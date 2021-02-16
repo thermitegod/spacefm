@@ -3975,7 +3975,7 @@ static void call_callbacks(VFSVolume* vol, VFSVolumeState state)
             (*e[i].cb)(vol, state, e[i].user_data);
     }
 
-    if (evt_device->s || evt_device->ob2_data)
+    if (event_handler.device->s || event_handler.device->ob2_data)
     {
         main_window_event(NULL, NULL, "evt_device", 0, 0, vol->device_file, 0, 0, state, FALSE);
     }

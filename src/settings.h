@@ -317,19 +317,24 @@ typedef struct XSet
 } XSet;
 
 // cache these for speed in event handlers
-extern XSet* evt_win_focus;
-extern XSet* evt_win_move;
-extern XSet* evt_win_click;
-extern XSet* evt_win_key;
-extern XSet* evt_win_close;
-extern XSet* evt_pnl_show;
-extern XSet* evt_pnl_focus;
-extern XSet* evt_pnl_sel;
-extern XSet* evt_tab_new;
-extern XSet* evt_tab_chdir;
-extern XSet* evt_tab_focus;
-extern XSet* evt_tab_close;
-extern XSet* evt_device;
+typedef struct EventHandler
+{
+    XSet* win_focus;
+    XSet* win_move;
+    XSet* win_click;
+    XSet* win_key;
+    XSet* win_close;
+    XSet* pnl_show;
+    XSet* pnl_focus;
+    XSet* pnl_sel;
+    XSet* tab_new;
+    XSet* tab_chdir;
+    XSet* tab_focus;
+    XSet* tab_close;
+    XSet* device;
+} EventHandler;
+
+extern EventHandler event_handler;
 
 // instance-wide command history
 extern GList* xset_cmd_history;

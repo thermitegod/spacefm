@@ -2624,9 +2624,9 @@ static bool on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* 
         (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
     ptk_file_browser_focus_me(file_browser);
 
-    if ((evt_win_click->s || evt_win_click->ob2_data) &&
+    if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
         main_window_event(file_browser->main_window,
-                          evt_win_click,
+                          event_handler.win_click,
                           "evt_win_click",
                           0,
                           0,
@@ -4053,9 +4053,9 @@ static bool on_bookmark_button_press_event(GtkTreeView* view, GdkEventButton* ev
 
     ptk_file_browser_focus_me(file_browser);
 
-    if ((evt_win_click->s || evt_win_click->ob2_data) &&
+    if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
         main_window_event(file_browser->main_window,
-                          evt_win_click,
+                          event_handler.win_click,
                           "evt_win_click",
                           0,
                           0,

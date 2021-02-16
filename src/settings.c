@@ -81,19 +81,8 @@ static const char* settings_user_tmp_dir = NULL;
 static XSetContext* xset_context = NULL;
 static XSet* book_icon_set_cached = NULL;
 
-XSet* evt_win_focus = NULL;
-XSet* evt_win_move = NULL;
-XSet* evt_win_click = NULL;
-XSet* evt_win_key = NULL;
-XSet* evt_win_close = NULL;
-XSet* evt_pnl_show = NULL;
-XSet* evt_pnl_focus = NULL;
-XSet* evt_pnl_sel = NULL;
-XSet* evt_tab_new = NULL;
-XSet* evt_tab_chdir = NULL;
-XSet* evt_tab_focus = NULL;
-XSet* evt_tab_close = NULL;
-XSet* evt_device = NULL;
+EventHandler event_handler;
+
 GList* xset_cmd_history = NULL;
 
 // delayed session saving
@@ -607,19 +596,19 @@ void load_settings(const char* config_dir, bool git_settings)
     xset_default_keys();
 
     // cache event handlers
-    evt_win_focus = xset_get("evt_win_focus");
-    evt_win_move = xset_get("evt_win_move");
-    evt_win_click = xset_get("evt_win_click");
-    evt_win_key = xset_get("evt_win_key");
-    evt_win_close = xset_get("evt_win_close");
-    evt_pnl_show = xset_get("evt_pnl_show");
-    evt_pnl_focus = xset_get("evt_pnl_focus");
-    evt_pnl_sel = xset_get("evt_pnl_sel");
-    evt_tab_new = xset_get("evt_tab_new");
-    evt_tab_chdir = xset_get("evt_tab_chdir");
-    evt_tab_focus = xset_get("evt_tab_focus");
-    evt_tab_close = xset_get("evt_tab_close");
-    evt_device = xset_get("evt_device");
+    event_handler.win_focus = xset_get("evt_win_focus");
+    event_handler.win_move = xset_get("evt_win_move");
+    event_handler.win_click = xset_get("evt_win_click");
+    event_handler.win_key = xset_get("evt_win_key");
+    event_handler.win_close = xset_get("evt_win_close");
+    event_handler.pnl_show = xset_get("evt_pnl_show");
+    event_handler.pnl_focus = xset_get("evt_pnl_focus");
+    event_handler.pnl_sel = xset_get("evt_pnl_sel");
+    event_handler.tab_new = xset_get("evt_tab_new");
+    event_handler.tab_chdir = xset_get("evt_tab_chdir");
+    event_handler.tab_focus = xset_get("evt_tab_focus");
+    event_handler.tab_close = xset_get("evt_tab_close");
+    event_handler.device = xset_get("evt_device");
 
     // add default bookmarks
     ptk_bookmark_view_get_first_bookmark(NULL);
