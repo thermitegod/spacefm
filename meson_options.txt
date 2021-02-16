@@ -1,33 +1,5 @@
-#preprocessor
-option(
-  'deprecated-ini-loading',
-  type : 'boolean',
-  value : true,
-  description : 'support for reading old session files',
-)
-option(
-  'ffmpegthumbnailer-cli',
-  type : 'boolean',
-  value : false,
-  description : 'use ffmpegthumbnailer cli not the api',
-)
-option(
-  'deprecated-hw',
-  type : 'boolean',
-  value : false,
-  description : 'enable support for firewire, audiocd, dvd, cdrom, floppy <TODO>',
-)
-option(
-  'nonlatin',
-  type : 'boolean',
-  value : false,
-  description : 'support for non-latin keyboards',
-)
-
-#other
-#TODO bashpath, etc
-option('package-ui-dir',
-  type : 'string',
-  value : '',
-  description : 'default is, /usr/share/spacefm/ui',
-)
+# misc features
+option('deprecated', type : 'boolean', value: false, description : 'enable deprecated features')
+option('deprecated-ini-loading', type : 'boolean', value: false, description : 'support for reading old session files')
+option('ffmpegthumbnailer-cli', type : 'boolean', value: false, description : 'use ffmpegthumbnailer cli not the api')
+option('nonlatin', type : 'boolean', value: false, description : 'support for non-latin keyboards')

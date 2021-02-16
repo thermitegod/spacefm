@@ -133,7 +133,7 @@ inline constexpr std::array<std::string_view, 3> cmds_mnt{
 
 /* do not change this script header or it will break header detection on
  * existing scripts! */
-inline constexpr std::string_view script_header = "#!/bin/bash\n";
+const std::string script_header = fmt::format("#!{}\n", BASH_PATH);
 
 struct HandlerData
 {

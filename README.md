@@ -23,7 +23,7 @@ __Everyone Else__
 ```
 mkdir build
 cd build
-meson ..
+meson setup --buildtype=release ..
 ninja
 ```
 
