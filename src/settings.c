@@ -307,11 +307,10 @@ void load_conf()
     g_free(etc_path);
 }
 
-void load_settings(const char* config_dir, bool git_settings)
+void load_settings(const char* config_dir)
 {
     FILE* file;
     char* path = NULL;
-    bool git_backed_settings = TRUE;
 
     xset_cmd_history = NULL;
     app_settings.load_saved_tabs = TRUE;
@@ -321,17 +320,13 @@ void load_settings(const char* config_dir, bool git_settings)
     else
         settings_config_dir = g_build_filename(g_get_user_config_dir(), "spacefm", NULL);
 
-    if (git_settings)
+    if (config_settings.git_backed_settings)
     {
         if (!g_find_program_in_path("git"))
         {
             fprintf(stderr, "spacefm: git backed settings enabled but git is not installed.\n");
-            git_backed_settings = FALSE;
+            config_settings.git_backed_settings = FALSE;
         }
-    }
-    else
-    {
-        git_backed_settings = FALSE;
     }
 
     /* Set default config values */
@@ -379,7 +374,7 @@ void load_settings(const char* config_dir, bool git_settings)
         g_mkdir_with_parents(settings_config_dir, 0700);
 
     // check if .git exists
-    if (git_backed_settings)
+    if (config_settings.git_backed_settings)
     {
         if (!G_LIKELY(g_file_test(g_build_filename(settings_config_dir, ".git", NULL),
                                   G_FILE_TEST_EXISTS)))
@@ -398,7 +393,7 @@ void load_settings(const char* config_dir, bool git_settings)
     path = g_build_filename(settings_config_dir, "session", NULL);
     if (G_LIKELY(g_file_test(path, G_FILE_TEST_EXISTS)))
     {
-        if (git_backed_settings)
+        if (config_settings.git_backed_settings)
         {
             command = g_strdup_printf("%s -c \"cd %s && git add session && "
                                       "git commit -m 'Session File' 1>/dev/null\"",
@@ -423,7 +418,7 @@ void load_settings(const char* config_dir, bool git_settings)
     }
     else
     {
-        if (git_backed_settings)
+        if (config_settings.git_backed_settings)
         {
             command = g_strdup_printf("%s -c \"cd %s && git checkout session\"",
                                       BASHPATH,

@@ -976,11 +976,10 @@ int main(int argc, char* argv[])
     }
 
     // --disable-git
-    bool git_settings;
     if (!disable_git_settings)
-        git_settings = TRUE;
+        config_settings.git_backed_settings = TRUE;
     else
-        git_settings = FALSE;
+        config_settings.git_backed_settings = FALSE;
 
     // --version
     if (version_opt)
@@ -1042,7 +1041,7 @@ int main(int argc, char* argv[])
 
     /* load config file */
     // MOD was before vfs_file_monitor_init
-    load_settings(config_dir, git_settings);
+    load_settings(config_dir);
 
     app_settings.sdebug = sdebug;
 

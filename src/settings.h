@@ -77,12 +77,13 @@ typedef struct ConfigSettings
     char* font_view_compact;
     char* font_general; // NOOP
 
+    bool git_backed_settings;
 } ConfigSettings;
 
 extern ConfigSettings config_settings;
 
 void load_conf();
-void load_settings(const char* config_dir, bool git_settings);
+void load_settings(const char* config_dir);
 void save_settings(void* main_window_ptr);
 void free_settings();
 const char* xset_get_config_dir();
