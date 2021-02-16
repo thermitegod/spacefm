@@ -2553,7 +2553,7 @@ static void show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser*
         str = g_strdup("");
 
     char* menu_elements =
-        g_strdup_printf("dev_menu_remove dev_menu_reload dev_menu_unmount dev_menu_sync sep_dm1 "
+        g_strdup_printf("dev_menu_remove dev_menu_reload dev_menu_unmount dev_menu_sync separator "
                         "dev_menu_open dev_menu_tab dev_menu_mount dev_menu_remount%s",
                         str);
     xset_add_menu(file_browser, popup, accel_group, menu_elements);
@@ -2594,12 +2594,12 @@ static void show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser*
 
     set = xset_get("dev_menu_settings");
     menu_elements = g_strdup_printf(
-        "dev_show sep_dm4 dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf dev_mount_options "
-        "dev_change sep_dm5 dev_single dev_newtab dev_icon");
+        "dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf dev_mount_options "
+        "dev_change separator dev_single dev_newtab dev_icon");
     xset_set_set(set, XSET_SET_SET_DESC, menu_elements);
     g_free(menu_elements);
 
-    menu_elements = g_strdup_printf("sep_dm2 dev_menu_root sep_dm3 dev_prop dev_menu_settings");
+    menu_elements = g_strdup_printf("separator dev_menu_root separator dev_prop dev_menu_settings");
     xset_add_menu(file_browser, popup, accel_group, menu_elements);
     g_free(menu_elements);
 
@@ -2947,7 +2947,7 @@ void ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser,
     xset_set_ob1(set, "set", set);
 
     set = xset_get("dev_menu_settings");
-    char* desc = g_strdup_printf("dev_show sep_dm4 dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
+    char* desc = g_strdup_printf("dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
                                  "dev_mount_options dev_change%s",
                                  file_browser ? " dev_newtab" : "");
     xset_set_set(set, XSET_SET_SET_DESC, desc);

@@ -580,7 +580,7 @@ static void on_view_popup(GtkTextView* entry, GtkMenu* menu, void* user_data)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     xset_context_new();
 
-    XSet* set = xset_get("sep_v9");
+    XSet* set = xset_get("separator");
     set->browser = NULL;
     xset_add_menuitem(NULL, GTK_WIDGET(menu), accel_group, set);
     gtk_widget_show_all(GTK_WIDGET(menu));

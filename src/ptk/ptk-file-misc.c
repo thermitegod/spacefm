@@ -1510,11 +1510,11 @@ static void on_options_button_press(GtkWidget* btn, MoveSet* mset)
     set = xset_get("move_option");
     xset_add_menuitem(mset->browser, popup, accel_group, set);
 
-    set = xset_get("sep_mopt1");
+    set = xset_get("separator");
     xset_add_menuitem(mset->browser, popup, accel_group, set);
     set = xset_get("move_dlg_confirm_create");
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_get("sep_mopt2");
+    set = xset_get("separator");
     xset_add_menuitem(mset->browser, popup, accel_group, set);
     set = xset_set_cb("move_dlg_help", on_help_activate, mset);
     xset_add_menuitem(mset->browser, popup, accel_group, set);

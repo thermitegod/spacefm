@@ -2425,7 +2425,7 @@ static void on_textview_popup(GtkTextView* input, GtkMenu* menu, HandlerData* hn
 {
     // uses same xsets as item-prop.c:on_script_popup()
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    XSet* set = xset_get("sep_ctxt");
+    XSet* set = xset_get("separator");
     set->menu_style = XSET_MENU_SEP;
     set->browser = NULL;
     xset_add_menuitem(NULL, GTK_WIDGET(menu), accel_group, set);
@@ -2787,7 +2787,7 @@ static void on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
             // temp remove unwanted items from Archive Defaults submenu
             set = xset_get("arc_default");
             char* old_desc = set->desc;
-            set->desc = g_strdup("arc_def_open arc_def_ex arc_def_exto arc_def_list sep_arc1 "
+            set->desc = g_strdup("arc_def_open arc_def_ex arc_def_exto arc_def_list separator "
                                  "arc_def_parent arc_def_write");
             xset_add_menuitem(hnd->browser, popup, accel_group, set);
             g_free(set->desc);

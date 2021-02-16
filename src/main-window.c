@@ -535,12 +535,12 @@ static GtkWidget* create_devices_menu(FMMainWindow* main_window)
     set->b = file_browser->side_dev ? XSET_B_TRUE : XSET_B_UNSET;
     xset_add_menuitem(file_browser, dev_menu, accel_group, set);
 
-    set = xset_get("main_dev_sep");
+    set = xset_get("separator");
     xset_add_menuitem(file_browser, dev_menu, accel_group, set);
 
     ptk_location_view_dev_menu(GTK_WIDGET(file_browser), file_browser, dev_menu);
 
-    set = xset_get("sep_dm3");
+    set = xset_get("separator");
     xset_add_menuitem(file_browser, dev_menu, accel_group, set);
 
     set = xset_get("dev_menu_settings");
@@ -1463,9 +1463,9 @@ static void rebuild_menus(FMMainWindow* main_window)
     xset_set_cb("main_root_terminal", on_open_root_terminal_activate, main_window);
     xset_set_cb("main_save_session", on_open_url, main_window);
     xset_set_cb("main_exit", on_quit_activate, main_window);
-    menu_elements =
-        g_strdup_printf("main_save_session main_search sep_f1 main_terminal main_root_terminal "
-                        "main_new_window main_root_window sep_f2 main_save_tabs sep_f3 main_exit");
+    menu_elements = g_strdup_printf(
+        "main_save_session main_search separator main_terminal main_root_terminal "
+        "main_new_window main_root_window separator main_save_tabs separator main_exit");
     xset_add_menu(file_browser, newmenu, accel_group, menu_elements);
     g_free(menu_elements);
     gtk_widget_show_all(GTK_WIDGET(newmenu));
@@ -1527,9 +1527,9 @@ static void rebuild_menus(FMMainWindow* main_window)
 
     menu_elements = g_strdup_printf(
         "panel1_show panel2_show panel3_show panel4_show main_pbar main_focus_panel");
-    char* menu_elements2 =
-        g_strdup_printf("sep_v1 main_tasks main_auto sep_v2 main_title main_icon main_full sep_v3 "
-                        "main_design_mode main_prefs");
+    char* menu_elements2 = g_strdup_printf(
+        "separator main_tasks main_auto separator main_title main_icon main_full separator "
+        "main_design_mode main_prefs");
 
     main_task_prepare_menu(main_window, newmenu, accel_group);
     xset_add_menu(file_browser, newmenu, accel_group, menu_elements);
@@ -1608,8 +1608,8 @@ static void rebuild_menus(FMMainWindow* main_window)
     xset_set_cb("main_homepage", on_homepage_activate, main_window);
     xset_set_cb("main_news", on_news_activate, main_window);
     xset_set_cb("main_getplug", on_getplug_activate, main_window);
-    menu_elements = g_strdup_printf("main_faq main_help sep_h1 main_homepage main_news "
-                                    "main_getplug sep_h2 main_help_opt sep_h3 main_about");
+    menu_elements = g_strdup_printf("main_faq main_help separator main_homepage main_news "
+                                    "main_getplug separator main_help_opt separator main_about");
     xset_add_menu(file_browser, newmenu, accel_group, menu_elements);
     g_free(menu_elements);
     gtk_widget_show_all(GTK_WIDGET(newmenu));
@@ -5173,9 +5173,9 @@ static bool on_task_button_press_event(GtkWidget* view, GdkEventButton* event,
             main_task_prepare_menu(main_window, popup, accel_group);
 
             char* menu_elements = g_strdup_printf(
-                "task_stop sep_t3 task_pause task_que task_resume%s task_all sep_t4 "
+                "task_stop separator task_pause task_que task_resume%s task_all separator "
                 "task_show_manager "
-                "task_hide_manager sep_t5 task_columns task_popups task_errors task_queue",
+                "task_hide_manager separator task_columns task_popups task_errors task_queue",
                 showout);
             xset_add_menu(file_browser, popup, accel_group, menu_elements);
             g_free(menu_elements);

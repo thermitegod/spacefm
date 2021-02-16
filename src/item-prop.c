@@ -1434,7 +1434,7 @@ static void replace_item_props(ContextData* ctxt)
 static void on_script_popup(GtkTextView* input, GtkMenu* menu, void* user_data)
 {
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    XSet* set = xset_get("sep_ctxt");
+    XSet* set = xset_get("separator");
     set->menu_style = XSET_MENU_SEP;
     set->browser = NULL;
     xset_add_menuitem(NULL, GTK_WIDGET(menu), accel_group, set);

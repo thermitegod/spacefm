@@ -1052,7 +1052,7 @@ static void on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrows
     main_context_fill(file_browser, context);
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     char* desc =
-        g_strdup_printf("sep_bar1 status_border status_text panel%d_icon_status status_middle",
+        g_strdup_printf("separator status_border status_text panel%d_icon_status status_middle",
                         file_browser->mypanel);
 
     xset_set_cb("status_border", on_status_effect_change, file_browser);

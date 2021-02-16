@@ -370,13 +370,14 @@ void ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 
         xset_set_cb("view_reorder_col", on_reorder, browser);
         set = xset_set("view_columns", "disable", "0");
-        desc = g_strdup_printf("panel%d_detcol_size panel%d_detcol_type panel%d_detcol_perm "
-                               "panel%d_detcol_owner panel%d_detcol_date sep_v4 view_reorder_col",
-                               p,
-                               p,
-                               p,
-                               p,
-                               p);
+        desc =
+            g_strdup_printf("panel%d_detcol_size panel%d_detcol_type panel%d_detcol_perm "
+                            "panel%d_detcol_owner panel%d_detcol_date separator view_reorder_col",
+                            p,
+                            p,
+                            p,
+                            p,
+                            p);
         xset_set_set(set, XSET_SET_SET_DESC, desc);
         g_free(desc);
         set = xset_set_cb("rubberband", main_window_rubberband_all, NULL);
@@ -483,19 +484,20 @@ void ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     }
 
     set = xset_get("view_list_style");
-    desc = g_strdup_printf("panel%d_list_detailed panel%d_list_compact panel%d_list_icons sep_v5 "
-                           "view_thumb panel%d_list_large rubberband",
-                           p,
-                           p,
-                           p,
-                           p);
+    desc =
+        g_strdup_printf("panel%d_list_detailed panel%d_list_compact panel%d_list_icons separator "
+                        "view_thumb panel%d_list_large rubberband",
+                        p,
+                        p,
+                        p,
+                        p);
     xset_set_set(set, XSET_SET_SET_DESC, desc);
     g_free(desc);
     set = xset_get("con_view");
     set->disable = !browser->file_list;
     desc = g_strdup_printf("panel%d_show_toolbox panel%d_show_sidebar panel%d_show_devmon "
-                           "panel%d_show_book panel%d_show_dirtree sep_v7 panel%d_show_hidden "
-                           "view_list_style view_sortby view_columns sep_v8 view_refresh",
+                           "panel%d_show_book panel%d_show_dirtree separator panel%d_show_hidden "
+                           "view_list_style view_sortby view_columns separator view_refresh",
                            p,
                            p,
                            p,
@@ -1033,14 +1035,14 @@ GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFS
         set->disable = !browser;
 
         set = xset_get("open_new");
-        xset_set_set(
-            set,
-            XSET_SET_SET_DESC,
-            "new_file new_directory new_link new_archive sep_o1 tab_new tab_new_here new_bookmark");
+        xset_set_set(set,
+                     XSET_SET_SET_DESC,
+                     "new_file new_directory new_link new_archive separator tab_new tab_new_here "
+                     "new_bookmark");
 
         xset_add_menuitem(browser, popup, accel_group, set);
 
-        set = xset_get("sep_new");
+        set = xset_get("separator");
         xset_add_menuitem(browser, popup, accel_group, set);
 
         // Edit
@@ -1172,7 +1174,7 @@ GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFS
     set->disable = !sel_files || no_write_access;
     xset_add_menuitem(browser, popup, accel_group, set);
 
-    set = xset_get("sep_edit");
+    set = xset_get("separator");
     xset_add_menuitem(browser, popup, accel_group, set);
 
     if (browser)

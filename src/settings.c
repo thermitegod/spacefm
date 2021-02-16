@@ -8175,22 +8175,11 @@ static void xset_defaults()
     set_last = xset_get("separator");
     set_last->menu_style = XSET_MENU_SEP;
 
+    // separator
+    set = xset_get("separator");
+    set->menu_style = XSET_MENU_SEP;
+
     // dev menu
-    set = xset_get("sep_dm1");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_dm2");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_dm3");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_dm4");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_dm5");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("dev_menu_remove", "lbl", _("Remo_ve / Eject"));
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-disconnect");
     set->line = g_strdup("#devices-menu-remove");
@@ -8227,22 +8216,13 @@ static void xset_defaults()
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-add");
     set->line = g_strdup("#devices-menu-bookmark");
 
-    set = xset_get("sep_mr1");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_mr2");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_mr3");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("dev_menu_root", "lbl", _("_Root"));
     set->menu_style = XSET_MENU_SUBMENU;
-    xset_set_set(
-        set,
-        XSET_SET_SET_DESC,
-        "dev_root_unmount dev_root_mount sep_mr1 sep_mr2 dev_root_check "
-        "dev_menu_format dev_menu_backup dev_menu_restore sep_mr3 dev_root_fstab dev_root_udevil");
+    xset_set_set(set,
+                 XSET_SET_SET_DESC,
+                 "dev_root_unmount dev_root_mount separator separator dev_root_check "
+                 "dev_menu_format dev_menu_backup dev_menu_restore separator dev_root_fstab "
+                 "dev_root_udevil");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-dialog-warning");
     set->line = g_strdup("#devices-root");
 
@@ -8392,14 +8372,11 @@ static void xset_defaults()
     set->menu_style = XSET_MENU_CHECK;
     set->line = g_strdup("#devices-settings-exit");
 
-    set = xset_get("sep_ar1");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("dev_exec", "lbl", _("Auto _Run"));
     set->menu_style = XSET_MENU_SUBMENU;
     xset_set_set(set,
                  XSET_SET_SET_DESC,
-                 "dev_exec_fs dev_exec_audio dev_exec_video sep_ar1 dev_exec_insert "
+                 "dev_exec_fs dev_exec_audio dev_exec_video separator dev_exec_insert "
                  "dev_exec_unmount dev_exec_remove");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-execute");
     set->line = g_strdup("#devices-settings-runm");
@@ -8528,27 +8505,15 @@ static void xset_defaults()
     set->line = g_strdup("#handlers-pro");
 
     // dev icons
-    set = xset_get("sep_i1");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_i2");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_i3");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_i4");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("dev_icon", "lbl", _("_Icon"));
     set->menu_style = XSET_MENU_SUBMENU;
     xset_set_set(
         set,
         XSET_SET_SET_DESC,
-        "dev_icon_internal_mounted dev_icon_internal_unmounted sep_i1 dev_icon_remove_mounted "
-        "dev_icon_remove_unmounted sep_i2 dev_icon_optical_mounted dev_icon_optical_media "
-        "dev_icon_optical_nomedia dev_icon_audiocd sep_i3 dev_icon_floppy_mounted "
-        "dev_icon_floppy_unmounted sep_i4 dev_icon_network dev_icon_file");
+        "dev_icon_internal_mounted dev_icon_internal_unmounted separator dev_icon_remove_mounted "
+        "dev_icon_remove_unmounted separator dev_icon_optical_mounted dev_icon_optical_media "
+        "dev_icon_optical_nomedia dev_icon_audiocd separator dev_icon_floppy_mounted "
+        "dev_icon_floppy_unmounted separator dev_icon_network dev_icon_file");
     set->line = g_strdup("#devices-settings-icon");
 
     set = xset_set("dev_icon_audiocd", "lbl", _("Audio CD"));
@@ -8702,9 +8667,6 @@ static void xset_defaults()
     set->b = XSET_B_TRUE;
 
     // status bar
-    set = xset_get("sep_bar1");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("status_border", "lbl", _("Highlight _Bar"));
     xset_set_set(set, XSET_SET_SET_TITLE, _("Status Bar Highlight Color"));
     xset_set_set(set, XSET_SET_SET_ICN, "Color");
@@ -8735,15 +8697,6 @@ static void xset_defaults()
     // MAIN WINDOW MENUS
 
     // File
-    set = xset_get("sep_f1");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_f2");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_f3");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("main_new_window", "lbl", _("New _Window"));
     xset_set_set(set, XSET_SET_SET_ICN, "spacefm");
 
@@ -8781,33 +8734,6 @@ static void xset_defaults()
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-quit");
 
     // View
-    set = xset_get("sep_v1");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_v2");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_v3");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_v4");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_v5");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_v6");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_v7");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_v8");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_v9");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("panel1_show", "lbl", _("Panel _1"));
     set->menu_style = XSET_MENU_CHECK;
     set->b = XSET_B_TRUE;
@@ -9123,12 +9049,9 @@ static void xset_defaults()
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-network");
     set->line = g_strdup("#plugins-install");
 
-    set = xset_get("sep_p1");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("plug_copy", "lbl", _("_Import"));
     set->menu_style = XSET_MENU_SUBMENU;
-    xset_set_set(set, XSET_SET_SET_DESC, "plug_cfile plug_curl sep_p1 plug_cverb");
+    xset_set_set(set, XSET_SET_SET_DESC, "plug_cfile plug_curl separator plug_cverb");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-copy");
     set->line = g_strdup("#plugins-import");
 
@@ -9150,15 +9073,6 @@ static void xset_defaults()
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-media-play");
 
     // Help
-    set = xset_get("sep_h1");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_h2");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_h3");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("main_help", "lbl", _("_User's Manual"));
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-help");
 
@@ -9203,28 +9117,8 @@ static void xset_defaults()
     set = xset_set("main_dev", "lbl", _("_Show Devices"));
     xset_set_set(set, XSET_SET_SET_SHARED_KEY, "panel1_show_devmon");
     set->menu_style = XSET_MENU_CHECK;
-    set = xset_get("main_dev_sep");
-    set->menu_style = XSET_MENU_SEP;
 
     // Tasks
-    set = xset_get("sep_t1");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_t2");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_t3");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_t4");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_t5");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_t6");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("main_tasks", "lbl", _("_Task Manager"));
     set->menu_style = XSET_MENU_SUBMENU;
     xset_set_set(set,
@@ -9453,37 +9347,7 @@ static void xset_defaults()
     set->menu_style = XSET_MENU_CHECK;
     set->line = g_strdup("#tasks-menu-qpause");
 
-    // Menu Item Properties
-    set = xset_get("sep_ctxt");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_set("context_dlg", "lbl", _("_Font"));
-    set->menu_style = XSET_MENU_FONTDLG;
-    xset_set_set(set, XSET_SET_SET_ICN, "gtk-select-font");
-    xset_set_set(set, XSET_SET_SET_TITLE, _("Editor Font"));
-    xset_set_set(set, XSET_SET_SET_DESC, _("Example Input 0123456789"));
-    set->s = g_strdup("Monospace 11");
-    // set->b reserved for Ignore Context
-
     // PANELS COMMON
-    set = xset_get("sep_new");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_edit");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_tab");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_entry");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_mopt1");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_mopt2");
-    set->menu_style = XSET_MENU_SEP;
-
     xset_set("date_format", "s", "%Y-%m-%d %H:%M");
 
     set = xset_set("con_open", "lbl", _("_Open"));
@@ -9555,18 +9419,12 @@ static void xset_defaults()
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-file");
     set->line = g_strdup("#handlers-arc");
 
-    set = xset_get("sep_arc1");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_arc2");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("arc_default", "lbl", _("_Archive Defaults"));
     set->line = g_strdup("#handlers-arc-arcdef");
     set->menu_style = XSET_MENU_SUBMENU;
     xset_set_set(set,
                  XSET_SET_SET_DESC,
-                 "arc_conf2 sep_arc2 arc_def_open arc_def_ex arc_def_exto arc_def_list sep_arc1 "
+                 "arc_conf2 separator arc_def_open arc_def_ex arc_def_exto arc_def_list separator "
                  "arc_def_parent arc_def_write");
 
     set = xset_set("arc_def_open", "lbl", _("_Open With App"));
@@ -9600,15 +9458,12 @@ static void xset_defaults()
     xset_set_set(set, XSET_SET_SET_ICON, "gtk-preferences");
     set->line = g_strdup("#handlers-arc");
 
-    set = xset_get("sep_o1");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("open_new", "lbl", _("_New"));
     set->menu_style = XSET_MENU_SUBMENU;
     xset_set_set(
         set,
         XSET_SET_SET_DESC,
-        "new_file new_directory new_link new_archive sep_o1 tab_new tab_new_here new_bookmark");
+        "new_file new_directory new_link new_archive separator tab_new tab_new_here new_bookmark");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-new");
 
     set = xset_set("new_file", "lbl", _("_File"));
@@ -9642,14 +9497,11 @@ static void xset_defaults()
     set = xset_set("new_app", "lbl", _("_Desktop Application"));
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-add");
 
-    set = xset_get("sep_g1");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("con_go", "lbl", _("_Go"));
     set->menu_style = XSET_MENU_SUBMENU;
     xset_set_set(set,
                  XSET_SET_SET_DESC,
-                 "go_back go_forward go_up go_home go_default go_set_default edit_canon sep_g1 "
+                 "go_back go_forward go_up go_home go_default go_set_default edit_canon separator "
                  "go_tab go_focus");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-go-forward");
 
@@ -9724,22 +9576,14 @@ static void xset_defaults()
     set->menu_style = XSET_MENU_CHECK;
     set->b = XSET_B_TRUE;
 
-    set = xset_get("sep_s1");
-    set->menu_style = XSET_MENU_SEP;
-    set = xset_get("sep_s2");
-    set->menu_style = XSET_MENU_SEP;
-    set = xset_get("sep_s3");
-    set->menu_style = XSET_MENU_SEP;
-    set = xset_get("sep_s4");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("view_sortby", "lbl", _("_Sort"));
     set->menu_style = XSET_MENU_SUBMENU;
-    xset_set_set(set,
-                 XSET_SET_SET_DESC,
-                 "sortby_name sortby_size sortby_type sortby_perm sortby_owner sortby_date sep_s1 "
-                 "sortby_ascend sortby_descend sep_s2 sortx_natural sortx_case sep_s3 "
-                 "sortx_directories sortx_files sortx_mix sep_s4 sortx_hidfirst sortx_hidlast");
+    xset_set_set(
+        set,
+        XSET_SET_SET_DESC,
+        "sortby_name sortby_size sortby_type sortby_perm sortby_owner sortby_date separator "
+        "sortby_ascend sortby_descend separator sortx_natural sortx_case separator "
+        "sortx_directories sortx_files sortx_mix separator sortx_hidfirst sortx_hidlast");
 
     set = xset_set("sortby_name", "lbl", _("_Name"));
     set->menu_style = XSET_MENU_RADIO;
@@ -9807,22 +9651,14 @@ static void xset_defaults()
     set = xset_set("edit_delete", "lbl", _("_Delete"));
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-delete");
 
-    set = xset_get("sep_e1");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_e2");
-    set->menu_style = XSET_MENU_SEP;
-
-    set = xset_get("sep_e3");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("edit_submenu", "lbl", _("_Actions"));
     set->menu_style = XSET_MENU_SUBMENU;
     xset_set_set(
         set,
         XSET_SET_SET_DESC,
-        "copy_name copy_parent copy_path sep_e1 paste_link paste_target paste_as sep_e2 copy_to "
-        "move_to edit_root edit_hide sep_e3 select_all select_patt select_invert select_un");
+        "copy_name copy_parent copy_path separator paste_link paste_target paste_as separator "
+        "copy_to "
+        "move_to edit_root edit_hide separator select_all select_patt select_invert select_un");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-edit");
 
     set = xset_set("copy_name", "lbl", _("Copy _Name"));
@@ -9843,12 +9679,9 @@ static void xset_defaults()
     set = xset_set("paste_as", "lbl", _("Paste _As"));
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-paste");
 
-    set = xset_get("sep_c1");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("copy_to", "lbl", _("_Copy To"));
     set->menu_style = XSET_MENU_SUBMENU;
-    xset_set_set(set, XSET_SET_SET_DESC, "copy_loc copy_loc_last sep_c1 copy_tab copy_panel");
+    xset_set_set(set, XSET_SET_SET_DESC, "copy_loc copy_loc_last separator copy_tab copy_panel");
 
     set = xset_set("copy_loc", "lbl", _("L_ocation"));
     set = xset_set("copy_loc_last", "lbl", _("L_ast Location"));
@@ -9888,12 +9721,9 @@ static void xset_defaults()
     xset_set("copy_panel_3", "lbl", _("Panel _3"));
     xset_set("copy_panel_4", "lbl", _("Panel _4"));
 
-    set = xset_get("sep_c2");
-    set->menu_style = XSET_MENU_SEP;
-
     set = xset_set("move_to", "lbl", _("_Move To"));
     set->menu_style = XSET_MENU_SUBMENU;
-    xset_set_set(set, XSET_SET_SET_DESC, "move_loc move_loc_last sep_c2 move_tab move_panel");
+    xset_set_set(set, XSET_SET_SET_DESC, "move_loc move_loc_last separator move_tab move_panel");
 
     set = xset_set("move_loc", "lbl", _("_Location"));
     set = xset_set("move_loc_last", "lbl", _("L_ast Location"));
