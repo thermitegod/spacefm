@@ -51,23 +51,11 @@
 AppSettings app_settings = {0};
 ConfigSettings config_settings = {0};
 
-static const bool show_thumbnail_default = FALSE;
-static const int max_thumb_size_default = 8 << 20;
-static const int big_icon_size_default = 48;
-static const int max_icon_size = 512;
-static const int small_icon_size_default = 22;
-static const int tool_icon_size_default = 0;
-
-/* Default values of interface settings */
-static const bool always_show_tabs_default = TRUE;
-static const bool hide_close_tab_buttons_default = FALSE;
-
 // MOD settings
 static void xset_write(GString* buf);
 static void xset_parse(char* line);
 static void read_root_settings();
 static void xset_defaults();
-static const bool use_si_prefix_default = FALSE;
 
 GList* xsets = NULL;
 static GList* keysets = NULL;
@@ -196,23 +184,11 @@ static void parse_general_settings(char* line)
     else if (!strcmp(name, "max_thumb_size"))
         app_settings.max_thumb_size = strtol(value, NULL, 10) << 10;
     else if (!strcmp(name, "big_icon_size"))
-    {
         app_settings.big_icon_size = strtol(value, NULL, 10);
-        if (app_settings.big_icon_size <= 0 || app_settings.big_icon_size > max_icon_size)
-            app_settings.big_icon_size = big_icon_size_default;
-    }
     else if (!strcmp(name, "small_icon_size"))
-    {
         app_settings.small_icon_size = strtol(value, NULL, 10);
-        if (app_settings.small_icon_size <= 0 || app_settings.small_icon_size > max_icon_size)
-            app_settings.small_icon_size = small_icon_size_default;
-    }
     else if (!strcmp(name, "tool_icon_size"))
-    {
         app_settings.tool_icon_size = strtol(value, NULL, 10);
-        if (app_settings.tool_icon_size < 0 || app_settings.tool_icon_size > GTK_ICON_SIZE_DIALOG)
-            app_settings.tool_icon_size = tool_icon_size_default;
-    }
     else if (!strcmp(name, "single_click"))
         app_settings.single_click = strtol(value, NULL, 10);
     else if (!strcmp(name, "no_single_hover"))
@@ -326,9 +302,14 @@ static void parse_conf(const char* etc_path, char* line)
 
 void load_conf()
 {
-    // load spacefm.conf
+    /* Set default config values */
     config_settings.terminal_su = NULL;
+    config_settings.tmp_dir = g_get_user_cache_dir();
+    config_settings.font_view_icon = "Monospace 9";
+    config_settings.font_view_compact = "Monospace 9";
+    config_settings.font_general = "Monospace 9";
 
+    // load spacefm.conf
     char* etc_path = g_build_filename(SYSCONFDIR, "spacefm", "spacefm.conf", NULL);
     FILE* file = fopen(etc_path, "r");
     if (file)
@@ -339,18 +320,6 @@ void load_conf()
         fclose(file);
     }
     g_free(etc_path);
-
-    // set tmp dir
-    if (!config_settings.tmp_dir)
-        config_settings.tmp_dir = g_strdup(DEFAULT_TMP_DIR);
-
-    // default fonts
-    if (!config_settings.font_view_icon)
-        config_settings.font_view_icon = "Monospace 9";
-    if (!config_settings.font_view_compact)
-        config_settings.font_view_compact = "Monospace 9";
-    if (!config_settings.font_general)
-        config_settings.font_view_compact = "Monospace 9";
 }
 
 void load_settings(const char* config_dir, bool git_settings)
@@ -361,8 +330,6 @@ void load_settings(const char* config_dir, bool git_settings)
 
     xset_cmd_history = NULL;
     app_settings.load_saved_tabs = TRUE;
-
-    config_settings.tmp_dir = g_get_user_cache_dir();
 
     if (config_dir)
         settings_config_dir = config_dir;
@@ -382,20 +349,22 @@ void load_settings(const char* config_dir, bool git_settings)
         git_backed_settings = FALSE;
     }
 
+    /* Set default config values */
+
     /* General */
-    app_settings.show_thumbnail = show_thumbnail_default;
-    app_settings.max_thumb_size = max_thumb_size_default;
-    app_settings.big_icon_size = big_icon_size_default;
-    app_settings.small_icon_size = small_icon_size_default;
-    app_settings.tool_icon_size = tool_icon_size_default;
-    app_settings.use_si_prefix = use_si_prefix_default;
+    app_settings.show_thumbnail = FALSE;
+    app_settings.max_thumb_size = 8 << 20;
+    app_settings.big_icon_size = 48;
+    app_settings.small_icon_size = 22;
+    app_settings.tool_icon_size = 0;
+    app_settings.use_si_prefix = FALSE;
     app_settings.no_execute = TRUE;  // MOD
     app_settings.no_confirm = FALSE; // MOD
     app_settings.date_format = NULL; // MOD
 
     /* Interface */
-    app_settings.always_show_tabs = always_show_tabs_default;
-    app_settings.hide_close_tab_buttons = hide_close_tab_buttons_default;
+    app_settings.always_show_tabs = TRUE;
+    app_settings.hide_close_tab_buttons = FALSE;
 
     /* Window State */
     app_settings.width = 640;
