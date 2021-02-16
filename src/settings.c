@@ -266,36 +266,21 @@ static void parse_conf(const char* etc_path, char* line)
                       svalue,
                       DEFAULT_TMP_DIR);
         else
-        {
             config_settings.tmp_dir = svalue;
-            svalue = NULL;
-        }
     }
     else if (!strcmp(sname, "terminal_su") || !strcmp(sname, "graphical_su"))
     {
         if (svalue[0] != '/' || !g_file_test(svalue, G_FILE_TEST_EXISTS))
             g_warning("%s: %s '%s' %s", etc_path, sname, svalue, _("file not found"));
         else if (!strcmp(sname, "terminal_su"))
-        {
             config_settings.terminal_su = svalue;
-            svalue = NULL;
-        }
     }
     if (!strcmp(sname, "font_view_icon"))
-    {
         config_settings.font_view_icon = svalue;
-        svalue = NULL;
-    }
     else if (!strcmp(sname, "font_view_compact"))
-    {
         config_settings.font_view_compact = svalue;
-        svalue = NULL;
-    }
     else if (!strcmp(sname, "font_general"))
-    {
         config_settings.font_general = svalue;
-        svalue = NULL;
-    }
 
     g_free(svalue);
 }
