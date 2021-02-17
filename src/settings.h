@@ -346,9 +346,6 @@ typedef struct XSetContext
     char* var[40];
 } XSetContext;
 
-void xset_autosave(bool force, bool delay);
-void xset_autosave_cancel();
-
 void xset_set_window_icon(GtkWindow* win);
 XSet* xset_get(const char* name);
 char* xset_get_s(const char* name);

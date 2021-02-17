@@ -20,6 +20,8 @@
 #include "ptk-handler.h"
 
 #include "settings.h"
+
+#include "autosave.h"
 #include "utils.h"
 
 // Archive handlers treeview model enum

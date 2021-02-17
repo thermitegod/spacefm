@@ -32,6 +32,7 @@
 #include "main-window.h"
 #include "item-prop.h"
 
+#include "autosave.h"
 #include "extern.h"
 #include "utils.h"
 
@@ -73,10 +74,6 @@ EventHandler event_handler;
 
 GList* xset_cmd_history = NULL;
 
-// delayed session saving
-static unsigned int xset_autosave_timer = 0;
-static bool xset_autosave_request = FALSE;
-
 typedef void (*SettingsParseFunc)(char* line);
 
 static void xset_free_all();
@@ -84,7 +81,6 @@ static void xset_default_keys();
 static char* xset_color_dialog(GtkWidget* parent, char* title, char* defcolor);
 static GtkWidget* xset_design_additem(GtkWidget* menu, const char* label, int job, XSet* set);
 static bool xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set);
-static bool on_autosave_timer(void* main_window);
 static void xset_builtin_tool_activate(char tool_type, XSet* set, GdkEventButton* event);
 static XSet* xset_new_builtin_toolitem(char tool_type);
 static void xset_custom_insert_after(XSet* target, XSet* set);
@@ -712,80 +708,6 @@ const char* xset_get_user_tmp_dir()
     g_mkdir_with_parents(settings_user_tmp_dir, 0700);
 
     return settings_user_tmp_dir;
-}
-
-static void idle_save_settings(void* ptr)
-{
-    // printf("AUTOSAVE *** idle_save_settings\n" );
-    save_settings(NULL);
-    // return FALSE;
-}
-
-static void auto_save_start(bool delay)
-{
-    // printf("AUTOSAVE auto_save_start\n" );
-    if (!delay)
-    {
-        g_idle_add((GSourceFunc)idle_save_settings, NULL);
-        xset_autosave_request = FALSE;
-    }
-    else
-        xset_autosave_request = TRUE;
-    if (!xset_autosave_timer)
-    {
-        xset_autosave_timer = g_timeout_add_seconds(10, (GSourceFunc)on_autosave_timer, NULL);
-        // printf("AUTOSAVE timer started\n" );
-    }
-}
-
-static bool on_autosave_timer(void* main_window)
-{
-    // printf("AUTOSAVE timeout\n" );
-    if (xset_autosave_timer)
-    {
-        g_source_remove(xset_autosave_timer);
-        xset_autosave_timer = 0;
-    }
-    if (xset_autosave_request)
-        auto_save_start(FALSE);
-    return FALSE;
-}
-
-void xset_autosave(bool force, bool delay)
-{
-    if (xset_autosave_timer && !force)
-    {
-        // autosave timer is running, so request save on timeout to prevent
-        // saving too frequently, unless force
-        xset_autosave_request = TRUE;
-        // printf("AUTOSAVE request\n" );
-    }
-    else
-    {
-        if (xset_autosave_timer && force)
-        {
-            g_source_remove(xset_autosave_timer);
-            xset_autosave_timer = 0;
-        }
-        /* if ( force )
-            printf("AUTOSAVE force\n" );
-        else if ( delay )
-            printf("AUTOSAVE delay\n" );
-        else
-            printf("AUTOSAVE normal\n" ); */
-        auto_save_start(!force && delay);
-    }
-}
-
-void xset_autosave_cancel()
-{
-    // printf("AUTOSAVE cancel\n" );
-    xset_autosave_request = FALSE;
-    if (xset_autosave_timer)
-    {
-        g_source_remove(xset_autosave_timer);
-        xset_autosave_timer = 0;
-    }
 }
 
 static void xset_free_all()

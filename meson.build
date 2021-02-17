@@ -129,6 +129,7 @@ dep_gtk = dependency('gtk+-3.0')
 
 
 sources = [
+  'src/autosave.c',
   'src/cust-dialog.c',
   'src/find-files.c',
   'src/go-dialog.c',
