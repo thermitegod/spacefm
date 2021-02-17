@@ -28,13 +28,15 @@
 
 G_BEGIN_DECLS
 
+void init_window_ref_counter(bool daemon_mode);
+
 /* After opening any window/dialog/tool, this should be called. */
 void pcmanfm_ref();
 
 /* After closing any window/dialog/tool, this should be called.
  * If the last window is closed and we are not a deamon, pcmanfm will quit.
  */
-bool pcmanfm_unref();
+void pcmanfm_unref();
 
 G_END_DECLS
 

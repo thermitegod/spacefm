@@ -11,7 +11,7 @@
 
 #include <stdbool.h>
 
-#include "pcmanfm.h"
+#include "spacefm.h"
 
 #include <string.h>
 #include <gtk/gtk.h>

@@ -32,6 +32,8 @@
 
 #include "main-window.h"
 
+#include "spacefm.h"
+
 #include "vfs/vfs-file-info.h"
 #include "vfs/vfs-mime-type.h"
 #include "vfs/vfs-app-desktop.h"
@@ -108,8 +110,6 @@ typedef struct CliFlags
 } CliFlags;
 
 CliFlags cli_flags;
-
-static int n_pcmanfm_ref = 0;
 
 // clang-format off
 static GOptionEntry opt_entries[] =
@@ -987,6 +987,9 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    // ref counter needs to know if in daemon_mode
+    init_window_ref_counter(cli_flags.daemon_mode);
+
     // dialog mode with other options?
     if (cli_flags.custom_dialog)
     {
@@ -1146,21 +1149,4 @@ static void open_file(const char* path)
     }
     vfs_mime_type_unref(mime_type);
     vfs_file_info_unref(file);
-}
-
-/* After opening any window/dialog/tool, this should be called. */
-void pcmanfm_ref()
-{
-    ++n_pcmanfm_ref;
-}
-
-/* After closing any window/dialog/tool, this should be called.
- * If the last window is closed and we are not a deamon, pcmanfm will quit.
- */
-bool pcmanfm_unref()
-{
-    --n_pcmanfm_ref;
-    if (n_pcmanfm_ref == 0 && !cli_flags.daemon_mode)
-        gtk_main_quit();
-    return FALSE;
 }
