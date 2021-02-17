@@ -81,48 +81,54 @@ static bool daemon_initialized = FALSE;
 static int sock;
 static GIOChannel* io_channel = NULL;
 
-static bool daemon_mode = FALSE;
-
-static char* default_files[2] = {NULL, NULL};
-static char** files = NULL;
-
-static bool new_tab = TRUE;
-static bool reuse_tab = FALSE; // sfm
-static bool no_tabs = FALSE;   // sfm
-static bool new_window = FALSE;
-static bool custom_dialog = FALSE; // sfm
-static bool socket_cmd = FALSE;    // sfm
-static bool version_opt = FALSE;   // sfm
-static bool sdebug = FALSE;        // sfm
 static bool socket_daemon = FALSE; // sfm
 
-static int show_pref = 0;
-static int panel = -1;
+static char* default_files[2] = {NULL, NULL};
 
-static bool find_files = FALSE;
-static char* config_dir = NULL;
-static bool disable_git_settings = FALSE;
+typedef struct CliFlags
+{
+    char** files;
+    bool new_tab;
+    bool reuse_tab;
+    bool no_tabs;
+    bool new_window;
+    bool custom_dialog;
+    bool socket_cmd;
+    bool version_opt;
+    bool sdebug;
+
+    bool daemon_mode;
+
+    int show_pref;
+    int panel;
+
+    bool find_files;
+    char* config_dir;
+    bool disable_git_settings;
+} CliFlags;
+
+CliFlags cli_flags;
 
 static int n_pcmanfm_ref = 0;
 
 // clang-format off
 static GOptionEntry opt_entries[] =
 {
-    {"new-tab", 't', 0, G_OPTION_ARG_NONE, &new_tab, N_("Open directories in new tab of last window (default)"), NULL},
-    {"reuse-tab", 'r', 0, G_OPTION_ARG_NONE, &reuse_tab, N_("Open directory in current tab of last used window"), NULL},
-    {"no-saved-tabs", 'n', 0, G_OPTION_ARG_NONE, &no_tabs, N_("Don't load saved tabs"), NULL},
-    {"new-window", 'w', 0, G_OPTION_ARG_NONE, &new_window, N_("Open directories in new window"), NULL},
-    {"panel", 'p', 0, G_OPTION_ARG_INT, &panel, N_("Open directories in panel 'P' (1-4)"), "P"},
-    {"show-pref", '\0', 0, G_OPTION_ARG_INT, &show_pref, N_("Show Preferences ('N' is the Pref tab number)"), "N"},
-    {"daemon-mode", 'd', 0, G_OPTION_ARG_NONE, &daemon_mode, N_("Run as a daemon"), NULL},
-    {"config", 'c', 0, G_OPTION_ARG_STRING, &config_dir, N_("Use DIR as configuration directory"), "DIR"},
-    {"disable-git", 'G', 0, G_OPTION_ARG_NONE, &disable_git_settings, N_("Don't use git to keep session history"), NULL},
-    {"find-files", 'f', 0, G_OPTION_ARG_NONE, &find_files, N_("Show File Search"), NULL},
-    {"dialog", 'g', 0, G_OPTION_ARG_NONE, &custom_dialog, N_("Show a custom dialog (See -g help)"), NULL},
-    {"socket-cmd", 's', 0, G_OPTION_ARG_NONE, &socket_cmd, N_("Send a socket command (See -s help)"), NULL},
-    {"version", 'v', 0, G_OPTION_ARG_NONE, &version_opt, N_("Show version information"), NULL},
-    {"sdebug", '\0', G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_NONE, &sdebug, NULL, NULL},
-    {G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &files, NULL, N_("[DIR | FILE | URL]...")},
+    {"new-tab", 't', 0, G_OPTION_ARG_NONE, &cli_flags.new_tab, N_("Open directories in new tab of last window (default)"), NULL},
+    {"reuse-tab", 'r', 0, G_OPTION_ARG_NONE, &cli_flags.reuse_tab, N_("Open directory in current tab of last used window"), NULL},
+    {"no-saved-tabs", 'n', 0, G_OPTION_ARG_NONE, &cli_flags.no_tabs, N_("Don't load saved tabs"), NULL},
+    {"new-window", 'w', 0, G_OPTION_ARG_NONE, &cli_flags.new_window, N_("Open directories in new window"), NULL},
+    {"panel", 'p', 0, G_OPTION_ARG_INT, &cli_flags.panel, N_("Open directories in panel 'P' (1-4)"), "P"},
+    {"show-pref", '\0', 0, G_OPTION_ARG_INT, &cli_flags.show_pref, N_("Show Preferences ('N' is the Pref tab number)"), "N"},
+    {"daemon-mode", 'd', 0, G_OPTION_ARG_NONE, &cli_flags.daemon_mode, N_("Run as a daemon"), NULL},
+    {"config", 'c', 0, G_OPTION_ARG_STRING, &cli_flags.config_dir, N_("Use DIR as configuration directory"), "DIR"},
+    {"disable-git", 'G', 0, G_OPTION_ARG_NONE, &cli_flags.disable_git_settings, N_("Don't use git to keep session history"), NULL},
+    {"find-files", 'f', 0, G_OPTION_ARG_NONE, &cli_flags.find_files, N_("Show File Search"), NULL},
+    {"dialog", 'g', 0, G_OPTION_ARG_NONE, &cli_flags.custom_dialog, N_("Show a custom dialog (See -g help)"), NULL},
+    {"socket-cmd", 's', 0, G_OPTION_ARG_NONE, &cli_flags.socket_cmd, N_("Send a socket command (See -s help)"), NULL},
+    {"version", 'v', 0, G_OPTION_ARG_NONE, &cli_flags.version_opt, N_("Show version information"), NULL},
+    {"sdebug", '\0', G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_NONE, &cli_flags.sdebug, NULL, NULL},
+    {G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &cli_flags.files, NULL, N_("[DIR | FILE | URL]...")},
     {NULL}
 };
 // clang-format on
@@ -183,61 +189,61 @@ static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
             shutdown(client, 2);
             close(client);
 
-            new_tab = TRUE;
-            panel = 0;
-            reuse_tab = FALSE;
-            no_tabs = FALSE;
+            cli_flags.new_tab = TRUE;
+            cli_flags.panel = 0;
+            cli_flags.reuse_tab = FALSE;
+            cli_flags.no_tabs = FALSE;
             socket_daemon = FALSE;
 
             int argx = 0;
             if (args->str[argx] == CMD_NO_TABS)
             {
-                reuse_tab = FALSE;
-                no_tabs = TRUE;
+                cli_flags.reuse_tab = FALSE;
+                cli_flags.no_tabs = TRUE;
                 argx++; // another command follows CMD_NO_TABS
             }
             if (args->str[argx] == CMD_REUSE_TAB)
             {
-                reuse_tab = TRUE;
-                new_tab = FALSE;
+                cli_flags.reuse_tab = TRUE;
+                cli_flags.new_tab = FALSE;
                 argx++; // another command follows CMD_REUSE_TAB
             }
 
             switch (args->str[argx])
             {
                 case CMD_PANEL1:
-                    panel = 1;
+                    cli_flags.panel = 1;
                     break;
                 case CMD_PANEL2:
-                    panel = 2;
+                    cli_flags.panel = 2;
                     break;
                 case CMD_PANEL3:
-                    panel = 3;
+                    cli_flags.panel = 3;
                     break;
                 case CMD_PANEL4:
-                    panel = 4;
+                    cli_flags.panel = 4;
                     break;
                 case CMD_OPEN:
-                    new_tab = FALSE;
+                    cli_flags.new_tab = FALSE;
                     break;
                 case CMD_OPEN_PANEL1:
-                    new_tab = FALSE;
-                    panel = 1;
+                    cli_flags.new_tab = FALSE;
+                    cli_flags.panel = 1;
                     break;
                 case CMD_OPEN_PANEL2:
-                    new_tab = FALSE;
-                    panel = 2;
+                    cli_flags.new_tab = FALSE;
+                    cli_flags.panel = 2;
                     break;
                 case CMD_OPEN_PANEL3:
-                    new_tab = FALSE;
-                    panel = 3;
+                    cli_flags.new_tab = FALSE;
+                    cli_flags.panel = 3;
                     break;
                 case CMD_OPEN_PANEL4:
-                    new_tab = FALSE;
-                    panel = 4;
+                    cli_flags.new_tab = FALSE;
+                    cli_flags.panel = 4;
                     break;
                 case CMD_DAEMON_MODE:
-                    socket_daemon = daemon_mode = TRUE;
+                    socket_daemon = cli_flags.daemon_mode = TRUE;
                     g_string_free(args, TRUE);
                     return TRUE;
                 case CMD_PREF:
@@ -245,7 +251,7 @@ static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
                     g_string_free(args, TRUE);
                     return TRUE;
                 case CMD_FIND_FILES:
-                    find_files = TRUE;
+                    cli_flags.find_files = TRUE;
                     __attribute__((fallthrough));
                 case CMD_SOCKET_CMD:
                     g_string_free(args, TRUE);
@@ -255,15 +261,15 @@ static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
             }
 
             if (args->str[argx + 1])
-                files = g_strsplit(args->str + argx + 1, "\n", 0);
+                cli_flags.files = g_strsplit(args->str + argx + 1, "\n", 0);
             else
-                files = NULL;
+                cli_flags.files = NULL;
             g_string_free(args, TRUE);
 
-            if (files)
+            if (cli_flags.files)
             {
                 char** file;
-                for (file = files; *file; ++file)
+                for (file = cli_flags.files; *file; ++file)
                 {
                     if (!**file) /* remove empty string at tail */
                         *file = NULL;
@@ -313,14 +319,14 @@ static bool single_instance_check()
         /* connected successfully */
         char cmd = CMD_OPEN_TAB;
 
-        if (no_tabs)
+        if (cli_flags.no_tabs)
         {
             cmd = CMD_NO_TABS;
             write(sock, &cmd, sizeof(char));
             // another command always follows CMD_NO_TABS
             cmd = CMD_OPEN_TAB;
         }
-        if (reuse_tab)
+        if (cli_flags.reuse_tab)
         {
             cmd = CMD_REUSE_TAB;
             write(sock, &cmd, sizeof(char));
@@ -328,38 +334,38 @@ static bool single_instance_check()
             cmd = CMD_OPEN;
         }
 
-        if (daemon_mode)
+        if (cli_flags.daemon_mode)
             cmd = CMD_DAEMON_MODE;
-        else if (new_window)
+        else if (cli_flags.new_window)
         {
-            if (panel > 0 && panel < 5)
-                cmd = CMD_OPEN_PANEL1 + panel - 1;
+            if (cli_flags.panel > 0 && cli_flags.panel < 5)
+                cmd = CMD_OPEN_PANEL1 + cli_flags.panel - 1;
             else
                 cmd = CMD_OPEN;
         }
-        else if (show_pref > 0)
+        else if (cli_flags.show_pref > 0)
             cmd = CMD_PREF;
-        else if (find_files)
+        else if (cli_flags.find_files)
             cmd = CMD_FIND_FILES;
-        else if (panel > 0 && panel < 5)
-            cmd = CMD_PANEL1 + panel - 1;
+        else if (cli_flags.panel > 0 && cli_flags.panel < 5)
+            cmd = CMD_PANEL1 + cli_flags.panel - 1;
 
         // open a new window if no file spec
-        if (cmd == CMD_OPEN_TAB && !files)
+        if (cmd == CMD_OPEN_TAB && !cli_flags.files)
             cmd = CMD_OPEN;
 
         write(sock, &cmd, sizeof(char));
-        if (G_UNLIKELY(show_pref > 0))
+        if (G_UNLIKELY(cli_flags.show_pref > 0))
         {
-            cmd = (unsigned char)show_pref;
+            cmd = (unsigned char)cli_flags.show_pref;
             write(sock, &cmd, sizeof(char));
         }
         else
         {
-            if (files)
+            if (cli_flags.files)
             {
                 char** file;
-                for (file = files; *file; ++file)
+                for (file = cli_flags.files; *file; ++file)
                 {
                     char* real_path;
 
@@ -377,7 +383,7 @@ static bool single_instance_check()
                 }
             }
         }
-        if (config_dir)
+        if (cli_flags.config_dir)
             g_warning(_("Option --config ignored - an instance is already running"));
         shutdown(sock, 2);
         close(sock);
@@ -659,13 +665,13 @@ static void open_in_tab(FMMainWindow** main_window, const char* real_path)
     if (G_UNLIKELY(!*main_window))
     {
         // initialize things required by folder view
-        if (G_UNLIKELY(!daemon_mode))
+        if (G_UNLIKELY(!cli_flags.daemon_mode))
             init_folder();
 
         // preload panel?
-        if (panel > 0 && panel < 5)
+        if (cli_flags.panel > 0 && cli_flags.panel < 5)
             // user specified panel
-            p = panel;
+            p = cli_flags.panel;
         else
         {
             // use first visible panel
@@ -691,34 +697,34 @@ static void open_in_tab(FMMainWindow** main_window, const char* real_path)
     {
         // existing window
         bool tab_added = FALSE;
-        if (panel > 0 && panel < 5)
+        if (cli_flags.panel > 0 && cli_flags.panel < 5)
         {
             // change to user-specified panel
-            if (!gtk_notebook_get_n_pages(GTK_NOTEBOOK((*main_window)->panel[panel - 1])))
+            if (!gtk_notebook_get_n_pages(GTK_NOTEBOOK((*main_window)->panel[cli_flags.panel - 1])))
             {
                 // set panel to load real_path on panel load
-                set = xset_get_panel(panel, "show");
+                set = xset_get_panel(cli_flags.panel, "show");
                 set->ob1 = g_strdup(real_path);
                 tab_added = TRUE;
                 set->b = XSET_B_TRUE;
                 show_panels_all_windows(NULL, *main_window);
             }
-            else if (!gtk_widget_get_visible((*main_window)->panel[panel - 1]))
+            else if (!gtk_widget_get_visible((*main_window)->panel[cli_flags.panel - 1]))
             {
                 // show panel
-                set = xset_get_panel(panel, "show");
+                set = xset_get_panel(cli_flags.panel, "show");
                 set->b = XSET_B_TRUE;
                 show_panels_all_windows(NULL, *main_window);
             }
-            (*main_window)->curpanel = panel;
-            (*main_window)->notebook = (*main_window)->panel[panel - 1];
+            (*main_window)->curpanel = cli_flags.panel;
+            (*main_window)->notebook = (*main_window)->panel[cli_flags.panel - 1];
         }
         if (!tab_added)
         {
-            if (reuse_tab)
+            if (cli_flags.reuse_tab)
             {
                 main_window_open_path_in_current_tab(*main_window, real_path);
-                reuse_tab = FALSE;
+                cli_flags.reuse_tab = FALSE;
             }
             else
                 fm_main_window_add_new_tab(*main_window, real_path);
@@ -735,17 +741,17 @@ static bool handle_parsed_commandline_args()
     XSet* set;
     struct stat statbuf;
 
-    app_settings.load_saved_tabs = !no_tabs;
+    app_settings.load_saved_tabs = !cli_flags.no_tabs;
 
     // If no files are specified, open home dir by defualt.
-    if (G_LIKELY(!files))
+    if (G_LIKELY(!cli_flags.files))
     {
-        files = default_files;
+        cli_flags.files = default_files;
         // files[0] = (char*)g_get_home_dir();
     }
 
     // get the last active window on this desktop, if available
-    if (new_tab || reuse_tab)
+    if (cli_flags.new_tab || cli_flags.reuse_tab)
     {
         main_window = fm_main_window_get_on_current_desktop();
         // printf("    fm_main_window_get_on_current_desktop = %p  %s %s\n", main_window,
@@ -754,26 +760,26 @@ static bool handle_parsed_commandline_args()
         //                                                            );
     }
 
-    if (show_pref > 0) /* show preferences dialog */
+    if (cli_flags.show_pref > 0) /* show preferences dialog */
     {
-        fm_edit_preference(GTK_WINDOW(main_window), show_pref - 1);
-        show_pref = 0;
+        fm_edit_preference(GTK_WINDOW(main_window), cli_flags.show_pref - 1);
+        cli_flags.show_pref = 0;
     }
-    else if (find_files) /* find files */
+    else if (cli_flags.find_files) /* find files */
     {
         init_folder();
-        fm_find_files((const char**)files);
-        find_files = FALSE;
+        fm_find_files((const char**)cli_flags.files);
+        cli_flags.find_files = FALSE;
     }
     else /* open files/directories */
     {
-        if (daemon_mode && !daemon_initialized)
+        if (cli_flags.daemon_mode && !daemon_initialized)
             init_daemon();
-        else if (files != default_files)
+        else if (cli_flags.files != default_files)
         {
             /* open files passed in command line arguments */
             ret = FALSE;
-            for (file = files; *file; ++file)
+            for (file = cli_flags.files; *file; ++file)
             {
                 char* real_path;
 
@@ -833,33 +839,33 @@ static bool handle_parsed_commandline_args()
             if (G_UNLIKELY(!main_window))
             {
                 // initialize things required by folder view
-                if (G_UNLIKELY(!daemon_mode))
+                if (G_UNLIKELY(!cli_flags.daemon_mode))
                     init_folder();
                 fm_main_window_store_positions(NULL);
                 main_window = FM_MAIN_WINDOW(fm_main_window_new());
             }
             gtk_window_present(GTK_WINDOW(main_window));
 
-            if (panel > 0 && panel < 5)
+            if (cli_flags.panel > 0 && cli_flags.panel < 5)
             {
                 // user specified a panel with no file, let's show the panel
-                if (!gtk_widget_get_visible(main_window->panel[panel - 1]))
+                if (!gtk_widget_get_visible(main_window->panel[cli_flags.panel - 1]))
                 {
                     // show panel
-                    set = xset_get_panel(panel, "show");
+                    set = xset_get_panel(cli_flags.panel, "show");
                     set->b = XSET_B_TRUE;
                     show_panels_all_windows(NULL, main_window);
                 }
-                focus_panel(NULL, (void*)main_window, panel);
+                focus_panel(NULL, (void*)main_window, cli_flags.panel);
             }
         }
     }
     // printf("    handle_parsed_commandline_args mw = %p\n\n", main_window );
 
-    if (files != default_files)
-        g_strfreev(files);
+    if (cli_flags.files != default_files)
+        g_strfreev(cli_flags.files);
 
-    files = NULL;
+    cli_flags.files = NULL;
     return ret;
 }
 
@@ -949,6 +955,26 @@ int main(int argc, char* argv[])
         }
     }
 
+    // init cli_flags
+    cli_flags.files = NULL;
+    cli_flags.new_tab = TRUE;
+    cli_flags.reuse_tab = FALSE; // sfm
+    cli_flags.no_tabs = FALSE;   // sfm
+    cli_flags.new_window = FALSE;
+    cli_flags.custom_dialog = FALSE; // sfm
+    cli_flags.socket_cmd = FALSE;    // sfm
+    cli_flags.version_opt = FALSE;   // sfm
+    cli_flags.sdebug = FALSE;        // sfm
+
+    cli_flags.daemon_mode = FALSE;
+
+    cli_flags.show_pref = 0;
+    cli_flags.panel = -1;
+
+    cli_flags.find_files = FALSE;
+    cli_flags.config_dir = NULL;
+    cli_flags.disable_git_settings = FALSE;
+
     /* initialize GTK+ and parse the command line arguments */
 #ifdef ENABLE_NLS
     if (G_UNLIKELY(!gtk_init_with_args(&argc, &argv, "", opt_entries, GETTEXT_PACKAGE, &err)))
@@ -962,27 +988,24 @@ int main(int argc, char* argv[])
     }
 
     // dialog mode with other options?
-    if (custom_dialog)
+    if (cli_flags.custom_dialog)
     {
         fprintf(stderr, "spacefm: %s\n", _("--dialog must be first option"));
         return 1;
     }
 
     // socket command with other options?
-    if (socket_cmd)
+    if (cli_flags.socket_cmd)
     {
         fprintf(stderr, "spacefm: %s\n", _("--socket-cmd must be first option"));
         return 1;
     }
 
     // --disable-git
-    if (!disable_git_settings)
-        config_settings.git_backed_settings = TRUE;
-    else
-        config_settings.git_backed_settings = FALSE;
+    config_settings.git_backed_settings = !cli_flags.disable_git_settings;
 
     // --version
-    if (version_opt)
+    if (cli_flags.version_opt)
     {
         printf("%s %s\n", PACKAGE_NAME_FANCY, PACKAGE_VERSION);
         printf("Features: ");
@@ -1041,9 +1064,9 @@ int main(int argc, char* argv[])
 
     /* load config file */
     // MOD was before vfs_file_monitor_init
-    load_settings(config_dir);
+    load_settings(cli_flags.config_dir);
 
-    app_settings.sdebug = sdebug;
+    app_settings.sdebug = cli_flags.sdebug;
 
     /* If we reach this point, we are the first instance.
      * Subsequent processes will exit() inside single_instance_check and won't reach here.
@@ -1137,7 +1160,7 @@ void pcmanfm_ref()
 bool pcmanfm_unref()
 {
     --n_pcmanfm_ref;
-    if (n_pcmanfm_ref == 0 && !daemon_mode)
+    if (n_pcmanfm_ref == 0 && !cli_flags.daemon_mode)
         gtk_main_quit();
     return FALSE;
 }
