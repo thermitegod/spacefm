@@ -92,6 +92,10 @@ if get_option('nls')
   pre_args += '-DHAVE_NLS'
 endif
 
+if get_option('nonlatin')
+  pre_args += '-DHAVE_NONLATIN'
+endif
+
 if get_option('sn')
   pre_args += '-DHAVE_SN'
 endif

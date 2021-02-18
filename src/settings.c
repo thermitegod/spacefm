@@ -4440,8 +4440,9 @@ static bool on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget
         }
     }
 
-    // need to transpose nonlatin keyboard layout ?
+#ifdef HAVE_NONLATIN
     unsigned int nonlatin_key = 0;
+    // need to transpose nonlatin keyboard layout ?
     if (!((GDK_KEY_0 <= event->keyval && event->keyval <= GDK_KEY_9) ||
           (GDK_KEY_A <= event->keyval && event->keyval <= GDK_KEY_Z) ||
           (GDK_KEY_a <= event->keyval && event->keyval <= GDK_KEY_z)))
@@ -4449,6 +4450,7 @@ static bool on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget
         nonlatin_key = event->keyval;
         transpose_nonlatin_keypress(event);
     }
+#endif
 
     *newkey = 0;
     *newkeymod = 0;
@@ -4477,7 +4479,9 @@ static bool on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget
                 name = g_strdup("( no name )");
 
             keyname = xset_get_keyname(NULL, event->keyval, keymod);
+#ifdef HAVE_NONLATIN
             if (nonlatin_key == 0)
+#endif
                 gtk_message_dialog_format_secondary_text(
                     GTK_MESSAGE_DIALOG(dlg),
                     _("\t%s\n\tKeycode: %#4x  Modifier: %#x\n\n%s is already assigned to "
@@ -4488,6 +4492,7 @@ static bool on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget
                     keymod,
                     keyname,
                     name);
+#ifdef HAVE_NONLATIN
             else
                 gtk_message_dialog_format_secondary_text(
                     GTK_MESSAGE_DIALOG(dlg),
@@ -4500,6 +4505,7 @@ static bool on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget
                     keymod,
                     keyname,
                     name);
+#endif
             g_free(name);
             g_free(keyname);
             *newkey = event->keyval;
@@ -5581,7 +5587,9 @@ static bool xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, XSe
     unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
                                            GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
 
+#ifdef HAVE_NONLATIN
     transpose_nonlatin_keypress(event);
+#endif
 
     switch (keymod)
     {
@@ -6294,7 +6302,9 @@ bool xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
     unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
                                            GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
 
+#ifdef HAVE_NONLATIN
     transpose_nonlatin_keypress(event);
+#endif
 
     switch (keymod)
     {

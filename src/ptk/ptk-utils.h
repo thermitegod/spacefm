@@ -54,7 +54,9 @@ void ptk_show_error(GtkWindow* parent, const char* title, const char* message);
 
 GtkBuilder* _gtk_builder_new_from_file(const char* file);
 
+#ifdef HAVE_NONLATIN
 void transpose_nonlatin_keypress(GdkEventKey* event);
+#endif
 
 G_END_DECLS
 

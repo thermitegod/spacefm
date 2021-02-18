@@ -3382,7 +3382,6 @@ static bool on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* even
     GList* l;
     XSet* set;
     PtkFileBrowser* browser;
-    unsigned int nonlatin_key = 0;
 
     if (known_set)
     {
@@ -3412,6 +3411,8 @@ static bool on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* even
             return FALSE; // send to pathbar
     }
 
+#ifdef HAVE_NONLATIN
+    unsigned int nonlatin_key = 0;
     // need to transpose nonlatin keyboard layout ?
     if (!((GDK_KEY_0 <= event->keyval && event->keyval <= GDK_KEY_9) ||
           (GDK_KEY_A <= event->keyval && event->keyval <= GDK_KEY_Z) ||
@@ -3420,6 +3421,7 @@ static bool on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* even
         nonlatin_key = event->keyval;
         transpose_nonlatin_keypress(event);
     }
+#endif
 
     if ((event_handler.win_key->s || event_handler.win_key->ob2_data) &&
         main_window_event(main_window,
@@ -3439,10 +3441,15 @@ static bool on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* even
         if (((XSet*)l->data)->shared_key)
         {
             // set has shared key
+#ifdef HAVE_NONLATIN
             // nonlatin key match is for nonlatin keycodes set prior to 1.0.3
             set = xset_get(((XSet*)l->data)->shared_key);
             if ((set->key == event->keyval || (nonlatin_key && set->key == nonlatin_key)) &&
                 set->keymod == keymod)
+#else
+            set = xset_get(((XSet*)l->data)->shared_key);
+            if (set->key == event->keyval && set->keymod == keymod)
+#endif
             {
                 // shared key match
                 if (g_str_has_prefix(set->name, "panel"))
@@ -3465,11 +3472,14 @@ static bool on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* even
             else
                 continue;
         }
-
+#ifdef HAVE_NONLATIN
         // nonlatin key match is for nonlatin keycodes set prior to 1.0.3
         if ((((XSet*)l->data)->key == event->keyval ||
              (nonlatin_key && ((XSet*)l->data)->key == nonlatin_key)) &&
             ((XSet*)l->data)->keymod == keymod)
+#else
+        if (((XSet*)l->data)->key == event->keyval && ((XSet*)l->data)->keymod == keymod)
+#endif
         {
             set = (XSet*)l->data;
         _key_found:
@@ -3598,11 +3608,13 @@ static bool on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* even
         }
     }
 
+#ifdef HAVE_NONLATIN
     if (nonlatin_key != 0)
     {
         // use literal keycode for pass-thru, eg for find-as-you-type search
         event->keyval = nonlatin_key;
     }
+#endif
 
     if ((event->state & GDK_MOD1_MASK))
         rebuild_menus(main_window);

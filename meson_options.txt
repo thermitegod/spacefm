@@ -29,6 +29,12 @@ option(
   value : true,
   description : 'ignore freedesktop standards and use xxhash for thumbnail hasher',
 )
+option(
+  'nonlatin',
+  type : 'boolean',
+  value : false,
+  description : 'support for non-latin keyboards',
+)
 
 #other
 #TODO bashpath, etc

@@ -136,6 +136,7 @@ GtkBuilder* _gtk_builder_new_from_file(const char* file)
     return builder;
 }
 
+#ifdef HAVE_NONLATIN
 void transpose_nonlatin_keypress(GdkEventKey* event)
 {
     if (!(event && event->keyval != 0))
@@ -191,3 +192,4 @@ void transpose_nonlatin_keypress(GdkEventKey* event)
         g_free(keyvals);
     }
 }
+#endif
