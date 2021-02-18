@@ -179,8 +179,7 @@ static GtkWidget* app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_ty
     show_default        Show 'Set as default' checkbox
     dir_default         Show 'Set as default' also for type dir
     */
-    const char* appchooserdlg_ui = g_strdup("/appchooserdlg3.ui");
-    GtkBuilder* builder = _gtk_builder_new_from_file(PACKAGE_UI_DIR, appchooserdlg_ui, NULL);
+    GtkBuilder* builder = _gtk_builder_new_from_file("appchooserdlg3.ui");
     GtkWidget* dlg = (GtkWidget*)gtk_builder_get_object(builder, "dlg");
     GtkWidget* file_type = (GtkWidget*)gtk_builder_get_object(builder, "file_type");
     char* mime_desc;

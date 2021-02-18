@@ -2766,8 +2766,7 @@ static void on_about_activate(GtkMenuItem* menuitem, void* user_data)
 
         pcmanfm_ref();
 
-        const char* about_dlg_ui = g_strdup("/about-dlg3.ui");
-        builder = _gtk_builder_new_from_file(PACKAGE_UI_DIR, about_dlg_ui, NULL);
+        builder = _gtk_builder_new_from_file("about-dlg3.ui");
         about_dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
         g_object_unref(builder);
         gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(about_dlg), PACKAGE_VERSION);

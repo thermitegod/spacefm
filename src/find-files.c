@@ -1027,8 +1027,7 @@ void fm_find_files(const char** search_dirs)
     GtkWidget* remove_directory_btn;
     GtkWidget* img;
 
-    const char* find_files_ui = "/find-files3.ui";
-    GtkBuilder* builder = _gtk_builder_new_from_file(PACKAGE_UI_DIR, find_files_ui, NULL);
+    GtkBuilder* builder = _gtk_builder_new_from_file("find-files3.ui");
     data->win = (GtkWidget*)gtk_builder_get_object(builder, "win");
     g_object_set_data_full(G_OBJECT(data->win), "find-files", data, (GDestroyNotify)free_data);
 

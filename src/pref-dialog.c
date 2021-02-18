@@ -470,8 +470,7 @@ bool fm_edit_preference(GtkWindow* parent, int page)
     {
         GtkTreeModel* model;
         // this invokes GVFS-RemoteVolumeMonitor via IsSupported
-        const char* prefdlg_ui = g_strdup("/prefdlg3.ui");
-        GtkBuilder* builder = _gtk_builder_new_from_file(PACKAGE_UI_DIR, prefdlg_ui, NULL);
+        GtkBuilder* builder = _gtk_builder_new_from_file("prefdlg3.ui");
 
         if (!builder)
             return FALSE;

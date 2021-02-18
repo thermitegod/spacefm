@@ -321,8 +321,7 @@ static void on_combo_change(GtkComboBox* combo, void* user_data)
 GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_files,
                                    int page)
 {
-    const char* file_properties_ui = g_strdup("/file_properties3.ui");
-    GtkBuilder* builder = _gtk_builder_new_from_file(PACKAGE_UI_DIR, file_properties_ui, NULL);
+    GtkBuilder* builder = _gtk_builder_new_from_file("file_properties3.ui");
     GtkWidget* dlg = (GtkWidget*)gtk_builder_get_object(builder, "dlg");
     GtkNotebook* notebook = (GtkNotebook*)gtk_builder_get_object(builder, "notebook");
     xset_set_window_icon(GTK_WINDOW(dlg));

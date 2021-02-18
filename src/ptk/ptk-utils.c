@@ -127,15 +127,12 @@ void ptk_show_error(GtkWindow* parent, const char* title, const char* message)
     gtk_widget_destroy(dlg);
 }
 
-GtkBuilder* _gtk_builder_new_from_file(const char* path, const char* file, GError** err)
+GtkBuilder* _gtk_builder_new_from_file(const char* file)
 {
-    char* filename = g_build_filename(path, file, NULL);
+    char* filename = g_build_filename(PACKAGE_UI_DIR, file, NULL);
     GtkBuilder* builder = gtk_builder_new();
-    if (G_UNLIKELY(!gtk_builder_add_from_file(builder, filename, err)))
-    {
-        g_object_unref(builder);
-        return NULL;
-    }
+    gtk_builder_add_from_file(builder, filename, NULL);
+
     return builder;
 }
 
