@@ -2634,7 +2634,7 @@ static VFSVolume* vfs_volume_read_by_mount(dev_t devnum, const char* mount_point
             }
         }
         // mount point must be readable
-        keep = keep && (geteuid() == 0 || g_access(point, R_OK) == 0);
+        keep = keep && (geteuid() == 0 || faccessat(0, point, R_OK, AT_EACCESS) == 0);
         if (keep)
         {
             // create a volume

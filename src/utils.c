@@ -8,6 +8,9 @@
 
 #include <errno.h>
 
+#include <fcntl.h>
+#include <unistd.h>
+
 #include "settings.h"
 #include "extern.h"
 #include "utils.h"
@@ -84,14 +87,14 @@ bool have_x_access(const char* path)
 {
     if (!path)
         return FALSE;
-    return (access(path, R_OK | X_OK) == 0);
+    return (faccessat(0, path, R_OK | X_OK, AT_EACCESS) == 0);
 }
 
 bool have_rw_access(const char* path)
 {
     if (!path)
         return FALSE;
-    return (access(path, R_OK | W_OK) == 0);
+    return (faccessat(0, path, R_OK | W_OK, AT_EACCESS) == 0);
 }
 
 bool dir_has_files(const char* path)
