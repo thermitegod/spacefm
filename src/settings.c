@@ -291,16 +291,19 @@ void load_conf()
     config_settings.font_general = "Monospace 9";
 
     // load spacefm.conf
-    char* etc_path = g_build_filename(SYSCONFDIR, "spacefm", "spacefm.conf", NULL);
-    FILE* file = fopen(etc_path, "r");
+    char* config_path = g_build_filename(g_get_user_config_dir(), "spacefm", "spacefm.conf", NULL);
+    if (!g_file_test(config_path, G_FILE_TEST_EXISTS))
+        config_path = g_build_filename(SYSCONFDIR, "spacefm", "spacefm.conf", NULL);
+
+    FILE* file = fopen(config_path, "r");
     if (file)
     {
         char line[2048];
         while (fgets(line, sizeof(line), file))
-            parse_conf(etc_path, line);
+            parse_conf(config_path, line);
         fclose(file);
     }
-    g_free(etc_path);
+    g_free(config_path);
 }
 
 void load_settings(const char* config_dir)
