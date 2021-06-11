@@ -612,6 +612,7 @@ static void select_in_tree_view(CustomElement* el, const char* value, bool selec
 static GList* args_from_file(const char* path)
 {
     char line[2048];
+    char* tmp = NULL;
     GList* args = NULL;
 
     FILE* file = fopen(path, "r");
@@ -629,7 +630,7 @@ static GList* args_from_file(const char* path)
             g_list_free(args);
             return NULL;
         }
-        strtok(line, "\r\n");
+        strtok_r(line, "\r\n", &tmp);
         if (!strcmp(line, "--"))
             break;
         if (line[0] != '\n') // skip blank lines
@@ -1600,6 +1601,7 @@ static char* read_file_value(const char* path, bool multi)
     FILE* file;
     int f;
     int bytes;
+    char* tmp = NULL;
     const char* end;
 
     if (!g_file_test(path, G_FILE_TEST_EXISTS))
@@ -1641,7 +1643,7 @@ static char* read_file_value(const char* path, bool multi)
             return NULL;
         }
         fclose(file);
-        strtok(line, "\r\n");
+        strtok_r(line, "\r\n", &tmp);
         if (line[0] == '\n')
             line[0] = '\0';
     }

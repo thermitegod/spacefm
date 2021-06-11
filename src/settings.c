@@ -447,14 +447,15 @@ void load_settings(const char* config_dir)
     {
         SettingsParseFunc func = NULL;
         char line[2048];
+        char* tmp = NULL;
         while (fgets(line, sizeof(line), file))
         {
-            strtok(line, "\r\n");
+            strtok_r(line, "\r\n", &tmp);
             if (!line[0])
                 continue;
             if (line[0] == '[')
             {
-                strtok(line, "]");
+                strtok_r(line, "]", &tmp);
                 if (!strcmp(line + 1, "General"))
                     func = &parse_general_settings;
                 else if (!strcmp(line + 1, "Window"))
@@ -1740,9 +1741,10 @@ static void read_root_settings()
         }
     }
 
+    char* tmp = NULL;
     while (fgets(line, sizeof(line), file))
     {
-        strtok(line, "\r\n");
+        strtok_r(line, "\r\n", &tmp);
         if (!line[0])
             continue;
         xset_parse(line);
@@ -2813,14 +2815,15 @@ XSet* xset_import_plugin(const char* plug_dir, int* use)
         return NULL;
     }
 
+    char* tmp = NULL;
     while (fgets(line, sizeof(line), file))
     {
-        strtok(line, "\r\n");
+        strtok_r(line, "\r\n", &tmp);
         if (!line[0])
             continue;
         if (line[0] == '[')
         {
-            section_name = strtok(line, "]");
+            section_name = strtok_r(line, "]", &tmp);
             if (!strcmp(line + 1, "Plugin"))
                 func = TRUE;
             else
