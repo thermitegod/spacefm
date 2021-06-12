@@ -2881,14 +2881,14 @@ void ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_h
     // Creating treeview - setting single-click mode (normally this
     // widget is used for file lists, where double-clicking is the norm
     // for doing an action)
-    hnd->view_handlers = exo_tree_view_new();
+    hnd->view_handlers = gtk_tree_view_new();
     gtk_tree_view_set_model(GTK_TREE_VIEW(hnd->view_handlers), GTK_TREE_MODEL(hnd->list));
     // gtk_tree_view_set_model adds a ref
     g_object_unref(hnd->list);
 
     /*igcr probably doesn't need to be single click, as you're not using row
      * activation, only selection changed? */
-    exo_tree_view_set_single_click(((ExoTreeView*)hnd->view_handlers), TRUE);
+    // gtk_tree_view_set_single_click(((GtkTreeView*)hnd->view_handlers), TRUE);
     gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(hnd->view_handlers), FALSE);
 
     // Turning the treeview into a scrollable widget

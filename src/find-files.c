@@ -1114,14 +1114,16 @@ void fm_find_files(const char** search_dirs)
 
     /* search result pane */
     data->search_result = (GtkWidget*)gtk_builder_get_object(builder, "search_result");
-    /* replace the problematic GtkTreeView with ExoTreeView */
-    data->result_view = exo_tree_view_new();
+    /* replace the problematic GtkTreeView with GtkTreeView */
+    data->result_view = gtk_tree_view_new();
+    /*
     if (app_settings.single_click)
     {
-        exo_tree_view_set_single_click(EXO_TREE_VIEW(data->result_view), TRUE);
-        exo_tree_view_set_single_click_timeout(EXO_TREE_VIEW(data->result_view),
+        gtk_tree_view_set_single_click(GTK_TREE_VIEW(data->result_view), TRUE);
+        gtk_tree_view_set_single_click_timeout(GTK_TREE_VIEW(data->result_view),
                                                SINGLE_CLICK_TIMEOUT);
     }
+     */
     gtk_widget_show(data->result_view);
     gtk_container_add((GtkContainer*)gtk_builder_get_object(builder, "result_scroll"),
                       data->result_view);

@@ -1670,11 +1670,11 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
         gtk_list_store_new(4, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT, G_TYPE_STRING);
 
     // Listview
-    ctxt->view = exo_tree_view_new();
+    ctxt->view = gtk_tree_view_new();
     gtk_tree_view_set_model(GTK_TREE_VIEW(ctxt->view), GTK_TREE_MODEL(list));
     // gtk_tree_view_set_model adds a ref
     g_object_unref(list);
-    exo_tree_view_set_single_click((ExoTreeView*)ctxt->view, TRUE);
+    // gtk_tree_view_set_single_click((GtkTreeView*)ctxt->view, TRUE);
     gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(ctxt->view), FALSE);
 
     scroll = gtk_scrolled_window_new(NULL, NULL);

@@ -3802,7 +3802,7 @@ static GtkWidget* create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode
 
             break;
         case PTK_FB_LIST_VIEW:
-            folder_view = exo_tree_view_new();
+            folder_view = gtk_tree_view_new();
 
             init_list_view(file_browser, GTK_TREE_VIEW(folder_view));
 
@@ -3820,10 +3820,10 @@ static GtkWidget* create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode
                                                 NULL,
                                                 NULL);
 
-            exo_tree_view_set_single_click((ExoTreeView*)folder_view, file_browser->single_click);
-            exo_tree_view_set_single_click_timeout(
-                (ExoTreeView*)folder_view,
-                app_settings.no_single_hover ? 0 : SINGLE_CLICK_TIMEOUT);
+            // gtk_tree_view_set_single_click((GtkTreeView*)folder_view,
+            // file_browser->single_click); gtk_tree_view_set_single_click_timeout(
+            //    (GtkTreeView*)folder_view,
+            //    app_settings.no_single_hover ? 0 : SINGLE_CLICK_TIMEOUT);
 
             icon_size = file_browser->large_icons ? big_icon_size : small_icon_size;
 
@@ -4023,7 +4023,7 @@ static void init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
             gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
             gtk_tree_view_column_set_min_width(col, 150);
             gtk_tree_view_column_set_reorderable(col, FALSE);
-            // exo_tree_view_set_activable_column((ExoTreeView*)list_view, col);
+            // gtk_tree_view_set_activable_column((GtkTreeView*)list_view, col);
         }
         else
         {
@@ -5399,7 +5399,8 @@ void ptk_file_browser_set_single_click(PtkFileBrowser* file_browser, bool single
             exo_icon_view_set_single_click((ExoIconView*)file_browser->folder_view, single_click);
             break;
         case PTK_FB_LIST_VIEW:
-            exo_tree_view_set_single_click((ExoTreeView*)file_browser->folder_view, single_click);
+            // gtk_tree_view_set_single_click((GtkTreeView*)file_browser->folder_view,
+            // single_click);
             break;
         default:
             break;
@@ -5421,8 +5422,8 @@ void ptk_file_browser_set_single_click_timeout(PtkFileBrowser* file_browser, uns
                                                    timeout);
             break;
         case PTK_FB_LIST_VIEW:
-            exo_tree_view_set_single_click_timeout((ExoTreeView*)file_browser->folder_view,
-                                                   timeout);
+            // gtk_tree_view_set_single_click_timeout((GtkTreeView*)file_browser->folder_view,
+            //                                       timeout);
             break;
         default:
             break;
