@@ -10,8 +10,7 @@
  *
  */
 
-#ifndef _PTK_DIR_TREE_H_
-#define _PTK_DIR_TREE_H_
+#pragma once
 
 #include <gtk/gtk.h>
 #include <glib.h>
@@ -64,5 +63,3 @@ void ptk_dir_tree_collapse_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath*
 char* ptk_dir_tree_get_dir_path(PtkDirTree* tree, GtkTreeIter* iter);
 
 G_END_DECLS
-
-#endif

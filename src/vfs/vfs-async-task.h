@@ -19,8 +19,7 @@
  *      MA 02110-1301, USA.
  */
 
-#ifndef __VFS_ASYNC_TASK_H__
-#define __VFS_ASYNC_TASK_H__
+#pragma once
 
 #include <stdbool.h>
 
@@ -78,5 +77,3 @@ void vfs_async_task_lock(VFSAsyncTask* task);
 void vfs_async_task_unlock(VFSAsyncTask* task);
 
 G_END_DECLS
-
-#endif /* __VFS_ASYNC_TASK_H__ */

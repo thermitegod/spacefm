@@ -4,8 +4,7 @@
  *
  */
 
-#ifndef _PREF_DLG_H_
-#define _PREF_DLG_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -22,5 +21,3 @@ typedef enum PrefDlgPage
 bool fm_edit_preference(GtkWindow* parent, int page);
 
 G_END_DECLS
-
-#endif

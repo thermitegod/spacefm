@@ -19,8 +19,7 @@
  *      MA 02110-1301, USA.
  */
 
-#ifndef _MIME_TYPE_H_INCLUDED_
-#define _MIME_TYPE_H_INCLUDED_
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -106,4 +105,3 @@ MimeCache** mime_type_get_caches(int* n);
 extern uint32_t mime_cache_max_extent;
 
 G_END_DECLS
-#endif

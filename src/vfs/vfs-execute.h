@@ -10,8 +10,7 @@
  *
  */
 
-#ifndef _VFS_EXECUTE_H_
-#define _VFS_EXECUTE_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -28,5 +27,3 @@ bool vfs_exec_on_screen(GdkScreen* screen, const char* work_dir, char** argv, ch
                         GError** err);
 
 G_END_DECLS
-
-#endif

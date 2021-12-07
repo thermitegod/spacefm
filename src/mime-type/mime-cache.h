@@ -19,8 +19,7 @@
  *      MA 02110-1301, USA.
  */
 
-#ifndef _MIME_CACHE_H_INCLUDED_
-#define _MIME_CACHE_H_INCLUDED_
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -73,4 +72,3 @@ const char** mime_cache_lookup_parents(MimeCache* cache, const char* mime_type);
 const char* mime_cache_lookup_alias(MimeCache* cache, const char* mime_type);
 
 G_END_DECLS
-#endif

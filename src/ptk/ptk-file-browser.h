@@ -4,8 +4,7 @@
  *
  */
 
-#ifndef _FILE_BROWSER_H_
-#define _FILE_BROWSER_H_
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -265,5 +264,3 @@ void ptk_file_browser_show_history_menu(PtkFileBrowser* file_browser, bool is_ba
                                         GdkEventButton* event);
 
 G_END_DECLS
-
-#endif

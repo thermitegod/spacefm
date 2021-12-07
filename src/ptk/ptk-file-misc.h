@@ -10,8 +10,7 @@
  *
  */
 
-#ifndef _PTK_FILE_MISC_H_
-#define _PTK_FILE_MISC_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -62,5 +61,3 @@ void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char*
 char* get_real_link_target(const char* link_path);
 
 G_END_DECLS
-
-#endif

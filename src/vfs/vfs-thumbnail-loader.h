@@ -19,8 +19,7 @@
  *      MA 02110-1301, USA.
  */
 
-#ifndef _VFS_THUMBNAIL_LOADER_H_
-#define _VFS_THUMBNAIL_LOADER_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -52,5 +51,3 @@ GdkPixbuf* vfs_thumbnail_load_for_file(const char* file, int size, time_t mtime)
 void vfs_thumbnail_init();
 
 G_END_DECLS
-
-#endif

@@ -10,8 +10,7 @@
  *
  */
 
-#ifndef _FILE_PROPERTIES_H_
-#define _FILE_PROPERTIES_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -23,5 +22,3 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
                                    int page);
 
 G_END_DECLS
-
-#endif

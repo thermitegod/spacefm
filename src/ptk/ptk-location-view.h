@@ -8,8 +8,7 @@
  *
  */
 
-#ifndef _PTK_LOCATION_VIEW_H_
-#define _PTK_LOCATION_VIEW_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -49,5 +48,3 @@ void ptk_bookmark_view_import_gtk(const char* path, XSet* book_set);
 void ptk_bookmark_view_on_open_reverse(GtkMenuItem* item, PtkFileBrowser* file_browser);
 
 G_END_DECLS
-
-#endif

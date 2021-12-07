@@ -10,8 +10,7 @@
  *
  */
 
-#ifndef _PTK_PATH_ENTRY_
-#define _PTK_PATH_ENTRY_
+#pragma once
 
 #include <gtk/gtk.h>
 #include "ptk-file-browser.h"
@@ -28,5 +27,3 @@ GtkWidget* ptk_path_entry_new(PtkFileBrowser* file_browser);
 void ptk_path_entry_help(GtkWidget* widget, GtkWidget* parent);
 
 G_END_DECLS
-
-#endif

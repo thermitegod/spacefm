@@ -10,8 +10,7 @@
  *
  */
 
-#ifndef _PTK_HANDLER_H_
-#define _PTK_HANDLER_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -60,4 +59,3 @@ GSList* ptk_handler_file_has_handlers(int mode, int cmd, const char* path, VFSMi
                                       bool test_cmd, bool multiple, bool enabled_only);
 
 G_END_DECLS
-#endif

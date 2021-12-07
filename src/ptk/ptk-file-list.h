@@ -10,8 +10,7 @@
  *
  */
 
-#ifndef _PTK_FILE_LIST_H_
-#define _PTK_FILE_LIST_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -103,5 +102,3 @@ void ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, int max_file_
 void ptk_file_list_sort(PtkFileList* list); // sfm
 
 G_END_DECLS
-
-#endif

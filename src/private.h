@@ -4,8 +4,7 @@
  *
  */
 
-#ifndef PCMANFM_PRIVATE_H
-#define PCMANFM_PRIVATE_H
+#pragma once
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
@@ -26,6 +25,4 @@
 #define _(String)                         (String)
 #define Q_(String)                        g_strip_context((String), (String))
 #define N_(String)                        (String)
-#endif
-
 #endif

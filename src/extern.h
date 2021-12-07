@@ -4,8 +4,7 @@
  *
  */
 
-#ifndef _EXTERN_H_
-#define _EXTERN_H_
+#pragma once
 
 static const char* terminal_programs[] = // for pref-dialog.c
     {"terminal",
@@ -28,5 +27,3 @@ static const char* su_commands[] = // order and contents must match prefdlg.ui
      "/usr/bin/sudo",
      "/usr/bin/doas"};
 // clang-format on
-
-#endif

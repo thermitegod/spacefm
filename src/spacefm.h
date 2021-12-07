@@ -19,8 +19,7 @@
  *      MA 02110-1301, USA.
  */
 
-#ifndef _PCMANFM_H_
-#define _PCMANFM_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -39,5 +38,3 @@ void pcmanfm_ref();
 void pcmanfm_unref();
 
 G_END_DECLS
-
-#endif

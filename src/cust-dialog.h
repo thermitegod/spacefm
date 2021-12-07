@@ -4,8 +4,7 @@
  *
  */
 
-#ifndef _CUST_DLG_H_
-#define _CUST_DLG_H_
+#pragma once
 
 #include <glib.h>
 #include "vfs/vfs-file-monitor.h"
@@ -196,5 +195,3 @@ enum
 int custom_dialog_init(int argc, char* argv[]);
 
 G_END_DECLS
-
-#endif

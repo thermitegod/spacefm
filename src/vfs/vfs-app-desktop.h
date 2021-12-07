@@ -10,8 +10,7 @@
  *
  */
 
-#ifndef _VFS_APP_DESKTOP_H_
-#define _VFS_APP_DESKTOP_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -63,5 +62,3 @@ bool vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSA
                                 GList* file_paths, GError** err);
 
 G_END_DECLS
-
-#endif

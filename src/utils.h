@@ -4,8 +4,7 @@
  *
  */
 
-#ifndef _UTILS_H_
-#define _UTILS_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -29,5 +28,3 @@ void string_copy_free(char** s, const char* src);
 char* unescape(const char* t);
 
 char* get_valid_su();
-
-#endif

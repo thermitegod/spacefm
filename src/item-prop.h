@@ -4,8 +4,7 @@
  *
  */
 
-#ifndef _ITEM_PROP_H_
-#define _ITEM_PROP_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -68,5 +67,3 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page);
 int xset_context_test(XSetContext* context, char* rules, bool def_disable);
 
 G_END_DECLS
-
-#endif

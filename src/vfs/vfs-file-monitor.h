@@ -16,8 +16,7 @@
          Maybe using inotify directly can solve this?
 */
 
-#ifndef _VFS_FILE_MONITOR_H_
-#define _VFS_FILE_MONITOR_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -102,5 +101,3 @@ void vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void
 void vfs_file_monitor_clean();
 
 G_END_DECLS
-
-#endif

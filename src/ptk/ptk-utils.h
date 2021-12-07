@@ -14,8 +14,7 @@
   I don't like GtkUIManager provided by gtk+, so I implement my own. ;-)
 */
 
-#ifndef _PTK_UTILS_H_
-#define _PTK_UTILS_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -59,5 +58,3 @@ void transpose_nonlatin_keypress(GdkEventKey* event);
 #endif
 
 G_END_DECLS
-
-#endif

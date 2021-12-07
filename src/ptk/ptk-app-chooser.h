@@ -10,8 +10,7 @@
  *
  */
 
-#ifndef _APP_CHOOSER_DLG_H_
-#define _APP_CHOOSER_DLG_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -44,5 +43,3 @@ void on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, unsigned in
 void on_browse_btn_clicked(GtkButton* button, void* user_data);
 
 G_END_DECLS
-
-#endif

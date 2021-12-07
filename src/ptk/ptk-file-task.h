@@ -10,15 +10,14 @@
  *
  */
 
+#pragma once
+
 #include <stdbool.h>
 
 #include "../vfs/vfs-file-task.h"
 
 #include <gtk/gtk.h>
 #include "settings.h"
-
-#ifndef _PTK_FILE_TASK_
-#define _PTK_FILE_TASK_
 
 enum
 {
@@ -110,5 +109,3 @@ bool ptk_file_task_cancel(PtkFileTask* ptask);
 void ptk_file_task_pause(PtkFileTask* ptask, int state);
 
 void ptk_file_task_progress_open(PtkFileTask* ptask);
-
-#endif

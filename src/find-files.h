@@ -19,8 +19,7 @@
  *      MA 02110-1301, USA.
  */
 
-#ifndef _FIND_FILES_H
-#define _FIND_FILES_H
+#pragma once
 
 #include <gtk/gtk.h>
 
@@ -29,5 +28,3 @@ G_BEGIN_DECLS
 void fm_find_files(const char** search_dirs);
 
 G_END_DECLS
-
-#endif

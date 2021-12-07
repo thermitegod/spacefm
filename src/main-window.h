@@ -4,8 +4,7 @@
  *
  */
 
-#ifndef _MAIN_WINDOW_H_
-#define _MAIN_WINDOW_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -137,5 +136,3 @@ bool main_window_event(void* mw, XSet* preset, const char* event, int panel, int
 void fm_main_window_store_positions(FMMainWindow* main_window);
 
 G_END_DECLS
-
-#endif

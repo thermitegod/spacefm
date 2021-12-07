@@ -10,8 +10,7 @@
  *
  */
 
-#ifndef _PTK_CLIPBOARD_H_
-#define _PTK_CLIPBOARD_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -45,5 +44,3 @@ GList* ptk_clipboard_get_file_paths(const char* cwd, bool* is_cut,
                                     int* missing_targets); // sfm
 
 G_END_DECLS
-
-#endif

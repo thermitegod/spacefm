@@ -10,8 +10,7 @@
  *
  */
 
-#ifndef _VFS_MIME_TYPE_H_
-#define _VFS_MIME_TYPE_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -88,5 +87,3 @@ void vfs_mime_type_remove_reload_cb(GList* cb);
 char* vfs_mime_type_locate_desktop_file(const char* dir, const char* desktop_id);
 
 G_END_DECLS
-
-#endif

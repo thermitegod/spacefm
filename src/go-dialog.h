@@ -4,8 +4,7 @@
  *
  */
 
-#ifndef _GO_DLG_H_
-#define _GO_DLG_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -17,5 +16,3 @@ G_BEGIN_DECLS
 bool fm_go(FMMainWindow* parent);
 
 G_END_DECLS
-
-#endif

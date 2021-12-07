@@ -9,8 +9,7 @@
  *
  */
 
-#ifndef _PTK_FILE_ARCHIVER_H_
-#define _PTK_FILE_ARCHIVER_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -37,4 +36,3 @@ void ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const
                                const char* dest_dir, int job, bool archive_presence_checked);
 
 G_END_DECLS
-#endif

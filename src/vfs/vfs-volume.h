@@ -8,8 +8,7 @@
  *
  */
 
-#ifndef _VFS_VOLUME_H_
-#define _VFS_VOLUME_H_
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -126,5 +125,3 @@ bool mtab_fstype_is_handled_by_protocol(const char* mtab_fstype);
 VFSVolume* vfs_volume_get_by_device_or_point(const char* device_file, const char* point);
 
 G_END_DECLS
-
-#endif

@@ -10,8 +10,7 @@
  *
  */
 
-#ifndef _VFS_DIR_H_
-#define _VFS_DIR_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -112,5 +111,3 @@ void vfs_dir_foreach(GHFunc func, void* user_data);
 void vfs_dir_monitor_mime();
 
 G_END_DECLS
-
-#endif

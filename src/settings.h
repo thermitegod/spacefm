@@ -8,8 +8,7 @@
  *
  */
 
-#ifndef _SETTINGS_H_
-#define _SETTINGS_H_
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -419,5 +418,3 @@ void xset_show_help(GtkWidget* parent, XSet* set, const char* anchor);
 bool xset_opener(PtkFileBrowser* file_browser, char job);
 const char* xset_get_builtin_toolitem_label(unsigned char tool_type);
 char* xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon);
-
-#endif

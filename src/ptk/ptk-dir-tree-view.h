@@ -10,8 +10,7 @@
  *
  */
 
-#ifndef _PTK_DIR_TREE_VIEW_H_
-#define _PTK_DIR_TREE_VIEW_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -33,5 +32,3 @@ void ptk_dir_tree_view_show_hidden_files(GtkTreeView* dir_tree_view, bool show_h
 char* ptk_dir_view_get_dir_path(GtkTreeModel* model, GtkTreeIter* it);
 
 G_END_DECLS
-
-#endif

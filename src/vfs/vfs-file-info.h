@@ -10,8 +10,7 @@
  *
  */
 
-#ifndef _VFS_FILE_INFO_H_
-#define _VFS_FILE_INFO_H_
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -142,5 +141,3 @@ void vfs_file_info_list_free(GList* list);
 char* vfs_file_resolve_path(const char* cwd, const char* relative_path);
 
 G_END_DECLS
-
-#endif

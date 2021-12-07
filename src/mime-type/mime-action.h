@@ -19,8 +19,7 @@
  *      MA 02110-1301, USA.
  */
 
-#ifndef _MIME_ACTION_H_INCLUDED_
-#define _MIME_ACTION_H_INCLUDED_
+#pragma once
 
 #include <stdbool.h>
 
@@ -84,5 +83,3 @@ void mime_type_update_association(const char* type, const char* desktop_id, int 
 char* mime_type_locate_desktop_file(const char* dir, const char* desktop_id);
 
 G_END_DECLS
-
-#endif

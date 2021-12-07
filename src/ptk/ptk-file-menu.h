@@ -10,8 +10,7 @@
  *
  */
 
-#ifndef _PTK_FILE_MENU_H_
-#define _PTK_FILE_MENU_H_
+#pragma once
 
 #include <gtk/gtk.h>
 #include "ptk-file-browser.h"
@@ -52,5 +51,3 @@ void on_popup_list_compact(GtkMenuItem* menuitem, PtkFileBrowser* browser);
 void on_popup_list_large(GtkMenuItem* menuitem, PtkFileBrowser* browser);
 
 G_END_DECLS
-
-#endif
