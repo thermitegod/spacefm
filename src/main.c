@@ -52,8 +52,6 @@
 
 #include "utils.h"
 
-#include "cust-dialog.h"
-
 // bool startup_mode = TRUE;  //MOD
 // bool design_mode = TRUE;  //MOD
 
@@ -94,7 +92,6 @@ typedef struct CliFlags
     bool reuse_tab;
     bool no_tabs;
     bool new_window;
-    bool custom_dialog;
     bool socket_cmd;
     bool version_opt;
     bool sdebug;
@@ -124,7 +121,6 @@ static GOptionEntry opt_entries[] =
     {"config", 'c', 0, G_OPTION_ARG_STRING, &cli_flags.config_dir, N_("Use DIR as configuration directory"), "DIR"},
     {"disable-git", 'G', 0, G_OPTION_ARG_NONE, &cli_flags.disable_git_settings, N_("Don't use git to keep session history"), NULL},
     {"find-files", 'f', 0, G_OPTION_ARG_NONE, &cli_flags.find_files, N_("Show File Search"), NULL},
-    {"dialog", 'g', 0, G_OPTION_ARG_NONE, &cli_flags.custom_dialog, N_("Show a custom dialog (See -g help)"), NULL},
     {"socket-cmd", 's', 0, G_OPTION_ARG_NONE, &cli_flags.socket_cmd, N_("Send a socket command (See -s help)"), NULL},
     {"version", 'v', 0, G_OPTION_ARG_NONE, &cli_flags.version_opt, N_("Show version information"), NULL},
     {"sdebug", '\0', G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_NONE, &cli_flags.sdebug, NULL, NULL},
@@ -906,32 +902,6 @@ int main(int argc, char* argv[])
     // separate instance options
     if (argc > 1)
     {
-        // dialog mode?
-        if (!strcmp(argv[1], "-g") || !strcmp(argv[1], "--dialog"))
-        {
-            /* initialize the file alteration monitor */
-            if (G_UNLIKELY(!vfs_file_monitor_init()))
-            {
-                ptk_show_error(NULL,
-                               _("Error"),
-                               _("Error: Unable to initialize inotify file change monitor.\n\nDo "
-                                 "you have an inotify-capable kernel?"));
-                vfs_file_monitor_clean();
-                return EXIT_FAILURE;
-            }
-            gtk_init(&argc, &argv);
-            int ret = custom_dialog_init(argc, argv);
-            if (ret != 0)
-            {
-                vfs_file_monitor_clean();
-                return ret == -1 ? 0 : ret;
-            }
-            gtk_main();
-
-            vfs_file_monitor_clean();
-            return EXIT_SUCCESS;
-        }
-
         // socket_command?
         if (!strcmp(argv[1], "-s") || !strcmp(argv[1], "--socket-cmd"))
         {
@@ -961,7 +931,6 @@ int main(int argc, char* argv[])
     cli_flags.reuse_tab = FALSE; // sfm
     cli_flags.no_tabs = FALSE;   // sfm
     cli_flags.new_window = FALSE;
-    cli_flags.custom_dialog = FALSE; // sfm
     cli_flags.socket_cmd = FALSE;    // sfm
     cli_flags.version_opt = FALSE;   // sfm
     cli_flags.sdebug = FALSE;        // sfm
@@ -989,13 +958,6 @@ int main(int argc, char* argv[])
 
     // ref counter needs to know if in daemon_mode
     init_window_ref_counter(cli_flags.daemon_mode);
-
-    // dialog mode with other options?
-    if (cli_flags.custom_dialog)
-    {
-        fprintf(stderr, "spacefm: %s\n", _("--dialog must be first option"));
-        return EXIT_FAILURE;
-    }
 
     // socket command with other options?
     if (cli_flags.socket_cmd)
