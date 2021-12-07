@@ -40,7 +40,7 @@
 #include "../ptk/ptk-handler.h"
 #include "../ptk/ptk-location-view.h"
 
-#include "utils.h"
+#include "utils.hxx"
 
 #define MOUNTINFO "/proc/self/mountinfo"
 #define MTAB      "/proc/mounts"

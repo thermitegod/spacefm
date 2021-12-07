@@ -22,7 +22,7 @@
 
 #include "../vfs/vfs-async-task.h"
 
-#include "settings.h"
+#include "settings.hxx"
 #include "ptk-handler.h"
 
 enum

@@ -9,25 +9,16 @@
  *
  */
 
-#include <stdbool.h>
+#include "spacefm.hxx"
 
-#include "spacefm.h"
-
-#include <string.h>
 #include <gtk/gtk.h>
 
-#include <stdlib.h>
-
-#include <glib/gi18n.h>
-
-#include "pref-dialog.h"
-#include "settings.h"
+#include "pref-dialog.hxx"
 #include "main-window.h"
 
-#include "extern.h"
+#include "extern.hxx"
 
 #include "ptk/ptk-utils.h"
-#include "ptk/ptk-file-browser.h"
 #include "ptk/ptk-location-view.h"
 
 typedef struct FMPrefDlg
@@ -408,14 +399,14 @@ static void on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             {
                 // task
                 char* msg = g_strdup_printf(
-                    _("You will now be asked for your root password to save the root settings for "
-                      "this user to a file in %s/spacefm/  Supplying the password in the next "
-                      "window is recommended.  Because SpaceFM runs some commands as root via su, "
-                      "these settings are best protected by root."),
+                    "You will now be asked for your root password to save the root settings for "
+                    "this user to a file in %s/spacefm/  Supplying the password in the next "
+                    "window is recommended.  Because SpaceFM runs some commands as root via su, "
+                    "these settings are best protected by root.",
                     SYSCONFDIR);
-                xset_msg_dialog(GTK_WIDGET(dlg), 0, _("Save Root Settings"), 0, msg, NULL, NULL);
+                xset_msg_dialog(GTK_WIDGET(dlg), 0, "Save Root Settings", 0, msg, NULL, NULL);
                 g_free(msg);
-                PtkFileTask* task = ptk_file_exec_new(_("Save Root Settings"), NULL, NULL, NULL);
+                PtkFileTask* task = ptk_file_exec_new("Save Root Settings", NULL, NULL, NULL);
                 task->task->exec_command = g_strdup_printf("echo");
                 task->task->exec_as_user = g_strdup_printf("root");
                 task->task->exec_sync = FALSE;

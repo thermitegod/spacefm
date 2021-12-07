@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <stdbool.h>
+#include <glib.h>
 
 G_BEGIN_DECLS
 

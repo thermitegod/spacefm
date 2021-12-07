@@ -21,7 +21,7 @@
 #include "ptk-utils.h"
 
 #include "main-window.h"
-#include "utils.h"
+#include "utils.hxx"
 
 #include <sys/wait.h>
 

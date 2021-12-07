@@ -22,7 +22,7 @@
 #include <pwd.h>
 
 #include <string.h>
-#include "settings.h"
+#include "settings.hxx"
 
 #include "vfs-app-desktop.h"
 #include "vfs-thumbnail-loader.h"

@@ -3,11 +3,12 @@ project(
   version : '3.0.0-dev',
   license : 'GPL2 LGPL',
   default_options : [
-      'warning_level=3',
-      'prefix=/usr',
-      'sysconfdir=/etc',
+    'cpp_std=c++20',
+    'warning_level=3',
+    'prefix=/usr',
+    'sysconfdir=/etc',
   ],
-  meson_version : '>= 0.49'
+  meson_version : '>= 0.62.0'
 )
 
 result = [ 'Passed options:' ]
@@ -133,18 +134,20 @@ dep_gtk = dependency('gtk+-3.0')
 
 
 sources = [
-  'src/autosave.c',
-  'src/find-files.c',
-  'src/item-prop.c',
+  'src/autosave.cxx',
+  'src/find-files.cxx',
+  'src/item-prop.cxx',
   'src/main.c',
   'src/main-window.c',
-  'src/pref-dialog.c',
-  'src/settings.c',
-  'src/spacefm.c',
-  'src/utils.c',
+  'src/pref-dialog.cxx',
+  'src/settings.cxx',
+  'src/spacefm.cxx',
+  'src/utils.cxx',
+
   'src/mime-type/mime-action.c',
   'src/mime-type/mime-cache.c',
   'src/mime-type/mime-type.c',
+
   'src/ptk/ptk-app-chooser.c',
   'src/ptk/ptk-clipboard.c',
   'src/ptk/ptk-dir-tree.c',
@@ -160,6 +163,7 @@ sources = [
   'src/ptk/ptk-location-view.c',
   'src/ptk/ptk-path-entry.c',
   'src/ptk/ptk-utils.c',
+
   'src/vfs/vfs-app-desktop.c',
   'src/vfs/vfs-async-task.c',
   'src/vfs/vfs-dir.c',
@@ -195,7 +199,7 @@ spacefm = build_target(
     lib_xxhash,
   ],
   c_pch:   'src/pch/c_pch.h',
-  # cpp_pch: 'src/pch/cxx_pch.hxx',
+  cpp_pch: 'src/pch/cxx_pch.hxx',
 )
 
 install_data('src/spacefm-auth', install_dir : bindir)

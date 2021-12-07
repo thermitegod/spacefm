@@ -14,11 +14,11 @@
 #include <gdk/gdkkeysyms.h>
 
 #include <string.h>
-#include "settings.h"
+#include "settings.hxx"
 #include "main-window.h"
 #include <glib/gi18n.h>
 
-#include "utils.h"
+#include "utils.hxx"
 #include "ptk-handler.h"
 #include "ptk-location-view.h"
 

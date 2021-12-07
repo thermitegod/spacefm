@@ -1,7 +1,7 @@
 /*
- *      find-files.h
+ *      pcmanfm.h
  *
- *      Copyright 2008 PCMan <pcman.tw@gmail.com>
+ *      Copyright 2008  <pcman.tw@gmail.com>
  *
  *      This program is free software; you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by
@@ -21,10 +21,18 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include <glib.h>
 
 G_BEGIN_DECLS
 
-void fm_find_files(const char** search_dirs);
+void init_window_ref_counter(bool daemon_mode);
+
+/* After opening any window/dialog/tool, this should be called. */
+void pcmanfm_ref();
+
+/* After closing any window/dialog/tool, this should be called.
+ * If the last window is closed and we are not a deamon, pcmanfm will quit.
+ */
+void pcmanfm_unref();
 
 G_END_DECLS

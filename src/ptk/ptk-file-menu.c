@@ -30,13 +30,13 @@
 #include "ptk-handler.h"
 #include "ptk-clipboard.h"
 #include "ptk-app-chooser.h"
-#include "settings.h"
-#include "item-prop.h"
+#include "settings.hxx"
+#include "item-prop.hxx"
 #include "main-window.h"
 #include "ptk-location-view.h"
 #include "ptk-file-list.h"
 
-#include "utils.h"
+#include "utils.hxx"
 
 static bool on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data);
 static bool app_menu_keypress(GtkWidget* widget, GdkEventKey* event, PtkFileMenu* data);

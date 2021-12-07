@@ -4,21 +4,15 @@
  *
  */
 
-#include <stdbool.h>
-#include <string.h>
-//#include <stdio.h>
+#include "settings.hxx"
 
-#include <gtk/gtk.h>
-
-#include "autosave.h"
-
-#include "settings.h"
+#include "autosave.hxx"
 
 static bool on_autosave_timer(void* main_window);
 
 typedef struct AutoSave
 {
-    unsigned int timer;
+    size_t timer;
     bool request;
 } AutoSave;
 
@@ -27,7 +21,7 @@ AutoSave autosave = {0};
 static void idle_save_settings(void* main_window)
 {
     // printf("AUTOSAVE *** idle_save_settings\n" );
-    save_settings(NULL);
+    save_settings(nullptr);
 }
 
 static void autosave_start(bool delay)
@@ -35,14 +29,14 @@ static void autosave_start(bool delay)
     // printf("AUTOSAVE autosave_start\n" );
     if (!delay)
     {
-        g_idle_add((GSourceFunc)idle_save_settings, NULL);
-        autosave.request = FALSE;
+        g_idle_add((GSourceFunc)idle_save_settings, nullptr);
+        autosave.request = false;
     }
     else
-        autosave.request = TRUE;
+        autosave.request = true;
     if (!autosave.timer)
     {
-        autosave.timer = g_timeout_add_seconds(10, (GSourceFunc)on_autosave_timer, NULL);
+        autosave.timer = g_timeout_add_seconds(10, (GSourceFunc)on_autosave_timer, nullptr);
         // printf("AUTOSAVE timer started\n" );
     }
 }
@@ -56,8 +50,8 @@ static bool on_autosave_timer(void* main_window)
         autosave.timer = 0;
     }
     if (autosave.request)
-        autosave_start(FALSE);
-    return FALSE;
+        autosave_start(false);
+    return false;
 }
 
 void xset_autosave(bool force, bool delay)
@@ -66,7 +60,7 @@ void xset_autosave(bool force, bool delay)
     {
         // autosave timer is running, so request save on timeout to prevent
         // saving too frequently, unless force
-        autosave.request = TRUE;
+        autosave.request = true;
         // printf("AUTOSAVE request\n" );
     }
     else
@@ -93,7 +87,7 @@ void xset_autosave(bool force, bool delay)
 void xset_autosave_cancel()
 {
     // printf("AUTOSAVE cancel\n" );
-    autosave.request = FALSE;
+    autosave.request = false;
     if (autosave.timer)
     {
         g_source_remove(autosave.timer);

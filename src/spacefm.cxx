@@ -1,18 +1,16 @@
 /*
- * spacefm.c
  *
  * License: See COPYING file
  *
  */
 
-#include <stdbool.h>
+#include <gtk/gtk.h>
 
-#include "spacefm.h"
+#include "spacefm.hxx"
 
 typedef struct WindowRef
 {
-    int n_pcmanfm_ref;
-
+    size_t n_pcmanfm_ref;
     bool daemon_mode;
 } WindowRef;
 

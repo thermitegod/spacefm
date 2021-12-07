@@ -21,7 +21,7 @@
 #include "ptk-file-misc.h"
 #include "ptk-utils.h"
 
-#include "utils.h"
+#include "utils.hxx"
 
 static GdkDragAction clipboard_action = GDK_ACTION_DEFAULT;
 static GList* clipboard_file_list = NULL;

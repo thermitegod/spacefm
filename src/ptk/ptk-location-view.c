@@ -28,12 +28,12 @@
 #include "ptk-file-browser.h"
 #include "ptk-handler.h"
 #include "ptk-file-task.h"
-#include "settings.h"
+#include "settings.hxx"
 #include "main-window.h"
 
 #include "../vfs/vfs-utils.h"
 
-#include "utils.h"
+#include "utils.hxx"
 
 static GtkTreeModel* model = NULL;
 static int n_vols = 0;

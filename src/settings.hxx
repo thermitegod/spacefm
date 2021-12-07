@@ -1,5 +1,5 @@
 /*
- * SpaceFM settings.h
+ * SpaceFM settings.hxx
  *
  * Copyright (C) 2015 IgnorantGuru <ignorantguru@gmx.com>
  * Copyright (C) 2006 Hong Jen Yee (PCMan) <pcman.tw (AT) gmail.com>
@@ -71,12 +71,12 @@ typedef struct ConfigSettings
     // char* graphical_su;
 
     /* tmp dir */
-    char* tmp_dir;
+    const char* tmp_dir;
 
     /* Fonts */
-    char* font_view_icon;
-    char* font_view_compact;
-    char* font_general; // NOOP
+    const char* font_view_icon;
+    const char* font_view_compact;
+    const char* font_general; // NOOP
 
     bool git_backed_settings;
 } ConfigSettings;
@@ -385,7 +385,7 @@ void xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup*
                    char* elements);
 GtkWidget* xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu,
                              GtkAccelGroup* accel_group, XSet* set);
-GtkWidget* xset_get_image(const char* icon, int icon_size);
+GtkWidget* xset_get_image(const char* icon, GtkIconSize icon_size);
 XSet* xset_set_cb(const char* name, void (*cb_func)(), void* cb_data);
 XSet* xset_set_ob1_int(XSet* set, const char* ob1, int ob1_int);
 XSet* xset_set_ob1(XSet* set, const char* ob1, void* ob1_data);

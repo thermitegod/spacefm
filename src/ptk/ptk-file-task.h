@@ -19,7 +19,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "settings.h"
+#include "settings.hxx"
 
 G_BEGIN_DECLS
 

@@ -23,31 +23,23 @@
  * Compatibility with other systems like BSD, need to be improved.
  */
 
-#include <stdbool.h>
-
-#include <glib/gi18n.h>
+#include <glib.h>
 #include <gtk/gtk.h>
-#include <string.h>
-#include <time.h>
-#include <sys/types.h>
-#include <signal.h>
+
 #include <sys/wait.h>
 
 #include <exo/exo.h>
 
-#include "spacefm.h"
+#include "spacefm.hxx"
 
-#include "vfs/vfs-dir.h"
-#include "vfs/vfs-file-info.h"
-
-#include "vfs/vfs-async-task.h"
 #include "vfs/vfs-volume.h"
 
 #include "main-window.h"
-#include "settings.h"
 
 #include "ptk/ptk-file-misc.h"
 #include "ptk/ptk-utils.h"
+
+#include "find-files.hxx"
 
 enum
 {
@@ -175,7 +167,7 @@ static void open_dir(char* dir, GList* files, FMMainWindow* w)
     fm_main_window_add_new_tab(w, dir);
 }
 
-static void on_open_files(GtkAction* action, FindFile* data)
+static void on_open_files(GAction* action, FindFile* data)
 {
     GtkTreeModel* model;
     GtkTreeSelection* sel;
@@ -217,7 +209,7 @@ static void on_open_files(GtkAction* action, FindFile* data)
             if (open_files)
             {
                 GList* l;
-                l = g_hash_table_lookup(hash, dir);
+                l = (GList*)g_hash_table_lookup(hash, dir);
                 l = g_list_prepend(l, vfs_file_info_ref(fi));
                 g_hash_table_insert(hash, dir, l); // sfm caused segfault with destroy function
                 if (vfs_file_info_is_dir(fi))      // sfm
@@ -284,15 +276,15 @@ static int get_date_offset(GtkCalendar* calendar)
     /* FIXME: I think we need a better implementation for this */
     GDate* date;
     GDate* today;
-    unsigned int y, m, d;
+    unsigned int d, m, y;
     int offset;
     time_t timeval = time(NULL);
     struct tm* lt = localtime(&timeval);
 
     gtk_calendar_get_date(calendar, &y, &m, &d);
 
-    date = g_date_new_dmy(d, m, y);
-    today = g_date_new_dmy(lt->tm_mday, lt->tm_mon, lt->tm_year + 1900);
+    date = g_date_new_dmy((GDateDay)d, (GDateMonth)m, (GDateYear)y);
+    today = g_date_new_dmy((GDateDay)lt->tm_mday, (GDateMonth)lt->tm_mon, (GDateYear)lt->tm_year + 1900);
 
     offset = g_date_days_between(date, today);
 
@@ -671,7 +663,7 @@ static void on_start_search(GtkWidget* btn, FindFile* data)
     if (g_spawn_async_with_pipes(g_get_home_dir(),
                                  argv,
                                  NULL,
-                                 G_SPAWN_SEARCH_PATH | G_SPAWN_STDERR_TO_DEV_NULL,
+                                 GSpawnFlags::G_SPAWN_SEARCH_PATH,
                                  NULL,
                                  NULL,
                                  &data->pid,
@@ -1034,7 +1026,7 @@ void fm_find_files(const char** search_dirs)
     GdkPixbuf* icon = NULL;
     GtkIconTheme* theme = gtk_icon_theme_get_default();
     if (theme)
-        icon = gtk_icon_theme_load_icon(theme, "spacefm-find", 48, 0, NULL);
+        icon = gtk_icon_theme_load_icon(theme, "spacefm-find", 48, GtkIconLookupFlags::GTK_ICON_LOOKUP_NO_SVG, NULL);
     if (icon)
     {
         gtk_window_set_icon(GTK_WINDOW(data->win), icon);

@@ -32,7 +32,7 @@
 
 #include "main-window.h"
 
-#include "spacefm.h"
+#include "spacefm.hxx"
 
 #include "vfs/vfs-file-info.h"
 #include "vfs/vfs-mime-type.h"
@@ -46,11 +46,11 @@
 #include "ptk/ptk-app-chooser.h"
 #include "ptk/ptk-location-view.h"
 
-#include "find-files.h"
-#include "pref-dialog.h"
-#include "settings.h"
+#include "find-files.hxx"
+#include "pref-dialog.hxx"
+#include "settings.hxx"
 
-#include "utils.h"
+#include "utils.hxx"
 
 // bool startup_mode = TRUE;  //MOD
 // bool design_mode = TRUE;  //MOD
@@ -931,9 +931,9 @@ int main(int argc, char* argv[])
     cli_flags.reuse_tab = FALSE; // sfm
     cli_flags.no_tabs = FALSE;   // sfm
     cli_flags.new_window = FALSE;
-    cli_flags.socket_cmd = FALSE;    // sfm
-    cli_flags.version_opt = FALSE;   // sfm
-    cli_flags.sdebug = FALSE;        // sfm
+    cli_flags.socket_cmd = FALSE;  // sfm
+    cli_flags.version_opt = FALSE; // sfm
+    cli_flags.sdebug = FALSE;      // sfm
 
     cli_flags.daemon_mode = FALSE;
 

@@ -9,7 +9,7 @@
 
 #include <libintl.h>
 
-#include "spacefm.h"
+#include "spacefm.hxx"
 #include "private.h"
 
 #include <gtk/gtk.h>
@@ -39,15 +39,15 @@
 #include "main-window.h"
 #include "ptk/ptk-utils.h"
 
-#include "pref-dialog.h"
+#include "pref-dialog.hxx"
 #include "ptk/ptk-file-menu.h"
 
-#include "settings.h"
-#include "item-prop.h"
-#include "find-files.h"
+#include "settings.hxx"
+#include "item-prop.hxx"
+#include "find-files.hxx"
 
-#include "autosave.h"
-#include "utils.h"
+#include "autosave.hxx"
+#include "utils.hxx"
 
 /* FIXME: statvfs support should be moved to src/vfs */
 #include <sys/statvfs.h>

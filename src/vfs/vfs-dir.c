@@ -26,7 +26,7 @@
 #include <unistd.h>
 #include "vfs-volume.h"
 
-#include "utils.h"
+#include "utils.hxx"
 
 static void vfs_dir_class_init(VFSDirClass* klass);
 static void vfs_dir_init(VFSDir* dir);

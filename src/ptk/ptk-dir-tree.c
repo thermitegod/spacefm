@@ -16,7 +16,7 @@
 
 #include <string.h>
 
-#include "settings.h"
+#include "settings.hxx"
 
 #include "../vfs/vfs-utils.h"
 

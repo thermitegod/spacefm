@@ -4,16 +4,14 @@
  *
  */
 
-#include <stdbool.h>
-
-#include <errno.h>
+#include <string>
 
 #include <fcntl.h>
-#include <unistd.h>
 
-#include "settings.h"
-#include "extern.h"
-#include "utils.h"
+#include "settings.hxx"
+#include "extern.hxx"
+
+#include "utils.hxx"
 
 void print_command(const char* cmd)
 {
@@ -179,7 +177,7 @@ char* replace_string(const char* orig, const char* str, const char* replace, boo
     char* rep;
     char* result = NULL;
     char* old_result;
-    char* s;
+    const char* s;
 
     if (!orig || !(s = strstr(orig, str)))
         return g_strdup(orig); // str not in orig

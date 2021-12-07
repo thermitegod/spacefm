@@ -14,7 +14,7 @@
 #include <stdint.h>
 
 #include <glib.h>
-#include "settings.h"
+#include "settings.hxx"
 
 G_BEGIN_DECLS
 

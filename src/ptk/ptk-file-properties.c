@@ -31,7 +31,7 @@
 #include "../vfs/vfs-app-desktop.h"
 
 #include "ptk-app-chooser.h"
-#include "utils.h"
+#include "utils.hxx"
 
 static const char* chmod_names[] = {"owner_r",
                                     "owner_w",

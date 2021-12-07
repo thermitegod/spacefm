@@ -28,14 +28,14 @@
 #include <errno.h>
 
 #include "vfs-dir.h"
-#include "settings.h"
+#include "settings.hxx"
 #include <sys/wait.h>
 #include "main-window.h"
 #include "vfs-volume.h"
 
 #include <linux/limits.h>
 
-#include "utils.h"
+#include "utils.hxx"
 
 const mode_t chmod_flags[] = {S_IRUSR,
                               S_IWUSR,
