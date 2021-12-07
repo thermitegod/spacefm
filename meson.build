@@ -3,7 +3,7 @@ project(
   version : '3.0.0-dev',
   license : 'GPL2 LGPL',
   default_options : [
-      'warning_level=1',
+      'warning_level=3',
       'prefix=/usr',
       'sysconfdir=/etc',
   ],
