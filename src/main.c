@@ -504,14 +504,14 @@ static int send_socket_command(int argc, char* argv[], char** reply) // sfm
     if (argc < 3)
     {
         fprintf(stderr, _("spacefm: --socket-cmd requires an argument\n"));
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // create socket
     if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
     {
         fprintf(stderr, _("spacefm: could not create socket\n"));
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // open socket
@@ -524,7 +524,7 @@ static int send_socket_command(int argc, char* argv[], char** reply) // sfm
     {
         fprintf(stderr,
                 _("spacefm: could not connect to socket (not running? or DISPLAY not set?)\n"));
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // send command
@@ -917,7 +917,7 @@ int main(int argc, char* argv[])
                                _("Error: Unable to initialize inotify file change monitor.\n\nDo "
                                  "you have an inotify-capable kernel?"));
                 vfs_file_monitor_clean();
-                return 1;
+                return EXIT_FAILURE;
             }
             gtk_init(&argc, &argv);
             int ret = custom_dialog_init(argc, argv);
@@ -929,7 +929,7 @@ int main(int argc, char* argv[])
             gtk_main();
 
             vfs_file_monitor_clean();
-            return 0;
+            return EXIT_SUCCESS;
         }
 
         // socket_command?
@@ -944,7 +944,7 @@ int main(int argc, char* argv[])
             if (argv[2] && (!strcmp(argv[2], "help") || !strcmp(argv[2], "--help")))
             {
                 printf("For help run, man spacefm-socket\n");
-                return 0;
+                return EXIT_SUCCESS;
             }
             char* reply = NULL;
             int ret = send_socket_command(argc, argv, &reply);
@@ -984,7 +984,7 @@ int main(int argc, char* argv[])
     {
         printf("spacefm: %s\n", err->message);
         g_error_free(err);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // ref counter needs to know if in daemon_mode
@@ -994,14 +994,14 @@ int main(int argc, char* argv[])
     if (cli_flags.custom_dialog)
     {
         fprintf(stderr, "spacefm: %s\n", _("--dialog must be first option"));
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // socket command with other options?
     if (cli_flags.socket_cmd)
     {
         fprintf(stderr, "spacefm: %s\n", _("--socket-cmd must be first option"));
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // --disable-git
@@ -1033,7 +1033,7 @@ int main(int argc, char* argv[])
         printf("DEBUG_THREAD ");
 #endif
         printf("\n");
-        return 0;
+        return EXIT_SUCCESS;
     }
 
     /* Initialize multithreading  //sfm moved below parse arguments
@@ -1056,7 +1056,7 @@ int main(int argc, char* argv[])
                          "an inotify-capable kernel?"));
         vfs_file_monitor_clean();
         // free_settings();
-        return 1;
+        return EXIT_FAILURE;
     }
 
     /* check if the filename encoding is UTF-8 */
@@ -1094,7 +1094,7 @@ int main(int argc, char* argv[])
     tmp_clean();
     free_settings();
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 static void open_file(const char* path)
