@@ -74,7 +74,7 @@ char* replace_line_subs(const char* line)
         if (strstr(line, perc[i]))
         {
             char* old_s = s;
-            s = replace_string(old_s, perc[i], var[i], FALSE);
+            s = replace_string(old_s, perc[i], var[i], false);
             g_free(old_s);
         }
     }
@@ -84,29 +84,29 @@ char* replace_line_subs(const char* line)
 bool have_x_access(const char* path)
 {
     if (!path)
-        return FALSE;
+        return false;
     return (faccessat(0, path, R_OK | X_OK, AT_EACCESS) == 0);
 }
 
 bool have_rw_access(const char* path)
 {
     if (!path)
-        return FALSE;
+        return false;
     return (faccessat(0, path, R_OK | W_OK, AT_EACCESS) == 0);
 }
 
 bool dir_has_files(const char* path)
 {
-    bool ret = FALSE;
+    bool ret = false;
 
     if (!(path && g_file_test(path, G_FILE_TEST_IS_DIR)))
-        return FALSE;
+        return false;
 
-    GDir* dir = g_dir_open(path, 0, NULL);
+    GDir* dir = g_dir_open(path, 0, nullptr);
     if (dir)
     {
         if (g_dir_read_name(dir))
-            ret = TRUE;
+            ret = true;
         g_dir_close(dir);
     }
     return ret;
@@ -121,7 +121,7 @@ char* get_name_extension(char* full_name, bool is_dir, char** ext)
     if (is_dir || !(dot = strrchr(full, '.')) || dot == full)
     {
         // dir or no dots or one dot first
-        *ext = NULL;
+        *ext = nullptr;
         return full;
     }
     dot[0] = '\0';
@@ -151,7 +151,7 @@ char* get_name_extension(char* full_name, bool is_dir, char** ext)
     {
         // extension too long, probably part of name
         final_ext[-1] = '.';
-        *ext = NULL;
+        *ext = nullptr;
         return full;
     }
 }
@@ -166,7 +166,7 @@ void open_in_prog(const char* path)
     char* qpath = bash_quote(path);
     char* command = g_strdup_printf("%s %s", prog, qpath);
     print_command(command);
-    g_spawn_command_line_async(command, NULL);
+    g_spawn_command_line_async(command, nullptr);
     g_free(qpath);
     g_free(command);
     g_free(prog);
@@ -175,7 +175,7 @@ void open_in_prog(const char* path)
 char* replace_string(const char* orig, const char* str, const char* replace, bool quote)
 { // replace all occurrences of str in orig with replace, optionally quoting
     char* rep;
-    char* result = NULL;
+    char* result = nullptr;
     char* old_result;
     const char* s;
 
@@ -219,7 +219,7 @@ char* bash_quote(const char* str)
 {
     if (!str)
         return g_strdup("\"\"");
-    char* s1 = replace_string(str, "\"", "\\\"", FALSE);
+    char* s1 = replace_string(str, "\"", "\\\"", false);
     char* s2 = g_strdup_printf("\"%s\"", s1);
     g_free(s1);
     return s2;
@@ -231,7 +231,7 @@ char* plain_ascii_name(const char* orig_name)
         return g_strdup("");
     char* orig = g_strdup(orig_name);
     g_strcanon(orig, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_", ' ');
-    char* s = replace_string(orig, " ", "", FALSE);
+    char* s = replace_string(orig, " ", "", false);
     g_free(orig);
     return s;
 }
@@ -242,19 +242,19 @@ char* clean_label(const char* menu_label, bool kill_special, bool escape)
     char* s2;
     if (menu_label && strstr(menu_label, "\\_"))
     {
-        s1 = replace_string(menu_label, "\\_", "@UNDERSCORE@", FALSE);
-        s2 = replace_string(s1, "_", "", FALSE);
+        s1 = replace_string(menu_label, "\\_", "@UNDERSCORE@", false);
+        s2 = replace_string(s1, "_", "", false);
         g_free(s1);
-        s1 = replace_string(s2, "@UNDERSCORE@", "_", FALSE);
+        s1 = replace_string(s2, "@UNDERSCORE@", "_", false);
         g_free(s2);
     }
     else
-        s1 = replace_string(menu_label, "_", "", FALSE);
+        s1 = replace_string(menu_label, "_", "", false);
     if (kill_special)
     {
-        s2 = replace_string(s1, "&", "", FALSE);
+        s2 = replace_string(s1, "&", "", false);
         g_free(s1);
-        s1 = replace_string(s2, " ", "-", FALSE);
+        s1 = replace_string(s2, " ", "-", false);
         g_free(s2);
     }
     else if (escape)
@@ -276,7 +276,7 @@ void string_copy_free(char** s, const char* src)
 char* unescape(const char* t)
 {
     if (!t)
-        return NULL;
+        return nullptr;
 
     char* s = g_strdup(t);
 
@@ -316,10 +316,10 @@ char* unescape(const char* t)
     return s;
 }
 
-char* get_valid_su() // may return NULL
+char* get_valid_su() // may return nullptr
 {
     int i;
-    char* use_su = NULL;
+    char* use_su = nullptr;
 
     use_su = g_strdup(xset_get_s("su_command"));
 
@@ -335,7 +335,7 @@ char* get_valid_su() // may return NULL
         {
             // not in list - invalid
             g_free(use_su);
-            use_su = NULL;
+            use_su = nullptr;
         }
     }
     if (!use_su)

@@ -57,7 +57,7 @@ typedef struct FMPrefDlg
     GtkWidget* root_editor_terminal;
 } FMPrefDlg;
 
-static FMPrefDlg* data = NULL;
+static FMPrefDlg* data = nullptr;
 static const int tool_icon_sizes[] = {0,
                                       GTK_ICON_SIZE_MENU,
                                       GTK_ICON_SIZE_SMALL_TOOLBAR,
@@ -94,7 +94,7 @@ static void on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
     int tool_icon;
     bool single_click;
     bool root_bar;
-    bool root_set_change = FALSE;
+    bool root_set_change = false;
     const GList* l;
     PtkFileBrowser* file_browser;
     bool use_si_prefix;
@@ -132,9 +132,9 @@ static void on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                     notebook = GTK_NOTEBOOK(a_window->panel[p - 1]);
                     n = gtk_notebook_get_n_pages(notebook);
                     if (always_show_tabs)
-                        gtk_notebook_set_show_tabs(notebook, TRUE);
+                        gtk_notebook_set_show_tabs(notebook, true);
                     else if (n == 1)
-                        gtk_notebook_set_show_tabs(notebook, FALSE);
+                        gtk_notebook_set_show_tabs(notebook, false);
                 }
             }
         }
@@ -213,15 +213,15 @@ static void on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                         file_browser = PTK_FILE_BROWSER(gtk_notebook_get_nth_page(notebook, i));
                         // update views
                         gtk_widget_destroy(file_browser->folder_view);
-                        file_browser->folder_view = NULL;
+                        file_browser->folder_view = nullptr;
                         if (file_browser->side_dir)
                         {
                             gtk_widget_destroy(file_browser->side_dir);
-                            file_browser->side_dir = NULL;
+                            file_browser->side_dir = nullptr;
                         }
-                        ptk_file_browser_update_views(NULL, file_browser);
+                        ptk_file_browser_update_views(nullptr, file_browser);
                         if (file_browser->side_book)
-                            ptk_bookmark_view_update_icons(NULL, file_browser);
+                            ptk_bookmark_view_update_icons(nullptr, file_browser);
                     }
                 }
             }
@@ -231,16 +231,16 @@ static void on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         if (tool_icon != app_settings.tool_icon_size)
         {
             app_settings.tool_icon_size = tool_icon;
-            main_window_rebuild_all_toolbars(NULL);
+            main_window_rebuild_all_toolbars(nullptr);
         }
 
         /* unit settings changed? */
-        bool need_refresh = FALSE;
+        bool need_refresh = false;
         use_si_prefix = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_si_prefix));
         if (use_si_prefix != app_settings.use_si_prefix)
         {
             app_settings.use_si_prefix = use_si_prefix;
-            need_refresh = TRUE;
+            need_refresh = true;
         }
 
         // date format
@@ -256,7 +256,7 @@ static void on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             if (app_settings.date_format)
                 g_free(app_settings.date_format);
             app_settings.date_format = g_strdup(xset_get_s("date_format"));
-            need_refresh = TRUE;
+            need_refresh = true;
         }
         if (need_refresh)
             main_window_refresh_all();
@@ -317,7 +317,7 @@ static void on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         g_free(s);
 
         // terminal su command
-        char* custom_su = NULL;
+        char* custom_su = nullptr;
         if (config_settings.terminal_su)
             // get su from /etc/spacefm/spacefm.conf
             custom_su = g_find_program_in_path(config_settings.terminal_su);
@@ -346,20 +346,20 @@ static void on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             if (root_editor[0] != '\0')
             {
                 xset_set("root_editor", "s", root_editor);
-                root_set_change = TRUE;
+                root_set_change = true;
             }
         }
         else if (strcmp(root_editor, old_root_editor))
         {
             xset_set("root_editor", "s", root_editor);
-            root_set_change = TRUE;
+            root_set_change = true;
         }
         if (!!gtk_toggle_button_get_active((GtkToggleButton*)data->root_editor_terminal) !=
             !!xset_get_b("root_editor"))
         {
             xset_set_b("root_editor",
                        gtk_toggle_button_get_active((GtkToggleButton*)data->root_editor_terminal));
-            root_set_change = TRUE;
+            root_set_change = true;
         }
 
         // MOD terminal
@@ -368,8 +368,8 @@ static void on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         g_strstrip(terminal);
         if (g_strcmp0(terminal, old_terminal))
         {
-            xset_set("main_terminal", "s", terminal[0] == '\0' ? NULL : terminal);
-            root_set_change = TRUE;
+            xset_set("main_terminal", "s", terminal[0] == '\0' ? nullptr : terminal);
+            root_set_change = true;
         }
         // report missing terminal
         if ((str = strchr(terminal, ' ')))
@@ -384,12 +384,12 @@ static void on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         g_free(terminal);
 
         /* save to config file */
-        save_settings(NULL);
+        save_settings(nullptr);
 
         if (xset_get_b("main_terminal"))
         {
-            root_set_change = TRUE;
-            xset_set_b("main_terminal", FALSE);
+            root_set_change = true;
+            xset_set_b("main_terminal", false);
         }
 
         // root settings saved?
@@ -404,21 +404,22 @@ static void on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                     "window is recommended.  Because SpaceFM runs some commands as root via su, "
                     "these settings are best protected by root.",
                     SYSCONFDIR);
-                xset_msg_dialog(GTK_WIDGET(dlg), 0, "Save Root Settings", 0, msg, NULL, NULL);
+                xset_msg_dialog(GTK_WIDGET(dlg), 0, "Save Root Settings", 0, msg, nullptr, nullptr);
                 g_free(msg);
-                PtkFileTask* task = ptk_file_exec_new("Save Root Settings", NULL, NULL, NULL);
+                PtkFileTask* task =
+                    ptk_file_exec_new("Save Root Settings", nullptr, nullptr, nullptr);
                 task->task->exec_command = g_strdup_printf("echo");
                 task->task->exec_as_user = g_strdup_printf("root");
-                task->task->exec_sync = FALSE;
-                task->task->exec_export = FALSE;
-                task->task->exec_write_root = TRUE;
+                task->task->exec_sync = false;
+                task->task->exec_export = false;
+                task->task->exec_write_root = true;
                 ptk_file_task_run(task);
             }
         }
     }
     gtk_widget_destroy(GTK_WIDGET(dlg));
     g_free(data);
-    data = NULL;
+    data = nullptr;
     pcmanfm_unref();
 }
 
@@ -427,7 +428,7 @@ static void on_date_format_changed(GtkComboBox* widget, FMPrefDlg* data)
     char buf[128];
     const char* etext;
 
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     etext = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(data->date_format))));
     strftime(buf, sizeof(buf), etext, localtime(&now));
     gtk_label_set_text(GTK_LABEL(data->date_display), buf);
@@ -464,7 +465,7 @@ bool fm_edit_preference(GtkWindow* parent, int page)
         GtkBuilder* builder = _gtk_builder_new_from_file("prefdlg3.ui");
 
         if (!builder)
-            return FALSE;
+            return false;
         pcmanfm_ref();
 
         data = g_new0(FMPrefDlg, 1);
@@ -614,7 +615,7 @@ bool fm_edit_preference(GtkWindow* parent, int page)
         // terminal su
         int idx;
         GtkTreeIter it;
-        char* custom_su = NULL;
+        char* custom_su = nullptr;
         char* use_su;
         data->su_command = (GtkWidget*)gtk_builder_get_object(builder, "su_command");
         use_su = xset_get_s("su_command");
@@ -675,7 +676,7 @@ bool fm_edit_preference(GtkWindow* parent, int page)
             }
             gtk_combo_box_set_active(GTK_COMBO_BOX(data->date_format), i);
         }
-        on_date_format_changed(NULL, data);
+        on_date_format_changed(nullptr, data);
         g_signal_connect(data->date_format, "changed", G_CALLBACK(on_date_format_changed), data);
 
         // editors
@@ -705,5 +706,5 @@ bool fm_edit_preference(GtkWindow* parent, int page)
     gtk_notebook_set_current_page((GtkNotebook*)data->notebook, page);
 
     gtk_window_present((GtkWindow*)data->dlg);
-    return TRUE;
+    return true;
 }
