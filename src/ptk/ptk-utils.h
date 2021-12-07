@@ -10,10 +10,6 @@
  *
  */
 
-/*
-  I don't like GtkUIManager provided by gtk+, so I implement my own. ;-)
-*/
-
 #pragma once
 
 #include <stdint.h>
@@ -22,28 +18,6 @@
 #include <gdk/gdk.h>
 
 G_BEGIN_DECLS
-
-#define PTK_IS_STOCK_ITEM(ent)      (ent->label && (*(uint32_t*)ent->label) == *(uint32_t*)"gtk-")
-#define PTK_IS_CHECK_MENU_ITEM(ent) (ent->stock_icon == (char*)1)
-#define PTK_IS_RADIO_MENU_ITEM(ent) (ent->stock_icon == (char*)2)
-
-typedef struct PtkMenuItemEntry
-{
-    const char* label;      /* or stock id */
-    const char* stock_icon; /* or menu type  1: check, 2: radio */
-    GCallback callback;
-    unsigned int key;
-    GdkModifierType mod;
-    struct PtkMenuItemEntry* sub_menu;
-    GtkWidget** ret;
-    GtkWidget* menu; // MOD
-} PtkMenuItemEntry;
-
-GtkWidget* ptk_menu_new_from_data(PtkMenuItemEntry* entries, void* cb_data,
-                                  GtkAccelGroup* accel_group);
-
-void ptk_menu_add_items_from_data(GtkWidget* menu, PtkMenuItemEntry* entries, void* cb_data,
-                                  GtkAccelGroup* accel_group);
 
 /* The string 'message' can contain pango markups.
  * If special characters like < and > are used in the string,
