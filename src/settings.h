@@ -19,6 +19,8 @@
 
 #include "ptk/ptk-file-browser.h"
 
+G_BEGIN_DECLS
+
 // this determines time before item is selected by hover in single-click mode
 #define SINGLE_CLICK_TIMEOUT 150
 
@@ -418,3 +420,5 @@ void xset_show_help(GtkWidget* parent, XSet* set, const char* anchor);
 bool xset_opener(PtkFileBrowser* file_browser, char job);
 const char* xset_get_builtin_toolitem_label(unsigned char tool_type);
 char* xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon);
+
+G_END_DECLS

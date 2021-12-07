@@ -16,8 +16,12 @@
 
 #include "../vfs/vfs-file-task.h"
 
+#include <glib.h>
 #include <gtk/gtk.h>
+
 #include "settings.h"
+
+G_BEGIN_DECLS
 
 enum
 {
@@ -109,3 +113,5 @@ bool ptk_file_task_cancel(PtkFileTask* ptask);
 void ptk_file_task_pause(PtkFileTask* ptask, int state);
 
 void ptk_file_task_progress_open(PtkFileTask* ptask);
+
+G_END_DECLS

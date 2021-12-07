@@ -23,4 +23,8 @@
 
 #include <gtk/gtk.h>
 
+G_BEGIN_DECLS
+
 GdkPixbuf* vfs_load_icon(GtkIconTheme* theme, const char* icon_name, int size);
+
+G_END_DECLS

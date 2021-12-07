@@ -18,6 +18,8 @@
 #include <sys/types.h>
 #include <gtk/gtk.h>
 
+G_BEGIN_DECLS
+
 typedef enum VFSFileTaskType
 {
     VFS_FILE_TASK_MOVE = 0,
@@ -205,3 +207,5 @@ void vfs_file_task_free(VFSFileTask* task);
 char* vfs_file_task_get_cpids(GPid pid);
 void vfs_file_task_kill_cpids(char* cpids, int signal);
 char* vfs_file_task_get_unique_name(const char* dest_dir, const char* base_name, const char* ext);
+
+G_END_DECLS
