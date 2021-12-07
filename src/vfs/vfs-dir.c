@@ -14,7 +14,6 @@
 #include "vfs-dir.h"
 #include "vfs-thumbnail-loader.h"
 
-#include <glib/gi18n.h>
 #include <string.h>
 
 #include <fcntl.h>

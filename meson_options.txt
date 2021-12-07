@@ -1,11 +1,5 @@
 #preprocessor
 option(
-  'nls',
-  type : 'boolean',
-  value : false,
-  description : 'enable native language support',
-)
-option(
   'sn',
   type : 'boolean',
   value : false,

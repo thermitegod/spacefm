@@ -12,8 +12,6 @@
 
 #include <libintl.h>
 
-#include "private.h"
-
 #include <gtk/gtk.h>
 
 #include "ptk-file-properties.h"
@@ -155,28 +153,23 @@ static bool on_update_labels(FilePropertiesDialogData* data)
     char buf2[64];
 
     vfs_file_size_to_string_format(buf2, data->total_size, TRUE);
-    g_snprintf(buf, sizeof(buf), _("%s ( %lu bytes )"), buf2, (uint64_t)data->total_size);
+    g_snprintf(buf, sizeof(buf), "%s ( %lu bytes )", buf2, (uint64_t)data->total_size);
     gtk_label_set_text(data->total_size_label, buf);
 
     vfs_file_size_to_string_format(buf2, data->size_on_disk, TRUE);
-    g_snprintf(buf, sizeof(buf), _("%s ( %lu bytes )"), buf2, (uint64_t)data->size_on_disk);
+    g_snprintf(buf, sizeof(buf), "%s ( %lu bytes )", buf2, (uint64_t)data->size_on_disk);
     gtk_label_set_text(data->size_on_disk_label, buf);
 
     char* count;
     char* count_dir;
     if (data->total_count_dir)
     {
-        count_dir =
-            g_strdup_printf(ngettext("%d directory", "%d directories", data->total_count_dir),
-                            data->total_count_dir);
-        count = g_strdup_printf(ngettext("%d file, %s", "%d files, %s", data->total_count),
-                                data->total_count,
-                                count_dir);
+        count_dir = g_strdup_printf("%d directory", data->total_count_dir);
+        count = g_strdup_printf("%d file, %s", data->total_count, count_dir);
         g_free(count_dir);
     }
     else
-        count =
-            g_strdup_printf(ngettext("%d files", "%d files", data->total_count), data->total_count);
+        count = g_strdup_printf("%d files", data->total_count);
 
     gtk_label_set_text(data->count_label, count);
     g_free(count);
@@ -332,7 +325,7 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
     VFSFileInfo* file;
     VFSMimeType* mime;
 
-    const char* multiple_files = _("( multiple files )");
+    const char* multiple_files = "( multiple files )";
     const char* calculating;
     GtkWidget* name = (GtkWidget*)gtk_builder_get_object(builder, "file_name");
     GtkWidget* label_name = (GtkWidget*)gtk_builder_get_object(builder, "label_filename");
@@ -427,7 +420,7 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
     }
     else
     {
-        gtk_label_set_text(GTK_LABEL(mime_type), _("( multiple types )"));
+        gtk_label_set_text(GTK_LABEL(mime_type), "( multiple types )");
     }
 
     /* Open with...
@@ -492,7 +485,7 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
         gtk_list_store_append(model, &it);
 
         gtk_list_store_append(model, &it);
-        gtk_list_store_set(model, &it, 0, NULL, 1, _("Choose..."), -1);
+        gtk_list_store_set(model, &it, 0, NULL, 1, "Choose...", -1);
         gtk_combo_box_set_model(GTK_COMBO_BOX(open_with), GTK_TREE_MODEL(model));
         // gtk_combo_box_set_model adds a ref
         g_object_unref(model);
@@ -538,7 +531,7 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
         {
             if (vfs_file_info_is_dir(file) && !vfs_file_info_is_symlink(file))
                 gtk_label_set_markup_with_mnemonic(GTK_LABEL(label_name),
-                                                   _("<b>Directory _Name:</b>"));
+                                                   "<b>Directory _Name:</b>");
             gtk_entry_set_text(GTK_ENTRY(name), vfs_file_info_get_disp_name(file));
         }
 
@@ -552,7 +545,7 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
 
             g_snprintf(buf,
                        sizeof(buf),
-                       _("%s  ( %lu bytes )"),
+                       "%s  ( %lu bytes )",
                        vfs_file_info_get_disp_size(file),
                        (uint64_t)vfs_file_info_get_size(file));
             gtk_label_set_text(data->total_size_label, buf);
@@ -560,12 +553,12 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
             vfs_file_size_to_string_format(buf2, vfs_file_info_get_blocks(file) * 512, TRUE);
             g_snprintf(buf,
                        sizeof(buf),
-                       _("%s  ( %lu bytes )"),
+                       "%s  ( %lu bytes )",
                        buf2,
                        (uint64_t)vfs_file_info_get_blocks(file) * 512);
             gtk_label_set_text(data->size_on_disk_label, buf);
 
-            gtk_label_set_text(data->count_label, _("1 file"));
+            gtk_label_set_text(data->count_label, "1 file");
         }
 
         // Modified / Accessed
@@ -599,7 +592,7 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
         // target
         if (vfs_file_info_is_symlink(file))
         {
-            gtk_label_set_markup_with_mnemonic(GTK_LABEL(label_name), _("<b>Link _Name:</b>"));
+            gtk_label_set_markup_with_mnemonic(GTK_LABEL(label_name), "<b>Link _Name:</b>");
             disp_path = g_build_filename(dir_path, file->name, NULL);
             char* target_path = g_file_read_link(disp_path, NULL);
             if (target_path)
@@ -613,11 +606,11 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
                     g_free(str);
                 }
                 if (!g_file_test(target_path, G_FILE_TEST_EXISTS))
-                    gtk_label_set_text(GTK_LABEL(mime_type), _("( broken link )"));
+                    gtk_label_set_text(GTK_LABEL(mime_type), "( broken link )");
                 g_free(target_path);
             }
             else
-                gtk_entry_set_text(GTK_ENTRY(target), _("( read link error )"));
+                gtk_entry_set_text(GTK_ENTRY(target), "( read link error )");
             g_free(disp_path);
             gtk_widget_show(target);
             gtk_widget_show(label_target);
@@ -628,7 +621,7 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
     {
         /* The total file size displayed in "File Properties" is not
            completely calculated yet. So "Calculating..." is displayed. */
-        calculating = _("Calculating...");
+        calculating = "Calculating...";
         gtk_label_set_text(data->total_size_label, calculating);
         gtk_label_set_text(data->size_on_disk_label, calculating);
 
@@ -790,7 +783,7 @@ static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 g_string_free(gstr, TRUE);
                 if (cmd)
                 {
-                    task = ptk_file_exec_new(_("Change File Date"), "/", GTK_WIDGET(dialog), NULL);
+                    task = ptk_file_exec_new("Change File Date", "/", GTK_WIDGET(dialog), NULL);
                     task->task->exec_command = cmd;
                     task->task->exec_sync = TRUE;
                     task->task->exec_export = FALSE;
@@ -830,7 +823,7 @@ static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 uid = uid_from_name(owner_name);
                 if (uid == -1)
                 {
-                    ptk_show_error(GTK_WINDOW(dialog), _("Error"), _("Invalid User"));
+                    ptk_show_error(GTK_WINDOW(dialog), "Error", "Invalid User");
                     return;
                 }
             }
@@ -841,7 +834,7 @@ static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 gid = gid_from_name(group_name);
                 if (gid == -1)
                 {
-                    ptk_show_error(GTK_WINDOW(dialog), _("Error"), _("Invalid Group"));
+                    ptk_show_error(GTK_WINDOW(dialog), "Error", "Invalid Group");
                     return;
                 }
             }

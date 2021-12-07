@@ -13,7 +13,6 @@
 #include <stdbool.h>
 
 #include "vfs-app-desktop.h"
-#include <glib/gi18n.h>
 
 #include <string.h>
 
@@ -497,7 +496,7 @@ bool vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSA
                 G_SPAWN_ERROR,
                 G_SPAWN_ERROR_FAILED,
                 "%s\n\n%s",
-                _("Command not found"),
+                "Command not found",
                 app->file_name);
     return FALSE;
 }

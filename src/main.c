@@ -9,8 +9,6 @@
 
 #include <stdbool.h>
 
-#include "private.h"
-
 #include <gtk/gtk.h>
 #include <glib.h>
 
@@ -111,20 +109,20 @@ CliFlags cli_flags;
 // clang-format off
 static GOptionEntry opt_entries[] =
 {
-    {"new-tab", 't', 0, G_OPTION_ARG_NONE, &cli_flags.new_tab, N_("Open directories in new tab of last window (default)"), NULL},
-    {"reuse-tab", 'r', 0, G_OPTION_ARG_NONE, &cli_flags.reuse_tab, N_("Open directory in current tab of last used window"), NULL},
-    {"no-saved-tabs", 'n', 0, G_OPTION_ARG_NONE, &cli_flags.no_tabs, N_("Don't load saved tabs"), NULL},
-    {"new-window", 'w', 0, G_OPTION_ARG_NONE, &cli_flags.new_window, N_("Open directories in new window"), NULL},
-    {"panel", 'p', 0, G_OPTION_ARG_INT, &cli_flags.panel, N_("Open directories in panel 'P' (1-4)"), "P"},
-    {"show-pref", '\0', 0, G_OPTION_ARG_INT, &cli_flags.show_pref, N_("Show Preferences ('N' is the Pref tab number)"), "N"},
-    {"daemon-mode", 'd', 0, G_OPTION_ARG_NONE, &cli_flags.daemon_mode, N_("Run as a daemon"), NULL},
-    {"config", 'c', 0, G_OPTION_ARG_STRING, &cli_flags.config_dir, N_("Use DIR as configuration directory"), "DIR"},
-    {"disable-git", 'G', 0, G_OPTION_ARG_NONE, &cli_flags.disable_git_settings, N_("Don't use git to keep session history"), NULL},
-    {"find-files", 'f', 0, G_OPTION_ARG_NONE, &cli_flags.find_files, N_("Show File Search"), NULL},
-    {"socket-cmd", 's', 0, G_OPTION_ARG_NONE, &cli_flags.socket_cmd, N_("Send a socket command (See -s help)"), NULL},
-    {"version", 'v', 0, G_OPTION_ARG_NONE, &cli_flags.version_opt, N_("Show version information"), NULL},
+    {"new-tab", 't', 0, G_OPTION_ARG_NONE, &cli_flags.new_tab, "Open directories in new tab of last window (default)", NULL},
+    {"reuse-tab", 'r', 0, G_OPTION_ARG_NONE, &cli_flags.reuse_tab, "Open directory in current tab of last used window", NULL},
+    {"no-saved-tabs", 'n', 0, G_OPTION_ARG_NONE, &cli_flags.no_tabs, "Don't load saved tabs", NULL},
+    {"new-window", 'w', 0, G_OPTION_ARG_NONE, &cli_flags.new_window, "Open directories in new window", NULL},
+    {"panel", 'p', 0, G_OPTION_ARG_INT, &cli_flags.panel, "Open directories in panel 'P' (1-4)", "P"},
+    {"show-pref", '\0', 0, G_OPTION_ARG_INT, &cli_flags.show_pref, "Show Preferences ('N' is the Pref tab number)", "N"},
+    {"daemon-mode", 'd', 0, G_OPTION_ARG_NONE, &cli_flags.daemon_mode, "Run as a daemon", NULL},
+    {"config", 'c', 0, G_OPTION_ARG_STRING, &cli_flags.config_dir, "Use DIR as configuration directory", "DIR"},
+    {"disable-git", 'G', 0, G_OPTION_ARG_NONE, &cli_flags.disable_git_settings, "Don't use git to keep session history", NULL},
+    {"find-files", 'f', 0, G_OPTION_ARG_NONE, &cli_flags.find_files, "Show File Search", NULL},
+    {"socket-cmd", 's', 0, G_OPTION_ARG_NONE, &cli_flags.socket_cmd, "Send a socket command (See -s help)", NULL},
+    {"version", 'v', 0, G_OPTION_ARG_NONE, &cli_flags.version_opt, "Show version information", NULL},
     {"sdebug", '\0', G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_NONE, &cli_flags.sdebug, NULL, NULL},
-    {G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &cli_flags.files, NULL, N_("[DIR | FILE | URL]...")},
+    {G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &cli_flags.files, NULL, "[DIR | FILE | URL]..."},
     {NULL}
 };
 // clang-format on
@@ -380,7 +378,7 @@ static bool single_instance_check()
             }
         }
         if (cli_flags.config_dir)
-            g_warning(_("Option --config ignored - an instance is already running"));
+            g_warning("Option --config ignored - an instance is already running");
         shutdown(sock, 2);
         close(sock);
         ret = 0;
@@ -499,14 +497,14 @@ static int send_socket_command(int argc, char* argv[], char** reply) // sfm
     *reply = NULL;
     if (argc < 3)
     {
-        fprintf(stderr, _("spacefm: --socket-cmd requires an argument\n"));
+        fprintf(stderr, "spacefm: --socket-cmd requires an argument\n");
         return EXIT_FAILURE;
     }
 
     // create socket
     if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
     {
-        fprintf(stderr, _("spacefm: could not create socket\n"));
+        fprintf(stderr, "spacefm: could not create socket\n");
         return EXIT_FAILURE;
     }
 
@@ -519,7 +517,7 @@ static int send_socket_command(int argc, char* argv[], char** reply) // sfm
     if (connect(sock, (struct sockaddr*)&addr, addr_len) != 0)
     {
         fprintf(stderr,
-                _("spacefm: could not connect to socket (not running? or DISPLAY not set?)\n"));
+                "spacefm: could not connect to socket (not running? or DISPLAY not set?)\n");
         return EXIT_FAILURE;
     }
 
@@ -563,7 +561,7 @@ static int send_socket_command(int argc, char* argv[], char** reply) // sfm
     }
     else
     {
-        fprintf(stderr, _("spacefm: invalid response from socket\n"));
+        fprintf(stderr, "spacefm: invalid response from socket\n");
         ret = 1;
     }
     g_string_free(sock_reply, TRUE);
@@ -821,9 +819,8 @@ static bool handle_parsed_commandline_args()
                 }
                 else
                 {
-                    char* err_msg =
-                        g_strdup_printf("%s:\n\n%s", _("File doesn't exist"), real_path);
-                    ptk_show_error(NULL, _("Error"), err_msg);
+                    char* err_msg = g_strdup_printf("%s:\n\n%s", "File doesn't exist", real_path);
+                    ptk_show_error(NULL, "Error", err_msg);
                     g_free(err_msg);
                 }
                 g_free(real_path);
@@ -890,12 +887,6 @@ int main(int argc, char* argv[])
     bool run = FALSE;
     GError* err = NULL;
 
-#ifdef ENABLE_NLS
-    bindtextdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
-    bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
-    textdomain(GETTEXT_PACKAGE);
-#endif
-
     // load spacefm.conf
     load_conf();
 
@@ -905,12 +896,6 @@ int main(int argc, char* argv[])
         // socket_command?
         if (!strcmp(argv[1], "-s") || !strcmp(argv[1], "--socket-cmd"))
         {
-#ifdef ENABLE_NLS
-            // initialize gettext since gtk_init is not run here
-            setlocale(LC_ALL, "");
-            bindtextdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
-            textdomain(GETTEXT_PACKAGE);
-#endif
             if (argv[2] && (!strcmp(argv[2], "help") || !strcmp(argv[2], "--help")))
             {
                 printf("For help run, man spacefm-socket\n");
@@ -945,11 +930,7 @@ int main(int argc, char* argv[])
     cli_flags.disable_git_settings = FALSE;
 
     /* initialize GTK+ and parse the command line arguments */
-#ifdef ENABLE_NLS
-    if (G_UNLIKELY(!gtk_init_with_args(&argc, &argv, "", opt_entries, GETTEXT_PACKAGE, &err)))
-#else
     if (G_UNLIKELY(!gtk_init_with_args(&argc, &argv, "", opt_entries, NULL, &err)))
-#endif
     {
         printf("spacefm: %s\n", err->message);
         g_error_free(err);
@@ -962,7 +943,7 @@ int main(int argc, char* argv[])
     // socket command with other options?
     if (cli_flags.socket_cmd)
     {
-        fprintf(stderr, "spacefm: %s\n", _("--socket-cmd must be first option"));
+        fprintf(stderr, "spacefm: %s\n", "--socket-cmd must be first option");
         return EXIT_FAILURE;
     }
 
@@ -1013,9 +994,9 @@ int main(int argc, char* argv[])
     if (G_UNLIKELY(!vfs_file_monitor_init()))
     {
         ptk_show_error(NULL,
-                       _("Error"),
-                       _("Error: Unable to initialize inotify file change monitor.\n\nDo you have "
-                         "an inotify-capable kernel?"));
+                       "Error",
+                       "Error: Unable to initialize inotify file change monitor.\n\nDo you have "
+                       "an inotify-capable kernel?");
         vfs_file_monitor_clean();
         // free_settings();
         return EXIT_FAILURE;
@@ -1100,11 +1081,11 @@ static void open_file(const char* path)
             error_msg = err->message;
         }
         else
-            error_msg = _("Don't know how to open the file");
+            error_msg = "Don't know how to open the file";
         char* disp_path = g_filename_display_name(path);
-        char* msg = g_strdup_printf(_("Unable to open file:\n\"%s\"\n%s"), disp_path, error_msg);
+        char* msg = g_strdup_printf("Unable to open file:\n\"%s\"\n%s", disp_path, error_msg);
         g_free(disp_path);
-        ptk_show_error(NULL, _("Error"), msg);
+        ptk_show_error(NULL, "Error", msg);
         g_free(msg);
         if (err)
             g_error_free(err);

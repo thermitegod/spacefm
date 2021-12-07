@@ -16,7 +16,7 @@
 #include "vfs-volume.h"
 #include <glib.h>
 #include <glib/gstdio.h>
-#include <glib/gi18n.h>
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -2012,7 +2012,7 @@ void vfs_volume_set_info(VFSVolume* volume)
     {
         case DEVICE_TYPE_BLOCK:
             if (volume->is_floppy && !volume->udi)
-                disp_id = g_strdup_printf(_(":floppy"));
+                disp_id = g_strdup_printf(":floppy");
             else if (volume->udi)
             {
                 if ((lastcomma = strrchr(volume->udi, '/')))
@@ -2033,7 +2033,7 @@ void vfs_volume_set_info(VFSVolume* volume)
                 }
             }
             else if (volume->is_optical)
-                disp_id = g_strdup_printf(_(":optical"));
+                disp_id = g_strdup_printf(":optical");
             if (!disp_id)
                 disp_id = g_strdup("");
             // table type
@@ -2076,11 +2076,11 @@ void vfs_volume_set_info(VFSVolume* volume)
     else if (volume->is_mountable) // has_media
     {
         if (volume->is_blank)
-            disp_label = g_strdup_printf(_("[blank]"));
+            disp_label = g_strdup_printf("[blank]");
         else if (volume->label && volume->label[0] != '\0')
             disp_label = g_strdup_printf("%s", volume->label);
         else if (volume->is_audiocd)
-            disp_label = g_strdup_printf(_("[audio]"));
+            disp_label = g_strdup_printf("[audio]");
         else
             disp_label = g_strdup("");
         if (volume->size > 0)
@@ -2094,7 +2094,7 @@ void vfs_volume_set_info(VFSVolume* volume)
     }
     else
     {
-        disp_label = g_strdup_printf(_("[no media]"));
+        disp_label = g_strdup_printf("[no media]");
         disp_size = g_strdup("");
         disp_mount = g_strdup("");
     }
@@ -2836,7 +2836,7 @@ char* vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* o
 
     // show selected handler
     printf("\n%s '%s': %s%s %s\n",
-           mode == HANDLER_MODE_FS ? _("Selected Device Handler") : _("Selected Protocol Handler"),
+           mode == HANDLER_MODE_FS ? "Selected Device Handler" : "Selected Protocol Handler",
            set->menu_label,
            action_s,
            command ? "" : " (no command)",
@@ -3127,7 +3127,7 @@ char* vfs_volume_device_info(VFSVolume* vol)
                   vol->device_file,
                   (unsigned int)MAJOR(vol->devnum),
                   (unsigned int)MINOR(vol->devnum));
-        return g_strdup_printf(_("( no udev device )"));
+        return g_strdup_printf("( no udev device )");
     }
 
     device_t* device = device_alloc(udevice);
@@ -3433,7 +3433,7 @@ static void vfs_volume_exec(VFSVolume* vol, const char* command)
     s1 = replace_string(s2, "%v", vol->device_file, FALSE);
     g_free(s2);
 
-    printf(_("\nAutoexec: %s\n"), s1);
+    printf("\nAutoexec: %s\n", s1);
     exec_task(s1, FALSE);
     g_free(s1);
 }
@@ -3471,7 +3471,7 @@ static void vfs_volume_autoexec(VFSVolume* vol)
                     FMMainWindow* main_window = fm_main_window_get_last_active();
                     if (main_window)
                     {
-                        printf(_("\nAuto Open Tab for %s in %s\n"),
+                        printf("\nAuto Open Tab for %s in %s\n",
                                vol->device_file,
                                vol->mount_point);
                         // PtkFileBrowser* file_browser =
@@ -3517,12 +3517,12 @@ static void vfs_volume_autounmount(VFSVolume* vol)
     char* line = vfs_volume_device_unmount_cmd(vol, &run_in_terminal);
     if (line)
     {
-        printf(_("\nAuto-Unmount: %s\n"), line);
+        printf("\nAuto-Unmount: %s\n", line);
         exec_task(line, run_in_terminal);
         g_free(line);
     }
     else
-        printf(_("\nAuto-Unmount: error: no unmount command available\n"));
+        printf("\nAuto-Unmount: error: no unmount command available\n");
 }
 
 void vfs_volume_automount(VFSVolume* vol)
@@ -3540,12 +3540,12 @@ void vfs_volume_automount(VFSVolume* vol)
         vfs_volume_get_mount_command(vol, xset_get_s("dev_mount_options"), &run_in_terminal);
     if (line)
     {
-        printf(_("\nAutomount: %s\n"), line);
+        printf("\nAutomount: %s\n", line);
         exec_task(line, run_in_terminal);
         g_free(line);
     }
     else
-        printf(_("\nAutomount: error: no mount command available\n"));
+        printf("\nAutomount: error: no mount command available\n");
 }
 
 static void vfs_volume_device_added(VFSVolume* volume, bool automount)
@@ -3746,7 +3746,7 @@ static void unmount_if_mounted(VFSVolume* vol)
                                  str);
     g_free(str);
     g_free(mtab_path);
-    printf(_("Unmount-If-Mounted: %s\n"), line);
+    printf("Unmount-If-Mounted: %s\n", line);
     exec_task(line, run_in_terminal);
     g_free(line);
 }

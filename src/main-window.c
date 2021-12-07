@@ -10,7 +10,6 @@
 #include <libintl.h>
 
 #include "spacefm.hxx"
-#include "private.h"
 
 #include <gtk/gtk.h>
 #include <glib.h>
@@ -252,7 +251,7 @@ static void on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet
         }
         path = xset_file_dialog(GTK_WIDGET(main_window),
                                 GTK_FILE_CHOOSER_ACTION_OPEN,
-                                _("Choose Plugin File"),
+                                "Choose Plugin File",
                                 deffolder,
                                 NULL);
         if (!path)
@@ -266,9 +265,9 @@ static void on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet
         // get url
         if (!xset_text_dialog(
                 GTK_WIDGET(main_window),
-                _("Enter Plugin URL"),
+                "Enter Plugin URL",
                 FALSE,
-                _("Enter SpaceFM Plugin URL:\n\n(wget will be used to download the plugin file)"),
+                "Enter SpaceFM Plugin URL:\n\n(wget will be used to download the plugin file)",
                 NULL,
                 NULL,
                 &path,
@@ -297,12 +296,11 @@ static void on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet
             g_free(filename);
             if (plug_dir_name[0] == '\0')
             {
-                msg =
-                    g_strdup_printf(_("This plugin's filename is invalid.  Please rename it using "
-                                      "alpha-numeric ASCII characters and try again."));
+                msg = g_strdup_printf("This plugin's filename is invalid.  Please rename it using "
+                                      "alpha-numeric ASCII characters and try again.");
                 xset_msg_dialog(GTK_WIDGET(main_window),
                                 GTK_MESSAGE_ERROR,
-                                _("Invalid Plugin Filename"),
+                                "Invalid Plugin Filename",
                                 0,
                                 msg,
                                 NULL,
@@ -327,13 +325,13 @@ static void on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet
             if (g_file_test(plug_dir, G_FILE_TEST_EXISTS))
             {
                 msg = g_strdup_printf(
-                    _("There is already a plugin installed as '%s'.  Overwrite ?\n\nTip: You can "
-                      "also "
-                      "rename this plugin file to install it under a different name."),
+                    "There is already a plugin installed as '%s'.  Overwrite ?\n\nTip: You can "
+                    "also "
+                    "rename this plugin file to install it under a different name.",
                     plug_dir_name);
                 if (xset_msg_dialog(GTK_WIDGET(main_window),
                                     GTK_MESSAGE_WARNING,
-                                    _("Overwrite Plugin ?"),
+                                    "Overwrite Plugin ?",
                                     GTK_BUTTONS_YES_NO,
                                     msg,
                                     NULL,
@@ -358,9 +356,9 @@ static void on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet
             {
                 xset_msg_dialog(GTK_WIDGET(main_window),
                                 GTK_MESSAGE_ERROR,
-                                _("Error Creating Temp Directory"),
+                                "Error Creating Temp Directory",
                                 0,
-                                _("Unable to create temporary directory"),
+                                "Unable to create temporary directory",
                                 NULL,
                                 NULL);
                 g_free(path);
@@ -584,7 +582,7 @@ static void on_open_current_folder_as_root(GtkMenuItem* menuitem, void* user_dat
     if (!file_browser)
         return;
     // root task
-    PtkFileTask* task = ptk_file_exec_new(_("Open Root Window"),
+    PtkFileTask* task = ptk_file_exec_new("Open Root Window",
                                           ptk_file_browser_get_cwd(file_browser),
                                           GTK_WIDGET(file_browser),
                                           file_browser->task_view);
@@ -615,8 +613,8 @@ static void main_window_open_terminal(FMMainWindow* main_window, bool as_root)
     if (!main_term || main_term[0] == '\0')
     {
         ptk_show_error(GTK_WINDOW(parent),
-                       _("Terminal Not Available"),
-                       _("Please set your terminal program in View|Preferences|Advanced"));
+                       "Terminal Not Available",
+                       "Please set your terminal program in View|Preferences|Advanced");
         fm_edit_preference((GtkWindow*)parent, PREF_ADVANCED);
         main_term = xset_get_s("main_terminal");
         if (!main_term || main_term[0] == '\0')
@@ -627,7 +625,7 @@ static void main_window_open_terminal(FMMainWindow* main_window, bool as_root)
     char* terminal = g_find_program_in_path(main_term);
     if (!terminal)
         terminal = g_strdup(main_term);
-    PtkFileTask* task = ptk_file_exec_new(_("Open Terminal"),
+    PtkFileTask* task = ptk_file_exec_new("Open Terminal",
                                           ptk_file_browser_get_cwd(file_browser),
                                           GTK_WIDGET(file_browser),
                                           file_browser->task_view);
@@ -759,13 +757,13 @@ static void main_design_mode(GtkMenuItem* menuitem, FMMainWindow* main_window)
     xset_msg_dialog(
         GTK_WIDGET(main_window),
         0,
-        _("Design Mode Help"),
+        "Design Mode Help",
         0,
-        _("Design Mode allows you to change the name, shortcut key and icon of menu, toolbar and "
-          "bookmark items, show help for an item, and add your own custom commands and "
-          "applications.\n\nTo open the Design Menu, simply right-click on a menu item, bookmark, "
-          "or toolbar item.  To open the Design Menu for a submenu, first close the submenu (by "
-          "clicking on it).\n\nFor more information, click the Help button below."),
+        "Design Mode allows you to change the name, shortcut key and icon of menu, toolbar and "
+        "bookmark items, show help for an item, and add your own custom commands and "
+        "applications.\n\nTo open the Design Menu, simply right-click on a menu item, bookmark, "
+        "or toolbar item.  To open the Design Menu for a submenu, first close the submenu (by "
+        "clicking on it).\n\nFor more information, click the Help button below.",
         NULL,
         "#designmode");
 }
@@ -1539,8 +1537,7 @@ static void rebuild_menus(FMMainWindow* main_window)
     // Panel View submenu
     set = xset_get("con_view");
     str = set->menu_label;
-    set->menu_label =
-        g_strdup_printf("%s %d %s", _("Panel"), main_window->curpanel, set->menu_label);
+    set->menu_label = g_strdup_printf("%s %d %s", "Panel", main_window->curpanel, set->menu_label);
     ptk_file_menu_add_panel_view_menu(file_browser, newmenu, accel_group);
     g_free(set->menu_label);
     set->menu_label = str;
@@ -1591,7 +1588,7 @@ static void rebuild_menus(FMMainWindow* main_window)
     if (!set->child)
     {
         child_set = xset_custom_new();
-        child_set->menu_label = g_strdup(_("New _Command"));
+        child_set->menu_label = g_strdup("New _Command");
         child_set->parent = g_strdup("main_tool");
         set->child = g_strdup(child_set->name);
     }
@@ -1687,7 +1684,7 @@ static void fm_main_window_init(FMMainWindow* main_window)
     for (i = 0; i < 4; i++)
     {
         main_window->panel_btn[i] = GTK_WIDGET(gtk_toggle_tool_button_new());
-        icon_name = g_strdup_printf(_("Show Panel %d"), i + 1);
+        icon_name = g_strdup_printf("Show Panel %d", i + 1);
         gtk_tool_button_set_label(GTK_TOOL_BUTTON(main_window->panel_btn[i]), icon_name);
         free((char*)icon_name);
         set = xset_get_panel(i + 1, "icon_status");
@@ -1715,27 +1712,27 @@ static void fm_main_window_init(FMMainWindow* main_window)
     gtk_box_pack_start(GTK_BOX(menu_hbox), main_window->panelbar, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(main_window->main_vbox), menu_hbox, FALSE, FALSE, 0);
 
-    main_window->file_menu_item = gtk_menu_item_new_with_mnemonic(_("_File"));
+    main_window->file_menu_item = gtk_menu_item_new_with_mnemonic("_File");
     gtk_menu_shell_append(GTK_MENU_SHELL(main_window->menu_bar), main_window->file_menu_item);
 
-    main_window->view_menu_item = gtk_menu_item_new_with_mnemonic(_("_View"));
+    main_window->view_menu_item = gtk_menu_item_new_with_mnemonic("_View");
     gtk_menu_shell_append(GTK_MENU_SHELL(main_window->menu_bar), main_window->view_menu_item);
 
-    main_window->dev_menu_item = gtk_menu_item_new_with_mnemonic(_("_Devices"));
+    main_window->dev_menu_item = gtk_menu_item_new_with_mnemonic("_Devices");
     gtk_menu_shell_append(GTK_MENU_SHELL(main_window->menu_bar), main_window->dev_menu_item);
     main_window->dev_menu = NULL;
 
-    main_window->book_menu_item = gtk_menu_item_new_with_mnemonic(_("_Bookmarks"));
+    main_window->book_menu_item = gtk_menu_item_new_with_mnemonic("_Bookmarks");
     gtk_menu_shell_append(GTK_MENU_SHELL(main_window->menu_bar), main_window->book_menu_item);
 
-    main_window->plug_menu_item = gtk_menu_item_new_with_mnemonic(_("_Plugins"));
+    main_window->plug_menu_item = gtk_menu_item_new_with_mnemonic("_Plugins");
     gtk_menu_shell_append(GTK_MENU_SHELL(main_window->menu_bar), main_window->plug_menu_item);
     main_window->plug_menu = NULL;
 
-    main_window->tool_menu_item = gtk_menu_item_new_with_mnemonic(_("_Tools"));
+    main_window->tool_menu_item = gtk_menu_item_new_with_mnemonic("_Tools");
     gtk_menu_shell_append(GTK_MENU_SHELL(main_window->menu_bar), main_window->tool_menu_item);
 
-    main_window->help_menu_item = gtk_menu_item_new_with_mnemonic(_("_Help"));
+    main_window->help_menu_item = gtk_menu_item_new_with_mnemonic("_Help");
     gtk_menu_shell_append(GTK_MENU_SHELL(main_window->menu_bar), main_window->help_menu_item);
 
     rebuild_menus(main_window);
@@ -2039,7 +2036,7 @@ static bool fm_main_window_delete_event(GtkWidget* widget, GdkEvent* event)
                                                 GTK_DIALOG_MODAL,
                                                 GTK_MESSAGE_QUESTION,
                                                 GTK_BUTTONS_YES_NO,
-                                                _("Stop all tasks running in this window?"));
+                                                "Stop all tasks running in this window?");
         gtk_dialog_set_default_response(GTK_DIALOG(dlg), GTK_RESPONSE_NO);
         if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_YES)
         {
@@ -2048,7 +2045,7 @@ static bool fm_main_window_delete_event(GtkWidget* widget, GdkEvent* event)
                                          GTK_DIALOG_MODAL,
                                          GTK_MESSAGE_INFO,
                                          GTK_BUTTONS_CLOSE,
-                                         _("Aborting tasks..."));
+                                         "Aborting tasks...");
             g_signal_connect(dlg, "response", G_CALLBACK(on_abort_tasks_response), widget);
             g_signal_connect(dlg, "destroy", G_CALLBACK(gtk_widget_destroy), dlg);
             gtk_widget_show_all(dlg);
@@ -3125,7 +3122,7 @@ static void fm_main_window_update_status_bar(FMMainWindow* main_window,
         vfs_file_size_to_string_format(total_size_str, fs_stat.f_frsize * fs_stat.f_blocks, TRUE);
         g_snprintf(free_space,
                    G_N_ELEMENTS(free_space),
-                   _(" %s free / %s   "),
+                   " %s free / %s   ",
                    size_str,
                    total_size_str); // MOD
     }
@@ -3133,9 +3130,8 @@ static void fm_main_window_update_status_bar(FMMainWindow* main_window,
     // Show Reading... while still loading
     if (file_browser->busy)
     {
-        msg = g_strdup_printf(_("%sReading %s ..."),
-                              free_space,
-                              ptk_file_browser_get_cwd(file_browser));
+        msg =
+            g_strdup_printf("%sReading %s ...", free_space, ptk_file_browser_get_cwd(file_browser));
         gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar), 0, msg);
         g_free(msg);
         return;
@@ -3183,13 +3179,12 @@ static void fm_main_window_update_status_bar(FMMainWindow* main_window,
                                 if (g_file_test(target_path, G_FILE_TEST_EXISTS))
                                 {
                                     if (!strcmp(target, "/"))
-                                        link_info = g_strdup_printf(_("   Link → %s"), target);
+                                        link_info = g_strdup_printf("   Link → %s", target);
                                     else
-                                        link_info = g_strdup_printf(_("   Link → %s/"), target);
+                                        link_info = g_strdup_printf("   Link → %s/", target);
                                 }
                                 else
-                                    link_info =
-                                        g_strdup_printf(_("   !Link → %s/ (missing)"), target);
+                                    link_info = g_strdup_printf("   !Link → %s/ (missing)", target);
                             }
                             else
                             {
@@ -3199,19 +3194,17 @@ static void fm_main_window_update_status_bar(FMMainWindow* main_window,
                                     char buf[64];
                                     vfs_file_size_to_string_format(buf, results.st_size, TRUE);
                                     char* lsize = g_strdup(buf);
-                                    link_info =
-                                        g_strdup_printf(_("   Link → %s (%s)"), target, lsize);
+                                    link_info = g_strdup_printf("   Link → %s (%s)", target, lsize);
                                 }
                                 else
-                                    link_info =
-                                        g_strdup_printf(_("   !Link → %s (missing)"), target);
+                                    link_info = g_strdup_printf("   !Link → %s (missing)", target);
                             }
                             g_free(target);
                             if (full_target)
                                 g_free(full_target);
                         }
                         else
-                            link_info = g_strdup_printf(_("   !Link → ( error reading target )"));
+                            link_info = g_strdup_printf("   !Link → ( error reading target )");
 
                         g_free(file_path);
                     }
@@ -3227,8 +3220,8 @@ static void fm_main_window_update_status_bar(FMMainWindow* main_window,
         vfs_file_size_to_string_format(size_str, total_size, TRUE);
         msg =
             g_strdup_printf("%s%d / %d (%s)%s", free_space, num_sel, num_vis, size_str, link_info);
-        // msg = g_strdup_printf( ngettext( _("%s%d sel (%s)%s"),  //MOD
-        //                 _("%s%d sel (%s)"), num_sel ), free_space, num_sel,
+        // msg = g_strdup_printf(( _"%s%d sel (%s)%s",  //MOD
+        //                 "%s%d sel (%s)"), num_sel , free_space, num_sel,
         //                                        size_str, link_info );  //MOD
     }
     else
@@ -3258,20 +3251,11 @@ static void fm_main_window_update_status_bar(FMMainWindow* main_window,
                 xhidden = g_strdup("");
 
             char hidden[128];
-            char* hidtext = ngettext("hidden", "hidden", num_hid);
-            g_snprintf(hidden, 127, g_strdup_printf("%d%s %s", num_hid, xhidden, hidtext), num_hid);
-            msg = g_strdup_printf(
-                ngettext("%s%d visible (%s)   %s", "%s%d visible (%s)   %s", num_vis),
-                free_space,
-                num_vis,
-                hidden,
-                dirmsg);
+            g_snprintf(hidden, 127, g_strdup_printf("%d%s hidden", num_hid, xhidden), num_hid);
+            msg = g_strdup_printf("%s%d visible (%s)   %s", free_space, num_vis, hidden, dirmsg);
         }
         else
-            msg = g_strdup_printf(ngettext("%s%d item   %s", "%s%d items   %s", num_vis),
-                                  free_space,
-                                  num_vis,
-                                  dirmsg);
+            msg = g_strdup_printf("%s%d item   %s", free_space, num_vis, dirmsg);
         g_free(dirmsg);
     }
     gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar), 0, msg);
@@ -3742,20 +3726,20 @@ enum
 static const char* task_titles[] =
 {
     // If you change "Status", also change it in on_task_button_press_event
-    N_("Status"),
-    N_("#"),
-    N_("Directory"),
-    N_("Item"),
-    N_("To"),
-    N_("Progress"),
-    N_("Total"),
-    N_("Started"),
-    N_("Elapsed"),
-    N_("Current"),
-    N_("CRemain"),
-    N_("Average"),
-    N_("Remain"),
-    "StartTime"
+    "Status",
+    "#",
+    "Directory",
+    "Item",
+    "To",
+    "Progress",
+    "Total",
+    "Started",
+    "Elapsed",
+    "Current",
+    "CRemain",
+    "Average",
+    "Remain",
+    "StartTime",
 };
 
 static const char* task_names[] =
@@ -3772,7 +3756,7 @@ static const char* task_names[] =
     "task_col_curspeed",
     "task_col_curest",
     "task_col_avgspeed",
-    "task_col_avgest"
+    "task_col_avgest",
 };
 // clang-format on
 
@@ -3781,9 +3765,9 @@ void on_reorder(GtkWidget* item, GtkWidget* parent)
     xset_msg_dialog(
         parent,
         0,
-        _("Reorder Columns Help"),
+        "Reorder Columns Help",
         0,
-        _("To change the order of the columns, drag the column header to the desired location."),
+        "To change the order of the columns, drag the column header to the desired location.",
         NULL,
         NULL);
 }
@@ -4533,7 +4517,7 @@ static void on_task_columns_changed(GtkWidget* view, void* user_data)
         int j;
         for (j = 0; j < 13; j++)
         {
-            if (!strcmp(title, _(task_titles[j])))
+            if (!strcmp(title, task_titles[j]))
                 break;
         }
         if (j != 13)
@@ -5103,7 +5087,7 @@ static bool on_task_button_press_event(GtkWidget* view, GdkEventButton* event,
 
             if (!ptask)
                 return FALSE;
-            if (event->button == 1 && g_strcmp0(gtk_tree_view_column_get_title(col), _("Status")))
+            if (event->button == 1 && g_strcmp0(gtk_tree_view_column_get_title(col), "Status"))
                 return FALSE;
             const char* sname;
             switch (ptask->task->state_pause)
@@ -5293,12 +5277,12 @@ void main_task_view_update_task(PtkFileTask* ptask)
 
     // printf("main_task_view_update_task  ptask=%d\n", ptask);
     // clang-format off
-    const char* job_titles[] = {N_("moving"),
-                                N_("copying"),
-                                N_("deleting"),
-                                N_("linking"),
-                                N_("changing"),
-                                N_("running")};
+    const char* job_titles[] = {"moving",
+                                "copying",
+                                "deleting",
+                                "linking",
+                                "changing",
+                                "running"};
     // clang-format on
 
     if (!ptask)
@@ -5375,13 +5359,11 @@ void main_task_view_update_task(PtkFileTask* ptask)
         if (ptask->task->type != VFS_FILE_TASK_EXEC)
         {
             if (!ptask->err_count)
-                status = _(job_titles[ptask->task->type]);
+                status = job_titles[ptask->task->type];
             else
             {
                 status2 =
-                    g_strdup_printf(ngettext(_("%d error %s"), _("%d errors %s"), ptask->err_count),
-                                    ptask->err_count,
-                                    _(job_titles[ptask->task->type]));
+                    g_strdup_printf("%d error %s", ptask->err_count, job_titles[ptask->task->type]);
                 status = status2;
             }
         }
@@ -5391,12 +5373,12 @@ void main_task_view_update_task(PtkFileTask* ptask)
             if (ptask->task->exec_action)
                 status = ptask->task->exec_action;
             else
-                status = _(job_titles[ptask->task->type]);
+                status = job_titles[ptask->task->type];
         }
         if (ptask->task->state_pause == VFS_FILE_TASK_PAUSE)
-            status3 = g_strdup_printf("%s %s", _("paused"), status);
+            status3 = g_strdup_printf("%s %s", "paused", status);
         else if (ptask->task->state_pause == VFS_FILE_TASK_QUEUE)
-            status3 = g_strdup_printf("%s %s", _("queued"), status);
+            status3 = g_strdup_printf("%s %s", "queued", status);
         else
             status3 = g_strdup(status);
 
@@ -5684,7 +5666,7 @@ static GtkWidget* main_task_view_new(FMMainWindow* main_window)
         }
 
         gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
-        gtk_tree_view_column_set_title(col, _(task_titles[j]));
+        gtk_tree_view_column_set_title(col, task_titles[j]);
         gtk_tree_view_column_set_reorderable(col, TRUE);
         gtk_tree_view_column_set_visible(col, xset_get_b(task_names[j]));
         if (j == TASK_COL_FILE) //|| j == TASK_COL_PATH || j == TASK_COL_TO
@@ -5760,13 +5742,12 @@ char main_window_socket_command(char* argv[], char** reply)
     int width;
     GtkWidget* widget;
     // must match file-browser.c
-    const char* column_titles[] =
-        {N_("Name"), N_("Size"), N_("Type"), N_("Permission"), N_("Owner"), N_("Modified")};
+    const char* column_titles[] = {"Name", "Size", "Type", "Permission", "Owner", "Modified"};
 
     *reply = NULL;
     if (!(argv && argv[0]))
     {
-        *reply = g_strdup(_("spacefm: invalid socket command\n"));
+        *reply = g_strdup("spacefm: invalid socket command\n");
         return 1;
     }
 
@@ -5798,10 +5779,10 @@ char main_window_socket_command(char* argv[], char** reply)
             i += 2;
             continue;
         }
-        *reply = g_strdup_printf(_("spacefm: invalid option '%s'\n"), argv[i]);
+        *reply = g_strdup_printf("spacefm: invalid option '%s'\n", argv[i]);
         return 1;
     _missing_arg:
-        *reply = g_strdup_printf(_("spacefm: option %s requires an argument\n"), argv[i]);
+        *reply = g_strdup_printf("spacefm: option %s requires an argument\n", argv[i]);
         return 1;
     }
 
@@ -5810,7 +5791,7 @@ char main_window_socket_command(char* argv[], char** reply)
     {
         if (!(main_window = fm_main_window_get_last_active()))
         {
-            *reply = g_strdup(_("spacefm: invalid window\n"));
+            *reply = g_strdup("spacefm: invalid window\n");
             return 2;
         }
     }
@@ -5830,7 +5811,7 @@ char main_window_socket_command(char* argv[], char** reply)
         }
         if (!main_window)
         {
-            *reply = g_strdup_printf(_("spacefm: invalid window %s\n"), window);
+            *reply = g_strdup_printf("spacefm: invalid window %s\n", window);
             return 2;
         }
     }
@@ -5840,13 +5821,13 @@ char main_window_socket_command(char* argv[], char** reply)
         panel = main_window->curpanel;
     if (panel < 1 || panel > 4)
     {
-        *reply = g_strdup_printf(_("spacefm: invalid panel %d\n"), panel);
+        *reply = g_strdup_printf("spacefm: invalid panel %d\n", panel);
         return 2;
     }
     if (!xset_get_b_panel(panel, "show") ||
         gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[panel - 1])) == -1)
     {
-        *reply = g_strdup_printf(_("spacefm: panel %d is not visible\n"), panel);
+        *reply = g_strdup_printf("spacefm: panel %d is not visible\n", panel);
         return 2;
     }
 
@@ -5857,7 +5838,7 @@ char main_window_socket_command(char* argv[], char** reply)
     }
     if (tab < 1 || tab > gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[panel - 1])))
     {
-        *reply = g_strdup_printf(_("spacefm: invalid tab %d\n"), tab);
+        *reply = g_strdup_printf("spacefm: invalid tab %d\n", tab);
         return 2;
     }
     file_browser = PTK_FILE_BROWSER(
@@ -5868,7 +5849,7 @@ char main_window_socket_command(char* argv[], char** reply)
     {
         if (!argv[i])
         {
-            *reply = g_strdup(_("spacefm: command set requires an argument\n"));
+            *reply = g_strdup("spacefm: command set requires an argument\n");
             return 1;
         }
         if (!strcmp(argv[i], "window_size") || !strcmp(argv[i], "window_position"))
@@ -5894,7 +5875,7 @@ char main_window_socket_command(char* argv[], char** reply)
             }
             if (height < 1 || width < 1)
             {
-                *reply = g_strdup_printf(_("spacefm: invalid %s value\n"), argv[i]);
+                *reply = g_strdup_printf("spacefm: invalid %s value\n", argv[i]);
                 return 2;
             }
             if (!strcmp(argv[i], "window_size"))
@@ -5926,7 +5907,7 @@ char main_window_socket_command(char* argv[], char** reply)
                 width = strtol(argv[i + 1], NULL, 10);
             if (width < 0)
             {
-                *reply = g_strdup(_("spacefm: invalid slider value\n"));
+                *reply = g_strdup("spacefm: invalid slider value\n");
                 return 2;
             }
             if (!strcmp(argv[i] + 7, "vslider_top"))
@@ -5955,7 +5936,7 @@ char main_window_socket_command(char* argv[], char** reply)
             }
             if (width == 0 || width < -3 || width > 4)
             {
-                *reply = g_strdup(_("spacefm: invalid panel number\n"));
+                *reply = g_strdup("spacefm: invalid panel number\n");
                 return 2;
             }
             focus_panel(NULL, (void*)main_window, width);
@@ -5996,7 +5977,7 @@ char main_window_socket_command(char* argv[], char** reply)
             if (width == 0 || width < -3 ||
                 width > gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[panel - 1])))
             {
-                *reply = g_strdup(_("spacefm: invalid tab number\n"));
+                *reply = g_strdup("spacefm: invalid tab number\n");
                 return 2;
             }
             ptk_file_browser_go_tab(NULL, file_browser, width);
@@ -6055,7 +6036,7 @@ char main_window_socket_command(char* argv[], char** reply)
                 j = argv[i][5] - 48;
                 if (j < 1 || j > 4)
                 {
-                    *reply = g_strdup_printf(_("spacefm: invalid property %s\n"), argv[i]);
+                    *reply = g_strdup_printf("spacefm: invalid property %s\n", argv[i]);
                     return 2;
                 }
                 xset_set_b_panel(j, "show", get_bool(argv[i + 1]));
@@ -6083,7 +6064,7 @@ char main_window_socket_command(char* argv[], char** reply)
                 width = strtol(argv[i + 1], NULL, 10);
             if (width < 0)
             {
-                *reply = g_strdup(_("spacefm: invalid slider value\n"));
+                *reply = g_strdup("spacefm: invalid slider value\n");
                 return 2;
             }
             if (!strcmp(argv[i] + 6, "hslider_top"))
@@ -6103,7 +6084,7 @@ char main_window_socket_command(char* argv[], char** reply)
                 width = strtol(argv[i + 2], NULL, 10);
             if (width < 1)
             {
-                *reply = g_strdup(_("spacefm: invalid column width\n"));
+                *reply = g_strdup("spacefm: invalid column width\n");
                 return 2;
             }
             if (file_browser->view_mode == PTK_FB_LIST_VIEW)
@@ -6117,27 +6098,24 @@ char main_window_socket_command(char* argv[], char** reply)
                     str = (char*)gtk_tree_view_column_get_title(col);
                     if (!g_strcmp0(argv[i + 1], str))
                         break;
-                    if (!g_strcmp0(argv[i + 1], "name") && !g_strcmp0(str, _(column_titles[0])))
+                    if (!g_strcmp0(argv[i + 1], "name") && !g_strcmp0(str, column_titles[0]))
                         break;
-                    else if (!g_strcmp0(argv[i + 1], "size") &&
-                             !g_strcmp0(str, _(column_titles[1])))
+                    else if (!g_strcmp0(argv[i + 1], "size") && !g_strcmp0(str, column_titles[1]))
                         break;
-                    else if (!g_strcmp0(argv[i + 1], "type") &&
-                             !g_strcmp0(str, _(column_titles[2])))
+                    else if (!g_strcmp0(argv[i + 1], "type") && !g_strcmp0(str, column_titles[2]))
                         break;
                     else if (!g_strcmp0(argv[i + 1], "permission") &&
-                             !g_strcmp0(str, _(column_titles[3])))
+                             !g_strcmp0(str, column_titles[3]))
                         break;
-                    else if (!g_strcmp0(argv[i + 1], "owner") &&
-                             !g_strcmp0(str, _(column_titles[4])))
+                    else if (!g_strcmp0(argv[i + 1], "owner") && !g_strcmp0(str, column_titles[4]))
                         break;
                     else if (!g_strcmp0(argv[i + 1], "modified") &&
-                             !g_strcmp0(str, _(column_titles[5])))
+                             !g_strcmp0(str, column_titles[5]))
                         break;
                 }
                 if (j == 6)
                 {
-                    *reply = g_strdup_printf(_("spacefm: invalid column name '%s'\n"), argv[i + 1]);
+                    *reply = g_strdup_printf("spacefm: invalid column name '%s'\n", argv[i + 1]);
                     return 2;
                 }
                 gtk_tree_view_column_set_fixed_width(col, width);
@@ -6164,7 +6142,7 @@ char main_window_socket_command(char* argv[], char** reply)
 
             if (j == -10)
             {
-                *reply = g_strdup_printf(_("spacefm: invalid column name '%s'\n"), argv[i + 1]);
+                *reply = g_strdup_printf("spacefm: invalid column name '%s'\n", argv[i + 1]);
                 return 2;
             }
             ptk_file_browser_set_sort_order(file_browser, j);
@@ -6203,7 +6181,7 @@ char main_window_socket_command(char* argv[], char** reply)
                     str = g_strdup("sortx_mix");
                 else
                 {
-                    *reply = g_strdup_printf(_("spacefm: invalid %s value\n"), argv[i]);
+                    *reply = g_strdup_printf("spacefm: invalid %s value\n", argv[i]);
                     return 2;
                 }
             }
@@ -6271,7 +6249,7 @@ char main_window_socket_command(char* argv[], char** reply)
         {
             if (argv[i + 1] && !g_utf8_validate(argv[i + 1], -1, NULL))
             {
-                *reply = g_strdup(_("spacefm: text is not valid UTF-8\n"));
+                *reply = g_strdup("spacefm: text is not valid UTF-8\n");
                 return 2;
             }
             GtkClipboard* clip =
@@ -6286,19 +6264,18 @@ char main_window_socket_command(char* argv[], char** reply)
         {
             if (!argv[i + 1])
             {
-                *reply = g_strdup_printf(_("spacefm: %s requires a file path\n"), argv[i]);
+                *reply = g_strdup_printf("spacefm: %s requires a file path\n", argv[i]);
                 return 1;
             }
             if (!g_file_get_contents(argv[i + 1], &str, NULL, NULL))
             {
-                *reply = g_strdup_printf(_("spacefm: error reading file '%s'\n"), argv[i + 1]);
+                *reply = g_strdup_printf("spacefm: error reading file '%s'\n", argv[i + 1]);
                 return 2;
             }
             if (!g_utf8_validate(str, -1, NULL))
             {
-                *reply =
-                    g_strdup_printf(_("spacefm: file '%s' does not contain valid UTF-8 text\n"),
-                                    argv[i + 1]);
+                *reply = g_strdup_printf("spacefm: file '%s' does not contain valid UTF-8 text\n",
+                                         argv[i + 1]);
                 g_free(str);
                 return 2;
             }
@@ -6333,13 +6310,12 @@ char main_window_socket_command(char* argv[], char** reply)
         {
             if (!argv[i + 1])
             {
-                *reply = g_strdup_printf(_("spacefm: %s requires a directory path\n"), argv[i]);
+                *reply = g_strdup_printf("spacefm: %s requires a directory path\n", argv[i]);
                 return 1;
             }
             if (!g_file_test(argv[i + 1], G_FILE_TEST_IS_DIR))
             {
-                *reply =
-                    g_strdup_printf(_("spacefm: directory '%s' does not exist\n"), argv[i + 1]);
+                *reply = g_strdup_printf("spacefm: directory '%s' does not exist\n", argv[i + 1]);
                 return 1;
             }
             ptk_file_browser_chdir(file_browser, argv[i + 1], PTK_FB_CHDIR_ADD_HISTORY);
@@ -6347,7 +6323,7 @@ char main_window_socket_command(char* argv[], char** reply)
         else
         {
         _invalid_set:
-            *reply = g_strdup_printf(_("spacefm: invalid property %s\n"), argv[i]);
+            *reply = g_strdup_printf("spacefm: invalid property %s\n", argv[i]);
             return 1;
         }
     }
@@ -6356,7 +6332,7 @@ char main_window_socket_command(char* argv[], char** reply)
         // get
         if (!argv[i])
         {
-            *reply = g_strdup_printf(_("spacefm: command %s requires an argument\n"), argv[0]);
+            *reply = g_strdup_printf("spacefm: command %s requires an argument\n", argv[0]);
             return 1;
         }
         if (!strcmp(argv[i], "window_size") || !strcmp(argv[i], "window_position"))
@@ -6468,7 +6444,7 @@ char main_window_socket_command(char* argv[], char** reply)
                 j = argv[i][5] - 48;
                 if (j < 1 || j > 4)
                 {
-                    *reply = g_strdup_printf(_("spacefm: invalid property %s\n"), argv[i]);
+                    *reply = g_strdup_printf("spacefm: invalid property %s\n", argv[i]);
                     return 2;
                 }
                 *reply = g_strdup_printf("%d\n", xset_get_b_panel(j, "show"));
@@ -6509,27 +6485,24 @@ char main_window_socket_command(char* argv[], char** reply)
                     str = (char*)gtk_tree_view_column_get_title(col);
                     if (!g_strcmp0(argv[i + 1], str))
                         break;
-                    if (!g_strcmp0(argv[i + 1], "name") && !g_strcmp0(str, _(column_titles[0])))
+                    if (!g_strcmp0(argv[i + 1], "name") && !g_strcmp0(str, column_titles[0]))
                         break;
-                    else if (!g_strcmp0(argv[i + 1], "size") &&
-                             !g_strcmp0(str, _(column_titles[1])))
+                    else if (!g_strcmp0(argv[i + 1], "size") && !g_strcmp0(str, column_titles[1]))
                         break;
-                    else if (!g_strcmp0(argv[i + 1], "type") &&
-                             !g_strcmp0(str, _(column_titles[2])))
+                    else if (!g_strcmp0(argv[i + 1], "type") && !g_strcmp0(str, column_titles[2]))
                         break;
                     else if (!g_strcmp0(argv[i + 1], "permission") &&
-                             !g_strcmp0(str, _(column_titles[3])))
+                             !g_strcmp0(str, column_titles[3]))
                         break;
-                    else if (!g_strcmp0(argv[i + 1], "owner") &&
-                             !g_strcmp0(str, _(column_titles[4])))
+                    else if (!g_strcmp0(argv[i + 1], "owner") && !g_strcmp0(str, column_titles[4]))
                         break;
                     else if (!g_strcmp0(argv[i + 1], "modified") &&
-                             !g_strcmp0(str, _(column_titles[5])))
+                             !g_strcmp0(str, column_titles[5]))
                         break;
                 }
                 if (j == 6)
                 {
-                    *reply = g_strdup_printf(_("spacefm: invalid column name '%s'\n"), argv[i + 1]);
+                    *reply = g_strdup_printf("spacefm: invalid column name '%s'\n", argv[i + 1]);
                     return 2;
                 }
                 *reply = g_strdup_printf("%d\n", gtk_tree_view_column_get_width(col));
@@ -6733,7 +6706,7 @@ char main_window_socket_command(char* argv[], char** reply)
         else
         {
         _invalid_get:
-            *reply = g_strdup_printf(_("spacefm: invalid property %s\n"), argv[i]);
+            *reply = g_strdup_printf("spacefm: invalid property %s\n", argv[i]);
             return 1;
         }
     }
@@ -6741,7 +6714,7 @@ char main_window_socket_command(char* argv[], char** reply)
     { // TASKNUM PROPERTY [VALUE]
         if (!(argv[i] && argv[i + 1]))
         {
-            *reply = g_strdup_printf(_("spacefm: %s requires two arguments\n"), argv[0]);
+            *reply = g_strdup_printf("spacefm: %s requires two arguments\n", argv[0]);
             return 1;
         }
 
@@ -6766,12 +6739,12 @@ char main_window_socket_command(char* argv[], char** reply)
         }
         if (!ptask)
         {
-            *reply = g_strdup_printf(_("spacefm: invalid task '%s'\n"), argv[i]);
+            *reply = g_strdup_printf("spacefm: invalid task '%s'\n", argv[i]);
             return 2;
         }
         if (ptask->task->type != VFS_FILE_TASK_EXEC)
         {
-            *reply = g_strdup_printf(_("spacefm: internal task %s is read-only\n"), argv[i]);
+            *reply = g_strdup_printf("spacefm: internal task %s is read-only\n", argv[i]);
             return 2;
         }
 
@@ -6823,7 +6796,7 @@ char main_window_socket_command(char* argv[], char** reply)
         else if (!strcmp(argv[i + 1], "elapsed") || !strcmp(argv[i + 1], "started") ||
                  !strcmp(argv[i + 1], "status"))
         {
-            *reply = g_strdup_printf(_("spacefm: task property '%s' is read-only\n"), argv[i + 1]);
+            *reply = g_strdup_printf("spacefm: task property '%s' is read-only\n", argv[i + 1]);
             return 2;
         }
         else if (!strcmp(argv[i + 1], "queue_state"))
@@ -6838,7 +6811,7 @@ char main_window_socket_command(char* argv[], char** reply)
                 on_task_stop(NULL, main_window->task_view, xset_get("task_stop_all"), NULL);
             else
             {
-                *reply = g_strdup_printf(_("spacefm: invalid queue_state '%s'\n"), argv[i + 2]);
+                *reply = g_strdup_printf("spacefm: invalid queue_state '%s'\n", argv[i + 2]);
                 return 2;
             }
             main_task_start_queued(main_window->task_view, NULL);
@@ -6855,7 +6828,7 @@ char main_window_socket_command(char* argv[], char** reply)
         }
         else
         {
-            *reply = g_strdup_printf(_("spacefm: invalid task property '%s'\n"), argv[i + 1]);
+            *reply = g_strdup_printf("spacefm: invalid task property '%s'\n", argv[i + 1]);
             return 2;
         }
         gtk_list_store_set(GTK_LIST_STORE(model), &it, j, argv[i + 2], -1);
@@ -6864,7 +6837,7 @@ char main_window_socket_command(char* argv[], char** reply)
     { // TASKNUM PROPERTY
         if (!(argv[i] && argv[i + 1]))
         {
-            *reply = g_strdup_printf(_("spacefm: %s requires two arguments\n"), argv[0]);
+            *reply = g_strdup_printf("spacefm: %s requires two arguments\n", argv[0]);
             return 1;
         }
 
@@ -6889,7 +6862,7 @@ char main_window_socket_command(char* argv[], char** reply)
         }
         if (!ptask)
         {
-            *reply = g_strdup_printf(_("spacefm: invalid task '%s'\n"), argv[i]);
+            *reply = g_strdup_printf("spacefm: invalid task '%s'\n", argv[i]);
             return 2;
         }
 
@@ -6952,7 +6925,7 @@ char main_window_socket_command(char* argv[], char** reply)
         }
         else
         {
-            *reply = g_strdup_printf(_("spacefm: invalid task property '%s'\n"), argv[i + 1]);
+            *reply = g_strdup_printf("spacefm: invalid task property '%s'\n", argv[i + 1]);
             return 2;
         }
         gtk_tree_model_get(model, &it, j, &str, -1);
@@ -6964,7 +6937,7 @@ char main_window_socket_command(char* argv[], char** reply)
     { // TYPE [OPTIONS] ...
         if (!(argv[i] && argv[i + 1]))
         {
-            *reply = g_strdup_printf(_("spacefm: %s requires two arguments\n"), argv[0]);
+            *reply = g_strdup_printf("spacefm: %s requires two arguments\n", argv[0]);
             return 1;
         }
         if (!strcmp(argv[i], "cmd") || !strcmp(argv[i], "command"))
@@ -7005,21 +6978,20 @@ char main_window_socket_command(char* argv[], char** reply)
                     opt_cwd = argv[++j];
                     if (!(opt_cwd && opt_cwd[0] == '/' && g_file_test(opt_cwd, G_FILE_TEST_IS_DIR)))
                     {
-                        *reply = g_strdup_printf(_("spacefm: no such directory '%s'\n"), opt_cwd);
+                        *reply = g_strdup_printf("spacefm: no such directory '%s'\n", opt_cwd);
                         return 2;
                     }
                 }
                 else
                 {
-                    *reply = g_strdup_printf(_("spacefm: invalid %s task option '%s'\n"),
-                                             argv[i],
-                                             argv[j]);
+                    *reply =
+                        g_strdup_printf("spacefm: invalid %s task option '%s'\n", argv[i], argv[j]);
                     return 2;
                 }
             }
             if (!argv[j])
             {
-                *reply = g_strdup_printf(_("spacefm: %s requires two arguments\n"), argv[0]);
+                *reply = g_strdup_printf("spacefm: %s requires two arguments\n", argv[0]);
                 return 1;
             }
             GString* gcmd = g_string_new(argv[j]);
@@ -7068,22 +7040,21 @@ char main_window_socket_command(char* argv[], char** reply)
                     opt_root = TRUE;
                 else
                 {
-                    *reply = g_strdup_printf(_("spacefm: invalid %s task option '%s'\n"),
-                                             argv[i],
-                                             argv[j]);
+                    *reply =
+                        g_strdup_printf("spacefm: invalid %s task option '%s'\n", argv[i], argv[j]);
                     return 2;
                 }
             }
             if (!argv[j])
             {
-                *reply = g_strdup_printf(_("spacefm: %s requires two arguments\n"), argv[0]);
+                *reply = g_strdup_printf("spacefm: %s requires two arguments\n", argv[0]);
                 return 1;
             }
             if (!strcmp(argv[i], "edit"))
             {
                 if (!(argv[j][0] == '/' && g_file_test(argv[j], G_FILE_TEST_EXISTS)))
                 {
-                    *reply = g_strdup_printf(_("spacefm: no such file '%s'\n"), argv[j]);
+                    *reply = g_strdup_printf("spacefm: no such file '%s'\n", argv[j]);
                     return 2;
                 }
                 xset_edit(GTK_WIDGET(file_browser), argv[j], opt_root, !opt_root);
@@ -7097,13 +7068,13 @@ char main_window_socket_command(char* argv[], char** reply)
             for (j = i + 1; argv[j] && argv[j][0] == '-'; j++)
             {
                 *reply =
-                    g_strdup_printf(_("spacefm: invalid %s task option '%s'\n"), argv[i], argv[j]);
+                    g_strdup_printf("spacefm: invalid %s task option '%s'\n", argv[i], argv[j]);
                 return 2;
             }
             if (!argv[j])
             {
                 *reply =
-                    g_strdup_printf(_("spacefm: task type %s requires TARGET argument\n"), argv[0]);
+                    g_strdup_printf("spacefm: task type %s requires TARGET argument\n", argv[0]);
                 return 1;
             }
 
@@ -7123,7 +7094,7 @@ char main_window_socket_command(char* argv[], char** reply)
                         // NON-block device - try to find vol by mount point
                         if (!(vol = vfs_volume_get_by_device_or_point(device_file, real_path)))
                         {
-                            *reply = g_strdup_printf(_("spacefm: invalid TARGET '%s'\n"), argv[j]);
+                            *reply = g_strdup_printf("spacefm: invalid TARGET '%s'\n", argv[j]);
                             return 2;
                         }
                         g_free(device_file);
@@ -7144,7 +7115,7 @@ char main_window_socket_command(char* argv[], char** reply)
                 if (split_network_url(real_path, &netmount) != 1)
                 {
                     // not a valid url
-                    *reply = g_strdup_printf(_("spacefm: invalid TARGET '%s'\n"), argv[j]);
+                    *reply = g_strdup_printf("spacefm: invalid TARGET '%s'\n", argv[j]);
                     return 2;
                 }
             }
@@ -7192,7 +7163,7 @@ char main_window_socket_command(char* argv[], char** reply)
             }
             if (!cmd)
             {
-                *reply = g_strdup_printf(_("spacefm: invalid TARGET '%s'\n"), argv[j]);
+                *reply = g_strdup_printf("spacefm: invalid TARGET '%s'\n", argv[j]);
                 return 2;
             }
             // Task
@@ -7227,15 +7198,14 @@ char main_window_socket_command(char* argv[], char** reply)
                     opt_cwd = argv[++j];
                     if (!(opt_cwd && opt_cwd[0] == '/' && g_file_test(opt_cwd, G_FILE_TEST_IS_DIR)))
                     {
-                        *reply = g_strdup_printf(_("spacefm: no such directory '%s'\n"), opt_cwd);
+                        *reply = g_strdup_printf("spacefm: no such directory '%s'\n", opt_cwd);
                         return 2;
                     }
                 }
                 else
                 {
-                    *reply = g_strdup_printf(_("spacefm: invalid %s task option '%s'\n"),
-                                             argv[i],
-                                             argv[j]);
+                    *reply =
+                        g_strdup_printf("spacefm: invalid %s task option '%s'\n", argv[i], argv[j]);
                     return 2;
                 }
             }
@@ -7248,7 +7218,7 @@ char main_window_socket_command(char* argv[], char** reply)
                     // last argument - use as TARGET
                     if (argv[j][0] != '/')
                     {
-                        *reply = g_strdup_printf(_("spacefm: no such directory '%s'\n"), argv[j]);
+                        *reply = g_strdup_printf("spacefm: no such directory '%s'\n", argv[j]);
                         g_list_foreach(l, (GFunc)g_free, NULL);
                         g_list_free(l);
                         return 2;
@@ -7267,7 +7237,7 @@ char main_window_socket_command(char* argv[], char** reply)
                         if (!opt_cwd)
                         {
                             *reply = g_strdup_printf(
-                                _("spacefm: relative path '%s' requires %s option --dir DIR\n"),
+                                "spacefm: relative path '%s' requires %s option --dir DIR\n",
                                 argv[j],
                                 argv[i]);
                             g_list_foreach(l, (GFunc)g_free, NULL);
@@ -7281,8 +7251,8 @@ char main_window_socket_command(char* argv[], char** reply)
             }
             if (!l || (strcmp(argv[i], "delete") && !target_dir))
             {
-                *reply = g_strdup_printf(_("spacefm: task type %s requires FILE argument(s)\n"),
-                                         argv[i]);
+                *reply =
+                    g_strdup_printf("spacefm: task type %s requires FILE argument(s)\n", argv[i]);
                 return 2;
             }
             l = g_list_reverse(l);
@@ -7313,7 +7283,7 @@ char main_window_socket_command(char* argv[], char** reply)
         }
         else
         {
-            *reply = g_strdup_printf(_("spacefm: invalid task type '%s'\n"), argv[i]);
+            *reply = g_strdup_printf("spacefm: invalid task type '%s'\n", argv[i]);
             return 2;
         }
     }
@@ -7321,7 +7291,7 @@ char main_window_socket_command(char* argv[], char** reply)
     { // KEYCODE [KEYMOD]
         if (!argv[i])
         {
-            *reply = g_strdup_printf(_("spacefm: command %s requires an argument\n"), argv[0]);
+            *reply = g_strdup_printf("spacefm: command %s requires an argument\n", argv[0]);
             return 1;
         }
         // this only handles keys assigned to menu items
@@ -7335,7 +7305,7 @@ char main_window_socket_command(char* argv[], char** reply)
         }
         else
         {
-            *reply = g_strdup_printf(_("spacefm: invalid keycode '%s'\n"), argv[i]);
+            *reply = g_strdup_printf("spacefm: invalid keycode '%s'\n", argv[i]);
             gdk_event_free((GdkEvent*)event);
             return 2;
         }
@@ -7345,14 +7315,14 @@ char main_window_socket_command(char* argv[], char** reply)
     {
         if (!argv[i])
         {
-            *reply = g_strdup_printf(_("spacefm: command %s requires an argument\n"), argv[0]);
+            *reply = g_strdup_printf("spacefm: command %s requires an argument\n", argv[0]);
             return 1;
         }
         XSet* set = xset_find_custom(argv[i]);
         if (!set)
         {
             *reply =
-                g_strdup_printf(_("spacefm: custom command or submenu '%s' not found\n"), argv[i]);
+                g_strdup_printf("spacefm: custom command or submenu '%s' not found\n", argv[i]);
             return 2;
         }
         XSetContext* context = xset_context_new();
@@ -7363,7 +7333,7 @@ char main_window_socket_command(char* argv[], char** reply)
                 xset_context_test(context, set->context, FALSE) != CONTEXT_SHOW)
             {
                 *reply =
-                    g_strdup_printf(_("spacefm: item '%s' context hidden or disabled\n"), argv[i]);
+                    g_strdup_printf("spacefm: item '%s' context hidden or disabled\n", argv[i]);
                 return 2;
             }
         }
@@ -7390,12 +7360,12 @@ char main_window_socket_command(char* argv[], char** reply)
 
         if (!(argv[i] && argv[i + 1]))
         {
-            *reply = g_strdup_printf(_("spacefm: %s requires two arguments\n"), argv[0]);
+            *reply = g_strdup_printf("spacefm: %s requires two arguments\n", argv[0]);
             return 1;
         }
         if (!(set = xset_is(argv[i])))
         {
-            *reply = g_strdup_printf(_("spacefm: invalid event type '%s'\n"), argv[i]);
+            *reply = g_strdup_printf("spacefm: invalid event type '%s'\n", argv[i]);
             return 2;
         }
         // build command
@@ -7418,7 +7388,7 @@ char main_window_socket_command(char* argv[], char** reply)
             g_free(str);
             if (!l)
             {
-                *reply = g_strdup_printf(_("spacefm: event handler not found\n"));
+                *reply = g_strdup_printf("spacefm: event handler not found\n");
                 return 2;
             }
             l = g_list_remove((GList*)set->ob2_data, l->data);
@@ -7429,7 +7399,7 @@ char main_window_socket_command(char* argv[], char** reply)
     }
     else
     {
-        *reply = g_strdup_printf(_("spacefm: invalid socket method '%s'\n"), argv[0]);
+        *reply = g_strdup_printf("spacefm: invalid socket method '%s'\n", argv[0]);
         return 1;
     }
     return 0;

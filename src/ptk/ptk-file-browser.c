@@ -12,7 +12,6 @@
 #include <gtk/gtk.h>
 
 #include <glib.h>
-#include <glib/gi18n.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -163,8 +162,7 @@ static GtkTargetEntry drag_targets[] = {{"text/uri-list", 0, 0}};
 #define GDK_ACTION_ALL (GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK)
 
 // must match main-window.c  main_window_socket_command
-static const char* column_titles[] =
-    {N_("Name"), N_("Size"), N_("Type"), N_("Permission"), N_("Owner"), N_("Modified")};
+static const char* column_titles[] = {"Name", "Size", "Type", "Permission", "Owner", "Modified"};
 
 static const char* column_names[] =
     {"detcol_name", "detcol_size", "detcol_type", "detcol_perm", "detcol_owner", "detcol_date"};
@@ -1585,7 +1583,7 @@ void ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser
                 title = gtk_tree_view_column_get_title(col);
                 for (j = 0; j < 6; j++)
                 {
-                    if (!strcmp(title, _(column_titles[j])))
+                    if (!strcmp(title, column_titles[j]))
                         break;
                 }
                 if (j != 6)
@@ -1913,9 +1911,9 @@ bool ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_pat
     {
         if (!inhibit_focus)
         {
-            msg = g_strdup_printf(_("Directory doesn't exist\n\n%s"), path);
+            msg = g_strdup_printf("Directory doesn't exist\n\n%s", path);
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
-                           _("Error"),
+                           "Error",
                            msg);
             if (path)
                 g_free(path);
@@ -1928,11 +1926,11 @@ bool ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_pat
     {
         if (!inhibit_focus)
         {
-            msg = g_strdup_printf(_("Unable to access %s\n\n%s"),
+            msg = g_strdup_printf("Unable to access %s\n\n%s",
                                   path,
                                   g_markup_escape_text(g_strerror(errno), -1));
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
-                           _("Error"),
+                           "Error",
                            msg);
             g_free(msg);
         }
@@ -2549,11 +2547,11 @@ void ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_brows
         XSet* set = xset_get("select_patt");
         if (!xset_text_dialog(
                 GTK_WIDGET(file_browser),
-                _("Select By Pattern"),
+                "Select By Pattern",
                 FALSE,
-                _("Enter pattern to select files and directories:\n\nIf your pattern contains any "
-                  "uppercase characters, the matching will be case sensitive.\n\nExample:  "
-                  "*sp*e?m*\n\nTIP: You can also enter '%% PATTERN' in the path bar."),
+                "Enter pattern to select files and directories:\n\nIf your pattern contains any "
+                "uppercase characters, the matching will be case sensitive.\n\nExample:  "
+                "*sp*e?m*\n\nTIP: You can also enter '%% PATTERN' in the path bar.",
                 NULL,
                 set->ob1,
                 &set->ob1,
@@ -3548,7 +3546,7 @@ void ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file
             int j;
             for (j = 0; j < 6; j++)
             {
-                if (!strcmp(title, _(column_titles[j])))
+                if (!strcmp(title, column_titles[j]))
                     break;
             }
             if (j != 6)
@@ -3586,7 +3584,7 @@ static void on_folder_view_columns_changed(GtkTreeView* view, PtkFileBrowser* fi
         int j;
         for (j = 0; j < 6; j++)
         {
-            if (!strcmp(title, _(column_titles[j])))
+            if (!strcmp(title, column_titles[j]))
                 break;
         }
         if (j != 6)
@@ -4037,7 +4035,7 @@ static void init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
         gtk_tree_view_column_pack_start(col, renderer, TRUE);
         gtk_tree_view_column_set_attributes(col, renderer, "text", cols[j], NULL);
         gtk_tree_view_append_column(list_view, col);
-        gtk_tree_view_column_set_title(col, _(column_titles[j]));
+        gtk_tree_view_column_set_title(col, column_titles[j]);
         gtk_tree_view_column_set_sort_indicator(col, TRUE);
         gtk_tree_view_column_set_sort_column_id(col, cols[j]);
         gtk_tree_view_column_set_sort_order(col, GTK_SORT_DESCENDING);
@@ -4876,7 +4874,7 @@ void ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, ch
             folder = cwd;
         char* path = xset_file_dialog(GTK_WIDGET(file_browser),
                                       GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-                                      _("Choose Location"),
+                                      "Choose Location",
                                       folder,
                                       NULL);
         if (path && g_file_test(path, G_FILE_TEST_IS_DIR))
@@ -4912,9 +4910,9 @@ void ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, ch
         {
             xset_msg_dialog(GTK_WIDGET(file_browser),
                             GTK_MESSAGE_ERROR,
-                            _("Invalid Destination"),
+                            "Invalid Destination",
                             0,
-                            _("Destination same as source"),
+                            "Destination same as source",
                             NULL,
                             NULL);
             g_free(dest_dir);
@@ -4947,9 +4945,9 @@ void ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, ch
     {
         xset_msg_dialog(GTK_WIDGET(file_browser),
                         GTK_MESSAGE_ERROR,
-                        _("Invalid Destination"),
+                        "Invalid Destination",
                         0,
-                        _("Invalid destination"),
+                        "Invalid destination",
                         NULL,
                         NULL);
     }
@@ -4960,12 +4958,12 @@ void ptk_file_browser_hide_selected(PtkFileBrowser* file_browser, GList* files, 
     if (xset_msg_dialog(
             GTK_WIDGET(file_browser),
             0,
-            _("Hide File"),
+            "Hide File",
             GTK_BUTTONS_OK_CANCEL,
-            _("The names of the selected files will be added to the '.hidden' file located in this "
-              "directory, which will hide them from view in SpaceFM.  You may need to refresh the "
-              "view or restart SpaceFM for the files to disappear.\n\nTo unhide a file, open the "
-              ".hidden file in your text editor, remove the name of the file, and refresh."),
+            "The names of the selected files will be added to the '.hidden' file located in this "
+            "directory, which will hide them from view in SpaceFM.  You may need to refresh the "
+            "view or restart SpaceFM for the files to disappear.\n\nTo unhide a file, open the "
+            ".hidden file in your text editor, remove the name of the file, and refresh.",
             NULL,
             NULL) != GTK_RESPONSE_OK)
         return;
@@ -4980,16 +4978,16 @@ void ptk_file_browser_hide_selected(PtkFileBrowser* file_browser, GList* files, 
             file = (VFSFileInfo*)l->data;
             if (!vfs_dir_add_hidden(cwd, vfs_file_info_get_name(file)))
                 ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
-                               _("Error"),
-                               _("Error hiding files"));
+                               "Error",
+                               "Error hiding files");
         }
         // refresh from here causes a segfault occasionally
         // ptk_file_browser_refresh( NULL, file_browser );
     }
     else
         ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
-                       _("Error"),
-                       _("No files are selected"));
+                       "Error",
+                       "No files are selected");
 }
 
 void ptk_file_browser_file_properties(PtkFileBrowser* file_browser, int page)

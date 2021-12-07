@@ -19,7 +19,6 @@
  *      MA 02110-1301, USA.
  */
 
-#include <glib/gi18n.h>
 #include <string.h>
 
 #include "vfs-utils.h"

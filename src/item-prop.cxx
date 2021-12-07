@@ -18,11 +18,11 @@
 #include "ptk/ptk-app-chooser.h"
 
 const char* enter_command_use =
-    N_("Enter program or bash command line(s):\n\nUse:\n\t%F\tselected files  or  %f first "
-       "selected file\n\t%N\tselected filenames  or  %n first selected filename\n\t%d\tcurrent "
-       "directory\n\t%v\tselected device (eg /dev/sda1)\n\t%m\tdevice mount point (eg /media/dvd); "
-       " %l device label\n\t%b\tselected bookmark\n\t%t\tselected task directory;  %p task "
-       "pid\n\t%a\tmenu item value\n\t$fm_panel, $fm_tab, etc");
+    "Enter program or bash command line(s):\n\nUse:\n\t%F\tselected files  or  %f first "
+    "selected file\n\t%N\tselected filenames  or  %n first selected filename\n\t%d\tcurrent "
+    "directory\n\t%v\tselected device (eg /dev/sda1)\n\t%m\tdevice mount point (eg /media/dvd); "
+    " %l device label\n\t%b\tselected bookmark\n\t%t\tselected task directory;  %p task "
+    "pid\n\t%a\tmenu item value\n\t$fm_panel, $fm_tab, etc";
 
 enum
 {
@@ -108,44 +108,44 @@ typedef struct ContextData
 // clang-format off
 static const char* context_sub[] =
 {
-    N_("MIME Type"),
-    N_("Filename"),
-    N_("Directory"),
-    N_("Dir Write Access"),
-    N_("File Is Text"),
-    N_("File Is Dir"),
-    N_("File Is Link"),
-    N_("User Is Root"),
-    N_("Multiple Selected"),
-    N_("Clipboard Has Files"),
-    N_("Clipboard Has Text"),
-    N_("Current Panel"),
-    N_("Panel Count"),
-    N_("Current Tab"),
-    N_("Tab Count"),
-    N_("Bookmark"),
-    N_("Device"),
-    N_("Device Mount Point"),
-    N_("Device Label"),
-    N_("Device FSType"),
-    N_("Device UDI"),
-    N_("Device Properties"),
-    N_("Task Count"),
-    N_("Task Directory"),
-    N_("Task Type"),
-    N_("Task Name"),
-    N_("Panel 1 Directory"),
-    N_("Panel 2 Directory"),
-    N_("Panel 3 Directory"),
-    N_("Panel 4 Directory"),
-    N_("Panel 1 Has Sel"),
-    N_("Panel 2 Has Sel"),
-    N_("Panel 3 Has Sel"),
-    N_("Panel 4 Has Sel"),
-    N_("Panel 1 Device"),
-    N_("Panel 2 Device"),
-    N_("Panel 3 Device"),
-    N_("Panel 4 Device")
+    "MIME Type",
+    "Filename",
+    "Directory",
+    "Dir Write Access",
+    "File Is Text",
+    "File Is Dir",
+    "File Is Link",
+    "User Is Root",
+    "Multiple Selected",
+    "Clipboard Has Files",
+    "Clipboard Has Text",
+    "Current Panel",
+    "Panel Count",
+    "Current Tab",
+    "Tab Count",
+    "Bookmark",
+    "Device",
+    "Device Mount Point",
+    "Device Label",
+    "Device FSType",
+    "Device UDI",
+    "Device Properties",
+    "Task Count",
+    "Task Directory",
+    "Task Type",
+    "Task Name",
+    "Panel 1 Directory",
+    "Panel 2 Directory",
+    "Panel 3 Directory",
+    "Panel 4 Directory",
+    "Panel 1 Has Sel",
+    "Panel 2 Has Sel",
+    "Panel 3 Has Sel",
+    "Panel 4 Has Sel",
+    "Panel 1 Device",
+    "Panel 2 Device",
+    "Panel 3 Device",
+    "Panel 4 Device",
 };
 
 static const char* context_sub_list[] =
@@ -210,25 +210,25 @@ enum
 // clang-format off
 static const char* context_comp[] =
 {
-    N_("equals"),
-    N_("doesn't equal"),
-    N_("contains"),
-    N_("doesn't contain"),
-    N_("begins with"),
-    N_("doesn't begin with"),
-    N_("ends with"),
-    N_("doesn't end with"),
-    N_("is less than"),
-    N_("is greater than"),
-    N_("matches"),
-    N_("doesn't match")
+    "equals",
+    "doesn't equal",
+    "contains",
+    "doesn't contain",
+    "begins with",
+    "doesn't begin with",
+    "ends with",
+    "doesn't end with",
+    "is less than",
+    "is greater than",
+    "matches",
+    "doesn't match",
 };
 
 static const char* item_types[] =
 {
-    N_("Bookmark"),
-    N_("Application"),
-    N_("Command"),
+    "Bookmark",
+    "Application",
+    "Command",
 };
 // clang-format on
 
@@ -554,9 +554,9 @@ static char* context_display(int sub, int comp, char* value)
 {
     char* disp;
     if (value[0] == '\0' || value[0] == ' ' || g_str_has_suffix(value, " "))
-        disp = g_strdup_printf("%s %s \"%s\"", _(context_sub[sub]), _(context_comp[comp]), value);
+        disp = g_strdup_printf("%s %s \"%s\"", context_sub[sub], context_comp[comp], value);
     else
-        disp = g_strdup_printf("%s %s %s", _(context_sub[sub]), _(context_comp[comp]), value);
+        disp = g_strdup_printf("%s %s %s", context_sub[sub], context_comp[comp], value);
     return disp;
 }
 
@@ -735,7 +735,7 @@ static void enable_options(ContextData* ctxt)
         // add default msg
         GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->cmd_msg));
         if (gtk_text_buffer_get_char_count(buf) == 0)
-            gtk_text_buffer_set_text(buf, _("Are you sure?"), -1);
+            gtk_text_buffer_set_text(buf, "Are you sure?", -1);
     }
     else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_input)))
     {
@@ -745,7 +745,7 @@ static void enable_options(ContextData* ctxt)
         gtk_text_buffer_get_start_iter(buf, &siter);
         gtk_text_buffer_get_end_iter(buf, &iter);
         char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
-        if (text && !strcmp(text, _("Are you sure?")))
+        if (text && !strcmp(text, "Are you sure?"))
             gtk_text_buffer_set_text(buf, "", -1);
         g_free(text);
     }
@@ -826,7 +826,7 @@ static void load_command_script(ContextData* ctxt, XSet* set)
         gtk_text_buffer_set_text(buf, "", -1);
         file = fopen(script, "r");
         if (!file)
-            g_warning(_("error reading file %s: %s"), script, g_strerror(errno));
+            g_warning("error reading file %s: %s", script, g_strerror(errno));
         else
         {
             // read file one line at a time to prevent splitting UTF-8 characters
@@ -837,7 +837,7 @@ static void load_command_script(ContextData* ctxt, XSet* set)
                     fclose(file);
                     gtk_text_buffer_set_text(buf, "", -1);
                     modified = true;
-                    g_warning(_("file '%s' contents are not valid UTF-8"), script);
+                    g_warning("file '%s' contents are not valid UTF-8", script);
                     break;
                 }
                 gtk_text_buffer_insert_at_cursor(buf, line, -1);
@@ -864,21 +864,20 @@ static void save_command_script(ContextData* ctxt, bool query)
         return;
     if (query && xset_msg_dialog(ctxt->dlg,
                                  GTK_MESSAGE_QUESTION,
-                                 _("Save Modified Script?"),
+                                 "Save Modified Script?",
                                  GTK_BUTTONS_YES_NO,
-                                 _("Save your changes to the command script?"),
+                                 "Save your changes to the command script?",
                                  nullptr,
                                  nullptr) == GTK_RESPONSE_NO)
         return;
     if (is_command_script_newer(ctxt) &&
-        xset_msg_dialog(
-            ctxt->dlg,
-            GTK_MESSAGE_QUESTION,
-            _("Overwrite Script?"),
-            GTK_BUTTONS_YES_NO,
-            _("The command script on disk has changed.\n\nDo you want to overwrite it?"),
-            nullptr,
-            nullptr) == GTK_RESPONSE_NO)
+        xset_msg_dialog(ctxt->dlg,
+                        GTK_MESSAGE_QUESTION,
+                        "Overwrite Script?",
+                        GTK_BUTTONS_YES_NO,
+                        "The command script on disk has changed.\n\nDo you want to overwrite it?",
+                        nullptr,
+                        nullptr) == GTK_RESPONSE_NO)
         return;
 
     char* script = xset_custom_get_script(ctxt->set, false);
@@ -980,10 +979,10 @@ static void on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
         {
             xset_msg_dialog(GTK_WIDGET(ctxt->dlg),
                             GTK_MESSAGE_ERROR,
-                            _("Error"),
+                            "Error",
                             0,
-                            _("The command line does not begin with a text file (script) to be "
-                              "opened, or the script was not found in your $PATH."),
+                            "The command line does not begin with a text file (script) to be "
+                            "opened, or the script was not found in your $PATH.",
                             nullptr,
                             nullptr);
             g_free(path);
@@ -1091,14 +1090,14 @@ static void on_type_changed(GtkComboBox* box, ContextData* ctxt)
                 gtk_widget_hide(ctxt->item_choose);
                 gtk_widget_hide(ctxt->hbox_opener);
                 gtk_label_set_text(GTK_LABEL(ctxt->target_label),
-                                   _("Targets:  (a semicolon-separated list of paths or URLs)"));
+                                   "Targets:  (a semicolon-separated list of paths or URLs)");
             }
             else
             {
                 gtk_widget_show(ctxt->item_choose);
                 gtk_widget_show(ctxt->hbox_opener);
                 gtk_label_set_text(GTK_LABEL(ctxt->target_label),
-                                   _("Target:  (a .desktop or executable file)"));
+                                   "Target:  (a .desktop or executable file)");
             }
             break;
         case ITEM_TYPE_COMMAND:
@@ -1194,7 +1193,7 @@ static void on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
         // Bookmark Browse
         char* add_path = xset_file_dialog(ctxt->dlg,
                                           GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-                                          _("Choose Directory"),
+                                          "Choose Directory",
                                           ctxt->context->var[CONTEXT_DIR],
                                           nullptr);
         if (add_path && add_path[0])
@@ -1241,7 +1240,7 @@ static void on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
             // Browse
             char* exec_path = xset_file_dialog(ctxt->dlg,
                                                GTK_FILE_CHOOSER_ACTION_OPEN,
-                                               _("Choose Executable"),
+                                               "Choose Executable",
                                                "/usr/bin",
                                                nullptr);
             if (exec_path && exec_path[0])
@@ -1331,11 +1330,11 @@ static void replace_item_props(ContextData* ctxt)
             if (rset->line && strlen(rset->line) > 2000)
                 xset_msg_dialog(ctxt->dlg,
                                 GTK_MESSAGE_WARNING,
-                                _("Command Line Too Long"),
+                                "Command Line Too Long",
                                 GTK_BUTTONS_OK,
-                                _("Your command line is greater than 2000 characters and may be "
-                                  "truncated when saved.  Consider using a command script instead "
-                                  "by selecting Script on the Command tab."),
+                                "Your command line is greater than 2000 characters and may be "
+                                "truncated when saved.  Consider using a command script instead "
+                                "by selecting Script on the Command tab.",
                                 nullptr,
                                 nullptr);
         }
@@ -1525,12 +1524,12 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
         ctxt->parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
     // Dialog
-    ctxt->dlg = gtk_dialog_new_with_buttons(set->tool ? _("Toolbar Item Properties")
-                                                      : _("Menu Item Properties"),
-                                            GTK_WINDOW(ctxt->parent),
-                                            GTK_DIALOG_MODAL,
-                                            nullptr,
-                                            nullptr);
+    ctxt->dlg =
+        gtk_dialog_new_with_buttons(set->tool ? "Toolbar Item Properties" : "Menu Item Properties",
+                                    GTK_WINDOW(ctxt->parent),
+                                    GTK_DIALOG_MODAL,
+                                    nullptr,
+                                    nullptr);
     xset_set_window_icon(GTK_WINDOW(ctxt->dlg));
     gtk_window_set_role(GTK_WINDOW(ctxt->dlg), "context_dialog");
 
@@ -1542,12 +1541,11 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
         gtk_window_set_default_size(GTK_WINDOW(ctxt->dlg), 800, 600);
 
     gtk_widget_set_focus_on_click(
-        gtk_dialog_add_button(GTK_DIALOG(ctxt->dlg), _("Help"), GTK_RESPONSE_HELP),
+        gtk_dialog_add_button(GTK_DIALOG(ctxt->dlg), "Help", GTK_RESPONSE_HELP),
         false);
 
-    gtk_dialog_add_button(GTK_DIALOG(ctxt->dlg), _("Cancel"), GTK_RESPONSE_CANCEL);
-    ctxt->btn_ok =
-        GTK_BUTTON(gtk_dialog_add_button(GTK_DIALOG(ctxt->dlg), _("OK"), GTK_RESPONSE_OK));
+    gtk_dialog_add_button(GTK_DIALOG(ctxt->dlg), "Cancel", GTK_RESPONSE_CANCEL);
+    ctxt->btn_ok = GTK_BUTTON(gtk_dialog_add_button(GTK_DIALOG(ctxt->dlg), "OK", GTK_RESPONSE_OK));
 
     // Notebook
     ctxt->notebook = gtk_notebook_new();
@@ -1567,7 +1565,7 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_notebook_append_page(
         GTK_NOTEBOOK(ctxt->notebook),
         align,
-        gtk_label_new_with_mnemonic(set->tool ? _("_Toolbar Item") : _("_Menu Item")));
+        gtk_label_new_with_mnemonic(set->tool ? "_Toolbar Item" : "_Menu Item"));
 
     GtkGrid* grid = GTK_GRID(gtk_grid_new());
     gtk_container_set_border_width(GTK_CONTAINER(grid), 0);
@@ -1575,7 +1573,7 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_grid_set_column_spacing(grid, 8);
     int row = 0;
 
-    GtkWidget* label = gtk_label_new_with_mnemonic(_("Type:"));
+    GtkWidget* label = gtk_label_new_with_mnemonic("Type:");
     gtk_widget_set_halign(label, GTK_ALIGN_START);
     gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
     gtk_grid_attach(grid, label, 0, row, 1, 1);
@@ -1583,7 +1581,7 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_widget_set_focus_on_click(ctxt->item_type, false);
     gtk_grid_attach(grid, ctxt->item_type, 1, row, 1, 1);
 
-    label = gtk_label_new_with_mnemonic(_("Name:"));
+    label = gtk_label_new_with_mnemonic("Name:");
     gtk_widget_set_halign(label, GTK_ALIGN_START);
     gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
     row++;
@@ -1591,7 +1589,7 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     ctxt->item_name = gtk_entry_new();
     gtk_grid_attach(grid, ctxt->item_name, 1, row, 1, 1);
 
-    label = gtk_label_new_with_mnemonic(_("Key:"));
+    label = gtk_label_new_with_mnemonic("Key:");
     gtk_widget_set_halign(label, GTK_ALIGN_START);
     gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
     row++;
@@ -1600,13 +1598,13 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_widget_set_focus_on_click(ctxt->item_key, false);
     gtk_grid_attach(grid, ctxt->item_key, 1, row, 1, 1);
 
-    label = gtk_label_new_with_mnemonic(_("Icon:"));
+    label = gtk_label_new_with_mnemonic("Icon:");
     gtk_widget_set_halign(label, GTK_ALIGN_START);
     gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
     row++;
     gtk_grid_attach(grid, label, 0, row, 1, 1);
     GtkWidget* hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    ctxt->icon_choose_btn = gtk_button_new_with_mnemonic(_("C_hoose"));
+    ctxt->icon_choose_btn = gtk_button_new_with_mnemonic("C_hoose");
     gtk_widget_set_focus_on_click(ctxt->icon_choose_btn, false);
 
     // keep this
@@ -1639,12 +1637,12 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
 
     hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(gtk_label_new(nullptr)), true, true, 0);
-    ctxt->item_choose = gtk_button_new_with_mnemonic(_("C_hoose"));
+    ctxt->item_choose = gtk_button_new_with_mnemonic("C_hoose");
     gtk_widget_set_focus_on_click(ctxt->item_choose, false);
 
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(ctxt->item_choose), false, true, 12);
 
-    ctxt->item_browse = gtk_button_new_with_mnemonic(_("_Browse"));
+    ctxt->item_browse = gtk_button_new_with_mnemonic("_Browse");
     gtk_widget_set_focus_on_click(ctxt->item_choose, false);
 
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(ctxt->item_browse), false, true, 0);
@@ -1659,7 +1657,7 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_container_add(GTK_CONTAINER(align), vbox);
     gtk_notebook_append_page(GTK_NOTEBOOK(ctxt->notebook),
                              align,
-                             gtk_label_new_with_mnemonic(_("Con_text")));
+                             gtk_label_new_with_mnemonic("Con_text"));
 
     GtkListStore* list =
         gtk_list_store_new(4, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT, G_TYPE_STRING);
@@ -1697,7 +1695,7 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_tree_view_column_set_expand(col, true);
 
     // list buttons
-    ctxt->btn_remove = GTK_BUTTON(gtk_button_new_with_mnemonic(_("_Remove")));
+    ctxt->btn_remove = GTK_BUTTON(gtk_button_new_with_mnemonic("_Remove"));
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->btn_remove), false);
 
     g_signal_connect(G_OBJECT(ctxt->btn_remove),
@@ -1705,12 +1703,12 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
                      G_CALLBACK(on_context_button_press),
                      ctxt);
 
-    ctxt->btn_add = GTK_BUTTON(gtk_button_new_with_mnemonic(_("_Add")));
+    ctxt->btn_add = GTK_BUTTON(gtk_button_new_with_mnemonic("_Add"));
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->btn_add), false);
 
     g_signal_connect(G_OBJECT(ctxt->btn_add), "clicked", G_CALLBACK(on_context_button_press), ctxt);
 
-    ctxt->btn_apply = GTK_BUTTON(gtk_button_new_with_mnemonic(_("A_pply")));
+    ctxt->btn_apply = GTK_BUTTON(gtk_button_new_with_mnemonic("A_pply"));
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->btn_apply), false);
 
     g_signal_connect(G_OBJECT(ctxt->btn_apply),
@@ -1722,13 +1720,13 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     ctxt->box_sub = gtk_combo_box_text_new();
     gtk_widget_set_focus_on_click(ctxt->box_sub, false);
     for (i = 0; i < G_N_ELEMENTS(context_sub); i++)
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_sub), _(context_sub[i]));
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_sub), context_sub[i]);
     g_signal_connect(G_OBJECT(ctxt->box_sub), "changed", G_CALLBACK(on_context_sub_changed), ctxt);
 
     ctxt->box_comp = gtk_combo_box_text_new();
     gtk_widget_set_focus_on_click(ctxt->box_comp, false);
     for (i = 0; i < G_N_ELEMENTS(context_comp); i++)
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_comp), _(context_comp[i]));
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_comp), context_comp[i]);
 
     ctxt->box_value = gtk_combo_box_text_new_with_entry();
     gtk_widget_set_focus_on_click(ctxt->box_value, false);
@@ -1739,12 +1737,10 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
 
     ctxt->box_match = gtk_combo_box_text_new();
     gtk_widget_set_focus_on_click(ctxt->box_match, false);
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_match), _("matches any rule:"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_match), _("matches all rules:"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_match),
-                                   _("doesn't match any rule:"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_match),
-                                   _("doesn't match all rules:"));
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_match), "matches any rule:");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_match), "matches all rules:");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_match), "doesn't match any rule:");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_match), "doesn't match all rules:");
     g_signal_connect(G_OBJECT(ctxt->box_match),
                      "changed",
                      G_CALLBACK(on_context_action_changed),
@@ -1752,10 +1748,10 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
 
     ctxt->box_action = gtk_combo_box_text_new();
     gtk_widget_set_focus_on_click(ctxt->box_action, false);
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_action), _("Show"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_action), _("Enable"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_action), _("Hide"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_action), _("Disable"));
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_action), "Show");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_action), "Enable");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_action), "Hide");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_action), "Disable");
     g_signal_connect(G_OBJECT(ctxt->box_action),
                      "changed",
                      G_CALLBACK(on_context_action_changed),
@@ -1789,7 +1785,7 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     ctxt->hbox_match = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
     gtk_box_pack_start(GTK_BOX(ctxt->hbox_match), GTK_WIDGET(ctxt->box_action), false, true, 0);
     gtk_box_pack_start(GTK_BOX(ctxt->hbox_match),
-                       GTK_WIDGET(gtk_label_new(_("item if context"))),
+                       GTK_WIDGET(gtk_label_new("item if context")),
                        false,
                        true,
                        4);
@@ -1815,7 +1811,7 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_box_pack_start(GTK_BOX(hbox_btns), GTK_WIDGET(ctxt->test), true, true, 4);
     gtk_box_pack_start(GTK_BOX(ctxt->vbox_context), GTK_WIDGET(hbox_btns), false, true, 4);
 
-    ctxt->frame = GTK_FRAME(gtk_frame_new(_("Edit Rule")));
+    ctxt->frame = GTK_FRAME(gtk_frame_new("Edit Rule"));
     GtkWidget* vbox_frame = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
     gtk_container_add(GTK_CONTAINER(ctxt->frame), vbox_frame);
     GtkWidget* hbox_frame = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
@@ -1826,7 +1822,7 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(ctxt->box_value), true, true, 8);
     gtk_box_pack_start(GTK_BOX(vbox_frame), GTK_WIDGET(hbox), true, true, 4);
     hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(gtk_label_new(_("Value:"))), false, true, 8);
+    gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(gtk_label_new("Value:")), false, true, 8);
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(ctxt->current_value), true, true, 2);
     gtk_box_pack_start(GTK_BOX(vbox_frame), GTK_WIDGET(hbox), true, true, 4);
     gtk_box_pack_start(GTK_BOX(ctxt->vbox_context), GTK_WIDGET(ctxt->frame), false, true, 16);
@@ -1835,21 +1831,21 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     // Opener
     ctxt->hbox_opener = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_box_pack_start(GTK_BOX(ctxt->hbox_opener),
-                       GTK_WIDGET(gtk_label_new(_("If enabled, use as handler for:"))),
+                       GTK_WIDGET(gtk_label_new("If enabled, use as handler for:")),
                        false,
                        true,
                        0);
     ctxt->opener = gtk_combo_box_text_new();
     gtk_widget_set_focus_on_click(ctxt->opener, false);
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->opener), _("none"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->opener), _("files"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->opener), _("devices"));
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->opener), "none");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->opener), "files");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->opener), "devices");
     gtk_box_pack_start(GTK_BOX(ctxt->hbox_opener), GTK_WIDGET(ctxt->opener), false, true, 4);
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(ctxt->hbox_opener), false, true, 0);
 
     // Ignore Context
     ctxt->ignore_context =
-        gtk_check_button_new_with_mnemonic(_("_Ignore Context / Show All  (global setting)"));
+        gtk_check_button_new_with_mnemonic("_Ignore Context / Show All  (global setting)");
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(ctxt->ignore_context), false, true, 0);
     if (xset_get_b("context_dlg"))
     {
@@ -1944,21 +1940,21 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_container_add(GTK_CONTAINER(align), vbox);
     gtk_notebook_append_page(GTK_NOTEBOOK(ctxt->notebook),
                              align,
-                             gtk_label_new_with_mnemonic(_("Comm_and")));
+                             gtk_label_new_with_mnemonic("Comm_and"));
 
     hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 8);
-    ctxt->cmd_opt_line = gtk_radio_button_new_with_mnemonic(nullptr, _("Command _Line"));
+    ctxt->cmd_opt_line = gtk_radio_button_new_with_mnemonic(nullptr, "Command _Line");
     ctxt->cmd_opt_script =
         gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(ctxt->cmd_opt_line),
-                                                       _("_Script"));
+                                                       "_Script");
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(ctxt->cmd_opt_line), false, true, 0);
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(ctxt->cmd_opt_script), false, true, 0);
-    ctxt->cmd_edit = gtk_button_new_with_mnemonic(_("Open In _Editor"));
+    ctxt->cmd_edit = gtk_button_new_with_mnemonic("Open In _Editor");
     gtk_widget_set_focus_on_click(ctxt->cmd_edit, false);
 
     g_signal_connect(G_OBJECT(ctxt->cmd_edit), "clicked", G_CALLBACK(on_edit_button_press), ctxt);
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(ctxt->cmd_edit), false, true, 24);
-    ctxt->cmd_edit_root = gtk_button_new_with_mnemonic(_("_Root Editor"));
+    ctxt->cmd_edit_root = gtk_button_new_with_mnemonic("_Root Editor");
     gtk_widget_set_focus_on_click(ctxt->cmd_edit_root, false);
 
     g_signal_connect(G_OBJECT(ctxt->cmd_edit_root),
@@ -1969,7 +1965,7 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(hbox), false, true, 8);
 
     // Line
-    ctxt->cmd_line_label = gtk_label_new(_(enter_command_use));
+    ctxt->cmd_line_label = gtk_label_new(enter_command_use);
     gtk_widget_set_halign(ctxt->cmd_line_label, GTK_ALIGN_START);
     gtk_widget_set_valign(ctxt->cmd_line_label, GTK_ALIGN_START);
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(ctxt->cmd_line_label), false, true, 8);
@@ -2000,9 +1996,9 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_container_add(GTK_CONTAINER(align), vbox);
     gtk_notebook_append_page(GTK_NOTEBOOK(ctxt->notebook),
                              align,
-                             gtk_label_new_with_mnemonic(_("Optio_ns")));
+                             gtk_label_new_with_mnemonic("Optio_ns"));
 
-    GtkWidget* frame = gtk_frame_new(_("Run Options"));
+    GtkWidget* frame = gtk_frame_new("Run Options");
     align = gtk_alignment_new(0, 0, 1, 1);
     gtk_alignment_set_padding(GTK_ALIGNMENT(align), 8, 0, 8, 8);
     vbox_frame = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
@@ -2010,13 +2006,13 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_container_add(GTK_CONTAINER(frame), align);
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(frame), false, true, 8);
 
-    ctxt->opt_task = gtk_check_button_new_with_mnemonic(_("Run As Task"));
+    ctxt->opt_task = gtk_check_button_new_with_mnemonic("Run As Task");
     gtk_box_pack_start(GTK_BOX(vbox_frame), GTK_WIDGET(ctxt->opt_task), false, true, 0);
     ctxt->opt_hbox_task = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 8);
-    ctxt->opt_task_pop = gtk_check_button_new_with_mnemonic(_("Popup Task"));
-    ctxt->opt_task_err = gtk_check_button_new_with_mnemonic(_("Popup Error"));
-    ctxt->opt_task_out = gtk_check_button_new_with_mnemonic(_("Popup Output"));
-    ctxt->opt_scroll = gtk_check_button_new_with_mnemonic(_("Scroll Output"));
+    ctxt->opt_task_pop = gtk_check_button_new_with_mnemonic("Popup Task");
+    ctxt->opt_task_err = gtk_check_button_new_with_mnemonic("Popup Error");
+    ctxt->opt_task_out = gtk_check_button_new_with_mnemonic("Popup Output");
+    ctxt->opt_scroll = gtk_check_button_new_with_mnemonic("Scroll Output");
     gtk_box_pack_start(GTK_BOX(ctxt->opt_hbox_task),
                        GTK_WIDGET(ctxt->opt_task_pop),
                        false,
@@ -2036,26 +2032,26 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_box_pack_start(GTK_BOX(vbox_frame), GTK_WIDGET(ctxt->opt_hbox_task), false, true, 8);
 
     hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 8);
-    ctxt->opt_terminal = gtk_check_button_new_with_mnemonic(_("Run In Terminal"));
-    ctxt->opt_keep_term = gtk_check_button_new_with_mnemonic(_("Keep Terminal Open"));
+    ctxt->opt_terminal = gtk_check_button_new_with_mnemonic("Run In Terminal");
+    ctxt->opt_keep_term = gtk_check_button_new_with_mnemonic("Keep Terminal Open");
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(ctxt->opt_terminal), false, true, 0);
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(ctxt->opt_keep_term), false, true, 6);
     gtk_box_pack_start(GTK_BOX(vbox_frame), GTK_WIDGET(hbox), false, true, 0);
 
     hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    label = gtk_label_new(_("Run As User:"));
+    label = gtk_label_new("Run As User:");
     gtk_widget_set_halign(label, GTK_ALIGN_START);
     gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(label), false, true, 2);
     ctxt->cmd_user = gtk_entry_new();
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(ctxt->cmd_user), false, true, 8);
-    label = gtk_label_new(_("( leave blank for current user )"));
+    label = gtk_label_new("( leave blank for current user )");
     gtk_widget_set_halign(label, GTK_ALIGN_START);
     gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(label), false, true, 8);
     gtk_box_pack_start(GTK_BOX(vbox_frame), GTK_WIDGET(hbox), false, true, 4);
 
-    frame = gtk_frame_new(_("Style"));
+    frame = gtk_frame_new("Style");
     align = gtk_alignment_new(0, 0, 1, 1);
     gtk_alignment_set_padding(GTK_ALIGNMENT(align), 8, 0, 8, 8);
     vbox_frame = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
@@ -2064,16 +2060,16 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(frame), true, true, 8);
 
     hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 8);
-    ctxt->cmd_opt_normal = gtk_radio_button_new_with_mnemonic(nullptr, _("Normal"));
+    ctxt->cmd_opt_normal = gtk_radio_button_new_with_mnemonic(nullptr, "Normal");
     ctxt->cmd_opt_checkbox =
         gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(ctxt->cmd_opt_normal),
-                                                       _("Checkbox"));
+                                                       "Checkbox");
     ctxt->cmd_opt_confirm =
         gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(ctxt->cmd_opt_normal),
-                                                       _("Confirmation"));
+                                                       "Confirmation");
     ctxt->cmd_opt_input =
         gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(ctxt->cmd_opt_normal),
-                                                       _("Input"));
+                                                       "Input");
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(ctxt->cmd_opt_normal), false, true, 4);
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(ctxt->cmd_opt_checkbox), false, true, 4);
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(ctxt->cmd_opt_confirm), false, true, 4);
@@ -2082,7 +2078,7 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
 
     // message box
     ctxt->cmd_vbox_msg = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
-    label = gtk_label_new(_("Confirmation/Input Message:"));
+    label = gtk_label_new("Confirmation/Input Message:");
     gtk_widget_set_halign(label, GTK_ALIGN_START);
     gtk_widget_set_valign(label, GTK_ALIGN_START);
     gtk_box_pack_start(GTK_BOX(ctxt->cmd_vbox_msg), GTK_WIDGET(label), false, true, 8);
@@ -2107,7 +2103,7 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
 
     // open directory
     hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    label = gtk_label_new(_("Open In Browser:"));
+    label = gtk_label_new("Open In Browser:");
     gtk_widget_set_halign(label, GTK_ALIGN_START);
     gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(label), false, true, 0);
@@ -2120,8 +2116,8 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     else
         path = g_build_filename(xset_get_config_dir(), "scripts", rset->name, nullptr);
     str = g_strdup_printf("%s  $fm_cmd_dir  %s",
-                          _("Command Dir"),
-                          dir_has_files(path) ? "" : _("(no files)"));
+                          "Command Dir",
+                          dir_has_files(path) ? "" : "(no files)");
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str);
     g_free(str);
     g_free(path);
@@ -2131,15 +2127,15 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
                             rset->plugin ? mset->name : rset->name,
                             nullptr);
     str = g_strdup_printf("%s  $fm_cmd_data  %s",
-                          _("Data Dir"),
-                          dir_has_files(path) ? "" : _("(no files)"));
+                          "Data Dir",
+                          dir_has_files(path) ? "" : "(no files)");
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str);
     g_free(str);
     g_free(path);
 
     if (rset->plugin)
     {
-        str = g_strdup_printf("%s  $fm_plugin_dir", _("Plugin Dir"));
+        str = g_strdup_printf("%s  $fm_plugin_dir", "Plugin Dir");
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str);
         g_free(str);
     }
@@ -2156,22 +2152,22 @@ void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     char* item_type_str = nullptr;
     if (set->tool > XSET_TOOL_CUSTOM)
         item_type_str = g_strdup_printf("%s: %s",
-                                        _("Built-In Toolbar Item"),
+                                        "Built-In Toolbar Item",
                                         xset_get_builtin_toolitem_label(set->tool));
     else if (rset->menu_style == XSET_MENU_SUBMENU)
-        item_type_str = g_strdup(_("Submenu"));
+        item_type_str = g_strdup("Submenu");
     else if (rset->menu_style == XSET_MENU_SEP)
-        item_type_str = g_strdup(_("Separator"));
+        item_type_str = g_strdup("Separator");
     else if (set->lock)
     {
         // built-in
-        item_type_str = g_strdup(_("Built-In Command"));
+        item_type_str = g_strdup("Built-In Command");
     }
     else
     {
         // custom command
         for (i = 0; i < G_N_ELEMENTS(item_types); i++)
-            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), _(item_types[i]));
+            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), item_types[i]);
         x = rset->x ? strtol(rset->x, nullptr, 10) : 0;
 
         switch (x)

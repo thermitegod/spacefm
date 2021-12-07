@@ -89,10 +89,6 @@ pre_args = [
     '-DG_LOG_DOMAIN="SpaceFM"',
     ]
 
-if get_option('nls')
-  pre_args += '-DHAVE_NLS'
-endif
-
 if get_option('nonlatin')
   pre_args += '-DHAVE_NONLATIN'
 endif

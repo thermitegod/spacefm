@@ -16,7 +16,6 @@
 #include "vfs-file-info.h"
 
 #include <glib.h>
-#include <glib/gi18n.h>
 
 #include <grp.h>
 #include <pwd.h>

@@ -20,7 +20,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <glib/gi18n.h>
 #include <gdk/gdkkeysyms.h>
 
 #include "../vfs/vfs-app-desktop.h"
@@ -1392,20 +1391,20 @@ void app_job(GtkWidget* item, GtkWidget* app_item)
                 xset_msg_dialog(
                     data->browser,
                     0,
-                    _("Remove Text Type Association"),
+                    "Remove Text Type Association",
                     0,
-                    _("NOTE:  When compiling the list of applications to appear in the Open "
-                      "submenu "
-                      "for a text file, SpaceFM will include applications associated with the MIME "
-                      "type (eg text/html) AND applications associated with text/plain.  If you "
-                      "select "
-                      "Remove on an application, it will be removed as an associated application "
-                      "for "
-                      "the MIME type (eg text/html), but will NOT be removed as an associated "
-                      "application for text/plain (unless the MIME type is text/plain).  Thus "
-                      "using "
-                      "Remove may not remove the application from the Open submenu for this type, "
-                      "unless you also remove it from text/plain."),
+                    "NOTE:  When compiling the list of applications to appear in the Open "
+                    "submenu "
+                    "for a text file, SpaceFM will include applications associated with the MIME "
+                    "type (eg text/html) AND applications associated with text/plain.  If you "
+                    "select "
+                    "Remove on an application, it will be removed as an associated application "
+                    "for "
+                    "the MIME type (eg text/html), but will NOT be removed as an associated "
+                    "application for text/plain (unless the MIME type is text/plain).  Thus "
+                    "using "
+                    "Remove may not remove the application from the Open submenu for this type, "
+                    "unless you also remove it from text/plain.",
                     NULL,
                     "#designmode-mime-remove");
             break;
@@ -1426,15 +1425,15 @@ void app_job(GtkWidget* item, GtkWidget* app_item)
                 }
 
                 char* msg = g_strdup_printf(
-                    _("The file '%s' does not exist.\n\nBy copying '%s' to '%s' and "
-                      "editing it, you can adjust the behavior and appearance of this "
-                      "application for the current user.\n\nCreate this copy now?"),
+                    "The file '%s' does not exist.\n\nBy copying '%s' to '%s' and "
+                    "editing it, you can adjust the behavior and appearance of this "
+                    "application for the current user.\n\nCreate this copy now?",
                     path,
                     share_desktop,
                     path);
                 if (xset_msg_dialog(GTK_WIDGET(data->browser),
                                     GTK_MESSAGE_QUESTION,
-                                    _("Copy Desktop File"),
+                                    "Copy Desktop File",
                                     GTK_BUTTONS_YES_NO,
                                     msg,
                                     NULL,
@@ -1532,24 +1531,24 @@ void app_job(GtkWidget* item, GtkWidget* app_item)
                 char* msg;
                 if (g_file_test(usr_path, G_FILE_TEST_EXISTS))
                     msg = g_strdup_printf(
-                        _("The file '%s' does not exist.\n\nBy copying '%s' to '%s' "
-                          "and editing it, you can adjust how MIME type '%s' files are "
-                          "recognized for the current user.\n\nCreate this copy now?"),
+                        "The file '%s' does not exist.\n\nBy copying '%s' to '%s' "
+                        "and editing it, you can adjust how MIME type '%s' files are "
+                        "recognized for the current user.\n\nCreate this copy now?",
                         path,
                         usr_path,
                         path,
                         mime_type->type);
                 else
                     msg = g_strdup_printf(
-                        _("The file '%s' does not exist.\n\nBy creating new file '%s' "
-                          "and editing it, you can define how MIME type '%s' files are "
-                          "recognized for the current user.\n\nCreate this file now?"),
+                        "The file '%s' does not exist.\n\nBy creating new file '%s' "
+                        "and editing it, you can define how MIME type '%s' files are "
+                        "recognized for the current user.\n\nCreate this file now?",
                         path,
                         path,
                         mime_type->type);
                 if (xset_msg_dialog(GTK_WIDGET(data->browser),
                                     GTK_MESSAGE_QUESTION,
-                                    _("Create New XML"),
+                                    "Create New XML",
                                     GTK_BUTTONS_YES_NO,
                                     msg,
                                     NULL,
@@ -1863,18 +1862,17 @@ static void show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* dat
 
     // Set Default
     newitem = app_menu_additem(app_menu,
-                               _("_Set As Default"),
+                               "_Set As Default",
                                "document-save",
                                APP_JOB_DEFAULT,
                                app_item,
                                data);
 
     // Remove
-    newitem =
-        app_menu_additem(app_menu, _("_Remove"), "edit-delete", APP_JOB_REMOVE, app_item, data);
+    newitem = app_menu_additem(app_menu, "_Remove", "edit-delete", APP_JOB_REMOVE, app_item, data);
 
     // Add
-    newitem = app_menu_additem(app_menu, _("_Add..."), "list-add", APP_JOB_ADD, app_item, data);
+    newitem = app_menu_additem(app_menu, "_Add...", "list-add", APP_JOB_ADD, app_item, data);
 
     // Separator
     gtk_container_add(GTK_CONTAINER(app_menu), gtk_separator_menu_item_new());
@@ -1892,7 +1890,7 @@ static void show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* dat
         else
         {
             str2 = replace_string(desktop_file->file_name, ".desktop", "._desktop", FALSE);
-            str = g_strdup_printf("%s (*%s)", str2, _("copy"));
+            str = g_strdup_printf("%s (*%s)", str2, "copy");
             g_free(str2);
             icon = "document-new";
         }
@@ -1933,7 +1931,7 @@ static void show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* dat
         g_free(path);
         str = replace_string(type, "/", "-", FALSE);
         path = str;
-        str = g_strdup_printf("%s._xml (*%s)", path, _("new"));
+        str = g_strdup_printf("%s._xml (*%s)", path, "new");
         g_free(path);
         icon = "document-new";
     }

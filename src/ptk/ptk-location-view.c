@@ -14,7 +14,7 @@
 #include <stdint.h>
 
 #include <glib.h>
-#include <glib/gi18n.h>
+
 #include <gdk/gdkkeysyms.h>
 #include <stdio.h>
 #include <string.h>
@@ -883,9 +883,9 @@ void ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* u
         // not a valid url
         xset_msg_dialog(GTK_WIDGET(file_browser),
                         GTK_MESSAGE_ERROR,
-                        _("Invalid URL"),
+                        "Invalid URL",
                         0,
-                        _("The entered URL is not valid."),
+                        "The entered URL is not valid.",
                         NULL,
                         NULL);
         return;
@@ -948,10 +948,10 @@ void ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* u
     {
         xset_msg_dialog(GTK_WIDGET(file_browser),
                         GTK_MESSAGE_ERROR,
-                        _("Handler Not Found"),
+                        "Handler Not Found",
                         0,
-                        _("No network handler is configured for this URL, or no mount command is "
-                          "set.  Add a handler in Devices|Settings|Protocol Handlers."),
+                        "No network handler is configured for this URL, or no mount command is "
+                        "set.  Add a handler in Devices|Settings|Protocol Handlers.",
                         NULL,
                         NULL);
         goto _net_free;
@@ -975,7 +975,7 @@ void ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* u
     g_free(keepterm);
     g_free(cmd);
 
-    char* task_name = g_strdup_printf(_("Open URL %s"), netmount->url);
+    char* task_name = g_strdup_printf("Open URL %s", netmount->url);
     PtkFileTask* task =
         ptk_file_exec_new(task_name, NULL, GTK_WIDGET(file_browser), file_browser->task_view);
     g_free(task_name);
@@ -1028,14 +1028,14 @@ static void popup_missing_mount(GtkWidget* view, int job)
     const char* cmd;
 
     if (job == 0)
-        cmd = _("mount");
+        cmd = "mount";
     else
-        cmd = _("unmount");
+        cmd = "unmount";
     char* msg =
-        g_strdup_printf(_("No handler is configured for this device type, or no %s command is set. "
-                          " Add a handler in Settings|Device Handlers or Protocol Handlers."),
+        g_strdup_printf("No handler is configured for this device type, or no %s command is set. "
+                        " Add a handler in Settings|Device Handlers or Protocol Handlers.",
                         cmd);
-    xset_msg_dialog(view, GTK_MESSAGE_ERROR, _("Handler Not Found"), 0, msg, NULL, NULL);
+    xset_msg_dialog(view, GTK_MESSAGE_ERROR, "Handler Not Found", 0, msg, NULL, NULL);
     g_free(msg);
 }
 
@@ -1066,7 +1066,7 @@ static void on_mount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         popup_missing_mount(view, 0);
         return;
     }
-    char* task_name = g_strdup_printf(_("Mount %s"), vol->device_file);
+    char* task_name = g_strdup_printf("Mount %s", vol->device_file);
     PtkFileTask* task =
         ptk_file_exec_new(task_name, NULL, view, file_browser ? file_browser->task_view : NULL);
     g_free(task_name);
@@ -1105,9 +1105,9 @@ static void on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (!options)
         options = g_strdup("");
     char* msg =
-        g_strdup_printf(_("Enter mount command:\n\nUse:\n\t%%%%v\tdevice file ( %s "
-                          ")\n\t%%%%o\tvolume-specific mount options\n\t\t( %s )\n\nNote: fstab "
-                          "overrides some options\n\nEDIT WITH CARE   This command is run as root"),
+        g_strdup_printf("Enter mount command:\n\nUse:\n\t%%%%v\tdevice file ( %s "
+                        ")\n\t%%%%o\tvolume-specific mount options\n\t\t( %s )\n\nNote: fstab "
+                        "overrides some options\n\nEDIT WITH CARE   This command is run as root",
                         vol->device_file,
                         options);
 
@@ -1116,9 +1116,9 @@ static void on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     char* old_set_s = g_strdup(set->s);
 
     if (xset_text_dialog(view,
-                         _("Mount As Root"),
+                         "Mount As Root",
                          TRUE,
-                         _("MOUNT AS ROOT"),
+                         "MOUNT AS ROOT",
                          msg,
                          set->s,
                          &set->s,
@@ -1139,7 +1139,7 @@ static void on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         // task
         PtkFileBrowser* file_browser =
             (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
-        char* task_name = g_strdup_printf(_("Mount As Root %s"), vol->device_file);
+        char* task_name = g_strdup_printf("Mount As Root %s", vol->device_file);
         PtkFileTask* task = ptk_file_exec_new(task_name, NULL, view, file_browser->task_view);
         g_free(task_name);
         task->task->exec_command = cmd;
@@ -1167,17 +1167,17 @@ static void on_umount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
 
     XSet* set = xset_get("dev_root_unmount");
-    char* msg = g_strdup_printf(_("Enter unmount command:\n\nUse:\n\t%%%%v\tdevice file ( %s "
-                                  ")\n\nEDIT WITH CARE   This command is run as root"),
+    char* msg = g_strdup_printf("Enter unmount command:\n\nUse:\n\t%%%%v\tdevice file ( %s "
+                                ")\n\nEDIT WITH CARE   This command is run as root",
                                 vol->device_file);
     if (!set->s)
         set->s = g_strdup(set->z);
     char* old_set_s = g_strdup(set->s);
 
     if (xset_text_dialog(view,
-                         _("Unmount As Root"),
+                         "Unmount As Root",
                          TRUE,
-                         _("UNMOUNT AS ROOT"),
+                         "UNMOUNT AS ROOT",
                          msg,
                          set->s,
                          &set->s,
@@ -1194,7 +1194,7 @@ static void on_umount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         g_free(s1);
         PtkFileBrowser* file_browser =
             (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
-        char* task_name = g_strdup_printf(_("Unmount As Root %s"), vol->device_file);
+        char* task_name = g_strdup_printf("Unmount As Root %s", vol->device_file);
         PtkFileTask* task = ptk_file_exec_new(task_name, NULL, view, file_browser->task_view);
         g_free(task_name);
         task->task->exec_command = cmd;
@@ -1233,7 +1233,7 @@ static void on_umount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         popup_missing_mount(view, 1);
         return;
     }
-    char* task_name = g_strdup_printf(_("Unmount %s"), vol->device_file);
+    char* task_name = g_strdup_printf("Unmount %s", vol->device_file);
     PtkFileTask* task =
         ptk_file_exec_new(task_name, NULL, view, file_browser ? file_browser->task_view : NULL);
     g_free(task_name);
@@ -1347,7 +1347,7 @@ static void on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     {
         // task
         line = g_strdup_printf("eject %s", vol->device_file);
-        char* task_name = g_strdup_printf(_("Remove %s"), vol->device_file);
+        char* task_name = g_strdup_printf("Remove %s", vol->device_file);
         task =
             ptk_file_exec_new(task_name, NULL, view, file_browser ? file_browser->task_view : NULL);
         g_free(task_name);
@@ -1360,7 +1360,7 @@ static void on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     {
         // task
         line = g_strdup_printf("sync");
-        char* task_name = g_strdup_printf(_("Remove %s"), vol->device_file);
+        char* task_name = g_strdup_printf("Remove %s", vol->device_file);
         task =
             ptk_file_exec_new(task_name, NULL, view, file_browser ? file_browser->task_view : NULL);
         g_free(task_name);
@@ -1421,7 +1421,7 @@ static bool try_mount(GtkTreeView* view, VFSVolume* vol)
         popup_missing_mount(GTK_WIDGET(view), 0);
         return FALSE;
     }
-    char* task_name = g_strdup_printf(_("Mount %s"), vol->device_file);
+    char* task_name = g_strdup_printf("Mount %s", vol->device_file);
     PtkFileTask* task =
         ptk_file_exec_new(task_name, NULL, GTK_WIDGET(view), file_browser->task_view);
     g_free(task_name);
@@ -1491,7 +1491,7 @@ static void on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         }
 
         // task
-        char* task_name = g_strdup_printf(_("Mount %s"), vol->device_file);
+        char* task_name = g_strdup_printf("Mount %s", vol->device_file);
         PtkFileTask* task = ptk_file_exec_new(task_name, NULL, view, file_browser->task_view);
         g_free(task_name);
         char* keep_term;
@@ -1561,7 +1561,7 @@ static void on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         }
 
         // task
-        char* task_name = g_strdup_printf(_("Mount %s"), vol->device_file);
+        char* task_name = g_strdup_printf("Mount %s", vol->device_file);
         PtkFileTask* task =
             ptk_file_exec_new(task_name, NULL, view, file_browser ? file_browser->task_view : NULL);
         g_free(task_name);
@@ -1636,7 +1636,7 @@ static void on_remount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     }
 
     // task
-    char* task_name = g_strdup_printf(_("Remount %s"), vol->device_file);
+    char* task_name = g_strdup_printf("Remount %s", vol->device_file);
     PtkFileTask* task = ptk_file_exec_new(task_name, NULL, view, file_browser->task_view);
     g_free(task_name);
     if (vfs_volume_is_mounted(vol))
@@ -1738,7 +1738,7 @@ static void on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         // task
         line =
             g_strdup_printf("eject %s; sleep 0.3; eject -t %s", vol->device_file, vol->device_file);
-        char* task_name = g_strdup_printf(_("Reload %s"), vol->device_file);
+        char* task_name = g_strdup_printf("Reload %s", vol->device_file);
         task = ptk_file_exec_new(task_name, NULL, view, file_browser->task_view);
         g_free(task_name);
         task->task->exec_command = line;
@@ -1766,7 +1766,7 @@ static void on_sync(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     PtkFileBrowser* file_browser =
         (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
 
-    PtkFileTask* task = ptk_file_exec_new(_("Sync"), NULL, view, file_browser->task_view);
+    PtkFileTask* task = ptk_file_exec_new("Sync", NULL, view, file_browser->task_view);
     task->task->exec_browser = NULL;
     task->task->exec_action = g_strdup_printf("sync");
     task->task->exec_command = g_strdup_printf("sync");
@@ -1793,11 +1793,11 @@ static void on_root_udevil(GtkMenuItem* item, GtkWidget* view)
     char* udevil_path = g_build_filename(SYSCONFDIR, "udevil", NULL);
     char* udevil_conf = g_build_filename(SYSCONFDIR, "udevil", "udevil.conf", NULL);
     char* msg =
-        g_strdup_printf(_("The %s directory was not found.  Is udevil installed?"), udevil_path);
+        g_strdup_printf("The %s directory was not found.  Is udevil installed?", udevil_path);
     if (g_file_test(udevil_path, G_FILE_TEST_IS_DIR))
         xset_edit(view, udevil_conf, TRUE, FALSE);
     else
-        xset_msg_dialog(view, GTK_MESSAGE_ERROR, _("Directory Missing"), 0, msg, NULL, NULL);
+        xset_msg_dialog(view, GTK_MESSAGE_ERROR, "Directory Missing", 0, msg, NULL, NULL);
     g_free(udevil_path);
     g_free(udevil_conf);
     g_free(msg);
@@ -1907,7 +1907,7 @@ static void on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     // Note: file_browser may be NULL
     if (!GTK_IS_WIDGET(file_browser))
         file_browser = NULL;
-    char* task_name = g_strdup_printf(_("Properties %s"), vol->device_file);
+    char* task_name = g_strdup_printf("Properties %s", vol->device_file);
     PtkFileTask* task = ptk_file_exec_new(task_name,
                                           NULL,
                                           file_browser ? GTK_WIDGET(file_browser) : view,
@@ -2248,7 +2248,7 @@ static void on_showhide(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         devid = strrchr(devid, '/');
         if (devid)
             devid++;
-        msg = g_strdup_printf(_("%sCurrently Selected Device: %s\nVolume Label: %s\nDevice ID: %s"),
+        msg = g_strdup_printf("%sCurrently Selected Device: %s\nVolume Label: %s\nDevice ID: %s",
                               set->desc,
                               vol->device_file,
                               vol->label,
@@ -2286,7 +2286,7 @@ static void on_automountlist(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2
         devid = strrchr(devid, '/');
         if (devid)
             devid++;
-        msg = g_strdup_printf(_("%sCurrently Selected Device: %s\nVolume Label: %s\nDevice ID: %s"),
+        msg = g_strdup_printf("%sCurrently Selected Device: %s\nVolume Label: %s\nDevice ID: %s",
                               set->desc,
                               vol->device_file,
                               vol->label,
@@ -2998,7 +2998,7 @@ void ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
             {
                 upath = g_strdup(line + 7);
                 if (!name)
-                    name = _("Home");
+                    name = "Home";
             }
             else if (g_str_has_prefix(line, "//") || strstr(line, ":/"))
                 upath = g_strdup(line);
@@ -3453,7 +3453,7 @@ XSet* ptk_bookmark_view_get_first_bookmark(XSet* book_set)
     if (!book_set->child)
     {
         child_set = xset_custom_new();
-        child_set->menu_label = g_strdup_printf(_("Home"));
+        child_set->menu_label = g_strdup_printf("Home");
         child_set->z = g_strdup(g_get_home_dir());
         child_set->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
         child_set->parent = g_strdup_printf("main_book");

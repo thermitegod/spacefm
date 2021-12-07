@@ -16,8 +16,6 @@
 #include <glib.h>
 #include <string.h>
 
-#include "private.h"
-
 #include "../vfs/vfs-app-desktop.h"
 
 #include "../vfs/vfs-async-task.h"
@@ -217,7 +215,7 @@ static GtkWidget* app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_ty
     {
         gtk_widget_hide((GtkWidget*)gtk_builder_get_object(builder, "hbox_command"));
         gtk_label_set_text(GTK_LABEL(gtk_builder_get_object(builder, "label_command")),
-                           _("Please choose an application:"));
+                           "Please choose an application:");
     }
 
     view = GTK_TREE_VIEW((GtkWidget*)gtk_builder_get_object(builder, "recommended_apps"));
@@ -463,13 +461,13 @@ void ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
     if (handlers_slist)
     {
         msg = g_strdup_printf(
-            _("Note:  MIME type '%s' is currently set to open with the '%s' file handler, rather "
-              "than with your associated MIME application.\n\nYou may also need to disable this "
-              "handler in Open|File Handlers for this type to be opened with your associated "
-              "application by default."),
+            "Note:  MIME type '%s' is currently set to open with the '%s' file handler, rather "
+            "than with your associated MIME application.\n\nYou may also need to disable this "
+            "handler in Open|File Handlers for this type to be opened with your associated "
+            "application by default.",
             vfs_mime_type_get_type(mime_type),
             ((XSet*)handlers_slist->data)->menu_label);
-        xset_msg_dialog(parent, 0, _("MIME Type Has Handler"), 0, msg, NULL, NULL);
+        xset_msg_dialog(parent, 0, "MIME Type Has Handler", 0, msg, NULL, NULL);
         g_free(msg);
         g_slist_free(handlers_slist);
     }
@@ -486,14 +484,14 @@ void ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
         if (handlers_slist)
         {
             msg = g_strdup_printf(
-                _("Note:  MIME type '%s' is currently set to open with the '%s' archive handler, "
-                  "rather than with your associated MIME application.\n\nYou may also need to "
-                  "disable this handler in Open|Archive Defaults|Archive Handlers, OR select "
-                  "global option Open|Archive Defaults|Open With App, for this type to be opened "
-                  "with your associated application by default."),
+                "Note:  MIME type '%s' is currently set to open with the '%s' archive handler, "
+                "rather than with your associated MIME application.\n\nYou may also need to "
+                "disable this handler in Open|Archive Defaults|Archive Handlers, OR select "
+                "global option Open|Archive Defaults|Open With App, for this type to be opened "
+                "with your associated application by default.",
                 vfs_mime_type_get_type(mime_type),
                 ((XSet*)handlers_slist->data)->menu_label);
-            xset_msg_dialog(parent, 0, _("MIME Type Has Handler"), 0, msg, NULL, NULL);
+            xset_msg_dialog(parent, 0, "MIME Type Has Handler", 0, msg, NULL, NULL);
             g_free(msg);
             g_slist_free(handlers_slist);
         }

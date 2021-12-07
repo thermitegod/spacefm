@@ -12,7 +12,6 @@
 
 #include "ptk-dir-tree.h"
 #include <gdk/gdk.h>
-#include <glib/gi18n.h>
 
 #include <string.h>
 
@@ -139,7 +138,7 @@ static void ptk_dir_tree_init(PtkDirTree* tree)
     tree->root->tree = tree;
     tree->root->n_children = 1;
     PtkDirTreeNode* child = ptk_dir_tree_node_new(tree, tree->root, "/", "/");
-    vfs_file_info_set_disp_name(child->file, _("File System"));
+    vfs_file_info_set_disp_name(child->file, "File System");
     tree->root->children = child;
 
     /* Random int to check whether an iter belongs to our model */
@@ -347,7 +346,7 @@ static void ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, 
             if (G_LIKELY(info))
                 g_value_set_string(value, vfs_file_info_get_disp_name(info));
             else
-                g_value_set_string(value, _("( no subdirectory )")); // no sub directory
+                g_value_set_string(value, "( no subdirectory )"); // no sub directory
             break;
         case COL_DIR_TREE_INFO:
             if (G_UNLIKELY(!info))

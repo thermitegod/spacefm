@@ -263,10 +263,10 @@ static void on_open_files(GAction* action, FindFile* data)
 }
 
 static GtkActionEntry menu_actions[] = {
-    {"OpenAction", "document-open", N_("_Open"), nullptr, nullptr, G_CALLBACK(on_open_files)},
+    {"OpenAction", "document-open", "_Open", nullptr, nullptr, G_CALLBACK(on_open_files)},
     {"OpenDirectoryAction",
      "document-open",
-     N_("Open Containing _Directory"),
+     "Open Containing _Directory",
      nullptr,
      nullptr,
      G_CALLBACK(on_open_files)}};
@@ -752,7 +752,7 @@ static void add_search_dir(FindFile* data, const char* path)
 
 static void on_add_search_browse(GtkWidget* menu, FindFile* data)
 {
-    GtkWidget* dlg = gtk_file_chooser_dialog_new(_("Select a directory"),
+    GtkWidget* dlg = gtk_file_chooser_dialog_new("Select a directory",
                                                  GTK_WINDOW(data->win),
                                                  GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
                                                  "Cancel",
@@ -804,7 +804,7 @@ static void on_add_search_folder(GtkWidget* btn, FindFile* data)
     GtkWidget* img;
     const char* dir;
 
-    item = gtk_menu_item_new_with_label(_("Browse..."));
+    item = gtk_menu_item_new_with_label("Browse...");
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     g_signal_connect(item, "activate", G_CALLBACK(on_add_search_browse), data);
 
@@ -826,7 +826,7 @@ static void on_add_search_folder(GtkWidget* btn, FindFile* data)
         g_signal_connect(item, "activate", G_CALLBACK(on_add_search_desktop), data);
     }
 
-    item = gtk_menu_item_new_with_label(_("Local Volumes"));
+    item = gtk_menu_item_new_with_label("Local Volumes");
     // img = gtk_image_new_from_icon_name( "gnome-dev-harddisk", GTK_ICON_SIZE_MENU );
     img = xset_get_image("gtk-harddisk", GTK_ICON_SIZE_MENU);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
@@ -886,7 +886,7 @@ static void init_search_result(FindFile* data)
     gtk_tree_view_set_model((GtkTreeView*)data->result_view, (GtkTreeModel*)data->result_list);
     g_object_unref(data->result_list);
     col = gtk_tree_view_column_new();
-    gtk_tree_view_column_set_title(col, _("Name"));
+    gtk_tree_view_column_set_title(col, "Name");
     render = gtk_cell_renderer_pixbuf_new();
     gtk_tree_view_column_pack_start(col, render, false);
     gtk_tree_view_column_set_attributes(col, render, "pixbuf", COL_ICON, nullptr);
@@ -901,14 +901,13 @@ static void init_search_result(FindFile* data)
 
     render = gtk_cell_renderer_text_new();
     g_object_set(render, "ellipsize", PANGO_ELLIPSIZE_END, nullptr);
-    col =
-        gtk_tree_view_column_new_with_attributes(_("Directory"), render, "text", COL_DIR, nullptr);
+    col = gtk_tree_view_column_new_with_attributes("Directory", render, "text", COL_DIR, nullptr);
     gtk_tree_view_column_set_expand(col, true);
     gtk_tree_view_column_set_resizable(col, true);
     gtk_tree_view_column_set_min_width(col, 200);
     gtk_tree_view_append_column((GtkTreeView*)data->result_view, col);
 
-    col = gtk_tree_view_column_new_with_attributes(_("Size"),
+    col = gtk_tree_view_column_new_with_attributes("Size",
                                                    gtk_cell_renderer_text_new(),
                                                    "text",
                                                    COL_SIZE,
@@ -916,7 +915,7 @@ static void init_search_result(FindFile* data)
     gtk_tree_view_column_set_resizable(col, true);
     gtk_tree_view_append_column((GtkTreeView*)data->result_view, col);
 
-    col = gtk_tree_view_column_new_with_attributes(_("Type"),
+    col = gtk_tree_view_column_new_with_attributes("Type",
                                                    gtk_cell_renderer_text_new(),
                                                    "text",
                                                    COL_TYPE,
@@ -926,7 +925,7 @@ static void init_search_result(FindFile* data)
     gtk_tree_view_column_set_resizable(col, true);
     gtk_tree_view_append_column((GtkTreeView*)data->result_view, col);
 
-    col = gtk_tree_view_column_new_with_attributes(_("Last Modified"),
+    col = gtk_tree_view_column_new_with_attributes("Last Modified",
                                                    gtk_cell_renderer_text_new(),
                                                    "text",
                                                    COL_MTIME,
@@ -963,9 +962,6 @@ static bool on_view_button_press(GtkTreeView* view, GdkEventButton* evt, FindFil
             GtkWidget* popup;
             GtkUIManager* menu_mgr;
             GtkActionGroup* action_group = gtk_action_group_new("PopupActions");
-#ifdef ENABLE_NLS
-            gtk_action_group_set_translation_domain(action_group, GETTEXT_PACKAGE);
-#endif
             menu_mgr = gtk_ui_manager_new();
 
             gtk_action_group_add_actions(action_group,
