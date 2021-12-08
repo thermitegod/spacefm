@@ -24,8 +24,6 @@
 #include <glib.h>
 #include <glib-object.h>
 
-G_BEGIN_DECLS
-
 #define VFS_ASYNC_TASK_TYPE (vfs_async_task_get_type())
 #define VFS_ASYNC_TASK(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), VFS_ASYNC_TASK_TYPE, VFSAsyncTask))
 
@@ -73,5 +71,3 @@ void vfs_async_task_cancel(VFSAsyncTask* task);
 
 void vfs_async_task_lock(VFSAsyncTask* task);
 void vfs_async_task_unlock(VFSAsyncTask* task);
-
-G_END_DECLS

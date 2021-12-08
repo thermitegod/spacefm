@@ -16,8 +16,6 @@
 
 #include "ptk-file-browser.hxx"
 
-G_BEGIN_DECLS
-
 // Archive operations enum
 enum
 {
@@ -30,5 +28,3 @@ enum
 void ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char* cwd);
 void ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char* cwd,
                                const char* dest_dir, int job, bool archive_presence_checked);
-
-G_END_DECLS

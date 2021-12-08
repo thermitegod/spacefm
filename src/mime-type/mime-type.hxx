@@ -28,8 +28,6 @@
 #include "mime-action.hxx"
 #include "mime-cache.hxx"
 
-G_BEGIN_DECLS
-
 extern const char xdg_mime_type_unknown[];
 #define XDG_MIME_TYPE_UNKNOWN xdg_mime_type_unknown
 extern const char xdg_mime_type_directory[];
@@ -100,5 +98,3 @@ MimeCache** mime_type_get_caches(int* n);
 
 /* max magic extent of all caches */
 extern uint32_t mime_cache_max_extent;
-
-G_END_DECLS

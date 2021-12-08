@@ -18,8 +18,6 @@
 #include "settings.hxx"
 #include "ptk-file-browser.hxx"
 
-G_BEGIN_DECLS
-
 enum
 {
     HANDLER_COMPRESS,
@@ -55,5 +53,3 @@ bool ptk_handler_command_is_empty(const char* command);
 void ptk_handler_load_text_view(GtkTextView* view, const char* text);
 GSList* ptk_handler_file_has_handlers(int mode, int cmd, const char* path, VFSMimeType* mime_type,
                                       bool test_cmd, bool multiple, bool enabled_only);
-
-G_END_DECLS

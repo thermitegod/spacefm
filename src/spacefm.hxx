@@ -23,8 +23,6 @@
 
 #include <glib.h>
 
-G_BEGIN_DECLS
-
 void init_window_ref_counter(bool daemon_mode);
 
 /* After opening any window/dialog/tool, this should be called. */
@@ -34,5 +32,3 @@ void pcmanfm_ref();
  * If the last window is closed and we are not a deamon, pcmanfm will quit.
  */
 void pcmanfm_unref();
-
-G_END_DECLS

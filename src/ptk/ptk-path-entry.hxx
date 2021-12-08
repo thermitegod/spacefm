@@ -15,8 +15,6 @@
 #include <gtk/gtk.h>
 #include "ptk-file-browser.hxx"
 
-G_BEGIN_DECLS
-
 typedef struct EntryData
 {
     PtkFileBrowser* browser;
@@ -25,5 +23,3 @@ typedef struct EntryData
 
 GtkWidget* ptk_path_entry_new(PtkFileBrowser* file_browser);
 void ptk_path_entry_help(GtkWidget* widget, GtkWidget* parent);
-
-G_END_DECLS

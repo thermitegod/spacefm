@@ -14,8 +14,6 @@
 
 #include "settings.hxx"
 
-G_BEGIN_DECLS
-
 typedef enum VFSVolumeState
 {
     VFS_VOLUME_ADDED,
@@ -121,5 +119,3 @@ bool path_is_mounted_mtab(const char* mtab_file, const char* path, char** device
                           char** fs_type);
 bool mtab_fstype_is_handled_by_protocol(const char* mtab_fstype);
 VFSVolume* vfs_volume_get_by_device_or_point(const char* device_file, const char* point);
-
-G_END_DECLS

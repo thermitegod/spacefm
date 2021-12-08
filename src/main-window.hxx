@@ -10,8 +10,6 @@
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-file-task.hxx"
 
-G_BEGIN_DECLS
-
 #define FM_TYPE_MAIN_WINDOW (fm_main_window_get_type())
 #define FM_MAIN_WINDOW(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), FM_TYPE_MAIN_WINDOW, FMMainWindow))
 
@@ -132,5 +130,3 @@ char main_window_socket_command(char* argv[], char** reply);
 bool main_window_event(void* mw, XSet* preset, const char* event, int panel, int tab,
                        const char* focus, int keyval, int button, int state, bool visible);
 void fm_main_window_store_positions(FMMainWindow* main_window);
-
-G_END_DECLS

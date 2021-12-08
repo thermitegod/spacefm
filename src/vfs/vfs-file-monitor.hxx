@@ -25,8 +25,6 @@
 #include <unistd.h>
 #include <sys/inotify.h>
 
-G_BEGIN_DECLS
-
 typedef enum VFSFileMonitorEvent
 {
     VFS_FILE_MONITOR_CREATE,
@@ -99,5 +97,3 @@ void vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void
  * Clearn up and shutdown file alteration monitor.
  */
 void vfs_file_monitor_clean();
-
-G_END_DECLS

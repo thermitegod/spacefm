@@ -15,8 +15,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-G_BEGIN_DECLS
-
 typedef struct VFSAppDesktop
 {
     char* file_name;
@@ -58,5 +56,3 @@ bool vfs_app_desktop_open_in_terminal(VFSAppDesktop* app);
 
 bool vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSAppDesktop* app,
                                 GList* file_paths, GError** err);
-
-G_END_DECLS

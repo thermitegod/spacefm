@@ -14,8 +14,6 @@
 
 #include "../vfs/vfs-volume.hxx"
 
-G_BEGIN_DECLS
-
 // Location View
 GtkWidget* ptk_location_view_new(PtkFileBrowser* file_browser);
 bool ptk_location_view_chdir(GtkTreeView* location_view, const char* path);
@@ -43,5 +41,3 @@ void ptk_bookmark_view_xset_changed(GtkTreeView* view, PtkFileBrowser* file_brow
 XSet* ptk_bookmark_view_get_first_bookmark(XSet* book_set);
 void ptk_bookmark_view_import_gtk(const char* path, XSet* book_set);
 void ptk_bookmark_view_on_open_reverse(GtkMenuItem* item, PtkFileBrowser* file_browser);
-
-G_END_DECLS

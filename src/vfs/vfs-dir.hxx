@@ -18,8 +18,6 @@
 #include "vfs-file-info.hxx"
 #include "vfs-async-task.hxx"
 
-G_BEGIN_DECLS
-
 #define VFS_TYPE_DIR (vfs_dir_get_type())
 #define VFS_DIR(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), VFS_TYPE_DIR, VFSDir))
 
@@ -106,5 +104,3 @@ bool vfs_dir_add_hidden(const char* path, const char* file_name); // MOD added
 void vfs_dir_foreach(GHFunc func, void* user_data);
 
 void vfs_dir_monitor_mime();
-
-G_END_DECLS

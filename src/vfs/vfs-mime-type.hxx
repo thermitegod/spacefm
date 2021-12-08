@@ -16,8 +16,6 @@
 
 #include "../mime-type/mime-type.hxx"
 
-G_BEGIN_DECLS
-
 typedef struct VFSMimeType
 {
     char* type;        /* mime_type-type string */
@@ -83,5 +81,3 @@ GList* vfs_mime_type_add_reload_cb(GFreeFunc cb, void* user_data);
 void vfs_mime_type_remove_reload_cb(GList* cb);
 
 char* vfs_mime_type_locate_desktop_file(const char* dir, const char* desktop_id);
-
-G_END_DECLS

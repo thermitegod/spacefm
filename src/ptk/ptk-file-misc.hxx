@@ -17,8 +17,6 @@
 
 #include "../vfs/vfs-file-info.hxx"
 
-G_BEGIN_DECLS
-
 typedef struct AutoOpenCreate
 {
     char* path;
@@ -57,5 +55,3 @@ void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char*
                            char* setname); // sfm
 
 char* get_real_link_target(const char* link_path);
-
-G_END_DECLS

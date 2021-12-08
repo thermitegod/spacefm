@@ -23,8 +23,6 @@
 
 #include <glib.h>
 
-G_BEGIN_DECLS
-
 typedef struct MimeCache
 {
     char* file_path;
@@ -65,5 +63,3 @@ const char* mime_cache_lookup_suffix(MimeCache* cache, const char* filename,
 const char* mime_cache_lookup_magic(MimeCache* cache, const char* data, int len);
 const char** mime_cache_lookup_parents(MimeCache* cache, const char* mime_type);
 const char* mime_cache_lookup_alias(MimeCache* cache, const char* mime_type);
-
-G_END_DECLS

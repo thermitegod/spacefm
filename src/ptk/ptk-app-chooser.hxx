@@ -15,8 +15,6 @@
 #include <gtk/gtk.h>
 #include "../vfs/vfs-mime-type.hxx"
 
-G_BEGIN_DECLS
-
 /* Let the user choose a application */
 char* ptk_choose_app_for_mime_type(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all_apps,
                                    bool show_command, bool show_default, bool dir_default);
@@ -39,5 +37,3 @@ void on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, unsigned in
                              void* user_data);
 
 void on_browse_btn_clicked(GtkButton* button, void* user_data);
-
-G_END_DECLS

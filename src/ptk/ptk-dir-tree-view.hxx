@@ -15,8 +15,6 @@
 #include <gtk/gtk.h>
 #include "ptk-file-browser.hxx"
 
-G_BEGIN_DECLS
-
 /* Create a new dir tree view */
 GtkWidget* ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden);
 
@@ -28,5 +26,3 @@ char* ptk_dir_tree_view_get_selected_dir(GtkTreeView* dir_tree_view);
 void ptk_dir_tree_view_show_hidden_files(GtkTreeView* dir_tree_view, bool show_hidden);
 
 char* ptk_dir_view_get_dir_path(GtkTreeModel* model, GtkTreeIter* it);
-
-G_END_DECLS

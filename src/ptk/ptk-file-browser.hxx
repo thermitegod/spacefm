@@ -10,8 +10,6 @@
 
 #include "../vfs/vfs-dir.hxx"
 
-G_BEGIN_DECLS
-
 #define PTK_TYPE_FILE_BROWSER (ptk_file_browser_get_type())
 #define PTK_FILE_BROWSER(obj) \
     (G_TYPE_CHECK_INSTANCE_CAST((obj), PTK_TYPE_FILE_BROWSER, PtkFileBrowser))
@@ -258,5 +256,3 @@ void ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void*
                                              char tool_type);
 void ptk_file_browser_show_history_menu(PtkFileBrowser* file_browser, bool is_back_history,
                                         GdkEventButton* event);
-
-G_END_DECLS

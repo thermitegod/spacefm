@@ -19,8 +19,6 @@
 
 #include "settings.hxx"
 
-G_BEGIN_DECLS
-
 enum
 {
     PTASK_ERROR_FIRST,
@@ -111,5 +109,3 @@ bool ptk_file_task_cancel(PtkFileTask* ptask);
 void ptk_file_task_pause(PtkFileTask* ptask, int state);
 
 void ptk_file_task_progress_open(PtkFileTask* ptask);
-
-G_END_DECLS

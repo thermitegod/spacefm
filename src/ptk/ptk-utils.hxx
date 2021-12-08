@@ -16,8 +16,6 @@
 #include <gdk/gdk.h>
 #include <glib.h>
 
-G_BEGIN_DECLS
-
 /* The string 'message' can contain pango markups.
  * If special characters like < and > are used in the string,
  * they should be escaped with g_markup_escape_text().
@@ -29,5 +27,3 @@ GtkBuilder* _gtk_builder_new_from_file(const char* file);
 #ifdef HAVE_NONLATIN
 void transpose_nonlatin_keypress(GdkEventKey* event);
 #endif
-
-G_END_DECLS

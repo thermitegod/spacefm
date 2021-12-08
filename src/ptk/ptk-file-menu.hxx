@@ -17,8 +17,6 @@
 
 #include "../vfs/vfs-file-info.hxx"
 
-G_BEGIN_DECLS
-
 /* sel_files is a list containing VFSFileInfo structures
  * The list will be freed in this function, so the caller mustn't
  * free the list after calling this function.
@@ -49,5 +47,3 @@ void on_popup_list_detailed(GtkMenuItem* menuitem, PtkFileBrowser* browser);
 void on_popup_list_icons(GtkMenuItem* menuitem, PtkFileBrowser* browser);
 void on_popup_list_compact(GtkMenuItem* menuitem, PtkFileBrowser* browser);
 void on_popup_list_large(GtkMenuItem* menuitem, PtkFileBrowser* browser);
-
-G_END_DECLS

@@ -29,8 +29,6 @@
 #include "vfs-file-info.hxx"
 #include "vfs-async-task.hxx"
 
-G_BEGIN_DECLS
-
 typedef struct VFSThumbnailLoader VFSThumbnailLoader;
 
 VFSThumbnailLoader* vfs_thumbnail_loader_new(VFSDir* dir);
@@ -49,5 +47,3 @@ GdkPixbuf* vfs_thumbnail_load_for_uri(const char* uri, int size, time_t mtime);
 GdkPixbuf* vfs_thumbnail_load_for_file(const char* file, int size, time_t mtime);
 
 void vfs_thumbnail_init();
-
-G_END_DECLS

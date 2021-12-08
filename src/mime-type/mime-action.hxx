@@ -23,8 +23,6 @@
 
 #include <glib.h>
 
-G_BEGIN_DECLS
-
 enum
 {
     MIME_TYPE_ACTION_DEFAULT,
@@ -79,5 +77,3 @@ void mime_type_update_association(const char* type, const char* desktop_id, int 
 
 /* Locate the file path of desktop file by desktop_id */
 char* mime_type_locate_desktop_file(const char* dir, const char* desktop_id);
-
-G_END_DECLS

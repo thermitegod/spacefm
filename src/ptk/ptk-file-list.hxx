@@ -20,8 +20,6 @@
 
 #include "../vfs/vfs-dir.hxx"
 
-G_BEGIN_DECLS
-
 #define PTK_TYPE_FILE_LIST    (ptk_file_list_get_type())
 #define PTK_FILE_LIST(obj)    (G_TYPE_CHECK_INSTANCE_CAST((obj), PTK_TYPE_FILE_LIST, PtkFileList))
 #define PTK_IS_FILE_LIST(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_FILE_LIST))
@@ -98,5 +96,3 @@ void ptk_file_list_file_changed(VFSDir* dir, VFSFileInfo* file, PtkFileList* lis
 
 void ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, int max_file_size);
 void ptk_file_list_sort(PtkFileList* list); // sfm
-
-G_END_DECLS

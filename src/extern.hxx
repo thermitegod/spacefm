@@ -8,8 +8,6 @@
 
 #include <glib.h>
 
-G_BEGIN_DECLS
-
 static const char* terminal_programs[] = // for pref-dialog.c
     {"terminal",
      "xfce4-terminal",
@@ -31,5 +29,3 @@ static const char* su_commands[] = // order and contents must match prefdlg.ui
      "/usr/bin/sudo",
      "/usr/bin/doas"};
 // clang-format on
-
-G_END_DECLS

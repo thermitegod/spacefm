@@ -18,8 +18,6 @@
 
 #include <sys/types.h>
 
-G_BEGIN_DECLS
-
 #define PTK_TYPE_DIR_TREE    (ptk_dir_tree_get_type())
 #define PTK_DIR_TREE(obj)    (G_TYPE_CHECK_INSTANCE_CAST((obj), PTK_TYPE_DIR_TREE, PtkDirTree))
 #define PTK_IS_DIR_TREE(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_DIR_TREE))
@@ -61,5 +59,3 @@ void ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* p
 void ptk_dir_tree_collapse_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* path);
 
 char* ptk_dir_tree_get_dir_path(PtkDirTree* tree, GtkTreeIter* iter);
-
-G_END_DECLS

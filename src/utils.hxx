@@ -10,8 +10,6 @@
 
 #include <glib.h>
 
-G_BEGIN_DECLS
-
 void print_command(const char* cmd);
 void print_task_command(char* ptask, const char* cmd);
 void print_task_command_spawn(char* argv[], int pid);
@@ -32,5 +30,3 @@ void string_copy_free(char** s, const char* src);
 char* unescape(const char* t);
 
 char* get_valid_su();
-
-G_END_DECLS

@@ -14,9 +14,5 @@
 
 #include <gtk/gtk.h>
 
-G_BEGIN_DECLS
-
 GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_files,
                                    int page);
-
-G_END_DECLS
