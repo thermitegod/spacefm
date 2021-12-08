@@ -17,7 +17,7 @@
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 
-#include "ptk/ptk-file-browser.h"
+#include "ptk/ptk-file-browser.hxx"
 
 G_BEGIN_DECLS
 

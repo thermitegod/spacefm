@@ -14,12 +14,12 @@
 #include <gtk/gtk.h>
 
 #include "pref-dialog.hxx"
-#include "main-window.h"
+#include "main-window.hxx"
 
 #include "extern.hxx"
 
-#include "ptk/ptk-utils.h"
-#include "ptk/ptk-location-view.h"
+#include "ptk/ptk-utils.hxx"
+#include "ptk/ptk-location-view.hxx"
 
 typedef struct FMPrefDlg
 {

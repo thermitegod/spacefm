@@ -27,21 +27,21 @@
 #include <exo/exo.h>
 
 #include "settings.hxx"
-#include "main-window.h"
+#include "main-window.hxx"
 #include "item-prop.hxx"
 
 #include "autosave.hxx"
 #include "extern.hxx"
 #include "utils.hxx"
 
-#include "vfs/vfs-app-desktop.h"
-#include "vfs/vfs-utils.h"
+#include "vfs/vfs-app-desktop.hxx"
+#include "vfs/vfs-utils.hxx"
 
-#include "ptk/ptk-utils.h"
-#include "ptk/ptk-app-chooser.h"
-#include "ptk/ptk-handler.h"
-#include "ptk/ptk-file-menu.h"
-#include "ptk/ptk-location-view.h"
+#include "ptk/ptk-utils.hxx"
+#include "ptk/ptk-app-chooser.hxx"
+#include "ptk/ptk-handler.hxx"
+#include "ptk/ptk-file-menu.hxx"
+#include "ptk/ptk-location-view.hxx"
 
 #define CONFIG_VERSION "38" // 1.0.6
 
@@ -9976,7 +9976,7 @@ static void xset_defaults()
         set = xset_get_panel(p, "sort_extra");
         set->b = XSET_B_TRUE;                         // sort_natural
         set->x = g_strdup_printf("%d", XSET_B_FALSE); // sort_case
-        set->y = g_strdup("1");                      // PTK_LIST_SORT_DIR_FIRST from ptk-file-list.h
+        set->y = g_strdup("1"); // PTK_LIST_SORT_DIR_FIRST from ptk-file-list.hxx
         set->z = g_strdup_printf("%d", XSET_B_TRUE); // sort_hidden_first
 
         set = xset_set_panel(p, "book_fol", "lbl", "Follow _Dir");

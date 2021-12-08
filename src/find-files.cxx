@@ -32,12 +32,12 @@
 
 #include "spacefm.hxx"
 
-#include "vfs/vfs-volume.h"
+#include "vfs/vfs-volume.hxx"
 
-#include "main-window.h"
+#include "main-window.hxx"
 
-#include "ptk/ptk-file-misc.h"
-#include "ptk/ptk-utils.h"
+#include "ptk/ptk-file-misc.hxx"
+#include "ptk/ptk-utils.hxx"
 
 #include "find-files.hxx"
 
@@ -801,7 +801,7 @@ static void on_add_search_folder(GtkWidget* btn, FindFile* data)
 {
     GtkWidget* menu = gtk_menu_new();
     GtkWidget* item;
-    GtkWidget* img;
+    // GtkWidget* img;
     const char* dir;
 
     item = gtk_menu_item_new_with_label("Browse...");
@@ -813,7 +813,7 @@ static void on_add_search_folder(GtkWidget* btn, FindFile* data)
 
     item = gtk_menu_item_new_with_label(g_get_home_dir());
     // img = gtk_image_new_from_icon_name( "gnome-fs-directory", GTK_ICON_SIZE_MENU );
-    img = xset_get_image("gtk-directory", GTK_ICON_SIZE_MENU);
+    // img = xset_get_image("gtk-directory", GTK_ICON_SIZE_MENU);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     g_signal_connect(item, "activate", G_CALLBACK(on_add_search_home), data);
 
@@ -821,14 +821,14 @@ static void on_add_search_folder(GtkWidget* btn, FindFile* data)
     {
         item = gtk_menu_item_new_with_label(dir);
         // img = gtk_image_new_from_icon_name( "gnome-fs-desktop", GTK_ICON_SIZE_MENU );
-        img = xset_get_image("gtk-directory", GTK_ICON_SIZE_MENU);
+        // img = xset_get_image("gtk-directory", GTK_ICON_SIZE_MENU);
         gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
         g_signal_connect(item, "activate", G_CALLBACK(on_add_search_desktop), data);
     }
 
     item = gtk_menu_item_new_with_label("Local Volumes");
     // img = gtk_image_new_from_icon_name( "gnome-dev-harddisk", GTK_ICON_SIZE_MENU );
-    img = xset_get_image("gtk-harddisk", GTK_ICON_SIZE_MENU);
+    // img = xset_get_image("gtk-harddisk", GTK_ICON_SIZE_MENU);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     g_signal_connect(item, "activate", G_CALLBACK(on_add_search_volumes), data);
 
