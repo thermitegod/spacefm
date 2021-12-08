@@ -622,6 +622,7 @@ GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFS
     else
         context->var[CONTEXT_NAME] = g_strdup("");
     context->var[CONTEXT_DIR] = g_strdup(cwd);
+    context->var[CONTEXT_READ_ACCESS] = no_read_access ? g_strdup("false") : g_strdup("true");
     context->var[CONTEXT_WRITE_ACCESS] = no_write_access ? g_strdup("false") : g_strdup("true");
     context->var[CONTEXT_IS_TEXT] = is_text ? g_strdup("true") : g_strdup("false");
     context->var[CONTEXT_IS_DIR] = is_dir ? g_strdup("true") : g_strdup("false");
