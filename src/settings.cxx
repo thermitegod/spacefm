@@ -2784,7 +2784,6 @@ static void xset_parse_plugin(const char* plug_dir, char* line, int use)
 XSet* xset_import_plugin(const char* plug_dir, int* use)
 {
     char line[2048];
-    char* section_name;
     bool func;
     GList* l;
     XSet* set;
@@ -2827,7 +2826,7 @@ XSet* xset_import_plugin(const char* plug_dir, int* use)
             continue;
         if (line[0] == '[')
         {
-            section_name = strtok_r(line, "]", &tmp);
+            strtok_r(line, "]", &tmp);
             if (!strcmp(line + 1, "Plugin"))
                 func = true;
             else
