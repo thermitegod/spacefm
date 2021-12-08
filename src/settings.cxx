@@ -1152,7 +1152,7 @@ static void xset_parse(char* line)
     }
 }
 
-XSet* xset_set_cb(const char* name, void (*cb_func)(), void* cb_data)
+XSet* xset_set_cb(const char* name, GFunc cb_func, void* cb_data)
 {
     XSet* set = xset_get(name);
     set->cb_func = cb_func;
@@ -1160,7 +1160,7 @@ XSet* xset_set_cb(const char* name, void (*cb_func)(), void* cb_data)
     return set;
 }
 
-XSet* xset_set_cb_panel(int panel, const char* name, void (*cb_func)(), void* cb_data)
+XSet* xset_set_cb_panel(int panel, const char* name, GFunc cb_func, void* cb_data)
 {
     char* fullname = g_strdup_printf("panel%d_%s", panel, name);
     XSet* set = xset_set_cb(fullname, cb_func, cb_data);
@@ -2124,8 +2124,6 @@ GtkWidget* xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu,
                 // if ( !design_mode )
                 //{
                 g_signal_connect(item, "activate", G_CALLBACK(xset_menu_cb), set);
-                g_object_set_data(G_OBJECT(item), "cb_func", (void*)set->cb_func);
-                g_object_set_data(G_OBJECT(item), "cb_data", (void*)set->cb_data);
                 //}
             }
             else if (set->cb_func)
@@ -6418,7 +6416,7 @@ bool xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
 void xset_menu_cb(GtkWidget* item, XSet* set)
 {
     GtkWidget* parent;
-    void (*cb_func)(GtkWidget*, void*) = nullptr;
+    GFunc cb_func = nullptr;
     void* cb_data = nullptr;
     char* title;
     XSet* mset; // mirror set or set
@@ -6430,11 +6428,8 @@ void xset_menu_cb(GtkWidget* item, XSet* set)
             !gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item)))
             return;
 
-        printf("here\n");
-
-        // FIXME - needs to be fixed, but
-        // cb_func = (void*)g_object_get_data(G_OBJECT(item), "cb_func");
-        cb_data = g_object_get_data(G_OBJECT(item), "cb_data");
+        cb_func = set->cb_func;
+        cb_data = set->cb_data;
     }
 
     parent = (GtkWidget*)set->browser;
@@ -6461,7 +6456,7 @@ void xset_menu_cb(GtkWidget* item, XSet* set)
     if (!rset->menu_style)
     {
         if (cb_func)
-            (*cb_func)(item, cb_data);
+            cb_func(item, cb_data);
         else if (!rset->lock)
             xset_custom_activate(item, rset);
     }
@@ -6477,7 +6472,7 @@ void xset_menu_cb(GtkWidget* item, XSet* set)
                 else
                     mset->b = XSET_B_TRUE;
                 if (cb_func)
-                    (*cb_func)(item, cb_data);
+                    cb_func(item, cb_data);
                 else if (!rset->lock)
                     xset_custom_activate(item, rset);
                 if (set->tool == XSET_TOOL_CUSTOM)
@@ -6521,7 +6516,7 @@ void xset_menu_cb(GtkWidget* item, XSet* set)
                                         help) == GTK_RESPONSE_OK)
                     {
                         if (cb_func)
-                            (*cb_func)(item, cb_data);
+                            cb_func(item, cb_data);
                         else if (!set->lock)
                             xset_custom_activate(item, rset);
                     }
@@ -6538,7 +6533,7 @@ void xset_menu_cb(GtkWidget* item, XSet* set)
                                           help))
                 {
                     if (cb_func)
-                        (*cb_func)(item, cb_data);
+                        cb_func(item, cb_data);
                     else if (!set->lock)
                         xset_custom_activate(item, rset);
                 }
@@ -6551,7 +6546,7 @@ void xset_menu_cb(GtkWidget* item, XSet* set)
                 if (mset->b != XSET_B_TRUE)
                     mset->b = XSET_B_TRUE;
                 if (cb_func)
-                    (*cb_func)(item, cb_data);
+                    cb_func(item, cb_data);
                 else if (!rset->lock)
                     xset_custom_activate(item, rset);
                 break;
@@ -6588,7 +6583,7 @@ void xset_menu_cb(GtkWidget* item, XSet* set)
                     if (rset->lock)
                         rset->keep_terminal = XSET_B_TRUE; // trigger save of changed icon
                     if (cb_func)
-                        (*cb_func)(item, cb_data);
+                        cb_func(item, cb_data);
                 }
                 break;
             case XSET_MENU_COLORDLG:
@@ -6599,12 +6594,12 @@ void xset_menu_cb(GtkWidget* item, XSet* set)
                     g_free(rset->s);
                 rset->s = scolor;
                 if (cb_func)
-                    (*cb_func)(item, cb_data);
+                    cb_func(item, cb_data);
             }
             break;
             default:
                 if (cb_func)
-                    (*cb_func)(item, cb_data);
+                    cb_func(item, cb_data);
                 else if (!set->lock)
                     xset_custom_activate(item, rset);
                 break;
