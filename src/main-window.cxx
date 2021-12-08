@@ -4,7 +4,7 @@
  *
  */
 
-#include "spacefm.hxx"
+#include "window-reference.hxx"
 
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
@@ -1621,7 +1621,7 @@ static void fm_main_window_init(FMMainWindow* main_window)
     ++n_windows;
     all_windows = g_list_prepend(all_windows, main_window);
 
-    pcmanfm_ref();
+    WindowReference::increase();
 
     // g_signal_connect( G_OBJECT( main_window ), "task-notify",
     //                            G_CALLBACK( ptk_file_task_notify_handler ), nullptr );
@@ -1863,7 +1863,7 @@ static void fm_main_window_finalize(GObject* obj)
 
     g_object_unref(((FMMainWindow*)obj)->wgroup);
 
-    pcmanfm_unref();
+    WindowReference::decrease();
 
     /* Remove the monitor for changes of the bookmarks */
     //    ptk_bookmarks_remove_callback( ( GFunc ) on_bookmarks_change, obj );
@@ -2744,7 +2744,7 @@ static void on_about_activate(GtkMenuItem* menuitem, void* user_data)
     {
         GtkBuilder* builder = gtk_builder_new();
 
-        pcmanfm_ref();
+        WindowReference::increase();
 
         builder = _gtk_builder_new_from_file("about-dlg3.ui");
         about_dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
@@ -2763,7 +2763,7 @@ static void on_about_activate(GtkMenuItem* menuitem, void* user_data)
 
         // g_object_add_weak_pointer(G_OBJECT(about_dlg), (void*)&about_dlg);
         g_signal_connect(about_dlg, "response", G_CALLBACK(gtk_widget_destroy), nullptr);
-        g_signal_connect(about_dlg, "destroy", G_CALLBACK(pcmanfm_unref), nullptr);
+        g_signal_connect(about_dlg, "destroy", G_CALLBACK(WindowReference::decrease), nullptr);
         g_signal_connect(about_dlg, "activate-link", G_CALLBACK(open_url), nullptr);
     }
     gtk_window_set_transient_for(GTK_WINDOW(about_dlg), GTK_WINDOW(user_data));

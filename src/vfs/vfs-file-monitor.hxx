@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include <stdbool.h>
-
 #include <glib.h>
 
 #include <unistd.h>

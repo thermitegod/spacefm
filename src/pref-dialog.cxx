@@ -9,7 +9,7 @@
  *
  */
 
-#include "spacefm.hxx"
+#include "window-reference.hxx"
 
 #include <gtk/gtk.h>
 
@@ -420,7 +420,7 @@ static void on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
     gtk_widget_destroy(GTK_WIDGET(dlg));
     g_free(data);
     data = nullptr;
-    pcmanfm_unref();
+    WindowReference::decrease();
 }
 
 static void on_date_format_changed(GtkComboBox* widget, FMPrefDlg* data)
@@ -466,7 +466,7 @@ bool fm_edit_preference(GtkWindow* parent, int page)
 
         if (!builder)
             return false;
-        pcmanfm_ref();
+        WindowReference::increase();
 
         data = g_new0(FMPrefDlg, 1);
         dlg = (GtkWidget*)gtk_builder_get_object(builder, "dlg");

@@ -30,7 +30,7 @@
 
 #include <exo/exo.h>
 
-#include "spacefm.hxx"
+#include "window-reference.hxx"
 
 #include "vfs/vfs-volume.hxx"
 
@@ -1149,8 +1149,8 @@ void fm_find_files(const char** search_dirs)
 
     g_signal_connect(data->win, "delete-event", G_CALLBACK(gtk_widget_destroy), nullptr);
 
-    pcmanfm_ref();
-    g_signal_connect(data->win, "destroy", G_CALLBACK(pcmanfm_unref), nullptr);
+    WindowReference::increase();
+    g_signal_connect(data->win, "destroy", G_CALLBACK(WindowReference::decrease), nullptr);
 
     int width = xset_get_int("main_search", "x");
     int height = xset_get_int("main_search", "y");

@@ -16,7 +16,7 @@
 
 #include "main-window.hxx"
 
-#include "spacefm.hxx"
+#include "window-reference.hxx"
 
 #include "vfs/vfs-file-info.hxx"
 #include "vfs/vfs-mime-type.hxx"
@@ -924,7 +924,7 @@ int main(int argc, char* argv[])
     }
 
     // ref counter needs to know if in daemon_mode
-    init_window_ref_counter(cli_flags.daemon_mode);
+    WindowReference::set_daemon(cli_flags.daemon_mode);
 
     // socket command with other options?
     if (cli_flags.socket_cmd)

@@ -131,8 +131,8 @@ sources = [
   'src/main-window.cxx',
   'src/pref-dialog.cxx',
   'src/settings.cxx',
-  'src/spacefm.cxx',
   'src/utils.cxx',
+  'src/window-reference.cxx',
 
   'src/mime-type/mime-action.cxx',
   'src/mime-type/mime-cache.cxx',
