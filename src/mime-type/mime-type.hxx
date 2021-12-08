@@ -54,7 +54,7 @@ void mime_type_finalize();
 /*
  * Get mime-type info of the specified file (quick, but less accurate):
  * Mime-type of the file is determined by cheking the filename only.
- * If statbuf != NULL, it will be used to determine if the file is a directory,
+ * If statbuf != nullptr, it will be used to determine if the file is a directory,
  * or if the file is an executable file.
  */
 const char* mime_type_get_by_filename(const char* filename, struct stat* statbuf);
@@ -64,7 +64,7 @@ const char* mime_type_get_by_filename(const char* filename, struct stat* statbuf
  * To determine the mime-type of the file, mime_type_get_by_filename() is
  * tried first.  If the mime-type couldn't be determined, the content of
  * the file will be checked, which is much more time-consuming.
- * If statbuf is not NULL, it will be used to determine if the file is a directory,
+ * If statbuf is not nullptr, it will be used to determine if the file is a directory,
  * or if the file is an executable file; otherwise, the function will call stat()
  * to gather this info itself. So if you already have stat info of the file,
  * pass it to the function to prevent checking the file stat again.
@@ -82,9 +82,9 @@ bool mime_type_is_executable_file(const char* file_path, const char* mime_type);
 // bool mime_type_is_subclass(const char* type, const char* parent);
 
 /* Get human-readable description and icon name of the mime-type
- * If locale is NULL, current locale will be used.
+ * If locale is nullptr, current locale will be used.
  * The returned string should be freed when no longer used.
- * The icon_name will only be set if points to NULL, and must be freed. */
+ * The icon_name will only be set if points to nullptr, and must be freed. */
 char* mime_type_get_desc_icon(const char* type, const char* locale, char** icon_name);
 
 /*

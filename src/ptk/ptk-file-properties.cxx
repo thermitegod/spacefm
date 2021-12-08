@@ -76,7 +76,7 @@ static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
  * Recursively count total size of all files in the specified directory.
  * If the path specified is a file, the size of the file is directly returned.
  * cancel is used to cancel the operation. This function will check the value
- * pointed by cancel in every iteration. If cancel is set to TRUE, the
+ * pointed by cancel in every iteration. If cancel is set to true, the
  * calculation is cancelled.
  * NOTE: path is encoded in on-disk encoding and not necessarily UTF-8.
  */
@@ -92,14 +92,14 @@ static void calc_total_size_of_files(const char* path, FilePropertiesDialogData*
     data->total_size += file_stat.st_size;
     data->size_on_disk += (file_stat.st_blocks << 9); /* block x 512 */
 
-    GDir* dir = g_dir_open(path, 0, NULL);
+    GDir* dir = g_dir_open(path, 0, nullptr);
     if (dir)
     {
         const char* name;
         ++data->total_count_dir;
         while (!data->cancel && (name = g_dir_read_name(dir)))
         {
-            char* full_path = g_build_filename(path, name, NULL);
+            char* full_path = g_build_filename(path, name, nullptr);
             lstat(full_path, &file_stat);
             if (S_ISDIR(file_stat.st_mode))
             {
@@ -128,15 +128,15 @@ static void* calc_size(void* user_data)
         if (data->cancel)
             break;
         VFSFileInfo* file = (VFSFileInfo*)l->data;
-        char* path = g_build_filename(data->dir_path, vfs_file_info_get_name(file), NULL);
+        char* path = g_build_filename(data->dir_path, vfs_file_info_get_name(file), nullptr);
         if (path)
         {
             calc_total_size_of_files(path, data);
             g_free(path);
         }
     }
-    data->done = TRUE;
-    return NULL;
+    data->done = true;
+    return nullptr;
 }
 
 static bool on_update_labels(FilePropertiesDialogData* data)
@@ -144,11 +144,11 @@ static bool on_update_labels(FilePropertiesDialogData* data)
     char buf[64];
     char buf2[64];
 
-    vfs_file_size_to_string_format(buf2, data->total_size, TRUE);
+    vfs_file_size_to_string_format(buf2, data->total_size, true);
     g_snprintf(buf, sizeof(buf), "%s ( %lu bytes )", buf2, (uint64_t)data->total_size);
     gtk_label_set_text(data->total_size_label, buf);
 
-    vfs_file_size_to_string_format(buf2, data->size_on_disk, TRUE);
+    vfs_file_size_to_string_format(buf2, data->size_on_disk, true);
     g_snprintf(buf, sizeof(buf), "%s ( %lu bytes )", buf2, (uint64_t)data->size_on_disk);
     gtk_label_set_text(data->size_on_disk_label, buf);
 
@@ -181,27 +181,27 @@ static void on_chmod_btn_toggled(GtkToggleButton* btn, FilePropertiesDialogData*
                                     G_SIGNAL_MATCH_FUNC,
                                     0,
                                     0,
-                                    NULL,
+                                    nullptr,
                                     (void*)on_chmod_btn_toggled,
-                                    NULL);
+                                    nullptr);
 
     if (gtk_toggle_button_get_inconsistent(btn))
     {
-        gtk_toggle_button_set_inconsistent(btn, FALSE);
-        gtk_toggle_button_set_active(btn, FALSE);
+        gtk_toggle_button_set_inconsistent(btn, false);
+        gtk_toggle_button_set_active(btn, false);
     }
     else if (!gtk_toggle_button_get_active(btn))
     {
-        gtk_toggle_button_set_inconsistent(btn, TRUE);
+        gtk_toggle_button_set_inconsistent(btn, true);
     }
 
     g_signal_handlers_unblock_matched(btn,
                                       G_SIGNAL_MATCH_FUNC,
                                       0,
                                       0,
-                                      NULL,
+                                      nullptr,
                                       (void*)on_chmod_btn_toggled,
-                                      NULL);
+                                      nullptr);
 }
 
 static bool combo_sep(GtkTreeModel* model, GtkTreeIter* it, void* user_data)
@@ -214,10 +214,10 @@ static bool combo_sep(GtkTreeModel* model, GtkTreeIter* it, void* user_data)
         if (tmp)
         {
             g_free(tmp);
-            return FALSE;
+            return false;
         }
     }
-    return TRUE;
+    return true;
 }
 
 static void on_combo_change(GtkComboBox* combo, void* user_data)
@@ -233,10 +233,10 @@ static void on_combo_change(GtkComboBox* combo, void* user_data)
             VFSMimeType* mime = (VFSMimeType*)user_data;
             GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(combo));
             action = (char*)
-                ptk_choose_app_for_mime_type(GTK_WINDOW(parent), mime, FALSE, TRUE, TRUE, TRUE);
+                ptk_choose_app_for_mime_type(GTK_WINDOW(parent), mime, false, true, true, true);
             if (action)
             {
-                bool exist = FALSE;
+                bool exist = false;
                 /* check if the action is already in the list */
                 if (gtk_tree_model_get_iter_first(model, &it))
                 {
@@ -248,7 +248,7 @@ static void on_combo_change(GtkComboBox* combo, void* user_data)
                             continue;
                         if (!strcmp(tmp, action))
                         {
-                            exist = TRUE;
+                            exist = true;
                             g_free(tmp);
                             break;
                         }
@@ -262,7 +262,7 @@ static void on_combo_change(GtkComboBox* combo, void* user_data)
                     if (app)
                     {
                         GdkPixbuf* icon;
-                        icon = vfs_app_desktop_get_icon(app, 20, TRUE);
+                        icon = vfs_app_desktop_get_icon(app, 20, true);
                         gtk_list_store_insert_with_values(GTK_LIST_STORE(model),
                                                           &it,
                                                           0,
@@ -276,7 +276,7 @@ static void on_combo_change(GtkComboBox* combo, void* user_data)
                         if (icon)
                             g_object_unref(icon);
                         vfs_app_desktop_unref(app);
-                        exist = TRUE;
+                        exist = true;
                     }
                 }
 
@@ -312,7 +312,7 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
     xset_set_window_icon(GTK_WINDOW(dlg));
 
     FilePropertiesDialogData* data;
-    bool need_calc_size = TRUE;
+    bool need_calc_size = true;
 
     VFSFileInfo* file;
     VFSMimeType* mime;
@@ -322,10 +322,10 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
     GtkWidget* name = (GtkWidget*)gtk_builder_get_object(builder, "file_name");
     GtkWidget* label_name = (GtkWidget*)gtk_builder_get_object(builder, "label_filename");
     GtkWidget* location = (GtkWidget*)gtk_builder_get_object(builder, "location");
-    gtk_editable_set_editable(GTK_EDITABLE(location), FALSE);
+    gtk_editable_set_editable(GTK_EDITABLE(location), false);
     GtkWidget* target = (GtkWidget*)gtk_builder_get_object(builder, "target");
     GtkWidget* label_target = (GtkWidget*)gtk_builder_get_object(builder, "label_target");
-    gtk_editable_set_editable(GTK_EDITABLE(target), FALSE);
+    gtk_editable_set_editable(GTK_EDITABLE(target), false);
     GtkWidget* mime_type = (GtkWidget*)gtk_builder_get_object(builder, "mime_type");
     GtkWidget* open_with = (GtkWidget*)gtk_builder_get_object(builder, "open_with");
 
@@ -338,8 +338,8 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
 
     int i;
     GList* l;
-    bool same_type = TRUE;
-    bool is_dirs = FALSE;
+    bool same_type = true;
+    bool is_dirs = false;
     char* owner_group;
     char* tmp;
 
@@ -378,7 +378,7 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
 
     // MOD
     VFSMimeType* type;
-    VFSMimeType* type2 = NULL;
+    VFSMimeType* type2 = nullptr;
     for (l = sel_files; l; l = l->next)
     {
         file = (VFSFileInfo*)l->data;
@@ -386,9 +386,9 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
         if (!type2)
             type2 = vfs_file_info_get_mime_type(file);
         if (vfs_file_info_is_dir(file))
-            is_dirs = TRUE;
+            is_dirs = true;
         if (type != type2)
-            same_type = FALSE;
+            same_type = false;
         vfs_mime_type_unref(type);
         if (is_dirs && !same_type)
             break;
@@ -420,11 +420,11 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
      * ,the selected file is a directory, or its type is unknown.
      */
     if (!same_type || vfs_file_info_is_desktop_entry(file) ||
-        vfs_file_info_is_executable(file, NULL))
+        vfs_file_info_is_executable(file, nullptr))
     {
         /* if open with shouldn't show, destroy it. */
         gtk_widget_destroy(open_with);
-        open_with = NULL;
+        open_with = nullptr;
         gtk_widget_destroy((GtkWidget*)gtk_builder_get_object(builder, "open_with_label"));
     }
     else /* Add available actions to the option menu */
@@ -439,11 +439,11 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
         GtkListStore* model;
         gtk_cell_layout_clear(GTK_CELL_LAYOUT(open_with));
         renderer = gtk_cell_renderer_pixbuf_new();
-        gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(open_with), renderer, FALSE);
-        gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(open_with), renderer, "pixbuf", 0, NULL);
+        gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(open_with), renderer, false);
+        gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(open_with), renderer, "pixbuf", 0, nullptr);
         renderer = gtk_cell_renderer_text_new();
-        gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(open_with), renderer, TRUE);
-        gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(open_with), renderer, "text", 1, NULL);
+        gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(open_with), renderer, true);
+        gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(open_with), renderer, "text", 1, nullptr);
         model = gtk_list_store_new(3, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
         if (actions)
         {
@@ -453,7 +453,7 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
                 GdkPixbuf* icon;
                 desktop = vfs_app_desktop_new(*action);
                 gtk_list_store_append(model, &it);
-                icon = vfs_app_desktop_get_icon(desktop, 20, TRUE);
+                icon = vfs_app_desktop_get_icon(desktop, 20, true);
                 gtk_list_store_set(model,
                                    &it,
                                    0,
@@ -477,14 +477,14 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
         gtk_list_store_append(model, &it);
 
         gtk_list_store_append(model, &it);
-        gtk_list_store_set(model, &it, 0, NULL, 1, "Choose...", -1);
+        gtk_list_store_set(model, &it, 0, nullptr, 1, "Choose...", -1);
         gtk_combo_box_set_model(GTK_COMBO_BOX(open_with), GTK_TREE_MODEL(model));
         // gtk_combo_box_set_model adds a ref
         g_object_unref(model);
         gtk_combo_box_set_row_separator_func(GTK_COMBO_BOX(open_with),
                                              (GtkTreeViewRowSeparatorFunc)combo_sep,
-                                             NULL,
-                                             NULL);
+                                             nullptr,
+                                             nullptr);
         gtk_combo_box_set_active(GTK_COMBO_BOX(open_with), 0);
         g_signal_connect(open_with, "changed", G_CALLBACK(on_combo_change), mime);
 
@@ -497,15 +497,15 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
     /* Multiple files are selected */
     if (sel_files && sel_files->next)
     {
-        gtk_widget_set_sensitive(name, FALSE);
+        gtk_widget_set_sensitive(name, false);
         gtk_entry_set_text(GTK_ENTRY(name), multiple_files);
 
-        data->orig_mtime = NULL;
-        data->orig_atime = NULL;
+        data->orig_mtime = nullptr;
+        data->orig_atime = nullptr;
 
         for (i = 0; i < N_CHMOD_ACTIONS; ++i)
         {
-            gtk_toggle_button_set_inconsistent(data->chmod_btns[i], TRUE);
+            gtk_toggle_button_set_inconsistent(data->chmod_btns[i], true);
             data->chmod_states[i] = 2; /* Don't touch this bit */
             g_signal_connect(G_OBJECT(data->chmod_btns[i]),
                              "toggled",
@@ -530,13 +530,13 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
             gtk_entry_set_text(GTK_ENTRY(name), vfs_file_info_get_disp_name(file));
         }
 
-        gtk_editable_set_editable(GTK_EDITABLE(name), FALSE);
+        gtk_editable_set_editable(GTK_EDITABLE(name), false);
 
         if (!vfs_file_info_is_dir(file))
         {
             /* Only single "file" is selected, so we don't need to
                 caculate total file size */
-            need_calc_size = FALSE;
+            need_calc_size = false;
 
             g_snprintf(buf,
                        sizeof(buf),
@@ -545,7 +545,7 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
                        (uint64_t)vfs_file_info_get_size(file));
             gtk_label_set_text(data->total_size_label, buf);
 
-            vfs_file_size_to_string_format(buf2, vfs_file_info_get_blocks(file) * 512, TRUE);
+            vfs_file_size_to_string_format(buf2, vfs_file_info_get_blocks(file) * 512, true);
             g_snprintf(buf,
                        sizeof(buf),
                        "%s  ( %lu bytes )",
@@ -588,8 +588,8 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
         if (vfs_file_info_is_symlink(file))
         {
             gtk_label_set_markup_with_mnemonic(GTK_LABEL(label_name), "<b>Link _Name:</b>");
-            disp_path = g_build_filename(dir_path, file->name, NULL);
-            char* target_path = g_file_read_link(disp_path, NULL);
+            disp_path = g_build_filename(dir_path, file->name, nullptr);
+            char* target_path = g_file_read_link(disp_path, nullptr);
             if (target_path)
             {
                 gtk_entry_set_text(GTK_ENTRY(target), target_path);
@@ -597,7 +597,7 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
                 {
                     // relative link to absolute
                     char* str = target_path;
-                    target_path = g_build_filename(dir_path, str, NULL);
+                    target_path = g_build_filename(dir_path, str, nullptr);
                     g_free(str);
                 }
                 if (!g_file_test(target_path, G_FILE_TEST_EXISTS))
@@ -723,7 +723,7 @@ static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
     {
         if (data->update_label_timer)
             g_source_remove(data->update_label_timer);
-        data->cancel = TRUE;
+        data->cancel = true;
 
         if (data->calc_size_thread)
             g_thread_join(data->calc_size_thread);
@@ -733,23 +733,23 @@ static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
             bool mod_change;
             PtkFileTask* task;
             // change file dates
-            char* cmd = NULL;
+            char* cmd = nullptr;
             char* quoted_time;
             char* quoted_path;
             const char* new_mtime = gtk_entry_get_text(data->mtime);
             if (!(new_mtime && new_mtime[0]) || !g_strcmp0(data->orig_mtime, new_mtime))
-                new_mtime = NULL;
+                new_mtime = nullptr;
             const char* new_atime = gtk_entry_get_text(data->atime);
             if (!(new_atime && new_atime[0]) || !g_strcmp0(data->orig_atime, new_atime))
-                new_atime = NULL;
+                new_atime = nullptr;
 
             if ((new_mtime || new_atime) && data->file_list)
             {
-                GString* gstr = g_string_new(NULL);
+                GString* gstr = g_string_new(nullptr);
                 for (l = data->file_list; l; l = l->next)
                 {
                     file_path =
-                        g_build_filename(data->dir_path, ((VFSFileInfo*)l->data)->name, NULL);
+                        g_build_filename(data->dir_path, ((VFSFileInfo*)l->data)->name, nullptr);
                     quoted_path = bash_quote(file_path);
                     g_string_append_printf(gstr, " %s", quoted_path);
                     g_free(file_path);
@@ -775,15 +775,15 @@ static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                     g_free(quoted_path);
                 }
                 g_free(quoted_time);
-                g_string_free(gstr, TRUE);
+                g_string_free(gstr, true);
                 if (cmd)
                 {
-                    task = ptk_file_exec_new("Change File Date", "/", GTK_WIDGET(dialog), NULL);
+                    task = ptk_file_exec_new("Change File Date", "/", GTK_WIDGET(dialog), nullptr);
                     task->task->exec_command = cmd;
-                    task->task->exec_sync = TRUE;
-                    task->task->exec_export = FALSE;
-                    task->task->exec_show_output = TRUE;
-                    task->task->exec_show_error = TRUE;
+                    task->task->exec_sync = true;
+                    task->task->exec_export = false;
+                    task->task->exec_show_output = true;
+                    task->task->exec_show_error = true;
                     ptk_file_task_run(task);
                 }
             }
@@ -843,7 +843,7 @@ static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 }
                 else if (data->chmod_states[i] != gtk_toggle_button_get_active(data->chmod_btns[i]))
                 {
-                    mod_change = TRUE;
+                    mod_change = true;
                     data->chmod_states[i] = gtk_toggle_button_get_active(data->chmod_btns[i]);
                 }
                 else /* Don't change this bit */
@@ -854,20 +854,20 @@ static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
 
             if (uid != -1 || gid != -1 || mod_change)
             {
-                GList* file_list = NULL;
+                GList* file_list = nullptr;
                 for (l = data->file_list; l; l = l->next)
                 {
                     file = (VFSFileInfo*)l->data;
                     file_path =
-                        g_build_filename(data->dir_path, vfs_file_info_get_name(file), NULL);
+                        g_build_filename(data->dir_path, vfs_file_info_get_name(file), nullptr);
                     file_list = g_list_prepend(file_list, file_path);
                 }
 
                 task = ptk_file_task_new(VFS_FILE_TASK_CHMOD_CHOWN,
                                          file_list,
-                                         NULL,
+                                         nullptr,
                                          GTK_WINDOW(gtk_widget_get_parent(GTK_WIDGET(dialog))),
-                                         NULL);
+                                         nullptr);
                 // MOD
                 ptk_file_task_set_recursive(
                     task,
@@ -883,9 +883,9 @@ static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
 
                 /*
                  * This file list will be freed by file operation, so we don't
-                 * need to do this. Just set the pointer to NULL.
+                 * need to do this. Just set the pointer to nullptr.
                  */
-                data->file_list = NULL;
+                data->file_list = nullptr;
             }
         }
 

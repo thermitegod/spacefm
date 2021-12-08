@@ -81,7 +81,7 @@ static void mime_cache_unload(MimeCache* cache, bool clear)
 
 void mime_cache_free(MimeCache* cache)
 {
-    mime_cache_unload(cache, FALSE);
+    mime_cache_unload(cache, false);
     g_slice_free(MimeCache, cache);
 }
 
@@ -89,8 +89,9 @@ bool mime_cache_load(MimeCache* cache, const char* file_path)
 {
     /* Unload old cache first if needed */
     if (file_path == cache->file_path)
-        cache->file_path = NULL; /* steal the string to prevent it from being freed during unload */
-    mime_cache_unload(cache, TRUE);
+        cache->file_path =
+            nullptr; /* steal the string to prevent it from being freed during unload */
+    mime_cache_unload(cache, true);
 
     /* Store the file path */
     cache->file_path = g_strdup(file_path);
@@ -99,18 +100,18 @@ bool mime_cache_load(MimeCache* cache, const char* file_path)
     int fd = open(file_path, O_RDONLY, 0);
 
     if (fd < 0)
-        return FALSE;
+        return false;
 
     struct stat statbuf;
     if (fstat(fd, &statbuf) < 0)
     {
         close(fd);
-        return FALSE;
+        return false;
     }
 
-    char* buffer = NULL;
+    char* buffer = nullptr;
 #ifdef HAVE_MMAP
-    buffer = (char*)mmap(NULL, statbuf.st_size, PROT_READ, MAP_SHARED, fd, 0);
+    buffer = (char*)mmap(nullptr, statbuf.st_size, PROT_READ, MAP_SHARED, fd, 0);
 #else
     buffer = g_malloc(statbuf.st_size);
     if (buffer)
@@ -121,7 +122,7 @@ bool mime_cache_load(MimeCache* cache, const char* file_path)
     close(fd);
 
     if (buffer == (void*)-1)
-        return FALSE;
+        return false;
 
     unsigned int majv = VAL16(buffer, MAJOR_VERSION);
     unsigned int minv = VAL16(buffer, MINOR_VERSION);
@@ -134,7 +135,7 @@ bool mime_cache_load(MimeCache* cache, const char* file_path)
 #else
         g_free(buffer);
 #endif
-        return FALSE;
+        return false;
     }
 
     /* Since mime.cache v1.1, shared mime info v0.4
@@ -142,8 +143,8 @@ bool mime_cache_load(MimeCache* cache, const char* file_path)
      * and glob and literal strings are sorted by weight. */
     if (minv >= 1)
     {
-        cache->has_reverse_suffix = TRUE;
-        cache->has_str_weight = TRUE;
+        cache->has_reverse_suffix = true;
+        cache->has_str_weight = true;
     }
 
     uint32_t offset;
@@ -176,7 +177,7 @@ bool mime_cache_load(MimeCache* cache, const char* file_path)
     cache->magic_max_extent = VAL32(buffer + offset, 4);
     cache->magics = buffer + VAL32(buffer + offset, 8);
 
-    return TRUE;
+    return true;
 }
 
 static bool magic_rule_match(const char* buf, const char* rule, const char* data, int len)
@@ -189,7 +190,7 @@ static bool magic_rule_match(const char* buf, const char* rule, const char* data
 
     for (; offset < max_offset && (offset + val_len) <= len; ++offset)
     {
-        bool match = FALSE;
+        bool match = false;
         uint32_t val_off = VAL32(rule, 16);
         uint32_t mask_off = VAL32(rule, 20);
         const char* value = buf + val_off;
@@ -206,12 +207,12 @@ static bool magic_rule_match(const char* buf, const char* rule, const char* data
                     break;
             }
             if (i >= val_len)
-                match = TRUE;
+                match = true;
         }
         else /* direct comparison */
         {
             if (memcmp(value, data + offset, val_len) == 0)
-                match = TRUE;
+                match = true;
         }
 
         if (match)
@@ -225,14 +226,14 @@ static bool magic_rule_match(const char* buf, const char* rule, const char* data
                 for (i = 0; i < n_children; ++i, rule += 32)
                 {
                     if (magic_rule_match(buf, rule, data, len))
-                        return TRUE;
+                        return true;
                 }
             }
             else
-                return TRUE;
+                return true;
         }
     }
-    return FALSE;
+    return false;
 }
 
 static bool magic_match(const char* buf, const char* magic, const char* data, int len)
@@ -244,8 +245,8 @@ static bool magic_match(const char* buf, const char* magic, const char* data, in
     int i;
     for (i = 0; i < n_rules; ++i, rule += 32)
         if (magic_rule_match(buf, rule, data, len))
-            return TRUE;
-    return FALSE;
+            return true;
+    return false;
 }
 
 const char* mime_cache_lookup_magic(MimeCache* cache, const char* data, int len)
@@ -253,7 +254,7 @@ const char* mime_cache_lookup_magic(MimeCache* cache, const char* data, int len)
     const char* magic = cache->magics;
 
     if (G_UNLIKELY(!data || (len == 0) || !magic))
-        return NULL;
+        return nullptr;
 
     int i;
     for (i = 0; i < cache->n_magics; ++i, magic += 16)
@@ -263,7 +264,7 @@ const char* mime_cache_lookup_magic(MimeCache* cache, const char* data, int len)
             return cache->buffer + VAL32(magic, 4);
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 static const char* lookup_suffix_nodes(const char* buf, const char* nodes, uint32_t n,
@@ -294,12 +295,12 @@ static const char* lookup_suffix_nodes(const char* buf, const char* nodes, uint3
             {
                 uint32_t first_child_off;
                 if (uchar == 0)
-                    return NULL;
+                    return nullptr;
 
                 if (!name || name[0] == 0)
                 {
                     uint32_t offset = VAL32(node, 4);
-                    return offset ? buf + offset : NULL;
+                    return offset ? buf + offset : nullptr;
                 }
                 first_child_off = VAL32(node, 12);
                 return lookup_suffix_nodes(buf, (buf + first_child_off), n_children, name);
@@ -309,14 +310,14 @@ static const char* lookup_suffix_nodes(const char* buf, const char* nodes, uint3
                 if (!name || name[0] == 0)
                 {
                     uint32_t offset = VAL32(node, 4);
-                    return offset ? buf + offset : NULL;
+                    return offset ? buf + offset : nullptr;
                 }
-                return NULL;
+                return nullptr;
             }
         }
         middle = (upper + lower) / 2;
     }
-    return NULL;
+    return nullptr;
 }
 
 /* Reverse suffix tree is used since mime.cache 1.1 (shared mime info 0.4)
@@ -328,7 +329,7 @@ static const char* lookup_reverse_suffix_nodes(const char* buf, const char* node
                                                const char* name, const char* suffix,
                                                const char** suffix_pos)
 {
-    const char* ret = NULL;
+    const char* ret = nullptr;
     const char* cur_suffix_pos = (const char*)suffix + 1;
 
     uint32_t uchar = suffix ? g_unichar_tolower(g_utf8_get_char(suffix)) : 0;
@@ -381,11 +382,11 @@ const char* mime_cache_lookup_suffix(MimeCache* cache, const char* filename,
 {
     const char* root = cache->suffix_roots;
     int n = cache->n_suffix_roots;
-    const char* mime_type = NULL;
-    const char* ret = NULL;
+    const char* mime_type = nullptr;
+    const char* ret = nullptr;
 
     if (G_UNLIKELY(!filename || !*filename || n == 0))
-        return NULL;
+        return nullptr;
     if (cache->has_reverse_suffix) /* since mime.cache ver: 1.1 */
     {
         const char* suffix;
@@ -462,7 +463,7 @@ static const char* lookup_str_in_entries(MimeCache* cache, const char* entries, 
             middle = (upper + lower) / 2;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 const char* mime_cache_lookup_alias(MimeCache* cache, const char* mime_type)
@@ -500,7 +501,7 @@ const char* mime_cache_lookup_literal(MimeCache* cache, const char* filename)
                 middle = (upper + lower) / 2;
             }
         }
-        return NULL;
+        return nullptr;
     }
     return lookup_str_in_entries(cache, cache->literals, cache->n_literals, filename);
 }
@@ -508,7 +509,7 @@ const char* mime_cache_lookup_literal(MimeCache* cache, const char* filename)
 const char* mime_cache_lookup_glob(MimeCache* cache, const char* filename, int* glob_len)
 {
     const char* entry = cache->globs;
-    const char* type = NULL;
+    const char* type = nullptr;
     int i;
     int max_glob_len = 0;
 
@@ -534,7 +535,7 @@ const char** mime_cache_lookup_parents(MimeCache* cache, const char* mime_type)
 {
     const char* parents = lookup_str_in_entries(cache, cache->parents, cache->n_parents, mime_type);
     if (!parents)
-        return NULL;
+        return nullptr;
     uint32_t n = VAL32(parents, 0);
     parents += 4;
 
@@ -547,6 +548,6 @@ const char** mime_cache_lookup_parents(MimeCache* cache, const char* mime_type)
         const char* parent = cache->buffer + parent_off;
         result[i] = parent;
     }
-    result[n] = NULL;
+    result[n] = nullptr;
     return result;
 }

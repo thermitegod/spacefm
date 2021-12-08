@@ -33,8 +33,8 @@ typedef struct VFSFileMonitorCallbackEntry
     void* user_data;
 } VFSFileMonitorCallbackEntry;
 
-static GHashTable* monitor_hash = NULL;
-static GIOChannel* fam_io_channel = NULL;
+static GHashTable* monitor_hash = nullptr;
+static GIOChannel* fam_io_channel = nullptr;
 static unsigned int fam_io_watch = 0;
 static int inotify_fd = -1;
 
@@ -46,24 +46,24 @@ static bool connect_to_fam()
     inotify_fd = inotify_init();
     if (inotify_fd < 0)
     {
-        fam_io_channel = NULL;
+        fam_io_channel = nullptr;
         g_warning("failed to initialize inotify.");
-        return FALSE;
+        return false;
     }
     fam_io_channel = g_io_channel_unix_new(inotify_fd);
 
     /* set fam socket to non-blocking */
     /* fcntl( FAMCONNECTION_GETFD( &fam ),F_SETFL,O_NONBLOCK); */
 
-    g_io_channel_set_encoding(fam_io_channel, NULL, NULL);
-    g_io_channel_set_buffered(fam_io_channel, FALSE);
-    g_io_channel_set_flags(fam_io_channel, G_IO_FLAG_NONBLOCK, NULL);
+    g_io_channel_set_encoding(fam_io_channel, nullptr, nullptr);
+    g_io_channel_set_buffered(fam_io_channel, false);
+    g_io_channel_set_flags(fam_io_channel, G_IO_FLAG_NONBLOCK, nullptr);
 
     fam_io_watch = g_io_add_watch(fam_io_channel,
                                   GIOCondition(G_IO_IN | G_IO_PRI | G_IO_HUP | G_IO_ERR),
                                   (GIOFunc)on_fam_event,
-                                  NULL);
-    return TRUE;
+                                  nullptr);
+    return true;
 }
 
 static void disconnect_from_fam()
@@ -71,7 +71,7 @@ static void disconnect_from_fam()
     if (fam_io_channel)
     {
         g_io_channel_unref(fam_io_channel);
-        fam_io_channel = NULL;
+        fam_io_channel = nullptr;
         g_source_remove(fam_io_watch);
         close(inotify_fd);
         inotify_fd = -1;
@@ -85,7 +85,7 @@ void vfs_file_monitor_clean()
     if (monitor_hash)
     {
         g_hash_table_destroy(monitor_hash);
-        monitor_hash = NULL;
+        monitor_hash = nullptr;
     }
 }
 
@@ -97,8 +97,8 @@ bool vfs_file_monitor_init()
 {
     monitor_hash = g_hash_table_new(g_str_hash, g_str_equal);
     if (!connect_to_fam())
-        return FALSE;
-    return TRUE;
+        return false;
+    return true;
 }
 
 VFSFileMonitor* vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCallback cb,
@@ -110,7 +110,7 @@ VFSFileMonitor* vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCall
     // printf( "vfs_file_monitor_add  %s\n", path );
 
     if (!monitor_hash)
-        return NULL;
+        return nullptr;
 
     // Since gamin, FAM and inotify don't follow symlinks, need to get real path
     if (strlen(path) > PATH_MAX - 1)
@@ -118,7 +118,7 @@ VFSFileMonitor* vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCall
         g_warning("PATH_MAX exceeded on %s", path);
         real_path = path; // fallback
     }
-    else if (realpath(path, resolved_path) == NULL)
+    else if (realpath(path, resolved_path) == nullptr)
     {
         g_warning("realpath failed on %s", path);
         real_path = path; // fallback
@@ -132,7 +132,7 @@ VFSFileMonitor* vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCall
         monitor = g_slice_new0(VFSFileMonitor);
         monitor->path = g_strdup(real_path);
 
-        monitor->callbacks = g_array_new(FALSE, FALSE, sizeof(VFSFileMonitorCallbackEntry));
+        monitor->callbacks = g_array_new(false, false, sizeof(VFSFileMonitorCallbackEntry));
         g_hash_table_insert(monitor_hash, monitor->path, monitor);
 
         monitor->wd = inotify_add_watch(inotify_fd,
@@ -180,7 +180,7 @@ VFSFileMonitor* vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCall
                       path,
                       errno,
                       msg);
-            return NULL;
+            return nullptr;
         }
         // printf("vfs_file_monitor_add  %s (%s) %d\n", real_path, path, monitor->wd );
     }
@@ -224,7 +224,7 @@ void vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void
 
         g_hash_table_remove(monitor_hash, fm->path);
         g_free(fm->path);
-        g_array_free(fm->callbacks, TRUE);
+        g_array_free(fm->callbacks, true);
         g_slice_free(VFSFileMonitor, fm);
     }
     // printf( "vfs_file_monitor_remove   DONE\n" );
@@ -308,9 +308,9 @@ static bool on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data
               So we have to reconnect to FAM server.
             */
             if (connect_to_fam())
-                g_hash_table_foreach(monitor_hash, (GHFunc)reconnect_fam, NULL);
+                g_hash_table_foreach(monitor_hash, (GHFunc)reconnect_fam, nullptr);
         }
-        return TRUE; /* don't need to remove the event source since
+        return true; /* don't need to remove the event source since
                                     it has been removed by disconnect_from_fam(). */
     }
 
@@ -321,7 +321,7 @@ static bool on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data
     {
         g_warning("Error reading inotify event: %s", g_strerror(errno));
         /* goto error_cancel; */
-        return FALSE;
+        return false;
     }
 
     if (len == 0)
@@ -331,7 +331,7 @@ static bool on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data
          */
         g_warning("Error reading inotify event: supplied buffer was too small");
         /* goto error_cancel; */
-        return FALSE;
+        return false;
     }
     int i = 0;
     while (i < len)
@@ -369,5 +369,5 @@ static bool on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data
         }
         i += sizeof(struct inotify_event) + ievent->len;
     }
-    return TRUE;
+    return true;
 }

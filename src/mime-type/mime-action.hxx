@@ -43,7 +43,7 @@ char** mime_type_get_actions(const char* type);
  * Add an applications used to open this mime-type
  * desktop_id is the name of *.desktop file.
  *
- * custom_desktop: used to store name of the newly created user-custom desktop file, can be NULL.
+ * custom_desktop: used to store name of the newly created user-custom desktop file, can be nullptr.
  */
 void mime_type_add_action(const char* type, const char* desktop_id, char** custom_desktop);
 
@@ -57,7 +57,7 @@ void mime_type_add_action(const char* type, const char* desktop_id, char** custo
  * Get default applications used to open this mime-type
  *
  * The returned string was newly allocated, and should be freed when no longer
- * used.  If NULL is returned, that means a default app is not set for this
+ * used.  If nullptr is returned, that means a default app is not set for this
  * mime-type.  This is very roughly based on specs:
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  *

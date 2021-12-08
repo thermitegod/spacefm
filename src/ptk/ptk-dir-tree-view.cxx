@@ -60,7 +60,7 @@ static bool filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
     bool show_hidden = GPOINTER_TO_INT(g_object_get_qdata(G_OBJECT(view), dir_tree_view_data));
 
     if (show_hidden)
-        return TRUE;
+        return true;
 
     gtk_tree_model_get(model, iter, COL_DIR_TREE_INFO, &file, -1);
     if (G_LIKELY(file))
@@ -69,11 +69,11 @@ static bool filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
         if (G_UNLIKELY(name && name[0] == '.'))
         {
             vfs_file_info_unref(file);
-            return FALSE;
+            return false;
         }
         vfs_file_info_unref(file);
     }
-    return TRUE;
+    return true;
 }
 static void on_destroy(GtkWidget* w)
 {
@@ -92,8 +92,8 @@ GtkWidget* ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
     GtkTreeModel* filter;
 
     GtkTreeView* dir_tree_view = GTK_TREE_VIEW(gtk_tree_view_new());
-    gtk_tree_view_set_headers_visible(dir_tree_view, FALSE);
-    gtk_tree_view_set_enable_tree_lines(dir_tree_view, TRUE);
+    gtk_tree_view_set_headers_visible(dir_tree_view, false);
+    gtk_tree_view_set_enable_tree_lines(dir_tree_view, true);
 
     // MOD enabled DND   FIXME: Temporarily disable drag & drop since it doesn't work right now.
     /*    exo_icon_view_enable_model_drag_dest (
@@ -115,33 +115,36 @@ GtkWidget* ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
     col = gtk_tree_view_column_new();
 
     renderer = gtk_cell_renderer_pixbuf_new();
-    gtk_tree_view_column_pack_start(col, renderer, FALSE);
+    gtk_tree_view_column_pack_start(col, renderer, false);
     gtk_tree_view_column_set_attributes(col,
                                         renderer,
                                         "pixbuf",
                                         COL_DIR_TREE_ICON,
                                         "info",
                                         COL_DIR_TREE_INFO,
-                                        NULL);
+                                        nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_column_pack_start(col, renderer, TRUE);
-    gtk_tree_view_column_set_attributes(col, renderer, "text", COL_DIR_TREE_DISP_NAME, NULL);
+    gtk_tree_view_column_pack_start(col, renderer, true);
+    gtk_tree_view_column_set_attributes(col, renderer, "text", COL_DIR_TREE_DISP_NAME, nullptr);
 
     gtk_tree_view_append_column(dir_tree_view, col);
 
     tree_sel = gtk_tree_view_get_selection(dir_tree_view);
-    gtk_tree_selection_set_select_function(tree_sel, (GtkTreeSelectionFunc)sel_func, NULL, NULL);
+    gtk_tree_selection_set_select_function(tree_sel,
+                                           (GtkTreeSelectionFunc)sel_func,
+                                           nullptr,
+                                           nullptr);
 
     if (G_UNLIKELY(!dir_tree_view_data))
         dir_tree_view_data = g_quark_from_static_string("show_hidden");
     g_object_set_qdata(G_OBJECT(dir_tree_view), dir_tree_view_data, GINT_TO_POINTER(show_hidden));
     model = get_dir_tree_model();
-    filter = gtk_tree_model_filter_new(model, NULL);
+    filter = gtk_tree_model_filter_new(model, nullptr);
     g_object_unref(G_OBJECT(model));
     gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER(filter),
                                            (GtkTreeModelFilterVisibleFunc)filter_func,
                                            dir_tree_view,
-                                           NULL);
+                                           nullptr);
     gtk_tree_view_set_model(dir_tree_view, filter);
     g_object_unref(G_OBJECT(filter));
 
@@ -154,7 +157,7 @@ GtkWidget* ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
                           "row-collapsed",
                           G_CALLBACK(on_dir_tree_view_row_collapsed),
                           model,
-                          NULL,
+                          nullptr,
                           G_CONNECT_AFTER);
 
     g_signal_connect(dir_tree_view,
@@ -188,10 +191,10 @@ GtkWidget* ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
                      browser);
 
     tree_path = gtk_tree_path_new_first();
-    gtk_tree_view_expand_row(dir_tree_view, tree_path, FALSE);
+    gtk_tree_view_expand_row(dir_tree_view, tree_path, false);
     gtk_tree_path_free(tree_path);
 
-    g_signal_connect(dir_tree_view, "destroy", G_CALLBACK(on_destroy), NULL);
+    g_signal_connect(dir_tree_view, "destroy", G_CALLBACK(on_destroy), nullptr);
     return GTK_WIDGET(dir_tree_view);
 }
 
@@ -199,22 +202,22 @@ bool ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
 {
     GtkTreeIter it;
     GtkTreeIter parent_it;
-    GtkTreePath* tree_path = NULL;
+    GtkTreePath* tree_path = nullptr;
 
     if (!path || *path != '/')
-        return FALSE;
+        return false;
 
     char** dirs = g_strsplit(path + 1, "/", -1);
 
     if (!dirs)
-        return FALSE;
+        return false;
 
     GtkTreeModel* model = gtk_tree_view_get_model(dir_tree_view);
 
-    if (!gtk_tree_model_iter_children(model, &parent_it, NULL))
+    if (!gtk_tree_model_iter_children(model, &parent_it, nullptr))
     {
         g_strfreev(dirs);
-        return FALSE;
+        return false;
     }
 
     /* special case: root dir */
@@ -231,9 +234,9 @@ bool ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
         if (!gtk_tree_model_iter_children(model, &it, &parent_it))
         {
             g_strfreev(dirs);
-            return FALSE;
+            return false;
         }
-        bool found = FALSE;
+        bool found = false;
         VFSFileInfo* info;
         do
         {
@@ -246,10 +249,10 @@ bool ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
 
                 if (dir[1])
                 {
-                    gtk_tree_view_expand_row(dir_tree_view, tree_path, FALSE);
+                    gtk_tree_view_expand_row(dir_tree_view, tree_path, false);
                     gtk_tree_model_get_iter(model, &parent_it, tree_path);
                 }
-                found = TRUE;
+                found = true;
                 vfs_file_info_unref(info);
                 break;
             }
@@ -257,23 +260,23 @@ bool ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
         } while (gtk_tree_model_iter_next(model, &it));
 
         if (!found)
-            return FALSE; /* Error! */
+            return false; /* Error! */
 
         if (tree_path && dir[1])
         {
             gtk_tree_path_free(tree_path);
-            tree_path = NULL;
+            tree_path = nullptr;
         }
     }
 _found:
     g_strfreev(dirs);
     gtk_tree_selection_select_path(gtk_tree_view_get_selection(dir_tree_view), tree_path);
 
-    gtk_tree_view_scroll_to_cell(dir_tree_view, tree_path, NULL, FALSE, 0.5, 0.5);
+    gtk_tree_view_scroll_to_cell(dir_tree_view, tree_path, nullptr, false, 0.5, 0.5);
 
     gtk_tree_path_free(tree_path);
 
-    return TRUE;
+    return true;
 }
 
 /* FIXME: should this API be put here? Maybe it belongs to prk-dir-tree.c */
@@ -295,12 +298,12 @@ char* ptk_dir_tree_view_get_selected_dir(GtkTreeView* dir_tree_view)
     GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(dir_tree_view);
     if (gtk_tree_selection_get_selected(tree_sel, &model, &it))
         return ptk_dir_view_get_dir_path(model, &it);
-    return NULL;
+    return nullptr;
 }
 
 static GtkTreeModel* get_dir_tree_model()
 {
-    static PtkDirTree* dir_tree_model = NULL;
+    static PtkDirTree* dir_tree_model = nullptr;
 
     if (G_UNLIKELY(!dir_tree_model))
     {
@@ -321,12 +324,12 @@ static bool sel_func(GtkTreeSelection* selection, GtkTreeModel* model, GtkTreePa
     VFSFileInfo* file;
 
     if (!gtk_tree_model_get_iter(model, &it, path))
-        return FALSE;
+        return false;
     gtk_tree_model_get(model, &it, COL_DIR_TREE_INFO, &file, -1);
     if (!file)
-        return FALSE;
+        return false;
     vfs_file_info_unref(file);
-    return TRUE;
+    return true;
 }
 
 void ptk_dir_tree_view_show_hidden_files(GtkTreeView* dir_tree_view, bool show_hidden)
@@ -378,12 +381,12 @@ static bool on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* evt,
                                           evt->y,
                                           &tree_path,
                                           &tree_col,
-                                          NULL,
-                                          NULL))
+                                          nullptr,
+                                          nullptr))
         {
             if (gtk_tree_model_get_iter(model, &it, tree_path))
             {
-                gtk_tree_view_set_cursor(GTK_TREE_VIEW(view), tree_path, tree_col, FALSE);
+                gtk_tree_view_set_cursor(GTK_TREE_VIEW(view), tree_path, tree_col, false);
 
                 if (evt->button == 3)
                 {
@@ -395,11 +398,12 @@ static bool on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* evt,
                          * This simulates a right-click in the file list when
                          * no files are selected (even if some are) since
                          * actions are to be taken on the dir itself. */
-                        GtkWidget* popup = ptk_file_menu_new(browser, NULL, NULL, dir_path, NULL);
+                        GtkWidget* popup =
+                            ptk_file_menu_new(browser, nullptr, nullptr, dir_path, nullptr);
                         if (popup)
-                            gtk_menu_popup_at_pointer(GTK_MENU(popup), NULL);
+                            gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
                         gtk_tree_path_free(tree_path);
-                        return TRUE;
+                        return true;
                     }
                 }
                 else
@@ -415,19 +419,19 @@ static bool on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* evt,
                                           evt->x,
                                           evt->y,
                                           &tree_path,
-                                          NULL,
-                                          NULL,
-                                          NULL))
+                                          nullptr,
+                                          nullptr,
+                                          nullptr))
         {
             if (gtk_tree_view_row_expanded(GTK_TREE_VIEW(view), tree_path))
                 gtk_tree_view_collapse_row(GTK_TREE_VIEW(view), tree_path);
             else
-                gtk_tree_view_expand_row(GTK_TREE_VIEW(view), tree_path, FALSE);
+                gtk_tree_view_expand_row(GTK_TREE_VIEW(view), tree_path, false);
             gtk_tree_path_free(tree_path);
-            return TRUE;
+            return true;
         }
     }
-    return FALSE;
+    return false;
 }
 
 static bool on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* browser)
@@ -437,7 +441,7 @@ static bool on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFil
     GtkTreeSelection* select = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
 
     if (!gtk_tree_selection_get_selected(select, &model, &iter))
-        return FALSE;
+        return false;
 
     int keymod = (evt->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_SUPER_MASK |
                                 GDK_HYPER_MASK | GDK_META_MASK));
@@ -454,24 +458,24 @@ static bool on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFil
             else if (gtk_tree_path_up(path))
             {
                 gtk_tree_selection_select_path(select, path);
-                gtk_tree_view_set_cursor(GTK_TREE_VIEW(view), path, NULL, FALSE);
+                gtk_tree_view_set_cursor(GTK_TREE_VIEW(view), path, nullptr, false);
             }
             else
             {
                 gtk_tree_path_free(path);
-                return FALSE;
+                return false;
             }
             break;
         case GDK_KEY_Right:
             if (!gtk_tree_view_row_expanded(GTK_TREE_VIEW(view), path))
             {
-                gtk_tree_view_expand_row(GTK_TREE_VIEW(view), path, FALSE);
+                gtk_tree_view_expand_row(GTK_TREE_VIEW(view), path, false);
             }
             else
             {
                 gtk_tree_path_down(path);
                 gtk_tree_selection_select_path(select, path);
-                gtk_tree_view_set_cursor(GTK_TREE_VIEW(view), path, NULL, FALSE);
+                gtk_tree_view_set_cursor(GTK_TREE_VIEW(view), path, nullptr, false);
             }
             break;
         case GDK_KEY_F10:
@@ -479,7 +483,7 @@ static bool on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFil
             if (evt->keyval == GDK_KEY_F10 && keymod != GDK_SHIFT_MASK)
             {
                 gtk_tree_path_free(path);
-                return FALSE;
+                return false;
             }
 
             char* dir_path;
@@ -490,34 +494,40 @@ static bool on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFil
                  * This simulates a right-click in the file list when
                  * no files are selected (even if some are) since
                  * actions are to be taken on the dir itself. */
-                GtkWidget* popup = ptk_file_menu_new(browser, NULL, NULL, dir_path, NULL);
+                GtkWidget* popup = ptk_file_menu_new(browser, nullptr, nullptr, dir_path, nullptr);
                 if (popup)
-                    gtk_menu_popup_at_pointer(GTK_MENU(popup), NULL);
+                    gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
             }
             break;
         default:
             gtk_tree_path_free(path);
-            return FALSE;
+            return false;
     }
     gtk_tree_path_free(path);
-    return TRUE;
+    return true;
 }
 
 // MOD drag n drop
 static char* dir_tree_view_get_drop_dir(GtkWidget* view, int x, int y)
 {
-    GtkTreePath* tree_path = NULL;
+    GtkTreePath* tree_path = nullptr;
     GtkTreeIter it;
     VFSFileInfo* file;
-    char* dest_path = NULL;
+    char* dest_path = nullptr;
 
     // if drag is in progress, get the dest row path
-    gtk_tree_view_get_drag_dest_row(GTK_TREE_VIEW(view), &tree_path, NULL);
+    gtk_tree_view_get_drag_dest_row(GTK_TREE_VIEW(view), &tree_path, nullptr);
     if (!tree_path)
     {
         // no drag in progress, get drop path
-        if (!gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view), x, y, &tree_path, NULL, NULL, NULL))
-            tree_path = NULL;
+        if (!gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
+                                           x,
+                                           y,
+                                           &tree_path,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr))
+            tree_path = nullptr;
     }
     if (tree_path)
     {
@@ -538,7 +548,7 @@ static char* dir_tree_view_get_drop_dir(GtkWidget* view, int x, int y)
         if ( dest_path && g_file_test( dest_path, G_FILE_TEST_IS_SYMLINK ) )
         {
             char* old_dest = dest_path;
-            dest_path = g_file_read_link( old_dest, NULL );
+            dest_path = g_file_read_link( old_dest, nullptr );
             g_free( old_dest );
         }
     */
@@ -578,7 +588,7 @@ static void on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContex
                         file_browser->drag_source_dev_tree = dest_dev;
                         for (; *puri; ++puri)
                         {
-                            file_path = g_filename_from_uri(*puri, NULL, NULL);
+                            file_path = g_filename_from_uri(*puri, nullptr, nullptr);
                             if (stat(file_path, &statbuf) == 0 && statbuf.st_dev != dest_dev)
                             {
                                 file_browser->drag_source_dev_tree = statbuf.st_dev;
@@ -606,20 +616,20 @@ static void on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContex
 
             if (puri)
             {
-                GList* files = NULL;
+                GList* files = nullptr;
                 if ((gdk_drag_context_get_selected_action(drag_context) &
                      (GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK)) == 0)
                 {
                     gdk_drag_status(drag_context, GDK_ACTION_MOVE, time);
                 }
-                gtk_drag_finish(drag_context, TRUE, FALSE, time);
+                gtk_drag_finish(drag_context, true, false, time);
 
                 while (*puri)
                 {
                     if (**puri == '/')
                         file_path = g_strdup(*puri);
                     else
-                        file_path = g_filename_from_uri(*puri, NULL, NULL);
+                        file_path = g_filename_from_uri(*puri, nullptr, nullptr);
 
                     if (file_path)
                         files = g_list_prepend(files, file_path);
@@ -659,7 +669,7 @@ static void on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContex
                     }
                 }
                 g_free(dest_dir);
-                gtk_drag_finish(drag_context, TRUE, FALSE, time);
+                gtk_drag_finish(drag_context, true, false, time);
                 return;
             }
             g_free(dest_dir);
@@ -674,20 +684,20 @@ static void on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContex
         file_browser->pending_drag_status_tree = 0;
         return;
     }
-    gtk_drag_finish(drag_context, FALSE, FALSE, time);
+    gtk_drag_finish(drag_context, false, false, time);
 }
 
 static bool on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, int x,
                                        int y, unsigned int time,
                                        PtkFileBrowser* file_browser) // MOD added
 {
-    GdkAtom target = gdk_atom_intern("text/uri-list", FALSE);
+    GdkAtom target = gdk_atom_intern("text/uri-list", false);
 
     /*  Don't call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-drop");
 
     gtk_drag_get_data(widget, drag_context, target, time);
-    return TRUE;
+    return true;
 }
 
 static bool on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, int x,
@@ -768,12 +778,12 @@ static bool on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag
         ((struct _GdkDragContext*)drag_context)->suggested_action = suggested_action;
         gdk_drag_status(drag_context, suggested_action, gtk_get_current_event_time());
     }
-    return FALSE;
+    return false;
 }
 
 static bool on_dir_tree_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context,
                                         unsigned int time, PtkFileBrowser* file_browser)
 {
     file_browser->drag_source_dev_tree = 0;
-    return FALSE;
+    return false;
 }

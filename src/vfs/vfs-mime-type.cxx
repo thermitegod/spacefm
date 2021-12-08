@@ -10,8 +10,6 @@
  *
  */
 
-#include <sys/stat.h>
-
 #include <gtk/gtk.h>
 
 #include "vfs-mime-type.hxx"
@@ -19,15 +17,15 @@
 
 #include "vfs-utils.hxx"
 
-static GHashTable* mime_hash = NULL;
+static GHashTable* mime_hash = nullptr;
 static GRWLock mime_hash_lock;
 
 static unsigned int reload_callback_id = 0;
-static GList* reload_cb = NULL;
+static GList* reload_cb = nullptr;
 
 static int big_icon_size = 32, small_icon_size = 16;
 
-static VFSFileMonitor** mime_caches_monitor = NULL;
+static VFSFileMonitor** mime_caches_monitor = nullptr;
 
 static unsigned int theme_change_notify = 0;
 
@@ -46,7 +44,7 @@ static bool vfs_mime_type_reload(void* user_data)
     /* Remove all items in the hash table */
 
     g_rw_lock_writer_lock(&mime_hash_lock);
-    g_hash_table_foreach_remove(mime_hash, (GHRFunc)gtk_true, NULL);
+    g_hash_table_foreach_remove(mime_hash, (GHRFunc)gtk_true, nullptr);
     g_rw_lock_writer_unlock(&mime_hash_lock);
 
     g_source_remove(reload_callback_id);
@@ -60,7 +58,7 @@ static bool vfs_mime_type_reload(void* user_data)
         VFSMimeReloadCbEnt* ent = (VFSMimeReloadCbEnt*)l->data;
         ent->cb(ent->user_data);
     }
-    return FALSE;
+    return false;
 }
 
 static void on_mime_cache_changed(VFSFileMonitor* fm, VFSFileMonitorEvent event,
@@ -83,7 +81,7 @@ static void on_mime_cache_changed(VFSFileMonitor* fm, VFSFileMonitorEvent event,
             mime_cache_reload(cache);
             /* g_debug( "reload cache: %s", file_name ); */
             if (reload_callback_id == 0)
-                reload_callback_id = g_idle_add((GSourceFunc)vfs_mime_type_reload, NULL);
+                reload_callback_id = g_idle_add((GSourceFunc)vfs_mime_type_reload, nullptr);
             break;
         default:
             break;
@@ -102,18 +100,18 @@ void vfs_mime_type_init()
     for (i = 0; i < n_caches; ++i)
     {
         // MOD NOTE1  check to see if path exists - otherwise it later tries to
-        //  remove NULL fm with inotify which caused segfault
+        //  remove nullptr fm with inotify which caused segfault
         VFSFileMonitor* fm;
         if (g_file_test(caches[i]->file_path, G_FILE_TEST_EXISTS))
             fm = vfs_file_monitor_add_file(caches[i]->file_path, on_mime_cache_changed, caches[i]);
         else
-            fm = NULL;
+            fm = nullptr;
         mime_caches_monitor[i] = fm;
     }
-    mime_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, vfs_mime_type_unref);
+    mime_hash = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, vfs_mime_type_unref);
     GtkIconTheme* theme = gtk_icon_theme_get_default();
     theme_change_notify =
-        g_signal_connect(theme, "changed", G_CALLBACK(on_icon_theme_changed), NULL);
+        g_signal_connect(theme, "changed", G_CALLBACK(on_icon_theme_changed), nullptr);
 }
 
 void vfs_mime_type_clean()
@@ -127,7 +125,7 @@ void vfs_mime_type_clean()
     int i;
     for (i = 0; i < n_caches; ++i)
     {
-        if (mime_caches_monitor[i]) // MOD added if !NULL - see NOTE1 above
+        if (mime_caches_monitor[i]) // MOD added if !nullptr - see NOTE1 above
             vfs_file_monitor_remove(mime_caches_monitor[i], on_mime_cache_changed, caches[i]);
     }
     g_free(mime_caches_monitor);
@@ -140,7 +138,7 @@ void vfs_mime_type_clean()
 VFSMimeType* vfs_mime_type_get_from_file_name(const char* ufile_name)
 {
     /* type = xdg_mime_get_mime_type_from_file_name( ufile_name ); */
-    const char* type = mime_type_get_by_filename(ufile_name, NULL);
+    const char* type = mime_type_get_by_filename(ufile_name, nullptr);
     return vfs_mime_type_get_from_type(type);
 }
 
@@ -215,7 +213,7 @@ GdkPixbuf* vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
     }
 
     GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
-    GdkPixbuf* icon = NULL;
+    GdkPixbuf* icon = nullptr;
 
     if (G_UNLIKELY(!strcmp(mime_type->type, XDG_MIME_TYPE_DIRECTORY)))
     {
@@ -228,13 +226,13 @@ GdkPixbuf* vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
             mime_type->big_icon = icon;
         else
             mime_type->small_icon = icon;
-        return icon ? g_object_ref(icon) : NULL;
+        return icon ? g_object_ref(icon) : nullptr;
     }
 
     // get description and icon from freedesktop XML - these are fetched
     // together for performance.
-    char* xml_icon = NULL;
-    char* xml_desc = mime_type_get_desc_icon(mime_type->type, NULL, &xml_icon);
+    char* xml_icon = nullptr;
+    char* xml_desc = mime_type_get_desc_icon(mime_type->type, nullptr, &xml_icon);
     if (xml_icon)
     {
         if (xml_icon[0])
@@ -319,7 +317,7 @@ GdkPixbuf* vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
         mime_type->big_icon = icon;
     else
         mime_type->small_icon = icon;
-    return icon ? g_object_ref(icon) : NULL;
+    return icon ? g_object_ref(icon) : nullptr;
 }
 
 static void free_cached_icons(void* key, void* value, void* user_data)
@@ -331,7 +329,7 @@ static void free_cached_icons(void* key, void* value, void* user_data)
         if (mime_type->big_icon)
         {
             g_object_unref(mime_type->big_icon);
-            mime_type->big_icon = NULL;
+            mime_type->big_icon = nullptr;
         }
     }
     else
@@ -339,7 +337,7 @@ static void free_cached_icons(void* key, void* value, void* user_data)
         if (mime_type->small_icon)
         {
             g_object_unref(mime_type->small_icon);
-            mime_type->small_icon = NULL;
+            mime_type->small_icon = nullptr;
         }
     }
 }
@@ -380,7 +378,7 @@ const char* vfs_mime_type_get_description(VFSMimeType* mime_type)
 {
     if (G_UNLIKELY(!mime_type->description))
     {
-        mime_type->description = mime_type_get_desc_icon(mime_type->type, NULL, NULL);
+        mime_type->description = mime_type_get_desc_icon(mime_type->type, nullptr, nullptr);
         if (G_UNLIKELY(!mime_type->description || !*mime_type->description))
         {
             g_warning("mime-type %s has no description (comment)", mime_type->type);
@@ -402,7 +400,7 @@ const char* vfs_mime_type_get_description(VFSMimeType* mime_type)
 char** vfs_mime_type_join_actions(char** list1, unsigned long len1, char** list2,
                                   unsigned long len2)
 {
-    char** ret = NULL;
+    char** ret = nullptr;
 
     if (len1 > 0 || len2 > 0)
         ret = g_new0(char*, len1 + len2 + 1);
@@ -462,7 +460,7 @@ char* vfs_mime_type_get_default_action(VFSMimeType* mime_type)
  */
 void vfs_mime_type_set_default_action(VFSMimeType* mime_type, const char* desktop_id)
 {
-    char* cust_desktop = NULL;
+    char* cust_desktop = nullptr;
     /*
         if( ! g_str_has_suffix( desktop_id, ".desktop" ) )
             return;

@@ -46,7 +46,7 @@ void ptk_show_file_properties(GtkWindow* parent_win, const char* cwd, GList* sel
 
 /* sel_files is a list of VFSFileInfo
  * app_desktop is the application used to open the files.
- * If app_desktop == NULL, each file will be opened with its
+ * If app_desktop == nullptr, each file will be opened with its
  * default application. */
 void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_desktop,
                              PtkFileBrowser* file_browser, bool xforce, bool xnever);

@@ -100,7 +100,7 @@ typedef struct VFSFileTask
     gid_t gid;
 
     /* For chmod */
-    unsigned char* chmod_actions; /* If chmod is not needed, this should be NULL */
+    unsigned char* chmod_actions; /* If chmod is not needed, this should be nullptr */
 
     off_t total_size; /* Total size of the files to be processed, in bytes */
     off_t progress;   /* Total size of current processed files, in btytes */

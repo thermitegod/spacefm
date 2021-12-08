@@ -22,8 +22,8 @@
 #include "vfs-file-info.hxx"
 
 static int big_thumb_size = 48, small_thumb_size = 20;
-static bool utf8_file_name = FALSE;
-static const char* desktop_dir = NULL; // MOD added
+static bool utf8_file_name = false;
+static const char* desktop_dir = nullptr; // MOD added
 
 void vfs_file_info_set_utf8_filename(bool is_utf8)
 {
@@ -42,47 +42,47 @@ static void vfs_file_info_clear(VFSFileInfo* fi)
     if (fi->disp_name && fi->disp_name != fi->name)
     {
         g_free(fi->disp_name);
-        fi->disp_name = NULL;
+        fi->disp_name = nullptr;
     }
     if (fi->name)
     {
         g_free(fi->name);
-        fi->name = NULL;
+        fi->name = nullptr;
     }
     if (fi->collate_key) // sfm
     {
         g_free(fi->collate_key);
-        fi->collate_key = NULL;
+        fi->collate_key = nullptr;
     }
     if (fi->collate_icase_key) // sfm
     {
         g_free(fi->collate_icase_key);
-        fi->collate_icase_key = NULL;
+        fi->collate_icase_key = nullptr;
     }
     if (fi->disp_size)
     {
         g_free(fi->disp_size);
-        fi->disp_size = NULL;
+        fi->disp_size = nullptr;
     }
     if (fi->disp_owner)
     {
         g_free(fi->disp_owner);
-        fi->disp_owner = NULL;
+        fi->disp_owner = nullptr;
     }
     if (fi->disp_mtime)
     {
         g_free(fi->disp_mtime);
-        fi->disp_mtime = NULL;
+        fi->disp_mtime = nullptr;
     }
     if (fi->big_thumbnail)
     {
         g_object_unref(fi->big_thumbnail);
-        fi->big_thumbnail = NULL;
+        fi->big_thumbnail = nullptr;
     }
     if (fi->small_thumbnail)
     {
         g_object_unref(fi->small_thumbnail);
-        fi->small_thumbnail = NULL;
+        fi->small_thumbnail = nullptr;
     }
 
     fi->disp_perm[0] = '\0';
@@ -90,7 +90,7 @@ static void vfs_file_info_clear(VFSFileInfo* fi)
     if (fi->mime_type)
     {
         vfs_mime_type_unref(fi->mime_type);
-        fi->mime_type = NULL;
+        fi->mime_type = nullptr;
     }
     fi->flags = VFS_FILE_INFO_NONE;
 }
@@ -134,7 +134,7 @@ bool vfs_file_info_get(VFSFileInfo* fi, const char* file_path, const char* base_
         fi->blksize = file_stat.st_blksize;
         fi->blocks = file_stat.st_blocks;
 
-        if (G_LIKELY(utf8_file_name && g_utf8_validate(fi->name, -1, NULL)))
+        if (G_LIKELY(utf8_file_name && g_utf8_validate(fi->name, -1, nullptr)))
         {
             fi->disp_name = fi->name; /* Don't duplicate the name and save memory */
         }
@@ -148,11 +148,11 @@ bool vfs_file_info_get(VFSFileInfo* fi, const char* file_path, const char* base_
         char* str = g_utf8_casefold(fi->disp_name, -1);
         fi->collate_icase_key = g_utf8_collate_key_for_filename(str, -1);
         g_free(str);
-        return TRUE;
+        return true;
     }
     else
         fi->mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
-    return FALSE;
+    return false;
 }
 
 const char* vfs_file_info_get_name(VFSFileInfo* fi)
@@ -190,7 +190,7 @@ const char* vfs_file_info_get_disp_size(VFSFileInfo* fi)
     if (G_UNLIKELY(!fi->disp_size))
     {
         char buf[64];
-        vfs_file_size_to_string_format(buf, fi->size, TRUE);
+        vfs_file_size_to_string_format(buf, fi->size, true);
         fi->disp_size = g_strdup(buf);
     }
     return fi->disp_size;
@@ -239,7 +239,7 @@ GdkPixbuf* vfs_file_info_get_big_icon(VFSFileInfo* fi)
     {
         int w, h;
         int icon_size;
-        vfs_mime_type_get_icon_size(&icon_size, NULL);
+        vfs_mime_type_get_icon_size(&icon_size, nullptr);
         if (fi->big_thumbnail)
         {
             w = gdk_pixbuf_get_width(fi->big_thumbnail);
@@ -250,17 +250,17 @@ GdkPixbuf* vfs_file_info_get_big_icon(VFSFileInfo* fi)
 
         if (ABS(MAX(w, h) - icon_size) > 2)
         {
-            char* icon_name = NULL;
+            char* icon_name = nullptr;
             if (fi->big_thumbnail)
             {
                 icon_name = (char*)g_object_steal_data(G_OBJECT(fi->big_thumbnail), "name");
                 g_object_unref(fi->big_thumbnail);
-                fi->big_thumbnail = NULL;
+                fi->big_thumbnail = nullptr;
             }
             if (G_LIKELY(icon_name))
             {
                 if (G_UNLIKELY(icon_name[0] == '/'))
-                    fi->big_thumbnail = gdk_pixbuf_new_from_file(icon_name, NULL);
+                    fi->big_thumbnail = gdk_pixbuf_new_from_file(icon_name, nullptr);
                 else
                     fi->big_thumbnail =
                         vfs_load_icon(gtk_icon_theme_get_default(), icon_name, icon_size);
@@ -270,11 +270,11 @@ GdkPixbuf* vfs_file_info_get_big_icon(VFSFileInfo* fi)
             else
                 g_free(icon_name);
         }
-        return fi->big_thumbnail ? g_object_ref(fi->big_thumbnail) : NULL;
+        return fi->big_thumbnail ? g_object_ref(fi->big_thumbnail) : nullptr;
     }
     if (G_UNLIKELY(!fi->mime_type))
-        return NULL;
-    return vfs_mime_type_get_icon(fi->mime_type, TRUE);
+        return nullptr;
+    return vfs_mime_type_get_icon(fi->mime_type, true);
 }
 
 GdkPixbuf* vfs_file_info_get_small_icon(VFSFileInfo* fi)
@@ -283,18 +283,18 @@ GdkPixbuf* vfs_file_info_get_small_icon(VFSFileInfo* fi)
         return g_object_ref(fi->small_thumbnail);
 
     if (G_UNLIKELY(!fi->mime_type))
-        return NULL;
-    return vfs_mime_type_get_icon(fi->mime_type, FALSE);
+        return nullptr;
+    return vfs_mime_type_get_icon(fi->mime_type, false);
 }
 
 GdkPixbuf* vfs_file_info_get_big_thumbnail(VFSFileInfo* fi)
 {
-    return fi->big_thumbnail ? g_object_ref(fi->big_thumbnail) : NULL;
+    return fi->big_thumbnail ? g_object_ref(fi->big_thumbnail) : nullptr;
 }
 
 GdkPixbuf* vfs_file_info_get_small_thumbnail(VFSFileInfo* fi)
 {
-    return fi->small_thumbnail ? g_object_ref(fi->small_thumbnail) : NULL;
+    return fi->small_thumbnail ? g_object_ref(fi->small_thumbnail) : nullptr;
 }
 
 const char* vfs_file_info_get_disp_owner(VFSFileInfo* fi)
@@ -489,34 +489,34 @@ void vfs_file_size_to_string_format(char* buf, uint64_t size, bool decimal)
 bool vfs_file_info_is_dir(VFSFileInfo* fi)
 {
     if (S_ISDIR(fi->mode))
-        return TRUE;
+        return true;
     if (S_ISLNK(fi->mode) &&
         !strcmp(vfs_mime_type_get_type(fi->mime_type), XDG_MIME_TYPE_DIRECTORY))
     {
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 
 bool vfs_file_info_is_symlink(VFSFileInfo* fi)
 {
-    return S_ISLNK(fi->mode) ? TRUE : FALSE;
+    return S_ISLNK(fi->mode) ? true : false;
 }
 
 bool vfs_file_info_is_image(VFSFileInfo* fi)
 {
     /* FIXME: We had better use functions of xdg_mime to check this */
     if (!strncmp("image/", vfs_mime_type_get_type(fi->mime_type), 6))
-        return TRUE;
-    return FALSE;
+        return true;
+    return false;
 }
 
 bool vfs_file_info_is_video(VFSFileInfo* fi)
 {
     /* FIXME: We had better use functions of xdg_mime to check this */
     if (!strncmp("video/", vfs_mime_type_get_type(fi->mime_type), 6))
-        return TRUE;
-    return FALSE;
+        return true;
+    return false;
 }
 
 bool vfs_file_info_is_desktop_entry(VFSFileInfo* fi)
@@ -527,8 +527,8 @@ bool vfs_file_info_is_desktop_entry(VFSFileInfo* fi)
 bool vfs_file_info_is_unknown_type(VFSFileInfo* fi)
 {
     if (!strcmp(XDG_MIME_TYPE_UNKNOWN, vfs_mime_type_get_type(fi->mime_type)))
-        return TRUE;
-    return FALSE;
+        return true;
+    return false;
 }
 
 /* full path of the file is required by this function */
@@ -549,20 +549,20 @@ bool vfs_file_info_is_text(VFSFileInfo* fi, const char* file_path)
  */
 bool vfs_file_info_open_file(VFSFileInfo* fi, const char* file_path, GError** err)
 {
-    bool ret = FALSE;
+    bool ret = false;
     char* argv[2];
 
     if (vfs_file_info_is_executable(fi, file_path))
     {
         argv[0] = (char*)file_path;
-        argv[1] = NULL;
-        ret = g_spawn_async(NULL,
+        argv[1] = nullptr;
+        ret = g_spawn_async(nullptr,
                             argv,
-                            NULL,
+                            nullptr,
                             GSpawnFlags(G_SPAWN_STDOUT_TO_DEV_NULL | G_SPAWN_SEARCH_PATH),
-                            NULL,
-                            NULL,
-                            NULL,
+                            nullptr,
+                            nullptr,
+                            nullptr,
                             err);
     }
     else
@@ -574,10 +574,10 @@ bool vfs_file_info_open_file(VFSFileInfo* fi, const char* file_path, GError** er
             VFSAppDesktop* app = vfs_app_desktop_new(app_name);
             if (!vfs_app_desktop_get_exec(app))
                 app->exec = g_strdup(app_name); /* FIXME: app->exec */
-            GList* files = NULL;
+            GList* files = nullptr;
             files = g_list_prepend(files, (void*)file_path);
             /* FIXME: working dir is needed */
-            ret = vfs_app_desktop_open_files(gdk_screen_get_default(), NULL, app, files, err);
+            ret = vfs_app_desktop_open_files(gdk_screen_get_default(), nullptr, app, files, err);
             g_list_free(files);
             vfs_app_desktop_unref(app);
             g_free(app_name);
@@ -595,8 +595,8 @@ mode_t vfs_file_info_get_mode(VFSFileInfo* fi)
 bool vfs_file_info_is_thumbnail_loaded(VFSFileInfo* fi, bool big)
 {
     if (big)
-        return (fi->big_thumbnail != NULL);
-    return (fi->small_thumbnail != NULL);
+        return (fi->big_thumbnail != nullptr);
+    return (fi->small_thumbnail != nullptr);
 }
 
 bool vfs_file_info_load_thumbnail(VFSFileInfo* fi, const char* full_path, bool big)
@@ -604,12 +604,12 @@ bool vfs_file_info_load_thumbnail(VFSFileInfo* fi, const char* full_path, bool b
     if (big)
     {
         if (fi->big_thumbnail)
-            return TRUE;
+            return true;
     }
     else
     {
         if (fi->small_thumbnail)
-            return TRUE;
+            return true;
     }
     GdkPixbuf* thumbnail =
         vfs_thumbnail_load_for_file(full_path, big ? big_thumb_size : small_thumb_size, fi->mtime);
@@ -627,7 +627,7 @@ bool vfs_file_info_load_thumbnail(VFSFileInfo* fi, const char* full_path, bool b
         else
             fi->small_thumbnail = vfs_file_info_get_small_icon(fi);
     }
-    return (thumbnail != NULL);
+    return (thumbnail != nullptr);
 }
 
 void vfs_file_info_set_thumbnail_size(int big, int small)
@@ -664,13 +664,13 @@ void vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
             vfs_mime_type_get_icon_size(&big_size, &small_size);
             if (!fi->big_thumbnail)
             {
-                icon = vfs_app_desktop_get_icon(desktop, big_size, FALSE);
+                icon = vfs_app_desktop_get_icon(desktop, big_size, false);
                 if (G_LIKELY(icon))
                     fi->big_thumbnail = icon;
             }
             if (!fi->small_thumbnail)
             {
-                icon = vfs_app_desktop_get_icon(desktop, small_size, FALSE);
+                icon = vfs_app_desktop_get_icon(desktop, small_size, false);
                 if (G_LIKELY(icon))
                     fi->small_thumbnail = icon;
             }
@@ -682,7 +682,7 @@ void vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
 
 void vfs_file_info_list_free(GList* list)
 {
-    g_list_foreach(list, (GFunc)vfs_file_info_unref, NULL);
+    g_list_foreach(list, (GFunc)vfs_file_info_unref, nullptr);
     g_list_free(list);
 }
 
@@ -690,7 +690,7 @@ char* vfs_file_resolve_path(const char* cwd, const char* relative_path)
 {
     GString* ret = g_string_sized_new(4096);
 
-    g_return_val_if_fail(G_LIKELY(relative_path), NULL);
+    g_return_val_if_fail(G_LIKELY(relative_path), nullptr);
 
     int len = strlen(relative_path);
     bool strip_tail = (len == 0 || relative_path[len - 1] != '/');
@@ -749,5 +749,5 @@ char* vfs_file_resolve_path(const char* cwd, const char* relative_path)
     /* if original path contains tailing '/', preserve it; otherwise, remove it. */
     if (strip_tail && G_LIKELY(ret->len > 1) && G_UNLIKELY(ret->str[ret->len - 1] == '/'))
         g_string_truncate(ret, ret->len - 1);
-    return g_string_free(ret, FALSE);
+    return g_string_free(ret, false);
 }

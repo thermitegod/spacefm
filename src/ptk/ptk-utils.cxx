@@ -17,13 +17,13 @@
 
 void ptk_show_error(GtkWindow* parent, const char* title, const char* message)
 {
-    char* msg = replace_string(message, "%", "%%", FALSE);
+    char* msg = replace_string(message, "%", "%%", false);
     GtkWidget* dlg = gtk_message_dialog_new(parent,
                                             GTK_DIALOG_MODAL,
                                             GTK_MESSAGE_ERROR,
                                             GTK_BUTTONS_OK,
                                             msg,
-                                            NULL);
+                                            nullptr);
     g_free(msg);
     if (title)
         gtk_window_set_title((GtkWindow*)dlg, title);
@@ -34,9 +34,9 @@ void ptk_show_error(GtkWindow* parent, const char* title, const char* message)
 
 GtkBuilder* _gtk_builder_new_from_file(const char* file)
 {
-    char* filename = g_build_filename(PACKAGE_UI_DIR, file, NULL);
+    char* filename = g_build_filename(PACKAGE_UI_DIR, file, nullptr);
     GtkBuilder* builder = gtk_builder_new();
-    gtk_builder_add_from_file(builder, filename, NULL);
+    gtk_builder_add_from_file(builder, filename, nullptr);
 
     return builder;
 }
@@ -54,7 +54,7 @@ void transpose_nonlatin_keypress(GdkEventKey* event)
         return;
 
     // We have a non-latin char, try other keyboard groups
-    GdkKeymapKey* keys = NULL;
+    GdkKeymapKey* keys = nullptr;
     unsigned int* keyvals;
     int n_entries;
     int level;
@@ -66,10 +66,10 @@ void transpose_nonlatin_keypress(GdkEventKey* event)
                                             event->hardware_keycode,
                                             (GdkModifierType)event->state,
                                             event->group,
-                                            NULL,
-                                            NULL,
+                                            nullptr,
+                                            nullptr,
                                             &level,
-                                            NULL) &&
+                                            nullptr) &&
         gdk_keymap_get_entries_for_keycode(gdk_keymap_get_for_display(display),
                                            event->hardware_keycode,
                                            &keys,

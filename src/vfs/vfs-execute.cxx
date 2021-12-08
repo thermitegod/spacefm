@@ -29,7 +29,7 @@ static bool sn_timeout(void* user_data)
     /* FIXME: startup notification, is this correct? */
     sn_launcher_context_complete(ctx);
     sn_launcher_context_unref(ctx);
-    return FALSE;
+    return false;
 }
 
 /* This function is taken from the code of thunar, written by Benedikt Meurer <benny@xfce.org> */
@@ -38,7 +38,7 @@ static int tvsn_get_active_workspace_number(GdkScreen* screen)
     GdkWindow* root;
     unsigned long bytes_after_ret = 0;
     unsigned long nitems_ret = 0;
-    unsigned int* prop_ret = NULL;
+    unsigned int* prop_ret = nullptr;
     Atom _NET_CURRENT_DESKTOP;
     Atom _WIN_WORKSPACE;
     Atom type_ret = None;
@@ -79,15 +79,15 @@ static int tvsn_get_active_workspace_number(GdkScreen* screen)
                                &bytes_after_ret,
                                (void*)&prop_ret) != Success)
         {
-            if (G_UNLIKELY(prop_ret != NULL))
+            if (G_UNLIKELY(prop_ret != nullptr))
             {
                 XFree(prop_ret);
-                prop_ret = NULL;
+                prop_ret = nullptr;
             }
         }
     }
 
-    if (G_LIKELY(prop_ret != NULL))
+    if (G_LIKELY(prop_ret != nullptr))
     {
         if (G_LIKELY(type_ret != None && format_ret != 0))
             ws_num = *prop_ret;
@@ -105,7 +105,7 @@ bool vfs_exec_on_screen(GdkScreen* screen, const char* work_dir, char** argv, ch
                         GError** err)
 {
 #ifdef HAVE_SN
-    SnLauncherContext* ctx = NULL;
+    SnLauncherContext* ctx = nullptr;
     SnDisplay* display;
     int startup_id_index = -1;
 #endif
@@ -140,7 +140,7 @@ bool vfs_exec_on_screen(GdkScreen* screen, const char* work_dir, char** argv, ch
                                  (SnDisplayErrorTrapPush)gdk_error_trap_push,
                                  (SnDisplayErrorTrapPush)gdk_error_trap_pop);
     else
-        display = NULL;
+        display = nullptr;
 
     if (G_LIKELY(display))
     {
@@ -165,7 +165,7 @@ bool vfs_exec_on_screen(GdkScreen* screen, const char* work_dir, char** argv, ch
                                      argv[0],
                                      gtk_get_current_event_time() /*cur_time*/);
 
-        GSpawnChildSetupFunc setup_func = NULL;
+        GSpawnChildSetupFunc setup_func = nullptr;
 
         setup_func = (GSpawnChildSetupFunc)sn_launcher_context_setup_child_process;
         if (startup_id_index >= 0)
@@ -173,21 +173,21 @@ bool vfs_exec_on_screen(GdkScreen* screen, const char* work_dir, char** argv, ch
         else
             startup_id_index = i++;
         new_env[startup_id_index] =
-            g_strconcat("DESKTOP_STARTUP_ID=", sn_launcher_context_get_startup_id(ctx), NULL);
+            g_strconcat("DESKTOP_STARTUP_ID=", sn_launcher_context_get_startup_id(ctx), nullptr);
     }
 #endif
 
     /* This is taken from gdk_spawn_on_screen */
     char* display_name = gdk_screen_make_display_name(screen);
     if (display_index >= 0)
-        new_env[display_index] = g_strconcat("DISPLAY=", display_name, NULL);
+        new_env[display_index] = g_strconcat("DISPLAY=", display_name, nullptr);
     else
-        new_env[i++] = g_strconcat("DISPLAY=", display_name, NULL);
+        new_env[i++] = g_strconcat("DISPLAY=", display_name, nullptr);
 
     g_free(display_name);
-    new_env[i] = NULL;
+    new_env[i] = nullptr;
 
-    bool ret = g_spawn_async(work_dir, argv, new_env, flags, NULL, NULL, NULL, err);
+    bool ret = g_spawn_async(work_dir, argv, new_env, flags, nullptr, nullptr, nullptr, err);
 
     /* for debugging */
 #if 0

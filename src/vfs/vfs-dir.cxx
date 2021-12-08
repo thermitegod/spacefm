@@ -60,15 +60,15 @@ enum
 };
 
 static unsigned int signals[N_SIGNALS] = {0};
-static GObjectClass* parent_class = NULL;
+static GObjectClass* parent_class = nullptr;
 
-static GHashTable* dir_hash = NULL;
-static GList* mime_cb = NULL;
+static GHashTable* dir_hash = nullptr;
+static GList* mime_cb = nullptr;
 static unsigned int change_notify_timeout = 0;
 static unsigned int theme_change_notify = 0;
 
-static bool is_desktop_set = FALSE;
-static const char* desktop_dir = NULL;
+static bool is_desktop_set = false;
+static const char* desktop_dir = nullptr;
 
 GType vfs_dir_get_type(void)
 {
@@ -77,15 +77,15 @@ GType vfs_dir_get_type(void)
     {
         static const GTypeInfo info = {
             sizeof(VFSDirClass),
-            NULL,
-            NULL,
+            nullptr,
+            nullptr,
             (GClassInitFunc)vfs_dir_class_init,
-            NULL,
-            NULL,
+            nullptr,
+            nullptr,
             sizeof(VFSDir),
             0,
             (GInstanceInitFunc)vfs_dir_init,
-            NULL,
+            nullptr,
         };
         type = g_type_register_static(G_TYPE_OBJECT, "VFSDir", &info, (GTypeFlags)0);
     }
@@ -111,8 +111,8 @@ static void vfs_dir_class_init(VFSDirClass* klass)
                                                 G_TYPE_FROM_CLASS(klass),
                                                 G_SIGNAL_RUN_FIRST,
                                                 G_STRUCT_OFFSET(VFSDirClass, file_created),
-                                                NULL,
-                                                NULL,
+                                                nullptr,
+                                                nullptr,
                                                 g_cclosure_marshal_VOID__POINTER,
                                                 G_TYPE_NONE,
                                                 1,
@@ -126,8 +126,8 @@ static void vfs_dir_class_init(VFSDirClass* klass)
                                                 G_TYPE_FROM_CLASS(klass),
                                                 G_SIGNAL_RUN_FIRST,
                                                 G_STRUCT_OFFSET(VFSDirClass, file_deleted),
-                                                NULL,
-                                                NULL,
+                                                nullptr,
+                                                nullptr,
                                                 g_cclosure_marshal_VOID__POINTER,
                                                 G_TYPE_NONE,
                                                 1,
@@ -141,8 +141,8 @@ static void vfs_dir_class_init(VFSDirClass* klass)
                                                 G_TYPE_FROM_CLASS(klass),
                                                 G_SIGNAL_RUN_FIRST,
                                                 G_STRUCT_OFFSET(VFSDirClass, file_changed),
-                                                NULL,
-                                                NULL,
+                                                nullptr,
+                                                nullptr,
                                                 g_cclosure_marshal_VOID__POINTER,
                                                 G_TYPE_NONE,
                                                 1,
@@ -152,8 +152,8 @@ static void vfs_dir_class_init(VFSDirClass* klass)
                                                     G_TYPE_FROM_CLASS(klass),
                                                     G_SIGNAL_RUN_FIRST,
                                                     G_STRUCT_OFFSET(VFSDirClass, thumbnail_loaded),
-                                                    NULL,
-                                                    NULL,
+                                                    nullptr,
+                                                    nullptr,
                                                     g_cclosure_marshal_VOID__POINTER,
                                                     G_TYPE_NONE,
                                                     1,
@@ -163,8 +163,8 @@ static void vfs_dir_class_init(VFSDirClass* klass)
                                                G_TYPE_FROM_CLASS(klass),
                                                G_SIGNAL_RUN_FIRST,
                                                G_STRUCT_OFFSET(VFSDirClass, file_listed),
-                                               NULL,
-                                               NULL,
+                                               nullptr,
+                                               nullptr,
                                                g_cclosure_marshal_VOID__BOOLEAN,
                                                G_TYPE_NONE,
                                                1,
@@ -216,7 +216,7 @@ static void vfs_dir_finalize(GObject* obj)
         // printf("spacefm: vfs_dir_finalize -> vfs_async_task_cancel\n");
         vfs_async_task_cancel(dir->task);
         g_object_unref(dir->task);
-        dir->task = NULL;
+        dir->task = nullptr;
     }
     if (dir->monitor)
     {
@@ -232,10 +232,10 @@ static void vfs_dir_finalize(GObject* obj)
             if (g_hash_table_size(dir_hash) == 0)
             {
                 g_hash_table_destroy(dir_hash);
-                dir_hash = NULL;
+                dir_hash = nullptr;
 
                 vfs_mime_type_remove_reload_cb(mime_cb);
-                mime_cb = NULL;
+                mime_cb = nullptr;
 
                 if (change_notify_timeout)
                 {
@@ -249,36 +249,36 @@ static void vfs_dir_finalize(GObject* obj)
         }
         g_free(dir->path);
         g_free(dir->disp_path);
-        dir->path = dir->disp_path = NULL;
+        dir->path = dir->disp_path = nullptr;
     }
     /* g_debug( "dir->thumbnail_loader: %p", dir->thumbnail_loader ); */
     if (G_UNLIKELY(dir->thumbnail_loader))
     {
         /* g_debug( "FREE THUMBNAIL LOADER IN VFSDIR" ); */
         vfs_thumbnail_loader_free(dir->thumbnail_loader);
-        dir->thumbnail_loader = NULL;
+        dir->thumbnail_loader = nullptr;
     }
 
     if (dir->file_list)
     {
-        g_list_foreach(dir->file_list, (GFunc)vfs_file_info_unref, NULL);
+        g_list_foreach(dir->file_list, (GFunc)vfs_file_info_unref, nullptr);
         g_list_free(dir->file_list);
-        dir->file_list = NULL;
+        dir->file_list = nullptr;
         dir->n_files = 0;
     }
 
     if (dir->changed_files)
     {
-        g_slist_foreach(dir->changed_files, (GFunc)vfs_file_info_unref, NULL);
+        g_slist_foreach(dir->changed_files, (GFunc)vfs_file_info_unref, nullptr);
         g_slist_free(dir->changed_files);
-        dir->changed_files = NULL;
+        dir->changed_files = nullptr;
     }
 
     if (dir->created_files)
     {
-        g_slist_foreach(dir->created_files, (GFunc)g_free, NULL);
+        g_slist_foreach(dir->created_files, (GFunc)g_free, nullptr);
         g_slist_free(dir->created_files);
-        dir->created_files = NULL;
+        dir->created_files = nullptr;
     }
 
     vfs_dir_clear(dir);
@@ -308,7 +308,7 @@ static GList* vfs_dir_find_file(VFSDir* dir, const char* file_name, VFSFileInfo*
             return l;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 /* signal handlers */
@@ -327,8 +327,11 @@ void vfs_dir_emit_file_created(VFSDir* dir, const char* file_name, bool force)
     dir->created_files = g_slist_append(dir->created_files, g_strdup(file_name));
     if (change_notify_timeout == 0)
     {
-        change_notify_timeout =
-            g_timeout_add_full(G_PRIORITY_LOW, 200, (GSourceFunc)notify_file_change, NULL, NULL);
+        change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
+                                                   200,
+                                                   (GSourceFunc)notify_file_change,
+                                                   nullptr,
+                                                   nullptr);
     }
 }
 
@@ -337,12 +340,12 @@ void vfs_dir_emit_file_deleted(VFSDir* dir, const char* file_name, VFSFileInfo* 
     if (G_UNLIKELY(!strcmp(file_name, dir->path)))
     {
         /* Special Case: The directory itself was deleted... */
-        file = NULL;
+        file = nullptr;
         /* clear the whole list */
         vfs_dir_lock(dir);
-        g_list_foreach(dir->file_list, (GFunc)vfs_file_info_unref, NULL);
+        g_list_foreach(dir->file_list, (GFunc)vfs_file_info_unref, nullptr);
         g_list_free(dir->file_list);
-        dir->file_list = NULL;
+        dir->file_list = nullptr;
         vfs_dir_unlock(dir);
 
         g_signal_emit(dir, signals[FILE_DELETED_SIGNAL], 0, file);
@@ -358,8 +361,11 @@ void vfs_dir_emit_file_deleted(VFSDir* dir, const char* file_name, VFSFileInfo* 
             dir->changed_files = g_slist_prepend(dir->changed_files, file_found);
             if (change_notify_timeout == 0)
             {
-                change_notify_timeout =
-                    g_timeout_add_full(G_PRIORITY_LOW, 200, (GSourceFunc)notify_file_change, NULL, NULL);
+                change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
+                                                           200,
+                                                           (GSourceFunc)notify_file_change,
+                                                           nullptr,
+                                                           nullptr);
             }
         }
         else
@@ -370,7 +376,7 @@ void vfs_dir_emit_file_deleted(VFSDir* dir, const char* file_name, VFSFileInfo* 
 void vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* file, bool force)
 {
     // printf("vfs_dir_emit_file_changed dir=%s file_name=%s avoid=%s\n", dir->path, file_name,
-    // dir->avoid_changes ? "TRUE" : "FALSE" );
+    // dir->avoid_changes ? "true" : "false" );
 
     if (!force && dir->avoid_changes)
         return;
@@ -378,7 +384,7 @@ void vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* 
     if (G_UNLIKELY(!strcmp(file_name, dir->path)))
     {
         // Special Case: The directory itself was changed
-        g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, NULL);
+        g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, nullptr);
         return;
     }
 
@@ -395,8 +401,11 @@ void vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* 
                 dir->changed_files = g_slist_prepend(dir->changed_files, file);
                 if (change_notify_timeout == 0)
                 {
-                    change_notify_timeout =
-                        g_timeout_add_full(G_PRIORITY_LOW, 100, (GSourceFunc)notify_file_change, NULL, NULL);
+                    change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
+                                                               100,
+                                                               (GSourceFunc)notify_file_change,
+                                                               nullptr,
+                                                               nullptr);
                 }
             }
             else if (G_LIKELY(update_file_info(dir, file))) // update file info the first time
@@ -404,8 +413,11 @@ void vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* 
                 dir->changed_files = g_slist_prepend(dir->changed_files, file);
                 if (change_notify_timeout == 0)
                 {
-                    change_notify_timeout =
-                        g_timeout_add_full(G_PRIORITY_LOW, 500, (GSourceFunc)notify_file_change, NULL, NULL);
+                    change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
+                                                               500,
+                                                               (GSourceFunc)notify_file_change,
+                                                               nullptr,
+                                                               nullptr);
                 }
                 g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, file);
             }
@@ -427,7 +439,7 @@ void vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file)
         file = vfs_file_info_ref((VFSFileInfo*)l->data);
     }
     else
-        file = NULL;
+        file = nullptr;
     vfs_dir_unlock(dir);
 
     if (G_LIKELY(file))
@@ -441,11 +453,11 @@ void vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file)
 
 static VFSDir* vfs_dir_new(const char* path)
 {
-    VFSDir* dir = (VFSDir*)g_object_new(VFS_TYPE_DIR, NULL);
+    VFSDir* dir = (VFSDir*)g_object_new(VFS_TYPE_DIR, nullptr);
     dir->path = g_strdup(path);
 
     dir->avoid_changes = vfs_volume_dir_avoid_changes(path);
-    // printf("vfs_dir_new %s  avoid_changes=%s\n", dir->path, dir->avoid_changes ? "TRUE" : "FALSE"
+    // printf("vfs_dir_new %s  avoid_changes=%s\n", dir->path, dir->avoid_changes ? "true" : "false"
     // );
     return dir;
 }
@@ -453,7 +465,7 @@ static VFSDir* vfs_dir_new(const char* path)
 void on_list_task_finished(VFSAsyncTask* task, bool is_cancelled, VFSDir* dir)
 {
     g_object_unref(dir->task);
-    dir->task = NULL;
+    dir->task = nullptr;
     g_signal_emit(dir, signals[FILE_LISTED_SIGNAL], 0, is_cancelled);
     dir->file_listed = 1;
     dir->load_complete = 1;
@@ -461,30 +473,30 @@ void on_list_task_finished(VFSAsyncTask* task, bool is_cancelled, VFSDir* dir)
 
 static bool is_dir_mount_point(const char* path)
 {
-    return FALSE; /* FIXME: not implemented */
+    return false; /* FIXME: not implemented */
 }
 
 static bool is_dir_remote(const char* path)
 {
-    return FALSE; /* FIXME: not implemented */
+    return false; /* FIXME: not implemented */
 }
 
 static bool is_dir_virtual(const char* path)
 {
-    return FALSE; /* FIXME: not implemented */
+    return false; /* FIXME: not implemented */
 }
 
 static char* gethidden(const char* path) // MOD added
 {
     // Read .hidden into string
-    char* hidden_path = g_build_filename(path, ".hidden", NULL);
+    char* hidden_path = g_build_filename(path, ".hidden", nullptr);
 
     // test access first because open() on missing file may cause
     // long delay on nfs
     if (faccessat(0, hidden_path, R_OK, AT_EACCESS) != 0)
     {
         g_free(hidden_path);
-        return NULL;
+        return nullptr;
     }
 
     int fd = open(hidden_path, O_RDONLY);
@@ -506,11 +518,11 @@ static char* gethidden(const char* path) // MOD added
         }
         close(fd);
     }
-    return NULL;
+    return nullptr;
 }
 
 static bool ishidden(const char* hidden, const char* file_name) // MOD added
-{                                                               // assumes hidden,file_name != NULL
+{ // assumes hidden,file_name != nullptr
     char c;
     char* str = (char*)strstr(hidden, file_name);
     while (str)
@@ -520,39 +532,39 @@ static bool ishidden(const char* hidden, const char* file_name) // MOD added
             // file_name is at start of buffer
             c = hidden[strlen(file_name)];
             if (c == '\n' || c == '\0')
-                return TRUE;
+                return true;
         }
         else
         {
             c = str[strlen(file_name)];
             if (str[-1] == '\n' && (c == '\n' || c == '\0'))
-                return TRUE;
+                return true;
         }
         str = strstr(++str, file_name);
     }
-    return FALSE;
+    return false;
 }
 
 bool vfs_dir_add_hidden(const char* path, const char* file_name)
 {
-    bool ret = TRUE;
+    bool ret = true;
     char* hidden = gethidden(path);
 
     if (!(hidden && ishidden(hidden, file_name)))
     {
         char* buf = g_strdup_printf("%s\n", file_name);
-        char* file_path = g_build_filename(path, ".hidden", NULL);
+        char* file_path = g_build_filename(path, ".hidden", nullptr);
         int fd = open(file_path, O_WRONLY | O_CREAT | O_APPEND, 0644);
         g_free(file_path);
 
         if (fd != -1)
         {
             if (write(fd, buf, strlen(buf)) == -1)
-                ret = FALSE;
+                ret = false;
             close(fd);
         }
         else
-            ret = FALSE;
+            ret = false;
 
         g_free(buf);
     }
@@ -572,15 +584,15 @@ static void vfs_dir_load(VFSDir* dir)
         /* FIXME: We should check access here! */
 
         if (G_UNLIKELY(!strcmp(dir->path, vfs_get_desktop_dir())))
-            dir->is_desktop = TRUE;
+            dir->is_desktop = true;
         else if (G_UNLIKELY(!strcmp(dir->path, g_get_home_dir())))
-            dir->is_home = TRUE;
+            dir->is_home = true;
         if (G_UNLIKELY(is_dir_mount_point(dir->path)))
-            dir->is_mount_point = TRUE;
+            dir->is_mount_point = true;
         if (G_UNLIKELY(is_dir_remote(dir->path)))
-            dir->is_remote = TRUE;
+            dir->is_remote = true;
         if (G_UNLIKELY(is_dir_virtual(dir->path)))
-            dir->is_virtual = TRUE;
+            dir->is_virtual = true;
 
         dir->task = vfs_async_task_new((VFSAsyncFunc)vfs_dir_load_thread, dir);
         g_signal_connect(dir->task, "finish", G_CALLBACK(on_list_task_finished), dir);
@@ -601,7 +613,7 @@ static void* vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
         /* Install file alteration monitor */
         dir->monitor = vfs_file_monitor_add_dir(dir->path, vfs_dir_monitor_callback, dir);
 
-        GDir* dir_content = g_dir_open(dir->path, 0, NULL);
+        GDir* dir_content = g_dir_open(dir->path, 0, nullptr);
 
         if (dir_content)
         {
@@ -611,7 +623,7 @@ static void* vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
             while (!vfs_async_task_is_cancelled(dir->task) &&
                    (file_name = g_dir_read_name(dir_content)))
             {
-                full_path = g_build_filename(dir->path, file_name, NULL);
+                full_path = g_build_filename(dir->path, file_name, nullptr);
                 if (!full_path)
                     continue;
 
@@ -644,7 +656,7 @@ static void* vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
                 g_free(hidden);
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 bool vfs_dir_is_file_listed(VFSDir* dir)
@@ -654,20 +666,20 @@ bool vfs_dir_is_file_listed(VFSDir* dir)
 
 static bool update_file_info(VFSDir* dir, VFSFileInfo* file)
 {
-    bool ret = FALSE;
+    bool ret = false;
 
     /* FIXME: Dirty hack: steal the string to prevent memory allocation */
     char* file_name = file->name;
     if (file->name == file->disp_name)
-        file->disp_name = NULL;
-    file->name = NULL;
+        file->disp_name = nullptr;
+    file->name = nullptr;
 
-    char* full_path = g_build_filename(dir->path, file_name, NULL);
+    char* full_path = g_build_filename(dir->path, file_name, nullptr);
     if (G_LIKELY(full_path))
     {
         if (G_LIKELY(vfs_file_info_get(file, full_path, file_name)))
         {
-            ret = TRUE;
+            ret = true;
             vfs_file_info_load_special_info(file, full_path);
         }
         else /* The file doesn't exist */
@@ -684,7 +696,7 @@ static bool update_file_info(VFSDir* dir, VFSFileInfo* file)
                     vfs_file_info_unref(file);
                 }
             }
-            ret = FALSE;
+            ret = false;
         }
         g_free(full_path);
     }
@@ -711,7 +723,7 @@ static void update_changed_files(void* key, void* data, void* user_data)
             // else was deleted, signaled, and unrefed in update_file_info
         }
         g_slist_free(dir->changed_files);
-        dir->changed_files = NULL;
+        dir->changed_files = nullptr;
         vfs_dir_unlock(dir);
     }
 }
@@ -728,12 +740,12 @@ static void update_created_files(void* key, void* data, void* user_data)
         {
             VFSFileInfo* file;
             GList* ll;
-            if (!(ll = vfs_dir_find_file(dir, (char*)l->data, NULL)))
+            if (!(ll = vfs_dir_find_file(dir, (char*)l->data, nullptr)))
             {
                 // file is not in dir file_list
-                char* full_path = g_build_filename(dir->path, (char*)l->data, NULL);
+                char* full_path = g_build_filename(dir->path, (char*)l->data, nullptr);
                 file = vfs_file_info_new();
-                if (vfs_file_info_get(file, full_path, NULL))
+                if (vfs_file_info_get(file, full_path, nullptr))
                 {
                     // add new file to dir file_list
                     vfs_file_info_load_special_info(file, full_path);
@@ -759,18 +771,18 @@ static void update_created_files(void* key, void* data, void* user_data)
             g_free((char*)l->data); // free file_name string
         }
         g_slist_free(dir->created_files);
-        dir->created_files = NULL;
+        dir->created_files = nullptr;
         vfs_dir_unlock(dir);
     }
 }
 
 static bool notify_file_change(void* user_data)
 {
-    g_hash_table_foreach(dir_hash, update_changed_files, NULL);
-    g_hash_table_foreach(dir_hash, update_created_files, NULL);
+    g_hash_table_foreach(dir_hash, update_changed_files, nullptr);
+    g_hash_table_foreach(dir_hash, update_created_files, nullptr);
     /* remove the timeout */
     change_notify_timeout = 0;
-    return FALSE;
+    return false;
 }
 
 void vfs_dir_flush_notify_cache()
@@ -778,8 +790,8 @@ void vfs_dir_flush_notify_cache()
     if (change_notify_timeout)
         g_source_remove(change_notify_timeout);
     change_notify_timeout = 0;
-    g_hash_table_foreach(dir_hash, update_changed_files, NULL);
-    g_hash_table_foreach(dir_hash, update_created_files, NULL);
+    g_hash_table_foreach(dir_hash, update_changed_files, nullptr);
+    g_hash_table_foreach(dir_hash, update_created_files, nullptr);
 }
 
 /* Callback function which will be called when monitored events happen */
@@ -791,13 +803,13 @@ static void vfs_dir_monitor_callback(VFSFileMonitor* fm, VFSFileMonitorEvent eve
     switch (event)
     {
         case VFS_FILE_MONITOR_CREATE:
-            vfs_dir_emit_file_created(dir, file_name, FALSE);
+            vfs_dir_emit_file_created(dir, file_name, false);
             break;
         case VFS_FILE_MONITOR_DELETE:
-            vfs_dir_emit_file_deleted(dir, file_name, NULL);
+            vfs_dir_emit_file_deleted(dir, file_name, nullptr);
             break;
         case VFS_FILE_MONITOR_CHANGE:
-            vfs_dir_emit_file_changed(dir, file_name, NULL, FALSE);
+            vfs_dir_emit_file_changed(dir, file_name, nullptr, false);
             break;
         default:
             g_warning("Error: unrecognized file monitor signal!");
@@ -814,16 +826,16 @@ static void reload_icons(const char* path, VFSDir* dir, void* user_data)
         /* It's a desktop entry file */
         if (fi->flags & VFS_FILE_INFO_DESKTOP_ENTRY)
         {
-            char* file_path = g_build_filename(path, fi->name, NULL);
+            char* file_path = g_build_filename(path, fi->name, nullptr);
             if (fi->big_thumbnail)
             {
                 g_object_unref(fi->big_thumbnail);
-                fi->big_thumbnail = NULL;
+                fi->big_thumbnail = nullptr;
             }
             if (fi->small_thumbnail)
             {
                 g_object_unref(fi->small_thumbnail);
-                fi->small_thumbnail = NULL;
+                fi->small_thumbnail = nullptr;
             }
             vfs_file_info_load_special_info(fi, file_path);
             g_free(file_path);
@@ -833,13 +845,13 @@ static void reload_icons(const char* path, VFSDir* dir, void* user_data)
 
 static void on_theme_changed(GtkIconTheme* icon_theme, void* user_data)
 {
-    g_hash_table_foreach(dir_hash, (GHFunc)reload_icons, NULL);
+    g_hash_table_foreach(dir_hash, (GHFunc)reload_icons, nullptr);
 }
 
 VFSDir* vfs_dir_get_by_path_soft(const char* path)
 {
     if (G_UNLIKELY(!dir_hash || !path))
-        return NULL;
+        return nullptr;
 
     VFSDir* dir = (VFSDir*)g_hash_table_lookup(dir_hash, path);
     if (dir)
@@ -849,18 +861,18 @@ VFSDir* vfs_dir_get_by_path_soft(const char* path)
 
 VFSDir* vfs_dir_get_by_path(const char* path)
 {
-    VFSDir* dir = NULL;
+    VFSDir* dir = nullptr;
 
-    g_return_val_if_fail(G_UNLIKELY(path), NULL);
+    g_return_val_if_fail(G_UNLIKELY(path), nullptr);
 
     if (G_UNLIKELY(!dir_hash))
     {
-        dir_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+        dir_hash = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, nullptr);
         if (theme_change_notify == 0)
             theme_change_notify = g_signal_connect(gtk_icon_theme_get_default(),
                                                    "changed",
                                                    G_CALLBACK(on_theme_changed),
-                                                   NULL);
+                                                   nullptr);
     }
     else
     {
@@ -868,7 +880,7 @@ VFSDir* vfs_dir_get_by_path(const char* path)
     }
 
     if (G_UNLIKELY(!mime_cb))
-        mime_cb = vfs_mime_type_add_reload_cb(on_mime_type_reload, NULL);
+        mime_cb = vfs_mime_type_add_reload_cb(on_mime_type_reload, nullptr);
 
     if (dir)
     {
@@ -894,7 +906,7 @@ static void reload_mime_type(char* key, VFSDir* dir, void* user_data)
     for (l = dir->file_list; l; l = l->next)
     {
         file = (VFSFileInfo*)l->data;
-        char* full_path = g_build_filename(dir->path, vfs_file_info_get_name(file), NULL);
+        char* full_path = g_build_filename(dir->path, vfs_file_info_get_name(file), nullptr);
         vfs_file_info_reload_mime_type(file, full_path);
         /* g_debug( "reload %s", full_path ); */
         g_free(full_path);
@@ -913,7 +925,7 @@ static void on_mime_type_reload(void* user_data)
     if (!dir_hash)
         return;
     /* g_debug( "reload mime-type" ); */
-    g_hash_table_foreach(dir_hash, (GHFunc)reload_mime_type, NULL);
+    g_hash_table_foreach(dir_hash, (GHFunc)reload_mime_type, nullptr);
 }
 
 /* Thanks to the freedesktop.org, things are much more complicated now... */
@@ -924,7 +936,7 @@ const char* vfs_get_desktop_dir()
 
     desktop_dir = g_get_user_special_dir(G_USER_DIRECTORY_DESKTOP);
 
-    is_desktop_set = TRUE;
+    is_desktop_set = true;
     return desktop_dir;
 }
 
@@ -951,13 +963,13 @@ void vfs_dir_unload_thumbnails(VFSDir* dir, bool is_big)
             if (file->big_thumbnail)
             {
                 g_object_unref(file->big_thumbnail);
-                file->big_thumbnail = NULL;
+                file->big_thumbnail = nullptr;
             }
             /* This is a desktop entry file, so the icon needs reload
                  FIXME: This is not a good way to do things, but there is no better way now.  */
             if (file->flags & VFS_FILE_INFO_DESKTOP_ENTRY)
             {
-                file_path = g_build_filename(dir->path, file->name, NULL);
+                file_path = g_build_filename(dir->path, file->name, nullptr);
                 vfs_file_info_load_special_info(file, file_path);
                 g_free(file_path);
             }
@@ -971,13 +983,13 @@ void vfs_dir_unload_thumbnails(VFSDir* dir, bool is_big)
             if (file->small_thumbnail)
             {
                 g_object_unref(file->small_thumbnail);
-                file->small_thumbnail = NULL;
+                file->small_thumbnail = nullptr;
             }
             /* This is a desktop entry file, so the icon needs reload
                  FIXME: This is not a good way to do things, but there is no better way now.  */
             if (file->flags & VFS_FILE_INFO_DESKTOP_ENTRY)
             {
-                file_path = g_build_filename(dir->path, file->name, NULL);
+                file_path = g_build_filename(dir->path, file->name, nullptr);
                 vfs_file_info_load_special_info(file, file_path);
                 g_free(file_path);
             }
@@ -995,24 +1007,24 @@ void vfs_dir_unload_thumbnails(VFSDir* dir, bool is_big)
 
 // sfm added mime change timer
 static unsigned int mime_change_timer = 0;
-static VFSDir* mime_dir = NULL;
+static VFSDir* mime_dir = nullptr;
 
 static bool on_mime_change_timer(void* user_data)
 {
     // printf("MIME-UPDATE on_timer\n" );
     char* command = g_strdup_printf("update-mime-database %s/mime", g_get_user_data_dir());
     print_command(command);
-    g_spawn_command_line_async(command, NULL);
+    g_spawn_command_line_async(command, nullptr);
     g_free(command);
 
     command = g_strdup_printf("update-desktop-database %s/applications", g_get_user_data_dir());
     print_command(command);
-    g_spawn_command_line_async(command, NULL);
+    g_spawn_command_line_async(command, nullptr);
     g_free(command);
 
     g_source_remove(mime_change_timer);
     mime_change_timer = 0;
-    return FALSE;
+    return false;
 }
 
 static void mime_change(void* user_data)
@@ -1026,7 +1038,7 @@ static void mime_change(void* user_data)
     if (mime_dir)
     {
         // update mime database in 2 seconds
-        mime_change_timer = g_timeout_add_seconds(2, (GSourceFunc)on_mime_change_timer, NULL);
+        mime_change_timer = g_timeout_add_seconds(2, (GSourceFunc)on_mime_change_timer, nullptr);
         // printf("MIME-UPDATE timer started\n" );
     }
 }
@@ -1036,16 +1048,16 @@ void vfs_dir_monitor_mime()
     // start watching for changes
     if (mime_dir)
         return;
-    char* path = g_build_filename(g_get_user_data_dir(), "mime/packages", NULL);
+    char* path = g_build_filename(g_get_user_data_dir(), "mime/packages", nullptr);
     if (g_file_test(path, G_FILE_TEST_IS_DIR))
     {
         mime_dir = vfs_dir_get_by_path(path);
         if (mime_dir)
         {
-            g_signal_connect(mime_dir, "file-listed", G_CALLBACK(mime_change), NULL);
-            g_signal_connect(mime_dir, "file-created", G_CALLBACK(mime_change), NULL);
-            g_signal_connect(mime_dir, "file-deleted", G_CALLBACK(mime_change), NULL);
-            g_signal_connect(mime_dir, "file-changed", G_CALLBACK(mime_change), NULL);
+            g_signal_connect(mime_dir, "file-listed", G_CALLBACK(mime_change), nullptr);
+            g_signal_connect(mime_dir, "file-created", G_CALLBACK(mime_change), nullptr);
+            g_signal_connect(mime_dir, "file-deleted", G_CALLBACK(mime_change), nullptr);
+            g_signal_connect(mime_dir, "file-changed", G_CALLBACK(mime_change), nullptr);
         }
         // printf("MIME-UPDATE watch started\n" );
     }

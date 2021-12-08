@@ -138,7 +138,7 @@ void ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files,
                                                 GTK_MESSAGE_WARNING,
                                                 GTK_BUTTONS_YES_NO,
                                                 msg,
-                                                NULL);
+                                                nullptr);
         gtk_dialog_set_default_response(GTK_DIALOG(dlg), GTK_RESPONSE_YES); // MOD
         gtk_window_set_title(GTK_WINDOW(dlg), "Confirm Delete");
         xset_set_window_icon(GTK_WINDOW(dlg));
@@ -150,19 +150,19 @@ void ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files,
             return;
     }
 
-    GList* file_list = NULL;
+    GList* file_list = nullptr;
     GList* sel;
     for (sel = sel_files; sel; sel = g_list_next(sel))
     {
         VFSFileInfo* file = (VFSFileInfo*)sel->data;
-        char* file_path = g_build_filename(cwd, vfs_file_info_get_name(file), NULL);
+        char* file_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
         file_list = g_list_prepend(file_list, file_path);
     }
     /* file_list = g_list_reverse( file_list ); */
     PtkFileTask* task = ptk_file_task_new(VFS_FILE_TASK_DELETE,
                                           file_list,
-                                          NULL,
-                                          parent_win ? GTK_WINDOW(parent_win) : NULL,
+                                          nullptr,
+                                          parent_win ? GTK_WINDOW(parent_win) : nullptr,
                                           GTK_WIDGET(task_view));
     ptk_file_task_run(task);
 }
@@ -173,7 +173,7 @@ char* get_real_link_target(const char* link_path)
     char* target_path;
 
     if (!link_path)
-        return NULL;
+        return nullptr;
 
     // canonicalize target
     if (!(target_path = g_strdup(realpath(link_path, buf))))
@@ -191,7 +191,7 @@ char* get_real_link_target(const char* link_path)
 
 static void on_help_activate(GtkMenuItem* item, MoveSet* mset)
 {
-    xset_show_help(GTK_WIDGET(mset->dlg), NULL, mset->create_new ? "#gui-newf" : "#gui-rename");
+    xset_show_help(GTK_WIDGET(mset->dlg), nullptr, mset->create_new ? "#gui-newf" : "#gui-rename");
 }
 
 static bool on_move_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
@@ -207,15 +207,15 @@ static bool on_move_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mse
             case GDK_KEY_KP_Enter:
                 if (gtk_widget_get_sensitive(GTK_WIDGET(mset->next)))
                     gtk_dialog_response(GTK_DIALOG(mset->dlg), GTK_RESPONSE_OK);
-                return TRUE;
+                return true;
             case GDK_KEY_F1:
-                on_help_activate(NULL, mset);
-                return TRUE;
+                on_help_activate(nullptr, mset);
+                return true;
             default:
                 break;
         }
     }
-    return FALSE;
+    return false;
 }
 
 static bool on_move_entry_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
@@ -231,15 +231,15 @@ static bool on_move_entry_keypress(GtkWidget* widget, GdkEventKey* event, MoveSe
             case GDK_KEY_KP_Enter:
                 if (gtk_widget_get_sensitive(GTK_WIDGET(mset->next)))
                     gtk_dialog_response(GTK_DIALOG(mset->dlg), GTK_RESPONSE_OK);
-                return TRUE;
+                return true;
             case GDK_KEY_F1:
-                on_help_activate(NULL, mset);
-                return TRUE;
+                on_help_activate(nullptr, mset);
+                return true;
             default:
                 break;
         }
     }
-    return FALSE;
+    return false;
 }
 
 static void on_move_change(GtkWidget* widget, MoveSet* mset)
@@ -257,37 +257,37 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
                                     G_SIGNAL_MATCH_FUNC,
                                     0,
                                     0,
-                                    NULL,
+                                    nullptr,
                                     (void*)on_move_change,
-                                    NULL);
+                                    nullptr);
     g_signal_handlers_block_matched(mset->buf_name,
                                     G_SIGNAL_MATCH_FUNC,
                                     0,
                                     0,
-                                    NULL,
+                                    nullptr,
                                     (void*)on_move_change,
-                                    NULL);
+                                    nullptr);
     g_signal_handlers_block_matched(mset->buf_full_name,
                                     G_SIGNAL_MATCH_FUNC,
                                     0,
                                     0,
-                                    NULL,
+                                    nullptr,
                                     (void*)on_move_change,
-                                    NULL);
+                                    nullptr);
     g_signal_handlers_block_matched(mset->buf_path,
                                     G_SIGNAL_MATCH_FUNC,
                                     0,
                                     0,
-                                    NULL,
+                                    nullptr,
                                     (void*)on_move_change,
-                                    NULL);
+                                    nullptr);
     g_signal_handlers_block_matched(mset->buf_full_path,
                                     G_SIGNAL_MATCH_FUNC,
                                     0,
                                     0,
-                                    NULL,
+                                    nullptr,
                                     (void*)on_move_change,
-                                    NULL);
+                                    nullptr);
 
     // change is_dir to reflect state of new directory or link option
     if (mset->create_new)
@@ -300,10 +300,10 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
              gtk_entry_get_text(GTK_ENTRY(mset->entry_target))[0] == '/'))
         {
             if (!mset->is_dir)
-                mset->is_dir = TRUE;
+                mset->is_dir = true;
         }
         else if (mset->is_dir)
-            mset->is_dir = FALSE;
+            mset->is_dir = false;
         if (mset->is_dir && gtk_widget_is_focus(GTK_WIDGET(mset->entry_ext)))
             gtk_widget_grab_focus(GTK_WIDGET(mset->input_name));
         gtk_widget_set_sensitive(GTK_WIDGET(mset->entry_ext), !mset->is_dir);
@@ -319,16 +319,16 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
 
         gtk_text_buffer_get_start_iter(mset->buf_name, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_name, &iter);
-        name = gtk_text_buffer_get_text(mset->buf_name, &siter, &iter, FALSE);
+        name = gtk_text_buffer_get_text(mset->buf_name, &siter, &iter, false);
         if (name[0] == '\0')
         {
             g_free(name);
-            name = NULL;
+            name = nullptr;
         }
         ext = (char*)gtk_entry_get_text(mset->entry_ext);
         if (ext[0] == '\0')
         {
-            ext = NULL;
+            ext = nullptr;
         }
         else if (ext[0] == '.')
             ext++; // ignore leading dot in extension field
@@ -349,7 +349,7 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
         // update full_path
         gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_path, &iter);
-        path = gtk_text_buffer_get_text(mset->buf_path, &siter, &iter, FALSE);
+        path = gtk_text_buffer_get_text(mset->buf_path, &siter, &iter, false);
         if (!strcmp(path, "."))
         {
             g_free(path);
@@ -364,11 +364,11 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
         }
 
         if (path[0] == '/')
-            full_path = g_build_filename(path, full_name, NULL);
+            full_path = g_build_filename(path, full_name, nullptr);
         else
         {
             cwd = g_path_get_dirname(mset->full_path);
-            full_path = g_build_filename(cwd, path, full_name, NULL);
+            full_path = g_build_filename(cwd, path, full_name, nullptr);
             g_free(cwd);
         }
         gtk_text_buffer_set_text(mset->buf_full_path, full_path, -1);
@@ -381,7 +381,7 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
         // update name & ext
         gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
-        full_name = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, FALSE);
+        full_name = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
         name = get_name_extension(full_name, mset->is_dir, &ext);
         gtk_text_buffer_set_text(mset->buf_name, name, -1);
         if (ext)
@@ -394,7 +394,7 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
         // update full_path
         gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_path, &iter);
-        path = gtk_text_buffer_get_text(mset->buf_path, &siter, &iter, FALSE);
+        path = gtk_text_buffer_get_text(mset->buf_path, &siter, &iter, false);
         if (!strcmp(path, "."))
         {
             g_free(path);
@@ -409,11 +409,11 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
         }
 
         if (path[0] == '/')
-            full_path = g_build_filename(path, full_name, NULL);
+            full_path = g_build_filename(path, full_name, nullptr);
         else
         {
             cwd = g_path_get_dirname(mset->full_path);
-            full_path = g_build_filename(cwd, path, full_name, NULL);
+            full_path = g_build_filename(cwd, path, full_name, nullptr);
             g_free(cwd);
         }
         gtk_text_buffer_set_text(mset->buf_full_path, full_path, -1);
@@ -426,11 +426,11 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
         // update full_path
         gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
-        full_name = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, FALSE);
+        full_name = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
 
         gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_path, &iter);
-        path = gtk_text_buffer_get_text(mset->buf_path, &siter, &iter, FALSE);
+        path = gtk_text_buffer_get_text(mset->buf_path, &siter, &iter, false);
         if (!strcmp(path, "."))
         {
             g_free(path);
@@ -445,11 +445,11 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
         }
 
         if (path[0] == '/')
-            full_path = g_build_filename(path, full_name, NULL);
+            full_path = g_build_filename(path, full_name, nullptr);
         else
         {
             cwd = g_path_get_dirname(mset->full_path);
-            full_path = g_build_filename(cwd, path, full_name, NULL);
+            full_path = g_build_filename(cwd, path, full_name, nullptr);
             g_free(cwd);
         }
         gtk_text_buffer_set_text(mset->buf_full_path, full_path, -1);
@@ -461,7 +461,7 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
         mset->last_widget = GTK_WIDGET(mset->input_full_path);
         gtk_text_buffer_get_start_iter(mset->buf_full_path, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_full_path, &iter);
-        full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, FALSE);
+        full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
 
         // update name & ext
         if (full_path[0] == '\0')
@@ -486,7 +486,7 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
         {
             cwd = g_path_get_dirname(mset->full_path);
             str = path;
-            path = g_build_filename(cwd, str, NULL);
+            path = g_build_filename(cwd, str, nullptr);
             g_free(str);
             g_free(cwd);
         }
@@ -518,7 +518,7 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
             // update full_path for tests below
             cwd = g_path_get_dirname(mset->full_path);
             str = full_path;
-            full_path = g_build_filename(cwd, str, NULL);
+            full_path = g_build_filename(cwd, str, nullptr);
             g_free(str);
             g_free(cwd);
         }
@@ -537,23 +537,23 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
 
     // tests
     struct stat statbuf;
-    bool full_path_exists = FALSE;
-    bool full_path_exists_dir = FALSE;
-    bool full_path_same = FALSE;
-    bool path_missing = FALSE;
-    bool path_exists_file = FALSE;
-    bool is_move = FALSE;
+    bool full_path_exists = false;
+    bool full_path_exists_dir = false;
+    bool full_path_same = false;
+    bool path_missing = false;
+    bool path_exists_file = false;
+    bool is_move = false;
 
     if (!strcmp(full_path, mset->full_path))
     {
-        full_path_same = TRUE;
+        full_path_same = true;
         if (mset->create_new && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link)))
         {
             if (lstat(full_path, &statbuf) == 0)
             {
-                full_path_exists = TRUE;
+                full_path_exists = true;
                 if (g_file_test(full_path, G_FILE_TEST_IS_DIR))
-                    full_path_exists_dir = TRUE;
+                    full_path_exists_dir = true;
             }
         }
     }
@@ -561,17 +561,17 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
     {
         if (lstat(full_path, &statbuf) == 0)
         {
-            full_path_exists = TRUE;
+            full_path_exists = true;
             if (g_file_test(full_path, G_FILE_TEST_IS_DIR))
-                full_path_exists_dir = TRUE;
+                full_path_exists_dir = true;
         }
         else if (lstat(path, &statbuf) == 0)
         {
             if (!g_file_test(path, G_FILE_TEST_IS_DIR))
-                path_exists_file = TRUE;
+                path_exists_file = true;
         }
         else
-            path_missing = TRUE;
+            path_missing = true;
 
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_move)))
         {
@@ -599,7 +599,7 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
         mset->path_missing = path_missing;
         mset->path_exists_file = path_exists_file;
         mset->full_path_same = full_path_same;
-        mset->mode_change = FALSE;
+        mset->mode_change = false;
 
         if (full_path_same &&
             (mset->create_new == PTK_RENAME || mset->create_new == PTK_RENAME_NEW_LINK))
@@ -617,7 +617,7 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
         }
         else if (full_path_exists_dir)
         {
-            gtk_widget_set_sensitive(mset->next, FALSE);
+            gtk_widget_set_sensitive(mset->next, false);
             gtk_label_set_markup_with_mnemonic(mset->label_full_path,
                                                "<b>P_ath:</b>   <i>exists as directory</i>");
             gtk_label_set_markup_with_mnemonic(mset->label_name,
@@ -630,7 +630,7 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
         {
             if (mset->is_dir)
             {
-                gtk_widget_set_sensitive(mset->next, FALSE);
+                gtk_widget_set_sensitive(mset->next, false);
                 gtk_label_set_markup_with_mnemonic(mset->label_full_path,
                                                    "<b>P_ath:</b>   <i>exists as file</i>");
                 gtk_label_set_markup_with_mnemonic(mset->label_name,
@@ -641,7 +641,7 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
             }
             else
             {
-                gtk_widget_set_sensitive(mset->next, TRUE);
+                gtk_widget_set_sensitive(mset->next, true);
                 gtk_label_set_markup_with_mnemonic(
                     mset->label_full_path,
                     "<b>P_ath:</b>   <i>* overwrite existing file</i>");
@@ -656,7 +656,7 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
         }
         else if (path_exists_file)
         {
-            gtk_widget_set_sensitive(mset->next, FALSE);
+            gtk_widget_set_sensitive(mset->next, false);
             gtk_label_set_markup_with_mnemonic(mset->label_full_path,
                                                "<b>P_ath:</b>   <i>parent exists as file</i>");
             gtk_label_set_markup_with_mnemonic(mset->label_name, "<b>_Name:</b>");
@@ -666,7 +666,7 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
         }
         else if (path_missing)
         {
-            gtk_widget_set_sensitive(mset->next, TRUE);
+            gtk_widget_set_sensitive(mset->next, true);
             gtk_label_set_markup_with_mnemonic(mset->label_full_path,
                                                "<b>P_ath:</b>   <i>* create parent</i>");
             gtk_label_set_markup_with_mnemonic(mset->label_name, "<b>_Name:</b>");
@@ -676,7 +676,7 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
         }
         else
         {
-            gtk_widget_set_sensitive(mset->next, TRUE);
+            gtk_widget_set_sensitive(mset->next, true);
             gtk_label_set_markup_with_mnemonic(mset->label_full_path, "<b>P_ath:</b>");
             gtk_label_set_markup_with_mnemonic(mset->label_name, "<b>_Name:</b>");
             gtk_label_set_markup_with_mnemonic(mset->label_full_name, "<b>_Filename:</b>");
@@ -708,37 +708,37 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
                                       G_SIGNAL_MATCH_FUNC,
                                       0,
                                       0,
-                                      NULL,
+                                      nullptr,
                                       (void*)on_move_change,
-                                      NULL);
+                                      nullptr);
     g_signal_handlers_unblock_matched(mset->buf_name,
                                       G_SIGNAL_MATCH_FUNC,
                                       0,
                                       0,
-                                      NULL,
+                                      nullptr,
                                       (void*)on_move_change,
-                                      NULL);
+                                      nullptr);
     g_signal_handlers_unblock_matched(mset->buf_full_name,
                                       G_SIGNAL_MATCH_FUNC,
                                       0,
                                       0,
-                                      NULL,
+                                      nullptr,
                                       (void*)on_move_change,
-                                      NULL);
+                                      nullptr);
     g_signal_handlers_unblock_matched(mset->buf_path,
                                       G_SIGNAL_MATCH_FUNC,
                                       0,
                                       0,
-                                      NULL,
+                                      nullptr,
                                       (void*)on_move_change,
-                                      NULL);
+                                      nullptr);
     g_signal_handlers_unblock_matched(mset->buf_full_path,
                                       G_SIGNAL_MATCH_FUNC,
                                       0,
                                       0,
-                                      NULL,
+                                      nullptr,
                                       (void*)on_move_change,
-                                      NULL);
+                                      nullptr);
 }
 
 static void select_input(GtkWidget* widget, MoveSet* mset)
@@ -759,7 +759,7 @@ static void select_input(GtkWidget* widget, MoveSet* mset)
             // name is not visible so select name in filename
             gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
             gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
-            char* full_name = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, FALSE);
+            char* full_name = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
             char* ext;
             char* name = get_name_extension(full_name, mset->is_dir, &ext);
             g_free(ext);
@@ -778,7 +778,7 @@ static void select_input(GtkWidget* widget, MoveSet* mset)
 static bool on_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
 {
     select_input(widget, mset);
-    return FALSE;
+    return false;
 }
 
 static bool on_button_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
@@ -787,7 +787,7 @@ static bool on_button_focus(GtkWidget* widget, GtkDirectionType direction, MoveS
     {
         if (widget == mset->options || widget == mset->opt_move || widget == mset->opt_new_file)
         {
-            GtkWidget* input = NULL;
+            GtkWidget* input = nullptr;
             if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_name)))
                 input = mset->input_name;
             else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_full_name)))
@@ -812,7 +812,7 @@ static bool on_button_focus(GtkWidget* widget, GtkDirectionType direction, MoveS
         }
         else
         {
-            GtkWidget* input = NULL;
+            GtkWidget* input = nullptr;
             if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_full_path)))
                 input = mset->input_full_path;
             else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_path)))
@@ -827,9 +827,9 @@ static bool on_button_focus(GtkWidget* widget, GtkDirectionType direction, MoveS
                 gtk_widget_grab_focus(input);
             }
         }
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 
 static void on_revert_button_press(GtkWidget* widget, MoveSet* mset)
@@ -862,7 +862,7 @@ static void on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         else
         {
             dir = g_path_get_dirname(mset->full_path);
-            name = text[0] != '\0' ? g_strdup(text) : NULL;
+            name = text[0] != '\0' ? g_strdup(text) : nullptr;
         }
     }
     else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
@@ -903,13 +903,13 @@ static void on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     }
 
     GtkWidget* dlg = gtk_file_chooser_dialog_new(title,
-                                                 mset->parent ? GTK_WINDOW(mset->parent) : NULL,
+                                                 mset->parent ? GTK_WINDOW(mset->parent) : nullptr,
                                                  (GtkFileChooserAction)action,
                                                  "Cancel",
                                                  GTK_RESPONSE_CANCEL,
                                                  "OK",
                                                  GTK_RESPONSE_OK,
-                                                 NULL);
+                                                 nullptr);
 
     xset_set_window_icon(GTK_WINDOW(dlg));
 
@@ -917,7 +917,7 @@ static void on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), dir);
     else
     {
-        char* path = g_build_filename(dir, name, NULL);
+        char* path = g_build_filename(dir, name, nullptr);
         gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path);
         g_free(path);
     }
@@ -1032,7 +1032,7 @@ static void on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     //  it creates a directory by default with no way to stop it
     //  it gives 'directory already exists' error popup
     GtkWidget* dlg = gtk_file_chooser_dialog_new("Browse",
-                                                 mset->parent ? GTK_WINDOW(mset->parent) : NULL,
+                                                 mset->parent ? GTK_WINDOW(mset->parent) : nullptr,
                                                  mode_default == MODE_PARENT
                                                      ? GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
                                                      : GTK_FILE_CHOOSER_ACTION_SAVE,
@@ -1040,12 +1040,12 @@ static void on_browse_button_press(GtkWidget* widget, MoveSet* mset)
                                                  GTK_RESPONSE_CANCEL,
                                                  "OK",
                                                  GTK_RESPONSE_OK,
-                                                 NULL);
+                                                 nullptr);
     gtk_window_set_role(GTK_WINDOW(dlg), "file_dialog");
 
     gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
     gtk_text_buffer_get_end_iter(mset->buf_path, &iter);
-    char* path = gtk_text_buffer_get_text(mset->buf_path, &siter, &iter, FALSE);
+    char* path = gtk_text_buffer_get_text(mset->buf_path, &siter, &iter, false);
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), path);
     g_free(path);
 
@@ -1053,33 +1053,33 @@ static void on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     {
         gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
-        path = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, FALSE);
+        path = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
         gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), path);
         g_free(path);
     }
 
-    gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), FALSE);
+    gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), false);
 
     // Mode
     int i;
     GtkWidget* mode[3];
     GtkWidget* hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
-    mode[MODE_FILENAME] = gtk_radio_button_new_with_mnemonic(NULL, "Fil_ename");
+    mode[MODE_FILENAME] = gtk_radio_button_new_with_mnemonic(nullptr, "Fil_ename");
     mode[MODE_PARENT] =
         gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(mode[MODE_FILENAME]),
                                                        "Pa_rent");
     mode[MODE_PATH] =
         gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(mode[MODE_FILENAME]),
                                                        "P_ath");
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mode[mode_default]), TRUE);
-    gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new("Insert as"), FALSE, TRUE, 2);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mode[mode_default]), true);
+    gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new("Insert as"), false, true, 2);
     for (i = MODE_FILENAME; i <= MODE_PATH; i++)
     {
-        gtk_widget_set_focus_on_click(GTK_WIDGET(mode[i]), FALSE);
+        gtk_widget_set_focus_on_click(GTK_WIDGET(mode[i]), false);
         g_signal_connect(G_OBJECT(mode[i]), "toggled", G_CALLBACK(on_browse_mode_toggled), dlg);
-        gtk_box_pack_start(GTK_BOX(hbox), mode[i], FALSE, TRUE, 2);
+        gtk_box_pack_start(GTK_BOX(hbox), mode[i], false, true, 2);
     }
-    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg))), hbox, FALSE, TRUE, 6);
+    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg))), hbox, false, true, 6);
     g_object_set_data(G_OBJECT(dlg), "mode", mode);
     gtk_widget_show_all(hbox);
 
@@ -1160,7 +1160,7 @@ static void on_browse_button_press(GtkWidget* widget, MoveSet* mset)
 static void on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
 {
     const char* action;
-    char* btn_label = NULL;
+    char* btn_label = nullptr;
 
     bool move = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_move));
     bool copy = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_copy));
@@ -1173,7 +1173,7 @@ static void on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     bool new_folder = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder));
     bool new_link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link));
 
-    const char* desc = NULL;
+    const char* desc = nullptr;
     if (mset->create_new)
     {
         btn_label = g_strdup("C_reate");
@@ -1191,7 +1191,7 @@ static void on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
         GtkTextIter siter;
         gtk_text_buffer_get_start_iter(mset->buf_full_path, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_full_path, &iter);
-        char* full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, FALSE);
+        char* full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
         char* new_path = g_path_get_dirname(full_path);
 
         bool rename = (!strcmp(mset->old_path, new_path) || !strcmp(new_path, "."));
@@ -1245,7 +1245,7 @@ static void on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
                                                  win_icon,
                                                  16,
                                                  GTK_ICON_LOOKUP_USE_BUILTIN,
-                                                 NULL);
+                                                 nullptr);
     if (pixbuf)
         gtk_window_set_icon(GTK_WINDOW(mset->dlg), pixbuf);
 
@@ -1259,17 +1259,17 @@ static void on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     if (btn_label)
         gtk_button_set_label(GTK_BUTTON(mset->next), btn_label);
 
-    mset->full_path_same = FALSE;
-    mset->mode_change = TRUE;
+    mset->full_path_same = false;
+    mset->mode_change = true;
     on_move_change(GTK_WIDGET(mset->buf_full_path), mset);
     if (mset->create_new)
-        on_toggled(NULL, mset);
+        on_toggled(nullptr, mset);
 }
 
 static void on_toggled(GtkMenuItem* item, MoveSet* mset)
 {
-    bool someone_is_visible = FALSE;
-    bool opts_visible = FALSE;
+    bool someone_is_visible = false;
+    bool opts_visible = false;
 
     // opts
     if (xset_get_b("move_copy") || mset->clip_copy)
@@ -1277,7 +1277,7 @@ static void on_toggled(GtkMenuItem* item, MoveSet* mset)
     else
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_copy)))
-            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), TRUE);
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), true);
         gtk_widget_hide(mset->opt_copy);
     }
 
@@ -1288,7 +1288,7 @@ static void on_toggled(GtkMenuItem* item, MoveSet* mset)
     else
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_link)))
-            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), TRUE);
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), true);
         gtk_widget_hide(mset->opt_link);
     }
 
@@ -1297,7 +1297,7 @@ static void on_toggled(GtkMenuItem* item, MoveSet* mset)
     else
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_copy_target)))
-            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), TRUE);
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), true);
         gtk_widget_hide(mset->opt_copy_target);
     }
 
@@ -1306,7 +1306,7 @@ static void on_toggled(GtkMenuItem* item, MoveSet* mset)
     else
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_link_target)))
-            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), TRUE);
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), true);
         gtk_widget_hide(mset->opt_link_target);
     }
 
@@ -1314,7 +1314,7 @@ static void on_toggled(GtkMenuItem* item, MoveSet* mset)
         gtk_widget_show(mset->opt_as_root);
     else
     {
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_as_root), FALSE);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_as_root), false);
         gtk_widget_hide(mset->opt_as_root);
     }
 
@@ -1328,13 +1328,13 @@ static void on_toggled(GtkMenuItem* item, MoveSet* mset)
     else
     {
         gtk_widget_show(mset->opt_move);
-        opts_visible = TRUE;
+        opts_visible = true;
     }
 
     // entries
     if (xset_get_b("move_name"))
     {
-        someone_is_visible = TRUE;
+        someone_is_visible = true;
 
         gtk_widget_show((GtkWidget*)mset->label_name);
         gtk_widget_show((GtkWidget*)mset->scroll_name);
@@ -1351,7 +1351,7 @@ static void on_toggled(GtkMenuItem* item, MoveSet* mset)
 
     if (xset_get_b("move_filename"))
     {
-        someone_is_visible = TRUE;
+        someone_is_visible = true;
 
         gtk_widget_show((GtkWidget*)mset->label_full_name);
         gtk_widget_show((GtkWidget*)mset->scroll_full_name);
@@ -1366,7 +1366,7 @@ static void on_toggled(GtkMenuItem* item, MoveSet* mset)
 
     if (xset_get_b("move_parent"))
     {
-        someone_is_visible = TRUE;
+        someone_is_visible = true;
 
         gtk_widget_show((GtkWidget*)mset->label_path);
         gtk_widget_show((GtkWidget*)mset->scroll_path);
@@ -1381,7 +1381,7 @@ static void on_toggled(GtkMenuItem* item, MoveSet* mset)
 
     if (xset_get_b("move_path"))
     {
-        someone_is_visible = TRUE;
+        someone_is_visible = true;
 
         gtk_widget_show((GtkWidget*)mset->label_full_path);
         gtk_widget_show((GtkWidget*)mset->scroll_full_path);
@@ -1401,9 +1401,9 @@ static void on_toggled(GtkMenuItem* item, MoveSet* mset)
         gtk_widget_hide(mset->hbox_type);
     }
 
-    bool new_file = FALSE;
-    bool new_folder = FALSE;
-    bool new_link = FALSE;
+    bool new_file = false;
+    bool new_folder = false;
+    bool new_link = false;
     if (mset->create_new)
     {
         new_file = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file));
@@ -1445,8 +1445,8 @@ static void on_toggled(GtkMenuItem* item, MoveSet* mset)
 
     if (!someone_is_visible)
     {
-        xset_set_b("move_filename", TRUE);
-        on_toggled(NULL, mset);
+        xset_set_b("move_filename", true);
+        on_toggled(nullptr, mset);
     }
 
     if (opts_visible)
@@ -1469,7 +1469,7 @@ static void on_toggled(GtkMenuItem* item, MoveSet* mset)
 static bool on_mnemonic_activate(GtkWidget* widget, bool arg1, MoveSet* mset)
 {
     select_input(widget, mset);
-    return FALSE;
+    return false;
 }
 
 static void on_options_button_press(GtkWidget* btn, MoveSet* mset)
@@ -1518,15 +1518,15 @@ static void on_options_button_press(GtkWidget* btn, MoveSet* mset)
     xset_add_menuitem(mset->browser, popup, accel_group, set);
 
     gtk_widget_show_all(GTK_WIDGET(popup));
-    g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), NULL);
-    gtk_menu_popup_at_pointer(GTK_MENU(popup), NULL);
+    g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
+    gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
 }
 
 static bool on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
 {
-    GtkWidget* input = NULL;
-    GtkWidget* input2 = NULL;
-    GtkWidget* first_input = NULL;
+    GtkWidget* input = nullptr;
+    GtkWidget* input2 = nullptr;
+    GtkWidget* first_input = nullptr;
 
     switch (direction)
     {
@@ -1544,7 +1544,7 @@ static bool on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSe
             else if (widget == GTK_WIDGET(mset->label_type))
             {
                 on_button_focus(mset->options, GTK_DIR_TAB_FORWARD, mset);
-                return TRUE;
+                return true;
             }
             else if (widget == GTK_WIDGET(mset->label_target))
                 input = GTK_WIDGET(mset->entry_target);
@@ -1588,7 +1588,7 @@ static bool on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSe
             first_input = input;
             while (input && !gtk_widget_get_visible(gtk_widget_get_parent(input)))
             {
-                input2 = NULL;
+                input2 = nullptr;
                 if (input == GTK_WIDGET(mset->combo_template_dir))
                 {
                     if (mset->combo_template)
@@ -1635,7 +1635,7 @@ static bool on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSe
                 }
 
                 if (input2 == first_input)
-                    input = NULL;
+                    input = nullptr;
                 else
                     input = input2;
             }
@@ -1654,13 +1654,13 @@ static bool on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSe
         select_input(input, mset);
         gtk_widget_grab_focus(input);
     }
-    return TRUE;
+    return true;
 }
 
 static void copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-    GtkTextBuffer* buf = NULL;
+    GtkTextBuffer* buf = nullptr;
 
     if (widget == GTK_WIDGET(mset->label_name))
         buf = mset->buf_name;
@@ -1702,7 +1702,7 @@ static void copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
     GtkTextIter siter;
     gtk_text_buffer_get_start_iter(buf, &siter);
     gtk_text_buffer_get_end_iter(buf, &iter);
-    char* text = gtk_text_buffer_get_text(buf, &siter, &iter, FALSE);
+    char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
     gtk_clipboard_set_text(clip, text, -1);
     g_free(text);
 }
@@ -1714,7 +1714,7 @@ static bool on_label_button_press(GtkWidget* widget, GdkEventButton* event, Move
         case GDK_BUTTON_PRESS:
             if (event->button == 1 || event->button == 2)
             {
-                GtkWidget* input = NULL;
+                GtkWidget* input = nullptr;
                 if (widget == GTK_WIDGET(mset->label_name))
                     input = mset->input_name;
                 else if (widget == GTK_WIDGET(mset->label_ext))
@@ -1731,7 +1731,7 @@ static bool on_label_button_press(GtkWidget* widget, GdkEventButton* event, Move
                     gtk_widget_grab_focus(GTK_WIDGET(mset->label_mime));
                     if (event->button == 2)
                         copy_entry_to_clipboard(widget, mset);
-                    return TRUE;
+                    return true;
                 }
                 else if (widget == GTK_WIDGET(mset->label_target))
                     input = GTK_WIDGET(mset->entry_target);
@@ -1759,7 +1759,7 @@ static bool on_label_button_press(GtkWidget* widget, GdkEventButton* event, Move
             break;
     }
 
-    return TRUE;
+    return true;
 }
 
 static char* get_unique_name(const char* dir, const char* ext)
@@ -1771,11 +1771,11 @@ static char* get_unique_name(const char* dir, const char* ext)
     if (ext && ext[0] != '\0')
     {
         name = g_strdup_printf("%s.%s", base, ext);
-        path = g_build_filename(dir, name, NULL);
+        path = g_build_filename(dir, name, nullptr);
         g_free(name);
     }
     else
-        path = g_build_filename(dir, base, NULL);
+        path = g_build_filename(dir, base, nullptr);
 
     int n = 2;
     struct stat statbuf;
@@ -1788,7 +1788,7 @@ static char* get_unique_name(const char* dir, const char* ext)
             name = g_strdup_printf("%s%d.%s", base, n++, ext);
         else
             name = g_strdup_printf("%s%d", base, n++);
-        path = g_build_filename(dir, name, NULL);
+        path = g_build_filename(dir, name, nullptr);
         g_free(name);
     }
     return path;
@@ -1809,20 +1809,20 @@ static char* get_template_dir()
          * dialog open and cause filesystem find loops.
          * https://wiki.freedesktop.org/www/Software/xdg-user-dirs/ */
         g_free(templates_path);
-        templates_path = NULL;
+        templates_path = nullptr;
     }
     if (!dir_has_files(templates_path))
     {
         g_free(templates_path);
-        templates_path = g_build_filename(g_get_home_dir(), "Templates", NULL);
+        templates_path = g_build_filename(g_get_home_dir(), "Templates", nullptr);
         if (!dir_has_files(templates_path))
         {
             g_free(templates_path);
-            templates_path = g_build_filename(g_get_home_dir(), ".templates", NULL);
+            templates_path = g_build_filename(g_get_home_dir(), ".templates", nullptr);
             if (!dir_has_files(templates_path))
             {
                 g_free(templates_path);
-                templates_path = NULL;
+                templates_path = nullptr;
             }
         }
     }
@@ -1838,26 +1838,26 @@ static GList* get_templates(const char* templates_dir, const char* subdir, GList
     {
         templates_path = get_template_dir();
         if (templates_path)
-            templates = get_templates(templates_path, NULL, templates, getdir);
+            templates = get_templates(templates_path, nullptr, templates, getdir);
         g_free(templates_path);
         return templates;
     }
 
-    templates_path = g_build_filename(templates_dir, subdir, NULL);
-    GDir* dir = g_dir_open(templates_path, 0, NULL);
+    templates_path = g_build_filename(templates_dir, subdir, nullptr);
+    GDir* dir = g_dir_open(templates_path, 0, nullptr);
     if (dir)
     {
         const char* name;
         while ((name = g_dir_read_name(dir)))
         {
             char* subsubdir;
-            char* path = g_build_filename(templates_path, name, NULL);
+            char* path = g_build_filename(templates_path, name, nullptr);
             if (getdir)
             {
                 if (g_file_test(path, G_FILE_TEST_IS_DIR))
                 {
                     if (subdir)
-                        subsubdir = g_build_filename(subdir, name, NULL);
+                        subsubdir = g_build_filename(subdir, name, nullptr);
                     else
                         subsubdir = g_strdup(name);
                     templates = g_list_prepend(templates, g_strdup_printf("%s/", subsubdir));
@@ -1872,7 +1872,8 @@ static GList* get_templates(const char* templates_dir, const char* subdir, GList
                 if (g_file_test(path, G_FILE_TEST_IS_REGULAR))
                 {
                     if (subdir)
-                        templates = g_list_prepend(templates, g_build_filename(subdir, name, NULL));
+                        templates =
+                            g_list_prepend(templates, g_build_filename(subdir, name, nullptr));
                     else
                         templates = g_list_prepend(templates, g_strdup(name));
                 }
@@ -1882,7 +1883,7 @@ static GList* get_templates(const char* templates_dir, const char* subdir, GList
                 {
                     if (subdir)
                     {
-                        subsubdir = g_build_filename(subdir, name, NULL);
+                        subsubdir = g_build_filename(subdir, name, nullptr);
                         templates = get_templates(templates_dir, subsubdir, templates, getdir);
                         g_free(subsubdir);
                     }
@@ -1900,7 +1901,7 @@ static GList* get_templates(const char* templates_dir, const char* subdir, GList
 
 static void on_template_changed(GtkWidget* widget, MoveSet* mset)
 {
-    char* str = NULL;
+    char* str = nullptr;
 
     if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
         return;
@@ -1918,7 +1919,7 @@ static void on_template_changed(GtkWidget* widget, MoveSet* mset)
         if ((str2 = strchr(str, '.')))
             str = str2 + 1;
         else
-            str = NULL;
+            str = nullptr;
     }
     gtk_entry_set_text(mset->entry_ext, str ? str : "");
 
@@ -1926,7 +1927,7 @@ static void on_template_changed(GtkWidget* widget, MoveSet* mset)
     GtkTextIter iter, siter;
     gtk_text_buffer_get_start_iter(mset->buf_full_path, &siter);
     gtk_text_buffer_get_end_iter(mset->buf_full_path, &iter);
-    char* full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, FALSE);
+    char* full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
     struct stat statbuf;
     if (lstat(full_path, &statbuf) == 0) // g_file_test doesn't see broken links
     {
@@ -1952,15 +1953,15 @@ static bool update_new_display_delayed(char* path)
     if (vdir && vdir->avoid_changes)
     {
         VFSFileInfo* file = vfs_file_info_new();
-        vfs_file_info_get(file, path, NULL);
-        vfs_dir_emit_file_created(vdir, vfs_file_info_get_name(file), TRUE);
+        vfs_file_info_get(file, path, nullptr);
+        vfs_dir_emit_file_created(vdir, vfs_file_info_get_name(file), true);
         vfs_file_info_unref(file);
         vfs_dir_flush_notify_cache();
     }
     if (vdir)
         g_object_unref(vdir);
     g_free(path);
-    return FALSE;
+    return false;
 }
 
 static void update_new_display(const char* path)
@@ -1987,16 +1988,16 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
     char* from_path;
     char* task_name;
     char* str;
-    GtkWidget* task_view = NULL;
+    GtkWidget* task_view = nullptr;
     int ret = 1;
-    bool target_missing = FALSE;
+    bool target_missing = false;
     GList* templates;
     struct stat statbuf;
 
     if (!file_dir)
         return 0;
     MoveSet* mset = g_slice_new0(MoveSet);
-    full_name = NULL;
+    full_name = nullptr;
 
     if (!create_new)
     {
@@ -2013,43 +2014,43 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
         mset->is_dir = vfs_file_info_is_dir(file);
         mset->is_link = vfs_file_info_is_symlink(file);
         mset->clip_copy = clip_copy;
-        mset->full_path = g_build_filename(file_dir, full_name, NULL);
+        mset->full_path = g_build_filename(file_dir, full_name, nullptr);
         if (dest_dir)
-            mset->new_path = g_build_filename(dest_dir, full_name, NULL);
+            mset->new_path = g_build_filename(dest_dir, full_name, nullptr);
         else
             mset->new_path = g_strdup(mset->full_path);
         g_free(full_name);
-        full_name = NULL;
+        full_name = nullptr;
     }
     else if (create_new == PTK_RENAME_NEW_LINK && file)
     {
         full_name = g_strdup(vfs_file_info_get_disp_name(file));
         if (!full_name)
             full_name = g_strdup(vfs_file_info_get_name(file));
-        mset->full_path = g_build_filename(file_dir, full_name, NULL);
+        mset->full_path = g_build_filename(file_dir, full_name, nullptr);
         mset->new_path = g_strdup(mset->full_path);
         mset->is_dir = vfs_file_info_is_dir(file); // is_dir is dynamic for create
         mset->is_link = vfs_file_info_is_symlink(file);
-        mset->clip_copy = FALSE;
+        mset->clip_copy = false;
     }
     else
     {
-        mset->full_path = get_unique_name(file_dir, NULL);
+        mset->full_path = get_unique_name(file_dir, nullptr);
         mset->new_path = g_strdup(mset->full_path);
-        mset->is_dir = FALSE; // is_dir is dynamic for create
-        mset->is_link = FALSE;
-        mset->clip_copy = FALSE;
+        mset->is_dir = false; // is_dir is dynamic for create
+        mset->is_link = false;
+        mset->clip_copy = false;
     }
 
     mset->create_new = create_new;
     mset->old_path = file_dir;
 
-    mset->full_path_exists = FALSE;
-    mset->full_path_exists_dir = FALSE;
-    mset->full_path_same = FALSE;
-    mset->path_missing = FALSE;
-    mset->path_exists_file = FALSE;
-    mset->is_move = FALSE;
+    mset->full_path_exists = false;
+    mset->full_path_exists_dir = false;
+    mset->full_path_same = false;
+    mset->path_missing = false;
+    mset->path_exists_file = false;
+    mset->is_move = false;
 
     // Dialog
     const char* root_msg;
@@ -2070,27 +2071,27 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
 
     mset->dlg = gtk_dialog_new_with_buttons(
         "Move",
-        mset->parent ? GTK_WINDOW(mset->parent) : NULL,
+        mset->parent ? GTK_WINDOW(mset->parent) : nullptr,
         GtkDialogFlags(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-        NULL,
-        NULL);
+        nullptr,
+        nullptr);
     // g_free( title );
     gtk_window_set_role(GTK_WINDOW(mset->dlg), "rename_dialog");
 
     // Buttons
     mset->options = gtk_button_new_with_mnemonic("Opt_ions");
     gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg), mset->options, GTK_RESPONSE_YES);
-    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->options), FALSE);
+    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->options), false);
     g_signal_connect(G_OBJECT(mset->options), "clicked", G_CALLBACK(on_options_button_press), mset);
 
     mset->browse = gtk_button_new_with_mnemonic("_Browse");
     gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg), mset->browse, GTK_RESPONSE_YES);
-    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->browse), FALSE);
+    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->browse), false);
     g_signal_connect(G_OBJECT(mset->browse), "clicked", G_CALLBACK(on_browse_button_press), mset);
 
     mset->revert = gtk_button_new_with_mnemonic("Re_vert");
     gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg), mset->revert, GTK_RESPONSE_NO);
-    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->revert), FALSE);
+    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->revert), false);
     g_signal_connect(G_OBJECT(mset->revert), "clicked", G_CALLBACK(on_revert_button_press), mset);
 
     mset->cancel = gtk_button_new_with_label("Cancel");
@@ -2098,21 +2099,21 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
 
     mset->next = gtk_button_new_with_label("OK");
     gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg), mset->next, GTK_RESPONSE_OK);
-    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->next), FALSE);
+    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->next), false);
     gtk_button_set_label(GTK_BUTTON(mset->next), "_Rename");
 
     if (create_new && auto_open)
     {
         mset->open = gtk_button_new_with_mnemonic("& _Open");
         gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg), mset->open, GTK_RESPONSE_APPLY);
-        gtk_widget_set_focus_on_click(GTK_WIDGET(mset->open), FALSE);
+        gtk_widget_set_focus_on_click(GTK_WIDGET(mset->open), false);
     }
     else
-        mset->open = NULL;
+        mset->open = nullptr;
 
     // Window
     gtk_widget_set_size_request(GTK_WIDGET(mset->dlg), 800, 500);
-    gtk_window_set_resizable(GTK_WINDOW(mset->dlg), TRUE);
+    gtk_window_set_resizable(GTK_WINDOW(mset->dlg), true);
     gtk_window_set_type_hint(GTK_WINDOW(mset->dlg), GDK_WINDOW_TYPE_HINT_DIALOG);
     gtk_widget_show_all(mset->dlg);
 
@@ -2120,13 +2121,13 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
 
     // Type
     char* type;
-    mset->label_type = GTK_LABEL(gtk_label_new(NULL));
+    mset->label_type = GTK_LABEL(gtk_label_new(nullptr));
     gtk_label_set_markup_with_mnemonic(mset->label_type, "<b>Type:</b>");
     if (mset->is_link)
     {
         // mset->mime_type = g_strdup_printf( "inode/symlink" );
         // type = g_strdup_printf( "symbolic link ( inode/symlink )" );
-        path = g_file_read_link(mset->full_path, NULL);
+        path = g_file_read_link(mset->full_path, nullptr);
         if (path)
         {
             mset->mime_type = path;
@@ -2135,7 +2136,7 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
             else
             {
                 type = g_strdup_printf("!Link-> %s (missing)", path);
-                target_missing = TRUE;
+                target_missing = true;
             }
         }
         else
@@ -2170,11 +2171,11 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
     gtk_label_set_ellipsize(mset->label_mime, PANGO_ELLIPSIZE_MIDDLE);
     g_free(type);
 
-    gtk_label_set_selectable(mset->label_mime, TRUE);
+    gtk_label_set_selectable(mset->label_mime, true);
     gtk_widget_set_halign(GTK_WIDGET(mset->label_mime), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(mset->label_mime), GTK_ALIGN_START);
 
-    gtk_label_set_selectable(mset->label_type, TRUE);
+    gtk_label_set_selectable(mset->label_type, true);
     g_signal_connect(G_OBJECT(mset->label_type),
                      "button-press-event",
                      G_CALLBACK(on_label_button_press),
@@ -2184,7 +2185,7 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
     // Target
     if (mset->is_link || create_new)
     {
-        mset->label_target = GTK_LABEL(gtk_label_new(NULL));
+        mset->label_target = GTK_LABEL(gtk_label_new(nullptr));
         gtk_label_set_markup_with_mnemonic(mset->label_target, "<b>_Target:</b>");
         gtk_widget_set_halign(GTK_WIDGET(mset->label_target), GTK_ALIGN_START);
         gtk_widget_set_valign(GTK_WIDGET(mset->label_target), GTK_ALIGN_END);
@@ -2194,7 +2195,7 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                          "mnemonic-activate",
                          G_CALLBACK(on_mnemonic_activate),
                          mset);
-        gtk_label_set_selectable(mset->label_target, TRUE);
+        gtk_label_set_selectable(mset->label_target, true);
         g_signal_connect(G_OBJECT(mset->label_target),
                          "button-press-event",
                          G_CALLBACK(on_label_button_press),
@@ -2209,7 +2210,7 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
         {
             // Target Browse button
             mset->browse_target = gtk_button_new();
-            gtk_widget_set_focus_on_click(GTK_WIDGET(mset->browse_target), FALSE);
+            gtk_widget_set_focus_on_click(GTK_WIDGET(mset->browse_target), false);
             if (mset->new_path && file)
                 gtk_entry_set_text(GTK_ENTRY(mset->entry_target), mset->new_path);
             g_signal_connect(G_OBJECT(mset->browse_target),
@@ -2220,18 +2221,18 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
         else
         {
             gtk_entry_set_text(GTK_ENTRY(mset->entry_target), mset->mime_type);
-            gtk_editable_set_editable(GTK_EDITABLE(mset->entry_target), FALSE);
-            mset->browse_target = NULL;
+            gtk_editable_set_editable(GTK_EDITABLE(mset->entry_target), false);
+            mset->browse_target = nullptr;
         }
         g_signal_connect(G_OBJECT(mset->entry_target), "changed", G_CALLBACK(on_move_change), mset);
     }
     else
-        mset->label_target = NULL;
+        mset->label_target = nullptr;
 
     // Template
     if (create_new)
     {
-        mset->label_template = GTK_LABEL(gtk_label_new(NULL));
+        mset->label_template = GTK_LABEL(gtk_label_new(nullptr));
         gtk_label_set_markup_with_mnemonic(mset->label_template, "<b>_Template:</b>");
         gtk_widget_set_halign(GTK_WIDGET(mset->label_template), GTK_ALIGN_START);
         gtk_widget_set_valign(GTK_WIDGET(mset->label_template), GTK_ALIGN_END);
@@ -2239,7 +2240,7 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                          "mnemonic-activate",
                          G_CALLBACK(on_mnemonic_activate),
                          mset);
-        gtk_label_set_selectable(mset->label_template, TRUE);
+        gtk_label_set_selectable(mset->label_template, true);
         g_signal_connect(G_OBJECT(mset->label_template),
                          "button-press-event",
                          G_CALLBACK(on_label_button_press),
@@ -2248,11 +2249,11 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
 
         // template combo
         mset->combo_template = GTK_COMBO_BOX(gtk_combo_box_text_new_with_entry());
-        gtk_widget_set_focus_on_click((GtkWidget*)mset->combo_template, FALSE);
+        gtk_widget_set_focus_on_click((GtkWidget*)mset->combo_template, false);
         // add entries
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template), "Empty File");
-        templates = NULL;
-        templates = get_templates(NULL, NULL, templates, FALSE);
+        templates = nullptr;
+        templates = get_templates(nullptr, nullptr, templates, false);
         if (templates)
         {
             templates = g_list_sort(templates, (GCompareFunc)g_strcmp0);
@@ -2278,13 +2279,13 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
 
         // template_dir combo
         mset->combo_template_dir = GTK_COMBO_BOX(gtk_combo_box_text_new_with_entry());
-        gtk_widget_set_focus_on_click((GtkWidget*)mset->combo_template_dir, FALSE);
+        gtk_widget_set_focus_on_click((GtkWidget*)mset->combo_template_dir, false);
 
         // add entries
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template_dir),
                                        "Empty Directory");
-        templates = NULL;
-        templates = get_templates(NULL, NULL, templates, TRUE);
+        templates = nullptr;
+        templates = get_templates(nullptr, nullptr, templates, true);
         if (templates)
         {
             templates = g_list_sort(templates, (GCompareFunc)g_strcmp0);
@@ -2305,7 +2306,7 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
 
         // Template Browse button
         mset->browse_template = gtk_button_new();
-        gtk_widget_set_focus_on_click(GTK_WIDGET(mset->browse_template), FALSE);
+        gtk_widget_set_focus_on_click(GTK_WIDGET(mset->browse_template), false);
         g_signal_connect(G_OBJECT(mset->browse_template),
                          "clicked",
                          G_CALLBACK(on_create_browse_button_press),
@@ -2313,18 +2314,18 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
     }
     else
     {
-        mset->label_template = NULL;
-        mset->combo_template = NULL;
-        mset->combo_template_dir = NULL;
+        mset->label_template = nullptr;
+        mset->combo_template = nullptr;
+        mset->combo_template_dir = nullptr;
     }
 
     // Name
-    mset->label_name = GTK_LABEL(gtk_label_new(NULL));
+    mset->label_name = GTK_LABEL(gtk_label_new(nullptr));
     gtk_label_set_markup_with_mnemonic(mset->label_name, "<b>_Name:</b>");
     gtk_widget_set_halign(GTK_WIDGET(mset->label_name), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(mset->label_name), GTK_ALIGN_START);
-    mset->scroll_name = gtk_scrolled_window_new(NULL, NULL);
-    mset->input_name = GTK_WIDGET(multi_input_new(GTK_SCROLLED_WINDOW(mset->scroll_name), NULL));
+    mset->scroll_name = gtk_scrolled_window_new(nullptr, nullptr);
+    mset->input_name = GTK_WIDGET(multi_input_new(GTK_SCROLLED_WINDOW(mset->scroll_name), nullptr));
     gtk_label_set_mnemonic_widget(mset->label_name, mset->input_name);
     g_signal_connect(G_OBJECT(mset->input_name),
                      "key-press-event",
@@ -2334,7 +2335,7 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                      "mnemonic-activate",
                      G_CALLBACK(on_mnemonic_activate),
                      mset);
-    gtk_label_set_selectable(mset->label_name, TRUE);
+    gtk_label_set_selectable(mset->label_name, true);
     g_signal_connect(G_OBJECT(mset->label_name),
                      "button-press-event",
                      G_CALLBACK(on_label_button_press),
@@ -2343,10 +2344,10 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
     mset->buf_name = GTK_TEXT_BUFFER(gtk_text_view_get_buffer(GTK_TEXT_VIEW(mset->input_name)));
     g_signal_connect(G_OBJECT(mset->buf_name), "changed", G_CALLBACK(on_move_change), mset);
     g_signal_connect(G_OBJECT(mset->input_name), "focus", G_CALLBACK(on_focus), mset);
-    mset->blank_name = GTK_LABEL(gtk_label_new(NULL));
+    mset->blank_name = GTK_LABEL(gtk_label_new(nullptr));
 
     // Ext
-    mset->label_ext = GTK_LABEL(gtk_label_new(NULL));
+    mset->label_ext = GTK_LABEL(gtk_label_new(nullptr));
     gtk_label_set_markup_with_mnemonic(mset->label_ext, "<b>E_xtension:</b>");
     gtk_widget_set_halign(GTK_WIDGET(mset->label_ext), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(mset->label_ext), GTK_ALIGN_END);
@@ -2356,7 +2357,7 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                      "mnemonic-activate",
                      G_CALLBACK(on_mnemonic_activate),
                      mset);
-    gtk_label_set_selectable(mset->label_ext, TRUE);
+    gtk_label_set_selectable(mset->label_ext, true);
     g_signal_connect(G_OBJECT(mset->label_ext),
                      "button-press-event",
                      G_CALLBACK(on_label_button_press),
@@ -2372,19 +2373,19 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
     gtk_widget_set_sensitive(GTK_WIDGET(mset->label_ext), !mset->is_dir);
 
     // Filename
-    mset->label_full_name = GTK_LABEL(gtk_label_new(NULL));
+    mset->label_full_name = GTK_LABEL(gtk_label_new(nullptr));
     gtk_label_set_markup_with_mnemonic(mset->label_full_name, "<b>_Filename:</b>");
     gtk_widget_set_halign(GTK_WIDGET(mset->label_full_name), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(mset->label_full_name), GTK_ALIGN_START);
-    mset->scroll_full_name = gtk_scrolled_window_new(NULL, NULL);
+    mset->scroll_full_name = gtk_scrolled_window_new(nullptr, nullptr);
     mset->input_full_name =
-        GTK_WIDGET(multi_input_new(GTK_SCROLLED_WINDOW(mset->scroll_full_name), NULL));
+        GTK_WIDGET(multi_input_new(GTK_SCROLLED_WINDOW(mset->scroll_full_name), nullptr));
     gtk_label_set_mnemonic_widget(mset->label_full_name, mset->input_full_name);
     g_signal_connect(G_OBJECT(mset->input_full_name),
                      "mnemonic-activate",
                      G_CALLBACK(on_mnemonic_activate),
                      mset);
-    gtk_label_set_selectable(mset->label_full_name, TRUE);
+    gtk_label_set_selectable(mset->label_full_name, true);
     g_signal_connect(G_OBJECT(mset->label_full_name),
                      "button-press-event",
                      G_CALLBACK(on_label_button_press),
@@ -2397,21 +2398,21 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
     mset->buf_full_name = gtk_text_view_get_buffer(GTK_TEXT_VIEW(mset->input_full_name));
     g_signal_connect(G_OBJECT(mset->buf_full_name), "changed", G_CALLBACK(on_move_change), mset);
     g_signal_connect(G_OBJECT(mset->input_full_name), "focus", G_CALLBACK(on_focus), mset);
-    mset->blank_full_name = GTK_LABEL(gtk_label_new(NULL));
+    mset->blank_full_name = GTK_LABEL(gtk_label_new(nullptr));
 
     // Parent
-    mset->label_path = GTK_LABEL(gtk_label_new(NULL));
+    mset->label_path = GTK_LABEL(gtk_label_new(nullptr));
     gtk_label_set_markup_with_mnemonic(mset->label_path, "<b>_Parent:</b>");
     gtk_widget_set_halign(GTK_WIDGET(mset->label_path), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(mset->label_path), GTK_ALIGN_START);
-    mset->scroll_path = gtk_scrolled_window_new(NULL, NULL);
-    mset->input_path = GTK_WIDGET(multi_input_new(GTK_SCROLLED_WINDOW(mset->scroll_path), NULL));
+    mset->scroll_path = gtk_scrolled_window_new(nullptr, nullptr);
+    mset->input_path = GTK_WIDGET(multi_input_new(GTK_SCROLLED_WINDOW(mset->scroll_path), nullptr));
     gtk_label_set_mnemonic_widget(mset->label_path, mset->input_path);
     g_signal_connect(G_OBJECT(mset->input_path),
                      "mnemonic-activate",
                      G_CALLBACK(on_mnemonic_activate),
                      mset);
-    gtk_label_set_selectable(mset->label_path, TRUE);
+    gtk_label_set_selectable(mset->label_path, true);
     g_signal_connect(G_OBJECT(mset->label_path),
                      "button-press-event",
                      G_CALLBACK(on_label_button_press),
@@ -2424,14 +2425,14 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
     mset->buf_path = gtk_text_view_get_buffer(GTK_TEXT_VIEW(mset->input_path));
     g_signal_connect(G_OBJECT(mset->buf_path), "changed", G_CALLBACK(on_move_change), mset);
     g_signal_connect(G_OBJECT(mset->input_path), "focus", G_CALLBACK(on_focus), mset);
-    mset->blank_path = GTK_LABEL(gtk_label_new(NULL));
+    mset->blank_path = GTK_LABEL(gtk_label_new(nullptr));
 
     // Path
-    mset->label_full_path = GTK_LABEL(gtk_label_new(NULL));
+    mset->label_full_path = GTK_LABEL(gtk_label_new(nullptr));
     gtk_label_set_markup_with_mnemonic(mset->label_full_path, "<b>P_ath:</b>");
     gtk_widget_set_halign(GTK_WIDGET(mset->label_full_path), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(mset->label_full_path), GTK_ALIGN_START);
-    mset->scroll_full_path = gtk_scrolled_window_new(NULL, NULL);
+    mset->scroll_full_path = gtk_scrolled_window_new(nullptr, nullptr);
     // set initial path
     mset->input_full_path =
         GTK_WIDGET(multi_input_new(GTK_SCROLLED_WINDOW(mset->scroll_full_path), mset->new_path));
@@ -2440,7 +2441,7 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                      "mnemonic-activate",
                      G_CALLBACK(on_mnemonic_activate),
                      mset);
-    gtk_label_set_selectable(mset->label_full_path, TRUE);
+    gtk_label_set_selectable(mset->label_full_path, true);
     g_signal_connect(G_OBJECT(mset->label_full_path),
                      "button-press-event",
                      G_CALLBACK(on_label_button_press),
@@ -2455,7 +2456,7 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
     g_signal_connect(G_OBJECT(mset->input_full_path), "focus", G_CALLBACK(on_focus), mset);
 
     // Options
-    mset->opt_move = gtk_radio_button_new_with_mnemonic(NULL, "Mov_e");
+    mset->opt_move = gtk_radio_button_new_with_mnemonic(nullptr, "Mov_e");
     mset->opt_copy =
         gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(mset->opt_move), "Cop_y");
     mset->opt_link =
@@ -2468,7 +2469,7 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                                                        "Link Tar_get");
     mset->opt_as_root = gtk_check_button_new_with_mnemonic("A_s Root");
 
-    mset->opt_new_file = gtk_radio_button_new_with_mnemonic(NULL, ("New|Radio", "Fil_e"));
+    mset->opt_new_file = gtk_radio_button_new_with_mnemonic(nullptr, ("New|Radio", "Fil_e"));
     mset->opt_new_folder =
         gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(mset->opt_new_file),
                                                        ("New|Radio", "Dir_ectory"));
@@ -2476,17 +2477,17 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
         gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(mset->opt_new_file),
                                                        ("New|Radio", "_Link"));
 
-    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_move), FALSE);
+    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_move), false);
     g_signal_connect(G_OBJECT(mset->opt_move), "focus", G_CALLBACK(on_button_focus), mset);
-    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_copy), FALSE);
-    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_link), FALSE);
-    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_copy_target), FALSE);
-    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_link_target), FALSE);
-    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_as_root), FALSE);
-    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_new_file), FALSE);
+    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_copy), false);
+    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_link), false);
+    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_copy_target), false);
+    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_link_target), false);
+    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_as_root), false);
+    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_new_file), false);
     g_signal_connect(G_OBJECT(mset->opt_new_file), "focus", G_CALLBACK(on_button_focus), mset);
-    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_new_folder), FALSE);
-    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_new_link), FALSE);
+    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_new_folder), false);
+    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_new_link), false);
     gtk_widget_set_sensitive(mset->opt_copy_target, mset->is_link && !target_missing);
     gtk_widget_set_sensitive(mset->opt_link_target, mset->is_link);
 
@@ -2494,58 +2495,58 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
     GtkWidget* dlg_vbox = gtk_dialog_get_content_area(GTK_DIALOG(mset->dlg));
     gtk_container_set_border_width(GTK_CONTAINER(mset->dlg), 10);
 
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->label_name), FALSE, TRUE, 4);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->scroll_name), TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->label_name), false, true, 4);
+    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->scroll_name), true, true, 0);
 
     mset->hbox_ext = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_box_pack_start(GTK_BOX(mset->hbox_ext), GTK_WIDGET(mset->label_ext), FALSE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(mset->hbox_ext), GTK_WIDGET(gtk_label_new(" ")), FALSE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(mset->hbox_ext), GTK_WIDGET(mset->entry_ext), TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->hbox_ext), FALSE, TRUE, 5);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->blank_name), FALSE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(mset->hbox_ext), GTK_WIDGET(mset->label_ext), false, true, 0);
+    gtk_box_pack_start(GTK_BOX(mset->hbox_ext), GTK_WIDGET(gtk_label_new(" ")), false, true, 0);
+    gtk_box_pack_start(GTK_BOX(mset->hbox_ext), GTK_WIDGET(mset->entry_ext), true, true, 0);
+    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->hbox_ext), false, true, 5);
+    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->blank_name), false, true, 0);
 
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->label_full_name), FALSE, TRUE, 4);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->scroll_full_name), TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->blank_full_name), FALSE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->label_full_name), false, true, 4);
+    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->scroll_full_name), true, true, 0);
+    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->blank_full_name), false, true, 0);
 
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->label_path), FALSE, TRUE, 4);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->scroll_path), TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->blank_path), FALSE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->label_path), false, true, 4);
+    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->scroll_path), true, true, 0);
+    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->blank_path), false, true, 0);
 
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->label_full_path), FALSE, TRUE, 4);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->scroll_full_path), TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->label_full_path), false, true, 4);
+    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->scroll_full_path), true, true, 0);
 
     mset->hbox_type = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_box_pack_start(GTK_BOX(mset->hbox_type), GTK_WIDGET(mset->label_type), FALSE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(mset->hbox_type), GTK_WIDGET(mset->label_mime), TRUE, TRUE, 5);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->hbox_type), FALSE, TRUE, 5);
+    gtk_box_pack_start(GTK_BOX(mset->hbox_type), GTK_WIDGET(mset->label_type), false, true, 0);
+    gtk_box_pack_start(GTK_BOX(mset->hbox_type), GTK_WIDGET(mset->label_mime), true, true, 5);
+    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->hbox_type), false, true, 5);
 
     mset->hbox_target = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     if (mset->label_target)
     {
         gtk_box_pack_start(GTK_BOX(mset->hbox_target),
                            GTK_WIDGET(mset->label_target),
-                           FALSE,
-                           TRUE,
+                           false,
+                           true,
                            0);
         if (!create_new)
             gtk_box_pack_start(GTK_BOX(mset->hbox_target),
                                GTK_WIDGET(gtk_label_new(" ")),
-                               FALSE,
-                               TRUE,
+                               false,
+                               true,
                                0);
         gtk_box_pack_start(GTK_BOX(mset->hbox_target),
                            GTK_WIDGET(mset->entry_target),
-                           TRUE,
-                           TRUE,
+                           true,
+                           true,
                            create_new ? 3 : 0);
         if (mset->browse_target)
             gtk_box_pack_start(GTK_BOX(mset->hbox_target),
                                GTK_WIDGET(mset->browse_target),
-                               FALSE,
-                               TRUE,
+                               false,
+                               true,
                                0);
-        gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->hbox_target), FALSE, TRUE, 5);
+        gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->hbox_target), false, true, 5);
     }
 
     mset->hbox_template = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -2553,64 +2554,64 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
     {
         gtk_box_pack_start(GTK_BOX(mset->hbox_template),
                            GTK_WIDGET(mset->label_template),
-                           FALSE,
-                           TRUE,
+                           false,
+                           true,
                            0);
         gtk_box_pack_start(GTK_BOX(mset->hbox_template),
                            GTK_WIDGET(mset->combo_template),
-                           TRUE,
-                           TRUE,
+                           true,
+                           true,
                            3);
         gtk_box_pack_start(GTK_BOX(mset->hbox_template),
                            GTK_WIDGET(mset->combo_template_dir),
-                           TRUE,
-                           TRUE,
+                           true,
+                           true,
                            3);
         gtk_box_pack_start(GTK_BOX(mset->hbox_template),
                            GTK_WIDGET(mset->browse_template),
-                           FALSE,
-                           TRUE,
+                           false,
+                           true,
                            0);
-        gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->hbox_template), FALSE, TRUE, 5);
+        gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->hbox_template), false, true, 5);
     }
 
     GtkWidget* hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
     if (create_new)
     {
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(gtk_label_new("New")), FALSE, TRUE, 3);
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_new_file), FALSE, TRUE, 3);
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_new_folder), FALSE, TRUE, 3);
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_new_link), FALSE, TRUE, 3);
+        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(gtk_label_new("New")), false, true, 3);
+        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_new_file), false, true, 3);
+        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_new_folder), false, true, 3);
+        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_new_link), false, true, 3);
     }
     else
     {
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_move), FALSE, TRUE, 3);
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_copy), FALSE, TRUE, 3);
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_link), FALSE, TRUE, 3);
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_copy_target), FALSE, TRUE, 3);
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_link_target), FALSE, TRUE, 3);
+        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_move), false, true, 3);
+        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_copy), false, true, 3);
+        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_link), false, true, 3);
+        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_copy_target), false, true, 3);
+        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_link_target), false, true, 3);
     }
-    gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(gtk_label_new("  ")), FALSE, TRUE, 3);
-    gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_as_root), FALSE, TRUE, 6);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(hbox), FALSE, TRUE, 10);
+    gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(gtk_label_new("  ")), false, true, 3);
+    gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_as_root), false, true, 6);
+    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(hbox), false, true, 10);
 
     // show
     gtk_widget_show_all(mset->dlg);
-    on_toggled(NULL, mset);
+    on_toggled(nullptr, mset);
     if (mset->clip_copy)
     {
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_copy), TRUE);
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), FALSE);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_copy), true);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), false);
     }
     else if (create_new == PTK_RENAME_NEW_DIR)
     {
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder), TRUE);
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_new_file), FALSE);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder), true);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_new_file), false);
     }
     else if (create_new == PTK_RENAME_NEW_LINK)
     {
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_new_link), TRUE);
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_new_file), FALSE);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_new_link), true);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_new_file), false);
     }
 
     // signals
@@ -2626,7 +2627,7 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
 
     // init
     on_move_change(GTK_WIDGET(mset->buf_full_path), mset);
-    on_opt_toggled(NULL, mset);
+    on_opt_toggled(nullptr, mset);
 
     if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_name)))
         mset->last_widget = mset->input_name;
@@ -2655,13 +2656,13 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
             GtkTextIter siter;
             gtk_text_buffer_get_start_iter(mset->buf_full_path, &siter);
             gtk_text_buffer_get_end_iter(mset->buf_full_path, &iter);
-            full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, FALSE);
+            full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
             if (full_path[0] != '/')
             {
                 // update full_path to absolute
                 char* cwd = g_path_get_dirname(mset->full_path);
                 char* old_path = full_path;
-                full_path = g_build_filename(cwd, old_path, NULL);
+                full_path = g_build_filename(cwd, old_path, nullptr);
                 g_free(cwd);
                 g_free(old_path);
             }
@@ -2674,7 +2675,7 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
             full_name = g_path_get_basename(full_path);
             path = g_path_get_dirname(full_path);
             old_path = g_path_get_dirname(mset->full_path);
-            bool overwrite = FALSE;
+            bool overwrite = false;
             char* msg;
 
             if (response == GTK_RESPONSE_APPLY)
@@ -2718,8 +2719,8 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                                         "Create Parent Directory",
                                         GTK_BUTTONS_YES_NO,
                                         "The parent directory does not exist.  Create it?",
-                                        NULL,
-                                        NULL) != GTK_RESPONSE_YES)
+                                        nullptr,
+                                        nullptr) != GTK_RESPONSE_YES)
                         goto _continue_free;
                 }
                 if (as_root)
@@ -2750,16 +2751,16 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                                     GTK_BUTTONS_YES_NO,
                                     "OVERWRITE WARNING",
                                     "The file path exists.  Overwrite existing file?",
-                                    NULL) != GTK_RESPONSE_YES)
+                                    nullptr) != GTK_RESPONSE_YES)
                     goto _continue_free;
-                overwrite = TRUE;
+                overwrite = true;
             }
 
             if (create_new && new_link)
             {
                 // new link task
                 task_name = g_strdup_printf("Create Link%s", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, NULL, mset->parent, task_view);
+                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 g_free(task_name);
 
                 str = g_strdup(gtk_entry_get_text(mset->entry_target));
@@ -2782,12 +2783,12 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                 }
                 g_free(from_path);
                 g_free(to_path);
-                task->task->exec_sync = TRUE;
-                task->task->exec_popup = FALSE;
-                task->task->exec_show_output = FALSE;
-                task->task->exec_show_error = TRUE;
-                task->task->exec_export = FALSE;
-                task->task->exec_as_user = as_root ? g_strdup("root") : NULL;
+                task->task->exec_sync = true;
+                task->task->exec_popup = false;
+                task->task->exec_show_output = false;
+                task->task->exec_show_error = true;
+                task->task->exec_export = false;
+                task->task->exec_as_user = as_root ? g_strdup("root") : nullptr;
                 if (auto_open)
                 {
                     auto_open->path = g_strdup(full_path);
@@ -2810,13 +2811,13 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                     if (str[0] == '/')
                         from_path = bash_quote(str);
                     else if (!g_strcmp0("Empty File", str) || str[0] == '\0')
-                        from_path = NULL;
+                        from_path = nullptr;
                     else
                     {
                         char* tdir = get_template_dir();
                         if (tdir)
                         {
-                            from_path = g_build_filename(tdir, str, NULL);
+                            from_path = g_build_filename(tdir, str, nullptr);
                             if (!g_file_test(from_path, G_FILE_TEST_IS_REGULAR))
                             {
                                 ptk_show_error(GTK_WINDOW(mset->dlg),
@@ -2833,12 +2834,12 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                             from_path = bash_quote(str);
                         }
                         else
-                            from_path = NULL;
+                            from_path = nullptr;
                     }
                     g_free(str);
                 }
                 else
-                    from_path = NULL;
+                    from_path = nullptr;
                 to_path = bash_quote(full_path);
                 char* over_cmd;
                 if (overwrite)
@@ -2847,7 +2848,7 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                     over_cmd = g_strdup("");
 
                 task_name = g_strdup_printf("Create New File%s", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, NULL, mset->parent, task_view);
+                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 g_free(task_name);
                 if (!from_path)
                     task->task->exec_command =
@@ -2861,12 +2862,12 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                 g_free(from_path);
                 g_free(to_path);
                 g_free(over_cmd);
-                task->task->exec_sync = TRUE;
-                task->task->exec_popup = FALSE;
-                task->task->exec_show_output = FALSE;
-                task->task->exec_show_error = TRUE;
-                task->task->exec_export = FALSE;
-                task->task->exec_as_user = as_root ? g_strdup("root") : NULL;
+                task->task->exec_sync = true;
+                task->task->exec_popup = false;
+                task->task->exec_show_output = false;
+                task->task->exec_show_error = true;
+                task->task->exec_export = false;
+                task->task->exec_as_user = as_root ? g_strdup("root") : nullptr;
                 if (auto_open)
                 {
                     auto_open->path = g_strdup(full_path);
@@ -2891,13 +2892,13 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                     if (str[0] == '/')
                         from_path = bash_quote(str);
                     else if (!g_strcmp0("Empty Directory", str) || str[0] == '\0')
-                        from_path = NULL;
+                        from_path = nullptr;
                     else
                     {
                         char* tdir = get_template_dir();
                         if (tdir)
                         {
-                            from_path = g_build_filename(tdir, str, NULL);
+                            from_path = g_build_filename(tdir, str, nullptr);
                             if (!g_file_test(from_path, G_FILE_TEST_IS_DIR))
                             {
                                 ptk_show_error(GTK_WINDOW(mset->dlg),
@@ -2914,16 +2915,16 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                             from_path = bash_quote(str);
                         }
                         else
-                            from_path = NULL;
+                            from_path = nullptr;
                     }
                     g_free(str);
                 }
                 else
-                    from_path = NULL;
+                    from_path = nullptr;
                 to_path = bash_quote(full_path);
 
                 task_name = g_strdup_printf("Create New Directory%s", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, NULL, mset->parent, task_view);
+                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 g_free(task_name);
                 if (!from_path)
                     task->task->exec_command = g_strdup_printf("%smkdir %s", root_mkdir, to_path);
@@ -2932,12 +2933,12 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                         g_strdup_printf("%scp -rL %s %s", root_mkdir, from_path, to_path);
                 g_free(from_path);
                 g_free(to_path);
-                task->task->exec_sync = TRUE;
-                task->task->exec_popup = FALSE;
-                task->task->exec_show_output = FALSE;
-                task->task->exec_show_error = TRUE;
-                task->task->exec_export = FALSE;
-                task->task->exec_as_user = as_root ? g_strdup("root") : NULL;
+                task->task->exec_sync = true;
+                task->task->exec_popup = false;
+                task->task->exec_show_output = false;
+                task->task->exec_show_error = true;
+                task->task->exec_export = false;
+                task->task->exec_as_user = as_root ? g_strdup("root") : nullptr;
                 if (auto_open)
                 {
                     auto_open->path = g_strdup(full_path);
@@ -2952,9 +2953,9 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
             {
                 // copy task
                 task_name = g_strdup_printf("Copy%s", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, NULL, mset->parent, task_view);
+                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 g_free(task_name);
-                char* over_opt = NULL;
+                char* over_opt = nullptr;
                 to_path = bash_quote(full_path);
                 if (copy || !mset->is_link)
                     from_path = bash_quote(mset->full_path);
@@ -2992,12 +2993,12 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                 g_free(from_path);
                 g_free(to_path);
                 g_free(over_opt);
-                task->task->exec_sync = TRUE;
-                task->task->exec_popup = FALSE;
-                task->task->exec_show_output = FALSE;
-                task->task->exec_show_error = TRUE;
-                task->task->exec_export = FALSE;
-                task->task->exec_as_user = as_root ? g_strdup("root") : NULL;
+                task->task->exec_sync = true;
+                task->task->exec_popup = false;
+                task->task->exec_show_output = false;
+                task->task->exec_show_error = true;
+                task->task->exec_export = false;
+                task->task->exec_as_user = as_root ? g_strdup("root") : nullptr;
                 ptk_file_task_run(task);
                 update_new_display(full_path);
             }
@@ -3005,7 +3006,7 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
             {
                 // link task
                 task_name = g_strdup_printf("Create Link%s", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, NULL, mset->parent, task_view);
+                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 g_free(task_name);
                 if (link || !mset->is_link)
                     from_path = bash_quote(mset->full_path);
@@ -3035,12 +3036,12 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                 }
                 g_free(from_path);
                 g_free(to_path);
-                task->task->exec_sync = TRUE;
-                task->task->exec_popup = FALSE;
-                task->task->exec_show_output = FALSE;
-                task->task->exec_show_error = TRUE;
-                task->task->exec_export = FALSE;
-                task->task->exec_as_user = as_root ? g_strdup("root") : NULL;
+                task->task->exec_sync = true;
+                task->task->exec_popup = false;
+                task->task->exec_show_output = false;
+                task->task->exec_show_error = true;
+                task->task->exec_export = false;
+                task->task->exec_as_user = as_root ? g_strdup("root") : nullptr;
                 ptk_file_task_run(task);
                 update_new_display(full_path);
             }
@@ -3051,7 +3052,7 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                 // move task - this is jumped to from the below rename block on
                 // EXDEV error
                 task_name = g_strdup_printf("Move%s", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, NULL, mset->parent, task_view);
+                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 g_free(task_name);
                 from_path = bash_quote(mset->full_path);
                 to_path = bash_quote(full_path);
@@ -3067,12 +3068,12 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
                 }
                 g_free(from_path);
                 g_free(to_path);
-                task->task->exec_sync = TRUE;
-                task->task->exec_popup = FALSE;
-                task->task->exec_show_output = FALSE;
-                task->task->exec_show_error = TRUE;
-                task->task->exec_export = FALSE;
-                task->task->exec_as_user = as_root ? g_strdup("root") : NULL;
+                task->task->exec_sync = true;
+                task->task->exec_popup = false;
+                task->task->exec_show_output = false;
+                task->task->exec_show_error = true;
+                task->task->exec_export = false;
+                task->task->exec_as_user = as_root ? g_strdup("root") : nullptr;
                 ptk_file_task_run(task);
                 update_new_display(full_path);
             }
@@ -3143,7 +3144,7 @@ void ptk_show_file_properties(GtkWindow* parent_win, const char* cwd, GList* sel
     {
         /* Make a copy of the list */
         sel_files = g_list_copy(sel_files);
-        g_list_foreach(sel_files, (GFunc)vfs_file_info_ref, NULL);
+        g_list_foreach(sel_files, (GFunc)vfs_file_info_ref, nullptr);
 
         dlg = file_properties_dlg_new(parent_win, cwd, sel_files, page);
     }
@@ -3151,8 +3152,8 @@ void ptk_show_file_properties(GtkWindow* parent_win, const char* cwd, GList* sel
     {
         // no files selected, use cwd as file
         VFSFileInfo* file = vfs_file_info_new();
-        vfs_file_info_get(file, cwd, NULL);
-        sel_files = g_list_prepend(NULL, vfs_file_info_ref(file));
+        vfs_file_info_get(file, cwd, nullptr);
+        sel_files = g_list_prepend(nullptr, vfs_file_info_ref(file));
         char* parent_dir = g_path_get_dirname(cwd);
         dlg = file_properties_dlg_new(parent_win, parent_dir, sel_files, page);
     }
@@ -3165,10 +3166,10 @@ static bool open_archives_with_handler(ParentInfo* parent, GList* sel_files, cha
 {
     if (xset_get_b("arc_def_open"))
         // user has open archives with app option enabled
-        return FALSE; // don't handle these files
+        return false; // don't handle these files
 
     bool extract_here = xset_get_b("arc_def_ex");
-    const char* dest_dir = NULL;
+    const char* dest_dir = nullptr;
     int cmd;
 
     // determine default archive action in this dir
@@ -3189,7 +3190,7 @@ static bool open_archives_with_handler(ParentInfo* parent, GList* sel_files, cha
         cmd = HANDLER_LIST;
     }
     else
-        return FALSE; // don't handle these files
+        return false; // don't handle these files
 
     // type or pathname has archive handler? - don't test command non-empty
     // here because only applies to first file
@@ -3197,9 +3198,9 @@ static bool open_archives_with_handler(ParentInfo* parent, GList* sel_files, cha
                                                            cmd,
                                                            full_path,
                                                            mime_type,
-                                                           FALSE,
-                                                           FALSE,
-                                                           TRUE);
+                                                           false,
+                                                           false,
+                                                           true);
     if (handlers_slist)
     {
         g_slist_free(handlers_slist);
@@ -3208,10 +3209,10 @@ static bool open_archives_with_handler(ParentInfo* parent, GList* sel_files, cha
                                   parent->cwd,
                                   dest_dir,
                                   cmd,
-                                  TRUE);
-        return TRUE; // all files handled
+                                  true);
+        return true; // all files handled
     }
-    return FALSE; // don't handle these files
+    return false; // don't handle these files
 }
 
 static void open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
@@ -3227,29 +3228,29 @@ static void open_files_with_handler(ParentInfo* parent, GList* files, XSet* hand
 
     // get command - was already checked as non-empty
     char* err_msg =
-        ptk_handler_load_script(HANDLER_MODE_FILE, HANDLER_MOUNT, handler_set, NULL, &command);
+        ptk_handler_load_script(HANDLER_MODE_FILE, HANDLER_MOUNT, handler_set, nullptr, &command);
     if (err_msg)
     {
-        xset_msg_dialog(parent->file_browser ? GTK_WIDGET(parent->file_browser) : NULL,
+        xset_msg_dialog(parent->file_browser ? GTK_WIDGET(parent->file_browser) : nullptr,
                         GTK_MESSAGE_ERROR,
                         "Error Loading Handler",
                         0,
                         err_msg,
-                        NULL,
-                        NULL);
+                        nullptr,
+                        nullptr);
         g_free(err_msg);
         return;
     }
     // auto mount point
     if (strstr(command, "%a"))
     {
-        name =
-            ptk_location_view_create_mount_point(HANDLER_MODE_FILE,
-                                                 NULL,
-                                                 NULL,
-                                                 files && files->data ? (char*)files->data : NULL);
+        name = ptk_location_view_create_mount_point(HANDLER_MODE_FILE,
+                                                    nullptr,
+                                                    nullptr,
+                                                    files && files->data ? (char*)files->data
+                                                                         : nullptr);
         str = command;
-        command = replace_string(command, "%a", name, FALSE);
+        command = replace_string(command, "%a", name, false);
         g_free(str);
         g_free(name);
     }
@@ -3316,26 +3317,26 @@ static void open_files_with_handler(ParentInfo* parent, GList* files, XSet* hand
         PtkFileTask* task =
             ptk_file_exec_new(handler_set->menu_label,
                               parent->cwd,
-                              parent->file_browser ? GTK_WIDGET(parent->file_browser) : NULL,
-                              parent->file_browser ? parent->file_browser->task_view : NULL);
+                              parent->file_browser ? GTK_WIDGET(parent->file_browser) : nullptr,
+                              parent->file_browser ? parent->file_browser->task_view : nullptr);
         // don't free cwd!
         task->task->exec_browser = parent->file_browser;
         task->task->exec_command = command_final;
         if (handler_set->icon)
             task->task->exec_icon = g_strdup(handler_set->icon);
         task->task->exec_terminal = (handler_set->in_terminal == XSET_B_TRUE);
-        task->task->exec_keep_terminal = FALSE;
+        task->task->exec_keep_terminal = false;
         // file handlers store Run As Task in keep_terminal
         task->task->exec_sync = handler_set->keep_terminal == XSET_B_TRUE;
         task->task->exec_show_error = task->task->exec_sync;
-        task->task->exec_export = TRUE;
+        task->task->exec_export = true;
         ptk_file_task_run(task);
 
         if (multiple)
             break;
     }
-    g_string_free(fm_filenames, TRUE);
-    g_string_free(fm_files, TRUE);
+    g_string_free(fm_filenames, true);
+    g_string_free(fm_files, true);
     g_free(command);
 }
 
@@ -3349,7 +3350,7 @@ static bool open_files_with_app(ParentInfo* parent, GList* files, const char* ap
     {
         // is a handler
         open_files_with_handler(parent, files, handler_set);
-        return TRUE;
+        return true;
     }
     else if (app_desktop)
     {
@@ -3363,7 +3364,7 @@ static bool open_files_with_app(ParentInfo* parent, GList* files, const char* ap
              * If we are lucky enough, there might be a desktop entry
              * for this program
              */
-            char* name = g_strconcat(app_desktop, ".desktop", NULL);
+            char* name = g_strconcat(app_desktop, ".desktop", nullptr);
             if (g_file_test(name, G_FILE_TEST_EXISTS))
             {
                 app = vfs_app_desktop_new(name);
@@ -3371,7 +3372,7 @@ static bool open_files_with_app(ParentInfo* parent, GList* files, const char* ap
             else
             {
                 /* dirty hack! */
-                app = vfs_app_desktop_new(NULL);
+                app = vfs_app_desktop_new(nullptr);
                 app->exec = g_strdup(app_desktop); // freed by vfs_app_desktop_unref
             }
             g_free(name);
@@ -3384,18 +3385,18 @@ static bool open_files_with_app(ParentInfo* parent, GList* files, const char* ap
             screen = gdk_screen_get_default();
 
         printf("EXEC(%s)=%s\n", app->full_path ? app->full_path : app_desktop, app->exec);
-        GError* err = NULL;
+        GError* err = nullptr;
         if (!vfs_app_desktop_open_files(screen, parent->cwd, app, files, &err))
         {
             GtkWidget* toplevel = parent->file_browser
                                       ? gtk_widget_get_toplevel(GTK_WIDGET(parent->file_browser))
-                                      : NULL;
+                                      : nullptr;
             ptk_show_error(GTK_WINDOW(toplevel), "Error", err->message);
             g_error_free(err);
         }
         vfs_app_desktop_unref(app);
     }
-    return TRUE;
+    return true;
 }
 
 static void open_files_with_each_app(void* key, void* value, void* user_data)
@@ -3410,7 +3411,7 @@ static void free_file_list_hash(void* key, void* value, void* user_data)
 {
     const char* app_desktop = (const char*)key;
     GList* files = (GList*)value;
-    g_list_foreach(files, (GFunc)g_free, NULL);
+    g_list_foreach(files, (GFunc)g_free, nullptr);
     g_list_free(files);
 }
 
@@ -3420,10 +3421,10 @@ void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_
     // if xnever, never execute an executable
     // if xforce, force execute of executable ignoring app_settings.no_execute
 
-    char* full_path = NULL;
-    GList* files_to_open = NULL;
-    GHashTable* file_list_hash = NULL;
-    char* new_dir = NULL;
+    char* full_path = nullptr;
+    GList* files_to_open = nullptr;
+    GHashTable* file_list_hash = nullptr;
+    char* new_dir = nullptr;
     GtkWidget* toplevel;
 
     ParentInfo* parent = g_slice_new0(ParentInfo);
@@ -3437,7 +3438,7 @@ void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_
         if (G_UNLIKELY(!file))
             continue;
 
-        full_path = g_build_filename(cwd, vfs_file_info_get_name(file), NULL);
+        full_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
         if (G_LIKELY(full_path))
         {
             if (app_desktop)
@@ -3466,22 +3467,22 @@ void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_
                 if (!xnever && vfs_file_info_is_executable(file, full_path) &&
                     (!app_settings.no_execute || xforce))
                 {
-                    char* argv[2] = {full_path, NULL};
+                    char* argv[2] = {full_path, nullptr};
                     GdkScreen* screen = file_browser
                                             ? gtk_widget_get_screen(GTK_WIDGET(file_browser))
                                             : gdk_screen_get_default();
-                    GError* err = NULL;
+                    GError* err = nullptr;
                     if (!vfs_exec_on_screen(screen,
                                             cwd,
                                             argv,
-                                            NULL,
+                                            nullptr,
                                             vfs_file_info_get_disp_name(file),
                                             (GSpawnFlags)VFS_EXEC_DEFAULT_FLAGS,
-                                            TRUE,
+                                            true,
                                             &err))
                     {
-                        toplevel =
-                            file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser)) : NULL;
+                        toplevel = file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser))
+                                                : nullptr;
                         ptk_show_error((GtkWindow*)toplevel, "Error", err->message);
                         g_error_free(err);
                     }
@@ -3498,7 +3499,7 @@ void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_
 
                 /* Find app to open this file and place copy in alloc_desktop.
                  * This string is freed when hash table is destroyed. */
-                char* alloc_desktop = NULL;
+                char* alloc_desktop = nullptr;
 
                 VFSMimeType* mime_type = vfs_file_info_get_mime_type(file);
 
@@ -3516,14 +3517,14 @@ void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_
                                                                        HANDLER_MOUNT,
                                                                        full_path,
                                                                        mime_type,
-                                                                       TRUE,
-                                                                       FALSE,
-                                                                       TRUE);
+                                                                       true,
+                                                                       false,
+                                                                       true);
                 if (handlers_slist)
                 {
                     XSet* handler_set = (XSet*)handlers_slist->data;
                     g_slist_free(handlers_slist);
-                    alloc_desktop = g_strconcat("###", handler_set->name, NULL);
+                    alloc_desktop = g_strconcat("###", handler_set->name, nullptr);
                 }
 
                 /* The file itself is a desktop entry file. */
@@ -3550,7 +3551,7 @@ void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_
                 if (!alloc_desktop && vfs_file_info_is_symlink(file))
                 {
                     // broken link?
-                    char* target_path = g_file_read_link(full_path, NULL);
+                    char* target_path = g_file_read_link(full_path, nullptr);
                     if (target_path)
                     {
                         if (!g_file_test(target_path, G_FILE_TEST_EXISTS))
@@ -3562,7 +3563,7 @@ void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_
                                 target_path);
                             toplevel = file_browser
                                            ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser))
-                                           : NULL;
+                                           : nullptr;
                             ptk_show_error((GtkWindow*)toplevel, "Broken Link", msg);
                             g_free(msg);
                             g_free(full_path);
@@ -3576,12 +3577,12 @@ void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_
                 {
                     /* Let the user choose an application */
                     toplevel =
-                        file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser)) : NULL;
+                        file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser)) : nullptr;
                     alloc_desktop = ptk_choose_app_for_mime_type((GtkWindow*)toplevel,
                                                                  mime_type,
-                                                                 TRUE,
-                                                                 TRUE,
-                                                                 TRUE,
+                                                                 true,
+                                                                 true,
+                                                                 true,
                                                                  !file_browser);
                 }
                 if (!alloc_desktop)
@@ -3591,11 +3592,12 @@ void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_
                 }
 
                 // add full_path to list, update hash table
-                files_to_open = NULL;
+                files_to_open = nullptr;
                 if (!file_list_hash)
                     /* this will free the keys (alloc_desktop) when hash table
                      * destroyed or new key inserted/replaced */
-                    file_list_hash = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+                    file_list_hash =
+                        g_hash_table_new_full(g_str_hash, g_str_equal, g_free, nullptr);
                 else
                     // get existing file list for this app
                     files_to_open = (GList*)g_hash_table_lookup(file_list_hash, alloc_desktop);
@@ -3615,7 +3617,7 @@ void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_
     {
         // specified app to open all files
         open_files_with_app(parent, files_to_open, app_desktop);
-        g_list_foreach(files_to_open, (GFunc)g_free, NULL);
+        g_list_foreach(files_to_open, (GFunc)g_free, nullptr);
         g_list_free(files_to_open);
     }
     else if (file_list_hash)
@@ -3623,7 +3625,7 @@ void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_
         // No app specified - Use default app to open each associated list of files
         // free_file_list_hash frees each file list and its strings
         g_hash_table_foreach(file_list_hash, open_files_with_each_app, parent);
-        g_hash_table_foreach(file_list_hash, free_file_list_hash, NULL);
+        g_hash_table_foreach(file_list_hash, free_file_list_hash, nullptr);
         g_hash_table_destroy(file_list_hash);
     }
 
@@ -3639,7 +3641,7 @@ void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_
 void ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc callback)
 {
     char* file_path;
-    bool is_cut = FALSE;
+    bool is_cut = false;
     int missing_targets;
     VFSFileInfo* file;
     char* file_dir;
@@ -3652,9 +3654,9 @@ void ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc
     {
         file_path = (char*)l->data;
         file = vfs_file_info_new();
-        vfs_file_info_get(file, file_path, NULL);
+        vfs_file_info_get(file, file_path, nullptr);
         file_dir = g_path_get_dirname(file_path);
-        if (!ptk_rename_file(file_browser, file_dir, file, cwd, !is_cut, PTK_RENAME, NULL))
+        if (!ptk_rename_file(file_browser, file_dir, file, cwd, !is_cut, PTK_RENAME, nullptr))
         {
             vfs_file_info_unref(file);
             g_free(file_dir);
@@ -3664,12 +3666,12 @@ void ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc
         vfs_file_info_unref(file);
         g_free(file_dir);
     }
-    g_list_foreach(files, (GFunc)g_free, NULL);
+    g_list_foreach(files, (GFunc)g_free, nullptr);
     g_list_free(files);
 
     if (missing_targets > 0)
     {
-        GtkWindow* parent = NULL;
+        GtkWindow* parent = nullptr;
         if (file_browser)
             parent = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser)));
 
@@ -3705,7 +3707,7 @@ void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char*
     int item_count = 0;
     for (sel = sel_files; sel; sel = sel->next)
     {
-        file_path = g_build_filename(cwd, vfs_file_info_get_name((VFSFileInfo*)sel->data), NULL);
+        file_path = g_build_filename(cwd, vfs_file_info_get_name((VFSFileInfo*)sel->data), nullptr);
         file_path_q = bash_quote(file_path);
         str = file_paths;
         file_paths = g_strdup_printf("%s %s", file_paths, file_path_q);
@@ -3726,7 +3728,7 @@ void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char*
                                 GTK_BUTTONS_YES_NO,
                                 "DELETE AS ROOT",
                                 str,
-                                NULL) != GTK_RESPONSE_YES)
+                                nullptr) != GTK_RESPONSE_YES)
             {
                 g_free(str);
                 return;
@@ -3748,7 +3750,7 @@ void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char*
                                 GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
                                 "Choose Location",
                                 folder,
-                                NULL);
+                                nullptr);
         if (path && g_file_test(path, G_FILE_TEST_IS_DIR))
         {
             xset_set_set(set, XSET_SET_SET_DESC, path);
@@ -3777,14 +3779,14 @@ void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char*
 
     // root task
     PtkFileTask* task =
-        ptk_file_exec_new(task_name, cwd, parent, file_browser ? file_browser->task_view : NULL);
+        ptk_file_exec_new(task_name, cwd, parent, file_browser ? file_browser->task_view : nullptr);
     g_free(task_name);
     task->task->exec_command = cmd;
-    task->task->exec_sync = TRUE;
-    task->task->exec_popup = FALSE;
-    task->task->exec_show_output = FALSE;
-    task->task->exec_show_error = TRUE;
-    task->task->exec_export = FALSE;
+    task->task->exec_sync = true;
+    task->task->exec_popup = false;
+    task->task->exec_show_output = false;
+    task->task->exec_show_error = true;
+    task->task->exec_export = false;
     task->task->exec_as_user = g_strdup("root");
     ptk_file_task_run(task);
 }

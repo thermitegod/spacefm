@@ -31,7 +31,7 @@ static void vfs_async_thread_cleanup(VFSAsyncTask* task, bool finalize);
 void vfs_async_task_real_cancel(VFSAsyncTask* task, bool finalize);
 
 /* Local data */
-static GObjectClass* parent_class = NULL;
+static GObjectClass* parent_class = nullptr;
 
 enum
 {
@@ -48,18 +48,19 @@ GType vfs_async_task_get_type(void)
     {
         static const GTypeInfo self_info = {
             sizeof(VFSAsyncTaskClass),
-            NULL, /* base_init */
-            NULL, /* base_finalize */
+            nullptr, /* base_init */
+            nullptr, /* base_finalize */
             (GClassInitFunc)vfs_async_task_class_init,
-            NULL, /* class_finalize */
-            NULL, /* class_data */
+            nullptr, /* class_finalize */
+            nullptr, /* class_data */
             sizeof(VFSAsyncTask),
             0,
             (GInstanceInitFunc)vfs_async_task_init,
-            NULL /* value_table */
+            nullptr /* value_table */
         };
 
-        self_type = g_type_register_static(G_TYPE_OBJECT, "VFSAsyncTask", &self_info, (GTypeFlags)0);
+        self_type =
+            g_type_register_static(G_TYPE_OBJECT, "VFSAsyncTask", &self_info, (GTypeFlags)0);
     }
 
     return self_type;
@@ -78,8 +79,8 @@ static void vfs_async_task_class_init(VFSAsyncTaskClass* klass)
                                           G_TYPE_FROM_CLASS(klass),
                                           G_SIGNAL_RUN_FIRST,
                                           G_STRUCT_OFFSET(VFSAsyncTaskClass, finish),
-                                          NULL,
-                                          NULL,
+                                          nullptr,
+                                          nullptr,
                                           g_cclosure_marshal_VOID__BOOLEAN,
                                           G_TYPE_NONE,
                                           1,
@@ -104,7 +105,7 @@ void vfs_async_task_unlock(VFSAsyncTask* task)
 
 VFSAsyncTask* vfs_async_task_new(VFSAsyncFunc task_func, void* user_data)
 {
-    VFSAsyncTask* task = (VFSAsyncTask*)g_object_new(VFS_ASYNC_TASK_TYPE, NULL);
+    VFSAsyncTask* task = (VFSAsyncTask*)g_object_new(VFS_ASYNC_TASK_TYPE, nullptr);
     task->func = task_func;
     task->user_data = user_data;
     return (VFSAsyncTask*)task;
@@ -122,11 +123,11 @@ static void vfs_async_task_finalize(GObject* object)
      currently induces unknown errors. */
     task = (VFSAsyncTask*)object;
 
-    /* finalize = TRUE, inhibit the emission of signals */
-    vfs_async_task_real_cancel(task, TRUE);
-    vfs_async_thread_cleanup(task, TRUE);
+    /* finalize = true, inhibit the emission of signals */
+    vfs_async_task_real_cancel(task, true);
+    vfs_async_thread_cleanup(task, true);
 
-    task->lock = NULL;
+    task->lock = nullptr;
 
     if (G_OBJECT_CLASS(parent_class)->finalize)
         (*G_OBJECT_CLASS(parent_class)->finalize)(object);
@@ -135,8 +136,8 @@ static void vfs_async_task_finalize(GObject* object)
 static bool on_idle(void* _task)
 {
     VFSAsyncTask* task = VFS_ASYNC_TASK(_task);
-    vfs_async_thread_cleanup(task, FALSE);
-    return TRUE; /* the idle handler is removed in vfs_async_thread_cleanup. */
+    vfs_async_thread_cleanup(task, false);
+    return true; /* the idle handler is removed in vfs_async_thread_cleanup. */
 }
 
 static void* vfs_async_task_thread(void* _task)
@@ -147,7 +148,7 @@ static void* vfs_async_task_thread(void* _task)
     vfs_async_task_lock(task);
     task->idle_id = g_idle_add((GSourceFunc)on_idle, task); // runs in main loop thread
     task->ret_val = ret;
-    task->finished = TRUE;
+    task->finished = true;
     vfs_async_task_unlock(task);
 
     return ret;
@@ -168,8 +169,8 @@ static void vfs_async_thread_cleanup(VFSAsyncTask* task, bool finalize)
     if (G_LIKELY(task->thread))
     {
         g_thread_join(task->thread);
-        task->thread = NULL;
-        task->finished = TRUE;
+        task->thread = nullptr;
+        task->finished = true;
         /* Only emit the signal when we are not finalizing.
             Emitting signal on an object during destruction is not allowed. */
         if (G_LIKELY(!finalize))
@@ -197,16 +198,16 @@ void vfs_async_task_real_cancel(VFSAsyncTask* task, bool finalize)
      */
 
     vfs_async_task_lock(task);
-    task->cancel = TRUE;
+    task->cancel = true;
     vfs_async_task_unlock(task);
 
     vfs_async_thread_cleanup(task, finalize);
-    task->cancelled = TRUE;
+    task->cancelled = true;
 }
 
 void vfs_async_task_cancel(VFSAsyncTask* task)
 {
-    vfs_async_task_real_cancel(task, FALSE);
+    vfs_async_task_real_cancel(task, false);
 }
 
 static void vfs_async_task_finish(VFSAsyncTask* task, bool is_cancelled)

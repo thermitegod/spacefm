@@ -42,16 +42,16 @@ static char* get_cwd(GtkEntry* entry)
             return ret;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 static bool seek_path(GtkEntry* entry)
 {
     if (!GTK_IS_ENTRY(entry))
-        return FALSE;
+        return false;
     EntryData* edata = (EntryData*)g_object_get_data(G_OBJECT(entry), "edata");
     if (!(edata && edata->browser))
-        return FALSE;
+        return false;
     if (edata->seek_timer)
     {
         g_source_remove(edata->seek_timer);
@@ -59,15 +59,15 @@ static bool seek_path(GtkEntry* entry)
     }
 
     if (!xset_get_b("path_seek"))
-        return FALSE;
+        return false;
 
     char* seek_dir;
-    char* seek_name = NULL;
+    char* seek_name = nullptr;
     char* full_path;
     const char* path = gtk_entry_get_text(entry);
     if (!path || path[0] == '$' || path[0] == '+' || path[0] == '&' || path[0] == '!' ||
         path[0] == '\0' || path[0] == ' ' || path[0] == '%')
-        return FALSE;
+        return false;
 
     // get dir and name prefix
     seek_dir = get_cwd(entry);
@@ -75,26 +75,26 @@ static bool seek_path(GtkEntry* entry)
     {
         // entry does not contain a valid dir
         g_free(seek_dir);
-        return FALSE;
+        return false;
     }
     if (!g_str_has_suffix(path, "/"))
     {
         // get name prefix
         seek_name = g_path_get_basename(path);
-        char* test_path = g_build_filename(seek_dir, seek_name, NULL);
+        char* test_path = g_build_filename(seek_dir, seek_name, nullptr);
         if (g_file_test(test_path, G_FILE_TEST_IS_DIR))
         {
             // complete dir path is in entry - is it unique?
             GDir* dir;
             const char* name;
             int count = 0;
-            if ((dir = g_dir_open(seek_dir, 0, NULL)))
+            if ((dir = g_dir_open(seek_dir, 0, nullptr)))
             {
                 while (count < 2 && (name = g_dir_read_name(dir)))
                 {
                     if (g_str_has_prefix(name, seek_name))
                     {
-                        full_path = g_build_filename(seek_dir, name, NULL);
+                        full_path = g_build_filename(seek_dir, name, nullptr);
                         if (g_file_test(full_path, G_FILE_TEST_IS_DIR))
                             count++;
                         g_free(full_path);
@@ -108,7 +108,7 @@ static bool seek_path(GtkEntry* entry)
                 g_free(seek_dir);
                 seek_dir = test_path;
                 g_free(seek_name);
-                seek_name = NULL;
+                seek_name = nullptr;
             }
         }
         else
@@ -122,7 +122,7 @@ static bool seek_path(GtkEntry* entry)
     ptk_file_browser_seek_path(edata->browser, seek_dir, seek_name);
     g_free(seek_dir);
     g_free(seek_name);
-    return FALSE;
+    return false;
 }
 
 static void seek_path_delayed(GtkEntry* entry, unsigned int delay)
@@ -139,23 +139,23 @@ static void seek_path_delayed(GtkEntry* entry, unsigned int delay)
 static bool match_func_cmd(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it,
                            void* user_data)
 {
-    char* name = NULL;
+    char* name = nullptr;
     GtkTreeModel* model = gtk_entry_completion_get_model(completion);
     gtk_tree_model_get(model, it, COL_NAME, &name, -1);
 
     if (name && key && g_str_has_prefix(name, key))
     {
         g_free(name);
-        return TRUE;
+        return true;
     }
     g_free(name);
-    return FALSE;
+    return false;
 }
 
 static bool match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it,
                        void* user_data)
 {
-    char* name = NULL;
+    char* name = nullptr;
     GtkTreeModel* model = gtk_entry_completion_get_model(completion);
 
     key = (const char*)g_object_get_data(G_OBJECT(completion), "fn");
@@ -166,11 +166,11 @@ static bool match_func(GtkEntryCompletion* completion, const char* key, GtkTreeI
         if (*key == 0 || g_ascii_strncasecmp(name, key, strlen(key)) == 0)
         {
             g_free(name);
-            return TRUE;
+            return true;
         }
         g_free(name);
     }
-    return FALSE;
+    return false;
 }
 
 static void update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
@@ -194,8 +194,8 @@ static void update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
         }
         gtk_entry_completion_set_match_func(completion,
                                             (GtkEntryCompletionMatchFunc)match_func_cmd,
-                                            NULL,
-                                            NULL);
+                                            nullptr,
+                                            nullptr);
     }
     else
     {
@@ -222,14 +222,14 @@ static void update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
         if (new_dir)
         {
             GDir* dir;
-            if ((dir = g_dir_open(new_dir, 0, NULL)))
+            if ((dir = g_dir_open(new_dir, 0, nullptr)))
             {
                 // build list of dir names
                 const char* name;
-                GSList* name_list = NULL;
+                GSList* name_list = nullptr;
                 while ((name = g_dir_read_name(dir)))
                 {
-                    char* full_path = g_build_filename(new_dir, name, NULL);
+                    char* full_path = g_build_filename(new_dir, name, nullptr);
                     if (g_file_test(full_path, G_FILE_TEST_IS_DIR))
                         name_list = g_slist_prepend(name_list, full_path);
                 }
@@ -257,11 +257,11 @@ static void update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
 
                 gtk_entry_completion_set_match_func(completion,
                                                     (GtkEntryCompletionMatchFunc)match_func,
-                                                    NULL,
-                                                    NULL);
+                                                    nullptr,
+                                                    nullptr);
             }
             else
-                gtk_entry_completion_set_match_func(completion, NULL, NULL, NULL);
+                gtk_entry_completion_set_match_func(completion, nullptr, nullptr, nullptr);
         }
     }
 }
@@ -290,7 +290,7 @@ static void insert_complete(GtkEntry* entry)
 
     // find longest common prefix
     GDir* dir;
-    if (!(dir = g_dir_open(dir_path, 0, NULL)))
+    if (!(dir = g_dir_open(dir_path, 0, nullptr)))
     {
         g_free(dir_path);
         return;
@@ -299,17 +299,17 @@ static void insert_complete(GtkEntry* entry)
     int count = 0;
     int i;
     const char* name;
-    char* last_path = NULL;
+    char* last_path = nullptr;
     char* prefix_name;
     char* full_path;
-    char* long_prefix = NULL;
+    char* long_prefix = nullptr;
     if (g_str_has_suffix(prefix, "/"))
-        prefix_name = NULL;
+        prefix_name = nullptr;
     else
         prefix_name = g_path_get_basename(prefix);
     while ((name = g_dir_read_name(dir)))
     {
-        full_path = g_build_filename(dir_path, name, NULL);
+        full_path = g_build_filename(dir_path, name, nullptr);
         if (g_file_test(full_path, G_FILE_TEST_IS_DIR))
         {
             if (!prefix_name)
@@ -317,7 +317,7 @@ static void insert_complete(GtkEntry* entry)
                 // full match
                 g_free(last_path);
                 last_path = full_path;
-                full_path = NULL;
+                full_path = nullptr;
                 if (++count > 1)
                     break;
             }
@@ -344,12 +344,12 @@ static void insert_complete(GtkEntry* entry)
         g_free(full_path);
     }
 
-    char* new_prefix = NULL;
+    char* new_prefix = nullptr;
     if (!prefix_name && count == 1)
         new_prefix = g_strdup_printf("%s/", last_path);
     else if (long_prefix)
     {
-        full_path = g_build_filename(dir_path, long_prefix, NULL);
+        full_path = g_build_filename(dir_path, long_prefix, nullptr);
         if (count == 1 && g_file_test(full_path, G_FILE_TEST_IS_DIR))
         {
             new_prefix = g_strdup_printf("%s/", full_path);
@@ -365,18 +365,18 @@ static void insert_complete(GtkEntry* entry)
                                         G_SIGNAL_MATCH_FUNC,
                                         0,
                                         0,
-                                        NULL,
+                                        nullptr,
                                         (void*)on_changed,
-                                        NULL);
+                                        nullptr);
         gtk_entry_set_text(GTK_ENTRY(entry), new_prefix);
         gtk_editable_set_position((GtkEditable*)entry, -1);
         g_signal_handlers_unblock_matched(G_OBJECT(entry),
                                           G_SIGNAL_MATCH_FUNC,
                                           0,
                                           0,
-                                          NULL,
+                                          nullptr,
                                           (void*)on_changed,
-                                          NULL);
+                                          nullptr);
         g_free(new_prefix);
     }
     g_dir_close(dir);
@@ -396,9 +396,9 @@ static bool on_key_press(GtkWidget* entry, GdkEventKey* evt, EntryData* edata)
             if (!keymod)
             {
                 insert_complete(GTK_ENTRY(entry));
-                on_changed(GTK_ENTRY(entry), NULL);
+                on_changed(GTK_ENTRY(entry), nullptr);
                 seek_path_delayed(GTK_ENTRY(entry), 10);
-                return TRUE;
+                return true;
             }
             break;
         case GDK_KEY_BackSpace:
@@ -406,26 +406,26 @@ static bool on_key_press(GtkWidget* entry, GdkEventKey* evt, EntryData* edata)
             if (keymod == 1)
             {
                 gtk_entry_set_text(GTK_ENTRY(entry), "");
-                return TRUE;
+                return true;
             }
             break;
         default:
             break;
     }
 
-    return FALSE;
+    return false;
 }
 
 static bool on_insert_prefix(GtkEntryCompletion* completion, char* prefix, GtkWidget* entry)
 {
     // don't use the default handler because it inserts partial names
-    return TRUE;
+    return true;
 }
 
 static bool on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model,
                               GtkTreeIter* iter, GtkWidget* entry)
 {
-    char* path = NULL;
+    char* path = nullptr;
     gtk_tree_model_get(model, iter, COL_PATH, &path, -1);
     if (path && path[0])
     {
@@ -433,9 +433,9 @@ static bool on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* mode
                                         G_SIGNAL_MATCH_FUNC,
                                         0,
                                         0,
-                                        NULL,
+                                        nullptr,
                                         (void*)on_changed,
-                                        NULL);
+                                        nullptr);
 
         gtk_entry_set_text(GTK_ENTRY(entry), path);
         g_free(path);
@@ -444,13 +444,13 @@ static bool on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* mode
                                           G_SIGNAL_MATCH_FUNC,
                                           0,
                                           0,
-                                          NULL,
+                                          nullptr,
                                           (void*)on_changed,
-                                          NULL);
-        on_changed(GTK_ENTRY(entry), NULL);
+                                          nullptr);
+        on_changed(GTK_ENTRY(entry), nullptr);
         seek_path_delayed(GTK_ENTRY(entry), 10);
     }
-    return TRUE;
+    return true;
 }
 
 static bool on_focus_in(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
@@ -466,37 +466,37 @@ static bool on_focus_in(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
 
     // Following line causes GTK3 to show both columns, so skip this and use
     // custom match-selected handler to insert COL_PATH
-    // g_object_set( completion, "text-column", COL_PATH, NULL );
+    // g_object_set( completion, "text-column", COL_PATH, nullptr );
     GtkCellRenderer* render = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start((GtkCellLayout*)completion, render, TRUE);
+    gtk_cell_layout_pack_start((GtkCellLayout*)completion, render, true);
     gtk_cell_layout_add_attribute((GtkCellLayout*)completion, render, "text", COL_NAME);
 
-    // gtk_entry_completion_set_inline_completion( completion, TRUE );
-    gtk_entry_completion_set_popup_set_width(completion, TRUE);
+    // gtk_entry_completion_set_inline_completion( completion, true );
+    gtk_entry_completion_set_popup_set_width(completion, true);
     gtk_entry_set_completion(GTK_ENTRY(entry), completion);
-    g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(on_changed), NULL);
+    g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(on_changed), nullptr);
     g_signal_connect(G_OBJECT(completion), "match-selected", G_CALLBACK(on_match_selected), entry);
     g_signal_connect(G_OBJECT(completion), "insert-prefix", G_CALLBACK(on_insert_prefix), entry);
     g_object_unref(completion);
 
-    return FALSE;
+    return false;
 }
 
 static bool on_focus_out(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
 {
-    g_signal_handlers_disconnect_by_func(entry, (void*)on_changed, NULL);
-    gtk_entry_set_completion(GTK_ENTRY(entry), NULL);
-    return FALSE;
+    g_signal_handlers_disconnect_by_func(entry, (void*)on_changed, nullptr);
+    gtk_entry_set_completion(GTK_ENTRY(entry), nullptr);
+    return false;
 }
 
 static void ptk_path_entry_man(GtkWidget* widget, GtkWidget* parent)
 {
-    xset_show_help(parent, NULL, "#gui-pathbar");
+    xset_show_help(parent, nullptr, "#gui-pathbar");
 }
 
 static void on_protocol_handlers(GtkWidget* widget, PtkFileBrowser* file_browser)
 {
-    ptk_handler_show_config(HANDLER_MODE_NET, file_browser, NULL);
+    ptk_handler_show_config(HANDLER_MODE_NET, file_browser, nullptr);
 }
 
 static void on_add_bookmark(GtkWidget* widget, PtkFileBrowser* file_browser)
@@ -505,7 +505,7 @@ static void on_add_bookmark(GtkWidget* widget, PtkFileBrowser* file_browser)
         return;
     const char* text = gtk_entry_get_text(GTK_ENTRY(file_browser->path_bar));
     if (text && text[0])
-        ptk_bookmark_view_add_bookmark(NULL, file_browser, text);
+        ptk_bookmark_view_add_bookmark(nullptr, file_browser, text);
 }
 
 void ptk_path_entry_help(GtkWidget* widget, GtkWidget* parent)
@@ -532,7 +532,7 @@ void ptk_path_entry_help(GtkWidget* widget, GtkWidget* parent)
 static bool on_button_press(GtkWidget* entry, GdkEventButton* evt, void* user_data)
 {
     if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
-        main_window_event(NULL,
+        main_window_event(nullptr,
                           event_handler.win_click,
                           "evt_win_click",
                           0,
@@ -541,15 +541,15 @@ static bool on_button_press(GtkWidget* entry, GdkEventButton* evt, void* user_da
                           0,
                           evt->button,
                           evt->state,
-                          TRUE))
-        return TRUE;
-    return FALSE;
+                          true))
+        return true;
+    return false;
 }
 
 static bool on_button_release(GtkEntry* entry, GdkEventButton* evt, void* user_data)
 {
     if (GDK_BUTTON_RELEASE != evt->type)
-        return FALSE;
+        return false;
 
     int keymod = (evt->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_SUPER_MASK |
                                 GDK_HYPER_MASK | GDK_META_MASK));
@@ -573,7 +573,7 @@ static bool on_button_release(GtkEntry* entry, GdkEventButton* evt, void* user_d
                         if ('/' == *sep)
                             ++sep;
                         else
-                            return FALSE;
+                            return false;
                     }
                     char* path = g_strndup(text, (sep - text));
                     gtk_entry_set_text(entry, path);
@@ -592,15 +592,15 @@ static bool on_button_release(GtkEntry* entry, GdkEventButton* evt, void* user_d
         char* clip_text = gtk_clipboard_wait_for_text(clip);
         if (clip_text && clip_text[0])
         {
-            char* str = replace_string(clip_text, "\n", "", FALSE);
+            char* str = replace_string(clip_text, "\n", "", false);
             gtk_entry_set_text(entry, str);
             g_free(str);
             gtk_widget_activate((GtkWidget*)entry);
         }
         g_free(clip_text);
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 
 static void on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
@@ -628,7 +628,7 @@ static void on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* fi
     set = xset_set_cb("path_help", (GFunc)ptk_path_entry_man, file_browser);
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
     gtk_widget_show_all(GTK_WIDGET(menu));
-    g_signal_connect(menu, "key-press-event", G_CALLBACK(xset_menu_keypress), NULL);
+    g_signal_connect(menu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
 }
 
 static void on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars,
@@ -638,12 +638,12 @@ static void on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* ch
     if (!text)
         return;
 
-    char* new_text = NULL;
+    char* new_text = nullptr;
 
     if (strchr(text, '\n'))
     {
         // remove linefeeds from pasted text
-        text = new_text = replace_string(text, "\n", "", FALSE);
+        text = new_text = replace_string(text, "\n", "", false);
     }
 
     // remove leading spaces for test
@@ -656,7 +656,7 @@ static void on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* ch
         char* unquote = g_strdup(text + 1);
         unquote[strlen(unquote) - 1] = '\0';
         g_free(new_text);
-        new_text = replace_string(unquote, "'\\''", "'", FALSE);
+        new_text = replace_string(unquote, "'\\''", "'", false);
         g_free(unquote);
     }
 
@@ -675,30 +675,30 @@ static void entry_data_free(EntryData* edata)
 GtkWidget* ptk_path_entry_new(PtkFileBrowser* file_browser)
 {
     GtkWidget* entry = gtk_entry_new();
-    gtk_entry_set_has_frame(GTK_ENTRY(entry), TRUE);
+    gtk_entry_set_has_frame(GTK_ENTRY(entry), true);
     gtk_widget_set_size_request(entry, 50, -1);
 
     EntryData* edata = g_slice_new0(EntryData);
     edata->browser = file_browser;
     edata->seek_timer = 0;
 
-    g_signal_connect(entry, "focus-in-event", G_CALLBACK(on_focus_in), NULL);
-    g_signal_connect(entry, "focus-out-event", G_CALLBACK(on_focus_out), NULL);
+    g_signal_connect(entry, "focus-in-event", G_CALLBACK(on_focus_in), nullptr);
+    g_signal_connect(entry, "focus-out-event", G_CALLBACK(on_focus_out), nullptr);
 
     /* used to eat the tab key */
     g_signal_connect(entry, "key-press-event", G_CALLBACK(on_key_press), edata);
 
     /*
-        g_signal_connect( entry, "motion-notify-event", G_CALLBACK(on_mouse_move), NULL );
+        g_signal_connect( entry, "motion-notify-event", G_CALLBACK(on_mouse_move), nullptr );
     */
-    g_signal_connect(entry, "button-press-event", G_CALLBACK(on_button_press), NULL);
-    g_signal_connect(entry, "button-release-event", G_CALLBACK(on_button_release), NULL);
+    g_signal_connect(entry, "button-press-event", G_CALLBACK(on_button_press), nullptr);
+    g_signal_connect(entry, "button-release-event", G_CALLBACK(on_button_release), nullptr);
     g_signal_connect(entry, "populate-popup", G_CALLBACK(on_populate_popup), file_browser);
 
     g_signal_connect_after(G_OBJECT(gtk_entry_get_buffer(GTK_ENTRY(entry))),
                            "inserted-text",
                            G_CALLBACK(on_entry_insert),
-                           NULL);
+                           nullptr);
 
     g_object_weak_ref(G_OBJECT(entry), (GWeakNotify)entry_data_free, edata);
     g_object_set_data(G_OBJECT(entry), "edata", edata);

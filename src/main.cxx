@@ -36,8 +36,8 @@
 
 #include "utils.hxx"
 
-// bool startup_mode = TRUE;  //MOD
-// bool design_mode = TRUE;  //MOD
+// bool startup_mode = true;  //MOD
+// bool design_mode = true;  //MOD
 
 typedef enum SocketEvent
 {
@@ -59,15 +59,15 @@ typedef enum SocketEvent
     CMD_SOCKET_CMD,
 } SocketEvent;
 
-static bool folder_initialized = FALSE;
-static bool daemon_initialized = FALSE;
+static bool folder_initialized = false;
+static bool daemon_initialized = false;
 
 static int sock;
-static GIOChannel* io_channel = NULL;
+static GIOChannel* io_channel = nullptr;
 
-static bool socket_daemon = FALSE; // sfm
+static bool socket_daemon = false; // sfm
 
-static char* default_files[2] = {NULL, NULL};
+static char* default_files[2] = {nullptr, nullptr};
 
 typedef struct CliFlags
 {
@@ -95,21 +95,21 @@ CliFlags cli_flags;
 // clang-format off
 static GOptionEntry opt_entries[] =
 {
-    {"new-tab", 't', 0, G_OPTION_ARG_NONE, &cli_flags.new_tab, "Open directories in new tab of last window (default)", NULL},
-    {"reuse-tab", 'r', 0, G_OPTION_ARG_NONE, &cli_flags.reuse_tab, "Open directory in current tab of last used window", NULL},
-    {"no-saved-tabs", 'n', 0, G_OPTION_ARG_NONE, &cli_flags.no_tabs, "Don't load saved tabs", NULL},
-    {"new-window", 'w', 0, G_OPTION_ARG_NONE, &cli_flags.new_window, "Open directories in new window", NULL},
+    {"new-tab", 't', 0, G_OPTION_ARG_NONE, &cli_flags.new_tab, "Open directories in new tab of last window (default)", nullptr},
+    {"reuse-tab", 'r', 0, G_OPTION_ARG_NONE, &cli_flags.reuse_tab, "Open directory in current tab of last used window", nullptr},
+    {"no-saved-tabs", 'n', 0, G_OPTION_ARG_NONE, &cli_flags.no_tabs, "Don't load saved tabs", nullptr},
+    {"new-window", 'w', 0, G_OPTION_ARG_NONE, &cli_flags.new_window, "Open directories in new window", nullptr},
     {"panel", 'p', 0, G_OPTION_ARG_INT, &cli_flags.panel, "Open directories in panel 'P' (1-4)", "P"},
     {"show-pref", '\0', 0, G_OPTION_ARG_INT, &cli_flags.show_pref, "Show Preferences ('N' is the Pref tab number)", "N"},
-    {"daemon-mode", 'd', 0, G_OPTION_ARG_NONE, &cli_flags.daemon_mode, "Run as a daemon", NULL},
+    {"daemon-mode", 'd', 0, G_OPTION_ARG_NONE, &cli_flags.daemon_mode, "Run as a daemon", nullptr},
     {"config", 'c', 0, G_OPTION_ARG_STRING, &cli_flags.config_dir, "Use DIR as configuration directory", "DIR"},
-    {"disable-git", 'G', 0, G_OPTION_ARG_NONE, &cli_flags.disable_git_settings, "Don't use git to keep session history", NULL},
-    {"find-files", 'f', 0, G_OPTION_ARG_NONE, &cli_flags.find_files, "Show File Search", NULL},
-    {"socket-cmd", 's', 0, G_OPTION_ARG_NONE, &cli_flags.socket_cmd, "Send a socket command (See -s help)", NULL},
-    {"version", 'v', 0, G_OPTION_ARG_NONE, &cli_flags.version_opt, "Show version information", NULL},
-    {"sdebug", '\0', G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_NONE, &cli_flags.sdebug, NULL, NULL},
-    {G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &cli_flags.files, NULL, "[DIR | FILE | URL]..."},
-    {NULL}
+    {"disable-git", 'G', 0, G_OPTION_ARG_NONE, &cli_flags.disable_git_settings, "Don't use git to keep session history", nullptr},
+    {"find-files", 'f', 0, G_OPTION_ARG_NONE, &cli_flags.find_files, "Show File Search", nullptr},
+    {"socket-cmd", 's', 0, G_OPTION_ARG_NONE, &cli_flags.socket_cmd, "Send a socket command (See -s help)", nullptr},
+    {"version", 'v', 0, G_OPTION_ARG_NONE, &cli_flags.version_opt, "Show version information", nullptr},
+    {"sdebug", '\0', G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_NONE, &cli_flags.sdebug, nullptr, nullptr},
+    {G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &cli_flags.files, nullptr, "[DIR | FILE | URL]..."},
+    {nullptr}
 };
 // clang-format on
 
@@ -153,7 +153,7 @@ static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
         if (client != -1)
         {
             static char buf[1024];
-            GString* args = g_string_new_len(NULL, 2048);
+            GString* args = g_string_new_len(nullptr, 2048);
             int r;
             while ((r = read(client, buf, sizeof(buf))) > 0)
             {
@@ -169,23 +169,23 @@ static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
             shutdown(client, 2);
             close(client);
 
-            cli_flags.new_tab = TRUE;
+            cli_flags.new_tab = true;
             cli_flags.panel = 0;
-            cli_flags.reuse_tab = FALSE;
-            cli_flags.no_tabs = FALSE;
-            socket_daemon = FALSE;
+            cli_flags.reuse_tab = false;
+            cli_flags.no_tabs = false;
+            socket_daemon = false;
 
             int argx = 0;
             if (args->str[argx] == CMD_NO_TABS)
             {
-                cli_flags.reuse_tab = FALSE;
-                cli_flags.no_tabs = TRUE;
+                cli_flags.reuse_tab = false;
+                cli_flags.no_tabs = true;
                 argx++; // another command follows CMD_NO_TABS
             }
             if (args->str[argx] == CMD_REUSE_TAB)
             {
-                cli_flags.reuse_tab = TRUE;
-                cli_flags.new_tab = FALSE;
+                cli_flags.reuse_tab = true;
+                cli_flags.new_tab = false;
                 argx++; // another command follows CMD_REUSE_TAB
             }
 
@@ -204,38 +204,38 @@ static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
                     cli_flags.panel = 4;
                     break;
                 case CMD_OPEN:
-                    cli_flags.new_tab = FALSE;
+                    cli_flags.new_tab = false;
                     break;
                 case CMD_OPEN_PANEL1:
-                    cli_flags.new_tab = FALSE;
+                    cli_flags.new_tab = false;
                     cli_flags.panel = 1;
                     break;
                 case CMD_OPEN_PANEL2:
-                    cli_flags.new_tab = FALSE;
+                    cli_flags.new_tab = false;
                     cli_flags.panel = 2;
                     break;
                 case CMD_OPEN_PANEL3:
-                    cli_flags.new_tab = FALSE;
+                    cli_flags.new_tab = false;
                     cli_flags.panel = 3;
                     break;
                 case CMD_OPEN_PANEL4:
-                    cli_flags.new_tab = FALSE;
+                    cli_flags.new_tab = false;
                     cli_flags.panel = 4;
                     break;
                 case CMD_DAEMON_MODE:
-                    socket_daemon = cli_flags.daemon_mode = TRUE;
-                    g_string_free(args, TRUE);
-                    return TRUE;
+                    socket_daemon = cli_flags.daemon_mode = true;
+                    g_string_free(args, true);
+                    return true;
                 case CMD_PREF:
-                    fm_edit_preference(NULL, (unsigned char)args->str[1] - 1);
-                    g_string_free(args, TRUE);
-                    return TRUE;
+                    fm_edit_preference(nullptr, (unsigned char)args->str[1] - 1);
+                    g_string_free(args, true);
+                    return true;
                 case CMD_FIND_FILES:
-                    cli_flags.find_files = TRUE;
+                    cli_flags.find_files = true;
                     __attribute__((fallthrough));
                 case CMD_SOCKET_CMD:
-                    g_string_free(args, TRUE);
-                    return TRUE;
+                    g_string_free(args, true);
+                    return true;
                 default:
                     break;
             }
@@ -243,8 +243,8 @@ static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
             if (args->str[argx + 1])
                 cli_flags.files = g_strsplit(args->str + argx + 1, "\n", 0);
             else
-                cli_flags.files = NULL;
-            g_string_free(args, TRUE);
+                cli_flags.files = nullptr;
+            g_string_free(args, true);
 
             if (cli_flags.files)
             {
@@ -252,16 +252,16 @@ static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
                 for (file = cli_flags.files; *file; ++file)
                 {
                     if (!**file) /* remove empty string at tail */
-                        *file = NULL;
+                        *file = nullptr;
                 }
             }
             handle_parsed_commandline_args();
-            app_settings.load_saved_tabs = TRUE;
-            socket_daemon = FALSE;
+            app_settings.load_saved_tabs = true;
+            socket_daemon = false;
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 static void get_socket_name(char* buf, int len)
@@ -386,10 +386,10 @@ static bool single_instance_check()
     else
     {
         io_channel = g_io_channel_unix_new(sock);
-        g_io_channel_set_encoding(io_channel, NULL, NULL);
-        g_io_channel_set_buffered(io_channel, FALSE);
+        g_io_channel_set_encoding(io_channel, nullptr, nullptr);
+        g_io_channel_set_buffered(io_channel, false);
 
-        g_io_add_watch(io_channel, G_IO_IN, (GIOFunc)on_socket_event, NULL);
+        g_io_add_watch(io_channel, G_IO_IN, (GIOFunc)on_socket_event, nullptr);
 
         if (listen(sock, 5) == -1)
         {
@@ -398,7 +398,7 @@ static bool single_instance_check()
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 static void single_instance_finalize()
@@ -417,7 +417,7 @@ static void receive_socket_command(int client, GString* args) // sfm
 {
     char** argv;
     char cmd;
-    char* reply = NULL;
+    char* reply = nullptr;
 
     if (args->str[1])
     {
@@ -430,7 +430,7 @@ static void receive_socket_command(int client, GString* args) // sfm
         argv = g_strsplit(args->str + 1, "\n", 0);
     }
     else
-        argv = NULL;
+        argv = nullptr;
 
     /*
         if ( argv )
@@ -461,7 +461,7 @@ static void receive_socket_command(int client, GString* args) // sfm
     else
     {
         // process command and get reply
-        cmd = main_window_socket_command(argv ? argv + 1 : NULL, &reply);
+        cmd = main_window_socket_command(argv ? argv + 1 : nullptr, &reply);
     }
     g_strfreev(argv);
     g_free(inode_tag);
@@ -475,7 +475,7 @@ static void receive_socket_command(int client, GString* args) // sfm
 
 static int send_socket_command(int argc, char* argv[], char** reply) // sfm
 {
-    *reply = NULL;
+    *reply = nullptr;
     if (argc < 3)
     {
         fprintf(stderr, "spacefm: --socket-cmd requires an argument\n");
@@ -522,7 +522,7 @@ static int send_socket_command(int argc, char* argv[], char** reply) // sfm
     write(sock, "\n", 1);
 
     // get response
-    GString* sock_reply = g_string_new_len(NULL, 2048);
+    GString* sock_reply = g_string_new_len(nullptr, 2048);
     int r;
     static char buf[1024];
 
@@ -545,7 +545,7 @@ static int send_socket_command(int argc, char* argv[], char** reply) // sfm
         fprintf(stderr, "spacefm: invalid response from socket\n");
         ret = 1;
     }
-    g_string_free(sock_reply, TRUE);
+    g_string_free(sock_reply, true);
     return ret;
 }
 
@@ -588,7 +588,7 @@ static void init_folder()
     vfs_mime_type_set_icon_size(app_settings.big_icon_size, app_settings.small_icon_size);
     vfs_file_info_set_thumbnail_size(app_settings.big_icon_size, app_settings.small_icon_size);
 
-    folder_initialized = TRUE;
+    folder_initialized = true;
 }
 
 static void exit_from_signal(int sig)
@@ -605,7 +605,7 @@ static void init_daemon()
     signal(SIGINT, exit_from_signal);
     signal(SIGTERM, exit_from_signal);
 
-    daemon_initialized = TRUE;
+    daemon_initialized = true;
 }
 
 static char* dup_to_absolute_file_path(char** file)
@@ -617,7 +617,7 @@ static char* dup_to_absolute_file_path(char** file)
 
     if (g_str_has_prefix(*file, "file:")) /* It's a URI */
     {
-        file_path = g_filename_from_uri(*file, NULL, NULL);
+        file_path = g_filename_from_uri(*file, nullptr, nullptr);
         g_free(*file);
         *file = file_path;
     }
@@ -632,7 +632,7 @@ static char* dup_to_absolute_file_path(char** file)
 
     real_path = vfs_file_resolve_path((char*)cwd_path, file_path);
     free(cwd_path);
-    cwd_path = NULL;
+    cwd_path = nullptr;
 
     return real_path; /* To free with g_free */
 }
@@ -670,13 +670,13 @@ static void open_in_tab(FMMainWindow** main_window, const char* real_path)
         set->b = XSET_B_TRUE;
 
         // create new window
-        fm_main_window_store_positions(NULL);
+        fm_main_window_store_positions(nullptr);
         *main_window = FM_MAIN_WINDOW(fm_main_window_new());
     }
     else
     {
         // existing window
-        bool tab_added = FALSE;
+        bool tab_added = false;
         if (cli_flags.panel > 0 && cli_flags.panel < 5)
         {
             // change to user-specified panel
@@ -685,16 +685,16 @@ static void open_in_tab(FMMainWindow** main_window, const char* real_path)
                 // set panel to load real_path on panel load
                 set = xset_get_panel(cli_flags.panel, "show");
                 set->ob1 = g_strdup(real_path);
-                tab_added = TRUE;
+                tab_added = true;
                 set->b = XSET_B_TRUE;
-                show_panels_all_windows(NULL, *main_window);
+                show_panels_all_windows(nullptr, *main_window);
             }
             else if (!gtk_widget_get_visible((*main_window)->panel[cli_flags.panel - 1]))
             {
                 // show panel
                 set = xset_get_panel(cli_flags.panel, "show");
                 set->b = XSET_B_TRUE;
-                show_panels_all_windows(NULL, *main_window);
+                show_panels_all_windows(nullptr, *main_window);
             }
             (*main_window)->curpanel = cli_flags.panel;
             (*main_window)->notebook = (*main_window)->panel[cli_flags.panel - 1];
@@ -704,7 +704,7 @@ static void open_in_tab(FMMainWindow** main_window, const char* real_path)
             if (cli_flags.reuse_tab)
             {
                 main_window_open_path_in_current_tab(*main_window, real_path);
-                cli_flags.reuse_tab = FALSE;
+                cli_flags.reuse_tab = false;
             }
             else
                 fm_main_window_add_new_tab(*main_window, real_path);
@@ -715,9 +715,9 @@ static void open_in_tab(FMMainWindow** main_window, const char* real_path)
 
 static bool handle_parsed_commandline_args()
 {
-    FMMainWindow* main_window = NULL;
+    FMMainWindow* main_window = nullptr;
     char** file;
-    bool ret = TRUE;
+    bool ret = true;
     XSet* set;
     struct stat statbuf;
 
@@ -749,7 +749,7 @@ static bool handle_parsed_commandline_args()
     {
         init_folder();
         fm_find_files((const char**)cli_flags.files);
-        cli_flags.find_files = FALSE;
+        cli_flags.find_files = false;
     }
     else /* open files/directories */
     {
@@ -758,7 +758,7 @@ static bool handle_parsed_commandline_args()
         else if (cli_flags.files != default_files)
         {
             /* open files passed in command line arguments */
-            ret = FALSE;
+            ret = false;
             for (file = cli_flags.files; *file; ++file)
             {
                 char* real_path;
@@ -771,7 +771,7 @@ static bool handle_parsed_commandline_args()
                 if (g_file_test(real_path, G_FILE_TEST_IS_DIR))
                 {
                     open_in_tab(&main_window, real_path);
-                    ret = TRUE;
+                    ret = true;
                 }
                 else if (g_file_test(real_path, G_FILE_TEST_EXISTS))
                 {
@@ -781,11 +781,11 @@ static bool handle_parsed_commandline_args()
                         if (!main_window)
                         {
                             open_in_tab(&main_window, "/");
-                            ptk_location_view_open_block(real_path, FALSE);
+                            ptk_location_view_open_block(real_path, false);
                         }
                         else
-                            ptk_location_view_open_block(real_path, TRUE);
-                        ret = TRUE;
+                            ptk_location_view_open_block(real_path, true);
+                        ret = true;
                         gtk_window_present(GTK_WINDOW(main_window));
                     }
                     else
@@ -794,19 +794,19 @@ static bool handle_parsed_commandline_args()
                 else if ((*file[0] != '/' && strstr(*file, ":/")) || g_str_has_prefix(*file, "//"))
                 {
                     if (main_window)
-                        main_window_open_network(main_window, *file, TRUE);
+                        main_window_open_network(main_window, *file, true);
                     else
                     {
                         open_in_tab(&main_window, "/");
-                        main_window_open_network(main_window, *file, FALSE);
+                        main_window_open_network(main_window, *file, false);
                     }
-                    ret = TRUE;
+                    ret = true;
                     gtk_window_present(GTK_WINDOW(main_window));
                 }
                 else
                 {
                     char* err_msg = g_strdup_printf("%s:\n\n%s", "File doesn't exist", real_path);
-                    ptk_show_error(NULL, "Error", err_msg);
+                    ptk_show_error(nullptr, "Error", err_msg);
                     g_free(err_msg);
                 }
                 g_free(real_path);
@@ -820,7 +820,7 @@ static bool handle_parsed_commandline_args()
                 // initialize things required by folder view
                 if (G_UNLIKELY(!cli_flags.daemon_mode))
                     init_folder();
-                fm_main_window_store_positions(NULL);
+                fm_main_window_store_positions(nullptr);
                 main_window = FM_MAIN_WINDOW(fm_main_window_new());
             }
             gtk_window_present(GTK_WINDOW(main_window));
@@ -833,9 +833,9 @@ static bool handle_parsed_commandline_args()
                     // show panel
                     set = xset_get_panel(cli_flags.panel, "show");
                     set->b = XSET_B_TRUE;
-                    show_panels_all_windows(NULL, main_window);
+                    show_panels_all_windows(nullptr, main_window);
                 }
-                focus_panel(NULL, (void*)main_window, cli_flags.panel);
+                focus_panel(nullptr, (void*)main_window, cli_flags.panel);
             }
         }
     }
@@ -844,13 +844,13 @@ static bool handle_parsed_commandline_args()
     if (cli_flags.files != default_files)
         g_strfreev(cli_flags.files);
 
-    cli_flags.files = NULL;
+    cli_flags.files = nullptr;
     return ret;
 }
 
 static void check_locale()
 {
-    char* name = setlocale(LC_ALL, NULL);
+    char* name = setlocale(LC_ALL, nullptr);
     if (G_UNLIKELY(!name && !(!strcmp(name, "C") || !strcmp(name, "C.UTF-8"))))
     {
         fprintf(stderr, "Non-C locale detected. This is not supported.\n");
@@ -862,7 +862,7 @@ static void tmp_clean()
 {
     char* command = g_strdup_printf("rm -rf %s", xset_get_user_tmp_dir());
     print_command(command);
-    g_spawn_command_line_async(command, NULL);
+    g_spawn_command_line_async(command, nullptr);
     g_free(command);
 }
 
@@ -870,8 +870,8 @@ int main(int argc, char* argv[])
 {
     check_locale();
 
-    bool run = FALSE;
-    GError* err = NULL;
+    bool run = false;
+    GError* err = nullptr;
 
     // load spacefm.conf
     load_conf();
@@ -887,7 +887,7 @@ int main(int argc, char* argv[])
                 printf("For help run, man spacefm-socket\n");
                 return EXIT_SUCCESS;
             }
-            char* reply = NULL;
+            char* reply = nullptr;
             int ret = send_socket_command(argc, argv, &reply);
             if (reply && reply[0])
                 fprintf(ret ? stderr : stdout, "%s", reply);
@@ -897,26 +897,26 @@ int main(int argc, char* argv[])
     }
 
     // init cli_flags
-    cli_flags.files = NULL;
-    cli_flags.new_tab = TRUE;
-    cli_flags.reuse_tab = FALSE; // sfm
-    cli_flags.no_tabs = FALSE;   // sfm
-    cli_flags.new_window = FALSE;
-    cli_flags.socket_cmd = FALSE;  // sfm
-    cli_flags.version_opt = FALSE; // sfm
-    cli_flags.sdebug = FALSE;      // sfm
+    cli_flags.files = nullptr;
+    cli_flags.new_tab = true;
+    cli_flags.reuse_tab = false; // sfm
+    cli_flags.no_tabs = false;   // sfm
+    cli_flags.new_window = false;
+    cli_flags.socket_cmd = false;  // sfm
+    cli_flags.version_opt = false; // sfm
+    cli_flags.sdebug = false;      // sfm
 
-    cli_flags.daemon_mode = FALSE;
+    cli_flags.daemon_mode = false;
 
     cli_flags.show_pref = 0;
     cli_flags.panel = -1;
 
-    cli_flags.find_files = FALSE;
-    cli_flags.config_dir = NULL;
-    cli_flags.disable_git_settings = FALSE;
+    cli_flags.find_files = false;
+    cli_flags.config_dir = nullptr;
+    cli_flags.disable_git_settings = false;
 
     /* initialize GTK+ and parse the command line arguments */
-    if (G_UNLIKELY(!gtk_init_with_args(&argc, &argv, "", opt_entries, NULL, &err)))
+    if (G_UNLIKELY(!gtk_init_with_args(&argc, &argv, "", opt_entries, nullptr, &err)))
     {
         printf("spacefm: %s\n", err->message);
         g_error_free(err);
@@ -979,7 +979,7 @@ int main(int argc, char* argv[])
     /* initialize the file alteration monitor */
     if (G_UNLIKELY(!vfs_file_monitor_init()))
     {
-        ptk_show_error(NULL,
+        ptk_show_error(nullptr,
                        "Error",
                        "Error: Unable to initialize inotify file change monitor.\n\nDo you have "
                        "an inotify-capable kernel?");
@@ -989,7 +989,7 @@ int main(int argc, char* argv[])
     }
 
     /* check if the filename encoding is UTF-8 */
-    vfs_file_info_set_utf8_filename(g_get_filename_charsets(NULL));
+    vfs_file_info_set_utf8_filename(g_get_filename_charsets(nullptr));
 
     /* Initialize our mime-type system */
     vfs_mime_type_init();
@@ -1004,16 +1004,16 @@ int main(int argc, char* argv[])
      * Subsequent processes will exit() inside single_instance_check and won't reach here.
      */
 
-    main_window_event(NULL, NULL, "evt_start", 0, 0, NULL, 0, 0, 0, FALSE);
+    main_window_event(nullptr, nullptr, "evt_start", 0, 0, nullptr, 0, 0, 0, false);
 
     /* handle the parsed result of command line args */
     run = handle_parsed_commandline_args();
-    app_settings.load_saved_tabs = TRUE;
+    app_settings.load_saved_tabs = true;
 
     if (run) /* run the main loop */
         gtk_main();
 
-    main_window_event(NULL, NULL, "evt_exit", 0, 0, NULL, 0, 0, 0, FALSE);
+    main_window_event(nullptr, nullptr, "evt_exit", 0, 0, nullptr, 0, 0, 0, false);
 
     single_instance_finalize();
 
@@ -1029,10 +1029,10 @@ int main(int argc, char* argv[])
 static void open_file(const char* path)
 {
     VFSFileInfo* file = vfs_file_info_new();
-    vfs_file_info_get(file, path, NULL);
+    vfs_file_info_get(file, path, nullptr);
     VFSMimeType* mime_type = vfs_file_info_get_mime_type(file);
-    bool opened = FALSE;
-    GError* err = NULL;
+    bool opened = false;
+    GError* err = nullptr;
 
     char* app_name = vfs_mime_type_get_default_action(mime_type);
     if (app_name)
@@ -1042,21 +1042,22 @@ static void open_file(const char* path)
     }
     else
     {
-        app_name = (char*)ptk_choose_app_for_mime_type(NULL, mime_type, TRUE, TRUE, TRUE, FALSE);
+        app_name = (char*)ptk_choose_app_for_mime_type(nullptr, mime_type, true, true, true, false);
         if (app_name)
         {
             VFSAppDesktop* app = vfs_app_desktop_new(app_name);
             if (!vfs_app_desktop_get_exec(app))
                 app->exec = g_strdup(app_name); /* This is a command line */
-            GList* files = g_list_prepend(NULL, (void*)path);
-            opened = vfs_app_desktop_open_files(gdk_screen_get_default(), NULL, app, files, &err);
+            GList* files = g_list_prepend(nullptr, (void*)path);
+            opened =
+                vfs_app_desktop_open_files(gdk_screen_get_default(), nullptr, app, files, &err);
             g_free(files->data);
             g_list_free(files);
             vfs_app_desktop_unref(app);
             g_free(app_name);
         }
         else
-            opened = TRUE;
+            opened = true;
     }
 
     if (!opened)
@@ -1071,7 +1072,7 @@ static void open_file(const char* path)
         char* disp_path = g_filename_display_name(path);
         char* msg = g_strdup_printf("Unable to open file:\n\"%s\"\n%s", disp_path, error_msg);
         g_free(disp_path);
-        ptk_show_error(NULL, "Error", msg);
+        ptk_show_error(nullptr, "Error", msg);
         g_free(msg);
         if (err)
             g_error_free(err);

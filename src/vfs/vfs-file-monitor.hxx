@@ -77,7 +77,7 @@ VFSFileMonitor* vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCall
  * user_data: user data to be passed to callback function.
  */
 #define vfs_file_monitor_add_file(path, cb, user_data) \
-    vfs_file_monitor_add(path, FALSE, cb, user_data)
+    vfs_file_monitor_add(path, false, cb, user_data)
 
 /*
  * Monitor changes of a directory.
@@ -88,7 +88,7 @@ VFSFileMonitor* vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCall
  * user_data: user data to be passed to callback function.
  */
 #define vfs_file_monitor_add_dir(path, cb, user_data) \
-    vfs_file_monitor_add(path, TRUE, cb, user_data)
+    vfs_file_monitor_add(path, true, cb, user_data)
 
 /*
  * Remove previously installed monitor.
