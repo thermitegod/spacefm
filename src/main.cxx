@@ -34,6 +34,7 @@
 #include "pref-dialog.hxx"
 #include "settings.hxx"
 
+#include "logger.hxx"
 #include "utils.hxx"
 
 // bool startup_mode = true;  //MOD
@@ -868,6 +869,8 @@ static void tmp_clean()
 
 int main(int argc, char* argv[])
 {
+    SpaceFM::Logger::Init();
+
     check_locale();
 
     bool run = false;

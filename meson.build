@@ -121,12 +121,14 @@ dep_exo = dependency('exo-2')
 dep_x11 = dependency('x11')
 dep_glib = dependency('glib-2.0')
 dep_gtk = dependency('gtk+-3.0')
+dep_spdlog = dependency('spdlog')
 
 
 sources = [
   'src/autosave.cxx',
   'src/find-files.cxx',
   'src/item-prop.cxx',
+  'src/logger.cxx',
   'src/main.cxx',
   'src/main-window.cxx',
   'src/pref-dialog.cxx',
@@ -182,6 +184,7 @@ spacefm = build_target(
     dep_gtk,
     dep_x11,
     dep_exo,
+    dep_spdlog,
     lib_math,
     lib_libbsd,
     lib_udev,
