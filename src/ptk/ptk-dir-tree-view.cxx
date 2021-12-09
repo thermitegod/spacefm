@@ -35,7 +35,7 @@ static bool sel_func(GtkTreeSelection* selection, GtkTreeModel* model, GtkTreePa
                      bool path_currently_selected, void* data);
 
 /*  Drag & Drop/Clipboard targets  */
-static GtkTargetEntry drag_targets[] = {{(char*)"text/uri-list", 0, 0}};
+static GtkTargetEntry drag_targets[] = {{g_strdup("text/uri-list"), 0, 0}};
 
 // MOD drag n drop...
 static void on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context,

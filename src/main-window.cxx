@@ -106,7 +106,7 @@ static GList* all_windows = nullptr;
 static unsigned int theme_change_notify = 0;
 
 //  Drag & Drop/Clipboard targets
-static GtkTargetEntry drag_targets[] = {{(char*)"text/uri-list", 0, 0}};
+static GtkTargetEntry drag_targets[] = {{g_strdup("text/uri-list"), 0, 0}};
 
 GType fm_main_window_get_type()
 {

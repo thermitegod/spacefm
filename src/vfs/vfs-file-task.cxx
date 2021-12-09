@@ -1307,7 +1307,7 @@ static void vfs_file_task_exec(char* src_file, VFSFileTask* task)
 
     if (!tmp || !g_file_test(tmp, G_FILE_TEST_IS_DIR))
     {
-        str = (char*)"Cannot create temporary directory";
+        str = g_strdup("Cannot create temporary directory");
         g_warning(str, nullptr);
         // do not use xset_msg_dialog if non-main thread
         // vfs_file_task_exec_error( task, 0, str );
@@ -1332,7 +1332,7 @@ static void vfs_file_task_exec(char* src_file, VFSFileTask* task)
             terminal = g_find_program_in_path(terminalv[0]);
         if (!(terminal && terminal[0] == '/'))
         {
-            str = (char*)"Please set a valid terminal program in View|Preferences|Advanced";
+            str = g_strdup("Please set a valid terminal program in View|Preferences|Advanced");
             g_warning(str, nullptr);
             // do not use xset_msg_dialog if non-main thread
             // vfs_file_task_exec_error( task, 0, str );
@@ -1729,7 +1729,7 @@ static void vfs_file_task_exec(char* src_file, VFSFileTask* task)
     // out and err can/should be closed too?
 
 _exit_with_error:
-    vfs_file_task_exec_error(task, errno, (char*)"Error writing temporary file");
+    vfs_file_task_exec_error(task, errno, g_strdup("Error writing temporary file"));
     g_string_free((GString*)buf, true);
 
     if (!task->exec_keep_tmp)
