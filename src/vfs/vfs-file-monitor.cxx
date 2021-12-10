@@ -16,8 +16,6 @@
  * Copyright (C) 2006 Mark McLoughlin
  */
 
-#include <stdbool.h>
-
 #include "vfs-file-monitor.hxx"
 #include <sys/stat.h>
 #include <errno.h>

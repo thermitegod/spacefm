@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <stdbool.h>
-
 #include <glib.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include "vfs-dir.hxx"

@@ -10,9 +10,6 @@
 
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include <glib.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
