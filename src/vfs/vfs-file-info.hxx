@@ -103,13 +103,15 @@ GdkPixbuf* vfs_file_info_get_small_thumbnail(VFSFileInfo* fi);
 void vfs_file_size_to_string_format(char* buf, uint64_t size, bool decimal);
 
 bool vfs_file_info_is_dir(VFSFileInfo* fi);
-
+bool vfs_file_info_is_regular_file(VFSFileInfo* fi);
 bool vfs_file_info_is_symlink(VFSFileInfo* fi);
+bool vfs_file_info_is_socket(VFSFileInfo* fi);
+bool vfs_file_info_is_named_pipe(VFSFileInfo* fi);
+bool vfs_file_info_is_block_device(VFSFileInfo* fi);
+bool vfs_file_info_is_char_device(VFSFileInfo* fi);
 
 bool vfs_file_info_is_image(VFSFileInfo* fi);
-
 bool vfs_file_info_is_video(VFSFileInfo* fi);
-
 bool vfs_file_info_is_desktop_entry(VFSFileInfo* fi);
 
 /* Full path of the file is required by this function */

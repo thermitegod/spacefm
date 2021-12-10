@@ -3075,7 +3075,7 @@ static void fm_main_window_update_status_bar(FMMainWindow* main_window,
     unsigned int num_hid;
     unsigned int num_hidx;
     uint64_t total_size;
-    char* msg;
+    char* msg = nullptr;
     char size_str[64];
     char free_space[100];
 
@@ -3124,19 +3124,27 @@ static void fm_main_window_update_status_bar(FMMainWindow* main_window,
     num_sel = ptk_file_browser_get_n_sel(file_browser, &total_size);
     num_vis = ptk_file_browser_get_n_visible_files(file_browser);
 
-    char* link_info = nullptr; // MOD added
     if (num_sel > 0)
     {
-        if (num_sel == 1) // MOD added
+        GList* files = ptk_file_browser_get_selected_files(file_browser);
+
+        VFSFileInfo* file;
+        const char* cwd;
+
+        vfs_file_size_to_string_format(size_str, total_size, true);
+
+        if (num_sel == 1)
         // display file name or symlink info in status bar if one file selected
         {
-            GList* files = ptk_file_browser_get_selected_files(file_browser);
+            char* link_info = nullptr;
+
             if (files)
             {
-                const char* cwd = ptk_file_browser_get_cwd(file_browser);
-                VFSFileInfo* file = vfs_file_info_ref((VFSFileInfo*)files->data);
+                file = vfs_file_info_ref((VFSFileInfo*)files->data);
+                cwd = ptk_file_browser_get_cwd(file_browser);
                 g_list_foreach(files, (GFunc)vfs_file_info_unref, nullptr);
                 g_list_free(files);
+
                 if (file)
                 {
                     if (vfs_file_info_is_symlink(file))
@@ -3197,16 +3205,132 @@ static void fm_main_window_update_status_bar(FMMainWindow* main_window,
                     vfs_file_info_unref(file);
                 }
             }
-        }
-        if (!link_info)
-            link_info = g_strdup("");
 
-        vfs_file_size_to_string_format(size_str, total_size, true);
-        msg =
-            g_strdup_printf("%s%d / %d (%s)%s", free_space, num_sel, num_vis, size_str, link_info);
-        // msg = g_strdup_printf(( _"%s%d sel (%s)%s",  //MOD
-        //                 "%s%d sel (%s)"), num_sel , free_space, num_sel,
-        //                                        size_str, link_info );  //MOD
+            if (!link_info)
+                link_info = g_strdup("");
+
+            msg = g_strdup_printf("%s%d / %d (%s)%s",
+                                  free_space,
+                                  num_sel,
+                                  num_vis,
+                                  size_str,
+                                  link_info);
+        }
+        else
+        {
+            unsigned int count_dir = 0;
+            unsigned int count_file = 0;
+            unsigned int count_symlink = 0;
+            unsigned int count_socket = 0;
+            unsigned int count_pipe = 0;
+            unsigned int count_block = 0;
+            unsigned int count_char = 0;
+
+            char* dir_info = nullptr;
+            char* file_info = nullptr;
+            char* symlink_info = nullptr;
+            char* socket_info = nullptr;
+            char* pipe_info = nullptr;
+            char* block_info = nullptr;
+            char* char_info = nullptr;
+
+            if (files)
+            {
+                GList* l;
+                for (l = files; l; l = l->next)
+                {
+                    file = vfs_file_info_ref((VFSFileInfo*)l->data);
+
+                    if (G_UNLIKELY(!file))
+                        continue;
+
+                    if (vfs_file_info_is_dir(file))
+                    {
+                        ++count_dir;
+                        continue;
+                    }
+                    else if (vfs_file_info_is_regular_file(file))
+                    {
+                        ++count_file;
+                        continue;
+                    }
+
+                    else if (vfs_file_info_is_symlink(file))
+                    {
+                        ++count_symlink;
+                        continue;
+                    }
+                    else if (vfs_file_info_is_socket(file))
+                    {
+                        ++count_socket;
+                        continue;
+                    }
+                    else if (vfs_file_info_is_named_pipe(file))
+                    {
+                        ++count_pipe;
+                        continue;
+                    }
+                    else if (vfs_file_info_is_block_device(file))
+                    {
+                        ++count_block;
+                        continue;
+                    }
+                    else if (vfs_file_info_is_char_device(file))
+                    {
+                        ++count_char;
+                        continue;
+                    }
+                }
+            }
+
+            if (count_dir)
+                dir_info = g_strdup_printf("  Directories (%i)", count_dir);
+            else
+                dir_info = g_strdup("");
+
+            if (count_file)
+                file_info = g_strdup_printf("  Files (%i)", count_file);
+            else
+                file_info = g_strdup("");
+
+            if (count_symlink)
+                symlink_info = g_strdup_printf("  Symlinks (%i)", count_symlink);
+            else
+                symlink_info = g_strdup("");
+
+            if (count_socket)
+                socket_info = g_strdup_printf("  Sockets (%i)", count_socket);
+            else
+                socket_info = g_strdup("");
+
+            if (count_pipe)
+                pipe_info = g_strdup_printf("  Named Pipes (%i)", count_pipe);
+            else
+                pipe_info = g_strdup("");
+
+            if (count_block)
+                block_info = g_strdup_printf("  Block Devices (%i)", count_block);
+            else
+                block_info = g_strdup("");
+
+            if (count_char)
+                char_info = g_strdup_printf("  Character Devices (%i)", count_char);
+            else
+                char_info = g_strdup("");
+
+            msg = g_strdup_printf("%s%d / %d (%s)%s%s%s%s%s%s%s",
+                                  free_space,
+                                  num_sel,
+                                  num_vis,
+                                  size_str,
+                                  dir_info,
+                                  file_info,
+                                  symlink_info,
+                                  socket_info,
+                                  pipe_info,
+                                  block_info,
+                                  char_info);
+        }
     }
     else
     {

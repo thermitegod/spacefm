@@ -498,9 +498,34 @@ bool vfs_file_info_is_dir(VFSFileInfo* fi)
     return false;
 }
 
+bool vfs_file_info_is_regular_file(VFSFileInfo* fi)
+{
+    return S_ISREG(fi->mode) ? true : false;
+}
+
 bool vfs_file_info_is_symlink(VFSFileInfo* fi)
 {
     return S_ISLNK(fi->mode) ? true : false;
+}
+
+bool vfs_file_info_is_socket(VFSFileInfo* fi)
+{
+    return S_ISSOCK(fi->mode) ? true : false;
+}
+
+bool vfs_file_info_is_named_pipe(VFSFileInfo* fi)
+{
+    return S_ISFIFO(fi->mode) ? true : false;
+}
+
+bool vfs_file_info_is_block_device(VFSFileInfo* fi)
+{
+    return S_ISBLK(fi->mode) ? true : false;
+}
+
+bool vfs_file_info_is_char_device(VFSFileInfo* fi)
+{
+    return S_ISCHR(fi->mode) ? true : false;
 }
 
 bool vfs_file_info_is_image(VFSFileInfo* fi)
