@@ -47,8 +47,8 @@
 
 #define DEFAULT_TMP_DIR "/tmp"
 
-AppSettings app_settings = {0};
-ConfigSettings config_settings = {0};
+AppSettings app_settings = AppSettings();
+ConfigSettings config_settings = ConfigSettings();
 
 // MOD settings
 static void xset_write(GString* buf);

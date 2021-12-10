@@ -16,7 +16,7 @@ typedef struct AutoSave
     bool request;
 } AutoSave;
 
-AutoSave autosave = {0};
+AutoSave autosave = AutoSave();
 
 static void idle_save_settings(void* main_window)
 {

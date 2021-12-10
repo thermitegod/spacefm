@@ -3080,7 +3080,7 @@ static void fm_main_window_update_status_bar(FMMainWindow* main_window,
     char free_space[100];
 
     // FIXME: statvfs support should be moved to src/vfs
-    struct statvfs fs_stat = {0};
+    struct statvfs fs_stat;
 
     if (!(GTK_IS_WIDGET(file_browser) && GTK_IS_STATUSBAR(file_browser->status_bar)))
         return;
@@ -5658,7 +5658,7 @@ static GtkWidget* main_task_view_new(FMMainWindow* main_window)
                 // ellipsize some columns
                 if (cols[j] == TASK_COL_FILE || cols[j] == TASK_COL_PATH || cols[j] == TASK_COL_TO)
                 {
-                    GValue val = {0}; // G_VALUE_INIT (glib>=2.30) caused to slackware issue ?
+                    GValue val = GValue();
                     g_value_init(&val, G_TYPE_CHAR);
                     g_value_set_schar(&val, PANGO_ELLIPSIZE_MIDDLE);
                     g_object_set_property(G_OBJECT(renderer), "ellipsize", &val);
@@ -6358,7 +6358,7 @@ char main_window_socket_command(char* argv[], char** reply)
         }
         else if (!strcmp(argv[i], "screen_size"))
         {
-            GdkRectangle workarea = {0};
+            GdkRectangle workarea = GdkRectangle();
             gdk_monitor_get_workarea(gdk_display_get_primary_monitor(gdk_display_get_default()),
                                      &workarea);
             *reply = g_strdup_printf("%dx%d\n", workarea.width, workarea.height);

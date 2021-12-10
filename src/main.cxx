@@ -109,7 +109,7 @@ static GOptionEntry opt_entries[] =
     {"version", 'v', 0, G_OPTION_ARG_NONE, &cli_flags.version_opt, "Show version information", nullptr},
     {"sdebug", '\0', G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_NONE, &cli_flags.sdebug, nullptr, nullptr},
     {G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &cli_flags.files, nullptr, "[DIR | FILE | URL]..."},
-    {nullptr}
+    {GOptionEntry()}
 };
 // clang-format on
 
@@ -146,7 +146,7 @@ static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
     if (cond & G_IO_IN)
     {
         socklen_t addr_len = 0;
-        struct sockaddr_un client_addr = {0};
+        struct sockaddr_un client_addr;
 
         int client =
             accept(g_io_channel_unix_get_fd(ioc), (struct sockaddr*)&client_addr, &addr_len);
