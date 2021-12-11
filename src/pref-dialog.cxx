@@ -73,12 +73,14 @@ static const int small_icon_sizes[] =
 static const char* date_formats[] = {"%Y-%m-%d %H:%M", "%Y-%m-%d", "%Y-%m-%d %H:%M:%S"};
 static const int drag_actions[] = {0, 1, 2, 3};
 
-static void dir_unload_thumbnails(const char* path, VFSDir* dir, void* user_data)
+static void
+dir_unload_thumbnails(const char* path, VFSDir* dir, void* user_data)
 {
     vfs_dir_unload_thumbnails(dir, GPOINTER_TO_INT(user_data));
 }
 
-static void on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
+static void
+on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
 
 {
     int i;
@@ -423,7 +425,8 @@ static void on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
     WindowReference::decrease();
 }
 
-static void on_date_format_changed(GtkComboBox* widget, FMPrefDlg* data)
+static void
+on_date_format_changed(GtkComboBox* widget, FMPrefDlg* data)
 {
     char buf[128];
     const char* etext;
@@ -434,13 +437,15 @@ static void on_date_format_changed(GtkComboBox* widget, FMPrefDlg* data)
     gtk_label_set_text(GTK_LABEL(data->date_display), buf);
 }
 
-static void on_single_click_toggled(GtkWidget* widget, FMPrefDlg* data)
+static void
+on_single_click_toggled(GtkWidget* widget, FMPrefDlg* data)
 {
     gtk_widget_set_sensitive(data->single_hover,
                              gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->single_click)));
 }
 
-static void on_show_thumbnail_toggled(GtkWidget* widget, FMPrefDlg* data)
+static void
+on_show_thumbnail_toggled(GtkWidget* widget, FMPrefDlg* data)
 {
     gtk_widget_set_sensitive(data->max_thumb_size,
                              gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->show_thumbnail)));
@@ -450,7 +455,8 @@ static void on_show_thumbnail_toggled(GtkWidget* widget, FMPrefDlg* data)
                              gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->show_thumbnail)));
 }
 
-bool fm_edit_preference(GtkWindow* parent, int page)
+bool
+fm_edit_preference(GtkWindow* parent, int page)
 {
     int i;
     int ibig_icon = -1;

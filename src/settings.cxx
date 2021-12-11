@@ -164,7 +164,8 @@ static const char* builtin_tool_shared_key[] = { // must match XSET_TOOL_ enum
     "view_thumb",
     "panel1_list_large"};
 
-static void parse_general_settings(char* line)
+static void
+parse_general_settings(char* line)
 {
     char* sep = strstr(line, "=");
     if (!sep)
@@ -198,7 +199,8 @@ static void parse_general_settings(char* line)
         app_settings.no_confirm = strtol(value, nullptr, 10); // MOD
 }
 
-static void parse_window_state(char* line)
+static void
+parse_window_state(char* line)
 {
     char* sep = strstr(line, "=");
     if (!sep)
@@ -223,7 +225,8 @@ static void parse_window_state(char* line)
     }
 }
 
-static void parse_interface_settings(char* line)
+static void
+parse_interface_settings(char* line)
 {
     char* sep = strstr(line, "=");
     if (!sep)
@@ -237,7 +240,8 @@ static void parse_interface_settings(char* line)
         app_settings.hide_close_tab_buttons = !strtol(value, nullptr, 10);
 }
 
-static void parse_conf(const char* etc_path, char* line)
+static void
+parse_conf(const char* etc_path, char* line)
 {
     char* sep = strstr(line, "=");
     if (!sep)
@@ -268,7 +272,8 @@ static void parse_conf(const char* etc_path, char* line)
     g_free(svalue);
 }
 
-void load_conf()
+void
+load_conf()
 {
     std::string default_font = "Monospace 9";
 
@@ -296,7 +301,8 @@ void load_conf()
     g_free(config_path);
 }
 
-void load_settings(const char* config_dir)
+void
+load_settings(const char* config_dir)
 {
     FILE* file;
     char* path = nullptr;
@@ -553,7 +559,8 @@ void load_settings(const char* config_dir)
     ptk_bookmark_view_get_first_bookmark(nullptr);
 }
 
-void save_settings(void* main_window_ptr)
+void
+save_settings(void* main_window_ptr)
 {
     XSet* set;
     FMMainWindow* main_window;
@@ -676,7 +683,8 @@ void save_settings(void* main_window_ptr)
     g_string_free(buf, true);
 }
 
-void free_settings()
+void
+free_settings()
 {
     if (xset_cmd_history)
     {
@@ -688,12 +696,14 @@ void free_settings()
     xset_free_all();
 }
 
-const char* xset_get_config_dir()
+const char*
+xset_get_config_dir()
 {
     return settings_config_dir;
 }
 
-const char* xset_get_user_tmp_dir()
+const char*
+xset_get_user_tmp_dir()
 {
     if (settings_user_tmp_dir && g_file_test(settings_user_tmp_dir, G_FILE_TEST_EXISTS))
         return settings_user_tmp_dir;
@@ -704,7 +714,8 @@ const char* xset_get_user_tmp_dir()
     return settings_user_tmp_dir;
 }
 
-static void xset_free_all()
+static void
+xset_free_all()
 {
     XSet* set;
     GList* l;
@@ -734,7 +745,8 @@ static void xset_free_all()
     }
 }
 
-static void xset_free(XSet* set)
+static void
+xset_free(XSet* set)
 {
     if (set->name)
         g_free(set->name);
@@ -781,7 +793,8 @@ static void xset_free(XSet* set)
     set_last = nullptr;
 }
 
-static XSet* xset_new(const char* name)
+static XSet*
+xset_new(const char* name)
 {
     XSet* set = g_slice_new(XSet);
     set->name = g_strdup(name);
@@ -828,7 +841,8 @@ static XSet* xset_new(const char* name)
     return set;
 }
 
-XSet* xset_get(const char* name)
+XSet*
+xset_get(const char* name)
 {
     if (!name)
         return nullptr;
@@ -848,7 +862,8 @@ XSet* xset_get(const char* name)
     return (XSet*)xsets->data;
 }
 
-XSet* xset_get_panel(int panel, const char* name)
+XSet*
+xset_get_panel(int panel, const char* name)
 {
     char* fullname = g_strdup_printf("panel%d_%s", panel, name);
     XSet* set = xset_get(fullname);
@@ -856,7 +871,8 @@ XSet* xset_get_panel(int panel, const char* name)
     return set;
 }
 
-XSet* xset_get_panel_mode(int panel, const char* name, char mode)
+XSet*
+xset_get_panel_mode(int panel, const char* name, char mode)
 {
     char* fullname = g_strdup_printf("panel%d_%s%d", panel, name, mode);
     XSet* set = xset_get(fullname);
@@ -864,7 +880,8 @@ XSet* xset_get_panel_mode(int panel, const char* name, char mode)
     return set;
 }
 
-char* xset_get_s(const char* name)
+char*
+xset_get_s(const char* name)
 {
     XSet* set = xset_get(name);
     if (set)
@@ -873,7 +890,8 @@ char* xset_get_s(const char* name)
         return nullptr;
 }
 
-char* xset_get_s_panel(int panel, const char* name)
+char*
+xset_get_s_panel(int panel, const char* name)
 {
     char* fullname = g_strdup_printf("panel%d_%s", panel, name);
     char* s = xset_get_s(fullname);
@@ -881,13 +899,15 @@ char* xset_get_s_panel(int panel, const char* name)
     return s;
 }
 
-bool xset_get_b(const char* name)
+bool
+xset_get_b(const char* name)
 {
     XSet* set = xset_get(name);
     return (set->b == XSET_B_TRUE);
 }
 
-bool xset_get_b_panel(int panel, const char* name)
+bool
+xset_get_b_panel(int panel, const char* name)
 {
     char* fullname = g_strdup_printf("panel%d_%s", panel, name);
     bool b = xset_get_b(fullname);
@@ -895,7 +915,8 @@ bool xset_get_b_panel(int panel, const char* name)
     return b;
 }
 
-bool xset_get_b_panel_mode(int panel, const char* name, char mode)
+bool
+xset_get_b_panel_mode(int panel, const char* name, char mode)
 {
     char* fullname = g_strdup_printf("panel%d_%s%d", panel, name, mode);
     bool b = xset_get_b(fullname);
@@ -903,12 +924,14 @@ bool xset_get_b_panel_mode(int panel, const char* name, char mode)
     return b;
 }
 
-static bool xset_get_b_set(XSet* set)
+static bool
+xset_get_b_set(XSet* set)
 {
     return (set->b == XSET_B_TRUE);
 }
 
-XSet* xset_is(const char* name)
+XSet*
+xset_is(const char* name)
 {
     if (!name)
         return nullptr;
@@ -925,7 +948,8 @@ XSet* xset_is(const char* name)
     return nullptr;
 }
 
-XSet* xset_set_b(const char* name, bool bval)
+XSet*
+xset_set_b(const char* name, bool bval)
 {
     XSet* set = xset_get(name);
 
@@ -936,7 +960,8 @@ XSet* xset_set_b(const char* name, bool bval)
     return set;
 }
 
-XSet* xset_set_b_panel(int panel, const char* name, bool bval)
+XSet*
+xset_set_b_panel(int panel, const char* name, bool bval)
 {
     char* fullname = g_strdup_printf("panel%d_%s", panel, name);
     XSet* set = xset_set_b(fullname, bval);
@@ -944,7 +969,8 @@ XSet* xset_set_b_panel(int panel, const char* name, bool bval)
     return set;
 }
 
-XSet* xset_set_b_panel_mode(int panel, const char* name, char mode, bool bval)
+XSet*
+xset_set_b_panel_mode(int panel, const char* name, char mode, bool bval)
 {
     char* fullname = g_strdup_printf("panel%d_%s%d", panel, name, mode);
     XSet* set = xset_set_b(fullname, bval);
@@ -952,7 +978,8 @@ XSet* xset_set_b_panel_mode(int panel, const char* name, char mode, bool bval)
     return set;
 }
 
-static int xset_get_int_set(XSet* set, const char* var)
+static int
+xset_get_int_set(XSet* set, const char* var)
 {
     if (!set || !var)
         return -1;
@@ -974,13 +1001,15 @@ static int xset_get_int_set(XSet* set, const char* var)
     return strtol(varstring, nullptr, 10);
 }
 
-int xset_get_int(const char* name, const char* var)
+int
+xset_get_int(const char* name, const char* var)
 {
     XSet* set = xset_get(name);
     return xset_get_int_set(set, var);
 }
 
-int xset_get_int_panel(int panel, const char* name, const char* var)
+int
+xset_get_int_panel(int panel, const char* name, const char* var)
 {
     char* fullname = g_strdup_printf("panel%d_%s", panel, name);
     int i = xset_get_int(fullname, var);
@@ -988,7 +1017,8 @@ int xset_get_int_panel(int panel, const char* name, const char* var)
     return i;
 }
 
-static XSet* xset_is_main_bookmark(XSet* set)
+static XSet*
+xset_is_main_bookmark(XSet* set)
 {
     XSet* set_parent = nullptr;
 
@@ -1015,7 +1045,8 @@ static XSet* xset_is_main_bookmark(XSet* set)
     return nullptr;
 }
 
-static void xset_write_set(GString* buf, XSet* set)
+static void
+xset_write_set(GString* buf, XSet* set)
 {
     if (set->plugin)
         return;
@@ -1099,7 +1130,8 @@ static void xset_write_set(GString* buf, XSet* set)
     }
 }
 
-static void xset_write(GString* buf)
+static void
+xset_write(GString* buf)
 {
     GList* l;
 
@@ -1114,7 +1146,8 @@ static void xset_write(GString* buf)
     }
 }
 
-static void xset_parse(char* line)
+static void
+xset_parse(char* line)
 {
     char* sep = strchr(line, '=');
     if (!sep)
@@ -1151,7 +1184,8 @@ static void xset_parse(char* line)
     }
 }
 
-XSet* xset_set_cb(const char* name, GFunc cb_func, void* cb_data)
+XSet*
+xset_set_cb(const char* name, GFunc cb_func, void* cb_data)
 {
     XSet* set = xset_get(name);
     set->cb_func = cb_func;
@@ -1159,7 +1193,8 @@ XSet* xset_set_cb(const char* name, GFunc cb_func, void* cb_data)
     return set;
 }
 
-XSet* xset_set_cb_panel(int panel, const char* name, GFunc cb_func, void* cb_data)
+XSet*
+xset_set_cb_panel(int panel, const char* name, GFunc cb_func, void* cb_data)
 {
     char* fullname = g_strdup_printf("panel%d_%s", panel, name);
     XSet* set = xset_set_cb(fullname, cb_func, cb_data);
@@ -1167,7 +1202,8 @@ XSet* xset_set_cb_panel(int panel, const char* name, GFunc cb_func, void* cb_dat
     return set;
 }
 
-XSet* xset_set_ob1_int(XSet* set, const char* ob1, int ob1_int)
+XSet*
+xset_set_ob1_int(XSet* set, const char* ob1, int ob1_int)
 {
     if (set->ob1)
         g_free(set->ob1);
@@ -1176,7 +1212,8 @@ XSet* xset_set_ob1_int(XSet* set, const char* ob1, int ob1_int)
     return set;
 }
 
-XSet* xset_set_ob1(XSet* set, const char* ob1, void* ob1_data)
+XSet*
+xset_set_ob1(XSet* set, const char* ob1, void* ob1_data)
 {
     if (set->ob1)
         g_free(set->ob1);
@@ -1185,7 +1222,8 @@ XSet* xset_set_ob1(XSet* set, const char* ob1, void* ob1_data)
     return set;
 }
 
-XSet* xset_set_ob2(XSet* set, const char* ob2, void* ob2_data)
+XSet*
+xset_set_ob2(XSet* set, const char* ob2, void* ob2_data)
 {
     if (set->ob2)
         g_free(set->ob2);
@@ -1194,7 +1232,8 @@ XSet* xset_set_ob2(XSet* set, const char* ob2, void* ob2_data)
     return set;
 }
 
-static XSet* xset_set_set_int(XSet* set, const char* var, const char* value)
+static XSet*
+xset_set_set_int(XSet* set, const char* var, const char* value)
 {
     int tmp;
     if (!strcmp(var, "s"))
@@ -1265,7 +1304,8 @@ static XSet* xset_set_set_int(XSet* set, const char* var, const char* value)
     return xset_set_set(set, tmp, value);
 }
 
-XSet* xset_set_set(XSet* set, int var, const char* value)
+XSet*
+xset_set_set(XSet* set, int var, const char* value)
 {
     if (!set)
         return nullptr;
@@ -1449,7 +1489,8 @@ XSet* xset_set_set(XSet* set, int var, const char* value)
     return set;
 }
 
-XSet* xset_set(const char* name, const char* var, const char* value)
+XSet*
+xset_set(const char* name, const char* var, const char* value)
 {
     XSet* set = xset_get(name);
     if (!set->lock || (strcmp(var, "style") && strcmp(var, "desc") && strcmp(var, "title") &&
@@ -1459,7 +1500,8 @@ XSet* xset_set(const char* name, const char* var, const char* value)
         return set;
 }
 
-XSet* xset_set_panel(int panel, const char* name, const char* var, const char* value)
+XSet*
+xset_set_panel(int panel, const char* name, const char* var, const char* value)
 {
     char* fullname = g_strdup_printf("panel%d_%s", panel, name);
     XSet* set = xset_set(fullname, var, value);
@@ -1467,7 +1509,8 @@ XSet* xset_set_panel(int panel, const char* name, const char* var, const char* v
     return set;
 }
 
-XSet* xset_find_custom(const char* search)
+XSet*
+xset_find_custom(const char* search)
 {
     // find a custom command or submenu by label or xset name
     GList* l;
@@ -1496,7 +1539,8 @@ XSet* xset_find_custom(const char* search)
     return nullptr;
 }
 
-bool xset_opener(PtkFileBrowser* file_browser, char job)
+bool
+xset_opener(PtkFileBrowser* file_browser, char job)
 { // find an opener for job
     XSet* set;
     XSet* mset;
@@ -1613,8 +1657,9 @@ bool xset_opener(PtkFileBrowser* file_browser, char job)
     return found;
 }
 
-static void write_root_saver(GString* buf, const char* path, const char* name, const char* var,
-                             const char* value)
+static void
+write_root_saver(GString* buf, const char* path, const char* name, const char* var,
+                 const char* value)
 {
     if (!value)
         return;
@@ -1626,7 +1671,8 @@ static void write_root_saver(GString* buf, const char* path, const char* name, c
     g_free(qsave);
 }
 
-bool write_root_settings(GString* buf, const char* path)
+bool
+write_root_settings(GString* buf, const char* path)
 {
     GList* l;
     XSet* set;
@@ -1665,7 +1711,8 @@ bool write_root_settings(GString* buf, const char* path)
     return true;
 }
 
-static void read_root_settings()
+static void
+read_root_settings()
 {
     GList* l;
     XSet* set;
@@ -1742,7 +1789,8 @@ static void read_root_settings()
     fclose(file);
 }
 
-XSetContext* xset_context_new()
+XSetContext*
+xset_context_new()
 {
     int i;
     if (!xset_context)
@@ -1765,7 +1813,8 @@ XSetContext* xset_context_new()
     return xset_context;
 }
 
-GtkWidget* xset_get_image(const char* icon, GtkIconSize icon_size)
+GtkWidget*
+xset_get_image(const char* icon, GtkIconSize icon_size)
 {
     /*
         GTK_ICON_SIZE_MENU,
@@ -1785,8 +1834,9 @@ GtkWidget* xset_get_image(const char* icon, GtkIconSize icon_size)
     return gtk_image_new_from_icon_name(icon, icon_size);
 }
 
-void xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
-                   char* elements)
+void
+xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
+              char* elements)
 {
     if (!elements)
         return;
@@ -1812,7 +1862,8 @@ void xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup*
     }
 }
 
-static GtkWidget* xset_new_menuitem(const char* label, const char* icon)
+static GtkWidget*
+xset_new_menuitem(const char* label, const char* icon)
 {
     GtkWidget* item;
 
@@ -1832,7 +1883,8 @@ static GtkWidget* xset_new_menuitem(const char* label, const char* icon)
     return item;
 }
 
-char* xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
+char*
+xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
 {
     char* menu_label = nullptr;
     VFSAppDesktop* app = nullptr;
@@ -1891,7 +1943,8 @@ char* xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
     return menu_label;
 }
 
-GdkPixbuf* xset_custom_get_bookmark_icon(XSet* set, int icon_size)
+GdkPixbuf*
+xset_custom_get_bookmark_icon(XSet* set, int icon_size)
 {
     GdkPixbuf* icon_new = nullptr;
     const char* icon1 = nullptr;
@@ -1962,8 +2015,9 @@ GdkPixbuf* xset_custom_get_bookmark_icon(XSet* set, int icon_size)
     return icon_new;
 }
 
-GtkWidget* xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu,
-                             GtkAccelGroup* accel_group, XSet* set)
+GtkWidget*
+xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
+                  XSet* set)
 {
     GtkWidget* item = nullptr;
     GtkWidget* submenu;
@@ -2166,7 +2220,8 @@ _next_item:
     return item;
 }
 
-char* xset_custom_get_script(XSet* set, bool create)
+char*
+xset_custom_get_script(XSet* set, bool create)
 {
     char* path;
 
@@ -2221,7 +2276,8 @@ char* xset_custom_get_script(XSet* set, bool create)
     return path;
 }
 
-static char* xset_custom_get_help(GtkWidget* parent, XSet* set)
+static char*
+xset_custom_get_help(GtkWidget* parent, XSet* set)
 {
     char* dir;
     char* path;
@@ -2319,7 +2375,8 @@ static char* xset_custom_get_help(GtkWidget* parent, XSet* set)
     return nullptr;
 }
 
-static char* xset_custom_new_name()
+static char*
+xset_custom_new_name()
 {
     char* setname;
 
@@ -2351,7 +2408,8 @@ static char* xset_custom_new_name()
     return setname;
 }
 
-static void xset_custom_copy_files(XSet* src, XSet* dest)
+static void
+xset_custom_copy_files(XSet* src, XSet* dest)
 {
     char* path_src;
     char* path_dest;
@@ -2453,7 +2511,8 @@ static void xset_custom_copy_files(XSet* src, XSet* dest)
     }
 }
 
-static XSet* xset_custom_copy(XSet* set, bool copy_next, bool delete_set)
+static XSet*
+xset_custom_copy(XSet* set, bool copy_next, bool delete_set)
 {
     // printf("\nxset_custom_copy( %s, %s, %s)\n", set->name, copy_next ? "true" : "false",
     // delete_set ? "true" : "false" );
@@ -2516,7 +2575,8 @@ static XSet* xset_custom_copy(XSet* set, bool copy_next, bool delete_set)
     return newset;
 }
 
-void clean_plugin_mirrors()
+void
+clean_plugin_mirrors()
 { // remove plugin mirrors for non-existent plugins
     GList* l;
     XSet* set;
@@ -2573,7 +2633,8 @@ _redo:
     g_free(path);
 }
 
-static void xset_set_plugin_mirror(XSet* pset)
+static void
+xset_set_plugin_mirror(XSet* pset)
 {
     XSet* set;
     GList* l;
@@ -2600,7 +2661,8 @@ static void xset_set_plugin_mirror(XSet* pset)
     }
 }
 
-XSet* xset_get_plugin_mirror(XSet* set)
+XSet*
+xset_get_plugin_mirror(XSet* set)
 {
     // plugin mirrors are custom xsets that save the user's key, icon
     // and run prefs for the plugin, if any
@@ -2629,12 +2691,14 @@ XSet* xset_get_plugin_mirror(XSet* set)
     return newset;
 }
 
-static int compare_plugin_sets(XSet* a, XSet* b)
+static int
+compare_plugin_sets(XSet* a, XSet* b)
 {
     return g_utf8_collate(a->menu_label, b->menu_label);
 }
 
-GList* xset_get_plugins(bool included)
+GList*
+xset_get_plugins(bool included)
 { // return list of plugin sets (included or not ) sorted by menu_label
     GList* l;
     GList* plugins = nullptr;
@@ -2658,7 +2722,8 @@ GList* xset_get_plugins(bool included)
     return plugins;
 }
 
-static XSet* xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
+static XSet*
+xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
 {
     GList* l;
     if (!plug_name)
@@ -2681,7 +2746,8 @@ static XSet* xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
     return set;
 }
 
-static void xset_parse_plugin(const char* plug_dir, char* line, int use)
+static void
+xset_parse_plugin(const char* plug_dir, char* line, int use)
 {
     char* sep = strchr(line, '=');
     char* name;
@@ -2778,7 +2844,8 @@ static void xset_parse_plugin(const char* plug_dir, char* line, int use)
     }
 }
 
-XSet* xset_import_plugin(const char* plug_dir, int* use)
+XSet*
+xset_import_plugin(const char* plug_dir, int* use)
 {
     char line[2048];
     bool func;
@@ -2887,7 +2954,8 @@ struct PluginData
     int job;
 };
 
-static void on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
+static void
+on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
 {
     XSet* set;
     char* msg;
@@ -3063,7 +3131,8 @@ static void on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
     g_slice_free(PluginData, plugin_data);
 }
 
-static void xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
+static void
+xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 {
     char* msg;
 
@@ -3116,8 +3185,9 @@ static void xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, 
     ptk_file_task_run(task);
 }
 
-void install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* path,
-                         const char* plug_dir, int job, XSet* insert_set)
+void
+install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* path, const char* plug_dir,
+                    int job, XSet* insert_set)
 {
     char* file_path;
     char* file_path_q;
@@ -3208,7 +3278,8 @@ void install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* pat
     ptk_file_task_run(task);
 }
 
-static bool xset_custom_export_files(XSet* set, char* plug_dir)
+static bool
+xset_custom_export_files(XSet* set, char* plug_dir)
 {
     char* path_src;
     char* path_dest;
@@ -3262,7 +3333,8 @@ static bool xset_custom_export_files(XSet* set, char* plug_dir)
     return ret;
 }
 
-static bool xset_custom_export_write(GString* buf, XSet* set, char* plug_dir)
+static bool
+xset_custom_export_write(GString* buf, XSet* set, char* plug_dir)
 { // recursively write set, submenu sets, and next sets
     xset_write_set(buf, set);
     if (!xset_custom_export_files(set, plug_dir))
@@ -3280,7 +3352,8 @@ static bool xset_custom_export_write(GString* buf, XSet* set, char* plug_dir)
     return true;
 }
 
-void xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
+void
+xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 {
     const char* deffolder;
     char* deffile;
@@ -3448,7 +3521,8 @@ _export_error:
                     nullptr);
 }
 
-static void open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
+static void
+open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
 {
     char* tilde_url = nullptr;
     const char* use_url;
@@ -3556,7 +3630,8 @@ static void open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new
     g_free(tilde_url);
 }
 
-static void xset_custom_activate(GtkWidget* item, XSet* set)
+static void
+xset_custom_activate(GtkWidget* item, XSet* set)
 {
     GtkWidget* parent;
     GtkWidget* task_view = nullptr;
@@ -3795,7 +3870,8 @@ static void xset_custom_activate(GtkWidget* item, XSet* set)
     ptk_file_task_run(task);
 }
 
-void xset_custom_delete(XSet* set, bool delete_next)
+void
+xset_custom_delete(XSet* set, bool delete_next)
 {
     char* command;
 
@@ -3831,7 +3907,8 @@ void xset_custom_delete(XSet* set, bool delete_next)
     xset_free(set);
 }
 
-XSet* xset_custom_remove(XSet* set)
+XSet*
+xset_custom_remove(XSet* set)
 {
     XSet* set_prev;
     XSet* set_next;
@@ -3894,7 +3971,8 @@ XSet* xset_custom_remove(XSet* set)
     return nullptr;
 }
 
-static void xset_custom_insert_after(XSet* target, XSet* set)
+static void
+xset_custom_insert_after(XSet* target, XSet* set)
 { // inserts single set 'set', no next
     XSet* target_next;
 
@@ -3940,7 +4018,8 @@ static void xset_custom_insert_after(XSet* target, XSet* set)
     }
 }
 
-static bool xset_clipboard_in_set(XSet* set)
+static bool
+xset_clipboard_in_set(XSet* set)
 { // look upward to see if clipboard is in set's tree
     if (!set_clipboard || set->lock)
         return false;
@@ -3975,7 +4054,8 @@ static bool xset_clipboard_in_set(XSet* set)
     return false;
 }
 
-XSet* xset_custom_new()
+XSet*
+xset_custom_new()
 {
     char* setname;
     XSet* set;
@@ -3993,7 +4073,8 @@ XSet* xset_custom_new()
     return set;
 }
 
-void xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
+void
+xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
 {
     bool as_root = false;
     bool terminal;
@@ -4061,7 +4142,8 @@ void xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_roo
     ptk_file_task_run(task);
 }
 
-void xset_open_url(GtkWidget* parent, const char* url)
+void
+xset_open_url(GtkWidget* parent, const char* url)
 {
     const char* browser;
     char* command = nullptr;
@@ -4142,7 +4224,8 @@ void xset_open_url(GtkWidget* parent, const char* url)
     ptk_file_task_run(task);
 }
 
-static char* xset_get_manual_url()
+static char*
+xset_get_manual_url()
 {
     char* path;
     char* url = xset_get_s("main_help_url");
@@ -4225,7 +4308,8 @@ static char* xset_get_manual_url()
     return path;
 }
 
-void xset_show_help(GtkWidget* parent, XSet* set, const char* anchor)
+void
+xset_show_help(GtkWidget* parent, XSet* set, const char* anchor)
 {
     GtkWidget* dlgparent = nullptr;
     char* url;
@@ -4312,7 +4396,8 @@ void xset_show_help(GtkWidget* parent, XSet* set, const char* anchor)
     }
 }
 
-char* xset_get_keyname(XSet* set, int key_val, int key_mod)
+char*
+xset_get_keyname(XSet* set, int key_val, int key_mod)
 {
     int keyval;
     int keymod;
@@ -4376,7 +4461,8 @@ char* xset_get_keyname(XSet* set, int key_val, int key_mod)
     return mod;
 }
 
-static bool on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
+static bool
+on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
 {
     GList* l;
     int* newkey = (int*)g_object_get_data(G_OBJECT(dlg), "newkey");
@@ -4503,7 +4589,8 @@ static bool on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget
     return true;
 }
 
-void xset_set_key(GtkWidget* parent, XSet* set)
+void
+xset_set_key(GtkWidget* parent, XSet* set)
 {
     char* name;
     char* keymsg;
@@ -4605,7 +4692,8 @@ void xset_set_key(GtkWidget* parent, XSet* set)
     }
 }
 
-static void xset_design_job(GtkWidget* item, XSet* set)
+static void
+xset_design_job(GtkWidget* item, XSet* set)
 {
     XSet* newset;
     XSet* mset;
@@ -5466,7 +5554,8 @@ static void xset_design_job(GtkWidget* item, XSet* set)
     xset_autosave(false, false);
 }
 
-static bool xset_job_is_valid(XSet* set, int job)
+static bool
+xset_job_is_valid(XSet* set, int job)
 {
     bool no_remove = false;
     bool no_paste = false;
@@ -5535,7 +5624,8 @@ static bool xset_job_is_valid(XSet* set, int job)
     return false;
 }
 
-static bool xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, XSet* set)
+static bool
+xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, XSet* set)
 {
     int job = -1;
 
@@ -5769,13 +5859,15 @@ static bool xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, XSe
     return false;
 }
 
-static void on_menu_hide(GtkWidget* widget, GtkWidget* design_menu)
+static void
+on_menu_hide(GtkWidget* widget, GtkWidget* design_menu)
 {
     gtk_widget_set_sensitive(widget, true);
     gtk_menu_shell_deactivate(GTK_MENU_SHELL(design_menu));
 }
 
-static void set_check_menu_item_block(GtkWidget* item)
+static void
+set_check_menu_item_block(GtkWidget* item)
 {
     g_signal_handlers_block_matched(item,
                                     G_SIGNAL_MATCH_FUNC,
@@ -5794,7 +5886,8 @@ static void set_check_menu_item_block(GtkWidget* item)
                                       nullptr);
 }
 
-static GtkWidget* xset_design_additem(GtkWidget* menu, const char* label, int job, XSet* set)
+static GtkWidget*
+xset_design_additem(GtkWidget* menu, const char* label, int job, XSet* set)
 {
     GtkWidget* item;
     item = gtk_menu_item_new_with_mnemonic(label);
@@ -5805,8 +5898,9 @@ static GtkWidget* xset_design_additem(GtkWidget* menu, const char* label, int jo
     return item;
 }
 
-GtkWidget* xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned int button,
-                                 uint32_t time)
+GtkWidget*
+xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned int button,
+                      uint32_t time)
 {
     GtkWidget* newitem;
     GtkWidget* submenu;
@@ -6111,7 +6205,8 @@ GtkWidget* xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, 
     return design_menu;
 }
 
-static bool xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set)
+static bool
+xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set)
 {
     int job = -1;
 
@@ -6248,7 +6343,8 @@ static bool xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set)
     return false; // true won't stop activate on button-press (will on release)
 }
 
-bool xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
+bool
+xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
 {
     int job = -1;
     XSet* set;
@@ -6356,7 +6452,8 @@ bool xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
     return false;
 }
 
-void xset_menu_cb(GtkWidget* item, XSet* set)
+void
+xset_menu_cb(GtkWidget* item, XSet* set)
 {
     GtkWidget* parent;
     GFunc cb_func = nullptr;
@@ -6553,8 +6650,9 @@ void xset_menu_cb(GtkWidget* item, XSet* set)
         xset_autosave(false, false);
 }
 
-int xset_msg_dialog(GtkWidget* parent, int action, const char* title, int buttons, const char* msg1,
-                    const char* msg2, const char* help)
+int
+xset_msg_dialog(GtkWidget* parent, int action, const char* title, int buttons, const char* msg1,
+                const char* msg2, const char* help)
 {
     /* action=
     GTK_MESSAGE_INFO,
@@ -6624,7 +6722,8 @@ int xset_msg_dialog(GtkWidget* parent, int action, const char* title, int button
     return response;
 }
 
-static void on_multi_input_insert(GtkTextBuffer* buf)
+static void
+on_multi_input_insert(GtkTextBuffer* buf)
 { // remove linefeeds from pasted text
     GtkTextIter iter, siter;
     // bool changed = false;
@@ -6701,7 +6800,8 @@ static void on_multi_input_insert(GtkTextBuffer* buf)
     g_free(b);
 }
 
-char* multi_input_get_text(GtkWidget* input)
+char*
+multi_input_get_text(GtkWidget* input)
 { // returns a new allocated string or nullptr if input is empty
     GtkTextIter iter, siter;
 
@@ -6720,7 +6820,8 @@ char* multi_input_get_text(GtkWidget* input)
     return ret;
 }
 
-void multi_input_select_region(GtkWidget* input, int start, int end)
+void
+multi_input_select_region(GtkWidget* input, int start, int end)
 {
     GtkTextIter iter, siter;
 
@@ -6739,7 +6840,8 @@ void multi_input_select_region(GtkWidget* input, int start, int end)
     gtk_text_buffer_select_range(buf, &iter, &siter);
 }
 
-GtkTextView* multi_input_new(GtkScrolledWindow* scrolled, const char* text)
+GtkTextView*
+multi_input_new(GtkScrolledWindow* scrolled, const char* text)
 {
     GtkTextIter iter;
 
@@ -6771,7 +6873,8 @@ GtkTextView* multi_input_new(GtkScrolledWindow* scrolled, const char* text)
     return input;
 }
 
-static bool on_input_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
+static bool
+on_input_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
 {
     if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter)
     {
@@ -6781,7 +6884,8 @@ static bool on_input_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* 
     return false;
 }
 
-char* xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
+char*
+xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
 {
     GtkAllocation allocation;
     char* icon = nullptr;
@@ -6842,9 +6946,10 @@ char* xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
     return icon;
 }
 
-bool xset_text_dialog(GtkWidget* parent, const char* title, bool large, const char* msg1,
-                      const char* msg2, const char* defstring, char** answer, const char* defreset,
-                      bool edit_care, const char* help)
+bool
+xset_text_dialog(GtkWidget* parent, const char* title, bool large, const char* msg1,
+                 const char* msg2, const char* defstring, char** answer, const char* defreset,
+                 bool edit_care, const char* help)
 {
     GtkTextIter iter;
     GtkTextIter siter;
@@ -7081,8 +7186,9 @@ bool xset_text_dialog(GtkWidget* parent, const char* title, bool large, const ch
     return ret;
 }
 
-char* xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* title,
-                       const char* deffolder, const char* deffile)
+char*
+xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* title,
+                 const char* deffolder, const char* deffile)
 {
     char* path;
     /*  Actions:
@@ -7169,7 +7275,8 @@ char* xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const cha
     return nullptr;
 }
 
-static char* xset_color_dialog(GtkWidget* parent, char* title, char* defcolor)
+static char*
+xset_color_dialog(GtkWidget* parent, char* title, char* defcolor)
 {
     GdkRGBA color;
     char* scolor = nullptr;
@@ -7218,7 +7325,8 @@ static char* xset_color_dialog(GtkWidget* parent, char* title, char* defcolor)
     return scolor;
 }
 
-static void xset_builtin_tool_activate(char tool_type, XSet* set, GdkEventButton* event)
+static void
+xset_builtin_tool_activate(char tool_type, XSet* set, GdkEventButton* event)
 {
     XSet* set2;
     int p;
@@ -7316,14 +7424,16 @@ static void xset_builtin_tool_activate(char tool_type, XSet* set, GdkEventButton
     }
 }
 
-const char* xset_get_builtin_toolitem_label(unsigned char tool_type)
+const char*
+xset_get_builtin_toolitem_label(unsigned char tool_type)
 {
     if (tool_type < XSET_TOOL_DEVICES || tool_type >= XSET_TOOL_INVALID)
         return nullptr;
     return builtin_tool_name[tool_type];
 }
 
-static XSet* xset_new_builtin_toolitem(char tool_type)
+static XSet*
+xset_new_builtin_toolitem(char tool_type)
 {
     if (tool_type < XSET_TOOL_DEVICES || tool_type >= XSET_TOOL_INVALID)
         return nullptr;
@@ -7335,7 +7445,8 @@ static XSet* xset_new_builtin_toolitem(char tool_type)
     return set;
 }
 
-static bool on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
+static bool
+on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
 {
     int job = -1;
 
@@ -7477,7 +7588,8 @@ static bool on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, 
     return true;
 }
 
-static bool on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
+static bool
+on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
 {
     // printf("on_tool_menu_button_press  %s   button = %d\n", set->menu_label,
     //                                                    event->button );
@@ -7522,7 +7634,8 @@ static bool on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, 
     return true;
 }
 
-static void set_gtk3_widget_padding(GtkWidget* widget, int left_right, int top_bottom)
+static void
+set_gtk3_widget_padding(GtkWidget* widget, int left_right, int top_bottom)
 {
     char* str = g_strdup_printf("GtkWidget { padding-left: %dpx; padding-right: %dpx; "
                                 "padding-top: %dpx; padding-bottom: %dpx; }",
@@ -7540,9 +7653,9 @@ static void set_gtk3_widget_padding(GtkWidget* widget, int left_right, int top_b
     g_free(str);
 }
 
-static GtkWidget* xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser,
-                                    GtkWidget* toolbar, int icon_size, XSet* set,
-                                    bool show_tooltips)
+static GtkWidget*
+xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,
+                  int icon_size, XSet* set, bool show_tooltips)
 {
     GtkWidget* image = nullptr;
     GtkWidget* item = nullptr;
@@ -7963,8 +8076,9 @@ _next_toolitem:
     return item;
 }
 
-void xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,
-                       XSet* set_parent, bool show_tooltips)
+void
+xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,
+                  XSet* set_parent, bool show_tooltips)
 {
     const char default_tools[] = {XSET_TOOL_BOOKMARKS,
                                   XSET_TOOL_TREE,
@@ -8030,7 +8144,8 @@ void xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidge
     gtk_widget_show_all(toolbar);
 }
 
-void xset_set_window_icon(GtkWindow* win)
+void
+xset_set_window_icon(GtkWindow* win)
 {
     const char* name;
     XSet* set = xset_get("main_icon");
@@ -8062,7 +8177,8 @@ void xset_set_window_icon(GtkWindow* win)
     }
 }
 
-static void xset_defaults()
+static void
+xset_defaults()
 {
     XSet* set;
 
@@ -9954,7 +10070,8 @@ static void xset_defaults()
     }
 }
 
-static void def_key(const char* name, int key, int keymod)
+static void
+def_key(const char* name, int key, int keymod)
 {
     XSet* set = xset_get(name);
 
@@ -9973,7 +10090,8 @@ static void def_key(const char* name, int key, int keymod)
     set->keymod = keymod;
 }
 
-static void xset_default_keys()
+static void
+xset_default_keys()
 {
     GList* l;
 

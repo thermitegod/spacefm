@@ -128,7 +128,8 @@ static void open_file(const char* path);
 static char* dup_to_absolute_file_path(char** file);
 static void receive_socket_command(int client, GString* args); // sfm
 
-static char* get_inode_tag()
+static char*
+get_inode_tag()
 {
     struct stat stat_buf;
 
@@ -142,7 +143,8 @@ static char* get_inode_tag()
                            stat_buf.st_ino);
 }
 
-static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
+static bool
+on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
 {
     if (cond & G_IO_IN)
     {
@@ -265,7 +267,8 @@ static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
     return true;
 }
 
-static void get_socket_name(char* buf, int len)
+static void
+get_socket_name(char* buf, int len)
 {
     char* dpy = g_strdup(g_getenv("DISPLAY"));
     if (dpy && !strcmp(dpy, ":0.0"))
@@ -278,13 +281,15 @@ static void get_socket_name(char* buf, int len)
     g_free(dpy);
 }
 
-static void single_instance_check_fatal(int ret)
+static void
+single_instance_check_fatal(int ret)
 {
     gdk_notify_startup_complete();
     exit(ret);
 }
 
-static bool single_instance_check()
+static bool
+single_instance_check()
 {
     if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
     {
@@ -402,7 +407,8 @@ static bool single_instance_check()
     return true;
 }
 
-static void single_instance_finalize()
+static void
+single_instance_finalize()
 {
     char lock_file[256];
 
@@ -414,7 +420,8 @@ static void single_instance_finalize()
     unlink(lock_file);
 }
 
-static void receive_socket_command(int client, GString* args) // sfm
+static void
+receive_socket_command(int client, GString* args) // sfm
 {
     char** argv;
     char cmd;
@@ -474,7 +481,8 @@ static void receive_socket_command(int client, GString* args) // sfm
     g_free(reply);
 }
 
-static int send_socket_command(int argc, char* argv[], char** reply) // sfm
+static int
+send_socket_command(int argc, char* argv[], char** reply) // sfm
 {
     *reply = nullptr;
     if (argc < 3)
@@ -553,32 +561,37 @@ static int send_socket_command(int argc, char* argv[], char** reply) // sfm
 #ifdef _DEBUG_THREAD
 
 G_LOCK_DEFINE(gdk_lock);
-void debug_gdk_threads_enter(const char* message)
+void
+debug_gdk_threads_enter(const char* message)
 {
     g_debug("Thread %p tries to get GDK lock: %s", g_thread_self(), message);
     G_LOCK(gdk_lock);
     g_debug("Thread %p got GDK lock: %s", g_thread_self(), message);
 }
 
-static void _debug_gdk_threads_enter()
+static void
+_debug_gdk_threads_enter()
 {
     debug_gdk_threads_enter("called from GTK+ internal");
 }
 
-void debug_gdk_threads_leave(const char* message)
+void
+debug_gdk_threads_leave(const char* message)
 {
     g_debug("Thread %p tries to release GDK lock: %s", g_thread_self(), message);
     G_UNLOCK(gdk_lock);
     g_debug("Thread %p released GDK lock: %s", g_thread_self(), message);
 }
 
-static void _debug_gdk_threads_leave()
+static void
+_debug_gdk_threads_leave()
 {
     debug_gdk_threads_leave("called from GTK+ internal");
 }
 #endif
 
-static void init_folder()
+static void
+init_folder()
 {
     if (G_LIKELY(folder_initialized))
         return;
@@ -592,12 +605,14 @@ static void init_folder()
     folder_initialized = true;
 }
 
-static void exit_from_signal(int sig)
+static void
+exit_from_signal(int sig)
 {
     gtk_main_quit();
 }
 
-static void init_daemon()
+static void
+init_daemon()
 {
     init_folder();
 
@@ -609,7 +624,8 @@ static void init_daemon()
     daemon_initialized = true;
 }
 
-static char* dup_to_absolute_file_path(char** file)
+static char*
+dup_to_absolute_file_path(char** file)
 {
     char* file_path;
     char* real_path;
@@ -638,7 +654,8 @@ static char* dup_to_absolute_file_path(char** file)
     return real_path; /* To free with g_free */
 }
 
-static void open_in_tab(FMMainWindow** main_window, const char* real_path)
+static void
+open_in_tab(FMMainWindow** main_window, const char* real_path)
 {
     XSet* set;
     int p;
@@ -714,7 +731,8 @@ static void open_in_tab(FMMainWindow** main_window, const char* real_path)
     gtk_window_present(GTK_WINDOW(*main_window));
 }
 
-static bool handle_parsed_commandline_args()
+static bool
+handle_parsed_commandline_args()
 {
     FMMainWindow* main_window = nullptr;
     char** file;
@@ -849,7 +867,8 @@ static bool handle_parsed_commandline_args()
     return ret;
 }
 
-static void check_locale()
+static void
+check_locale()
 {
     char* name = setlocale(LC_ALL, nullptr);
     if (G_UNLIKELY(!name && !(!strcmp(name, "C") || !strcmp(name, "C.UTF-8"))))
@@ -859,7 +878,8 @@ static void check_locale()
     }
 }
 
-static void tmp_clean()
+static void
+tmp_clean()
 {
     char* command = g_strdup_printf("rm -rf %s", xset_get_user_tmp_dir());
     print_command(command);
@@ -867,7 +887,8 @@ static void tmp_clean()
     g_free(command);
 }
 
-int main(int argc, char* argv[])
+int
+main(int argc, char* argv[])
 {
     SpaceFM::Logger::Init();
 
@@ -1029,7 +1050,8 @@ int main(int argc, char* argv[])
     return EXIT_SUCCESS;
 }
 
-static void open_file(const char* path)
+static void
+open_file(const char* path)
 {
     VFSFileInfo* file = vfs_file_info_new();
     vfs_file_info_get(file, path, nullptr);

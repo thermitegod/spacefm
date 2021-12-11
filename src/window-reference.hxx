@@ -20,7 +20,8 @@ class WindowRef
     bool daemon_mode;
 
   public:
-    static WindowRef* getInstance()
+    static WindowRef*
+    getInstance()
     {
         if (!s_instance)
             s_instance = new WindowRef;

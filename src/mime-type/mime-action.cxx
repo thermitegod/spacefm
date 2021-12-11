@@ -22,7 +22,8 @@
 
 #include "mime-action.hxx"
 
-static bool save_to_file(const char* path, const char* data, long len)
+static bool
+save_to_file(const char* path, const char* data, long len)
 {
     int fd = creat(path, 0644);
     if (fd == -1)
@@ -42,7 +43,8 @@ static const char key_mime_type[] = "MimeType";
 
 typedef char* (*DataDirFunc)(const char* dir, const char* mime_type, void* user_data);
 
-static char* data_dir_foreach(DataDirFunc func, const char* mime_type, void* user_data)
+static char*
+data_dir_foreach(DataDirFunc func, const char* mime_type, void* user_data)
 {
     char* ret = nullptr;
 
@@ -74,7 +76,8 @@ static char* data_dir_foreach(DataDirFunc func, const char* mime_type, void* use
     return ret;
 }
 
-static char* apps_dir_foreach(DataDirFunc func, const char* mime_type, void* user_data)
+static char*
+apps_dir_foreach(DataDirFunc func, const char* mime_type, void* user_data)
 {
     char* ret = nullptr;
     const char* dir = g_get_user_data_dir();
@@ -91,7 +94,8 @@ static char* apps_dir_foreach(DataDirFunc func, const char* mime_type, void* use
     return ret;
 }
 
-static void update_desktop_database()
+static void
+update_desktop_database()
 {
     char* argv[3];
     argv[0] = g_find_program_in_path("update-desktop-database");
@@ -113,7 +117,8 @@ static void update_desktop_database()
     g_free(argv[1]);
 }
 
-static int strv_index(char** strv, const char* str)
+static int
+strv_index(char** strv, const char* str)
 {
     if (G_LIKELY(strv && str))
     {
@@ -128,7 +133,8 @@ static int strv_index(char** strv, const char* str)
 }
 
 /* Determine removed associations for this type */
-static void remove_actions(const char* type, GArray* actions)
+static void
+remove_actions(const char* type, GArray* actions)
 { // sfm 0.7.7+ added
     // g_print( "remove_actions( %s )\n", type );
     GKeyFile* file = g_key_file_new();
@@ -178,7 +184,8 @@ static void remove_actions(const char* type, GArray* actions)
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  *
  */
-static char* get_actions(const char* dir, const char* type, GArray* actions)
+static char*
+get_actions(const char* dir, const char* type, GArray* actions)
 {
     // g_print( "get_actions( %s, %s )\n", dir, type );
     char** removed = nullptr;
@@ -276,7 +283,8 @@ static char* get_actions(const char* dir, const char* type, GArray* actions)
  * The returned string array was newly allocated, and should be
  * freed with g_strfreev() when no longer used.
  */
-char** mime_type_get_actions(const char* type)
+char**
+mime_type_get_actions(const char* type)
 {
     GArray* actions = g_array_sized_new(true, false, sizeof(char*), 10);
     char* default_app = nullptr;
@@ -317,7 +325,8 @@ char** mime_type_get_actions(const char* type)
  * This API is very time consuming, but unfortunately, due to the damn poor design of
  * Freedesktop.org spec, all the insane checks here are necessary.  Sigh...  :-(
  */
-static bool mime_type_has_action(const char* type, const char* desktop_id)
+static bool
+mime_type_has_action(const char* type, const char* desktop_id)
 {
     char* cmd = nullptr;
     char* name = nullptr;
@@ -408,7 +417,8 @@ static bool mime_type_has_action(const char* type, const char* desktop_id)
     return found;
 }
 
-static char* make_custom_desktop_file(const char* desktop_id, const char* mime_type)
+static char*
+make_custom_desktop_file(const char* desktop_id, const char* mime_type)
 {
     char* name = nullptr;
     char* cust_template = nullptr;
@@ -504,7 +514,8 @@ static char* make_custom_desktop_file(const char* desktop_id, const char* mime_t
  *
  * custom_desktop: used to store name of the newly created user-custom desktop file, can be nullptr.
  */
-void mime_type_add_action(const char* type, const char* desktop_id, char** custom_desktop)
+void
+mime_type_add_action(const char* type, const char* desktop_id, char** custom_desktop)
 {
     if (mime_type_has_action(type, desktop_id))
     {
@@ -520,7 +531,8 @@ void mime_type_add_action(const char* type, const char* desktop_id, char** custo
         g_free(cust);
 }
 
-static char* _locate_desktop_file_recursive(const char* path, const char* desktop_id, bool first)
+static char*
+_locate_desktop_file_recursive(const char* path, const char* desktop_id, bool first)
 { // if first is true, just search for subdirs not desktop_id (already searched)
     const char* name;
 
@@ -552,7 +564,8 @@ static char* _locate_desktop_file_recursive(const char* path, const char* deskto
     return found;
 }
 
-static char* _locate_desktop_file(const char* dir, const char* unused, const void* desktop_id)
+static char*
+_locate_desktop_file(const char* dir, const char* unused, const void* desktop_id)
 { // sfm 0.7.8 modified + 0.8.7 modified
     bool found = false;
 
@@ -589,14 +602,16 @@ static char* _locate_desktop_file(const char* dir, const char* unused, const voi
     return sep;
 }
 
-char* mime_type_locate_desktop_file(const char* dir, const char* desktop_id)
+char*
+mime_type_locate_desktop_file(const char* dir, const char* desktop_id)
 {
     if (dir)
         return _locate_desktop_file(dir, nullptr, (void*)desktop_id);
     return apps_dir_foreach((DataDirFunc)_locate_desktop_file, nullptr, (void*)desktop_id);
 }
 
-static char* get_default_action(const char* dir, const char* type, void* user_data)
+static char*
+get_default_action(const char* dir, const char* type, void* user_data)
 {
     // g_print( "get_default_action( %s, %s )\n", dir, type );
     // search these files in dir for the first existing default app
@@ -661,7 +676,8 @@ static char* get_default_action(const char* dir, const char* type, void* user_da
  *
  * The old defaults.list is also checked.
  */
-char* mime_type_get_default_action(const char* type)
+char*
+mime_type_get_default_action(const char* type)
 {
     /* FIXME: need to check parent types if default action of current type is not set. */
     return data_dir_foreach((DataDirFunc)get_default_action, type, nullptr);
@@ -677,7 +693,8 @@ char* mime_type_get_default_action(const char* type)
  *
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  */
-void mime_type_update_association(const char* type, const char* desktop_id, int action)
+void
+mime_type_update_association(const char* type, const char* desktop_id, int action)
 {
     const char* groups[] = {"Default Applications", "Added Associations", "Removed Associations"};
     bool data_changed = false;

@@ -25,7 +25,8 @@ enum PTKPathEntryCol
     N_COLS
 };
 
-static char* get_cwd(GtkEntry* entry)
+static char*
+get_cwd(GtkEntry* entry)
 {
     const char* path = gtk_entry_get_text(entry);
     if (path[0] == '/')
@@ -45,7 +46,8 @@ static char* get_cwd(GtkEntry* entry)
     return nullptr;
 }
 
-static bool seek_path(GtkEntry* entry)
+static bool
+seek_path(GtkEntry* entry)
 {
     if (!GTK_IS_ENTRY(entry))
         return false;
@@ -125,7 +127,8 @@ static bool seek_path(GtkEntry* entry)
     return false;
 }
 
-static void seek_path_delayed(GtkEntry* entry, unsigned int delay)
+static void
+seek_path_delayed(GtkEntry* entry, unsigned int delay)
 {
     EntryData* edata = (EntryData*)g_object_get_data(G_OBJECT(entry), "edata");
     if (!(edata && edata->browser))
@@ -136,8 +139,8 @@ static void seek_path_delayed(GtkEntry* entry, unsigned int delay)
     edata->seek_timer = g_timeout_add(delay ? delay : 250, (GSourceFunc)seek_path, entry);
 }
 
-static bool match_func_cmd(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it,
-                           void* user_data)
+static bool
+match_func_cmd(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it, void* user_data)
 {
     char* name = nullptr;
     GtkTreeModel* model = gtk_entry_completion_get_model(completion);
@@ -152,8 +155,8 @@ static bool match_func_cmd(GtkEntryCompletion* completion, const char* key, GtkT
     return false;
 }
 
-static bool match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it,
-                       void* user_data)
+static bool
+match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it, void* user_data)
 {
     char* name = nullptr;
     GtkTreeModel* model = gtk_entry_completion_get_model(completion);
@@ -173,7 +176,8 @@ static bool match_func(GtkEntryCompletion* completion, const char* key, GtkTreeI
     return false;
 }
 
-static void update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
+static void
+update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
 {
     GtkListStore* list;
     GtkTreeIter it;
@@ -266,7 +270,8 @@ static void update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
     }
 }
 
-static void on_changed(GtkEntry* entry, void* user_data)
+static void
+on_changed(GtkEntry* entry, void* user_data)
 {
     GtkEntryCompletion* completion = gtk_entry_get_completion(entry);
     update_completion(entry, completion);
@@ -274,7 +279,8 @@ static void on_changed(GtkEntry* entry, void* user_data)
     seek_path_delayed(GTK_ENTRY(entry), 0);
 }
 
-static void insert_complete(GtkEntry* entry)
+static void
+insert_complete(GtkEntry* entry)
 {
     // find a real completion
     const char* prefix = gtk_entry_get_text(GTK_ENTRY(entry));
@@ -385,7 +391,8 @@ static void insert_complete(GtkEntry* entry)
     g_free(dir_path);
 }
 
-static bool on_key_press(GtkWidget* entry, GdkEventKey* evt, EntryData* edata)
+static bool
+on_key_press(GtkWidget* entry, GdkEventKey* evt, EntryData* edata)
 {
     int keymod = (evt->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_SUPER_MASK |
                                 GDK_HYPER_MASK | GDK_META_MASK));
@@ -416,14 +423,16 @@ static bool on_key_press(GtkWidget* entry, GdkEventKey* evt, EntryData* edata)
     return false;
 }
 
-static bool on_insert_prefix(GtkEntryCompletion* completion, char* prefix, GtkWidget* entry)
+static bool
+on_insert_prefix(GtkEntryCompletion* completion, char* prefix, GtkWidget* entry)
 {
     // don't use the default handler because it inserts partial names
     return true;
 }
 
-static bool on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model,
-                              GtkTreeIter* iter, GtkWidget* entry)
+static bool
+on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIter* iter,
+                  GtkWidget* entry)
 {
     char* path = nullptr;
     gtk_tree_model_get(model, iter, COL_PATH, &path, -1);
@@ -453,7 +462,8 @@ static bool on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* mode
     return true;
 }
 
-static bool on_focus_in(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
+static bool
+on_focus_in(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
 {
     GtkEntryCompletion* completion = gtk_entry_completion_new();
     GtkListStore* list = gtk_list_store_new(N_COLS, G_TYPE_STRING, G_TYPE_STRING);
@@ -482,24 +492,28 @@ static bool on_focus_in(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
     return false;
 }
 
-static bool on_focus_out(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
+static bool
+on_focus_out(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
 {
     g_signal_handlers_disconnect_by_func(entry, (void*)on_changed, nullptr);
     gtk_entry_set_completion(GTK_ENTRY(entry), nullptr);
     return false;
 }
 
-static void ptk_path_entry_man(GtkWidget* widget, GtkWidget* parent)
+static void
+ptk_path_entry_man(GtkWidget* widget, GtkWidget* parent)
 {
     xset_show_help(parent, nullptr, "#gui-pathbar");
 }
 
-static void on_protocol_handlers(GtkWidget* widget, PtkFileBrowser* file_browser)
+static void
+on_protocol_handlers(GtkWidget* widget, PtkFileBrowser* file_browser)
 {
     ptk_handler_show_config(HANDLER_MODE_NET, file_browser, nullptr);
 }
 
-static void on_add_bookmark(GtkWidget* widget, PtkFileBrowser* file_browser)
+static void
+on_add_bookmark(GtkWidget* widget, PtkFileBrowser* file_browser)
 {
     if (!(file_browser && file_browser->path_bar))
         return;
@@ -508,7 +522,8 @@ static void on_add_bookmark(GtkWidget* widget, PtkFileBrowser* file_browser)
         ptk_bookmark_view_add_bookmark(nullptr, file_browser, text);
 }
 
-void ptk_path_entry_help(GtkWidget* widget, GtkWidget* parent)
+void
+ptk_path_entry_help(GtkWidget* widget, GtkWidget* parent)
 {
     GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(parent));
     GtkWidget* dlg = gtk_message_dialog_new(
@@ -529,7 +544,8 @@ void ptk_path_entry_help(GtkWidget* widget, GtkWidget* parent)
     gtk_widget_destroy(dlg);
 }
 
-static bool on_button_press(GtkWidget* entry, GdkEventButton* evt, void* user_data)
+static bool
+on_button_press(GtkWidget* entry, GdkEventButton* evt, void* user_data)
 {
     if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
         main_window_event(nullptr,
@@ -546,7 +562,8 @@ static bool on_button_press(GtkWidget* entry, GdkEventButton* evt, void* user_da
     return false;
 }
 
-static bool on_button_release(GtkEntry* entry, GdkEventButton* evt, void* user_data)
+static bool
+on_button_release(GtkEntry* entry, GdkEventButton* evt, void* user_data)
 {
     if (GDK_BUTTON_RELEASE != evt->type)
         return false;
@@ -603,7 +620,8 @@ static bool on_button_release(GtkEntry* entry, GdkEventButton* evt, void* user_d
     return false;
 }
 
-static void on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
+static void
+on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
 {
     if (!file_browser)
         return;
@@ -631,8 +649,9 @@ static void on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* fi
     g_signal_connect(menu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
 }
 
-static void on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars,
-                            unsigned int n_chars, void* user_data)
+static void
+on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars, unsigned int n_chars,
+                void* user_data)
 {
     const char* text = gtk_entry_buffer_get_text(buf);
     if (!text)
@@ -667,12 +686,14 @@ static void on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* ch
     }
 }
 
-static void entry_data_free(EntryData* edata)
+static void
+entry_data_free(EntryData* edata)
 {
     g_slice_free(EntryData, edata);
 }
 
-GtkWidget* ptk_path_entry_new(PtkFileBrowser* file_browser)
+GtkWidget*
+ptk_path_entry_new(PtkFileBrowser* file_browser)
 {
     GtkWidget* entry = gtk_entry_new();
     gtk_entry_set_has_frame(GTK_ENTRY(entry), true);

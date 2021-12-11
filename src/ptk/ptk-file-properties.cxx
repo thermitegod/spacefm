@@ -80,7 +80,8 @@ static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
  * calculation is cancelled.
  * NOTE: path is encoded in on-disk encoding and not necessarily UTF-8.
  */
-static void calc_total_size_of_files(const char* path, FilePropertiesDialogData* data)
+static void
+calc_total_size_of_files(const char* path, FilePropertiesDialogData* data)
 {
     if (data->cancel)
         return;
@@ -119,7 +120,8 @@ static void calc_total_size_of_files(const char* path, FilePropertiesDialogData*
         ++data->total_count;
 }
 
-static void* calc_size(void* user_data)
+static void*
+calc_size(void* user_data)
 {
     FilePropertiesDialogData* data = (FilePropertiesDialogData*)user_data;
     GList* l;
@@ -139,7 +141,8 @@ static void* calc_size(void* user_data)
     return nullptr;
 }
 
-static bool on_update_labels(FilePropertiesDialogData* data)
+static bool
+on_update_labels(FilePropertiesDialogData* data)
 {
     char buf[64];
     char buf2[64];
@@ -171,7 +174,8 @@ static bool on_update_labels(FilePropertiesDialogData* data)
     return !data->done;
 }
 
-static void on_chmod_btn_toggled(GtkToggleButton* btn, FilePropertiesDialogData* data)
+static void
+on_chmod_btn_toggled(GtkToggleButton* btn, FilePropertiesDialogData* data)
 {
     /* Bypass the default handler */
     g_signal_stop_emission_by_name(btn, "toggled");
@@ -204,7 +208,8 @@ static void on_chmod_btn_toggled(GtkToggleButton* btn, FilePropertiesDialogData*
                                       nullptr);
 }
 
-static bool combo_sep(GtkTreeModel* model, GtkTreeIter* it, void* user_data)
+static bool
+combo_sep(GtkTreeModel* model, GtkTreeIter* it, void* user_data)
 {
     int i;
     for (i = 2; i > 0; --i)
@@ -220,7 +225,8 @@ static bool combo_sep(GtkTreeModel* model, GtkTreeIter* it, void* user_data)
     return true;
 }
 
-static void on_combo_change(GtkComboBox* combo, void* user_data)
+static void
+on_combo_change(GtkComboBox* combo, void* user_data)
 {
     GtkTreeIter it;
     if (gtk_combo_box_get_active_iter(combo, &it))
@@ -303,8 +309,8 @@ static void on_combo_change(GtkComboBox* combo, void* user_data)
     }
 }
 
-GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_files,
-                                   int page)
+GtkWidget*
+file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_files, int page)
 {
     GtkBuilder* builder = _gtk_builder_new_from_file("file_properties3.ui");
     GtkWidget* dlg = (GtkWidget*)gtk_builder_get_object(builder, "dlg");
@@ -644,7 +650,8 @@ GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GLis
     return dlg;
 }
 
-static uid_t uid_from_name(const char* user_name)
+static uid_t
+uid_from_name(const char* user_name)
 {
     uid_t uid = -1;
 
@@ -669,7 +676,8 @@ static uid_t uid_from_name(const char* user_name)
     return uid;
 }
 
-static gid_t gid_from_name(const char* group_name)
+static gid_t
+gid_from_name(const char* group_name)
 {
     gid_t gid = -1;
 
@@ -694,7 +702,8 @@ static gid_t gid_from_name(const char* group_name)
     return gid;
 }
 
-static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
+static void
+on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
 {
     uid_t uid = -1;
     gid_t gid = -1;

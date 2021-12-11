@@ -24,7 +24,8 @@ static const char desktop_entry_name[] = "Desktop Entry";
  * If file_name is not a full path, this function searches default paths
  * for the desktop file.
  */
-VFSAppDesktop* vfs_app_desktop_new(const char* file_name)
+VFSAppDesktop*
+vfs_app_desktop_new(const char* file_name)
 {
     bool load;
     char* relative_path;
@@ -84,7 +85,8 @@ VFSAppDesktop* vfs_app_desktop_new(const char* file_name)
     return app;
 }
 
-static void vfs_app_desktop_free(VFSAppDesktop* app)
+static void
+vfs_app_desktop_free(VFSAppDesktop* app)
 {
     g_free(app->disp_name);
     g_free(app->comment);
@@ -96,36 +98,42 @@ static void vfs_app_desktop_free(VFSAppDesktop* app)
     g_slice_free(VFSAppDesktop, app);
 }
 
-void vfs_app_desktop_unref(void* data)
+void
+vfs_app_desktop_unref(void* data)
 {
     VFSAppDesktop* app = (VFSAppDesktop*)data;
     if (g_atomic_int_dec_and_test(&app->n_ref))
         vfs_app_desktop_free(app);
 }
 
-const char* vfs_app_desktop_get_name(VFSAppDesktop* app)
+const char*
+vfs_app_desktop_get_name(VFSAppDesktop* app)
 {
     return app->file_name;
 }
 
-const char* vfs_app_desktop_get_disp_name(VFSAppDesktop* app)
+const char*
+vfs_app_desktop_get_disp_name(VFSAppDesktop* app)
 {
     if (G_LIKELY(app->disp_name))
         return app->disp_name;
     return app->file_name;
 }
 
-const char* vfs_app_desktop_get_exec(VFSAppDesktop* app)
+const char*
+vfs_app_desktop_get_exec(VFSAppDesktop* app)
 {
     return app->exec;
 }
 
-const char* vfs_app_desktop_get_icon_name(VFSAppDesktop* app)
+const char*
+vfs_app_desktop_get_icon_name(VFSAppDesktop* app)
 {
     return app->icon_name;
 }
 
-static GdkPixbuf* load_icon_file(const char* file_name, int size)
+static GdkPixbuf*
+load_icon_file(const char* file_name, int size)
 {
     GdkPixbuf* icon = nullptr;
     const char** dirs = (const char**)g_get_system_data_dirs();
@@ -141,7 +149,8 @@ static GdkPixbuf* load_icon_file(const char* file_name, int size)
     return icon;
 }
 
-GdkPixbuf* vfs_app_desktop_get_icon(VFSAppDesktop* app, int size, bool use_fallback)
+GdkPixbuf*
+vfs_app_desktop_get_icon(VFSAppDesktop* app, int size, bool use_fallback)
 {
     GtkIconTheme* theme;
     char* icon_name = nullptr;
@@ -194,7 +203,8 @@ GdkPixbuf* vfs_app_desktop_get_icon(VFSAppDesktop* app, int size, bool use_fallb
     return icon;
 }
 
-bool vfs_app_desktop_open_multiple_files(VFSAppDesktop* app)
+bool
+vfs_app_desktop_open_multiple_files(VFSAppDesktop* app)
 {
     if (app->exec)
     {
@@ -205,12 +215,14 @@ bool vfs_app_desktop_open_multiple_files(VFSAppDesktop* app)
     return false;
 }
 
-bool vfs_app_desktop_open_in_terminal(VFSAppDesktop* app)
+bool
+vfs_app_desktop_open_in_terminal(VFSAppDesktop* app)
 {
     return app->terminal;
 }
 
-static bool vfs_app_desktop_uses_startup_notify(VFSAppDesktop* app)
+static bool
+vfs_app_desktop_uses_startup_notify(VFSAppDesktop* app)
 {
     return app->startup;
 }
@@ -222,7 +234,8 @@ static bool vfs_app_desktop_uses_startup_notify(VFSAppDesktop* app)
  * paths of the files passed to app.
  * returned char* should be freed when no longer needed.
  */
-static char* translate_app_exec_to_command_line(VFSAppDesktop* app, GList* file_list)
+static char*
+translate_app_exec_to_command_line(VFSAppDesktop* app, GList* file_list)
 {
     const char* pexec = vfs_app_desktop_get_exec(app);
     char* file;
@@ -364,7 +377,8 @@ _finish:
     return g_string_free(cmd, false);
 }
 
-static void exec_in_terminal(const char* app_name, const char* cwd, const char* cmd)
+static void
+exec_in_terminal(const char* app_name, const char* cwd, const char* cmd)
 {
     // task
     PtkFileTask* task = ptk_file_exec_new(app_name, cwd, nullptr, nullptr);
@@ -379,8 +393,9 @@ static void exec_in_terminal(const char* app_name, const char* cwd, const char* 
     ptk_file_task_run(task);
 }
 
-bool vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSAppDesktop* app,
-                                GList* file_paths, GError** err)
+bool
+vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSAppDesktop* app,
+                           GList* file_paths, GError** err)
 {
     char* exec = nullptr;
     char* cmd;

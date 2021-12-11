@@ -39,7 +39,8 @@ static int inotify_fd = -1;
 /* event handler of all FAM events */
 static bool on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data);
 
-static bool connect_to_fam()
+static bool
+connect_to_fam()
 {
     inotify_fd = inotify_init();
     if (inotify_fd < 0)
@@ -64,7 +65,8 @@ static bool connect_to_fam()
     return true;
 }
 
-static void disconnect_from_fam()
+static void
+disconnect_from_fam()
 {
     if (fam_io_channel)
     {
@@ -77,7 +79,8 @@ static void disconnect_from_fam()
 }
 
 /* final cleanup */
-void vfs_file_monitor_clean()
+void
+vfs_file_monitor_clean()
 {
     disconnect_from_fam();
     if (monitor_hash)
@@ -91,7 +94,8 @@ void vfs_file_monitor_clean()
  * Init monitor:
  * Establish connection with gamin/fam.
  */
-bool vfs_file_monitor_init()
+bool
+vfs_file_monitor_init()
 {
     monitor_hash = g_hash_table_new(g_str_hash, g_str_equal);
     if (!connect_to_fam())
@@ -99,8 +103,8 @@ bool vfs_file_monitor_init()
     return true;
 }
 
-VFSFileMonitor* vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCallback cb,
-                                     void* user_data)
+VFSFileMonitor*
+vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCallback cb, void* user_data)
 {
     char resolved_path[PATH_MAX];
     char* real_path;
@@ -198,7 +202,8 @@ VFSFileMonitor* vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCall
     return monitor;
 }
 
-void vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* user_data)
+void
+vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* user_data)
 {
     // printf( "vfs_file_monitor_remove\n" );
     if (cb && fm && fm->callbacks)
@@ -228,7 +233,8 @@ void vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void
     // printf( "vfs_file_monitor_remove   DONE\n" );
 }
 
-static void reconnect_fam(void* key, void* value, void* user_data)
+static void
+reconnect_fam(void* key, void* value, void* user_data)
 {
     struct stat file_stat; // skip stat
     VFSFileMonitor* monitor = (VFSFileMonitor*)value;
@@ -251,14 +257,16 @@ static void reconnect_fam(void* key, void* value, void* user_data)
     }
 }
 
-static bool find_monitor(void* key, void* value, void* user_data)
+static bool
+find_monitor(void* key, void* value, void* user_data)
 {
     int wd = GPOINTER_TO_INT(user_data);
     VFSFileMonitor* monitor = (VFSFileMonitor*)value;
     return (monitor->wd == wd);
 }
 
-static VFSFileMonitorEvent translate_inotify_event(int inotify_mask)
+static VFSFileMonitorEvent
+translate_inotify_event(int inotify_mask)
 {
     if (inotify_mask & (IN_CREATE | IN_MOVED_TO))
         return VFS_FILE_MONITOR_CREATE;
@@ -274,7 +282,8 @@ static VFSFileMonitorEvent translate_inotify_event(int inotify_mask)
     }
 }
 
-static void dispatch_event(VFSFileMonitor* monitor, VFSFileMonitorEvent evt, const char* file_name)
+static void
+dispatch_event(VFSFileMonitor* monitor, VFSFileMonitorEvent evt, const char* file_name)
 {
     /* Call the callback functions */
     if (monitor->callbacks && monitor->callbacks->len)
@@ -290,7 +299,8 @@ static void dispatch_event(VFSFileMonitor* monitor, VFSFileMonitorEvent evt, con
 }
 
 /* event handler of all FAM events */
-static bool on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data)
+static bool
+on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data)
 {
 #define BUF_LEN (1024 * (sizeof(struct inotify_event) + 16))
     char buf[BUF_LEN];

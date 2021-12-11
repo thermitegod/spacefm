@@ -13,17 +13,20 @@
 
 #include "utils.hxx"
 
-void print_command(const char* cmd)
+void
+print_command(const char* cmd)
 {
     printf("COMMAND=%s\n", cmd);
 }
 
-void print_task_command(char* ptask, const char* cmd)
+void
+print_task_command(char* ptask, const char* cmd)
 {
     printf("\nTASK_COMMAND(%p)=%s\n", ptask, cmd);
 }
 
-void print_task_command_spawn(char* argv[], int pid)
+void
+print_task_command_spawn(char* argv[], int pid)
 {
     printf("SPAWN=");
     int i = 0;
@@ -37,7 +40,8 @@ void print_task_command_spawn(char* argv[], int pid)
     printf("    pid = %d\n", pid);
 }
 
-char* randhex8()
+char*
+randhex8()
 {
     char hex[9];
     unsigned int n = mrand48();
@@ -47,7 +51,8 @@ char* randhex8()
     return g_strdup(hex);
 }
 
-char* replace_line_subs(const char* line)
+char*
+replace_line_subs(const char* line)
 {
     const char* perc[] =
         {"%f", "%F", "%n", "%N", "%d", "%D", "%v", "%l", "%m", "%y", "%b", "%t", "%p", "%a"};
@@ -81,21 +86,24 @@ char* replace_line_subs(const char* line)
     return s;
 }
 
-bool have_x_access(const char* path)
+bool
+have_x_access(const char* path)
 {
     if (!path)
         return false;
     return (faccessat(0, path, R_OK | X_OK, AT_EACCESS) == 0);
 }
 
-bool have_rw_access(const char* path)
+bool
+have_rw_access(const char* path)
 {
     if (!path)
         return false;
     return (faccessat(0, path, R_OK | W_OK, AT_EACCESS) == 0);
 }
 
-bool dir_has_files(const char* path)
+bool
+dir_has_files(const char* path)
 {
     bool ret = false;
 
@@ -112,7 +120,8 @@ bool dir_has_files(const char* path)
     return ret;
 }
 
-char* get_name_extension(char* full_name, bool is_dir, char** ext)
+char*
+get_name_extension(char* full_name, bool is_dir, char** ext)
 {
     char* str;
     char* full = g_strdup(full_name);
@@ -156,7 +165,8 @@ char* get_name_extension(char* full_name, bool is_dir, char** ext)
     }
 }
 
-void open_in_prog(const char* path)
+void
+open_in_prog(const char* path)
 {
     char* prog = g_find_program_in_path(g_get_prgname());
     if (!prog)
@@ -172,7 +182,8 @@ void open_in_prog(const char* path)
     g_free(prog);
 }
 
-char* replace_string(const char* orig, const char* str, const char* replace, bool quote)
+char*
+replace_string(const char* orig, const char* str, const char* replace, bool quote)
 { // replace all occurrences of str in orig with replace, optionally quoting
     char* rep;
     char* result = nullptr;
@@ -215,7 +226,8 @@ char* replace_string(const char* orig, const char* str, const char* replace, boo
     return result;
 }
 
-char* bash_quote(const char* str)
+char*
+bash_quote(const char* str)
 {
     if (!str)
         return g_strdup("\"\"");
@@ -225,7 +237,8 @@ char* bash_quote(const char* str)
     return s2;
 }
 
-char* plain_ascii_name(const char* orig_name)
+char*
+plain_ascii_name(const char* orig_name)
 {
     if (!orig_name)
         return g_strdup("");
@@ -236,7 +249,8 @@ char* plain_ascii_name(const char* orig_name)
     return s;
 }
 
-char* clean_label(const char* menu_label, bool kill_special, bool escape)
+char*
+clean_label(const char* menu_label, bool kill_special, bool escape)
 {
     char* s1;
     char* s2;
@@ -266,14 +280,16 @@ char* clean_label(const char* menu_label, bool kill_special, bool escape)
     return s1;
 }
 
-void string_copy_free(char** s, const char* src)
+void
+string_copy_free(char** s, const char* src)
 {
     char* discard = *s;
     *s = g_strdup(src);
     g_free(discard);
 }
 
-char* unescape(const char* t)
+char*
+unescape(const char* t)
 {
     if (!t)
         return nullptr;
@@ -316,7 +332,8 @@ char* unescape(const char* t)
     return s;
 }
 
-char* get_valid_su() // may return nullptr
+char*
+get_valid_su() // may return nullptr
 {
     int i;
     char* use_su = nullptr;

@@ -25,19 +25,22 @@ static int big_thumb_size = 48, small_thumb_size = 20;
 static bool utf8_file_name = false;
 static const char* desktop_dir = nullptr; // MOD added
 
-void vfs_file_info_set_utf8_filename(bool is_utf8)
+void
+vfs_file_info_set_utf8_filename(bool is_utf8)
 {
     utf8_file_name = is_utf8;
 }
 
-VFSFileInfo* vfs_file_info_new()
+VFSFileInfo*
+vfs_file_info_new()
 {
     VFSFileInfo* fi = g_slice_new0(VFSFileInfo);
     fi->n_ref = 1;
     return fi;
 }
 
-static void vfs_file_info_clear(VFSFileInfo* fi)
+static void
+vfs_file_info_clear(VFSFileInfo* fi)
 {
     if (fi->disp_name && fi->disp_name != fi->name)
     {
@@ -95,13 +98,15 @@ static void vfs_file_info_clear(VFSFileInfo* fi)
     fi->flags = VFS_FILE_INFO_NONE;
 }
 
-VFSFileInfo* vfs_file_info_ref(VFSFileInfo* fi)
+VFSFileInfo*
+vfs_file_info_ref(VFSFileInfo* fi)
 {
     g_atomic_int_inc(&fi->n_ref);
     return fi;
 }
 
-void vfs_file_info_unref(VFSFileInfo* fi)
+void
+vfs_file_info_unref(VFSFileInfo* fi)
 {
     if (g_atomic_int_dec_and_test(&fi->n_ref))
     {
@@ -110,7 +115,8 @@ void vfs_file_info_unref(VFSFileInfo* fi)
     }
 }
 
-bool vfs_file_info_get(VFSFileInfo* fi, const char* file_path, const char* base_name)
+bool
+vfs_file_info_get(VFSFileInfo* fi, const char* file_path, const char* base_name)
 {
     struct stat file_stat;
     vfs_file_info_clear(fi);
@@ -155,18 +161,21 @@ bool vfs_file_info_get(VFSFileInfo* fi, const char* file_path, const char* base_
     return false;
 }
 
-const char* vfs_file_info_get_name(VFSFileInfo* fi)
+const char*
+vfs_file_info_get_name(VFSFileInfo* fi)
 {
     return fi->name;
 }
 
 /* Get displayed name encoded in UTF-8 */
-const char* vfs_file_info_get_disp_name(VFSFileInfo* fi)
+const char*
+vfs_file_info_get_disp_name(VFSFileInfo* fi)
 {
     return fi->disp_name;
 }
 
-void vfs_file_info_set_disp_name(VFSFileInfo* fi, const char* name)
+void
+vfs_file_info_set_disp_name(VFSFileInfo* fi, const char* name)
 {
     if (fi->disp_name && fi->disp_name != fi->name)
         g_free(fi->disp_name);
@@ -180,12 +189,14 @@ void vfs_file_info_set_disp_name(VFSFileInfo* fi, const char* name)
     g_free(str);
 }
 
-off_t vfs_file_info_get_size(VFSFileInfo* fi)
+off_t
+vfs_file_info_get_size(VFSFileInfo* fi)
 {
     return fi->size;
 }
 
-const char* vfs_file_info_get_disp_size(VFSFileInfo* fi)
+const char*
+vfs_file_info_get_disp_size(VFSFileInfo* fi)
 {
     if (G_UNLIKELY(!fi->disp_size))
     {
@@ -196,18 +207,21 @@ const char* vfs_file_info_get_disp_size(VFSFileInfo* fi)
     return fi->disp_size;
 }
 
-off_t vfs_file_info_get_blocks(VFSFileInfo* fi)
+off_t
+vfs_file_info_get_blocks(VFSFileInfo* fi)
 {
     return fi->blocks;
 }
 
-VFSMimeType* vfs_file_info_get_mime_type(VFSFileInfo* fi)
+VFSMimeType*
+vfs_file_info_get_mime_type(VFSFileInfo* fi)
 {
     vfs_mime_type_ref(fi->mime_type);
     return fi->mime_type;
 }
 
-void vfs_file_info_reload_mime_type(VFSFileInfo* fi, const char* full_path)
+void
+vfs_file_info_reload_mime_type(VFSFileInfo* fi, const char* full_path)
 {
     VFSMimeType* old_mime_type;
     struct stat file_stat;
@@ -225,12 +239,14 @@ void vfs_file_info_reload_mime_type(VFSFileInfo* fi, const char* full_path)
     vfs_mime_type_unref(old_mime_type); /* FIXME: is vfs_mime_type_unref needed ?*/
 }
 
-const char* vfs_file_info_get_mime_type_desc(VFSFileInfo* fi)
+const char*
+vfs_file_info_get_mime_type_desc(VFSFileInfo* fi)
 {
     return vfs_mime_type_get_description(fi->mime_type);
 }
 
-GdkPixbuf* vfs_file_info_get_big_icon(VFSFileInfo* fi)
+GdkPixbuf*
+vfs_file_info_get_big_icon(VFSFileInfo* fi)
 {
     /* get special icons for special files, especially for
        some desktop icons */
@@ -277,7 +293,8 @@ GdkPixbuf* vfs_file_info_get_big_icon(VFSFileInfo* fi)
     return vfs_mime_type_get_icon(fi->mime_type, true);
 }
 
-GdkPixbuf* vfs_file_info_get_small_icon(VFSFileInfo* fi)
+GdkPixbuf*
+vfs_file_info_get_small_icon(VFSFileInfo* fi)
 {
     if (fi->flags & VFS_FILE_INFO_DESKTOP_ENTRY && fi->small_thumbnail) // sfm
         return g_object_ref(fi->small_thumbnail);
@@ -287,17 +304,20 @@ GdkPixbuf* vfs_file_info_get_small_icon(VFSFileInfo* fi)
     return vfs_mime_type_get_icon(fi->mime_type, false);
 }
 
-GdkPixbuf* vfs_file_info_get_big_thumbnail(VFSFileInfo* fi)
+GdkPixbuf*
+vfs_file_info_get_big_thumbnail(VFSFileInfo* fi)
 {
     return fi->big_thumbnail ? g_object_ref(fi->big_thumbnail) : nullptr;
 }
 
-GdkPixbuf* vfs_file_info_get_small_thumbnail(VFSFileInfo* fi)
+GdkPixbuf*
+vfs_file_info_get_small_thumbnail(VFSFileInfo* fi)
 {
     return fi->small_thumbnail ? g_object_ref(fi->small_thumbnail) : nullptr;
 }
 
-const char* vfs_file_info_get_disp_owner(VFSFileInfo* fi)
+const char*
+vfs_file_info_get_disp_owner(VFSFileInfo* fi)
 {
     struct passwd* puser;
     struct group* pgroup;
@@ -331,7 +351,8 @@ const char* vfs_file_info_get_disp_owner(VFSFileInfo* fi)
     return fi->disp_owner;
 }
 
-const char* vfs_file_info_get_disp_mtime(VFSFileInfo* fi)
+const char*
+vfs_file_info_get_disp_mtime(VFSFileInfo* fi)
 {
     if (!fi->disp_mtime)
     {
@@ -345,17 +366,20 @@ const char* vfs_file_info_get_disp_mtime(VFSFileInfo* fi)
     return fi->disp_mtime;
 }
 
-time_t* vfs_file_info_get_mtime(VFSFileInfo* fi)
+time_t*
+vfs_file_info_get_mtime(VFSFileInfo* fi)
 {
     return &fi->mtime;
 }
 
-time_t* vfs_file_info_get_atime(VFSFileInfo* fi)
+time_t*
+vfs_file_info_get_atime(VFSFileInfo* fi)
 {
     return &fi->atime;
 }
 
-static void get_file_perm_string(char* perm, mode_t mode)
+static void
+get_file_perm_string(char* perm, mode_t mode)
 {
     if (S_ISREG(mode)) // sfm
         perm[0] = '-';
@@ -409,14 +433,16 @@ static void get_file_perm_string(char* perm, mode_t mode)
     perm[10] = '\0';
 }
 
-const char* vfs_file_info_get_disp_perm(VFSFileInfo* fi)
+const char*
+vfs_file_info_get_disp_perm(VFSFileInfo* fi)
 {
     if (!fi->disp_perm[0])
         get_file_perm_string(fi->disp_perm, fi->mode);
     return fi->disp_perm;
 }
 
-void vfs_file_size_to_string_format(char* buf, uint64_t size, bool decimal)
+void
+vfs_file_size_to_string_format(char* buf, uint64_t size, bool decimal)
 {
     const char* unit;
     float val;
@@ -486,7 +512,8 @@ void vfs_file_size_to_string_format(char* buf, uint64_t size, bool decimal)
         g_snprintf(buf, 64, "%.0f %s", val, unit);
 }
 
-bool vfs_file_info_is_dir(VFSFileInfo* fi)
+bool
+vfs_file_info_is_dir(VFSFileInfo* fi)
 {
     if (S_ISDIR(fi->mode))
         return true;
@@ -498,37 +525,44 @@ bool vfs_file_info_is_dir(VFSFileInfo* fi)
     return false;
 }
 
-bool vfs_file_info_is_regular_file(VFSFileInfo* fi)
+bool
+vfs_file_info_is_regular_file(VFSFileInfo* fi)
 {
     return S_ISREG(fi->mode) ? true : false;
 }
 
-bool vfs_file_info_is_symlink(VFSFileInfo* fi)
+bool
+vfs_file_info_is_symlink(VFSFileInfo* fi)
 {
     return S_ISLNK(fi->mode) ? true : false;
 }
 
-bool vfs_file_info_is_socket(VFSFileInfo* fi)
+bool
+vfs_file_info_is_socket(VFSFileInfo* fi)
 {
     return S_ISSOCK(fi->mode) ? true : false;
 }
 
-bool vfs_file_info_is_named_pipe(VFSFileInfo* fi)
+bool
+vfs_file_info_is_named_pipe(VFSFileInfo* fi)
 {
     return S_ISFIFO(fi->mode) ? true : false;
 }
 
-bool vfs_file_info_is_block_device(VFSFileInfo* fi)
+bool
+vfs_file_info_is_block_device(VFSFileInfo* fi)
 {
     return S_ISBLK(fi->mode) ? true : false;
 }
 
-bool vfs_file_info_is_char_device(VFSFileInfo* fi)
+bool
+vfs_file_info_is_char_device(VFSFileInfo* fi)
 {
     return S_ISCHR(fi->mode) ? true : false;
 }
 
-bool vfs_file_info_is_image(VFSFileInfo* fi)
+bool
+vfs_file_info_is_image(VFSFileInfo* fi)
 {
     /* FIXME: We had better use functions of xdg_mime to check this */
     if (!strncmp("image/", vfs_mime_type_get_type(fi->mime_type), 6))
@@ -536,7 +570,8 @@ bool vfs_file_info_is_image(VFSFileInfo* fi)
     return false;
 }
 
-bool vfs_file_info_is_video(VFSFileInfo* fi)
+bool
+vfs_file_info_is_video(VFSFileInfo* fi)
 {
     /* FIXME: We had better use functions of xdg_mime to check this */
     if (!strncmp("video/", vfs_mime_type_get_type(fi->mime_type), 6))
@@ -544,12 +579,14 @@ bool vfs_file_info_is_video(VFSFileInfo* fi)
     return false;
 }
 
-bool vfs_file_info_is_desktop_entry(VFSFileInfo* fi)
+bool
+vfs_file_info_is_desktop_entry(VFSFileInfo* fi)
 {
     return 0 != (fi->flags & VFS_FILE_INFO_DESKTOP_ENTRY);
 }
 
-bool vfs_file_info_is_unknown_type(VFSFileInfo* fi)
+bool
+vfs_file_info_is_unknown_type(VFSFileInfo* fi)
 {
     if (!strcmp(XDG_MIME_TYPE_UNKNOWN, vfs_mime_type_get_type(fi->mime_type)))
         return true;
@@ -557,13 +594,15 @@ bool vfs_file_info_is_unknown_type(VFSFileInfo* fi)
 }
 
 /* full path of the file is required by this function */
-bool vfs_file_info_is_executable(VFSFileInfo* fi, const char* file_path)
+bool
+vfs_file_info_is_executable(VFSFileInfo* fi, const char* file_path)
 {
     return mime_type_is_executable_file(file_path, fi->mime_type->type);
 }
 
 /* full path of the file is required by this function */
-bool vfs_file_info_is_text(VFSFileInfo* fi, const char* file_path)
+bool
+vfs_file_info_is_text(VFSFileInfo* fi, const char* file_path)
 {
     return mime_type_is_text_file(file_path, fi->mime_type->type);
 }
@@ -572,7 +611,8 @@ bool vfs_file_info_is_text(VFSFileInfo* fi, const char* file_path)
  * Run default action of specified file.
  * Full path of the file is required by this function.
  */
-bool vfs_file_info_open_file(VFSFileInfo* fi, const char* file_path, GError** err)
+bool
+vfs_file_info_open_file(VFSFileInfo* fi, const char* file_path, GError** err)
 {
     bool ret = false;
     char* argv[2];
@@ -612,19 +652,22 @@ bool vfs_file_info_open_file(VFSFileInfo* fi, const char* file_path, GError** er
     return ret;
 }
 
-mode_t vfs_file_info_get_mode(VFSFileInfo* fi)
+mode_t
+vfs_file_info_get_mode(VFSFileInfo* fi)
 {
     return fi->mode;
 }
 
-bool vfs_file_info_is_thumbnail_loaded(VFSFileInfo* fi, bool big)
+bool
+vfs_file_info_is_thumbnail_loaded(VFSFileInfo* fi, bool big)
 {
     if (big)
         return (fi->big_thumbnail != nullptr);
     return (fi->small_thumbnail != nullptr);
 }
 
-bool vfs_file_info_load_thumbnail(VFSFileInfo* fi, const char* full_path, bool big)
+bool
+vfs_file_info_load_thumbnail(VFSFileInfo* fi, const char* full_path, bool big)
 {
     if (big)
     {
@@ -655,13 +698,15 @@ bool vfs_file_info_load_thumbnail(VFSFileInfo* fi, const char* full_path, bool b
     return (thumbnail != nullptr);
 }
 
-void vfs_file_info_set_thumbnail_size(int big, int small)
+void
+vfs_file_info_set_thumbnail_size(int big, int small)
 {
     big_thumb_size = big;
     small_thumb_size = small;
 }
 
-void vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
+void
+vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
 {
     /*if ( G_LIKELY(fi->type) && G_UNLIKELY(fi->type->name, "application/x-desktop") ) */
     if (G_UNLIKELY(g_str_has_suffix(fi->name, ".desktop")))
@@ -705,13 +750,15 @@ void vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
     }
 }
 
-void vfs_file_info_list_free(GList* list)
+void
+vfs_file_info_list_free(GList* list)
 {
     g_list_foreach(list, (GFunc)vfs_file_info_unref, nullptr);
     g_list_free(list);
 }
 
-char* vfs_file_resolve_path(const char* cwd, const char* relative_path)
+char*
+vfs_file_resolve_path(const char* cwd, const char* relative_path)
 {
     GString* ret = g_string_sized_new(4096);
 

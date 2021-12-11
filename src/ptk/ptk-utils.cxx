@@ -15,7 +15,8 @@
 
 #include "ptk-utils.hxx"
 
-void ptk_show_error(GtkWindow* parent, const char* title, const char* message)
+void
+ptk_show_error(GtkWindow* parent, const char* title, const char* message)
 {
     char* msg = replace_string(message, "%", "%%", false);
     GtkWidget* dlg = gtk_message_dialog_new(parent,
@@ -32,7 +33,8 @@ void ptk_show_error(GtkWindow* parent, const char* title, const char* message)
     gtk_widget_destroy(dlg);
 }
 
-GtkBuilder* _gtk_builder_new_from_file(const char* file)
+GtkBuilder*
+_gtk_builder_new_from_file(const char* file)
 {
     char* filename = g_build_filename(PACKAGE_UI_DIR, file, nullptr);
     GtkBuilder* builder = gtk_builder_new();
@@ -42,7 +44,8 @@ GtkBuilder* _gtk_builder_new_from_file(const char* file)
 }
 
 #ifdef HAVE_NONLATIN
-void transpose_nonlatin_keypress(GdkEventKey* event)
+void
+transpose_nonlatin_keypress(GdkEventKey* event)
 {
     if (!(event && event->keyval != 0))
         return;

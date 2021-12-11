@@ -41,7 +41,8 @@ enum VFSAsyncSignal
 
 static unsigned int signals[N_SIGNALS] = {0};
 
-GType vfs_async_task_get_type(void)
+GType
+vfs_async_task_get_type(void)
 {
     static GType self_type = 0;
     if (!self_type)
@@ -66,7 +67,8 @@ GType vfs_async_task_get_type(void)
     return self_type;
 }
 
-static void vfs_async_task_class_init(VFSAsyncTaskClass* klass)
+static void
+vfs_async_task_class_init(VFSAsyncTaskClass* klass)
 {
     GObjectClass* g_object_class;
     g_object_class = G_OBJECT_CLASS(klass);
@@ -87,23 +89,27 @@ static void vfs_async_task_class_init(VFSAsyncTaskClass* klass)
                                           G_TYPE_BOOLEAN);
 }
 
-static void vfs_async_task_init(VFSAsyncTask* task)
+static void
+vfs_async_task_init(VFSAsyncTask* task)
 {
     task->lock = (GMutex*)g_malloc(sizeof(GMutex));
     g_mutex_init(task->lock);
 }
 
-void vfs_async_task_lock(VFSAsyncTask* task)
+void
+vfs_async_task_lock(VFSAsyncTask* task)
 {
     g_mutex_lock(task->lock);
 }
 
-void vfs_async_task_unlock(VFSAsyncTask* task)
+void
+vfs_async_task_unlock(VFSAsyncTask* task)
 {
     g_mutex_unlock(task->lock);
 }
 
-VFSAsyncTask* vfs_async_task_new(VFSAsyncFunc task_func, void* user_data)
+VFSAsyncTask*
+vfs_async_task_new(VFSAsyncFunc task_func, void* user_data)
 {
     VFSAsyncTask* task = (VFSAsyncTask*)g_object_new(VFS_ASYNC_TASK_TYPE, nullptr);
     task->func = task_func;
@@ -111,12 +117,14 @@ VFSAsyncTask* vfs_async_task_new(VFSAsyncFunc task_func, void* user_data)
     return (VFSAsyncTask*)task;
 }
 
-void* vfs_async_task_get_data(VFSAsyncTask* task)
+void*
+vfs_async_task_get_data(VFSAsyncTask* task)
 {
     return task->user_data;
 }
 
-static void vfs_async_task_finalize(GObject* object)
+static void
+vfs_async_task_finalize(GObject* object)
 {
     VFSAsyncTask* task;
     /* FIXME: destroying the object without calling vfs_async_task_cancel
@@ -133,14 +141,16 @@ static void vfs_async_task_finalize(GObject* object)
         (*G_OBJECT_CLASS(parent_class)->finalize)(object);
 }
 
-static bool on_idle(void* _task)
+static bool
+on_idle(void* _task)
 {
     VFSAsyncTask* task = VFS_ASYNC_TASK(_task);
     vfs_async_thread_cleanup(task, false);
     return true; /* the idle handler is removed in vfs_async_thread_cleanup. */
 }
 
-static void* vfs_async_task_thread(void* _task)
+static void*
+vfs_async_task_thread(void* _task)
 {
     VFSAsyncTask* task = VFS_ASYNC_TASK(_task);
     void* ret = task->func(task, task->user_data);
@@ -154,12 +164,14 @@ static void* vfs_async_task_thread(void* _task)
     return ret;
 }
 
-void vfs_async_task_execute(VFSAsyncTask* task)
+void
+vfs_async_task_execute(VFSAsyncTask* task)
 {
     task->thread = g_thread_new("async_task", vfs_async_task_thread, task);
 }
 
-static void vfs_async_thread_cleanup(VFSAsyncTask* task, bool finalize)
+static void
+vfs_async_thread_cleanup(VFSAsyncTask* task, bool finalize)
 {
     if (task->idle_id)
     {
@@ -178,7 +190,8 @@ static void vfs_async_thread_cleanup(VFSAsyncTask* task, bool finalize)
     }
 }
 
-void vfs_async_task_real_cancel(VFSAsyncTask* task, bool finalize)
+void
+vfs_async_task_real_cancel(VFSAsyncTask* task, bool finalize)
 {
     if (!task->thread)
         return;
@@ -205,22 +218,26 @@ void vfs_async_task_real_cancel(VFSAsyncTask* task, bool finalize)
     task->cancelled = true;
 }
 
-void vfs_async_task_cancel(VFSAsyncTask* task)
+void
+vfs_async_task_cancel(VFSAsyncTask* task)
 {
     vfs_async_task_real_cancel(task, false);
 }
 
-static void vfs_async_task_finish(VFSAsyncTask* task, bool is_cancelled)
+static void
+vfs_async_task_finish(VFSAsyncTask* task, bool is_cancelled)
 {
     /* default handler of "finish" signal. */
 }
 
-bool vfs_async_task_is_finished(VFSAsyncTask* task)
+bool
+vfs_async_task_is_finished(VFSAsyncTask* task)
 {
     return task->finished;
 }
 
-bool vfs_async_task_is_cancelled(VFSAsyncTask* task)
+bool
+vfs_async_task_is_cancelled(VFSAsyncTask* task)
 {
     return task->cancel;
 }

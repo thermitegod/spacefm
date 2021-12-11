@@ -21,7 +21,8 @@ namespace SpaceFM
       public:
         static void Init();
 
-        inline static Ref<spdlog::logger>& SpaceFMLogger()
+        inline static Ref<spdlog::logger>&
+        SpaceFMLogger()
         {
             return s_SpaceFMLogger;
         }

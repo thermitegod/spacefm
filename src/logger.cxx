@@ -15,7 +15,8 @@ namespace SpaceFM
 {
     Ref<spdlog::logger> Logger::s_SpaceFMLogger;
 
-    void Logger::Init()
+    void
+    Logger::Init()
     {
         spdlog::set_pattern("[%H:%M:%S.%e] [%^%=8l%$] [thread %t] %v");
         s_SpaceFMLogger = spdlog::stdout_color_mt("SpaceFM");

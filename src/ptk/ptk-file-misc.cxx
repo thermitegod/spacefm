@@ -122,8 +122,8 @@ struct MoveSet
 static void on_toggled(GtkMenuItem* item, MoveSet* mset);
 static char* get_template_dir();
 
-void ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files,
-                      GtkTreeView* task_view)
+void
+ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTreeView* task_view)
 {
     if (!sel_files)
         return;
@@ -167,7 +167,8 @@ void ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files,
     ptk_file_task_run(task);
 }
 
-char* get_real_link_target(const char* link_path)
+char*
+get_real_link_target(const char* link_path)
 {
     char buf[PATH_MAX + 1];
     char* target_path;
@@ -189,12 +190,14 @@ char* get_real_link_target(const char* link_path)
     return target_path;
 }
 
-static void on_help_activate(GtkMenuItem* item, MoveSet* mset)
+static void
+on_help_activate(GtkMenuItem* item, MoveSet* mset)
 {
     xset_show_help(GTK_WIDGET(mset->dlg), nullptr, mset->create_new ? "#gui-newf" : "#gui-rename");
 }
 
-static bool on_move_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
+static bool
+on_move_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
 {
     unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
                                            GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
@@ -218,7 +221,8 @@ static bool on_move_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mse
     return false;
 }
 
-static bool on_move_entry_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
+static bool
+on_move_entry_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
 {
     unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
                                            GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
@@ -242,7 +246,8 @@ static bool on_move_entry_keypress(GtkWidget* widget, GdkEventKey* event, MoveSe
     return false;
 }
 
-static void on_move_change(GtkWidget* widget, MoveSet* mset)
+static void
+on_move_change(GtkWidget* widget, MoveSet* mset)
 {
     char* name;
     char* full_name;
@@ -741,7 +746,8 @@ static void on_move_change(GtkWidget* widget, MoveSet* mset)
                                       nullptr);
 }
 
-static void select_input(GtkWidget* widget, MoveSet* mset)
+static void
+select_input(GtkWidget* widget, MoveSet* mset)
 {
     if (GTK_IS_EDITABLE(widget))
         gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
@@ -775,13 +781,15 @@ static void select_input(GtkWidget* widget, MoveSet* mset)
     }
 }
 
-static bool on_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
+static bool
+on_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
 {
     select_input(widget, mset);
     return false;
 }
 
-static bool on_button_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
+static bool
+on_button_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
 {
     if (direction == GTK_DIR_TAB_FORWARD || direction == GTK_DIR_TAB_BACKWARD)
     {
@@ -832,7 +840,8 @@ static bool on_button_focus(GtkWidget* widget, GtkDirectionType direction, MoveS
     return false;
 }
 
-static void on_revert_button_press(GtkWidget* widget, MoveSet* mset)
+static void
+on_revert_button_press(GtkWidget* widget, MoveSet* mset)
 {
     GtkWidget* temp = mset->last_widget;
     gtk_text_buffer_set_text(mset->buf_full_path, mset->new_path, -1);
@@ -841,7 +850,8 @@ static void on_revert_button_press(GtkWidget* widget, MoveSet* mset)
     gtk_widget_grab_focus(mset->last_widget);
 }
 
-static void on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
+static void
+on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
 {
     int action;
     const char* title;
@@ -987,7 +997,8 @@ enum PTKFileMiscMode
     MODE_PATH
 };
 
-static void on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
+static void
+on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
 {
     int i;
     GtkWidget** mode = (GtkWidget**)g_object_get_data(G_OBJECT(dlg), "mode");
@@ -1017,7 +1028,8 @@ static void on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
     }
 }
 
-static void on_browse_button_press(GtkWidget* widget, MoveSet* mset)
+static void
+on_browse_button_press(GtkWidget* widget, MoveSet* mset)
 {
     char* str;
     GtkTextIter iter;
@@ -1157,7 +1169,8 @@ static void on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     gtk_widget_destroy(dlg);
 }
 
-static void on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
+static void
+on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
 {
     const char* action;
     char* btn_label = nullptr;
@@ -1266,7 +1279,8 @@ static void on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
         on_toggled(nullptr, mset);
 }
 
-static void on_toggled(GtkMenuItem* item, MoveSet* mset)
+static void
+on_toggled(GtkMenuItem* item, MoveSet* mset)
 {
     bool someone_is_visible = false;
     bool opts_visible = false;
@@ -1466,13 +1480,15 @@ static void on_toggled(GtkMenuItem* item, MoveSet* mset)
     }
 }
 
-static bool on_mnemonic_activate(GtkWidget* widget, bool arg1, MoveSet* mset)
+static bool
+on_mnemonic_activate(GtkWidget* widget, bool arg1, MoveSet* mset)
 {
     select_input(widget, mset);
     return false;
 }
 
-static void on_options_button_press(GtkWidget* btn, MoveSet* mset)
+static void
+on_options_button_press(GtkWidget* btn, MoveSet* mset)
 {
     GtkWidget* popup = gtk_menu_new();
     GtkAccelGroup* accel_group = gtk_accel_group_new();
@@ -1522,7 +1538,8 @@ static void on_options_button_press(GtkWidget* btn, MoveSet* mset)
     gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
 }
 
-static bool on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
+static bool
+on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
 {
     GtkWidget* input = nullptr;
     GtkWidget* input2 = nullptr;
@@ -1657,7 +1674,8 @@ static bool on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSe
     return true;
 }
 
-static void copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
+static void
+copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkTextBuffer* buf = nullptr;
@@ -1707,7 +1725,8 @@ static void copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
     g_free(text);
 }
 
-static bool on_label_button_press(GtkWidget* widget, GdkEventButton* event, MoveSet* mset)
+static bool
+on_label_button_press(GtkWidget* widget, GdkEventButton* event, MoveSet* mset)
 {
     switch (event->type)
     {
@@ -1762,7 +1781,8 @@ static bool on_label_button_press(GtkWidget* widget, GdkEventButton* event, Move
     return true;
 }
 
-static char* get_unique_name(const char* dir, const char* ext)
+static char*
+get_unique_name(const char* dir, const char* ext)
 {
     char* name;
     char* path;
@@ -1794,7 +1814,8 @@ static char* get_unique_name(const char* dir, const char* ext)
     return path;
 }
 
-static char* get_template_dir()
+static char*
+get_template_dir()
 {
     char* templates_path = g_strdup(g_get_user_special_dir(G_USER_DIRECTORY_TEMPLATES));
 
@@ -1829,8 +1850,8 @@ static char* get_template_dir()
     return templates_path;
 }
 
-static GList* get_templates(const char* templates_dir, const char* subdir, GList* templates,
-                            bool getdir)
+static GList*
+get_templates(const char* templates_dir, const char* subdir, GList* templates, bool getdir)
 {
     char* templates_path;
 
@@ -1899,7 +1920,8 @@ static GList* get_templates(const char* templates_dir, const char* subdir, GList
     return templates;
 }
 
-static void on_template_changed(GtkWidget* widget, MoveSet* mset)
+static void
+on_template_changed(GtkWidget* widget, MoveSet* mset)
 {
     char* str = nullptr;
 
@@ -1945,7 +1967,8 @@ static void on_template_changed(GtkWidget* widget, MoveSet* mset)
     g_free(text);
 }
 
-static bool update_new_display_delayed(char* path)
+static bool
+update_new_display_delayed(char* path)
 {
     char* dir_path = g_path_get_dirname(path);
     VFSDir* vdir = vfs_dir_get_by_path_soft(dir_path);
@@ -1964,7 +1987,8 @@ static bool update_new_display_delayed(char* path)
     return false;
 }
 
-static void update_new_display(const char* path)
+static void
+update_new_display(const char* path)
 {
     // for devices like nfs, emit created so the new file is shown
     // update now
@@ -1973,9 +1997,10 @@ static void update_new_display(const char* path)
     g_timeout_add(1500, (GSourceFunc)update_new_display_delayed, g_strdup(path));
 }
 
-int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo* file,
-                    const char* dest_dir, bool clip_copy, PtkRenameMode create_new,
-                    AutoOpenCreate* auto_open)
+int
+ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo* file,
+                const char* dest_dir, bool clip_copy, PtkRenameMode create_new,
+                AutoOpenCreate* auto_open)
 {
     // TODO convert to gtk_builder (glade file)
 
@@ -3136,7 +3161,8 @@ int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileI
     return ret;
 }
 
-void ptk_show_file_properties(GtkWindow* parent_win, const char* cwd, GList* sel_files, int page)
+void
+ptk_show_file_properties(GtkWindow* parent_win, const char* cwd, GList* sel_files, int page)
 {
     GtkWidget* dlg;
 
@@ -3161,8 +3187,9 @@ void ptk_show_file_properties(GtkWindow* parent_win, const char* cwd, GList* sel
     gtk_widget_show(dlg);
 }
 
-static bool open_archives_with_handler(ParentInfo* parent, GList* sel_files, char* full_path,
-                                       VFSMimeType* mime_type)
+static bool
+open_archives_with_handler(ParentInfo* parent, GList* sel_files, char* full_path,
+                           VFSMimeType* mime_type)
 {
     if (xset_get_b("arc_def_open"))
         // user has open archives with app option enabled
@@ -3215,7 +3242,8 @@ static bool open_archives_with_handler(ParentInfo* parent, GList* sel_files, cha
     return false; // don't handle these files
 }
 
-static void open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
+static void
+open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
 {
     GList* l;
     char* str;
@@ -3340,7 +3368,8 @@ static void open_files_with_handler(ParentInfo* parent, GList* files, XSet* hand
     g_free(command);
 }
 
-static bool open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
+static bool
+open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
 {
     VFSAppDesktop* app;
     XSet* handler_set;
@@ -3399,7 +3428,8 @@ static bool open_files_with_app(ParentInfo* parent, GList* files, const char* ap
     return true;
 }
 
-static void open_files_with_each_app(void* key, void* value, void* user_data)
+static void
+open_files_with_each_app(void* key, void* value, void* user_data)
 {
     char* app_desktop = (char*)key; // is const unless handler
     GList* files = (GList*)value;
@@ -3407,7 +3437,8 @@ static void open_files_with_each_app(void* key, void* value, void* user_data)
     open_files_with_app(parent, files, app_desktop);
 }
 
-static void free_file_list_hash(void* key, void* value, void* user_data)
+static void
+free_file_list_hash(void* key, void* value, void* user_data)
 {
     const char* app_desktop = (const char*)key;
     GList* files = (GList*)value;
@@ -3415,8 +3446,9 @@ static void free_file_list_hash(void* key, void* value, void* user_data)
     g_list_free(files);
 }
 
-void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_desktop,
-                             PtkFileBrowser* file_browser, bool xforce, bool xnever)
+void
+ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_desktop,
+                        PtkFileBrowser* file_browser, bool xforce, bool xnever)
 {
     // if xnever, never execute an executable
     // if xforce, force execute of executable ignoring app_settings.no_execute
@@ -3638,7 +3670,8 @@ void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_
     g_slice_free(ParentInfo, parent);
 }
 
-void ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc callback)
+void
+ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc callback)
 {
     char* file_path;
     bool is_cut = false;
@@ -3684,7 +3717,8 @@ void ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc
     }
 }
 
-void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd, char* setname)
+void
+ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd, char* setname)
 {
     /*
      * root_copy_loc    copy to location

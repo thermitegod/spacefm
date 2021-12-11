@@ -26,7 +26,8 @@ enum PTKAppChooser
 static void load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* task);
 static void* load_all_known_apps_thread(VFSAsyncTask* task);
 
-static void init_list_view(GtkTreeView* view)
+static void
+init_list_view(GtkTreeView* view)
 {
     GtkTreeViewColumn* col = gtk_tree_view_column_new();
     GtkCellRenderer* renderer;
@@ -45,7 +46,8 @@ static void init_list_view(GtkTreeView* view)
     gtk_tree_view_set_tooltip_column(view, COL_FULL_PATH);
 }
 
-static int sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_data)
+static int
+sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_data)
 {
     char* name_a;
     int ret = 0;
@@ -64,7 +66,8 @@ static int sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, voi
     return ret;
 }
 
-static void add_list_item(GtkListStore* list, VFSAppDesktop* desktop)
+static void
+add_list_item(GtkListStore* list, VFSAppDesktop* desktop)
 {
     GtkTreeIter it;
 
@@ -114,7 +117,8 @@ static void add_list_item(GtkListStore* list, VFSAppDesktop* desktop)
         g_object_unref(icon);
 }
 
-static GtkTreeModel* create_model_from_mime_type(VFSMimeType* mime_type)
+static GtkTreeModel*
+create_model_from_mime_type(VFSMimeType* mime_type)
 {
     GtkListStore* list =
         gtk_list_store_new(N_COLS, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
@@ -143,24 +147,26 @@ static GtkTreeModel* create_model_from_mime_type(VFSMimeType* mime_type)
     return (GtkTreeModel*)list;
 }
 
-static bool on_cmdline_keypress(GtkWidget* widget, GdkEventKey* event, GtkNotebook* notebook)
+static bool
+on_cmdline_keypress(GtkWidget* widget, GdkEventKey* event, GtkNotebook* notebook)
 {
     gtk_widget_set_sensitive(GTK_WIDGET(notebook),
                              gtk_entry_get_text_length((GtkEntry*)widget) == 0);
     return false;
 }
 
-static void on_view_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColumn* col,
-                                  GtkWidget* dlg)
+static void
+on_view_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColumn* col,
+                      GtkWidget* dlg)
 {
     GtkBuilder* builder = (GtkBuilder*)g_object_get_data(G_OBJECT(dlg), "builder");
     GtkWidget* ok = (GtkWidget*)gtk_builder_get_object(builder, "okbutton");
     gtk_button_clicked(GTK_BUTTON(ok));
 }
 
-static GtkWidget* app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_type,
-                                         bool focus_all_apps, bool show_command, bool show_default,
-                                         bool dir_default)
+static GtkWidget*
+app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all_apps,
+                       bool show_command, bool show_default, bool dir_default)
 {
     /*
     focus_all_apps      Focus All Apps tab by default
@@ -241,7 +247,8 @@ static GtkWidget* app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_ty
     return dlg;
 }
 
-static void on_load_all_apps_finish(VFSAsyncTask* task, bool is_cancelled, GtkWidget* dlg)
+static void
+on_load_all_apps_finish(VFSAsyncTask* task, bool is_cancelled, GtkWidget* dlg)
 {
     GtkTreeModel* model = (GtkTreeModel*)vfs_async_task_get_data(task);
     if (is_cancelled)
@@ -267,8 +274,9 @@ static void on_load_all_apps_finish(VFSAsyncTask* task, bool is_cancelled, GtkWi
     gdk_window_set_cursor(gtk_widget_get_window(dlg), nullptr);
 }
 
-void on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, unsigned int page_num,
-                             void* user_data)
+void
+on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, unsigned int page_num,
+                        void* user_data)
 {
     GtkWidget* dlg = (GtkWidget*)user_data;
 
@@ -313,7 +321,8 @@ void on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, unsigned in
  * These two can be separated by check if the returned string is ended
  * with ".desktop" postfix.
  */
-static char* app_chooser_dialog_get_selected_app(GtkWidget* dlg)
+static char*
+app_chooser_dialog_get_selected_app(GtkWidget* dlg)
 {
     GtkBuilder* builder = (GtkBuilder*)g_object_get_data(G_OBJECT(dlg), "builder");
     GtkEntry* entry = GTK_ENTRY((GtkWidget*)gtk_builder_get_object(builder, "cmdline"));
@@ -344,14 +353,16 @@ static char* app_chooser_dialog_get_selected_app(GtkWidget* dlg)
 /*
  * Check if the user set the selected app default handler.
  */
-static bool app_chooser_dialog_get_set_default(GtkWidget* dlg)
+static bool
+app_chooser_dialog_get_set_default(GtkWidget* dlg)
 {
     GtkBuilder* builder = (GtkBuilder*)g_object_get_data(G_OBJECT(dlg), "builder");
     GtkWidget* check = (GtkWidget*)gtk_builder_get_object(builder, "set_default");
     return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check));
 }
 
-void on_browse_btn_clicked(GtkButton* button, void* user_data)
+void
+on_browse_btn_clicked(GtkButton* button, void* user_data)
 {
     GtkWidget* parent = GTK_WIDGET(user_data);
     GtkWidget* dlg = gtk_file_chooser_dialog_new(nullptr,
@@ -396,7 +407,8 @@ void on_browse_btn_clicked(GtkButton* button, void* user_data)
     gtk_widget_destroy(dlg);
 }
 
-static void on_dlg_response(GtkDialog* dlg, int id, void* user_data)
+static void
+on_dlg_response(GtkDialog* dlg, int id, void* user_data)
 {
     VFSAsyncTask* task;
     GtkAllocation allocation;
@@ -438,7 +450,8 @@ static void on_dlg_response(GtkDialog* dlg, int id, void* user_data)
     }
 }
 
-void ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
+void
+ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
 {
     // is file handler set for this type?
     char* msg;
@@ -489,8 +502,9 @@ void ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
     }
 }
 
-char* ptk_choose_app_for_mime_type(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all_apps,
-                                   bool show_command, bool show_default, bool dir_default)
+char*
+ptk_choose_app_for_mime_type(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all_apps,
+                             bool show_command, bool show_default, bool dir_default)
 {
     /*
     focus_all_apps      Focus All Apps tab by default
@@ -538,7 +552,8 @@ char* ptk_choose_app_for_mime_type(GtkWindow* parent, VFSMimeType* mime_type, bo
     return app;
 }
 
-static void load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* task)
+static void
+load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* task)
 {
     GDir* dir = g_dir_open(dir_path, 0, nullptr);
     if (dir)
@@ -587,7 +602,8 @@ static void load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAs
     }
 }
 
-static void* load_all_known_apps_thread(VFSAsyncTask* task)
+static void*
+load_all_known_apps_thread(VFSAsyncTask* task)
 {
     GtkListStore* list = GTK_LIST_STORE(vfs_async_task_get_data(task));
 

@@ -18,13 +18,15 @@ struct AutoSave
 
 AutoSave autosave = AutoSave();
 
-static void idle_save_settings(void* main_window)
+static void
+idle_save_settings(void* main_window)
 {
     // printf("AUTOSAVE *** idle_save_settings\n" );
     save_settings(nullptr);
 }
 
-static void autosave_start(bool delay)
+static void
+autosave_start(bool delay)
 {
     // printf("AUTOSAVE autosave_start\n" );
     if (!delay)
@@ -41,7 +43,8 @@ static void autosave_start(bool delay)
     }
 }
 
-static bool on_autosave_timer(void* main_window)
+static bool
+on_autosave_timer(void* main_window)
 {
     // printf("AUTOSAVE timeout\n" );
     if (autosave.timer)
@@ -54,7 +57,8 @@ static bool on_autosave_timer(void* main_window)
     return false;
 }
 
-void xset_autosave(bool force, bool delay)
+void
+xset_autosave(bool force, bool delay)
 {
     if (autosave.timer && !force)
     {
@@ -84,7 +88,8 @@ void xset_autosave(bool force, bool delay)
     }
 }
 
-void xset_autosave_cancel()
+void
+xset_autosave_cancel()
 {
     // printf("AUTOSAVE cancel\n" );
     autosave.request = false;

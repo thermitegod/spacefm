@@ -33,7 +33,8 @@ enum PTKFileArchiverExtensionsCol
     COL_HANDLER_EXTENSIONS = 1
 };
 
-static char* archive_handler_get_first_extension(XSet* handler_xset)
+static char*
+archive_handler_get_first_extension(XSet* handler_xset)
 {
     // Function deals with the possibility that a handler is responsible
     // for multiple MIME types and therefore file extensions. Functions
@@ -69,7 +70,8 @@ static char* archive_handler_get_first_extension(XSet* handler_xset)
         return g_strdup("");
 }
 
-static bool archive_handler_run_in_term(XSet* handler_xset, int operation)
+static bool
+archive_handler_run_in_term(XSet* handler_xset, int operation)
 {
     // Making sure a valid handler_xset has been passed
     if (!handler_xset)
@@ -100,7 +102,8 @@ static bool archive_handler_run_in_term(XSet* handler_xset, int operation)
     return ret == XSET_B_TRUE;
 }
 
-static void on_format_changed(GtkComboBox* combo, void* user_data)
+static void
+on_format_changed(GtkComboBox* combo, void* user_data)
 {
     // Obtaining reference to dialog
     GtkFileChooser* dlg = GTK_FILE_CHOOSER(user_data);
@@ -218,7 +221,8 @@ static void on_format_changed(GtkComboBox* combo, void* user_data)
     }
 }
 
-static char* generate_bash_error_function(bool run_in_terminal, char* parent_quote)
+static char*
+generate_bash_error_function(bool run_in_terminal, char* parent_quote)
 {
     /* When ran in a terminal, errors need to result in a pause so that
      * the user can review the situation. Even outside a terminal, IG
@@ -253,8 +257,9 @@ static char* generate_bash_error_function(bool run_in_terminal, char* parent_quo
                            finished_with_errors);
 }
 
-static char* replace_archive_subs(const char* line, const char* n, const char* N, const char* o,
-                                  const char* x, const char* g)
+static char*
+replace_archive_subs(const char* line, const char* n, const char* N, const char* o, const char* x,
+                     const char* g)
 {
     char* old_s;
     char* sub;
@@ -321,7 +326,8 @@ static char* replace_archive_subs(const char* line, const char* n, const char* N
     return s;
 }
 
-void ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char* cwd)
+void
+ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char* cwd)
 {
     /* Generating dialog - extra nullptr on the nullptr-terminated list to
      * placate an irrelevant compilation warning. See notes in
@@ -976,14 +982,16 @@ void ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const 
     ptk_file_task_run(task);
 }
 
-static void on_create_subfolder_toggled(GtkToggleButton* togglebutton, GtkWidget* chk_write)
+static void
+on_create_subfolder_toggled(GtkToggleButton* togglebutton, GtkWidget* chk_write)
 {
     bool enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(togglebutton));
     gtk_widget_set_sensitive(chk_write, enabled && geteuid() != 0);
 }
 
-void ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char* cwd,
-                               const char* dest_dir, int job, bool archive_presence_checked)
+void
+ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char* cwd,
+                          const char* dest_dir, int job, bool archive_presence_checked)
 { /* This function is also used to list the contents of archives */
     GtkWidget* dlgparent = nullptr;
     char* choose_dir = nullptr;

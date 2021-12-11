@@ -23,7 +23,8 @@
 #include "vfs-execute.hxx"
 
 #ifdef HAVE_SN
-static bool sn_timeout(void* user_data)
+static bool
+sn_timeout(void* user_data)
 {
     SnLauncherContext* ctx = (SnLauncherContext*)user_data;
     /* FIXME: startup notification, is this correct? */
@@ -33,7 +34,8 @@ static bool sn_timeout(void* user_data)
 }
 
 /* This function is taken from the code of thunar, written by Benedikt Meurer <benny@xfce.org> */
-static int tvsn_get_active_workspace_number(GdkScreen* screen)
+static int
+tvsn_get_active_workspace_number(GdkScreen* screen)
 {
     GdkWindow* root;
     unsigned long bytes_after_ret = 0;
@@ -100,9 +102,9 @@ static int tvsn_get_active_workspace_number(GdkScreen* screen)
 }
 #endif
 
-bool vfs_exec_on_screen(GdkScreen* screen, const char* work_dir, char** argv, char** envp,
-                        const char* disp_name, GSpawnFlags flags, bool use_startup_notify,
-                        GError** err)
+bool
+vfs_exec_on_screen(GdkScreen* screen, const char* work_dir, char** argv, char** envp,
+                   const char* disp_name, GSpawnFlags flags, bool use_startup_notify, GError** err)
 {
 #ifdef HAVE_SN
     SnLauncherContext* ctx = nullptr;

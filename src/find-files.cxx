@@ -125,7 +125,8 @@ static const char menu_def[] = "<ui>"
                                "</popup>"
                                "</ui>";
 
-static bool open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
+static bool
+open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
 {
     if (files)
     {
@@ -162,12 +163,14 @@ static bool open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
     return false;
 }
 
-static void open_dir(char* dir, GList* files, FMMainWindow* w)
+static void
+open_dir(char* dir, GList* files, FMMainWindow* w)
 {
     fm_main_window_add_new_tab(w, dir);
 }
 
-static void on_open_files(GAction* action, FindFile* data)
+static void
+on_open_files(GAction* action, FindFile* data)
 {
     GtkTreeModel* model;
     GtkTreeSelection* sel;
@@ -271,7 +274,8 @@ static GtkActionEntry menu_actions[] = {
      nullptr,
      G_CALLBACK(on_open_files)}};
 
-static int get_date_offset(GtkCalendar* calendar)
+static int
+get_date_offset(GtkCalendar* calendar)
 {
     /* FIXME: I think we need a better implementation for this */
     GDate* date;
@@ -295,7 +299,8 @@ static int get_date_offset(GtkCalendar* calendar)
     return ABS(offset);
 }
 
-static char** compose_command(FindFile* data)
+static char**
+compose_command(FindFile* data)
 {
     GArray* argv = g_array_sized_new(true, true, sizeof(char*), 10);
     char* arg;
@@ -492,7 +497,8 @@ static char** compose_command(FindFile* data)
     return (char**)g_array_free(argv, false);
 }
 
-static void finish_search(FindFile* data)
+static void
+finish_search(FindFile* data)
 {
     if (data->pid)
     {
@@ -512,7 +518,8 @@ static void finish_search(FindFile* data)
     gtk_widget_show(data->again_btn);
 }
 
-static void process_found_files(FindFile* data, GQueue* queue, const char* path)
+static void
+process_found_files(FindFile* data, GQueue* queue, const char* path)
 {
     char* name;
     GtkTreeIter it;
@@ -574,7 +581,8 @@ static void process_found_files(FindFile* data, GQueue* queue, const char* path)
     }
 }
 
-static void* search_thread(VFSAsyncTask* task, FindFile* data)
+static void*
+search_thread(VFSAsyncTask* task, FindFile* data)
 {
     ssize_t rlen;
     char buf[4096];
@@ -626,12 +634,14 @@ static void* search_thread(VFSAsyncTask* task, FindFile* data)
     return nullptr;
 }
 
-static void on_search_finish(VFSAsyncTask* task, bool cancelled, FindFile* data)
+static void
+on_search_finish(VFSAsyncTask* task, bool cancelled, FindFile* data)
 {
     finish_search(data);
 }
 
-static void on_start_search(GtkWidget* btn, FindFile* data)
+static void
+on_start_search(GtkWidget* btn, FindFile* data)
 {
     char** argv;
     GError* err = nullptr;
@@ -691,7 +701,8 @@ static void on_start_search(GtkWidget* btn, FindFile* data)
     g_strfreev(argv);
 }
 
-static void on_stop_search(GtkWidget* btn, FindFile* data)
+static void
+on_stop_search(GtkWidget* btn, FindFile* data)
 {
     if (data->task && !vfs_async_task_is_finished(data->task))
     {
@@ -700,7 +711,8 @@ static void on_stop_search(GtkWidget* btn, FindFile* data)
     }
 }
 
-static void on_search_again(GtkWidget* btn, FindFile* data)
+static void
+on_search_again(GtkWidget* btn, FindFile* data)
 {
     GtkAllocation allocation;
 
@@ -730,7 +742,8 @@ static void on_search_again(GtkWidget* btn, FindFile* data)
     g_object_unref(data->result_list);
 }
 
-static void menu_pos(GtkMenu* menu, int* x, int* y, bool* push_in, GtkWidget* btn)
+static void
+menu_pos(GtkMenu* menu, int* x, int* y, bool* push_in, GtkWidget* btn)
 {
     GtkAllocation allocation;
 
@@ -743,14 +756,16 @@ static void menu_pos(GtkMenu* menu, int* x, int* y, bool* push_in, GtkWidget* bt
     *push_in = false;
 }
 
-static void add_search_dir(FindFile* data, const char* path)
+static void
+add_search_dir(FindFile* data, const char* path)
 {
     GtkTreeIter it;
     gtk_list_store_append(data->places_list, &it);
     gtk_list_store_set(data->places_list, &it, 0, path, -1);
 }
 
-static void on_add_search_browse(GtkWidget* menu, FindFile* data)
+static void
+on_add_search_browse(GtkWidget* menu, FindFile* data)
 {
     GtkWidget* dlg = gtk_file_chooser_dialog_new("Select a directory",
                                                  GTK_WINDOW(data->win),
@@ -770,17 +785,20 @@ static void on_add_search_browse(GtkWidget* menu, FindFile* data)
     gtk_widget_destroy(dlg);
 }
 
-static void on_add_search_home(GtkWidget* menu, FindFile* data)
+static void
+on_add_search_home(GtkWidget* menu, FindFile* data)
 {
     add_search_dir(data, g_get_home_dir());
 }
 
-static void on_add_search_desktop(GtkWidget* menu, FindFile* data)
+static void
+on_add_search_desktop(GtkWidget* menu, FindFile* data)
 {
     add_search_dir(data, vfs_get_desktop_dir());
 }
 
-static void on_add_search_volumes(GtkWidget* menu, FindFile* data)
+static void
+on_add_search_volumes(GtkWidget* menu, FindFile* data)
 {
     const char* path;
     const GList* vols = vfs_volume_get_all_volumes();
@@ -797,7 +815,8 @@ static void on_add_search_volumes(GtkWidget* menu, FindFile* data)
     }
 }
 
-static void on_add_search_folder(GtkWidget* btn, FindFile* data)
+static void
+on_add_search_folder(GtkWidget* btn, FindFile* data)
 {
     GtkWidget* menu = gtk_menu_new();
     GtkWidget* item;
@@ -846,7 +865,8 @@ static void on_add_search_folder(GtkWidget* btn, FindFile* data)
                    gtk_get_current_event_time());
 }
 
-static void on_remove_search_folder(GtkWidget* btn, FindFile* data)
+static void
+on_remove_search_folder(GtkWidget* btn, FindFile* data)
 {
     GtkTreeIter it;
     GtkTreeSelection* sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(data->places_view));
@@ -854,7 +874,8 @@ static void on_remove_search_folder(GtkWidget* btn, FindFile* data)
         gtk_list_store_remove(data->places_list, &it);
 }
 
-static void on_date_limit_changed(GtkWidget* date_limit, FindFile* data)
+static void
+on_date_limit_changed(GtkWidget* date_limit, FindFile* data)
 {
     int sel = gtk_combo_box_get_active((GtkComboBox*)date_limit);
     bool sensitive = (sel == 5); /* date range */
@@ -862,12 +883,14 @@ static void on_date_limit_changed(GtkWidget* date_limit, FindFile* data)
     gtk_widget_set_sensitive(data->date2, sensitive);
 }
 
-static void free_data(FindFile* data)
+static void
+free_data(FindFile* data)
 {
     g_slice_free(FindFile, data);
 }
 
-static void init_search_result(FindFile* data)
+static void
+init_search_result(FindFile* data)
 {
     GtkTreeViewColumn* col;
     GtkCellRenderer* render;
@@ -934,7 +957,8 @@ static void init_search_result(FindFile* data)
     gtk_tree_view_append_column((GtkTreeView*)data->result_view, col);
 }
 
-static bool on_view_button_press(GtkTreeView* view, GdkEventButton* evt, FindFile* data)
+static bool
+on_view_button_press(GtkTreeView* view, GdkEventButton* evt, FindFile* data)
 {
     if (evt->type == GDK_BUTTON_PRESS)
     {
@@ -993,7 +1017,8 @@ static bool on_view_button_press(GtkTreeView* view, GdkEventButton* evt, FindFil
     return false;
 }
 
-void on_use_size_lower_toggled(GtkWidget* widget, FindFile* data)
+void
+on_use_size_lower_toggled(GtkWidget* widget, FindFile* data)
 {
     gtk_widget_set_sensitive(data->size_lower,
                              gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_size_lower)));
@@ -1001,7 +1026,8 @@ void on_use_size_lower_toggled(GtkWidget* widget, FindFile* data)
                              gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_size_lower)));
 }
 
-void on_use_size_upper_toggled(GtkWidget* widget, FindFile* data)
+void
+on_use_size_upper_toggled(GtkWidget* widget, FindFile* data)
 {
     gtk_widget_set_sensitive(data->size_upper,
                              gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_size_upper)));
@@ -1009,7 +1035,8 @@ void on_use_size_upper_toggled(GtkWidget* widget, FindFile* data)
                              gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_size_upper)));
 }
 
-void fm_find_files(const char** search_dirs)
+void
+fm_find_files(const char** search_dirs)
 {
     FindFile* data = g_slice_new0(FindFile);
     GtkTreeIter it;

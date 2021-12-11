@@ -56,7 +56,8 @@
 #define MAGIC_LIST     24
 #define NAMESPACE_LIST 28
 
-MimeCache* mime_cache_new(const char* file_path)
+MimeCache*
+mime_cache_new(const char* file_path)
 {
     MimeCache* cache = g_slice_new0(MimeCache);
     if (G_LIKELY(file_path))
@@ -64,7 +65,8 @@ MimeCache* mime_cache_new(const char* file_path)
     return cache;
 }
 
-static void mime_cache_unload(MimeCache* cache, bool clear)
+static void
+mime_cache_unload(MimeCache* cache, bool clear)
 {
     if (G_LIKELY(cache->buffer))
     {
@@ -79,13 +81,15 @@ static void mime_cache_unload(MimeCache* cache, bool clear)
         memset(cache, 0, sizeof(MimeCache));
 }
 
-void mime_cache_free(MimeCache* cache)
+void
+mime_cache_free(MimeCache* cache)
 {
     mime_cache_unload(cache, false);
     g_slice_free(MimeCache, cache);
 }
 
-bool mime_cache_load(MimeCache* cache, const char* file_path)
+bool
+mime_cache_load(MimeCache* cache, const char* file_path)
 {
     /* Unload old cache first if needed */
     if (file_path == cache->file_path)
@@ -180,7 +184,8 @@ bool mime_cache_load(MimeCache* cache, const char* file_path)
     return true;
 }
 
-static bool magic_rule_match(const char* buf, const char* rule, const char* data, int len)
+static bool
+magic_rule_match(const char* buf, const char* rule, const char* data, int len)
 {
     uint32_t offset = VAL32(rule, 0);
     uint32_t range = VAL32(rule, 4);
@@ -236,7 +241,8 @@ static bool magic_rule_match(const char* buf, const char* rule, const char* data
     return false;
 }
 
-static bool magic_match(const char* buf, const char* magic, const char* data, int len)
+static bool
+magic_match(const char* buf, const char* magic, const char* data, int len)
 {
     uint32_t n_rules = VAL32(magic, 8);
     uint32_t rules_off = VAL32(magic, 12);
@@ -249,7 +255,8 @@ static bool magic_match(const char* buf, const char* magic, const char* data, in
     return false;
 }
 
-const char* mime_cache_lookup_magic(MimeCache* cache, const char* data, int len)
+const char*
+mime_cache_lookup_magic(MimeCache* cache, const char* data, int len)
 {
     const char* magic = cache->magics;
 
@@ -267,8 +274,8 @@ const char* mime_cache_lookup_magic(MimeCache* cache, const char* data, int len)
     return nullptr;
 }
 
-static const char* lookup_suffix_nodes(const char* buf, const char* nodes, uint32_t n,
-                                       const char* name)
+static const char*
+lookup_suffix_nodes(const char* buf, const char* nodes, uint32_t n, const char* name)
 {
     uint32_t uchar = g_unichar_tolower(g_utf8_get_char(name));
 
@@ -325,9 +332,9 @@ static const char* lookup_suffix_nodes(const char* buf, const char* nodes, uint3
  * FIXME: 1. Should be optimized with binary search
  *        2. Should consider weight of suffix nodes
  */
-static const char* lookup_reverse_suffix_nodes(const char* buf, const char* nodes, uint32_t n,
-                                               const char* name, const char* suffix,
-                                               const char** suffix_pos)
+static const char*
+lookup_reverse_suffix_nodes(const char* buf, const char* nodes, uint32_t n, const char* name,
+                            const char* suffix, const char** suffix_pos)
 {
     const char* ret = nullptr;
     const char* cur_suffix_pos = (const char*)suffix + 1;
@@ -377,8 +384,8 @@ static const char* lookup_reverse_suffix_nodes(const char* buf, const char* node
     return ret;
 }
 
-const char* mime_cache_lookup_suffix(MimeCache* cache, const char* filename,
-                                     const char** suffix_pos)
+const char*
+mime_cache_lookup_suffix(MimeCache* cache, const char* filename, const char** suffix_pos)
 {
     const char* root = cache->suffix_roots;
     int n = cache->n_suffix_roots;
@@ -439,8 +446,8 @@ const char* mime_cache_lookup_suffix(MimeCache* cache, const char* filename,
     return ret;
 }
 
-static const char* lookup_str_in_entries(MimeCache* cache, const char* entries, int n,
-                                         const char* str)
+static const char*
+lookup_str_in_entries(MimeCache* cache, const char* entries, int n, const char* str)
 {
     int upper = n;
     int lower = 0;
@@ -466,12 +473,14 @@ static const char* lookup_str_in_entries(MimeCache* cache, const char* entries, 
     return nullptr;
 }
 
-const char* mime_cache_lookup_alias(MimeCache* cache, const char* mime_type)
+const char*
+mime_cache_lookup_alias(MimeCache* cache, const char* mime_type)
 {
     return lookup_str_in_entries(cache, cache->alias, cache->n_alias, mime_type);
 }
 
-const char* mime_cache_lookup_literal(MimeCache* cache, const char* filename)
+const char*
+mime_cache_lookup_literal(MimeCache* cache, const char* filename)
 {
     /* FIXME: weight is used in literal lookup after mime.cache v1.1.
      * However, it's poorly documented. So I've no idea how to implement this. */
@@ -506,7 +515,8 @@ const char* mime_cache_lookup_literal(MimeCache* cache, const char* filename)
     return lookup_str_in_entries(cache, cache->literals, cache->n_literals, filename);
 }
 
-const char* mime_cache_lookup_glob(MimeCache* cache, const char* filename, int* glob_len)
+const char*
+mime_cache_lookup_glob(MimeCache* cache, const char* filename, int* glob_len)
 {
     const char* entry = cache->globs;
     const char* type = nullptr;
@@ -531,7 +541,8 @@ const char* mime_cache_lookup_glob(MimeCache* cache, const char* filename, int* 
     return type;
 }
 
-const char** mime_cache_lookup_parents(MimeCache* cache, const char* mime_type)
+const char**
+mime_cache_lookup_parents(MimeCache* cache, const char* mime_type)
 {
     const char* parents = lookup_str_in_entries(cache, cache->parents, cache->n_parents, mime_type);
     if (!parents)

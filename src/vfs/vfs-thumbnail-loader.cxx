@@ -58,7 +58,8 @@ static void* thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loa
 static void thumbnail_request_free(VFSThumbnailRequest* req);
 static bool on_thumbnail_idle(VFSThumbnailLoader* loader);
 
-VFSThumbnailLoader* vfs_thumbnail_loader_new(VFSDir* dir)
+VFSThumbnailLoader*
+vfs_thumbnail_loader_new(VFSDir* dir)
 {
     VFSThumbnailLoader* loader = g_slice_new0(VFSThumbnailLoader);
     loader->idle_handler = 0;
@@ -70,7 +71,8 @@ VFSThumbnailLoader* vfs_thumbnail_loader_new(VFSDir* dir)
     return loader;
 }
 
-void vfs_thumbnail_loader_free(VFSThumbnailLoader* loader)
+void
+vfs_thumbnail_loader_free(VFSThumbnailLoader* loader)
 {
     if (loader->idle_handler)
     {
@@ -114,14 +116,16 @@ void on_load_finish( VFSAsyncTask* task, bool is_cancelled, VFSThumbnailLoader* 
 }
 #endif
 
-static void thumbnail_request_free(VFSThumbnailRequest* req)
+static void
+thumbnail_request_free(VFSThumbnailRequest* req)
 {
     vfs_file_info_unref(req->file);
     g_slice_free(VFSThumbnailRequest, req);
     /* g_debug( "FREE REQUEST!" ); */
 }
 
-static bool on_thumbnail_idle(VFSThumbnailLoader* loader)
+static bool
+on_thumbnail_idle(VFSThumbnailLoader* loader)
 {
     VFSFileInfo* file;
 
@@ -149,7 +153,8 @@ static bool on_thumbnail_idle(VFSThumbnailLoader* loader)
     return false;
 }
 
-static void* thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
+static void*
+thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
 {
     while (G_LIKELY(!vfs_async_task_is_cancelled(task)))
     {
@@ -237,7 +242,8 @@ static void* thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loa
     return nullptr;
 }
 
-void vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big)
+void
+vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big)
 {
     bool new_task = false;
 
@@ -286,7 +292,8 @@ void vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big)
         vfs_async_task_execute(loader->task);
 }
 
-void vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
+void
+vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
 {
     VFSThumbnailLoader* loader;
 
@@ -332,8 +339,8 @@ void vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
     }
 }
 
-static GdkPixbuf* _vfs_thumbnail_load(const char* file_path, const char* uri, int size,
-                                      time_t mtime)
+static GdkPixbuf*
+_vfs_thumbnail_load(const char* file_path, const char* uri, int size, time_t mtime)
 {
     char file_name[64];
     char mtime_str[64];
@@ -496,7 +503,8 @@ static GdkPixbuf* _vfs_thumbnail_load(const char* file_path, const char* uri, in
     return result;
 }
 
-GdkPixbuf* vfs_thumbnail_load_for_uri(const char* uri, int size, time_t mtime)
+GdkPixbuf*
+vfs_thumbnail_load_for_uri(const char* uri, int size, time_t mtime)
 {
     char* file = g_filename_from_uri(uri, nullptr, nullptr);
     GdkPixbuf* ret = _vfs_thumbnail_load(file, uri, size, mtime);
@@ -504,7 +512,8 @@ GdkPixbuf* vfs_thumbnail_load_for_uri(const char* uri, int size, time_t mtime)
     return ret;
 }
 
-GdkPixbuf* vfs_thumbnail_load_for_file(const char* file, int size, time_t mtime)
+GdkPixbuf*
+vfs_thumbnail_load_for_file(const char* file, int size, time_t mtime)
 {
     char* uri = g_filename_to_uri(file, nullptr, nullptr);
     GdkPixbuf* ret = _vfs_thumbnail_load(file, uri, size, mtime);
@@ -513,7 +522,8 @@ GdkPixbuf* vfs_thumbnail_load_for_file(const char* file, int size, time_t mtime)
 }
 
 /* Ensure the thumbnail dirs exist and have proper file permission. */
-void vfs_thumbnail_init()
+void
+vfs_thumbnail_init()
 {
     char* dir = g_build_filename(g_get_user_cache_dir(), "thumbnails/normal", nullptr);
 

@@ -21,7 +21,8 @@
 
 #include "vfs-utils.hxx"
 
-GdkPixbuf* vfs_load_icon(GtkIconTheme* theme, const char* icon_name, int size)
+GdkPixbuf*
+vfs_load_icon(GtkIconTheme* theme, const char* icon_name, int size)
 {
     if (!icon_name)
         return nullptr;

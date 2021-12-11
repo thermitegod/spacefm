@@ -79,7 +79,8 @@ static GObjectClass* parent_class = nullptr;
 
 static GType column_types[N_FILE_LIST_COLS];
 
-GType ptk_file_list_get_type(void)
+GType
+ptk_file_list_get_type(void)
 {
     static GType type = 0;
     if (G_UNLIKELY(!type))
@@ -123,7 +124,8 @@ GType ptk_file_list_get_type(void)
     return type;
 }
 
-static void ptk_file_list_init(PtkFileList* list)
+static void
+ptk_file_list_init(PtkFileList* list)
 {
     list->n_files = 0;
     list->files = nullptr;
@@ -133,7 +135,8 @@ static void ptk_file_list_init(PtkFileList* list)
     list->stamp = g_random_int();
 }
 
-static void ptk_file_list_class_init(PtkFileListClass* klass)
+static void
+ptk_file_list_class_init(PtkFileListClass* klass)
 {
     GObjectClass* object_class;
 
@@ -143,7 +146,8 @@ static void ptk_file_list_class_init(PtkFileListClass* klass)
     object_class->finalize = ptk_file_list_finalize;
 }
 
-static void ptk_file_list_tree_model_init(GtkTreeModelIface* iface)
+static void
+ptk_file_list_tree_model_init(GtkTreeModelIface* iface)
 {
     iface->get_flags = ptk_file_list_get_flags;
     iface->get_n_columns = ptk_file_list_get_n_columns;
@@ -170,7 +174,8 @@ static void ptk_file_list_tree_model_init(GtkTreeModelIface* iface)
     column_types[COL_FILE_INFO] = G_TYPE_POINTER;
 }
 
-static void ptk_file_list_tree_sortable_init(GtkTreeSortableIface* iface)
+static void
+ptk_file_list_tree_sortable_init(GtkTreeSortableIface* iface)
 {
     /* iface->sort_column_changed = ptk_file_list_sort_column_changed; */
     iface->get_sort_column_id = ptk_file_list_get_sort_column_id;
@@ -180,17 +185,20 @@ static void ptk_file_list_tree_sortable_init(GtkTreeSortableIface* iface)
     iface->has_default_sort_func = (gboolean(*)(GtkTreeSortable*))gtk_false;
 }
 
-static void ptk_file_list_drag_source_init(GtkTreeDragSourceIface* iface)
+static void
+ptk_file_list_drag_source_init(GtkTreeDragSourceIface* iface)
 {
     /* FIXME: Unused. Will this cause any problem? */
 }
 
-static void ptk_file_list_drag_dest_init(GtkTreeDragDestIface* iface)
+static void
+ptk_file_list_drag_dest_init(GtkTreeDragDestIface* iface)
 {
     /* FIXME: Unused. Will this cause any problem? */
 }
 
-static void ptk_file_list_finalize(GObject* object)
+static void
+ptk_file_list_finalize(GObject* object)
 {
     PtkFileList* list = (PtkFileList*)object;
 
@@ -199,7 +207,8 @@ static void ptk_file_list_finalize(GObject* object)
     (*parent_class->finalize)(object);
 }
 
-PtkFileList* ptk_file_list_new(VFSDir* dir, bool show_hidden)
+PtkFileList*
+ptk_file_list_new(VFSDir* dir, bool show_hidden)
 {
     PtkFileList* list = (PtkFileList*)g_object_new(PTK_TYPE_FILE_LIST, nullptr);
     list->show_hidden = show_hidden;
@@ -207,7 +216,8 @@ PtkFileList* ptk_file_list_new(VFSDir* dir, bool show_hidden)
     return list;
 }
 
-static void _ptk_file_list_file_changed(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
+static void
+_ptk_file_list_file_changed(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
 {
     if (!file || !dir || dir->cancel)
         return;
@@ -226,7 +236,8 @@ static void _ptk_file_list_file_changed(VFSDir* dir, VFSFileInfo* file, PtkFileL
     }
 }
 
-static void _ptk_file_list_file_created(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
+static void
+_ptk_file_list_file_created(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
 {
     ptk_file_list_file_created(dir, file, list);
 
@@ -241,7 +252,8 @@ static void _ptk_file_list_file_created(VFSDir* dir, VFSFileInfo* file, PtkFileL
     }
 }
 
-void ptk_file_list_set_dir(PtkFileList* list, VFSDir* dir)
+void
+ptk_file_list_set_dir(PtkFileList* list, VFSDir* dir)
 {
     if (list->dir == dir)
         return;
@@ -288,26 +300,29 @@ void ptk_file_list_set_dir(PtkFileList* list, VFSDir* dir)
     }
 }
 
-static GtkTreeModelFlags ptk_file_list_get_flags(GtkTreeModel* tree_model)
+static GtkTreeModelFlags
+ptk_file_list_get_flags(GtkTreeModel* tree_model)
 {
     g_return_val_if_fail(PTK_IS_FILE_LIST(tree_model), (GtkTreeModelFlags)0);
     return GtkTreeModelFlags(GTK_TREE_MODEL_LIST_ONLY | GTK_TREE_MODEL_ITERS_PERSIST);
 }
 
-static int ptk_file_list_get_n_columns(GtkTreeModel* tree_model)
+static int
+ptk_file_list_get_n_columns(GtkTreeModel* tree_model)
 {
     return N_FILE_LIST_COLS;
 }
 
-static GType ptk_file_list_get_column_type(GtkTreeModel* tree_model, int index)
+static GType
+ptk_file_list_get_column_type(GtkTreeModel* tree_model, int index)
 {
     g_return_val_if_fail(PTK_IS_FILE_LIST(tree_model), G_TYPE_INVALID);
     g_return_val_if_fail(index < G_N_ELEMENTS(column_types) && index >= 0, G_TYPE_INVALID);
     return column_types[index];
 }
 
-static gboolean ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter,
-                                       GtkTreePath* path)
+static gboolean
+ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* path)
 {
     g_assert(PTK_IS_FILE_LIST(tree_model));
     g_assert(path != nullptr);
@@ -338,7 +353,8 @@ static gboolean ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* it
     return true;
 }
 
-static GtkTreePath* ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
+static GtkTreePath*
+ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
     PtkFileList* list = PTK_FILE_LIST(tree_model);
 
@@ -354,8 +370,8 @@ static GtkTreePath* ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter
     return path;
 }
 
-static void ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column,
-                                    GValue* value)
+static void
+ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column, GValue* value)
 {
     PtkFileList* list = PTK_FILE_LIST(tree_model);
     GdkPixbuf* icon;
@@ -434,7 +450,8 @@ static void ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter,
     }
 }
 
-static gboolean ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter)
+static gboolean
+ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
     g_return_val_if_fail(PTK_IS_FILE_LIST(tree_model), false);
 
@@ -455,8 +472,8 @@ static gboolean ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* i
     return true;
 }
 
-static gboolean ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
-                                            GtkTreeIter* parent)
+static gboolean
+ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent)
 {
     g_return_val_if_fail(parent == nullptr || parent->user_data != nullptr, false);
 
@@ -479,12 +496,14 @@ static gboolean ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIte
     return true;
 }
 
-static gboolean ptk_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter)
+static gboolean
+ptk_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
     return false;
 }
 
-static int ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
+static int
+ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
     g_return_val_if_fail(PTK_IS_FILE_LIST(tree_model), -1);
     g_return_val_if_fail(iter == nullptr || iter->user_data != nullptr, false);
@@ -495,8 +514,9 @@ static int ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* 
     return 0; /* otherwise, this is easy again for a list */
 }
 
-static gboolean ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter,
-                                             GtkTreeIter* parent, int n)
+static gboolean
+ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent,
+                             int n)
 {
     g_return_val_if_fail(PTK_IS_FILE_LIST(tree_model), false);
     PtkFileList* list = PTK_FILE_LIST(tree_model);
@@ -519,14 +539,14 @@ static gboolean ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIt
     return true;
 }
 
-static gboolean ptk_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter,
-                                          GtkTreeIter* child)
+static gboolean
+ptk_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* child)
 {
     return false;
 }
 
-static gboolean ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, int* sort_column_id,
-                                                 GtkSortType* order)
+static gboolean
+ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, int* sort_column_id, GtkSortType* order)
 {
     PtkFileList* list = (PtkFileList*)sortable;
     if (sort_column_id)
@@ -536,8 +556,8 @@ static gboolean ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, int*
     return true;
 }
 
-static void ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, int sort_column_id,
-                                             GtkSortType order)
+static void
+ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, int sort_column_id, GtkSortType order)
 {
     PtkFileList* list = (PtkFileList*)sortable;
     if (list->sort_col == sort_column_id && list->sort_order == order)
@@ -548,21 +568,23 @@ static void ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, int sort
     ptk_file_list_sort(list);
 }
 
-static void ptk_file_list_set_sort_func(GtkTreeSortable* sortable, int sort_column_id,
-                                        GtkTreeIterCompareFunc sort_func, void* user_data,
-                                        GDestroyNotify destroy)
+static void
+ptk_file_list_set_sort_func(GtkTreeSortable* sortable, int sort_column_id,
+                            GtkTreeIterCompareFunc sort_func, void* user_data,
+                            GDestroyNotify destroy)
 {
     g_warning("ptk_file_list_set_sort_func: Not supported\n");
 }
 
-static void ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable,
-                                                GtkTreeIterCompareFunc sort_func, void* user_data,
-                                                GDestroyNotify destroy)
+static void
+ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompareFunc sort_func,
+                                    void* user_data, GDestroyNotify destroy)
 {
     g_warning("ptk_file_list_set_default_sort_func: Not supported\n");
 }
 
-static int ptk_file_list_compare(const void* a, const void* b, void* user_data)
+static int
+ptk_file_list_compare(const void* a, const void* b, void* user_data)
 {
     VFSFileInfo* file_a = (VFSFileInfo*)a;
     VFSFileInfo* file_b = (VFSFileInfo*)b;
@@ -650,7 +672,8 @@ static int ptk_file_list_compare(const void* a, const void* b, void* user_data)
     return list->sort_order == GTK_SORT_ASCENDING ? result : -result;
 }
 
-void ptk_file_list_sort(PtkFileList* list)
+void
+ptk_file_list_sort(PtkFileList* list)
 {
     if (list->n_files <= 1)
         return;
@@ -676,7 +699,8 @@ void ptk_file_list_sort(PtkFileList* list)
     g_free(new_order);
 }
 
-bool ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, VFSFileInfo* fi)
+bool
+ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, VFSFileInfo* fi)
 {
     GList* l;
     for (l = list->files; l; l = l->next)
@@ -694,7 +718,8 @@ bool ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, VFSFileInfo* fi
     return false;
 }
 
-void ptk_file_list_file_created(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
+void
+ptk_file_list_file_created(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
 {
     if (!list->show_hidden && vfs_file_info_get_name(file)[0] == '.')
         return;
@@ -765,7 +790,8 @@ void ptk_file_list_file_created(VFSDir* dir, VFSFileInfo* file, PtkFileList* lis
     gtk_tree_path_free(path);
 }
 
-void ptk_file_list_file_deleted(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
+void
+ptk_file_list_file_deleted(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
 {
     GList* l;
     GtkTreePath* path;
@@ -805,7 +831,8 @@ void ptk_file_list_file_deleted(VFSDir* dir, VFSFileInfo* file, PtkFileList* lis
     --list->n_files;
 }
 
-void ptk_file_list_file_changed(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
+void
+ptk_file_list_file_changed(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
 {
     if (!list->show_hidden && vfs_file_info_get_name(file)[0] == '.')
         return;
@@ -826,13 +853,15 @@ void ptk_file_list_file_changed(VFSDir* dir, VFSFileInfo* file, PtkFileList* lis
     gtk_tree_path_free(path);
 }
 
-static void on_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
+static void
+on_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
 {
     /* g_debug( "LOADED: %s", file->name ); */
     ptk_file_list_file_changed(dir, file, list);
 }
 
-void ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, int max_file_size)
+void
+ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, int max_file_size)
 {
     if (!list)
         return;

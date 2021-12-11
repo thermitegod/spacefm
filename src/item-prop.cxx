@@ -239,7 +239,8 @@ enum ItemPropItemType
     ITEM_TYPE_COMMAND
 };
 
-static char* get_element_next(char** s)
+static char*
+get_element_next(char** s)
 {
     char* ret;
 
@@ -259,7 +260,8 @@ static char* get_element_next(char** s)
     return ret;
 }
 
-static bool get_rule_next(char** s, int* sub, int* comp, char** value)
+static bool
+get_rule_next(char** s, int* sub, int* comp, char** value)
 {
     char* vs;
     vs = get_element_next(s);
@@ -279,7 +281,8 @@ static bool get_rule_next(char** s, int* sub, int* comp, char** value)
     return true;
 }
 
-int xset_context_test(XSetContext* context, char* rules, bool def_disable)
+int
+xset_context_test(XSetContext* context, char* rules, bool def_disable)
 {
     // assumes valid xset_context and rules != nullptr and no global ignore
     int i;
@@ -478,7 +481,8 @@ int xset_context_test(XSetContext* context, char* rules, bool def_disable)
     return def_disable ? CONTEXT_DISABLE : CONTEXT_SHOW;
 }
 
-static char* context_build(ContextData* ctxt)
+static char*
+context_build(ContextData* ctxt)
 {
     GtkTreeIter it;
     char* value;
@@ -515,7 +519,8 @@ static char* context_build(ContextData* ctxt)
     return new_context;
 }
 
-static void enable_context(ContextData* ctxt)
+static void
+enable_context(ContextData* ctxt)
 {
     bool is_sel =
         gtk_tree_selection_get_selected(gtk_tree_view_get_selection(GTK_TREE_VIEW(ctxt->view)),
@@ -545,12 +550,14 @@ static void enable_context(ContextData* ctxt)
     }
 }
 
-static void on_context_action_changed(GtkComboBox* box, ContextData* ctxt)
+static void
+on_context_action_changed(GtkComboBox* box, ContextData* ctxt)
 {
     enable_context(ctxt);
 }
 
-static char* context_display(int sub, int comp, char* value)
+static char*
+context_display(int sub, int comp, char* value)
 {
     char* disp;
     if (value[0] == '\0' || value[0] == ' ' || g_str_has_suffix(value, " "))
@@ -560,7 +567,8 @@ static char* context_display(int sub, int comp, char* value)
     return disp;
 }
 
-static void on_context_button_press(GtkWidget* widget, ContextData* ctxt)
+static void
+on_context_button_press(GtkWidget* widget, ContextData* ctxt)
 {
     GtkTreeIter it;
     GtkTreeSelection* tree_sel;
@@ -613,7 +621,8 @@ static void on_context_button_press(GtkWidget* widget, ContextData* ctxt)
     enable_context(ctxt);
 }
 
-static void on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
+static void
+on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
 {
     GtkTreeIter it;
     char* value;
@@ -642,8 +651,9 @@ static void on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
         gtk_label_set_text(ctxt->current_value, ctxt->context->var[sub]);
 }
 
-static void on_context_row_activated(GtkTreeView* view, GtkTreePath* tree_path,
-                                     GtkTreeViewColumn* col, ContextData* ctxt)
+static void
+on_context_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* col,
+                         ContextData* ctxt)
 {
     GtkTreeIter it;
     char* value;
@@ -668,8 +678,8 @@ static void on_context_row_activated(GtkTreeView* view, GtkTreePath* tree_path,
     // enable_context( ctxt );
 }
 
-static bool on_current_value_button_press(GtkWidget* widget, GdkEventButton* event,
-                                          ContextData* ctxt)
+static bool
+on_current_value_button_press(GtkWidget* widget, GdkEventButton* event, ContextData* ctxt)
 {
     if (event->type == GDK_2BUTTON_PRESS && event->button == 1)
     {
@@ -681,8 +691,9 @@ static bool on_current_value_button_press(GtkWidget* widget, GdkEventButton* eve
     return false;
 }
 
-static void on_context_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars,
-                                    unsigned int n_chars, void* user_data)
+static void
+on_context_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars,
+                        unsigned int n_chars, void* user_data)
 { // remove linefeeds from pasted text
     if (!strchr(gtk_entry_buffer_get_text(buf), '\n'))
         return;
@@ -692,13 +703,15 @@ static void on_context_entry_insert(GtkEntryBuffer* buf, unsigned int position, 
     g_free(new_text);
 }
 
-static bool on_context_selection_change(GtkTreeSelection* tree_sel, ContextData* ctxt)
+static bool
+on_context_selection_change(GtkTreeSelection* tree_sel, ContextData* ctxt)
 {
     enable_context(ctxt);
     return false;
 }
 
-static bool on_context_entry_keypress(GtkWidget* entry, GdkEventKey* event, ContextData* ctxt)
+static bool
+on_context_entry_keypress(GtkWidget* entry, GdkEventKey* event, ContextData* ctxt)
 {
     if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter)
     {
@@ -711,7 +724,8 @@ static bool on_context_entry_keypress(GtkWidget* entry, GdkEventKey* event, Cont
     return false;
 }
 
-static void enable_options(ContextData* ctxt)
+static void
+enable_options(ContextData* ctxt)
 {
     gtk_widget_set_sensitive(ctxt->opt_keep_term,
                              gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_terminal)));
@@ -751,7 +765,8 @@ static void enable_options(ContextData* ctxt)
     }
 }
 
-static bool is_command_script_newer(ContextData* ctxt)
+static bool
+is_command_script_newer(ContextData* ctxt)
 {
     struct stat statbuf;
 
@@ -767,7 +782,8 @@ static bool is_command_script_newer(ContextData* ctxt)
     return false;
 }
 
-void command_script_stat(ContextData* ctxt)
+void
+command_script_stat(ContextData* ctxt)
 {
     char* script = xset_custom_get_script(ctxt->set, false);
     if (script && stat(script, &ctxt->script_stat) == 0)
@@ -777,7 +793,8 @@ void command_script_stat(ContextData* ctxt)
     g_free(script);
 }
 
-void load_text_view(GtkTextView* view, const char* line)
+void
+load_text_view(GtkTextView* view, const char* line)
 {
     GtkTextBuffer* buf = gtk_text_view_get_buffer(view);
     if (!line)
@@ -792,7 +809,8 @@ void load_text_view(GtkTextView* view, const char* line)
     g_free(tabs);
 }
 
-char* get_text_view(GtkTextView* view)
+char*
+get_text_view(GtkTextView* view)
 {
     GtkTextBuffer* buf = gtk_text_view_get_buffer(view);
     GtkTextIter iter, siter;
@@ -811,7 +829,8 @@ char* get_text_view(GtkTextView* view)
     return tabs;
 }
 
-static void load_command_script(ContextData* ctxt, XSet* set)
+static void
+load_command_script(ContextData* ctxt, XSet* set)
 {
     bool modified = false;
     FILE* file = 0;
@@ -857,7 +876,8 @@ static void load_command_script(ContextData* ctxt, XSet* set)
         gtk_widget_show(ctxt->cmd_edit_root);
 }
 
-static void save_command_script(ContextData* ctxt, bool query)
+static void
+save_command_script(ContextData* ctxt, bool query)
 {
     GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->cmd_script));
     if (!gtk_text_buffer_get_modified(buf))
@@ -897,7 +917,8 @@ static void save_command_script(ContextData* ctxt, bool query)
     g_free(text);
 }
 
-static void on_script_toggled(GtkWidget* item, ContextData* ctxt)
+static void
+on_script_toggled(GtkWidget* item, ContextData* ctxt)
 {
     if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(item)))
         return;
@@ -924,7 +945,8 @@ static void on_script_toggled(GtkWidget* item, ContextData* ctxt)
     gtk_widget_grab_focus(ctxt->cmd_script);
 }
 
-static void on_cmd_opt_toggled(GtkWidget* item, ContextData* ctxt)
+static void
+on_cmd_opt_toggled(GtkWidget* item, ContextData* ctxt)
 {
     enable_options(ctxt);
     if ((item == ctxt->cmd_opt_confirm || item == ctxt->cmd_opt_input) &&
@@ -935,13 +957,15 @@ static void on_cmd_opt_toggled(GtkWidget* item, ContextData* ctxt)
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->opt_task), false);
 }
 
-static void on_ignore_context_toggled(GtkWidget* item, ContextData* ctxt)
+static void
+on_ignore_context_toggled(GtkWidget* item, ContextData* ctxt)
 {
     gtk_widget_set_sensitive(ctxt->vbox_context,
                              !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(item)));
 }
 
-static void on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
+static void
+on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
 {
     char* path;
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_line)))
@@ -1002,7 +1026,8 @@ static void on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
     g_free(path);
 }
 
-static void on_open_browser(GtkComboBox* box, ContextData* ctxt)
+static void
+on_open_browser(GtkComboBox* box, ContextData* ctxt)
 {
     char* folder = nullptr;
     int job = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
@@ -1057,7 +1082,8 @@ static void on_open_browser(GtkComboBox* box, ContextData* ctxt)
     g_free(folder);
 }
 
-static void on_key_button_clicked(GtkWidget* widget, ContextData* ctxt)
+static void
+on_key_button_clicked(GtkWidget* widget, ContextData* ctxt)
 {
     xset_set_key(ctxt->dlg, ctxt->set);
 
@@ -1071,7 +1097,8 @@ static void on_key_button_clicked(GtkWidget* widget, ContextData* ctxt)
     g_free(str);
 }
 
-static void on_type_changed(GtkComboBox* box, ContextData* ctxt)
+static void
+on_type_changed(GtkComboBox* box, ContextData* ctxt)
 {
     XSet* rset = ctxt->set;
     XSet* mset = xset_get_plugin_mirror(rset);
@@ -1185,7 +1212,8 @@ static void on_type_changed(GtkComboBox* box, ContextData* ctxt)
     }
 }
 
-static void on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
+static void
+on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
 {
     int job = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->item_type));
     if (job == ITEM_TYPE_BOOKMARK)
@@ -1253,7 +1281,8 @@ static void on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
     }
 }
 
-static void replace_item_props(ContextData* ctxt)
+static void
+replace_item_props(ContextData* ctxt)
 {
     int x;
     XSet* rset = ctxt->set;
@@ -1425,7 +1454,8 @@ static void replace_item_props(ContextData* ctxt)
                gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->ignore_context)));
 }
 
-static void on_script_popup(GtkTextView* input, GtkMenu* menu, void* user_data)
+static void
+on_script_popup(GtkTextView* input, GtkMenu* menu, void* user_data)
 {
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     XSet* set = xset_get("separator");
@@ -1436,15 +1466,17 @@ static void on_script_popup(GtkTextView* input, GtkMenu* menu, void* user_data)
     gtk_widget_show_all(GTK_WIDGET(menu));
 }
 
-static bool delayed_focus(GtkWidget* widget)
+static bool
+delayed_focus(GtkWidget* widget)
 {
     if (GTK_IS_WIDGET(widget))
         gtk_widget_grab_focus(widget);
     return false;
 }
 
-static void on_prop_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page,
-                                         unsigned int page_num, ContextData* ctxt)
+static void
+on_prop_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, unsigned int page_num,
+                             ContextData* ctxt)
 {
     GtkWidget* widget;
     switch (page_num)
@@ -1462,7 +1494,8 @@ static void on_prop_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page,
     g_idle_add((GSourceFunc)delayed_focus, widget);
 }
 
-static void on_icon_choose_button_clicked(GtkWidget* widget, ContextData* ctxt)
+static void
+on_icon_choose_button_clicked(GtkWidget* widget, ContextData* ctxt)
 {
     // get current icon
     char* new_icon;
@@ -1477,12 +1510,14 @@ static void on_icon_choose_button_clicked(GtkWidget* widget, ContextData* ctxt)
     }
 }
 
-static void on_entry_activate(GtkWidget* entry, ContextData* ctxt)
+static void
+on_entry_activate(GtkWidget* entry, ContextData* ctxt)
 {
     gtk_button_clicked(GTK_BUTTON(ctxt->btn_ok));
 }
 
-static bool on_target_keypress(GtkWidget* widget, GdkEventKey* event, ContextData* ctxt)
+static bool
+on_target_keypress(GtkWidget* widget, GdkEventKey* event, ContextData* ctxt)
 {
     if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter)
     {
@@ -1492,7 +1527,8 @@ static bool on_target_keypress(GtkWidget* widget, GdkEventKey* event, ContextDat
     return false;
 }
 
-static bool on_dlg_keypress(GtkWidget* widget, GdkEventKey* event, ContextData* ctxt)
+static bool
+on_dlg_keypress(GtkWidget* widget, GdkEventKey* event, ContextData* ctxt)
 {
     unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
                                            GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
@@ -1505,7 +1541,8 @@ static bool on_dlg_keypress(GtkWidget* widget, GdkEventKey* event, ContextData* 
     return false;
 }
 
-void xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
+void
+xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
 {
     GtkTreeViewColumn* col;
     GtkCellRenderer* renderer;
