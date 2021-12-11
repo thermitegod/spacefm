@@ -47,7 +47,7 @@ enum VFSThumbnailSize
     N_LOAD_TYPES
 };
 
-struct ThumbnailRequest
+struct VFSThumbnailRequest
 {
     int n_requests[N_LOAD_TYPES];
     VFSFileInfo* file;
@@ -55,7 +55,7 @@ struct ThumbnailRequest
 
 static void* thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader);
 // static void on_load_finish(VFSAsyncTask* task, bool is_cancelled, VFSThumbnailLoader* loader);
-static void thumbnail_request_free(ThumbnailRequest* req);
+static void thumbnail_request_free(VFSThumbnailRequest* req);
 static bool on_thumbnail_idle(VFSThumbnailLoader* loader);
 
 VFSThumbnailLoader* vfs_thumbnail_loader_new(VFSDir* dir)
@@ -114,10 +114,10 @@ void on_load_finish( VFSAsyncTask* task, bool is_cancelled, VFSThumbnailLoader* 
 }
 #endif
 
-static void thumbnail_request_free(ThumbnailRequest* req)
+static void thumbnail_request_free(VFSThumbnailRequest* req)
 {
     vfs_file_info_unref(req->file);
-    g_slice_free(ThumbnailRequest, req);
+    g_slice_free(VFSThumbnailRequest, req);
     /* g_debug( "FREE REQUEST!" ); */
 }
 
@@ -154,7 +154,7 @@ static void* thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loa
     while (G_LIKELY(!vfs_async_task_is_cancelled(task)))
     {
         vfs_async_task_lock(task);
-        ThumbnailRequest* req = (ThumbnailRequest*)g_queue_pop_head(loader->queue);
+        VFSThumbnailRequest* req = (VFSThumbnailRequest*)g_queue_pop_head(loader->queue);
         vfs_async_task_unlock(task);
         if (G_UNLIKELY(!req))
             break;
@@ -258,22 +258,22 @@ void vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big)
     vfs_async_task_lock(loader->task);
 
     /* Check if the request is already scheduled */
-    ThumbnailRequest* req;
+    VFSThumbnailRequest* req;
     GList* l;
     for (l = loader->queue->head; l; l = l->next)
     {
-        req = (ThumbnailRequest*)l->data;
+        req = (VFSThumbnailRequest*)l->data;
         /* If file with the same name is already in our queue */
         if (req->file == file || !strcmp(req->file->name, file->name))
             break;
     }
     if (l)
     {
-        req = (ThumbnailRequest*)l->data;
+        req = (VFSThumbnailRequest*)l->data;
     }
     else
     {
-        req = g_slice_new0(ThumbnailRequest);
+        req = g_slice_new0(VFSThumbnailRequest);
         req->file = vfs_file_info_ref(file);
         g_queue_push_tail(dir->thumbnail_loader->queue, req);
     }
@@ -297,7 +297,7 @@ void vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
         GList* l;
         for (l = loader->queue->head; l;)
         {
-            ThumbnailRequest* req = (ThumbnailRequest*)l->data;
+            VFSThumbnailRequest* req = (VFSThumbnailRequest*)l->data;
             --req->n_requests[is_big ? LOAD_BIG_THUMBNAIL : LOAD_SMALL_THUMBNAIL];
 
             if (req->n_requests[0] <= 0 && req->n_requests[1] <= 0) /* nobody needs this */
