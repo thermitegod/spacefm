@@ -855,7 +855,7 @@ static void check_locale()
     if (G_UNLIKELY(!name && !(!strcmp(name, "C") || !strcmp(name, "C.UTF-8"))))
     {
         fprintf(stderr, "Non-C locale detected. This is not supported.\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 
