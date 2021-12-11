@@ -16,7 +16,7 @@
 
 #include <gtk/gtk.h>
 
-typedef enum VFSFileInfoFlag
+enum VFSFileInfoFlag
 {
     VFS_FILE_INFO_NONE = 0,
     VFS_FILE_INFO_HOME_DIR = (1 << 0),
@@ -25,7 +25,7 @@ typedef enum VFSFileInfoFlag
     VFS_FILE_INFO_MOUNT_POINT = (1 << 3),
     VFS_FILE_INFO_REMOTE = (1 << 4),
     VFS_FILE_INFO_VIRTUAL = (1 << 5)
-} VFSFileInfoFlag; /* For future use, not all supported now */
+}; /* For future use, not all supported now */
 
 typedef struct VFSFileInfo
 {

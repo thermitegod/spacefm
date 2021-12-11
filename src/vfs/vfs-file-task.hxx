@@ -15,7 +15,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-typedef enum VFSFileTaskType
+enum VFSFileTaskType
 {
     VFS_FILE_TASK_MOVE = 0,
     VFS_FILE_TASK_COPY,
@@ -25,9 +25,9 @@ typedef enum VFSFileTaskType
                                 * so put them together to reduce duplicated disk I/O */
     VFS_FILE_TASK_EXEC,        // MOD
     VFS_FILE_TASK_LAST
-} VFSFileTaskType;
+};
 
-typedef enum ChmodActionType
+enum ChmodActionType
 {
     OWNER_R = 0,
     OWNER_W,
@@ -42,11 +42,11 @@ typedef enum ChmodActionType
     SET_GID,
     STICKY,
     N_CHMOD_ACTIONS
-} ChmodActionType;
+};
 
 extern const mode_t chmod_flags[];
 
-typedef enum VFSFileTaskState
+enum VFSFileTaskState
 {
     VFS_FILE_TASK_RUNNING,
     VFS_FILE_TASK_SIZE_TIMEOUT,
@@ -55,9 +55,9 @@ typedef enum VFSFileTaskState
     VFS_FILE_TASK_PAUSE,
     VFS_FILE_TASK_QUEUE,
     VFS_FILE_TASK_FINISH
-} VFSFileTaskState;
+};
 
-typedef enum VFSFileTaskOverwriteMode
+enum VFSFileTaskOverwriteMode
 {
     // do not reposition first four values
     VFS_FILE_TASK_OVERWRITE,     /* Overwrite current dest file / Ask */
@@ -66,13 +66,13 @@ typedef enum VFSFileTaskOverwriteMode
     VFS_FILE_TASK_AUTO_RENAME,   /* Assign a new unique name */
     VFS_FILE_TASK_SKIP,          /* Don't overwrite current file */
     VFS_FILE_TASK_RENAME         /* Rename file */
-} VFSFileTaskOverwriteMode;
+};
 
-typedef enum VFSExecType
+enum VFSExecType
 {
     VFS_EXEC_NORMAL,
     VFS_EXEC_CUSTOM,
-} VFSExecType;
+};
 
 typedef struct VFSFileTask VFSFileTask;
 

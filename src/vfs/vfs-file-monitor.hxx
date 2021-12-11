@@ -23,12 +23,12 @@
 #include <unistd.h>
 #include <sys/inotify.h>
 
-typedef enum VFSFileMonitorEvent
+enum VFSFileMonitorEvent
 {
     VFS_FILE_MONITOR_CREATE,
     VFS_FILE_MONITOR_DELETE,
     VFS_FILE_MONITOR_CHANGE
-} VFSFileMonitorEvent;
+};
 
 typedef struct VFSFileMonitor
 {

@@ -14,7 +14,7 @@
 
 #include "settings.hxx"
 
-typedef enum VFSVolumeState
+enum VFSVolumeState
 {
     VFS_VOLUME_ADDED,
     VFS_VOLUME_REMOVED,
@@ -22,7 +22,7 @@ typedef enum VFSVolumeState
     VFS_VOLUME_UNMOUNTED, /* Not implemented */
     VFS_VOLUME_EJECT,
     VFS_VOLUME_CHANGED
-} VFSVolumeState;
+};
 
 typedef struct VFSVolume VFSVolume;
 

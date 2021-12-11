@@ -40,7 +40,7 @@
 // bool startup_mode = true;  //MOD
 // bool design_mode = true;  //MOD
 
-typedef enum SocketEvent
+enum SocketEvent
 {
     CMD_OPEN = 1,
     CMD_OPEN_TAB,
@@ -58,7 +58,7 @@ typedef enum SocketEvent
     CMD_PANEL4,
     CMD_NO_TABS,
     CMD_SOCKET_CMD,
-} SocketEvent;
+};
 
 static bool folder_initialized = false;
 static bool daemon_initialized = false;

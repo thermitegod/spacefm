@@ -15,14 +15,14 @@
     (G_TYPE_CHECK_INSTANCE_CAST((obj), PTK_TYPE_FILE_BROWSER, PtkFileBrowser))
 #define PTK_IS_FILE_BROWSER(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_FILE_BROWSER))
 
-typedef enum PtkFBViewMode
+enum PtkFBViewMode
 {
     PTK_FB_ICON_VIEW,
     PTK_FB_LIST_VIEW,
     PTK_FB_COMPACT_VIEW
-} PtkFBViewMode;
+};
 
-typedef enum PtkFBSortOrder
+enum PtkFBSortOrder
 {
     PTK_FB_SORT_BY_NAME = 0,
     PTK_FB_SORT_BY_SIZE,
@@ -30,16 +30,16 @@ typedef enum PtkFBSortOrder
     PTK_FB_SORT_BY_TYPE,
     PTK_FB_SORT_BY_PERM,
     PTK_FB_SORT_BY_OWNER
-} PtkFBSortOrder;
+};
 
-typedef enum PtkFBChdirMode
+enum PtkFBChdirMode
 {
     PTK_FB_CHDIR_NORMAL,
     PTK_FB_CHDIR_ADD_HISTORY,
     PTK_FB_CHDIR_NO_HISTORY,
     PTK_FB_CHDIR_BACK,
     PTK_FB_CHDIR_FORWARD
-} PtkFBChdirMode;
+};
 
 typedef struct PtkFileBrowser
 {
@@ -126,14 +126,14 @@ typedef struct PtkFileBrowser
     char* status_bar_custom;
 } PtkFileBrowser;
 
-typedef enum PtkOpenAction
+enum PtkOpenAction
 {
     PTK_OPEN_DIR,
     PTK_OPEN_NEW_TAB,
     PTK_OPEN_NEW_WINDOW,
     PTK_OPEN_TERMINAL,
     PTK_OPEN_FILE
-} PtkOpenAction;
+};
 
 typedef struct PtkFileBrowserClass
 {
