@@ -31,14 +31,14 @@
 #include "xxhash.h"
 #endif
 
-typedef struct VFSThumbnailLoader
+struct VFSThumbnailLoader
 {
     VFSDir* dir;
     GQueue* queue;
     VFSAsyncTask* task;
     unsigned int idle_handler;
     GQueue* update_queue;
-} VFSThumbnailLoader;
+};
 
 enum VFSThumbnailSize
 {
@@ -47,11 +47,11 @@ enum VFSThumbnailSize
     N_LOAD_TYPES
 };
 
-typedef struct ThumbnailRequest
+struct ThumbnailRequest
 {
     int n_requests[N_LOAD_TYPES];
     VFSFileInfo* file;
-} ThumbnailRequest;
+};
 
 static void* thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader);
 // static void on_load_finish(VFSAsyncTask* task, bool is_cancelled, VFSThumbnailLoader* loader);

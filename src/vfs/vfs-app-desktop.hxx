@@ -15,7 +15,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-typedef struct VFSAppDesktop
+struct VFSAppDesktop
 {
     char* file_name;
     char* disp_name;
@@ -30,7 +30,7 @@ typedef struct VFSAppDesktop
 
     /* <private> */
     int n_ref;
-} VFSAppDesktop;
+};
 
 /*
  * If file_name is not a full path, this function searches default paths

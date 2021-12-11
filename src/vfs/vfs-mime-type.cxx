@@ -31,11 +31,11 @@ static unsigned int theme_change_notify = 0;
 
 static void on_icon_theme_changed(GtkIconTheme* icon_theme, void* user_data);
 
-typedef struct VFSMimeReloadCbEnt
+struct VFSMimeReloadCbEnt
 {
     GFreeFunc cb;
     void* user_data;
-} VFSMimeReloadCbEnt;
+};
 
 static bool vfs_mime_type_reload(void* user_data)
 {

@@ -30,14 +30,14 @@ enum VFSFileMonitorEvent
     VFS_FILE_MONITOR_CHANGE
 };
 
-typedef struct VFSFileMonitor
+struct VFSFileMonitor
 {
     char* path;
     /*<private>*/
     int n_ref;
     int wd;
     GArray* callbacks;
-} VFSFileMonitor;
+};
 
 /* Callback function which will be called when monitored events happen
  *  NOTE: GDK_THREADS_ENTER and GDK_THREADS_LEAVE might be needed

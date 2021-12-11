@@ -41,7 +41,7 @@ enum PtkFBChdirMode
     PTK_FB_CHDIR_FORWARD
 };
 
-typedef struct PtkFileBrowser
+struct PtkFileBrowser
 {
     /* parent class */
     GtkVBox parent;
@@ -124,7 +124,7 @@ typedef struct PtkFileBrowser
     GtkTreeIter book_iter_inserted;
     char* select_path;
     char* status_bar_custom;
-} PtkFileBrowser;
+};
 
 enum PtkOpenAction
 {
@@ -135,7 +135,7 @@ enum PtkOpenAction
     PTK_OPEN_FILE
 };
 
-typedef struct PtkFileBrowserClass
+struct PtkFileBrowserClass
 {
     GtkPanedClass parent;
 
@@ -147,7 +147,7 @@ typedef struct PtkFileBrowserClass
     void (*content_change)(PtkFileBrowser* file_browser);
     void (*sel_change)(PtkFileBrowser* file_browser);
     void (*pane_mode_change)(PtkFileBrowser* file_browser);
-} PtkFileBrowserClass;
+};
 
 GType ptk_file_browser_get_type(void);
 

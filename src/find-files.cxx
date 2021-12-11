@@ -53,7 +53,7 @@ enum FindFilesCol
     N_RES_COLS
 };
 
-typedef struct FindFile
+struct FindFile
 {
     GtkWidget* win;
     GtkWidget* search_criteria;
@@ -110,13 +110,13 @@ typedef struct FindFile
     int stdo;
 
     VFSAsyncTask* task;
-} FindFile;
+};
 
-typedef struct FoundFile
+struct FoundFile
 {
     VFSFileInfo* fi;
     char* dir_path;
-} FoundFile;
+};
 
 static const char menu_def[] = "<ui>"
                                "<popup name=\"Popup\">"

@@ -15,11 +15,11 @@
 #include <gtk/gtk.h>
 #include "ptk-file-browser.hxx"
 
-typedef struct EntryData
+struct EntryData
 {
     PtkFileBrowser* browser;
     unsigned int seek_timer;
-} EntryData;
+};
 
 GtkWidget* ptk_path_entry_new(PtkFileBrowser* file_browser);
 void ptk_path_entry_help(GtkWidget* widget, GtkWidget* parent);

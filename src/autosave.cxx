@@ -10,11 +10,11 @@
 
 static bool on_autosave_timer(void* main_window);
 
-typedef struct AutoSave
+struct AutoSave
 {
     size_t timer;
     bool request;
-} AutoSave;
+};
 
 AutoSave autosave = AutoSave();
 

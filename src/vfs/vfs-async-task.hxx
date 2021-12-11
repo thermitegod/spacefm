@@ -27,10 +27,10 @@
 #define VFS_ASYNC_TASK_TYPE (vfs_async_task_get_type())
 #define VFS_ASYNC_TASK(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), VFS_ASYNC_TASK_TYPE, VFSAsyncTask))
 
-typedef struct VFSAsyncTask VFSAsyncTask;
+struct VFSAsyncTask;
 typedef void* (*VFSAsyncFunc)(VFSAsyncTask*, void*);
 
-typedef struct VFSAsyncTask
+struct VFSAsyncTask
 {
     GObject parent;
     VFSAsyncFunc func;
@@ -44,13 +44,13 @@ typedef struct VFSAsyncTask
     bool cancel : 1;
     bool cancelled : 1;
     bool finished : 1;
-} VFSAsyncTask;
+};
 
-typedef struct VFSAsyncTaskClass
+struct VFSAsyncTaskClass
 {
     GObjectClass parent_class;
     void (*finish)(VFSAsyncTask* task, bool is_cancelled);
-} VFSAsyncTaskClass;
+};
 
 GType vfs_async_task_get_type(void);
 VFSAsyncTask* vfs_async_task_new(VFSAsyncFunc task_func, void* user_data);

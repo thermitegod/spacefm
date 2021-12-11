@@ -22,7 +22,7 @@
 // This limits the small icon size for side panes and task list
 #define PANE_MAX_ICON_SIZE 48
 
-typedef struct AppSettings
+struct AppSettings
 {
     /* General Settings */
     bool show_thumbnail;
@@ -55,11 +55,11 @@ typedef struct AppSettings
 
     /* Units */
     bool use_si_prefix;
-} AppSettings;
+};
 
 extern AppSettings app_settings;
 
-typedef struct ConfigSettings
+struct ConfigSettings
 {
     /* su */
     char* terminal_su;
@@ -74,7 +74,7 @@ typedef struct ConfigSettings
     const char* font_general; // NOOP
 
     bool git_backed_settings;
-} ConfigSettings;
+};
 
 extern ConfigSettings config_settings;
 
@@ -258,7 +258,7 @@ enum PluginUse
     PLUGIN_USE_NORMAL
 };
 
-typedef struct XSet
+struct XSet
 {
     char* name;
     char b; // tri-state 0=unset(false) 1=true 2=false
@@ -309,11 +309,10 @@ typedef struct XSet
     bool plugin_top;
     char* plug_name;
     char* plug_dir;
-
-} XSet;
+};
 
 // cache these for speed in event handlers
-typedef struct EventHandler
+struct EventHandler
 {
     XSet* win_focus;
     XSet* win_move;
@@ -328,18 +327,18 @@ typedef struct EventHandler
     XSet* tab_focus;
     XSet* tab_close;
     XSet* device;
-} EventHandler;
+};
 
 extern EventHandler event_handler;
 
 // instance-wide command history
 extern GList* xset_cmd_history;
 
-typedef struct XSetContext
+struct XSetContext
 {
     bool valid;
     char* var[40];
-} XSetContext;
+};
 
 void xset_set_window_icon(GtkWindow* win);
 XSet* xset_get(const char* name);

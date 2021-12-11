@@ -16,7 +16,7 @@
 
 #include "ptk-dir-tree.hxx"
 
-typedef struct PtkDirTreeNode
+struct PtkDirTreeNode
 {
     VFSFileInfo* file;
     PtkDirTreeNode* children;
@@ -28,7 +28,7 @@ typedef struct PtkDirTreeNode
     PtkDirTreeNode* prev;
     PtkDirTreeNode* last;
     PtkDirTree* tree; /* FIXME: This is a waste of memory :-( */
-} PtkDirTreeNode;
+};
 
 static void ptk_dir_tree_init(PtkDirTree* tree);
 

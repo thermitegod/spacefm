@@ -36,7 +36,7 @@ static const char* chmod_names[] = {"owner_r",
                                     "set_gid",
                                     "sticky"};
 
-typedef struct FilePropertiesDialogData
+struct FilePropertiesDialogData
 {
     char* dir_path;
     GList* file_list;
@@ -67,7 +67,7 @@ typedef struct FilePropertiesDialogData
     GThread* calc_size_thread;
     unsigned int update_label_timer;
     GtkWidget* recurse;
-} FilePropertiesDialogData;
+};
 
 static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data);
 

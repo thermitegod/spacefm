@@ -21,7 +21,7 @@ enum MainWindowPanel
     PANEL_BOTH
 };
 
-typedef struct FMMainWindow
+struct FMMainWindow
 {
     /* Private */
     GtkWindow parent;
@@ -64,13 +64,12 @@ typedef struct FMMainWindow
     bool maximized;
     bool opened_maximized;
     bool fullscreen;
-} FMMainWindow;
+};
 
-typedef struct FMMainWindowClass
+struct FMMainWindowClass
 {
     GtkWindowClass parent;
-
-} FMMainWindowClass;
+};
 
 GType fm_main_window_get_type(void);
 

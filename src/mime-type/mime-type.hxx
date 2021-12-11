@@ -37,9 +37,6 @@ extern const char xdg_mime_type_executable[];
 extern const char xdg_mime_type_plain_text[];
 #define XDG_MIME_TYPE_PLAIN_TEXT xdg_mime_type_plain_text
 
-/* Opaque data structure storing information of recognized mime-types */
-// typedef struct MimeInfo MimeInfo;
-
 /* Initialize the library */
 void mime_type_init();
 

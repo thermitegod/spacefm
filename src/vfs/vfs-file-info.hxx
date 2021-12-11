@@ -27,7 +27,7 @@ enum VFSFileInfoFlag
     VFS_FILE_INFO_VIRTUAL = (1 << 5)
 }; /* For future use, not all supported now */
 
-typedef struct VFSFileInfo
+struct VFSFileInfo
 {
     /* struct stat file_stat; */
     /* Only use some members of struct stat to reduce memory usage */
@@ -56,7 +56,7 @@ typedef struct VFSFileInfo
     VFSFileInfoFlag flags; /* if it's a special file */
     /*<private>*/
     int n_ref;
-} VFSFileInfo;
+};
 
 void vfs_file_info_set_utf8_filename(bool is_utf8);
 

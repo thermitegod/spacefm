@@ -74,16 +74,16 @@ enum VFSExecType
     VFS_EXEC_CUSTOM,
 };
 
-typedef struct VFSFileTask VFSFileTask;
+struct VFSFileTask;
 
 typedef bool (*VFSFileTaskStateCallback)(VFSFileTask*, VFSFileTaskState state, void* state_data,
                                          void* user_data);
 
-typedef struct VFSFileTask
+struct VFSFileTask
 {
     VFSFileTaskType type;
     GList* src_paths; /* All source files. This list will be freed
-                                 after file operation is completed. */
+                       *after file operation is completed. */
     char* dest_dir;   /* Destinaton directory */
     bool avoid_changes;
     GSList* devs;
@@ -167,7 +167,7 @@ typedef struct VFSFileTask
     void* exec_set;
     GCond* exec_cond;
     void* exec_ptask;
-} VFSFileTask;
+};
 
 /*
  * source_files sould be a newly allocated list, and it will be

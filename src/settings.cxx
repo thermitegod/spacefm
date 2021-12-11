@@ -2878,14 +2878,14 @@ XSet* xset_import_plugin(const char* plug_dir, int* use)
     return plugin_good ? rset : nullptr;
 }
 
-typedef struct PluginData
+struct PluginData
 {
     FMMainWindow* main_window;
     GtkWidget* handler_dlg;
     char* plug_dir;
     XSet* set;
     int job;
-} PluginData;
+};
 
 static void on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
 {

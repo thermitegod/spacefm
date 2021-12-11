@@ -23,7 +23,7 @@
 
 #include <glib.h>
 
-typedef struct MimeCache
+struct MimeCache
 {
     char* file_path;
     bool has_reverse_suffix : 1; /* since mime.cache v1.1, shared mime info v0.4 */
@@ -49,7 +49,7 @@ typedef struct MimeCache
     uint32_t n_magics;
     uint32_t magic_max_extent;
     const char* magics;
-} MimeCache;
+};
 
 MimeCache* mime_cache_new(const char* file_path);
 bool mime_cache_load(MimeCache* cache, const char* file_path);

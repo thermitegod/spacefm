@@ -25,11 +25,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct VFSFileMonitorCallbackEntry
+struct VFSFileMonitorCallbackEntry
 {
     VFSFileMonitorCallback callback;
     void* user_data;
-} VFSFileMonitorCallbackEntry;
+};
 
 static GHashTable* monitor_hash = nullptr;
 static GIOChannel* fam_io_channel = nullptr;

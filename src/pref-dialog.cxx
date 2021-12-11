@@ -21,7 +21,7 @@
 #include "ptk/ptk-utils.hxx"
 #include "ptk/ptk-location-view.hxx"
 
-typedef struct FMPrefDlg
+struct FMPrefDlg
 {
     GtkWidget* dlg;
     GtkWidget* notebook;
@@ -55,7 +55,7 @@ typedef struct FMPrefDlg
     GtkWidget* editor_terminal;
     GtkWidget* root_editor;
     GtkWidget* root_editor_terminal;
-} FMPrefDlg;
+};
 
 static FMPrefDlg* data = nullptr;
 static const int tool_icon_sizes[] = {0,

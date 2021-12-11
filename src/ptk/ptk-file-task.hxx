@@ -26,7 +26,7 @@ enum PTKFileTaskPtaskError
     PTASK_ERROR_CONT
 };
 
-typedef struct PtkFileTask
+struct PtkFileTask
 {
     VFSFileTask* task;
 
@@ -82,7 +82,7 @@ typedef struct PtkFileTask
     char* dsp_curest;
     char* dsp_avgspeed;
     char* dsp_avgest;
-} PtkFileTask;
+};
 
 void ptk_file_task_lock(PtkFileTask* ptask);
 void ptk_file_task_unlock(PtkFileTask* ptask);

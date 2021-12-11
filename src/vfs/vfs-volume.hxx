@@ -24,7 +24,7 @@ enum VFSVolumeState
     VFS_VOLUME_CHANGED
 };
 
-typedef struct VFSVolume VFSVolume;
+struct VFSVolume;
 
 typedef void (*VFSVolumeCallback)(VFSVolume* vol, VFSVolumeState state, void* user_data);
 
@@ -52,7 +52,7 @@ bool vfs_volume_is_mounted(VFSVolume* vol);
 
 /* HAL build also needs this for file handler
  * ptk_location_view_create_mount_point() */
-typedef struct netmount_t
+struct netmount_t
 {
     char* url;
     char* fstype;
@@ -62,7 +62,7 @@ typedef struct netmount_t
     char* user;
     char* pass;
     char* path;
-} netmount_t;
+};
 
 enum VFSVolumeDeviceType
 {
@@ -71,7 +71,7 @@ enum VFSVolumeDeviceType
     DEVICE_TYPE_OTHER // eg fuseiso mounted file
 };
 
-typedef struct VFSVolume
+struct VFSVolume
 {
     dev_t devnum;
     int device_type;
@@ -100,7 +100,7 @@ typedef struct VFSVolume
     bool inhibit_auto : 1;
     time_t automount_time;
     void* open_main_window;
-} VFSVolume;
+};
 
 char* vfs_volume_get_mount_command(VFSVolume* vol, char* default_options, bool* run_in_terminal);
 char* vfs_volume_get_mount_options(VFSVolume* vol, char* options);

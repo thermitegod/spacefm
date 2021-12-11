@@ -37,24 +37,24 @@ static bool vfs_volume_nonblock_removed(dev_t devnum);
 static void call_callbacks(VFSVolume* vol, VFSVolumeState state);
 static void unmount_if_mounted(VFSVolume* vol);
 
-typedef struct VFSVolumeCallbackData
+struct VFSVolumeCallbackData
 {
     VFSVolumeCallback cb;
     void* user_data;
-} VFSVolumeCallbackData;
+};
 
 static GList* volumes = nullptr;
 static GArray* callbacks = nullptr;
 static bool global_inhibit_auto = false;
 
-typedef struct devmount_t
+struct devmount_t
 {
     unsigned int major;
     unsigned int minor;
     char* mount_points;
     char* fstype;
     GList* mounts;
-} devmount_t;
+};
 
 static GList* devmounts = nullptr;
 static struct udev* udev = nullptr;
@@ -66,7 +66,7 @@ static GIOChannel* mchannel = nullptr;
  * device info
  ************************************************************************** */
 
-typedef struct device_t
+struct device_t
 {
     struct udev_device* udevice;
     dev_t devnum;
@@ -128,7 +128,7 @@ typedef struct device_t
     char* optical_disc_num_tracks;
     char* optical_disc_num_audio_tracks;
     char* optical_disc_num_sessions;
-} device_t;
+};
 
 static char* _dupv8(const char* s)
 {

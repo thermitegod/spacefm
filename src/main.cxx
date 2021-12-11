@@ -70,7 +70,7 @@ static bool socket_daemon = false; // sfm
 
 static char* default_files[2] = {nullptr, nullptr};
 
-typedef struct CliFlags
+struct CliFlags
 {
     char** files;
     bool new_tab;
@@ -89,7 +89,7 @@ typedef struct CliFlags
     bool find_files;
     char* config_dir;
     bool disable_git_settings;
-} CliFlags;
+};
 
 CliFlags cli_flags;
 

@@ -31,9 +31,9 @@ enum PTKDirTreeCol
     N_DIR_TREE_COLS
 };
 
-typedef struct PtkDirTreeNode PtkDirTreeNode;
+struct PtkDirTreeNode;
 
-typedef struct PtkDirTree
+struct PtkDirTree
 {
     GObject parent;
     /* <private> */
@@ -42,13 +42,13 @@ typedef struct PtkDirTree
     /* GtkSortType sort_order; */ /* I don't want to support this :-( */
     /* Random integer to check whether an iter belongs to our model */
     int stamp;
-} PtkDirTree;
+};
 
-typedef struct PtkDirTreeClass
+struct PtkDirTreeClass
 {
     GObjectClass parent;
     /* Default signal handlers */
-} PtkDirTreeClass;
+};
 
 GType ptk_dir_tree_get_type(void);
 

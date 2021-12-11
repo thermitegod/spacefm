@@ -123,7 +123,7 @@ static const char* cmds_mnt[] =
  * existing scripts! */
 static const char* script_header = "#!/bin/bash\n";
 
-typedef struct HandlerData
+struct HandlerData
 {
     GtkWidget* dlg;
     GtkWidget* parent;
@@ -161,9 +161,9 @@ typedef struct HandlerData
     GtkWidget* btn_defaults;
     GtkWidget* btn_defaults0;
     GtkWidget* icon_choose_btn;
-} HandlerData;
+};
 
-typedef struct Handler
+struct Handler
 {
     // enabled              set->b
     const char* xset_name;    //                      set->name
@@ -180,7 +180,7 @@ typedef struct Handler
         if handler equals default, don't save in session    set->disable = true
         icon (file handlers only)                           set->icon
     */
-} Handler;
+};
 
 /* If you add a new handler, add it to (end of ) existing session file handler
  * list so existing users see the new handler. */

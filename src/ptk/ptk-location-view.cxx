@@ -55,7 +55,7 @@ enum PtkLocationViewCol
     N_COLS
 };
 
-typedef struct AutoOpen
+struct AutoOpen
 {
     PtkFileBrowser* file_browser;
     char* device_file;
@@ -63,7 +63,7 @@ typedef struct AutoOpen
     char* mount_point;
     bool keep_point;
     int job;
-} AutoOpen;
+};
 
 static bool volume_is_visible(VFSVolume* vol);
 static void update_all();

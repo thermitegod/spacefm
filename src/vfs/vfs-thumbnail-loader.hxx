@@ -27,7 +27,7 @@
 #include "vfs-file-info.hxx"
 #include "vfs-async-task.hxx"
 
-typedef struct VFSThumbnailLoader VFSThumbnailLoader;
+struct VFSThumbnailLoader;
 
 VFSThumbnailLoader* vfs_thumbnail_loader_new(VFSDir* dir);
 void vfs_thumbnail_loader_free(VFSThumbnailLoader* loader);

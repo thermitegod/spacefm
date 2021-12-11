@@ -32,7 +32,7 @@ enum ItemPropContextCol
     CONTEXT_COL_VALUE
 };
 
-typedef struct ContextData
+struct ContextData
 {
     GtkWidget* dlg;
     GtkWidget* parent;
@@ -103,7 +103,7 @@ typedef struct ContextData
     GtkWidget* opt_scroll;
     GtkWidget* opt_hbox_task;
     GtkWidget* open_browser;
-} ContextData;
+};
 
 // clang-format off
 static const char* context_sub[] =

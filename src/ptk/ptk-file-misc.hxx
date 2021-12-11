@@ -17,13 +17,13 @@
 
 #include "../vfs/vfs-file-info.hxx"
 
-typedef struct AutoOpenCreate
+struct AutoOpenCreate
 {
     char* path;
     PtkFileBrowser* file_browser;
     GFunc callback;
     bool open_file;
-} AutoOpenCreate;
+};
 
 enum PtkRenameMode
 {

@@ -26,13 +26,13 @@
 #include "ptk-handler.hxx"
 #include "utils.hxx"
 
-typedef struct ParentInfo
+struct ParentInfo
 {
     PtkFileBrowser* file_browser;
     const char* cwd;
-} ParentInfo;
+};
 
-typedef struct MoveSet
+struct MoveSet
 {
     char* full_path;
     const char* old_path;
@@ -117,7 +117,7 @@ typedef struct MoveSet
     bool path_exists_file;
     bool mode_change;
     bool is_move;
-} MoveSet;
+};
 
 static void on_toggled(GtkMenuItem* item, MoveSet* mset);
 static char* get_template_dir();

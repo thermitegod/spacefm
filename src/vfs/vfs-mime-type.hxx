@@ -16,7 +16,7 @@
 
 #include "../mime-type/mime-type.hxx"
 
-typedef struct VFSMimeType
+struct VFSMimeType
 {
     char* type;        /* mime_type-type string */
     char* description; /* description of the mimele type */
@@ -24,7 +24,7 @@ typedef struct VFSMimeType
     GdkPixbuf* small_icon;
     /*<private>*/
     int n_ref;
-} VFSMimeType;
+};
 
 void vfs_mime_type_init();
 
