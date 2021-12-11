@@ -1695,7 +1695,7 @@ static bool on_vfs_file_task_state_cb(VFSFileTask* task, VFSFileTaskState state,
     return ret; /* return true to continue */
 }
 
-enum
+enum PTKFileTaskResponse
 {
     RESPONSE_OVERWRITE = 1 << 0,
     RESPONSE_OVERWRITEALL = 1 << 1,

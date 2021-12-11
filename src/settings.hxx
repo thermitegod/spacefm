@@ -90,7 +90,7 @@ const char* xset_get_user_tmp_dir();
 
 extern GList* xsets;
 
-enum
+enum XSetSetSet
 {
     XSET_SET_SET_S,
     XSET_SET_SET_B,
@@ -125,14 +125,14 @@ enum
     XSET_SET_SET_OP
 };
 
-enum
+enum XSetB
 {
     XSET_B_UNSET,
     XSET_B_TRUE,
     XSET_B_FALSE
 };
 
-enum
+enum XSetCMD
 {
     XSET_CMD_LINE,
     XSET_CMD_SCRIPT,
@@ -140,7 +140,7 @@ enum
     XSET_CMD_BOOKMARK
 };
 
-enum
+enum XSetMenu
 { // do not renumber - these values are saved in session files
     XSET_MENU_NORMAL,
     XSET_MENU_CHECK,
@@ -163,7 +163,7 @@ enum
     XSET_MENU_SEP
 };
 
-enum
+enum XSetTool
 { // do not reorder - these values are saved in session files
   // also update builtin_tool_name builtin_tool_icon in settings.c
     XSET_TOOL_NOT,
@@ -187,7 +187,7 @@ enum
     XSET_TOOL_INVALID // keep this always last
 };
 
-enum
+enum XSetJob
 {
     XSET_JOB_KEY,
     XSET_JOB_ICON,
@@ -241,14 +241,14 @@ enum
     XSET_JOB_TOOLTIPS
 };
 
-enum
+enum PluginJob
 {
     PLUGIN_JOB_INSTALL,
     PLUGIN_JOB_COPY,
     PLUGIN_JOB_REMOVE
 };
 
-enum
+enum PluginUse
 {
     PLUGIN_USE_HAND_ARC,
     PLUGIN_USE_HAND_FS,

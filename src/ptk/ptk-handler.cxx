@@ -32,7 +32,7 @@
     "MOUNT\n# mount | grep \" on %a \"\n# echo\n# echo PROCESSES\n# /usr/bin/lsof -w \"%a\" | " \
     "head -n 500\n"
 
-enum
+enum PtkHandlerJob
 {
     HANDLER_JOB_EXPORT,
     HANDLER_JOB_IMPORT_FILE,
@@ -41,14 +41,14 @@ enum
 };
 
 // Archive handlers treeview model enum
-enum
+enum PtkHandlerCol
 {
     COL_XSET_NAME,
     COL_HANDLER_NAME
 };
 
 // Archive creation handlers combobox model enum
-enum
+enum PtkHandlerExtensionsCol
 {
     COL_HANDLER_EXTENSIONS = 1
 };

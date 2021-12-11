@@ -980,7 +980,7 @@ static void on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     gtk_widget_destroy(dlg);
 }
 
-enum
+enum PTKFileMiscMode
 {
     MODE_FILENAME,
     MODE_PARENT,

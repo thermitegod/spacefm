@@ -33,7 +33,7 @@ void vfs_async_task_real_cancel(VFSAsyncTask* task, bool finalize);
 /* Local data */
 static GObjectClass* parent_class = nullptr;
 
-enum
+enum VFSAsyncSignal
 {
     FINISH_SIGNAL,
     N_SIGNALS

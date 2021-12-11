@@ -3789,7 +3789,7 @@ FMMainWindow* fm_main_window_get_on_current_desktop()
     return invalid ? fm_main_window_get_last_active() : nullptr;
 }
 
-enum
+enum MainWindowTaskCol
 {
     TASK_COL_STATUS,
     TASK_COL_COUNT,
@@ -4774,7 +4774,7 @@ static void on_task_stop(GtkMenuItem* item, GtkWidget* view, XSet* set2, PtkFile
     PtkFileTask* ptask;
     XSet* set;
     int job;
-    enum
+    enum MainWindowJob
     {
         JOB_STOP,
         JOB_PAUSE,

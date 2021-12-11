@@ -8,7 +8,7 @@
 
 #include "settings.hxx"
 
-enum
+enum ItemPropContextState
 {
     CONTEXT_SHOW,
     CONTEXT_ENABLE,
@@ -16,7 +16,7 @@ enum
     CONTEXT_DISABLE
 };
 
-enum
+enum ItemPropContext
 {
     CONTEXT_MIME,
     CONTEXT_NAME,

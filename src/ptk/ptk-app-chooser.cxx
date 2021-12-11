@@ -14,7 +14,7 @@
 
 #include "ptk-app-chooser.hxx"
 
-enum
+enum PTKAppChooser
 {
     COL_APP_ICON = 0,
     COL_APP_NAME,

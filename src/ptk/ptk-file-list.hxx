@@ -25,7 +25,7 @@
 #define PTK_IS_FILE_LIST(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_FILE_LIST))
 
 /* Columns of directory view */
-enum
+enum PTKFileListCol
 {
     COL_FILE_BIG_ICON = 0,
     COL_FILE_SMALL_ICON,
@@ -41,7 +41,7 @@ enum
 
 // sort_dir of directory view - do not change order, saved
 // see also: main-window.c main_window_socket_command() get sort_first
-enum
+enum PTKFileListSortDir
 {
     PTK_LIST_SORT_DIR_MIXED = 0,
     PTK_LIST_SORT_DIR_FIRST,

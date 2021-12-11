@@ -23,7 +23,7 @@
 
 #include <glib.h>
 
-enum
+enum MimeTypeAction
 {
     MIME_TYPE_ACTION_DEFAULT,
     MIME_TYPE_ACTION_APPEND,

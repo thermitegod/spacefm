@@ -23,7 +23,7 @@
 #define PTK_IS_DIR_TREE(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_DIR_TREE))
 
 /* Columns of folder view */
-enum
+enum PTKDirTreeCol
 {
     COL_DIR_TREE_ICON,
     COL_DIR_TREE_DISP_NAME,

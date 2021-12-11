@@ -17,7 +17,7 @@
 #include "ptk-file-browser.hxx"
 
 // Archive operations enum
-enum
+enum PTKFileArchiverArc
 {
     ARC_COMPRESS,
     ARC_EXTRACT,

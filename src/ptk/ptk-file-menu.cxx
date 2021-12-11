@@ -1317,7 +1317,7 @@ static void on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
     g_free(set_app);
 }
 
-enum
+enum PTKFileMenuAppJob
 {
     APP_JOB_DEFAULT,
     APP_JOB_REMOVE,

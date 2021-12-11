@@ -19,7 +19,7 @@
 
 #include "settings.hxx"
 
-enum
+enum PTKFileTaskPtaskError
 {
     PTASK_ERROR_FIRST,
     PTASK_ERROR_ANY,

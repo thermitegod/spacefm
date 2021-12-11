@@ -41,7 +41,7 @@
 
 #include "find-files.hxx"
 
-enum
+enum FindFilesCol
 {
     COL_ICON,
     COL_NAME,

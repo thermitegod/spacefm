@@ -108,7 +108,7 @@ static int file_list_order_from_sort_order(PtkFBSortOrder order);
 
 static GtkPanedClass* parent_class = nullptr;
 
-enum
+enum PTKFileBrowserSignal
 {
     BEFORE_CHDIR_SIGNAL,
     BEGIN_CHDIR_SIGNAL,
@@ -120,7 +120,7 @@ enum
     N_SIGNALS
 };
 
-enum
+enum PTKFileBrowserResponse
 { // MOD
     RESPONSE_RUN = 100,
     RESPONSE_RUNTERMINAL = 101,

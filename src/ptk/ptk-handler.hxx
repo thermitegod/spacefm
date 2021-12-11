@@ -18,21 +18,21 @@
 #include "settings.hxx"
 #include "ptk-file-browser.hxx"
 
-enum
+enum PtkHandlerArchive
 {
     HANDLER_COMPRESS,
     HANDLER_EXTRACT,
     HANDLER_LIST
 };
 
-enum
+enum PtkHandlerMount
 {
     HANDLER_MOUNT,
     HANDLER_UNMOUNT,
     HANDLER_PROP
 };
 
-enum
+enum PtkHandlerMode
 {
     HANDLER_MODE_ARC,
     HANDLER_MODE_FS,

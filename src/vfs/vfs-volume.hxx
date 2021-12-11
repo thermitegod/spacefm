@@ -64,7 +64,7 @@ typedef struct netmount_t
     char* path;
 } netmount_t;
 
-enum
+enum VFSVolumeDeviceType
 {
     DEVICE_TYPE_BLOCK,
     DEVICE_TYPE_NETWORK,

@@ -24,7 +24,7 @@ const char* enter_command_use =
     " %l device label\n\t%b\tselected bookmark\n\t%t\tselected task directory;  %p task "
     "pid\n\t%a\tmenu item value\n\t$fm_panel, $fm_tab, etc";
 
-enum
+enum ItemPropContextCol
 {
     CONTEXT_COL_DISP,
     CONTEXT_COL_SUB,
@@ -191,7 +191,7 @@ static const char* context_sub_list[] =
 };
 // clang-format on
 
-enum
+enum ItemPropContextComp
 {
     CONTEXT_COMP_EQUALS,
     CONTEXT_COMP_NEQUALS,
@@ -232,7 +232,7 @@ static const char* item_types[] =
 };
 // clang-format on
 
-enum
+enum ItemPropItemType
 {
     ITEM_TYPE_BOOKMARK,
     ITEM_TYPE_APP,
@@ -292,7 +292,7 @@ int xset_context_test(XSetContext* context, char* rules, bool def_disable)
     char* eleval;
     char* sep;
     bool test;
-    enum
+    enum ItemPropContextTest
     {
         ANY,
         ALL,

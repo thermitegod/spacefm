@@ -40,7 +40,7 @@ typedef struct VFSThumbnailLoader
     GQueue* update_queue;
 } VFSThumbnailLoader;
 
-enum
+enum VFSThumbnailSize
 {
     LOAD_BIG_THUMBNAIL,
     LOAD_SMALL_THUMBNAIL,

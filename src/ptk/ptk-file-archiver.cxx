@@ -20,14 +20,14 @@
 #include "utils.hxx"
 
 // Archive handlers treeview model enum
-enum
+enum PTKFileArchiverCol
 {
     COL_XSET_NAME,
     COL_HANDLER_NAME
 };
 
 // Archive creation handlers combobox model enum
-enum
+enum PTKFileArchiverExtensionsCol
 {
     // COL_XSET_NAME
     COL_HANDLER_EXTENSIONS = 1

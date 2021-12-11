@@ -49,7 +49,7 @@ static bool update_file_info(VFSDir* dir, VFSFileInfo* file);
 
 static void on_list_task_finished(VFSAsyncTask* task, bool is_cancelled, VFSDir* dir);
 
-enum
+enum VFSDirSignal
 {
     FILE_CREATED_SIGNAL = 0,
     FILE_DELETED_SIGNAL,

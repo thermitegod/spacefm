@@ -18,7 +18,7 @@
 
 static void on_changed(GtkEntry* entry, void* user_data);
 
-enum
+enum PTKPathEntryCol
 {
     COL_NAME,
     COL_PATH,

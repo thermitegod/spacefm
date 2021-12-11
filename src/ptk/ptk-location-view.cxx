@@ -46,7 +46,7 @@ static bool try_mount(GtkTreeView* view, VFSVolume* vol);
 static void on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2);
 static void on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2);
 
-enum
+enum PtkLocationViewCol
 {
     COL_ICON = 0,
     COL_NAME,
