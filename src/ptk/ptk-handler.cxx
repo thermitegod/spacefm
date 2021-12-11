@@ -36,7 +36,6 @@ enum
 {
     HANDLER_JOB_EXPORT,
     HANDLER_JOB_IMPORT_FILE,
-    HANDLER_JOB_IMPORT_URL,
     HANDLER_JOB_RESTORE_ALL,
     HANDLER_JOB_REMOVE
 };
@@ -2616,23 +2615,6 @@ static void on_option_cb(GtkMenuItem* item, HandlerData* hnd)
                 g_free(save->s);
             save->s = g_path_get_dirname(file);
             break;
-        case HANDLER_JOB_IMPORT_URL:
-            // Get URL
-            file = nullptr;
-            if (!xset_text_dialog(GTK_WIDGET(hnd->dlg),
-                                  "Enter Handler Plugin URL",
-                                  false,
-                                  "Enter SpaceFM Handler Plugin URL:\n\n(wget will be used to "
-                                  "download the handler plugin file)",
-                                  nullptr,
-                                  nullptr,
-                                  &file,
-                                  nullptr,
-                                  false,
-                                  "#handlers-opt-impu") ||
-                !file || file[0] == '\0')
-                return;
-            break;
         case HANDLER_JOB_RESTORE_ALL:
             restore_defaults(hnd, true);
             return;
@@ -2684,13 +2666,7 @@ static void on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     }
 
     // Install plugin
-    install_plugin_file(nullptr,
-                        hnd->dlg,
-                        file,
-                        folder,
-                        job == HANDLER_JOB_IMPORT_FILE ? 0 : 1,
-                        PLUGIN_JOB_COPY,
-                        nullptr);
+    install_plugin_file(nullptr, hnd->dlg, file, folder, PLUGIN_JOB_COPY, nullptr);
     g_free(file);
     g_free(folder);
 }
@@ -2742,7 +2718,6 @@ static void on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
     gtk_widget_set_sensitive(item, handler_selected);
 
     add_popup_menuitem(popup, accel_group, "Import _File", HANDLER_JOB_IMPORT_FILE, hnd);
-    add_popup_menuitem(popup, accel_group, "Import _URL", HANDLER_JOB_IMPORT_URL, hnd);
     add_popup_menuitem(popup,
                        accel_group,
                        "Restore _Default Handlers",

@@ -212,7 +212,6 @@ enum
     XSET_JOB_SEP,
     XSET_JOB_ADD_TOOL,
     XSET_JOB_IMPORT_FILE,
-    XSET_JOB_IMPORT_URL,
     XSET_JOB_IMPORT_GTK,
     XSET_JOB_CUT,
     XSET_JOB_COPY,
@@ -408,7 +407,7 @@ XSet* xset_custom_new();
 bool write_root_settings(GString* buf, const char* path);
 GList* xset_get_plugins(bool included);
 void install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* path,
-                         const char* plug_dir, int type, int job, XSet* insert_set);
+                         const char* plug_dir, int job, XSet* insert_set);
 XSet* xset_import_plugin(const char* plug_dir, int* use);
 void clean_plugin_mirrors();
 void xset_show_help(GtkWidget* parent, XSet* set, const char* anchor);
