@@ -58,15 +58,9 @@ add_global_link_arguments(ldflags_opt, language: ['c', 'cpp'])
 
 data_args = []
 
-data_args += '-DHTMLDIR="/usr/share"'
 data_args += '-DDATADIR="/usr/share"'
 data_args += '-DSYSCONFDIR="/etc"'
 data_args += '-DPACKAGE_UI_DIR="/usr/share/spacefm/ui"'
-
-#htmldir_path = get_option('htmldir')
-#if htmldir_path == ''
-#  htmldir_path = join_paths(get_option('libdir'), 'dri')
-#endif
 
 foreach a : data_args
   add_project_arguments(a, language : ['c', 'cpp'])

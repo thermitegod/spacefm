@@ -32,14 +32,8 @@ option(
 
 #other
 #TODO bashpath, etc
-option('htmldir',
-  type : 'string',
-  value : '',
-  description : 'default is, /usr/share',
-)
 option('package-ui-dir',
   type : 'string',
   value : '',
   description : 'default is, /usr/share/spacefm/ui',
 )
-

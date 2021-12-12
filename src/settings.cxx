@@ -4213,8 +4213,6 @@ static char* xset_get_manual_url()
 
     // get potential locations
     GList* locations = nullptr;
-    if (HTMLDIR)
-        locations = g_list_append(locations, g_strdup(HTMLDIR));
     if (DATADIR)
         locations = g_list_append(locations, g_build_filename(DATADIR, "spacefm", nullptr));
     const char* const* dir = g_get_system_data_dirs();
