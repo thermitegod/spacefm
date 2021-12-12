@@ -35,8 +35,10 @@ struct AppSettings
     bool single_click;
     bool no_single_hover;
 
-    bool no_execute;      // MOD
-    bool no_confirm;      // MOD
+    bool no_execute;
+    bool no_confirm;
+    // bool no_confirm_delete;
+    bool no_confirm_trash = true;
     bool sdebug;          // sfm
     bool load_saved_tabs; // sfm
     char* date_format;    // MOD for speed dupe of xset

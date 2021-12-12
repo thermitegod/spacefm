@@ -174,7 +174,7 @@ static const char* context_sub_list[] =
     "2%%%%%audiocd%%%%%blank%%%%%dvd%%%%%dvd && blank%%%%%ejectable%%%%%floppy%%%%%internal%%%%%mountable%%%%%mounted%%%%%no_media%%%%%optical%%%%%optical && blank%%%%%optical && mountable%%%%%optical && mounted%%%%%removable%%%%%removable && mountable%%%%%removable && mounted%%%%%removable || optical%%%%%table%%%%%policy_hide%%%%%policy_noauto",  //"Device Properties",
     "8%%%%%0%%%%%1%%%%%2",  //"Task Count",
     "0%%%%%",  //"Task Dir",
-    "0%%%%%change%%%%%copy%%%%%delete%%%%%link%%%%%move%%%%%run",  //"Task Type",
+    "0%%%%%change%%%%%copy%%%%%delete%%%%%link%%%%%move%%%%%run%%%%%trash",  //"Task Type",
     "0%%%%%",  //"Task Name",
     "0%%%%%",  //"Panel 1 Dir",
     "0%%%%%",  //"Panel 2 Dir",

@@ -9,6 +9,8 @@
  *
  */
 
+#include <string>
+
 #include <fcntl.h>
 #include <utime.h>
 
@@ -18,6 +20,7 @@
 #include "utils.hxx"
 
 #include "vfs-file-task.hxx"
+#include "vfs-file-trash.hxx"
 
 const mode_t chmod_flags[] = {S_IRUSR,
                               S_IWUSR,
@@ -768,6 +771,39 @@ vfs_file_task_move(char* src_file, VFSFileTask* task)
     }
     else
         vfs_file_task_error(task, errno, "Accessing", src_file);
+}
+
+static void
+vfs_file_task_trash(char* src_file, VFSFileTask* task)
+{
+    if (should_abort(task))
+        return;
+
+    vfs_file_task_lock(task);
+    string_copy_free(&task->current_file, src_file);
+    task->current_item++;
+    vfs_file_task_unlock(task);
+
+    struct stat file_stat;
+    if (lstat(src_file, &file_stat) == -1)
+    {
+        vfs_file_task_error(task, errno, "Accessing", src_file);
+        return;
+    }
+
+    bool result = Trash::trash(std::string(src_file));
+
+    if (!result)
+    {
+        vfs_file_task_error(task, errno, "Trashing", src_file);
+        return;
+    }
+
+    vfs_file_task_lock(task);
+    task->progress += file_stat.st_size;
+    if (task->error_first)
+        task->error_first = false;
+    vfs_file_task_unlock(task);
 }
 
 static void
@@ -1780,7 +1816,6 @@ on_size_timeout(VFSFileTask* task)
 
 static void*
 vfs_file_task_thread(VFSFileTask* task)
-// void * vfs_file_task_thread ( void * ptr )
 {
     GList* l;
     struct stat file_stat;
@@ -1789,11 +1824,11 @@ vfs_file_task_thread(VFSFileTask* task)
     off_t size;
     GFunc funcs[] = {(GFunc)vfs_file_task_move,
                      (GFunc)vfs_file_task_copy,
+                     (GFunc)vfs_file_task_trash,
                      (GFunc)vfs_file_task_delete,
                      (GFunc)vfs_file_task_link,
                      (GFunc)vfs_file_task_chown_chmod,
                      (GFunc)vfs_file_task_exec};
-    // VFSFileTask* task = (VFSFileTask*)ptr;
     if (task->type < VFS_FILE_TASK_MOVE || task->type >= VFS_FILE_TASK_LAST)
         goto _exit_thread;
 
@@ -1832,6 +1867,9 @@ vfs_file_task_thread(VFSFileTask* task)
             if (task->state == VFS_FILE_TASK_SIZE_TIMEOUT)
                 break;
         }
+    }
+    else if (task->type == VFS_FILE_TASK_TRASH)
+    {
     }
     else if (task->type != VFS_FILE_TASK_EXEC)
     {
@@ -1899,6 +1937,7 @@ vfs_file_task_thread(VFSFileTask* task)
             off_t exlimit;
             switch (task->type)
             {
+                case VFS_FILE_TASK_TRASH:
                 case VFS_FILE_TASK_MOVE:
                 case VFS_FILE_TASK_COPY:
                     exlimit = 10485760; // 10M

@@ -51,6 +51,7 @@ static void on_popup_copy_parent_activate(GtkMenuItem* menuitem, PtkFileMenu* da
 
 static void on_popup_paste_as_activate(GtkMenuItem* menuitem, PtkFileMenu* data); // sfm added
 
+static void on_popup_trash_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_delete_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_rename_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_compress_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
@@ -1186,6 +1187,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
     set = xset_set_cb("edit_rename", (GFunc)on_popup_rename_activate, data);
     set->disable = !sel_files;
     xset_add_menuitem(browser, popup, accel_group, set);
+    set = xset_set_cb("edit_trash", (GFunc)on_popup_trash_activate, data);
+    set->disable = !sel_files || no_write_access;
+    xset_add_menuitem(browser, popup, accel_group, set);
     set = xset_set_cb("edit_delete", (GFunc)on_popup_delete_activate, data);
     set->disable = !sel_files || no_write_access;
     xset_add_menuitem(browser, popup, accel_group, set);
@@ -2291,6 +2295,22 @@ on_popup_delete_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 }
 
 static void
+on_popup_trash_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
+{
+    if (data->sel_files)
+    {
+        if (data->browser)
+        {
+            GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
+            ptk_trash_files(GTK_WINDOW(parent_win),
+                            data->cwd,
+                            data->sel_files,
+                            GTK_TREE_VIEW(data->browser->task_view));
+        }
+    }
+}
+
+static void
 on_popup_rename_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     if (data->browser)
@@ -2570,6 +2590,8 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
             on_popup_rename_activate(nullptr, data);
         else if (!strcmp(xname, "delete"))
             on_popup_delete_activate(nullptr, data);
+        else if (!strcmp(xname, "trash"))
+            on_popup_trash_activate(nullptr, data);
         else if (!strcmp(xname, "hide"))
             on_hide_file(nullptr, data);
         else if (!strcmp(xname, "canon"))
@@ -2592,7 +2614,8 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     else if (g_str_has_prefix(set->name, "root_"))
     {
         xname = set->name + 5;
-        if (!strcmp(xname, "copy_loc") || !strcmp(xname, "move2") || !strcmp(xname, "delete"))
+        if (!strcmp(xname, "copy_loc") || !strcmp(xname, "move2") || !strcmp(xname, "delete") ||
+            !strcmp(xname, "trash"))
             on_popup_rootcmd_activate(nullptr, data, set);
     }
     else if (browser)

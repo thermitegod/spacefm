@@ -128,7 +128,7 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTr
     if (!sel_files)
         return;
 
-    if (!app_settings.no_confirm) // MOD
+    if (!app_settings.no_confirm)
     {
         // count
         int count = g_list_length(sel_files);
@@ -160,6 +160,51 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTr
     }
     /* file_list = g_list_reverse( file_list ); */
     PtkFileTask* task = ptk_file_task_new(VFS_FILE_TASK_DELETE,
+                                          file_list,
+                                          nullptr,
+                                          parent_win ? GTK_WINDOW(parent_win) : nullptr,
+                                          GTK_WIDGET(task_view));
+    ptk_file_task_run(task);
+}
+
+void
+ptk_trash_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTreeView* task_view)
+{
+    if (!sel_files)
+        return;
+
+    if (!app_settings.no_confirm_trash)
+    {
+        // count
+        int count = g_list_length(sel_files);
+        char* msg = g_strdup_printf("Trash %d selected item ?", count);
+        GtkWidget* dlg = gtk_message_dialog_new(parent_win,
+                                                GTK_DIALOG_MODAL,
+                                                GTK_MESSAGE_WARNING,
+                                                GTK_BUTTONS_YES_NO,
+                                                msg,
+                                                nullptr);
+        gtk_dialog_set_default_response(GTK_DIALOG(dlg), GTK_RESPONSE_YES); // MOD
+        gtk_window_set_title(GTK_WINDOW(dlg), "Confirm Trash");
+        xset_set_window_icon(GTK_WINDOW(dlg));
+
+        int ret = gtk_dialog_run(GTK_DIALOG(dlg));
+        gtk_widget_destroy(dlg);
+        g_free(msg);
+        if (ret != GTK_RESPONSE_YES)
+            return;
+    }
+
+    GList* file_list = nullptr;
+    GList* sel;
+    for (sel = sel_files; sel; sel = g_list_next(sel))
+    {
+        VFSFileInfo* file = (VFSFileInfo*)sel->data;
+        char* file_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
+        file_list = g_list_prepend(file_list, file_path);
+    }
+    /* file_list = g_list_reverse( file_list ); */
+    PtkFileTask* task = ptk_file_task_new(VFS_FILE_TASK_TRASH,
                                           file_list,
                                           nullptr,
                                           parent_win ? GTK_WINDOW(parent_win) : nullptr,

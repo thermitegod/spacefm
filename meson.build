@@ -163,6 +163,7 @@ sources = [
   'src/vfs/vfs-file-info.cxx',
   'src/vfs/vfs-file-monitor.cxx',
   'src/vfs/vfs-file-task.cxx',
+  'src/vfs/vfs-file-trash.cxx',
   'src/vfs/vfs-mime-type.cxx',
   'src/vfs/vfs-thumbnail-loader.cxx',
   'src/vfs/vfs-utils.cxx',

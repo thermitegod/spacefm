@@ -617,7 +617,7 @@ set_progress_icon(PtkFileTask* ptask)
                                           GTK_ICON_LOOKUP_USE_BUILTIN,
                                           nullptr);
     else if (task->type == VFS_FILE_TASK_MOVE || task->type == VFS_FILE_TASK_COPY ||
-             task->type == VFS_FILE_TASK_LINK)
+             task->type == VFS_FILE_TASK_LINK || task->type == VFS_FILE_TASK_TRASH)
         pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
                                           "stock_copy",
                                           16,
@@ -672,12 +672,14 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     // clang-format off
     const char* actions[] = {"Move: ",
                              "Copy: ",
+                             "Trash: ",
                              "Delete: ",
                              "Link: ",
                              "Change: ",
                              "Run: "};
     const char* titles[] = {"Moving...",
                             "Copying...",
+                            "Trashing...",
                             "Deleting...",
                             "Linking...",
                             "Changing...",

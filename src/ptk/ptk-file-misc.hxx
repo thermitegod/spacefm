@@ -33,6 +33,8 @@ enum PtkRenameMode
     PTK_RENAME_NEW_LINK
 };
 
+void ptk_trash_files(GtkWindow* parent_win, const char* cwd, GList* sel_files,
+                     GtkTreeView* task_view);
 void ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files,
                       GtkTreeView* task_view);
 

@@ -197,6 +197,8 @@ parse_general_settings(char* line)
         app_settings.no_execute = strtol(value, nullptr, 10); // MOD
     else if (!strcmp(name, "no_confirm"))
         app_settings.no_confirm = strtol(value, nullptr, 10); // MOD
+    else if (!strcmp(name, "no_confirm_trash"))
+        app_settings.no_confirm_trash = strtol(value, nullptr, 10); // MOD
 }
 
 static void
@@ -659,8 +661,10 @@ save_settings(void* main_window_ptr)
     g_string_append_printf(buf, "sort_order=%d\n", app_settings.sort_order);
     g_string_append_printf(buf, "sort_type=%d\n", app_settings.sort_type);
     g_string_append_printf(buf, "use_si_prefix=%d\n", app_settings.use_si_prefix);
+
     g_string_append_printf(buf, "no_execute=%d\n", app_settings.no_execute);
     g_string_append_printf(buf, "no_confirm=%d\n", app_settings.no_confirm);
+    g_string_append_printf(buf, "no_confirm_trash=%d\n", app_settings.no_confirm_trash);
 
     g_string_append(buf, "\n[Window]\n");
     g_string_append_printf(buf, "width=%d\n", app_settings.width);
@@ -9658,6 +9662,9 @@ xset_defaults()
     set = xset_set("edit_delete", "lbl", "_Delete");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-delete");
 
+    set = xset_set("edit_trash", "lbl", "_Trash");
+    xset_set_set(set, XSET_SET_SET_ICN, "gtk-delete");
+
     set = xset_set("edit_submenu", "lbl", "_Actions");
     set->menu_style = XSET_MENU_SUBMENU;
     xset_set_set(
@@ -10121,7 +10128,8 @@ xset_default_keys()
     def_key("edit_copy", 99, 4);
     def_key("edit_paste", 118, 4);
     def_key("edit_rename", 65471, 0);
-    def_key("edit_delete", 65535, 0);
+    def_key("edit_delete", 65535, 1); // Shift+Delete
+    def_key("edit_trash", 65535, 0);  // Delete
     def_key("copy_name", 67, 9);
     def_key("copy_path", 67, 5);
     def_key("paste_link", 86, 5);
