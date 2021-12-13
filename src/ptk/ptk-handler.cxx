@@ -1618,7 +1618,7 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
     g_free(archive_handlers);
 
     // Saving settings
-    xset_autosave(false, false);
+    autosave_request();
 }
 
 static void
@@ -1996,7 +1996,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
     }
 
     // Saving settings
-    xset_autosave(false, false);
+    autosave_request();
 
     if (err_msg)
     {

@@ -813,7 +813,7 @@ main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser)
             }
         }
     }
-    xset_autosave(false, false);
+    autosave_request();
 }
 
 void
@@ -871,7 +871,7 @@ update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser)
             }
         }
     }
-    xset_autosave(false, false);
+    autosave_request();
 }
 
 void
@@ -1025,7 +1025,7 @@ show_panels_all_windows(GtkMenuItem* item, FMMainWindow* main_window)
             show_panels(nullptr, a_window);
     }
 
-    xset_autosave(false, false);
+    autosave_request();
 }
 
 static void
@@ -2026,7 +2026,7 @@ fm_main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
 
     // save settings
     app_settings.maximized = main_window->maximized;
-    xset_autosave_cancel();
+    autosave_cancel();
     save_settings(main_window);
 
     // tasks running?
@@ -2362,7 +2362,7 @@ _done_close:
 
     update_window_title(nullptr, main_window);
     if (xset_get_b("main_save_tabs"))
-        xset_autosave(false, true);
+        autosave_request();
 }
 
 static bool
@@ -2451,7 +2451,7 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, FMMainWindow* main_win
         gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view)); // MOD
     }
     if (xset_get_b("main_save_tabs"))
-        xset_autosave(false, true);
+        autosave_request();
 
     if (event_handler.tab_chdir->s || event_handler.tab_chdir->ob2_data)
         main_window_event(main_window,
@@ -2835,7 +2835,7 @@ on_new_window_activate(GtkMenuItem* menuitem, void* user_data)
 {
     FMMainWindow* main_window = FM_MAIN_WINDOW(user_data);
 
-    xset_autosave_cancel();
+    autosave_cancel();
     fm_main_window_store_positions(main_window);
     save_settings(main_window);
 

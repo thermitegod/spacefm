@@ -44,8 +44,6 @@
 
 #define CONFIG_VERSION "38" // 1.0.6
 
-#define DEFAULT_TMP_DIR "/tmp"
-
 AppSettings app_settings = AppSettings();
 ConfigSettings config_settings = ConfigSettings();
 
@@ -5555,7 +5553,7 @@ xset_design_job(GtkWidget* item, XSet* set)
         main_window_rebuild_all_toolbars(set ? set->browser : nullptr);
 
     // autosave
-    xset_autosave(false, false);
+    autosave_request();
 }
 
 static bool
@@ -6651,7 +6649,7 @@ xset_menu_cb(GtkWidget* item, XSet* set)
     }
 
     if (rset->menu_style)
-        xset_autosave(false, false);
+        autosave_request();
 }
 
 int

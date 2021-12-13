@@ -732,7 +732,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                     g_free(compress_cmd);
 
                 // Saving settings
-                xset_autosave(false, false);
+                autosave_request();
                 exit_loop = true;
                 break;
             case GTK_RESPONSE_NONE:

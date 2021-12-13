@@ -4,98 +4,61 @@
  *
  */
 
+#include <thread>
+#include <atomic>
+#include <chrono>
+
 #include "settings.hxx"
-
+//#include "logger.hxx"
 #include "autosave.hxx"
-
-static bool on_autosave_timer(void* main_window);
 
 struct AutoSave
 {
-    size_t timer;
-    bool request;
+    std::atomic<bool> keep_saving = true;
+    std::atomic<bool> request;
+    // size_t timer = 5; // 5 seconds
+    size_t timer = 300; // 5 minutes
 };
 
 AutoSave autosave = AutoSave();
 
-static void
-idle_save_settings(void* main_window)
-{
-    // printf("AUTOSAVE *** idle_save_settings\n" );
-    save_settings(nullptr);
-}
+void autosave_thread();
 
-static void
-autosave_start(bool delay)
-{
-    // printf("AUTOSAVE autosave_start\n" );
-    if (!delay)
-    {
-        g_idle_add((GSourceFunc)idle_save_settings, nullptr);
-        autosave.request = false;
-    }
-    else
-        autosave.request = true;
-    if (!autosave.timer)
-    {
-        autosave.timer = g_timeout_add_seconds(10, (GSourceFunc)on_autosave_timer, nullptr);
-        // printf("AUTOSAVE timer started\n" );
-    }
-}
-
-static bool
-on_autosave_timer(void* main_window)
-{
-    // printf("AUTOSAVE timeout\n" );
-    if (autosave.timer)
-    {
-        g_source_remove(autosave.timer);
-        autosave.timer = 0;
-    }
-    if (autosave.request)
-        autosave_start(false);
-    return false;
-}
+std::thread thread_save_settings(autosave_thread);
 
 void
-xset_autosave(bool force, bool delay)
+autosave_thread()
 {
-    if (autosave.timer && !force)
+    const std::chrono::duration<int> duration(autosave.timer);
+    do
     {
-        // autosave timer is running, so request save on timeout to prevent
-        // saving too frequently, unless force
-        autosave.request = true;
-        // printf("AUTOSAVE request\n" );
-    }
-    else
-    {
-        if (autosave.timer && force)
+        std::this_thread::sleep_for(duration);
+        // LOG_INFO("AUTOSAVE save_thread_loop");
+
+        if (autosave.request)
         {
-            g_source_remove(autosave.timer);
-            autosave.timer = 0;
+            // LOG_INFO("AUTOSAVE save_settings");
+
+            autosave.request.store(false);
+            save_settings(nullptr);
         }
 
-        /*
-        if ( force )
-            printf("AUTOSAVE force\n" );
-        else if ( delay )
-            printf("AUTOSAVE delay\n" );
-        else
-            printf("AUTOSAVE normal\n" );
-        */
-
-        autosave_start(!force && delay);
-    }
+    } while (autosave.keep_saving);
 }
 
 void
-xset_autosave_cancel()
+autosave_request()
 {
-    // printf("AUTOSAVE cancel\n" );
-    autosave.request = false;
-    if (autosave.timer)
-    {
-        g_source_remove(autosave.timer);
-        autosave.timer = 0;
-    }
+    // LOG_INFO("AUTOSAVE request");
+
+    autosave.request.store(true);
+}
+
+void
+autosave_cancel()
+{
+    // LOG_INFO("AUTOSAVE cancel");
+
+    autosave.request.store(false);
+    // autosave.keep_saving.store(false);
 }
