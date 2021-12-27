@@ -4519,7 +4519,7 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
         g_string_append(uri_list, uri);
         g_free(uri);
 
-        g_string_append(uri_list, "\r\n");
+        g_string_append(uri_list, "\n");
     }
     g_list_foreach(sels, (GFunc)vfs_file_info_unref, nullptr);
     g_list_free(sels);

@@ -446,7 +446,7 @@ load_settings(const char* config_dir)
         char* tmp = nullptr;
         while (fgets(line, sizeof(line), file))
         {
-            strtok_r(line, "\r\n", &tmp);
+            strtok_r(line, "\n", &tmp);
             if (!line[0])
                 continue;
             if (line[0] == '[')
@@ -1783,7 +1783,7 @@ read_root_settings()
     char* tmp = nullptr;
     while (fgets(line, sizeof(line), file))
     {
-        strtok_r(line, "\r\n", &tmp);
+        strtok_r(line, "\n", &tmp);
         if (!line[0])
             continue;
         xset_parse(line);
@@ -2887,7 +2887,7 @@ xset_import_plugin(const char* plug_dir, int* use)
     char* tmp = nullptr;
     while (fgets(line, sizeof(line), file))
     {
-        strtok_r(line, "\r\n", &tmp);
+        strtok_r(line, "\n", &tmp);
         if (!line[0])
             continue;
         if (line[0] == '[')

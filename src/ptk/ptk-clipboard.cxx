@@ -60,7 +60,7 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, un
         if (gtk_selection_data_get_target(selection_data) != uri_list_target)
             g_string_append_c(list, '\n');
         else
-            g_string_append(list, "\r\n");
+            g_string_append(list, "\n");
     }
 
     gtk_selection_data_set(selection_data,
