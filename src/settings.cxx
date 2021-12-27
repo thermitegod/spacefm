@@ -60,8 +60,8 @@ static XSet* set_clipboard = nullptr;
 static bool clipboard_is_cut;
 static XSet* set_last;
 
-static const char* settings_config_dir = nullptr;
-static const char* settings_user_tmp_dir = nullptr;
+std::string settings_config_dir;
+std::string settings_user_tmp_dir;
 
 static XSetContext* xset_context = nullptr;
 static XSet* book_icon_set_cached = nullptr;
@@ -301,14 +301,11 @@ load_conf()
 void
 load_settings(const char* config_dir)
 {
-    FILE* file;
-    char* path = nullptr;
-
     xset_cmd_history = nullptr;
     app_settings.load_saved_tabs = true;
 
     if (config_dir)
-        settings_config_dir = config_dir;
+        settings_config_dir = g_build_filename(config_dir, nullptr);
     else
         settings_config_dir = g_build_filename(vfs_user_config_dir(), "spacefm", nullptr);
 
@@ -345,21 +342,23 @@ load_settings(const char* config_dir)
     // MOD extra settings
     xset_defaults();
 
-    char* command;
+    std::string session;
+
+    std::string command;
 
     if (!std::filesystem::exists(settings_config_dir))
     {
         // copy /etc/xdg/spacefm
-        char* xdg_path = g_build_filename(SYSCONFDIR, "xdg", "spacefm", nullptr);
+        std::string xdg_path =
+            g_build_filename(settings_config_dir.c_str(), "xdg", "spacefm", nullptr);
         if (std::filesystem::is_directory(xdg_path))
         {
-            command = g_strdup_printf("cp -r %s '%s'", xdg_path, settings_config_dir);
-            print_command(command);
-            g_spawn_command_line_sync(command, nullptr, nullptr, nullptr, nullptr);
-            g_free(command);
-            chmod(settings_config_dir, S_IRWXU);
+            command = fmt::format("cp -r {} '{}'", xdg_path, settings_config_dir);
+            print_command(command.c_str());
+            g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
+
+            std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
         }
-        g_free(xdg_path);
     }
 
     if (!std::filesystem::exists(settings_config_dir))
@@ -371,76 +370,65 @@ load_settings(const char* config_dir)
     // check if .git exists
     if (config_settings.git_backed_settings)
     {
-        if (!G_LIKELY(
-                std::filesystem::exists(g_build_filename(settings_config_dir, ".git", nullptr))))
+        std::string git_path = g_build_filename(settings_config_dir.c_str(), ".git", nullptr);
+        if (!std::filesystem::exists(git_path))
         {
-            command = g_strdup_printf("%s -c \"cd %s && git init && "
-                                      "git config commit.gpgsign false\"",
-                                      BASHPATH,
-                                      settings_config_dir);
-            print_command(command);
-            g_spawn_command_line_sync(command, nullptr, nullptr, nullptr, nullptr);
-            g_free(command);
+            command = fmt::format("{} -c \"cd {} && git init && "
+                                  "git config commit.gpgsign false\"",
+                                  BASHPATH,
+                                  settings_config_dir);
+            print_command(command.c_str());
+            g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
         }
     }
 
     // load session
-    path = g_build_filename(settings_config_dir, "session", nullptr);
-    if (G_LIKELY(std::filesystem::exists(path)))
+    session = g_build_filename(settings_config_dir.c_str(), "session", nullptr);
+    if (G_LIKELY(std::filesystem::exists(session)))
     {
         if (config_settings.git_backed_settings)
         {
-            command = g_strdup_printf("%s -c \"cd %s && git add session && "
-                                      "git commit -m 'Session File' 1>/dev/null\"",
-                                      BASHPATH,
-                                      settings_config_dir);
-            print_command(command);
-            g_spawn_command_line_sync(command, nullptr, nullptr, nullptr, nullptr);
-            g_free(command);
+            command = fmt::format("{} -c \"cd {} && git add session && "
+                                  "git commit -m 'Session File' 1>/dev/null\"",
+                                  BASHPATH,
+                                  settings_config_dir);
+            print_command(command.c_str());
+            g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
         }
         else
         {
             // copy session to session-old
-            char* old = g_build_filename(settings_config_dir, "session-old", nullptr);
-            command = g_strdup_printf("cp -a  %s %s", path, old);
-            if (std::filesystem::exists(old))
-                unlink(old);
-            print_command(command);
-            g_spawn_command_line_sync(command, nullptr, nullptr, nullptr, nullptr);
-            g_free(command);
-            g_free(old);
+            std::string session_old =
+                g_build_filename(settings_config_dir.c_str(), "session-old", nullptr);
+
+            command = fmt::format("cp -a  {} {}", session, session_old);
+            if (std::filesystem::exists(session_old))
+                std::filesystem::remove(session_old);
+            print_command(command.c_str());
+            g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
         }
     }
     else
     {
         if (config_settings.git_backed_settings)
         {
-            command = g_strdup_printf("%s -c \"cd %s && git checkout session\"",
-                                      BASHPATH,
-                                      settings_config_dir);
-            print_command(command);
-            g_spawn_command_line_sync(command, nullptr, nullptr, nullptr, nullptr);
-            g_free(command);
-            path = g_build_filename(settings_config_dir, "session", nullptr);
+            command = fmt::format("{} -c \"cd {} && git checkout session\"",
+                                  BASHPATH,
+                                  settings_config_dir);
+            print_command(command.c_str());
+            g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
+            session = g_build_filename(settings_config_dir.c_str(), "session", nullptr);
         }
         else
         {
-            path = g_build_filename(settings_config_dir, "session-old", nullptr);
+            session = g_build_filename(settings_config_dir.c_str(), "session-old", nullptr);
         }
-        if (!std::filesystem::exists(path))
-            path = nullptr;
     }
 
-    if (path)
+    if (std::filesystem::is_regular_file(session))
     {
-        file = fopen(path, "r");
-        g_free(path);
-    }
-    else
-        file = nullptr;
+        FILE* file = fopen(session.c_str(), "r");
 
-    if (file)
-    {
         SettingsParseFunc func = nullptr;
         char line[2048];
         char* tmp = nullptr;
@@ -458,7 +446,7 @@ load_settings(const char* config_dir)
                     func = &parse_window_state;
                 else if (!strcmp(line + 1, "Interface"))
                     func = &parse_interface_settings;
-                else if (!strcmp(line + 1, "MOD")) // MOD
+                else if (!strcmp(line + 1, "MOD"))
                     func = &xset_parse;
                 else
                     func = nullptr;
@@ -467,6 +455,7 @@ load_settings(const char* config_dir)
             if (func)
                 (*func)(line);
         }
+
         fclose(file);
     }
 
@@ -681,10 +670,9 @@ save_settings(void* main_window_ptr)
     // clang-format on
 
     // move
-    char* path = g_build_filename(settings_config_dir, "session", nullptr);
-    if (!g_file_set_contents(path, buf->str, buf->len, nullptr))
+    std::string path = g_build_filename(settings_config_dir.c_str(), "session", nullptr);
+    if (!g_file_set_contents(path.c_str(), buf->str, buf->len, nullptr))
         LOG_ERROR("saving session file failed");
-    g_free(path);
     g_string_free(buf, true);
 }
 
@@ -704,20 +692,20 @@ free_settings()
 const char*
 xset_get_config_dir()
 {
-    return settings_config_dir;
+    return settings_config_dir.c_str();
 }
 
 const char*
 xset_get_user_tmp_dir()
 {
-    if (settings_user_tmp_dir && std::filesystem::exists(settings_user_tmp_dir))
-        return settings_user_tmp_dir;
+    if (settings_user_tmp_dir.empty() && std::filesystem::exists(settings_user_tmp_dir))
+        return settings_user_tmp_dir.c_str();
 
     settings_user_tmp_dir = g_build_filename(config_settings.tmp_dir, "spacefm", nullptr);
     std::filesystem::create_directories(settings_user_tmp_dir);
     std::filesystem::permissions(settings_user_tmp_dir, std::filesystem::perms::owner_all);
 
-    return settings_user_tmp_dir;
+    return settings_user_tmp_dir.c_str();
 }
 
 static void
@@ -2051,7 +2039,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
             icon_file = g_build_filename(set->plug_dir, set->plug_name, "icon", nullptr);
         else
             icon_file =
-                g_build_filename(settings_config_dir, "scripts", set->name, "icon", nullptr);
+                g_build_filename(xset_get_config_dir(), "scripts", set->name, "icon", nullptr);
         if (!std::filesystem::exists(icon_file))
         {
             g_free(icon_file);
@@ -2238,7 +2226,7 @@ xset_custom_get_script(XSet* set, bool create)
 
     if (create)
     {
-        path = g_build_filename(settings_config_dir, "scripts", set->name, nullptr);
+        path = g_build_filename(xset_get_config_dir(), "scripts", set->name, nullptr);
         if (!std::filesystem::exists(path))
         {
             std::filesystem::create_directories(path);
@@ -2253,7 +2241,7 @@ xset_custom_get_script(XSet* set, bool create)
     }
     else
     {
-        path = g_build_filename(settings_config_dir, "scripts", set->name, "exec.sh", nullptr);
+        path = g_build_filename(xset_get_config_dir(), "scripts", set->name, "exec.sh", nullptr);
     }
 
     if (create && !std::filesystem::exists(path))
@@ -2302,8 +2290,8 @@ xset_custom_new_name()
         }
         else
         {
-            char* path1 = g_build_filename(settings_config_dir, "scripts", setname, nullptr);
-            char* path2 = g_build_filename(settings_config_dir, "plugin-data", setname, nullptr);
+            char* path1 = g_build_filename(xset_get_config_dir(), "scripts", setname, nullptr);
+            char* path2 = g_build_filename(xset_get_config_dir(), "plugin-data", setname, nullptr);
             if (std::filesystem::exists(path1) || std::filesystem::exists(path2))
             {
                 g_free(setname);
@@ -2335,15 +2323,15 @@ xset_custom_copy_files(XSet* src, XSet* dest)
     if (src->plugin)
         path_src = g_build_filename(src->plug_dir, src->plug_name, nullptr);
     else
-        path_src = g_build_filename(settings_config_dir, "scripts", src->name, nullptr);
+        path_src = g_build_filename(xset_get_config_dir(), "scripts", src->name, nullptr);
     // LOG_INFO("    path_src={}", path_src);
 
     // LOG_INFO("    path_src EXISTS");
-    path_dest = g_build_filename(settings_config_dir, "scripts", nullptr);
+    path_dest = g_build_filename(xset_get_config_dir(), "scripts", nullptr);
     std::filesystem::create_directories(path_dest);
     std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
     g_free(path_dest);
-    path_dest = g_build_filename(settings_config_dir, "scripts", dest->name, nullptr);
+    path_dest = g_build_filename(xset_get_config_dir(), "scripts", dest->name, nullptr);
     command = g_strdup_printf("cp -a %s %s", path_src, path_dest);
 
     g_free(path_src);
@@ -2377,10 +2365,10 @@ xset_custom_copy_files(XSet* src, XSet* dest)
 
     // copy data dir
     XSet* mset = xset_get_plugin_mirror(src);
-    path_src = g_build_filename(settings_config_dir, "plugin-data", mset->name, nullptr);
+    path_src = g_build_filename(xset_get_config_dir(), "plugin-data", mset->name, nullptr);
     if (std::filesystem::is_directory(path_src))
     {
-        path_dest = g_build_filename(settings_config_dir, "plugin-data", dest->name, nullptr);
+        path_dest = g_build_filename(xset_get_config_dir(), "plugin-data", dest->name, nullptr);
         command = g_strdup_printf("cp -a %s %s", path_src, path_dest);
         g_free(path_src);
         stderr = stdout = nullptr;
@@ -2503,7 +2491,7 @@ clean_plugin_mirrors()
     char* stdout;
     char* stderr;
     GDir* dir;
-    char* path = g_build_filename(settings_config_dir, "plugin-data", nullptr);
+    char* path = g_build_filename(xset_get_config_dir(), "plugin-data", nullptr);
 _redo:
     dir = g_dir_open(path, 0, nullptr);
     if (dir)
@@ -3186,7 +3174,7 @@ xset_custom_export_files(XSet* set, char* plug_dir)
     }
     else
     {
-        path_src = g_build_filename(settings_config_dir, "scripts", set->name, nullptr);
+        path_src = g_build_filename(xset_get_config_dir(), "scripts", set->name, nullptr);
         path_dest = g_build_filename(plug_dir, set->name, nullptr);
     }
 
@@ -3781,8 +3769,8 @@ xset_custom_delete(XSet* set, bool delete_next)
     if (set == set_clipboard)
         set_clipboard = nullptr;
 
-    char* path1 = g_build_filename(settings_config_dir, "scripts", set->name, nullptr);
-    char* path2 = g_build_filename(settings_config_dir, "plugin-data", set->name, nullptr);
+    char* path1 = g_build_filename(xset_get_config_dir(), "scripts", set->name, nullptr);
+    char* path2 = g_build_filename(xset_get_config_dir(), "plugin-data", set->name, nullptr);
     if (std::filesystem::exists(path1) || std::filesystem::exists(path2))
         command = g_strdup_printf("rm -rf %s %s", path1, path2);
     else
@@ -5006,7 +4994,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             }
             else
             {
-                folder = g_build_filename(settings_config_dir, "scripts", set->name, nullptr);
+                folder = g_build_filename(xset_get_config_dir(), "scripts", set->name, nullptr);
             }
             if (!std::filesystem::exists(folder) && !set->plugin)
             {
@@ -5025,10 +5013,11 @@ xset_design_job(GtkWidget* item, XSet* set)
             if (set->plugin)
             {
                 mset = xset_get_plugin_mirror(set);
-                folder = g_build_filename(settings_config_dir, "plugin-data", mset->name, nullptr);
+                folder =
+                    g_build_filename(xset_get_config_dir(), "plugin-data", mset->name, nullptr);
             }
             else
-                folder = g_build_filename(settings_config_dir, "plugin-data", set->name, nullptr);
+                folder = g_build_filename(xset_get_config_dir(), "plugin-data", set->name, nullptr);
             if (!std::filesystem::exists(folder))
             {
                 std::filesystem::create_directories(folder);
@@ -7104,7 +7093,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     if (!icon_name && set->tool == XSET_TOOL_CUSTOM)
     {
         // custom 'icon' file?
-        icon_file = g_build_filename(settings_config_dir, "scripts", set->name, "icon", nullptr);
+        icon_file = g_build_filename(xset_get_config_dir(), "scripts", set->name, "icon", nullptr);
         if (!std::filesystem::exists(icon_file))
         {
             g_free(icon_file);
