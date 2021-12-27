@@ -15,6 +15,9 @@
 #include <fstream>
 #include <filesystem>
 
+// FMT
+#include <fmt/core.h>
+
 // GTK
 #include <gtk/gtk.h>
 

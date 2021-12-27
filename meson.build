@@ -122,6 +122,7 @@ dep_x11 = dependency('x11')
 dep_glib = dependency('glib-2.0')
 dep_gtk = dependency('gtk+-3.0')
 dep_spdlog = dependency('spdlog')
+dep_fmt = dependency('fmt')
 
 
 sources = [
@@ -187,6 +188,7 @@ spacefm = build_target(
     dep_x11,
     dep_exo,
     dep_spdlog,
+    dep_fmt,
     lib_math,
     lib_libbsd,
     lib_udev,
