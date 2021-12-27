@@ -21,15 +21,11 @@
 
 #pragma once
 
-#include <glib.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
 #include "vfs-dir.hxx"
 #include "vfs-file-info.hxx"
-#include "vfs-async-task.hxx"
 
 struct VFSThumbnailLoader;
 
-VFSThumbnailLoader* vfs_thumbnail_loader_new(VFSDir* dir);
 void vfs_thumbnail_loader_free(VFSThumbnailLoader* loader);
 
 void vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big);

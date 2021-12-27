@@ -25,11 +25,11 @@
 
 #include <sys/stat.h>
 
-#include <libffmpegthumbnailer/videothumbnailerc.h>
+#include <libffmpegthumbnailer/imagetypes.h>
+#include <libffmpegthumbnailer/videothumbnailer.h>
 
-#include "vfs-mime-type.hxx"
-#include "vfs-thumbnail-loader.hxx"
 #include "vfs-user-dir.hxx"
+#include "vfs-thumbnail-loader.hxx"
 
 #ifdef USE_XXHASH
 #include "xxhash.h"
@@ -457,26 +457,17 @@ _vfs_thumbnail_load(const char* file_path, const char* uri, int size, time_t mti
         }
         else
         {
-            video_thumbnailer* video_thumb = video_thumbnailer_create();
+            ffmpegthumbnailer::VideoThumbnailer video_thumb;
+            video_thumb.setSeekPercentage(25);
+            video_thumb.setThumbnailSize(128);
+            video_thumb.setMaintainAspectRatio(true);
+            // video_thumb.clearFilters();
+            video_thumb.generateThumbnail(file_path,
+                                          ThumbnailerImageType::Png,
+                                          thumbnail_file,
+                                          nullptr);
 
-            /* Setting a callback to allow silencing of stdout/stderr messages
-             * from the library. This is no longer required since v2.0.11, where
-             * silence is the default.  It can be used for debugging in 2.0.11
-             * and later. */
-            // video_thumbnailer_set_log_callback(on_video_thumbnailer_log_message);
-
-            if (video_thumb)
-            {
-                video_thumb->seek_percentage = 25;
-                video_thumb->overlay_film_strip = 1;
-                video_thumbnailer_set_size(video_thumb, 0, 128);
-                video_thumbnailer_generate_thumbnail_to_file(video_thumb,
-                                                             file_path,
-                                                             thumbnail_file);
-                video_thumbnailer_destroy(video_thumb);
-
-                thumbnail = gdk_pixbuf_new_from_file(thumbnail_file, nullptr);
-            }
+            thumbnail = gdk_pixbuf_new_from_file(thumbnail_file, nullptr);
         }
     }
 
