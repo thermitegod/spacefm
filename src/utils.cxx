@@ -5,12 +5,16 @@
  */
 
 #include <string>
+#include <vector>
+#include <iostream>
+#include <filesystem>
 
 #include <fcntl.h>
 
 #include "settings.hxx"
 #include "extern.hxx"
 
+#include "logger.hxx"
 #include "utils.hxx"
 
 void
@@ -105,19 +109,22 @@ have_rw_access(const char* path)
 bool
 dir_has_files(const char* path)
 {
-    bool ret = false;
-
-    if (!(path && g_file_test(path, G_FILE_TEST_IS_DIR)))
+    if (!path)
         return false;
 
-    GDir* dir = g_dir_open(path, 0, nullptr);
-    if (dir)
+    if (!std::filesystem::exists(path))
+        return false;
+
+    if (!std::filesystem::is_directory(path))
+        return false;
+
+    for (const auto& file: std::filesystem::directory_iterator(path))
     {
-        if (g_dir_read_name(dir))
-            ret = true;
-        g_dir_close(dir);
+        if (file.exists())
+            return true;
     }
-    return ret;
+
+    return false;
 }
 
 char*
