@@ -178,16 +178,14 @@ TrashDir::unique_name(const std::string& path)
     return to_trash_filename;
 }
 
-bool
+void
 TrashDir::check_dir_exists(const std::string& path, mode_t mode)
 {
-    if (g_file_test(path.c_str(), G_FILE_TEST_EXISTS))
-        return true;
+    if (std::filesystem::is_directory(path))
+        return;
 
     // LOG_INFO("trash mkdir {}", path);
-    int res = g_mkdir_with_parents(path.c_str(), mode);
-
-    return res >= 0;
+    std::filesystem::create_directories(path);
 }
 
 void

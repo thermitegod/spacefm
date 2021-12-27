@@ -116,7 +116,7 @@ class TrashDir
 
   protected:
     // Create a directory if it does not exist
-    static bool check_dir_exists(const std::string& dir, mode_t mode);
+    static void check_dir_exists(const std::string& dir, mode_t mode);
 
     // Data Members
     std::string _path;
