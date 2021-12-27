@@ -9278,56 +9278,56 @@ xset_default_keys()
             keysets = g_list_prepend(keysets, (XSet*)l->data);
     }
 
-    def_key("tab_prev", 65056, 5); // ctrl-tab  or use ctrl-pgdn??
-    def_key("tab_next", 65289, 4);
-    def_key("tab_close", 119, 4);
-    def_key("tab_new", 116, 4);
-    def_key("tab_1", 0x31, 8); // Alt-1
-    def_key("tab_2", 0x32, 8);
-    def_key("tab_3", 0x33, 8);
-    def_key("tab_4", 0x34, 8);
-    def_key("tab_5", 0x35, 8);
-    def_key("tab_6", 0x36, 8);
-    def_key("tab_7", 0x37, 8);
-    def_key("tab_8", 0x38, 8);
-    def_key("tab_9", 0x39, 8);  // Alt-9
-    def_key("tab_10", 0x30, 8); // Alt-0
-    def_key("edit_cut", 120, 4);
-    def_key("edit_copy", 99, 4);
-    def_key("edit_paste", 118, 4);
-    def_key("edit_rename", 65471, 0);
-    def_key("edit_delete", 65535, 1); // Shift+Delete
-    def_key("edit_trash", 65535, 0);  // Delete
-    def_key("copy_name", 67, 9);
-    def_key("copy_path", 67, 5);
-    def_key("paste_link", 86, 5);
-    def_key("paste_as", 65, 5);
-    def_key("select_all", 97, 4);
-    def_key("main_terminal", 65473, 0); // F4
-    def_key("go_default", 65307, 0);
-    def_key("go_back", 65361, 8);
-    def_key("go_forward", 65363, 8);
-    def_key("go_up", 65362, 8);
-    def_key("focus_path_bar", 0x6c, 4); // Ctrl-L
-    def_key("view_refresh", 65474, 0);
-    def_key("prop_info", 0xff0d, 8);
-    def_key("prop_perm", 112, 4);
-    def_key("panel1_show_hidden", 104, 4);
-    def_key("book_new", 100, 4);
-    def_key("new_file", 70, 5);      // Shift+Ctrl+F
-    def_key("new_directory", 78, 5); // Shift+Ctrl+N
-    def_key("new_link", 76, 5);      // Shift+Ctrl+L
-    def_key("main_new_window", 110, 4);
-    def_key("open_all", 65475, 0);   // F6
-    def_key("main_full", 0xffc8, 0); // F11
-    def_key("panel1_show", 0x31, 4);
-    def_key("panel2_show", 0x32, 4);
-    def_key("panel3_show", 0x33, 4);
-    def_key("panel4_show", 0x34, 4);
-    // def_key("main_help", 0xffbe, 0); // F1
-    def_key("main_exit", 0x71, 4);   // Ctrl-Q
-    def_key("main_prefs", 65481, 0); // F12
-    def_key("book_add", 0x64, 4);    // Ctrl-D
+    def_key("tab_prev", GDK_KEY_Tab, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
+    def_key("tab_next", GDK_KEY_Tab, GDK_CONTROL_MASK);
+    def_key("tab_close", GDK_KEY_w, GDK_CONTROL_MASK);
+    def_key("tab_new", GDK_KEY_t, GDK_CONTROL_MASK);
+    def_key("tab_1", GDK_KEY_1, GDK_MOD1_MASK);
+    def_key("tab_2", GDK_KEY_2, GDK_MOD1_MASK);
+    def_key("tab_3", GDK_KEY_3, GDK_MOD1_MASK);
+    def_key("tab_4", GDK_KEY_4, GDK_MOD1_MASK);
+    def_key("tab_5", GDK_KEY_5, GDK_MOD1_MASK);
+    def_key("tab_6", GDK_KEY_6, GDK_MOD1_MASK);
+    def_key("tab_7", GDK_KEY_7, GDK_MOD1_MASK);
+    def_key("tab_8", GDK_KEY_8, GDK_MOD1_MASK);
+    def_key("tab_9", GDK_KEY_9, GDK_MOD1_MASK);
+    def_key("tab_10", GDK_KEY_0, GDK_MOD1_MASK);
+    def_key("edit_cut", GDK_KEY_x, GDK_CONTROL_MASK);
+    def_key("edit_copy", GDK_KEY_c, GDK_CONTROL_MASK);
+    def_key("edit_paste", GDK_KEY_v, GDK_CONTROL_MASK);
+    def_key("edit_rename", GDK_KEY_F2, 0);
+    def_key("edit_delete", GDK_KEY_Delete, GDK_SHIFT_MASK);
+    def_key("edit_trash", GDK_KEY_Delete, 0);
+    def_key("copy_name", GDK_KEY_C, (GDK_SHIFT_MASK | GDK_MOD1_MASK));
+    def_key("copy_path", GDK_KEY_C, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
+    def_key("paste_link", GDK_KEY_V, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
+    def_key("paste_as", GDK_KEY_A, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
+    def_key("select_all", GDK_KEY_A, GDK_CONTROL_MASK);
+    def_key("main_terminal", GDK_KEY_F4, 0);
+    def_key("go_default", GDK_KEY_Escape, 0);
+    def_key("go_back", GDK_KEY_Left, GDK_MOD1_MASK);
+    def_key("go_forward", GDK_KEY_Right, GDK_MOD1_MASK);
+    def_key("go_up", GDK_KEY_Up, GDK_MOD1_MASK);
+    def_key("focus_path_bar", GDK_KEY_l, GDK_CONTROL_MASK);
+    def_key("view_refresh", GDK_KEY_F5, 0);
+    def_key("prop_info", GDK_KEY_Return, GDK_MOD1_MASK);
+    def_key("prop_perm", GDK_KEY_p, GDK_CONTROL_MASK);
+    def_key("panel1_show_hidden", GDK_KEY_h, GDK_CONTROL_MASK);
+    def_key("book_new", GDK_KEY_d, GDK_CONTROL_MASK);
+    def_key("new_file", GDK_KEY_f, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
+    def_key("new_directory", GDK_KEY_n, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
+    def_key("new_link", GDK_KEY_l, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
+    def_key("main_new_window", GDK_KEY_n, GDK_CONTROL_MASK);
+    def_key("open_all", GDK_KEY_F6, 0);
+    def_key("main_full", GDK_KEY_F11, 0);
+    def_key("panel1_show", GDK_KEY_1, GDK_CONTROL_MASK);
+    def_key("panel2_show", GDK_KEY_2, GDK_CONTROL_MASK);
+    def_key("panel3_show", GDK_KEY_3, GDK_CONTROL_MASK);
+    def_key("panel4_show", GDK_KEY_4, GDK_CONTROL_MASK);
+    // def_key("main_help", GDK_KEY_F1, 0);
+    def_key("main_exit", GDK_KEY_q, GDK_CONTROL_MASK);
+    def_key("main_prefs", GDK_KEY_F12, 0);
+    def_key("book_add", GDK_KEY_d, GDK_CONTROL_MASK);
 
     if (keysets)
         g_list_free(keysets);
