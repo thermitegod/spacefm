@@ -1339,7 +1339,7 @@ xset_set_set(XSet* set, int var, const char* value)
             set->keymod = strtol(value, nullptr, 10);
             break;
         case XSET_SET_SET_STYLE:
-            set->menu_style = strtol(value, nullptr, 10);
+            set->menu_style = (XSetMenu)strtol(value, nullptr, 10);
             break;
         case XSET_SET_SET_DESC:
             if (set->desc)
@@ -6819,7 +6819,10 @@ xset_new_builtin_toolitem(char tool_type)
 
     XSet* set = xset_custom_new();
     set->tool = tool_type;
-    set->task = set->task_err = set->task_out = set->keep_terminal = 0;
+    set->task = XSET_B_UNSET;
+    set->task_err = XSET_B_UNSET;
+    set->task_out = XSET_B_UNSET;
+    set->keep_terminal = XSET_B_UNSET;
 
     return set;
 }
