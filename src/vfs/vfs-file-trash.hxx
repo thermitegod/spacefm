@@ -78,28 +78,28 @@ class TrashDir
     TrashDir(const std::string& _path, dev_t device);
 
     // Return the full path for this trash directory.
-    std::string
+    [[nodiscard]] std::string
     path() const
     {
         return _path;
     }
 
     // Return the device (as returned from stat()) for this trash directory.
-    dev_t
+    [[nodiscard]] dev_t
     device() const
     {
         return _device;
     }
 
     // Return the path of the "files" subdirectory of this trash dir.
-    std::string
+    [[nodiscard]] std::string
     files_path() const
     {
         return _path + "/files";
     }
 
     // Return the path of the "info" subdirectory of this trash dir.
-    std::string
+    [[nodiscard]] std::string
     info_path() const
     {
         return _path + "/info";
