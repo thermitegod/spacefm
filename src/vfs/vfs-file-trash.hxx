@@ -57,11 +57,11 @@ class Trash
     TrashDir* trash_dir(const std::string& path);
 
     // Data Members
-    static Trash* _instance;
+    static Trash* m_instance;
 
-    dev_t _home_device;
-    TrashDir* _home_trash_dir{nullptr};
-    TrashDirMap _trash_dirs;
+    dev_t m_home_device;
+    TrashDir* m_home_trash_dir{nullptr};
+    TrashDirMap m_trash_dirs;
 
 }; // class Trash
 
@@ -75,34 +75,34 @@ class TrashDir
 {
   public:
     // Create the trash directory and subdirectories if they do not exist.
-    TrashDir(const std::string& _path, dev_t device);
+    TrashDir(const std::string& path, dev_t device);
 
     // Return the full path for this trash directory.
     [[nodiscard]] std::string
     path() const
     {
-        return _path;
+        return m_path;
     }
 
     // Return the device (as returned from stat()) for this trash directory.
     [[nodiscard]] dev_t
     device() const
     {
-        return _device;
+        return m_device;
     }
 
     // Return the path of the "files" subdirectory of this trash dir.
     [[nodiscard]] std::string
     files_path() const
     {
-        return _path + "/files";
+        return m_path + "/files";
     }
 
     // Return the path of the "info" subdirectory of this trash dir.
     [[nodiscard]] std::string
     info_path() const
     {
-        return _path + "/info";
+        return m_path + "/info";
     }
 
     // Get a unique name for use within the trash directory
@@ -119,6 +119,6 @@ class TrashDir
     static void check_dir_exists(const std::string& dir, mode_t mode);
 
     // Data Members
-    std::string _path;
-    dev_t _device;
+    std::string m_path;
+    dev_t m_device;
 };

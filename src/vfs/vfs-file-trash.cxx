@@ -19,27 +19,27 @@
 #include "vfs-file-trash.hxx"
 //#include "../logger.hxx"
 
-Trash* Trash::_instance = nullptr;
+Trash* Trash::m_instance = nullptr;
 
 Trash*
 Trash::instance()
 {
-    if (!_instance)
-        _instance = new Trash();
+    if (!m_instance)
+        m_instance = new Trash();
 
-    return _instance;
+    return m_instance;
 }
 
 Trash::Trash()
 {
-    _home_device = device(vfs_user_home_dir());
+    m_home_device = device(vfs_user_home_dir());
 
     std::string home_trash_dir = vfs_user_data_dir();
     home_trash_dir += "/Trash";
 
-    _home_trash_dir = new TrashDir(home_trash_dir, _home_device);
+    m_home_trash_dir = new TrashDir(home_trash_dir, m_home_device);
 
-    _trash_dirs[_home_device] = _home_trash_dir;
+    m_trash_dirs[m_home_device] = m_home_trash_dir;
 }
 
 Trash::~Trash()
@@ -93,8 +93,8 @@ Trash::trash_dir(const std::string& path)
 {
     dev_t dev = device(path);
 
-    if (_trash_dirs.count(dev))
-        return _trash_dirs[dev];
+    if (m_trash_dirs.count(dev))
+        return m_trash_dirs[dev];
 
     // on another device cannot use $HOME trashcan
     std::string top_dir = toplevel(path);
@@ -105,7 +105,7 @@ Trash::trash_dir(const std::string& path)
     int result = stat(trashPath.c_str(), &file_stat);
 
     TrashDir* trash_dir = new TrashDir(trashPath, dev);
-    _trash_dirs[dev] = trash_dir;
+    m_trash_dirs[dev] = trash_dir;
 
     return trash_dir;
 }
@@ -140,7 +140,7 @@ Trash::empty()
     // NOOP
 }
 
-TrashDir::TrashDir(const std::string& path, dev_t device) : _path(path), _device(device)
+TrashDir::TrashDir(const std::string& path, dev_t device) : m_path(path), m_device(device)
 {
     // LOG_DEBUG("create trash dirs {}", path);
 
