@@ -9,6 +9,9 @@
  *
  */
 
+#include <string>
+#include <filesystem>
+
 #include <fcntl.h>
 
 #if defined(__GLIBC__)
@@ -1073,7 +1076,7 @@ vfs_dir_monitor_mime()
     if (mime_dir)
         return;
     char* path = g_build_filename(vfs_user_data_dir(), "mime/packages", nullptr);
-    if (g_file_test(path, G_FILE_TEST_IS_DIR))
+    if (std::filesystem::is_directory(path))
     {
         mime_dir = vfs_dir_get_by_path(path);
         if (mime_dir)

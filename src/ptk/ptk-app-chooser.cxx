@@ -7,6 +7,9 @@
  *
  */
 
+#include <string>
+#include <filesystem>
+
 #include "../vfs/vfs-app-desktop.hxx"
 #include "../vfs/vfs-user-dir.hxx"
 
@@ -573,7 +576,7 @@ load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* tas
             vfs_async_task_unlock(task);
 
             path = g_build_filename(dir_path, name, nullptr);
-            if (G_UNLIKELY(g_file_test(path, G_FILE_TEST_IS_DIR)))
+            if (G_UNLIKELY(std::filesystem::is_directory(path)))
             {
                 /* recursively load sub dirs */
                 load_all_apps_in_dir(path, list, task);

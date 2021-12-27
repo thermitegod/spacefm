@@ -10,6 +10,9 @@
  * and adding non-HAL device manager features
  */
 
+#include <string>
+#include <filesystem>
+
 #include "ptk-location-view.hxx"
 #include "ptk-handler.hxx"
 #include "main-window.hxx"
@@ -786,7 +789,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
 
     // attempt to remove existing dir - succeeds only if empty and unmounted
     rmdir(point);
-    while (g_file_test(point, G_FILE_TEST_EXISTS))
+    while (std::filesystem::exists(point))
     {
         g_free(point);
         point = g_strdup_printf("%s-%d", point1, r++);
@@ -852,7 +855,7 @@ on_autoopen_net_cb(VFSFileTask* task, AutoOpen* ao)
         // if fuse fails, device may be in mtab even though mount point doesn't
         // exist, so test for mount point exists
         if (GTK_IS_WIDGET(ao->file_browser) &&
-            g_file_test(device_file_vol->mount_point, G_FILE_TEST_IS_DIR))
+            std::filesystem::is_directory(device_file_vol->mount_point))
         {
             ptk_file_browser_emit_open(ao->file_browser,
                                        device_file_vol->mount_point,
@@ -1831,7 +1834,7 @@ on_root_udevil(GtkMenuItem* item, GtkWidget* view)
     char* udevil_conf = g_build_filename(SYSCONFDIR, "udevil", "udevil.conf", nullptr);
     char* msg =
         g_strdup_printf("The %s directory was not found.  Is udevil installed?", udevil_path);
-    if (g_file_test(udevil_path, G_FILE_TEST_IS_DIR))
+    if (std::filesystem::is_directory(udevil_path))
         xset_edit(view, udevil_conf, true, false);
     else
         xset_msg_dialog(view, GTK_MESSAGE_ERROR, "Directory Missing", 0, msg, nullptr);
@@ -3203,7 +3206,7 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
     {
         // custom 'icon' file?
         icon_file = g_build_filename(xset_get_config_dir(), "scripts", set->name, "icon", nullptr);
-        if (!g_file_test(icon_file, G_FILE_TEST_EXISTS))
+        if (!std::filesystem::exists(icon_file))
         {
             g_free(icon_file);
             icon_file = nullptr;

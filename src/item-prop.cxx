@@ -5,6 +5,7 @@
  */
 
 #include <string>
+#include <filesystem>
 
 #include <gtk/gtk.h>
 
@@ -1037,7 +1038,7 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
         if (ctxt->set->plugin)
         {
             folder = g_build_filename(ctxt->set->plug_dir, "files", nullptr);
-            if (!g_file_test(folder, G_FILE_TEST_EXISTS))
+            if (!std::filesystem::exists(folder))
             {
                 g_free(folder);
                 folder = g_build_filename(ctxt->set->plug_dir, ctxt->set->plug_name, nullptr);
@@ -1047,7 +1048,7 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
         {
             folder = g_build_filename(xset_get_config_dir(), "scripts", ctxt->set->name, nullptr);
         }
-        if (!g_file_test(folder, G_FILE_TEST_EXISTS) && !ctxt->set->plugin)
+        if (!std::filesystem::exists(folder) && !ctxt->set->plugin)
         {
             g_mkdir_with_parents(folder, 0700);
         }
@@ -1063,7 +1064,7 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
         else
             folder =
                 g_build_filename(xset_get_config_dir(), "plugin-data", ctxt->set->name, nullptr);
-        if (!g_file_test(folder, G_FILE_TEST_EXISTS))
+        if (!std::filesystem::exists(folder))
         {
             g_mkdir_with_parents(folder, 0700);
         }
@@ -1076,7 +1077,7 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
     }
     else
         return;
-    if (folder && g_file_test(folder, G_FILE_TEST_IS_DIR))
+    if (folder && std::filesystem::is_directory(folder))
         open_in_prog(folder);
     g_free(folder);
 }

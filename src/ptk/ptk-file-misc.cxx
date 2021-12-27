@@ -9,6 +9,9 @@
  *
  */
 
+#include <string>
+#include <filesystem>
+
 #include "ptk-file-misc.hxx"
 
 #include "ptk-utils.hxx"
@@ -336,7 +339,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         bool new_link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link));
         if (new_folder ||
             (new_link &&
-             g_file_test(gtk_entry_get_text(GTK_ENTRY(mset->entry_target)), G_FILE_TEST_IS_DIR) &&
+             std::filesystem::is_directory(gtk_entry_get_text(GTK_ENTRY(mset->entry_target))) &&
              gtk_entry_get_text(GTK_ENTRY(mset->entry_target))[0] == '/'))
         {
             if (!mset->is_dir)
@@ -592,7 +595,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
             if (lstat(full_path, &statbuf) == 0)
             {
                 full_path_exists = true;
-                if (g_file_test(full_path, G_FILE_TEST_IS_DIR))
+                if (std::filesystem::is_directory(full_path))
                     full_path_exists_dir = true;
             }
         }
@@ -602,12 +605,12 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         if (lstat(full_path, &statbuf) == 0)
         {
             full_path_exists = true;
-            if (g_file_test(full_path, G_FILE_TEST_IS_DIR))
+            if (std::filesystem::is_directory(full_path))
                 full_path_exists_dir = true;
         }
         else if (lstat(path, &statbuf) == 0)
         {
-            if (!g_file_test(path, G_FILE_TEST_IS_DIR))
+            if (!std::filesystem::is_directory(path))
                 path_exists_file = true;
         }
         else
@@ -1833,7 +1836,7 @@ get_unique_name(const char* dir, const char* ext)
 
     int n = 2;
     struct stat statbuf;
-    while (lstat(path, &statbuf) == 0) // g_file_test doesn't see broken links
+    while (lstat(path, &statbuf) == 0) // need to see broken symlinks
     {
         g_free(path);
         if (n == 1000)
@@ -1909,7 +1912,7 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
             char* path = g_build_filename(templates_path, name, nullptr);
             if (getdir)
             {
-                if (g_file_test(path, G_FILE_TEST_IS_DIR))
+                if (std::filesystem::is_directory(path))
                 {
                     if (subdir)
                         subsubdir = g_build_filename(subdir, name, nullptr);
@@ -1917,14 +1920,14 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
                         subsubdir = g_strdup(name);
                     templates = g_list_prepend(templates, g_strdup_printf("%s/", subsubdir));
                     // prevent filesystem loops during recursive find
-                    if (!g_file_test(path, G_FILE_TEST_IS_SYMLINK))
+                    if (!std::filesystem::is_symlink(path))
                         templates = get_templates(templates_dir, subsubdir, templates, getdir);
                     g_free(subsubdir);
                 }
             }
             else
             {
-                if (g_file_test(path, G_FILE_TEST_IS_REGULAR))
+                if (std::filesystem::is_regular_file(path))
                 {
                     if (subdir)
                         templates =
@@ -1932,9 +1935,9 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
                     else
                         templates = g_list_prepend(templates, g_strdup(name));
                 }
-                else if (g_file_test(path, G_FILE_TEST_IS_DIR) &&
+                else if (std::filesystem::is_directory(path) &&
                          // prevent filesystem loops during recursive find
-                         !g_file_test(path, G_FILE_TEST_IS_SYMLINK))
+                         !std::filesystem::is_symlink(path))
                 {
                     if (subdir)
                     {
@@ -1985,7 +1988,7 @@ on_template_changed(GtkWidget* widget, MoveSet* mset)
     gtk_text_buffer_get_end_iter(mset->buf_full_path, &iter);
     char* full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
     struct stat statbuf;
-    if (lstat(full_path, &statbuf) == 0) // g_file_test doesn't see broken links
+    if (lstat(full_path, &statbuf) == 0) // need to see broken symlinks
     {
         char* dir = g_path_get_dirname(full_path);
         g_free(full_path);
@@ -2190,7 +2193,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         if (path)
         {
             mset->mime_type = path;
-            if (g_file_test(path, G_FILE_TEST_EXISTS))
+            if (std::filesystem::exists(path))
                 type = g_strdup_printf("Link-> %s", path);
             else
             {
@@ -2768,7 +2771,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             else
                 root_msg = "";
 
-            if (!g_file_test(path, G_FILE_TEST_EXISTS))
+            if (!std::filesystem::exists(path))
             {
                 // create parent directory
                 if (xset_get_b("move_dlg_confirm_create"))
@@ -2801,7 +2804,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             else if (lstat(full_path, &statbuf) == 0)
             {
                 // overwrite
-                if (g_file_test(full_path, G_FILE_TEST_IS_DIR))
+                if (std::filesystem::is_directory(full_path))
                     goto _continue_free; // just in case
                 if (xset_msg_dialog(mset->parent,
                                     GTK_MESSAGE_WARNING,
@@ -2876,7 +2879,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                         if (tdir)
                         {
                             from_path = g_build_filename(tdir, str, nullptr);
-                            if (!g_file_test(from_path, G_FILE_TEST_IS_REGULAR))
+                            if (!std::filesystem::is_regular_file(from_path))
                             {
                                 ptk_show_error(GTK_WINDOW(mset->dlg),
                                                "Template Missing",
@@ -2957,7 +2960,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                         if (tdir)
                         {
                             from_path = g_build_filename(tdir, str, nullptr);
-                            if (!g_file_test(from_path, G_FILE_TEST_IS_DIR))
+                            if (!std::filesystem::is_directory(from_path))
                             {
                                 ptk_show_error(GTK_WINDOW(mset->dlg),
                                                "Template Missing",
@@ -3426,7 +3429,7 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
              * for this program
              */
             char* name = g_strconcat(app_desktop, ".desktop", nullptr);
-            if (g_file_test(name, G_FILE_TEST_EXISTS))
+            if (std::filesystem::exists(name))
             {
                 app = vfs_app_desktop_new(name);
             }
@@ -3513,7 +3516,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                 // No app specified - Use default app for each file
 
                 // Is a dir?  Open in browser
-                if (G_LIKELY(file_browser) && g_file_test(full_path, G_FILE_TEST_IS_DIR))
+                if (G_LIKELY(file_browser) && std::filesystem::is_directory(full_path))
                 {
                     if (!new_dir)
                         new_dir = full_path;
@@ -3618,7 +3621,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                     char* target_path = g_file_read_link(full_path, nullptr);
                     if (target_path)
                     {
-                        if (!g_file_test(target_path, G_FILE_TEST_EXISTS))
+                        if (!std::filesystem::exists(target_path))
                         {
                             char* msg = g_strdup_printf(
                                 "This symlink's target is missing or you do not have permission "
@@ -3816,7 +3819,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
                                 "Choose Location",
                                 folder,
                                 nullptr);
-        if (path && g_file_test(path, G_FILE_TEST_IS_DIR))
+        if (path && std::filesystem::is_directory(path))
         {
             xset_set_set(set, XSET_SET_SET_DESC, path);
             char* quote_path = bash_quote(path);

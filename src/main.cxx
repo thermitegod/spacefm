@@ -9,6 +9,9 @@
 
 #include <csignal>
 
+#include <string>
+#include <filesystem>
+
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/sysmacros.h>
@@ -768,12 +771,12 @@ handle_parsed_commandline_args()
 
                 real_path = dup_to_absolute_file_path(file);
 
-                if (g_file_test(real_path, G_FILE_TEST_IS_DIR))
+                if (std::filesystem::is_directory(real_path))
                 {
                     open_in_tab(&main_window, real_path);
                     ret = true;
                 }
-                else if (g_file_test(real_path, G_FILE_TEST_EXISTS))
+                else if (std::filesystem::exists(real_path))
                 {
                     if (stat(real_path, &statbuf) == 0 && S_ISBLK(statbuf.st_mode))
                     {

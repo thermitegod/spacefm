@@ -20,6 +20,9 @@
  *      MA 02110-1301, USA.
  */
 
+#include <string>
+#include <filesystem>
+
 #include <sys/stat.h>
 
 #include <libffmpegthumbnailer/videothumbnailerc.h>
@@ -529,7 +532,7 @@ vfs_thumbnail_init()
 {
     char* dir = g_build_filename(vfs_user_cache_dir(), "thumbnails/normal", nullptr);
 
-    if (G_LIKELY(g_file_test(dir, G_FILE_TEST_IS_DIR)))
+    if (G_LIKELY(std::filesystem::is_directory(dir)))
         chmod(dir, 0700);
     else
         g_mkdir_with_parents(dir, 0700);

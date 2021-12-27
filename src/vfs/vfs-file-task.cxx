@@ -10,6 +10,7 @@
  */
 
 #include <string>
+#include <filesystem>
 
 #include <fcntl.h>
 #include <utime.h>
@@ -519,7 +520,7 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
             }
 
             // MOD if dest is a symlink, delete it first to prevent overwriting target!
-            if (g_file_test(dest_file, G_FILE_TEST_IS_SYMLINK))
+            if (std::filesystem::is_symlink(dest_file))
             {
                 result = unlink(dest_file);
                 if (result)
@@ -571,7 +572,7 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
                 else
                 {
                     // MOD don't chmod link
-                    if (!g_file_test(dest_file, G_FILE_TEST_IS_SYMLINK))
+                    if (!std::filesystem::is_symlink(dest_file))
                     {
                         chmod(dest_file, file_stat.st_mode);
                         times.actime = file_stat.st_atime;
@@ -671,7 +672,7 @@ vfs_file_task_do_move(VFSFileTask* task, const char* src_file,
         vfs_file_task_unlock(task);
     }
 
-    if (S_ISDIR(file_stat.st_mode) && g_file_test(dest_file, G_FILE_TEST_IS_DIR))
+    if (S_ISDIR(file_stat.st_mode) && std::filesystem::is_directory(dest_file))
     {
         // moving a directory onto a directory that exists
         GError* error = nullptr;
@@ -720,7 +721,7 @@ vfs_file_task_do_move(VFSFileTask* task, const char* src_file,
         }
     }
     // MOD don't chmod link
-    else if (!g_file_test(dest_file, G_FILE_TEST_IS_SYMLINK))
+    else if (!std::filesystem::is_symlink(dest_file))
         chmod(dest_file, file_stat.st_mode);
 
     vfs_file_task_lock(task);
@@ -901,7 +902,7 @@ vfs_file_task_link(char* src_file, VFSFileTask* task)
     if (stat(src_file, &src_stat) == -1)
     {
         // MOD allow link to broken symlink
-        if (errno != 2 || !g_file_test(src_file, G_FILE_TEST_IS_SYMLINK)) // MOD
+        if (errno != 2 || !std::filesystem::is_symlink(src_file))
         {
             vfs_file_task_error(task, errno, "Accessing", src_file);
             if (should_abort(task))
@@ -1366,7 +1367,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     const char* tmp;
     tmp = xset_get_user_tmp_dir();
 
-    if (!tmp || !g_file_test(tmp, G_FILE_TEST_IS_DIR))
+    if (!tmp || !std::filesystem::is_directory(tmp))
     {
         str = g_strdup("Cannot create temporary directory");
         LOG_WARN("{}", str);
@@ -1421,7 +1422,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
             hexname = g_strdup_printf("%s-tmp.sh", randhex8());
             task->exec_script = g_build_filename(tmp, hexname, nullptr);
             g_free(hexname);
-        } while (g_file_test(task->exec_script, G_FILE_TEST_EXISTS));
+        } while (std::filesystem::exists(task->exec_script));
 
         // open buffer
         GString* buf = g_string_sized_new(524288); // 500K

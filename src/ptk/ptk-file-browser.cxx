@@ -4,6 +4,9 @@
  *
  */
 
+#include <string>
+#include <filesystem>
+
 #include <malloc.h>
 
 #include <fnmatch.h>
@@ -521,7 +524,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
     }
 
     char* str;
-    bool final_path_exists = g_file_test(final_path, G_FILE_TEST_EXISTS);
+    bool final_path_exists = std::filesystem::exists(final_path);
 
     if (!final_path_exists &&
         (text[0] == '$' || text[0] == '+' || text[0] == '&' || text[0] == '!' || text[0] == '\0'))
@@ -625,7 +628,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
             final_path = replace_string(str, "//", "/", false);
             g_free(str);
         }
-        if (g_file_test(final_path, G_FILE_TEST_IS_DIR))
+        if (std::filesystem::is_directory(final_path))
         {
             // open dir
             if (strcmp(final_path, ptk_file_browser_get_cwd(file_browser)))
@@ -1915,7 +1918,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
     else
         path = nullptr;
 
-    if (!path || !g_file_test(path, (G_FILE_TEST_IS_DIR)))
+    if (!path || !std::filesystem::is_directory(path))
     {
         if (!inhibit_focus)
         {
@@ -2173,7 +2176,7 @@ on_folder_content_changed(VFSDir* dir, VFSFileInfo* file, PtkFileBrowser* file_b
     if (file == nullptr)
     {
         // The current directory itself changed
-        if (!g_file_test(ptk_file_browser_get_cwd(file_browser), G_FILE_TEST_IS_DIR))
+        if (!std::filesystem::is_directory(ptk_file_browser_get_cwd(file_browser)))
             // current directory doesn't exist - was renamed
             on_close_notebook_page(nullptr, file_browser);
     }
@@ -2344,13 +2347,13 @@ ptk_file_browser_canon(PtkFileBrowser* file_browser, const char* path)
     if (!canon || !g_strcmp0(canon, cwd) || !g_strcmp0(canon, path))
         return;
 
-    if (g_file_test(canon, G_FILE_TEST_IS_DIR))
+    if (std::filesystem::is_directory(canon))
     {
         // open dir
         ptk_file_browser_chdir(file_browser, canon, PTK_FB_CHDIR_ADD_HISTORY);
         gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
     }
-    else if (g_file_test(canon, G_FILE_TEST_EXISTS))
+    else if (std::filesystem::exists(canon))
     {
         // open dir and select file
         char* dir_path = g_path_get_dirname(canon);
@@ -3344,7 +3347,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
             /* open in new tab if its a directory */
             if (G_LIKELY(file_path))
             {
-                if (g_file_test(file_path, G_FILE_TEST_IS_DIR))
+                if (std::filesystem::is_directory(file_path))
                 {
                     g_signal_emit(file_browser,
                                   signals[OPEN_ITEM_SIGNAL],
@@ -3541,7 +3544,7 @@ ptk_file_browser_new_tab(GtkMenuItem* item, PtkFileBrowser* file_browser)
     else
         dir_path = vfs_user_home_dir();
 
-    if (!g_file_test(dir_path, G_FILE_TEST_IS_DIR))
+    if (!std::filesystem::is_directory(dir_path))
         g_signal_emit(file_browser, signals[OPEN_ITEM_SIGNAL], 0, "/", PTK_OPEN_NEW_TAB);
     else
     {
@@ -3554,14 +3557,14 @@ ptk_file_browser_new_tab_here(GtkMenuItem* item, PtkFileBrowser* file_browser)
 {
     focus_folder_view(file_browser);
     const char* dir_path = ptk_file_browser_get_cwd(file_browser);
-    if (!g_file_test(dir_path, G_FILE_TEST_IS_DIR))
+    if (!std::filesystem::is_directory(dir_path))
     {
         if (xset_get_s("go_set_default"))
             dir_path = xset_get_s("go_set_default");
         else
             dir_path = vfs_user_home_dir();
     }
-    if (!g_file_test(dir_path, G_FILE_TEST_IS_DIR))
+    if (!std::filesystem::is_directory(dir_path))
         g_signal_emit(file_browser, signals[OPEN_ITEM_SIGNAL], 0, "/", PTK_OPEN_NEW_TAB);
     else
     {
@@ -4107,7 +4110,7 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
         // a dir is already loading
         return;
 
-    if (!g_file_test(ptk_file_browser_get_cwd(file_browser), G_FILE_TEST_IS_DIR))
+    if (!std::filesystem::is_directory(ptk_file_browser_get_cwd(file_browser)))
     {
         on_close_notebook_page(nullptr, file_browser);
         return;
@@ -4302,7 +4305,7 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, int x, int y)
                                              nullptr);
                 /*  this isn't needed?
                                 // dest_path is a link? resolve
-                                if ( g_file_test( dest_path, G_FILE_TEST_IS_SYMLINK ) )
+                                if ( std::filesystem::is_symlink(dest_path))
                                 {
                                     char* old_dest = dest_path;
                                     dest_path = g_file_read_link( old_dest, nullptr );
@@ -4965,7 +4968,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
                                       "Choose Location",
                                       folder,
                                       nullptr);
-        if (path && g_file_test(path, G_FILE_TEST_IS_DIR))
+        if (path && std::filesystem::is_directory(path))
         {
             if (g_str_has_prefix(setname, "copy_loc"))
                 copy_dest = path;
@@ -5866,7 +5869,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
             const char* text = browser->path_bar && gtk_widget_has_focus(browser->path_bar)
                                    ? gtk_entry_get_text(GTK_ENTRY(browser->path_bar))
                                    : nullptr;
-            if (text && (g_file_test(text, G_FILE_TEST_EXISTS) || strstr(text, ":/") ||
+            if (text && (std::filesystem::exists(text) || strstr(text, ":/") ||
                          g_str_has_prefix(text, "//")))
                 ptk_bookmark_view_add_bookmark(nullptr, browser, text);
             else

@@ -9,6 +9,9 @@
  *
  */
 
+#include <string>
+#include <filesystem>
+
 #include <fnmatch.h>
 
 #include "ptk-handler.hxx"
@@ -732,7 +735,7 @@ ptk_handler_get_command(int mode, int cmd, XSet* handler_set)
     char* script = replace_string(def_script, "/exec.sh", str, false);
     g_free(str);
     g_free(def_script);
-    if (g_file_test(script, G_FILE_TEST_EXISTS))
+    if (std::filesystem::exists(script))
         return script;
     LOG_WARN("ptk_handler_get_command missing script for custom {}", handler_set->name);
     g_free(script);
@@ -794,7 +797,7 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
     if (!view)
         gstr = g_string_new("");
 
-    if (g_file_test(script, G_FILE_TEST_EXISTS))
+    if (std::filesystem::exists(script))
     {
         if ((file = fopen(script, "r")))
         {
@@ -868,7 +871,7 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
     }
     // create parent dir
     char* parent_dir = g_path_get_dirname(def_script);
-    if (!g_file_test(parent_dir, G_FILE_TEST_IS_DIR))
+    if (!std::filesystem::is_directory(parent_dir))
     {
         g_mkdir_with_parents(parent_dir, 0700);
     }
@@ -2592,7 +2595,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
         case HANDLER_JOB_IMPORT_FILE:
             // get file path
             save = xset_get("plug_ifile");
-            if (save->s) //&& g_file_test( save->s, G_FILE_TEST_IS_DIR )
+            if (save->s) //&& std::filesystem::is_directory(save->s)
                 folder = save->s;
             else
             {
@@ -2650,7 +2653,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     }
     char* hex8;
     folder = nullptr;
-    while (!folder || (folder && g_file_test(folder, G_FILE_TEST_EXISTS)))
+    while (!folder || (folder && std::filesystem::exists(folder)))
     {
         hex8 = randhex8();
         if (folder)

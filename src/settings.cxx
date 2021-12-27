@@ -9,8 +9,10 @@
  */
 
 #include <string>
+#include <filesystem>
 
 #include <unistd.h>
+
 #include <sys/stat.h>
 
 #include <gtk/gtk.h>
@@ -253,7 +255,7 @@ parse_conf(const char* etc_path, char* line)
     }
     else if (!strcmp(sname, "terminal_su") || !strcmp(sname, "graphical_su"))
     {
-        if (svalue[0] != '/' || !g_file_test(svalue, G_FILE_TEST_EXISTS))
+        if (svalue[0] != '/' || !std::filesystem::exists(svalue))
             LOG_WARN("{}: {} '{}' file not found", etc_path, sname, svalue);
         else if (!strcmp(sname, "terminal_su"))
             config_settings.terminal_su = svalue;
@@ -282,7 +284,7 @@ load_conf()
 
     // load spacefm.conf
     char* config_path = g_build_filename(vfs_user_config_dir(), "spacefm", "spacefm.conf", nullptr);
-    if (!g_file_test(config_path, G_FILE_TEST_EXISTS))
+    if (!std::filesystem::exists(config_path))
         config_path = g_build_filename(SYSCONFDIR, "spacefm", "spacefm.conf", nullptr);
 
     FILE* file = fopen(config_path, "r");
@@ -345,11 +347,11 @@ load_settings(const char* config_dir)
 
     char* command;
 
-    if (!g_file_test(settings_config_dir, G_FILE_TEST_EXISTS))
+    if (!std::filesystem::exists(settings_config_dir))
     {
         // copy /etc/xdg/spacefm
         char* xdg_path = g_build_filename(SYSCONFDIR, "xdg", "spacefm", nullptr);
-        if (g_file_test(xdg_path, G_FILE_TEST_IS_DIR))
+        if (std::filesystem::is_directory(xdg_path))
         {
             command = g_strdup_printf("cp -r %s '%s'", xdg_path, settings_config_dir);
             print_command(command);
@@ -360,14 +362,14 @@ load_settings(const char* config_dir)
         g_free(xdg_path);
     }
 
-    if (!g_file_test(settings_config_dir, G_FILE_TEST_EXISTS))
+    if (!std::filesystem::exists(settings_config_dir))
         g_mkdir_with_parents(settings_config_dir, 0700);
 
     // check if .git exists
     if (config_settings.git_backed_settings)
     {
-        if (!G_LIKELY(g_file_test(g_build_filename(settings_config_dir, ".git", nullptr),
-                                  G_FILE_TEST_EXISTS)))
+        if (!G_LIKELY(
+                std::filesystem::exists(g_build_filename(settings_config_dir, ".git", nullptr))))
         {
             command = g_strdup_printf("%s -c \"cd %s && git init && "
                                       "git config commit.gpgsign false\"",
@@ -381,7 +383,7 @@ load_settings(const char* config_dir)
 
     // load session
     path = g_build_filename(settings_config_dir, "session", nullptr);
-    if (G_LIKELY(g_file_test(path, G_FILE_TEST_EXISTS)))
+    if (G_LIKELY(std::filesystem::exists(path)))
     {
         if (config_settings.git_backed_settings)
         {
@@ -398,7 +400,7 @@ load_settings(const char* config_dir)
             // copy session to session-old
             char* old = g_build_filename(settings_config_dir, "session-old", nullptr);
             command = g_strdup_printf("cp -a  %s %s", path, old);
-            if (g_file_test(old, G_FILE_TEST_EXISTS))
+            if (std::filesystem::exists(old))
                 unlink(old);
             print_command(command);
             g_spawn_command_line_sync(command, nullptr, nullptr, nullptr, nullptr);
@@ -422,7 +424,7 @@ load_settings(const char* config_dir)
         {
             path = g_build_filename(settings_config_dir, "session-old", nullptr);
         }
-        if (!g_file_test(path, G_FILE_TEST_EXISTS))
+        if (!std::filesystem::exists(path))
             path = nullptr;
     }
 
@@ -637,7 +639,7 @@ save_settings(void* main_window_ptr)
     }
 
     /* save settings */
-    if (G_UNLIKELY(!g_file_test(settings_config_dir, G_FILE_TEST_EXISTS)))
+    if (G_UNLIKELY(!std::filesystem::exists(settings_config_dir)))
         g_mkdir_with_parents(settings_config_dir, 0700);
 
     GString* buf = g_string_sized_new(4096);
@@ -702,7 +704,7 @@ xset_get_config_dir()
 const char*
 xset_get_user_tmp_dir()
 {
-    if (settings_user_tmp_dir && g_file_test(settings_user_tmp_dir, G_FILE_TEST_EXISTS))
+    if (settings_user_tmp_dir && std::filesystem::exists(settings_user_tmp_dir))
         return settings_user_tmp_dir;
 
     settings_user_tmp_dir = g_build_filename(config_settings.tmp_dir, "spacefm", nullptr);
@@ -1720,7 +1722,7 @@ read_root_settings()
         return;
 
     char* root_set_path = g_strdup_printf("%s/spacefm/%s-as-root", SYSCONFDIR, g_get_user_name());
-    if (!g_file_test(root_set_path, G_FILE_TEST_EXISTS))
+    if (!std::filesystem::exists(root_set_path))
     {
         g_free(root_set_path);
         root_set_path = g_strdup_printf("%s/spacefm/%d-as-root", SYSCONFDIR, geteuid());
@@ -1730,7 +1732,7 @@ read_root_settings()
 
     if (!file)
     {
-        if (g_file_test(root_set_path, G_FILE_TEST_EXISTS))
+        if (std::filesystem::exists(root_set_path))
             LOG_WARN("Error reading root settings from {}/spacefm/  Commands run as root may "
                      "present a security risk",
                      SYSCONFDIR);
@@ -2043,7 +2045,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         else
             icon_file =
                 g_build_filename(settings_config_dir, "scripts", set->name, "icon", nullptr);
-        if (!g_file_test(icon_file, G_FILE_TEST_EXISTS))
+        if (!std::filesystem::exists(icon_file))
         {
             g_free(icon_file);
             icon_file = nullptr;
@@ -2230,7 +2232,7 @@ xset_custom_get_script(XSet* set, bool create)
     if (create)
     {
         path = g_build_filename(settings_config_dir, "scripts", set->name, nullptr);
-        if (!g_file_test(path, G_FILE_TEST_EXISTS))
+        if (!std::filesystem::exists(path))
         {
             g_mkdir_with_parents(path, 0700);
         }
@@ -2246,7 +2248,7 @@ xset_custom_get_script(XSet* set, bool create)
         path = g_build_filename(settings_config_dir, "scripts", set->name, "exec.sh", nullptr);
     }
 
-    if (create && !g_file_test(path, G_FILE_TEST_EXISTS))
+    if (create && !std::filesystem::exists(path))
     {
         FILE* file;
         file = fopen(path, "w");
@@ -2294,7 +2296,7 @@ xset_custom_new_name()
         {
             char* path1 = g_build_filename(settings_config_dir, "scripts", setname, nullptr);
             char* path2 = g_build_filename(settings_config_dir, "plugin-data", setname, nullptr);
-            if (g_file_test(path1, G_FILE_TEST_EXISTS) || g_file_test(path2, G_FILE_TEST_EXISTS))
+            if (std::filesystem::exists(path1) || std::filesystem::exists(path2))
             {
                 g_free(setname);
                 setname = nullptr;
@@ -2367,7 +2369,7 @@ xset_custom_copy_files(XSet* src, XSet* dest)
     // copy data dir
     XSet* mset = xset_get_plugin_mirror(src);
     path_src = g_build_filename(settings_config_dir, "plugin-data", mset->name, nullptr);
-    if (g_file_test(path_src, G_FILE_TEST_IS_DIR))
+    if (std::filesystem::is_directory(path_src))
     {
         path_dest = g_build_filename(settings_config_dir, "plugin-data", dest->name, nullptr);
         command = g_strdup_printf("cp -a %s %s", path_src, path_dest);
@@ -2848,7 +2850,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
     // LOG_INFO("on_install_plugin_cb");
     if (plugin_data->job == PLUGIN_JOB_REMOVE) // uninstall
     {
-        if (!g_file_test(plugin_data->plug_dir, G_FILE_TEST_EXISTS))
+        if (!std::filesystem::exists(plugin_data->plug_dir))
         {
             xset_custom_delete(plugin_data->set, false);
             clean_plugin_mirrors();
@@ -2857,7 +2859,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
     else
     {
         char* plugin = g_build_filename(plugin_data->plug_dir, "plugin", nullptr);
-        if (g_file_test(plugin, G_FILE_TEST_EXISTS))
+        if (std::filesystem::exists(plugin))
         {
             int use = PLUGIN_USE_NORMAL;
             set = xset_import_plugin(plugin_data->plug_dir, &use);
@@ -3179,13 +3181,13 @@ xset_custom_export_files(XSet* set, char* plug_dir)
         path_dest = g_build_filename(plug_dir, set->name, nullptr);
     }
 
-    if (!(g_file_test(path_src, G_FILE_TEST_EXISTS) && dir_has_files(path_src)))
+    if (!(std::filesystem::exists(path_src) && dir_has_files(path_src)))
     {
         if (!strcmp(set->name, "main_book"))
         {
             // exporting all bookmarks - create empty main_book dir
             g_mkdir_with_parents(path_dest, 0755);
-            if (!g_file_test(path_dest, G_FILE_TEST_EXISTS))
+            if (!std::filesystem::exists(path_dest))
             {
                 g_free(path_src);
                 g_free(path_dest);
@@ -3241,7 +3243,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 
     // get new plugin filename
     XSet* save = xset_get("plug_cfile");
-    if (save->s) //&& g_file_test( save->s, G_FILE_TEST_IS_DIR )
+    if (save->s) //&& std::filesystem::is_directory(save->s)
         deffolder = save->s;
     else
     {
@@ -3304,7 +3306,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
         char* s1 = (char*)xset_get_user_tmp_dir();
         if (!s1)
             goto _export_error;
-        while (!plug_dir || g_file_test(plug_dir, G_FILE_TEST_EXISTS))
+        while (!plug_dir || std::filesystem::exists(plug_dir))
         {
             char* hex8 = randhex8();
             if (plug_dir)
@@ -3439,7 +3441,7 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
         else
             open_in_prog(use_url);
     }
-    else if (g_file_test(use_url, G_FILE_TEST_IS_DIR))
+    else if (std::filesystem::is_directory(use_url))
     {
         // dir
         if (file_browser)
@@ -3453,11 +3455,11 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
         else
             open_in_prog(use_url);
     }
-    else if (g_file_test(use_url, G_FILE_TEST_EXISTS))
+    else if (std::filesystem::exists(use_url))
     {
         // file - open dir and select file
         char* dir = g_path_get_dirname(use_url);
-        if (dir && g_file_test(dir, G_FILE_TEST_IS_DIR))
+        if (dir && std::filesystem::is_directory(dir))
         {
             if (file_browser)
             {
@@ -3686,7 +3688,7 @@ xset_custom_activate(GtkWidget* item, XSet* set)
             specs = set->z;
             while (specs && (specs[0] == ' ' || specs[0] == ';'))
                 specs++;
-            if (specs && g_file_test(specs, G_FILE_TEST_EXISTS))
+            if (specs && std::filesystem::exists(specs))
                 open_spec(set->browser, specs, xset_get_b("book_newtab"));
             else
             {
@@ -3770,7 +3772,7 @@ xset_custom_delete(XSet* set, bool delete_next)
 
     char* path1 = g_build_filename(settings_config_dir, "scripts", set->name, nullptr);
     char* path2 = g_build_filename(settings_config_dir, "plugin-data", set->name, nullptr);
-    if (g_file_test(path1, G_FILE_TEST_EXISTS) || g_file_test(path2, G_FILE_TEST_EXISTS))
+    if (std::filesystem::exists(path1) || std::filesystem::exists(path2))
         command = g_strdup_printf("rm -rf %s %s", path1, path2);
     else
         command = nullptr;
@@ -4679,7 +4681,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             // get file path
             XSet* save;
             save = xset_get("plug_ifile");
-            if (save->s) //&& g_file_test( save->s, G_FILE_TEST_IS_DIR )
+            if (save->s) //&& std::filesystem::is_directory(save->s)
                 folder = save->s;
             else
             {
@@ -4713,7 +4715,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             }
             char* hex8;
             folder = nullptr;
-            while (!folder || (folder && g_file_test(folder, G_FILE_TEST_EXISTS)))
+            while (!folder || (folder && std::filesystem::exists(folder)))
             {
                 hex8 = randhex8();
                 if (folder)
@@ -4733,7 +4735,7 @@ xset_design_job(GtkWidget* item, XSet* set)
         case XSET_JOB_IMPORT_GTK:
             // both GTK2 and GTK3 now use new location?
             file = g_build_filename(vfs_user_config_dir(), "gtk-3.0", "bookmarks", nullptr);
-            if (!(file && g_file_test(file, G_FILE_TEST_EXISTS)))
+            if (!(file && std::filesystem::exists(file)))
                 file = g_build_filename(vfs_user_home_dir(), ".gtk-bookmarks", nullptr);
             msg =
                 g_strdup_printf("GTK bookmarks (%s) will be imported into the current or selected "
@@ -4985,7 +4987,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             if (set->plugin)
             {
                 folder = g_build_filename(set->plug_dir, "files", nullptr);
-                if (!g_file_test(folder, G_FILE_TEST_EXISTS))
+                if (!std::filesystem::exists(folder))
                 {
                     g_free(folder);
                     folder = g_build_filename(set->plug_dir, set->plug_name, nullptr);
@@ -4995,7 +4997,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             {
                 folder = g_build_filename(settings_config_dir, "scripts", set->name, nullptr);
             }
-            if (!g_file_test(folder, G_FILE_TEST_EXISTS) && !set->plugin)
+            if (!std::filesystem::exists(folder) && !set->plugin)
             {
                 g_mkdir_with_parents(folder, 0700);
             }
@@ -5015,7 +5017,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             }
             else
                 folder = g_build_filename(settings_config_dir, "plugin-data", set->name, nullptr);
-            if (!g_file_test(folder, G_FILE_TEST_EXISTS))
+            if (!std::filesystem::exists(folder))
             {
                 g_mkdir_with_parents(folder, 0700);
             }
@@ -7090,7 +7092,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     {
         // custom 'icon' file?
         icon_file = g_build_filename(settings_config_dir, "scripts", set->name, "icon", nullptr);
-        if (!g_file_test(icon_file, G_FILE_TEST_EXISTS))
+        if (!std::filesystem::exists(icon_file))
         {
             g_free(icon_file);
             icon_file = nullptr;

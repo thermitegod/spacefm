@@ -21,6 +21,9 @@
 
 /* Currently this library is NOT MT-safe */
 
+#include <string>
+#include <filesystem>
+
 #include <cstdint>
 
 #include <fcntl.h>

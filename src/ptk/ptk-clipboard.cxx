@@ -8,6 +8,9 @@
  *
  */
 
+#include <string>
+#include <filesystem>
+
 #include "ptk-file-task.hxx"
 #include "ptk-file-misc.hxx"
 #include "ptk-utils.hxx"
@@ -455,7 +458,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
             char* file_path = g_filename_from_uri(*puri, nullptr, nullptr);
             if (file_path)
             {
-                if (g_file_test(file_path, G_FILE_TEST_IS_SYMLINK))
+                if (std::filesystem::is_symlink(file_path))
                 {
                     // canonicalize target
                     char* str = get_real_link_target(file_path);
@@ -464,9 +467,8 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
                 }
                 if (file_path)
                 {
-                    // do not use g_file_test here - link target may be missing
                     struct stat stat;
-                    if (lstat(file_path, &stat) == 0)
+                    if (lstat(file_path, &stat) == 0) // need to see broken symlinks
                         files = g_list_prepend(files, file_path);
                     else
                     {
@@ -565,7 +567,7 @@ ptk_clipboard_get_file_paths(const char* cwd, bool* is_cut, int* missing_targets
         char* file_path = g_filename_from_uri(*puri, nullptr, nullptr);
         if (file_path)
         {
-            if (g_file_test(file_path, G_FILE_TEST_EXISTS))
+            if (std::filesystem::exists(file_path))
             {
                 files = g_list_prepend(files, file_path);
             }

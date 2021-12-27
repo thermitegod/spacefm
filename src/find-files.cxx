@@ -23,6 +23,9 @@
  * Compatibility with other systems like BSD, need to be improved.
  */
 
+#include <string>
+#include <filesystem>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -151,7 +154,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
                 full_path = g_build_filename(dir, vfs_file_info_get_name(file), nullptr);
                 if (G_LIKELY(full_path))
                 {
-                    if (g_file_test(full_path, G_FILE_TEST_IS_DIR))
+                    if (std::filesystem::is_directory(full_path))
                     {
                         ptk_file_browser_emit_open(file_browser, full_path, PTK_OPEN_NEW_TAB);
                     }
@@ -1119,7 +1122,7 @@ fm_find_files(const char** search_dirs)
         const char** dir;
         for (dir = search_dirs; *dir; ++dir)
         {
-            if (g_file_test(*dir, G_FILE_TEST_IS_DIR))
+            if (std::filesystem::is_directory(*dir))
                 gtk_list_store_insert_with_values(data->places_list, &it, 0, 0, *dir, -1);
         }
     }

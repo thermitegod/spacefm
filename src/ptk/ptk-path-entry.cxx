@@ -8,6 +8,9 @@
  *
  */
 
+#include <string>
+#include <filesystem>
+
 #include "ptk-path-entry.hxx"
 
 #include "main-window.hxx"
@@ -73,7 +76,7 @@ seek_path(GtkEntry* entry)
 
     // get dir and name prefix
     seek_dir = get_cwd(entry);
-    if (!(seek_dir && g_file_test(seek_dir, G_FILE_TEST_IS_DIR)))
+    if (!(seek_dir && std::filesystem::is_directory(seek_dir)))
     {
         // entry does not contain a valid dir
         g_free(seek_dir);
@@ -84,7 +87,7 @@ seek_path(GtkEntry* entry)
         // get name prefix
         seek_name = g_path_get_basename(path);
         char* test_path = g_build_filename(seek_dir, seek_name, nullptr);
-        if (g_file_test(test_path, G_FILE_TEST_IS_DIR))
+        if (std::filesystem::is_directory(test_path))
         {
             // complete dir path is in entry - is it unique?
             GDir* dir;
@@ -97,7 +100,7 @@ seek_path(GtkEntry* entry)
                     if (g_str_has_prefix(name, seek_name))
                     {
                         full_path = g_build_filename(seek_dir, name, nullptr);
-                        if (g_file_test(full_path, G_FILE_TEST_IS_DIR))
+                        if (std::filesystem::is_directory(full_path))
                             count++;
                         g_free(full_path);
                     }
@@ -234,7 +237,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
                 while ((name = g_dir_read_name(dir)))
                 {
                     char* full_path = g_build_filename(new_dir, name, nullptr);
-                    if (g_file_test(full_path, G_FILE_TEST_IS_DIR))
+                    if (std::filesystem::is_directory(full_path))
                         name_list = g_slist_prepend(name_list, full_path);
                 }
                 g_dir_close(dir);
@@ -288,7 +291,7 @@ insert_complete(GtkEntry* entry)
         return;
 
     char* dir_path = get_cwd(entry);
-    if (!(dir_path && g_file_test(dir_path, G_FILE_TEST_IS_DIR)))
+    if (!(dir_path && std::filesystem::is_directory(dir_path)))
     {
         g_free(dir_path);
         return;
@@ -316,7 +319,7 @@ insert_complete(GtkEntry* entry)
     while ((name = g_dir_read_name(dir)))
     {
         full_path = g_build_filename(dir_path, name, nullptr);
-        if (g_file_test(full_path, G_FILE_TEST_IS_DIR))
+        if (std::filesystem::is_directory(full_path))
         {
             if (!prefix_name)
             {
@@ -356,7 +359,7 @@ insert_complete(GtkEntry* entry)
     else if (long_prefix)
     {
         full_path = g_build_filename(dir_path, long_prefix, nullptr);
-        if (count == 1 && g_file_test(full_path, G_FILE_TEST_IS_DIR))
+        if (count == 1 && std::filesystem::is_directory(full_path))
         {
             new_prefix = g_strdup_printf("%s/", full_path);
             g_free(full_path);
@@ -629,7 +632,7 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
     // New Bookmark
     set = xset_set_cb("book_add", (GFunc)on_add_bookmark, file_browser);
     const char* text = gtk_entry_get_text(GTK_ENTRY(entry));
-    set->disable = !(text && (g_file_test(text, G_FILE_TEST_EXISTS) || strstr(text, ":/") ||
+    set->disable = !(text && (std::filesystem::exists(text) || strstr(text, ":/") ||
                               g_str_has_prefix(text, "//")));
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
 

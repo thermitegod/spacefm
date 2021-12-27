@@ -16,7 +16,9 @@
  * compatibility with older systems, and is NOT fully spec compliant.
  */
 
-#include <cstring>
+#include <string>
+#include <filesystem>
+
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -492,7 +494,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
         /* generate the basename */
         cust = g_strdup_printf(cust_template, i);
         path = g_build_filename(dir, cust, nullptr); /* test if the filename already exists */
-        if (g_file_test(path, G_FILE_TEST_EXISTS))
+        if (std::filesystem::exists(path))
         {
             g_free(cust);
             g_free(path);
@@ -548,7 +550,7 @@ _locate_desktop_file_recursive(const char* path, const char* desktop_id, bool fi
     while ((name = g_dir_read_name(dir)))
     {
         char* sub_path = g_build_filename(path, name, nullptr);
-        if (g_file_test(sub_path, G_FILE_TEST_IS_DIR))
+        if (std::filesystem::is_directory(sub_path))
         {
             if ((found = _locate_desktop_file_recursive(sub_path, desktop_id, false)))
             {
@@ -556,8 +558,7 @@ _locate_desktop_file_recursive(const char* path, const char* desktop_id, bool fi
                 break;
             }
         }
-        else if (!first && !strcmp(name, desktop_id) &&
-                 g_file_test(sub_path, G_FILE_TEST_IS_REGULAR))
+        else if (!first && !strcmp(name, desktop_id) && std::filesystem::is_regular_file(sub_path))
         {
             found = sub_path;
             break;
@@ -581,7 +582,7 @@ _locate_desktop_file(const char* dir, const char* unused, const void* desktop_id
 
     do
     {
-        if (g_file_test(path, G_FILE_TEST_IS_REGULAR))
+        if (std::filesystem::is_regular_file(path))
         {
             found = true;
             break;

@@ -8,6 +8,9 @@
  *
  */
 
+#include <string>
+#include <filesystem>
+
 #include <gtk/gtk.h>
 
 #include "ptk-file-properties.hxx"
@@ -606,7 +609,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
                     target_path = g_build_filename(dir_path, str, nullptr);
                     g_free(str);
                 }
-                if (!g_file_test(target_path, G_FILE_TEST_EXISTS))
+                if (!std::filesystem::exists(target_path))
                     gtk_label_set_text(GTK_LABEL(mime_type), "( broken link )");
                 g_free(target_path);
             }

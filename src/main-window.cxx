@@ -4,6 +4,9 @@
  *
  */
 
+#include <string>
+#include <filesystem>
+
 #include "window-reference.hxx"
 
 #include <gdk/gdkx.h>
@@ -222,7 +225,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
     {
         // get file path
         XSet* save = xset_get("plug_ifile");
-        if (save->s) //&& g_file_test( save->s, G_FILE_TEST_IS_DIR )
+        if (save->s) //&& std::filesystem::is_directory(save->s)
             deffolder = save->s;
         else
         {
@@ -276,7 +279,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
 
             plug_dir = g_build_filename(DATADIR, "spacefm", "plugins", plug_dir_name, nullptr);
 
-            if (g_file_test(plug_dir, G_FILE_TEST_EXISTS))
+            if (std::filesystem::exists(plug_dir))
             {
                 msg = g_strdup_printf(
                     "There is already a plugin installed as '%s'.  Overwrite ?\n\nTip: You can "
@@ -316,7 +319,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
                 g_free(path);
                 return;
             }
-            while (!plug_dir || (plug_dir && g_file_test(plug_dir, G_FILE_TEST_EXISTS)))
+            while (!plug_dir || (plug_dir && std::filesystem::exists(plug_dir)))
             {
                 char* hex8 = randhex8();
                 if (plug_dir)
@@ -429,8 +432,7 @@ import_all_plugins(FMMainWindow* main_window)
             {
                 char* bookmarks_dir = g_build_filename((char*)l->data, name, "main_book", nullptr);
                 char* plug_file = g_build_filename((char*)l->data, name, "plugin", nullptr);
-                if (g_file_test(plug_file, G_FILE_TEST_EXISTS) &&
-                    !g_file_test(bookmarks_dir, G_FILE_TEST_EXISTS))
+                if (std::filesystem::exists(plug_file) && !std::filesystem::exists(bookmarks_dir))
                 {
                     char* plug_dir = g_build_filename((char*)l->data, name, nullptr);
                     if (!xset_import_plugin(plug_dir, nullptr))
@@ -1185,7 +1187,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                                 g_free(tab_dir);
                                 tab_dir = str;
                             }
-                            if (g_file_test(tab_dir, G_FILE_TEST_IS_DIR))
+                            if (std::filesystem::is_directory(tab_dir))
                                 folder_path = tab_dir;
                             else if (!(folder_path = xset_get_s("go_set_default")))
                             {
@@ -3141,7 +3143,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
 
                             if (vfs_file_info_is_dir(file))
                             {
-                                if (g_file_test(target_path, G_FILE_TEST_EXISTS))
+                                if (std::filesystem::exists(target_path))
                                 {
                                     if (!strcmp(target, "/"))
                                         link_info = g_strdup_printf("   Link → %s", target);
@@ -3909,9 +3911,8 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
         {
             c->var[CONTEXT_NAME] = g_strdup(vfs_file_info_get_name(file));
             path = g_build_filename(c->var[CONTEXT_DIR], c->var[CONTEXT_NAME], nullptr);
-            c->var[CONTEXT_IS_DIR] = path && g_file_test(path, G_FILE_TEST_IS_DIR)
-                                         ? g_strdup("true")
-                                         : g_strdup("false");
+            c->var[CONTEXT_IS_DIR] =
+                path && std::filesystem::is_directory(path) ? g_strdup("true") : g_strdup("false");
             c->var[CONTEXT_IS_TEXT] =
                 vfs_file_info_is_text(file, path) ? g_strdup("true") : g_strdup("false");
             c->var[CONTEXT_IS_LINK] =
@@ -4494,7 +4495,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, GString* buf)
         if (set->plugin)
         {
             path = g_build_filename(set->plug_dir, "files", nullptr);
-            if (!g_file_test(path, G_FILE_TEST_EXISTS))
+            if (!std::filesystem::exists(path))
             {
                 g_free(path);
                 path = g_build_filename(set->plug_dir, set->plug_name, nullptr);
@@ -6112,7 +6113,7 @@ main_window_socket_command(char* argv[], char** reply)
         else if (!strcmp(argv[i], "new_tab"))
         {
             focus_panel(nullptr, (void*)main_window, panel);
-            if (!(argv[i + 1] && g_file_test(argv[i + 1], G_FILE_TEST_IS_DIR)))
+            if (!(argv[i + 1] && std::filesystem::is_directory(argv[i + 1])))
                 ptk_file_browser_new_tab(nullptr, file_browser);
             else
                 fm_main_window_add_new_tab(main_window, argv[i + 1]);
@@ -6440,7 +6441,7 @@ main_window_socket_command(char* argv[], char** reply)
                 *reply = g_strdup_printf("spacefm: %s requires a directory path\n", argv[i]);
                 return 1;
             }
-            if (!g_file_test(argv[i + 1], G_FILE_TEST_IS_DIR))
+            if (!std::filesystem::is_directory(argv[i + 1]))
             {
                 *reply = g_strdup_printf("spacefm: directory '%s' does not exist\n", argv[i + 1]);
                 return 1;
@@ -7103,7 +7104,7 @@ main_window_socket_command(char* argv[], char** reply)
                 else if (!strcmp(argv[j], "--dir"))
                 {
                     opt_cwd = argv[++j];
-                    if (!(opt_cwd && opt_cwd[0] == '/' && g_file_test(opt_cwd, G_FILE_TEST_IS_DIR)))
+                    if (!(opt_cwd && opt_cwd[0] == '/' && std::filesystem::is_directory(opt_cwd)))
                     {
                         *reply = g_strdup_printf("spacefm: no such directory '%s'\n", opt_cwd);
                         return 2;
@@ -7179,7 +7180,7 @@ main_window_socket_command(char* argv[], char** reply)
             }
             if (!strcmp(argv[i], "edit"))
             {
-                if (!(argv[j][0] == '/' && g_file_test(argv[j], G_FILE_TEST_EXISTS)))
+                if (!(argv[j][0] == '/' && std::filesystem::exists(argv[j])))
                 {
                     *reply = g_strdup_printf("spacefm: no such file '%s'\n", argv[j]);
                     return 2;
@@ -7209,7 +7210,7 @@ main_window_socket_command(char* argv[], char** reply)
             char* device_file = nullptr;
             VFSVolume* vol = nullptr;
             netmount_t* netmount = nullptr;
-            if (!strcmp(argv[i], "unmount") && g_file_test(real_path, G_FILE_TEST_IS_DIR))
+            if (!strcmp(argv[i], "unmount") && std::filesystem::is_directory(real_path))
             {
                 // unmount DIR
                 if (path_is_mounted_mtab(nullptr, real_path, &device_file, nullptr) && device_file)
@@ -7321,7 +7322,7 @@ main_window_socket_command(char* argv[], char** reply)
                 if (!strcmp(argv[j], "--dir"))
                 {
                     opt_cwd = argv[++j];
-                    if (!(opt_cwd && opt_cwd[0] == '/' && g_file_test(opt_cwd, G_FILE_TEST_IS_DIR)))
+                    if (!(opt_cwd && opt_cwd[0] == '/' && std::filesystem::is_directory(opt_cwd)))
                     {
                         *reply = g_strdup_printf("spacefm: no such directory '%s'\n", opt_cwd);
                         return 2;

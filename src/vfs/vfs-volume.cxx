@@ -10,6 +10,9 @@
  * device info code uses code excerpts from freedesktop's udisks v1.0.4
  */
 
+#include <string>
+#include <filesystem>
+
 #include <libudev.h>
 #include <fcntl.h>
 #include <linux/kdev_t.h>
@@ -274,7 +277,7 @@ sysfs_file_exists(const char* dir, const char* attribute)
 {
     bool result = false;
     char* filename = g_build_filename(dir, attribute, nullptr);
-    if (g_file_test(filename, G_FILE_TEST_EXISTS))
+    if (std::filesystem::exists(filename))
     {
         result = true;
     }
@@ -3489,7 +3492,7 @@ vfs_volume_autoexec(VFSVolume* vol)
         else
         {
             char* path = g_build_filename(vol->mount_point, "VIDEO_TS", nullptr);
-            if (vol->is_dvd && g_file_test(path, G_FILE_TEST_IS_DIR))
+            if (vol->is_dvd && std::filesystem::is_directory(path))
                 command = xset_get_s("dev_exec_video");
             else
             {
@@ -3768,7 +3771,7 @@ unmount_if_mounted(VFSVolume* vol)
     char* mtab_path = g_build_filename(SYSCONFDIR, "mtab", nullptr);
 
     const char* mtab = MTAB;
-    if (!g_file_test(mtab, G_FILE_TEST_EXISTS))
+    if (!std::filesystem::exists(mtab))
         mtab = mtab_path;
 
     char* line = g_strdup_printf("grep -qs '^%s ' %s 2>/dev/nullptr || exit\n%s\n",

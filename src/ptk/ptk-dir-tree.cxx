@@ -8,6 +8,9 @@
  *
  */
 
+#include <string>
+#include <filesystem>
+
 #include <gdk/gdk.h>
 
 #include "settings.hxx"
@@ -695,7 +698,7 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
         while ((name = g_dir_read_name(dir)))
         {
             char* file_path = g_build_filename(path, name, nullptr);
-            if (g_file_test(file_path, G_FILE_TEST_IS_DIR))
+            if (std::filesystem::is_directory(file_path))
             {
                 ptk_dir_tree_insert_child(tree, node, file_path, name);
             }
@@ -784,7 +787,7 @@ on_file_monitor_event(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char*
                 else
                     child = nullptr;
                 file_path = g_build_filename(fm->path, file_name, nullptr);
-                if (g_file_test(file_path, G_FILE_TEST_IS_DIR))
+                if (std::filesystem::is_directory(file_path))
                 {
                     ptk_dir_tree_insert_child(node->tree, node, fm->path, file_name);
                     if (child)

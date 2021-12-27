@@ -10,6 +10,9 @@
  *
  */
 
+#include <string>
+#include <filesystem>
+
 #include <gtk/gtk.h>
 
 #include "vfs-mime-type.hxx"
@@ -107,7 +110,7 @@ vfs_mime_type_init()
         // MOD NOTE1  check to see if path exists - otherwise it later tries to
         //  remove nullptr fm with inotify which caused segfault
         VFSFileMonitor* fm;
-        if (g_file_test(caches[i]->file_path, G_FILE_TEST_EXISTS))
+        if (std::filesystem::exists(caches[i]->file_path))
             fm = vfs_file_monitor_add_file(caches[i]->file_path, on_mime_cache_changed, caches[i]);
         else
             fm = nullptr;

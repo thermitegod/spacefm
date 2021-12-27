@@ -10,6 +10,9 @@
  *
  */
 
+#include <string>
+#include <filesystem>
+
 #include "logger.hxx"
 
 #include "ptk-dir-tree.hxx"
@@ -560,7 +563,7 @@ dir_tree_view_get_drop_dir(GtkWidget* view, int x, int y)
     }
     /*  this isn't needed?
         // dest_path is a link? resolve
-        if ( dest_path && g_file_test( dest_path, G_FILE_TEST_IS_SYMLINK ) )
+        if ( dest_path && std::filesystem::is_symlink(dest_path))
         {
             char* old_dest = dest_path;
             dest_path = g_file_read_link( old_dest, nullptr );
