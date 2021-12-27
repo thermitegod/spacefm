@@ -14,7 +14,7 @@
 
 #include <sys/stat.h>
 
-#include <glib.h>
+#include "vfs-user-dir.hxx"
 
 #include "vfs-file-trash.hxx"
 //#include "../logger.hxx"
@@ -32,9 +32,9 @@ Trash::instance()
 
 Trash::Trash()
 {
-    _home_device = device(g_get_home_dir());
+    _home_device = device(vfs_user_home_dir());
 
-    std::string home_trash_dir = g_get_user_data_dir();
+    std::string home_trash_dir = vfs_user_data_dir();
     home_trash_dir += "/Trash";
 
     _home_trash_dir = new TrashDir(home_trash_dir, _home_device);

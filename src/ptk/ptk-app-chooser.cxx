@@ -8,6 +8,7 @@
  */
 
 #include "../vfs/vfs-app-desktop.hxx"
+#include "../vfs/vfs-user-dir.hxx"
 
 #include "ptk-handler.hxx"
 #include "ptk-utils.hxx"
@@ -607,12 +608,12 @@ load_all_known_apps_thread(VFSAsyncTask* task)
 {
     GtkListStore* list = GTK_LIST_STORE(vfs_async_task_get_data(task));
 
-    char* dir = g_build_filename(g_get_user_data_dir(), "applications", nullptr);
+    char* dir = g_build_filename(vfs_user_data_dir(), "applications", nullptr);
     load_all_apps_in_dir(dir, list, task);
     g_free(dir);
 
     char** dirs;
-    for (dirs = (char**)g_get_system_data_dirs(); !task->cancel && *dirs; ++dirs)
+    for (dirs = (char**)vfs_system_data_dir(); !task->cancel && *dirs; ++dirs)
     {
         dir = g_build_filename(*dirs, "applications", nullptr);
         load_all_apps_in_dir(dir, list, task);

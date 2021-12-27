@@ -15,6 +15,7 @@
 #include "main-window.hxx"
 
 #include "../vfs/vfs-utils.hxx"
+#include "../vfs/vfs-user-dir.hxx"
 
 #include "logger.hxx"
 #include "utils.hxx"
@@ -579,7 +580,7 @@ ptk_location_view_get_mount_point_dir(const char* name)
     if (set->s)
     {
         if (g_str_has_prefix(set->s, "~/"))
-            parent = g_build_filename(g_get_home_dir(), set->s + 2, nullptr);
+            parent = g_build_filename(vfs_user_home_dir(), set->s + 2, nullptr);
         else
             parent = g_strdup(set->s);
         if (parent)
@@ -604,13 +605,13 @@ ptk_location_view_get_mount_point_dir(const char* name)
                         value = g_strdup_printf("%d", geteuid());
                         break;
                     case 2: // $HOME
-                        value = g_strdup(g_get_home_dir());
+                        value = g_strdup(vfs_user_home_dir());
                         break;
                     case 3: // $XDG_RUNTIME_DIR
-                        value = g_strdup(g_get_user_runtime_dir());
+                        value = g_strdup(vfs_user_runtime_dir());
                         break;
                     case 4: // $XDG_CACHE_HOME
-                        value = g_strdup(g_get_user_cache_dir());
+                        value = g_strdup(vfs_user_cache_dir());
                         break;
                     default:
                         value = g_strdup("");
@@ -629,7 +630,7 @@ ptk_location_view_get_mount_point_dir(const char* name)
         }
     }
     if (!parent)
-        return g_build_filename(g_get_user_cache_dir(), "spacefm-mount", name, nullptr);
+        return g_build_filename(vfs_user_cache_dir(), "spacefm-mount", name, nullptr);
     char* path = g_build_filename(parent, name, nullptr);
     g_free(parent);
     return path;
@@ -649,7 +650,7 @@ ptk_location_view_clean_mount_points()
         char* del_path;
 
         if (i == 0)
-            path = g_build_filename(g_get_user_cache_dir(), "spacefm-mount", nullptr);
+            path = g_build_filename(vfs_user_cache_dir(), "spacefm-mount", nullptr);
         else // i == 1
         {
             del_path = ptk_location_view_get_mount_point_dir(nullptr);
@@ -3497,7 +3498,7 @@ ptk_bookmark_view_get_first_bookmark(XSet* book_set)
     {
         child_set = xset_custom_new();
         child_set->menu_label = g_strdup_printf("Home");
-        child_set->z = g_strdup(g_get_home_dir());
+        child_set->z = g_strdup(vfs_user_home_dir());
         child_set->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
         child_set->parent = g_strdup_printf("main_book");
         book_set->child = g_strdup(child_set->name);

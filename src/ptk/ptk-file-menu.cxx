@@ -14,6 +14,7 @@
 #include <glib.h>
 
 #include "../vfs/vfs-app-desktop.hxx"
+#include "../vfs/vfs-user-dir.hxx"
 
 #include "ptk-file-misc.hxx"
 #include "ptk-file-archiver.hxx"
@@ -1375,7 +1376,7 @@ get_shared_desktop_file_location(const char* name)
 {
     char* ret;
 
-    const char* const* dirs = g_get_system_data_dirs();
+    const char* const* dirs = vfs_system_data_dir();
     for (; *dirs; ++dirs)
     {
         if ((ret = vfs_mime_type_locate_desktop_file(*dirs, name)))
@@ -1437,7 +1438,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     nullptr);
             break;
         case APP_JOB_EDIT:
-            path = g_build_filename(g_get_user_data_dir(),
+            path = g_build_filename(vfs_user_data_dir(),
                                     "applications",
                                     desktop_file->file_name,
                                     nullptr);
@@ -1495,16 +1496,14 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             break;
         case APP_JOB_EDIT_LIST:
             // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-            path = g_build_filename(g_get_user_config_dir(), "mimeapps.list", nullptr);
+            path = g_build_filename(vfs_user_config_dir(), "mimeapps.list", nullptr);
             if (!g_file_test(path, G_FILE_TEST_EXISTS))
             {
                 // try old location
                 // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
                 g_free(path);
-                path = g_build_filename(g_get_user_data_dir(),
-                                        "applications",
-                                        "mimeapps.list",
-                                        nullptr);
+                path =
+                    g_build_filename(vfs_user_data_dir(), "applications", "mimeapps.list", nullptr);
             }
             xset_edit((GtkWidget*)data->browser, path, false, true);
             g_free(path);
@@ -1525,7 +1524,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             g_free(path);
             break;
         case APP_JOB_BROWSE:
-            path = g_build_filename(g_get_user_data_dir(), "applications", nullptr);
+            path = g_build_filename(vfs_user_data_dir(), "applications", nullptr);
             g_mkdir_with_parents(path, 0700);
 
             if (data->browser)
@@ -1542,14 +1541,14 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 ptk_file_browser_emit_open(data->browser, path, PTK_OPEN_NEW_TAB);
             break;
         case APP_JOB_EDIT_TYPE:
-            path = g_build_filename(g_get_user_data_dir(), "mime/packages", nullptr);
+            path = g_build_filename(vfs_user_data_dir(), "mime/packages", nullptr);
             g_mkdir_with_parents(path, 0700);
             g_free(path);
             str = replace_string(mime_type->type, "/", "-", false);
             path = str;
             str = g_strdup_printf("%s.xml", path);
             g_free(path);
-            path = g_build_filename(g_get_user_data_dir(), "mime/packages", str, nullptr);
+            path = g_build_filename(vfs_user_data_dir(), "mime/packages", str, nullptr);
             g_free(str);
             if (!g_file_test(path, G_FILE_TEST_EXISTS))
             {
@@ -1689,20 +1688,19 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                            PTK_OPEN_NEW_TAB);
             break;
         case APP_JOB_BROWSE_MIME:
-            path = g_build_filename(g_get_user_data_dir(), "mime/packages", nullptr);
+            path = g_build_filename(vfs_user_data_dir(), "mime/packages", nullptr);
             g_mkdir_with_parents(path, 0700);
             if (data->browser)
                 ptk_file_browser_emit_open(data->browser, path, PTK_OPEN_NEW_TAB);
             vfs_dir_monitor_mime();
             break;
         case APP_JOB_UPDATE:
-            path = g_strdup_printf("update-mime-database %s/mime", g_get_user_data_dir());
+            path = g_strdup_printf("update-mime-database %s/mime", vfs_user_data_dir());
             print_command(path);
             g_spawn_command_line_async(path, nullptr);
             g_free(path);
 
-            path =
-                g_strdup_printf("update-desktop-database %s/applications", g_get_user_data_dir());
+            path = g_strdup_printf("update-desktop-database %s/applications", vfs_user_data_dir());
             print_command(path);
             g_spawn_command_line_async(path, nullptr);
             g_free(path);
@@ -1872,10 +1870,8 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     // *.desktop (missing)
     if (desktop_file->file_name)
     {
-        path = g_build_filename(g_get_user_data_dir(),
-                                "applications",
-                                desktop_file->file_name,
-                                nullptr);
+        path =
+            g_build_filename(vfs_user_data_dir(), "applications", desktop_file->file_name, nullptr);
         if (g_file_test(path, G_FILE_TEST_EXISTS))
         {
             str = replace_string(desktop_file->file_name, ".desktop", "._desktop", false);
@@ -1918,7 +1914,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     path = str;
     str = g_strdup_printf("%s.xml", path);
     g_free(path);
-    path = g_build_filename(g_get_user_data_dir(), "mime/packages", str, nullptr);
+    path = g_build_filename(vfs_user_data_dir(), "mime/packages", str, nullptr);
     if (path && g_file_test(path, G_FILE_TEST_EXISTS))
     {
         g_free(path);
@@ -2444,7 +2440,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     }
     else
     {
-        cwd = vfs_get_desktop_dir();
+        cwd = vfs_user_desktop_dir();
     }
     if (!sel_files)
         info = nullptr;

@@ -33,6 +33,7 @@
 #include "window-reference.hxx"
 
 #include "vfs/vfs-volume.hxx"
+#include "vfs/vfs-user-dir.hxx"
 
 #include "main-window.hxx"
 
@@ -673,7 +674,7 @@ on_start_search(GtkWidget* btn, FindFile* data)
     cmd_line = g_strjoinv(" ", argv);
     LOG_DEBUG("find command: {}", cmd_line);
     g_free(cmd_line);
-    if (g_spawn_async_with_pipes(g_get_home_dir(),
+    if (g_spawn_async_with_pipes(vfs_user_home_dir(),
                                  argv,
                                  nullptr,
                                  GSpawnFlags::G_SPAWN_SEARCH_PATH,
@@ -789,13 +790,13 @@ on_add_search_browse(GtkWidget* menu, FindFile* data)
 static void
 on_add_search_home(GtkWidget* menu, FindFile* data)
 {
-    add_search_dir(data, g_get_home_dir());
+    add_search_dir(data, vfs_user_home_dir());
 }
 
 static void
 on_add_search_desktop(GtkWidget* menu, FindFile* data)
 {
-    add_search_dir(data, vfs_get_desktop_dir());
+    add_search_dir(data, vfs_user_desktop_dir());
 }
 
 static void
@@ -831,13 +832,13 @@ on_add_search_folder(GtkWidget* btn, FindFile* data)
     item = gtk_separator_menu_item_new();
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    item = gtk_menu_item_new_with_label(g_get_home_dir());
+    item = gtk_menu_item_new_with_label(vfs_user_home_dir());
     // img = gtk_image_new_from_icon_name( "gnome-fs-directory", GTK_ICON_SIZE_MENU );
     // img = xset_get_image("gtk-directory", GTK_ICON_SIZE_MENU);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     g_signal_connect(item, "activate", G_CALLBACK(on_add_search_home), data);
 
-    if ((dir = vfs_get_desktop_dir()))
+    if ((dir = vfs_user_desktop_dir()))
     {
         item = gtk_menu_item_new_with_label(dir);
         // img = gtk_image_new_from_icon_name( "gnome-fs-desktop", GTK_ICON_SIZE_MENU );

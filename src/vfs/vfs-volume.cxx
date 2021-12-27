@@ -22,6 +22,8 @@
 #include "logger.hxx"
 #include "utils.hxx"
 
+#include "vfs-user-dir.hxx"
+
 #include "vfs-volume.hxx"
 
 #define MOUNTINFO "/proc/self/mountinfo"
@@ -2597,7 +2599,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
          * hack - sleep for 0.2 seconds here because sometimes the
          * .mtab.fuseiso file is not updated until after new device is detected. */
         g_usleep(200000);
-        char* mtab_file = g_build_filename(g_get_home_dir(), ".mtab.fuseiso", nullptr);
+        char* mtab_file = g_build_filename(vfs_user_home_dir(), ".mtab.fuseiso", nullptr);
         char* new_name = nullptr;
         if (path_is_mounted_mtab(mtab_file, point, &new_name, nullptr) && new_name && new_name[0])
         {
@@ -2635,7 +2637,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         if (!keep && !strstr(HIDDEN_NON_BLOCK_FS, mtab_fstype))
         {
             // no protocol handler and not blacklisted - show anyway?
-            keep = g_str_has_prefix(point, g_get_user_cache_dir()) ||
+            keep = g_str_has_prefix(point, vfs_user_cache_dir()) ||
                    g_str_has_prefix(point, "/media/") || g_str_has_prefix(point, "/run/media/") ||
                    g_str_has_prefix(mtab_fstype, "fuse.");
             if (!keep)

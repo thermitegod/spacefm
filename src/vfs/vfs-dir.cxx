@@ -19,6 +19,7 @@
 #include "vfs-thumbnail-loader.hxx"
 #include "utils.hxx"
 
+#include "vfs-user-dir.hxx"
 #include "vfs-dir.hxx"
 
 #include "logger.hxx"
@@ -68,9 +69,6 @@ static GHashTable* dir_hash = nullptr;
 static GList* mime_cb = nullptr;
 static unsigned int change_notify_timeout = 0;
 static unsigned int theme_change_notify = 0;
-
-static bool is_desktop_set = false;
-static const char* desktop_dir = nullptr;
 
 GType
 vfs_dir_get_type()
@@ -173,10 +171,6 @@ vfs_dir_class_init(VFSDirClass* klass)
                                                G_TYPE_NONE,
                                                1,
                                                G_TYPE_BOOLEAN);
-
-    /* FIXME: Is there better way to do this? */
-    if (G_UNLIKELY(!is_desktop_set))
-        vfs_get_desktop_dir();
 }
 
 /* constructor */
@@ -606,9 +600,9 @@ vfs_dir_load(VFSDir* dir)
 
         /* FIXME: We should check access here! */
 
-        if (G_UNLIKELY(!strcmp(dir->path, vfs_get_desktop_dir())))
+        if (G_UNLIKELY(!strcmp(dir->path, vfs_user_desktop_dir())))
             dir->is_desktop = true;
-        else if (G_UNLIKELY(!strcmp(dir->path, g_get_home_dir())))
+        else if (G_UNLIKELY(!strcmp(dir->path, vfs_user_home_dir())))
             dir->is_home = true;
         if (G_UNLIKELY(is_dir_mount_point(dir->path)))
             dir->is_mount_point = true;
@@ -965,19 +959,6 @@ on_mime_type_reload(void* user_data)
     g_hash_table_foreach(dir_hash, (GHFunc)reload_mime_type, nullptr);
 }
 
-/* Thanks to the freedesktop.org, things are much more complicated now... */
-const char*
-vfs_get_desktop_dir()
-{
-    if (G_LIKELY(is_desktop_set))
-        return desktop_dir;
-
-    desktop_dir = g_get_user_special_dir(G_USER_DIRECTORY_DESKTOP);
-
-    is_desktop_set = true;
-    return desktop_dir;
-}
-
 void
 vfs_dir_foreach(GHFunc func, void* user_data)
 {
@@ -1053,12 +1034,12 @@ static bool
 on_mime_change_timer(void* user_data)
 {
     // LOG_INFO("MIME-UPDATE on_timer");
-    char* command = g_strdup_printf("update-mime-database %s/mime", g_get_user_data_dir());
+    char* command = g_strdup_printf("update-mime-database %s/mime", vfs_user_data_dir());
     print_command(command);
     g_spawn_command_line_async(command, nullptr);
     g_free(command);
 
-    command = g_strdup_printf("update-desktop-database %s/applications", g_get_user_data_dir());
+    command = g_strdup_printf("update-desktop-database %s/applications", vfs_user_data_dir());
     print_command(command);
     g_spawn_command_line_async(command, nullptr);
     g_free(command);
@@ -1091,7 +1072,7 @@ vfs_dir_monitor_mime()
     // start watching for changes
     if (mime_dir)
         return;
-    char* path = g_build_filename(g_get_user_data_dir(), "mime/packages", nullptr);
+    char* path = g_build_filename(vfs_user_data_dir(), "mime/packages", nullptr);
     if (g_file_test(path, G_FILE_TEST_IS_DIR))
     {
         mime_dir = vfs_dir_get_by_path(path);

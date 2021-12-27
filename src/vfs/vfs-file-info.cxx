@@ -18,6 +18,7 @@
 #include "vfs-app-desktop.hxx"
 #include "vfs-thumbnail-loader.hxx"
 #include "vfs-utils.hxx"
+#include "vfs-user-dir.hxx"
 
 #include "vfs-file-info.hxx"
 
@@ -712,7 +713,7 @@ vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
     if (G_UNLIKELY(g_str_has_suffix(fi->name, ".desktop")))
     {
         if (!desktop_dir)
-            desktop_dir = vfs_get_desktop_dir();
+            desktop_dir = vfs_user_desktop_dir();
         char* file_dir = g_path_get_dirname(file_path);
 
         fi->flags = (VFSFileInfoFlag)(fi->flags | VFS_FILE_INFO_DESKTOP_ENTRY);
@@ -771,17 +772,15 @@ vfs_file_resolve_path(const char* cwd, const char* relative_path)
     {
         if (G_UNLIKELY(relative_path[0] == '~')) /* home dir */
         {
-            g_string_append(ret, g_get_home_dir());
+            g_string_append(ret, vfs_user_home_dir());
             ++relative_path;
         }
         else
         {
             if (!cwd)
             {
-                char* cwd_new;
-                cwd_new = g_get_current_dir();
+                const char* cwd_new = vfs_current_dir();
                 g_string_append(ret, cwd_new);
-                g_free(cwd_new);
             }
             else
                 g_string_append(ret, cwd);

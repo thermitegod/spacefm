@@ -26,6 +26,8 @@
 #include "ptk-path-entry.hxx"
 #include "main-window.hxx"
 
+#include "../vfs/vfs-user-dir.hxx"
+
 #include "logger.hxx"
 
 #include "utils.hxx"
@@ -1905,7 +1907,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
         // convert ~ to /home/user for smarter bookmarks
         if (g_str_has_prefix(path, "~/") || !g_strcmp0(path, "~"))
         {
-            msg = g_strdup_printf("%s%s", g_get_home_dir(), path + 1);
+            msg = g_strdup_printf("%s%s", vfs_user_home_dir(), path + 1);
             g_free(path);
             path = msg;
         }
@@ -2186,7 +2188,7 @@ on_file_deleted(VFSDir* dir, VFSFileInfo* file, PtkFileBrowser* file_browser)
     {
         // The directory itself was deleted
         on_close_notebook_page(nullptr, file_browser);
-        // ptk_file_browser_chdir( file_browser, g_get_home_dir(), PTK_FB_CHDIR_ADD_HISTORY);
+        // ptk_file_browser_chdir( file_browser, vfs_user_home_dir(), PTK_FB_CHDIR_ADD_HISTORY);
     }
     else
     {
@@ -2410,7 +2412,7 @@ ptk_file_browser_go_home(GtkWidget* item, PtkFileBrowser* file_browser)
 {
     focus_folder_view(file_browser);
     ptk_file_browser_chdir(PTK_FILE_BROWSER(file_browser),
-                           g_get_home_dir(),
+                           vfs_user_home_dir(),
                            PTK_FB_CHDIR_ADD_HISTORY);
 }
 
@@ -2423,7 +2425,7 @@ ptk_file_browser_go_default(GtkWidget* item, PtkFileBrowser* file_browser)
         ptk_file_browser_chdir(PTK_FILE_BROWSER(file_browser), path, PTK_FB_CHDIR_ADD_HISTORY);
     else if (geteuid() != 0)
         ptk_file_browser_chdir(PTK_FILE_BROWSER(file_browser),
-                               g_get_home_dir(),
+                               vfs_user_home_dir(),
                                PTK_FB_CHDIR_ADD_HISTORY);
     else
         ptk_file_browser_chdir(PTK_FILE_BROWSER(file_browser), "/", PTK_FB_CHDIR_ADD_HISTORY);
@@ -3537,7 +3539,7 @@ ptk_file_browser_new_tab(GtkMenuItem* item, PtkFileBrowser* file_browser)
     if (xset_get_s("go_set_default"))
         dir_path = xset_get_s("go_set_default");
     else
-        dir_path = g_get_home_dir();
+        dir_path = vfs_user_home_dir();
 
     if (!g_file_test(dir_path, G_FILE_TEST_IS_DIR))
         g_signal_emit(file_browser, signals[OPEN_ITEM_SIGNAL], 0, "/", PTK_OPEN_NEW_TAB);
@@ -3557,7 +3559,7 @@ ptk_file_browser_new_tab_here(GtkMenuItem* item, PtkFileBrowser* file_browser)
         if (xset_get_s("go_set_default"))
             dir_path = xset_get_s("go_set_default");
         else
-            dir_path = g_get_home_dir();
+            dir_path = vfs_user_home_dir();
     }
     if (!g_file_test(dir_path, G_FILE_TEST_IS_DIR))
         g_signal_emit(file_browser, signals[OPEN_ITEM_SIGNAL], 0, "/", PTK_OPEN_NEW_TAB);

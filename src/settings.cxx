@@ -33,6 +33,7 @@
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-utils.hxx"
+#include "vfs/vfs-user-dir.hxx"
 
 #include "ptk/ptk-utils.hxx"
 #include "ptk/ptk-app-chooser.hxx"
@@ -274,14 +275,13 @@ load_conf()
 
     /* Set default config values */
     config_settings.terminal_su = nullptr;
-    config_settings.tmp_dir = g_get_user_cache_dir();
+    config_settings.tmp_dir = vfs_user_cache_dir();
     config_settings.font_view_icon = default_font.c_str();
     config_settings.font_view_compact = default_font.c_str();
     config_settings.font_general = default_font.c_str();
 
     // load spacefm.conf
-    char* config_path =
-        g_build_filename(g_get_user_config_dir(), "spacefm", "spacefm.conf", nullptr);
+    char* config_path = g_build_filename(vfs_user_config_dir(), "spacefm", "spacefm.conf", nullptr);
     if (!g_file_test(config_path, G_FILE_TEST_EXISTS))
         config_path = g_build_filename(SYSCONFDIR, "spacefm", "spacefm.conf", nullptr);
 
@@ -308,7 +308,7 @@ load_settings(const char* config_dir)
     if (config_dir)
         settings_config_dir = config_dir;
     else
-        settings_config_dir = g_build_filename(g_get_user_config_dir(), "spacefm", nullptr);
+        settings_config_dir = g_build_filename(vfs_user_config_dir(), "spacefm", nullptr);
 
     if (config_settings.git_backed_settings)
     {
@@ -3427,7 +3427,7 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
 
     // convert ~ to /home/user for smarter bookmarks
     if (g_str_has_prefix(url, "~/") || !g_strcmp0(url, "~"))
-        use_url = tilde_url = g_strdup_printf("%s%s", g_get_home_dir(), url + 1);
+        use_url = tilde_url = g_strdup_printf("%s%s", vfs_user_home_dir(), url + 1);
     else
         use_url = url;
 
@@ -4650,7 +4650,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             {
                 // adding new submenu from a bookmark - fill with bookmark
                 folder = set->browser ? (char*)ptk_file_browser_get_cwd(set->browser)
-                                      : (char*)vfs_get_desktop_dir();
+                                      : (char*)vfs_user_desktop_dir();
                 childset->menu_label = g_path_get_basename(folder);
                 childset->z = g_strdup(folder);
                 childset->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
@@ -4732,9 +4732,9 @@ xset_design_job(GtkWidget* item, XSet* set)
             break;
         case XSET_JOB_IMPORT_GTK:
             // both GTK2 and GTK3 now use new location?
-            file = g_build_filename(g_get_user_config_dir(), "gtk-3.0", "bookmarks", nullptr);
+            file = g_build_filename(vfs_user_config_dir(), "gtk-3.0", "bookmarks", nullptr);
             if (!(file && g_file_test(file, G_FILE_TEST_EXISTS)))
-                file = g_build_filename(g_get_home_dir(), ".gtk-bookmarks", nullptr);
+                file = g_build_filename(vfs_user_home_dir(), ".gtk-bookmarks", nullptr);
             msg =
                 g_strdup_printf("GTK bookmarks (%s) will be imported into the current or selected "
                                 "submenu.  Note that importing large numbers of bookmarks (eg more "
@@ -4889,7 +4889,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             {
                 // added a new default item to submenu from a bookmark
                 folder = set->browser ? (char*)ptk_file_browser_get_cwd(set->browser)
-                                      : (char*)vfs_get_desktop_dir();
+                                      : (char*)vfs_user_desktop_dir();
                 g_free(childset->menu_label);
                 childset->menu_label = g_path_get_basename(folder);
                 childset->z = g_strdup(folder);
@@ -6597,7 +6597,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
             gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), path);
         else
         {
-            path = (char*)g_get_home_dir();
+            path = (char*)vfs_user_home_dir();
             gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), path);
         }
     }

@@ -26,6 +26,7 @@
 
 #include "vfs-mime-type.hxx"
 #include "vfs-thumbnail-loader.hxx"
+#include "vfs-user-dir.hxx"
 
 #ifdef USE_XXHASH
 #include "xxhash.h"
@@ -395,7 +396,7 @@ _vfs_thumbnail_load(const char* file_path, const char* uri, int size, time_t mti
 #endif
 
     thumbnail_file =
-        g_build_filename(g_get_user_cache_dir(), "thumbnails/normal", file_name, nullptr);
+        g_build_filename(vfs_user_cache_dir(), "thumbnails/normal", file_name, nullptr);
 
     // LOG_INFO("{}", thumbnail_file);
 
@@ -526,7 +527,7 @@ vfs_thumbnail_load_for_file(const char* file, int size, time_t mtime)
 void
 vfs_thumbnail_init()
 {
-    char* dir = g_build_filename(g_get_user_cache_dir(), "thumbnails/normal", nullptr);
+    char* dir = g_build_filename(vfs_user_cache_dir(), "thumbnails/normal", nullptr);
 
     if (G_LIKELY(g_file_test(dir, G_FILE_TEST_IS_DIR)))
         chmod(dir, 0700);

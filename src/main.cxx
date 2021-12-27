@@ -21,6 +21,7 @@
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-app-desktop.hxx"
 
+#include "vfs/vfs-user-dir.hxx"
 #include "vfs/vfs-file-monitor.hxx"
 #include "vfs/vfs-volume.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
@@ -132,7 +133,7 @@ get_inode_tag()
 {
     struct stat stat_buf;
 
-    const char* path = g_get_home_dir();
+    const char* path = vfs_user_home_dir();
     if (!path || stat(path, &stat_buf) == -1)
         return g_strdup_printf("%d=", getuid());
     return g_strdup_printf("%d=%d:%d-%ld",
@@ -728,7 +729,7 @@ handle_parsed_commandline_args()
     if (G_LIKELY(!cli_flags.files))
     {
         cli_flags.files = default_files;
-        // files[0] = (char*)g_get_home_dir();
+        // files[0] = (char*)vfs_user_home_dir();
     }
 
     // get the last active window on this desktop, if available

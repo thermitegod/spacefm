@@ -25,6 +25,8 @@
 
 #include <fcntl.h>
 
+#include "../vfs/vfs-user-dir.hxx"
+
 #include "mime-type.hxx"
 #include "mime-cache.hxx"
 
@@ -423,7 +425,7 @@ mime_type_get_desc_icon(const char* type, const char* locale, char** icon_name)
      * Since the spec really sucks, we don't follow it here.
      */
     /* FIXME: This path shouldn't be hard-coded. */
-    g_snprintf(file_path, 256, "%s/mime/%s.xml", g_get_user_data_dir(), type);
+    g_snprintf(file_path, 256, "%s/mime/%s.xml", vfs_user_data_dir(), type);
     if (faccessat(0, file_path, F_OK, AT_EACCESS) != -1)
     {
         desc = _mime_type_get_desc_icon(file_path, locale, true, icon_name);
@@ -432,7 +434,7 @@ mime_type_get_desc_icon(const char* type, const char* locale, char** icon_name)
     }
 
     // look in system dirs
-    const char* const* dir = g_get_system_data_dirs();
+    const char* const* dir = vfs_system_data_dir();
     for (; *dir; ++dir)
     {
         /* FIXME: This path shouldn't be hard-coded. */
@@ -470,11 +472,11 @@ mime_cache_load_all()
 {
     const char filename[] = "/mime/mime.cache";
 
-    const char* const* dirs = g_get_system_data_dirs();
+    const char* const* dirs = vfs_system_data_dir();
     n_caches = g_strv_length((char**)dirs) + 1;
     caches = (MimeCache**)g_slice_alloc(n_caches * sizeof(MimeCache*));
 
-    char* path = g_build_filename(g_get_user_data_dir(), filename, nullptr);
+    char* path = g_build_filename(vfs_user_data_dir(), filename, nullptr);
     caches[0] = mime_cache_new(path);
     g_free(path);
     if (caches[0]->magic_max_extent > mime_cache_max_extent)

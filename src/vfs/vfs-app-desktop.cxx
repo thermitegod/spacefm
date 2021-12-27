@@ -15,6 +15,7 @@
 
 #include "vfs-execute.hxx"
 #include "vfs-utils.hxx"
+#include "vfs-user-dir.hxx"
 
 #include "vfs-app-desktop.hxx"
 
@@ -138,7 +139,7 @@ static GdkPixbuf*
 load_icon_file(const char* file_name, int size)
 {
     GdkPixbuf* icon = nullptr;
-    const char** dirs = (const char**)g_get_system_data_dirs();
+    const char** dirs = (const char**)vfs_system_data_dir();
     const char** dir;
     for (dir = dirs; *dir; ++dir)
     {

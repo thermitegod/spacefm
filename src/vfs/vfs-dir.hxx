@@ -95,9 +95,6 @@ void vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* 
 void vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file);
 void vfs_dir_flush_notify_cache();
 
-/* get the path of desktop dir */
-const char* vfs_get_desktop_dir();
-
 bool vfs_dir_add_hidden(const char* path, const char* file_name); // MOD added
 
 /* call function "func" for every VFSDir instances */

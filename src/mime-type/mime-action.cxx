@@ -20,6 +20,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include "../vfs/vfs-user-dir.hxx"
+
 #include "logger.hxx"
 
 #include "mime-action.hxx"
@@ -51,11 +53,11 @@ data_dir_foreach(DataDirFunc func, const char* mime_type, void* user_data)
     char* ret = nullptr;
 
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    if ((ret = func(g_get_user_config_dir(), mime_type, user_data)))
+    if ((ret = func(vfs_user_config_dir(), mime_type, user_data)))
         return ret;
 
     // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
-    char* dir = g_build_filename(g_get_user_data_dir(), "applications", nullptr);
+    char* dir = g_build_filename(vfs_user_data_dir(), "applications", nullptr);
     if ((ret = func(dir, mime_type, user_data)))
     {
         g_free(dir);
@@ -64,7 +66,7 @@ data_dir_foreach(DataDirFunc func, const char* mime_type, void* user_data)
     g_free(dir);
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
-    const char* const* dirs = g_get_system_data_dirs();
+    const char* const* dirs = vfs_system_data_dir();
     for (; *dirs; ++dirs)
     {
         dir = g_build_filename(*dirs, "applications", nullptr);
@@ -82,12 +84,12 @@ static char*
 apps_dir_foreach(DataDirFunc func, const char* mime_type, void* user_data)
 {
     char* ret = nullptr;
-    const char* dir = g_get_user_data_dir();
+    const char* dir = vfs_user_data_dir();
 
     if ((ret = func(dir, mime_type, user_data)))
         return ret;
 
-    const char* const* dirs = g_get_system_data_dirs();
+    const char* const* dirs = vfs_system_data_dir();
     for (; *dirs; ++dirs)
     {
         if ((ret = func(*dirs, mime_type, user_data)))
@@ -103,7 +105,7 @@ update_desktop_database()
     argv[0] = g_find_program_in_path("update-desktop-database");
     if (G_UNLIKELY(!argv[0]))
         return;
-    argv[1] = g_build_filename(g_get_user_data_dir(), "applications", nullptr);
+    argv[1] = g_build_filename(vfs_user_data_dir(), "applications", nullptr);
     argv[2] = nullptr;
     g_spawn_sync(nullptr,
                  argv,
@@ -142,12 +144,12 @@ remove_actions(const char* type, GArray* actions)
     GKeyFile* file = g_key_file_new();
 
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    char* path = g_build_filename(g_get_user_config_dir(), "mimeapps.list", nullptr);
+    char* path = g_build_filename(vfs_user_config_dir(), "mimeapps.list", nullptr);
     if (!g_key_file_load_from_file(file, path, G_KEY_FILE_NONE, nullptr))
     {
         // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
         g_free(path);
-        path = g_build_filename(g_get_user_data_dir(), "applications/mimeapps.list", nullptr);
+        path = g_build_filename(vfs_user_data_dir(), "applications/mimeapps.list", nullptr);
         if (!g_key_file_load_from_file(file, path, G_KEY_FILE_NONE, nullptr))
         {
             g_key_file_free(file);
@@ -273,7 +275,7 @@ get_actions(const char* dir, const char* type, GArray* actions)
             }
         }
         g_key_file_free(file);
-        if (!g_strcmp0(dir, g_get_user_config_dir()))
+        if (!g_strcmp0(dir, vfs_user_config_dir()))
             break; // no mimeinfo.cache in ~/.config
     }
     g_strfreev(removed);
@@ -482,7 +484,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
     }
 
     /* generate unique file name */
-    char* dir = g_build_filename(g_get_user_data_dir(), "applications", nullptr);
+    char* dir = g_build_filename(vfs_user_data_dir(), "applications", nullptr);
     g_mkdir_with_parents(dir, 0700);
     unsigned int i;
     for (i = 0;; ++i)
@@ -662,7 +664,7 @@ get_default_action(const char* dir, const char* type, void* user_data)
             }
         }
         g_key_file_free(file);
-        if (!g_strcmp0(dir, g_get_user_config_dir()))
+        if (!g_strcmp0(dir, vfs_user_config_dir()))
             break; // no defaults.list in ~/.config
     }
     return nullptr;
@@ -715,7 +717,7 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
     // Load current mimeapps.list content, if available
     GKeyFile* file = g_key_file_new();
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    char* path = g_build_filename(g_get_user_config_dir(), "mimeapps.list", nullptr);
+    char* path = g_build_filename(vfs_user_config_dir(), "mimeapps.list", nullptr);
     g_key_file_load_from_file(file, path, G_KEY_FILE_NONE, nullptr);
 
     int k;

@@ -22,6 +22,7 @@
 
 #include "../vfs/vfs-app-desktop.hxx"
 #include "../vfs/vfs-execute.hxx"
+#include "../vfs/vfs-user-dir.hxx"
 
 #include "ptk-handler.hxx"
 #include "utils.hxx"
@@ -1850,13 +1851,13 @@ get_unique_name(const char* dir, const char* ext)
 static char*
 get_template_dir()
 {
-    char* templates_path = g_strdup(g_get_user_special_dir(G_USER_DIRECTORY_TEMPLATES));
+    char* templates_path = g_strdup(vfs_user_template_dir());
 
     if (!templates_path)
     {
         templates_path = g_strdup(g_getenv("XDG_TEMPLATES_DIR"));
     }
-    if (!g_strcmp0(templates_path, g_get_home_dir()))
+    if (!g_strcmp0(templates_path, vfs_user_home_dir()))
     {
         /* If $XDG_TEMPLATES_DIR == $HOME this means it is disabled. Don't
          * recurse it as this is too many files/directories and may slow
@@ -1868,11 +1869,11 @@ get_template_dir()
     if (!dir_has_files(templates_path))
     {
         g_free(templates_path);
-        templates_path = g_build_filename(g_get_home_dir(), "Templates", nullptr);
+        templates_path = g_build_filename(vfs_user_home_dir(), "Templates", nullptr);
         if (!dir_has_files(templates_path))
         {
             g_free(templates_path);
-            templates_path = g_build_filename(g_get_home_dir(), ".templates", nullptr);
+            templates_path = g_build_filename(vfs_user_home_dir(), ".templates", nullptr);
             if (!dir_has_files(templates_path))
             {
                 g_free(templates_path);
