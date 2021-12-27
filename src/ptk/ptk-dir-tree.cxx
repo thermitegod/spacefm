@@ -570,7 +570,7 @@ dir_path_from_tree_node(PtkDirTree* tree, PtkDirTreeNode* node)
 
     for (len = 1, l = names; l; l = l->next)
         len += strlen((char*)l->data) + 1;
-    char* dir_path = (char*)g_malloc(len);
+    char* dir_path = static_cast<char*>(g_malloc(len));
 
     for (p = dir_path, l = names; l; l = l->next)
     {

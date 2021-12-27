@@ -201,7 +201,7 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
             if (G_LIKELY(G_TRYLOCK(mime_magic_buf)))
                 data = mime_magic_buf;
             else /* the buffer is in use, allocate new one */
-                data = (char*)g_malloc(len);
+                data = static_cast<char*>(g_malloc(len));
 
             len = read(fd, data, len);
 
@@ -363,9 +363,9 @@ _mime_type_get_desc_icon(const char* file_path, const char* locale, bool is_loca
 
     char* buffer;
 #ifdef HAVE_MMAP
-    buffer = (char*)mmap(nullptr, statbuf.st_size, PROT_READ, MAP_SHARED, fd, 0);
+    buffer = static_cast<char*>(mmap(nullptr, statbuf.st_size, PROT_READ, MAP_SHARED, fd, 0));
 #else
-    buffer = (char*)g_malloc(statbuf.st_size);
+    buffer = static_cast<char*>(g_malloc(statbuf.st_size));
     if (read(fd, buffer, statbuf.st_size) == -1)
     {
         g_free(buffer);
@@ -489,7 +489,7 @@ mime_cache_load_all()
         if (caches[i]->magic_max_extent > mime_cache_max_extent)
             mime_cache_max_extent = caches[i]->magic_max_extent;
     }
-    mime_magic_buf = (char*)g_malloc(mime_cache_max_extent);
+    mime_magic_buf = static_cast<char*>(g_malloc(mime_cache_max_extent));
     return;
 }
 

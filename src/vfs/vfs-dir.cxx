@@ -524,7 +524,7 @@ gethidden(const char* path) // MOD added
         struct stat s; // skip stat
         if (G_LIKELY(fstat(fd, &s) != -1))
         {
-            char* buf = (char*)g_malloc(s.st_size + 1);
+            char* buf = static_cast<char*>(g_malloc(s.st_size + 1));
             if ((s.st_size = read(fd, buf, s.st_size)) != -1)
             {
                 buf[s.st_size] = 0;
