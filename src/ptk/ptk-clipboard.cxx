@@ -16,6 +16,8 @@
 
 #include "ptk-clipboard.hxx"
 
+#include "logger.hxx"
+
 static GdkDragAction clipboard_action = GDK_ACTION_DEFAULT;
 static GList* clipboard_file_list = nullptr;
 
@@ -68,14 +70,14 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, un
                            8,
                            (unsigned char*)list->str,
                            list->len + 1);
-    /* g_debug( "clipboard data:\n%s\n\n", list->str ); */
+    // LOG_DEBUG("clipboard data: \n\n{}\n\n", list->str);
     g_string_free(list, true);
 }
 
 static void
 clipboard_clean_data(GtkClipboard* clipboard, void* user_data)
 {
-    /* g_debug( "clean clipboard!\n" ); */
+    // LOG_DEBUG("clean clipboard!");
     if (clipboard_file_list)
     {
         g_list_foreach(clipboard_file_list, (GFunc)g_free, nullptr);

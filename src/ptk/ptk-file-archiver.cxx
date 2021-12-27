@@ -14,6 +14,7 @@
 #include "ptk-file-task.hxx"
 #include "ptk-handler.hxx"
 
+#include "logger.hxx"
 #include "settings.hxx"
 
 #include "autosave.hxx"
@@ -76,8 +77,8 @@ archive_handler_run_in_term(XSet* handler_xset, int operation)
     // Making sure a valid handler_xset has been passed
     if (!handler_xset)
     {
-        g_warning("archive_handler_run_in_term has been called with an "
-                  "invalid handler_xset!");
+        LOG_WARN("archive_handler_run_in_term has been called with an "
+                 "invalid handler_xset!");
         return false;
     }
 
@@ -94,9 +95,9 @@ archive_handler_run_in_term(XSet* handler_xset, int operation)
             ret = handler_xset->scroll_lock;
             break;
         default:
-            g_warning("archive_handler_run_in_term was passed an invalid"
-                      " archive operation ('%d')!",
-                      operation);
+            LOG_WARN("archive_handler_run_in_term was passed an invalid"
+                     " archive operation ('{}')!",
+                     operation);
             return false;
     }
     return ret == XSET_B_TRUE;
@@ -126,8 +127,8 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     if (!gtk_tree_model_get_iter_first(GTK_TREE_MODEL(list), &iter))
     {
         // Failed to get iterator - warning user and exiting
-        g_warning("Unable to get an iterator to the start of the model "
-                  "associated with combobox!");
+        LOG_WARN("Unable to get an iterator to the start of the model "
+                 "associated with combobox!");
         return;
     }
 
@@ -405,7 +406,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     char** archive_handlers = g_strsplit(archive_handlers_s, " ", -1);
 
     // Debug code
-    // g_message("archive_handlers_s: %s", archive_handlers_s);
+    // LOG_INFO("archive_handlers_s: {}", archive_handlers_s);
 
     // Looping for handlers (nullptr-terminated list)
     GtkTreeIter iter;
@@ -523,7 +524,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     else
     {
         // Recording the fact getting the iter failed
-        g_warning("Unable to fetch the iter from handler ordinal %d!", format);
+        LOG_WARN("Unable to fetch the iter from handler ordinal {}!", format);
     };
     g_free(str);
 
@@ -599,7 +600,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 {
                     // Unable to fetch iter from combo box - warning user and
                     // exiting
-                    g_warning("Unable to fetch iter from combobox!");
+                    LOG_WARN("Unable to fetch iter from combobox!");
                     g_free(dest_file);
                     gtk_widget_destroy(dlg);
                     return;
@@ -654,7 +655,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                                                   &compress_cmd);
                 if (err_msg)
                 {
-                    g_warning("%s", err_msg);
+                    LOG_WARN("{}", err_msg);
                     g_free(err_msg);
                     compress_cmd = g_strdup("");
                 }
@@ -679,7 +680,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                                                           compress_cmd);
                         if (err_msg)
                         {
-                            g_warning("%s", err_msg);
+                            LOG_WARN("{}", err_msg);
                             g_free(err_msg);
                         }
                         g_free(compress_cmd);
@@ -694,7 +695,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                                                           compress_cmd);
                         if (err_msg)
                         {
-                            g_warning("%s", err_msg);
+                            LOG_WARN("{}", err_msg);
                             g_free(err_msg);
                         }
                         g_free(compress_cmd);
@@ -1219,11 +1220,11 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         // Continuing to next file if a handler hasnt been found
         if (!handler_xset)
         {
-            g_warning("%s %s", "No archive handler/command found for file:", full_path);
+            LOG_WARN("No archive handler/command found for file: {}", full_path);
             g_free(full_path);
             continue;
         }
-        printf("Archive Handler Selected: %s\n", handler_xset->menu_label);
+        LOG_INFO("Archive Handler Selected: {}", handler_xset->menu_label);
 
         /* Handler found - fetching the 'run in terminal' preference, if
          * the operation is listing then the terminal should be kept
@@ -1251,7 +1252,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                                                     &cmd);
             if (err_msg)
             {
-                g_warning(err_msg, nullptr);
+                LOG_WARN("{}", err_msg);
                 g_free(err_msg);
                 cmd = g_strdup("");
             }
@@ -1331,7 +1332,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                                               &cmd);
             if (err_msg)
             {
-                g_warning(err_msg, nullptr);
+                LOG_WARN(err_msg);
                 g_free(err_msg);
                 cmd = g_strdup("");
             }
@@ -1388,7 +1389,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
             }
 
             // Debug code
-            // g_message( "full_quote: %s\ndest: %s", full_quote, dest );
+            // LOG_INFO("full_quote : {}", full_quote);
+            // LOG_INFO("dest       : {}", dest);
 
             /* Singular file extraction target (e.g. stdout-redirected
              * gzip) */

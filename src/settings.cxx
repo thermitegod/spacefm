@@ -29,6 +29,7 @@
 #include "autosave.hxx"
 #include "extern.hxx"
 #include "utils.hxx"
+#include "logger.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-utils.hxx"
@@ -252,7 +253,7 @@ parse_conf(const char* etc_path, char* line)
     else if (!strcmp(sname, "terminal_su") || !strcmp(sname, "graphical_su"))
     {
         if (svalue[0] != '/' || !g_file_test(svalue, G_FILE_TEST_EXISTS))
-            g_warning("%s: %s '%s' %s", etc_path, sname, svalue, "file not found");
+            LOG_WARN("{}: {} '{}' file not found", etc_path, sname, svalue);
         else if (!strcmp(sname, "terminal_su"))
             config_settings.terminal_su = svalue;
     }
@@ -313,7 +314,7 @@ load_settings(const char* config_dir)
     {
         if (!g_find_program_in_path("git"))
         {
-            fprintf(stderr, "spacefm: git backed settings enabled but git is not installed.\n");
+            LOG_ERROR("git backed settings enabled but git is not installed");
             config_settings.git_backed_settings = false;
         }
     }
@@ -558,7 +559,7 @@ save_settings(void* main_window_ptr)
 {
     XSet* set;
     FMMainWindow* main_window;
-    // printf("save_settings\n");
+    // LOG_INFO("save_settings");
 
     xset_set("config_version", "s", CONFIG_VERSION);
 
@@ -674,7 +675,7 @@ save_settings(void* main_window_ptr)
     // move
     char* path = g_build_filename(settings_config_dir, "session", nullptr);
     if (!g_file_set_contents(path, buf->str, buf->len, nullptr))
-        fprintf(stderr, "spacefm: saving session file failed\n");
+        LOG_ERROR("saving session file failed");
     g_free(path);
     g_string_free(buf, true);
 }
@@ -1645,7 +1646,7 @@ xset_opener(PtkFileBrowser* file_browser, char job)
             found = true;
             set->browser = file_browser;
             char* clean = clean_label(set->menu_label, false, false);
-            printf("\nSelected Menu Item '%s' As Handler\n", clean);
+            LOG_INFO("Selected Menu Item '{}' As Handler", clean);
             g_free(clean);
             xset_menu_cb(nullptr, set); // also does custom activate
         }
@@ -1730,14 +1731,14 @@ read_root_settings()
     if (!file)
     {
         if (g_file_test(root_set_path, G_FILE_TEST_EXISTS))
-            g_warning("Error reading root settings from %s/spacefm/  Commands run as root may "
-                      "present a security risk",
-                      SYSCONFDIR);
+            LOG_WARN("Error reading root settings from {}/spacefm/  Commands run as root may "
+                     "present a security risk",
+                     SYSCONFDIR);
         else
-            g_warning("No root settings found in %s/spacefm/  Setting a root editor in "
-                      "Preferences should remove this warning on startup.   Otherwise commands "
-                      "run as root may present a security risk.",
-                      SYSCONFDIR);
+            LOG_WARN("No root settings found in {}/spacefm/  Setting a root editor in "
+                     "Preferences should remove this warning on startup.   Otherwise commands "
+                     "run as root may present a security risk.",
+                     SYSCONFDIR);
         g_free(root_set_path);
         return;
     }
@@ -1922,7 +1923,7 @@ xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
         }
     }
     else
-        g_warning("xset_custom_get_app_name_icon set is not XSET_CMD_APP");
+        LOG_WARN("xset_custom_get_app_name_icon set is not XSET_CMD_APP");
 
     if (icon)
         *icon = icon_new;
@@ -2007,7 +2008,7 @@ xset_custom_get_bookmark_icon(XSet* set, int icon_size)
             icon_new = vfs_load_icon(icon_theme, icon3, icon_size);
     }
     else
-        g_warning("xset_custom_get_bookmark_icon set is not XSET_CMD_BOOKMARK");
+        LOG_WARN("xset_custom_get_bookmark_icon set is not XSET_CMD_BOOKMARK");
     return icon_new;
 }
 
@@ -2024,7 +2025,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
     int context_action = CONTEXT_SHOW;
     XSet* mset;
     char* icon_file = nullptr;
-    // printf("xset_add_menuitem %s\n", set->name );
+    // LOG_INFO("xset_add_menuitem {}", set->name);
 
     // plugin?
     mset = xset_get_plugin_mirror(set);
@@ -2317,7 +2318,7 @@ xset_custom_copy_files(XSet* src, XSet* dest)
     bool ret;
     int exit_status;
 
-    // printf("xset_custom_copy_files( %s, %s )\n", src->name, dest->name );
+    // LOG_INFO("xset_custom_copy_files( {}, {} )", src->name, dest->name);
 
     // copy command dir
 
@@ -2325,9 +2326,9 @@ xset_custom_copy_files(XSet* src, XSet* dest)
         path_src = g_build_filename(src->plug_dir, src->plug_name, nullptr);
     else
         path_src = g_build_filename(settings_config_dir, "scripts", src->name, nullptr);
-    // printf("    path_src=%s\n", path_src );
+    // LOG_INFO("    path_src={}", path_src);
 
-    // printf("    path_src EXISTS\n");
+    // LOG_INFO("    path_src EXISTS");
     path_dest = g_build_filename(settings_config_dir, "scripts", nullptr);
     g_mkdir_with_parents(path_dest, 0700);
     g_free(path_dest);
@@ -2338,11 +2339,11 @@ xset_custom_copy_files(XSet* src, XSet* dest)
 
     if (command)
     {
-        // printf("    path_dest=%s\n", path_dest );
+        // LOG_INFO("    path_dest={}", path_dest );
         print_command(command);
         ret = g_spawn_command_line_sync(command, &stdout, &stderr, &exit_status, nullptr);
         g_free(command);
-        printf("%s%s", stdout, stderr);
+        LOG_INFO("{}{}", stdout, stderr);
 
         if (!ret || (exit_status && WIFEXITED(exit_status)))
         {
@@ -2375,7 +2376,7 @@ xset_custom_copy_files(XSet* src, XSet* dest)
         print_command(command);
         ret = g_spawn_command_line_sync(command, &stdout, &stderr, &exit_status, nullptr);
         g_free(command);
-        printf("%s%s", stdout, stderr);
+        LOG_INFO("{}{}", stdout, stderr);
         if (!ret || (exit_status && WIFEXITED(exit_status)))
         {
             msg = g_strdup_printf("An error occured copying command data files\n\n%s",
@@ -2399,8 +2400,8 @@ xset_custom_copy_files(XSet* src, XSet* dest)
 static XSet*
 xset_custom_copy(XSet* set, bool copy_next, bool delete_set)
 {
-    // printf("\nxset_custom_copy( %s, %s, %s)\n", set->name, copy_next ? "true" : "false",
-    // delete_set ? "true" : "false" );
+    // LOG_INFO("xset_custom_copy( {}, {}, {})", set->name, copy_next ? "true" : "false",
+    // delete_set ? "true" : "false");
     XSet* mset = set;
     // if a plugin with a mirror, get the mirror
     if (set->plugin && set->shared_key)
@@ -2438,7 +2439,7 @@ xset_custom_copy(XSet* set, bool copy_next, bool delete_set)
     if (set->menu_style == XSET_MENU_SUBMENU && set->child)
     {
         XSet* set_child = xset_get(set->child);
-        // printf("    copy submenu %s\n", set_child->name );
+        // LOG_INFO("    copy submenu {}", set_child->name);
         XSet* newchild = xset_custom_copy(set_child, true, delete_set);
         newset->child = g_strdup(newchild->name);
         newchild->parent = g_strdup(newset->name);
@@ -2447,7 +2448,7 @@ xset_custom_copy(XSet* set, bool copy_next, bool delete_set)
     if (copy_next && set->next)
     {
         XSet* set_next = xset_get(set->next);
-        // printf("    copy next %s\n", set_next->name );
+        // LOG_INFO("    copy next {}", set_next->name);
         XSet* newnext = xset_custom_copy(set_next, true, delete_set);
         newnext->prev = g_strdup(newset->name);
         newset->next = g_strdup(newnext->name);
@@ -2763,7 +2764,7 @@ xset_import_plugin(const char* plug_dir, int* use)
     FILE* file = fopen(plugin, "r");
     if (!file)
     {
-        g_warning("Error reading plugin file %s", plugin);
+        LOG_WARN("Error reading plugin file {}", plugin);
         return nullptr;
     }
 
@@ -2844,7 +2845,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
 {
     XSet* set;
     char* msg;
-    // printf("on_install_plugin_cb\n");
+    // LOG_INFO("on_install_plugin_cb");
     if (plugin_data->job == PLUGIN_JOB_REMOVE) // uninstall
     {
         if (!g_file_test(plugin_data->plug_dir, G_FILE_TEST_EXISTS))
@@ -3536,7 +3537,7 @@ xset_custom_activate(GtkWidget* item, XSet* set)
     }
     else
     {
-        g_warning("xset_custom_activate !browser !desktop");
+        LOG_WARN("xset_custom_activate !browser !desktop");
         return;
     }
 
@@ -3793,15 +3794,15 @@ xset_custom_remove(XSet* set)
     XSet* set_child;
 
     /*
-    printf("xset_custom_remove %s (%s)\n", set->name, set->menu_label );
-    printf("    set->parent = %s\n", set->parent );
-    printf("    set->prev = %s\n", set->prev );
-    printf("    set->next = %s\n", set->next );
+    LOG_INFO("xset_custom_remove {} ({})", set->name, set->menu_label );
+    LOG_INFO("    set->parent = {}", set->parent );
+    LOG_INFO("    set->prev   = {}", set->prev );
+    LOG_INFO("    set->next   = {}", set->next );
     */
     if (set->prev)
     {
         set_prev = xset_get(set->prev);
-        // printf("        set->prev = %s (%s)\n", set_prev->name, set_prev->menu_label );
+        // LOG_INFO("        set->prev = {} ({})", set_prev->name, set_prev->menu_label);
         if (set_prev->next)
             g_free(set_prev->next);
         if (set->next)
@@ -3855,12 +3856,12 @@ xset_custom_insert_after(XSet* target, XSet* set)
 
     if (!set)
     {
-        g_warning("xset_custom_insert_after set == nullptr");
+        LOG_WARN("xset_custom_insert_after set == nullptr");
         return;
     }
     if (!target)
     {
-        g_warning("xset_custom_insert_after target == nullptr");
+        LOG_WARN("xset_custom_insert_after target == nullptr");
         return;
     }
 
@@ -3890,7 +3891,7 @@ xset_custom_insert_after(XSet* target, XSet* set)
     else
     {
         if (set->tool > XSET_TOOL_CUSTOM)
-            g_warning("xset_custom_insert_after builtin tool inserted after non-tool");
+            LOG_WARN("xset_custom_insert_after builtin tool inserted after non-tool");
         set->tool = XSET_TOOL_NOT;
     }
 }
@@ -4342,7 +4343,7 @@ xset_design_job(GtkWidget* item, XSet* set)
     int job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
     int cmd_type = xset_get_int_set(set, "x");
 
-    // printf("activate job %d %s\n", job, set->name);
+    // LOG_INFO("activate job {} {}", job, set->name);
     switch (job)
     {
         case XSET_JOB_KEY:
@@ -6032,7 +6033,7 @@ xset_menu_cb(GtkWidget* item, XSet* set)
                                             rset->title,
                                             rset->s,
                                             "foobar.xyz");
-                    // printf("file=%s\n", file );
+                    // LOG_INFO("file={}", file);
                     g_free(file);
                 }
                 break;
@@ -6673,7 +6674,7 @@ xset_color_dialog(GtkWidget* parent, char* title, char* defcolor)
         /*
         if (gdk_rgba_parse(defcolor, &color))
         {
-            // printf("        gdk_rgba_to_string = %s\n", gdk_rgba_to_string(&color));
+            // LOG_INFO("        gdk_rgba_to_string = {}", gdk_rgba_to_string(&color));
             gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(color_sel), &color);
         }
         */
@@ -6711,10 +6712,10 @@ xset_builtin_tool_activate(char tool_type, XSet* set, GdkEventButton* event)
     // set may be a submenu that doesn't match tool_type
     if (!(set && !set->lock && tool_type > XSET_TOOL_CUSTOM))
     {
-        g_warning("xset_builtin_tool_activate invalid");
+        LOG_WARN("xset_builtin_tool_activate invalid");
         return;
     }
-    // printf("xset_builtin_tool_activate  %s\n", set->menu_label );
+    // LOG_INFO("xset_builtin_tool_activate  {}", set->menu_label);
 
     // get current browser, panel, and mode
     if (main_window)
@@ -6794,7 +6795,7 @@ xset_builtin_tool_activate(char tool_type, XSet* set, GdkEventButton* event)
             }
             break;
         default:
-            g_warning("xset_builtin_tool_activate invalid tool_type");
+            LOG_WARN("xset_builtin_tool_activate invalid tool_type");
     }
 }
 
@@ -6824,8 +6825,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
 {
     int job = -1;
 
-    // printf("on_tool_icon_button_press  %s   button = %d\n", set->menu_label,
-    //                                                    event->button );
+    // LOG_INFO("on_tool_icon_button_press  {}   button = {}", set->menu_label, event->button);
     if (event->type != GDK_BUTTON_PRESS)
         return false;
     unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
@@ -6964,8 +6964,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
 static bool
 on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
 {
-    // printf("on_tool_menu_button_press  %s   button = %d\n", set->menu_label,
-    //                                                    event->button );
+    // LOG_INFO("on_tool_menu_button_press  {}   button = {}", set->menu_label, event->button);
     if (event->type != GDK_BUTTON_PRESS)
         return false;
     unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
@@ -7045,7 +7044,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
 
     if (set->tool == XSET_TOOL_NOT)
     {
-        g_warning("xset_add_toolitem set->tool == XSET_TOOL_NOT");
+        LOG_WARN("xset_add_toolitem set->tool == XSET_TOOL_NOT");
         set->tool = XSET_TOOL_CUSTOM;
     }
 
@@ -7437,12 +7436,12 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     g_free(icon_file);
     gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(item), -1);
 
-// printf("    set=%s   set->next=%s\n", set->name, set->next );
+// LOG_INFO("    set={}   set->next={}", set->name, set->next);
 // next toolitem
 _next_toolitem:
     if ((set_next = xset_is(set->next)))
     {
-        // printf("    NEXT %s\n", set_next->name );
+        // LOG_INFO("    NEXT {}", set_next->name);
         xset_add_toolitem(parent, file_browser, toolbar, icon_size, set_next, show_tooltips);
     }
 
@@ -7465,7 +7464,7 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     XSet* set;
     XSet* set_target;
 
-    // printf("xset_fill_toolbar %s\n", set_parent->name );
+    // LOG_INFO("xset_fill_toolbar {}", set_parent->name);
     if (!(file_browser && toolbar && set_parent))
         return;
 
@@ -7541,11 +7540,9 @@ xset_set_window_icon(GtkWindow* win)
     else if (error)
     {
         // An error occured on loading the icon
-        fprintf(stderr,
-                "spacefm: Unable to load the window icon "
-                "'%s' in - xset_set_window_icon - %s\n",
-                name,
-                error->message);
+        LOG_ERROR("Unable to load the window icon '{}' in - xset_set_window_icon - {}",
+                  name,
+                  error->message);
         g_error_free(error);
     }
 }

@@ -20,6 +20,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include "logger.hxx"
+
 #include "mime-action.hxx"
 
 static bool
@@ -136,7 +138,7 @@ strv_index(char** strv, const char* str)
 static void
 remove_actions(const char* type, GArray* actions)
 { // sfm 0.7.7+ added
-    // g_print( "remove_actions( %s )\n", type );
+    // LOG_INFO("remove_actions( {} )", type);
     GKeyFile* file = g_key_file_new();
 
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
@@ -164,11 +166,11 @@ remove_actions(const char* type, GArray* actions)
         for (r = 0; r < n_removed; ++r)
         {
             g_strstrip(removed[r]);
-            // g_print( "    %s\n", removed[r] );
+            // LOG_INFO("    {}", removed[r]);
             int i = strv_index((char**)actions->data, removed[r]);
             if (i != -1)
             {
-                // g_print(  "        ACTION-REMOVED\n" );
+                // LOG_INFO("        ACTION-REMOVED");
                 g_array_remove_index(actions, i);
             }
         }
@@ -187,17 +189,17 @@ remove_actions(const char* type, GArray* actions)
 static char*
 get_actions(const char* dir, const char* type, GArray* actions)
 {
-    // g_print( "get_actions( %s, %s )\n", dir, type );
+    // LOG_INFO("get_actions( {}, {} )\n", dir, type);
     char** removed = nullptr;
 
     const char* names[] = {"mimeapps.list", "mimeinfo.cache"};
     const char* groups[] = {"Default Applications", "Added Associations", "MIME Cache"};
-    // g_print("get_actions( %s/, %s )\n", dir, type );
+    // LOG_INFO("get_actions( {}/, {} )", dir, type);
     int n;
     for (n = 0; n < G_N_ELEMENTS(names); n++)
     {
         char* path = g_build_filename(dir, names[n], nullptr);
-        // g_print( "    %s\n", path );
+        // LOG_INFO( "    {}", path);
         GKeyFile* file = g_key_file_new();
         bool opened = g_key_file_load_from_file(file, path, G_KEY_FILE_NONE, nullptr);
         g_free(path);
@@ -217,7 +219,7 @@ get_actions(const char* dir, const char* type, GArray* actions)
             int k;
             for (k = (n == 0 ? 0 : 2); k < (n == 0 ? 2 : 3); k++)
             {
-                // g_print( "        %s [%d]\n", groups[k], k );
+                // LOG_INFO("        {} [{}]", groups[k], k);
                 unsigned long n_apps = 0;
                 bool is_removed;
                 char** apps = g_key_file_get_string_list(file, groups[k], type, &n_apps, nullptr);
@@ -225,7 +227,7 @@ get_actions(const char* dir, const char* type, GArray* actions)
                 for (i = 0; i < n_apps; ++i)
                 {
                     g_strstrip(apps[i]);
-                    // g_print( "            %s\n", apps[i] );
+                    // LOG_INFO("            {}", apps[i]);
                     // check if removed
                     is_removed = false;
                     if (removed && n > 0)
@@ -236,7 +238,7 @@ get_actions(const char* dir, const char* type, GArray* actions)
                             g_strstrip(removed[r]);
                             if (!strcmp(removed[r], apps[i]))
                             {
-                                // g_print( "                REMOVED\n" );
+                                // LOG_INFO("                REMOVED");
                                 is_removed = true;
                                 break;
                             }
@@ -248,13 +250,13 @@ get_actions(const char* dir, const char* type, GArray* actions)
                         path = mime_type_locate_desktop_file(nullptr, apps[i]);
                         if (G_LIKELY(path))
                         {
-                            // g_print( "                EXISTS\n");
+                            // LOG_INFO("                EXISTS");
                             g_array_append_val(actions, apps[i]);
                             g_free(path);
                         }
                         else
                         {
-                            // g_print( "                MISSING\n");
+                            // LOG_INFO("                MISSING");
                             g_free(apps[i]);
                         }
                         apps[i] = nullptr; /* steal the string */
@@ -613,7 +615,7 @@ mime_type_locate_desktop_file(const char* dir, const char* desktop_id)
 static char*
 get_default_action(const char* dir, const char* type, void* user_data)
 {
-    // g_print( "get_default_action( %s, %s )\n", dir, type );
+    // LOG_INFO("get_default_action( {}, {} )", dir, type);
     // search these files in dir for the first existing default app
     const char* names[] = {"mimeapps.list", "defaults.list"};
     const char* groups[] = {"Default Applications", "Added Associations"};
@@ -622,7 +624,7 @@ get_default_action(const char* dir, const char* type, void* user_data)
     for (n = 0; n < G_N_ELEMENTS(names); n++)
     {
         char* path = g_build_filename(dir, names[n], nullptr);
-        // g_print( "    path = %s\n", path );
+        // LOG_INFO("    path = {}", path);
         GKeyFile* file = g_key_file_new();
         bool opened = g_key_file_load_from_file(file, path, G_KEY_FILE_NONE, nullptr);
         g_free(path);
@@ -641,10 +643,10 @@ get_default_action(const char* dir, const char* type, void* user_data)
                         g_strstrip(apps[i]);
                         if (apps[i][0] != '\0')
                         {
-                            // g_print( "        %s\n", apps[i] );
+                            // LOG_INFO("        {}", apps[i]);
                             if ((path = mime_type_locate_desktop_file(nullptr, apps[i])))
                             {
-                                // g_print( "            EXISTS\n" );
+                                // LOG_INFO("            EXISTS");
                                 g_free(path);
                                 path = g_strdup(apps[i]);
                                 g_strfreev(apps);
@@ -701,12 +703,12 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
 
     if (!(type && type[0] != '\0' && desktop_id && desktop_id[0] != '\0'))
     {
-        g_warning("mime_type_update_association invalid type or desktop_id");
+        LOG_WARN("mime_type_update_association invalid type or desktop_id");
         return;
     }
     if (action > MIME_TYPE_ACTION_REMOVE || action < MIME_TYPE_ACTION_DEFAULT)
     {
-        g_warning("mime_type_update_association invalid action");
+        LOG_WARN("mime_type_update_association invalid action");
         return;
     }
 

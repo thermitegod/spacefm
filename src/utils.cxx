@@ -20,28 +20,27 @@
 void
 print_command(const char* cmd)
 {
-    printf("COMMAND=%s\n", cmd);
+    LOG_INFO("COMMAND={}", cmd);
 }
 
 void
 print_task_command(char* ptask, const char* cmd)
 {
-    printf("\nTASK_COMMAND(%p)=%s\n", ptask, cmd);
+    LOG_INFO("TASK_COMMAND({:p})={}", ptask, cmd);
 }
 
 void
 print_task_command_spawn(char* argv[], int pid)
 {
-    printf("SPAWN=");
+    LOG_INFO("SPAWN=");
     int i = 0;
     while (argv[i])
     {
-        printf("%s%s", i == 0 ? "" : "  ", argv[i]);
+        LOG_INFO("  {}", argv[i]);
         i++;
     }
 
-    printf("\n");
-    printf("    pid = %d\n", pid);
+    LOG_INFO("    pid = {}", pid);
 }
 
 char*
@@ -50,8 +49,8 @@ randhex8()
     char hex[9];
     unsigned int n = mrand48();
     snprintf(hex, sizeof(hex), "%08x", n);
-    // printf("rand  : %d\n", n);
-    // printf("hex   : %s\n", hex);
+    // LOG_INFO("rand  : {}", n);
+    // LOG_INFO("hex   : {}", hex);
     return g_strdup(hex);
 }
 

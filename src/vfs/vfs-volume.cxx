@@ -19,6 +19,7 @@
 #include "../ptk/ptk-handler.hxx"
 #include "../ptk/ptk-location-view.hxx"
 
+#include "logger.hxx"
 #include "utils.hxx"
 
 #include "vfs-volume.hxx"
@@ -137,10 +138,8 @@ _dupv8(const char* s)
 
     if (!g_utf8_validate(s, -1, &end_valid))
     {
-        g_print(
-            "**** NOTE: The string '%s' is not valid UTF-8. Invalid characters begins at '%s'\n",
-            s,
-            end_valid);
+        LOG_INFO("The string '{}' is not valid UTF-8", s);
+        LOG_INFO("Invalid characters begins at '{}'", end_valid);
         return g_strndup(s, end_valid - s);
     }
     else
@@ -167,7 +166,7 @@ decode_udev_encoded_string(const char* str)
 
             if (str[n + 1] != 'x' || str[n + 2] == '\0' || str[n + 3] == '\0')
             {
-                g_print("**** NOTE: malformed encoded string '%s'\n", str);
+                LOG_INFO("malformed encoded string '{}'", str);
                 break;
             }
 
@@ -187,10 +186,8 @@ decode_udev_encoded_string(const char* str)
     const char* end_valid;
     if (!g_utf8_validate(s->str, -1, &end_valid))
     {
-        g_print(
-            "**** NOTE: The string '%s' is not valid UTF-8. Invalid characters begins at '%s'\n",
-            s->str,
-            end_valid);
+        LOG_INFO("The string '{}' is not valid UTF-8", s->str);
+        LOG_INFO("Invalid characters begins at '{}'", end_valid);
         ret = g_strndup(s->str, end_valid - s->str);
         g_string_free(s, true);
     }
@@ -957,7 +954,7 @@ info_mount_points(device_t* device)
     GError* error = nullptr;
     if (!g_file_get_contents(MOUNTINFO, &contents, nullptr, &error))
     {
-        g_warning("Error reading %s: %s", MOUNTINFO, error->message);
+        LOG_WARN("Error reading {}: {}", MOUNTINFO, error->message);
         g_error_free(error);
         return nullptr;
     }
@@ -991,7 +988,7 @@ info_mount_points(device_t* device)
                    encoded_root,
                    encoded_mount_point) != 6)
         {
-            g_warning("Error reading /proc/self/mountinfo: Error parsing line '%s'", lines[n]);
+            LOG_WARN("Error reading /proc/self/mountinfo: Error parsing line '{}'", lines[n]);
             continue;
         }
 
@@ -1479,7 +1476,7 @@ cmp_devmounts(devmount_t* a, devmount_t* b)
 static void
 parse_mounts(bool report)
 {
-    // printf("\n@@@@@@@@@@@@@ parse_mounts %s\n\n", report ? "true" : "false" );
+    // LOG_INFO("@@@@@@@@@@@@@ parse_mounts {}", report ? "true" : "false");
     char* contents = nullptr;
     char** lines = nullptr;
     struct udev_device* udevice;
@@ -1489,7 +1486,7 @@ parse_mounts(bool report)
     GError* error = nullptr;
     if (!g_file_get_contents(MOUNTINFO, &contents, nullptr, &error))
     {
-        g_warning("Error reading %s: %s", MOUNTINFO, error->message);
+        LOG_WARN("Error reading {}: {}", MOUNTINFO, error->message);
         g_error_free(error);
         return;
     }
@@ -1545,7 +1542,7 @@ parse_mounts(bool report)
                    encoded_root,
                    encoded_mount_point) != 6)
         {
-            g_warning("Error reading /proc/self/mountinfo: Error parsing line '%s'", lines[n]);
+            LOG_WARN("Error reading /proc/self/mountinfo: Error parsing line '{}'", lines[n]);
             continue;
         }
 
@@ -1555,20 +1552,20 @@ parse_mounts(bool report)
         if (subdir_mount)
         {
             // get mount source
-            // printf("subdir_mount %u:%u %s root=%s\n", major, minor, encoded_mount_point,
-            // encoded_root );
+            // LOG_INFO("subdir_mount {}:{} {} root={}", major, minor, encoded_mount_point,
+            // encoded_root);
             char typebuf[PATH_MAX];
             char mount_source[PATH_MAX];
             const char* sep;
             sep = strstr(lines[n], " - ");
             if (sep && sscanf(sep + 3, "%s %s", typebuf, mount_source) == 2)
             {
-                // printf( "    source=%s\n", mount_source );
+                // LOG_INFO("    source={}", mount_source);
                 if (g_str_has_prefix(mount_source, "/dev/"))
                 {
                     /* is a subdir mount on a local device, eg a bind mount
                      * so don't include this mount point */
-                    // printf( "        local\n" );
+                    // LOG_INFO("        local");
                     continue;
                 }
             }
@@ -1593,7 +1590,7 @@ parse_mounts(bool report)
                 str[0] = '\0';
         }
 
-        // printf("mount_point(%d:%d)=%s\n", major, minor, mount_point );
+        // LOG_INFO("mount_point({}:{})={}", major, minor, mount_point);
         devmount = nullptr;
         for (l = newmounts; l; l = l->next)
         {
@@ -1605,7 +1602,7 @@ parse_mounts(bool report)
         }
         if (!devmount)
         {
-            // printf("     new devmount %s\n", mount_point);
+            // LOG_INFO("     new devmount {}", mount_point);
             if (report)
             {
                 if (subdir_mount)
@@ -1658,7 +1655,7 @@ parse_mounts(bool report)
 
         if (devmount && !g_list_find(devmount->mounts, mount_point))
         {
-            // printf("    prepended\n");
+            // LOG_INFO("    prepended");
             devmount->mounts = g_list_prepend(devmount->mounts, mount_point);
         }
         else
@@ -1666,7 +1663,7 @@ parse_mounts(bool report)
     }
     g_free(contents);
     g_strfreev(lines);
-    // printf("\nLINES DONE\n\n");
+    // LOG_INFO("LINES DONE");
     // translate each mount points list to string
     char* points;
     char* old_points;
@@ -1688,7 +1685,7 @@ parse_mounts(bool report)
         g_list_free(devmount->mounts);
         devmount->mounts = nullptr;
         devmount->mount_points = points;
-        // printf( "translate %d:%d %s\n", devmount->major, devmount->minor, points );
+        // LOG_INFO("translate {}:{} {}", devmount->major, devmount->minor, points);
     }
 
     // compare old and new lists
@@ -1698,15 +1695,15 @@ parse_mounts(bool report)
         for (l = newmounts; l; l = l->next)
         {
             devmount = (devmount_t*)l->data;
-            // printf("finding %d:%d\n", devmount->major, devmount->minor );
+            // LOG_INFO("finding {}:{}", devmount->major, devmount->minor);
             found =
                 g_list_find_custom(devmounts, (const void*)devmount, (GCompareFunc)cmp_devmounts);
             if (found)
             {
-                // printf("    found\n");
+                // LOG_INFO("    found");
                 if (!g_strcmp0(((devmount_t*)found->data)->mount_points, devmount->mount_points))
                 {
-                    // printf("    freed\n");
+                    // LOG_INFO("    freed");
                     // no change to mount points, so remove from old list
                     devmount = (devmount_t*)found->data;
                     g_free(devmount->mount_points);
@@ -1718,8 +1715,8 @@ parse_mounts(bool report)
             else
             {
                 // new mount
-                // printf("    new mount %d:%d %s\n", devmount->major, devmount->minor,
-                // devmount->mount_points );
+                // LOG_INFO("    new mount {}:{} {}", devmount->major, devmount->minor,
+                // devmount->mount_points);
                 devmount_t* devcopy = g_slice_new0(devmount_t);
                 devcopy->major = devmount->major;
                 devcopy->minor = devmount->minor;
@@ -1730,12 +1727,12 @@ parse_mounts(bool report)
             }
         }
     }
-    // printf( "\nREMAINING\n\n");
+    // LOG_INFO("REMAINING");
     // any remaining devices in old list have changed mount status
     for (l = devmounts; l; l = l->next)
     {
         devmount = (devmount_t*)l->data;
-        // printf("remain %d:%d\n", devmount->major, devmount->minor );
+        // LOG_INFO("remain {}:{}", devmount->major, devmount->minor );
         if (report)
         {
             changed = g_list_prepend(changed, devmount);
@@ -1766,7 +1763,7 @@ parse_mounts(bool report)
             if (devnode)
             {
                 // block device
-                printf("mount changed: %s\n", devnode);
+                LOG_INFO("mount changed: {}", devnode);
                 if ((volume = vfs_volume_read_by_device(udevice)))
                     vfs_volume_device_added(volume, true); // frees volume if needed
                 g_free(devnode);
@@ -1776,11 +1773,11 @@ parse_mounts(bool report)
                 // not a block device
                 if ((volume = vfs_volume_read_by_mount(devnum, devmount->mount_points)))
                 {
-                    printf("special mount changed: %s (%u:%u) on %s\n",
-                           volume->device_file,
-                           (unsigned int)MAJOR(volume->devnum),
-                           (unsigned int)MINOR(volume->devnum),
-                           devmount->mount_points);
+                    LOG_INFO("special mount changed: {} ({}:{}) on {}",
+                             volume->device_file,
+                             (unsigned int)MAJOR(volume->devnum),
+                             (unsigned int)MINOR(volume->devnum),
+                             devmount->mount_points);
                     vfs_volume_device_added(volume, false); // frees volume if needed
                 }
                 else
@@ -1844,37 +1841,37 @@ static bool
 cb_udev_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
 {
     /*
-    printf("cb_monitor_watch %d\n", channel);
+    LOG_INFO("cb_monitor_watch {}", channel);
     if ( cond & G_IO_IN )
-        printf("    G_IO_IN\n");
+        LOG_INFO("    G_IO_IN");
     if ( cond & G_IO_OUT )
-        printf("    G_IO_OUT\n");
+        LOG_INFO("    G_IO_OUT");
     if ( cond & G_IO_PRI )
-        printf("    G_IO_PRI\n");
+        LOG_INFO("    G_IO_PRI");
     if ( cond & G_IO_ERR )
-        printf("    G_IO_ERR\n");
+        LOG_INFO("    G_IO_ERR");
     if ( cond & G_IO_HUP )
-        printf("    G_IO_HUP\n");
+        LOG_INFO("    G_IO_HUP");
     if ( cond & G_IO_NVAL )
-        printf("    G_IO_NVAL\n");
+        LOG_INFO("    G_IO_NVAL");
 
     if ( !( cond & G_IO_NVAL ) )
     {
         int fd = g_io_channel_unix_get_fd( channel );
-        printf("    fd=%d\n", fd);
+        LOG_INFO("    fd={}", fd);
         if ( fcntl(fd, F_GETFL) != -1 || errno != EBADF )
         {
             int flags = g_io_channel_get_flags( channel );
             if ( flags & G_IO_FLAG_IS_READABLE )
-                printf( "    G_IO_FLAG_IS_READABLE\n");
+                LOG_INFO( "    G_IO_FLAG_IS_READABLE");
         }
         else
-            printf("    Invalid FD\n");
+            LOG_INFO("    Invalid FD");
     }
     */
     if ((cond & G_IO_NVAL))
     {
-        g_warning("udev g_io_channel_unref G_IO_NVAL");
+        LOG_WARN("udev g_io_channel_unref G_IO_NVAL");
         g_io_channel_unref(channel);
         return false;
     }
@@ -1882,7 +1879,7 @@ cb_udev_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
     {
         if ((cond & G_IO_HUP))
         {
-            g_warning("udev g_io_channel_unref !G_IO_IN && G_IO_HUP");
+            LOG_WARN("udev g_io_channel_unref !G_IO_IN && G_IO_HUP");
             g_io_channel_unref(channel);
             return false;
         }
@@ -1892,7 +1889,7 @@ cb_udev_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
     else if (!(fcntl(g_io_channel_unix_get_fd(channel), F_GETFL) != -1 || errno != EBADF))
     {
         // bad file descriptor
-        g_warning("udev g_io_channel_unref BAD_FD");
+        LOG_WARN("udev g_io_channel_unref BAD_FD");
         g_io_channel_unref(channel);
         return false;
     }
@@ -1916,7 +1913,7 @@ cb_udev_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
             else if (!strcmp(action, "move"))
                 acted = "moved:   ";
             if (acted)
-                printf("udev %s%s\n", acted, devnode);
+                LOG_INFO("udev {}{}", acted, devnode);
 
             // add/remove volume
             if (!strcmp(action, "add") || !strcmp(action, "change"))
@@ -2250,24 +2247,24 @@ vfs_volume_read_by_device(struct udev_device* udevice)
 
     vfs_volume_set_info(volume);
     /*
-        printf( "====devnum=%u:%u\n", MAJOR( volume->devnum ), MINOR( volume->devnum ) );
-        printf( "    device_file=%s\n", volume->device_file );
-        printf( "    udi=%s\n", volume->udi );
-        printf( "    label=%s\n", volume->label );
-        printf( "    icon=%s\n", volume->icon );
-        printf( "    is_mounted=%d\n", volume->is_mounted );
-        printf( "    is_mountable=%d\n", volume->is_mountable );
-        printf( "    is_optical=%d\n", volume->is_optical );
-        printf( "    is_audiocd=%d\n", volume->is_audiocd );
-        printf( "    is_blank=%d\n", volume->is_blank );
-        printf( "    is_floppy=%d\n", volume->is_floppy );
-        printf( "    is_table=%d\n", volume->is_table );
-        printf( "    is_removable=%d\n", volume->is_removable );
-        printf( "    requires_eject=%d\n", volume->requires_eject );
-        printf( "    is_user_visible=%d\n", volume->is_user_visible );
-        printf( "    mount_point=%s\n", volume->mount_point );
-        printf( "    size=%u\n", volume->size );
-        printf( "    disp_name=%s\n", volume->disp_name );
+        LOG_INFO( "====devnum={}:{}", MAJOR(volume->devnum), MINOR(volume->devnum));
+        LOG_INFO( "    device_file={}", volume->device_file);
+        LOG_INFO( "    udi={}", volume->udi);
+        LOG_INFO( "    label={}", volume->label);
+        LOG_INFO( "    icon={}", volume->icon);
+        LOG_INFO( "    is_mounted={}", volume->is_mounted);
+        LOG_INFO( "    is_mountable={}", volume->is_mountable);
+        LOG_INFO( "    is_optical={}", volume->is_optical);
+        LOG_INFO( "    is_audiocd={}", volume->is_audiocd);
+        LOG_INFO( "    is_blank={}", volume->is_blank);
+        LOG_INFO( "    is_floppy={}", volume->is_floppy);
+        LOG_INFO( "    is_table={}", volume->is_table);
+        LOG_INFO( "    is_removable={}", volume->is_removable);
+        LOG_INFO( "    requires_eject={}", volume->requires_eject);
+        LOG_INFO( "    is_user_visible={}", volume->is_user_visible);
+        LOG_INFO( "    mount_point={}", volume->mount_point);
+        LOG_INFO( "    size={}", volume->size);
+        LOG_INFO( "    disp_name={}", volume->disp_name);
     */
     return volume;
 }
@@ -2302,7 +2299,7 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
     {
         if (!g_file_get_contents(mtab_path, &contents, nullptr, &error))
         {
-            g_warning("Error reading %s: %s", mtab_path, error->message);
+            LOG_WARN("Error reading {}: {}", mtab_path, error->message);
             g_error_free(error);
             g_free(mtab_path);
             return false;
@@ -2318,7 +2315,7 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
 
         if (sscanf(lines[n], "%s %s %s ", encoded_file, encoded_point, encoded_fstype) != 3)
         {
-            g_warning("Error parsing mtab line '%s'", lines[n]);
+            LOG_WARN("Error parsing mtab line '{}'", lines[n]);
             continue;
         }
 
@@ -2764,7 +2761,7 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
             }
             break;
         default:
-            g_warning("vfs_volume_handler_cmd invalid mode %d\n", mode);
+            LOG_WARN("vfs_volume_handler_cmd invalid mode {}", mode);
             return nullptr;
     }
 
@@ -2828,7 +2825,7 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
     char* err_msg = ptk_handler_load_script(mode, action, set, nullptr, &command);
     if (err_msg)
     {
-        g_warning("%s", err_msg);
+        LOG_WARN("{}", err_msg);
         g_free(err_msg);
         return nullptr;
     }
@@ -2852,12 +2849,12 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
     }
 
     // show selected handler
-    printf("\n%s '%s': %s%s %s\n",
-           mode == HANDLER_MODE_FS ? "Selected Device Handler" : "Selected Protocol Handler",
-           set->menu_label,
-           action_s,
-           command ? "" : " (no command)",
-           msg);
+    LOG_INFO("{} '{}': {}{} {}",
+             mode == HANDLER_MODE_FS ? "Selected Device Handler" : "Selected Protocol Handler",
+             set->menu_label,
+             action_s,
+             command ? "" : " (no command)",
+             msg);
 
     if (ptk_handler_command_is_empty(command))
     {
@@ -3144,10 +3141,10 @@ vfs_volume_device_info(VFSVolume* vol)
     struct udev_device* udevice = udev_device_new_from_devnum(udev, 'b', vol->devnum);
     if (udevice == nullptr)
     {
-        g_warning("No udev device for device %s (%u:%u)",
-                  vol->device_file,
-                  (unsigned int)MAJOR(vol->devnum),
-                  (unsigned int)MINOR(vol->devnum));
+        LOG_WARN("No udev device for device {} ({}:{})",
+                 vol->device_file,
+                 (unsigned int)MAJOR(vol->devnum),
+                 (unsigned int)MINOR(vol->devnum));
         return g_strdup_printf("( no udev device )");
     }
 
@@ -3450,7 +3447,7 @@ exec_task(const char* command, bool run_in_terminal)
 static void
 vfs_volume_exec(VFSVolume* vol, const char* command)
 {
-    // printf( "vfs_volume_exec %s %s\n", vol->device_file, command );
+    // LOG_INFO("vfs_volume_exec {} {}", vol->device_file, command);
     if (!(command && command[0]) || vol->device_type != DEVICE_TYPE_BLOCK)
         return;
 
@@ -3460,7 +3457,7 @@ vfs_volume_exec(VFSVolume* vol, const char* command)
     s1 = replace_string(s2, "%v", vol->device_file, false);
     g_free(s2);
 
-    printf("\nAutoexec: %s\n", s1);
+    LOG_INFO("Autoexec: {}", s1);
     exec_task(s1, false);
     g_free(s1);
 }
@@ -3499,9 +3496,7 @@ vfs_volume_autoexec(VFSVolume* vol)
                     FMMainWindow* main_window = fm_main_window_get_last_active();
                     if (main_window)
                     {
-                        printf("\nAuto Open Tab for %s in %s\n",
-                               vol->device_file,
-                               vol->mount_point);
+                        LOG_INFO("Auto Open Tab for {} in {}", vol->device_file, vol->mount_point);
                         // PtkFileBrowser* file_browser =
                         //        (PtkFileBrowser*)fm_main_window_get_current_file_browser(
                         //                                                main_window );
@@ -3510,8 +3505,8 @@ vfs_volume_autoexec(VFSVolume* vol)
                         //                                        PTK_OPEN_DIR ); //PTK_OPEN_NEW_TAB
                         // fm_main_window_add_new_tab causes hang without GDK_THREADS_ENTER
                         fm_main_window_add_new_tab(main_window, vol->mount_point);
-                        // printf("DONE Auto Open Tab for %s in %s\n", vol->device_file,
-                        //                                        vol->mount_point );
+                        // LOG_INFO("DONE Auto Open Tab for {} in {}", vol->device_file,
+                        //                                             vol->mount_point);
                     }
                     else
                     {
@@ -3546,12 +3541,12 @@ vfs_volume_autounmount(VFSVolume* vol)
     char* line = vfs_volume_device_unmount_cmd(vol, &run_in_terminal);
     if (line)
     {
-        printf("\nAuto-Unmount: %s\n", line);
+        LOG_INFO("Auto-Unmount: {}", line);
         exec_task(line, run_in_terminal);
         g_free(line);
     }
     else
-        printf("\nAuto-Unmount: error: no unmount command available\n");
+        LOG_INFO("Auto-Unmount: error: no unmount command available");
 }
 
 void
@@ -3570,12 +3565,12 @@ vfs_volume_automount(VFSVolume* vol)
         vfs_volume_get_mount_command(vol, xset_get_s("dev_mount_options"), &run_in_terminal);
     if (line)
     {
-        printf("\nAutomount: %s\n", line);
+        LOG_INFO("Automount: {}", line);
         exec_task(line, run_in_terminal);
         g_free(line);
     }
     else
-        printf("\nAutomount: error: no mount command available\n");
+        LOG_INFO("Automount: error: no mount command available");
 }
 
 static void
@@ -3709,11 +3704,11 @@ vfs_volume_nonblock_removed(dev_t devnum)
         {
             // remove volume
             volume = (VFSVolume*)l->data;
-            printf("special mount removed: %s (%u:%u) on %s\n",
-                   volume->device_file,
-                   (unsigned int)MAJOR(volume->devnum),
-                   (unsigned int)MINOR(volume->devnum),
-                   volume->mount_point);
+            LOG_INFO("special mount removed: {} ({}:{}) on {}",
+                     volume->device_file,
+                     (unsigned int)MAJOR(volume->devnum),
+                     (unsigned int)MINOR(volume->devnum),
+                     volume->mount_point);
             volumes = g_list_remove(volumes, volume);
             call_callbacks(volume, VFS_VOLUME_REMOVED);
             vfs_free_volume_members(volume);
@@ -3742,7 +3737,7 @@ vfs_volume_device_removed(struct udev_device* udevice)
         {
             // remove volume
             volume = (VFSVolume*)l->data;
-            // printf("remove volume %s\n", volume->device_file );
+            // LOG_INFO("remove volume {}", volume->device_file);
             vfs_volume_exec(volume, xset_get_s("dev_exec_remove"));
             if (volume->is_mounted && volume->is_removable)
                 unmount_if_mounted(volume);
@@ -3780,7 +3775,7 @@ unmount_if_mounted(VFSVolume* vol)
                                  str);
     g_free(str);
     g_free(mtab_path);
-    printf("Unmount-If-Mounted: %s\n", line);
+    LOG_INFO("Unmount-If-Mounted: {}", line);
     exec_task(line, run_in_terminal);
     g_free(line);
 }
@@ -3807,7 +3802,7 @@ vfs_volume_init()
     udev = udev_new();
     if (!udev)
     {
-        printf("spacefm: unable to initialize udev\n");
+        LOG_INFO("unable to initialize udev");
         return true;
     }
 
@@ -3843,17 +3838,17 @@ vfs_volume_init()
     umonitor = udev_monitor_new_from_netlink(udev, "udev");
     if (!umonitor)
     {
-        printf("spacefm: cannot create udev monitor\n");
+        LOG_INFO("cannot create udev monitor");
         goto finish_;
     }
     if (udev_monitor_enable_receiving(umonitor))
     {
-        printf("spacefm: cannot enable udev monitor receiving\n");
+        LOG_INFO("cannot enable udev monitor receiving");
         goto finish_;
     }
     if (udev_monitor_filter_add_match_subsystem_devtype(umonitor, "block", nullptr))
     {
-        printf("spacefm: cannot set udev filter\n");
+        LOG_INFO("cannot set udev filter");
         goto finish_;
     }
 
@@ -3861,7 +3856,7 @@ vfs_volume_init()
     ufd = udev_monitor_get_fd(umonitor);
     if (ufd == 0)
     {
-        printf("spacefm: cannot get udev monitor socket file descriptor\n");
+        LOG_INFO("scannot get udev monitor socket file descriptor");
         goto finish_;
     }
     global_inhibit_auto = true; // don't autoexec during startup
@@ -3886,7 +3881,7 @@ vfs_volume_init()
     else
     {
         free_devmounts();
-        printf("spacefm: error monitoring %s: %s\n", MOUNTINFO, error->message);
+        LOG_INFO("error monitoring {}: {}", MOUNTINFO, error->message);
         g_error_free(error);
     }
 
@@ -4115,7 +4110,7 @@ vfs_volume_dir_avoid_changes(const char* dir)
     const char* devnode;
     bool ret;
 
-    // printf("vfs_volume_dir_avoid_changes( %s )\n", dir );
+    // LOG_INFO("vfs_volume_dir_avoid_changes( {} )", dir);
     if (!udev || !dir)
         return false;
 
@@ -4129,7 +4124,7 @@ vfs_volume_dir_avoid_changes(const char* dir)
     struct stat stat_buf; // skip stat
     if (stat(canon, &stat_buf) == -1)
         return false;
-    // printf("    stat_buf.st_dev = %d:%d\n", major(stat_buf.st_dev), minor( stat_buf.st_dev) );
+    // LOG_INFO("    stat_buf.st_dev = {}:{}", major(stat_buf.st_dev), minor(stat_buf.st_dev));
 
     struct udev_device* udevice = udev_device_new_from_devnum(udev, 'b', stat_buf.st_dev);
     if (udevice)
@@ -4141,7 +4136,7 @@ vfs_volume_dir_avoid_changes(const char* dir)
     {
         // not a block device
         const char* fstype = get_devmount_fstype(major(stat_buf.st_dev), minor(stat_buf.st_dev));
-        // printf("    !udevice || !devnode  fstype=%s\n", fstype );
+        // LOG_INFO("    !udevice || !devnode  fstype={}", fstype);
         ret = false;
         if (fstype && fstype[0])
         {
@@ -4157,7 +4152,7 @@ vfs_volume_dir_avoid_changes(const char* dir)
                     if (g_str_has_prefix(ptr, fstype) &&
                         (ptr[len] == ' ' || ptr[len] == ',' || ptr[len] == '\0'))
                     {
-                        printf("Change Detection Blacklist: fstype '%s' on %s\n", fstype, dir);
+                        LOG_INFO("Change Detection Blacklist: fstype '{}' on {}", fstype, dir);
                         ret = true;
                         break;
                     }
@@ -4185,7 +4180,7 @@ vfs_volume_dir_avoid_changes(const char* dir)
 
     if (udevice)
         udev_device_unref(udevice);
-    // printf( "    avoid_changes = %s\n", ret ? "true" : "false" );
+    // LOG_INFO("    avoid_changes = {}", ret ? "true" : "false");
     return ret;
 }
 

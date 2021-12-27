@@ -17,6 +17,8 @@
 
 #include "ptk/ptk-app-chooser.hxx"
 
+#include "logger.hxx"
+
 const char* enter_command_use =
     "Enter program or bash command line(s):\n\nUse:\n\t%F\tselected files  or  %f first "
     "selected file\n\t%N\tselected filenames  or  %n first selected filename\n\t%d\tcurrent "
@@ -845,7 +847,7 @@ load_command_script(ContextData* ctxt, XSet* set)
         gtk_text_buffer_set_text(buf, "", -1);
         file = fopen(script, "r");
         if (!file)
-            g_warning("error reading file %s: %s", script, g_strerror(errno));
+            LOG_WARN("error reading file {}: {}", script, g_strerror(errno));
         else
         {
             // read file one line at a time to prevent splitting UTF-8 characters
@@ -856,7 +858,7 @@ load_command_script(ContextData* ctxt, XSet* set)
                     fclose(file);
                     gtk_text_buffer_set_text(buf, "", -1);
                     modified = true;
-                    g_warning("file '%s' contents are not valid UTF-8", script);
+                    LOG_WARN("file '{}' contents are not valid UTF-8", script);
                     break;
                 }
                 gtk_text_buffer_insert_at_cursor(buf, line, -1);

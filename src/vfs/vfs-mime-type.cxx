@@ -17,6 +17,8 @@
 
 #include "vfs-utils.hxx"
 
+#include "logger.hxx"
+
 static GHashTable* mime_hash = nullptr;
 static GRWLock mime_hash_lock;
 
@@ -51,7 +53,7 @@ vfs_mime_type_reload(void* user_data)
     g_source_remove(reload_callback_id);
     reload_callback_id = 0;
 
-    /* g_debug( "reload mime-types" ); */
+    // LOG_DEBUG("reload mime-types");
 
     /* call all registered callbacks */
     for (l = reload_cb; l; l = l->next)
@@ -81,7 +83,7 @@ on_mime_cache_changed(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char*
             __attribute__((fallthrough));
         case VFS_FILE_MONITOR_CHANGE:
             mime_cache_reload(cache);
-            /* g_debug( "reload cache: %s", file_name ); */
+            // LOG_DEBUG("reload cache: {}", file_name);
             if (reload_callback_id == 0)
                 reload_callback_id = g_idle_add((GSourceFunc)vfs_mime_type_reload, nullptr);
             break;
@@ -258,7 +260,7 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
     }
     if (!mime_type->description)
     {
-        g_warning("mime-type %s has no description (comment)", mime_type->type);
+        LOG_WARN("mime-type {} has no description (comment)", mime_type->type);
         VFSMimeType* vfs_mime = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
         if (vfs_mime)
         {
@@ -396,7 +398,7 @@ vfs_mime_type_get_description(VFSMimeType* mime_type)
         mime_type->description = mime_type_get_desc_icon(mime_type->type, nullptr, nullptr);
         if (G_UNLIKELY(!mime_type->description || !*mime_type->description))
         {
-            g_warning("mime-type %s has no description (comment)", mime_type->type);
+            LOG_WARN("mime-type {} has no description (comment)", mime_type->type);
             VFSMimeType* vfs_mime = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
             if (vfs_mime)
             {

@@ -29,6 +29,8 @@
 #include <fcntl.h>
 #include <fnmatch.h>
 
+#include "logger.hxx"
+
 #include "mime-cache.hxx"
 
 #define LIB_MAJOR_VERSION 1
@@ -340,7 +342,7 @@ lookup_reverse_suffix_nodes(const char* buf, const char* nodes, uint32_t n, cons
     const char* cur_suffix_pos = (const char*)suffix + 1;
 
     uint32_t uchar = suffix ? g_unichar_tolower(g_utf8_get_char(suffix)) : 0;
-    /* g_debug("%s: suffix= '%s'", name, suffix); */
+    // LOG_DEBUG("{}: suffix= '{}'", name, suffix);
 
     int i;
     for (i = 0; i < n; ++i)
@@ -406,7 +408,7 @@ mime_cache_lookup_suffix(MimeCache* cache, const char* filename, const char** su
         if (leaf_node)
         {
             mime_type = cache->buffer + VAL32(leaf_node, 4);
-            /* g_debug( "found: %s", mime_type ); */
+            // LOG_DEBUG("found: {}", mime_type);
             *suffix_pos = _suffix_pos;
             ret = mime_type;
         }

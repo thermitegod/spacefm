@@ -25,6 +25,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "logger.hxx"
+
 struct VFSFileMonitorCallbackEntry
 {
     VFSFileMonitorCallback callback;
@@ -46,7 +48,7 @@ connect_to_fam()
     if (inotify_fd < 0)
     {
         fam_io_channel = nullptr;
-        g_warning("failed to initialize inotify.");
+        LOG_WARN("failed to initialize inotify.");
         return false;
     }
     fam_io_channel = g_io_channel_unix_new(inotify_fd);
@@ -109,7 +111,7 @@ vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCallback cb, void* u
     char resolved_path[PATH_MAX];
     char* real_path;
 
-    // printf( "vfs_file_monitor_add  %s\n", path );
+    // LOG_INFO("vfs_file_monitor_add  {}", path);
 
     if (!monitor_hash)
         return nullptr;
@@ -117,12 +119,12 @@ vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCallback cb, void* u
     // Since gamin, FAM and inotify don't follow symlinks, need to get real path
     if (strlen(path) > PATH_MAX - 1)
     {
-        g_warning("PATH_MAX exceeded on %s", path);
+        LOG_WARN("PATH_MAX exceeded on {}", path);
         real_path = path; // fallback
     }
     else if (realpath(path, resolved_path) == nullptr)
     {
-        g_warning("realpath failed on %s", path);
+        LOG_WARN("realpath failed on {}", path);
         real_path = path; // fallback
     }
     else
@@ -177,19 +179,19 @@ vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCallback cb, void* u
                     msg = g_strdup("??? Unknown error.");
                     break;
             }
-            g_warning("Failed to add watch on '%s' ('%s'): inotify_add_watch errno %d %s",
-                      real_path,
-                      path,
-                      errno,
-                      msg);
+            LOG_WARN("Failed to add watch on '{}' ('{}'): inotify_add_watch errno {} {}",
+                     real_path,
+                     path,
+                     errno,
+                     msg);
             return nullptr;
         }
-        // printf("vfs_file_monitor_add  %s (%s) %d\n", real_path, path, monitor->wd );
+        // LOG_INFO("vfs_file_monitor_add  {} ({}) {}", real_path, path, monitor->wd);
     }
 
     if (G_LIKELY(monitor))
     {
-        /* g_debug( "monitor installed: %s, %p", path, monitor ); */
+        // LOG_DEBUG("monitor installed: {}, {:p}", path, monitor);
         if (cb)
         { /* Install a callback */
             VFSFileMonitorCallbackEntry cb_ent;
@@ -205,7 +207,7 @@ vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCallback cb, void* u
 void
 vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* user_data)
 {
-    // printf( "vfs_file_monitor_remove\n" );
+    // LOG_INFO("vfs_file_monitor_remove");
     if (cb && fm && fm->callbacks)
     {
         VFSFileMonitorCallbackEntry* callbacks = (VFSFileMonitorCallbackEntry*)fm->callbacks->data;
@@ -222,7 +224,7 @@ vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* use
 
     if (fm && g_atomic_int_dec_and_test(&fm->n_ref)) // MOD added "fm &&"
     {
-        // printf( "vfs_file_monitor_remove  %d\n", fm->wd );
+        // LOG_INFO("vfs_file_monitor_remove  {}", fm->wd);
         inotify_rm_watch(inotify_fd, fm->wd);
 
         g_hash_table_remove(monitor_hash, fm->path);
@@ -230,7 +232,7 @@ vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* use
         g_array_free(fm->callbacks, true);
         g_slice_free(VFSFileMonitor, fm);
     }
-    // printf( "vfs_file_monitor_remove   DONE\n" );
+    // LOG_INFO("vfs_file_monitor_remove   DONE");
 }
 
 static void
@@ -251,7 +253,7 @@ reconnect_fam(void* key, void* value, void* user_data)
              *        a list of monitors on non-existent files/directories
              *        which you retry in a timeout.
              */
-            g_warning("Failed to add monitor on '%s': %s", path, g_strerror(errno));
+            LOG_WARN("Failed to add monitor on '{}': {}", path, g_strerror(errno));
             return;
         }
     }
@@ -277,7 +279,7 @@ translate_inotify_event(int inotify_mask)
     else
     {
         // IN_IGNORED not handled
-        // g_warning( "translate_inotify_event mask not handled %d", inotify_mask );
+        // LOG_WARN("translate_inotify_event mask not handled {}", inotify_mask);
         return VFS_FILE_MONITOR_CHANGE;
     }
 }
@@ -327,7 +329,7 @@ on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data)
         ;
     if (len < 0)
     {
-        g_warning("Error reading inotify event: %s", g_strerror(errno));
+        LOG_WARN("Error reading inotify event: {}", g_strerror(errno));
         /* goto error_cancel; */
         return false;
     }
@@ -337,7 +339,7 @@ on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data)
         /*
          * FIXME: handle this better?
          */
-        g_warning("Error reading inotify event: supplied buffer was too small");
+        LOG_WARN("Error reading inotify event: supplied buffer was too small");
         /* goto error_cancel; */
         return false;
     }
@@ -370,8 +372,8 @@ on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data)
             // which triggers another printf below, which triggers another file change)
             // https://bugs.launchpad.net/ubuntu/+source/vte/+bug/778872
             else
-                printf("inotify-event %s: %s///%s\n", desc, monitor->path, file_name);
-            //g_debug("inotify (%d) :%s", ievent->mask, file_name);
+                LOG_INFO("inotify-event {}: {}///{}", desc, monitor->path, file_name);
+            //LOG_DEBUG("inotify ({}) :{}", ievent->mask, file_name);
             */
             dispatch_event(monitor, translate_inotify_event(ievent->mask), file_name);
         }

@@ -22,6 +22,8 @@
 
 #include "vfs-execute.hxx"
 
+#include "logger.hxx"
+
 #ifdef HAVE_SN
 static bool
 sn_timeout(void* user_data)
@@ -123,7 +125,7 @@ vfs_exec_on_screen(GdkScreen* screen, const char* work_dir, char** argv, char** 
     int i;
     for (i = 0; i < n_env; ++i)
     {
-        /* g_debug( "old envp[%d] = \"%s\"" , i, envp[i]); */
+        // LOG_DEBUG("old envp[{}] = '{}'" , i, envp[i]);
         if (!strncmp(envp[i], "DISPLAY=", 8))
             display_index = i;
         else
@@ -193,17 +195,17 @@ vfs_exec_on_screen(GdkScreen* screen, const char* work_dir, char** argv, char** 
 
     /* for debugging */
 #if 0
-    g_debug( "debug vfs_execute_on_screen(): flags: %d, display_index=%d", flags, display_index );
+    LOG_DEBUG("debug vfs_execute_on_screen(): flags: {}, display_index={}", flags, display_index );
     for( i = 0; argv[i]; ++i ) {
-        g_debug( "argv[%d] = \"%s\"" , i, argv[i] );
+        LOG_DEBUG("argv[{}] = '{}'" , i, argv[i]);
     }
     for( i = 0; i < n_env /*new_env[i]*/; ++i ) {
-        g_debug( "new_env[%d] = \"%s\"" , i, new_env[i] );
+        LOG_DEBUG("new_env[{}] = '{}'" , i, new_env[i]);
     }
     if( ret )
-        g_debug( "the program was executed without error" );
+        LOG_DEBUG("the program was executed without error");
     else
-        g_debug( "launch failed: %s", (*err)->message );
+        LOG_DEBUG("launch failed: '{}'", (*err)->message);
 #endif
 
     g_strfreev(new_env);

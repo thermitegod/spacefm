@@ -292,7 +292,7 @@ single_instance_check()
 {
     if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
     {
-        fprintf(stderr, "spacefm: socket init failure\n");
+        LOG_ERROR("socket init failure");
         single_instance_check_fatal(EXIT_FAILURE);
     }
 
@@ -372,7 +372,7 @@ single_instance_check()
             }
         }
         if (cli_flags.config_dir)
-            g_warning("Option --config ignored - an instance is already running");
+            LOG_WARN("Option --config ignored - an instance is already running");
         shutdown(sock, 2);
         close(sock);
         single_instance_check_fatal(EXIT_SUCCESS);
@@ -384,7 +384,7 @@ single_instance_check()
     setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
     if (bind(sock, (struct sockaddr*)&addr, addr_len) == -1)
     {
-        g_warning("could not create socket %s", addr.sun_path);
+        LOG_WARN("could not create socket {}", addr.sun_path);
         // could still run partially without this
         single_instance_check_fatal(EXIT_FAILURE);
     }
@@ -398,7 +398,7 @@ single_instance_check()
 
         if (listen(sock, 5) == -1)
         {
-            g_warning("could not listen to socket");
+            LOG_WARN("could not listen to socket");
             single_instance_check_fatal(EXIT_FAILURE);
         }
     }
@@ -439,22 +439,6 @@ receive_socket_command(int client, GString* args) // sfm
     else
         argv = nullptr;
 
-    /*
-        if ( argv )
-        {
-            printf( "receive:\n");
-            for ( arg = argv; *arg; ++arg )
-            {
-                if ( ! **arg )  // skip empty string
-                {
-                    printf( "    (skipped empty)\n");
-                    continue;
-                }
-                printf( "    %s\n", *arg );
-            }
-        }
-    */
-
     // check inode tag - was socket command sent from the same filesystem?
     // eg this helps deter use of socket commands sent from a chroot jail
     // or from another user or system
@@ -463,7 +447,7 @@ receive_socket_command(int client, GString* args) // sfm
     {
         reply = g_strdup("spacefm: invalid socket command user\n");
         cmd = 1;
-        g_warning("invalid socket command user");
+        LOG_WARN("invalid socket command user");
     }
     else
     {
@@ -486,14 +470,14 @@ send_socket_command(int argc, char* argv[], char** reply) // sfm
     *reply = nullptr;
     if (argc < 3)
     {
-        fprintf(stderr, "spacefm: --socket-cmd requires an argument\n");
+        LOG_ERROR("socket-cmd requires an argument");
         return EXIT_FAILURE;
     }
 
     // create socket
     if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
     {
-        fprintf(stderr, "spacefm: could not create socket\n");
+        LOG_ERROR("failed to create socket");
         return EXIT_FAILURE;
     }
 
@@ -505,8 +489,7 @@ send_socket_command(int argc, char* argv[], char** reply) // sfm
 
     if (connect(sock, (struct sockaddr*)&addr, addr_len) != 0)
     {
-        fprintf(stderr,
-                "spacefm: could not connect to socket (not running? or DISPLAY not set?)\n");
+        LOG_ERROR("could not connect to socket (not running? or DISPLAY not set?)");
         return EXIT_FAILURE;
     }
 
@@ -550,7 +533,7 @@ send_socket_command(int argc, char* argv[], char** reply) // sfm
     }
     else
     {
-        fprintf(stderr, "spacefm: invalid response from socket\n");
+        LOG_ERROR("invalid response from socket");
         ret = 1;
     }
     g_string_free(sock_reply, true);
@@ -563,9 +546,9 @@ G_LOCK_DEFINE(gdk_lock);
 void
 debug_gdk_threads_enter(const char* message)
 {
-    g_debug("Thread %p tries to get GDK lock: %s", g_thread_self(), message);
+    LOG_DEBUG("Thread {:p} tries to get GDK lock: {}", g_thread_self(), message);
     G_LOCK(gdk_lock);
-    g_debug("Thread %p got GDK lock: %s", g_thread_self(), message);
+    LOG_DEBUG("Thread {:p} got GDK lock: {}", g_thread_self(), message);
 }
 
 static void
@@ -577,9 +560,9 @@ _debug_gdk_threads_enter()
 void
 debug_gdk_threads_leave(const char* message)
 {
-    g_debug("Thread %p tries to release GDK lock: %s", g_thread_self(), message);
+    LOG_DEBUG("Thread {:p} tries to release GDK lock: {}", g_thread_self(), message);
     G_UNLOCK(gdk_lock);
-    g_debug("Thread %p released GDK lock: %s", g_thread_self(), message);
+    LOG_DEBUG("Thread {:p} released GDK lock: {}", g_thread_self(), message);
 }
 
 static void
@@ -752,10 +735,8 @@ handle_parsed_commandline_args()
     if (cli_flags.new_tab || cli_flags.reuse_tab)
     {
         main_window = fm_main_window_get_on_current_desktop();
-        // printf("    fm_main_window_get_on_current_desktop = %p  %s %s\n", main_window,
-        //                                                            new_tab ? "new_tab" : "",
-        //                                                            reuse_tab ? "reuse_tab" : ""
-        //                                                            );
+        // LOG_INFO("    fm_main_window_get_on_current_desktop = {:p}  {} {}", main_window,
+        //               new_tab ? "new_tab" : "", reuse_tab ? "reuse_tab" : "");
     }
 
     if (cli_flags.show_pref > 0) /* show preferences dialog */
@@ -857,24 +838,13 @@ handle_parsed_commandline_args()
             }
         }
     }
-    // printf("    handle_parsed_commandline_args mw = %p\n\n", main_window );
+    // LOG_INFO("    handle_parsed_commandline_args mw = {:p}", main_window);
 
     if (cli_flags.files != default_files)
         g_strfreev(cli_flags.files);
 
     cli_flags.files = nullptr;
     return ret;
-}
-
-static void
-check_locale()
-{
-    char* name = setlocale(LC_ALL, nullptr);
-    if (G_UNLIKELY(!name && !(!strcmp(name, "C") || !strcmp(name, "C.UTF-8"))))
-    {
-        fprintf(stderr, "Non-C locale detected. This is not supported.\n");
-        exit(EXIT_FAILURE);
-    }
 }
 
 static void
@@ -890,8 +860,6 @@ int
 main(int argc, char* argv[])
 {
     SpaceFM::Logger::Init();
-
-    check_locale();
 
     bool run = false;
     GError* err = nullptr;
@@ -913,7 +881,7 @@ main(int argc, char* argv[])
             char* reply = nullptr;
             int ret = send_socket_command(argc, argv, &reply);
             if (reply && reply[0])
-                fprintf(ret ? stderr : stdout, "%s", reply);
+                LOG_ERROR("%s", reply);
             g_free(reply);
             return ret;
         }
@@ -941,7 +909,7 @@ main(int argc, char* argv[])
     /* initialize GTK+ and parse the command line arguments */
     if (G_UNLIKELY(!gtk_init_with_args(&argc, &argv, "", opt_entries, nullptr, &err)))
     {
-        printf("spacefm: %s\n", err->message);
+        LOG_INFO("{}", err->message);
         g_error_free(err);
         return EXIT_FAILURE;
     }
@@ -952,7 +920,7 @@ main(int argc, char* argv[])
     // socket command with other options?
     if (cli_flags.socket_cmd)
     {
-        fprintf(stderr, "spacefm: %s\n", "--socket-cmd must be first option");
+        LOG_ERROR("socket-cmd must be first option");
         return EXIT_FAILURE;
     }
 

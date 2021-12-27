@@ -31,6 +31,8 @@
 #include "xxhash.h"
 #endif
 
+#include "logger.hxx"
+
 struct VFSThumbnailLoader
 {
     VFSDir* dir;
@@ -102,7 +104,7 @@ vfs_thumbnail_loader_free(VFSThumbnailLoader* loader)
         g_queue_foreach(loader->update_queue, (GFunc)vfs_file_info_unref, nullptr);
         g_queue_free(loader->update_queue);
     }
-    /* g_debug( "FREE THUMBNAIL LOADER" ); */
+    // LOG_DEBUG("FREE THUMBNAIL LOADER");
 
     /* prevent recursive unref called from vfs_dir_finalize */
     loader->dir->thumbnail_loader = nullptr;
@@ -112,7 +114,7 @@ vfs_thumbnail_loader_free(VFSThumbnailLoader* loader)
 #if 0 /* This is not used in the program. For debug only */
 void on_load_finish( VFSAsyncTask* task, bool is_cancelled, VFSThumbnailLoader* loader )
 {
-    g_debug( "TASK FINISHED" );
+    LOG_DEBUG("TASK FINISHED");
 }
 #endif
 
@@ -121,7 +123,7 @@ thumbnail_request_free(VFSThumbnailRequest* req)
 {
     vfs_file_info_unref(req->file);
     g_slice_free(VFSThumbnailRequest, req);
-    /* g_debug( "FREE REQUEST!" ); */
+    // LOG_DEBUG("FREE REQUEST!");
 }
 
 static bool
@@ -129,7 +131,7 @@ on_thumbnail_idle(VFSThumbnailLoader* loader)
 {
     VFSFileInfo* file;
 
-    /* g_debug( "ENTER ON_THUMBNAIL_IDLE" ); */
+    // LOG_DEBUG("ENTER ON_THUMBNAIL_IDLE");
     vfs_async_task_lock(loader->task);
 
     while ((file = (VFSFileInfo*)g_queue_pop_head(loader->update_queue)))
@@ -144,11 +146,11 @@ on_thumbnail_idle(VFSThumbnailLoader* loader)
 
     if (vfs_async_task_is_finished(loader->task))
     {
-        /* g_debug( "FREE LOADER IN IDLE HANDLER" ); */
+        // LOG_DEBUG("FREE LOADER IN IDLE HANDLER");
         loader->dir->thumbnail_loader = nullptr;
         vfs_thumbnail_loader_free(loader);
     }
-    /* g_debug( "LEAVE ON_THUMBNAIL_IDLE" ); */
+    // LOG_DEBUG("LEAVE ON_THUMBNAIL_IDLE");
 
     return false;
 }
@@ -163,7 +165,7 @@ thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
         vfs_async_task_unlock(task);
         if (G_UNLIKELY(!req))
             break;
-        /* g_debug("pop: %s", req->file->name); */
+        // LOG_DEBUG("pop: {}", req->file->name);
 
         /* Only we have the reference. That means, no body is using the file */
         if (req->file->n_ref == 1)
@@ -187,12 +189,11 @@ thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
                     g_build_filename(loader->dir->path, vfs_file_info_get_name(req->file), nullptr);
                 vfs_file_info_load_thumbnail(req->file, full_path, load_big);
                 g_free(full_path);
-                /*  Slow donwn for debugging.
-                g_debug( "DELAY!!" );
-                g_usleep(G_USEC_PER_SEC/2);
-                */
+                //  Slow donwn for debugging.
+                // LOG_DEBUG("DELAY!!");
+                // g_usleep(G_USEC_PER_SEC/2);
 
-                /* g_debug( "thumbnail loaded: %s", req->file ); */
+                // LOG_DEBUG("thumbnail loaded: %s", req->file);
             }
             need_update = true;
         }
@@ -210,13 +211,13 @@ thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
             }
             vfs_async_task_unlock(task);
         }
-        /* g_debug( "NEED_UPDATE: %d", need_update ); */
+        // LOG_DEBUG("NEED_UPDATE: {}", need_update);
         thumbnail_request_free(req);
     }
 
     if (vfs_async_task_is_cancelled(task))
     {
-        /* g_debug( "THREAD CANCELLED!!!" ); */
+        // LOG_DEBUG("THREAD CANCELLED!!!");
         vfs_async_task_lock(task);
         if (loader->idle_handler)
         {
@@ -229,7 +230,7 @@ thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
     {
         if (loader->idle_handler == 0)
         {
-            /* g_debug( "ADD IDLE HANDLER BEFORE THREAD ENDING" ); */
+            // LOG_DEBUG("ADD IDLE HANDLER BEFORE THREAD ENDING");
             /* FIXME: add2 This source always causes a "Source ID was not
              * found" critical warning if removed in vfs_thumbnail_loader_free.
              * Where is this being removed?  See comment in
@@ -238,7 +239,7 @@ thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
                 g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc)on_thumbnail_idle, loader, nullptr);
         }
     }
-    /* g_debug("THREAD ENDED!");  */
+    // LOG_DEBUG("THREAD ENDED!");
     return nullptr;
 }
 
@@ -247,7 +248,7 @@ vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big)
 {
     bool new_task = false;
 
-    /* g_debug( "request thumbnail: %s, is_big: %d", file->name, is_big ); */
+    // LOG_DEBUG("request thumbnail: {}, is_big: {}", file->name, is_big);
     if (G_UNLIKELY(!dir->thumbnail_loader))
     {
         dir->thumbnail_loader = vfs_thumbnail_loader_new(dir);
@@ -300,7 +301,7 @@ vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
     if (G_UNLIKELY((loader = dir->thumbnail_loader)))
     {
         vfs_async_task_lock(loader->task);
-        /* g_debug( "TRY TO CANCEL REQUESTS!!" ); */
+        // LOG_DEBUG("TRY TO CANCEL REQUESTS!!");
         GList* l;
         for (l = loader->queue->head; l;)
         {
@@ -319,7 +320,7 @@ vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
 
         if (g_queue_get_length(loader->queue) == 0)
         {
-            /* g_debug( "FREE LOADER IN vfs_thumbnail_loader_cancel_all_requests!" ); */
+            // LOG_DEBUG("FREE LOADER IN vfs_thumbnail_loader_cancel_all_requests!");
             vfs_async_task_unlock(loader->task);
             loader->dir->thumbnail_loader = nullptr;
 
@@ -396,7 +397,7 @@ _vfs_thumbnail_load(const char* file_path, const char* uri, int size, time_t mti
     thumbnail_file =
         g_build_filename(g_get_user_cache_dir(), "thumbnails/normal", file_name, nullptr);
 
-    // printf("%s\n", thumbnail_file);
+    // LOG_INFO("{}", thumbnail_file);
 
     if (G_UNLIKELY(mtime == 0))
     {

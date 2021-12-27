@@ -39,6 +39,7 @@
 #include "ptk/ptk-file-misc.hxx"
 #include "ptk/ptk-utils.hxx"
 
+#include "logger.hxx"
 #include "find-files.hxx"
 
 enum FindFilesCol
@@ -506,7 +507,7 @@ finish_search(FindFile* data)
         kill(data->pid, SIGTERM);
         waitpid(data->pid, &status, 0);
         data->pid = 0;
-        /* g_debug( "find process is killed!" ); */
+        LOG_DEBUG("find process is killed!");
     }
     if (data->task)
     {
@@ -670,7 +671,7 @@ on_start_search(GtkWidget* btn, FindFile* data)
     argv = compose_command(data);
 
     cmd_line = g_strjoinv(" ", argv);
-    g_debug("find command: %s", cmd_line);
+    LOG_DEBUG("find command: {}", cmd_line);
     g_free(cmd_line);
     if (g_spawn_async_with_pipes(g_get_home_dir(),
                                  argv,

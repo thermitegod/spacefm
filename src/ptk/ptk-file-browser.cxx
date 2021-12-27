@@ -26,6 +26,8 @@
 #include "ptk-path-entry.hxx"
 #include "main-window.hxx"
 
+#include "logger.hxx"
+
 #include "utils.hxx"
 
 static void ptk_file_browser_class_init(PtkFileBrowserClass* klass);
@@ -363,12 +365,12 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
             set->x = g_strdup_printf("%d", pos);
         }
         main_window->panel_slide_x[p - 1] = pos;
-        // printf("    slide_x = %d\n", pos );
+        // LOG_INFO("    slide_x = {}", pos);
     }
     else
     {
-        // printf("ptk_file_browser_slider_release fb=%#x  (panel %d)  mode = %d\n", file_browser,
-        // p, mode );
+        // LOG_INFO("ptk_file_browser_slider_release fb={:p}  (panel {})  mode = {}", file_browser,
+        // p, fmt::ptr(mode));
         pos = gtk_paned_get_position(GTK_PANED(file_browser->side_vpane_top));
         if (!main_window->fullscreen)
         {
@@ -376,7 +378,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
             set->y = g_strdup_printf("%d", pos);
         }
         main_window->panel_slide_y[p - 1] = pos;
-        // printf("    slide_y = %d  ", pos );
+        // LOG_INFO("    slide_y = {}  ", pos);
 
         pos = gtk_paned_get_position(GTK_PANED(file_browser->side_vpane_bottom));
         if (!main_window->fullscreen)
@@ -385,7 +387,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
             set->s = g_strdup_printf("%d", pos);
         }
         main_window->panel_slide_s[p - 1] = pos;
-        // printf("slide_s = %d\n", pos );
+        // LOG_INFO("slide_s = {}", pos);
     }
     return false;
 }
@@ -749,12 +751,12 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
                 }
             }
         }
-        g_warning("ptk_file_browser_update_toolbar_widget widget not found for set");
+        LOG_WARN("ptk_file_browser_update_toolbar_widget widget not found for set");
         return;
     }
     else if (set_ptr)
     {
-        g_warning("ptk_file_browser_update_toolbar_widget invalid set_ptr or set");
+        LOG_WARN("ptk_file_browser_update_toolbar_widget invalid set_ptr or set");
         return;
     }
 
@@ -804,7 +806,7 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
             b = file_browser->large_icons;
             break;
         default:
-            g_warning("ptk_file_browser_update_toolbar_widget invalid tool_type");
+            LOG_WARN("ptk_file_browser_update_toolbar_widget invalid tool_type");
             return;
     }
 
@@ -818,7 +820,7 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
             gtk_widget_set_sensitive(widget, b);
         else
         {
-            g_warning("ptk_file_browser_update_toolbar_widget invalid widget");
+            LOG_WARN("ptk_file_browser_update_toolbar_widget invalid widget");
         }
     }
 }
@@ -840,7 +842,7 @@ enable_toolbar(PtkFileBrowser* file_browser)
 static void
 rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
 {
-    // printf(" rebuild_toolbox\n");
+    // LOG_INFO("rebuild_toolbox");
     if (!file_browser)
         return;
 
@@ -1208,7 +1210,7 @@ ptk_file_browser_finalize(GObject* obj)
 {
     int i;
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(obj);
-    // printf("ptk_file_browser_finalize\n");
+    // LOG_INFO("ptk_file_browser_finalize");
     if (file_browser->dir)
     {
         g_signal_handlers_disconnect_matched(file_browser->dir,
@@ -1276,8 +1278,8 @@ ptk_file_browser_set_property(GObject* obj, unsigned int prop_id, const GValue* 
 void
 ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
 {
-    // printf("ptk_file_browser_update_views fb=%p  (panel %d)\n", file_browser,
-    // file_browser->mypanel );
+    // LOG_INFO("ptk_file_browser_update_views fb={:p}  (panel {})", file_browser,
+    // file_browser->mypanel);
 
     FMMainWindow* main_window = (FMMainWindow*)file_browser->main_window;
     // hide/show browser widgets based on user settings
@@ -1529,7 +1531,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     pos = main_window->panel_slide_x[p - 1];
     if (pos < 100)
         pos = -1;
-    // printf( "    set slide_x = %d  \n", pos );
+    // LOG_INFO("    set slide_x = {}", pos);
     if (pos > 0)
         gtk_paned_set_position(GTK_PANED(file_browser->hpane), pos);
 
@@ -1537,14 +1539,14 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     pos = main_window->panel_slide_y[p - 1];
     if (pos < 20)
         pos = -1;
-    // printf( "    slide_y = %d  ", pos );
+    // LOG_INFO("    slide_y = {}", pos);
     gtk_paned_set_position(GTK_PANED(file_browser->side_vpane_top), pos);
 
     // side_vpane_bottom
     pos = main_window->panel_slide_s[p - 1];
     if (pos < 20)
         pos = -1;
-    // printf( "slide_s = %d\n", pos );
+    // LOG_INFO( "slide_s = {}", pos);
     gtk_paned_set_position(GTK_PANED(file_browser->side_vpane_bottom), pos);
 
     // Large Icons - option for Detailed and Compact list views
@@ -1575,7 +1577,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
 
         if (GTK_IS_TREE_VIEW(file_browser->folder_view))
         {
-            // printf("    set widths   mode = %d\n", mode);
+            // LOG_INFO("    set widths   mode = {}", mode);
             int i;
             for (i = 0; i < 6; i++)
             {
@@ -1593,11 +1595,11 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
                     // get column width for this panel context
                     set = xset_get_panel_mode(p, column_names[j], mode);
                     width = set->y ? strtol(set->y, nullptr, 10) : 100;
-                    // printf("        %d\t%s\n", width, title );
+                    // LOG_INFO("        {}\t{}", width, title );
                     if (width)
                     {
                         gtk_tree_view_column_set_fixed_width(col, width);
-                        // printf("upd set_width %s %d\n", column_names[j], width );
+                        // LOG_INFO("upd set_width {} {}", column_names[j], width );
                     }
                     // set column visibility
                     gtk_tree_view_column_set_visible(col, set->b == XSET_B_TRUE || j == 0);
@@ -1618,7 +1620,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     // Show Hidden
     ptk_file_browser_show_hidden_files(file_browser, xset_get_b_panel(p, "show_hidden"));
 
-    // printf("ptk_file_browser_update_views fb=%p DONE\n", file_browser);
+    // LOG_INFO("ptk_file_browser_update_views fb={:p} DONE", file_browser);
 }
 
 GtkWidget*
@@ -1735,7 +1737,7 @@ ptk_file_browser_update_tab_label(PtkFileBrowser* file_browser)
 void
 ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
 {
-    // printf("ptk_file_browser_select_last\n");
+    // LOG_INFO("ptk_file_browser_select_last");
     // select one file?
     if (file_browser->select_path)
     {
@@ -1749,7 +1751,7 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
     int elementn = -1;
     GList* l;
     GList* element = nullptr;
-    // printf("    search for %s\n", (char*)file_browser->curHistory->data );
+    // LOG_INFO("    search for {}", (char*)file_browser->curHistory->data);
 
     if (file_browser->history && file_browser->histsel && file_browser->curHistory &&
         (l = g_list_last(file_browser->history)))
@@ -1763,10 +1765,10 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
                 // skip the current history item if sellist empty since it was just created
                 if (!element->data)
                 {
-                    // printf( "        found current empty\n");
+                    // LOG_INFO("        found current empty");
                     element = nullptr;
                 }
-                // else printf( "        found current NON-empty\n");
+                // else LOG_INFO("        found current NON-empty");
             }
         }
         if (!element)
@@ -1800,7 +1802,7 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
     */
     if (element && element->data)
     {
-        // printf("    select files\n");
+        // LOG_INFO("    select files");
         PtkFileList* list = PTK_FILE_LIST(file_browser->file_list);
         GtkTreeSelection* tree_sel;
         bool firstsel = true;
@@ -1866,7 +1868,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
 {
     bool cancel = false;
     GtkWidget* folder_view = file_browser->folder_view;
-    // printf("ptk_file_browser_chdir\n");
+    // LOG_INFO("ptk_file_browser_chdir");
     char* path;
     char* msg;
 
@@ -1958,8 +1960,8 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
     {
         file_browser->curhistsel->data = ptk_file_browser_get_selected_files(file_browser);
 
-        // g_debug("set curhistsel %d", g_list_position( file_browser->histsel,
-        //                                    file_browser->curhistsel ) );
+        // LOG_DEBUG("set curhistsel {}", g_list_position(file_browser->histsel,
+        //                                    file_browser->curhistsel));
         // if ( file_browser->curhistsel->data )
         //    g_debug ("curhistsel->data OK" );
         // else
@@ -1982,13 +1984,13 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
                 // MOD added - make histsel shadow file_browser->history
                 if (file_browser->curhistsel && file_browser->curhistsel->next)
                 {
-                    // g_debug("@@@@@@@@@@@ free forward");
+                    // LOG_DEBUG("@@@@@@@@@@@ free forward");
                     GList* l;
                     for (l = file_browser->curhistsel->next; l; l = l->next)
                     {
                         if (l->data)
                         {
-                            // g_debug("free forward item");
+                            // LOG_DEBUG("free forward item");
                             g_list_foreach((GList*)l->data, (GFunc)vfs_file_info_unref, nullptr);
                             g_list_free((GList*)l->data);
                         }
@@ -2096,7 +2098,7 @@ on_history_menu_item_activate(GtkWidget* menu_item, PtkFileBrowser* file_browser
         if (elementn != -1)
             file_browser->curhistsel = g_list_nth(file_browser->histsel, elementn);
         else
-            g_debug("missing history item - ptk-file-browser.c");
+            LOG_DEBUG("missing history item - ptk-file-browser.cxx");
     }
 }
 
@@ -3582,7 +3584,7 @@ ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_brow
     {
         int p = file_browser->mypanel;
         char mode = main_window->panel_context[p - 1];
-        // printf("*** save_columns  fb=%#x (panel %d)  mode = %d\n", file_browser, p, mode);
+        // LOG_INFO("save_columns  fb={:p} (panel {})  mode = {}", fmt::ptr(file_browser), p, mode);
         int i;
         for (i = 0; i < 6; i++)
         {
@@ -3605,7 +3607,7 @@ ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_brow
                 {
                     g_free(set->y);
                     set->y = g_strdup_printf("%d", width);
-                    // printf("        %d\t%s\n", width, title );
+                    // LOG_INFO("        {}\t{}", width, title);
                 }
             }
         }
@@ -4045,7 +4047,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
                 else
                 {
                     gtk_tree_view_column_set_fixed_width(col, width);
-                    // printf("init set_width %s %d\n", column_names[j], width );
+                    // LOG_INFO("init set_width {} {}", column_names[j], width);
                 }
             }
         }
@@ -4341,7 +4343,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
         // and because exo_icon_view has no get_drag_dest_row
         dest_dir =
             folder_view_get_drop_dir(file_browser, file_browser->drag_x, file_browser->drag_y);
-        // printf("FB dest_dir = %s\n", dest_dir );
+        // LOG_INFO("FB dest_dir = {}", dest_dir );
         if (dest_dir)
         {
             char** list;
@@ -4447,7 +4449,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
 
                 if (files)
                 {
-                    /* g_print( "dest_dir = %s\n", dest_dir ); */
+                    // LOG_INFO("dest_dir = {}", dest_dir);
 
                     /* We only want to update drag status, not really want to drop */
                     if (file_browser->pending_drag_status)
@@ -5623,7 +5625,7 @@ ptk_file_browser_focus_me(PtkFileBrowser* file_browser)
 void
 ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, int t)
 {
-    // printf( "ptk_file_browser_go_tab fb=%#x\n", file_browser );
+    // LOG_INFO("ptk_file_browser_go_tab fb={:p}", fmt::ptr(file_browser));
     GtkWidget* notebook = file_browser->mynotebook;
     int tab_num;
     if (item)
@@ -5850,7 +5852,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
     FMMainWindow* main_window = (FMMainWindow*)browser->main_window;
     char mode = main_window->panel_context[browser->mypanel - 1];
 
-    // printf("ptk_file_browser_on_action %s\n", set->name );
+    // LOG_INFO("ptk_file_browser_on_action {}", set->name);
 
     if (g_str_has_prefix(set->name, "book_"))
     {
@@ -5973,7 +5975,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
             xname[1] = '_';
             g_free(xname);
         }
-        // printf( "ACTION panelN=%d  %c\n", i, set->name[5] );
+        // LOG_INFO("ACTION panelN={}  {}", i, set->name[5]);
         if (i > 0 && i < 5)
         {
             XSet* set2;

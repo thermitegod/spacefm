@@ -10,6 +10,8 @@
  *
  */
 
+#include "logger.hxx"
+
 #include "ptk-dir-tree.hxx"
 #include "ptk-file-menu.hxx"
 #include "ptk-file-task.hxx"
@@ -688,8 +690,8 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
             }
             g_free(dest_dir);
         }
-        // else
-        //    g_warning ("bad dest_dir in on_dir_tree_view_drag_data_received");
+        else
+            LOG_WARN("bad dest_dir in on_dir_tree_view_drag_data_received");
     }
     /* If we are only getting drag status, not finished. */
     if (file_browser->pending_drag_status_tree)

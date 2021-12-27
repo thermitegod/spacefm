@@ -18,6 +18,8 @@
 
 #include "vfs-app-desktop.hxx"
 
+#include "logger.hxx"
+
 static const char desktop_entry_name[] = "Desktop Entry";
 
 /*
@@ -436,7 +438,7 @@ vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSAppDes
                                      cmd);
                 else
                 {
-                    /* g_debug( "Execute %s\n", cmd ); */
+                    // LOG_DEBUG("Execute: {}", cmd);
                     if (g_shell_parse_argv(cmd, &argc, &argv, nullptr))
                     {
                         vfs_exec_on_screen(screen,
@@ -480,7 +482,7 @@ vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSAppDes
                                          cmd);
                     else
                     {
-                        /* g_debug( "Execute %s\n", cmd ); */
+                        // LOG_DEBUG("Execute: {}", cmd);
                         if (g_shell_parse_argv(cmd, &argc, &argv, nullptr))
                         {
                             vfs_exec_on_screen(screen,

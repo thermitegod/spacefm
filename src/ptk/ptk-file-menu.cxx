@@ -26,6 +26,8 @@
 #include "ptk-location-view.hxx"
 #include "ptk-file-list.hxx"
 
+#include "logger.hxx"
+
 #include "utils.hxx"
 
 static bool on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data);
@@ -656,7 +658,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
     if (!context->valid)
     {
         // rare exception due to context_fill hacks - fb was probably destroyed
-        g_warning("context_fill rare exception");
+        LOG_WARN("context_fill rare exception");
         context = xset_context_new();
         g_slice_free(XSetContext, context);
         context = nullptr;

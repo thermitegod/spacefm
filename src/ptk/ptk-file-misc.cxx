@@ -25,6 +25,7 @@
 
 #include "ptk-handler.hxx"
 #include "utils.hxx"
+#include "logger.hxx"
 
 struct ParentInfo
 {
@@ -571,7 +572,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         path = g_path_get_dirname(full_path);
     }
 
-    // printf("path=%s   full=%s\n", path, full_path );
+    // LOG_INFO("path={}   full={}", path, full_path);
 
     // tests
     struct stat statbuf;
@@ -620,11 +621,12 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     g_free(full_path);
 
     /*
-        printf( "\nTEST\n    full_path_same %d %d\n", full_path_same, mset->full_path_same );
-        printf( "    full_path_exists %d %d\n", full_path_exists, mset->full_path_exists );
-        printf( "    full_path_exists_dir %d %d\n", full_path_exists_dir, mset->full_path_exists_dir
-       ); printf( "    path_missing %d %d\n", path_missing, mset->path_missing ); printf( "
-       path_exists_file %d %d\n", path_exists_file, mset->path_exists_file );
+        LOG_INFO("TEST")
+        LOG_INFO( "  full_path_same {} {}", full_path_same, mset->full_path_same);
+        LOG_INFO( "  full_path_exists {} {}", full_path_exists, mset->full_path_exists);
+        LOG_INFO( "  full_path_exists_dir {} {}", full_path_exists_dir, mset->full_path_exists_dir);
+        LOG_INFO( "  path_missing {} {}", path_missing, mset->path_missing);
+        LOG_INFO( "  path_exists_file {} {}", path_exists_file, mset->path_exists_file);
     */
     // update display
     if (mset->full_path_same != full_path_same || mset->full_path_exists != full_path_exists ||
@@ -3282,7 +3284,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
     char* command;
     char* name;
 
-    printf("\nSelected File Handler '%s'\n", handler_set->menu_label);
+    LOG_INFO("Selected File Handler '{}'", handler_set->menu_label);
 
     // get command - was already checked as non-empty
     char* err_msg =
@@ -3442,7 +3444,7 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
         else
             screen = gdk_screen_get_default();
 
-        printf("EXEC(%s)=%s\n", app->full_path ? app->full_path : app_desktop, app->exec);
+        LOG_INFO("EXEC({})={}", app->full_path ? app->full_path : app_desktop, app->exec);
         GError* err = nullptr;
         if (!vfs_app_desktop_open_files(screen, parent->cwd, app, files, &err))
         {

@@ -14,6 +14,8 @@
 
 #include "../vfs/vfs-thumbnail-loader.hxx"
 
+#include "logger.hxx"
+
 static void ptk_file_list_init(PtkFileList* list);
 
 static void ptk_file_list_class_init(PtkFileListClass* klass);
@@ -573,14 +575,14 @@ ptk_file_list_set_sort_func(GtkTreeSortable* sortable, int sort_column_id,
                             GtkTreeIterCompareFunc sort_func, void* user_data,
                             GDestroyNotify destroy)
 {
-    g_warning("ptk_file_list_set_sort_func: Not supported\n");
+    LOG_WARN("ptk_file_list_set_sort_func: Not supported");
 }
 
 static void
 ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompareFunc sort_func,
                                     void* user_data, GDestroyNotify destroy)
 {
-    g_warning("ptk_file_list_set_default_sort_func: Not supported\n");
+    LOG_WARN("ptk_file_list_set_default_sort_func: Not supported");
 }
 
 static int
@@ -856,7 +858,7 @@ ptk_file_list_file_changed(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
 static void
 on_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
 {
-    /* g_debug( "LOADED: %s", file->name ); */
+    // LOG_DEBUG("LOADED: {}", file->name);
     ptk_file_list_file_changed(dir, file, list);
 }
 
@@ -913,7 +915,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, int max_file_size)
             else
             {
                 vfs_thumbnail_loader_request(list->dir, file, is_big);
-                /* g_debug( "REQUEST: %s", file->name ); */
+                // LOG_DEBUG("REQUEST: {}", file->name);
             }
         }
     }

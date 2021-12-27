@@ -22,6 +22,8 @@
 #include "vfs-file-task.hxx"
 #include "vfs-file-trash.hxx"
 
+#include "logger.hxx"
+
 const mode_t chmod_flags[] = {S_IRUSR,
                               S_IWUSR,
                               S_IXUSR,
@@ -350,7 +352,7 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
 
     if (should_abort(task))
         return false;
-    // printf("vfs_file_task_do_copy( %s, %s )\n", src_file, dest_file );
+    // LOG_INFO("vfs_file_task_do_copy( {}, {} )", src_file, dest_file);
     vfs_file_task_lock(task);
     string_copy_free(&task->current_file, src_file);
     string_copy_free(&task->current_dest, dest_file);
@@ -642,7 +644,7 @@ vfs_file_task_do_move(VFSFileTask* task, const char* src_file,
     task->current_item++;
     vfs_file_task_unlock(task);
 
-    /* g_debug( "move \"%s\" to \"%s\"\n", src_file, dest_file ); */
+    // LOG_DEBUG("move '{}' to '{}'", src_file, dest_file);
     struct stat file_stat;
     if (lstat(src_file, &file_stat) == -1)
     {
@@ -755,12 +757,12 @@ vfs_file_task_move(char* src_file, VFSFileTask* task)
         /* Not on the same device */
         if (src_stat.st_dev != dest_stat.st_dev)
         {
-            /* g_print("not on the same dev: %s\n", src_file); */
+            // LOG_INFO("not on the same dev: {}", src_file);
             vfs_file_task_do_copy(task, src_file, dest_file);
         }
         else
         {
-            /* g_print("on the same dev: %s\n", src_file); */
+            // LOG_INFO("on the same dev: {}", src_file);
             if (vfs_file_task_do_move(task, src_file, dest_file) == EXDEV) // MOD
             {
                 // MOD Invalid cross-device link (st_dev not always accurate test)
@@ -962,7 +964,7 @@ vfs_file_task_chown_chmod(char* src_file, VFSFileTask* task)
     string_copy_free(&task->current_file, src_file);
     task->current_item++;
     vfs_file_task_unlock(task);
-    /* g_debug("chmod_chown: %s\n", src_file); */
+    // LOG_DEBUG("chmod_chown: {}", src_file);
 
     struct stat src_stat;
     if (lstat(src_file, &src_stat) == 0)
@@ -1090,7 +1092,7 @@ vfs_file_task_get_cpids(GPid pid)
             }
         }
         g_free(stdout);
-        // printf("vfs_file_task_get_cpids %d\n[\n%s]\n", pid, cpids );
+        // LOG_INFO("vfs_file_task_get_cpids {}[{}]", pid, cpids );
         return cpids;
     }
     if (stdout)
@@ -1116,7 +1118,7 @@ vfs_file_task_kill_cpids(char* cpids, int signal)
         g_free(pida);
         if (pidi)
         {
-            // printf("KILL_CPID %d %d\n", pidi, signal );
+            // LOG_INFO("KILL_CPID pidi={} signal={}", pidi, signal );
             kill(pidi, signal);
         }
     }
@@ -1125,15 +1127,14 @@ vfs_file_task_kill_cpids(char* cpids, int signal)
 static void
 cb_exec_child_cleanup(GPid pid, int status, char* tmp_file)
 { // delete tmp files after async task terminates
-    // printf("cb_exec_child_cleanup pid=%d status=%d file=%s\n", pid, status, tmp_file );
+    // LOG_INFO("cb_exec_child_cleanup pid={} status={} file={}", pid, status, tmp_file );
     g_spawn_close_pid(pid);
     if (tmp_file)
     {
         unlink(tmp_file);
         g_free(tmp_file);
     }
-    printf("async child finished  pid=%d\n", pid);
-    // printf("cb_exec_child_cleanup DONE\n", pid, status);
+    LOG_INFO("async child finished  pid={} status={}", pid, status);
 }
 
 static void
@@ -1162,9 +1163,9 @@ cb_exec_child_watch(GPid pid, int status, VFSFileTask* task)
         if (task->exec_script)
             unlink(task->exec_script);
     }
-    printf("child finished  pid=%d exit_status=%d\n",
-           pid,
-           bad_status ? -1 : task->exec_exit_status);
+    LOG_INFO("child finished  pid={} exit_status={}",
+             pid,
+             bad_status ? -1 : task->exec_exit_status);
     if (!task->exec_exit_status && !bad_status)
     {
         if (!task->custom_percent)
@@ -1181,32 +1182,32 @@ static bool
 cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, VFSFileTask* task)
 {
     /*
-    printf("cb_exec_out_watch %p\n", channel);
+    LOG_INFO("cb_exec_out_watch {:p}", channel);
     if ( cond & G_IO_IN )
-        printf("    G_IO_IN\n");
+        LOG_INFO("    G_IO_IN");
     if ( cond & G_IO_OUT )
-        printf("    G_IO_OUT\n");
+        LOG_INFO("    G_IO_OUT");
     if ( cond & G_IO_PRI )
-        printf("    G_IO_PRI\n");
+        LOG_INFO("    G_IO_PRI");
     if ( cond & G_IO_ERR )
-        printf("    G_IO_ERR\n");
+        LOG_INFO("    G_IO_ERR");
     if ( cond & G_IO_HUP )
-        printf("    G_IO_HUP\n");
+        LOG_INFO("    G_IO_HUP");
     if ( cond & G_IO_NVAL )
-        printf("    G_IO_NVAL\n");
+        LOG_INFO("    G_IO_NVAL");
 
     if ( !( cond & G_IO_NVAL ) )
     {
         int fd = g_io_channel_unix_get_fd( channel );
-        printf("    fd=%d\n", fd);
+        LOG_INFO("    fd={}", fd);
         if ( fcntl(fd, F_GETFL) != -1 || errno != EBADF )
         {
             int flags = g_io_channel_get_flags( channel );
             if ( flags & G_IO_FLAG_IS_READABLE )
-                printf( "    G_IO_FLAG_IS_READABLE\n");
+                LOG_INFO( "    G_IO_FLAG_IS_READABLE");
         }
         else
-            printf("    Invalid FD\n");
+            LOG_INFO("    Invalid FD");
     }
     */
 
@@ -1236,7 +1237,7 @@ cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, VFSFileTask* task)
         size > 0)
         append_add_log(task, buf, size);
     else
-        printf("cb_exec_out_watch: g_io_channel_read_chars != G_IO_STATUS_NORMAL\n");
+        LOG_INFO("cb_exec_out_watch: g_io_channel_read_chars != G_IO_STATUS_NORMAL");
 
     return true;
 
@@ -1257,7 +1258,7 @@ get_xxhash(char* path)
     const char* xxhash = g_find_program_in_path("/usr/bin/xxh128sum");
     if (!xxhash)
     {
-        g_warning("Missing program xxhash\n");
+        LOG_WARN("Missing program xxhash");
         return nullptr;
     }
 
@@ -1309,7 +1310,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     GtkWidget* parent = nullptr;
     char buf[PATH_MAX + 1];
 
-    // printf("vfs_file_task_exec\n");
+    // LOG_INFO("vfs_file_task_exec");
     // task->exec_keep_tmp = true;
 
     vfs_file_task_lock(task);
@@ -1347,7 +1348,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
             {
                 str = g_strdup(
                     "Please configure a valid Terminal SU command in View|Preferences|Advanced");
-                g_warning(str, nullptr);
+                LOG_WARN("{}", str);
                 // do not use xset_msg_dialog if non-main thread
                 // vfs_file_task_exec_error( task, 0, str );
                 xset_msg_dialog(parent,
@@ -1368,7 +1369,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     if (!tmp || !g_file_test(tmp, G_FILE_TEST_IS_DIR))
     {
         str = g_strdup("Cannot create temporary directory");
-        g_warning(str, nullptr);
+        LOG_WARN("{}", str);
         // do not use xset_msg_dialog if non-main thread
         // vfs_file_task_exec_error( task, 0, str );
         xset_msg_dialog(parent, GTK_MESSAGE_ERROR, "Error", 0, str, nullptr);
@@ -1393,7 +1394,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         if (!(terminal && terminal[0] == '/'))
         {
             str = g_strdup("Please set a valid terminal program in View|Preferences|Advanced");
-            g_warning(str, nullptr);
+            LOG_WARN("{}", str);
             // do not use xset_msg_dialog if non-main thread
             // vfs_file_task_exec_error( task, 0, str );
             xset_msg_dialog(parent, GTK_MESSAGE_ERROR, "Terminal Not Available", 0, str, nullptr);
@@ -1441,7 +1442,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
             if (task->exec_export && !task->exec_browser && !task->exec_desktop)
             {
                 task->exec_export = false;
-                g_warning("exec_export set without exec_browser/exec_desktop");
+                LOG_WARN("exec_export set without exec_browser/exec_desktop");
             }
         }
 
@@ -1608,7 +1609,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         {
             g_free(sum_script);
             sum_script = nullptr;
-            g_warning("spacefm-auth not found in path - this reduces your security");
+            LOG_WARN("spacefm-auth not found in path - this reduces your security");
         }
     }
 
@@ -1713,7 +1714,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     if (!result)
     {
         if (errno)
-            printf("    result=%d ( %s )\n", errno, g_strerror(errno));
+            LOG_INFO("    result={} ( {} )", errno, g_strerror(errno));
         if (!task->exec_keep_tmp && task->exec_sync)
         {
             if (task->exec_script)
@@ -1777,7 +1778,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     // running
     task->state = VFS_FILE_TASK_RUNNING;
 
-    // printf("vfs_file_task_exec DONE\n");
+    // LOG_INFO("vfs_file_task_exec DONE");
     return; // exit thread
 
     // out and err can/should be closed too?
@@ -1796,7 +1797,7 @@ _exit_with_error_lean:
     g_free(terminal);
     g_free(su);
     call_state_callback(task, VFS_FILE_TASK_FINISH);
-    // printf("vfs_file_task_exec DONE ERROR\n");
+    // LOG_INFO("vfs_file_task_exec DONE ERROR");
 }
 
 static bool
@@ -2164,12 +2165,12 @@ add_task_dev(VFSFileTask* task, dev_t dev)
     if (!g_slist_find(task->devs, GUINT_TO_POINTER(dev)))
     {
         parent = get_device_parent(dev);
-        // printf("add_task_dev %d:%d\n", major(dev), minor(dev) );
+        // LOG_INFO("add_task_dev {}:{}", major(dev), minor(dev));
         vfs_file_task_lock(task);
         task->devs = g_slist_append(task->devs, GUINT_TO_POINTER(dev));
         if (parent && !g_slist_find(task->devs, GUINT_TO_POINTER(parent)))
         {
-            // printf("add_task_dev PARENT %d:%d\n", major(parent), minor(parent) );
+            // LOG_INFO("add_task_dev PARENT {}:{}", major(parent), minor(parent));
             task->devs = g_slist_append(task->devs, GUINT_TO_POINTER(parent));
         }
         vfs_file_task_unlock(task);

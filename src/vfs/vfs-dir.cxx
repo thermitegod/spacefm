@@ -21,6 +21,8 @@
 
 #include "vfs-dir.hxx"
 
+#include "logger.hxx"
+
 static void vfs_dir_class_init(VFSDirClass* klass);
 static void vfs_dir_init(VFSDir* dir);
 static void vfs_dir_finalize(GObject* obj);
@@ -210,7 +212,7 @@ static void
 vfs_dir_finalize(GObject* obj)
 {
     VFSDir* dir = VFS_DIR(obj);
-    // printf("vfs_dir_finalize  %s\n", dir->path );
+    // LOG_INFO("vfs_dir_finalize  {}", dir->path);
     do
     {
     } while (g_source_remove_by_user_data(dir));
@@ -220,7 +222,7 @@ vfs_dir_finalize(GObject* obj)
         g_signal_handlers_disconnect_by_func(dir->task, (void*)on_list_task_finished, dir);
         /* FIXME: should we generate a "file-list" signal to indicate the dir loading was cancelled?
          */
-        // printf("spacefm: vfs_dir_finalize -> vfs_async_task_cancel\n");
+        // LOG_INFO("vfs_dir_finalize -> vfs_async_task_cancel");
         vfs_async_task_cancel(dir->task);
         g_object_unref(dir->task);
         dir->task = nullptr;
@@ -258,10 +260,10 @@ vfs_dir_finalize(GObject* obj)
         g_free(dir->disp_path);
         dir->path = dir->disp_path = nullptr;
     }
-    /* g_debug( "dir->thumbnail_loader: %p", dir->thumbnail_loader ); */
+    // LOG_DEBUG("dir->thumbnail_loader: {:p}", dir->thumbnail_loader);
     if (G_UNLIKELY(dir->thumbnail_loader))
     {
-        /* g_debug( "FREE THUMBNAIL LOADER IN VFSDIR" ); */
+        // LOG_DEBUG("FREE THUMBNAIL LOADER IN VFSDIR");
         vfs_thumbnail_loader_free(dir->thumbnail_loader);
         dir->thumbnail_loader = nullptr;
     }
@@ -386,8 +388,8 @@ vfs_dir_emit_file_deleted(VFSDir* dir, const char* file_name, VFSFileInfo* file)
 void
 vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* file, bool force)
 {
-    // printf("vfs_dir_emit_file_changed dir=%s file_name=%s avoid=%s\n", dir->path, file_name,
-    // dir->avoid_changes ? "true" : "false" );
+    // LOG_INFO("vfs_dir_emit_file_changed dir={} file_name={} avoid={}", dir->path, file_name,
+    // dir->avoid_changes ? "true" : "false");
 
     if (!force && dir->avoid_changes)
         return;
@@ -470,8 +472,8 @@ vfs_dir_new(const char* path)
     dir->path = g_strdup(path);
 
     dir->avoid_changes = vfs_volume_dir_avoid_changes(path);
-    // printf("vfs_dir_new %s  avoid_changes=%s\n", dir->path, dir->avoid_changes ? "true" : "false"
-    // );
+    // LOG_INFO("vfs_dir_new {}  avoid_changes={}", dir->path, dir->avoid_changes ? "true" :
+    // "false");
     return dir;
 }
 
@@ -841,7 +843,7 @@ vfs_dir_monitor_callback(VFSFileMonitor* fm, VFSFileMonitorEvent event, const ch
             vfs_dir_emit_file_changed(dir, file_name, nullptr, false);
             break;
         default:
-            g_warning("Error: unrecognized file monitor signal!");
+            LOG_WARN("Error: unrecognized file monitor signal!");
     }
 }
 
@@ -942,7 +944,7 @@ reload_mime_type(char* key, VFSDir* dir, void* user_data)
         file = (VFSFileInfo*)l->data;
         char* full_path = g_build_filename(dir->path, vfs_file_info_get_name(file), nullptr);
         vfs_file_info_reload_mime_type(file, full_path);
-        /* g_debug( "reload %s", full_path ); */
+        // LOG_DEBUG("reload {}", full_path);
         g_free(full_path);
     }
 
@@ -959,7 +961,7 @@ on_mime_type_reload(void* user_data)
 {
     if (!dir_hash)
         return;
-    /* g_debug( "reload mime-type" ); */
+    // LOG_DEBUG("reload mime-type");
     g_hash_table_foreach(dir_hash, (GHFunc)reload_mime_type, nullptr);
 }
 
@@ -981,7 +983,7 @@ vfs_dir_foreach(GHFunc func, void* user_data)
 {
     if (!dir_hash)
         return;
-    /* g_debug( "reload mime-type" ); */
+    // LOG_DEBUG("reload mime-type");
     g_hash_table_foreach(dir_hash, (GHFunc)func, user_data);
 }
 
@@ -1050,7 +1052,7 @@ static VFSDir* mime_dir = nullptr;
 static bool
 on_mime_change_timer(void* user_data)
 {
-    // printf("MIME-UPDATE on_timer\n" );
+    // LOG_INFO("MIME-UPDATE on_timer");
     char* command = g_strdup_printf("update-mime-database %s/mime", g_get_user_data_dir());
     print_command(command);
     g_spawn_command_line_async(command, nullptr);
@@ -1072,14 +1074,14 @@ mime_change(void* user_data)
     if (mime_change_timer)
     {
         // timer is already running, so ignore request
-        // printf("MIME-UPDATE already set\n" );
+        // LOG_INFO("MIME-UPDATE already set");
         return;
     }
     if (mime_dir)
     {
         // update mime database in 2 seconds
         mime_change_timer = g_timeout_add_seconds(2, (GSourceFunc)on_mime_change_timer, nullptr);
-        // printf("MIME-UPDATE timer started\n" );
+        // LOG_INFO("MIME-UPDATE timer started");
     }
 }
 
@@ -1100,7 +1102,7 @@ vfs_dir_monitor_mime()
             g_signal_connect(mime_dir, "file-deleted", G_CALLBACK(mime_change), nullptr);
             g_signal_connect(mime_dir, "file-changed", G_CALLBACK(mime_change), nullptr);
         }
-        // printf("MIME-UPDATE watch started\n" );
+        // LOG_INFO("MIME-UPDATE watch started");
     }
     g_free(path);
 }

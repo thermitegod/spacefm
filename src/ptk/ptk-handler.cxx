@@ -13,6 +13,7 @@
 
 #include "ptk-handler.hxx"
 
+#include "logger.hxx"
 #include "autosave.hxx"
 #include "utils.hxx"
 
@@ -721,7 +722,7 @@ ptk_handler_get_command(int mode, int cmd, XSet* handler_set)
     char* def_script = xset_custom_get_script(handler_set, false);
     if (!def_script)
     {
-        g_warning("ptk_handler_get_command unable to get script for custom %s", handler_set->name);
+        LOG_WARN("ptk_handler_get_command unable to get script for custom {}", handler_set->name);
         return nullptr;
     }
     // name script
@@ -733,7 +734,7 @@ ptk_handler_get_command(int mode, int cmd, XSet* handler_set)
     g_free(def_script);
     if (g_file_test(script, G_FILE_TEST_EXISTS))
         return script;
-    g_warning("ptk_handler_get_command missing script for custom %s", handler_set->name);
+    LOG_WARN("ptk_handler_get_command missing script for custom {}", handler_set->name);
     g_free(script);
     return nullptr;
 }
@@ -772,7 +773,7 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
     char* def_script = xset_custom_get_script(handler_set, false);
     if (!def_script)
     {
-        g_warning("get_handler_script unable to get script for custom %s", handler_set->name);
+        LOG_WARN("get_handler_script unable to get script for custom {}", handler_set->name);
         return g_strdup("Error: unable to save command (can't get script path?)");
     }
     // name script
@@ -808,7 +809,7 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
                     else
                         g_string_erase(gstr, 0, -1);
                     // modified = true;
-                    g_warning("file '%s' contents are not valid UTF-8", script);
+                    LOG_WARN("file '{}' contents are not valid UTF-8", script);
                     break;
                 }
                 if (start)
@@ -862,7 +863,7 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
     char* def_script = xset_custom_get_script(handler_set, false);
     if (!def_script)
     {
-        g_warning("save_handler_script unable to get script for custom %s", handler_set->name);
+        LOG_WARN("save_handler_script unable to get script for custom {}", handler_set->name);
         return g_strdup("Error: unable to save command (can't get script path?)");
     }
     // create parent dir
@@ -896,7 +897,7 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
     else
         text = g_strdup("");
 
-    // printf("WRITE %s\n", script );
+    // LOG_INFO("WRITE {}", script);
     // write script
     FILE* file = nullptr;
     if ((file = fopen(script, "w")))
@@ -1096,7 +1097,7 @@ ptk_handler_file_has_handlers(int mode, int cmd, const char* path, VFSMimeType* 
                         ptk_handler_load_script(mode, cmd, handler_set, nullptr, &command);
                     if (err_msg)
                     {
-                        g_warning("%s", err_msg);
+                        LOG_WARN("%s", err_msg);
                         g_free(err_msg);
                     }
                     else if (!ptk_handler_command_is_empty(command))
@@ -1287,7 +1288,7 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     print_command(command);
     ret = g_spawn_command_line_sync(command, &stdout, &stderr, &exit_status, nullptr);
     g_free(command);
-    printf("%s%s", stdout, stderr);
+    LOG_INFO("{}{}", stdout, stderr);
 
     if (!ret || (exit_status && WIFEXITED(exit_status)))
     {
@@ -1520,7 +1521,7 @@ populate_archive_handlers(HandlerData* hnd, XSet* def_handler_set)
     char** archive_handlers = g_strsplit(archive_handlers_s, " ", -1);
 
     // Debug code
-    // g_message("archive_handlers_s: %s", archive_handlers_s);
+    // LOG_INFO("archive_handlers_s: {}", archive_handlers_s);
 
     // Looping for handlers (nullptr-terminated list)
     GtkTreeIter iter;
@@ -1586,8 +1587,8 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
     if (!gtk_tree_model_get_iter_first(GTK_TREE_MODEL(hnd->list), &iter))
     {
         // Failed to get iterator - warning user and exiting
-        g_warning("Drag'n'drop end event detected, but unable to get an"
-                  " iterator to the start of the model!");
+        LOG_WARN("Drag'n'drop end event detected, but unable to get an"
+                 " iterator to the start of the model!");
         return;
     }
 
@@ -1673,7 +1674,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         // Making sure it has been fetched
         if (!handler_xset)
         {
-            g_warning("Unable to fetch the xset for the archive handler '%s'", handler_name);
+            LOG_WARN("Unable to fetch the xset for the archive handler '%s'", handler_name);
             goto _clean_exit;
         }
     }
@@ -1901,8 +1902,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                 if (g_strcmp0(archive_handlers[i], xset_name) != 0)
                 {
                     // Debug code
-                    // g_message("archive_handlers[i]: %s\nxset_name: %s",
-                    //                        archive_handlers[i], xset_name);
+                    // LOG_INFO("archive_handlers[i] : {}", archive_handlers[i])
+                    // LOG_INFO("xset_name           : {}", xset_name);
 
                     new_archive_handlers_s_temp = new_archive_handlers_s;
                     if (!g_strcmp0(new_archive_handlers_s, ""))
@@ -2797,7 +2798,7 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
     g_object_set_data(G_OBJECT(hnd->dlg), "hnd", hnd);
 
     // Debug code
-    // g_message( "Parent window title: %s", gtk_window_get_title( GTK_WINDOW( hnd->parent ) ) );
+    // LOG_INFO("Parent window title: {}", gtk_window_get_title(GTK_WINDOW(hnd->parent)));
 
     // Forcing dialog icon
     xset_set_window_icon(GTK_WINDOW(hnd->dlg));
