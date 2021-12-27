@@ -1036,16 +1036,16 @@ static VFSDir* mime_dir = nullptr;
 static bool
 on_mime_change_timer(void* user_data)
 {
-    // LOG_INFO("MIME-UPDATE on_timer");
-    char* command = g_strdup_printf("update-mime-database %s/mime", vfs_user_data_dir());
-    print_command(command);
-    g_spawn_command_line_async(command, nullptr);
-    g_free(command);
+    std::string command;
 
-    command = g_strdup_printf("update-desktop-database %s/applications", vfs_user_data_dir());
+    // LOG_INFO("MIME-UPDATE on_timer");
+    command = fmt::format("update-mime-database {}/mime", vfs_user_data_dir());
     print_command(command);
-    g_spawn_command_line_async(command, nullptr);
-    g_free(command);
+    g_spawn_command_line_async(command.c_str(), nullptr);
+
+    command = fmt::format("update-desktop-database {}/applications", vfs_user_data_dir());
+    print_command(command);
+    g_spawn_command_line_async(command.c_str(), nullptr);
 
     g_source_remove(mime_change_timer);
     mime_change_timer = 0;

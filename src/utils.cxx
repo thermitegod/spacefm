@@ -18,9 +18,9 @@
 #include "utils.hxx"
 
 void
-print_command(const char* cmd)
+print_command(std::string& command)
 {
-    LOG_INFO("COMMAND={}", cmd);
+    LOG_INFO("COMMAND={}", command);
 }
 
 void
@@ -180,11 +180,10 @@ open_in_prog(const char* path)
     if (!prog)
         prog = g_strdup("spacefm");
     char* qpath = bash_quote(path);
-    char* command = g_strdup_printf("%s %s", prog, qpath);
+    std::string command = fmt::format("{} {}", prog, qpath);
     print_command(command);
-    g_spawn_command_line_async(command, nullptr);
+    g_spawn_command_line_async(command.c_str(), nullptr);
     g_free(qpath);
-    g_free(command);
     g_free(prog);
 }
 

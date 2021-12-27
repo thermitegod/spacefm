@@ -854,10 +854,9 @@ handle_parsed_commandline_args()
 static void
 tmp_clean()
 {
-    char* command = g_strdup_printf("rm -rf %s", xset_get_user_tmp_dir());
+    std::string command = fmt::format("rm -rf {}", xset_get_user_tmp_dir());
     print_command(command);
-    g_spawn_command_line_async(command, nullptr);
-    g_free(command);
+    g_spawn_command_line_async(command.c_str(), nullptr);
 }
 
 int

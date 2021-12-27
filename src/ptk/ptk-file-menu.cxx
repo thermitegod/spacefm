@@ -1394,6 +1394,8 @@ app_job(GtkWidget* item, GtkWidget* app_item)
     char* path;
     char* str;
 
+    std::string command;
+
     VFSAppDesktop* desktop_file =
         (VFSAppDesktop*)g_object_get_data(G_OBJECT(app_item), "desktop_file");
     if (!(desktop_file && desktop_file->file_name))
@@ -1701,15 +1703,13 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             vfs_dir_monitor_mime();
             break;
         case APP_JOB_UPDATE:
-            path = g_strdup_printf("update-mime-database %s/mime", vfs_user_data_dir());
-            print_command(path);
-            g_spawn_command_line_async(path, nullptr);
-            g_free(path);
+            command = fmt::format("update-mime-database {}/mime", vfs_user_data_dir());
+            print_command(command);
+            g_spawn_command_line_async(command.c_str(), nullptr);
 
-            path = g_strdup_printf("update-desktop-database %s/applications", vfs_user_data_dir());
-            print_command(path);
-            g_spawn_command_line_async(path, nullptr);
-            g_free(path);
+            command = fmt::format("update-desktop-database {}/applications", vfs_user_data_dir());
+            print_command(command);
+            g_spawn_command_line_async(command.c_str(), nullptr);
             break;
         default:
             break;

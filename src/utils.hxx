@@ -6,9 +6,11 @@
 
 #pragma once
 
+#include <string>
+
 #include <glib.h>
 
-void print_command(const char* cmd);
+void print_command(std::string& command);
 void print_task_command(char* ptask, const char* cmd);
 void print_task_command_spawn(char* argv[], int pid);
 

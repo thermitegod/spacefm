@@ -1281,7 +1281,7 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
     g_free(path_dest);
     path_dest = g_build_filename(xset_get_config_dir(), "scripts", new_handler_xset->name, nullptr);
-    char* command = g_strdup_printf("cp -a %s %s", path_src, path_dest);
+    std::string command = fmt::format("cp -a {} {}", path_src, path_dest);
     g_free(path_src);
 
     // run command
@@ -1291,8 +1291,7 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     bool ret;
     int exit_status;
     print_command(command);
-    ret = g_spawn_command_line_sync(command, &stdout, &stderr, &exit_status, nullptr);
-    g_free(command);
+    ret = g_spawn_command_line_sync(command.c_str(), &stdout, &stderr, &exit_status, nullptr);
     LOG_INFO("{}{}", stdout, stderr);
 
     if (!ret || (exit_status && WIFEXITED(exit_status)))
@@ -1308,8 +1307,7 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     stderr = stdout = nullptr;
     command = g_strdup_printf("chmod -R go-rwx %s", path_dest);
     print_command(command);
-    g_spawn_command_line_sync(command, nullptr, nullptr, nullptr, nullptr);
-    g_free(command);
+    g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
     g_free(path_dest);
 
     // add to handler list

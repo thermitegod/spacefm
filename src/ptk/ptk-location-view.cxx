@@ -686,12 +686,11 @@ ptk_location_view_clean_mount_points()
     char* udevil = g_find_program_in_path("udevil");
     if (udevil)
     {
-        g_free(udevil);
-        char* command = g_strdup_printf("%s -c \"sleep 1 ; %s clean\"", BASHPATH, udevil);
+        std::string command = fmt::format("{} -c \"sleep 1 ; {} clean\"", BASHPATH, udevil);
         print_command(command);
-        g_spawn_command_line_async(command, nullptr);
-        g_free(command);
+        g_spawn_command_line_async(command.c_str(), nullptr);
     }
+    g_free(udevil);
 }
 
 char*
@@ -1974,7 +1973,8 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         task->task->exec_scroll_lock = true;
         task->task->exec_icon = g_strdup(vfs_volume_get_icon(vol));
         // task->task->exec_keep_tmp = true;
-        print_command(cmd);
+        std::string command = cmd;
+        print_command(command);
         ptk_file_task_run(task);
         return;
     }
@@ -1998,14 +1998,15 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     char* base = g_path_get_basename(vol->device_file);
     if (base)
     {
+        std::string command;
         // /bin/ls -l /dev/disk/by-uuid | grep ../sdc2 | sed 's/.* \([a-fA-F0-9\-]*\) -> .*/\1/'
-        cmd = g_strdup_printf("%s -c \"/bin/ls -l /dev/disk/by-uuid | grep '\\.\\./%s$' | sed "
+        command = fmt::format("{} -c \"/bin/ls -l /dev/disk/by-uuid | grep '\\.\\./{}$' | sed "
                               "'s/.* \\([a-fA-F0-9-]*\\) -> .*/\\1/'\"",
                               BASHPATH,
                               base);
-        print_command(cmd);
-        g_spawn_command_line_sync(cmd, &uuid, nullptr, nullptr, nullptr);
-        g_free(cmd);
+        print_command(command);
+        g_spawn_command_line_sync(command.c_str(), &uuid, nullptr, nullptr, nullptr);
+
         if (uuid && strlen(uuid) < 9)
         {
             g_free(uuid);
@@ -2019,28 +2020,25 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 
         if (uuid)
         {
-            cmd = g_strdup_printf("%s -c \"cat %s | grep -e '%s' -e '%s'\"",
+            command = fmt::format("{} -c \"cat {} | grep -e '{}' -e '{}'\"",
                                   BASHPATH,
                                   fstab_path,
                                   uuid,
                                   vol->device_file);
-            // cmd = g_strdup_printf( "bash -c \"cat /etc/fstab | grep -e ^[#\\ ]*UUID=$(/bin/ls -l
+            // command = g_strdup_printf( "bash -c \"cat /etc/fstab | grep -e ^[#\\ ]*UUID=$(/bin/ls
+            // -l
             // /dev/disk/by-uuid | grep \\.\\./%s | sed 's/.* \\([a-fA-F0-9\-]*\\) -> \.*/\\1/')\\
             // */ -e '^[# ]*%s '\"", base, vol->device_file );
-            print_command(cmd);
-            g_spawn_command_line_sync(cmd, &fstab, nullptr, nullptr, nullptr);
-            g_free(cmd);
+            print_command(command);
+            g_spawn_command_line_sync(command.c_str(), &fstab, nullptr, nullptr, nullptr);
         }
 
         if (!fstab)
         {
-            cmd = g_strdup_printf("%s -c \"cat %s | grep '%s'\"",
-                                  BASHPATH,
-                                  fstab_path,
-                                  vol->device_file);
-            print_command(cmd);
-            g_spawn_command_line_sync(cmd, &fstab, nullptr, nullptr, nullptr);
-            g_free(cmd);
+            command =
+                fmt::format("{} -c \"cat {} | grep '{}'\"", BASHPATH, fstab_path, vol->device_file);
+            print_command(command);
+            g_spawn_command_line_sync(command.c_str(), &fstab, nullptr, nullptr, nullptr);
         }
 
         if (fstab && strlen(fstab) < 9)

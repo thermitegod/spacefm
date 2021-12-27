@@ -1062,10 +1062,9 @@ vfs_file_task_get_cpids(GPid pid)
 
     char* stdout = nullptr;
 
-    char* command = g_strdup_printf("/bin/ps h --ppid %d -o pid", pid);
+    std::string command = fmt::format("/bin/ps h --ppid {} -o pid", pid);
     print_command(command);
-    bool ret = g_spawn_command_line_sync(command, &stdout, nullptr, nullptr, nullptr);
-    g_free(command);
+    bool ret = g_spawn_command_line_sync(command.c_str(), &stdout, nullptr, nullptr, nullptr);
     if (ret && stdout && stdout[0] != '\0' && strchr(stdout, '\n'))
     {
         char* cpids = g_strdup(stdout);
@@ -1265,9 +1264,9 @@ get_xxhash(char* path)
 
     char* stdout;
     char* sum = nullptr;
-    char* command = g_strdup_printf("%s %s", xxhash, path);
+    std::string command = fmt::format("{} {}", xxhash, path);
     print_command(command);
-    if (g_spawn_command_line_sync(command, &stdout, nullptr, nullptr, nullptr))
+    if (g_spawn_command_line_sync(command.c_str(), &stdout, nullptr, nullptr, nullptr))
     {
         sum = g_strndup(stdout, 64);
         g_free(stdout);
@@ -1277,7 +1276,6 @@ get_xxhash(char* path)
             sum = nullptr;
         }
     }
-    g_free(command);
     return sum;
 }
 

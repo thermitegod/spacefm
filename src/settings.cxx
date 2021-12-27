@@ -353,7 +353,7 @@ load_settings(const char* config_dir)
         if (std::filesystem::is_directory(xdg_path))
         {
             command = fmt::format("cp -r {} '{}'", xdg_path, settings_config_dir);
-            print_command(command.c_str());
+            print_command(command);
             g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
 
             std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
@@ -376,7 +376,7 @@ load_settings(const char* config_dir)
                                   "git config commit.gpgsign false\"",
                                   BASHPATH,
                                   settings_config_dir);
-            print_command(command.c_str());
+            print_command(command);
             g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
         }
     }
@@ -391,7 +391,7 @@ load_settings(const char* config_dir)
                                   "git commit -m 'Session File' 1>/dev/null\"",
                                   BASHPATH,
                                   settings_config_dir);
-            print_command(command.c_str());
+            print_command(command);
             g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
         }
         else
@@ -403,7 +403,8 @@ load_settings(const char* config_dir)
             command = fmt::format("cp -a  {} {}", session, session_old);
             if (std::filesystem::exists(session_old))
                 std::filesystem::remove(session_old);
-            print_command(command.c_str());
+            print_command(command);
+
             g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
         }
     }
@@ -414,7 +415,7 @@ load_settings(const char* config_dir)
             command = fmt::format("{} -c \"cd {} && git checkout session\"",
                                   BASHPATH,
                                   settings_config_dir);
-            print_command(command.c_str());
+            print_command(command);
             g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
             session = g_build_filename(settings_config_dir.c_str(), "session", nullptr);
         }
@@ -2303,12 +2304,13 @@ xset_custom_new_name()
 static void
 xset_custom_copy_files(XSet* src, XSet* dest)
 {
-    char* path_src;
-    char* path_dest;
-    char* command = nullptr;
+    std::string path_src;
+    std::string path_dest;
+    std::string command;
+
     char* stdout = nullptr;
     char* stderr = nullptr;
-    char* msg;
+    std::string msg;
     bool ret;
     int exit_status;
 
@@ -2326,38 +2328,27 @@ xset_custom_copy_files(XSet* src, XSet* dest)
     path_dest = g_build_filename(xset_get_config_dir(), "scripts", nullptr);
     std::filesystem::create_directories(path_dest);
     std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
-    g_free(path_dest);
     path_dest = g_build_filename(xset_get_config_dir(), "scripts", dest->name, nullptr);
-    command = g_strdup_printf("cp -a %s %s", path_src, path_dest);
+    command = fmt::format("cp -a {} {}", path_src, path_dest);
 
-    g_free(path_src);
+    // LOG_INFO("    path_dest={}", path_dest );
+    print_command(command);
+    ret = g_spawn_command_line_sync(command.c_str(), &stdout, &stderr, &exit_status, nullptr);
+    LOG_INFO("{}{}", stdout, stderr);
 
-    if (command)
+    if (!ret || (exit_status && WIFEXITED(exit_status)))
     {
-        // LOG_INFO("    path_dest={}", path_dest );
-        print_command(command);
-        ret = g_spawn_command_line_sync(command, &stdout, &stderr, &exit_status, nullptr);
-        g_free(command);
-        LOG_INFO("{}{}", stdout, stderr);
-
-        if (!ret || (exit_status && WIFEXITED(exit_status)))
-        {
-            msg = g_strdup_printf("An error occured copying command files\n\n%s",
-                                  stderr ? stderr : "");
-            xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", 0, msg, nullptr);
-            g_free(msg);
-        }
-        if (stderr)
-            g_free(stderr);
-        if (stdout)
-            g_free(stdout);
-        stderr = stdout = nullptr;
-        command = g_strdup_printf("chmod -R go-rwx %s", path_dest);
-        print_command(command);
-        g_spawn_command_line_sync(command, nullptr, nullptr, nullptr, nullptr);
-        g_free(command);
-        g_free(path_dest);
+        msg = fmt::format("An error occured copying command files\n\n{}", stderr ? stderr : "");
+        xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", 0, msg.c_str(), nullptr);
     }
+    if (stderr)
+        g_free(stderr);
+    if (stdout)
+        g_free(stdout);
+    stderr = stdout = nullptr;
+    command = fmt::format("chmod -R go-rwx {}", path_dest);
+    print_command(command);
+    g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
 
     // copy data dir
     XSet* mset = xset_get_plugin_mirror(src);
@@ -2365,30 +2356,30 @@ xset_custom_copy_files(XSet* src, XSet* dest)
     if (std::filesystem::is_directory(path_src))
     {
         path_dest = g_build_filename(xset_get_config_dir(), "plugin-data", dest->name, nullptr);
-        command = g_strdup_printf("cp -a %s %s", path_src, path_dest);
-        g_free(path_src);
+        command = fmt::format("cp -a {} {}", path_src, path_dest);
         stderr = stdout = nullptr;
         print_command(command);
-        ret = g_spawn_command_line_sync(command, &stdout, &stderr, &exit_status, nullptr);
-        g_free(command);
+        ret = g_spawn_command_line_sync(command.c_str(), &stdout, &stderr, &exit_status, nullptr);
         LOG_INFO("{}{}", stdout, stderr);
         if (!ret || (exit_status && WIFEXITED(exit_status)))
         {
-            msg = g_strdup_printf("An error occured copying command data files\n\n%s",
-                                  stderr ? stderr : "");
-            xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", 0, msg, nullptr);
-            g_free(msg);
+            msg = fmt::format("An error occured copying command data files\n\n{}",
+                              stderr ? stderr : "");
+            xset_msg_dialog(nullptr,
+                            GTK_MESSAGE_ERROR,
+                            "Copy Command Error",
+                            0,
+                            msg.c_str(),
+                            nullptr);
         }
         if (stderr)
             g_free(stderr);
         if (stdout)
             g_free(stdout);
         stderr = stdout = nullptr;
-        command = g_strdup_printf("chmod -R go-rwx %s", path_dest);
-        g_free(path_dest);
+        command = fmt::format("chmod -R go-rwx {}", path_dest);
         print_command(command);
-        g_spawn_command_line_sync(command, nullptr, nullptr, nullptr, nullptr);
-        g_free(command);
+        g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
     }
 }
 
@@ -2497,11 +2488,11 @@ _redo:
             if (strlen(name) == 13 && g_str_has_prefix(name, "cstm_") && !xset_is(name))
             {
                 g_dir_close(dir);
-                command = g_strdup_printf("rm -rf %s/%s", path, name);
+                // FIXME - this and all the of other 'rm -rf' look like a bad idea
+                std::string command = fmt::format("rm -rf {}/{}", path, name);
                 stderr = stdout = nullptr;
                 print_command(command);
-                g_spawn_command_line_sync(command, nullptr, nullptr, nullptr, nullptr);
-                g_free(command);
+                g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
                 if (stderr)
                     g_free(stderr);
                 if (stdout)
@@ -3159,7 +3150,6 @@ xset_custom_export_files(XSet* set, char* plug_dir)
 {
     char* path_src;
     char* path_dest;
-    char* command;
     char* stdout = nullptr;
     char* stderr = nullptr;
 
@@ -3193,15 +3183,12 @@ xset_custom_export_files(XSet* set, char* plug_dir)
         g_free(path_dest);
         return true;
     }
-    else
-    {
-        command = g_strdup_printf("cp -a %s %s", path_src, path_dest);
-    }
+
+    std::string command = fmt::format("cp -a {} {}", path_src, path_dest);
     g_free(path_src);
     g_free(path_dest);
     print_command(command);
-    bool ret = g_spawn_command_line_sync(command, nullptr, nullptr, nullptr, nullptr);
-    g_free(command);
+    bool ret = g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
     if (stderr)
         g_free(stderr);
     if (stdout)
@@ -3382,10 +3369,9 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 _rmtmp_error:
     if (!set->plugin)
     {
-        char* command = g_strdup_printf("rm -rf %s", bash_quote(plug_dir));
+        std::string command = fmt::format("rm -rf {}", bash_quote(plug_dir));
         print_command(command);
-        g_spawn_command_line_sync(command, nullptr, nullptr, nullptr, nullptr);
-        g_free(command);
+        g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
     }
 _export_error:
     g_free(plug_dir);
@@ -3748,7 +3734,7 @@ xset_custom_activate(GtkWidget* item, XSet* set)
 void
 xset_custom_delete(XSet* set, bool delete_next)
 {
-    char* command;
+    std::string command;
 
     if (set->menu_style == XSET_MENU_SUBMENU && set->child)
     {
@@ -3768,16 +3754,14 @@ xset_custom_delete(XSet* set, bool delete_next)
     char* path1 = g_build_filename(xset_get_config_dir(), "scripts", set->name, nullptr);
     char* path2 = g_build_filename(xset_get_config_dir(), "plugin-data", set->name, nullptr);
     if (std::filesystem::exists(path1) || std::filesystem::exists(path2))
-        command = g_strdup_printf("rm -rf %s %s", path1, path2);
-    else
-        command = nullptr;
+        command = fmt::format("rm -rf {} {}", path1, path2);
+
     g_free(path1);
     g_free(path2);
-    if (command)
+    if (!command.empty())
     {
         print_command(command);
-        g_spawn_command_line_sync(command, nullptr, nullptr, nullptr, nullptr);
-        g_free(command);
+        g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
     }
     xset_free(set);
 }
