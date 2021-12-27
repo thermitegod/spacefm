@@ -363,7 +363,10 @@ load_settings(const char* config_dir)
     }
 
     if (!std::filesystem::exists(settings_config_dir))
-        g_mkdir_with_parents(settings_config_dir, 0700);
+    {
+        std::filesystem::create_directories(settings_config_dir);
+        std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
+    }
 
     // check if .git exists
     if (config_settings.git_backed_settings)
@@ -640,7 +643,10 @@ save_settings(void* main_window_ptr)
 
     /* save settings */
     if (G_UNLIKELY(!std::filesystem::exists(settings_config_dir)))
-        g_mkdir_with_parents(settings_config_dir, 0700);
+    {
+        std::filesystem::create_directories(settings_config_dir);
+        std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
+    }
 
     GString* buf = g_string_sized_new(4096);
 
@@ -708,7 +714,8 @@ xset_get_user_tmp_dir()
         return settings_user_tmp_dir;
 
     settings_user_tmp_dir = g_build_filename(config_settings.tmp_dir, "spacefm", nullptr);
-    g_mkdir_with_parents(settings_user_tmp_dir, 0700);
+    std::filesystem::create_directories(settings_user_tmp_dir);
+    std::filesystem::permissions(settings_user_tmp_dir, std::filesystem::perms::owner_all);
 
     return settings_user_tmp_dir;
 }
@@ -2234,7 +2241,8 @@ xset_custom_get_script(XSet* set, bool create)
         path = g_build_filename(settings_config_dir, "scripts", set->name, nullptr);
         if (!std::filesystem::exists(path))
         {
-            g_mkdir_with_parents(path, 0700);
+            std::filesystem::create_directories(path);
+            std::filesystem::permissions(path, std::filesystem::perms::owner_all);
         }
         g_free(path);
     }
@@ -2332,7 +2340,8 @@ xset_custom_copy_files(XSet* src, XSet* dest)
 
     // LOG_INFO("    path_src EXISTS");
     path_dest = g_build_filename(settings_config_dir, "scripts", nullptr);
-    g_mkdir_with_parents(path_dest, 0700);
+    std::filesystem::create_directories(path_dest);
+    std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
     g_free(path_dest);
     path_dest = g_build_filename(settings_config_dir, "scripts", dest->name, nullptr);
     command = g_strdup_printf("cp -a %s %s", path_src, path_dest);
@@ -3186,7 +3195,8 @@ xset_custom_export_files(XSet* set, char* plug_dir)
         if (!strcmp(set->name, "main_book"))
         {
             // exporting all bookmarks - create empty main_book dir
-            g_mkdir_with_parents(path_dest, 0755);
+            std::filesystem::create_directories(path_dest);
+            std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
             if (!std::filesystem::exists(path_dest))
             {
                 g_free(path_src);
@@ -3314,7 +3324,8 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
             plug_dir = g_build_filename(s1, hex8, nullptr);
             g_free(hex8);
         }
-        g_mkdir_with_parents(plug_dir, 0700);
+        std::filesystem::create_directories(plug_dir);
+        std::filesystem::permissions(plug_dir, std::filesystem::perms::owner_all);
 
         // Create plugin file
         char* plugin_path = g_build_filename(plug_dir, "plugin", nullptr);
@@ -4999,7 +5010,8 @@ xset_design_job(GtkWidget* item, XSet* set)
             }
             if (!std::filesystem::exists(folder) && !set->plugin)
             {
-                g_mkdir_with_parents(folder, 0700);
+                std::filesystem::create_directories(folder);
+                std::filesystem::permissions(folder, std::filesystem::perms::owner_all);
             }
 
             if (set->browser)
@@ -5019,7 +5031,8 @@ xset_design_job(GtkWidget* item, XSet* set)
                 folder = g_build_filename(settings_config_dir, "plugin-data", set->name, nullptr);
             if (!std::filesystem::exists(folder))
             {
-                g_mkdir_with_parents(folder, 0700);
+                std::filesystem::create_directories(folder);
+                std::filesystem::permissions(folder, std::filesystem::perms::owner_all);
             }
 
             if (set->browser)

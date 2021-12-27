@@ -532,10 +532,10 @@ vfs_thumbnail_init()
 {
     char* dir = g_build_filename(vfs_user_cache_dir(), "thumbnails/normal", nullptr);
 
-    if (G_LIKELY(std::filesystem::is_directory(dir)))
-        chmod(dir, 0700);
-    else
-        g_mkdir_with_parents(dir, 0700);
+    if (!std::filesystem::is_directory(dir))
+        std::filesystem::create_directories(dir);
+
+    std::filesystem::permissions(dir, std::filesystem::perms::owner_all);
 
     g_free(dir);
 }

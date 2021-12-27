@@ -1050,7 +1050,8 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
         }
         if (!std::filesystem::exists(folder) && !ctxt->set->plugin)
         {
-            g_mkdir_with_parents(folder, 0700);
+            std::filesystem::create_directories(folder);
+            std::filesystem::permissions(folder, std::filesystem::perms::owner_all);
         }
     }
     else if (job == 1)
@@ -1066,7 +1067,8 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
                 g_build_filename(xset_get_config_dir(), "plugin-data", ctxt->set->name, nullptr);
         if (!std::filesystem::exists(folder))
         {
-            g_mkdir_with_parents(folder, 0700);
+            std::filesystem::create_directories(folder);
+            std::filesystem::permissions(folder, std::filesystem::perms::owner_all);
         }
     }
     else if (job == 2)

@@ -144,9 +144,9 @@ TrashDir::TrashDir(const std::string& path, dev_t device) : m_path(path), m_devi
 {
     // LOG_DEBUG("create trash dirs {}", path);
 
-    check_dir_exists(path, 0700);
-    check_dir_exists(files_path(), 0700);
-    check_dir_exists(info_path(), 0700);
+    check_dir_exists(path);
+    check_dir_exists(files_path());
+    check_dir_exists(info_path());
 }
 
 std::string
@@ -177,13 +177,14 @@ TrashDir::unique_name(const std::string& path)
 }
 
 void
-TrashDir::check_dir_exists(const std::string& path, mode_t mode)
+TrashDir::check_dir_exists(const std::string& path)
 {
     if (std::filesystem::is_directory(path))
         return;
 
     // LOG_INFO("trash mkdir {}", path);
     std::filesystem::create_directories(path);
+    std::filesystem::permissions(path, std::filesystem::perms::owner_all);
 }
 
 void

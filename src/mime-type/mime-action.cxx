@@ -487,7 +487,8 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
 
     /* generate unique file name */
     char* dir = g_build_filename(vfs_user_data_dir(), "applications", nullptr);
-    g_mkdir_with_parents(dir, 0700);
+    std::filesystem::create_directories(dir);
+    std::filesystem::permissions(dir, std::filesystem::perms::owner_all);
     unsigned int i;
     for (i = 0;; ++i)
     {

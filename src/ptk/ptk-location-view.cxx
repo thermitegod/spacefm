@@ -624,7 +624,8 @@ ptk_location_view_get_mount_point_dir(const char* name)
                 g_free(str);
                 g_free(value);
             }
-            g_mkdir_with_parents(parent, 0700);
+            std::filesystem::create_directories(parent);
+            std::filesystem::permissions(parent, std::filesystem::perms::owner_all);
         }
         if (!have_rw_access(parent))
         {
@@ -796,8 +797,12 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
         rmdir(point);
     }
     g_free(point1);
-    if (g_mkdir_with_parents(point, 0700) == -1)
+    std::filesystem::create_directories(point);
+    std::filesystem::permissions(point, std::filesystem::perms::owner_all);
+
+    if (!std::filesystem::is_directory(point))
         LOG_WARN("Error creating mount point directory '{}': {}", point, g_strerror(errno));
+
     return point;
 }
 

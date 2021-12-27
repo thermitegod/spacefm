@@ -2791,15 +2791,22 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     root_mkdir = g_strdup_printf("mkdir -p %s && ", to_path);
                     g_free(to_path);
                 }
-                else if (g_mkdir_with_parents(path, 0755) != 0)
-                {
-                    msg = g_strdup_printf("Error creating parent directory\n\n%s", strerror(errno));
-                    ptk_show_error(GTK_WINDOW(mset->dlg), "Mkdir Error", msg);
-                    g_free(msg);
-                    goto _continue_free;
-                }
                 else
-                    update_new_display(path);
+                {
+                    std::filesystem::create_directories(path);
+                    std::filesystem::permissions(path, std::filesystem::perms::owner_all);
+
+                    if (std::filesystem::is_directory(path))
+                    {
+                        msg = g_strdup_printf("Error creating parent directory\n\n%s",
+                                              strerror(errno));
+                        ptk_show_error(GTK_WINDOW(mset->dlg), "Mkdir Error", msg);
+                        g_free(msg);
+                        goto _continue_free;
+                    }
+                    else
+                        update_new_display(path);
+                }
             }
             else if (lstat(full_path, &statbuf) == 0)
             {

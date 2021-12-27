@@ -1528,7 +1528,8 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             break;
         case APP_JOB_BROWSE:
             path = g_build_filename(vfs_user_data_dir(), "applications", nullptr);
-            g_mkdir_with_parents(path, 0700);
+            std::filesystem::create_directories(path);
+            std::filesystem::permissions(path, std::filesystem::perms::owner_all);
 
             if (data->browser)
                 ptk_file_browser_emit_open(data->browser, path, PTK_OPEN_NEW_TAB);
@@ -1545,7 +1546,8 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             break;
         case APP_JOB_EDIT_TYPE:
             path = g_build_filename(vfs_user_data_dir(), "mime/packages", nullptr);
-            g_mkdir_with_parents(path, 0700);
+            std::filesystem::create_directories(path);
+            std::filesystem::permissions(path, std::filesystem::perms::owner_all);
             g_free(path);
             str = replace_string(mime_type->type, "/", "-", false);
             path = str;
@@ -1692,7 +1694,8 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             break;
         case APP_JOB_BROWSE_MIME:
             path = g_build_filename(vfs_user_data_dir(), "mime/packages", nullptr);
-            g_mkdir_with_parents(path, 0700);
+            std::filesystem::create_directories(path);
+            std::filesystem::permissions(path, std::filesystem::perms::owner_all);
             if (data->browser)
                 ptk_file_browser_emit_open(data->browser, path, PTK_OPEN_NEW_TAB);
             vfs_dir_monitor_mime();
