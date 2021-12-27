@@ -71,7 +71,7 @@ struct FMMainWindowClass
     GtkWindowClass parent;
 };
 
-GType fm_main_window_get_type(void);
+GType fm_main_window_get_type();
 
 GtkWidget* fm_main_window_new();
 

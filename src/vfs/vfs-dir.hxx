@@ -79,7 +79,7 @@ struct VFSDirClass
 void vfs_dir_lock(VFSDir* dir);
 void vfs_dir_unlock(VFSDir* dir);
 
-GType vfs_dir_get_type(void);
+GType vfs_dir_get_type();
 
 VFSDir* vfs_dir_get_by_path(const char* path);
 VFSDir* vfs_dir_get_by_path_soft(const char* path);

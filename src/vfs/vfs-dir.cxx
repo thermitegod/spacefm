@@ -71,7 +71,7 @@ static bool is_desktop_set = false;
 static const char* desktop_dir = nullptr;
 
 GType
-vfs_dir_get_type(void)
+vfs_dir_get_type()
 {
     static GType type = G_TYPE_INVALID;
     if (G_UNLIKELY(type == G_TYPE_INVALID))

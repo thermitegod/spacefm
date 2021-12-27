@@ -42,7 +42,7 @@ enum VFSAsyncSignal
 static unsigned int signals[N_SIGNALS] = {0};
 
 GType
-vfs_async_task_get_type(void)
+vfs_async_task_get_type()
 {
     static GType self_type = 0;
     if (!self_type)

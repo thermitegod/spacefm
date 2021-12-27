@@ -52,7 +52,7 @@ struct VFSAsyncTaskClass
     void (*finish)(VFSAsyncTask* task, bool is_cancelled);
 };
 
-GType vfs_async_task_get_type(void);
+GType vfs_async_task_get_type();
 VFSAsyncTask* vfs_async_task_new(VFSAsyncFunc task_func, void* user_data);
 
 void* vfs_async_task_get_data(VFSAsyncTask* task);

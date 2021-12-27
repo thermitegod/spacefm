@@ -80,7 +80,7 @@ struct PtkFileListClass
     void (*load_complete)(VFSDir* dir);
 };
 
-GType ptk_file_list_get_type(void);
+GType ptk_file_list_get_type();
 
 PtkFileList* ptk_file_list_new(VFSDir* dir, bool show_hidden);
 

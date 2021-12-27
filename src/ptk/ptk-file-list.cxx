@@ -80,7 +80,7 @@ static GObjectClass* parent_class = nullptr;
 static GType column_types[N_FILE_LIST_COLS];
 
 GType
-ptk_file_list_get_type(void)
+ptk_file_list_get_type()
 {
     static GType type = 0;
     if (G_UNLIKELY(!type))

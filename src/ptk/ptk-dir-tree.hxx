@@ -50,7 +50,7 @@ struct PtkDirTreeClass
     /* Default signal handlers */
 };
 
-GType ptk_dir_tree_get_type(void);
+GType ptk_dir_tree_get_type();
 
 PtkDirTree* ptk_dir_tree_new();
 

@@ -149,7 +149,7 @@ struct PtkFileBrowserClass
     void (*pane_mode_change)(PtkFileBrowser* file_browser);
 };
 
-GType ptk_file_browser_get_type(void);
+GType ptk_file_browser_get_type();
 
 GtkWidget* ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view,
                                 void* main_window);

@@ -93,7 +93,7 @@ static GObjectClass* parent_class = nullptr;
 static GType column_types[N_DIR_TREE_COLS];
 
 GType
-ptk_dir_tree_get_type(void)
+ptk_dir_tree_get_type()
 {
     static GType type = 0;
     if (G_UNLIKELY(!type))
