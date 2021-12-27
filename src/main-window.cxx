@@ -278,14 +278,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
                 }
             }
 
-            if (DATADIR)
-                plug_dir = g_build_filename(DATADIR, "spacefm", "plugins", plug_dir_name, nullptr);
-            else if (!g_file_test("/usr/share/spacefm/plugins", G_FILE_TEST_IS_DIR) &&
-                     g_file_test("/usr/local/share/spacefm/plugins", G_FILE_TEST_IS_DIR))
-                plug_dir =
-                    g_build_filename("/usr/local/share/spacefm/plugins", plug_dir_name, nullptr);
-            else
-                plug_dir = g_build_filename("/usr/share/spacefm/plugins", plug_dir_name, nullptr);
+            plug_dir = g_build_filename(DATADIR, "spacefm", "plugins", plug_dir_name, nullptr);
 
             if (g_file_test(plug_dir, G_FILE_TEST_EXISTS))
             {
@@ -406,41 +399,33 @@ import_all_plugins(FMMainWindow* main_window)
 {
     // get potential locations
     char* path;
-    GList* locations = nullptr;
-    if (DATADIR)
-    {
-        locations =
-            g_list_append(locations, g_build_filename(DATADIR, "spacefm", "included", nullptr));
-        locations =
-            g_list_append(locations, g_build_filename(DATADIR, "spacefm", "plugins", nullptr));
-    }
+    GList* paths = nullptr;
+
+    paths = g_list_append(paths, g_build_filename(DATADIR, "spacefm", "included", nullptr));
+    paths = g_list_append(paths, g_build_filename(DATADIR, "spacefm", "plugins", nullptr));
+
     const char* const* sdir = g_get_system_data_dirs();
     for (; *sdir; ++sdir)
     {
         path = g_build_filename(*sdir, "spacefm", "included", nullptr);
-        if (!g_list_find_custom(locations, path, (GCompareFunc)g_strcmp0))
-            locations = g_list_append(locations, path);
+        if (!g_list_find_custom(paths, path, (GCompareFunc)g_strcmp0))
+            paths = g_list_append(paths, path);
         else
             g_free(path);
+
         path = g_build_filename(*sdir, "spacefm", "plugins", nullptr);
-        if (!g_list_find_custom(locations, path, (GCompareFunc)g_strcmp0))
-            locations = g_list_append(locations, path);
+        if (!g_list_find_custom(paths, path, (GCompareFunc)g_strcmp0))
+            paths = g_list_append(paths, path);
         else
             g_free(path);
     }
-    if (!g_list_find_custom(locations,
-                            "/usr/local/share/spacefm/included",
-                            (GCompareFunc)g_strcmp0))
-        locations = g_list_append(locations, g_strdup("/usr/local/share/spacefm/included"));
-    if (!g_list_find_custom(locations, "/usr/share/spacefm/included", (GCompareFunc)g_strcmp0))
-        locations = g_list_append(locations, g_strdup("/usr/share/spacefm/included"));
-    if (!g_list_find_custom(locations, "/usr/local/share/spacefm/plugins", (GCompareFunc)g_strcmp0))
-        locations = g_list_append(locations, g_strdup("/usr/local/share/spacefm/plugins"));
-    if (!g_list_find_custom(locations, "/usr/share/spacefm/plugins", (GCompareFunc)g_strcmp0))
-        locations = g_list_append(locations, g_strdup("/usr/share/spacefm/plugins"));
+    if (!g_list_find_custom(paths, "/usr/share/spacefm/included", (GCompareFunc)g_strcmp0))
+        paths = g_list_append(paths, g_strdup("/usr/share/spacefm/included"));
+    if (!g_list_find_custom(paths, "/usr/share/spacefm/plugins", (GCompareFunc)g_strcmp0))
+        paths = g_list_append(paths, g_strdup("/usr/share/spacefm/plugins"));
 
     GList* l;
-    for (l = locations; l; l = l->next)
+    for (l = paths; l; l = l->next)
     {
         GDir* dir = g_dir_open((char*)l->data, 0, nullptr);
         if (dir)
@@ -464,8 +449,8 @@ import_all_plugins(FMMainWindow* main_window)
             g_dir_close(dir);
         }
     }
-    g_list_foreach(locations, (GFunc)g_free, nullptr);
-    g_list_free(locations);
+    g_list_foreach(paths, (GFunc)g_free, nullptr);
+    g_list_free(paths);
 
     clean_plugin_mirrors();
 }
