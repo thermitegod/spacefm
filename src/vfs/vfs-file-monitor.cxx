@@ -18,12 +18,12 @@
 
 #include "vfs-file-monitor.hxx"
 #include <sys/stat.h>
-#include <errno.h>
+#include <cerrno>
 
 #include <linux/limits.h>
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 struct VFSFileMonitorCallbackEntry
 {

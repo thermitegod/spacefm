@@ -16,7 +16,7 @@
  * compatibility with older systems, and is NOT fully spec compliant.
  */
 
-#include <string.h>
+#include <cstring>
 #include <unistd.h>
 #include <fcntl.h>
 

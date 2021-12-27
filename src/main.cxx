@@ -12,7 +12,6 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/sysmacros.h>
-#include <locale.h>
 
 #include "main-window.hxx"
 
