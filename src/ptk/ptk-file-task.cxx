@@ -1988,7 +1988,10 @@ query_overwrite(PtkFileTask* ptask)
             }
             else
             {
-                strftime(buf, sizeof(buf), app_settings.date_format, localtime(&src_stat.st_mtime));
+                strftime(buf,
+                         sizeof(buf),
+                         app_settings.date_format.c_str(),
+                         localtime(&src_stat.st_mtime));
                 src_time = g_strdup(buf);
                 if (src_stat.st_mtime > dest_stat.st_mtime)
                     src_rel_time = "newer";
@@ -1997,7 +2000,10 @@ query_overwrite(PtkFileTask* ptask)
             }
             vfs_file_size_to_string_format(buf, dest_stat.st_size, true);
             dest_size = g_strdup_printf("%s\t( %lu bytes )", buf, dest_stat.st_size);
-            strftime(buf, sizeof(buf), app_settings.date_format, localtime(&dest_stat.st_mtime));
+            strftime(buf,
+                     sizeof(buf),
+                     app_settings.date_format.c_str(),
+                     localtime(&dest_stat.st_mtime));
             dest_time = g_strdup(buf);
 
             src_rel = g_strdup_printf("%s%s%s%s%s",

@@ -360,7 +360,7 @@ vfs_file_info_get_disp_mtime(VFSFileInfo* fi)
         char buf[64];
         strftime(buf,
                  sizeof(buf),
-                 app_settings.date_format, //"%Y-%m-%d %H:%M",
+                 app_settings.date_format.c_str(), //"%Y-%m-%d %H:%M",
                  localtime(&fi->mtime));
         fi->disp_mtime = g_strdup(buf);
     }

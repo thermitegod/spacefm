@@ -327,9 +327,8 @@ load_settings(const char* config_dir)
     app_settings.small_icon_size = 22;
     app_settings.tool_icon_size = 0;
     app_settings.use_si_prefix = false;
-    app_settings.no_execute = true;     // MOD
-    app_settings.no_confirm = false;    // MOD
-    app_settings.date_format = nullptr; // MOD
+    app_settings.no_execute = true;  // MOD
+    app_settings.no_confirm = false; // MOD
 
     /* Interface */
     app_settings.always_show_tabs = true;
@@ -462,14 +461,11 @@ load_settings(const char* config_dir)
     // MOD turn off fullscreen
     xset_set_b("main_full", false);
 
-    // MOD date_format
-    app_settings.date_format = g_strdup(xset_get_s("date_format"));
-    if (!app_settings.date_format || app_settings.date_format[0] == '\0')
+    app_settings.date_format = xset_get_s("date_format");
+    if (app_settings.date_format.empty())
     {
-        if (app_settings.date_format)
-            g_free(app_settings.date_format);
-        app_settings.date_format = g_strdup_printf("%%Y-%%m-%%d %%H:%%M");
-        xset_set("date_format", "s", "%Y-%m-%d %H:%M");
+        app_settings.date_format = "%Y-%m-%d %H:%M";
+        xset_set("date_format", "s", app_settings.date_format.c_str());
     }
 
     // MOD su command discovery (sets default)

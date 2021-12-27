@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <glib.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
@@ -39,9 +41,9 @@ struct AppSettings
     bool no_confirm;
     // bool no_confirm_delete;
     bool no_confirm_trash = true;
-    bool sdebug;          // sfm
-    bool load_saved_tabs; // sfm
-    char* date_format;    // MOD for speed dupe of xset
+    bool sdebug;             // sfm
+    bool load_saved_tabs;    // sfm
+    std::string date_format; // speed dupe of xset
 
     int sort_order; /* Sort by name, size, time */
     int sort_type;  /* ascending, descending */

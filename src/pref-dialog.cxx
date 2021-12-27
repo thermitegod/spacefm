@@ -255,9 +255,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             else
                 xset_set("date_format", "s", etext);
             g_free(etext);
-            if (app_settings.date_format)
-                g_free(app_settings.date_format);
-            app_settings.date_format = g_strdup(xset_get_s("date_format"));
+            app_settings.date_format = xset_get_s("date_format");
             need_refresh = true;
         }
         if (need_refresh)
