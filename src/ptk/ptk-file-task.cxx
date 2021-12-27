@@ -529,7 +529,7 @@ static void
 on_progress_dlg_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
 {
     save_progress_dialog_size(ptask);
-    if (response != GTK_RESPONSE_HELP && ptask->complete && !ptask->complete_notify)
+    if (ptask->complete && !ptask->complete_notify)
     {
         ptk_file_task_destroy(ptask);
         return;
@@ -560,9 +560,6 @@ on_progress_dlg_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
                 ptk_file_task_pause(ptask, VFS_FILE_TASK_PAUSE);
             }
             main_task_start_queued(ptask->task_view, nullptr);
-            break;
-        case GTK_RESPONSE_HELP:
-            xset_show_help(GTK_WIDGET(ptask->parent_window), nullptr, "#tasks-dlg");
             break;
         case GTK_RESPONSE_OK:
         case GTK_RESPONSE_NONE:
@@ -724,11 +721,6 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
                                  ptask->progress_btn_close,
                                  GTK_RESPONSE_OK);
     gtk_widget_set_sensitive(ptask->progress_btn_close, !!ptask->task_view);
-
-    // Help
-    GtkWidget* help_btn = gtk_button_new_with_label("Help");
-    gtk_dialog_add_action_widget(GTK_DIALOG(ptask->progress_dlg), help_btn, GTK_RESPONSE_HELP);
-    gtk_widget_set_focus_on_click(GTK_WIDGET(help_btn), false);
 
     set_button_states(ptask);
 

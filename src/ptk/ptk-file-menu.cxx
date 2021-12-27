@@ -1365,7 +1365,6 @@ enum PTKFileMenuAppJob
     APP_JOB_UPDATE,
     APP_JOB_BROWSE_MIME,
     APP_JOB_BROWSE_MIME_USR,
-    APP_JOB_HELP,
     APP_JOB_USR
 };
 
@@ -1433,8 +1432,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     "using "
                     "Remove may not remove the application from the Open submenu for this type, "
                     "unless you also remove it from text/plain.",
-                    nullptr,
-                    "#designmode-mime-remove");
+                    nullptr);
             break;
         case APP_JOB_EDIT:
             path = g_build_filename(g_get_user_data_dir(),
@@ -1464,8 +1462,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                     "Copy Desktop File",
                                     GTK_BUTTONS_YES_NO,
                                     msg,
-                                    nullptr,
-                                    "#designmode-mime-appdesktop") != GTK_RESPONSE_YES)
+                                    nullptr) != GTK_RESPONSE_YES)
                 {
                     g_free(share_desktop);
                     g_free(path);
@@ -1581,8 +1578,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                     "Create New XML",
                                     GTK_BUTTONS_YES_NO,
                                     msg,
-                                    nullptr,
-                                    "#designmode-mime-xml") != GTK_RESPONSE_YES)
+                                    nullptr) != GTK_RESPONSE_YES)
                 {
                     g_free(usr_path);
                     g_free(path);
@@ -1709,9 +1705,6 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             g_spawn_command_line_async(path, nullptr);
             g_free(path);
             break;
-        case APP_JOB_HELP:
-            xset_show_help((GtkWidget*)data->browser, nullptr, "#designmode-mime");
-            break;
         default:
             break;
     }
@@ -1748,53 +1741,6 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
         const char* help = nullptr;
         switch (event->keyval)
         {
-            case GDK_KEY_F1:
-                if (app_data)
-                {
-                    job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
-                    switch (job)
-                    {
-                        case APP_JOB_DEFAULT:
-                            help = g_strdup("#designmode-mime-set");
-                            break;
-                        case APP_JOB_REMOVE:
-                            help = g_strdup("#designmode-mime-remove");
-                            break;
-                        case APP_JOB_ADD:
-                            help = g_strdup("#designmode-mime-add");
-                            break;
-                        case APP_JOB_EDIT:
-                            help = g_strdup("#designmode-mime-appdesktop");
-                            break;
-                        case APP_JOB_EDIT_LIST:
-                            help = g_strdup("#designmode-mime-mimeappslist");
-                            break;
-                        case APP_JOB_BROWSE:
-                            help = g_strdup("#designmode-mime-appdir");
-                            break;
-                        case APP_JOB_EDIT_TYPE:
-                            help = g_strdup("#designmode-mime-xml");
-                            break;
-                        case APP_JOB_BROWSE_MIME:
-                            help = g_strdup("#designmode-mime-mimedir");
-                            break;
-                        case APP_JOB_USR:
-                        case APP_JOB_BROWSE_SHARED:
-                        case APP_JOB_VIEW:
-                        case APP_JOB_VIEW_TYPE:
-                        case APP_JOB_VIEW_OVER:
-                        case APP_JOB_BROWSE_MIME_USR:
-                            help = g_strdup("#designmode-mime-usr");
-                            break;
-                        default:
-                            help = g_strdup("#designmode-mime");
-                            break;
-                    }
-                }
-                gtk_menu_shell_deactivate(GTK_MENU_SHELL(menu));
-                xset_show_help((GtkWidget*)data->browser, nullptr, help);
-                return true;
-                break;
             case GDK_KEY_F2:
             case GDK_KEY_Menu:
                 if (desktop_file)
@@ -2078,14 +2024,6 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
 
     // Separator
     gtk_container_add(GTK_CONTAINER(app_menu), gtk_separator_menu_item_new());
-
-    // Help
-    newitem = app_menu_additem(app_menu,
-                               g_strdup("_Help"),
-                               g_strdup("help-browser"),
-                               APP_JOB_HELP,
-                               app_item,
-                               data);
 
     // show menu
     gtk_widget_show_all(GTK_WIDGET(app_menu));

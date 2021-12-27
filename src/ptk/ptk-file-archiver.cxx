@@ -214,7 +214,6 @@ on_format_changed(GtkComboBox* combo, void* user_data)
                             "Error Loading Handler",
                             0,
                             err_msg,
-                            nullptr,
                             nullptr);
             g_free(err_msg);
         }
@@ -353,12 +352,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                       "btn_ok",
                       gtk_dialog_add_button(GTK_DIALOG(dlg), "OK", GTK_RESPONSE_OK));
 
-    /* Adding the help button but preventing it from taking the focus on
-     * click */
-    gtk_widget_set_focus_on_click(
-        GTK_WIDGET(gtk_dialog_add_button(GTK_DIALOG(dlg), "Help", GTK_RESPONSE_HELP)),
-        false);
-
     GtkFileFilter* filter = gtk_file_filter_new();
 
     /* Top hbox has 'Command:' label, 'Archive Format:' label then format
@@ -403,7 +396,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                         "No archive handlers "
                         "configured. You must add a handler before "
                         "creating an archive.",
-                        nullptr,
                         nullptr);
         ptk_handler_show_config(HANDLER_MODE_ARC, file_browser, nullptr);
         return;
@@ -522,7 +514,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                                 "Error Loading Handler",
                                 0,
                                 err_msg,
-                                nullptr,
                                 nullptr);
                 g_free(err_msg);
             }
@@ -648,7 +639,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                         "Create Archive",
                         0,
                         "The archive creation command is empty.  Please enter a command.",
-                        nullptr,
                         nullptr);
                     g_free(command);
                     continue;
@@ -723,7 +713,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                                         "Error Saving Handler",
                                         0,
                                         err_msg,
-                                        nullptr,
                                         nullptr);
                         g_free(err_msg);
                     }
@@ -742,9 +731,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 gtk_widget_destroy(dlg);
                 ptk_handler_show_config(HANDLER_MODE_ARC, file_browser, nullptr);
                 return;
-            case GTK_RESPONSE_HELP:
-                xset_show_help(dlg, nullptr, "#handlers-arc");
-                __attribute__((fallthrough));
             default:
                 // Destroying dialog
                 gtk_widget_destroy(dlg);
@@ -1096,13 +1082,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                           "btn_ok",
                           gtk_dialog_add_button(GTK_DIALOG(dlg), "OK", GTK_RESPONSE_OK));
 
-        /* Adding the help button but preventing it from taking the focus on
-         * click */
-
-        gtk_widget_set_focus_on_click(
-            GTK_WIDGET(gtk_dialog_add_button(GTK_DIALOG(dlg), "Help", GTK_RESPONSE_HELP)),
-            false);
-
         GtkWidget* hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
         GtkWidget* chk_parent = gtk_check_button_new_with_mnemonic("Cre_ate subdirectories");
         GtkWidget* chk_write = gtk_check_button_new_with_mnemonic("Make contents "
@@ -1160,9 +1139,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                     gtk_widget_destroy(dlg);
                     ptk_handler_show_config(HANDLER_MODE_ARC, file_browser, nullptr);
                     return;
-                case GTK_RESPONSE_HELP:
-                    xset_show_help(dlg, nullptr, "#handlers-arc");
-                    __attribute__((fallthrough));
                 default:
                     // Destroying dialog
                     gtk_widget_destroy(dlg);

@@ -501,12 +501,6 @@ on_focus_out(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
 }
 
 static void
-ptk_path_entry_man(GtkWidget* widget, GtkWidget* parent)
-{
-    xset_show_help(parent, nullptr, "#gui-pathbar");
-}
-
-static void
 on_protocol_handlers(GtkWidget* widget, PtkFileBrowser* file_browser)
 {
     ptk_handler_show_config(HANDLER_MODE_NET, file_browser, nullptr);
@@ -642,8 +636,6 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
     set = xset_get("path_seek");
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
     set = xset_set_cb("path_hand", (GFunc)on_protocol_handlers, file_browser);
-    xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
-    set = xset_set_cb("path_help", (GFunc)ptk_path_entry_man, file_browser);
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
     gtk_widget_show_all(GTK_WIDGET(menu));
     g_signal_connect(menu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);

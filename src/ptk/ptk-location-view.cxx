@@ -892,7 +892,6 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
                         "Invalid URL",
                         0,
                         "The entered URL is not valid.",
-                        nullptr,
                         nullptr);
         return;
     }
@@ -960,7 +959,6 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
                         0,
                         "No network handler is configured for this URL, or no mount command is "
                         "set.  Add a handler in Devices|Settings|Protocol Handlers.",
-                        nullptr,
                         nullptr);
         goto _net_free;
     }
@@ -1046,7 +1044,7 @@ popup_missing_mount(GtkWidget* view, int job)
         g_strdup_printf("No handler is configured for this device type, or no %s command is set. "
                         " Add a handler in Settings|Device Handlers or Protocol Handlers.",
                         cmd);
-    xset_msg_dialog(view, GTK_MESSAGE_ERROR, "Handler Not Found", 0, msg, nullptr, nullptr);
+    xset_msg_dialog(view, GTK_MESSAGE_ERROR, "Handler Not Found", 0, msg, nullptr);
     g_free(msg);
 }
 
@@ -1138,8 +1136,7 @@ on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                          set->s,
                          &set->s,
                          set->z,
-                         true,
-                         set->line) &&
+                         true) &&
         set->s)
     {
         bool change_root = (!old_set_s || strcmp(old_set_s, set->s));
@@ -1198,8 +1195,7 @@ on_umount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                          set->s,
                          &set->s,
                          set->z,
-                         true,
-                         set->line) &&
+                         true) &&
         set->s)
     {
         bool change_root = (!old_set_s || strcmp(old_set_s, set->s));
@@ -1657,8 +1653,7 @@ on_remount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                           set->s,
                           &set->s,
                           set->z,
-                          false,
-                          set->line))
+                          false))
         return;
 
     bool mount_in_terminal;
@@ -1836,7 +1831,7 @@ on_root_udevil(GtkMenuItem* item, GtkWidget* view)
     if (g_file_test(udevil_path, G_FILE_TEST_IS_DIR))
         xset_edit(view, udevil_conf, true, false);
     else
-        xset_msg_dialog(view, GTK_MESSAGE_ERROR, "Directory Missing", 0, msg, nullptr, nullptr);
+        xset_msg_dialog(view, GTK_MESSAGE_ERROR, "Directory Missing", 0, msg, nullptr);
     g_free(udevil_path);
     g_free(udevil_conf);
     g_free(msg);
@@ -2297,16 +2292,7 @@ on_showhide(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     }
     else
         msg = g_strdup(set->desc);
-    if (xset_text_dialog(view,
-                         set->title,
-                         true,
-                         msg,
-                         nullptr,
-                         set->s,
-                         &set->s,
-                         nullptr,
-                         false,
-                         set->line))
+    if (xset_text_dialog(view, set->title, true, msg, nullptr, set->s, &set->s, nullptr, false))
         update_all();
     g_free(msg);
 }
@@ -2336,16 +2322,7 @@ on_automountlist(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     }
     else
         msg = g_strdup(set->desc);
-    if (xset_text_dialog(view,
-                         set->title,
-                         true,
-                         msg,
-                         nullptr,
-                         set->s,
-                         &set->s,
-                         nullptr,
-                         false,
-                         set->line))
+    if (xset_text_dialog(view, set->title, true, msg, nullptr, set->s, &set->s, nullptr, false))
     {
         // update view / automount all?
     }

@@ -887,7 +887,6 @@ save_command_script(ContextData* ctxt, bool query)
                                  "Save Modified Script?",
                                  GTK_BUTTONS_YES_NO,
                                  "Save your changes to the command script?",
-                                 nullptr,
                                  nullptr) == GTK_RESPONSE_NO)
         return;
     if (is_command_script_newer(ctxt) &&
@@ -896,7 +895,6 @@ save_command_script(ContextData* ctxt, bool query)
                         "Overwrite Script?",
                         GTK_BUTTONS_YES_NO,
                         "The command script on disk has changed.\n\nDo you want to overwrite it?",
-                        nullptr,
                         nullptr) == GTK_RESPONSE_NO)
         return;
 
@@ -1007,7 +1005,6 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
                             0,
                             "The command line does not begin with a text file (script) to be "
                             "opened, or the script was not found in your $PATH.",
-                            nullptr,
                             nullptr);
             g_free(path);
             return;
@@ -1364,7 +1361,6 @@ replace_item_props(ContextData* ctxt)
                                 "Your command line is greater than 2000 characters and may be "
                                 "truncated when saved.  Consider using a command script instead "
                                 "by selecting Script on the Command tab.",
-                                nullptr,
                                 nullptr);
         }
         else
@@ -1527,20 +1523,6 @@ on_target_keypress(GtkWidget* widget, GdkEventKey* event, ContextData* ctxt)
     return false;
 }
 
-static bool
-on_dlg_keypress(GtkWidget* widget, GdkEventKey* event, ContextData* ctxt)
-{
-    unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
-                                           GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
-
-    if (event->keyval == GDK_KEY_F1 && keymod == 0)
-    {
-        gtk_dialog_response(GTK_DIALOG(ctxt->dlg), GTK_RESPONSE_HELP);
-        return true;
-    }
-    return false;
-}
-
 void
 xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
 {
@@ -1576,10 +1558,6 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
         gtk_window_set_default_size(GTK_WINDOW(ctxt->dlg), width, height);
     else
         gtk_window_set_default_size(GTK_WINDOW(ctxt->dlg), 800, 600);
-
-    gtk_widget_set_focus_on_click(
-        GTK_WIDGET(gtk_dialog_add_button(GTK_DIALOG(ctxt->dlg), "Help", GTK_RESPONSE_HELP)),
-        false);
 
     gtk_dialog_add_button(GTK_DIALOG(ctxt->dlg), "Cancel", GTK_RESPONSE_CANCEL);
     ctxt->btn_ok = GTK_BUTTON(gtk_dialog_add_button(GTK_DIALOG(ctxt->dlg), "OK", GTK_RESPONSE_OK));
@@ -2344,8 +2322,6 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     g_signal_connect(G_OBJECT(ctxt->item_type), "changed", G_CALLBACK(on_type_changed), ctxt);
 
     g_signal_connect(ctxt->notebook, "switch-page", G_CALLBACK(on_prop_notebook_switch_page), ctxt);
-
-    g_signal_connect(G_OBJECT(ctxt->dlg), "key-press-event", G_CALLBACK(on_dlg_keypress), ctxt);
     // clang-format on
 
     // run
@@ -2360,7 +2336,6 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     while ((response = gtk_dialog_run(GTK_DIALOG(ctxt->dlg))))
     {
         bool exit_loop = false;
-        const char* help;
         switch (response)
         {
             case GTK_RESPONSE_OK:
@@ -2369,24 +2344,6 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
                 mset->context = context_build(ctxt);
                 replace_item_props(ctxt);
                 exit_loop = true;
-                break;
-            case GTK_RESPONSE_HELP:
-                switch (gtk_notebook_get_current_page(GTK_NOTEBOOK(ctxt->notebook)))
-                {
-                    case 1:
-                        help = g_strdup("#designmode-props-context");
-                        break;
-                    case 2:
-                        help = g_strdup("#designmode-props-command");
-                        break;
-                    case 3:
-                        help = g_strdup("#designmode-props-opts");
-                        break;
-                    default:
-                        help = g_strdup("#designmode-props");
-                        break;
-                }
-                xset_show_help(ctxt->dlg, nullptr, help);
                 break;
             default:
                 exit_loop = true;

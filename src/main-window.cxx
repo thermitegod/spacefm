@@ -86,11 +86,6 @@ static void on_task_column_selected(GtkMenuItem* item, GtkWidget* view);
 static void on_task_popup_errset(GtkMenuItem* item, FMMainWindow* main_window, char* name2);
 static void show_task_dialog(GtkWidget* widget, GtkWidget* view);
 static void on_about_activate(GtkMenuItem* menuitem, void* user_data);
-static void on_main_help_activate(GtkMenuItem* menuitem, FMMainWindow* main_window);
-static void on_main_faq(GtkMenuItem* menuitem, FMMainWindow* main_window);
-static void on_homepage_activate(GtkMenuItem* menuitem, FMMainWindow* main_window);
-static void on_news_activate(GtkMenuItem* menuitem, FMMainWindow* main_window);
-static void on_getplug_activate(GtkMenuItem* menuitem, FMMainWindow* main_window);
 static void update_window_title(GtkMenuItem* item, FMMainWindow* main_window);
 static void on_toggle_panelbar(GtkWidget* widget, FMMainWindow* main_window);
 static void on_fullscreen_activate(GtkMenuItem* menuitem, FMMainWindow* main_window);
@@ -268,8 +263,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
                                 "Invalid Plugin Filename",
                                 0,
                                 msg,
-                                nullptr,
-                                "#plugins-install");
+                                nullptr);
                 {
                     g_free(plug_dir_name);
                     g_free(path);
@@ -292,8 +286,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
                                     "Overwrite Plugin ?",
                                     GTK_BUTTONS_YES_NO,
                                     msg,
-                                    nullptr,
-                                    "#plugins-install") != GTK_RESPONSE_YES)
+                                    nullptr) != GTK_RESPONSE_YES)
                 {
                     g_free(plug_dir_name);
                     g_free(plug_dir);
@@ -317,7 +310,6 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
                                 "Error Creating Temp Directory",
                                 0,
                                 "Unable to create temporary directory",
-                                nullptr,
                                 nullptr);
                 g_free(path);
                 return;
@@ -728,8 +720,7 @@ main_design_mode(GtkMenuItem* menuitem, FMMainWindow* main_window)
         "applications.\n\nTo open the Design Menu, simply right-click on a menu item, bookmark, "
         "or toolbar item.  To open the Design Menu for a submenu, first close the submenu (by "
         "clicking on it).\n\nFor more information, click the Help button below.",
-        nullptr,
-        "#designmode");
+        nullptr);
 }
 
 void
@@ -1578,14 +1569,8 @@ rebuild_menus(FMMainWindow* main_window)
 
     // Help
     newmenu = gtk_menu_new();
-    xset_set_cb("main_faq", (GFunc)on_main_faq, main_window);
     xset_set_cb("main_about", (GFunc)on_about_activate, main_window);
-    xset_set_cb("main_help", (GFunc)on_main_help_activate, main_window);
-    xset_set_cb("main_homepage", (GFunc)on_homepage_activate, main_window);
-    xset_set_cb("main_news", (GFunc)on_news_activate, main_window);
-    xset_set_cb("main_getplug", (GFunc)on_getplug_activate, main_window);
-    menu_elements = g_strdup_printf("main_faq main_help separator main_homepage main_news "
-                                    "main_getplug separator main_help_opt separator main_about");
+    menu_elements = g_strdup_printf("main_about");
     xset_add_menu(file_browser, newmenu, accel_group, menu_elements);
     g_free(menu_elements);
     gtk_widget_show_all(GTK_WIDGET(newmenu));
@@ -2713,57 +2698,6 @@ fm_main_window_preference(FMMainWindow* main_window)
     fm_edit_preference((GtkWindow*)main_window, PREF_GENERAL);
 }
 
-/* callback used to open default browser when URLs got clicked */
-static void
-open_url(GtkAboutDialog* dlg, const char* url, void* data)
-{
-    xset_open_url(GTK_WIDGET(dlg), url);
-}
-
-static void
-on_main_help_activate(GtkMenuItem* menuitem, FMMainWindow* main_window)
-{
-    const char* help;
-
-    PtkFileBrowser* browser =
-        PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
-    if (browser && browser->path_bar && gtk_widget_has_focus(GTK_WIDGET(browser->path_bar)))
-        help = g_strdup("#gui-pathbar");
-    else if (browser && browser->side_dev && gtk_widget_has_focus(GTK_WIDGET(browser->side_dev)))
-        help = g_strdup("#devices");
-    else if (browser && browser->side_book && gtk_widget_has_focus(GTK_WIDGET(browser->side_book)))
-        help = g_strdup("#gui-book");
-    else if (main_window->task_view && gtk_widget_has_focus(GTK_WIDGET(main_window->task_view)))
-        help = g_strdup("#tasks-man");
-    else
-        help = nullptr;
-    xset_show_help(GTK_WIDGET(main_window), nullptr, help);
-}
-
-static void
-on_main_faq(GtkMenuItem* menuitem, FMMainWindow* main_window)
-{
-    xset_show_help(GTK_WIDGET(main_window), nullptr, "#quickstart-faq");
-}
-
-static void
-on_homepage_activate(GtkMenuItem* menuitem, FMMainWindow* main_window)
-{
-    xset_open_url(GTK_WIDGET(main_window), nullptr);
-}
-
-static void
-on_news_activate(GtkMenuItem* menuitem, FMMainWindow* main_window)
-{
-    xset_open_url(GTK_WIDGET(main_window), "http://ignorantguru.github.io/spacefm/news.html");
-}
-
-static void
-on_getplug_activate(GtkMenuItem* menuitem, FMMainWindow* main_window)
-{
-    xset_open_url(GTK_WIDGET(main_window), "https://github.com/IgnorantGuru/spacefm/wiki/plugins/");
-}
-
 static void
 on_about_activate(GtkMenuItem* menuitem, void* user_data)
 {
@@ -2792,7 +2726,6 @@ on_about_activate(GtkMenuItem* menuitem, void* user_data)
         // g_object_add_weak_pointer(G_OBJECT(about_dlg), (void*)&about_dlg);
         g_signal_connect(about_dlg, "response", G_CALLBACK(gtk_widget_destroy), nullptr);
         g_signal_connect(about_dlg, "destroy", G_CALLBACK(WindowReference::decrease), nullptr);
-        g_signal_connect(about_dlg, "activate-link", G_CALLBACK(open_url), nullptr);
     }
     gtk_window_set_transient_for(GTK_WINDOW(about_dlg), GTK_WINDOW(user_data));
     gtk_window_present((GtkWindow*)about_dlg);
@@ -3693,16 +3626,6 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
                     update_window_title(nullptr, main_window);
                 else if (!strcmp(xname, "about"))
                     on_about_activate(nullptr, main_window);
-                else if (!strcmp(xname, "help"))
-                    on_main_help_activate(nullptr, main_window);
-                else if (!strcmp(xname, "faq"))
-                    on_main_faq(nullptr, main_window);
-                else if (!strcmp(xname, "homepage"))
-                    on_homepage_activate(nullptr, main_window);
-                else if (!strcmp(xname, "news"))
-                    on_news_activate(nullptr, main_window);
-                else if (!strcmp(xname, "getplug"))
-                    on_getplug_activate(nullptr, main_window);
             }
             else if (g_str_has_prefix(set->name, "panel_"))
             {
@@ -3930,7 +3853,6 @@ on_reorder(GtkWidget* item, GtkWidget* parent)
         "Reorder Columns Help",
         0,
         "To change the order of the columns, drag the column header to the desired location.",
-        nullptr,
         nullptr);
 }
 
@@ -7264,8 +7186,6 @@ main_window_socket_command(char* argv[], char** reply)
                 }
                 xset_edit(GTK_WIDGET(file_browser), argv[j], opt_root, !opt_root);
             }
-            else
-                xset_open_url(GTK_WIDGET(file_browser), argv[j]);
         }
         else if (!strcmp(argv[i], "mount") || !strcmp(argv[i], "unmount"))
         {

@@ -1355,7 +1355,6 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
                                 "Terminal SU Not Available",
                                 0,
                                 str,
-                                nullptr,
                                 nullptr);
                 goto _exit_with_error_lean;
             }
@@ -1372,7 +1371,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         g_warning(str, nullptr);
         // do not use xset_msg_dialog if non-main thread
         // vfs_file_task_exec_error( task, 0, str );
-        xset_msg_dialog(parent, GTK_MESSAGE_ERROR, "Error", 0, str, nullptr, nullptr);
+        xset_msg_dialog(parent, GTK_MESSAGE_ERROR, "Error", 0, str, nullptr);
         goto _exit_with_error_lean;
     }
 
@@ -1397,13 +1396,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
             g_warning(str, nullptr);
             // do not use xset_msg_dialog if non-main thread
             // vfs_file_task_exec_error( task, 0, str );
-            xset_msg_dialog(parent,
-                            GTK_MESSAGE_ERROR,
-                            "Terminal Not Available",
-                            0,
-                            str,
-                            nullptr,
-                            nullptr);
+            xset_msg_dialog(parent, GTK_MESSAGE_ERROR, "Terminal Not Available", 0, str, nullptr);
             goto _exit_with_error_lean;
         }
         // resolve x-terminal-emulator link (may be recursive link)

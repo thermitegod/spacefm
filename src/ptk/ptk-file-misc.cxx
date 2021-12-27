@@ -235,12 +235,6 @@ get_real_link_target(const char* link_path)
     return target_path;
 }
 
-static void
-on_help_activate(GtkMenuItem* item, MoveSet* mset)
-{
-    xset_show_help(GTK_WIDGET(mset->dlg), nullptr, mset->create_new ? "#gui-newf" : "#gui-rename");
-}
-
 static bool
 on_move_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
 {
@@ -255,9 +249,6 @@ on_move_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
             case GDK_KEY_KP_Enter:
                 if (gtk_widget_get_sensitive(GTK_WIDGET(mset->next)))
                     gtk_dialog_response(GTK_DIALOG(mset->dlg), GTK_RESPONSE_OK);
-                return true;
-            case GDK_KEY_F1:
-                on_help_activate(nullptr, mset);
                 return true;
             default:
                 break;
@@ -280,9 +271,6 @@ on_move_entry_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
             case GDK_KEY_KP_Enter:
                 if (gtk_widget_get_sensitive(GTK_WIDGET(mset->next)))
                     gtk_dialog_response(GTK_DIALOG(mset->dlg), GTK_RESPONSE_OK);
-                return true;
-            case GDK_KEY_F1:
-                on_help_activate(nullptr, mset);
                 return true;
             default:
                 break;
@@ -1575,8 +1563,6 @@ on_options_button_press(GtkWidget* btn, MoveSet* mset)
     xset_add_menuitem(mset->browser, popup, accel_group, set);
     set = xset_get("separator");
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_set_cb("move_dlg_help", (GFunc)on_help_activate, mset);
-    xset_add_menuitem(mset->browser, popup, accel_group, set);
 
     gtk_widget_show_all(GTK_WIDGET(popup));
     g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
@@ -2789,7 +2775,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                                         "Create Parent Directory",
                                         GTK_BUTTONS_YES_NO,
                                         "The parent directory does not exist.  Create it?",
-                                        nullptr,
                                         nullptr) != GTK_RESPONSE_YES)
                         goto _continue_free;
                 }
@@ -2820,8 +2805,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                                     "Overwrite Existing File",
                                     GTK_BUTTONS_YES_NO,
                                     "OVERWRITE WARNING",
-                                    "The file path exists.  Overwrite existing file?",
-                                    nullptr) != GTK_RESPONSE_YES)
+                                    "The file path exists.  Overwrite existing file?") !=
+                    GTK_RESPONSE_YES)
                     goto _continue_free;
                 overwrite = true;
             }
@@ -3309,7 +3294,6 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
                         "Error Loading Handler",
                         0,
                         err_msg,
-                        nullptr,
                         nullptr);
         g_free(err_msg);
         return;
@@ -3806,8 +3790,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
                                 "Confirm Delete As Root",
                                 GTK_BUTTONS_YES_NO,
                                 "DELETE AS ROOT",
-                                str,
-                                nullptr) != GTK_RESPONSE_YES)
+                                str) != GTK_RESPONSE_YES)
             {
                 g_free(str);
                 return;

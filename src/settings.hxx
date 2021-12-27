@@ -392,15 +392,14 @@ void xset_menu_cb(GtkWidget* item, XSet* set);
 bool xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data);
 bool xset_text_dialog(GtkWidget* parent, const char* title, bool large, const char* msg1,
                       const char* msg2, const char* defstring, char** answer, const char* defreset,
-                      bool edit_care, const char* help);
+                      bool edit_care);
 char* xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* title,
                        const char* deffolder, const char* deffile);
 void xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root);
-void xset_open_url(GtkWidget* parent, const char* url);
 void xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,
                        XSet* set_parent, bool show_tooltips);
 int xset_msg_dialog(GtkWidget* parent, int action, const char* title, int buttons, const char* msg1,
-                    const char* msg2, const char* help);
+                    const char* msg2);
 GtkTextView* multi_input_new(GtkScrolledWindow* scrolled, const char* text);
 void multi_input_select_region(GtkWidget* input, int start, int end);
 char* multi_input_get_text(GtkWidget* input);
@@ -411,7 +410,6 @@ void install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* pat
                          const char* plug_dir, int job, XSet* insert_set);
 XSet* xset_import_plugin(const char* plug_dir, int* use);
 void clean_plugin_mirrors();
-void xset_show_help(GtkWidget* parent, XSet* set, const char* anchor);
 bool xset_opener(PtkFileBrowser* file_browser, char job);
 const char* xset_get_builtin_toolitem_label(unsigned char tool_type);
 char* xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon);

@@ -471,7 +471,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
             "application by default.",
             vfs_mime_type_get_type(mime_type),
             ((XSet*)handlers_slist->data)->menu_label);
-        xset_msg_dialog(parent, 0, "MIME Type Has Handler", 0, msg, nullptr, nullptr);
+        xset_msg_dialog(parent, 0, "MIME Type Has Handler", 0, msg, nullptr);
         g_free(msg);
         g_slist_free(handlers_slist);
     }
@@ -495,7 +495,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
                 "with your associated application by default.",
                 vfs_mime_type_get_type(mime_type),
                 ((XSet*)handlers_slist->data)->menu_label);
-            xset_msg_dialog(parent, 0, "MIME Type Has Handler", 0, msg, nullptr, nullptr);
+            xset_msg_dialog(parent, 0, "MIME Type Has Handler", 0, msg, nullptr);
             g_free(msg);
             g_slist_free(handlers_slist);
         }

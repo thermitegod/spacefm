@@ -2582,8 +2582,7 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
                 set->ob1,
                 &set->ob1,
                 nullptr,
-                false,
-                nullptr) ||
+                false) ||
             !set->ob1)
             return;
         key = set->ob1;
@@ -4998,7 +4997,6 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
                             "Invalid Destination",
                             0,
                             "Destination same as source",
-                            nullptr,
                             nullptr);
             g_free(dest_dir);
             return;
@@ -5033,7 +5031,6 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
                         "Invalid Destination",
                         0,
                         "Invalid destination",
-                        nullptr,
                         nullptr);
     }
 }
@@ -5050,7 +5047,6 @@ ptk_file_browser_hide_selected(PtkFileBrowser* file_browser, GList* files, char*
             "directory, which will hide them from view in SpaceFM.  You may need to refresh the "
             "view or restart SpaceFM for the files to disappear.\n\nTo unhide a file, open the "
             ".hidden file in your text editor, remove the name of the file, and refresh.",
-            nullptr,
             nullptr) != GTK_RESPONSE_OK)
         return;
 

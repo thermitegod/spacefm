@@ -1292,7 +1292,7 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     if (!ret || (exit_status && WIFEXITED(exit_status)))
     {
         msg = g_strdup_printf("An error occured copying command files\n\n%s", stderr ? stderr : "");
-        xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", 0, msg, nullptr, nullptr);
+        xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", 0, msg, nullptr);
         g_free(msg);
     }
     if (stderr)
@@ -1350,7 +1350,7 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
             "The selected %s Handler file has been imported to the %s Handlers list.",
             mode_name,
             mode_name);
-        xset_msg_dialog(nullptr, GTK_MESSAGE_INFO, "Handler Imported", 0, msg, nullptr, nullptr);
+        xset_msg_dialog(nullptr, GTK_MESSAGE_INFO, "Handler Imported", 0, msg, nullptr);
         g_free(msg);
         return;
     }
@@ -1463,7 +1463,6 @@ config_load_handler_settings(XSet* handler_xset, char* handler_xset_name, const 
                             "Error Loading Handler",
                             0,
                             err_msg,
-                            nullptr,
                             nullptr);
             g_free(err_msg);
         }
@@ -1880,7 +1879,6 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                             "Confirm Remove",
                             GTK_BUTTONS_YES_NO,
                             "Permanently remove the selected handler?",
-                            nullptr,
                             nullptr) != GTK_RESPONSE_YES)
             goto _clean_exit;
 
@@ -2005,7 +2003,6 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                         "Error Saving Handler",
                         0,
                         err_msg,
-                        nullptr,
                         nullptr);
         g_free(err_msg);
     }
@@ -2103,7 +2100,6 @@ on_handlers_key_press(GtkWidget* widget, GdkEventKey* evt, HandlerData* hnd)
                         "Apply Changes ?",
                         GTK_BUTTONS_YES_NO,
                         "Apply changes to the current handler?",
-                        nullptr,
                         nullptr) == GTK_RESPONSE_YES)
         on_configure_button_press(GTK_BUTTON(hnd->btn_apply), hnd);
     else
@@ -2144,7 +2140,6 @@ on_handlers_button_press(GtkWidget* view, GdkEventButton* evt, HandlerData* hnd)
                             "Apply Changes ?",
                             GTK_BUTTONS_YES_NO,
                             "Apply changes to the current handler?",
-                            nullptr,
                             nullptr) == GTK_RESPONSE_YES)
             on_configure_button_press(GTK_BUTTON(hnd->btn_apply), hnd);
 
@@ -2188,7 +2183,6 @@ restore_defaults(HandlerData* hnd, bool all)
                                        GTK_BUTTONS_YES_NO,
                                        "Missing default handlers will be restored.\n\nAlso "
                                        "OVERWRITE ALL EXISTING default handlers?",
-                                       nullptr,
                                        nullptr);
         if (response != GTK_RESPONSE_YES && response != GTK_RESPONSE_NO)
             // dialog was closed with no button pressed - cancel
@@ -2319,7 +2313,6 @@ validate_archive_handler(HandlerData* hnd)
                         dialog_titles[hnd->mode],
                         false,
                         "Please enter a valid handler name.",
-                        nullptr,
                         nullptr);
         gtk_widget_grab_focus(hnd->entry_handler_name);
         return false;
@@ -2334,7 +2327,6 @@ validate_archive_handler(HandlerData* hnd)
                         false,
                         "Please enter a valid MIME Type or Pathname "
                         "pattern.",
-                        nullptr,
                         nullptr);
         gtk_widget_grab_focus(hnd->entry_handler_mime);
         return false;
@@ -2379,7 +2371,6 @@ validate_archive_handler(HandlerData* hnd)
                             "%%o: Resulting single archive\n"
                             "%%O: Resulting archive per source "
                             "file/directory",
-                            nullptr,
                             nullptr);
             gtk_widget_grab_focus(hnd->view_handler_compress);
             ret = false;
@@ -2400,7 +2391,6 @@ validate_archive_handler(HandlerData* hnd)
                         "variables should probably be in the extraction "
                         "command:\n\n%%x: "
                         "Archive to extract",
-                        nullptr,
                         nullptr);
         gtk_widget_grab_focus(hnd->view_handler_extract);
         ret = false;
@@ -2420,7 +2410,6 @@ validate_archive_handler(HandlerData* hnd)
                         "variables should probably be in the list "
                         "command:\n\n%%x: "
                         "Archive to list",
-                        nullptr,
                         nullptr);
         gtk_widget_grab_focus(hnd->view_handler_list);
         ret = false;
@@ -2506,33 +2495,6 @@ on_textview_keypress(GtkWidget* widget, GdkEventKey* event, HandlerData* hnd)
                 char* uri = g_strdup_printf("%d", keymod);
                 on_activate_link(nullptr, uri, hnd);
                 g_free(uri);
-                return true;
-            }
-            break;
-        case GDK_KEY_F1:
-            // F1 show help
-            if (keymod == 0)
-            {
-                const char* help;
-                switch (hnd->mode)
-                {
-                    case HANDLER_MODE_ARC:
-                        help = g_strdup("#handlers-arc");
-                        break;
-                    case HANDLER_MODE_FS:
-                        help = g_strdup("#handlers-dev");
-                        break;
-                    case HANDLER_MODE_NET:
-                        help = g_strdup("#handlers-pro");
-                        break;
-                    case HANDLER_MODE_FILE:
-                        help = g_strdup("#handlers-fil");
-                        break;
-                    default:
-                        help = nullptr;
-                        break;
-                }
-                xset_show_help(hnd->dlg, nullptr, help);
                 return true;
             }
             break;
@@ -2681,7 +2643,6 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
                         "Error Creating Temp Directory",
                         0,
                         "Unable to create temporary directory",
-                        nullptr,
                         nullptr);
         g_free(file);
         return;
@@ -2846,11 +2807,6 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
     int height = xset_get_int(handler_conf_xset[HANDLER_MODE_ARC], "y");
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(hnd->dlg), width, height);
-
-    // Adding the help button but preventing it from taking the focus on click
-    gtk_widget_set_focus_on_click(
-        GTK_WIDGET(gtk_dialog_add_button(GTK_DIALOG(hnd->dlg), "Help", GTK_RESPONSE_HELP)),
-        false);
 
     // Adding standard buttons and saving references in the dialog
     // 'Restore defaults' button has custom text but a stock image
@@ -3349,27 +3305,6 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
             case GTK_RESPONSE_CANCEL:
                 exit_loop = true;
                 break;
-            /*
-            case GTK_RESPONSE_HELP:
-                switch (mode)
-                {
-                    case HANDLER_MODE_ARC:
-                        help = "#handlers-arc-archand";
-                        break;
-                    case HANDLER_MODE_FS:
-                        help = "#handlers-dev";
-                        break;
-                    case HANDLER_MODE_NET:
-                        help = "#handlers-pro";
-                        break;
-                    case HANDLER_MODE_FILE:
-                        help = "#handlers-fil";
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            */
             case GTK_RESPONSE_NONE:
                 // Options menu requested
                 break;
