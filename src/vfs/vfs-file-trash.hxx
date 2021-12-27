@@ -60,7 +60,7 @@ class Trash
     static Trash* _instance;
 
     dev_t _home_device;
-    TrashDir* _home_trash_dir;
+    TrashDir* _home_trash_dir{nullptr};
     TrashDirMap _trash_dirs;
 
 }; // class Trash

@@ -32,7 +32,7 @@ Trash::instance()
     return _instance;
 }
 
-Trash::Trash() : _home_trash_dir(0)
+Trash::Trash()
 {
     _home_device = device(g_get_home_dir());
 
