@@ -1016,7 +1016,7 @@ value_in_list(const char* list, const char* value)
     // value in space-separated list with wildcards?
     if (value && (ptr = (char*)list) && ptr[0])
     {
-        while (1)
+        while (true)
         {
             while (ptr[0] == ' ')
                 ptr++;

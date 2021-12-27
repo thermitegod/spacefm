@@ -624,7 +624,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
 
                 g_free(dest_dir);
                 g_strfreev(list);
-                file_browser->pending_drag_status_tree = 0;
+                file_browser->pending_drag_status_tree = false;
                 return;
             }
 
@@ -695,7 +695,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
     if (file_browser->pending_drag_status_tree)
     {
         gdk_drag_status(drag_context, GDK_ACTION_COPY, time);
-        file_browser->pending_drag_status_tree = 0;
+        file_browser->pending_drag_status_tree = false;
         return;
     }
     gtk_drag_finish(drag_context, false, false, time);
@@ -753,7 +753,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, in
             else
             {
                 // automatic
-                file_browser->pending_drag_status_tree = 1;
+                file_browser->pending_drag_status_tree = true;
                 gtk_drag_get_data(widget, drag_context, target, time);
                 suggested_action = gdk_drag_context_get_selected_action(drag_context);
             }

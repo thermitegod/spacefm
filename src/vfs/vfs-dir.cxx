@@ -481,8 +481,8 @@ on_list_task_finished(VFSAsyncTask* task, bool is_cancelled, VFSDir* dir)
     g_object_unref(dir->task);
     dir->task = nullptr;
     g_signal_emit(dir, signals[FILE_LISTED_SIGNAL], 0, is_cancelled);
-    dir->file_listed = 1;
-    dir->load_complete = 1;
+    dir->file_listed = true;
+    dir->load_complete = true;
 }
 
 static bool
@@ -627,8 +627,8 @@ vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
     const char* file_name;
     char* full_path;
 
-    dir->file_listed = 0;
-    dir->load_complete = 0;
+    dir->file_listed = false;
+    dir->load_complete = false;
     dir->xhidden_count = 0; // MOD
     if (dir->path)
     {

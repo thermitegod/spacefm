@@ -173,7 +173,7 @@ check_overwrite(VFSFileTask* task, const char* dest_file, bool* dest_exists, cha
     struct stat dest_stat;
     char* new_dest;
 
-    while (1)
+    while (true)
     {
         *new_dest_file = nullptr;
         if (task->overwrite_mode == VFS_FILE_TASK_OVERWRITE_ALL)

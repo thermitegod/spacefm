@@ -4400,7 +4400,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
 
                 g_free(dest_dir);
                 g_strfreev(list);
-                file_browser->pending_drag_status = 0;
+                file_browser->pending_drag_status = false;
                 return;
             }
             if (puri)
@@ -4455,7 +4455,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                         struct stat statbuf; // skip stat
                         if (stat(dest_dir, &statbuf) == 0)
                         {
-                            file_browser->pending_drag_status = 0;
+                            file_browser->pending_drag_status = false;
                         }
                         g_list_foreach(files, (GFunc)g_free, nullptr);
                         g_list_free(files);
@@ -4484,7 +4484,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
     /* If we are only getting drag status, not finished. */
     if (file_browser->pending_drag_status)
     {
-        file_browser->pending_drag_status = 0;
+        file_browser->pending_drag_status = false;
         return;
     }
     gtk_drag_finish(drag_context, false, false, time);
@@ -4748,7 +4748,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, int 
                     break;
                 default:
                     // automatic
-                    file_browser->pending_drag_status = 1;
+                    file_browser->pending_drag_status = true;
                     gtk_drag_get_data(widget, drag_context, target, time);
                     suggested_action = gdk_drag_context_get_selected_action(drag_context);
                     break;
