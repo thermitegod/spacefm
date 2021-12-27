@@ -833,7 +833,7 @@ static void
 load_command_script(ContextData* ctxt, XSet* set)
 {
     bool modified = false;
-    FILE* file = 0;
+    FILE* file = nullptr;
     GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->cmd_script));
     char* script = xset_custom_get_script(set, !set->plugin);
     if (!script)

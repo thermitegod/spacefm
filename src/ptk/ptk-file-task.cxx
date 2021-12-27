@@ -176,7 +176,7 @@ ptk_file_task_destroy(PtkFileTask* ptask)
             g_io_channel_shutdown(ptask->task->exec_channel_out, true, nullptr);
         if (ptask->task->exec_channel_err)
             g_io_channel_shutdown(ptask->task->exec_channel_err, true, nullptr);
-        ptask->task->exec_channel_out = ptask->task->exec_channel_err = 0;
+        ptask->task->exec_channel_out = ptask->task->exec_channel_err = nullptr;
         if (ptask->task->child_watch)
         {
             g_source_remove(ptask->task->child_watch);
@@ -1358,7 +1358,7 @@ ptk_file_task_update(PtkFileTask* ptask)
                 g_io_channel_shutdown(task->exec_channel_out, true, nullptr);
             if (task->exec_channel_err)
                 g_io_channel_shutdown(task->exec_channel_err, true, nullptr);
-            task->exec_channel_out = task->exec_channel_err = 0;
+            task->exec_channel_out = task->exec_channel_err = nullptr;
             if (status)
             {
                 if (WIFEXITED(status))

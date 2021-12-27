@@ -787,7 +787,7 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
     // load script
     // bool modified = false;
     char line[4096];
-    FILE* file = 0;
+    FILE* file = nullptr;
     bool start = true;
 
     if (!view)
@@ -898,7 +898,7 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
 
     // printf("WRITE %s\n", script );
     // write script
-    FILE* file = 0;
+    FILE* file = nullptr;
     if ((file = fopen(script, "w")))
     {
         // add default script header   #!/bin/bash\n\n

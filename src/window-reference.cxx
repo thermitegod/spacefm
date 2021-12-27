@@ -10,7 +10,7 @@
 
 WindowRef* window_ref = window_ref->getInstance();
 
-WindowRef* WindowRef::s_instance = 0;
+WindowRef* WindowRef::s_instance = nullptr;
 
 void
 WindowRef::ref_inc()

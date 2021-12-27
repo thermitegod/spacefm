@@ -6660,7 +6660,7 @@ xset_color_dialog(GtkWidget* parent, char* title, char* defcolor)
 {
     GdkRGBA color;
     char* scolor = nullptr;
-    GtkWidget* dlg = gtk_color_chooser_dialog_new(title, 0);
+    GtkWidget* dlg = gtk_color_chooser_dialog_new(title, nullptr);
     GtkWidget* color_sel = nullptr;
     GtkWidget* help_button;
 

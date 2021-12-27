@@ -1243,9 +1243,9 @@ cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, VFSFileTask* task)
 _unref_channel:
     g_io_channel_unref(channel);
     if (channel == task->exec_channel_out)
-        task->exec_channel_out = 0;
+        task->exec_channel_out = nullptr;
     else if (channel == task->exec_channel_err)
-        task->exec_channel_err = 0;
+        task->exec_channel_err = nullptr;
     if (!task->exec_channel_out && !task->exec_channel_err && !task->exec_pid)
         call_state_callback(task, VFS_FILE_TASK_FINISH);
     return false;

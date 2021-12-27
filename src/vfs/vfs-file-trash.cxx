@@ -21,7 +21,7 @@
 #include "vfs-file-trash.hxx"
 //#include "../logger.hxx"
 
-Trash* Trash::_instance = 0;
+Trash* Trash::_instance = nullptr;
 
 Trash*
 Trash::instance()
