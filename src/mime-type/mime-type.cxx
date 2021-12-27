@@ -25,6 +25,8 @@
 
 #include <fcntl.h>
 
+#include "utils.hxx"
+
 #include "../vfs/vfs-user-dir.hxx"
 
 #include "mime-type.hxx"
@@ -223,7 +225,7 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
                     type = mime_cache_lookup_magic(caches[i], data, len);
 
                 /* Check for executable file */
-                if (!type && g_file_test(filepath, G_FILE_TEST_IS_EXECUTABLE))
+                if (!type && have_x_access(filepath))
                     type = XDG_MIME_TYPE_EXECUTABLE;
 
                 /* fallback: check for plain text */
@@ -620,7 +622,7 @@ mime_type_is_executable_file(const char* file_path, const char* mime_type)
     {
         if (file_path)
         {
-            if (!g_file_test(file_path, G_FILE_TEST_IS_EXECUTABLE))
+            if (!have_x_access(file_path))
                 return false;
         }
         return true;
