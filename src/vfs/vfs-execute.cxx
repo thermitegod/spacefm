@@ -11,6 +11,9 @@
  */
 
 #ifdef HAVE_SN
+
+#include <ctime>
+
 /* FIXME: Startup notification may cause problems */
 #define SN_API_NOT_YET_FROZEN
 #include <libsn/sn-launcher.h>
@@ -163,7 +166,7 @@ vfs_exec_on_screen(GdkScreen* screen, const char* work_dir, char** argv, char** 
                   However, using CurrentTime causes problems, so I so it like this.
                   Maybe this is incorrect, but it works, so, who cares?
         */
-        /* time( &cur_time ); */
+        /* std::time( &cur_time ); */
         sn_launcher_context_initiate(ctx,
                                      g_get_prgname(),
                                      argv[0],

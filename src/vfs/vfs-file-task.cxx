@@ -12,6 +12,8 @@
 #include <string>
 #include <filesystem>
 
+#include <ctime>
+
 #include <fcntl.h>
 #include <utime.h>
 
@@ -2034,7 +2036,7 @@ vfs_task_new(VFSFileTaskType type, GList* src_files, const char* dest_dir)
     gtk_text_buffer_get_end_iter(task->add_log_buf, &iter);
     gtk_text_buffer_add_mark(task->add_log_buf, task->add_log_end, &iter);
 
-    task->start_time = time(nullptr);
+    task->start_time = std::time(nullptr);
     task->last_speed = 0;
     task->last_progress = 0;
     task->current_item = 0;

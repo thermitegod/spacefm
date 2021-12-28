@@ -26,6 +26,8 @@
 #include <string>
 #include <filesystem>
 
+#include <ctime>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -287,7 +289,7 @@ get_date_offset(GtkCalendar* calendar)
     GDate* today;
     unsigned int d, m, y;
     int offset;
-    time_t timeval = time(nullptr);
+    std::time_t timeval = std::time(nullptr);
     struct tm* lt = localtime(&timeval);
 
     gtk_calendar_get_date(calendar, &y, &m, &d);

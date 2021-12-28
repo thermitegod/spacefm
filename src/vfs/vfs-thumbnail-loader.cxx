@@ -23,6 +23,8 @@
 #include <string>
 #include <filesystem>
 
+#include <ctime>
+
 #include <sys/stat.h>
 
 #include <libffmpegthumbnailer/imagetypes.h>
@@ -345,7 +347,7 @@ vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
 }
 
 static GdkPixbuf*
-_vfs_thumbnail_load(const char* file_path, const char* uri, int size, time_t mtime)
+_vfs_thumbnail_load(const char* file_path, const char* uri, int size, std::time_t mtime)
 {
     char file_name[64];
     char mtime_str[64];
@@ -414,7 +416,7 @@ _vfs_thumbnail_load(const char* file_path, const char* uri, int size, time_t mti
      * FIXME: This means that a newly saved file may not show a thumbnail
      * until refresh. */
     /*
-    if (file_is_video && time(nullptr) - mtime < 5)
+    if (file_is_video && std::time(nullptr) - mtime < 5)
         return nullptr;
     */
 
@@ -500,7 +502,7 @@ _vfs_thumbnail_load(const char* file_path, const char* uri, int size, time_t mti
 }
 
 GdkPixbuf*
-vfs_thumbnail_load_for_uri(const char* uri, int size, time_t mtime)
+vfs_thumbnail_load_for_uri(const char* uri, int size, std::time_t mtime)
 {
     char* file = g_filename_from_uri(uri, nullptr, nullptr);
     GdkPixbuf* ret = _vfs_thumbnail_load(file, uri, size, mtime);
@@ -509,7 +511,7 @@ vfs_thumbnail_load_for_uri(const char* uri, int size, time_t mtime)
 }
 
 GdkPixbuf*
-vfs_thumbnail_load_for_file(const char* file, int size, time_t mtime)
+vfs_thumbnail_load_for_file(const char* file, int size, std::time_t mtime)
 {
     char* uri = g_filename_to_uri(file, nullptr, nullptr);
     GdkPixbuf* ret = _vfs_thumbnail_load(file, uri, size, mtime);

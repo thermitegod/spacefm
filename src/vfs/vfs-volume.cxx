@@ -13,6 +13,8 @@
 #include <string>
 #include <filesystem>
 
+#include <ctime>
+
 #include <libudev.h>
 #include <fcntl.h>
 #include <linux/kdev_t.h>
@@ -3560,9 +3562,9 @@ vfs_volume_automount(VFSVolume* vol)
         !vfs_volume_is_automount(vol))
         return;
 
-    if (vol->automount_time && time(nullptr) - vol->automount_time < 5)
+    if (vol->automount_time && std::time(nullptr) - vol->automount_time < 5)
         return;
-    vol->automount_time = time(nullptr);
+    vol->automount_time = std::time(nullptr);
 
     bool run_in_terminal;
     char* line =

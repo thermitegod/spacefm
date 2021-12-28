@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <ctime>
+
 #include <glib.h>
 
 #include "settings.hxx"
@@ -98,7 +100,7 @@ struct VFSVolume
     bool is_table : 1;
     bool ever_mounted : 1;
     bool inhibit_auto : 1;
-    time_t automount_time;
+    std::time_t automount_time;
     void* open_main_window;
 };
 

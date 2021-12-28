@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <ctime>
+
 #include "vfs-dir.hxx"
 #include "vfs-file-info.hxx"
 
@@ -37,7 +39,7 @@ void vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big);
  *  Otherwise, it should pass 0 for mtime, and the function will do stat() on the file
  *  to get mtime.
  */
-GdkPixbuf* vfs_thumbnail_load_for_uri(const char* uri, int size, time_t mtime);
-GdkPixbuf* vfs_thumbnail_load_for_file(const char* file, int size, time_t mtime);
+GdkPixbuf* vfs_thumbnail_load_for_uri(const char* uri, int size, std::time_t mtime);
+GdkPixbuf* vfs_thumbnail_load_for_file(const char* file, int size, std::time_t mtime);
 
 void vfs_thumbnail_init();

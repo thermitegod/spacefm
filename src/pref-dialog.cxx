@@ -9,6 +9,8 @@
  *
  */
 
+#include <ctime>
+
 #include "window-reference.hxx"
 
 #include <gtk/gtk.h>
@@ -429,7 +431,7 @@ on_date_format_changed(GtkComboBox* widget, FMPrefDlg* data)
     char buf[128];
     const char* etext;
 
-    time_t now = time(nullptr);
+    std::time_t now = std::time(nullptr);
     etext = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(data->date_format))));
     strftime(buf, sizeof(buf), etext, localtime(&now));
     gtk_label_set_text(GTK_LABEL(data->date_display), buf);

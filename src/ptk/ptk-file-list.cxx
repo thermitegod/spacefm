@@ -10,6 +10,8 @@
  *
  */
 
+#include <ctime>
+
 #include "ptk-file-list.hxx"
 
 #include "../vfs/vfs-thumbnail-loader.hxx"
@@ -229,7 +231,8 @@ _ptk_file_list_file_changed(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
     /* check if reloading of thumbnail is needed.
      * See also desktop-window.c:on_file_changed() */
     if (list->max_thumbnail != 0 &&
-        ((vfs_file_info_is_video(file) && time(nullptr) - *vfs_file_info_get_mtime(file) > 5) ||
+        ((vfs_file_info_is_video(file) &&
+          std::time(nullptr) - *vfs_file_info_get_mtime(file) > 5) ||
          (file->size /*vfs_file_info_get_size( file )*/ < list->max_thumbnail &&
           vfs_file_info_is_image(file))))
     {

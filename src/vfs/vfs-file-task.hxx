@@ -105,7 +105,7 @@ struct VFSFileTask
     off_t progress;   /* Total size of current processed files, in btytes */
     int percent;      /* progress (percentage) */
     bool custom_percent;
-    time_t start_time;
+    std::time_t start_time;
     off_t last_speed;
     off_t last_progress;
     GTimer* timer;

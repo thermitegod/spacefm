@@ -8,6 +8,8 @@
  *
  */
 
+#include <ctime>
+
 #include <sys/wait.h>
 
 #include "main-window.hxx"
@@ -1470,7 +1472,7 @@ ptk_file_task_update(PtkFileTask* ptask)
             speed1 = g_strdup_printf("%s/s", buf1);
         }
         // avg speed
-        time_t avg_speed;
+        std::time_t avg_speed;
         if (timer_elapsed > 0)
             avg_speed = task->progress / timer_elapsed;
         else

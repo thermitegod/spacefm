@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <fstream>
 #include <filesystem>
+#include <ctime>
 
 // FMT
 #include <fmt/core.h>

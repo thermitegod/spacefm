@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include <ctime>
+
 #include "vfs-mime-type.hxx"
 
 #include <gtk/gtk.h>
@@ -36,8 +38,8 @@ struct VFSFileInfo
     uid_t uid;
     gid_t gid;
     off_t size;
-    time_t mtime;
-    time_t atime;
+    std::time_t mtime;
+    std::time_t atime;
     long blksize;
     blkcnt_t blocks;
 
