@@ -33,6 +33,7 @@
 #include "ptk/ptk-app-chooser.hxx"
 #include "ptk/ptk-location-view.hxx"
 
+#include "autosave.hxx"
 #include "find-files.hxx"
 #include "pref-dialog.hxx"
 #include "settings.hxx"
@@ -994,6 +995,9 @@ main(int argc, char* argv[])
 
     app_settings.sdebug = cli_flags.sdebug;
 
+    // start autosave thread
+    autosave_init();
+
     /* If we reach this point, we are the first instance.
      * Subsequent processes will exit() inside single_instance_check and won't reach here.
      */
@@ -1014,6 +1018,7 @@ main(int argc, char* argv[])
     vfs_volume_finalize();
     vfs_mime_type_clean();
     vfs_file_monitor_clean();
+    autosave_terminate();
     tmp_clean();
     free_settings();
 

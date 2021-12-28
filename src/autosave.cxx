@@ -4,8 +4,12 @@
  *
  */
 
+#include <vector>
 #include <thread>
 #include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <future>
 #include <chrono>
 
 #include "settings.hxx"
@@ -14,51 +18,89 @@
 
 struct AutoSave
 {
-    std::atomic<bool> keep_saving = true;
-    std::atomic<bool> request;
-    // size_t timer = 5; // 5 seconds
-    size_t timer = 300; // 5 minutes
+    // returns false when killed:
+    template<class R, class P>
+    bool
+    wait(std::chrono::duration<R, P> const& time)
+    {
+        std::unique_lock<std::mutex> lock(m);
+        return !cv.wait_for(lock,
+                            time,
+                            [&]
+                            {
+                                return terminate;
+                            });
+    }
+    void
+    kill()
+    {
+        std::unique_lock<std::mutex> lock(m);
+        terminate = true;
+        cv.notify_all();
+    }
+
+  public:
+    std::atomic<bool> request{false};
+    // const unsigned int timer{5}; // 5 seconds
+    const unsigned int timer{300}; // 5 minutes
+
+  private:
+    std::condition_variable cv;
+    std::mutex m;
+    bool terminate{false};
 };
 
-AutoSave autosave = AutoSave();
+AutoSave autosave;
 
-void autosave_thread();
+std::vector<std::future<void>> threads;
 
-std::thread thread_save_settings(autosave_thread);
-
-void
+static void
 autosave_thread()
 {
-    const std::chrono::duration<int> duration(autosave.timer);
-    do
+    const std::chrono::duration<unsigned int> duration(autosave.timer);
+    while (autosave.wait(duration))
     {
-        std::this_thread::sleep_for(duration);
         // LOG_INFO("AUTOSAVE save_thread_loop");
-
         if (autosave.request)
         {
             // LOG_INFO("AUTOSAVE save_settings");
-
             autosave.request.store(false);
             save_settings(nullptr);
         }
-
-    } while (autosave.keep_saving);
+    }
 }
 
 void
 autosave_request()
 {
-    // LOG_INFO("AUTOSAVE request");
-
+    // LOG_INFO("AUTOSAVE request add");
     autosave.request.store(true);
 }
 
 void
 autosave_cancel()
 {
-    // LOG_INFO("AUTOSAVE cancel");
-
+    // LOG_INFO("AUTOSAVE request cancel");
     autosave.request.store(false);
-    // autosave.keep_saving.store(false);
+}
+
+void
+autosave_init()
+{
+    // LOG_INFO("AUTOSAVE init");
+    threads.push_back(std::async(std::launch::async,
+                                 []
+                                 {
+                                     autosave_thread();
+                                 }));
+}
+
+void
+autosave_terminate()
+{
+    // LOG_INFO("AUTOSAVE kill thread");
+    autosave.kill();
+
+    for (auto&& f: threads)
+        f.wait();
 }
