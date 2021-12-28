@@ -280,7 +280,7 @@ get_socket_name(char* buf, int len)
         g_free(dpy);
         dpy = g_strdup(":0");
     }
-    g_snprintf(buf, len, "/run/spacefm-%s%s.socket", g_get_user_name(), dpy);
+    g_snprintf(buf, len, "%s/spacefm-%s%s.socket", vfs_user_runtime_dir(), g_get_user_name(), dpy);
     g_free(dpy);
 }
 
