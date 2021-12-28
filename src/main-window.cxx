@@ -3045,18 +3045,6 @@ on_file_browser_open_item(PtkFileBrowser* file_browser, const char* path, PtkOpe
 static void
 fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file_browser)
 {
-    unsigned int num_sel;
-    unsigned int num_vis;
-    unsigned int num_hid;
-    unsigned int num_hidx;
-    uint64_t total_size;
-    char* msg = nullptr;
-    char size_str[64];
-    char free_space[100];
-
-    // FIXME: statvfs support should be moved to src/vfs
-    struct statvfs fs_stat;
-
     if (!(GTK_IS_WIDGET(file_browser) && GTK_IS_STATUSBAR(file_browser->status_bar)))
         return;
 
@@ -3068,32 +3056,40 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
         return;
     }
 
-    free_space[0] = '\0';
+    const char* cwd = ptk_file_browser_get_cwd(file_browser);
+    if (!cwd)
+        return;
 
-    // FIXME: statvfs support should be moved to src/vfs
-    if (statvfs(ptk_file_browser_get_cwd(file_browser), &fs_stat) == 0)
+    char size_str[64];
+    std::string statusbar_txt = "";
+
+    if (std::filesystem::exists(cwd))
     {
         char total_size_str[64];
+
+        // FIXME: statvfs support should be moved to src/vfs
+        struct statvfs fs_stat;
+        statvfs(cwd, &fs_stat);
+
         // calc free space
         vfs_file_size_to_string_format(size_str, fs_stat.f_bsize * fs_stat.f_bavail, true);
         // calc total space
         vfs_file_size_to_string_format(total_size_str, fs_stat.f_frsize * fs_stat.f_blocks, true);
-        g_snprintf(free_space,
-                   G_N_ELEMENTS(free_space),
-                   " %s free / %s   ",
-                   size_str,
-                   total_size_str); // MOD
+
+        statusbar_txt.append(fmt::format(" {} / {}   ", size_str, total_size_str));
     }
 
-    // Show Reading... while still loading
+    // Show Reading... while sill loading
     if (file_browser->busy)
     {
-        msg =
-            g_strdup_printf("%sReading %s ...", free_space, ptk_file_browser_get_cwd(file_browser));
-        gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar), 0, msg);
-        g_free(msg);
+        statusbar_txt.append(fmt::format("Reading {} ...", ptk_file_browser_get_cwd(file_browser)));
+        gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar), 0, statusbar_txt.c_str());
         return;
     }
+
+    unsigned int num_sel;
+    unsigned int num_vis;
+    uint64_t total_size;
 
     // note: total size won't include content changes since last selection change
     num_sel = ptk_file_browser_get_n_sel(file_browser, &total_size);
@@ -3102,94 +3098,73 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
     if (num_sel > 0)
     {
         GList* files = ptk_file_browser_get_selected_files(file_browser);
+        if (!files)
+            return;
 
         VFSFileInfo* file;
-        const char* cwd;
 
         vfs_file_size_to_string_format(size_str, total_size, true);
+
+        statusbar_txt.append(fmt::format("{} / {} ({})", num_sel, num_vis, size_str));
 
         if (num_sel == 1)
         // display file name or symlink info in status bar if one file selected
         {
-            char* link_info = nullptr;
+            file = vfs_file_info_ref((VFSFileInfo*)files->data);
+            if (!file)
+                return;
 
-            if (files)
+            g_list_foreach(files, (GFunc)vfs_file_info_unref, nullptr);
+            g_list_free(files);
+
+            if (vfs_file_info_is_symlink(file))
             {
-                file = vfs_file_info_ref((VFSFileInfo*)files->data);
-                cwd = ptk_file_browser_get_cwd(file_browser);
-                g_list_foreach(files, (GFunc)vfs_file_info_unref, nullptr);
-                g_list_free(files);
+                std::string full_target;
+                std::string target_path;
+                std::string file_path;
+                std::string target;
 
-                if (file)
+                file_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
+                target = std::filesystem::absolute(file_path);
+                if (!target.empty())
                 {
-                    if (vfs_file_info_is_symlink(file))
+                    // LOG_INFO("LINK: {}", file_path);
+                    if (target.at(0) != '/')
                     {
-                        char* full_target = nullptr;
-                        char* target_path;
-                        char* file_path =
-                            g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
-                        char* target = g_file_read_link(file_path, nullptr);
-                        if (target)
-                        {
-                            // LOG_INFO("LINK: {}", file_path);
-                            if (target[0] != '/')
-                            {
-                                // relative link
-                                full_target = g_build_filename(cwd, target, nullptr);
-                                target_path = full_target;
-                            }
-                            else
-                                target_path = target;
-
-                            if (vfs_file_info_is_dir(file))
-                            {
-                                if (std::filesystem::exists(target_path))
-                                {
-                                    if (!strcmp(target, "/"))
-                                        link_info = g_strdup_printf("   Link → %s", target);
-                                    else
-                                        link_info = g_strdup_printf("   Link → %s/", target);
-                                }
-                                else
-                                    link_info = g_strdup_printf("   !Link → %s/ (missing)", target);
-                            }
-                            else
-                            {
-                                struct stat results;
-                                if (stat(target_path, &results) == 0)
-                                {
-                                    char buf[64];
-                                    vfs_file_size_to_string_format(buf, results.st_size, true);
-                                    char* lsize = g_strdup(buf);
-                                    link_info = g_strdup_printf("   Link → %s (%s)", target, lsize);
-                                }
-                                else
-                                    link_info = g_strdup_printf("   !Link → %s (missing)", target);
-                            }
-                            g_free(target);
-                            if (full_target)
-                                g_free(full_target);
-                        }
-                        else
-                            link_info = g_strdup_printf("   !Link → ( error reading target )");
-
-                        g_free(file_path);
+                        // relative link
+                        full_target = g_build_filename(cwd, target.c_str(), nullptr);
+                        target_path = full_target;
                     }
                     else
-                        link_info = g_strdup_printf("   %s", vfs_file_info_get_name(file));
-                    vfs_file_info_unref(file);
+                        target_path = target;
+
+                    if (vfs_file_info_is_dir(file))
+                    {
+                        if (std::filesystem::exists(target_path))
+                            statusbar_txt.append(fmt::format("  Link -> {}/", target));
+                        else
+                            statusbar_txt.append(fmt::format("  !Link -> {}/ (missing)", target));
+                    }
+                    else
+                    {
+                        struct stat results;
+                        if (stat(target_path.c_str(), &results) == 0)
+                        {
+                            char lsize[64];
+                            vfs_file_size_to_string_format(lsize, results.st_size, true);
+                            statusbar_txt.append(fmt::format("  Link -> {} ({})", target, lsize));
+                        }
+                        else
+                            statusbar_txt.append(fmt::format("  !Link -> {} (missing)", target));
+                    }
                 }
+                else
+                    statusbar_txt.append(fmt::format("  !Link -> (error reading target)"));
             }
+            else
+                statusbar_txt.append(fmt::format("  {}", vfs_file_info_get_name(file)));
 
-            if (!link_info)
-                link_info = g_strdup("");
-
-            msg = g_strdup_printf("%s%d / %d (%s)%s",
-                                  free_space,
-                                  num_sel,
-                                  num_vis,
-                                  size_str,
-                                  link_info);
+            vfs_file_info_unref(file);
         }
         else
         {
@@ -3201,148 +3176,72 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
             unsigned int count_block = 0;
             unsigned int count_char = 0;
 
-            char* dir_info = nullptr;
-            char* file_info = nullptr;
-            char* symlink_info = nullptr;
-            char* socket_info = nullptr;
-            char* pipe_info = nullptr;
-            char* block_info = nullptr;
-            char* char_info = nullptr;
-
-            if (files)
+            GList* l;
+            for (l = files; l; l = l->next)
             {
-                GList* l;
-                for (l = files; l; l = l->next)
-                {
-                    file = vfs_file_info_ref((VFSFileInfo*)l->data);
+                file = vfs_file_info_ref((VFSFileInfo*)l->data);
 
-                    if (G_UNLIKELY(!file))
-                        continue;
+                if (G_UNLIKELY(!file))
+                    continue;
 
-                    if (vfs_file_info_is_dir(file))
-                    {
-                        ++count_dir;
-                        continue;
-                    }
-                    else if (vfs_file_info_is_regular_file(file))
-                    {
-                        ++count_file;
-                        continue;
-                    }
+                if (vfs_file_info_is_dir(file))
+                    ++count_dir;
+                else if (vfs_file_info_is_regular_file(file))
+                    ++count_file;
+                else if (vfs_file_info_is_symlink(file))
+                    ++count_symlink;
+                else if (vfs_file_info_is_socket(file))
+                    ++count_socket;
+                else if (vfs_file_info_is_named_pipe(file))
+                    ++count_pipe;
+                else if (vfs_file_info_is_block_device(file))
+                    ++count_block;
+                else if (vfs_file_info_is_char_device(file))
+                    ++count_char;
 
-                    else if (vfs_file_info_is_symlink(file))
-                    {
-                        ++count_symlink;
-                        continue;
-                    }
-                    else if (vfs_file_info_is_socket(file))
-                    {
-                        ++count_socket;
-                        continue;
-                    }
-                    else if (vfs_file_info_is_named_pipe(file))
-                    {
-                        ++count_pipe;
-                        continue;
-                    }
-                    else if (vfs_file_info_is_block_device(file))
-                    {
-                        ++count_block;
-                        continue;
-                    }
-                    else if (vfs_file_info_is_char_device(file))
-                    {
-                        ++count_char;
-                        continue;
-                    }
-                }
+                vfs_file_info_unref(file);
             }
 
             if (count_dir)
-                dir_info = g_strdup_printf("  Directories (%i)", count_dir);
-            else
-                dir_info = g_strdup("");
-
+                statusbar_txt.append(fmt::format("  Directories ({})", count_dir));
             if (count_file)
-                file_info = g_strdup_printf("  Files (%i)", count_file);
-            else
-                file_info = g_strdup("");
-
+                statusbar_txt.append(fmt::format("  Files ({})", count_file));
             if (count_symlink)
-                symlink_info = g_strdup_printf("  Symlinks (%i)", count_symlink);
-            else
-                symlink_info = g_strdup("");
-
+                statusbar_txt.append(fmt::format("  Symlinks ({})", count_symlink));
             if (count_socket)
-                socket_info = g_strdup_printf("  Sockets (%i)", count_socket);
-            else
-                socket_info = g_strdup("");
-
+                statusbar_txt.append(fmt::format("  Sockets ({})", count_socket));
             if (count_pipe)
-                pipe_info = g_strdup_printf("  Named Pipes (%i)", count_pipe);
-            else
-                pipe_info = g_strdup("");
-
+                statusbar_txt.append(fmt::format("  Named Pipes ({})", count_pipe));
             if (count_block)
-                block_info = g_strdup_printf("  Block Devices (%i)", count_block);
-            else
-                block_info = g_strdup("");
-
+                statusbar_txt.append(fmt::format("  Block Devices ({})", count_block));
             if (count_char)
-                char_info = g_strdup_printf("  Character Devices (%i)", count_char);
-            else
-                char_info = g_strdup("");
-
-            msg = g_strdup_printf("%s%d / %d (%s)%s%s%s%s%s%s%s",
-                                  free_space,
-                                  num_sel,
-                                  num_vis,
-                                  size_str,
-                                  dir_info,
-                                  file_info,
-                                  symlink_info,
-                                  socket_info,
-                                  pipe_info,
-                                  block_info,
-                                  char_info);
+                statusbar_txt.append(fmt::format("  Character Devices ({})", count_char));
         }
     }
     else
     {
-        // cur dir is link ?  canonicalize
-        char* dirmsg;
-        const char* cwd = ptk_file_browser_get_cwd(file_browser);
-        char buf[PATH_MAX + 1];
-        char* canon = realpath(cwd, buf);
-        if (!canon || !g_strcmp0(canon, cwd))
-            dirmsg = g_strdup_printf("%s", cwd);
-        else
-            dirmsg = g_strdup_printf("./ → %s", canon);
+        // count for .hidden files
+        unsigned int num_hid;
+        unsigned int num_hidx;
 
-        // MOD add count for .hidden files
-        char* xhidden;
         num_hid = ptk_file_browser_get_n_all_files(file_browser) - num_vis;
-        if (num_hid < 0)
-            num_hid = 0; // needed due to bug in get_n_visible_files?
         num_hidx = file_browser->dir ? file_browser->dir->xhidden_count : 0;
-        // VFSDir* xdir = file_browser->dir;
         if (num_hid || num_hidx)
-        {
-            if (num_hidx)
-                xhidden = g_strdup_printf("+%d", num_hidx);
-            else
-                xhidden = g_strdup("");
+            statusbar_txt.append(fmt::format("{} visible ({} hidden)", num_vis, num_hid));
+        else
+            statusbar_txt.append(fmt::format("{} item", num_vis));
 
-            char hidden[128];
-            g_snprintf(hidden, 127, g_strdup_printf("%d%s hidden", num_hid, xhidden), num_hid);
-            msg = g_strdup_printf("%s%d visible (%s)   %s", free_space, num_vis, hidden, dirmsg);
+        // cur dir is a symlink? canonicalize path
+        if (std::filesystem::is_symlink(cwd))
+        {
+            std::string canon = std::filesystem::read_symlink(cwd);
+            statusbar_txt.append(fmt::format("  {} -> {}", cwd, canon));
         }
         else
-            msg = g_strdup_printf("%s%d item   %s", free_space, num_vis, dirmsg);
-        g_free(dirmsg);
+            statusbar_txt.append(fmt::format("  {}", cwd));
     }
-    gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar), 0, msg);
-    g_free(msg);
+
+    gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar), 0, statusbar_txt.c_str());
 }
 
 static void
