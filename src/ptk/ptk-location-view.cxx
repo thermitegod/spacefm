@@ -2220,9 +2220,8 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                                  vol->device_file);
     }
 
-    char* udisks_info = vfs_volume_device_info(vol);
-    udisks = g_strdup_printf("%s\ncat << EOF\n%s\nEOF\necho ; ", info, udisks_info);
-    g_free(udisks_info);
+    std::string udisks_info = vfs_volume_device_info(vol);
+    udisks = g_strdup_printf("%s\ncat << EOF\n%s\nEOF\necho ; ", info, udisks_info.c_str());
 
     if (vol->is_mounted)
     {

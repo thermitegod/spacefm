@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <ctime>
 
 #include <glib.h>
@@ -112,7 +114,7 @@ void vfs_volume_automount(VFSVolume* vol);
 void vfs_volume_set_info(VFSVolume* volume);
 char* vfs_volume_device_mount_cmd(VFSVolume* vol, const char* options, bool* run_in_terminal);
 char* vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal);
-char* vfs_volume_device_info(VFSVolume* vol);
+const std::string vfs_volume_device_info(VFSVolume* vol);
 char* vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options,
                              netmount_t* netmount, bool* run_in_terminal, char** mount_point);
 

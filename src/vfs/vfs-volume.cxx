@@ -1372,97 +1372,86 @@ device_get_info(device_t* device)
     return true;
 }
 
-static char*
-device_show_info(device_t* device)
+static void
+device_show_info(device_t* device, std::string& info)
 {
-    char* line[140];
-    int i = 0;
-
     // clang-format off
-    line[i++] = g_strdup_printf("Showing information for %s\n", device->devnode);
-    line[i++] = g_strdup_printf("  native-path:                 %s\n", device->native_path);
-    line[i++] = g_strdup_printf("  device:                      %u:%u\n", (unsigned int)MAJOR(device->devnum),
-                                                                                   (unsigned int)MINOR(device->devnum));
-    line[i++] = g_strdup_printf("  device-file:                 %s\n", device->devnode);
-    line[i++] = g_strdup_printf("    presentation:              %s\n", device->devnode);
+    info.append(fmt::format("Showing information for {}\n", device->devnode));
+    info.append(fmt::format("  native-path:                 {}\n", device->native_path));
+    info.append(fmt::format("  device:                      {}:{}\n", (unsigned int)MAJOR(device->devnum), (unsigned int)MINOR(device->devnum)));
+    info.append(fmt::format("  device-file:                 {}\n", device->devnode));
+    info.append(fmt::format("    presentation:              {}\n", device->devnode));
     if (device->device_by_id)
-        line[i++] = g_strdup_printf("    by-id:                     %s\n", device->device_by_id);
-    line[i++] = g_strdup_printf("  system internal:             %d\n", device->device_is_system_internal);
-    line[i++] = g_strdup_printf("  removable:                   %d\n", device->device_is_removable);
-    line[i++] = g_strdup_printf("  has media:                   %d\n", device->device_is_media_available);
-    line[i++] = g_strdup_printf("  is read only:                %d\n", device->device_is_read_only);
-    line[i++] = g_strdup_printf("  is mounted:                  %d\n", device->device_is_mounted);
-    line[i++] = g_strdup_printf("  mount paths:                 %s\n", device->mount_points ? device->mount_points : "");
-    line[i++] = g_strdup_printf("  presentation hide:           %s\n", device->device_presentation_hide ? device->device_presentation_hide : "0");
-    line[i++] = g_strdup_printf("  presentation nopolicy:       %s\n", device->device_presentation_nopolicy ? device->device_presentation_nopolicy : "0");
-    line[i++] = g_strdup_printf("  presentation name:           %s\n", device->device_presentation_name ? device->device_presentation_name : "");
-    line[i++] = g_strdup_printf("  presentation icon:           %s\n", device->device_presentation_icon_name ? device->device_presentation_icon_name : "");
-    line[i++] = g_strdup_printf("  automount hint:              %s\n", device->device_automount_hint ? device->device_automount_hint : "");
-    line[i++] = g_strdup_printf("  size:                        %" G_GUINT64_FORMAT "\n", device->device_size);
-    line[i++] = g_strdup_printf("  block size:                  %" G_GUINT64_FORMAT "\n", device->device_block_size);
-    line[i++] = g_strdup_printf("  usage:                       %s\n", device->id_usage ? device->id_usage : "");
-    line[i++] = g_strdup_printf("  type:                        %s\n", device->id_type ? device->id_type : "");
-    line[i++] = g_strdup_printf("  version:                     %s\n", device->id_version ? device->id_version : "");
-    line[i++] = g_strdup_printf("  uuid:                        %s\n", device->id_uuid ? device->id_uuid : "");
-    line[i++] = g_strdup_printf("  label:                       %s\n", device->id_label ? device->id_label : "");
+        info.append(fmt::format("    by-id:                     {}\n", device->device_by_id));
+    info.append(fmt::format("  system internal:             {}\n", device->device_is_system_internal));
+    info.append(fmt::format("  removable:                   {}\n", device->device_is_removable));
+    info.append(fmt::format("  has media:                   {}\n", device->device_is_media_available));
+    info.append(fmt::format("  is read only:                {}\n", device->device_is_read_only));
+    info.append(fmt::format("  is mounted:                  {}\n", device->device_is_mounted));
+    info.append(fmt::format("  mount paths:                 {}\n", device->mount_points ? device->mount_points : ""));
+    info.append(fmt::format("  presentation hide:           {}\n", device->device_presentation_hide ? device->device_presentation_hide : "0"));
+    info.append(fmt::format("  presentation nopolicy:       {}\n", device->device_presentation_nopolicy ? device->device_presentation_nopolicy : "0"));
+    info.append(fmt::format("  presentation name:           {}\n", device->device_presentation_name ? device->device_presentation_name : ""));
+    info.append(fmt::format("  presentation icon:           {}\n", device->device_presentation_icon_name ? device->device_presentation_icon_name : ""));
+    info.append(fmt::format("  automount hint:              {}\n", device->device_automount_hint ? device->device_automount_hint : ""));
+    info.append(fmt::format("  size:                        {}\n", device->device_size));
+    info.append(fmt::format("  block size:                  {}\n", device->device_block_size));
+    info.append(fmt::format("  usage:                       {}\n", device->id_usage ? device->id_usage : ""));
+    info.append(fmt::format("  type:                        {}\n", device->id_type ? device->id_type : ""));
+    info.append(fmt::format("  version:                     {}\n", device->id_version ? device->id_version : ""));
+    info.append(fmt::format("  uuid:                        {}\n", device->id_uuid ? device->id_uuid : ""));
+    info.append(fmt::format("  label:                       {}\n", device->id_label ? device->id_label : ""));
     if (device->device_is_partition_table)
     {
-        line[i++] = g_strdup_printf("  partition table:\n");
-        line[i++] = g_strdup_printf("    scheme:                    %s\n", device->partition_table_scheme ? device->partition_table_scheme : "");
-        line[i++] = g_strdup_printf("    count:                     %s\n", device->partition_table_count ? device->partition_table_count : "0");
+        info.append(fmt::format("  partition table:\n"));
+        info.append(fmt::format("    scheme:                    {}\n", device->partition_table_scheme ? device->partition_table_scheme : ""));
+        info.append(fmt::format("    count:                     {}\n", device->partition_table_count ? device->partition_table_count : "0"));
     }
     if (device->device_is_partition)
     {
-        line[i++] = g_strdup_printf("  partition:\n");
-        line[i++] = g_strdup_printf("    scheme:                    %s\n", device->partition_scheme ? device->partition_scheme : "");
-        line[i++] = g_strdup_printf("    number:                    %s\n", device->partition_number ? device->partition_number : "");
-        line[i++] = g_strdup_printf("    type:                      %s\n", device->partition_type ? device->partition_type : "");
-        line[i++] = g_strdup_printf("    flags:                     %s\n", device->partition_flags ? device->partition_flags : "");
-        line[i++] = g_strdup_printf("    offset:                    %s\n", device->partition_offset ? device->partition_offset : "");
-        line[i++] = g_strdup_printf("    alignment offset:          %s\n", device->partition_alignment_offset ? device->partition_alignment_offset : "");
-        line[i++] = g_strdup_printf("    size:                      %s\n", device->partition_size ? device->partition_size : "");
-        line[i++] = g_strdup_printf("    label:                     %s\n", device->partition_label ? device->partition_label : "");
-        line[i++] = g_strdup_printf("    uuid:                      %s\n", device->partition_uuid ? device->partition_uuid : "");
+        info.append(fmt::format("  partition:\n"));
+        info.append(fmt::format("    scheme:                    {}\n", device->partition_scheme ? device->partition_scheme : ""));
+        info.append(fmt::format("    number:                    {}\n", device->partition_number ? device->partition_number : ""));
+        info.append(fmt::format("    type:                      {}\n", device->partition_type ? device->partition_type : ""));
+        info.append(fmt::format("    flags:                     {}\n", device->partition_flags ? device->partition_flags : ""));
+        info.append(fmt::format("    offset:                    {}\n", device->partition_offset ? device->partition_offset : ""));
+        info.append(fmt::format("    alignment offset:          {}\n", device->partition_alignment_offset ? device->partition_alignment_offset : ""));
+        info.append(fmt::format("    size:                      {}\n", device->partition_size ? device->partition_size : ""));
+        info.append(fmt::format("    label:                     {}\n", device->partition_label ? device->partition_label : ""));
+        info.append(fmt::format("    uuid:                      {}\n", device->partition_uuid ? device->partition_uuid : ""));
     }
     if (device->device_is_optical_disc)
     {
-        line[i++] = g_strdup_printf("  optical disc:\n");
-        line[i++] = g_strdup_printf("    blank:                     %d\n", device->optical_disc_is_blank);
-        line[i++] = g_strdup_printf("    appendable:                %d\n", device->optical_disc_is_appendable);
-        line[i++] = g_strdup_printf("    closed:                    %d\n", device->optical_disc_is_closed);
-        line[i++] = g_strdup_printf("    num tracks:                %s\n", device->optical_disc_num_tracks ? device->optical_disc_num_tracks : "0");
-        line[i++] = g_strdup_printf("    num audio tracks:          %s\n", device->optical_disc_num_audio_tracks ? device->optical_disc_num_audio_tracks : "0");
-        line[i++] = g_strdup_printf("    num sessions:              %s\n", device->optical_disc_num_sessions ? device->optical_disc_num_sessions : "0");
+        info.append(fmt::format("  optical disc:\n"));
+        info.append(fmt::format("    blank:                     {}\n", device->optical_disc_is_blank));
+        info.append(fmt::format("    appendable:                {}\n", device->optical_disc_is_appendable));
+        info.append(fmt::format("    closed:                    {}\n", device->optical_disc_is_closed));
+        info.append(fmt::format("    num tracks:                {}\n", device->optical_disc_num_tracks ? device->optical_disc_num_tracks : "0"));
+        info.append(fmt::format("    num audio tracks:          {}\n", device->optical_disc_num_audio_tracks ? device->optical_disc_num_audio_tracks : "0"));
+        info.append(fmt::format("    num sessions:              {}\n", device->optical_disc_num_sessions ? device->optical_disc_num_sessions : "0"));
     }
     if (device->device_is_drive)
     {
-        line[i++] = g_strdup_printf("  drive:\n");
-        line[i++] = g_strdup_printf("    vendor:                    %s\n", device->drive_vendor ? device->drive_vendor : "");
-        line[i++] = g_strdup_printf("    model:                     %s\n", device->drive_model ? device->drive_model : "");
-        line[i++] = g_strdup_printf("    revision:                  %s\n", device->drive_revision ? device->drive_revision : "");
-        line[i++] = g_strdup_printf("    serial:                    %s\n", device->drive_serial ? device->drive_serial : "");
-        line[i++] = g_strdup_printf("    WWN:                       %s\n", device->drive_wwn ? device->drive_wwn : "");
-        line[i++] = g_strdup_printf("    detachable:                %d\n", device->drive_can_detach);
-        line[i++] = g_strdup_printf("    ejectable:                 %d\n", device->drive_is_media_ejectable);
-        line[i++] = g_strdup_printf("    media:                     %s\n", device->drive_media ? device->drive_media : "");
-        line[i++] = g_strdup_printf("      compat:                  %s\n", device->drive_media_compatibility ? device->drive_media_compatibility : "");
+        info.append(fmt::format("  drive:\n"));
+        info.append(fmt::format("    vendor:                    {}\n", device->drive_vendor ? device->drive_vendor : ""));
+        info.append(fmt::format("    model:                     {}\n", device->drive_model ? device->drive_model : ""));
+        info.append(fmt::format("    revision:                  {}\n", device->drive_revision ? device->drive_revision : ""));
+        info.append(fmt::format("    serial:                    {}\n", device->drive_serial ? device->drive_serial : ""));
+        info.append(fmt::format("    WWN:                       {}\n", device->drive_wwn ? device->drive_wwn : ""));
+        info.append(fmt::format("    detachable:                {}\n", device->drive_can_detach));
+        info.append(fmt::format("    ejectable:                 {}\n", device->drive_is_media_ejectable));
+        info.append(fmt::format("    media:                     {}\n", device->drive_media ? device->drive_media : ""));
+        info.append(fmt::format("      compat:                  {}\n", device->drive_media_compatibility ? device->drive_media_compatibility : ""));
         if (device->drive_connection_interface == nullptr || strlen(device->drive_connection_interface) == 0)
-            line[i++] = g_strdup_printf("    interface:                 (unknown)\n");
+            info.append(fmt::format("    interface:                 (unknown)\n"));
         else
-            line[i++] = g_strdup_printf("    interface:                 %s\n",
-                                        device->drive_connection_interface);
+            info.append(fmt::format("    interface:                 {}\n", device->drive_connection_interface));
         if (device->drive_connection_speed == 0)
-            line[i++] = g_strdup_printf("    if speed:                  (unknown)\n");
+            info.append(fmt::format("    if speed:                  (unknown)\n"));
         else
-            line[i++] = g_strdup_printf("    if speed:                  %" G_GINT64_FORMAT " bits/s\n", device->drive_connection_speed);
+            info.append(fmt::format("    if speed:                  {} bits/s\n", device->drive_connection_speed));
     }
     // clang-format on
-    line[i] = nullptr;
-    char* output = g_strjoinv(nullptr, line);
-    i = 0;
-    while (line[i])
-        g_free(line[i++]);
-    return output;
 }
 
 /* ************************************************************************
@@ -3146,9 +3135,11 @@ vfs_volume_is_automount(VFSVolume* vol)
     return false;
 }
 
-char*
+const std::string
 vfs_volume_device_info(VFSVolume* vol)
 {
+    std::string info = "";
+
     struct udev_device* udevice = udev_device_new_from_devnum(udev, 'b', vol->devnum);
     if (udevice == nullptr)
     {
@@ -3156,14 +3147,15 @@ vfs_volume_device_info(VFSVolume* vol)
                  vol->device_file,
                  (unsigned int)MAJOR(vol->devnum),
                  (unsigned int)MINOR(vol->devnum));
-        return g_strdup_printf("( no udev device )");
+        info = "( no udev device )";
+        return info;
     }
 
     device_t* device = device_alloc(udevice);
     if (!device_get_info(device))
-        return g_strdup("");
+        return info;
 
-    char* info = device_show_info(device);
+    device_show_info(device, info);
     device_free(device);
     udev_device_unref(udevice);
     return info;
