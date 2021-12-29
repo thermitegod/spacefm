@@ -50,7 +50,6 @@ enum SocketEvent
     CMD_OPEN_TAB,
     CMD_REUSE_TAB,
     CMD_DAEMON_MODE,
-    CMD_PREF,
     CMD_FIND_FILES,
     CMD_OPEN_PANEL1,
     CMD_OPEN_PANEL2,
@@ -86,7 +85,6 @@ struct CliFlags
 
     bool daemon_mode{false};
 
-    int show_pref{0};
     int panel{0};
 
     bool find_files{false};
@@ -104,7 +102,6 @@ static GOptionEntry opt_entries[] =
     {"no-saved-tabs", 'n', 0, G_OPTION_ARG_NONE, &cli_flags.no_tabs, "Don't load saved tabs", nullptr},
     {"new-window", 'w', 0, G_OPTION_ARG_NONE, &cli_flags.new_window, "Open directories in new window", nullptr},
     {"panel", 'p', 0, G_OPTION_ARG_INT, &cli_flags.panel, "Open directories in panel 'P' (1-4)", "P"},
-    {"show-pref", '\0', 0, G_OPTION_ARG_INT, &cli_flags.show_pref, "Show Preferences ('N' is the Pref tab number)", "N"},
     {"daemon-mode", 'd', 0, G_OPTION_ARG_NONE, &cli_flags.daemon_mode, "Run as a daemon", nullptr},
     {"config", 'c', 0, G_OPTION_ARG_STRING, &cli_flags.config_dir, "Use DIR as configuration directory", "DIR"},
     {"disable-git", 'G', 0, G_OPTION_ARG_NONE, &cli_flags.disable_git_settings, "Don't use git to keep session history", nullptr},
@@ -230,10 +227,6 @@ on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
                     socket_daemon = cli_flags.daemon_mode = true;
                     g_string_free(args, true);
                     return true;
-                case CMD_PREF:
-                    fm_edit_preference(nullptr, (unsigned char)args->str[1] - 1);
-                    g_string_free(args, true);
-                    return true;
                 case CMD_FIND_FILES:
                     cli_flags.find_files = true;
                     __attribute__((fallthrough));
@@ -333,8 +326,6 @@ single_instance_check()
             else
                 cmd = CMD_OPEN;
         }
-        else if (cli_flags.show_pref > 0)
-            cmd = CMD_PREF;
         else if (cli_flags.find_files)
             cmd = CMD_FIND_FILES;
         else if (cli_flags.panel > 0 && cli_flags.panel < 5)
@@ -345,34 +336,28 @@ single_instance_check()
             cmd = CMD_OPEN;
 
         write(sock, &cmd, sizeof(char));
-        if (G_UNLIKELY(cli_flags.show_pref > 0))
-        {
-            cmd = (unsigned char)cli_flags.show_pref;
-            write(sock, &cmd, sizeof(char));
-        }
-        else
-        {
-            if (cli_flags.files)
-            {
-                char** file;
-                for (file = cli_flags.files; *file; ++file)
-                {
-                    char* real_path;
 
-                    if ((*file[0] != '/' && strstr(*file, ":/")) || g_str_has_prefix(*file, "//"))
-                        real_path = g_strdup(*file);
-                    else
-                    {
-                        /* We send absolute paths because with different
-                           $PWDs resolution would not work. */
-                        real_path = dup_to_absolute_file_path(file);
-                    }
-                    write(sock, real_path, strlen(real_path));
-                    g_free(real_path);
-                    write(sock, "\n", 1);
+        if (cli_flags.files)
+        {
+            char** file;
+            for (file = cli_flags.files; *file; ++file)
+            {
+                char* real_path;
+
+                if ((*file[0] != '/' && strstr(*file, ":/")) || g_str_has_prefix(*file, "//"))
+                    real_path = g_strdup(*file);
+                else
+                {
+                    /* We send absolute paths because with different
+                       $PWDs resolution would not work. */
+                    real_path = dup_to_absolute_file_path(file);
                 }
+                write(sock, real_path, strlen(real_path));
+                g_free(real_path);
+                write(sock, "\n", 1);
             }
         }
+
         if (cli_flags.config_dir)
             LOG_WARN("Option --config ignored - an instance is already running");
         shutdown(sock, 2);
@@ -743,12 +728,7 @@ handle_parsed_commandline_args()
         //               new_tab ? "new_tab" : "", reuse_tab ? "reuse_tab" : "");
     }
 
-    if (cli_flags.show_pref > 0) /* show preferences dialog */
-    {
-        fm_edit_preference(GTK_WINDOW(main_window), cli_flags.show_pref - 1);
-        cli_flags.show_pref = 0;
-    }
-    else if (cli_flags.find_files) /* find files */
+    if (cli_flags.find_files) /* find files */
     {
         init_folder();
         fm_find_files((const char**)cli_flags.files);
