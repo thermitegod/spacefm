@@ -374,19 +374,6 @@ load_settings(const char* config_dir)
             print_command(command);
             g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
         }
-        else
-        {
-            // copy session to session-old
-            std::string session_old =
-                g_build_filename(settings_config_dir.c_str(), "session-old", nullptr);
-
-            command = fmt::format("cp -a  {} {}", session, session_old);
-            if (std::filesystem::exists(session_old))
-                std::filesystem::remove(session_old);
-            print_command(command);
-
-            g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
-        }
     }
     else
     {
@@ -398,10 +385,6 @@ load_settings(const char* config_dir)
             print_command(command);
             g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
             session = g_build_filename(settings_config_dir.c_str(), "session", nullptr);
-        }
-        else
-        {
-            session = g_build_filename(settings_config_dir.c_str(), "session-old", nullptr);
         }
     }
 
