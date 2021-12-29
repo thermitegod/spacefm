@@ -3338,16 +3338,13 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
         if (event->button == 2 && file_path) /* middle click on a item */
         {
             /* open in new tab if its a directory */
-            if (G_LIKELY(file_path))
+            if (std::filesystem::is_directory(file_path))
             {
-                if (std::filesystem::is_directory(file_path))
-                {
-                    g_signal_emit(file_browser,
-                                  signals[OPEN_ITEM_SIGNAL],
-                                  0,
-                                  file_path,
-                                  PTK_OPEN_NEW_TAB);
-                }
+                g_signal_emit(file_browser,
+                              signals[OPEN_ITEM_SIGNAL],
+                              0,
+                              file_path,
+                              PTK_OPEN_NEW_TAB);
             }
             ret = true;
         }
