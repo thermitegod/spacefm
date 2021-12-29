@@ -318,26 +318,6 @@ load_settings(const char* config_dir)
         }
     }
 
-    /* Set default config values */
-
-    /* General */
-    app_settings.show_thumbnail = false;
-    app_settings.max_thumb_size = 8 << 20;
-    app_settings.big_icon_size = 48;
-    app_settings.small_icon_size = 22;
-    app_settings.tool_icon_size = 0;
-    app_settings.use_si_prefix = false;
-    app_settings.no_execute = true;  // MOD
-    app_settings.no_confirm = false; // MOD
-
-    /* Interface */
-    app_settings.always_show_tabs = true;
-    app_settings.hide_close_tab_buttons = false;
-
-    /* Window State */
-    app_settings.width = 640;
-    app_settings.height = 480;
-
     // MOD extra settings
     xset_defaults();
 

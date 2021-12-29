@@ -26,57 +26,54 @@
 
 struct AppSettings
 {
-    /* General Settings */
-    bool show_thumbnail;
-    int max_thumb_size;
+    // General Settings
+    bool show_thumbnail{false};
+    int max_thumb_size{8 << 20};
 
-    int big_icon_size;
-    int small_icon_size;
-    int tool_icon_size;
+    int big_icon_size{48};
+    int small_icon_size{22};
+    int tool_icon_size{0};
 
-    bool single_click;
-    bool no_single_hover;
+    bool single_click{false};
+    bool no_single_hover{false};
 
-    bool no_execute;
-    bool no_confirm;
-    // bool no_confirm_delete;
-    bool no_confirm_trash = true;
-    bool load_saved_tabs;    // sfm
-    std::string date_format; // speed dupe of xset
+    bool no_execute{true};
+    bool no_confirm{false};
+    // bool no_confirm_delete{false}; // probably too dangerous
+    bool no_confirm_trash{true};
+    bool load_saved_tabs{true};
+    std::string date_format{""};
 
-    int sort_order; /* Sort by name, size, time */
-    int sort_type;  /* ascending, descending */
+    // Sort by name, size, time
+    int sort_order{0};
+    // ascending, descending
+    int sort_type{0};
 
-    /* Window State */
-    int width;
-    int height;
-    bool maximized;
+    // Window State
+    int width{640};
+    int height{480};
+    bool maximized{false};
 
-    /* Interface */
-    bool always_show_tabs;
-    bool hide_close_tab_buttons;
+    // Interface
+    bool always_show_tabs{true};
+    bool hide_close_tab_buttons{false};
 
-    /* Units */
-    bool use_si_prefix;
+    // Units
+    bool use_si_prefix{false};
 };
 
 extern AppSettings app_settings;
 
 struct ConfigSettings
 {
-    /* su */
-    char* terminal_su;
-    // char* graphical_su;
+    const char* terminal_su{nullptr};
+    const char* tmp_dir{nullptr};
 
-    /* tmp dir */
-    const char* tmp_dir;
+    const char* font_view_icon{nullptr};
+    const char* font_view_compact{nullptr};
+    const char* font_general{nullptr}; // NOOP
 
-    /* Fonts */
-    const char* font_view_icon;
-    const char* font_view_compact;
-    const char* font_general; // NOOP
-
-    bool git_backed_settings;
+    bool git_backed_settings{true};
 };
 
 extern ConfigSettings config_settings;
@@ -317,19 +314,19 @@ struct XSet
 // cache these for speed in event handlers
 struct EventHandler
 {
-    XSet* win_focus;
-    XSet* win_move;
-    XSet* win_click;
-    XSet* win_key;
-    XSet* win_close;
-    XSet* pnl_show;
-    XSet* pnl_focus;
-    XSet* pnl_sel;
-    XSet* tab_new;
-    XSet* tab_chdir;
-    XSet* tab_focus;
-    XSet* tab_close;
-    XSet* device;
+    XSet* win_focus{nullptr};
+    XSet* win_move{nullptr};
+    XSet* win_click{nullptr};
+    XSet* win_key{nullptr};
+    XSet* win_close{nullptr};
+    XSet* pnl_show{nullptr};
+    XSet* pnl_focus{nullptr};
+    XSet* pnl_sel{nullptr};
+    XSet* tab_new{nullptr};
+    XSet* tab_chdir{nullptr};
+    XSet* tab_focus{nullptr};
+    XSet* tab_close{nullptr};
+    XSet* device{nullptr};
 };
 
 extern EventHandler event_handler;

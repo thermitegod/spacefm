@@ -76,22 +76,22 @@ static char* default_files[2] = {nullptr, nullptr};
 
 struct CliFlags
 {
-    char** files;
-    bool new_tab;
-    bool reuse_tab;
-    bool no_tabs;
-    bool new_window;
-    bool socket_cmd;
-    bool version_opt;
+    char** files{nullptr};
+    bool new_tab{true};
+    bool reuse_tab{false};
+    bool no_tabs{false};
+    bool new_window{false};
+    bool socket_cmd{false};
+    bool version_opt{false};
 
-    bool daemon_mode;
+    bool daemon_mode{false};
 
-    int show_pref;
-    int panel;
+    int show_pref{0};
+    int panel{0};
 
-    bool find_files;
-    char* config_dir;
-    bool disable_git_settings;
+    bool find_files{false};
+    char* config_dir{nullptr};
+    bool disable_git_settings{false};
 };
 
 CliFlags cli_flags;
@@ -888,24 +888,6 @@ main(int argc, char* argv[])
             return ret;
         }
     }
-
-    // init cli_flags
-    cli_flags.files = nullptr;
-    cli_flags.new_tab = true;
-    cli_flags.reuse_tab = false; // sfm
-    cli_flags.no_tabs = false;   // sfm
-    cli_flags.new_window = false;
-    cli_flags.socket_cmd = false;  // sfm
-    cli_flags.version_opt = false; // sfm
-
-    cli_flags.daemon_mode = false;
-
-    cli_flags.show_pref = 0;
-    cli_flags.panel = -1;
-
-    cli_flags.find_files = false;
-    cli_flags.config_dir = nullptr;
-    cli_flags.disable_git_settings = false;
 
     /* initialize GTK+ and parse the command line arguments */
     if (G_UNLIKELY(!gtk_init_with_args(&argc, &argv, "", opt_entries, nullptr, &err)))
