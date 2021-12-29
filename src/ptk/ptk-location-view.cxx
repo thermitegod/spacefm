@@ -181,7 +181,7 @@ update_all()
     const GList* l;
     for (l = volumes; l; l = l->next)
     {
-        VFSVolume* vol = static_cast<VFSVolume*>(l->data);
+        VFSVolume* vol = VFS_VOLUME(l->data);
         if (vol)
         {
             // search model for volume vol
@@ -227,7 +227,7 @@ update_names()
     {
         if (l->data)
         {
-            VFSVolume* vol = static_cast<VFSVolume*>(l->data);
+            VFSVolume* vol = VFS_VOLUME(l->data);
             vfs_volume_set_info(vol);
 
             // search model for volume vol
@@ -352,9 +352,9 @@ ptk_location_view_open_block(const char* block, bool new_tab)
     const GList* l = vfs_volume_get_all_volumes();
     for (; l; l = l->next)
     {
-        if (!g_strcmp0(vfs_volume_get_device(static_cast<VFSVolume*>(l->data)), canon))
+        if (!g_strcmp0(vfs_volume_get_device(VFS_VOLUME(l->data)), canon))
         {
-            VFSVolume* vol = static_cast<VFSVolume*>(l->data);
+            VFSVolume* vol = VFS_VOLUME(l->data);
             if (new_tab)
                 on_open_tab(nullptr, vol, nullptr);
             else
@@ -374,7 +374,7 @@ ptk_location_view_init_model(GtkListStore* list)
 
     for (; l; l = l->next)
     {
-        add_volume(static_cast<VFSVolume*>(l->data), false);
+        add_volume(VFS_VOLUME(l->data), false);
     }
     update_volume_icons();
 }
@@ -818,7 +818,7 @@ on_autoopen_net_cb(VFSFileTask* task, AutoOpen* ao)
     const GList* l;
     for (l = volumes; l; l = l->next)
     {
-        VFSVolume* vol = static_cast<VFSVolume*>(l->data);
+        VFSVolume* vol = VFS_VOLUME(l->data);
         if (vol->is_mounted)
         {
             if (!strcmp(vol->device_file, ao->device_file))
@@ -923,7 +923,7 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
         const GList* volumes = vfs_volume_get_all_volumes();
         for (l = volumes; l; l = l->next)
         {
-            vol = static_cast<VFSVolume*>(l->data);
+            vol = VFS_VOLUME(l->data);
             // test against mtab url and copy of user-entered url (udi)
             if (strstr(vol->device_file, netmount->url) || strstr(vol->udi, netmount->url))
             {
@@ -1411,9 +1411,9 @@ on_autoopen_cb(VFSFileTask* task, AutoOpen* ao)
     const GList* l;
     for (l = volumes; l; l = l->next)
     {
-        if ((static_cast<VFSVolume*>(l->data))->devnum == ao->devnum)
+        if ((VFS_VOLUME(l->data))->devnum == ao->devnum)
         {
-            VFSVolume* vol = static_cast<VFSVolume*>(l->data);
+            VFSVolume* vol = VFS_VOLUME(l->data);
             vol->inhibit_auto = false;
             if (vol->is_mounted)
             {
@@ -2756,7 +2756,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, unsig
     const GList* volumes = vfs_volume_get_all_volumes();
     for (l = volumes; l; l = l->next)
     {
-        if (static_cast<VFSVolume*>(l->data) == vol)
+        if (VFS_VOLUME(l->data) == vol)
             break;
     }
     if (!l)
@@ -2870,7 +2870,7 @@ on_dev_menu_keypress(GtkWidget* menu, GdkEventKey* event, void* user_data)
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(menu));
     if (item)
     {
-        VFSVolume* vol = static_cast<VFSVolume*>(g_object_get_data(G_OBJECT(item), "vol"));
+        VFSVolume* vol = VFS_VOLUME(g_object_get_data(G_OBJECT(item), "vol"));
         if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter ||
             event->keyval == GDK_KEY_space)
         {
@@ -2946,7 +2946,7 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     const GList* volumes = vfs_volume_get_all_volumes();
     for (v = volumes; v; v = v->next)
     {
-        vol = static_cast<VFSVolume*>(v->data);
+        vol = VFS_VOLUME(v->data);
         if (vol && volume_is_visible(vol))
             names = g_list_prepend(names, vol);
     }
@@ -2954,7 +2954,7 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     names = g_list_sort(names, (GCompareFunc)cmp_dev_name);
     for (l = names; l; l = l->next)
     {
-        vol = static_cast<VFSVolume*>(l->data);
+        vol = VFS_VOLUME(l->data);
         item = gtk_menu_item_new_with_label(vfs_volume_get_disp_name(vol));
         g_object_set_data(G_OBJECT(item), "menu", menu);
         g_object_set_data(G_OBJECT(item), "vol", vol);

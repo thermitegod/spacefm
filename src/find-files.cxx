@@ -812,7 +812,7 @@ on_add_search_volumes(GtkWidget* menu, FindFile* data)
     const GList* l;
     for (l = vols; l; l = l->next)
     {
-        VFSVolume* vol = static_cast<VFSVolume*>(l->data);
+        VFSVolume* vol = VFS_VOLUME(l->data);
         if (vfs_volume_is_mounted(vol))
         {
             path = vfs_volume_get_mount_point(vol);
