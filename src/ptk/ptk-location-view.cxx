@@ -2017,10 +2017,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         {
             if ((old_flags = strchr(uuid, '\n')))
                 old_flags[0] = '\0';
-        }
 
-        if (uuid)
-        {
             command = fmt::format("{} -c \"cat {} | grep -e '{}' -e '{}'\"",
                                   BASHPATH,
                                   fstab_path,
