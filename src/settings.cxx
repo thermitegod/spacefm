@@ -62,7 +62,7 @@ static void read_root_settings();
 static void xset_defaults();
 
 std::vector<XSet*> xsets;
-static GList* keysets = nullptr;
+static std::vector<XSet*> keysets;
 static XSet* set_clipboard = nullptr;
 static bool clipboard_is_cut;
 static XSet* set_last;
@@ -9218,10 +9218,9 @@ def_key(const char* name, unsigned int key, unsigned int keymod)
         return;
 
     // key combo already in use?
-    GList* l;
-    for (l = keysets; l; l = l->next)
+    for (XSet* set2: keysets)
     {
-        if ((XSET(l->data))->key == key && (XSET(l->data))->keymod == keymod)
+        if (set2->key == key && set2->keymod == keymod)
             return;
     }
     set->key = key;
@@ -9231,14 +9230,11 @@ def_key(const char* name, unsigned int key, unsigned int keymod)
 static void
 xset_default_keys()
 {
-    GList* l;
-
     // read all currently set or unset keys
-    keysets = nullptr;
     for (XSet* set: xsets)
     {
         if (set->key)
-            keysets = g_list_prepend(keysets, set);
+            keysets.push_back(set);
     }
 
     def_key("tab_prev", GDK_KEY_Tab, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
@@ -9291,7 +9287,4 @@ xset_default_keys()
     def_key("main_exit", GDK_KEY_q, GDK_CONTROL_MASK);
     def_key("main_prefs", GDK_KEY_F12, 0);
     def_key("book_add", GDK_KEY_d, GDK_CONTROL_MASK);
-
-    if (keysets)
-        g_list_free(keysets);
 }
