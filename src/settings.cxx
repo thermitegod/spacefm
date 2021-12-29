@@ -309,19 +309,10 @@ load_settings(const char* config_dir)
     else
         settings_config_dir = g_build_filename(vfs_user_config_dir(), "spacefm", nullptr);
 
-    if (config_settings.git_backed_settings)
-    {
-        if (!g_find_program_in_path("git"))
-        {
-            LOG_ERROR("git backed settings enabled but git is not installed");
-            config_settings.git_backed_settings = false;
-        }
-    }
-
     // MOD extra settings
     xset_defaults();
 
-    std::string session;
+    const std::string session = g_build_filename(settings_config_dir.c_str(), "session", nullptr);
 
     std::string command;
 
@@ -346,7 +337,15 @@ load_settings(const char* config_dir)
         std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
     }
 
-    // check if .git exists
+    if (config_settings.git_backed_settings)
+    {
+        if (!g_find_program_in_path("git"))
+        {
+            LOG_ERROR("git backed settings enabled but git is not installed");
+            config_settings.git_backed_settings = false;
+        }
+    }
+
     if (config_settings.git_backed_settings)
     {
         std::string git_path = g_build_filename(settings_config_dir.c_str(), ".git", nullptr);
@@ -356,35 +355,26 @@ load_settings(const char* config_dir)
                                   "git config commit.gpgsign false\"",
                                   BASHPATH,
                                   settings_config_dir);
-            print_command(command);
             g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
+            LOG_INFO("Initialized git repo at: {}", git_path);
         }
-    }
-
-    // load session
-    session = g_build_filename(settings_config_dir.c_str(), "session", nullptr);
-    if (G_LIKELY(std::filesystem::exists(session)))
-    {
-        if (config_settings.git_backed_settings)
+        else if (G_LIKELY(std::filesystem::exists(session)))
         {
             command = fmt::format("{} -c \"cd {} && git add session && "
                                   "git commit -m 'Session File' 1>/dev/null\"",
                                   BASHPATH,
                                   settings_config_dir);
-            print_command(command);
             g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
+            LOG_INFO("Updated git copy of: {}", session);
         }
-    }
-    else
-    {
-        if (config_settings.git_backed_settings)
+        else if (std::filesystem::exists(git_path))
         {
             command = fmt::format("{} -c \"cd {} && git checkout session\"",
                                   BASHPATH,
                                   settings_config_dir);
             print_command(command);
             g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
-            session = g_build_filename(settings_config_dir.c_str(), "session", nullptr);
+            LOG_INFO("Checked out: {}", session);
         }
     }
 
