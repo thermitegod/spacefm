@@ -14,7 +14,7 @@
 #include <unistd.h>
 
 class TrashDir;
-typedef std::map<dev_t, TrashDir*> TrashDirMap;
+using TrashDirMap = std::map<dev_t, TrashDir*>;
 
 // This class implements some of the XDG Trash specification:
 //
