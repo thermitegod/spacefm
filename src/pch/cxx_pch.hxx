@@ -16,6 +16,7 @@
 #include <filesystem>
 #include <ctime>
 #include <atomic>
+#include <regex>
 
 // FMT
 #include <fmt/core.h>

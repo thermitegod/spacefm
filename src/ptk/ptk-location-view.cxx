@@ -13,6 +13,9 @@
 #include <string>
 #include <filesystem>
 
+#include <iostream>
+#include <fstream>
+
 #include "ptk/ptk-location-view.hxx"
 #include "ptk/ptk-handler.hxx"
 #include "main-window.hxx"
@@ -2997,72 +3000,51 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
 void
 ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
 { // import bookmarks file from spacefm < 1.0 or gtk bookmarks file
-    char line[2048];
-
     XSet* set_prev = nullptr;
     XSet* set_first = nullptr;
-    char* sep;
-    char* name;
-    char* upath;
-    char* tpath;
-    char* upath_name = nullptr;
-
-    // int count = 0;
 
     if (!path)
         return;
 
-    FILE* file = fopen(path, "r");
-    if (file)
+    std::string line;
+    std::ifstream file(path);
+    if (file.is_open())
     {
-        while (fgets(line, sizeof(line), file))
+        std::string name;
+        std::string upath;
+        std::string tpath;
+
+        while (std::getline(file, line))
         {
-            /* Every line is an URI containing no space charactetrs
-               with its name appended (optional) */
-            if ((sep = strchr(line, ' ')))
-            {
-                sep[0] = '\0';
-                name = sep + 1;
-            }
-            else if (line[0])
-                name = nullptr;
-            else
+            // Every line is an URI containing no space charactetrs
+            // with its name appended (optional)
+            if (line.empty())
                 continue;
-            tpath = g_filename_from_uri(line, nullptr, nullptr);
-            if (tpath)
+
+            std::size_t sep = line.find(' ');
+            if (sep == std::string::npos)
+                continue;
+
+            tpath = g_filename_from_uri(line.c_str(), nullptr, nullptr);
+            if (std::filesystem::exists(tpath))
             {
                 unsigned long upath_len;
-                upath = g_filename_to_utf8(tpath, -1, nullptr, &upath_len, nullptr);
-                g_free(tpath);
+                upath = g_filename_to_utf8(tpath.c_str(), -1, nullptr, &upath_len, nullptr);
             }
-            else if (g_str_has_prefix(line, "file://~/"))
-            {
-                upath = g_strdup(line + 7);
-                if (!name)
-                    name = g_strdup("Home");
-            }
-            else if (g_str_has_prefix(line, "//") || strstr(line, ":/"))
-                upath = g_strdup(line);
+            else if (line.substr(0, 9) == "file://~/")
+                name = g_strdup("Home");
+            else if (line.substr(0, 2) == "//" || line.find(":/"))
+                upath = line;
             else
                 continue;
 
-            if (!name)
-                name = upath_name = g_path_get_basename(upath);
-
-            if (name)
-            {
-                sep = strchr(name, '\r');
-                if (sep)
-                    sep[0] = '\0';
-                sep = strchr(name, '\n');
-                if (sep)
-                    sep[0] = '\0';
-            }
+            if (name.empty())
+                name = g_path_get_basename(upath.c_str());
 
             // add new bookmark
             XSet* newset = xset_custom_new();
-            newset->z = upath;
-            newset->menu_label = g_strdup(name);
+            newset->z = const_cast<char*>(upath.c_str());
+            newset->menu_label = const_cast<char*>(name.c_str());
             newset->x = g_strdup("3"); // XSET_CMD_BOOKMARK
             // unset these to save session space
             newset->task = newset->task_err = newset->task_out = newset->keep_terminal =
@@ -3077,11 +3059,7 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
             set_prev = newset;
             // if ( count++ > 500 )
             //    break;
-
-            g_free(upath_name);
-            upath_name = nullptr;
         }
-        fclose(file);
 
         // add new xsets to bookmarks list
         if (set_first)
@@ -3121,6 +3099,8 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
             }
         }
     }
+    file.close();
+
     if (book_set)
         main_window_bookmark_changed(book_set->name);
 }

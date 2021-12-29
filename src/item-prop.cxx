@@ -7,6 +7,9 @@
 #include <string>
 #include <filesystem>
 
+#include <iostream>
+#include <fstream>
+
 #include <gtk/gtk.h>
 
 #include <fnmatch.h>
@@ -836,40 +839,37 @@ static void
 load_command_script(ContextData* ctxt, XSet* set)
 {
     bool modified = false;
-    FILE* file = nullptr;
     GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->cmd_script));
     char* script = xset_custom_get_script(set, !set->plugin);
-    if (!script)
-        gtk_text_buffer_set_text(buf, "", -1);
-    else
+    gtk_text_buffer_set_text(buf, "", -1);
+    if (script)
     {
-        char line[4096];
-
-        gtk_text_buffer_set_text(buf, "", -1);
-        file = fopen(script, "r");
-        if (!file)
+        std::string line;
+        std::ifstream file(script);
+        if (!file.is_open())
+        {
             LOG_WARN("error reading file {}: {}", script, g_strerror(errno));
+        }
         else
         {
-            // read file one line at a time to prevent splitting UTF-8 characters
-            while (fgets(line, sizeof(line), file))
+            while (std::getline(file, line))
             {
-                if (!g_utf8_validate(line, -1, nullptr))
+                // read file one line at a time to prevent splitting UTF-8 characters
+                if (!g_utf8_validate(line.c_str(), -1, nullptr))
                 {
-                    fclose(file);
+                    file.close();
                     gtk_text_buffer_set_text(buf, "", -1);
                     modified = true;
                     LOG_WARN("file '{}' contents are not valid UTF-8", script);
                     break;
                 }
-                gtk_text_buffer_insert_at_cursor(buf, line, -1);
+                gtk_text_buffer_insert_at_cursor(buf, line.c_str(), -1);
             }
-            fclose(file);
+            file.close();
         }
     }
     bool have_access = script && have_rw_access(script);
-    gtk_text_view_set_editable(GTK_TEXT_VIEW(ctxt->cmd_script),
-                               !set->plugin && (!file || have_access));
+    gtk_text_view_set_editable(GTK_TEXT_VIEW(ctxt->cmd_script), !set->plugin && have_access);
     gtk_text_buffer_set_modified(buf, modified);
     command_script_stat(ctxt);
     g_free(script);
@@ -909,12 +909,13 @@ save_command_script(ContextData* ctxt, bool query)
     gtk_text_buffer_get_start_iter(buf, &siter);
     gtk_text_buffer_get_end_iter(buf, &iter);
     char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
-    FILE* file = fopen(script, "w");
-    if (file)
-    {
-        fputs(text, file);
-        fclose(file);
-    }
+
+    std::ofstream file(script);
+    if (file.is_open())
+        file << text;
+
+    file.close();
+
     g_free(text);
 }
 

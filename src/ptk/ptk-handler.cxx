@@ -12,6 +12,9 @@
 #include <string>
 #include <filesystem>
 
+#include <iostream>
+#include <fstream>
+
 #include <fnmatch.h>
 
 #include "ptk/ptk-handler.hxx"
@@ -799,14 +802,24 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
 
     if (std::filesystem::exists(script))
     {
-        if ((file = fopen(script, "r")))
+        std::string line;
+        std::ifstream file(script);
+        if (!file.is_open())
         {
-            // read file one line at a time to prevent splitting UTF-8 characters
-            while (fgets(line, sizeof(line), file))
+            str =
+                g_strdup_printf("%s '%s':\n\n%s", "Error reading file", script, g_strerror(errno));
+            g_free(script);
+            if (!view)
+                g_string_free(gstr, true);
+            return str;
+        }
+        else
+        {
+            while (std::getline(file, line))
             {
-                if (!g_utf8_validate(line, -1, nullptr))
+                if (!g_utf8_validate(line.c_str(), -1, nullptr))
                 {
-                    fclose(file);
+                    file.close();
                     if (view)
                         gtk_text_buffer_set_text(buf, "", -1);
                     else
@@ -817,22 +830,20 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
                 }
                 if (start)
                 {
-                    if (!strcmp(line, script_header) || !strcmp(line, "\n"))
-                        // skip script header and initial blank lines
+                    // skip script header
+                    if (!line.compare(script_header))
                         continue;
+
                     start = false;
                 }
                 // add line to buffer
                 if (view)
-                    gtk_text_buffer_insert_at_cursor(buf, line, -1);
+                    gtk_text_buffer_insert_at_cursor(buf, line.c_str(), -1);
                 else
-                    g_string_append(gstr, line);
+                    g_string_append(gstr, line.c_str());
             }
-            if (fclose(file) != 0)
-                goto _read_error;
+            file.close();
         }
-        else
-            goto _read_error;
     }
     g_free(script);
 
@@ -844,15 +855,6 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
     // gtk_text_buffer_set_modified( buf, modified );
     // command_script_stat(  );
     return nullptr; // success
-
-_read_error:
-    if (file)
-        fclose(file);
-    str = g_strdup_printf("%s '%s':\n\n%s", "Error reading file", script, g_strerror(errno));
-    g_free(script);
-    if (!view)
-        g_string_free(gstr, true);
-    return str;
 }
 
 char*
@@ -903,37 +905,28 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
 
     // LOG_INFO("WRITE {}", script);
     // write script
-    FILE* file = nullptr;
-    if ((file = fopen(script, "w")))
+    std::ofstream file(script);
+    if (file.is_open())
     {
-        // add default script header   #!/bin/bash\n\n
-        if (fputs(script_header, file) < 0)
-            goto _write_error;
-        if (fputs("\n", file) < 0)
-            goto _write_error;
-        if (text && fputs(text, file) < 0)
-            goto _write_error;
-        if (!g_str_has_suffix(text, "\n") && fputs("\n", file) < 0)
-            goto _write_error;
-        if (fclose(file) != 0)
-            goto _write_error;
-        // This script isn't run directly so no need to make executable
+        file << script_header;
+        file << "\n";
+        if (text)
+            file << text;
+        file << "\n";
     }
     else
-        goto _write_error;
+    {
+        str = g_strdup_printf("%s '%s':\n\n%s", "Error writing to file", script, g_strerror(errno));
+        g_free(script);
+        if (view)
+            g_free(text);
+        return str;
+    }
+    file.close();
     g_free(script);
     if (view)
         g_free(text);
     return nullptr; // success
-
-_write_error:
-    if (file)
-        fclose(file);
-    str = g_strdup_printf("%s '%s':\n\n%s", "Error writing to file", script, g_strerror(errno));
-    g_free(script);
-    if (view)
-        g_free(text);
-    return str;
 }
 
 bool

@@ -11,6 +11,11 @@
 #include <string>
 #include <filesystem>
 
+#include <regex>
+
+#include <iostream>
+#include <fstream>
+
 #include <unistd.h>
 
 #include <sys/stat.h>
@@ -50,7 +55,7 @@ ConfigSettings config_settings = ConfigSettings();
 
 // MOD settings
 static void xset_write(GString* buf);
-static void xset_parse(char* line);
+static void xset_parse(std::string& line);
 static void read_root_settings();
 static void xset_defaults();
 
@@ -70,7 +75,7 @@ EventHandler event_handler;
 
 GList* xset_cmd_history = nullptr;
 
-typedef void (*SettingsParseFunc)(char* line);
+typedef void (*SettingsParseFunc)(std::string& line);
 
 static void xset_free_all();
 static void xset_default_keys();
@@ -161,113 +166,167 @@ static const char* builtin_tool_shared_key[] = { // must match XSET_TOOL_ enum
     "panel1_list_large"};
 
 static void
-parse_general_settings(char* line)
+parse_general_settings(std::string& line)
 {
-    char* sep = strstr(line, "=");
-    if (!sep)
+    std::size_t sep = line.find("=");
+    if (sep == std::string::npos)
         return;
-    char* name = line;
-    char* value = sep + 1;
-    *sep = '\0';
-    if (!strcmp(name, "show_thumbnail"))
-        app_settings.show_thumbnail = strtol(value, nullptr, 10);
-    else if (!strcmp(name, "max_thumb_size"))
-        app_settings.max_thumb_size = strtol(value, nullptr, 10) << 10;
-    else if (!strcmp(name, "big_icon_size"))
-        app_settings.big_icon_size = strtol(value, nullptr, 10);
-    else if (!strcmp(name, "small_icon_size"))
-        app_settings.small_icon_size = strtol(value, nullptr, 10);
-    else if (!strcmp(name, "tool_icon_size"))
-        app_settings.tool_icon_size = strtol(value, nullptr, 10);
-    else if (!strcmp(name, "single_click"))
-        app_settings.single_click = strtol(value, nullptr, 10);
-    else if (!strcmp(name, "no_single_hover"))
-        app_settings.no_single_hover = strtol(value, nullptr, 10);
-    else if (!strcmp(name, "sort_order"))
-        app_settings.sort_order = strtol(value, nullptr, 10);
-    else if (!strcmp(name, "sort_type"))
-        app_settings.sort_type = strtol(value, nullptr, 10);
-    else if (!strcmp(name, "use_si_prefix"))
-        app_settings.use_si_prefix = strtol(value, nullptr, 10);
-    else if (!strcmp(name, "no_execute"))
-        app_settings.no_execute = strtol(value, nullptr, 10); // MOD
-    else if (!strcmp(name, "no_confirm"))
-        app_settings.no_confirm = strtol(value, nullptr, 10); // MOD
-    else if (!strcmp(name, "no_confirm_trash"))
-        app_settings.no_confirm_trash = strtol(value, nullptr, 10); // MOD
+
+    // remove leading spaces
+    line = std::regex_replace(line, std::regex("^ +"), "");
+    // remove tailing spaces
+    line = std::regex_replace(line, std::regex(" +$"), "");
+
+    if (line.at(0) == '#')
+        return;
+
+    std::string token = line.substr(0, sep);
+    std::string value = line.substr(sep + 1, std::string::npos - 1);
+
+    // remove any quotes
+    std::size_t quotes = value.find('\"');
+    if (quotes != std::string::npos)
+        value.erase(std::remove(value.begin(), value.end(), '\"'), value.end());
+
+    if (value.empty())
+        return;
+
+    if (!token.compare("show_thumbnail"))
+        app_settings.show_thumbnail = std::stoi(value);
+    else if (!token.compare("max_thumb_size"))
+        app_settings.max_thumb_size = std::stoi(value) << 10;
+    else if (!token.compare("big_icon_size"))
+        app_settings.big_icon_size = std::stoi(value);
+    else if (!token.compare("small_icon_size"))
+        app_settings.small_icon_size = std::stoi(value);
+    else if (!token.compare("tool_icon_size"))
+        app_settings.tool_icon_size = std::stoi(value);
+    else if (!token.compare("single_click"))
+        app_settings.single_click = std::stoi(value);
+    else if (!token.compare("no_single_hover"))
+        app_settings.no_single_hover = std::stoi(value);
+    else if (!token.compare("sort_order"))
+        app_settings.sort_order = std::stoi(value);
+    else if (!token.compare("sort_type"))
+        app_settings.sort_type = std::stoi(value);
+    else if (!token.compare("use_si_prefix"))
+        app_settings.use_si_prefix = std::stoi(value);
+    else if (!token.compare("no_execute"))
+        app_settings.no_execute = std::stoi(value);
+    else if (!token.compare("no_confirm"))
+        app_settings.no_confirm = std::stoi(value);
+    else if (!token.compare("no_confirm_trash"))
+        app_settings.no_confirm_trash = std::stoi(value);
 }
 
 static void
-parse_window_state(char* line)
+parse_window_state(std::string& line)
 {
-    char* sep = strstr(line, "=");
-    if (!sep)
+    std::size_t sep = line.find("=");
+    if (sep == std::string::npos)
         return;
-    int v;
-    char* name = line;
-    char* value = sep + 1;
-    *sep = '\0';
-    if (!strcmp(name, "width"))
-    {
-        v = strtol(value, nullptr, 10);
-        app_settings.width = (v > 0 ? v : 640);
-    }
-    else if (!strcmp(name, "height"))
-    {
-        v = strtol(value, nullptr, 10);
-        app_settings.height = (v > 0 ? v : 480);
-    }
-    else if (!strcmp(name, "maximized"))
-    {
-        app_settings.maximized = strtol(value, nullptr, 10);
-    }
+
+    // remove leading spaces
+    line = std::regex_replace(line, std::regex("^ +"), "");
+    // remove tailing spaces
+    line = std::regex_replace(line, std::regex(" +$"), "");
+
+    if (line.at(0) == '#')
+        return;
+
+    std::string token = line.substr(0, sep);
+    std::string value = line.substr(sep + 1, std::string::npos - 1);
+
+    // remove any quotes
+    std::size_t quotes = value.find('\"');
+    if (quotes != std::string::npos)
+        value.erase(std::remove(value.begin(), value.end(), '\"'), value.end());
+
+    if (value.empty())
+        return;
+
+    if (!token.compare("width"))
+        app_settings.width = std::stoi(value);
+    else if (!token.compare("height"))
+        app_settings.height = std::stoi(value);
+    else if (!token.compare("maximized"))
+        app_settings.maximized = std::stoi(value);
 }
 
 static void
-parse_interface_settings(char* line)
+parse_interface_settings(std::string& line)
 {
-    char* sep = strstr(line, "=");
-    if (!sep)
+    std::size_t sep = line.find("=");
+    if (sep == std::string::npos)
         return;
-    char* name = line;
-    char* value = sep + 1;
-    *sep = '\0';
-    if (!strcmp(name, "always_show_tabs"))
-        app_settings.always_show_tabs = strtol(value, nullptr, 10);
-    else if (!strcmp(name, "show_close_tab_buttons"))
-        app_settings.hide_close_tab_buttons = !strtol(value, nullptr, 10);
+
+    // remove leading spaces
+    line = std::regex_replace(line, std::regex("^ +"), "");
+    // remove tailing spaces
+    line = std::regex_replace(line, std::regex(" +$"), "");
+
+    if (line.at(0) == '#')
+        return;
+
+    std::string token = line.substr(0, sep);
+    std::string value = line.substr(sep + 1, std::string::npos - 1);
+
+    // remove any quotes
+    std::size_t quotes = value.find('\"');
+    if (quotes != std::string::npos)
+        value.erase(std::remove(value.begin(), value.end(), '\"'), value.end());
+
+    if (value.empty())
+        return;
+
+    if (!token.compare("always_show_tabs"))
+        app_settings.always_show_tabs = std::stoi(value);
+    else if (!token.compare("show_close_tab_buttons"))
+        app_settings.hide_close_tab_buttons = std::stoi(value);
 }
 
 static void
-parse_conf(const char* etc_path, char* line)
+parse_conf(std::string& etc_path, std::string& line)
 {
-    char* sep = strstr(line, "=");
-    if (!sep)
+    std::size_t sep = line.find("=");
+    if (sep == std::string::npos)
         return;
-    char* name = line;
-    char* value = sep + 1;
-    *sep = '\0';
-    char* sname = g_strstrip(name);
-    char* svalue = g_strdup(g_strstrip(value));
 
-    if (!(sname && sname[0] && svalue && svalue[0]))
-    {
-    }
-    else if (!strcmp(sname, "terminal_su") || !strcmp(sname, "graphical_su"))
-    {
-        if (svalue[0] != '/' || !std::filesystem::exists(svalue))
-            LOG_WARN("{}: {} '{}' file not found", etc_path, sname, svalue);
-        else if (!strcmp(sname, "terminal_su"))
-            config_settings.terminal_su = svalue;
-    }
-    if (!strcmp(sname, "font_view_icon"))
-        config_settings.font_view_icon = svalue;
-    else if (!strcmp(sname, "font_view_compact"))
-        config_settings.font_view_compact = svalue;
-    else if (!strcmp(sname, "font_general"))
-        config_settings.font_general = svalue;
+    // remove leading spaces
+    line = std::regex_replace(line, std::regex("^ +"), "");
+    // remove tailing spaces
+    line = std::regex_replace(line, std::regex(" +$"), "");
 
-    g_free(svalue);
+    if (line.at(0) == '#')
+        return;
+
+    std::string token = line.substr(0, sep);
+    std::string value = line.substr(sep + 1, std::string::npos - 1);
+
+    // remove any quotes
+    std::size_t quotes = value.find('\"');
+    if (quotes != std::string::npos)
+        value.erase(std::remove(value.begin(), value.end(), '\"'), value.end());
+
+    if (value.empty())
+        return;
+
+    // LOG_INFO("token {}", token);
+    // LOG_INFO("value {}", value);
+
+    if (!token.compare("terminal_su") || !token.compare("graphical_su"))
+    {
+        if (value.at(0) != '/' || !std::filesystem::exists(value))
+            LOG_WARN("{}: {} '{}' file not found", etc_path, token, value);
+        else if (!token.compare("terminal_su"))
+            config_settings.terminal_su = value.c_str();
+    }
+    else if (!token.compare("font_view_icon"))
+        config_settings.font_view_icon = value.c_str();
+    else if (!token.compare("font_view_compact"))
+        config_settings.font_view_compact = value.c_str();
+    else if (!token.compare("font_general"))
+        config_settings.font_general = value.c_str();
 }
 
 void
@@ -283,19 +342,21 @@ load_conf()
     config_settings.font_general = default_font.c_str();
 
     // load spacefm.conf
-    char* config_path = g_build_filename(vfs_user_config_dir(), "spacefm", "spacefm.conf", nullptr);
+    std::string config_path =
+        g_build_filename(vfs_user_config_dir(), "spacefm", "spacefm.conf", nullptr);
     if (!std::filesystem::exists(config_path))
         config_path = g_build_filename(SYSCONFDIR, "spacefm", "spacefm.conf", nullptr);
 
-    FILE* file = fopen(config_path, "r");
-    if (file)
+    std::string line;
+    std::ifstream file(config_path);
+    if (file.is_open())
     {
-        char line[2048];
-        while (fgets(line, sizeof(line), file))
+        while (std::getline(file, line))
+        {
             parse_conf(config_path, line);
-        fclose(file);
+        }
     }
-    g_free(config_path);
+    file.close();
 }
 
 void
@@ -380,36 +441,37 @@ load_settings(const char* config_dir)
 
     if (std::filesystem::is_regular_file(session))
     {
-        FILE* file = fopen(session.c_str(), "r");
-
-        SettingsParseFunc func = nullptr;
-        char line[2048];
-        char* tmp = nullptr;
-        while (fgets(line, sizeof(line), file))
+        std::string line;
+        std::ifstream file(session);
+        if (file.is_open())
         {
-            strtok_r(line, "\n", &tmp);
-            if (!line[0])
-                continue;
-            if (line[0] == '[')
-            {
-                strtok_r(line, "]", &tmp);
-                if (!strcmp(line + 1, "General"))
-                    func = &parse_general_settings;
-                else if (!strcmp(line + 1, "Window"))
-                    func = &parse_window_state;
-                else if (!strcmp(line + 1, "Interface"))
-                    func = &parse_interface_settings;
-                else if (!strcmp(line + 1, "MOD"))
-                    func = &xset_parse;
-                else
-                    func = nullptr;
-                continue;
-            }
-            if (func)
-                (*func)(line);
-        }
+            SettingsParseFunc func = nullptr;
 
-        fclose(file);
+            while (std::getline(file, line))
+            {
+                if (line.empty())
+                    continue;
+
+                if (line.at(0) == '[')
+                {
+                    if (!line.compare("[General]"))
+                        func = &parse_general_settings;
+                    else if (!line.compare("[Window]"))
+                        func = &parse_window_state;
+                    else if (!line.compare("[Interface]"))
+                        func = &parse_interface_settings;
+                    else if (!line.compare("[MOD]"))
+                        func = &xset_parse;
+                    else
+                        func = nullptr;
+                    continue;
+                }
+
+                if (func)
+                    (*func)(line);
+            }
+        }
+        file.close();
     }
 
     // MOD turn off fullscreen
@@ -1091,40 +1153,56 @@ xset_write(GString* buf)
 }
 
 static void
-xset_parse(char* line)
+xset_parse(std::string& line)
 {
-    char* sep = strchr(line, '=');
-    if (!sep)
+    std::size_t sep = line.find("=");
+    if (sep == std::string::npos)
         return;
-    char* name = line;
-    char* value = sep + 1;
-    *sep = '\0';
-    sep = strchr(name, '-');
-    if (!sep)
-        return;
-    char* var = sep + 1;
-    *sep = '\0';
 
-    if (!strncmp(name, "cstm_", 5) || !strncmp(name, "hand_", 5))
+    std::size_t sep2 = line.find("-");
+    if (sep2 == std::string::npos)
+        return;
+
+    // remove leading spaces
+    line = std::regex_replace(line, std::regex("^ +"), "");
+    // remove tailing spaces
+    line = std::regex_replace(line, std::regex(" +$"), "");
+
+    if (line.at(0) == '#')
+        return;
+
+    std::string token = line.substr(0, sep2);
+    std::string value = line.substr(sep + 1, std::string::npos - 1);
+    std::string token_var = line.substr(sep2 + 1, sep - sep2 - 1);
+
+    // remove any quotes
+    std::size_t quotes = value.find('\"');
+    if (quotes != std::string::npos)
+        value.erase(std::remove(value.begin(), value.end(), '\"'), value.end());
+
+    if (value.empty())
+        return;
+
+    if (token.substr(0, 5) == "cstm_" || token.substr(0, 5) == "hand_")
     {
         // custom
-        if (!strcmp(set_last->name, name))
-            xset_set_set_int(set_last, var, value);
+        if (!token.compare(set_last->name))
+            xset_set_set_int(set_last, token_var.c_str(), value.c_str());
         else
         {
-            set_last = xset_get(name);
+            set_last = xset_get(token.c_str());
             if (set_last->lock)
                 set_last->lock = false;
-            xset_set_set_int(set_last, var, value);
+            xset_set_set_int(set_last, token_var.c_str(), value.c_str());
         }
     }
     else
     {
         // normal (lock)
-        if (!strcmp(set_last->name, name))
-            xset_set_set_int(set_last, var, value);
+        if (!token.compare(set_last->name))
+            xset_set_set_int(set_last, token_var.c_str(), value.c_str());
         else
-            set_last = xset_set(name, var, value);
+            set_last = xset_set(token.c_str(), token_var.c_str(), value.c_str());
     }
 }
 
@@ -1660,36 +1738,30 @@ read_root_settings()
 {
     GList* l;
     XSet* set;
-    FILE* file;
-    char line[2048];
 
     if (geteuid() == 0)
         return;
 
-    char* root_set_path = g_strdup_printf("%s/spacefm/%s-as-root", SYSCONFDIR, g_get_user_name());
+    std::string root_set_path = fmt::format("{}/spacefm/{}-as-root", SYSCONFDIR, g_get_user_name());
     if (!std::filesystem::exists(root_set_path))
-    {
-        g_free(root_set_path);
         root_set_path = g_strdup_printf("%s/spacefm/%d-as-root", SYSCONFDIR, geteuid());
-    }
 
-    file = fopen(root_set_path, "r");
+    std::string line;
+    std::ifstream file(root_set_path);
 
-    if (!file)
+    if (!file.is_open())
     {
         if (std::filesystem::exists(root_set_path))
-            LOG_WARN("Error reading root settings from {}/spacefm/  Commands run as root may "
+            LOG_WARN("Error reading root settings from {} Commands run as root may "
                      "present a security risk",
-                     SYSCONFDIR);
+                     root_set_path);
         else
-            LOG_WARN("No root settings found in {}/spacefm/  Setting a root editor in "
+            LOG_WARN("No root settings found in {} Setting a root editor in "
                      "Preferences should remove this warning on startup.   Otherwise commands "
                      "run as root may present a security risk.",
-                     SYSCONFDIR);
-        g_free(root_set_path);
+                     root_set_path);
         return;
     }
-    g_free(root_set_path);
 
     // clear settings
     for (l = xsets; l; l = l->next)
@@ -1722,15 +1794,15 @@ read_root_settings()
         }
     }
 
-    char* tmp = nullptr;
-    while (fgets(line, sizeof(line), file))
+    while (std::getline(file, line))
     {
-        strtok_r(line, "\n", &tmp);
-        if (!line[0])
+        if (line.empty())
             continue;
+
         xset_parse(line);
     }
-    fclose(file);
+
+    file.close();
 }
 
 XSetContext*
@@ -2196,26 +2268,21 @@ xset_custom_get_script(XSet* set, bool create)
 
     if (create && !std::filesystem::exists(path))
     {
-        FILE* file;
-        file = fopen(path, "w");
-
-        if (file)
+        std::ofstream file(path);
+        if (file.is_open())
         {
-            // write default script
-            // head
-            fputs(g_strdup_printf("#!%s\n%s\n\n#import file manager variables\n$fm_import\n\n"
-                                  "#For all spacefm variables see man page: spacefm-scripts\n\n"
-                                  "#Start script\n",
-                                  BASHPATH,
-                                  SHELL_SETTINGS),
-                  file);
-            int i;
-            for (i = 0; i < 14; i++)
-                fputs("\n", file);
-            // tail
-            fputs("#End script\nexit $?", file);
-            fclose(file);
+            file << fmt::format("#!{}\n", BASHPATH);
+            file << fmt::format("{}\n\n", SHELL_SETTINGS);
+            file << fmt::format("#import file manager variables\n");
+            file << fmt::format("$fm_import\n\n");
+            file << fmt::format("#For all spacefm variables see man page: spacefm-scripts\n\n");
+            file << fmt::format("#Start script\n");
+            file << fmt::format("\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+            file << fmt::format("#End script\n");
+            file << fmt::format("exit $?\n");
         }
+        file.close();
+
         chmod(path, 0700);
     }
     return path;
@@ -2572,10 +2639,10 @@ xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
 }
 
 static void
-xset_parse_plugin(const char* plug_dir, char* line, int use)
+xset_parse_plugin(const char* plug_dir, const char* line, int use)
 {
-    char* sep = strchr(line, '=');
-    char* name;
+    char* sep = strchr(const_cast<char*>(line), '=');
+    const char* name;
     char* value;
     XSet* set;
     XSet* set2;
@@ -2587,7 +2654,7 @@ xset_parse_plugin(const char* plug_dir, char* line, int use)
     name = line;
     value = sep + 1;
     *sep = '\0';
-    sep = strchr(name, '-');
+    sep = strchr(const_cast<char*>(name), '-');
     if (!sep)
         return;
     char* var = sep + 1;
@@ -2672,7 +2739,6 @@ xset_parse_plugin(const char* plug_dir, char* line, int use)
 XSet*
 xset_import_plugin(const char* plug_dir, int* use)
 {
-    char line[2048];
     bool func;
     GList* l;
     XSet* set;
@@ -2699,56 +2765,68 @@ xset_import_plugin(const char* plug_dir, int* use)
 
     // read plugin file into xsets
     bool plugin_good = false;
-    char* plugin = g_build_filename(plug_dir, "plugin", nullptr);
-    FILE* file = fopen(plugin, "r");
-    if (!file)
+    std::string plugin = g_build_filename(plug_dir, "plugin", nullptr);
+
+    std::string line;
+    std::ifstream file(plugin);
+    if (!file.is_open())
     {
         LOG_WARN("Error reading plugin file {}", plugin);
         return nullptr;
     }
 
-    char* tmp = nullptr;
-    while (fgets(line, sizeof(line), file))
+    if (file.is_open())
     {
-        strtok_r(line, "\n", &tmp);
-        if (!line[0])
-            continue;
-        if (line[0] == '[')
+        while (std::getline(file, line))
         {
-            strtok_r(line, "]", &tmp);
-            if (!strcmp(line + 1, "Plugin"))
-                func = true;
-            else
-                func = false;
-            continue;
-        }
-        if (func)
-        {
-            if (use && *use == PLUGIN_USE_NORMAL)
+            if (line.empty())
+                continue;
+
+            if (line.at(0) == '[')
             {
-                if (g_str_has_prefix(line, "main_book-child="))
-                {
-                    // This plugin is an export of all bookmarks
-                    *use = PLUGIN_USE_BOOKMARKS;
-                }
-                else if (g_str_has_prefix(line, "hand_"))
-                {
-                    if (g_str_has_prefix(line, "hand_fs_"))
-                        *use = PLUGIN_USE_HAND_FS;
-                    else if (g_str_has_prefix(line, "hand_arc_"))
-                        *use = PLUGIN_USE_HAND_ARC;
-                    else if (g_str_has_prefix(line, "hand_net_"))
-                        *use = PLUGIN_USE_HAND_NET;
-                    else if (g_str_has_prefix(line, "hand_f_"))
-                        *use = PLUGIN_USE_HAND_FILE;
-                }
+                if (!line.compare("[Plugin]"))
+                    func = true;
+                else
+                    func = false;
+                continue;
             }
-            xset_parse_plugin(plug_dir, line, use ? *use : PLUGIN_USE_NORMAL);
-            if (!plugin_good)
-                plugin_good = true;
+
+            if (func)
+            {
+                std::size_t sep = line.find("=");
+                if (sep == std::string::npos)
+                    continue;
+
+                std::string token = line.substr(0, sep);
+                std::string value = line.substr(sep + 1, std::string::npos - 1);
+
+                if (use && *use == PLUGIN_USE_NORMAL)
+                {
+                    if (!token.compare("main_book-child"))
+                    {
+                        // This plugin is an export of all bookmarks
+                        *use = PLUGIN_USE_BOOKMARKS;
+                    }
+                    else if (token.substr(0, 5) == "hand_")
+                    {
+                        if (token.substr(0, 8) == "hand_fs_")
+                            *use = PLUGIN_USE_HAND_FS;
+                        else if (token.substr(0, 9) == "hand_arc_")
+                            *use = PLUGIN_USE_HAND_ARC;
+                        else if (token.substr(0, 9) == "hand_net_")
+                            *use = PLUGIN_USE_HAND_NET;
+                        else if (token.substr(0, 7) == "hand_f_")
+                            *use = PLUGIN_USE_HAND_FILE;
+                    }
+                }
+                xset_parse_plugin(plug_dir, token.c_str(), use ? *use : PLUGIN_USE_NORMAL);
+                if (!plugin_good)
+                    plugin_good = true;
+            }
         }
     }
-    fclose(file);
+
+    file.close();
 
     // clean plugin sets, set type
     bool top = true;

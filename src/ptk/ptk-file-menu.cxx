@@ -11,6 +11,9 @@
 #include <string>
 #include <filesystem>
 
+#include <iostream>
+#include <fstream>
+
 #include <fcntl.h>
 
 #include "ptk/ptk-file-menu.hxx"
@@ -1659,12 +1662,12 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 g_free(msg);
 
                 // write file
-                FILE* file = fopen(path, "w");
-                if (file)
-                {
-                    fputs(contents, file);
-                    fclose(file);
-                }
+                std::ofstream file(path);
+                if (file.is_open())
+                    file << contents;
+
+                file.close();
+
                 g_free(contents);
             }
             if (std::filesystem::exists(path))
