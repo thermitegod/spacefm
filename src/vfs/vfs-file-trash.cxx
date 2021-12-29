@@ -118,6 +118,15 @@ Trash::trash(const std::string& path)
     if (!trash_dir)
         return false;
 
+    if (std::filesystem::is_symlink(path))
+    {
+        // TODO std::filesystem::rename does not support symlinks
+        // should limit too only regular files and directories;
+
+        // LOG_INFO("Cannot trash symlink: {}", path);
+        return false;
+    }
+
     std::string target_name = trash_dir->unique_name(path);
     trash_dir->create_trash_info(path, target_name);
     trash_dir->move(path, target_name);
