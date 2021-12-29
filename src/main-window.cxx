@@ -319,7 +319,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
                 g_free(path);
                 return;
             }
-            while (!plug_dir || (plug_dir && std::filesystem::exists(plug_dir)))
+            while (!plug_dir || std::filesystem::exists(plug_dir))
             {
                 char* hex8 = randhex8();
                 if (plug_dir)
@@ -4723,7 +4723,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, XSet* set2, PtkFileTask* task2)
             return;
     }
 
-    if (!model || (model && gtk_tree_model_get_iter_first(model, &it)))
+    if (!model || gtk_tree_model_get_iter_first(model, &it))
     {
         do
         {

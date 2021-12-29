@@ -1582,7 +1582,7 @@ parse_mounts(bool report)
         }
 
         mount_point = g_strcompress(encoded_mount_point);
-        if (!mount_point || (mount_point && mount_point[0] == '\0'))
+        if (!mount_point || mount_point[0] == '\0')
         {
             g_free(mount_point);
             continue;
@@ -4203,7 +4203,7 @@ get_device_parent(dev_t dev)
     char* native_path = g_strdup(udev_device_get_syspath(udevice));
     udev_device_unref(udevice);
 
-    if (!native_path || (native_path && !sysfs_file_exists(native_path, "start")))
+    if (!native_path || !sysfs_file_exists(native_path, "start"))
     {
         // not a partition if no "start"
         g_free(native_path);

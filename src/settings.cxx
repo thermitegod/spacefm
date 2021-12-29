@@ -2420,7 +2420,7 @@ clean_plugin_mirrors()
                 !strcmp((static_cast<XSet*>(l->data))->desc, "@plugin@mirror@"))
             {
                 set = static_cast<XSet*>(l->data);
-                if (!set->shared_key || (set->shared_key && !xset_is(set->shared_key)))
+                if (!set->shared_key || !xset_is(set->shared_key))
                 {
                     xset_free(set);
                     redo = true;
@@ -4660,7 +4660,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             }
             char* hex8;
             folder = nullptr;
-            while (!folder || (folder && std::filesystem::exists(folder)))
+            while (!folder || std::filesystem::exists(folder))
             {
                 hex8 = randhex8();
                 if (folder)
@@ -5475,7 +5475,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
                                   "_Help",
                                   is_bookmark ? XSET_JOB_HELP_BOOK : XSET_JOB_HELP,
                                   set);
-    gtk_widget_set_sensitive(newitem, !set->lock || (set->lock && set->line));
+    gtk_widget_set_sensitive(newitem, !set->lock || set->line);
     if (show_keys)
         gtk_widget_add_accelerator(newitem,
                                    "activate",

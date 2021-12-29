@@ -2654,7 +2654,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     }
     char* hex8;
     folder = nullptr;
-    while (!folder || (folder && std::filesystem::exists(folder)))
+    while (!folder || std::filesystem::exists(folder))
     {
         hex8 = randhex8();
         if (folder)

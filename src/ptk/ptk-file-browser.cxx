@@ -774,7 +774,7 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
             const char* cwd;
             x = 0;
             cwd = ptk_file_browser_get_cwd(file_browser);
-            b = !cwd || (cwd && strcmp(cwd, "/"));
+            b = !cwd || strcmp(cwd, "/");
             break;
         case XSET_TOOL_BACK:
         case XSET_TOOL_BACK_MENU:
