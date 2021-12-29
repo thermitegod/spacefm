@@ -555,7 +555,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
         // Fetching first extension handler deals with
         char* ext = archive_handler_get_first_extension(handler_xset);
         dest_file = g_strjoin(nullptr,
-                              vfs_file_info_get_disp_name((VFSFileInfo*)files->data),
+                              vfs_file_info_get_disp_name(static_cast<VFSFileInfo*>(files->data)),
                               ext,
                               nullptr);
         gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), dest_file);
@@ -783,7 +783,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
          * when '%N' is present, only the first otherwise */
         for (i = 0, l = files; l && (i == 0 || g_strstr_len(command, -1, "%N")); l = l->next, ++i)
         {
-            desc = (char*)vfs_file_info_get_name((VFSFileInfo*)l->data);
+            desc = (char*)vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data));
 
             /* In %O mode, every source file is output to its own archive,
              * so the resulting archive name is based on the filename and
@@ -867,7 +867,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
         char* first;
         if (files)
         {
-            desc = (char*)vfs_file_info_get_name((VFSFileInfo*)files->data);
+            desc = (char*)vfs_file_info_get_name(static_cast<VFSFileInfo*>(files->data));
             if (desc[0] == '-')
             {
                 // special handling for filename starting with a dash
@@ -885,7 +885,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
             {
                 for (l = files; l; l = l->next)
                 {
-                    desc = (char*)vfs_file_info_get_name((VFSFileInfo*)l->data);
+                    desc = (char*)vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data));
                     if (desc[0] == '-')
                     {
                         // special handling for filename starting with a dash
@@ -1030,7 +1030,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         for (l = files; l; l = l->next)
         {
             // Fetching file details
-            file = (VFSFileInfo*)l->data;
+            file = static_cast<VFSFileInfo*>(l->data);
             mime_type = vfs_file_info_get_mime_type(file);
             full_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
 
@@ -1195,7 +1195,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     for (l = files; l; l = l->next)
     {
         // Fetching file details
-        file = (VFSFileInfo*)l->data;
+        file = static_cast<VFSFileInfo*>(l->data);
         mime_type = vfs_file_info_get_mime_type(file);
         // Determining file paths
         full_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
@@ -1210,7 +1210,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                                                        true);
         if (handlers_slist)
         {
-            handler_xset = (XSet*)handlers_slist->data;
+            handler_xset = static_cast<XSet*>(handlers_slist->data);
             g_slist_free(handlers_slist);
         }
         else

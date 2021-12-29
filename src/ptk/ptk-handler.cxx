@@ -1326,9 +1326,10 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     }
 
     // have handler dialog open?
-    HandlerData* hnd = handler_dlg && GTK_IS_WIDGET(handler_dlg)
-                           ? (HandlerData*)g_object_get_data(G_OBJECT(handler_dlg), "hnd")
-                           : nullptr;
+    HandlerData* hnd =
+        handler_dlg && GTK_IS_WIDGET(handler_dlg)
+            ? static_cast<HandlerData*>(g_object_get_data(G_OBJECT(handler_dlg), "hnd"))
+            : nullptr;
     if (!(hnd && hnd->dlg == handler_dlg && hnd->mode == mode))
     {
         // dialog not shown or invalid

@@ -130,7 +130,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             // update all windows/all panels
             for (l = fm_main_window_get_all(); l; l = l->next)
             {
-                a_window = FM_MAIN_WINDOW(l->data);
+                a_window = static_cast<FMMainWindow*>(l->data);
                 for (p = 1; p < 5; p++)
                 {
                     notebook = GTK_NOTEBOOK(a_window->panel[p - 1]);
@@ -150,7 +150,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             // update all windows/all panels/all browsers
             for (l = fm_main_window_get_all(); l; l = l->next)
             {
-                a_window = FM_MAIN_WINDOW(l->data);
+                a_window = static_cast<FMMainWindow*>(l->data);
                 for (p = 1; p < 5; p++)
                 {
                     notebook = GTK_NOTEBOOK(a_window->panel[p - 1]);
@@ -207,7 +207,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             // update all windows/all panels/all browsers
             for (l = fm_main_window_get_all(); l; l = l->next)
             {
-                a_window = FM_MAIN_WINDOW(l->data);
+                a_window = static_cast<FMMainWindow*>(l->data);
                 for (p = 1; p < 5; p++)
                 {
                     notebook = GTK_NOTEBOOK(a_window->panel[p - 1]);
@@ -271,7 +271,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             // update all windows/all panels/all browsers
             for (l = fm_main_window_get_all(); l; l = l->next)
             {
-                a_window = FM_MAIN_WINDOW(l->data);
+                a_window = static_cast<FMMainWindow*>(l->data);
                 for (p = 1; p < 5; p++)
                 {
                     notebook = GTK_NOTEBOOK(a_window->panel[p - 1]);
@@ -293,7 +293,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             // update all windows/all panels/all browsers
             for (l = fm_main_window_get_all(); l; l = l->next)
             {
-                a_window = FM_MAIN_WINDOW(l->data);
+                a_window = static_cast<FMMainWindow*>(l->data);
                 for (p = 1; p < 5; p++)
                 {
                     notebook = GTK_NOTEBOOK(a_window->panel[p - 1]);

@@ -11,7 +11,7 @@
 #include "ptk/ptk-file-task.hxx"
 
 #define FM_TYPE_MAIN_WINDOW (fm_main_window_get_type())
-#define FM_MAIN_WINDOW(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), FM_TYPE_MAIN_WINDOW, FMMainWindow))
+#define FM_MAIN_WINDOW(obj) (reinterpret_cast<FMMainWindow*>(obj))
 
 enum MainWindowPanel
 { // how a panel shares vertical and horizontal space with other panels

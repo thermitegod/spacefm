@@ -19,7 +19,7 @@
 #include <sys/types.h>
 
 #define PTK_TYPE_DIR_TREE    (ptk_dir_tree_get_type())
-#define PTK_DIR_TREE(obj)    (G_TYPE_CHECK_INSTANCE_CAST((obj), PTK_TYPE_DIR_TREE, PtkDirTree))
+#define PTK_DIR_TREE(obj)    (reinterpret_cast<PtkDirTree*>(obj))
 #define PTK_IS_DIR_TREE(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_DIR_TREE))
 
 /* Columns of folder view */

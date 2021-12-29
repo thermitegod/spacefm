@@ -25,7 +25,7 @@
 #include <glib-object.h>
 
 #define VFS_ASYNC_TASK_TYPE (vfs_async_task_get_type())
-#define VFS_ASYNC_TASK(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), VFS_ASYNC_TASK_TYPE, VFSAsyncTask))
+#define VFS_ASYNC_TASK(obj) (reinterpret_cast<VFSAsyncTask*>(obj))
 
 struct VFSAsyncTask;
 typedef void* (*VFSAsyncFunc)(VFSAsyncTask*, void*);

@@ -101,7 +101,7 @@ ptk_clipboard_copy_as_text(const char* working_dir,
     char* file_text = g_strdup("");
     for (l = files; l; l = l->next)
     {
-        VFSFileInfo* file = (VFSFileInfo*)l->data;
+        VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
         char* file_path = g_build_filename(working_dir, vfs_file_info_get_name(file), nullptr);
         char* quoted = bash_quote(file_path);
         char* str = file_text;
@@ -127,7 +127,7 @@ ptk_clipboard_copy_name(const char* working_dir,
     char* file_text = g_strdup("");
     for (l = files; l; l = l->next)
     {
-        VFSFileInfo* file = (VFSFileInfo*)l->data;
+        VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
         char* str = file_text;
         if (fcount == 0)
             file_text = g_strdup_printf("%s", vfs_file_info_get_name(file));
@@ -176,7 +176,7 @@ ptk_clipboard_cut_or_copy_files(const char* working_dir, GList* files, bool copy
 
     for (l = g_list_last(files); l; l = l->prev) // sfm was reverse order
     {
-        VFSFileInfo* file = (VFSFileInfo*)l->data;
+        VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
         char* file_path = g_build_filename(working_dir, vfs_file_info_get_name(file), nullptr);
         file_list = g_list_prepend(file_list, file_path);
     }

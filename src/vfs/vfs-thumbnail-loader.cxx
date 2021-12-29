@@ -140,7 +140,7 @@ on_thumbnail_idle(VFSThumbnailLoader* loader)
     // LOG_DEBUG("ENTER ON_THUMBNAIL_IDLE");
     vfs_async_task_lock(loader->task);
 
-    while ((file = (VFSFileInfo*)g_queue_pop_head(loader->update_queue)))
+    while ((file = static_cast<VFSFileInfo*>(g_queue_pop_head(loader->update_queue))))
     {
         vfs_dir_emit_thumbnail_loaded(loader->dir, file);
         vfs_file_info_unref(file);
@@ -167,7 +167,8 @@ thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
     while (G_LIKELY(!vfs_async_task_is_cancelled(task)))
     {
         vfs_async_task_lock(task);
-        VFSThumbnailRequest* req = (VFSThumbnailRequest*)g_queue_pop_head(loader->queue);
+        VFSThumbnailRequest* req =
+            static_cast<VFSThumbnailRequest*>(g_queue_pop_head(loader->queue));
         vfs_async_task_unlock(task);
         if (G_UNLIKELY(!req))
             break;
@@ -275,14 +276,14 @@ vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big)
     GList* l;
     for (l = loader->queue->head; l; l = l->next)
     {
-        req = (VFSThumbnailRequest*)l->data;
+        req = static_cast<VFSThumbnailRequest*>(l->data);
         /* If file with the same name is already in our queue */
         if (req->file == file || !strcmp(req->file->name, file->name))
             break;
     }
     if (l)
     {
-        req = (VFSThumbnailRequest*)l->data;
+        req = static_cast<VFSThumbnailRequest*>(l->data);
     }
     else
     {
@@ -311,7 +312,7 @@ vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
         GList* l;
         for (l = loader->queue->head; l;)
         {
-            VFSThumbnailRequest* req = (VFSThumbnailRequest*)l->data;
+            VFSThumbnailRequest* req = static_cast<VFSThumbnailRequest*>(l->data);
             --req->n_requests[is_big ? LOAD_BIG_THUMBNAIL : LOAD_SMALL_THUMBNAIL];
 
             if (req->n_requests[0] <= 0 && req->n_requests[1] <= 0) /* nobody needs this */

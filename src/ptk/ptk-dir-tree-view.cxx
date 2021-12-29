@@ -579,7 +579,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                                     unsigned int time,
                                     void* user_data) // MOD added
 {
-    PtkFileBrowser* file_browser = (PtkFileBrowser*)user_data;
+    PtkFileBrowser* file_browser = static_cast<PtkFileBrowser*>(user_data);
 
     /*  Don't call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-data-received");

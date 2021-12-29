@@ -37,7 +37,7 @@ get_cwd(GtkEntry* entry)
     else if (path[0] != '$' && path[0] != '+' && path[0] != '&' && path[0] != '!' &&
              path[0] != '\0' && path[0] != ' ')
     {
-        EntryData* edata = (EntryData*)g_object_get_data(G_OBJECT(entry), "edata");
+        EntryData* edata = static_cast<EntryData*>(g_object_get_data(G_OBJECT(entry), "edata"));
         if (edata && edata->browser)
         {
             char* real_path = vfs_file_resolve_path(ptk_file_browser_get_cwd(edata->browser), path);
@@ -54,7 +54,7 @@ seek_path(GtkEntry* entry)
 {
     if (!GTK_IS_ENTRY(entry))
         return false;
-    EntryData* edata = (EntryData*)g_object_get_data(G_OBJECT(entry), "edata");
+    EntryData* edata = static_cast<EntryData*>(g_object_get_data(G_OBJECT(entry), "edata"));
     if (!(edata && edata->browser))
         return false;
     if (edata->seek_timer)
@@ -133,7 +133,7 @@ seek_path(GtkEntry* entry)
 static void
 seek_path_delayed(GtkEntry* entry, unsigned int delay)
 {
-    EntryData* edata = (EntryData*)g_object_get_data(G_OBJECT(entry), "edata");
+    EntryData* edata = static_cast<EntryData*>(g_object_get_data(G_OBJECT(entry), "edata"));
     if (!(edata && edata->browser))
         return;
     // user is still typing - restart timer

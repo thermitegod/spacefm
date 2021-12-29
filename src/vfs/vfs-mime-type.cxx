@@ -61,7 +61,7 @@ vfs_mime_type_reload(void* user_data)
     /* call all registered callbacks */
     for (l = reload_cb; l; l = l->next)
     {
-        VFSMimeReloadCbEnt* ent = (VFSMimeReloadCbEnt*)l->data;
+        VFSMimeReloadCbEnt* ent = static_cast<VFSMimeReloadCbEnt*>(l->data);
         ent->cb(ent->user_data);
     }
     return false;
@@ -71,7 +71,7 @@ static void
 on_mime_cache_changed(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char* file_name,
                       void* user_data)
 {
-    MimeCache* cache = (MimeCache*)user_data;
+    MimeCache* cache = static_cast<MimeCache*>(user_data);
     switch (event)
     {
         case VFS_FILE_MONITOR_CREATE:
@@ -163,7 +163,7 @@ VFSMimeType*
 vfs_mime_type_get_from_type(const char* type)
 {
     g_rw_lock_reader_lock(&mime_hash_lock);
-    VFSMimeType* mime_type = (VFSMimeType*)g_hash_table_lookup(mime_hash, type);
+    VFSMimeType* mime_type = static_cast<VFSMimeType*>(g_hash_table_lookup(mime_hash, type));
     g_rw_lock_reader_unlock(&mime_hash_lock);
 
     if (!mime_type)
@@ -195,7 +195,7 @@ vfs_mime_type_ref(VFSMimeType* mime_type)
 void
 vfs_mime_type_unref(void* mime_type_)
 {
-    VFSMimeType* mime_type = (VFSMimeType*)mime_type_;
+    VFSMimeType* mime_type = static_cast<VFSMimeType*>(mime_type_);
     mime_type->ref_dec();
     if (mime_type->ref_count() == 0)
     {
@@ -339,7 +339,7 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
 static void
 free_cached_icons(void* key, void* value, void* user_data)
 {
-    VFSMimeType* mime_type = (VFSMimeType*)value;
+    VFSMimeType* mime_type = static_cast<VFSMimeType*>(value);
     bool big = GPOINTER_TO_INT(user_data);
     if (big)
     {

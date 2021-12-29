@@ -307,7 +307,7 @@ vfs_dir_find_file(VFSDir* dir, const char* file_name, VFSFileInfo* file)
     GList* l;
     for (l = dir->file_list; l; l = l->next)
     {
-        VFSFileInfo* file2 = (VFSFileInfo*)l->data;
+        VFSFileInfo* file2 = static_cast<VFSFileInfo*>(l->data);
         if (G_UNLIKELY(file == file2))
             return l;
         if (file2->name && !strcmp(file2->name, file_name))
@@ -364,7 +364,7 @@ vfs_dir_emit_file_deleted(VFSDir* dir, const char* file_name, VFSFileInfo* file)
     GList* l = vfs_dir_find_file(dir, file_name, file);
     if (G_LIKELY(l))
     {
-        VFSFileInfo* file_found = vfs_file_info_ref((VFSFileInfo*)l->data);
+        VFSFileInfo* file_found = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data));
         if (!g_slist_find(dir->changed_files, file_found))
         {
             dir->changed_files = g_slist_prepend(dir->changed_files, file_found);
@@ -403,7 +403,7 @@ vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* file,
     GList* l = vfs_dir_find_file(dir, file_name, file);
     if (G_LIKELY(l))
     {
-        file = vfs_file_info_ref((VFSFileInfo*)l->data);
+        file = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data));
         if (!g_slist_find(dir->changed_files, file))
         {
             if (force)
@@ -446,8 +446,8 @@ vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file)
     GList* l = vfs_dir_find_file(dir, file->name, file);
     if (l)
     {
-        g_assert(file == (VFSFileInfo*)l->data);
-        file = vfs_file_info_ref((VFSFileInfo*)l->data);
+        g_assert(file == static_cast<VFSFileInfo*>(l->data));
+        file = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data));
     }
     else
         file = nullptr;
@@ -465,7 +465,7 @@ vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file)
 static VFSDir*
 vfs_dir_new(const char* path)
 {
-    VFSDir* dir = (VFSDir*)g_object_new(VFS_TYPE_DIR, nullptr);
+    VFSDir* dir = static_cast<VFSDir*>(g_object_new(VFS_TYPE_DIR, nullptr));
     dir->path = g_strdup(path);
 
     dir->avoid_changes = vfs_volume_dir_avoid_changes(path);
@@ -697,7 +697,7 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
 static void
 update_changed_files(void* key, void* data, void* user_data)
 {
-    VFSDir* dir = (VFSDir*)data;
+    VFSDir* dir = static_cast<VFSDir*>(data);
 
     if (dir->changed_files)
     {
@@ -705,7 +705,7 @@ update_changed_files(void* key, void* data, void* user_data)
         GSList* l;
         for (l = dir->changed_files; l; l = l->next)
         {
-            VFSFileInfo* file = vfs_file_info_ref((VFSFileInfo*)l->data); ///
+            VFSFileInfo* file = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data)); ///
             if (update_file_info(dir, file))
             {
                 g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, file);
@@ -722,7 +722,7 @@ update_changed_files(void* key, void* data, void* user_data)
 static void
 update_created_files(void* key, void* data, void* user_data)
 {
-    VFSDir* dir = (VFSDir*)data;
+    VFSDir* dir = static_cast<VFSDir*>(data);
 
     if (dir->created_files)
     {
@@ -752,7 +752,7 @@ update_created_files(void* key, void* data, void* user_data)
             else
             {
                 // file already exists in dir file_list
-                file = vfs_file_info_ref((VFSFileInfo*)ll->data);
+                file = vfs_file_info_ref(static_cast<VFSFileInfo*>(ll->data));
                 if (update_file_info(dir, file))
                 {
                     g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, file);
@@ -793,7 +793,7 @@ static void
 vfs_dir_monitor_callback(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char* file_name,
                          void* user_data)
 {
-    VFSDir* dir = (VFSDir*)user_data;
+    VFSDir* dir = static_cast<VFSDir*>(user_data);
 
     switch (event)
     {
@@ -818,7 +818,7 @@ reload_icons(const char* path, VFSDir* dir, void* user_data)
     GList* l;
     for (l = dir->file_list; l; l = l->next)
     {
-        VFSFileInfo* fi = (VFSFileInfo*)l->data;
+        VFSFileInfo* fi = static_cast<VFSFileInfo*>(l->data);
         /* It's a desktop entry file */
         if (fi->flags & VFS_FILE_INFO_DESKTOP_ENTRY)
         {
@@ -851,7 +851,7 @@ vfs_dir_get_by_path_soft(const char* path)
     if (G_UNLIKELY(!dir_hash || !path))
         return nullptr;
 
-    VFSDir* dir = (VFSDir*)g_hash_table_lookup(dir_hash, path);
+    VFSDir* dir = static_cast<VFSDir*>(g_hash_table_lookup(dir_hash, path));
     if (dir)
         g_object_ref(dir);
     return dir;
@@ -875,7 +875,7 @@ vfs_dir_get_by_path(const char* path)
     }
     else
     {
-        dir = (VFSDir*)g_hash_table_lookup(dir_hash, path);
+        dir = static_cast<VFSDir*>(g_hash_table_lookup(dir_hash, path));
     }
 
     if (G_UNLIKELY(!mime_cb))
@@ -905,7 +905,7 @@ reload_mime_type(char* key, VFSDir* dir, void* user_data)
     vfs_dir_lock(dir);
     for (l = dir->file_list; l; l = l->next)
     {
-        file = (VFSFileInfo*)l->data;
+        file = static_cast<VFSFileInfo*>(l->data);
         char* full_path = g_build_filename(dir->path, vfs_file_info_get_name(file), nullptr);
         vfs_file_info_reload_mime_type(file, full_path);
         // LOG_DEBUG("reload {}", full_path);
@@ -914,7 +914,7 @@ reload_mime_type(char* key, VFSDir* dir, void* user_data)
 
     for (l = dir->file_list; l; l = l->next)
     {
-        file = (VFSFileInfo*)l->data;
+        file = static_cast<VFSFileInfo*>(l->data);
         g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, file);
     }
     vfs_dir_unlock(dir);
@@ -950,7 +950,7 @@ vfs_dir_unload_thumbnails(VFSDir* dir, bool is_big)
     {
         for (l = dir->file_list; l; l = l->next)
         {
-            file = (VFSFileInfo*)l->data;
+            file = static_cast<VFSFileInfo*>(l->data);
             if (file->big_thumbnail)
             {
                 g_object_unref(file->big_thumbnail);
@@ -970,7 +970,7 @@ vfs_dir_unload_thumbnails(VFSDir* dir, bool is_big)
     {
         for (l = dir->file_list; l; l = l->next)
         {
-            file = (VFSFileInfo*)l->data;
+            file = static_cast<VFSFileInfo*>(l->data);
             if (file->small_thumbnail)
             {
                 g_object_unref(file->small_thumbnail);

@@ -159,7 +159,7 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTr
     GList* sel;
     for (sel = sel_files; sel; sel = g_list_next(sel))
     {
-        VFSFileInfo* file = (VFSFileInfo*)sel->data;
+        VFSFileInfo* file = static_cast<VFSFileInfo*>(sel->data);
         char* file_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
         file_list = g_list_prepend(file_list, file_path);
     }
@@ -204,7 +204,7 @@ ptk_trash_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTre
     GList* sel;
     for (sel = sel_files; sel; sel = g_list_next(sel))
     {
-        VFSFileInfo* file = (VFSFileInfo*)sel->data;
+        VFSFileInfo* file = static_cast<VFSFileInfo*>(sel->data);
         char* file_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
         file_list = g_list_prepend(file_list, file_path);
     }
@@ -3475,7 +3475,7 @@ open_files_with_each_app(void* key, void* value, void* user_data)
 {
     char* app_desktop = (char*)key; // is const unless handler
     GList* files = (GList*)value;
-    ParentInfo* parent = (ParentInfo*)user_data;
+    ParentInfo* parent = static_cast<ParentInfo*>(user_data);
     open_files_with_app(parent, files, app_desktop);
 }
 
@@ -3508,7 +3508,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
     GList* l;
     for (l = sel_files; l; l = l->next)
     {
-        VFSFileInfo* file = (VFSFileInfo*)l->data;
+        VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
         if (G_UNLIKELY(!file))
             continue;
 
@@ -3596,7 +3596,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                                                                        true);
                 if (handlers_slist)
                 {
-                    XSet* handler_set = (XSet*)handlers_slist->data;
+                    XSet* handler_set = static_cast<XSet*>(handlers_slist->data);
                     g_slist_free(handlers_slist);
                     alloc_desktop = g_strconcat("###", handler_set->name, nullptr);
                 }
@@ -3783,7 +3783,9 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
     int item_count = 0;
     for (sel = sel_files; sel; sel = sel->next)
     {
-        file_path = g_build_filename(cwd, vfs_file_info_get_name((VFSFileInfo*)sel->data), nullptr);
+        file_path = g_build_filename(cwd,
+                                     vfs_file_info_get_name(static_cast<VFSFileInfo*>(sel->data)),
+                                     nullptr);
         file_path_q = bash_quote(file_path);
         str = file_paths;
         file_paths = g_strdup_printf("%s %s", file_paths, file_path_q);

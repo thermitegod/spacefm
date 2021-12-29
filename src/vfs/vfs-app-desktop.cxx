@@ -104,7 +104,7 @@ vfs_app_desktop_free(VFSAppDesktop* app)
 void
 vfs_app_desktop_unref(void* data)
 {
-    VFSAppDesktop* app = (VFSAppDesktop*)data;
+    VFSAppDesktop* app = static_cast<VFSAppDesktop*>(data);
     app->ref_dec();
     if (app->ref_count() == 0)
         vfs_app_desktop_free(app);

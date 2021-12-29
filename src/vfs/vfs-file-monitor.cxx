@@ -127,7 +127,8 @@ vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCallback cb, void* u
     else
         real_path = resolved_path;
 
-    VFSFileMonitor* monitor = (VFSFileMonitor*)g_hash_table_lookup(monitor_hash, real_path);
+    VFSFileMonitor* monitor =
+        static_cast<VFSFileMonitor*>(g_hash_table_lookup(monitor_hash, real_path));
     if (!monitor)
     {
         monitor = g_slice_new0(VFSFileMonitor);
@@ -210,7 +211,8 @@ vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* use
     // LOG_INFO("vfs_file_monitor_remove");
     if (cb && fm->callbacks)
     {
-        VFSFileMonitorCallbackEntry* callbacks = (VFSFileMonitorCallbackEntry*)fm->callbacks->data;
+        VFSFileMonitorCallbackEntry* callbacks =
+            VFS_FILE_MONITOR_CALLBACK_DATA(fm->callbacks->data);
         unsigned int i;
         for (i = 0; i < fm->callbacks->len; ++i)
         {
@@ -240,7 +242,7 @@ static void
 reconnect_fam(void* key, void* value, void* user_data)
 {
     struct stat file_stat; // skip stat
-    VFSFileMonitor* monitor = (VFSFileMonitor*)value;
+    VFSFileMonitor* monitor = static_cast<VFSFileMonitor*>(value);
     const char* path = (const char*)key;
     if (lstat(path, &file_stat) != -1)
     {
@@ -264,7 +266,7 @@ static bool
 find_monitor(void* key, void* value, void* user_data)
 {
     int wd = GPOINTER_TO_INT(user_data);
-    VFSFileMonitor* monitor = (VFSFileMonitor*)value;
+    VFSFileMonitor* monitor = static_cast<VFSFileMonitor*>(value);
     return (monitor->wd == wd);
 }
 
@@ -291,7 +293,7 @@ dispatch_event(VFSFileMonitor* monitor, VFSFileMonitorEvent evt, const char* fil
     /* Call the callback functions */
     if (monitor->callbacks && monitor->callbacks->len)
     {
-        VFSFileMonitorCallbackEntry* cb = (VFSFileMonitorCallbackEntry*)monitor->callbacks->data;
+        VFSFileMonitorCallbackEntry* cb = VFS_FILE_MONITOR_CALLBACK_DATA(monitor->callbacks->data);
         unsigned int i;
         for (i = 0; i < monitor->callbacks->len; ++i)
         {
@@ -350,9 +352,8 @@ on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data)
         struct inotify_event* ievent = (struct inotify_event*)&buf[i];
         /* FIXME: 2 different paths can have the same wd because of link
          *        This was fixed in spacefm 0.8.7 ?? */
-        VFSFileMonitor* monitor = (VFSFileMonitor*)g_hash_table_find(monitor_hash,
-                                                                     (GHRFunc)find_monitor,
-                                                                     GINT_TO_POINTER(ievent->wd));
+        VFSFileMonitor* monitor = static_cast<VFSFileMonitor*>(
+            g_hash_table_find(monitor_hash, (GHRFunc)find_monitor, GINT_TO_POINTER(ievent->wd)));
         if (G_LIKELY(monitor))
         {
             const char* file_name;

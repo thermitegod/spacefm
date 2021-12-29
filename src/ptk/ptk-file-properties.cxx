@@ -126,13 +126,13 @@ calc_total_size_of_files(const char* path, FilePropertiesDialogData* data)
 static void*
 calc_size(void* user_data)
 {
-    FilePropertiesDialogData* data = (FilePropertiesDialogData*)user_data;
+    FilePropertiesDialogData* data = static_cast<FilePropertiesDialogData*>(user_data);
     GList* l;
     for (l = data->file_list; l; l = l->next)
     {
         if (data->cancel)
             break;
-        VFSFileInfo* file = (VFSFileInfo*)l->data;
+        VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
         char* path = g_build_filename(data->dir_path, vfs_file_info_get_name(file), nullptr);
         if (path)
         {
@@ -239,7 +239,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
         gtk_tree_model_get(model, &it, 2, &action, -1);
         if (!action)
         {
-            VFSMimeType* mime = (VFSMimeType*)user_data;
+            VFSMimeType* mime = static_cast<VFSMimeType*>(user_data);
             GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(combo));
             action = (char*)
                 ptk_choose_app_for_mime_type(GTK_WINDOW(parent), mime, false, true, true, true);
@@ -390,7 +390,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     VFSMimeType* type2 = nullptr;
     for (l = sel_files; l; l = l->next)
     {
-        file = (VFSFileInfo*)l->data;
+        file = static_cast<VFSFileInfo*>(l->data);
         type = vfs_file_info_get_mime_type(file);
         if (!type2)
             type2 = vfs_file_info_get_mime_type(file);
@@ -408,7 +408,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     data->recurse = (GtkWidget*)gtk_builder_get_object(builder, "recursive");
     gtk_widget_set_sensitive(data->recurse, is_dirs);
 
-    file = (VFSFileInfo*)sel_files->data;
+    file = static_cast<VFSFileInfo*>(sel_files->data);
     if (same_type)
     {
         mime = vfs_file_info_get_mime_type(file);
@@ -731,7 +731,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
     }
 
     FilePropertiesDialogData* data =
-        (FilePropertiesDialogData*)g_object_get_data(G_OBJECT(dialog), "DialogData");
+        static_cast<FilePropertiesDialogData*>(g_object_get_data(G_OBJECT(dialog), "DialogData"));
     if (data)
     {
         if (data->update_label_timer)
@@ -761,8 +761,9 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 GString* gstr = g_string_new(nullptr);
                 for (l = data->file_list; l; l = l->next)
                 {
-                    file_path =
-                        g_build_filename(data->dir_path, ((VFSFileInfo*)l->data)->name, nullptr);
+                    file_path = g_build_filename(data->dir_path,
+                                                 (static_cast<VFSFileInfo*>(l->data))->name,
+                                                 nullptr);
                     quoted_path = bash_quote(file_path);
                     g_string_append_printf(gstr, " %s", quoted_path);
                     g_free(file_path);
@@ -814,7 +815,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                     gtk_tree_model_get(model, &it, 2, &action, -1);
                     if (action)
                     {
-                        file = (VFSFileInfo*)data->file_list->data;
+                        file = static_cast<VFSFileInfo*>(data->file_list->data);
                         VFSMimeType* mime = vfs_file_info_get_mime_type(file);
                         vfs_mime_type_set_default_action(mime, action);
                         vfs_mime_type_unref(mime);
@@ -870,7 +871,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 GList* file_list = nullptr;
                 for (l = data->file_list; l; l = l->next)
                 {
-                    file = (VFSFileInfo*)l->data;
+                    file = static_cast<VFSFileInfo*>(l->data);
                     file_path =
                         g_build_filename(data->dir_path, vfs_file_info_get_name(file), nullptr);
                     file_list = g_list_prepend(file_list, file_path);

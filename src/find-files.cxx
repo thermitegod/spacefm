@@ -149,7 +149,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
 
             for (l = files; l; l = l->next)
             {
-                file = (VFSFileInfo*)l->data;
+                file = static_cast<VFSFileInfo*>(l->data);
                 if (G_UNLIKELY(!file))
                     continue;
 
@@ -250,7 +250,7 @@ on_open_files(GAction* action, FindFile* data)
             }
             gtk_window_present((GtkWindow*)w);
             file_browser =
-                (PtkFileBrowser*)fm_main_window_get_current_file_browser((FMMainWindow*)w);
+                PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(FM_MAIN_WINDOW(w)));
         }
         g_hash_table_foreach_steal(hash, (GHRFunc)open_file, file_browser);
     }
@@ -562,7 +562,7 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
         //            return;
     }
 
-    while ((ff = (FoundFile*)g_queue_pop_head(queue)))
+    while ((ff = static_cast<FoundFile*>(g_queue_pop_head(queue))))
     {
         gtk_list_store_append(data->result_list, &it);
         icon = vfs_file_info_get_small_icon(ff->fi);
@@ -812,7 +812,7 @@ on_add_search_volumes(GtkWidget* menu, FindFile* data)
     const GList* l;
     for (l = vols; l; l = l->next)
     {
-        VFSVolume* vol = (VFSVolume*)l->data;
+        VFSVolume* vol = static_cast<VFSVolume*>(l->data);
         if (vfs_volume_is_mounted(vol))
         {
             path = vfs_volume_get_mount_point(vol);

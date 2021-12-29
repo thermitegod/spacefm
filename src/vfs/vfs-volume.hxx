@@ -16,6 +16,8 @@
 
 #include "settings.hxx"
 
+#define VFS_VOLUME_CALLBACK_DATA(obj) (reinterpret_cast<VFSVolumeCallbackData*>(obj))
+
 enum VFSVolumeState
 {
     VFS_VOLUME_ADDED,

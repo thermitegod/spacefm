@@ -25,6 +25,8 @@
 #include <unistd.h>
 #include <sys/inotify.h>
 
+#define VFS_FILE_MONITOR_CALLBACK_DATA(obj) (reinterpret_cast<VFSFileMonitorCallbackEntry*>(obj))
+
 enum VFSFileMonitorEvent
 {
     VFS_FILE_MONITOR_CREATE,

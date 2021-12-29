@@ -142,7 +142,7 @@ update_change_detection()
     const GList* l;
     for (l = fm_main_window_get_all(); l; l = l->next)
     {
-        FMMainWindow* a_window = FM_MAIN_WINDOW(l->data);
+        FMMainWindow* a_window = static_cast<FMMainWindow*>(l->data);
         int p;
         for (p = 1; p < 5; p++)
         {
@@ -181,7 +181,7 @@ update_all()
     const GList* l;
     for (l = volumes; l; l = l->next)
     {
-        VFSVolume* vol = (VFSVolume*)l->data;
+        VFSVolume* vol = static_cast<VFSVolume*>(l->data);
         if (vol)
         {
             // search model for volume vol
@@ -227,7 +227,7 @@ update_names()
     {
         if (l->data)
         {
-            VFSVolume* vol = (VFSVolume*)l->data;
+            VFSVolume* vol = static_cast<VFSVolume*>(l->data);
             vfs_volume_set_info(vol);
 
             // search model for volume vol
@@ -352,9 +352,9 @@ ptk_location_view_open_block(const char* block, bool new_tab)
     const GList* l = vfs_volume_get_all_volumes();
     for (; l; l = l->next)
     {
-        if (!g_strcmp0(vfs_volume_get_device((VFSVolume*)l->data), canon))
+        if (!g_strcmp0(vfs_volume_get_device(static_cast<VFSVolume*>(l->data)), canon))
         {
-            VFSVolume* vol = (VFSVolume*)l->data;
+            VFSVolume* vol = static_cast<VFSVolume*>(l->data);
             if (new_tab)
                 on_open_tab(nullptr, vol, nullptr);
             else
@@ -374,7 +374,7 @@ ptk_location_view_init_model(GtkListStore* list)
 
     for (; l; l = l->next)
     {
-        add_volume((VFSVolume*)l->data, false);
+        add_volume(static_cast<VFSVolume*>(l->data), false);
     }
     update_volume_icons();
 }
@@ -818,7 +818,7 @@ on_autoopen_net_cb(VFSFileTask* task, AutoOpen* ao)
     const GList* l;
     for (l = volumes; l; l = l->next)
     {
-        VFSVolume* vol = (VFSVolume*)l->data;
+        VFSVolume* vol = static_cast<VFSVolume*>(l->data);
         if (vol->is_mounted)
         {
             if (!strcmp(vol->device_file, ao->device_file))
@@ -923,7 +923,7 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
         const GList* volumes = vfs_volume_get_all_volumes();
         for (l = volumes; l; l = l->next)
         {
-            vol = (VFSVolume*)l->data;
+            vol = static_cast<VFSVolume*>(l->data);
             // test against mtab url and copy of user-entered url (udi)
             if (strstr(vol->device_file, netmount->url) || strstr(vol->udi, netmount->url))
             {
@@ -1071,7 +1071,7 @@ on_mount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (!vol->device_file)
         return;
     PtkFileBrowser* file_browser =
-        (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
+        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
     // Note: file_browser may be nullptr
     if (!GTK_IS_WIDGET(file_browser))
         file_browser = nullptr;
@@ -1159,7 +1159,7 @@ on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 
         // task
         PtkFileBrowser* file_browser =
-            (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
+            static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
         char* task_name = g_strdup_printf("Mount As Root %s", vol->device_file);
         PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
         g_free(task_name);
@@ -1214,7 +1214,7 @@ on_umount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         char* cmd = g_strdup_printf("echo %s; echo; %s", s1, s1);
         g_free(s1);
         PtkFileBrowser* file_browser =
-            (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
+            static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
         char* task_name = g_strdup_printf("Unmount As Root %s", vol->device_file);
         PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
         g_free(task_name);
@@ -1242,7 +1242,7 @@ on_umount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else
         view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
     PtkFileBrowser* file_browser =
-        (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
+        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
     // Note: file_browser may be nullptr
     if (!GTK_IS_WIDGET(file_browser))
         file_browser = nullptr;
@@ -1291,7 +1291,7 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else
         view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
     PtkFileBrowser* file_browser =
-        (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
+        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
     // Note: file_browser may be nullptr
     if (!GTK_IS_WIDGET(file_browser))
         file_browser = nullptr;
@@ -1411,9 +1411,9 @@ on_autoopen_cb(VFSFileTask* task, AutoOpen* ao)
     const GList* l;
     for (l = volumes; l; l = l->next)
     {
-        if (((VFSVolume*)l->data)->devnum == ao->devnum)
+        if ((static_cast<VFSVolume*>(l->data))->devnum == ao->devnum)
         {
-            VFSVolume* vol = (VFSVolume*)l->data;
+            VFSVolume* vol = static_cast<VFSVolume*>(l->data);
             vol->inhibit_auto = false;
             if (vol->is_mounted)
             {
@@ -1444,7 +1444,7 @@ try_mount(GtkTreeView* view, VFSVolume* vol)
     if (!view || !vol)
         return false;
     PtkFileBrowser* file_browser =
-        (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
+        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
     if (!file_browser)
         return false;
     // task
@@ -1507,9 +1507,10 @@ on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else
         view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
     if (view)
-        file_browser = (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
+        file_browser =
+            static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
     else
-        file_browser = (PtkFileBrowser*)fm_main_window_get_current_file_browser(nullptr);
+        file_browser = PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(nullptr));
 
     if (!file_browser || !vol)
         return;
@@ -1574,9 +1575,10 @@ on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else
         view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
     if (view)
-        file_browser = (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
+        file_browser =
+            static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
     else
-        file_browser = (PtkFileBrowser*)fm_main_window_get_current_file_browser(nullptr);
+        file_browser = PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(nullptr));
 
     if (!vol)
         return;
@@ -1650,7 +1652,7 @@ on_remount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else
         view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
     PtkFileBrowser* file_browser =
-        (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
+        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
 
     // get user options
     XSet* set = xset_get("dev_remount_options");
@@ -1729,7 +1731,7 @@ on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else
         view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
     PtkFileBrowser* file_browser =
-        (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
+        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
 
     if (vfs_volume_is_mounted(vol))
     {
@@ -1805,7 +1807,7 @@ on_sync(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     }
 
     PtkFileBrowser* file_browser =
-        (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
+        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
 
     PtkFileTask* task = ptk_file_exec_new("Sync", nullptr, view, file_browser->task_view);
     task->task->exec_browser = nullptr;
@@ -1864,7 +1866,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         return;
 
     PtkFileBrowser* file_browser =
-        (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
+        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
 
     // use handler command if available
     bool run_in_terminal;
@@ -2348,7 +2350,7 @@ on_handler_show_config(GtkMenuItem* item, GtkWidget* view, XSet* set2)
     if (!item)
         set = set2;
     else
-        set = (XSet*)g_object_get_data(G_OBJECT(item), "set");
+        set = static_cast<XSet*>(g_object_get_data(G_OBJECT(item), "set"));
 
     if (!g_strcmp0(set->name, "dev_fs_cnf"))
         mode = HANDLER_MODE_FS;
@@ -2357,7 +2359,7 @@ on_handler_show_config(GtkMenuItem* item, GtkWidget* view, XSet* set2)
     else
         return;
     PtkFileBrowser* file_browser =
-        (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
+        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
     ptk_handler_show_config(mode, file_browser, nullptr);
 }
 
@@ -2655,7 +2657,7 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data)
 
     // LOG_INFO("on_button_press_event   view = {}", view);
     PtkFileBrowser* file_browser =
-        (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
+        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
     ptk_file_browser_focus_me(file_browser);
 
     if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
@@ -2758,7 +2760,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, unsig
     const GList* volumes = vfs_volume_get_all_volumes();
     for (l = volumes; l; l = l->next)
     {
-        if ((VFSVolume*)l->data == vol)
+        if (static_cast<VFSVolume*>(l->data) == vol)
             break;
     }
     if (!l)
@@ -2767,7 +2769,8 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, unsig
 
     GtkWidget* view = (GtkWidget*)g_object_get_data(G_OBJECT(menu), "parent");
     if (xset_get_b("dev_newtab"))
-        file_browser = (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
+        file_browser =
+            static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
     else
         file_browser = nullptr;
 
@@ -2871,7 +2874,7 @@ on_dev_menu_keypress(GtkWidget* menu, GdkEventKey* event, void* user_data)
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(menu));
     if (item)
     {
-        VFSVolume* vol = (VFSVolume*)g_object_get_data(G_OBJECT(item), "vol");
+        VFSVolume* vol = static_cast<VFSVolume*>(g_object_get_data(G_OBJECT(item), "vol"));
         if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter ||
             event->keyval == GDK_KEY_space)
         {
@@ -2947,7 +2950,7 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     const GList* volumes = vfs_volume_get_all_volumes();
     for (v = volumes; v; v = v->next)
     {
-        vol = (VFSVolume*)v->data;
+        vol = static_cast<VFSVolume*>(v->data);
         if (vol && volume_is_visible(vol))
             names = g_list_prepend(names, vol);
     }
@@ -2955,7 +2958,7 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     names = g_list_sort(names, (GCompareFunc)cmp_dev_name);
     for (l = names; l; l = l->next)
     {
-        vol = (VFSVolume*)l->data;
+        vol = static_cast<VFSVolume*>(l->data);
         item = gtk_menu_item_new_with_label(vfs_volume_get_disp_name(vol));
         g_object_set_data(G_OBJECT(item), "menu", menu);
         g_object_set_data(G_OBJECT(item), "vol", vol);
@@ -3402,7 +3405,7 @@ on_bookmark_device(GtkMenuItem* item, VFSVolume* vol)
 {
     GtkWidget* view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
     PtkFileBrowser* file_browser =
-        (PtkFileBrowser*)g_object_get_data(G_OBJECT(view), "file_browser");
+        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
     if (!file_browser)
         return;
 

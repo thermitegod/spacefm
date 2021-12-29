@@ -19,7 +19,7 @@
 #include "vfs/vfs-async-task.hxx"
 
 #define VFS_TYPE_DIR (vfs_dir_get_type())
-#define VFS_DIR(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), VFS_TYPE_DIR, VFSDir))
+#define VFS_DIR(obj) (reinterpret_cast<VFSDir*>(obj))
 
 struct VFSDir
 {

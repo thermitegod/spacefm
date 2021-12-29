@@ -947,9 +947,10 @@ info_mount_points(device_t* device)
         GList* l;
         for (l = devmounts; l; l = l->next)
         {
-            if (((devmount_t*)l->data)->major == dmajor && ((devmount_t*)l->data)->minor == dminor)
+            if ((static_cast<devmount_t*>(l->data))->major == dmajor &&
+                (static_cast<devmount_t*>(l->data))->minor == dminor)
             {
-                return g_strdup(((devmount_t*)l->data)->mount_points);
+                return g_strdup((static_cast<devmount_t*>(l->data))->mount_points);
             }
         }
         return nullptr;
@@ -1601,9 +1602,10 @@ parse_mounts(bool report)
         devmount = nullptr;
         for (l = newmounts; l; l = l->next)
         {
-            if (((devmount_t*)l->data)->major == major && ((devmount_t*)l->data)->minor == minor)
+            if ((static_cast<devmount_t*>(l->data))->major == major &&
+                (static_cast<devmount_t*>(l->data))->minor == minor)
             {
-                devmount = (devmount_t*)l->data;
+                devmount = static_cast<devmount_t*>(l->data);
                 break;
             }
         }
@@ -1677,7 +1679,7 @@ parse_mounts(bool report)
     GList* m;
     for (l = newmounts; l; l = l->next)
     {
-        devmount = (devmount_t*)l->data;
+        devmount = static_cast<devmount_t*>(l->data);
         // Sort the list to ensure that shortest mount paths appear first
         devmount->mounts = g_list_sort(devmount->mounts, (GCompareFunc)g_strcmp0);
         m = devmount->mounts;
@@ -1701,18 +1703,19 @@ parse_mounts(bool report)
     {
         for (l = newmounts; l; l = l->next)
         {
-            devmount = (devmount_t*)l->data;
+            devmount = static_cast<devmount_t*>(l->data);
             // LOG_INFO("finding {}:{}", devmount->major, devmount->minor);
             found =
                 g_list_find_custom(devmounts, (const void*)devmount, (GCompareFunc)cmp_devmounts);
             if (found)
             {
                 // LOG_INFO("    found");
-                if (!g_strcmp0(((devmount_t*)found->data)->mount_points, devmount->mount_points))
+                if (!g_strcmp0((static_cast<devmount_t*>(found->data))->mount_points,
+                               devmount->mount_points))
                 {
                     // LOG_INFO("    freed");
                     // no change to mount points, so remove from old list
-                    devmount = (devmount_t*)found->data;
+                    devmount = static_cast<devmount_t*>(found->data);
                     g_free(devmount->mount_points);
                     g_free(devmount->fstype);
                     devmounts = g_list_remove(devmounts, devmount);
@@ -1738,7 +1741,7 @@ parse_mounts(bool report)
     // any remaining devices in old list have changed mount status
     for (l = devmounts; l; l = l->next)
     {
-        devmount = (devmount_t*)l->data;
+        devmount = static_cast<devmount_t*>(l->data);
         // LOG_INFO("remain {}:{}", devmount->major, devmount->minor );
         if (report)
         {
@@ -1762,7 +1765,7 @@ parse_mounts(bool report)
         for (l = changed; l; l = l->next)
         {
             devnode = nullptr;
-            devmount = (devmount_t*)l->data;
+            devmount = static_cast<devmount_t*>(l->data);
             devnum = makedev(devmount->major, devmount->minor);
             udevice = udev_device_new_from_devnum(udev, 'b', devnum);
             if (udevice)
@@ -1810,7 +1813,7 @@ free_devmounts()
         return;
     for (l = devmounts; l; l = l->next)
     {
-        devmount = (devmount_t*)l->data;
+        devmount = static_cast<devmount_t*>(l->data);
         g_free(devmount->mount_points);
         g_free(devmount->fstype);
         g_slice_free(devmount_t, devmount);
@@ -1826,8 +1829,9 @@ get_devmount_fstype(unsigned int major, unsigned int minor)
 
     for (l = devmounts; l; l = l->next)
     {
-        if (((devmount_t*)l->data)->major == major && ((devmount_t*)l->data)->minor == minor)
-            return ((devmount_t*)l->data)->fstype;
+        if ((static_cast<devmount_t*>(l->data))->major == major &&
+            (static_cast<devmount_t*>(l->data))->minor == minor)
+            return (static_cast<devmount_t*>(l->data))->fstype;
     }
     return nullptr;
 }
@@ -3590,63 +3594,63 @@ vfs_volume_device_added(VFSVolume* volume, bool automount)
     GList* l;
     for (l = volumes; l; l = l->next)
     {
-        if (((VFSVolume*)l->data)->devnum == volume->devnum)
+        if ((static_cast<VFSVolume*>(l->data))->devnum == volume->devnum)
         {
             // update existing volume
-            bool was_mounted = ((VFSVolume*)l->data)->is_mounted;
-            bool was_audiocd = ((VFSVolume*)l->data)->is_audiocd;
-            bool was_mountable = ((VFSVolume*)l->data)->is_mountable;
+            bool was_mounted = (static_cast<VFSVolume*>(l->data))->is_mounted;
+            bool was_audiocd = (static_cast<VFSVolume*>(l->data))->is_audiocd;
+            bool was_mountable = (static_cast<VFSVolume*>(l->data))->is_mountable;
 
             // detect changed mount point
             if (!was_mounted && volume->is_mounted)
                 changed_mount_point = g_strdup(volume->mount_point);
             else if (was_mounted && !volume->is_mounted)
-                changed_mount_point = g_strdup(((VFSVolume*)l->data)->mount_point);
+                changed_mount_point = g_strdup((static_cast<VFSVolume*>(l->data))->mount_point);
 
-            vfs_free_volume_members((VFSVolume*)l->data);
-            ((VFSVolume*)l->data)->udi = g_strdup(volume->udi);
-            ((VFSVolume*)l->data)->device_file = g_strdup(volume->device_file);
-            ((VFSVolume*)l->data)->label = g_strdup(volume->label);
-            ((VFSVolume*)l->data)->mount_point = g_strdup(volume->mount_point);
-            ((VFSVolume*)l->data)->icon = g_strdup(volume->icon);
-            ((VFSVolume*)l->data)->disp_name = g_strdup(volume->disp_name);
-            ((VFSVolume*)l->data)->is_mounted = volume->is_mounted;
-            ((VFSVolume*)l->data)->is_mountable = volume->is_mountable;
-            ((VFSVolume*)l->data)->is_optical = volume->is_optical;
-            ((VFSVolume*)l->data)->requires_eject = volume->requires_eject;
-            ((VFSVolume*)l->data)->is_removable = volume->is_removable;
-            ((VFSVolume*)l->data)->is_user_visible = volume->is_user_visible;
-            ((VFSVolume*)l->data)->size = volume->size;
-            ((VFSVolume*)l->data)->is_table = volume->is_table;
-            ((VFSVolume*)l->data)->is_floppy = volume->is_floppy;
-            ((VFSVolume*)l->data)->nopolicy = volume->nopolicy;
-            ((VFSVolume*)l->data)->fs_type = volume->fs_type;
-            ((VFSVolume*)l->data)->is_blank = volume->is_blank;
-            ((VFSVolume*)l->data)->is_audiocd = volume->is_audiocd;
-            ((VFSVolume*)l->data)->is_dvd = volume->is_dvd;
+            vfs_free_volume_members(static_cast<VFSVolume*>(l->data));
+            (static_cast<VFSVolume*>(l->data))->udi = g_strdup(volume->udi);
+            (static_cast<VFSVolume*>(l->data))->device_file = g_strdup(volume->device_file);
+            (static_cast<VFSVolume*>(l->data))->label = g_strdup(volume->label);
+            (static_cast<VFSVolume*>(l->data))->mount_point = g_strdup(volume->mount_point);
+            (static_cast<VFSVolume*>(l->data))->icon = g_strdup(volume->icon);
+            (static_cast<VFSVolume*>(l->data))->disp_name = g_strdup(volume->disp_name);
+            (static_cast<VFSVolume*>(l->data))->is_mounted = volume->is_mounted;
+            (static_cast<VFSVolume*>(l->data))->is_mountable = volume->is_mountable;
+            (static_cast<VFSVolume*>(l->data))->is_optical = volume->is_optical;
+            (static_cast<VFSVolume*>(l->data))->requires_eject = volume->requires_eject;
+            (static_cast<VFSVolume*>(l->data))->is_removable = volume->is_removable;
+            (static_cast<VFSVolume*>(l->data))->is_user_visible = volume->is_user_visible;
+            (static_cast<VFSVolume*>(l->data))->size = volume->size;
+            (static_cast<VFSVolume*>(l->data))->is_table = volume->is_table;
+            (static_cast<VFSVolume*>(l->data))->is_floppy = volume->is_floppy;
+            (static_cast<VFSVolume*>(l->data))->nopolicy = volume->nopolicy;
+            (static_cast<VFSVolume*>(l->data))->fs_type = volume->fs_type;
+            (static_cast<VFSVolume*>(l->data))->is_blank = volume->is_blank;
+            (static_cast<VFSVolume*>(l->data))->is_audiocd = volume->is_audiocd;
+            (static_cast<VFSVolume*>(l->data))->is_dvd = volume->is_dvd;
 
             // Mount and ejection detect for automount
             if (volume->is_mounted)
             {
-                ((VFSVolume*)l->data)->ever_mounted = true;
-                ((VFSVolume*)l->data)->automount_time = 0;
+                (static_cast<VFSVolume*>(l->data))->ever_mounted = true;
+                (static_cast<VFSVolume*>(l->data))->automount_time = 0;
             }
             else
             {
                 if (volume->is_removable && !volume->is_mountable) // ejected
                 {
-                    ((VFSVolume*)l->data)->ever_mounted = false;
-                    ((VFSVolume*)l->data)->automount_time = 0;
-                    ((VFSVolume*)l->data)->inhibit_auto = false;
+                    (static_cast<VFSVolume*>(l->data))->ever_mounted = false;
+                    (static_cast<VFSVolume*>(l->data))->automount_time = 0;
+                    (static_cast<VFSVolume*>(l->data))->inhibit_auto = false;
                 }
             }
 
-            call_callbacks((VFSVolume*)l->data, VFS_VOLUME_CHANGED);
+            call_callbacks(static_cast<VFSVolume*>(l->data), VFS_VOLUME_CHANGED);
 
             vfs_free_volume_members(volume);
             g_slice_free(VFSVolume, volume);
 
-            volume = (VFSVolume*)l->data;
+            volume = static_cast<VFSVolume*>(l->data);
             if (automount)
             {
                 vfs_volume_automount(volume);
@@ -3704,11 +3708,11 @@ vfs_volume_nonblock_removed(dev_t devnum)
 
     for (l = volumes; l; l = l->next)
     {
-        if (((VFSVolume*)l->data)->device_type != DEVICE_TYPE_BLOCK &&
-            ((VFSVolume*)l->data)->devnum == devnum)
+        if ((static_cast<VFSVolume*>(l->data))->device_type != DEVICE_TYPE_BLOCK &&
+            (static_cast<VFSVolume*>(l->data))->devnum == devnum)
         {
             // remove volume
-            volume = (VFSVolume*)l->data;
+            volume = static_cast<VFSVolume*>(l->data);
             LOG_INFO("special mount removed: {} ({}:{}) on {}",
                      volume->device_file,
                      (unsigned int)MAJOR(volume->devnum),
@@ -3737,11 +3741,11 @@ vfs_volume_device_removed(struct udev_device* udevice)
     VFSVolume* volume;
     for (l = volumes; l; l = l->next)
     {
-        if (((VFSVolume*)l->data)->device_type == DEVICE_TYPE_BLOCK &&
-            ((VFSVolume*)l->data)->devnum == devnum)
+        if ((static_cast<VFSVolume*>(l->data))->device_type == DEVICE_TYPE_BLOCK &&
+            (static_cast<VFSVolume*>(l->data))->devnum == devnum)
         {
             // remove volume
-            volume = (VFSVolume*)l->data;
+            volume = static_cast<VFSVolume*>(l->data);
             // LOG_INFO("remove volume {}", volume->device_file);
             vfs_volume_exec(volume, xset_get_s("dev_exec_remove"));
             if (volume->is_mounted && volume->is_removable)
@@ -3893,7 +3897,7 @@ vfs_volume_init()
     // do startup automounts
     GList* l;
     for (l = volumes; l; l = l->next)
-        vfs_volume_automount((VFSVolume*)l->data);
+        vfs_volume_automount(static_cast<VFSVolume*>(l->data));
 
     // start resume autoexec timer
     g_timeout_add_seconds(3, (GSourceFunc)on_cancel_inhibit_timer, nullptr);
@@ -3953,8 +3957,8 @@ vfs_volume_finalize()
         for (l = volumes; l; l = l->next)
         {
             if (unmount_all)
-                vfs_volume_autounmount((VFSVolume*)l->data);
-            vfs_free_volume_members((VFSVolume*)l->data);
+                vfs_volume_autounmount(static_cast<VFSVolume*>(l->data));
+            vfs_free_volume_members(static_cast<VFSVolume*>(l->data));
             g_slice_free(VFSVolume, l->data);
         }
     }
@@ -3993,7 +3997,7 @@ vfs_volume_get_by_device_or_point(const char* device_file, const char* point)
         GList* l;
         for (l = volumes; l; l = l->next)
         {
-            VFSVolume* vol = (VFSVolume*)l->data;
+            VFSVolume* vol = static_cast<VFSVolume*>(l->data);
             if (device_file && !strcmp(device_file, vol->device_file))
                 return vol;
             if (point && vol->is_mounted && vol->mount_point)
@@ -4011,7 +4015,7 @@ call_callbacks(VFSVolume* vol, VFSVolumeState state)
 {
     if (callbacks)
     {
-        VFSVolumeCallbackData* e = (VFSVolumeCallbackData*)callbacks->data;
+        VFSVolumeCallbackData* e = VFS_VOLUME_CALLBACK_DATA(callbacks->data);
         for (unsigned int i = 0; i < callbacks->len; ++i)
             (*e[i].cb)(vol, state, e[i].user_data);
     }
@@ -4052,7 +4056,7 @@ vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data)
     if (!callbacks)
         return;
 
-    VFSVolumeCallbackData* e = (VFSVolumeCallbackData*)callbacks->data;
+    VFSVolumeCallbackData* e = VFS_VOLUME_CALLBACK_DATA(callbacks->data);
     for (unsigned int i = 0; i < callbacks->len; ++i)
     {
         if (e[i].cb == cb && e[i].user_data == user_data)

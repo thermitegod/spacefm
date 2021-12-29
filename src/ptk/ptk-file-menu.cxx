@@ -80,7 +80,7 @@ void
 on_popup_list_large(GtkMenuItem* menuitem, PtkFileBrowser* browser)
 {
     int p = browser->mypanel;
-    FMMainWindow* main_window = (FMMainWindow*)browser->main_window;
+    FMMainWindow* main_window = static_cast<FMMainWindow*>(browser->main_window);
     char mode = main_window->panel_context[p - 1];
 
     xset_set_b_panel_mode(p, "list_large", mode, xset_get_b_panel(p, "list_large"));
@@ -157,7 +157,7 @@ on_copycmd(GtkMenuItem* menuitem, PtkFileMenu* data, XSet* set2)
 {
     XSet* set;
     if (menuitem)
-        set = (XSet*)g_object_get_data(G_OBJECT(menuitem), "set");
+        set = static_cast<XSet*>(g_object_get_data(G_OBJECT(menuitem), "set"));
     else
         set = set2;
     if (!set)
@@ -171,7 +171,7 @@ on_popup_rootcmd_activate(GtkMenuItem* menuitem, PtkFileMenu* data, XSet* set2)
 {
     XSet* set;
     if (menuitem)
-        set = (XSet*)g_object_get_data(G_OBJECT(menuitem), "set");
+        set = static_cast<XSet*>(g_object_get_data(G_OBJECT(menuitem), "set"));
     else
         set = set2;
     if (set)
@@ -218,7 +218,7 @@ on_popup_sort_extra(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, XSet* s
 {
     XSet* set;
     if (menuitem)
-        set = (XSet*)g_object_get_data(G_OBJECT(menuitem), "set");
+        set = static_cast<XSet*>(g_object_get_data(G_OBJECT(menuitem), "set"));
     else
         set = set2;
     ptk_file_browser_set_sort_extra(file_browser, set->name);
@@ -262,7 +262,7 @@ on_popup_detailed_column(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
     if (file_browser->view_mode == PTK_FB_LIST_VIEW)
     {
         // get visiblity for correct mode
-        FMMainWindow* main_window = (FMMainWindow*)file_browser->main_window;
+        FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
         int p = file_browser->mypanel;
         char mode = main_window->panel_context[p - 1];
 
@@ -285,7 +285,7 @@ static void
 on_popup_toggle_view(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
 {
     // get visiblity for correct mode
-    FMMainWindow* main_window = (FMMainWindow*)file_browser->main_window;
+    FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
     int p = file_browser->mypanel;
     char mode = main_window->panel_context[p - 1];
 
@@ -348,7 +348,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
         return;
     int p = browser->mypanel;
 
-    FMMainWindow* main_window = (FMMainWindow*)browser->main_window;
+    FMMainWindow* main_window = static_cast<FMMainWindow*>(browser->main_window);
     char mode = main_window->panel_context[p - 1];
 
     bool show_side = false;
@@ -788,7 +788,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
             GSList* sl;
             for (sl = handlers_slist; sl; sl = sl->next)
             {
-                set = (XSet*)sl->data;
+                set = static_cast<XSet*>(sl->data);
                 app_menu_item = gtk_menu_item_new_with_label(set->menu_label);
                 gtk_container_add(GTK_CONTAINER(submenu), app_menu_item);
                 g_signal_connect(G_OBJECT(app_menu_item),
@@ -1329,7 +1329,7 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
     const char* app = nullptr;
     char* set_app = nullptr;
 
-    XSet* handler_set = (XSet*)g_object_get_data(G_OBJECT(menuitem), "handler_set");
+    XSet* handler_set = static_cast<XSet*>(g_object_get_data(G_OBJECT(menuitem), "handler_set"));
     if (handler_set)
     {
         // is a file handler
@@ -1338,7 +1338,7 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
     else
     {
         VFSAppDesktop* desktop_file =
-            (VFSAppDesktop*)g_object_get_data(G_OBJECT(menuitem), "desktop_file");
+            static_cast<VFSAppDesktop*>(g_object_get_data(G_OBJECT(menuitem), "desktop_file"));
         if (!desktop_file)
             return;
         app = vfs_app_desktop_get_name(desktop_file);
@@ -1395,12 +1395,12 @@ app_job(GtkWidget* item, GtkWidget* app_item)
     std::string command;
 
     VFSAppDesktop* desktop_file =
-        (VFSAppDesktop*)g_object_get_data(G_OBJECT(app_item), "desktop_file");
+        static_cast<VFSAppDesktop*>(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
     if (!(desktop_file && desktop_file->file_name))
         return;
 
     int job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
-    PtkFileMenu* data = (PtkFileMenu*)g_object_get_data(G_OBJECT(item), "data");
+    PtkFileMenu* data = static_cast<PtkFileMenu*>(g_object_get_data(G_OBJECT(item), "data"));
     if (!(data && data->info))
         return;
 
@@ -1727,9 +1727,10 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
     if (item)
     {
         // if original menu, desktop_file will be set
-        desktop_file = (VFSAppDesktop*)g_object_get_data(G_OBJECT(item), "desktop_file");
+        desktop_file =
+            static_cast<VFSAppDesktop*>(g_object_get_data(G_OBJECT(item), "desktop_file"));
         // else if app menu, data will be set
-        app_data = (PtkFileMenu*)g_object_get_data(G_OBJECT(item), "data");
+        app_data = static_cast<PtkFileMenu*>(g_object_get_data(G_OBJECT(item), "data"));
 
         if (!desktop_file && !app_data)
             return false;
@@ -1818,7 +1819,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     if (!(data && data->info))
         return;
 
-    XSet* handler_set = (XSet*)g_object_get_data(G_OBJECT(app_item), "handler_set");
+    XSet* handler_set = static_cast<XSet*>(g_object_get_data(G_OBJECT(app_item), "handler_set"));
     if (handler_set)
     {
         // is a file handler - open file handler config
@@ -1837,7 +1838,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
         type = "unknown";
 
     VFSAppDesktop* desktop_file =
-        (VFSAppDesktop*)g_object_get_data(G_OBJECT(app_item), "desktop_file");
+        static_cast<VFSAppDesktop*>(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
     if (!desktop_file)
         return;
 
@@ -2111,7 +2112,7 @@ on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
         GList* sel;
         for (sel = data->sel_files; sel; sel = sel->next)
         {
-            VFSFileInfo* file = (VFSFileInfo*)sel->data;
+            VFSFileInfo* file = static_cast<VFSFileInfo*>(sel->data);
             char* full_path = g_build_filename(data->cwd, vfs_file_info_get_name(file), nullptr);
             if (data->browser && std::filesystem::is_directory(full_path))
             {
@@ -2139,10 +2140,10 @@ on_new_bookmark(GtkMenuItem* menuitem, PtkFileMenu* data)
     // if a single dir or file is selected, bookmark it instead of cwd
     if (data->sel_files && !data->sel_files->next)
     {
-        char* full_path =
-            g_build_filename(data->cwd,
-                             vfs_file_info_get_name((VFSFileInfo*)data->sel_files->data),
-                             nullptr);
+        char* full_path = g_build_filename(
+            data->cwd,
+            vfs_file_info_get_name(static_cast<VFSFileInfo*>(data->sel_files->data)),
+            nullptr);
         ptk_bookmark_view_add_bookmark(nullptr, data->browser, full_path);
         g_free(full_path);
     }
@@ -2363,7 +2364,8 @@ create_new_file(PtkFileMenu* data, int create_new)
         ao->callback = (GFunc)on_autoopen_create_cb;
     int result = ptk_rename_file(data->browser,
                                  data->cwd,
-                                 data->sel_files ? (VFSFileInfo*)data->sel_files->data : nullptr,
+                                 data->sel_files ? static_cast<VFSFileInfo*>(data->sel_files->data)
+                                                 : nullptr,
                                  nullptr,
                                  false,
                                  (PtkRenameMode)create_new,
@@ -2449,7 +2451,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         info = nullptr;
     else
     {
-        info = vfs_file_info_ref((VFSFileInfo*)sel_files->data);
+        info = vfs_file_info_ref(static_cast<VFSFileInfo*>(sel_files->data));
         file_path = g_build_filename(cwd, vfs_file_info_get_name(info), nullptr);
     }
 

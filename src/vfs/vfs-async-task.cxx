@@ -111,10 +111,10 @@ vfs_async_task_unlock(VFSAsyncTask* task)
 VFSAsyncTask*
 vfs_async_task_new(VFSAsyncFunc task_func, void* user_data)
 {
-    VFSAsyncTask* task = (VFSAsyncTask*)g_object_new(VFS_ASYNC_TASK_TYPE, nullptr);
+    VFSAsyncTask* task = static_cast<VFSAsyncTask*>(g_object_new(VFS_ASYNC_TASK_TYPE, nullptr));
     task->func = task_func;
     task->user_data = user_data;
-    return (VFSAsyncTask*)task;
+    return static_cast<VFSAsyncTask*>(task);
 }
 
 void*
@@ -129,7 +129,7 @@ vfs_async_task_finalize(GObject* object)
     VFSAsyncTask* task;
     /* FIXME: destroying the object without calling vfs_async_task_cancel
      currently induces unknown errors. */
-    task = (VFSAsyncTask*)object;
+    task = VFS_ASYNC_TASK(object);
 
     /* finalize = true, inhibit the emission of signals */
     vfs_async_task_real_cancel(task, true);
@@ -144,7 +144,7 @@ vfs_async_task_finalize(GObject* object)
 static bool
 on_idle(void* _task)
 {
-    VFSAsyncTask* task = VFS_ASYNC_TASK(_task);
+    VFSAsyncTask* task = static_cast<VFSAsyncTask*>(_task);
     vfs_async_thread_cleanup(task, false);
     return true; /* the idle handler is removed in vfs_async_thread_cleanup. */
 }
@@ -152,7 +152,7 @@ on_idle(void* _task)
 static void*
 vfs_async_task_thread(void* _task)
 {
-    VFSAsyncTask* task = VFS_ASYNC_TASK(_task);
+    VFSAsyncTask* task = static_cast<VFSAsyncTask*>(_task);
     void* ret = task->func(task, task->user_data);
 
     vfs_async_task_lock(task);

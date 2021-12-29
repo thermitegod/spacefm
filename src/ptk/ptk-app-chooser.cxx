@@ -438,7 +438,7 @@ on_dlg_response(GtkDialog* dlg, int id, void* user_data)
         case GTK_RESPONSE_NONE:
         case GTK_RESPONSE_DELETE_EVENT:
             /* cancel app loading on dialog closing... */
-            task = (VFSAsyncTask*)g_object_get_data(G_OBJECT(dlg), "task");
+            task = static_cast<VFSAsyncTask*>(g_object_get_data(G_OBJECT(dlg), "task"));
             if (task)
             {
                 // LOG_INFO("app-chooser.cxx -> vfs_async_task_cancel");
@@ -474,7 +474,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
             "handler in Open|File Handlers for this type to be opened with your associated "
             "application by default.",
             vfs_mime_type_get_type(mime_type),
-            ((XSet*)handlers_slist->data)->menu_label);
+            (static_cast<XSet*>(handlers_slist->data))->menu_label);
         xset_msg_dialog(parent, 0, "MIME Type Has Handler", 0, msg, nullptr);
         g_free(msg);
         g_slist_free(handlers_slist);
@@ -498,7 +498,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
                 "global option Open|Archive Defaults|Open With App, for this type to be opened "
                 "with your associated application by default.",
                 vfs_mime_type_get_type(mime_type),
-                ((XSet*)handlers_slist->data)->menu_label);
+                (static_cast<XSet*>(handlers_slist->data))->menu_label);
             xset_msg_dialog(parent, 0, "MIME Type Has Handler", 0, msg, nullptr);
             g_free(msg);
             g_slist_free(handlers_slist);
