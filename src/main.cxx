@@ -83,7 +83,6 @@ struct CliFlags
     bool new_window;
     bool socket_cmd;
     bool version_opt;
-    bool sdebug;
 
     bool daemon_mode;
 
@@ -112,7 +111,6 @@ static GOptionEntry opt_entries[] =
     {"find-files", 'f', 0, G_OPTION_ARG_NONE, &cli_flags.find_files, "Show File Search", nullptr},
     {"socket-cmd", 's', 0, G_OPTION_ARG_NONE, &cli_flags.socket_cmd, "Send a socket command (See -s help)", nullptr},
     {"version", 'v', 0, G_OPTION_ARG_NONE, &cli_flags.version_opt, "Show version information", nullptr},
-    {"sdebug", '\0', G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_NONE, &cli_flags.sdebug, nullptr, nullptr},
     {G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &cli_flags.files, nullptr, "[DIR | FILE | URL]..."},
     {GOptionEntry()}
 };
@@ -899,7 +897,6 @@ main(int argc, char* argv[])
     cli_flags.new_window = false;
     cli_flags.socket_cmd = false;  // sfm
     cli_flags.version_opt = false; // sfm
-    cli_flags.sdebug = false;      // sfm
 
     cli_flags.daemon_mode = false;
 
@@ -989,8 +986,6 @@ main(int argc, char* argv[])
     /* load config file */
     // MOD was before vfs_file_monitor_init
     load_settings(cli_flags.config_dir);
-
-    app_settings.sdebug = cli_flags.sdebug;
 
     // start autosave thread
     autosave_init();

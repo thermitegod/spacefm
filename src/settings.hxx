@@ -41,7 +41,6 @@ struct AppSettings
     bool no_confirm;
     // bool no_confirm_delete;
     bool no_confirm_trash = true;
-    bool sdebug;             // sfm
     bool load_saved_tabs;    // sfm
     std::string date_format; // speed dupe of xset
 
