@@ -983,9 +983,6 @@ main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    /* check if the filename encoding is UTF-8 */
-    vfs_file_info_set_utf8_filename(g_get_filename_charsets(nullptr));
-
     /* Initialize our mime-type system */
     vfs_mime_type_init();
 

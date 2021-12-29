@@ -23,14 +23,7 @@
 #include "vfs-file-info.hxx"
 
 static int big_thumb_size = 48, small_thumb_size = 20;
-static bool utf8_file_name = false;
 static const char* desktop_dir = nullptr; // MOD added
-
-void
-vfs_file_info_set_utf8_filename(bool is_utf8)
-{
-    utf8_file_name = is_utf8;
-}
 
 VFSFileInfo*
 vfs_file_info_new()
@@ -142,7 +135,7 @@ vfs_file_info_get(VFSFileInfo* fi, const char* file_path, const char* base_name)
         fi->blksize = file_stat.st_blksize;
         fi->blocks = file_stat.st_blocks;
 
-        if (G_LIKELY(utf8_file_name && g_utf8_validate(fi->name, -1, nullptr)))
+        if (G_LIKELY(g_utf8_validate(fi->name, -1, nullptr)))
         {
             fi->disp_name = fi->name; /* Don't duplicate the name and save memory */
         }
