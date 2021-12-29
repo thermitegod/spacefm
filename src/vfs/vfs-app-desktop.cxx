@@ -34,7 +34,7 @@ vfs_app_desktop_new(const char* file_name)
     char* relative_path;
 
     VFSAppDesktop* app = g_slice_new0(VFSAppDesktop);
-    app->n_ref = 1;
+    app->ref_inc();
 
     GKeyFile* file = g_key_file_new();
 
@@ -105,7 +105,8 @@ void
 vfs_app_desktop_unref(void* data)
 {
     VFSAppDesktop* app = (VFSAppDesktop*)data;
-    if (g_atomic_int_dec_and_test(&app->n_ref))
+    app->ref_dec();
+    if (app->ref_count() == 0)
         vfs_app_desktop_free(app);
 }
 
@@ -514,4 +515,22 @@ vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSAppDes
                 "Command not found",
                 app->file_name);
     return false;
+}
+
+void
+VFSAppDesktop::ref_inc()
+{
+    ++n_ref;
+}
+
+void
+VFSAppDesktop::ref_dec()
+{
+    --n_ref;
+}
+
+unsigned int
+VFSAppDesktop::ref_count()
+{
+    return n_ref;
 }

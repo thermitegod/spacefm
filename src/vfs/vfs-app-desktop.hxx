@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -28,8 +30,12 @@ struct VFSAppDesktop
     bool hidden : 1;
     bool startup : 1;
 
-    /* <private> */
-    int n_ref;
+    void ref_inc();
+    void ref_dec();
+    unsigned int ref_count();
+
+  private:
+    std::atomic<unsigned int> n_ref{0};
 };
 
 /*

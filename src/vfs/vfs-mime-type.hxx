@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include <gdk/gdk.h>
 
 #include "../mime-type/mime-type.hxx"
@@ -22,8 +24,13 @@ struct VFSMimeType
     char* description; /* description of the mimele type */
     GdkPixbuf* big_icon;
     GdkPixbuf* small_icon;
-    /*<private>*/
-    int n_ref;
+
+    void ref_inc();
+    void ref_dec();
+    unsigned int ref_count();
+
+  private:
+    std::atomic<unsigned int> n_ref{0};
 };
 
 void vfs_mime_type_init();

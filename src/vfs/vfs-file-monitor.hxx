@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include <glib.h>
 
 #include <unistd.h>
@@ -33,10 +35,17 @@ enum VFSFileMonitorEvent
 struct VFSFileMonitor
 {
     char* path;
-    /*<private>*/
-    int n_ref;
+
+    // TODO private
     int wd;
     GArray* callbacks;
+
+    void ref_inc();
+    void ref_dec();
+    unsigned int ref_count();
+
+  private:
+    std::atomic<unsigned int> n_ref{0};
 };
 
 /* Callback function which will be called when monitored events happen

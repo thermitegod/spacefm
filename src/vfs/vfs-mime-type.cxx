@@ -182,21 +182,22 @@ vfs_mime_type_new(const char* type_name)
 {
     VFSMimeType* mime_type = g_slice_new0(VFSMimeType);
     mime_type->type = g_strdup(type_name);
-    mime_type->n_ref = 1;
+    mime_type->ref_inc();
     return mime_type;
 }
 
 void
 vfs_mime_type_ref(VFSMimeType* mime_type)
 {
-    g_atomic_int_inc(&mime_type->n_ref);
+    mime_type->ref_inc();
 }
 
 void
 vfs_mime_type_unref(void* mime_type_)
 {
     VFSMimeType* mime_type = (VFSMimeType*)mime_type_;
-    if (g_atomic_int_dec_and_test(&mime_type->n_ref))
+    mime_type->ref_dec();
+    if (mime_type->ref_count() == 0)
     {
         g_free(mime_type->type);
         if (mime_type->big_icon)
@@ -551,4 +552,22 @@ void
 vfs_mime_type_append_action(const char* type, const char* desktop_id)
 {
     mime_type_update_association(type, desktop_id, MIME_TYPE_ACTION_APPEND);
+}
+
+void
+VFSMimeType::ref_inc()
+{
+    ++n_ref;
+}
+
+void
+VFSMimeType::ref_dec()
+{
+    --n_ref;
+}
+
+unsigned int
+VFSMimeType::ref_count()
+{
+    return n_ref;
 }

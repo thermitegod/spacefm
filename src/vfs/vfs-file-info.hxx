@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <ctime>
 
 #include "vfs-mime-type.hxx"
@@ -56,8 +57,13 @@ struct VFSFileInfo
     GdkPixbuf* small_thumbnail; /* thumbnail of the file */
 
     VFSFileInfoFlag flags; /* if it's a special file */
-    /*<private>*/
-    int n_ref;
+
+    void ref_inc();
+    void ref_dec();
+    unsigned int ref_count();
+
+  private:
+    std::atomic<unsigned int> n_ref{0};
 };
 
 void vfs_file_info_set_utf8_filename(bool is_utf8);

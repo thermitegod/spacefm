@@ -16,16 +16,13 @@
  * Copyright (C) 2006 Mark McLoughlin
  */
 
-#include "vfs-file-monitor.hxx"
 #include <sys/stat.h>
-#include <cerrno>
 
 #include <linux/limits.h>
 
-#include <cstdlib>
-#include <cstring>
-
 #include "logger.hxx"
+
+#include "vfs-file-monitor.hxx"
 
 struct VFSFileMonitorCallbackEntry
 {
@@ -199,7 +196,7 @@ vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCallback cb, void* u
             cb_ent.user_data = user_data;
             monitor->callbacks = g_array_append_val(monitor->callbacks, cb_ent);
         }
-        g_atomic_int_inc(&monitor->n_ref);
+        monitor->ref_inc();
     }
     return monitor;
 }
@@ -207,8 +204,11 @@ vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCallback cb, void* u
 void
 vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* user_data)
 {
+    if (!fm)
+        return;
+
     // LOG_INFO("vfs_file_monitor_remove");
-    if (cb && fm && fm->callbacks)
+    if (cb && fm->callbacks)
     {
         VFSFileMonitorCallbackEntry* callbacks = (VFSFileMonitorCallbackEntry*)fm->callbacks->data;
         int i;
@@ -222,7 +222,8 @@ vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* use
         }
     }
 
-    if (fm && g_atomic_int_dec_and_test(&fm->n_ref)) // MOD added "fm &&"
+    fm->ref_dec();
+    if (fm->ref_count() == 0)
     {
         // LOG_INFO("vfs_file_monitor_remove  {}", fm->wd);
         inotify_rm_watch(inotify_fd, fm->wd);
@@ -380,4 +381,22 @@ on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data)
         i += sizeof(struct inotify_event) + ievent->len;
     }
     return true;
+}
+
+void
+VFSFileMonitor::ref_inc()
+{
+    ++n_ref;
+}
+
+void
+VFSFileMonitor::ref_dec()
+{
+    --n_ref;
+}
+
+unsigned int
+VFSFileMonitor::ref_count()
+{
+    return n_ref;
 }

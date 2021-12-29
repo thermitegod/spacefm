@@ -174,7 +174,7 @@ thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
         // LOG_DEBUG("pop: {}", req->file->name);
 
         /* Only we have the reference. That means, no body is using the file */
-        if (req->file->n_ref == 1)
+        if (req->file->ref_count() == 1)
         {
             thumbnail_request_free(req);
             continue;

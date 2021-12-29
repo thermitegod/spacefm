@@ -36,7 +36,7 @@ VFSFileInfo*
 vfs_file_info_new()
 {
     VFSFileInfo* fi = g_slice_new0(VFSFileInfo);
-    fi->n_ref = 1;
+    fi->ref_inc();
     return fi;
 }
 
@@ -102,14 +102,15 @@ vfs_file_info_clear(VFSFileInfo* fi)
 VFSFileInfo*
 vfs_file_info_ref(VFSFileInfo* fi)
 {
-    g_atomic_int_inc(&fi->n_ref);
+    fi->ref_inc();
     return fi;
 }
 
 void
 vfs_file_info_unref(VFSFileInfo* fi)
 {
-    if (g_atomic_int_dec_and_test(&fi->n_ref))
+    fi->ref_dec();
+    if (fi->ref_count() == 0)
     {
         vfs_file_info_clear(fi);
         g_slice_free(VFSFileInfo, fi);
@@ -821,4 +822,22 @@ vfs_file_resolve_path(const char* cwd, const char* relative_path)
     if (strip_tail && G_LIKELY(ret->len > 1) && G_UNLIKELY(ret->str[ret->len - 1] == '/'))
         g_string_truncate(ret, ret->len - 1);
     return g_string_free(ret, false);
+}
+
+void
+VFSFileInfo::ref_inc()
+{
+    ++n_ref;
+}
+
+void
+VFSFileInfo::ref_dec()
+{
+    --n_ref;
+}
+
+unsigned int
+VFSFileInfo::ref_count()
+{
+    return n_ref;
 }

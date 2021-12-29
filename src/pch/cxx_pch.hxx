@@ -15,6 +15,7 @@
 #include <fstream>
 #include <filesystem>
 #include <ctime>
+#include <atomic>
 
 // FMT
 #include <fmt/core.h>
