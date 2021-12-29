@@ -101,9 +101,6 @@ Trash::trash_dir(const std::string& path)
     std::string uid = std::to_string(getuid());
     std::string trashPath = top_dir + "/.Trash-" + uid;
 
-    struct stat file_stat;
-    int result = stat(trashPath.c_str(), &file_stat);
-
     TrashDir* trash_dir = new TrashDir(trashPath, dev);
     m_trash_dirs[dev] = trash_dir;
 
