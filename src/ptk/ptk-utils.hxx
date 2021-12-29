@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <glib.h>
@@ -21,6 +23,7 @@
  * they should be escaped with g_markup_escape_text().
  */
 void ptk_show_error(GtkWindow* parent, const char* title, const char* message);
+void ptk_show_error(GtkWindow* parent, const std::string& title, const std::string& message);
 
 GtkBuilder* _gtk_builder_new_from_file(const char* file);
 
