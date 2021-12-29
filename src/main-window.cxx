@@ -68,6 +68,7 @@ static bool on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, 
 static bool on_main_window_focus(GtkWidget* main_window, GdkEventFocus* event, void* user_data);
 
 static bool on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* known_set);
+static bool on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set);
 static bool on_window_button_press_event(GtkWidget* widget, GdkEventButton* event,
                                          FMMainWindow* main_window); // sfm
 static void on_new_window_activate(GtkMenuItem* menuitem, void* user_data);
@@ -3357,7 +3358,7 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
     if (known_set)
     {
         set = known_set;
-        goto _key_found;
+        return on_main_window_keypress_found_key(main_window, set);
     }
 
     if (event->keyval == 0)
@@ -3440,7 +3441,7 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
                     else
                         return false; // failsafe
                 }
-                goto _key_found; // for speed
+                return on_main_window_keypress_found_key(main_window, set);
             }
             else
                 continue;
@@ -3455,119 +3456,7 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
 #endif
         {
             set = XSET(l->data);
-        _key_found:
-            browser = PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
-            if (!browser)
-                return true;
-
-            char* xname;
-            int i;
-
-            // special edit items
-            if (!strcmp(set->name, "edit_cut") || !strcmp(set->name, "edit_copy") ||
-                !strcmp(set->name, "edit_delete") || !strcmp(set->name, "select_all"))
-            {
-                if (!gtk_widget_is_focus(browser->folder_view))
-                    return false;
-            }
-            else if (!strcmp(set->name, "edit_paste"))
-            {
-                bool side_dir_focus =
-                    (browser->side_dir && gtk_widget_is_focus(GTK_WIDGET(browser->side_dir)));
-                if (!gtk_widget_is_focus(GTK_WIDGET(browser->folder_view)) && !side_dir_focus)
-                    return false;
-            }
-
-            // run menu_cb
-            if (set->menu_style < XSET_MENU_SUBMENU)
-            {
-                set->browser = browser;
-                xset_menu_cb(nullptr, set); // also does custom activate
-            }
-            if (!set->lock)
-                return true;
-
-            // handlers
-            if (g_str_has_prefix(set->name, "dev_"))
-                ptk_location_view_on_action(GTK_WIDGET(browser->side_dev), set);
-
-            else if (g_str_has_prefix(set->name, "main_"))
-            {
-                xname = set->name + 5;
-                if (!strcmp(xname, "new_window"))
-                    on_new_window_activate(nullptr, main_window);
-                else if (!strcmp(xname, "root_window"))
-                    on_open_current_folder_as_root(nullptr, main_window);
-                else if (!strcmp(xname, "search"))
-                    on_find_file_activate(nullptr, main_window);
-                else if (!strcmp(xname, "terminal"))
-                    on_open_terminal_activate(nullptr, main_window);
-                else if (!strcmp(xname, "root_terminal"))
-                    on_open_root_terminal_activate(nullptr, main_window);
-                else if (!strcmp(xname, "save_session"))
-                    on_open_url(nullptr, main_window);
-                else if (!strcmp(xname, "exit"))
-                    on_quit_activate(nullptr, main_window);
-                else if (!strcmp(xname, "full"))
-                {
-                    xset_set_b("main_full", !main_window->fullscreen);
-                    on_fullscreen_activate(nullptr, main_window);
-                }
-                else if (!strcmp(xname, "prefs"))
-                    on_preference_activate(nullptr, main_window);
-                else if (!strcmp(xname, "design_mode"))
-                    main_design_mode(nullptr, main_window);
-                else if (!strcmp(xname, "pbar"))
-                    show_panels_all_windows(nullptr, main_window);
-                else if (!strcmp(xname, "icon"))
-                    on_main_icon();
-                else if (!strcmp(xname, "title"))
-                    update_window_title(nullptr, main_window);
-                else if (!strcmp(xname, "about"))
-                    on_about_activate(nullptr, main_window);
-            }
-            else if (g_str_has_prefix(set->name, "panel_"))
-            {
-                xname = set->name + 6;
-                if (!strcmp(xname, "prev"))
-                    i = -1;
-                else if (!strcmp(xname, "next"))
-                    i = -2;
-                else if (!strcmp(xname, "hide"))
-                    i = -3;
-                else
-                    i = strtol(xname, nullptr, 10);
-                focus_panel(nullptr, main_window, i);
-            }
-            else if (g_str_has_prefix(set->name, "plug_"))
-                on_plugin_install(nullptr, main_window, set);
-            else if (g_str_has_prefix(set->name, "task_"))
-            {
-                xname = set->name + 5;
-                if (strstr(xname, "_manager"))
-                    on_task_popup_show(nullptr, main_window, set->name);
-                else if (!strcmp(xname, "col_reorder"))
-                    on_reorder(nullptr, GTK_WIDGET(browser->task_view));
-                else if (g_str_has_prefix(xname, "col_"))
-                    on_task_column_selected(nullptr, browser->task_view);
-                else if (g_str_has_prefix(xname, "stop") || g_str_has_prefix(xname, "pause") ||
-                         g_str_has_prefix(xname, "que_") || !strcmp(xname, "que") ||
-                         g_str_has_prefix(xname, "resume"))
-                {
-                    PtkFileTask* ptask = get_selected_task(browser->task_view);
-                    on_task_stop(nullptr, browser->task_view, set, ptask);
-                }
-                else if (!strcmp(xname, "showout"))
-                    show_task_dialog(nullptr, browser->task_view);
-                else if (g_str_has_prefix(xname, "err_"))
-                    on_task_popup_errset(nullptr, main_window, set->name);
-            }
-            else if (!strcmp(set->name, "rubberband"))
-                main_window_rubberband_all();
-            else
-                ptk_file_browser_on_action(browser, set->name);
-
-            return true;
+            return on_main_window_keypress_found_key(main_window, set);
         }
     }
 
@@ -3583,6 +3472,125 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
         rebuild_menus(main_window);
 
     return false;
+}
+
+static bool
+on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
+{
+    PtkFileBrowser* browser;
+
+    browser = PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
+    if (!browser)
+        return true;
+
+    char* xname;
+    int i;
+
+    // special edit items
+    if (!strcmp(set->name, "edit_cut") || !strcmp(set->name, "edit_copy") ||
+        !strcmp(set->name, "edit_delete") || !strcmp(set->name, "select_all"))
+    {
+        if (!gtk_widget_is_focus(browser->folder_view))
+            return false;
+    }
+    else if (!strcmp(set->name, "edit_paste"))
+    {
+        bool side_dir_focus =
+            (browser->side_dir && gtk_widget_is_focus(GTK_WIDGET(browser->side_dir)));
+        if (!gtk_widget_is_focus(GTK_WIDGET(browser->folder_view)) && !side_dir_focus)
+            return false;
+    }
+
+    // run menu_cb
+    if (set->menu_style < XSET_MENU_SUBMENU)
+    {
+        set->browser = browser;
+        xset_menu_cb(nullptr, set); // also does custom activate
+    }
+    if (!set->lock)
+        return true;
+
+    // handlers
+    if (g_str_has_prefix(set->name, "dev_"))
+        ptk_location_view_on_action(GTK_WIDGET(browser->side_dev), set);
+
+    else if (g_str_has_prefix(set->name, "main_"))
+    {
+        xname = set->name + 5;
+        if (!strcmp(xname, "new_window"))
+            on_new_window_activate(nullptr, main_window);
+        else if (!strcmp(xname, "root_window"))
+            on_open_current_folder_as_root(nullptr, main_window);
+        else if (!strcmp(xname, "search"))
+            on_find_file_activate(nullptr, main_window);
+        else if (!strcmp(xname, "terminal"))
+            on_open_terminal_activate(nullptr, main_window);
+        else if (!strcmp(xname, "root_terminal"))
+            on_open_root_terminal_activate(nullptr, main_window);
+        else if (!strcmp(xname, "save_session"))
+            on_open_url(nullptr, main_window);
+        else if (!strcmp(xname, "exit"))
+            on_quit_activate(nullptr, main_window);
+        else if (!strcmp(xname, "full"))
+        {
+            xset_set_b("main_full", !main_window->fullscreen);
+            on_fullscreen_activate(nullptr, main_window);
+        }
+        else if (!strcmp(xname, "prefs"))
+            on_preference_activate(nullptr, main_window);
+        else if (!strcmp(xname, "design_mode"))
+            main_design_mode(nullptr, main_window);
+        else if (!strcmp(xname, "pbar"))
+            show_panels_all_windows(nullptr, main_window);
+        else if (!strcmp(xname, "icon"))
+            on_main_icon();
+        else if (!strcmp(xname, "title"))
+            update_window_title(nullptr, main_window);
+        else if (!strcmp(xname, "about"))
+            on_about_activate(nullptr, main_window);
+    }
+    else if (g_str_has_prefix(set->name, "panel_"))
+    {
+        xname = set->name + 6;
+        if (!strcmp(xname, "prev"))
+            i = -1;
+        else if (!strcmp(xname, "next"))
+            i = -2;
+        else if (!strcmp(xname, "hide"))
+            i = -3;
+        else
+            i = strtol(xname, nullptr, 10);
+        focus_panel(nullptr, main_window, i);
+    }
+    else if (g_str_has_prefix(set->name, "plug_"))
+        on_plugin_install(nullptr, main_window, set);
+    else if (g_str_has_prefix(set->name, "task_"))
+    {
+        xname = set->name + 5;
+        if (strstr(xname, "_manager"))
+            on_task_popup_show(nullptr, main_window, set->name);
+        else if (!strcmp(xname, "col_reorder"))
+            on_reorder(nullptr, GTK_WIDGET(browser->task_view));
+        else if (g_str_has_prefix(xname, "col_"))
+            on_task_column_selected(nullptr, browser->task_view);
+        else if (g_str_has_prefix(xname, "stop") || g_str_has_prefix(xname, "pause") ||
+                 g_str_has_prefix(xname, "que_") || !strcmp(xname, "que") ||
+                 g_str_has_prefix(xname, "resume"))
+        {
+            PtkFileTask* ptask = get_selected_task(browser->task_view);
+            on_task_stop(nullptr, browser->task_view, set, ptask);
+        }
+        else if (!strcmp(xname, "showout"))
+            show_task_dialog(nullptr, browser->task_view);
+        else if (g_str_has_prefix(xname, "err_"))
+            on_task_popup_errset(nullptr, main_window, set->name);
+    }
+    else if (!strcmp(set->name, "rubberband"))
+        main_window_rubberband_all();
+    else
+        ptk_file_browser_on_action(browser, set->name);
+
+    return true;
 }
 
 FMMainWindow*
