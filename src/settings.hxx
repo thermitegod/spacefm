@@ -18,6 +18,8 @@
 
 #include "ptk/ptk-file-browser.hxx"
 
+#define XSET(obj) (static_cast<XSet*>(obj))
+
 // this determines time before item is selected by hover in single-click mode
 #define SINGLE_CLICK_TIMEOUT 150
 

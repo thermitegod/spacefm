@@ -3596,7 +3596,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                                                                        true);
                 if (handlers_slist)
                 {
-                    XSet* handler_set = static_cast<XSet*>(handlers_slist->data);
+                    XSet* handler_set = XSET(handlers_slist->data);
                     g_slist_free(handlers_slist);
                     alloc_desktop = g_strconcat("###", handler_set->name, nullptr);
                 }

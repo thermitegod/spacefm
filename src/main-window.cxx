@@ -214,7 +214,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
     if (!item)
         set = set2;
     else
-        set = static_cast<XSet*>(g_object_get_data(G_OBJECT(item), "set"));
+        set = XSET(g_object_get_data(G_OBJECT(item), "set"));
     if (!set)
         return;
 
@@ -373,7 +373,7 @@ create_plugins_menu(FMMainWindow* main_window)
 
         plugins = xset_get_plugins(true);
         for (l = plugins; l; l = l->next)
-            xset_add_menuitem(file_browser, inc_menu, accel_group, static_cast<XSet*>(l->data));
+            xset_add_menuitem(file_browser, inc_menu, accel_group, XSET(l->data));
     }
     set->disable = !plugins;
     if (plugins)
@@ -381,7 +381,7 @@ create_plugins_menu(FMMainWindow* main_window)
 
     plugins = xset_get_plugins(false);
     for (l = plugins; l; l = l->next)
-        xset_add_menuitem(file_browser, plug_menu, accel_group, static_cast<XSet*>(l->data));
+        xset_add_menuitem(file_browser, plug_menu, accel_group, XSET(l->data));
     if (plugins)
         g_list_free(plugins);
 
@@ -3411,16 +3411,16 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
 
     for (l = xsets; l; l = l->next)
     {
-        if ((static_cast<XSet*>(l->data))->shared_key)
+        if ((XSET(l->data))->shared_key)
         {
             // set has shared key
 #ifdef HAVE_NONLATIN
             // nonlatin key match is for nonlatin keycodes set prior to 1.0.3
-            set = xset_get((static_cast<XSet*>(l->data))->shared_key);
+            set = xset_get((XSET(l->data))->shared_key);
             if ((set->key == event->keyval || (nonlatin_key && set->key == nonlatin_key)) &&
                 set->keymod == keymod)
 #else
-            set = xset_get((static_cast<XSet*>(l->data))->shared_key);
+            set = xset_get((XSET(l->data))->shared_key);
             if (set->key == event->keyval && set->keymod == keymod)
 #endif
             {
@@ -3447,15 +3447,14 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
         }
 #ifdef HAVE_NONLATIN
         // nonlatin key match is for nonlatin keycodes set prior to 1.0.3
-        if (((static_cast<XSet*>(l->data))->key == event->keyval ||
-             (nonlatin_key && (static_cast<XSet*>(l->data))->key == nonlatin_key)) &&
-            (static_cast<XSet*>(l->data))->keymod == keymod)
+        if (((XSET(l->data))->key == event->keyval ||
+             (nonlatin_key && (XSET(l->data))->key == nonlatin_key)) &&
+            (XSET(l->data))->keymod == keymod)
 #else
-        if ((static_cast<XSet*>(l->data))->key == event->keyval &&
-            (static_cast<XSet*>(l->data))->keymod == keymod)
+        if ((XSET(l->data))->key == event->keyval && (XSET(l->data))->keymod == keymod)
 #endif
         {
-            set = static_cast<XSet*>(l->data);
+            set = XSET(l->data);
         _key_found:
             browser = PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
             if (!browser)
@@ -4138,7 +4137,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, GString* buf)
 
     PtkFileBrowser* file_browser = static_cast<PtkFileBrowser*>(vtask->exec_browser);
     FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
-    XSet* set = static_cast<XSet*>(vtask->exec_set);
+    XSet* set = XSET(vtask->exec_set);
 
     g_string_append(buf, "\n#source");
     // g_string_append(buf, "\n#source\ncp $0 /tmp\n");
@@ -4689,7 +4688,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, XSet* set2, PtkFileTask* task2)
     };
 
     if (item)
-        set = static_cast<XSet*>(g_object_get_data(G_OBJECT(item), "set"));
+        set = XSET(g_object_get_data(G_OBJECT(item), "set"));
     else
         set = set2;
     if (!set || !g_str_has_prefix(set->name, "task_"))

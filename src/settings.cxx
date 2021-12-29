@@ -666,7 +666,7 @@ xset_free_all()
 
     for (l = xsets; l; l = l->next)
     {
-        set = static_cast<XSet*>(l->data);
+        set = XSET(l->data);
         if (set->ob2_data && g_str_has_prefix(set->name, "evt_"))
         {
             g_list_foreach((GList*)set->ob2_data, (GFunc)g_free, nullptr);
@@ -794,16 +794,16 @@ xset_get(const char* name)
     GList* l;
     for (l = xsets; l; l = l->next)
     {
-        if (!strcmp(name, (static_cast<XSet*>(l->data))->name))
+        if (!strcmp(name, (XSET(l->data))->name))
         {
             // existing xset
-            return static_cast<XSet*>(l->data);
+            return XSET(l->data);
         }
     }
 
     // add new
     xsets = g_list_prepend(xsets, xset_new(name));
-    return static_cast<XSet*>(xsets->data);
+    return XSET(xsets->data);
 }
 
 XSet*
@@ -883,10 +883,10 @@ xset_is(const char* name)
     GList* l;
     for (l = xsets; l; l = l->next)
     {
-        if (!strcmp(name, (static_cast<XSet*>(l->data))->name))
+        if (!strcmp(name, (XSET(l->data))->name))
         {
             // existing xset
-            return static_cast<XSet*>(l->data);
+            return XSET(l->data);
         }
     }
     return nullptr;
@@ -1083,11 +1083,10 @@ xset_write(GString* buf)
     {
         // hack to not save default handlers - this allows default handlers
         // to be updated more easily
-        if ((bool)(static_cast<XSet*>(l->data))->disable &&
-            (char)(static_cast<XSet*>(l->data))->name[0] == 'h' &&
-            g_str_has_prefix((char*)(static_cast<XSet*>(l->data))->name, "hand"))
+        if ((bool)(XSET(l->data))->disable && (char)(XSET(l->data))->name[0] == 'h' &&
+            g_str_has_prefix((char*)(XSET(l->data))->name, "hand"))
             continue;
-        xset_write_set(buf, static_cast<XSet*>(l->data));
+        xset_write_set(buf, XSET(l->data));
     }
 }
 
@@ -1463,7 +1462,7 @@ xset_find_custom(const char* search)
     char* label = clean_label(search, true, false);
     for (l = xsets; l; l = l->next)
     {
-        XSet* set = static_cast<XSet*>(l->data);
+        XSet* set = XSET(l->data);
         if (!set->lock && ((set->menu_style == XSET_MENU_SUBMENU && set->child) ||
                            (set->menu_style < XSET_MENU_SUBMENU &&
                             xset_get_int_set(set, "x") <= XSET_CMD_BOOKMARK)))
@@ -1501,28 +1500,25 @@ xset_opener(PtkFileBrowser* file_browser, char job)
 
     for (l = xsets; l; l = l->next)
     {
-        if (!(static_cast<XSet*>(l->data))->lock && (static_cast<XSet*>(l->data))->opener == job &&
-            !(static_cast<XSet*>(l->data))->tool &&
-            (static_cast<XSet*>(l->data))->menu_style != XSET_MENU_SUBMENU &&
-            (static_cast<XSet*>(l->data))->menu_style != XSET_MENU_SEP)
+        if (!(XSET(l->data))->lock && (XSET(l->data))->opener == job && !(XSET(l->data))->tool &&
+            (XSET(l->data))->menu_style != XSET_MENU_SUBMENU &&
+            (XSET(l->data))->menu_style != XSET_MENU_SEP)
         {
-            if ((static_cast<XSet*>(l->data))->desc &&
-                !strcmp((static_cast<XSet*>(l->data))->desc, "@plugin@mirror@"))
+            if ((XSET(l->data))->desc && !strcmp((XSET(l->data))->desc, "@plugin@mirror@"))
             {
                 // is a plugin mirror
-                mset = static_cast<XSet*>(l->data);
+                mset = XSET(l->data);
                 set = xset_is(mset->shared_key);
                 if (!set)
                     continue;
             }
-            else if ((static_cast<XSet*>(l->data))->plugin &&
-                     (static_cast<XSet*>(l->data))->shared_key)
+            else if ((XSET(l->data))->plugin && (XSET(l->data))->shared_key)
             {
                 // plugin with mirror - ignore to use mirror's context only
                 continue;
             }
             else
-                set = mset = static_cast<XSet*>(l->data);
+                set = mset = XSET(l->data);
 
             if (!context)
             {
@@ -1569,10 +1565,10 @@ xset_opener(PtkFileBrowser* file_browser, char job)
             pinned = 0;
             for (ll = xsets; ll && !pinned; ll = ll->next)
             {
-                if ((static_cast<XSet*>(ll->data))->next &&
-                    g_str_has_prefix((static_cast<XSet*>(ll->data))->name, "open_all_type_"))
+                if ((XSET(ll->data))->next &&
+                    g_str_has_prefix((XSET(ll->data))->name, "open_all_type_"))
                 {
-                    tset = open_all_tset = static_cast<XSet*>(ll->data);
+                    tset = open_all_tset = XSET(ll->data);
                     while (tset->next)
                     {
                         if (!strcmp(set->name, tset->next))
@@ -1633,7 +1629,7 @@ write_root_settings(GString* buf, const char* path)
 
     for (l = xsets; l; l = l->next)
     {
-        set = static_cast<XSet*>(l->data);
+        set = XSET(l->data);
         if (set)
         {
             if (!strcmp(set->name, "root_editor") || !strcmp(set->name, "dev_back_part") ||
@@ -1698,7 +1694,7 @@ read_root_settings()
     // clear settings
     for (l = xsets; l; l = l->next)
     {
-        set = static_cast<XSet*>(l->data);
+        set = XSET(l->data);
         if (set)
         {
             if (!strcmp(set->name, "root_editor") || !strcmp(set->name, "dev_back_part") ||
@@ -2030,7 +2026,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                     break;
                 case XSET_MENU_RADIO:
                     if (set->ob2_data)
-                        set_radio = static_cast<XSet*>(set->ob2_data);
+                        set_radio = XSET(set->ob2_data);
                     else
                         set_radio = set;
                     item = gtk_radio_menu_item_new_with_mnemonic((GSList*)set_radio->ob2_data,
@@ -2416,10 +2412,9 @@ clean_plugin_mirrors()
         redo = false;
         for (l = xsets; l; l = l->next)
         {
-            if ((static_cast<XSet*>(l->data))->desc &&
-                !strcmp((static_cast<XSet*>(l->data))->desc, "@plugin@mirror@"))
+            if ((XSET(l->data))->desc && !strcmp((XSET(l->data))->desc, "@plugin@mirror@"))
             {
-                set = static_cast<XSet*>(l->data);
+                set = XSET(l->data);
                 if (!set->shared_key || !xset_is(set->shared_key))
                 {
                     xset_free(set);
@@ -2471,10 +2466,9 @@ xset_set_plugin_mirror(XSet* pset)
 
     for (l = xsets; l; l = l->next)
     {
-        if ((static_cast<XSet*>(l->data))->desc &&
-            !strcmp((static_cast<XSet*>(l->data))->desc, "@plugin@mirror@"))
+        if ((XSET(l->data))->desc && !strcmp((XSET(l->data))->desc, "@plugin@mirror@"))
         {
-            set = static_cast<XSet*>(l->data);
+            set = XSET(l->data);
             if (set->parent && set->child)
             {
                 if (!strcmp(set->child, pset->plug_name) && !strcmp(set->parent, pset->plug_dir))
@@ -2537,10 +2531,9 @@ xset_get_plugins(bool included)
 
     for (l = xsets; l; l = l->next)
     {
-        if ((static_cast<XSet*>(l->data))->plugin && (static_cast<XSet*>(l->data))->plugin_top &&
-            (static_cast<XSet*>(l->data))->plug_dir)
+        if ((XSET(l->data))->plugin && (XSET(l->data))->plugin_top && (XSET(l->data))->plug_dir)
         {
-            set = static_cast<XSet*>(l->data);
+            set = XSET(l->data);
             if (strstr(set->plug_dir, "/included/"))
             {
                 if (included)
@@ -2563,10 +2556,9 @@ xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
 
     for (l = xsets; l; l = l->next)
     {
-        if ((static_cast<XSet*>(l->data))->plugin &&
-            !strcmp(plug_name, (static_cast<XSet*>(l->data))->plug_name) &&
-            !strcmp(plug_dir, (static_cast<XSet*>(l->data))->plug_dir))
-            return static_cast<XSet*>(l->data);
+        if ((XSET(l->data))->plugin && !strcmp(plug_name, (XSET(l->data))->plug_name) &&
+            !strcmp(plug_dir, (XSET(l->data))->plug_dir))
+            return XSET(l->data);
     }
 
     // add new
@@ -2696,10 +2688,9 @@ xset_import_plugin(const char* plug_dir, int* use)
         redo = false;
         for (l = xsets; l; l = l->next)
         {
-            if ((static_cast<XSet*>(l->data))->plugin &&
-                !strcmp(plug_dir, (static_cast<XSet*>(l->data))->plug_dir))
+            if ((XSET(l->data))->plugin && !strcmp(plug_dir, (XSET(l->data))->plug_dir))
             {
-                xset_free(static_cast<XSet*>(l->data));
+                xset_free(XSET(l->data));
                 redo = true; // search list from start again due to changed list
                 break;
             }
@@ -2764,10 +2755,9 @@ xset_import_plugin(const char* plug_dir, int* use)
     XSet* rset = nullptr;
     for (l = xsets; l; l = l->next)
     {
-        if ((static_cast<XSet*>(l->data))->plugin &&
-            !strcmp(plug_dir, (static_cast<XSet*>(l->data))->plug_dir))
+        if ((XSET(l->data))->plugin && !strcmp(plug_dir, (XSET(l->data))->plug_dir))
         {
-            set = static_cast<XSet*>(l->data);
+            set = XSET(l->data);
             set->key = set->keymod = set->tool = set->opener = 0;
             xset_set_plugin_mirror(set);
             if ((set->plugin_top = top))
@@ -4038,7 +4028,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
     int* newkey = (int*)g_object_get_data(G_OBJECT(dlg), "newkey");
     int* newkeymod = (int*)g_object_get_data(G_OBJECT(dlg), "newkeymod");
     GtkWidget* btn = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "btn"));
-    XSet* set = static_cast<XSet*>(g_object_get_data(G_OBJECT(dlg), "set"));
+    XSet* set = XSET(g_object_get_data(G_OBJECT(dlg), "set"));
     XSet* set2;
     XSet* keyset = nullptr;
     char* keyname;
@@ -4093,7 +4083,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
 
     for (l = xsets; l; l = l->next)
     {
-        set2 = static_cast<XSet*>(l->data);
+        set2 = XSET(l->data);
         if (set2 && set2 != set && set2->key > 0 && set2->key == event->keyval &&
             set2->keymod == keymod && set2 != keyset)
         {
@@ -4237,7 +4227,7 @@ xset_set_key(GtkWidget* parent, XSet* set)
             XSet* set2;
             for (l = xsets; l; l = l->next)
             {
-                set2 = static_cast<XSet*>(l->data);
+                set2 = XSET(l->data);
                 if (set2 && set2->key > 0 && set2->key == newkey && set2->keymod == newkeymod)
                 {
                     set2->key = 0;
@@ -5741,7 +5731,7 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(widget));
     if (item)
     {
-        set = static_cast<XSet*>(g_object_get_data(G_OBJECT(item), "set"));
+        set = XSET(g_object_get_data(G_OBJECT(item), "set"));
         if (!set)
             return false;
     }
@@ -9173,12 +9163,12 @@ xset_defaults()
     GList* l;
     for (l = xsets; l; l = l->next)
     {
-        if ((static_cast<XSet*>(l->data))->lock)
+        if ((XSET(l->data))->lock)
         {
-            if ((static_cast<XSet*>(l->data))->in_terminal == XSET_B_TRUE)
-                (static_cast<XSet*>(l->data))->in_terminal = XSET_B_UNSET;
-            if ((static_cast<XSet*>(l->data))->keep_terminal == XSET_B_TRUE)
-                (static_cast<XSet*>(l->data))->keep_terminal = XSET_B_UNSET;
+            if ((XSET(l->data))->in_terminal == XSET_B_TRUE)
+                (XSET(l->data))->in_terminal = XSET_B_UNSET;
+            if ((XSET(l->data))->keep_terminal == XSET_B_TRUE)
+                (XSET(l->data))->keep_terminal = XSET_B_UNSET;
         }
     }
 }
@@ -9196,8 +9186,7 @@ def_key(const char* name, unsigned int key, unsigned int keymod)
     GList* l;
     for (l = keysets; l; l = l->next)
     {
-        if ((static_cast<XSet*>(l->data))->key == key &&
-            (static_cast<XSet*>(l->data))->keymod == keymod)
+        if ((XSET(l->data))->key == key && (XSET(l->data))->keymod == keymod)
             return;
     }
     set->key = key;
@@ -9213,8 +9202,8 @@ xset_default_keys()
     keysets = nullptr;
     for (l = xsets; l; l = l->next)
     {
-        if ((static_cast<XSet*>(l->data))->key)
-            keysets = g_list_prepend(keysets, static_cast<XSet*>(l->data));
+        if ((XSET(l->data))->key)
+            keysets = g_list_prepend(keysets, XSET(l->data));
     }
 
     def_key("tab_prev", GDK_KEY_Tab, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));

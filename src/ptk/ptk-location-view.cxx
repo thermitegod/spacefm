@@ -2346,7 +2346,7 @@ on_handler_show_config(GtkMenuItem* item, GtkWidget* view, XSet* set2)
     if (!item)
         set = set2;
     else
-        set = static_cast<XSet*>(g_object_get_data(G_OBJECT(item), "set"));
+        set = XSET(g_object_get_data(G_OBJECT(item), "set"));
 
     if (!g_strcmp0(set->name, "dev_fs_cnf"))
         mode = HANDLER_MODE_FS;

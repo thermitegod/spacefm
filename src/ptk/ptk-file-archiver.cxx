@@ -1210,7 +1210,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                                                        true);
         if (handlers_slist)
         {
-            handler_xset = static_cast<XSet*>(handlers_slist->data);
+            handler_xset = XSET(handlers_slist->data);
             g_slist_free(handlers_slist);
         }
         else

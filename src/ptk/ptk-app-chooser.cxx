@@ -474,7 +474,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
             "handler in Open|File Handlers for this type to be opened with your associated "
             "application by default.",
             vfs_mime_type_get_type(mime_type),
-            (static_cast<XSet*>(handlers_slist->data))->menu_label);
+            (XSET(handlers_slist->data))->menu_label);
         xset_msg_dialog(parent, 0, "MIME Type Has Handler", 0, msg, nullptr);
         g_free(msg);
         g_slist_free(handlers_slist);
@@ -498,7 +498,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
                 "global option Open|Archive Defaults|Open With App, for this type to be opened "
                 "with your associated application by default.",
                 vfs_mime_type_get_type(mime_type),
-                (static_cast<XSet*>(handlers_slist->data))->menu_label);
+                (XSET(handlers_slist->data))->menu_label);
             xset_msg_dialog(parent, 0, "MIME Type Has Handler", 0, msg, nullptr);
             g_free(msg);
             g_slist_free(handlers_slist);

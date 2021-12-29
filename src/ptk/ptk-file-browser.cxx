@@ -675,7 +675,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
 void
 ptk_file_browser_add_toolbar_widget(void* set_ptr, GtkWidget* widget)
 { // store the toolbar widget created by set for later change of status
-    XSet* set = static_cast<XSet*>(set_ptr);
+    XSet* set = XSET(set_ptr);
 
     if (!(set && !set->lock && set->browser && set->tool && GTK_IS_WIDGET(widget)))
         return;
@@ -739,14 +739,14 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
     unsigned char x;
     GSList* l;
     GtkWidget* widget;
-    XSet* set = static_cast<XSet*>(set_ptr);
+    XSet* set = XSET(set_ptr);
 
     if (set && !set->lock && set->menu_style == XSET_MENU_CHECK && set->tool == XSET_TOOL_CUSTOM)
     {
         // a custom checkbox is being updated
         for (l = file_browser->toolbar_widgets[7]; l; l = l->next)
         {
-            if (static_cast<XSet*>(g_object_get_data(G_OBJECT(l->data), "set")) == set)
+            if (XSET(g_object_get_data(G_OBJECT(l->data), "set")) == set)
             {
                 widget = GTK_WIDGET(l->data);
                 if (GTK_IS_TOGGLE_BUTTON(widget))
@@ -5703,7 +5703,7 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser, 
     if (!sel_files)
         return;
 
-    XSet* set = static_cast<XSet*>(g_object_get_data(G_OBJECT(item), "set"));
+    XSet* set = XSET(g_object_get_data(G_OBJECT(item), "set"));
     if (!set || !file_browser)
         return;
 

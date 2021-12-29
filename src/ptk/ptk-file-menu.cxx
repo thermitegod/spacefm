@@ -157,7 +157,7 @@ on_copycmd(GtkMenuItem* menuitem, PtkFileMenu* data, XSet* set2)
 {
     XSet* set;
     if (menuitem)
-        set = static_cast<XSet*>(g_object_get_data(G_OBJECT(menuitem), "set"));
+        set = XSET(g_object_get_data(G_OBJECT(menuitem), "set"));
     else
         set = set2;
     if (!set)
@@ -171,7 +171,7 @@ on_popup_rootcmd_activate(GtkMenuItem* menuitem, PtkFileMenu* data, XSet* set2)
 {
     XSet* set;
     if (menuitem)
-        set = static_cast<XSet*>(g_object_get_data(G_OBJECT(menuitem), "set"));
+        set = XSET(g_object_get_data(G_OBJECT(menuitem), "set"));
     else
         set = set2;
     if (set)
@@ -218,7 +218,7 @@ on_popup_sort_extra(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, XSet* s
 {
     XSet* set;
     if (menuitem)
-        set = static_cast<XSet*>(g_object_get_data(G_OBJECT(menuitem), "set"));
+        set = XSET(g_object_get_data(G_OBJECT(menuitem), "set"));
     else
         set = set2;
     ptk_file_browser_set_sort_extra(file_browser, set->name);
@@ -788,7 +788,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
             GSList* sl;
             for (sl = handlers_slist; sl; sl = sl->next)
             {
-                set = static_cast<XSet*>(sl->data);
+                set = XSET(sl->data);
                 app_menu_item = gtk_menu_item_new_with_label(set->menu_label);
                 gtk_container_add(GTK_CONTAINER(submenu), app_menu_item);
                 g_signal_connect(G_OBJECT(app_menu_item),
@@ -1329,7 +1329,7 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
     const char* app = nullptr;
     char* set_app = nullptr;
 
-    XSet* handler_set = static_cast<XSet*>(g_object_get_data(G_OBJECT(menuitem), "handler_set"));
+    XSet* handler_set = XSET(g_object_get_data(G_OBJECT(menuitem), "handler_set"));
     if (handler_set)
     {
         // is a file handler
@@ -1819,7 +1819,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     if (!(data && data->info))
         return;
 
-    XSet* handler_set = static_cast<XSet*>(g_object_get_data(G_OBJECT(app_item), "handler_set"));
+    XSet* handler_set = XSET(g_object_get_data(G_OBJECT(app_item), "handler_set"));
     if (handler_set)
     {
         // is a file handler - open file handler config
