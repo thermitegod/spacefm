@@ -484,24 +484,6 @@ on_list_task_finished(VFSAsyncTask* task, bool is_cancelled, VFSDir* dir)
     dir->load_complete = true;
 }
 
-static bool
-is_dir_mount_point(const char* path)
-{
-    return false; /* FIXME: not implemented */
-}
-
-static bool
-is_dir_remote(const char* path)
-{
-    return false; /* FIXME: not implemented */
-}
-
-static bool
-is_dir_virtual(const char* path)
-{
-    return false; /* FIXME: not implemented */
-}
-
 static char*
 gethidden(const char* path) // MOD added
 {
@@ -599,21 +581,6 @@ vfs_dir_load(VFSDir* dir)
     if (G_LIKELY(dir->path))
     {
         dir->disp_path = g_filename_display_name(dir->path);
-        dir->flags = 0;
-
-        /* FIXME: We should check access here! */
-
-        if (G_UNLIKELY(!strcmp(dir->path, vfs_user_desktop_dir())))
-            dir->is_desktop = true;
-        else if (G_UNLIKELY(!strcmp(dir->path, vfs_user_home_dir())))
-            dir->is_home = true;
-        if (G_UNLIKELY(is_dir_mount_point(dir->path)))
-            dir->is_mount_point = true;
-        if (G_UNLIKELY(is_dir_remote(dir->path)))
-            dir->is_remote = true;
-        if (G_UNLIKELY(is_dir_virtual(dir->path)))
-            dir->is_virtual = true;
-
         dir->task = vfs_async_task_new((VFSAsyncFunc)vfs_dir_load_thread, dir);
         g_signal_connect(dir->task, "finish", G_CALLBACK(on_list_task_finished), dir);
         vfs_async_task_execute(dir->task);

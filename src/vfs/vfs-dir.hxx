@@ -30,19 +30,6 @@ struct VFSDir
     GList* file_list;
     int n_files;
 
-    union
-    {
-        int flags;
-        struct
-        {
-            bool is_home : 1;
-            bool is_desktop : 1;
-            bool is_mount_point : 1;
-            bool is_remote : 1;
-            bool is_virtual : 1;
-        };
-    };
-
     /*<private>*/
     VFSFileMonitor* monitor;
 
