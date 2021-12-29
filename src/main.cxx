@@ -12,6 +12,8 @@
 #include <string>
 #include <filesystem>
 
+#include <iostream>
+
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/sysmacros.h>
@@ -858,7 +860,7 @@ main(int argc, char* argv[])
         {
             if (argv[2] && (!strcmp(argv[2], "help") || !strcmp(argv[2], "--help")))
             {
-                printf("For help run, man spacefm-socket\n");
+                std::cout << "For help run, man spacefm-socket" << std::endl;
                 return EXIT_SUCCESS;
             }
             char* reply = nullptr;
@@ -894,30 +896,7 @@ main(int argc, char* argv[])
     // --version
     if (cli_flags.version_opt)
     {
-        printf("%s %s\n", PACKAGE_NAME_FANCY, PACKAGE_VERSION);
-        printf("Features: ");
-        printf("GTK3 ");
-        printf("UDEV ");
-        printf("INOTIFY ");
-        printf("FFMPEG ");
-        printf("STATVFS ");
-#ifdef USE_XXHASH
-        printf("XXHASH ");
-#endif
-#ifdef HAVE_SN
-        printf("SNOTIFY ");
-#endif
-#ifdef DEPRECATED_HW
-        printf("DEPRECATED_HW ");
-#endif
-#ifdef HAVE_MMAP
-        printf("MMAP ");
-#endif
-#ifdef _DEBUG_THREAD
-        printf("DEBUG_THREAD ");
-#endif
-        printf("\n");
-        return EXIT_SUCCESS;
+        std::cout << fmt::format("{} {}", PACKAGE_NAME_FANCY, PACKAGE_VERSION) << std::endl;
     }
 
     /* Initialize multithreading  //sfm moved below parse arguments
