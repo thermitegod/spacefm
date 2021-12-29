@@ -2492,7 +2492,7 @@ fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
     gtk_label_set_max_width_chars(GTK_LABEL(tab_text), 30);
     gtk_box_pack_start(GTK_BOX(tab_label), tab_text, false, false, 4);
 
-    if (!app_settings.hide_close_tab_buttons)
+    if (app_settings.show_close_tab_buttons)
     {
         close_btn = gtk_button_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(close_btn), false);
@@ -4129,7 +4129,7 @@ get_task_view_window(GtkWidget* view)
 }
 
 void
-main_write_exports(VFSFileTask* vtask, const char* value, GString* buf)
+main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
 {
     char* path;
     char* esc_path;
@@ -4139,7 +4139,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, GString* buf)
     FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
     XSet* set = XSET(vtask->exec_set);
 
-    g_string_append(buf, "\n#source");
+    buf.append("\n#source");
     // g_string_append(buf, "\n#source\ncp $0 /tmp\n");
 
     // panels
@@ -4167,55 +4167,54 @@ main_write_exports(VFSFileTask* vtask, const char* value, GString* buf)
         if ((cwd_needs_quote = !!strchr(cwd, '\'')))
         {
             path = bash_quote(cwd);
-            g_string_append_printf(buf, "\nfm_pwd_panel[%d]=%s\n", p, path);
+            buf.append(fmt::format("\nfm_pwd_panel[{}]={}\n", p, path));
             g_free(path);
         }
         else
-            g_string_append_printf(buf, "\nfm_pwd_panel[%d]=\"%s\"\n", p, cwd);
-        g_string_append_printf(buf, "\nfm_tab_panel[%d]=\"%d\"\n", p, i + 1);
+            buf.append(fmt::format("\nfm_pwd_panel[{}]=\"{}\"\n", p, cwd));
+        buf.append(fmt::format("\nfm_tab_panel[{}]=\"{}\"\n", p, i + 1));
 
         // selected files
         GList* sel_files = ptk_file_browser_get_selected_files(a_browser);
         if (sel_files)
         {
-            g_string_append_printf(buf, "fm_panel%d_files=(\n", p);
+            buf.append(fmt::format("fm_panel{}_files=(\n", p));
             GList* l;
             for (l = sel_files; l; l = l->next)
             {
                 path = (char*)vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data));
                 if (G_LIKELY(!cwd_needs_quote && !strchr(path, '"')))
-                    g_string_append_printf(buf,
-                                           "\"%s%s%s\"\n",
+                    buf.append(fmt::format("\"{}{}{}\"\n",
                                            cwd,
                                            (cwd[0] != '\0' && cwd[1] == '\0') ? "" : "/",
-                                           path);
+                                           path));
                 else
                 {
                     path = g_build_filename(cwd, path, nullptr);
                     esc_path = bash_quote(path);
-                    g_string_append_printf(buf, "%s\n", esc_path);
+                    buf.append(fmt::format("{}\n", esc_path));
                     g_free(esc_path);
                     g_free(path);
                 }
             }
-            g_string_append(buf, ")\n");
+            buf.append(fmt::format(")\n"));
 
             if (file_browser == a_browser)
             {
-                g_string_append_printf(buf, "fm_filenames=(\n");
+                buf.append(fmt::format("fm_filenames=(\n"));
                 for (l = sel_files; l; l = l->next)
                 {
                     path = (char*)vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data));
                     if (G_LIKELY(!strchr(path, '"')))
-                        g_string_append_printf(buf, "\"%s\"\n", path);
+                        buf.append(fmt::format("\"{}\"\n", path));
                     else
                     {
                         esc_path = bash_quote(path);
-                        g_string_append_printf(buf, "%s\n", esc_path);
+                        buf.append(fmt::format("{}\n", esc_path));
                         g_free(esc_path);
                     }
                 }
-                g_string_append(buf, ")\n");
+                buf.append(fmt::format(")\n"));
             }
 
             g_list_foreach(sel_files, (GFunc)vfs_file_info_unref, nullptr);
@@ -4230,8 +4229,8 @@ main_write_exports(VFSFileTask* vtask, const char* value, GString* buf)
             {
                 esc_path = bash_quote(path);
                 if (file_browser == a_browser)
-                    g_string_append_printf(buf, "fm_bookmark=%s\n", esc_path);
-                g_string_append_printf(buf, "fm_panel%d_bookmark=%s\n", p, esc_path);
+                    buf.append(fmt::format("fm_bookmark={}\n", esc_path));
+                buf.append(fmt::format("fm_panel{}_bookmark={}\n", p, esc_path));
                 g_free(esc_path);
             }
         }
@@ -4244,86 +4243,86 @@ main_write_exports(VFSFileTask* vtask, const char* value, GString* buf)
             {
                 if (file_browser == a_browser)
                 {
-                    g_string_append_printf(buf, "fm_device=\"%s\"\n", vol->device_file);
+                    buf.append(fmt::format("fm_device=\"{}\"\n", vol->device_file));
                     if (vol->udi)
                     {
                         esc_path = bash_quote(vol->udi);
-                        g_string_append_printf(buf, "fm_device_udi=%s\n", esc_path);
+                        buf.append(fmt::format("fm_device_udi={}\n", esc_path));
                         g_free(esc_path);
                     }
                     if (vol->mount_point)
                     {
                         esc_path = bash_quote(vol->mount_point);
-                        g_string_append_printf(buf, "fm_device_mount_point=%s\n", esc_path);
+                        buf.append(fmt::format("fm_device_mount_point={}\n", esc_path));
                         g_free(esc_path);
                     }
                     if (vol->label)
                     {
                         esc_path = bash_quote(vol->label);
-                        g_string_append_printf(buf, "fm_device_label=%s\n", esc_path);
+                        buf.append(fmt::format("fm_device_label={}\n", esc_path));
                         g_free(esc_path);
                     }
                     if (vol->fs_type)
-                        g_string_append_printf(buf, "fm_device_fstype=\"%s\"\n", vol->fs_type);
-                    g_string_append_printf(buf, "fm_device_size=\"%lu\"\n", vol->size);
+                        buf.append(fmt::format("fm_device_fstype=\"{}\"\n", vol->fs_type));
+                    buf.append(fmt::format("fm_device_size=\"{}\"\n", vol->size));
                     if (vol->disp_name)
                     {
                         esc_path = bash_quote(vol->disp_name);
-                        g_string_append_printf(buf, "fm_device_display_name=\"%s\"\n", esc_path);
+                        buf.append(fmt::format("fm_device_display_name=\"%{}\"\n", esc_path));
                         g_free(esc_path);
                     }
                     // clang-format off
-                    g_string_append_printf(buf, "fm_device_icon=\"%s\"\n", vol->icon);
-                    g_string_append_printf(buf, "fm_device_is_mounted=\"%d\"\n", vol->is_mounted ? 1 : 0);
-                    g_string_append_printf(buf, "fm_device_is_optical=\"%d\"\n", vol->is_optical ? 1 : 0);
-                    g_string_append_printf(buf, "fm_device_is_floppy=\"%d\"\n", vol->is_floppy ? 1 : 0);
-                    g_string_append_printf(buf, "fm_device_is_table=\"%d\"\n", vol->is_table ? 1 : 0);
-                    g_string_append_printf(buf, "fm_device_is_removable=\"%d\"\n", vol->is_removable ? 1 : 0);
-                    g_string_append_printf(buf, "fm_device_is_audiocd=\"%d\"\n", vol->is_audiocd ? 1 : 0);
-                    g_string_append_printf(buf, "fm_device_is_dvd=\"%d\"\n", vol->is_dvd ? 1 : 0);
-                    g_string_append_printf(buf, "fm_device_is_blank=\"%d\"\n", vol->is_blank ? 1 : 0);
-                    g_string_append_printf(buf, "fm_device_is_mountable=\"%d\"\n", vol->is_mountable ? 1 : 0);
-                    g_string_append_printf(buf, "fm_device_nopolicy=\"%d\"\n", vol->nopolicy ? 1 : 0);
+                    buf.append(fmt::format("fm_device_icon=\"{}\"\n", vol->icon));
+                    buf.append(fmt::format("fm_device_is_mounted=\"{}\"\n", vol->is_mounted ? 1 : 0));
+                    buf.append(fmt::format("fm_device_is_optical=\"{}\"\n", vol->is_optical ? 1 : 0));
+                    buf.append(fmt::format("fm_device_is_floppy=\"{}\"\n", vol->is_floppy ? 1 : 0));
+                    buf.append(fmt::format("fm_device_is_table=\"{}\"\n", vol->is_table ? 1 : 0));
+                    buf.append(fmt::format("fm_device_is_removable=\"{}\"\n", vol->is_removable ? 1 : 0));
+                    buf.append(fmt::format("fm_device_is_audiocd=\"{}\"\n", vol->is_audiocd ? 1 : 0));
+                    buf.append(fmt::format("fm_device_is_dvd=\"{}\"\n", vol->is_dvd ? 1 : 0));
+                    buf.append(fmt::format("fm_device_is_blank=\"{}\"\n", vol->is_blank ? 1 : 0));
+                    buf.append(fmt::format("fm_device_is_mountable=\"{}\"\n", vol->is_mountable ? 1 : 0));
+                    buf.append(fmt::format("fm_device_nopolicy=\"{}\"\n", vol->nopolicy ? 1 : 0));
                 }
-                g_string_append_printf(buf, "fm_panel%d_device=\"%s\"\n", p, vol->device_file);
+                buf.append(fmt::format("fm_panel{}_device=\"{}\"\n", p, vol->device_file));
                 if (vol->udi)
                 {
                     esc_path = bash_quote(vol->udi);
-                    g_string_append_printf(buf, "fm_panel%d_device_udi=%s\n", p, esc_path);
+                    buf.append(fmt::format("fm_panel{}_device_udi={}\n", p, esc_path));
                     g_free(esc_path);
                 }
                 if (vol->mount_point)
                 {
                     esc_path = bash_quote(vol->mount_point);
-                    g_string_append_printf(buf, "fm_panel%d_device_mount_point=%s\n", p, esc_path);
+                    buf.append(fmt::format("fm_panel{}_device_mount_point={}\n", p, esc_path));
                     g_free(esc_path);
                 }
                 if (vol->label)
                 {
                     esc_path = bash_quote(vol->label);
-                    g_string_append_printf(buf, "fm_panel%d_device_label=%s\n", p, esc_path);
+                    buf.append(fmt::format("fm_panel{}_device_label={}\n", p, esc_path));
                     g_free(esc_path);
                 }
                 if (vol->fs_type)
-                    g_string_append_printf(buf, "fm_panel%d_device_fstype=\"%s\"\n", p, vol->fs_type);
-                g_string_append_printf(buf, "fm_panel%d_device_size=\"%lu\"\n", p, vol->size);
+                    buf.append(fmt::format("fm_panel{}_device_fstype=\"{}\"\n", p, vol->fs_type));
+                buf.append(fmt::format("fm_panel{}_device_size=\"{}\"\n", p, vol->size));
                 if (vol->disp_name)
                 {
                     esc_path = bash_quote(vol->disp_name);
-                    g_string_append_printf(buf, "fm_panel%d_device_display_name=%s\n", p, esc_path);
+                    buf.append(fmt::format("fm_panel{}_device_display_name={}\n", p, esc_path));
                     g_free(esc_path);
                 }
-                g_string_append_printf(buf, "fm_panel%d_device_icon=\"%s\"\n", p, vol->icon);
-                g_string_append_printf(buf, "fm_panel%d_device_is_mounted=\"%d\"\n", p, vol->is_mounted ? 1 : 0);
-                g_string_append_printf(buf, "fm_panel%d_device_is_optical=\"%d\"\n", p, vol->is_optical ? 1 : 0);
-                g_string_append_printf(buf, "fm_panel%d_device_is_table=\"%d\"\n", p, vol->is_table ? 1 : 0);
-                g_string_append_printf(buf, "fm_panel%d_device_is_floppy=\"%d\"\n", p, vol->is_floppy ? 1 : 0);
-                g_string_append_printf(buf, "fm_panel%d_device_is_removable=\"%d\"\n", p, vol->is_removable ? 1 : 0);
-                g_string_append_printf(buf, "fm_panel%d_device_is_audiocd=\"%d\"\n", p, vol->is_audiocd ? 1 : 0);
-                g_string_append_printf(buf, "fm_panel%d_device_is_dvd=\"%d\"\n", p, vol->is_dvd ? 1 : 0);
-                g_string_append_printf(buf, "fm_panel%d_device_is_blank=\"%d\"\n", p, vol->is_blank ? 1 : 0);
-                g_string_append_printf(buf, "fm_panel%d_device_is_mountable=\"%d\"\n", p, vol->is_mountable ? 1 : 0);
-                g_string_append_printf(buf, "fm_panel%d_device_nopolicy=\"%d\"\n", p, vol->nopolicy ? 1 : 0);
+                buf.append(fmt::format("fm_panel{}_device_icon=\"{}\"\n", p, vol->icon));
+                buf.append(fmt::format("fm_panel{}_device_is_mounted=\"{}\"\n", p, vol->is_mounted ? 1 : 0));
+                buf.append(fmt::format("fm_panel{}_device_is_optical=\"{}\"\n", p, vol->is_optical ? 1 : 0));
+                buf.append(fmt::format("fm_panel{}_device_is_table=\"{}\"\n", p, vol->is_table ? 1 : 0));
+                buf.append(fmt::format("fm_panel{}_device_is_floppy=\"{}\"\n", p, vol->is_floppy ? 1 : 0));
+                buf.append(fmt::format("fm_panel{}_device_is_removable=\"{}\"\n", p, vol->is_removable ? 1 : 0));
+                buf.append(fmt::format("fm_panel{}_device_is_audiocd=\"{}\"\n", p, vol->is_audiocd ? 1 : 0));
+                buf.append(fmt::format("fm_panel{}_device_is_dvd=\"{}\"\n", p, vol->is_dvd ? 1 : 0));
+                buf.append(fmt::format("fm_panel{}_device_is_blank=\"{}\"\n", p, vol->is_blank ? 1 : 0));
+                buf.append(fmt::format("fm_panel{}_device_is_mountable=\"{}\"\n", p, vol->is_mountable ? 1 : 0));
+                buf.append(fmt::format("fm_panel{}_device_nopolicy=\"{}\"\n", p, vol->nopolicy ? 1 : 0));
                 // clang-format on
             }
         }
@@ -4335,31 +4334,31 @@ main_write_exports(VFSFileTask* vtask, const char* value, GString* buf)
             PtkFileBrowser* t_browser = PTK_FILE_BROWSER(
                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), i));
             path = bash_quote(ptk_file_browser_get_cwd(t_browser));
-            g_string_append_printf(buf, "fm_pwd_panel%d_tab[%d]=%s\n", p, i + 1, path);
+            buf.append(fmt::format("fm_pwd_panel{}_tab[{}]={}\n", p, i + 1, path));
             if (p == file_browser->mypanel)
             {
-                g_string_append_printf(buf, "fm_pwd_tab[%d]=%s\n", i + 1, path);
+                buf.append(fmt::format("fm_pwd_tab[{}]={}\n", i + 1, path));
             }
             if (file_browser == t_browser)
             {
                 // my browser
-                g_string_append_printf(buf, "fm_pwd=%s\n", path);
-                g_string_append_printf(buf, "fm_panel=\"%d\"\n", p);
-                g_string_append_printf(buf, "fm_tab=\"%d\"\n", i + 1);
+                buf.append(fmt::format("fm_pwd={}\n", path));
+                buf.append(fmt::format("fm_panel=\"{}\"\n", p));
+                buf.append(fmt::format("fm_tab=\"{}\"\n", i + 1));
             }
             g_free(path);
         }
     }
     // my selected files
-    g_string_append_printf(buf, "\nfm_files=(\"${fm_panel%d_files[@]}\")\n", file_browser->mypanel);
-    g_string_append_printf(buf, "fm_file=\"${fm_panel%d_files[0]}\"\n", file_browser->mypanel);
-    g_string_append_printf(buf, "fm_filename=\"${fm_filenames[0]}\"\n");
+    buf.append(fmt::format("\nfm_files=(\"${{fm_panel{}_files[@]}}\")\n", file_browser->mypanel));
+    buf.append(fmt::format("fm_file=\"${{fm_panel{}_files[0]}}\"\n", file_browser->mypanel));
+    buf.append(fmt::format("fm_filename=\"${{fm_filenames[0]}}\"\n"));
     // user
     const char* this_user = g_get_user_name();
     if (this_user)
     {
         esc_path = bash_quote(this_user);
-        g_string_append_printf(buf, "fm_user=%s\n", esc_path);
+        buf.append(fmt::format("fm_user={}\n", esc_path));
         g_free(esc_path);
         // g_free( this_user );  DON'T
     }
@@ -4367,22 +4366,22 @@ main_write_exports(VFSFileTask* vtask, const char* value, GString* buf)
     if (value)
     {
         esc_path = bash_quote(value);
-        g_string_append_printf(buf, "fm_value=%s\n", esc_path);
+        buf.append(fmt::format("fm_value={}\n", esc_path));
         g_free(esc_path);
     }
-    if (vtask->exec_ptask)
-    {
-        g_string_append_printf(buf, "fm_my_task=\"%p\"\n", vtask->exec_ptask);
-        g_string_append_printf(buf, "fm_my_task_id=\"%p\"\n", vtask->exec_ptask);
-    }
-    g_string_append_printf(buf, "fm_my_window=\"%p\"\n", main_window);
-    g_string_append_printf(buf, "fm_my_window_id=\"%p\"\n", main_window);
+    // if (vtask->exec_ptask)
+    //{
+    //     buf.append(fmt::format("fm_my_task=\"{}\"\n", vtask->exec_ptask));
+    //     buf.append(fmt::format("fm_my_task_id=\"{}\"\n", vtask->exec_ptask));
+    // }
+    // buf.append(fmt::format("fm_my_window=\"{}\"\n", main_window));
+    // buf.append(fmt::format("fm_my_window_id=\"{}\"\n", main_window));
 
     // utils
     esc_path = bash_quote(xset_get_s("editor"));
-    g_string_append_printf(buf, "fm_editor=%s\n", esc_path);
+    buf.append(fmt::format("fm_editor={}\n", esc_path));
     g_free(esc_path);
-    g_string_append_printf(buf, "fm_editor_terminal=\"%d\"\n", xset_get_b("editor") ? 1 : 0);
+    buf.append(fmt::format("fm_editor_terminal=\"{}\"\n", xset_get_b("editor") ? 1 : 0));
 
     // set
     if (set)
@@ -4402,7 +4401,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, GString* buf)
             path = g_build_filename(xset_get_config_dir(), "scripts", set->name, nullptr);
         }
         esc_path = bash_quote(path);
-        g_string_append_printf(buf, "fm_cmd_dir=%s\n", esc_path);
+        buf.append(fmt::format("fm_cmd_dir={}\n", esc_path));
         g_free(esc_path);
         g_free(path);
 
@@ -4415,7 +4414,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, GString* buf)
         else
             path = g_build_filename(xset_get_config_dir(), "plugin-data", set->name, nullptr);
         esc_path = bash_quote(path);
-        g_string_append_printf(buf, "fm_cmd_data=%s\n", esc_path);
+        buf.append(fmt::format("fm_cmd_data={}\n", esc_path));
         g_free(esc_path);
         g_free(path);
 
@@ -4423,7 +4422,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, GString* buf)
         if (set->plugin)
         {
             esc_path = bash_quote(set->plug_dir);
-            g_string_append_printf(buf, "fm_plugin_dir=%s\n", esc_path);
+            buf.append(fmt::format("fm_plugin_dir={}\n", esc_path));
             g_free(esc_path);
         }
 
@@ -4431,58 +4430,58 @@ main_write_exports(VFSFileTask* vtask, const char* value, GString* buf)
         if (set->menu_label)
         {
             esc_path = bash_quote(set->menu_label);
-            g_string_append_printf(buf, "fm_cmd_name=%s\n", esc_path);
+            buf.append(fmt::format("fm_cmd_name={}\n", esc_path));
             g_free(esc_path);
         }
     }
 
     // tmp
-    g_string_append_printf(buf, "fm_tmp_dir=\"%s\"\n", xset_get_user_tmp_dir());
+    buf.append(fmt::format("fm_tmp_dir=\"{}\"\n", xset_get_user_tmp_dir()));
 
     // tasks
     if ((ptask = get_selected_task(file_browser->task_view)))
     {
         const char* job_titles[] = {"move", "copy", "trash", "delete", "link", "change", "run"};
-        g_string_append_printf(buf, "\nfm_task_type=\"%s\"\n", job_titles[ptask->task->type]);
+        buf.append(fmt::format("\nfm_task_type=\"{}\"\n", job_titles[ptask->task->type]));
         if (ptask->task->type == VFS_FILE_TASK_EXEC)
         {
             esc_path = bash_quote(ptask->task->dest_dir);
-            g_string_append_printf(buf, "fm_task_pwd=%s\n", esc_path);
+            buf.append(fmt::format("fm_task_pwd={}\n", esc_path));
             g_free(esc_path);
             esc_path = bash_quote(ptask->task->current_file);
-            g_string_append_printf(buf, "fm_task_name=%s\n", esc_path);
+            buf.append(fmt::format("fm_task_name={}\n", esc_path));
             g_free(esc_path);
             esc_path = bash_quote(ptask->task->exec_command);
-            g_string_append_printf(buf, "fm_task_command=%s\n", esc_path);
+            buf.append(fmt::format("fm_task_command={}\n", esc_path));
             g_free(esc_path);
             if (ptask->task->exec_as_user)
-                g_string_append_printf(buf, "fm_task_user=\"%s\"\n", ptask->task->exec_as_user);
+                buf.append(fmt::format("fm_task_user=\"{}\"\n", ptask->task->exec_as_user));
             if (ptask->task->exec_icon)
-                g_string_append_printf(buf, "fm_task_icon=\"%s\"\n", ptask->task->exec_icon);
+                buf.append(fmt::format("fm_task_icon=\"{}\"\n", ptask->task->exec_icon));
             if (ptask->task->exec_pid)
-                g_string_append_printf(buf, "fm_task_pid=\"%d\"\n", ptask->task->exec_pid);
+                buf.append(fmt::format("fm_task_pid=\"{}\"\n", ptask->task->exec_pid));
         }
         else
         {
             esc_path = bash_quote(ptask->task->dest_dir);
-            g_string_append_printf(buf, "fm_task_dest_dir=%s\n", esc_path);
+            buf.append(fmt::format("fm_task_dest_dir={}\n", esc_path));
             g_free(esc_path);
             esc_path = bash_quote(ptask->task->current_file);
-            g_string_append_printf(buf, "fm_task_current_src_file=%s\n", esc_path);
+            buf.append(fmt::format("fm_task_current_src_file={}\n", esc_path));
             g_free(esc_path);
             esc_path = bash_quote(ptask->task->current_dest);
-            g_string_append_printf(buf, "fm_task_current_dest_file=%s\n", esc_path);
+            buf.append(fmt::format("fm_task_current_dest_file={}\n", esc_path));
             g_free(esc_path);
         }
-        g_string_append_printf(buf, "fm_task_id=\"%p\"\n", ptask);
-        if (ptask->task_view && (main_window = get_task_view_window(ptask->task_view)))
-        {
-            g_string_append_printf(buf, "fm_task_window=\"%p\"\n", main_window);
-            g_string_append_printf(buf, "fm_task_window_id=\"%p\"\n", main_window);
-        }
+        // buf.append(fmt::format("fm_task_id=\"{}\"\n", ptask));
+        // if (ptask->task_view && (main_window = get_task_view_window(ptask->task_view)))
+        //{
+        //    buf.append(fmt::format("fm_task_window=\"{}\"\n", main_window));
+        //    buf.append(fmt::format("fm_task_window_id=\"{}\"\n", main_window));
+        //}
     }
 
-    g_string_append(buf, "\n");
+    buf.append(fmt::format("\n"));
 }
 
 static void

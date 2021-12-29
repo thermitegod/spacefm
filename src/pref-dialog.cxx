@@ -144,9 +144,9 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         }
         hide_close_tab_buttons =
             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->hide_close_tab_buttons));
-        if (hide_close_tab_buttons != app_settings.hide_close_tab_buttons)
+        if (hide_close_tab_buttons != app_settings.show_close_tab_buttons)
         {
-            app_settings.hide_close_tab_buttons = hide_close_tab_buttons;
+            app_settings.show_close_tab_buttons = hide_close_tab_buttons;
             // update all windows/all panels/all browsers
             for (l = fm_main_window_get_all(); l; l = l->next)
             {
@@ -591,7 +591,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         data->hide_close_tab_buttons =
             GTK_WIDGET(gtk_builder_get_object(builder, "hide_close_tab_buttons"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->hide_close_tab_buttons),
-                                     app_settings.hide_close_tab_buttons);
+                                     app_settings.show_close_tab_buttons);
 
         // MOD Interface
         data->confirm_delete = GTK_WIDGET(gtk_builder_get_object(builder, "confirm_delete"));

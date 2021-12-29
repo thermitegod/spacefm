@@ -54,7 +54,7 @@ AppSettings app_settings = AppSettings();
 ConfigSettings config_settings = ConfigSettings();
 
 // MOD settings
-static void xset_write(GString* buf);
+static void xset_write(std::string& buf);
 static void xset_parse(std::string& line);
 static void read_root_settings();
 static void xset_defaults();
@@ -282,7 +282,7 @@ parse_interface_settings(std::string& line)
     if (!token.compare("always_show_tabs"))
         app_settings.always_show_tabs = std::stoi(value);
     else if (!token.compare("show_close_tab_buttons"))
-        app_settings.hide_close_tab_buttons = std::stoi(value);
+        app_settings.show_close_tab_buttons = std::stoi(value);
 }
 
 static void
@@ -649,43 +649,45 @@ save_settings(void* main_window_ptr)
         std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
     }
 
-    GString* buf = g_string_sized_new(4096);
+    std::string buf = "";
 
     // clang-format off
-    g_string_append(buf, "[General]\n");
-    g_string_append_printf(buf, "show_thumbnail=%d\n", app_settings.show_thumbnail);
-    g_string_append_printf(buf, "max_thumb_size=%d\n", app_settings.max_thumb_size >> 10);
-    g_string_append_printf(buf, "big_icon_size=%d\n", app_settings.big_icon_size);
-    g_string_append_printf(buf, "small_icon_size=%d\n", app_settings.small_icon_size);
-    g_string_append_printf(buf, "tool_icon_size=%d\n", app_settings.tool_icon_size);
-    g_string_append_printf(buf, "single_click=%d\n", app_settings.single_click);
-    g_string_append_printf(buf, "no_single_hover=%d\n", app_settings.no_single_hover);
-    g_string_append_printf(buf, "sort_order=%d\n", app_settings.sort_order);
-    g_string_append_printf(buf, "sort_type=%d\n", app_settings.sort_type);
-    g_string_append_printf(buf, "use_si_prefix=%d\n", app_settings.use_si_prefix);
+    buf.append("[General]\n");
+    buf.append(fmt::format("show_thumbnail={:d}\n", app_settings.show_thumbnail));
+    buf.append(fmt::format("max_thumb_size={}\n", app_settings.max_thumb_size >> 10));
+    buf.append(fmt::format("big_icon_size={}\n", app_settings.big_icon_size));
+    buf.append(fmt::format("small_icon_size={}\n", app_settings.small_icon_size));
+    buf.append(fmt::format("tool_icon_size={}\n", app_settings.tool_icon_size));
+    buf.append(fmt::format("single_click={:d}\n", app_settings.single_click));
+    buf.append(fmt::format("no_single_hover={:d}\n", app_settings.no_single_hover));
+    buf.append(fmt::format("sort_order={}\n", app_settings.sort_order));
+    buf.append(fmt::format("sort_type={}\n", app_settings.sort_type));
+    buf.append(fmt::format("use_si_prefix={:d}\n", app_settings.use_si_prefix));
+    buf.append(fmt::format("no_execute={:d}\n", app_settings.no_execute));
+    buf.append(fmt::format("no_confirm={:d}\n", app_settings.no_confirm));
+    buf.append(fmt::format("no_confirm_trash={:d}\n", app_settings.no_confirm_trash));
 
-    g_string_append_printf(buf, "no_execute=%d\n", app_settings.no_execute);
-    g_string_append_printf(buf, "no_confirm=%d\n", app_settings.no_confirm);
-    g_string_append_printf(buf, "no_confirm_trash=%d\n", app_settings.no_confirm_trash);
+    buf.append("\n[Window]\n");
+    buf.append(fmt::format("width={}\n", app_settings.width));
+    buf.append(fmt::format("height={}\n", app_settings.height));
+    buf.append(fmt::format("maximized={:d}\n", app_settings.maximized));
 
-    g_string_append(buf, "\n[Window]\n");
-    g_string_append_printf(buf, "width=%d\n", app_settings.width);
-    g_string_append_printf(buf, "height=%d\n", app_settings.height);
-    g_string_append_printf(buf, "maximized=%d\n", app_settings.maximized);
+    buf.append("\n[Interface]\n");
+    buf.append(fmt::format("always_show_tabs={:d}\n", app_settings.always_show_tabs));
+    buf.append(fmt::format("show_close_tab_buttons={:d}\n", app_settings.show_close_tab_buttons));
 
-    g_string_append(buf, "\n[Interface]\n");
-    g_string_append_printf(buf, "always_show_tabs=%d\n", app_settings.always_show_tabs);
-    g_string_append_printf(buf, "show_close_tab_buttons=%d\n", !app_settings.hide_close_tab_buttons);
-
-    g_string_append(buf, "\n[MOD]\n");
+    buf.append("\n[MOD]\n");
     xset_write(buf);
     // clang-format on
 
     // move
     std::string path = g_build_filename(settings_config_dir.c_str(), "session", nullptr);
-    if (!g_file_set_contents(path.c_str(), buf->str, buf->len, nullptr))
+    std::ofstream file(path);
+    if (file.is_open())
+        file << buf;
+    else
         LOG_ERROR("saving session file failed");
-    g_string_free(buf, true);
+    file.close();
 }
 
 void
@@ -1052,22 +1054,22 @@ xset_is_main_bookmark(XSet* set)
 }
 
 static void
-xset_write_set(GString* buf, XSet* set)
+xset_write_set(std::string& buf, XSet* set)
 {
     if (set->plugin)
         return;
     if (set->s)
-        g_string_append_printf(buf, "%s-s=%s\n", set->name, set->s);
+        buf.append(fmt::format("{}-s={}\n", set->name, set->s));
     if (set->x)
-        g_string_append_printf(buf, "%s-x=%s\n", set->name, set->x);
+        buf.append(fmt::format("{}-x={}\n", set->name, set->x));
     if (set->y)
-        g_string_append_printf(buf, "%s-y=%s\n", set->name, set->y);
+        buf.append(fmt::format("{}-y={}\n", set->name, set->y));
     if (set->z)
-        g_string_append_printf(buf, "%s-z=%s\n", set->name, set->z);
+        buf.append(fmt::format("{}-z={}\n", set->name, set->z));
     if (set->key)
-        g_string_append_printf(buf, "%s-key=%d\n", set->name, set->key);
+        buf.append(fmt::format("{}-key={}\n", set->name, set->key));
     if (set->keymod)
-        g_string_append_printf(buf, "%s-keymod=%d\n", set->name, set->keymod);
+        buf.append(fmt::format("{}-keymod={}\n", set->name, set->keymod));
     // menu label
     if (set->menu_label)
     {
@@ -1076,11 +1078,11 @@ xset_write_set(GString* buf, XSet* set)
             // built-in
             if (set->in_terminal == XSET_B_TRUE && set->menu_label && set->menu_label[0])
                 // only save lbl if menu_label was customized
-                g_string_append_printf(buf, "%s-lbl=%s\n", set->name, set->menu_label);
+                buf.append(fmt::format("{}-lbl={}\n", set->name, set->menu_label));
         }
         else
             // custom
-            g_string_append_printf(buf, "%s-label=%s\n", set->name, set->menu_label);
+            buf.append(fmt::format("{}-label={}\n", set->name, set->menu_label));
     }
     // icon
     if (set->lock)
@@ -1088,56 +1090,56 @@ xset_write_set(GString* buf, XSet* set)
         // built-in
         if (set->keep_terminal == XSET_B_TRUE)
             // only save icn if icon was customized
-            g_string_append_printf(buf, "%s-icn=%s\n", set->name, set->icon ? set->icon : "");
+            buf.append(fmt::format("{}-icn={}\n", set->name, set->icon ? set->icon : ""));
     }
     else if (set->icon)
         // custom
-        g_string_append_printf(buf, "%s-icon=%s\n", set->name, set->icon);
+        buf.append(fmt::format("{}-icon={}\n", set->name, set->icon));
     if (set->next)
-        g_string_append_printf(buf, "%s-next=%s\n", set->name, set->next);
+        buf.append(fmt::format("{}-next={}\n", set->name, set->next));
     if (set->child)
-        g_string_append_printf(buf, "%s-child=%s\n", set->name, set->child);
+        buf.append(fmt::format("{}-child={}\n", set->name, set->child));
     if (set->context)
-        g_string_append_printf(buf, "%s-cxt=%s\n", set->name, set->context);
+        buf.append(fmt::format("{}-cxt={}\n", set->name, set->context));
     if (set->b != XSET_B_UNSET)
-        g_string_append_printf(buf, "%s-b=%d\n", set->name, set->b);
+        buf.append(fmt::format("{}-b={}\n", set->name, set->b));
     if (set->tool != XSET_TOOL_NOT)
-        g_string_append_printf(buf, "%s-tool=%d\n", set->name, set->tool);
+        buf.append(fmt::format("{}-tool={}\n", set->name, set->tool));
     if (!set->lock)
     {
         if (set->menu_style)
-            g_string_append_printf(buf, "%s-style=%d\n", set->name, set->menu_style);
+            buf.append(fmt::format("{}-style={}\n", set->name, set->menu_style));
         if (set->desc)
-            g_string_append_printf(buf, "%s-desc=%s\n", set->name, set->desc);
+            buf.append(fmt::format("{}-desc={}\n", set->name, set->desc));
         if (set->title)
-            g_string_append_printf(buf, "%s-title=%s\n", set->name, set->title);
+            buf.append(fmt::format("{}-title={}\n", set->name, set->title));
         if (set->prev)
-            g_string_append_printf(buf, "%s-prev=%s\n", set->name, set->prev);
+            buf.append(fmt::format("{}-prev={}\n", set->name, set->prev));
         if (set->parent)
-            g_string_append_printf(buf, "%s-parent=%s\n", set->name, set->parent);
+            buf.append(fmt::format("{}-parent={}\n", set->name, set->parent));
         if (set->line)
-            g_string_append_printf(buf, "%s-line=%s\n", set->name, set->line);
+            buf.append(fmt::format("{}-line={}\n", set->name, set->line));
         if (set->task != XSET_B_UNSET)
-            g_string_append_printf(buf, "%s-task=%d\n", set->name, set->task);
+            buf.append(fmt::format("{}-task={}\n", set->name, set->task));
         if (set->task_pop != XSET_B_UNSET)
-            g_string_append_printf(buf, "%s-task_pop=%d\n", set->name, set->task_pop);
+            buf.append(fmt::format("{}-task_pop={}\n", set->name, set->task_pop));
         if (set->task_err != XSET_B_UNSET)
-            g_string_append_printf(buf, "%s-task_err=%d\n", set->name, set->task_err);
+            buf.append(fmt::format("{}-task_err={}\n", set->name, set->task_err));
         if (set->task_out != XSET_B_UNSET)
-            g_string_append_printf(buf, "%s-task_out=%d\n", set->name, set->task_out);
+            buf.append(fmt::format("{}-task_out={}\n", set->name, set->task_out));
         if (set->in_terminal != XSET_B_UNSET)
-            g_string_append_printf(buf, "%s-term=%d\n", set->name, set->in_terminal);
+            buf.append(fmt::format("{}-term={}\n", set->name, set->in_terminal));
         if (set->keep_terminal != XSET_B_UNSET)
-            g_string_append_printf(buf, "%s-keep=%d\n", set->name, set->keep_terminal);
+            buf.append(fmt::format("{}-keep={}\n", set->name, set->keep_terminal));
         if (set->scroll_lock != XSET_B_UNSET)
-            g_string_append_printf(buf, "%s-scroll=%d\n", set->name, set->scroll_lock);
+            buf.append(fmt::format("{}-scroll={}\n", set->name, set->scroll_lock));
         if (set->opener != 0)
-            g_string_append_printf(buf, "%s-op=%d\n", set->name, set->opener);
+            buf.append(fmt::format("{}-op={}\n", set->name, set->opener));
     }
 }
 
 static void
-xset_write(GString* buf)
+xset_write(std::string& buf)
 {
     GList* l;
 
@@ -1680,7 +1682,7 @@ xset_opener(PtkFileBrowser* file_browser, char job)
 }
 
 static void
-write_root_saver(GString* buf, const char* path, const char* name, const char* var,
+write_root_saver(std::string& buf, const char* path, const char* name, const char* var,
                  const char* value)
 {
     if (!value)
@@ -1688,22 +1690,21 @@ write_root_saver(GString* buf, const char* path, const char* name, const char* v
 
     char* save = g_strdup_printf("%s-%s=%s", name, var, value);
     char* qsave = bash_quote(save);
-    g_string_append_printf(buf, "echo %s >>| \"%s\"\n", qsave, path);
+    buf.append(fmt::format("echo {} >>| \"{}\"\n", qsave, path));
     g_free(save);
     g_free(qsave);
 }
 
 bool
-write_root_settings(GString* buf, const char* path)
+write_root_settings(std::string& buf, const char* path)
 {
     GList* l;
     XSet* set;
 
-    g_string_append_printf(buf,
-                           "\n#save root settings\nmkdir -p %s/spacefm\n"
-                           "echo -e '#SpaceFM As-Root Session File\\n\\' >| '%s'\n",
+    buf.append(fmt::format("\n#save root settings\nmkdir -p {}/spacefm\n"
+                           "echo -e '#SpaceFM As-Root Session File\\n\\' >| '{}'\n",
                            SYSCONFDIR,
-                           path);
+                           path));
 
     for (l = xsets; l; l = l->next)
     {
@@ -1720,16 +1721,12 @@ write_root_settings(GString* buf, const char* path)
                 write_root_saver(buf, path, set->name, "x", set->x);
                 write_root_saver(buf, path, set->name, "y", set->y);
                 if (set->b != XSET_B_UNSET)
-                    g_string_append_printf(buf,
-                                           "echo '%s-b=%d' >>| \"%s\"\n",
-                                           set->name,
-                                           set->b,
-                                           path);
+                    buf.append(fmt::format("echo '{}-b={}' >>| \"{}\"\n", set->name, set->b, path));
             }
         }
     }
 
-    g_string_append_printf(buf, "chmod -R go-w+rX %s/spacefm\n\n", SYSCONFDIR);
+    buf.append(fmt::format("chmod -R go-w+rX {}/spacefm\n\n", SYSCONFDIR));
     return true;
 }
 
@@ -3229,7 +3226,7 @@ xset_custom_export_files(XSet* set, char* plug_dir)
 }
 
 static bool
-xset_custom_export_write(GString* buf, XSet* set, char* plug_dir)
+xset_custom_export_write(std::string& buf, XSet* set, char* plug_dir)
 { // recursively write set, submenu sets, and next sets
     xset_write_set(buf, set);
     if (!xset_custom_export_files(set, plug_dir))
@@ -3331,9 +3328,10 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 
         // Create plugin file
         char* plugin_path = g_build_filename(plug_dir, "plugin", nullptr);
-        GString* buf = g_string_sized_new(4096);
 
-        g_string_append(buf, "[Plugin]\n");
+        std::string buf = "";
+
+        buf.append("[Plugin]\n");
         xset_write_set(buf, xset_get("config_version"));
 
         char* s_prev = set->prev;
@@ -3352,10 +3350,14 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
             if (!xset_custom_export_write(buf, xset_get(set->child), plug_dir))
                 goto _rmtmp_error;
         }
-        g_string_append(buf, "\n");
-        g_file_set_contents(plugin_path, buf->str, buf->len, nullptr);
+        buf.append("\n");
+
+        std::ofstream file(path);
+        if (file.is_open())
+            file << buf;
+        file.close();
+
         g_free(plugin_path);
-        g_string_free(buf, true);
     }
     else
         plug_dir = g_strdup(set->plug_dir);

@@ -12,6 +12,9 @@
 #include <string>
 #include <filesystem>
 
+#include <iostream>
+#include <fstream>
+
 #include <ctime>
 
 #include <fcntl.h>
@@ -1425,10 +1428,10 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         } while (std::filesystem::exists(task->exec_script));
 
         // open buffer
-        GString* buf = g_string_sized_new(524288); // 500K
+        std::string buf = "";
 
         // build - header
-        g_string_append_printf(buf, "#!%s\n%s\n#tmp exec script\n", BASHPATH, SHELL_SETTINGS);
+        buf.append(fmt::format("#!{}\n{}\n#tmp exec script\n", BASHPATH, SHELL_SETTINGS));
 
         // build - exports
         if (task->exec_export && (task->exec_browser || task->exec_desktop))
@@ -1448,7 +1451,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         }
 
         // build - run
-        g_string_append_printf(buf, "#run\nif [ \"$1\" == \"run\" ];then\n\n");
+        buf.append(fmt::format("#run\nif [ \"$1\" == \"run\" ];then\n\n"));
 
         // build - write root settings
         if (task->exec_write_root && geteuid() != 0)
@@ -1472,51 +1475,51 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
 
         // build - export vars
         if (task->exec_export)
-            g_string_append_printf(buf, "export fm_import=\"source %s\"\n", task->exec_script);
+            buf.append(fmt::format("export fm_import=\"source {}\"\n", task->exec_script));
         else
-            g_string_append_printf(buf, "export fm_import=\"\"\n");
+            buf.append(fmt::format("export fm_import=\"\"\n"));
 
-        g_string_append_printf(buf, "export fm_source=\"%s\"\n\n", task->exec_script);
+        buf.append(fmt::format("export fm_source=\"{}\"\n\n", task->exec_script));
 
         // build - trap rm
         if (!task->exec_keep_tmp && geteuid() != 0 && task->exec_as_user &&
             !strcmp(task->exec_as_user, "root"))
         {
             // run as root command, clean up
-            g_string_append_printf(buf,
-                                   "trap \"rm -f %s; exit\" EXIT SIint SIGTERM SIGQUIT SIGHUP\n\n",
-                                   task->exec_script);
+            buf.append(fmt::format("trap \"rm -f {}; exit\" EXIT SIint SIGTERM SIGQUIT SIGHUP\n\n",
+                                   task->exec_script));
         }
 
         // build - command
         print_task_command((char*)task->exec_ptask, task->exec_command);
 
-        g_string_append_printf(buf, "%s\nfm_err=$?\n", task->exec_command);
+        buf.append(fmt::format("{}\nfm_err=$?\n", task->exec_command));
 
         // build - press enter to close
         if (terminal && task->exec_keep_terminal)
         {
             if (geteuid() == 0 || (task->exec_as_user && !strcmp(task->exec_as_user, "root")))
-                g_string_append_printf(buf,
-                                       "\necho;read -p '[ Finished ]  Press Enter to close: '\n");
+                buf.append(fmt::format("\necho;read -p '[ Finished ]  Press Enter to close: '\n"));
             else
             {
-                g_string_append_printf(buf,
-                                       "\necho;read -p '[ Finished ]  Press Enter to close or s + "
-                                       "Enter for a shell: ' "
-                                       "s\nif [ \"$s\" = 's' ];then\n    if [ \"$(whoami)\" = "
-                                       "\"root\" ];then\n        "
-                                       "echo '\n[ %s ]'\n    fi\n    echo\n    %s\nfi\n\n",
-                                       "You are ROOT",
-                                       BASHPATH);
+                buf.append(
+                    fmt::format("\necho;read -p '[ Finished ]  Press Enter to close or s + "
+                                "Enter for a shell: ' "
+                                "s\nif [ \"$s\" = 's' ];then\n    if [ \"$(whoami)\" = "
+                                "\"root\" ];then\n        "
+                                "echo '\n[ {} ]'\n    fi\n    echo\n    You are ROOT\nfi\n\n",
+                                BASHPATH));
             }
         }
 
-        g_string_append_printf(buf, "\nexit $fm_err\nfi\n");
+        buf.append(fmt::format("\nexit $fm_err\nfi\n"));
 
-        if (!g_file_set_contents(task->exec_script, buf->str, buf->len, nullptr))
+        std::ofstream file(task->exec_script);
+        if (file.is_open())
+            file << buf;
+        else
             goto _exit_with_error;
-        g_string_free(buf, true);
+        file.close();
 
         // set permissions
         chmod(task->exec_script, 0700);
