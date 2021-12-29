@@ -116,19 +116,18 @@ static GOptionEntry opt_entries[] =
 };
 // clang-format on
 
+static void init_folder();
+static bool handle_parsed_commandline_args();
+static void open_file(const char* path);
+static char* dup_to_absolute_file_path(char** file);
+
+// SOCKET START
+
 static bool single_instance_check();
 static void single_instance_finalize();
 static void get_socket_name(char* buf, int len);
 static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data);
-
-static void init_folder();
-
-static bool handle_parsed_commandline_args();
-
-static void open_file(const char* path);
-
-static char* dup_to_absolute_file_path(char** file);
-static void receive_socket_command(int client, GString* args); // sfm
+static void receive_socket_command(int client, GString* args);
 
 static char*
 get_inode_tag()
@@ -542,6 +541,8 @@ send_socket_command(int argc, char* argv[], char** reply) // sfm
     g_string_free(sock_reply, true);
     return ret;
 }
+
+// SOCKET END
 
 #ifdef _DEBUG_THREAD
 
