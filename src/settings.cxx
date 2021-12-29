@@ -2552,26 +2552,29 @@ compare_plugin_sets(XSet* a, XSet* b)
     return g_utf8_collate(a->menu_label, b->menu_label);
 }
 
-GList*
+std::vector<XSet*>
 xset_get_plugins(bool included)
 { // return list of plugin sets (included or not ) sorted by menu_label
-    GList* plugins = nullptr;
+    std::vector<XSet*> plugins;
 
     for (XSet* set: xsets)
     {
         if (set->plugin && set->plugin_top && set->plug_dir)
-        {
-            if (strstr(set->plug_dir, "/included/"))
-            {
-                if (included)
-                    plugins = g_list_prepend(plugins, set);
-            }
-            else if (!included)
-                plugins = g_list_prepend(plugins, set);
-        }
+            plugins.push_back(set);
     }
-    plugins = g_list_sort(plugins, (GCompareFunc)compare_plugin_sets);
+    sort(plugins.begin(), plugins.end(), compare_plugin_sets);
     return plugins;
+}
+
+void
+xset_clear_plugins(std::vector<XSet*>& plugins)
+{
+    if (!plugins.empty())
+    {
+        for (XSet* set: plugins)
+            xset_free(set);
+        plugins.clear();
+    }
 }
 
 static XSet*

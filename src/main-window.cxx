@@ -342,16 +342,16 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
 static GtkWidget*
 create_plugins_menu(FMMainWindow* main_window)
 {
-    GList* l;
-    GList* plugins = nullptr;
-    XSet* set;
-
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     GtkWidget* plug_menu = gtk_menu_new();
     if (!file_browser)
         return plug_menu;
+
+    std::vector<XSet*> plugins;
+
+    XSet* set;
 
     set = xset_set_cb("plug_ifile", (GFunc)on_plugin_install, main_window);
     xset_set_ob1(set, "set", set);
@@ -373,18 +373,18 @@ create_plugins_menu(FMMainWindow* main_window)
         GtkWidget* inc_menu = gtk_menu_item_get_submenu(GTK_MENU_ITEM(item));
 
         plugins = xset_get_plugins(true);
-        for (l = plugins; l; l = l->next)
-            xset_add_menuitem(file_browser, inc_menu, accel_group, XSET(l->data));
+        for (XSet* set: plugins)
+            xset_add_menuitem(file_browser, inc_menu, accel_group, set);
     }
-    set->disable = !plugins;
-    if (plugins)
-        g_list_free(plugins);
+    set->disable = plugins.empty();
+    if (!plugins.empty())
+        xset_clear_plugins(plugins);
 
     plugins = xset_get_plugins(false);
-    for (l = plugins; l; l = l->next)
-        xset_add_menuitem(file_browser, plug_menu, accel_group, XSET(l->data));
-    if (plugins)
-        g_list_free(plugins);
+    for (XSet* set: plugins)
+        xset_add_menuitem(file_browser, plug_menu, accel_group, set);
+    if (!plugins.empty())
+        xset_clear_plugins(plugins);
 
     gtk_widget_show_all(plug_menu);
     if (set->disable)
