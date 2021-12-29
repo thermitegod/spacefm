@@ -12,12 +12,7 @@ class WindowRef
 
     WindowRef()
     {
-        ref_count = 0;
     }
-
-  private:
-    size_t ref_count = 0;
-    bool daemon_mode;
 
   public:
     static WindowRef*
@@ -36,6 +31,10 @@ class WindowRef
     void ref_dec();
 
     void set_daemon_mode(bool is_daemon);
+
+  private:
+    unsigned int ref_count{0};
+    bool daemon_mode{false};
 };
 
 namespace WindowReference
