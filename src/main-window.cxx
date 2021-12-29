@@ -3351,7 +3351,6 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
 {
     // LOG_INFO("main_keypress {} {}", event->keyval, event->state);
 
-    GList* l;
     XSet* set;
     PtkFileBrowser* browser;
 
@@ -3410,18 +3409,18 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
                           true))
         return true;
 
-    for (l = xsets; l; l = l->next)
+    for (XSet* set: xsets)
     {
-        if ((XSET(l->data))->shared_key)
+        if (set->shared_key)
         {
             // set has shared key
 #ifdef HAVE_NONLATIN
             // nonlatin key match is for nonlatin keycodes set prior to 1.0.3
-            set = xset_get((XSET(l->data))->shared_key);
+            set = xset_get(set->shared_key);
             if ((set->key == event->keyval || (nonlatin_key && set->key == nonlatin_key)) &&
                 set->keymod == keymod)
 #else
-            set = xset_get((XSET(l->data))->shared_key);
+            set = xset_get(set->shared_key);
             if (set->key == event->keyval && set->keymod == keymod)
 #endif
             {
@@ -3448,14 +3447,13 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
         }
 #ifdef HAVE_NONLATIN
         // nonlatin key match is for nonlatin keycodes set prior to 1.0.3
-        if (((XSET(l->data))->key == event->keyval ||
-             (nonlatin_key && (XSET(l->data))->key == nonlatin_key)) &&
-            (XSET(l->data))->keymod == keymod)
+        if (((set->key == event->keyval ||
+            (nonlatin_key && set->key == nonlatin_key)) &&
+            set->keymod == keymod)
 #else
-        if ((XSET(l->data))->key == event->keyval && (XSET(l->data))->keymod == keymod)
+        if (set->key == event->keyval && set->keymod == keymod)
 #endif
         {
-            set = XSET(l->data);
             return on_main_window_keypress_found_key(main_window, set);
         }
     }

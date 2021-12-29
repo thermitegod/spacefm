@@ -12,6 +12,8 @@
 
 #include <string>
 
+#include <vector>
+
 #include <glib.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
@@ -89,8 +91,6 @@ const char* xset_get_user_tmp_dir();
 
 ///////////////////////////////////////////////////////////////////////////////
 // MOD extra settings below
-
-extern GList* xsets;
 
 enum XSetSetSet
 {
@@ -332,6 +332,8 @@ struct EventHandler
 };
 
 extern EventHandler event_handler;
+
+extern std::vector<XSet*> xsets;
 
 // instance-wide command history
 extern GList* xset_cmd_history;
