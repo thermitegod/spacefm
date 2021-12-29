@@ -1319,9 +1319,9 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     task->current_dest = nullptr;
 
     if (task->exec_browser)
-        parent = gtk_widget_get_toplevel((GtkWidget*)task->exec_browser);
+        parent = gtk_widget_get_toplevel(GTK_WIDGET(task->exec_browser));
     else if (task->exec_desktop)
-        parent = gtk_widget_get_toplevel((GtkWidget*)task->exec_desktop);
+        parent = gtk_widget_get_toplevel(GTK_WIDGET(task->exec_desktop));
 
     task->state = VFS_FILE_TASK_RUNNING;
     string_copy_free(&task->current_file, src_file);

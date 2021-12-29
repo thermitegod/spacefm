@@ -117,7 +117,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     g_free(path);
 
     // Fetching the combo model
-    GtkListStore* list = (GtkListStore*)g_object_get_data(G_OBJECT(dlg), "combo-model");
+    GtkListStore* list = GTK_LIST_STORE(g_object_get_data(G_OBJECT(dlg), "combo-model"));
 
     // Attempting to detect and remove extension from any current archive
     // handler - otherwise cycling through the handlers just appends

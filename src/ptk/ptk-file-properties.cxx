@@ -316,8 +316,8 @@ GtkWidget*
 file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_files, int page)
 {
     GtkBuilder* builder = _gtk_builder_new_from_file("file_properties3.ui");
-    GtkWidget* dlg = (GtkWidget*)gtk_builder_get_object(builder, "dlg");
-    GtkNotebook* notebook = (GtkNotebook*)gtk_builder_get_object(builder, "notebook");
+    GtkWidget* dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
+    GtkNotebook* notebook = GTK_NOTEBOOK(gtk_builder_get_object(builder, "notebook"));
     xset_set_window_icon(GTK_WINDOW(dlg));
 
     FilePropertiesDialogData* data;
@@ -328,15 +328,15 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
 
     const char* multiple_files = "( multiple files )";
     const char* calculating;
-    GtkWidget* name = (GtkWidget*)gtk_builder_get_object(builder, "file_name");
-    GtkWidget* label_name = (GtkWidget*)gtk_builder_get_object(builder, "label_filename");
-    GtkWidget* location = (GtkWidget*)gtk_builder_get_object(builder, "location");
+    GtkWidget* name = GTK_WIDGET(gtk_builder_get_object(builder, "file_name"));
+    GtkWidget* label_name = GTK_WIDGET(gtk_builder_get_object(builder, "label_filename"));
+    GtkWidget* location = GTK_WIDGET(gtk_builder_get_object(builder, "location"));
     gtk_editable_set_editable(GTK_EDITABLE(location), false);
-    GtkWidget* target = (GtkWidget*)gtk_builder_get_object(builder, "target");
-    GtkWidget* label_target = (GtkWidget*)gtk_builder_get_object(builder, "label_target");
+    GtkWidget* target = GTK_WIDGET(gtk_builder_get_object(builder, "target"));
+    GtkWidget* label_target = GTK_WIDGET(gtk_builder_get_object(builder, "label_target"));
     gtk_editable_set_editable(GTK_EDITABLE(target), false);
-    GtkWidget* mime_type = (GtkWidget*)gtk_builder_get_object(builder, "mime_type");
-    GtkWidget* open_with = (GtkWidget*)gtk_builder_get_object(builder, "open_with");
+    GtkWidget* mime_type = GTK_WIDGET(gtk_builder_get_object(builder, "mime_type"));
+    GtkWidget* open_with = GTK_WIDGET(gtk_builder_get_object(builder, "open_with"));
 
     char buf[64];
     char buf2[64];
@@ -370,19 +370,19 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     gtk_entry_set_text(GTK_ENTRY(location), disp_path);
     g_free(disp_path);
 
-    data->total_size_label = GTK_LABEL((GtkWidget*)gtk_builder_get_object(builder, "total_size"));
+    data->total_size_label = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(builder, "total_size")));
     data->size_on_disk_label =
-        GTK_LABEL((GtkWidget*)gtk_builder_get_object(builder, "size_on_disk"));
-    data->count_label = GTK_LABEL((GtkWidget*)gtk_builder_get_object(builder, "count"));
-    data->owner = GTK_ENTRY((GtkWidget*)gtk_builder_get_object(builder, "owner"));
-    data->group = GTK_ENTRY((GtkWidget*)gtk_builder_get_object(builder, "group"));
-    data->mtime = GTK_ENTRY((GtkWidget*)gtk_builder_get_object(builder, "mtime"));
-    data->atime = GTK_ENTRY((GtkWidget*)gtk_builder_get_object(builder, "atime"));
+        GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(builder, "size_on_disk")));
+    data->count_label = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(builder, "count")));
+    data->owner = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "owner")));
+    data->group = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "group")));
+    data->mtime = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "mtime")));
+    data->atime = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "atime")));
 
     for (i = 0; i < N_CHMOD_ACTIONS; ++i)
     {
         data->chmod_btns[i] =
-            GTK_TOGGLE_BUTTON((GtkWidget*)gtk_builder_get_object(builder, chmod_names[i]));
+            GTK_TOGGLE_BUTTON(GTK_WIDGET(gtk_builder_get_object(builder, chmod_names[i])));
     }
 
     // MOD
@@ -405,7 +405,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     if (type2)
         vfs_mime_type_unref(type2);
 
-    data->recurse = (GtkWidget*)gtk_builder_get_object(builder, "recursive");
+    data->recurse = GTK_WIDGET(gtk_builder_get_object(builder, "recursive"));
     gtk_widget_set_sensitive(data->recurse, is_dirs);
 
     file = static_cast<VFSFileInfo*>(sel_files->data);
@@ -434,7 +434,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         /* if open with shouldn't show, destroy it. */
         gtk_widget_destroy(open_with);
         open_with = nullptr;
-        gtk_widget_destroy((GtkWidget*)gtk_builder_get_object(builder, "open_with_label"));
+        gtk_widget_destroy(GTK_WIDGET(gtk_builder_get_object(builder, "open_with_label")));
     }
     else /* Add available actions to the option menu */
     {
@@ -804,7 +804,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
 
             /* Set default action for mimetype */
             GtkWidget* open_with;
-            if ((open_with = (GtkWidget*)g_object_get_data(G_OBJECT(dialog), "open_with")))
+            if ((open_with = GTK_WIDGET(g_object_get_data(G_OBJECT(dialog), "open_with"))))
             {
                 GtkTreeModel* model = gtk_combo_box_get_model(GTK_COMBO_BOX(open_with));
                 GtkTreeIter it;

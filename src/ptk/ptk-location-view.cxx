@@ -390,7 +390,7 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
                                                 G_TYPE_STRING,
                                                 G_TYPE_POINTER);
         g_object_weak_ref(G_OBJECT(list), on_model_destroy, nullptr);
-        model = (GtkTreeModel*)list;
+        model = GTK_TREE_MODEL(list);
         ptk_location_view_init_model(list);
         GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
         theme_changed =
@@ -1064,7 +1064,7 @@ on_mount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (!item)
         view = view2;
     else
-        view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
+        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
 
     if (!view || !vol)
         return;
@@ -1120,7 +1120,7 @@ on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (!item)
         view = view2;
     else
-        view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
+        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
 
     XSet* set = xset_get("dev_root_mount");
     char* options = vfs_volume_get_mount_options(vol, xset_get_s("dev_mount_options"));
@@ -1186,7 +1186,7 @@ on_umount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (!item)
         view = view2;
     else
-        view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
+        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
 
     XSet* set = xset_get("dev_root_unmount");
     char* msg = g_strdup_printf("Enter unmount command:\n\nUse:\n\t%%%%v\tdevice file ( %s "
@@ -1240,7 +1240,7 @@ on_umount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (!item)
         view = view2;
     else
-        view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
+        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     PtkFileBrowser* file_browser =
         static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
     // Note: file_browser may be nullptr
@@ -1289,7 +1289,7 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (!item)
         view = view2;
     else
-        view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
+        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     PtkFileBrowser* file_browser =
         static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
     // Note: file_browser may be nullptr
@@ -1505,7 +1505,7 @@ on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (!item)
         view = view2;
     else
-        view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
+        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     if (view)
         file_browser =
             static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
@@ -1573,7 +1573,7 @@ on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (!item)
         view = view2;
     else
-        view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
+        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     if (view)
         file_browser =
             static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
@@ -1650,7 +1650,7 @@ on_remount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (!item)
         view = view2;
     else
-        view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
+        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     PtkFileBrowser* file_browser =
         static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
 
@@ -1729,7 +1729,7 @@ on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (!item)
         view = view2;
     else
-        view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
+        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     PtkFileBrowser* file_browser =
         static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
 
@@ -1803,7 +1803,7 @@ on_sync(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else
     {
         g_signal_stop_emission_by_name(item, "activate");
-        view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
+        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     }
 
     PtkFileBrowser* file_browser =
@@ -1857,7 +1857,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (!item)
         view = view2;
     else
-        view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
+        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
 
     if (!vol || !view)
         return;
@@ -2283,7 +2283,7 @@ on_showhide(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (!item)
         view = view2;
     else
-        view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
+        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
 
     XSet* set = xset_get("dev_show_hide_volumes");
     if (vol)
@@ -2313,7 +2313,7 @@ on_automountlist(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (!item)
         view = view2;
     else
-        view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
+        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
 
     XSet* set = xset_get("dev_automount_volumes");
     if (vol)
@@ -2763,7 +2763,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, unsig
         /////// destroy menu?
         return;
 
-    GtkWidget* view = (GtkWidget*)g_object_get_data(G_OBJECT(menu), "parent");
+    GtkWidget* view = GTK_WIDGET(g_object_get_data(G_OBJECT(menu), "parent"));
     if (xset_get_b("dev_newtab"))
         file_browser =
             static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
@@ -2890,7 +2890,7 @@ on_dev_menu_keypress(GtkWidget* menu, GdkEventKey* event, void* user_data)
 static bool
 on_dev_menu_button_press(GtkWidget* item, GdkEventButton* event, VFSVolume* vol)
 {
-    GtkWidget* menu = (GtkWidget*)g_object_get_data(G_OBJECT(item), "menu");
+    GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
     unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
                                            GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
 
@@ -3399,7 +3399,7 @@ ptk_bookmark_view_reload_list(GtkTreeView* view, XSet* book_set)
 static void
 on_bookmark_device(GtkMenuItem* item, VFSVolume* vol)
 {
-    GtkWidget* view = (GtkWidget*)g_object_get_data(G_OBJECT(item), "view");
+    GtkWidget* view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     PtkFileBrowser* file_browser =
         static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
     if (!file_browser)

@@ -510,7 +510,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
 {
     const char* text = gtk_entry_get_text(GTK_ENTRY(entry));
 
-    gtk_editable_select_region((GtkEditable*)entry, 0, 0); // clear selection
+    gtk_editable_select_region(GTK_EDITABLE(entry), 0, 0); // clear selection
 
     // Convert to on-disk encoding
     char* dir_path = g_filename_from_utf8(text, -1, nullptr, nullptr, nullptr);
@@ -1696,7 +1696,7 @@ ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
 
     gtk_widget_show_all(GTK_WIDGET(file_browser));
 
-    return GTK_IS_WIDGET(file_browser) ? (GtkWidget*)file_browser : nullptr;
+    return GTK_IS_WIDGET(file_browser) ? GTK_WIDGET(file_browser) : nullptr;
 }
 
 static void
@@ -2547,7 +2547,7 @@ ptk_file_browser_invert_selection(GtkWidget* item, PtkFileBrowser* file_browser)
                                               nullptr,
                                               (void*)on_folder_view_item_sel_change,
                                               nullptr);
-            on_folder_view_item_sel_change((ExoIconView*)tree_sel, file_browser);
+            on_folder_view_item_sel_change(EXO_ICON_VIEW(tree_sel), file_browser);
             break;
         default:
             break;
@@ -2737,7 +2737,7 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
                                               nullptr,
                                               (void*)on_folder_view_item_sel_change,
                                               nullptr);
-            on_folder_view_item_sel_change((ExoIconView*)tree_sel, file_browser);
+            on_folder_view_item_sel_change(EXO_ICON_VIEW(tree_sel), file_browser);
             break;
         default:
             break;
@@ -2910,7 +2910,7 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
                                               nullptr,
                                               (void*)on_folder_view_item_sel_change,
                                               nullptr);
-            on_folder_view_item_sel_change((ExoIconView*)tree_sel, file_browser);
+            on_folder_view_item_sel_change(EXO_ICON_VIEW(tree_sel), file_browser);
             break;
         default:
             break;
@@ -3098,7 +3098,7 @@ _restore_sig:
                                               nullptr,
                                               (void*)on_folder_view_item_sel_change,
                                               nullptr);
-            on_folder_view_item_sel_change((ExoIconView*)tree_sel, file_browser);
+            on_folder_view_item_sel_change(EXO_ICON_VIEW(tree_sel), file_browser);
             break;
         default:
             break;
@@ -3739,33 +3739,34 @@ create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode view_mode)
             {
                 icon_size = file_browser->large_icons ? big_icon_size : small_icon_size;
 
-                exo_icon_view_set_layout_mode((ExoIconView*)folder_view, EXO_ICON_VIEW_LAYOUT_COLS);
-                exo_icon_view_set_orientation((ExoIconView*)folder_view,
+                exo_icon_view_set_layout_mode(EXO_ICON_VIEW(folder_view),
+                                              EXO_ICON_VIEW_LAYOUT_COLS);
+                exo_icon_view_set_orientation(EXO_ICON_VIEW(folder_view),
                                               GTK_ORIENTATION_HORIZONTAL);
             }
             else
             {
                 icon_size = big_icon_size;
 
-                exo_icon_view_set_column_spacing((ExoIconView*)folder_view, 4);
-                exo_icon_view_set_item_width((ExoIconView*)folder_view,
+                exo_icon_view_set_column_spacing(EXO_ICON_VIEW(folder_view), 4);
+                exo_icon_view_set_item_width(EXO_ICON_VIEW(folder_view),
                                              icon_size < 110 ? 110 : icon_size);
             }
 
-            exo_icon_view_set_selection_mode((ExoIconView*)folder_view, GTK_SELECTION_MULTIPLE);
+            exo_icon_view_set_selection_mode(EXO_ICON_VIEW(folder_view), GTK_SELECTION_MULTIPLE);
 
             // search
-            exo_icon_view_set_enable_search((ExoIconView*)folder_view, true);
-            exo_icon_view_set_search_column((ExoIconView*)folder_view, COL_FILE_NAME);
+            exo_icon_view_set_enable_search(EXO_ICON_VIEW(folder_view), true);
+            exo_icon_view_set_search_column(EXO_ICON_VIEW(folder_view), COL_FILE_NAME);
             exo_icon_view_set_search_equal_func(
-                (ExoIconView*)folder_view,
+                EXO_ICON_VIEW(folder_view),
                 (ExoIconViewSearchEqualFunc)folder_view_search_equal,
                 nullptr,
                 nullptr);
 
-            exo_icon_view_set_single_click((ExoIconView*)folder_view, file_browser->single_click);
+            exo_icon_view_set_single_click(EXO_ICON_VIEW(folder_view), file_browser->single_click);
             exo_icon_view_set_single_click_timeout(
-                (ExoIconView*)folder_view,
+                EXO_ICON_VIEW(folder_view),
                 app_settings.no_single_hover ? 0 : SINGLE_CLICK_TIMEOUT);
 
             gtk_cell_layout_clear(GTK_CELL_LAYOUT(folder_view));
@@ -3857,20 +3858,20 @@ create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode view_mode)
             gtk_tree_selection_set_mode(tree_sel, GTK_SELECTION_MULTIPLE);
 
             if (xset_get_b("rubberband"))
-                gtk_tree_view_set_rubber_banding((GtkTreeView*)folder_view, true);
+                gtk_tree_view_set_rubber_banding(GTK_TREE_VIEW(folder_view), true);
 
             // Search
-            gtk_tree_view_set_enable_search((GtkTreeView*)folder_view, true);
-            gtk_tree_view_set_search_column((GtkTreeView*)folder_view, COL_FILE_NAME);
+            gtk_tree_view_set_enable_search(GTK_TREE_VIEW(folder_view), true);
+            gtk_tree_view_set_search_column(GTK_TREE_VIEW(folder_view), COL_FILE_NAME);
             gtk_tree_view_set_search_equal_func(
-                (GtkTreeView*)folder_view,
+                GTK_TREE_VIEW(folder_view),
                 (GtkTreeViewSearchEqualFunc)folder_view_search_equal,
                 nullptr,
                 nullptr);
 
-            // gtk_tree_view_set_single_click((GtkTreeView*)folder_view,
+            // gtk_tree_view_set_single_click(GTK_TREE_VIEW(folder_view),
             // file_browser->single_click); gtk_tree_view_set_single_click_timeout(
-            //    (GtkTreeView*)folder_view,
+            //    GTK_TREE_VIEW(folder_view),
             //    app_settings.no_single_hover ? 0 : SINGLE_CLICK_TIMEOUT);
 
             icon_size = file_browser->large_icons ? big_icon_size : small_icon_size;
@@ -4070,7 +4071,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
             gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
             gtk_tree_view_column_set_min_width(col, 150);
             gtk_tree_view_column_set_reorderable(col, false);
-            // gtk_tree_view_set_activable_column((GtkTreeView*)list_view, col);
+            // gtk_tree_view_set_activable_column(GTK_TREE_VIEW(list_view), col);
         }
         else
         {
@@ -5492,10 +5493,10 @@ ptk_file_browser_set_single_click(PtkFileBrowser* file_browser, bool single_clic
     {
         case PTK_FB_ICON_VIEW:
         case PTK_FB_COMPACT_VIEW:
-            exo_icon_view_set_single_click((ExoIconView*)file_browser->folder_view, single_click);
+            exo_icon_view_set_single_click(EXO_ICON_VIEW(file_browser->folder_view), single_click);
             break;
         case PTK_FB_LIST_VIEW:
-            // gtk_tree_view_set_single_click((GtkTreeView*)file_browser->folder_view,
+            // gtk_tree_view_set_single_click(GTK_TREE_VIEW(file_browser->folder_view),
             // single_click);
             break;
         default:
@@ -5515,11 +5516,11 @@ ptk_file_browser_set_single_click_timeout(PtkFileBrowser* file_browser, unsigned
     {
         case PTK_FB_ICON_VIEW:
         case PTK_FB_COMPACT_VIEW:
-            exo_icon_view_set_single_click_timeout((ExoIconView*)file_browser->folder_view,
+            exo_icon_view_set_single_click_timeout(EXO_ICON_VIEW(file_browser->folder_view),
                                                    timeout);
             break;
         case PTK_FB_LIST_VIEW:
-            // gtk_tree_view_set_single_click_timeout((GtkTreeView*)file_browser->folder_view,
+            // gtk_tree_view_set_single_click_timeout(GTK_TREE_VIEW(file_browser->folder_view),
             //                                       timeout);
             break;
         default:

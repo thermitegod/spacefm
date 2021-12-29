@@ -4037,7 +4037,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
     GList* l;
     int* newkey = (int*)g_object_get_data(G_OBJECT(dlg), "newkey");
     int* newkeymod = (int*)g_object_get_data(G_OBJECT(dlg), "newkeymod");
-    GtkWidget* btn = (GtkWidget*)g_object_get_data(G_OBJECT(dlg), "btn");
+    GtkWidget* btn = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "btn"));
     XSet* set = static_cast<XSet*>(g_object_get_data(G_OBJECT(dlg), "set"));
     XSet* set2;
     XSet* keyset = nullptr;
@@ -4068,7 +4068,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
         else if (event->keyval == GDK_KEY_Escape && *newkey == GDK_KEY_Escape)
         {
             // user pressed Escape twice so click Unset
-            GtkWidget* btn_unset = (GtkWidget*)g_object_get_data(G_OBJECT(dlg), "btn_unset");
+            GtkWidget* btn_unset = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "btn_unset"));
             gtk_button_clicked(GTK_BUTTON(btn_unset));
             return true;
         }
@@ -4285,7 +4285,7 @@ xset_design_job(GtkWidget* item, XSet* set)
     GtkWidget* parent = nullptr;
     bool update_toolbars = false;
 
-    parent = gtk_widget_get_toplevel((GtkWidget*)set->browser);
+    parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
     int job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
     int cmd_type = xset_get_int_set(set, "x");
@@ -5599,7 +5599,7 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set)
 {
     int job = -1;
 
-    GtkWidget* menu = item ? (GtkWidget*)g_object_get_data(G_OBJECT(item), "menu") : nullptr;
+    GtkWidget* menu = item ? GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu")) : nullptr;
     unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
                                            GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
 
@@ -5858,7 +5858,7 @@ xset_menu_cb(GtkWidget* item, XSet* set)
         cb_data = set->cb_data;
     }
 
-    parent = (GtkWidget*)set->browser;
+    parent = GTK_WIDGET(set->browser);
 
     if (set->plugin)
     {

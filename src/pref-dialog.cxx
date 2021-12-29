@@ -264,7 +264,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             main_window_refresh_all();
 
         /* single click changed? */
-        single_click = gtk_toggle_button_get_active((GtkToggleButton*)data->single_click);
+        single_click = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->single_click));
         if (single_click != app_settings.single_click)
         {
             app_settings.single_click = single_click;
@@ -286,7 +286,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         }
 
         /* single click - hover selects changed? */
-        bool no_single_hover = !gtk_toggle_button_get_active((GtkToggleButton*)data->single_hover);
+        bool no_single_hover = !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->single_hover));
         if (no_single_hover != app_settings.no_single_hover)
         {
             app_settings.no_single_hover = no_single_hover;
@@ -310,9 +310,10 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         }
 
         // MOD
-        app_settings.no_execute = !gtk_toggle_button_get_active((GtkToggleButton*)data->click_exec);
+        app_settings.no_execute =
+            !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->click_exec));
         app_settings.no_confirm =
-            !gtk_toggle_button_get_active((GtkToggleButton*)data->confirm_delete);
+            !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->confirm_delete));
 
         char* s = g_strdup_printf("%d", gtk_combo_box_get_active(GTK_COMBO_BOX(data->drag_action)));
         xset_set("drag_action", "x", s);
@@ -340,7 +341,8 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
 
         // MOD editors
         xset_set("editor", "s", gtk_entry_get_text(GTK_ENTRY(data->editor)));
-        xset_set_b("editor", gtk_toggle_button_get_active((GtkToggleButton*)data->editor_terminal));
+        xset_set_b("editor",
+                   gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->editor_terminal)));
         const char* root_editor = gtk_entry_get_text(GTK_ENTRY(data->root_editor));
         const char* old_root_editor = xset_get_s("root_editor");
         if (!old_root_editor)
@@ -356,11 +358,11 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             xset_set("root_editor", "s", root_editor);
             root_set_change = true;
         }
-        if (!!gtk_toggle_button_get_active((GtkToggleButton*)data->root_editor_terminal) !=
+        if (!!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->root_editor_terminal)) !=
             !!xset_get_b("root_editor"))
         {
             xset_set_b("root_editor",
-                       gtk_toggle_button_get_active((GtkToggleButton*)data->root_editor_terminal));
+                       gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->root_editor_terminal)));
             root_set_change = true;
         }
 
@@ -474,31 +476,31 @@ fm_edit_preference(GtkWindow* parent, int page)
         WindowReference::increase();
 
         data = g_new0(FMPrefDlg, 1);
-        dlg = (GtkWidget*)gtk_builder_get_object(builder, "dlg");
+        dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
         if (parent)
             gtk_window_set_transient_for(GTK_WINDOW(dlg), parent);
         xset_set_window_icon(GTK_WINDOW(dlg));
 
         data->dlg = dlg;
-        data->notebook = (GtkWidget*)gtk_builder_get_object(builder, "notebook");
+        data->notebook = GTK_WIDGET(gtk_builder_get_object(builder, "notebook"));
 
         /* Setup 'General' tab */
 
-        data->encoding = (GtkWidget*)gtk_builder_get_object(builder, "filename_encoding");
-        data->bm_open_method = (GtkWidget*)gtk_builder_get_object(builder, "bm_open_method");
-        data->show_thumbnail = (GtkWidget*)gtk_builder_get_object(builder, "show_thumbnail");
-        data->thumb_label1 = (GtkWidget*)gtk_builder_get_object(builder, "thumb_label1");
-        data->thumb_label2 = (GtkWidget*)gtk_builder_get_object(builder, "thumb_label2");
-        data->max_thumb_size = (GtkWidget*)gtk_builder_get_object(builder, "max_thumb_size");
-        data->terminal = (GtkWidget*)gtk_builder_get_object(builder, "terminal");
-        data->big_icon_size = (GtkWidget*)gtk_builder_get_object(builder, "big_icon_size");
-        data->small_icon_size = (GtkWidget*)gtk_builder_get_object(builder, "small_icon_size");
-        data->tool_icon_size = (GtkWidget*)gtk_builder_get_object(builder, "tool_icon_size");
-        data->single_click = (GtkWidget*)gtk_builder_get_object(builder, "single_click");
-        data->single_hover = (GtkWidget*)gtk_builder_get_object(builder, "single_hover");
-        data->use_si_prefix = (GtkWidget*)gtk_builder_get_object(builder, "use_si_prefix");
-        data->root_bar = (GtkWidget*)gtk_builder_get_object(builder, "root_bar");
-        data->drag_action = (GtkWidget*)gtk_builder_get_object(builder, "drag_action");
+        data->encoding = GTK_WIDGET(gtk_builder_get_object(builder, "filename_encoding"));
+        data->bm_open_method = GTK_WIDGET(gtk_builder_get_object(builder, "bm_open_method"));
+        data->show_thumbnail = GTK_WIDGET(gtk_builder_get_object(builder, "show_thumbnail"));
+        data->thumb_label1 = GTK_WIDGET(gtk_builder_get_object(builder, "thumb_label1"));
+        data->thumb_label2 = GTK_WIDGET(gtk_builder_get_object(builder, "thumb_label2"));
+        data->max_thumb_size = GTK_WIDGET(gtk_builder_get_object(builder, "max_thumb_size"));
+        data->terminal = GTK_WIDGET(gtk_builder_get_object(builder, "terminal"));
+        data->big_icon_size = GTK_WIDGET(gtk_builder_get_object(builder, "big_icon_size"));
+        data->small_icon_size = GTK_WIDGET(gtk_builder_get_object(builder, "small_icon_size"));
+        data->tool_icon_size = GTK_WIDGET(gtk_builder_get_object(builder, "tool_icon_size"));
+        data->single_click = GTK_WIDGET(gtk_builder_get_object(builder, "single_click"));
+        data->single_hover = GTK_WIDGET(gtk_builder_get_object(builder, "single_hover"));
+        data->use_si_prefix = GTK_WIDGET(gtk_builder_get_object(builder, "use_si_prefix"));
+        data->root_bar = GTK_WIDGET(gtk_builder_get_object(builder, "root_bar"));
+        data->drag_action = GTK_WIDGET(gtk_builder_get_object(builder, "drag_action"));
 
         model = GTK_TREE_MODEL(gtk_list_store_new(1, G_TYPE_STRING));
         gtk_combo_box_set_model(GTK_COMBO_BOX(data->terminal), model);
@@ -573,29 +575,29 @@ fm_edit_preference(GtkWindow* parent, int page)
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(data->tool_icon_size), itool_icon);
 
-        gtk_toggle_button_set_active((GtkToggleButton*)data->single_click,
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->single_click),
                                      app_settings.single_click);
-        gtk_toggle_button_set_active((GtkToggleButton*)data->single_hover,
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->single_hover),
                                      !app_settings.no_single_hover);
         gtk_widget_set_sensitive(data->single_hover, app_settings.single_click);
         g_signal_connect(data->single_click, "toggled", G_CALLBACK(on_single_click_toggled), data);
 
         /* Setup 'Interface' tab */
 
-        data->always_show_tabs = (GtkWidget*)gtk_builder_get_object(builder, "always_show_tabs");
+        data->always_show_tabs = GTK_WIDGET(gtk_builder_get_object(builder, "always_show_tabs"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->always_show_tabs),
                                      app_settings.always_show_tabs);
 
         data->hide_close_tab_buttons =
-            (GtkWidget*)gtk_builder_get_object(builder, "hide_close_tab_buttons");
+            GTK_WIDGET(gtk_builder_get_object(builder, "hide_close_tab_buttons"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->hide_close_tab_buttons),
                                      app_settings.hide_close_tab_buttons);
 
         // MOD Interface
-        data->confirm_delete = (GtkWidget*)gtk_builder_get_object(builder, "confirm_delete");
+        data->confirm_delete = GTK_WIDGET(gtk_builder_get_object(builder, "confirm_delete"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->confirm_delete),
                                      !app_settings.no_confirm);
-        data->click_exec = (GtkWidget*)gtk_builder_get_object(builder, "click_exec");
+        data->click_exec = GTK_WIDGET(gtk_builder_get_object(builder, "click_exec"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->click_exec), !app_settings.no_execute);
 
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->root_bar), xset_get_b("root_bar"));
@@ -613,7 +615,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(data->drag_action), drag_action_set);
 
-        gtk_toggle_button_set_active((GtkToggleButton*)data->use_si_prefix,
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->use_si_prefix),
                                      app_settings.use_si_prefix);
 
         // Advanced Tab ==================================================
@@ -623,7 +625,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         GtkTreeIter it;
         char* custom_su = nullptr;
         char* use_su;
-        data->su_command = (GtkWidget*)gtk_builder_get_object(builder, "su_command");
+        data->su_command = GTK_WIDGET(gtk_builder_get_object(builder, "su_command"));
         use_su = xset_get_s("su_command");
         if (config_settings.terminal_su)
             // get su from /etc/spacefm/spacefm.conf
@@ -658,8 +660,8 @@ fm_edit_preference(GtkWindow* parent, int page)
         g_free(custom_su);
 
         // date format
-        data->date_format = (GtkWidget*)gtk_builder_get_object(builder, "date_format");
-        data->date_display = (GtkWidget*)gtk_builder_get_object(builder, "label_date_disp");
+        data->date_format = GTK_WIDGET(gtk_builder_get_object(builder, "date_format"));
+        data->date_display = GTK_WIDGET(gtk_builder_get_object(builder, "label_date_disp"));
         model = GTK_TREE_MODEL(gtk_list_store_new(1, G_TYPE_STRING));
         gtk_combo_box_set_model(GTK_COMBO_BOX(data->date_format), model);
         gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(data->date_format), 0);
@@ -688,17 +690,17 @@ fm_edit_preference(GtkWindow* parent, int page)
         g_signal_connect(data->date_format, "changed", G_CALLBACK(on_date_format_changed), data);
 
         // editors
-        data->editor = (GtkWidget*)gtk_builder_get_object(builder, "editor");
+        data->editor = GTK_WIDGET(gtk_builder_get_object(builder, "editor"));
         if (xset_get_s("editor"))
             gtk_entry_set_text(GTK_ENTRY(data->editor), xset_get_s("editor"));
-        data->editor_terminal = (GtkWidget*)gtk_builder_get_object(builder, "editor_terminal");
+        data->editor_terminal = GTK_WIDGET(gtk_builder_get_object(builder, "editor_terminal"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->editor_terminal),
                                      xset_get_b("editor"));
-        data->root_editor = (GtkWidget*)gtk_builder_get_object(builder, "root_editor");
+        data->root_editor = GTK_WIDGET(gtk_builder_get_object(builder, "root_editor"));
         if (xset_get_s("root_editor"))
             gtk_entry_set_text(GTK_ENTRY(data->root_editor), xset_get_s("root_editor"));
         data->root_editor_terminal =
-            (GtkWidget*)gtk_builder_get_object(builder, "root_editor_terminal");
+            GTK_WIDGET(gtk_builder_get_object(builder, "root_editor_terminal"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->root_editor_terminal),
                                      xset_get_b("root_editor"));
 
@@ -711,8 +713,8 @@ fm_edit_preference(GtkWindow* parent, int page)
     // notebook page number 3 is permanently hidden Volume Management
     if (page > desktop_page_num)
         page++;
-    gtk_notebook_set_current_page((GtkNotebook*)data->notebook, page);
+    gtk_notebook_set_current_page(GTK_NOTEBOOK(data->notebook), page);
 
-    gtk_window_present((GtkWindow*)data->dlg);
+    gtk_window_present(GTK_WINDOW(data->dlg));
     return true;
 }

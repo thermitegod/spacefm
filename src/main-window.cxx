@@ -566,7 +566,7 @@ main_window_open_terminal(FMMainWindow* main_window, bool as_root)
         ptk_show_error(GTK_WINDOW(parent),
                        "Terminal Not Available",
                        "Please set your terminal program in View|Preferences|Advanced");
-        fm_edit_preference((GtkWindow*)parent, PREF_ADVANCED);
+        fm_edit_preference(GTK_WINDOW(parent), PREF_ADVANCED);
         main_term = xset_get_s("main_terminal");
         if (!main_term || main_term[0] == '\0')
             return;
@@ -606,7 +606,7 @@ on_open_root_terminal_activate(GtkMenuItem* menuitem, void* user_data)
 static void
 on_quit_activate(GtkMenuItem* menuitem, void* user_data)
 {
-    fm_main_window_delete_event((GtkWidget*)user_data, nullptr);
+    fm_main_window_delete_event(GTK_WIDGET(user_data), nullptr);
     // fm_main_window_close( GTK_WIDGET( user_data ) );
 }
 
@@ -629,7 +629,7 @@ main_window_rubberband_all()
                     PTK_FILE_BROWSER(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), i));
                 if (a_browser->view_mode == PTK_FB_LIST_VIEW)
                 {
-                    gtk_tree_view_set_rubber_banding((GtkTreeView*)a_browser->folder_view,
+                    gtk_tree_view_set_rubber_banding(GTK_TREE_VIEW(a_browser->folder_view),
                                                      xset_get_b("rubberband"));
                 }
             }
@@ -1598,7 +1598,7 @@ fm_main_window_init(FMMainWindow* main_window)
 
     /* this is used to limit the scope of gtk_grab and modal dialogs */
     main_window->wgroup = gtk_window_group_new();
-    gtk_window_group_add_window(main_window->wgroup, (GtkWindow*)main_window);
+    gtk_window_group_add_window(main_window->wgroup, GTK_WINDOW(main_window));
 
     /* Add to total window count */
     ++n_windows;
@@ -1621,7 +1621,7 @@ fm_main_window_init(FMMainWindow* main_window)
                                                G_CALLBACK(update_window_icons),
                                                nullptr);
     }
-    update_window_icon((GtkWindow*)main_window, gtk_icon_theme_get_default());
+    update_window_icon(GTK_WINDOW(main_window), gtk_icon_theme_get_default());
 
     main_window->main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_container_add(GTK_CONTAINER(main_window), main_window->main_vbox);
@@ -2664,7 +2664,7 @@ fm_main_window_add_new_tab(FMMainWindow* main_window, const char* folder_path)
 GtkWidget*
 fm_main_window_new()
 {
-    return (GtkWidget*)g_object_new(FM_TYPE_MAIN_WINDOW, nullptr);
+    return GTK_WIDGET(g_object_new(FM_TYPE_MAIN_WINDOW, nullptr));
 }
 
 GtkWidget*
@@ -2695,7 +2695,7 @@ on_preference_activate(GtkMenuItem* menuitem, void* user_data)
 static void
 fm_main_window_preference(FMMainWindow* main_window)
 {
-    fm_edit_preference((GtkWindow*)main_window, PREF_GENERAL);
+    fm_edit_preference(GTK_WINDOW(main_window), PREF_GENERAL);
 }
 
 static void
@@ -2728,7 +2728,7 @@ on_about_activate(GtkMenuItem* menuitem, void* user_data)
         g_signal_connect(about_dlg, "destroy", G_CALLBACK(WindowReference::decrease), nullptr);
     }
     gtk_window_set_transient_for(GTK_WINDOW(about_dlg), GTK_WINDOW(user_data));
-    gtk_window_present((GtkWindow*)about_dlg);
+    gtk_window_present(GTK_WINDOW(about_dlg));
 }
 
 static void
@@ -5610,9 +5610,9 @@ main_task_view_new(FMMainWindow* main_window)
     gtk_tree_view_set_model(GTK_TREE_VIEW(view), GTK_TREE_MODEL(list));
     // gtk_tree_view_set_model adds a ref
     g_object_unref(list);
-    // gtk_tree_view_set_single_click((GtkTreeView*)view, true);
+    // gtk_tree_view_set_single_click(GTK_TREE_VIEW(view), true);
     gtk_tree_view_set_enable_search(GTK_TREE_VIEW(view), false);
-    // gtk_tree_view_set_single_click_timeout( (GtkTreeView*)view, SINGLE_CLICK_TIMEOUT );
+    // gtk_tree_view_set_single_click_timeout(GTK_TREE_VIEW(view), SINGLE_CLICK_TIMEOUT);
 
     // Columns
     for (i = 0; i < 13; i++)

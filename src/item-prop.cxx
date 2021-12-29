@@ -1686,7 +1686,7 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_tree_view_set_model(GTK_TREE_VIEW(ctxt->view), GTK_TREE_MODEL(list));
     // gtk_tree_view_set_model adds a ref
     g_object_unref(list);
-    // gtk_tree_view_set_single_click((GtkTreeView*)ctxt->view, true);
+    // gtk_tree_view_set_single_click(GTK_TREE_VIEW(ctxt->view), true);
     gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(ctxt->view), false);
 
     scroll = gtk_scrolled_window_new(nullptr, nullptr);

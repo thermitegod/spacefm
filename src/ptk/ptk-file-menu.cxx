@@ -204,13 +204,13 @@ on_open_in_panel(GtkMenuItem* menuitem, PtkFileMenu* data)
 static void
 on_file_edit(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
-    xset_edit((GtkWidget*)data->browser, data->file_path, false, true);
+    xset_edit(GTK_WIDGET(data->browser), data->file_path, false, true);
 }
 
 static void
 on_file_root_edit(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
-    xset_edit((GtkWidget*)data->browser, data->file_path, true, false);
+    xset_edit(GTK_WIDGET(data->browser), data->file_path, true, false);
 }
 
 static void
@@ -1422,7 +1422,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             vfs_mime_type_remove_action(mime_type, desktop_file->file_name);
             if (strcmp(mime_type->type, "text/plain") && g_str_has_prefix(mime_type->type, "text/"))
                 xset_msg_dialog(
-                    (GtkWidget*)data->browser,
+                    GTK_WIDGET(data->browser),
                     0,
                     "Remove Text Type Association",
                     0,
@@ -1489,13 +1489,13 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     return;
                 }
             }
-            xset_edit((GtkWidget*)data->browser, path, false, false);
+            xset_edit(GTK_WIDGET(data->browser), path, false, false);
             g_free(path);
             break;
         case APP_JOB_VIEW:
             path = get_shared_desktop_file_location(desktop_file->file_name);
             if (path)
-                xset_edit((GtkWidget*)data->browser, path, false, true);
+                xset_edit(GTK_WIDGET(data->browser), path, false, true);
             break;
         case APP_JOB_EDIT_LIST:
             // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
@@ -1508,7 +1508,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 path =
                     g_build_filename(vfs_user_data_dir(), "applications", "mimeapps.list", nullptr);
             }
-            xset_edit((GtkWidget*)data->browser, path, false, true);
+            xset_edit(GTK_WIDGET(data->browser), path, false, true);
             g_free(path);
             break;
         case APP_JOB_ADD:
@@ -1668,7 +1668,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 g_free(contents);
             }
             if (std::filesystem::exists(path))
-                xset_edit((GtkWidget*)data->browser, path, false, false);
+                xset_edit(GTK_WIDGET(data->browser), path, false, false);
 
             g_free(path);
             vfs_dir_monitor_mime();
@@ -1678,13 +1678,13 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             path = g_build_filename("/usr/share/mime", str, nullptr);
             g_free(str);
             if (std::filesystem::exists(path))
-                xset_edit((GtkWidget*)data->browser, path, false, true);
+                xset_edit(GTK_WIDGET(data->browser), path, false, true);
 
             g_free(path);
             break;
         case APP_JOB_VIEW_OVER:
             path = g_strdup("/usr/share/mime/packages/Overrides.xml");
-            xset_edit((GtkWidget*)data->browser, path, true, false);
+            xset_edit(GTK_WIDGET(data->browser), path, true, false);
             break;
         case APP_JOB_BROWSE_MIME_USR:
             if (data->browser)
@@ -2044,7 +2044,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
 static bool
 on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data)
 {
-    GtkWidget* menu = (GtkWidget*)g_object_get_data(G_OBJECT(item), "menu");
+    GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
     unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
                                            GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
 

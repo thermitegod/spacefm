@@ -1764,7 +1764,7 @@ on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input)
     GtkWidget* dlg = gtk_widget_get_toplevel(query_input);
     if (!GTK_IS_DIALOG(dlg))
         return;
-    GtkWidget* rename_button = (GtkWidget*)g_object_get_data(G_OBJECT(dlg), "rename_button");
+    GtkWidget* rename_button = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "rename_button"));
     if (GTK_IS_WIDGET(rename_button))
         gtk_widget_set_sensitive(rename_button, can_rename);
     gtk_dialog_set_response_sensitive(GTK_DIALOG(dlg), RESPONSE_OVERWRITE, !can_rename);
@@ -1810,13 +1810,13 @@ query_overwrite_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
             if (response == RESPONSE_AUTO_RENAME)
             {
                 GtkWidget* auto_button =
-                    (GtkWidget*)g_object_get_data(G_OBJECT(dlg), "auto_button");
+                    GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "auto_button"));
                 str = gtk_widget_get_tooltip_text(auto_button);
             }
             else
             {
                 GtkWidget* query_input =
-                    (GtkWidget*)g_object_get_data(G_OBJECT(dlg), "query_input");
+                    GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "query_input"));
                 str = multi_input_get_text(query_input);
             }
             file_name = g_filename_from_utf8(str, -1, nullptr, nullptr, nullptr);
@@ -1883,8 +1883,8 @@ on_query_button_press(GtkWidget* widget, PtkFileTask* ptask)
     GtkWidget* dlg = gtk_widget_get_toplevel(widget);
     if (!GTK_IS_DIALOG(dlg))
         return;
-    GtkWidget* rename_button = (GtkWidget*)g_object_get_data(G_OBJECT(dlg), "rename_button");
-    GtkWidget* auto_button = (GtkWidget*)g_object_get_data(G_OBJECT(dlg), "auto_button");
+    GtkWidget* rename_button = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "rename_button"));
+    GtkWidget* auto_button = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "auto_button"));
     if (!rename_button || !auto_button)
         return;
     int response;

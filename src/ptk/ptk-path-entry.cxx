@@ -192,7 +192,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
     {
         // command history
         GList* l;
-        list = (GtkListStore*)gtk_entry_completion_get_model(completion);
+        list = GTK_LIST_STORE(gtk_entry_completion_get_model(completion));
         gtk_list_store_clear(list);
         for (l = xset_cmd_history; l; l = l->next)
         {
@@ -217,14 +217,14 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
         g_object_set_data_full(G_OBJECT(completion), "fn", g_strdup(fn), (GDestroyNotify)g_free);
 
         char* new_dir = get_cwd(entry);
-        const char* old_dir = (const char*)g_object_get_data((GObject*)completion, "cwd");
+        const char* old_dir = (const char*)g_object_get_data(G_OBJECT(completion), "cwd");
         if (old_dir && new_dir && g_ascii_strcasecmp(old_dir, new_dir) == 0)
         {
             g_free(new_dir);
             return;
         }
-        g_object_set_data_full((GObject*)completion, "cwd", new_dir, g_free);
-        list = (GtkListStore*)gtk_entry_completion_get_model(completion);
+        g_object_set_data_full(G_OBJECT(completion), "cwd", new_dir, g_free);
+        list = GTK_LIST_STORE(gtk_entry_completion_get_model(completion));
         gtk_list_store_clear(list);
         if (new_dir)
         {
@@ -378,7 +378,7 @@ insert_complete(GtkEntry* entry)
                                         (void*)on_changed,
                                         nullptr);
         gtk_entry_set_text(GTK_ENTRY(entry), new_prefix);
-        gtk_editable_set_position((GtkEditable*)entry, -1);
+        gtk_editable_set_position(GTK_EDITABLE(entry), -1);
         g_signal_handlers_unblock_matched(G_OBJECT(entry),
                                           G_SIGNAL_MATCH_FUNC,
                                           0,
@@ -451,7 +451,7 @@ on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIt
 
         gtk_entry_set_text(GTK_ENTRY(entry), path);
         g_free(path);
-        gtk_editable_set_position((GtkEditable*)entry, -1);
+        gtk_editable_set_position(GTK_EDITABLE(entry), -1);
         g_signal_handlers_unblock_matched(G_OBJECT(entry),
                                           G_SIGNAL_MATCH_FUNC,
                                           0,
@@ -591,9 +591,9 @@ on_button_release(GtkEntry* entry, GdkEventButton* evt, void* user_data)
                     }
                     char* path = g_strndup(text, (sep - text));
                     gtk_entry_set_text(entry, path);
-                    gtk_editable_set_position((GtkEditable*)entry, -1);
+                    gtk_editable_set_position(GTK_EDITABLE(entry), -1);
                     g_free(path);
-                    gtk_widget_activate((GtkWidget*)entry);
+                    gtk_widget_activate(GTK_WIDGET(entry));
                 }
             }
         }
@@ -609,7 +609,7 @@ on_button_release(GtkEntry* entry, GdkEventButton* evt, void* user_data)
             char* str = replace_string(clip_text, "\n", "", false);
             gtk_entry_set_text(entry, str);
             g_free(str);
-            gtk_widget_activate((GtkWidget*)entry);
+            gtk_widget_activate(GTK_WIDGET(entry));
         }
         g_free(clip_text);
         return true;

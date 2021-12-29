@@ -1389,60 +1389,60 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
     {
         someone_is_visible = true;
 
-        gtk_widget_show((GtkWidget*)mset->label_name);
-        gtk_widget_show((GtkWidget*)mset->scroll_name);
-        gtk_widget_show((GtkWidget*)mset->hbox_ext);
-        gtk_widget_show((GtkWidget*)mset->blank_name);
+        gtk_widget_show(GTK_WIDGET(mset->label_name));
+        gtk_widget_show(GTK_WIDGET(mset->scroll_name));
+        gtk_widget_show(GTK_WIDGET(mset->hbox_ext));
+        gtk_widget_show(GTK_WIDGET(mset->blank_name));
     }
     else
     {
-        gtk_widget_hide((GtkWidget*)mset->label_name);
-        gtk_widget_hide((GtkWidget*)mset->scroll_name);
-        gtk_widget_hide((GtkWidget*)mset->hbox_ext);
-        gtk_widget_hide((GtkWidget*)mset->blank_name);
+        gtk_widget_hide(GTK_WIDGET(mset->label_name));
+        gtk_widget_hide(GTK_WIDGET(mset->scroll_name));
+        gtk_widget_hide(GTK_WIDGET(mset->hbox_ext));
+        gtk_widget_hide(GTK_WIDGET(mset->blank_name));
     }
 
     if (xset_get_b("move_filename"))
     {
         someone_is_visible = true;
 
-        gtk_widget_show((GtkWidget*)mset->label_full_name);
-        gtk_widget_show((GtkWidget*)mset->scroll_full_name);
-        gtk_widget_show((GtkWidget*)mset->blank_full_name);
+        gtk_widget_show(GTK_WIDGET(mset->label_full_name));
+        gtk_widget_show(GTK_WIDGET(mset->scroll_full_name));
+        gtk_widget_show(GTK_WIDGET(mset->blank_full_name));
     }
     else
     {
-        gtk_widget_hide((GtkWidget*)mset->label_full_name);
-        gtk_widget_hide((GtkWidget*)mset->scroll_full_name);
-        gtk_widget_hide((GtkWidget*)mset->blank_full_name);
+        gtk_widget_hide(GTK_WIDGET(mset->label_full_name));
+        gtk_widget_hide(GTK_WIDGET(mset->scroll_full_name));
+        gtk_widget_hide(GTK_WIDGET(mset->blank_full_name));
     }
 
     if (xset_get_b("move_parent"))
     {
         someone_is_visible = true;
 
-        gtk_widget_show((GtkWidget*)mset->label_path);
-        gtk_widget_show((GtkWidget*)mset->scroll_path);
-        gtk_widget_show((GtkWidget*)mset->blank_path);
+        gtk_widget_show(GTK_WIDGET(mset->label_path));
+        gtk_widget_show(GTK_WIDGET(mset->scroll_path));
+        gtk_widget_show(GTK_WIDGET(mset->blank_path));
     }
     else
     {
-        gtk_widget_hide((GtkWidget*)mset->label_path);
-        gtk_widget_hide((GtkWidget*)mset->scroll_path);
-        gtk_widget_hide((GtkWidget*)mset->blank_path);
+        gtk_widget_hide(GTK_WIDGET(mset->label_path));
+        gtk_widget_hide(GTK_WIDGET(mset->scroll_path));
+        gtk_widget_hide(GTK_WIDGET(mset->blank_path));
     }
 
     if (xset_get_b("move_path"))
     {
         someone_is_visible = true;
 
-        gtk_widget_show((GtkWidget*)mset->label_full_path);
-        gtk_widget_show((GtkWidget*)mset->scroll_full_path);
+        gtk_widget_show(GTK_WIDGET(mset->label_full_path));
+        gtk_widget_show(GTK_WIDGET(mset->scroll_full_path));
     }
     else
     {
-        gtk_widget_hide((GtkWidget*)mset->label_full_path);
-        gtk_widget_hide((GtkWidget*)mset->scroll_full_path);
+        gtk_widget_hide(GTK_WIDGET(mset->label_full_path));
+        gtk_widget_hide(GTK_WIDGET(mset->scroll_full_path));
     }
 
     if (!mset->is_link && !mset->create_new && xset_get_b("move_type"))
@@ -1466,11 +1466,11 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
 
     if (new_link || (mset->is_link && xset_get_b("move_target")))
     {
-        gtk_widget_show((GtkWidget*)mset->hbox_target);
+        gtk_widget_show(GTK_WIDGET(mset->hbox_target));
     }
     else
     {
-        gtk_widget_hide((GtkWidget*)mset->hbox_target);
+        gtk_widget_hide(GTK_WIDGET(mset->hbox_target));
     }
 
     if ((new_file || new_folder) && xset_get_b("move_template"))
@@ -1489,11 +1489,11 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
             gtk_widget_hide(GTK_WIDGET(mset->combo_template));
         }
 
-        gtk_widget_show((GtkWidget*)mset->hbox_template);
+        gtk_widget_show(GTK_WIDGET(mset->hbox_template));
     }
     else
     {
-        gtk_widget_hide((GtkWidget*)mset->hbox_template);
+        gtk_widget_hide(GTK_WIDGET(mset->hbox_template));
     }
 
     if (!someone_is_visible)
@@ -2311,7 +2311,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
 
         // template combo
         mset->combo_template = GTK_COMBO_BOX(gtk_combo_box_text_new_with_entry());
-        gtk_widget_set_focus_on_click((GtkWidget*)mset->combo_template, false);
+        gtk_widget_set_focus_on_click(GTK_WIDGET(mset->combo_template), false);
         // add entries
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template), "Empty File");
         templates = nullptr;
@@ -2341,7 +2341,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
 
         // template_dir combo
         mset->combo_template_dir = GTK_COMBO_BOX(gtk_combo_box_text_new_with_entry());
-        gtk_widget_set_focus_on_click((GtkWidget*)mset->combo_template_dir, false);
+        gtk_widget_set_focus_on_click(GTK_WIDGET(mset->combo_template_dir), false);
 
         // add entries
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template_dir),
@@ -3557,7 +3557,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                     {
                         toplevel = file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser))
                                                 : nullptr;
-                        ptk_show_error((GtkWindow*)toplevel, "Error", err->message);
+                        ptk_show_error(GTK_WINDOW(toplevel), "Error", err->message);
                         g_error_free(err);
                     }
                     else
@@ -3638,7 +3638,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                             toplevel = file_browser
                                            ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser))
                                            : nullptr;
-                            ptk_show_error((GtkWindow*)toplevel, "Broken Link", msg);
+                            ptk_show_error(GTK_WINDOW(toplevel), "Broken Link", msg);
                             g_free(msg);
                             g_free(full_path);
                             g_free(target_path);
@@ -3652,7 +3652,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                     /* Let the user choose an application */
                     toplevel =
                         file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser)) : nullptr;
-                    alloc_desktop = ptk_choose_app_for_mime_type((GtkWindow*)toplevel,
+                    alloc_desktop = ptk_choose_app_for_mime_type(GTK_WINDOW(toplevel),
                                                                  mime_type,
                                                                  true,
                                                                  true,
@@ -3774,7 +3774,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
     char* cmd;
     char* task_name;
 
-    GtkWidget* parent = (GtkWidget*)file_browser;
+    GtkWidget* parent = GTK_WIDGET(file_browser);
     char* file_paths = g_strdup("");
     GList* sel;
     char* file_path;

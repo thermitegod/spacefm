@@ -27,7 +27,7 @@ ptk_show_error(GtkWindow* parent, const std::string& title, const std::string& m
                                             nullptr);
     g_free(msg);
     if (!title.empty())
-        gtk_window_set_title((GtkWindow*)dlg, title.c_str());
+        gtk_window_set_title(GTK_WINDOW(dlg), title.c_str());
     xset_set_window_icon(GTK_WINDOW(dlg));
     gtk_dialog_run(GTK_DIALOG(dlg));
     gtk_widget_destroy(dlg);
@@ -45,7 +45,7 @@ ptk_show_error(GtkWindow* parent, const char* title, const char* message)
                                             nullptr);
     g_free(msg);
     if (title)
-        gtk_window_set_title((GtkWindow*)dlg, title);
+        gtk_window_set_title(GTK_WINDOW(dlg), title);
     xset_set_window_icon(GTK_WINDOW(dlg));
     gtk_dialog_run(GTK_DIALOG(dlg));
     gtk_widget_destroy(dlg);

@@ -62,7 +62,7 @@ static bool
 filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
 {
     VFSFileInfo* file;
-    GtkTreeView* view = (GtkTreeView*)data;
+    GtkTreeView* view = GTK_TREE_VIEW(data);
     bool show_hidden = GPOINTER_TO_INT(g_object_get_qdata(G_OBJECT(view), dir_tree_view_data));
 
     if (show_hidden)
@@ -320,7 +320,7 @@ get_dir_tree_model()
     if (G_UNLIKELY(!dir_tree_model))
     {
         dir_tree_model = ptk_dir_tree_new();
-        g_object_add_weak_pointer(G_OBJECT(dir_tree_model), (void**)(GtkWidget*)&dir_tree_model);
+        g_object_add_weak_pointer(G_OBJECT(dir_tree_model), (void**)GTK_WIDGET(&dir_tree_model));
     }
     else
     {

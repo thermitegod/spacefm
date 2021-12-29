@@ -248,7 +248,7 @@ on_open_files(GAction* action, FindFile* data)
                 // gtk_window_set_default_size( GTK_WINDOW( w ), app_settings.width,
                 // app_settings.height );
             }
-            gtk_window_present((GtkWindow*)w);
+            gtk_window_present(GTK_WINDOW(w));
             file_browser =
                 PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(FM_MAIN_WINDOW(w)));
         }
@@ -266,7 +266,7 @@ on_open_files(GAction* action, FindFile* data)
         }
 
         g_hash_table_foreach(hash, (GHFunc)open_dir, w);
-        gtk_window_present((GtkWindow*)w);
+        gtk_window_present(GTK_WINDOW(w));
     }
 
     g_hash_table_destroy(hash);
@@ -338,7 +338,7 @@ compose_command(FindFile* data)
     }
 
     /* if include sub is excluded */ // MOD added
-    if (!gtk_toggle_button_get_active((GtkToggleButton*)data->include_sub))
+    if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->include_sub)))
     {
         arg = g_strdup("-maxdepth");
         g_array_append_val(argv, arg);
@@ -347,7 +347,7 @@ compose_command(FindFile* data)
     }
 
     /* if hidden files is excluded */
-    if (!gtk_toggle_button_get_active((GtkToggleButton*)data->search_hidden))
+    if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->search_hidden)))
     {
         arg = g_strdup("-name");
         g_array_append_val(argv, arg);
@@ -360,38 +360,38 @@ compose_command(FindFile* data)
     }
 
     /* if lower limit of file size is set */
-    if (gtk_toggle_button_get_active((GtkToggleButton*)data->use_size_lower))
+    if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_size_lower)))
     {
         arg = g_strdup("-size");
         g_array_append_val(argv, arg);
 
         tmp = g_strdup_printf(
             "+%u%c",
-            gtk_spin_button_get_value_as_int((GtkSpinButton*)data->size_lower),
-            size_units[gtk_combo_box_get_active((GtkComboBox*)data->size_lower_unit)]);
+            gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->size_lower)),
+            size_units[gtk_combo_box_get_active(GTK_COMBO_BOX(data->size_lower_unit))]);
         g_array_append_val(argv, tmp);
     }
 
     /* if upper limit of file size is set */
-    if (gtk_toggle_button_get_active((GtkToggleButton*)data->use_size_upper))
+    if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_size_upper)))
     {
         arg = g_strdup("-size");
         g_array_append_val(argv, arg);
 
         tmp = g_strdup_printf(
             "-%u%c",
-            gtk_spin_button_get_value_as_int((GtkSpinButton*)data->size_upper),
-            size_units[gtk_combo_box_get_active((GtkComboBox*)data->size_upper_unit)]);
+            gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->size_upper)),
+            size_units[gtk_combo_box_get_active(GTK_COMBO_BOX(data->size_upper_unit))]);
 
         arg = g_strdup(tmp + 1);
         g_array_append_val(argv, arg);
     }
 
     /* If -name is used */
-    tmp = (char*)gtk_entry_get_text((GtkEntry*)data->fn_pattern_entry);
+    tmp = (char*)gtk_entry_get_text(GTK_ENTRY(data->fn_pattern_entry));
     if (tmp && strcmp(tmp, "*"))
     {
-        if (gtk_toggle_button_get_active((GtkToggleButton*)data->fn_case_sensitive))
+        if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->fn_case_sensitive)))
             arg = g_strdup("-name");
         else
             arg = g_strdup("-iname");
@@ -402,7 +402,7 @@ compose_command(FindFile* data)
     }
 
     /* match by mtime */
-    idx = gtk_combo_box_get_active((GtkComboBox*)data->date_limit);
+    idx = gtk_combo_box_get_active(GTK_COMBO_BOX(data->date_limit));
     if (idx > 0)
     {
         if (idx == 5) /* range */
@@ -414,14 +414,14 @@ compose_command(FindFile* data)
             g_array_append_val(argv, arg);
 
             /* date1 */
-            arg = g_strdup_printf("-%d", get_date_offset((GtkCalendar*)data->date1));
+            arg = g_strdup_printf("-%d", get_date_offset(GTK_CALENDAR(data->date1)));
             g_array_append_val(argv, arg);
 
             arg = g_strdup("-mtime");
             g_array_append_val(argv, arg);
 
             /* date2 */
-            arg = g_strdup_printf("+%d", get_date_offset((GtkCalendar*)data->date2));
+            arg = g_strdup_printf("+%d", get_date_offset(GTK_CALENDAR(data->date2)));
             g_array_append_val(argv, arg);
 
             arg = g_strdup(")");
@@ -454,7 +454,7 @@ compose_command(FindFile* data)
     }
 
     /* grep text inside files */
-    tmp = (char*)gtk_entry_get_text((GtkEntry*)data->fc_pattern);
+    tmp = (char*)gtk_entry_get_text(GTK_ENTRY(data->fc_pattern));
     if (tmp && *tmp)
     {
         print = true;
@@ -471,7 +471,7 @@ compose_command(FindFile* data)
         arg = g_strdup("grep");
         g_array_append_val(argv, arg);
 
-        if (!gtk_toggle_button_get_active((GtkToggleButton*)data->fc_case_sensitive))
+        if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->fc_case_sensitive)))
         {
             arg = g_strdup("-i");
             g_array_append_val(argv, arg);
@@ -480,7 +480,7 @@ compose_command(FindFile* data)
         arg = g_strdup("--files-with-matches");
         g_array_append_val(argv, arg);
 
-        if (gtk_toggle_button_get_active((GtkToggleButton*)data->fc_use_regexp))
+        if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->fc_use_regexp)))
             arg = g_strdup("--regexp");
         else
             arg = g_strdup("--fixed-strings");
@@ -743,9 +743,9 @@ on_search_again(GtkWidget* btn, FindFile* data)
     gtk_widget_show(data->start_btn);
 
     g_object_ref(data->result_list);
-    gtk_tree_view_set_model((GtkTreeView*)data->result_view, nullptr);
+    gtk_tree_view_set_model(GTK_TREE_VIEW(data->result_view), nullptr);
     gtk_list_store_clear(data->result_list);
-    gtk_tree_view_set_model((GtkTreeView*)data->result_view, GTK_TREE_MODEL(data->result_list));
+    gtk_tree_view_set_model(GTK_TREE_VIEW(data->result_view), GTK_TREE_MODEL(data->result_list));
     g_object_unref(data->result_list);
 }
 
@@ -884,7 +884,7 @@ on_remove_search_folder(GtkWidget* btn, FindFile* data)
 static void
 on_date_limit_changed(GtkWidget* date_limit, FindFile* data)
 {
-    int sel = gtk_combo_box_get_active((GtkComboBox*)date_limit);
+    int sel = gtk_combo_box_get_active(GTK_COMBO_BOX(date_limit));
     bool sensitive = (sel == 5); /* date range */
     gtk_widget_set_sensitive(data->date1, sensitive);
     gtk_widget_set_sensitive(data->date2, sensitive);
@@ -902,7 +902,7 @@ init_search_result(FindFile* data)
     GtkTreeViewColumn* col;
     GtkCellRenderer* render;
 
-    gtk_tree_selection_set_mode(gtk_tree_view_get_selection((GtkTreeView*)data->result_view),
+    gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(data->result_view)),
                                 GTK_SELECTION_MULTIPLE);
     data->result_list = gtk_list_store_new(N_RES_COLS,
                                            GDK_TYPE_PIXBUF, /* icon */
@@ -913,7 +913,7 @@ init_search_result(FindFile* data)
                                            G_TYPE_STRING,   /* mtime */
                                            G_TYPE_POINTER /* VFSFileInfo */);
 
-    gtk_tree_view_set_model((GtkTreeView*)data->result_view, (GtkTreeModel*)data->result_list);
+    gtk_tree_view_set_model(GTK_TREE_VIEW(data->result_view), GTK_TREE_MODEL(data->result_list));
     g_object_unref(data->result_list);
     col = gtk_tree_view_column_new();
     gtk_tree_view_column_set_title(col, "Name");
@@ -927,7 +927,7 @@ init_search_result(FindFile* data)
     gtk_tree_view_column_set_expand(col, true);
     gtk_tree_view_column_set_min_width(col, 200);
     gtk_tree_view_column_set_resizable(col, true);
-    gtk_tree_view_append_column((GtkTreeView*)data->result_view, col);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(data->result_view), col);
 
     render = gtk_cell_renderer_text_new();
     g_object_set(render, "ellipsize", PANGO_ELLIPSIZE_END, nullptr);
@@ -935,7 +935,7 @@ init_search_result(FindFile* data)
     gtk_tree_view_column_set_expand(col, true);
     gtk_tree_view_column_set_resizable(col, true);
     gtk_tree_view_column_set_min_width(col, 200);
-    gtk_tree_view_append_column((GtkTreeView*)data->result_view, col);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(data->result_view), col);
 
     col = gtk_tree_view_column_new_with_attributes("Size",
                                                    gtk_cell_renderer_text_new(),
@@ -943,7 +943,7 @@ init_search_result(FindFile* data)
                                                    COL_SIZE,
                                                    nullptr);
     gtk_tree_view_column_set_resizable(col, true);
-    gtk_tree_view_append_column((GtkTreeView*)data->result_view, col);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(data->result_view), col);
 
     col = gtk_tree_view_column_new_with_attributes("Type",
                                                    gtk_cell_renderer_text_new(),
@@ -953,7 +953,7 @@ init_search_result(FindFile* data)
     gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
     gtk_tree_view_column_set_fixed_width(col, 120);
     gtk_tree_view_column_set_resizable(col, true);
-    gtk_tree_view_append_column((GtkTreeView*)data->result_view, col);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(data->result_view), col);
 
     col = gtk_tree_view_column_new_with_attributes("Last Modified",
                                                    gtk_cell_renderer_text_new(),
@@ -961,7 +961,7 @@ init_search_result(FindFile* data)
                                                    COL_MTIME,
                                                    nullptr);
     gtk_tree_view_column_set_resizable(col, true);
-    gtk_tree_view_append_column((GtkTreeView*)data->result_view, col);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(data->result_view), col);
 }
 
 static bool
@@ -1053,7 +1053,7 @@ fm_find_files(const char** search_dirs)
     GtkWidget* img;
 
     GtkBuilder* builder = _gtk_builder_new_from_file("find-files3.ui");
-    data->win = (GtkWidget*)gtk_builder_get_object(builder, "win");
+    data->win = GTK_WIDGET(gtk_builder_get_object(builder, "win"));
     g_object_set_data_full(G_OBJECT(data->win), "find-files", data, (GDestroyNotify)free_data);
 
     GdkPixbuf* icon = nullptr;
@@ -1073,51 +1073,51 @@ fm_find_files(const char** search_dirs)
         gtk_window_set_icon_name(GTK_WINDOW(data->win), "Find");
 
     /* search criteria pane */
-    data->search_criteria = (GtkWidget*)gtk_builder_get_object(builder, "search_criteria");
+    data->search_criteria = GTK_WIDGET(gtk_builder_get_object(builder, "search_criteria"));
 
-    data->fn_pattern = (GtkWidget*)gtk_builder_get_object(builder, "fn_pattern");
+    data->fn_pattern = GTK_WIDGET(gtk_builder_get_object(builder, "fn_pattern"));
     data->fn_pattern_entry = gtk_bin_get_child(GTK_BIN(data->fn_pattern));
-    data->fn_case_sensitive = (GtkWidget*)gtk_builder_get_object(builder, "fn_case_sensitive");
-    gtk_entry_set_activates_default((GtkEntry*)data->fn_pattern_entry, true);
+    data->fn_case_sensitive = GTK_WIDGET(gtk_builder_get_object(builder, "fn_case_sensitive"));
+    gtk_entry_set_activates_default(GTK_ENTRY(data->fn_pattern_entry), true);
 
     /* file content */
-    data->fc_pattern = (GtkWidget*)gtk_builder_get_object(builder, "fc_pattern");
-    data->fc_case_sensitive = (GtkWidget*)gtk_builder_get_object(builder, "fc_case_sensitive");
-    data->fc_use_regexp = (GtkWidget*)gtk_builder_get_object(builder, "fc_use_regexp");
+    data->fc_pattern = GTK_WIDGET(gtk_builder_get_object(builder, "fc_pattern"));
+    data->fc_case_sensitive = GTK_WIDGET(gtk_builder_get_object(builder, "fc_case_sensitive"));
+    data->fc_use_regexp = GTK_WIDGET(gtk_builder_get_object(builder, "fc_use_regexp"));
 
     /* advanced options */
-    data->search_hidden = (GtkWidget*)gtk_builder_get_object(builder, "search_hidden");
+    data->search_hidden = GTK_WIDGET(gtk_builder_get_object(builder, "search_hidden"));
 
     /* size & date */
-    data->use_size_lower = (GtkWidget*)gtk_builder_get_object(builder, "use_size_lower");
-    data->use_size_upper = (GtkWidget*)gtk_builder_get_object(builder, "use_size_upper");
-    data->size_lower = (GtkWidget*)gtk_builder_get_object(builder, "size_lower");
-    data->size_upper = (GtkWidget*)gtk_builder_get_object(builder, "size_upper");
-    data->size_lower_unit = (GtkWidget*)gtk_builder_get_object(builder, "size_lower_unit");
-    data->size_upper_unit = (GtkWidget*)gtk_builder_get_object(builder, "size_upper_unit");
+    data->use_size_lower = GTK_WIDGET(gtk_builder_get_object(builder, "use_size_lower"));
+    data->use_size_upper = GTK_WIDGET(gtk_builder_get_object(builder, "use_size_upper"));
+    data->size_lower = GTK_WIDGET(gtk_builder_get_object(builder, "size_lower"));
+    data->size_upper = GTK_WIDGET(gtk_builder_get_object(builder, "size_upper"));
+    data->size_lower_unit = GTK_WIDGET(gtk_builder_get_object(builder, "size_lower_unit"));
+    data->size_upper_unit = GTK_WIDGET(gtk_builder_get_object(builder, "size_upper_unit"));
     g_signal_connect(data->use_size_lower, "toggled", G_CALLBACK(on_use_size_lower_toggled), data);
     g_signal_connect(data->use_size_upper, "toggled", G_CALLBACK(on_use_size_upper_toggled), data);
     on_use_size_lower_toggled(data->use_size_lower, data);
     on_use_size_upper_toggled(data->use_size_upper, data);
 
-    data->date_limit = (GtkWidget*)gtk_builder_get_object(builder, "date_limit");
-    data->date1 = (GtkWidget*)gtk_builder_get_object(builder, "date1");
-    data->date2 = (GtkWidget*)gtk_builder_get_object(builder, "date2");
+    data->date_limit = GTK_WIDGET(gtk_builder_get_object(builder, "date_limit"));
+    data->date1 = GTK_WIDGET(gtk_builder_get_object(builder, "date1"));
+    data->date2 = GTK_WIDGET(gtk_builder_get_object(builder, "date2"));
     g_signal_connect(data->date_limit, "changed", G_CALLBACK(on_date_limit_changed), data);
 
     /* file types */
-    data->all_files = (GtkWidget*)gtk_builder_get_object(builder, "all_files");
-    data->text_files = (GtkWidget*)gtk_builder_get_object(builder, "text_files");
-    data->img_files = (GtkWidget*)gtk_builder_get_object(builder, "img_files");
-    data->audio_files = (GtkWidget*)gtk_builder_get_object(builder, "audio_files");
-    data->video_files = (GtkWidget*)gtk_builder_get_object(builder, "video_files");
+    data->all_files = GTK_WIDGET(gtk_builder_get_object(builder, "all_files"));
+    data->text_files = GTK_WIDGET(gtk_builder_get_object(builder, "text_files"));
+    data->img_files = GTK_WIDGET(gtk_builder_get_object(builder, "img_files"));
+    data->audio_files = GTK_WIDGET(gtk_builder_get_object(builder, "audio_files"));
+    data->video_files = GTK_WIDGET(gtk_builder_get_object(builder, "video_files"));
 
     /* places */
     data->places_list = gtk_list_store_new(1, G_TYPE_STRING);
-    data->places_view = (GtkWidget*)gtk_builder_get_object(builder, "places_view");
-    add_directory_btn = (GtkWidget*)gtk_builder_get_object(builder, "add_directory_btn");
-    remove_directory_btn = (GtkWidget*)gtk_builder_get_object(builder, "remove_directory_btn");
-    data->include_sub = (GtkWidget*)gtk_builder_get_object(builder, "include_sub");
+    data->places_view = GTK_WIDGET(gtk_builder_get_object(builder, "places_view"));
+    add_directory_btn = GTK_WIDGET(gtk_builder_get_object(builder, "add_directory_btn"));
+    remove_directory_btn = GTK_WIDGET(gtk_builder_get_object(builder, "remove_directory_btn"));
+    data->include_sub = GTK_WIDGET(gtk_builder_get_object(builder, "include_sub"));
 
     if (search_dirs)
     {
@@ -1129,20 +1129,20 @@ fm_find_files(const char** search_dirs)
         }
     }
 
-    gtk_tree_view_set_model((GtkTreeView*)data->places_view, (GtkTreeModel*)data->places_list);
+    gtk_tree_view_set_model(GTK_TREE_VIEW(data->places_view), GTK_TREE_MODEL(data->places_list));
     g_object_unref(data->places_list);
     col = gtk_tree_view_column_new_with_attributes(nullptr,
                                                    gtk_cell_renderer_text_new(),
                                                    "text",
                                                    0,
                                                    nullptr);
-    gtk_tree_view_append_column((GtkTreeView*)data->places_view, col);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(data->places_view), col);
 
     g_signal_connect(add_directory_btn, "clicked", G_CALLBACK(on_add_search_folder), data);
     g_signal_connect(remove_directory_btn, "clicked", G_CALLBACK(on_remove_search_folder), data);
 
     /* search result pane */
-    data->search_result = (GtkWidget*)gtk_builder_get_object(builder, "search_result");
+    data->search_result = GTK_WIDGET(gtk_builder_get_object(builder, "search_result"));
     /* replace the problematic GtkTreeView with GtkTreeView */
     data->result_view = gtk_tree_view_new();
     /*
@@ -1154,7 +1154,7 @@ fm_find_files(const char** search_dirs)
     }
      */
     gtk_widget_show(data->result_view);
-    gtk_container_add((GtkContainer*)gtk_builder_get_object(builder, "result_scroll"),
+    gtk_container_add(GTK_CONTAINER(gtk_builder_get_object(builder, "result_scroll")),
                       data->result_view);
     init_search_result(data);
     g_signal_connect(data->result_view,
@@ -1163,23 +1163,23 @@ fm_find_files(const char** search_dirs)
                      data);
 
     /* buttons */
-    data->start_btn = (GtkWidget*)gtk_builder_get_object(builder, "start_btn");
-    data->stop_btn = (GtkWidget*)gtk_builder_get_object(builder, "stop_btn");
-    data->again_btn = (GtkWidget*)gtk_builder_get_object(builder, "again_btn");
+    data->start_btn = GTK_WIDGET(gtk_builder_get_object(builder, "start_btn"));
+    data->stop_btn = GTK_WIDGET(gtk_builder_get_object(builder, "stop_btn"));
+    data->again_btn = GTK_WIDGET(gtk_builder_get_object(builder, "again_btn"));
 
     g_signal_connect(data->start_btn, "clicked", G_CALLBACK(on_start_search), data);
     g_signal_connect(data->stop_btn, "clicked", G_CALLBACK(on_stop_search), data);
     g_signal_connect(data->again_btn, "clicked", G_CALLBACK(on_search_again), data);
 
-    gtk_entry_set_text((GtkEntry*)data->fn_pattern_entry, "*");
-    gtk_editable_select_region((GtkEditable*)data->fn_pattern_entry, 0, -1);
+    gtk_entry_set_text(GTK_ENTRY(data->fn_pattern_entry), "*");
+    gtk_editable_select_region(GTK_EDITABLE(data->fn_pattern_entry), 0, -1);
 
-    gtk_combo_box_set_active((GtkComboBox*)data->size_lower_unit, 1);
-    gtk_spin_button_set_range((GtkSpinButton*)data->size_lower, 0, G_MAXINT);
-    gtk_combo_box_set_active((GtkComboBox*)data->size_upper_unit, 2);
-    gtk_spin_button_set_range((GtkSpinButton*)data->size_upper, 0, G_MAXINT);
+    gtk_combo_box_set_active(GTK_COMBO_BOX(data->size_lower_unit), 1);
+    gtk_spin_button_set_range(GTK_SPIN_BUTTON(data->size_lower), 0, G_MAXINT);
+    gtk_combo_box_set_active(GTK_COMBO_BOX(data->size_upper_unit), 2);
+    gtk_spin_button_set_range(GTK_SPIN_BUTTON(data->size_upper), 0, G_MAXINT);
 
-    gtk_combo_box_set_active((GtkComboBox*)data->date_limit, 0);
+    gtk_combo_box_set_active(GTK_COMBO_BOX(data->date_limit), 0);
 
     g_signal_connect(data->win, "delete-event", G_CALLBACK(gtk_widget_destroy), nullptr);
 

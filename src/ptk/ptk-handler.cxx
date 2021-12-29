@@ -2046,8 +2046,8 @@ on_configure_changed(GtkTreeSelection* selection, HandlerData* hnd)
     /* Focussing archive handler name
      * Selects the text rather than just placing the cursor at the start
      * of the text... */
-    /*GtkWidget* entry_handler_name = (GtkWidget*)g_object_get_data( G_OBJECT( dlg ),
-                                                "entry_handler_name" );
+    /*GtkWidget* entry_handler_name = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg),
+                                                 "entry_handler_name"));
     gtk_widget_grab_focus( entry_handler_name );*/
 }
 
@@ -2850,7 +2850,7 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
 
     /*igcr probably doesn't need to be single click, as you're not using row
      * activation, only selection changed? */
-    // gtk_tree_view_set_single_click(((GtkTreeView*)hnd->view_handlers), true);
+    // gtk_tree_view_set_single_click(GTK_TREE_VIEW(hnd->view_handlers)), true);
     gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(hnd->view_handlers), false);
 
     // Turning the treeview into a scrollable widget
