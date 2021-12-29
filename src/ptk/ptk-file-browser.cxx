@@ -476,25 +476,17 @@ ptk_file_browser_select_file(PtkFileBrowser* file_browser, const char* path)
 static void
 save_command_history(GtkEntry* entry)
 {
-    EntryData* edata = static_cast<EntryData*>(g_object_get_data(G_OBJECT(entry), "edata"));
-    if (!edata)
-        return;
-    const char* text = gtk_entry_get_text(GTK_ENTRY(entry));
+    std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
 
-    // remove duplicates
-    GList* l;
-    while ((l = g_list_find_custom(xset_cmd_history, text, (GCompareFunc)g_strcmp0)))
-    {
-        g_free((char*)l->data);
-        xset_cmd_history = g_list_delete_link(xset_cmd_history, l);
-    }
-    xset_cmd_history = g_list_prepend(xset_cmd_history, g_strdup(text));
+    if (text.empty())
+        return;
+
+    xset_cmd_history.push_back(text);
+
     // shorten to 200 entries
-    while (g_list_length(xset_cmd_history) > 200)
+    while (xset_cmd_history.size() > 200)
     {
-        l = g_list_last(xset_cmd_history);
-        g_free((char*)l->data);
-        xset_cmd_history = g_list_delete_link(xset_cmd_history, l);
+        xset_cmd_history.erase(xset_cmd_history.begin());
     }
 }
 

@@ -191,13 +191,12 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
          (text[0] != '/' && strstr(text, ":/")) || g_str_has_prefix(text, "//")))
     {
         // command history
-        GList* l;
         list = GTK_LIST_STORE(gtk_entry_completion_get_model(completion));
         gtk_list_store_clear(list);
-        for (l = xset_cmd_history; l; l = l->next)
+        for (std::string cmd: xset_cmd_history)
         {
             gtk_list_store_append(list, &it);
-            gtk_list_store_set(list, &it, COL_NAME, (char*)l->data, COL_PATH, (char*)l->data, -1);
+            gtk_list_store_set(list, &it, COL_NAME, cmd.c_str(), COL_PATH, cmd.c_str(), -1);
         }
         gtk_entry_completion_set_match_func(completion,
                                             (GtkEntryCompletionMatchFunc)match_func_cmd,

@@ -75,7 +75,7 @@ static XSet* book_icon_set_cached = nullptr;
 
 EventHandler event_handler;
 
-GList* xset_cmd_history = nullptr;
+std::vector<std::string> xset_cmd_history;
 
 typedef void (*SettingsParseFunc)(std::string& line);
 
@@ -364,7 +364,6 @@ load_conf()
 void
 load_settings(const char* config_dir)
 {
-    xset_cmd_history = nullptr;
     app_settings.load_saved_tabs = true;
 
     if (config_dir)
@@ -695,12 +694,8 @@ save_settings(void* main_window_ptr)
 void
 free_settings()
 {
-    if (xset_cmd_history)
-    {
-        g_list_foreach(xset_cmd_history, (GFunc)g_free, nullptr);
-        g_list_free(xset_cmd_history);
-        xset_cmd_history = nullptr;
-    }
+    if (!xset_cmd_history.empty())
+        xset_cmd_history.clear();
 
     xset_free_all();
 }

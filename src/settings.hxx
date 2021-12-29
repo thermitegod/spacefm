@@ -336,7 +336,7 @@ extern EventHandler event_handler;
 extern std::vector<XSet*> xsets;
 
 // instance-wide command history
-extern GList* xset_cmd_history;
+extern std::vector<std::string> xset_cmd_history;
 
 struct XSetContext
 {
