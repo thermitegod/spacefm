@@ -14,7 +14,7 @@
 
 #include <fnmatch.h>
 
-#include "ptk-handler.hxx"
+#include "ptk/ptk-handler.hxx"
 
 #include "logger.hxx"
 #include "autosave.hxx"

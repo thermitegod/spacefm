@@ -11,7 +11,7 @@
 
 // #include "logger.hxx"
 
-#include "vfs-user-dir.hxx"
+#include "vfs/vfs-user-dir.hxx"
 
 struct VFSDirXDG
 {

@@ -13,12 +13,12 @@
 #include <string>
 #include <filesystem>
 
-#include "ptk-location-view.hxx"
-#include "ptk-handler.hxx"
+#include "ptk/ptk-location-view.hxx"
+#include "ptk/ptk-handler.hxx"
 #include "main-window.hxx"
 
-#include "../vfs/vfs-utils.hxx"
-#include "../vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-utils.hxx"
+#include "vfs/vfs-user-dir.hxx"
 
 #include "logger.hxx"
 #include "utils.hxx"

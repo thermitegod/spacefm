@@ -23,8 +23,8 @@
 
 #include <ctime>
 
-#include "vfs-dir.hxx"
-#include "vfs-file-info.hxx"
+#include "vfs/vfs-dir.hxx"
+#include "vfs/vfs-file-info.hxx"
 
 struct VFSThumbnailLoader;
 

@@ -12,22 +12,22 @@
 #include <string>
 #include <filesystem>
 
-#include "ptk-file-misc.hxx"
+#include "ptk/ptk-file-misc.hxx"
 
-#include "ptk-utils.hxx"
-#include "ptk-file-task.hxx"
-#include "ptk-file-properties.hxx"
-#include "ptk-file-browser.hxx"
-#include "ptk-app-chooser.hxx"
-#include "ptk-clipboard.hxx"
-#include "ptk-file-archiver.hxx"
-#include "ptk-location-view.hxx"
+#include "ptk/ptk-utils.hxx"
+#include "ptk/ptk-file-task.hxx"
+#include "ptk/ptk-file-properties.hxx"
+#include "ptk/ptk-file-browser.hxx"
+#include "ptk/ptk-app-chooser.hxx"
+#include "ptk/ptk-clipboard.hxx"
+#include "ptk/ptk-file-archiver.hxx"
+#include "ptk/ptk-location-view.hxx"
 
-#include "../vfs/vfs-app-desktop.hxx"
-#include "../vfs/vfs-execute.hxx"
-#include "../vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-app-desktop.hxx"
+#include "vfs/vfs-execute.hxx"
+#include "vfs/vfs-user-dir.hxx"
 
-#include "ptk-handler.hxx"
+#include "ptk/ptk-handler.hxx"
 #include "utils.hxx"
 #include "logger.hxx"
 

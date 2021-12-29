@@ -13,7 +13,7 @@
 #include "settings.hxx"
 #include "utils.hxx"
 
-#include "ptk-utils.hxx"
+#include "ptk/ptk-utils.hxx"
 
 void
 ptk_show_error(GtkWindow* parent, const char* title, const char* message)

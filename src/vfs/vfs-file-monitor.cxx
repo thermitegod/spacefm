@@ -22,7 +22,7 @@
 
 #include "logger.hxx"
 
-#include "vfs-file-monitor.hxx"
+#include "vfs/vfs-file-monitor.hxx"
 
 struct VFSFileMonitorCallbackEntry
 {

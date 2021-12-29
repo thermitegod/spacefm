@@ -15,11 +15,11 @@
 
 #include "logger.hxx"
 
-#include "ptk-dir-tree.hxx"
-#include "ptk-file-menu.hxx"
-#include "ptk-file-task.hxx"
+#include "ptk/ptk-dir-tree.hxx"
+#include "ptk/ptk-file-menu.hxx"
+#include "ptk/ptk-file-task.hxx"
 
-#include "ptk-dir-tree-view.hxx"
+#include "ptk/ptk-dir-tree-view.hxx"
 
 static GQuark dir_tree_view_data = 0;
 

@@ -14,9 +14,9 @@
 
 #include <glib.h>
 
-#include "vfs-file-monitor.hxx"
-#include "vfs-file-info.hxx"
-#include "vfs-async-task.hxx"
+#include "vfs/vfs-file-monitor.hxx"
+#include "vfs/vfs-file-info.hxx"
+#include "vfs/vfs-async-task.hxx"
 
 #define VFS_TYPE_DIR (vfs_dir_get_type())
 #define VFS_DIR(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), VFS_TYPE_DIR, VFSDir))

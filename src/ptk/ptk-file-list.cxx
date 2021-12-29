@@ -12,9 +12,9 @@
 
 #include <ctime>
 
-#include "ptk-file-list.hxx"
+#include "ptk/ptk-file-list.hxx"
 
-#include "../vfs/vfs-thumbnail-loader.hxx"
+#include "vfs/vfs-thumbnail-loader.hxx"
 
 #include "logger.hxx"
 

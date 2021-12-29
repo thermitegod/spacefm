@@ -13,9 +13,9 @@
 #pragma once
 
 #include <gtk/gtk.h>
-#include "ptk-file-browser.hxx"
+#include "ptk/ptk-file-browser.hxx"
 
-#include "../vfs/vfs-file-info.hxx"
+#include "vfs/vfs-file-info.hxx"
 
 /* sel_files is a list containing VFSFileInfo structures
  * The list will be freed in this function, so the caller mustn't

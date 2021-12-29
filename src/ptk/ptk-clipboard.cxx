@@ -11,13 +11,13 @@
 #include <string>
 #include <filesystem>
 
-#include "ptk-file-task.hxx"
-#include "ptk-file-misc.hxx"
-#include "ptk-utils.hxx"
+#include "ptk/ptk-file-task.hxx"
+#include "ptk/ptk-file-misc.hxx"
+#include "ptk/ptk-utils.hxx"
 
 #include "utils.hxx"
 
-#include "ptk-clipboard.hxx"
+#include "ptk/ptk-clipboard.hxx"
 
 #include "logger.hxx"
 

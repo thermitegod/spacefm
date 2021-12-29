@@ -18,7 +18,7 @@
 
 #include <sys/types.h>
 
-#include "../vfs/vfs-dir.hxx"
+#include "vfs/vfs-dir.hxx"
 
 #define PTK_TYPE_FILE_LIST    (ptk_file_list_get_type())
 #define PTK_FILE_LIST(obj)    (G_TYPE_CHECK_INSTANCE_CAST((obj), PTK_TYPE_FILE_LIST, PtkFileList))

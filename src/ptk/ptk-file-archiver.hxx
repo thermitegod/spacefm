@@ -14,7 +14,7 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 
-#include "ptk-file-browser.hxx"
+#include "ptk/ptk-file-browser.hxx"
 
 // Archive operations enum
 enum PTKFileArchiverArc

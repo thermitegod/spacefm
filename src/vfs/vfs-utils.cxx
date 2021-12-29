@@ -19,7 +19,7 @@
  *      MA 02110-1301, USA.
  */
 
-#include "vfs-utils.hxx"
+#include "vfs/vfs-utils.hxx"
 
 GdkPixbuf*
 vfs_load_icon(GtkIconTheme* theme, const char* icon_name, int size)

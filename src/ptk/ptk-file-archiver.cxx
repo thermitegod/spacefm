@@ -10,9 +10,9 @@
  *
  */
 
-#include "ptk-file-archiver.hxx"
-#include "ptk-file-task.hxx"
-#include "ptk-handler.hxx"
+#include "ptk/ptk-file-archiver.hxx"
+#include "ptk/ptk-file-task.hxx"
+#include "ptk/ptk-handler.hxx"
 
 #include "logger.hxx"
 #include "settings.hxx"

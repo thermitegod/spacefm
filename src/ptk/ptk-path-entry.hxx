@@ -13,7 +13,7 @@
 #pragma once
 
 #include <gtk/gtk.h>
-#include "ptk-file-browser.hxx"
+#include "ptk/ptk-file-browser.hxx"
 
 struct EntryData
 {

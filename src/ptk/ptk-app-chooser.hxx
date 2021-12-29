@@ -13,7 +13,7 @@
 #pragma once
 
 #include <gtk/gtk.h>
-#include "../vfs/vfs-mime-type.hxx"
+#include "vfs/vfs-mime-type.hxx"
 
 /* Let the user choose a application */
 char* ptk_choose_app_for_mime_type(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all_apps,

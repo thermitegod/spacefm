@@ -14,10 +14,10 @@
 
 #include <sys/stat.h>
 
-#include "vfs-user-dir.hxx"
+#include "vfs/vfs-user-dir.hxx"
 
-#include "vfs-file-trash.hxx"
-//#include "../logger.hxx"
+#include "vfs/vfs-file-trash.hxx"
+//#include "logger.hxx"
 
 Trash* Trash::m_instance = nullptr;
 

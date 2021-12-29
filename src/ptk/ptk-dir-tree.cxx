@@ -15,9 +15,9 @@
 
 #include "settings.hxx"
 
-#include "../vfs/vfs-utils.hxx"
+#include "vfs/vfs-utils.hxx"
 
-#include "ptk-dir-tree.hxx"
+#include "ptk/ptk-dir-tree.hxx"
 
 struct PtkDirTreeNode
 {

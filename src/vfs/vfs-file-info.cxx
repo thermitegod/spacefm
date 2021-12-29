@@ -15,12 +15,12 @@
 
 #include "settings.hxx"
 
-#include "vfs-app-desktop.hxx"
-#include "vfs-thumbnail-loader.hxx"
-#include "vfs-utils.hxx"
-#include "vfs-user-dir.hxx"
+#include "vfs/vfs-app-desktop.hxx"
+#include "vfs/vfs-thumbnail-loader.hxx"
+#include "vfs/vfs-utils.hxx"
+#include "vfs/vfs-user-dir.hxx"
 
-#include "vfs-file-info.hxx"
+#include "vfs/vfs-file-info.hxx"
 
 static int big_thumb_size = 48, small_thumb_size = 20;
 static const char* desktop_dir = nullptr; // MOD added

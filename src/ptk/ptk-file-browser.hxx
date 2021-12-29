@@ -8,7 +8,7 @@
 
 #include <gtk/gtk.h>
 
-#include "../vfs/vfs-dir.hxx"
+#include "vfs/vfs-dir.hxx"
 
 #define PTK_TYPE_FILE_BROWSER (ptk_file_browser_get_type())
 #define PTK_FILE_BROWSER(obj) \

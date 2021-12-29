@@ -15,10 +15,10 @@
 
 #include <gtk/gtk.h>
 
-#include "vfs-mime-type.hxx"
-#include "vfs-file-monitor.hxx"
+#include "vfs/vfs-mime-type.hxx"
+#include "vfs/vfs-file-monitor.hxx"
 
-#include "vfs-utils.hxx"
+#include "vfs/vfs-utils.hxx"
 
 #include "logger.hxx"
 

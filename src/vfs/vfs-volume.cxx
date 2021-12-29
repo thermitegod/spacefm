@@ -21,15 +21,15 @@
 
 #include "main-window.hxx"
 
-#include "../ptk/ptk-handler.hxx"
-#include "../ptk/ptk-location-view.hxx"
+#include "ptk/ptk-handler.hxx"
+#include "ptk/ptk-location-view.hxx"
 
 #include "logger.hxx"
 #include "utils.hxx"
 
-#include "vfs-user-dir.hxx"
+#include "vfs/vfs-user-dir.hxx"
 
-#include "vfs-volume.hxx"
+#include "vfs/vfs-volume.hxx"
 
 #define MOUNTINFO "/proc/self/mountinfo"
 #define MTAB      "/proc/mounts"

@@ -30,10 +30,10 @@
 
 #include "utils.hxx"
 
-#include "../vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dir.hxx"
 
-#include "mime-type.hxx"
-#include "mime-cache.hxx"
+#include "mime-type/mime-type.hxx"
+#include "mime-type/mime-cache.hxx"
 
 /*
  * FIXME:

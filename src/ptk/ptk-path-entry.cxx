@@ -11,13 +11,13 @@
 #include <string>
 #include <filesystem>
 
-#include "ptk-path-entry.hxx"
+#include "ptk/ptk-path-entry.hxx"
 
 #include "main-window.hxx"
 
 #include "utils.hxx"
-#include "ptk-handler.hxx"
-#include "ptk-location-view.hxx"
+#include "ptk/ptk-handler.hxx"
+#include "ptk/ptk-location-view.hxx"
 
 static void on_changed(GtkEntry* entry, void* user_data);
 

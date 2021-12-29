@@ -18,12 +18,12 @@
 #include <malloc.h>
 #endif
 
-#include "vfs-volume.hxx"
-#include "vfs-thumbnail-loader.hxx"
+#include "vfs/vfs-volume.hxx"
+#include "vfs/vfs-thumbnail-loader.hxx"
 #include "utils.hxx"
 
-#include "vfs-user-dir.hxx"
-#include "vfs-dir.hxx"
+#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-dir.hxx"
 
 #include "logger.hxx"
 

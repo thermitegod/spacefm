@@ -16,7 +16,7 @@
 #include "utils.hxx"
 #include "logger.hxx"
 
-#include "ptk-file-task.hxx"
+#include "ptk/ptk-file-task.hxx"
 
 static bool on_vfs_file_task_state_cb(VFSFileTask* task, VFSFileTaskState state, void* state_data,
                                       void* user_data);

@@ -10,13 +10,13 @@
 #include <string>
 #include <filesystem>
 
-#include "../vfs/vfs-app-desktop.hxx"
-#include "../vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-app-desktop.hxx"
+#include "vfs/vfs-user-dir.hxx"
 
-#include "ptk-handler.hxx"
-#include "ptk-utils.hxx"
+#include "ptk/ptk-handler.hxx"
+#include "ptk/ptk-utils.hxx"
 
-#include "ptk-app-chooser.hxx"
+#include "ptk/ptk-app-chooser.hxx"
 
 enum PTKAppChooser
 {

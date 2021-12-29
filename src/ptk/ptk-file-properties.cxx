@@ -13,17 +13,17 @@
 
 #include <gtk/gtk.h>
 
-#include "ptk-file-properties.hxx"
+#include "ptk/ptk-file-properties.hxx"
 
 #include <pwd.h>
 #include <grp.h>
 
-#include "ptk-file-task.hxx"
-#include "ptk-utils.hxx"
+#include "ptk/ptk-file-task.hxx"
+#include "ptk/ptk-utils.hxx"
 
-#include "../vfs/vfs-app-desktop.hxx"
+#include "vfs/vfs-app-desktop.hxx"
 
-#include "ptk-app-chooser.hxx"
+#include "ptk/ptk-app-chooser.hxx"
 #include "utils.hxx"
 
 static const char* chmod_names[] = {"owner_r",

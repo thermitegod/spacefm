@@ -16,7 +16,7 @@
 #include <glib.h>
 
 #include "settings.hxx"
-#include "ptk-file-browser.hxx"
+#include "ptk/ptk-file-browser.hxx"
 
 enum PtkHandlerArchive
 {

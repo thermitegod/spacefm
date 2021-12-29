@@ -16,7 +16,7 @@
 
 #include <gdk/gdk.h>
 
-#include "../mime-type/mime-type.hxx"
+#include "mime-type/mime-type.hxx"
 
 struct VFSMimeType
 {

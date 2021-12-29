@@ -23,7 +23,7 @@
 #include <time.h>
 #endif
 
-#include "vfs-execute.hxx"
+#include "vfs/vfs-execute.hxx"
 
 #include "logger.hxx"
 

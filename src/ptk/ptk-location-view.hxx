@@ -12,7 +12,7 @@
 
 #include <gtk/gtk.h>
 
-#include "../vfs/vfs-volume.hxx"
+#include "vfs/vfs-volume.hxx"
 
 // Location View
 GtkWidget* ptk_location_view_new(PtkFileBrowser* file_browser);

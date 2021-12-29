@@ -22,7 +22,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "../vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dir.hxx"
 
 #include "logger.hxx"
 

@@ -15,7 +15,7 @@
 #include <atomic>
 #include <ctime>
 
-#include "vfs-mime-type.hxx"
+#include "vfs/vfs-mime-type.hxx"
 
 #include <gtk/gtk.h>
 

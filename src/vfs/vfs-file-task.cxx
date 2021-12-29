@@ -18,12 +18,12 @@
 #include <utime.h>
 
 #include "main-window.hxx"
-#include "vfs-volume.hxx"
+#include "vfs/vfs-volume.hxx"
 
 #include "utils.hxx"
 
-#include "vfs-file-task.hxx"
-#include "vfs-file-trash.hxx"
+#include "vfs/vfs-file-task.hxx"
+#include "vfs/vfs-file-trash.hxx"
 
 #include "logger.hxx"
 

@@ -19,7 +19,7 @@
  *      MA 02110-1301, USA.
  */
 
-#include "vfs-async-task.hxx"
+#include "vfs/vfs-async-task.hxx"
 
 static void vfs_async_task_class_init(VFSAsyncTaskClass* klass);
 static void vfs_async_task_init(VFSAsyncTask* task);

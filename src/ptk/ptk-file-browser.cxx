@@ -14,22 +14,22 @@
 
 #include <exo/exo.h>
 
-#include "ptk-utils.hxx"
-#include "ptk-file-misc.hxx"
+#include "ptk/ptk-utils.hxx"
+#include "ptk/ptk-file-misc.hxx"
 
-#include "ptk-location-view.hxx"
-#include "ptk-dir-tree-view.hxx"
-#include "ptk-dir-tree.hxx"
+#include "ptk/ptk-location-view.hxx"
+#include "ptk/ptk-dir-tree-view.hxx"
+#include "ptk/ptk-dir-tree.hxx"
 
-#include "ptk-file-list.hxx"
+#include "ptk/ptk-file-list.hxx"
 
-#include "ptk-clipboard.hxx"
+#include "ptk/ptk-clipboard.hxx"
 
-#include "ptk-file-menu.hxx"
-#include "ptk-path-entry.hxx"
+#include "ptk/ptk-file-menu.hxx"
+#include "ptk/ptk-path-entry.hxx"
 #include "main-window.hxx"
 
-#include "../vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dir.hxx"
 
 #include "logger.hxx"
 

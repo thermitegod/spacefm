@@ -13,7 +13,7 @@
 #pragma once
 
 #include <gtk/gtk.h>
-#include "ptk-file-browser.hxx"
+#include "ptk/ptk-file-browser.hxx"
 
 /* Create a new dir tree view */
 GtkWidget* ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden);

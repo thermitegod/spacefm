@@ -13,22 +13,22 @@
 
 #include <fcntl.h>
 
-#include "ptk-file-menu.hxx"
+#include "ptk/ptk-file-menu.hxx"
 #include <glib.h>
 
-#include "../vfs/vfs-app-desktop.hxx"
-#include "../vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-app-desktop.hxx"
+#include "vfs/vfs-user-dir.hxx"
 
-#include "ptk-file-misc.hxx"
-#include "ptk-file-archiver.hxx"
-#include "ptk-handler.hxx"
-#include "ptk-clipboard.hxx"
-#include "ptk-app-chooser.hxx"
+#include "ptk/ptk-file-misc.hxx"
+#include "ptk/ptk-file-archiver.hxx"
+#include "ptk/ptk-handler.hxx"
+#include "ptk/ptk-clipboard.hxx"
+#include "ptk/ptk-app-chooser.hxx"
 #include "settings.hxx"
 #include "item-prop.hxx"
 #include "main-window.hxx"
-#include "ptk-location-view.hxx"
-#include "ptk-file-list.hxx"
+#include "ptk/ptk-location-view.hxx"
+#include "ptk/ptk-file-list.hxx"
 
 #include "logger.hxx"
 
