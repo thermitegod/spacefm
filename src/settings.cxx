@@ -90,6 +90,7 @@ static void xset_custom_insert_after(XSet* target, XSet* set);
 static XSet* xset_custom_copy(XSet* set, bool copy_next, bool delete_set);
 static XSet* xset_set_set_int(XSet* set, const char* var, const char* value);
 static void xset_free(XSet* set);
+static void xset_remove(XSet* set);
 
 static const char* enter_command_line =
     "Enter program or bash command line:\n\nUse:\n\t%%F\tselected files  or  %%f first selected "
@@ -729,10 +730,9 @@ xset_free_all()
             g_list_foreach((GList*)set->ob2_data, (GFunc)g_free, nullptr);
             g_list_free((GList*)set->ob2_data);
         }
-
         xset_free(set);
+        g_slice_free(XSet, set);
     }
-
     xsets.clear();
     set_last = nullptr;
 
@@ -786,9 +786,14 @@ xset_free(XSet* set)
         if (set->plug_name)
             g_free(set->plug_name);
     }
+}
 
-    xsets.erase(std::remove(xsets.begin(), xsets.end(), set), xsets.end());
+static void
+xset_remove(XSet* set)
+{
+    xset_free(set);
     g_slice_free(XSet, set);
+    xsets.erase(std::remove(xsets.begin(), xsets.end(), set), xsets.end());
     set_last = nullptr;
 }
 
@@ -853,8 +858,9 @@ xset_get(const char* name)
             return set;
     }
 
-    xsets.push_back(xset_new(name));
-    return xset_get(name);
+    XSet* set = xset_new(name);
+    xsets.push_back(set);
+    return set;
 }
 
 XSet*
@@ -2446,7 +2452,7 @@ clean_plugin_mirrors()
             {
                 if (!set->shared_key || !xset_is(set->shared_key))
                 {
-                    xset_free(set);
+                    xset_remove(set);
                     redo = true;
                     break;
                 }
@@ -2567,7 +2573,7 @@ xset_clear_plugins(std::vector<XSet*>& plugins)
     if (!plugins.empty())
     {
         for (XSet* set: plugins)
-            xset_free(set);
+            xset_remove(set);
         plugins.clear();
     }
 }
@@ -2710,7 +2716,7 @@ xset_import_plugin(const char* plug_dir, int* use)
         {
             if (set->plugin && !strcmp(plug_dir, set->plug_dir))
             {
-                xset_free(set);
+                xset_remove(set);
                 redo = true; // search list from start again due to changed list
                 break;
             }
@@ -3754,7 +3760,7 @@ xset_custom_delete(XSet* set, bool delete_next)
         print_command(command);
         g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
     }
-    xset_free(set);
+    xset_remove(set);
 }
 
 XSet*
