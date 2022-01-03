@@ -898,7 +898,9 @@ main(int argc, char* argv[])
     // --version
     if (cli_flags.version_opt)
     {
-        std::cout << fmt::format("{} {}", PACKAGE_NAME_FANCY, PACKAGE_VERSION) << std::endl;
+        std::cout << fmt::format("{} {} Copyright (C) 2022", PACKAGE_NAME_FANCY, PACKAGE_VERSION)
+                  << std::endl;
+        return EXIT_SUCCESS;
     }
 
     /* Initialize multithreading  //sfm moved below parse arguments
