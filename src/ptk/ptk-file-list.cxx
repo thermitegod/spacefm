@@ -312,6 +312,7 @@ ptk_file_list_set_dir(PtkFileList* list, VFSDir* dir)
 static GtkTreeModelFlags
 ptk_file_list_get_flags(GtkTreeModel* tree_model)
 {
+    (void)tree_model;
     g_return_val_if_fail(PTK_IS_FILE_LIST(tree_model), (GtkTreeModelFlags)0);
     return GtkTreeModelFlags(GTK_TREE_MODEL_LIST_ONLY | GTK_TREE_MODEL_ITERS_PERSIST);
 }
@@ -326,6 +327,7 @@ ptk_file_list_get_n_columns(GtkTreeModel* tree_model)
 static GType
 ptk_file_list_get_column_type(GtkTreeModel* tree_model, int index)
 {
+    (void)tree_model;
     g_return_val_if_fail(PTK_IS_FILE_LIST(tree_model), G_TYPE_INVALID);
     g_return_val_if_fail(index < G_N_ELEMENTS(column_types) && index >= 0, G_TYPE_INVALID);
     return column_types[index];
