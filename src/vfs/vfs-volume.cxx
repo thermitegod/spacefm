@@ -1828,6 +1828,8 @@ get_devmount_fstype(unsigned int major, unsigned int minor)
 static bool
 cb_mount_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
 {
+    (void)channel;
+    (void)user_data;
     if (cond & ~G_IO_ERR)
         return true;
 
@@ -1840,6 +1842,8 @@ cb_mount_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
 static bool
 cb_udev_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
 {
+    (void)user_data;
+
     /*
     LOG_INFO("cb_monitor_watch {}", channel);
     if ( cond & G_IO_IN )
@@ -1869,6 +1873,7 @@ cb_udev_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
             LOG_INFO("    Invalid FD");
     }
     */
+
     if ((cond & G_IO_NVAL))
     {
         LOG_WARN("udev g_io_channel_unref G_IO_NVAL");
@@ -3784,6 +3789,7 @@ unmount_if_mounted(VFSVolume* vol)
 static bool
 on_cancel_inhibit_timer(void* user_data)
 {
+    (void)user_data;
     global_inhibit_auto = false;
     return false;
 }

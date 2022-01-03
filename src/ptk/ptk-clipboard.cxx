@@ -28,6 +28,9 @@ static void
 clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, unsigned int info,
                    void* user_data)
 {
+    (void)clipboard;
+    (void)info;
+    (void)user_data;
     GdkAtom uri_list_target = gdk_atom_intern("text/uri-list", false);
     GdkAtom gnome_target = gdk_atom_intern("x-special/gnome-copied-files", false);
 
@@ -80,6 +83,8 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, un
 static void
 clipboard_clean_data(GtkClipboard* clipboard, void* user_data)
 {
+    (void)clipboard;
+    (void)user_data;
     // LOG_DEBUG("clean clipboard!");
     if (clipboard_file_list)
     {
@@ -119,6 +124,7 @@ void
 ptk_clipboard_copy_name(const char* working_dir,
                         GList* files) // MOD added
 {
+    (void)working_dir;
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
     GList* l;
@@ -508,6 +514,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
 GList*
 ptk_clipboard_get_file_paths(const char* cwd, bool* is_cut, int* missing_targets)
 {
+    (void)cwd;
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
     char* uri_list_str;

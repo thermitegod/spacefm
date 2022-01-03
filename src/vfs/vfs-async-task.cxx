@@ -227,6 +227,8 @@ vfs_async_task_cancel(VFSAsyncTask* task)
 static void
 vfs_async_task_finish(VFSAsyncTask* task, bool is_cancelled)
 {
+    (void)task;
+    (void)is_cancelled;
     /* default handler of "finish" signal. */
 }
 

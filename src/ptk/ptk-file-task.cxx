@@ -525,6 +525,8 @@ ptk_file_task_pause(PtkFileTask* ptask, int state)
 static bool
 on_progress_dlg_delete_event(GtkWidget* widget, GdkEvent* event, PtkFileTask* ptask)
 {
+    (void)widget;
+    (void)event;
     save_progress_dialog_size(ptask);
     return !(ptask->complete || ptask->task_view);
 }
@@ -532,6 +534,7 @@ on_progress_dlg_delete_event(GtkWidget* widget, GdkEvent* event, PtkFileTask* pt
 static void
 on_progress_dlg_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
 {
+    (void)dlg;
     save_progress_dialog_size(ptask);
     if (ptask->complete && !ptask->complete_notify)
     {
@@ -583,12 +586,15 @@ on_progress_dlg_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
 static void
 on_progress_dlg_destroy(GtkDialog* dlg, PtkFileTask* ptask)
 {
+    (void)dlg;
     ptask->progress_dlg = nullptr;
 }
 
 static void
 on_view_popup(GtkTextView* entry, GtkMenu* menu, void* user_data)
 {
+    (void)entry;
+    (void)user_data;
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     xset_context_new();
 
@@ -1736,6 +1742,7 @@ enum PTKFileTaskResponse
 static bool
 on_query_input_keypress(GtkWidget* widget, GdkEventKey* event, PtkFileTask* ptask)
 {
+    (void)ptask;
     if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter)
     {
         // User pressed enter in rename/overwrite dialog
@@ -1757,6 +1764,7 @@ on_query_input_keypress(GtkWidget* widget, GdkEventKey* event, PtkFileTask* ptas
 static void
 on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input)
 {
+    (void)input_buf;
     char* new_name = multi_input_get_text(query_input);
     const char* old_name = (const char*)g_object_get_data(G_OBJECT(query_input), "old_name");
     bool can_rename = new_name && (0 != strcmp(new_name, old_name));

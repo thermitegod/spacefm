@@ -86,6 +86,7 @@ static GtkTargetEntry drag_targets[] = {{g_strdup("text/uri-list"), 0, 0}};
 static void
 on_model_destroy(void* data, GObject* object)
 {
+    (void)data;
     vfs_volume_remove_callback(on_volume_event, (void*)object);
 
     model = nullptr;
@@ -300,6 +301,7 @@ static void
 on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* col,
                  PtkFileBrowser* file_browser)
 {
+    (void)col;
     // LOG_INFO("on_row_activated   view = {}", view);
     if (!file_browser)
         return;
@@ -371,6 +373,7 @@ ptk_location_view_open_block(const char* block, bool new_tab)
 static void
 ptk_location_view_init_model(GtkListStore* list)
 {
+    (void)list;
     n_vols = 0;
     const GList* l = vfs_volume_get_all_volumes();
     vfs_volume_add_callback(on_volume_event, model);
@@ -444,6 +447,7 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
 static void
 on_volume_event(VFSVolume* vol, VFSVolumeState state, void* user_data)
 {
+    (void)user_data;
     switch (state)
     {
         case VFS_VOLUME_ADDED:
@@ -810,6 +814,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
 static void
 on_autoopen_net_cb(VFSFileTask* task, AutoOpen* ao)
 {
+    (void)task;
     if (!(ao && ao->device_file))
         return;
 
@@ -1409,6 +1414,7 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 static bool
 on_autoopen_cb(VFSFileTask* task, AutoOpen* ao)
 {
+    (void)task;
     // LOG_INFO("on_autoopen_cb");
     const GList* volumes = vfs_volume_get_all_volumes();
     const GList* l;
@@ -1800,6 +1806,7 @@ on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 static void
 on_sync(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 {
+    (void)vol;
     GtkWidget* view;
     if (!item)
         view = view2;
@@ -1830,6 +1837,7 @@ on_sync(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 static void
 on_root_fstab(GtkMenuItem* item, GtkWidget* view)
 {
+    (void)item;
     char* fstab_path = g_build_filename(SYSCONFDIR, "fstab", nullptr);
     xset_edit(view, fstab_path, true, false);
     g_free(fstab_path);
@@ -1838,6 +1846,7 @@ on_root_fstab(GtkMenuItem* item, GtkWidget* view)
 static void
 on_root_udevil(GtkMenuItem* item, GtkWidget* view)
 {
+    (void)item;
     char* udevil_path = g_build_filename(SYSCONFDIR, "udevil", nullptr);
     char* udevil_conf = g_build_filename(SYSCONFDIR, "udevil", "udevil.conf", nullptr);
     char* msg =
@@ -2522,6 +2531,8 @@ static void
 show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browser,
                   unsigned int button, uint32_t time)
 {
+    (void)button;
+    (void)time;
     XSet* set;
     char* str;
     GtkWidget* popup = gtk_menu_new();
@@ -2648,6 +2659,7 @@ show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browse
 static bool
 on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data)
 {
+    (void)user_data;
     VFSVolume* vol = nullptr;
     bool ret = false;
 
@@ -2725,6 +2737,7 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data)
 static bool
 on_key_press_event(GtkWidget* w, GdkEventKey* event, PtkFileBrowser* file_browser)
 {
+    (void)w;
     unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
                                            GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
 
@@ -2752,6 +2765,8 @@ static void
 show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, unsigned int button,
                      uint32_t time)
 {
+    (void)dev_item;
+    (void)time;
     PtkFileBrowser* file_browser;
 
     // validate vol
@@ -2870,6 +2885,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, unsig
 static bool
 on_dev_menu_keypress(GtkWidget* menu, GdkEventKey* event, void* user_data)
 {
+    (void)user_data;
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(menu));
     if (item)
     {
@@ -3449,6 +3465,7 @@ on_bookmark_device(GtkMenuItem* item, VFSVolume* vol)
 void
 ptk_bookmark_view_update_icons(GtkIconTheme* icon_theme, PtkFileBrowser* file_browser)
 {
+    (void)icon_theme;
     if (!(GTK_IS_WIDGET(file_browser) && file_browser->side_book))
         return;
 
@@ -3836,6 +3853,7 @@ activate_bookmark_item(XSet* sel_set, GtkTreeView* view, PtkFileBrowser* file_br
 void
 ptk_bookmark_view_on_open_reverse(GtkMenuItem* item, PtkFileBrowser* file_browser)
 {
+    (void)item;
     if (!(file_browser && file_browser->side_book))
         return;
     XSet* sel_set = get_selected_bookmark_set(GTK_TREE_VIEW(file_browser->side_book));
@@ -3845,6 +3863,7 @@ ptk_bookmark_view_on_open_reverse(GtkMenuItem* item, PtkFileBrowser* file_browse
 static void
 on_bookmark_model_destroy(void* data, GObject* object)
 {
+    (void)object;
     g_signal_handlers_disconnect_matched(gtk_icon_theme_get_default(),
                                          G_SIGNAL_MATCH_DATA,
                                          0,
@@ -3858,6 +3877,8 @@ static void
 on_bookmark_row_inserted(GtkTreeModel* list, GtkTreePath* tree_path, GtkTreeIter* iter,
                          PtkFileBrowser* file_browser)
 {
+    (void)list;
+    (void)tree_path;
     if (!file_browser)
         return;
 
@@ -3872,6 +3893,8 @@ static void
 on_bookmark_drag_begin(GtkWidget* widget, GdkDragContext* drag_context,
                        PtkFileBrowser* file_browser)
 {
+    (void)widget;
+    (void)drag_context;
     if (!file_browser)
         return;
 
@@ -3888,6 +3911,7 @@ on_bookmark_drag_begin(GtkWidget* widget, GdkDragContext* drag_context,
 static void
 on_bookmark_drag_end(GtkWidget* widget, GdkDragContext* drag_context, PtkFileBrowser* file_browser)
 {
+    (void)drag_context;
     GtkTreeIter it;
     GtkTreeIter it_prev;
     char* set_name;
@@ -4024,6 +4048,8 @@ static void
 on_bookmark_row_activated(GtkTreeView* view, GtkTreePath* path, GtkTreeViewColumn* column,
                           PtkFileBrowser* file_browser)
 {
+    (void)path;
+    (void)column;
     activate_bookmark_item(get_selected_bookmark_set(view), view, file_browser, false);
 }
 
@@ -4178,6 +4204,7 @@ on_bookmark_button_release_event(GtkTreeView* view, GdkEventButton* evt,
 static bool
 on_bookmark_key_press_event(GtkWidget* w, GdkEventKey* event, PtkFileBrowser* file_browser)
 {
+    (void)w;
     unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
                                            GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
 
@@ -4193,6 +4220,7 @@ on_bookmark_key_press_event(GtkWidget* w, GdkEventKey* event, PtkFileBrowser* fi
 static int
 is_row_separator(GtkTreeModel* model, GtkTreeIter* it, PtkFileBrowser* file_browser)
 {
+    (void)file_browser;
     const int is_sep = 0;
     gtk_tree_model_get(model, it, COL_DATA, &is_sep, -1);
     return is_sep;

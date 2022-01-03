@@ -78,13 +78,14 @@ static const int drag_actions[] = {0, 1, 2, 3};
 static void
 dir_unload_thumbnails(const char* path, VFSDir* dir, void* user_data)
 {
+    (void)path;
     vfs_dir_unload_thumbnails(dir, GPOINTER_TO_INT(user_data));
 }
 
 static void
 on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
-
 {
+    (void)user_data;
     int i;
     int n;
     int ibig_icon = -1;
@@ -430,6 +431,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
 static void
 on_date_format_changed(GtkComboBox* widget, FMPrefDlg* data)
 {
+    (void)widget;
     char buf[128];
     const char* etext;
 
@@ -442,6 +444,7 @@ on_date_format_changed(GtkComboBox* widget, FMPrefDlg* data)
 static void
 on_single_click_toggled(GtkWidget* widget, FMPrefDlg* data)
 {
+    (void)widget;
     gtk_widget_set_sensitive(data->single_hover,
                              gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->single_click)));
 }
@@ -449,6 +452,7 @@ on_single_click_toggled(GtkWidget* widget, FMPrefDlg* data)
 static void
 on_show_thumbnail_toggled(GtkWidget* widget, FMPrefDlg* data)
 {
+    (void)widget;
     gtk_widget_set_sensitive(data->max_thumb_size,
                              gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->show_thumbnail)));
     gtk_widget_set_sensitive(data->thumb_label1,

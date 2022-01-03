@@ -145,6 +145,7 @@ seek_path_delayed(GtkEntry* entry, unsigned int delay)
 static bool
 match_func_cmd(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it, void* user_data)
 {
+    (void)user_data;
     char* name = nullptr;
     GtkTreeModel* model = gtk_entry_completion_get_model(completion);
     gtk_tree_model_get(model, it, COL_NAME, &name, -1);
@@ -161,6 +162,7 @@ match_func_cmd(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it,
 static bool
 match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it, void* user_data)
 {
+    (void)user_data;
     char* name = nullptr;
     GtkTreeModel* model = gtk_entry_completion_get_model(completion);
 
@@ -275,6 +277,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
 static void
 on_changed(GtkEntry* entry, void* user_data)
 {
+    (void)user_data;
     GtkEntryCompletion* completion = gtk_entry_get_completion(entry);
     update_completion(entry, completion);
     gtk_entry_completion_complete(gtk_entry_get_completion(GTK_ENTRY(entry)));
@@ -396,6 +399,7 @@ insert_complete(GtkEntry* entry)
 static bool
 on_key_press(GtkWidget* entry, GdkEventKey* evt, EntryData* edata)
 {
+    (void)edata;
     int keymod = (evt->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_SUPER_MASK |
                                 GDK_HYPER_MASK | GDK_META_MASK));
 
@@ -428,6 +432,9 @@ on_key_press(GtkWidget* entry, GdkEventKey* evt, EntryData* edata)
 static bool
 on_insert_prefix(GtkEntryCompletion* completion, char* prefix, GtkWidget* entry)
 {
+    (void)completion;
+    (void)prefix;
+    (void)entry;
     // don't use the default handler because it inserts partial names
     return true;
 }
@@ -436,6 +443,7 @@ static bool
 on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIter* iter,
                   GtkWidget* entry)
 {
+    (void)completion;
     char* path = nullptr;
     gtk_tree_model_get(model, iter, COL_PATH, &path, -1);
     if (path && path[0])
@@ -467,6 +475,8 @@ on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIt
 static bool
 on_focus_in(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
 {
+    (void)evt;
+    (void)user_data;
     GtkEntryCompletion* completion = gtk_entry_completion_new();
     GtkListStore* list = gtk_list_store_new(N_COLS, G_TYPE_STRING, G_TYPE_STRING);
 
@@ -497,6 +507,8 @@ on_focus_in(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
 static bool
 on_focus_out(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
 {
+    (void)evt;
+    (void)user_data;
     g_signal_handlers_disconnect_by_func(entry, (void*)on_changed, nullptr);
     gtk_entry_set_completion(GTK_ENTRY(entry), nullptr);
     return false;
@@ -505,12 +517,14 @@ on_focus_out(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
 static void
 on_protocol_handlers(GtkWidget* widget, PtkFileBrowser* file_browser)
 {
+    (void)widget;
     ptk_handler_show_config(HANDLER_MODE_NET, file_browser, nullptr);
 }
 
 static void
 on_add_bookmark(GtkWidget* widget, PtkFileBrowser* file_browser)
 {
+    (void)widget;
     if (!(file_browser && file_browser->path_bar))
         return;
     const char* text = gtk_entry_get_text(GTK_ENTRY(file_browser->path_bar));
@@ -521,6 +535,7 @@ on_add_bookmark(GtkWidget* widget, PtkFileBrowser* file_browser)
 void
 ptk_path_entry_help(GtkWidget* widget, GtkWidget* parent)
 {
+    (void)widget;
     GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(parent));
     GtkWidget* dlg = gtk_message_dialog_new(
         GTK_WINDOW(parent_win),
@@ -543,6 +558,8 @@ ptk_path_entry_help(GtkWidget* widget, GtkWidget* parent)
 static bool
 on_button_press(GtkWidget* entry, GdkEventButton* evt, void* user_data)
 {
+    (void)entry;
+    (void)user_data;
     if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
         main_window_event(nullptr,
                           event_handler.win_click,
@@ -561,6 +578,7 @@ on_button_press(GtkWidget* entry, GdkEventButton* evt, void* user_data)
 static bool
 on_button_release(GtkEntry* entry, GdkEventButton* evt, void* user_data)
 {
+    (void)user_data;
     if (GDK_BUTTON_RELEASE != evt->type)
         return false;
 
@@ -647,6 +665,10 @@ static void
 on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars, unsigned int n_chars,
                 void* user_data)
 {
+    (void)position;
+    (void)chars;
+    (void)n_chars;
+    (void)user_data;
     const char* text = gtk_entry_buffer_get_text(buf);
     if (!text)
         return;

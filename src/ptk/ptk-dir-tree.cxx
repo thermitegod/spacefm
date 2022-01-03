@@ -184,12 +184,14 @@ ptk_dir_tree_tree_model_init(GtkTreeModelIface* iface)
 static void
 ptk_dir_tree_drag_source_init(GtkTreeDragSourceIface* iface)
 {
+    (void)iface;
     /* FIXME: Unused. Will this cause any problem? */
 }
 
 static void
 ptk_dir_tree_drag_dest_init(GtkTreeDragDestIface* iface)
 {
+    (void)iface;
     /* FIXME: Unused. Will this cause any problem? */
 }
 
@@ -222,6 +224,7 @@ ptk_dir_tree_get_flags(GtkTreeModel* tree_model)
 static int
 ptk_dir_tree_get_n_columns(GtkTreeModel* tree_model)
 {
+    (void)tree_model;
     return N_DIR_TREE_COLS;
 }
 
@@ -433,6 +436,7 @@ ptk_dir_tree_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeI
 static gboolean
 ptk_dir_tree_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
+    (void)tree_model;
     g_return_val_if_fail(iter != nullptr, false);
     PtkDirTreeNode* node = static_cast<PtkDirTreeNode*>(iter->user_data);
     return node->n_children != 0;
@@ -505,6 +509,7 @@ ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIte
 static int
 ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b)
 {
+    (void)tree;
     VFSFileInfo* file1 = a->file;
     VFSFileInfo* file2 = b->file;
 
@@ -683,6 +688,7 @@ ptk_dir_tree_delete_child(PtkDirTree* tree, PtkDirTreeNode* child)
 void
 ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_path)
 {
+    (void)tree_path;
     PtkDirTreeNode* node = static_cast<PtkDirTreeNode*>(iter->user_data);
     ++node->n_expand;
     if (node->n_expand > 1 || node->n_children > 1)
@@ -718,6 +724,7 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
 void
 ptk_dir_tree_collapse_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* path)
 {
+    (void)path;
     PtkDirTreeNode* node = static_cast<PtkDirTreeNode*>(iter->user_data);
     --node->n_expand;
 

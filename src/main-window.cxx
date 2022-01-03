@@ -194,6 +194,8 @@ on_configure_evt_timer(FMMainWindow* main_window)
 static bool
 on_window_configure_event(GtkWindow* window, GdkEvent* event, FMMainWindow* main_window)
 {
+    (void)window;
+    (void)event;
     // use timer to prevent rapid events during resize
     if ((event_handler.win_move->s || event_handler.win_move->ob2_data) &&
         !main_window->configure_evt_timer)
@@ -395,6 +397,7 @@ create_plugins_menu(FMMainWindow* main_window)
 static void
 import_all_plugins(FMMainWindow* main_window)
 {
+    (void)main_window;
     // get potential locations
     char* path;
     GList* paths = nullptr;
@@ -455,6 +458,7 @@ import_all_plugins(FMMainWindow* main_window)
 static void
 on_devices_show(GtkMenuItem* item, FMMainWindow* main_window)
 {
+    (void)item;
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
     if (!file_browser)
@@ -503,6 +507,7 @@ create_devices_menu(FMMainWindow* main_window)
 static void
 on_open_url(GtkWidget* widget, FMMainWindow* main_window)
 {
+    (void)widget;
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
     char* url = xset_get_s("main_save_session");
@@ -513,6 +518,7 @@ on_open_url(GtkWidget* widget, FMMainWindow* main_window)
 static void
 on_find_file_activate(GtkMenuItem* menuitem, void* user_data)
 {
+    (void)menuitem;
     FMMainWindow* main_window = static_cast<FMMainWindow*>(user_data);
     const char* dirs[2];
     PtkFileBrowser* file_browser =
@@ -527,6 +533,7 @@ on_find_file_activate(GtkMenuItem* menuitem, void* user_data)
 static void
 on_open_current_folder_as_root(GtkMenuItem* menuitem, void* user_data)
 {
+    (void)menuitem;
     FMMainWindow* main_window = static_cast<FMMainWindow*>(user_data);
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
@@ -593,6 +600,7 @@ main_window_open_terminal(FMMainWindow* main_window, bool as_root)
 static void
 on_open_terminal_activate(GtkMenuItem* menuitem, void* user_data)
 {
+    (void)menuitem;
     FMMainWindow* main_window = static_cast<FMMainWindow*>(user_data);
     main_window_open_terminal(main_window, false);
 }
@@ -600,6 +608,7 @@ on_open_terminal_activate(GtkMenuItem* menuitem, void* user_data)
 static void
 on_open_root_terminal_activate(GtkMenuItem* menuitem, void* user_data)
 {
+    (void)menuitem;
     FMMainWindow* main_window = static_cast<FMMainWindow*>(user_data);
     main_window_open_terminal(main_window, true);
 }
@@ -607,6 +616,7 @@ on_open_root_terminal_activate(GtkMenuItem* menuitem, void* user_data)
 static void
 on_quit_activate(GtkMenuItem* menuitem, void* user_data)
 {
+    (void)menuitem;
     fm_main_window_delete_event(GTK_WIDGET(user_data), nullptr);
     // fm_main_window_close( GTK_WIDGET( user_data ) );
 }
@@ -693,6 +703,7 @@ update_window_icon(GtkWindow* window, GtkIconTheme* theme)
 static void
 update_window_icons(GtkIconTheme* theme, GtkWindow* window)
 {
+    (void)window;
     g_list_foreach(all_windows, (GFunc)update_window_icon, theme);
 }
 
@@ -711,6 +722,7 @@ on_main_icon()
 static void
 main_design_mode(GtkMenuItem* menuitem, FMMainWindow* main_window)
 {
+    (void)menuitem;
     xset_msg_dialog(
         GTK_WIDGET(main_window),
         0,
@@ -754,6 +766,7 @@ main_window_bookmark_changed(const char* changed_set_name)
 void
 main_window_refresh_all_tabs_matching(const char* path)
 {
+    (void)path;
     // This function actually closes the tabs because refresh doesn't work.
     // dir objects have multiple refs and unreffing them all wouldn't finalize
     // the dir object for unknown reason.
@@ -822,6 +835,7 @@ main_window_update_all_bookmark_views()
 void
 update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser)
 {
+    (void)item;
     // LOG_INFO("update_views_all_windows");
     // do this browser first
     if (!file_browser)
@@ -988,6 +1002,7 @@ focus_panel(GtkMenuItem* item, void* mw, int p)
 void
 show_panels_all_windows(GtkMenuItem* item, FMMainWindow* main_window)
 {
+    (void)item;
     // do this window first
     main_window->panel_change = true;
     show_panels(nullptr, main_window);
@@ -1008,6 +1023,7 @@ show_panels_all_windows(GtkMenuItem* item, FMMainWindow* main_window)
 static void
 show_panels(GtkMenuItem* item, FMMainWindow* main_window)
 {
+    (void)item;
     int p;
     int cur_tabx;
     const char* folder_path;
@@ -1382,6 +1398,8 @@ on_toggle_panelbar(GtkWidget* widget, FMMainWindow* main_window)
 static bool
 on_menu_bar_event(GtkWidget* widget, GdkEvent* event, FMMainWindow* main_window)
 {
+    (void)widget;
+    (void)event;
     rebuild_menus(main_window);
     return false;
 }
@@ -1389,6 +1407,7 @@ on_menu_bar_event(GtkWidget* widget, GdkEvent* event, FMMainWindow* main_window)
 static void
 on_bookmarks_show(GtkMenuItem* item, FMMainWindow* main_window)
 {
+    (void)item;
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
     if (!file_browser)
@@ -1582,6 +1601,7 @@ rebuild_menus(FMMainWindow* main_window)
 static void
 on_main_window_realize(GtkWidget* widget, FMMainWindow* main_window)
 {
+    (void)widget;
     // preset the task manager height for no double-resize on first show
     idle_set_task_height(main_window);
 }
@@ -1864,12 +1884,20 @@ fm_main_window_finalize(GObject* obj)
 static void
 fm_main_window_get_property(GObject* obj, unsigned int prop_id, GValue* value, GParamSpec* pspec)
 {
+    (void)obj;
+    (void)prop_id;
+    (void)value;
+    (void)pspec;
 }
 
 static void
 fm_main_window_set_property(GObject* obj, unsigned int prop_id, const GValue* value,
                             GParamSpec* pspec)
 {
+    (void)obj;
+    (void)prop_id;
+    (void)value;
+    (void)pspec;
 }
 
 static void
@@ -1897,6 +1925,8 @@ fm_main_window_close(FMMainWindow* main_window)
 static void
 on_abort_tasks_response(GtkDialog* dlg, int response, GtkWidget* main_window)
 {
+    (void)dlg;
+    (void)response;
     fm_main_window_close(FM_MAIN_WINDOW(main_window));
 }
 
@@ -1988,6 +2018,7 @@ fm_main_window_store_positions(FMMainWindow* main_window)
 static gboolean
 fm_main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
 {
+    (void)event;
     // LOG_INFO("fm_main_window_delete_event");
 
     FMMainWindow* main_window = FM_MAIN_WINDOW(widget);
@@ -2229,6 +2260,7 @@ main_window_get_counts(PtkFileBrowser* file_browser, int* panel_count, int* tab_
 void
 on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
 {
+    (void)btn;
     PtkFileBrowser* a_browser;
 
     // LOG_INFO("on_close_notebook_page fb={:p}", fmt::ptr(file_browser));
@@ -2339,6 +2371,7 @@ static bool
 notebook_clicked(GtkWidget* widget, GdkEventButton* event,
                  PtkFileBrowser* file_browser) // MOD added
 {
+    (void)widget;
     on_file_browser_panel_change(file_browser,
                                  static_cast<FMMainWindow*>(file_browser->main_window));
     if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
@@ -2440,6 +2473,7 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, FMMainWindow* main_win
 GtkWidget*
 fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_browser)
 {
+    (void)main_window;
     GtkEventBox* evt_box;
     GtkWidget* tab_label;
     GtkWidget* tab_text = nullptr;
@@ -2689,6 +2723,7 @@ fm_main_window_get_current_file_browser(FMMainWindow* main_window)
 static void
 on_preference_activate(GtkMenuItem* menuitem, void* user_data)
 {
+    (void)menuitem;
     FMMainWindow* main_window = static_cast<FMMainWindow*>(user_data);
     fm_main_window_preference(main_window);
 }
@@ -2702,6 +2737,7 @@ fm_main_window_preference(FMMainWindow* main_window)
 static void
 on_about_activate(GtkMenuItem* menuitem, void* user_data)
 {
+    (void)menuitem;
     static GtkWidget* about_dlg = nullptr;
     if (!about_dlg)
     {
@@ -2752,6 +2788,7 @@ fm_main_window_add_new_window(FMMainWindow* main_window)
 static void
 on_new_window_activate(GtkMenuItem* menuitem, void* user_data)
 {
+    (void)menuitem;
     FMMainWindow* main_window = static_cast<FMMainWindow*>(user_data);
 
     autosave_cancel();
@@ -2827,6 +2864,7 @@ set_panel_focus(FMMainWindow* main_window, PtkFileBrowser* file_browser)
 static void
 on_fullscreen_activate(GtkMenuItem* menuitem, FMMainWindow* main_window)
 {
+    (void)menuitem;
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
     if (xset_get_b("main_full"))
@@ -2943,6 +2981,7 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
 static void
 update_window_title(GtkMenuItem* item, FMMainWindow* main_window)
 {
+    (void)item;
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
     if (file_browser)
@@ -2953,6 +2992,7 @@ static void
 on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, unsigned int page_num,
                                void* user_data)
 {
+    (void)page;
     FMMainWindow* main_window = static_cast<FMMainWindow*>(user_data);
     PtkFileBrowser* file_browser;
 
@@ -3044,6 +3084,7 @@ on_file_browser_open_item(PtkFileBrowser* file_browser, const char* path, PtkOpe
 static void
 fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file_browser)
 {
+    (void)main_window;
     if (!(GTK_IS_WIDGET(file_browser) && GTK_IS_STATUSBAR(file_browser->status_bar)))
         return;
 
@@ -3283,6 +3324,11 @@ static bool
 on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, int x, int y, unsigned int time,
                    PtkFileBrowser* file_browser)
 {
+    (void)widget;
+    (void)drag_context;
+    (void)x;
+    (void)y;
+    (void)time;
     GtkNotebook* notebook = GTK_NOTEBOOK(gtk_widget_get_parent(GTK_WIDGET(file_browser)));
     // TODO: Add a timeout here and don't set current page immediately
     int idx = gtk_notebook_page_num(notebook, GTK_WIDGET(file_browser));
@@ -3294,6 +3340,7 @@ static bool
 on_window_button_press_event(GtkWidget* widget, GdkEventButton* event,
                              FMMainWindow* main_window) // sfm
 {
+    (void)widget;
     if (event->type != GDK_BUTTON_PRESS)
         return false;
 
@@ -3316,6 +3363,8 @@ on_window_button_press_event(GtkWidget* widget, GdkEventButton* event,
 static bool
 on_main_window_focus(GtkWidget* main_window, GdkEventFocus* event, void* user_data)
 {
+    (void)event;
+    (void)user_data;
     // this causes a widget not realized loop by running rebuild_menus while
     // rebuild_menus is already running
     // but this unneeded anyway?  cross-window menu changes seem to work ok
@@ -3752,6 +3801,7 @@ static const char* task_names[] =
 void
 on_reorder(GtkWidget* item, GtkWidget* parent)
 {
+    (void)item;
     xset_msg_dialog(
         parent,
         0,
@@ -4493,6 +4543,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
 static void
 on_task_columns_changed(GtkWidget* view, void* user_data)
 {
+    (void)user_data;
     FMMainWindow* main_window = get_task_view_window(view);
     if (!main_window || !view)
         return;
@@ -4540,6 +4591,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
 static void
 on_task_destroy(GtkWidget* view, void* user_data)
 {
+    (void)user_data;
     unsigned int id = g_signal_lookup("columns-changed", G_TYPE_FROM_INSTANCE(view));
     if (id)
     {
@@ -4554,6 +4606,7 @@ on_task_destroy(GtkWidget* view, void* user_data)
 static void
 on_task_column_selected(GtkMenuItem* item, GtkWidget* view)
 {
+    (void)item;
     on_task_columns_changed(view, nullptr);
 }
 
@@ -4902,6 +4955,7 @@ on_task_popup_show(GtkMenuItem* item, FMMainWindow* main_window, char* name2)
 static void
 on_task_popup_errset(GtkMenuItem* item, FMMainWindow* main_window, char* name2)
 {
+    (void)main_window;
     char* name;
     if (item)
         name = (char*)g_object_get_data(G_OBJECT(item), "name");
@@ -4955,6 +5009,8 @@ on_task_popup_errset(GtkMenuItem* item, FMMainWindow* main_window, char* name2)
 static void
 main_task_prepare_menu(FMMainWindow* main_window, GtkWidget* menu, GtkAccelGroup* accel_group)
 {
+    (void)menu;
+    (void)accel_group;
     XSet* set;
     XSet* set_radio;
 
@@ -5019,6 +5075,7 @@ get_selected_task(GtkWidget* view)
 static void
 show_task_dialog(GtkWidget* widget, GtkWidget* view)
 {
+    (void)widget;
     PtkFileTask* ptask = get_selected_task(view);
     if (!ptask)
         return;
@@ -5202,6 +5259,8 @@ static void
 on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn* col,
                       void* user_data)
 {
+    (void)col;
+    (void)user_data;
     GtkTreeModel* model;
     GtkTreeIter it;
     PtkFileTask* ptask;

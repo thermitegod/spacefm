@@ -572,6 +572,7 @@ _locate_desktop_file_recursive(const char* path, const char* desktop_id, bool fi
 static char*
 _locate_desktop_file(const char* dir, const char* unused, const void* desktop_id)
 { // sfm 0.7.8 modified + 0.8.7 modified
+    (void)unused;
     bool found = false;
 
     char* path = g_build_filename(dir, "applications", (const char*)desktop_id, nullptr);
@@ -618,6 +619,7 @@ mime_type_locate_desktop_file(const char* dir, const char* desktop_id)
 static char*
 get_default_action(const char* dir, const char* type, void* user_data)
 {
+    (void)user_data;
     // LOG_INFO("get_default_action( {}, {} )", dir, type);
     // search these files in dir for the first existing default app
     const char* names[] = {"mimeapps.list", "defaults.list"};

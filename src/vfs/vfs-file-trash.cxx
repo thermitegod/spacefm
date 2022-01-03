@@ -136,6 +136,7 @@ Trash::trash(const std::string& path)
 bool
 Trash::restore(const std::string& path)
 {
+    (void)path;
     // NOOP
     return true;
 }

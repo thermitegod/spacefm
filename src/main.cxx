@@ -146,6 +146,7 @@ get_inode_tag()
 static bool
 on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
 {
+    (void)data;
     if (cond & G_IO_IN)
     {
         socklen_t addr_len = 0;
@@ -581,6 +582,7 @@ init_folder()
 static void
 exit_from_signal(int sig)
 {
+    (void)sig;
     gtk_main_quit();
 }
 

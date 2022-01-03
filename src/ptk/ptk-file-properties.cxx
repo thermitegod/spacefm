@@ -180,6 +180,7 @@ on_update_labels(FilePropertiesDialogData* data)
 static void
 on_chmod_btn_toggled(GtkToggleButton* btn, FilePropertiesDialogData* data)
 {
+    (void)data;
     /* Bypass the default handler */
     g_signal_stop_emission_by_name(btn, "toggled");
     /* Block this handler while we are changing the state of buttons,
@@ -214,6 +215,7 @@ on_chmod_btn_toggled(GtkToggleButton* btn, FilePropertiesDialogData* data)
 static bool
 combo_sep(GtkTreeModel* model, GtkTreeIter* it, void* user_data)
 {
+    (void)user_data;
     int i;
     for (i = 2; i > 0; --i)
     {
@@ -708,6 +710,7 @@ gid_from_name(const char* group_name)
 static void
 on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
 {
+    (void)user_data;
     uid_t uid;
     gid_t gid;
 

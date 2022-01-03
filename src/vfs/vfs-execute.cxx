@@ -115,6 +115,9 @@ vfs_exec_on_screen(GdkScreen* screen, const char* work_dir, char** argv, char** 
     SnLauncherContext* ctx = nullptr;
     SnDisplay* display;
     int startup_id_index = -1;
+#else
+    (void)disp_name;
+    (void)use_startup_notify;
 #endif
     extern char** environ;
     int display_index = -1;

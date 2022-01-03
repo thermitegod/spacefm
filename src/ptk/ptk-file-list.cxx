@@ -193,12 +193,14 @@ ptk_file_list_tree_sortable_init(GtkTreeSortableIface* iface)
 static void
 ptk_file_list_drag_source_init(GtkTreeDragSourceIface* iface)
 {
+    (void)iface;
     /* FIXME: Unused. Will this cause any problem? */
 }
 
 static void
 ptk_file_list_drag_dest_init(GtkTreeDragDestIface* iface)
 {
+    (void)iface;
     /* FIXME: Unused. Will this cause any problem? */
 }
 
@@ -317,6 +319,7 @@ ptk_file_list_get_flags(GtkTreeModel* tree_model)
 static int
 ptk_file_list_get_n_columns(GtkTreeModel* tree_model)
 {
+    (void)tree_model;
     return N_FILE_LIST_COLS;
 }
 
@@ -506,6 +509,8 @@ ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTree
 static gboolean
 ptk_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
+    (void)tree_model;
+    (void)iter;
     return false;
 }
 
@@ -549,6 +554,9 @@ ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTre
 static gboolean
 ptk_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* child)
 {
+    (void)tree_model;
+    (void)iter;
+    (void)child;
     return false;
 }
 
@@ -580,6 +588,11 @@ ptk_file_list_set_sort_func(GtkTreeSortable* sortable, int sort_column_id,
                             GtkTreeIterCompareFunc sort_func, void* user_data,
                             GDestroyNotify destroy)
 {
+    (void)sortable;
+    (void)sort_column_id;
+    (void)sort_func;
+    (void)user_data;
+    (void)destroy;
     LOG_WARN("ptk_file_list_set_sort_func: Not supported");
 }
 
@@ -587,6 +600,10 @@ static void
 ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompareFunc sort_func,
                                     void* user_data, GDestroyNotify destroy)
 {
+    (void)sortable;
+    (void)sort_func;
+    (void)user_data;
+    (void)destroy;
     LOG_WARN("ptk_file_list_set_default_sort_func: Not supported");
 }
 
@@ -728,6 +745,7 @@ ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, VFSFileInfo* fi)
 void
 ptk_file_list_file_created(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
 {
+    (void)dir;
     if (!list->show_hidden && vfs_file_info_get_name(file)[0] == '.')
         return;
 
@@ -800,6 +818,7 @@ ptk_file_list_file_created(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
 void
 ptk_file_list_file_deleted(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
 {
+    (void)dir;
     GList* l;
     GtkTreePath* path;
 
@@ -841,6 +860,7 @@ ptk_file_list_file_deleted(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
 void
 ptk_file_list_file_changed(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
 {
+    (void)dir;
     if (!list->show_hidden && vfs_file_info_get_name(file)[0] == '.')
         return;
     GList* l = g_list_find(list->files, file);

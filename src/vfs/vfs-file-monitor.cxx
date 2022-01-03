@@ -241,6 +241,7 @@ vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* use
 static void
 reconnect_fam(void* key, void* value, void* user_data)
 {
+    (void)user_data;
     struct stat file_stat; // skip stat
     VFSFileMonitor* monitor = static_cast<VFSFileMonitor*>(value);
     const char* path = (const char*)key;
@@ -265,6 +266,8 @@ reconnect_fam(void* key, void* value, void* user_data)
 static bool
 find_monitor(void* key, void* value, void* user_data)
 {
+    (void)key;
+    (void)user_data;
     int wd = GPOINTER_TO_INT(user_data);
     VFSFileMonitor* monitor = static_cast<VFSFileMonitor*>(value);
     return (monitor->wd == wd);
@@ -307,6 +310,8 @@ dispatch_event(VFSFileMonitor* monitor, VFSFileMonitorEvent evt, const char* fil
 static bool
 on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data)
 {
+    (void)channel;
+    (void)user_data;
 #define BUF_LEN (1024 * (sizeof(struct inotify_event) + 16))
     char buf[BUF_LEN];
 

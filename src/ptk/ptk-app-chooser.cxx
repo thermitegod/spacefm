@@ -53,6 +53,7 @@ init_list_view(GtkTreeView* view)
 static int
 sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_data)
 {
+    (void)user_data;
     char* name_a;
     int ret = 0;
     gtk_tree_model_get(model, a, COL_APP_NAME, &name_a, -1);
@@ -154,6 +155,7 @@ create_model_from_mime_type(VFSMimeType* mime_type)
 static bool
 on_cmdline_keypress(GtkWidget* widget, GdkEventKey* event, GtkNotebook* notebook)
 {
+    (void)event;
     gtk_widget_set_sensitive(GTK_WIDGET(notebook),
                              gtk_entry_get_text_length(GTK_ENTRY(widget)) == 0);
     return false;
@@ -163,6 +165,9 @@ static void
 on_view_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColumn* col,
                       GtkWidget* dlg)
 {
+    (void)tree_view;
+    (void)path;
+    (void)col;
     GtkBuilder* builder = GTK_BUILDER(g_object_get_data(G_OBJECT(dlg), "builder"));
     GtkWidget* ok = GTK_WIDGET(gtk_builder_get_object(builder, "okbutton"));
     gtk_button_clicked(GTK_BUTTON(ok));
@@ -282,6 +287,8 @@ void
 on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, unsigned int page_num,
                         void* user_data)
 {
+    (void)notebook;
+    (void)page;
     GtkWidget* dlg = GTK_WIDGET(user_data);
 
     GtkBuilder* builder = GTK_BUILDER(g_object_get_data(G_OBJECT(dlg), "builder"));
@@ -368,6 +375,7 @@ app_chooser_dialog_get_set_default(GtkWidget* dlg)
 void
 on_browse_btn_clicked(GtkButton* button, void* user_data)
 {
+    (void)button;
     GtkWidget* parent = GTK_WIDGET(user_data);
     GtkWidget* dlg = gtk_file_chooser_dialog_new(nullptr,
                                                  GTK_WINDOW(parent),
@@ -414,6 +422,7 @@ on_browse_btn_clicked(GtkButton* button, void* user_data)
 static void
 on_dlg_response(GtkDialog* dlg, int id, void* user_data)
 {
+    (void)user_data;
     VFSAsyncTask* task;
     GtkAllocation allocation;
 

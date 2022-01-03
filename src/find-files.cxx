@@ -173,6 +173,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
 static void
 open_dir(char* dir, GList* files, FMMainWindow* w)
 {
+    (void)files;
     fm_main_window_add_new_tab(w, dir);
 }
 
@@ -591,6 +592,7 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
 static void*
 search_thread(VFSAsyncTask* task, FindFile* data)
 {
+    (void)task;
     ssize_t rlen;
     char buf[4096];
     GString* path = g_string_new_len(nullptr, 256);
@@ -644,6 +646,8 @@ search_thread(VFSAsyncTask* task, FindFile* data)
 static void
 on_search_finish(VFSAsyncTask* task, bool cancelled, FindFile* data)
 {
+    (void)task;
+    (void)cancelled;
     finish_search(data);
 }
 
@@ -711,6 +715,7 @@ on_start_search(GtkWidget* btn, FindFile* data)
 static void
 on_stop_search(GtkWidget* btn, FindFile* data)
 {
+    (void)btn;
     if (data->task && !vfs_async_task_is_finished(data->task))
     {
         // see note in vfs-async-task.c: vfs_async_task_real_cancel()
@@ -752,6 +757,7 @@ on_search_again(GtkWidget* btn, FindFile* data)
 static void
 menu_pos(GtkMenu* menu, int* x, int* y, bool* push_in, GtkWidget* btn)
 {
+    (void)menu;
     GtkAllocation allocation;
 
     /* FIXME: I'm not sure if this work well in different WMs */
@@ -774,6 +780,7 @@ add_search_dir(FindFile* data, const char* path)
 static void
 on_add_search_browse(GtkWidget* menu, FindFile* data)
 {
+    (void)menu;
     GtkWidget* dlg = gtk_file_chooser_dialog_new("Select a directory",
                                                  GTK_WINDOW(data->win),
                                                  GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
@@ -795,18 +802,21 @@ on_add_search_browse(GtkWidget* menu, FindFile* data)
 static void
 on_add_search_home(GtkWidget* menu, FindFile* data)
 {
+    (void)menu;
     add_search_dir(data, vfs_user_home_dir());
 }
 
 static void
 on_add_search_desktop(GtkWidget* menu, FindFile* data)
 {
+    (void)menu;
     add_search_dir(data, vfs_user_desktop_dir());
 }
 
 static void
 on_add_search_volumes(GtkWidget* menu, FindFile* data)
 {
+    (void)menu;
     const char* path;
     const GList* vols = vfs_volume_get_all_volumes();
     const GList* l;
@@ -875,6 +885,7 @@ on_add_search_folder(GtkWidget* btn, FindFile* data)
 static void
 on_remove_search_folder(GtkWidget* btn, FindFile* data)
 {
+    (void)btn;
     GtkTreeIter it;
     GtkTreeSelection* sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(data->places_view));
     if (gtk_tree_selection_get_selected(sel, nullptr, &it))
@@ -1027,6 +1038,7 @@ on_view_button_press(GtkTreeView* view, GdkEventButton* evt, FindFile* data)
 void
 on_use_size_lower_toggled(GtkWidget* widget, FindFile* data)
 {
+    (void)widget;
     gtk_widget_set_sensitive(data->size_lower,
                              gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_size_lower)));
     gtk_widget_set_sensitive(data->size_lower_unit,
@@ -1036,6 +1048,7 @@ on_use_size_lower_toggled(GtkWidget* widget, FindFile* data)
 void
 on_use_size_upper_toggled(GtkWidget* widget, FindFile* data)
 {
+    (void)widget;
     gtk_widget_set_sensitive(data->size_upper,
                              gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_size_upper)));
     gtk_widget_set_sensitive(data->size_upper_unit,

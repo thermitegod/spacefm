@@ -1578,6 +1578,8 @@ populate_archive_handlers(HandlerData* hnd, XSet* def_handler_set)
 static void
 on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerData* hnd)
 {
+    (void)widget;
+    (void)drag_context;
     // Regenerating archive handlers list xset
     // Obtaining iterator pointing at first handler
     GtkTreeIter iter;
@@ -2089,6 +2091,8 @@ on_configure_handler_enabled_check(GtkToggleButton* togglebutton, HandlerData* h
 static bool
 on_handlers_key_press(GtkWidget* widget, GdkEventKey* evt, HandlerData* hnd)
 {
+    (void)widget;
+    (void)evt;
     // Current handler hasn't been changed?
     if (!hnd->changed /* was !gtk_widget_get_sensitive( hnd->btn_apply )*/)
         return false;
@@ -2426,6 +2430,8 @@ _cleanup:
 static void
 on_textview_popup(GtkTextView* input, GtkMenu* menu, HandlerData* hnd)
 {
+    (void)input;
+    (void)hnd;
     // uses same xsets as item-prop.c:on_script_popup()
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     XSet* set = xset_get("separator");
@@ -2439,6 +2445,7 @@ on_textview_popup(GtkTextView* input, GtkMenu* menu, HandlerData* hnd)
 static bool
 on_activate_link(GtkLabel* label, char* uri, HandlerData* hnd)
 {
+    (void)label;
     // click apply to save handler
     on_configure_button_press(GTK_BUTTON(hnd->btn_apply), hnd);
     // open in editor
@@ -2521,6 +2528,10 @@ static void
 on_entry_text_insert(GtkEntryBuffer* buffer, unsigned int position, char* chars,
                      unsigned int n_chars, HandlerData* hnd)
 {
+    (void)buffer;
+    (void)position;
+    (void)chars;
+    (void)n_chars;
     if (!hnd->changed)
     {
         hnd->changed = true;
@@ -2538,6 +2549,7 @@ on_entry_text_delete(GtkEntryBuffer* buffer, unsigned int position, unsigned int
 static void
 on_terminal_toggled(GtkToggleButton* togglebutton, HandlerData* hnd)
 {
+    (void)togglebutton;
     if (!hnd->changed)
     {
         hnd->changed = true;
@@ -2548,6 +2560,7 @@ on_terminal_toggled(GtkToggleButton* togglebutton, HandlerData* hnd)
 static void
 on_icon_choose_button_clicked(GtkWidget* widget, HandlerData* hnd)
 {
+    (void)widget;
     // get current icon
     const char* icon = gtk_entry_get_text(GTK_ENTRY(hnd->entry_handler_icon));
     char* new_icon = xset_icon_chooser_dialog(GTK_WINDOW(hnd->dlg), icon);
@@ -2665,6 +2678,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
 static void
 on_archive_default(GtkMenuItem* menuitem, XSet* set)
 {
+    (void)menuitem;
     const char* arcname[] = {"arc_def_open", "arc_def_ex", "arc_def_exto", "arc_def_list"};
     for (unsigned int i = 0; i < G_N_ELEMENTS(arcname); i++)
     {
@@ -2679,6 +2693,7 @@ static GtkWidget*
 add_popup_menuitem(GtkWidget* popup, GtkAccelGroup* accel_group, const char* label, int job,
                    HandlerData* hnd)
 {
+    (void)accel_group;
     GtkWidget* item = gtk_menu_item_new_with_mnemonic(label);
     gtk_container_add(GTK_CONTAINER(popup), item);
     g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_option_cb), (void*)hnd);

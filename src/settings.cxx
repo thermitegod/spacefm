@@ -2556,6 +2556,7 @@ compare_plugin_sets(XSet* a, XSet* b)
 std::vector<XSet*>
 xset_get_plugins(bool included)
 { // return list of plugin sets (included or not ) sorted by menu_label
+    (void)included;
     std::vector<XSet*> plugins;
 
     for (XSet* set: xsets)
@@ -2819,6 +2820,7 @@ struct PluginData
 static void
 on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
 {
+    (void)task;
     XSet* set;
     char* msg;
     // LOG_INFO("on_install_plugin_cb");
@@ -3491,6 +3493,7 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
 static void
 xset_custom_activate(GtkWidget* item, XSet* set)
 {
+    (void)item;
     GtkWidget* parent;
     GtkWidget* task_view = nullptr;
     const char* cwd;
@@ -4066,6 +4069,7 @@ xset_get_keyname(XSet* set, int key_val, int key_mod)
 static bool
 on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
 {
+    (void)widget;
     GList* l;
     int* newkey = (int*)g_object_get_data(G_OBJECT(dlg), "newkey");
     int* newkeymod = (int*)g_object_get_data(G_OBJECT(dlg), "newkeymod");
@@ -5762,6 +5766,7 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set)
 bool
 xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
 {
+    (void)user_data;
     int job = -1;
     XSet* set;
 
@@ -6253,6 +6258,7 @@ multi_input_new(GtkScrolledWindow* scrolled, const char* text)
 static bool
 on_input_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
 {
+    (void)widget;
     if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter)
     {
         gtk_dialog_response(GTK_DIALOG(dlg), GTK_RESPONSE_OK);
@@ -6632,6 +6638,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
 static char*
 xset_color_dialog(GtkWidget* parent, char* title, char* defcolor)
 {
+    (void)parent;
     GdkRGBA color;
     char* scolor = nullptr;
     GtkWidget* dlg = gtk_color_chooser_dialog_new(title, nullptr);

@@ -294,11 +294,19 @@ vfs_dir_finalize(GObject* obj)
 static void
 vfs_dir_get_property(GObject* obj, unsigned int prop_id, GValue* value, GParamSpec* pspec)
 {
+    (void)obj;
+    (void)prop_id;
+    (void)value;
+    (void)pspec;
 }
 
 static void
 vfs_dir_set_property(GObject* obj, unsigned int prop_id, const GValue* value, GParamSpec* pspec)
 {
+    (void)obj;
+    (void)prop_id;
+    (void)value;
+    (void)pspec;
 }
 
 static GList*
@@ -322,6 +330,7 @@ vfs_dir_find_file(VFSDir* dir, const char* file_name, VFSFileInfo* file)
 void
 vfs_dir_emit_file_created(VFSDir* dir, const char* file_name, bool force)
 {
+    (void)force;
     // Ignore avoid_changes for creation of files
     // if ( !force && dir->avoid_changes )
     //    return;
@@ -477,6 +486,7 @@ vfs_dir_new(const char* path)
 void
 on_list_task_finished(VFSAsyncTask* task, bool is_cancelled, VFSDir* dir)
 {
+    (void)task;
     g_object_unref(dir->task);
     dir->task = nullptr;
     g_signal_emit(dir, signals[FILE_LISTED_SIGNAL], 0, is_cancelled);
@@ -590,6 +600,7 @@ vfs_dir_load(VFSDir* dir)
 static void*
 vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
 {
+    (void)task;
     const char* file_name;
     char* full_path;
 
@@ -697,6 +708,8 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
 static void
 update_changed_files(void* key, void* data, void* user_data)
 {
+    (void)key;
+    (void)user_data;
     VFSDir* dir = static_cast<VFSDir*>(data);
 
     if (dir->changed_files)
@@ -722,6 +735,8 @@ update_changed_files(void* key, void* data, void* user_data)
 static void
 update_created_files(void* key, void* data, void* user_data)
 {
+    (void)key;
+    (void)user_data;
     VFSDir* dir = static_cast<VFSDir*>(data);
 
     if (dir->created_files)
@@ -771,6 +786,7 @@ update_created_files(void* key, void* data, void* user_data)
 static bool
 notify_file_change(void* user_data)
 {
+    (void)user_data;
     g_hash_table_foreach(dir_hash, update_changed_files, nullptr);
     g_hash_table_foreach(dir_hash, update_created_files, nullptr);
     /* remove the timeout */
@@ -793,6 +809,7 @@ static void
 vfs_dir_monitor_callback(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char* file_name,
                          void* user_data)
 {
+    (void)fm;
     VFSDir* dir = static_cast<VFSDir*>(user_data);
 
     switch (event)
@@ -815,6 +832,7 @@ vfs_dir_monitor_callback(VFSFileMonitor* fm, VFSFileMonitorEvent event, const ch
 static void
 reload_icons(const char* path, VFSDir* dir, void* user_data)
 {
+    (void)user_data;
     GList* l;
     for (l = dir->file_list; l; l = l->next)
     {
@@ -842,6 +860,8 @@ reload_icons(const char* path, VFSDir* dir, void* user_data)
 static void
 on_theme_changed(GtkIconTheme* icon_theme, void* user_data)
 {
+    (void)icon_theme;
+    (void)user_data;
     g_hash_table_foreach(dir_hash, (GHFunc)reload_icons, nullptr);
 }
 
@@ -897,6 +917,8 @@ vfs_dir_get_by_path(const char* path)
 static void
 reload_mime_type(char* key, VFSDir* dir, void* user_data)
 {
+    (void)key;
+    (void)user_data;
     GList* l;
     VFSFileInfo* file;
 
@@ -923,6 +945,7 @@ reload_mime_type(char* key, VFSDir* dir, void* user_data)
 static void
 on_mime_type_reload(void* user_data)
 {
+    (void)user_data;
     if (!dir_hash)
         return;
     // LOG_DEBUG("reload mime-type");
@@ -1003,6 +1026,7 @@ static VFSDir* mime_dir = nullptr;
 static bool
 on_mime_change_timer(void* user_data)
 {
+    (void)user_data;
     std::string command;
 
     // LOG_INFO("MIME-UPDATE on_timer");
@@ -1022,6 +1046,7 @@ on_mime_change_timer(void* user_data)
 static void
 mime_change(void* user_data)
 {
+    (void)user_data;
     if (mime_change_timer)
     {
         // timer is already running, so ignore request

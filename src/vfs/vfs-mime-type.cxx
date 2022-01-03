@@ -45,6 +45,7 @@ struct VFSMimeReloadCbEnt
 static bool
 vfs_mime_type_reload(void* user_data)
 {
+    (void)user_data;
     GList* l;
     /* FIXME: process mime database reloading properly. */
     /* Remove all items in the hash table */
@@ -71,6 +72,8 @@ static void
 on_mime_cache_changed(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char* file_name,
                       void* user_data)
 {
+    (void)fm;
+    (void)file_name;
     MimeCache* cache = static_cast<MimeCache*>(user_data);
     switch (event)
     {
@@ -339,6 +342,7 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
 static void
 free_cached_icons(void* key, void* value, void* user_data)
 {
+    (void)key;
     VFSMimeType* mime_type = static_cast<VFSMimeType*>(value);
     bool big = GPOINTER_TO_INT(user_data);
     if (big)
@@ -516,6 +520,8 @@ vfs_mime_type_add_action(VFSMimeType* mime_type, const char* desktop_id, char** 
 static void
 on_icon_theme_changed(GtkIconTheme* icon_theme, void* user_data)
 {
+    (void)icon_theme;
+    (void)user_data;
     /* reload_mime_icons */
     g_rw_lock_reader_lock(&mime_hash_lock);
 
