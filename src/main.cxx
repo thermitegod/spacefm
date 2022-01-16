@@ -46,9 +46,6 @@
 #include "logger.hxx"
 #include "utils.hxx"
 
-// bool startup_mode = true;  //MOD
-// bool design_mode = true;  //MOD
-
 enum SocketEvent
 {
     CMD_OPEN = 1,
@@ -75,8 +72,6 @@ static int sock;
 static GIOChannel* io_channel = nullptr;
 
 static bool socket_daemon = false; // sfm
-
-static char* default_files[2] = {nullptr, nullptr};
 
 struct CliFlags
 {
@@ -598,6 +593,9 @@ exit_from_signal(int sig)
 static void
 init_daemon()
 {
+    if (daemon_initialized)
+        return;
+
     init_folder();
 
     signal(SIGPIPE, SIG_IGN);
@@ -712,17 +710,14 @@ handle_parsed_commandline_args()
     FMMainWindow* main_window = nullptr;
     char** file;
     bool ret = true;
-    XSet* set;
-    struct stat statbuf;
+
+    char* default_files[2] = {nullptr, nullptr};
 
     app_settings.load_saved_tabs = !cli_flags.no_tabs;
 
-    // If no files are specified, open home dir by defualt.
+    // no files were specified from cli
     if (G_LIKELY(!cli_flags.files))
-    {
         cli_flags.files = default_files;
-        // files[0] = (char*)vfs_user_home_dir();
-    }
 
     // get the last active window on this desktop, if available
     if (cli_flags.new_tab || cli_flags.reuse_tab)
@@ -732,25 +727,28 @@ handle_parsed_commandline_args()
         //               new_tab ? "new_tab" : "", reuse_tab ? "reuse_tab" : "");
     }
 
-    if (cli_flags.find_files) /* find files */
+    if (cli_flags.find_files)
     {
+        // find files
         init_folder();
         fm_find_files((const char**)cli_flags.files);
         cli_flags.find_files = false;
     }
-    else /* open files/directories */
+    else
     {
-        if (cli_flags.daemon_mode && !daemon_initialized)
+        // open files/directories
+        if (cli_flags.daemon_mode)
             init_daemon();
         else if (cli_flags.files != default_files)
         {
-            /* open files passed in command line arguments */
+            // open files passed in command line arguments
             ret = false;
             for (file = cli_flags.files; *file; ++file)
             {
                 char* real_path;
 
-                if (!**file) /* skip empty string */
+                // skip empty string
+                if (!**file)
                     continue;
 
                 real_path = dup_to_absolute_file_path(file);
@@ -762,6 +760,7 @@ handle_parsed_commandline_args()
                 }
                 else if (std::filesystem::exists(real_path))
                 {
+                    struct stat statbuf;
                     if (stat(real_path, &statbuf) == 0 && S_ISBLK(statbuf.st_mode))
                     {
                         // open block device eg /dev/sda1
@@ -792,9 +791,8 @@ handle_parsed_commandline_args()
                 }
                 else
                 {
-                    char* err_msg = g_strdup_printf("%s:\n\n%s", "File doesn't exist", real_path);
+                    std::string err_msg = fmt::format("File doesn't exist:\n\n{}", real_path);
                     ptk_show_error(nullptr, "Error", err_msg);
-                    g_free(err_msg);
                 }
                 g_free(real_path);
             }
@@ -818,6 +816,7 @@ handle_parsed_commandline_args()
                 if (!gtk_widget_get_visible(main_window->panel[cli_flags.panel - 1]))
                 {
                     // show panel
+                    XSet* set;
                     set = xset_get_panel(cli_flags.panel, "show");
                     set->b = XSET_B_TRUE;
                     show_panels_all_windows(nullptr, main_window);
@@ -826,6 +825,7 @@ handle_parsed_commandline_args()
             }
         }
     }
+
     // LOG_INFO("    handle_parsed_commandline_args mw = {:p}", main_window);
 
     if (cli_flags.files != default_files)
