@@ -848,9 +848,6 @@ main(int argc, char* argv[])
 {
     SpaceFM::Logger::Init();
 
-    bool run = false;
-    GError* err = nullptr;
-
     // load spacefm.conf
     load_conf();
 
@@ -874,7 +871,8 @@ main(int argc, char* argv[])
         }
     }
 
-    /* initialize GTK+ and parse the command line arguments */
+    // initialize GTK+ and parse the command line arguments
+    GError* err = nullptr;
     if (G_UNLIKELY(!gtk_init_with_args(&argc, &argv, "", opt_entries, nullptr, &err)))
     {
         LOG_INFO("{}", err->message);
@@ -902,18 +900,21 @@ main(int argc, char* argv[])
         return EXIT_SUCCESS;
     }
 
-    /* Initialize multithreading  //sfm moved below parse arguments
-         No matter we use threads or not, it's safer to initialize this earlier. */
+    // Initialize multithreading
+    // No matter we use threads or not, it's safer to initialize this earlier.
 #ifdef _DEBUG_THREAD
     gdk_threads_set_lock_functions(_debug_gdk_threads_enter, _debug_gdk_threads_leave);
 #endif
 
-    /* ensure that there is only one instance of spacefm.
-         if there is an existing instance, command line arguments
-         will be passed to the existing instance, and exit() will be called here.  */
+    // ensure that there is only one instance of spacefm.
+    // if there is an existing instance, command line arguments
+    // will be passed to the existing instance, and exit() will be called here.
     single_instance_check();
+    // If we reach this point, we are the first instance.
+    // Subsequent processes will exit() inside single_instance_check
+    // and won't reach here.
 
-    /* initialize the file alteration monitor */
+    // initialize the file alteration monitor
     if (G_UNLIKELY(!vfs_file_monitor_init()))
     {
         ptk_show_error(nullptr,
@@ -931,28 +932,25 @@ main(int argc, char* argv[])
     std::asctime(std::localtime(&epoch));
     srand48(epoch);
 
-    /* Initialize our mime-type system */
+    // Initialize our mime-type system
     vfs_mime_type_init();
 
-    /* load config file */
-    // MOD was before vfs_file_monitor_init
+    // load config file
     load_settings(cli_flags.config_dir);
 
     // start autosave thread
     autosave_init();
 
-    /* If we reach this point, we are the first instance.
-     * Subsequent processes will exit() inside single_instance_check and won't reach here.
-     */
-
     main_window_event(nullptr, nullptr, "evt_start", 0, 0, nullptr, 0, 0, 0, false);
 
-    /* handle the parsed result of command line args */
-    run = handle_parsed_commandline_args();
-    app_settings.load_saved_tabs = true;
+    // handle the parsed result of command line args
+    if (handle_parsed_commandline_args())
+    {
+        app_settings.load_saved_tabs = true;
 
-    if (run) /* run the main loop */
+        // run the main loop
         gtk_main();
+    }
 
     main_window_event(nullptr, nullptr, "evt_exit", 0, 0, nullptr, 0, 0, 0, false);
 
