@@ -2463,8 +2463,6 @@ clean_plugin_mirrors()
     // remove plugin-data for non-existent xsets
     const char* name;
     char* command;
-    char* stdout;
-    char* stderr;
     GDir* dir;
     char* path = g_build_filename(xset_get_config_dir(), "plugin-data", nullptr);
 _redo:
@@ -2476,15 +2474,10 @@ _redo:
             if (strlen(name) == 13 && g_str_has_prefix(name, "cstm_") && !xset_is(name))
             {
                 g_dir_close(dir);
-                // FIXME - this and all the of other 'rm -rf' look like a bad idea
-                std::string command = fmt::format("rm -rf {}/{}", path, name);
-                stderr = stdout = nullptr;
-                print_command(command);
-                g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
-                if (stderr)
-                    g_free(stderr);
-                if (stdout)
-                    g_free(stdout);
+
+                std::string plugin_path = fmt::format("{}/{}", path, name);
+                std::filesystem::remove_all(plugin_path);
+                LOG_INFO("Removed {}/{}", path, name);
                 goto _redo;
             }
         }
@@ -3366,9 +3359,8 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 _rmtmp_error:
     if (!set->plugin)
     {
-        std::string command = fmt::format("rm -rf {}", bash_quote(plug_dir));
-        print_command(command);
-        g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
+        std::filesystem::remove_all(plug_dir);
+        LOG_INFO("Removed {}", plug_dir);
     }
 _export_error:
     g_free(plug_dir);
@@ -3734,8 +3726,6 @@ xset_custom_activate(GtkWidget* item, XSet* set)
 void
 xset_custom_delete(XSet* set, bool delete_next)
 {
-    std::string command;
-
     if (set->menu_style == XSET_MENU_SUBMENU && set->child)
     {
         XSet* set_child = xset_get(set->child);
@@ -3751,18 +3741,20 @@ xset_custom_delete(XSet* set, bool delete_next)
     if (set == set_clipboard)
         set_clipboard = nullptr;
 
-    char* path1 = g_build_filename(xset_get_config_dir(), "scripts", set->name, nullptr);
-    char* path2 = g_build_filename(xset_get_config_dir(), "plugin-data", set->name, nullptr);
-    if (std::filesystem::exists(path1) || std::filesystem::exists(path2))
-        command = fmt::format("rm -rf {} {}", path1, path2);
-
-    g_free(path1);
-    g_free(path2);
-    if (!command.empty())
+    std::string path1 = g_build_filename(xset_get_config_dir(), "scripts", set->name, nullptr);
+    std::string path2 = g_build_filename(xset_get_config_dir(), "plugin-data", set->name, nullptr);
+    if (std::filesystem::exists(path1))
     {
-        print_command(command);
-        g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
+        std::filesystem::remove_all(path1);
+        LOG_INFO("Removed {}", path1);
     }
+
+    if (std::filesystem::exists(path2))
+    {
+        std::filesystem::remove_all(path2);
+        LOG_INFO("Removed {}", path2);
+    }
+
     xset_remove(set);
 }
 

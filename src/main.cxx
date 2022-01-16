@@ -339,9 +339,9 @@ handle_parsed_commandline_args()
 static void
 tmp_clean()
 {
-    std::string command = fmt::format("rm -rf {}", xset_get_user_tmp_dir());
-    print_command(command);
-    g_spawn_command_line_async(command.c_str(), nullptr);
+    std::string tmp = xset_get_user_tmp_dir();
+    std::filesystem::remove_all(tmp);
+    LOG_INFO("Removed {}", tmp);
 }
 
 int
