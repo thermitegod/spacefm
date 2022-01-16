@@ -1,7 +1,7 @@
 project(
   'spacefm', ['c', 'cpp'],
   version : '3.0.0-dev',
-  license : 'GPL2 LGPL',
+  license : 'GPL3',
   default_options : [
     'cpp_std=c++20',
     'warning_level=3',
