@@ -7540,8 +7540,6 @@ xset_defaults()
 {
     XSet* set;
 
-    mrand48();
-
     // set_last must be set (to anything)
     set_last = xset_get("separator");
     set_last->menu_style = XSET_MENU_SEP;

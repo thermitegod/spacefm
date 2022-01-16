@@ -925,6 +925,12 @@ main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
+    // Seed RNG
+    // using the current time is a good enough seed
+    std::time_t epoch = std::time(nullptr);
+    std::asctime(std::localtime(&epoch));
+    srand48(epoch);
+
     /* Initialize our mime-type system */
     vfs_mime_type_init();
 
