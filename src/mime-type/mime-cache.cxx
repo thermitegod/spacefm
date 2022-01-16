@@ -522,7 +522,7 @@ mime_cache_lookup_glob(MimeCache* cache, const char* filename, int* glob_len)
     int max_glob_len = 0;
 
     /* entry size is changed in mime.cache 1.1 */
-    size_t entry_size = cache->has_str_weight ? 12 : 8;
+    std::size_t entry_size = cache->has_str_weight ? 12 : 8;
 
     for (unsigned int i = 0; i < cache->n_globs; ++i)
     {

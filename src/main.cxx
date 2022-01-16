@@ -608,7 +608,7 @@ dup_to_absolute_file_path(char** file)
     char* file_path;
     char* real_path;
     void* cwd_path;
-    const size_t cwd_size = PATH_MAX;
+    const std::size_t cwd_size = PATH_MAX;
 
     if (g_str_has_prefix(*file, "file:")) /* It's a URI */
     {

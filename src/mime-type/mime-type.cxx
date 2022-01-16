@@ -258,7 +258,7 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
 }
 
 static char*
-parse_xml_icon(const char* buf, size_t len, bool is_local)
+parse_xml_icon(const char* buf, std::size_t len, bool is_local)
 { // Note: This function modifies contents of buf
     char* icon_tag = nullptr;
 
@@ -307,13 +307,13 @@ parse_xml_icon(const char* buf, size_t len, bool is_local)
 }
 
 static char*
-parse_xml_desc(const char* buf, size_t len, const char* locale)
+parse_xml_desc(const char* buf, std::size_t len, const char* locale)
 {
     const char* buf_end = buf + len;
     const char* comment = nullptr;
     const char* comment_end;
     const char* eng_comment;
-    size_t comment_len = 0;
+    std::size_t comment_len = 0;
     static const char end_comment_tag[] = "</comment>";
 
     eng_comment = g_strstr_len(buf, len, "<comment>"); /* default English comment */
@@ -324,7 +324,7 @@ parse_xml_desc(const char* buf, size_t len, const char* locale)
     comment_end = g_strstr_len(eng_comment, len, end_comment_tag); /* find </comment> */
     if (G_UNLIKELY(!comment_end))
         return nullptr;
-    size_t eng_comment_len = comment_end - eng_comment;
+    std::size_t eng_comment_len = comment_end - eng_comment;
 
     if (G_LIKELY(locale))
     {
