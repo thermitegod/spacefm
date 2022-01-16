@@ -172,12 +172,21 @@ sources = [
   'src/vfs/vfs-volume.cxx',
 ]
 
+# Git current commit
+git_version_h = vcs_tag(
+  command : ['git', 'describe', '--tags'],
+  input : 'src/git-version.h.in',
+  output :'git-version.h',
+  replace_string:'@GIT_VERSION@',
+)
+
 target_name = 'spacefm'
 target_type = 'executable'
 
 spacefm = build_target(
   target_name,
   sources,
+  git_version_h,
   target_type: target_type,
   include_directories: incdir,
   install : true,

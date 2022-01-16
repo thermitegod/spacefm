@@ -35,6 +35,8 @@
 #include "ptk/ptk-app-chooser.hxx"
 #include "ptk/ptk-location-view.hxx"
 
+#include "git-version.h"
+
 #include "autosave.hxx"
 #include "find-files.hxx"
 #include "pref-dialog.hxx"
@@ -898,8 +900,7 @@ main(int argc, char* argv[])
     // --version
     if (cli_flags.version_opt)
     {
-        std::cout << fmt::format("{} {} Copyright (C) 2022", PACKAGE_NAME_FANCY, PACKAGE_VERSION)
-                  << std::endl;
+        std::cout << fmt::format("{} {}", PACKAGE_NAME_FANCY, GIT_VERSION) << std::endl;
         return EXIT_SUCCESS;
     }
 
