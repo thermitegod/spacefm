@@ -8338,10 +8338,11 @@ xset_defaults()
     // Tasks
     set = xset_set("main_tasks", "lbl", "_Task Manager");
     set->menu_style = XSET_MENU_SUBMENU;
-    xset_set_set(set,
-                 XSET_SET_SET_DESC,
-                 "task_show_manager task_hide_manager sep_t1 task_columns task_popups task_errors "
-                 "task_queue");
+    xset_set_set(
+        set,
+        XSET_SET_SET_DESC,
+        "task_show_manager task_hide_manager separator task_columns task_popups task_errors "
+        "task_queue");
 
     set = xset_set("task_col_status", "lbl", "_Status");
     set->menu_style = XSET_MENU_CHECK;
@@ -8453,14 +8454,15 @@ xset_defaults()
         XSET_SET_SET_DESC,
         "task_col_count task_col_path task_col_file task_col_to task_col_progress task_col_total "
         "task_col_started task_col_elapsed task_col_curspeed task_col_curest task_col_avgspeed "
-        "task_col_avgest sep_t2 task_col_reorder");
+        "task_col_avgest separator task_col_reorder");
 
     set = xset_set("task_popups", "lbl", "_Popups");
     set->menu_style = XSET_MENU_SUBMENU;
-    xset_set_set(set,
-                 XSET_SET_SET_DESC,
-                 "task_pop_all task_pop_top task_pop_above task_pop_stick sep_t6 task_pop_detail "
-                 "task_pop_over task_pop_err");
+    xset_set_set(
+        set,
+        XSET_SET_SET_DESC,
+        "task_pop_all task_pop_top task_pop_above task_pop_stick separator task_pop_detail "
+        "task_pop_over task_pop_err");
 
     set = xset_set("task_pop_all", "lbl", "Popup _All Tasks");
     set->menu_style = XSET_MENU_CHECK;
