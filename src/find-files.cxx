@@ -304,7 +304,7 @@ get_date_offset(GtkCalendar* calendar)
 
     g_date_free(date);
     g_date_free(today);
-    return ABS(offset);
+    return std::abs(offset);
 }
 
 static char**

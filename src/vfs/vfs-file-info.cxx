@@ -258,7 +258,7 @@ vfs_file_info_get_big_icon(VFSFileInfo* fi)
         else
             w = h = 0;
 
-        if (ABS(MAX(w, h) - icon_size) > 2)
+        if (std::abs(std::max(w, h) - icon_size) > 2)
         {
             char* icon_name = nullptr;
             if (fi->big_thumbnail)
