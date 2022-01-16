@@ -66,8 +66,6 @@ struct VFSFileInfo
     std::atomic<unsigned int> n_ref{0};
 };
 
-void vfs_file_info_set_utf8_filename(bool is_utf8);
-
 VFSFileInfo* vfs_file_info_new();
 VFSFileInfo* vfs_file_info_ref(VFSFileInfo* fi);
 void vfs_file_info_unref(VFSFileInfo* fi);
