@@ -23,7 +23,6 @@
 #include "vfs/vfs-file-info.hxx"
 
 static int big_thumb_size = 48, small_thumb_size = 20;
-static const char* desktop_dir = nullptr; // MOD added
 
 VFSFileInfo*
 vfs_file_info_new()
@@ -706,15 +705,13 @@ vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
     /*if ( G_LIKELY(fi->type) && G_UNLIKELY(fi->type->name, "application/x-desktop") ) */
     if (G_UNLIKELY(g_str_has_suffix(fi->name, ".desktop")))
     {
-        if (!desktop_dir)
-            desktop_dir = vfs_user_desktop_dir();
         char* file_dir = g_path_get_dirname(file_path);
 
         fi->flags = (VFSFileInfoFlag)(fi->flags | VFS_FILE_INFO_DESKTOP_ENTRY);
         VFSAppDesktop* desktop = vfs_app_desktop_new(file_path);
 
         // MOD  display real filenames of .desktop files not in desktop directory
-        if (desktop_dir && !strcmp(file_dir, desktop_dir))
+        if (!strcmp(file_dir, vfs_user_desktop_dir()))
         {
             if (vfs_app_desktop_get_disp_name(desktop))
             {
