@@ -149,6 +149,7 @@ sources = [
   'src/main-window.cxx',
   'src/pref-dialog.cxx',
   'src/settings.cxx',
+  'src/socket.cxx',
   'src/utils.cxx',
   'src/window-reference.cxx',
 
