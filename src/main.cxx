@@ -16,7 +16,8 @@
 
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <sys/sysmacros.h>
+
+#include <linux/kdev_t.h>
 
 #include "main-window.hxx"
 
@@ -136,12 +137,12 @@ get_inode_tag()
     struct stat stat_buf;
 
     const char* path = vfs_user_home_dir();
-    if (!path || stat(path, &stat_buf) == -1)
+    if (stat(path, &stat_buf) == -1)
         return g_strdup_printf("%d=", getuid());
-    return g_strdup_printf("%d=%d:%d-%ld",
+    return g_strdup_printf("%d=%lu:%lu-%ld",
                            getuid(),
-                           major(stat_buf.st_dev),
-                           minor(stat_buf.st_dev),
+                           MAJOR(stat_buf.st_dev),
+                           MINOR(stat_buf.st_dev),
                            stat_buf.st_ino);
 }
 

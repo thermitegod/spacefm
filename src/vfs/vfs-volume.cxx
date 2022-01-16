@@ -57,8 +57,8 @@ static bool global_inhibit_auto = false;
 
 struct devmount_t
 {
-    unsigned int major;
-    unsigned int minor;
+    dev_t major;
+    dev_t minor;
     char* mount_points;
     char* fstype;
     GList* mounts;
@@ -938,8 +938,8 @@ info_mount_points(device_t* device)
 {
     GList* mounts = nullptr;
 
-    unsigned int dmajor = MAJOR(device->devnum);
-    unsigned int dminor = MINOR(device->devnum);
+    dev_t dmajor = MAJOR(device->devnum);
+    dev_t dminor = MINOR(device->devnum);
 
     // if we have the mount point list, use this instead of reading mountinfo
     if (devmounts)
@@ -978,7 +978,7 @@ info_mount_points(device_t* device)
     {
         unsigned int mount_id;
         unsigned int parent_id;
-        unsigned int major, minor;
+        dev_t major, minor;
         char encoded_root[PATH_MAX];
         char encoded_mount_point[PATH_MAX];
         char* mount_point;
@@ -988,7 +988,7 @@ info_mount_points(device_t* device)
             continue;
 
         if (sscanf(lines[n],
-                   "%d %d %d:%d %s %s",
+                   "%d %d %lu:%lu %s %s",
                    &mount_id,
                    &parent_id,
                    &major,
@@ -1378,7 +1378,7 @@ device_show_info(device_t* device, std::string& info)
     // clang-format off
     info.append(fmt::format("Showing information for {}\n", device->devnode));
     info.append(fmt::format("  native-path:                 {}\n", device->native_path));
-    info.append(fmt::format("  device:                      {}:{}\n", (unsigned int)MAJOR(device->devnum), (unsigned int)MINOR(device->devnum)));
+    info.append(fmt::format("  device:                      {}:{}\n", MAJOR(device->devnum), MINOR(device->devnum)));
     info.append(fmt::format("  device-file:                 {}\n", device->devnode));
     info.append(fmt::format("    presentation:              {}\n", device->devnode));
     if (device->device_by_id)
@@ -1521,7 +1521,7 @@ parse_mounts(bool report)
     {
         unsigned int mount_id;
         unsigned int parent_id;
-        unsigned int major, minor;
+        dev_t major, minor;
         char encoded_root[PATH_MAX];
         char encoded_mount_point[PATH_MAX];
         char* mount_point;
@@ -1531,7 +1531,7 @@ parse_mounts(bool report)
             continue;
 
         if (sscanf(lines[n],
-                   "%d %d %d:%d %s %s",
+                   "%d %d %lu:%lu %s %s",
                    &mount_id,
                    &parent_id,
                    &major,
@@ -1774,8 +1774,8 @@ parse_mounts(bool report)
                 {
                     LOG_INFO("special mount changed: {} ({}:{}) on {}",
                              volume->device_file,
-                             (unsigned int)MAJOR(volume->devnum),
-                             (unsigned int)MINOR(volume->devnum),
+                             MAJOR(volume->devnum),
+                             MINOR(volume->devnum),
                              devmount->mount_points);
                     vfs_volume_device_added(volume, false); // frees volume if needed
                 }
@@ -2120,9 +2120,7 @@ vfs_volume_set_info(VFSVolume* volume)
         disp_fstype = g_strdup(volume->fs_type); // g_strdup_printf( "-%s", volume->fs_type );
     else
         disp_fstype = g_strdup("");
-    disp_devnum = g_strdup_printf("%u:%u",
-                                  (unsigned int)MAJOR(volume->devnum),
-                                  (unsigned int)MINOR(volume->devnum));
+    disp_devnum = g_strdup_printf("%lu:%lu", MAJOR(volume->devnum), MINOR(volume->devnum));
 
     char* fmt = xset_get_s("dev_dispname");
     if (!fmt)
@@ -3150,8 +3148,8 @@ vfs_volume_device_info(VFSVolume* vol)
     {
         LOG_WARN("No udev device for device {} ({}:{})",
                  vol->device_file,
-                 (unsigned int)MAJOR(vol->devnum),
-                 (unsigned int)MINOR(vol->devnum));
+                 MAJOR(vol->devnum),
+                 MINOR(vol->devnum));
         info = "( no udev device )";
         return info;
     }
@@ -3712,8 +3710,8 @@ vfs_volume_nonblock_removed(dev_t devnum)
             volume = VFS_VOLUME(l->data);
             LOG_INFO("special mount removed: {} ({}:{}) on {}",
                      volume->device_file,
-                     (unsigned int)MAJOR(volume->devnum),
-                     (unsigned int)MINOR(volume->devnum),
+                     MAJOR(volume->devnum),
+                     MINOR(volume->devnum),
                      volume->mount_point);
             volumes = g_list_remove(volumes, volume);
             call_callbacks(volume, VFS_VOLUME_REMOVED);
