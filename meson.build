@@ -223,7 +223,7 @@ spacefm = build_target(
   cpp_pch: 'src/pch/cxx_pch.hxx',
 )
 
-install_data('src/spacefm-auth', install_dir : bindir)
+install_data('scripts/spacefm-auth', install_dir : bindir)
 install_data('etc/spacefm.conf', install_dir : sysconfdir / 'spacefm')
 
 install_subdir('data/applications', install_dir : datadir)
