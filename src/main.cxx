@@ -380,7 +380,7 @@ single_instance_check()
     }
 
     /* There is no existing server, and we are in the first instance. */
-    unlink(addr.sun_path); /* delete old socket file if it exists. */
+    std::filesystem::remove(addr.sun_path); /* delete old socket file if it exists. */
     int reuse = 1;
     setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
     if (bind(sock, (struct sockaddr*)&addr, addr_len) == -1)
@@ -417,7 +417,7 @@ single_instance_finalize()
     close(sock);
 
     get_socket_name(lock_file, sizeof(lock_file));
-    unlink(lock_file);
+    std::filesystem::remove(lock_file);
 }
 
 static void

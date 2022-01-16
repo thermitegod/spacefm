@@ -371,7 +371,7 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
         return false;
     }
 
-    int result = 0;
+    bool result = true;
     if (S_ISDIR(file_stat.st_mode))
     {
         if (check_dest_in_src(task, src_file))
@@ -388,9 +388,12 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
         }
 
         if (!dest_exists)
-            result = mkdir(dest_file, file_stat.st_mode | 0700);
+        {
+            result = std::filesystem::create_directories(dest_file);
+            std::filesystem::permissions(dest_file, std::filesystem::perms::owner_all);
+        }
 
-        if (result == 0)
+        if (result)
         {
             struct utimbuf times;
             vfs_file_task_lock(task);
@@ -436,7 +439,9 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
             /* Move files to different device: Need to delete source dir */
             if ((task->type == VFS_FILE_TASK_MOVE) && !should_abort(task) && !copy_fail)
             {
-                if ((result = rmdir(src_file)))
+                std::filesystem::remove_all(src_file);
+                result = std::filesystem::exists(src_file);
+                if (!result)
                 {
                     vfs_file_task_error(task, errno, "Removing", src_file);
                     copy_fail = true;
@@ -470,21 +475,22 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
             // MOD delete it first to prevent exists error
             if (dest_exists)
             {
-                result = unlink(dest_file);
-                if (result && errno != 2 /* no such file */)
+                result = std::filesystem::remove(dest_file);
+                if (!result && errno != 2 /* no such file */)
                 {
                     vfs_file_task_error(task, errno, "Removing", dest_file);
                     goto _return_;
                 }
             }
 
-            if ((wfd = symlink(buffer, dest_file)) == 0)
+            std::filesystem::create_symlink(buffer, dest_file);
+            if (std::filesystem::is_symlink(dest_file))
             {
                 /* Move files to different device: Need to delete source files */
                 if ((task->type == VFS_FILE_TASK_MOVE) && !copy_fail)
                 {
-                    result = unlink(src_file);
-                    if (result)
+                    result = std::filesystem::remove(src_file);
+                    if (!result)
                     {
                         vfs_file_task_error(task, errno, "Removing", src_file);
                         copy_fail = true;
@@ -527,7 +533,7 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
             // MOD if dest is a symlink, delete it first to prevent overwriting target!
             if (std::filesystem::is_symlink(dest_file))
             {
-                result = unlink(dest_file);
+                result = std::filesystem::remove(dest_file);
                 if (result)
                 {
                     vfs_file_task_error(task, errno, "Removing", dest_file);
@@ -567,7 +573,7 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
                 close(wfd);
                 if (copy_fail)
                 {
-                    result = unlink(dest_file);
+                    result = std::filesystem::remove(dest_file);
                     if (result && errno != 2 /* no such file */)
                     {
                         vfs_file_task_error(task, errno, "Removing", dest_file);
@@ -590,7 +596,7 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
                     /* Move files to different device: Need to delete source files */
                     if ((task->type == VFS_FILE_TASK_MOVE) && !should_abort(task))
                     {
-                        result = unlink(src_file);
+                        result = std::filesystem::remove(src_file);
                         if (result)
                         {
                             vfs_file_task_error(task, errno, "Removing", src_file);
@@ -869,7 +875,7 @@ vfs_file_task_delete(char* src_file, VFSFileTask* task)
     }
     else
     {
-        result = unlink(src_file);
+        result = std::filesystem::remove(src_file);
         if (result != 0)
         {
             vfs_file_task_error(task, errno, "Removing", src_file);
@@ -930,19 +936,19 @@ vfs_file_task_link(char* src_file, VFSFileTask* task)
     }
 
     // MOD if dest exists, delete it first to prevent exists error
-    int result;
+    bool result;
     if (dest_exists)
     {
-        result = unlink(dest_file);
-        if (result)
+        result = std::filesystem::remove(dest_file);
+        if (!result)
         {
             vfs_file_task_error(task, errno, "Removing", dest_file);
             return;
         }
     }
 
-    result = symlink(src_file, dest_file);
-    if (result)
+    std::filesystem::create_symlink(src_file, dest_file);
+    if (!std::filesystem::is_symlink(dest_file))
     {
         vfs_file_task_error(task, errno, "Creating Link", dest_file);
         if (should_abort(task))
@@ -1136,7 +1142,7 @@ cb_exec_child_cleanup(GPid pid, int status, char* tmp_file)
     g_spawn_close_pid(pid);
     if (tmp_file)
     {
-        unlink(tmp_file);
+        std::filesystem::remove(tmp_file);
         g_free(tmp_file);
     }
     LOG_INFO("async child finished  pid={} status={}", pid, status);
