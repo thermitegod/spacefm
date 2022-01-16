@@ -865,7 +865,7 @@ main(int argc, char* argv[])
         {
             if (argv[2] && (!strcmp(argv[2], "help") || !strcmp(argv[2], "--help")))
             {
-                std::cout << "For help run, man spacefm-socket" << std::endl;
+                fmt::print("For help run, man spacefm-socket\n");
                 return EXIT_SUCCESS;
             }
             char* reply = nullptr;
@@ -901,7 +901,7 @@ main(int argc, char* argv[])
     // --version
     if (cli_flags.version_opt)
     {
-        std::cout << fmt::format("{} {}", PACKAGE_NAME_FANCY, GIT_VERSION) << std::endl;
+        fmt::print("{} {}\n", PACKAGE_NAME_FANCY, GIT_VERSION);
         return EXIT_SUCCESS;
     }
 
