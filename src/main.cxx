@@ -613,8 +613,6 @@ dup_to_absolute_file_path(char** file)
 {
     char* file_path;
     char* real_path;
-    void* cwd_path;
-    const std::size_t cwd_size = PATH_MAX;
 
     if (g_str_has_prefix(*file, "file:")) /* It's a URI */
     {
@@ -625,15 +623,8 @@ dup_to_absolute_file_path(char** file)
     else
         file_path = *file;
 
-    cwd_path = malloc(cwd_size);
-    if (cwd_path)
-    {
-        getcwd((char*)cwd_path, cwd_size);
-    }
-
-    real_path = vfs_file_resolve_path((char*)cwd_path, file_path);
-    free(cwd_path);
-    cwd_path = nullptr;
+    std::string cwd = std::filesystem::current_path();
+    real_path = vfs_file_resolve_path(cwd.c_str(), file_path);
 
     return real_path; /* To free with g_free */
 }
