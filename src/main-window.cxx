@@ -4425,13 +4425,13 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         buf.append(fmt::format("fm_value={}\n", esc_path));
         g_free(esc_path);
     }
-    // if (vtask->exec_ptask)
-    //{
-    //     buf.append(fmt::format("fm_my_task=\"{}\"\n", vtask->exec_ptask));
-    //     buf.append(fmt::format("fm_my_task_id=\"{}\"\n", vtask->exec_ptask));
-    // }
-    // buf.append(fmt::format("fm_my_window=\"{}\"\n", main_window));
-    // buf.append(fmt::format("fm_my_window_id=\"{}\"\n", main_window));
+    if (vtask->exec_ptask)
+    {
+        buf.append(fmt::format("fm_my_task=\"{:p}\"\n", (void*)vtask->exec_ptask));
+        buf.append(fmt::format("fm_my_task_id=\"{:p}\"\n", (void*)vtask->exec_ptask));
+    }
+    buf.append(fmt::format("fm_my_window=\"{:p}\"\n", (void*)main_window));
+    buf.append(fmt::format("fm_my_window_id=\"{:p}\"\n", (void*)main_window));
 
     // utils
     esc_path = bash_quote(xset_get_s("editor"));
@@ -4529,12 +4529,12 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
             buf.append(fmt::format("fm_task_current_dest_file={}\n", esc_path));
             g_free(esc_path);
         }
-        // buf.append(fmt::format("fm_task_id=\"{}\"\n", ptask));
-        // if (ptask->task_view && (main_window = get_task_view_window(ptask->task_view)))
-        //{
-        //    buf.append(fmt::format("fm_task_window=\"{}\"\n", main_window));
-        //    buf.append(fmt::format("fm_task_window_id=\"{}\"\n", main_window));
-        //}
+        buf.append(fmt::format("fm_task_id=\"{:p}\"\n", (void*)ptask));
+        if (ptask->task_view && (main_window = get_task_view_window(ptask->task_view)))
+        {
+            buf.append(fmt::format("fm_task_window=\"{:p}\"\n", (void*)main_window));
+            buf.append(fmt::format("fm_task_window_id=\"{:p}\"\n", (void*)main_window));
+        }
     }
 
     buf.append(fmt::format("\n"));
