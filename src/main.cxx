@@ -131,19 +131,27 @@ static void get_socket_name(char* buf, int len);
 static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data);
 static void receive_socket_command(int client, GString* args);
 
-static char*
+static std::string
 get_inode_tag()
 {
     struct stat stat_buf;
+    std::string inode_tag;
 
     const char* path = vfs_user_home_dir();
     if (stat(path, &stat_buf) == -1)
-        return g_strdup_printf("%d=", getuid());
-    return g_strdup_printf("%d=%lu:%lu-%ld",
-                           getuid(),
-                           MAJOR(stat_buf.st_dev),
-                           MINOR(stat_buf.st_dev),
-                           stat_buf.st_ino);
+    {
+        inode_tag = fmt::format("{}=", getuid());
+    }
+    else
+    {
+        inode_tag = fmt::format("{}={}:{}-{}",
+                                getuid(),
+                                MAJOR(stat_buf.st_dev),
+                                MINOR(stat_buf.st_dev),
+                                stat_buf.st_ino);
+    }
+
+    return inode_tag;
 }
 
 static bool
@@ -435,8 +443,8 @@ receive_socket_command(int client, GString* args) // sfm
     // check inode tag - was socket command sent from the same filesystem?
     // eg this helps deter use of socket commands sent from a chroot jail
     // or from another user or system
-    char* inode_tag = get_inode_tag();
-    if (argv && strcmp(inode_tag, argv[0]))
+    std::string inode_tag = get_inode_tag();
+    if (argv && strcmp(inode_tag.c_str(), argv[0]))
     {
         reply = g_strdup("spacefm: invalid socket command user\n");
         cmd = 1;
@@ -448,7 +456,6 @@ receive_socket_command(int client, GString* args) // sfm
         cmd = main_window_socket_command(argv ? argv + 1 : nullptr, &reply);
     }
     g_strfreev(argv);
-    g_free(inode_tag);
 
     // send response
     write(client, &cmd, sizeof(char)); // send exit status
@@ -491,10 +498,9 @@ send_socket_command(int argc, char* argv[], char** reply) // sfm
     write(sock, &cmd, sizeof(char));
 
     // send inode tag
-    char* inode_tag = get_inode_tag();
-    write(sock, inode_tag, strlen(inode_tag));
+    std::string inode_tag = get_inode_tag();
+    write(sock, inode_tag.c_str(), strlen(inode_tag.c_str()));
     write(sock, "\n", 1);
-    g_free(inode_tag);
 
     // send arguments
     int i;
