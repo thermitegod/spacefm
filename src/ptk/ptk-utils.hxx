@@ -18,11 +18,9 @@
 #include <gdk/gdk.h>
 #include <glib.h>
 
-/* The string 'message' can contain pango markups.
- * If special characters like < and > are used in the string,
- * they should be escaped with g_markup_escape_text().
- */
-void ptk_show_error(GtkWindow* parent, const char* title, const char* message);
+// The string 'message' can contain pango markups.
+// If special characters like < and > are used in the string,
+// they should be escaped with g_markup_escape_text().
 void ptk_show_error(GtkWindow* parent, const std::string& title, const std::string& message);
 
 GtkBuilder* _gtk_builder_new_from_file(const char* file);

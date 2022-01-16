@@ -18,34 +18,15 @@
 void
 ptk_show_error(GtkWindow* parent, const std::string& title, const std::string& message)
 {
-    char* msg = replace_string(message.c_str(), "%", "%%", false);
+    std::string msg = replace_string(message.c_str(), "%", "%%", false);
     GtkWidget* dlg = gtk_message_dialog_new(parent,
                                             GTK_DIALOG_MODAL,
                                             GTK_MESSAGE_ERROR,
                                             GTK_BUTTONS_OK,
-                                            msg,
+                                            msg.c_str(),
                                             nullptr);
-    g_free(msg);
     if (!title.empty())
         gtk_window_set_title(GTK_WINDOW(dlg), title.c_str());
-    xset_set_window_icon(GTK_WINDOW(dlg));
-    gtk_dialog_run(GTK_DIALOG(dlg));
-    gtk_widget_destroy(dlg);
-}
-
-void
-ptk_show_error(GtkWindow* parent, const char* title, const char* message)
-{
-    char* msg = replace_string(message, "%", "%%", false);
-    GtkWidget* dlg = gtk_message_dialog_new(parent,
-                                            GTK_DIALOG_MODAL,
-                                            GTK_MESSAGE_ERROR,
-                                            GTK_BUTTONS_OK,
-                                            msg,
-                                            nullptr);
-    g_free(msg);
-    if (title)
-        gtk_window_set_title(GTK_WINDOW(dlg), title);
     xset_set_window_icon(GTK_WINDOW(dlg));
     gtk_dialog_run(GTK_DIALOG(dlg));
     gtk_widget_destroy(dlg);
