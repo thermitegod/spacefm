@@ -40,10 +40,24 @@ ldflags_opt = []
 cflags_opt = []
 
 cflags_opt += [
+  #[ '-ggdb' ],
+
+  #[ '-Wall' ],
+  #[ '-Wextra' ],
+  #[ '-Wshadow' ],
+  #[ '-Wconversion' ],
+  #[ '-fsanitize=undefined,address' ],
+
+  [ '-Wno-deprecated-declarations' ],
+  [ '-Wno-unused-variable' ],
+  [ '-Wno-format-pedantic' ],
+
+  #[ '-Wstring-conversion' ],
+  #[ '-Wint-conversion' ],
   [ '-Wimplicit-fallthrough' ],
   [ '-Wvla' ],
-  [ '-fomit-frame-pointer' ],
-  [ '-fno-common' ],
+  #[ '-fomit-frame-pointer' ],
+  #[ '-fno-common' ],
 ]
 ldflags_opt += [
   [ '-Wl,-O2' ],
@@ -81,6 +95,7 @@ pre_args = [
     '-DG_DISABLE_CAST_CHECKS',
     '-DG_DISABLE_CHECKS',
     '-DG_LOG_DOMAIN="SpaceFM"',
+    #'-DG_DEBUG=fatal_warnings'
     ]
 
 if get_option('nonlatin')
