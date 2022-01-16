@@ -610,7 +610,7 @@ vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
     if (dir->path)
     {
         /* Install file alteration monitor */
-        dir->monitor = vfs_file_monitor_add_dir(dir->path, vfs_dir_monitor_callback, dir);
+        dir->monitor = vfs_file_monitor_add(dir->path, vfs_dir_monitor_callback, dir);
 
         GDir* dir_content = g_dir_open(dir->path, 0, nullptr);
 

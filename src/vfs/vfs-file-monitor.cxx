@@ -96,7 +96,7 @@ vfs_file_monitor_init()
 }
 
 VFSFileMonitor*
-vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCallback cb, void* user_data)
+vfs_file_monitor_add(char* path, VFSFileMonitorCallback cb, void* user_data)
 {
     char resolved_path[PATH_MAX];
     char* real_path;

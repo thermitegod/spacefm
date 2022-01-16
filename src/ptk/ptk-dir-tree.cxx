@@ -703,7 +703,7 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
     GDir* dir = g_dir_open(path, 0, nullptr);
     if (dir)
     {
-        node->monitor = vfs_file_monitor_add_dir(path, &on_file_monitor_event, node);
+        node->monitor = vfs_file_monitor_add(path, &on_file_monitor_event, node);
         const char* name = nullptr;
         while ((name = g_dir_read_name(dir)))
         {

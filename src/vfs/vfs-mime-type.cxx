@@ -114,7 +114,7 @@ vfs_mime_type_init()
         //  remove nullptr fm with inotify which caused segfault
         VFSFileMonitor* fm;
         if (std::filesystem::exists(caches[i]->file_path))
-            fm = vfs_file_monitor_add_file(caches[i]->file_path, on_mime_cache_changed, caches[i]);
+            fm = vfs_file_monitor_add(caches[i]->file_path, on_mime_cache_changed, caches[i]);
         else
             fm = nullptr;
         mime_caches_monitor[i] = fm;

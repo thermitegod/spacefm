@@ -66,30 +66,7 @@ bool vfs_file_monitor_init();
  * cb: callback function to be called when file event happens.
  * user_data: user data to be passed to callback function.
  */
-VFSFileMonitor* vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCallback cb,
-                                     void* user_data);
-
-/*
- * Monitor changes of a file.
- *
- * Parameters:
- * path: the file/dir to be monitored
- * cb: callback function to be called when file event happens.
- * user_data: user data to be passed to callback function.
- */
-#define vfs_file_monitor_add_file(path, cb, user_data) \
-    vfs_file_monitor_add(path, false, cb, user_data)
-
-/*
- * Monitor changes of a directory.
- *
- * Parameters:
- * path: the file/dir to be monitored
- * cb: callback function to be called when file event happens.
- * user_data: user data to be passed to callback function.
- */
-#define vfs_file_monitor_add_dir(path, cb, user_data) \
-    vfs_file_monitor_add(path, true, cb, user_data)
+VFSFileMonitor* vfs_file_monitor_add(char* path, VFSFileMonitorCallback cb, void* user_data);
 
 /*
  * Remove previously installed monitor.
