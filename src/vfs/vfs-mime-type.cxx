@@ -86,7 +86,7 @@ on_mime_cache_changed(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char*
             if (!cache->buffer)
                 return;
 
-            __attribute__((fallthrough));
+            FMT_FALLTHROUGH;
         case VFS_FILE_MONITOR_CHANGE:
             mime_cache_reload(cache);
             // LOG_DEBUG("reload cache: {}", file_name);
