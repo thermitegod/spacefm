@@ -27,7 +27,7 @@
 /* Columns of directory view */
 enum PTKFileListCol
 {
-    COL_FILE_BIG_ICON = 0,
+    COL_FILE_BIG_ICON,
     COL_FILE_SMALL_ICON,
     COL_FILE_NAME,
     COL_FILE_SIZE,
@@ -43,7 +43,7 @@ enum PTKFileListCol
 // see also: main-window.c main_window_socket_command() get sort_first
 enum PTKFileListSortDir
 {
-    PTK_LIST_SORT_DIR_MIXED = 0,
+    PTK_LIST_SORT_DIR_MIXED,
     PTK_LIST_SORT_DIR_FIRST,
     PTK_LIST_SORT_DIR_LAST
 };

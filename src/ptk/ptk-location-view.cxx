@@ -56,7 +56,7 @@ static void on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2);
 
 enum PtkLocationViewCol
 {
-    COL_ICON = 0,
+    COL_ICON,
     COL_NAME,
     COL_PATH,
     COL_DATA,

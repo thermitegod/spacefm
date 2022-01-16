@@ -57,7 +57,7 @@ static void on_list_task_finished(VFSAsyncTask* task, bool is_cancelled, VFSDir*
 
 enum VFSDirSignal
 {
-    FILE_CREATED_SIGNAL = 0,
+    FILE_CREATED_SIGNAL,
     FILE_DELETED_SIGNAL,
     FILE_CHANGED_SIGNAL,
     THUMBNAIL_LOADED_SIGNAL,

@@ -20,7 +20,7 @@
 
 enum PTKAppChooser
 {
-    COL_APP_ICON = 0,
+    COL_APP_ICON,
     COL_APP_NAME,
     COL_DESKTOP_FILE,
     COL_FULL_PATH,

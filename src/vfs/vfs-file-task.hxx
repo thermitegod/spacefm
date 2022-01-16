@@ -17,7 +17,7 @@
 
 enum VFSFileTaskType
 {
-    VFS_FILE_TASK_MOVE = 0,
+    VFS_FILE_TASK_MOVE,
     VFS_FILE_TASK_COPY,
     VFS_FILE_TASK_TRASH,
     VFS_FILE_TASK_DELETE,
@@ -30,7 +30,7 @@ enum VFSFileTaskType
 
 enum ChmodActionType
 {
-    OWNER_R = 0,
+    OWNER_R,
     OWNER_W,
     OWNER_X,
     GROUP_R,

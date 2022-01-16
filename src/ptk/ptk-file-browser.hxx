@@ -23,7 +23,7 @@ enum PtkFBViewMode
 
 enum PtkFBSortOrder
 {
-    PTK_FB_SORT_BY_NAME = 0,
+    PTK_FB_SORT_BY_NAME,
     PTK_FB_SORT_BY_SIZE,
     PTK_FB_SORT_BY_MTIME,
     PTK_FB_SORT_BY_TYPE,
