@@ -4,7 +4,7 @@
  *
  */
 
-/* turn on to debug GDK_THREADS_ENTER/GDK_THREADS_LEAVE related deadlocks */
+// turn on to debug GDK_THREADS_ENTER/GDK_THREADS_LEAVE related deadlocks
 #undef _DEBUG_THREAD
 
 #include <csignal>
@@ -540,9 +540,9 @@ G_LOCK_DEFINE(gdk_lock);
 void
 debug_gdk_threads_enter(const char* message)
 {
-    LOG_DEBUG("Thread {:p} tries to get GDK lock: {}", g_thread_self(), message);
+    LOG_DEBUG("Thread {:p} tries to get GDK lock: {}", (void*)g_thread_self(), message);
     G_LOCK(gdk_lock);
-    LOG_DEBUG("Thread {:p} got GDK lock: {}", g_thread_self(), message);
+    LOG_DEBUG("Thread {:p} got GDK lock: {}", (void*)g_thread_self(), message);
 }
 
 static void
@@ -554,9 +554,9 @@ _debug_gdk_threads_enter()
 void
 debug_gdk_threads_leave(const char* message)
 {
-    LOG_DEBUG("Thread {:p} tries to release GDK lock: {}", g_thread_self(), message);
+    LOG_DEBUG("Thread {:p} tries to release GDK lock: {}", (void*)g_thread_self(), message);
     G_UNLOCK(gdk_lock);
-    LOG_DEBUG("Thread {:p} released GDK lock: {}", g_thread_self(), message);
+    LOG_DEBUG("Thread {:p} released GDK lock: {}", (void*)g_thread_self(), message);
 }
 
 static void
