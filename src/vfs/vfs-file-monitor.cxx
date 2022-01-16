@@ -31,57 +31,54 @@ struct VFSFileMonitorCallbackEntry
 };
 
 static GHashTable* monitor_hash = nullptr;
-static GIOChannel* fam_io_channel = nullptr;
-static unsigned int fam_io_watch = 0;
-static int inotify_fd = -1;
+static GIOChannel* vfs_inotify_io_channel = nullptr;
+static unsigned int vfs_inotify_io_watch = 0;
+static int vfs_inotify_fd = -1;
 
-/* event handler of all FAM events */
-static bool on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data);
+/* event handler of all inotify events */
+static bool vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond,
+                                              void* user_data);
 
 static bool
-connect_to_fam()
+vfs_file_monitor_connect_to_inotify()
 {
-    inotify_fd = inotify_init();
-    if (inotify_fd < 0)
+    vfs_inotify_fd = inotify_init();
+    if (vfs_inotify_fd < 0)
     {
-        fam_io_channel = nullptr;
+        vfs_inotify_io_channel = nullptr;
         LOG_WARN("failed to initialize inotify.");
         return false;
     }
-    fam_io_channel = g_io_channel_unix_new(inotify_fd);
+    vfs_inotify_io_channel = g_io_channel_unix_new(vfs_inotify_fd);
 
-    /* set fam socket to non-blocking */
-    /* fcntl( FAMCONNECTION_GETFD( &fam ),F_SETFL,O_NONBLOCK); */
+    g_io_channel_set_encoding(vfs_inotify_io_channel, nullptr, nullptr);
+    g_io_channel_set_buffered(vfs_inotify_io_channel, false);
+    g_io_channel_set_flags(vfs_inotify_io_channel, G_IO_FLAG_NONBLOCK, nullptr);
 
-    g_io_channel_set_encoding(fam_io_channel, nullptr, nullptr);
-    g_io_channel_set_buffered(fam_io_channel, false);
-    g_io_channel_set_flags(fam_io_channel, G_IO_FLAG_NONBLOCK, nullptr);
-
-    fam_io_watch = g_io_add_watch(fam_io_channel,
-                                  GIOCondition(G_IO_IN | G_IO_PRI | G_IO_HUP | G_IO_ERR),
-                                  (GIOFunc)on_fam_event,
-                                  nullptr);
+    vfs_inotify_io_watch = g_io_add_watch(vfs_inotify_io_channel,
+                                          GIOCondition(G_IO_IN | G_IO_PRI | G_IO_HUP | G_IO_ERR),
+                                          (GIOFunc)vfs_file_monitor_on_inotify_event,
+                                          nullptr);
     return true;
 }
 
 static void
-disconnect_from_fam()
+vfs_file_monitor_disconnect_from_inotify()
 {
-    if (fam_io_channel)
+    if (vfs_inotify_io_channel)
     {
-        g_io_channel_unref(fam_io_channel);
-        fam_io_channel = nullptr;
-        g_source_remove(fam_io_watch);
-        close(inotify_fd);
-        inotify_fd = -1;
+        g_io_channel_unref(vfs_inotify_io_channel);
+        vfs_inotify_io_channel = nullptr;
+        g_source_remove(vfs_inotify_io_watch);
+        close(vfs_inotify_fd);
+        vfs_inotify_fd = -1;
     }
 }
 
-/* final cleanup */
 void
 vfs_file_monitor_clean()
 {
-    disconnect_from_fam();
+    vfs_file_monitor_disconnect_from_inotify();
     if (monitor_hash)
     {
         g_hash_table_destroy(monitor_hash);
@@ -89,15 +86,11 @@ vfs_file_monitor_clean()
     }
 }
 
-/*
- * Init monitor:
- * Establish connection with gamin/fam.
- */
 bool
 vfs_file_monitor_init()
 {
     monitor_hash = g_hash_table_new(g_str_hash, g_str_equal);
-    if (!connect_to_fam())
+    if (!vfs_file_monitor_connect_to_inotify())
         return false;
     return true;
 }
@@ -113,7 +106,7 @@ vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCallback cb, void* u
     if (!monitor_hash)
         return nullptr;
 
-    // Since gamin, FAM and inotify don't follow symlinks, need to get real path
+    // inotify does not follow symlinks, need to get real path
     if (strlen(path) > PATH_MAX - 1)
     {
         LOG_WARN("PATH_MAX exceeded on {}", path);
@@ -137,7 +130,7 @@ vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCallback cb, void* u
         monitor->callbacks = g_array_new(false, false, sizeof(VFSFileMonitorCallbackEntry));
         g_hash_table_insert(monitor_hash, monitor->path, monitor);
 
-        monitor->wd = inotify_add_watch(inotify_fd,
+        monitor->wd = inotify_add_watch(vfs_inotify_fd,
                                         real_path,
                                         IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF |
                                             IN_MOVE | IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
@@ -228,7 +221,7 @@ vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* use
     if (fm->ref_count() == 0)
     {
         // LOG_INFO("vfs_file_monitor_remove  {}", fm->wd);
-        inotify_rm_watch(inotify_fd, fm->wd);
+        inotify_rm_watch(vfs_inotify_fd, fm->wd);
 
         g_hash_table_remove(monitor_hash, fm->path);
         g_free(fm->path);
@@ -239,7 +232,7 @@ vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* use
 }
 
 static void
-reconnect_fam(void* key, void* value, void* user_data)
+vfs_file_monitor_reconnect_inotify(void* key, void* value, void* user_data)
 {
     (void)user_data;
     struct stat file_stat; // skip stat
@@ -248,7 +241,7 @@ reconnect_fam(void* key, void* value, void* user_data)
     if (lstat(path, &file_stat) != -1)
     {
         monitor->wd =
-            inotify_add_watch(inotify_fd, path, IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVE);
+            inotify_add_watch(vfs_inotify_fd, path, IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVE);
         if (monitor->wd < 0)
         {
             /*
@@ -264,7 +257,7 @@ reconnect_fam(void* key, void* value, void* user_data)
 }
 
 static bool
-find_monitor(void* key, void* value, void* user_data)
+vfs_file_monitor_find_monitor(void* key, void* value, void* user_data)
 {
     (void)key;
     (void)user_data;
@@ -274,7 +267,7 @@ find_monitor(void* key, void* value, void* user_data)
 }
 
 static VFSFileMonitorEvent
-translate_inotify_event(int inotify_mask)
+vfs_file_monitor_translate_inotify_event(int inotify_mask)
 {
     if (inotify_mask & (IN_CREATE | IN_MOVED_TO))
         return VFS_FILE_MONITOR_CREATE;
@@ -291,7 +284,8 @@ translate_inotify_event(int inotify_mask)
 }
 
 static void
-dispatch_event(VFSFileMonitor* monitor, VFSFileMonitorEvent evt, const char* file_name)
+vfs_file_monitor_dispatch_event(VFSFileMonitor* monitor, VFSFileMonitorEvent evt,
+                                const char* file_name)
 {
     /* Call the callback functions */
     if (monitor->callbacks && monitor->callbacks->len)
@@ -306,9 +300,8 @@ dispatch_event(VFSFileMonitor* monitor, VFSFileMonitorEvent evt, const char* fil
     }
 }
 
-/* event handler of all FAM events */
 static bool
-on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data)
+vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* user_data)
 {
     (void)channel;
     (void)user_data;
@@ -317,38 +310,33 @@ on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data)
 
     if (cond & (G_IO_HUP | G_IO_ERR))
     {
-        disconnect_from_fam();
+        vfs_file_monitor_disconnect_from_inotify();
         if (g_hash_table_size(monitor_hash) > 0)
         {
-            /*
-              Disconnected from FAM server, but there are still monitors.
-              This may be caused by crash of FAM server.
-              So we have to reconnect to FAM server.
-            */
-            if (connect_to_fam())
-                g_hash_table_foreach(monitor_hash, (GHFunc)reconnect_fam, nullptr);
+            // Disconnected from inotify server, but there are still monitors, reconnect
+            if (vfs_file_monitor_connect_to_inotify())
+                g_hash_table_foreach(monitor_hash,
+                                     (GHFunc)vfs_file_monitor_reconnect_inotify,
+                                     nullptr);
         }
-        return true; /* don't need to remove the event source since
-                                    it has been removed by disconnect_from_fam(). */
+        // don't need to remove the event source since
+        // it has been removed by vfs_monitor_disconnect_from_inotify()
+        return true;
     }
 
     int len;
-    while ((len = read(inotify_fd, buf, BUF_LEN)) < 0 && errno == EINTR)
+    while ((len = read(vfs_inotify_fd, buf, BUF_LEN)) < 0 && errno == EINTR)
         ;
     if (len < 0)
     {
         LOG_WARN("Error reading inotify event: {}", g_strerror(errno));
-        /* goto error_cancel; */
         return false;
     }
 
     if (len == 0)
     {
-        /*
-         * FIXME: handle this better?
-         */
+        // FIXME: handle this better?
         LOG_WARN("Error reading inotify event: supplied buffer was too small");
-        /* goto error_cancel; */
         return false;
     }
     int i = 0;
@@ -357,8 +345,10 @@ on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data)
         struct inotify_event* ievent = (struct inotify_event*)&buf[i];
         /* FIXME: 2 different paths can have the same wd because of link
          *        This was fixed in spacefm 0.8.7 ?? */
-        VFSFileMonitor* monitor = static_cast<VFSFileMonitor*>(
-            g_hash_table_find(monitor_hash, (GHRFunc)find_monitor, GINT_TO_POINTER(ievent->wd)));
+        VFSFileMonitor* monitor =
+            static_cast<VFSFileMonitor*>(g_hash_table_find(monitor_hash,
+                                                           (GHRFunc)vfs_file_monitor_find_monitor,
+                                                           GINT_TO_POINTER(ievent->wd)));
         if (G_LIKELY(monitor))
         {
             const char* file_name;
@@ -382,7 +372,9 @@ on_fam_event(GIOChannel* channel, GIOCondition cond, void* user_data)
                 LOG_INFO("inotify-event {}: {}///{}", desc, monitor->path, file_name);
             //LOG_DEBUG("inotify ({}) :{}", ievent->mask, file_name);
             */
-            dispatch_event(monitor, translate_inotify_event(ievent->mask), file_name);
+            vfs_file_monitor_dispatch_event(monitor,
+                                            vfs_file_monitor_translate_inotify_event(ievent->mask),
+                                            file_name);
         }
         i += sizeof(struct inotify_event) + ievent->len;
     }

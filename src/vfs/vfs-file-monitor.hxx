@@ -10,12 +10,6 @@
  *
  */
 
-/*
-  FIXME: VFSFileMonitor can support at most 1024 monitored files.
-         This is caused by the limit of FAM/gamin itself.
-         Maybe using inotify directly can solve this?
-*/
-
 #pragma once
 
 #include <atomic>
@@ -60,7 +54,7 @@ typedef void (*VFSFileMonitorCallback)(VFSFileMonitor* fm, VFSFileMonitorEvent e
 
 /*
  * Init monitor:
- * Establish connection with gamin/fam.
+ * Establish connection with inotify.
  */
 bool vfs_file_monitor_init();
 
@@ -103,6 +97,6 @@ VFSFileMonitor* vfs_file_monitor_add(char* path, bool is_dir, VFSFileMonitorCall
 void vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* user_data);
 
 /*
- * Clearn up and shutdown file alteration monitor.
+ * Clean up and shutdown file alteration monitor.
  */
 void vfs_file_monitor_clean();
