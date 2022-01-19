@@ -680,7 +680,7 @@ ptk_location_view_clean_mount_points()
             while ((name = g_dir_read_name(dir)) != nullptr)
             {
                 del_path = g_build_filename(path, name, nullptr);
-                rmdir(del_path); // removes empty, non-mounted directories
+                std::filesystem::remove_all(del_path); // removes empty, non-mounted directories
                 g_free(del_path);
             }
             g_dir_close(dir);
@@ -794,12 +794,12 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
     char* point = g_strdup(point1);
 
     // attempt to remove existing dir - succeeds only if empty and unmounted
-    rmdir(point);
+    std::filesystem::remove_all(point);
     while (std::filesystem::exists(point))
     {
         g_free(point);
         point = g_strdup_printf("%s-%d", point1, r++);
-        rmdir(point);
+        std::filesystem::remove_all(point);
     }
     g_free(point1);
     std::filesystem::create_directories(point);
