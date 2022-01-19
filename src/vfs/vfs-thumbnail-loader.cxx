@@ -465,16 +465,24 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
         }
         else
         {
-            ffmpegthumbnailer::VideoThumbnailer video_thumb;
-            video_thumb.setSeekPercentage(25);
-            video_thumb.setThumbnailSize(128);
-            video_thumb.setMaintainAspectRatio(true);
-            // video_thumb.clearFilters();
-            video_thumb.generateThumbnail(file_path,
-                                          ThumbnailerImageType::Png,
-                                          thumbnail_file,
-                                          nullptr);
-
+            try
+            {
+                ffmpegthumbnailer::VideoThumbnailer video_thumb;
+                video_thumb.setSeekPercentage(25);
+                video_thumb.setThumbnailSize(128);
+                video_thumb.setMaintainAspectRatio(true);
+                // video_thumb.clearFilters();
+                video_thumb.generateThumbnail(file_path,
+                                              ThumbnailerImageType::Png,
+                                              thumbnail_file,
+                                              nullptr);
+            }
+            catch (...) // std::logic_error
+            {
+                // Video file cannot be opened
+                g_object_unref(thumbnail);
+                return nullptr;
+            }
             thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
         }
     }
