@@ -417,14 +417,11 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
             mtime = statbuf.st_mtime;
     }
 
-#if 0
-    // if mod time of video being thumbnailed is less than 5 sec ago,
-    // don't create a thumbnail (is copying?)
-    // FIXME: This means that a newly saved file may not show a thumbnail
-    // until refresh.
+    // if mtime of video being thumbnailed is less than 5 sec ago,
+    // don't create a thumbnail. This means that newly created video
+    // files will not have a thumbnail until a refresh.
     if (file_is_video && std::time(nullptr) - mtime < 5)
         return nullptr;
-#endif
 
     // load existing thumbnail
     GdkPixbuf* thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
