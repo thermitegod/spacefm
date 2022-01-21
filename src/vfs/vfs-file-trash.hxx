@@ -79,7 +79,7 @@ class TrashDir
 
     // Return the full path for this trash directory.
     [[nodiscard]] std::string
-    path() const
+    trash_path() const
     {
         return m_path;
     }
@@ -107,6 +107,8 @@ class TrashDir
 
     // Get a unique name for use within the trash directory
     std::string unique_name(const std::string& path);
+
+    void create_trash_dir();
 
     // Create a .trashinfo file for a file or directory 'path'
     void create_trash_info(const std::string& path, const std::string& target_name);

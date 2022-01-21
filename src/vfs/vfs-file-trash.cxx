@@ -124,6 +124,8 @@ Trash::trash(const std::string& path)
         return false;
     }
 
+    trash_dir->create_trash_dir();
+
     std::string target_name = trash_dir->unique_name(path);
     trash_dir->create_trash_info(path, target_name);
     trash_dir->move(path, target_name);
@@ -149,11 +151,7 @@ Trash::empty()
 
 TrashDir::TrashDir(const std::string& path, dev_t device) : m_path(path), m_device(device)
 {
-    // LOG_DEBUG("create trash dirs {}", path);
-
-    check_dir_exists(path);
-    check_dir_exists(files_path());
-    check_dir_exists(info_path());
+    create_trash_dir();
 }
 
 std::string
@@ -192,6 +190,16 @@ TrashDir::check_dir_exists(const std::string& path)
     // LOG_INFO("trash mkdir {}", path);
     std::filesystem::create_directories(path);
     std::filesystem::permissions(path, std::filesystem::perms::owner_all);
+}
+
+void
+TrashDir::create_trash_dir()
+{
+    // LOG_DEBUG("create trash dirs {}", trash_path());
+
+    check_dir_exists(trash_path());
+    check_dir_exists(files_path());
+    check_dir_exists(info_path());
 }
 
 void
