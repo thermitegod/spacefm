@@ -1335,13 +1335,12 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         return;
 
     // need su?
-    if (task->exec_as_user)
+    if (!task->exec_as_user.empty())
     {
-        if (geteuid() == 0 && !strcmp(task->exec_as_user, "root"))
+        if (geteuid() == 0 && !task->exec_as_user.compare("root"))
         {
             // already root so no su
-            g_free(task->exec_as_user);
-            task->exec_as_user = nullptr;
+            task->exec_as_user.clear();
         }
         else
         {
@@ -1380,7 +1379,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     }
 
     // get terminal
-    if (!task->exec_terminal && task->exec_as_user)
+    if (!task->exec_terminal && !task->exec_as_user.empty())
     {
         // using cli tool so run in terminal
         task->exec_terminal = true;
@@ -1478,11 +1477,10 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         buf.append(fmt::format("export fm_source=\"{}\"\n\n", task->exec_script));
 
         // build - trap rm
-        if (!task->exec_keep_tmp && geteuid() != 0 && task->exec_as_user &&
-            !strcmp(task->exec_as_user, "root"))
+        if (!task->exec_keep_tmp && geteuid() != 0 && !task->exec_as_user.compare("root"))
         {
             // run as root command, clean up
-            buf.append(fmt::format("trap \"rm -f {}; exit\" EXIT SIint SIGTERM SIGQUIT SIGHUP\n\n",
+            buf.append(fmt::format("trap \"rm -f {}; exit\" EXIT SIGINT SIGTERM SIGQUIT SIGHUP\n\n",
                                    task->exec_script));
         }
 
@@ -1494,7 +1492,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         // build - press enter to close
         if (terminal && task->exec_keep_terminal)
         {
-            if (geteuid() == 0 || (task->exec_as_user && !strcmp(task->exec_as_user, "root")))
+            if (geteuid() == 0 || !task->exec_as_user.compare("root"))
                 buf.append(fmt::format("\necho;read -p '[ Finished ]  Press Enter to close: '\n"));
             else
             {
@@ -1521,7 +1519,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         chmod(task->exec_script.c_str(), 0700);
 
         // use checksum
-        if (geteuid() != 0 && (task->exec_as_user || task->exec_checksum))
+        if (geteuid() != 0 && (!task->exec_as_user.empty() || task->exec_checksum))
             sum_script = get_xxhash(task->exec_script.c_str());
     }
 
@@ -1580,15 +1578,15 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         use_su = su;
     }
 
-    if (task->exec_as_user)
+    if (!task->exec_as_user.empty())
     {
         // su
         argv[a++] = g_strdup(use_su);
-        if (strcmp(task->exec_as_user, "root"))
+        if (task->exec_as_user.compare("root"))
         {
             if (strcmp(use_su, "/bin/su"))
                 argv[a++] = g_strdup("-u");
-            argv[a++] = g_strdup(task->exec_as_user);
+            argv[a++] = const_cast<char*>(task->exec_as_user.c_str());
         }
 
         if (!strcmp(use_su, "/bin/su"))
@@ -1618,10 +1616,10 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         // spacefm-auth
         if (single_arg)
         {
-            argv[a++] = g_strdup_printf("%s %s%s %s %s",
+            argv[a++] = g_strdup_printf("%s %s %s %s %s",
                                         BASHPATH,
                                         auth,
-                                        !g_strcmp0(task->exec_as_user, "root") ? " root" : "",
+                                        !task->exec_as_user.compare("root") ? "root" : "",
                                         task->exec_script.c_str(),
                                         sum_script);
             g_free(auth);
@@ -1630,7 +1628,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         {
             argv[a++] = g_strdup(BASHPATH);
             argv[a++] = auth;
-            if (!g_strcmp0(task->exec_as_user, "root"))
+            if (!task->exec_as_user.compare("root"))
                 argv[a++] = g_strdup("root");
             argv[a++] = g_strdup(task->exec_script.c_str());
             argv[a++] = g_strdup(sum_script);
@@ -2006,7 +2004,7 @@ vfs_task_new(VFSFileTaskType type, GList* src_files, const char* dest_dir)
     task->exec_keep_terminal = false;
     task->exec_export = false;
     task->exec_direct = false;
-    task->exec_as_user = nullptr;
+    // task->exec_as_user = nullptr;
     task->exec_icon = nullptr;
     // task->exec_script = nullptr;
     task->exec_keep_tmp = false;
@@ -2136,9 +2134,6 @@ vfs_file_task_free(VFSFileTask* task)
 
     if (task->chmod_actions)
         g_slice_free1(sizeof(unsigned char) * N_CHMOD_ACTIONS, task->chmod_actions);
-
-    if (task->exec_as_user)
-        g_free(task->exec_as_user);
 
     vfs_file_task_clear(task);
 

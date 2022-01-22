@@ -154,7 +154,7 @@ struct VFSFileTask
     bool exec_keep_tmp; // diagnostic to keep temp files
     void* exec_browser;
     void* exec_desktop;
-    char* exec_as_user;
+    std::string exec_as_user;
     char* exec_icon;
     GPid exec_pid;
     int exec_exit_status;

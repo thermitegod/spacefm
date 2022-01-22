@@ -1167,7 +1167,7 @@ on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         g_free(task_name);
         task->task->exec_command = cmd;
         task->task->exec_write_root = change_root;
-        task->task->exec_as_user = g_strdup_printf("root");
+        task->task->exec_as_user = "root";
         task->task->exec_sync = true;
         task->task->exec_popup = false;
         task->task->exec_show_output = false;
@@ -1222,7 +1222,7 @@ on_umount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         g_free(task_name);
         task->task->exec_command = cmd;
         task->task->exec_write_root = change_root;
-        task->task->exec_as_user = g_strdup_printf("root");
+        task->task->exec_as_user = "root";
         task->task->exec_sync = true;
         task->task->exec_popup = false;
         task->task->exec_show_output = false;
@@ -1805,7 +1805,6 @@ on_sync(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     task->task->exec_browser = nullptr;
     task->task->exec_action = "sync";
     task->task->exec_command = "sync";
-    task->task->exec_as_user = nullptr;
     task->task->exec_sync = true;
     task->task->exec_popup = false;
     task->task->exec_show_output = false;

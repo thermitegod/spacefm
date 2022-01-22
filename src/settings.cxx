@@ -3023,7 +3023,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
     task->task->exec_show_output = false;
     task->task->exec_show_error = true;
     task->task->exec_export = false;
-    task->task->exec_as_user = g_strdup("root");
+    task->task->exec_as_user = "root";
 
     PluginData* plugin_data = g_slice_new0(PluginData);
     plugin_data->main_window = nullptr;
@@ -3057,7 +3057,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* path, co
             // install
             own =
                 fmt::format("chown -R root:root {} && chmod -R go+rX-w {}", plug_dir_q, plug_dir_q);
-            task->task->exec_as_user = g_strdup("root");
+            task->task->exec_as_user = "root";
             break;
         case PLUGIN_JOB_COPY:
             // copy to clipboard or import to menu
@@ -3688,7 +3688,7 @@ xset_custom_activate(GtkWidget* item, XSet* set)
     task->task->exec_set = set;
 
     if (set->y && set->y[0] != '\0')
-        task->task->exec_as_user = g_strdup(set->y);
+        task->task->exec_as_user = set->y;
 
     if (set->plugin && set->shared_key && mset->icon)
         task->task->exec_icon = g_strdup(mset->icon);
@@ -3977,7 +3977,7 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     task->task->exec_sync = false;
     task->task->exec_terminal = terminal;
     if (as_root)
-        task->task->exec_as_user = g_strdup_printf("root");
+        task->task->exec_as_user = "root";
     ptk_file_task_run(task);
 }
 

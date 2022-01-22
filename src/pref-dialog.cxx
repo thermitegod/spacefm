@@ -408,7 +408,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                 PtkFileTask* task =
                     ptk_file_exec_new("Save Root Settings", nullptr, nullptr, nullptr);
                 task->task->exec_command = "echo";
-                task->task->exec_as_user = g_strdup_printf("root");
+                task->task->exec_as_user = "root";
                 task->task->exec_sync = false;
                 task->task->exec_export = false;
                 task->task->exec_write_root = true;

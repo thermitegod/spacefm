@@ -575,7 +575,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
         task->task->exec_command = replace_line_subs(trim_command);
         g_free(command);
         if (as_root)
-            task->task->exec_as_user = g_strdup_printf("root");
+            task->task->exec_as_user = "root";
         if (!as_task)
             task->task->exec_sync = false;
         else
@@ -5901,7 +5901,7 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser, 
     task->task->exec_show_output = false;
     task->task->exec_export = false;
     if (as_root)
-        task->task->exec_as_user = g_strdup_printf("root");
+        task->task->exec_as_user = "root";
     ptk_file_task_run(task);
 }
 

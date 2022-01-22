@@ -550,7 +550,7 @@ on_open_current_folder_as_root(GtkMenuItem* menuitem, void* user_data)
     const std::string prog = g_get_prgname();
     const std::string cwd = bash_quote(ptk_file_browser_get_cwd(file_browser));
     task->task->exec_command = fmt::format("HOME=/root {} {}", prog, cwd);
-    task->task->exec_as_user = g_strdup("root");
+    task->task->exec_as_user = "root";
     task->task->exec_sync = false;
     task->task->exec_export = false;
     task->task->exec_browser = nullptr;
@@ -584,7 +584,8 @@ main_window_open_terminal(FMMainWindow* main_window, bool as_root)
                                           file_browser->task_view);
 
     task->task->exec_command = g_find_program_in_path(main_term);
-    task->task->exec_as_user = as_root ? g_strdup("root") : nullptr;
+    if (as_root)
+        task->task->exec_as_user = "root";
     task->task->exec_sync = false;
     task->task->exec_export = true;
     task->task->exec_browser = file_browser;
@@ -4454,7 +4455,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
             buf.append(fmt::format("fm_task_name={}\n", esc_path));
             esc_path = bash_quote(ptask->task->exec_command.c_str());
             buf.append(fmt::format("fm_task_command={}\n", esc_path));
-            if (ptask->task->exec_as_user)
+            if (!ptask->task->exec_as_user.empty())
                 buf.append(fmt::format("fm_task_user=\"{}\"\n", ptask->task->exec_as_user));
             if (ptask->task->exec_icon)
                 buf.append(fmt::format("fm_task_icon=\"{}\"\n", ptask->task->exec_icon));
@@ -7035,7 +7036,7 @@ main_window_socket_command(char* argv[], char** reply)
                                   file_browser->task_view);
             ptask->task->exec_browser = file_browser;
             ptask->task->exec_command = cmd;
-            ptask->task->exec_as_user = g_strdup(opt_user);
+            ptask->task->exec_as_user = opt_user;
             ptask->task->exec_icon = g_strdup(opt_icon);
             ptask->task->exec_terminal = opt_terminal;
             ptask->task->exec_keep_terminal = false;

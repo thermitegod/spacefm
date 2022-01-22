@@ -2867,7 +2867,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 task->task->exec_show_output = false;
                 task->task->exec_show_error = true;
                 task->task->exec_export = false;
-                task->task->exec_as_user = as_root ? g_strdup("root") : nullptr;
+                if (as_root)
+                    task->task->exec_as_user = "root";
                 if (auto_open)
                 {
                     auto_open->path = g_strdup(full_path);
@@ -2943,7 +2944,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 task->task->exec_show_output = false;
                 task->task->exec_show_error = true;
                 task->task->exec_export = false;
-                task->task->exec_as_user = as_root ? g_strdup("root") : nullptr;
+                if (as_root)
+                    task->task->exec_as_user = "root";
                 if (auto_open)
                 {
                     auto_open->path = g_strdup(full_path);
@@ -3014,7 +3016,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 task->task->exec_show_output = false;
                 task->task->exec_show_error = true;
                 task->task->exec_export = false;
-                task->task->exec_as_user = as_root ? g_strdup("root") : nullptr;
+                if (as_root)
+                    task->task->exec_as_user = "root";
                 if (auto_open)
                 {
                     auto_open->path = g_strdup(full_path);
@@ -3071,7 +3074,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 task->task->exec_show_output = false;
                 task->task->exec_show_error = true;
                 task->task->exec_export = false;
-                task->task->exec_as_user = as_root ? g_strdup("root") : nullptr;
+                if (as_root)
+                    task->task->exec_as_user = "root";
                 ptk_file_task_run(task);
                 update_new_display(full_path);
             }
@@ -3114,7 +3118,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 task->task->exec_show_output = false;
                 task->task->exec_show_error = true;
                 task->task->exec_export = false;
-                task->task->exec_as_user = as_root ? g_strdup("root") : nullptr;
+                if (as_root)
+                    task->task->exec_as_user = "root";
                 ptk_file_task_run(task);
                 update_new_display(full_path);
             }
@@ -3146,7 +3151,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 task->task->exec_show_output = false;
                 task->task->exec_show_error = true;
                 task->task->exec_export = false;
-                task->task->exec_as_user = as_root ? g_strdup("root") : nullptr;
+                if (as_root)
+                    task->task->exec_as_user = "root";
                 ptk_file_task_run(task);
                 update_new_display(full_path);
             }
@@ -3871,6 +3877,6 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
     task->task->exec_show_output = false;
     task->task->exec_show_error = true;
     task->task->exec_export = false;
-    task->task->exec_as_user = g_strdup("root");
+    task->task->exec_as_user = "root";
     ptk_file_task_run(task);
 }
