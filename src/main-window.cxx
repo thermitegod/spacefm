@@ -5389,8 +5389,8 @@ main_task_view_update_task(PtkFileTask* ptask)
         else
         {
             // exec task
-            if (ptask->task->exec_action)
-                status = ptask->task->exec_action;
+            if (!ptask->task->exec_action.empty())
+                status = ptask->task->exec_action.c_str();
             else
                 status = job_titles[ptask->task->type];
         }

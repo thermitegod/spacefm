@@ -2002,7 +2002,7 @@ vfs_task_new(VFSFileTaskType type, GList* src_files, const char* dest_dir)
     task->custom_percent = false;
 
     task->exec_type = VFS_EXEC_NORMAL;
-    task->exec_action = nullptr;
+    // task->exec_action = nullptr;
     // task->exec_command = std::string();
     task->exec_sync = true;
     task->exec_popup = false;
@@ -2145,8 +2145,6 @@ vfs_file_task_free(VFSFileTask* task)
     if (task->chmod_actions)
         g_slice_free1(sizeof(unsigned char) * N_CHMOD_ACTIONS, task->chmod_actions);
 
-    if (task->exec_action)
-        g_free(task->exec_action);
     if (task->exec_as_user)
         g_free(task->exec_as_user);
     if (task->exec_script)

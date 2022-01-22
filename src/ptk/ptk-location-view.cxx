@@ -1803,7 +1803,7 @@ on_sync(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 
     PtkFileTask* task = ptk_file_exec_new("Sync", nullptr, view, file_browser->task_view);
     task->task->exec_browser = nullptr;
-    task->task->exec_action = g_strdup_printf("sync");
+    task->task->exec_action = "sync";
     task->task->exec_command = "sync";
     task->task->exec_as_user = nullptr;
     task->task->exec_sync = true;

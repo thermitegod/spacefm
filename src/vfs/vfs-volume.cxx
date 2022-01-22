@@ -3441,7 +3441,7 @@ exec_task(const char* command, bool run_in_terminal)
     GList* files = g_list_prepend(nullptr, g_strdup("exec_task"));
 
     PtkFileTask* task = ptk_file_task_new(VFS_FILE_TASK_EXEC, files, "/", nullptr, nullptr);
-    task->task->exec_action = g_strdup("exec_task");
+    task->task->exec_action = "exec_task";
     task->task->exec_command = command;
     task->task->exec_sync = false;
     task->task->exec_export = false;
