@@ -766,7 +766,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
         gtk_label_set_ellipsize(ptask->src_dir, PANGO_ELLIPSIZE_MIDDLE);
         gtk_label_set_selectable(ptask->src_dir, true);
         gtk_grid_attach(grid, GTK_WIDGET(ptask->src_dir), 1, row, 1, 1);
-        if (task->dest_dir)
+        if (!task->dest_dir.empty())
         {
             /* To: <Destination directory>
             ex. Copy file to..., Move file to...etc. */
@@ -775,7 +775,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
             gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
             gtk_widget_set_valign(GTK_WIDGET(label), GTK_ALIGN_CENTER);
             gtk_grid_attach(grid, GTK_WIDGET(label), 0, row, 1, 1);
-            ptask->to = GTK_LABEL(gtk_label_new(task->dest_dir));
+            ptask->to = GTK_LABEL(gtk_label_new(task->dest_dir.c_str()));
             gtk_widget_set_halign(GTK_WIDGET(ptask->to), GTK_ALIGN_START);
             gtk_widget_set_valign(GTK_WIDGET(ptask->to), GTK_ALIGN_CENTER);
             gtk_label_set_ellipsize(ptask->to, PANGO_ELLIPSIZE_MIDDLE);
@@ -1101,9 +1101,9 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     }
     else
         ufile_path = nullptr;
-    if (!udest && !ptask->complete && task->dest_dir)
+    if (!udest && !ptask->complete && !task->dest_dir.empty())
     {
-        udest = g_filename_display_name(task->dest_dir);
+        udest = g_filename_display_name(task->dest_dir.c_str());
         if (!(udest[0] == '/' && udest[1] == '\0'))
         {
             str = udest;

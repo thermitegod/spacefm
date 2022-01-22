@@ -83,9 +83,9 @@ typedef bool (*VFSFileTaskStateCallback)(VFSFileTask*, VFSFileTaskState state, v
 struct VFSFileTask
 {
     VFSFileTaskType type;
-    GList* src_paths; /* All source files. This list will be freed
-                       *after file operation is completed. */
-    char* dest_dir;   /* Destinaton directory */
+    GList* src_paths;     // All source files. This list will be freed
+                          // after file operation is completed.
+    std::string dest_dir; // Destinaton directory
     bool avoid_changes;
     GSList* devs;
 

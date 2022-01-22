@@ -299,15 +299,16 @@ check_dest_in_src(VFSFileTask* task, const char* src_dir)
     char real_dest_path[PATH_MAX];
     int len;
 
-    if (!(task->dest_dir && realpath(task->dest_dir, real_dest_path)))
+    if (!(!task->dest_dir.empty() && realpath(task->dest_dir.c_str(), real_dest_path)))
         return false;
+
     if (realpath(src_dir, real_src_path) && g_str_has_prefix(real_dest_path, real_src_path) &&
         (len = strlen(real_src_path)) &&
         (real_dest_path[len] == '/' || real_dest_path[len] == '\0'))
     {
         // source is contained in destination dir
         char* disp_src = g_filename_display_name(src_dir);
-        char* disp_dest = g_filename_display_name(task->dest_dir);
+        char* disp_dest = g_filename_display_name(task->dest_dir.c_str());
         char* err =
             g_strdup_printf("Destination directory \"%1$s\" is contained in source \"%2$s\"",
                             disp_dest,
@@ -635,7 +636,7 @@ vfs_file_task_copy(char* src_file, VFSFileTask* task)
     char* dest_file;
 
     file_name = g_path_get_basename(src_file);
-    dest_file = g_build_filename(task->dest_dir, file_name, nullptr);
+    dest_file = g_build_filename(task->dest_dir.c_str(), file_name, nullptr);
     g_free(file_name);
     vfs_file_task_do_copy(task, src_file, dest_file);
     g_free(dest_file);
@@ -756,13 +757,13 @@ vfs_file_task_move(char* src_file, VFSFileTask* task)
 
     char* file_name = g_path_get_basename(src_file);
 
-    char* dest_file = g_build_filename(task->dest_dir, file_name, nullptr);
+    char* dest_file = g_build_filename(task->dest_dir.c_str(), file_name, nullptr);
 
     g_free(file_name);
 
     struct stat src_stat;
     struct stat dest_stat;
-    if (lstat(src_file, &src_stat) == 0 && stat(task->dest_dir, &dest_stat) == 0)
+    if (lstat(src_file, &src_stat) == 0 && stat(task->dest_dir.c_str(), &dest_stat) == 0)
     {
         /* Not on the same device */
         if (src_stat.st_dev != dest_stat.st_dev)
@@ -893,7 +894,7 @@ vfs_file_task_link(char* src_file, VFSFileTask* task)
         return;
 
     char* file_name = g_path_get_basename(src_file);
-    char* old_dest_file = g_build_filename(task->dest_dir, file_name, nullptr);
+    char* old_dest_file = g_build_filename(task->dest_dir.c_str(), file_name, nullptr);
     g_free(file_name);
     char* dest_file = old_dest_file;
 
@@ -1308,7 +1309,6 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     // another thread because gio adds watches to main loop thread anyway
     char* su = nullptr;
     char* str;
-    int result;
     char* terminal = nullptr;
     char** terminalv = nullptr;
     char* sum_script = nullptr;
@@ -1557,7 +1557,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
 
         // automatic terminal options
         if (strstr(terminal, "xfce4-terminal") || g_str_has_suffix(terminal, "/terminal"))
-            argv[a++] = g_strdup_printf("--disable-server");
+            argv[a++] = g_strdup("--disable-server");
 
         // add option to execute command in terminal
         if (strstr(terminal, "xfce4-terminal") || strstr(terminal, "terminator") ||
@@ -1586,7 +1586,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         {
             if (strcmp(use_su, "/bin/su"))
                 argv[a++] = g_strdup("-u");
-            argv[a++] = const_cast<char*>(task->exec_as_user.c_str());
+            argv[a++] = g_strdup(task->exec_as_user.c_str());
         }
 
         if (!strcmp(use_su, "/bin/su"))
@@ -1676,35 +1676,39 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     if (su)
         g_free(su);
 
+    bool result;
+
     char* first_arg;
     first_arg = g_strdup(argv[0]);
     if (task->exec_sync)
     {
-        result = g_spawn_async_with_pipes(task->dest_dir,
-                                          argv,
-                                          nullptr,
-                                          G_SPAWN_DO_NOT_REAP_CHILD,
-                                          nullptr,
-                                          nullptr,
-                                          &pid,
-                                          nullptr,
-                                          &out,
-                                          &err,
-                                          nullptr);
+        result =
+            g_spawn_async_with_pipes(!task->dest_dir.empty() ? task->dest_dir.c_str() : nullptr,
+                                     argv,
+                                     nullptr,
+                                     G_SPAWN_DO_NOT_REAP_CHILD,
+                                     nullptr,
+                                     nullptr,
+                                     &pid,
+                                     nullptr,
+                                     &out,
+                                     &err,
+                                     nullptr);
     }
     else
     {
-        result = g_spawn_async_with_pipes(task->dest_dir,
-                                          argv,
-                                          nullptr,
-                                          G_SPAWN_DO_NOT_REAP_CHILD,
-                                          nullptr,
-                                          nullptr,
-                                          &pid,
-                                          nullptr,
-                                          nullptr,
-                                          nullptr,
-                                          nullptr);
+        result =
+            g_spawn_async_with_pipes(!task->dest_dir.empty() ? task->dest_dir.c_str() : nullptr,
+                                     argv,
+                                     nullptr,
+                                     G_SPAWN_DO_NOT_REAP_CHILD,
+                                     nullptr,
+                                     nullptr,
+                                     &pid,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr);
     }
 
     print_task_command_spawn(argv, pid);
@@ -1713,6 +1717,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     {
         if (errno)
             LOG_INFO("    result={} ( {} )", errno, g_strerror(errno));
+
         if (!task->exec_keep_tmp && task->exec_sync)
         {
             if (std::filesystem::exists(task->exec_script))
@@ -1870,9 +1875,9 @@ vfs_file_task_thread(VFSFileTask* task)
         size_timeout = g_timeout_add_seconds(5, (GSourceFunc)on_size_timeout, task);
         if (task->type != VFS_FILE_TASK_CHMOD_CHOWN)
         {
-            if (!(task->dest_dir && stat(task->dest_dir, &file_stat) == 0))
+            if (!(!task->dest_dir.empty() && stat(task->dest_dir.c_str(), &file_stat) == 0))
             {
-                vfs_file_task_error(task, errno, "Accessing", task->dest_dir);
+                vfs_file_task_error(task, errno, "Accessing", task->dest_dir.c_str());
                 task->abort = true;
                 goto _exit_thread;
             }
@@ -1911,7 +1916,7 @@ vfs_file_task_thread(VFSFileTask* task)
         }
     }
 
-    if (task->dest_dir && stat(task->dest_dir, &file_stat) != -1)
+    if (!task->dest_dir.empty() && stat(task->dest_dir.c_str(), &file_stat) != -1)
         add_task_dev(task, file_stat.st_dev);
 
     if (task->abort)
@@ -1982,7 +1987,8 @@ vfs_task_new(VFSFileTaskType type, GList* src_files, const char* dest_dir)
 
     task->type = type;
     task->src_paths = src_files;
-    task->dest_dir = g_strdup(dest_dir);
+    if (dest_dir)
+        task->dest_dir = dest_dir;
     // task->current_file = nullptr;
     // task->current_dest = nullptr;
 
@@ -2072,7 +2078,7 @@ vfs_file_task_run(VFSFileTask* task)
             g_free(dir);
         }
         else
-            task->avoid_changes = vfs_volume_dir_avoid_changes(task->dest_dir);
+            task->avoid_changes = vfs_volume_dir_avoid_changes(task->dest_dir.c_str());
 
         task->thread = g_thread_new("task_run", (GThreadFunc)vfs_file_task_thread, task);
     }
@@ -2129,7 +2135,6 @@ vfs_file_task_free(VFSFileTask* task)
         g_list_foreach(task->src_paths, (GFunc)g_free, nullptr);
         g_list_free(task->src_paths);
     }
-    g_free(task->dest_dir);
     g_slist_free(task->devs);
 
     if (task->chmod_actions)
