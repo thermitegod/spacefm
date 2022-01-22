@@ -3212,12 +3212,8 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
     if (!set->plugin)
     {
         char* s1 = clean_label(set->menu_label, true, false);
-        char* s2 = plain_ascii_name(s1);
-        if (s2[0] == '\0')
-        {
-            g_free(s2);
-            s2 = g_strdup("Plugin");
-        }
+        if (!s1)
+            s1 = g_strdup("Plugin");
         char* type;
         if (!strcmp(set->name, "main_book"))
             type = g_strdup_printf("bookmarks");
@@ -3232,10 +3228,9 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
         else
             type = g_strdup_printf("plugin");
 
-        deffile = g_strdup_printf("%s.spacefm-%s.tar.xz", s2, type);
+        deffile = g_strdup_printf("%s.spacefm-%s.tar.xz", s1, type);
 
         g_free(s1);
-        g_free(s2);
         g_free(type);
     }
     else

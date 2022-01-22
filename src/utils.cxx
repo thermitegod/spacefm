@@ -243,18 +243,6 @@ bash_quote(const char* str)
 }
 
 char*
-plain_ascii_name(const char* orig_name)
-{
-    if (!orig_name)
-        return g_strdup("");
-    char* orig = g_strdup(orig_name);
-    g_strcanon(orig, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_", ' ');
-    char* s = replace_string(orig, " ", "", false);
-    g_free(orig);
-    return s;
-}
-
-char*
 clean_label(const char* menu_label, bool kill_special, bool escape)
 {
     char* s1;

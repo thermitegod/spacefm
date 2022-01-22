@@ -24,7 +24,6 @@ void open_in_prog(const char* path);
 
 char* replace_string(const char* orig, const char* str, const char* replace, bool quote);
 char* bash_quote(const char* str);
-char* plain_ascii_name(const char* orig_name);
 char* clean_label(const char* menu_label, bool kill_special, bool convert_amp);
 void string_copy_free(char** s, const char* src);
 char* unescape(const char* t);

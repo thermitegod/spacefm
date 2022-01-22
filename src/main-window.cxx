@@ -261,11 +261,10 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
                 ext = strstr(filename, ".tar.gz");
             if (ext)
                 ext[0] = '\0';
-            char* plug_dir_name = plain_ascii_name(filename);
+            char* plug_dir_name = filename;
             if (ext)
                 ext[0] = '.';
-            g_free(filename);
-            if (plug_dir_name[0] == '\0')
+            if (!plug_dir_name)
             {
                 msg = g_strdup_printf("This plugin's filename is invalid.  Please rename it using "
                                       "alpha-numeric ASCII characters and try again.");
