@@ -873,7 +873,7 @@ xset_get_panel(int panel, const char* name)
 }
 
 XSet*
-xset_get_panel_mode(int panel, const char* name, char mode)
+xset_get_panel_mode(int panel, const char* name, const char mode)
 {
     char* fullname = g_strdup_printf("panel%d_%s%d", panel, name, mode);
     XSet* set = xset_get(fullname);
@@ -917,7 +917,7 @@ xset_get_b_panel(int panel, const char* name)
 }
 
 bool
-xset_get_b_panel_mode(int panel, const char* name, char mode)
+xset_get_b_panel_mode(int panel, const char* name, const char mode)
 {
     char* fullname = g_strdup_printf("panel%d_%s%d", panel, name, mode);
     bool b = xset_get_b(fullname);
@@ -968,7 +968,7 @@ xset_set_b_panel(int panel, const char* name, bool bval)
 }
 
 XSet*
-xset_set_b_panel_mode(int panel, const char* name, char mode, bool bval)
+xset_set_b_panel_mode(int panel, const char* name, const char mode, bool bval)
 {
     char* fullname = g_strdup_printf("panel%d_%s%d", panel, name, mode);
     XSet* set = xset_set_b(fullname, bval);
@@ -1550,7 +1550,7 @@ xset_find_custom(const char* search)
 }
 
 bool
-xset_opener(PtkFileBrowser* file_browser, char job)
+xset_opener(PtkFileBrowser* file_browser, const char job)
 { // find an opener for job
     XSet* set;
     XSet* mset;
@@ -3131,7 +3131,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* path, co
 }
 
 static bool
-xset_custom_export_files(XSet* set, char* plug_dir)
+xset_custom_export_files(XSet* set, const char* plug_dir)
 {
     char* path_src;
     char* path_dest;
@@ -3183,7 +3183,7 @@ xset_custom_export_files(XSet* set, char* plug_dir)
 }
 
 static bool
-xset_custom_export_write(std::string& buf, XSet* set, char* plug_dir)
+xset_custom_export_write(std::string& buf, XSet* set, const char* plug_dir)
 { // recursively write set, submenu sets, and next sets
     xset_write_set(buf, set);
     if (!xset_custom_export_files(set, plug_dir))
@@ -6676,7 +6676,7 @@ xset_color_dialog(GtkWidget* parent, char* title, char* defcolor)
 }
 
 static void
-xset_builtin_tool_activate(char tool_type, XSet* set, GdkEventButton* event)
+xset_builtin_tool_activate(const char tool_type, XSet* set, GdkEventButton* event)
 {
     XSet* set2;
     int p;
@@ -6775,7 +6775,7 @@ xset_builtin_tool_activate(char tool_type, XSet* set, GdkEventButton* event)
 }
 
 const char*
-xset_get_builtin_toolitem_label(unsigned char tool_type)
+xset_get_builtin_toolitem_label(const unsigned char tool_type)
 {
     if (tool_type < XSET_TOOL_DEVICES || tool_type >= XSET_TOOL_INVALID)
         return nullptr;
@@ -6783,7 +6783,7 @@ xset_get_builtin_toolitem_label(unsigned char tool_type)
 }
 
 static XSet*
-xset_new_builtin_toolitem(char tool_type)
+xset_new_builtin_toolitem(const char tool_type)
 {
     if (tool_type < XSET_TOOL_DEVICES || tool_type >= XSET_TOOL_INVALID)
         return nullptr;
