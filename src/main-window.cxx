@@ -4100,15 +4100,15 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
         c->var[CONTEXT_TASK_TYPE] = g_strdup(job_titles[ptask->task->type]);
         if (ptask->task->type == VFS_FILE_TASK_EXEC)
         {
-            c->var[CONTEXT_TASK_NAME] = g_strdup(ptask->task->current_file);
+            c->var[CONTEXT_TASK_NAME] = const_cast<char*>(ptask->task->current_file.c_str());
             c->var[CONTEXT_TASK_DIR] = g_strdup(ptask->task->dest_dir);
         }
         else
         {
             c->var[CONTEXT_TASK_NAME] = g_strdup("");
             ptk_file_task_lock(ptask);
-            if (ptask->task->current_file)
-                c->var[CONTEXT_TASK_DIR] = g_path_get_dirname(ptask->task->current_file);
+            if (!ptask->task->current_file.empty())
+                c->var[CONTEXT_TASK_DIR] = g_path_get_dirname(ptask->task->current_file.c_str());
             else
                 c->var[CONTEXT_TASK_DIR] = g_strdup("");
             ptk_file_task_unlock(ptask);
@@ -4450,7 +4450,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         {
             esc_path = bash_quote(ptask->task->dest_dir);
             buf.append(fmt::format("fm_task_pwd={}\n", esc_path));
-            esc_path = bash_quote(ptask->task->current_file);
+            esc_path = bash_quote(ptask->task->current_file.c_str());
             buf.append(fmt::format("fm_task_name={}\n", esc_path));
             esc_path = bash_quote(ptask->task->exec_command.c_str());
             buf.append(fmt::format("fm_task_command={}\n", esc_path));
@@ -4465,9 +4465,9 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         {
             esc_path = bash_quote(ptask->task->dest_dir);
             buf.append(fmt::format("fm_task_dest_dir={}\n", esc_path));
-            esc_path = bash_quote(ptask->task->current_file);
+            esc_path = bash_quote(ptask->task->current_file.c_str());
             buf.append(fmt::format("fm_task_current_src_file={}\n", esc_path));
-            esc_path = bash_quote(ptask->task->current_dest);
+            esc_path = bash_quote(ptask->task->current_dest.c_str());
             buf.append(fmt::format("fm_task_current_dest_file={}\n", esc_path));
         }
         buf.append(fmt::format("fm_task_id=\"{:p}\"\n", (void*)ptask));
@@ -5359,16 +5359,16 @@ main_task_view_update_task(PtkFileTask* ptask)
             percent = 100;
         if (ptask->task->type != VFS_FILE_TASK_EXEC)
         {
-            if (ptask->task->current_file)
+            if (!ptask->task->current_file.empty())
             {
-                path = g_path_get_dirname(ptask->task->current_file);
-                file = g_path_get_basename(ptask->task->current_file);
+                path = g_path_get_dirname(ptask->task->current_file.c_str());
+                file = g_path_get_basename(ptask->task->current_file.c_str());
             }
         }
         else
         {
             path = g_strdup(ptask->task->dest_dir); // cwd
-            file = g_strdup_printf("( %s )", ptask->task->current_file);
+            file = g_strdup_printf("( %s )", ptask->task->current_file.c_str());
         }
 
         // status

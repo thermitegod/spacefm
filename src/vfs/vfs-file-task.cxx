@@ -187,7 +187,7 @@ check_overwrite(VFSFileTask* task, const char* dest_file, bool* dest_exists, cha
         if (task->overwrite_mode == VFS_FILE_TASK_OVERWRITE_ALL)
         {
             *dest_exists = !lstat(dest_file, &dest_stat);
-            if (!g_strcmp0(task->current_file, task->current_dest))
+            if (task->current_file.compare(task->current_dest))
             {
                 // src and dest are same file - don't overwrite (truncates)
                 // occurs if user pauses task and changes overwrite mode
@@ -263,7 +263,7 @@ check_overwrite(VFSFileTask* task, const char* dest_file, bool* dest_exists, cha
                     case VFS_FILE_TASK_OVERWRITE:
                     case VFS_FILE_TASK_OVERWRITE_ALL:
                         *dest_exists = !lstat(dest_file, &dest_stat);
-                        if (!g_strcmp0(task->current_file, task->current_dest))
+                        if (task->current_file.compare(task->current_dest))
                         {
                             // src and dest are same file - don't overwrite (truncates)
                             // occurs if user pauses task and changes overwrite mode
@@ -360,8 +360,8 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
         return false;
     // LOG_INFO("vfs_file_task_do_copy( {}, {} )", src_file, dest_file);
     vfs_file_task_lock(task);
-    string_copy_free(&task->current_file, src_file);
-    string_copy_free(&task->current_dest, dest_file);
+    task->current_file = src_file;
+    task->current_dest = dest_file;
     task->current_item++;
     vfs_file_task_unlock(task);
 
@@ -382,7 +382,7 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
         {
             dest_file = new_dest_file;
             vfs_file_task_lock(task);
-            string_copy_free(&task->current_dest, dest_file);
+            task->current_dest = dest_file;
             vfs_file_task_unlock(task);
         }
 
@@ -466,7 +466,7 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
             {
                 dest_file = new_dest_file;
                 vfs_file_task_lock(task);
-                string_copy_free(&task->current_dest, dest_file);
+                task->current_dest = dest_file;
                 vfs_file_task_unlock(task);
             }
 
@@ -524,7 +524,7 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
             {
                 dest_file = new_dest_file;
                 vfs_file_task_lock(task);
-                string_copy_free(&task->current_dest, dest_file);
+                task->current_dest = dest_file;
                 vfs_file_task_unlock(task);
             }
 
@@ -649,8 +649,8 @@ vfs_file_task_do_move(VFSFileTask* task, const char* src_file,
         return 0;
 
     vfs_file_task_lock(task);
-    string_copy_free(&task->current_file, src_file);
-    string_copy_free(&task->current_dest, dest_file);
+    task->current_file = src_file;
+    task->current_dest = dest_file;
     task->current_item++;
     vfs_file_task_unlock(task);
 
@@ -677,7 +677,7 @@ vfs_file_task_do_move(VFSFileTask* task, const char* src_file,
     {
         dest_file = new_dest_file;
         vfs_file_task_lock(task);
-        string_copy_free(&task->current_dest, dest_file);
+        task->current_dest = dest_file;
         vfs_file_task_unlock(task);
     }
 
@@ -751,7 +751,7 @@ vfs_file_task_move(char* src_file, VFSFileTask* task)
         return;
 
     vfs_file_task_lock(task);
-    string_copy_free(&task->current_file, src_file);
+    task->current_file = src_file;
     vfs_file_task_unlock(task);
 
     char* file_name = g_path_get_basename(src_file);
@@ -792,7 +792,7 @@ vfs_file_task_trash(char* src_file, VFSFileTask* task)
         return;
 
     vfs_file_task_lock(task);
-    string_copy_free(&task->current_file, src_file);
+    task->current_file = src_file;
     task->current_item++;
     vfs_file_task_unlock(task);
 
@@ -825,7 +825,7 @@ vfs_file_task_delete(char* src_file, VFSFileTask* task)
         return;
 
     vfs_file_task_lock(task);
-    string_copy_free(&task->current_file, src_file);
+    task->current_file = src_file;
     task->current_item++;
     vfs_file_task_unlock(task);
 
@@ -901,8 +901,8 @@ vfs_file_task_link(char* src_file, VFSFileTask* task)
     if (should_abort(task))
         return;
     vfs_file_task_lock(task);
-    string_copy_free(&task->current_file, src_file);
-    string_copy_free(&task->current_dest, old_dest_file);
+    task->current_file = src_file;
+    task->current_dest = old_dest_file;
     task->current_item++;
     vfs_file_task_unlock(task);
 
@@ -928,7 +928,7 @@ vfs_file_task_link(char* src_file, VFSFileTask* task)
     {
         dest_file = new_dest_file;
         vfs_file_task_lock(task);
-        string_copy_free(&task->current_dest, dest_file);
+        task->current_dest = dest_file;
         vfs_file_task_unlock(task);
     }
 
@@ -969,7 +969,7 @@ vfs_file_task_chown_chmod(char* src_file, VFSFileTask* task)
         return;
 
     vfs_file_task_lock(task);
-    string_copy_free(&task->current_file, src_file);
+    task->current_file = src_file;
     task->current_item++;
     vfs_file_task_unlock(task);
     // LOG_DEBUG("chmod_chown: {}", src_file);
@@ -1320,8 +1320,6 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     // task->exec_keep_tmp = true;
 
     vfs_file_task_lock(task);
-    const char* value = task->current_dest; // variable value temp storage
-    task->current_dest = nullptr;
 
     if (task->exec_browser)
         parent = gtk_widget_get_toplevel(GTK_WIDGET(task->exec_browser));
@@ -1329,7 +1327,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         parent = gtk_widget_get_toplevel(GTK_WIDGET(task->exec_desktop));
 
     task->state = VFS_FILE_TASK_RUNNING;
-    string_copy_free(&task->current_file, src_file);
+    task->current_file = src_file;
     task->total_size = 0;
     task->percent = 0;
     vfs_file_task_unlock(task);
@@ -1439,7 +1437,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         if (task->exec_export && (task->exec_browser || task->exec_desktop))
         {
             if (task->exec_browser)
-                main_write_exports(task, value, buf);
+                main_write_exports(task, task->current_dest.c_str(), buf);
             else
                 goto _exit_with_error;
         }
@@ -1834,7 +1832,7 @@ vfs_file_task_thread(VFSFileTask* task)
 
     vfs_file_task_lock(task);
     task->state = VFS_FILE_TASK_RUNNING;
-    string_copy_free(&task->current_file, task->src_paths ? (char*)task->src_paths->data : nullptr);
+    task->current_file = task->src_paths ? (char*)task->src_paths->data : nullptr;
     task->total_size = 0;
     vfs_file_task_unlock(task);
 
@@ -1991,8 +1989,8 @@ vfs_task_new(VFSFileTaskType type, GList* src_files, const char* dest_dir)
     task->type = type;
     task->src_paths = src_files;
     task->dest_dir = g_strdup(dest_dir);
-    task->current_file = nullptr;
-    task->current_dest = nullptr;
+    // task->current_file = nullptr;
+    // task->current_dest = nullptr;
 
     task->recursive = (task->type == VFS_FILE_TASK_COPY || task->type == VFS_FILE_TASK_DELETE);
 
@@ -2138,8 +2136,6 @@ vfs_file_task_free(VFSFileTask* task)
         g_list_free(task->src_paths);
     }
     g_free(task->dest_dir);
-    g_free(task->current_file);
-    g_free(task->current_dest);
     g_slist_free(task->devs);
 
     if (task->chmod_actions)

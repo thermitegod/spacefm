@@ -3479,7 +3479,7 @@ xset_custom_activate(GtkWidget* item, XSet* set)
     GtkWidget* parent;
     GtkWidget* task_view = nullptr;
     const char* cwd;
-    char* value = nullptr;
+    std::string value;
     XSet* mset;
 
     // builtin toolitem?
@@ -3528,13 +3528,13 @@ xset_custom_activate(GtkWidget* item, XSet* set)
     switch (set->menu_style)
     {
         case XSET_MENU_CHECK:
-            value = g_strdup_printf("%d", mset->b == XSET_B_TRUE ? 1 : 0);
+            value = fmt::format("{:d}", mset->b == XSET_B_TRUE ? 1 : 0);
             break;
         case XSET_MENU_STRING:
-            value = g_strdup(mset->s);
+            value = mset->s;
             break;
         default:
-            value = g_strdup(set->menu_label);
+            value = set->menu_label;
             break;
     }
 

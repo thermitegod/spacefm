@@ -745,7 +745,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(label), GTK_ALIGN_CENTER);
     gtk_grid_attach(grid, GTK_WIDGET(label), 0, row, 1, 1);
-    ptask->from = GTK_LABEL(gtk_label_new(ptask->complete ? "" : task->current_file));
+    ptask->from = GTK_LABEL(gtk_label_new(ptask->complete ? "" : task->current_file.c_str()));
     gtk_widget_set_halign(GTK_WIDGET(ptask->from), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(ptask->from), GTK_ALIGN_CENTER);
     gtk_label_set_ellipsize(ptask->from, PANGO_ELLIPSIZE_MIDDLE);
@@ -1031,7 +1031,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         if (task->type != VFS_FILE_TASK_EXEC)
             ufile_path = nullptr;
         else
-            ufile_path = g_markup_printf_escaped("<b>%s</b>", task->current_file);
+            ufile_path = g_markup_printf_escaped("<b>%s</b>", task->current_file.c_str());
 
         if (ptask->aborted)
             window_title = "Stopped";
@@ -1046,17 +1046,17 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         if (!ufile_path)
             ufile_path = g_markup_printf_escaped("<b>( %s )</b>", window_title);
     }
-    else if (task->current_file)
+    else if (!task->current_file.empty())
     {
         if (task->type != VFS_FILE_TASK_EXEC)
         {
             // Copy: <src basename>
-            str = g_filename_display_basename(task->current_file);
+            str = g_filename_display_basename(task->current_file.c_str());
             ufile_path = g_markup_printf_escaped("<b>%s</b>", str);
             g_free(str);
 
             // From: <src_dir>
-            str = g_path_get_dirname(task->current_file);
+            str = g_path_get_dirname(task->current_file.c_str());
             usrc_dir = g_filename_display_name(str);
             g_free(str);
             if (!(usrc_dir[0] == '/' && usrc_dir[1] == '\0'))
@@ -1067,23 +1067,23 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             }
 
             // To: <dest_dir> OR <dest_file>
-            if (task->current_dest)
+            if (!task->current_dest.empty())
             {
-                str = g_path_get_basename(task->current_file);
-                str2 = g_path_get_basename(task->current_dest);
+                str = g_path_get_basename(task->current_file.c_str());
+                str2 = g_path_get_basename(task->current_dest.c_str());
                 if (strcmp(str, str2))
                 {
                     // source and dest filenames differ, user renamed - show all
                     g_free(str);
                     g_free(str2);
-                    udest = g_filename_display_name(task->current_dest);
+                    udest = g_filename_display_name(task->current_dest.c_str());
                 }
                 else
                 {
                     // source and dest filenames same - show dest dir only
                     g_free(str);
                     g_free(str2);
-                    str = g_path_get_dirname(task->current_dest);
+                    str = g_path_get_dirname(task->current_dest.c_str());
                     if (str[0] == '/' && str[1] == '\0')
                         udest = g_filename_display_name(str);
                     else
@@ -1097,7 +1097,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             }
         }
         else
-            ufile_path = g_markup_printf_escaped("<b>%s</b>", task->current_file);
+            ufile_path = g_markup_printf_escaped("<b>%s</b>", task->current_file.c_str());
     }
     else
         ufile_path = nullptr;
@@ -1669,7 +1669,7 @@ on_vfs_file_task_state_cb(VFSFileTask* task, VFSFileTaskState state, void* state
 
             vfs_file_task_lock(task);
             if (task->type != VFS_FILE_TASK_EXEC)
-                string_copy_free(&task->current_file, nullptr);
+                task->current_file.clear();
             ptask->progress_count = 50; // trigger fast display
             vfs_file_task_unlock(task);
             // gtk_signal_emit_by_name( G_OBJECT( ptask->signal_widget ), "task-notify",
@@ -1828,9 +1828,9 @@ query_overwrite_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
                 str = multi_input_get_text(query_input);
             }
             file_name = g_filename_from_utf8(str, -1, nullptr, nullptr, nullptr);
-            if (str && file_name && ptask->task->current_dest)
+            if (str && file_name && !ptask->task->current_dest.empty())
             {
-                dir_name = g_path_get_dirname(ptask->task->current_dest);
+                dir_name = g_path_get_dirname(ptask->task->current_dest.c_str());
                 *ptask->query_new_dest = g_build_filename(dir_name, file_name, nullptr);
                 g_free(file_name);
                 g_free(dir_name);
@@ -1934,10 +1934,10 @@ query_overwrite(PtkFileTask* ptask)
     else
         from_disp = "Copying from directory:";
 
-    different_files = (0 != g_strcmp0(ptask->task->current_file, ptask->task->current_dest));
+    different_files = (0 != ptask->task->current_file.compare(ptask->task->current_dest));
 
-    lstat(ptask->task->current_file, &src_stat);
-    lstat(ptask->task->current_dest, &dest_stat);
+    lstat(ptask->task->current_file.c_str(), &src_stat);
+    lstat(ptask->task->current_dest.c_str(), &dest_stat);
 
     is_src_dir = !!S_ISDIR(dest_stat.st_mode);
     is_dest_dir = !!S_ISDIR(src_stat.st_mode);
@@ -2054,11 +2054,11 @@ query_overwrite(PtkFileTask* ptask)
 
     // filenames
     char* ext;
-    char* base_name = g_path_get_basename(ptask->task->current_dest);
+    char* base_name = g_path_get_basename(ptask->task->current_dest.c_str());
     char* base_name_disp = g_filename_display_name(base_name); // auto free
-    char* src_dir = g_path_get_dirname(ptask->task->current_file);
+    char* src_dir = g_path_get_dirname(ptask->task->current_file.c_str());
     char* src_dir_disp = g_filename_display_name(src_dir);
-    char* dest_dir = g_path_get_dirname(ptask->task->current_dest);
+    char* dest_dir = g_path_get_dirname(ptask->task->current_dest.c_str());
     char* dest_dir_disp = g_filename_display_name(dest_dir);
 
     char* name = get_name_extension(base_name, S_ISDIR(dest_stat.st_mode), &ext);

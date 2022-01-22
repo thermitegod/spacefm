@@ -113,8 +113,8 @@ struct VFSFileTask
     unsigned int current_item;
     int err_count;
 
-    char* current_file; /* copy of Current processed file */
-    char* current_dest; /* copy of Current destination file */
+    std::string current_file; // copy of Current processed file
+    std::string current_dest; // copy of Current destination file
 
     int error;
     bool error_first;
