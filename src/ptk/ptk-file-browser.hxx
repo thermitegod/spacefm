@@ -139,7 +139,7 @@ struct PtkFileBrowserClass
     GtkPanedClass parent;
 
     /* Default signal handlers */
-    void (*before_chdir)(PtkFileBrowser* file_browser, const char* path, bool* cancel);
+    void (*before_chdir)(PtkFileBrowser* file_browser, const char* path);
     void (*begin_chdir)(PtkFileBrowser* file_browser);
     void (*after_chdir)(PtkFileBrowser* file_browser);
     void (*open_item)(PtkFileBrowser* file_browser, const char* path, int action);

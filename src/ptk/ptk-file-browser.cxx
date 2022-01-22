@@ -99,8 +99,7 @@ static void on_folder_view_drag_end(GtkWidget* widget, GdkDragContext* drag_cont
                                     PtkFileBrowser* file_browser);
 
 /* Default signal handlers */
-static void ptk_file_browser_before_chdir(PtkFileBrowser* file_browser, const char* path,
-                                          bool* cancel);
+static void ptk_file_browser_before_chdir(PtkFileBrowser* file_browser, const char* path);
 static void ptk_file_browser_after_chdir(PtkFileBrowser* file_browser);
 static void ptk_file_browser_content_change(PtkFileBrowser* file_browser);
 static void ptk_file_browser_sel_change(PtkFileBrowser* file_browser);
@@ -175,43 +174,6 @@ ptk_file_browser_get_type()
     return type;
 }
 
-/* These g_cclosure_marshal functions are from gtkmarshal.c, the deprecated
- * functions renamed from gtk_* to g_cclosure_*, to match the naming convention
- * of the non-deprecated glib functions.   Added for gtk3 port. */
-static void
-g_cclosure_marshal_VOID__POINTER_POINTER(GClosure* closure, GValue* return_value G_GNUC_UNUSED,
-                                         unsigned int n_param_values, const GValue* param_values,
-                                         void* invocation_hint G_GNUC_UNUSED, void* marshal_data)
-{
-    GCClosure* cc = (GCClosure*)closure;
-    void* data1;
-    void* data2;
-
-    g_return_if_fail(n_param_values == 3);
-
-    if (G_CCLOSURE_SWAP_DATA(closure))
-    {
-        data1 = closure->data;
-        data2 = g_value_peek_pointer(param_values + 0);
-    }
-    else
-    {
-        data1 = g_value_peek_pointer(param_values + 0);
-        data2 = closure->data;
-    }
-
-    typedef void (
-        *GMarshalFunc_VOID__POINTER_POINTER)(void* data1, void* arg_1, void* arg_2, void* data2);
-
-    GMarshalFunc_VOID__POINTER_POINTER callback =
-        (GMarshalFunc_VOID__POINTER_POINTER)(marshal_data ? marshal_data : cc->callback);
-
-    callback(data1,
-             g_value_get_pointer(param_values + 1),
-             g_value_get_pointer(param_values + 2),
-             data2);
-}
-
 static void
 g_cclosure_marshal_VOID__POINTER_INT(GClosure* closure, GValue* return_value,
                                      unsigned int n_param_values, const GValue* param_values,
@@ -266,21 +228,17 @@ ptk_file_browser_class_init(PtkFileBrowserClass* klass)
     klass->sel_change = ptk_file_browser_sel_change;
     klass->pane_mode_change = ptk_file_browser_pane_mode_change;
 
-    /* before-chdir is emitted when PtkFileBrowser is about to change
-     * its working directory. The 1st param is the path of the dir (in UTF-8),
-     * and the 2nd param is a bool*, which can be filled by the
-     * signal handler with true to cancel the operation.
-     */
+    // before-chdir is emitted when PtkFileBrowser is about to change
+    // its working directory. The param is the path of the dir (in UTF-8),
     signals[BEFORE_CHDIR_SIGNAL] = g_signal_new("before-chdir",
                                                 G_TYPE_FROM_CLASS(klass),
                                                 G_SIGNAL_RUN_LAST,
                                                 G_STRUCT_OFFSET(PtkFileBrowserClass, before_chdir),
                                                 nullptr,
                                                 nullptr,
-                                                g_cclosure_marshal_VOID__POINTER_POINTER,
+                                                g_cclosure_marshal_VOID__POINTER,
                                                 G_TYPE_NONE,
-                                                2,
-                                                G_TYPE_POINTER,
+                                                1,
                                                 G_TYPE_POINTER);
 
     signals[BEGIN_CHDIR_SIGNAL] = g_signal_new("begin-chdir",
@@ -5479,11 +5437,10 @@ ptk_file_browser_get_n_sel(PtkFileBrowser* file_browser, uint64_t* sel_size)
 }
 
 static void
-ptk_file_browser_before_chdir(PtkFileBrowser* file_browser, const char* path, bool* cancel)
+ptk_file_browser_before_chdir(PtkFileBrowser* file_browser, const char* path)
 {
     (void)file_browser;
     (void)path;
-    (void)cancel;
 }
 
 static void
