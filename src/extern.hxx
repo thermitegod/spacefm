@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include <glib.h>
-
 static const char* terminal_programs[] = // for pref-dialog.c
     {"terminal",
      "xfce4-terminal",
