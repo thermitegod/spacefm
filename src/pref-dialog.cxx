@@ -100,7 +100,6 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
     bool single_click;
     bool root_bar;
     bool root_set_change = false;
-    const GList* l;
     PtkFileBrowser* file_browser;
     bool use_si_prefix;
     GtkNotebook* notebook;
@@ -129,12 +128,11 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         {
             app_settings.always_show_tabs = always_show_tabs;
             // update all windows/all panels
-            for (l = fm_main_window_get_all(); l; l = l->next)
+            for (FMMainWindow* window: fm_main_window_get_all())
             {
-                a_window = static_cast<FMMainWindow*>(l->data);
                 for (p = 1; p < 5; p++)
                 {
-                    notebook = GTK_NOTEBOOK(a_window->panel[p - 1]);
+                    notebook = GTK_NOTEBOOK(window->panel[p - 1]);
                     n = gtk_notebook_get_n_pages(notebook);
                     if (always_show_tabs)
                         gtk_notebook_set_show_tabs(notebook, true);
@@ -149,19 +147,18 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         {
             app_settings.show_close_tab_buttons = hide_close_tab_buttons;
             // update all windows/all panels/all browsers
-            for (l = fm_main_window_get_all(); l; l = l->next)
+            for (FMMainWindow* window: fm_main_window_get_all())
             {
-                a_window = static_cast<FMMainWindow*>(l->data);
                 for (p = 1; p < 5; p++)
                 {
-                    notebook = GTK_NOTEBOOK(a_window->panel[p - 1]);
+                    notebook = GTK_NOTEBOOK(window->panel[p - 1]);
                     n = gtk_notebook_get_n_pages(notebook);
                     for (i = 0; i < n; ++i)
                     {
                         file_browser = PTK_FILE_BROWSER(gtk_notebook_get_nth_page(notebook, i));
-                        tab_label = fm_main_window_create_tab_label(a_window, file_browser);
+                        tab_label = fm_main_window_create_tab_label(window, file_browser);
                         gtk_notebook_set_tab_label(notebook, GTK_WIDGET(file_browser), tab_label);
-                        fm_main_window_update_tab_label(a_window,
+                        fm_main_window_update_tab_label(window,
                                                         file_browser,
                                                         file_browser->dir->disp_path);
                     }
@@ -206,12 +203,11 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             app_settings.small_icon_size = small_icon;
 
             // update all windows/all panels/all browsers
-            for (l = fm_main_window_get_all(); l; l = l->next)
+            for (FMMainWindow* window: fm_main_window_get_all())
             {
-                a_window = static_cast<FMMainWindow*>(l->data);
                 for (p = 1; p < 5; p++)
                 {
-                    notebook = GTK_NOTEBOOK(a_window->panel[p - 1]);
+                    notebook = GTK_NOTEBOOK(window->panel[p - 1]);
                     n = gtk_notebook_get_n_pages(notebook);
                     for (i = 0; i < n; ++i)
                     {
@@ -270,12 +266,11 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         {
             app_settings.single_click = single_click;
             // update all windows/all panels/all browsers
-            for (l = fm_main_window_get_all(); l; l = l->next)
+            for (FMMainWindow* window: fm_main_window_get_all())
             {
-                a_window = static_cast<FMMainWindow*>(l->data);
                 for (p = 1; p < 5; p++)
                 {
-                    notebook = GTK_NOTEBOOK(a_window->panel[p - 1]);
+                    notebook = GTK_NOTEBOOK(window->panel[p - 1]);
                     n = gtk_notebook_get_n_pages(notebook);
                     for (i = 0; i < n; ++i)
                     {
@@ -292,12 +287,11 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         {
             app_settings.no_single_hover = no_single_hover;
             // update all windows/all panels/all browsers
-            for (l = fm_main_window_get_all(); l; l = l->next)
+            for (FMMainWindow* window: fm_main_window_get_all())
             {
-                a_window = static_cast<FMMainWindow*>(l->data);
                 for (p = 1; p < 5; p++)
                 {
-                    notebook = GTK_NOTEBOOK(a_window->panel[p - 1]);
+                    notebook = GTK_NOTEBOOK(window->panel[p - 1]);
                     n = gtk_notebook_get_n_pages(notebook);
                     for (i = 0; i < n; ++i)
                     {

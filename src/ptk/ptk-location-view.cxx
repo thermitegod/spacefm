@@ -143,14 +143,12 @@ static void
 update_change_detection()
 {
     // update all windows/all panels/all browsers
-    const GList* l;
-    for (l = fm_main_window_get_all(); l; l = l->next)
+    for (FMMainWindow* window: fm_main_window_get_all())
     {
-        FMMainWindow* a_window = static_cast<FMMainWindow*>(l->data);
         int p;
         for (p = 1; p < 5; p++)
         {
-            GtkNotebook* notebook = GTK_NOTEBOOK(a_window->panel[p - 1]);
+            GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
             int n = gtk_notebook_get_n_pages(notebook);
             int i;
             for (i = 0; i < n; ++i)

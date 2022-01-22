@@ -7,6 +7,8 @@
 #include <string>
 #include <filesystem>
 
+#include <vector>
+
 #include "window-reference.hxx"
 
 #include <gdk/gdkx.h>
@@ -102,7 +104,8 @@ static bool idle_set_task_height(FMMainWindow* main_window);
 static GtkWindowClass* parent_class = nullptr;
 
 static int n_windows = 0;
-static GList* all_windows = nullptr;
+
+static std::vector<FMMainWindow*> all_windows;
 
 static unsigned int theme_change_notify = 0;
 
@@ -163,15 +166,15 @@ fm_main_window_class_init(FMMainWindowClass* klass)
 static bool
 on_configure_evt_timer(FMMainWindow* main_window)
 {
+    if (all_windows.empty())
+        return false;
+
     // verify main_window still valid
-    GList* l;
-    for (l = all_windows; l; l = l->next)
+    for (FMMainWindow* window: all_windows)
     {
-        if (static_cast<FMMainWindow*>(l->data) == main_window)
+        if (window == main_window)
             break;
     }
-    if (!l)
-        return false;
 
     if (main_window->configure_evt_timer)
     {
@@ -624,14 +627,12 @@ on_quit_activate(GtkMenuItem* menuitem, void* user_data)
 void
 main_window_rubberband_all()
 {
-    GList* l;
-    for (l = all_windows; l; l = l->next)
+    for (FMMainWindow* window: all_windows)
     {
-        FMMainWindow* main_window = static_cast<FMMainWindow*>(l->data);
         int p;
         for (p = 1; p < 5; p++)
         {
-            GtkWidget* notebook = main_window->panel[p - 1];
+            GtkWidget* notebook = window->panel[p - 1];
             int num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
             int i;
             for (i = 0; i < num_pages; i++)
@@ -651,14 +652,11 @@ main_window_rubberband_all()
 void
 main_window_refresh_all()
 {
-    GList* l;
-
-    for (l = all_windows; l; l = l->next)
+    for (FMMainWindow* window: all_windows)
     {
-        FMMainWindow* main_window = static_cast<FMMainWindow*>(l->data);
         for (int p = 1; p < 5; p++)
         {
-            int64_t notebook = (int64_t)main_window->panel[p - 1];
+            int64_t notebook = (int64_t)window->panel[p - 1];
             int num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
             for (int i = 0; i < num_pages; i++)
             {
@@ -704,18 +702,18 @@ static void
 update_window_icons(GtkIconTheme* theme, GtkWindow* window)
 {
     (void)window;
-    g_list_foreach(all_windows, (GFunc)update_window_icon, theme);
+    for (FMMainWindow* window2: all_windows)
+    {
+        update_window_icon(GTK_WINDOW(window2), theme);
+    }
 }
 
 static void
 on_main_icon()
 {
-    GList* l;
-    FMMainWindow* a_window;
-    for (l = all_windows; l; l = l->next)
+    for (FMMainWindow* window: all_windows)
     {
-        a_window = static_cast<FMMainWindow*>(l->data);
-        update_window_icon(GTK_WINDOW(a_window), gtk_icon_theme_get_default());
+        update_window_icon(GTK_WINDOW(window), gtk_icon_theme_get_default());
     }
 }
 
@@ -739,15 +737,12 @@ main_design_mode(GtkMenuItem* menuitem, FMMainWindow* main_window)
 void
 main_window_bookmark_changed(const char* changed_set_name)
 {
-    GList* l;
-
-    for (l = all_windows; l; l = l->next)
+    for (FMMainWindow* window: all_windows)
     {
-        FMMainWindow* main_window = static_cast<FMMainWindow*>(l->data);
         int p;
         for (p = 1; p < 5; p++)
         {
-            GtkWidget* notebook = main_window->panel[p - 1];
+            GtkWidget* notebook = window->panel[p - 1];
             int num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
             int i;
             for (i = 0; i < num_pages; i++)
@@ -784,14 +779,12 @@ main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser)
         ptk_file_browser_rebuild_toolbars(file_browser);
 
     // do all windows all panels all tabs
-    GList* l;
-    for (l = all_windows; l; l = l->next)
+    for (FMMainWindow* window: all_windows)
     {
-        FMMainWindow* a_window = static_cast<FMMainWindow*>(l->data);
         int p;
         for (p = 1; p < 5; p++)
         {
-            GtkWidget* notebook = a_window->panel[p - 1];
+            GtkWidget* notebook = window->panel[p - 1];
             int pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
             int cur_tabx;
             for (cur_tabx = 0; cur_tabx < pages; cur_tabx++)
@@ -810,14 +803,12 @@ void
 main_window_update_all_bookmark_views()
 {
     // do all windows all panels all tabs
-    GList* l;
-    for (l = all_windows; l; l = l->next)
+    for (FMMainWindow* window: all_windows)
     {
-        FMMainWindow* a_window = static_cast<FMMainWindow*>(l->data);
         int p;
         for (p = 1; p < 5; p++)
         {
-            GtkWidget* notebook = a_window->panel[p - 1];
+            GtkWidget* notebook = window->panel[p - 1];
             int pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
             int cur_tabx;
             for (cur_tabx = 0; cur_tabx < pages; cur_tabx++)
@@ -845,13 +836,11 @@ update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser)
     ptk_file_browser_update_views(nullptr, file_browser);
 
     // do other windows
-    GList* l;
-    for (l = all_windows; l; l = l->next)
+    for (FMMainWindow* window: all_windows)
     {
-        FMMainWindow* a_window = static_cast<FMMainWindow*>(l->data);
-        if (gtk_widget_get_visible(a_window->panel[p - 1]))
+        if (gtk_widget_get_visible(window->panel[p - 1]))
         {
-            GtkWidget* notebook = a_window->panel[p - 1];
+            GtkWidget* notebook = window->panel[p - 1];
             int cur_tabx = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
             if (cur_tabx != -1)
             {
@@ -872,14 +861,12 @@ main_window_toggle_thumbnails_all_windows()
     app_settings.show_thumbnail = !app_settings.show_thumbnail;
 
     // update all windows/all panels/all browsers
-    GList* l;
-    for (l = all_windows; l; l = l->next)
+    for (FMMainWindow* window: all_windows)
     {
-        FMMainWindow* a_window = static_cast<FMMainWindow*>(l->data);
         int p;
         for (p = 1; p < 5; p++)
         {
-            GtkNotebook* notebook = GTK_NOTEBOOK(a_window->panel[p - 1]);
+            GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
             int n = gtk_notebook_get_n_pages(notebook);
             int i;
             for (i = 0; i < n; ++i)
@@ -1009,12 +996,10 @@ show_panels_all_windows(GtkMenuItem* item, FMMainWindow* main_window)
 
     // do other windows
     main_window->panel_change = false; // don't save columns for other windows
-    GList* l;
-    for (l = all_windows; l; l = l->next)
+    for (FMMainWindow* window: all_windows)
     {
-        FMMainWindow* a_window = static_cast<FMMainWindow*>(l->data);
-        if (main_window != a_window)
-            show_panels(nullptr, a_window);
+        if (main_window != window)
+            show_panels(nullptr, window);
     }
 
     autosave_request();
@@ -1623,7 +1608,7 @@ fm_main_window_init(FMMainWindow* main_window)
 
     /* Add to total window count */
     ++n_windows;
-    all_windows = g_list_prepend(all_windows, main_window);
+    all_windows.push_back(main_window);
 
     WindowReference::increase();
 
@@ -1863,7 +1848,8 @@ fm_main_window_init(FMMainWindow* main_window)
 static void
 fm_main_window_finalize(GObject* obj)
 {
-    all_windows = g_list_remove(all_windows, obj);
+    all_windows.erase(std::remove(all_windows.begin(), all_windows.end(), FM_MAIN_WINDOW(obj)),
+                      all_windows.end());
     --n_windows;
 
     g_object_unref((FM_MAIN_WINDOW(obj))->wgroup);
@@ -3369,18 +3355,6 @@ on_main_window_focus(GtkWidget* main_window, GdkEventFocus* event, void* user_da
     // rebuild_menus is already running
     // but this unneeded anyway?  cross-window menu changes seem to work ok
     // rebuild_menus( main_window );  // xset may change in another window
-
-    if (all_windows->data != (void*)main_window)
-    {
-        GList* active = g_list_find(all_windows, main_window);
-        if (active)
-        {
-            all_windows = g_list_remove_link(all_windows, active);
-            all_windows->prev = active;
-            active->next = all_windows;
-            all_windows = active;
-        }
-    }
     if (event_handler.win_focus->s || event_handler.win_focus->ob2_data)
         main_window_event(FM_MAIN_WINDOW(main_window),
                           event_handler.win_focus,
@@ -3643,10 +3617,12 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
 FMMainWindow*
 fm_main_window_get_last_active()
 {
-    return all_windows ? static_cast<FMMainWindow*>(all_windows->data) : nullptr;
+    if (!all_windows.empty())
+        return all_windows.at(0);
+    return nullptr;
 }
 
-const GList*
+const std::vector<FMMainWindow*>
 fm_main_window_get_all()
 {
     return all_windows;
@@ -3725,14 +3701,13 @@ fm_main_window_get_on_current_desktop()
     if (cur_desktop == -1)
         return fm_main_window_get_last_active(); // revert to dumb if no current
 
-    GList* l;
     bool invalid = false;
-    for (l = all_windows; l; l = l->next)
+    for (FMMainWindow* window: all_windows)
     {
-        desktop = get_desktop_index(GTK_WINDOW(static_cast<FMMainWindow*>(l->data)));
-        // LOG_INFO( "    test win {:p} = {}", static_cast<FMMainWindow*>(l->data), desktop);
+        desktop = get_desktop_index(GTK_WINDOW(window));
+        // LOG_INFO( "    test win {:p} = {}", window, desktop);
         if (desktop == cur_desktop || desktop > 254 /* 255 == all desktops */)
-            return static_cast<FMMainWindow*>(l->data);
+            return window;
         else if (desktop == -1 && !invalid)
             invalid = true;
     }
@@ -4175,11 +4150,10 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
 static FMMainWindow*
 get_task_view_window(GtkWidget* view)
 {
-    GList* l;
-    for (l = all_windows; l; l = l->next)
+    for (FMMainWindow* window: all_windows)
     {
-        if ((static_cast<FMMainWindow*>(l->data))->task_view == view)
-            return static_cast<FMMainWindow*>(l->data);
+        if (window->task_view == view)
+            return window;
     }
     return nullptr;
 }
@@ -5884,12 +5858,12 @@ main_window_socket_command(char* argv[], char** reply)
     else
     {
         main_window = nullptr;
-        for (l = all_windows; l; l = l->next)
+        for (FMMainWindow* window2: all_windows)
         {
-            str = g_strdup_printf("%p", l->data);
+            str = g_strdup_printf("%p", window2);
             if (!strcmp(str, window))
             {
-                main_window = static_cast<FMMainWindow*>(l->data);
+                main_window = window2;
                 g_free(str);
                 break;
             }
