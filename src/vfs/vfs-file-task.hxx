@@ -150,7 +150,7 @@ struct VFSFileTask
     char* exec_argv[7]; // for exec_direct, command ignored
                         // for su commands, must use bash -c
                         // as su does not execute binaries
-    char* exec_script;
+    std::string exec_script;
     bool exec_keep_tmp; // diagnostic to keep temp files
     void* exec_browser;
     void* exec_desktop;

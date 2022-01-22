@@ -1167,8 +1167,8 @@ cb_exec_child_watch(GPid pid, int status, VFSFileTask* task)
 
     if (!task->exec_keep_tmp)
     {
-        if (task->exec_script)
-            unlink(task->exec_script);
+        if (std::filesystem::exists(task->exec_script))
+            std::filesystem::remove(task->exec_script);
     }
     LOG_INFO("child finished  pid={} exit_status={}",
              pid,
@@ -1260,7 +1260,7 @@ _unref_channel:
 }
 
 static char*
-get_xxhash(char* path)
+get_xxhash(const char* path)
 {
     const char* xxhash = g_find_program_in_path("/usr/bin/xxh128sum");
     if (!xxhash)
@@ -1308,7 +1308,6 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     // another thread because gio adds watches to main loop thread anyway
     char* su = nullptr;
     char* str;
-    char* hexname;
     int result;
     char* terminal = nullptr;
     char** terminalv = nullptr;
@@ -1420,11 +1419,8 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         // get script name
         do
         {
-            if (task->exec_script)
-                g_free(task->exec_script);
-            hexname = g_strdup_printf("%s-tmp.sh", randhex8());
-            task->exec_script = g_build_filename(tmp, hexname, nullptr);
-            g_free(hexname);
+            std::string hexname = fmt::format("{}-tmp.sh", randhex8());
+            task->exec_script = g_build_filename(tmp, hexname.c_str(), nullptr);
         } while (std::filesystem::exists(task->exec_script));
 
         // open buffer
@@ -1522,11 +1518,11 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         file.close();
 
         // set permissions
-        chmod(task->exec_script, 0700);
+        chmod(task->exec_script.c_str(), 0700);
 
         // use checksum
         if (geteuid() != 0 && (task->exec_as_user || task->exec_checksum))
-            sum_script = get_xxhash(task->exec_script);
+            sum_script = get_xxhash(task->exec_script.c_str());
     }
 
     task->percent = 50;
@@ -1626,7 +1622,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
                                         BASHPATH,
                                         auth,
                                         !g_strcmp0(task->exec_as_user, "root") ? " root" : "",
-                                        task->exec_script,
+                                        task->exec_script.c_str(),
                                         sum_script);
             g_free(auth);
         }
@@ -1636,7 +1632,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
             argv[a++] = auth;
             if (!g_strcmp0(task->exec_as_user, "root"))
                 argv[a++] = g_strdup("root");
-            argv[a++] = g_strdup(task->exec_script);
+            argv[a++] = g_strdup(task->exec_script.c_str());
             argv[a++] = g_strdup(sum_script);
         }
         g_free(sum_script);
@@ -1668,12 +1664,12 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     {
         if (single_arg)
         {
-            argv[a++] = g_strdup_printf("%s %s run", BASHPATH, task->exec_script);
+            argv[a++] = g_strdup_printf("%s %s run", BASHPATH, task->exec_script.c_str());
         }
         else
         {
             argv[a++] = g_strdup(BASHPATH);
-            argv[a++] = g_strdup(task->exec_script);
+            argv[a++] = g_strdup(task->exec_script.c_str());
             argv[a++] = g_strdup("run");
         }
     }
@@ -1721,8 +1717,8 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
             LOG_INFO("    result={} ( {} )", errno, g_strerror(errno));
         if (!task->exec_keep_tmp && task->exec_sync)
         {
-            if (task->exec_script)
-                unlink(task->exec_script);
+            if (std::filesystem::exists(task->exec_script))
+                std::filesystem::remove(task->exec_script);
         }
         str = g_strdup_printf(
             "Error executing '%s'\nSee stdout (run spacefm in a terminal) for debug info",
@@ -1741,8 +1737,8 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         // task can be destroyed while this watch is still active
         g_child_watch_add(pid,
                           (GChildWatchFunc)cb_exec_child_cleanup,
-                          !task->exec_keep_tmp && !task->exec_direct && task->exec_script
-                              ? g_strdup(task->exec_script)
+                          !task->exec_keep_tmp && !task->exec_direct && task->exec_script.c_str()
+                              ? g_strdup(task->exec_script.c_str())
                               : nullptr);
         call_state_callback(task, VFS_FILE_TASK_FINISH);
         return;
@@ -1793,8 +1789,8 @@ _exit_with_error:
 
     if (!task->exec_keep_tmp)
     {
-        if (task->exec_script)
-            unlink(task->exec_script);
+        if (std::filesystem::exists(task->exec_script))
+            std::filesystem::remove(task->exec_script);
     }
 _exit_with_error_lean:
     g_strfreev(terminalv);
@@ -2012,7 +2008,7 @@ vfs_task_new(VFSFileTaskType type, GList* src_files, const char* dest_dir)
     task->exec_direct = false;
     task->exec_as_user = nullptr;
     task->exec_icon = nullptr;
-    task->exec_script = nullptr;
+    // task->exec_script = nullptr;
     task->exec_keep_tmp = false;
     task->exec_browser = nullptr;
     task->exec_desktop = nullptr;
@@ -2143,8 +2139,6 @@ vfs_file_task_free(VFSFileTask* task)
 
     if (task->exec_as_user)
         g_free(task->exec_as_user);
-    if (task->exec_script)
-        g_free(task->exec_script);
 
     vfs_file_task_clear(task);
 
