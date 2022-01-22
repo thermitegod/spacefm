@@ -547,15 +547,9 @@ on_open_current_folder_as_root(GtkMenuItem* menuitem, void* user_data)
                                           ptk_file_browser_get_cwd(file_browser),
                                           GTK_WIDGET(file_browser),
                                           file_browser->task_view);
-    char* prog = g_find_program_in_path(g_get_prgname());
-    if (!prog)
-        prog = g_strdup(g_get_prgname());
-    if (!prog)
-        prog = g_strdup("spacefm");
-    char* cwd = bash_quote(ptk_file_browser_get_cwd(file_browser));
-    task->task->exec_command = g_strdup_printf("HOME=/root %s %s", prog, cwd);
-    g_free(prog);
-    g_free(cwd);
+    const std::string prog = g_get_prgname();
+    const std::string cwd = bash_quote(ptk_file_browser_get_cwd(file_browser));
+    task->task->exec_command = fmt::format("HOME=/root {} {}", prog, cwd);
     task->task->exec_as_user = g_strdup("root");
     task->task->exec_sync = false;
     task->task->exec_export = false;
@@ -584,15 +578,12 @@ main_window_open_terminal(FMMainWindow* main_window, bool as_root)
     }
 
     // task
-    char* terminal = g_find_program_in_path(main_term);
-    if (!terminal)
-        terminal = g_strdup(main_term);
     PtkFileTask* task = ptk_file_exec_new("Open Terminal",
                                           ptk_file_browser_get_cwd(file_browser),
                                           GTK_WIDGET(file_browser),
                                           file_browser->task_view);
 
-    task->task->exec_command = terminal;
+    task->task->exec_command = g_find_program_in_path(main_term);
     task->task->exec_as_user = as_root ? g_strdup("root") : nullptr;
     task->task->exec_sync = false;
     task->task->exec_export = true;
@@ -4481,7 +4472,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
             esc_path = bash_quote(ptask->task->current_file);
             buf.append(fmt::format("fm_task_name={}\n", esc_path));
             g_free(esc_path);
-            esc_path = bash_quote(ptask->task->exec_command);
+            esc_path = bash_quote(ptask->task->exec_command.c_str());
             buf.append(fmt::format("fm_task_command={}\n", esc_path));
             g_free(esc_path);
             if (ptask->task->exec_as_user)
@@ -7057,17 +7048,17 @@ main_window_socket_command(char* argv[], char** reply)
                 *reply = g_strdup_printf("spacefm: %s requires two arguments\n", argv[0]);
                 return 1;
             }
-            GString* gcmd = g_string_new(argv[j]);
+            std::string cmd = "";
             while (argv[++j])
-                g_string_append_printf(gcmd, " %s", argv[j]);
+                cmd.append(fmt::format(" {}", argv[j]));
 
             PtkFileTask* ptask =
-                ptk_file_exec_new(opt_title ? opt_title : gcmd->str,
+                ptk_file_exec_new(opt_title ? opt_title : cmd.c_str(),
                                   opt_cwd ? opt_cwd : ptk_file_browser_get_cwd(file_browser),
                                   GTK_WIDGET(file_browser),
                                   file_browser->task_view);
             ptask->task->exec_browser = file_browser;
-            ptask->task->exec_command = g_string_free(gcmd, false);
+            ptask->task->exec_command = cmd;
             ptask->task->exec_as_user = g_strdup(opt_user);
             ptask->task->exec_icon = g_strdup(opt_icon);
             ptask->task->exec_terminal = opt_terminal;
@@ -7191,7 +7182,7 @@ main_window_socket_command(char* argv[], char** reply)
 
             // Create command
             bool run_in_terminal = false;
-            char* cmd = nullptr;
+            std::string cmd;
             if (vol)
             {
                 // mount/unmount vol
@@ -7222,7 +7213,7 @@ main_window_socket_command(char* argv[], char** reply)
                 g_free(netmount->path);
                 g_slice_free(netmount_t, netmount);
             }
-            if (!cmd)
+            if (cmd.empty())
             {
                 *reply = g_strdup_printf("spacefm: invalid TARGET '%s'\n", argv[j]);
                 return 2;
@@ -7473,7 +7464,6 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
           int panel, int tab, const char* focus, int keyval, int button, int state, bool visible,
           XSet* set, char* ucmd)
 {
-    char* cmd;
     bool inhibit;
     char* argv[4];
     int exit_status;
@@ -7492,6 +7482,8 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
     if (!preset &&
         (!strcmp(event, "evt_start") || !strcmp(event, "evt_exit") || !strcmp(event, "evt_device")))
     {
+        char* cmd;
+
         cmd = replace_string(ucmd, "%e", event, false);
         if (!strcmp(event, "evt_device"))
         {
@@ -7562,7 +7554,7 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
     var[0] = '%';
     var[2] = '\0';
     int i = 0;
-    cmd = nullptr;
+    std::string cmd;
     while (replace[i])
     {
         /*
@@ -7578,7 +7570,7 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
         %d  cwd
         */
         var[1] = replace[i];
-        str = cmd;
+        str = (char*)cmd.c_str();
         if (var[1] == 'e')
             cmd = replace_string(ucmd, var, event, false);
         else if (strstr(str, var))
@@ -7637,7 +7629,6 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
                 default:
                     // failsafe
                     g_free(str);
-                    g_free(cmd);
                     return false;
                     break;
             }
@@ -7654,7 +7645,7 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
             // file_browser becomes invalid so spawn
             argv[0] = g_strdup("bash");
             argv[1] = g_strdup("-c");
-            argv[2] = cmd;
+            argv[2] = (char*)cmd.c_str();
             argv[3] = nullptr;
             g_spawn_async(nullptr,
                           argv,
@@ -7684,7 +7675,7 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
 
     argv[0] = g_strdup("bash");
     argv[1] = g_strdup("-c");
-    argv[2] = cmd;
+    argv[2] = (char*)cmd.c_str();
     argv[3] = nullptr;
     LOG_INFO("REPLACE_EVENT {} >>> {}", event, argv[2]);
     inhibit = false;

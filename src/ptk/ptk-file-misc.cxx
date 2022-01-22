@@ -2853,12 +2853,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 if (overwrite)
                 {
                     task->task->exec_command =
-                        g_strdup_printf("%sln -sf %s %s", root_mkdir, from_path, to_path);
+                        fmt::format("{}ln -sf {} {}", root_mkdir, from_path, to_path);
                 }
                 else
                 {
                     task->task->exec_command =
-                        g_strdup_printf("%sln -s %s %s", root_mkdir, from_path, to_path);
+                        fmt::format("{}ln -s {} {}", root_mkdir, from_path, to_path);
                 }
                 g_free(from_path);
                 g_free(to_path);
@@ -2931,13 +2931,10 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 g_free(task_name);
                 if (!from_path)
                     task->task->exec_command =
-                        g_strdup_printf("%s%stouch %s", root_mkdir, over_cmd, to_path);
+                        fmt::format("{}{}touch {}", root_mkdir, over_cmd, to_path);
                 else
-                    task->task->exec_command = g_strdup_printf("%s%scp -f %s %s",
-                                                               root_mkdir,
-                                                               over_cmd,
-                                                               from_path,
-                                                               to_path);
+                    task->task->exec_command =
+                        fmt::format("{}{}cp -f {} {}", root_mkdir, over_cmd, from_path, to_path);
                 g_free(from_path);
                 g_free(to_path);
                 g_free(over_cmd);
@@ -3006,10 +3003,10 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 g_free(task_name);
                 if (!from_path)
-                    task->task->exec_command = g_strdup_printf("%smkdir %s", root_mkdir, to_path);
+                    task->task->exec_command = fmt::format("{}mkdir {}", root_mkdir, to_path);
                 else
                     task->task->exec_command =
-                        g_strdup_printf("%scp -rL %s %s", root_mkdir, from_path, to_path);
+                        fmt::format("{}cp -rL {} {}", root_mkdir, from_path, to_path);
                 g_free(from_path);
                 g_free(to_path);
                 task->task->exec_sync = true;
@@ -3059,15 +3056,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 if (mset->is_dir)
                 {
                     task->task->exec_command =
-                        g_strdup_printf("%scp -Pfr %s %s", root_mkdir, from_path, to_path);
+                        fmt::format("{}cp -Pfr {} {}", root_mkdir, from_path, to_path);
                 }
                 else
                 {
-                    task->task->exec_command = g_strdup_printf("%scp -Pf%s %s %s",
-                                                               root_mkdir,
-                                                               over_opt,
-                                                               from_path,
-                                                               to_path);
+                    task->task->exec_command =
+                        fmt::format("{}cp -Pf{} {} {}", root_mkdir, over_opt, from_path, to_path);
                 }
                 g_free(from_path);
                 g_free(to_path);
@@ -3106,12 +3100,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 if (overwrite)
                 {
                     task->task->exec_command =
-                        g_strdup_printf("%sln -sf %s %s", root_mkdir, from_path, to_path);
+                        fmt::format("{}ln -sf {} {}", root_mkdir, from_path, to_path);
                 }
                 else
                 {
                     task->task->exec_command =
-                        g_strdup_printf("%sln -s %s %s", root_mkdir, from_path, to_path);
+                        fmt::format("{}ln -s {} {}", root_mkdir, from_path, to_path);
                 }
                 g_free(from_path);
                 g_free(to_path);
@@ -3138,12 +3132,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 if (overwrite)
                 {
                     task->task->exec_command =
-                        g_strdup_printf("%smv -f %s %s", root_mkdir, from_path, to_path);
+                        fmt::format("{}mv -f {} {}", root_mkdir, from_path, to_path);
                 }
                 else
                 {
                     task->task->exec_command =
-                        g_strdup_printf("%smv %s %s", root_mkdir, from_path, to_path);
+                        fmt::format("{}mv {} {}", root_mkdir, from_path, to_path);
                 }
                 g_free(from_path);
                 g_free(to_path);

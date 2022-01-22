@@ -3015,10 +3015,9 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
     PtkFileTask* task =
         ptk_file_exec_new("Uninstall Plugin", nullptr, parent, file_browser->task_view);
 
-    char* plug_dir_q = bash_quote(set->plug_dir);
+    const std::string plug_dir_q = bash_quote(set->plug_dir);
 
-    task->task->exec_command = g_strdup_printf("rm -rf %s", plug_dir_q);
-    g_free(plug_dir_q);
+    task->task->exec_command = fmt::format("rm -rf {}", plug_dir_q);
     task->task->exec_sync = true;
     task->task->exec_popup = false;
     task->task->exec_show_output = false;
@@ -3041,11 +3040,9 @@ void
 install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* path, const char* plug_dir,
                     int job, XSet* insert_set)
 {
-    char* file_path;
-    char* file_path_q;
-    char* own;
-    char* rem = g_strdup("");
-    const char* compression = g_strdup("z");
+    std::string own;
+    std::string plug_dir_q = bash_quote(plug_dir);
+    std::string file_path_q = bash_quote(path);
 
     FMMainWindow* main_window = static_cast<FMMainWindow*>(main_win);
     // task
@@ -3054,27 +3051,23 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* path, co
                                           main_win ? GTK_WIDGET(main_window) : nullptr,
                                           main_win ? main_window->task_view : nullptr);
 
-    char* plug_dir_q = bash_quote(plug_dir);
-    file_path_q = bash_quote(path);
-
     switch (job)
     {
         case PLUGIN_JOB_INSTALL:
             // install
-            own = g_strdup_printf("chown -R root:root %s && chmod -R go+rX-w %s",
-                                  plug_dir_q,
-                                  plug_dir_q);
+            own =
+                fmt::format("chown -R root:root {} && chmod -R go+rX-w {}", plug_dir_q, plug_dir_q);
             task->task->exec_as_user = g_strdup("root");
             break;
         case PLUGIN_JOB_COPY:
             // copy to clipboard or import to menu
-            own = g_strdup_printf("chmod -R go+rX-w %s", plug_dir_q);
+            own = fmt::format("chmod -R go+rX-w {}", plug_dir_q);
             break;
         default:
             break;
     }
 
-    const char* book = g_strdup("");
+    std::string book = "";
     if (insert_set && !strcmp(insert_set->name, "main_book"))
     {
         // import bookmarks to end
@@ -3091,27 +3084,24 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* path, co
     {
         // prevent install of exported bookmarks or handler as plugin or design clipboard
         if (job == PLUGIN_JOB_INSTALL)
-            book = g_strdup(" || [ -e main_book ] || [ -d hand_* ]");
+            book = " || [ -e main_book ] || [ -d hand_* ]";
         else
-            book = g_strdup(" || [ -e main_book ]");
+            book = " || [ -e main_book ]";
     }
 
-    task->task->exec_command = g_strdup_printf(
-        "rm -rf %s ; mkdir -p %s && cd %s && tar --exclude='/*' --keep-old-files -xf %s ; "
-        "err=$?; if [ $err -ne 0 ] || [ ! -e plugin ]%s;then rm -rf %s ; echo 'Error installing "
-        "plugin (invalid plugin file?)'; exit 1 ; fi ; %s %s",
+    task->task->exec_command = fmt::format(
+        "rm -rf {} ; mkdir -p {} && cd {} && tar --exclude='/*' --keep-old-files -xf {} ; "
+        "err=$? ; if [ $err -ne 0 ] || [ ! -e plugin ] {} ; then rm -rf {} ; echo 'Error "
+        "installing "
+        "plugin (invalid plugin file?)'; exit 1 ; fi ; {}",
         plug_dir_q,
         plug_dir_q,
         plug_dir_q,
         file_path_q,
         book,
         plug_dir_q,
-        own,
-        rem);
-    g_free(plug_dir_q);
-    g_free(file_path_q);
-    g_free(own);
-    g_free(rem);
+        own);
+
     task->task->exec_sync = true;
     task->task->exec_popup = false;
     task->task->exec_show_output = false;
@@ -3206,6 +3196,9 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 {
     const char* deffolder;
     char* deffile;
+
+    std::string plug_dir_q;
+    std::string path_q;
 
     // get new plugin filename
     XSet* save = xset_get("plug_cfile");
@@ -3326,24 +3319,21 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
                              plug_dir,
                              parent,
                              file_browser ? file_browser->task_view : nullptr);
-    char* plug_dir_q;
-    char* path_q;
+
     plug_dir_q = bash_quote(plug_dir);
     path_q = bash_quote(path);
     if (!set->plugin)
         task->task->exec_command =
-            g_strdup_printf("tar --numeric-owner -cJf %s * ; err=$? ; rm -rf %s ; if [ $err -ne 0 "
-                            "];then rm -f %s; fi; exit $err",
-                            path_q,
-                            plug_dir_q,
-                            path_q);
+            fmt::format("tar --numeric-owner -cJf {} * ; err=$? ; rm -rf {} ; "
+                        "if [ $err -ne 0 ];then rm -f {} ; fi ; exit $err",
+                        path_q,
+                        plug_dir_q,
+                        path_q);
     else
-        task->task->exec_command = g_strdup_printf("tar --numeric-owner -cJf %s * ; err=$? ; if [ "
-                                                   "$err -ne 0 ];then rm -f %s; fi; exit $err",
-                                                   path_q,
-                                                   path_q);
-    g_free(plug_dir_q);
-    g_free(path_q);
+        task->task->exec_command = fmt::format("tar --numeric-owner -cJf {} * ; err=$? ; "
+                                               "if [ $err -ne 0 ] ; then rm -f {} ; fi ; exit $err",
+                                               path_q,
+                                               path_q);
     task->task->exec_sync = true;
     task->task->exec_popup = false;
     task->task->exec_show_output = false;
@@ -3489,7 +3479,6 @@ xset_custom_activate(GtkWidget* item, XSet* set)
     GtkWidget* parent;
     GtkWidget* task_view = nullptr;
     const char* cwd;
-    char* command;
     char* value = nullptr;
     XSet* mset;
 
@@ -3557,6 +3546,7 @@ xset_custom_activate(GtkWidget* item, XSet* set)
     }
 
     // command
+    std::string command;
     bool app_no_sync = false;
     int cmd_type = xset_get_int_set(set, "x");
     switch (cmd_type)
@@ -3569,16 +3559,13 @@ xset_custom_activate(GtkWidget* item, XSet* set)
                 return;
             }
             command = replace_line_subs(set->line);
-            char* str;
-            str = replace_string(command, "\\n", "\n", false);
-            g_free(command);
-            command = replace_string(str, "\\t", "\t", false);
-            g_free(str);
+            command = replace_string(command.c_str(), "\\n", "\n", false);
+            command = replace_string(command.c_str(), "\\t", "\t", false);
             break;
         case XSET_CMD_SCRIPT:
             // script
             command = xset_custom_get_script(set, false);
-            if (!command)
+            if (command.empty())
                 return;
             break;
         case XSET_CMD_APP:
@@ -3929,8 +3916,6 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
 {
     bool as_root = false;
     bool terminal;
-    char* editor;
-    char* quoted_path;
     GtkWidget* dlgparent = nullptr;
     if (!path)
         return;
@@ -3940,10 +3925,11 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     if (parent)
         dlgparent = gtk_widget_get_toplevel(GTK_WIDGET(parent));
 
+    std::string editor;
     if (geteuid() != 0 && !force_root && (no_root || have_rw_access(path)))
     {
         editor = xset_get_s("editor");
-        if (!editor || editor[0] == '\0')
+        if (editor.empty() || editor.at(0) == '\0')
         {
             ptk_show_error(dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
                            "Editor Not Set",
@@ -3955,7 +3941,7 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     else
     {
         editor = xset_get_s("root_editor");
-        if (!editor || editor[0] == '\0')
+        if (editor.empty() || editor.at(0) == '\0')
         {
             ptk_show_error(dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
                            "Root Editor Not Set",
@@ -3966,18 +3952,20 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
         terminal = xset_get_b("root_editor");
     }
     // replacements
-    quoted_path = bash_quote(path);
-    if (strstr(editor, "%f"))
-        editor = replace_string(editor, "%f", quoted_path, false);
-    else if (strstr(editor, "%F"))
-        editor = replace_string(editor, "%F", quoted_path, false);
-    else if (strstr(editor, "%u"))
-        editor = replace_string(editor, "%u", quoted_path, false);
-    else if (strstr(editor, "%U"))
-        editor = replace_string(editor, "%U", quoted_path, false);
+    const std::string quoted_path = bash_quote(path);
+#if 0
+    if (strstr(editor.c_str(), "%f"))
+        editor = replace_string(editor.c_str(), "%f", quoted_path.c_str(), false);
+    else if (strstr(editor.c_str(), "%F"))
+        editor = replace_string(editor.c_str(), "%F", quoted_path.c_str(), false);
+    else if (strstr(editor.c_str(), "%u"))
+        editor = replace_string(editor.c_str(), "%u", quoted_path.c_str(), false);
+    else if (strstr(editor.c_str(), "%U"))
+        editor = replace_string(editor.c_str(), "%U", quoted_path.c_str(), false);
     else
-        editor = g_strdup_printf("%s %s", editor, quoted_path);
-    g_free(quoted_path);
+        editor = fmt::format("{} {}", editor, quoted_path);
+#endif
+    editor = fmt::format("{} {}", editor, quoted_path);
 
     // task
     char* task_name = g_strdup_printf("Edit %s", path);

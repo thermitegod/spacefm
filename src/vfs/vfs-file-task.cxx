@@ -1493,7 +1493,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         }
 
         // build - command
-        print_task_command((char*)task->exec_ptask, task->exec_command);
+        print_task_command((char*)task->exec_ptask, task->exec_command.c_str());
 
         buf.append(fmt::format("{}\nfm_err=$?\n", task->exec_command));
 
@@ -2003,7 +2003,7 @@ vfs_task_new(VFSFileTaskType type, GList* src_files, const char* dest_dir)
 
     task->exec_type = VFS_EXEC_NORMAL;
     task->exec_action = nullptr;
-    task->exec_command = nullptr;
+    // task->exec_command = std::string();
     task->exec_sync = true;
     task->exec_popup = false;
     task->exec_show_output = false;
@@ -2149,8 +2149,6 @@ vfs_file_task_free(VFSFileTask* task)
         g_free(task->exec_action);
     if (task->exec_as_user)
         g_free(task->exec_as_user);
-    if (task->exec_command)
-        g_free(task->exec_command);
     if (task->exec_script)
         g_free(task->exec_script);
 

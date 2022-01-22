@@ -898,6 +898,8 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     char* mount_point = nullptr;
     netmount_t* netmount = nullptr;
 
+    std::string line;
+
     // split url
     if (split_network_url(url, &netmount) != 1)
     {
@@ -991,8 +993,7 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     else
         keepterm = g_strdup("");
 
-    char* line;
-    line = g_strdup_printf("%s%s\n%s", ssh_udevil ? "echo Connecting...\n\n" : "", cmd, keepterm);
+    line = fmt::format("{}{}\n{}", ssh_udevil ? "echo Connecting...\n\n" : "", cmd, keepterm);
     g_free(keepterm);
     g_free(cmd);
 
@@ -1098,15 +1099,12 @@ on_mount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                                           file_browser ? file_browser->task_view : nullptr);
     g_free(task_name);
 
-    char* keep_term;
+    std::string keep_term = "";
     if (run_in_terminal)
-        keep_term = g_strdup_printf(keep_term_when_done, press_enter_to_close);
-    else
-        keep_term = g_strdup("");
+        keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
 
-    task->task->exec_command = g_strdup_printf("%s%s", line, keep_term);
+    task->task->exec_command = fmt::format("{}{}", line, keep_term);
     g_free(line);
-    g_free(keep_term);
     task->task->exec_sync = !run_in_terminal;
     task->task->exec_export = !!file_browser;
     task->task->exec_browser = file_browser;
@@ -1156,12 +1154,10 @@ on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     {
         bool change_root = (!old_set_s || strcmp(old_set_s, set->s));
 
-        char* s1 = replace_string(set->s, "%v", vol->device_file, false);
-        char* cmd = replace_string(s1, "%o", options, false);
-        g_free(s1);
-        s1 = cmd;
-        cmd = g_strdup_printf("echo %s; echo; %s", s1, s1);
-        g_free(s1);
+        std::string cmd;
+        cmd = replace_string(set->s, "%v", vol->device_file, false);
+        cmd = replace_string(cmd.c_str(), "%o", options, false);
+        cmd = fmt::format("echo {}; echo; {}", cmd.c_str(), cmd.c_str());
 
         // task
         PtkFileBrowser* file_browser =
@@ -1216,9 +1212,9 @@ on_umount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         bool change_root = (!old_set_s || strcmp(old_set_s, set->s));
 
         // task
-        char* s1 = replace_string(set->s, "%v", vol->device_file, false);
-        char* cmd = g_strdup_printf("echo %s; echo; %s", s1, s1);
-        g_free(s1);
+        std::string cmd;
+        cmd = replace_string(set->s, "%v", vol->device_file, false);
+        cmd = fmt::format("echo {}; echo; {}", cmd, cmd);
         PtkFileBrowser* file_browser =
             static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
         char* task_name = g_strdup_printf("Unmount As Root %s", vol->device_file);
@@ -1267,14 +1263,12 @@ on_umount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                                           view,
                                           file_browser ? file_browser->task_view : nullptr);
     g_free(task_name);
-    char* keep_term;
+
+    std::string keep_term = "";
     if (run_in_terminal)
-        keep_term = g_strdup_printf(keep_term_when_done, press_enter_to_close);
-    else
-        keep_term = g_strdup("");
-    task->task->exec_command = g_strdup_printf("%s%s", line, keep_term);
+        keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
+    task->task->exec_command = fmt::format("{}{}", line, keep_term);
     g_free(line);
-    g_free(keep_term);
     task->task->exec_sync = !run_in_terminal;
     task->task->exec_export = !!file_browser;
     task->task->exec_browser = file_browser;
@@ -1290,7 +1284,6 @@ static void
 on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 {
     PtkFileTask* task;
-    char* line;
     GtkWidget* view;
     if (!item)
         view = view2;
@@ -1301,6 +1294,8 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     // Note: file_browser may be nullptr
     if (!GTK_IS_WIDGET(file_browser))
         file_browser = nullptr;
+
+    std::string line;
 
     if (vfs_volume_is_mounted(vol))
     {
@@ -1345,20 +1340,20 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
             wait_done = g_strdup("");
         }
         if (run_in_terminal)
-            line = g_strdup_printf("echo 'Unmounting %s...'\n%s%s\nif [ $? -ne 0 ];then\n    "
-                                   "read -p '%s: '\n    exit 1\nelse\n    %s\nfi",
-                                   vol->device_file,
-                                   vol->device_type == DEVICE_TYPE_BLOCK ? "sync\n" : "",
-                                   unmount,
-                                   press_enter_to_close,
-                                   eject);
+            line = fmt::format("echo 'Unmounting {}...'\n{}{}\nif [ $? -ne 0 ];then\n    "
+                               "read -p '{}: '\n    exit 1\nelse\n    {}\nfi",
+                               vol->device_file,
+                               vol->device_type == DEVICE_TYPE_BLOCK ? "sync\n" : "",
+                               unmount,
+                               press_enter_to_close,
+                               eject);
         else
-            line = g_strdup_printf("%s%s%s\nuerr=$?%s\nif [ $uerr -ne 0 ];then\n    exit 1\nfi%s",
-                                   wait,
-                                   vol->device_type == DEVICE_TYPE_BLOCK ? "sync\n" : "",
-                                   unmount,
-                                   wait_done,
-                                   eject);
+            line = fmt::format("{}{}{}\nuerr=$?{}\nif [ $uerr -ne 0 ];then\n    exit 1\nfi{}",
+                               wait,
+                               vol->device_type == DEVICE_TYPE_BLOCK ? "sync\n" : "",
+                               unmount,
+                               wait_done,
+                               eject);
         g_free(eject);
         g_free(wait);
         g_free(wait_done);
@@ -1379,7 +1374,7 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else if (vol->device_type == DEVICE_TYPE_BLOCK && (vol->is_optical || vol->requires_eject))
     {
         // task
-        line = g_strdup_printf("eject %s", vol->device_file);
+        line = fmt::format("eject {}", vol->device_file);
         char* task_name = g_strdup_printf("Remove %s", vol->device_file);
         task = ptk_file_exec_new(task_name,
                                  nullptr,
@@ -1394,7 +1389,7 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else
     {
         // task
-        line = g_strdup_printf("sync");
+        line = "sync";
         char* task_name = g_strdup_printf("Remove %s", vol->device_file);
         task = ptk_file_exec_new(task_name,
                                  nullptr,
@@ -1467,14 +1462,11 @@ try_mount(GtkTreeView* view, VFSVolume* vol)
     PtkFileTask* task =
         ptk_file_exec_new(task_name, nullptr, GTK_WIDGET(view), file_browser->task_view);
     g_free(task_name);
-    char* keep_term;
+    std::string keep_term = "";
     if (run_in_terminal)
-        keep_term = g_strdup_printf(keep_term_when_done, press_enter_to_close);
-    else
-        keep_term = g_strdup("");
-    task->task->exec_command = g_strdup_printf("%s%s", line, keep_term);
+        keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
+    task->task->exec_command = fmt::format("{}{}", line, keep_term);
     g_free(line);
-    g_free(keep_term);
     task->task->exec_sync = true;
     task->task->exec_export = true;
     task->task->exec_browser = file_browser;
@@ -1538,14 +1530,11 @@ on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         char* task_name = g_strdup_printf("Mount %s", vol->device_file);
         PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
         g_free(task_name);
-        char* keep_term;
+        std::string keep_term = "";
         if (run_in_terminal)
-            keep_term = g_strdup_printf(keep_term_when_done, press_enter_to_close);
-        else
-            keep_term = g_strdup("");
-        task->task->exec_command = g_strdup_printf("%s%s", line, keep_term);
+            keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
+        task->task->exec_command = fmt::format("{}{}", line, keep_term);
         g_free(line);
-        g_free(keep_term);
         task->task->exec_sync = true;
         task->task->exec_export = true;
         task->task->exec_browser = file_browser;
@@ -1613,14 +1602,11 @@ on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                                               view,
                                               file_browser ? file_browser->task_view : nullptr);
         g_free(task_name);
-        char* keep_term;
+        std::string keep_term = "";
         if (run_in_terminal)
-            keep_term = g_strdup_printf(keep_term_when_done, press_enter_to_close);
-        else
-            keep_term = g_strdup("");
-        task->task->exec_command = g_strdup_printf("%s%s", line, keep_term);
+            keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
+        task->task->exec_command = fmt::format("{}{}", line, keep_term);
         g_free(line);
-        g_free(keep_term);
         task->task->exec_sync = true;
         task->task->exec_export = !!file_browser;
         task->task->exec_browser = file_browser;
@@ -1652,7 +1638,7 @@ on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 static void
 on_remount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 {
-    char* line;
+    std::string line;
     GtkWidget* view;
     if (!item)
         view = view2;
@@ -1698,16 +1684,16 @@ on_remount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
             return;
         }
         if (mount_in_terminal || unmount_in_terminal)
-            line = g_strdup_printf("%s\nif [ $? -ne 0 ];then\n    read -p '%s: '\n    exit 1\n"
-                                   "else\n    %s\n    [[ $? -eq 0 ]] || ( read -p '%s: ' )\nfi",
-                                   unmount_command,
-                                   press_enter_to_close,
-                                   mount_command,
-                                   press_enter_to_close);
+            line = fmt::format("{}\nif [ $? -ne 0 ];then\n    read -p '{}: '\n    exit 1\n"
+                               "else\n    {}\n    [[ $? -eq 0 ]] || ( read -p '{}: ' )\nfi",
+                               unmount_command,
+                               press_enter_to_close,
+                               mount_command,
+                               press_enter_to_close);
         else
-            line = g_strdup_printf("%s\nif [ $? -ne 0 ];then\n    exit 1\nelse\n    %s\nfi",
-                                   unmount_command,
-                                   mount_command);
+            line = fmt::format("{}\nif [ $? -ne 0 ];then\n    exit 1\nelse\n    {}\nfi",
+                               unmount_command,
+                               mount_command);
         g_free(mount_command);
         g_free(unmount_command);
     }
@@ -1729,7 +1715,7 @@ on_remount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 static void
 on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 {
-    char* line;
+    std::string line;
     PtkFileTask* task;
 
     GtkWidget* view;
@@ -1760,15 +1746,14 @@ on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
             eject = g_strdup("");
 
         if (run_in_terminal)
-            line = g_strdup_printf("echo 'Unmounting %s...'\nsync\n%s\nif [ $? -ne 0 ];then\n    "
-                                   "read -p '%s: '\n    exit 1%s\nfi",
-                                   vol->device_file,
-                                   unmount,
-                                   press_enter_to_close,
-                                   eject);
+            line = fmt::format("echo 'Unmounting {}...'\nsync\n{}\nif [ $? -ne 0 ];then\n    "
+                               "read -p '{}: '\n    exit 1{}\nfi",
+                               vol->device_file,
+                               unmount,
+                               press_enter_to_close,
+                               eject);
         else
-            line =
-                g_strdup_printf("sync\n%s\nif [ $? -ne 0 ];then\n    exit 1%s\nfi", unmount, eject);
+            line = fmt::format("sync\n{}\nif [ $? -ne 0 ];then\n    exit 1{}\nfi", unmount, eject);
         g_free(eject);
         g_free(unmount);
         char* task_name = g_strdup_printf("Reload %s", vol->device_file);
@@ -1785,8 +1770,7 @@ on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else if (vol->is_optical || vol->requires_eject)
     {
         // task
-        line =
-            g_strdup_printf("eject %s; sleep 0.3; eject -t %s", vol->device_file, vol->device_file);
+        line = fmt::format("eject {}; sleep 0.3; eject -t {}", vol->device_file, vol->device_file);
         char* task_name = g_strdup_printf("Reload %s", vol->device_file);
         task = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
         g_free(task_name);
@@ -1820,7 +1804,7 @@ on_sync(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     PtkFileTask* task = ptk_file_exec_new("Sync", nullptr, view, file_browser->task_view);
     task->task->exec_browser = nullptr;
     task->task->exec_action = g_strdup_printf("sync");
-    task->task->exec_command = g_strdup_printf("sync");
+    task->task->exec_command = "sync";
     task->task->exec_as_user = nullptr;
     task->task->exec_sync = true;
     task->task->exec_popup = false;
@@ -2270,7 +2254,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     */
     infobash = g_strdup("");
 
-    task->task->exec_command = g_strdup_printf("%s%s%s%s%s", flags, df, udisks, lsof, infobash);
+    task->task->exec_command = fmt::format("{}{}{}{}{}", flags, df, udisks, lsof, infobash);
     task->task->exec_sync = true;
     task->task->exec_popup = true;
     task->task->exec_show_output = true;

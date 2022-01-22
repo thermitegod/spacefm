@@ -3442,7 +3442,7 @@ exec_task(const char* command, bool run_in_terminal)
 
     PtkFileTask* task = ptk_file_task_new(VFS_FILE_TASK_EXEC, files, "/", nullptr, nullptr);
     task->task->exec_action = g_strdup("exec_task");
-    task->task->exec_command = g_strdup(command);
+    task->task->exec_command = command;
     task->task->exec_sync = false;
     task->task->exec_export = false;
     task->task->exec_terminal = run_in_terminal;

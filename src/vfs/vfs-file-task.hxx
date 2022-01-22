@@ -138,7 +138,7 @@ struct VFSFileTask
     // MOD run task
     VFSExecType exec_type;
     char* exec_action;
-    char* exec_command;
+    std::string exec_command;
     bool exec_sync;
     bool exec_popup;
     bool exec_show_output;
