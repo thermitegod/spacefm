@@ -1451,21 +1451,9 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         // build - write root settings
         if (task->exec_write_root && geteuid() != 0)
         {
-            const char* this_user = g_get_user_name();
-            if (this_user && this_user[0] != '\0')
-            {
-                char* root_set_path =
-                    g_strdup_printf("%s/spacefm/%s-as-root", SYSCONFDIR, this_user);
-                write_root_settings(buf, root_set_path);
-                g_free(root_set_path);
-            }
-            else
-            {
-                char* root_set_path =
-                    g_strdup_printf("%s/spacefm/%d-as-root", SYSCONFDIR, geteuid());
-                write_root_settings(buf, root_set_path);
-                g_free(root_set_path);
-            }
+            const std::string root_set_path =
+                fmt::format("{}/spacefm/{}-as-root", SYSCONFDIR, g_get_user_name());
+            write_root_settings(buf, root_set_path);
         }
 
         // build - export vars

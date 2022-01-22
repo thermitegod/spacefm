@@ -406,7 +406,7 @@ GtkTextView* multi_input_new(GtkScrolledWindow* scrolled, const char* text);
 void multi_input_select_region(GtkWidget* input, int start, int end);
 char* multi_input_get_text(GtkWidget* input);
 XSet* xset_custom_new();
-bool write_root_settings(std::string& buf, const char* path);
+bool write_root_settings(std::string& buf, const std::string& path);
 
 std::vector<XSet*> xset_get_plugins(bool included);
 void xset_clear_plugins(std::vector<XSet*>& plugins);

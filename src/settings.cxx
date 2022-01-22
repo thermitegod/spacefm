@@ -1664,21 +1664,20 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
 }
 
 static void
-write_root_saver(std::string& buf, const char* path, const char* name, const char* var,
+write_root_saver(std::string& buf, const std::string& path, const char* name, const char* var,
                  const char* value)
 {
     if (!value)
         return;
 
-    char* save = g_strdup_printf("%s-%s=%s", name, var, value);
-    char* qsave = bash_quote(save);
-    buf.append(fmt::format("echo {} >>| \"{}\"\n", qsave, path));
-    g_free(save);
-    g_free(qsave);
+    std::string save;
+    save = fmt::format("{}-{}={}", name, var, value);
+    save = bash_quote(save.c_str());
+    buf.append(fmt::format("echo {} >>| \"{}\"\n", save, path));
 }
 
 bool
-write_root_settings(std::string& buf, const char* path)
+write_root_settings(std::string& buf, const std::string& path)
 {
     buf.append(fmt::format("\n#save root settings\nmkdir -p {}/spacefm\n"
                            "echo -e '#SpaceFM As-Root Session File\\n\\' >| '{}'\n",
