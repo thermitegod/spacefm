@@ -636,9 +636,9 @@ set_progress_icon(PtkFileTask* ptask)
                                           16,
                                           GTK_ICON_LOOKUP_USE_BUILTIN,
                                           nullptr);
-    else if (task->type == VFS_FILE_TASK_EXEC && task->exec_icon)
+    else if (task->type == VFS_FILE_TASK_EXEC && !task->exec_icon.empty())
         pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
-                                          task->exec_icon,
+                                          task->exec_icon.c_str(),
                                           16,
                                           GTK_ICON_LOOKUP_USE_BUILTIN,
                                           nullptr);

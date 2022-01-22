@@ -963,7 +963,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     task->task->exec_export = true; // Setup SpaceFM bash variables
     XSet* set = xset_get("new_archive");
     if (set->icon)
-        task->task->exec_icon = g_strdup(set->icon);
+        task->task->exec_icon = set->icon;
 
     // Running task
     ptk_file_task_run(task);
@@ -1495,7 +1495,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     // Setting custom icon
     XSet* set = xset_get("arc_extract");
     if (set->icon)
-        task->task->exec_icon = g_strdup(set->icon);
+        task->task->exec_icon = set->icon;
 
     // Running task
     ptk_file_task_run(task);

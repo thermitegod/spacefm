@@ -2005,7 +2005,7 @@ vfs_task_new(VFSFileTaskType type, GList* src_files, const char* dest_dir)
     task->exec_export = false;
     task->exec_direct = false;
     // task->exec_as_user = nullptr;
-    task->exec_icon = nullptr;
+    // task->exec_icon = nullptr;
     // task->exec_script = nullptr;
     task->exec_keep_tmp = false;
     task->exec_browser = nullptr;

@@ -3404,7 +3404,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
         task->task->exec_browser = parent->file_browser;
         task->task->exec_command = command_final;
         if (handler_set->icon)
-            task->task->exec_icon = g_strdup(handler_set->icon);
+            task->task->exec_icon = handler_set->icon;
         task->task->exec_terminal = (handler_set->in_terminal == XSET_B_TRUE);
         task->task->exec_keep_terminal = false;
         // file handlers store Run As Task in keep_terminal

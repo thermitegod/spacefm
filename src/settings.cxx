@@ -3691,9 +3691,9 @@ xset_custom_activate(GtkWidget* item, XSet* set)
         task->task->exec_as_user = set->y;
 
     if (set->plugin && set->shared_key && mset->icon)
-        task->task->exec_icon = g_strdup(mset->icon);
-    if (!task->task->exec_icon && set->icon)
-        task->task->exec_icon = g_strdup(set->icon);
+        task->task->exec_icon = mset->icon;
+    else if (set->icon)
+        task->task->exec_icon = set->icon;
 
     task->task->current_dest = value; // temp storage
     task->task->exec_terminal = (mset->in_terminal == XSET_B_TRUE);

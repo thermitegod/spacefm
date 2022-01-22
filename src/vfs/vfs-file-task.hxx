@@ -155,7 +155,7 @@ struct VFSFileTask
     void* exec_browser;
     void* exec_desktop;
     std::string exec_as_user;
-    char* exec_icon;
+    std::string exec_icon;
     GPid exec_pid;
     int exec_exit_status;
     unsigned int child_watch;

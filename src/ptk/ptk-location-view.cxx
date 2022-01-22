@@ -1013,7 +1013,7 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     task->task->exec_keep_terminal = false;
     XSet* set;
     set = xset_get("dev_icon_network");
-    task->task->exec_icon = g_strdup(set->icon);
+    task->task->exec_icon = set->icon;
 
     // autoopen
     if (!ssh_udevil) // !sync
@@ -1112,7 +1112,7 @@ on_mount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     task->task->exec_show_output = false;
     task->task->exec_show_error = true;
     task->task->exec_terminal = run_in_terminal;
-    task->task->exec_icon = g_strdup(vfs_volume_get_icon(vol));
+    task->task->exec_icon = vfs_volume_get_icon(vol);
     vol->inhibit_auto = true;
     ptk_file_task_run(task);
 }
@@ -1174,7 +1174,7 @@ on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         task->task->exec_show_error = true;
         task->task->exec_export = false;
         task->task->exec_browser = file_browser;
-        task->task->exec_icon = g_strdup(vfs_volume_get_icon(vol));
+        task->task->exec_icon = vfs_volume_get_icon(vol);
         ptk_file_task_run(task);
     }
     g_free(msg);
@@ -1229,7 +1229,7 @@ on_umount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         task->task->exec_show_error = true;
         task->task->exec_export = false;
         task->task->exec_browser = file_browser;
-        task->task->exec_icon = g_strdup(vfs_volume_get_icon(vol));
+        task->task->exec_icon = vfs_volume_get_icon(vol);
         ptk_file_task_run(task);
     }
     g_free(msg);
@@ -1276,7 +1276,7 @@ on_umount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     task->task->exec_show_output = false;
     task->task->exec_show_error = true;
     task->task->exec_terminal = run_in_terminal;
-    task->task->exec_icon = g_strdup(vfs_volume_get_icon(vol));
+    task->task->exec_icon = vfs_volume_get_icon(vol);
     ptk_file_task_run(task);
 }
 
@@ -1369,7 +1369,7 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         task->task->exec_browser = file_browser;
         task->task->exec_show_error = true;
         task->task->exec_terminal = run_in_terminal;
-        task->task->exec_icon = g_strdup(vfs_volume_get_icon(vol));
+        task->task->exec_icon = vfs_volume_get_icon(vol);
     }
     else if (vol->device_type == DEVICE_TYPE_BLOCK && (vol->is_optical || vol->requires_eject))
     {
@@ -1384,7 +1384,7 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         task->task->exec_command = line;
         task->task->exec_sync = false;
         task->task->exec_show_error = false;
-        task->task->exec_icon = g_strdup(vfs_volume_get_icon(vol));
+        task->task->exec_icon = vfs_volume_get_icon(vol);
     }
     else
     {
@@ -1399,7 +1399,7 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         task->task->exec_command = line;
         task->task->exec_sync = false;
         task->task->exec_show_error = false;
-        task->task->exec_icon = g_strdup(vfs_volume_get_icon(vol));
+        task->task->exec_icon = vfs_volume_get_icon(vol);
     }
     ptk_file_task_run(task);
 }
@@ -1474,7 +1474,7 @@ try_mount(GtkTreeView* view, VFSVolume* vol)
     task->task->exec_show_output = false;
     task->task->exec_show_error = true; // set to true for error on click
     task->task->exec_terminal = run_in_terminal;
-    task->task->exec_icon = g_strdup(vfs_volume_get_icon(vol));
+    task->task->exec_icon = vfs_volume_get_icon(vol);
 
     // autoopen
     AutoOpen* ao = g_slice_new0(AutoOpen);
@@ -1542,7 +1542,7 @@ on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         task->task->exec_show_output = false;
         task->task->exec_show_error = true;
         task->task->exec_terminal = run_in_terminal;
-        task->task->exec_icon = g_strdup(vfs_volume_get_icon(vol));
+        task->task->exec_icon = vfs_volume_get_icon(vol);
 
         // autoopen
         AutoOpen* ao = g_slice_new0(AutoOpen);
@@ -1614,7 +1614,7 @@ on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         task->task->exec_show_output = false;
         task->task->exec_show_error = true;
         task->task->exec_terminal = run_in_terminal;
-        task->task->exec_icon = g_strdup(vfs_volume_get_icon(vol));
+        task->task->exec_icon = vfs_volume_get_icon(vol);
 
         // autoopen
         AutoOpen* ao = g_slice_new0(AutoOpen);
@@ -1707,7 +1707,7 @@ on_remount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     task->task->exec_show_output = false;
     task->task->exec_show_error = true;
     task->task->exec_terminal = mount_in_terminal || unmount_in_terminal;
-    task->task->exec_icon = g_strdup(vfs_volume_get_icon(vol));
+    task->task->exec_icon = vfs_volume_get_icon(vol);
     vol->inhibit_auto = true;
     ptk_file_task_run(task);
 }
@@ -1765,7 +1765,7 @@ on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         task->task->exec_browser = file_browser;
         task->task->exec_show_error = true;
         task->task->exec_terminal = run_in_terminal;
-        task->task->exec_icon = g_strdup(vfs_volume_get_icon(vol));
+        task->task->exec_icon = vfs_volume_get_icon(vol);
     }
     else if (vol->is_optical || vol->requires_eject)
     {
@@ -1777,7 +1777,7 @@ on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         task->task->exec_command = line;
         task->task->exec_sync = false;
         task->task->exec_show_error = false;
-        task->task->exec_icon = g_strdup(vfs_volume_get_icon(vol));
+        task->task->exec_icon = vfs_volume_get_icon(vol);
     }
     else
         return;
@@ -1811,7 +1811,7 @@ on_sync(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     task->task->exec_show_error = true;
     task->task->exec_terminal = false;
     task->task->exec_export = false;
-    // task->task->exec_icon = g_strdup_printf( "start-here" );
+    // task->task->exec_icon =  "start-here";
     ptk_file_task_run(task);
 }
 
@@ -1965,7 +1965,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         task->task->exec_terminal = run_in_terminal;
         task->task->exec_keep_terminal = run_in_terminal;
         task->task->exec_scroll_lock = true;
-        task->task->exec_icon = g_strdup(vfs_volume_get_icon(vol));
+        task->task->exec_icon = vfs_volume_get_icon(vol);
         // task->task->exec_keep_tmp = true;
         std::string command = cmd;
         print_command(command);
@@ -2259,7 +2259,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     task->task->exec_show_output = true;
     task->task->exec_export = false;
     task->task->exec_scroll_lock = true;
-    task->task->exec_icon = g_strdup(vfs_volume_get_icon(vol));
+    task->task->exec_icon = vfs_volume_get_icon(vol);
     // task->task->exec_keep_tmp = true;
     ptk_file_task_run(task);
     g_free(df);
