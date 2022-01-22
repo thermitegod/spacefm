@@ -18,13 +18,13 @@
 #include "utils.hxx"
 
 void
-print_command(std::string& command)
+print_command(const std::string& command)
 {
     LOG_INFO("COMMAND={}", command);
 }
 
 void
-print_task_command(char* ptask, const char* cmd)
+print_task_command(const char* ptask, const char* cmd)
 {
     LOG_INFO("TASK_COMMAND({:p})={}", ptask, cmd);
 }
@@ -127,7 +127,7 @@ dir_has_files(const char* path)
 }
 
 char*
-get_name_extension(char* full_name, bool is_dir, char** ext)
+get_name_extension(const char* full_name, bool is_dir, char** ext)
 {
     char* str;
     char* full = g_strdup(full_name);

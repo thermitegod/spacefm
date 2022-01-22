@@ -10,8 +10,8 @@
 
 #include <glib.h>
 
-void print_command(std::string& command);
-void print_task_command(char* ptask, const char* cmd);
+void print_command(const std::string& command);
+void print_task_command(const char* ptask, const char* cmd);
 void print_task_command_spawn(char* argv[], int pid);
 
 char* randhex8();
@@ -19,7 +19,7 @@ bool have_rw_access(const char* path);
 bool have_x_access(const char* path);
 bool dir_has_files(const char* path);
 char* replace_line_subs(const char* line);
-char* get_name_extension(char* full_name, bool is_dir, char** ext);
+char* get_name_extension(const char* full_name, bool is_dir, char** ext);
 void open_in_prog(const char* path);
 
 char* replace_string(const char* orig, const char* str, const char* replace, bool quote);
