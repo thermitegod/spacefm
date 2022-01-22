@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include <glib.h>
 
 #include "vfs/vfs-file-monitor.hxx"
@@ -44,7 +46,7 @@ struct VFSDir
 
     struct VFSThumbnailLoader* thumbnail_loader;
 
-    GSList* changed_files;
+    std::vector<VFSFileInfo*> changed_files;
     GSList* created_files; // MOD
     long xhidden_count;    // MOD
 };

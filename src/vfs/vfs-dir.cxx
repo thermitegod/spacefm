@@ -273,11 +273,13 @@ vfs_dir_finalize(GObject* obj)
         dir->n_files = 0;
     }
 
-    if (dir->changed_files)
+    if (!dir->changed_files.empty())
     {
-        g_slist_foreach(dir->changed_files, (GFunc)vfs_file_info_unref, nullptr);
-        g_slist_free(dir->changed_files);
-        dir->changed_files = nullptr;
+        for (VFSFileInfo* file: dir->changed_files)
+        {
+            vfs_file_info_unref(file);
+        }
+        dir->changed_files.clear();
     }
 
     if (dir->created_files)
@@ -374,9 +376,9 @@ vfs_dir_emit_file_deleted(VFSDir* dir, const char* file_name, VFSFileInfo* file)
     if (G_LIKELY(l))
     {
         VFSFileInfo* file_found = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data));
-        if (!g_slist_find(dir->changed_files, file_found))
+        if (!std::count(dir->changed_files.begin(), dir->changed_files.end(), file_found))
         {
-            dir->changed_files = g_slist_prepend(dir->changed_files, file_found);
+            dir->changed_files.push_back(file_found);
             if (change_notify_timeout == 0)
             {
                 change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
@@ -413,11 +415,11 @@ vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* file,
     if (G_LIKELY(l))
     {
         file = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data));
-        if (!g_slist_find(dir->changed_files, file))
+        if (!std::count(dir->changed_files.begin(), dir->changed_files.end(), file))
         {
             if (force)
             {
-                dir->changed_files = g_slist_prepend(dir->changed_files, file);
+                dir->changed_files.push_back(file);
                 if (change_notify_timeout == 0)
                 {
                     change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
@@ -429,7 +431,7 @@ vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* file,
             }
             else if (G_LIKELY(update_file_info(dir, file))) // update file info the first time
             {
-                dir->changed_files = g_slist_prepend(dir->changed_files, file);
+                dir->changed_files.push_back(file);
                 if (change_notify_timeout == 0)
                 {
                     change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
@@ -712,13 +714,11 @@ update_changed_files(void* key, void* data, void* user_data)
     (void)user_data;
     VFSDir* dir = static_cast<VFSDir*>(data);
 
-    if (dir->changed_files)
+    if (!dir->changed_files.empty())
     {
         vfs_dir_lock(dir);
-        GSList* l;
-        for (l = dir->changed_files; l; l = l->next)
+        for (VFSFileInfo* file: dir->changed_files)
         {
-            VFSFileInfo* file = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data)); ///
             if (update_file_info(dir, file))
             {
                 g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, file);
@@ -726,8 +726,7 @@ update_changed_files(void* key, void* data, void* user_data)
             }
             // else was deleted, signaled, and unrefed in update_file_info
         }
-        g_slist_free(dir->changed_files);
-        dir->changed_files = nullptr;
+        dir->changed_files.clear();
         vfs_dir_unlock(dir);
     }
 }
