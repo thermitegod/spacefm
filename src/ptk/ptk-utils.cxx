@@ -10,6 +10,9 @@
  *
  */
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "settings.hxx"
 #include "utils.hxx"
 
@@ -18,7 +21,7 @@
 void
 ptk_show_error(GtkWindow* parent, const std::string& title, const std::string& message)
 {
-    std::string msg = replace_string(message.c_str(), "%", "%%", false);
+    std::string msg = ztd::replace(message.c_str(), "%", "%%");
     GtkWidget* dlg = gtk_message_dialog_new(parent,
                                             GTK_DIALOG_MODAL,
                                             GTK_MESSAGE_ERROR,

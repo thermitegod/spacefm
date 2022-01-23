@@ -76,19 +76,19 @@ replace_line_subs(const char* line)
                          "\"${fm_task_pid}\"",
                          "\"${fm_value}\""};
 
-    char* s = g_strdup(line);
+    std::string s = line;
     int num = G_N_ELEMENTS(perc);
     int i;
     for (i = 0; i < num; i++)
     {
         if (strstr(line, perc[i]))
         {
-            char* old_s = s;
-            s = replace_string(old_s, perc[i], var[i], false);
-            g_free(old_s);
+            std::string old_s = s;
+            s = ztd::replace(old_s, perc[i], var[i]);
         }
     }
-    return s;
+    char* ss = const_cast<char*>(s.c_str());
+    return ss;
 }
 
 bool
@@ -189,7 +189,7 @@ open_in_prog(const char* path)
     g_free(prog);
 }
 
-char*
+[[deprecated]] char*
 replace_string(const char* orig, const char* str, const char* replace, bool quote)
 { // replace all occurrences of str in orig with replace, optionally quoting
     char* rep;
@@ -247,31 +247,25 @@ bash_quote(const char* str)
 char*
 clean_label(const char* menu_label, bool kill_special, bool escape)
 {
-    char* s1;
-    char* s2;
+    std::string new_menu_label;
+
     if (menu_label && strstr(menu_label, "\\_"))
     {
-        s1 = replace_string(menu_label, "\\_", "@UNDERSCORE@", false);
-        s2 = replace_string(s1, "_", "", false);
-        g_free(s1);
-        s1 = replace_string(s2, "@UNDERSCORE@", "_", false);
-        g_free(s2);
+        new_menu_label = ztd::replace(menu_label, "\\_", "@UNDERSCORE@");
+        new_menu_label = ztd::replace(menu_label, "_", "");
+        new_menu_label = ztd::replace(menu_label, "@UNDERSCORE@", "_");
     }
     else
-        s1 = replace_string(menu_label, "_", "", false);
+        new_menu_label = ztd::replace(menu_label, "_", "");
     if (kill_special)
     {
-        s2 = replace_string(s1, "&", "", false);
-        g_free(s1);
-        s1 = replace_string(s2, " ", "-", false);
-        g_free(s2);
+        new_menu_label = ztd::replace(menu_label, "&", "");
+        new_menu_label = ztd::replace(menu_label, " ", "-");
     }
     else if (escape)
-    {
-        s2 = g_markup_escape_text(s1, -1);
-        g_free(s1);
-        s1 = s2;
-    }
+        new_menu_label = g_markup_escape_text(menu_label, -1);
+
+    char* s1 = g_strdup(new_menu_label.c_str());
     return s1;
 }
 

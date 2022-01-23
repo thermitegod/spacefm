@@ -714,9 +714,8 @@ on_context_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars,
     if (!strchr(gtk_entry_buffer_get_text(buf), '\n'))
         return;
 
-    char* new_text = replace_string(gtk_entry_buffer_get_text(buf), "\n", "", false);
-    gtk_entry_buffer_set_text(buf, new_text, -1);
-    g_free(new_text);
+    std::string new_text = ztd::replace(gtk_entry_buffer_get_text(buf), "\n", "");
+    gtk_entry_buffer_set_text(buf, new_text.c_str(), -1);
 }
 
 static bool
@@ -820,11 +819,10 @@ load_text_view(GtkTextView* view, const char* line)
         gtk_text_buffer_set_text(buf, "", -1);
         return;
     }
-    char* lines = replace_string(line, "\\n", "\n", false);
-    char* tabs = replace_string(lines, "\\t", "\t", false);
-    gtk_text_buffer_set_text(buf, tabs, -1);
-    g_free(lines);
-    g_free(tabs);
+    std::string text = line;
+    text = ztd::replace(text, "\\n", "\n");
+    text = ztd::replace(text, "\\t", "\t");
+    gtk_text_buffer_set_text(buf, text.c_str(), -1);
 }
 
 char*
@@ -840,11 +838,12 @@ get_text_view(GtkTextView* view)
         g_free(text);
         return nullptr;
     }
-    char* lines = replace_string(text, "\n", "\\n", false);
-    char* tabs = replace_string(lines, "\t", "\\t", false);
-    g_free(text);
-    g_free(lines);
-    return tabs;
+    std::string text2 = text;
+    text2 = ztd::replace(text2, "\\n", "\n");
+    text2 = ztd::replace(text2, "\\t", "\t");
+
+    char* text3 = const_cast<char*>(text2.c_str());
+    return text3;
 }
 
 static void

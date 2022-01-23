@@ -13,6 +13,10 @@
 #include <string>
 #include <filesystem>
 
+#include <vector>
+
+#include <regex>
+
 #include <ctime>
 
 #include <libudev.h>
@@ -1952,9 +1956,6 @@ vfs_free_volume_members(VFSVolume* volume)
 void
 vfs_volume_set_info(VFSVolume* volume)
 {
-    char* parameter;
-    char* value;
-    char* valuec;
     char* lastcomma;
     char* disp_device;
     char* disp_label;
@@ -2124,48 +2125,44 @@ vfs_volume_set_info(VFSVolume* volume)
         disp_fstype = g_strdup("");
     disp_devnum = g_strdup_printf("%lu:%lu", MAJOR(volume->devnum), MINOR(volume->devnum));
 
+    std::string value;
+    std::string parameter;
     char* fmt = xset_get_s("dev_dispname");
     if (!fmt)
-        parameter = g_strdup_printf("%s %s %s %s %s %s",
-                                    disp_device,
-                                    disp_size,
-                                    disp_fstype,
-                                    disp_label,
-                                    disp_mount,
-                                    disp_id);
+        parameter = fmt::format("{} {} {} {} {} {}",
+                                disp_device,
+                                disp_size,
+                                disp_fstype,
+                                disp_label,
+                                disp_mount,
+                                disp_id);
     else
     {
-        value = replace_string(fmt, "%v", disp_device, false);
-        valuec = replace_string(value, "%s", disp_size, false);
-        g_free(value);
-        value = replace_string(valuec, "%t", disp_fstype, false);
-        g_free(valuec);
-        valuec = replace_string(value, "%l", disp_label, false);
-        g_free(value);
-        value = replace_string(valuec, "%m", disp_mount, false);
-        g_free(valuec);
-        valuec = replace_string(value, "%n", disp_devnum, false);
-        g_free(value);
-        parameter = replace_string(valuec, "%i", disp_id, false);
-        g_free(valuec);
+        value = fmt;
+
+        value = ztd::replace(value, "%v", disp_device);
+        value = ztd::replace(value, "%s", disp_size);
+        value = ztd::replace(value, "%t", disp_fstype);
+        value = ztd::replace(value, "%l", disp_label);
+        value = ztd::replace(value, "%m", disp_mount);
+        value = ztd::replace(value, "%n", disp_devnum);
+        value = ztd::replace(value, "%i", disp_id);
+
+        parameter = value;
     }
 
     // volume->disp_name = g_filename_to_utf8( parameter, -1, nullptr, nullptr, nullptr );
-    while (strstr(parameter, "  "))
+    while (ztd::contains(parameter, "  "))
     {
-        value = parameter;
-        parameter = replace_string(value, "  ", " ", false);
-        g_free(value);
+        parameter = ztd::replace(parameter, "  ", " ");
     }
-    while (parameter[0] == ' ')
-    {
-        value = parameter;
-        parameter = g_strdup(parameter + 1);
-        g_free(value);
-    }
-    volume->disp_name = g_filename_display_name(parameter);
 
-    g_free(parameter);
+    // remove leading spaces
+    if (parameter.at(0) == ' ')
+        parameter = std::regex_replace(parameter, std::regex("^ +"), "");
+
+    volume->disp_name = g_filename_display_name(parameter.c_str());
+
     g_free(disp_label);
     g_free(disp_size);
     g_free(disp_mount);
@@ -2690,7 +2687,6 @@ char*
 vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options,
                        netmount_t* netmount, bool* run_in_terminal, char** mount_point)
 {
-    char* str;
     const char* handlers_list;
     int i;
     XSet* set;
@@ -2824,10 +2820,10 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
         return nullptr;
 
     // get command for action
-    char* command = nullptr;
+    char* cmd = nullptr;
     const char* action_s;
     bool terminal;
-    char* err_msg = ptk_handler_load_script(mode, action, set, nullptr, &command);
+    char* err_msg = ptk_handler_load_script(mode, action, set, nullptr, &cmd);
     if (err_msg)
     {
         LOG_WARN("{}", err_msg);
@@ -2858,15 +2854,17 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
              mode == HANDLER_MODE_FS ? "Selected Device Handler" : "Selected Protocol Handler",
              set->menu_label,
              action_s,
-             command ? "" : " (no command)",
+             cmd ? "" : " (no command)",
              msg);
 
-    if (ptk_handler_command_is_empty(command))
+    if (ptk_handler_command_is_empty(cmd))
     {
         // empty command
-        g_free(command);
+        g_free(cmd);
         return nullptr;
     }
+
+    std::string command = cmd;
 
     // replace sub vars
     char* fileq = nullptr;
@@ -2880,20 +2878,14 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
              *      %a  mount point, or create auto mount point
              */
             fileq = bash_quote(vol->device_file); // for iso files
-            str = command;
-            command = replace_string(command, "%v", fileq, false);
+            command = ztd::replace(command, "%v", fileq);
             g_free(fileq);
-            g_free(str);
             if (action == HANDLER_MOUNT)
             {
-                str = command;
-                command = replace_string(command, "%o", options ? options : "", false);
-                g_free(str);
-                str = command;
-                command = replace_string(command, "%t", vol->fs_type ? vol->fs_type : "", false);
-                g_free(str);
+                command = ztd::replace(command, "%o", options ? options : "");
+                command = ztd::replace(command, "%t", vol->fs_type ? vol->fs_type : "");
             }
-            if (strstr(command, "%a"))
+            if (ztd::contains(command.c_str(), "%a"))
             {
                 if (action == HANDLER_MOUNT)
                 {
@@ -2902,9 +2894,7 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
                                                                            vol,
                                                                            nullptr,
                                                                            nullptr);
-                    str = command;
-                    command = replace_string(command, "%a", point_dir, false);
-                    g_free(str);
+                    command = ztd::replace(command, "%a", point_dir);
                     if (mount_point)
                         *mount_point = point_dir;
                     else
@@ -2912,21 +2902,16 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
                 }
                 else
                 {
-                    str = command;
                     command =
-                        replace_string(command,
-                                       "%a",
-                                       vol->is_mounted && vol->mount_point && vol->mount_point[0]
-                                           ? vol->mount_point
-                                           : "",
-                                       false);
-                    g_free(str);
+                        ztd::replace(command,
+                                     "%a",
+                                     vol->is_mounted && vol->mount_point && vol->mount_point[0]
+                                         ? vol->mount_point
+                                         : "");
                 }
             }
             // standard sub vars
-            str = command;
-            command = replace_line_subs(command);
-            g_free(str);
+            command = replace_line_subs(command.c_str());
             break;
         case HANDLER_MODE_NET:
             // also used for DEVICE_TYPE_OTHER unmount and prop
@@ -2944,55 +2929,29 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
             if (netmount)
             {
                 // replace sub vars
-                if (strstr(command, "%url%"))
+                if (ztd::contains(command, "%url%"))
                 {
-                    str = command;
                     if (action != HANDLER_MOUNT && vol && vol->is_mounted)
                         // user-entered url (or mtab url if not available)
-                        command = replace_string(command, "%url%", vol->udi, false);
+                        command = ztd::replace(command, "%url%", vol->udi);
                     else
                         // user-entered url
-                        command = replace_string(command, "%url%", netmount->url, false);
-                    g_free(str);
+                        command = ztd::replace(command, "%url%", netmount->url);
                 }
-                if (strstr(command, "%proto%"))
-                {
-                    str = command;
-                    command = replace_string(command, "%proto%", netmount->fstype, false);
-                    g_free(str);
-                }
-                if (strstr(command, "%host%"))
-                {
-                    str = command;
-                    command = replace_string(command, "%host%", netmount->host, false);
-                    g_free(str);
-                }
-                if (strstr(command, "%port%"))
-                {
-                    str = command;
-                    command = replace_string(command, "%port%", netmount->port, false);
-                    g_free(str);
-                }
-                if (strstr(command, "%user%"))
-                {
-                    str = command;
-                    command = replace_string(command, "%user%", netmount->user, false);
-                    g_free(str);
-                }
-                if (strstr(command, "%pass%"))
-                {
-                    str = command;
-                    command = replace_string(command, "%pass%", netmount->pass, false);
-                    g_free(str);
-                }
-                if (strstr(command, "%path%"))
-                {
-                    str = command;
-                    command = replace_string(command, "%path%", netmount->path, false);
-                    g_free(str);
-                }
+                if (ztd::contains(command, "%proto%"))
+                    command = ztd::replace(command, "%proto%", netmount->fstype);
+                if (ztd::contains(command, "%host%"))
+                    command = ztd::replace(command, "%host%", netmount->host);
+                if (ztd::contains(command, "%port%"))
+                    command = ztd::replace(command, "%port%", netmount->port);
+                if (ztd::contains(command, "%user%"))
+                    command = ztd::replace(command, "%user%", netmount->user);
+                if (ztd::contains(command, "%pass%"))
+                    command = ztd::replace(command, "%pass%", netmount->pass);
+                if (ztd::contains(command, "%path%"))
+                    command = ztd::replace(command, "%path%", netmount->path);
             }
-            if (strstr(command, "%a"))
+            if (ztd::contains(command, "%a"))
             {
                 if (action == HANDLER_MOUNT && netmount)
                 {
@@ -3001,9 +2960,7 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
                                                                            nullptr,
                                                                            netmount,
                                                                            nullptr);
-                    str = command;
-                    command = replace_string(command, "%a", point_dir, false);
-                    g_free(str);
+                    command = ztd::replace(command, "%a", point_dir);
                     if (mount_point)
                         *mount_point = point_dir;
                     else
@@ -3011,15 +2968,12 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
                 }
                 else
                 {
-                    str = command;
-                    command = replace_string(command,
-                                             "%a",
-                                             vol && vol->is_mounted && vol->mount_point &&
-                                                     vol->mount_point[0]
-                                                 ? vol->mount_point
-                                                 : "",
-                                             false);
-                    g_free(str);
+                    command = ztd::replace(command,
+                                           "%a",
+                                           vol && vol->is_mounted && vol->mount_point &&
+                                                   vol->mount_point[0]
+                                               ? vol->mount_point
+                                               : "");
                 }
             }
 
@@ -3041,10 +2995,9 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
                 // urlq and mtaburlq will both be the same mtab url if mounted
                 char* mtaburlq = bash_quote(
                     action != HANDLER_MOUNT && vol && vol->is_mounted ? vol->device_file : nullptr);
-                str = command;
-                command = g_strdup_printf(
-                    "fm_url_proto=%s; fm_url=%s; fm_url_host=%s; fm_url_port=%s; fm_url_user=%s; "
-                    "fm_url_pass=%s; fm_url_path=%s; fm_mtab_fs=%s; fm_mtab_url=%s\n%s",
+                command = fmt::format(
+                    "fm_url_proto={}; fm_url={}; fm_url_host={}; fm_url_port={}; fm_url_user={}; "
+                    "fm_url_pass={}; fm_url_path={}; fm_mtab_fs={}; fm_mtab_url={}\n{}",
                     protoq,
                     urlq,
                     hostq,
@@ -3055,7 +3008,6 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
                     mtabfsq,
                     mtaburlq,
                     command);
-                g_free(str);
                 g_free(urlq);
                 g_free(protoq);
                 g_free(hostq);
@@ -3072,7 +3024,9 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
     }
 
     *run_in_terminal = terminal;
-    return command;
+    // fixes -Wreturn-stack-address, will get an actual fix later
+    char* command2 = const_cast<char*>(command.c_str());
+    return command2;
 }
 
 static bool
@@ -3247,9 +3201,8 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
                 if (command && strstr(command, "%a"))
                 {
                     pointq = bash_quote(vol->is_mounted ? vol->mount_point : nullptr);
-                    s1 = command;
-                    command = replace_string(command, "%a", pointq, false);
-                    g_free(s1);
+                    std::string command2 = ztd::replace(command, "%a", pointq);
+                    command = const_cast<char*>(command2.c_str());
                     g_free(pointq);
                 }
             }
@@ -3270,9 +3223,8 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
                 if (command && strstr(command, "%a"))
                 {
                     pointq = bash_quote(vol->is_mounted ? vol->mount_point : nullptr);
-                    s1 = command;
-                    command = replace_string(command, "%a", pointq, false);
-                    g_free(s1);
+                    std::string command2 = ztd::replace(command, "%a", pointq);
+                    command = const_cast<char*>(command2.c_str());
                     g_free(pointq);
                 }
             }
@@ -3458,15 +3410,16 @@ vfs_volume_exec(VFSVolume* vol, const char* command)
     if (!(command && command[0]) || vol->device_type != DEVICE_TYPE_BLOCK)
         return;
 
-    char* s1 = replace_string(command, "%m", vol->mount_point, true);
-    char* s2 = replace_string(s1, "%l", vol->label, true);
-    g_free(s1);
-    s1 = replace_string(s2, "%v", vol->device_file, false);
-    g_free(s2);
+    std::string cmd = command;
 
-    LOG_INFO("Autoexec: {}", s1);
-    exec_task(s1, false);
-    g_free(s1);
+    std::string quoted_mount = bash_quote(vol->mount_point);
+    std::string quoted_label = bash_quote(vol->label);
+    cmd = ztd::replace(cmd, "%m", quoted_mount);
+    cmd = ztd::replace(cmd, "%l", quoted_label);
+    cmd = ztd::replace(cmd, "%v", vol->device_file);
+
+    LOG_INFO("Autoexec: {}", cmd);
+    exec_task(cmd.c_str(), false);
 }
 
 static void

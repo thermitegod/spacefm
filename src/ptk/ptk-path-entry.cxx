@@ -11,6 +11,9 @@
 #include <string>
 #include <filesystem>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "ptk/ptk-path-entry.hxx"
 
 #include "main-window.hxx"
@@ -623,9 +626,8 @@ on_button_release(GtkEntry* entry, GdkEventButton* evt, void* user_data)
         char* clip_text = gtk_clipboard_wait_for_text(clip);
         if (clip_text && clip_text[0])
         {
-            char* str = replace_string(clip_text, "\n", "", false);
-            gtk_entry_set_text(entry, str);
-            g_free(str);
+            std::string str = ztd::replace(clip_text, "\n", "");
+            gtk_entry_set_text(entry, str.c_str());
             gtk_widget_activate(GTK_WIDGET(entry));
         }
         g_free(clip_text);
@@ -675,10 +677,13 @@ on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars, unsigne
 
     char* new_text = nullptr;
 
+    std::string cleaned;
+
     if (strchr(text, '\n'))
     {
         // remove linefeeds from pasted text
-        text = new_text = replace_string(text, "\n", "", false);
+        cleaned = ztd::replace(text, "\n", "");
+        text = new_text = const_cast<char*>(cleaned.c_str());
     }
 
     // remove leading spaces for test
@@ -690,16 +695,13 @@ on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars, unsigne
         // path is quoted - assume bash quote
         char* unquote = g_strdup(text + 1);
         unquote[strlen(unquote) - 1] = '\0';
-        g_free(new_text);
-        new_text = replace_string(unquote, "'\\''", "'", false);
+        cleaned = ztd::replace(unquote, "'\\''", "'");
+        new_text = const_cast<char*>(cleaned.c_str());
         g_free(unquote);
     }
 
     if (new_text)
-    {
         gtk_entry_buffer_set_text(buf, new_text, -1);
-        g_free(new_text);
-    }
 }
 
 static void

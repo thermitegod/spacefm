@@ -22,7 +22,6 @@ char* replace_line_subs(const char* line);
 char* get_name_extension(const char* full_name, bool is_dir, char** ext);
 void open_in_prog(const char* path);
 
-char* replace_string(const char* orig, const char* str, const char* replace, bool quote);
 char* bash_quote(const char* str);
 char* clean_label(const char* menu_label, bool kill_special, bool convert_amp);
 void string_copy_free(char** s, const char* src);

@@ -1598,18 +1598,17 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
                     return false;
 
                 // get mime type open_all_type set
+                std::string str;
                 char* open_all_name = g_strdup(context->var[CONTEXT_MIME]);
-                if (!open_all_name)
-                    open_all_name = g_strdup("");
-                char* str = open_all_name;
-                open_all_name = replace_string(str, "-", "_", false);
-                g_free(str);
-                str = replace_string(open_all_name, " ", "", false);
-                g_free(open_all_name);
-                open_all_name = g_strdup_printf("open_all_type_%s", str);
-                g_free(str);
+                if (open_all_name)
+                    str = open_all_name;
+                else
+                    str = "";
+
+                str = ztd::replace(str, "-", "_");
+                str = ztd::replace(str, " ", "");
+                open_all_name = g_strdup_printf("open_all_type_%s", str.c_str());
                 open_all_set = xset_is(open_all_name);
-                g_free(open_all_name);
             }
 
             // test context
@@ -3555,8 +3554,8 @@ xset_custom_activate(GtkWidget* item, XSet* set)
                 return;
             }
             command = replace_line_subs(set->line);
-            command = replace_string(command.c_str(), "\\n", "\n", false);
-            command = replace_string(command.c_str(), "\\t", "\t", false);
+            command = ztd::replace(command, "\\n", "\n");
+            command = ztd::replace(command, "\\t", "\t");
             break;
         case XSET_CMD_SCRIPT:
             // script
@@ -3951,13 +3950,13 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     const std::string quoted_path = bash_quote(path);
 #if 0
     if (strstr(editor.c_str(), "%f"))
-        editor = replace_string(editor.c_str(), "%f", quoted_path.c_str(), false);
+        editor = ztd::replace(editor, "%f", quoted_path.c_str());
     else if (strstr(editor.c_str(), "%F"))
-        editor = replace_string(editor.c_str(), "%F", quoted_path.c_str(), false);
+        editor = ztd::replace(editor, "%F", quoted_path.c_str());
     else if (strstr(editor.c_str(), "%u"))
-        editor = replace_string(editor.c_str(), "%u", quoted_path.c_str(), false);
+        editor = ztd::replace(editor, "%u", quoted_path.c_str());
     else if (strstr(editor.c_str(), "%U"))
-        editor = replace_string(editor.c_str(), "%U", quoted_path.c_str(), false);
+        editor = ztd::replace(editor, "%U", quoted_path.c_str());
     else
         editor = fmt::format("{} {}", editor, quoted_path);
 #endif
@@ -5915,26 +5914,18 @@ xset_menu_cb(GtkWidget* item, XSet* set)
             case XSET_MENU_STRING:
             case XSET_MENU_CONFIRM:
             {
-                char* msg;
+                std::string msg = rset->desc;
                 char* default_str = nullptr;
                 if (rset->title && rset->lock)
                     title = g_strdup(rset->title);
                 else
                     title = clean_label(rset->menu_label, false, false);
                 if (rset->lock)
-                {
-                    msg = rset->desc;
                     default_str = rset->z;
-                }
                 else
                 {
-                    char* newline = g_strdup_printf("\n");
-                    char* tab = g_strdup_printf("\t");
-                    char* msg1 = replace_string(rset->desc, "\\n", newline, false);
-                    msg = replace_string(msg1, "\\t", tab, false);
-                    g_free(msg1);
-                    g_free(newline);
-                    g_free(tab);
+                    msg = ztd::replace(msg, "\\n", "\n");
+                    msg = ztd::replace(msg, "\\t", "\t");
                 }
                 if (rset->menu_style == XSET_MENU_CONFIRM)
                 {
@@ -5942,7 +5933,7 @@ xset_menu_cb(GtkWidget* item, XSet* set)
                                         GTK_MESSAGE_QUESTION,
                                         title,
                                         GTK_BUTTONS_OK_CANCEL,
-                                        msg,
+                                        msg.c_str(),
                                         nullptr) == GTK_RESPONSE_OK)
                     {
                         if (cb_func)
@@ -5954,7 +5945,7 @@ xset_menu_cb(GtkWidget* item, XSet* set)
                 else if (xset_text_dialog(parent,
                                           title,
                                           true,
-                                          msg,
+                                          msg.c_str(),
                                           nullptr,
                                           mset->s,
                                           &mset->s,
@@ -5966,8 +5957,6 @@ xset_menu_cb(GtkWidget* item, XSet* set)
                     else if (!set->lock)
                         xset_custom_activate(item, rset);
                 }
-                if (!rset->lock)
-                    g_free(msg);
                 g_free(title);
             }
             break;

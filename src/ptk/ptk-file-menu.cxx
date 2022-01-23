@@ -16,11 +16,12 @@
 
 #include <fcntl.h>
 
-#include "ptk/ptk-file-menu.hxx"
 #include <glib.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
+
+#include "utils.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dir.hxx"
@@ -36,7 +37,7 @@
 #include "ptk/ptk-location-view.hxx"
 #include "ptk/ptk-file-list.hxx"
 
-#include "utils.hxx"
+#include "ptk/ptk-file-menu.hxx"
 
 static bool on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data);
 static bool app_menu_keypress(GtkWidget* widget, GdkEventKey* event, PtkFileMenu* data);
@@ -570,7 +571,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
     VFSAppDesktop* desktop_file;
     char* name;
     char* desc;
-    char* str;
     XSet* set_radio;
     int icon_w;
     int icon_h;
@@ -902,20 +902,13 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         xset_add_menuitem(browser, submenu, accel_group, set);
 
         // Default
-        char* plain_type = nullptr;
+        std::string plain_type = "";
         if (mime_type)
             plain_type = g_strdup(vfs_mime_type_get_type(mime_type));
-        if (!plain_type)
-            plain_type = g_strdup("");
-        str = plain_type;
-        plain_type = replace_string(str, "-", "_", false);
-        g_free(str);
-        str = replace_string(plain_type, " ", "", false);
-        g_free(plain_type);
-        plain_type = g_strdup_printf("open_all_type_%s", str);
-        g_free(str);
-        set = xset_set_cb(plain_type, (GFunc)on_popup_open_all, data);
-        g_free(plain_type);
+        plain_type = ztd::replace(plain_type, "-", "_");
+        plain_type = ztd::replace(plain_type, " ", "");
+        plain_type = fmt::format("open_all_type_{}", plain_type);
+        set = xset_set_cb(plain_type.c_str(), (GFunc)on_popup_open_all, data);
         set->lock = true;
         set->menu_style = XSET_MENU_NORMAL;
         if (set->shared_key)
@@ -1158,7 +1151,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         bool b;
         for (int i = 1; i < 11; i++)
         {
-            str = g_strdup_printf("copy_tab_%d", i);
+            char* str = g_strdup_printf("copy_tab_%d", i);
             set = xset_get(str);
             g_free(str);
             set->disable = (i > tab_count) || (i == tab_num);
@@ -1413,6 +1406,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 {
     char* path;
     char* str;
+    std::string str2;
 
     std::string command;
 
@@ -1571,12 +1565,9 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             std::filesystem::create_directories(path);
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
             g_free(path);
-            str = replace_string(mime_type->type, "/", "-", false);
-            path = str;
-            str = g_strdup_printf("%s.xml", path);
-            g_free(path);
-            path = g_build_filename(vfs_user_data_dir(), "mime/packages", str, nullptr);
-            g_free(str);
+            str2 = ztd::replace(mime_type->type, "/", "-");
+            str2 = fmt::format("{}.xml", str2);
+            path = g_build_filename(vfs_user_data_dir(), "mime/packages", str2.c_str(), nullptr);
             if (!std::filesystem::exists(path))
             {
                 str = g_strdup_printf("%s.xml", mime_type->type);
@@ -1805,8 +1796,8 @@ on_app_menu_hide(GtkWidget* widget, GtkWidget* app_menu)
 }
 
 static GtkWidget*
-app_menu_additem(GtkWidget* menu, char* label, char* stock_icon, int job, GtkWidget* app_item,
-                 PtkFileMenu* data)
+app_menu_additem(GtkWidget* menu, const char* label, const char* stock_icon, int job,
+                 GtkWidget* app_item, PtkFileMenu* data)
 {
     GtkWidget* item;
     if (stock_icon)
@@ -1834,9 +1825,8 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     (void)time;
     GtkWidget* newitem;
     GtkWidget* submenu;
-    char* str;
-    char* str2;
-    char* path;
+    std::string str;
+    std::string path;
     char* icon;
     const char* type;
 
@@ -1899,23 +1889,19 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     // *.desktop (missing)
     if (desktop_file->file_name)
     {
-        path =
-            g_build_filename(vfs_user_data_dir(), "applications", desktop_file->file_name, nullptr);
+        path = g_build_filename(vfs_user_data_dir(), "applications", desktop_file->file_name, nullptr);
         if (std::filesystem::exists(path))
         {
-            str = replace_string(desktop_file->file_name, ".desktop", "._desktop", false);
+            str = ztd::replace(desktop_file->file_name, ".desktop", "._desktop");
             icon = g_strdup("Edit");
         }
         else
         {
-            str2 = replace_string(desktop_file->file_name, ".desktop", "._desktop", false);
-            str = g_strdup_printf("%s (*%s)", str2, "copy");
-            g_free(str2);
+            str = ztd::replace(desktop_file->file_name, ".desktop", "._desktop");
+            str = fmt::format("{} (*copy)", str);
             icon = g_strdup("document-new");
         }
-        newitem = app_menu_additem(app_menu, str, icon, APP_JOB_EDIT, app_item, data);
-        g_free(str);
-        g_free(path);
+        newitem = app_menu_additem(app_menu, str.c_str(), icon, APP_JOB_EDIT, app_item, data);
     }
 
     // mimeapps.list
@@ -1939,30 +1925,24 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     gtk_container_add(GTK_CONTAINER(app_menu), gtk_separator_menu_item_new());
 
     // *.xml (missing)
-    str = replace_string(type, "/", "-", false);
-    path = str;
-    str = g_strdup_printf("%s.xml", path);
-    g_free(path);
-    path = g_build_filename(vfs_user_data_dir(), "mime/packages", str, nullptr);
-    if (path && std::filesystem::exists(path))
+    str = ztd::replace(type, "/", "-");
+    str = fmt::format("{}.xml", str);
+    path = g_build_filename(vfs_user_data_dir(), "mime/packages", str.c_str(), nullptr);
+    if (std::filesystem::exists(path))
     {
-        g_free(path);
-        str = replace_string(type, "/", "-", false);
-        path = str;
-        str = g_strdup_printf("%s._xml", path);
-        g_free(path);
+        str = ztd::replace(type, "/", "-");
+        str = fmt::format("{}._xml", str);
+
         icon = g_strdup("Edit");
     }
     else
     {
-        g_free(path);
-        str = replace_string(type, "/", "-", false);
-        path = str;
-        str = g_strdup_printf("%s._xml (*%s)", path, "new");
-        g_free(path);
+        str = ztd::replace(type, "/", "-");
+        str = fmt::format("{}._xml (*new)", str);
+
         icon = g_strdup("document-new");
     }
-    newitem = app_menu_additem(app_menu, str, icon, APP_JOB_EDIT_TYPE, app_item, data);
+    newitem = app_menu_additem(app_menu, str.c_str(), icon, APP_JOB_EDIT_TYPE, app_item, data);
 
     // mime/packages/
     newitem = app_menu_additem(app_menu,
@@ -1994,10 +1974,10 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
                                    APP_JOB_VIEW,
                                    app_item,
                                    data);
-        path = get_shared_desktop_file_location(desktop_file->file_name);
+        char* desk_path = get_shared_desktop_file_location(desktop_file->file_name);
 
-        gtk_widget_set_sensitive(GTK_WIDGET(newitem), !!path);
-        g_free(path);
+        gtk_widget_set_sensitive(GTK_WIDGET(newitem), !!desk_path);
+        g_free(desk_path);
     }
 
     // /usr applications/
@@ -2014,18 +1994,15 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
 
     // /usr *.xml
     str = g_strdup_printf("%s.xml", type);
-    path = g_build_filename("/usr/share/mime", str, nullptr);
-    g_free(str);
+    path = g_build_filename("/usr/share/mime", str.c_str(), nullptr);
     str = g_strdup_printf("%s._xml", type);
     newitem = app_menu_additem(submenu,
-                               str,
+                               str.c_str(),
                                g_strdup("text-x-generic"),
                                APP_JOB_VIEW_TYPE,
                                app_item,
                                data);
-    g_free(str);
     gtk_widget_set_sensitive(GTK_WIDGET(newitem), std::filesystem::exists(path));
-    g_free(path);
 
     // /usr *Overrides.xml
     newitem = app_menu_additem(submenu,

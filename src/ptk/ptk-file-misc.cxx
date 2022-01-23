@@ -3305,14 +3305,14 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
     char* str;
     char* quoted;
     char* command_final;
-    char* command;
+    char* cmd;
     char* name;
 
     LOG_INFO("Selected File Handler '{}'", handler_set->menu_label);
 
     // get command - was already checked as non-empty
     char* err_msg =
-        ptk_handler_load_script(HANDLER_MODE_FILE, HANDLER_MOUNT, handler_set, nullptr, &command);
+        ptk_handler_load_script(HANDLER_MODE_FILE, HANDLER_MOUNT, handler_set, nullptr, &cmd);
     if (err_msg)
     {
         xset_msg_dialog(parent->file_browser ? GTK_WIDGET(parent->file_browser) : nullptr,
@@ -3325,16 +3325,15 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
         return;
     }
     // auto mount point
-    if (strstr(command, "%a"))
+    std::string command = cmd;
+    if (ztd::contains(command, "%a"))
     {
         name = ptk_location_view_create_mount_point(HANDLER_MODE_FILE,
                                                     nullptr,
                                                     nullptr,
                                                     files && files->data ? (char*)files->data
                                                                          : nullptr);
-        str = command;
-        command = replace_string(command, "%a", name, false);
-        g_free(str);
+        command = ztd::replace(command, "%a", name);
         g_free(name);
     }
 
@@ -3343,8 +3342,8 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
     GString* fm_filenames = g_string_new("fm_filenames=(\n");
     GString* fm_files = g_string_new("fm_files=(\n");
     // command looks like it handles multiple files ?
-    bool multiple = (strstr(command, "%N") || strstr(command, "%F") ||
-                     strstr(command, "fm_files[") || strstr(command, "fm_filenames["));
+    std::vector<std::string> keys{"%N", "%F", "fm_files[", "fm_filenames["};
+    bool multiple = ztd::contains(command, keys);
     if (multiple)
     {
         for (l = files; l; l = l->next)
@@ -3364,16 +3363,15 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
     g_string_append(fm_filenames, ")\nfm_filename=\"$fm_filenames[0]\"\n");
     g_string_append(fm_files, ")\nfm_file=\"$fm_files[0]\"\n");
     // replace standard sub vars
-    str = command;
-    command = replace_line_subs(command);
-    g_free(str);
+    command = replace_line_subs(command.c_str());
 
     // start task(s)
     for (l = files; l; l = l->next)
     {
         if (multiple)
         {
-            command_final = g_strdup_printf("%s%s%s", fm_filenames->str, fm_files->str, command);
+            command_final =
+                g_strdup_printf("%s%s%s", fm_filenames->str, fm_files->str, command.c_str());
         }
         else
         {
@@ -3391,7 +3389,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
                                             fm_files->str,
                                             str,
                                             quoted,
-                                            command);
+                                            command.c_str());
             g_free(str);
             g_free(quoted);
         }
@@ -3420,7 +3418,6 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
     }
     g_string_free(fm_filenames, true);
     g_string_free(fm_files, true);
-    g_free(command);
 }
 
 static bool

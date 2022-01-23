@@ -734,16 +734,18 @@ ptk_handler_get_command(int mode, int cmd, XSet* handler_set)
         return nullptr;
     }
     // name script
-    char* str = g_strdup_printf("/hand-%s-%s.sh",
-                                modes[mode],
-                                mode == HANDLER_MODE_ARC ? cmds_arc[cmd] : cmds_mnt[cmd]);
-    char* script = replace_string(def_script, "/exec.sh", str, false);
-    g_free(str);
+    std::string str = fmt::format("/hand-{}-{}.sh",
+                                  modes[mode],
+                                  mode == HANDLER_MODE_ARC ? cmds_arc[cmd] : cmds_mnt[cmd]);
+    std::string script = ztd::replace(def_script, "/exec.sh", str);
     g_free(def_script);
     if (std::filesystem::exists(script))
-        return script;
+    {
+        char* script2 = const_cast<char*>(script.c_str());
+        return script2;
+    }
+
     LOG_WARN("ptk_handler_get_command missing script for custom {}", handler_set->name);
-    g_free(script);
     return nullptr;
 }
 
@@ -785,13 +787,12 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
         return g_strdup("Error: unable to save command (can't get script path?)");
     }
     // name script
-    char* script;
-    char* str;
-    str = g_strdup_printf("/hand-%s-%s.sh",
-                          modes[mode],
-                          mode == HANDLER_MODE_ARC ? cmds_arc[cmd] : cmds_mnt[cmd]);
-    script = replace_string(def_script, "/exec.sh", str, false);
-    g_free(str);
+    std::string script;
+    std::string str;
+    str = fmt::format("/hand-{}-{}.sh",
+                      modes[mode],
+                      mode == HANDLER_MODE_ARC ? cmds_arc[cmd] : cmds_mnt[cmd]);
+    script = ztd::replace(def_script, "/exec.sh", str);
     g_free(def_script);
     // load script
     // bool modified = false;
@@ -808,12 +809,12 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
         std::ifstream file(script);
         if (!file.is_open())
         {
-            str =
-                g_strdup_printf("%s '%s':\n\n%s", "Error reading file", script, g_strerror(errno));
-            g_free(script);
+            str = fmt::format("{} '{}':\n\n{}", "Error reading file", script, g_strerror(errno));
             if (!view)
                 g_string_free(gstr, true);
-            return str;
+
+            char* str2 = const_cast<char*>(str.c_str());
+            return str2;
         }
         else
         {
@@ -847,7 +848,6 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
             file.close();
         }
     }
-    g_free(script);
 
     if (!view)
         *text = g_string_free(gstr, false);
@@ -882,13 +882,12 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
     }
     g_free(parent_dir);
     // name script
-    char* script;
-    char* str;
-    str = g_strdup_printf("/hand-%s-%s.sh",
-                          modes[mode],
-                          mode == HANDLER_MODE_ARC ? cmds_arc[cmd] : cmds_mnt[cmd]);
-    script = replace_string(def_script, "/exec.sh", str, false);
-    g_free(str);
+    std::string script;
+    std::string str;
+    str = fmt::format("/hand-{}-{}.sh",
+                      modes[mode],
+                      mode == HANDLER_MODE_ARC ? cmds_arc[cmd] : cmds_mnt[cmd]);
+    script = ztd::replace(def_script, "/exec.sh", str);
     g_free(def_script);
     // get text
     char* text;
@@ -918,14 +917,14 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
     }
     else
     {
-        str = g_strdup_printf("%s '%s':\n\n%s", "Error writing to file", script, g_strerror(errno));
-        g_free(script);
+        str = fmt::format("{} '{}':\n\n{}", "Error writing to file", script, g_strerror(errno));
         if (view)
             g_free(text);
-        return str;
+
+        char* str2 = const_cast<char*>(str.c_str());
+        return str2;
     }
     file.close();
-    g_free(script);
     if (view)
         g_free(text);
     return nullptr; // success
@@ -1050,7 +1049,6 @@ ptk_handler_file_has_handlers(int mode, int cmd, const char* path, VFSMimeType* 
     char* delim;
     char* ptr;
     char* under_path;
-    char* new_path = nullptr;
     GSList* handlers = nullptr;
 
     if (!path && !mime_type)
@@ -1063,7 +1061,10 @@ ptk_handler_file_has_handlers(int mode, int cmd, const char* path, VFSMimeType* 
 
     // replace spaces in path with underscores for matching
     if (path && strchr(path, ' '))
-        under_path = new_path = replace_string(path, " ", "_", false);
+    {
+        std::string cleaned = ztd::replace(path, " ", "_");
+        under_path = const_cast<char*>(cleaned.c_str());
+    }
     else
         under_path = (char*)path;
 
@@ -1122,7 +1123,6 @@ ptk_handler_file_has_handlers(int mode, int cmd, const char* path, VFSMimeType* 
             ptr = delim + 1;
         }
     }
-    g_free(new_path);
     return g_slist_reverse(handlers);
 }
 

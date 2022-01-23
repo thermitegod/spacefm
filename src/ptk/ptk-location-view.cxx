@@ -580,7 +580,7 @@ update_volume(VFSVolume* vol)
 char*
 ptk_location_view_get_mount_point_dir(const char* name)
 {
-    char* parent = nullptr;
+    std::string parent;
 
     // clean mount points
     if (name)
@@ -592,57 +592,46 @@ ptk_location_view_get_mount_point_dir(const char* name)
         if (g_str_has_prefix(set->s, "~/"))
             parent = g_build_filename(vfs_user_home_dir(), set->s + 2, nullptr);
         else
-            parent = g_strdup(set->s);
-        if (parent)
+            parent = set->s;
+
+        const char* varname[] = {"$USER", "$UID", "$HOME", "$XDG_RUNTIME_DIR", "$XDG_CACHE_HOME"};
+        for (unsigned int i = 0; i < G_N_ELEMENTS(varname); i++)
         {
-            const char* varname[] = {"$USER",
-                                     "$UID",
-                                     "$HOME",
-                                     "$XDG_RUNTIME_DIR",
-                                     "$XDG_CACHE_HOME"};
-            for (unsigned int i = 0; i < G_N_ELEMENTS(varname); i++)
+            if (!ztd::contains(parent, varname[i]))
+                continue;
+            std::string value;
+            switch (i)
             {
-                if (!strstr(parent, varname[i]))
-                    continue;
-                char* value;
-                switch (i)
-                {
-                    case 0: // $USER
-                        value = g_strdup(g_get_user_name());
-                        break;
-                    case 1: // $UID
-                        value = g_strdup_printf("%d", geteuid());
-                        break;
-                    case 2: // $HOME
-                        value = g_strdup(vfs_user_home_dir());
-                        break;
-                    case 3: // $XDG_RUNTIME_DIR
-                        value = g_strdup(vfs_user_runtime_dir());
-                        break;
-                    case 4: // $XDG_CACHE_HOME
-                        value = g_strdup(vfs_user_cache_dir());
-                        break;
-                    default:
-                        value = g_strdup("");
-                }
-                char* str = parent;
-                parent = replace_string(parent, varname[i], value, false);
-                g_free(str);
-                g_free(value);
+                case 0: // $USER
+                    value = g_get_user_name();
+                    break;
+                case 1: // $UID
+                    value = fmt::format("{}", geteuid());
+                    break;
+                case 2: // $HOME
+                    value = vfs_user_home_dir();
+                    break;
+                case 3: // $XDG_RUNTIME_DIR
+                    value = vfs_user_runtime_dir();
+                    break;
+                case 4: // $XDG_CACHE_HOME
+                    value = vfs_user_cache_dir();
+                    break;
+                default:
+                    value = "";
             }
-            std::filesystem::create_directories(parent);
-            std::filesystem::permissions(parent, std::filesystem::perms::owner_all);
+            parent = ztd::replace(parent, varname[i], value);
         }
-        if (!have_rw_access(parent))
-        {
-            g_free(parent);
-            parent = nullptr;
-        }
+        std::filesystem::create_directories(parent);
+        std::filesystem::permissions(parent, std::filesystem::perms::owner_all);
+
+        if (!have_rw_access(parent.c_str()))
+            parent.clear();
     }
-    if (!parent)
+    if (!std::filesystem::exists(parent))
         return g_build_filename(vfs_user_cache_dir(), "spacefm-mount", name, nullptr);
-    char* path = g_build_filename(parent, name, nullptr);
-    g_free(parent);
+
+    char* path = g_build_filename(parent.c_str(), name, nullptr);
     return path;
 }
 
@@ -731,9 +720,11 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
             if (netmount->host && g_utf8_validate(netmount->host, -1, nullptr))
             {
                 char* parent_dir = nullptr;
+                std::string parent_dir_str;
                 if (netmount->path)
                 {
-                    parent_dir = replace_string(netmount->path, "/", "-", false);
+                    parent_dir_str = ztd::replace(netmount->path, "/", "-");
+                    parent_dir = const_cast<char*>(parent_dir_str.c_str());
                     g_strstrip(parent_dir);
                     while (g_str_has_suffix(parent_dir, "-"))
                         parent_dir[strlen(parent_dir) - 1] = '\0';
@@ -774,9 +765,8 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
     if (mname && strchr(mname, ' '))
     {
         g_strstrip(mname);
-        str = mname;
-        mname = replace_string(mname, " ", "", false);
-        g_free(str);
+        std::string cleaned = ztd::replace(mname, " ", "");
+        mname = const_cast<char*>(cleaned.c_str());
     }
 
     if (mname && !mname[0])
@@ -1157,9 +1147,9 @@ on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         bool change_root = (!old_set_s || strcmp(old_set_s, set->s));
 
         std::string cmd;
-        cmd = replace_string(set->s, "%v", vol->device_file, false);
-        cmd = replace_string(cmd.c_str(), "%o", options, false);
-        cmd = fmt::format("echo {}; echo; {}", cmd.c_str(), cmd.c_str());
+        cmd = ztd::replace(set->s, "%v", vol->device_file);
+        cmd = ztd::replace(cmd, "%o", options);
+        cmd = fmt::format("echo {}; echo; {}", cmd, cmd);
 
         // task
         PtkFileBrowser* file_browser =
@@ -1215,7 +1205,7 @@ on_umount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 
         // task
         std::string cmd;
-        cmd = replace_string(set->s, "%v", vol->device_file, false);
+        cmd = ztd::replace(set->s, "%v", vol->device_file);
         cmd = fmt::format("echo {}; echo; {}", cmd, cmd);
         PtkFileBrowser* file_browser =
             static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
@@ -1899,9 +1889,9 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
             else if (strstr(cmd, "%a"))
             {
                 char* pointq = bash_quote(vol->mount_point);
-                char* str = cmd;
-                cmd = replace_string(cmd, "%a", pointq, false);
-                g_free(str);
+                std::string cmd2;
+                cmd2 = ztd::replace(cmd, "%a", pointq);
+                cmd = const_cast<char*>(cmd2.c_str());
                 g_free(pointq);
             }
         }
@@ -1929,9 +1919,9 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         else if (strstr(cmd, "%a"))
         {
             char* pointq = bash_quote(vol->mount_point);
-            char* str = cmd;
-            cmd = replace_string(cmd, "%a", pointq, false);
-            g_free(str);
+            std::string cmd2;
+            cmd2 = ztd::replace(cmd, "%a", pointq);
+            cmd = const_cast<char*>(cmd2.c_str());
             g_free(pointq);
         }
     }
@@ -2038,17 +2028,6 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         {
             g_free(fstab);
             fstab = nullptr;
-        }
-        if (fstab)
-        {
-            /// if ( old_flags = strchr( fstab, '\n' ) )
-            ///    old_flags[0] = '\0';
-            while (strstr(fstab, "  "))
-            {
-                old_flags = fstab;
-                fstab = replace_string(fstab, "  ", " ", false);
-                g_free(old_flags);
-            }
         }
     }
     g_free(fstab_path);

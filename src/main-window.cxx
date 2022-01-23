@@ -9,8 +9,6 @@
 
 #include <vector>
 
-#include "window-reference.hxx"
-
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
 
@@ -21,7 +19,9 @@
 
 #include "ptk/ptk-location-view.hxx"
 
+#include "window-reference.hxx"
 #include "main-window.hxx"
+
 #include "ptk/ptk-utils.hxx"
 
 #include "pref-dialog.hxx"
@@ -2878,7 +2878,6 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
     char* tab_num = nullptr;
     char* panel_count = nullptr;
     char* panel_num = nullptr;
-    char* s;
 
     if (!file_browser || !main_window)
         return;
@@ -2904,11 +2903,14 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
     }
 
     char* orig_fmt = xset_get_s("main_title");
-    char* fmt = g_strdup(orig_fmt);
-    if (!fmt)
-        fmt = g_strdup("%d");
+    std::string fmt;
+    if (orig_fmt)
+        fmt = orig_fmt;
+    else
+        fmt = "%d";
 
-    if (strstr(fmt, "%t") || strstr(fmt, "%T") || strstr(fmt, "%p") || strstr(fmt, "%P"))
+    std::vector<std::string> keys{"%t", "%T", "%p", "%P"};
+    if (ztd::contains(fmt, keys))
     {
         // get panel/tab info
         int ipanel_count = 0, itab_count = 0, itab_num = 0;
@@ -2918,43 +2920,28 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
         tab_num = g_strdup_printf("%d", itab_num);
         panel_count = g_strdup_printf("%d", ipanel_count);
         panel_num = g_strdup_printf("%d", main_window->curpanel);
-        s = replace_string(fmt, "%t", tab_num, false);
-        g_free(fmt);
-        fmt = replace_string(s, "%T", tab_count, false);
-        g_free(s);
-        s = replace_string(fmt, "%p", panel_num, false);
-        g_free(fmt);
-        fmt = replace_string(s, "%P", panel_count, false);
+
+        fmt = ztd::replace(fmt, "%t", tab_num);
+        fmt = ztd::replace(fmt, "%T", tab_count);
+        fmt = ztd::replace(fmt, "%p", panel_num);
+        fmt = ztd::replace(fmt, "%P", panel_count);
+
         g_free(panel_count);
         g_free(tab_count);
         g_free(tab_num);
         g_free(panel_num);
     }
+    if (ztd::contains(fmt, "*") && !main_tasks_running(main_window))
+        fmt = ztd::replace(fmt, "*", "");
+    if (ztd::contains(fmt, "%n"))
+        fmt = ztd::replace(fmt, "%n", disp_name);
+    if (orig_fmt && ztd::contains(orig_fmt, "%d"))
+        fmt = ztd::replace(fmt, "%d", disp_path);
 
-    if (strchr(fmt, '*') && !main_tasks_running(main_window))
-    {
-        s = fmt;
-        fmt = replace_string(s, "*", "", false);
-        g_free(s);
-    }
-
-    if (strstr(fmt, "%n"))
-    {
-        s = fmt;
-        fmt = replace_string(s, "%n", disp_name, false);
-        g_free(s);
-    }
-    if (orig_fmt && strstr(orig_fmt, "%d"))
-    {
-        s = fmt;
-        fmt = replace_string(s, "%d", disp_path, false);
-        g_free(s);
-    }
     g_free(disp_name);
     g_free(disp_path);
 
-    gtk_window_set_title(GTK_WINDOW(main_window), fmt);
-    g_free(fmt);
+    gtk_window_set_title(GTK_WINDOW(main_window), fmt.c_str());
 }
 
 static void
@@ -7457,16 +7444,14 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
     if (!preset &&
         (!strcmp(event, "evt_start") || !strcmp(event, "evt_exit") || !strcmp(event, "evt_device")))
     {
-        char* cmd;
+        std::string cmd = ucmd;
 
-        cmd = replace_string(ucmd, "%e", event, false);
+        cmd = ztd::replace(cmd, "%e", event);
         if (!strcmp(event, "evt_device"))
         {
             if (!focus)
                 return false;
-            char* str = cmd;
-            cmd = replace_string(str, "%f", focus, false);
-            g_free(str);
+            cmd = ztd::replace(cmd, "%f", focus);
             const char* change;
             switch (state)
             {
@@ -7480,13 +7465,11 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
                     change = g_strdup("changed");
                     break;
             }
-            str = cmd;
-            cmd = replace_string(str, "%v", change, false);
-            g_free(str);
+            cmd = ztd::replace(cmd, "%v", change);
         }
         argv[0] = g_strdup("bash");
         argv[1] = g_strdup("-c");
-        argv[2] = cmd;
+        argv[2] = (char*)cmd.c_str();
         argv[3] = nullptr;
         LOG_INFO("EVENT {} >>> {}", event, argv[2]);
         // g_spawn_command_line_async( cmd, nullptr );
@@ -7529,7 +7512,7 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
     var[0] = '%';
     var[2] = '\0';
     int i = 0;
-    std::string cmd;
+    std::string cmd = ucmd;
     while (replace[i])
     {
         /*
@@ -7545,10 +7528,9 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
         %d  cwd
         */
         var[1] = replace[i];
-        str = (char*)cmd.c_str();
         if (var[1] == 'e')
-            cmd = replace_string(ucmd, var, event, false);
-        else if (strstr(str, var))
+            cmd = ztd::replace(cmd, var, event);
+        else if (ztd::contains(cmd, var))
         {
             switch (var[1])
             {
@@ -7556,58 +7538,56 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
                     if (!focus)
                     {
                         rep = g_strdup_printf("panel%d", panel);
-                        cmd = replace_string(str, var, rep, false);
+                        cmd = ztd::replace(cmd, var, rep);
                         g_free(rep);
                     }
                     else
-                        cmd = replace_string(str, var, focus, false);
+                        cmd = ztd::replace(cmd, var, focus);
                     break;
                 case 'w':
                     rep = g_strdup_printf("%p", main_window);
-                    cmd = replace_string(str, var, rep, false);
+                    cmd = ztd::replace(cmd, var, rep);
                     g_free(rep);
                     break;
                 case 'p':
                     rep = g_strdup_printf("%d", panel);
-                    cmd = replace_string(str, var, rep, false);
+                    cmd = ztd::replace(cmd, var, rep);
                     g_free(rep);
                     break;
                 case 't':
                     rep = g_strdup_printf("%d", tab);
-                    cmd = replace_string(str, var, rep, false);
+                    cmd = ztd::replace(cmd, var, rep);
                     g_free(rep);
                     break;
                 case 'v':
-                    cmd = replace_string(str, var, visible ? "1" : "0", false);
+                    cmd = ztd::replace(cmd, var, visible ? "1" : "0");
                     break;
                 case 'k':
                     rep = g_strdup_printf("%#x", keyval);
-                    cmd = replace_string(str, var, rep, false);
+                    cmd = ztd::replace(cmd, var, rep);
                     g_free(rep);
                     break;
                 case 'b':
                     rep = g_strdup_printf("%d", button);
-                    cmd = replace_string(str, var, rep, false);
+                    cmd = ztd::replace(cmd, var, rep);
                     g_free(rep);
                     break;
                 case 'm':
                     rep = g_strdup_printf("%#x", state);
-                    cmd = replace_string(str, var, rep, false);
+                    cmd = ztd::replace(cmd, var, rep);
                     g_free(rep);
                     break;
                 case 'd':
                     rep =
                         bash_quote(file_browser ? ptk_file_browser_get_cwd(file_browser) : nullptr);
-                    cmd = replace_string(str, var, rep, false);
+                    cmd = ztd::replace(cmd, var, rep);
                     g_free(rep);
                     break;
                 default:
                     // failsafe
-                    g_free(str);
                     return false;
                     break;
             }
-            g_free(str);
         }
         i++;
     }
