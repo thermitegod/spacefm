@@ -13,6 +13,8 @@
 #include <string>
 #include <string_view>
 
+#include <vector>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -157,89 +159,70 @@ VFSAppDesktop::open_multiple_files()
     return false;
 }
 
-/*
- * Parse Exec command line of app desktop file, and translate
- * it into a real command which can be passed to g_spawn_command_line_async().
- * file_list is a null-terminated file list containing full
- * paths of the files passed to app.
- * returned char* should be freed when no longer needed.
- */
 std::string
-VFSAppDesktop::translate_app_exec_to_command_line(GList* file_list)
+VFSAppDesktop::translate_app_exec_to_command_line(std::vector<std::string>& file_list)
 {
     // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
 
-    const char* pexec = get_exec();
-    char* file;
-    GList* l;
-    std::string tmp;
-    std::string cmd = "";
+    std::string cmd = get_exec();
+
     bool add_files = false;
 
-    for (; *pexec; ++pexec)
+    std::vector<std::string> open_files_keys{"%F", "%U"};
+    if (ztd::contains(cmd, open_files_keys))
     {
-        if (*pexec == '%')
+        std::string tmp;
+        for (std::string file: file_list)
         {
-            ++pexec;
-            switch (*pexec)
-            {
-                case 'F':
-                case 'U':
-                    for (l = file_list; l; l = l->next)
-                    {
-                        file = (char*)l->data;
-                        cmd.append(bash_quote(file));
-                        cmd.append(" ");
-                    }
-                    add_files = true;
-                    break;
-                case 'f':
-                case 'u':
-                    if (file_list && file_list->data)
-                    {
-                        file = (char*)file_list->data;
-                        cmd.append(bash_quote(file));
-                        add_files = true;
-                    }
-                    break;
-                case 'c':
-                    cmd.append(get_disp_name());
-                    break;
-                case 'i':
-                    // Add icon name
-                    if (get_icon_name())
-                    {
-                        cmd.append("--icon ");
-                        cmd.append(get_icon_name());
-                    }
-                    break;
-                case 'k':
-                    // Location of the desktop file
-                    break;
-                case '%':
-                    cmd.append("%");
-                    break;
-                case '\0':
-                    break;
-                default:
-                    break;
-            }
+            tmp.append(bash_quote(file));
+            tmp.append(" ");
         }
-        else
-        {
-            // not % escaped part
-            cmd.append(fmt::format("{}", (char)*pexec));
-        }
+        if (ztd::contains(cmd, open_files_keys[0]))
+            cmd = ztd::replace(cmd, open_files_keys[0], tmp);
+        if (ztd::contains(cmd, open_files_keys[1]))
+            cmd = ztd::replace(cmd, open_files_keys[1], tmp);
+
+        add_files = true;
     }
+
+    std::vector<std::string> open_file_keys{"%f", "%u"};
+    if (ztd::contains(cmd, open_file_keys))
+    {
+        std::string tmp;
+        for (std::string file: file_list)
+        {
+            tmp.append(bash_quote(file));
+        }
+        if (ztd::contains(cmd, open_file_keys[0]))
+            cmd = ztd::replace(cmd, open_file_keys[0], tmp);
+        if (ztd::contains(cmd, open_file_keys[1]))
+            cmd = ztd::replace(cmd, open_file_keys[1], tmp);
+
+        add_files = true;
+    }
+
+    if (ztd::contains(cmd, "%c"))
+    {
+        cmd = ztd::replace(cmd, "%c", get_disp_name());
+    }
+
+    if (ztd::contains(cmd, "%i"))
+    {
+        std::string icon = fmt::format("--icon {}", get_icon_name());
+        cmd = ztd::replace(cmd, "%i", icon);
+    }
+
     if (!add_files)
     {
+        std::string tmp;
+
         cmd.append(" ");
-        for (l = file_list; l; l = l->next)
+        for (std::string file: file_list)
         {
-            file = (char*)l->data;
-            cmd.append(bash_quote(file));
-            cmd.append(" ");
+            tmp.append(bash_quote(file));
+            tmp.append(" ");
         }
+        cmd.append(tmp);
     }
 
     return cmd;
@@ -263,8 +246,8 @@ VFSAppDesktop::exec_in_terminal(const std::string& app_name, const std::string& 
 }
 
 bool
-VFSAppDesktop::open_files(GdkScreen* screen, const char* working_dir, GList* file_paths,
-                          GError** err)
+VFSAppDesktop::open_files(GdkScreen* screen, const char* working_dir,
+                          std::vector<std::string>& file_paths, GError** err)
 {
     char* exec = nullptr;
     std::string cmd;
@@ -322,22 +305,12 @@ VFSAppDesktop::open_files(GdkScreen* screen, const char* working_dir, GList* fil
         else
         {
             // app does not accept multiple files, so run multiple times
-            GList* single;
-            l = file_paths;
-            do
+            for (std::string open_file: file_paths)
             {
-                if (l)
-                {
-                    // just pass a single file path to translate
-                    single = g_list_append(nullptr, l->data);
-                }
-                else
-                {
-                    // there are no files being passed, just run once
-                    single = nullptr;
-                }
-                cmd = translate_app_exec_to_command_line(single);
-                g_list_free(single);
+                std::vector<std::string> open_files;
+                open_files.push_back(open_file);
+
+                cmd = translate_app_exec_to_command_line(open_files);
                 if (!cmd.empty())
                 {
                     if (use_terminal())
@@ -359,7 +332,7 @@ VFSAppDesktop::open_files(GdkScreen* screen, const char* working_dir, GList* fil
                         }
                     }
                 }
-            } while ((l = l ? l->next : nullptr));
+            }
         }
         g_free(exec);
         return true;

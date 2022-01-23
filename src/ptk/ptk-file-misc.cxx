@@ -3438,7 +3438,18 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
 
         LOG_INFO("EXEC({})={}", desktop.get_full_path(), desktop.get_exec());
         GError* err = nullptr;
-        if (!desktop.open_files(screen, parent->cwd, files, &err))
+
+        //////////
+        std::vector<std::string> open_files;
+        GList* l;
+        for (l = files; l; l = l->next)
+        {
+            std::string open_file = (char*)(l->data);
+            open_files.push_back(open_file);
+        }
+        //////////
+
+        if (!desktop.open_files(screen, parent->cwd, open_files, &err))
         {
             GtkWidget* toplevel = parent->file_browser
                                       ? gtk_widget_get_toplevel(GTK_WIDGET(parent->file_browser))

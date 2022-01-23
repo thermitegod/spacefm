@@ -492,10 +492,12 @@ open_file(const char* path)
         if (app_name)
         {
             VFSAppDesktop desktop(app_name);
-            GList* files = g_list_prepend(nullptr, (void*)path);
-            opened = desktop.open_files(gdk_screen_get_default(), nullptr, files, &err);
-            g_free(files->data);
-            g_list_free(files);
+
+            std::string open_file = path;
+            std::vector<std::string> open_files;
+            open_files.push_back(open_file);
+
+            opened = desktop.open_files(gdk_screen_get_default(), nullptr, open_files, &err);
             g_free(app_name);
         }
         else

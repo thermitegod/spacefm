@@ -3566,22 +3566,23 @@ xset_custom_activate(GtkWidget* item, XSet* set)
                         cwd = g_strdup("/");
                         screen = gdk_screen_get_default();
                     }
-                    GList* file_paths = nullptr;
+
+                    std::vector<std::string> open_files;
+
                     GList* l;
                     for (l = sel_files; l; l = l->next)
                     {
-                        file_paths =
-                            g_list_prepend(file_paths,
-                                           g_build_filename(cwd,
-                                                            vfs_file_info_get_name(
-                                                                static_cast<VFSFileInfo*>(l->data)),
-                                                            nullptr));
+                        std::string open_file = g_build_filename(
+                            cwd,
+                            vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data)),
+                            nullptr);
+
+                        open_files.push_back(open_file);
                     }
-                    file_paths = g_list_reverse(file_paths);
 
                     // open in app
                     GError* err = nullptr;
-                    if (!desktop.open_files(screen, cwd, file_paths, &err))
+                    if (!desktop.open_files(screen, cwd, open_files, &err))
                     {
                         ptk_show_error(parent ? GTK_WINDOW(parent) : nullptr,
                                        "Error",
@@ -3592,11 +3593,6 @@ xset_custom_activate(GtkWidget* item, XSet* set)
                     {
                         g_list_foreach(sel_files, (GFunc)vfs_file_info_unref, nullptr);
                         g_list_free(sel_files);
-                    }
-                    if (file_paths)
-                    {
-                        g_list_foreach(file_paths, (GFunc)g_free, nullptr);
-                        g_list_free(file_paths);
                     }
                 }
                 return;

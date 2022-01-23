@@ -10,6 +10,9 @@
  *
  */
 
+#include <string>
+#include <vector>
+
 #include <grp.h>
 #include <pwd.h>
 
@@ -634,11 +637,13 @@ vfs_file_info_open_file(VFSFileInfo* fi, const char* file_path, GError** err)
         if (app_name)
         {
             VFSAppDesktop desktop(app_name);
-            GList* files = nullptr;
-            files = g_list_prepend(files, (void*)file_path);
-            /* FIXME: working dir is needed */
-            ret = desktop.open_files(gdk_screen_get_default(), nullptr, files, err);
-            g_list_free(files);
+
+            std::string open_file = file_path;
+            std::vector<std::string> open_files;
+            open_files.push_back(open_file);
+
+            // FIXME: working dir is needed
+            ret = desktop.open_files(gdk_screen_get_default(), nullptr, open_files, err);
             g_free(app_name);
         }
         vfs_mime_type_unref(mime_type);
