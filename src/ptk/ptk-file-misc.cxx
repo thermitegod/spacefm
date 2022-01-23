@@ -3392,10 +3392,31 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
     g_string_free(fm_files, true);
 }
 
+static const char*
+check_desktop_name(const char* app_desktop)
+{
+    // Check whether this is an app desktop file or just a command line
+    if (g_str_has_suffix(app_desktop, ".desktop"))
+        return app_desktop;
+    else
+    {
+        // Not a desktop entry name
+        // If we are lucky enough, there might be a desktop entry
+        // for this program
+        const char* name = g_strconcat(app_desktop, ".desktop", nullptr);
+        if (std::filesystem::exists(name))
+            return name;
+        else
+        {
+            // fallback
+            return app_desktop;
+        }
+    }
+}
+
 static bool
 open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
 {
-    VFSAppDesktop* desktop;
     XSet* handler_set;
 
     if (app_desktop && g_str_has_prefix(app_desktop, "###") &&
@@ -3407,26 +3428,7 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
     }
     else if (app_desktop)
     {
-        /* Check whether this is an app desktop file or just a command line */
-        if (g_str_has_suffix(app_desktop, ".desktop"))
-            desktop = vfs_app_desktop_new(app_desktop);
-        else
-        {
-            /* Not a desktop entry name */
-            /*
-             * If we are lucky enough, there might be a desktop entry
-             * for this program
-             */
-            char* name = g_strconcat(app_desktop, ".desktop", nullptr);
-            if (std::filesystem::exists(name))
-                desktop = vfs_app_desktop_new(name);
-            else
-            {
-                // fallback
-                desktop = vfs_app_desktop_new(app_desktop);
-            }
-            g_free(name);
-        }
+        VFSAppDesktop desktop(check_desktop_name(app_desktop));
 
         GdkScreen* screen;
         if (parent->file_browser)
@@ -3434,11 +3436,9 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
         else
             screen = gdk_screen_get_default();
 
-        LOG_INFO("EXEC({})={}",
-                 vfs_app_desktop_get_full_path(desktop),
-                 vfs_app_desktop_get_exec(desktop));
+        LOG_INFO("EXEC({})={}", desktop.get_full_path(), desktop.get_exec());
         GError* err = nullptr;
-        if (!vfs_app_desktop_open_files(screen, parent->cwd, desktop, files, &err))
+        if (!desktop.open_files(screen, parent->cwd, files, &err))
         {
             GtkWidget* toplevel = parent->file_browser
                                       ? gtk_widget_get_toplevel(GTK_WIDGET(parent->file_browser))
@@ -3446,7 +3446,6 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
             ptk_show_error(GTK_WINDOW(toplevel), "Error", err->message);
             g_error_free(err);
         }
-        vfs_app_desktop_unref(desktop);
     }
     return true;
 }

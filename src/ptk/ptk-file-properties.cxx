@@ -269,26 +269,23 @@ on_combo_change(GtkComboBox* combo, void* user_data)
 
                 if (!exist) /* It didn't exist */
                 {
-                    VFSAppDesktop* desktop = vfs_app_desktop_new(action);
-                    if (desktop)
-                    {
-                        GdkPixbuf* icon;
-                        icon = vfs_app_desktop_get_icon(desktop, 20);
-                        gtk_list_store_insert_with_values(GTK_LIST_STORE(model),
-                                                          &it,
-                                                          0,
-                                                          0,
-                                                          icon,
-                                                          1,
-                                                          vfs_app_desktop_get_disp_name(desktop),
-                                                          2,
-                                                          action,
-                                                          -1);
-                        if (icon)
-                            g_object_unref(icon);
-                        vfs_app_desktop_unref(desktop);
-                        exist = true;
-                    }
+                    VFSAppDesktop desktop(action);
+
+                    GdkPixbuf* icon;
+                    icon = desktop.get_icon(20);
+                    gtk_list_store_insert_with_values(GTK_LIST_STORE(model),
+                                                      &it,
+                                                      0,
+                                                      0,
+                                                      icon,
+                                                      1,
+                                                      desktop.get_disp_name(),
+                                                      2,
+                                                      action,
+                                                      -1);
+                    if (icon)
+                        g_object_unref(icon);
+                    exist = true;
                 }
 
                 if (exist)
@@ -460,23 +457,13 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         {
             for (action = actions; *action; ++action)
             {
-                VFSAppDesktop* desktop;
+                VFSAppDesktop desktop(*action);
                 GdkPixbuf* icon;
-                desktop = vfs_app_desktop_new(*action);
                 gtk_list_store_append(model, &it);
-                icon = vfs_app_desktop_get_icon(desktop, 20);
-                gtk_list_store_set(model,
-                                   &it,
-                                   0,
-                                   icon,
-                                   1,
-                                   vfs_app_desktop_get_disp_name(desktop),
-                                   2,
-                                   *action,
-                                   -1);
+                icon = desktop.get_icon(20);
+                gtk_list_store_set(model, &it, 0, icon, 1, desktop.get_disp_name(), 2, *action, -1);
                 if (icon)
                     g_object_unref(icon);
-                vfs_app_desktop_unref(desktop);
             }
         }
         else

@@ -14,54 +14,38 @@
 
 #include <string>
 
-#include <atomic>
-
 #include <glib.h>
 #include <gtk/gtk.h>
 
-struct VFSAppDesktop
+class VFSAppDesktop
 {
+  public:
+    VFSAppDesktop(const std::string& open_file_name);
+    ~VFSAppDesktop();
+
+    const char* get_name();
+    const char* get_disp_name();
+    const char* get_exec();
+    const char* get_full_path();
+    GdkPixbuf* get_icon(int size);
+    const char* get_icon_name();
+    bool use_terminal();
+    bool open_multiple_files();
+    bool open_files(GdkScreen* screen, const char* working_dir, GList* file_paths, GError** err);
+
+  private:
+    // desktop entry spec keys
     std::string file_name;
     std::string disp_name;
     std::string exec;
     std::string icon_name;
-    char* path;      // working dir
+    std::string path; // working dir
     std::string full_path;
-    bool terminal : 1;
-    bool hidden : 1;
-    bool startup : 1;
+    bool terminal{false};
+    bool hidden{false};
+    bool startup{false};
 
-    void ref_inc();
-    void ref_dec();
-    unsigned int ref_count();
-
-  private:
-    std::atomic<unsigned int> n_ref{0};
+    std::string translate_app_exec_to_command_line(GList* file_list);
+    static void exec_in_terminal(const std::string& app_name, const std::string& cwd,
+                                 const std::string& cmd);
 };
-
-/*
- * If file_name is not a full path, this function searches default paths
- * for the desktop file.
- */
-VFSAppDesktop* vfs_app_desktop_new(const char* file_name);
-
-void vfs_app_desktop_unref(void* data);
-
-const char* vfs_app_desktop_get_name(VFSAppDesktop* desktop);
-
-const char* vfs_app_desktop_get_disp_name(VFSAppDesktop* desktop);
-
-const char* vfs_app_desktop_get_exec(VFSAppDesktop* desktop);
-
-const char* vfs_app_desktop_get_full_path(VFSAppDesktop* desktop);
-
-GdkPixbuf* vfs_app_desktop_get_icon(VFSAppDesktop* desktop, int size);
-
-const char* vfs_app_desktop_get_icon_name(VFSAppDesktop* desktop);
-
-bool vfs_app_desktop_open_multiple_files(VFSAppDesktop* desktop);
-
-bool vfs_app_desktop_open_in_terminal(VFSAppDesktop* desktop);
-
-bool vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSAppDesktop* desktop,
-                                GList* file_paths, GError** err);

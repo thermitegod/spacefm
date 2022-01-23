@@ -633,14 +633,12 @@ vfs_file_info_open_file(VFSFileInfo* fi, const char* file_path, GError** err)
         char* app_name = vfs_mime_type_get_default_action(mime_type);
         if (app_name)
         {
-            VFSAppDesktop* desktop = vfs_app_desktop_new(app_name);
+            VFSAppDesktop desktop(app_name);
             GList* files = nullptr;
             files = g_list_prepend(files, (void*)file_path);
             /* FIXME: working dir is needed */
-            ret =
-                vfs_app_desktop_open_files(gdk_screen_get_default(), nullptr, desktop, files, err);
+            ret = desktop.open_files(gdk_screen_get_default(), nullptr, files, err);
             g_list_free(files);
-            vfs_app_desktop_unref(desktop);
             g_free(app_name);
         }
         vfs_mime_type_unref(mime_type);
@@ -710,36 +708,33 @@ vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
         char* file_dir = g_path_get_dirname(file_path);
 
         fi->flags = (VFSFileInfoFlag)(fi->flags | VFS_FILE_INFO_DESKTOP_ENTRY);
-        VFSAppDesktop* desktop = vfs_app_desktop_new(file_path);
+        VFSAppDesktop desktop(file_path);
 
         // MOD  display real filenames of .desktop files not in desktop directory
         if (!strcmp(file_dir, vfs_user_desktop_dir()))
         {
-            if (vfs_app_desktop_get_disp_name(desktop))
-            {
-                vfs_file_info_set_disp_name(fi, vfs_app_desktop_get_disp_name(desktop));
-            }
+            if (desktop.get_disp_name())
+                vfs_file_info_set_disp_name(fi, desktop.get_disp_name());
         }
 
-        if (vfs_app_desktop_get_icon_name(desktop))
+        if (desktop.get_icon_name())
         {
             GdkPixbuf* icon;
             int big_size, small_size;
             vfs_mime_type_get_icon_size(&big_size, &small_size);
             if (!fi->big_thumbnail)
             {
-                icon = vfs_app_desktop_get_icon(desktop, big_size);
+                icon = desktop.get_icon(big_size);
                 if (G_LIKELY(icon))
                     fi->big_thumbnail = icon;
             }
             if (!fi->small_thumbnail)
             {
-                icon = vfs_app_desktop_get_icon(desktop, small_size);
+                icon = desktop.get_icon(small_size);
                 if (G_LIKELY(icon))
                     fi->small_thumbnail = icon;
             }
         }
-        vfs_app_desktop_unref(desktop);
         g_free(file_dir);
     }
 }

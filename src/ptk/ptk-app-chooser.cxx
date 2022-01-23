@@ -72,7 +72,7 @@ sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_dat
 }
 
 static void
-add_list_item(GtkListStore* list, VFSAppDesktop* desktop)
+add_list_item(GtkListStore* list, const char* path)
 {
     GtkTreeIter it;
 
@@ -85,7 +85,8 @@ add_list_item(GtkListStore* list, VFSAppDesktop* desktop)
             gtk_tree_model_get(GTK_TREE_MODEL(list), &it, COL_DESKTOP_FILE, &file, -1);
             if (file)
             {
-                const char* name = vfs_app_desktop_get_name(desktop);
+                VFSAppDesktop desktop(path);
+                const char* name = desktop.get_name();
                 if (!g_strcmp0(file, name))
                 {
                     // already exists
@@ -97,27 +98,28 @@ add_list_item(GtkListStore* list, VFSAppDesktop* desktop)
         } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(list), &it));
     }
 
-    // tooltip
-    char* tooltip = g_markup_printf_escaped("%s\nName=%s\nExec=%s%s",
-                                            vfs_app_desktop_get_full_path(desktop),
-                                            vfs_app_desktop_get_disp_name(desktop),
-                                            vfs_app_desktop_get_exec(desktop),
-                                            desktop->terminal ? "\nTerminal=true" : "");
+    VFSAppDesktop desktop(path);
 
-    GdkPixbuf* icon = vfs_app_desktop_get_icon(desktop, 20);
+    // tooltip
+    std::string tooltip = fmt::format("{}\nName={}\nExec={}{}",
+                                      desktop.get_full_path(),
+                                      desktop.get_disp_name(),
+                                      desktop.get_exec(),
+                                      desktop.use_terminal() ? "\nTerminal=true" : "");
+
+    GdkPixbuf* icon = desktop.get_icon(20);
     gtk_list_store_append(list, &it);
     gtk_list_store_set(list,
                        &it,
                        COL_APP_ICON,
                        icon,
                        COL_APP_NAME,
-                       vfs_app_desktop_get_disp_name(desktop),
+                       desktop.get_disp_name(),
                        COL_DESKTOP_FILE,
-                       vfs_app_desktop_get_name(desktop),
+                       desktop.get_name(),
                        COL_FULL_PATH,
-                       tooltip,
+                       tooltip.c_str(),
                        -1);
-    g_free(tooltip);
     if (icon)
         g_object_unref(icon);
 }
@@ -142,9 +144,7 @@ create_model_from_mime_type(VFSMimeType* mime_type)
             char** app;
             for (app = apps; *app; ++app)
             {
-                VFSAppDesktop* desktop = vfs_app_desktop_new(*app);
-                add_list_item(list, desktop);
-                vfs_app_desktop_unref(desktop);
+                add_list_item(list, *app);
             }
             g_strfreev(apps);
         }
@@ -602,12 +602,9 @@ load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* tas
             }
             vfs_async_task_unlock(task);
 
-            VFSAppDesktop* desktop = vfs_app_desktop_new(path);
-
             /* There are some operations using GTK+, so lock may be needed. */
-            add_list_item(list, desktop);
+            add_list_item(list, path);
 
-            vfs_app_desktop_unref(desktop);
             g_free(path);
         }
         g_dir_close(dir);

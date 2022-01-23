@@ -491,13 +491,11 @@ open_file(const char* path)
         app_name = ptk_choose_app_for_mime_type(nullptr, mime_type, true, true, true, false);
         if (app_name)
         {
-            VFSAppDesktop* desktop = vfs_app_desktop_new(app_name);
+            VFSAppDesktop desktop(app_name);
             GList* files = g_list_prepend(nullptr, (void*)path);
-            opened =
-                vfs_app_desktop_open_files(gdk_screen_get_default(), nullptr, desktop, files, &err);
+            opened = desktop.open_files(gdk_screen_get_default(), nullptr, files, &err);
             g_free(files->data);
             g_list_free(files);
-            vfs_app_desktop_unref(desktop);
             g_free(app_name);
         }
         else

@@ -508,12 +508,8 @@ load_settings(const char* config_dir)
             vfs_mime_type_unref(mime_type);
             if (app_name)
             {
-                VFSAppDesktop* desktop = vfs_app_desktop_new(app_name);
-                if (desktop)
-                {
-                    xset_set("editor", "s", vfs_app_desktop_get_exec(desktop));
-                    vfs_app_desktop_unref(desktop);
-                }
+                VFSAppDesktop desktop(app_name);
+                xset_set("editor", "s", desktop.get_exec());
             }
         }
     }
@@ -1856,23 +1852,21 @@ char*
 xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
 {
     char* menu_label = nullptr;
-    VFSAppDesktop* desktop = nullptr;
     GdkPixbuf* icon_new = nullptr;
     GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
     if (!set->lock && xset_get_int_set(set, "x") == XSET_CMD_APP)
     {
-        if (set->z && g_str_has_suffix(set->z, ".desktop") &&
-            (desktop = vfs_app_desktop_new(set->z)))
+        if (set->z && g_str_has_suffix(set->z, ".desktop"))
         {
+            VFSAppDesktop desktop(set->z);
+
             if (!(set->menu_label && set->menu_label[0]))
-                menu_label = g_strdup(vfs_app_desktop_get_disp_name(desktop));
+                menu_label = g_strdup(desktop.get_disp_name());
             if (set->icon)
                 icon_new = vfs_load_icon(icon_theme, set->icon, icon_size);
             if (!icon_new)
-                icon_new = vfs_app_desktop_get_icon(desktop, icon_size);
-            if (desktop)
-                vfs_app_desktop_unref(desktop);
+                icon_new = desktop.get_icon(icon_size);
         }
         else
         {
@@ -3555,9 +3549,8 @@ xset_custom_activate(GtkWidget* item, XSet* set)
             }
             else if (g_str_has_suffix(set->z, ".desktop"))
             {
-                VFSAppDesktop* desktop = vfs_app_desktop_new(set->z);
-                if (desktop && vfs_app_desktop_get_exec(desktop) &&
-                    vfs_app_desktop_get_exec(desktop)[0] != '\0')
+                VFSAppDesktop desktop(set->z);
+                if (desktop.get_exec() && desktop.get_exec()[0] != '\0')
                 {
                     // get file list
                     GList* sel_files;
@@ -3588,7 +3581,7 @@ xset_custom_activate(GtkWidget* item, XSet* set)
 
                     // open in app
                     GError* err = nullptr;
-                    if (!vfs_app_desktop_open_files(screen, cwd, desktop, file_paths, &err))
+                    if (!desktop.open_files(screen, cwd, file_paths, &err))
                     {
                         ptk_show_error(parent ? GTK_WINDOW(parent) : nullptr,
                                        "Error",
@@ -3606,8 +3599,6 @@ xset_custom_activate(GtkWidget* item, XSet* set)
                         g_list_free(file_paths);
                     }
                 }
-                if (desktop)
-                    vfs_app_desktop_unref(desktop);
                 return;
             }
             else
