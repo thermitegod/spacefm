@@ -2866,7 +2866,7 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
     std::string command = cmd;
 
     // replace sub vars
-    char* fileq = nullptr;
+    std::string fileq;
     switch (mode)
     {
         case HANDLER_MODE_FS:
@@ -2878,7 +2878,6 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
              */
             fileq = bash_quote(vol->device_file); // for iso files
             command = ztd::replace(command, "%v", fileq);
-            g_free(fileq);
             if (action == HANDLER_MOUNT)
             {
                 command = ztd::replace(command, "%o", options ? options : "");
@@ -2980,20 +2979,23 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
             {
                 // add bash variables
                 // urlq is user-entered url or (if mounted) mtab url
-                char* urlq = bash_quote(
+                std::string urlq = bash_quote(
                     action != HANDLER_MOUNT && vol && vol->is_mounted ? vol->udi : netmount->url);
-                char* protoq = bash_quote(netmount->fstype); // url-derived protocol (ssh)
-                char* hostq = bash_quote(netmount->host);
-                char* portq = bash_quote(netmount->port);
-                char* userq = bash_quote(netmount->user);
-                char* passq = bash_quote(netmount->pass);
-                char* pathq = bash_quote(netmount->path);
+                std::string protoq = bash_quote(netmount->fstype); // url-derived protocol (ssh)
+                std::string hostq = bash_quote(netmount->host);
+                std::string portq = bash_quote(netmount->port);
+                std::string userq = bash_quote(netmount->user);
+                std::string passq = bash_quote(netmount->pass);
+                std::string pathq = bash_quote(netmount->path);
                 // mtab fs type (fuse.ssh)
-                char* mtabfsq = bash_quote(
-                    action != HANDLER_MOUNT && vol && vol->is_mounted ? vol->fs_type : nullptr);
+                std::string mtabfsq;
+                std::string mtaburlq;
                 // urlq and mtaburlq will both be the same mtab url if mounted
-                char* mtaburlq = bash_quote(
-                    action != HANDLER_MOUNT && vol && vol->is_mounted ? vol->device_file : nullptr);
+                if (action != HANDLER_MOUNT && vol && vol->is_mounted)
+                {
+                    mtabfsq = bash_quote(vol->fs_type);
+                    mtaburlq = bash_quote(vol->device_file);
+                }
                 command = fmt::format(
                     "fm_url_proto={}; fm_url={}; fm_url_host={}; fm_url_port={}; fm_url_user={}; "
                     "fm_url_pass={}; fm_url_path={}; fm_mtab_fs={}; fm_mtab_url={}\n{}",
@@ -3007,15 +3009,6 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
                     mtabfsq,
                     mtaburlq,
                     command);
-                g_free(urlq);
-                g_free(protoq);
-                g_free(hostq);
-                g_free(portq);
-                g_free(userq);
-                g_free(passq);
-                g_free(pathq);
-                g_free(mtabfsq);
-                g_free(mtaburlq);
             }
             break;
         default:
@@ -3023,9 +3016,7 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
     }
 
     *run_in_terminal = terminal;
-    // fixes -Wreturn-stack-address, will get an actual fix later
-    char* command2 = const_cast<char*>(command.c_str());
-    return command2;
+    return g_strdup(command.c_str());
 }
 
 static bool
@@ -3166,7 +3157,7 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
 {
     char* command = nullptr;
     char* s1;
-    char* pointq;
+    std::string pointq = "";
     *run_in_terminal = false;
 
     netmount_t* netmount = nullptr;
@@ -3199,10 +3190,10 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
                 // replace mount point sub var
                 if (command && strstr(command, "%a"))
                 {
-                    pointq = bash_quote(vol->is_mounted ? vol->mount_point : nullptr);
+                    if (vol->is_mounted)
+                        pointq = bash_quote(vol->mount_point);
                     std::string command2 = ztd::replace(command, "%a", pointq);
-                    command = const_cast<char*>(command2.c_str());
-                    g_free(pointq);
+                    command = g_strdup(command2.c_str());
                 }
             }
             break;
@@ -3221,10 +3212,10 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
                 // replace mount point sub var
                 if (command && strstr(command, "%a"))
                 {
-                    pointq = bash_quote(vol->is_mounted ? vol->mount_point : nullptr);
+                    if (vol->is_mounted)
+                        pointq = bash_quote(vol->mount_point);
                     std::string command2 = ztd::replace(command, "%a", pointq);
-                    command = const_cast<char*>(command2.c_str());
-                    g_free(pointq);
+                    command = g_strdup(command2.c_str());
                 }
             }
             break;
@@ -3248,19 +3239,18 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
         if ((s1 = g_find_program_in_path("udevil")))
         {
             // udevil
-            command = g_strdup_printf("%s umount %s", s1, pointq);
+            command = g_strdup_printf("%s umount %s", s1, pointq.c_str());
         }
         else if ((s1 = g_find_program_in_path("pumount")))
         {
             // pmount
-            command = g_strdup_printf("%s %s", s1, pointq);
+            command = g_strdup_printf("%s %s", s1, pointq.c_str());
         }
         else if ((s1 = g_find_program_in_path("udisksctl")))
         {
             // udisks2
-            command = g_strdup_printf("%s unmount -b %s", s1, pointq);
+            command = g_strdup_printf("%s unmount -b %s", s1, pointq.c_str());
         }
-        g_free(pointq);
         g_free(s1);
         *run_in_terminal = false;
     }
@@ -3474,12 +3464,11 @@ vfs_volume_autoexec(VFSVolume* vol)
                             prog = g_strdup(g_get_prgname());
                         if (!prog)
                             prog = g_strdup("spacefm");
-                        char* quote_path = bash_quote(vol->mount_point);
+                        std::string quote_path = bash_quote(vol->mount_point);
                         std::string cmd = fmt::format("{} -t {}", prog, quote_path);
                         print_command(cmd);
                         g_spawn_command_line_async(cmd.c_str(), nullptr);
                         g_free(prog);
-                        g_free(quote_path);
                     }
                 }
                 command = xset_get_s("dev_exec_fs");

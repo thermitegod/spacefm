@@ -724,7 +724,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
                 if (netmount->path)
                 {
                     parent_dir_str = ztd::replace(netmount->path, "/", "-");
-                    parent_dir = const_cast<char*>(parent_dir_str.c_str());
+                    parent_dir = g_strdup(parent_dir_str.c_str());
                     g_strstrip(parent_dir);
                     while (g_str_has_suffix(parent_dir, "-"))
                         parent_dir[strlen(parent_dir) - 1] = '\0';
@@ -766,7 +766,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
     {
         g_strstrip(mname);
         std::string cleaned = ztd::replace(mname, " ", "");
-        mname = const_cast<char*>(cleaned.c_str());
+        mname = g_strdup(cleaned.c_str());
     }
 
     if (mname && !mname[0])
@@ -1888,11 +1888,9 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
             }
             else if (strstr(cmd, "%a"))
             {
-                char* pointq = bash_quote(vol->mount_point);
-                std::string cmd2;
-                cmd2 = ztd::replace(cmd, "%a", pointq);
-                cmd = const_cast<char*>(cmd2.c_str());
-                g_free(pointq);
+                std::string pointq = bash_quote(vol->mount_point);
+                std::string cmd2 = ztd::replace(cmd, "%a", pointq);
+                cmd = g_strdup(cmd2.c_str());
             }
         }
         else
@@ -1918,11 +1916,10 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         }
         else if (strstr(cmd, "%a"))
         {
-            char* pointq = bash_quote(vol->mount_point);
+            std::string pointq = bash_quote(vol->mount_point);
             std::string cmd2;
             cmd2 = ztd::replace(cmd, "%a", pointq);
-            cmd = const_cast<char*>(cmd2.c_str());
-            g_free(pointq);
+            cmd = g_strdup(cmd2.c_str());
         }
     }
     else
@@ -1977,7 +1974,6 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     char* uuid = nullptr;
     char* fstab = nullptr;
     char* info;
-    char* esc_path;
 
     char* fstab_path = g_build_filename(SYSCONFDIR, "fstab", nullptr);
 
@@ -2171,10 +2167,9 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
             df = g_strdup_printf("echo %s ; echo \"( please install df )\" ; echo ; ", "USAGE");
         else
         {
-            esc_path = bash_quote(vol->mount_point);
-            df = g_strdup_printf("echo %s ; %s -hT %s ; echo ; ", "USAGE", path, esc_path);
+            std::string esc_path = bash_quote(vol->mount_point);
+            df = g_strdup_printf("echo %s ; %s -hT %s ; echo ; ", "USAGE", path, esc_path.c_str());
             g_free(path);
-            g_free(esc_path);
         }
     }
     else
@@ -2212,12 +2207,11 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                                        path);
             else
             {
-                esc_path = bash_quote(vol->mount_point);
+                std::string esc_path = bash_quote(vol->mount_point);
                 lsof = g_strdup_printf("echo %s ; %s -w %s | head -n 500 ; echo ; ",
                                        "PROCESSES",
                                        path,
-                                       esc_path);
-                g_free(esc_path);
+                                       esc_path.c_str());
             }
             g_free(path);
         }

@@ -682,7 +682,7 @@ on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars, unsigne
     {
         // remove linefeeds from pasted text
         cleaned = ztd::replace(text, "\n", "");
-        text = new_text = const_cast<char*>(cleaned.c_str());
+        text = new_text = g_strdup(cleaned.c_str());
     }
 
     // remove leading spaces for test
@@ -695,7 +695,7 @@ on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars, unsigne
         char* unquote = g_strdup(text + 1);
         unquote[strlen(unquote) - 1] = '\0';
         cleaned = ztd::replace(unquote, "'\\''", "'");
-        new_text = const_cast<char*>(cleaned.c_str());
+        new_text = g_strdup(cleaned.c_str());
         g_free(unquote);
     }
 

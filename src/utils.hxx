@@ -22,7 +22,8 @@ char* replace_line_subs(const char* line);
 char* get_name_extension(const char* full_name, bool is_dir, char** ext);
 void open_in_prog(const char* path);
 
-char* bash_quote(const char* str);
+std::string bash_quote(const std::string& str);
+
 char* clean_label(const char* menu_label, bool kill_special, bool convert_amp);
 void string_copy_free(char** s, const char* src);
 char* unescape(const char* t);

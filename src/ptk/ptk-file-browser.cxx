@@ -5833,25 +5833,21 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser, 
     else
         return;
 
-    char* file_paths = g_strdup("");
+    std::string file_paths = "";
     GList* sel;
-    char* file_path;
+    std::string file_path;
     char* str;
     for (sel = sel_files; sel; sel = sel->next)
     {
         file_path = bash_quote(vfs_file_info_get_name(static_cast<VFSFileInfo*>(sel->data)));
-        str = file_paths;
-        file_paths = g_strdup_printf("%s %s", file_paths, file_path);
-        g_free(str);
-        g_free(file_path);
+        file_paths = fmt::format("{} {}", file_paths, file_path);
     }
 
     // task
     PtkFileTask* task =
         ptk_file_exec_new(set->menu_label, cwd, GTK_WIDGET(file_browser), file_browser->task_view);
-    task->task->exec_command = g_strdup_printf("%s %s %s", prog, cmd, file_paths);
+    task->task->exec_command = g_strdup_printf("%s %s %s", prog, cmd, file_paths.c_str());
     g_free(cmd);
-    g_free(file_paths);
     task->task->exec_browser = file_browser;
     task->task->exec_sync = true;
     task->task->exec_show_error = true;

@@ -750,8 +750,8 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
             PtkFileTask* task;
             // change file dates
             char* cmd = nullptr;
-            char* quoted_time;
-            char* quoted_path;
+            std::string quoted_time;
+            std::string quoted_path;
             const char* new_mtime = gtk_entry_get_text(data->mtime);
             if (!(new_mtime && new_mtime[0]) || !g_strcmp0(data->orig_mtime, new_mtime))
                 new_mtime = nullptr;
@@ -768,16 +768,15 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                                                  (static_cast<VFSFileInfo*>(l->data))->name,
                                                  nullptr);
                     quoted_path = bash_quote(file_path);
-                    g_string_append_printf(gstr, " %s", quoted_path);
+                    g_string_append_printf(gstr, " %s", quoted_path.c_str());
                     g_free(file_path);
-                    g_free(quoted_path);
                 }
 
                 if (new_mtime)
                 {
                     quoted_time = bash_quote(new_mtime);
                     cmd = g_strdup_printf("touch --no-dereference --no-create -m -d %s%s",
-                                          quoted_time,
+                                          quoted_time.c_str(),
                                           gstr->str);
                 }
                 if (new_atime)
@@ -787,11 +786,9 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                     cmd = g_strdup_printf("%s%stouch --no-dereference --no-create -a -d %s%s",
                                           cmd ? cmd : "",
                                           cmd ? "\n" : "",
-                                          quoted_time,
+                                          quoted_time.c_str(),
                                           gstr->str);
-                    g_free(quoted_path);
                 }
-                g_free(quoted_time);
                 g_string_free(gstr, true);
                 if (cmd)
                 {

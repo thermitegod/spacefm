@@ -4176,9 +4176,8 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         const char* cwd = ptk_file_browser_get_cwd(a_browser);
         if ((cwd_needs_quote = !!strchr(cwd, '\'')))
         {
-            path = bash_quote(cwd);
-            buf.append(fmt::format("\nfm_pwd_panel[{}]={}\n", p, path));
-            g_free(path);
+            std::string path2 = bash_quote(cwd);
+            buf.append(fmt::format("\nfm_pwd_panel[{}]={}\n", p, path2));
         }
         else
             buf.append(fmt::format("\nfm_pwd_panel[{}]=\"{}\"\n", p, cwd));
@@ -4332,20 +4331,19 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         {
             PtkFileBrowser* t_browser = PTK_FILE_BROWSER(
                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), i));
-            path = bash_quote(ptk_file_browser_get_cwd(t_browser));
-            buf.append(fmt::format("fm_pwd_panel{}_tab[{}]={}\n", p, i + 1, path));
+            std::string path2 = bash_quote(ptk_file_browser_get_cwd(t_browser));
+            buf.append(fmt::format("fm_pwd_panel{}_tab[{}]={}\n", p, i + 1, path2));
             if (p == file_browser->mypanel)
             {
-                buf.append(fmt::format("fm_pwd_tab[{}]={}\n", i + 1, path));
+                buf.append(fmt::format("fm_pwd_tab[{}]={}\n", i + 1, path2));
             }
             if (file_browser == t_browser)
             {
                 // my browser
-                buf.append(fmt::format("fm_pwd={}\n", path));
+                buf.append(fmt::format("fm_pwd={}\n", path2));
                 buf.append(fmt::format("fm_panel=\"{}\"\n", p));
                 buf.append(fmt::format("fm_tab=\"{}\"\n", i + 1));
             }
-            g_free(path);
         }
     }
     // my selected files
@@ -4437,11 +4435,11 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         buf.append(fmt::format("\nfm_task_type=\"{}\"\n", job_titles[ptask->task->type]));
         if (ptask->task->type == VFS_FILE_TASK_EXEC)
         {
-            esc_path = bash_quote(ptask->task->dest_dir.c_str());
+            esc_path = bash_quote(ptask->task->dest_dir);
             buf.append(fmt::format("fm_task_pwd={}\n", esc_path));
-            esc_path = bash_quote(ptask->task->current_file.c_str());
+            esc_path = bash_quote(ptask->task->current_file);
             buf.append(fmt::format("fm_task_name={}\n", esc_path));
-            esc_path = bash_quote(ptask->task->exec_command.c_str());
+            esc_path = bash_quote(ptask->task->exec_command);
             buf.append(fmt::format("fm_task_command={}\n", esc_path));
             if (!ptask->task->exec_as_user.empty())
                 buf.append(fmt::format("fm_task_user=\"{}\"\n", ptask->task->exec_as_user));
@@ -4452,11 +4450,11 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         }
         else
         {
-            esc_path = bash_quote(ptask->task->dest_dir.c_str());
+            esc_path = bash_quote(ptask->task->dest_dir);
             buf.append(fmt::format("fm_task_dest_dir={}\n", esc_path));
-            esc_path = bash_quote(ptask->task->current_file.c_str());
+            esc_path = bash_quote(ptask->task->current_file);
             buf.append(fmt::format("fm_task_current_src_file={}\n", esc_path));
-            esc_path = bash_quote(ptask->task->current_dest.c_str());
+            esc_path = bash_quote(ptask->task->current_dest);
             buf.append(fmt::format("fm_task_current_dest_file={}\n", esc_path));
         }
         buf.append(fmt::format("fm_task_id=\"{:p}\"\n", (void*)ptask));
@@ -6678,8 +6676,8 @@ main_window_socket_command(char* argv[], char** reply)
             {
                 if (pathv[j][0])
                 {
-                    str = bash_quote(pathv[j]);
-                    g_string_append_printf(gstr, "%s ", str);
+                    std::string str2 = bash_quote(pathv[j]);
+                    g_string_append_printf(gstr, "%s ", str2.c_str());
                     g_free(str);
                 }
                 j++;
@@ -6703,9 +6701,8 @@ main_window_socket_command(char* argv[], char** reply)
                 VFSFileInfo* file = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data));
                 if (file)
                 {
-                    str = bash_quote(vfs_file_info_get_name(file));
-                    g_string_append_printf(gstr, "%s ", str);
-                    g_free(str);
+                    std::string str2 = bash_quote(vfs_file_info_get_name(file));
+                    g_string_append_printf(gstr, "%s ", str2.c_str());
                     vfs_file_info_unref(file);
                 }
             }
@@ -7507,7 +7504,7 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
         replace = g_strdup("ewpt");
 
     char* str;
-    char* rep;
+    std::string rep;
     char var[3];
     var[0] = '%';
     var[2] = '\0';
@@ -7537,51 +7534,45 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
                 case 'f':
                     if (!focus)
                     {
-                        rep = g_strdup_printf("panel%d", panel);
+                        rep = fmt::format("panel{}", panel);
                         cmd = ztd::replace(cmd, var, rep);
-                        g_free(rep);
                     }
                     else
                         cmd = ztd::replace(cmd, var, focus);
                     break;
                 case 'w':
-                    rep = g_strdup_printf("%p", main_window);
+                    rep = fmt::format("{:p}", (void*)main_window);
                     cmd = ztd::replace(cmd, var, rep);
-                    g_free(rep);
                     break;
                 case 'p':
-                    rep = g_strdup_printf("%d", panel);
+                    rep = fmt::format("{}", panel);
                     cmd = ztd::replace(cmd, var, rep);
-                    g_free(rep);
                     break;
                 case 't':
-                    rep = g_strdup_printf("%d", tab);
+                    rep = fmt::format("{}", tab);
                     cmd = ztd::replace(cmd, var, rep);
-                    g_free(rep);
                     break;
                 case 'v':
                     cmd = ztd::replace(cmd, var, visible ? "1" : "0");
                     break;
                 case 'k':
-                    rep = g_strdup_printf("%#x", keyval);
+                    rep = fmt::format("{:#x}", keyval);
                     cmd = ztd::replace(cmd, var, rep);
-                    g_free(rep);
                     break;
                 case 'b':
-                    rep = g_strdup_printf("%d", button);
+                    rep = fmt::format("{}", button);
                     cmd = ztd::replace(cmd, var, rep);
-                    g_free(rep);
                     break;
                 case 'm':
-                    rep = g_strdup_printf("%#x", state);
+                    rep = fmt::format("{:#x}", state);
                     cmd = ztd::replace(cmd, var, rep);
-                    g_free(rep);
                     break;
                 case 'd':
-                    rep =
-                        bash_quote(file_browser ? ptk_file_browser_get_cwd(file_browser) : nullptr);
-                    cmd = ztd::replace(cmd, var, rep);
-                    g_free(rep);
+                    if (file_browser)
+                    {
+                        rep = bash_quote(ptk_file_browser_get_cwd(file_browser));
+                        cmd = ztd::replace(cmd, var, rep);
+                    }
                     break;
                 default:
                     // failsafe

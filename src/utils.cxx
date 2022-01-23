@@ -181,67 +181,21 @@ open_in_prog(const char* path)
         prog = g_strdup(g_get_prgname());
     if (!prog)
         prog = g_strdup("spacefm");
-    char* qpath = bash_quote(path);
+    std::string qpath = bash_quote(path);
     std::string command = fmt::format("{} {}", prog, qpath);
     print_command(command);
     g_spawn_command_line_async(command.c_str(), nullptr);
-    g_free(qpath);
     g_free(prog);
 }
 
-[[deprecated]] char*
-replace_string(const char* orig, const char* str, const char* replace, bool quote)
-{ // replace all occurrences of str in orig with replace, optionally quoting
-    char* rep;
-    char* result = nullptr;
-    char* old_result;
-    const char* s;
-
-    if (!orig || !(s = strstr(orig, str)))
-        return g_strdup(orig); // str not in orig
-
-    if (!replace)
-    {
-        if (quote)
-            rep = g_strdup("''");
-        else
-            rep = g_strdup("");
-    }
-    else if (quote)
-        rep = g_strdup_printf("'%s'", replace);
-    else
-        rep = g_strdup(replace);
-
-    const char* cur = orig;
-    do
-    {
-        if (result)
-        {
-            old_result = result;
-            result = g_strdup_printf("%s%s%s", old_result, g_strndup(cur, s - cur), rep);
-            g_free(old_result);
-        }
-        else
-            result = g_strdup_printf("%s%s", g_strndup(cur, s - cur), rep);
-        cur = s + strlen(str);
-        s = strstr(cur, str);
-    } while (s);
-    old_result = result;
-    result = g_strdup_printf("%s%s", old_result, cur);
-    g_free(old_result);
-    g_free(rep);
-    return result;
-}
-
-char*
-bash_quote(const char* str)
+std::string
+bash_quote(const std::string& str)
 {
-    if (!str)
-        return g_strdup("\"\"");
-    char* s1 = replace_string(str, "\"", "\\\"", false);
-    char* s2 = g_strdup_printf("\"%s\"", s1);
-    g_free(s1);
-    return s2;
+    if (str.empty())
+        return "\"\"";
+    std::string s1 = ztd::replace(str, "\"", "\\\"");
+    s1 = fmt::format("\"{}\"", s1);
+    return s1;
 }
 
 char*

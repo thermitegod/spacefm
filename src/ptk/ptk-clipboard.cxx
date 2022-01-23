@@ -104,21 +104,17 @@ ptk_clipboard_copy_as_text(const char* working_dir,
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
     GList* l;
 
-    char* file_text = g_strdup("");
+    std::string file_text = "";
     for (l = files; l; l = l->next)
     {
         VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
-        char* file_path = g_build_filename(working_dir, vfs_file_info_get_name(file), nullptr);
-        char* quoted = bash_quote(file_path);
-        char* str = file_text;
-        file_text = g_strdup_printf("%s %s", str, quoted);
-        g_free(str);
-        g_free(quoted);
-        g_free(file_path);
+        std::string file_path =
+            g_build_filename(working_dir, vfs_file_info_get_name(file), nullptr);
+        std::string quoted = bash_quote(file_path);
+        file_text = fmt::format("{} {}", file_text, quoted);
     }
-    gtk_clipboard_set_text(clip, file_text, -1);
-    gtk_clipboard_set_text(clip_primary, file_text, -1);
-    g_free(file_text);
+    gtk_clipboard_set_text(clip, file_text.c_str(), -1);
+    gtk_clipboard_set_text(clip_primary, file_text.c_str(), -1);
 }
 
 void

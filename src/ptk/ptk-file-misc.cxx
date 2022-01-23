@@ -2059,8 +2059,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     char* path;
     char* old_path;
     char* root_mkdir = g_strdup("");
-    char* to_path;
-    char* from_path;
     char* task_name;
     char* str;
     GtkWidget* task_view = nullptr;
@@ -2722,6 +2720,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     g_signal_connect(G_OBJECT(mset->cancel), "focus", G_CALLBACK(on_button_focus), mset);
 
     // run
+    std::string to_path;
+    std::string from_path;
     int response;
     while ((response = gtk_dialog_run(GTK_DIALOG(mset->dlg))))
     {
@@ -2801,8 +2801,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 {
                     g_free(root_mkdir);
                     to_path = bash_quote(path);
-                    root_mkdir = g_strdup_printf("mkdir -p %s && ", to_path);
-                    g_free(to_path);
+                    root_mkdir = g_strdup_printf("mkdir -p %s && ", to_path.c_str());
                 }
                 else
                 {
@@ -2862,8 +2861,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     task->task->exec_command =
                         fmt::format("{}ln -s {} {}", root_mkdir, from_path, to_path);
                 }
-                g_free(from_path);
-                g_free(to_path);
                 task->task->exec_sync = true;
                 task->task->exec_popup = false;
                 task->task->exec_show_output = false;
@@ -2892,8 +2889,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     g_strstrip(str);
                     if (str[0] == '/')
                         from_path = bash_quote(str);
-                    else if (!g_strcmp0("Empty File", str) || str[0] == '\0')
-                        from_path = nullptr;
+                    // else if (!g_strcmp0("Empty File", str) || str[0] == '\0')
+                    //     from_path = "";
                     else
                     {
                         char* tdir = get_template_dir();
@@ -2905,41 +2902,32 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                                 ptk_show_error(GTK_WINDOW(mset->dlg),
                                                "Template Missing",
                                                "The specified template does not exist");
-                                g_free(from_path);
                                 g_free(str);
                                 g_free(tdir);
                                 goto _continue_free;
                             }
-                            g_free(str);
                             g_free(tdir);
-                            str = from_path;
-                            from_path = bash_quote(str);
+                            from_path = bash_quote(from_path);
                         }
-                        else
-                            from_path = nullptr;
                     }
                     g_free(str);
                 }
-                else
-                    from_path = nullptr;
                 to_path = bash_quote(full_path);
                 char* over_cmd;
                 if (overwrite)
-                    over_cmd = g_strdup_printf("rm -f %s && ", to_path);
+                    over_cmd = g_strdup_printf("rm -f %s && ", to_path.c_str());
                 else
                     over_cmd = g_strdup("");
 
                 task_name = g_strdup_printf("Create New File%s", root_msg);
                 PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 g_free(task_name);
-                if (!from_path)
+                if (from_path.empty())
                     task->task->exec_command =
                         fmt::format("{}{}touch {}", root_mkdir, over_cmd, to_path);
                 else
                     task->task->exec_command =
                         fmt::format("{}{}cp -f {} {}", root_mkdir, over_cmd, from_path, to_path);
-                g_free(from_path);
-                g_free(to_path);
                 g_free(over_cmd);
                 task->task->exec_sync = true;
                 task->task->exec_popup = false;
@@ -2971,8 +2959,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     g_strstrip(str);
                     if (str[0] == '/')
                         from_path = bash_quote(str);
-                    else if (!g_strcmp0("Empty Directory", str) || str[0] == '\0')
-                        from_path = nullptr;
+                    // else if (!g_strcmp0("Empty Directory", str) || str[0] == '\0')
+                    //     from_path = nullptr;
                     else
                     {
                         char* tdir = get_template_dir();
@@ -2984,35 +2972,26 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                                 ptk_show_error(GTK_WINDOW(mset->dlg),
                                                "Template Missing",
                                                "The specified template does not exist");
-                                g_free(from_path);
                                 g_free(str);
                                 g_free(tdir);
                                 goto _continue_free;
                             }
-                            g_free(str);
                             g_free(tdir);
-                            str = from_path;
-                            from_path = bash_quote(str);
+                            from_path = bash_quote(from_path);
                         }
-                        else
-                            from_path = nullptr;
                     }
                     g_free(str);
                 }
-                else
-                    from_path = nullptr;
                 to_path = bash_quote(full_path);
 
                 task_name = g_strdup_printf("Create New Directory%s", root_msg);
                 PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 g_free(task_name);
-                if (!from_path)
+                if (from_path.empty())
                     task->task->exec_command = fmt::format("{}mkdir {}", root_mkdir, to_path);
                 else
                     task->task->exec_command =
                         fmt::format("{}cp -rL {} {}", root_mkdir, from_path, to_path);
-                g_free(from_path);
-                g_free(to_path);
                 task->task->exec_sync = true;
                 task->task->exec_popup = false;
                 task->task->exec_show_output = false;
@@ -3068,8 +3047,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     task->task->exec_command =
                         fmt::format("{}cp -Pf{} {} {}", root_mkdir, over_opt, from_path, to_path);
                 }
-                g_free(from_path);
-                g_free(to_path);
                 g_free(over_opt);
                 task->task->exec_sync = true;
                 task->task->exec_popup = false;
@@ -3113,8 +3090,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     task->task->exec_command =
                         fmt::format("{}ln -s {} {}", root_mkdir, from_path, to_path);
                 }
-                g_free(from_path);
-                g_free(to_path);
                 task->task->exec_sync = true;
                 task->task->exec_popup = false;
                 task->task->exec_show_output = false;
@@ -3146,8 +3121,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     task->task->exec_command =
                         fmt::format("{}mv {} {}", root_mkdir, from_path, to_path);
                 }
-                g_free(from_path);
-                g_free(to_path);
                 task->task->exec_sync = true;
                 task->task->exec_popup = false;
                 task->task->exec_show_output = false;
@@ -3303,7 +3276,6 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
 {
     GList* l;
     char* str;
-    char* quoted;
     char* command_final;
     char* cmd;
     char* name;
@@ -3349,15 +3321,15 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
         for (l = files; l; l = l->next)
         {
             // filename
+            std::string quoted;
+
             name = g_path_get_basename((char*)l->data);
             quoted = bash_quote(name);
             g_free(name);
-            g_string_append_printf(fm_filenames, "%s\n", quoted);
-            g_free(quoted);
+            g_string_append_printf(fm_filenames, "%s\n", quoted.c_str());
             // file path
             quoted = bash_quote((char*)l->data);
-            g_string_append_printf(fm_files, "%s\n", quoted);
-            g_free(quoted);
+            g_string_append_printf(fm_files, "%s\n", quoted.c_str());
         }
     }
     g_string_append(fm_filenames, ")\nfm_filename=\"$fm_filenames[0]\"\n");
@@ -3377,21 +3349,21 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
         {
             // add sub vars for single file
             // filename
+            std::string quoted;
+
             name = g_path_get_basename((char*)l->data);
             quoted = bash_quote(name);
             g_free(name);
-            str = g_strdup_printf("fm_filename=%s\n", quoted);
-            g_free(quoted);
+            str = g_strdup_printf("fm_filename=%s\n", quoted.c_str());
             // file path
             quoted = bash_quote((char*)l->data);
             command_final = g_strdup_printf("%s%s%sfm_file=%s\n%s",
                                             fm_filenames->str,
                                             fm_files->str,
                                             str,
-                                            quoted,
+                                            quoted.c_str(),
                                             command.c_str());
             g_free(str);
-            g_free(quoted);
         }
 
         // Run task
@@ -3790,7 +3762,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
     char* file_paths = g_strdup("");
     GList* sel;
     char* file_path;
-    char* file_path_q;
+    std::string file_path_q;
     char* str;
     int item_count = 0;
     for (sel = sel_files; sel; sel = sel->next)
@@ -3800,10 +3772,9 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
                                      nullptr);
         file_path_q = bash_quote(file_path);
         str = file_paths;
-        file_paths = g_strdup_printf("%s %s", file_paths, file_path_q);
+        file_paths = g_strdup_printf("%s %s", file_paths, file_path_q.c_str());
         g_free(str);
         g_free(file_path);
-        g_free(file_path_q);
         item_count++;
     }
 
@@ -3843,22 +3814,21 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
         if (path && std::filesystem::is_directory(path))
         {
             xset_set_set(set, XSET_SET_SET_DESC, path);
-            char* quote_path = bash_quote(path);
+            std::string quote_path = bash_quote(path);
 
             if (!strcmp(setname, "root_move2"))
             {
                 task_name = g_strdup("Move As Root");
                 // problem: no warning if already exists
-                cmd = g_strdup_printf("mv -f %s %s", file_paths, quote_path);
+                cmd = g_strdup_printf("mv -f %s %s", file_paths, quote_path.c_str());
             }
             else
             {
                 task_name = g_strdup("Copy As Root");
                 // problem: no warning if already exists
-                cmd = g_strdup_printf("cp -r %s %s", file_paths, quote_path);
+                cmd = g_strdup_printf("cp -r %s %s", file_paths, quote_path.c_str());
             }
 
-            g_free(quote_path);
             g_free(path);
         }
         else

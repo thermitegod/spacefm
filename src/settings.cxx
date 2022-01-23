@@ -1656,7 +1656,7 @@ write_root_saver(std::string& buf, const std::string& path, const char* name, co
 
     std::string save;
     save = fmt::format("{}-{}={}", name, var, value);
-    save = bash_quote(save.c_str());
+    save = bash_quote(save);
     buf.append(fmt::format("echo {} >>| \"{}\"\n", save, path));
 }
 

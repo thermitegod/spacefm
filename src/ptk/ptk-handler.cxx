@@ -740,10 +740,7 @@ ptk_handler_get_command(int mode, int cmd, XSet* handler_set)
     std::string script = ztd::replace(def_script, "/exec.sh", str);
     g_free(def_script);
     if (std::filesystem::exists(script))
-    {
-        char* script2 = const_cast<char*>(script.c_str());
-        return script2;
-    }
+        return g_strdup(script.c_str());
 
     LOG_WARN("ptk_handler_get_command missing script for custom {}", handler_set->name);
     return nullptr;
@@ -1063,7 +1060,7 @@ ptk_handler_file_has_handlers(int mode, int cmd, const char* path, VFSMimeType* 
     if (path && strchr(path, ' '))
     {
         std::string cleaned = ztd::replace(path, " ", "_");
-        under_path = const_cast<char*>(cleaned.c_str());
+        under_path = g_strdup(cleaned.c_str());
     }
     else
         under_path = (char*)path;

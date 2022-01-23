@@ -842,8 +842,7 @@ get_text_view(GtkTextView* view)
     text2 = ztd::replace(text2, "\\n", "\n");
     text2 = ztd::replace(text2, "\\t", "\t");
 
-    char* text3 = const_cast<char*>(text2.c_str());
-    return text3;
+    return g_strdup(text2.c_str());
 }
 
 static void

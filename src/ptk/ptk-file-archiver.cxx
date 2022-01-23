@@ -224,7 +224,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
 }
 
 static char*
-generate_bash_error_function(bool run_in_terminal, char* parent_quote)
+generate_bash_error_function(bool run_in_terminal, const char* parent_quote)
 {
     /* When ran in a terminal, errors need to result in a pause so that
      * the user can review the situation. Even outside a terminal, IG
@@ -763,10 +763,10 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
 
     // Make Archive Creation Command
 
-    char* desc;
+    std::string desc;
     char* ext;
     char* udest_file;
-    char* udest_quote;
+    std::string udest_quote;
     char* s1;
     char* final_command;
     char* cmd_to_run;
@@ -802,7 +802,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 /* For subsequent archives, base archive name on the filename
                  * being compressed, in the user-selected dir */
                 char* dest_dir = g_path_get_dirname(dest_file);
-                udest_file = g_strconcat(dest_dir, "/", desc, ext, nullptr);
+                udest_file = g_strconcat(dest_dir, "/", desc.c_str(), ext, nullptr);
 
                 // Looping to find a path that doesnt exist
                 struct stat statbuf;
@@ -810,7 +810,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 while (lstat(udest_file, &statbuf) == 0)
                 {
                     g_free(udest_file);
-                    udest_file = g_strdup_printf("%s/%s-%s%d%s", dest_dir, desc, "copy", ++n, ext);
+                    udest_file =
+                        g_strdup_printf("%s/%s-%s%d%s", dest_dir, desc.c_str(), "copy", ++n, ext);
                 }
                 g_free(dest_dir);
             }
@@ -820,11 +821,11 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
 
             /* Bash quoting desc - desc original value comes from the
              * VFSFileInfo struct and therefore should not be freed */
-            if (desc[0] == '-')
+            if (desc.at(0) == '-')
             {
                 // special handling for filename starting with a dash
                 // due to tar interpreting it as option
-                s1 = g_strdup_printf("./%s", desc);
+                s1 = g_strdup_printf("./%s", desc.c_str());
                 desc = bash_quote(s1);
                 g_free(s1);
             }
@@ -832,14 +833,13 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 desc = bash_quote(desc);
 
             // Replace sub vars  %n %N %O (and erroneous %o treat as %O)
-            cmd_to_run = replace_archive_subs(command,
-                                              i == 0 ? desc : "", // first run only %n = desc
-                                              desc, // Replace %N with nth file (NOT ALL FILES)
-                                              udest_quote,
-                                              nullptr,
-                                              nullptr);
-            g_free(udest_quote);
-            g_free(desc);
+            cmd_to_run =
+                replace_archive_subs(command,
+                                     i == 0 ? desc.c_str() : "", // first run only %n = desc
+                                     desc.c_str(), // Replace %N with nth file (NOT ALL FILES)
+                                     udest_quote.c_str(),
+                                     nullptr,
+                                     nullptr);
 
             // Appending to final command as appropriate
             if (i == 0)
@@ -866,7 +866,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
         udest_quote = bash_quote(udest_file);
         g_free(udest_file);
         char* all = g_strdup("");
-        char* first;
+        std::string first;
         if (files)
         {
             desc = (char*)vfs_file_info_get_name(static_cast<VFSFileInfo*>(files->data));
@@ -874,7 +874,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
             {
                 // special handling for filename starting with a dash
                 // due to tar interpreting it as option
-                s1 = g_strdup_printf("./%s", desc);
+                s1 = g_strdup_printf("./%s", desc.c_str());
                 first = bash_quote(s1);
                 g_free(s1);
             }
@@ -892,7 +892,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                     {
                         // special handling for filename starting with a dash
                         // due to tar interpreting it as option
-                        s1 = g_strdup_printf("./%s", desc);
+                        s1 = g_strdup_printf("./%s", desc.c_str());
                         desc = bash_quote(s1);
                         g_free(s1);
                     }
@@ -900,9 +900,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                         desc = bash_quote(desc);
 
                     str = all;
-                    all = g_strdup_printf("%s%s%s", all, all[0] ? " " : "", desc);
+                    all = g_strdup_printf("%s%s%s", all, all[0] ? " " : "", desc.c_str());
                     g_free(str);
-                    g_free(desc);
                 }
             }
         }
@@ -913,13 +912,16 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
         }
 
         // Replace sub vars  %n %N %o
-        cmd_to_run = replace_archive_subs(command, first, all, udest_quote, nullptr, nullptr);
+        cmd_to_run = replace_archive_subs(command,
+                                          first.c_str(),
+                                          all,
+                                          udest_quote.c_str(),
+                                          nullptr,
+                                          nullptr);
 
         // Enforce error check
         final_command = g_strconcat(cmd_to_run, "\n[[ $? -eq 0 ]] || fm_handle_err\n", nullptr);
         g_free(cmd_to_run);
-        g_free(udest_quote);
-        g_free(first);
         g_free(all);
     }
     g_free(dest_file);
@@ -989,14 +991,14 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     bool keep_term = false;
     bool write_access = false;
     bool list_contents = false;
-    char* parent_quote = nullptr;
+    std::string parent_quote;
     VFSFileInfo* file;
     VFSMimeType* mime_type;
     const char* dest;
     GList* l;
-    char* dest_quote = nullptr;
+    std::string dest_quote;
     char* full_path = nullptr;
-    char* full_quote = nullptr;
+    std::string full_quote;
     char* perm = nullptr;
     char* cmd = nullptr;
     char* str = nullptr;
@@ -1240,7 +1242,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
 
         // Archive to list or extract:
         full_quote = bash_quote(full_path); // %x
-        char* extract_target = nullptr;     // %g or %G
+        std::string extract_target;         // %g or %G
         char* mkparent = g_strdup("");
         perm = g_strdup("");
 
@@ -1366,8 +1368,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                 mkparent = g_strdup_printf(""
                                            "mkdir -p %s || fm_handle_err\n"
                                            "cd %s || fm_handle_err\n",
-                                           parent_quote,
-                                           parent_quote);
+                                           parent_quote.c_str(),
+                                           parent_quote.c_str());
 
                 /* Dealing with the need to make extracted files writable if
                  * desired (e.g. a tar of files originally archived from a CD
@@ -1379,10 +1381,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                     /* deliberately omitting fm_handle_error - only a
                      * convenience function */
                     g_free(perm);
-                    perm = g_strdup_printf("chmod -R u+rwX %s\n", parent_quote);
+                    perm = g_strdup_printf("chmod -R u+rwX %s\n", parent_quote.c_str());
                 }
-                g_free(parent_quote);
-                parent_quote = nullptr;
+                parent_quote.clear();
             }
             else
             {
@@ -1407,19 +1408,16 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                 n = 1;
 
                 // Looping to find a path that doesnt exist
-                while (lstat(extract_target, &statbuf) == 0)
+                while (lstat(extract_target.c_str(), &statbuf) == 0)
                 {
-                    g_free(extract_target);
-                    str = g_strdup_printf("%s-%s%d%s", filename_no_ext, "copy", ++n, extension);
+                    std::string str2 =
+                        fmt::format("{}-{}{}{}", filename_no_ext, "copy", ++n, extension);
                     extract_target =
-                        g_build_filename(create_parent ? parent_path : dest, str, nullptr);
-                    g_free(str);
+                        g_build_filename(create_parent ? parent_path : dest, str2.c_str(), nullptr);
                 }
 
                 // Quoting target
-                str = extract_target;
-                extract_target = bash_quote(extract_target);
-                g_free(str);
+                extract_target = bash_quote(extract_target.c_str());
             }
 
             // Cleaning up
@@ -1432,7 +1430,12 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
 
         // Substituting %x %g %G
         str = cmd;
-        cmd = replace_archive_subs(cmd, nullptr, nullptr, nullptr, full_quote, extract_target);
+        cmd = replace_archive_subs(cmd,
+                                   nullptr,
+                                   nullptr,
+                                   nullptr,
+                                   full_quote.c_str(),
+                                   extract_target.c_str());
         g_free(str);
 
         /* Finally constructing command to run, taking into account more than
@@ -1443,14 +1446,13 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         final_command = g_strdup_printf("%s\ncd %s || fm_handle_err\n%s%s"
                                         "\n[[ $? -eq 0 ]] || fm_handle_err\n%s\n",
                                         (g_strcmp0(final_command, "") < 0) ? "" : final_command,
-                                        dest_quote,
+                                        dest_quote.c_str(),
                                         mkparent,
                                         cmd,
                                         perm);
         g_free(str);
 
         // Cleaning up
-        g_free(full_quote);
         g_free(full_path);
         g_free(cmd);
         g_free(mkparent);
@@ -1460,13 +1462,11 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     /* When ran in a terminal, errors need to result in a pause so that
      * the user can review the situation - in any case an error check
      * needs to be made */
-    str = generate_bash_error_function(in_term, create_parent ? parent_quote : nullptr);
+    str = generate_bash_error_function(in_term, create_parent ? parent_quote.c_str() : nullptr);
     s1 = final_command;
     final_command = g_strconcat(str, "\n", final_command, nullptr);
     g_free(str);
     g_free(s1);
-    g_free(dest_quote);
-    g_free(parent_quote);
     g_free(choose_dir);
     g_strfreev(archive_handlers);
 
