@@ -215,8 +215,7 @@ vfs_app_desktop_open_multiple_files(VFSAppDesktop* app)
 {
     if (app->exec)
     {
-        if (strstr(app->exec, "%U") || strstr(app->exec, "%F") || strstr(app->exec, "%N") ||
-            strstr(app->exec, "%D"))
+        if (strstr(app->exec, "%U") || strstr(app->exec, "%F"))
             return true;
     }
     return false;
@@ -244,6 +243,8 @@ vfs_app_desktop_uses_startup_notify(VFSAppDesktop* app)
 static std::string
 translate_app_exec_to_command_line(VFSAppDesktop* app, GList* file_list)
 {
+    // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
+
     const char* pexec = vfs_app_desktop_get_exec(app);
     char* file;
     GList* l;
@@ -258,37 +259,7 @@ translate_app_exec_to_command_line(VFSAppDesktop* app, GList* file_list)
             ++pexec;
             switch (*pexec)
             {
-                /* 0.9.4: Treat %u/%U as %f/%F acceptable for local files per spec at
-                 * http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
-                 * This seems to be more common behavior among file managers and
-                 * some common .desktop files erroneously make this assumption.
-                case 'U':
-                    for( l = file_list; l; l = l->next )
-                    {
-                        tmp = g_filename_to_uri( (char*)l->data, nullptr, nullptr );
-                        file = g_shell_quote( tmp );
-                        g_free( tmp );
-                        g_string_append( cmd, file );
-                        g_string_append_c( cmd, ' ' );
-                        g_free( file );
-                    }
-                    add_files = true;
-                    break;
-                case 'u':
-                    if( file_list && file_list->data )
-                    {
-                        file = (char*)file_list->data;
-                        tmp = g_filename_to_uri( file, nullptr, nullptr );
-                        file = g_shell_quote( tmp );
-                        g_free( tmp );
-                        g_string_append( cmd, file );
-                        g_free( file );
-                        add_files = true;
-                    }
-                    break;
-                */
                 case 'F':
-                case 'N':
                 case 'U':
                     for (l = file_list; l; l = l->next)
                     {
@@ -299,7 +270,6 @@ translate_app_exec_to_command_line(VFSAppDesktop* app, GList* file_list)
                     add_files = true;
                     break;
                 case 'f':
-                case 'n':
                 case 'u':
                     if (file_list && file_list->data)
                     {
@@ -308,28 +278,11 @@ translate_app_exec_to_command_line(VFSAppDesktop* app, GList* file_list)
                         add_files = true;
                     }
                     break;
-                case 'D':
-                    for (l = file_list; l; l = l->next)
-                    {
-                        tmp = g_path_get_dirname((char*)l->data);
-                        cmd.append(bash_quote(tmp));
-                        cmd.append(" ");
-                    }
-                    add_files = true;
-                    break;
-                case 'd':
-                    if (file_list && file_list->data)
-                    {
-                        tmp = g_path_get_dirname((char*)file_list->data);
-                        cmd.append(bash_quote(file));
-                        add_files = true;
-                    }
-                    break;
                 case 'c':
                     cmd.append(vfs_app_desktop_get_disp_name(app));
                     break;
                 case 'i':
-                    /* Add icon name */
+                    // Add icon name
                     if (vfs_app_desktop_get_icon_name(app))
                     {
                         cmd.append("--icon ");
@@ -337,10 +290,7 @@ translate_app_exec_to_command_line(VFSAppDesktop* app, GList* file_list)
                     }
                     break;
                 case 'k':
-                    /* Location of the desktop file */
-                    break;
-                case 'v':
-                    /* Device name */
+                    // Location of the desktop file
                     break;
                 case '%':
                     cmd.append("%");
@@ -351,8 +301,11 @@ translate_app_exec_to_command_line(VFSAppDesktop* app, GList* file_list)
                     break;
             }
         }
-        else /* not % escaped part */
+        else
+        {
+            // not % escaped part
             cmd.append(fmt::format("{}", (char)*pexec));
+        }
     }
     if (!add_files)
     {
