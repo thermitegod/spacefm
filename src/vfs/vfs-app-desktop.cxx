@@ -39,14 +39,14 @@ VFSAppDesktop::VFSAppDesktop(const std::string& open_file_name)
 
     if (g_path_is_absolute(open_file_name.c_str()))
     {
-        file_name = g_path_get_basename(open_file_name.c_str());
-        full_path = open_file_name;
+        m_file_name = g_path_get_basename(open_file_name.c_str());
+        m_full_path = open_file_name;
         load = g_key_file_load_from_file(file, open_file_name.c_str(), G_KEY_FILE_NONE, nullptr);
     }
     else
     {
-        file_name = open_file_name;
-        std::string relative_path = g_build_filename("applications", file_name.c_str(), nullptr);
+        m_file_name = open_file_name;
+        std::string relative_path = g_build_filename("applications", m_file_name.c_str(), nullptr);
         char* full_path_c;
         load = g_key_file_load_from_data_dirs(file,
                                               relative_path.c_str(),
@@ -54,7 +54,7 @@ VFSAppDesktop::VFSAppDesktop(const std::string& open_file_name)
                                               G_KEY_FILE_NONE,
                                               nullptr);
         if (full_path_c)
-            full_path = full_path_c;
+            m_full_path = full_path_c;
         g_free(full_path_c);
     }
 
@@ -63,18 +63,18 @@ VFSAppDesktop::VFSAppDesktop(const std::string& open_file_name)
         static const std::string desktop_entry = "Desktop Entry";
 
         // clang-format off
-        disp_name = ztd::null_check(g_key_file_get_locale_string(file, desktop_entry.c_str(), "Name", nullptr, nullptr));
-        exec = ztd::null_check(g_key_file_get_string(file, desktop_entry.c_str(), "Exec", nullptr));
-        icon_name = ztd::null_check(g_key_file_get_string(file, desktop_entry.c_str(), "Icon", nullptr));
-        path = ztd::null_check(g_key_file_get_string(file, desktop_entry.c_str(), "Path", nullptr));
-        terminal = g_key_file_get_boolean(file, desktop_entry.c_str(), "Terminal", nullptr);
-        hidden = g_key_file_get_boolean(file, desktop_entry.c_str(), "NoDisplay", nullptr);
-        startup = g_key_file_get_boolean(file, desktop_entry.c_str(), "StartupNotify", nullptr);
+        m_disp_name = ztd::null_check(g_key_file_get_locale_string(file, desktop_entry.c_str(), "Name", nullptr, nullptr));
+        m_exec = ztd::null_check(g_key_file_get_string(file, desktop_entry.c_str(), "Exec", nullptr));
+        m_icon_name = ztd::null_check(g_key_file_get_string(file, desktop_entry.c_str(), "Icon", nullptr));
+        m_path = ztd::null_check(g_key_file_get_string(file, desktop_entry.c_str(), "Path", nullptr));
+        m_terminal = g_key_file_get_boolean(file, desktop_entry.c_str(), "Terminal", nullptr);
+        m_hidden = g_key_file_get_boolean(file, desktop_entry.c_str(), "NoDisplay", nullptr);
+        m_startup = g_key_file_get_boolean(file, desktop_entry.c_str(), "StartupNotify", nullptr);
         // clang-format on
     }
     else
     {
-        exec = file_name;
+        m_exec = m_file_name;
     }
 
     g_key_file_free(file);
@@ -88,39 +88,39 @@ VFSAppDesktop::~VFSAppDesktop()
 const char*
 VFSAppDesktop::get_name()
 {
-    return file_name.c_str();
+    return m_file_name.c_str();
 }
 
 const char*
 VFSAppDesktop::get_disp_name()
 {
-    if (!disp_name.empty())
-        return disp_name.c_str();
-    return file_name.c_str();
+    if (!m_disp_name.empty())
+        return m_disp_name.c_str();
+    return m_file_name.c_str();
 }
 
 const char*
 VFSAppDesktop::get_exec()
 {
-    return exec.c_str();
+    return m_exec.c_str();
 }
 
 bool
 VFSAppDesktop::use_terminal()
 {
-    return terminal;
+    return m_terminal;
 }
 
 const char*
 VFSAppDesktop::get_full_path()
 {
-    return full_path.c_str();
+    return m_full_path.c_str();
 }
 
 const char*
 VFSAppDesktop::get_icon_name()
 {
-    return icon_name.c_str();
+    return m_icon_name.c_str();
 }
 
 GdkPixbuf*
@@ -129,10 +129,10 @@ VFSAppDesktop::get_icon(int size)
     GtkIconTheme* theme;
     GdkPixbuf* icon = nullptr;
 
-    if (icon_name.c_str())
+    if (m_icon_name.c_str())
     {
         theme = gtk_icon_theme_get_default();
-        icon = vfs_load_icon(theme, icon_name.c_str(), size);
+        icon = vfs_load_icon(theme, m_icon_name.c_str(), size);
     }
 
     // fallback to generic icon
@@ -150,10 +150,10 @@ VFSAppDesktop::get_icon(int size)
 bool
 VFSAppDesktop::open_multiple_files()
 {
-    if (!exec.empty())
+    if (!m_exec.empty())
     {
         std::vector<std::string> keys{"%U", "%F"};
-        if (ztd::contains(exec, keys))
+        if (ztd::contains(m_exec, keys))
             return true;
     }
     return false;
@@ -295,7 +295,7 @@ VFSAppDesktop::exec_desktop(GdkScreen* screen, const std::string& working_dir,
 
     if (use_terminal())
     {
-        exec_in_terminal(sn_desc, !path.empty() ? path : working_dir, cmd);
+        exec_in_terminal(sn_desc, !m_path.empty() ? m_path : working_dir, cmd);
     }
     else
     {
@@ -304,12 +304,12 @@ VFSAppDesktop::exec_desktop(GdkScreen* screen, const std::string& working_dir,
         if (g_shell_parse_argv(cmd.c_str(), &argc, &argv, nullptr))
         {
             vfs_exec_on_screen(screen,
-                               !path.empty() ? path.c_str() : working_dir.c_str(),
+                               !m_path.empty() ? m_path.c_str() : working_dir.c_str(),
                                argv,
                                nullptr,
                                sn_desc.c_str(),
                                GSpawnFlags(VFS_EXEC_DEFAULT_FLAGS),
-                               startup,
+                               m_startup,
                                err);
             g_strfreev(argv);
         }
