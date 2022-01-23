@@ -20,6 +20,7 @@ bool have_x_access(const char* path);
 bool dir_has_files(const char* path);
 char* replace_line_subs(const char* line);
 char* get_name_extension(const char* full_name, bool is_dir, char** ext);
+const std::string get_prog_executable();
 void open_in_prog(const char* path);
 
 std::string bash_quote(const std::string& str);

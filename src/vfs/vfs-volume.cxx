@@ -3459,16 +3459,11 @@ vfs_volume_autoexec(VFSVolume* vol)
                     }
                     else
                     {
-                        char* prog = g_find_program_in_path(g_get_prgname());
-                        if (!prog)
-                            prog = g_strdup(g_get_prgname());
-                        if (!prog)
-                            prog = g_strdup("spacefm");
+                        std::string exe = get_prog_executable();
                         std::string quote_path = bash_quote(vol->mount_point);
-                        std::string cmd = fmt::format("{} -t {}", prog, quote_path);
+                        std::string cmd = fmt::format("{} -t {}", exe, quote_path);
                         print_command(cmd);
                         g_spawn_command_line_async(cmd.c_str(), nullptr);
-                        g_free(prog);
                     }
                 }
                 command = xset_get_s("dev_exec_fs");

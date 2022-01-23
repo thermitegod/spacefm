@@ -173,19 +173,20 @@ get_name_extension(const char* full_name, bool is_dir, char** ext)
     }
 }
 
+const std::string
+get_prog_executable()
+{
+    return std::filesystem::read_symlink("/proc/self/exe");
+}
+
 void
 open_in_prog(const char* path)
 {
-    char* prog = g_find_program_in_path(g_get_prgname());
-    if (!prog)
-        prog = g_strdup(g_get_prgname());
-    if (!prog)
-        prog = g_strdup("spacefm");
-    std::string qpath = bash_quote(path);
-    std::string command = fmt::format("{} {}", prog, qpath);
+    const std::string exe = get_prog_executable();
+    const std::string qpath = bash_quote(path);
+    const std::string command = fmt::format("{} {}", exe, qpath);
     print_command(command);
     g_spawn_command_line_async(command.c_str(), nullptr);
-    g_free(prog);
 }
 
 std::string

@@ -548,9 +548,9 @@ on_open_current_folder_as_root(GtkMenuItem* menuitem, void* user_data)
                                           ptk_file_browser_get_cwd(file_browser),
                                           GTK_WIDGET(file_browser),
                                           file_browser->task_view);
-    const std::string prog = g_get_prgname();
+    const std::string exe = get_prog_executable();
     const std::string cwd = bash_quote(ptk_file_browser_get_cwd(file_browser));
-    task->task->exec_command = fmt::format("HOME=/root {} {}", prog, cwd);
+    task->task->exec_command = fmt::format("HOME=/root {} {}", exe, cwd);
     task->task->exec_as_user = "root";
     task->task->exec_sync = false;
     task->task->exec_export = false;
