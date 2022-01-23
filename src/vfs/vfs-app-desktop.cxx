@@ -55,8 +55,8 @@ vfs_app_desktop_new(const char* file_name)
     }
     else
     {
-        desktop->file_name = g_strdup(file_name);
-        relative_path = g_build_filename("applications", desktop->file_name, nullptr);
+        desktop->file_name = file_name;
+        relative_path = g_build_filename("applications", desktop->file_name.c_str(), nullptr);
         load = g_key_file_load_from_data_dirs(file,
                                               relative_path,
                                               &desktop->full_path,
@@ -95,7 +95,6 @@ vfs_app_desktop_new(const char* file_name)
 static void
 vfs_app_desktop_free(VFSAppDesktop* desktop)
 {
-    g_free(desktop->disp_name);
     g_free(desktop->comment);
     g_free(desktop->exec);
     g_free(desktop->icon_name);
@@ -117,15 +116,15 @@ vfs_app_desktop_unref(void* data)
 const char*
 vfs_app_desktop_get_name(VFSAppDesktop* desktop)
 {
-    return desktop->file_name;
+    return desktop->file_name.c_str();
 }
 
 const char*
 vfs_app_desktop_get_disp_name(VFSAppDesktop* desktop)
 {
-    if (G_LIKELY(desktop->disp_name))
-        return desktop->disp_name;
-    return desktop->file_name;
+    if (!desktop->disp_name.empty())
+        return desktop->disp_name.c_str();
+    return desktop->file_name.c_str();
 }
 
 const char*
@@ -408,7 +407,7 @@ vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSAppDes
                 G_SPAWN_ERROR_FAILED,
                 "%s\n\n%s",
                 "Command not found",
-                desktop->file_name);
+                desktop->file_name.c_str());
     return false;
 }
 

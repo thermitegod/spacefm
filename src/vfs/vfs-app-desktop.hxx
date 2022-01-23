@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <atomic>
 
 #include <glib.h>
@@ -19,8 +21,8 @@
 
 struct VFSAppDesktop
 {
-    char* file_name;
-    char* disp_name;
+    std::string file_name;
+    std::string disp_name;
     char* comment;
     char* exec;
     char* icon_name;
