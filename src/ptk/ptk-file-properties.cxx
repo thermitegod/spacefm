@@ -269,24 +269,24 @@ on_combo_change(GtkComboBox* combo, void* user_data)
 
                 if (!exist) /* It didn't exist */
                 {
-                    VFSAppDesktop* app = vfs_app_desktop_new(action);
-                    if (app)
+                    VFSAppDesktop* desktop = vfs_app_desktop_new(action);
+                    if (desktop)
                     {
                         GdkPixbuf* icon;
-                        icon = vfs_app_desktop_get_icon(app, 20, true);
+                        icon = vfs_app_desktop_get_icon(desktop, 20, true);
                         gtk_list_store_insert_with_values(GTK_LIST_STORE(model),
                                                           &it,
                                                           0,
                                                           0,
                                                           icon,
                                                           1,
-                                                          vfs_app_desktop_get_disp_name(app),
+                                                          vfs_app_desktop_get_disp_name(desktop),
                                                           2,
                                                           action,
                                                           -1);
                         if (icon)
                             g_object_unref(icon);
-                        vfs_app_desktop_unref(app);
+                        vfs_app_desktop_unref(desktop);
                         exist = true;
                     }
                 }

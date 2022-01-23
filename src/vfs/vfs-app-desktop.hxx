@@ -46,19 +46,19 @@ VFSAppDesktop* vfs_app_desktop_new(const char* file_name);
 
 void vfs_app_desktop_unref(void* data);
 
-const char* vfs_app_desktop_get_name(VFSAppDesktop* app);
+const char* vfs_app_desktop_get_name(VFSAppDesktop* desktop);
 
-const char* vfs_app_desktop_get_disp_name(VFSAppDesktop* app);
+const char* vfs_app_desktop_get_disp_name(VFSAppDesktop* desktop);
 
-const char* vfs_app_desktop_get_exec(VFSAppDesktop* app);
+const char* vfs_app_desktop_get_exec(VFSAppDesktop* desktop);
 
-GdkPixbuf* vfs_app_desktop_get_icon(VFSAppDesktop* app, int size, bool use_fallback);
+GdkPixbuf* vfs_app_desktop_get_icon(VFSAppDesktop* desktop, int size, bool use_fallback);
 
-const char* vfs_app_desktop_get_icon_name(VFSAppDesktop* app);
+const char* vfs_app_desktop_get_icon_name(VFSAppDesktop* desktop);
 
-bool vfs_app_desktop_open_multiple_files(VFSAppDesktop* app);
+bool vfs_app_desktop_open_multiple_files(VFSAppDesktop* desktop);
 
-bool vfs_app_desktop_open_in_terminal(VFSAppDesktop* app);
+bool vfs_app_desktop_open_in_terminal(VFSAppDesktop* desktop);
 
-bool vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSAppDesktop* app,
+bool vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSAppDesktop* desktop,
                                 GList* file_paths, GError** err);

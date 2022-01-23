@@ -576,7 +576,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
     char** app;
     const char* app_name = nullptr;
-    VFSAppDesktop* desktop_file;
     char* name;
     char* desc;
     XSet* set_radio;
@@ -870,8 +869,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                     gtk_widget_show(GTK_WIDGET(item));
                     gtk_container_add(GTK_CONTAINER(submenu), GTK_WIDGET(item));
                 }
-                desktop_file = vfs_app_desktop_new(*app);
-                app_name = vfs_app_desktop_get_disp_name(desktop_file);
+                VFSAppDesktop* desktop = vfs_app_desktop_new(*app);
+                app_name = vfs_app_desktop_get_disp_name(desktop);
                 if (app_name)
                     app_menu_item = gtk_menu_item_new_with_label(app_name);
                 else
@@ -893,7 +892,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                                  (void*)data);
                 g_object_set_data_full(G_OBJECT(app_menu_item),
                                        "desktop_file",
-                                       desktop_file,
+                                       desktop,
                                        vfs_app_desktop_unref);
             }
             g_strfreev(apps);
@@ -1360,11 +1359,11 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
     }
     else
     {
-        VFSAppDesktop* desktop_file =
+        VFSAppDesktop* desktop =
             static_cast<VFSAppDesktop*>(g_object_get_data(G_OBJECT(menuitem), "desktop_file"));
-        if (!desktop_file)
+        if (!desktop)
             return;
-        app = vfs_app_desktop_get_name(desktop_file);
+        app = vfs_app_desktop_get_name(desktop);
     }
 
     GList* sel_files = data->sel_files;
@@ -1418,9 +1417,9 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 
     std::string command;
 
-    VFSAppDesktop* desktop_file =
+    VFSAppDesktop* desktop =
         static_cast<VFSAppDesktop*>(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
-    if (!(desktop_file && desktop_file->file_name))
+    if (!(desktop && desktop->file_name))
         return;
 
     int job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
@@ -1435,7 +1434,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
     switch (job)
     {
         case APP_JOB_DEFAULT:
-            vfs_mime_type_set_default_action(mime_type, desktop_file->file_name);
+            vfs_mime_type_set_default_action(mime_type, desktop->file_name);
             ptk_app_chooser_has_handler_warn(data->browser ? GTK_WIDGET(data->browser) : nullptr,
                                              mime_type);
             break;
@@ -1443,7 +1442,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             // for text files, spacefm displays both the actions for the type
             // and the actions for text/plain, so removing an app may appear to not
             // work if that app is still associated with text/plain
-            vfs_mime_type_remove_action(mime_type, desktop_file->file_name);
+            vfs_mime_type_remove_action(mime_type, desktop->file_name);
             if (strcmp(mime_type->type, "text/plain") && g_str_has_prefix(mime_type->type, "text/"))
                 xset_msg_dialog(
                     GTK_WIDGET(data->browser),
@@ -1465,14 +1464,12 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     nullptr);
             break;
         case APP_JOB_EDIT:
-            path = g_build_filename(vfs_user_data_dir(),
-                                    "applications",
-                                    desktop_file->file_name,
-                                    nullptr);
+            path =
+                g_build_filename(vfs_user_data_dir(), "applications", desktop->file_name, nullptr);
             if (!std::filesystem::exists(path))
             {
                 char* share_desktop =
-                    vfs_mime_type_locate_desktop_file(nullptr, desktop_file->file_name);
+                    vfs_mime_type_locate_desktop_file(nullptr, desktop->file_name);
                 if (!(share_desktop && strcmp(share_desktop, path)))
                 {
                     g_free(share_desktop);
@@ -1517,7 +1514,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             g_free(path);
             break;
         case APP_JOB_VIEW:
-            path = get_shared_desktop_file_location(desktop_file->file_name);
+            path = get_shared_desktop_file_location(desktop->file_name);
             if (path)
                 xset_edit(GTK_WIDGET(data->browser), path, false, true);
             break;
@@ -1559,7 +1556,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 ptk_file_browser_emit_open(data->browser, path, PTK_OPEN_NEW_TAB);
             break;
         case APP_JOB_BROWSE_SHARED:
-            str = get_shared_desktop_file_location(desktop_file->file_name);
+            str = get_shared_desktop_file_location(desktop->file_name);
             if (str)
                 path = g_path_get_dirname(str);
             else
@@ -1742,18 +1739,17 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
 {
     int job = -1;
     PtkFileMenu* app_data = nullptr;
-    VFSAppDesktop* desktop_file = nullptr;
+    VFSAppDesktop* desktop = nullptr;
 
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(menu));
     if (item)
     {
-        // if original menu, desktop_file will be set
-        desktop_file =
-            static_cast<VFSAppDesktop*>(g_object_get_data(G_OBJECT(item), "desktop_file"));
+        // if original menu, desktop will be set
+        desktop = static_cast<VFSAppDesktop*>(g_object_get_data(G_OBJECT(item), "desktop_file"));
         // else if app menu, data will be set
         app_data = static_cast<PtkFileMenu*>(g_object_get_data(G_OBJECT(item), "data"));
 
-        if (!desktop_file && !app_data)
+        if (!desktop && !app_data)
             return false;
     }
     else
@@ -1769,7 +1765,7 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
         {
             case GDK_KEY_F2:
             case GDK_KEY_Menu:
-                if (desktop_file)
+                if (desktop)
                     show_app_menu(menu, item, data, 0, event->time);
                 return true;
             case GDK_KEY_F4:
@@ -1785,7 +1781,7 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
                 break;
         }
     }
-    if (desktop_file && job != -1)
+    if (desktop && job != -1)
     {
         gtk_menu_shell_deactivate(GTK_MENU_SHELL(menu));
         g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(job));
@@ -1859,9 +1855,9 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     else
         type = "unknown";
 
-    VFSAppDesktop* desktop_file =
+    VFSAppDesktop* desktop =
         static_cast<VFSAppDesktop*>(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
-    if (!desktop_file)
+    if (!desktop)
         return;
 
     GtkWidget* app_menu = gtk_menu_new();
@@ -1895,17 +1891,17 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     gtk_container_add(GTK_CONTAINER(app_menu), gtk_separator_menu_item_new());
 
     // *.desktop (missing)
-    if (desktop_file->file_name)
+    if (desktop->file_name)
     {
-        path = g_build_filename(vfs_user_data_dir(), "applications", desktop_file->file_name, nullptr);
+        path = g_build_filename(vfs_user_data_dir(), "applications", desktop->file_name, nullptr);
         if (std::filesystem::exists(path))
         {
-            str = ztd::replace(desktop_file->file_name, ".desktop", "._desktop");
+            str = ztd::replace(desktop->file_name, ".desktop", "._desktop");
             icon = g_strdup("Edit");
         }
         else
         {
-            str = ztd::replace(desktop_file->file_name, ".desktop", "._desktop");
+            str = ztd::replace(desktop->file_name, ".desktop", "._desktop");
             str = fmt::format("{} (*copy)", str);
             icon = g_strdup("document-new");
         }
@@ -1974,16 +1970,16 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     g_signal_connect(submenu, "key_press_event", G_CALLBACK(app_menu_keypress), data);
 
     // View /usr .desktop
-    if (desktop_file->file_name)
+    if (desktop->file_name)
     {
         newitem = app_menu_additem(submenu,
-                                   desktop_file->file_name,
+                                   desktop->file_name,
                                    g_strdup("text-x-generic"),
                                    APP_JOB_VIEW,
                                    app_item,
                                    data);
-        char* desk_path = get_shared_desktop_file_location(desktop_file->file_name);
 
+        char* desk_path = get_shared_desktop_file_location(desktop->file_name);
         gtk_widget_set_sensitive(GTK_WIDGET(newitem), !!desk_path);
         g_free(desk_path);
     }

@@ -573,7 +573,6 @@ load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* tas
     {
         const char* name;
         char* path;
-        VFSAppDesktop* app;
         while ((name = g_dir_read_name(dir)))
         {
             vfs_async_task_lock(task);
@@ -603,12 +602,12 @@ load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* tas
             }
             vfs_async_task_unlock(task);
 
-            app = vfs_app_desktop_new(path);
+            VFSAppDesktop* desktop = vfs_app_desktop_new(path);
 
             /* There are some operations using GTK+, so lock may be needed. */
-            add_list_item(list, app);
+            add_list_item(list, desktop);
 
-            vfs_app_desktop_unref(app);
+            vfs_app_desktop_unref(desktop);
             g_free(path);
         }
         g_dir_close(dir);

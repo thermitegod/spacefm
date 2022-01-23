@@ -633,15 +633,16 @@ vfs_file_info_open_file(VFSFileInfo* fi, const char* file_path, GError** err)
         char* app_name = vfs_mime_type_get_default_action(mime_type);
         if (app_name)
         {
-            VFSAppDesktop* app = vfs_app_desktop_new(app_name);
-            if (!vfs_app_desktop_get_exec(app))
-                app->exec = g_strdup(app_name); /* FIXME: app->exec */
+            VFSAppDesktop* desktop = vfs_app_desktop_new(app_name);
+            if (!vfs_app_desktop_get_exec(desktop))
+                desktop->exec = g_strdup(app_name); /* FIXME: desktop->exec */
             GList* files = nullptr;
             files = g_list_prepend(files, (void*)file_path);
             /* FIXME: working dir is needed */
-            ret = vfs_app_desktop_open_files(gdk_screen_get_default(), nullptr, app, files, err);
+            ret =
+                vfs_app_desktop_open_files(gdk_screen_get_default(), nullptr, desktop, files, err);
             g_list_free(files);
-            vfs_app_desktop_unref(app);
+            vfs_app_desktop_unref(desktop);
             g_free(app_name);
         }
         vfs_mime_type_unref(mime_type);
