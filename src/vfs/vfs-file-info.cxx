@@ -13,6 +13,9 @@
 #include <grp.h>
 #include <pwd.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "settings.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"

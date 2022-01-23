@@ -21,6 +21,9 @@
 #include <malloc.h>
 #endif
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "vfs/vfs-volume.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 #include "utils.hxx"

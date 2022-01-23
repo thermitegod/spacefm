@@ -13,10 +13,9 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "settings.hxx"
-#include "utils.hxx"
-
 #include "ptk/ptk-utils.hxx"
+
+#include "settings.hxx"
 
 void
 ptk_show_error(GtkWindow* parent, const std::string& title, const std::string& message)

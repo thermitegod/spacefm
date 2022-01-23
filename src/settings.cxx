@@ -13,8 +13,6 @@
 
 #include <vector>
 
-#include <regex>
-
 #include <iostream>
 #include <fstream>
 
@@ -177,10 +175,7 @@ parse_general_settings(std::string& line)
     if (sep == std::string::npos)
         return;
 
-    // remove leading spaces
-    line = std::regex_replace(line, std::regex("^ +"), "");
-    // remove tailing spaces
-    line = std::regex_replace(line, std::regex(" +$"), "");
+    line = ztd::strip(line);
 
     if (line.at(0) == '#')
         return;
@@ -231,10 +226,7 @@ parse_window_state(std::string& line)
     if (sep == std::string::npos)
         return;
 
-    // remove leading spaces
-    line = std::regex_replace(line, std::regex("^ +"), "");
-    // remove tailing spaces
-    line = std::regex_replace(line, std::regex(" +$"), "");
+    line = ztd::strip(line);
 
     if (line.at(0) == '#')
         return;
@@ -265,10 +257,7 @@ parse_interface_settings(std::string& line)
     if (sep == std::string::npos)
         return;
 
-    // remove leading spaces
-    line = std::regex_replace(line, std::regex("^ +"), "");
-    // remove tailing spaces
-    line = std::regex_replace(line, std::regex(" +$"), "");
+    line = ztd::strip(line);
 
     if (line.at(0) == '#')
         return;
@@ -297,10 +286,7 @@ parse_conf(std::string& etc_path, std::string& line)
     if (sep == std::string::npos)
         return;
 
-    // remove leading spaces
-    line = std::regex_replace(line, std::regex("^ +"), "");
-    // remove tailing spaces
-    line = std::regex_replace(line, std::regex(" +$"), "");
+    line = ztd::strip(line);
 
     if (line.at(0) == '#')
         return;
@@ -1154,10 +1140,7 @@ xset_parse(std::string& line)
     if (sep2 == std::string::npos)
         return;
 
-    // remove leading spaces
-    line = std::regex_replace(line, std::regex("^ +"), "");
-    // remove tailing spaces
-    line = std::regex_replace(line, std::regex(" +$"), "");
+    line = ztd::strip(line);
 
     if (line.at(0) == '#')
         return;
@@ -3948,18 +3931,16 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     }
     // replacements
     const std::string quoted_path = bash_quote(path);
-#if 0
-    if (strstr(editor.c_str(), "%f"))
+    if (ztd::contains(editor, "%f"))
         editor = ztd::replace(editor, "%f", quoted_path.c_str());
-    else if (strstr(editor.c_str(), "%F"))
+    else if (ztd::contains(editor, "%F"))
         editor = ztd::replace(editor, "%F", quoted_path.c_str());
-    else if (strstr(editor.c_str(), "%u"))
+    else if (ztd::contains(editor, "%u"))
         editor = ztd::replace(editor, "%u", quoted_path.c_str());
-    else if (strstr(editor.c_str(), "%U"))
+    else if (ztd::contains(editor, "%U"))
         editor = ztd::replace(editor, "%U", quoted_path.c_str());
     else
         editor = fmt::format("{} {}", editor, quoted_path);
-#endif
     editor = fmt::format("{} {}", editor, quoted_path);
 
     // task

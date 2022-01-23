@@ -18,7 +18,6 @@
 
 #include "main-window.hxx"
 
-#include "utils.hxx"
 #include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-location-view.hxx"
 
