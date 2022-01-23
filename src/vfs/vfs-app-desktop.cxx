@@ -22,6 +22,8 @@
 
 #include "vfs/vfs-app-desktop.hxx"
 
+#include "utils.hxx"
+
 static const char desktop_entry_name[] = "Desktop Entry";
 
 /*
@@ -239,14 +241,14 @@ vfs_app_desktop_uses_startup_notify(VFSAppDesktop* app)
  * paths of the files passed to app.
  * returned char* should be freed when no longer needed.
  */
-static char*
+static std::string
 translate_app_exec_to_command_line(VFSAppDesktop* app, GList* file_list)
 {
     const char* pexec = vfs_app_desktop_get_exec(app);
     char* file;
     GList* l;
-    char* tmp;
-    GString* cmd = g_string_new("");
+    std::string tmp;
+    std::string cmd = "";
     bool add_files = false;
 
     for (; *pexec; ++pexec)
@@ -291,10 +293,8 @@ translate_app_exec_to_command_line(VFSAppDesktop* app, GList* file_list)
                     for (l = file_list; l; l = l->next)
                     {
                         file = (char*)l->data;
-                        tmp = g_shell_quote(file);
-                        g_string_append(cmd, tmp);
-                        g_string_append_c(cmd, ' ');
-                        g_free(tmp);
+                        cmd.append(bash_quote(file));
+                        cmd.append(" ");
                     }
                     add_files = true;
                     break;
@@ -304,9 +304,7 @@ translate_app_exec_to_command_line(VFSAppDesktop* app, GList* file_list)
                     if (file_list && file_list->data)
                     {
                         file = (char*)file_list->data;
-                        tmp = g_shell_quote(file);
-                        g_string_append(cmd, tmp);
-                        g_free(tmp);
+                        cmd.append(bash_quote(file));
                         add_files = true;
                     }
                     break;
@@ -314,11 +312,8 @@ translate_app_exec_to_command_line(VFSAppDesktop* app, GList* file_list)
                     for (l = file_list; l; l = l->next)
                     {
                         tmp = g_path_get_dirname((char*)l->data);
-                        file = g_shell_quote(tmp);
-                        g_free(tmp);
-                        g_string_append(cmd, file);
-                        g_string_append_c(cmd, ' ');
-                        g_free(file);
+                        cmd.append(bash_quote(tmp));
+                        cmd.append(" ");
                     }
                     add_files = true;
                     break;
@@ -326,22 +321,19 @@ translate_app_exec_to_command_line(VFSAppDesktop* app, GList* file_list)
                     if (file_list && file_list->data)
                     {
                         tmp = g_path_get_dirname((char*)file_list->data);
-                        file = g_shell_quote(tmp);
-                        g_free(tmp);
-                        g_string_append(cmd, file);
-                        g_free(tmp);
+                        cmd.append(bash_quote(file));
                         add_files = true;
                     }
                     break;
                 case 'c':
-                    g_string_append(cmd, vfs_app_desktop_get_disp_name(app));
+                    cmd.append(vfs_app_desktop_get_disp_name(app));
                     break;
                 case 'i':
                     /* Add icon name */
                     if (vfs_app_desktop_get_icon_name(app))
                     {
-                        g_string_append(cmd, "--icon ");
-                        g_string_append(cmd, vfs_app_desktop_get_icon_name(app));
+                        cmd.append("--icon ");
+                        cmd.append(vfs_app_desktop_get_icon_name(app));
                     }
                     break;
                 case 'k':
@@ -351,35 +343,29 @@ translate_app_exec_to_command_line(VFSAppDesktop* app, GList* file_list)
                     /* Device name */
                     break;
                 case '%':
-                    g_string_append_c(cmd, '%');
+                    cmd.append("%");
                     break;
                 case '\0':
-                    goto _finish;
                     break;
                 default:
                     break;
             }
         }
         else /* not % escaped part */
-        {
-            g_string_append_c(cmd, *pexec);
-        }
+            cmd.append(fmt::format("{}", (char)*pexec));
     }
-_finish:
     if (!add_files)
     {
-        g_string_append_c(cmd, ' ');
+        cmd.append(" ");
         for (l = file_list; l; l = l->next)
         {
             file = (char*)l->data;
-            tmp = g_shell_quote(file);
-            g_string_append(cmd, tmp);
-            g_string_append_c(cmd, ' ');
-            g_free(tmp);
+            cmd.append(bash_quote(file));
+            cmd.append(" ");
         }
     }
 
-    return g_string_free(cmd, false);
+    return cmd;
 }
 
 static void
@@ -403,7 +389,7 @@ vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSAppDes
                            GList* file_paths, GError** err)
 {
     char* exec = nullptr;
-    char* cmd;
+    std::string cmd;
     GList* l;
     char** argv = nullptr;
     int argc = 0;
@@ -433,16 +419,16 @@ vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSAppDes
         if (vfs_app_desktop_open_multiple_files(app))
         {
             cmd = translate_app_exec_to_command_line(app, file_paths);
-            if (cmd)
+            if (!cmd.empty())
             {
                 if (vfs_app_desktop_open_in_terminal(app))
                     exec_in_terminal(sn_desc,
                                      app->path && app->path[0] ? app->path : working_dir,
-                                     cmd);
+                                     cmd.c_str());
                 else
                 {
                     // LOG_DEBUG("Execute: {}", cmd);
-                    if (g_shell_parse_argv(cmd, &argc, &argv, nullptr))
+                    if (g_shell_parse_argv(cmd.c_str(), &argc, &argv, nullptr))
                     {
                         vfs_exec_on_screen(screen,
                                            app->path && app->path[0] ? app->path : working_dir,
@@ -455,7 +441,6 @@ vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSAppDes
                         g_strfreev(argv);
                     }
                 }
-                g_free(cmd);
             }
         }
         else
@@ -477,16 +462,16 @@ vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSAppDes
                 }
                 cmd = translate_app_exec_to_command_line(app, single);
                 g_list_free(single);
-                if (cmd)
+                if (!cmd.empty())
                 {
                     if (vfs_app_desktop_open_in_terminal(app))
                         exec_in_terminal(sn_desc,
                                          app->path && app->path[0] ? app->path : working_dir,
-                                         cmd);
+                                         cmd.c_str());
                     else
                     {
                         // LOG_DEBUG("Execute: {}", cmd);
-                        if (g_shell_parse_argv(cmd, &argc, &argv, nullptr))
+                        if (g_shell_parse_argv(cmd.c_str(), &argc, &argv, nullptr))
                         {
                             vfs_exec_on_screen(screen,
                                                app->path && app->path[0] ? app->path : working_dir,
@@ -501,7 +486,6 @@ vfs_app_desktop_open_files(GdkScreen* screen, const char* working_dir, VFSAppDes
                             g_strfreev(argv);
                         }
                     }
-                    g_free(cmd);
                 }
             } while ((l = l ? l->next : nullptr));
         }
