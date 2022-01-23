@@ -98,7 +98,6 @@ vfs_app_desktop_new(const char* file_name)
 static void
 vfs_app_desktop_free(VFSAppDesktop* desktop)
 {
-    g_free(desktop->icon_name);
     g_free(desktop->path);
     g_free(desktop->full_path);
 
@@ -137,7 +136,7 @@ vfs_app_desktop_get_exec(VFSAppDesktop* desktop)
 const char*
 vfs_app_desktop_get_icon_name(VFSAppDesktop* desktop)
 {
-    return desktop->icon_name;
+    return desktop->icon_name.c_str();
 }
 
 GdkPixbuf*
@@ -146,10 +145,10 @@ vfs_app_desktop_get_icon(VFSAppDesktop* desktop, int size)
     GtkIconTheme* theme;
     GdkPixbuf* icon = nullptr;
 
-    if (desktop->icon_name)
+    if (desktop->icon_name.c_str())
     {
         theme = gtk_icon_theme_get_default();
-        icon = vfs_load_icon(theme, desktop->icon_name, size);
+        icon = vfs_load_icon(theme, desktop->icon_name.c_str(), size);
     }
 
     // fallback to generic icon
