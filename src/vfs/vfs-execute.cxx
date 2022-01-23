@@ -23,9 +23,10 @@
 #include <time.h>
 #endif
 
-#include "vfs/vfs-execute.hxx"
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
 
-#include "logger.hxx"
+#include "vfs/vfs-execute.hxx"
 
 #ifdef HAVE_SN
 static bool

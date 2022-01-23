@@ -11,6 +11,9 @@
 #include <string>
 #include <filesystem>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-file-misc.hxx"
 #include "ptk/ptk-utils.hxx"
@@ -18,8 +21,6 @@
 #include "utils.hxx"
 
 #include "ptk/ptk-clipboard.hxx"
-
-#include "logger.hxx"
 
 static GdkDragAction clipboard_action = GDK_ACTION_DEFAULT;
 static GList* clipboard_file_list = nullptr;

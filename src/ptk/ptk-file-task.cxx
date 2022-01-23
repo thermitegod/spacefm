@@ -12,9 +12,11 @@
 
 #include <sys/wait.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "main-window.hxx"
 #include "utils.hxx"
-#include "logger.hxx"
 
 #include "ptk/ptk-file-task.hxx"
 

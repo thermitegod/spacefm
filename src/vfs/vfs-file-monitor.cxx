@@ -20,7 +20,8 @@
 
 #include <linux/limits.h>
 
-#include "logger.hxx"
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
 
 #include "vfs/vfs-file-monitor.hxx"
 

@@ -10,6 +10,9 @@
  *
  */
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 // sfm breaks vfs independence for exec_in_terminal
 #include "ptk/ptk-file-task.hxx"
 
@@ -18,8 +21,6 @@
 #include "vfs/vfs-user-dir.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
-
-#include "logger.hxx"
 
 static const char desktop_entry_name[] = "Desktop Entry";
 

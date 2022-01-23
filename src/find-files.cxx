@@ -35,6 +35,9 @@
 
 #include <exo/exo.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "window-reference.hxx"
 
 #include "vfs/vfs-volume.hxx"
@@ -45,7 +48,6 @@
 #include "ptk/ptk-file-misc.hxx"
 #include "ptk/ptk-utils.hxx"
 
-#include "logger.hxx"
 #include "find-files.hxx"
 
 enum FindFilesCol

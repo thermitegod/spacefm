@@ -14,10 +14,12 @@
 
 #include <sys/stat.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "vfs/vfs-user-dir.hxx"
 
 #include "vfs/vfs-file-trash.hxx"
-//#include "logger.hxx"
 
 Trash* Trash::m_instance = nullptr;
 

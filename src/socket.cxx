@@ -12,10 +12,12 @@
 
 #include <linux/kdev_t.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "vfs/vfs-user-dir.hxx"
 
 #include "main-window.hxx"
-#include "logger.hxx"
 
 #include "socket.hxx"
 

@@ -32,14 +32,15 @@
 #include <libffmpegthumbnailer/imagetypes.h>
 #include <libffmpegthumbnailer/videothumbnailer.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "vfs/vfs-user-dir.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 
 #ifdef USE_XXHASH
 #include "xxhash.h"
 #endif
-
-#include "logger.hxx"
 
 enum VFSThumbnailSize
 {

@@ -14,6 +14,9 @@
 
 #include <exo/exo.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "ptk/ptk-utils.hxx"
 #include "ptk/ptk-file-misc.hxx"
 
@@ -30,8 +33,6 @@
 #include "main-window.hxx"
 
 #include "vfs/vfs-user-dir.hxx"
-
-#include "logger.hxx"
 
 #include "utils.hxx"
 

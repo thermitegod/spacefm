@@ -1,2 +1,3 @@
-#!/bin/sh
-find ./src -iname *.h -o -iname *.c -o -iname *.hxx -o -iname *.cxx -o -iname *.ixx | xargs clang-format -i
+#!/bin/bash
+
+find src/ -iname '*.cxx' -o -iname '*.hxx' | xargs clang-format -i

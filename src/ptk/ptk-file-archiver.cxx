@@ -10,11 +10,13 @@
  *
  */
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "ptk/ptk-file-archiver.hxx"
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-handler.hxx"
 
-#include "logger.hxx"
 #include "settings.hxx"
 
 #include "autosave.hxx"

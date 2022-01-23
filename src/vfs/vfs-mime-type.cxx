@@ -15,12 +15,14 @@
 
 #include <gtk/gtk.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-file-monitor.hxx"
 
 #include "vfs/vfs-utils.hxx"
 
-#include "logger.hxx"
 
 static GHashTable* mime_hash = nullptr;
 static GRWLock mime_hash_lock;

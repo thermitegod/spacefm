@@ -16,6 +16,9 @@
 
 #include <malloc.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "ptk/ptk-location-view.hxx"
 
 #include "main-window.hxx"
@@ -30,7 +33,6 @@
 
 #include "autosave.hxx"
 #include "utils.hxx"
-#include "logger.hxx"
 
 /* FIXME: statvfs support should be moved to src/vfs */
 #include <sys/statvfs.h>

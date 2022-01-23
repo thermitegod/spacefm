@@ -12,6 +12,9 @@
 #include <string>
 #include <filesystem>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "main-window.hxx"
 #include "window-reference.hxx"
 
@@ -31,7 +34,6 @@
 #include "socket.hxx"
 #include "settings.hxx"
 
-#include "logger.hxx"
 #include "utils.hxx"
 
 static bool folder_initialized = false;
@@ -347,7 +349,8 @@ tmp_clean()
 int
 main(int argc, char* argv[])
 {
-    SpaceFM::Logger::Init();
+    // logging init
+    ztd::Logger->initialize();
 
     // load spacefm.conf
     load_conf();
@@ -441,6 +444,8 @@ main(int argc, char* argv[])
 
     // start autosave thread
     autosave_init();
+
+    std::atexit(ztd::Logger->shutdown);
 
     main_window_event(nullptr, nullptr, "evt_start", 0, 0, nullptr, 0, 0, 0, false);
 

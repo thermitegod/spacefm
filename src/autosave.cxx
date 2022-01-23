@@ -12,8 +12,10 @@
 #include <future>
 #include <chrono>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "settings.hxx"
-//#include "logger.hxx"
 #include "autosave.hxx"
 
 struct AutoSave

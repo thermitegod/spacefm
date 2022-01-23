@@ -31,6 +31,9 @@
 
 #include <exo/exo.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "settings.hxx"
 #include "main-window.hxx"
 #include "item-prop.hxx"
@@ -38,7 +41,6 @@
 #include "autosave.hxx"
 #include "extern.hxx"
 #include "utils.hxx"
-#include "logger.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-utils.hxx"

@@ -20,6 +20,9 @@
 #include <fcntl.h>
 #include <utime.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "main-window.hxx"
 #include "vfs/vfs-volume.hxx"
 
@@ -27,8 +30,6 @@
 
 #include "vfs/vfs-file-task.hxx"
 #include "vfs/vfs-file-trash.hxx"
-
-#include "logger.hxx"
 
 const mode_t chmod_flags[] = {S_IRUSR,
                               S_IWUSR,

@@ -16,12 +16,13 @@
 
 #include <exo/exo.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "item-prop.hxx"
 #include "utils.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
-
-#include "logger.hxx"
 
 const char* enter_command_use =
     "Enter program or bash command line(s):\n\nUse:\n\t%F\tselected files  or  %f first "

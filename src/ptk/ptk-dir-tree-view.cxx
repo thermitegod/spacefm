@@ -13,7 +13,8 @@
 #include <string>
 #include <filesystem>
 
-#include "logger.hxx"
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
 
 #include "ptk/ptk-dir-tree.hxx"
 #include "ptk/ptk-file-menu.hxx"

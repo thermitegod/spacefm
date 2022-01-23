@@ -29,7 +29,8 @@
 #include <fcntl.h>
 #include <fnmatch.h>
 
-#include "logger.hxx"
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
 
 #include "mime-cache.hxx"
 

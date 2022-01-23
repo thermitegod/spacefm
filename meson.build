@@ -127,24 +127,25 @@ endforeach
 
 # preprocessor related - end
 
-lib_math = meson.get_compiler('c').find_library('libm', required : true)
-lib_libbsd = meson.get_compiler('c').find_library('libbsd', required : true)
-lib_udev = meson.get_compiler('c').find_library('libudev', required : true)
-lib_ffmpeg = meson.get_compiler('c').find_library('libffmpegthumbnailer', required : true)
+libztd_dep = dependency('ztd', required : true)
 
-dep_exo = dependency('exo-2')
-dep_x11 = dependency('x11')
-dep_glib = dependency('glib-2.0')
-dep_gtk = dependency('gtk+-3.0')
-dep_spdlog = dependency('spdlog')
-dep_fmt = dependency('fmt')
+libudev_dep = dependency('libudev', required : true)
+libffmpegthumbnailer_dep = dependency('libffmpegthumbnailer', required : true)
+
+exo_dep = dependency('exo-2', required : true)
+x11_dep = dependency('x11', required : true)
+spdlog_dep = dependency('spdlog', required : true)
+fmt_dep = dependency('fmt', required : true)
+sigc_dep = dependency('sigc++-3.0', required : true)
+
+gtk_dep = dependency('gtk+-3.0', required : true)
+glib_dep = dependency('glib-2.0', required : true)
 
 
 sources = [
   'src/autosave.cxx',
   'src/find-files.cxx',
   'src/item-prop.cxx',
-  'src/logger.cxx',
   'src/main.cxx',
   'src/main-window.cxx',
   'src/pref-dialog.cxx',
@@ -208,17 +209,22 @@ spacefm = build_target(
   install : true,
   install_dir : bindir,
   dependencies: [
-    dep_glib,
-    dep_gtk,
-    dep_x11,
-    dep_exo,
-    dep_spdlog,
-    dep_fmt,
-    lib_math,
-    lib_libbsd,
-    lib_udev,
-    lib_ffmpeg,
+    glib_dep,
+    gtk_dep,
+
+    x11_dep,
+    exo_dep,
+
     lib_xxhash,
+
+    spdlog_dep,
+    fmt_dep,
+    sigc_dep,
+
+    libudev_dep,
+    libffmpegthumbnailer_dep,
+
+    libztd_dep,
   ],
   cpp_pch: 'pch/cxx_pch.hxx',
 )

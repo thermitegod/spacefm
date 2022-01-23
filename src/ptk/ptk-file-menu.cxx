@@ -19,6 +19,9 @@
 #include "ptk/ptk-file-menu.hxx"
 #include <glib.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dir.hxx"
 
@@ -32,8 +35,6 @@
 #include "main-window.hxx"
 #include "ptk/ptk-location-view.hxx"
 #include "ptk/ptk-file-list.hxx"
-
-#include "logger.hxx"
 
 #include "utils.hxx"
 

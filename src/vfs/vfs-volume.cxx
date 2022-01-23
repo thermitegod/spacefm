@@ -19,12 +19,14 @@
 #include <fcntl.h>
 #include <linux/kdev_t.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "main-window.hxx"
 
 #include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-location-view.hxx"
 
-#include "logger.hxx"
 #include "utils.hxx"
 
 #include "vfs/vfs-user-dir.hxx"

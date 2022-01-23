@@ -12,11 +12,12 @@
 
 #include <ctime>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "ptk/ptk-file-list.hxx"
 
 #include "vfs/vfs-thumbnail-loader.hxx"
-
-#include "logger.hxx"
 
 static void ptk_file_list_init(PtkFileList* list);
 

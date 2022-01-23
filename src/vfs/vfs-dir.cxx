@@ -14,6 +14,9 @@
 
 #include <fcntl.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #if defined(__GLIBC__)
 #include <malloc.h>
 #endif
@@ -24,8 +27,6 @@
 
 #include "vfs/vfs-user-dir.hxx"
 #include "vfs/vfs-dir.hxx"
-
-#include "logger.hxx"
 
 static void vfs_dir_class_init(VFSDirClass* klass);
 static void vfs_dir_init(VFSDir* dir);

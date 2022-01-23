@@ -11,10 +11,12 @@
 
 #include <fcntl.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "settings.hxx"
 #include "extern.hxx"
 
-#include "logger.hxx"
 #include "utils.hxx"
 
 void
