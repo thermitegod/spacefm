@@ -1936,7 +1936,7 @@ query_overwrite(PtkFileTask* ptask)
     else
         from_disp = "Copying from directory:";
 
-    different_files = (0 != ptask->task->current_file.compare(ptask->task->current_dest));
+    different_files = (!ztd::same(ptask->task->current_file, ptask->task->current_dest));
 
     lstat(ptask->task->current_file.c_str(), &src_stat);
     lstat(ptask->task->current_dest.c_str(), &dest_stat);

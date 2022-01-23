@@ -196,31 +196,31 @@ parse_general_settings(std::string& line)
     if (value.empty())
         return;
 
-    if (!token.compare("show_thumbnail"))
+    if (ztd::same(token, "show_thumbnail"))
         app_settings.show_thumbnail = std::stoi(value);
-    else if (!token.compare("max_thumb_size"))
+    else if (ztd::same(token, "max_thumb_size"))
         app_settings.max_thumb_size = std::stoi(value) << 10;
-    else if (!token.compare("big_icon_size"))
+    else if (ztd::same(token, "big_icon_size"))
         app_settings.big_icon_size = std::stoi(value);
-    else if (!token.compare("small_icon_size"))
+    else if (ztd::same(token, "small_icon_size"))
         app_settings.small_icon_size = std::stoi(value);
-    else if (!token.compare("tool_icon_size"))
+    else if (ztd::same(token, "tool_icon_size"))
         app_settings.tool_icon_size = std::stoi(value);
-    else if (!token.compare("single_click"))
+    else if (ztd::same(token, "single_click"))
         app_settings.single_click = std::stoi(value);
-    else if (!token.compare("no_single_hover"))
+    else if (ztd::same(token, "no_single_hover"))
         app_settings.no_single_hover = std::stoi(value);
-    else if (!token.compare("sort_order"))
+    else if (ztd::same(token, "sort_order"))
         app_settings.sort_order = std::stoi(value);
-    else if (!token.compare("sort_type"))
+    else if (ztd::same(token, "sort_type"))
         app_settings.sort_type = std::stoi(value);
-    else if (!token.compare("use_si_prefix"))
+    else if (ztd::same(token, "use_si_prefix"))
         app_settings.use_si_prefix = std::stoi(value);
-    else if (!token.compare("no_execute"))
+    else if (ztd::same(token, "no_execute"))
         app_settings.no_execute = std::stoi(value);
-    else if (!token.compare("no_confirm"))
+    else if (ztd::same(token, "no_confirm"))
         app_settings.no_confirm = std::stoi(value);
-    else if (!token.compare("no_confirm_trash"))
+    else if (ztd::same(token, "no_confirm_trash"))
         app_settings.no_confirm_trash = std::stoi(value);
 }
 
@@ -250,11 +250,11 @@ parse_window_state(std::string& line)
     if (value.empty())
         return;
 
-    if (!token.compare("width"))
+    if (ztd::same(token, "width"))
         app_settings.width = std::stoi(value);
-    else if (!token.compare("height"))
+    else if (ztd::same(token, "height"))
         app_settings.height = std::stoi(value);
-    else if (!token.compare("maximized"))
+    else if (ztd::same(token, "maximized"))
         app_settings.maximized = std::stoi(value);
 }
 
@@ -284,9 +284,9 @@ parse_interface_settings(std::string& line)
     if (value.empty())
         return;
 
-    if (!token.compare("always_show_tabs"))
+    if (ztd::same(token, "always_show_tabs"))
         app_settings.always_show_tabs = std::stoi(value);
-    else if (!token.compare("show_close_tab_buttons"))
+    else if (ztd::same(token, "show_close_tab_buttons"))
         app_settings.show_close_tab_buttons = std::stoi(value);
 }
 
@@ -319,18 +319,18 @@ parse_conf(std::string& etc_path, std::string& line)
     // LOG_INFO("token {}", token);
     // LOG_INFO("value {}", value);
 
-    if (!token.compare("terminal_su") || !token.compare("graphical_su"))
+    if (ztd::same(token, "terminal_su") || ztd::same(token, "graphical_su"))
     {
         if (value.at(0) != '/' || !std::filesystem::exists(value))
             LOG_WARN("{}: {} '{}' file not found", etc_path, token, value);
-        else if (!token.compare("terminal_su"))
+        else if (ztd::same(token, "terminal_su"))
             config_settings.terminal_su = value.c_str();
     }
-    else if (!token.compare("font_view_icon"))
+    else if (ztd::same(token, "font_view_icon"))
         config_settings.font_view_icon = value.c_str();
-    else if (!token.compare("font_view_compact"))
+    else if (ztd::same(token, "font_view_compact"))
         config_settings.font_view_compact = value.c_str();
-    else if (!token.compare("font_general"))
+    else if (ztd::same(token, "font_general"))
         config_settings.font_general = value.c_str();
 }
 
@@ -458,13 +458,13 @@ load_settings(const char* config_dir)
 
                 if (line.at(0) == '[')
                 {
-                    if (!line.compare("[General]"))
+                    if (ztd::same(line, "[General]"))
                         func = &parse_general_settings;
-                    else if (!line.compare("[Window]"))
+                    else if (ztd::same(line, "[Window]"))
                         func = &parse_window_state;
-                    else if (!line.compare("[Interface]"))
+                    else if (ztd::same(line, "[Interface]"))
                         func = &parse_interface_settings;
-                    else if (!line.compare("[MOD]"))
+                    else if (ztd::same(line, "[MOD]"))
                         func = &xset_parse;
                     else
                         func = nullptr;
@@ -1177,7 +1177,7 @@ xset_parse(std::string& line)
     if (token.substr(0, 5) == "cstm_" || token.substr(0, 5) == "hand_")
     {
         // custom
-        if (!token.compare(set_last->name))
+        if (ztd::same(token, set_last->name))
             xset_set_set_int(set_last, token_var.c_str(), value.c_str());
         else
         {
@@ -1190,7 +1190,7 @@ xset_parse(std::string& line)
     else
     {
         // normal (lock)
-        if (!token.compare(set_last->name))
+        if (ztd::same(token, set_last->name))
             xset_set_set_int(set_last, token_var.c_str(), value.c_str());
         else
             set_last = xset_set(token.c_str(), token_var.c_str(), value.c_str());
@@ -2739,7 +2739,7 @@ xset_import_plugin(const char* plug_dir, int* use)
 
             if (line.at(0) == '[')
             {
-                if (!line.compare("[Plugin]"))
+                if (ztd::same(line, "[Plugin]"))
                     func = true;
                 else
                     func = false;
@@ -2757,7 +2757,7 @@ xset_import_plugin(const char* plug_dir, int* use)
 
                 if (use && *use == PLUGIN_USE_NORMAL)
                 {
-                    if (!token.compare("main_book-child"))
+                    if (ztd::same(token, "main_book-child"))
                     {
                         // This plugin is an export of all bookmarks
                         *use = PLUGIN_USE_BOOKMARKS;

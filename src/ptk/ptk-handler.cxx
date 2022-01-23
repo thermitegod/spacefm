@@ -833,7 +833,7 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
                 if (start)
                 {
                     // skip script header
-                    if (!line.compare(script_header))
+                    if (ztd::same(line, script_header))
                         continue;
 
                     start = false;
