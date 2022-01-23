@@ -50,26 +50,35 @@ vfs_app_desktop_new(const char* file_name)
     if (g_path_is_absolute(file_name))
     {
         desktop->file_name = g_path_get_basename(file_name);
-        desktop->full_path = g_strdup(file_name);
+        desktop->full_path = file_name;
         load = g_key_file_load_from_file(file, file_name, G_KEY_FILE_NONE, nullptr);
     }
     else
     {
         desktop->file_name = file_name;
         relative_path = g_build_filename("applications", desktop->file_name.c_str(), nullptr);
+        char* full_path;
         load = g_key_file_load_from_data_dirs(file,
                                               relative_path,
-                                              &desktop->full_path,
+                                              &full_path,
                                               G_KEY_FILE_NONE,
                                               nullptr);
+        if (full_path)
+        {
+            desktop->full_path = full_path;
+            g_free(full_path);
+        }
         g_free(relative_path);
 
         if (!load)
         {
             // some desktop files are in subdirs of data dirs (out of spec)
-            if ((desktop->full_path = mime_type_locate_desktop_file(nullptr, file_name)))
-                load =
-                    g_key_file_load_from_file(file, desktop->full_path, G_KEY_FILE_NONE, nullptr);
+            desktop->full_path = mime_type_locate_desktop_file(nullptr, file_name);
+            if (!desktop->full_path.empty())
+                load = g_key_file_load_from_file(file,
+                                                 desktop->full_path.c_str(),
+                                                 G_KEY_FILE_NONE,
+                                                 nullptr);
         }
     }
 
@@ -98,9 +107,6 @@ vfs_app_desktop_new(const char* file_name)
 static void
 vfs_app_desktop_free(VFSAppDesktop* desktop)
 {
-    g_free(desktop->path);
-    g_free(desktop->full_path);
-
     g_slice_free(VFSAppDesktop, desktop);
 }
 
@@ -131,6 +137,12 @@ const char*
 vfs_app_desktop_get_exec(VFSAppDesktop* desktop)
 {
     return desktop->exec.c_str();
+}
+
+const char*
+vfs_app_desktop_get_full_path(VFSAppDesktop* desktop)
+{
+    return desktop->full_path.c_str();
 }
 
 const char*

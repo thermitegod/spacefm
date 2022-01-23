@@ -26,7 +26,7 @@ struct VFSAppDesktop
     std::string exec;
     std::string icon_name;
     char* path;      // working dir
-    char* full_path; // path of desktop file
+    std::string full_path;
     bool terminal : 1;
     bool hidden : 1;
     bool startup : 1;
@@ -52,6 +52,8 @@ const char* vfs_app_desktop_get_name(VFSAppDesktop* desktop);
 const char* vfs_app_desktop_get_disp_name(VFSAppDesktop* desktop);
 
 const char* vfs_app_desktop_get_exec(VFSAppDesktop* desktop);
+
+const char* vfs_app_desktop_get_full_path(VFSAppDesktop* desktop);
 
 GdkPixbuf* vfs_app_desktop_get_icon(VFSAppDesktop* desktop, int size);
 

@@ -3435,7 +3435,7 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
             screen = gdk_screen_get_default();
 
         LOG_INFO("EXEC({})={}",
-                 desktop->full_path ? desktop->full_path : app_desktop,
+                 vfs_app_desktop_get_full_path(desktop),
                  vfs_app_desktop_get_exec(desktop));
         GError* err = nullptr;
         if (!vfs_app_desktop_open_files(screen, parent->cwd, desktop, files, &err))
