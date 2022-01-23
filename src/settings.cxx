@@ -1871,7 +1871,7 @@ xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
             if (set->icon)
                 icon_new = vfs_load_icon(icon_theme, set->icon, icon_size);
             if (!icon_new)
-                icon_new = vfs_app_desktop_get_icon(desktop, icon_size, true);
+                icon_new = vfs_app_desktop_get_icon(desktop, icon_size);
             if (desktop)
                 vfs_app_desktop_unref(desktop);
         }

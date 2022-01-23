@@ -52,7 +52,7 @@ const char* vfs_app_desktop_get_disp_name(VFSAppDesktop* desktop);
 
 const char* vfs_app_desktop_get_exec(VFSAppDesktop* desktop);
 
-GdkPixbuf* vfs_app_desktop_get_icon(VFSAppDesktop* desktop, int size, bool use_fallback);
+GdkPixbuf* vfs_app_desktop_get_icon(VFSAppDesktop* desktop, int size);
 
 const char* vfs_app_desktop_get_icon_name(VFSAppDesktop* desktop);
 

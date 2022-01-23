@@ -273,7 +273,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
                     if (desktop)
                     {
                         GdkPixbuf* icon;
-                        icon = vfs_app_desktop_get_icon(desktop, 20, true);
+                        icon = vfs_app_desktop_get_icon(desktop, 20);
                         gtk_list_store_insert_with_values(GTK_LIST_STORE(model),
                                                           &it,
                                                           0,
@@ -464,7 +464,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
                 GdkPixbuf* icon;
                 desktop = vfs_app_desktop_new(*action);
                 gtk_list_store_append(model, &it);
-                icon = vfs_app_desktop_get_icon(desktop, 20, true);
+                icon = vfs_app_desktop_get_icon(desktop, 20);
                 gtk_list_store_set(model,
                                    &it,
                                    0,

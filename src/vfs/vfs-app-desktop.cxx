@@ -140,73 +140,26 @@ vfs_app_desktop_get_icon_name(VFSAppDesktop* desktop)
     return desktop->icon_name;
 }
 
-static GdkPixbuf*
-load_icon_file(const char* file_name, int size)
-{
-    GdkPixbuf* icon = nullptr;
-    const char** dirs = (const char**)vfs_system_data_dir();
-    const char** dir;
-    for (dir = dirs; *dir; ++dir)
-    {
-        char* file_path = g_build_filename(*dir, "pixmaps", file_name, nullptr);
-        icon = gdk_pixbuf_new_from_file_at_scale(file_path, size, size, true, nullptr);
-        g_free(file_path);
-        if (icon)
-            break;
-    }
-    return icon;
-}
-
 GdkPixbuf*
-vfs_app_desktop_get_icon(VFSAppDesktop* desktop, int size, bool use_fallback)
+vfs_app_desktop_get_icon(VFSAppDesktop* desktop, int size)
 {
     GtkIconTheme* theme;
-    char* icon_name = nullptr;
-    char* suffix;
     GdkPixbuf* icon = nullptr;
 
     if (desktop->icon_name)
     {
-        if (g_path_is_absolute(desktop->icon_name))
-        {
-            icon = gdk_pixbuf_new_from_file_at_scale(desktop->icon_name, size, size, true, nullptr);
-        }
-        else
-        {
-            theme = gtk_icon_theme_get_default();
-            // sfm 1.0.6 changed strchr to strrchr [Teklad]
-            suffix = strrchr(desktop->icon_name, '.');
-            if (suffix) /* has file extension, it's a basename of icon file */
-            {
-                /* try to find it in pixmaps dirs */
-                icon = load_icon_file(desktop->icon_name, size);
-                if (G_UNLIKELY(!icon)) /* unfortunately, not found */
-                {
-                    /* Let's remove the suffix, and see if this name can match an icon
-                         in current icon theme */
-                    icon_name = g_strndup(desktop->icon_name, (suffix - desktop->icon_name));
-                    icon = vfs_load_icon(theme, icon_name, size);
-                    g_free(icon_name);
-                    icon_name = nullptr;
-                    if (!icon)
-                        // sfm 1.0.6 Try to lookup with full name instead. [Teklad]
-                        icon = vfs_load_icon(theme, desktop->icon_name, size);
-                }
-            }
-            else /* no file extension, it could be an icon name in the icon theme */
-            {
-                icon = vfs_load_icon(theme, desktop->icon_name, size);
-            }
-        }
+        theme = gtk_icon_theme_get_default();
+        icon = vfs_load_icon(theme, desktop->icon_name, size);
     }
-    if (G_UNLIKELY(!icon) && use_fallback) /* fallback to generic icon */
+
+    // fallback to generic icon
+    if (G_UNLIKELY(!icon))
     {
         theme = gtk_icon_theme_get_default();
         icon = vfs_load_icon(theme, "application-x-executable", size);
-        if (G_UNLIKELY(!icon)) /* fallback to generic icon */
-        {
+        // fallback to generic icon
+        if (G_UNLIKELY(!icon))
             icon = vfs_load_icon(theme, "gnome-mime-application-x-executable", size);
-        }
     }
     return icon;
 }

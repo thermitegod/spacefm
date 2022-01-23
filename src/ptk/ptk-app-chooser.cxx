@@ -104,7 +104,7 @@ add_list_item(GtkListStore* list, VFSAppDesktop* desktop)
                                             desktop->exec,
                                             desktop->terminal ? "\nTerminal=true" : "");
 
-    GdkPixbuf* icon = vfs_app_desktop_get_icon(desktop, 20, true);
+    GdkPixbuf* icon = vfs_app_desktop_get_icon(desktop, 20);
     gtk_list_store_append(list, &it);
     gtk_list_store_set(list,
                        &it,

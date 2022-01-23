@@ -730,13 +730,13 @@ vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
             vfs_mime_type_get_icon_size(&big_size, &small_size);
             if (!fi->big_thumbnail)
             {
-                icon = vfs_app_desktop_get_icon(desktop, big_size, false);
+                icon = vfs_app_desktop_get_icon(desktop, big_size);
                 if (G_LIKELY(icon))
                     fi->big_thumbnail = icon;
             }
             if (!fi->small_thumbnail)
             {
-                icon = vfs_app_desktop_get_icon(desktop, small_size, false);
+                icon = vfs_app_desktop_get_icon(desktop, small_size);
                 if (G_LIKELY(icon))
                     fi->small_thumbnail = icon;
             }
