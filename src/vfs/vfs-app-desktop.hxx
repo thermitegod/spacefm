@@ -32,7 +32,7 @@ class VFSAppDesktop
     const char* get_icon_name();
     bool use_terminal();
     bool open_multiple_files();
-    bool open_files(GdkScreen* screen, const char* working_dir,
+    bool open_files(GdkScreen* screen, const std::string& working_dir,
                     std::vector<std::string>& file_paths, GError** err);
 
   private:
@@ -48,6 +48,8 @@ class VFSAppDesktop
     bool startup{false};
 
     std::string translate_app_exec_to_command_line(std::vector<std::string>& file_list);
-    static void exec_in_terminal(const std::string& app_name, const std::string& cwd,
-                                 const std::string& cmd);
+    void exec_in_terminal(const std::string& app_name, const std::string& cwd,
+                          const std::string& cmd);
+    void exec_desktop(GdkScreen* screen, const std::string& working_dir,
+                      std::vector<std::string>& file_paths, GError** err);
 };

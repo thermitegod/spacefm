@@ -246,103 +246,72 @@ VFSAppDesktop::exec_in_terminal(const std::string& app_name, const std::string& 
 }
 
 bool
-VFSAppDesktop::open_files(GdkScreen* screen, const char* working_dir,
+VFSAppDesktop::open_files(GdkScreen* screen, const std::string& working_dir,
                           std::vector<std::string>& file_paths, GError** err)
 {
-    char* exec = nullptr;
-    std::string cmd;
-    GList* l;
-    char** argv = nullptr;
-    int argc = 0;
-    const char* sn_desc;
-
-    if (get_exec())
+    if (!get_exec())
     {
-        if (!strchr(get_exec(), '%'))
-        { /* No filename parameters */
-            exec = g_strconcat(get_exec(), " %f", nullptr);
-        }
-        else
-        {
-            exec = g_strdup(get_exec());
-        }
+        g_set_error(err,
+                    G_SPAWN_ERROR,
+                    G_SPAWN_ERROR_FAILED,
+                    "%s\n\n%s",
+                    "Command not found",
+                    get_name());
+        return false;
     }
 
-    if (exec)
+    if (!screen)
+        screen = gdk_screen_get_default();
+
+    if (open_multiple_files())
     {
-        if (!screen)
-            screen = gdk_screen_get_default();
-
-        sn_desc = get_disp_name();
-        if (!sn_desc)
-            sn_desc = exec;
-
-        if (open_multiple_files())
-        {
-            cmd = translate_app_exec_to_command_line(file_paths);
-            if (!cmd.empty())
-            {
-                if (use_terminal())
-                    exec_in_terminal(sn_desc, !path.empty() ? path : working_dir, cmd);
-                else
-                {
-                    // LOG_DEBUG("Execute: {}", cmd);
-                    if (g_shell_parse_argv(cmd.c_str(), &argc, &argv, nullptr))
-                    {
-                        vfs_exec_on_screen(screen,
-                                           !path.empty() ? path.c_str() : working_dir,
-                                           argv,
-                                           nullptr,
-                                           sn_desc,
-                                           (GSpawnFlags)VFS_EXEC_DEFAULT_FLAGS,
-                                           startup,
-                                           err);
-                        g_strfreev(argv);
-                    }
-                }
-            }
-        }
-        else
-        {
-            // app does not accept multiple files, so run multiple times
-            for (std::string open_file: file_paths)
-            {
-                std::vector<std::string> open_files;
-                open_files.push_back(open_file);
-
-                cmd = translate_app_exec_to_command_line(open_files);
-                if (!cmd.empty())
-                {
-                    if (use_terminal())
-                        exec_in_terminal(sn_desc, !path.empty() ? path : working_dir, cmd);
-                    else
-                    {
-                        // LOG_DEBUG("Execute: {}", cmd);
-                        if (g_shell_parse_argv(cmd.c_str(), &argc, &argv, nullptr))
-                        {
-                            vfs_exec_on_screen(screen,
-                                               !path.empty() ? path.c_str() : working_dir,
-                                               argv,
-                                               nullptr,
-                                               sn_desc,
-                                               (GSpawnFlags)VFS_EXEC_DEFAULT_FLAGS,
-                                               startup,
-                                               err);
-                            g_strfreev(argv);
-                        }
-                    }
-                }
-            }
-        }
-        g_free(exec);
-        return true;
+        exec_desktop(screen, working_dir, file_paths, err);
     }
+    else
+    {
+        // app does not accept multiple files, so run multiple times
+        for (std::string open_file: file_paths)
+        {
+            std::vector<std::string> open_files;
+            open_files.push_back(open_file);
 
-    g_set_error(err,
-                G_SPAWN_ERROR,
-                G_SPAWN_ERROR_FAILED,
-                "%s\n\n%s",
-                "Command not found",
-                get_name());
-    return false;
+            exec_desktop(screen, working_dir, open_files, err);
+        }
+    }
+    return true;
+}
+
+void
+VFSAppDesktop::exec_desktop(GdkScreen* screen, const std::string& working_dir,
+                            std::vector<std::string>& file_paths, GError** err)
+{
+    std::string cmd = translate_app_exec_to_command_line(file_paths);
+    std::string sn_desc = get_disp_name();
+
+    if (cmd.empty())
+        return;
+
+    // LOG_DEBUG("Execute: {}", cmd);
+
+    if (use_terminal())
+    {
+        exec_in_terminal(sn_desc, !path.empty() ? path : working_dir, cmd);
+    }
+    else
+    {
+        char** argv = nullptr;
+        int argc = 0;
+        if (g_shell_parse_argv(cmd.c_str(), &argc, &argv, nullptr))
+        {
+            vfs_exec_on_screen(screen,
+                               !path.empty() ? path.c_str() : working_dir.c_str(),
+                               argv,
+                               nullptr,
+                               sn_desc.c_str(),
+                               GSpawnFlags(VFS_EXEC_DEFAULT_FLAGS),
+                               startup,
+                               err);
+            g_strfreev(argv);
+        }
+    }
 }
