@@ -23,7 +23,6 @@ struct VFSAppDesktop
 {
     std::string file_name;
     std::string disp_name;
-    char* comment;
     std::string exec;
     char* icon_name;
     char* path;      // working dir

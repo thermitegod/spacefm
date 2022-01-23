@@ -77,7 +77,6 @@ vfs_app_desktop_new(const char* file_name)
     {
         // clang-format off
         desktop->disp_name = g_key_file_get_locale_string(file, desktop_entry_name, "Name", nullptr, nullptr);
-        desktop->comment = g_key_file_get_locale_string(file, desktop_entry_name, "Comment", nullptr, nullptr);
         desktop->exec = g_key_file_get_string(file, desktop_entry_name, "Exec", nullptr);
         desktop->icon_name = g_key_file_get_string(file, desktop_entry_name, "Icon", nullptr);
         desktop->terminal = g_key_file_get_boolean(file, desktop_entry_name, "Terminal", nullptr);
@@ -99,7 +98,6 @@ vfs_app_desktop_new(const char* file_name)
 static void
 vfs_app_desktop_free(VFSAppDesktop* desktop)
 {
-    g_free(desktop->comment);
     g_free(desktop->icon_name);
     g_free(desktop->path);
     g_free(desktop->full_path);
