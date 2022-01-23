@@ -5250,7 +5250,10 @@ ptk_file_browser_read_sort_extra(PtkFileBrowser* file_browser)
     if (!list)
         return;
 
+    list->sort_alphanum = xset_get_b_panel(file_browser->mypanel, "sort_extra");
+#if 0
     list->sort_natural = xset_get_b_panel(file_browser->mypanel, "sort_extra");
+#endif
     list->sort_case = xset_get_int_panel(file_browser->mypanel, "sort_extra", "x") == XSET_B_TRUE;
     list->sort_dir = xset_get_int_panel(file_browser->mypanel, "sort_extra", "y");
     list->sort_hidden_first =
@@ -5275,11 +5278,18 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, const char* setnam
     int panel = file_browser->mypanel;
     char* val = nullptr;
 
-    if (!strcmp(name, "natural"))
+    if (!strcmp(name, "alphanum"))
+    {
+        list->sort_alphanum = set->b == XSET_B_TRUE;
+        xset_set_b_panel(panel, "sort_extra", list->sort_alphanum);
+    }
+#if 0
+    else if (!strcmp(name, "natural"))
     {
         list->sort_natural = set->b == XSET_B_TRUE;
         xset_set_b_panel(panel, "sort_extra", list->sort_natural);
     }
+#endif
     else if (!strcmp(name, "case"))
     {
         list->sort_case = set->b == XSET_B_TRUE;

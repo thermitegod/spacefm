@@ -1,4 +1,4 @@
-.TH spacefm-socket 7 "December 2021"
+.TH spacefm-socket 7 "January 2022"
 
 .SH NAME
 .B spacefm-socket
@@ -125,6 +125,7 @@ Otherwise the current tab of the current panel in the last window is used.
  column_width                    name|size|type|permission|owner|modified WIDTH
  sort_by                         name|size|type|permission|owner|modified
  sort_ascend                     1|true|yes|0|false|no
+ sort_alphanum                   1|true|yes|0|false|no
  sort_natural                    1|true|yes|0|false|no
  sort_case                       1|true|yes|0|false|no
  sort_hidden_first               1|true|yes|0|false|no
@@ -326,7 +327,7 @@ As with all methods, by default the set method will apply to the current tab in 
     spacefm -s set sort_by size
     spacefm -s set sort_by name
     spacefm -s set sort_ascend false
-    spacefm -s set sort_natural true
+    spacefm -s set sort_alphanum true
     spacefm -s set sort_first folders
 
 .P

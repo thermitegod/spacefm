@@ -677,7 +677,33 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
         return result;
 
     // by display name
-    if (list->sort_natural)
+    if (list->sort_alphanum)
+    {
+        // TODO - option to enable/disable numbers first
+
+        // numbers before letters
+        bool num_a = isdigit(file_a->disp_name[0]);
+        bool num_b = isdigit(file_b->disp_name[0]);
+        if (num_a && !num_b)
+            result = -1;
+        else if (!num_a && num_b)
+            result = 1;
+        if (result != 0)
+            return result;
+
+        // alphanumeric
+        if (list->sort_case)
+        {
+            result = ztd::sort::alphanumeric(file_a->collate_key, file_b->collate_key);
+        }
+        else
+        {
+            result = ztd::sort::alphanumeric(file_a->collate_icase_key, file_b->collate_icase_key);
+        }
+    }
+#if 0
+    // TODO support both alphanum and natural sort
+    else if (list->sort_natural)
     {
         // natural
         if (list->sort_case)
@@ -685,6 +711,7 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
         else
             result = strcmp(file_a->collate_icase_key, file_b->collate_icase_key);
     }
+#endif
     else
     {
         // non-natural
@@ -780,7 +807,7 @@ ptk_file_list_file_created(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
             // disp_name matches ?
             // ptk_file_list_compare may return 0 on differing display names
             // if case-insensitive - need to compare filenames
-            if (list->sort_natural && list->sort_case)
+            if ((list->sort_alphanum || list->sort_natural) && list->sort_case)
                 return;
             else if (!strcmp(file->name, file2->name))
                 return;

@@ -487,11 +487,19 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     // this crashes if !browser->file_list so don't allow
     if (browser->file_list)
     {
+        set = xset_set_cb("sortx_alphanum", (GFunc)on_popup_sort_extra, browser);
+        set->b = PTK_FILE_LIST(browser->file_list)->sort_alphanum ? XSET_B_TRUE : XSET_B_FALSE;
+        set = xset_set_cb("sortx_case", (GFunc)on_popup_sort_extra, browser);
+        set->b = PTK_FILE_LIST(browser->file_list)->sort_case ? XSET_B_TRUE : XSET_B_FALSE;
+        set->disable = !PTK_FILE_LIST(browser->file_list)->sort_alphanum;
+
+#if 0
         set = xset_set_cb("sortx_natural", (GFunc)on_popup_sort_extra, browser);
         set->b = PTK_FILE_LIST(browser->file_list)->sort_natural ? XSET_B_TRUE : XSET_B_FALSE;
         set = xset_set_cb("sortx_case", (GFunc)on_popup_sort_extra, browser);
         set->b = PTK_FILE_LIST(browser->file_list)->sort_case ? XSET_B_TRUE : XSET_B_FALSE;
         set->disable = !PTK_FILE_LIST(browser->file_list)->sort_natural;
+#endif
 
         set = xset_set_cb("sortx_directories", (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, nullptr);

@@ -62,11 +62,13 @@ struct PtkFileList
 
     int sort_col;
     GtkSortType sort_order;
-    bool sort_natural;      // sfm
-    bool sort_case;         // sfm
-    bool sort_hidden_first; // sfm
-    char sort_dir;          // sfm
-    /* Random integer to check whether an iter belongs to our model */
+    bool sort_alphanum;
+    bool sort_natural;
+    bool sort_case;
+    bool sort_hidden_first;
+    char sort_dir;
+
+    // Random integer to check whether an iter belongs to our model
     int stamp;
 };
 

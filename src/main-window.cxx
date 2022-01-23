@@ -6168,6 +6168,11 @@ main_window_socket_command(char* argv[], char** reply)
                                                                      : GTK_SORT_DESCENDING);
                 return 0;
             }
+            else if (!strcmp(argv[i] + 5, "alphanum"))
+            {
+                str = g_strdup("sortx_alphanum");
+                xset_set_b(str, get_bool(argv[i + 1]));
+            }
             else if (!strcmp(argv[i] + 5, "natural"))
             {
                 str = g_strdup("sortx_natural");
@@ -6555,7 +6560,10 @@ main_window_socket_command(char* argv[], char** reply)
             if (!strcmp(argv[i] + 5, "ascend"))
                 *reply =
                     g_strdup_printf("%d\n", file_browser->sort_type == GTK_SORT_ASCENDING ? 1 : 0);
+#if 0
             else if (!strcmp(argv[i] + 5, "natural"))
+#endif
+            else if (!strcmp(argv[i] + 5, "alphanum"))
                 *reply =
                     g_strdup_printf("%d\n",
                                     xset_get_b_panel(file_browser->mypanel, "sort_extra") ? 1 : 0);

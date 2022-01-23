@@ -8687,7 +8687,7 @@ xset_defaults()
         set,
         XSET_SET_SET_DESC,
         "sortby_name sortby_size sortby_type sortby_perm sortby_owner sortby_date separator "
-        "sortby_ascend sortby_descend separator sortx_natural sortx_case separator "
+        "sortby_ascend sortby_descend separator sortx_alphanum sortx_case separator " // sortx_natural
         "sortx_directories sortx_files sortx_mix separator sortx_hidfirst sortx_hidlast");
 
     set = xset_set("sortby_name", "lbl", "_Name");
@@ -8707,8 +8707,12 @@ xset_defaults()
     set = xset_set("sortby_descend", "lbl", "_Descending");
     set->menu_style = XSET_MENU_RADIO;
 
+    set = xset_set("sortx_alphanum", "lbl", "Alphanumeric");
+    set->menu_style = XSET_MENU_CHECK;
+#if 0
     set = xset_set("sortx_natural", "lbl", "Nat_ural");
     set->menu_style = XSET_MENU_CHECK;
+#endif
     set = xset_set("sortx_case", "lbl", "_Case Sensitive");
     set->menu_style = XSET_MENU_CHECK;
     set = xset_set("sortx_directories", "lbl", "Directories Fi_rst");
