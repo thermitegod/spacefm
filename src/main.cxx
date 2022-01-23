@@ -492,8 +492,6 @@ open_file(const char* path)
         if (app_name)
         {
             VFSAppDesktop* desktop = vfs_app_desktop_new(app_name);
-            if (!vfs_app_desktop_get_exec(desktop))
-                desktop->exec = g_strdup(app_name); /* This is a command line */
             GList* files = g_list_prepend(nullptr, (void*)path);
             opened =
                 vfs_app_desktop_open_files(gdk_screen_get_default(), nullptr, desktop, files, &err);

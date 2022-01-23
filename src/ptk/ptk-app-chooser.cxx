@@ -101,7 +101,7 @@ add_list_item(GtkListStore* list, VFSAppDesktop* desktop)
     char* tooltip = g_markup_printf_escaped("%s\nName=%s\nExec=%s%s",
                                             desktop->full_path,
                                             vfs_app_desktop_get_disp_name(desktop),
-                                            desktop->exec,
+                                            vfs_app_desktop_get_exec(desktop),
                                             desktop->terminal ? "\nTerminal=true" : "");
 
     GdkPixbuf* icon = vfs_app_desktop_get_icon(desktop, 20);

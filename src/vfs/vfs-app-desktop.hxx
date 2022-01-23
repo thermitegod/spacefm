@@ -24,7 +24,7 @@ struct VFSAppDesktop
     std::string file_name;
     std::string disp_name;
     char* comment;
-    char* exec;
+    std::string exec;
     char* icon_name;
     char* path;      // working dir
     char* full_path; // path of desktop file

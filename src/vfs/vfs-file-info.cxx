@@ -634,8 +634,6 @@ vfs_file_info_open_file(VFSFileInfo* fi, const char* file_path, GError** err)
         if (app_name)
         {
             VFSAppDesktop* desktop = vfs_app_desktop_new(app_name);
-            if (!vfs_app_desktop_get_exec(desktop))
-                desktop->exec = g_strdup(app_name); /* FIXME: desktop->exec */
             GList* files = nullptr;
             files = g_list_prepend(files, (void*)file_path);
             /* FIXME: working dir is needed */

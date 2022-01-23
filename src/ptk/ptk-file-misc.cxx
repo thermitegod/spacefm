@@ -3419,14 +3419,11 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
              */
             char* name = g_strconcat(app_desktop, ".desktop", nullptr);
             if (std::filesystem::exists(name))
-            {
                 desktop = vfs_app_desktop_new(name);
-            }
             else
             {
-                /* dirty hack! */
-                desktop = vfs_app_desktop_new(nullptr);
-                desktop->exec = g_strdup(app_desktop); // freed by vfs_app_desktop_unref
+                // fallback
+                desktop = vfs_app_desktop_new(app_desktop);
             }
             g_free(name);
         }
@@ -3439,7 +3436,7 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
 
         LOG_INFO("EXEC({})={}",
                  desktop->full_path ? desktop->full_path : app_desktop,
-                 desktop->exec);
+                 vfs_app_desktop_get_exec(desktop));
         GError* err = nullptr;
         if (!vfs_app_desktop_open_files(screen, parent->cwd, desktop, files, &err))
         {

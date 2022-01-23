@@ -511,8 +511,7 @@ load_settings(const char* config_dir)
                 VFSAppDesktop* desktop = vfs_app_desktop_new(app_name);
                 if (desktop)
                 {
-                    if (desktop->exec)
-                        xset_set("editor", "s", desktop->exec);
+                    xset_set("editor", "s", vfs_app_desktop_get_exec(desktop));
                     vfs_app_desktop_unref(desktop);
                 }
             }
@@ -3557,7 +3556,8 @@ xset_custom_activate(GtkWidget* item, XSet* set)
             else if (g_str_has_suffix(set->z, ".desktop"))
             {
                 VFSAppDesktop* desktop = vfs_app_desktop_new(set->z);
-                if (desktop && desktop->exec && desktop->exec[0] != '\0')
+                if (desktop && vfs_app_desktop_get_exec(desktop) &&
+                    vfs_app_desktop_get_exec(desktop)[0] != '\0')
                 {
                     // get file list
                     GList* sel_files;
