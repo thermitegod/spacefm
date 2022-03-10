@@ -26,8 +26,6 @@
 #include "ptk/ptk-app-chooser.hxx"
 #include "ptk/ptk-location-view.hxx"
 
-#include "git-version.h"
-
 #include "autosave.hxx"
 #include "find-files.hxx"
 #include "pref-dialog.hxx"
@@ -400,7 +398,7 @@ main(int argc, char* argv[])
     // --version
     if (cli_flags.version_opt)
     {
-        fmt::print("{} {}\n", PACKAGE_NAME_FANCY, GIT_VERSION);
+        fmt::print("{} {}\n", PACKAGE_NAME_FANCY, PACKAGE_VERSION);
         return EXIT_SUCCESS;
     }
 
