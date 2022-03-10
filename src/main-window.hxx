@@ -103,6 +103,7 @@ void main_task_view_update_task(PtkFileTask* task);
 void main_task_view_remove_task(PtkFileTask* task);
 void main_task_pause_all_queued(PtkFileTask* ptask);
 void main_task_start_queued(GtkWidget* view, PtkFileTask* new_task);
+void on_restore_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser);
 void on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser);
 // void show_panels(GtkMenuItem* item, FMMainWindow* main_window);
 void show_panels_all_windows(GtkMenuItem* item, FMMainWindow* main_window);

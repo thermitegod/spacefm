@@ -5684,7 +5684,12 @@ ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, int t)
             // close
             on_close_notebook_page(nullptr, file_browser);
             break;
+        case -4:
+            // restore
+            on_restore_notebook_page(nullptr, file_browser);
+            break;
         default:
+            // set tab
             if (tab_num <= gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook)) && tab_num > 0)
                 gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), tab_num - 1);
             break;
@@ -5929,6 +5934,8 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
                 i = -2;
             else if (!strcmp(xname, "close"))
                 i = -3;
+            else if (!strcmp(xname, "restore"))
+                i = -4;
             else
                 i = strtol(xname, nullptr, 10);
             ptk_file_browser_go_tab(nullptr, browser, i);

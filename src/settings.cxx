@@ -8633,15 +8633,15 @@ xset_defaults()
 
     set = xset_set("go_tab", "lbl", "_Tab");
     set->menu_style = XSET_MENU_SUBMENU;
-    xset_set_set(
-        set,
-        XSET_SET_SET_DESC,
-        "tab_prev tab_next tab_close tab_1 tab_2 tab_3 tab_4 tab_5 tab_6 tab_7 tab_8 tab_9 tab_10");
+    xset_set_set(set,
+                 XSET_SET_SET_DESC,
+                 "tab_prev tab_next tab_restore tab_close tab_1 tab_2 tab_3 tab_4 tab_5 tab_6 "
+                 "tab_7 tab_8 tab_9 tab_10");
 
     xset_set("tab_prev", "lbl", "_Prev");
     xset_set("tab_next", "lbl", "_Next");
-    set = xset_set("tab_close", "lbl", "_Close");
-    xset_set_set(set, XSET_SET_SET_ICN, "gtk-close");
+    xset_set("tab_restore", "lbl", "_Restore");
+    xset_set("tab_close", "lbl", "_Close");
     xset_set("tab_1", "lbl", "Tab _1");
     xset_set("tab_2", "lbl", "Tab _2");
     xset_set("tab_3", "lbl", "Tab _3");
@@ -9185,8 +9185,9 @@ xset_default_keys()
 
     def_key("tab_prev", GDK_KEY_Tab, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
     def_key("tab_next", GDK_KEY_Tab, GDK_CONTROL_MASK);
-    def_key("tab_close", GDK_KEY_w, GDK_CONTROL_MASK);
     def_key("tab_new", GDK_KEY_t, GDK_CONTROL_MASK);
+    def_key("tab_restore", GDK_KEY_T, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
+    def_key("tab_close", GDK_KEY_w, GDK_CONTROL_MASK);
     def_key("tab_1", GDK_KEY_1, GDK_MOD1_MASK);
     def_key("tab_2", GDK_KEY_2, GDK_MOD1_MASK);
     def_key("tab_3", GDK_KEY_3, GDK_MOD1_MASK);

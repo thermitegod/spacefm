@@ -1048,6 +1048,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         set->disable = (tab_count < 2);
         set = xset_set_cb("tab_close", (GFunc)ptk_file_browser_go_tab, browser);
         xset_set_ob1_int(set, "tab_num", -3);
+        set = xset_set_cb("tab_restore", (GFunc)ptk_file_browser_go_tab, browser);
+        xset_set_ob1_int(set, "tab_num", -4);
 
         for (int i = 1; i < 11; i++)
         {

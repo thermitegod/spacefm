@@ -109,6 +109,8 @@ static int n_windows = 0;
 
 static std::vector<FMMainWindow*> all_windows;
 
+static std::vector<std::string> closed_tabs_restore;
+
 static unsigned int theme_change_notify = 0;
 
 //  Drag & Drop/Clipboard targets
@@ -2237,10 +2239,36 @@ main_window_get_counts(PtkFileBrowser* file_browser, int* panel_count, int* tab_
 }
 
 void
+on_restore_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
+{
+    (void)btn;
+
+    if (closed_tabs_restore.empty())
+    {
+        LOG_INFO("No tabs to restore");
+        return;
+    }
+
+    std::string file_path = closed_tabs_restore.back();
+    closed_tabs_restore.pop_back();
+    // LOG_INFO("on_restore_notebook_page path={}", file_path);
+
+    // LOG_INFO("on_restore_notebook_page fb={:p}", fmt::ptr(file_browser));
+    if (!GTK_IS_WIDGET(file_browser))
+        return;
+
+    FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
+    fm_main_window_add_new_tab(main_window, file_path.c_str());
+}
+
+void
 on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
 {
     (void)btn;
     PtkFileBrowser* a_browser;
+
+    closed_tabs_restore.push_back(ptk_file_browser_get_cwd(file_browser));
+    // LOG_INFO("on_close_notebook_page path={}", closed_tabs_restore.back());
 
     // LOG_INFO("on_close_notebook_page fb={:p}", fmt::ptr(file_browser));
     if (!GTK_IS_WIDGET(file_browser))
@@ -2380,7 +2408,11 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
             XSetContext* context = xset_context_new();
             main_context_fill(file_browser, context);
 
-            XSet* set = xset_set_cb("tab_close", (GFunc)on_close_notebook_page, file_browser);
+            XSet* set;
+
+            set = xset_set_cb("tab_close", (GFunc)on_close_notebook_page, file_browser);
+            xset_add_menuitem(file_browser, popup, accel_group, set);
+            set = xset_set_cb("tab_restore", (GFunc)on_restore_notebook_page, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
             set = xset_set_cb("tab_new", (GFunc)ptk_file_browser_new_tab, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
