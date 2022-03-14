@@ -605,12 +605,14 @@ static bool validate_archive_handler(HandlerData* hnd);
 static void on_options_button_clicked(GtkWidget* btn, HandlerData* hnd);
 
 bool
-ptk_handler_command_is_empty(const char* command)
+ptk_handler_command_is_empty(const std::string& command)
 {
+    const char* check_command = command.c_str();
+
     // test if command contains only comments and whitespace
-    if (!command)
+    if (!check_command)
         return true;
-    char** lines = g_strsplit(command, "\n", 0);
+    char** lines = g_strsplit(check_command, "\n", 0);
     if (!lines)
         return true;
 
@@ -748,17 +750,14 @@ ptk_handler_get_command(int mode, int cmd, XSet* handler_set)
     return nullptr;
 }
 
-char*
-ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view, char** text)
+bool
+ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
+                        std::string& script, std::string& error_message)
 {
-    /* places command in textview buffer or char** */
-    GtkTextBuffer* buf = nullptr;
-    GString* gstr = nullptr;
+    // returns true if there is an error
 
-    if (text)
-        *text = nullptr;
-    if ((!view && !text) || !handler_set)
-        return g_strdup("Error: unable to load command (internal error)");
+    GtkTextBuffer* buf = nullptr;
+
     if (view)
     {
         buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
@@ -770,37 +769,36 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
         // is default handler - get contents from const char
         char* command = ptk_handler_get_command(mode, cmd, handler_set);
         if (!command)
-            return g_strdup("Error: unable to load command (internal error)");
+        {
+            error_message = "Error: unable to load command (internal error)";
+            return true;
+        }
         if (view)
             gtk_text_buffer_insert_at_cursor(buf, command, -1);
         else
-            *text = command;
-        return nullptr; // success
+            script = command;
+
+        // success
+        return false;
     }
 
     // get default script path
     char* def_script = xset_custom_get_script(handler_set, false);
     if (!def_script)
     {
-        LOG_WARN("get_handler_script unable to get script for custom {}", handler_set->name);
-        return g_strdup("Error: unable to save command (can't get script path?)");
+        error_message =
+            fmt::format("get_handler_script unable to get script for custom {}", handler_set->name);
+        return true;
     }
     // name script
-    std::string script;
-    std::string str;
-    str = fmt::format("/hand-{}-{}.sh",
-                      modes[mode],
-                      mode == HANDLER_MODE_ARC ? cmds_arc[cmd] : cmds_mnt[cmd]);
-    script = ztd::replace(def_script, "/exec.sh", str);
+    std::string script_name = fmt::format("/hand-{}-{}.sh",
+                                          modes[mode],
+                                          mode == HANDLER_MODE_ARC ? cmds_arc[cmd] : cmds_mnt[cmd]);
+    script = ztd::replace(def_script, "/exec.sh", script_name);
     g_free(def_script);
     // load script
     // bool modified = false;
-    char line[4096];
-    FILE* file = nullptr;
     bool start = true;
-
-    if (!view)
-        gstr = g_string_new("");
 
     if (std::filesystem::exists(script))
     {
@@ -808,12 +806,9 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
         std::ifstream file(script);
         if (!file.is_open())
         {
-            str = fmt::format("{} '{}':\n\n{}", "Error reading file", script, g_strerror(errno));
-            if (!view)
-                g_string_free(gstr, true);
-
-            char* str2 = const_cast<char*>(str.c_str());
-            return str2;
+            error_message =
+                fmt::format("Error reading file '{}':\n\n{}", script, g_strerror(errno));
+            return true;
         }
         else
         {
@@ -825,9 +820,9 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
                     if (view)
                         gtk_text_buffer_set_text(buf, "", -1);
                     else
-                        g_string_erase(gstr, 0, -1);
+                        script.clear();
                     // modified = true;
-                    LOG_WARN("file '{}' contents are not valid UTF-8", script);
+                    error_message = fmt::format("file '{}' contents are not valid UTF-8", script);
                     break;
                 }
                 if (start)
@@ -842,35 +837,34 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
                 if (view)
                     gtk_text_buffer_insert_at_cursor(buf, line.c_str(), -1);
                 else
-                    g_string_append(gstr, line.c_str());
+                    script.append(line);
             }
             file.close();
         }
     }
-
-    if (!view)
-        *text = g_string_free(gstr, false);
-
-    // gtk_text_view_set_editable( GTK_TEXT_VIEW( view ), !file ||
-    //                                        have_rw_access( script ) );
-    // gtk_text_buffer_set_modified( buf, modified );
-    // command_script_stat(  );
-    return nullptr; // success
+    // success
+    return false;
 }
 
-char*
+bool
 ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
-                        const char* command)
+                        const std::string command, std::string& error_message)
 {
+    // returns true if there is an error
+
     /* writes command in textview buffer or const command to script */
     if (!(handler_set && !handler_set->disable))
-        return g_strdup("Error: unable to save command (internal error)");
+    {
+        error_message = "Error: unable to save command (internal error)";
+        return true;
+    }
     // get default script path
     char* def_script = xset_custom_get_script(handler_set, false);
     if (!def_script)
     {
         LOG_WARN("save_handler_script unable to get script for custom {}", handler_set->name);
-        return g_strdup("Error: unable to save command (can't get script path?)");
+        error_message = "Error: unable to save command (can't get script path?)";
+        return true;
     }
     // create parent dir
     char* parent_dir = g_path_get_dirname(def_script);
@@ -889,7 +883,7 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
     script = ztd::replace(def_script, "/exec.sh", str);
     g_free(def_script);
     // get text
-    char* text;
+    std::string text;
     if (view)
     {
         GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
@@ -898,10 +892,8 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
         gtk_text_buffer_get_end_iter(buf, &iter);
         text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
     }
-    else if (command)
-        text = (char*)command;
     else
-        text = g_strdup("");
+        text = command;
 
     // LOG_INFO("WRITE {}", script);
     // write script
@@ -910,23 +902,19 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
     {
         file << script_header;
         file << "\n";
-        if (text)
-            file << text;
+        file << text;
         file << "\n";
     }
     else
     {
-        str = fmt::format("{} '{}':\n\n{}", "Error writing to file", script, g_strerror(errno));
-        if (view)
-            g_free(text);
-
-        char* str2 = const_cast<char*>(str.c_str());
-        return str2;
+        error_message =
+            fmt::format("{} '{}':\n\n{}", "Error writing to file", script, g_strerror(errno));
+        return true;
     }
     file.close();
-    if (view)
-        g_free(text);
-    return nullptr; // success
+
+    // success
+    return false;
 }
 
 bool
@@ -1073,24 +1061,22 @@ ptk_handler_file_has_handlers(int mode, int cmd, const char* path, VFSMimeType* 
                 // test command
                 if (test_cmd)
                 {
-                    char* command;
-                    char* err_msg =
-                        ptk_handler_load_script(mode, cmd, handler_set, nullptr, &command);
-                    if (err_msg)
-                    {
-                        LOG_WARN("%s", err_msg);
-                        g_free(err_msg);
-                    }
+                    std::string command;
+                    std::string error_message;
+                    bool error = ptk_handler_load_script(mode,
+                                                         cmd,
+                                                         handler_set,
+                                                         nullptr,
+                                                         command,
+                                                         error_message);
+                    if (error)
+                        LOG_ERROR(error_message);
                     else if (!ptk_handler_command_is_empty(command))
                     {
                         handlers = g_slist_prepend(handlers, handler_set);
                         if (!multiple)
-                        {
-                            g_free(command);
                             break;
-                        }
                     }
-                    g_free(command);
                 }
                 else
                 {
@@ -1414,34 +1400,40 @@ config_load_handler_settings(XSet* handler_xset, char* handler_xset_name, const 
     }
     else
     {
-        char* err_msg = ptk_handler_load_script(hnd->mode,
-                                                HANDLER_COMPRESS,
-                                                handler_xset,
-                                                GTK_TEXT_VIEW(hnd->view_handler_compress),
-                                                nullptr);
+        bool error = false;
+        std::string command;
+        std::string error_message;
+
+        error = ptk_handler_load_script(hnd->mode,
+                                        HANDLER_COMPRESS,
+                                        handler_xset,
+                                        GTK_TEXT_VIEW(hnd->view_handler_compress),
+                                        command,
+                                        error_message);
         if (hnd->mode != HANDLER_MODE_FILE)
         {
-            if (!err_msg)
-                err_msg = ptk_handler_load_script(hnd->mode,
-                                                  HANDLER_EXTRACT,
-                                                  handler_xset,
-                                                  GTK_TEXT_VIEW(hnd->view_handler_extract),
-                                                  nullptr);
-            if (!err_msg)
-                err_msg = ptk_handler_load_script(hnd->mode,
-                                                  HANDLER_LIST,
-                                                  handler_xset,
-                                                  GTK_TEXT_VIEW(hnd->view_handler_list),
-                                                  nullptr);
+            if (!error)
+                error = ptk_handler_load_script(hnd->mode,
+                                                HANDLER_EXTRACT,
+                                                handler_xset,
+                                                GTK_TEXT_VIEW(hnd->view_handler_extract),
+                                                command,
+                                                error_message);
+            if (!error)
+                error = ptk_handler_load_script(hnd->mode,
+                                                HANDLER_LIST,
+                                                handler_xset,
+                                                GTK_TEXT_VIEW(hnd->view_handler_list),
+                                                command,
+                                                error_message);
         }
-        if (err_msg)
+        if (error)
         {
             xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                             GTK_MESSAGE_ERROR,
                             "Error Loading Handler",
                             GTK_BUTTONS_OK,
-                            err_msg);
-            g_free(err_msg);
+                            error_message);
         }
     }
     // Run In Terminal checkboxes
@@ -1602,9 +1594,9 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
 static void
 on_configure_button_press(GtkButton* widget, HandlerData* hnd)
 {
-    int i;
-    char* err_msg = nullptr;
-    char* str;
+    std::string command;
+    std::string error_message;
+    bool error = false;
 
     const char* handler_name = gtk_entry_get_text(GTK_ENTRY(hnd->entry_handler_name));
     const char* handler_mime = gtk_entry_get_text(GTK_ENTRY(hnd->entry_handler_mime));
@@ -1678,11 +1670,13 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                      handler_extension); // Extension(s) or blacklist
         new_handler_xset->in_terminal = handler_compress_term ? XSET_B_TRUE : XSET_B_UNSET;
         new_handler_xset->keep_terminal = handler_extract_term ? XSET_B_TRUE : XSET_B_UNSET;
-        err_msg = ptk_handler_save_script(hnd->mode,
-                                          HANDLER_COMPRESS,
-                                          new_handler_xset,
-                                          GTK_TEXT_VIEW(hnd->view_handler_compress),
-                                          nullptr);
+
+        error = ptk_handler_save_script(hnd->mode,
+                                        HANDLER_COMPRESS,
+                                        new_handler_xset,
+                                        GTK_TEXT_VIEW(hnd->view_handler_compress),
+                                        command,
+                                        error_message);
         if (hnd->mode == HANDLER_MODE_FILE)
         {
             if (handler_icon)
@@ -1691,18 +1685,20 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         else
         {
             new_handler_xset->scroll_lock = handler_list_term ? XSET_B_TRUE : XSET_B_UNSET;
-            if (!err_msg)
-                err_msg = ptk_handler_save_script(hnd->mode,
-                                                  HANDLER_EXTRACT,
-                                                  new_handler_xset,
-                                                  GTK_TEXT_VIEW(hnd->view_handler_extract),
-                                                  nullptr);
-            if (!err_msg)
-                err_msg = ptk_handler_save_script(hnd->mode,
-                                                  HANDLER_LIST,
-                                                  new_handler_xset,
-                                                  GTK_TEXT_VIEW(hnd->view_handler_list),
-                                                  nullptr);
+            if (!error)
+                error = ptk_handler_save_script(hnd->mode,
+                                                HANDLER_EXTRACT,
+                                                new_handler_xset,
+                                                GTK_TEXT_VIEW(hnd->view_handler_extract),
+                                                command,
+                                                error_message);
+            if (!error)
+                error = ptk_handler_save_script(hnd->mode,
+                                                HANDLER_LIST,
+                                                new_handler_xset,
+                                                GTK_TEXT_VIEW(hnd->view_handler_list),
+                                                command,
+                                                error_message);
         }
 
         // Obtaining appending iterator for treeview model
@@ -1799,11 +1795,12 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         handler_xset->keep_terminal = handler_extract_term ? XSET_B_TRUE : XSET_B_UNSET;
         if (hnd->compress_changed || was_default)
         {
-            err_msg = ptk_handler_save_script(hnd->mode,
-                                              HANDLER_COMPRESS,
-                                              handler_xset,
-                                              GTK_TEXT_VIEW(hnd->view_handler_compress),
-                                              nullptr);
+            error = ptk_handler_save_script(hnd->mode,
+                                            HANDLER_COMPRESS,
+                                            handler_xset,
+                                            GTK_TEXT_VIEW(hnd->view_handler_compress),
+                                            command,
+                                            error_message);
         }
         if (hnd->mode == HANDLER_MODE_FILE)
         {
@@ -1815,33 +1812,21 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
             handler_xset->scroll_lock = handler_list_term ? XSET_B_TRUE : XSET_B_UNSET;
             if (hnd->extract_changed || was_default)
             {
-                str = ptk_handler_save_script(hnd->mode,
-                                              HANDLER_EXTRACT,
-                                              handler_xset,
-                                              GTK_TEXT_VIEW(hnd->view_handler_extract),
-                                              nullptr);
-                if (str)
-                {
-                    if (!err_msg)
-                        err_msg = str;
-                    else
-                        g_free(str);
-                }
+                error = ptk_handler_save_script(hnd->mode,
+                                                HANDLER_EXTRACT,
+                                                handler_xset,
+                                                GTK_TEXT_VIEW(hnd->view_handler_extract),
+                                                command,
+                                                error_message);
             }
             if (hnd->list_changed || was_default)
             {
-                str = ptk_handler_save_script(hnd->mode,
-                                              HANDLER_LIST,
-                                              handler_xset,
-                                              GTK_TEXT_VIEW(hnd->view_handler_list),
-                                              nullptr);
-                if (str)
-                {
-                    if (!err_msg)
-                        err_msg = str;
-                    else
-                        g_free(str);
-                }
+                error = ptk_handler_save_script(hnd->mode,
+                                                HANDLER_LIST,
+                                                handler_xset,
+                                                GTK_TEXT_VIEW(hnd->view_handler_list),
+                                                command,
+                                                error_message);
             }
         }
         hnd->changed = hnd->compress_changed = hnd->extract_changed = hnd->list_changed = false;
@@ -1871,7 +1856,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         // Looping for handlers (nullptr-terminated list)
         if (archive_handlers)
         {
-            for (i = 0; archive_handlers[i] != nullptr; ++i)
+            for (int i = 0; archive_handlers[i] != nullptr; ++i)
             {
                 // Appending to new archive handlers list when it isnt the
                 // deleted handler - remember that archive handlers are
@@ -1974,14 +1959,13 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
     // Saving settings
     autosave_request();
 
-    if (err_msg)
+    if (error)
     {
         xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                         GTK_MESSAGE_ERROR,
                         "Error Saving Handler",
                         GTK_BUTTONS_OK,
-                        err_msg);
-        g_free(err_msg);
+                        error_message);
     }
 
 _clean_exit:

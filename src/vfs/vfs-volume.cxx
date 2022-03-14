@@ -2808,16 +2808,21 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
         return nullptr;
 
     // get command for action
-    char* cmd = nullptr;
+    std::string command;
+    std::string error_message;
     const char* action_s;
     bool terminal;
-    char* err_msg = ptk_handler_load_script(mode, action, set, nullptr, &cmd);
-    if (err_msg)
+    bool error = ptk_handler_load_script(mode, action, set, nullptr, command, error_message);
+
+    if (error)
     {
-        LOG_WARN("{}", err_msg);
-        g_free(err_msg);
+        LOG_ERROR(error_message);
         return nullptr;
     }
+
+    // empty command
+    if (ptk_handler_command_is_empty(command))
+        return nullptr;
 
     switch (action)
     {
@@ -2842,17 +2847,8 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
              mode == HANDLER_MODE_FS ? "Selected Device Handler" : "Selected Protocol Handler",
              set->menu_label,
              action_s,
-             cmd ? "" : " (no command)",
+             !command.empty() ? "" : " (no command)",
              msg);
-
-    if (ptk_handler_command_is_empty(cmd))
-    {
-        // empty command
-        g_free(cmd);
-        return nullptr;
-    }
-
-    std::string command = cmd;
 
     // replace sub vars
     std::string fileq;

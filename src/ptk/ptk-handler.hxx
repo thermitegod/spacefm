@@ -46,11 +46,12 @@ void ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_h
 bool ptk_handler_values_in_list(const std::string list, const std::vector<std::string>& values,
                                 std::string& msg);
 XSet* add_new_handler(int mode); // for settings.c upgrade
-char* ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view, char** text);
-char* ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
-                              const char* command);
+bool ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
+                             std::string& script, std::string& error_message);
+bool ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
+                             const std::string command, std::string& error_message);
 char* ptk_handler_get_command(int mode, int cmd, XSet* handler_set);
-bool ptk_handler_command_is_empty(const char* command);
+bool ptk_handler_command_is_empty(const std::string& command);
 void ptk_handler_load_text_view(GtkTextView* view, const char* text);
 GSList* ptk_handler_file_has_handlers(int mode, int cmd, const char* path, VFSMimeType* mime_type,
                                       bool test_cmd, bool multiple, bool enabled_only);

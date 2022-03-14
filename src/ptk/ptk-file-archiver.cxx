@@ -210,19 +210,21 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     if (handler_xset)
     {
         GtkTextView* view = (GtkTextView*)g_object_get_data(G_OBJECT(dlg), "view");
-        char* err_msg = ptk_handler_load_script(HANDLER_MODE_ARC,
-                                                HANDLER_COMPRESS,
-                                                handler_xset,
-                                                GTK_TEXT_VIEW(view),
-                                                nullptr);
-        if (err_msg)
+        std::string error_message;
+        std::string command;
+        bool error = ptk_handler_load_script(HANDLER_MODE_ARC,
+                                             HANDLER_COMPRESS,
+                                             handler_xset,
+                                             GTK_TEXT_VIEW(view),
+                                             command,
+                                             error_message);
+        if (error)
         {
             xset_msg_dialog(GTK_WIDGET(dlg),
                             GTK_MESSAGE_ERROR,
                             "Error Loading Handler",
                             GTK_BUTTONS_OK,
-                            err_msg);
-            g_free(err_msg);
+                            error_message);
         }
     }
 }
@@ -495,6 +497,11 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     gtk_container_add(GTK_CONTAINER(view_scroll), GTK_WIDGET(view));
     g_object_set_data(G_OBJECT(dlg), "view", view);
 
+    std::string command;
+    std::string compress_command;
+    std::string error_message;
+    bool error = false;
+
     /* Loading command for handler, based off the format handler */
     // Obtaining iterator from string turned into a path into the model
     char* str = g_strdup_printf("%d", format);
@@ -508,19 +515,20 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                            -1);
         if ((handler_xset = xset_is(xset_name)))
         {
-            char* err_msg = ptk_handler_load_script(HANDLER_MODE_ARC,
-                                                    HANDLER_COMPRESS,
-                                                    handler_xset,
-                                                    GTK_TEXT_VIEW(view),
-                                                    nullptr);
-            if (err_msg)
+            bool error = ptk_handler_load_script(HANDLER_MODE_ARC,
+                                                 HANDLER_COMPRESS,
+                                                 handler_xset,
+                                                 GTK_TEXT_VIEW(view),
+                                                 command,
+                                                 error_message);
+            if (error)
             {
                 xset_msg_dialog(GTK_WIDGET(dlg),
                                 GTK_MESSAGE_ERROR,
                                 "Error Loading Handler",
                                 GTK_BUTTONS_OK,
-                                err_msg);
-                g_free(err_msg);
+                                error_message);
+                error_message.clear();
             }
         }
         g_free(xset_name);
@@ -583,7 +591,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     }
 
     // Displaying dialog
-    char* command = nullptr;
     bool run_in_terminal;
     gtk_widget_show_all(dlg);
 
@@ -642,84 +649,81 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                         "Create Archive",
                         GTK_BUTTONS_OK,
                         "The archive creation command is empty.  Please enter a command.");
-                    g_free(command);
                     continue;
                 }
                 // Getting prior command for comparison
-                char* err_msg;
-                char* compress_cmd;
-                compress_cmd = nullptr;
-                err_msg = ptk_handler_load_script(HANDLER_MODE_ARC,
-                                                  HANDLER_COMPRESS,
-                                                  handler_xset,
-                                                  nullptr,
-                                                  &compress_cmd);
-                if (err_msg)
+                error = ptk_handler_load_script(HANDLER_MODE_ARC,
+                                                HANDLER_COMPRESS,
+                                                handler_xset,
+                                                nullptr,
+                                                compress_command,
+                                                error_message);
+                if (error)
                 {
-                    LOG_WARN("{}", err_msg);
-                    g_free(err_msg);
-                    compress_cmd = g_strdup("");
+                    LOG_WARN(error_message);
+                    error_message.clear();
+                    compress_command = "";
                 }
 
                 // Checking to see if the compression command has changed
-                if (g_strcmp0(compress_cmd, command))
+                if (!ztd::same(compress_command, command))
                 {
                     // command has changed - saving command
-                    g_free(compress_cmd);
                     if (handler_xset->disable)
                     {
                         // commmand was default - need to save all commands
                         // get default extract command from const
-                        compress_cmd = ptk_handler_get_command(HANDLER_MODE_ARC,
-                                                               HANDLER_EXTRACT,
-                                                               handler_xset);
+                        compress_command = ptk_handler_get_command(HANDLER_MODE_ARC,
+                                                                   HANDLER_EXTRACT,
+                                                                   handler_xset);
                         // write extract command script
-                        err_msg = ptk_handler_save_script(HANDLER_MODE_ARC,
-                                                          HANDLER_EXTRACT,
-                                                          handler_xset,
-                                                          nullptr,
-                                                          compress_cmd);
-                        if (err_msg)
+                        error = ptk_handler_save_script(HANDLER_MODE_ARC,
+                                                        HANDLER_EXTRACT,
+                                                        handler_xset,
+                                                        nullptr,
+                                                        compress_command,
+                                                        error_message);
+                        if (error)
                         {
-                            LOG_WARN("{}", err_msg);
-                            g_free(err_msg);
+                            LOG_WARN(error_message);
+                            error_message.clear();
                         }
-                        g_free(compress_cmd);
+
                         // get default list command from const
-                        compress_cmd =
+                        compress_command =
                             ptk_handler_get_command(HANDLER_MODE_ARC, HANDLER_LIST, handler_xset);
                         // write list command script
-                        err_msg = ptk_handler_save_script(HANDLER_MODE_ARC,
-                                                          HANDLER_LIST,
-                                                          handler_xset,
-                                                          nullptr,
-                                                          compress_cmd);
-                        if (err_msg)
+                        error = ptk_handler_save_script(HANDLER_MODE_ARC,
+                                                        HANDLER_LIST,
+                                                        handler_xset,
+                                                        nullptr,
+                                                        compress_command,
+                                                        error_message);
+                        if (error)
                         {
-                            LOG_WARN("{}", err_msg);
-                            g_free(err_msg);
+                            LOG_WARN(error_message);
+                            error_message.clear();
                         }
-                        g_free(compress_cmd);
+
                         handler_xset->disable = false; // not default handler now
                     }
                     // save updated compress command
-                    err_msg = ptk_handler_save_script(HANDLER_MODE_ARC,
-                                                      HANDLER_COMPRESS,
-                                                      handler_xset,
-                                                      nullptr,
-                                                      command);
-                    if (err_msg)
+                    error = ptk_handler_save_script(HANDLER_MODE_ARC,
+                                                    HANDLER_COMPRESS,
+                                                    handler_xset,
+                                                    nullptr,
+                                                    command,
+                                                    error_message);
+                    if (error)
                     {
                         xset_msg_dialog(GTK_WIDGET(dlg),
                                         GTK_MESSAGE_ERROR,
                                         "Error Saving Handler",
                                         GTK_BUTTONS_OK,
-                                        err_msg);
-                        g_free(err_msg);
+                                        error_message);
+                        error_message.clear();
                     }
                 }
-                else
-                    g_free(compress_cmd);
 
                 // Saving settings
                 autosave_request();
@@ -771,7 +775,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
 
     // Dealing with separate archives for each source file/directory ('%O')
     GList* l;
-    if (g_strstr_len(command, -1, "%O"))
+    if (ztd::contains(command, "%O"))
     {
         /* '%O' is present - the archiving command should be generated
          * and ran for each individual file */
@@ -781,7 +785,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
 
         /* Looping for all selected files/directories - all are used
          * when '%N' is present, only the first otherwise */
-        for (i = 0, l = files; l && (i == 0 || g_strstr_len(command, -1, "%N")); l = l->next, ++i)
+        for (i = 0, l = files; l && (i == 0 || ztd::contains(command, "%N")); l = l->next, ++i)
         {
             desc = (char*)vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data));
 
@@ -828,7 +832,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
 
             // Replace sub vars  %n %N %O (and erroneous %o treat as %O)
             cmd_to_run =
-                replace_archive_subs(command,
+                replace_archive_subs(command.c_str(),
                                      i == 0 ? desc.c_str() : "", // first run only %n = desc
                                      desc.c_str(), // Replace %N with nth file (NOT ALL FILES)
                                      udest_quote.c_str(),
@@ -876,7 +880,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
 
             /* Generating string of selected files/directories to archive if
              * '%N' is present */
-            if (g_strstr_len(command, -1, "%N"))
+            if (ztd::contains(command, "%N"))
             {
                 for (l = files; l; l = l->next)
                 {
@@ -905,7 +909,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
         }
 
         // Replace sub vars  %n %N %o
-        cmd_to_run = replace_archive_subs(command,
+        cmd_to_run = replace_archive_subs(command.c_str(),
                                           first.c_str(),
                                           all,
                                           udest_quote.c_str(),
@@ -930,7 +934,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
 
     /* Cleaning up - final_command does not need freeing, as this
      * is freed by the task */
-    g_free(command);
 
     // Creating task
     char* task_name = g_strdup_printf("Archive");
@@ -993,9 +996,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     char* full_path = nullptr;
     std::string full_quote;
     char* perm = nullptr;
-    char* cmd = nullptr;
-    char* str = nullptr;
-    char* final_command = nullptr;
     char* s1 = nullptr;
     int i;
     int n;
@@ -1152,12 +1152,11 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         height = allocation.height;
         if (width && height)
         {
-            str = g_strdup_printf("%d", width);
-            xset_set("arc_dlg", "x", str);
-            g_free(str);
-            str = g_strdup_printf("%d", height);
-            xset_set("arc_dlg", "y", str);
-            g_free(str);
+            std::string str;
+            str = fmt::format("{}", width);
+            xset_set("arc_dlg", "x", str.c_str());
+            str = fmt::format("{}", height);
+            xset_set("arc_dlg", "y", str.c_str());
         }
 
         // Destroying dialog
@@ -1187,6 +1186,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         archive_handlers_s ? g_strsplit(archive_handlers_s, " ", -1) : nullptr;
     XSet* handler_xset = nullptr;
 
+    std::string command;
+    std::string final_command;
+    std::string error_message;
     // Looping for all files to attempt to list/extract
     for (l = files; l; l = l->next)
     {
@@ -1242,16 +1244,17 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         if (list_contents)
         {
             // List archive contents only
-            char* err_msg = ptk_handler_load_script(HANDLER_MODE_ARC,
-                                                    HANDLER_LIST,
-                                                    handler_xset,
-                                                    nullptr,
-                                                    &cmd);
-            if (err_msg)
+            bool error = ptk_handler_load_script(HANDLER_MODE_ARC,
+                                                 HANDLER_LIST,
+                                                 handler_xset,
+                                                 nullptr,
+                                                 command,
+                                                 error_message);
+            if (error)
             {
-                LOG_WARN("{}", err_msg);
-                g_free(err_msg);
-                cmd = g_strdup("");
+                LOG_WARN(error_message);
+                error_message.clear();
+                command = "";
             }
         }
         else
@@ -1313,17 +1316,17 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
 
             /* Get extraction command - Doing this here as parent
              * directory creation needs access to the command. */
-            char* err_msg;
-            err_msg = ptk_handler_load_script(HANDLER_MODE_ARC,
-                                              HANDLER_EXTRACT,
-                                              handler_xset,
-                                              nullptr,
-                                              &cmd);
-            if (err_msg)
+            bool error = ptk_handler_load_script(HANDLER_MODE_ARC,
+                                                 HANDLER_EXTRACT,
+                                                 handler_xset,
+                                                 nullptr,
+                                                 command,
+                                                 error_message);
+            if (error)
             {
-                LOG_WARN(err_msg);
-                g_free(err_msg);
-                cmd = g_strdup("");
+                LOG_WARN(error_message);
+                error_message.clear();
+                command = "";
             }
 
             /* Dealing with creation of parent directory if needed -
@@ -1331,7 +1334,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
              * an override substitution for the sake of gzip */
             char* parent_path;
             parent_path = nullptr;
-            if (create_parent && !g_strstr_len(cmd, -1, "%G"))
+            if (create_parent && !ztd::contains(command, "%G"))
             {
                 /* Determining full path of parent directory to make
                  * (also used later in '%g' substitution) */
@@ -1380,9 +1383,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
             // LOG_INFO("full_quote : {}", full_quote);
             // LOG_INFO("dest       : {}", dest);
 
-            /* Singular file extraction target (e.g. stdout-redirected
-             * gzip) */
-            if (g_strstr_len(cmd, -1, "%g") || g_strstr_len(cmd, -1, "%G"))
+            // Singular file extraction target (e.g. stdout-redirected gzip)
+            std::vector<std::string> keys{"%g", "%G"};
+            if (ztd::contains(command, keys))
             {
                 /* Creating extraction target, taking into account whether
                  * a parent directory has been created or not - target is
@@ -1412,32 +1415,27 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         }
 
         // Substituting %x %g %G
-        str = cmd;
-        cmd = replace_archive_subs(cmd,
-                                   nullptr,
-                                   nullptr,
-                                   nullptr,
-                                   full_quote.c_str(),
-                                   extract_target.c_str());
-        g_free(str);
+        command = replace_archive_subs(command.c_str(),
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
+                                       full_quote.c_str(),
+                                       extract_target.c_str());
 
         /* Finally constructing command to run, taking into account more than
          * one archive to list/extract. The mkparent command itself has error
          * checking - final error check not here as I want the code shared with
          * the list code flow */
-        str = final_command;
-        final_command = g_strdup_printf("%s\ncd %s || fm_handle_err\n%s%s"
-                                        "\n[[ $? -eq 0 ]] || fm_handle_err\n%s\n",
-                                        (g_strcmp0(final_command, "") < 0) ? "" : final_command,
-                                        dest_quote.c_str(),
-                                        mkparent,
-                                        cmd,
-                                        perm);
-        g_free(str);
+        final_command = fmt::format("{}\ncd {} || fm_handle_err\n{}{}"
+                                    "\n[[ $? -eq 0 ]] || fm_handle_err\n{}\n",
+                                    final_command,
+                                    dest_quote,
+                                    mkparent,
+                                    command,
+                                    perm);
 
         // Cleaning up
         g_free(full_path);
-        g_free(cmd);
         g_free(mkparent);
         g_free(perm);
     }
@@ -1445,11 +1443,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     /* When ran in a terminal, errors need to result in a pause so that
      * the user can review the situation - in any case an error check
      * needs to be made */
+    std::string str;
     str = generate_bash_error_function(in_term, create_parent ? parent_quote.c_str() : nullptr);
-    s1 = final_command;
-    final_command = g_strconcat(str, "\n", final_command, nullptr);
-    g_free(str);
-    g_free(s1);
+    final_command = g_strconcat(str.c_str(), "\n", final_command.c_str(), nullptr);
     g_free(choose_dir);
     g_strfreev(archive_handlers);
 

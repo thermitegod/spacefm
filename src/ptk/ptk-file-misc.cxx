@@ -3278,26 +3278,29 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
     GList* l;
     std::string str;
     std::string command_final;
-    char* cmd;
     std::string name;
 
     LOG_INFO("Selected File Handler '{}'", handler_set->menu_label);
 
     // get command - was already checked as non-empty
-    char* err_msg =
-        ptk_handler_load_script(HANDLER_MODE_FILE, HANDLER_MOUNT, handler_set, nullptr, &cmd);
-    if (err_msg)
+    std::string error_message;
+    std::string command;
+    bool error = ptk_handler_load_script(HANDLER_MODE_FILE,
+                                         HANDLER_MOUNT,
+                                         handler_set,
+                                         nullptr,
+                                         command,
+                                         error_message);
+    if (error)
     {
         xset_msg_dialog(parent->file_browser ? GTK_WIDGET(parent->file_browser) : nullptr,
                         GTK_MESSAGE_ERROR,
                         "Error Loading Handler",
                         GTK_BUTTONS_OK,
-                        err_msg);
-        g_free(err_msg);
+                        error_message);
         return;
     }
     // auto mount point
-    std::string command = cmd;
     if (ztd::contains(command, "%a"))
     {
         name = ptk_location_view_create_mount_point(HANDLER_MODE_FILE,
