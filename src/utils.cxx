@@ -168,12 +168,15 @@ bash_quote(const std::string& str)
     return s1;
 }
 
-char*
-clean_label(const char* menu_label, bool kill_special, bool escape)
+std::string
+clean_label(const std::string& menu_label, bool kill_special, bool escape)
 {
+    if (menu_label.empty())
+        return "";
+
     std::string new_menu_label;
 
-    if (menu_label && strstr(menu_label, "\\_"))
+    if (ztd::contains(menu_label, "\\_"))
     {
         new_menu_label = ztd::replace(menu_label, "\\_", "@UNDERSCORE@");
         new_menu_label = ztd::replace(menu_label, "_", "");
@@ -187,10 +190,9 @@ clean_label(const char* menu_label, bool kill_special, bool escape)
         new_menu_label = ztd::replace(menu_label, " ", "-");
     }
     else if (escape)
-        new_menu_label = g_markup_escape_text(menu_label, -1);
+        new_menu_label = g_markup_escape_text(menu_label.c_str(), -1);
 
-    char* s1 = g_strdup(new_menu_label.c_str());
-    return s1;
+    return new_menu_label;
 }
 
 void

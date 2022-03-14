@@ -1486,10 +1486,10 @@ xset_set_panel(int panel, const char* name, const char* var, const char* value)
 }
 
 XSet*
-xset_find_custom(const char* search)
+xset_find_custom(const std::string& search)
 {
     // find a custom command or submenu by label or xset name
-    char* label = clean_label(search, true, false);
+    std::string label = clean_label(search, true, false);
 
     for (XSet* set: xsets)
     {
@@ -1498,19 +1498,14 @@ xset_find_custom(const char* search)
                             xset_get_int_set(set, "x") <= XSET_CMD_BOOKMARK)))
         {
             // custom submenu or custom command - label or name matches?
-            char* str = clean_label(set->menu_label, true, false);
-            if (!g_strcmp0(set->name, search) || !g_strcmp0(str, label))
+            std::string str = clean_label(set->menu_label, true, false);
+            if (ztd::same(set->name, search) || ztd::same(str, label))
             {
                 // match
-                g_free(str);
-                g_free(label);
                 return set;
             }
-            g_free(str);
         }
     }
-
-    g_free(label);
     return nullptr;
 }
 
@@ -1618,9 +1613,8 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
             // valid
             found = true;
             set->browser = file_browser;
-            char* clean = clean_label(set->menu_label, false, false);
+            std::string clean = clean_label(set->menu_label, false, false);
             LOG_INFO("Selected Menu Item '{}' As Handler", clean);
-            g_free(clean);
             xset_menu_cb(nullptr, set); // also does custom activate
         }
     }
@@ -1820,9 +1814,8 @@ xset_new_menuitem(const char* label, const char* icon)
     if (label && strstr(label, "\\_"))
     {
         // allow escape of underscore
-        char* str = clean_label(label, false, false);
-        item = gtk_menu_item_new_with_label(str);
-        g_free(str);
+        std::string str = clean_label(label, false, false);
+        item = gtk_menu_item_new_with_label(str.c_str());
     }
     else
         item = gtk_menu_item_new_with_mnemonic(label);
@@ -2233,7 +2226,7 @@ xset_custom_new_name()
             g_free(hex8);
         hex8 = randhex8();
         setname = fmt::format("cstm_{}", hex8);
-        if (xset_is(setname.data()))
+        if (xset_is(setname.c_str()))
             setname.clear();
         else
         {
@@ -2535,7 +2528,9 @@ xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
     }
 
     // add new
-    XSet* set = xset_new(xset_custom_new_name().data());
+    std::string setname = xset_custom_new_name();
+
+    XSet* set = xset_new(setname.c_str());
     set->plug_dir = g_strdup(plug_dir);
     set->plug_name = g_strdup(plug_name);
     set->plugin = true;
@@ -3147,10 +3142,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 
     if (!set->plugin)
     {
-        char* s1 = clean_label(set->menu_label, true, false);
-        if (!s1)
-            s1 = g_strdup("Plugin");
-
+        std::string s1 = clean_label(set->menu_label, true, false);
         std::string type;
         if (!strcmp(set->name, "main_book"))
             type = "bookmarks";
@@ -3166,14 +3158,11 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
             type = "plugin";
 
         deffile = fmt::format("{}.spacefm-{}.tar.xz", s1, type);
-
-        g_free(s1);
     }
     else
     {
-        char* s1 = g_path_get_basename(set->plug_dir);
+        std::string s1 = g_path_get_basename(set->plug_dir);
         deffile = fmt::format("{}.spacefm-plugin.tar.xz", s1);
-        g_free(s1);
     }
 
     char* path = xset_file_dialog(parent,
@@ -3598,9 +3587,8 @@ xset_custom_activate(GtkWidget* item, XSet* set)
     }
 
     // task
-    char* task_name = clean_label(set->menu_label, false, false);
-    PtkFileTask* task = ptk_file_exec_new(task_name, cwd, parent, task_view);
-    g_free(task_name);
+    std::string task_name = clean_label(set->menu_label, false, false);
+    PtkFileTask* task = ptk_file_exec_new(task_name.c_str(), cwd, parent, task_view);
     // don't free cwd!
     task->task->exec_browser = set->browser;
     task->task->exec_command = command;
@@ -3817,7 +3805,7 @@ xset_custom_new()
     std::string setname = xset_custom_new_name();
 
     XSet* set;
-    set = xset_get(setname.data());
+    set = xset_get(setname.c_str());
     set->lock = false;
     set->keep_terminal = XSET_B_TRUE;
     set->task = XSET_B_TRUE;
@@ -4002,7 +3990,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
         if (set2 && set2 != set && set2->key > 0 && set2->key == event->keyval &&
             set2->keymod == keymod && set2 != keyset)
         {
-            char* name;
+            std::string name;
             if (set2->desc && !strcmp(set2->desc, "@plugin@mirror@") && set2->shared_key)
             {
                 // set2 is plugin mirror
@@ -4010,12 +3998,12 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
                 if (rset->menu_label)
                     name = clean_label(rset->menu_label, false, false);
                 else
-                    name = g_strdup("( no name )");
+                    name = "( no name )";
             }
             else if (set2->menu_label)
                 name = clean_label(set2->menu_label, false, false);
             else
-                name = g_strdup("( no name )");
+                name = "( no name )";
 
             keyname = xset_get_keyname(nullptr, event->keyval, keymod);
 #ifdef HAVE_NONLATIN
@@ -4030,7 +4018,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
                     event->keyval,
                     keymod,
                     keyname.c_str(),
-                    name);
+                    name.c_str());
 #ifdef HAVE_NONLATIN
             else
                 gtk_message_dialog_format_secondary_text(
@@ -4043,9 +4031,8 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
                     nonlatin_key,
                     keymod,
                     keyname.c_str(),
-                    name);
+                    name.c_str());
 #endif
-            g_free(name);
             *newkey = event->keyval;
             *newkeymod = keymod;
             return true;
@@ -4075,7 +4062,7 @@ xset_set_key(GtkWidget* parent, XSet* set)
     if (set->menu_label)
         name = clean_label(set->menu_label, false, true);
     else if (set->tool > XSET_TOOL_CUSTOM)
-        name = g_strdup(xset_get_builtin_toolitem_label(set->tool));
+        name = xset_get_builtin_toolitem_label(set->tool);
     else if (g_str_has_prefix(set->name, "open_all_type_"))
     {
         keyset = xset_get("open_all");
@@ -4652,7 +4639,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 break;
             }
             if (set->menu_label && set->menu_label[0])
-                name = clean_label(set->menu_label, false, false);
+                name = g_strdup(clean_label(set->menu_label, false, false).c_str());
             else
             {
                 if (!set->lock && set->z && set->menu_style < XSET_MENU_SUBMENU &&
@@ -5729,7 +5716,7 @@ xset_menu_cb(GtkWidget* item, XSet* set)
     GtkWidget* parent;
     GFunc cb_func = nullptr;
     void* cb_data = nullptr;
-    char* title;
+    std::string title;
     XSet* mset; // mirror set or set
     XSet* rset; // real set
 
@@ -5820,7 +5807,7 @@ xset_menu_cb(GtkWidget* item, XSet* set)
                     }
                 }
                 else if (xset_text_dialog(parent,
-                                          title,
+                                          title.c_str(),
                                           true,
                                           msg.c_str(),
                                           nullptr,
@@ -5834,7 +5821,6 @@ xset_menu_cb(GtkWidget* item, XSet* set)
                     else if (!set->lock)
                         xset_custom_activate(item, rset);
                 }
-                g_free(title);
             }
             break;
             case XSET_MENU_RADIO:
@@ -6864,7 +6850,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     GdkPixbuf* pixbuf = nullptr;
     char* icon_file = nullptr;
     int cmd_type;
-    char* str;
+    std::string str;
 
     if (set->lock)
         return nullptr;
@@ -7011,8 +6997,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             if (show_tooltips)
             {
                 str = clean_label(new_menu_label, false, false);
-                gtk_widget_set_tooltip_text(ebox, str);
-                g_free(str);
+                gtk_widget_set_tooltip_text(ebox, str.c_str());
             }
             g_free(new_menu_label);
             break;
@@ -7062,8 +7047,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             if (show_tooltips)
             {
                 str = clean_label(menu_label, false, false);
-                gtk_widget_set_tooltip_text(ebox, str);
-                g_free(str);
+                gtk_widget_set_tooltip_text(ebox, str.c_str());
             }
             break;
         case XSET_MENU_SUBMENU:
@@ -7170,8 +7154,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             if (show_tooltips)
             {
                 str = clean_label(menu_label, false, false);
-                gtk_widget_set_tooltip_text(ebox, str);
-                g_free(str);
+                gtk_widget_set_tooltip_text(ebox, str.c_str());
             }
             g_free(new_menu_label);
 
@@ -7236,8 +7219,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             if (show_tooltips)
             {
                 str = clean_label(menu_label, false, false);
-                gtk_widget_set_tooltip_text(ebox, str);
-                g_free(str);
+                gtk_widget_set_tooltip_text(ebox, str.c_str());
             }
             break;
         case XSET_MENU_SEP:

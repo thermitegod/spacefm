@@ -388,7 +388,8 @@ XSet* xset_set_ob1_int(XSet* set, const char* ob1, int ob1_int);
 XSet* xset_set_ob1(XSet* set, const char* ob1, void* ob1_data);
 XSet* xset_set_ob2(XSet* set, const char* ob2, void* ob2_data);
 XSet* xset_is(const char* name);
-XSet* xset_find_custom(const char* search);
+
+XSet* xset_find_custom(const std::string& search);
 
 int xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string& title,
                     GtkButtonsType buttons, const std::string& msg1, const std::string& msg2);

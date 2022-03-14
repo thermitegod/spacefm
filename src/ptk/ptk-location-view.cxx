@@ -3125,7 +3125,6 @@ select_bookmark(GtkTreeView* view, XSet* set)
 static void
 update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
 {
-    char* name;
     const char* icon1 = nullptr;
     const char* icon2 = nullptr;
     const char* icon3 = nullptr;
@@ -3229,11 +3228,11 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
     }
 
     // add label and xset name
+    std::string name;
     name = clean_label(menu_label ? menu_label : set->menu_label, false, false);
-    gtk_list_store_set(list, it, COL_NAME, name, -1);
+    gtk_list_store_set(list, it, COL_NAME, name.c_str(), -1);
     gtk_list_store_set(list, it, COL_PATH, set->name, -1);
     gtk_list_store_set(list, it, COL_DATA, is_sep, -1);
-    g_free(name);
     g_free(menu_label);
 
     // add icon
@@ -3290,11 +3289,11 @@ ptk_bookmark_view_reload_list(GtkTreeView* view, XSet* book_set)
 
     // Add top item
     gtk_list_store_insert(list, &it, ++pos);
-    char* name = clean_label(book_set->menu_label, false, false);
+    std::string name;
+    name = clean_label(book_set->menu_label, false, false);
     // char* name = g_strdup_printf( "[ %s ]", str );
-    gtk_list_store_set(list, &it, COL_NAME, name, -1);
+    gtk_list_store_set(list, &it, COL_NAME, name.c_str(), -1);
     gtk_list_store_set(list, &it, COL_PATH, book_set->name, -1);
-    g_free(name);
     // icon
     GtkIconTheme* icon_theme;
     GdkPixbuf* icon = nullptr;

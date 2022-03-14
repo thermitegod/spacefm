@@ -23,7 +23,8 @@ void open_in_prog(const char* path);
 
 std::string bash_quote(const std::string& str);
 
-char* clean_label(const char* menu_label, bool kill_special, bool convert_amp);
+std::string clean_label(const std::string& menu_label, bool kill_special, bool escape);
+
 void string_copy_free(char** s, const char* src);
 char* unescape(const char* t);
 
