@@ -1950,7 +1950,6 @@ vfs_free_volume_members(VFSVolume* volume)
     g_free(volume->label);
     g_free(volume->mount_point);
     g_free(volume->disp_name);
-    g_free(volume->icon);
 }
 
 void
@@ -1974,49 +1973,49 @@ vfs_volume_set_info(VFSVolume* volume)
     {
         case DEVICE_TYPE_BLOCK:
             if (volume->is_audiocd)
-                volume->icon = g_strdup_printf("dev_icon_audiocd");
+                volume->icon = "dev_icon_audiocd";
             else if (volume->is_optical)
             {
                 if (volume->is_mounted)
-                    volume->icon = g_strdup_printf("dev_icon_optical_mounted");
+                    volume->icon = "dev_icon_optical_mounted";
                 else if (volume->is_mountable)
-                    volume->icon = g_strdup_printf("dev_icon_optical_media");
+                    volume->icon = "dev_icon_optical_media";
                 else
-                    volume->icon = g_strdup_printf("dev_icon_optical_nomedia");
+                    volume->icon = "dev_icon_optical_nomedia";
             }
             else if (volume->is_floppy)
             {
                 if (volume->is_mounted)
-                    volume->icon = g_strdup_printf("dev_icon_floppy_mounted");
+                    volume->icon = "dev_icon_floppy_mounted";
                 else
-                    volume->icon = g_strdup_printf("dev_icon_floppy_unmounted");
+                    volume->icon = "dev_icon_floppy_unmounted";
                 volume->is_mountable = true;
             }
             else if (volume->is_removable)
             {
                 if (volume->is_mounted)
-                    volume->icon = g_strdup_printf("dev_icon_remove_mounted");
+                    volume->icon = "dev_icon_remove_mounted";
                 else
-                    volume->icon = g_strdup_printf("dev_icon_remove_unmounted");
+                    volume->icon = "dev_icon_remove_unmounted";
             }
             else
             {
                 if (volume->is_mounted)
                 {
                     if (g_str_has_prefix(volume->device_file, "/dev/loop"))
-                        volume->icon = g_strdup_printf("dev_icon_file");
+                        volume->icon = "dev_icon_file";
                     else
-                        volume->icon = g_strdup_printf("dev_icon_internal_mounted");
+                        volume->icon = "dev_icon_internal_mounted";
                 }
                 else
-                    volume->icon = g_strdup_printf("dev_icon_internal_unmounted");
+                    volume->icon = "dev_icon_internal_unmounted";
             }
             break;
         case DEVICE_TYPE_NETWORK:
-            volume->icon = g_strdup_printf("dev_icon_network");
+            volume->icon = "dev_icon_network";
             break;
         case DEVICE_TYPE_OTHER:
-            volume->icon = g_strdup_printf("dev_icon_file");
+            volume->icon = "dev_icon_file";
             break;
         default:
             break;
@@ -2233,7 +2232,6 @@ vfs_volume_read_by_device(struct udev_device* udevice)
     volume->label = g_strdup(device->id_label);
     volume->fs_type = g_strdup(device->id_type);
     volume->disp_name = nullptr;
-    volume->icon = nullptr;
     volume->automount_time = 0;
     volume->inhibit_auto = false;
 
@@ -2578,7 +2576,6 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         volume->open_main_window = nullptr;
         volume->mount_point = point;
         volume->disp_name = nullptr;
-        volume->icon = nullptr;
         volume->automount_time = 0;
         volume->inhibit_auto = false;
 
@@ -2624,7 +2621,6 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         volume->open_main_window = nullptr;
         volume->mount_point = point;
         volume->disp_name = nullptr;
-        volume->icon = nullptr;
         volume->automount_time = 0;
         volume->inhibit_auto = false;
     }
@@ -2666,7 +2662,6 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
             volume->open_main_window = nullptr;
             volume->mount_point = point;
             volume->disp_name = nullptr;
-            volume->icon = nullptr;
             volume->automount_time = 0;
             volume->inhibit_auto = false;
         }
@@ -3544,7 +3539,7 @@ vfs_volume_device_added(VFSVolume* volume, bool automount)
             volume2->device_file = g_strdup(volume->device_file);
             volume2->label = g_strdup(volume->label);
             volume2->mount_point = g_strdup(volume->mount_point);
-            volume2->icon = g_strdup(volume->icon);
+            volume2->icon = volume->icon;
             volume2->disp_name = g_strdup(volume->disp_name);
             volume2->is_mounted = volume->is_mounted;
             volume2->is_mountable = volume->is_mountable;
@@ -4013,9 +4008,9 @@ vfs_volume_get_fstype(VFSVolume* vol)
 const char*
 vfs_volume_get_icon(VFSVolume* vol)
 {
-    if (!vol->icon)
+    if (vol->icon.empty())
         return nullptr;
-    XSet* set = xset_get(vol->icon);
+    XSet* set = xset_get(vol->icon.c_str());
     return set->icon;
 }
 

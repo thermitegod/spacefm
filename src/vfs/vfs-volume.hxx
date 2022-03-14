@@ -87,7 +87,7 @@ struct VFSVolume
     char* device_file;
     char* udi;
     char* disp_name;
-    char* icon;
+    std::string icon;
     char* mount_point;
     uint64_t size;
     char* label;
