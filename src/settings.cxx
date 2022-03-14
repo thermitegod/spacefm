@@ -1212,7 +1212,8 @@ xset_set_ob2(XSet* set, const char* ob2, void* ob2_data)
 static XSet*
 xset_set_set_int(XSet* set, const char* var, const char* value)
 {
-    int tmp;
+    XSetSetSet tmp;
+
     if (!strcmp(var, "s"))
         tmp = XSET_SET_SET_S;
     else if (!strcmp(var, "b"))
@@ -1282,7 +1283,7 @@ xset_set_set_int(XSet* set, const char* var, const char* value)
 }
 
 XSet*
-xset_set_set(XSet* set, int var, const char* value)
+xset_set_set(XSet* set, XSetSetSet var, const char* value)
 {
     if (!set)
         return nullptr;

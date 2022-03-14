@@ -372,7 +372,7 @@ XSet* xset_set_cb(const char* name, GFunc cb_func, void* cb_data);
 XSet* xset_set_cb_panel(int panel, const char* name, GFunc cb_func, void* cb_data);
 
 XSet* xset_set(const char* name, const char* var, const char* value);
-XSet* xset_set_set(XSet* set, int var, const char* value);
+XSet* xset_set_set(XSet* set, XSetSetSet var, const char* value);
 
 void xset_set_key(GtkWidget* parent, XSet* set);
 
