@@ -21,6 +21,8 @@
 
 #include "vfs/vfs-thumbnail-loader.hxx"
 
+#include "utils.hxx"
+
 static void ptk_file_list_init(PtkFileList* list);
 
 static void ptk_file_list_class_init(PtkFileListClass* klass);
@@ -709,9 +711,9 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
     {
         // natural
         if (list->sort_case)
-            result = strcmp(file_a->collate_key, file_b->collate_key);
+            result = ztd::same(file_a->collate_key, file_b->collate_key);
         else
-            result = strcmp(file_a->collate_icase_key, file_b->collate_icase_key);
+            result = ztd::same(file_a->collate_icase_key, file_b->collate_icase_key);
     }
 #endif
     else

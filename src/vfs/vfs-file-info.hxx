@@ -47,17 +47,17 @@ struct VFSFileInfo
     long blksize;
     blkcnt_t blocks;
 
-    char* name;                 /* real name on file system */
-    char* disp_name;            /* displayed name (in UTF-8) */
-    char* collate_key;          // sfm sort key
-    char* collate_icase_key;    // sfm case folded sort key
-    char* disp_size;            /* displayed human-readable file size */
-    char* disp_owner;           /* displayed owner:group pair */
-    char* disp_mtime;           /* displayed last modification time */
-    char disp_perm[12];         /* displayed permission in string form */
-    VFSMimeType* mime_type;     /* mime type related information */
-    GdkPixbuf* big_thumbnail;   /* thumbnail of the file */
-    GdkPixbuf* small_thumbnail; /* thumbnail of the file */
+    char* name;                    // real name on file system
+    char* disp_name;               // displayed name (in UTF-8)
+    std::string collate_key;       // sfm sort key
+    std::string collate_icase_key; // sfm case folded sort key
+    char* disp_size;               // displayed human-readable file size
+    char* disp_owner;              // displayed owner:group pair
+    char* disp_mtime;              // displayed last modification time
+    char disp_perm[12];            // displayed permission in string form
+    VFSMimeType* mime_type;        // mime type related information
+    GdkPixbuf* big_thumbnail;      // thumbnail of the file
+    GdkPixbuf* small_thumbnail;    // thumbnail of the file
 
     VFSFileInfoFlag flags; /* if it's a special file */
 

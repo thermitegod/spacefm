@@ -51,16 +51,10 @@ vfs_file_info_clear(VFSFileInfo* fi)
         g_free(fi->name);
         fi->name = nullptr;
     }
-    if (fi->collate_key) // sfm
-    {
-        g_free(fi->collate_key);
-        fi->collate_key = nullptr;
-    }
-    if (fi->collate_icase_key) // sfm
-    {
-        g_free(fi->collate_icase_key);
-        fi->collate_icase_key = nullptr;
-    }
+    if (!fi->collate_key.empty())
+        fi->collate_key.clear();
+    if (!fi->collate_icase_key.empty())
+        fi->collate_icase_key.clear();
     if (fi->disp_size)
     {
         g_free(fi->disp_size);
@@ -76,6 +70,7 @@ vfs_file_info_clear(VFSFileInfo* fi)
         g_free(fi->disp_mtime);
         fi->disp_mtime = nullptr;
     }
+
     if (fi->big_thumbnail)
     {
         g_object_unref(fi->big_thumbnail);
@@ -181,12 +176,9 @@ vfs_file_info_set_disp_name(VFSFileInfo* fi, const char* name)
         g_free(fi->disp_name);
     fi->disp_name = g_strdup(name);
     // sfm get new collate keys
-    g_free(fi->collate_key);
-    g_free(fi->collate_icase_key);
     fi->collate_key = g_utf8_collate_key_for_filename(fi->disp_name, -1);
-    char* str = g_utf8_casefold(fi->disp_name, -1);
-    fi->collate_icase_key = g_utf8_collate_key_for_filename(str, -1);
-    g_free(str);
+    std::string str = g_utf8_casefold(fi->disp_name, -1);
+    fi->collate_icase_key = g_utf8_collate_key_for_filename(str.c_str(), -1);
 }
 
 off_t
