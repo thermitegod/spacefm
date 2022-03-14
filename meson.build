@@ -138,8 +138,13 @@ spdlog_dep = dependency('spdlog', required : true)
 fmt_dep = dependency('fmt', required : true)
 sigc_dep = dependency('sigc++-3.0', required : true)
 
+#gtk_dep = dependency('gtk+-4.0', required : true)
 gtk_dep = dependency('gtk+-3.0', required : true)
 glib_dep = dependency('glib-2.0', required : true)
+
+#gtkmm_dep = dependency('gtkmm-4.0', required : true)
+glibmm_dep = dependency('glibmm-2.68', required : true)
+giomm_dep = dependency('giomm-2.68', required : true)
 
 
 sources = [
@@ -200,6 +205,9 @@ spacefm = build_target(
   install : true,
   install_dir : bindir,
   dependencies: [
+    glibmm_dep,
+    giomm_dep,
+
     glib_dep,
     gtk_dep,
 
