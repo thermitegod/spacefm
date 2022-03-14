@@ -10,6 +10,8 @@
 #include <string>
 #include <filesystem>
 
+#include <glibmm.h>
+
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dir.hxx"
 
@@ -614,19 +616,19 @@ load_all_known_apps_thread(VFSAsyncTask* task)
 {
     GtkListStore* list = GTK_LIST_STORE(vfs_async_task_get_data(task));
 
-    char* dir = g_build_filename(vfs_user_data_dir(), "applications", nullptr);
-    load_all_apps_in_dir(dir, list, task);
-    g_free(dir);
+    std::string dir;
 
-    char** dirs;
-    for (dirs = (char**)vfs_system_data_dir(); !task->cancel && *dirs; ++dirs)
+    dir = Glib::build_filename(vfs_user_data_dir(), "applications");
+    load_all_apps_in_dir(dir.c_str(), list, task);
+
+    for (std::string sys_dir: vfs_system_data_dir())
     {
-        dir = g_build_filename(*dirs, "applications", nullptr);
-        load_all_apps_in_dir(dir, list, task);
-        g_free(dir);
+        dir = Glib::build_filename(sys_dir, "applications");
+        load_all_apps_in_dir(dir.c_str(), list, task);
     }
 
     vfs_async_task_lock(task);
     vfs_async_task_unlock(task);
+
     return nullptr;
 }

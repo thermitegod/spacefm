@@ -7,7 +7,7 @@
 #include <string>
 #include <filesystem>
 
-#include <glib.h>
+#include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -17,18 +17,18 @@
 struct VFSDirXDG
 {
     // GUserDirectory
-    const std::string user_desktop{g_get_user_special_dir(G_USER_DIRECTORY_DESKTOP)};
-    const std::string user_template{g_get_user_special_dir(G_USER_DIRECTORY_TEMPLATES)};
+    const std::string user_desktop{Glib::get_user_special_dir(Glib::UserDirectory::DESKTOP)};
+    const std::string user_template{Glib::get_user_special_dir(Glib::UserDirectory::TEMPLATES)};
 
     // User
-    const std::string user_home{g_get_home_dir()};
-    const std::string user_cache{g_get_user_cache_dir()};
-    const std::string user_data{g_get_user_data_dir()};
-    const std::string user_config{g_get_user_config_dir()};
-    const std::string user_runtime{g_get_user_runtime_dir()};
+    const std::string user_home{Glib::get_home_dir()};
+    const std::string user_cache{Glib::get_user_cache_dir()};
+    const std::string user_data{Glib::get_user_data_dir()};
+    const std::string user_config{Glib::get_user_config_dir()};
+    const std::string user_runtime{Glib::get_user_runtime_dir()};
 
     // System
-    const char* const* sys_data{g_get_system_data_dirs()};
+    const std::vector<std::string> sys_data{Glib::get_system_data_dirs()};
 };
 
 VFSDirXDG vfs_dir_xdg;
@@ -75,7 +75,7 @@ vfs_user_runtime_dir()
     return vfs_dir_xdg.user_runtime.c_str();
 }
 
-const char* const*
+std::vector<std::string>
 vfs_system_data_dir()
 {
     return vfs_dir_xdg.sys_data;

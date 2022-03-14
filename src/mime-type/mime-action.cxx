@@ -19,8 +19,12 @@
 #include <string>
 #include <filesystem>
 
+#include <vector>
+
 #include <unistd.h>
 #include <fcntl.h>
+
+#include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -55,31 +59,25 @@ data_dir_foreach(DataDirFunc func, const char* mime_type, void* user_data)
 {
     char* ret = nullptr;
 
+    std::string dir;
+
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
     if ((ret = func(vfs_user_config_dir(), mime_type, user_data)))
         return ret;
 
     // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
-    char* dir = g_build_filename(vfs_user_data_dir(), "applications", nullptr);
-    if ((ret = func(dir, mime_type, user_data)))
-    {
-        g_free(dir);
+    dir = Glib::build_filename(vfs_user_data_dir(), "applications");
+    if ((ret = func(dir.c_str(), mime_type, user_data)))
         return ret;
-    }
-    g_free(dir);
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
-    const char* const* dirs = vfs_system_data_dir();
-    for (; *dirs; ++dirs)
+    for (std::string sys_dir: vfs_system_data_dir())
     {
-        dir = g_build_filename(*dirs, "applications", nullptr);
-        if ((ret = func(dir, mime_type, user_data)))
-        {
-            g_free(dir);
+        dir = Glib::build_filename(sys_dir, "applications");
+        if ((ret = func(dir.c_str(), mime_type, user_data)))
             return ret;
-        }
-        g_free(dir);
     }
+
     return ret;
 }
 
@@ -87,15 +85,15 @@ static char*
 apps_dir_foreach(DataDirFunc func, const char* mime_type, void* user_data)
 {
     char* ret = nullptr;
-    const char* dir = vfs_user_data_dir();
 
-    if ((ret = func(dir, mime_type, user_data)))
+    std::string dir = vfs_user_data_dir();
+
+    if ((ret = func(dir.c_str(), mime_type, user_data)))
         return ret;
 
-    const char* const* dirs = vfs_system_data_dir();
-    for (; *dirs; ++dirs)
+    for (std::string sys_dir: vfs_system_data_dir())
     {
-        if ((ret = func(*dirs, mime_type, user_data)))
+        if ((ret = func(sys_dir.c_str(), mime_type, user_data)))
             return ret;
     }
     return ret;

@@ -1404,12 +1404,12 @@ get_shared_desktop_file_location(const char* name)
 {
     char* ret;
 
-    const char* const* dirs = vfs_system_data_dir();
-    for (; *dirs; ++dirs)
+    for (std::string sys_dir: vfs_system_data_dir())
     {
-        if ((ret = vfs_mime_type_locate_desktop_file(*dirs, name)))
+        if ((ret = vfs_mime_type_locate_desktop_file(sys_dir.c_str(), name)))
             return ret;
     }
+
     return nullptr;
 }
 

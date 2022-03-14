@@ -24,9 +24,13 @@
 #include <string>
 #include <filesystem>
 
+#include <vector>
+
 #include <cstdint>
 
 #include <fcntl.h>
+
+#include <glibmm.h>
 
 #include "utils.hxx"
 
@@ -61,7 +65,7 @@ static void mime_cache_foreach(GFunc func, void* user_data);
 static bool mime_type_is_subclass(const char* type, const char* parent);
 
 static MimeCache** caches = nullptr;
-static unsigned int n_caches = 0;
+static std::size_t n_caches = 0;
 uint32_t mime_cache_max_extent = 0;
 
 /* allocated buffer used for mime magic checking to
@@ -437,11 +441,10 @@ mime_type_get_desc_icon(const char* type, const char* locale, char** icon_name)
     }
 
     // look in system dirs
-    const char* const* dir = vfs_system_data_dir();
-    for (; *dir; ++dir)
+    for (std::string sys_dir: vfs_system_data_dir())
     {
         /* FIXME: This path shouldn't be hard-coded. */
-        g_snprintf(file_path, 256, "%s/mime/%s.xml", *dir, type);
+        g_snprintf(file_path, 256, "%s/mime/%s.xml", sys_dir.c_str(), type);
         if (faccessat(0, file_path, F_OK, AT_EACCESS) != -1)
         {
             desc = _mime_type_get_desc_icon(file_path, locale, false, icon_name);
@@ -475,21 +478,20 @@ mime_cache_load_all()
 {
     const char filename[] = "/mime/mime.cache";
 
-    const char* const* dirs = vfs_system_data_dir();
-    n_caches = g_strv_length((char**)dirs) + 1;
-    caches = (MimeCache**)g_slice_alloc(n_caches * sizeof(MimeCache*));
+    std::vector<std::string> dirs = vfs_system_data_dir();
+    n_caches = dirs.size();
+    caches = (MimeCache**)g_slice_alloc(dirs.size() * sizeof(MimeCache*));
 
-    char* path = g_build_filename(vfs_user_data_dir(), filename, nullptr);
-    caches[0] = mime_cache_new(path);
-    g_free(path);
+    std::string path = Glib::build_filename(vfs_user_data_dir(), filename);
+    caches[0] = mime_cache_new(path.c_str());
     if (caches[0]->magic_max_extent > mime_cache_max_extent)
         mime_cache_max_extent = caches[0]->magic_max_extent;
 
-    for (unsigned int i = 1; i < n_caches; ++i)
+    // for (std::string sys_dir: vfs_system_data_dir())
+    for (std::size_t i = 0; i < dirs.size(); ++i)
     {
-        path = g_build_filename(dirs[i - 1], filename, nullptr);
-        caches[i] = mime_cache_new(path);
-        g_free(path);
+        path = Glib::build_filename(dirs[i], filename);
+        caches[i] = mime_cache_new(path.c_str());
         if (caches[i]->magic_max_extent > mime_cache_max_extent)
             mime_cache_max_extent = caches[i]->magic_max_extent;
     }
