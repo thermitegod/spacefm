@@ -5751,11 +5751,17 @@ main_task_view_new(FMMainWindow* main_window)
 // ============== socket commands
 
 static bool
-get_bool(const char* value)
+get_bool(const std::string& value)
 {
-    return (!(value && value[0]) || !strcmp(value, "1") || !strcmp(value, "true") ||
-            !strcmp(value, "True") || !strcmp(value, "true") || !strcmp(value, "yes") ||
-            !strcmp(value, "Yes") || !strcmp(value, "YES"));
+    if (ztd::same(ztd::lower(value), "yes") || ztd::same(value, "1"))
+        return true;
+    else if (ztd::same(ztd::lower(value), "no") || ztd::same(value, "0"))
+        return false;
+
+    // throw std::logic_error("");
+    LOG_WARN("socket command defaulting to false, invalid value: {}", value);
+    LOG_INFO("supported socket command values are 'yes|1|no|0");
+    return false;
 }
 
 static bool
