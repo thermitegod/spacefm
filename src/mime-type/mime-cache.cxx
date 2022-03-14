@@ -45,8 +45,8 @@
 #define LIB_MIN_MINOR_VERSION 0
 
 /* handle byte order here */
-#define VAL16(buffrer, idx) GUINT16_FROM_BE(*(uint16_t*)(buffer + idx))
-#define VAL32(buffer, idx)  GUINT32_FROM_BE(*(uint32_t*)(buffer + idx))
+#define VAL16(buffer, idx) GUINT16_FROM_BE(*(uint16_t*)(buffer + idx))
+#define VAL32(buffer, idx) GUINT32_FROM_BE(*(uint32_t*)(buffer + idx))
 
 /* cache header */
 #define MAJOR_VERSION  0
@@ -159,30 +159,30 @@ mime_cache_load(MimeCache* cache, const char* file_path)
     cache->buffer = buffer;
     cache->size = statbuf.st_size;
 
-    offset = VAL32(buffer, ALIAS_LIST);
-    cache->alias = buffer + offset + 4;
-    cache->n_alias = VAL32(buffer, offset);
+    offset = VAL32(cache->buffer, ALIAS_LIST);
+    cache->alias = cache->buffer + offset + 4;
+    cache->n_alias = VAL32(cache->buffer, offset);
 
-    offset = VAL32(buffer, PARENT_LIST);
-    cache->parents = buffer + offset + 4;
-    cache->n_parents = VAL32(buffer, offset);
+    offset = VAL32(cache->buffer, PARENT_LIST);
+    cache->parents = cache->buffer + offset + 4;
+    cache->n_parents = VAL32(cache->buffer, offset);
 
-    offset = VAL32(buffer, LITERAL_LIST);
-    cache->literals = buffer + offset + 4;
-    cache->n_literals = VAL32(buffer, offset);
+    offset = VAL32(cache->buffer, LITERAL_LIST);
+    cache->literals = cache->buffer + offset + 4;
+    cache->n_literals = VAL32(cache->buffer, offset);
 
-    offset = VAL32(buffer, GLOB_LIST);
-    cache->globs = buffer + offset + 4;
-    cache->n_globs = VAL32(buffer, offset);
+    offset = VAL32(cache->buffer, GLOB_LIST);
+    cache->globs = cache->buffer + offset + 4;
+    cache->n_globs = VAL32(cache->buffer, offset);
 
-    offset = VAL32(buffer, SUFFIX_TREE);
-    cache->suffix_roots = buffer + VAL32(buffer + offset, 4);
-    cache->n_suffix_roots = VAL32(buffer, offset);
+    offset = VAL32(cache->buffer, SUFFIX_TREE);
+    cache->suffix_roots = cache->buffer + VAL32(cache->buffer + offset, 4);
+    cache->n_suffix_roots = VAL32(cache->buffer, offset);
 
-    offset = VAL32(buffer, MAGIC_LIST);
-    cache->n_magics = VAL32(buffer, offset);
-    cache->magic_max_extent = VAL32(buffer + offset, 4);
-    cache->magics = buffer + VAL32(buffer + offset, 8);
+    offset = VAL32(cache->buffer, MAGIC_LIST);
+    cache->n_magics = VAL32(cache->buffer, offset);
+    cache->magic_max_extent = VAL32(cache->buffer + offset, 4);
+    cache->magics = cache->buffer + VAL32(cache->buffer + offset, 8);
 
     return true;
 }
