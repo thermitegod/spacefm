@@ -20,8 +20,6 @@
  *      MA 02110-1301, USA.
  */
 
-#undef VFS_THUMB_FINISH_DEBUG
-
 #include <string>
 #include <filesystem>
 
@@ -59,10 +57,6 @@ static void* thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loa
 static void thumbnail_request_free(VFSThumbnailRequest* req);
 static bool on_thumbnail_idle(VFSThumbnailLoader* loader);
 
-#ifdef VFS_THUMB_FINISH_DEBUG
-static void on_load_finish(VFSAsyncTask* task, bool is_cancelled, VFSThumbnailLoader* loader);
-#endif
-
 VFSThumbnailLoader*
 vfs_thumbnail_loader_new(VFSDir* dir)
 {
@@ -72,9 +66,6 @@ vfs_thumbnail_loader_new(VFSDir* dir)
     loader->queue = g_queue_new();
     loader->update_queue = g_queue_new();
     loader->task = vfs_async_task_new((VFSAsyncFunc)thumbnail_loader_thread, loader);
-#ifdef VFS_THUMB_FINISH_DEBUG
-    g_signal_connect(loader->task, "finish", G_CALLBACK(on_load_finish), loader);
-#endif
     return loader;
 }
 
@@ -86,10 +77,6 @@ vfs_thumbnail_loader_free(VFSThumbnailLoader* loader)
         g_source_remove(loader->idle_handler);
         loader->idle_handler = 0;
     }
-
-#ifdef VFS_THUMB_FINISH_DEBUG
-    g_signal_handlers_disconnect_by_func(loader->task, on_load_finish, loader);
-#endif
 
     // stop the running thread, if any.
     vfs_async_task_cancel(loader->task);
@@ -118,15 +105,6 @@ vfs_thumbnail_loader_free(VFSThumbnailLoader* loader)
     loader->dir->thumbnail_loader = nullptr;
     g_object_unref(loader->dir);
 }
-
-#ifdef VFS_THUMB_FINISH_DEBUG
-// This is not used in the program. For debug only
-void
-on_load_finish(VFSAsyncTask* task, bool is_cancelled, VFSThumbnailLoader* loader)
-{
-    LOG_DEBUG("TASK FINISHED");
-}
-#endif
 
 static void
 thumbnail_request_free(VFSThumbnailRequest* req)
