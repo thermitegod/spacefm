@@ -1105,9 +1105,8 @@ on_key_button_clicked(GtkWidget* widget, ContextData* ctxt)
         keyset = xset_get(ctxt->set->shared_key);
     else
         keyset = ctxt->set;
-    char* str = xset_get_keyname(keyset, 0, 0);
-    gtk_button_set_label(GTK_BUTTON(ctxt->item_key), str);
-    g_free(str);
+    std::string str = xset_get_keyname(keyset, 0, 0);
+    gtk_button_set_label(GTK_BUTTON(ctxt->item_key), str.c_str());
 }
 
 static void
@@ -2271,14 +2270,14 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     if (rset->menu_style < XSET_MENU_SUBMENU || set->tool == XSET_TOOL_BACK_MENU ||
         set->tool == XSET_TOOL_FWD_MENU)
     {
+        std::string str2;
         XSet* keyset;
         if (set->shared_key)
             keyset = xset_get(set->shared_key);
         else
             keyset = set;
-        str = xset_get_keyname(keyset, 0, 0);
-        gtk_button_set_label(GTK_BUTTON(ctxt->item_key), str);
-        g_free(str);
+        str2 = xset_get_keyname(keyset, 0, 0);
+        gtk_button_set_label(GTK_BUTTON(ctxt->item_key), str2.c_str());
     }
     else
         gtk_widget_set_sensitive(ctxt->item_key, false);

@@ -365,7 +365,7 @@ XSet* xset_set_b_panel_mode(int panel, const char* name, char mode, bool bval);
 XSetContext* xset_context_new();
 XSet* xset_get_plugin_mirror(XSet* set);
 char* xset_custom_get_script(XSet* set, bool create);
-char* xset_get_keyname(XSet* set, int key_val, int key_mod);
+std::string xset_get_keyname(XSet* set, int key_val, int key_mod);
 void xset_set_key(GtkWidget* parent, XSet* set);
 
 XSet* xset_set(const char* name, const char* var, const char* value);

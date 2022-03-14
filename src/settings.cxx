@@ -3913,7 +3913,7 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     ptk_file_task_run(task);
 }
 
-char*
+std::string
 xset_get_keyname(XSet* set, int key_val, int key_mod)
 {
     int keyval;
@@ -3929,51 +3929,31 @@ xset_get_keyname(XSet* set, int key_val, int key_mod)
         keymod = key_mod;
     }
     if (keyval <= 0)
-        return g_strdup("( none )");
-    char* mod = g_strdup(gdk_keyval_name(keyval));
+        return "( none )";
+
+    std::string mod = gdk_keyval_name(keyval);
+
+#if 0
     if (mod && mod[0] && !mod[1] && g_ascii_isalpha(mod[0]))
         mod[0] = g_ascii_toupper(mod[0]);
     else if (!mod)
         mod = g_strdup("NA");
-    char* str;
+#endif
+
     if (keymod)
     {
         if (keymod & GDK_SUPER_MASK)
-        {
-            str = mod;
-            mod = g_strdup_printf("Super+%s", str);
-            g_free(str);
-        }
+            mod = fmt::format("Super+{}", mod);
         if (keymod & GDK_HYPER_MASK)
-        {
-            str = mod;
-            mod = g_strdup_printf("Hyper+%s", str);
-            g_free(str);
-        }
+            mod = fmt::format("Hyper+{}", mod);
         if (keymod & GDK_META_MASK)
-        {
-            str = mod;
-            mod = g_strdup_printf("Meta+%s", str);
-            g_free(str);
-        }
+            mod = fmt::format("Meta+{}", mod);
         if (keymod & GDK_MOD1_MASK)
-        {
-            str = mod;
-            mod = g_strdup_printf("Alt+%s", str);
-            g_free(str);
-        }
+            mod = fmt::format("Alt+{}", mod);
         if (keymod & GDK_CONTROL_MASK)
-        {
-            str = mod;
-            mod = g_strdup_printf("Ctrl+%s", str);
-            g_free(str);
-        }
+            mod = fmt::format("Ctrl+{}", mod);
         if (keymod & GDK_SHIFT_MASK)
-        {
-            str = mod;
-            mod = g_strdup_printf("Shift+%s", str);
-            g_free(str);
-        }
+            mod = fmt::format("Shift+{}", mod);
     }
     return mod;
 }
@@ -3988,7 +3968,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
     GtkWidget* btn = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "btn"));
     XSet* set = XSET(g_object_get_data(G_OBJECT(dlg), "set"));
     XSet* keyset = nullptr;
-    char* keyname;
+    std::string keyname;
 
     unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
                                            GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
@@ -4067,10 +4047,10 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
                     "\t%s\n\tKeycode: %#4x  Modifier: %#x\n\n%s is already assigned to "
                     "'%s'.\n\nPress a different key or click Set to replace the current key "
                     "assignment.",
-                    keyname,
+                    keyname.c_str(),
                     event->keyval,
                     keymod,
-                    keyname,
+                    keyname.c_str(),
                     name);
 #ifdef HAVE_NONLATIN
             else
@@ -4079,15 +4059,14 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
                     "\t%s\n\tKeycode: %#4x [%#4x]  Modifier: %#x\n\n%s is already assigned to "
                     "'%s'.\n\nPress a different key or click Set to replace the current key "
                     "assignment.",
-                    keyname,
+                    keyname.c_str(),
                     event->keyval,
                     nonlatin_key,
                     keymod,
-                    keyname,
+                    keyname.c_str(),
                     name);
 #endif
             g_free(name);
-            g_free(keyname);
             *newkey = event->keyval;
             *newkeymod = keymod;
             return true;
@@ -4096,10 +4075,9 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
     keyname = xset_get_keyname(nullptr, event->keyval, keymod);
     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dlg),
                                              "\t%s\n\tKeycode: %#4x  Modifier: %#x",
-                                             keyname,
+                                             keyname.c_str(),
                                              event->keyval,
                                              keymod);
-    g_free(keyname);
     *newkey = event->keyval;
     *newkeymod = keymod;
     return true;
@@ -4108,8 +4086,8 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
 void
 xset_set_key(GtkWidget* parent, XSet* set)
 {
-    char* name;
-    char* keymsg;
+    std::string name;
+    std::string keymsg;
     XSet* keyset;
     unsigned int newkey = 0;
     unsigned int newkeymod = 0;
@@ -4128,18 +4106,19 @@ xset_set_key(GtkWidget* parent, XSet* set)
         set->shared_key = g_strdup("open_all");
     }
     else
-        name = g_strdup("( no name )");
-    keymsg = g_strdup_printf("Press your key combination for item '%s' then click Set.  To "
-                             "remove the current key assignment, click Unset.",
-                             name);
-    g_free(name);
+        name = "( no name )";
+
+    keymsg = fmt::format("Press your key combination for item '{}' then click Set.  To "
+                         "remove the current key assignment, click Unset.",
+                         name);
     if (parent)
         dlgparent = gtk_widget_get_toplevel(parent);
-    GtkWidget* dlg = gtk_message_dialog_new_with_markup(dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
+
+    GtkWidget* dlg = gtk_message_dialog_new_with_markup(GTK_WINDOW(dlgparent),
                                                         GTK_DIALOG_MODAL,
                                                         GTK_MESSAGE_QUESTION,
                                                         GTK_BUTTONS_NONE,
-                                                        keymsg,
+                                                        keymsg.c_str(),
                                                         nullptr);
     xset_set_window_icon(GTK_WINDOW(dlg));
 
