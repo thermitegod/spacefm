@@ -17,8 +17,16 @@
 struct VFSDirXDG
 {
     // GUserDirectory
+    // clang-format off
     const std::string user_desktop{Glib::get_user_special_dir(Glib::UserDirectory::DESKTOP)};
+    const std::string user_documents{Glib::get_user_special_dir(Glib::UserDirectory::DOCUMENTS)};
+    const std::string user_download{Glib::get_user_special_dir(Glib::UserDirectory::DOWNLOAD)};
+    const std::string user_music{Glib::get_user_special_dir(Glib::UserDirectory::MUSIC)};
+    const std::string user_pictures{Glib::get_user_special_dir(Glib::UserDirectory::PICTURES)};
+    const std::string user_public_share{Glib::get_user_special_dir(Glib::UserDirectory::PUBLIC_SHARE)};
     const std::string user_template{Glib::get_user_special_dir(Glib::UserDirectory::TEMPLATES)};
+    const std::string user_videos{Glib::get_user_special_dir(Glib::UserDirectory::VIDEOS)};
+    // clang-format on
 
     // User
     const std::string user_home{Glib::get_home_dir()};
@@ -40,9 +48,45 @@ vfs_user_desktop_dir() noexcept
 }
 
 const std::string&
+vfs_user_documents_dir() noexcept
+{
+    return vfs_dir_xdg.user_documents;
+}
+
+const std::string&
+vfs_user_download_dir() noexcept
+{
+    return vfs_dir_xdg.user_download;
+}
+
+const std::string&
+vfs_user_music_dir() noexcept
+{
+    return vfs_dir_xdg.user_music;
+}
+
+const std::string&
+vfs_user_pictures_dir() noexcept
+{
+    return vfs_dir_xdg.user_pictures;
+}
+
+const std::string&
+vfs_user_public_share_dir() noexcept
+{
+    return vfs_dir_xdg.user_public_share;
+}
+
+const std::string&
 vfs_user_template_dir() noexcept
 {
     return vfs_dir_xdg.user_template;
+}
+
+const std::string&
+vfs_user_videos_dir() noexcept
+{
+    return vfs_dir_xdg.user_videos;
 }
 
 const std::string&
