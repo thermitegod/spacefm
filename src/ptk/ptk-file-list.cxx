@@ -671,8 +671,8 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
         return list->sort_order == GTK_SORT_ASCENDING ? result : -result;
 
     // hidden first/last
-    bool hidden_a = file_a->disp_name[0] == '.' || file_a->disp_name[0] == '#';
-    bool hidden_b = file_b->disp_name[0] == '.' || file_b->disp_name[0] == '#';
+    bool hidden_a = file_a->disp_name.at(0) == '.' || file_a->disp_name.at(0) == '#';
+    bool hidden_b = file_b->disp_name.at(0) == '.' || file_b->disp_name.at(0) == '#';
     if (hidden_a && !hidden_b)
         result = list->sort_hidden_first ? -1 : 1;
     else if (!hidden_a && hidden_b)
@@ -686,8 +686,8 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
         // TODO - option to enable/disable numbers first
 
         // numbers before letters
-        bool num_a = isdigit(file_a->disp_name[0]);
-        bool num_b = isdigit(file_b->disp_name[0]);
+        bool num_a = isdigit(file_a->disp_name.at(0));
+        bool num_b = isdigit(file_b->disp_name.at(0));
         if (num_a && !num_b)
             result = -1;
         else if (!num_a && num_b)
@@ -725,7 +725,7 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
          * case insensitive when used on utf8
          * FIXME: No case sensitive mode here because no function compare
          * UTF-8 strings case sensitively without collating (natural) */
-        result = g_ascii_strcasecmp(file_a->disp_name, file_b->disp_name);
+        result = g_ascii_strcasecmp(file_a->disp_name.c_str(), file_b->disp_name.c_str());
     }
     return list->sort_order == GTK_SORT_ASCENDING ? result : -result;
 }

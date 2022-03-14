@@ -41,11 +41,8 @@ vfs_file_info_new()
 static void
 vfs_file_info_clear(VFSFileInfo* fi)
 {
-    if (fi->disp_name && fi->disp_name != fi->name.c_str())
-    {
-        g_free(fi->disp_name);
-        fi->disp_name = nullptr;
-    }
+    if (!fi->disp_name.empty() && !ztd::same(fi->disp_name, fi->name))
+        fi->disp_name.clear();
     if (!fi->name.empty())
         fi->name.clear();
     if (!fi->collate_key.empty())
@@ -114,9 +111,15 @@ vfs_file_info_get(VFSFileInfo* fi, const char* file_path, const char* base_name)
     vfs_file_info_clear(fi);
 
     if (base_name)
+    {
         fi->name = base_name;
+        fi->disp_name = base_name;
+    }
     else
+    {
         fi->name = g_path_get_basename(file_path);
+        fi->disp_name = g_path_get_basename(file_path);
+    }
 
     if (lstat(file_path, &file_stat) == 0)
     {
@@ -133,17 +136,13 @@ vfs_file_info_get(VFSFileInfo* fi, const char* file_path, const char* base_name)
         fi->blksize = file_stat.st_blksize;
         fi->blocks = file_stat.st_blocks;
 
-        if (G_LIKELY(g_utf8_validate(fi->name.c_str(), -1, nullptr)))
-            fi->disp_name = g_strdup(fi->name.c_str());
-        else
-            fi->disp_name = g_filename_display_name(fi->name.c_str());
+        fi->disp_name = fi->name;
 
-        fi->mime_type = vfs_mime_type_get_from_file(file_path, fi->disp_name, &file_stat);
+        fi->mime_type = vfs_mime_type_get_from_file(file_path, fi->disp_name.c_str(), &file_stat);
         // sfm get collate keys
-        fi->collate_key = g_utf8_collate_key_for_filename(fi->disp_name, -1);
-        char* str = g_utf8_casefold(fi->disp_name, -1);
-        fi->collate_icase_key = g_utf8_collate_key_for_filename(str, -1);
-        g_free(str);
+        fi->collate_key = g_utf8_collate_key_for_filename(fi->disp_name.c_str(), -1);
+        std::string str = g_utf8_casefold(fi->disp_name.c_str(), -1);
+        fi->collate_icase_key = g_utf8_collate_key_for_filename(str.c_str(), -1);
         return true;
     }
     else
@@ -161,18 +160,19 @@ vfs_file_info_get_name(VFSFileInfo* fi)
 const char*
 vfs_file_info_get_disp_name(VFSFileInfo* fi)
 {
-    return fi->disp_name;
+    return fi->disp_name.c_str();
 }
 
 void
 vfs_file_info_set_disp_name(VFSFileInfo* fi, const char* name)
 {
-    if (fi->disp_name && fi->disp_name != fi->name.c_str())
-        g_free(fi->disp_name);
-    fi->disp_name = g_strdup(name);
+    if (fi->disp_name.c_str() != fi->name.c_str())
+        fi->disp_name.clear();
+
+    fi->disp_name = name;
     // sfm get new collate keys
-    fi->collate_key = g_utf8_collate_key_for_filename(fi->disp_name, -1);
-    std::string str = g_utf8_casefold(fi->disp_name, -1);
+    fi->collate_key = g_utf8_collate_key_for_filename(fi->disp_name.c_str(), -1);
+    std::string str = g_utf8_casefold(fi->disp_name.c_str(), -1);
     fi->collate_icase_key = g_utf8_collate_key_for_filename(str.c_str(), -1);
 }
 

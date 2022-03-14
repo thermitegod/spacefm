@@ -678,7 +678,7 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
     /* FIXME: Dirty hack: steal the string to prevent memory allocation */
     std::string file_name = file->name;
     if (ztd::same(file->name, file->disp_name))
-        file->disp_name = nullptr;
+        file->disp_name.clear();
     file->name.clear();
 
     char* full_path = g_build_filename(dir->path, file_name.c_str(), nullptr);
