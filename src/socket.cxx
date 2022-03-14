@@ -286,18 +286,17 @@ single_instance_check()
             char** file;
             for (file = cli_flags.files; *file; ++file)
             {
-                char* real_path;
+                std::string real_path;
 
                 if ((*file[0] != '/' && strstr(*file, ":/")) || g_str_has_prefix(*file, "//"))
-                    real_path = g_strdup(*file);
+                    real_path = *file;
                 else
                 {
                     // We send absolute paths because with different
                     // $PWDs resolution would not work.
-                    real_path = dup_to_absolute_file_path(file);
+                    real_path = std::filesystem::absolute(*file);
                 }
-                write(sock, real_path, strlen(real_path));
-                g_free(real_path);
+                write(sock, real_path.c_str(), real_path.length());
                 write(sock, "\n", 1);
             }
         }
@@ -471,27 +470,4 @@ send_socket_command(int argc, char* argv[], char** reply)
     }
     g_string_free(sock_reply, true);
     return ret;
-}
-
-char*
-dup_to_absolute_file_path(char** file)
-{
-    char* file_path;
-    char* real_path;
-
-    if (g_str_has_prefix(*file, "file:"))
-    {
-        // It's a URI
-        file_path = g_filename_from_uri(*file, nullptr, nullptr);
-        g_free(*file);
-        *file = file_path;
-    }
-    else
-        file_path = *file;
-
-    std::string cwd = std::filesystem::current_path();
-    real_path = vfs_file_resolve_path(cwd.c_str(), file_path);
-
-    // To free with g_free
-    return real_path;
 }

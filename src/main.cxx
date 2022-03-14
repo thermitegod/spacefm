@@ -213,37 +213,37 @@ handle_parsed_commandline_args()
         char** file;
         for (file = cli_flags.files; *file; ++file)
         {
-            char* real_path;
+            std::string real_path;
 
             // skip empty string
             if (!**file)
                 continue;
 
-            real_path = dup_to_absolute_file_path(file);
+            real_path = std::filesystem::absolute(*file);
 
             if (std::filesystem::is_directory(real_path))
             {
-                open_in_tab(&main_window, real_path);
+                open_in_tab(&main_window, real_path.c_str());
                 ret = true;
             }
-            else if (std::filesystem::exists(real_path))
+            else if (std::filesystem::exists(real_path.c_str()))
             {
                 struct stat statbuf;
-                if (stat(real_path, &statbuf) == 0 && S_ISBLK(statbuf.st_mode))
+                if (stat(real_path.c_str(), &statbuf) == 0 && S_ISBLK(statbuf.st_mode))
                 {
                     // open block device eg /dev/sda1
                     if (!main_window)
                     {
                         open_in_tab(&main_window, "/");
-                        ptk_location_view_open_block(real_path, false);
+                        ptk_location_view_open_block(real_path.c_str(), false);
                     }
                     else
-                        ptk_location_view_open_block(real_path, true);
+                        ptk_location_view_open_block(real_path.c_str(), true);
                     ret = true;
                     gtk_window_present(GTK_WINDOW(main_window));
                 }
                 else
-                    open_file(real_path);
+                    open_file(real_path.c_str());
             }
             else if ((*file[0] != '/' && strstr(*file, ":/")) || g_str_has_prefix(*file, "//"))
             {
@@ -262,7 +262,6 @@ handle_parsed_commandline_args()
                 std::string err_msg = fmt::format("File doesn't exist:\n\n{}", real_path);
                 ptk_show_error(nullptr, "Error", err_msg);
             }
-            g_free(real_path);
         }
     }
     else if (!check_socket_daemon())

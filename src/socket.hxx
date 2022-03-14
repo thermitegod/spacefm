@@ -31,5 +31,3 @@ bool check_socket_daemon();
 bool single_instance_check();
 void single_instance_finalize();
 int send_socket_command(int argc, char* argv[], char** reply);
-
-char* dup_to_absolute_file_path(char** file);

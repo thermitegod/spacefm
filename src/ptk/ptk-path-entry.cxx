@@ -42,9 +42,8 @@ get_cwd(GtkEntry* entry)
         EntryData* edata = static_cast<EntryData*>(g_object_get_data(G_OBJECT(entry), "edata"));
         if (edata && edata->browser)
         {
-            char* real_path = vfs_file_resolve_path(ptk_file_browser_get_cwd(edata->browser), path);
-            char* ret = g_path_get_dirname(real_path);
-            g_free(real_path);
+            std::string real_path = std::filesystem::absolute(path);
+            char* ret = g_path_get_dirname(real_path.c_str());
             return ret;
         }
     }

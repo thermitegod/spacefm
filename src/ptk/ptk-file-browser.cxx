@@ -469,18 +469,14 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
 
     gtk_editable_select_region(GTK_EDITABLE(entry), 0, 0); // clear selection
 
-    // Convert to on-disk encoding
-    char* dir_path = g_filename_from_utf8(text, -1, nullptr, nullptr, nullptr);
-    char* final_path = vfs_file_resolve_path(ptk_file_browser_get_cwd(file_browser), dir_path);
-    g_free(dir_path);
-
     if (text[0] == '\0')
-    {
-        g_free(final_path);
         return;
-    }
 
-    char* str;
+    // Convert to on-disk encoding
+    std::string dir_path = g_filename_from_utf8(text, -1, nullptr, nullptr, nullptr);
+    std::string final_path = std::filesystem::absolute(dir_path);
+
+    std::string str;
     bool final_path_exists = std::filesystem::exists(final_path);
 
     if (!final_path_exists &&
@@ -503,8 +499,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
                 as_root = true;
 
             str = prefix;
-            prefix = g_strdup_printf("%s%c", str, text[0]);
-            g_free(str);
+            prefix = g_strdup_printf("%s%c", str.c_str(), text[0]);
             text++;
         }
         bool is_space = text[0] == ' ';
@@ -550,69 +545,63 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
 
         // reset entry text
         str = prefix;
-        prefix = g_strdup_printf("%s%s", str, is_space ? " " : "");
-        g_free(str);
+        prefix = g_strdup_printf("%s%s", str.c_str(), is_space ? " " : "");
         gtk_entry_set_text(GTK_ENTRY(entry), prefix);
         g_free(prefix);
         gtk_editable_set_position(GTK_EDITABLE(entry), -1);
     }
     else if (!final_path_exists && text[0] == '%')
     {
-        str = g_strdup(++text);
-        g_strstrip(str);
-        if (str && str[0] != '\0')
+        str = ztd::strip(++text);
+        if (!str.empty())
         {
             save_command_history(GTK_ENTRY(entry));
-            ptk_file_browser_select_pattern(nullptr, file_browser, str);
+            ptk_file_browser_select_pattern(nullptr, file_browser, str.c_str());
         }
-        g_free(str);
     }
     else if ((text[0] != '/' && strstr(text, ":/")) || g_str_has_prefix(text, "//"))
     {
         save_command_history(GTK_ENTRY(entry));
-        str = g_strdup(text);
-        ptk_location_view_mount_network(file_browser, str, false, false);
-        g_free(str);
+        ptk_location_view_mount_network(file_browser, text, false, false);
         return;
     }
     else
     {
         // path?
         // clean double slashes
-        while (strstr(final_path, "//"))
-        {
-            std::string str2 = final_path;
-            str2 = ztd::replace(str2, "//", "/");
-            final_path = const_cast<char*>(str2.c_str());
-        }
+        final_path = ztd::replace(final_path, "//", "/");
+
         if (std::filesystem::is_directory(final_path))
         {
             // open dir
-            if (strcmp(final_path, ptk_file_browser_get_cwd(file_browser)))
-                ptk_file_browser_chdir(file_browser, final_path, PTK_FB_CHDIR_ADD_HISTORY);
+            if (strcmp(final_path.c_str(), ptk_file_browser_get_cwd(file_browser)))
+                ptk_file_browser_chdir(file_browser, final_path.c_str(), PTK_FB_CHDIR_ADD_HISTORY);
             gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
         }
         else if (final_path_exists)
         {
             struct stat statbuf;
-            if (stat(final_path, &statbuf) == 0 && S_ISBLK(statbuf.st_mode) &&
-                ptk_location_view_open_block(final_path, false))
+            if (stat(final_path.c_str(), &statbuf) == 0 && S_ISBLK(statbuf.st_mode) &&
+                ptk_location_view_open_block(final_path.c_str(), false))
             {
                 // ptk_location_view_open_block opened device
             }
             else
             {
                 // open dir and select file
-                dir_path = g_path_get_dirname(final_path);
-                if (strcmp(dir_path, ptk_file_browser_get_cwd(file_browser)))
+                dir_path = g_path_get_dirname(final_path.c_str());
+                if (!ztd::contains(dir_path, ptk_file_browser_get_cwd(file_browser)))
                 {
                     g_free(file_browser->select_path);
-                    file_browser->select_path = g_strdup(final_path);
-                    ptk_file_browser_chdir(file_browser, dir_path, PTK_FB_CHDIR_ADD_HISTORY);
+                    file_browser->select_path = g_strdup(final_path.c_str());
+                    ptk_file_browser_chdir(file_browser,
+                                           dir_path.c_str(),
+                                           PTK_FB_CHDIR_ADD_HISTORY);
                 }
                 else
-                    ptk_file_browser_select_file(file_browser, final_path);
-                g_free(dir_path);
+                {
+                    ptk_file_browser_select_file(file_browser, final_path.c_str());
+                }
             }
             gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
         }

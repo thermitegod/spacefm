@@ -138,6 +138,3 @@ bool vfs_file_info_open_file(VFSFileInfo* fi, const char* file_path, GError** er
 void vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path);
 
 void vfs_file_info_list_free(GList* list);
-
-/* resolve file path name */
-char* vfs_file_resolve_path(const char* cwd, const char* relative_path);
