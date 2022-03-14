@@ -25,7 +25,6 @@ std::string bash_quote(const std::string& str);
 
 std::string clean_label(const std::string& menu_label, bool kill_special, bool escape);
 
-void string_copy_free(char** s, const char* src);
 char* unescape(const char* t);
 
 char* get_valid_su();

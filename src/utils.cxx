@@ -195,14 +195,6 @@ clean_label(const std::string& menu_label, bool kill_special, bool escape)
     return new_menu_label;
 }
 
-void
-string_copy_free(char** s, const char* src)
-{
-    char* discard = *s;
-    *s = g_strdup(src);
-    g_free(discard);
-}
-
 char*
 unescape(const char* t)
 {

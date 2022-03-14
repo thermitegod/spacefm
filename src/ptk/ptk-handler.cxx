@@ -1093,6 +1093,14 @@ ptk_handler_file_has_handlers(int mode, int cmd, const char* path, VFSMimeType* 
     return g_slist_reverse(handlers);
 }
 
+static void
+string_copy_free(char** s, const char* src)
+{
+    char* discard = *s;
+    *s = g_strdup(src);
+    g_free(discard);
+}
+
 void
 ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
 {
