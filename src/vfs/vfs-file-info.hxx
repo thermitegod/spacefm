@@ -35,17 +35,17 @@ enum VFSFileInfoFlag
 
 struct VFSFileInfo
 {
-    /* struct stat file_stat; */
-    /* Only use some members of struct stat to reduce memory usage */
-    mode_t mode;
-    dev_t dev;
-    uid_t uid;
-    gid_t gid;
-    off_t size;
-    std::time_t mtime;
-    std::time_t atime;
-    long blksize;
-    blkcnt_t blocks;
+    // cached copy of struct stat file_stat
+    // Only use some members of struct stat to reduce memory usage
+    dev_t dev;         // st_dev - ID of device containing file
+    mode_t mode;       // st_dev - File type and mode
+    uid_t uid;         // st_uid - User ID of owner
+    gid_t gid;         // st_gid - Group ID of owner
+    off_t size;        // st_size - Total size, in bytes
+    std::time_t atime; // st_atime - Time of the last access
+    std::time_t mtime; // st_mtime - Time of last modification
+    blksize_t blksize; // st_blksize - Block size for filesystem I/O
+    blkcnt_t blocks;   // st_blocks - Number of 512B blocks allocated
 
     std::string name;              // real name on file system
     std::string disp_name;         // displayed name (in UTF-8)
@@ -59,7 +59,7 @@ struct VFSFileInfo
     GdkPixbuf* big_thumbnail;      // thumbnail of the file
     GdkPixbuf* small_thumbnail;    // thumbnail of the file
 
-    VFSFileInfoFlag flags; /* if it's a special file */
+    VFSFileInfoFlag flags; // if it's a special file
 
     void ref_inc();
     void ref_dec();
