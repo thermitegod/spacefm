@@ -2504,9 +2504,8 @@ compare_plugin_sets(XSet* a, XSet* b)
 }
 
 std::vector<XSet*>
-xset_get_plugins(bool included)
-{ // return list of plugin sets (included or not ) sorted by menu_label
-    (void)included;
+xset_get_plugins()
+{ // return list of plugin sets sorted by menu_label
     std::vector<XSet*> plugins;
 
     for (XSet* set: xsets)
@@ -2939,9 +2938,6 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 {
     if (!file_browser || !set || !set->plugin_top || !set->plug_dir)
         return;
-
-    if (strstr(set->plug_dir, "/included/"))
-        return; // failsafe - don't allow removal of included
 
     if (!app_settings.no_confirm)
     {
@@ -5011,7 +5007,7 @@ xset_job_is_valid(XSet* set, int job)
     {
         if (!set->plug_dir)
             return false;
-        if (!set->plugin_top || strstr(set->plug_dir, "/included/"))
+        if (!set->plugin_top)
             no_remove = true;
     }
 
@@ -5221,7 +5217,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
     {
         if (set->plug_dir)
         {
-            if (!set->plugin_top || strstr(set->plug_dir, "/included/"))
+            if (!set->plugin_top)
                 no_remove = true;
         }
         else
@@ -8178,12 +8174,6 @@ xset_defaults()
     set = xset_set("plug_cverb", "lbl", "_Verbose");
     set->menu_style = XSET_MENU_CHECK;
     set->b = XSET_B_TRUE;
-
-    set = xset_set("plug_browse", "lbl", "_Browse");
-
-    set = xset_set("plug_inc", "lbl", "In_cluded");
-    set->menu_style = XSET_MENU_SUBMENU;
-    xset_set_set(set, XSET_SET_SET_ICN, "gtk-media-play");
 
     // Help
     set = xset_set("main_about", "lbl", "_About");

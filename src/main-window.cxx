@@ -367,91 +367,14 @@ create_plugins_menu(FMMainWindow* main_window)
     GtkWidget* item = gtk_separator_menu_item_new();
     gtk_menu_shell_append(GTK_MENU_SHELL(plug_menu), item);
 
-    set = xset_get("plug_inc");
-    xset_add_menuitem(file_browser, plug_menu, accel_group, set);
-    if (item)
-    {
-        GtkWidget* inc_menu = gtk_menu_item_get_submenu(GTK_MENU_ITEM(item));
-
-        plugins = xset_get_plugins(true);
-        for (XSet* set: plugins)
-            xset_add_menuitem(file_browser, inc_menu, accel_group, set);
-    }
-    set->disable = plugins.empty();
-    if (!plugins.empty())
-        xset_clear_plugins(plugins);
-
-    plugins = xset_get_plugins(false);
+    plugins = xset_get_plugins();
     for (XSet* set: plugins)
         xset_add_menuitem(file_browser, plug_menu, accel_group, set);
     if (!plugins.empty())
         xset_clear_plugins(plugins);
 
     gtk_widget_show_all(plug_menu);
-    if (set->disable)
-        gtk_widget_hide(item); // temporary until included available
     return plug_menu;
-}
-
-static void
-import_all_plugins(FMMainWindow* main_window)
-{
-    (void)main_window;
-    // get potential locations
-    char* path;
-    GList* paths = nullptr;
-
-    paths = g_list_append(paths, g_build_filename(DATADIR, "spacefm", "included", nullptr));
-    paths = g_list_append(paths, g_build_filename(DATADIR, "spacefm", "plugins", nullptr));
-
-    const char* const* sdir = vfs_system_data_dir();
-    for (; *sdir; ++sdir)
-    {
-        path = g_build_filename(*sdir, "spacefm", "included", nullptr);
-        if (!g_list_find_custom(paths, path, (GCompareFunc)g_strcmp0))
-            paths = g_list_append(paths, path);
-        else
-            g_free(path);
-
-        path = g_build_filename(*sdir, "spacefm", "plugins", nullptr);
-        if (!g_list_find_custom(paths, path, (GCompareFunc)g_strcmp0))
-            paths = g_list_append(paths, path);
-        else
-            g_free(path);
-    }
-    if (!g_list_find_custom(paths, "/usr/share/spacefm/included", (GCompareFunc)g_strcmp0))
-        paths = g_list_append(paths, g_strdup("/usr/share/spacefm/included"));
-    if (!g_list_find_custom(paths, "/usr/share/spacefm/plugins", (GCompareFunc)g_strcmp0))
-        paths = g_list_append(paths, g_strdup("/usr/share/spacefm/plugins"));
-
-    GList* l;
-    for (l = paths; l; l = l->next)
-    {
-        GDir* dir = g_dir_open((char*)l->data, 0, nullptr);
-        if (dir)
-        {
-            const char* name;
-            while ((name = g_dir_read_name(dir)))
-            {
-                char* bookmarks_dir = g_build_filename((char*)l->data, name, "main_book", nullptr);
-                char* plug_file = g_build_filename((char*)l->data, name, "plugin", nullptr);
-                if (std::filesystem::exists(plug_file) && !std::filesystem::exists(bookmarks_dir))
-                {
-                    char* plug_dir = g_build_filename((char*)l->data, name, nullptr);
-                    if (!xset_import_plugin(plug_dir, nullptr))
-                        LOG_INFO("Invalid Plugin Ignored: {}", plug_dir);
-                    g_free(plug_dir);
-                }
-                g_free(plug_file);
-                g_free(bookmarks_dir);
-            }
-            g_dir_close(dir);
-        }
-    }
-    g_list_foreach(paths, (GFunc)g_free, nullptr);
-    g_list_free(paths);
-
-    clean_plugin_mirrors();
 }
 
 static void
@@ -1795,7 +1718,6 @@ fm_main_window_init(FMMainWindow* main_window)
                      G_CALLBACK(on_main_window_realize),
                      main_window);
 
-    import_all_plugins(main_window);
     main_window->panel_change = false;
     show_panels(nullptr, main_window);
 

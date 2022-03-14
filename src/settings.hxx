@@ -411,7 +411,7 @@ char* multi_input_get_text(GtkWidget* input);
 XSet* xset_custom_new();
 bool write_root_settings(std::string& buf, const std::string& path);
 
-std::vector<XSet*> xset_get_plugins(bool included);
+std::vector<XSet*> xset_get_plugins();
 void xset_clear_plugins(std::vector<XSet*>& plugins);
 
 void install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* path,
