@@ -363,7 +363,6 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
     int w;
     int h;
     struct stat statbuf;
-    GdkPixbuf* result = nullptr;
     int create_size = size;
 
     if (size > 256)
@@ -428,8 +427,14 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
     GdkPixbuf* thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
 
     const char* thumb_mtime;
-    if (!thumbnail || (w < size && h < size) ||
-        !(thumb_mtime = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::MTime")) ||
+    if (thumbnail)
+    {
+        w = gdk_pixbuf_get_width(thumbnail);
+        h = gdk_pixbuf_get_height(thumbnail);
+        thumb_mtime = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::MTime");
+    }
+
+    if (!thumbnail || (w < size && h < size) || !thumb_mtime ||
         strtol(thumb_mtime, nullptr, 10) != mtime)
     {
         if (thumbnail)
@@ -478,13 +483,15 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
             catch (...) // std::logic_error
             {
                 // Video file cannot be opened
-                g_object_unref(thumbnail);
+                if (thumbnail)
+                    g_object_unref(thumbnail);
                 return nullptr;
             }
             thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
         }
     }
 
+    GdkPixbuf* result = nullptr;
     if (thumbnail)
     {
         w = gdk_pixbuf_get_width(thumbnail);
