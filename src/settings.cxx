@@ -184,9 +184,7 @@ parse_general_settings(std::string& line)
     std::string value = line.substr(sep + 1, std::string::npos - 1);
 
     // remove any quotes
-    std::size_t quotes = value.find('\"');
-    if (quotes != std::string::npos)
-        value.erase(std::remove(value.begin(), value.end(), '\"'), value.end());
+    value = ztd::replace(value, "\"", "");
 
     if (value.empty())
         return;
@@ -235,9 +233,7 @@ parse_window_state(std::string& line)
     std::string value = line.substr(sep + 1, std::string::npos - 1);
 
     // remove any quotes
-    std::size_t quotes = value.find('\"');
-    if (quotes != std::string::npos)
-        value.erase(std::remove(value.begin(), value.end(), '\"'), value.end());
+    value = ztd::replace(value, "\"", "");
 
     if (value.empty())
         return;
@@ -266,9 +262,7 @@ parse_interface_settings(std::string& line)
     std::string value = line.substr(sep + 1, std::string::npos - 1);
 
     // remove any quotes
-    std::size_t quotes = value.find('\"');
-    if (quotes != std::string::npos)
-        value.erase(std::remove(value.begin(), value.end(), '\"'), value.end());
+    value = ztd::replace(value, "\"", "");
 
     if (value.empty())
         return;
@@ -295,15 +289,10 @@ parse_conf(std::string& etc_path, std::string& line)
     std::string value = line.substr(sep + 1, std::string::npos - 1);
 
     // remove any quotes
-    std::size_t quotes = value.find('\"');
-    if (quotes != std::string::npos)
-        value.erase(std::remove(value.begin(), value.end(), '\"'), value.end());
+    value = ztd::replace(value, "\"", "");
 
     if (value.empty())
         return;
-
-    // LOG_INFO("token {}", token);
-    // LOG_INFO("value {}", value);
 
     if (ztd::same(token, "terminal_su") || ztd::same(token, "graphical_su"))
     {
@@ -1145,14 +1134,12 @@ xset_parse(std::string& line)
     std::string token_var = line.substr(sep2 + 1, sep - sep2 - 1);
 
     // remove any quotes
-    std::size_t quotes = value.find('\"');
-    if (quotes != std::string::npos)
-        value.erase(std::remove(value.begin(), value.end(), '\"'), value.end());
+    value = ztd::replace(value, "\"", "");
 
     if (value.empty())
         return;
 
-    if (token.substr(0, 5) == "cstm_" || token.substr(0, 5) == "hand_")
+    if (ztd::startswith(token, "cstm_") || ztd::startswith(token, "hand_"))
     {
         // custom
         if (ztd::same(token, set_last->name))
