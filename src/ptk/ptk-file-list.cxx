@@ -657,11 +657,8 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
             result = strcmp(file_a->disp_perm, file_b->disp_perm);
             break;
         case COL_FILE_OWNER:
-            if (file_a->disp_owner && file_b->disp_owner)
-                result = g_ascii_strcasecmp(file_a->disp_owner, file_b->disp_owner);
-            else
-                result = g_ascii_strcasecmp(vfs_file_info_get_disp_owner(file_a),
-                                            vfs_file_info_get_disp_owner(file_b));
+            result = g_ascii_strcasecmp(vfs_file_info_get_disp_owner(file_a),
+                                        vfs_file_info_get_disp_owner(file_b));
             break;
         default:
             result = 0;

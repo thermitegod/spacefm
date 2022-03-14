@@ -49,21 +49,12 @@ vfs_file_info_clear(VFSFileInfo* fi)
         fi->collate_key.clear();
     if (!fi->collate_icase_key.empty())
         fi->collate_icase_key.clear();
-    if (fi->disp_size)
-    {
-        g_free(fi->disp_size);
-        fi->disp_size = nullptr;
-    }
-    if (fi->disp_owner)
-    {
-        g_free(fi->disp_owner);
-        fi->disp_owner = nullptr;
-    }
-    if (fi->disp_mtime)
-    {
-        g_free(fi->disp_mtime);
-        fi->disp_mtime = nullptr;
-    }
+    if (!fi->disp_size.empty())
+        fi->disp_size.clear();
+    if (!fi->disp_owner.empty())
+        fi->disp_owner.clear();
+    if (!fi->disp_mtime.empty())
+        fi->disp_mtime.clear();
 
     if (fi->big_thumbnail)
     {
@@ -185,13 +176,13 @@ vfs_file_info_get_size(VFSFileInfo* fi)
 const char*
 vfs_file_info_get_disp_size(VFSFileInfo* fi)
 {
-    if (G_UNLIKELY(!fi->disp_size))
+    if (fi->disp_size.empty())
     {
         char buf[64];
         vfs_file_size_to_string_format(buf, fi->size, true);
-        fi->disp_size = g_strdup(buf);
+        fi->disp_size = buf;
     }
-    return fi->disp_size;
+    return fi->disp_size.c_str();
 }
 
 off_t
@@ -308,49 +299,44 @@ vfs_file_info_get_disp_owner(VFSFileInfo* fi)
 {
     struct passwd* puser;
     struct group* pgroup;
-    char uid_str_buf[32];
-    char* user_name;
-    char gid_str_buf[32];
-    char* group_name;
+
+    std::string user_name;
+    std::string group_name;
 
     /* FIXME: user names should be cached */
-    if (!fi->disp_owner)
+    if (fi->disp_owner.empty())
     {
         puser = getpwuid(fi->uid);
         if (puser && puser->pw_name && *puser->pw_name)
             user_name = puser->pw_name;
         else
-        {
-            g_snprintf(uid_str_buf, sizeof(uid_str_buf), "%d", fi->uid);
-            user_name = uid_str_buf;
-        }
+            user_name = fmt::format("{}", fi->uid);
 
         pgroup = getgrgid(fi->gid);
         if (pgroup && pgroup->gr_name && *pgroup->gr_name)
             group_name = pgroup->gr_name;
         else
-        {
-            g_snprintf(gid_str_buf, sizeof(gid_str_buf), "%d", fi->gid);
-            group_name = gid_str_buf;
-        }
-        fi->disp_owner = g_strdup_printf("%s:%s", user_name, group_name);
+            group_name = fmt::format("{}", fi->gid);
+
+        std::string str = fmt::format("{}:{}", user_name, group_name);
+        fi->disp_owner = str;
     }
-    return fi->disp_owner;
+    return fi->disp_owner.c_str();
 }
 
 const char*
 vfs_file_info_get_disp_mtime(VFSFileInfo* fi)
 {
-    if (!fi->disp_mtime)
+    if (fi->disp_mtime.empty())
     {
         char buf[64];
         strftime(buf,
                  sizeof(buf),
                  app_settings.date_format.c_str(), //"%Y-%m-%d %H:%M",
                  localtime(&fi->mtime));
-        fi->disp_mtime = g_strdup(buf);
+        fi->disp_mtime = buf;
     }
-    return fi->disp_mtime;
+    return fi->disp_mtime.c_str();
 }
 
 time_t*
