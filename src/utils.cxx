@@ -56,39 +56,27 @@ randhex8()
     return g_strdup(hex);
 }
 
-char*
-replace_line_subs(const char* line)
+std::string
+replace_line_subs(const std::string& line)
 {
-    const char* perc[] =
-        {"%f", "%F", "%n", "%N", "%d", "%D", "%v", "%l", "%m", "%y", "%b", "%t", "%p", "%a"};
-    const char* var[] = {"\"${fm_file}\"",
-                         "\"${fm_files[@]}\"",
-                         "\"${fm_filename}\"",
-                         "\"${fm_filenames[@]}\"",
-                         "\"${fm_pwd}\"",
-                         "\"${fm_pwd}\"",
-                         "\"${fm_device}\"",
-                         "\"${fm_device_label}\"",
-                         "\"${fm_device_mount_point}\"",
-                         "\"${fm_device_fstype}\"",
-                         "\"${fm_bookmark}\"",
-                         "\"${fm_task_pwd}\"",
-                         "\"${fm_task_pid}\"",
-                         "\"${fm_value}\""};
+    std::string cmd = line;
 
-    std::string s = line;
-    int num = G_N_ELEMENTS(perc);
-    int i;
-    for (i = 0; i < num; i++)
-    {
-        if (strstr(line, perc[i]))
-        {
-            std::string old_s = s;
-            s = ztd::replace(old_s, perc[i], var[i]);
-        }
-    }
-    char* ss = const_cast<char*>(s.c_str());
-    return ss;
+    cmd = ztd::replace(cmd, "%f", "\"${fm_file}\"");
+    cmd = ztd::replace(cmd, "%F", "\"${fm_files[@]}\"");
+    cmd = ztd::replace(cmd, "%n", "\"${fm_filename}\"");
+    cmd = ztd::replace(cmd, "%N", "\"${fm_filenames[@]}\"");
+    cmd = ztd::replace(cmd, "%d", "\"${fm_pwd}\"");
+    cmd = ztd::replace(cmd, "%D", "\"${fm_pwd}\"");
+    cmd = ztd::replace(cmd, "%v", "\"${fm_device}\"");
+    cmd = ztd::replace(cmd, "%l", "\"${fm_device_label}\"");
+    cmd = ztd::replace(cmd, "%m", "\"${fm_device_mount_point}\"");
+    cmd = ztd::replace(cmd, "%y", "\"${fm_device_fstype}\"");
+    cmd = ztd::replace(cmd, "%b", "\"${fm_bookmark}\"");
+    cmd = ztd::replace(cmd, "%t", "\"${fm_task_pwd}\"");
+    cmd = ztd::replace(cmd, "%p", "\"${fm_task_pid}\"");
+    cmd = ztd::replace(cmd, "%a", "\"${fm_value}\"");
+
+    return cmd;
 }
 
 bool

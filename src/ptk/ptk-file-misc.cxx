@@ -3335,7 +3335,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
     g_string_append(fm_filenames, ")\nfm_filename=\"$fm_filenames[0]\"\n");
     g_string_append(fm_files, ")\nfm_file=\"$fm_files[0]\"\n");
     // replace standard sub vars
-    command = replace_line_subs(command.c_str());
+    command = replace_line_subs(command);
 
     // start task(s)
     for (l = files; l; l = l->next)

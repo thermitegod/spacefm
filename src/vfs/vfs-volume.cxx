@@ -2909,7 +2909,7 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
                 }
             }
             // standard sub vars
-            command = replace_line_subs(command.c_str());
+            command = replace_line_subs(command);
             break;
         case HANDLER_MODE_NET:
             // also used for DEVICE_TYPE_OTHER unmount and prop
