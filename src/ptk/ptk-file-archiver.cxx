@@ -10,6 +10,12 @@
  *
  */
 
+#include <string>
+
+#include <vector>
+
+#include <sstream>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -36,7 +42,7 @@ enum PTKFileArchiverExtensionsCol
     COL_HANDLER_EXTENSIONS = 1
 };
 
-static char*
+static std::string
 archive_handler_get_first_extension(XSet* handler_xset)
 {
     // Function deals with the possibility that a handler is responsible
@@ -46,14 +52,22 @@ archive_handler_get_first_extension(XSet* handler_xset)
     if (handler_xset && handler_xset->x)
     {
         // find first extension
-        char** pathnames = g_strsplit(handler_xset->x, " ", -1);
-        if (pathnames)
+        std::string s = handler_xset->x;
+        std::stringstream ss(s);
+        std::vector<std::string> pathnames;
+
+        std::string tmp;
+        while (std::getline(ss, tmp, ' '))
         {
-            int i;
-            for (i = 0; pathnames[i]; ++i)
+            pathnames.push_back(tmp);
+        }
+
+        if (!pathnames.empty())
+        {
+            for (std::string path: pathnames)
             {
                 // getting just the extension of the pathname list element
-                std::string name = get_name_extension(pathnames[i], first_ext);
+                std::string name = get_name_extension(path, first_ext);
                 if (!first_ext.empty())
                 {
                     // add a dot to extension
@@ -61,16 +75,12 @@ archive_handler_get_first_extension(XSet* handler_xset)
                     break;
                 }
             }
-            g_strfreev(pathnames);
         }
     }
     if (!first_ext.empty())
-    {
-        char* first_ext_ret = const_cast<char*>(first_ext.c_str());
-        return first_ext_ret;
-    }
+        return first_ext;
     else
-        return g_strdup("");
+        return "";
 }
 
 static bool
@@ -115,7 +125,8 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
     if (!path)
         return;
-    char* name = g_path_get_basename(path);
+
+    std::string name = g_path_get_basename(path);
     g_free(path);
 
     // Fetching the combo model
@@ -135,10 +146,10 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     }
 
     // Loop through available handlers
-    unsigned int len = 0;
+    std::size_t len = 0;
     XSet* handler_xset;
     char* xset_name = nullptr;
-    char* extension;
+    std::string extension;
     do
     {
         gtk_tree_model_get(GTK_TREE_MODEL(list),
@@ -153,14 +164,13 @@ on_format_changed(GtkComboBox* combo, void* user_data)
             extension = archive_handler_get_first_extension(handler_xset);
 
             // Checking to see if the current archive filename has this
-            if (g_str_has_suffix(name, extension))
+            if (ztd::endswith(name, extension))
             {
                 /* It does - recording its length if its the longest match
                  * yet, and continuing */
-                if (strlen(extension) > len)
-                    len = strlen(extension);
+                if (extension.size() > len)
+                    len = extension.size();
             }
-            g_free(extension);
         }
         g_free(xset_name);
     } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(list), &iter));
@@ -168,7 +178,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     // Cropping current extension if found
     if (len)
     {
-        len = strlen(name) - len;
+        len = name.size() - len;
         name[len] = '\0';
     }
 
@@ -188,18 +198,13 @@ on_format_changed(GtkComboBox* combo, void* user_data)
             extension = archive_handler_get_first_extension(handler_xset);
 
             // Appending extension to original filename
-            char* new_name = g_strconcat(name, extension, nullptr);
+            std::string new_name = name + extension;
 
             // Updating new archive filename
-            gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), new_name);
-
-            g_free(new_name);
-            g_free(extension);
+            gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), new_name.c_str());
         }
         g_free(xset_name);
     }
-
-    g_free(name);
 
     // Loading command
     if (handler_xset)
@@ -552,16 +557,14 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     if (files)
     {
         // Fetching first extension handler deals with
-        char* ext = archive_handler_get_first_extension(handler_xset);
+        std::string ext = archive_handler_get_first_extension(handler_xset);
         dest_file = g_strjoin(nullptr,
                               vfs_file_info_get_disp_name(static_cast<VFSFileInfo*>(files->data)),
-                              ext,
+                              ext.c_str(),
                               nullptr);
         gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), dest_file);
         g_free(dest_file);
         dest_file = nullptr;
-        g_free(ext);
-        ext = nullptr;
     }
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd);
 
@@ -759,8 +762,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     // Make Archive Creation Command
 
     std::string desc;
-    char* ext;
-    char* udest_file;
+    std::string ext;
+    std::string udest_file;
     std::string udest_quote;
     char* s1;
     char* final_command;
@@ -796,23 +799,19 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
             {
                 /* For subsequent archives, base archive name on the filename
                  * being compressed, in the user-selected dir */
-                char* dest_dir = g_path_get_dirname(dest_file);
-                udest_file = g_strconcat(dest_dir, "/", desc.c_str(), ext, nullptr);
+                std::string dest_dir = g_path_get_dirname(dest_file);
+                udest_file = g_strconcat(dest_dir.c_str(), "/", desc.c_str(), ext.c_str(), nullptr);
 
                 // Looping to find a path that doesnt exist
                 struct stat statbuf;
                 n = 1;
-                while (lstat(udest_file, &statbuf) == 0)
+                while (lstat(udest_file.c_str(), &statbuf) == 0)
                 {
-                    g_free(udest_file);
                     udest_file =
-                        g_strdup_printf("%s/%s-%s%d%s", dest_dir, desc.c_str(), "copy", ++n, ext);
+                        fmt::format("{}/{}-{}{}{}", dest_dir, desc.c_str(), "copy", ++n, ext);
                 }
-                g_free(dest_dir);
             }
             udest_quote = bash_quote(udest_file);
-            g_free(udest_file);
-            udest_file = nullptr;
 
             /* Bash quoting desc - desc original value comes from the
              * VFSFileInfo struct and therefore should not be freed */
@@ -859,7 +858,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
          * Obtaining valid quoted UTF8 file name %o for archive to create */
         udest_file = g_filename_display_name(dest_file);
         udest_quote = bash_quote(udest_file);
-        g_free(udest_file);
         char* all = g_strdup("");
         std::string first;
         if (files)
