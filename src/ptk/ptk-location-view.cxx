@@ -695,9 +695,10 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
             if (vol)
             {
                 char* bdev = g_path_get_basename(vol->device_file);
-                if (vol->label && vol->label[0] != '\0' && vol->label[0] != ' ' &&
-                    g_utf8_validate(vol->label, -1, nullptr) && !strchr(vol->label, '/'))
-                    mname = g_strdup_printf("%.20s", vol->label);
+                if (!vol->label.empty() && vol->label.at(0) != ' ' &&
+                    g_utf8_validate(vol->label.c_str(), -1, nullptr) &&
+                    !ztd::contains(vol->label, "/"))
+                    mname = g_strdup_printf("%.20s", vol->label.c_str());
                 else if (vol->udi && vol->udi[0] != '\0' && g_utf8_validate(vol->udi, -1, nullptr))
                 {
                     str = g_path_get_basename(vol->udi);
@@ -2222,7 +2223,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 static void
 on_showhide(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 {
-    char* msg;
+    std::string msg;
     GtkWidget* view;
     if (!item)
         view = view2;
@@ -2236,23 +2237,30 @@ on_showhide(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         devid = strrchr(devid, '/');
         if (devid)
             devid++;
-        msg = g_strdup_printf("%sCurrently Selected Device: %s\nVolume Label: %s\nDevice ID: %s",
-                              set->desc,
-                              vol->device_file,
-                              vol->label,
-                              devid);
+        msg = fmt::format("{}Currently Selected Device: {}\nVolume Label: {}\nDevice ID: {}",
+                          set->desc,
+                          vol->device_file,
+                          vol->label,
+                          devid);
     }
     else
         msg = g_strdup(set->desc);
-    if (xset_text_dialog(view, set->title, true, msg, nullptr, set->s, &set->s, nullptr, false))
+    if (xset_text_dialog(view,
+                         set->title,
+                         true,
+                         msg.c_str(),
+                         nullptr,
+                         set->s,
+                         &set->s,
+                         nullptr,
+                         false))
         update_all();
-    g_free(msg);
 }
 
 static void
 on_automountlist(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 {
-    char* msg;
+    std::string msg;
     GtkWidget* view;
     if (!item)
         view = view2;
@@ -2266,19 +2274,26 @@ on_automountlist(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         devid = strrchr(devid, '/');
         if (devid)
             devid++;
-        msg = g_strdup_printf("%sCurrently Selected Device: %s\nVolume Label: %s\nDevice ID: %s",
-                              set->desc,
-                              vol->device_file,
-                              vol->label,
-                              devid);
+        msg = fmt::format("{}Currently Selected Device: {}\nVolume Label: {}\nDevice ID: {}",
+                          set->desc,
+                          vol->device_file,
+                          vol->label,
+                          devid);
     }
     else
         msg = g_strdup(set->desc);
-    if (xset_text_dialog(view, set->title, true, msg, nullptr, set->s, &set->s, nullptr, false))
+    if (xset_text_dialog(view,
+                         set->title,
+                         true,
+                         msg.c_str(),
+                         nullptr,
+                         set->s,
+                         &set->s,
+                         nullptr,
+                         false))
     {
         // update view / automount all?
     }
-    g_free(msg);
 }
 
 static void
@@ -2318,7 +2333,7 @@ volume_is_visible(VFSVolume* vol)
             if (i == 0)
                 value = vol->device_file;
             else if (i == 1)
-                value = vol->label;
+                value = g_strdup(vol->label.c_str());
             else
             {
                 if ((value = vol->udi))

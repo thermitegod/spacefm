@@ -1947,7 +1947,6 @@ vfs_free_volume_members(VFSVolume* volume)
 {
     g_free(volume->device_file);
     g_free(volume->udi);
-    g_free(volume->label);
     g_free(volume->mount_point);
     g_free(volume->disp_name);
 }
@@ -1957,7 +1956,7 @@ vfs_volume_set_info(VFSVolume* volume)
 {
     char* lastcomma;
     char* disp_device;
-    char* disp_label;
+    std::string disp_label;
     char* disp_size;
     char* disp_mount;
     char* disp_fstype;
@@ -2070,10 +2069,10 @@ vfs_volume_set_info(VFSVolume* volume)
     // set display name
     if (volume->is_mounted)
     {
-        if (volume->label && volume->label[0] != '\0')
-            disp_label = g_strdup_printf("%s", volume->label);
+        if (!volume->label.empty())
+            disp_label = volume->label;
         else
-            disp_label = g_strdup("");
+            disp_label = "";
 
         if (volume->size > 0)
         {
@@ -2090,13 +2089,13 @@ vfs_volume_set_info(VFSVolume* volume)
     else if (volume->is_mountable) // has_media
     {
         if (volume->is_blank)
-            disp_label = g_strdup_printf("[blank]");
-        else if (volume->label && volume->label[0] != '\0')
-            disp_label = g_strdup_printf("%s", volume->label);
+            disp_label = "[blank]";
+        else if (!volume->label.empty())
+            disp_label = volume->label;
         else if (volume->is_audiocd)
-            disp_label = g_strdup_printf("[audio]");
+            disp_label = "[audio]";
         else
-            disp_label = g_strdup("");
+            disp_label = "";
         if (volume->size > 0)
         {
             vfs_file_size_to_string_format(size_str, volume->size, false);
@@ -2108,7 +2107,7 @@ vfs_volume_set_info(VFSVolume* volume)
     }
     else
     {
-        disp_label = g_strdup_printf("[no media]");
+        disp_label = "[no media]";
         disp_size = g_strdup("");
         disp_mount = g_strdup("");
     }
@@ -2161,7 +2160,6 @@ vfs_volume_set_info(VFSVolume* volume)
 
     volume->disp_name = g_filename_display_name(parameter.c_str());
 
-    g_free(disp_label);
     g_free(disp_size);
     g_free(disp_mount);
     g_free(disp_device);
@@ -2229,7 +2227,8 @@ vfs_volume_read_by_device(struct udev_device* udevice)
             volume->mount_point = g_strdup(device->mount_points);
     }
     volume->size = device->device_size;
-    volume->label = g_strdup(device->id_label);
+    if (device->id_label)
+        volume->label = device->id_label;
     volume->fs_type = g_strdup(device->id_type);
     volume->disp_name = nullptr;
     volume->automount_time = 0;
@@ -2613,7 +2612,6 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         volume->device_file = name;
         volume->udi = g_strdup(name);
         volume->should_autounmount = false;
-        volume->label = nullptr;
         volume->fs_type = mtab_fstype;
         volume->size = 0;
         volume->is_mounted = true;
@@ -2654,7 +2652,6 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
             volume->device_file = name;
             volume->udi = g_strdup(name);
             volume->should_autounmount = false;
-            volume->label = nullptr;
             volume->fs_type = mtab_fstype;
             volume->size = 0;
             volume->is_mounted = true;
@@ -2698,8 +2695,8 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
             // fs values
             // change spaces in label to underscores for testing
             // clang-format off
-            if (vol->label && vol->label[0])
-                values = g_slist_prepend(values, g_strdelimit(g_strconcat("label=", vol->label, nullptr), " ", '_'));
+            if (!vol->label.empty())
+                values = g_slist_prepend(values, g_strdelimit(g_strconcat("label=", vol->label.c_str(), nullptr), " ", '_'));
             if (vol->udi && vol->udi[0])
                 values = g_slist_prepend(values, g_strconcat("id=", vol->udi, nullptr));
             values = g_slist_prepend(values, g_strconcat("audiocd=", vol->is_audiocd ? "1" : "0", nullptr));
@@ -3037,7 +3034,7 @@ vfs_volume_is_automount(VFSVolume* vol)
             if (i == 0)
                 value = vol->device_file;
             else if (i == 1)
-                value = vol->label;
+                value = (char*)vol->label.c_str();
             else
             {
                 value = vol->udi;
@@ -3537,7 +3534,7 @@ vfs_volume_device_added(VFSVolume* volume, bool automount)
             vfs_free_volume_members(volume);
             volume2->udi = g_strdup(volume->udi);
             volume2->device_file = g_strdup(volume->device_file);
-            volume2->label = g_strdup(volume->label);
+            volume2->label = volume->label;
             volume2->mount_point = g_strdup(volume->mount_point);
             volume2->icon = volume->icon;
             volume2->disp_name = g_strdup(volume->disp_name);

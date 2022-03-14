@@ -90,7 +90,7 @@ struct VFSVolume
     std::string icon;
     char* mount_point;
     uint64_t size;
-    char* label;
+    std::string label;
     char* fs_type;
 
     bool should_autounmount{false}; // a network or ISO file was mounted

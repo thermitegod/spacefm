@@ -3916,7 +3916,7 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
         c->var[CONTEXT_DEVICE] = g_strdup(vol->device_file);
         if (!c->var[CONTEXT_DEVICE])
             c->var[CONTEXT_DEVICE] = g_strdup("");
-        c->var[CONTEXT_DEVICE_LABEL] = g_strdup(vol->label);
+        c->var[CONTEXT_DEVICE_LABEL] = g_strdup(vol->label.c_str());
         if (!c->var[CONTEXT_DEVICE_LABEL])
             c->var[CONTEXT_DEVICE_LABEL] = g_strdup("");
         c->var[CONTEXT_DEVICE_MOUNT_POINT] = g_strdup(vol->mount_point);
@@ -4283,7 +4283,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
                         esc_path = bash_quote(vol->mount_point);
                         buf.append(fmt::format("fm_device_mount_point={}\n", esc_path));
                     }
-                    if (vol->label)
+                    if (!vol->label.empty())
                     {
                         esc_path = bash_quote(vol->label);
                         buf.append(fmt::format("fm_device_label={}\n", esc_path));
@@ -4320,7 +4320,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
                     esc_path = bash_quote(vol->mount_point);
                     buf.append(fmt::format("fm_panel{}_device_mount_point={}\n", p, esc_path));
                 }
-                if (vol->label)
+                if (!vol->label.empty())
                 {
                     esc_path = bash_quote(vol->label);
                     buf.append(fmt::format("fm_panel{}_device_label={}\n", p, esc_path));
