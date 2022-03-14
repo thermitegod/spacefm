@@ -20,6 +20,8 @@
 
 #include <sys/stat.h>
 
+#include <glibmm.h>
+
 #include <gtk/gtk.h>
 
 #include <gdk/gdkkeysyms.h>
@@ -321,9 +323,9 @@ load_conf()
 
     // load spacefm.conf
     std::string config_path =
-        g_build_filename(vfs_user_config_dir(), "spacefm", "spacefm.conf", nullptr);
+        Glib::build_filename(vfs_user_config_dir(), "spacefm", "spacefm.conf");
     if (!std::filesystem::exists(config_path))
-        config_path = g_build_filename(SYSCONFDIR, "spacefm", "spacefm.conf", nullptr);
+        config_path = Glib::build_filename(SYSCONFDIR, "spacefm", "spacefm.conf");
 
     std::string line;
     std::ifstream file(config_path);
@@ -343,22 +345,21 @@ load_settings(const char* config_dir)
     app_settings.load_saved_tabs = true;
 
     if (config_dir)
-        settings_config_dir = g_build_filename(config_dir, nullptr);
+        settings_config_dir = config_dir;
     else
-        settings_config_dir = g_build_filename(vfs_user_config_dir(), "spacefm", nullptr);
+        settings_config_dir = Glib::build_filename(vfs_user_config_dir(), "spacefm");
 
     // MOD extra settings
     xset_defaults();
 
-    const std::string session = g_build_filename(settings_config_dir.c_str(), "session", nullptr);
+    const std::string session = Glib::build_filename(settings_config_dir, "session");
 
     std::string command;
 
     if (!std::filesystem::exists(settings_config_dir))
     {
         // copy /etc/xdg/spacefm
-        std::string xdg_path =
-            g_build_filename(settings_config_dir.c_str(), "xdg", "spacefm", nullptr);
+        std::string xdg_path = Glib::build_filename(settings_config_dir, "xdg", "spacefm");
         if (std::filesystem::is_directory(xdg_path))
         {
             command = fmt::format("cp -r {} '{}'", xdg_path, settings_config_dir);
@@ -386,7 +387,7 @@ load_settings(const char* config_dir)
 
     if (config_settings.git_backed_settings)
     {
-        std::string git_path = g_build_filename(settings_config_dir.c_str(), ".git", nullptr);
+        std::string git_path = Glib::build_filename(settings_config_dir, ".git");
         if (!std::filesystem::exists(git_path))
         {
             command = fmt::format("{} -c \"cd {} && git init && "
@@ -653,7 +654,7 @@ save_settings(void* main_window_ptr)
     // clang-format on
 
     // move
-    std::string path = g_build_filename(settings_config_dir.c_str(), "session", nullptr);
+    std::string path = Glib::build_filename(settings_config_dir, "session");
     std::ofstream file(path);
     if (file.is_open())
         file << buf;
@@ -683,7 +684,7 @@ xset_get_user_tmp_dir()
     if (settings_user_tmp_dir.empty() && std::filesystem::exists(settings_user_tmp_dir))
         return settings_user_tmp_dir.c_str();
 
-    settings_user_tmp_dir = g_build_filename(config_settings.tmp_dir, "spacefm", nullptr);
+    settings_user_tmp_dir = Glib::build_filename(config_settings.tmp_dir, "spacefm");
     std::filesystem::create_directories(settings_user_tmp_dir);
     std::filesystem::permissions(settings_user_tmp_dir, std::filesystem::perms::owner_all);
 
@@ -2230,10 +2231,8 @@ xset_custom_new_name()
             setname.clear();
         else
         {
-            std::string path1 =
-                g_build_filename(xset_get_config_dir(), "scripts", setname.c_str(), nullptr);
-            std::string path2 =
-                g_build_filename(xset_get_config_dir(), "plugin-data", setname.c_str(), nullptr);
+            std::string path1 = Glib::build_filename(xset_get_config_dir(), "scripts", setname);
+            std::string path2 = Glib::build_filename(xset_get_config_dir(), "plugin-data", setname);
             if (std::filesystem::exists(path1) || std::filesystem::exists(path2))
                 setname.clear();
         }
@@ -2259,16 +2258,16 @@ xset_custom_copy_files(XSet* src, XSet* dest)
     // copy command dir
 
     if (src->plugin)
-        path_src = g_build_filename(src->plug_dir, src->plug_name, nullptr);
+        path_src = Glib::build_filename(src->plug_dir, src->plug_name);
     else
-        path_src = g_build_filename(xset_get_config_dir(), "scripts", src->name, nullptr);
+        path_src = Glib::build_filename(xset_get_config_dir(), "scripts", src->name);
     // LOG_INFO("    path_src={}", path_src);
 
     // LOG_INFO("    path_src EXISTS");
-    path_dest = g_build_filename(xset_get_config_dir(), "scripts", nullptr);
+    path_dest = Glib::build_filename(xset_get_config_dir(), "scripts");
     std::filesystem::create_directories(path_dest);
     std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
-    path_dest = g_build_filename(xset_get_config_dir(), "scripts", dest->name, nullptr);
+    path_dest = Glib::build_filename(xset_get_config_dir(), "scripts", dest->name);
     command = fmt::format("cp -a {} {}", path_src, path_dest);
 
     // LOG_INFO("    path_dest={}", path_dest );
@@ -2292,10 +2291,10 @@ xset_custom_copy_files(XSet* src, XSet* dest)
 
     // copy data dir
     XSet* mset = xset_get_plugin_mirror(src);
-    path_src = g_build_filename(xset_get_config_dir(), "plugin-data", mset->name, nullptr);
+    path_src = Glib::build_filename(xset_get_config_dir(), "plugin-data", mset->name);
     if (std::filesystem::is_directory(path_src))
     {
-        path_dest = g_build_filename(xset_get_config_dir(), "plugin-data", dest->name, nullptr);
+        path_dest = Glib::build_filename(xset_get_config_dir(), "plugin-data", dest->name);
         command = fmt::format("cp -a {} {}", path_src, path_dest);
         stderr = stdout = nullptr;
         print_command(command);
@@ -2664,7 +2663,7 @@ xset_import_plugin(const char* plug_dir, int* use)
 
     // read plugin file into xsets
     bool plugin_good = false;
-    std::string plugin = g_build_filename(plug_dir, "plugin", nullptr);
+    std::string plugin = Glib::build_filename(plug_dir, "plugin");
 
     std::string line;
     std::ifstream file(plugin);
@@ -3634,8 +3633,8 @@ xset_custom_delete(XSet* set, bool delete_next)
     if (set == set_clipboard)
         set_clipboard = nullptr;
 
-    std::string path1 = g_build_filename(xset_get_config_dir(), "scripts", set->name, nullptr);
-    std::string path2 = g_build_filename(xset_get_config_dir(), "plugin-data", set->name, nullptr);
+    std::string path1 = Glib::build_filename(xset_get_config_dir(), "scripts", set->name);
+    std::string path2 = Glib::build_filename(xset_get_config_dir(), "plugin-data", set->name);
     if (std::filesystem::exists(path1))
     {
         std::filesystem::remove_all(path1);

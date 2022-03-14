@@ -16,6 +16,8 @@
 
 #include <fcntl.h>
 
+#include <glibmm.h>
+
 #include <glib.h>
 
 #include <ztd/ztd.hxx>

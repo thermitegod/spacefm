@@ -11,6 +11,8 @@
 
 #include <fcntl.h>
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -139,7 +141,7 @@ get_name_extension(const std::string& full_name, std::string& ext)
     // remove '.'
     ext.erase(0, 1);
 
-    return g_build_filename(parent.c_str(), basename.c_str(), nullptr);
+    return Glib::build_filename(parent, basename);
 }
 
 const std::string

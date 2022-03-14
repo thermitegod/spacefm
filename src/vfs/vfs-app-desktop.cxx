@@ -15,6 +15,8 @@
 
 #include <vector>
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -46,7 +48,7 @@ VFSAppDesktop::VFSAppDesktop(const std::string& open_file_name)
     else
     {
         m_file_name = open_file_name;
-        std::string relative_path = g_build_filename("applications", m_file_name.c_str(), nullptr);
+        const std::string relative_path = Glib::build_filename("applications", m_file_name);
         char* full_path_c;
         load = g_key_file_load_from_data_dirs(file,
                                               relative_path.c_str(),
