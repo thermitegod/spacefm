@@ -54,7 +54,7 @@ struct VFSFileInfo
     std::string disp_size;         // displayed human-readable file size
     std::string disp_owner;        // displayed owner:group pair
     std::string disp_mtime;        // displayed last modification time
-    char disp_perm[12];            // displayed permission in string form
+    std::string disp_perm;         // displayed permission in string form
     VFSMimeType* mime_type;        // mime type related information
     GdkPixbuf* big_thumbnail;      // thumbnail of the file
     GdkPixbuf* small_thumbnail;    // thumbnail of the file

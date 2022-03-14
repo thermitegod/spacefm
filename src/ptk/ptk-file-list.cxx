@@ -654,7 +654,8 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
                                         vfs_file_info_get_mime_type_desc(file_b));
             break;
         case COL_FILE_PERM:
-            result = strcmp(file_a->disp_perm, file_b->disp_perm);
+            result =
+                strcmp(vfs_file_info_get_disp_perm(file_a), vfs_file_info_get_disp_perm(file_b));
             break;
         case COL_FILE_OWNER:
             result = g_ascii_strcasecmp(vfs_file_info_get_disp_owner(file_a),

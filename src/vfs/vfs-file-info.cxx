@@ -55,7 +55,8 @@ vfs_file_info_clear(VFSFileInfo* fi)
         fi->disp_owner.clear();
     if (!fi->disp_mtime.empty())
         fi->disp_mtime.clear();
-
+    if (!fi->disp_perm.empty())
+        fi->disp_perm.clear();
     if (fi->big_thumbnail)
     {
         g_object_unref(fi->big_thumbnail);
@@ -66,9 +67,6 @@ vfs_file_info_clear(VFSFileInfo* fi)
         g_object_unref(fi->small_thumbnail);
         fi->small_thumbnail = nullptr;
     }
-
-    fi->disp_perm[0] = '\0';
-
     if (fi->mime_type)
     {
         vfs_mime_type_unref(fi->mime_type);
@@ -352,66 +350,107 @@ vfs_file_info_get_atime(VFSFileInfo* fi)
 }
 
 static void
-get_file_perm_string(char* perm, mode_t mode)
+get_file_perm_string(std::string& perm, mode_t mode)
 {
-    if (S_ISREG(mode)) // sfm
-        perm[0] = '-';
+    // Special Permissions
+    if (S_ISREG(mode))
+        perm.append("-");
     else if (S_ISDIR(mode))
-        perm[0] = 'd';
+        perm.append("d");
     else if (S_ISLNK(mode))
-        perm[0] = 'l';
+        perm.append("l");
     else if (G_UNLIKELY(S_ISCHR(mode)))
-        perm[0] = 'c';
+        perm.append("c");
     else if (G_UNLIKELY(S_ISBLK(mode)))
-        perm[0] = 'b';
+        perm.append("b");
     else if (G_UNLIKELY(S_ISFIFO(mode)))
-        perm[0] = 'p';
+        perm.append("p");
     else if (G_UNLIKELY(S_ISSOCK(mode)))
-        perm[0] = 's';
+        perm.append("s");
     else
-        perm[0] = '-';
-    perm[1] = (mode & S_IRUSR) ? 'r' : '-';
-    perm[2] = (mode & S_IWUSR) ? 'w' : '-';
-    if (G_UNLIKELY(mode & S_ISUID)) // sfm
+        perm.append("-");
+
+    // Owner
+    if (mode & S_IRUSR)
+        perm.append("r");
+    else
+        perm.append("-");
+    if (mode & S_IWUSR)
+        perm.append("w");
+    else
+        perm.append("-");
+
+    if (G_UNLIKELY(mode & S_ISUID))
     {
         if (G_LIKELY(mode & S_IXUSR))
-            perm[3] = 's';
+            perm.append("s");
         else
-            perm[3] = 'S';
+            perm.append("S");
     }
     else
-        perm[3] = (mode & S_IXUSR) ? 'x' : '-';
-    perm[4] = (mode & S_IRGRP) ? 'r' : '-';
-    perm[5] = (mode & S_IWGRP) ? 'w' : '-';
-    if (G_UNLIKELY(mode & S_ISGID)) // sfm
+    {
+        if (mode & S_IXUSR)
+            perm.append("x");
+        else
+            perm.append("-");
+    }
+
+    // Group
+    if (mode & S_IRGRP)
+        perm.append("r");
+    else
+        perm.append("-");
+    if (mode & S_IWGRP)
+        perm.append("w");
+    else
+        perm.append("-");
+    if (G_UNLIKELY(mode & S_ISGID))
     {
         if (G_LIKELY(mode & S_IXGRP))
-            perm[6] = 's';
+            perm.append("s");
         else
-            perm[6] = 'S';
+            perm.append("S");
     }
     else
-        perm[6] = (mode & S_IXGRP) ? 'x' : '-';
-    perm[7] = (mode & S_IROTH) ? 'r' : '-';
-    perm[8] = (mode & S_IWOTH) ? 'w' : '-';
-    if (G_UNLIKELY(mode & S_ISVTX)) // MOD
+    {
+        if (mode & S_IXGRP)
+            perm.append("x");
+        else
+            perm.append("-");
+    }
+
+    // Other
+    if (mode & S_IROTH)
+        perm.append("r");
+    else
+        perm.append("-");
+    if (mode & S_IWOTH)
+        perm.append("w");
+    else
+        perm.append("-");
+    if (G_UNLIKELY(mode & S_ISVTX))
     {
         if (G_LIKELY(mode & S_IXOTH))
-            perm[9] = 't';
+            perm.append("t");
         else
-            perm[9] = 'T';
+            perm.append("T");
     }
     else
-        perm[9] = (mode & S_IXOTH) ? 'x' : '-';
-    perm[10] = '\0';
+    {
+        if (mode & S_IXOTH)
+            perm.append("x");
+        else
+            perm.append("-");
+    }
 }
 
 const char*
 vfs_file_info_get_disp_perm(VFSFileInfo* fi)
 {
-    if (!fi->disp_perm[0])
+    if (fi->disp_perm.empty())
         get_file_perm_string(fi->disp_perm, fi->mode);
-    return fi->disp_perm;
+
+    return fi->disp_perm.c_str();
 }
 
 void
