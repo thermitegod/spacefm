@@ -85,7 +85,7 @@ static char* xset_color_dialog(GtkWidget* parent, char* title, char* defcolor);
 static GtkWidget* xset_design_additem(GtkWidget* menu, const char* label, int job, XSet* set);
 static bool xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set);
 static void xset_builtin_tool_activate(char tool_type, XSet* set, GdkEventButton* event);
-static XSet* xset_new_builtin_toolitem(char tool_type);
+static XSet* xset_new_builtin_toolitem(XSetTool tool_type);
 static void xset_custom_insert_after(XSet* target, XSet* set);
 static XSet* xset_custom_copy(XSet* set, bool copy_next, bool delete_set);
 static XSet* xset_set_set_int(XSet* set, const char* var, const char* value);
@@ -1407,7 +1407,7 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
             set->line = g_strdup(value);
             break;
         case XSET_SET_SET_TOOL:
-            set->tool = strtol(value, nullptr, 10);
+            set->tool = XSetTool(std::stoi(value));
             break;
         case XSET_SET_SET_TASK:
             if (strtol(value, nullptr, 10) == 1)
@@ -2734,7 +2734,10 @@ xset_import_plugin(const char* plug_dir, int* use)
     {
         if (set->plugin && !strcmp(plug_dir, set->plug_dir))
         {
-            set->key = set->keymod = set->tool = set->opener = 0;
+            set->key = 0;
+            set->keymod = 0;
+            set->tool = XSET_TOOL_NOT;
+            set->opener = 0;
             xset_set_plugin_mirror(set);
             if ((set->plugin_top = top))
             {
@@ -4484,7 +4487,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "tool_type"));
             if (job < XSET_TOOL_DEVICES || job >= XSET_TOOL_INVALID || !set->tool)
                 break;
-            newset = xset_new_builtin_toolitem(job);
+            newset = xset_new_builtin_toolitem(XSetTool(job));
             if (newset)
                 xset_custom_insert_after(set, newset);
             break;
@@ -6582,7 +6585,7 @@ xset_get_builtin_toolitem_label(const unsigned char tool_type)
 }
 
 static XSet*
-xset_new_builtin_toolitem(const char tool_type)
+xset_new_builtin_toolitem(XSetTool tool_type)
 {
     if (tool_type < XSET_TOOL_DEVICES || tool_type >= XSET_TOOL_INVALID)
         return nullptr;
@@ -7266,7 +7269,7 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             set_target = set_child;
             for (i = 0; i < stop_b4; i++)
             {
-                set = xset_new_builtin_toolitem(default_tools[i]);
+                set = xset_new_builtin_toolitem(XSetTool(default_tools[i]));
                 xset_custom_insert_after(set_target, set);
                 set_target = set;
             }

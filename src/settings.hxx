@@ -286,7 +286,7 @@ struct XSet
     char* title;      // not saved or read if locked
     char* next;
     char* context;
-    unsigned char tool; // 0=not 1=true 2=false
+    XSetTool tool;
     bool lock;          // not saved, default true
 
     // Custom Command ( !lock )
