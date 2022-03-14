@@ -57,7 +57,7 @@ struct VFSVolumeCallbackData
     void* user_data;
 };
 
-static GList* volumes = nullptr;
+static std::vector<VFSVolume*> volumes;
 static GArray* callbacks = nullptr;
 static bool global_inhibit_auto = false;
 
@@ -3524,66 +3524,64 @@ vfs_volume_device_added(VFSVolume* volume, bool automount)
         return;
 
     // check if we already have this volume device file
-    GList* l;
-    for (l = volumes; l; l = l->next)
+    for (VFSVolume* volume2: volumes)
     {
-        if ((VFS_VOLUME(l->data))->devnum == volume->devnum)
+        if (volume2->devnum == volume->devnum)
         {
             // update existing volume
-            bool was_mounted = (VFS_VOLUME(l->data))->is_mounted;
-            bool was_audiocd = (VFS_VOLUME(l->data))->is_audiocd;
-            bool was_mountable = (VFS_VOLUME(l->data))->is_mountable;
+            bool was_mounted = volume2->is_mounted;
+            bool was_audiocd = volume2->is_audiocd;
+            bool was_mountable = volume2->is_mountable;
 
             // detect changed mount point
             if (!was_mounted && volume->is_mounted)
                 changed_mount_point = g_strdup(volume->mount_point);
             else if (was_mounted && !volume->is_mounted)
-                changed_mount_point = g_strdup((VFS_VOLUME(l->data))->mount_point);
+                changed_mount_point = g_strdup(volume2->mount_point);
 
-            vfs_free_volume_members(VFS_VOLUME(l->data));
-            (VFS_VOLUME(l->data))->udi = g_strdup(volume->udi);
-            (VFS_VOLUME(l->data))->device_file = g_strdup(volume->device_file);
-            (VFS_VOLUME(l->data))->label = g_strdup(volume->label);
-            (VFS_VOLUME(l->data))->mount_point = g_strdup(volume->mount_point);
-            (VFS_VOLUME(l->data))->icon = g_strdup(volume->icon);
-            (VFS_VOLUME(l->data))->disp_name = g_strdup(volume->disp_name);
-            (VFS_VOLUME(l->data))->is_mounted = volume->is_mounted;
-            (VFS_VOLUME(l->data))->is_mountable = volume->is_mountable;
-            (VFS_VOLUME(l->data))->is_optical = volume->is_optical;
-            (VFS_VOLUME(l->data))->requires_eject = volume->requires_eject;
-            (VFS_VOLUME(l->data))->is_removable = volume->is_removable;
-            (VFS_VOLUME(l->data))->is_user_visible = volume->is_user_visible;
-            (VFS_VOLUME(l->data))->size = volume->size;
-            (VFS_VOLUME(l->data))->is_table = volume->is_table;
-            (VFS_VOLUME(l->data))->is_floppy = volume->is_floppy;
-            (VFS_VOLUME(l->data))->nopolicy = volume->nopolicy;
-            (VFS_VOLUME(l->data))->fs_type = volume->fs_type;
-            (VFS_VOLUME(l->data))->is_blank = volume->is_blank;
-            (VFS_VOLUME(l->data))->is_audiocd = volume->is_audiocd;
-            (VFS_VOLUME(l->data))->is_dvd = volume->is_dvd;
+            vfs_free_volume_members(volume);
+            volume2->udi = g_strdup(volume->udi);
+            volume2->device_file = g_strdup(volume->device_file);
+            volume2->label = g_strdup(volume->label);
+            volume2->mount_point = g_strdup(volume->mount_point);
+            volume2->icon = g_strdup(volume->icon);
+            volume2->disp_name = g_strdup(volume->disp_name);
+            volume2->is_mounted = volume->is_mounted;
+            volume2->is_mountable = volume->is_mountable;
+            volume2->is_optical = volume->is_optical;
+            volume2->requires_eject = volume->requires_eject;
+            volume2->is_removable = volume->is_removable;
+            volume2->is_user_visible = volume->is_user_visible;
+            volume2->size = volume->size;
+            volume2->is_table = volume->is_table;
+            volume2->is_floppy = volume->is_floppy;
+            volume2->nopolicy = volume->nopolicy;
+            volume2->fs_type = volume->fs_type;
+            volume2->is_blank = volume->is_blank;
+            volume2->is_audiocd = volume->is_audiocd;
+            volume2->is_dvd = volume->is_dvd;
 
             // Mount and ejection detect for automount
             if (volume->is_mounted)
             {
-                (VFS_VOLUME(l->data))->ever_mounted = true;
-                (VFS_VOLUME(l->data))->automount_time = 0;
+                volume2->ever_mounted = true;
+                volume2->automount_time = 0;
             }
             else
             {
                 if (volume->is_removable && !volume->is_mountable) // ejected
                 {
-                    (VFS_VOLUME(l->data))->ever_mounted = false;
-                    (VFS_VOLUME(l->data))->automount_time = 0;
-                    (VFS_VOLUME(l->data))->inhibit_auto = false;
+                    volume2->ever_mounted = false;
+                    volume2->automount_time = 0;
+                    volume2->inhibit_auto = false;
                 }
             }
 
-            call_callbacks(VFS_VOLUME(l->data), VFS_VOLUME_CHANGED);
+            call_callbacks(volume2, VFS_VOLUME_CHANGED);
 
             vfs_free_volume_members(volume);
             g_slice_free(VFSVolume, volume);
 
-            volume = VFS_VOLUME(l->data);
             if (automount)
             {
                 vfs_volume_automount(volume);
@@ -3619,7 +3617,7 @@ vfs_volume_device_added(VFSVolume* volume, bool automount)
     }
 
     // add as new volume
-    volumes = g_list_append(volumes, volume);
+    volumes.push_back(volume);
     call_callbacks(volume, VFS_VOLUME_ADDED);
     if (automount)
     {
@@ -3636,22 +3634,17 @@ vfs_volume_device_added(VFSVolume* volume, bool automount)
 static bool
 vfs_volume_nonblock_removed(dev_t devnum)
 {
-    GList* l;
-    VFSVolume* volume;
-
-    for (l = volumes; l; l = l->next)
+    for (VFSVolume* volume: volumes)
     {
-        if ((VFS_VOLUME(l->data))->device_type != DEVICE_TYPE_BLOCK &&
-            (VFS_VOLUME(l->data))->devnum == devnum)
+        if (volume->device_type != DEVICE_TYPE_BLOCK && volume->devnum == devnum)
         {
             // remove volume
-            volume = VFS_VOLUME(l->data);
             LOG_INFO("special mount removed: {} ({}:{}) on {}",
                      volume->device_file,
                      MAJOR(volume->devnum),
                      MINOR(volume->devnum),
                      volume->mount_point);
-            volumes = g_list_remove(volumes, volume);
+            volumes.erase(std::remove(volumes.begin(), volumes.end(), volume), volumes.end());
             call_callbacks(volume, VFS_VOLUME_REMOVED);
             vfs_free_volume_members(volume);
             g_slice_free(VFSVolume, volume);
@@ -3670,20 +3663,16 @@ vfs_volume_device_removed(struct udev_device* udevice)
 
     dev_t devnum = udev_device_get_devnum(udevice);
 
-    GList* l;
-    VFSVolume* volume;
-    for (l = volumes; l; l = l->next)
+    for (VFSVolume* volume: volumes)
     {
-        if ((VFS_VOLUME(l->data))->device_type == DEVICE_TYPE_BLOCK &&
-            (VFS_VOLUME(l->data))->devnum == devnum)
+        if (volume->device_type == DEVICE_TYPE_BLOCK && volume->devnum == devnum)
         {
             // remove volume
-            volume = VFS_VOLUME(l->data);
             // LOG_INFO("remove volume {}", volume->device_file);
             vfs_volume_exec(volume, xset_get_s("dev_exec_remove"));
             if (volume->is_mounted && volume->is_removable)
                 unmount_if_mounted(volume);
-            volumes = g_list_remove(volumes, volume);
+            volumes.erase(std::remove(volumes.begin(), volumes.end(), volume), volumes.end());
             call_callbacks(volume, VFS_VOLUME_REMOVED);
             if (volume->is_mounted && volume->mount_point)
                 main_window_refresh_all_tabs_matching(volume->mount_point);
@@ -3736,7 +3725,6 @@ vfs_volume_init()
     struct udev_device* udevice;
     struct udev_enumerate* enumerate;
     struct udev_list_entry *devices, *dev_list_entry;
-    VFSVolume* volume;
 
     // remove unused mount points
     ptk_location_view_clean_mount_points();
@@ -3766,7 +3754,8 @@ vfs_volume_init()
             udevice = udev_device_new_from_syspath(udev, syspath);
             if (udevice)
             {
-                if ((volume = vfs_volume_read_by_device(udevice)))
+                VFSVolume* volume = vfs_volume_read_by_device(udevice);
+                if (volume)
                     vfs_volume_device_added(volume, false); // frees volume if needed
                 udev_device_unref(udevice);
             }
@@ -3829,9 +3818,8 @@ vfs_volume_init()
     }
 
     // do startup automounts
-    GList* l;
-    for (l = volumes; l; l = l->next)
-        vfs_volume_automount(VFS_VOLUME(l->data));
+    for (VFSVolume* volume: volumes)
+        vfs_volume_automount(volume);
 
     // start resume autoexec timer
     g_timeout_add_seconds(3, (GSourceFunc)on_cancel_inhibit_timer, nullptr);
@@ -3884,25 +3872,24 @@ vfs_volume_finalize()
         g_array_free(callbacks, true);
 
     // free volumes / unmount all ?
-    GList* l;
     bool unmount_all = xset_get_b("dev_unmount_quit");
-    if (G_LIKELY(volumes))
+    if (!volumes.empty())
     {
-        for (l = volumes; l; l = l->next)
+        for (VFSVolume* volume: volumes)
         {
             if (unmount_all)
-                vfs_volume_autounmount(VFS_VOLUME(l->data));
-            vfs_free_volume_members(VFS_VOLUME(l->data));
-            g_slice_free(VFSVolume, l->data);
+                vfs_volume_autounmount(volume);
+            vfs_free_volume_members(volume);
+            g_slice_free(VFSVolume, volume);
         }
     }
-    volumes = nullptr;
+    volumes.clear();
 
     // remove unused mount points
     ptk_location_view_clean_mount_points();
 }
 
-const GList*
+const std::vector<VFSVolume*>
 vfs_volume_get_all_volumes()
 {
     return volumes;
@@ -3924,18 +3911,17 @@ vfs_volume_get_by_device_or_point(const char* device_file, const char* point)
             canon = nullptr;
     }
 
-    if (G_LIKELY(volumes))
+    if (!volumes.empty())
     {
-        GList* l;
-        for (l = volumes; l; l = l->next)
+        for (VFSVolume* volume: volumes)
         {
-            VFSVolume* vol = VFS_VOLUME(l->data);
-            if (device_file && !strcmp(device_file, vol->device_file))
-                return vol;
-            if (point && vol->is_mounted && vol->mount_point)
+            if (device_file && !strcmp(device_file, volume->device_file))
+                return volume;
+            if (point && volume->is_mounted && volume->mount_point)
             {
-                if (!strcmp(point, vol->mount_point) || (canon && !strcmp(canon, vol->mount_point)))
-                    return vol;
+                if (!strcmp(point, volume->mount_point) ||
+                    (canon && !strcmp(canon, volume->mount_point)))
+                    return volume;
             }
         }
     }

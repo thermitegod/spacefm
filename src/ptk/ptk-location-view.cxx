@@ -13,6 +13,8 @@
 #include <string>
 #include <filesystem>
 
+#include <vector>
+
 #include <iostream>
 #include <fstream>
 
@@ -181,12 +183,10 @@ update_all()
     VFSVolume* v = nullptr;
     bool havevol;
 
-    const GList* volumes = vfs_volume_get_all_volumes();
-    const GList* l;
-    for (l = volumes; l; l = l->next)
+    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
+    for (VFSVolume* volume: volumes)
     {
-        VFSVolume* vol = VFS_VOLUME(l->data);
-        if (vol)
+        if (volume)
         {
             // search model for volume vol
             GtkTreeIter it;
@@ -195,28 +195,28 @@ update_all()
                 do
                 {
                     gtk_tree_model_get(model, &it, COL_DATA, &v, -1);
-                } while (v != vol && gtk_tree_model_iter_next(model, &it));
-                havevol = (v == vol);
+                } while (v != volume && gtk_tree_model_iter_next(model, &it));
+                havevol = (v == volume);
             }
             else
                 havevol = false;
 
-            if (volume_is_visible(vol))
+            if (volume_is_visible(volume))
             {
                 if (havevol)
                 {
-                    update_volume(vol);
+                    update_volume(volume);
 
                     // attempt automount in case settings changed
-                    vol->automount_time = 0;
-                    vol->ever_mounted = false;
-                    vfs_volume_automount(vol);
+                    volume->automount_time = 0;
+                    volume->ever_mounted = false;
+                    vfs_volume_automount(volume);
                 }
                 else
-                    add_volume(vol, true);
+                    add_volume(volume, true);
             }
             else if (havevol)
-                remove_volume(vol);
+                remove_volume(volume);
         }
     }
 }
@@ -225,26 +225,21 @@ static void
 update_names()
 {
     VFSVolume* v = nullptr;
-    const GList* l;
-    const GList* volumes = vfs_volume_get_all_volumes();
-    for (l = volumes; l; l = l->next)
+    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
+    for (VFSVolume* volume: volumes)
     {
-        if (l->data)
-        {
-            VFSVolume* vol = VFS_VOLUME(l->data);
-            vfs_volume_set_info(vol);
+        vfs_volume_set_info(volume);
 
-            // search model for volume vol
-            GtkTreeIter it;
-            if (gtk_tree_model_get_iter_first(model, &it))
+        // search model for volume vol
+        GtkTreeIter it;
+        if (gtk_tree_model_get_iter_first(model, &it))
+        {
+            do
             {
-                do
-                {
-                    gtk_tree_model_get(model, &it, COL_DATA, &v, -1);
-                } while (v != vol && gtk_tree_model_iter_next(model, &it));
-                if (v == vol)
-                    update_volume(vol);
-            }
+                gtk_tree_model_get(model, &it, COL_DATA, &v, -1);
+            } while (v != volume && gtk_tree_model_iter_next(model, &it));
+            if (v == volume)
+                update_volume(volume);
         }
     }
 }
@@ -354,16 +349,15 @@ ptk_location_view_open_block(const char* block, bool new_tab)
     char buf[PATH_MAX + 1];
     char* canon = realpath(block, buf);
 
-    const GList* l = vfs_volume_get_all_volumes();
-    for (; l; l = l->next)
+    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
+    for (VFSVolume* volume: volumes)
     {
-        if (!g_strcmp0(vfs_volume_get_device(VFS_VOLUME(l->data)), canon))
+        if (!g_strcmp0(vfs_volume_get_device(volume), canon))
         {
-            VFSVolume* vol = VFS_VOLUME(l->data);
             if (new_tab)
-                on_open_tab(nullptr, vol, nullptr);
+                on_open_tab(nullptr, volume, nullptr);
             else
-                on_open(nullptr, vol, nullptr);
+                on_open(nullptr, volume, nullptr);
             return true;
         }
     }
@@ -375,12 +369,13 @@ ptk_location_view_init_model(GtkListStore* list)
 {
     (void)list;
     n_vols = 0;
-    const GList* l = vfs_volume_get_all_volumes();
+    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
+
     vfs_volume_add_callback(on_volume_event, model);
 
-    for (; l; l = l->next)
+    for (VFSVolume* volume: volumes)
     {
-        add_volume(VFS_VOLUME(l->data), false);
+        add_volume(volume, false);
     }
     update_volume_icons();
 }
@@ -812,23 +807,21 @@ on_autoopen_net_cb(VFSFileTask* task, AutoOpen* ao)
     // user-entered url
     VFSVolume* device_file_vol = nullptr;
     VFSVolume* mount_point_vol = nullptr;
-    const GList* volumes = vfs_volume_get_all_volumes();
-    const GList* l;
-    for (l = volumes; l; l = l->next)
+    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
+    for (VFSVolume* volume: volumes)
     {
-        VFSVolume* vol = VFS_VOLUME(l->data);
-        if (vol->is_mounted)
+        if (volume->is_mounted)
         {
-            if (!strcmp(vol->device_file, ao->device_file))
+            if (!strcmp(volume->device_file, ao->device_file))
             {
-                device_file_vol = vol;
+                device_file_vol = volume;
                 break;
             }
-            else if (!mount_point_vol && ao->mount_point && !vol->should_autounmount &&
-                     !g_strcmp0(vol->mount_point, ao->mount_point))
+            else if (!mount_point_vol && ao->mount_point && !volume->should_autounmount &&
+                     !g_strcmp0(volume->mount_point, ao->mount_point))
                 // found an unspecial mount point that matches the ao mount point -
                 // save for later use if no device file match found
-                mount_point_vol = vol;
+                mount_point_vol = volume;
         }
     }
 
@@ -917,28 +910,25 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     // already mounted?
     if (!force_new_mount)
     {
-        const GList* l;
-        VFSVolume* vol;
-        const GList* volumes = vfs_volume_get_all_volumes();
-        for (l = volumes; l; l = l->next)
+        const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
+        for (VFSVolume* volume: volumes)
         {
-            vol = VFS_VOLUME(l->data);
             // test against mtab url and copy of user-entered url (udi)
-            if (strstr(vol->device_file, netmount->url) || strstr(vol->udi, netmount->url))
+            if (strstr(volume->device_file, netmount->url) || strstr(volume->udi, netmount->url))
             {
-                if (vol->is_mounted && vol->mount_point && have_x_access(vol->mount_point))
+                if (volume->is_mounted && volume->mount_point && have_x_access(volume->mount_point))
                 {
                     if (new_tab)
                     {
                         ptk_file_browser_emit_open(file_browser,
-                                                   vol->mount_point,
+                                                   volume->mount_point,
                                                    PTK_OPEN_NEW_TAB);
                     }
                     else
                     {
-                        if (strcmp(vol->mount_point, ptk_file_browser_get_cwd(file_browser)))
+                        if (strcmp(volume->mount_point, ptk_file_browser_get_cwd(file_browser)))
                             ptk_file_browser_chdir(file_browser,
-                                                   vol->mount_point,
+                                                   volume->mount_point,
                                                    PTK_FB_CHDIR_ADD_HISTORY);
                     }
                     goto _net_free;
@@ -1392,24 +1382,22 @@ on_autoopen_cb(VFSFileTask* task, AutoOpen* ao)
 {
     (void)task;
     // LOG_INFO("on_autoopen_cb");
-    const GList* volumes = vfs_volume_get_all_volumes();
-    const GList* l;
-    for (l = volumes; l; l = l->next)
+    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
+    for (VFSVolume* volume: volumes)
     {
-        if ((VFS_VOLUME(l->data))->devnum == ao->devnum)
+        if (volume->devnum == ao->devnum)
         {
-            VFSVolume* vol = VFS_VOLUME(l->data);
-            vol->inhibit_auto = false;
-            if (vol->is_mounted)
+            volume->inhibit_auto = false;
+            if (volume->is_mounted)
             {
                 if (GTK_IS_WIDGET(ao->file_browser))
                 {
                     ptk_file_browser_emit_open(ao->file_browser,
-                                               vol->mount_point,
+                                               volume->mount_point,
                                                (PtkOpenAction)ao->job);
                 }
                 else
-                    open_in_prog(vol->mount_point);
+                    open_in_prog(volume->mount_point);
             }
             break;
         }
@@ -2714,16 +2702,12 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, unsig
     PtkFileBrowser* file_browser;
 
     // validate vol
-    const GList* l;
-    const GList* volumes = vfs_volume_get_all_volumes();
-    for (l = volumes; l; l = l->next)
+    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
+    for (VFSVolume* volume: volumes)
     {
-        if (VFS_VOLUME(l->data) == vol)
+        if (volume == vol)
             break;
     }
-    if (!l)
-        /////// destroy menu?
-        return;
 
     GtkWidget* view = GTK_WIDGET(g_object_get_data(G_OBJECT(menu), "parent"));
     if (xset_get_b("dev_newtab"))
@@ -2895,37 +2879,38 @@ cmp_dev_name(VFSVolume* a, VFSVolume* b)
 void
 ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* menu)
 { // add currently visible devices to menu with dev design mode callback
-    const GList* v;
-    VFSVolume* vol;
     GtkWidget* item;
     XSet* set;
-    GList* names = nullptr;
-    GList* l;
+
+    std::vector<VFSVolume*> names;
 
     g_object_set_data(G_OBJECT(menu), "parent", parent);
     // file_browser may be nullptr
     g_object_set_data(G_OBJECT(parent), "file_browser", file_browser);
 
-    const GList* volumes = vfs_volume_get_all_volumes();
-    for (v = volumes; v; v = v->next)
+    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
+    for (VFSVolume* volume: volumes)
     {
-        vol = VFS_VOLUME(v->data);
-        if (vol && volume_is_visible(vol))
-            names = g_list_prepend(names, vol);
+        if (volume && volume_is_visible(volume))
+            names.push_back(volume);
     }
 
-    names = g_list_sort(names, (GCompareFunc)cmp_dev_name);
-    for (l = names; l; l = l->next)
+    VFSVolume* vol;
+
+    sort(names.begin(), names.end(), cmp_dev_name);
+    for (VFSVolume* volume: names)
     {
-        vol = VFS_VOLUME(l->data);
-        item = gtk_menu_item_new_with_label(vfs_volume_get_disp_name(vol));
+        vol = volume;
+        item = gtk_menu_item_new_with_label(vfs_volume_get_disp_name(volume));
         g_object_set_data(G_OBJECT(item), "menu", menu);
-        g_object_set_data(G_OBJECT(item), "vol", vol);
-        g_signal_connect(item, "button-press-event", G_CALLBACK(on_dev_menu_button_press), vol);
-        g_signal_connect(item, "button-release-event", G_CALLBACK(on_dev_menu_button_press), vol);
+        g_object_set_data(G_OBJECT(item), "vol", volume);
+        g_signal_connect(item, "button-press-event", G_CALLBACK(on_dev_menu_button_press), volume);
+        g_signal_connect(item,
+                         "button-release-event",
+                         G_CALLBACK(on_dev_menu_button_press),
+                         volume);
         gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     }
-    g_list_free(names);
     g_signal_connect(menu, "key_press_event", G_CALLBACK(on_dev_menu_keypress), nullptr);
 
     xset_set_cb("dev_show_internal_drives", (GFunc)update_all, nullptr);

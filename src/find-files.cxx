@@ -820,14 +820,12 @@ on_add_search_volumes(GtkWidget* menu, FindFile* data)
 {
     (void)menu;
     const char* path;
-    const GList* vols = vfs_volume_get_all_volumes();
-    const GList* l;
-    for (l = vols; l; l = l->next)
+    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
+    for (VFSVolume* volume: volumes)
     {
-        VFSVolume* vol = VFS_VOLUME(l->data);
-        if (vfs_volume_is_mounted(vol))
+        if (vfs_volume_is_mounted(volume))
         {
-            path = vfs_volume_get_mount_point(vol);
+            path = vfs_volume_get_mount_point(volume);
             if (path && path[0] != '\0')
                 add_search_dir(data, path);
         }

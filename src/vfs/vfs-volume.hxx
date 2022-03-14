@@ -12,6 +12,8 @@
 
 #include <string>
 
+#include <vector>
+
 #include <ctime>
 
 #include <glib.h>
@@ -39,7 +41,7 @@ bool vfs_volume_init();
 
 void vfs_volume_finalize();
 
-const GList* vfs_volume_get_all_volumes();
+const std::vector<VFSVolume*> vfs_volume_get_all_volumes();
 
 void vfs_volume_add_callback(VFSVolumeCallback cb, void* user_data);
 
