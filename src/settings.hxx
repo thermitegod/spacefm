@@ -390,6 +390,11 @@ XSet* xset_set_ob2(XSet* set, const char* ob2, void* ob2_data);
 XSet* xset_is(const char* name);
 XSet* xset_find_custom(const char* search);
 
+int xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string& title,
+                    GtkButtonsType buttons, const std::string& msg1, const std::string& msg2);
+int xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string& title,
+                    GtkButtonsType buttons, const std::string& msg1);
+
 void xset_menu_cb(GtkWidget* item, XSet* set);
 bool xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data);
 bool xset_text_dialog(GtkWidget* parent, const char* title, bool large, const char* msg1,
@@ -400,8 +405,6 @@ char* xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const cha
 void xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root);
 void xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,
                        XSet* set_parent, bool show_tooltips);
-int xset_msg_dialog(GtkWidget* parent, int action, const char* title, int buttons, const char* msg1,
-                    const char* msg2);
 GtkTextView* multi_input_new(GtkScrolledWindow* scrolled, const char* text);
 void multi_input_select_region(GtkWidget* input, int start, int end);
 char* multi_input_get_text(GtkWidget* input);

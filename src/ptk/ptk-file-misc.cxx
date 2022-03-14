@@ -2794,8 +2794,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                                         GTK_MESSAGE_QUESTION,
                                         "Create Parent Directory",
                                         GTK_BUTTONS_YES_NO,
-                                        "The parent directory does not exist.  Create it?",
-                                        nullptr) != GTK_RESPONSE_YES)
+                                        "The parent directory does not exist.  Create it?") !=
+                        GTK_RESPONSE_YES)
                         goto _continue_free;
                 }
                 if (as_root)
@@ -3291,9 +3291,8 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
         xset_msg_dialog(parent->file_browser ? GTK_WIDGET(parent->file_browser) : nullptr,
                         GTK_MESSAGE_ERROR,
                         "Error Loading Handler",
-                        0,
-                        err_msg,
-                        nullptr);
+                        GTK_BUTTONS_OK,
+                        err_msg);
         g_free(err_msg);
         return;
     }

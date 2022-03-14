@@ -899,9 +899,8 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
         xset_msg_dialog(GTK_WIDGET(file_browser),
                         GTK_MESSAGE_ERROR,
                         "Invalid URL",
-                        0,
-                        "The entered URL is not valid.",
-                        nullptr);
+                        GTK_BUTTONS_OK,
+                        "The entered URL is not valid.");
         return;
     }
 
@@ -965,10 +964,9 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
         xset_msg_dialog(GTK_WIDGET(file_browser),
                         GTK_MESSAGE_ERROR,
                         "Handler Not Found",
-                        0,
+                        GTK_BUTTONS_OK,
                         "No network handler is configured for this URL, or no mount command is "
-                        "set.  Add a handler in Devices|Settings|Protocol Handlers.",
-                        nullptr);
+                        "set.  Add a handler in Devices|Settings|Protocol Handlers.");
         goto _net_free;
     }
 
@@ -1042,18 +1040,16 @@ _net_free:
 static void
 popup_missing_mount(GtkWidget* view, int job)
 {
-    const char* cmd;
-
+    std::string cmd;
     if (job == 0)
         cmd = "mount";
     else
         cmd = "unmount";
-    char* msg =
-        g_strdup_printf("No handler is configured for this device type, or no %s command is set. "
-                        " Add a handler in Settings|Device Handlers or Protocol Handlers.",
-                        cmd);
-    xset_msg_dialog(view, GTK_MESSAGE_ERROR, "Handler Not Found", 0, msg, nullptr);
-    g_free(msg);
+    std::string msg =
+        fmt::format("No handler is configured for this device type, or no {} command is set. "
+                    " Add a handler in Settings|Device Handlers or Protocol Handlers.",
+                    cmd);
+    xset_msg_dialog(view, GTK_MESSAGE_ERROR, "Handler Not Found", GTK_BUTTONS_OK, msg);
 }
 
 static void
@@ -1815,17 +1811,14 @@ static void
 on_root_udevil(GtkMenuItem* item, GtkWidget* view)
 {
     (void)item;
-    char* udevil_path = g_build_filename(SYSCONFDIR, "udevil", nullptr);
-    char* udevil_conf = g_build_filename(SYSCONFDIR, "udevil", "udevil.conf", nullptr);
-    char* msg =
-        g_strdup_printf("The %s directory was not found.  Is udevil installed?", udevil_path);
+    std::string udevil_path = g_build_filename(SYSCONFDIR, "udevil", nullptr);
+    std::string udevil_conf = g_build_filename(SYSCONFDIR, "udevil", "udevil.conf", nullptr);
+    std::string msg =
+        fmt::format("The {} directory was not found.  Is udevil installed?", udevil_path);
     if (std::filesystem::is_directory(udevil_path))
-        xset_edit(view, udevil_conf, true, false);
+        xset_edit(view, udevil_conf.c_str(), true, false);
     else
-        xset_msg_dialog(view, GTK_MESSAGE_ERROR, "Directory Missing", 0, msg, nullptr);
-    g_free(udevil_path);
-    g_free(udevil_conf);
-    g_free(msg);
+        xset_msg_dialog(view, GTK_MESSAGE_ERROR, "Directory Missing", GTK_BUTTONS_OK, msg);
 }
 
 static void

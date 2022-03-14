@@ -899,16 +899,16 @@ save_command_script(ContextData* ctxt, bool query)
                                  GTK_MESSAGE_QUESTION,
                                  "Save Modified Script?",
                                  GTK_BUTTONS_YES_NO,
-                                 "Save your changes to the command script?",
-                                 nullptr) == GTK_RESPONSE_NO)
+                                 "Save your changes to the command script?") == GTK_RESPONSE_NO)
         return;
     if (is_command_script_newer(ctxt) &&
-        xset_msg_dialog(ctxt->dlg,
-                        GTK_MESSAGE_QUESTION,
-                        "Overwrite Script?",
-                        GTK_BUTTONS_YES_NO,
-                        "The command script on disk has changed.\n\nDo you want to overwrite it?",
-                        nullptr) == GTK_RESPONSE_NO)
+        xset_msg_dialog(
+            ctxt->dlg,
+            GTK_MESSAGE_QUESTION,
+            "Overwrite Script?",
+            GTK_BUTTONS_YES_NO,
+            "The command script on disk has changed.\n\nDo you want to overwrite it?") ==
+            GTK_RESPONSE_NO)
         return;
 
     char* script = xset_custom_get_script(ctxt->set, false);
@@ -1016,10 +1016,9 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
             xset_msg_dialog(GTK_WIDGET(ctxt->dlg),
                             GTK_MESSAGE_ERROR,
                             "Error",
-                            0,
+                            GTK_BUTTONS_OK,
                             "The command line does not begin with a text file (script) to be "
-                            "opened, or the script was not found in your $PATH.",
-                            nullptr);
+                            "opened, or the script was not found in your $PATH.");
             g_free(path);
             return;
         }
@@ -1377,8 +1376,7 @@ replace_item_props(ContextData* ctxt)
                                 GTK_BUTTONS_OK,
                                 "Your command line is greater than 2000 characters and may be "
                                 "truncated when saved.  Consider using a command script instead "
-                                "by selecting Script on the Command tab.",
-                                nullptr);
+                                "by selecting Script on the Command tab.");
         }
         else
             rset->line = g_strdup(ctxt->temp_cmd_line);

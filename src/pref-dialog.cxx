@@ -397,14 +397,17 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             if (root_set_change)
             {
                 // task
-                char* msg = g_strdup_printf(
+                std::string msg = fmt::format(
                     "You will now be asked for your root password to save the root settings for "
-                    "this user to a file in %s/spacefm/  Supplying the password in the next "
+                    "this user to a file in {}/spacefm/  Supplying the password in the next "
                     "window is recommended.  Because SpaceFM runs some commands as root via su, "
                     "these settings are best protected by root.",
                     SYSCONFDIR);
-                xset_msg_dialog(GTK_WIDGET(dlg), 0, "Save Root Settings", 0, msg, nullptr);
-                g_free(msg);
+                xset_msg_dialog(GTK_WIDGET(dlg),
+                                GTK_MESSAGE_INFO,
+                                "Save Root Settings",
+                                GTK_BUTTONS_OK,
+                                msg);
                 PtkFileTask* task =
                     ptk_file_exec_new("Save Root Settings", nullptr, nullptr, nullptr);
                 task->task->exec_command = "echo";

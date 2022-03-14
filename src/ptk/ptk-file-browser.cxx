@@ -5005,9 +5005,8 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
             xset_msg_dialog(GTK_WIDGET(file_browser),
                             GTK_MESSAGE_ERROR,
                             "Invalid Destination",
-                            0,
-                            "Destination same as source",
-                            nullptr);
+                            GTK_BUTTONS_OK,
+                            "Destination same as source");
             g_free(dest_dir);
             return;
         }
@@ -5039,9 +5038,8 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
         xset_msg_dialog(GTK_WIDGET(file_browser),
                         GTK_MESSAGE_ERROR,
                         "Invalid Destination",
-                        0,
-                        "Invalid destination",
-                        nullptr);
+                        GTK_BUTTONS_OK,
+                        "Invalid destination");
     }
 }
 
@@ -5050,14 +5048,14 @@ ptk_file_browser_hide_selected(PtkFileBrowser* file_browser, GList* files, char*
 {
     if (xset_msg_dialog(
             GTK_WIDGET(file_browser),
-            0,
+            GTK_MESSAGE_INFO,
             "Hide File",
             GTK_BUTTONS_OK_CANCEL,
             "The names of the selected files will be added to the '.hidden' file located in this "
             "directory, which will hide them from view in SpaceFM.  You may need to refresh the "
             "view or restart SpaceFM for the files to disappear.\n\nTo unhide a file, open the "
-            ".hidden file in your text editor, remove the name of the file, and refresh.",
-            nullptr) != GTK_RESPONSE_OK)
+            ".hidden file in your text editor, remove the name of the file, and refresh.") !=
+        GTK_RESPONSE_OK)
         return;
 
     VFSFileInfo* file;

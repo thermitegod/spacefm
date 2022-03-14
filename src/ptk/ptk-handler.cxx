@@ -1279,7 +1279,7 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     // run command
     char* stdout = nullptr;
     char* stderr = nullptr;
-    char* msg;
+    std::string msg;
     bool ret;
     int exit_status;
     print_command(command);
@@ -1288,9 +1288,8 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
 
     if (!ret || (exit_status && WIFEXITED(exit_status)))
     {
-        msg = g_strdup_printf("An error occured copying command files\n\n%s", stderr ? stderr : "");
-        xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", 0, msg, nullptr);
-        g_free(msg);
+        msg = fmt::format("An error occured copying command files\n\n{}", stderr ? stderr : "");
+        xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", GTK_BUTTONS_OK, msg);
     }
     if (stderr)
         g_free(stderr);
@@ -1343,12 +1342,10 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
             default:
                 return;
         }
-        msg = g_strdup_printf(
-            "The selected %s Handler file has been imported to the %s Handlers list.",
-            mode_name,
-            mode_name);
-        xset_msg_dialog(nullptr, GTK_MESSAGE_INFO, "Handler Imported", 0, msg, nullptr);
-        g_free(msg);
+        msg = fmt::format("The selected {} Handler file has been imported to the {} Handlers list.",
+                          mode_name,
+                          mode_name);
+        xset_msg_dialog(nullptr, GTK_MESSAGE_INFO, "Handler Imported", GTK_BUTTONS_OK, msg);
         return;
     }
 
@@ -1458,9 +1455,8 @@ config_load_handler_settings(XSet* handler_xset, char* handler_xset_name, const 
             xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                             GTK_MESSAGE_ERROR,
                             "Error Loading Handler",
-                            0,
-                            err_msg,
-                            nullptr);
+                            GTK_BUTTONS_OK,
+                            err_msg);
             g_free(err_msg);
         }
     }
@@ -1877,8 +1873,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                             GTK_MESSAGE_WARNING,
                             "Confirm Remove",
                             GTK_BUTTONS_YES_NO,
-                            "Permanently remove the selected handler?",
-                            nullptr) != GTK_RESPONSE_YES)
+                            "Permanently remove the selected handler?") != GTK_RESPONSE_YES)
             goto _clean_exit;
 
         // Updating available archive handlers list - fetching current
@@ -2000,9 +1995,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                         GTK_MESSAGE_ERROR,
                         "Error Saving Handler",
-                        0,
-                        err_msg,
-                        nullptr);
+                        GTK_BUTTONS_OK,
+                        err_msg);
         g_free(err_msg);
     }
 
@@ -2100,8 +2094,7 @@ on_handlers_key_press(GtkWidget* widget, GdkEventKey* evt, HandlerData* hnd)
                         GTK_MESSAGE_QUESTION,
                         "Apply Changes ?",
                         GTK_BUTTONS_YES_NO,
-                        "Apply changes to the current handler?",
-                        nullptr) == GTK_RESPONSE_YES)
+                        "Apply changes to the current handler?") == GTK_RESPONSE_YES)
         on_configure_button_press(GTK_BUTTON(hnd->btn_apply), hnd);
     else
         hnd->changed = false;
@@ -2140,8 +2133,7 @@ on_handlers_button_press(GtkWidget* view, GdkEventButton* evt, HandlerData* hnd)
                             GTK_MESSAGE_QUESTION,
                             "Apply Changes ?",
                             GTK_BUTTONS_YES_NO,
-                            "Apply changes to the current handler?",
-                            nullptr) == GTK_RESPONSE_YES)
+                            "Apply changes to the current handler?") == GTK_RESPONSE_YES)
             on_configure_button_press(GTK_BUTTON(hnd->btn_apply), hnd);
 
         // Move cursor or unselect
@@ -2183,8 +2175,7 @@ restore_defaults(HandlerData* hnd, bool all)
                                        "Restore Default Handlers",
                                        GTK_BUTTONS_YES_NO,
                                        "Missing default handlers will be restored.\n\nAlso "
-                                       "OVERWRITE ALL EXISTING default handlers?",
-                                       nullptr);
+                                       "OVERWRITE ALL EXISTING default handlers?");
         if (response != GTK_RESPONSE_YES && response != GTK_RESPONSE_NO)
             // dialog was closed with no button pressed - cancel
             return;
@@ -2312,9 +2303,8 @@ validate_archive_handler(HandlerData* hnd)
         xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                         GTK_MESSAGE_WARNING,
                         dialog_titles[hnd->mode],
-                        false,
-                        "Please enter a valid handler name.",
-                        nullptr);
+                        GTK_BUTTONS_OK,
+                        "Please enter a valid handler name.");
         gtk_widget_grab_focus(hnd->entry_handler_name);
         return false;
     }
@@ -2325,10 +2315,8 @@ validate_archive_handler(HandlerData* hnd)
         xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                         GTK_MESSAGE_WARNING,
                         dialog_titles[hnd->mode],
-                        false,
-                        "Please enter a valid MIME Type or Pathname "
-                        "pattern.",
-                        nullptr);
+                        GTK_BUTTONS_OK,
+                        "Please enter a valid MIME Type or Pathname pattern.");
         gtk_widget_grab_focus(hnd->entry_handler_mime);
         return false;
     }
@@ -2359,7 +2347,7 @@ validate_archive_handler(HandlerData* hnd)
             xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                             GTK_MESSAGE_WARNING,
                             dialog_titles[hnd->mode],
-                            false,
+                            GTK_BUTTONS_OK,
                             "The following "
                             "substitution variables should probably be in the "
                             "compression command:\n\n"
@@ -2371,8 +2359,7 @@ validate_archive_handler(HandlerData* hnd)
                             "and one of the following:\n\n"
                             "%%o: Resulting single archive\n"
                             "%%O: Resulting archive per source "
-                            "file/directory",
-                            nullptr);
+                            "file/directory");
             gtk_widget_grab_focus(hnd->view_handler_compress);
             ret = false;
             goto _cleanup;
@@ -2387,12 +2374,11 @@ validate_archive_handler(HandlerData* hnd)
         xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                         GTK_MESSAGE_WARNING,
                         dialog_titles[hnd->mode],
-                        false,
+                        GTK_BUTTONS_OK,
                         "The following "
                         "variables should probably be in the extraction "
                         "command:\n\n%%x: "
-                        "Archive to extract",
-                        nullptr);
+                        "Archive to extract");
         gtk_widget_grab_focus(hnd->view_handler_extract);
         ret = false;
         goto _cleanup;
@@ -2406,12 +2392,11 @@ validate_archive_handler(HandlerData* hnd)
         xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                         GTK_MESSAGE_WARNING,
                         dialog_titles[hnd->mode],
-                        false,
+                        GTK_BUTTONS_OK,
                         "The following "
                         "variables should probably be in the list "
                         "command:\n\n%%x: "
-                        "Archive to list",
-                        nullptr);
+                        "Archive to list");
         gtk_widget_grab_focus(hnd->view_handler_list);
         ret = false;
         goto _cleanup;
@@ -2651,9 +2636,8 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
         xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                         GTK_MESSAGE_ERROR,
                         "Error Creating Temp Directory",
-                        0,
-                        "Unable to create temporary directory",
-                        nullptr);
+                        GTK_BUTTONS_OK,
+                        "Unable to create temporary directory");
         g_free(file);
         return;
     }

@@ -2294,7 +2294,7 @@ xset_custom_copy_files(XSet* src, XSet* dest)
     if (!ret || (exit_status && WIFEXITED(exit_status)))
     {
         msg = fmt::format("An error occured copying command files\n\n{}", stderr ? stderr : "");
-        xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", 0, msg.c_str(), nullptr);
+        xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", GTK_BUTTONS_OK, msg);
     }
     if (stderr)
         g_free(stderr);
@@ -2320,12 +2320,7 @@ xset_custom_copy_files(XSet* src, XSet* dest)
         {
             msg = fmt::format("An error occured copying command data files\n\n{}",
                               stderr ? stderr : "");
-            xset_msg_dialog(nullptr,
-                            GTK_MESSAGE_ERROR,
-                            "Copy Command Error",
-                            0,
-                            msg.c_str(),
-                            nullptr);
+            xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", GTK_BUTTONS_OK, msg);
         }
         if (stderr)
             g_free(stderr);
@@ -2779,7 +2774,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
 {
     (void)task;
     XSet* set;
-    char* msg;
+    std::string msg;
     // LOG_INFO("on_install_plugin_cb");
     if (plugin_data->job == PLUGIN_JOB_REMOVE) // uninstall
     {
@@ -2798,16 +2793,14 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
             set = xset_import_plugin(plugin_data->plug_dir, &use);
             if (!set)
             {
-                msg = g_strdup_printf(
-                    "The imported plugin directory does not contain a valid plugin.\n\n(%s/)",
+                msg = fmt::format(
+                    "The imported plugin directory does not contain a valid plugin.\n\n({}/)",
                     plugin_data->plug_dir);
                 xset_msg_dialog(GTK_WIDGET(plugin_data->main_window),
                                 GTK_MESSAGE_ERROR,
                                 "Invalid Plugin",
-                                0,
-                                msg,
-                                nullptr);
-                g_free(msg);
+                                GTK_BUTTONS_OK,
+                                msg);
             }
             // TODO - switch
             else if (use == PLUGIN_USE_BOOKMARKS)
@@ -2820,11 +2813,10 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                         GTK_WIDGET(plugin_data->main_window),
                         GTK_MESSAGE_ERROR,
                         "Bookmarks",
-                        0,
+                        GTK_BUTTONS_OK,
                         "This plugin file contains exported bookmarks which cannot be installed or "
                         "imported to the design clipboard.\n\nYou can import these directly into a "
-                        "menu (select New|Import from the Design Menu).",
-                        nullptr);
+                        "menu (select New|Import from the Design Menu).");
                 }
                 else
                 {
@@ -2871,11 +2863,10 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                                                              : nullptr,
                                     GTK_MESSAGE_ERROR,
                                     "Handler Plugin",
-                                    0,
+                                    GTK_BUTTONS_OK,
                                     "This file contains a handler plugin which cannot be installed "
                                     "as a plugin.\n\nYou can import handlers from a handler "
-                                    "configuration window, or use Plugins|Import.",
-                                    nullptr);
+                                    "configuration window, or use Plugins|Import.");
                 }
                 else
                     ptk_handler_import(use, plugin_data->handler_dlg, set);
@@ -2910,17 +2901,17 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                     clipboard_is_cut = false;
                     if (xset_get_b("plug_cverb") || plugin_data->handler_dlg)
                     {
-                        char* label = clean_label(set->menu_label, false, false);
+                        std::string label = clean_label(set->menu_label, false, false);
                         if (geteuid() == 0)
-                            msg = g_strdup_printf(
-                                "The '%s' plugin has been copied to the design clipboard.  Use "
+                            msg = fmt::format(
+                                "The '{}' plugin has been copied to the design clipboard.  Use "
                                 "View|Design Mode to paste it into a menu.\n\nBecause it has not "
                                 "been installed, this plugin will not appear in the Plugins "
                                 "menu.",
                                 label);
                         else
-                            msg = g_strdup_printf(
-                                "The '%s' plugin has been copied to the design clipboard.  Use "
+                            msg = fmt::format(
+                                "The '{}' plugin has been copied to the design clipboard.  Use "
                                 "View|Design Mode to paste it into a menu.\n\nBecause it has not "
                                 "been installed, this plugin will not appear in the Plugins "
                                 "menu, and its contents are not protected by root (once pasted "
@@ -2929,14 +2920,11 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                                 "and running it only from the Plugins menu is recommended to "
                                 "improve your system security.",
                                 label);
-                        g_free(label);
                         xset_msg_dialog(GTK_WIDGET(plugin_data->main_window),
-                                        0,
+                                        GTK_MESSAGE_INFO,
                                         "Copy Plugin",
-                                        0,
-                                        msg,
-                                        nullptr);
-                        g_free(msg);
+                                        GTK_BUTTONS_OK,
+                                        msg);
                     }
                 }
             }
@@ -2951,8 +2939,6 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
 static void
 xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 {
-    char* msg;
-
     if (!file_browser || !set || !set->plugin_top || !set->plug_dir)
         return;
 
@@ -2961,20 +2947,17 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 
     if (!app_settings.no_confirm)
     {
-        char* label = clean_label(set->menu_label, false, false);
-        msg = g_strdup_printf("Uninstall the '%s' plugin?\n\n( %s )", label, set->plug_dir);
-        g_free(label);
+        std::string msg;
+        std::string label = clean_label(set->menu_label, false, false);
+        msg = fmt::format("Uninstall the '{}' plugin?\n\n( {} )", label, set->plug_dir);
         if (xset_msg_dialog(parent,
                             GTK_MESSAGE_WARNING,
                             "Uninstall Plugin",
                             GTK_BUTTONS_YES_NO,
-                            msg,
-                            nullptr) != GTK_RESPONSE_YES)
+                            msg) != GTK_RESPONSE_YES)
         {
-            g_free(msg);
             return;
         }
-        g_free(msg);
     }
     PtkFileTask* task =
         ptk_file_exec_new("Uninstall Plugin", nullptr, parent, file_browser->task_view);
@@ -3317,9 +3300,8 @@ _export_error:
     xset_msg_dialog(parent,
                     GTK_MESSAGE_ERROR,
                     "Export Error",
-                    0,
-                    "Unable to create temporary files",
-                    nullptr);
+                    GTK_BUTTONS_OK,
+                    "Unable to create temporary files");
 }
 
 static void
@@ -3423,9 +3405,8 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
         xset_msg_dialog(file_browser ? GTK_WIDGET(file_browser) : nullptr,
                         GTK_MESSAGE_ERROR,
                         "Invalid Bookmark Target",
-                        0,
-                        msg,
-                        nullptr);
+                        GTK_BUTTONS_OK,
+                        msg);
         g_free(msg);
     }
     g_free(tilde_url);
@@ -4232,7 +4213,7 @@ xset_design_job(GtkWidget* item, XSet* set)
     XSet* mset;
     XSet* childset;
     XSet* set_next;
-    char* msg;
+    std::string msg;
     int response;
     char* folder;
     char* file = nullptr;
@@ -4390,25 +4371,20 @@ xset_design_job(GtkWidget* item, XSet* set)
             if (g_str_has_prefix(set->name, "open_all_type_"))
             {
                 name = set->name + 14;
-                msg = g_strdup_printf(
+                msg = fmt::format(
                     "You are adding a custom command to the Default menu item.  This item will "
                     "automatically have a pre-context - it will only appear when the MIME type "
-                    "of "
-                    "the first selected file matches the current type '%s'.\n\nAdd commands or "
-                    "menus "
-                    "here which you only want to appear for this one MIME type.",
+                    "of the first selected file matches the current type '{}'.\n\nAdd commands "
+                    "or menus here which you only want to appear for this one MIME type.",
                     name[0] == '\0' ? "(none)" : name);
                 if (xset_msg_dialog(parent,
-                                    0,
+                                    GTK_MESSAGE_INFO,
                                     "New Context Command",
                                     GTK_BUTTONS_OK_CANCEL,
-                                    msg,
-                                    nullptr) != GTK_RESPONSE_OK)
+                                    msg) != GTK_RESPONSE_OK)
                 {
-                    g_free(msg);
                     break;
                 }
-                g_free(msg);
             }
             switch (job)
             {
@@ -4510,25 +4486,20 @@ xset_design_job(GtkWidget* item, XSet* set)
             if (g_str_has_prefix(set->name, "open_all_type_"))
             {
                 name = set->name + 14;
-                msg = g_strdup_printf(
+                msg = fmt::format(
                     "You are adding a custom submenu to the Default menu item.  This item will "
                     "automatically have a pre-context - it will only appear when the MIME type "
-                    "of "
-                    "the first selected file matches the current type '%s'.\n\nAdd commands or "
-                    "menus "
-                    "here which you only want to appear for this one MIME type.",
+                    "of the first selected file matches the current type '{}'.\n\nAdd commands "
+                    "or menus here which you only want to appear for this one MIME type.",
                     name[0] == '\0' ? "(none)" : name);
                 if (xset_msg_dialog(parent,
-                                    0,
+                                    GTK_MESSAGE_INFO,
                                     "New Context Submenu",
                                     GTK_BUTTONS_OK_CANCEL,
-                                    msg,
-                                    nullptr) != GTK_RESPONSE_OK)
+                                    msg) != GTK_RESPONSE_OK)
                 {
-                    g_free(msg);
                     break;
                 }
-                g_free(msg);
             }
             name = nullptr;
             if (!xset_text_dialog(
@@ -4614,9 +4585,8 @@ xset_design_job(GtkWidget* item, XSet* set)
                 xset_msg_dialog(GTK_WIDGET(parent),
                                 GTK_MESSAGE_ERROR,
                                 "Error Creating Temp Directory",
-                                0,
-                                "Unable to create temporary directory",
-                                nullptr);
+                                GTK_BUTTONS_OK,
+                                "Unable to create temporary directory");
                 g_free(file);
                 break;
             }
@@ -4644,22 +4614,18 @@ xset_design_job(GtkWidget* item, XSet* set)
             file = g_build_filename(vfs_user_config_dir(), "gtk-3.0", "bookmarks", nullptr);
             if (!(file && std::filesystem::exists(file)))
                 file = g_build_filename(vfs_user_home_dir(), ".gtk-bookmarks", nullptr);
-            msg =
-                g_strdup_printf("GTK bookmarks (%s) will be imported into the current or selected "
-                                "submenu.  Note that importing large numbers of bookmarks (eg more "
-                                "than 500) may impact performance.",
-                                file);
+            msg = fmt::format("GTK bookmarks ({}) will be imported into the current or selected "
+                              "submenu.  Note that importing large numbers of bookmarks (eg more "
+                              "than 500) may impact performance.",
+                              file);
             if (xset_msg_dialog(parent,
                                 GTK_MESSAGE_QUESTION,
                                 "Import GTK Bookmarks",
                                 GTK_BUTTONS_OK_CANCEL,
-                                msg,
-                                nullptr) != GTK_RESPONSE_OK)
+                                msg) != GTK_RESPONSE_OK)
             {
-                g_free(msg);
                 break;
             }
-            g_free(msg);
             ptk_bookmark_view_import_gtk(file, set);
             g_free(file);
             break;
@@ -4767,7 +4733,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                                              GTK_DIALOG_MODAL,
                                              GTK_MESSAGE_WARNING,
                                              (GtkButtonsType)buttons,
-                                             msg,
+                                             msg.c_str(),
                                              nullptr);
                 xset_set_window_icon(GTK_WINDOW(dlg));
                 gtk_window_set_title(GTK_WINDOW(dlg), "Confirm Remove");
@@ -4777,7 +4743,6 @@ xset_design_job(GtkWidget* item, XSet* set)
                 if (response != GTK_RESPONSE_OK && response != GTK_RESPONSE_YES)
                     break;
             }
-            g_free(msg);
 
             // remove
             name = g_strdup(set->name);
@@ -5889,8 +5854,7 @@ xset_menu_cb(GtkWidget* item, XSet* set)
                                         GTK_MESSAGE_QUESTION,
                                         title,
                                         GTK_BUTTONS_OK_CANCEL,
-                                        msg.c_str(),
-                                        nullptr) == GTK_RESPONSE_OK)
+                                        msg) == GTK_RESPONSE_OK)
                     {
                         if (cb_func)
                             cb_func(item, cb_data);
@@ -5984,40 +5948,38 @@ xset_menu_cb(GtkWidget* item, XSet* set)
 }
 
 int
-xset_msg_dialog(GtkWidget* parent, int action, const char* title, int buttons, const char* msg1,
-                const char* msg2)
+xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string& title,
+                GtkButtonsType buttons, const std::string& msg1)
 {
-    /* action=
-    GTK_MESSAGE_INFO,
-    GTK_MESSAGE_WARNING,
-    GTK_MESSAGE_QUESTION,
-    GTK_MESSAGE_ERROR
-    */
+    std::string msg2;
+    return xset_msg_dialog(parent, action, title, buttons, msg1, msg2);
+}
+
+int
+xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string& title,
+                GtkButtonsType buttons, const std::string& msg1, const std::string& msg2)
+{
     GtkWidget* dlgparent = nullptr;
 
     if (parent)
         dlgparent = gtk_widget_get_toplevel(parent);
 
-    if (!buttons)
-        buttons = GTK_BUTTONS_OK;
-    if (action == 0)
-        action = GTK_MESSAGE_INFO;
-
     GtkWidget* dlg =
         gtk_message_dialog_new(GTK_WINDOW(dlgparent),
                                GtkDialogFlags(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-                               (GtkMessageType)action,
-                               (GtkButtonsType)buttons,
-                               msg1,
+                               action,
+                               buttons,
+                               msg1.c_str(),
                                nullptr);
+
     if (action == GTK_MESSAGE_INFO)
         xset_set_window_icon(GTK_WINDOW(dlg));
     gtk_window_set_role(GTK_WINDOW(dlg), "msg_dialog");
 
-    if (msg2)
-        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dlg), msg2, nullptr);
-    if (title)
-        gtk_window_set_title(GTK_WINDOW(dlg), title);
+    if (!msg2.empty())
+        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dlg), msg2.c_str(), nullptr);
+
+    gtk_window_set_title(GTK_WINDOW(dlg), title.c_str());
 
     gtk_widget_show_all(dlg);
     int res = gtk_dialog_run(GTK_DIALOG(dlg));

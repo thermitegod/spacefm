@@ -1308,7 +1308,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     // this function is now thread safe but is not currently run in
     // another thread because gio adds watches to main loop thread anyway
     char* su = nullptr;
-    char* str;
+    std::string msg;
     char* terminal = nullptr;
     char** terminalv = nullptr;
     char* sum_script = nullptr;
@@ -1348,17 +1348,15 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
             su = get_valid_su();
             if (!su)
             {
-                str = g_strdup(
-                    "Please configure a valid Terminal SU command in View|Preferences|Advanced");
-                LOG_WARN("{}", str);
+                msg = "Configure a valid Terminal SU command in View|Preferences|Advanced";
+                LOG_WARN(msg);
                 // do not use xset_msg_dialog if non-main thread
                 // vfs_file_task_exec_error( task, 0, str );
                 xset_msg_dialog(parent,
                                 GTK_MESSAGE_ERROR,
                                 "Terminal SU Not Available",
-                                0,
-                                str,
-                                nullptr);
+                                GTK_BUTTONS_OK,
+                                msg);
                 goto _exit_with_error_lean;
             }
         }
@@ -1370,11 +1368,11 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
 
     if (!tmp || !std::filesystem::is_directory(tmp))
     {
-        str = g_strdup("Cannot create temporary directory");
-        LOG_WARN("{}", str);
+        msg = "Cannot create temporary directory";
+        LOG_WARN(msg);
         // do not use xset_msg_dialog if non-main thread
         // vfs_file_task_exec_error( task, 0, str );
-        xset_msg_dialog(parent, GTK_MESSAGE_ERROR, "Error", 0, str, nullptr);
+        xset_msg_dialog(parent, GTK_MESSAGE_ERROR, "Error", GTK_BUTTONS_OK, msg);
         goto _exit_with_error_lean;
     }
 
@@ -1387,7 +1385,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     if (task->exec_terminal)
     {
         // get terminal
-        str = g_strdup(xset_get_s("main_terminal"));
+        char* str = g_strdup(xset_get_s("main_terminal"));
         g_strstrip(str);
         terminalv = g_strsplit(str, " ", 0);
         g_free(str);
@@ -1395,11 +1393,15 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
             terminal = g_find_program_in_path(terminalv[0]);
         if (!(terminal && terminal[0] == '/'))
         {
-            str = g_strdup("Please set a valid terminal program in View|Preferences|Advanced");
-            LOG_WARN("{}", str);
+            msg = "Please set a valid terminal program in View|Preferences|Advanced";
+            LOG_WARN(msg);
             // do not use xset_msg_dialog if non-main thread
             // vfs_file_task_exec_error( task, 0, str );
-            xset_msg_dialog(parent, GTK_MESSAGE_ERROR, "Terminal Not Available", 0, str, nullptr);
+            xset_msg_dialog(parent,
+                            GTK_MESSAGE_ERROR,
+                            "Terminal Not Available",
+                            GTK_BUTTONS_OK,
+                            msg);
             goto _exit_with_error_lean;
         }
         // resolve x-terminal-emulator link (may be recursive link)
@@ -1711,7 +1713,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
             if (std::filesystem::exists(task->exec_script))
                 std::filesystem::remove(task->exec_script);
         }
-        str = g_strdup_printf(
+        char* str = g_strdup_printf(
             "Error executing '%s'\nSee stdout (run spacefm in a terminal) for debug info",
             first_arg);
         g_free(first_arg);

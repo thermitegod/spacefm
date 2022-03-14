@@ -215,9 +215,8 @@ on_format_changed(GtkComboBox* combo, void* user_data)
             xset_msg_dialog(GTK_WIDGET(dlg),
                             GTK_MESSAGE_ERROR,
                             "Error Loading Handler",
-                            0,
-                            err_msg,
-                            nullptr);
+                            GTK_BUTTONS_OK,
+                            err_msg);
             g_free(err_msg);
         }
     }
@@ -398,8 +397,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                         GTK_BUTTONS_OK,
                         "No archive handlers "
                         "configured. You must add a handler before "
-                        "creating an archive.",
-                        nullptr);
+                        "creating an archive.");
         ptk_handler_show_config(HANDLER_MODE_ARC, file_browser, nullptr);
         return;
     }
@@ -515,9 +513,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 xset_msg_dialog(GTK_WIDGET(dlg),
                                 GTK_MESSAGE_ERROR,
                                 "Error Loading Handler",
-                                0,
-                                err_msg,
-                                nullptr);
+                                GTK_BUTTONS_OK,
+                                err_msg);
                 g_free(err_msg);
             }
         }
@@ -640,9 +637,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                         GTK_WIDGET(dlg),
                         GTK_MESSAGE_ERROR,
                         "Create Archive",
-                        0,
-                        "The archive creation command is empty.  Please enter a command.",
-                        nullptr);
+                        GTK_BUTTONS_OK,
+                        "The archive creation command is empty.  Please enter a command.");
                     g_free(command);
                     continue;
                 }
@@ -714,9 +710,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                         xset_msg_dialog(GTK_WIDGET(dlg),
                                         GTK_MESSAGE_ERROR,
                                         "Error Saving Handler",
-                                        0,
-                                        err_msg,
-                                        nullptr);
+                                        GTK_BUTTONS_OK,
+                                        err_msg);
                         g_free(err_msg);
                     }
                 }

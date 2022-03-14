@@ -467,7 +467,7 @@ void
 ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
 {
     // is file handler set for this type?
-    char* msg;
+    std::string msg;
     GSList* handlers_slist = ptk_handler_file_has_handlers(HANDLER_MODE_FILE,
                                                            HANDLER_MOUNT,
                                                            nullptr,
@@ -477,15 +477,14 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
                                                            true);
     if (handlers_slist)
     {
-        msg = g_strdup_printf(
-            "Note:  MIME type '%s' is currently set to open with the '%s' file handler, rather "
+        msg = fmt::format(
+            "Note:  MIME type '{}' is currently set to open with the '{}' file handler, rather "
             "than with your associated MIME application.\n\nYou may also need to disable this "
             "handler in Open|File Handlers for this type to be opened with your associated "
             "application by default.",
             vfs_mime_type_get_type(mime_type),
             (XSET(handlers_slist->data))->menu_label);
-        xset_msg_dialog(parent, 0, "MIME Type Has Handler", 0, msg, nullptr);
-        g_free(msg);
+        xset_msg_dialog(parent, GTK_MESSAGE_INFO, "MIME Type Has Handler", GTK_BUTTONS_OK, msg);
         g_slist_free(handlers_slist);
     }
     else if (!xset_get_b("arc_def_open"))
@@ -500,16 +499,15 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
                                                        true);
         if (handlers_slist)
         {
-            msg = g_strdup_printf(
-                "Note:  MIME type '%s' is currently set to open with the '%s' archive handler, "
+            msg = fmt::format(
+                "Note:  MIME type '{}' is currently set to open with the '{}' archive handler, "
                 "rather than with your associated MIME application.\n\nYou may also need to "
                 "disable this handler in Open|Archive Defaults|Archive Handlers, OR select "
                 "global option Open|Archive Defaults|Open With App, for this type to be opened "
                 "with your associated application by default.",
                 vfs_mime_type_get_type(mime_type),
                 (XSET(handlers_slist->data))->menu_label);
-            xset_msg_dialog(parent, 0, "MIME Type Has Handler", 0, msg, nullptr);
-            g_free(msg);
+            xset_msg_dialog(parent, GTK_MESSAGE_INFO, "MIME Type Has Handler", GTK_BUTTONS_OK, msg);
             g_slist_free(handlers_slist);
         }
     }

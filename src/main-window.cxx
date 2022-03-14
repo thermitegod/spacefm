@@ -218,7 +218,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
     char* path = nullptr;
     const char* deffolder;
     char* plug_dir = nullptr;
-    char* msg;
+    std::string msg;
     int job = PLUGIN_JOB_INSTALL;
 
     if (!item)
@@ -270,18 +270,16 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
                 ext[0] = '.';
             if (!plug_dir_name)
             {
-                msg = g_strdup_printf("This plugin's filename is invalid.  Please rename it using "
-                                      "alpha-numeric ASCII characters and try again.");
+                msg = "This plugin's filename is invalid.  Please rename it using "
+                      "alpha-numeric ASCII characters and try again.";
                 xset_msg_dialog(GTK_WIDGET(main_window),
                                 GTK_MESSAGE_ERROR,
                                 "Invalid Plugin Filename",
-                                0,
-                                msg,
-                                nullptr);
+                                GTK_BUTTONS_OK,
+                                msg);
                 {
                     g_free(plug_dir_name);
                     g_free(path);
-                    g_free(msg);
                     return;
                 }
             }
@@ -290,25 +288,21 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
 
             if (std::filesystem::exists(plug_dir))
             {
-                msg = g_strdup_printf(
-                    "There is already a plugin installed as '%s'.  Overwrite ?\n\nTip: You can "
-                    "also "
-                    "rename this plugin file to install it under a different name.",
+                msg = fmt::format(
+                    "There is already a plugin installed as '{}'.  Overwrite ?\n\nTip: You can "
+                    "also rename this plugin file to install it under a different name.",
                     plug_dir_name);
                 if (xset_msg_dialog(GTK_WIDGET(main_window),
                                     GTK_MESSAGE_WARNING,
                                     "Overwrite Plugin ?",
                                     GTK_BUTTONS_YES_NO,
-                                    msg,
-                                    nullptr) != GTK_RESPONSE_YES)
+                                    msg) != GTK_RESPONSE_YES)
                 {
                     g_free(plug_dir_name);
                     g_free(plug_dir);
                     g_free(path);
-                    g_free(msg);
                     return;
                 }
-                g_free(msg);
             }
             g_free(plug_dir_name);
             break;
@@ -322,9 +316,8 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
                 xset_msg_dialog(GTK_WIDGET(main_window),
                                 GTK_MESSAGE_ERROR,
                                 "Error Creating Temp Directory",
-                                0,
-                                "Unable to create temporary directory",
-                                nullptr);
+                                GTK_BUTTONS_OK,
+                                "Unable to create temporary directory");
                 g_free(path);
                 return;
             }
@@ -718,15 +711,14 @@ main_design_mode(GtkMenuItem* menuitem, FMMainWindow* main_window)
     (void)menuitem;
     xset_msg_dialog(
         GTK_WIDGET(main_window),
-        0,
+        GTK_MESSAGE_INFO,
         "Design Mode Help",
-        0,
+        GTK_BUTTONS_OK,
         "Design Mode allows you to change the name, shortcut key and icon of menu, toolbar and "
         "bookmark items, show help for an item, and add your own custom commands and "
         "applications.\n\nTo open the Design Menu, simply right-click on a menu item, bookmark, "
         "or toolbar item.  To open the Design Menu for a submenu, first close the submenu (by "
-        "clicking on it).\n\nFor more information, click the Help button below.",
-        nullptr);
+        "clicking on it).\n\nFor more information, click the Help button below.");
 }
 
 void
@@ -3791,11 +3783,10 @@ on_reorder(GtkWidget* item, GtkWidget* parent)
     (void)item;
     xset_msg_dialog(
         parent,
-        0,
+        GTK_MESSAGE_INFO,
         "Reorder Columns Help",
-        0,
-        "To change the order of the columns, drag the column header to the desired location.",
-        nullptr);
+        GTK_BUTTONS_OK,
+        "To change the order of the columns, drag the column header to the desired location.");
 }
 
 void

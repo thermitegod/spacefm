@@ -1414,6 +1414,7 @@ get_shared_desktop_file_location(const char* name)
 void
 app_job(GtkWidget* item, GtkWidget* app_item)
 {
+    std::string msg;
     char* path;
     char* str;
     std::string str2;
@@ -1450,22 +1451,18 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             if (strcmp(mime_type->type, "text/plain") && g_str_has_prefix(mime_type->type, "text/"))
                 xset_msg_dialog(
                     GTK_WIDGET(data->browser),
-                    0,
+                    GTK_MESSAGE_INFO,
                     "Remove Text Type Association",
-                    0,
+                    GTK_BUTTONS_OK,
                     "NOTE:  When compiling the list of applications to appear in the Open "
-                    "submenu "
-                    "for a text file, SpaceFM will include applications associated with the MIME "
-                    "type (eg text/html) AND applications associated with text/plain.  If you "
-                    "select "
-                    "Remove on an application, it will be removed as an associated application "
-                    "for "
-                    "the MIME type (eg text/html), but will NOT be removed as an associated "
-                    "application for text/plain (unless the MIME type is text/plain).  Thus "
-                    "using "
-                    "Remove may not remove the application from the Open submenu for this type, "
-                    "unless you also remove it from text/plain.",
-                    nullptr);
+                    "submenu for a text file, SpaceFM will include applications associated "
+                    "with the MIME type (eg text/html) AND applications associated with "
+                    "text/plain.  If you select Remove on an application, it will be removed "
+                    "as an associated application for the MIME type (eg text/html), "
+                    "but will NOT be removed as an associated application for text/plain "
+                    "(unless the MIME type is text/plain).  Thus using Remove may not remove "
+                    "the application from the Open submenu for this type, unless you also remove "
+                    "it from text/plain.");
             break;
         case APP_JOB_EDIT:
             path =
@@ -1481,26 +1478,22 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     return;
                 }
 
-                char* msg = g_strdup_printf(
-                    "The file '%s' does not exist.\n\nBy copying '%s' to '%s' and "
-                    "editing it, you can adjust the behavior and appearance of this "
-                    "application for the current user.\n\nCreate this copy now?",
-                    path,
-                    share_desktop,
-                    path);
+                msg = fmt::format("The file '{}' does not exist.\n\nBy copying '{}' to '{}' and "
+                                  "editing it, you can adjust the behavior and appearance of this "
+                                  "application for the current user.\n\nCreate this copy now?",
+                                  path,
+                                  share_desktop,
+                                  path);
                 if (xset_msg_dialog(GTK_WIDGET(data->browser),
                                     GTK_MESSAGE_QUESTION,
                                     "Copy Desktop File",
                                     GTK_BUTTONS_YES_NO,
-                                    msg,
-                                    nullptr) != GTK_RESPONSE_YES)
+                                    msg) != GTK_RESPONSE_YES)
                 {
                     g_free(share_desktop);
                     g_free(path);
-                    g_free(msg);
                     break;
                 }
-                g_free(msg);
 
                 // need to copy
                 char* command = g_strdup_printf("cp -a  %s %s", share_desktop, path);
@@ -1583,48 +1576,40 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 char* usr_path = g_build_filename("/usr/share/mime", str, nullptr);
                 g_free(str);
 
-                char* msg;
                 if (std::filesystem::exists(usr_path))
-                    msg = g_strdup_printf(
-                        "The file '%s' does not exist.\n\nBy copying '%s' to '%s' "
-                        "and editing it, you can adjust how MIME type '%s' files are "
-                        "recognized for the current user.\n\nCreate this copy now?",
-                        path,
-                        usr_path,
-                        path,
-                        mime_type->type);
+                    msg = fmt::format("The file '{}' does not exist.\n\nBy copying '{}' to '{}' "
+                                      "and editing it, you can adjust how MIME type '%s' files are "
+                                      "recognized for the current user.\n\nCreate this copy now?",
+                                      path,
+                                      usr_path,
+                                      path,
+                                      mime_type->type);
                 else
-                    msg = g_strdup_printf(
-                        "The file '%s' does not exist.\n\nBy creating new file '%s' "
-                        "and editing it, you can define how MIME type '%s' files are "
-                        "recognized for the current user.\n\nCreate this file now?",
-                        path,
-                        path,
-                        mime_type->type);
+                    msg = fmt::format("The file '%s' does not exist.\n\nBy creating new file '%s' "
+                                      "and editing it, you can define how MIME type '%s' files are "
+                                      "recognized for the current user.\n\nCreate this file now?",
+                                      path,
+                                      path,
+                                      mime_type->type);
                 if (xset_msg_dialog(GTK_WIDGET(data->browser),
                                     GTK_MESSAGE_QUESTION,
                                     "Create New XML",
                                     GTK_BUTTONS_YES_NO,
-                                    msg,
-                                    nullptr) != GTK_RESPONSE_YES)
+                                    msg) != GTK_RESPONSE_YES)
                 {
                     g_free(usr_path);
                     g_free(path);
-                    g_free(msg);
                     break;
                 }
-                g_free(msg);
 
                 // need to create
-                msg = g_strdup_printf(
+                msg = fmt::format(
                     "<?xml version='1.0' encoding='utf-8'?>\n<mime-info "
                     "xmlns='http://www.freedesktop.org/standards/shared-mime-info'>\n<mime-type "
-                    "type='%s'>\n\n<!-- This file was generated by SpaceFM to allow you to change "
-                    "the "
-                    "name or icon\n     of the above mime type and to change the filename or magic "
-                    "patterns that\n     define this type.\n\n     IMPORTANT:  After saving this "
-                    "file, "
-                    "restart SpaceFM.  You may need to run:\n         update-mime-database "
+                    "type='{}'>\n\n<!-- This file was generated by SpaceFM to allow you to change "
+                    "the name or icon\n     of the above mime type and to change the filename or "
+                    "magic patterns that\n     define this type.\n\n     IMPORTANT:  After saving "
+                    "this file, restart SpaceFM.  You may need to run:\n     update-mime-database "
                     "~/.local/share/mime\n\n     Delete this file from "
                     "~/.local/share/mime/packages/ "
                     "to revert to default.\n\n     To make this definition file apply to all "
@@ -1666,7 +1651,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                         }
                     }
                     if (start)
-                        str = g_strdup_printf("%s\n\n%s</mime-info>\n", msg, start);
+                        str = g_strdup_printf("%s\n\n%s</mime-info>\n", msg.c_str(), start);
                     else
                         str = nullptr;
                     g_free(contents);
@@ -1677,8 +1662,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 if (!contents)
                     contents = g_strdup_printf("%s\n\n<!-- insert your patterns below "
                                                "-->\n\n\n</mime-type>\n</mime-info>\n\n",
-                                               msg);
-                g_free(msg);
+                                               msg.c_str());
 
                 // write file
                 std::ofstream file(path);
