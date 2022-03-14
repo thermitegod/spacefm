@@ -2342,13 +2342,14 @@ mtab_fstype_is_handled_by_protocol(const char* mtab_fstype)
     if (mtab_fstype && mtab_fstype[0] && (handlers_list = xset_get_s("dev_net_cnf")))
     {
         // is the mtab_fstype handled by a protocol handler?
-        GSList* values = nullptr;
-        values = g_slist_prepend(values, g_strdup(mtab_fstype));
-        values = g_slist_prepend(values, g_strconcat("mtab_fs=", mtab_fstype, nullptr));
+        std::vector<std::string> values;
+        values.push_back(mtab_fstype);
+        values.push_back(fmt::format("mtab_fs={}", mtab_fstype));
         char** handlers = g_strsplit(handlers_list, " ", 0);
         if (handlers)
         {
             // test handlers
+            std::string msg;
             XSet* set;
             int i;
             for (i = 0; handlers[i]; i++)
@@ -2357,7 +2358,7 @@ mtab_fstype_is_handled_by_protocol(const char* mtab_fstype)
                     set->b != XSET_B_TRUE /* disabled */)
                     continue;
                 // test whitelist
-                if (g_strcmp0(set->s, "*") && ptk_handler_values_in_list(set->s, values, nullptr))
+                if (g_strcmp0(set->s, "*") && ptk_handler_values_in_list(set->s, values, msg))
                 {
                     found = true;
                     break;
@@ -2365,8 +2366,6 @@ mtab_fstype_is_handled_by_protocol(const char* mtab_fstype)
             }
             g_strfreev(handlers);
         }
-        g_slist_foreach(values, (GFunc)g_free, nullptr);
-        g_slist_free(values);
     }
     return found;
 }
@@ -2679,9 +2678,8 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
                        netmount_t* netmount, bool* run_in_terminal, char** mount_point)
 {
     const char* handlers_list;
-    int i;
     XSet* set;
-    GSList* values = nullptr;
+    std::vector<std::string> values;
 
     if (mount_point)
         *mount_point = nullptr;
@@ -2696,18 +2694,18 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
             // change spaces in label to underscores for testing
             // clang-format off
             if (!vol->label.empty())
-                values = g_slist_prepend(values, g_strdelimit(g_strconcat("label=", vol->label.c_str(), nullptr), " ", '_'));
+                values.push_back(fmt::format("label={}", vol->label));
             if (vol->udi && vol->udi[0])
-                values = g_slist_prepend(values, g_strconcat("id=", vol->udi, nullptr));
-            values = g_slist_prepend(values, g_strconcat("audiocd=", vol->is_audiocd ? "1" : "0", nullptr));
-            values = g_slist_prepend(values, g_strconcat("optical=", vol->is_optical ? "1" : "0", nullptr));
-            values = g_slist_prepend(values, g_strconcat("removable=", vol->is_removable ? "1" : "0", nullptr));
-            values = g_slist_prepend(values, g_strconcat("mountable=", vol->is_mountable && !vol->is_blank ? "1" : "0", nullptr));
+                values.push_back(fmt::format("id={}", vol->udi));
+            values.push_back(fmt::format("audiocd={}", vol->is_audiocd ? "1" : "0"));
+            values.push_back(fmt::format("optical={}", vol->is_optical ? "1" : "0"));
+            values.push_back(fmt::format("removable={}", vol->is_removable ? "1" : "0"));
+            values.push_back(fmt::format("mountable={}", vol->is_mountable && !vol->is_blank ? "1" : "0"));
             // change spaces in device to underscores for testing - for ISO files
-            values = g_slist_prepend(values, g_strdelimit(g_strconcat("dev=", vol->device_file, nullptr), " ", '_'));
+            values.push_back(fmt::format("dev={}", vol->device_file));
             // clang-format on
             if (vol->fs_type)
-                values = g_slist_prepend(values, g_strdup(vol->fs_type));
+                values.push_back(fmt::format("{}", vol->fs_type));
             break;
         case HANDLER_MODE_NET:
             // for DEVICE_TYPE_NETWORK
@@ -2715,26 +2713,26 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
             {
                 // net values
                 if (netmount->host && netmount->host[0])
-                    values = g_slist_prepend(values, g_strconcat("host=", netmount->host, nullptr));
+                    values.push_back(fmt::format("host={}", netmount->host));
                 if (netmount->user && netmount->user[0])
-                    values = g_slist_prepend(values, g_strconcat("user=", netmount->user, nullptr));
+                    values.push_back(fmt::format("user={}", netmount->user));
                 if (action != HANDLER_MOUNT && vol && vol->is_mounted)
                 {
                     // clang-format off
                     // user-entered url (or mtab url if not available)
-                    values = g_slist_prepend(values, g_strconcat("url=", vol->udi, nullptr));
+                    values.push_back(fmt::format("url={}", vol->udi));
                     // mtab fs type (fuse.ssh)
-                    values = g_slist_prepend(values, g_strconcat("mtab_fs=", vol->fs_type, nullptr));
+                    values.push_back(fmt::format("mtab_fs={}", vol->fs_type));
                     // mtab_url == url if mounted
-                    values = g_slist_prepend(values, g_strconcat("mtab_url=", vol->device_file, nullptr));
+                    values.push_back(fmt::format("mtab_url={}", vol->device_file));
                     // clang-format on
                 }
                 else if (netmount->url && netmount->url[0])
                     // user-entered url
-                    values = g_slist_prepend(values, g_strconcat("url=", netmount->url, nullptr));
+                    values.push_back(fmt::format("url={}", netmount->url));
                 // url-derived protocol
                 if (netmount->fstype && netmount->fstype[0])
-                    values = g_slist_prepend(values, g_strdup(netmount->fstype));
+                    values.push_back(fmt::format("{}", netmount->fstype));
             }
             else
             {
@@ -2743,11 +2741,11 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
                 {
                     // clang-format off
                     // user-entered url (or mtab url if not available)
-                    values = g_slist_prepend(values, g_strconcat("url=", vol->udi, nullptr));
+                    values.push_back(fmt::format("url={}", vol->udi));
                     // mtab fs type (fuse.ssh)
-                    values = g_slist_prepend(values, g_strconcat("mtab_fs=", vol->fs_type, nullptr));
+                    values.push_back(fmt::format("mtab_fs={}", vol->fs_type));
                     // mtab_url == url if mounted
-                    values = g_slist_prepend(values, g_strconcat("mtab_url=", vol->device_file, nullptr));
+                    values.push_back(fmt::format("mtab_url={}", vol->device_file));
                     // clang-format on
                 }
             }
@@ -2759,7 +2757,7 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
 
     // universal values
     if (vol && vol->is_mounted && vol->mount_point && vol->mount_point[0])
-        values = g_slist_prepend(values, g_strconcat("point=", vol->mount_point, nullptr));
+        values.push_back(fmt::format("point={}", vol->mount_point));
 
     // get handlers
     if (!(handlers_list = xset_get_s(mode == HANDLER_MODE_FS ? "dev_fs_cnf" : "dev_net_cnf")))
@@ -2769,8 +2767,9 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
         return nullptr;
 
     // test handlers
+    int i;
     bool found = false;
-    char* msg = nullptr;
+    std::string msg;
     for (i = 0; handlers[i]; i++)
     {
         if (!handlers[i][0] || !(set = xset_is(handlers[i])) ||
@@ -2780,10 +2779,10 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
         {
             case HANDLER_MODE_FS:
                 // test blacklist
-                if (ptk_handler_values_in_list(set->x, values, nullptr))
+                if (ptk_handler_values_in_list(set->x, values, msg))
                     break;
                 // test whitelist
-                if (ptk_handler_values_in_list(set->s, values, &msg))
+                if (ptk_handler_values_in_list(set->s, values, msg))
                 {
                     found = true;
                     break;
@@ -2791,10 +2790,10 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
                 break;
             case HANDLER_MODE_NET:
                 // test blacklist
-                if (ptk_handler_values_in_list(set->x, values, nullptr))
+                if (ptk_handler_values_in_list(set->x, values, msg))
                     break;
                 // test whitelist
-                if (ptk_handler_values_in_list(set->s, values, &msg))
+                if (ptk_handler_values_in_list(set->s, values, msg))
                 {
                     found = true;
                     break;
@@ -2804,8 +2803,6 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
                 break;
         }
     }
-    g_slist_foreach(values, (GFunc)g_free, nullptr);
-    g_slist_free(values);
     g_strfreev(handlers);
     if (!found)
         return nullptr;

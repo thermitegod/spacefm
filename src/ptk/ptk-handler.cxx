@@ -12,6 +12,8 @@
 #include <string>
 #include <filesystem>
 
+#include <vector>
+
 #include <iostream>
 #include <fstream>
 
@@ -928,26 +930,21 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
 }
 
 bool
-ptk_handler_values_in_list(const char* list, GSList* values, char** msg)
+ptk_handler_values_in_list(const std::string list, const std::vector<std::string>& values,
+                           std::string& msg)
 { /* test for the presence of values in list, using wildcards.
    *  list is space-separated, plus sign (+) indicates required. */
-    if (!(list && list[0]) || !values)
+    if (values.empty())
         return false;
 
-    if (msg)
-        *msg = nullptr;
-
     // get elements of list
-    char** elements = g_strsplit(list, " ", -1);
+    char** elements = g_strsplit(list.c_str(), " ", -1);
     if (!elements)
         return false;
 
     // test each element for match
     int i;
-    GSList* l;
     char* element;
-    char* ret_msg = nullptr;
-    char* str;
     bool required, match;
     bool ret = false;
     for (i = 0; elements[i]; i++)
@@ -966,9 +963,9 @@ ptk_handler_values_in_list(const char* list, GSList* values, char** msg)
             required = false;
         }
         match = false;
-        for (l = values; l; l = l->next)
+        for (std::string handler: values)
         {
-            if (fnmatch(element, (char*)l->data, 0) == 0)
+            if (fnmatch(element, handler.c_str(), 0) == 0)
             {
                 // match
                 ret = match = true;
@@ -979,26 +976,13 @@ ptk_handler_values_in_list(const char* list, GSList* values, char** msg)
         {
             // no match of required
             g_strfreev(elements);
-            g_free(ret_msg);
             return false;
         }
-        if (msg)
-        {
-            str = ret_msg;
-            ret_msg = g_strdup_printf("%s%s%s%s%s",
-                                      ret_msg ? ret_msg : "",
-                                      ret_msg ? " " : "",
-                                      match ? "[" : "",
-                                      elements[i],
-                                      match ? "]" : "");
-            g_free(str);
-        }
+
+        msg = fmt::format("{}{}{}", match ? "[" : "", elements[i], match ? "]" : "");
     }
     g_strfreev(elements);
-    if (ret && msg)
-        *msg = ret_msg;
-    else
-        g_free(ret_msg);
+
     return ret;
 }
 

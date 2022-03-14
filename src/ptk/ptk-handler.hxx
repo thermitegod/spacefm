@@ -43,7 +43,8 @@ enum PtkHandlerMode
 void ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing);
 void ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set);
 void ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handler_set);
-bool ptk_handler_values_in_list(const char* list, GSList* values, char** msg);
+bool ptk_handler_values_in_list(const std::string list, const std::vector<std::string>& values,
+                                std::string& msg);
 XSet* add_new_handler(int mode); // for settings.c upgrade
 char* ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view, char** text);
 char* ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
