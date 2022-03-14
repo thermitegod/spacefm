@@ -57,7 +57,7 @@ static void get_total_size_of_dir(VFSFileTask* task, const char* path, off_t* si
                                   struct stat* have_stat);
 static void vfs_file_task_error(VFSFileTask* task, int errnox, const char* action,
                                 const char* target);
-static void vfs_file_task_exec_error(VFSFileTask* task, int errnox, char* action);
+static void vfs_file_task_exec_error(VFSFileTask* task, int errnox, const std::string& action);
 static void add_task_dev(VFSFileTask* task, dev_t dev);
 static bool should_abort(VFSFileTask* task);
 
@@ -88,12 +88,12 @@ vfs_file_task_clear(VFSFileTask* task)
 }
 
 static void
-append_add_log(VFSFileTask* task, const char* msg, int msg_len)
+append_add_log(VFSFileTask* task, const std::string& msg)
 {
     vfs_file_task_lock(task);
     GtkTextIter iter;
     gtk_text_buffer_get_iter_at_mark(task->add_log_buf, &iter, task->add_log_end);
-    gtk_text_buffer_insert(task->add_log_buf, &iter, msg, msg_len);
+    gtk_text_buffer_insert(task->add_log_buf, &iter, msg.c_str(), msg.length());
     vfs_file_task_unlock(task);
 }
 
@@ -307,16 +307,12 @@ check_dest_in_src(VFSFileTask* task, const char* src_dir)
         (real_dest_path[len] == '/' || real_dest_path[len] == '\0'))
     {
         // source is contained in destination dir
-        char* disp_src = g_filename_display_name(src_dir);
-        char* disp_dest = g_filename_display_name(task->dest_dir.c_str());
-        char* err =
-            g_strdup_printf("Destination directory \"%1$s\" is contained in source \"%2$s\"",
-                            disp_dest,
-                            disp_src);
-        append_add_log(task, err, -1);
-        g_free(err);
-        g_free(disp_src);
-        g_free(disp_dest);
+        std::string disp_src = g_filename_display_name(src_dir);
+        std::string disp_dest = g_filename_display_name(task->dest_dir.c_str());
+        std::string err = fmt::format("Destination directory \"{}\" is contained in source \"{}\"",
+                                      disp_dest,
+                                      disp_src);
+        append_add_log(task, err);
         if (task->state_cb)
             task->state_cb(task, VFS_FILE_TASK_ERROR, nullptr, task->state_cb_data);
         task->state = VFS_FILE_TASK_RUNNING;
@@ -419,10 +415,9 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
             }
             else if (error)
             {
-                char* msg = g_strdup_printf("\n%s\n", error->message);
+                std::string msg = fmt::format("\n{}\n", error->message);
                 g_error_free(error);
                 vfs_file_task_exec_error(task, 0, msg);
-                g_free(msg);
                 copy_fail = true;
                 if (should_abort(task))
                     goto _return_;
@@ -709,10 +704,9 @@ vfs_file_task_do_move(VFSFileTask* task, const char* src_file,
         }
         else if (error)
         {
-            char* msg = g_strdup_printf("\n%s\n", error->message);
+            std::string msg = fmt::format("\n{}\n", error->message);
             g_error_free(error);
             vfs_file_task_exec_error(task, 0, msg);
-            g_free(msg);
         }
         return 0;
     }
@@ -856,10 +850,9 @@ vfs_file_task_delete(char* src_file, VFSFileTask* task)
         }
         else if (error)
         {
-            char* msg = g_strdup_printf("\n%s\n", error->message);
+            std::string msg = fmt::format("\n{}\n", error->message);
             g_error_free(error);
             vfs_file_task_exec_error(task, 0, msg);
-            g_free(msg);
         }
 
         if (should_abort(task))
@@ -1043,10 +1036,9 @@ vfs_file_task_chown_chmod(char* src_file, VFSFileTask* task)
             }
             else if (error)
             {
-                char* msg = g_strdup_printf("\n%s\n", error->message);
+                std::string msg = fmt::format("\n{}\n", error->message);
                 g_error_free(error);
                 vfs_file_task_exec_error(task, 0, msg);
-                g_free(msg);
                 if (should_abort(task))
                     return;
             }
@@ -1219,8 +1211,6 @@ cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, VFSFileTask* task)
     }
     */
 
-    unsigned long size;
-
     if ((cond & G_IO_NVAL))
     {
         g_io_channel_unref(channel);
@@ -1240,10 +1230,11 @@ cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, VFSFileTask* task)
     }
 
     // GError *error = nullptr;
+    unsigned long size;
     char buf[2048];
     if (g_io_channel_read_chars(channel, buf, sizeof(buf), &size, nullptr) == G_IO_STATUS_NORMAL &&
         size > 0)
-        append_add_log(task, buf, size);
+        append_add_log(task, buf);
     else
         LOG_INFO("cb_exec_out_watch: g_io_channel_read_chars != G_IO_STATUS_NORMAL");
 
@@ -1288,17 +1279,16 @@ get_xxhash(const char* path)
 }
 
 static void
-vfs_file_task_exec_error(VFSFileTask* task, int errnox, char* action)
+vfs_file_task_exec_error(VFSFileTask* task, int errnox, const std::string& action)
 {
-    char* msg;
+    std::string msg;
 
     if (errnox)
-        msg = g_strdup_printf("%s\n%s\n", action, g_strerror(errnox));
+        msg = fmt::format("{}\n{}\n", action, g_strerror(errnox));
     else
-        msg = g_strdup_printf("%s\n", action);
+        msg = fmt::format("{}\n", action);
 
-    append_add_log(task, msg, -1);
-    g_free(msg);
+    append_add_log(task, msg);
     call_state_callback(task, VFS_FILE_TASK_ERROR);
 }
 
@@ -1351,7 +1341,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
                 msg = "Configure a valid Terminal SU command in View|Preferences|Advanced";
                 LOG_WARN(msg);
                 // do not use xset_msg_dialog if non-main thread
-                // vfs_file_task_exec_error( task, 0, str );
+                // vfs_file_task_exec_error(task, 0, str);
                 xset_msg_dialog(parent,
                                 GTK_MESSAGE_ERROR,
                                 "Terminal SU Not Available",
@@ -1371,7 +1361,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         msg = "Cannot create temporary directory";
         LOG_WARN(msg);
         // do not use xset_msg_dialog if non-main thread
-        // vfs_file_task_exec_error( task, 0, str );
+        // vfs_file_task_exec_error(task, 0, str);
         xset_msg_dialog(parent, GTK_MESSAGE_ERROR, "Error", GTK_BUTTONS_OK, msg);
         goto _exit_with_error_lean;
     }
@@ -1396,7 +1386,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
             msg = "Please set a valid terminal program in View|Preferences|Advanced";
             LOG_WARN(msg);
             // do not use xset_msg_dialog if non-main thread
-            // vfs_file_task_exec_error( task, 0, str );
+            // vfs_file_task_exec_error(task, 0, str);
             xset_msg_dialog(parent,
                             GTK_MESSAGE_ERROR,
                             "Terminal Not Available",
@@ -1713,12 +1703,11 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
             if (std::filesystem::exists(task->exec_script))
                 std::filesystem::remove(task->exec_script);
         }
-        char* str = g_strdup_printf(
-            "Error executing '%s'\nSee stdout (run spacefm in a terminal) for debug info",
+        msg = fmt::format(
+            "Error executing '{}'\nSee stdout (run spacefm in a terminal) for debug info",
             first_arg);
         g_free(first_arg);
-        vfs_file_task_exec_error(task, errno, str);
-        g_free(str);
+        vfs_file_task_exec_error(task, errno, msg);
         call_state_callback(task, VFS_FILE_TASK_FINISH);
         return;
     }
@@ -1777,7 +1766,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     // out and err can/should be closed too?
 
 _exit_with_error:
-    vfs_file_task_exec_error(task, errno, g_strdup("Error writing temporary file"));
+    vfs_file_task_exec_error(task, errno, "Error writing temporary file");
     g_string_free((GString*)buf, true);
 
     if (!task->exec_keep_tmp)
@@ -1946,7 +1935,7 @@ vfs_file_task_thread(VFSFileTask* task)
 
     if (task->state == VFS_FILE_TASK_SIZE_TIMEOUT)
     {
-        append_add_log(task, "Timed out calculating total size\n", -1);
+        append_add_log(task, "Timed out calculating total size\n");
         task->total_size = 0;
     }
     task->state = VFS_FILE_TASK_RUNNING;
@@ -2238,8 +2227,7 @@ static void
 vfs_file_task_error(VFSFileTask* task, int errnox, const char* action, const char* target)
 {
     task->error = errnox;
-    char* msg = g_strdup_printf("\n%s %s\nError: %s\n", action, target, g_strerror(errnox));
-    append_add_log(task, msg, -1);
-    g_free(msg);
+    std::string msg = fmt::format("\n{} {}\nError: {}\n", action, target, g_strerror(errnox));
+    append_add_log(task, msg);
     call_state_callback(task, VFS_FILE_TASK_ERROR);
 }
