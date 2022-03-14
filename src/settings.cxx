@@ -1679,7 +1679,7 @@ read_root_settings()
 
     std::string root_set_path = fmt::format("{}/spacefm/{}-as-root", SYSCONFDIR, g_get_user_name());
     if (!std::filesystem::exists(root_set_path))
-        root_set_path = g_strdup_printf("%s/spacefm/%d-as-root", SYSCONFDIR, geteuid());
+        root_set_path = fmt::format("{}/spacefm/{}-as-root", SYSCONFDIR, geteuid());
 
     std::string line;
     std::ifstream file(root_set_path);
@@ -2221,10 +2221,10 @@ xset_custom_get_script(XSet* set, bool create)
     return path;
 }
 
-static char*
+static std::string
 xset_custom_new_name()
 {
-    char* setname;
+    std::string setname;
 
     do
     {
@@ -2232,25 +2232,19 @@ xset_custom_new_name()
         if (hex8)
             g_free(hex8);
         hex8 = randhex8();
-        setname = g_strdup_printf("cstm_%s", hex8);
-        if (xset_is(setname))
-        {
-            g_free(setname);
-            setname = nullptr;
-        }
+        setname = fmt::format("cstm_{}", hex8);
+        if (xset_is(setname.data()))
+            setname.clear();
         else
         {
-            char* path1 = g_build_filename(xset_get_config_dir(), "scripts", setname, nullptr);
-            char* path2 = g_build_filename(xset_get_config_dir(), "plugin-data", setname, nullptr);
+            std::string path1 =
+                g_build_filename(xset_get_config_dir(), "scripts", setname.c_str(), nullptr);
+            std::string path2 =
+                g_build_filename(xset_get_config_dir(), "plugin-data", setname.c_str(), nullptr);
             if (std::filesystem::exists(path1) || std::filesystem::exists(path2))
-            {
-                g_free(setname);
-                setname = nullptr;
-            }
-            g_free(path1);
-            g_free(path2);
+                setname.clear();
         }
-    } while (!setname);
+    } while (!setname.empty());
     return setname;
 }
 
@@ -2541,7 +2535,7 @@ xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
     }
 
     // add new
-    XSet* set = xset_new(xset_custom_new_name());
+    XSet* set = xset_new(xset_custom_new_name().data());
     set->plug_dir = g_strdup(plug_dir);
     set->plug_name = g_strdup(plug_name);
     set->plugin = true;
@@ -3136,7 +3130,7 @@ void
 xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 {
     const char* deffolder;
-    char* deffile;
+    std::string deffile;
 
     std::string plug_dir_q;
     std::string path_q;
@@ -3156,29 +3150,29 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
         char* s1 = clean_label(set->menu_label, true, false);
         if (!s1)
             s1 = g_strdup("Plugin");
-        char* type;
-        if (!strcmp(set->name, "main_book"))
-            type = g_strdup_printf("bookmarks");
-        else if (g_str_has_prefix(set->name, "hand_arc_"))
-            type = g_strdup_printf("archive-handler");
-        else if (g_str_has_prefix(set->name, "hand_fs_"))
-            type = g_strdup_printf("device-handler");
-        else if (g_str_has_prefix(set->name, "hand_net_"))
-            type = g_strdup_printf("protocol-handler");
-        else if (g_str_has_prefix(set->name, "hand_f_"))
-            type = g_strdup_printf("file-handler");
-        else
-            type = g_strdup_printf("plugin");
 
-        deffile = g_strdup_printf("%s.spacefm-%s.tar.xz", s1, type);
+        std::string type;
+        if (!strcmp(set->name, "main_book"))
+            type = "bookmarks";
+        else if (g_str_has_prefix(set->name, "hand_arc_"))
+            type = "archive-handler";
+        else if (g_str_has_prefix(set->name, "hand_fs_"))
+            type = "device-handler";
+        else if (g_str_has_prefix(set->name, "hand_net_"))
+            type = "protocol-handler";
+        else if (g_str_has_prefix(set->name, "hand_f_"))
+            type = "file-handler";
+        else
+            type = "plugin";
+
+        deffile = fmt::format("{}.spacefm-{}.tar.xz", s1, type);
 
         g_free(s1);
-        g_free(type);
     }
     else
     {
         char* s1 = g_path_get_basename(set->plug_dir);
-        deffile = g_strdup_printf("%s.spacefm-plugin.tar.xz", s1);
+        deffile = fmt::format("{}.spacefm-plugin.tar.xz", s1);
         g_free(s1);
     }
 
@@ -3186,8 +3180,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
                                   GTK_FILE_CHOOSER_ACTION_SAVE,
                                   "Save As Plugin File",
                                   deffolder,
-                                  deffile);
-    g_free(deffile);
+                                  deffile.c_str());
     if (!path)
         return;
     if (save->s)
@@ -3324,7 +3317,7 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
 
     // convert ~ to /home/user for smarter bookmarks
     if (g_str_has_prefix(url, "~/") || !g_strcmp0(url, "~"))
-        use_url = tilde_url = g_strdup_printf("%s%s", vfs_user_home_dir(), url + 1);
+        use_url = g_strdup_printf("%s%s", vfs_user_home_dir(), url + 1);
     else
         use_url = url;
 
@@ -3395,15 +3388,13 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
     }
     else
     {
-        char* msg = g_strdup_printf("Bookmark target '%s' is missing or invalid.", use_url);
+        std::string msg = fmt::format("Bookmark target '{}' is missing or invalid.", use_url);
         xset_msg_dialog(file_browser ? GTK_WIDGET(file_browser) : nullptr,
                         GTK_MESSAGE_ERROR,
                         "Invalid Bookmark Target",
                         GTK_BUTTONS_OK,
                         msg);
-        g_free(msg);
     }
-    g_free(tilde_url);
 }
 
 static void
@@ -3823,14 +3814,10 @@ xset_clipboard_in_set(XSet* set)
 XSet*
 xset_custom_new()
 {
-    char* setname;
+    std::string setname = xset_custom_new_name();
+
     XSet* set;
-
-    setname = xset_custom_new_name();
-
-    // create set
-    set = xset_get(setname);
-    g_free(setname);
+    set = xset_get(setname.data());
     set->lock = false;
     set->keep_terminal = XSET_B_TRUE;
     set->task = XSET_B_TRUE;
@@ -3894,11 +3881,9 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     editor = fmt::format("{} {}", editor, quoted_path);
 
     // task
-    char* task_name = g_strdup_printf("Edit %s", path);
-    char* cwd = g_path_get_dirname(path);
-    PtkFileTask* task = ptk_file_exec_new(task_name, cwd, dlgparent, nullptr);
-    g_free(task_name);
-    g_free(cwd);
+    std::string task_name = fmt::format("Edit {}", path);
+    std::string cwd = g_path_get_dirname(path);
+    PtkFileTask* task = ptk_file_exec_new(task_name.c_str(), cwd.c_str(), dlgparent, nullptr);
     task->task->exec_command = editor;
     task->task->exec_sync = false;
     task->task->exec_terminal = terminal;
@@ -4309,7 +4294,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             }
             else
             {
-                folder = g_strdup_printf("/usr/bin");
+                folder = g_strdup("/usr/bin");
                 file = nullptr;
             }
             if ((custom_file = xset_file_dialog(parent,
@@ -4362,7 +4347,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             switch (job)
             {
                 case XSET_JOB_COMMAND:
-                    name = g_strdup_printf("New _Command");
+                    name = g_strdup("New _Command");
                     if (!xset_text_dialog(parent,
                                           "Set Item Name",
                                           false,
@@ -4511,7 +4496,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                     XSET_B_UNSET;
             }
             else
-                childset->menu_label = g_strdup_printf("New _Command");
+                childset->menu_label = g_strdup("New _Command");
             main_window_bookmark_changed(newset->name);
             break;
         case XSET_JOB_SEP:
@@ -4678,18 +4663,17 @@ xset_design_job(GtkWidget* item, XSet* set)
             }
             if (set->child && set->menu_style == XSET_MENU_SUBMENU)
             {
-                msg = g_strdup_printf(
-                    "Permanently remove the '%s' SUBMENU AND ALL ITEMS WITHIN IT?\n\nThis action "
+                msg = fmt::format(
+                    "Permanently remove the '{}' SUBMENU AND ALL ITEMS WITHIN IT?\n\nThis action "
                     "will delete all settings and files associated with these items.",
                     name);
                 buttons = GTK_BUTTONS_YES_NO;
             }
             else
             {
-                msg =
-                    g_strdup_printf("Permanently remove the '%s' item?\n\nThis action will delete "
-                                    "all settings and files associated with this item.",
-                                    name);
+                msg = fmt::format("Permanently remove the '{}' item?\n\nThis action will delete "
+                                  "all settings and files associated with this item.",
+                                  name);
                 buttons = GTK_BUTTONS_OK_CANCEL;
             }
             g_free(name);
@@ -6170,12 +6154,12 @@ xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
     gtk_widget_get_allocation(GTK_WIDGET(icon_chooser), &allocation);
     if (allocation.width && allocation.height)
     {
-        char* str = g_strdup_printf("%d", allocation.width);
-        xset_set("main_icon", "x", str);
-        g_free(str);
-        str = g_strdup_printf("%d", allocation.height);
-        xset_set("main_icon", "y", str);
-        g_free(str);
+        std::string str;
+
+        str = fmt::format("{}", allocation.width);
+        xset_set("main_icon", "x", str.c_str());
+        str = fmt::format("{}", allocation.height);
+        xset_set("main_icon", "y", str.c_str());
     }
     gtk_widget_destroy(icon_chooser);
 
@@ -6385,18 +6369,18 @@ xset_text_dialog(GtkWidget* parent, const char* title, bool large, const char* m
     height = allocation.height;
     if (width && height)
     {
-        char* str = g_strdup_printf("%d", width);
+        std::string str;
+        str = fmt::format("{}", width);
         if (large)
-            xset_set("text_dlg", "s", str);
+            xset_set("text_dlg", "s", str.c_str());
         else
-            xset_set("text_dlg", "x", str);
-        g_free(str);
-        str = g_strdup_printf("%d", height);
+            xset_set("text_dlg", "x", str.c_str());
+
+        str = fmt::format("{}", height);
         if (large)
-            xset_set("text_dlg", "z", str);
+            xset_set("text_dlg", "z", str.c_str());
         else
-            xset_set("text_dlg", "y", str);
-        g_free(str);
+            xset_set("text_dlg", "y", str.c_str());
     }
     gtk_widget_destroy(dlg);
     return ret;
@@ -6473,12 +6457,12 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
     height = allocation.height;
     if (width && height)
     {
-        char* str = g_strdup_printf("%d", width);
-        xset_set("file_dlg", "x", str);
-        g_free(str);
-        str = g_strdup_printf("%d", height);
-        xset_set("file_dlg", "y", str);
-        g_free(str);
+        std::string str;
+
+        str = fmt::format("{}", width);
+        xset_set("file_dlg", "x", str.c_str());
+        str = fmt::format("{}", height);
+        xset_set("file_dlg", "y", str.c_str());
     }
 
     if (response == GTK_RESPONSE_OK)
@@ -6853,20 +6837,19 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
 static void
 set_gtk3_widget_padding(GtkWidget* widget, int left_right, int top_bottom)
 {
-    char* str = g_strdup_printf("GtkWidget { padding-left: %dpx; padding-right: %dpx; "
-                                "padding-top: %dpx; padding-bottom: %dpx; }",
-                                left_right,
-                                left_right,
-                                top_bottom,
-                                top_bottom);
+    std::string str = fmt::format("GtkWidget {{ padding-left: {}px; padding-right: {}px; "
+                                  "padding-top: {}px; padding-bottom: {}px; }}",
+                                  left_right,
+                                  left_right,
+                                  top_bottom,
+                                  top_bottom);
 
     GtkCssProvider* provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(provider), str, -1, nullptr);
+    gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(provider), str.c_str(), -1, nullptr);
     GtkStyleContext* context = gtk_widget_get_style_context(widget);
     gtk_style_context_add_provider(context,
                                    GTK_STYLE_PROVIDER(provider),
                                    GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-    g_free(str);
 }
 
 static GtkWidget*

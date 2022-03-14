@@ -464,16 +464,13 @@ open_file(const char* path)
     {
         const char* error_msg;
         if (err && err->message)
-        {
             error_msg = err->message;
-        }
         else
             error_msg = "Don't know how to open the file";
-        char* disp_path = g_filename_display_name(path);
-        char* msg = g_strdup_printf("Unable to open file:\n\"%s\"\n%s", disp_path, error_msg);
-        g_free(disp_path);
+
+        std::string disp_path = g_filename_display_name(path);
+        std::string msg = fmt::format("Unable to open file:\n\"{}\"\n{}", disp_path, error_msg);
         ptk_show_error(nullptr, "Error", msg);
-        g_free(msg);
         if (err)
             g_error_free(err);
     }
