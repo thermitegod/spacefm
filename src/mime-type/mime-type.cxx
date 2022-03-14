@@ -30,6 +30,8 @@
 
 #include <fcntl.h>
 
+#include <fmt/core.h>
+
 #include <glibmm.h>
 
 #include "utils.hxx"
@@ -422,7 +424,7 @@ char*
 mime_type_get_desc_icon(const char* type, const char* locale, char** icon_name)
 {
     char* desc;
-    char file_path[256];
+    std::string file_path;
 
     /*  //sfm 0.7.7+ FIXED:
      * According to specs on freedesktop.org, user_data_dir has
@@ -431,11 +433,11 @@ mime_type_get_desc_icon(const char* type, const char* locale, char** icon_name)
      * result in many unnecessary open() system calls, yealding bad performance.
      * Since the spec really sucks, we don't follow it here.
      */
-    /* FIXME: This path shouldn't be hard-coded. */
-    g_snprintf(file_path, 256, "%s/mime/%s.xml", vfs_user_data_dir(), type);
-    if (faccessat(0, file_path, F_OK, AT_EACCESS) != -1)
+
+    file_path = fmt::format("{}/mime/{}.xml", vfs_user_data_dir(), type);
+    if (faccessat(0, file_path.c_str(), F_OK, AT_EACCESS) != -1)
     {
-        desc = _mime_type_get_desc_icon(file_path, locale, true, icon_name);
+        desc = _mime_type_get_desc_icon(file_path.c_str(), locale, true, icon_name);
         if (desc)
             return desc;
     }
@@ -443,11 +445,10 @@ mime_type_get_desc_icon(const char* type, const char* locale, char** icon_name)
     // look in system dirs
     for (std::string sys_dir: vfs_system_data_dir())
     {
-        /* FIXME: This path shouldn't be hard-coded. */
-        g_snprintf(file_path, 256, "%s/mime/%s.xml", sys_dir.c_str(), type);
-        if (faccessat(0, file_path, F_OK, AT_EACCESS) != -1)
+        file_path = fmt::format("{}/mime/{}.xml", sys_dir.c_str(), type);
+        if (faccessat(0, file_path.c_str(), F_OK, AT_EACCESS) != -1)
         {
-            desc = _mime_type_get_desc_icon(file_path, locale, false, icon_name);
+            desc = _mime_type_get_desc_icon(file_path.c_str(), locale, false, icon_name);
             if (G_LIKELY(desc))
                 return desc;
         }

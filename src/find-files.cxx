@@ -683,7 +683,7 @@ on_start_search(GtkWidget* btn, FindFile* data)
     cmd_line = g_strjoinv(" ", argv);
     LOG_DEBUG("find command: {}", cmd_line);
     g_free(cmd_line);
-    if (g_spawn_async_with_pipes(vfs_user_home_dir(),
+    if (g_spawn_async_with_pipes(vfs_user_home_dir().c_str(),
                                  argv,
                                  nullptr,
                                  GSpawnFlags::G_SPAWN_SEARCH_PATH,
@@ -770,11 +770,11 @@ menu_pos(GtkMenu* menu, int* x, int* y, bool* push_in, GtkWidget* btn)
 }
 
 static void
-add_search_dir(FindFile* data, const char* path)
+add_search_dir(FindFile* data, const std::string& path)
 {
     GtkTreeIter it;
     gtk_list_store_append(data->places_list, &it);
-    gtk_list_store_set(data->places_list, &it, 0, path, -1);
+    gtk_list_store_set(data->places_list, &it, 0, path.c_str(), -1);
 }
 
 static void
@@ -836,7 +836,6 @@ on_add_search_folder(GtkWidget* btn, FindFile* data)
     GtkWidget* menu = gtk_menu_new();
     GtkWidget* item;
     // GtkWidget* img;
-    const char* dir;
 
     item = gtk_menu_item_new_with_label("Browse...");
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
@@ -845,20 +844,17 @@ on_add_search_folder(GtkWidget* btn, FindFile* data)
     item = gtk_separator_menu_item_new();
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    item = gtk_menu_item_new_with_label(vfs_user_home_dir());
+    item = gtk_menu_item_new_with_label(vfs_user_home_dir().c_str());
     // img = gtk_image_new_from_icon_name( "gnome-fs-directory", GTK_ICON_SIZE_MENU );
     // img = xset_get_image("gtk-directory", GTK_ICON_SIZE_MENU);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     g_signal_connect(item, "activate", G_CALLBACK(on_add_search_home), data);
 
-    if ((dir = vfs_user_desktop_dir()))
-    {
-        item = gtk_menu_item_new_with_label(dir);
-        // img = gtk_image_new_from_icon_name( "gnome-fs-desktop", GTK_ICON_SIZE_MENU );
-        // img = xset_get_image("gtk-directory", GTK_ICON_SIZE_MENU);
-        gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
-        g_signal_connect(item, "activate", G_CALLBACK(on_add_search_desktop), data);
-    }
+    item = gtk_menu_item_new_with_label(vfs_user_desktop_dir().c_str());
+    // img = gtk_image_new_from_icon_name( "gnome-fs-desktop", GTK_ICON_SIZE_MENU );
+    // img = xset_get_image("gtk-directory", GTK_ICON_SIZE_MENU);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+    g_signal_connect(item, "activate", G_CALLBACK(on_add_search_desktop), data);
 
     item = gtk_menu_item_new_with_label("Local Volumes");
     // img = gtk_image_new_from_icon_name( "gnome-dev-harddisk", GTK_ICON_SIZE_MENU );

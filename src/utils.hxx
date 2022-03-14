@@ -15,7 +15,9 @@ void print_task_command_spawn(char* argv[], int pid);
 char* randhex8();
 bool have_rw_access(const char* path);
 bool have_x_access(const char* path);
-bool dir_has_files(const char* path);
+
+bool dir_has_files(const std::string& path);
+
 std::string replace_line_subs(const std::string& line);
 std::string get_name_extension(const std::string& full_name, std::string& ext);
 const std::string get_prog_executable();

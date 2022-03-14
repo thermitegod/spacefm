@@ -33,56 +33,56 @@ struct VFSDirXDG
 
 VFSDirXDG vfs_dir_xdg;
 
-const char*
-vfs_user_desktop_dir()
+const std::string&
+vfs_user_desktop_dir() noexcept
 {
-    return vfs_dir_xdg.user_desktop.c_str();
+    return vfs_dir_xdg.user_desktop;
 }
 
-const char*
-vfs_user_template_dir()
+const std::string&
+vfs_user_template_dir() noexcept
 {
-    return vfs_dir_xdg.user_template.c_str();
+    return vfs_dir_xdg.user_template;
 }
 
-const char*
-vfs_user_home_dir()
+const std::string&
+vfs_user_home_dir() noexcept
 {
-    return vfs_dir_xdg.user_home.c_str();
+    return vfs_dir_xdg.user_home;
 }
 
-const char*
-vfs_user_cache_dir()
+const std::string&
+vfs_user_cache_dir() noexcept
 {
-    return vfs_dir_xdg.user_cache.c_str();
+    return vfs_dir_xdg.user_cache;
 }
 
-const char*
-vfs_user_data_dir()
+const std::string&
+vfs_user_data_dir() noexcept
 {
-    return vfs_dir_xdg.user_data.c_str();
+    return vfs_dir_xdg.user_data;
 }
 
-const char*
-vfs_user_config_dir()
+const std::string&
+vfs_user_config_dir() noexcept
 {
-    return vfs_dir_xdg.user_config.c_str();
+    return vfs_dir_xdg.user_config;
 }
 
-const char*
-vfs_user_runtime_dir()
+const std::string&
+vfs_user_runtime_dir() noexcept
 {
-    return vfs_dir_xdg.user_runtime.c_str();
+    return vfs_dir_xdg.user_runtime;
 }
 
-std::vector<std::string>
-vfs_system_data_dir()
+const std::vector<std::string>&
+vfs_system_data_dir() noexcept
 {
     return vfs_dir_xdg.sys_data;
 }
 
-const char*
-vfs_current_dir()
+std::string
+vfs_current_dir() noexcept
 {
-    return g_get_current_dir();
+    return Glib::get_current_dir();
 }

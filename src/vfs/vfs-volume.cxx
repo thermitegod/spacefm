@@ -23,6 +23,8 @@
 #include <fcntl.h>
 #include <linux/kdev_t.h>
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -2595,16 +2597,16 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
          * hack - sleep for 0.2 seconds here because sometimes the
          * .mtab.fuseiso file is not updated until after new device is detected. */
         g_usleep(200000);
-        char* mtab_file = g_build_filename(vfs_user_home_dir(), ".mtab.fuseiso", nullptr);
+        std::string mtab_file = Glib::build_filename(vfs_user_home_dir(), ".mtab.fuseiso");
         char* new_name = nullptr;
-        if (path_is_mounted_mtab(mtab_file, point, &new_name, nullptr) && new_name && new_name[0])
+        if (path_is_mounted_mtab(mtab_file.c_str(), point, &new_name, nullptr) && new_name &&
+            new_name[0])
         {
             g_free(name);
             name = new_name;
             new_name = nullptr;
         }
         g_free(new_name);
-        g_free(mtab_file);
 
         // create a volume
         volume = g_slice_new0(VFSVolume);
@@ -2631,7 +2633,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         if (!keep && !strstr(HIDDEN_NON_BLOCK_FS, mtab_fstype))
         {
             // no protocol handler and not blacklisted - show anyway?
-            keep = g_str_has_prefix(point, vfs_user_cache_dir()) ||
+            keep = g_str_has_prefix(point, vfs_user_cache_dir().c_str()) ||
                    g_str_has_prefix(point, "/media/") || g_str_has_prefix(point, "/run/media/") ||
                    g_str_has_prefix(mtab_fstype, "fuse.");
             if (!keep)

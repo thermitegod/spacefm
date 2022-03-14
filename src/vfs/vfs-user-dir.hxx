@@ -8,15 +8,15 @@
 
 #include <string>
 
-const char* vfs_user_desktop_dir();
-const char* vfs_user_template_dir();
+const std::string& vfs_user_desktop_dir() noexcept;
+const std::string& vfs_user_template_dir() noexcept;
 
-const char* vfs_user_home_dir();
-const char* vfs_user_cache_dir();
-const char* vfs_user_data_dir();
-const char* vfs_user_config_dir();
-const char* vfs_user_runtime_dir();
+const std::string& vfs_user_home_dir() noexcept;
+const std::string& vfs_user_cache_dir() noexcept;
+const std::string& vfs_user_data_dir() noexcept;
+const std::string& vfs_user_config_dir() noexcept;
+const std::string& vfs_user_runtime_dir() noexcept;
 
-std::vector<std::string> vfs_system_data_dir();
+const std::vector<std::string>& vfs_system_data_dir() noexcept;
 
-const char* vfs_current_dir();
+std::string vfs_current_dir() noexcept;

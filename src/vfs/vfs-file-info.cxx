@@ -656,7 +656,7 @@ vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
         VFSAppDesktop desktop(file_path);
 
         // MOD  display real filenames of .desktop files not in desktop directory
-        if (!strcmp(file_dir, vfs_user_desktop_dir()))
+        if (ztd::same(file_dir, vfs_user_desktop_dir()))
         {
             if (desktop.get_disp_name())
                 vfs_file_info_set_disp_name(fi, desktop.get_disp_name());

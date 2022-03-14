@@ -1417,7 +1417,7 @@ void
 app_job(GtkWidget* item, GtkWidget* app_item)
 {
     std::string msg;
-    char* path;
+    std::string path;
     char* str;
     std::string str2;
 
@@ -1467,16 +1467,14 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     "it from text/plain.");
             break;
         case APP_JOB_EDIT:
-            path =
-                g_build_filename(vfs_user_data_dir(), "applications", desktop.get_name(), nullptr);
+            path = Glib::build_filename(vfs_user_data_dir(), "applications", desktop.get_name());
             if (!std::filesystem::exists(path))
             {
                 char* share_desktop =
                     vfs_mime_type_locate_desktop_file(nullptr, desktop.get_name());
-                if (!(share_desktop && strcmp(share_desktop, path)))
+                if (!(share_desktop && ztd::same(share_desktop, path)))
                 {
                     g_free(share_desktop);
-                    g_free(path);
                     return;
                 }
 
@@ -1493,46 +1491,37 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                     msg) != GTK_RESPONSE_YES)
                 {
                     g_free(share_desktop);
-                    g_free(path);
                     break;
                 }
 
                 // need to copy
-                char* command = g_strdup_printf("cp -a  %s %s", share_desktop, path);
-                command = g_strdup_printf("cp -a  %s %s", share_desktop, path);
-                g_spawn_command_line_sync(command, nullptr, nullptr, nullptr, nullptr);
-                g_free(command);
+                command = fmt::format("cp -a  {} {}", share_desktop, path);
+                g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
                 g_free(share_desktop);
                 if (!std::filesystem::exists(path))
-                {
-                    g_free(path);
                     return;
-                }
             }
-            xset_edit(GTK_WIDGET(data->browser), path, false, false);
-            g_free(path);
+            xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, false);
             break;
         case APP_JOB_VIEW:
-            path = get_shared_desktop_file_location(desktop.get_name());
-            if (path)
-                xset_edit(GTK_WIDGET(data->browser), path, false, true);
+            str = get_shared_desktop_file_location(desktop.get_name());
+            if (str)
+                xset_edit(GTK_WIDGET(data->browser), str, false, true);
+            g_free(str);
             break;
         case APP_JOB_EDIT_LIST:
             // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-            path = g_build_filename(vfs_user_config_dir(), "mimeapps.list", nullptr);
+            path = Glib::build_filename(vfs_user_config_dir(), "mimeapps.list");
             if (!std::filesystem::exists(path))
             {
                 // try old location
                 // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
-                g_free(path);
-                path =
-                    g_build_filename(vfs_user_data_dir(), "applications", "mimeapps.list", nullptr);
+                path = Glib::build_filename(vfs_user_data_dir(), "applications", "mimeapps.list");
             }
-            xset_edit(GTK_WIDGET(data->browser), path, false, true);
-            g_free(path);
+            xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, true);
             break;
         case APP_JOB_ADD:
-            path = ptk_choose_app_for_mime_type(
+            str = ptk_choose_app_for_mime_type(
                 data->browser ? GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)))
                               : GTK_WINDOW(data->browser),
                 mime_type,
@@ -1542,36 +1531,39 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 true);
             // ptk_choose_app_for_mime_type returns either a bare command that
             // was already set as default, or a (custom or shared) desktop file
-            if (path && g_str_has_suffix(path, ".desktop") && !strchr(path, '/') && mime_type)
-                vfs_mime_type_append_action(mime_type->type, path);
-            g_free(path);
+            if (!str)
+                break;
+
+            path = str;
+            if (ztd::endswith(path, ".desktop") && !ztd::contains(path, "/") && mime_type)
+                vfs_mime_type_append_action(mime_type->type, path.c_str());
+            g_free(str);
             break;
         case APP_JOB_BROWSE:
-            path = g_build_filename(vfs_user_data_dir(), "applications", nullptr);
+            path = Glib::build_filename(vfs_user_data_dir(), "applications");
             std::filesystem::create_directories(path);
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
 
             if (data->browser)
-                ptk_file_browser_emit_open(data->browser, path, PTK_OPEN_NEW_TAB);
+                ptk_file_browser_emit_open(data->browser, path.c_str(), PTK_OPEN_NEW_TAB);
             break;
         case APP_JOB_BROWSE_SHARED:
             str = get_shared_desktop_file_location(desktop.get_name());
             if (str)
                 path = g_path_get_dirname(str);
             else
-                path = g_strdup("/usr/share/applications");
+                path = "/usr/share/applications";
             g_free(str);
             if (data->browser)
-                ptk_file_browser_emit_open(data->browser, path, PTK_OPEN_NEW_TAB);
+                ptk_file_browser_emit_open(data->browser, path.c_str(), PTK_OPEN_NEW_TAB);
             break;
         case APP_JOB_EDIT_TYPE:
-            path = g_build_filename(vfs_user_data_dir(), "mime/packages", nullptr);
+            path = Glib::build_filename(vfs_user_data_dir(), "mime/packages");
             std::filesystem::create_directories(path);
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
-            g_free(path);
             str2 = ztd::replace(mime_type->type, "/", "-");
             str2 = fmt::format("{}.xml", str2);
-            path = g_build_filename(vfs_user_data_dir(), "mime/packages", str2.c_str(), nullptr);
+            path = Glib::build_filename(vfs_user_data_dir(), "mime/packages", str2);
             if (!std::filesystem::exists(path))
             {
                 str = g_strdup_printf("%s.xml", mime_type->type);
@@ -1600,7 +1592,6 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                     msg) != GTK_RESPONSE_YES)
                 {
                     g_free(usr_path);
-                    g_free(path);
                     break;
                 }
 
@@ -1676,9 +1667,8 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 g_free(contents);
             }
             if (std::filesystem::exists(path))
-                xset_edit(GTK_WIDGET(data->browser), path, false, false);
+                xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, false);
 
-            g_free(path);
             vfs_dir_monitor_mime();
             break;
         case APP_JOB_VIEW_TYPE:
@@ -1686,13 +1676,11 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             path = g_build_filename("/usr/share/mime", str, nullptr);
             g_free(str);
             if (std::filesystem::exists(path))
-                xset_edit(GTK_WIDGET(data->browser), path, false, true);
-
-            g_free(path);
+                xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, true);
             break;
         case APP_JOB_VIEW_OVER:
-            path = g_strdup("/usr/share/mime/packages/Overrides.xml");
-            xset_edit(GTK_WIDGET(data->browser), path, true, false);
+            path = "/usr/share/mime/packages/Overrides.xml";
+            xset_edit(GTK_WIDGET(data->browser), path.c_str(), true, false);
             break;
         case APP_JOB_BROWSE_MIME_USR:
             if (data->browser)
@@ -1701,11 +1689,11 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                            PTK_OPEN_NEW_TAB);
             break;
         case APP_JOB_BROWSE_MIME:
-            path = g_build_filename(vfs_user_data_dir(), "mime/packages", nullptr);
+            path = Glib::build_filename(vfs_user_data_dir(), "mime/packages");
             std::filesystem::create_directories(path);
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
             if (data->browser)
-                ptk_file_browser_emit_open(data->browser, path, PTK_OPEN_NEW_TAB);
+                ptk_file_browser_emit_open(data->browser, path.c_str(), PTK_OPEN_NEW_TAB);
             vfs_dir_monitor_mime();
             break;
         case APP_JOB_UPDATE:
@@ -1876,7 +1864,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     // *.desktop (missing)
     if (desktop.get_name())
     {
-        path = g_build_filename(vfs_user_data_dir(), "applications", desktop.get_name(), nullptr);
+        path = Glib::build_filename(vfs_user_data_dir(), "applications", desktop.get_name());
         if (std::filesystem::exists(path))
         {
             str = ztd::replace(desktop.get_name(), ".desktop", "._desktop");
@@ -1914,7 +1902,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     // *.xml (missing)
     str = ztd::replace(type, "/", "-");
     str = fmt::format("{}.xml", str);
-    path = g_build_filename(vfs_user_data_dir(), "mime/packages", str.c_str(), nullptr);
+    path = Glib::build_filename(vfs_user_data_dir(), "mime/packages", str);
     if (std::filesystem::exists(path))
     {
         str = ztd::replace(type, "/", "-");
@@ -2456,8 +2444,9 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     }
     else
     {
-        cwd = vfs_user_desktop_dir();
+        cwd = vfs_user_desktop_dir().c_str();
     }
+
     if (!sel_files)
         info = nullptr;
     else

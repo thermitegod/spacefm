@@ -1000,7 +1000,7 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
     main_context_fill(file_browser, context);
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     char* desc =
-        g_strdup_printf("separator panel%d_icon_status status_middle" , file_browser->mypanel);
+        g_strdup_printf("separator panel%d_icon_status status_middle", file_browser->mypanel);
 
     xset_set_cb_panel(file_browser->mypanel,
                       "icon_status",
@@ -1863,7 +1863,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
         // convert ~ to /home/user for smarter bookmarks
         if (g_str_has_prefix(path, "~/") || !g_strcmp0(path, "~"))
         {
-            msg = g_strdup_printf("%s%s", vfs_user_home_dir(), path + 1);
+            msg = g_strdup_printf("%s%s", vfs_user_home_dir().c_str(), path + 1);
             g_free(path);
             path = msg;
         }
@@ -2374,7 +2374,7 @@ ptk_file_browser_go_home(GtkWidget* item, PtkFileBrowser* file_browser)
     (void)item;
     focus_folder_view(file_browser);
     ptk_file_browser_chdir(PTK_FILE_BROWSER(file_browser),
-                           vfs_user_home_dir(),
+                           vfs_user_home_dir().c_str(),
                            PTK_FB_CHDIR_ADD_HISTORY);
 }
 
@@ -2388,7 +2388,7 @@ ptk_file_browser_go_default(GtkWidget* item, PtkFileBrowser* file_browser)
         ptk_file_browser_chdir(PTK_FILE_BROWSER(file_browser), path, PTK_FB_CHDIR_ADD_HISTORY);
     else if (geteuid() != 0)
         ptk_file_browser_chdir(PTK_FILE_BROWSER(file_browser),
-                               vfs_user_home_dir(),
+                               vfs_user_home_dir().c_str(),
                                PTK_FB_CHDIR_ADD_HISTORY);
     else
         ptk_file_browser_chdir(PTK_FILE_BROWSER(file_browser), "/", PTK_FB_CHDIR_ADD_HISTORY);
@@ -3518,7 +3518,7 @@ ptk_file_browser_new_tab(GtkMenuItem* item, PtkFileBrowser* file_browser)
     if (xset_get_s("go_set_default"))
         dir_path = xset_get_s("go_set_default");
     else
-        dir_path = vfs_user_home_dir();
+        dir_path = vfs_user_home_dir().c_str();
 
     if (!std::filesystem::is_directory(dir_path))
         g_signal_emit(file_browser, signals[OPEN_ITEM_SIGNAL], 0, "/", PTK_OPEN_NEW_TAB);
@@ -3539,7 +3539,7 @@ ptk_file_browser_new_tab_here(GtkMenuItem* item, PtkFileBrowser* file_browser)
         if (xset_get_s("go_set_default"))
             dir_path = xset_get_s("go_set_default");
         else
-            dir_path = vfs_user_home_dir();
+            dir_path = vfs_user_home_dir().c_str();
     }
     if (!std::filesystem::is_directory(dir_path))
         g_signal_emit(file_browser, signals[OPEN_ITEM_SIGNAL], 0, "/", PTK_OPEN_NEW_TAB);

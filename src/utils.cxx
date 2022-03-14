@@ -98,14 +98,8 @@ have_rw_access(const char* path)
 }
 
 bool
-dir_has_files(const char* path)
+dir_has_files(const std::string& path)
 {
-    if (!path)
-        return false;
-
-    if (!std::filesystem::exists(path))
-        return false;
-
     if (!std::filesystem::is_directory(path))
         return false;
 

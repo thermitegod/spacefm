@@ -12,6 +12,8 @@
 #include <string>
 #include <filesystem>
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -1867,37 +1869,30 @@ get_unique_name(const char* dir, const char* ext)
 static char*
 get_template_dir()
 {
-    char* templates_path = g_strdup(vfs_user_template_dir());
+    std::string templates_path = vfs_user_template_dir();
 
-    if (!templates_path)
-    {
-        templates_path = g_strdup(g_getenv("XDG_TEMPLATES_DIR"));
-    }
-    if (!g_strcmp0(templates_path, vfs_user_home_dir()))
+    if (ztd::same(templates_path, vfs_user_home_dir()))
     {
         /* If $XDG_TEMPLATES_DIR == $HOME this means it is disabled. Don't
          * recurse it as this is too many files/directories and may slow
          * dialog open and cause filesystem find loops.
          * https://wiki.freedesktop.org/www/Software/xdg-user-dirs/ */
-        g_free(templates_path);
-        templates_path = nullptr;
+        return nullptr;
     }
+
     if (!dir_has_files(templates_path))
     {
-        g_free(templates_path);
-        templates_path = g_build_filename(vfs_user_home_dir(), "Templates", nullptr);
+        templates_path = Glib::build_filename(vfs_user_home_dir(), "Templates");
         if (!dir_has_files(templates_path))
         {
-            g_free(templates_path);
-            templates_path = g_build_filename(vfs_user_home_dir(), ".templates", nullptr);
+            templates_path = Glib::build_filename(vfs_user_home_dir(), ".templates");
             if (!dir_has_files(templates_path))
             {
-                g_free(templates_path);
                 templates_path = nullptr;
             }
         }
     }
-    return templates_path;
+    return g_strdup(templates_path.c_str());
 }
 
 static GList*

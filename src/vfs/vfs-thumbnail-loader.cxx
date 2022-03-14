@@ -27,6 +27,8 @@
 
 #include <sys/stat.h>
 
+#include <glibmm.h>
+
 #include <libffmpegthumbnailer/imagetypes.h>
 #include <libffmpegthumbnailer/videothumbnailer.h>
 
@@ -386,8 +388,7 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
     g_checksum_free(cs);
 #endif
 
-    thumbnail_file =
-        g_build_filename(vfs_user_cache_dir(), "thumbnails/normal", file_name.c_str(), nullptr);
+    thumbnail_file = Glib::build_filename(vfs_user_cache_dir(), "thumbnails/normal", file_name);
 
     // LOG_INFO("{}", thumbnail_file);
 
@@ -520,7 +521,7 @@ vfs_thumbnail_load_for_file(const std::string& file, int size, std::time_t mtime
 void
 vfs_thumbnail_init()
 {
-    std::string dir = g_build_filename(vfs_user_cache_dir(), "thumbnails/normal", nullptr);
+    std::string dir = Glib::build_filename(vfs_user_cache_dir(), "thumbnails/normal");
 
     if (!std::filesystem::is_directory(dir))
         std::filesystem::create_directories(dir);

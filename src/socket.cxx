@@ -63,8 +63,7 @@ get_inode_tag()
     struct stat stat_buf;
     std::string inode_tag;
 
-    const char* path = vfs_user_home_dir();
-    if (stat(path, &stat_buf) == -1)
+    if (stat(vfs_user_home_dir().c_str(), &stat_buf) == -1)
     {
         inode_tag = fmt::format("{}=", getuid());
     }
@@ -215,7 +214,12 @@ get_socket_name(char* buf, int len)
         g_free(dpy);
         dpy = g_strdup(":0");
     }
-    g_snprintf(buf, len, "%s/spacefm-%s%s.socket", vfs_user_runtime_dir(), g_get_user_name(), dpy);
+    g_snprintf(buf,
+               len,
+               "%s/spacefm-%s%s.socket",
+               vfs_user_runtime_dir().c_str(),
+               g_get_user_name(),
+               dpy);
     g_free(dpy);
 }
 

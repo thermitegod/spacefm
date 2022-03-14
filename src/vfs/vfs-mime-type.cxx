@@ -23,7 +23,6 @@
 
 #include "vfs/vfs-utils.hxx"
 
-
 static GHashTable* mime_hash = nullptr;
 static GRWLock mime_hash_lock;
 

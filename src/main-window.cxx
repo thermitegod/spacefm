@@ -1093,7 +1093,9 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                             if (g_str_has_prefix(tab_dir, "~/"))
                             {
                                 // convert ~ to /home/user for hacked session files
-                                str = g_strdup_printf("%s%s", vfs_user_home_dir(), tab_dir + 1);
+                                str = g_strdup_printf("%s%s",
+                                                      vfs_user_home_dir().c_str(),
+                                                      tab_dir + 1);
                                 g_free(tab_dir);
                                 tab_dir = str;
                             }
@@ -1102,7 +1104,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                             else if (!(folder_path = xset_get_s("go_set_default")))
                             {
                                 if (geteuid() != 0)
-                                    folder_path = vfs_user_home_dir();
+                                    folder_path = vfs_user_home_dir().c_str();
                                 else
                                     folder_path = g_strdup("/");
                             }
@@ -1140,7 +1142,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                     if (!(folder_path = xset_get_s("go_set_default")))
                     {
                         if (geteuid() != 0)
-                            folder_path = vfs_user_home_dir();
+                            folder_path = vfs_user_home_dir().c_str();
                         else
                             folder_path = g_strdup("/");
                     }
@@ -2237,7 +2239,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
         if (!(path && path[0] != '\0'))
         {
             if (geteuid() != 0)
-                path = vfs_user_home_dir();
+                path = vfs_user_home_dir().c_str();
             else
                 path = g_strdup("/");
         }

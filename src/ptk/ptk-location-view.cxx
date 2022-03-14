@@ -18,6 +18,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -585,7 +587,7 @@ ptk_location_view_get_mount_point_dir(const char* name)
     if (set->s)
     {
         if (g_str_has_prefix(set->s, "~/"))
-            parent = g_build_filename(vfs_user_home_dir(), set->s + 2, nullptr);
+            parent = Glib::build_filename(vfs_user_home_dir(), set->s + 2);
         else
             parent = set->s;
 
@@ -624,7 +626,7 @@ ptk_location_view_get_mount_point_dir(const char* name)
             parent.clear();
     }
     if (!std::filesystem::exists(parent))
-        return g_build_filename(vfs_user_cache_dir(), "spacefm-mount", name, nullptr);
+        return g_build_filename(vfs_user_cache_dir().c_str(), "spacefm-mount", name, nullptr);
 
     char* path = g_build_filename(parent.c_str(), name, nullptr);
     return path;
@@ -644,7 +646,7 @@ ptk_location_view_clean_mount_points()
         char* del_path;
 
         if (i == 0)
-            path = g_build_filename(vfs_user_cache_dir(), "spacefm-mount", nullptr);
+            path = g_build_filename(vfs_user_cache_dir().c_str(), "spacefm-mount", nullptr);
         else // i == 1
         {
             del_path = ptk_location_view_get_mount_point_dir(nullptr);
@@ -3412,7 +3414,7 @@ ptk_bookmark_view_get_first_bookmark(XSet* book_set)
     {
         child_set = xset_custom_new();
         child_set->menu_label = g_strdup_printf("Home");
-        child_set->z = g_strdup(vfs_user_home_dir());
+        child_set->z = g_strdup(vfs_user_home_dir().c_str());
         child_set->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
         child_set->parent = g_strdup_printf("main_book");
         book_set->child = g_strdup(child_set->name);

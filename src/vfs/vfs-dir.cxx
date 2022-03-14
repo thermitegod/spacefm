@@ -16,8 +16,7 @@
 
 #include <fcntl.h>
 
-#include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+#include <glibmm.h>
 
 #if defined(__GLIBC__)
 #include <malloc.h>
@@ -1069,10 +1068,10 @@ vfs_dir_monitor_mime()
     // start watching for changes
     if (mime_dir)
         return;
-    char* path = g_build_filename(vfs_user_data_dir(), "mime/packages", nullptr);
+    std::string path = Glib::build_filename(vfs_user_data_dir(), "mime/packages", nullptr);
     if (std::filesystem::is_directory(path))
     {
-        mime_dir = vfs_dir_get_by_path(path);
+        mime_dir = vfs_dir_get_by_path(path.c_str());
         if (mime_dir)
         {
             g_signal_connect(mime_dir, "file-listed", G_CALLBACK(mime_change), nullptr);
@@ -1082,5 +1081,4 @@ vfs_dir_monitor_mime()
         }
         // LOG_INFO("MIME-UPDATE watch started");
     }
-    g_free(path);
 }

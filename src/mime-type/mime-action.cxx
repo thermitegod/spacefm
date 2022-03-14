@@ -62,7 +62,7 @@ data_dir_foreach(DataDirFunc func, const char* mime_type, void* user_data)
     std::string dir;
 
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    if ((ret = func(vfs_user_config_dir(), mime_type, user_data)))
+    if ((ret = func(vfs_user_config_dir().c_str(), mime_type, user_data)))
         return ret;
 
     // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
@@ -106,7 +106,7 @@ update_desktop_database()
     argv[0] = g_find_program_in_path("update-desktop-database");
     if (G_UNLIKELY(!argv[0]))
         return;
-    argv[1] = g_build_filename(vfs_user_data_dir(), "applications", nullptr);
+    argv[1] = g_build_filename(vfs_user_data_dir().c_str(), "applications", nullptr);
     argv[2] = nullptr;
     g_spawn_sync(nullptr,
                  argv,
@@ -145,20 +145,17 @@ remove_actions(const char* type, GArray* actions)
     GKeyFile* file = g_key_file_new();
 
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    char* path = g_build_filename(vfs_user_config_dir(), "mimeapps.list", nullptr);
-    if (!g_key_file_load_from_file(file, path, G_KEY_FILE_NONE, nullptr))
+    std::string path = Glib::build_filename(vfs_user_config_dir(), "mimeapps.list");
+    if (!g_key_file_load_from_file(file, path.c_str(), G_KEY_FILE_NONE, nullptr))
     {
         // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
-        g_free(path);
-        path = g_build_filename(vfs_user_data_dir(), "applications/mimeapps.list", nullptr);
-        if (!g_key_file_load_from_file(file, path, G_KEY_FILE_NONE, nullptr))
+        path = Glib::build_filename(vfs_user_data_dir(), "applications/mimeapps.list");
+        if (!g_key_file_load_from_file(file, path.c_str(), G_KEY_FILE_NONE, nullptr))
         {
             g_key_file_free(file);
-            g_free(path);
             return;
         }
     }
-    g_free(path);
 
     unsigned long n_removed = 0;
     char** removed =
@@ -275,7 +272,7 @@ get_actions(const char* dir, const char* type, GArray* actions)
             }
         }
         g_key_file_free(file);
-        if (!g_strcmp0(dir, vfs_user_config_dir()))
+        if (ztd::same(dir, vfs_user_config_dir()))
             break; // no mimeinfo.cache in ~/.config
     }
     g_strfreev(removed);
@@ -427,7 +424,6 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
     char* name = nullptr;
     char* cust_template = nullptr;
     char* cust = nullptr;
-    char* path;
     char* file_content = nullptr;
     unsigned long len = 0;
 
@@ -484,32 +480,27 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
     }
 
     /* generate unique file name */
-    char* dir = g_build_filename(vfs_user_data_dir(), "applications", nullptr);
+    std::string dir = Glib::build_filename(vfs_user_data_dir(), "applications");
     std::filesystem::create_directories(dir);
     std::filesystem::permissions(dir, std::filesystem::perms::owner_all);
+    std::string path;
     unsigned int i;
     for (i = 0;; ++i)
     {
         /* generate the basename */
         cust = g_strdup_printf(cust_template, i);
-        path = g_build_filename(dir, cust, nullptr); /* test if the filename already exists */
+        path = Glib::build_filename(dir, cust); /* test if the filename already exists */
         if (std::filesystem::exists(path))
-        {
             g_free(cust);
-            g_free(path);
-        }
         else /* this generated filename can be used */
             break;
     }
-    g_free(dir);
-    if (G_LIKELY(path))
-    {
-        save_to_file(path, file_content, len);
-        g_free(path);
 
-        /* execute update-desktop-database" to update mimeinfo.cache */
-        update_desktop_database();
-    }
+    save_to_file(path.c_str(), file_content, len);
+
+    /* execute update-desktop-database" to update mimeinfo.cache */
+    update_desktop_database();
+
     return cust;
 }
 
@@ -664,7 +655,7 @@ get_default_action(const char* dir, const char* type, void* user_data)
             }
         }
         g_key_file_free(file);
-        if (!g_strcmp0(dir, vfs_user_config_dir()))
+        if (ztd::same(dir, vfs_user_config_dir()))
             break; // no defaults.list in ~/.config
     }
     return nullptr;
@@ -717,8 +708,8 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
     // Load current mimeapps.list content, if available
     GKeyFile* file = g_key_file_new();
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    char* path = g_build_filename(vfs_user_config_dir(), "mimeapps.list", nullptr);
-    g_key_file_load_from_file(file, path, G_KEY_FILE_NONE, nullptr);
+    std::string path = Glib::build_filename(vfs_user_config_dir(), "mimeapps.list");
+    g_key_file_load_from_file(file, path.c_str(), G_KEY_FILE_NONE, nullptr);
 
     for (unsigned int k = 0; k < G_N_ELEMENTS(groups); k++)
     {
@@ -851,9 +842,8 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
     {
         unsigned long len = 0;
         char* data = g_key_file_to_data(file, &len, nullptr);
-        save_to_file(path, data, len);
+        save_to_file(path.c_str(), data, len);
         g_free(data);
     }
     g_key_file_free(file);
-    g_free(path);
 }
