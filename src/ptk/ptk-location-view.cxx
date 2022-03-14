@@ -2979,8 +2979,10 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
             newset->menu_label = const_cast<char*>(name.c_str());
             newset->x = g_strdup("3"); // XSET_CMD_BOOKMARK
             // unset these to save session space
-            newset->task = newset->task_err = newset->task_out = newset->keep_terminal =
-                XSET_B_UNSET;
+            newset->task = false;
+            newset->task_err = false;
+            newset->task_out = false;
+            newset->keep_terminal = false;
             if (set_prev)
             {
                 newset->prev = g_strdup(set_prev->name);
@@ -3365,7 +3367,10 @@ on_bookmark_device(GtkMenuItem* item, VFSVolume* vol)
     newset->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
     newset->prev = g_strdup(sel_set->name);
     newset->next = sel_set->next; // steal string
-    newset->task = newset->task_err = newset->task_out = newset->keep_terminal = XSET_B_UNSET;
+    newset->task = false;
+    newset->task_err = false;
+    newset->task_out = false;
+    newset->keep_terminal = false;
     if (sel_set->next)
     {
         XSet* sel_set_next = xset_get(sel_set->next);
@@ -3418,8 +3423,10 @@ ptk_bookmark_view_get_first_bookmark(XSet* book_set)
         child_set->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
         child_set->parent = g_strdup_printf("main_book");
         book_set->child = g_strdup(child_set->name);
-        child_set->task = child_set->task_err = child_set->task_out = child_set->keep_terminal =
-            XSET_B_UNSET;
+        child_set->task = false;
+        child_set->task_err = false;
+        child_set->task_out = false;
+        child_set->keep_terminal = false;
     }
     else
         child_set = xset_get(book_set->child);
@@ -3622,7 +3629,11 @@ ptk_bookmark_view_add_bookmark(GtkMenuItem* menuitem, PtkFileBrowser* file_brows
     newset->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
     newset->prev = g_strdup(sel_set->name);
     newset->next = sel_set->next; // steal string
-    newset->task = newset->task_err = newset->task_out = newset->keep_terminal = XSET_B_UNSET;
+    newset->task = false;
+    newset->task_err = false;
+    newset->task_out = false;
+    newset->keep_terminal = false;
+
     if (sel_set->next)
     {
         XSet* sel_set_next = xset_get(sel_set->next);

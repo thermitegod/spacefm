@@ -263,6 +263,7 @@ enum PluginUse
 struct XSet
 {
     char* name;
+
     XSetB b; // tri-state 0=unset(false) 1=true 2=false
     char* s;
     char* x;
@@ -287,7 +288,7 @@ struct XSet
     char* next;
     char* context;
     XSetTool tool;
-    bool lock;          // not saved, default true
+    bool lock; // not saved, default true
 
     // Custom Command ( !lock )
     char* prev;
@@ -297,13 +298,13 @@ struct XSet
     // x = XSET_CMD_LINE..XSET_CMD_BOOKMARK
     // y = user
     // z = custom executable
-    XSetB task;
-    XSetB task_pop;
-    XSetB task_err;
-    XSetB task_out;
-    XSetB in_terminal;   // or save menu_label if lock
-    XSetB keep_terminal; // or save icon if lock
-    XSetB scroll_lock;
+    bool task;
+    bool task_pop;
+    bool task_err;
+    bool task_out;
+    bool in_terminal;   // or save menu_label if lock
+    bool keep_terminal; // or save icon if lock
+    bool scroll_lock;
     char opener;
 
     // Plugin (not saved at all)

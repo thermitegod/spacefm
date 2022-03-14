@@ -3364,10 +3364,10 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
         task->task->exec_command = command_final;
         if (handler_set->icon)
             task->task->exec_icon = handler_set->icon;
-        task->task->exec_terminal = (handler_set->in_terminal == XSET_B_TRUE);
+        task->task->exec_terminal = handler_set->in_terminal;
         task->task->exec_keep_terminal = false;
         // file handlers store Run As Task in keep_terminal
-        task->task->exec_sync = handler_set->keep_terminal == XSET_B_TRUE;
+        task->task->exec_sync = handler_set->keep_terminal;
         task->task->exec_show_error = task->task->exec_sync;
         task->task->exec_export = true;
         ptk_file_task_run(task);

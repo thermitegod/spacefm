@@ -2831,15 +2831,15 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
     switch (action)
     {
         case HANDLER_MOUNT:
-            terminal = set->in_terminal == XSET_B_TRUE;
+            terminal = set->in_terminal;
             action_s = "MOUNT";
             break;
         case HANDLER_UNMOUNT:
-            terminal = set->keep_terminal == XSET_B_TRUE;
+            terminal = set->keep_terminal;
             action_s = "UNMOUNT";
             break;
         case HANDLER_PROP:
-            terminal = set->scroll_lock == XSET_B_TRUE;
+            terminal = set->scroll_lock;
             action_s = "PROPERTIES";
             break;
         default:

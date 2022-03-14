@@ -629,7 +629,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 g_free(xset_name);
 
                 // run in the terminal or not
-                run_in_terminal = handler_xset->in_terminal == XSET_B_TRUE;
+                run_in_terminal = handler_xset->in_terminal;
 
                 // Get command from text view
                 GtkTextBuffer* buf;

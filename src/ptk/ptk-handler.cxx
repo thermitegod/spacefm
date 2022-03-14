@@ -1187,11 +1187,11 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
                 string_copy_free(&set->menu_label, handler->handler_name);
                 string_copy_free(&set->s, handler->type);
                 string_copy_free(&set->x, handler->ext);
-                set->in_terminal = handler->compress_term ? XSET_B_TRUE : XSET_B_UNSET;
+                set->in_terminal = handler->compress_term;
                 // extract in terminal or (file handler) run as task
-                set->keep_terminal = handler->extract_term ? XSET_B_TRUE : XSET_B_UNSET;
+                set->keep_terminal = handler->extract_term;
                 if (mode != HANDLER_MODE_FILE)
-                    set->scroll_lock = handler->list_term ? XSET_B_TRUE : XSET_B_UNSET;
+                    set->scroll_lock = handler->list_term;
                 set->b = XSET_B_TRUE;
                 set->lock = false;
                 // handler equals default, so don't save in session
@@ -1446,11 +1446,11 @@ config_load_handler_settings(XSet* handler_xset, char* handler_xset_name, const 
     }
     // Run In Terminal checkboxes
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hnd->chkbtn_handler_compress_term),
-                                 handler_xset->in_terminal == XSET_B_TRUE);
+                                 handler_xset->in_terminal);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hnd->chkbtn_handler_extract_term),
-                                 handler_xset->keep_terminal == XSET_B_TRUE);
+                                 handler_xset->keep_terminal);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hnd->chkbtn_handler_list_term),
-                                 handler_xset->scroll_lock == XSET_B_TRUE);
+                                 handler_xset->scroll_lock);
 }
 
 static void
@@ -1676,8 +1676,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         xset_set_set(new_handler_xset,
                      XSET_SET_SET_X,
                      handler_extension); // Extension(s) or blacklist
-        new_handler_xset->in_terminal = handler_compress_term ? XSET_B_TRUE : XSET_B_UNSET;
-        new_handler_xset->keep_terminal = handler_extract_term ? XSET_B_TRUE : XSET_B_UNSET;
+        new_handler_xset->in_terminal = handler_compress_term;
+        new_handler_xset->keep_terminal = handler_extract_term;
 
         error = ptk_handler_save_script(hnd->mode,
                                         HANDLER_COMPRESS,
@@ -1692,7 +1692,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         }
         else
         {
-            new_handler_xset->scroll_lock = handler_list_term ? XSET_B_TRUE : XSET_B_UNSET;
+            new_handler_xset->scroll_lock = handler_list_term;
             if (!error)
                 error = ptk_handler_save_script(hnd->mode,
                                                 HANDLER_EXTRACT,
@@ -1799,8 +1799,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         xset_set_set(handler_xset, XSET_SET_SET_LABEL, handler_name);
         xset_set_set(handler_xset, XSET_SET_SET_S, handler_mime);
         xset_set_set(handler_xset, XSET_SET_SET_X, handler_extension);
-        handler_xset->in_terminal = handler_compress_term ? XSET_B_TRUE : XSET_B_UNSET;
-        handler_xset->keep_terminal = handler_extract_term ? XSET_B_TRUE : XSET_B_UNSET;
+        handler_xset->in_terminal = handler_compress_term;
+        handler_xset->keep_terminal = handler_extract_term;
         if (hnd->compress_changed || was_default)
         {
             error = ptk_handler_save_script(hnd->mode,
@@ -1817,7 +1817,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         }
         else
         {
-            handler_xset->scroll_lock = handler_list_term ? XSET_B_TRUE : XSET_B_UNSET;
+            handler_xset->scroll_lock = handler_list_term;
             if (hnd->extract_changed || was_default)
             {
                 error = ptk_handler_save_script(hnd->mode,
@@ -2243,10 +2243,10 @@ restore_defaults(HandlerData* hnd, bool all)
         set->menu_label = (char*)handler->handler_name;
         set->s = (char*)handler->type;
         set->x = (char*)handler->ext;
-        set->in_terminal = handler->compress_term ? XSET_B_TRUE : XSET_B_UNSET;
-        set->keep_terminal = handler->extract_term ? XSET_B_TRUE : XSET_B_UNSET;
+        set->in_terminal = handler->compress_term;
+        set->keep_terminal = handler->extract_term;
         if (hnd->mode != HANDLER_MODE_FILE)
-            set->scroll_lock = handler->list_term ? XSET_B_TRUE : XSET_B_UNSET;
+            set->scroll_lock = handler->list_term;
         set->b = XSET_B_TRUE;
         set->icon = nullptr;
 

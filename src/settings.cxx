@@ -50,7 +50,7 @@
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/ptk-location-view.hxx"
 
-#define CONFIG_VERSION "38" // 1.0.6
+#define CONFIG_VERSION "100" // 3.0.0
 
 AppSettings app_settings = AppSettings();
 ConfigSettings config_settings = ConfigSettings();
@@ -805,13 +805,13 @@ xset_new(const char* name)
     set->parent = nullptr;
     set->child = nullptr;
     set->line = nullptr;
-    set->task = XSET_B_UNSET;
-    set->task_pop = XSET_B_UNSET;
-    set->task_err = XSET_B_UNSET;
-    set->task_out = XSET_B_UNSET;
-    set->in_terminal = XSET_B_UNSET;
-    set->keep_terminal = XSET_B_UNSET;
-    set->scroll_lock = XSET_B_UNSET;
+    set->task = false;
+    set->task_pop = false;
+    set->task_err = false;
+    set->task_out = false;
+    set->in_terminal = false;
+    set->keep_terminal = false;
+    set->scroll_lock = false;
     set->opener = 0;
     return set;
 }
@@ -1037,7 +1037,7 @@ xset_write_set(std::string& buf, XSet* set)
         if (set->lock)
         {
             // built-in
-            if (set->in_terminal == XSET_B_TRUE && set->menu_label && set->menu_label[0])
+            if (set->in_terminal && set->menu_label && set->menu_label[0])
                 // only save lbl if menu_label was customized
                 buf.append(fmt::format("{}-lbl={}\n", set->name, set->menu_label));
         }
@@ -1049,7 +1049,7 @@ xset_write_set(std::string& buf, XSet* set)
     if (set->lock)
     {
         // built-in
-        if (set->keep_terminal == XSET_B_TRUE)
+        if (set->keep_terminal)
             // only save icn if icon was customized
             buf.append(fmt::format("{}-icn={}\n", set->name, set->icon ? set->icon : ""));
     }
@@ -1080,20 +1080,20 @@ xset_write_set(std::string& buf, XSet* set)
             buf.append(fmt::format("{}-parent={}\n", set->name, set->parent));
         if (set->line)
             buf.append(fmt::format("{}-line={}\n", set->name, set->line));
-        if (set->task != XSET_B_UNSET)
-            buf.append(fmt::format("{}-task={}\n", set->name, set->task));
-        if (set->task_pop != XSET_B_UNSET)
-            buf.append(fmt::format("{}-task_pop={}\n", set->name, set->task_pop));
-        if (set->task_err != XSET_B_UNSET)
-            buf.append(fmt::format("{}-task_err={}\n", set->name, set->task_err));
-        if (set->task_out != XSET_B_UNSET)
-            buf.append(fmt::format("{}-task_out={}\n", set->name, set->task_out));
-        if (set->in_terminal != XSET_B_UNSET)
-            buf.append(fmt::format("{}-term={}\n", set->name, set->in_terminal));
-        if (set->keep_terminal != XSET_B_UNSET)
-            buf.append(fmt::format("{}-keep={}\n", set->name, set->keep_terminal));
-        if (set->scroll_lock != XSET_B_UNSET)
-            buf.append(fmt::format("{}-scroll={}\n", set->name, set->scroll_lock));
+        if (set->task)
+            buf.append(fmt::format("{}-task={:d}\n", set->name, set->task));
+        if (set->task_pop)
+            buf.append(fmt::format("{}-task_pop={:d}\n", set->name, set->task_pop));
+        if (set->task_err)
+            buf.append(fmt::format("{}-task_err={:d}\n", set->name, set->task_err));
+        if (set->task_out)
+            buf.append(fmt::format("{}-task_out={:d}\n", set->name, set->task_out));
+        if (set->in_terminal)
+            buf.append(fmt::format("{}-term={:d}\n", set->name, set->in_terminal));
+        if (set->keep_terminal)
+            buf.append(fmt::format("{}-keep={:d}\n", set->name, set->keep_terminal));
+        if (set->scroll_lock)
+            buf.append(fmt::format("{}-scroll={:d}\n", set->name, set->scroll_lock));
         if (set->opener != 0)
             buf.append(fmt::format("{}-op={}\n", set->name, set->opener));
     }
@@ -1342,7 +1342,7 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
             set->menu_label = g_strdup(value);
             if (set->lock)
                 // indicate that menu label is not default and should be saved
-                set->in_terminal = XSET_B_TRUE;
+                set->in_terminal = true;
             break;
         case XSET_SET_SET_ICN:
             // icn is only used >= 0.9.0 for changed lock default icon
@@ -1351,7 +1351,7 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
             set->icon = g_strdup(value);
             if (set->lock)
                 // indicate that icon is not default and should be saved
-                set->keep_terminal = XSET_B_TRUE;
+                set->keep_terminal = true;
             break;
         case XSET_SET_SET_LABEL:
             // pre-0.9.0 menu_label or >= 0.9.0 custom item label
@@ -1363,7 +1363,7 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
                 set->menu_label = g_strdup(value);
                 if (set->lock)
                     // indicate that menu label is not default and should be saved
-                    set->in_terminal = XSET_B_TRUE;
+                    set->in_terminal = true;
             }
             break;
         case XSET_SET_SET_ICON:
@@ -1410,55 +1410,55 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
             set->tool = XSetTool(std::stoi(value));
             break;
         case XSET_SET_SET_TASK:
-            if (strtol(value, nullptr, 10) == 1)
-                set->task = XSET_B_TRUE;
+            if (std::stoi(value) == 1)
+                set->task = true;
             else
-                set->task = XSET_B_UNSET;
+                set->task = false;
             break;
         case XSET_SET_SET_TASK_POP:
-            if (strtol(value, nullptr, 10) == 1)
-                set->task_pop = XSET_B_TRUE;
+            if (std::stoi(value) == 1)
+                set->task_pop = true;
             else
-                set->task_pop = XSET_B_UNSET;
+                set->task_pop = false;
             break;
         case XSET_SET_SET_TASK_ERR:
-            if (strtol(value, nullptr, 10) == 1)
-                set->task_err = XSET_B_TRUE;
+            if (std::stoi(value) == 1)
+                set->task_err = true;
             else
-                set->task_err = XSET_B_UNSET;
+                set->task_err = false;
             break;
         case XSET_SET_SET_TASK_OUT:
-            if (strtol(value, nullptr, 10) == 1)
-                set->task_out = XSET_B_TRUE;
+            if (std::stoi(value) == 1)
+                set->task_out = true;
             else
-                set->task_out = XSET_B_UNSET;
+                set->task_out = false;
             break;
         case XSET_SET_SET_TERM:
-            if (strtol(value, nullptr, 10) == 1)
-                set->in_terminal = XSET_B_TRUE;
+            if (std::stoi(value) == 1)
+                set->in_terminal = true;
             else
-                set->in_terminal = XSET_B_UNSET;
+                set->in_terminal = false;
             break;
         case XSET_SET_SET_KEEP:
-            if (strtol(value, nullptr, 10) == 1)
-                set->keep_terminal = XSET_B_TRUE;
+            if (std::stoi(value) == 1)
+                set->keep_terminal = true;
             else
-                set->keep_terminal = XSET_B_UNSET;
+                set->keep_terminal = false;
             break;
         case XSET_SET_SET_SCROLL:
-            if (strtol(value, nullptr, 10) == 1)
-                set->scroll_lock = XSET_B_TRUE;
+            if (std::stoi(value) == 1)
+                set->scroll_lock = true;
             else
-                set->scroll_lock = XSET_B_UNSET;
+                set->scroll_lock = false;
             break;
         case XSET_SET_SET_DISABLE:
-            if (!strcmp(value, "1"))
+            if (std::stoi(value) == 1)
                 set->disable = true;
             else
                 set->disable = false;
             break;
         case XSET_SET_SET_OP:
-            set->opener = strtol(value, nullptr, 10);
+            set->opener = std::stoi(value);
             break;
         default:
             break;
@@ -3605,13 +3605,13 @@ xset_custom_activate(GtkWidget* item, XSet* set)
         task->task->exec_icon = set->icon;
 
     task->task->current_dest = value; // temp storage
-    task->task->exec_terminal = (mset->in_terminal == XSET_B_TRUE);
-    task->task->exec_keep_terminal = (mset->keep_terminal == XSET_B_TRUE);
-    task->task->exec_sync = !app_no_sync && (mset->task == XSET_B_TRUE);
-    task->task->exec_popup = (mset->task_pop == XSET_B_TRUE);
-    task->task->exec_show_output = (mset->task_out == XSET_B_TRUE);
-    task->task->exec_show_error = (mset->task_err == XSET_B_TRUE);
-    task->task->exec_scroll_lock = (mset->scroll_lock == XSET_B_TRUE);
+    task->task->exec_terminal = mset->in_terminal;
+    task->task->exec_keep_terminal = mset->keep_terminal;
+    task->task->exec_sync = !app_no_sync && mset->task;
+    task->task->exec_popup = mset->task_pop;
+    task->task->exec_show_output = mset->task_out;
+    task->task->exec_show_error = mset->task_err;
+    task->task->exec_scroll_lock = mset->scroll_lock;
     task->task->exec_checksum = set->plugin;
     task->task->exec_export = true;
     // task->task->exec_keep_tmp = true;
@@ -3809,10 +3809,10 @@ xset_custom_new()
     XSet* set;
     set = xset_get(setname.c_str());
     set->lock = false;
-    set->keep_terminal = XSET_B_TRUE;
-    set->task = XSET_B_TRUE;
-    set->task_err = XSET_B_TRUE;
-    set->task_out = XSET_B_TRUE;
+    set->keep_terminal = true;
+    set->task = true;
+    set->task_err = true;
+    set->task_out = true;
     return set;
 }
 
@@ -4195,10 +4195,10 @@ xset_design_job(GtkWidget* item, XSet* set)
             // icon chooser, so it adds a Choose button.  If you change the title,
             // change xset_text_dialog.
             xset_text_dialog(parent, "Set Icon", icon_desc, "", mset->icon, &mset->icon, "", false);
-            if (set->lock && set->keep_terminal == XSET_B_UNSET && g_strcmp0(old_icon, mset->icon))
+            if (set->lock && g_strcmp0(old_icon, mset->icon))
             {
                 // built-in icon has been changed from default, save it
-                set->keep_terminal = XSET_B_TRUE;
+                set->keep_terminal = true;
             }
             g_free(old_icon);
             break;
@@ -4403,15 +4403,19 @@ xset_design_job(GtkWidget* item, XSet* set)
                     g_free(newset->x);
                     newset->x = g_strdup("2"); // XSET_CMD_APP
                     // unset these to save session space
-                    newset->task = newset->task_err = newset->task_out = newset->keep_terminal =
-                        XSET_B_UNSET;
+                    newset->task = false;
+                    newset->task_err = false;
+                    newset->task_out = false;
+                    newset->keep_terminal = false;
                     break;
                 case XSET_JOB_BOOKMARK:
                     g_free(newset->x);
                     newset->x = g_strdup("3"); // XSET_CMD_BOOKMARK
                     // unset these to save session space
-                    newset->task = newset->task_err = newset->task_out = newset->keep_terminal =
-                        XSET_B_UNSET;
+                    newset->task = false;
+                    newset->task_err = false;
+                    newset->task_out = false;
+                    newset->keep_terminal = false;
                     break;
                 default:
                     break;
@@ -4470,8 +4474,11 @@ xset_design_job(GtkWidget* item, XSet* set)
                 childset->menu_label = g_path_get_basename(folder);
                 childset->z = g_strdup(folder);
                 childset->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
-                childset->task = childset->task_err = childset->task_out = childset->keep_terminal =
-                    XSET_B_UNSET;
+                // unset these to save session space
+                childset->task = false;
+                childset->task_err = false;
+                childset->task_out = false;
+                childset->keep_terminal = false;
             }
             else
                 childset->menu_label = g_strdup("New _Command");
@@ -4702,8 +4709,11 @@ xset_design_job(GtkWidget* item, XSet* set)
                 childset->menu_label = g_path_get_basename(folder);
                 childset->z = g_strdup(folder);
                 childset->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
-                childset->task = childset->task_err = childset->task_out = childset->keep_terminal =
-                    XSET_B_UNSET;
+                // unset these to save session space
+                childset->task = false;
+                childset->task_err = false;
+                childset->task_out = false;
+                childset->keep_terminal = false;
             }
             else if (set->tool)
             {
@@ -4844,88 +4854,55 @@ xset_design_job(GtkWidget* item, XSet* set)
             break;
         case XSET_JOB_TERM:
             mset = xset_get_plugin_mirror(set);
-            switch (mset->in_terminal)
+            if (mset->in_terminal)
+                mset->in_terminal = false;
+            else
             {
-                case XSET_B_TRUE:
-                    mset->in_terminal = XSET_B_UNSET;
-                    break;
-                default:
-                    mset->in_terminal = XSET_B_TRUE;
-                    mset->task = XSET_B_FALSE;
-                    break;
+                mset->in_terminal = true;
+                mset->task = false;
             }
             break;
         case XSET_JOB_KEEP:
             mset = xset_get_plugin_mirror(set);
-            switch (mset->keep_terminal)
-            {
-                case XSET_B_TRUE:
-                    mset->keep_terminal = XSET_B_UNSET;
-                    break;
-                default:
-                    mset->keep_terminal = XSET_B_TRUE;
-                    break;
-            }
+            if (mset->keep_terminal)
+                mset->keep_terminal = false;
+            else
+                mset->keep_terminal = true;
             break;
         case XSET_JOB_TASK:
             mset = xset_get_plugin_mirror(set);
-            switch (mset->task)
-            {
-                case XSET_B_TRUE:
-                    mset->task = XSET_B_UNSET;
-                    break;
-                default:
-                    mset->task = XSET_B_TRUE;
-                    break;
-            }
+            if (mset->task)
+                mset->task = false;
+            else
+                mset->task = true;
             break;
         case XSET_JOB_POP:
             mset = xset_get_plugin_mirror(set);
-            switch (mset->task_pop)
-            {
-                case XSET_B_TRUE:
-                    mset->task_pop = XSET_B_UNSET;
-                    break;
-                default:
-                    mset->task_pop = XSET_B_TRUE;
-                    break;
-            }
+            if (mset->task_pop)
+                mset->task_pop = false;
+            else
+                mset->task_pop = true;
             break;
         case XSET_JOB_ERR:
             mset = xset_get_plugin_mirror(set);
-            switch (mset->task_err)
-            {
-                case XSET_B_TRUE:
-                    mset->task_err = XSET_B_UNSET;
-                    break;
-                default:
-                    mset->task_err = XSET_B_TRUE;
-                    break;
-            }
+            if (mset->task_err)
+                mset->task_err = false;
+            else
+                mset->task_err = true;
             break;
         case XSET_JOB_OUT:
             mset = xset_get_plugin_mirror(set);
-            switch (mset->task_out)
-            {
-                case XSET_B_TRUE:
-                    mset->task_out = XSET_B_UNSET;
-                    break;
-                default:
-                    mset->task_out = XSET_B_TRUE;
-                    break;
-            }
+            if (mset->task_out)
+                mset->task_out = false;
+            else
+                mset->task_out = true;
             break;
         case XSET_JOB_SCROLL:
             mset = xset_get_plugin_mirror(set);
-            switch (mset->scroll_lock)
-            {
-                case XSET_B_TRUE:
-                    mset->scroll_lock = XSET_B_UNSET;
-                    break;
-                default:
-                    mset->scroll_lock = XSET_B_TRUE;
-                    break;
-            }
+            if (mset->scroll_lock)
+                mset->scroll_lock = false;
+            else
+                mset->scroll_lock = true;
             break;
         case XSET_JOB_TOOLTIPS:
             set_next = xset_get_panel(1, "tool_l");
@@ -5846,7 +5823,7 @@ xset_menu_cb(GtkWidget* item, XSet* set)
                                      false))
                 {
                     if (rset->lock)
-                        rset->keep_terminal = XSET_B_TRUE; // trigger save of changed icon
+                        rset->keep_terminal = true; // trigger save of changed icon
                     if (cb_func)
                         cb_func(item, cb_data);
                 }
@@ -6592,10 +6569,10 @@ xset_new_builtin_toolitem(XSetTool tool_type)
 
     XSet* set = xset_custom_new();
     set->tool = tool_type;
-    set->task = XSET_B_UNSET;
-    set->task_err = XSET_B_UNSET;
-    set->task_out = XSET_B_UNSET;
-    set->keep_terminal = XSET_B_UNSET;
+    set->task = false;
+    set->task_err = false;
+    set->task_out = false;
+    set->keep_terminal = false;
 
     return set;
 }
@@ -8995,10 +8972,10 @@ xset_defaults()
     {
         if (set->lock)
         {
-            if (set->in_terminal == XSET_B_TRUE)
-                set->in_terminal = XSET_B_UNSET;
-            if (set->keep_terminal == XSET_B_TRUE)
-                set->keep_terminal = XSET_B_UNSET;
+            if (set->in_terminal)
+                set->in_terminal = false;
+            if (set->keep_terminal)
+                set->keep_terminal = false;
         }
     }
 }

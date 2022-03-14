@@ -1169,20 +1169,20 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
     // command, so reset the command options to defaults (they are not stored
     // for bookmarks/applications)
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->opt_terminal),
-                                 mset->in_terminal == XSET_B_TRUE && !ctxt->reset_command);
+                                 mset->in_terminal && !ctxt->reset_command);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->opt_keep_term),
-                                 mset->keep_terminal == XSET_B_TRUE || ctxt->reset_command);
+                                 mset->keep_terminal || ctxt->reset_command);
     gtk_entry_set_text(GTK_ENTRY(ctxt->cmd_user), rset->y ? rset->y : "");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->opt_task),
-                                 mset->task == XSET_B_TRUE || ctxt->reset_command);
+                                 mset->task || ctxt->reset_command);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->opt_task_pop),
-                                 mset->task_pop == XSET_B_TRUE && !ctxt->reset_command);
+                                 mset->task_pop && !ctxt->reset_command);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->opt_task_err),
-                                 mset->task_err == XSET_B_TRUE || ctxt->reset_command);
+                                 mset->task_err || ctxt->reset_command);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->opt_task_out),
-                                 mset->task_out == XSET_B_TRUE || ctxt->reset_command);
+                                 mset->task_out || ctxt->reset_command);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->opt_scroll),
-                                 mset->scroll_lock != XSET_B_TRUE || ctxt->reset_command);
+                                 !mset->scroll_lock || ctxt->reset_command);
     if (rset->menu_style == XSET_MENU_CHECK)
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_checkbox), true);
     else if (rset->menu_style == XSET_MENU_CONFIRM)
@@ -1382,34 +1382,20 @@ replace_item_props(ContextData* ctxt)
 
         // run options
         mset->in_terminal = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_terminal)) &&
-                                    !is_bookmark_or_app
-                                ? XSET_B_TRUE
-                                : XSET_B_UNSET;
+                            !is_bookmark_or_app;
         mset->keep_terminal =
             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_keep_term)) &&
-                    !is_bookmark_or_app
-                ? XSET_B_TRUE
-                : XSET_B_UNSET;
+            !is_bookmark_or_app;
         mset->task =
-            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_task)) && !is_bookmark_or_app
-                ? XSET_B_TRUE
-                : XSET_B_UNSET;
+            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_task)) && !is_bookmark_or_app;
         mset->task_pop = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_task_pop)) &&
-                                 !is_bookmark_or_app
-                             ? XSET_B_TRUE
-                             : XSET_B_UNSET;
+                         !is_bookmark_or_app;
         mset->task_err = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_task_err)) &&
-                                 !is_bookmark_or_app
-                             ? XSET_B_TRUE
-                             : XSET_B_UNSET;
+                         !is_bookmark_or_app;
         mset->task_out = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_task_out)) &&
-                                 !is_bookmark_or_app
-                             ? XSET_B_TRUE
-                             : XSET_B_UNSET;
+                         !is_bookmark_or_app;
         mset->scroll_lock =
-            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_scroll)) || is_bookmark_or_app
-                ? XSET_B_UNSET
-                : XSET_B_TRUE;
+            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_scroll)) || is_bookmark_or_app;
 
         // Opener
         if ((item_type == ITEM_TYPE_COMMAND || item_type == ITEM_TYPE_APP))
@@ -1425,10 +1411,10 @@ replace_item_props(ContextData* ctxt)
     if (rset->menu_style != XSET_MENU_SEP && !rset->plugin)
     {
         // name
-        if (rset->lock && rset->in_terminal == XSET_B_UNSET &&
+        if (rset->lock &&
             g_strcmp0(rset->menu_label, gtk_entry_get_text(GTK_ENTRY(ctxt->item_name))))
             // built-in label has been changed from default, save it
-            rset->in_terminal = XSET_B_TRUE;
+            rset->in_terminal = true;
 
         g_free(rset->menu_label);
         if (rset->tool > XSET_TOOL_CUSTOM &&
@@ -1453,9 +1439,9 @@ replace_item_props(ContextData* ctxt)
         else
             mset->icon = nullptr;
 
-        if (rset->lock && rset->keep_terminal == XSET_B_UNSET && g_strcmp0(old_icon, mset->icon))
+        if (rset->lock && g_strcmp0(old_icon, mset->icon))
             // built-in icon has been changed from default, save it
-            rset->keep_terminal = XSET_B_TRUE;
+            rset->keep_terminal = true;
         g_free(old_icon);
     }
 
