@@ -219,7 +219,7 @@ get_socket_name(char* buf, int len)
     g_free(dpy);
 }
 
-static void
+[[noreturn]] static void
 single_instance_check_fatal(int ret)
 {
     gdk_notify_startup_complete();
