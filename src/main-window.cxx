@@ -6707,21 +6707,21 @@ main_window_socket_command(char* argv[], char** reply)
             // build bash array
             char** pathv = g_strsplit(str, "\n", 0);
             g_free(str);
-            GString* gstr = g_string_new("(");
+            std::string str2 = "(";
             j = 0;
             while (pathv[j])
             {
                 if (pathv[j][0])
                 {
-                    std::string str2 = bash_quote(pathv[j]);
-                    g_string_append_printf(gstr, "%s ", str2.c_str());
-                    g_free(str);
+                    std::string str3 = bash_quote(pathv[j]);
+                    str2.append(fmt::format("{} ", str2));
                 }
                 j++;
             }
             g_strfreev(pathv);
-            g_string_append_printf(gstr, ")\n");
-            *reply = g_string_free(gstr, false);
+            str2.append(")\n");
+
+            *reply = (char*)str2.c_str();
         }
         else if (!strcmp(argv[i], "selected_filenames") || !strcmp(argv[i], "selected_files"))
         {
@@ -6732,20 +6732,20 @@ main_window_socket_command(char* argv[], char** reply)
                 return 0;
 
             // build bash array
-            GString* gstr = g_string_new("(");
+            std::string str2 = "(";
             for (l = sel_files; l; l = l->next)
             {
                 VFSFileInfo* file = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data));
                 if (file)
                 {
-                    std::string str2 = bash_quote(vfs_file_info_get_name(file));
-                    g_string_append_printf(gstr, "%s ", str2.c_str());
+                    std::string str3 = bash_quote(vfs_file_info_get_name(file));
+                    str2.append(fmt::format("{} ", str3));
                     vfs_file_info_unref(file);
                 }
             }
             vfs_file_info_list_free(sel_files);
-            g_string_append_printf(gstr, ")\n");
-            *reply = g_string_free(gstr, false);
+            str2.append(")\n");
+            *reply = (char*)str2.c_str();
         }
         else if (!strcmp(argv[i], "selected_pattern"))
         {
@@ -7419,10 +7419,10 @@ main_window_socket_command(char* argv[], char** reply)
             return 2;
         }
         // build command
-        GString* gstr = g_string_new(!strcmp(argv[0], "replace-event") ? "*" : "");
+        std::string str2 = (!strcmp(argv[0], "replace-event") ? "*" : "");
         for (j = i + 1; argv[j]; j++)
-            g_string_append_printf(gstr, "%s%s", j == i + 1 ? "" : " ", argv[j]);
-        str = g_string_free(gstr, false);
+            str2.append(fmt::format("{}{}", j == i + 1 ? "" : " ", argv[j]));
+        str = (char*)str2.c_str();
         // modify list
         if (!strcmp(argv[0], "remove-event"))
         {

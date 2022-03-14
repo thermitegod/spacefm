@@ -3276,10 +3276,10 @@ static void
 open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
 {
     GList* l;
-    char* str;
-    char* command_final;
+    std::string str;
+    std::string command_final;
     char* cmd;
-    char* name;
+    std::string name;
 
     LOG_INFO("Selected File Handler '{}'", handler_set->menu_label);
 
@@ -3306,13 +3306,12 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
                                                     files && files->data ? (char*)files->data
                                                                          : nullptr);
         command = ztd::replace(command, "%a", name);
-        g_free(name);
     }
 
     /* prepare bash vars for just the files being opened by this handler,
      * not necessarily all selected */
-    GString* fm_filenames = g_string_new("fm_filenames=(\n");
-    GString* fm_files = g_string_new("fm_files=(\n");
+    std::string fm_filenames = "fm_filenames=(\n";
+    std::string fm_files = "fm_files=(\n";
     // command looks like it handles multiple files ?
     std::vector<std::string> keys{"%N", "%F", "fm_files[", "fm_filenames["};
     bool multiple = ztd::contains(command, keys);
@@ -3325,15 +3324,14 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
 
             name = g_path_get_basename((char*)l->data);
             quoted = bash_quote(name);
-            g_free(name);
-            g_string_append_printf(fm_filenames, "%s\n", quoted.c_str());
+            fm_filenames.append(fmt::format("{}\n", quoted));
             // file path
             quoted = bash_quote((char*)l->data);
-            g_string_append_printf(fm_files, "%s\n", quoted.c_str());
+            fm_filenames.append(fmt::format("{}\n", quoted));
         }
     }
-    g_string_append(fm_filenames, ")\nfm_filename=\"$fm_filenames[0]\"\n");
-    g_string_append(fm_files, ")\nfm_file=\"$fm_files[0]\"\n");
+    fm_filenames.append(")\nfm_filename=\"$fm_filenames[0]\"\n");
+    fm_files.append(")\nfm_file=\"$fm_files[0]\"\n");
     // replace standard sub vars
     command = replace_line_subs(command);
 
@@ -3341,10 +3339,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
     for (l = files; l; l = l->next)
     {
         if (multiple)
-        {
-            command_final =
-                g_strdup_printf("%s%s%s", fm_filenames->str, fm_files->str, command.c_str());
-        }
+            command_final = fmt::format("{}{}{}", fm_filenames, fm_files, command);
         else
         {
             // add sub vars for single file
@@ -3353,17 +3348,11 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
 
             name = g_path_get_basename((char*)l->data);
             quoted = bash_quote(name);
-            g_free(name);
-            str = g_strdup_printf("fm_filename=%s\n", quoted.c_str());
+            str = fmt::format("fm_filename={}\n", quoted);
             // file path
             quoted = bash_quote((char*)l->data);
-            command_final = g_strdup_printf("%s%s%sfm_file=%s\n%s",
-                                            fm_filenames->str,
-                                            fm_files->str,
-                                            str,
-                                            quoted.c_str(),
-                                            command.c_str());
-            g_free(str);
+            command_final =
+                fmt::format("{}{}{}fm_file={}\n{}", fm_filenames, fm_files, str, quoted, command);
         }
 
         // Run task
@@ -3388,8 +3377,6 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
         if (multiple)
             break;
     }
-    g_string_free(fm_filenames, true);
-    g_string_free(fm_files, true);
 }
 
 static const char*

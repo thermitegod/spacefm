@@ -597,7 +597,7 @@ search_thread(VFSAsyncTask* task, FindFile* data)
     (void)task;
     ssize_t rlen;
     char buf[4096];
-    GString* path = g_string_new_len(nullptr, 256);
+    std::string path;
     GQueue* queue = g_queue_new();
 
     while (!data->task->cancel && (rlen = read(data->stdo, buf, sizeof(buf) - 1)) > 0)
@@ -612,36 +612,34 @@ search_thread(VFSAsyncTask* task, FindFile* data)
             if ((eol = strchr(pbuf, '\n'))) /* end of line is reached */
             {
                 *eol = '\0';
-                g_string_append(path, pbuf);
+                path.append(pbuf);
 
                 /* we get a complete file path */
                 if (!data->task->cancel)
-                {
-                    process_found_files(data, queue, path->str);
-                }
+                    process_found_files(data, queue, path.c_str());
 
-                pbuf = eol + 1;            /* start reading the next line */
-                g_string_assign(path, ""); /* empty the line buffer */
+                pbuf = eol + 1;  /* start reading the next line */
+                path.append(""); /* empty the line buffer */
             }
             else /* end of line is not reached */
             {
-                g_string_append(path, pbuf); /* store the partial path in the buffer */
+                /* store the partial path in the buffer */
+                path.append(pbuf);
                 break;
             }
         }
     }
     /* end of stream (EOF) is reached */
-    if (path->len > 0) /* this is the last line without eol character '\n' */
+    if (!path.empty()) /* this is the last line without eol character '\n' */
     {
         if (!data->task->cancel)
         {
-            process_found_files(data, queue, path->str);
+            process_found_files(data, queue, path.c_str());
             process_found_files(data, queue, nullptr);
         }
     }
 
     g_queue_free(queue);
-    g_string_free(path, true);
     return nullptr;
 }
 

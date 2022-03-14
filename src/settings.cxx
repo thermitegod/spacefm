@@ -25,8 +25,6 @@
 #include <gdk/gdkkeysyms.h>
 #include <fcntl.h>
 
-#include <gmodule.h>
-
 #include <exo/exo.h>
 
 #include <ztd/ztd.hxx>
