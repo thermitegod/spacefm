@@ -291,9 +291,7 @@ on_move_entry_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
 static void
 on_move_change(GtkWidget* widget, MoveSet* mset)
 {
-    char* name;
     char* full_name;
-    char* ext;
     char* full_path;
     char* path;
     char* cwd;
@@ -359,6 +357,9 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
 
     if (widget == GTK_WIDGET(mset->buf_name) || widget == GTK_WIDGET(mset->entry_ext))
     {
+        char* name;
+        char* ext;
+
         if (widget == GTK_WIDGET(mset->buf_name))
             mset->last_widget = GTK_WIDGET(mset->input_name);
         else
@@ -426,17 +427,18 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     {
         mset->last_widget = GTK_WIDGET(mset->input_full_name);
         // update name & ext
+        std::string name;
+        std::string ext;
+
         gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
         full_name = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
-        name = get_name_extension(full_name, mset->is_dir, &ext);
-        gtk_text_buffer_set_text(mset->buf_name, name, -1);
-        if (ext)
-            gtk_entry_set_text(mset->entry_ext, ext);
+        name = get_name_extension(full_name, ext);
+        gtk_text_buffer_set_text(mset->buf_name, name.c_str(), -1);
+        if (!ext.empty())
+            gtk_entry_set_text(mset->entry_ext, ext.c_str());
         else
             gtk_entry_set_text(mset->entry_ext, "");
-        g_free(name);
-        g_free(ext);
 
         // update full_path
         gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
@@ -510,11 +512,13 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         gtk_text_buffer_get_end_iter(mset->buf_full_path, &iter);
         full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
 
+        std::string full_name2;
+
         // update name & ext
         if (full_path[0] == '\0')
-            full_name = g_strdup("");
+            full_name2 = "";
         else
-            full_name = g_path_get_basename(full_path);
+            full_name2 = g_path_get_basename(full_path);
 
         path = g_path_get_dirname(full_path);
         if (!strcmp(path, "."))
@@ -537,25 +541,26 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
             g_free(str);
             g_free(cwd);
         }
-        name = get_name_extension(full_name, mset->is_dir, &ext);
-        gtk_text_buffer_set_text(mset->buf_name, name, -1);
-        if (ext)
-            gtk_entry_set_text(mset->entry_ext, ext);
+        std::string name;
+        std::string ext;
+
+        name = get_name_extension(full_name2, ext);
+        gtk_text_buffer_set_text(mset->buf_name, name.c_str(), -1);
+        if (!ext.empty())
+            gtk_entry_set_text(mset->entry_ext, ext.c_str());
         else
             gtk_entry_set_text(mset->entry_ext, "");
 
         // update full_name
-        if (name && ext)
-            full_name = g_strdup_printf("%s.%s", name, ext);
-        else if (name && !ext)
-            full_name = g_strdup(name);
-        else if (!name && ext)
-            full_name = g_strdup(ext);
+        if (!name.empty() && !ext.empty())
+            full_name2 = fmt::format("{}.{}", name, ext);
+        else if (!name.empty() && ext.empty())
+            full_name2 = name;
+        else if (name.empty() && !ext.empty())
+            full_name2 = ext;
         else
-            full_name = g_strdup("");
-        g_free(name);
-        g_free(ext);
-        gtk_text_buffer_set_text(mset->buf_full_name, full_name, -1);
+            full_name2 = "";
+        gtk_text_buffer_set_text(mset->buf_full_name, full_name2.c_str(), -1);
 
         // update path
         gtk_text_buffer_set_text(mset->buf_path, path, -1);
@@ -569,8 +574,6 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
             g_free(str);
             g_free(cwd);
         }
-
-        g_free(full_name);
     }
 
     // change relative path to absolute
@@ -809,12 +812,10 @@ select_input(GtkWidget* widget, MoveSet* mset)
             gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
             gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
             char* full_name = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
-            char* ext;
-            char* name = get_name_extension(full_name, mset->is_dir, &ext);
-            g_free(ext);
+            std::string ext;
+            std::string name = get_name_extension(full_name, ext);
             g_free(full_name);
-            gtk_text_buffer_get_iter_at_offset(buf, &iter, g_utf8_strlen(name, -1));
-            g_free(name);
+            gtk_text_buffer_get_iter_at_offset(buf, &iter, g_utf8_strlen(name.c_str(), -1));
         }
         else
             gtk_text_buffer_get_end_iter(buf, &iter);

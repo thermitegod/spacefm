@@ -2055,7 +2055,6 @@ query_overwrite(PtkFileTask* ptask)
     }
 
     // filenames
-    char* ext;
     char* base_name = g_path_get_basename(ptask->task->current_dest.c_str());
     char* base_name_disp = g_filename_display_name(base_name); // auto free
     char* src_dir = g_path_get_dirname(ptask->task->current_file.c_str());
@@ -2063,18 +2062,17 @@ query_overwrite(PtkFileTask* ptask)
     char* dest_dir = g_path_get_dirname(ptask->task->current_dest.c_str());
     char* dest_dir_disp = g_filename_display_name(dest_dir);
 
-    char* name = get_name_extension(base_name, S_ISDIR(dest_stat.st_mode), &ext);
-    char* ext_disp = ext ? g_filename_display_name(ext) : nullptr;
-    char* unique_name = vfs_file_task_get_unique_name(dest_dir, name, ext);
+    std::string ext;
+    std::string name = get_name_extension(base_name, ext);
+    char* ext_disp = !ext.empty() ? g_filename_display_name(ext.c_str()) : nullptr;
+    char* unique_name = vfs_file_task_get_unique_name(dest_dir, name.c_str(), ext.c_str());
     char* new_name_plain = unique_name ? g_path_get_basename(unique_name) : nullptr;
     char* new_name = new_name_plain ? g_filename_display_name(new_name_plain) : nullptr;
 
     int pos = ext_disp ? g_utf8_strlen(base_name_disp, -1) - g_utf8_strlen(ext_disp, -1) - 1 : -1;
 
     g_free(base_name);
-    g_free(name);
     g_free(unique_name);
-    g_free(ext);
     g_free(ext_disp);
     g_free(src_dir);
     g_free(dest_dir);

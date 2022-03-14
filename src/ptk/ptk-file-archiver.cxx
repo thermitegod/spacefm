@@ -42,7 +42,7 @@ archive_handler_get_first_extension(XSet* handler_xset)
     // Function deals with the possibility that a handler is responsible
     // for multiple MIME types and therefore file extensions. Functions
     // like archive creation need only one extension
-    char* first_ext = nullptr;
+    std::string first_ext;
     if (handler_xset && handler_xset->x)
     {
         // find first extension
@@ -53,22 +53,22 @@ archive_handler_get_first_extension(XSet* handler_xset)
             for (i = 0; pathnames[i]; ++i)
             {
                 // getting just the extension of the pathname list element
-                char* name = get_name_extension(pathnames[i], false, &first_ext);
-                g_free(name);
-                if (first_ext)
+                std::string name = get_name_extension(pathnames[i], first_ext);
+                if (!first_ext.empty())
                 {
                     // add a dot to extension
-                    char* str = first_ext;
-                    first_ext = g_strconcat(".", first_ext, nullptr);
-                    g_free(str);
+                    first_ext = g_strconcat(".", first_ext.c_str(), nullptr);
                     break;
                 }
             }
             g_strfreev(pathnames);
         }
     }
-    if (first_ext)
-        return first_ext;
+    if (!first_ext.empty())
+    {
+        char* first_ext_ret = const_cast<char*>(first_ext.c_str());
+        return first_ext_ret;
+    }
     else
         return g_strdup("");
 }
@@ -1004,7 +1004,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     char* str = nullptr;
     char* final_command = nullptr;
     char* s1 = nullptr;
-    char* extension = nullptr;
     int i;
     int n;
     int res;
@@ -1245,6 +1244,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         std::string extract_target;         // %g or %G
         char* mkparent = g_strdup("");
         perm = g_strdup("");
+        std::string extension;
 
         if (list_contents)
         {
@@ -1274,24 +1274,22 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
             /* Looping for all extensions registered with the current
              * archive handler (nullptr-terminated list) */
             char** pathnames = handler_xset->x ? g_strsplit(handler_xset->x, " ", -1) : nullptr;
-            char* filename_no_ext;
+            std::string filename_no_ext;
             if (pathnames)
             {
                 for (i = 0; pathnames[i]; ++i)
                 {
                     // getting just the extension of the pathname list element
-                    filename_no_ext = get_name_extension(pathnames[i], false, &extension);
-                    if (extension)
+                    filename_no_ext = get_name_extension(pathnames[i], extension);
+                    if (!extension.empty())
                     {
                         // add a dot to extension
-                        str = extension;
-                        extension = g_strconcat(".", extension, nullptr);
-                        g_free(str);
+                        extension = g_strconcat(".", extension.c_str(), nullptr);
                         // Checking if the current extension is being used
-                        if (g_str_has_suffix(filename, extension))
+                        if (g_str_has_suffix(filename, extension.c_str()))
                         {
                             // It is - determining filename without extension
-                            n = strlen(filename) - strlen(extension);
+                            n = strlen(filename) - strlen(extension.c_str());
                             char ch = filename[n];
                             filename[n] = '\0';
                             filename_no_archive_ext = g_strdup(filename);
@@ -1299,8 +1297,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                             break;
                         }
                     }
-                    g_free(filename_no_ext);
-                    g_free(extension);
                 }
             }
             g_strfreev(pathnames);
@@ -1313,18 +1309,14 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
 
             /* Now the extraction filename is obtained, determine the
              * normal filename without the extension */
-            filename_no_ext = get_name_extension(filename_no_archive_ext, false, &extension);
+            filename_no_ext = get_name_extension(filename_no_archive_ext, extension);
 
             /* 'Completing' the extension and dealing with files with
              * no extension */
-            if (!extension)
-                extension = g_strdup("");
+            if (extension.empty())
+                extension = "";
             else
-            {
-                str = extension;
-                extension = g_strconcat(".", extension, nullptr);
-                g_free(str);
-            }
+                extension = g_strconcat(".", extension.c_str(), nullptr);
 
             /* Get extraction command - Doing this here as parent
              * directory creation needs access to the command. */
@@ -1423,8 +1415,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
             // Cleaning up
             g_free(filename);
             g_free(filename_no_archive_ext);
-            g_free(filename_no_ext);
-            g_free(extension);
             g_free(parent_path);
         }
 

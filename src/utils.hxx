@@ -8,8 +8,6 @@
 
 #include <string>
 
-#include <glib.h>
-
 void print_command(const std::string& command);
 void print_task_command(const char* ptask, const char* cmd);
 void print_task_command_spawn(char* argv[], int pid);
@@ -19,7 +17,7 @@ bool have_rw_access(const char* path);
 bool have_x_access(const char* path);
 bool dir_has_files(const char* path);
 std::string replace_line_subs(const std::string& line);
-char* get_name_extension(const char* full_name, bool is_dir, char** ext);
+std::string get_name_extension(const std::string& full_name, std::string& ext);
 const std::string get_prog_executable();
 void open_in_prog(const char* path);
 

@@ -116,49 +116,30 @@ dir_has_files(const char* path)
     return false;
 }
 
-char*
-get_name_extension(const char* full_name, bool is_dir, char** ext)
+std::string
+get_name_extension(const std::string& full_name, std::string& ext)
 {
-    char* str;
-    char* full = g_strdup(full_name);
-    // get last dot
-    char* dot;
-    if (is_dir || !(dot = strrchr(full, '.')) || dot == full)
+    if (std::filesystem::is_directory(full_name))
+        return full_name;
+
+    std::filesystem::path name = std::filesystem::path(full_name);
+    // std::string filename = name.filename();
+    std::string basename = name.stem();
+    std::string parent = name.parent_path();
+    ext = name.extension();
+
+    if (ext.empty())
+        return full_name;
+
+    if (ztd::contains(full_name, ".tar" + ext))
     {
-        // dir or no dots or one dot first
-        *ext = nullptr;
-        return full;
+        ext = ".tar" + ext;
+        basename = name.stem().stem();
     }
-    dot[0] = '\0';
-    char* final_ext = dot + 1;
-    // get previous dot
-    dot = strrchr(full, '.');
-    unsigned int final_ext_len = strlen(final_ext);
-    if (dot && !strcmp(dot + 1, "tar") && final_ext_len < 11 && final_ext_len)
-    {
-        // double extension
-        final_ext[-1] = '.';
-        *ext = g_strdup(dot + 1);
-        dot[0] = '\0';
-        str = g_strdup(full);
-        g_free(full);
-        return str;
-    }
-    // single extension, one or more dots
-    if (final_ext_len < 11 && final_ext[0])
-    {
-        *ext = g_strdup(final_ext);
-        str = g_strdup(full);
-        g_free(full);
-        return str;
-    }
-    else
-    {
-        // extension too long, probably part of name
-        final_ext[-1] = '.';
-        *ext = nullptr;
-        return full;
-    }
+    // remove '.'
+    ext.erase(0, 1);
+
+    return g_build_filename(parent.c_str(), basename.c_str(), nullptr);
 }
 
 const std::string
