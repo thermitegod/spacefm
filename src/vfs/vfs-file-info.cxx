@@ -176,9 +176,8 @@ vfs_file_info_get_disp_size(VFSFileInfo* fi)
 {
     if (fi->disp_size.empty())
     {
-        char buf[64];
-        vfs_file_size_to_string_format(buf, fi->size, true);
-        fi->disp_size = buf;
+        std::string size_str = vfs_file_size_to_string_format(fi->size, true);
+        fi->disp_size = size_str;
     }
     return fi->disp_size.c_str();
 }
@@ -451,77 +450,6 @@ vfs_file_info_get_disp_perm(VFSFileInfo* fi)
         get_file_perm_string(fi->disp_perm, fi->mode);
 
     return fi->disp_perm.c_str();
-}
-
-void
-vfs_file_size_to_string_format(char* buf, uint64_t size, bool decimal)
-{
-    const char* unit;
-    float val;
-
-    if (size > ((uint64_t)1) << 40)
-    {
-        if (app_settings.use_si_prefix)
-        {
-            unit = "TB";
-            val = ((float)size) / ((float)1000000000000);
-        }
-        else
-        {
-            unit = "TiB";
-            val = ((float)size) / ((uint64_t)1 << 40);
-        }
-    }
-    else if (size > ((uint64_t)1) << 30)
-    {
-        if (app_settings.use_si_prefix)
-        {
-            unit = "GB";
-            val = ((float)size) / ((float)1000000000);
-        }
-        else
-        {
-            unit = "GiB";
-            val = ((float)size) / ((uint64_t)1 << 30);
-        }
-    }
-    else if (size > ((uint64_t)1 << 20))
-    {
-        if (app_settings.use_si_prefix)
-        {
-            unit = "MB";
-            val = ((float)size) / ((float)1000000);
-        }
-        else
-        {
-            unit = "MiB";
-            val = ((float)size) / ((uint64_t)1 << 20);
-        }
-    }
-    else if (size > ((uint64_t)1 << 10))
-    {
-        if (app_settings.use_si_prefix)
-        {
-            unit = "KB";
-            val = ((float)size) / ((float)1000);
-        }
-        else
-        {
-            unit = "KiB";
-            val = ((float)size) / ((uint64_t)1 << 10);
-        }
-    }
-    else
-    {
-        unit = "B";
-        g_snprintf(buf, 64, "%u %s", (unsigned int)size, unit);
-        return;
-    }
-
-    if (decimal)
-        g_snprintf(buf, 64, "%.1f %s", val, unit);
-    else
-        g_snprintf(buf, 64, "%.0f %s", val, unit);
 }
 
 bool

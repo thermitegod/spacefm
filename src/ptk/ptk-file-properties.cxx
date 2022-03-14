@@ -22,6 +22,7 @@
 #include "ptk/ptk-utils.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
+#include "vfs/vfs-utils.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
 #include "utils.hxx"
@@ -147,16 +148,15 @@ calc_size(void* user_data)
 static bool
 on_update_labels(FilePropertiesDialogData* data)
 {
-    char buf[64];
-    char buf2[64];
+    std::string size_str;
 
-    vfs_file_size_to_string_format(buf2, data->total_size, true);
-    g_snprintf(buf, sizeof(buf), "%s ( %lu bytes )", buf2, (uint64_t)data->total_size);
-    gtk_label_set_text(data->total_size_label, buf);
+    size_str = vfs_file_size_to_string_format(data->total_size, true);
+    size_str = fmt::format("{} ( {} bytes )", size_str, (uint64_t)data->total_size);
+    gtk_label_set_text(data->total_size_label, size_str.c_str());
 
-    vfs_file_size_to_string_format(buf2, data->size_on_disk, true);
-    g_snprintf(buf, sizeof(buf), "%s ( %lu bytes )", buf2, (uint64_t)data->size_on_disk);
-    gtk_label_set_text(data->size_on_disk_label, buf);
+    size_str = vfs_file_size_to_string_format(data->size_on_disk, true);
+    size_str = fmt::format("{} ( {} bytes )", size_str, (uint64_t)data->size_on_disk);
+    gtk_label_set_text(data->size_on_disk_label, size_str.c_str());
 
     char* count;
     char* count_dir;
@@ -543,11 +543,13 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
                        (uint64_t)vfs_file_info_get_size(file));
             gtk_label_set_text(data->total_size_label, buf);
 
-            vfs_file_size_to_string_format(buf2, vfs_file_info_get_blocks(file) * 512, true);
+            std::string size_str =
+                vfs_file_size_to_string_format(vfs_file_info_get_blocks(file) * 512, true);
+
             g_snprintf(buf,
                        sizeof(buf),
                        "%s  ( %lu bytes )",
-                       buf2,
+                       size_str.c_str(),
                        (uint64_t)vfs_file_info_get_blocks(file) * 512);
             gtk_label_set_text(data->size_on_disk_label, buf);
 

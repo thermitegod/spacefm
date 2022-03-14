@@ -21,7 +21,10 @@
 
 #pragma once
 
+#include <string>
+
 #include <gtk/gtk.h>
-#include <glib.h>
 
 GdkPixbuf* vfs_load_icon(GtkIconTheme* theme, const char* icon_name, int size);
+
+std::string vfs_file_size_to_string_format(uint64_t size, bool decimal);

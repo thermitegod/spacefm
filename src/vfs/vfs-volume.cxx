@@ -33,6 +33,7 @@
 
 #include "utils.hxx"
 
+#include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-user-dir.hxx"
 
 #include "vfs/vfs-volume.hxx"
@@ -1962,7 +1963,6 @@ vfs_volume_set_info(VFSVolume* volume)
     char* disp_fstype;
     char* disp_devnum;
     char* disp_id = nullptr;
-    char size_str[64];
 
     if (!volume)
         return;
@@ -2066,6 +2066,8 @@ vfs_volume_set_info(VFSVolume* volume)
             break;
     }
 
+    std::string size_str;
+
     // set display name
     if (volume->is_mounted)
     {
@@ -2076,8 +2078,8 @@ vfs_volume_set_info(VFSVolume* volume)
 
         if (volume->size > 0)
         {
-            vfs_file_size_to_string_format(size_str, volume->size, false);
-            disp_size = g_strdup_printf("%s", size_str);
+            size_str = vfs_file_size_to_string_format(volume->size, false);
+            disp_size = g_strdup_printf("%s", size_str.c_str());
         }
         else
             disp_size = g_strdup("");
@@ -2098,8 +2100,8 @@ vfs_volume_set_info(VFSVolume* volume)
             disp_label = "";
         if (volume->size > 0)
         {
-            vfs_file_size_to_string_format(size_str, volume->size, false);
-            disp_size = g_strdup_printf("%s", size_str);
+            size_str = vfs_file_size_to_string_format(volume->size, false);
+            disp_size = g_strdup_printf("%s", size_str.c_str());
         }
         else
             disp_size = g_strdup("");

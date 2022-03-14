@@ -1928,7 +1928,6 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     }
 
     // no handler command - show default properties
-    char size_str[64];
     char* df;
     char* udisks;
     char* lsof;
@@ -2129,11 +2128,11 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     {
         path = g_find_program_in_path("df");
         if (!path)
-            df = g_strdup_printf("echo %s ; echo \"( please install df )\" ; echo ; ", "USAGE");
+            df = g_strdup("echo USAGE ; echo \"( please install df )\" ; echo ; ");
         else
         {
             std::string esc_path = bash_quote(vol->mount_point);
-            df = g_strdup_printf("echo %s ; %s -hT %s ; echo ; ", "USAGE", path, esc_path.c_str());
+            df = g_strdup_printf("echo USAGE ; %s -hT %s ; echo ; ", path, esc_path.c_str());
             g_free(path);
         }
     }
@@ -2141,16 +2140,15 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     {
         if (vol->is_mountable)
         {
-            vfs_file_size_to_string_format(size_str, vol->size, true);
-            df = g_strdup_printf("echo %s ; echo \"%s      %s  %s  ( not mounted )\" ; echo ; ",
-                                 "USAGE",
+            std::string size_str;
+            size_str = vfs_file_size_to_string_format(vol->size, true);
+            df = g_strdup_printf("echo USAGE ; echo \"%s      %s  %s  ( not mounted )\" ; echo ; ",
                                  vol->device_file,
                                  vol->fs_type ? vol->fs_type : "",
-                                 size_str);
+                                 size_str.c_str());
         }
         else
-            df = g_strdup_printf("echo %s ; echo \"%s      ( no media )\" ; echo ; ",
-                                 "USAGE",
+            df = g_strdup_printf("echo USAGE ; echo \"%s      ( no media )\" ; echo ; ",
                                  vol->device_file);
     }
 

@@ -18,6 +18,8 @@
 #include "main-window.hxx"
 #include "utils.hxx"
 
+#include "vfs/vfs-utils.hxx"
+
 #include "ptk/ptk-file-task.hxx"
 
 static bool on_vfs_file_task_state_cb(VFSFileTask* task, VFSFileTaskState state, void* state_data,
@@ -1443,23 +1445,25 @@ ptk_file_task_update(PtkFileTask* ptask)
 
     if (task->type != VFS_FILE_TASK_EXEC)
     {
-        char* file_count;
-        char* size_tally;
-        char* speed1;
-        char* speed2;
-        char* remain1;
-        char* remain2;
-        char buf1[64];
-        char buf2[64];
+        std::string file_count;
+        std::string size_tally;
+        std::string speed1;
+        std::string speed2;
+        std::string remain1;
+        std::string remain2;
+
+        std::string size_str;
+        std::string size_str2;
+
         // count
-        file_count = g_strdup_printf("%d", task->current_item);
+        file_count = std::to_string(task->current_item);
         // size
-        vfs_file_size_to_string_format(buf1, task->progress, true);
+        size_str = vfs_file_size_to_string_format(task->progress, true);
         if (task->total_size)
-            vfs_file_size_to_string_format(buf2, task->total_size, true);
+            size_str2 = vfs_file_size_to_string_format(task->total_size, true);
         else
-            g_snprintf(buf2, sizeof(buf2), "??"); // total_size calculation timed out
-        size_tally = g_strdup_printf("%s / %s", buf1, buf2);
+            size_str2 = "??"; // total_size calculation timed out
+        size_tally = fmt::format("{} / {}", size_str, size_str2);
         // cur speed display
         if (task->last_speed != 0)
             // use speed of last 2 sec interval if available
@@ -1467,16 +1471,16 @@ ptk_file_task_update(PtkFileTask* ptask)
         if (cur_speed == 0 || task->state_pause != VFS_FILE_TASK_RUNNING)
         {
             if (task->state_pause == VFS_FILE_TASK_PAUSE)
-                speed1 = g_strdup_printf("paused");
+                speed1 = "paused";
             else if (task->state_pause == VFS_FILE_TASK_QUEUE)
-                speed1 = g_strdup_printf("queued");
+                speed1 = "queued";
             else
-                speed1 = g_strdup_printf("stalled");
+                speed1 = "stalled";
         }
         else
         {
-            vfs_file_size_to_string_format(buf1, cur_speed, true);
-            speed1 = g_strdup_printf("%s/s", buf1);
+            size_str = vfs_file_size_to_string_format(cur_speed, true);
+            speed1 = fmt::format("{}/s", size_str);
         }
         // avg speed
         std::time_t avg_speed;
@@ -1484,8 +1488,9 @@ ptk_file_task_update(PtkFileTask* ptask)
             avg_speed = task->progress / timer_elapsed;
         else
             avg_speed = 0;
-        vfs_file_size_to_string_format(buf2, avg_speed, true);
-        speed2 = g_strdup_printf("%s/s", buf2);
+        size_str2 = vfs_file_size_to_string_format(avg_speed, true);
+        speed2 = fmt::format("{}/s", size_str2);
+
         // remain cur
         off_t remain;
         if (cur_speed > 0 && task->total_size != 0)
@@ -1493,53 +1498,53 @@ ptk_file_task_update(PtkFileTask* ptask)
         else
             remain = 0;
         if (remain <= 0)
-            remain1 = g_strdup(""); // n/a
+            remain1 = ""; // n/a
         else if (remain > 3599)
         {
             hours = remain / 3600;
             if (remain - (hours * 3600) > 1799)
                 hours++;
-            remain1 = g_strdup_printf("%dh", hours);
+            remain1 = fmt::format("{}/h", hours);
         }
         else if (remain > 59)
-            remain1 = g_strdup_printf("%lu:%02lu",
-                                      remain / 60,
-                                      remain - ((unsigned int)(remain / 60) * 60));
+            remain1 =
+                fmt::format("{}:{:02}", remain / 60, remain - ((unsigned int)(remain / 60) * 60));
         else
-            remain1 = g_strdup_printf(":%02lu", remain);
+            remain1 = fmt::format(":{:02}", remain);
+
         // remain avg
         if (avg_speed > 0 && task->total_size != 0)
             remain = (task->total_size - task->progress) / avg_speed;
         else
             remain = 0;
         if (remain <= 0)
-            remain2 = g_strdup(""); // n/a
+            remain2 = ""; // n/a
         else if (remain > 3599)
         {
             hours = remain / 3600;
             if (remain - (hours * 3600) > 1799)
                 hours++;
-            remain2 = g_strdup_printf("%dh", hours);
+            remain2 = fmt::format("{}/h", hours);
         }
         else if (remain > 59)
-            remain2 = g_strdup_printf("%lu:%02lu",
-                                      remain / 60,
-                                      remain - ((unsigned int)(remain / 60) * 60));
+            remain2 =
+                fmt::format("{}:{:02}", remain / 60, remain - ((unsigned int)(remain / 60) * 60));
         else
-            remain2 = g_strdup_printf(":%02lu", remain);
+            remain2 = fmt::format(":{:02}", remain);
 
         g_free(ptask->dsp_file_count);
-        ptask->dsp_file_count = file_count;
+        ptask->dsp_file_count = g_strdup(file_count.c_str());
         g_free(ptask->dsp_size_tally);
-        ptask->dsp_size_tally = size_tally;
+        ptask->dsp_size_tally = g_strdup(size_tally.c_str());
         g_free(ptask->dsp_curspeed);
-        ptask->dsp_curspeed = speed1;
-        g_free(ptask->dsp_curest);
-        ptask->dsp_curest = remain1;
+        ptask->dsp_curspeed = g_strdup(speed1.c_str());
         g_free(ptask->dsp_avgspeed);
-        ptask->dsp_avgspeed = speed2;
+        ptask->dsp_avgspeed = g_strdup(speed2.c_str());
+        g_free(ptask->dsp_curest);
+        ptask->dsp_curest = g_strdup(remain1.c_str());
         g_free(ptask->dsp_avgest);
-        ptask->dsp_avgest = remain2;
+        ptask->dsp_avgest = g_strdup(remain2.c_str());
+        ;
     }
 
     // move log lines from add_log_buf to log_buf
@@ -1966,6 +1971,9 @@ query_overwrite(PtkFileTask* ptask)
             const char* src_link;
             const char* dest_link;
             const char* link_warn;
+
+            std::string size_str;
+
             if (S_ISLNK(src_stat.st_mode))
                 src_link = "\t<b>( link )</b>";
             else
@@ -1985,8 +1993,8 @@ query_overwrite(PtkFileTask* ptask)
             }
             else
             {
-                vfs_file_size_to_string_format(buf, src_stat.st_size, true);
-                src_size = g_strdup_printf("%s\t( %lu bytes )", buf, src_stat.st_size);
+                size_str = vfs_file_size_to_string_format(src_stat.st_size, true);
+                src_size = g_strdup_printf("%s\t( %lu bytes )", size_str.c_str(), src_stat.st_size);
                 if (src_stat.st_size > dest_stat.st_size)
                     src_rel_size = "larger";
                 else
@@ -2009,8 +2017,8 @@ query_overwrite(PtkFileTask* ptask)
                 else
                     src_rel_time = "older";
             }
-            vfs_file_size_to_string_format(buf, dest_stat.st_size, true);
-            dest_size = g_strdup_printf("%s\t( %lu bytes )", buf, dest_stat.st_size);
+            size_str = vfs_file_size_to_string_format(dest_stat.st_size, true);
+            dest_size = g_strdup_printf("%s\t( %lu bytes )", size_str.c_str(), dest_stat.st_size);
             strftime(buf,
                      sizeof(buf),
                      app_settings.date_format.c_str(),

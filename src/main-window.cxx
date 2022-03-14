@@ -3012,21 +3012,21 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
     if (!cwd)
         return;
 
-    char size_str[64];
-    std::string statusbar_txt = "";
+    std::string size_str;
+    std::string statusbar_txt;
 
     if (std::filesystem::exists(cwd))
     {
-        char total_size_str[64];
+        std::string total_size_str;
 
         // FIXME: statvfs support should be moved to src/vfs
         struct statvfs fs_stat;
         statvfs(cwd, &fs_stat);
 
         // calc free space
-        vfs_file_size_to_string_format(size_str, fs_stat.f_bsize * fs_stat.f_bavail, true);
+        size_str = vfs_file_size_to_string_format(fs_stat.f_bsize * fs_stat.f_bavail, true);
         // calc total space
-        vfs_file_size_to_string_format(total_size_str, fs_stat.f_frsize * fs_stat.f_blocks, true);
+        total_size_str = vfs_file_size_to_string_format(fs_stat.f_frsize * fs_stat.f_blocks, true);
 
         statusbar_txt.append(fmt::format(" {} / {}   ", size_str, total_size_str));
     }
@@ -3055,7 +3055,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
 
         VFSFileInfo* file;
 
-        vfs_file_size_to_string_format(size_str, total_size, true);
+        size_str = vfs_file_size_to_string_format(total_size, true);
 
         statusbar_txt.append(fmt::format("{} / {} ({})", num_sel, num_vis, size_str));
 
@@ -3102,8 +3102,8 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
                         struct stat results;
                         if (stat(target_path.c_str(), &results) == 0)
                         {
-                            char lsize[64];
-                            vfs_file_size_to_string_format(lsize, results.st_size, true);
+                            std::string lsize =
+                                vfs_file_size_to_string_format(results.st_size, true);
                             statusbar_txt.append(fmt::format("  Link -> {} ({})", target, lsize));
                         }
                         else
