@@ -37,7 +37,7 @@ typedef void (*VFSVolumeCallback)(VFSVolume* vol, VFSVolumeState state, void* us
 
 bool vfs_volume_init();
 
-bool vfs_volume_finalize();
+void vfs_volume_finalize();
 
 const GList* vfs_volume_get_all_volumes();
 

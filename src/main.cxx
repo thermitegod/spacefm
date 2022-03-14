@@ -71,11 +71,11 @@ init_folder()
     folder_initialized = true;
 }
 
-static void
+[[noreturn]] static void
 exit_from_signal(int sig)
 {
-    (void)sig;
     gtk_main_quit();
+    std::exit(sig);
 }
 
 static void
@@ -328,14 +328,14 @@ main(int argc, char* argv[])
             if (argv[2] && (!strcmp(argv[2], "help") || !strcmp(argv[2], "--help")))
             {
                 fmt::print("For help run, man spacefm-socket\n");
-                return EXIT_SUCCESS;
+                std::exit(EXIT_SUCCESS);
             }
             char* reply = nullptr;
             int ret = send_socket_command(argc, argv, &reply);
             if (reply && reply[0])
                 fmt::print("{}", reply);
             g_free(reply);
-            return ret;
+            std::exit(ret);
         }
     }
 
@@ -345,7 +345,7 @@ main(int argc, char* argv[])
     {
         LOG_INFO("{}", err->message);
         g_error_free(err);
-        return EXIT_FAILURE;
+        std::exit(EXIT_FAILURE);
     }
 
     // ref counter needs to know if in daemon_mode
@@ -355,7 +355,7 @@ main(int argc, char* argv[])
     if (cli_flags.socket_cmd)
     {
         LOG_ERROR("socket-cmd must be first option");
-        return EXIT_FAILURE;
+        std::exit(EXIT_FAILURE);
     }
 
     // --disable-git
@@ -365,7 +365,7 @@ main(int argc, char* argv[])
     if (cli_flags.version_opt)
     {
         fmt::print("{} {}\n", PACKAGE_NAME_FANCY, PACKAGE_VERSION);
-        return EXIT_SUCCESS;
+        std::exit(EXIT_SUCCESS);
     }
 
     // ensure that there is only one instance of spacefm.
@@ -384,8 +384,7 @@ main(int argc, char* argv[])
                        "Error: Unable to initialize inotify file change monitor.\n\nDo you have "
                        "an inotify-capable kernel?");
         vfs_file_monitor_clean();
-        // free_settings();
-        return EXIT_FAILURE;
+        std::exit(EXIT_FAILURE);
     }
 
     // Seed RNG
@@ -404,6 +403,13 @@ main(int argc, char* argv[])
     autosave_init();
 
     std::atexit(ztd::Logger->shutdown);
+    std::atexit(free_settings);
+    std::atexit(tmp_clean);
+    std::atexit(autosave_terminate);
+    std::atexit(vfs_file_monitor_clean);
+    std::atexit(vfs_mime_type_clean);
+    std::atexit(vfs_volume_finalize);
+    std::atexit(single_instance_finalize);
 
     main_window_event(nullptr, nullptr, "evt_start", 0, 0, nullptr, 0, 0, 0, false);
 
@@ -418,15 +424,7 @@ main(int argc, char* argv[])
 
     main_window_event(nullptr, nullptr, "evt_exit", 0, 0, nullptr, 0, 0, 0, false);
 
-    single_instance_finalize();
-    vfs_volume_finalize();
-    vfs_mime_type_clean();
-    vfs_file_monitor_clean();
-    autosave_terminate();
-    tmp_clean();
-    free_settings();
-
-    return EXIT_SUCCESS;
+    std::exit(EXIT_SUCCESS);
 }
 
 static void

@@ -223,7 +223,7 @@ static void
 single_instance_check_fatal(int ret)
 {
     gdk_notify_startup_complete();
-    exit(ret);
+    std::exit(ret);
 }
 
 bool

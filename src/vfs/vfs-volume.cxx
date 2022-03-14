@@ -3851,7 +3851,7 @@ finish_:
     return true;
 }
 
-bool
+void
 vfs_volume_finalize()
 {
     // stop mount monitor
@@ -3900,8 +3900,6 @@ vfs_volume_finalize()
 
     // remove unused mount points
     ptk_location_view_clean_mount_points();
-
-    return true;
 }
 
 const GList*
