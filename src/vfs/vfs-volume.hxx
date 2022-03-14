@@ -92,21 +92,23 @@ struct VFSVolume
     uint64_t size;
     char* label;
     char* fs_type;
-    bool should_autounmount : 1; // a network or ISO file was mounted
-    bool is_mounted : 1;
-    bool is_removable : 1;
-    bool is_mountable : 1;
-    bool is_audiocd : 1;
-    bool is_dvd : 1;
-    bool is_blank : 1;
-    bool requires_eject : 1;
-    bool is_user_visible : 1;
-    bool nopolicy : 1;
-    bool is_optical : 1;
-    bool is_floppy : 1;
-    bool is_table : 1;
-    bool ever_mounted : 1;
-    bool inhibit_auto : 1;
+
+    bool should_autounmount{false}; // a network or ISO file was mounted
+    bool is_mounted{false};
+    bool is_removable{false};
+    bool is_mountable{false};
+    bool is_audiocd{false};
+    bool is_dvd{false};
+    bool is_blank{false};
+    bool requires_eject{false};
+    bool is_user_visible{false};
+    bool nopolicy{false};
+    bool is_optical{false};
+    bool is_floppy{false};
+    bool is_table{false};
+    bool ever_mounted{false};
+    bool inhibit_auto{false};
+
     std::time_t automount_time;
     void* open_main_window;
 };
