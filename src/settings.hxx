@@ -395,12 +395,12 @@ int xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string&
                     GtkButtonsType buttons, const std::string& msg1, const std::string& msg2);
 int xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string& title,
                     GtkButtonsType buttons, const std::string& msg1);
+bool xset_text_dialog(GtkWidget* parent, const std::string& title, const std::string& msg1,
+                      const std::string& msg2, const char* defstring, char** answer,
+                      const std::string& defreset, bool edit_care);
 
 void xset_menu_cb(GtkWidget* item, XSet* set);
 bool xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data);
-bool xset_text_dialog(GtkWidget* parent, const char* title, bool large, const char* msg1,
-                      const char* msg2, const char* defstring, char** answer, const char* defreset,
-                      bool edit_care);
 char* xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* title,
                        const char* deffolder, const char* deffile);
 void xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root);

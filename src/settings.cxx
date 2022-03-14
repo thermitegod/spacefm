@@ -3427,12 +3427,11 @@ xset_custom_activate(GtkWidget* item, XSet* set)
         {
             if (!xset_text_dialog(parent,
                                   "Change Item Name",
-                                  false,
                                   enter_menu_name_new,
-                                  nullptr,
+                                  "",
                                   set->menu_label,
                                   &set->menu_label,
-                                  nullptr,
+                                  "",
                                   false))
                 return;
         }
@@ -4191,15 +4190,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             // Note: xset_text_dialog uses the title passed to know this is an
             // icon chooser, so it adds a Choose button.  If you change the title,
             // change xset_text_dialog.
-            xset_text_dialog(parent,
-                             "Set Icon",
-                             false,
-                             icon_desc,
-                             nullptr,
-                             mset->icon,
-                             &mset->icon,
-                             nullptr,
-                             false);
+            xset_text_dialog(parent, "Set Icon", icon_desc, "", mset->icon, &mset->icon, "", false);
             if (set->lock && set->keep_terminal == XSET_B_UNSET && g_strcmp0(old_icon, mset->icon))
             {
                 // built-in icon has been changed from default, save it
@@ -4256,12 +4247,11 @@ xset_design_job(GtkWidget* item, XSet* set)
         case XSET_JOB_LINE:
             if (xset_text_dialog(parent,
                                  "Edit Command Line",
-                                 true,
                                  enter_command_line,
-                                 nullptr,
+                                 "",
                                  set->line,
                                  &set->line,
-                                 nullptr,
+                                 "",
                                  false))
                 xset_set_set(set, XSET_SET_SET_X, "0");
             break;
@@ -4302,12 +4292,11 @@ xset_design_job(GtkWidget* item, XSet* set)
                 xset_text_dialog(
                     parent,
                     "Run As User",
-                    false,
                     "Run this command as username:\n\n( Leave blank for current user )",
-                    nullptr,
+                    "",
                     set->y,
                     &set->y,
-                    nullptr,
+                    "",
                     false);
             break;
         case XSET_JOB_BOOKMARK:
@@ -4337,12 +4326,11 @@ xset_design_job(GtkWidget* item, XSet* set)
                     name = g_strdup("New _Command");
                     if (!xset_text_dialog(parent,
                                           "Set Item Name",
-                                          false,
                                           enter_menu_name_new,
-                                          nullptr,
+                                          "",
                                           name,
                                           &name,
-                                          nullptr,
+                                          "",
                                           false))
                     {
                         g_free(name);
@@ -4450,13 +4438,12 @@ xset_design_job(GtkWidget* item, XSet* set)
             if (!xset_text_dialog(
                     parent,
                     "Set Submenu Name",
-                    false,
                     "Enter submenu name:\n\nPrecede a character with an underscore (_) "
                     "to underline that character as a shortcut key if desired.",
-                    nullptr,
+                    "",
                     "New _Submenu",
                     &name,
-                    nullptr,
+                    "",
                     false) ||
                 !name)
                 break;
@@ -4753,39 +4740,36 @@ xset_design_job(GtkWidget* item, XSet* set)
                 set->desc = g_strdup("Are you sure?");
             if (xset_text_dialog(parent,
                                  "Dialog Message",
-                                 true,
                                  "Enter the message to be displayed in this "
                                  "dialog:\n\nUse:\n\t\\n\tnewline\n\t\\t\ttab",
-                                 nullptr,
+                                 "",
                                  set->desc,
                                  &set->desc,
-                                 nullptr,
+                                 "",
                                  false))
                 set->menu_style = XSET_MENU_CONFIRM;
             break;
         case XSET_JOB_DIALOG:
             if (xset_text_dialog(parent,
                                  "Dialog Message",
-                                 true,
                                  "Enter the message to be displayed in this "
                                  "dialog:\n\nUse:\n\t\\n\tnewline\n\t\\t\ttab",
-                                 nullptr,
+                                 "",
                                  set->desc,
                                  &set->desc,
-                                 nullptr,
+                                 "",
                                  false))
                 set->menu_style = XSET_MENU_STRING;
             break;
         case XSET_JOB_MESSAGE:
             xset_text_dialog(parent,
                              "Dialog Message",
-                             true,
                              "Enter the message to be displayed in this "
                              "dialog:\n\nUse:\n\t\\n\tnewline\n\t\\t\ttab",
-                             nullptr,
+                             "",
                              set->desc,
                              &set->desc,
-                             nullptr,
+                             "",
                              false);
             break;
         case XSET_JOB_PROP:
@@ -5807,10 +5791,9 @@ xset_menu_cb(GtkWidget* item, XSet* set)
                     }
                 }
                 else if (xset_text_dialog(parent,
-                                          title.c_str(),
-                                          true,
-                                          msg.c_str(),
-                                          nullptr,
+                                          title,
+                                          msg,
+                                          "",
                                           mset->s,
                                           &mset->s,
                                           default_str,
@@ -5852,12 +5835,11 @@ xset_menu_cb(GtkWidget* item, XSet* set)
                 // change xset_text_dialog.
                 if (xset_text_dialog(parent,
                                      rset->title ? rset->title : "Set Icon",
-                                     false,
                                      rset->desc ? rset->desc : icon_desc,
-                                     nullptr,
+                                     "",
                                      rset->icon,
                                      &rset->icon,
-                                     nullptr,
+                                     "",
                                      false))
                 {
                     if (rset->lock)
@@ -6156,9 +6138,9 @@ xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
 }
 
 bool
-xset_text_dialog(GtkWidget* parent, const char* title, bool large, const char* msg1,
-                 const char* msg2, const char* defstring, char** answer, const char* defreset,
-                 bool edit_care)
+xset_text_dialog(GtkWidget* parent, const std::string& title, const std::string& msg1,
+                 const std::string& msg2, const char* defstring, char** answer,
+                 const std::string& defreset, bool edit_care)
 {
     GtkTextIter iter;
     GtkTextIter siter;
@@ -6169,40 +6151,28 @@ xset_text_dialog(GtkWidget* parent, const char* title, bool large, const char* m
 
     if (parent)
         dlgparent = gtk_widget_get_toplevel(parent);
-    GtkWidget* dlg = gtk_message_dialog_new(dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
+
+    GtkWidget* dlg = gtk_message_dialog_new(GTK_WINDOW(dlgparent),
                                             GTK_DIALOG_MODAL,
                                             GTK_MESSAGE_QUESTION,
                                             GTK_BUTTONS_NONE,
-                                            msg1,
+                                            msg1.c_str(),
                                             nullptr);
     xset_set_window_icon(GTK_WINDOW(dlg));
     gtk_window_set_role(GTK_WINDOW(dlg), "text_dialog");
 
-    if (large)
-    {
-        width = xset_get_int("text_dlg", "s");
-        height = xset_get_int("text_dlg", "z");
-        if (width && height)
-            gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
-        else
-            gtk_window_set_default_size(GTK_WINDOW(dlg), 600, 400);
-        // gtk_widget_set_size_request( GTK_WIDGET( dlg ), 600, 400 );
-    }
+    width = xset_get_int("text_dlg", "s");
+    height = xset_get_int("text_dlg", "z");
+    if (width && height)
+        gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
     else
-    {
-        width = xset_get_int("text_dlg", "x");
-        height = xset_get_int("text_dlg", "y");
-        if (width && height)
-            gtk_window_set_default_size(GTK_WINDOW(dlg), width, -1);
-        else
-            gtk_window_set_default_size(GTK_WINDOW(dlg), 500, -1);
-        // gtk_widget_set_size_request( GTK_WIDGET( dlg ), 500, 300 );
-    }
+        gtk_window_set_default_size(GTK_WINDOW(dlg), 600, 400);
+    // gtk_widget_set_size_request( GTK_WIDGET( dlg ), 600, 400 );
 
     gtk_window_set_resizable(GTK_WINDOW(dlg), true);
 
-    if (msg2)
-        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dlg), msg2, nullptr);
+    if (!msg2.empty())
+        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dlg), msg2.c_str(), nullptr);
 
     // input view
     GtkScrolledWindow* scroll_input =
@@ -6234,14 +6204,14 @@ xset_text_dialog(GtkWidget* parent, const char* title, bool large, const char* m
     /* Special hack to add an icon chooser button when this dialog is called
      * to set icons - see xset_menu_cb() and set init "main_icon"
      * and xset_design_job */
-    if (!g_strcmp0(title, "Set Icon") || !g_strcmp0(title, "Set Window Icon"))
+    if (ztd::same(title, "Set Icon") || ztd::same(title, "Set Window Icon"))
     {
         btn_icon_choose = gtk_button_new_with_mnemonic("C_hoose");
         gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_icon_choose, GTK_RESPONSE_ACCEPT);
         gtk_widget_set_focus_on_click(GTK_WIDGET(btn_icon_choose), false);
     }
 
-    if (defreset)
+    if (!defreset.empty())
     {
         btn_default = gtk_button_new_with_mnemonic("_Default");
         gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_default, GTK_RESPONSE_NO);
@@ -6257,8 +6227,8 @@ xset_text_dialog(GtkWidget* parent, const char* title, bool large, const char* m
     // show
     gtk_widget_show_all(dlg);
 
-    if (title)
-        gtk_window_set_title(GTK_WINDOW(dlg), title);
+    gtk_window_set_title(GTK_WINDOW(dlg), title.c_str());
+
     if (edit_care)
     {
         gtk_widget_grab_focus(btn_ok);
@@ -6337,7 +6307,7 @@ xset_text_dialog(GtkWidget* parent, const char* title, bool large, const char* m
                 break;
             case GTK_RESPONSE_NO:
                 // btn_default clicked
-                gtk_text_buffer_set_text(buf, defreset, -1);
+                gtk_text_buffer_set_text(buf, defreset.c_str(), -1);
                 exit_loop = true;
                 break;
             case GTK_RESPONSE_CANCEL:
@@ -6356,17 +6326,12 @@ xset_text_dialog(GtkWidget* parent, const char* title, bool large, const char* m
     if (width && height)
     {
         std::string str;
+
         str = fmt::format("{}", width);
-        if (large)
-            xset_set("text_dlg", "s", str.c_str());
-        else
-            xset_set("text_dlg", "x", str.c_str());
+        xset_set("text_dlg", "s", str.c_str());
 
         str = fmt::format("{}", height);
-        if (large)
-            xset_set("text_dlg", "z", str.c_str());
-        else
-            xset_set("text_dlg", "y", str.c_str());
+        xset_set("text_dlg", "z", str.c_str());
     }
     gtk_widget_destroy(dlg);
     return ret;

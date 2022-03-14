@@ -1109,12 +1109,12 @@ on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     char* options = vfs_volume_get_mount_options(vol, xset_get_s("dev_mount_options"));
     if (!options)
         options = g_strdup("");
-    char* msg =
-        g_strdup_printf("Enter mount command:\n\nUse:\n\t%%%%v\tdevice file ( %s "
-                        ")\n\t%%%%o\tvolume-specific mount options\n\t\t( %s )\n\nNote: fstab "
-                        "overrides some options\n\nEDIT WITH CARE   This command is run as root",
-                        vol->device_file,
-                        options);
+    std::string msg =
+        fmt::format("Enter mount command:\n\nUse:\n\t%%%%v\tdevice file ( {} )"
+                    "\n\t%%%%o\tvolume-specific mount options\n\t\t( {} )\n\nNote: fstab "
+                    "overrides some options\n\nEDIT WITH CARE   This command is run as root",
+                    vol->device_file,
+                    options);
 
     if (!set->s)
         set->s = g_strdup(set->z);
@@ -1122,7 +1122,6 @@ on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 
     if (xset_text_dialog(view,
                          "Mount As Root",
-                         true,
                          "MOUNT AS ROOT",
                          msg,
                          set->s,
@@ -1156,7 +1155,6 @@ on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         task->task->exec_icon = vfs_volume_get_icon(vol);
         ptk_file_task_run(task);
     }
-    g_free(msg);
     g_free(options);
 }
 
@@ -1170,16 +1168,15 @@ on_umount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
 
     XSet* set = xset_get("dev_root_unmount");
-    char* msg = g_strdup_printf("Enter unmount command:\n\nUse:\n\t%%%%v\tdevice file ( %s "
-                                ")\n\nEDIT WITH CARE   This command is run as root",
-                                vol->device_file);
+    std::string msg = fmt::format("Enter unmount command:\n\nUse:\n\t%%%%v\tdevice file ( {} )"
+                                  "\n\nEDIT WITH CARE   This command is run as root",
+                                  vol->device_file);
     if (!set->s)
         set->s = g_strdup(set->z);
     char* old_set_s = g_strdup(set->s);
 
     if (xset_text_dialog(view,
                          "Unmount As Root",
-                         true,
                          "UNMOUNT AS ROOT",
                          msg,
                          set->s,
@@ -1211,7 +1208,6 @@ on_umount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         task->task->exec_icon = vfs_volume_get_icon(vol);
         ptk_file_task_run(task);
     }
-    g_free(msg);
 }
 
 static void
@@ -1621,15 +1617,7 @@ on_remount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 
     // get user options
     XSet* set = xset_get("dev_remount_options");
-    if (!xset_text_dialog(view,
-                          set->title,
-                          true,
-                          set->desc,
-                          nullptr,
-                          set->s,
-                          &set->s,
-                          set->z,
-                          false))
+    if (!xset_text_dialog(view, set->title, set->desc, "", set->s, &set->s, set->z, false))
         return;
 
     bool mount_in_terminal;
@@ -2245,15 +2233,7 @@ on_showhide(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     }
     else
         msg = g_strdup(set->desc);
-    if (xset_text_dialog(view,
-                         set->title,
-                         true,
-                         msg.c_str(),
-                         nullptr,
-                         set->s,
-                         &set->s,
-                         nullptr,
-                         false))
+    if (xset_text_dialog(view, set->title, msg, "", set->s, &set->s, "", false))
         update_all();
 }
 
@@ -2282,15 +2262,7 @@ on_automountlist(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     }
     else
         msg = g_strdup(set->desc);
-    if (xset_text_dialog(view,
-                         set->title,
-                         true,
-                         msg.c_str(),
-                         nullptr,
-                         set->s,
-                         &set->s,
-                         nullptr,
-                         false))
+    if (xset_text_dialog(view, set->title, msg, "", set->s, &set->s, "", false))
     {
         // update view / automount all?
     }

@@ -2559,14 +2559,13 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
         if (!xset_text_dialog(
                 GTK_WIDGET(file_browser),
                 "Select By Pattern",
-                false,
                 "Enter pattern to select files and directories:\n\nIf your pattern contains any "
                 "uppercase characters, the matching will be case sensitive.\n\nExample:  "
                 "*sp*e?m*\n\nTIP: You can also enter '%% PATTERN' in the path bar.",
-                nullptr,
+                "",
                 set->ob1,
                 &set->ob1,
-                nullptr,
+                "",
                 false) ||
             !set->ob1)
             return;
