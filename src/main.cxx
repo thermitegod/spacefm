@@ -4,9 +4,6 @@
  *
  */
 
-// turn on to debug GDK_THREADS_ENTER/GDK_THREADS_LEAVE related deadlocks
-#undef _DEBUG_THREAD
-
 #include <csignal>
 
 #include <string>
@@ -58,37 +55,6 @@ static GOptionEntry opt_entries[] =
 
 static bool handle_parsed_commandline_args();
 static void open_file(const char* path);
-
-#ifdef _DEBUG_THREAD
-G_LOCK_DEFINE(gdk_lock);
-void
-debug_gdk_threads_enter(const char* message)
-{
-    LOG_DEBUG("Thread {:p} tries to get GDK lock: {}", (void*)g_thread_self(), message);
-    G_LOCK(gdk_lock);
-    LOG_DEBUG("Thread {:p} got GDK lock: {}", (void*)g_thread_self(), message);
-}
-
-static void
-_debug_gdk_threads_enter()
-{
-    debug_gdk_threads_enter("called from GTK+ internal");
-}
-
-void
-debug_gdk_threads_leave(const char* message)
-{
-    LOG_DEBUG("Thread {:p} tries to release GDK lock: {}", (void*)g_thread_self(), message);
-    G_UNLOCK(gdk_lock);
-    LOG_DEBUG("Thread {:p} released GDK lock: {}", (void*)g_thread_self(), message);
-}
-
-static void
-_debug_gdk_threads_leave()
-{
-    debug_gdk_threads_leave("called from GTK+ internal");
-}
-#endif
 
 static void
 init_folder()
@@ -401,12 +367,6 @@ main(int argc, char* argv[])
         fmt::print("{} {}\n", PACKAGE_NAME_FANCY, PACKAGE_VERSION);
         return EXIT_SUCCESS;
     }
-
-#ifdef _DEBUG_THREAD
-    // Initialize multithreading
-    // No matter we use threads or not, it's safer to initialize this earlier.
-    gdk_threads_set_lock_functions(_debug_gdk_threads_enter, _debug_gdk_threads_leave);
-#endif
 
     // ensure that there is only one instance of spacefm.
     // if there is an existing instance, command line arguments
