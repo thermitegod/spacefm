@@ -12,6 +12,8 @@
 #include <string>
 #include <filesystem>
 
+#include <cassert>
+
 #include <fcntl.h>
 
 #include <ztd/ztd.hxx>
@@ -461,7 +463,7 @@ vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file)
     GList* l = vfs_dir_find_file(dir, file->name, file);
     if (l)
     {
-        g_assert(file == static_cast<VFSFileInfo*>(l->data));
+        assert(file == static_cast<VFSFileInfo*>(l->data));
         file = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data));
     }
     else

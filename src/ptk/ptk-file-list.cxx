@@ -12,6 +12,8 @@
 
 #include <ctime>
 
+#include <cassert>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -337,8 +339,8 @@ ptk_file_list_get_column_type(GtkTreeModel* tree_model, int index)
 static gboolean
 ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* path)
 {
-    g_assert(PTK_IS_FILE_LIST(tree_model));
-    g_assert(path != nullptr);
+    assert(PTK_IS_FILE_LIST(tree_model));
+    assert(path != nullptr);
 
     PtkFileList* list = PTK_FILE_LIST(tree_model);
 
@@ -346,7 +348,7 @@ ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
     int depth = gtk_tree_path_get_depth(path);
 
     /* we do not allow children */
-    g_assert(depth == 1); /* depth 1 = top level; a list only has top level nodes and no children */
+    assert(depth == 1); /* depth 1 = top level; a list only has top level nodes and no children */
 
     unsigned int n = indices[0]; /* the n-th top level row */
 
@@ -355,7 +357,7 @@ ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
 
     GList* l = g_list_nth(list->files, n);
 
-    g_assert(l != nullptr);
+    assert(l != nullptr);
 
     /* We simply store a pointer in the iter */
     iter->stamp = list->stamp;
@@ -545,7 +547,7 @@ ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTre
         return false;
 
     GList* l = g_list_nth(list->files, n);
-    g_assert(l != nullptr);
+    assert(l != nullptr);
 
     iter->stamp = list->stamp;
     iter->user_data = l;

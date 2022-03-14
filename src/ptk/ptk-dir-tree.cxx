@@ -11,6 +11,8 @@
 #include <string>
 #include <filesystem>
 
+#include <cassert>
+
 #include <gdk/gdk.h>
 
 #include "settings.hxx"
@@ -256,8 +258,8 @@ get_nth_node(PtkDirTreeNode* parent, int n)
 static gboolean
 ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* path)
 {
-    g_assert(PTK_IS_DIR_TREE(tree_model));
-    g_assert(path != nullptr);
+    assert(PTK_IS_DIR_TREE(tree_model));
+    assert(path != nullptr);
 
     PtkDirTree* tree = PTK_DIR_TREE(tree_model);
     if (!tree || !tree->root)
