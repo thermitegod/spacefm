@@ -2079,7 +2079,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             return 0;
         // special processing for files with inconsistent real name and display name
         if (G_UNLIKELY(vfs_file_info_is_desktop_entry(file)))
-            full_name = g_filename_display_name(file->name);
+            full_name = g_filename_display_name(file->name.c_str());
         if (!full_name)
             full_name = g_strdup(vfs_file_info_get_disp_name(file));
         if (!full_name)

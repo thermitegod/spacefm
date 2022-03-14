@@ -326,10 +326,8 @@ vfs_dir_find_file(VFSDir* dir, const char* file_name, VFSFileInfo* file)
         VFSFileInfo* file2 = static_cast<VFSFileInfo*>(l->data);
         if (G_UNLIKELY(file == file2))
             return l;
-        if (file2->name && !strcmp(file2->name, file_name))
-        {
+        if (ztd::same(file2->name, file_name))
             return l;
-        }
     }
     return nullptr;
 }
@@ -460,7 +458,7 @@ void
 vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file)
 {
     vfs_dir_lock(dir);
-    GList* l = vfs_dir_find_file(dir, file->name, file);
+    GList* l = vfs_dir_find_file(dir, file->name.c_str(), file);
     if (l)
     {
         assert(file == static_cast<VFSFileInfo*>(l->data));
@@ -678,15 +676,15 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
     bool ret = false;
 
     /* FIXME: Dirty hack: steal the string to prevent memory allocation */
-    char* file_name = file->name;
-    if (file->name == file->disp_name)
+    std::string file_name = file->name;
+    if (ztd::same(file->name, file->disp_name))
         file->disp_name = nullptr;
-    file->name = nullptr;
+    file->name.clear();
 
-    char* full_path = g_build_filename(dir->path, file_name, nullptr);
+    char* full_path = g_build_filename(dir->path, file_name.c_str(), nullptr);
     if (G_LIKELY(full_path))
     {
-        if (G_LIKELY(vfs_file_info_get(file, full_path, file_name)))
+        if (G_LIKELY(vfs_file_info_get(file, full_path, file_name.c_str())))
         {
             ret = true;
             vfs_file_info_load_special_info(file, full_path);
@@ -709,7 +707,6 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
         }
         g_free(full_path);
     }
-    g_free(file_name);
     return ret;
 }
 
@@ -845,7 +842,7 @@ reload_icons(const char* path, VFSDir* dir, void* user_data)
         /* It's a desktop entry file */
         if (fi->flags & VFS_FILE_INFO_DESKTOP_ENTRY)
         {
-            char* file_path = g_build_filename(path, fi->name, nullptr);
+            char* file_path = g_build_filename(path, fi->name.c_str(), nullptr);
             if (fi->big_thumbnail)
             {
                 g_object_unref(fi->big_thumbnail);
@@ -988,7 +985,7 @@ vfs_dir_unload_thumbnails(VFSDir* dir, bool is_big)
                  FIXME: This is not a good way to do things, but there is no better way now.  */
             if (file->flags & VFS_FILE_INFO_DESKTOP_ENTRY)
             {
-                file_path = g_build_filename(dir->path, file->name, nullptr);
+                file_path = g_build_filename(dir->path, file->name.c_str(), nullptr);
                 vfs_file_info_load_special_info(file, file_path);
                 g_free(file_path);
             }
@@ -1008,7 +1005,7 @@ vfs_dir_unload_thumbnails(VFSDir* dir, bool is_big)
                  FIXME: This is not a good way to do things, but there is no better way now.  */
             if (file->flags & VFS_FILE_INFO_DESKTOP_ENTRY)
             {
-                file_path = g_build_filename(dir->path, file->name, nullptr);
+                file_path = g_build_filename(dir->path, file->name.c_str(), nullptr);
                 vfs_file_info_load_special_info(file, file_path);
                 g_free(file_path);
             }

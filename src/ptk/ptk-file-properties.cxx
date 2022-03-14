@@ -516,7 +516,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         /* special processing for files with special display names */
         if (vfs_file_info_is_desktop_entry(file))
         {
-            char* disp_name = g_filename_display_name(file->name);
+            char* disp_name = g_filename_display_name(file->name.c_str());
             gtk_entry_set_text(GTK_ENTRY(name), disp_name);
             g_free(disp_name);
         }
@@ -586,7 +586,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         if (vfs_file_info_is_symlink(file))
         {
             gtk_label_set_markup_with_mnemonic(GTK_LABEL(label_name), "<b>Link _Name:</b>");
-            disp_path = g_build_filename(dir_path, file->name, nullptr);
+            disp_path = g_build_filename(dir_path, file->name.c_str(), nullptr);
             char* target_path = g_file_read_link(disp_path, nullptr);
             if (target_path)
             {
@@ -751,9 +751,8 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 GString* gstr = g_string_new(nullptr);
                 for (l = data->file_list; l; l = l->next)
                 {
-                    file_path = g_build_filename(data->dir_path,
-                                                 (static_cast<VFSFileInfo*>(l->data))->name,
-                                                 nullptr);
+                    VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
+                    file_path = g_build_filename(data->dir_path, file->name.c_str(), nullptr);
                     quoted_path = bash_quote(file_path);
                     g_string_append_printf(gstr, " %s", quoted_path.c_str());
                     g_free(file_path);

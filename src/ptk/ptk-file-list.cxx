@@ -799,12 +799,8 @@ ptk_file_list_file_created(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
         bool is_desktop2 = vfs_file_info_is_desktop_entry(file2);
         if (is_desktop || is_desktop2)
         {
-            // at least one is a desktop file, need to compare filenames
-            if (file->name && file2->name)
-            {
-                if (!strcmp(file->name, file2->name))
-                    return;
-            }
+            if (ztd::same(file->name, file2->name))
+                return;
         }
         else if (ptk_file_list_compare(file2, file, list) == 0)
         {
@@ -813,7 +809,7 @@ ptk_file_list_file_created(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
             // if case-insensitive - need to compare filenames
             if ((list->sort_alphanum || list->sort_natural) && list->sort_case)
                 return;
-            else if (!strcmp(file->name, file2->name))
+            else if (ztd::same(file->name, file2->name))
                 return;
         }
 

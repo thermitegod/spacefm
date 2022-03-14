@@ -41,16 +41,13 @@ vfs_file_info_new()
 static void
 vfs_file_info_clear(VFSFileInfo* fi)
 {
-    if (fi->disp_name && fi->disp_name != fi->name)
+    if (fi->disp_name && fi->disp_name != fi->name.c_str())
     {
         g_free(fi->disp_name);
         fi->disp_name = nullptr;
     }
-    if (fi->name)
-    {
-        g_free(fi->name);
-        fi->name = nullptr;
-    }
+    if (!fi->name.empty())
+        fi->name.clear();
     if (!fi->collate_key.empty())
         fi->collate_key.clear();
     if (!fi->collate_icase_key.empty())
@@ -117,12 +114,13 @@ vfs_file_info_get(VFSFileInfo* fi, const char* file_path, const char* base_name)
     vfs_file_info_clear(fi);
 
     if (base_name)
-        fi->name = g_strdup(base_name);
+        fi->name = base_name;
     else
         fi->name = g_path_get_basename(file_path);
 
     if (lstat(file_path, &file_stat) == 0)
     {
+        // LOG_INFO("VFSFileInfo {}", fi->name);
         /* This is time-consuming but can save much memory */
         fi->mode = file_stat.st_mode;
         fi->dev = file_stat.st_dev;
@@ -135,14 +133,11 @@ vfs_file_info_get(VFSFileInfo* fi, const char* file_path, const char* base_name)
         fi->blksize = file_stat.st_blksize;
         fi->blocks = file_stat.st_blocks;
 
-        if (G_LIKELY(g_utf8_validate(fi->name, -1, nullptr)))
-        {
-            fi->disp_name = fi->name; /* Don't duplicate the name and save memory */
-        }
+        if (G_LIKELY(g_utf8_validate(fi->name.c_str(), -1, nullptr)))
+            fi->disp_name = g_strdup(fi->name.c_str());
         else
-        {
-            fi->disp_name = g_filename_display_name(fi->name);
-        }
+            fi->disp_name = g_filename_display_name(fi->name.c_str());
+
         fi->mime_type = vfs_mime_type_get_from_file(file_path, fi->disp_name, &file_stat);
         // sfm get collate keys
         fi->collate_key = g_utf8_collate_key_for_filename(fi->disp_name, -1);
@@ -159,7 +154,7 @@ vfs_file_info_get(VFSFileInfo* fi, const char* file_path, const char* base_name)
 const char*
 vfs_file_info_get_name(VFSFileInfo* fi)
 {
-    return fi->name;
+    return fi->name.c_str();
 }
 
 /* Get displayed name encoded in UTF-8 */
@@ -172,7 +167,7 @@ vfs_file_info_get_disp_name(VFSFileInfo* fi)
 void
 vfs_file_info_set_disp_name(VFSFileInfo* fi, const char* name)
 {
-    if (fi->disp_name && fi->disp_name != fi->name)
+    if (fi->disp_name && fi->disp_name != fi->name.c_str())
         g_free(fi->disp_name);
     fi->disp_name = g_strdup(name);
     // sfm get new collate keys
@@ -226,7 +221,7 @@ vfs_file_info_reload_mime_type(VFSFileInfo* fi, const char* full_path)
     file_stat.st_mode = fi->mode;
 
     old_mime_type = fi->mime_type;
-    fi->mime_type = vfs_mime_type_get_from_file(full_path, fi->name, &file_stat);
+    fi->mime_type = vfs_mime_type_get_from_file(full_path, fi->name.c_str(), &file_stat);
     vfs_file_info_load_special_info(fi, full_path);
     vfs_mime_type_unref(old_mime_type); /* FIXME: is vfs_mime_type_unref needed ?*/
 }
@@ -700,7 +695,7 @@ void
 vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
 {
     /*if ( G_LIKELY(fi->type) && G_UNLIKELY(fi->type->name, "application/x-desktop") ) */
-    if (G_UNLIKELY(g_str_has_suffix(fi->name, ".desktop")))
+    if (ztd::same(fi->name, ".desktop"))
     {
         char* file_dir = g_path_get_dirname(file_path);
 

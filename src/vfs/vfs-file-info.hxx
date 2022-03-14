@@ -47,7 +47,7 @@ struct VFSFileInfo
     long blksize;
     blkcnt_t blocks;
 
-    char* name;                    // real name on file system
+    std::string name;              // real name on file system
     char* disp_name;               // displayed name (in UTF-8)
     std::string collate_key;       // sfm sort key
     std::string collate_icase_key; // sfm case folded sort key

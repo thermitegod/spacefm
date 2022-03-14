@@ -40,6 +40,8 @@
 #include "xxhash.h"
 #endif
 
+#include "utils.hxx"
+
 enum VFSThumbnailSize
 {
     LOAD_BIG_THUMBNAIL,
@@ -258,8 +260,8 @@ vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big)
     for (l = loader->queue->head; l; l = l->next)
     {
         req = static_cast<VFSThumbnailRequest*>(l->data);
-        /* If file with the same name is already in our queue */
-        if (req->file == file || !strcmp(req->file->name, file->name))
+        // If file with the same name is already in our queue
+        if (req->file == file || ztd::same(req->file->name, file->name))
             break;
     }
     if (l)
