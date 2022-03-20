@@ -1514,172 +1514,6 @@ on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 }
 
 static void
-on_remount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
-{
-    std::string line;
-    GtkWidget* view;
-    if (!item)
-        view = view2;
-    else
-        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
-    PtkFileBrowser* file_browser =
-        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
-
-    // get user options
-    XSet* set = xset_get("dev_remount_options");
-    if (!xset_text_dialog(view, set->title, set->desc, "", set->s, &set->s, set->z, false))
-        return;
-
-    bool mount_in_terminal;
-    bool unmount_in_terminal = false;
-    char* mount_command = vfs_volume_get_mount_command(vol, set->s, &mount_in_terminal);
-    if (!mount_command)
-    {
-        popup_missing_mount(view, 0);
-        return;
-    }
-
-    // task
-    std::string task_name = fmt::format("Remount {}", vol->device_file);
-    PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
-    if (vfs_volume_is_mounted(vol))
-    {
-        // udisks cannot remount, so unmount and mount
-        char* unmount_command = vfs_volume_device_unmount_cmd(vol, &unmount_in_terminal);
-        if (!unmount_command)
-        {
-            free(mount_command);
-            popup_missing_mount(view, 1);
-            return;
-        }
-        if (mount_in_terminal || unmount_in_terminal)
-            line = fmt::format("{}\nif [ $? -ne 0 ];then\n    read -p '{}: '\n    exit 1\n"
-                               "else\n    {}\n    [[ $? -eq 0 ]] || ( read -p '{}: ' )\nfi",
-                               unmount_command,
-                               press_enter_to_close,
-                               mount_command,
-                               press_enter_to_close);
-        else
-            line = fmt::format("{}\nif [ $? -ne 0 ];then\n    exit 1\nelse\n    {}\nfi",
-                               unmount_command,
-                               mount_command);
-        free(mount_command);
-        free(unmount_command);
-    }
-    else
-        line = mount_command;
-    ptask->task->exec_command = line;
-    ptask->task->exec_sync = !mount_in_terminal && !unmount_in_terminal;
-    ptask->task->exec_export = true;
-    ptask->task->exec_browser = file_browser;
-    ptask->task->exec_popup = false;
-    ptask->task->exec_show_output = false;
-    ptask->task->exec_show_error = true;
-    ptask->task->exec_terminal = mount_in_terminal || unmount_in_terminal;
-    ptask->task->exec_icon = vfs_volume_get_icon(vol);
-    vol->inhibit_auto = true;
-    ptk_file_task_run(ptask);
-}
-
-static void
-on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
-{
-    std::string line;
-    PtkFileTask* ptask;
-
-    GtkWidget* view;
-    if (!item)
-        view = view2;
-    else
-        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
-    PtkFileBrowser* file_browser =
-        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
-
-    if (vfs_volume_is_mounted(vol))
-    {
-        // task
-        std::string eject;
-        bool run_in_terminal;
-        char* unmount = vfs_volume_device_unmount_cmd(vol, &run_in_terminal);
-        if (!unmount)
-        {
-            popup_missing_mount(view, 1);
-            return;
-        }
-
-        if (vol->is_optical || vol->requires_eject)
-            eject = fmt::format("\nelse\n    eject {}\n    sleep 0.3\n    eject -t {}",
-                                vol->device_file,
-                                vol->device_file);
-
-        if (run_in_terminal)
-            line = fmt::format("echo 'Unmounting {}...'\nsync\n{}\nif [ $? -ne 0 ];then\n    "
-                               "read -p '{}: '\n    exit 1{}\nfi",
-                               vol->device_file,
-                               unmount,
-                               press_enter_to_close,
-                               eject);
-        else
-            line = fmt::format("sync\n{}\nif [ $? -ne 0 ];then\n    exit 1{}\nfi", unmount, eject);
-        free(unmount);
-        std::string task_name = fmt::format("Reload {}", vol->device_file);
-        ptask = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
-        ptask->task->exec_command = line;
-        ptask->task->exec_sync = !run_in_terminal;
-        ptask->task->exec_export = true;
-        ptask->task->exec_browser = file_browser;
-        ptask->task->exec_show_error = true;
-        ptask->task->exec_terminal = run_in_terminal;
-        ptask->task->exec_icon = vfs_volume_get_icon(vol);
-    }
-    else if (vol->is_optical || vol->requires_eject)
-    {
-        // task
-        line = fmt::format("eject {}; sleep 0.3; eject -t {}", vol->device_file, vol->device_file);
-        std::string task_name = fmt::format("Reload {}", vol->device_file);
-        ptask = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
-        ptask->task->exec_command = line;
-        ptask->task->exec_sync = false;
-        ptask->task->exec_show_error = false;
-        ptask->task->exec_icon = vfs_volume_get_icon(vol);
-    }
-    else
-        return;
-    ptk_file_task_run(ptask);
-    //    vol->ever_mounted = false;
-}
-
-static void
-on_sync(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
-{
-    (void)vol;
-    GtkWidget* view;
-    if (!item)
-        view = view2;
-    else
-    {
-        g_signal_stop_emission_by_name(item, "activate");
-        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
-    }
-
-    PtkFileBrowser* file_browser =
-        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
-
-    PtkFileTask* ptask = ptk_file_exec_new("Sync", nullptr, view, file_browser->task_view);
-    ptask->task->exec_browser = nullptr;
-    ptask->task->exec_action = "sync";
-    ptask->task->exec_command = "sync";
-    ptask->task->exec_sync = true;
-    ptask->task->exec_popup = false;
-    ptask->task->exec_show_output = false;
-    ptask->task->exec_show_error = true;
-    ptask->task->exec_terminal = false;
-    ptask->task->exec_export = false;
-    // ptask->task->exec_icon =  "start-here";
-    ptk_file_task_run(ptask);
-}
-
-static void
 on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 {
     GtkWidget* view;
@@ -2165,8 +1999,6 @@ ptk_location_view_on_action(GtkWidget* view, XSet* set)
         update_volume_icons();
     else if (!strcmp(set->name, "dev_dispname"))
         update_names();
-    else if (!strcmp(set->name, "dev_menu_sync"))
-        on_sync(nullptr, vol, view);
     else if (!strcmp(set->name, "dev_fs_cnf"))
         on_handler_show_config(nullptr, view, set);
     else if (!strcmp(set->name, "dev_net_cnf"))
@@ -2184,16 +2016,12 @@ ptk_location_view_on_action(GtkWidget* view, XSet* set)
                 on_eject(nullptr, vol, view);
             else if (!strcmp(set->name, "dev_menu_unmount"))
                 on_umount(nullptr, vol, view);
-            else if (!strcmp(set->name, "dev_menu_reload"))
-                on_reload(nullptr, vol, view);
             else if (!strcmp(set->name, "dev_menu_open"))
                 on_open(nullptr, vol, view);
             else if (!strcmp(set->name, "dev_menu_tab"))
                 on_open_tab(nullptr, vol, view);
             else if (!strcmp(set->name, "dev_menu_mount"))
                 on_mount(nullptr, vol, view);
-            else if (!strcmp(set->name, "dev_menu_remount"))
-                on_remount(nullptr, vol, view);
         }
         else if (!strcmp(set->name, "dev_prop"))
         {
@@ -2221,11 +2049,6 @@ show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browse
     set = xset_set_cb("dev_menu_unmount", (GFunc)on_umount, vol);
     xset_set_ob1(set, "view", view);
     set->disable = !vol; //!( vol && vol->is_mounted );
-    set = xset_set_cb("dev_menu_reload", (GFunc)on_reload, vol);
-    xset_set_ob1(set, "view", view);
-    set->disable = !(vol && vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK);
-    set = xset_set_cb("dev_menu_sync", (GFunc)on_sync, vol);
-    xset_set_ob1(set, "view", view);
     set = xset_set_cb("dev_menu_open", (GFunc)on_open, vol);
     xset_set_ob1(set, "view", view);
     set->disable = !vol;
@@ -2235,9 +2058,6 @@ show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browse
     set = xset_set_cb("dev_menu_mount", (GFunc)on_mount, vol);
     xset_set_ob1(set, "view", view);
     set->disable = !vol; // || ( vol && vol->is_mounted );
-    set = xset_set_cb("dev_menu_remount", (GFunc)on_remount, vol);
-    xset_set_ob1(set, "view", view);
-    set->disable = !vol;
 
     set = xset_set_cb("dev_menu_mark", (GFunc)on_bookmark_device, vol);
     xset_set_ob1(set, "view", view);
@@ -2266,10 +2086,9 @@ show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browse
 
     std::string menu_elements;
 
-    menu_elements =
-        fmt::format("dev_menu_remove dev_menu_reload dev_menu_unmount dev_menu_sync separator "
-                    "dev_menu_open dev_menu_tab dev_menu_mount dev_menu_remount{}",
-                    str);
+    menu_elements = fmt::format("dev_menu_remove dev_menu_unmount separator "
+                                "dev_menu_open dev_menu_tab dev_menu_mount{}",
+                                str);
     xset_add_menu(file_browser, popup, accel_group, menu_elements.c_str());
 
     set = xset_set_cb("dev_prop", (GFunc)on_prop, vol);

@@ -7446,12 +7446,6 @@ xset_defaults()
     set = xset_set("dev_menu_unmount", "menu_label", "_Unmount");
     xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-remove");
 
-    set = xset_set("dev_menu_reload", "menu_label", "Re_load");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-disconnect");
-
-    set = xset_set("dev_menu_sync", "menu_label", "_Sync");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-save");
-
     set = xset_set("dev_menu_open", "menu_label", "_Open");
     xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-open");
 
@@ -7460,9 +7454,6 @@ xset_defaults()
 
     set = xset_set("dev_menu_mount", "menu_label", "_Mount");
     xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "drive-removable-media");
-
-    set = xset_set("dev_menu_remount", "menu_label", "Re_/mount");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-redo");
 
     set = xset_set("dev_menu_mark", "menu_label", "_Bookmark");
     xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-add");
@@ -7660,21 +7651,6 @@ xset_defaults()
     xset_set_set(set, XSetSetSet::XSET_SET_SET_S, "noexec, nosuid, noatime");
     xset_set_set(set, XSetSetSet::XSET_SET_SET_Z, "noexec, nosuid, noatime");
     xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-edit");
-
-    set = xset_set("dev_remount_options", "z", "noexec, nosuid, noatime");
-    set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Re/mount With Options");
-    xset_set_set(
-        set,
-        XSetSetSet::XSET_SET_SET_DESC,
-        "Device will be (re)mounted using the options below.\n\nIn addition to regular options, "
-        "you can also specify options to be added or removed for a specific filesystem type by "
-        "using the form OPTION+FSTYPE or OPTION-FSTYPE.\n\nExample:  nosuid, sync+vfat, "
-        "sync+ntfs, noatime, noatime-ext4\nThis will add nosuid and noatime for all filesystem "
-        "types, add sync for vfat and ntfs only, and remove noatime for ext4.\n\nNote: Some "
-        "options, such as nosuid, may be added by the mount program even if you do not include "
-        "them.  Options in fstab take precedence.  pmount ignores options set here.");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_S, "noexec, nosuid, noatime");
 
     set = xset_set("dev_change", "menu_label", "_Change Detection");
     xset_set_set(
