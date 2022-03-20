@@ -23,6 +23,8 @@
 // they should be escaped with g_markup_escape_text().
 void ptk_show_error(GtkWindow* parent, const std::string& title, const std::string& message);
 
+unsigned int ptk_get_keymod(unsigned int event);
+
 GtkBuilder* _gtk_builder_new_from_file(const char* file);
 
 #ifdef HAVE_NONLATIN

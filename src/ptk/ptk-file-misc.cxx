@@ -248,8 +248,7 @@ static bool
 on_move_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
 {
     (void)widget;
-    unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
-                                           GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
+    unsigned int keymod = ptk_get_keymod(event->state);
 
     if (keymod == 0)
     {
@@ -271,8 +270,7 @@ static bool
 on_move_entry_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
 {
     (void)widget;
-    unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
-                                           GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
+    unsigned int keymod = ptk_get_keymod(event->state);
 
     if (keymod == 0)
     {

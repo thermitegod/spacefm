@@ -25,6 +25,7 @@
 
 #include "ptk/ptk-location-view.hxx"
 #include "ptk/ptk-handler.hxx"
+#include "ptk/ptk-utils.hxx"
 #include "main-window.hxx"
 
 #include "vfs/vfs-utils.hxx"
@@ -2657,8 +2658,7 @@ static bool
 on_key_press_event(GtkWidget* w, GdkEventKey* event, PtkFileBrowser* file_browser)
 {
     (void)w;
-    unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
-                                           GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
+    unsigned int keymod = ptk_get_keymod(event->state);
 
     if (event->keyval == GDK_KEY_Menu || (event->keyval == GDK_KEY_F10 && keymod == GDK_SHIFT_MASK))
     {
@@ -2825,8 +2825,7 @@ static bool
 on_dev_menu_button_press(GtkWidget* item, GdkEventButton* event, VFSVolume* vol)
 {
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
-    unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
-                                           GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
+    unsigned int keymod = ptk_get_keymod(event->state);
 
     switch (event->type)
     {
@@ -4131,8 +4130,7 @@ static bool
 on_bookmark_key_press_event(GtkWidget* w, GdkEventKey* event, PtkFileBrowser* file_browser)
 {
     (void)w;
-    unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
-                                           GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
+    unsigned int keymod = ptk_get_keymod(event->state);
 
     if (event->keyval == GDK_KEY_Menu || (event->keyval == GDK_KEY_F10 && keymod == GDK_SHIFT_MASK))
     {

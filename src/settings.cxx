@@ -3939,8 +3939,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
     XSet* keyset = nullptr;
     std::string keyname;
 
-    unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
-                                           GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
+    unsigned int keymod = ptk_get_keymod(event->state);
 
     if (!event->keyval) // || ( event->keyval < 1000 && !keymod ) )
     {
@@ -5005,8 +5004,7 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, XSet* set)
     if (!item)
         return false;
 
-    unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
-                                           GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
+    unsigned int keymod = ptk_get_keymod(event->state);
 
 #ifdef HAVE_NONLATIN
     transpose_nonlatin_keypress(event);
@@ -5435,8 +5433,7 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set)
     int job = -1;
 
     GtkWidget* menu = item ? GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu")) : nullptr;
-    unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
-                                           GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
+    unsigned int keymod = ptk_get_keymod(event->state);
 
     if (event->type == GDK_BUTTON_RELEASE)
     {
@@ -5584,8 +5581,7 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
     else
         return false;
 
-    unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
-                                           GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
+    unsigned int keymod = ptk_get_keymod(event->state);
 
 #ifdef HAVE_NONLATIN
     transpose_nonlatin_keypress(event);
@@ -6585,8 +6581,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
     // LOG_INFO("on_tool_icon_button_press  {}   button = {}", set->menu_label, event->button);
     if (event->type != GDK_BUTTON_PRESS)
         return false;
-    unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
-                                           GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
+    unsigned int keymod = ptk_get_keymod(event->state);
 
     // get and focus browser
     PtkFileBrowser* file_browser =
@@ -6725,8 +6720,7 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
     // LOG_INFO("on_tool_menu_button_press  {}   button = {}", set->menu_label, event->button);
     if (event->type != GDK_BUTTON_PRESS)
         return false;
-    unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
-                                           GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
+    unsigned int keymod = ptk_get_keymod(event->state);
     if (keymod != 0 || event->button != 1)
         return on_tool_icon_button_press(widget, event, set);
 

@@ -34,6 +34,13 @@ ptk_show_error(GtkWindow* parent, const std::string& title, const std::string& m
     gtk_widget_destroy(dlg);
 }
 
+unsigned int
+ptk_get_keymod(unsigned int event)
+{
+    return (event & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_SUPER_MASK |
+                     GDK_HYPER_MASK | GDK_META_MASK));
+}
+
 GtkBuilder*
 _gtk_builder_new_from_file(const char* file)
 {

@@ -40,6 +40,7 @@
 #include "ptk/ptk-file-list.hxx"
 
 #include "ptk/ptk-file-menu.hxx"
+#include "ptk/ptk-utils.hxx"
 
 static bool on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data);
 static bool app_menu_keypress(GtkWidget* widget, GdkEventKey* event, PtkFileMenu* data);
@@ -1728,8 +1729,7 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
     // else if app menu, data will be set
     PtkFileMenu* app_data = static_cast<PtkFileMenu*>(g_object_get_data(G_OBJECT(item), "data"));
 
-    unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
-                                           GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
+    unsigned int keymod = ptk_get_keymod(event->state);
 
     if (keymod == 0)
     {
@@ -2021,8 +2021,7 @@ static bool
 on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data)
 {
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
-    unsigned int keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK |
-                                           GDK_SUPER_MASK | GDK_HYPER_MASK | GDK_META_MASK));
+    unsigned int keymod = ptk_get_keymod(event->state);
 
     switch (event->type)
     {
