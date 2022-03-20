@@ -5052,7 +5052,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
             else
                 move_dest = path;
             set2 = xset_get("copy_loc_last");
-            xset_set_set(set2, XSetSetSet::XSET_SET_SET_DESC, path);
+            xset_set_set(set2, XSetSetSet::DESC, path);
         }
         else
             return;

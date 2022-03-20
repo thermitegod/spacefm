@@ -4338,7 +4338,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
         {
             XSet* set = xset_get(task_names.at(j));
             // save column position
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_X, std::to_string(i).c_str());
+            xset_set_set(set, XSetSetSet::X, std::to_string(i).c_str());
             // if the window was opened maximized and stayed maximized, or the
             // window is unmaximized and not fullscreen, save the columns
             if ((!main_window->maximized || main_window->opened_maximized) &&
@@ -4348,7 +4348,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
                 if (width) // manager unshown, all widths are zero
                 {
                     // save column width
-                    xset_set_set(set, XSetSetSet::XSET_SET_SET_Y, std::to_string(width).c_str());
+                    xset_set_set(set, XSetSetSet::Y, std::to_string(width).c_str());
                 }
             }
             // set column visibility

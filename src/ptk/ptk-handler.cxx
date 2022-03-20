@@ -1667,12 +1667,11 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                 ? XSetB::XSET_B_TRUE
                 : XSetB::XSET_B_FALSE;
         new_handler_xset->disable = false; // not default - save in session
-        xset_set_set(new_handler_xset, XSetSetSet::XSET_SET_SET_MENU_LABEL, handler_name);
-        xset_set_set(new_handler_xset,
-                     XSetSetSet::XSET_SET_SET_S,
+        xset_set_set(new_handler_xset, XSetSetSet::MENU_LABEL, handler_name);
+        xset_set_set(new_handler_xset, XSetSetSet::S,
                      handler_mime); // Mime Type(s) or whitelist
         xset_set_set(new_handler_xset,
-                     XSetSetSet::XSET_SET_SET_X,
+                     XSetSetSet::X,
                      handler_extension); // Extension(s) or blacklist
         new_handler_xset->in_terminal = handler_compress_term;
         new_handler_xset->keep_terminal = handler_extract_term;
@@ -1686,7 +1685,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         if (hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE)
         {
             if (handler_icon)
-                xset_set_set(new_handler_xset, XSetSetSet::XSET_SET_SET_ICN, handler_icon);
+                xset_set_set(new_handler_xset, XSetSetSet::ICN, handler_icon);
         }
         else
         {
@@ -1797,9 +1796,9 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         handler_xset->b = handler_enabled ? XSetB::XSET_B_TRUE : XSetB::XSET_B_UNSET;
         bool was_default = handler_xset->disable;
         handler_xset->disable = false; // not default - save in session
-        xset_set_set(handler_xset, XSetSetSet::XSET_SET_SET_MENU_LABEL, handler_name);
-        xset_set_set(handler_xset, XSetSetSet::XSET_SET_SET_S, handler_mime);
-        xset_set_set(handler_xset, XSetSetSet::XSET_SET_SET_X, handler_extension);
+        xset_set_set(handler_xset, XSetSetSet::MENU_LABEL, handler_name);
+        xset_set_set(handler_xset, XSetSetSet::S, handler_mime);
+        xset_set_set(handler_xset, XSetSetSet::X, handler_extension);
         handler_xset->in_terminal = handler_compress_term;
         handler_xset->keep_terminal = handler_extract_term;
         if (hnd->compress_changed || was_default)
@@ -1814,7 +1813,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         if (hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE)
         {
             if (handler_icon)
-                xset_set_set(handler_xset, XSetSetSet::XSET_SET_SET_ICN, handler_icon);
+                xset_set_set(handler_xset, XSetSetSet::ICN, handler_icon);
         }
         else
         {

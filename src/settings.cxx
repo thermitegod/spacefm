@@ -1228,82 +1228,82 @@ xset_set_set_int(XSet* set, const char* var, const char* value)
     XSetSetSet tmp;
 
     if (!strcmp(var, "s"))
-        tmp = XSetSetSet::XSET_SET_SET_S;
+        tmp = XSetSetSet::S;
     else if (!strcmp(var, "b"))
-        tmp = XSetSetSet::XSET_SET_SET_B;
+        tmp = XSetSetSet::B;
     else if (!strcmp(var, "x"))
-        tmp = XSetSetSet::XSET_SET_SET_X;
+        tmp = XSetSetSet::X;
     else if (!strcmp(var, "y"))
-        tmp = XSetSetSet::XSET_SET_SET_Y;
+        tmp = XSetSetSet::Y;
     else if (!strcmp(var, "z"))
-        tmp = XSetSetSet::XSET_SET_SET_Z;
+        tmp = XSetSetSet::Z;
     else if (!strcmp(var, "key"))
-        tmp = XSetSetSet::XSET_SET_SET_KEY;
+        tmp = XSetSetSet::KEY;
     else if (!strcmp(var, "keymod"))
-        tmp = XSetSetSet::XSET_SET_SET_KEYMOD;
+        tmp = XSetSetSet::KEYMOD;
     else if (!strcmp(var, "style"))
-        tmp = XSetSetSet::XSET_SET_SET_STYLE;
+        tmp = XSetSetSet::STYLE;
     else if (!strcmp(var, "desc"))
-        tmp = XSetSetSet::XSET_SET_SET_DESC;
+        tmp = XSetSetSet::DESC;
     else if (!strcmp(var, "title"))
-        tmp = XSetSetSet::XSET_SET_SET_TITLE;
+        tmp = XSetSetSet::TITLE;
     else if (!strcmp(var, "menu_label"))
-        tmp = XSetSetSet::XSET_SET_SET_MENU_LABEL;
+        tmp = XSetSetSet::MENU_LABEL;
     else if (!strcmp(var, "icn"))
-        tmp = XSetSetSet::XSET_SET_SET_ICN;
+        tmp = XSetSetSet::ICN;
     else if (!strcmp(var, "menu_label_custom"))
-        tmp = XSetSetSet::XSET_SET_SET_MENU_LABEL_CUSTOM;
+        tmp = XSetSetSet::MENU_LABEL_CUSTOM;
     else if (!strcmp(var, "icon"))
-        tmp = XSetSetSet::XSET_SET_SET_ICON;
+        tmp = XSetSetSet::ICON;
     else if (!strcmp(var, "shared_key"))
-        tmp = XSetSetSet::XSET_SET_SET_SHARED_KEY;
+        tmp = XSetSetSet::SHARED_KEY;
     else if (!strcmp(var, "next"))
-        tmp = XSetSetSet::XSET_SET_SET_NEXT;
+        tmp = XSetSetSet::NEXT;
     else if (!strcmp(var, "prev"))
-        tmp = XSetSetSet::XSET_SET_SET_PREV;
+        tmp = XSetSetSet::PREV;
     else if (!strcmp(var, "parent"))
-        tmp = XSetSetSet::XSET_SET_SET_PARENT;
+        tmp = XSetSetSet::PARENT;
     else if (!strcmp(var, "child"))
-        tmp = XSetSetSet::XSET_SET_SET_CHILD;
+        tmp = XSetSetSet::CHILD;
     else if (!strcmp(var, "context"))
-        tmp = XSetSetSet::XSET_SET_SET_CONTEXT;
+        tmp = XSetSetSet::CONTEXT;
     else if (!strcmp(var, "line"))
-        tmp = XSetSetSet::XSET_SET_SET_LINE;
+        tmp = XSetSetSet::LINE;
     else if (!strcmp(var, "tool"))
-        tmp = XSetSetSet::XSET_SET_SET_TOOL;
+        tmp = XSetSetSet::TOOL;
     else if (!strcmp(var, "task"))
-        tmp = XSetSetSet::XSET_SET_SET_TASK;
+        tmp = XSetSetSet::TASK;
     else if (!strcmp(var, "task_pop"))
-        tmp = XSetSetSet::XSET_SET_SET_TASK_POP;
+        tmp = XSetSetSet::TASK_POP;
     else if (!strcmp(var, "task_err"))
-        tmp = XSetSetSet::XSET_SET_SET_TASK_ERR;
+        tmp = XSetSetSet::TASK_ERR;
     else if (!strcmp(var, "task_out"))
-        tmp = XSetSetSet::XSET_SET_SET_TASK_OUT;
+        tmp = XSetSetSet::TASK_OUT;
     else if (!strcmp(var, "run_in_terminal"))
-        tmp = XSetSetSet::XSET_SET_SET_RUN_IN_TERMINAL;
+        tmp = XSetSetSet::RUN_IN_TERMINAL;
     else if (!strcmp(var, "keep_terminal"))
-        tmp = XSetSetSet::XSET_SET_SET_KEEP_TERMINAL;
+        tmp = XSetSetSet::KEEP_TERMINAL;
     else if (!strcmp(var, "scroll_lock"))
-        tmp = XSetSetSet::XSET_SET_SET_SCROLL_LOCK;
+        tmp = XSetSetSet::SCROLL_LOCK;
     else if (!strcmp(var, "disable"))
-        tmp = XSetSetSet::XSET_SET_SET_DISABLE;
+        tmp = XSetSetSet::DISABLE;
     else if (!strcmp(var, "opener"))
-        tmp = XSetSetSet::XSET_SET_SET_OPENER;
+        tmp = XSetSetSet::OPENER;
     // Deprecated config keys - start
     else if (!strcmp(var, "lbl"))
-        tmp = XSetSetSet::XSET_SET_SET_MENU_LABEL;
+        tmp = XSetSetSet::MENU_LABEL;
     else if (!strcmp(var, "label"))
-        tmp = XSetSetSet::XSET_SET_SET_MENU_LABEL_CUSTOM;
+        tmp = XSetSetSet::MENU_LABEL_CUSTOM;
     else if (!strcmp(var, "cxt"))
-        tmp = XSetSetSet::XSET_SET_SET_CONTEXT;
+        tmp = XSetSetSet::CONTEXT;
     else if (!strcmp(var, "term"))
-        tmp = XSetSetSet::XSET_SET_SET_RUN_IN_TERMINAL;
+        tmp = XSetSetSet::RUN_IN_TERMINAL;
     else if (!strcmp(var, "keep"))
-        tmp = XSetSetSet::XSET_SET_SET_KEEP_TERMINAL;
+        tmp = XSetSetSet::KEEP_TERMINAL;
     else if (!strcmp(var, "scroll"))
-        tmp = XSetSetSet::XSET_SET_SET_SCROLL_LOCK;
+        tmp = XSetSetSet::SCROLL_LOCK;
     else if (!strcmp(var, "op"))
-        tmp = XSetSetSet::XSET_SET_SET_OPENER;
+        tmp = XSetSetSet::OPENER;
     // Deprecated config keys - end
     else
         return nullptr;
@@ -1319,52 +1319,52 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
 
     switch (var)
     {
-        case XSetSetSet::XSET_SET_SET_S:
+        case XSetSetSet::S:
             if (set->s)
                 free(set->s);
             set->s = ztd::strdup(value);
             break;
-        case XSetSetSet::XSET_SET_SET_B:
+        case XSetSetSet::B:
             if (!strcmp(value, "1"))
                 set->b = XSetB::XSET_B_TRUE;
             else
                 set->b = XSetB::XSET_B_FALSE;
             break;
-        case XSetSetSet::XSET_SET_SET_X:
+        case XSetSetSet::X:
             if (set->x)
                 free(set->x);
             set->x = ztd::strdup(value);
             break;
-        case XSetSetSet::XSET_SET_SET_Y:
+        case XSetSetSet::Y:
             if (set->y)
                 free(set->y);
             set->y = ztd::strdup(value);
             break;
-        case XSetSetSet::XSET_SET_SET_Z:
+        case XSetSetSet::Z:
             if (set->z)
                 free(set->z);
             set->z = ztd::strdup(value);
             break;
-        case XSetSetSet::XSET_SET_SET_KEY:
+        case XSetSetSet::KEY:
             set->key = strtol(value, nullptr, 10);
             break;
-        case XSetSetSet::XSET_SET_SET_KEYMOD:
+        case XSetSetSet::KEYMOD:
             set->keymod = strtol(value, nullptr, 10);
             break;
-        case XSetSetSet::XSET_SET_SET_STYLE:
+        case XSetSetSet::STYLE:
             set->menu_style = (XSetMenu)strtol(value, nullptr, 10);
             break;
-        case XSetSetSet::XSET_SET_SET_DESC:
+        case XSetSetSet::DESC:
             if (set->desc)
                 free(set->desc);
             set->desc = ztd::strdup(value);
             break;
-        case XSetSetSet::XSET_SET_SET_TITLE:
+        case XSetSetSet::TITLE:
             if (set->title)
                 free(set->title);
             set->title = ztd::strdup(value);
             break;
-        case XSetSetSet::XSET_SET_SET_MENU_LABEL:
+        case XSetSetSet::MENU_LABEL:
             // lbl is only used >= 0.9.0 for changed lock default menu_label
             if (set->menu_label)
                 free(set->menu_label);
@@ -1373,7 +1373,7 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
                 // indicate that menu label is not default and should be saved
                 set->in_terminal = true;
             break;
-        case XSetSetSet::XSET_SET_SET_ICN:
+        case XSetSetSet::ICN:
             // icn is only used >= 0.9.0 for changed lock default icon
             if (set->icon)
                 free(set->icon);
@@ -1382,7 +1382,7 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
                 // indicate that icon is not default and should be saved
                 set->keep_terminal = true;
             break;
-        case XSetSetSet::XSET_SET_SET_MENU_LABEL_CUSTOM:
+        case XSetSetSet::MENU_LABEL_CUSTOM:
             // pre-0.9.0 menu_label or >= 0.9.0 custom item label
             // only save if custom or not default label
             if (!set->lock || g_strcmp0(set->menu_label, value))
@@ -1395,98 +1395,98 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
                     set->in_terminal = true;
             }
             break;
-        case XSetSetSet::XSET_SET_SET_ICON:
+        case XSetSetSet::ICON:
             // pre-0.9.0 icon or >= 0.9.0 custom item icon
             // only save if custom or not default icon
             // also check that stock name does not match
             break;
-        case XSetSetSet::XSET_SET_SET_SHARED_KEY:
+        case XSetSetSet::SHARED_KEY:
             if (set->shared_key)
                 free(set->shared_key);
             set->shared_key = ztd::strdup(value);
             break;
-        case XSetSetSet::XSET_SET_SET_NEXT:
+        case XSetSetSet::NEXT:
             if (set->next)
                 free(set->next);
             set->next = ztd::strdup(value);
             break;
-        case XSetSetSet::XSET_SET_SET_PREV:
+        case XSetSetSet::PREV:
             if (set->prev)
                 free(set->prev);
             set->prev = ztd::strdup(value);
             break;
-        case XSetSetSet::XSET_SET_SET_PARENT:
+        case XSetSetSet::PARENT:
             if (set->parent)
                 free(set->parent);
             set->parent = ztd::strdup(value);
             break;
-        case XSetSetSet::XSET_SET_SET_CHILD:
+        case XSetSetSet::CHILD:
             if (set->child)
                 free(set->child);
             set->child = ztd::strdup(value);
             break;
-        case XSetSetSet::XSET_SET_SET_CONTEXT:
+        case XSetSetSet::CONTEXT:
             if (set->context)
                 free(set->context);
             set->context = ztd::strdup(value);
             break;
-        case XSetSetSet::XSET_SET_SET_LINE:
+        case XSetSetSet::LINE:
             if (set->line)
                 free(set->line);
             set->line = ztd::strdup(value);
             break;
-        case XSetSetSet::XSET_SET_SET_TOOL:
+        case XSetSetSet::TOOL:
             set->tool = XSetTool(std::stoi(value));
             break;
-        case XSetSetSet::XSET_SET_SET_TASK:
+        case XSetSetSet::TASK:
             if (std::stoi(value) == 1)
                 set->task = true;
             else
                 set->task = false;
             break;
-        case XSetSetSet::XSET_SET_SET_TASK_POP:
+        case XSetSetSet::TASK_POP:
             if (std::stoi(value) == 1)
                 set->task_pop = true;
             else
                 set->task_pop = false;
             break;
-        case XSetSetSet::XSET_SET_SET_TASK_ERR:
+        case XSetSetSet::TASK_ERR:
             if (std::stoi(value) == 1)
                 set->task_err = true;
             else
                 set->task_err = false;
             break;
-        case XSetSetSet::XSET_SET_SET_TASK_OUT:
+        case XSetSetSet::TASK_OUT:
             if (std::stoi(value) == 1)
                 set->task_out = true;
             else
                 set->task_out = false;
             break;
-        case XSetSetSet::XSET_SET_SET_RUN_IN_TERMINAL:
+        case XSetSetSet::RUN_IN_TERMINAL:
             if (std::stoi(value) == 1)
                 set->in_terminal = true;
             else
                 set->in_terminal = false;
             break;
-        case XSetSetSet::XSET_SET_SET_KEEP_TERMINAL:
+        case XSetSetSet::KEEP_TERMINAL:
             if (std::stoi(value) == 1)
                 set->keep_terminal = true;
             else
                 set->keep_terminal = false;
             break;
-        case XSetSetSet::XSET_SET_SET_SCROLL_LOCK:
+        case XSetSetSet::SCROLL_LOCK:
             if (std::stoi(value) == 1)
                 set->scroll_lock = true;
             else
                 set->scroll_lock = false;
             break;
-        case XSetSetSet::XSET_SET_SET_DISABLE:
+        case XSetSetSet::DISABLE:
             if (std::stoi(value) == 1)
                 set->disable = true;
             else
                 set->disable = false;
             break;
-        case XSetSetSet::XSET_SET_SET_OPENER:
+        case XSetSetSet::OPENER:
             set->opener = std::stoi(value);
             break;
         default:
@@ -4316,10 +4316,10 @@ xset_design_job(GtkWidget* item, XSet* set)
                                  &set->line,
                                  "",
                                  false))
-                xset_set_set(set, XSetSetSet::XSET_SET_SET_X, "0");
+                xset_set_set(set, XSetSetSet::X, "0");
             break;
         case XSetJob::XSET_JOB_SCRIPT:
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_X, "1");
+            xset_set_set(set, XSetSetSet::X, "1");
             cscript = xset_custom_get_script(set, true);
             if (!cscript)
                 break;
@@ -4343,8 +4343,8 @@ xset_design_job(GtkWidget* item, XSet* set)
                                                 folder,
                                                 file)))
             {
-                xset_set_set(set, XSetSetSet::XSET_SET_SET_X, "2");
-                xset_set_set(set, XSetSetSet::XSET_SET_SET_Z, custom_file);
+                xset_set_set(set, XSetSetSet::X, "2");
+                xset_set_set(set, XSetSetSet::Z, custom_file);
                 free(custom_file);
             }
             free(file);
@@ -7441,35 +7441,35 @@ xset_defaults()
 
     // dev menu
     set = xset_set("dev_menu_remove", "menu_label", "Remo_ve / Eject");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-disconnect");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-disconnect");
 
     set = xset_set("dev_menu_unmount", "menu_label", "_Unmount");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-remove");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-remove");
 
     set = xset_set("dev_menu_open", "menu_label", "_Open");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-open");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-open");
 
     set = xset_set("dev_menu_tab", "menu_label", "Open In _Tab");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-add");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-add");
 
     set = xset_set("dev_menu_mount", "menu_label", "_Mount");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "drive-removable-media");
+    xset_set_set(set, XSetSetSet::ICN, "drive-removable-media");
 
     set = xset_set("dev_menu_mark", "menu_label", "_Bookmark");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-add");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-add");
 
     set = xset_set("dev_prop", "menu_label", "_Properties");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-properties");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-properties");
 
     set = xset_set("dev_menu_settings", "menu_label", "Setti_ngs");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-properties");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-properties");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
 
     // dev settings
     set = xset_set("dev_show", "menu_label", "S_how");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "dev_show_internal_drives dev_show_empty dev_show_partition_tables dev_show_net "
                  "dev_show_file dev_ignore_udisks_hide dev_show_hide_volumes dev_dispname");
 
@@ -7493,10 +7493,10 @@ xset_defaults()
     set->b = XSetB::XSET_B_TRUE;
 
     set = xset_set("dev_show_hide_volumes", "menu_label", "_Volumes...");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Show/Hide Volumes");
+    xset_set_set(set, XSetSetSet::TITLE, "Show/Hide Volumes");
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "To force showing or hiding of some volumes, overriding other settings, you can specify "
         "the devices, volume labels, or device IDs in the space-separated list "
         "below.\n\nExample:  +/dev/sdd1 -Label With Space +ata-OCZ-part4\nThis would cause "
@@ -7509,21 +7509,21 @@ xset_defaults()
 
     set = xset_set("dev_dispname", "menu_label", "_Display Name");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set Display Name Format");
+    xset_set_set(set, XSetSetSet::TITLE, "Set Display Name Format");
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "Enter device display name format:\n\nUse:\n\t%%v\tdevice filename (eg "
                  "sdd1)\n\t%%s\ttotal size (eg 800G)\n\t%%t\tfstype (eg ext4)\n\t%%l\tvolume "
                  "label (eg Label or [no media])\n\t%%m\tmount point if mounted, or "
                  "---\n\t%%i\tdevice ID\n\t%%n\tmajor:minor device numbers (eg 15:3)\n");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_S, "%v %s %l %m");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_Z, "%v %s %l %m");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-edit");
+    xset_set_set(set, XSetSetSet::S, "%v %s %l %m");
+    xset_set_set(set, XSetSetSet::Z, "%v %s %l %m");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-edit");
 
     set = xset_set("dev_menu_auto", "menu_label", "_Auto Mount");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "dev_automount_optical dev_automount_removable dev_ignore_udisks_nopolicy "
                  "dev_automount_volumes dev_automount_dirs dev_auto_open dev_unmount_quit");
 
@@ -7536,10 +7536,10 @@ xset_defaults()
     set->menu_style = XSetMenu::XSET_MENU_CHECK;
 
     set = xset_set("dev_automount_volumes", "menu_label", "Mount _Volumes...");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Auto-Mount Volumes");
+    xset_set_set(set, XSetSetSet::TITLE, "Auto-Mount Volumes");
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "To force or prevent automounting of some volumes, overriding other settings, you can "
         "specify the devices, volume labels, or device IDs in the space-separated list "
         "below.\n\nExample:  +/dev/sdd1 -Label With Space +ata-OCZ-part4\nThis would cause "
@@ -7548,11 +7548,11 @@ xset_defaults()
         "a plus or minus sign directly before each item.  This list is case-sensitive.\n\n");
 
     set = xset_set("dev_automount_dirs", "menu_label", "Mount _Dirs...");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Automatic Mount Point Dirs");
+    xset_set_set(set, XSetSetSet::TITLE, "Automatic Mount Point Dirs");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "Enter the directory where SpaceFM should automatically create mount point directories "
         "for fuse and similar filesystems (%%a in handler commands).  This directory must be "
         "user-writable (do NOT use /media), and empty subdirectories will be removed.  If left "
@@ -7571,62 +7571,62 @@ xset_defaults()
     set = xset_set("dev_exec", "menu_label", "Auto _Run");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "dev_exec_fs dev_exec_audio dev_exec_video separator dev_exec_insert "
                  "dev_exec_unmount dev_exec_remove");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-execute");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-execute");
 
     set = xset_set("dev_exec_fs", "menu_label", "On _Mount");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Auto Run On Mount");
+    xset_set_set(set, XSetSetSet::TITLE, "Auto Run On Mount");
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "Enter program or bash command line to be run automatically after a removable "
                  "drive or data disc is auto-mounted:\n\nUse:\n\t%%v\tdevice (eg "
                  "/dev/sda1)\n\t%%l\tdevice label\n\t%%m\tdevice mount point (eg /media/disk)");
 
     set = xset_set("dev_exec_audio", "menu_label", "On _Audio CD");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Auto Run On Audio CD");
+    xset_set_set(set, XSetSetSet::TITLE, "Auto Run On Audio CD");
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "Enter program or bash command line to be run automatically when an audio CD is "
                  "inserted in a qualified device:\n\nUse:\n\t%%v\tdevice (eg "
                  "/dev/sda1)\n\t%%l\tdevice label\n\t%%m\tdevice mount point (eg /media/disk)");
 
     set = xset_set("dev_exec_video", "menu_label", "On _Video DVD");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Auto Run On Video DVD");
+    xset_set_set(set, XSetSetSet::TITLE, "Auto Run On Video DVD");
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "Enter program or bash command line to be run automatically when a video DVD is "
                  "auto-mounted:\n\nUse:\n\t%%v\tdevice (eg /dev/sda1)\n\t%%l\tdevice "
                  "label\n\t%%m\tdevice mount point (eg /media/disk)");
 
     set = xset_set("dev_exec_insert", "menu_label", "On _Insert");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Auto Run On Insert");
+    xset_set_set(set, XSetSetSet::TITLE, "Auto Run On Insert");
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "Enter program or bash command line to be run automatically when any device is "
                  "inserted:\n\nUse:\n\t%%v\tdevice added (eg /dev/sda1)\n\t%%l\tdevice "
                  "label\n\t%%m\tdevice mount point (eg /media/disk)");
 
     set = xset_set("dev_exec_unmount", "menu_label", "On _Unmount");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Auto Run On Unmount");
+    xset_set_set(set, XSetSetSet::TITLE, "Auto Run On Unmount");
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "Enter program or bash command line to be run automatically when any device is "
                  "unmounted by any means:\n\nUse:\n\t%%v\tdevice unmounted (eg "
                  "/dev/sda1)\n\t%%l\tdevice label\n\t%%m\tdevice mount point (eg /media/disk)");
 
     set = xset_set("dev_exec_remove", "menu_label", "On _Remove");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Auto Run On Remove");
+    xset_set_set(set, XSetSetSet::TITLE, "Auto Run On Remove");
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "Enter program or bash command line to be run automatically when any device is removed "
         "(ejection of media does not qualify):\n\nUse:\n\t%%v\tdevice removed (eg "
         "/dev/sda1)\n\t%%l\tdevice label\n\t%%m\tdevice mount point (eg /media/disk)");
@@ -7637,7 +7637,7 @@ xset_defaults()
     set = xset_set("dev_mount_options", "menu_label", "_Mount Options");
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "Enter your comma- or space-separated list of default mount options below (%%o in "
         "handlers).\n\nIn addition to regular options, you can also specify options to be added "
         "or removed for a specific filesystem type by using the form OPTION+FSTYPE or "
@@ -7647,37 +7647,37 @@ xset_defaults()
         "mount program even if you do not include them.  Options in fstab take precedence.  "
         "pmount and some handlers may ignore options set here.");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Default Mount Options");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_S, "noexec, nosuid, noatime");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_Z, "noexec, nosuid, noatime");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-edit");
+    xset_set_set(set, XSetSetSet::TITLE, "Default Mount Options");
+    xset_set_set(set, XSetSetSet::S, "noexec, nosuid, noatime");
+    xset_set_set(set, XSetSetSet::Z, "noexec, nosuid, noatime");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-edit");
 
     set = xset_set("dev_change", "menu_label", "_Change Detection");
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "Enter your comma- or space-separated list of filesystems which should NOT be monitored "
         "for file changes.  This setting only affects non-block devices (such as nfs or fuse), "
         "and is usually used to prevent SpaceFM becoming unresponsive with network filesystems.  "
         "Loading of thumbnails and subdirectory sizes will also be disabled.");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Change Detection Blacklist");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-edit");
+    xset_set_set(set, XSetSetSet::TITLE, "Change Detection Blacklist");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-edit");
     set->s = ztd::strdup("cifs curlftpfs ftpfs fuse.sshfs nfs smbfs");
     set->z = ztd::strdup(set->s);
 
     set = xset_set("dev_fs_cnf", "menu_label", "_Device Handlers");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICON, "gtk-preferences");
+    xset_set_set(set, XSetSetSet::ICON, "gtk-preferences");
 
     set = xset_set("dev_net_cnf", "menu_label", "_Protocol Handlers");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICON, "gtk-preferences");
+    xset_set_set(set, XSetSetSet::ICON, "gtk-preferences");
 
     // dev icons
     set = xset_set("dev_icon", "menu_label", "_Icon");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "dev_icon_internal_mounted dev_icon_internal_unmounted separator dev_icon_remove_mounted "
         "dev_icon_remove_unmounted separator dev_icon_optical_mounted dev_icon_optical_media "
         "dev_icon_optical_nomedia dev_icon_audiocd separator dev_icon_floppy_mounted "
@@ -7685,58 +7685,58 @@ xset_defaults()
 
     set = xset_set("dev_icon_audiocd", "menu_label", "Audio CD");
     set->menu_style = XSetMenu::XSET_MENU_ICON;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-cdrom");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-cdrom");
 
     set = xset_set("dev_icon_optical_mounted", "menu_label", "Optical Mounted");
     set->menu_style = XSetMenu::XSET_MENU_ICON;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-cdrom");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-cdrom");
 
     set = xset_set("dev_icon_optical_media", "menu_label", "Optical Has Media");
     set->menu_style = XSetMenu::XSET_MENU_ICON;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-yes");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-yes");
 
     set = xset_set("dev_icon_optical_nomedia", "menu_label", "Optical No Media");
     set->menu_style = XSetMenu::XSET_MENU_ICON;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-close");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-close");
 
     set = xset_set("dev_icon_floppy_mounted", "menu_label", "Floppy Mounted");
     set->menu_style = XSetMenu::XSET_MENU_ICON;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-floppy");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-floppy");
 
     set = xset_set("dev_icon_floppy_unmounted", "menu_label", "Floppy Unmounted");
     set->menu_style = XSetMenu::XSET_MENU_ICON;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-floppy");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-floppy");
 
     set = xset_set("dev_icon_remove_mounted", "menu_label", "Removable Mounted");
     set->menu_style = XSetMenu::XSET_MENU_ICON;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-add");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-add");
 
     set = xset_set("dev_icon_remove_unmounted", "menu_label", "Removable Unmounted");
     set->menu_style = XSetMenu::XSET_MENU_ICON;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-remove");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-remove");
 
     set = xset_set("dev_icon_internal_mounted", "menu_label", "Internal Mounted");
     set->menu_style = XSetMenu::XSET_MENU_ICON;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-open");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-open");
 
     set = xset_set("dev_icon_internal_unmounted", "menu_label", "Internal Unmounted");
     set->menu_style = XSetMenu::XSET_MENU_ICON;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-harddisk");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-harddisk");
 
     set = xset_set("dev_icon_network", "menu_label", "Mounted Network");
     set->menu_style = XSetMenu::XSET_MENU_ICON;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-network");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-network");
 
     set = xset_set("dev_icon_file", "menu_label", "Mounted Other");
     set->menu_style = XSetMenu::XSET_MENU_ICON;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-file");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-file");
 
     set = xset_set("book_open", "menu_label", "_Open");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-open");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-open");
 
     set = xset_set("book_settings", "menu_label", "_Settings");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-properties");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-properties");
 
     set = xset_set("book_icon", "menu_label", "Bookmark _Icon");
     set->menu_style = XSetMenu::XSET_MENU_ICON;
@@ -7748,13 +7748,13 @@ xset_defaults()
 
     set = xset_set("book_show", "menu_label", "_Show Bookmarks");
     set->menu_style = XSetMenu::XSET_MENU_CHECK;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_show_book");
+    xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_show_book");
 
     set = xset_set("book_add", "menu_label", "New _Bookmark");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-jump-to");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-jump-to");
 
     set = xset_set("main_book", "menu_label", "_Bookmarks");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-directory");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-directory");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
 
     // Rename/Move Dialog
@@ -7786,9 +7786,7 @@ xset_defaults()
 
     set = xset_set("move_option", "menu_label", "_Option");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
-                 "move_copy move_link move_copyt move_linkt move_as_root");
+    xset_set_set(set, XSetSetSet::DESC, "move_copy move_link move_copyt move_linkt move_as_root");
 
     set = xset_set("move_copy", "menu_label", "_Copy");
     set->menu_style = XSetMenu::XSET_MENU_CHECK;
@@ -7809,7 +7807,7 @@ xset_defaults()
     set->b = XSetB::XSET_B_TRUE;
 
     set = xset_set("move_dlg_help", "menu_label", "_Help");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-help");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-help");
 
     set = xset_set("move_dlg_confirm_create", "menu_label", "_Confirm Create");
     set->menu_style = XSetMenu::XSET_MENU_CHECK;
@@ -7818,9 +7816,7 @@ xset_defaults()
     // status bar
     set = xset_set("status_middle", "menu_label", "_Middle Click");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
-                 "status_name status_path status_info status_hide");
+    xset_set_set(set, XSetSetSet::DESC, "status_name status_path status_info status_hide");
 
     set = xset_set("status_name", "menu_label", "Copy _Name");
     set->menu_style = XSetMenu::XSET_MENU_RADIO;
@@ -7839,27 +7835,27 @@ xset_defaults()
 
     // File
     set = xset_set("main_new_window", "menu_label", "New _Window");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "spacefm");
+    xset_set_set(set, XSetSetSet::ICN, "spacefm");
 
     set = xset_set("main_root_window", "menu_label", "R_oot Window");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-dialog-warning");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-dialog-warning");
 
     set = xset_set("main_search", "menu_label", "_File Search");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-find");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-find");
 
     set = xset_set("main_terminal", "menu_label", "_Terminal");
     set->b = XSetB::XSET_B_UNSET; // discovery notification
 
     set = xset_set("main_root_terminal", "menu_label", "_Root Terminal");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-dialog-warning");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-dialog-warning");
 
     // was previously used for 'Save Session' < 0.9.4 as XSetMenu::XSET_MENU_NORMAL
     set = xset_set("main_save_session", "menu_label", "Open _URL");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-network");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Open URL");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-network");
+    xset_set_set(set, XSetSetSet::TITLE, "Open URL");
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "Enter URL in the "
                  "format:\n\tPROTOCOL://USERNAME:PASSWORD@HOST:PORT/SHARE\n\nExamples:\n\tftp://"
                  "mirrors.kernel.org\n\tsmb://user:pass@10.0.0.1:50/docs\n\tssh://"
@@ -7872,7 +7868,7 @@ xset_defaults()
     set->b = XSetB::XSET_B_TRUE;
 
     set = xset_set("main_exit", "menu_label", "E_xit");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-quit");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-quit");
 
     // View
     set = xset_set("panel1_show", "menu_label", "Panel _1");
@@ -7895,9 +7891,9 @@ xset_defaults()
     set = xset_set("main_focus_panel", "menu_label", "F_ocus");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "panel_prev panel_next panel_hide panel_1 panel_2 panel_3 panel_4");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-go-forward");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-go-forward");
 
     set = xset_set("panel_prev", "menu_label", "_Prev");
     xset_set("panel_next", "menu_label", "_Next");
@@ -7909,43 +7905,41 @@ xset_defaults()
 
     set = xset_set("main_auto", "menu_label", "_Event Manager");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
-                 "auto_inst auto_win auto_pnl auto_tab evt_device");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-execute");
+    xset_set_set(set, XSetSetSet::DESC, "auto_inst auto_win auto_pnl auto_tab evt_device");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-execute");
 
     set = xset_set("auto_inst", "menu_label", "_Instance");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_DESC, "evt_start evt_exit");
+    xset_set_set(set, XSetSetSet::DESC, "evt_start evt_exit");
 
     set = xset_set("evt_start", "menu_label", "_Startup");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set Instance Startup Command");
+    xset_set_set(set, XSetSetSet::TITLE, "Set Instance Startup Command");
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "Enter program or bash command line to be run automatically when a SpaceFM "
                  "instance starts:\n\nUse:\n\t%%e\tevent type  (evt_start)\n");
 
     set = xset_set("evt_exit", "menu_label", "_Exit");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set Instance Exit Command");
+    xset_set_set(set, XSetSetSet::TITLE, "Set Instance Exit Command");
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "Enter program or bash command line to be run automatically when a SpaceFM "
                  "instance exits:\n\nUse:\n\t%%e\tevent type  (evt_exit)\n");
 
     set = xset_set("auto_win", "menu_label", "_Window");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "evt_win_new evt_win_focus evt_win_move evt_win_click evt_win_key evt_win_close");
 
     set = xset_set("evt_win_new", "menu_label", "_New");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set New Window Command");
+    xset_set_set(set, XSetSetSet::TITLE, "Set New Window Command");
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "Enter program or bash command line to be run automatically whenever a new SpaceFM "
         "window is opened:\n\nUse:\n\t%%e\tevent type  (evt_win_new)\n\t%%w\twindow id  (see "
         "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables (eg $fm_pwd, etc) "
@@ -7953,9 +7947,9 @@ xset_defaults()
 
     set = xset_set("evt_win_focus", "menu_label", "_Focus");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set Window Focus Command");
+    xset_set_set(set, XSetSetSet::TITLE, "Set Window Focus Command");
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "Enter program or bash command line to be run automatically whenever a SpaceFM "
                  "window gets focus:\n\nUse:\n\t%%e\tevent type  (evt_win_focus)\n\t%%w\twindow "
                  "id  (see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables "
@@ -7963,10 +7957,10 @@ xset_defaults()
 
     set = xset_set("evt_win_move", "menu_label", "_Move/Resize");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set Window Move/Resize Command");
+    xset_set_set(set, XSetSetSet::TITLE, "Set Window Move/Resize Command");
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "Enter program or bash command line to be run automatically whenever a SpaceFM window is "
         "moved or resized:\n\nUse:\n\t%%e\tevent type  (evt_win_move)\n\t%%w\twindow id  (see "
         "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables (eg $fm_pwd, etc) "
@@ -7975,10 +7969,10 @@ xset_defaults()
 
     set = xset_set("evt_win_click", "menu_label", "_Click");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set Click Command");
+    xset_set_set(set, XSetSetSet::TITLE, "Set Click Command");
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "Enter program or bash command line to be run automatically whenever the mouse is "
         "clicked:\n\nUse:\n\t%%e\tevent type  (evt_win_click)\n\t%%w\twindow id  (see spacefm -s "
         "help)\n\t%%p\tpanel\n\t%%t\ttab\n\t%%b\tbutton  (mouse button pressed)\n\t%%m\tmodifier "
@@ -7990,10 +7984,10 @@ xset_defaults()
 
     set = xset_set("evt_win_key", "menu_label", "_Keypress");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set Window Keypress Command");
+    xset_set_set(set, XSetSetSet::TITLE, "Set Window Keypress Command");
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "Enter program or bash command line to be run automatically whenever a key is "
         "pressed:\n\nUse:\n\t%%e\tevent type  (evt_win_key)\n\t%%w\twindow id  (see spacefm -s "
         "help)\n\t%%p\tpanel\n\t%%t\ttab\n\t%%k\tkey code  (key pressed)\n\t%%m\tmodifier  "
@@ -8005,9 +7999,9 @@ xset_defaults()
 
     set = xset_set("evt_win_close", "menu_label", "Cl_ose");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set Window Close Command");
+    xset_set_set(set, XSetSetSet::TITLE, "Set Window Close Command");
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "Enter program or bash command line to be run automatically whenever a SpaceFM "
                  "window is closed:\n\nUse:\n\t%%e\tevent type  (evt_win_close)\n\t%%w\twindow "
                  "id  (see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables "
@@ -8015,13 +8009,13 @@ xset_defaults()
 
     set = xset_set("auto_pnl", "menu_label", "_Panel");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_DESC, "evt_pnl_focus evt_pnl_show evt_pnl_sel");
+    xset_set_set(set, XSetSetSet::DESC, "evt_pnl_focus evt_pnl_show evt_pnl_sel");
 
     set = xset_set("evt_pnl_focus", "menu_label", "_Focus");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set Panel Focus Command");
+    xset_set_set(set, XSetSetSet::TITLE, "Set Panel Focus Command");
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "Enter program or bash command line to be run automatically whenever a panel "
                  "gets focus:\n\nUse:\n\t%%e\tevent type  (evt_pnl_focus)\n\t%%w\twindow id  "
                  "(see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables (eg "
@@ -8029,10 +8023,10 @@ xset_defaults()
 
     set = xset_set("evt_pnl_show", "menu_label", "_Show");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set Panel Show Command");
+    xset_set_set(set, XSetSetSet::TITLE, "Set Panel Show Command");
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "Enter program or bash command line to be run automatically whenever a panel or panel "
         "element is shown or hidden:\n\nUse:\n\t%%e\tevent type  (evt_pnl_show)\n\t%%w\twindow "
         "id  (see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\t%%f\tfocus  (element shown or "
@@ -8041,10 +8035,10 @@ xset_defaults()
 
     set = xset_set("evt_pnl_sel", "menu_label", "S_elect");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set Panel Select Command");
+    xset_set_set(set, XSetSetSet::TITLE, "Set Panel Select Command");
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "Enter program or bash command line to be run automatically whenever the file selection "
         "changes:\n\nUse:\n\t%%e\tevent type  (evt_pnl_sel)\n\t%%w\twindow id  (see spacefm -s "
         "help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables (eg $fm_pwd, etc) can be "
@@ -8053,15 +8047,13 @@ xset_defaults()
 
     set = xset_set("auto_tab", "menu_label", "_Tab");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
-                 "evt_tab_new evt_tab_chdir evt_tab_focus evt_tab_close");
+    xset_set_set(set, XSetSetSet::DESC, "evt_tab_new evt_tab_chdir evt_tab_focus evt_tab_close");
 
     set = xset_set("evt_tab_new", "menu_label", "_New");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set New Tab Command");
+    xset_set_set(set, XSetSetSet::TITLE, "Set New Tab Command");
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "Enter program or bash command line to be run automatically whenever a new tab "
                  "is opened:\n\nUse:\n\t%%e\tevent type  (evt_tab_new)\n\t%%w\twindow id  (see "
                  "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables (eg "
@@ -8069,10 +8061,10 @@ xset_defaults()
 
     set = xset_set("evt_tab_chdir", "menu_label", "_Change Dir");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set Tab Change Dir Command");
+    xset_set_set(set, XSetSetSet::TITLE, "Set Tab Change Dir Command");
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "Enter program or bash command line to be run automatically whenever a tab changes to a "
         "different directory:\n\nUse:\n\t%%e\tevent type  (evt_tab_chdir)\n\t%%w\twindow id  "
         "(see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\t%%d\tnew directory\n\nExported bash "
@@ -8080,9 +8072,9 @@ xset_defaults()
 
     set = xset_set("evt_tab_focus", "menu_label", "_Focus");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set Tab Focus Command");
+    xset_set_set(set, XSetSetSet::TITLE, "Set Tab Focus Command");
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "Enter program or bash command line to be run automatically whenever a tab gets "
                  "focus:\n\nUse:\n\t%%e\tevent type  (evt_tab_focus)\n\t%%w\twindow id  (see "
                  "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables (eg "
@@ -8090,35 +8082,35 @@ xset_defaults()
 
     set = xset_set("evt_tab_close", "menu_label", "_Close");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set Tab Close Command");
+    xset_set_set(set, XSetSetSet::TITLE, "Set Tab Close Command");
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "Enter program or bash command line to be run automatically whenever a tab is "
                  "closed:\n\nUse:\n\t%%e\tevent type  (evt_tab_close)\n\t%%w\twindow id  (see "
                  "spacefm -s help)\n\t%%p\tpanel\n\t%%t\tclosed tab");
 
     set = xset_set("evt_device", "menu_label", "_Device");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set Device Command");
+    xset_set_set(set, XSetSetSet::TITLE, "Set Device Command");
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "Enter program or bash command line to be run automatically whenever a device "
                  "state changes:\n\nUse:\n\t%%e\tevent type  (evt_device)\n\t%%f\tdevice "
                  "file\n\t%%v\tchange  (added|removed|changed)\n");
 
     set = xset_set("main_title", "menu_label", "Wi_ndow Title");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Set Window Title Format");
+    xset_set_set(set, XSetSetSet::TITLE, "Set Window Title Format");
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "Set window title format:\n\nUse:\n\t%%n\tcurrent directory name (eg "
         "bin)\n\t%%d\tcurrent "
         "directory path (eg /usr/bin)\n\t%%p\tcurrent panel number (1-4)\n\t%%t\tcurrent tab "
         "number\n\t%%P\ttotal number of panels visible\n\t%%T\ttotal number of tabs in current "
         "panel\n\t*\tasterisk shown if tasks running in window");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_S, "%d");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_Z, "%d");
+    xset_set_set(set, XSetSetSet::S, "%d");
+    xset_set_set(set, XSetSetSet::Z, "%d");
 
     set = xset_set("main_icon", "menu_label", "_Window Icon");
     set->menu_style = XSetMenu::XSET_MENU_ICON;
@@ -8137,10 +8129,10 @@ xset_defaults()
     set->menu_style = XSetMenu::XSET_MENU_CHECK;
 
     set = xset_set("main_design_mode", "menu_label", "_Design Mode");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-help");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-help");
 
     set = xset_set("main_prefs", "menu_label", "_Preferences");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-preferences");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-preferences");
 
     set = xset_set("main_tool", "menu_label", "_Tool");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
@@ -8154,29 +8146,29 @@ xset_defaults()
     // Plugins
     set = xset_set("plug_install", "menu_label", "_Install");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_DESC, "plug_ifile");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-add");
+    xset_set_set(set, XSetSetSet::DESC, "plug_ifile");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-add");
 
     set = xset_set("plug_ifile", "menu_label", "_File");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-file");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-file");
 
     set = xset_set("plug_copy", "menu_label", "_Import");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_DESC, "plug_cfile separator plug_cverb");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-copy");
+    xset_set_set(set, XSetSetSet::DESC, "plug_cfile separator plug_cverb");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-copy");
 
     set = xset_set("plug_cfile", "menu_label", "_File");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-file");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-file");
     set = xset_set("plug_cverb", "menu_label", "_Verbose");
     set->menu_style = XSetMenu::XSET_MENU_CHECK;
     set->b = XSetB::XSET_B_TRUE;
 
     // Help
     set = xset_set("main_about", "menu_label", "_About");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-about");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-about");
 
     set = xset_set("main_dev", "menu_label", "_Show Devices");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_show_devmon");
+    xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_show_devmon");
     set->menu_style = XSetMenu::XSET_MENU_CHECK;
 
     // Tasks
@@ -8184,7 +8176,7 @@ xset_defaults()
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "task_show_manager task_hide_manager separator task_columns task_popups task_errors "
         "task_queue");
 
@@ -8258,29 +8250,29 @@ xset_defaults()
     set = xset_set("task_col_reorder", "menu_label", "Reor_der");
 
     set = xset_set("task_stop", "menu_label", "_Stop");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-stop");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-stop");
     set = xset_set("task_pause", "menu_label", "Pa_use");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-media-pause");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-media-pause");
     set = xset_set("task_que", "menu_label", "_Queue");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-add");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-add");
     set = xset_set("task_resume", "menu_label", "_Resume");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-media-play");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-media-play");
     set = xset_set("task_showout", "menu_label", "Sho_w Output");
 
     set = xset_set("task_all", "menu_label", "_All Tasks");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "task_stop_all task_pause_all task_que_all task_resume_all");
 
     set = xset_set("task_stop_all", "menu_label", "_Stop");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-stop");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-stop");
     set = xset_set("task_pause_all", "menu_label", "Pa_use");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-media-pause");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-media-pause");
     set = xset_set("task_que_all", "menu_label", "_Queue");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-add");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-add");
     set = xset_set("task_resume_all", "menu_label", "_Resume");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-media-play");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-media-play");
 
     set = xset_set("task_show_manager", "menu_label", "Show _Manager");
     set->menu_style = XSetMenu::XSET_MENU_RADIO;
@@ -8295,7 +8287,7 @@ xset_defaults()
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "task_col_count task_col_path task_col_file task_col_to task_col_progress task_col_total "
         "task_col_started task_col_elapsed task_col_curspeed task_col_curest task_col_avgspeed "
         "task_col_avgest separator task_col_reorder");
@@ -8304,7 +8296,7 @@ xset_defaults()
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "task_pop_all task_pop_top task_pop_above task_pop_stick separator task_pop_detail "
         "task_pop_over task_pop_err");
 
@@ -8338,7 +8330,7 @@ xset_defaults()
 
     set = xset_set("task_errors", "menu_label", "Err_ors");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_DESC, "task_err_first task_err_any task_err_cont");
+    xset_set_set(set, XSetSetSet::DESC, "task_err_first task_err_any task_err_cont");
 
     set = xset_set("task_err_first", "menu_label", "Stop If _First");
     set->menu_style = XSetMenu::XSET_MENU_RADIO;
@@ -8354,7 +8346,7 @@ xset_defaults()
 
     set = xset_set("task_queue", "menu_label", "Qu_eue");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_DESC, "task_q_new task_q_smart task_q_pause");
+    xset_set_set(set, XSetSetSet::DESC, "task_q_new task_q_smart task_q_pause");
 
     set = xset_set("task_q_new", "menu_label", "_Queue New Tasks");
     set->menu_style = XSetMenu::XSET_MENU_CHECK;
@@ -8372,29 +8364,29 @@ xset_defaults()
 
     set = xset_set("con_open", "menu_label", "_Open");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-open");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-open");
 
     set = xset_set("open_execute", "menu_label", "E_xecute");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-execute");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-execute");
 
     set = xset_set("open_edit", "menu_label", "Edi_t");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-edit");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-edit");
 
     set = xset_set("open_edit_root", "menu_label", "Edit As _Root");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-dialog-warning");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-dialog-warning");
 
     set = xset_set("open_other", "menu_label", "_Choose...");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-open");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-open");
 
     set = xset_set("open_hand", "menu_label", "File _Handlers...");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-preferences");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-preferences");
 
     set = xset_set("open_all", "menu_label", "Open With _Default"); // virtual
 
     set = xset_set("open_in_tab", "menu_label", "In _Tab");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "opentab_new opentab_prev opentab_next opentab_1 opentab_2 opentab_3 opentab_4 "
                  "opentab_5 opentab_6 opentab_7 opentab_8 opentab_9 opentab_10");
 
@@ -8415,7 +8407,7 @@ xset_defaults()
     set = xset_set("open_in_panel", "menu_label", "In _Panel");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "open_in_panelprev open_in_panelnext open_in_panel1 open_in_panel2 open_in_panel3 "
                  "open_in_panel4");
 
@@ -8427,18 +8419,18 @@ xset_defaults()
     xset_set("open_in_panel4", "menu_label", "Panel _4");
 
     set = xset_set("arc_extract", "menu_label", "_Extract");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-convert");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-convert");
 
     set = xset_set("arc_extractto", "menu_label", "Extract _To");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-convert");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-convert");
 
     set = xset_set("arc_list", "menu_label", "_List Contents");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-file");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-file");
 
     set = xset_set("arc_default", "menu_label", "_Archive Defaults");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "arc_conf2 separator arc_def_open arc_def_ex arc_def_exto arc_def_list separator "
                  "arc_def_parent arc_def_write");
 
@@ -8464,89 +8456,89 @@ xset_defaults()
     set->b = XSetB::XSET_B_TRUE;
 
     set = xset_set("arc_conf2", "menu_label", "Archive _Handlers");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICON, "gtk-preferences");
+    xset_set_set(set, XSetSetSet::ICON, "gtk-preferences");
 
     set = xset_set("open_new", "menu_label", "_New");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "new_file new_directory new_link new_archive separator tab_new tab_new_here new_bookmark");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-new");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-new");
 
     set = xset_set("new_file", "menu_label", "_File");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-file");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-file");
 
     set = xset_set("new_directory", "menu_label", "Dir_ectory");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-directory");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-directory");
 
     set = xset_set("new_link", "menu_label", "_Link");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-file");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-file");
 
     set = xset_set("new_bookmark", "menu_label", "_Bookmark");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "book_add");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-jump-to");
+    xset_set_set(set, XSetSetSet::SHARED_KEY, "book_add");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-jump-to");
 
     set = xset_set("new_archive", "menu_label", "_Archive");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-save-as");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-save-as");
 
     set = xset_get("arc_dlg");
     set->b = XSetB::XSET_B_TRUE; // Extract To - Create Subdirectory
     set->z = ztd::strdup("1");   // Extract To - Write Access
 
     set = xset_set("tab_new", "menu_label", "_Tab");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-add");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-add");
     set = xset_set("tab_new_here", "menu_label", "Tab _Here");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-add");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-add");
 
     set = xset_set("new_app", "menu_label", "_Desktop Application");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-add");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-add");
 
     set = xset_set("con_go", "menu_label", "_Go");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "go_back go_forward go_up go_home go_default go_set_default edit_canon separator "
                  "go_tab go_focus");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-go-forward");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-go-forward");
 
     set = xset_set("go_back", "menu_label", "_Back");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-go-back");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-go-back");
     set = xset_set("go_forward", "menu_label", "_Forward");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-go-forward");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-go-forward");
     set = xset_set("go_up", "menu_label", "_Up");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-go-up");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-go-up");
     set = xset_set("go_home", "menu_label", "_Home");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-home");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-home");
     set = xset_set("go_default", "menu_label", "_Default");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-home");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-home");
 
     set = xset_set("go_set_default", "menu_label", "_Set Default");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-save");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-save");
 
     set = xset_set("edit_canon", "menu_label", "Re_al Path");
 
     set = xset_set("go_focus", "menu_label", "Fo_cus");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "focus_path_bar focus_filelist focus_dirtree focus_book focus_device");
 
     set = xset_set("focus_path_bar", "menu_label", "_Path Bar");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-dialog-question");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-dialog-question");
     set = xset_set("focus_filelist", "menu_label", "_File List");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-file");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-file");
     set = xset_set("focus_dirtree", "menu_label", "_Tree");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-directory");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-directory");
     set = xset_set("focus_book", "menu_label", "_Bookmarks");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-jump-to");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-jump-to");
     set = xset_set("focus_device", "menu_label", "De_vices");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-harddisk");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-harddisk");
 
     set = xset_set("go_tab", "menu_label", "_Tab");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "tab_prev tab_next tab_restore tab_close tab_1 tab_2 tab_3 tab_4 tab_5 tab_6 "
                  "tab_7 tab_8 tab_9 tab_10");
 
@@ -8567,7 +8559,7 @@ xset_defaults()
 
     set = xset_set("con_view", "menu_label", "_View");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-preferences");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-preferences");
 
     set = xset_set("view_list_style", "menu_label", "Styl_e");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
@@ -8585,7 +8577,7 @@ xset_defaults()
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "sortby_name sortby_size sortby_type sortby_perm sortby_owner sortby_date separator "
         "sortby_ascend sortby_descend separator sortx_alphanum sortx_case separator " // sortx_natural
         "sortx_directories sortx_files sortx_mix separator sortx_hidfirst sortx_hidlast");
@@ -8627,81 +8619,79 @@ xset_defaults()
     set->menu_style = XSetMenu::XSET_MENU_RADIO;
 
     set = xset_set("view_refresh", "menu_label", "Re_fresh");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-refresh");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-refresh");
 
     set = xset_set("path_seek", "menu_label", "Auto See_k");
     set->menu_style = XSetMenu::XSET_MENU_CHECK;
     set->b = XSetB::XSET_B_TRUE;
 
     set = xset_set("path_hand", "menu_label", "_Protocol Handlers");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-preferences");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "dev_net_cnf");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-preferences");
+    xset_set_set(set, XSetSetSet::SHARED_KEY, "dev_net_cnf");
     // set->s was custom protocol handler in sfm<=0.9.3 - retained
 
     set = xset_set("path_help", "menu_label", "Path Bar _Help");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-help");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-help");
 
     // EDIT
     set = xset_set("edit_cut", "menu_label", "Cu_t");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-cut");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-cut");
 
     set = xset_set("edit_copy", "menu_label", "_Copy");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-copy");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-copy");
 
     set = xset_set("edit_paste", "menu_label", "_Paste");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-paste");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-paste");
 
     set = xset_set("edit_rename", "menu_label", "_Rename");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-edit");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-edit");
 
     set = xset_set("edit_delete", "menu_label", "_Delete");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-delete");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-delete");
 
     set = xset_set("edit_trash", "menu_label", "_Trash");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-delete");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-delete");
 
     set = xset_set("edit_submenu", "menu_label", "_Actions");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "copy_name copy_parent copy_path separator paste_link paste_target paste_as separator "
         "copy_to "
         "move_to edit_root edit_hide separator select_all select_patt select_invert select_un");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-edit");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-edit");
 
     set = xset_set("copy_name", "menu_label", "Copy _Name");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-copy");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-copy");
 
     set = xset_set("copy_path", "menu_label", "Copy _Path");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-copy");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-copy");
 
     set = xset_set("copy_parent", "menu_label", "Copy Pa_rent");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-copy");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-copy");
 
     set = xset_set("paste_link", "menu_label", "Paste _Link");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-paste");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-paste");
 
     set = xset_set("paste_target", "menu_label", "Paste _Target");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-paste");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-paste");
 
     set = xset_set("paste_as", "menu_label", "Paste _As");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-paste");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-paste");
 
     set = xset_set("copy_to", "menu_label", "_Copy To");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
-                 "copy_loc copy_loc_last separator copy_tab copy_panel");
+    xset_set_set(set, XSetSetSet::DESC, "copy_loc copy_loc_last separator copy_tab copy_panel");
 
     set = xset_set("copy_loc", "menu_label", "L_ocation");
     set = xset_set("copy_loc_last", "menu_label", "L_ast Location");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-redo");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-redo");
 
     set = xset_set("copy_tab", "menu_label", "_Tab");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "copy_tab_prev copy_tab_next copy_tab_1 copy_tab_2 copy_tab_3 copy_tab_4 "
                  "copy_tab_5 copy_tab_6 copy_tab_7 copy_tab_8 copy_tab_9 copy_tab_10");
 
@@ -8722,7 +8712,7 @@ xset_defaults()
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "copy_panel_prev copy_panel_next copy_panel_1 copy_panel_2 copy_panel_3 copy_panel_4");
 
     xset_set("copy_panel_prev", "menu_label", "_Prev");
@@ -8734,17 +8724,15 @@ xset_defaults()
 
     set = xset_set("move_to", "menu_label", "_Move To");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
-                 "move_loc move_loc_last separator move_tab move_panel");
+    xset_set_set(set, XSetSetSet::DESC, "move_loc move_loc_last separator move_tab move_panel");
 
     set = xset_set("move_loc", "menu_label", "_Location");
     set = xset_set("move_loc_last", "menu_label", "L_ast Location");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-redo");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-redo");
     set = xset_set("move_tab", "menu_label", "_Tab");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "move_tab_prev move_tab_next move_tab_1 move_tab_2 move_tab_3 move_tab_4 "
                  "move_tab_5 move_tab_6 move_tab_7 move_tab_8 move_tab_9 move_tab_10");
 
@@ -8765,7 +8753,7 @@ xset_defaults()
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "move_panel_prev move_panel_next move_panel_1 move_panel_2 move_panel_3 move_panel_4");
 
     xset_set("move_panel_prev", "menu_label", "_Prev");
@@ -8778,7 +8766,7 @@ xset_defaults()
     set = xset_set("edit_hide", "menu_label", "_Hide");
 
     set = xset_set("select_all", "menu_label", "_Select All");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-select-all");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-select-all");
 
     set = xset_set("select_un", "menu_label", "_Unselect All");
 
@@ -8788,30 +8776,30 @@ xset_defaults()
 
     set = xset_set("edit_root", "menu_label", "R_oot");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_DESC, "root_copy_loc root_move2 root_delete");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-dialog-warning");
+    xset_set_set(set, XSetSetSet::DESC, "root_copy_loc root_move2 root_delete");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-dialog-warning");
 
     set = xset_set("root_copy_loc", "menu_label", "_Copy To");
     set = xset_set("root_move2", "menu_label", "Move _To");
     set = xset_set("root_delete", "menu_label", "_Delete");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-delete");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-delete");
 
     // Properties
     set = xset_set("con_prop", "menu_label", "Propert_ies");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_DESC, "");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-properties");
+    xset_set_set(set, XSetSetSet::DESC, "");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-properties");
 
     set = xset_set("prop_info", "menu_label", "_Info");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-dialog-info");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-dialog-info");
 
     set = xset_set("prop_perm", "menu_label", "_Permissions");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "dialog-password");
+    xset_set_set(set, XSetSetSet::ICN, "dialog-password");
 
     set = xset_set("prop_quick", "menu_label", "_Quick");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "perm_r perm_rw perm_rwx perm_r_r perm_rw_r perm_rw_rw perm_rwxr_x perm_rwxrwx "
                  "perm_r_r_r perm_rw_r_r perm_rw_rw_rw perm_rwxr_r perm_rwxr_xr_x perm_rwxrwxrwx "
                  "perm_rwxrwxrwt perm_unstick perm_stick perm_recurs");
@@ -8837,7 +8825,7 @@ xset_defaults()
     set = xset_set("perm_recurs", "menu_label", "_Recursive");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "perm_go_w perm_go_rwx perm_ugo_w perm_ugo_rx perm_ugo_rwx");
 
     xset_set("perm_go_w", "menu_label", "go-w");
@@ -8849,11 +8837,11 @@ xset_defaults()
     set = xset_set("prop_root", "menu_label", "_Root");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "rperm_rw rperm_rwx rperm_rw_r rperm_rw_rw rperm_rwxr_x rperm_rwxrwx rperm_rw_r_r "
                  "rperm_rw_rw_rw rperm_rwxr_r rperm_rwxr_xr_x rperm_rwxrwxrwx rperm_rwxrwxrwt "
                  "rperm_unstick rperm_stick rperm_recurs rperm_own");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-dialog-warning");
+    xset_set_set(set, XSetSetSet::ICN, "gtk-dialog-warning");
 
     xset_set("rperm_rw", "menu_label", "rw-------");
     xset_set("rperm_rwx", "menu_label", "rwx------");
@@ -8873,7 +8861,7 @@ xset_defaults()
     set = xset_set("rperm_recurs", "menu_label", "_Recursive");
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
+                 XSetSetSet::DESC,
                  "rperm_go_w rperm_go_rwx rperm_ugo_w rperm_ugo_rx rperm_ugo_rwx");
 
     xset_set("rperm_go_w", "menu_label", "go-w");
@@ -8886,7 +8874,7 @@ xset_defaults()
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "own_myuser own_myuser_users own_user1 own_user1_users own_user2 own_user2_users own_root "
         "own_root_users own_root_myuser own_root_user1 own_root_user2 own_recurs");
 
@@ -8906,7 +8894,7 @@ xset_defaults()
     set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
     xset_set_set(
         set,
-        XSetSetSet::XSET_SET_SET_DESC,
+        XSetSetSet::DESC,
         "rown_myuser rown_myuser_users rown_user1 rown_user1_users rown_user2 rown_user2_users "
         "rown_root rown_root_users rown_root_myuser rown_root_user1 rown_root_user2");
 
@@ -8930,67 +8918,67 @@ xset_defaults()
         set->menu_style = XSetMenu::XSET_MENU_CHECK;
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_show_toolbox");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_show_toolbox");
 
         set = xset_set_panel(p, "show_devmon", "menu_label", "_Devices");
         set->menu_style = XSetMenu::XSET_MENU_CHECK;
         set->b = XSetB::XSET_B_UNSET;
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_show_devmon");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_show_devmon");
 
         set = xset_set_panel(p, "show_dirtree", "menu_label", "T_ree");
         set->menu_style = XSetMenu::XSET_MENU_CHECK;
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_show_dirtree");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_show_dirtree");
 
         set = xset_set_panel(p, "show_book", "menu_label", "_Bookmarks");
         set->menu_style = XSetMenu::XSET_MENU_CHECK;
         set->b = XSetB::XSET_B_UNSET;
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_show_book");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_show_book");
 
         set = xset_set_panel(p, "show_sidebar", "menu_label", "_Side Toolbar");
         set->menu_style = XSetMenu::XSET_MENU_CHECK;
         set->b = XSetB::XSET_B_UNSET;
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_show_sidebar");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_show_sidebar");
 
         set = xset_set_panel(p, "list_detailed", "menu_label", "_Detailed");
         set->menu_style = XSetMenu::XSET_MENU_RADIO;
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_list_detailed");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_list_detailed");
 
         set = xset_set_panel(p, "list_icons", "menu_label", "_Icons");
         set->menu_style = XSetMenu::XSET_MENU_RADIO;
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_list_icons");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_list_icons");
 
         set = xset_set_panel(p, "list_compact", "menu_label", "_Compact");
         set->menu_style = XSetMenu::XSET_MENU_RADIO;
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_list_compact");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_list_compact");
 
         set = xset_set_panel(p, "list_large", "menu_label", "_Large Icons");
         set->menu_style = XSetMenu::XSET_MENU_CHECK;
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_list_large");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_list_large");
 
         set = xset_set_panel(p, "show_hidden", "menu_label", "_Hidden Files");
         set->menu_style = XSetMenu::XSET_MENU_CHECK;
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_show_hidden");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_show_hidden");
 
         set = xset_set_panel(p, "icon_tab", "menu_label", "_Icon");
         set->menu_style = XSetMenu::XSET_MENU_ICON;
-        xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-directory");
+        xset_set_set(set, XSetSetSet::ICN, "gtk-directory");
 
         set = xset_set_panel(p, "icon_status", "menu_label", "_Icon");
         set->menu_style = XSetMenu::XSET_MENU_ICON;
-        xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-yes");
+        xset_set_set(set, XSetSetSet::ICN, "gtk-yes");
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_icon_status");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_icon_status");
 
         set = xset_set_panel(p, "detcol_name", "menu_label", "_Name");
         set->menu_style = XSetMenu::XSET_MENU_CHECK;
@@ -9002,31 +8990,31 @@ xset_defaults()
         set->b = XSetB::XSET_B_TRUE;
         set->x = ztd::strdup("1");
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_detcol_size");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_detcol_size");
 
         set = xset_set_panel(p, "detcol_type", "menu_label", "_Type");
         set->menu_style = XSetMenu::XSET_MENU_CHECK;
         set->x = ztd::strdup("2");
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_detcol_type");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_detcol_type");
 
         set = xset_set_panel(p, "detcol_perm", "menu_label", "_Permission");
         set->menu_style = XSetMenu::XSET_MENU_CHECK;
         set->x = ztd::strdup("3");
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_detcol_perm");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_detcol_perm");
 
         set = xset_set_panel(p, "detcol_owner", "menu_label", "_Owner");
         set->menu_style = XSetMenu::XSET_MENU_CHECK;
         set->x = ztd::strdup("4");
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_detcol_owner");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_detcol_owner");
 
         set = xset_set_panel(p, "detcol_date", "menu_label", "_Modified");
         set->menu_style = XSetMenu::XSET_MENU_CHECK;
         set->x = ztd::strdup("5");
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_detcol_date");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_detcol_date");
 
         set = xset_get_panel(p, "sort_extra");
         set->b = XSetB::XSET_B_TRUE;               // sort_natural
@@ -9038,7 +9026,7 @@ xset_defaults()
         set->menu_style = XSetMenu::XSET_MENU_CHECK;
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_book_fol");
+            xset_set_set(set, XSetSetSet::SHARED_KEY, "panel1_book_fol");
     }
 
     // speed

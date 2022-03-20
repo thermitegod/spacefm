@@ -427,7 +427,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                            p,
                            p,
                            p);
-        xset_set_set(set, XSetSetSet::XSET_SET_SET_DESC, desc.c_str());
+        xset_set_set(set, XSetSetSet::DESC, desc.c_str());
         set = xset_set_cb("rubberband", (GFunc)main_window_rubberband_all, nullptr);
         set->disable = false;
     }
@@ -559,7 +559,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                        p,
                        p,
                        p);
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_DESC, desc.c_str());
+    xset_set_set(set, XSetSetSet::DESC, desc.c_str());
     set = xset_get("con_view");
     set->disable = !browser->file_list;
     desc = fmt::format("panel{}_show_toolbox panel{}_show_sidebar panel{}_show_devmon "
@@ -571,7 +571,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                        p,
                        p,
                        p);
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_DESC, desc.c_str());
+    xset_set_set(set, XSetSetSet::DESC, desc.c_str());
     xset_add_menuitem(browser, menu, accel_group, set);
 }
 
@@ -1093,7 +1093,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
         set = xset_get("open_new");
         xset_set_set(set,
-                     XSetSetSet::XSET_SET_SET_DESC,
+                     XSetSetSet::DESC,
                      "new_file new_directory new_link new_archive separator tab_new tab_new_here "
                      "new_bookmark");
 
@@ -1277,7 +1277,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
             desc = ztd::strdup("prop_info prop_perm prop_root");
         else
             desc = ztd::strdup("prop_info prop_perm prop_quick prop_root");
-        xset_set_set(set, XSetSetSet::XSET_SET_SET_DESC, desc);
+        xset_set_set(set, XSetSetSet::DESC, desc);
         free(desc);
         xset_add_menuitem(browser, popup, accel_group, set);
     }

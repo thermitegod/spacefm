@@ -3810,7 +3810,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
                                 nullptr);
         if (path && std::filesystem::is_directory(path))
         {
-            xset_set_set(set, XSetSetSet::XSET_SET_SET_DESC, path);
+            xset_set_set(set, XSetSetSet::DESC, path);
             std::string quote_path = bash_quote(path);
 
             if (!strcmp(setname, "root_move2"))
