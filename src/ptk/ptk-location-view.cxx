@@ -2195,13 +2195,14 @@ static bool
 volume_is_visible(VFSVolume* vol)
 {
     // check show/hide
-    int i, j;
+#if 0
     char* test;
     char* value;
+
     char* showhidelist = g_strdup_printf(" %s ", xset_get_s("dev_show_hide_volumes"));
-    for (i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++)
     {
-        for (j = 0; j < 2; j++)
+        for (int j = 0; j < 2; j++)
         {
             if (i == 0)
                 value = vol->device_file;
@@ -2233,6 +2234,7 @@ volume_is_visible(VFSVolume* vol)
         }
     }
     free(showhidelist);
+#endif
 
     // network
     if (vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_NETWORK)
