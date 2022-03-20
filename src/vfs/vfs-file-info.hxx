@@ -13,7 +13,7 @@
 #pragma once
 
 #include <atomic>
-#include <ctime>
+#include <chrono>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>

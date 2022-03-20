@@ -26,7 +26,7 @@
 #include <string>
 #include <filesystem>
 
-#include <ctime>
+#include <chrono>
 
 #include <glib.h>
 #include <gtk/gtk.h>

@@ -15,7 +15,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <ctime>
+#include <chrono>
 
 #include <fcntl.h>
 #include <utime.h>

@@ -9,7 +9,7 @@
  *
  */
 
-#include <ctime>
+#include <chrono>
 
 #include "window-reference.hxx"
 

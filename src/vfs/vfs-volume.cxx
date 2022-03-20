@@ -15,9 +15,7 @@
 
 #include <vector>
 
-#include <regex>
-
-#include <ctime>
+#include <chrono>
 
 #include <libudev.h>
 #include <fcntl.h>
