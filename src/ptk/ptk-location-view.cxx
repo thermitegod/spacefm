@@ -1131,118 +1131,6 @@ on_mount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 }
 
 static void
-on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
-{
-    GtkWidget* view;
-    if (!item)
-        view = view2;
-    else
-        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
-
-    XSet* set = xset_get("dev_root_mount");
-    char* options = vfs_volume_get_mount_options(vol, xset_get_s("dev_mount_options"));
-    if (!options)
-        options = ztd::strdup("");
-    std::string msg =
-        fmt::format("Enter mount command:\n\nUse:\n\t%%%%v\tdevice file ( {} )"
-                    "\n\t%%%%o\tvolume-specific mount options\n\t\t( {} )\n\nNote: fstab "
-                    "overrides some options\n\nEDIT WITH CARE   This command is run as root",
-                    vol->device_file,
-                    options);
-
-    if (!set->s)
-        set->s = ztd::strdup(set->z);
-    char* old_set_s = ztd::strdup(set->s);
-
-    if (xset_text_dialog(view,
-                         "Mount As Root",
-                         "MOUNT AS ROOT",
-                         msg,
-                         set->s,
-                         &set->s,
-                         set->z,
-                         true) &&
-        set->s)
-    {
-        bool change_root = (!old_set_s || strcmp(old_set_s, set->s));
-
-        std::string cmd;
-        cmd = ztd::replace(set->s, "%v", vol->device_file);
-        cmd = ztd::replace(cmd, "%o", options);
-        cmd = fmt::format("echo {}; echo; {}", cmd, cmd);
-
-        // task
-        PtkFileBrowser* file_browser =
-            static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
-        std::string task_name = fmt::format("Mount As Root {}", vol->device_file);
-        PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
-        ptask->task->exec_command = cmd;
-        ptask->task->exec_write_root = change_root;
-        ptask->task->exec_as_user = "root";
-        ptask->task->exec_sync = true;
-        ptask->task->exec_popup = false;
-        ptask->task->exec_show_output = false;
-        ptask->task->exec_show_error = true;
-        ptask->task->exec_export = false;
-        ptask->task->exec_browser = file_browser;
-        ptask->task->exec_icon = vfs_volume_get_icon(vol);
-        ptk_file_task_run(ptask);
-    }
-    free(options);
-}
-
-static void
-on_umount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
-{
-    GtkWidget* view;
-    if (!item)
-        view = view2;
-    else
-        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
-
-    XSet* set = xset_get("dev_root_unmount");
-    std::string msg = fmt::format("Enter unmount command:\n\nUse:\n\t%%%%v\tdevice file ( {} )"
-                                  "\n\nEDIT WITH CARE   This command is run as root",
-                                  vol->device_file);
-    if (!set->s)
-        set->s = ztd::strdup(set->z);
-    char* old_set_s = ztd::strdup(set->s);
-
-    if (xset_text_dialog(view,
-                         "Unmount As Root",
-                         "UNMOUNT AS ROOT",
-                         msg,
-                         set->s,
-                         &set->s,
-                         set->z,
-                         true) &&
-        set->s)
-    {
-        bool change_root = (!old_set_s || strcmp(old_set_s, set->s));
-
-        // task
-        std::string cmd;
-        cmd = ztd::replace(set->s, "%v", vol->device_file);
-        cmd = fmt::format("echo {}; echo; {}", cmd, cmd);
-        PtkFileBrowser* file_browser =
-            static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
-        std::string task_name = fmt::format("Unmount As Root {}", vol->device_file);
-        PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
-        ptask->task->exec_command = cmd;
-        ptask->task->exec_write_root = change_root;
-        ptask->task->exec_as_user = "root";
-        ptask->task->exec_sync = true;
-        ptask->task->exec_popup = false;
-        ptask->task->exec_show_output = false;
-        ptask->task->exec_show_error = true;
-        ptask->task->exec_export = false;
-        ptask->task->exec_browser = file_browser;
-        ptask->task->exec_icon = vfs_volume_get_icon(vol);
-        ptk_file_task_run(ptask);
-    }
-}
-
-static void
 on_umount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 {
     GtkWidget* view;
@@ -1792,29 +1680,6 @@ on_sync(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 }
 
 static void
-on_root_fstab(GtkMenuItem* item, GtkWidget* view)
-{
-    (void)item;
-    char* fstab_path = g_build_filename(SYSCONFDIR, "fstab", nullptr);
-    xset_edit(view, fstab_path, true, false);
-    free(fstab_path);
-}
-
-static void
-on_root_udevil(GtkMenuItem* item, GtkWidget* view)
-{
-    (void)item;
-    std::string udevil_path = g_build_filename(SYSCONFDIR, "udevil", nullptr);
-    std::string udevil_conf = g_build_filename(SYSCONFDIR, "udevil", "udevil.conf", nullptr);
-    std::string msg =
-        fmt::format("The {} directory was not found.  Is udevil installed?", udevil_path);
-    if (std::filesystem::is_directory(udevil_path))
-        xset_edit(view, udevil_conf.c_str(), true, false);
-    else
-        xset_msg_dialog(view, GTK_MESSAGE_ERROR, "Directory Missing", GTK_BUTTONS_OK, msg);
-}
-
-static void
 on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 {
     GtkWidget* view;
@@ -2296,10 +2161,6 @@ ptk_location_view_on_action(GtkWidget* view, XSet* set)
         update_all();
     else if (!strcmp(set->name, "dev_automount_volumes"))
         on_automountlist(nullptr, vol, view);
-    else if (!strcmp(set->name, "dev_root_fstab"))
-        on_root_fstab(nullptr, view);
-    else if (!strcmp(set->name, "dev_root_udevil"))
-        on_root_udevil(nullptr, view);
     else if (Glib::str_has_prefix(set->name, "dev_icon_"))
         update_volume_icons();
     else if (!strcmp(set->name, "dev_dispname"))
@@ -2334,15 +2195,10 @@ ptk_location_view_on_action(GtkWidget* view, XSet* set)
             else if (!strcmp(set->name, "dev_menu_remount"))
                 on_remount(nullptr, vol, view);
         }
-        else if (Glib::str_has_prefix(set->name, "dev_root_"))
-        {
-            if (!strcmp(set->name, "dev_root_mount"))
-                on_mount_root(nullptr, vol, view);
-            else if (!strcmp(set->name, "dev_root_unmount"))
-                on_umount_root(nullptr, vol, view);
-        }
         else if (!strcmp(set->name, "dev_prop"))
+        {
             on_prop(nullptr, vol, view);
+        }
     }
 }
 
@@ -2382,14 +2238,6 @@ show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browse
     set = xset_set_cb("dev_menu_remount", (GFunc)on_remount, vol);
     xset_set_ob1(set, "view", view);
     set->disable = !vol;
-    set = xset_set_cb("dev_root_mount", (GFunc)on_mount_root, vol);
-    xset_set_ob1(set, "view", view);
-    set->disable = !vol;
-    set = xset_set_cb("dev_root_unmount", (GFunc)on_umount_root, vol);
-    xset_set_ob1(set, "view", view);
-    set->disable = !vol;
-    xset_set_cb("dev_root_fstab", (GFunc)on_root_fstab, view);
-    xset_set_cb("dev_root_udevil", (GFunc)on_root_udevil, view);
 
     set = xset_set_cb("dev_menu_mark", (GFunc)on_bookmark_device, vol);
     xset_set_ob1(set, "view", view);

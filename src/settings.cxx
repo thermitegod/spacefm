@@ -1680,10 +1680,8 @@ write_root_settings(std::string& buf, const std::string& path)
         if (set)
         {
             if (!strcmp(set->name, "root_editor") || !strcmp(set->name, "dev_back_part") ||
-                !strcmp(set->name, "dev_rest_file") || !strcmp(set->name, "dev_root_check") ||
-                !strcmp(set->name, "dev_root_mount") || !strcmp(set->name, "dev_root_unmount") ||
-                !strcmp(set->name, "main_terminal") || !strncmp(set->name, "dev_fmt_", 8) ||
-                !strncmp(set->name, "label_cmd_", 8))
+                !strcmp(set->name, "dev_rest_file") || !strcmp(set->name, "main_terminal") ||
+                !strncmp(set->name, "dev_fmt_", 8) || !strncmp(set->name, "label_cmd_", 8))
             {
                 write_root_saver(buf, path, set->name, "s", set->s);
                 write_root_saver(buf, path, set->name, "x", set->x);
@@ -1732,9 +1730,8 @@ read_root_settings()
         if (set)
         {
             if (!strcmp(set->name, "root_editor") || !strcmp(set->name, "dev_back_part") ||
-                !strcmp(set->name, "dev_rest_file") || !strcmp(set->name, "dev_root_check") ||
-                !strcmp(set->name, "dev_root_mount") || !strcmp(set->name, "dev_root_unmount") ||
-                !strncmp(set->name, "dev_fmt_", 8) || !strncmp(set->name, "label_cmd_", 8))
+                !strcmp(set->name, "dev_rest_file") || !strncmp(set->name, "dev_fmt_", 8) ||
+                !strncmp(set->name, "label_cmd_", 8))
             {
                 if (set->s)
                 {
@@ -7469,29 +7466,6 @@ xset_defaults()
 
     set = xset_set("dev_menu_mark", "menu_label", "_Bookmark");
     xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-add");
-
-    set = xset_set("dev_menu_root", "menu_label", "_Root");
-    set->menu_style = XSetMenu::XSET_MENU_SUBMENU;
-    xset_set_set(set,
-                 XSetSetSet::XSET_SET_SET_DESC,
-                 "dev_root_unmount dev_root_mount separator separator dev_root_check "
-                 "dev_menu_format dev_menu_backup dev_menu_restore separator dev_root_fstab "
-                 "dev_root_udevil");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-dialog-warning");
-
-    set = xset_set("dev_root_mount", "menu_label", "_Mount");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "drive-removable-media");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_Z, "/usr/bin/udevil mount -o %o %v");
-
-    set = xset_set("dev_root_unmount", "menu_label", "_Unmount");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-remove");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_Z, "/usr/bin/udevil umount %v");
-
-    set = xset_set("dev_root_fstab", "menu_label", "_Edit fstab");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-edit");
-
-    set = xset_set("dev_root_udevil", "menu_label", "Edit u_devil.conf");
-    xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-edit");
 
     set = xset_set("dev_prop", "menu_label", "_Properties");
     xset_set_set(set, XSetSetSet::XSET_SET_SET_ICN, "gtk-properties");
