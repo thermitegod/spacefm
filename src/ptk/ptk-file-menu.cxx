@@ -1573,15 +1573,15 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 
                 if (std::filesystem::exists(usr_path))
                     msg = fmt::format("The file '{}' does not exist.\n\nBy copying '{}' to '{}' "
-                                      "and editing it, you can adjust how MIME type '%s' files are "
+                                      "and editing it, you can adjust how MIME type '{}' files are "
                                       "recognized for the current user.\n\nCreate this copy now?",
                                       path,
                                       usr_path,
                                       path,
                                       mime_type->type);
                 else
-                    msg = fmt::format("The file '%s' does not exist.\n\nBy creating new file '%s' "
-                                      "and editing it, you can define how MIME type '%s' files are "
+                    msg = fmt::format("The file '{}' does not exist.\n\nBy creating new file '{}' "
+                                      "and editing it, you can define how MIME type '{}' files are "
                                       "recognized for the current user.\n\nCreate this file now?",
                                       path,
                                       path,
