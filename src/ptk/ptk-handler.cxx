@@ -1109,12 +1109,9 @@ string_copy_free(char** s, const char* src)
 void
 ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
 {
-    int i;
     int nelements;
     char* list;
     char* str;
-    char* testlist;
-    char* testname;
     XSet* set;
     XSet* set_conf;
     const Handler* handler;
@@ -1147,7 +1144,7 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
         overwrite = add_missing = true;
     }
 
-    for (i = 0; i < nelements; i++)
+    for (int i = 0; i < nelements; i++)
     {
         switch (mode)
         {
@@ -1167,20 +1164,22 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
                 return;
         }
 
+        std::string testlist;
+        std::string testname;
+
         // add a space to end of list and end of name before testing to avoid
         // substring false positive
-        testlist = g_strdup_printf("%s ", list);
-        testname = g_strdup_printf("%s ", handler->xset_name);
-        if (add_missing && !strstr(testlist, testname))
+        testlist = fmt::format("{} ", list);
+        testname = fmt::format("{} ", handler->xset_name);
+        if (add_missing && !ztd::contains(testlist, testname))
         {
             // add a missing default handler to the list
             str = list;
             list = g_strconcat(list, list[0] ? " " : "", handler->xset_name, nullptr);
             free(str);
         }
-        free(testlist);
-        testlist = g_strdup_printf("%s ", list);
-        if (add_missing || strstr(testlist, testname))
+        testlist = fmt::format("{} ", list);
+        if (add_missing || ztd::contains(testlist, testname))
         {
             set = xset_is(handler->xset_name);
             if (!set || overwrite)
@@ -1203,8 +1202,6 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
                 set->disable = true;
             }
         }
-        free(testlist);
-        free(testname);
     }
     // update handler list
     free(set_conf->s);
@@ -1271,7 +1268,7 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
         msg = fmt::format("An error occured copying command files\n\n{}", *standard_error);
         xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", GTK_BUTTONS_OK, msg);
     }
-    command = g_strdup_printf("chmod -R go-rwx %s", path_dest);
+    command = fmt::format("chmod -R go-rwx {}", path_dest);
     print_command(command);
     Glib::spawn_command_line_sync(command);
     free(path_dest);
@@ -1285,11 +1282,9 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     else
     {
         // Adding new handler to handlers
-        char* new_handlers_list = g_strdup_printf("%s %s",
-                                                  new_handler_xset->name,
-                                                  xset_get_s(handler_conf_xsets.at(mode)));
-        xset_set(handler_conf_xsets.at(mode), "s", new_handlers_list);
-        free(new_handlers_list);
+        std::string new_handlers_list =
+            fmt::format("{} {}", new_handler_xset->name, xset_get_s(handler_conf_xsets.at(mode)));
+        xset_set(handler_conf_xsets.at(mode), "s", new_handlers_list.c_str());
     }
 
     // have handler dialog open?
@@ -1334,17 +1329,16 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     // Adding handler to model
     const char* disabled =
         hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
-    char* dis_name = g_strdup_printf("%s %s",
-                                     new_handler_xset->menu_label,
-                                     new_handler_xset->b == XSetB::XSET_B_TRUE ? "" : disabled);
+    std::string dis_name = fmt::format("{} {}",
+                                       new_handler_xset->menu_label,
+                                       new_handler_xset->b == XSetB::XSET_B_TRUE ? "" : disabled);
     gtk_list_store_set(GTK_LIST_STORE(hnd->list),
                        &iter,
                        PtkHandlerCol::COL_XSET_NAME,
                        new_handler_xset->name,
                        PtkHandlerCol::COL_HANDLER_NAME,
-                       dis_name,
+                       dis_name.c_str(),
                        -1);
-    free(dis_name);
 
     // Activating the new handler - the normal loading code
     // automatically kicks in
@@ -1517,18 +1511,17 @@ populate_archive_handlers(HandlerData* hnd, XSet* def_handler_set)
                 // Adding handler to model
                 const char* disabled =
                     hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
-                char* dis_name =
-                    g_strdup_printf("%s %s",
-                                    handler_xset->menu_label,
-                                    handler_xset->b == XSetB::XSET_B_TRUE ? "" : disabled);
+                std::string dis_name =
+                    fmt::format("{} {}",
+                                handler_xset->menu_label,
+                                handler_xset->b == XSetB::XSET_B_TRUE ? "" : disabled);
                 gtk_list_store_set(GTK_LIST_STORE(hnd->list),
                                    &iter,
                                    PtkHandlerCol::COL_XSET_NAME,
                                    archive_handlers[i],
                                    PtkHandlerCol::COL_HANDLER_NAME,
-                                   dis_name,
+                                   dis_name.c_str(),
                                    -1);
-                free(dis_name);
                 if (def_handler_set == handler_xset)
                     def_handler_iter = iter;
             }
@@ -1574,8 +1567,7 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
 
     // Looping for all handlers
     char* xset_name;
-    char* archive_handlers = ztd::strdup("");
-    char* archive_handlers_temp;
+    std::string archive_handlers;
     do
     {
         gtk_tree_model_get(GTK_TREE_MODEL(hnd->list),
@@ -1584,22 +1576,15 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
                            &xset_name,
                            -1);
 
-        archive_handlers_temp = archive_handlers;
-        if (!g_strcmp0(archive_handlers, ""))
-        {
-            archive_handlers = ztd::strdup(xset_name);
-        }
+        if (ztd::same(archive_handlers, ""))
+            archive_handlers = xset_name;
         else
-        {
-            archive_handlers = g_strdup_printf("%s %s", archive_handlers, xset_name);
-        }
-        free(archive_handlers_temp);
+            archive_handlers = fmt::format("{} {}", archive_handlers, xset_name);
         free(xset_name);
     } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(hnd->list), &iter));
 
     // Saving the new archive handlers list
-    xset_set(handler_conf_xsets.at(hnd->mode), "s", archive_handlers);
-    free(archive_handlers);
+    xset_set(handler_conf_xsets.at(hnd->mode), "s", archive_handlers.c_str());
 
     // Saving settings
     autosave_request_add();
@@ -1728,17 +1713,17 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         // Adding handler to model
         const char* disabled =
             hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
-        char* dis_name = g_strdup_printf("%s %s",
-                                         handler_name,
-                                         new_handler_xset->b == XSetB::XSET_B_TRUE ? "" : disabled);
+        std::string dis_name =
+            fmt::format("{} {}",
+                        handler_name,
+                        new_handler_xset->b == XSetB::XSET_B_TRUE ? "" : disabled);
         gtk_list_store_set(GTK_LIST_STORE(hnd->list),
                            &iter,
                            PtkHandlerCol::COL_XSET_NAME,
                            new_handler_xset->name,
                            PtkHandlerCol::COL_HANDLER_NAME,
-                           dis_name,
+                           dis_name.c_str(),
                            -1);
-        free(dis_name);
 
         // Updating available archive handlers list
         if (g_strcmp0(xset_get_s(handler_conf_xsets.at(hnd->mode)), "") <= 0)
@@ -1749,13 +1734,11 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         else
         {
             // Adding new handler to handlers
-            char* new_handlers_list = g_strdup_printf("%s %s",
-                                                      new_handler_xset->name,
-                                                      xset_get_s(handler_conf_xsets.at(hnd->mode)));
-            xset_set(handler_conf_xsets.at(hnd->mode), "s", new_handlers_list);
-
-            // Clearing up
-            free(new_handlers_list);
+            std::string new_handlers_list =
+                fmt::format("{} {}",
+                            new_handler_xset->name,
+                            xset_get_s(handler_conf_xsets.at(hnd->mode)));
+            xset_set(handler_conf_xsets.at(hnd->mode), "s", new_handlers_list.c_str());
         }
 
         // Activating the new handler - the normal loading code
@@ -1799,16 +1782,15 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
             // It has - updating model
             const char* disabled =
                 hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
-            char* dis_name =
-                g_strdup_printf("%s %s", handler_name, handler_enabled ? "" : disabled);
+            std::string dis_name =
+                fmt::format("{} {}", handler_name, handler_enabled ? "" : disabled);
             gtk_list_store_set(GTK_LIST_STORE(model),
                                &it,
                                PtkHandlerCol::COL_XSET_NAME,
                                xset_name,
                                PtkHandlerCol::COL_HANDLER_NAME,
-                               dis_name,
+                               dis_name.c_str(),
                                -1);
-            free(dis_name);
         }
 
         // Saving archive handler
@@ -1885,8 +1867,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         const char* archive_handlers_s = xset_get_s(handler_conf_xsets.at(hnd->mode));
         char** archive_handlers =
             archive_handlers_s ? g_strsplit(archive_handlers_s, " ", -1) : nullptr;
-        char* new_archive_handlers_s = ztd::strdup("");
-        char* new_archive_handlers_s_temp;
+        std::string new_archive_handlers_s;
 
         // Looping for handlers (nullptr-terminated list)
         if (archive_handlers)
@@ -1902,23 +1883,17 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                     // LOG_INFO("archive_handlers[i] : {}", archive_handlers[i])
                     // LOG_INFO("xset_name           : {}", xset_name);
 
-                    new_archive_handlers_s_temp = new_archive_handlers_s;
-                    if (!g_strcmp0(new_archive_handlers_s, ""))
-                    {
+                    if (ztd::same(new_archive_handlers_s, ""))
                         new_archive_handlers_s = ztd::strdup(archive_handlers[i]);
-                    }
                     else
-                    {
                         new_archive_handlers_s =
-                            g_strdup_printf("%s %s", new_archive_handlers_s, archive_handlers[i]);
-                    }
-                    free(new_archive_handlers_s_temp);
+                            fmt::format("{} {}", new_archive_handlers_s, archive_handlers[i]);
                 }
             }
         }
 
         // Finally updating handlers
-        xset_set(handler_conf_xsets.at(hnd->mode), "s", new_archive_handlers_s);
+        xset_set(handler_conf_xsets.at(hnd->mode), "s", new_archive_handlers_s.c_str());
 
         // Deleting xset
         xset_custom_delete(handler_xset, false);
@@ -1927,7 +1902,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         // Removing handler from the list
         gtk_list_store_remove(GTK_LIST_STORE(model), &it);
 
-        if (!g_strcmp0(new_archive_handlers_s, ""))
+        if (ztd::same(new_archive_handlers_s, ""))
         {
             /* Making remove and apply buttons insensitive if the last
              * handler has been removed */
@@ -1958,7 +1933,6 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
 
         // Clearing up
         g_strfreev(archive_handlers);
-        free(new_archive_handlers_s);
     }
     else if (GTK_WIDGET(widget) == GTK_WIDGET(hnd->btn_up) ||
              GTK_WIDGET(widget) == GTK_WIDGET(hnd->btn_down))
@@ -2800,7 +2774,7 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
 void
 ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handler_set)
 {
-    char* str;
+    std::string str;
 
     HandlerData* hnd = g_slice_new0(HandlerData);
     hnd->mode = mode;
@@ -2996,12 +2970,12 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
 
     GtkWidget* lbl_handler_compress = gtk_label_new(nullptr);
     if (mode == PtkHandlerMode::HANDLER_MODE_ARC)
-        str = ztd::strdup("<b>Co_mpress:</b>");
+        str = "<b>Co_mpress:</b>";
     else if (mode == PtkHandlerMode::HANDLER_MODE_FILE)
-        str = ztd::strdup("<b>Open Co_mmand:</b>");
+        str = "<b>Open Co_mmand:</b>";
     else
-        str = ztd::strdup("<b>_Mount:</b>");
-    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handler_compress), str);
+        str = "<b>_Mount:</b>";
+    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handler_compress), str.c_str());
     gtk_widget_set_halign(GTK_WIDGET(lbl_handler_compress), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(lbl_handler_compress), GTK_ALIGN_END);
     GtkWidget* lbl_handler_extract = gtk_label_new(nullptr);
@@ -3166,19 +3140,16 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
                      hnd);
 
     GtkWidget* lbl_edit0 = gtk_label_new(nullptr);
-    str = g_strdup_printf("<a href=\"%d\">%s</a>", 0, "Edit");
-    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit0), str);
-    free(str);
+    str = fmt::format("<a href=\"{}\">{}</a>", 0, "Edit");
+    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit0), str.c_str());
     g_signal_connect(G_OBJECT(lbl_edit0), "activate-link", G_CALLBACK(on_activate_link), hnd);
     GtkWidget* lbl_edit1 = gtk_label_new(nullptr);
-    str = g_strdup_printf("<a href=\"%d\">%s</a>", 1, "Edit");
-    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit1), str);
-    free(str);
+    str = fmt::format("<a href=\"{}\">{}</a>", 1, "Edit");
+    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit1), str.c_str());
     g_signal_connect(G_OBJECT(lbl_edit1), "activate-link", G_CALLBACK(on_activate_link), hnd);
     GtkWidget* lbl_edit2 = gtk_label_new(nullptr);
-    str = g_strdup_printf("<a href=\"%d\">%s</a>", 2, "Edit");
-    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit2), str);
-    free(str);
+    str = fmt::format("<a href=\"{}\">{}</a>", 2, "Edit");
+    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit2), str.c_str());
     g_signal_connect(G_OBJECT(lbl_edit2), "activate-link", G_CALLBACK(on_activate_link), hnd);
 
     /* Creating container boxes - at this point the dialog already comes

@@ -1094,9 +1094,9 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             free(str);
             if (!(usrc_dir[0] == '/' && usrc_dir[1] == '\0'))
             {
-                str = usrc_dir;
-                usrc_dir = g_strdup_printf("%s/", str);
-                free(str);
+                std::string str3 = fmt::format("{}/", usrc_dir);
+                free(usrc_dir);
+                usrc_dir = ztd::strdup(str3);
             }
 
             // To: <dest_dir> OR <dest_file>
@@ -1121,9 +1121,8 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
                         udest = g_filename_display_name(str);
                     else
                     {
-                        str2 = g_filename_display_name(str);
-                        udest = g_strdup_printf("%s/", str2);
-                        free(str2);
+                        std::string str3 = fmt::format("{}/", g_filename_display_name(str));
+                        udest = ztd::strdup(str3);
                     }
                     free(str);
                 }
@@ -1142,9 +1141,9 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         udest = g_filename_display_name(task->dest_dir.c_str());
         if (!(udest[0] == '/' && udest[1] == '\0'))
         {
-            str = udest;
-            udest = g_strdup_printf("%s/", str);
-            free(str);
+            std::string str3 = fmt::format("{}/", udest);
+            free(udest);
+            udest = ztd::strdup(str3);
         }
     }
     gtk_label_set_markup(ptask->from, ufile_path);
@@ -1961,7 +1960,6 @@ query_overwrite(PtkFileTask* ptask)
     // TODO convert to gtk_builder (glade file)
 
     // LOG_INFO("query_overwrite ptask={:p}", fmt::ptr(ptask));
-    const char* title;
     GtkWidget* dlg;
     GtkWidget* parent_win;
     GtkTextIter iter;
@@ -1970,12 +1968,15 @@ query_overwrite(PtkFileTask* ptask)
     bool different_files;
     bool is_src_dir;
     bool is_dest_dir;
+
     struct stat src_stat;
     struct stat dest_stat;
-    char* from_size_str = nullptr;
-    char* to_size_str = nullptr;
-    const char* from_disp;
-    const char* message;
+
+    std::string title;
+    std::string message;
+    std::string from_size_str;
+    std::string to_size_str;
+    std::string from_disp;
 
     if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_MOVE)
         from_disp = "Moving from directory:";
@@ -2004,96 +2005,78 @@ query_overwrite(PtkFileTask* ptask)
         {
             /* Ask the user whether to overwrite the file or not */
             char buf[64];
-            char* dest_size;
-            char* dest_time;
-            char* src_size;
-            char* src_time;
-            char* src_rel;
-            const char* src_rel_size;
-            const char* src_rel_time;
-            const char* src_link;
-            const char* dest_link;
-            const char* link_warn;
+            std::string dest_size;
+            std::string dest_time;
+            std::string src_size;
+            std::string src_time;
+            std::string src_rel;
+            std::string src_rel_size;
+            std::string src_rel_time;
+            std::string src_link;
+            std::string dest_link;
+            std::string link_warn;
 
             std::string size_str;
 
             if (S_ISLNK(src_stat.st_mode))
                 src_link = "\t<b>( link )</b>";
-            else
-                src_link = ztd::strdup("");
             if (S_ISLNK(dest_stat.st_mode))
                 dest_link = "\t<b>( link )</b>";
-            else
-                dest_link = ztd::strdup("");
             if (S_ISLNK(src_stat.st_mode) && !S_ISLNK(dest_stat.st_mode))
                 link_warn = "\t<b>! overwrite file with link !</b>";
-            else
-                link_warn = ztd::strdup("");
             if (src_stat.st_size == dest_stat.st_size)
-            {
-                src_size = ztd::strdup("<b>( same size )</b>");
-                src_rel_size = nullptr;
-            }
+                src_size = "<b>( same size )</b>";
             else
             {
                 size_str = vfs_file_size_to_string_format(src_stat.st_size, true);
-                src_size = g_strdup_printf("%s\t( %lu bytes )", size_str.c_str(), src_stat.st_size);
+                src_size = fmt::format("{}\t( {} bytes )", size_str, src_stat.st_size);
                 if (src_stat.st_size > dest_stat.st_size)
                     src_rel_size = "larger";
                 else
                     src_rel_size = "smaller";
             }
             if (src_stat.st_mtime == dest_stat.st_mtime)
-            {
-                src_time = ztd::strdup("<b>( same time )</b>\t");
-                src_rel_time = nullptr;
-            }
+                src_time = "<b>( same time )</b>\t";
             else
             {
                 strftime(buf,
                          sizeof(buf),
                          app_settings.date_format.c_str(),
                          std::localtime(&src_stat.st_mtime));
-                src_time = ztd::strdup(buf);
+                src_time = buf;
                 if (src_stat.st_mtime > dest_stat.st_mtime)
                     src_rel_time = "newer";
                 else
                     src_rel_time = "older";
             }
             size_str = vfs_file_size_to_string_format(dest_stat.st_size, true);
-            dest_size = g_strdup_printf("%s\t( %lu bytes )", size_str.c_str(), dest_stat.st_size);
+            dest_size = fmt::format("{}\t( {} bytes )", size_str, dest_stat.st_size);
             strftime(buf,
                      sizeof(buf),
                      app_settings.date_format.c_str(),
                      std::localtime(&dest_stat.st_mtime));
-            dest_time = ztd::strdup(buf);
+            dest_time = buf;
 
-            src_rel = g_strdup_printf("%s%s%s%s%s",
-                                      src_rel_time || src_rel_size ? "<b>( " : "",
-                                      src_rel_time ? src_rel_time : "",
-                                      src_rel_time && src_rel_size ? " &amp; " : "",
-                                      src_rel_size ? src_rel_size : "",
-                                      src_rel_time || src_rel_size ? " )</b> " : "");
+            src_rel = fmt::format("{}{}{}{}{}",
+                                  !src_rel_time.empty() || !src_rel_size.empty() ? "<b>( " : "",
+                                  !src_rel_time.empty() ? src_rel_time : "",
+                                  !src_rel_time.empty() && !src_rel_size.empty() ? " &amp; " : "",
+                                  !src_rel_size.empty() ? src_rel_size : "",
+                                  !src_rel_time.empty() || !src_rel_size.empty() ? " )</b> " : "");
 
-            from_size_str = g_strdup_printf("\t%s\t%s%s%s%s",
-                                            src_time,
-                                            src_size,
-                                            src_rel ? "\t" : "",
-                                            src_rel,
-                                            src_link);
-            to_size_str = g_strdup_printf("\t%s\t%s%s",
-                                          dest_time,
-                                          dest_size,
-                                          dest_link[0] ? dest_link : link_warn);
+            from_size_str = fmt::format("\t{}\t{}{}{}{}",
+                                        src_time,
+                                        src_size,
+                                        !src_rel.empty() ? "\t" : "",
+                                        src_rel,
+                                        src_link);
+            to_size_str = fmt::format("\t{}\t{}{}",
+                                      dest_time,
+                                      dest_size,
+                                      !dest_link.empty() ? dest_link : link_warn);
 
             title = "Filename Exists";
             message = "<b>Filename already exists.</b>  Please rename or select an action.";
-
-            free(dest_size);
-            free(dest_time);
-            free(src_size);
-            free(src_time);
-            free(src_rel);
         }
     }
     else
@@ -2135,7 +2118,7 @@ query_overwrite(PtkFileTask* ptask)
     else
         parent_win = GTK_WIDGET(ptask->parent_window);
     dlg = gtk_dialog_new_with_buttons(
-        title,
+        title.c_str(),
         GTK_WINDOW(parent_win),
         GtkDialogFlags(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
         nullptr,
@@ -2143,7 +2126,7 @@ query_overwrite(PtkFileTask* ptask)
 
     g_signal_connect(G_OBJECT(dlg), "response", G_CALLBACK(query_overwrite_response), ptask);
     gtk_window_set_resizable(GTK_WINDOW(dlg), true);
-    gtk_window_set_title(GTK_WINDOW(dlg), title);
+    gtk_window_set_title(GTK_WINDOW(dlg), title.c_str());
     gtk_window_set_type_hint(GTK_WINDOW(dlg), GDK_WINDOW_TYPE_HINT_DIALOG);
     gtk_window_set_gravity(GTK_WINDOW(dlg), GDK_GRAVITY_NORTH_EAST);
     gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER);
@@ -2198,14 +2181,14 @@ query_overwrite(PtkFileTask* ptask)
     // labels
     gtk_box_pack_start(GTK_BOX(vbox), gtk_label_new(nullptr), false, true, 0);
     GtkWidget* msg = gtk_label_new(nullptr);
-    gtk_label_set_markup(GTK_LABEL(msg), message);
+    gtk_label_set_markup(GTK_LABEL(msg), message.c_str());
     gtk_widget_set_halign(GTK_WIDGET(msg), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(msg), GTK_ALIGN_START);
     gtk_widget_set_can_focus(msg, false);
     gtk_box_pack_start(GTK_BOX(vbox), msg, false, true, 0);
     gtk_box_pack_start(GTK_BOX(vbox), gtk_label_new(nullptr), false, true, 0);
     GtkWidget* from_label = gtk_label_new(nullptr);
-    gtk_label_set_markup(GTK_LABEL(from_label), from_disp);
+    gtk_label_set_markup(GTK_LABEL(from_label), from_disp.c_str());
     gtk_widget_set_halign(GTK_WIDGET(from_label), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(from_label), GTK_ALIGN_START);
     gtk_widget_set_can_focus(from_label, false);
@@ -2218,10 +2201,10 @@ query_overwrite(PtkFileTask* ptask)
     gtk_label_set_selectable(GTK_LABEL(from_dir), true);
     gtk_box_pack_start(GTK_BOX(vbox), from_dir, false, true, 0);
 
-    if (from_size_str)
+    if (!from_size_str.empty())
     {
         GtkWidget* from_size = gtk_label_new(nullptr);
-        gtk_label_set_markup(GTK_LABEL(from_size), from_size_str);
+        gtk_label_set_markup(GTK_LABEL(from_size), from_size_str.c_str());
         gtk_widget_set_halign(GTK_WIDGET(from_size), GTK_ALIGN_START);
         gtk_widget_set_valign(GTK_WIDGET(from_size), GTK_ALIGN_END);
         gtk_label_set_selectable(GTK_LABEL(from_size), true);
@@ -2244,10 +2227,10 @@ query_overwrite(PtkFileTask* ptask)
         gtk_label_set_selectable(GTK_LABEL(to_dir), true);
         gtk_box_pack_start(GTK_BOX(vbox), to_dir, false, true, 0);
 
-        if (to_size_str)
+        if (!to_size_str.empty())
         {
             GtkWidget* to_size = gtk_label_new(nullptr);
-            gtk_label_set_markup(GTK_LABEL(to_size), to_size_str);
+            gtk_label_set_markup(GTK_LABEL(to_size), to_size_str.c_str());
             gtk_widget_set_halign(GTK_WIDGET(to_size), GTK_ALIGN_START);
             gtk_widget_set_valign(GTK_WIDGET(to_size), GTK_ALIGN_END);
             gtk_label_set_selectable(GTK_LABEL(to_size), true);
@@ -2309,8 +2292,6 @@ query_overwrite(PtkFileTask* ptask)
     free(src_dir_disp);
     free(dest_dir_disp);
     free(new_name);
-    free(from_size_str);
-    free(to_size_str);
 
     // update displays (mutex is already locked)
     free(ptask->dsp_curspeed);

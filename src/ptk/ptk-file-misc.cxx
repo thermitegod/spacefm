@@ -297,7 +297,6 @@ on_move_entry_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
 static void
 on_move_change(GtkWidget* widget, MoveSet* mset)
 {
-    char* full_name;
     char* full_path;
     char* path;
     char* cwd;
@@ -363,6 +362,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
 
     if (widget == GTK_WIDGET(mset->buf_name) || widget == GTK_WIDGET(mset->entry_ext))
     {
+        std::string full_name;
         char* name;
         char* ext;
 
@@ -389,16 +389,16 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
 
         // update full_name
         if (name && ext)
-            full_name = g_strdup_printf("%s.%s", name, ext);
+            full_name = fmt::format("{}.{}", name, ext);
         else if (name && !ext)
-            full_name = ztd::strdup(name);
+            full_name = name;
         else if (!name && ext)
-            full_name = ztd::strdup(ext);
+            full_name = ext;
         else
-            full_name = ztd::strdup("");
+            full_name = "";
         if (name)
             free(name);
-        gtk_text_buffer_set_text(mset->buf_full_name, full_name, -1);
+        gtk_text_buffer_set_text(mset->buf_full_name, full_name.c_str(), -1);
 
         // update full_path
         gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
@@ -418,19 +418,19 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         }
 
         if (path[0] == '/')
-            full_path = g_build_filename(path, full_name, nullptr);
+            full_path = g_build_filename(path, full_name.c_str(), nullptr);
         else
         {
             cwd = g_path_get_dirname(mset->full_path);
-            full_path = g_build_filename(cwd, path, full_name, nullptr);
+            full_path = g_build_filename(cwd, path, full_name.c_str(), nullptr);
             free(cwd);
         }
         gtk_text_buffer_set_text(mset->buf_full_path, full_path, -1);
-
-        free(full_name);
     }
     else if (widget == GTK_WIDGET(mset->buf_full_name))
     {
+        char* full_name;
+
         mset->last_widget = GTK_WIDGET(mset->input_full_name);
         // update name & ext
         std::string name;
@@ -477,6 +477,8 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     }
     else if (widget == GTK_WIDGET(mset->buf_path))
     {
+        char* full_name;
+
         mset->last_widget = GTK_WIDGET(mset->input_path);
         // update full_path
         gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
@@ -513,18 +515,18 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     }
     else // if ( widget == GTK_WIDGET( mset->buf_full_path ) )
     {
+        std::string full_name;
+
         mset->last_widget = GTK_WIDGET(mset->input_full_path);
         gtk_text_buffer_get_start_iter(mset->buf_full_path, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_full_path, &iter);
         full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
 
-        std::string full_name2;
-
         // update name & ext
         if (full_path[0] == '\0')
-            full_name2 = "";
+            full_name = "";
         else
-            full_name2 = g_path_get_basename(full_path);
+            full_name = g_path_get_basename(full_path);
 
         path = g_path_get_dirname(full_path);
         if (!strcmp(path, "."))
@@ -550,7 +552,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         std::string name;
         std::string ext;
 
-        name = get_name_extension(full_name2, ext);
+        name = get_name_extension(full_name, ext);
         gtk_text_buffer_set_text(mset->buf_name, name.c_str(), -1);
         if (!ext.empty())
             gtk_entry_set_text(mset->entry_ext, ext.c_str());
@@ -559,14 +561,14 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
 
         // update full_name
         if (!name.empty() && !ext.empty())
-            full_name2 = fmt::format("{}.{}", name, ext);
+            full_name = fmt::format("{}.{}", name, ext);
         else if (!name.empty() && ext.empty())
-            full_name2 = name;
+            full_name = name;
         else if (name.empty() && !ext.empty())
-            full_name2 = ext;
+            full_name = ext;
         else
-            full_name2 = "";
-        gtk_text_buffer_set_text(mset->buf_full_name, full_name2.c_str(), -1);
+            full_name = "";
+        gtk_text_buffer_set_text(mset->buf_full_name, full_name.c_str(), -1);
 
         // update path
         gtk_text_buffer_set_text(mset->buf_path, path, -1);
@@ -1919,7 +1921,8 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
                         subsubdir = g_build_filename(subdir, file_name.c_str(), nullptr);
                     else
                         subsubdir = ztd::strdup(file_name);
-                    templates = g_list_prepend(templates, g_strdup_printf("%s/", subsubdir));
+                    std::string subsubdir_fmt = fmt::format("{}/", subsubdir);
+                    templates = g_list_prepend(templates, ztd::strdup(subsubdir_fmt));
                     // prevent filesystem loops during recursive find
                     if (!std::filesystem::is_symlink(path))
                         templates = get_templates(templates_dir, subsubdir, templates, getdir);

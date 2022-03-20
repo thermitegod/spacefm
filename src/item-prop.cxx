@@ -517,15 +517,14 @@ context_build(ContextData* ctxt)
     GtkTreeIter it;
     char* value;
     int sub, comp;
-    char* new_context = nullptr;
-    char* old_context;
+    std::string new_context;
 
     GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(ctxt->view));
     if (gtk_tree_model_get_iter_first(model, &it))
     {
-        new_context = g_strdup_printf("%d%%%%%%%%%%%d",
-                                      gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_action)),
-                                      gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_match)));
+        new_context = fmt::format("{}%%%%%{}",
+                                  gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_action)),
+                                  gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_match)));
         do
         {
             gtk_tree_model_get(model,
@@ -537,16 +536,10 @@ context_build(ContextData* ctxt)
                                ItemPropContextCol::CONTEXT_COL_COMP,
                                &comp,
                                -1);
-            old_context = new_context;
-            new_context = g_strdup_printf("%s%%%%%%%%%%%d%%%%%%%%%%%d%%%%%%%%%%%s",
-                                          old_context,
-                                          sub,
-                                          comp,
-                                          value);
-            free(old_context);
+            new_context = fmt::format("{}%%%%%{}%%%%%{}%%%%%{}", new_context, sub, comp, value);
         } while (gtk_tree_model_iter_next(model, &it));
     }
-    return new_context;
+    return ztd::strdup(new_context);
 }
 
 static void
@@ -1267,7 +1260,7 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
         if (add_path && add_path[0])
         {
             char* old_path = multi_input_get_text(ctxt->item_target);
-            std::string new_path = fmt::format("%s%s%s",
+            std::string new_path = fmt::format("{}{}{}",
                                                old_path && old_path[0] ? old_path : "",
                                                old_path && old_path[0] ? "; " : "",
                                                add_path);

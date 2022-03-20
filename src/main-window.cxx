@@ -4117,7 +4117,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
                     if (vol->disp_name)
                     {
                         esc_path = bash_quote(vol->disp_name);
-                        buf.append(fmt::format("fm_device_display_name=\"%{}\"\n", esc_path));
+                        buf.append(fmt::format("fm_device_display_name=\"{}\"\n", esc_path));
                     }
                     // clang-format off
                     buf.append(fmt::format("fm_device_icon=\"{}\"\n", vol->icon));
@@ -7114,7 +7114,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 }
                 else
                 {
-                    reply = fmt::format("spacefm: invalid %s task option '{}'\n", argv[i], argv[j]);
+                    reply = fmt::format("spacefm: invalid {} task option '{}'\n", argv[i], argv[j]);
                     return 2;
                 }
             }
@@ -7290,10 +7290,10 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (!l)
             {
                 // remove replace event
-                char* str3 = str;
-                str = g_strdup_printf("*%s", str3);
-                free(str3);
-                l = g_list_find_custom((GList*)set->ob2_data, str, (GCompareFunc)g_strcmp0);
+                std::string str3 = fmt::format("*{}", str);
+                l = g_list_find_custom((GList*)set->ob2_data,
+                                       str3.c_str(),
+                                       (GCompareFunc)g_strcmp0);
             }
             free(str);
             if (!l)

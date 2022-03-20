@@ -1596,8 +1596,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
 
                 str = ztd::replace(str, "-", "_");
                 str = ztd::replace(str, " ", "");
-                open_all_name = g_strdup_printf("open_all_type_%s", str.c_str());
-                open_all_set = xset_is(open_all_name);
+                open_all_set = xset_is(fmt::format("open_all_type_{}", str));
             }
 
             // test context
@@ -3335,8 +3334,6 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 static void
 open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
 {
-    const char* use_url;
-
     bool new_window = false;
     if (!file_browser)
     {
@@ -3356,45 +3353,46 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
     bool new_tab = !new_window && in_new_tab;
 
     // convert ~ to /home/user for smarter bookmarks
+    std::string use_url;
     if (Glib::str_has_prefix(url, "~/") || !g_strcmp0(url, "~"))
-        use_url = g_strdup_printf("%s%s", vfs_user_home_dir().c_str(), url + 1);
+        use_url = fmt::format("{}{}", vfs_user_home_dir(), url + 1);
     else
         use_url = url;
 
-    if ((use_url[0] != '/' && strstr(use_url, ":/")) || Glib::str_has_prefix(use_url, "//"))
+    if ((use_url[0] != '/' && strstr(use_url.c_str(), ":/")) || Glib::str_has_prefix(use_url, "//"))
     {
         // network
         if (file_browser)
-            ptk_location_view_mount_network(file_browser, use_url, new_tab, false);
+            ptk_location_view_mount_network(file_browser, use_url.c_str(), new_tab, false);
         else
-            open_in_prog(use_url);
+            open_in_prog(use_url.c_str());
     }
     else if (std::filesystem::is_directory(use_url))
     {
         // dir
         if (file_browser)
         {
-            if (new_tab || g_strcmp0(ptk_file_browser_get_cwd(file_browser), use_url))
+            if (new_tab || g_strcmp0(ptk_file_browser_get_cwd(file_browser), use_url.c_str()))
                 ptk_file_browser_emit_open(file_browser,
-                                           use_url,
+                                           use_url.c_str(),
                                            new_tab ? PtkOpenAction::PTK_OPEN_NEW_TAB
                                                    : PtkOpenAction::PTK_OPEN_DIR);
             gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
         }
         else
-            open_in_prog(use_url);
+            open_in_prog(use_url.c_str());
     }
     else if (std::filesystem::exists(use_url))
     {
         // file - open dir and select file
-        char* dir = g_path_get_dirname(use_url);
+        char* dir = g_path_get_dirname(use_url.c_str());
         if (dir && std::filesystem::is_directory(dir))
         {
             if (file_browser)
             {
                 if (!new_tab && !strcmp(dir, ptk_file_browser_get_cwd(file_browser)))
                 {
-                    ptk_file_browser_select_file(file_browser, use_url);
+                    ptk_file_browser_select_file(file_browser, use_url.c_str());
                     gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
                 }
                 else
@@ -3418,7 +3416,7 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
                             // select path in new browser
                             file_browser->select_path = ztd::strdup(use_url);
                             // usually this is not ready but try anyway
-                            ptk_file_browser_select_file(file_browser, use_url);
+                            ptk_file_browser_select_file(file_browser, use_url.c_str());
                         }
                     }
                 }

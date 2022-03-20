@@ -1193,14 +1193,6 @@ info_partition(device_t* device)
         for (n = std::strlen(s) - 1; n >= 0 && g_ascii_isdigit(s[n]); n--)
             ;
         device->partition_number = ztd::strdup(strtol(s + n + 1, nullptr, 0));
-        /*
-      s = g_strdup (device->priv->native_path);
-      for (n = strlen (s) - 1; n >= 0 && s[n] != '/'; n--)
-        s[n] = '\0';
-      s[n] = '\0';
-      device_set_partition_slave (device, compute_object_path (s));
-      g_free (s);
-        */
         is_partition = true;
     }
 
@@ -2043,7 +2035,7 @@ vfs_volume_set_info(VFSVolume* volume)
                     lastcomma = volume->udi;
                 if (lastcomma[0] != '\0')
                 {
-                    disp_id = g_strdup_printf(":%.16s", lastcomma);
+                    disp_id = fmt::format(":{:.16s}", lastcomma);
                 }
             }
             else if (volume->is_optical)
@@ -3049,7 +3041,7 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
 static bool
 vfs_volume_is_automount(VFSVolume* vol)
 { // determine if volume should be automounted or auto-unmounted
-    char* test;
+    std::string test;
     char* value;
 
     if (vol->should_autounmount)
@@ -3060,7 +3052,8 @@ vfs_volume_is_automount(VFSVolume* vol)
         vol->device_type != VFSVolumeDeviceType::DEVICE_TYPE_BLOCK)
         return false;
 
-    char* showhidelist = g_strdup_printf(" %s ", xset_get_s("dev_automount_volumes"));
+    std::string showhidelist =
+        fmt::format(" {} ", ztd::null_check(xset_get_s("dev_automount_volumes")));
     int i;
     for (i = 0; i < 3; i++)
     {
@@ -3079,19 +3072,13 @@ vfs_volume_is_automount(VFSVolume* vol)
                     value++;
             }
             if (j == 0)
-                test = g_strdup_printf(" +%s ", value);
+                test = fmt::format(" +{} ", ztd::null_check(value));
             else
-                test = g_strdup_printf(" -%s ", value);
-            if (strstr(showhidelist, test))
-            {
-                free(test);
-                free(showhidelist);
+                test = fmt::format(" -{} ", ztd::null_check(value));
+            if (ztd::contains(showhidelist, test))
                 return (j == 0);
-            }
-            free(test);
         }
     }
-    free(showhidelist);
 
     // udisks no?
     if (vol->nopolicy && !xset_get_b("dev_ignore_udisks_nopolicy"))
@@ -3163,7 +3150,7 @@ vfs_volume_device_mount_cmd(VFSVolume* vol, const char* options, bool* run_in_te
     {
         // udevil
         if (options && options[0] != '\0')
-            command2 = fmt::format("{} mount %s -o '{}'", path, vol->device_file, options);
+            command2 = fmt::format("{} mount {} -o '{}'", path, vol->device_file, options);
         else
             command2 = fmt::format("{} mount {}", path, vol->device_file);
 
@@ -3286,17 +3273,17 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
     // udevil
     path = Glib::find_program_in_path("udevil");
     if (!path.empty())
-        command2 = fmt::format("%s umount %s", path, pointq);
+        command2 = fmt::format("{} umount {}", path, pointq);
 
     // pmount
     path = Glib::find_program_in_path("pumount");
     if (!path.empty())
-        command2 = fmt::format("%s %s", path, pointq);
+        command2 = fmt::format("{} {}", path, pointq);
 
     // udisks2
     path = Glib::find_program_in_path("udisksctl");
     if (!path.empty())
-        command2 = fmt::format("%s unmount -b %s", path, pointq);
+        command2 = fmt::format("{} unmount -b {}", path, pointq);
 
     *run_in_terminal = false;
 
@@ -3345,18 +3332,18 @@ vfs_volume_get_mount_options(VFSVolume* vol, char* options)
 
     // parse options with fs type
     // nosuid,sync+vfat,utf+vfat,nosuid-ext4
-    char* opts = g_strdup_printf(",%s,", news);
+    std::string opts = fmt::format(",{},", news);
     const char* fstype = vfs_volume_get_fstype(vol);
     char newo[16384];
     newo[0] = ',';
     newo[1] = '\0';
     char* newoptr = newo + 1;
-    char* ptr = opts + 1;
+    char* ptr = (char*)opts.data() + 1;
     char* comma;
     char* single;
-    char* singlefs;
+    std::string singlefs;
     char* plus;
-    char* test;
+    std::string test;
     while (ptr[0] != '\0')
     {
         comma = strchr(ptr, ',');
@@ -3364,8 +3351,8 @@ vfs_volume_get_mount_options(VFSVolume* vol, char* options)
         if (!strchr(single, '+') && !strchr(single, '-'))
         {
             // pure option, check for -fs option
-            test = g_strdup_printf(",%s-%s,", single, fstype);
-            if (!strstr(opts, test))
+            test = fmt::format(",{}-{},", single, fstype);
+            if (!ztd::contains(opts, test))
             {
                 // add option
                 strncpy(newoptr, single, sizeof(char));
@@ -3374,20 +3361,19 @@ vfs_volume_get_mount_options(VFSVolume* vol, char* options)
                 newoptr[1] = '\0';
                 newoptr++;
             }
-            free(test);
         }
         else if ((plus = strchr(single, '+')))
         {
             // opt+fs
             plus[0] = '\0'; // set single to just option
-            singlefs = g_strdup_printf("%s+%s", single, fstype);
+            singlefs = fmt::format("{}+{}", single, fstype);
             plus[0] = '+'; // restore single to option+fs
-            if (!strcmp(singlefs, single))
+            if (ztd::same(singlefs, single))
             {
                 // correct fstype, check if already in options
                 plus[0] = '\0'; // set single to just option
-                test = g_strdup_printf(",%s,", single);
-                if (!strstr(newo, test))
+                test = fmt::format(",{},", single);
+                if (!ztd::contains(newo, test))
                 {
                     // add +fs option
                     strncpy(newoptr, single, sizeof(char));
@@ -3396,16 +3382,13 @@ vfs_volume_get_mount_options(VFSVolume* vol, char* options)
                     newoptr[1] = '\0';
                     newoptr++;
                 }
-                free(test);
             }
-            free(singlefs);
         }
         free(single);
         ptr = comma + 1;
     }
     newoptr--;
     newoptr[0] = '\0';
-    free(opts);
     if (newo[1] == '\0')
         return nullptr;
     else
@@ -3751,15 +3734,12 @@ unmount_if_mounted(VFSVolume* vol)
     if (!std::filesystem::exists(mtab))
         mtab = mtab_path;
 
-    char* line = g_strdup_printf("grep -qs '^%s ' %s 2>/dev/nullptr || exit\n%s\n",
-                                 vol->device_file,
-                                 mtab,
-                                 str);
+    std::string line =
+        fmt::format("grep -qs '^{} ' {} 2>/dev/nullptr || exit\n{}\n", vol->device_file, mtab, str);
     free(str);
     free(mtab_path);
     LOG_INFO("Unmount-If-Mounted: {}", line);
-    exec_task(line, run_in_terminal);
-    free(line);
+    exec_task(line.c_str(), run_in_terminal);
 }
 
 static bool

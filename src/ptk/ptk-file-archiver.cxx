@@ -248,7 +248,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     }
 }
 
-static std::string
+static const std::string
 generate_bash_error_function(bool run_in_terminal, const char* parent_quote)
 {
     /* When ran in a terminal, errors need to result in a pause so that
@@ -1219,7 +1219,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
              * Obtaining filename minus the archive extension - this is
              * needed if a parent directory must be created, and if the
              * extraction target is a file without the handler extension
-             * filename is g_strdup'd to get rid of the const */
+             * filename is strdup'd to get rid of the const */
             char* filename = ztd::strdup(vfs_file_info_get_name(file));
             char* filename_no_archive_ext = nullptr;
 

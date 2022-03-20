@@ -1652,17 +1652,25 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                         }
                     }
                     if (start)
-                        str = g_strdup_printf("%s\n\n%s</mime-info>\n", msg.c_str(), start);
+                    {
+                        std::string str4 = fmt::format("{}\n\n{}</mime-info>\n", msg, start);
+                        str = ztd::strdup(str4);
+                    }
                     else
+                    {
                         str = nullptr;
+                    }
                     free(contents);
                     contents = str;
                 }
 
                 if (!contents)
-                    contents = g_strdup_printf("%s\n\n<!-- insert your patterns below "
-                                               "-->\n\n\n</mime-type>\n</mime-info>\n\n",
-                                               msg.c_str());
+                {
+                    std::string str4 = fmt::format("{}\n\n<!-- insert your patterns below "
+                                                   "-->\n\n\n</mime-type>\n</mime-info>\n\n",
+                                                   msg);
+                    contents = ztd::strdup(str4);
+                }
 
                 // write file
                 std::ofstream file(path);

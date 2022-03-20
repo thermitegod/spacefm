@@ -715,8 +715,7 @@ char*
 ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmount,
                                      const char* path)
 {
-    char* mname = nullptr;
-    char* str;
+    std::string mname;
     switch (mode)
     {
         case PtkHandlerMode::HANDLER_MODE_FS:
@@ -726,16 +725,14 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
                 if (!vol->label.empty() && vol->label.at(0) != ' ' &&
                     g_utf8_validate(vol->label.c_str(), -1, nullptr) &&
                     !ztd::contains(vol->label, "/"))
-                    mname = g_strdup_printf("%.20s", vol->label.c_str());
+                    mname = fmt::format("{:.20s}", vol->label);
                 else if (vol->udi && vol->udi[0] != '\0' && g_utf8_validate(vol->udi, -1, nullptr))
                 {
-                    str = g_path_get_basename(vol->udi);
-                    mname = g_strdup_printf("%s-%.20s", bdev, str);
-                    free(str);
+                    mname = fmt::format("{}-{:.20s}", bdev, g_path_get_basename(vol->udi));
                 }
                 else
                 {
-                    mname = ztd::strdup(bdev);
+                    mname = bdev;
                 }
                 free(bdev);
             }
@@ -754,9 +751,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
                         parent_dir[std::strlen(parent_dir) - 1] = '\0';
                     while (Glib::str_has_prefix(parent_dir, "-"))
                     {
-                        str = parent_dir;
-                        parent_dir = ztd::strdup(str + 1);
-                        free(str);
+                        parent_dir = ztd::strdup(parent_dir + 1);
                     }
                     if (parent_dir[0] == '\0' || !g_utf8_validate(parent_dir, -1, nullptr) ||
                         std::strlen(parent_dir) > 30)
@@ -766,16 +761,17 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
                     }
                 }
                 if (parent_dir)
-                    mname =
-                        g_strdup_printf("%s-%s-%s", netmount->fstype, netmount->host, parent_dir);
+                    mname = fmt::format("{}-{}-{}", netmount->fstype, netmount->host, parent_dir);
                 else if (netmount->host && netmount->host[0])
-                    mname = g_strdup_printf("%s-%s", netmount->fstype, netmount->host);
+                    mname = fmt::format("{}-{}", netmount->fstype, netmount->host);
                 else
-                    mname = g_strdup_printf("%s", netmount->fstype);
+                    mname = fmt::format("{}", netmount->fstype);
                 free(parent_dir);
             }
             else
-                mname = ztd::strdup(netmount->fstype);
+            {
+                mname = netmount->fstype;
+            }
             break;
         case PtkHandlerMode::HANDLER_MODE_FILE:
             if (path)
@@ -786,26 +782,19 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
     }
 
     // remove spaces
-    if (mname && strchr(mname, ' '))
+    if (ztd::contains(mname, " "))
     {
-        g_strstrip(mname);
-        std::string cleaned = ztd::replace(mname, " ", "");
-        mname = ztd::strdup(cleaned);
+        ztd::strip(mname);
+        mname = ztd::replace(mname, " ", "");
     }
 
-    if (mname && !mname[0])
-    {
-        free(mname);
-        mname = nullptr;
-    }
-    if (!mname)
-        mname = ztd::strdup("mount");
+    if (mname.empty())
+        mname = "mount";
 
     // complete mount point
-    char* point1 = ptk_location_view_get_mount_point_dir(mname);
-    free(mname);
+    char* point1 = ptk_location_view_get_mount_point_dir(mname.c_str());
     int r = 2;
-    std::string point = ztd::strdup(point1);
+    std::string point = point1;
 
     // attempt to remove existing dir - succeeds only if empty and unmounted
     std::filesystem::remove_all(point);
@@ -1340,8 +1329,8 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         {
             std::string exe = get_prog_executable();
             // run from desktop window - show a pending dialog
-            wait = fmt::format("%s -g --title 'Remove %s' --label '\\nPlease wait while device "
-                               "%s is synced and unmounted...' >/dev/null &\nwaitp=$!\n",
+            wait = fmt::format("{} -g --title 'Remove {}' --label '\\nPlease wait while device "
+                               "{} is synced and unmounted...' >/dev/null &\nwaitp=$!\n",
                                exe,
                                vol->device_file,
                                vol->device_file);
@@ -1721,7 +1710,7 @@ on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (vfs_volume_is_mounted(vol))
     {
         // task
-        char* eject;
+        std::string eject;
         bool run_in_terminal;
         char* unmount = vfs_volume_device_unmount_cmd(vol, &run_in_terminal);
         if (!unmount)
@@ -1731,11 +1720,9 @@ on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         }
 
         if (vol->is_optical || vol->requires_eject)
-            eject = g_strdup_printf("\nelse\n    eject %s\n    sleep 0.3\n    eject -t %s",
-                                    vol->device_file,
-                                    vol->device_file);
-        else
-            eject = ztd::strdup("");
+            eject = fmt::format("\nelse\n    eject {}\n    sleep 0.3\n    eject -t {}",
+                                vol->device_file,
+                                vol->device_file);
 
         if (run_in_terminal)
             line = fmt::format("echo 'Unmounting {}...'\nsync\n{}\nif [ $? -ne 0 ];then\n    "
@@ -1746,9 +1733,8 @@ on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                                eject);
         else
             line = fmt::format("sync\n{}\nif [ $? -ne 0 ];then\n    exit 1{}\nfi", unmount, eject);
-        free(eject);
         free(unmount);
-        std::string task_name = fmt::format("Reload %s", vol->device_file);
+        std::string task_name = fmt::format("Reload {}", vol->device_file);
         ptask = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
         ptask->task->exec_command = line;
         ptask->task->exec_sync = !run_in_terminal;
@@ -1762,7 +1748,7 @@ on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     {
         // task
         line = fmt::format("eject {}; sleep 0.3; eject -t {}", vol->device_file, vol->device_file);
-        std::string task_name = fmt::format("Reload %s", vol->device_file);
+        std::string task_name = fmt::format("Reload {}", vol->device_file);
         ptask = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
         ptask->task->exec_command = line;
         ptask->task->exec_sync = false;
@@ -1832,7 +1818,7 @@ static void
 on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 {
     GtkWidget* view;
-    char* cmd;
+    std::string cmd;
 
     if (!item)
         view = view2;
@@ -1856,13 +1842,13 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         netmount_t* netmount = nullptr;
         if (split_network_url(vol->udi, &netmount) == 1)
         {
-            cmd = vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_NET,
-                                         PtkHandlerMount::HANDLER_PROP,
-                                         vol,
-                                         nullptr,
-                                         netmount,
-                                         &run_in_terminal,
-                                         nullptr);
+            cmd = ztd::null_check(vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_NET,
+                                                         PtkHandlerMount::HANDLER_PROP,
+                                                         vol,
+                                                         nullptr,
+                                                         netmount,
+                                                         &run_in_terminal,
+                                                         nullptr));
             free(netmount->url);
             free(netmount->fstype);
             free(netmount->host);
@@ -1873,15 +1859,15 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
             free(netmount->path);
             g_slice_free(netmount_t, netmount);
 
-            if (!cmd)
+            if (cmd.empty())
             {
-                cmd = g_strdup_printf("echo MOUNT\nmount | grep \" on %s \"\necho\necho "
-                                      "PROCESSES\n/usr/bin/lsof -w \"%s\" | head -n 500\n",
-                                      vol->mount_point,
-                                      vol->mount_point);
+                cmd = fmt::format("echo MOUNT\nmount | grep \" on {} \"\necho\necho "
+                                  "PROCESSES\n/usr/bin/lsof -w \"{}\" | head -n 500\n",
+                                  vol->mount_point,
+                                  vol->mount_point);
                 run_in_terminal = false;
             }
-            else if (strstr(cmd, "%a"))
+            else if (ztd::contains(cmd, "%a"))
             {
                 std::string pointq = bash_quote(vol->mount_point);
                 std::string cmd2 = ztd::replace(cmd, "%a", pointq);
@@ -1894,22 +1880,22 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else if (vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_OTHER &&
              mtab_fstype_is_handled_by_protocol(vol->fs_type))
     {
-        cmd = vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_NET,
-                                     PtkHandlerMount::HANDLER_PROP,
-                                     vol,
-                                     nullptr,
-                                     nullptr,
-                                     &run_in_terminal,
-                                     nullptr);
-        if (!cmd)
+        cmd = ztd::null_check(vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_NET,
+                                                     PtkHandlerMount::HANDLER_PROP,
+                                                     vol,
+                                                     nullptr,
+                                                     nullptr,
+                                                     &run_in_terminal,
+                                                     nullptr));
+        if (cmd.empty())
         {
-            cmd = g_strdup_printf("echo MOUNT\nmount | grep \" on %s \"\necho\necho "
-                                  "PROCESSES\n/usr/bin/lsof -w \"%s\" | head -n 500\n",
-                                  vol->mount_point,
-                                  vol->mount_point);
+            cmd = fmt::format("echo MOUNT\nmount | grep \" on {} \"\necho\necho "
+                              "PROCESSES\n/usr/bin/lsof -w \"{}\" | head -n 500\n",
+                              vol->mount_point,
+                              vol->mount_point);
             run_in_terminal = false;
         }
-        else if (strstr(cmd, "%a"))
+        else if (ztd::contains(cmd, "%a"))
         {
             std::string pointq = bash_quote(vol->mount_point);
             std::string cmd2;
@@ -1918,13 +1904,15 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         }
     }
     else
-        cmd = vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_FS,
-                                     PtkHandlerMount::HANDLER_PROP,
-                                     vol,
-                                     nullptr,
-                                     nullptr,
-                                     &run_in_terminal,
-                                     nullptr);
+    {
+        cmd = ztd::null_check(vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_FS,
+                                                     PtkHandlerMount::HANDLER_PROP,
+                                                     vol,
+                                                     nullptr,
+                                                     nullptr,
+                                                     &run_in_terminal,
+                                                     nullptr));
+    }
 
     // create task
     // Note: file_browser may be nullptr
@@ -1937,7 +1925,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                                            file_browser ? file_browser->task_view : nullptr);
     ptask->task->exec_browser = file_browser;
 
-    if (cmd)
+    if (!cmd.empty())
     {
         ptask->task->exec_command = cmd;
         ptask->task->exec_sync = !run_in_terminal;
@@ -2063,7 +2051,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 
     if (vol->is_mounted)
         flags =
-            fmt::format("%s ; mount | grep \"{} \" | sed 's/\\/dev.*\\( on .*\\)/\\1/' ; echo ; ",
+            fmt::format("{} ; mount | grep \"{} \" | sed 's/\\/dev.*\\( on .*\\)/\\1/' ; echo ; ",
                         flags,
                         vol->device_file);
     else
