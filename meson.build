@@ -220,8 +220,7 @@ spacefm = build_target(
     lib_ffmpeg,
     lib_xxhash,
   ],
-  # c_pch:   'src/pch/c_pch.h',
-  cpp_pch: 'src/pch/cxx_pch.hxx',
+  cpp_pch: 'pch/cxx_pch.hxx',
 )
 
 install_data('scripts/spacefm-auth', install_dir : bindir)
