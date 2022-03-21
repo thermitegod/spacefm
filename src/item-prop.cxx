@@ -42,6 +42,8 @@
 
 #include "ptk/ptk-app-chooser.hxx"
 
+#include "settings.hxx"
+
 const char* enter_command_use =
     "Enter program or bash command line(s):\n\nUse:\n\t%F\tselected files  or  %f first "
     "selected file\n\t%N\tselected filenames  or  %n first selected filename\n\t%d\tcurrent "
@@ -1321,7 +1323,7 @@ replace_item_props(ContextData* ctxt)
     XSet* mset = xset_get_plugin_mirror(rset);
 
     if (!rset->lock && rset->menu_style != XSetMenu::SUBMENU && rset->menu_style != XSetMenu::SEP &&
-        rset->tool <= XSetTool::XSET_TOOL_CUSTOM)
+        rset->tool <= XSetTool::CUSTOM)
     {
         // custom bookmark, app, or command
         bool is_bookmark_or_app = false;
@@ -1438,7 +1440,7 @@ replace_item_props(ContextData* ctxt)
             rset->in_terminal = true;
 
         free(rset->menu_label);
-        if (rset->tool > XSetTool::XSET_TOOL_CUSTOM &&
+        if (rset->tool > XSetTool::CUSTOM &&
             !g_strcmp0(gtk_entry_get_text(GTK_ENTRY(ctxt->item_name)),
                        xset_get_builtin_toolitem_label(rset->tool)))
             // do not save default label of builtin toolitems
@@ -1570,7 +1572,7 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
 
     // Dialog
     ctxt->dlg = gtk_dialog_new_with_buttons(
-        set->tool ? "Toolbar Item Properties" : "Menu Item Properties",
+        set->tool != XSetTool::NOT ? "Toolbar Item Properties" : "Menu Item Properties",
         GTK_WINDOW(ctxt->parent),
         GtkDialogFlags(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
         nullptr,
@@ -1606,7 +1608,7 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_notebook_append_page(
         GTK_NOTEBOOK(ctxt->notebook),
         align,
-        gtk_label_new_with_mnemonic(set->tool ? "_Toolbar Item" : "_Menu Item"));
+        gtk_label_new_with_mnemonic(set->tool != XSetTool::NOT ? "_Toolbar Item" : "_Menu Item"));
 
     GtkGrid* grid = GTK_GRID(gtk_grid_new());
     gtk_container_set_border_width(GTK_CONTAINER(grid), 0);
@@ -2194,7 +2196,7 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     int item_type = -1;
 
     std::string item_type_str;
-    if (set->tool > XSetTool::XSET_TOOL_CUSTOM)
+    if (set->tool > XSetTool::CUSTOM)
         item_type_str =
             fmt::format("Built-In Toolbar Item: {}", xset_get_builtin_toolitem_label(set->tool));
     else if (rset->menu_style == XSetMenu::SUBMENU)
@@ -2246,7 +2248,7 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
 
     ctxt->temp_cmd_line = !set->lock ? ztd::strdup(rset->line) : nullptr;
     if (set->lock || rset->menu_style == XSetMenu::SUBMENU || rset->menu_style == XSetMenu::SEP ||
-        set->tool > XSetTool::XSET_TOOL_CUSTOM)
+        set->tool > XSetTool::CUSTOM)
     {
         gtk_widget_hide(gtk_notebook_get_nth_page(GTK_NOTEBOOK(ctxt->notebook), 2));
         gtk_widget_hide(gtk_notebook_get_nth_page(GTK_NOTEBOOK(ctxt->notebook), 3));
@@ -2270,15 +2272,15 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     {
         if (set->menu_label)
             gtk_entry_set_text(GTK_ENTRY(ctxt->item_name), set->menu_label);
-        else if (set->tool > XSetTool::XSET_TOOL_CUSTOM)
+        else if (set->tool > XSetTool::CUSTOM)
             gtk_entry_set_text(GTK_ENTRY(ctxt->item_name),
                                xset_get_builtin_toolitem_label(set->tool));
     }
     else
         gtk_widget_set_sensitive(ctxt->item_name, false);
     // key
-    if (rset->menu_style < XSetMenu::SUBMENU || set->tool == XSetTool::XSET_TOOL_BACK_MENU ||
-        set->tool == XSetTool::XSET_TOOL_FWD_MENU)
+    if (rset->menu_style < XSetMenu::SUBMENU || set->tool == XSetTool::BACK_MENU ||
+        set->tool == XSetTool::FWD_MENU)
     {
         std::string str2;
         XSet* keyset;
@@ -2318,7 +2320,7 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
         gtk_widget_set_sensitive(ctxt->cmd_opt_script, false);
         gtk_widget_set_sensitive(ctxt->cmd_opt_line, false);
     }
-    if (set->tool)
+    if (set->tool != XSetTool::NOT)
     {
         // Hide Context tab
         gtk_widget_hide(gtk_notebook_get_nth_page(GTK_NOTEBOOK(ctxt->notebook), 1));

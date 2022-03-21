@@ -50,6 +50,7 @@
 
 #include "vfs/vfs-user-dir.hxx"
 
+#include "settings.hxx"
 #include "utils.hxx"
 
 static void ptk_file_browser_class_init(PtkFileBrowserClass* klass);
@@ -644,37 +645,37 @@ ptk_file_browser_add_toolbar_widget(void* set_ptr, GtkWidget* widget)
 { // store the toolbar widget created by set for later change of status
     XSet* set = XSET(set_ptr);
 
-    if (!(set && !set->lock && set->browser && set->tool && GTK_IS_WIDGET(widget)))
+    if (!(set && !set->lock && set->browser && set->tool != XSetTool::NOT && GTK_IS_WIDGET(widget)))
         return;
 
     unsigned char x;
 
     switch (set->tool)
     {
-        case XSetTool::XSET_TOOL_UP:
+        case XSetTool::UP:
             x = 0;
             break;
-        case XSetTool::XSET_TOOL_BACK:
-        case XSetTool::XSET_TOOL_BACK_MENU:
+        case XSetTool::BACK:
+        case XSetTool::BACK_MENU:
             x = 1;
             break;
-        case XSetTool::XSET_TOOL_FWD:
-        case XSetTool::XSET_TOOL_FWD_MENU:
+        case XSetTool::FWD:
+        case XSetTool::FWD_MENU:
             x = 2;
             break;
-        case XSetTool::XSET_TOOL_DEVICES:
+        case XSetTool::DEVICES:
             x = 3;
             break;
-        case XSetTool::XSET_TOOL_BOOKMARKS:
+        case XSetTool::BOOKMARKS:
             x = 4;
             break;
-        case XSetTool::XSET_TOOL_TREE:
+        case XSetTool::TREE:
             x = 5;
             break;
-        case XSetTool::XSET_TOOL_SHOW_HIDDEN:
+        case XSetTool::SHOW_HIDDEN:
             x = 6;
             break;
-        case XSetTool::XSET_TOOL_CUSTOM:
+        case XSetTool::CUSTOM:
             if (set->menu_style == XSetMenu::CHECK)
             {
                 x = 7;
@@ -684,19 +685,19 @@ ptk_file_browser_add_toolbar_widget(void* set_ptr, GtkWidget* widget)
             else
                 return;
             break;
-        case XSetTool::XSET_TOOL_SHOW_THUMB:
+        case XSetTool::SHOW_THUMB:
             x = 8;
             break;
-        case XSetTool::XSET_TOOL_LARGE_ICONS:
+        case XSetTool::LARGE_ICONS:
             x = 9;
             break;
-        case XSetTool::XSET_TOOL_NOT:
-        case XSetTool::XSET_TOOL_HOME:
-        case XSetTool::XSET_TOOL_DEFAULT:
-        case XSetTool::XSET_TOOL_REFRESH:
-        case XSetTool::XSET_TOOL_NEW_TAB:
-        case XSetTool::XSET_TOOL_NEW_TAB_HERE:
-        case XSetTool::XSET_TOOL_INVALID:
+        case XSetTool::NOT:
+        case XSetTool::HOME:
+        case XSetTool::DEFAULT:
+        case XSetTool::REFRESH:
+        case XSetTool::NEW_TAB:
+        case XSetTool::NEW_TAB_HERE:
+        case XSetTool::INVALID:
         default:
             return;
     }
@@ -705,7 +706,8 @@ ptk_file_browser_add_toolbar_widget(void* set_ptr, GtkWidget* widget)
 }
 
 void
-ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_ptr, char tool_type)
+ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_ptr,
+                                        XSetTool tool_type)
 {
     if (!PTK_IS_FILE_BROWSER(file_browser))
         return;
@@ -715,8 +717,7 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
     GtkWidget* widget;
     XSet* set = XSET(set_ptr);
 
-    if (set && !set->lock && set->menu_style == XSetMenu::CHECK &&
-        set->tool == XSetTool::XSET_TOOL_CUSTOM)
+    if (set && !set->lock && set->menu_style == XSetMenu::CHECK && set->tool == XSetTool::CUSTOM)
     {
         // a custom checkbox is being updated
         for (l = file_browser->toolbar_widgets[7]; l; l = l->next)
@@ -746,46 +747,54 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
 
     switch (tool_type)
     {
-        case XSetTool::XSET_TOOL_UP:
+        case XSetTool::UP:
             const char* cwd;
             x = 0;
             cwd = ptk_file_browser_get_cwd(file_browser);
             b = !cwd || strcmp(cwd, "/");
             break;
-        case XSetTool::XSET_TOOL_BACK:
-        case XSetTool::XSET_TOOL_BACK_MENU:
+        case XSetTool::BACK:
+        case XSetTool::BACK_MENU:
             x = 1;
             b = file_browser->curHistory && file_browser->curHistory->prev;
             break;
-        case XSetTool::XSET_TOOL_FWD:
-        case XSetTool::XSET_TOOL_FWD_MENU:
+        case XSetTool::FWD:
+        case XSetTool::FWD_MENU:
             x = 2;
             b = file_browser->curHistory && file_browser->curHistory->next;
             break;
-        case XSetTool::XSET_TOOL_DEVICES:
+        case XSetTool::DEVICES:
             x = 3;
             b = !!file_browser->side_dev;
             break;
-        case XSetTool::XSET_TOOL_BOOKMARKS:
+        case XSetTool::BOOKMARKS:
             x = 4;
             b = !!file_browser->side_book;
             break;
-        case XSetTool::XSET_TOOL_TREE:
+        case XSetTool::TREE:
             x = 5;
             b = !!file_browser->side_dir;
             break;
-        case XSetTool::XSET_TOOL_SHOW_HIDDEN:
+        case XSetTool::SHOW_HIDDEN:
             x = 6;
             b = file_browser->show_hidden_files;
             break;
-        case XSetTool::XSET_TOOL_SHOW_THUMB:
+        case XSetTool::SHOW_THUMB:
             x = 8;
             b = app_settings.show_thumbnail;
             break;
-        case XSetTool::XSET_TOOL_LARGE_ICONS:
+        case XSetTool::LARGE_ICONS:
             x = 9;
             b = file_browser->large_icons;
             break;
+        case XSetTool::NOT:
+        case XSetTool::CUSTOM:
+        case XSetTool::HOME:
+        case XSetTool::DEFAULT:
+        case XSetTool::REFRESH:
+        case XSetTool::NEW_TAB:
+        case XSetTool::NEW_TAB_HERE:
+        case XSetTool::INVALID:
         default:
             LOG_WARN("ptk_file_browser_update_toolbar_widget invalid tool_type");
             return;
@@ -809,15 +818,15 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
 static void
 enable_toolbar(PtkFileBrowser* file_browser)
 {
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::XSET_TOOL_BACK);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::XSET_TOOL_FWD);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::XSET_TOOL_UP);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::XSET_TOOL_DEVICES);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::XSET_TOOL_BOOKMARKS);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::XSET_TOOL_TREE);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::XSET_TOOL_SHOW_HIDDEN);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::XSET_TOOL_SHOW_THUMB);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::XSET_TOOL_LARGE_ICONS);
+    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::BACK);
+    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::FWD);
+    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::UP);
+    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::DEVICES);
+    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::BOOKMARKS);
+    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::TREE);
+    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::SHOW_HIDDEN);
+    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::SHOW_THUMB);
+    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::LARGE_ICONS);
 }
 
 static void
@@ -1514,11 +1523,9 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     else
     {
         // toggle sidepane toolbar buttons
-        ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::XSET_TOOL_DEVICES);
-        ptk_file_browser_update_toolbar_widgets(file_browser,
-                                                nullptr,
-                                                XSetTool::XSET_TOOL_BOOKMARKS);
-        ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::XSET_TOOL_TREE);
+        ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::DEVICES);
+        ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::BOOKMARKS);
+        ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::TREE);
     }
 
     // set slider positions
@@ -1557,9 +1564,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
             file_browser->folder_view = nullptr;
         }
         file_browser->large_icons = large_icons;
-        ptk_file_browser_update_toolbar_widgets(file_browser,
-                                                nullptr,
-                                                XSetTool::XSET_TOOL_LARGE_ICONS);
+        ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::LARGE_ICONS);
     }
 
     // List Styles
@@ -5205,7 +5210,7 @@ ptk_file_browser_show_hidden_files(PtkFileBrowser* file_browser, bool show)
                                             file_browser->show_hidden_files);
     }
 
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::XSET_TOOL_SHOW_HIDDEN);
+    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::SHOW_HIDDEN);
 }
 
 static bool
@@ -5575,7 +5580,7 @@ show_thumbnails(PtkFileBrowser* file_browser, PtkFileList* list, bool is_big, in
     else if (file_browser->dir->avoid_changes)
         max_file_size = 0;
     ptk_file_list_show_thumbnails(list, is_big, max_file_size);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::XSET_TOOL_SHOW_THUMB);
+    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::SHOW_THUMB);
 }
 
 void

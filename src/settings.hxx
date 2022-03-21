@@ -27,6 +27,10 @@
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 
+#define INCLUDE_XSET_ENUMS
+#include "xset.hxx"
+#undef INCLUDE_XSET_ENUMS
+
 #include "ptk/ptk-file-browser.hxx"
 
 #define XSET(obj) (static_cast<XSet*>(obj))
@@ -105,155 +109,11 @@ const char* xset_get_user_tmp_dir();
 ///////////////////////////////////////////////////////////////////////////////
 // MOD extra settings below
 
-enum class XSetSetSet
-{
-    S,
-    B,
-    X,
-    Y,
-    Z,
-    KEY,
-    KEYMOD,
-    STYLE,
-    DESC,
-    TITLE,
-    MENU_LABEL,
-    ICN,
-    MENU_LABEL_CUSTOM,
-    ICON,
-    SHARED_KEY,
-    NEXT,
-    PREV,
-    PARENT,
-    CHILD,
-    CONTEXT,
-    LINE,
-    TOOL,
-    TASK,
-    TASK_POP,
-    TASK_ERR,
-    TASK_OUT,
-    RUN_IN_TERMINAL,
-    KEEP_TERMINAL,
-    SCROLL_LOCK,
-    DISABLE,
-    OPENER
-};
-
 enum XSetB
 {
     XSET_B_UNSET,
     XSET_B_TRUE,
     XSET_B_FALSE
-};
-
-enum XSetCMD
-{
-    XSET_CMD_LINE,
-    XSET_CMD_SCRIPT,
-    XSET_CMD_APP,
-    XSET_CMD_BOOKMARK
-};
-
-enum class XSetMenu
-{ // do not reorder - these values are saved in session files
-    NORMAL,
-    CHECK,
-    STRING,
-    RADIO,
-    FILEDLG,
-    FONTDLG,
-    ICON,
-    COLORDLG,
-    CONFIRM,
-    RESERVED_03,
-    RESERVED_04,
-    RESERVED_05,
-    RESERVED_06,
-    RESERVED_07,
-    RESERVED_08,
-    RESERVED_09,
-    RESERVED_10,
-    SUBMENU, // add new before submenu
-    SEP
-};
-
-enum XSetTool
-{ // do not reorder - these values are saved in session files
-  // also update builtin_tool_name builtin_tool_icon in settings.c
-    XSET_TOOL_NOT,
-    XSET_TOOL_CUSTOM,
-    XSET_TOOL_DEVICES,
-    XSET_TOOL_BOOKMARKS,
-    XSET_TOOL_TREE,
-    XSET_TOOL_HOME,
-    XSET_TOOL_DEFAULT,
-    XSET_TOOL_UP,
-    XSET_TOOL_BACK,
-    XSET_TOOL_BACK_MENU,
-    XSET_TOOL_FWD,
-    XSET_TOOL_FWD_MENU,
-    XSET_TOOL_REFRESH,
-    XSET_TOOL_NEW_TAB,
-    XSET_TOOL_NEW_TAB_HERE,
-    XSET_TOOL_SHOW_HIDDEN,
-    XSET_TOOL_SHOW_THUMB,
-    XSET_TOOL_LARGE_ICONS,
-    XSET_TOOL_INVALID // keep this always last
-};
-
-enum XSetJob
-{
-    XSET_JOB_KEY,
-    XSET_JOB_ICON,
-    XSET_JOB_LABEL,
-    XSET_JOB_EDIT,
-    XSET_JOB_EDIT_ROOT,
-    XSET_JOB_LINE,
-    XSET_JOB_SCRIPT,
-    XSET_JOB_CUSTOM,
-    XSET_JOB_TERM,
-    XSET_JOB_KEEP,
-    XSET_JOB_USER,
-    XSET_JOB_TASK,
-    XSET_JOB_POP,
-    XSET_JOB_ERR,
-    XSET_JOB_OUT,
-    XSET_JOB_BOOKMARK,
-    XSET_JOB_APP,
-    XSET_JOB_COMMAND,
-    XSET_JOB_SUBMENU,
-    XSET_JOB_SUBMENU_BOOK,
-    XSET_JOB_SEP,
-    XSET_JOB_ADD_TOOL,
-    XSET_JOB_IMPORT_FILE,
-    XSET_JOB_IMPORT_GTK,
-    XSET_JOB_CUT,
-    XSET_JOB_COPY,
-    XSET_JOB_PASTE,
-    XSET_JOB_REMOVE,
-    XSET_JOB_REMOVE_BOOK,
-    XSET_JOB_NORMAL,
-    XSET_JOB_CHECK,
-    XSET_JOB_CONFIRM,
-    XSET_JOB_DIALOG,
-    XSET_JOB_MESSAGE,
-    XSET_JOB_COPYNAME,
-    XSET_JOB_PROP,
-    XSET_JOB_PROP_CMD,
-    XSET_JOB_IGNORE_CONTEXT,
-    XSET_JOB_SCROLL,
-    XSET_JOB_EXPORT,
-    XSET_JOB_BROWSE_FILES,
-    XSET_JOB_BROWSE_DATA,
-    XSET_JOB_BROWSE_PLUGIN,
-    XSET_JOB_HELP,
-    XSET_JOB_HELP_NEW,
-    XSET_JOB_HELP_ADD,
-    XSET_JOB_HELP_BROWSE,
-    XSET_JOB_HELP_STYLE,
-    XSET_JOB_HELP_BOOK,
-    XSET_JOB_TOOLTIPS
 };
 
 enum PluginJob
@@ -445,5 +305,5 @@ void install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::stri
 XSet* xset_import_plugin(const char* plug_dir, int* use);
 void clean_plugin_mirrors();
 bool xset_opener(PtkFileBrowser* file_browser, char job);
-const char* xset_get_builtin_toolitem_label(unsigned char tool_type);
+const char* xset_get_builtin_toolitem_label(XSetTool tool_type);
 char* xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon);

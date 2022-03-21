@@ -19,6 +19,11 @@
 
 #include "vfs/vfs-dir.hxx"
 
+// avoids circular header dependencies
+#define INCLUDE_XSET_ENUMS
+#include "xset.hxx"
+#undef INCLUDE_XSET_ENUMS
+
 #define PTK_TYPE_FILE_BROWSER    (ptk_file_browser_get_type())
 #define PTK_FILE_BROWSER(obj)    (reinterpret_cast<PtkFileBrowser*>(obj))
 #define PTK_IS_FILE_BROWSER(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_FILE_BROWSER))
@@ -261,6 +266,6 @@ void ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const char* seek_d
                                 const char* seek_name);
 void ptk_file_browser_add_toolbar_widget(void* set_ptr, GtkWidget* widget);
 void ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_ptr,
-                                             char tool_type);
+                                             XSetTool tool_type);
 void ptk_file_browser_show_history_menu(PtkFileBrowser* file_browser, bool is_back_history,
                                         GdkEventButton* event);
