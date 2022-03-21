@@ -93,7 +93,6 @@ typedef void (*SettingsParseFunc)(std::string& line);
 static void xset_free_all();
 static void xset_default_keys();
 static char* xset_color_dialog(GtkWidget* parent, char* title, char* defcolor);
-static GtkWidget* xset_design_additem(GtkWidget* menu, const char* label, int job, XSet* set);
 static bool xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set);
 static void xset_builtin_tool_activate(XSetTool tool_type, XSet* set, GdkEventButton* event);
 static XSet* xset_new_builtin_toolitem(XSetTool tool_type);
@@ -4239,16 +4238,16 @@ xset_design_job(GtkWidget* item, XSet* set)
     parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
     XSetTool tool_type;
-    int job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
+    XSetJob job = XSetJob(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job")));
     int cmd_type = xset_get_int_set(set, "x");
 
     // LOG_INFO("activate job {} {}", job, set->name);
     switch (job)
     {
-        case XSetJob::XSET_JOB_KEY:
+        case XSetJob::KEY:
             xset_set_key(parent, set);
             break;
-        case XSetJob::XSET_JOB_ICON:
+        case XSetJob::ICON:
             mset = xset_get_plugin_mirror(set);
             char* old_icon;
             old_icon = ztd::strdup(mset->icon);
@@ -4263,9 +4262,9 @@ xset_design_job(GtkWidget* item, XSet* set)
             }
             free(old_icon);
             break;
-        case XSetJob::XSET_JOB_LABEL:
+        case XSetJob::LABEL:
             break;
-        case XSetJob::XSET_JOB_EDIT:
+        case XSetJob::EDIT:
             if (cmd_type == XSetCMD::XSET_CMD_SCRIPT)
             {
                 // script
@@ -4276,7 +4275,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 free(cscript);
             }
             break;
-        case XSetJob::XSET_JOB_EDIT_ROOT:
+        case XSetJob::EDIT_ROOT:
             if (cmd_type == XSetCMD::XSET_CMD_SCRIPT)
             {
                 // script
@@ -4287,7 +4286,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 free(cscript);
             }
             break;
-        case XSetJob::XSET_JOB_COPYNAME:
+        case XSetJob::COPYNAME:
             clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
             if (cmd_type == XSetCMD::XSET_CMD_LINE)
             {
@@ -4309,7 +4308,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 gtk_clipboard_set_text(clip, set->z, -1);
             }
             break;
-        case XSetJob::XSET_JOB_LINE:
+        case XSetJob::LINE:
             if (xset_text_dialog(parent,
                                  "Edit Command Line",
                                  enter_command_line,
@@ -4320,7 +4319,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                                  false))
                 xset_set_set(set, XSetSetSet::X, "0");
             break;
-        case XSetJob::XSET_JOB_SCRIPT:
+        case XSetJob::SCRIPT:
             xset_set_set(set, XSetSetSet::X, "1");
             cscript = xset_custom_get_script(set, true);
             if (!cscript)
@@ -4328,7 +4327,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             xset_edit(parent, cscript, false, false);
             free(cscript);
             break;
-        case XSetJob::XSET_JOB_CUSTOM:
+        case XSetJob::CUSTOM:
             if (set->z && set->z[0] != '\0')
             {
                 folder = g_path_get_dirname(set->z);
@@ -4352,7 +4351,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             free(file);
             free(folder);
             break;
-        case XSetJob::XSET_JOB_USER:
+        case XSetJob::USER:
             if (!set->plugin)
                 xset_text_dialog(
                     parent,
@@ -4364,9 +4363,9 @@ xset_design_job(GtkWidget* item, XSet* set)
                     "",
                     false);
             break;
-        case XSetJob::XSET_JOB_BOOKMARK:
-        case XSetJob::XSET_JOB_APP:
-        case XSetJob::XSET_JOB_COMMAND:
+        case XSetJob::BOOKMARK:
+        case XSetJob::APP:
+        case XSetJob::COMMAND:
             if (Glib::str_has_prefix(set->name, "open_all_type_"))
             {
                 name = set->name + 14;
@@ -4387,7 +4386,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             }
             switch (job)
             {
-                case XSetJob::XSET_JOB_COMMAND:
+                case XSetJob::COMMAND:
                     name = ztd::strdup("New _Command");
                     if (!xset_text_dialog(parent,
                                           "Set Item Name",
@@ -4403,7 +4402,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                     }
                     file = nullptr;
                     break;
-                case XSetJob::XSET_JOB_APP:
+                case XSetJob::APP:
                 {
                     VFSMimeType* mime_type;
                     mime_type = vfs_mime_type_get_from_type(
@@ -4426,7 +4425,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                     name = nullptr;
                     break;
                 }
-                case XSetJob::XSET_JOB_BOOKMARK:
+                case XSetJob::BOOKMARK:
                     if (set->browser)
                         folder = (char*)ptk_file_browser_get_cwd(set->browser);
                     else
@@ -4443,6 +4442,54 @@ xset_design_job(GtkWidget* item, XSet* set)
                     }
                     name = g_path_get_basename(file);
                     break;
+                case XSetJob::KEY:
+                case XSetJob::ICON:
+                case XSetJob::LABEL:
+                case XSetJob::EDIT:
+                case XSetJob::EDIT_ROOT:
+                case XSetJob::LINE:
+                case XSetJob::SCRIPT:
+                case XSetJob::CUSTOM:
+                case XSetJob::TERM:
+                case XSetJob::KEEP:
+                case XSetJob::USER:
+                case XSetJob::TASK:
+                case XSetJob::POP:
+                case XSetJob::ERR:
+                case XSetJob::OUT:
+                case XSetJob::SUBMENU:
+                case XSetJob::SUBMENU_BOOK:
+                case XSetJob::SEP:
+                case XSetJob::ADD_TOOL:
+                case XSetJob::IMPORT_FILE:
+                case XSetJob::IMPORT_GTK:
+                case XSetJob::CUT:
+                case XSetJob::COPY:
+                case XSetJob::PASTE:
+                case XSetJob::REMOVE:
+                case XSetJob::REMOVE_BOOK:
+                case XSetJob::NORMAL:
+                case XSetJob::CHECK:
+                case XSetJob::CONFIRM:
+                case XSetJob::DIALOG:
+                case XSetJob::MESSAGE:
+                case XSetJob::COPYNAME:
+                case XSetJob::PROP:
+                case XSetJob::PROP_CMD:
+                case XSetJob::IGNORE_CONTEXT:
+                case XSetJob::SCROLL:
+                case XSetJob::EXPORT:
+                case XSetJob::BROWSE_FILES:
+                case XSetJob::BROWSE_DATA:
+                case XSetJob::BROWSE_PLUGIN:
+                case XSetJob::HELP:
+                case XSetJob::HELP_NEW:
+                case XSetJob::HELP_ADD:
+                case XSetJob::HELP_BROWSE:
+                case XSetJob::HELP_STYLE:
+                case XSetJob::HELP_BOOK:
+                case XSetJob::TOOLTIPS:
+                case XSetJob::INVALID:
                 default:
                     break;
             }
@@ -4457,10 +4504,10 @@ xset_design_job(GtkWidget* item, XSet* set)
 
             switch (job)
             {
-                case XSetJob::XSET_JOB_COMMAND:
+                case XSetJob::COMMAND:
                     xset_item_prop_dlg(xset_context, newset, 2);
                     break;
-                case XSetJob::XSET_JOB_APP:
+                case XSetJob::APP:
                     free(newset->x);
                     newset->x = ztd::strdup("2"); // XSetCMD::XSET_CMD_APP
                     // unset these to save session space
@@ -4469,7 +4516,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                     newset->task_out = false;
                     newset->keep_terminal = false;
                     break;
-                case XSetJob::XSET_JOB_BOOKMARK:
+                case XSetJob::BOOKMARK:
                     free(newset->x);
                     newset->x = ztd::strdup("3"); // XSetCMD::XSET_CMD_BOOKMARK
                     // unset these to save session space
@@ -4478,13 +4525,61 @@ xset_design_job(GtkWidget* item, XSet* set)
                     newset->task_out = false;
                     newset->keep_terminal = false;
                     break;
+                case XSetJob::KEY:
+                case XSetJob::ICON:
+                case XSetJob::LABEL:
+                case XSetJob::EDIT:
+                case XSetJob::EDIT_ROOT:
+                case XSetJob::LINE:
+                case XSetJob::SCRIPT:
+                case XSetJob::CUSTOM:
+                case XSetJob::TERM:
+                case XSetJob::KEEP:
+                case XSetJob::USER:
+                case XSetJob::TASK:
+                case XSetJob::POP:
+                case XSetJob::ERR:
+                case XSetJob::OUT:
+                case XSetJob::SUBMENU:
+                case XSetJob::SUBMENU_BOOK:
+                case XSetJob::SEP:
+                case XSetJob::ADD_TOOL:
+                case XSetJob::IMPORT_FILE:
+                case XSetJob::IMPORT_GTK:
+                case XSetJob::CUT:
+                case XSetJob::COPY:
+                case XSetJob::PASTE:
+                case XSetJob::REMOVE:
+                case XSetJob::REMOVE_BOOK:
+                case XSetJob::NORMAL:
+                case XSetJob::CHECK:
+                case XSetJob::CONFIRM:
+                case XSetJob::DIALOG:
+                case XSetJob::MESSAGE:
+                case XSetJob::COPYNAME:
+                case XSetJob::PROP:
+                case XSetJob::PROP_CMD:
+                case XSetJob::IGNORE_CONTEXT:
+                case XSetJob::SCROLL:
+                case XSetJob::EXPORT:
+                case XSetJob::BROWSE_FILES:
+                case XSetJob::BROWSE_DATA:
+                case XSetJob::BROWSE_PLUGIN:
+                case XSetJob::HELP:
+                case XSetJob::HELP_NEW:
+                case XSetJob::HELP_ADD:
+                case XSetJob::HELP_BROWSE:
+                case XSetJob::HELP_STYLE:
+                case XSetJob::HELP_BOOK:
+                case XSetJob::TOOLTIPS:
+                case XSetJob::INVALID:
                 default:
                     break;
             }
             main_window_bookmark_changed(newset->name);
             break;
-        case XSetJob::XSET_JOB_SUBMENU:
-        case XSetJob::XSET_JOB_SUBMENU_BOOK:
+        case XSetJob::SUBMENU:
+        case XSetJob::SUBMENU_BOOK:
             if (Glib::str_has_prefix(set->name, "open_all_type_"))
             {
                 name = set->name + 14;
@@ -4527,7 +4622,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             childset = xset_custom_new();
             newset->child = ztd::strdup(childset->name);
             childset->parent = ztd::strdup(newset->name);
-            if (job == XSetJob::XSET_JOB_SUBMENU_BOOK || xset_is_main_bookmark(set))
+            if (job == XSetJob::SUBMENU_BOOK || xset_is_main_bookmark(set))
             {
                 // adding new submenu from a bookmark - fill with bookmark
                 folder = set->browser ? (char*)ptk_file_browser_get_cwd(set->browser)
@@ -4545,13 +4640,13 @@ xset_design_job(GtkWidget* item, XSet* set)
                 childset->menu_label = ztd::strdup("New _Command");
             main_window_bookmark_changed(newset->name);
             break;
-        case XSetJob::XSET_JOB_SEP:
+        case XSetJob::SEP:
             newset = xset_custom_new();
             newset->menu_style = XSetMenu::SEP;
             xset_custom_insert_after(set, newset);
             main_window_bookmark_changed(newset->name);
             break;
-        case XSetJob::XSET_JOB_ADD_TOOL:
+        case XSetJob::ADD_TOOL:
             tool_type = XSetTool(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "tool_type")));
             if (tool_type < XSetTool::DEVICES || tool_type >= XSetTool::INVALID ||
                 set->tool == XSetTool::NOT)
@@ -4560,7 +4655,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             if (newset)
                 xset_custom_insert_after(set, newset);
             break;
-        case XSetJob::XSET_JOB_IMPORT_FILE:
+        case XSetJob::IMPORT_FILE:
             // get file path
             XSet* save;
             save = xset_get("plug_ifile");
@@ -4609,7 +4704,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                                 set);
             free(file);
             break;
-        case XSetJob::XSET_JOB_IMPORT_GTK:
+        case XSetJob::IMPORT_GTK:
             // both GTK2 and GTK3 now use new location?
             file2 = Glib::build_filename(vfs_user_config_dir(), "gtk-3.0", "bookmarks");
             if (!std::filesystem::exists(file2))
@@ -4628,11 +4723,11 @@ xset_design_job(GtkWidget* item, XSet* set)
             }
             ptk_bookmark_view_import_gtk(file2.c_str(), set);
             break;
-        case XSetJob::XSET_JOB_CUT:
+        case XSetJob::CUT:
             set_clipboard = set;
             clipboard_is_cut = true;
             break;
-        case XSetJob::XSET_JOB_COPY:
+        case XSetJob::COPY:
             set_clipboard = set;
             clipboard_is_cut = false;
 
@@ -4646,7 +4741,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 gtk_clipboard_set_text(clip, set->z, -1);
             }
             break;
-        case XSetJob::XSET_JOB_PASTE:
+        case XSetJob::PASTE:
             if (!set_clipboard)
                 break;
             if (set_clipboard->tool > XSetTool::CUSTOM && set->tool == XSetTool::NOT)
@@ -4685,8 +4780,8 @@ xset_design_job(GtkWidget* item, XSet* set)
                 main_window_bookmark_changed(newset->name);
             }
             break;
-        case XSetJob::XSET_JOB_REMOVE:
-        case XSetJob::XSET_JOB_REMOVE_BOOK:
+        case XSetJob::REMOVE:
+        case XSetJob::REMOVE_BOOK:
             if (set->plugin)
             {
                 xset_remove_plugin(parent, set->browser, set);
@@ -4747,9 +4842,9 @@ xset_design_job(GtkWidget* item, XSet* set)
             name = ztd::strdup(set->name);
             prog = ztd::strdup(set->parent);
 
-            if (job == XSetJob::XSET_JOB_REMOVE && set->parent /* maybe only item in sub */
+            if (job == XSetJob::REMOVE && set->parent /* maybe only item in sub */
                 && xset_is_main_bookmark(set))
-                job = XSetJob::XSET_JOB_REMOVE_BOOK;
+                job = XSetJob::REMOVE_BOOK;
 
             if (set->parent && (set_next = xset_is(set->parent)) &&
                 set_next->tool == XSetTool::CUSTOM && set_next->menu_style == XSetMenu::SUBMENU)
@@ -4758,7 +4853,7 @@ xset_design_job(GtkWidget* item, XSet* set)
 
             childset = xset_custom_remove(set);
 
-            if (childset && job == XSetJob::XSET_JOB_REMOVE_BOOK)
+            if (childset && job == XSetJob::REMOVE_BOOK)
             {
                 // added a new default item to submenu from a bookmark
                 folder = set->browser ? (char*)ptk_file_browser_get_cwd(set->browser)
@@ -4796,17 +4891,17 @@ xset_design_job(GtkWidget* item, XSet* set)
             free(name);
             free(prog);
             break;
-        case XSetJob::XSET_JOB_EXPORT:
+        case XSetJob::EXPORT:
             if ((!set->lock || !g_strcmp0(set->name, "main_book")) && set->tool <= XSetTool::CUSTOM)
                 xset_custom_export(parent, set->browser, set);
             break;
-        case XSetJob::XSET_JOB_NORMAL:
+        case XSetJob::NORMAL:
             set->menu_style = XSetMenu::NORMAL;
             break;
-        case XSetJob::XSET_JOB_CHECK:
+        case XSetJob::CHECK:
             set->menu_style = XSetMenu::CHECK;
             break;
-        case XSetJob::XSET_JOB_CONFIRM:
+        case XSetJob::CONFIRM:
             if (!set->desc)
                 set->desc = ztd::strdup("Are you sure?");
             if (xset_text_dialog(parent,
@@ -4820,7 +4915,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                                  false))
                 set->menu_style = XSetMenu::CONFIRM;
             break;
-        case XSetJob::XSET_JOB_DIALOG:
+        case XSetJob::DIALOG:
             if (xset_text_dialog(parent,
                                  "Dialog Message",
                                  "Enter the message to be displayed in this "
@@ -4832,7 +4927,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                                  false))
                 set->menu_style = XSetMenu::STRING;
             break;
-        case XSetJob::XSET_JOB_MESSAGE:
+        case XSetJob::MESSAGE:
             xset_text_dialog(parent,
                              "Dialog Message",
                              "Enter the message to be displayed in this "
@@ -4843,16 +4938,16 @@ xset_design_job(GtkWidget* item, XSet* set)
                              "",
                              false);
             break;
-        case XSetJob::XSET_JOB_PROP:
+        case XSetJob::PROP:
             xset_item_prop_dlg(xset_context, set, 0);
             break;
-        case XSetJob::XSET_JOB_PROP_CMD:
+        case XSetJob::PROP_CMD:
             xset_item_prop_dlg(xset_context, set, 2);
             break;
-        case XSetJob::XSET_JOB_IGNORE_CONTEXT:
+        case XSetJob::IGNORE_CONTEXT:
             xset_set_b("context_dlg", !xset_get_b("context_dlg"));
             break;
-        case XSetJob::XSET_JOB_BROWSE_FILES:
+        case XSetJob::BROWSE_FILES:
             if (set->tool > XSetTool::CUSTOM)
                 break;
             if (set->plugin)
@@ -4879,7 +4974,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 ptk_file_browser_emit_open(set->browser, folder, PtkOpenAction::PTK_OPEN_DIR);
             }
             break;
-        case XSetJob::XSET_JOB_BROWSE_DATA:
+        case XSetJob::BROWSE_DATA:
             if (set->tool > XSetTool::CUSTOM)
                 break;
             if (set->plugin)
@@ -4901,7 +4996,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 ptk_file_browser_emit_open(set->browser, folder, PtkOpenAction::PTK_OPEN_DIR);
             }
             break;
-        case XSetJob::XSET_JOB_BROWSE_PLUGIN:
+        case XSetJob::BROWSE_PLUGIN:
             if (set->plugin && set->plug_dir)
             {
                 if (set->browser)
@@ -4912,7 +5007,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 }
             }
             break;
-        case XSetJob::XSET_JOB_TERM:
+        case XSetJob::TERM:
             mset = xset_get_plugin_mirror(set);
             if (mset->in_terminal)
                 mset->in_terminal = false;
@@ -4922,53 +5017,60 @@ xset_design_job(GtkWidget* item, XSet* set)
                 mset->task = false;
             }
             break;
-        case XSetJob::XSET_JOB_KEEP:
+        case XSetJob::KEEP:
             mset = xset_get_plugin_mirror(set);
             if (mset->keep_terminal)
                 mset->keep_terminal = false;
             else
                 mset->keep_terminal = true;
             break;
-        case XSetJob::XSET_JOB_TASK:
+        case XSetJob::TASK:
             mset = xset_get_plugin_mirror(set);
             if (mset->task)
                 mset->task = false;
             else
                 mset->task = true;
             break;
-        case XSetJob::XSET_JOB_POP:
+        case XSetJob::POP:
             mset = xset_get_plugin_mirror(set);
             if (mset->task_pop)
                 mset->task_pop = false;
             else
                 mset->task_pop = true;
             break;
-        case XSetJob::XSET_JOB_ERR:
+        case XSetJob::ERR:
             mset = xset_get_plugin_mirror(set);
             if (mset->task_err)
                 mset->task_err = false;
             else
                 mset->task_err = true;
             break;
-        case XSetJob::XSET_JOB_OUT:
+        case XSetJob::OUT:
             mset = xset_get_plugin_mirror(set);
             if (mset->task_out)
                 mset->task_out = false;
             else
                 mset->task_out = true;
             break;
-        case XSetJob::XSET_JOB_SCROLL:
+        case XSetJob::SCROLL:
             mset = xset_get_plugin_mirror(set);
             if (mset->scroll_lock)
                 mset->scroll_lock = false;
             else
                 mset->scroll_lock = true;
             break;
-        case XSetJob::XSET_JOB_TOOLTIPS:
+        case XSetJob::TOOLTIPS:
             set_next = xset_get_panel(1, "tool_l");
             set_next->b =
                 set_next->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_UNSET : XSetB::XSET_B_TRUE;
             break;
+        case XSetJob::HELP:
+        case XSetJob::HELP_NEW:
+        case XSetJob::HELP_ADD:
+        case XSetJob::HELP_BROWSE:
+        case XSetJob::HELP_STYLE:
+        case XSetJob::HELP_BOOK:
+        case XSetJob::INVALID:
         default:
             break;
     }
@@ -4990,7 +5092,7 @@ xset_design_job(GtkWidget* item, XSet* set)
 }
 
 static bool
-xset_job_is_valid(XSet* set, int job)
+xset_job_is_valid(XSet* set, XSetJob job)
 {
     bool no_remove = false;
     bool no_paste = false;
@@ -5013,23 +5115,23 @@ xset_job_is_valid(XSet* set, int job)
 
     switch (job)
     {
-        case XSetJob::XSET_JOB_KEY:
+        case XSetJob::KEY:
             return set->menu_style < XSetMenu::SUBMENU;
-        case XSetJob::XSET_JOB_ICON:
+        case XSetJob::ICON:
             return ((set->menu_style == XSetMenu::NORMAL || set->menu_style == XSetMenu::STRING ||
                      set->menu_style == XSetMenu::FONTDLG ||
                      set->menu_style == XSetMenu::COLORDLG ||
                      set->menu_style == XSetMenu::SUBMENU || set->tool != XSetTool::NOT) &&
                     !open_all);
-        case XSetJob::XSET_JOB_EDIT:
+        case XSetJob::EDIT:
             return !set->lock && set->menu_style < XSetMenu::SUBMENU;
-        case XSetJob::XSET_JOB_COMMAND:
+        case XSetJob::COMMAND:
             return !set->plugin;
-        case XSetJob::XSET_JOB_CUT:
+        case XSetJob::CUT:
             return (!set->lock && !set->plugin);
-        case XSetJob::XSET_JOB_COPY:
+        case XSetJob::COPY:
             return !set->lock;
-        case XSetJob::XSET_JOB_PASTE:
+        case XSetJob::PASTE:
             if (!set_clipboard)
                 no_paste = true;
             else if (set->plugin)
@@ -5044,13 +5146,54 @@ xset_job_is_valid(XSet* set, int job)
                 // do not allow paste of submenu to self or below
                 no_paste = xset_clipboard_in_set(set);
             return !no_paste;
-        case XSetJob::XSET_JOB_REMOVE:
+        case XSetJob::REMOVE:
             return (!set->lock && !no_remove);
-        // case XSetJob::XSET_JOB_CONTEXT:
+        // case XSetJob::CONTEXT:
         //    return ( xset_context && xset_context->valid && !open_all );
-        case XSetJob::XSET_JOB_PROP:
-        case XSetJob::XSET_JOB_PROP_CMD:
+        case XSetJob::PROP:
+        case XSetJob::PROP_CMD:
             return true;
+        case XSetJob::LABEL:
+        case XSetJob::EDIT_ROOT:
+        case XSetJob::LINE:
+        case XSetJob::SCRIPT:
+        case XSetJob::CUSTOM:
+        case XSetJob::TERM:
+        case XSetJob::KEEP:
+        case XSetJob::USER:
+        case XSetJob::TASK:
+        case XSetJob::POP:
+        case XSetJob::ERR:
+        case XSetJob::OUT:
+        case XSetJob::BOOKMARK:
+        case XSetJob::APP:
+        case XSetJob::SUBMENU:
+        case XSetJob::SUBMENU_BOOK:
+        case XSetJob::SEP:
+        case XSetJob::ADD_TOOL:
+        case XSetJob::IMPORT_FILE:
+        case XSetJob::IMPORT_GTK:
+        case XSetJob::REMOVE_BOOK:
+        case XSetJob::NORMAL:
+        case XSetJob::CHECK:
+        case XSetJob::CONFIRM:
+        case XSetJob::DIALOG:
+        case XSetJob::MESSAGE:
+        case XSetJob::COPYNAME:
+        case XSetJob::IGNORE_CONTEXT:
+        case XSetJob::SCROLL:
+        case XSetJob::EXPORT:
+        case XSetJob::BROWSE_FILES:
+        case XSetJob::BROWSE_DATA:
+        case XSetJob::BROWSE_PLUGIN:
+        case XSetJob::HELP:
+        case XSetJob::HELP_NEW:
+        case XSetJob::HELP_ADD:
+        case XSetJob::HELP_BROWSE:
+        case XSetJob::HELP_STYLE:
+        case XSetJob::HELP_BOOK:
+        case XSetJob::TOOLTIPS:
+        case XSetJob::INVALID:
         default:
             break;
     }
@@ -5060,7 +5203,7 @@ xset_job_is_valid(XSet* set, int job)
 static bool
 xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, XSet* set)
 {
-    int job = -1;
+    XSetJob job = XSetJob::INVALID;
 
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(widget));
     if (!item)
@@ -5080,19 +5223,19 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, XSet* set)
                 case GDK_KEY_F1:
                     return true;
                 case GDK_KEY_F3:
-                    job = XSetJob::XSET_JOB_PROP;
+                    job = XSetJob::PROP;
                     break;
                 case GDK_KEY_F4:
                     if (xset_get_int_set(set, "x") == XSetCMD::XSET_CMD_SCRIPT)
-                        job = XSetJob::XSET_JOB_EDIT;
+                        job = XSetJob::EDIT;
                     else
-                        job = XSetJob::XSET_JOB_PROP_CMD;
+                        job = XSetJob::PROP_CMD;
                     break;
                 case GDK_KEY_Delete:
-                    job = XSetJob::XSET_JOB_REMOVE;
+                    job = XSetJob::REMOVE;
                     break;
                 case GDK_KEY_Insert:
-                    job = XSetJob::XSET_JOB_COMMAND;
+                    job = XSetJob::COMMAND;
                     break;
                 default:
                     break;
@@ -5102,13 +5245,13 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, XSet* set)
             switch (event->keyval)
             {
                 case GDK_KEY_c:
-                    job = XSetJob::XSET_JOB_COPY;
+                    job = XSetJob::COPY;
                     break;
                 case GDK_KEY_x:
-                    job = XSetJob::XSET_JOB_CUT;
+                    job = XSetJob::CUT;
                     break;
                 case GDK_KEY_v:
-                    job = XSetJob::XSET_JOB_PASTE;
+                    job = XSetJob::PASTE;
                     break;
                 case GDK_KEY_e:
                     if (set->lock)
@@ -5116,13 +5259,13 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, XSet* set)
                         return false;
                     }
                     else
-                        job = XSetJob::XSET_JOB_EDIT;
+                        job = XSetJob::EDIT;
                     break;
                 case GDK_KEY_k:
-                    job = XSetJob::XSET_JOB_KEY;
+                    job = XSetJob::KEY;
                     break;
                 case GDK_KEY_i:
-                    job = XSetJob::XSET_JOB_ICON;
+                    job = XSetJob::ICON;
                     break;
                 default:
                     break;
@@ -5131,7 +5274,7 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, XSet* set)
         default:
             break;
     }
-    if (job != -1)
+    if (job != XSetJob::INVALID)
     {
         if (xset_job_is_valid(set, job))
         {
@@ -5172,12 +5315,12 @@ set_check_menu_item_block(GtkWidget* item)
 }
 
 static GtkWidget*
-xset_design_additem(GtkWidget* menu, const char* label, int job, XSet* set)
+xset_design_additem(GtkWidget* menu, const char* label, XSetJob job, XSet* set)
 {
     GtkWidget* item;
     item = gtk_menu_item_new_with_mnemonic(label);
 
-    g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(job));
+    g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(static_cast<int>(job)));
     gtk_container_add(GTK_CONTAINER(menu), item);
     g_signal_connect(item, "activate", G_CALLBACK(xset_design_job), set);
     return item;
@@ -5241,7 +5384,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
     GtkAccelGroup* accel_group = gtk_accel_group_new();
 
     // Cut
-    newitem = xset_design_additem(design_menu, "Cu_t", XSetJob::XSET_JOB_CUT, set);
+    newitem = xset_design_additem(design_menu, "Cu_t", XSetJob::CUT, set);
     gtk_widget_set_sensitive(newitem, !set->lock && !set->plugin);
     if (show_keys)
         gtk_widget_add_accelerator(newitem,
@@ -5252,7 +5395,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
                                    GTK_ACCEL_VISIBLE);
 
     // Copy
-    newitem = xset_design_additem(design_menu, "_Copy", XSetJob::XSET_JOB_COPY, set);
+    newitem = xset_design_additem(design_menu, "_Copy", XSetJob::COPY, set);
     gtk_widget_set_sensitive(newitem, !set->lock);
     if (show_keys)
         gtk_widget_add_accelerator(newitem,
@@ -5263,7 +5406,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
                                    GTK_ACCEL_VISIBLE);
 
     // Paste
-    newitem = xset_design_additem(design_menu, "_Paste", XSetJob::XSET_JOB_PASTE, insert_set);
+    newitem = xset_design_additem(design_menu, "_Paste", XSetJob::PASTE, insert_set);
     gtk_widget_set_sensitive(newitem, !no_paste);
     if (show_keys)
         gtk_widget_add_accelerator(newitem,
@@ -5274,11 +5417,10 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
                                    GTK_ACCEL_VISIBLE);
 
     // Remove
-    newitem =
-        xset_design_additem(design_menu,
-                            "_Remove",
-                            is_bookmark ? XSetJob::XSET_JOB_REMOVE_BOOK : XSetJob::XSET_JOB_REMOVE,
-                            set);
+    newitem = xset_design_additem(design_menu,
+                                  "_Remove",
+                                  is_bookmark ? XSetJob::REMOVE_BOOK : XSetJob::REMOVE,
+                                  set);
     gtk_widget_set_sensitive(newitem, !set->lock && !no_remove);
     if (show_keys)
         gtk_widget_add_accelerator(newitem,
@@ -5289,7 +5431,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
                                    GTK_ACCEL_VISIBLE);
 
     // Export
-    newitem = xset_design_additem(design_menu, "E_xport", XSetJob::XSET_JOB_EXPORT, set);
+    newitem = xset_design_additem(design_menu, "E_xport", XSetJob::EXPORT, set);
     gtk_widget_set_sensitive(
         newitem,
         (!set->lock && set->menu_style < XSetMenu::SEP && set->tool <= XSetTool::CUSTOM) ||
@@ -5301,17 +5443,17 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(newitem), submenu);
     gtk_container_add(GTK_CONTAINER(design_menu), newitem);
     gtk_widget_set_sensitive(newitem, !set->plugin);
-    g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(XSetJob::XSET_JOB_HELP_NEW));
+    g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(XSetJob::HELP_NEW));
     g_signal_connect(submenu, "key_press_event", G_CALLBACK(xset_design_menu_keypress), set);
 
     // New > Bookmark
-    newitem = xset_design_additem(submenu, "_Bookmark", XSetJob::XSET_JOB_BOOKMARK, insert_set);
+    newitem = xset_design_additem(submenu, "_Bookmark", XSetJob::BOOKMARK, insert_set);
 
     // New > Application
-    newitem = xset_design_additem(submenu, "_Application", XSetJob::XSET_JOB_APP, insert_set);
+    newitem = xset_design_additem(submenu, "_Application", XSetJob::APP, insert_set);
 
     // New > Command
-    newitem = xset_design_additem(submenu, "_Command", XSetJob::XSET_JOB_COMMAND, insert_set);
+    newitem = xset_design_additem(submenu, "_Command", XSetJob::COMMAND, insert_set);
     if (show_keys)
         gtk_widget_add_accelerator(newitem,
                                    "activate",
@@ -5323,12 +5465,11 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
     // New > Submenu
     newitem = xset_design_additem(submenu,
                                   "Sub_menu",
-                                  is_bookmark ? XSetJob::XSET_JOB_SUBMENU_BOOK
-                                              : XSetJob::XSET_JOB_SUBMENU,
+                                  is_bookmark ? XSetJob::SUBMENU_BOOK : XSetJob::SUBMENU,
                                   insert_set);
 
     // New > Separator
-    newitem = xset_design_additem(submenu, "S_eparator", XSetJob::XSET_JOB_SEP, insert_set);
+    newitem = xset_design_additem(submenu, "S_eparator", XSetJob::SEP, insert_set);
 
     // New > Import >
     newitem = gtk_menu_item_new_with_mnemonic("_Import");
@@ -5336,16 +5477,15 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(newitem), submenu2);
     gtk_container_add(GTK_CONTAINER(submenu), newitem);
     gtk_widget_set_sensitive(newitem, !insert_set->plugin);
-    g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(XSetJob::XSET_JOB_IMPORT_FILE));
+    g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(XSetJob::IMPORT_FILE));
     g_signal_connect(submenu2,
                      "key_press_event",
                      G_CALLBACK(xset_design_menu_keypress),
                      insert_set);
 
-    newitem = xset_design_additem(submenu2, "_File", XSetJob::XSET_JOB_IMPORT_FILE, insert_set);
+    newitem = xset_design_additem(submenu2, "_File", XSetJob::IMPORT_FILE, insert_set);
     if (is_bookmark)
-        newitem =
-            xset_design_additem(submenu2, "_GTK Bookmarks", XSetJob::XSET_JOB_IMPORT_GTK, set);
+        newitem = xset_design_additem(submenu2, "_GTK Bookmarks", XSetJob::IMPORT_GTK, set);
 
     if (insert_set->tool != XSetTool::NOT)
     {
@@ -5354,15 +5494,13 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
         submenu = gtk_menu_new();
         gtk_menu_item_set_submenu(GTK_MENU_ITEM(newitem), submenu);
         gtk_container_add(GTK_CONTAINER(design_menu), newitem);
-        g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(XSetJob::XSET_JOB_HELP_ADD));
+        g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(XSetJob::HELP_ADD));
         g_signal_connect(submenu, "key_press_event", G_CALLBACK(xset_design_menu_keypress), set);
 
         for (std::size_t i = static_cast<int>(XSetTool::DEVICES); i < builtin_tool_name.size(); i++)
         {
-            newitem = xset_design_additem(submenu,
-                                          builtin_tool_name[i],
-                                          XSetJob::XSET_JOB_ADD_TOOL,
-                                          insert_set);
+            newitem =
+                xset_design_additem(submenu, builtin_tool_name[i], XSetJob::ADD_TOOL, insert_set);
             g_object_set_data(G_OBJECT(newitem), "tool_type", GINT_TO_POINTER(i));
         }
     }
@@ -5371,11 +5509,10 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
     gtk_container_add(GTK_CONTAINER(design_menu), gtk_separator_menu_item_new());
 
     // Help
-    newitem =
-        xset_design_additem(design_menu,
-                            "_Help",
-                            is_bookmark ? XSetJob::XSET_JOB_HELP_BOOK : XSetJob::XSET_JOB_HELP,
-                            set);
+    newitem = xset_design_additem(design_menu,
+                                  "_Help",
+                                  is_bookmark ? XSetJob::HELP_BOOK : XSetJob::HELP,
+                                  set);
     gtk_widget_set_sensitive(newitem, !set->lock || set->line);
     if (show_keys)
         gtk_widget_add_accelerator(newitem,
@@ -5388,13 +5525,13 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
     // Tooltips (toolbar)
     if (set->tool != XSetTool::NOT)
     {
-        newitem = xset_design_additem(design_menu, "T_ooltips", XSetJob::XSET_JOB_TOOLTIPS, set);
+        newitem = xset_design_additem(design_menu, "T_ooltips", XSetJob::TOOLTIPS, set);
         if (!xset_get_b_panel(1, "tool_l"))
             set_check_menu_item_block(newitem);
     }
 
     // Key
-    newitem = xset_design_additem(design_menu, "_Key Shortcut", XSetJob::XSET_JOB_KEY, set);
+    newitem = xset_design_additem(design_menu, "_Key Shortcut", XSetJob::KEY, set);
     gtk_widget_set_sensitive(newitem, (set->menu_style < XSetMenu::SUBMENU));
     if (show_keys)
         gtk_widget_add_accelerator(newitem,
@@ -5415,10 +5552,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
                 if (geteuid() != 0 && have_rw_access(script))
                 {
                     // edit as user
-                    newitem = xset_design_additem(design_menu,
-                                                  "_Edit Script",
-                                                  XSetJob::XSET_JOB_EDIT,
-                                                  set);
+                    newitem = xset_design_additem(design_menu, "_Edit Script", XSetJob::EDIT, set);
                     if (show_keys)
                         gtk_widget_add_accelerator(newitem,
                                                    "activate",
@@ -5430,10 +5564,8 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
                 else
                 {
                     // edit as root
-                    newitem = xset_design_additem(design_menu,
-                                                  "E_dit As Root",
-                                                  XSetJob::XSET_JOB_EDIT_ROOT,
-                                                  set);
+                    newitem =
+                        xset_design_additem(design_menu, "E_dit As Root", XSetJob::EDIT_ROOT, set);
                     if (geteuid() == 0 && show_keys)
                         gtk_widget_add_accelerator(newitem,
                                                    "activate",
@@ -5448,8 +5580,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
         else if (xset_get_int_set(set, "x") == XSetCMD::XSET_CMD_LINE)
         {
             // edit command line
-            newitem =
-                xset_design_additem(design_menu, "_Edit Command", XSetJob::XSET_JOB_PROP_CMD, set);
+            newitem = xset_design_additem(design_menu, "_Edit Command", XSetJob::PROP_CMD, set);
             if (show_keys)
                 gtk_widget_add_accelerator(newitem,
                                            "activate",
@@ -5461,7 +5592,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
     }
 
     // Properties
-    newitem = xset_design_additem(design_menu, "_Properties", XSetJob::XSET_JOB_PROP, set);
+    newitem = xset_design_additem(design_menu, "_Properties", XSetJob::PROP, set);
     if (show_keys)
         gtk_widget_add_accelerator(newitem,
                                    "activate",
@@ -5504,7 +5635,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
 static bool
 xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set)
 {
-    int job = -1;
+    XSetJob job = XSetJob::INVALID;
 
     GtkWidget* menu = item ? GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu")) : nullptr;
     unsigned int keymod = ptk_get_keymod(event->state);
@@ -5558,19 +5689,19 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set)
                     break;
                 case GDK_CONTROL_MASK:
                     // ctrl
-                    job = XSetJob::XSET_JOB_COPY;
+                    job = XSetJob::COPY;
                     break;
                 case GDK_MOD1_MASK:
                     // alt
-                    job = XSetJob::XSET_JOB_CUT;
+                    job = XSetJob::CUT;
                     break;
                 case GDK_SHIFT_MASK:
                     // shift
-                    job = XSetJob::XSET_JOB_PASTE;
+                    job = XSetJob::PASTE;
                     break;
                 case (GDK_CONTROL_MASK | GDK_SHIFT_MASK):
                     // ctrl + shift
-                    job = XSetJob::XSET_JOB_COMMAND;
+                    job = XSetJob::COMMAND;
                     break;
                 default:
                     break;
@@ -5590,30 +5721,30 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set)
                     else
                     {
                         if (xset_get_int_set(set, "x") == XSetCMD::XSET_CMD_SCRIPT)
-                            job = XSetJob::XSET_JOB_EDIT;
+                            job = XSetJob::EDIT;
                         else
-                            job = XSetJob::XSET_JOB_PROP_CMD;
+                            job = XSetJob::PROP_CMD;
                     }
                     break;
                 case GDK_CONTROL_MASK:
                     // ctrl
-                    job = XSetJob::XSET_JOB_KEY;
+                    job = XSetJob::KEY;
                     break;
                 case GDK_MOD1_MASK:
                     // alt
-                    job = XSetJob::XSET_JOB_HELP;
+                    job = XSetJob::HELP;
                     break;
                 case GDK_SHIFT_MASK:
                     // shift
-                    job = XSetJob::XSET_JOB_ICON;
+                    job = XSetJob::ICON;
                     break;
                 case (GDK_CONTROL_MASK | GDK_SHIFT_MASK):
                     // ctrl + shift
-                    job = XSetJob::XSET_JOB_REMOVE;
+                    job = XSetJob::REMOVE;
                     break;
                 case (GDK_CONTROL_MASK | GDK_MOD1_MASK):
                     // ctrl + alt
-                    job = XSetJob::XSET_JOB_PROP;
+                    job = XSetJob::PROP;
                     break;
                 default:
                     break;
@@ -5622,7 +5753,7 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set)
         default:
             break;
     }
-    if (job != -1)
+    if (job != XSetJob::INVALID)
     {
         if (xset_job_is_valid(set, job))
         {
@@ -5642,7 +5773,7 @@ bool
 xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
 {
     (void)user_data;
-    int job = -1;
+    XSetJob job = XSetJob::INVALID;
     XSet* set;
 
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(widget));
@@ -5671,19 +5802,19 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
                     xset_design_show_menu(widget, set, nullptr, 0, event->time);
                     return true;
                 case GDK_KEY_F3:
-                    job = XSetJob::XSET_JOB_PROP;
+                    job = XSetJob::PROP;
                     break;
                 case GDK_KEY_F4:
                     if (xset_get_int_set(set, "x") == XSetCMD::XSET_CMD_SCRIPT)
-                        job = XSetJob::XSET_JOB_EDIT;
+                        job = XSetJob::EDIT;
                     else
-                        job = XSetJob::XSET_JOB_PROP_CMD;
+                        job = XSetJob::PROP_CMD;
                     break;
                 case GDK_KEY_Delete:
-                    job = XSetJob::XSET_JOB_REMOVE;
+                    job = XSetJob::REMOVE;
                     break;
                 case GDK_KEY_Insert:
-                    job = XSetJob::XSET_JOB_COMMAND;
+                    job = XSetJob::COMMAND;
                     break;
                 default:
                     break;
@@ -5693,13 +5824,13 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
             switch (event->keyval)
             {
                 case GDK_KEY_c:
-                    job = XSetJob::XSET_JOB_COPY;
+                    job = XSetJob::COPY;
                     break;
                 case GDK_KEY_x:
-                    job = XSetJob::XSET_JOB_CUT;
+                    job = XSetJob::CUT;
                     break;
                 case GDK_KEY_v:
-                    job = XSetJob::XSET_JOB_PASTE;
+                    job = XSetJob::PASTE;
                     break;
                 case GDK_KEY_e:
                     if (set->lock)
@@ -5710,16 +5841,16 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
                     else
                     {
                         if (xset_get_int_set(set, "x") == XSetCMD::XSET_CMD_SCRIPT)
-                            job = XSetJob::XSET_JOB_EDIT;
+                            job = XSetJob::EDIT;
                         else
-                            job = XSetJob::XSET_JOB_PROP_CMD;
+                            job = XSetJob::PROP_CMD;
                     }
                     break;
                 case GDK_KEY_k:
-                    job = XSetJob::XSET_JOB_KEY;
+                    job = XSetJob::KEY;
                     break;
                 case GDK_KEY_i:
-                    job = XSetJob::XSET_JOB_ICON;
+                    job = XSetJob::ICON;
                     break;
                 default:
                     break;
@@ -5729,7 +5860,7 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
             break;
     }
 
-    if (job != -1)
+    if (job != XSetJob::INVALID)
     {
         if (xset_job_is_valid(set, job))
         {
@@ -6658,7 +6789,7 @@ xset_new_builtin_toolitem(XSetTool tool_type)
 static bool
 on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
 {
-    int job = -1;
+    XSetJob job = XSetJob::INVALID;
 
     // LOG_INFO("on_tool_icon_button_press  {}   button = {}", set->menu_label, event->button);
     if (event->type != GDK_BUTTON_PRESS)
@@ -6722,19 +6853,19 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
                     break;
                 case GDK_CONTROL_MASK:
                     // ctrl
-                    job = XSetJob::XSET_JOB_COPY;
+                    job = XSetJob::COPY;
                     break;
                 case GDK_MOD1_MASK:
                     // alt
-                    job = XSetJob::XSET_JOB_CUT;
+                    job = XSetJob::CUT;
                     break;
                 case GDK_SHIFT_MASK:
                     // shift
-                    job = XSetJob::XSET_JOB_PASTE;
+                    job = XSetJob::PASTE;
                     break;
                 case (GDK_CONTROL_MASK | GDK_SHIFT_MASK):
                     // ctrl + shift
-                    job = XSetJob::XSET_JOB_COMMAND;
+                    job = XSetJob::COMMAND;
                     break;
                 default:
                     break;
@@ -6748,28 +6879,28 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
                     // no modifier
                     if (set->tool == XSetTool::CUSTOM &&
                         xset_get_int_set(set, "x") == XSetCMD::XSET_CMD_SCRIPT)
-                        job = XSetJob::XSET_JOB_EDIT;
+                        job = XSetJob::EDIT;
                     else
-                        job = XSetJob::XSET_JOB_PROP_CMD;
+                        job = XSetJob::PROP_CMD;
                     break;
                 case GDK_CONTROL_MASK:
                     // ctrl
-                    job = XSetJob::XSET_JOB_KEY;
+                    job = XSetJob::KEY;
                     break;
                 case GDK_MOD1_MASK:
                     // alt
                     break;
                 case GDK_SHIFT_MASK:
                     // shift
-                    job = XSetJob::XSET_JOB_ICON;
+                    job = XSetJob::ICON;
                     break;
                 case (GDK_CONTROL_MASK | GDK_SHIFT_MASK):
                     // ctrl + shift
-                    job = XSetJob::XSET_JOB_REMOVE;
+                    job = XSetJob::REMOVE;
                     break;
                 case (GDK_CONTROL_MASK | GDK_MOD1_MASK):
                     // ctrl + alt
-                    job = XSetJob::XSET_JOB_PROP;
+                    job = XSetJob::PROP;
                     break;
                 default:
                     break;
@@ -6779,7 +6910,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
             break;
     }
 
-    if (job != -1)
+    if (job != XSetJob::INVALID)
     {
         if (xset_job_is_valid(set, job))
         {
