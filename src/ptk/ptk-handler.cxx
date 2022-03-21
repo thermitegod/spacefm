@@ -2415,7 +2415,7 @@ on_textview_popup(GtkTextView* input, GtkMenu* menu, HandlerData* hnd)
     // uses same xsets as item-prop.c:on_script_popup()
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     XSet* set = xset_get("separator");
-    set->menu_style = XSetMenu::XSET_MENU_SEP;
+    set->menu_style = XSetMenu::SEP;
     set->browser = nullptr;
     xset_add_menuitem(nullptr, GTK_WIDGET(menu), accel_group, set);
 

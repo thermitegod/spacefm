@@ -675,7 +675,7 @@ ptk_file_browser_add_toolbar_widget(void* set_ptr, GtkWidget* widget)
             x = 6;
             break;
         case XSetTool::XSET_TOOL_CUSTOM:
-            if (set->menu_style == XSetMenu::XSET_MENU_CHECK)
+            if (set->menu_style == XSetMenu::CHECK)
             {
                 x = 7;
                 // attach set pointer to custom checkboxes so we can find it
@@ -715,7 +715,7 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
     GtkWidget* widget;
     XSet* set = XSET(set_ptr);
 
-    if (set && !set->lock && set->menu_style == XSetMenu::XSET_MENU_CHECK &&
+    if (set && !set->lock && set->menu_style == XSetMenu::CHECK &&
         set->tool == XSetTool::XSET_TOOL_CUSTOM)
     {
         // a custom checkbox is being updated

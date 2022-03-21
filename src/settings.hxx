@@ -155,27 +155,27 @@ enum XSetCMD
     XSET_CMD_BOOKMARK
 };
 
-enum XSetMenu
-{ // do not renumber - these values are saved in session files
-    XSET_MENU_NORMAL,
-    XSET_MENU_CHECK,
-    XSET_MENU_STRING,
-    XSET_MENU_RADIO,
-    XSET_MENU_FILEDLG,
-    XSET_MENU_FONTDLG,
-    XSET_MENU_ICON,
-    XSET_MENU_COLORDLG,
-    XSET_MENU_CONFIRM,
-    XSET_MENU_RESERVED_03,
-    XSET_MENU_RESERVED_04,
-    XSET_MENU_RESERVED_05,
-    XSET_MENU_RESERVED_06,
-    XSET_MENU_RESERVED_07,
-    XSET_MENU_RESERVED_08,
-    XSET_MENU_RESERVED_09,
-    XSET_MENU_RESERVED_10,
-    XSET_MENU_SUBMENU, // add new before submenu
-    XSET_MENU_SEP
+enum class XSetMenu
+{ // do not reorder - these values are saved in session files
+    NORMAL,
+    CHECK,
+    STRING,
+    RADIO,
+    FILEDLG,
+    FONTDLG,
+    ICON,
+    COLORDLG,
+    CONFIRM,
+    RESERVED_03,
+    RESERVED_04,
+    RESERVED_05,
+    RESERVED_06,
+    RESERVED_07,
+    RESERVED_08,
+    RESERVED_09,
+    RESERVED_10,
+    SUBMENU, // add new before submenu
+    SEP
 };
 
 enum XSetTool

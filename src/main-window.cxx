@@ -3399,7 +3399,7 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
     }
 
     // run menu_cb
-    if (set->menu_style < XSetMenu::XSET_MENU_SUBMENU)
+    if (set->menu_style < XSetMenu::SUBMENU)
     {
         set->browser = browser;
         xset_menu_cb(nullptr, set); // also does custom activate
@@ -7247,7 +7247,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 return 2;
             }
         }
-        if (set->menu_style == XSetMenu::XSET_MENU_SUBMENU)
+        if (set->menu_style == XSetMenu::SUBMENU)
         {
             // show submenu as popup menu
             set = xset_get(set->child);

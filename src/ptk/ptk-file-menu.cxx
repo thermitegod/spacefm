@@ -936,7 +936,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         plain_type = fmt::format("open_all_type_{}", plain_type);
         set = xset_set_cb(plain_type.c_str(), (GFunc)on_popup_open_all, data);
         set->lock = true;
-        set->menu_style = XSetMenu::XSET_MENU_NORMAL;
+        set->menu_style = XSetMenu::NORMAL;
         if (set->shared_key)
             free(set->shared_key);
         set->shared_key = ztd::strdup("open_all");

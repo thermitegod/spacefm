@@ -2696,7 +2696,7 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
     // get icon name
     switch (set->menu_style)
     {
-        case XSetMenu::XSET_MENU_SUBMENU:
+        case XSetMenu::SUBMENU:
             icon1 = icon_name;
             if (!icon1)
             {
@@ -2718,28 +2718,28 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
                 }
             }
             break;
-        case XSetMenu::XSET_MENU_SEP:
+        case XSetMenu::SEP:
             is_sep = true;
             break;
-        case XSetMenu::XSET_MENU_NORMAL:
-        case XSetMenu::XSET_MENU_CHECK:
-        case XSetMenu::XSET_MENU_STRING:
-        case XSetMenu::XSET_MENU_RADIO:
-        case XSetMenu::XSET_MENU_FILEDLG:
-        case XSetMenu::XSET_MENU_FONTDLG:
-        case XSetMenu::XSET_MENU_ICON:
-        case XSetMenu::XSET_MENU_COLORDLG:
-        case XSetMenu::XSET_MENU_CONFIRM:
-        case XSetMenu::XSET_MENU_RESERVED_03:
-        case XSetMenu::XSET_MENU_RESERVED_04:
-        case XSetMenu::XSET_MENU_RESERVED_05:
-        case XSetMenu::XSET_MENU_RESERVED_06:
-        case XSetMenu::XSET_MENU_RESERVED_07:
-        case XSetMenu::XSET_MENU_RESERVED_08:
-        case XSetMenu::XSET_MENU_RESERVED_09:
-        case XSetMenu::XSET_MENU_RESERVED_10:
+        case XSetMenu::NORMAL:
+        case XSetMenu::CHECK:
+        case XSetMenu::STRING:
+        case XSetMenu::RADIO:
+        case XSetMenu::FILEDLG:
+        case XSetMenu::FONTDLG:
+        case XSetMenu::ICON:
+        case XSetMenu::COLORDLG:
+        case XSetMenu::CONFIRM:
+        case XSetMenu::RESERVED_03:
+        case XSetMenu::RESERVED_04:
+        case XSetMenu::RESERVED_05:
+        case XSetMenu::RESERVED_06:
+        case XSetMenu::RESERVED_07:
+        case XSetMenu::RESERVED_08:
+        case XSetMenu::RESERVED_09:
+        case XSetMenu::RESERVED_10:
         default:
-            if (set->menu_style != XSetMenu::XSET_MENU_CHECK)
+            if (set->menu_style != XSetMenu::CHECK)
                 icon1 = icon_name;
             cmd_type = set->x ? strtol(set->x, nullptr, 10) : -1;
             if (!set->lock && cmd_type == XSetCMD::XSET_CMD_BOOKMARK)
@@ -2769,9 +2769,9 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
                      (cmd_type == XSetCMD::XSET_CMD_APP || cmd_type == XSetCMD::XSET_CMD_LINE ||
                       cmd_type == XSetCMD::XSET_CMD_SCRIPT))
             {
-                if (set->menu_style != XSetMenu::XSET_MENU_CHECK || set->b == XSetB::XSET_B_TRUE)
+                if (set->menu_style != XSetMenu::CHECK || set->b == XSetB::XSET_B_TRUE)
                 {
-                    if (set->menu_style == XSetMenu::XSET_MENU_CHECK && icon_name &&
+                    if (set->menu_style == XSetMenu::CHECK && icon_name &&
                         set->b == XSetB::XSET_B_TRUE)
                     {
                         icon1 = icon_name;
@@ -3033,7 +3033,7 @@ find_cwd_match_bookmark(XSet* parent_set, const char* cwd, bool recurse, XSet* s
     {
         if (no_skip && set->z && set->x && !set->lock &&
             set->x[0] == '3' /* XSetCMD::XSET_CMD_BOOKMARK */ &&
-            set->menu_style < XSetMenu::XSET_MENU_SUBMENU && Glib::str_has_prefix(set->z, cwd))
+            set->menu_style < XSetMenu::SUBMENU && Glib::str_has_prefix(set->z, cwd))
         {
             // found a possible match - confirm
             char* sep = strchr(set->z, ';');
@@ -3051,7 +3051,7 @@ find_cwd_match_bookmark(XSet* parent_set, const char* cwd, bool recurse, XSet* s
             }
             free(url);
         }
-        else if (set->menu_style == XSetMenu::XSET_MENU_SUBMENU && recurse && set->child)
+        else if (set->menu_style == XSetMenu::SUBMENU && recurse && set->child)
         {
             // set is a parent - recurse contents
             XSet* found_set;
@@ -3076,7 +3076,7 @@ ptk_bookmark_view_chdir(GtkTreeView* view, PtkFileBrowser* file_browser, bool re
 
     // cur dir is already selected?
     XSet* set = get_selected_bookmark_set(view);
-    if (set && !set->lock && set->z && set->menu_style < XSetMenu::XSET_MENU_SUBMENU && set->x &&
+    if (set && !set->lock && set->z && set->menu_style < XSetMenu::SUBMENU && set->x &&
         strtol(set->x, nullptr, 10) == XSetCMD::XSET_CMD_BOOKMARK &&
         Glib::str_has_prefix(set->z, cwd))
     {
@@ -3335,7 +3335,7 @@ activate_bookmark_item(XSet* sel_set, GtkTreeView* view, PtkFileBrowser* file_br
                 ptk_bookmark_view_chdir(view, file_browser, false);
         }
     }
-    else if (sel_set->menu_style == XSetMenu::XSET_MENU_SUBMENU)
+    else if (sel_set->menu_style == XSetMenu::SUBMENU)
     {
         // enter submenu
         free(file_browser->book_set_name);
@@ -3358,7 +3358,7 @@ activate_bookmark_item(XSet* sel_set, GtkTreeView* view, PtkFileBrowser* file_br
             // restore the New Tab setting
             set->b = set->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_UNSET : XSetB::XSET_B_TRUE;
         }
-        if (sel_set->menu_style == XSetMenu::XSET_MENU_CHECK)
+        if (sel_set->menu_style == XSetMenu::CHECK)
             main_window_bookmark_changed(sel_set->name);
     }
 }
