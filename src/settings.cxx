@@ -2775,7 +2775,7 @@ struct PluginData
     GtkWidget* handler_dlg;
     char* plug_dir;
     XSet* set;
-    int job;
+    PluginJob job;
 };
 
 static void
@@ -2785,7 +2785,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
     XSet* set;
     std::string msg;
     // LOG_INFO("on_install_plugin_cb");
-    if (plugin_data->job == PluginJob::PLUGIN_JOB_REMOVE) // uninstall
+    if (plugin_data->job == PluginJob::REMOVE) // uninstall
     {
         if (!std::filesystem::exists(plugin_data->plug_dir))
         {
@@ -2815,7 +2815,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
             else if (use == PluginUse::PLUGIN_USE_BOOKMARKS)
             {
                 // bookmarks
-                if (plugin_data->job != PluginJob::PLUGIN_JOB_COPY || !plugin_data->set)
+                if (plugin_data->job != PluginJob::COPY || !plugin_data->set)
                 {
                     // This dialog should never be seen - failsafe
                     xset_msg_dialog(
@@ -2865,7 +2865,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
             {
                 // handler
                 set->plugin_top = false; // prevent being added to Plugins menu
-                if (plugin_data->job == PluginJob::PLUGIN_JOB_INSTALL)
+                if (plugin_data->job == PluginJob::INSTALL)
                 {
                     // This dialog should never be seen - failsafe
                     xset_msg_dialog(plugin_data->main_window ? GTK_WIDGET(plugin_data->main_window)
@@ -2880,7 +2880,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                 else
                     ptk_handler_import(use, plugin_data->handler_dlg, set);
             }
-            else if (plugin_data->job == PluginJob::PLUGIN_JOB_COPY)
+            else if (plugin_data->job == PluginJob::COPY)
             {
                 // copy
                 set->plugin_top = false; // do not show tmp plugin in Plugins menu
@@ -2982,7 +2982,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
     plugin_data->main_window = nullptr;
     plugin_data->plug_dir = ztd::strdup(set->plug_dir);
     plugin_data->set = set;
-    plugin_data->job = PluginJob::PLUGIN_JOB_REMOVE;
+    plugin_data->job = PluginJob::REMOVE;
     ptask->complete_notify = (GFunc)on_install_plugin_cb;
     ptask->user_data = plugin_data;
 
@@ -2991,7 +2991,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 
 void
 install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& path,
-                    const std::string& plug_dir, int job, XSet* insert_set)
+                    const std::string& plug_dir, PluginJob job, XSet* insert_set)
 {
     std::string own;
     std::string plug_dir_q = bash_quote(plug_dir);
@@ -3007,16 +3007,17 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& p
 
     switch (job)
     {
-        case PluginJob::PLUGIN_JOB_INSTALL:
+        case PluginJob::INSTALL:
             // install
             own =
                 fmt::format("chown -R root:root {} && chmod -R go+rX-w {}", plug_dir_q, plug_dir_q);
             ptask->task->exec_as_user = "root";
             break;
-        case PluginJob::PLUGIN_JOB_COPY:
+        case PluginJob::COPY:
             // copy to clipboard or import to menu
             own = fmt::format("chmod -R go+rX-w {}", plug_dir_q);
             break;
+        case PluginJob::REMOVE:
         default:
             break;
     }
@@ -3048,10 +3049,10 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& p
             insert_set = nullptr;
         }
     }
-    if (job == PluginJob::PLUGIN_JOB_INSTALL || !insert_set)
+    if (job == PluginJob::INSTALL || !insert_set)
     {
         // prevent install of exported bookmarks or handler as plugin or design clipboard
-        if (job == PluginJob::PLUGIN_JOB_INSTALL)
+        if (job == PluginJob::INSTALL)
             book = " || [ -e main_book ] || [ -d hand_* ]";
         else
             book = " || [ -e main_book ]";
@@ -4701,7 +4702,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                                 nullptr,
                                 file,
                                 plug_dir,
-                                PluginJob::PLUGIN_JOB_COPY,
+                                PluginJob::COPY,
                                 set);
             free(file);
             break;

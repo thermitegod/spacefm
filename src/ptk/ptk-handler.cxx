@@ -2645,7 +2645,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     }
 
     // Install plugin
-    install_plugin_file(nullptr, hnd->dlg, file, plug_dir, PluginJob::PLUGIN_JOB_COPY, nullptr);
+    install_plugin_file(nullptr, hnd->dlg, file, plug_dir, PluginJob::COPY, nullptr);
     free(file);
 }
 

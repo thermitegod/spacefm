@@ -116,11 +116,11 @@ enum XSetB
     XSET_B_FALSE
 };
 
-enum PluginJob
+enum class PluginJob
 {
-    PLUGIN_JOB_INSTALL,
-    PLUGIN_JOB_COPY,
-    PLUGIN_JOB_REMOVE
+    INSTALL,
+    COPY,
+    REMOVE
 };
 
 enum PluginUse
@@ -301,7 +301,7 @@ std::vector<XSet*> xset_get_plugins();
 void xset_clear_plugins(std::vector<XSet*>& plugins);
 
 void install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& path,
-                         const std::string& plug_dir, int job, XSet* insert_set);
+                         const std::string& plug_dir, PluginJob job, XSet* insert_set);
 XSet* xset_import_plugin(const char* plug_dir, int* use);
 void clean_plugin_mirrors();
 bool xset_opener(PtkFileBrowser* file_browser, char job);

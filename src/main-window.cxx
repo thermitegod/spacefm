@@ -238,7 +238,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
     char* path = nullptr;
     const char* deffolder;
     std::string msg;
-    int job = PluginJob::PLUGIN_JOB_INSTALL;
+    PluginJob job = PluginJob::INSTALL;
 
     if (!item)
         set = set2;
@@ -248,7 +248,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
         return;
 
     if (Glib::str_has_suffix(set->name, "cfile") || Glib::str_has_suffix(set->name, "curl"))
-        job = PluginJob::PLUGIN_JOB_COPY;
+        job = PluginJob::COPY;
 
     if (Glib::str_has_suffix(set->name, "file"))
     {
@@ -276,7 +276,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
     std::string plug_dir;
     switch (job)
     {
-        case PluginJob::PLUGIN_JOB_INSTALL:
+        case PluginJob::INSTALL:
         {
             // install job
             char* filename = g_path_get_basename(path);
@@ -326,7 +326,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
             free(plug_dir_name);
             break;
         }
-        case PluginJob::PLUGIN_JOB_COPY:
+        case PluginJob::COPY:
         {
             // copy job
             const char* user_tmp = xset_get_user_tmp_dir();
@@ -348,6 +348,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
             }
             break;
         }
+        case PluginJob::REMOVE:
         default:
             break;
     }
