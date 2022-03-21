@@ -57,12 +57,13 @@ enum class XSetSetSet
     OPENER
 };
 
-enum XSetCMD
+enum class XSetCMD
 {
-    XSET_CMD_LINE,
-    XSET_CMD_SCRIPT,
-    XSET_CMD_APP,
-    XSET_CMD_BOOKMARK
+    LINE,
+    SCRIPT,
+    APP,
+    BOOKMARK,
+    INVALID // Must be last
 };
 
 enum class XSetMenu

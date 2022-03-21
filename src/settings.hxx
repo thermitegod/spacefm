@@ -168,7 +168,7 @@ struct XSet
     char* parent; // saved
     char* child;  // saved
     char* line;   // saved or help if lock
-    // x = XSetCMD::XSET_CMD_LINE..XSetCMD::XSET_CMD_BOOKMARK
+    // x = XSetCMD::LINE..XSetCMD::BOOKMARK
     // y = user
     // z = custom executable
     bool task;          // saved

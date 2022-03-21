@@ -1173,7 +1173,7 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
     }
 
     // load command data
-    if (rset->x && strtol(rset->x, nullptr, 10) == XSetCMD::XSET_CMD_SCRIPT)
+    if (rset->x && XSetCMD(strtol(rset->x, nullptr, 10)) == XSetCMD::SCRIPT)
     {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_script), true);
         gtk_widget_hide(ctxt->cmd_line_label);
@@ -1318,7 +1318,7 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
 static void
 replace_item_props(ContextData* ctxt)
 {
-    int x;
+    XSetCMD x;
     XSet* rset = ctxt->set;
     XSet* mset = xset_get_plugin_mirror(rset);
 
@@ -1332,36 +1332,36 @@ replace_item_props(ContextData* ctxt)
         switch (item_type)
         {
             case ItemPropItemType::ITEM_TYPE_BOOKMARK:
-                x = XSetCMD::XSET_CMD_BOOKMARK;
+                x = XSetCMD::BOOKMARK;
                 is_bookmark_or_app = true;
                 break;
             case ItemPropItemType::ITEM_TYPE_APP:
-                x = XSetCMD::XSET_CMD_APP;
+                x = XSetCMD::APP;
                 is_bookmark_or_app = true;
                 break;
             case ItemPropItemType::ITEM_TYPE_COMMAND:
                 if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_line)))
                     // line
-                    x = XSetCMD::XSET_CMD_LINE;
+                    x = XSetCMD::LINE;
                 else
                 {
                     // script
-                    x = XSetCMD::XSET_CMD_SCRIPT;
+                    x = XSetCMD::SCRIPT;
                     save_command_script(ctxt, false);
                 }
                 break;
             default:
-                x = -1;
+                x = XSetCMD::INVALID;
                 break;
         }
 
-        if (x >= 0)
+        if (x != XSetCMD::INVALID)
         {
             free(rset->x);
-            if (x == 0)
+            if (x == XSetCMD::LINE)
                 rset->x = nullptr;
             else
-                rset->x = ztd::strdup(x);
+                rset->x = ztd::strdup(static_cast<int>(x));
         }
         if (!rset->plugin)
         {
@@ -1387,7 +1387,7 @@ replace_item_props(ContextData* ctxt)
         }
         // command line
         free(rset->line);
-        if (x == XSetCMD::XSET_CMD_LINE)
+        if (x == XSetCMD::LINE)
         {
             rset->line = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_script));
             if (rset->line && std::strlen(rset->line) > 2000)
@@ -1558,7 +1558,6 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
 {
     GtkTreeViewColumn* col;
     GtkCellRenderer* renderer;
-    int x;
 
     if (!context || !set)
         return;
@@ -2211,25 +2210,26 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     else
     {
         // custom command
-
+        XSetCMD x;
         for (const char* item_type2: item_types)
         {
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), item_type2);
         }
-        x = rset->x ? strtol(rset->x, nullptr, 10) : 0;
+        x = rset->x ? XSetCMD(strtol(rset->x, nullptr, 10)) : XSetCMD::LINE;
 
         switch (x)
         {
-            case XSetCMD::XSET_CMD_LINE:
-            case XSetCMD::XSET_CMD_SCRIPT:
+            case XSetCMD::LINE:
+            case XSetCMD::SCRIPT:
                 item_type = ItemPropItemType::ITEM_TYPE_COMMAND;
                 break;
-            case XSetCMD::XSET_CMD_APP:
+            case XSetCMD::APP:
                 item_type = ItemPropItemType::ITEM_TYPE_APP;
                 break;
-            case XSetCMD::XSET_CMD_BOOKMARK:
+            case XSetCMD::BOOKMARK:
                 item_type = ItemPropItemType::ITEM_TYPE_BOOKMARK;
                 break;
+            case XSetCMD::INVALID:
             default:
                 item_type = -1;
                 break;

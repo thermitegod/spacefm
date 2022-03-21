@@ -2537,7 +2537,7 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
             XSet* newset = xset_custom_new();
             newset->z = const_cast<char*>(upath.c_str());
             newset->menu_label = const_cast<char*>(name.c_str());
-            newset->x = ztd::strdup("3"); // XSetCMD::XSET_CMD_BOOKMARK
+            newset->x = ztd::strdup("3"); // XSetCMD::BOOKMARK
             // unset these to save session space
             newset->task = false;
             newset->task_err = false;
@@ -2668,7 +2668,7 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
     const char* icon3 = nullptr;
     const char* icon_name = nullptr;
     char* icon_file = nullptr;
-    int cmd_type;
+    XSetCMD cmd_type;
     char* menu_label = nullptr;
     GdkPixbuf* icon = nullptr;
     bool is_submenu = false;
@@ -2741,8 +2741,8 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
         default:
             if (set->menu_style != XSetMenu::CHECK)
                 icon1 = icon_name;
-            cmd_type = set->x ? strtol(set->x, nullptr, 10) : -1;
-            if (!set->lock && cmd_type == XSetCMD::XSET_CMD_BOOKMARK)
+            cmd_type = set->x ? XSetCMD(strtol(set->x, nullptr, 10)) : XSetCMD::INVALID;
+            if (!set->lock && cmd_type == XSetCMD::BOOKMARK)
             {
                 // Bookmark
                 if (!(set->menu_label && set->menu_label[0]))
@@ -2760,14 +2760,13 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
                 else
                     icon = xset_custom_get_bookmark_icon(set, icon_size);
             }
-            else if (!set->lock && cmd_type == XSetCMD::XSET_CMD_APP)
+            else if (!set->lock && cmd_type == XSetCMD::APP)
             {
                 // Application
                 menu_label = xset_custom_get_app_name_icon(set, &icon, icon_size);
             }
-            else if (!icon1 &&
-                     (cmd_type == XSetCMD::XSET_CMD_APP || cmd_type == XSetCMD::XSET_CMD_LINE ||
-                      cmd_type == XSetCMD::XSET_CMD_SCRIPT))
+            else if (!icon1 && (cmd_type == XSetCMD::APP || cmd_type == XSetCMD::LINE ||
+                                cmd_type == XSetCMD::SCRIPT))
             {
                 if (set->menu_style != XSetMenu::CHECK || set->b == XSetB::XSET_B_TRUE)
                 {
@@ -2942,7 +2941,7 @@ on_bookmark_device(GtkMenuItem* item, VFSVolume* vol)
     newset = xset_custom_new();
     newset->menu_label = ztd::strdup(url);
     newset->z = ztd::strdup(url);
-    newset->x = ztd::strdup(XSetCMD::XSET_CMD_BOOKMARK);
+    newset->x = ztd::strdup(static_cast<int>(XSetCMD::BOOKMARK));
     newset->prev = ztd::strdup(sel_set->name);
     newset->next = sel_set->next; // steal string
     newset->task = false;
@@ -3001,7 +3000,7 @@ ptk_bookmark_view_get_first_bookmark(XSet* book_set)
         child_set = xset_custom_new();
         child_set->menu_label = ztd::strdup("Home");
         child_set->z = ztd::strdup(vfs_user_home_dir());
-        child_set->x = ztd::strdup(XSetCMD::XSET_CMD_BOOKMARK);
+        child_set->x = ztd::strdup(static_cast<int>(XSetCMD::BOOKMARK));
         child_set->parent = ztd::strdup("main_book");
         book_set->child = ztd::strdup(child_set->name);
         child_set->task = false;
@@ -3031,8 +3030,7 @@ find_cwd_match_bookmark(XSet* parent_set, const char* cwd, bool recurse, XSet* s
     XSet* set = xset_is(parent_set->child);
     while (set)
     {
-        if (no_skip && set->z && set->x && !set->lock &&
-            set->x[0] == '3' /* XSetCMD::XSET_CMD_BOOKMARK */ &&
+        if (no_skip && set->z && set->x && !set->lock && set->x[0] == '3' /* XSetCMD::BOOKMARK */ &&
             set->menu_style < XSetMenu::SUBMENU && Glib::str_has_prefix(set->z, cwd))
         {
             // found a possible match - confirm
@@ -3077,7 +3075,7 @@ ptk_bookmark_view_chdir(GtkTreeView* view, PtkFileBrowser* file_browser, bool re
     // cur dir is already selected?
     XSet* set = get_selected_bookmark_set(view);
     if (set && !set->lock && set->z && set->menu_style < XSetMenu::SUBMENU && set->x &&
-        strtol(set->x, nullptr, 10) == XSetCMD::XSET_CMD_BOOKMARK &&
+        XSetCMD(strtol(set->x, nullptr, 10)) == XSetCMD::BOOKMARK &&
         Glib::str_has_prefix(set->z, cwd))
     {
         char* sep = strchr(set->z, ';');
@@ -3122,8 +3120,8 @@ ptk_bookmark_view_get_selected_dir(GtkTreeView* view)
     XSet* set = get_selected_bookmark_set(view);
     if (set)
     {
-        int cmd_type = set->x ? strtol(set->x, nullptr, 10) : -1;
-        if (!set->lock && cmd_type == XSetCMD::XSET_CMD_BOOKMARK && set->z)
+        XSetCMD cmd_type = set->x ? XSetCMD(strtol(set->x, nullptr, 10)) : XSetCMD::INVALID;
+        if (!set->lock && cmd_type == XSetCMD::BOOKMARK && set->z)
         {
             char* sep = strchr(set->z, ';');
             if (sep)
@@ -3209,7 +3207,7 @@ ptk_bookmark_view_add_bookmark(GtkMenuItem* menuitem, PtkFileBrowser* file_brows
     newset = xset_custom_new();
     newset->menu_label = g_path_get_basename(url);
     newset->z = ztd::strdup(url);
-    newset->x = ztd::strdup(XSetCMD::XSET_CMD_BOOKMARK);
+    newset->x = ztd::strdup(static_cast<int>(XSetCMD::BOOKMARK));
     newset->prev = ztd::strdup(sel_set->name);
     newset->next = sel_set->next; // steal string
     newset->task = false;
