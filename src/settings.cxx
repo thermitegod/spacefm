@@ -2558,18 +2558,12 @@ static void
 xset_parse_plugin(const char* plug_dir, const char* line, int use)
 {
     char* sep = strchr(const_cast<char*>(line), '=');
+    if (!sep)
+        return;
     const char* name;
     char* value;
     XSet* set;
     XSet* set2;
-    std::string prefix;
-    const std::array<std::string, 4> handler_prefix{"hand_arc_",
-                                                    "hand_fs_",
-                                                    "hand_net_",
-                                                    "hand_f_"};
-
-    if (!sep)
-        return;
     name = line;
     value = sep + 1;
     *sep = '\0';
@@ -2579,13 +2573,28 @@ xset_parse_plugin(const char* plug_dir, const char* line, int use)
     char* var = sep + 1;
     *sep = '\0';
 
-    if (use < PluginUse::PLUGIN_USE_BOOKMARKS)
+    // handler
+    std::string prefix;
+    switch (use)
     {
-        // handler
-        prefix = handler_prefix.at(use);
+        case PluginUse::PLUGIN_USE_HAND_ARC:
+            prefix = "hand_arc_";
+            break;
+        case PluginUse::PLUGIN_USE_HAND_FS:
+            prefix = "hand_fs_";
+            break;
+        case PluginUse::PLUGIN_USE_HAND_NET:
+            prefix = "hand_net_";
+            break;
+        case PluginUse::PLUGIN_USE_HAND_FILE:
+            prefix = "hand_f_";
+            break;
+        case PluginUse::PLUGIN_USE_BOOKMARKS:
+        case PluginUse::PLUGIN_USE_NORMAL:
+        default:
+            prefix = "cstm_";
+            break;
     }
-    else
-        prefix = "cstm_";
 
     if (Glib::str_has_prefix(name, prefix))
     {
