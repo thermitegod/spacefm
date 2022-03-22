@@ -2555,23 +2555,26 @@ xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
 }
 
 static void
-xset_parse_plugin(const char* plug_dir, const char* line, int use)
+xset_parse_plugin(const char* plug_dir, const std::string& line, int use)
 {
-    char* sep = strchr(const_cast<char*>(line), '=');
-    if (!sep)
+    std::size_t sep = line.find("=");
+    if (sep == std::string::npos)
         return;
-    const char* name;
-    char* value;
+
+    std::size_t sep2 = line.find("-");
+    if (sep2 == std::string::npos)
+        return;
+
+    std::string token = line.substr(0, sep2);
+    std::string value = line.substr(sep + 1, std::string::npos - 1);
+    std::string token_var = line.substr(sep2 + 1, sep - sep2 - 1);
+
+    if (value.empty())
+        return;
+
+    const char* name = line.c_str();
     XSet* set;
     XSet* set2;
-    name = line;
-    value = sep + 1;
-    *sep = '\0';
-    sep = strchr(const_cast<char*>(name), '-');
-    if (!sep)
-        return;
-    char* var = sep + 1;
-    *sep = '\0';
 
     // handler
     std::string prefix;
@@ -2596,69 +2599,69 @@ xset_parse_plugin(const char* plug_dir, const char* line, int use)
             break;
     }
 
-    if (Glib::str_has_prefix(name, prefix))
-    {
-        set = xset_get_by_plug_name(plug_dir, name);
-        xset_set_set_int(set, var, value);
+    if (!ztd::startswith(name, prefix))
+        return;
 
-        if (use >= PluginUse::PLUGIN_USE_BOOKMARKS)
+    set = xset_get_by_plug_name(plug_dir, name);
+    xset_set_set_int(set, token_var.c_str(), value.c_str());
+
+    if (use >= PluginUse::PLUGIN_USE_BOOKMARKS)
+    {
+        // map plug names to new set names (does not apply to handlers)
+        if (set->prev && ztd::same(token_var, "prev"))
         {
-            // map plug names to new set names (does not apply to handlers)
-            if (set->prev && !strcmp(var, "prev"))
+            if (ztd::startswith(set->prev, "cstm_"))
             {
-                if (!strncmp(set->prev, "cstm_", 5))
-                {
-                    set2 = xset_get_by_plug_name(plug_dir, set->prev);
-                    free(set->prev);
-                    set->prev = ztd::strdup(set2->name);
-                }
-                else
-                {
-                    free(set->prev);
-                    set->prev = nullptr;
-                }
+                set2 = xset_get_by_plug_name(plug_dir, set->prev);
+                free(set->prev);
+                set->prev = ztd::strdup(set2->name);
             }
-            else if (set->next && !strcmp(var, "next"))
+            else
             {
-                if (!strncmp(set->next, "cstm_", 5))
-                {
-                    set2 = xset_get_by_plug_name(plug_dir, set->next);
-                    free(set->next);
-                    set->next = ztd::strdup(set2->name);
-                }
-                else
-                {
-                    free(set->next);
-                    set->next = nullptr;
-                }
+                free(set->prev);
+                set->prev = nullptr;
             }
-            else if (set->parent && !strcmp(var, "parent"))
+        }
+        else if (set->next && ztd::same(token_var, "next"))
+        {
+            if (ztd::startswith(set->next, "cstm_"))
             {
-                if (!strncmp(set->parent, "cstm_", 5))
-                {
-                    set2 = xset_get_by_plug_name(plug_dir, set->parent);
-                    free(set->parent);
-                    set->parent = ztd::strdup(set2->name);
-                }
-                else
-                {
-                    free(set->parent);
-                    set->parent = nullptr;
-                }
+                set2 = xset_get_by_plug_name(plug_dir, set->next);
+                free(set->next);
+                set->next = ztd::strdup(set2->name);
             }
-            else if (set->child && !strcmp(var, "child"))
+            else
             {
-                if (!strncmp(set->child, "cstm_", 5))
-                {
-                    set2 = xset_get_by_plug_name(plug_dir, set->child);
-                    free(set->child);
-                    set->child = ztd::strdup(set2->name);
-                }
-                else
-                {
-                    free(set->child);
-                    set->child = nullptr;
-                }
+                free(set->next);
+                set->next = nullptr;
+            }
+        }
+        else if (set->parent && ztd::same(token_var, "parent"))
+        {
+            if (ztd::startswith(set->parent, "cstm_"))
+            {
+                set2 = xset_get_by_plug_name(plug_dir, set->parent);
+                free(set->parent);
+                set->parent = ztd::strdup(set2->name);
+            }
+            else
+            {
+                free(set->parent);
+                set->parent = nullptr;
+            }
+        }
+        else if (set->child && ztd::same(token_var, "child"))
+        {
+            if (ztd::startswith(set->child, "cstm_"))
+            {
+                set2 = xset_get_by_plug_name(plug_dir, set->child);
+                free(set->child);
+                set->child = ztd::strdup(set2->name);
+            }
+            else
+            {
+                free(set->child);
+                set->child = nullptr;
             }
         }
     }
@@ -2745,9 +2748,7 @@ xset_import_plugin(const char* plug_dir, int* use)
                             *use = PluginUse::PLUGIN_USE_HAND_FILE;
                     }
                 }
-                xset_parse_plugin(plug_dir,
-                                  token.c_str(),
-                                  use ? *use : PluginUse::PLUGIN_USE_NORMAL);
+                xset_parse_plugin(plug_dir, token, use ? *use : PluginUse::PLUGIN_USE_NORMAL);
                 if (!plugin_good)
                     plugin_good = true;
             }
