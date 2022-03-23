@@ -2555,7 +2555,7 @@ xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
 }
 
 static void
-xset_parse_plugin(const char* plug_dir, const std::string& line, int use)
+xset_parse_plugin(const char* plug_dir, const std::string& line, PluginUse use)
 {
     std::size_t sep = line.find("=");
     if (sep == std::string::npos)
@@ -2580,20 +2580,20 @@ xset_parse_plugin(const char* plug_dir, const std::string& line, int use)
     std::string prefix;
     switch (use)
     {
-        case PluginUse::PLUGIN_USE_HAND_ARC:
+        case PluginUse::HAND_ARC:
             prefix = "hand_arc_";
             break;
-        case PluginUse::PLUGIN_USE_HAND_FS:
+        case PluginUse::HAND_FS:
             prefix = "hand_fs_";
             break;
-        case PluginUse::PLUGIN_USE_HAND_NET:
+        case PluginUse::HAND_NET:
             prefix = "hand_net_";
             break;
-        case PluginUse::PLUGIN_USE_HAND_FILE:
+        case PluginUse::HAND_FILE:
             prefix = "hand_f_";
             break;
-        case PluginUse::PLUGIN_USE_BOOKMARKS:
-        case PluginUse::PLUGIN_USE_NORMAL:
+        case PluginUse::BOOKMARKS:
+        case PluginUse::NORMAL:
         default:
             prefix = "cstm_";
             break;
@@ -2605,7 +2605,7 @@ xset_parse_plugin(const char* plug_dir, const std::string& line, int use)
     set = xset_get_by_plug_name(plug_dir, name);
     xset_set_set_int(set, token_var.c_str(), value.c_str());
 
-    if (use >= PluginUse::PLUGIN_USE_BOOKMARKS)
+    if (use >= PluginUse::BOOKMARKS)
     {
         // map plug names to new set names (does not apply to handlers)
         if (set->prev && ztd::same(token_var, "prev"))
@@ -2668,12 +2668,12 @@ xset_parse_plugin(const char* plug_dir, const std::string& line, int use)
 }
 
 XSet*
-xset_import_plugin(const char* plug_dir, int* use)
+xset_import_plugin(const char* plug_dir, PluginUse* use)
 {
     bool func;
 
     if (use)
-        *use = PluginUse::PLUGIN_USE_NORMAL;
+        *use = PluginUse::NORMAL;
 
     // clear all existing plugin sets with this plug_dir
     // ( keep the mirrors to retain user prefs )
@@ -2729,26 +2729,26 @@ xset_import_plugin(const char* plug_dir, int* use)
                 std::string token = line.substr(0, sep);
                 std::string value = line.substr(sep + 1, std::string::npos - 1);
 
-                if (use && *use == PluginUse::PLUGIN_USE_NORMAL)
+                if (use && *use == PluginUse::NORMAL)
                 {
                     if (ztd::same(token, "main_book-child"))
                     {
                         // This plugin is an export of all bookmarks
-                        *use = PluginUse::PLUGIN_USE_BOOKMARKS;
+                        *use = PluginUse::BOOKMARKS;
                     }
                     else if (token.substr(0, 5) == "hand_")
                     {
                         if (token.substr(0, 8) == "hand_fs_")
-                            *use = PluginUse::PLUGIN_USE_HAND_FS;
+                            *use = PluginUse::HAND_FS;
                         else if (token.substr(0, 9) == "hand_arc_")
-                            *use = PluginUse::PLUGIN_USE_HAND_ARC;
+                            *use = PluginUse::HAND_ARC;
                         else if (token.substr(0, 9) == "hand_net_")
-                            *use = PluginUse::PLUGIN_USE_HAND_NET;
+                            *use = PluginUse::HAND_NET;
                         else if (token.substr(0, 7) == "hand_f_")
-                            *use = PluginUse::PLUGIN_USE_HAND_FILE;
+                            *use = PluginUse::HAND_FILE;
                     }
                 }
-                xset_parse_plugin(plug_dir, token, use ? *use : PluginUse::PLUGIN_USE_NORMAL);
+                xset_parse_plugin(plug_dir, token, use ? *use : PluginUse::NORMAL);
                 if (!plugin_good)
                     plugin_good = true;
             }
@@ -2808,7 +2808,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
         char* plugin = g_build_filename(plugin_data->plug_dir, "plugin", nullptr);
         if (std::filesystem::exists(plugin))
         {
-            int use = PluginUse::PLUGIN_USE_NORMAL;
+            PluginUse use = PluginUse::NORMAL;
             set = xset_import_plugin(plugin_data->plug_dir, &use);
             if (!set)
             {
@@ -2822,7 +2822,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                                 msg);
             }
             // TODO - switch
-            else if (use == PluginUse::PLUGIN_USE_BOOKMARKS)
+            else if (use == PluginUse::BOOKMARKS)
             {
                 // bookmarks
                 if (plugin_data->job != PluginJob::COPY || !plugin_data->set)
@@ -2871,7 +2871,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                         main_window_bookmark_changed(set->parent);
                 }
             }
-            else if (use < PluginUse::PLUGIN_USE_BOOKMARKS)
+            else if (use < PluginUse::BOOKMARKS)
             {
                 // handler
                 set->plugin_top = false; // prevent being added to Plugins menu
@@ -2888,7 +2888,10 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                                     "configuration window, or use Plugins|Import.");
                 }
                 else
-                    ptk_handler_import(use, plugin_data->handler_dlg, set);
+                {
+                    // TODO
+                    ptk_handler_import(static_cast<int>(use), plugin_data->handler_dlg, set);
+                }
             }
             else if (plugin_data->job == PluginJob::COPY)
             {

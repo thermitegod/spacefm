@@ -123,14 +123,14 @@ enum class PluginJob
     REMOVE
 };
 
-enum PluginUse
+enum class PluginUse
 {
-    PLUGIN_USE_HAND_ARC,
-    PLUGIN_USE_HAND_FS,
-    PLUGIN_USE_HAND_NET,
-    PLUGIN_USE_HAND_FILE,
-    PLUGIN_USE_BOOKMARKS,
-    PLUGIN_USE_NORMAL
+    HAND_ARC,
+    HAND_FS,
+    HAND_NET,
+    HAND_FILE,
+    BOOKMARKS,
+    NORMAL
 };
 
 struct XSet
