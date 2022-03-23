@@ -22,6 +22,21 @@
 #include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-file-info.hxx"
 
+#define VFS_THUMBNAIL_REQUEST(obj) (static_cast<VFSThumbnailRequest*>(obj))
+
+enum VFSThumbnailSize
+{
+    LOAD_BIG_THUMBNAIL,
+    LOAD_SMALL_THUMBNAIL,
+    N_LOAD_TYPES
+};
+
+struct VFSThumbnailRequest
+{
+    VFSFileInfo* file;
+    unsigned int n_requests[VFSThumbnailSize::N_LOAD_TYPES];
+};
+
 struct VFSThumbnailLoader
 {
     VFSDir* dir;

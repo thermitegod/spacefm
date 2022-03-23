@@ -38,19 +38,6 @@
 
 #include "utils.hxx"
 
-enum VFSThumbnailSize
-{
-    LOAD_BIG_THUMBNAIL,
-    LOAD_SMALL_THUMBNAIL,
-    N_LOAD_TYPES
-};
-
-struct VFSThumbnailRequest
-{
-    int n_requests[VFSThumbnailSize::N_LOAD_TYPES];
-    VFSFileInfo* file;
-};
-
 static void* thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader);
 static void thumbnail_request_free(VFSThumbnailRequest* req);
 static bool on_thumbnail_idle(VFSThumbnailLoader* loader);
@@ -147,8 +134,7 @@ thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
     while (!vfs_async_task_is_cancelled(task))
     {
         vfs_async_task_lock(task);
-        VFSThumbnailRequest* req =
-            static_cast<VFSThumbnailRequest*>(g_queue_pop_head(loader->queue));
+        VFSThumbnailRequest* req = VFS_THUMBNAIL_REQUEST(g_queue_pop_head(loader->queue));
         vfs_async_task_unlock(task);
         if (!req)
             break;
@@ -254,14 +240,14 @@ vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big)
     GList* l;
     for (l = loader->queue->head; l; l = l->next)
     {
-        req = static_cast<VFSThumbnailRequest*>(l->data);
+        req = VFS_THUMBNAIL_REQUEST(l->data);
         // If file with the same name is already in our queue
         if (req->file == file || ztd::same(req->file->name, file->name))
             break;
     }
     if (l)
     {
-        req = static_cast<VFSThumbnailRequest*>(l->data);
+        req = VFS_THUMBNAIL_REQUEST(l->data);
     }
     else
     {
@@ -291,7 +277,7 @@ vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
         GList* l;
         for (l = loader->queue->head; l;)
         {
-            VFSThumbnailRequest* req = static_cast<VFSThumbnailRequest*>(l->data);
+            VFSThumbnailRequest* req = VFS_THUMBNAIL_REQUEST(l->data);
             --req->n_requests[is_big ? VFSThumbnailSize::LOAD_BIG_THUMBNAIL
                                      : VFSThumbnailSize::LOAD_SMALL_THUMBNAIL];
 
