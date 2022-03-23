@@ -593,7 +593,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         // Permissions
         owner_group = (char*)vfs_file_info_get_disp_owner(file);
         tmp = strchr(owner_group, ':');
-        data->owner_name = g_strndup(owner_group, tmp - owner_group);
+        data->owner_name = strndup(owner_group, tmp - owner_group);
         gtk_entry_set_text(GTK_ENTRY(data->owner), data->owner_name);
         data->group_name = ztd::strdup(tmp + 1);
         gtk_entry_set_text(GTK_ENTRY(data->group), data->group_name);

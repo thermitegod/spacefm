@@ -245,7 +245,7 @@ get_real_link_target(const char* link_path)
          * gives nothing if final target missing */
         ssize_t len = readlink(link_path, buf, PATH_MAX);
         if (len > 0)
-            target_path = g_strndup(buf, len);
+            target_path = strndup(buf, len);
     }
     return target_path;
 }

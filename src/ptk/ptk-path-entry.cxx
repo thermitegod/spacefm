@@ -612,7 +612,7 @@ on_button_release(GtkEntry* entry, GdkEventButton* evt, void* user_data)
                         else
                             return false;
                     }
-                    char* path = g_strndup(text, (sep - text));
+                    char* path = strndup(text, (sep - text));
                     gtk_entry_set_text(entry, path);
                     gtk_editable_set_position(GTK_EDITABLE(entry), -1);
                     free(path);

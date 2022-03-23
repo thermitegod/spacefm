@@ -323,8 +323,8 @@ parse_xml_desc(const char* buf, std::size_t len, const char* locale)
         }
     }
     if (comment)
-        return g_strndup(comment, comment_len);
-    return g_strndup(eng_comment, eng_comment_len);
+        return strndup(comment, comment_len);
+    return strndup(eng_comment, eng_comment_len);
 }
 
 static char*
@@ -351,7 +351,7 @@ _mime_type_get_desc_icon(const char* file_path, const char* locale, bool is_loca
         const char* const* langs = g_get_language_names();
         char* dot = (char*)strchr(langs[0], '.');
         if (dot)
-            locale = _locale = g_strndup(langs[0], (size_t)(dot - langs[0]));
+            locale = _locale = strndup(langs[0], (size_t)(dot - langs[0]));
         else
             locale = langs[0];
     }

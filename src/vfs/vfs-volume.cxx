@@ -165,7 +165,7 @@ _dupv8(const char* s)
     {
         LOG_INFO("The string '{}' is not valid UTF-8", s);
         LOG_INFO("Invalid characters begins at '{}'", end_valid);
-        return g_strndup(s, end_valid - s);
+        return strndup(s, end_valid - s);
     }
     else
     {
@@ -213,7 +213,7 @@ decode_udev_encoded_string(const char* str)
     {
         LOG_INFO("The string '{}' is not valid UTF-8", s->str);
         LOG_INFO("Invalid characters begins at '{}'", end_valid);
-        ret = g_strndup(s->str, end_valid - s->str);
+        ret = strndup(s->str, end_valid - s->str);
         g_string_free(s, true);
     }
     else
@@ -3347,7 +3347,7 @@ vfs_volume_get_mount_options(VFSVolume* vol, char* options)
     while (ptr[0] != '\0')
     {
         comma = strchr(ptr, ',');
-        single = g_strndup(ptr, comma - ptr);
+        single = strndup(ptr, comma - ptr);
         if (!strchr(single, '+') && !strchr(single, '-'))
         {
             // pure option, check for -fs option

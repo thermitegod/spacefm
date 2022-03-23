@@ -278,7 +278,7 @@ get_element_next(char** s)
         *s = nullptr;
         return ret;
     }
-    ret = g_strndup(*s, sep - *s);
+    ret = strndup(*s, sep - *s);
     *s = sep + 5;
     return ret;
 }
