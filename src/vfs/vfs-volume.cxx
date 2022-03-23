@@ -200,77 +200,74 @@ ptr_str_array_compare(const char** a, const char** b)
 static double
 sysfs_get_double(const char* dir, const char* attribute)
 {
-    char* contents;
-    double result = 0.0;
-    char* filename = g_build_filename(dir, attribute, nullptr);
-    if (g_file_get_contents(filename, &contents, nullptr, nullptr))
+    std::string contents;
+    std::string filename = Glib::build_filename(dir, attribute);
+    try
     {
-        result = atof(contents);
-        free(contents);
+        contents = Glib::file_get_contents(filename);
     }
-    free(filename);
-
-    return result;
+    catch (Glib::FileError)
+    {
+        return 0.0;
+    }
+    return std::stod(contents);
 }
 
 static char*
 sysfs_get_string(const char* dir, const char* attribute)
 {
-    char* result = nullptr;
-    char* filename = g_build_filename(dir, attribute, nullptr);
-    if (!g_file_get_contents(filename, &result, nullptr, nullptr))
+    std::string result;
+    std::string filename = Glib::build_filename(dir, attribute);
+    try
     {
-        result = ztd::strdup("");
+        result = Glib::file_get_contents(filename);
     }
-    free(filename);
-
-    return result;
+    catch (Glib::FileError)
+    {
+        return ztd::strdup("");
+    }
+    return ztd::strdup(result);
 }
 
 static int
 sysfs_get_int(const char* dir, const char* attribute)
 {
-    int result = 0;
-    char* contents;
-    char* filename = g_build_filename(dir, attribute, nullptr);
-    if (g_file_get_contents(filename, &contents, nullptr, nullptr))
+    std::string contents;
+    std::string filename = Glib::build_filename(dir, attribute);
+    try
     {
-        result = strtol(contents, nullptr, 0);
-        free(contents);
+        contents = Glib::file_get_contents(filename);
     }
-    free(filename);
-
-    return result;
+    catch (Glib::FileError)
+    {
+        return 0;
+    }
+    return std::stoi(contents);
 }
 
 static uint64_t
 sysfs_get_uint64(const char* dir, const char* attribute)
 {
-    char* contents;
-    uint64_t result = 0;
-    char* filename = g_build_filename(dir, attribute, nullptr);
-    if (g_file_get_contents(filename, &contents, nullptr, nullptr))
+    std::string contents;
+    std::string filename = Glib::build_filename(dir, attribute);
+    try
     {
-        result = strtoll(contents, nullptr, 0);
-        free(contents);
+        contents = Glib::file_get_contents(filename);
     }
-    free(filename);
-
-    return result;
+    catch (Glib::FileError)
+    {
+        return 0;
+    }
+    return std::stoll(contents);
 }
 
 static bool
 sysfs_file_exists(const char* dir, const char* attribute)
 {
-    bool result = false;
-    char* filename = g_build_filename(dir, attribute, nullptr);
+    std::string filename = Glib::build_filename(dir, attribute);
     if (std::filesystem::exists(filename))
-    {
-        result = true;
-    }
-    free(filename);
-
-    return result;
+        return true;
+    return false;
 }
 
 static char*
@@ -934,14 +931,15 @@ info_mount_points(device_t* device)
         return nullptr;
     }
 
-    char* contents = nullptr;
-    char** lines = nullptr;
-
-    GError* error = nullptr;
-    if (!g_file_get_contents(MOUNTINFO, &contents, nullptr, &error))
+    std::string contents;
+    try
     {
-        LOG_WARN("Error reading {}: {}", MOUNTINFO, error->message);
-        g_error_free(error);
+        contents = Glib::file_get_contents(MOUNTINFO);
+    }
+    catch (const Glib::FileError& e)
+    {
+        std::string what = e.what();
+        LOG_WARN("Error reading {}: {}", MOUNTINFO, what);
         return nullptr;
     }
 
@@ -950,9 +948,8 @@ info_mount_points(device_t* device)
      * Note that things like space are encoded as \020.
      */
 
-    lines = g_strsplit(contents, "\n", 0);
-    unsigned int n;
-    for (n = 0; lines[n] != nullptr; n++)
+    std::vector<std::string> lines = ztd::split(contents, "\n");
+    for (const std::string& line: lines)
     {
         unsigned int mount_id;
         unsigned int parent_id;
@@ -960,12 +957,11 @@ info_mount_points(device_t* device)
         char encoded_root[PATH_MAX];
         char encoded_mount_point[PATH_MAX];
         char* mount_point;
-        // dev_t dev;
 
-        if (std::strlen(lines[n]) == 0)
+        if (line.size() == 0)
             continue;
 
-        if (sscanf(lines[n],
+        if (sscanf(line.c_str(),
                    "%d %d %lu:%lu %s %s",
                    &mount_id,
                    &parent_id,
@@ -974,7 +970,7 @@ info_mount_points(device_t* device)
                    encoded_root,
                    encoded_mount_point) != 6)
         {
-            LOG_WARN("Error reading /proc/self/mountinfo: Error parsing line '{}'", lines[n]);
+            LOG_WARN("Error reading /proc/self/mountinfo: Error parsing line '{}'", line);
             continue;
         }
 
@@ -997,8 +993,6 @@ info_mount_points(device_t* device)
                 free(mount_point);
         }
     }
-    free(contents);
-    g_strfreev(lines);
 
     if (mounts)
     {
@@ -1436,17 +1430,18 @@ static void
 parse_mounts(bool report)
 {
     // LOG_INFO("@@@@@@@@@@@@@ parse_mounts {}", report ? "true" : "false");
-    char* contents = nullptr;
-    char** lines = nullptr;
     struct udev_device* udevice;
     dev_t devnum;
-    char* str;
 
-    GError* error = nullptr;
-    if (!g_file_get_contents(MOUNTINFO, &contents, nullptr, &error))
+    std::string contents;
+    try
     {
-        LOG_WARN("Error reading {}: {}", MOUNTINFO, error->message);
-        g_error_free(error);
+        contents = Glib::file_get_contents(MOUNTINFO);
+    }
+    catch (const Glib::FileError& e)
+    {
+        std::string what = e.what();
+        LOG_WARN("Error reading {}: {}", MOUNTINFO, what);
         return;
     }
 
@@ -1477,9 +1472,9 @@ parse_mounts(bool report)
      * (11) super options:  per super block options
      * Parsers should ignore all unrecognised optional fields.
      */
-    lines = g_strsplit(contents, "\n", 0);
-    unsigned int n;
-    for (n = 0; lines[n] != nullptr; n++)
+
+    std::vector<std::string> lines = ztd::split(contents, "\n");
+    for (const std::string& line: lines)
     {
         unsigned int mount_id;
         unsigned int parent_id;
@@ -1487,12 +1482,11 @@ parse_mounts(bool report)
         char encoded_root[PATH_MAX];
         char encoded_mount_point[PATH_MAX];
         char* mount_point;
-        char* fstype;
 
-        if (std::strlen(lines[n]) == 0)
+        if (line.size() == 0)
             continue;
 
-        if (sscanf(lines[n],
+        if (sscanf(line.c_str(),
                    "%d %d %lu:%lu %s %s",
                    &mount_id,
                    &parent_id,
@@ -1501,7 +1495,7 @@ parse_mounts(bool report)
                    encoded_root,
                    encoded_mount_point) != 6)
         {
-            LOG_WARN("Error reading /proc/self/mountinfo: Error parsing line '{}'", lines[n]);
+            LOG_WARN("Error reading /proc/self/mountinfo: Error parsing line '{}'", line);
             continue;
         }
 
@@ -1516,7 +1510,7 @@ parse_mounts(bool report)
             char typebuf[PATH_MAX];
             char mount_source[PATH_MAX];
             const char* sep;
-            sep = strstr(lines[n], " - ");
+            sep = strstr(line.c_str(), " - ");
             if (sep && sscanf(sep + 3, "%s %s", typebuf, mount_source) == 2)
             {
                 // LOG_INFO("    source={}", mount_source);
@@ -1540,14 +1534,9 @@ parse_mounts(bool report)
         }
 
         // fstype
-        fstype = strstr(lines[n], " - ");
-        if (fstype)
-        {
-            fstype += 3;
-            // modifies lines[n]
-            if ((str = strchr(fstype, ' ')))
-                str[0] = '\0';
-        }
+        std::string fstype;
+        if (ztd::contains(line, " - "))
+            fstype = ztd::rpartition(line, " - ")[2];
 
         // LOG_INFO("mount_point({}:{})={}", major, minor, mount_point);
         devmount = nullptr;
@@ -1621,8 +1610,6 @@ parse_mounts(bool report)
         else
             free(mount_point);
     }
-    free(contents);
-    g_strfreev(lines);
     // LOG_INFO("LINES DONE");
     // translate each mount points list to string
     std::string points;
@@ -2215,42 +2202,47 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
     char encoded_point[PATH_MAX];
     char encoded_fstype[PATH_MAX];
 
-    char* contents = nullptr;
-    char** lines = nullptr;
-    GError* error = nullptr;
+    std::string mtab_path = Glib::build_filename(SYSCONFDIR, "mtab");
 
-    char* mtab_path = g_build_filename(SYSCONFDIR, "mtab", nullptr);
+    std::string contents;
 
     if (mtab_file)
     {
         // read from a custom mtab file, eg ~/.mtab.fuseiso
-        if (!g_file_get_contents(mtab_file, &contents, nullptr, nullptr))
+        try
         {
-            free(mtab_path);
+            contents = Glib::file_get_contents(mtab_file);
+        }
+        catch (const Glib::FileError& e)
+        {
+            std::string what = e.what();
+            LOG_WARN("Error reading {}: {}", mtab_file, what);
             return false;
         }
     }
-    else if (!g_file_get_contents(MTAB, &contents, nullptr, nullptr))
+    else
     {
-        if (!g_file_get_contents(mtab_path, &contents, nullptr, &error))
+        try
         {
-            LOG_WARN("Error reading {}: {}", mtab_path, error->message);
-            g_error_free(error);
-            free(mtab_path);
+            contents = Glib::file_get_contents(MTAB);
+        }
+        catch (const Glib::FileError& e)
+        {
+            std::string what = e.what();
+            LOG_WARN("Error reading {}: {}", MTAB, what);
             return false;
         }
     }
-    free(mtab_path);
-    lines = g_strsplit(contents, "\n", 0);
-    unsigned int n;
-    for (n = 0; lines[n] != nullptr; n++)
+
+    std::vector<std::string> lines = ztd::split(contents, "\n");
+    for (const std::string& line: lines)
     {
-        if (lines[n][0] == '\0')
+        if (line.size() == 0)
             continue;
 
-        if (sscanf(lines[n], "%s %s %s ", encoded_file, encoded_point, encoded_fstype) != 3)
+        if (sscanf(line.c_str(), "%s %s %s ", encoded_file, encoded_point, encoded_fstype) != 3)
         {
-            LOG_WARN("Error parsing mtab line '{}'", lines[n]);
+            LOG_WARN("Error parsing mtab line '{}'", line);
             continue;
         }
 
@@ -2266,8 +2258,6 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
         }
         free(point);
     }
-    free(contents);
-    g_strfreev(lines);
     return ret;
 }
 

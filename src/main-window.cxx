@@ -6190,23 +6190,26 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = fmt::format("spacefm: {} requires a file path\n", argv[i]);
                 return 1;
             }
-            if (!g_file_get_contents(argv[i + 1], &str, nullptr, nullptr))
+            std::string contents;
+            try
+            {
+                contents = Glib::file_get_contents(argv[i + 1]);
+            }
+            catch (const Glib::FileError& e)
             {
                 reply = fmt::format("spacefm: error reading file '{}'\n", argv[i + 1]);
                 return 2;
             }
-            if (!g_utf8_validate(str, -1, nullptr))
+            if (!g_utf8_validate(contents.c_str(), -1, nullptr))
             {
                 reply = fmt::format("spacefm: file '{}' does not contain valid UTF-8 text\n",
                                     argv[i + 1]);
-                free(str);
                 return 2;
             }
             GtkClipboard* clip =
                 gtk_clipboard_get(!strcmp(argv[i], "clipboard_from_file") ? GDK_SELECTION_CLIPBOARD
                                                                           : GDK_SELECTION_PRIMARY);
-            gtk_clipboard_set_text(clip, str, -1);
-            free(str);
+            gtk_clipboard_set_text(clip, contents.c_str(), -1);
         }
         else if (!strcmp(argv[i], "clipboard_cut_files") ||
                  !strcmp(argv[i], "clipboard_copy_files"))

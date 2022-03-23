@@ -1637,16 +1637,28 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     mime_type->type);
 
                 // build from /usr/share/mime type ?
-                char* contents = nullptr;
-                if (g_file_get_contents(usr_path.c_str(), &contents, nullptr, nullptr))
+
+                std::string contents;
+                try
                 {
+                    contents = Glib::file_get_contents(usr_path);
+                }
+                catch (const Glib::FileError& e)
+                {
+                    std::string what = e.what();
+                    LOG_WARN("Error reading {}: {}", usr_path, what);
+                }
+
+                if (!contents.empty())
+                {
+                    char* contents2 = ztd::strdup(contents);
                     char* start = nullptr;
-                    if ((str = strstr(contents, "\n<mime-type ")))
+                    if ((str = strstr(contents2, "\n<mime-type ")))
                     {
                         if ((str = strstr(str, ">\n")))
                         {
                             str[1] = '\0';
-                            start = contents;
+                            start = contents2;
                             if ((str = strstr(str + 2, "<!--Created automatically")))
                             {
                                 if ((str = strstr(str, "-->")))
@@ -1655,34 +1667,21 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                         }
                     }
                     if (start)
-                    {
-                        std::string str4 = fmt::format("{}\n\n{}</mime-info>\n", msg, start);
-                        str = ztd::strdup(str4);
-                    }
-                    else
-                    {
-                        str = nullptr;
-                    }
-                    free(contents);
-                    contents = str;
+                        contents = fmt::format("{}\n\n{}</mime-info>\n", msg, start);
                 }
 
-                if (!contents)
+                if (contents.empty())
                 {
-                    std::string str4 = fmt::format("{}\n\n<!-- insert your patterns below "
-                                                   "-->\n\n\n</mime-type>\n</mime-info>\n\n",
-                                                   msg);
-                    contents = ztd::strdup(str4);
+                    contents = fmt::format("{}\n\n<!-- insert your patterns below "
+                                           "-->\n\n\n</mime-type>\n</mime-info>\n\n",
+                                           msg);
                 }
 
                 // write file
                 std::ofstream file(path);
                 if (file.is_open())
                     file << contents;
-
                 file.close();
-
-                free(contents);
             }
             if (std::filesystem::exists(path))
                 xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, false);
