@@ -1616,7 +1616,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
         ptk_file_browser_view_as_compact_list(file_browser);
     else
     {
-        xset_set_panel(p, "list_detailed", "b", "1");
+        xset_set_panel(p, "list_detailed", XSetSetSet::B, "1");
         ptk_file_browser_view_as_list(file_browser);
     }
 
@@ -1662,7 +1662,7 @@ ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
     }
     else
     {
-        xset_set_panel(curpanel, "list_detailed", "b", "1");
+        xset_set_panel(curpanel, "list_detailed", XSetSetSet::B, "1");
         view_mode = PtkFBViewMode::PTK_FB_LIST_VIEW;
     }
 
@@ -2239,10 +2239,13 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
     //        ptk_file_browser_set_sort_order( PTK_FILE_BROWSER( file_browser ),
     //        app_settings.sort_order );
 
-    xset_set_panel(file_browser->mypanel, "list_detailed", "x", std::to_string(col).c_str());
     xset_set_panel(file_browser->mypanel,
                    "list_detailed",
-                   "y",
+                   XSetSetSet::X,
+                   std::to_string(col).c_str());
+    xset_set_panel(file_browser->mypanel,
+                   "list_detailed",
+                   XSetSetSet::Y,
                    std::to_string(file_browser->sort_type).c_str());
 }
 
@@ -2451,7 +2454,7 @@ void
 ptk_file_browser_set_default_folder(GtkWidget* item, PtkFileBrowser* file_browser)
 {
     (void)item;
-    xset_set("go_set_default", "s", ptk_file_browser_get_cwd(file_browser));
+    xset_set("go_set_default", XSetSetSet::S, ptk_file_browser_get_cwd(file_browser));
 }
 
 void
@@ -4072,7 +4075,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
         std::size_t j;
         for (j = 0; j < cols.size(); j++)
         {
-            if (xset_get_int_panel(p, column_names.at(j), "x") == static_cast<int>(i))
+            if (xset_get_int_panel(p, column_names.at(j), XSetSetSet::X) == static_cast<int>(i))
                 break;
         }
         if (j == cols.size())
@@ -4810,7 +4813,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, int 
         /* Several different actions are available. We have to figure out a good default action. */
         else
         {
-            int drag_action = xset_get_int("drag_action", "x");
+            int drag_action = xset_get_int("drag_action", XSetSetSet::X);
 
             switch (drag_action)
             {
@@ -5331,11 +5334,12 @@ ptk_file_browser_read_sort_extra(PtkFileBrowser* file_browser)
 #if 0
     list->sort_natural = xset_get_b_panel(file_browser->mypanel, "sort_extra");
 #endif
-    list->sort_case =
-        xset_get_int_panel(file_browser->mypanel, "sort_extra", "x") == XSetB::XSET_B_TRUE;
-    list->sort_dir = xset_get_int_panel(file_browser->mypanel, "sort_extra", "y");
+    list->sort_case = xset_get_int_panel(file_browser->mypanel, "sort_extra", XSetSetSet::X) ==
+                      XSetB::XSET_B_TRUE;
+    list->sort_dir = xset_get_int_panel(file_browser->mypanel, "sort_extra", XSetSetSet::Y);
     list->sort_hidden_first =
-        xset_get_int_panel(file_browser->mypanel, "sort_extra", "z") == XSetB::XSET_B_TRUE;
+        xset_get_int_panel(file_browser->mypanel, "sort_extra", XSetSetSet::Z) ==
+        XSetB::XSET_B_TRUE;
 }
 
 void
@@ -5370,14 +5374,14 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, const char* setnam
     else if (!strcmp(name, "case"))
     {
         list->sort_case = set->b == XSetB::XSET_B_TRUE;
-        xset_set_panel(panel, "sort_extra", "x", std::to_string(set->b).c_str());
+        xset_set_panel(panel, "sort_extra", XSetSetSet::X, std::to_string(set->b).c_str());
     }
     else if (!strcmp(name, "directories"))
     {
         list->sort_dir = PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST;
         xset_set_panel(panel,
                        "sort_extra",
-                       "y",
+                       XSetSetSet::Y,
                        std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST).c_str());
     }
     else if (!strcmp(name, "files"))
@@ -5385,7 +5389,7 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, const char* setnam
         list->sort_dir = PTKFileListSortDir::PTK_LIST_SORT_DIR_LAST;
         xset_set_panel(panel,
                        "sort_extra",
-                       "y",
+                       XSetSetSet::Y,
                        std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_LAST).c_str());
     }
     else if (!strcmp(name, "mix"))
@@ -5393,13 +5397,13 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, const char* setnam
         list->sort_dir = PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED;
         xset_set_panel(panel,
                        "sort_extra",
-                       "y",
+                       XSetSetSet::Y,
                        std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED).c_str());
     }
     else if (!strcmp(name, "hidfirst"))
     {
         list->sort_hidden_first = set->b == XSetB::XSET_B_TRUE;
-        xset_set_panel(panel, "sort_extra", "z", std::to_string(set->b).c_str());
+        xset_set_panel(panel, "sort_extra", XSetSetSet::Z, std::to_string(set->b).c_str());
     }
     else if (!strcmp(name, "hidlast"))
     {
@@ -5407,7 +5411,7 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, const char* setnam
         xset_set_panel(
             panel,
             "sort_extra",
-            "z",
+            XSetSetSet::Z,
             std::to_string(set->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_FALSE : XSetB::XSET_B_TRUE)
                 .c_str());
     }

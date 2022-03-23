@@ -777,7 +777,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, in
         /* Several different actions are available. We have to figure out a good default action. */
         else
         {
-            int drag_action = xset_get_int("drag_action", "x");
+            int drag_action = xset_get_int("drag_action", XSetSetSet::X);
             if (drag_action == 1)
                 suggested_action = GDK_ACTION_COPY;
             else if (drag_action == 2)

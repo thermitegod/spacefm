@@ -1719,15 +1719,15 @@ fm_main_window_init(FMMainWindow* main_window)
     // restore panel sliders
     // do this after maximizing/showing window so slider positions are valid
     // in actual window size
-    int pos = xset_get_int("panel_sliders", "x");
+    int pos = xset_get_int("panel_sliders", XSetSetSet::X);
     if (pos < 200)
         pos = 200;
     gtk_paned_set_position(GTK_PANED(main_window->hpane_top), pos);
-    pos = xset_get_int("panel_sliders", "y");
+    pos = xset_get_int("panel_sliders", XSetSetSet::Y);
     if (pos < 200)
         pos = 200;
     gtk_paned_set_position(GTK_PANED(main_window->hpane_bottom), pos);
-    pos = xset_get_int("panel_sliders", "s");
+    pos = xset_get_int("panel_sliders", XSetSetSet::S);
     if (pos < 200)
         pos = -1;
     gtk_paned_set_position(GTK_PANED(main_window->vpane), pos);
@@ -1828,15 +1828,15 @@ fm_main_window_store_positions(FMMainWindow* main_window)
         {
             pos = gtk_paned_get_position(GTK_PANED(main_window->hpane_top));
             if (pos)
-                xset_set("panel_sliders", "x", std::to_string(pos).c_str());
+                xset_set("panel_sliders", XSetSetSet::X, std::to_string(pos).c_str());
 
             pos = gtk_paned_get_position(GTK_PANED(main_window->hpane_bottom));
             if (pos)
-                xset_set("panel_sliders", "y", std::to_string(pos).c_str());
+                xset_set("panel_sliders", XSetSetSet::Y, std::to_string(pos).c_str());
 
             pos = gtk_paned_get_position(GTK_PANED(main_window->vpane));
             if (pos)
-                xset_set("panel_sliders", "s", std::to_string(pos).c_str());
+                xset_set("panel_sliders", XSetSetSet::S, std::to_string(pos).c_str());
 
             if (gtk_widget_get_visible(main_window->task_scroll))
             {
@@ -1845,7 +1845,7 @@ fm_main_window_store_positions(FMMainWindow* main_window)
                 {
                     // save absolute height
                     xset_set("task_show_manager",
-                             "x",
+                             XSetSetSet::X,
                              std::to_string(allocation.height - pos).c_str());
                     // LOG_INFO("CLOS  win {}x{}    task height {}   slider {}", allocation.width,
                     // allocation.height, allocation.height - pos, pos);
@@ -2532,10 +2532,10 @@ fm_main_window_add_new_tab(FMMainWindow* main_window, const char* folder_path)
 
     ptk_file_browser_set_sort_order(
         file_browser,
-        (PtkFBSortOrder)xset_get_int_panel(file_browser->mypanel, "list_detailed", "x"));
+        (PtkFBSortOrder)xset_get_int_panel(file_browser->mypanel, "list_detailed", XSetSetSet::X));
     ptk_file_browser_set_sort_type(
         file_browser,
-        (GtkSortType)xset_get_int_panel(file_browser->mypanel, "list_detailed", "y"));
+        (GtkSortType)xset_get_int_panel(file_browser->mypanel, "list_detailed", XSetSetSet::Y));
 
     gtk_widget_show(GTK_WIDGET(file_browser));
 
@@ -4612,11 +4612,11 @@ idle_set_task_height(FMMainWindow* main_window)
     }
 
     // restore height (in case window height changed)
-    taskh = xset_get_int("task_show_manager", "x"); // task height >=0.9.2
+    taskh = xset_get_int("task_show_manager", XSetSetSet::X); // task height >=0.9.2
     if (taskh == 0)
     {
         // use pre-0.9.2 slider pos to calculate height
-        pos = xset_get_int("panel_sliders", "z"); // < 0.9.2 slider pos
+        pos = xset_get_int("panel_sliders", XSetSetSet::Z); // < 0.9.2 slider pos
         if (pos == 0)
             taskh = 200;
         else
@@ -4657,9 +4657,11 @@ show_task_manager(FMMainWindow* main_window, bool show)
             if (pos)
             {
                 // save slider pos for version < 0.9.2 (in case of downgrade)
-                xset_set("panel_sliders", "z", std::to_string(pos).c_str());
+                xset_set("panel_sliders", XSetSetSet::Z, std::to_string(pos).c_str());
                 // save absolute height introduced v0.9.2
-                xset_set("task_show_manager", "x", std::to_string(allocation.height - pos).c_str());
+                xset_set("task_show_manager",
+                         XSetSetSet::X,
+                         std::to_string(allocation.height - pos).c_str());
                 // LOG_INFO("HIDE  win {}x{}    task height {}   slider {}", allocation.width,
                 // allocation.height, allocation.height - pos, pos);
             }
@@ -5470,7 +5472,7 @@ main_task_view_new(FMMainWindow* main_window)
         // column order
         for (j = 0; j < 13; j++)
         {
-            if (xset_get_int(task_names.at(j), "x") == i)
+            if (xset_get_int(task_names.at(j), XSetSetSet::X) == i)
                 break;
         }
         if (j == 13)
@@ -5478,7 +5480,7 @@ main_task_view_new(FMMainWindow* main_window)
         else
         {
             // column width
-            int width = xset_get_int(task_names.at(j), "y");
+            int width = xset_get_int(task_names.at(j), XSetSetSet::Y);
             if (width == 0)
                 width = 80;
             gtk_tree_view_column_set_fixed_width(col, width);
@@ -6477,18 +6479,19 @@ main_window_socket_command(char* argv[], std::string& reply)
                                     xset_get_b_panel(file_browser->mypanel, "sort_extra") &&
                                             xset_get_int_panel(file_browser->mypanel,
                                                                "sort_extra",
-                                                               "x") == XSetB::XSET_B_TRUE
+                                                               XSetSetSet::X) == XSetB::XSET_B_TRUE
                                         ? 1
                                         : 0);
             else if (!strcmp(argv[i] + 5, "hidden_first"))
                 reply = fmt::format("{}\n",
-                                    xset_get_int_panel(file_browser->mypanel, "sort_extra", "z") ==
-                                            XSetB::XSET_B_TRUE
+                                    xset_get_int_panel(file_browser->mypanel,
+                                                       "sort_extra",
+                                                       XSetSetSet::Z) == XSetB::XSET_B_TRUE
                                         ? 1
                                         : 0);
             else if (!strcmp(argv[i] + 5, "first"))
             {
-                switch (xset_get_int_panel(file_browser->mypanel, "sort_extra", "y"))
+                switch (xset_get_int_panel(file_browser->mypanel, "sort_extra", XSetSetSet::Y))
                 {
                     case 0:
                         str = ztd::strdup("mixed");

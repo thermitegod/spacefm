@@ -268,14 +268,17 @@ on_popup_sortby(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, int order)
             v = GTK_SORT_ASCENDING;
         else
             v = GTK_SORT_DESCENDING;
-        xset_set_panel(file_browser->mypanel, "list_detailed", "y", std::to_string(v).c_str());
+        xset_set_panel(file_browser->mypanel,
+                       "list_detailed",
+                       XSetSetSet::Y,
+                       std::to_string(v).c_str());
         ptk_file_browser_set_sort_type(file_browser, (GtkSortType)v);
     }
     else
     {
         xset_set_panel(file_browser->mypanel,
                        "list_detailed",
-                       "x",
+                       XSetSetSet::X,
                        std::to_string(sort_order).c_str());
         ptk_file_browser_set_sort_order(file_browser, (PtkFBSortOrder)sort_order);
     }
@@ -419,7 +422,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
         set->b = xset_get_panel_mode(p, "detcol_date", mode)->b;
 
         xset_set_cb("view_reorder_col", (GFunc)on_reorder, browser);
-        set = xset_set("view_columns", "disable", "0");
+        set = xset_set("view_columns", XSetSetSet::DISABLE, "0");
         desc = fmt::format("panel{}_detcol_size panel{}_detcol_type panel{}_detcol_perm "
                            "panel{}_detcol_owner panel{}_detcol_date separator view_reorder_col",
                            p,
@@ -433,8 +436,8 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     }
     else
     {
-        xset_set("view_columns", "disable", "1");
-        xset_set("rubberband", "disable", "1");
+        xset_set("view_columns", XSetSetSet::DISABLE, "1");
+        xset_set("rubberband", XSetSetSet::DISABLE, "1");
     }
 
     set = xset_set_cb("view_thumb", (GFunc)main_window_toggle_thumbnails_all_windows, nullptr);

@@ -226,8 +226,8 @@ XSet* xset_get(const std::string& name);
 XSet* xset_get_panel(int panel, const std::string& name);
 XSet* xset_get_panel_mode(int panel, const std::string& name, char mode);
 
-int xset_get_int(const std::string& name, const char* var);
-int xset_get_int_panel(int panel, const std::string& name, const char* var);
+int xset_get_int(const std::string& name, XSetSetSet var);
+int xset_get_int_panel(int panel, const std::string& name, XSetSetSet var);
 
 char* xset_get_s(const std::string& name);
 char* xset_get_s_panel(int panel, const std::string& name);
@@ -240,12 +240,12 @@ XSet* xset_set_b(const std::string& name, bool bval);
 XSet* xset_set_b_panel(int panel, const std::string& name, bool bval);
 XSet* xset_set_b_panel_mode(int panel, const std::string& name, char mode, bool bval);
 
-XSet* xset_set_panel(int panel, const std::string& name, const char* var, const char* value);
+XSet* xset_set_panel(int panel, const std::string& name, XSetSetSet var, const char* value);
 
 XSet* xset_set_cb(const std::string& name, GFunc cb_func, void* cb_data);
 XSet* xset_set_cb_panel(int panel, const std::string& name, GFunc cb_func, void* cb_data);
 
-XSet* xset_set(const std::string& name, const char* var, const char* value);
+XSet* xset_set(const std::string& name, XSetSetSet var, const char* value);
 XSet* xset_set_set(XSet* set, XSetSetSet var, const char* value);
 
 void xset_set_key(GtkWidget* parent, XSet* set);

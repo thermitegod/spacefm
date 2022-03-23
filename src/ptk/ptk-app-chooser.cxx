@@ -218,8 +218,8 @@ app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all
 
     xset_set_window_icon(GTK_WINDOW(dlg));
 
-    int width = xset_get_int("app_dlg", "x");
-    int height = xset_get_int("app_dlg", "y");
+    int width = xset_get_int("app_dlg", XSetSetSet::X);
+    int height = xset_get_int("app_dlg", XSetSetSet::Y);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
     else
@@ -451,8 +451,8 @@ on_dlg_response(GtkDialog* dlg, int id, void* user_data)
     int height = allocation.height;
     if (width && height)
     {
-        xset_set("app_dlg", "x", std::to_string(width).c_str());
-        xset_set("app_dlg", "y", std::to_string(height).c_str());
+        xset_set("app_dlg", XSetSetSet::X, std::to_string(width).c_str());
+        xset_set("app_dlg", XSetSetSet::Y, std::to_string(height).c_str());
     }
 
     switch (id)

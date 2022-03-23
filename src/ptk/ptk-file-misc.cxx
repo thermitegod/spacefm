@@ -994,8 +994,8 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     free(dir);
     free(name);
 
-    int width = xset_get_int("move_dlg_help", "x");
-    int height = xset_get_int("move_dlg_help", "y");
+    int width = xset_get_int("move_dlg_help", XSetSetSet::X);
+    int height = xset_get_int("move_dlg_help", XSetSetSet::Y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -1039,8 +1039,8 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     height = allocation.height;
     if (width && height)
     {
-        xset_set("move_dlg_help", "x", std::to_string(width).c_str());
-        xset_set("move_dlg_help", "y", std::to_string(height).c_str());
+        xset_set("move_dlg_help", XSetSetSet::X, std::to_string(width).c_str());
+        xset_set("move_dlg_help", XSetSetSet::Y, std::to_string(height).c_str());
     }
 
     gtk_widget_destroy(dlg);
@@ -1095,7 +1095,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
 
     XSet* set = xset_get("move_dlg_help");
     if (set->z)
-        mode_default = xset_get_int("move_dlg_help", "z");
+        mode_default = xset_get_int("move_dlg_help", XSetSetSet::Z);
 
     // action create directory does not work properly so not used:
     //  it creates a directory by default with no way to stop it
@@ -1152,8 +1152,8 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     g_object_set_data(G_OBJECT(dlg), "mode", mode);
     gtk_widget_show_all(hbox);
 
-    int width = xset_get_int("move_dlg_help", "x");
-    int height = xset_get_int("move_dlg_help", "y");
+    int width = xset_get_int("move_dlg_help", XSetSetSet::X);
+    int height = xset_get_int("move_dlg_help", XSetSetSet::Y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -1204,8 +1204,8 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     height = allocation.height;
     if (width && height)
     {
-        xset_set("move_dlg_help", "x", std::to_string(width).c_str());
-        xset_set("move_dlg_help", "y", std::to_string(height).c_str());
+        xset_set("move_dlg_help", XSetSetSet::X, std::to_string(width).c_str());
+        xset_set("move_dlg_help", XSetSetSet::Y, std::to_string(height).c_str());
     }
 
     // save mode
@@ -1213,7 +1213,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
         {
-            xset_set("move_dlg_help", "z", std::to_string(i).c_str());
+            xset_set("move_dlg_help", XSetSetSet::Z, std::to_string(i).c_str());
             break;
         }
     }

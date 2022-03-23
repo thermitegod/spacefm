@@ -1277,14 +1277,14 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     if (g_strcmp0(xset_get_s(handler_conf_xsets.at(mode)), "") <= 0)
     {
         // No handlers present - adding new handler
-        xset_set(handler_conf_xsets.at(mode), "s", new_handler_xset->name);
+        xset_set(handler_conf_xsets.at(mode), XSetSetSet::S, new_handler_xset->name);
     }
     else
     {
         // Adding new handler to handlers
         std::string new_handlers_list =
             fmt::format("{} {}", new_handler_xset->name, xset_get_s(handler_conf_xsets.at(mode)));
-        xset_set(handler_conf_xsets.at(mode), "s", new_handlers_list.c_str());
+        xset_set(handler_conf_xsets.at(mode), XSetSetSet::S, new_handlers_list.c_str());
     }
 
     // have handler dialog open?
@@ -1584,7 +1584,7 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
     } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(hnd->list), &iter));
 
     // Saving the new archive handlers list
-    xset_set(handler_conf_xsets.at(hnd->mode), "s", archive_handlers.c_str());
+    xset_set(handler_conf_xsets.at(hnd->mode), XSetSetSet::S, archive_handlers.c_str());
 
     // Saving settings
     autosave_request_add();
@@ -1728,7 +1728,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         if (g_strcmp0(xset_get_s(handler_conf_xsets.at(hnd->mode)), "") <= 0)
         {
             // No handlers present - adding new handler
-            xset_set(handler_conf_xsets.at(hnd->mode), "s", new_handler_xset->name);
+            xset_set(handler_conf_xsets.at(hnd->mode), XSetSetSet::S, new_handler_xset->name);
         }
         else
         {
@@ -1737,7 +1737,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                 fmt::format("{} {}",
                             new_handler_xset->name,
                             xset_get_s(handler_conf_xsets.at(hnd->mode)));
-            xset_set(handler_conf_xsets.at(hnd->mode), "s", new_handlers_list.c_str());
+            xset_set(handler_conf_xsets.at(hnd->mode), XSetSetSet::S, new_handlers_list.c_str());
         }
 
         // Activating the new handler - the normal loading code
@@ -1892,7 +1892,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         }
 
         // Finally updating handlers
-        xset_set(handler_conf_xsets.at(hnd->mode), "s", new_archive_handlers_s.c_str());
+        xset_set(handler_conf_xsets.at(hnd->mode), XSetSetSet::S, new_archive_handlers_s.c_str());
 
         // Deleting xset
         xset_custom_delete(handler_xset, false);
@@ -2803,8 +2803,10 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
     xset_set_window_icon(GTK_WINDOW(hnd->dlg));
 
     // Setting saved dialog size
-    int width = xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), "x");
-    int height = xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), "y");
+    int width =
+        xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), XSetSetSet::X);
+    int height =
+        xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), XSetSetSet::Y);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(hnd->dlg), width, height);
 
@@ -3332,10 +3334,10 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
     {
         // They are - saving
         xset_set(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC),
-                 "x",
+                 XSetSetSet::X,
                  std::to_string(width).c_str());
         xset_set(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC),
-                 "y",
+                 XSetSetSet::Y,
                  std::to_string(height).c_str());
     }
 

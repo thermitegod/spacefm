@@ -628,8 +628,8 @@ on_start_search(GtkWidget* btn, FindFile* data)
     int height = allocation.height;
     if (width && height)
     {
-        xset_set("main_search", "x", std::to_string(width).c_str());
-        xset_set("main_search", "y", std::to_string(height).c_str());
+        xset_set("main_search", XSetSetSet::X, std::to_string(width).c_str());
+        xset_set("main_search", XSetSetSet::Y, std::to_string(height).c_str());
     }
 
     gtk_widget_hide(data->search_criteria);
@@ -682,8 +682,8 @@ on_search_again(GtkWidget* btn, FindFile* data)
     int height = allocation.height;
     if (width && height)
     {
-        xset_set("main_search", "x", std::to_string(width).c_str());
-        xset_set("main_search", "y", std::to_string(height).c_str());
+        xset_set("main_search", XSetSetSet::X, std::to_string(width).c_str());
+        xset_set("main_search", XSetSetSet::Y, std::to_string(height).c_str());
     }
 
     gtk_widget_show(data->search_criteria);
@@ -1140,8 +1140,8 @@ fm_find_files(const char** search_dirs)
     WindowReference::increase();
     g_signal_connect(data->win, "destroy", G_CALLBACK(WindowReference::decrease), nullptr);
 
-    int width = xset_get_int("main_search", "x");
-    int height = xset_get_int("main_search", "y");
+    int width = xset_get_int("main_search", XSetSetSet::X);
+    int height = xset_get_int("main_search", XSetSetSet::Y);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(data->win), width, height);
 
