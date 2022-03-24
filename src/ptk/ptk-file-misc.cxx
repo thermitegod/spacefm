@@ -230,21 +230,21 @@ ptk_trash_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTre
 char*
 get_real_link_target(const char* link_path)
 {
-    char buf[PATH_MAX + 1];
-    char* target_path;
-
     if (!link_path)
         return nullptr;
 
-    // canonicalize target
-    if (!(target_path = ztd::strdup(realpath(link_path, buf))))
+    std::string target_path;
+    try
     {
-        // fall back to immediate target if canonical target missing
-        ssize_t len = readlink(link_path, buf, PATH_MAX);
-        if (len > 0)
-            target_path = strndup(buf, len);
+        target_path = std::filesystem::read_symlink(link_path);
     }
-    return target_path;
+    catch (const std::filesystem::filesystem_error& e)
+    {
+        LOG_WARN("{}", e.what());
+        target_path = link_path;
+    }
+
+    return ztd::strdup(target_path);
 }
 
 static bool

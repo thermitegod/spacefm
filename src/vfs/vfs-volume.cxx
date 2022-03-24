@@ -273,37 +273,18 @@ sysfs_file_exists(const char* dir, const char* attribute)
 static char*
 sysfs_resolve_link(const char* sysfs_path, const char* name)
 {
-    char link_path[PATH_MAX];
-    char resolved_path[PATH_MAX];
-    bool found_it = false;
-
-    char* full_path = g_build_filename(sysfs_path, name, nullptr);
-
-    // g_debug ("name='%s'", name);
-    // g_debug ("full_path='%s'", full_path);
-    ssize_t num = readlink(full_path, link_path, sizeof(link_path) - 1);
-    if (num != -1)
+    std::string target_path;
+    std::string full_path = Glib::build_filename(sysfs_path, name);
+    try
     {
-        char* absolute_path;
-
-        link_path[num] = '\0';
-
-        // g_debug ("link_path='%s'", link_path);
-        absolute_path = g_build_filename(sysfs_path, link_path, nullptr);
-        // g_debug ("absolute_path='%s'", absolute_path);
-        if (realpath(absolute_path, resolved_path) != nullptr)
-        {
-            // g_debug ("resolved_path='%s'", resolved_path);
-            found_it = true;
-        }
-        free(absolute_path);
+        target_path = std::filesystem::read_symlink(full_path);
     }
-    free(full_path);
-
-    if (found_it)
-        return ztd::strdup(resolved_path);
-    else
+    catch (const std::filesystem::filesystem_error& e)
+    {
+        // LOG_WARN("{}", e.what());
         return nullptr;
+    }
+    return ztd::strdup(target_path);
 }
 
 static bool
