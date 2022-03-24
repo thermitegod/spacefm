@@ -584,15 +584,6 @@ dir_tree_view_get_drop_dir(GtkWidget* view, int x, int y)
         }
         gtk_tree_path_free(tree_path);
     }
-    /*  this is not needed?
-        // dest_path is a link? resolve
-        if ( dest_path && std::filesystem::is_symlink(dest_path))
-        {
-            char* old_dest = dest_path;
-            dest_path = g_file_read_link( old_dest, nullptr );
-            free( old_dest );
-        }
-    */
     return dest_path;
 }
 

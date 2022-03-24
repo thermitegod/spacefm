@@ -239,10 +239,7 @@ get_real_link_target(const char* link_path)
     // canonicalize target
     if (!(target_path = ztd::strdup(realpath(link_path, buf))))
     {
-        /* fall back to immediate target if canonical target
-         * missing.
-         * g_file_read_link() does not behave like readlink,
-         * gives nothing if final target missing */
+        // fall back to immediate target if canonical target missing
         ssize_t len = readlink(link_path, buf, PATH_MAX);
         if (len > 0)
             target_path = strndup(buf, len);
@@ -2194,19 +2191,20 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     gtk_label_set_markup_with_mnemonic(mset->label_type, "<b>Type:</b>");
     if (mset->is_link)
     {
-        path = g_file_read_link(mset->full_path, nullptr);
-        if (path)
+        try
         {
-            mset->mime_type = path;
-            if (std::filesystem::exists(path))
-                type = fmt::format("Link-> {}", path);
+            std::string target_path = std::filesystem::read_symlink(mset->full_path);
+
+            mset->mime_type = ztd::strdup(target_path);
+            if (std::filesystem::exists(target_path))
+                type = fmt::format("Link-> {}", target_path);
             else
             {
-                type = fmt::format("!Link-> {} (missing)", path);
+                type = fmt::format("!Link-> {} (missing)", target_path);
                 target_missing = true;
             }
         }
-        else
+        catch (std::filesystem::filesystem_error)
         {
             mset->mime_type = ztd::strdup("inode/symlink");
             type = ztd::strdup("symbolic link ( inode/symlink )");
@@ -3610,9 +3608,10 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                 if (!alloc_desktop && vfs_file_info_is_symlink(file))
                 {
                     // broken link?
-                    char* target_path = g_file_read_link(full_path, nullptr);
-                    if (target_path)
+                    try
                     {
+                        std::string target_path = std::filesystem::read_symlink(full_path);
+
                         if (!std::filesystem::exists(target_path))
                         {
                             std::string msg = fmt::format("This symlink's target is missing or "
@@ -3625,10 +3624,12 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                                            : nullptr;
                             ptk_show_error(GTK_WINDOW(toplevel), "Broken Link", msg.c_str());
                             free(full_path);
-                            free(target_path);
                             continue;
                         }
-                        free(target_path);
+                    }
+                    catch (const std::filesystem::filesystem_error& e)
+                    {
+                        LOG_WARN("{}", e.what());
                     }
                 }
                 if (!alloc_desktop)

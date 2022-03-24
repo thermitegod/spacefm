@@ -4375,15 +4375,6 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, int x, int y)
                 dest_path = g_build_filename(ptk_file_browser_get_cwd(file_browser),
                                              vfs_file_info_get_name(file),
                                              nullptr);
-                /*  this is not needed?
-                                // dest_path is a link? resolve
-                                if ( std::filesystem::is_symlink(dest_path))
-                                {
-                                    char* old_dest = dest_path;
-                                    dest_path = g_file_read_link( old_dest, nullptr );
-                                    free( old_dest );
-                                }
-                */
             }
             else /* Drop on a file, not directory */
             {

@@ -612,23 +612,26 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         {
             gtk_label_set_markup_with_mnemonic(GTK_LABEL(label_name), "<b>Link _Name:</b>");
             disp_path = g_build_filename(dir_path, file->name.c_str(), nullptr);
-            char* target_path = g_file_read_link(disp_path, nullptr);
-            if (target_path)
+
+            try
             {
-                gtk_entry_set_text(GTK_ENTRY(target), target_path);
-                if (target_path[0] && target_path[0] != '/')
-                {
-                    // relative link to absolute
-                    char* str = target_path;
-                    target_path = g_build_filename(dir_path, str, nullptr);
-                    free(str);
-                }
+                std::string target_path = std::filesystem::read_symlink(disp_path);
+
+                gtk_entry_set_text(GTK_ENTRY(target), target_path.c_str());
+
+                // relative link to absolute
+                if (ztd::startswith(target_path, "/"))
+                    target_path = Glib::build_filename(dir_path, target_path);
+
                 if (!std::filesystem::exists(target_path))
                     gtk_label_set_text(GTK_LABEL(mime_type), "( broken link )");
-                free(target_path);
             }
-            else
+            catch (const std::filesystem::filesystem_error& e)
+            {
+                LOG_WARN("{}", e.what());
                 gtk_entry_set_text(GTK_ENTRY(target), "( read link error )");
+            }
+
             free(disp_path);
             gtk_widget_show(target);
             gtk_widget_show(label_target);
