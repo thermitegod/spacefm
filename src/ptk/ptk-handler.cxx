@@ -192,7 +192,7 @@ struct Handler
 
 /* If you add a new handler, add it to (end of ) existing session file handler
  * list so existing users see the new handler. */
-static const Handler handlers_arc[] = {
+static const std::array<Handler, 13> handlers_arc{
     /* In compress commands:
      *   %n: First selected filename/dir to archive
      *   %N: All selected filenames/dirs to archive, or (with %O) a single filename
@@ -209,138 +209,138 @@ static const Handler handlers_arc[] = {
      *
      * Plus standard bash variables are accepted.
      */
-    {"hand_arc_+7z",
-     "7-Zip",
-     "application/x-7z-compressed",
-     "*.7z",
-     "\"$(which 7za || echo 7zr)\" a %o %N",
-     true,
-     "\"$(which 7za || echo 7zr)\" x %x",
-     true,
-     "\"$(which 7za || echo 7zr)\" l %x",
-     false},
-    {"hand_arc_+rar",
-     "RAR",
-     "application/x-rar",
-     "*.rar *.RAR",
-     "rar a -r %o %N",
-     true,
-     "unrar -o- x %x",
-     true,
-     "unrar lt %x",
-     false},
-    {"hand_arc_+tar",
-     "Tar",
-     "application/x-tar",
-     "*.tar",
-     "tar -cvf %o %N",
-     false,
-     "tar -xvf %x",
-     false,
-     "tar -tvf %x",
-     false},
-    {"hand_arc_+tar_bz2",
-     "Tar bzip2",
-     "application/x-bzip-compressed-tar",
-     "*.tar.bz2",
-     "tar -cvjf %o %N",
-     false,
-     "tar -xvjf %x",
-     false,
-     "tar -tvf %x",
-     false},
-    {"hand_arc_+tar_gz",
-     "Tar Gzip",
-     "application/x-compressed-tar",
-     "*.tar.gz *.tgz",
-     "tar -cvzf %o %N",
-     false,
-     "tar -xvzf %x",
-     false,
-     "tar -tvf %x",
-     false},
-    {"hand_arc_+tar_xz",
-     "Tar xz",
-     "application/x-xz-compressed-tar",
-     "*.tar.xz *.txz",
-     "tar -cvJf %o %N",
-     false,
-     "tar -xvJf %x",
-     false,
-     "tar -tvf %x",
-     false},
-    {"hand_arc_+zip",
-     "Zip",
-     "application/x-zip application/zip",
-     "*.zip *.ZIP",
-     "zip -r %o %N",
-     true,
-     "unzip %x",
-     true,
-     "unzip -l %x",
-     false},
-    {"hand_arc_+gz",
-     "Gzip",
-     "application/x-gzip application/x-gzpdf application/gzip",
-     "*.gz",
-     "gzip -c %N >| %O",
-     false,
-     "gzip -cd %x >| %G",
-     false,
-     "gunzip -l %x",
-     false},
-    {"hand_arc_+xz",
-     "XZ",
-     "application/x-xz",
-     "*.xz",
-     "xz -cz %N >| %O",
-     false,
-     "xz -cd %x >| %G",
-     false,
-     "xz -tv %x",
-     false},
-    {"hand_arc_+tar_lz4",
-     "Tar Lz4",
-     "application/x-lz4-compressed-tar",
-     "*.tar.lz4",
-     "tar -I lz4 -cvf %o %N",
-     false,
-     "tar -I lz4 -xvf %x",
-     false,
-     "lz4 -dc %x | tar tvf -",
-     false},
-    {"hand_arc_+lz4",
-     "Lz4",
-     "application/x-lz4",
-     "*.lz4",
-     "lz4 -c %N >| %O",
-     false,
-     "lz4 -d -c %x >| %G",
-     false,
-     "lz4 -tv %x",
-     false},
-    {"hand_arc_+tar_zst",
-     "Tar Zstd",
-     "application/x-zstd-compressed-tar",
-     "*.tar.zst",
-     "tar -I 'zstd --long=31' -cvf %o %N",
-     false,
-     "zstd -dc --long=31 %x | tar xvf -",
-     false,
-     "zstd -dc --long=31 %x | tar tvf -",
-     false},
-    {"hand_arc_+zst",
-     "Zstd",
-     "application/zstd",
-     "*.zst",
-     "zstd -c --long=31 %N >| %O",
-     false,
-     "zstd -dc --long=31 -d %x >| %G",
-     false,
-     "zstd -dc --long=31 -tlv %x",
-     false}};
+    Handler{"hand_arc_+7z",
+            "7-Zip",
+            "application/x-7z-compressed",
+            "*.7z",
+            "\"$(which 7za || echo 7zr)\" a %o %N",
+            true,
+            "\"$(which 7za || echo 7zr)\" x %x",
+            true,
+            "\"$(which 7za || echo 7zr)\" l %x",
+            false},
+    Handler{"hand_arc_+rar",
+            "RAR",
+            "application/x-rar",
+            "*.rar *.RAR",
+            "rar a -r %o %N",
+            true,
+            "unrar -o- x %x",
+            true,
+            "unrar lt %x",
+            false},
+    Handler{"hand_arc_+tar",
+            "Tar",
+            "application/x-tar",
+            "*.tar",
+            "tar -cvf %o %N",
+            false,
+            "tar -xvf %x",
+            false,
+            "tar -tvf %x",
+            false},
+    Handler{"hand_arc_+tar_bz2",
+            "Tar bzip2",
+            "application/x-bzip-compressed-tar",
+            "*.tar.bz2",
+            "tar -cvjf %o %N",
+            false,
+            "tar -xvjf %x",
+            false,
+            "tar -tvf %x",
+            false},
+    Handler{"hand_arc_+tar_gz",
+            "Tar Gzip",
+            "application/x-compressed-tar",
+            "*.tar.gz *.tgz",
+            "tar -cvzf %o %N",
+            false,
+            "tar -xvzf %x",
+            false,
+            "tar -tvf %x",
+            false},
+    Handler{"hand_arc_+tar_xz",
+            "Tar xz",
+            "application/x-xz-compressed-tar",
+            "*.tar.xz *.txz",
+            "tar -cvJf %o %N",
+            false,
+            "tar -xvJf %x",
+            false,
+            "tar -tvf %x",
+            false},
+    Handler{"hand_arc_+zip",
+            "Zip",
+            "application/x-zip application/zip",
+            "*.zip *.ZIP",
+            "zip -r %o %N",
+            true,
+            "unzip %x",
+            true,
+            "unzip -l %x",
+            false},
+    Handler{"hand_arc_+gz",
+            "Gzip",
+            "application/x-gzip application/x-gzpdf application/gzip",
+            "*.gz",
+            "gzip -c %N >| %O",
+            false,
+            "gzip -cd %x >| %G",
+            false,
+            "gunzip -l %x",
+            false},
+    Handler{"hand_arc_+xz",
+            "XZ",
+            "application/x-xz",
+            "*.xz",
+            "xz -cz %N >| %O",
+            false,
+            "xz -cd %x >| %G",
+            false,
+            "xz -tv %x",
+            false},
+    Handler{"hand_arc_+tar_lz4",
+            "Tar Lz4",
+            "application/x-lz4-compressed-tar",
+            "*.tar.lz4",
+            "tar -I lz4 -cvf %o %N",
+            false,
+            "tar -I lz4 -xvf %x",
+            false,
+            "lz4 -dc %x | tar tvf -",
+            false},
+    Handler{"hand_arc_+lz4",
+            "Lz4",
+            "application/x-lz4",
+            "*.lz4",
+            "lz4 -c %N >| %O",
+            false,
+            "lz4 -d -c %x >| %G",
+            false,
+            "lz4 -tv %x",
+            false},
+    Handler{"hand_arc_+tar_zst",
+            "Tar Zstd",
+            "application/x-zstd-compressed-tar",
+            "*.tar.zst",
+            "tar -I 'zstd --long=31' -cvf %o %N",
+            false,
+            "zstd -dc --long=31 %x | tar xvf -",
+            false,
+            "zstd -dc --long=31 %x | tar tvf -",
+            false},
+    Handler{"hand_arc_+zst",
+            "Zstd",
+            "application/zstd",
+            "*.zst",
+            "zstd -c --long=31 %N >| %O",
+            false,
+            "zstd -dc --long=31 -d %x >| %G",
+            false,
+            "zstd -dc --long=31 -tlv %x",
+            false}};
 
-const Handler handlers_fs[] = {
+const std::array<Handler, 3> handlers_fs{
     /* In commands:
      *      %v  device
      *      %o  volume-specific mount options (use in mount command only)
@@ -360,48 +360,50 @@ const Handler handlers_fs[] = {
      *
      *      eg: +ext3 dev=/dev/sdb* id=ata-* label=Label_With_Spaces
      */
-    {"hand_fs_+fuseiso",
-     "fuseiso unmount",
-     "*fuseiso",
-     "",
-     "# Mounting of iso files is performed by fuseiso in a file handler,\n# not this device "
-     "handler.  Right-click on any file and select\n# Open|File Handlers, and select Mount ISO to "
-     "see this command.",
-     false,
-     "fusermount -u \"%a\"",
-     false,
-     "grep \"%a\" ~/.mtab.fuseiso",
-     false},
-    {"hand_fs_+udiso",
-     "udevil iso unmount",
-     "+iso9660 +dev=/dev/loop*",
-     "optical=1 removable=1",
-     "# Mounting of iso files is performed by udevil in a file handler,\n# not this device "
-     "handler.  Right-click on any file and select\n# Open|File Handlers, and select Mount ISO to "
-     "see this command.",
-     false,
-     "# Note: non-iso9660 types will fall through to Default unmount handler\nudevil umount "
-     "\"%a\"\n",
-     false,
-     INFO_EXAMPLE,
-     false},
-    {"hand_fs_+def",
-     "Default",
-     "*",
-     "",
-     "# Enter mount command or leave blank for auto:\n\n\n# # Examples: (remove # to enable a "
-     "mount command)\n#\n# # udevil:\n#     udevil mount -o '%o' %v\n#\n# # pmount: (does not "
-     "accept mount options)\n#     pmount %v\n#\n# # udisks v2:\n#     udisksctl mount -b %v -o "
-     "'%o'\n",
-     false,
-     "# Enter unmount command or leave blank for auto:\n\n\n# # Examples: (remove # to enable an "
-     "unmount command)\n#\n# # udevil:\n#     udevil umount %v\n#\n# # pmount:\n#     pumount "
-     "%v\n#\n# # udisks v2:\n#     udisksctl unmount -b %v\n#\n",
-     false,
-     INFO_EXAMPLE,
-     false}};
+    Handler{"hand_fs_+fuseiso",
+            "fuseiso unmount",
+            "*fuseiso",
+            "",
+            "# Mounting of iso files is performed by fuseiso in a file handler,\n# not this device "
+            "handler.  Right-click on any file and select\n# Open|File Handlers, and select Mount "
+            "ISO to "
+            "see this command.",
+            false,
+            "fusermount -u \"%a\"",
+            false,
+            "grep \"%a\" ~/.mtab.fuseiso",
+            false},
+    Handler{"hand_fs_+udiso",
+            "udevil iso unmount",
+            "+iso9660 +dev=/dev/loop*",
+            "optical=1 removable=1",
+            "# Mounting of iso files is performed by udevil in a file handler,\n# not this device "
+            "handler.  Right-click on any file and select\n# Open|File Handlers, and select Mount "
+            "ISO to see this command.",
+            false,
+            "# Note: non-iso9660 types will fall through to Default unmount handler\nudevil umount "
+            "\"%a\"\n",
+            false,
+            INFO_EXAMPLE,
+            false},
+    Handler{"hand_fs_+def",
+            "Default",
+            "*",
+            "",
+            "# Enter mount command or leave blank for auto:\n\n\n# # Examples: (remove # to "
+            "enable a mount command)\n#\n# # udevil:\n#     udevil mount -o '%o' %v\n#\n# # "
+            "pmount: (does not accept mount options)\n#     pmount %v\n#\n# # udisks v2:\n# "
+            "    udisksctl mount -b %v -o '%o'\n",
+            false,
+            "# Enter unmount command or leave blank for auto:\n\n\n# # Examples: "
+            "(remove # to enable an unmount command)\n#\n# # udevil:\n#     "
+            "udevil umount %v\n#\n# # pmount:\n#     pumount %v\n#\n# # udisks v2:\n#"
+            "     udisksctl unmount -b %v\n#\n",
+            false,
+            INFO_EXAMPLE,
+            false}};
 
-static const Handler handlers_net[] = {
+static const std::array<Handler, 10> handlers_net{
     /* In commands:
      *       %url%     $fm_url
      *       %proto%   $fm_url_proto
@@ -425,180 +427,189 @@ static const Handler handlers_net[] = {
      *
      *      eg: +ssh url=ssh://...
      */
-    {"hand_net_+http",
-     "http & webdav",
-     "http https webdav davfs davs dav mtab_fs=davfs*",
-     "",
-     "# This handler opens http:// and webdav://\n\n# Set your web browser in "
-     "Help|Options|Browser\n\n# set missing_davfs=1 if you always want to open http in web "
-     "browser\n# set missing_davfs=0 if you always want to mount http with "
-     "davfs\nmissing_davfs=\n\nif [ -z \"$missing_davfs\" ];then\n    grep -qs "
-     "'^[[:space:]]*allowed_types[[:space:]]*=[^#]*davfs' \\\n                                    "
-     "/etc/udevil/udevil.conf 2>/dev/null\n    missing_davfs=$?  \nfi\nif [ \"$fm_url_proto\" = "
-     "\"webdav\" ] || [ \"$fm_url_proto\" = \"davfs\" ] || \\\n   [ \"$fm_url_proto\" = \"dav\" ] "
-     "|| [ \"$fm_url_proto\" = \"davs\" ] || \\\n                                    [ "
-     "$missing_davfs -eq 0 ];then\n    fm_url_proto=\"${fm_url_proto/webdav/http}\"\n    "
-     "fm_url_proto=\"${fm_url_proto/davfs/http}\"\n    "
-     "fm_url_proto=\"${fm_url_proto/davs/https}\"\n    fm_url_proto=\"${fm_url_proto/dav/http}\"\n "
-     "   "
-     "url=\"${fm_url_proto}://${fm_url_host}${fm_url_port:+:}${fm_url_port}${fm_url_path:-/}\"\n   "
-     " [[ -z \"$fm_url_user$fm_url_password\" ]] && msg=\"\" || \\\n            msg=\"Warning: "
-     "user:password in URL is not supported by davfs.\"\n    # attempt davfs mount in terminal\n   "
-     " spacefm -s run-task cmd --terminal \\\n        \"echo $msg; echo 'udevil mount $url'; "
-     "udevil mount '$url' || \" \\\n                        \"( echo; echo 'Press Enter to "
-     "close:'; read )\"\n    exit\nfi\n# open in web browser\nspacefm -s run-task web "
-     "\"$fm_url\"\n",
-     false,
-     "# Note: Unmount is usually performed by the 'fuse unmount' handler.\n\nudevil umount \"%a\"",
-     false,
-     INFO_EXAMPLE,
-     false},
-    {"hand_net_+ftp",
-     "ftp",
-     "ftp",
-     "",
-     "options=\"nonempty\"\nif [ -n \"%user%\" ];then\n    user=\",user=%user%\"\n    [[ -n "
-     "\"%pass%\" ]] && user=\"$user:%pass%\"\nfi\n[[ -n \"%port%\" ]] && portcolon=:\necho \">>> "
-     "curlftpfs -o $options$user ftp://%host%${portcolon}%port%%path% %a\"\necho\ncurlftpfs -o "
-     "$options$user ftp://%host%${portcolon}%port%%path% \"%a\"\n[[ $? -eq 0 ]] && sleep 1 && ls "
-     "\"%a\"  # set error status or wait until ready\n",
-     true,
-     "fusermount -u \"%a\"",
-     false,
-     INFO_EXAMPLE,
-     false},
-    {"hand_net_+ssh",
-     "ssh",
-     "ssh sftp mtab_fs=fuse.sshfs",
-     "",
-     "[[ -n \"$fm_url_user\" ]] && fm_url_user=\"${fm_url_user}@\"\n[[ -z \"$fm_url_port\" ]] && "
-     "fm_url_port=22\necho \">>> sshfs -p $fm_url_port $fm_url_user$fm_url_host:$fm_url_path "
-     "%a\"\necho\n# Run sshfs through nohup to prevent disconnect on terminal "
-     "close\nsshtmp=\"$(mktemp --tmpdir spacefm-ssh-output-XXXXXXXX.tmp)\" || exit 1\nnohup sshfs "
-     "-p $fm_url_port $fm_url_user$fm_url_host:$fm_url_path %a &> \"$sshtmp\"\nerr=$?\n[[ -e "
-     "\"$sshtmp\" ]] && cat \"$sshtmp\" ; rm -f \"$sshtmp\"\n[[ $err -eq 0 ]]  # set error "
-     "status\n\n# Alternate Method - if enabled, disable nohup line above and\n#                   "
-     " uncheck Run In Terminal\n# # Run sshfs in a terminal without SpaceFM task.  sshfs "
-     "disconnects when the\n# # terminal is closed\n# spacefm -s run-task cmd --terminal \"echo "
-     "'Connecting to $fm_url'; echo; sshfs -p $fm_url_port $fm_url_user$fm_url_host:$fm_url_path "
-     "%a; if [ $? -ne 0 ];then echo; echo '[ Finished ] Press Enter to close'; else echo; echo "
-     "'Press Enter to close (closing this window may unmount sshfs)'; fi; read\" & sleep 1\n",
-     true,
-     "fusermount -u \"%a\"",
-     false,
-     INFO_EXAMPLE,
-     false},
-    {"hand_net_+mtp",
-     "mtp",
-     "mtp mtab_fs=fuse.jmtpfs mtab_fs=fuse.simple-mtpfs mtab_fs=fuse.mtpfs mtab_fs=fuse.DeviceFs(*",
-     "",
-     "mtpmount=\"$(which jmtpfs || which simple-mtpfs || which mtpfs || which go-mtpfs)\"\nif [ -z "
-     "\"$mtpmount\" ];then\n    echo \"To mount mtp:// you must install jmtpfs, simple-mtpfs, "
-     "mtpfs, or go-mtpfs,\"\n    echo \"or add a custom protocol handler.\"\n    exit 1\nelif [ "
-     "\"${mtpmount##*/}\" = \"go-mtpfs\" ];then\n    # Run go-mtpfs in background, as it does not "
-     "exit after mount\n    outputtmp=\"$(mktemp --tmpdir spacefm-go-mtpfs-output-XXXXXXXX)\" || "
-     "exit 1\n    go-mtpfs \"%a\" &> \"$outputtmp\" &\n    sleep 2s\n    [[ -e \"$outputtmp\" ]] "
-     "&& cat \"$outputtmp\" ; rm -f \"$outputtmp\"\n    # set success status only if positive that "
-     "mountpoint is mountpoint\n    mountpoint \"%a\"\nelse\n    $mtpmount \"%a\"\nfi\n",
-     false,
-     "fusermount -u \"%a\"",
-     false,
-     INFO_EXAMPLE,
-     false},
-    {"hand_net_+gphoto",
-     "ptp",
-     "ptp gphoto mtab_fs=fuse.gphotofs",
-     "",
-     "gphotofs \"%a\"",
-     false,
-     "fusermount -u \"%a\"",
-     false,
-     INFO_EXAMPLE,
-     false},
-    {"hand_net_+ifuse",
-     "ifuse",
-     "ifuse ios mtab_fs=fuse.ifuse",
-     "",
-     "ifuse \"%a\"",
-     false,
-     "fusermount -u \"%a\"",
-     false,
-     INFO_EXAMPLE,
-     false},
-    {"hand_net_+udevil",
-     "udevil",
-     "ftp http https nfs ssh mtab_fs=fuse.sshfs mtab_fs=davfs*",
-     "",
-     "udevil mount \"$fm_url\"",
-     true,
-     "udevil umount \"%a\"",
-     false,
-     INFO_EXAMPLE,
-     false},
-    {"hand_net_+udevilsmb",
-     "udevil-smb",
-     "smb mtab_fs=cifs",
-     "",
-     "UDEVIL_RESULT=\"$(udevil mount \"$fm_url\" | grep Mounted)\"\n[ -n \"$UDEVIL_RESULT\" ] && "
-     "spacefm -s set new_tab \"${UDEVIL_RESULT#* at }\"",
-     true,
-     "udevil umount \"%a\"",
-     false,
-     INFO_EXAMPLE,
-     false},
-    {"hand_net_+fusesmb",
-     "fusesmb",
-     "smb mtab_fs=fuse.fusesmb",
-     "",
-     "fusesmb \"%a\"",
-     true,
-     "fusermount -u \"%a\"",
-     false,
-     INFO_EXAMPLE,
-     false},
-    {"hand_net_+fuse",
-     "fuse unmount",
-     "mtab_fs=fuse.* mtab_fs=fuse",
-     "",
-     "",
-     false,
-     "fusermount -u \"%a\"",
-     false,
-     INFO_EXAMPLE,
-     false}};
+    Handler{
+        "hand_net_+http",
+        "http & webdav",
+        "http https webdav davfs davs dav mtab_fs=davfs*",
+        "",
+        "# This handler opens http:// and webdav://\n\n# Set your web browser in "
+        "Help|Options|Browser\n\n# set missing_davfs=1 if you always want to open http in web "
+        "browser\n# set missing_davfs=0 if you always want to mount http with "
+        "davfs\nmissing_davfs=\n\nif [ -z \"$missing_davfs\" ];then\n    grep -qs "
+        "'^[[:space:]]*allowed_types[[:space:]]*=[^#]*davfs' \\\n                                  "
+        "  /etc/udevil/udevil.conf 2>/dev/null\n    missing_davfs=$?  \nfi\nif [ \"$fm_url_proto\" "
+        "= \"webdav\" ] || [ \"$fm_url_proto\" = \"davfs\" ] || \\\n   [ \"$fm_url_proto\" = "
+        "\"dav\" ] || [ \"$fm_url_proto\" = \"davs\" ] || \\\n                                    "
+        "[ $missing_davfs -eq 0 ];then\n    fm_url_proto=\"${fm_url_proto/webdav/http}\"\n    "
+        "fm_url_proto=\"${fm_url_proto/davfs/http}\"\n    "
+        "fm_url_proto=\"${fm_url_proto/davs/https}\"\n    "
+        "fm_url_proto=\"${fm_url_proto/dav/http}\"\n    "
+        "url=\"${fm_url_proto}://${fm_url_host}${fm_url_port:+:}${fm_url_port}${fm_url_path:-/"
+        "}\"\n    [[ -z \"$fm_url_user$fm_url_password\" ]] && msg=\"\" || \\\n            "
+        "msg=\"Warning: user:password in URL is not supported by davfs.\"\n    # attempt davfs "
+        "mount in terminal\n    spacefm -s run-task cmd --terminal \\\n        \"echo $msg; echo "
+        "'udevil mount $url'; udevil mount '$url' || \" \\\n                        \"( echo; echo "
+        "'Press Enter to close:'; read )\"\n    exit\nfi\n# open in web browser\nspacefm -s "
+        "run-task web \"$fm_url\"\n",
+        false,
+        "# Note: Unmount is usually performed by the 'fuse unmount' handler.\n\nudevil umount "
+        "\"%a\"",
+        false,
+        INFO_EXAMPLE,
+        false},
+    Handler{
+        "hand_net_+ftp",
+        "ftp",
+        "ftp",
+        "",
+        "options=\"nonempty\"\nif [ -n \"%user%\" ];then\n    user=\",user=%user%\"\n    [[ -n "
+        "\"%pass%\" ]] && user=\"$user:%pass%\"\nfi\n[[ -n \"%port%\" ]] && portcolon=:\necho "
+        "\">>> curlftpfs -o $options$user ftp://%host%${portcolon}%port%%path% "
+        "%a\"\necho\ncurlftpfs -o $options$user ftp://%host%${portcolon}%port%%path% \"%a\"\n[[ $? "
+        "-eq 0 ]] && sleep 1 && ls \"%a\"  # set error status or wait until ready\n",
+        true,
+        "fusermount -u \"%a\"",
+        false,
+        INFO_EXAMPLE,
+        false},
+    Handler{
+        "hand_net_+ssh",
+        "ssh",
+        "ssh sftp mtab_fs=fuse.sshfs",
+        "",
+        "[[ -n \"$fm_url_user\" ]] && fm_url_user=\"${fm_url_user}@\"\n[[ -z \"$fm_url_port\" ]] "
+        "&& fm_url_port=22\necho \">>> sshfs -p $fm_url_port $fm_url_user$fm_url_host:$fm_url_path "
+        "%a\"\necho\n# Run sshfs through nohup to prevent disconnect on terminal "
+        "close\nsshtmp=\"$(mktemp --tmpdir spacefm-ssh-output-XXXXXXXX.tmp)\" || exit 1\nnohup "
+        "sshfs -p $fm_url_port $fm_url_user$fm_url_host:$fm_url_path %a &> \"$sshtmp\"\nerr=$?\n[[ "
+        "-e \"$sshtmp\" ]] && cat \"$sshtmp\" ; rm -f \"$sshtmp\"\n[[ $err -eq 0 ]]  # set error "
+        "status\n\n# Alternate Method - if enabled, disable nohup line above and\n#                "
+        "    uncheck Run In Terminal\n# # Run sshfs in a terminal without SpaceFM task.  sshfs "
+        "disconnects when the\n# # terminal is closed\n# spacefm -s run-task cmd --terminal \"echo "
+        "'Connecting to $fm_url'; echo; sshfs -p $fm_url_port "
+        "$fm_url_user$fm_url_host:$fm_url_path %a; if [ $? -ne 0 ];then echo; echo '[ Finished ] "
+        "Press Enter to close'; else echo; echo 'Press Enter to close (closing this window may "
+        "unmount sshfs)'; fi; read\" & sleep 1\n",
+        true,
+        "fusermount -u \"%a\"",
+        false,
+        INFO_EXAMPLE,
+        false},
+    Handler{"hand_net_+mtp",
+            "mtp",
+            "mtp mtab_fs=fuse.jmtpfs mtab_fs=fuse.simple-mtpfs mtab_fs=fuse.mtpfs "
+            "mtab_fs=fuse.DeviceFs(*",
+            "",
+            "mtpmount=\"$(which jmtpfs || which simple-mtpfs || which mtpfs || which "
+            "go-mtpfs)\"\nif [ -z \"$mtpmount\" ];then\n    echo \"To mount mtp:// you must "
+            "install jmtpfs, simple-mtpfs, mtpfs, or go-mtpfs,\"\n    echo \"or add a custom "
+            "protocol handler.\"\n    exit 1\nelif [ \"${mtpmount##*/}\" = \"go-mtpfs\" ];then\n   "
+            " # Run go-mtpfs in background, as it does not exit after mount\n    "
+            "outputtmp=\"$(mktemp --tmpdir spacefm-go-mtpfs-output-XXXXXXXX)\" || exit 1\n    "
+            "go-mtpfs \"%a\" &> \"$outputtmp\" &\n    sleep 2s\n    [[ -e \"$outputtmp\" ]] && cat "
+            "\"$outputtmp\" ; rm -f \"$outputtmp\"\n    # set success status only if positive that "
+            "mountpoint is mountpoint\n    mountpoint \"%a\"\nelse\n    $mtpmount \"%a\"\nfi\n",
+            false,
+            "fusermount -u \"%a\"",
+            false,
+            INFO_EXAMPLE,
+            false},
+    Handler{"hand_net_+gphoto",
+            "ptp",
+            "ptp gphoto mtab_fs=fuse.gphotofs",
+            "",
+            "gphotofs \"%a\"",
+            false,
+            "fusermount -u \"%a\"",
+            false,
+            INFO_EXAMPLE,
+            false},
+    Handler{"hand_net_+ifuse",
+            "ifuse",
+            "ifuse ios mtab_fs=fuse.ifuse",
+            "",
+            "ifuse \"%a\"",
+            false,
+            "fusermount -u \"%a\"",
+            false,
+            INFO_EXAMPLE,
+            false},
+    Handler{"hand_net_+udevil",
+            "udevil",
+            "ftp http https nfs ssh mtab_fs=fuse.sshfs mtab_fs=davfs*",
+            "",
+            "udevil mount \"$fm_url\"",
+            true,
+            "udevil umount \"%a\"",
+            false,
+            INFO_EXAMPLE,
+            false},
+    Handler{"hand_net_+udevilsmb",
+            "udevil-smb",
+            "smb mtab_fs=cifs",
+            "",
+            "UDEVIL_RESULT=\"$(udevil mount \"$fm_url\" | grep Mounted)\"\n[ -n \"$UDEVIL_RESULT\" "
+            "] && spacefm -s set new_tab \"${UDEVIL_RESULT#* at }\"",
+            true,
+            "udevil umount \"%a\"",
+            false,
+            INFO_EXAMPLE,
+            false},
+    Handler{"hand_net_+fusesmb",
+            "fusesmb",
+            "smb mtab_fs=fuse.fusesmb",
+            "",
+            "fusesmb \"%a\"",
+            true,
+            "fusermount -u \"%a\"",
+            false,
+            INFO_EXAMPLE,
+            false},
+    Handler{"hand_net_+fuse",
+            "fuse unmount",
+            "mtab_fs=fuse.* mtab_fs=fuse",
+            "",
+            "",
+            false,
+            "fusermount -u \"%a\"",
+            false,
+            INFO_EXAMPLE,
+            false}};
 
-static const Handler handlers_file[] = {
+static const std::array<Handler, 1> handlers_file{
     /* %a custom mount point
      * Plus standard bash variables are accepted.
      * For file handlers, extract_term is used for Run As Task. */
-    {"hand_f_+iso",
-     "Mount ISO",
-     "application/x-iso9660-image application/x-iso-image application/x-cd-image",
-     "*.img *.iso *.mdf *.nrg",
-     "# Note: Unmounting of iso files is performed by the fuseiso or udevil device\n# handler, not "
-     "this file handler.\n\n# Use fuseiso or udevil ?\nfuse=\"$(which fuseiso)\"  # remove this "
-     "line to use udevil only\nif [[ -z \"$fuse\" ]];then\n    udevil=\"$(which udevil)\"\n    if "
-     "[[ -z \"$udevil\" ]];then\n        echo \"You must install fuseiso or udevil to mount ISOs "
-     "with this handler.\"\n        exit 1\n    fi\n    # use udevil - attempt mount\n    "
-     "uout=\"$($udevil mount \"$fm_file\" 2>&1)\"\n    err=$?; echo \"$uout\"\n    if [ $err -eq 2 "
-     "];then\n        # is file already mounted? (english only)\n        point=\"${uout#* is "
-     "already mounted at }\"\n        if [ \"$point\" != \"$uout\" ];then\n            "
-     "point=\"${point% (*}\"\n            if [ -x \"$point\" ];then\n                spacefm -t "
-     "\"$point\"\n                exit 0\n            fi\n        fi\n    fi\n    [[ $err -ne 0 ]] "
-     "&& exit 1\n    point=\"${uout#Mounted }\"\n    [[ \"$point\" = \"$uout\" ]] && exit 0\n    "
-     "point=\"${point##* at }\"\n    [[ -d \"$point\" ]] && spacefm \"$point\" &\n    exit "
-     "0\nfi\n# use fuseiso - is file already mounted?\ncanon=\"$(readlink -f \"$fm_file\" "
-     "2>/dev/null)\"\nif [ -n \"$canon\" ];then\n    canon_enc=\"${canon// /\\\\040}\" # encode "
-     "spaces for mtab+grep\n    if grep -q \"^$canon_enc \" ~/.mtab.fuseiso 2>/dev/null;then\n    "
-     "    # file is mounted - get mount point\n        point=\"$(grep -m 1 \"^$canon_enc \" "
-     "~/.mtab.fuseiso \\\n                 | sed 's/.* \\(.*\\) fuseiso .*/\\1/' )\"\n    if [ -x "
-     "\"$point\" ];then\n            spacefm \"$point\" &\n            exit\n        fi\n    "
-     "fi\nfi\n# mount & open\nfuseiso %f %a && spacefm %a &\n",
-     false,
-     "",
-     true, // Run As Task
-     "",
-     false}};
+    Handler{
+        "hand_f_+iso",
+        "Mount ISO",
+        "application/x-iso9660-image application/x-iso-image application/x-cd-image",
+        "*.img *.iso *.mdf *.nrg",
+        "# Note: Unmounting of iso files is performed by the fuseiso or udevil device\n# handler, "
+        "not this file handler.\n\n# Use fuseiso or udevil ?\nfuse=\"$(which fuseiso)\"  # remove "
+        "this line to use udevil only\nif [[ -z \"$fuse\" ]];then\n    udevil=\"$(which "
+        "udevil)\"\n    if [[ -z \"$udevil\" ]];then\n        echo \"You must install fuseiso or "
+        "udevil to mount ISOs with this handler.\"\n        exit 1\n    fi\n    # use udevil - "
+        "attempt mount\n    uout=\"$($udevil mount \"$fm_file\" 2>&1)\"\n    err=$?; echo "
+        "\"$uout\"\n    if [ $err -eq 2 ];then\n        # is file already mounted? (english "
+        "only)\n        point=\"${uout#* is already mounted at }\"\n        if [ \"$point\" != "
+        "\"$uout\" ];then\n            point=\"${point% (*}\"\n            if [ -x \"$point\" "
+        "];then\n                spacefm -t \"$point\"\n                exit 0\n            fi\n   "
+        "     fi\n    fi\n    [[ $err -ne 0 ]] && exit 1\n    point=\"${uout#Mounted }\"\n    [[ "
+        "\"$point\" = \"$uout\" ]] && exit 0\n    point=\"${point##* at }\"\n    [[ -d \"$point\" "
+        "]] && spacefm \"$point\" &\n    exit 0\nfi\n# use fuseiso - is file already "
+        "mounted?\ncanon=\"$(readlink -f \"$fm_file\" 2>/dev/null)\"\nif [ -n \"$canon\" ];then\n  "
+        "  canon_enc=\"${canon// /\\\\040}\" # encode spaces for mtab+grep\n    if grep -q "
+        "\"^$canon_enc \" ~/.mtab.fuseiso 2>/dev/null;then\n        # file is mounted - get mount "
+        "point\n        point=\"$(grep -m 1 \"^$canon_enc \" ~/.mtab.fuseiso \\\n                 "
+        "| sed 's/.* \\(.*\\) fuseiso .*/\\1/' )\"\n    if [ -x \"$point\" ];then\n            "
+        "spacefm \"$point\" &\n            exit\n        fi\n    fi\nfi\n# mount & open\nfuseiso "
+        "%f %a && spacefm %a &\n",
+        false,
+        "",
+        true, // Run As Task
+        "",
+        false}};
 
 // Function prototypes
 static void on_configure_handler_enabled_check(GtkToggleButton* togglebutton, HandlerData* hnd);
@@ -667,29 +678,28 @@ ptk_handler_get_command(int mode, int cmd, XSet* handler_set)
     {
         // is default handler - get command from const char
         const Handler* handler;
-        int i;
-        int nelements;
+        std::size_t nelements;
         const char* command;
 
         switch (mode)
         {
             case PtkHandlerMode::HANDLER_MODE_ARC:
-                nelements = G_N_ELEMENTS(handlers_arc);
+                nelements = handlers_arc.size();
                 break;
             case PtkHandlerMode::HANDLER_MODE_FS:
-                nelements = G_N_ELEMENTS(handlers_fs);
+                nelements = handlers_fs.size();
                 break;
             case PtkHandlerMode::HANDLER_MODE_NET:
-                nelements = G_N_ELEMENTS(handlers_net);
+                nelements = handlers_net.size();
                 break;
             case PtkHandlerMode::HANDLER_MODE_FILE:
-                nelements = G_N_ELEMENTS(handlers_file);
+                nelements = handlers_file.size();
                 break;
             default:
                 return nullptr;
         }
 
-        for (i = 0; i < nelements; i++)
+        for (std::size_t i = 0; i < nelements; i++)
         {
             switch (mode)
             {
@@ -1109,7 +1119,7 @@ string_copy_free(char** s, const char* src)
 void
 ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
 {
-    int nelements;
+    std::size_t nelements;
     char* list;
     char* str;
     XSet* set;
@@ -1119,16 +1129,16 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
     switch (mode)
     {
         case PtkHandlerMode::HANDLER_MODE_ARC:
-            nelements = G_N_ELEMENTS(handlers_arc);
+            nelements = handlers_arc.size();
             break;
         case PtkHandlerMode::HANDLER_MODE_FS:
-            nelements = G_N_ELEMENTS(handlers_fs);
+            nelements = handlers_fs.size();
             break;
         case PtkHandlerMode::HANDLER_MODE_NET:
-            nelements = G_N_ELEMENTS(handlers_net);
+            nelements = handlers_net.size();
             break;
         case PtkHandlerMode::HANDLER_MODE_FILE:
-            nelements = G_N_ELEMENTS(handlers_file);
+            nelements = handlers_file.size();
             break;
         default:
             return;
@@ -1144,7 +1154,7 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
         overwrite = add_missing = true;
     }
 
-    for (int i = 0; i < nelements; i++)
+    for (std::size_t i = 0; i < nelements; i++)
     {
         switch (mode)
         {
@@ -2196,30 +2206,29 @@ restore_defaults(HandlerData* hnd, bool all)
         }
 
         // get default handler
-        int nelements;
+        std::size_t nelements;
         const Handler* handler = nullptr;
 
         switch (hnd->mode)
         {
             case PtkHandlerMode::HANDLER_MODE_ARC:
-                nelements = G_N_ELEMENTS(handlers_arc);
+                nelements = handlers_arc.size();
                 break;
             case PtkHandlerMode::HANDLER_MODE_FS:
-                nelements = G_N_ELEMENTS(handlers_fs);
+                nelements = handlers_fs.size();
                 break;
             case PtkHandlerMode::HANDLER_MODE_NET:
-                nelements = G_N_ELEMENTS(handlers_net);
+                nelements = handlers_net.size();
                 break;
             case PtkHandlerMode::HANDLER_MODE_FILE:
-                nelements = G_N_ELEMENTS(handlers_file);
+                nelements = handlers_file.size();
                 break;
             default:
                 return;
         }
 
         bool found_handler = false;
-        int i;
-        for (i = 0; i < nelements; i++)
+        for (std::size_t i = 0; i < nelements; i++)
         {
             switch (hnd->mode)
             {
