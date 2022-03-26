@@ -271,6 +271,7 @@ sources = [
   'src/socket.cxx',
   'src/utils.cxx',
   'src/window-reference.cxx',
+  'src/xset.cxx',
 
   'src/mime-type/mime-action.cxx',
   'src/mime-type/mime-cache.cxx',

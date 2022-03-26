@@ -130,6 +130,6 @@ void focus_panel(GtkMenuItem* item, void* mw, int p);
 void main_window_open_path_in_current_tab(FMMainWindow* main_window, const char* path);
 void main_window_open_network(FMMainWindow* main_window, const char* path, bool new_tab);
 char main_window_socket_command(char* argv[], std::string& reply);
-bool main_window_event(void* mw, XSet* preset, const char* event, int panel, int tab,
+bool main_window_event(void* mw, XSet* preset, XSetName event, int panel, int tab,
                        const char* focus, int keyval, int button, int state, bool visible);
 void fm_main_window_store_positions(FMMainWindow* main_window);

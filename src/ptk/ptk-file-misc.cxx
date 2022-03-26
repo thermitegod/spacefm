@@ -991,8 +991,8 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     free(dir);
     free(name);
 
-    int width = xset_get_int("move_dlg_help", XSetSetSet::X);
-    int height = xset_get_int("move_dlg_help", XSetSetSet::Y);
+    int width = xset_get_int(XSetName::MOVE_DLG_HELP, XSetSetSet::X);
+    int height = xset_get_int(XSetName::MOVE_DLG_HELP, XSetSetSet::Y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -1036,8 +1036,8 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     height = allocation.height;
     if (width && height)
     {
-        xset_set("move_dlg_help", XSetSetSet::X, std::to_string(width).c_str());
-        xset_set("move_dlg_help", XSetSetSet::Y, std::to_string(height).c_str());
+        xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::X, std::to_string(width).c_str());
+        xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::Y, std::to_string(height).c_str());
     }
 
     gtk_widget_destroy(dlg);
@@ -1090,9 +1090,9 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     GtkTextIter siter;
     int mode_default = MODE_PARENT;
 
-    XSet* set = xset_get("move_dlg_help");
+    XSet* set = xset_get(XSetName::MOVE_DLG_HELP);
     if (set->z)
-        mode_default = xset_get_int("move_dlg_help", XSetSetSet::Z);
+        mode_default = xset_get_int(XSetName::MOVE_DLG_HELP, XSetSetSet::Z);
 
     // action create directory does not work properly so not used:
     //  it creates a directory by default with no way to stop it
@@ -1149,8 +1149,8 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     g_object_set_data(G_OBJECT(dlg), "mode", mode);
     gtk_widget_show_all(hbox);
 
-    int width = xset_get_int("move_dlg_help", XSetSetSet::X);
-    int height = xset_get_int("move_dlg_help", XSetSetSet::Y);
+    int width = xset_get_int(XSetName::MOVE_DLG_HELP, XSetSetSet::X);
+    int height = xset_get_int(XSetName::MOVE_DLG_HELP, XSetSetSet::Y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -1201,8 +1201,8 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     height = allocation.height;
     if (width && height)
     {
-        xset_set("move_dlg_help", XSetSetSet::X, std::to_string(width).c_str());
-        xset_set("move_dlg_help", XSetSetSet::Y, std::to_string(height).c_str());
+        xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::X, std::to_string(width).c_str());
+        xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::Y, std::to_string(height).c_str());
     }
 
     // save mode
@@ -1210,7 +1210,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
         {
-            xset_set("move_dlg_help", XSetSetSet::Z, std::to_string(i).c_str());
+            xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::Z, std::to_string(i).c_str());
             break;
         }
     }
@@ -1336,7 +1336,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
     bool opts_visible = false;
 
     // opts
-    if (xset_get_b("move_copy") || mset->clip_copy)
+    if (xset_get_b(XSetName::MOVE_COPY) || mset->clip_copy)
         gtk_widget_show(mset->opt_copy);
     else
     {
@@ -1345,7 +1345,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         gtk_widget_hide(mset->opt_copy);
     }
 
-    if (xset_get_b("move_link"))
+    if (xset_get_b(XSetName::MOVE_LINK))
     {
         gtk_widget_show(mset->opt_link);
     }
@@ -1356,7 +1356,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         gtk_widget_hide(mset->opt_link);
     }
 
-    if (xset_get_b("move_copyt") && mset->is_link)
+    if (xset_get_b(XSetName::MOVE_COPYT) && mset->is_link)
         gtk_widget_show(mset->opt_copy_target);
     else
     {
@@ -1365,7 +1365,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         gtk_widget_hide(mset->opt_copy_target);
     }
 
-    if (xset_get_b("move_linkt") && mset->is_link)
+    if (xset_get_b(XSetName::MOVE_LINKT) && mset->is_link)
         gtk_widget_show(mset->opt_link_target);
     else
     {
@@ -1374,7 +1374,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         gtk_widget_hide(mset->opt_link_target);
     }
 
-    if (xset_get_b("move_as_root"))
+    if (xset_get_b(XSetName::MOVE_AS_ROOT))
         gtk_widget_show(mset->opt_as_root);
     else
     {
@@ -1396,7 +1396,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
     }
 
     // entries
-    if (xset_get_b("move_name"))
+    if (xset_get_b(XSetName::MOVE_NAME))
     {
         someone_is_visible = true;
 
@@ -1413,7 +1413,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         gtk_widget_hide(GTK_WIDGET(mset->blank_name));
     }
 
-    if (xset_get_b("move_filename"))
+    if (xset_get_b(XSetName::MOVE_FILENAME))
     {
         someone_is_visible = true;
 
@@ -1428,7 +1428,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         gtk_widget_hide(GTK_WIDGET(mset->blank_full_name));
     }
 
-    if (xset_get_b("move_parent"))
+    if (xset_get_b(XSetName::MOVE_PARENT))
     {
         someone_is_visible = true;
 
@@ -1443,7 +1443,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         gtk_widget_hide(GTK_WIDGET(mset->blank_path));
     }
 
-    if (xset_get_b("move_path"))
+    if (xset_get_b(XSetName::MOVE_PATH))
     {
         someone_is_visible = true;
 
@@ -1456,7 +1456,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         gtk_widget_hide(GTK_WIDGET(mset->scroll_full_path));
     }
 
-    if (!mset->is_link && !mset->create_new && xset_get_b("move_type"))
+    if (!mset->is_link && !mset->create_new && xset_get_b(XSetName::MOVE_TYPE))
     {
         gtk_widget_show(mset->hbox_type);
     }
@@ -1475,7 +1475,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         new_link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link));
     }
 
-    if (new_link || (mset->is_link && xset_get_b("move_target")))
+    if (new_link || (mset->is_link && xset_get_b(XSetName::MOVE_TARGET)))
     {
         gtk_widget_show(GTK_WIDGET(mset->hbox_target));
     }
@@ -1484,7 +1484,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         gtk_widget_hide(GTK_WIDGET(mset->hbox_target));
     }
 
-    if ((new_file || new_folder) && xset_get_b("move_template"))
+    if ((new_file || new_folder) && xset_get_b(XSetName::MOVE_TEMPLATE))
     {
         if (new_file)
         {
@@ -1509,7 +1509,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
 
     if (!someone_is_visible)
     {
-        xset_set_b("move_filename", true);
+        xset_set_b(XSetName::MOVE_FILENAME, true);
         on_toggled(nullptr, mset);
     }
 
@@ -1546,41 +1546,41 @@ on_options_button_press(GtkWidget* btn, MoveSet* mset)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     xset_context_new();
 
-    XSet* set = xset_set_cb("move_name", (GFunc)on_toggled, mset);
+    XSet* set = xset_set_cb(XSetName::MOVE_NAME, (GFunc)on_toggled, mset);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_set_cb("move_filename", (GFunc)on_toggled, mset);
+    set = xset_set_cb(XSetName::MOVE_FILENAME, (GFunc)on_toggled, mset);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_set_cb("move_parent", (GFunc)on_toggled, mset);
+    set = xset_set_cb(XSetName::MOVE_PARENT, (GFunc)on_toggled, mset);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_set_cb("move_path", (GFunc)on_toggled, mset);
+    set = xset_set_cb(XSetName::MOVE_PATH, (GFunc)on_toggled, mset);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_set_cb("move_type", (GFunc)on_toggled, mset);
+    set = xset_set_cb(XSetName::MOVE_TYPE, (GFunc)on_toggled, mset);
     set->disable = (mset->create_new || mset->is_link);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_set_cb("move_target", (GFunc)on_toggled, mset);
+    set = xset_set_cb(XSetName::MOVE_TARGET, (GFunc)on_toggled, mset);
     set->disable = mset->create_new || !mset->is_link;
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_set_cb("move_template", (GFunc)on_toggled, mset);
+    set = xset_set_cb(XSetName::MOVE_TEMPLATE, (GFunc)on_toggled, mset);
     set->disable = !mset->create_new;
     xset_add_menuitem(mset->browser, popup, accel_group, set);
 
-    set = xset_set_cb("move_copy", (GFunc)on_toggled, mset);
+    set = xset_set_cb(XSetName::MOVE_COPY, (GFunc)on_toggled, mset);
     set->disable = mset->clip_copy || mset->create_new;
-    set = xset_set_cb("move_link", (GFunc)on_toggled, mset);
+    set = xset_set_cb(XSetName::MOVE_LINK, (GFunc)on_toggled, mset);
     set->disable = mset->create_new;
-    set = xset_set_cb("move_copyt", (GFunc)on_toggled, mset);
+    set = xset_set_cb(XSetName::MOVE_COPYT, (GFunc)on_toggled, mset);
     set->disable = !mset->is_link;
-    set = xset_set_cb("move_linkt", (GFunc)on_toggled, mset);
+    set = xset_set_cb(XSetName::MOVE_LINKT, (GFunc)on_toggled, mset);
     set->disable = !mset->is_link;
-    xset_set_cb("move_as_root", (GFunc)on_toggled, mset);
-    set = xset_get("move_option");
+    xset_set_cb(XSetName::MOVE_AS_ROOT, (GFunc)on_toggled, mset);
+    set = xset_get(XSetName::MOVE_OPTION);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
 
-    set = xset_get("separator");
+    set = xset_get(XSetName::SEPARATOR);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_get("move_dlg_confirm_create");
+    set = xset_get(XSetName::MOVE_DLG_CONFIRM_CREATE);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_get("separator");
+    set = xset_get(XSetName::SEPARATOR);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
 
     gtk_widget_show_all(GTK_WIDGET(popup));
@@ -2779,7 +2779,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             if (!std::filesystem::exists(path))
             {
                 // create parent directory
-                if (xset_get_b("move_dlg_confirm_create"))
+                if (xset_get_b(XSetName::MOVE_DLG_CONFIRM_CREATE))
                 {
                     if (xset_msg_dialog(mset->parent,
                                         GTK_MESSAGE_QUESTION,
@@ -3247,11 +3247,11 @@ static bool
 open_archives_with_handler(ParentInfo* parent, GList* sel_files, char* full_path,
                            VFSMimeType* mime_type)
 {
-    if (xset_get_b("arc_def_open"))
+    if (xset_get_b(XSetName::ARC_DEF_OPEN))
         // user has open archives with app option enabled
         return false; // do not handle these files
 
-    bool extract_here = xset_get_b("arc_def_ex");
+    bool extract_here = xset_get_b(XSetName::ARC_DEF_EX);
     const char* dest_dir = nullptr;
     int cmd;
 
@@ -3262,12 +3262,12 @@ open_archives_with_handler(ParentInfo* parent, GList* sel_files, char* full_path
         cmd = PtkHandlerArchive::HANDLER_EXTRACT;
         dest_dir = parent->cwd;
     }
-    else if (extract_here || xset_get_b("arc_def_exto"))
+    else if (extract_here || xset_get_b(XSetName::ARC_DEF_EXTO))
     {
         // Extract Here but no write access or Extract To option
         cmd = PtkHandlerArchive::HANDLER_EXTRACT;
     }
-    else if (xset_get_b("arc_def_list"))
+    else if (xset_get_b(XSetName::ARC_DEF_LIST))
     {
         // List contents
         cmd = PtkHandlerArchive::HANDLER_LIST;

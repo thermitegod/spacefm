@@ -969,7 +969,7 @@ on_status_bar_button_press(GtkWidget* widget, GdkEventButton* event, PtkFileBrow
         if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
             main_window_event(file_browser->main_window,
                               event_handler.win_click,
-                              "evt_win_click",
+                              XSetName::EVT_WIN_CLICK,
                               0,
                               0,
                               "statusbar",
@@ -980,10 +980,12 @@ on_status_bar_button_press(GtkWidget* widget, GdkEventButton* event, PtkFileBrow
             return true;
         if (event->button == 2)
         {
-            const std::array<std::string, 4> setnames{"status_name",
-                                                      "status_path",
-                                                      "status_info",
-                                                      "status_hide"};
+            const std::array<XSetName, 4> setnames{
+                XSetName::STATUS_NAME,
+                XSetName::STATUS_PATH,
+                XSetName::STATUS_INFO,
+                XSetName::STATUS_HIDE,
+            };
 
             for (std::size_t i = 0; i < setnames.size(); i++)
             {
@@ -1025,13 +1027,17 @@ static void
 on_status_middle_click_config(GtkMenuItem* menuitem, XSet* set)
 {
     (void)menuitem;
-    const std::array<std::string, 4> setnames{"status_name",
-                                              "status_path",
-                                              "status_info",
-                                              "status_hide"};
-    for (const std::string& setname: setnames)
+
+    const std::array<XSetName, 4> setnames{
+        XSetName::STATUS_NAME,
+        XSetName::STATUS_PATH,
+        XSetName::STATUS_INFO,
+        XSetName::STATUS_HIDE,
+    };
+
+    for (XSetName setname: setnames)
     {
-        if (ztd::same(set->name, setname))
+        if (set->xset_name == setname)
             set->b = XSetB::XSET_B_TRUE;
         else
             xset_set_b(setname, false);
@@ -1052,18 +1058,18 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
                       "icon_status",
                       (GFunc)on_status_effect_change,
                       file_browser);
-    XSet* set = xset_get("status_name");
-    xset_set_cb("status_name", (GFunc)on_status_middle_click_config, set);
+    XSet* set = xset_get(XSetName::STATUS_NAME);
+    xset_set_cb(XSetName::STATUS_NAME, (GFunc)on_status_middle_click_config, set);
     xset_set_ob2(set, nullptr, nullptr);
     XSet* set_radio = set;
-    set = xset_get("status_path");
-    xset_set_cb("status_path", (GFunc)on_status_middle_click_config, set);
+    set = xset_get(XSetName::STATUS_PATH);
+    xset_set_cb(XSetName::STATUS_PATH, (GFunc)on_status_middle_click_config, set);
     xset_set_ob2(set, nullptr, set_radio);
-    set = xset_get("status_info");
-    xset_set_cb("status_info", (GFunc)on_status_middle_click_config, set);
+    set = xset_get(XSetName::STATUS_INFO);
+    xset_set_cb(XSetName::STATUS_INFO, (GFunc)on_status_middle_click_config, set);
     xset_set_ob2(set, nullptr, set_radio);
-    set = xset_get("status_hide");
-    xset_set_cb("status_hide", (GFunc)on_status_middle_click_config, set);
+    set = xset_get(XSetName::STATUS_HIDE);
+    xset_set_cb(XSetName::STATUS_HIDE, (GFunc)on_status_middle_click_config, set);
     xset_set_ob2(set, nullptr, set_radio);
 
     xset_add_menu(file_browser, menu, accel_group, desc.c_str());
@@ -1296,7 +1302,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
             (!file_browser->toolbar || !gtk_widget_get_visible(file_browser->toolbox)))
             main_window_event(main_window,
                               event_handler.pnl_show,
-                              "evt_pnl_show",
+                              XSetName::EVT_PNL_SHOW,
                               0,
                               0,
                               "toolbar",
@@ -1317,7 +1323,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
             file_browser->toolbox && gtk_widget_get_visible(file_browser->toolbox))
             main_window_event(main_window,
                               event_handler.pnl_show,
-                              "evt_pnl_show",
+                              XSetName::EVT_PNL_SHOW,
                               0,
                               0,
                               "toolbar",
@@ -1334,7 +1340,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
             (!file_browser->side_toolbox || !gtk_widget_get_visible(file_browser->side_toolbox)))
             main_window_event(main_window,
                               event_handler.pnl_show,
-                              "evt_pnl_show",
+                              XSetName::EVT_PNL_SHOW,
                               0,
                               0,
                               "sidetoolbar",
@@ -1356,7 +1362,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
             gtk_widget_get_visible(file_browser->side_toolbox))
             main_window_event(main_window,
                               event_handler.pnl_show,
-                              "evt_pnl_show",
+                              XSetName::EVT_PNL_SHOW,
                               0,
                               0,
                               "sidetoolbar",
@@ -1381,7 +1387,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
              !gtk_widget_get_visible(file_browser->side_dir_scroll)))
             main_window_event(main_window,
                               event_handler.pnl_show,
-                              "evt_pnl_show",
+                              XSetName::EVT_PNL_SHOW,
                               0,
                               0,
                               "dirtree",
@@ -1405,7 +1411,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
             file_browser->side_dir_scroll && gtk_widget_get_visible(file_browser->side_dir_scroll))
             main_window_event(main_window,
                               event_handler.pnl_show,
-                              "evt_pnl_show",
+                              XSetName::EVT_PNL_SHOW,
                               0,
                               0,
                               "dirtree",
@@ -1426,7 +1432,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
              !gtk_widget_get_visible(file_browser->side_book_scroll)))
             main_window_event(main_window,
                               event_handler.pnl_show,
-                              "evt_pnl_show",
+                              XSetName::EVT_PNL_SHOW,
                               0,
                               0,
                               "bookmarks",
@@ -1449,7 +1455,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
             gtk_widget_get_visible(file_browser->side_book_scroll))
             main_window_event(main_window,
                               event_handler.pnl_show,
-                              "evt_pnl_show",
+                              XSetName::EVT_PNL_SHOW,
                               0,
                               0,
                               "bookmarks",
@@ -1470,7 +1476,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
              !gtk_widget_get_visible(file_browser->side_dev_scroll)))
             main_window_event(main_window,
                               event_handler.pnl_show,
-                              "evt_pnl_show",
+                              XSetName::EVT_PNL_SHOW,
                               0,
                               0,
                               "devices",
@@ -1491,7 +1497,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
             file_browser->side_dev_scroll && gtk_widget_get_visible(file_browser->side_dev_scroll))
             main_window_event(main_window,
                               event_handler.pnl_show,
-                              "evt_pnl_show",
+                              XSetName::EVT_PNL_SHOW,
                               0,
                               0,
                               "devices",
@@ -2435,7 +2441,7 @@ ptk_file_browser_go_default(GtkWidget* item, PtkFileBrowser* file_browser)
 {
     (void)item;
     focus_folder_view(file_browser);
-    const char* path = xset_get_s("go_set_default");
+    const char* path = xset_get_s(XSetName::GO_SET_DEFAULT);
     if (path && path[0] != '\0')
         ptk_file_browser_chdir(PTK_FILE_BROWSER(file_browser),
                                path,
@@ -2454,7 +2460,7 @@ void
 ptk_file_browser_set_default_folder(GtkWidget* item, PtkFileBrowser* file_browser)
 {
     (void)item;
-    xset_set("go_set_default", XSetSetSet::S, ptk_file_browser_get_cwd(file_browser));
+    xset_set(XSetName::GO_SET_DEFAULT, XSetSetSet::S, ptk_file_browser_get_cwd(file_browser));
 }
 
 void
@@ -2600,7 +2606,7 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
     else
     {
         // get pattern from user  (store in ob1 so it is not saved)
-        XSet* set = xset_get("select_patt");
+        XSet* set = xset_get(XSetName::SELECT_PATT);
         if (!xset_text_dialog(
                 GTK_WIDGET(file_browser),
                 "Select By Pattern",
@@ -3301,7 +3307,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
         if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
             main_window_event(file_browser->main_window,
                               event_handler.win_click,
-                              "evt_win_click",
+                              XSetName::EVT_WIN_CLICK,
                               0,
                               0,
                               "filelist",
@@ -3450,7 +3456,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
         if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
             main_window_event(file_browser->main_window,
                               event_handler.win_click,
-                              "evt_win_click",
+                              XSetName::EVT_WIN_CLICK,
                               0,
                               0,
                               "filelist",
@@ -3588,8 +3594,8 @@ ptk_file_browser_new_tab(GtkMenuItem* item, PtkFileBrowser* file_browser)
     const char* dir_path;
 
     focus_folder_view(file_browser);
-    if (xset_get_s("go_set_default"))
-        dir_path = xset_get_s("go_set_default");
+    if (xset_get_s(XSetName::GO_SET_DEFAULT))
+        dir_path = xset_get_s(XSetName::GO_SET_DEFAULT);
     else
         dir_path = vfs_user_home_dir().c_str();
 
@@ -3617,8 +3623,8 @@ ptk_file_browser_new_tab_here(GtkMenuItem* item, PtkFileBrowser* file_browser)
     const char* dir_path = ptk_file_browser_get_cwd(file_browser);
     if (!std::filesystem::is_directory(dir_path))
     {
-        if (xset_get_s("go_set_default"))
-            dir_path = xset_get_s("go_set_default");
+        if (xset_get_s(XSetName::GO_SET_DEFAULT))
+            dir_path = xset_get_s(XSetName::GO_SET_DEFAULT);
         else
             dir_path = vfs_user_home_dir().c_str();
     }
@@ -3936,7 +3942,7 @@ create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode view_mode)
             tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(folder_view));
             gtk_tree_selection_set_mode(tree_sel, GTK_SELECTION_MULTIPLE);
 
-            if (xset_get_b("rubberband"))
+            if (xset_get_b(XSetName::RUBBERBAND))
                 gtk_tree_view_set_rubber_banding(GTK_TREE_VIEW(folder_view), true);
 
             // Search
@@ -4804,7 +4810,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, int 
         /* Several different actions are available. We have to figure out a good default action. */
         else
         {
-            int drag_action = xset_get_int("drag_action", XSetSetSet::X);
+            int drag_action = xset_get_int(XSetName::DRAG_ACTION, XSetSetSet::X);
 
             switch (drag_action)
             {
@@ -4987,54 +4993,105 @@ ptk_file_browser_open_selected_files(PtkFileBrowser* file_browser)
 }
 
 void
-ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd, char* setname)
+ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
+                         XSetName setname)
 {
-    if (!setname || !file_browser || !sel_files)
+    if (!file_browser || !sel_files)
         return;
+
     XSet* set2;
     char* copy_dest = nullptr;
     char* move_dest = nullptr;
 
-    if (!strcmp(setname, "copy_tab_prev"))
+    if (setname == XSetName::COPY_TAB_PREV)
         copy_dest = main_window_get_tab_cwd(file_browser, -1);
-    else if (!strcmp(setname, "copy_tab_next"))
+    else if (setname == XSetName::COPY_TAB_NEXT)
         copy_dest = main_window_get_tab_cwd(file_browser, -2);
-    else if (!strncmp(setname, "copy_tab_", 9))
-        copy_dest = main_window_get_tab_cwd(file_browser, strtol(setname + 9, nullptr, 10));
-    else if (!strcmp(setname, "copy_panel_prev"))
+    else if (setname == XSetName::COPY_TAB_1)
+        copy_dest = main_window_get_tab_cwd(file_browser, 1);
+    else if (setname == XSetName::COPY_TAB_2)
+        copy_dest = main_window_get_tab_cwd(file_browser, 2);
+    else if (setname == XSetName::COPY_TAB_3)
+        copy_dest = main_window_get_tab_cwd(file_browser, 3);
+    else if (setname == XSetName::COPY_TAB_4)
+        copy_dest = main_window_get_tab_cwd(file_browser, 4);
+    else if (setname == XSetName::COPY_TAB_5)
+        copy_dest = main_window_get_tab_cwd(file_browser, 5);
+    else if (setname == XSetName::COPY_TAB_6)
+        copy_dest = main_window_get_tab_cwd(file_browser, 6);
+    else if (setname == XSetName::COPY_TAB_7)
+        copy_dest = main_window_get_tab_cwd(file_browser, 7);
+    else if (setname == XSetName::COPY_TAB_8)
+        copy_dest = main_window_get_tab_cwd(file_browser, 8);
+    else if (setname == XSetName::COPY_TAB_9)
+        copy_dest = main_window_get_tab_cwd(file_browser, 9);
+    else if (setname == XSetName::COPY_TAB_10)
+        copy_dest = main_window_get_tab_cwd(file_browser, 10);
+    else if (setname == XSetName::COPY_PANEL_PREV)
         copy_dest = main_window_get_panel_cwd(file_browser, -1);
-    else if (!strcmp(setname, "copy_panel_next"))
+    else if (setname == XSetName::COPY_PANEL_NEXT)
         copy_dest = main_window_get_panel_cwd(file_browser, -2);
-    else if (!strncmp(setname, "copy_panel_", 11))
-        copy_dest = main_window_get_panel_cwd(file_browser, strtol(setname + 11, nullptr, 10));
-    else if (!strcmp(setname, "copy_loc_last"))
+    else if (setname == XSetName::COPY_PANEL_1)
+        copy_dest = main_window_get_panel_cwd(file_browser, 1);
+    else if (setname == XSetName::COPY_PANEL_2)
+        copy_dest = main_window_get_panel_cwd(file_browser, 2);
+    else if (setname == XSetName::COPY_PANEL_3)
+        copy_dest = main_window_get_panel_cwd(file_browser, 3);
+    else if (setname == XSetName::COPY_PANEL_4)
+        copy_dest = main_window_get_panel_cwd(file_browser, 4);
+    else if (setname == XSetName::COPY_LOC_LAST)
     {
-        set2 = xset_get("copy_loc_last");
+        set2 = xset_get(XSetName::COPY_LOC_LAST);
         copy_dest = ztd::strdup(set2->desc);
     }
-    else if (!strcmp(setname, "move_tab_prev"))
+    else if (setname == XSetName::MOVE_TAB_PREV)
         move_dest = main_window_get_tab_cwd(file_browser, -1);
-    else if (!strcmp(setname, "move_tab_next"))
+    else if (setname == XSetName::MOVE_TAB_NEXT)
         move_dest = main_window_get_tab_cwd(file_browser, -2);
-    else if (!strncmp(setname, "move_tab_", 9))
-        move_dest = main_window_get_tab_cwd(file_browser, strtol(setname + 9, nullptr, 10));
-    else if (!strcmp(setname, "move_panel_prev"))
+    else if (setname == XSetName::MOVE_TAB_1)
+        move_dest = main_window_get_tab_cwd(file_browser, 1);
+    else if (setname == XSetName::MOVE_TAB_2)
+        move_dest = main_window_get_tab_cwd(file_browser, 2);
+    else if (setname == XSetName::MOVE_TAB_3)
+        move_dest = main_window_get_tab_cwd(file_browser, 3);
+    else if (setname == XSetName::MOVE_TAB_4)
+        move_dest = main_window_get_tab_cwd(file_browser, 4);
+    else if (setname == XSetName::MOVE_TAB_5)
+        move_dest = main_window_get_tab_cwd(file_browser, 5);
+    else if (setname == XSetName::MOVE_TAB_6)
+        move_dest = main_window_get_tab_cwd(file_browser, 6);
+    else if (setname == XSetName::MOVE_TAB_7)
+        move_dest = main_window_get_tab_cwd(file_browser, 7);
+    else if (setname == XSetName::MOVE_TAB_8)
+        move_dest = main_window_get_tab_cwd(file_browser, 8);
+    else if (setname == XSetName::MOVE_TAB_9)
+        move_dest = main_window_get_tab_cwd(file_browser, 9);
+    else if (setname == XSetName::MOVE_TAB_10)
+        move_dest = main_window_get_tab_cwd(file_browser, 10);
+    else if (setname == XSetName::MOVE_PANEL_PREV)
         move_dest = main_window_get_panel_cwd(file_browser, -1);
-    else if (!strcmp(setname, "move_panel_next"))
+    else if (setname == XSetName::MOVE_PANEL_NEXT)
         move_dest = main_window_get_panel_cwd(file_browser, -2);
-    else if (!strncmp(setname, "move_panel_", 11))
-        move_dest = main_window_get_panel_cwd(file_browser, strtol(setname + 11, nullptr, 10));
-    else if (!strcmp(setname, "move_loc_last"))
+    else if (setname == XSetName::MOVE_PANEL_1)
+        move_dest = main_window_get_panel_cwd(file_browser, 1);
+    else if (setname == XSetName::MOVE_PANEL_2)
+        move_dest = main_window_get_panel_cwd(file_browser, 2);
+    else if (setname == XSetName::MOVE_PANEL_3)
+        move_dest = main_window_get_panel_cwd(file_browser, 3);
+    else if (setname == XSetName::MOVE_PANEL_4)
+        move_dest = main_window_get_panel_cwd(file_browser, 4);
+    else if (setname == XSetName::MOVE_LOC_LAST)
     {
-        set2 = xset_get("copy_loc_last");
+        set2 = xset_get(XSetName::COPY_LOC_LAST);
         move_dest = ztd::strdup(set2->desc);
     }
 
-    if ((Glib::str_has_prefix(setname, "copy_loc") || Glib::str_has_prefix(setname, "move_loc")) &&
+    if ((setname == XSetName::COPY_LOC || setname == XSetName::COPY_LOC_LAST ||
+         setname == XSetName::MOVE_LOC || setname == XSetName::MOVE_LOC_LAST) &&
         !copy_dest && !move_dest)
     {
         char* folder;
-        set2 = xset_get("copy_loc_last");
+        set2 = xset_get(XSetName::COPY_LOC_LAST);
         if (set2->desc)
             folder = set2->desc;
         else
@@ -5046,15 +5103,17 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
                                       nullptr);
         if (path && std::filesystem::is_directory(path))
         {
-            if (Glib::str_has_prefix(setname, "copy_loc"))
+            if (setname == XSetName::COPY_LOC || setname == XSetName::COPY_LOC_LAST)
                 copy_dest = path;
             else
                 move_dest = path;
-            set2 = xset_get("copy_loc_last");
+            set2 = xset_get(XSetName::COPY_LOC_LAST);
             xset_set_set(set2, XSetSetSet::DESC, path);
         }
         else
+        {
             return;
+        }
     }
 
     if (copy_dest || move_dest)
@@ -5215,7 +5274,7 @@ on_dir_tree_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrowser* f
     if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
         main_window_event(file_browser->main_window,
                           event_handler.win_click,
-                          "evt_win_click",
+                          XSetName::EVT_WIN_CLICK,
                           0,
                           0,
                           "dirtree",
@@ -5334,9 +5393,9 @@ ptk_file_browser_read_sort_extra(PtkFileBrowser* file_browser)
 }
 
 void
-ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, const char* setname)
+ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname)
 {
-    if (!file_browser || !setname)
+    if (!file_browser)
         return;
 
     XSet* set = xset_get(setname);
@@ -5344,30 +5403,29 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, const char* setnam
     if (!Glib::str_has_prefix(set->name, "sortx_"))
         return;
 
-    const char* name = set->name + 6;
     PtkFileList* list = PTK_FILE_LIST(file_browser->file_list);
     if (!list)
         return;
     int panel = file_browser->mypanel;
 
-    if (!strcmp(name, "alphanum"))
+    if (set->xset_name == XSetName::SORTX_ALPHANUM)
     {
         list->sort_alphanum = set->b == XSetB::XSET_B_TRUE;
         xset_set_b_panel(panel, "sort_extra", list->sort_alphanum);
     }
 #if 0
-    else if (!strcmp(name, "natural"))
+    else if (set->xset_name ==  XSetName::SORTX_NATURAL)
     {
         list->sort_natural = set->b == XSetB::XSET_B_TRUE;
         xset_set_b_panel(panel, "sort_extra", list->sort_natural);
     }
 #endif
-    else if (!strcmp(name, "case"))
+    else if (set->xset_name == XSetName::SORTX_CASE)
     {
         list->sort_case = set->b == XSetB::XSET_B_TRUE;
         xset_set_panel(panel, "sort_extra", XSetSetSet::X, std::to_string(set->b).c_str());
     }
-    else if (!strcmp(name, "directories"))
+    else if (set->xset_name == XSetName::SORTX_DIRECTORIES)
     {
         list->sort_dir = PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST;
         xset_set_panel(panel,
@@ -5375,7 +5433,7 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, const char* setnam
                        XSetSetSet::Y,
                        std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST).c_str());
     }
-    else if (!strcmp(name, "files"))
+    else if (set->xset_name == XSetName::SORTX_FILES)
     {
         list->sort_dir = PTKFileListSortDir::PTK_LIST_SORT_DIR_LAST;
         xset_set_panel(panel,
@@ -5383,7 +5441,7 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, const char* setnam
                        XSetSetSet::Y,
                        std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_LAST).c_str());
     }
-    else if (!strcmp(name, "mix"))
+    else if (set->xset_name == XSetName::SORTX_MIX)
     {
         list->sort_dir = PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED;
         xset_set_panel(panel,
@@ -5391,12 +5449,12 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, const char* setnam
                        XSetSetSet::Y,
                        std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED).c_str());
     }
-    else if (!strcmp(name, "hidfirst"))
+    else if (set->xset_name == XSetName::SORTX_HIDFIRST)
     {
         list->sort_hidden_first = set->b == XSetB::XSET_B_TRUE;
         xset_set_panel(panel, "sort_extra", XSetSetSet::Z, std::to_string(set->b).c_str());
     }
-    else if (!strcmp(name, "hidlast"))
+    else if (set->xset_name == XSetName::SORTX_HIDLAST)
     {
         list->sort_hidden_first = set->b != XSetB::XSET_B_TRUE;
         xset_set_panel(
@@ -5952,7 +6010,7 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser, 
 }
 
 void
-ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
+ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
 {
     int i = 0;
     XSet* set = xset_get(setname);
@@ -5963,9 +6021,9 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
 
     if (Glib::str_has_prefix(set->name, "book_"))
     {
-        if (!strcmp(set->name, "book_icon") || !strcmp(set->name, "book_menu_icon"))
+        if (set->xset_name == XSetName::BOOK_ICON || set->xset_name == XSetName::BOOK_MENU_ICON)
             ptk_bookmark_view_update_icons(nullptr, browser);
-        else if (!strcmp(set->name, "book_add"))
+        else if (set->xset_name == XSetName::BOOK_ADD)
         {
             const char* text = browser->path_bar && gtk_widget_has_focus(browser->path_bar)
                                    ? gtk_entry_get_text(GTK_ENTRY(browser->path_bar))
@@ -5976,39 +6034,39 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
             else
                 ptk_bookmark_view_add_bookmark(nullptr, browser, nullptr);
         }
-        else if (!strcmp(set->name, "book_open") && browser->side_book)
+        else if (set->xset_name == XSetName::BOOK_OPEN && browser->side_book)
             ptk_bookmark_view_on_open_reverse(nullptr, browser);
     }
     else if (Glib::str_has_prefix(set->name, "go_"))
     {
-        if (!strcmp(set->name, "go_back"))
+        if (set->xset_name == XSetName::GO_BACK)
             ptk_file_browser_go_back(nullptr, browser);
-        else if (!strcmp(set->name, "go_forward"))
+        else if (set->xset_name == XSetName::GO_FORWARD)
             ptk_file_browser_go_forward(nullptr, browser);
-        else if (!strcmp(set->name, "go_up"))
+        else if (set->xset_name == XSetName::GO_UP)
             ptk_file_browser_go_up(nullptr, browser);
-        else if (!strcmp(set->name, "go_home"))
+        else if (set->xset_name == XSetName::GO_HOME)
             ptk_file_browser_go_home(nullptr, browser);
-        else if (!strcmp(set->name, "go_default"))
+        else if (set->xset_name == XSetName::GO_DEFAULT)
             ptk_file_browser_go_default(nullptr, browser);
-        else if (!strcmp(set->name, "go_set_default"))
+        else if (set->xset_name == XSetName::GO_SET_DEFAULT)
             ptk_file_browser_set_default_folder(nullptr, browser);
     }
     else if (Glib::str_has_prefix(set->name, "tab_"))
     {
-        if (!strcmp(set->name, "tab_new"))
+        if (set->xset_name == XSetName::TAB_NEW)
             ptk_file_browser_new_tab(nullptr, browser);
-        else if (!strcmp(set->name, "tab_new_here"))
+        else if (set->xset_name == XSetName::TAB_NEW_HERE)
             ptk_file_browser_new_tab_here(nullptr, browser);
         else
         {
-            if (!strcmp(set->name, "tab_prev"))
+            if (set->xset_name == XSetName::TAB_PREV)
                 i = -1;
-            else if (!strcmp(set->name, "tab_next"))
+            else if (set->xset_name == XSetName::TAB_NEXT)
                 i = -2;
-            else if (!strcmp(set->name, "tab_close"))
+            else if (set->xset_name == XSetName::TAB_CLOSE)
                 i = -3;
-            else if (!strcmp(set->name, "tab_restore"))
+            else if (set->xset_name == XSetName::TAB_RESTORE)
                 i = -4;
             else
                 i = strtol(set->name, nullptr, 10);
@@ -6017,46 +6075,46 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
     }
     else if (Glib::str_has_prefix(set->name, "focus_"))
     {
-        if (!strcmp(set->name, "focus_path_bar"))
+        if (set->xset_name == XSetName::FOCUS_PATH_BAR)
             i = 0;
-        else if (!strcmp(set->name, "focus_filelist"))
+        else if (set->xset_name == XSetName::FOCUS_FILELIST)
             i = 4;
-        else if (!strcmp(set->name, "focus_dirtree"))
+        else if (set->xset_name == XSetName::FOCUS_DIRTREE)
             i = 1;
-        else if (!strcmp(set->name, "focus_book"))
+        else if (set->xset_name == XSetName::FOCUS_BOOK)
             i = 2;
-        else if (!strcmp(set->name, "focus_device"))
+        else if (set->xset_name == XSetName::FOCUS_DEVICE)
             i = 3;
         ptk_file_browser_focus(nullptr, browser, i);
     }
-    else if (!strcmp(set->name, "view_reorder_col"))
+    else if (set->xset_name == XSetName::VIEW_REORDER_COL)
         on_reorder(nullptr, GTK_WIDGET(browser));
-    else if (!strcmp(set->name, "view_refresh"))
+    else if (set->xset_name == XSetName::VIEW_REFRESH)
         ptk_file_browser_refresh(nullptr, browser);
-    else if (!strcmp(set->name, "view_thumb"))
+    else if (set->xset_name == XSetName::VIEW_THUMB)
         main_window_toggle_thumbnails_all_windows();
     else if (Glib::str_has_prefix(set->name, "sortby_"))
     {
         i = -3;
-        if (!strcmp(set->name, "sortby_name"))
+        if (set->xset_name == XSetName::SORTBY_NAME)
             i = PtkFBSortOrder::PTK_FB_SORT_BY_NAME;
-        else if (!strcmp(set->name, "sortby_size"))
+        else if (set->xset_name == XSetName::SORTBY_SIZE)
             i = PtkFBSortOrder::PTK_FB_SORT_BY_SIZE;
-        else if (!strcmp(set->name, "sortby_type"))
+        else if (set->xset_name == XSetName::SORTBY_TYPE)
             i = PtkFBSortOrder::PTK_FB_SORT_BY_TYPE;
-        else if (!strcmp(set->name, "sortby_perm"))
+        else if (set->xset_name == XSetName::SORTBY_PERM)
             i = PtkFBSortOrder::PTK_FB_SORT_BY_PERM;
-        else if (!strcmp(set->name, "sortby_owner"))
+        else if (set->xset_name == XSetName::SORTBY_OWNER)
             i = PtkFBSortOrder::PTK_FB_SORT_BY_OWNER;
-        else if (!strcmp(set->name, "sortby_date"))
+        else if (set->xset_name == XSetName::SORTBY_DATE)
             i = PtkFBSortOrder::PTK_FB_SORT_BY_MTIME;
-        else if (!strcmp(set->name, "sortby_ascend"))
+        else if (set->xset_name == XSetName::SORTBY_ASCEND)
         {
             i = -1;
             set->b =
                 browser->sort_type == GTK_SORT_ASCENDING ? XSetB::XSET_B_TRUE : XSetB::XSET_B_FALSE;
         }
-        else if (!strcmp(set->name, "sortby_descend"))
+        else if (set->xset_name == XSetName::SORTBY_DESCEND)
         {
             i = -2;
             set->b = browser->sort_type == GTK_SORT_DESCENDING ? XSetB::XSET_B_TRUE
@@ -6067,8 +6125,8 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
         on_popup_sortby(nullptr, browser, i);
     }
     else if (Glib::str_has_prefix(set->name, "sortx_"))
-        ptk_file_browser_set_sort_extra(browser, set->name);
-    else if (!strcmp(set->name, "path_help"))
+        ptk_file_browser_set_sort_extra(browser, set->xset_name);
+    else if (set->xset_name == XSetName::PATH_HELP)
         ptk_path_entry_help(nullptr, GTK_WIDGET(browser));
     else if (Glib::str_has_prefix(set->name, "panel"))
     {
@@ -6127,28 +6185,29 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
     {
         if (!strcmp(set->name, "status_border") || !strcmp(set->name, "status_text"))
             on_status_effect_change(nullptr, browser);
-        else if (!strcmp(set->name, "status_name") || !strcmp(set->name, "status_path") ||
-                 !strcmp(set->name, "status_info") || !strcmp(set->name, "status_hide"))
+        else if (set->xset_name == XSetName::STATUS_NAME ||
+                 set->xset_name == XSetName::STATUS_PATH ||
+                 set->xset_name == XSetName::STATUS_INFO || set->xset_name == XSetName::STATUS_HIDE)
             on_status_middle_click_config(nullptr, set);
     }
     else if (Glib::str_has_prefix(set->name, "paste_"))
     {
-        if (!strcmp(set->name, "paste_link"))
+        if (set->xset_name == XSetName::PASTE_LINK)
             ptk_file_browser_paste_link(browser);
-        else if (!strcmp(set->name, "paste_target"))
+        else if (set->xset_name == XSetName::PASTE_TARGET)
             ptk_file_browser_paste_target(browser);
-        else if (!strcmp(set->name, "paste_as"))
+        else if (set->xset_name == XSetName::PASTE_AS)
             ptk_file_misc_paste_as(browser, ptk_file_browser_get_cwd(browser), nullptr);
     }
     else if (Glib::str_has_prefix(set->name, "select_"))
     {
-        if (!strcmp(set->name, "select_all"))
+        if (set->xset_name == XSetName::SELECT_ALL)
             ptk_file_browser_select_all(nullptr, browser);
-        else if (!strcmp(set->name, "select_un"))
+        else if (set->xset_name == XSetName::SELECT_UN)
             ptk_file_browser_unselect_all(nullptr, browser);
-        else if (!strcmp(set->name, "select_invert"))
+        else if (set->xset_name == XSetName::SELECT_INVERT)
             ptk_file_browser_invert_selection(nullptr, browser);
-        else if (!strcmp(set->name, "select_patt"))
+        else if (set->xset_name == XSetName::SELECT_PATT)
             ptk_file_browser_select_pattern(nullptr, browser, nullptr);
     }
     else // all the rest require ptkfilemenu data

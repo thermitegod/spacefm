@@ -80,12 +80,12 @@ static const std::array<const char*, 4> handler_cust_prefixs
     "hand_f_"
 };
 
-static const std::array<std::string, 4> handler_conf_xsets
+static const std::array<XSetName, 4> handler_conf_xsets
 {
-    "arc_conf2",
-    "dev_fs_cnf",
-    "dev_net_cnf",
-    "open_hand"
+    XSetName::ARC_CONF2,
+    XSetName::DEV_FS_CNF,
+    XSetName::DEV_NET_CNF,
+    XSetName::OPEN_HAND,
 };
 
 static const std::array<const char*, 4> dialog_titles
@@ -174,7 +174,8 @@ struct HandlerData
 struct Handler
 {
     // enabled              set->b
-    const char* xset_name;    //                      set->name
+    const char* setname;      //                      set->name
+    XSetName xset_name;       //                      set->xset_name
     const char* handler_name; //                      set->menu_label
     const char* type;         // or whitelist         set->s
     const char* ext;          // or blacklist         set->x
@@ -210,6 +211,7 @@ static const std::array<Handler, 13> handlers_arc{
      * Plus standard bash variables are accepted.
      */
     Handler{"hand_arc_+7z",
+            XSetName::HAND_ARC_7Z,
             "7-Zip",
             "application/x-7z-compressed",
             "*.7z",
@@ -220,6 +222,7 @@ static const std::array<Handler, 13> handlers_arc{
             "\"$(which 7za || echo 7zr)\" l %x",
             false},
     Handler{"hand_arc_+rar",
+            XSetName::HAND_ARC_RAR,
             "RAR",
             "application/x-rar",
             "*.rar *.RAR",
@@ -230,6 +233,7 @@ static const std::array<Handler, 13> handlers_arc{
             "unrar lt %x",
             false},
     Handler{"hand_arc_+tar",
+            XSetName::HAND_ARC_TAR,
             "Tar",
             "application/x-tar",
             "*.tar",
@@ -240,6 +244,7 @@ static const std::array<Handler, 13> handlers_arc{
             "tar -tvf %x",
             false},
     Handler{"hand_arc_+tar_bz2",
+            XSetName::HAND_ARC_TAR_BZ2,
             "Tar bzip2",
             "application/x-bzip-compressed-tar",
             "*.tar.bz2",
@@ -250,6 +255,7 @@ static const std::array<Handler, 13> handlers_arc{
             "tar -tvf %x",
             false},
     Handler{"hand_arc_+tar_gz",
+            XSetName::HAND_ARC_TAR_GZ,
             "Tar Gzip",
             "application/x-compressed-tar",
             "*.tar.gz *.tgz",
@@ -260,6 +266,7 @@ static const std::array<Handler, 13> handlers_arc{
             "tar -tvf %x",
             false},
     Handler{"hand_arc_+tar_xz",
+            XSetName::HAND_ARC_TAR_XZ,
             "Tar xz",
             "application/x-xz-compressed-tar",
             "*.tar.xz *.txz",
@@ -270,6 +277,7 @@ static const std::array<Handler, 13> handlers_arc{
             "tar -tvf %x",
             false},
     Handler{"hand_arc_+zip",
+            XSetName::HAND_ARC_ZIP,
             "Zip",
             "application/x-zip application/zip",
             "*.zip *.ZIP",
@@ -280,6 +288,7 @@ static const std::array<Handler, 13> handlers_arc{
             "unzip -l %x",
             false},
     Handler{"hand_arc_+gz",
+            XSetName::HAND_ARC_GZ,
             "Gzip",
             "application/x-gzip application/x-gzpdf application/gzip",
             "*.gz",
@@ -290,6 +299,7 @@ static const std::array<Handler, 13> handlers_arc{
             "gunzip -l %x",
             false},
     Handler{"hand_arc_+xz",
+            XSetName::HAND_ARC_XZ,
             "XZ",
             "application/x-xz",
             "*.xz",
@@ -300,6 +310,7 @@ static const std::array<Handler, 13> handlers_arc{
             "xz -tv %x",
             false},
     Handler{"hand_arc_+tar_lz4",
+            XSetName::HAND_ARC_TAR_LZ4,
             "Tar Lz4",
             "application/x-lz4-compressed-tar",
             "*.tar.lz4",
@@ -310,6 +321,7 @@ static const std::array<Handler, 13> handlers_arc{
             "lz4 -dc %x | tar tvf -",
             false},
     Handler{"hand_arc_+lz4",
+            XSetName::HAND_ARC_LZ4,
             "Lz4",
             "application/x-lz4",
             "*.lz4",
@@ -320,6 +332,7 @@ static const std::array<Handler, 13> handlers_arc{
             "lz4 -tv %x",
             false},
     Handler{"hand_arc_+tar_zst",
+            XSetName::HAND_ARC_TAR_ZST,
             "Tar Zstd",
             "application/x-zstd-compressed-tar",
             "*.tar.zst",
@@ -330,6 +343,7 @@ static const std::array<Handler, 13> handlers_arc{
             "zstd -dc --long=31 %x | tar tvf -",
             false},
     Handler{"hand_arc_+zst",
+            XSetName::HAND_ARC_ZIP,
             "Zstd",
             "application/zstd",
             "*.zst",
@@ -361,6 +375,7 @@ const std::array<Handler, 3> handlers_fs{
      *      eg: +ext3 dev=/dev/sdb* id=ata-* label=Label_With_Spaces
      */
     Handler{"hand_fs_+fuseiso",
+            XSetName::HAND_FS_FUSEISO,
             "fuseiso unmount",
             "*fuseiso",
             "",
@@ -374,6 +389,7 @@ const std::array<Handler, 3> handlers_fs{
             "grep \"%a\" ~/.mtab.fuseiso",
             false},
     Handler{"hand_fs_+udiso",
+            XSetName::HAND_FS_UDISO,
             "udevil iso unmount",
             "+iso9660 +dev=/dev/loop*",
             "optical=1 removable=1",
@@ -387,6 +403,7 @@ const std::array<Handler, 3> handlers_fs{
             INFO_EXAMPLE,
             false},
     Handler{"hand_fs_+def",
+            XSetName::HAND_FS_DEF,
             "Default",
             "*",
             "",
@@ -429,6 +446,7 @@ static const std::array<Handler, 10> handlers_net{
      */
     Handler{
         "hand_net_+http",
+        XSetName::HAND_NET_HTTP,
         "http & webdav",
         "http https webdav davfs davs dav mtab_fs=davfs*",
         "",
@@ -459,6 +477,7 @@ static const std::array<Handler, 10> handlers_net{
         false},
     Handler{
         "hand_net_+ftp",
+        XSetName::HAND_NET_FTP,
         "ftp",
         "ftp",
         "",
@@ -474,6 +493,7 @@ static const std::array<Handler, 10> handlers_net{
         false},
     Handler{
         "hand_net_+ssh",
+        XSetName::HAND_NET_SSH,
         "ssh",
         "ssh sftp mtab_fs=fuse.sshfs",
         "",
@@ -496,6 +516,7 @@ static const std::array<Handler, 10> handlers_net{
         INFO_EXAMPLE,
         false},
     Handler{"hand_net_+mtp",
+            XSetName::HAND_NET_MTP,
             "mtp",
             "mtp mtab_fs=fuse.jmtpfs mtab_fs=fuse.simple-mtpfs mtab_fs=fuse.mtpfs "
             "mtab_fs=fuse.DeviceFs(*",
@@ -515,6 +536,7 @@ static const std::array<Handler, 10> handlers_net{
             INFO_EXAMPLE,
             false},
     Handler{"hand_net_+gphoto",
+            XSetName::HAND_NET_GPHOTO,
             "ptp",
             "ptp gphoto mtab_fs=fuse.gphotofs",
             "",
@@ -525,6 +547,7 @@ static const std::array<Handler, 10> handlers_net{
             INFO_EXAMPLE,
             false},
     Handler{"hand_net_+ifuse",
+            XSetName::HAND_NET_IFUSE,
             "ifuse",
             "ifuse ios mtab_fs=fuse.ifuse",
             "",
@@ -535,6 +558,7 @@ static const std::array<Handler, 10> handlers_net{
             INFO_EXAMPLE,
             false},
     Handler{"hand_net_+udevil",
+            XSetName::HAND_NET_UDEVIL,
             "udevil",
             "ftp http https nfs ssh mtab_fs=fuse.sshfs mtab_fs=davfs*",
             "",
@@ -545,6 +569,7 @@ static const std::array<Handler, 10> handlers_net{
             INFO_EXAMPLE,
             false},
     Handler{"hand_net_+udevilsmb",
+            XSetName::HAND_NET_UDEVILSMB,
             "udevil-smb",
             "smb mtab_fs=cifs",
             "",
@@ -556,6 +581,7 @@ static const std::array<Handler, 10> handlers_net{
             INFO_EXAMPLE,
             false},
     Handler{"hand_net_+fusesmb",
+            XSetName::HAND_NET_FUSESMB,
             "fusesmb",
             "smb mtab_fs=fuse.fusesmb",
             "",
@@ -566,6 +592,7 @@ static const std::array<Handler, 10> handlers_net{
             INFO_EXAMPLE,
             false},
     Handler{"hand_net_+fuse",
+            XSetName::HAND_NET_FUSE,
             "fuse unmount",
             "mtab_fs=fuse.* mtab_fs=fuse",
             "",
@@ -582,6 +609,7 @@ static const std::array<Handler, 1> handlers_file{
      * For file handlers, extract_term is used for Run As Task. */
     Handler{
         "hand_f_+iso",
+        XSetName::HAND_F_ISO,
         "Mount ISO",
         "application/x-iso9660-image application/x-iso-image application/x-cd-image",
         "*.img *.iso *.mdf *.nrg",
@@ -719,7 +747,7 @@ ptk_handler_get_command(int mode, int cmd, XSet* handler_set)
                     break;
             }
 
-            if (!strcmp(handler->xset_name, handler_set->name))
+            if (handler->xset_name == handler_set->xset_name)
             {
                 // found default handler
                 switch (cmd)
@@ -1180,12 +1208,12 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
         // add a space to end of list and end of name before testing to avoid
         // substring false positive
         testlist = fmt::format("{} ", list);
-        testname = fmt::format("{} ", handler->xset_name);
+        testname = fmt::format("{} ", handler->setname);
         if (add_missing && !ztd::contains(testlist, testname))
         {
             // add a missing default handler to the list
             str = list;
-            list = g_strconcat(list, list[0] ? " " : "", handler->xset_name, nullptr);
+            list = g_strconcat(list, list[0] ? " " : "", handler->setname, nullptr);
             free(str);
         }
         testlist = fmt::format("{} ", list);
@@ -2248,7 +2276,7 @@ restore_defaults(HandlerData* hnd, bool all)
                     break;
             }
 
-            if (!g_strcmp0(handler->xset_name, xset_name))
+            if (!g_strcmp0(handler->setname, xset_name))
             {
                 found_handler = true;
                 break;
@@ -2260,7 +2288,7 @@ restore_defaults(HandlerData* hnd, bool all)
 
         // create fake xset
         XSet* set = g_slice_new(XSet);
-        set->name = (char*)handler->xset_name;
+        set->name = (char*)handler->setname;
         set->menu_label = (char*)handler->handler_name;
         set->s = (char*)handler->type;
         set->x = (char*)handler->ext;
@@ -2423,7 +2451,7 @@ on_textview_popup(GtkTextView* input, GtkMenu* menu, HandlerData* hnd)
     (void)hnd;
     // uses same xsets as item-prop.c:on_script_popup()
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    XSet* set = xset_get("separator");
+    XSet* set = xset_get(XSetName::SEPARATOR);
     set->menu_style = XSetMenu::SEP;
     set->browser = nullptr;
     xset_add_menuitem(nullptr, GTK_WIDGET(menu), accel_group, set);
@@ -2587,12 +2615,12 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     {
         case PtkHandlerJob::HANDLER_JOB_IMPORT_FILE:
             // get file path
-            save = xset_get("plug_ifile");
+            save = xset_get(XSetName::PLUG_IFILE);
             if (save->s) //&& std::filesystem::is_directory(save->s)
                 folder = save->s;
             else
             {
-                if (!(folder = xset_get_s("go_set_default")))
+                if (!(folder = xset_get_s(XSetName::GO_SET_DEFAULT)))
                     folder = ztd::strdup("/");
             }
             file = xset_file_dialog(GTK_WIDGET(hnd->dlg),
@@ -2662,13 +2690,16 @@ static void
 on_archive_default(GtkMenuItem* menuitem, XSet* set)
 {
     (void)menuitem;
-    const std::array<std::string, 4> arcnames{"arc_def_open",
-                                              "arc_def_ex",
-                                              "arc_def_exto",
-                                              "arc_def_list"};
-    for (const std::string& arcname: arcnames)
+    const std::array<XSetName, 4> arcnames{
+        XSetName::ARC_DEF_OPEN,
+        XSetName::ARC_DEF_EX,
+        XSetName::ARC_DEF_EXTO,
+        XSetName::ARC_DEF_LIST,
+    };
+
+    for (XSetName arcname: arcnames)
     {
-        if (ztd::same(set->name, arcname))
+        if (set->xset_name == arcname)
             set->b = XSetB::XSET_B_TRUE;
         else
             xset_set_b(arcname, false);
@@ -2734,29 +2765,29 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
             // Archive options
             xset_context_new();
             gtk_container_add(GTK_CONTAINER(popup), gtk_separator_menu_item_new());
-            set = xset_get("arc_def_open");
+            set = xset_get(XSetName::ARC_DEF_OPEN);
             // do NOT use set = xset_set_cb here or wrong set is passed
-            xset_set_cb("arc_def_open", (GFunc)on_archive_default, set);
+            xset_set_cb(XSetName::ARC_DEF_OPEN, (GFunc)on_archive_default, set);
             xset_set_ob2(set, nullptr, nullptr);
             XSet* set_radio = set;
 
-            set = xset_get("arc_def_ex");
-            xset_set_cb("arc_def_ex", (GFunc)on_archive_default, set);
+            set = xset_get(XSetName::ARC_DEF_EX);
+            xset_set_cb(XSetName::ARC_DEF_EX, (GFunc)on_archive_default, set);
             xset_set_ob2(set, nullptr, set_radio);
 
-            set = xset_get("arc_def_exto");
-            xset_set_cb("arc_def_exto", (GFunc)on_archive_default, set);
+            set = xset_get(XSetName::ARC_DEF_EXTO);
+            xset_set_cb(XSetName::ARC_DEF_EXTO, (GFunc)on_archive_default, set);
             xset_set_ob2(set, nullptr, set_radio);
 
-            set = xset_get("arc_def_list");
-            xset_set_cb("arc_def_list", (GFunc)on_archive_default, set);
+            set = xset_get(XSetName::ARC_DEF_LIST);
+            xset_set_cb(XSetName::ARC_DEF_LIST, (GFunc)on_archive_default, set);
             xset_set_ob2(set, nullptr, set_radio);
 
-            set = xset_get("arc_def_write");
-            set->disable = geteuid() == 0 || !xset_get_b("arc_def_parent");
+            set = xset_get(XSetName::ARC_DEF_WRITE);
+            set->disable = geteuid() == 0 || !xset_get_b(XSetName::ARC_DEF_PARENT);
 
             // temp remove unwanted items from Archive Defaults submenu
-            set = xset_get("arc_default");
+            set = xset_get(XSetName::ARC_DEFAULT);
             char* old_desc = set->desc;
             set->desc = ztd::strdup("arc_def_open arc_def_ex arc_def_exto arc_def_list separator "
                                     "arc_def_parent arc_def_write");
@@ -2769,7 +2800,10 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
             // Device handler options
             xset_context_new();
             gtk_container_add(GTK_CONTAINER(popup), gtk_separator_menu_item_new());
-            xset_add_menuitem(hnd->browser, popup, accel_group, xset_get("dev_mount_options"));
+            xset_add_menuitem(hnd->browser,
+                              popup,
+                              accel_group,
+                              xset_get(XSetName::DEV_MOUNT_OPTIONS));
         }
     }
 

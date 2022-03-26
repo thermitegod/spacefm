@@ -198,7 +198,7 @@ void ptk_file_browser_set_sort_order(PtkFileBrowser* file_browser, PtkFBSortOrde
 
 void ptk_file_browser_set_sort_type(PtkFileBrowser* file_browser, GtkSortType order);
 
-void ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, const char* setname);
+void ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname);
 void ptk_file_browser_read_sort_extra(PtkFileBrowser* file_browser);
 
 GList* ptk_file_browser_get_selected_files(PtkFileBrowser* file_browser);
@@ -252,8 +252,8 @@ void ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, int tab_num, cha
 void ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
                                     GList* sel_files, char* cwd);
 void ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
-                              char* setname);
-void ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname);
+                              XSetName setname);
+void ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname);
 GList* folder_view_get_selected_items(PtkFileBrowser* file_browser, GtkTreeModel** model);
 void ptk_file_browser_select_file(PtkFileBrowser* file_browser, const char* path);
 void ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,

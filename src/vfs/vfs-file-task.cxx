@@ -1375,7 +1375,7 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
     if (task->exec_terminal)
     {
         // get terminal
-        terminal = Glib::find_program_in_path(xset_get_s("main_terminal"));
+        terminal = Glib::find_program_in_path(xset_get_s(XSetName::MAIN_TERMINAL));
         if (terminal.empty())
         {
             msg = "Please set a valid terminal program in View|Preferences|Advanced";
@@ -1907,7 +1907,7 @@ vfs_file_task_thread(VFSFileTask* task)
     if (task->state_pause == VFSFileTaskState::VFS_FILE_TASK_QUEUE)
     {
         if (task->state != VFSFileTaskState::VFS_FILE_TASK_SIZE_TIMEOUT &&
-            xset_get_b("task_q_smart"))
+            xset_get_b(XSetName::TASK_Q_SMART))
         {
             // make queue exception for smaller tasks
             off_t exlimit;

@@ -1469,7 +1469,7 @@ replace_item_props(ContextData* ctxt)
     }
 
     // Ignore Context
-    xset_set_b("context_dlg",
+    xset_set_b(XSetName::CONTEXT_DLG,
                gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->ignore_context)));
 }
 
@@ -1479,7 +1479,7 @@ on_script_popup(GtkTextView* input, GtkMenu* menu, void* user_data)
     (void)input;
     (void)user_data;
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    XSet* set = xset_get("separator");
+    XSet* set = xset_get(XSetName::SEPARATOR);
     set->menu_style = XSetMenu::SEP;
     set->browser = nullptr;
     xset_add_menuitem(nullptr, GTK_WIDGET(menu), accel_group, set);
@@ -1579,8 +1579,8 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     xset_set_window_icon(GTK_WINDOW(ctxt->dlg));
     gtk_window_set_role(GTK_WINDOW(ctxt->dlg), "context_dialog");
 
-    int width = xset_get_int("context_dlg", XSetSetSet::X);
-    int height = xset_get_int("context_dlg", XSetSetSet::Y);
+    int width = xset_get_int(XSetName::CONTEXT_DLG, XSetSetSet::X);
+    int height = xset_get_int(XSetName::CONTEXT_DLG, XSetSetSet::Y);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(ctxt->dlg), width, height);
     else
@@ -1898,7 +1898,7 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     ctxt->ignore_context =
         gtk_check_button_new_with_mnemonic("_Ignore Context / Show All  (global setting)");
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(ctxt->ignore_context), false, true, 0);
-    if (xset_get_b("context_dlg"))
+    if (xset_get_b(XSetName::CONTEXT_DLG))
     {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->ignore_context), true);
 
@@ -2391,8 +2391,8 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     height = allocation.height;
     if (width && height)
     {
-        xset_set("context_dlg", XSetSetSet::X, std::to_string(width).c_str());
-        xset_set("context_dlg", XSetSetSet::Y, std::to_string(height).c_str());
+        xset_set(XSetName::CONTEXT_DLG, XSetSetSet::X, std::to_string(width).c_str());
+        xset_set(XSetName::CONTEXT_DLG, XSetSetSet::Y, std::to_string(height).c_str());
     }
 
     gtk_widget_destroy(ctxt->dlg);

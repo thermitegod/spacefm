@@ -27,6 +27,8 @@
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 
+#include "xset.hxx"
+
 #define XSET(obj) (static_cast<XSet*>(obj))
 
 // this determines time before item is selected by hover in single-click mode
@@ -278,6 +280,7 @@ struct PtkFileBrowser;
 struct XSet
 {
     char* name;
+    XSetName xset_name;
 
     XSetB b;                 // saved, tri-state enum 0=unset(false) 1=true 2=false
     char* s;                 // saved
@@ -362,31 +365,40 @@ struct XSetContext
 
 void xset_set_window_icon(GtkWindow* win);
 
+XSet* xset_is(XSetName name);
 XSet* xset_is(const std::string& name);
+
+XSet* xset_get(XSetName name);
 XSet* xset_get(const std::string& name);
 
 XSet* xset_get_panel(int panel, const std::string& name);
 XSet* xset_get_panel_mode(int panel, const std::string& name, char mode);
 
+int xset_get_int(XSetName name, XSetSetSet var);
 int xset_get_int(const std::string& name, XSetSetSet var);
 int xset_get_int_panel(int panel, const std::string& name, XSetSetSet var);
 
+char* xset_get_s(XSetName name);
 char* xset_get_s(const std::string& name);
 char* xset_get_s_panel(int panel, const std::string& name);
 
+bool xset_get_b(XSetName name);
 bool xset_get_b(const std::string& name);
 bool xset_get_b_panel(int panel, const std::string& name);
 bool xset_get_b_panel_mode(int panel, const std::string& name, char mode);
 
+XSet* xset_set_b(XSetName name, bool bval);
 XSet* xset_set_b(const std::string& name, bool bval);
 XSet* xset_set_b_panel(int panel, const std::string& name, bool bval);
 XSet* xset_set_b_panel_mode(int panel, const std::string& name, char mode, bool bval);
 
 XSet* xset_set_panel(int panel, const std::string& name, XSetSetSet var, const char* value);
 
+XSet* xset_set_cb(XSetName name, GFunc cb_func, void* cb_data);
 XSet* xset_set_cb(const std::string& name, GFunc cb_func, void* cb_data);
 XSet* xset_set_cb_panel(int panel, const std::string& name, GFunc cb_func, void* cb_data);
 
+XSet* xset_set(XSetName name, XSetSetSet var, const char* value);
 XSet* xset_set(const std::string& name, XSetSetSet var, const char* value);
 XSet* xset_set_set(XSet* set, XSetSetSet var, const char* value);
 

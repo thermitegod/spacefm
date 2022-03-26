@@ -2037,7 +2037,7 @@ vfs_volume_set_info(VFSVolume* volume)
 
     std::string value;
     std::string parameter;
-    char* fmt = xset_get_s("dev_dispname");
+    char* fmt = xset_get_s(XSetName::DEV_DISPNAME);
     if (!fmt)
         parameter = fmt::format("{} {} {} {} {} {}",
                                 disp_device,
@@ -2247,7 +2247,7 @@ mtab_fstype_is_handled_by_protocol(const char* mtab_fstype)
 {
     bool found = false;
     const char* handlers_list;
-    if (mtab_fstype && mtab_fstype[0] && (handlers_list = xset_get_s("dev_net_cnf")))
+    if (mtab_fstype && mtab_fstype[0] && (handlers_list = xset_get_s(XSetName::DEV_NET_CNF)))
     {
         // is the mtab_fstype handled by a protocol handler?
         std::vector<std::string> values;
@@ -2719,7 +2719,8 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
 
     // get handlers
     if (!(handlers_list =
-              xset_get_s(mode == PtkHandlerMode::HANDLER_MODE_FS ? "dev_fs_cnf" : "dev_net_cnf")))
+              xset_get_s(mode == PtkHandlerMode::HANDLER_MODE_FS ? XSetName::DEV_FS_CNF
+                                                                 : XSetName::DEV_NET_CNF)))
         return nullptr;
     char** handlers = g_strsplit(handlers_list, " ", 0);
     if (!handlers)
@@ -2983,7 +2984,7 @@ vfs_volume_is_automount(VFSVolume* vol)
         return false;
 
     std::string showhidelist =
-        fmt::format(" {} ", ztd::null_check(xset_get_s("dev_automount_volumes")));
+        fmt::format(" {} ", ztd::null_check(xset_get_s(XSetName::DEV_AUTOMOUNT_VOLUMES)));
     int i;
     for (i = 0; i < 3; i++)
     {
@@ -3011,7 +3012,7 @@ vfs_volume_is_automount(VFSVolume* vol)
     }
 
     // udisks no?
-    if (vol->nopolicy && !xset_get_b("dev_ignore_udisks_nopolicy"))
+    if (vol->nopolicy && !xset_get_b(XSetName::DEV_IGNORE_UDISKS_NOPOLICY))
         return false;
 
     // table?
@@ -3020,10 +3021,10 @@ vfs_volume_is_automount(VFSVolume* vol)
 
     // optical
     if (vol->is_optical)
-        return xset_get_b("dev_automount_optical");
+        return xset_get_b(XSetName::DEV_AUTOMOUNT_OPTICAL);
 
     // internal?
-    if (vol->is_removable && xset_get_b("dev_automount_removable"))
+    if (vol->is_removable && xset_get_b(XSetName::DEV_AUTOMOUNT_REMOVABLE))
         return true;
 
     return false;
@@ -3384,7 +3385,7 @@ vfs_volume_autoexec(VFSVolume* vol)
 
     if (vol->is_audiocd)
     {
-        command = xset_get_s("dev_exec_audio");
+        command = xset_get_s(XSetName::DEV_EXEC_AUDIO);
     }
     else if (vol->is_mounted && vol->mount_point && vol->mount_point[0] != '\0')
     {
@@ -3398,10 +3399,10 @@ vfs_volume_autoexec(VFSVolume* vol)
         {
             char* path = g_build_filename(vol->mount_point, "VIDEO_TS", nullptr);
             if (vol->is_dvd && std::filesystem::is_directory(path))
-                command = xset_get_s("dev_exec_video");
+                command = xset_get_s(XSetName::DEV_EXEC_VIDEO);
             else
             {
-                if (xset_get_b("dev_auto_open"))
+                if (xset_get_b(XSetName::DEV_AUTO_OPEN))
                 {
                     FMMainWindow* main_window = fm_main_window_get_last_active();
                     if (main_window)
@@ -3428,7 +3429,7 @@ vfs_volume_autoexec(VFSVolume* vol)
                         Glib::spawn_command_line_async(cmd);
                     }
                 }
-                command = xset_get_s("dev_exec_fs");
+                command = xset_get_s(XSetName::DEV_EXEC_FS);
             }
             free(path);
         }
@@ -3465,8 +3466,9 @@ vfs_volume_automount(VFSVolume* vol)
     vol->automount_time = std::time(nullptr);
 
     bool run_in_terminal;
-    char* line =
-        vfs_volume_get_mount_command(vol, xset_get_s("dev_mount_options"), &run_in_terminal);
+    char* line = vfs_volume_get_mount_command(vol,
+                                              xset_get_s(XSetName::DEV_MOUNT_OPTIONS),
+                                              &run_in_terminal);
     if (line)
     {
         LOG_INFO("Automount: {}", line);
@@ -3551,7 +3553,7 @@ vfs_volume_device_added(VFSVolume* volume, bool automount)
                     vfs_volume_autoexec(volume);
                 else if (was_mounted && !volume->is_mounted)
                 {
-                    vfs_volume_exec(volume, xset_get_s("dev_exec_unmount"));
+                    vfs_volume_exec(volume, xset_get_s(XSetName::DEV_EXEC_UNMOUNT));
                     volume->should_autounmount = false;
                     // remove mount points in case other unmounted
                     ptk_location_view_clean_mount_points();
@@ -3561,7 +3563,7 @@ vfs_volume_device_added(VFSVolume* volume, bool automount)
 
                 // media inserted ?
                 if (!was_mountable && volume->is_mountable)
-                    vfs_volume_exec(volume, xset_get_s("dev_exec_insert"));
+                    vfs_volume_exec(volume, xset_get_s(XSetName::DEV_EXEC_INSERT));
 
                 // media ejected ?
                 if (was_mountable && !volume->is_mountable && volume->is_mounted &&
@@ -3584,7 +3586,7 @@ vfs_volume_device_added(VFSVolume* volume, bool automount)
     if (automount)
     {
         vfs_volume_automount(volume);
-        vfs_volume_exec(volume, xset_get_s("dev_exec_insert"));
+        vfs_volume_exec(volume, xset_get_s(XSetName::DEV_EXEC_INSERT));
         if (volume->is_audiocd)
             vfs_volume_autoexec(volume);
     }
@@ -3633,7 +3635,7 @@ vfs_volume_device_removed(struct udev_device* udevice)
         {
             // remove volume
             // LOG_INFO("remove volume {}", volume->device_file);
-            vfs_volume_exec(volume, xset_get_s("dev_exec_remove"));
+            vfs_volume_exec(volume, xset_get_s(XSetName::DEV_EXEC_REMOVE));
             if (volume->is_mounted && volume->is_removable)
                 unmount_if_mounted(volume);
             volumes.erase(std::remove(volumes.begin(), volumes.end(), volume), volumes.end());
@@ -3861,7 +3863,7 @@ vfs_volume_finalize()
         g_array_free(callbacks, true);
 
     // free volumes / unmount all ?
-    bool unmount_all = xset_get_b("dev_unmount_quit");
+    bool unmount_all = xset_get_b(XSetName::DEV_UNMOUNT_QUIT);
     if (!volumes.empty())
     {
         for (VFSVolume* volume: volumes)
@@ -3931,7 +3933,7 @@ call_callbacks(VFSVolume* vol, VFSVolumeState state)
     {
         main_window_event(nullptr,
                           nullptr,
-                          "evt_device",
+                          XSetName::EVT_DEVICE,
                           0,
                           0,
                           vol->device_file,
@@ -4057,7 +4059,7 @@ vfs_volume_dir_avoid_changes(const char* dir)
             // fstype listed in change detection blacklist?
             int len = std::strlen(fstype);
             char* ptr;
-            if ((ptr = xset_get_s("dev_change")))
+            if ((ptr = xset_get_s(XSetName::DEV_CHANGE)))
             {
                 while (ptr[0])
                 {

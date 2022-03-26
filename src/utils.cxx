@@ -195,7 +195,7 @@ const std::string
 get_valid_su() noexcept
 {
     std::string use_su;
-    if (!xset_get_s("su_command"))
+    if (!xset_get_s(XSetName::SU_COMMAND))
     {
         for (std::size_t i = 0; i < terminal_programs.size(); ++i)
         {
@@ -205,7 +205,7 @@ get_valid_su() noexcept
         }
         if (use_su.empty())
             use_su = su_commands.at(0);
-        xset_set("su_command", XSetSetSet::S, use_su.c_str());
+        xset_set(XSetName::SU_COMMAND, XSetSetSet::S, use_su.c_str());
     }
     std::string su_path = Glib::find_program_in_path(use_su);
     return su_path;

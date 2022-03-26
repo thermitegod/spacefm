@@ -259,14 +259,14 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         // date format
         char* etext = ztd::strdup(
             gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(data->date_format)))));
-        if (g_strcmp0(etext, xset_get_s("date_format")))
+        if (g_strcmp0(etext, xset_get_s(XSetName::DATE_FORMAT)))
         {
             if (etext[0] == '\0')
-                xset_set("date_format", XSetSetSet::S, "%Y-%m-%d %H:%M");
+                xset_set(XSetName::DATE_FORMAT, XSetSetSet::S, "%Y-%m-%d %H:%M");
             else
-                xset_set("date_format", XSetSetSet::S, etext);
+                xset_set(XSetName::DATE_FORMAT, XSetSetSet::S, etext);
             free(etext);
-            app_settings.date_format = xset_get_s("date_format");
+            app_settings.date_format = xset_get_s(XSetName::DATE_FORMAT);
             need_refresh = true;
         }
         if (need_refresh)
@@ -323,7 +323,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->confirm_delete));
 
         std::string s = std::to_string(gtk_combo_box_get_active(GTK_COMBO_BOX(data->drag_action)));
-        xset_set("drag_action", XSetSetSet::X, s.c_str());
+        xset_set(XSetName::DRAG_ACTION, XSetSetSet::X, s.c_str());
 
         // terminal su command
         std::string custom_su;
@@ -336,50 +336,52 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             if (!custom_su.empty())
             {
                 if (idx == 0)
-                    xset_set("su_command", XSetSetSet::S, custom_su.c_str());
+                    xset_set(XSetName::SU_COMMAND, XSetSetSet::S, custom_su.c_str());
                 else
-                    xset_set("su_command", XSetSetSet::S, su_commands.at(idx - 1));
+                    xset_set(XSetName::SU_COMMAND, XSetSetSet::S, su_commands.at(idx - 1));
             }
             else
             {
-                xset_set("su_command", XSetSetSet::S, su_commands.at(idx));
+                xset_set(XSetName::SU_COMMAND, XSetSetSet::S, su_commands.at(idx));
             }
         }
 
         // MOD editors
-        xset_set("editor", XSetSetSet::S, gtk_entry_get_text(GTK_ENTRY(data->editor)));
-        xset_set_b("editor",
+        xset_set(XSetName::EDITOR, XSetSetSet::S, gtk_entry_get_text(GTK_ENTRY(data->editor)));
+        xset_set_b(XSetName::EDITOR,
                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->editor_terminal)));
         const char* root_editor = gtk_entry_get_text(GTK_ENTRY(data->root_editor));
-        const char* old_root_editor = xset_get_s("root_editor");
+        const char* old_root_editor = xset_get_s(XSetName::ROOT_EDITOR);
         if (!old_root_editor)
         {
             if (root_editor[0] != '\0')
             {
-                xset_set("root_editor", XSetSetSet::S, root_editor);
+                xset_set(XSetName::ROOT_EDITOR, XSetSetSet::S, root_editor);
                 root_set_change = true;
             }
         }
         else if (strcmp(root_editor, old_root_editor))
         {
-            xset_set("root_editor", XSetSetSet::S, root_editor);
+            xset_set(XSetName::ROOT_EDITOR, XSetSetSet::S, root_editor);
             root_set_change = true;
         }
         if (!!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->root_editor_terminal)) !=
-            !!xset_get_b("root_editor"))
+            !!xset_get_b(XSetName::ROOT_EDITOR))
         {
-            xset_set_b("root_editor",
+            xset_set_b(XSetName::ROOT_EDITOR,
                        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->root_editor_terminal)));
             root_set_change = true;
         }
 
         // MOD terminal
-        char* old_terminal = xset_get_s("main_terminal");
+        char* old_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
         char* terminal = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(data->terminal));
         g_strstrip(terminal);
         if (g_strcmp0(terminal, old_terminal))
         {
-            xset_set("main_terminal", XSetSetSet::S, terminal[0] == '\0' ? nullptr : terminal);
+            xset_set(XSetName::MAIN_TERMINAL,
+                     XSetSetSet::S,
+                     terminal[0] == '\0' ? nullptr : terminal);
             root_set_change = true;
         }
         // report missing terminal
@@ -393,10 +395,10 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         /* save to config file */
         save_settings(nullptr);
 
-        if (xset_get_b("main_terminal"))
+        if (xset_get_b(XSetName::MAIN_TERMINAL))
         {
             root_set_change = true;
-            xset_set_b("main_terminal", false);
+            xset_set_b(XSetName::MAIN_TERMINAL, false);
         }
 
         // root settings saved?
@@ -539,7 +541,7 @@ fm_edit_preference(GtkWindow* parent, int page)
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->terminal), terminal.c_str());
         }
 
-        char* main_terminal = xset_get_s("main_terminal");
+        char* main_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
         if (main_terminal)
         {
             std::size_t i;
@@ -613,13 +615,14 @@ fm_edit_preference(GtkWindow* parent, int page)
         data->click_exec = GTK_WIDGET(gtk_builder_get_object(builder, "click_exec"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->click_exec), !app_settings.no_execute);
 
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->root_bar), xset_get_b("root_bar"));
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->root_bar),
+                                     xset_get_b(XSetName::ROOT_BAR));
         gtk_widget_set_sensitive(data->root_bar, geteuid() == 0);
 
         int drag_action_set = 0;
         for (int drag_action: drag_actions)
         {
-            if (drag_action == xset_get_int("drag_action", XSetSetSet::X))
+            if (drag_action == xset_get_int(XSetName::DRAG_ACTION, XSetSetSet::X))
             {
                 drag_action_set = drag_action;
                 break;
@@ -638,7 +641,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         std::string custom_su;
         std::string use_su;
         data->su_command = GTK_WIDGET(gtk_builder_get_object(builder, "su_command"));
-        use_su = xset_get_s("su_command");
+        use_su = xset_get_s(XSetName::SU_COMMAND);
         if (config_settings.terminal_su)
             // get su from /etc/spacefm/spacefm.conf
             custom_su = Glib::find_program_in_path(config_settings.terminal_su);
@@ -681,7 +684,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         {
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->date_format), date_format);
         }
-        char* date_s = xset_get_s("date_format");
+        char* date_s = xset_get_s(XSetName::DATE_FORMAT);
         if (date_s)
         {
             std::size_t i;
@@ -702,18 +705,18 @@ fm_edit_preference(GtkWindow* parent, int page)
 
         // editors
         data->editor = GTK_WIDGET(gtk_builder_get_object(builder, "editor"));
-        if (xset_get_s("editor"))
-            gtk_entry_set_text(GTK_ENTRY(data->editor), xset_get_s("editor"));
+        if (xset_get_s(XSetName::EDITOR))
+            gtk_entry_set_text(GTK_ENTRY(data->editor), xset_get_s(XSetName::EDITOR));
         data->editor_terminal = GTK_WIDGET(gtk_builder_get_object(builder, "editor_terminal"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->editor_terminal),
-                                     xset_get_b("editor"));
+                                     xset_get_b(XSetName::EDITOR));
         data->root_editor = GTK_WIDGET(gtk_builder_get_object(builder, "root_editor"));
-        if (xset_get_s("root_editor"))
-            gtk_entry_set_text(GTK_ENTRY(data->root_editor), xset_get_s("root_editor"));
+        if (xset_get_s(XSetName::ROOT_EDITOR))
+            gtk_entry_set_text(GTK_ENTRY(data->root_editor), xset_get_s(XSetName::ROOT_EDITOR));
         data->root_editor_terminal =
             GTK_WIDGET(gtk_builder_get_object(builder, "root_editor_terminal"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->root_editor_terminal),
-                                     xset_get_b("root_editor"));
+                                     xset_get_b(XSetName::ROOT_EDITOR));
 
         g_signal_connect(dlg, "response", G_CALLBACK(on_response), data);
         g_object_unref(builder);

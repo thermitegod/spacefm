@@ -76,7 +76,7 @@ seek_path(GtkEntry* entry)
         edata->seek_timer = 0;
     }
 
-    if (!xset_get_b("path_seek"))
+    if (!xset_get_b(XSetName::PATH_SEEK))
         return false;
 
     char* seek_dir;
@@ -570,7 +570,7 @@ on_button_press(GtkWidget* entry, GdkEventButton* evt, void* user_data)
     if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
         main_window_event(nullptr,
                           event_handler.win_click,
-                          "evt_win_click",
+                          XSetName::EVT_WIN_CLICK,
                           0,
                           0,
                           "pathbar",
@@ -648,19 +648,19 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
     main_context_fill(file_browser, context);
 
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    XSet* set = xset_get("separator");
+    XSet* set = xset_get(XSetName::SEPARATOR);
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
 
     // New Bookmark
-    set = xset_set_cb("book_add", (GFunc)on_add_bookmark, file_browser);
+    set = xset_set_cb(XSetName::BOOK_ADD, (GFunc)on_add_bookmark, file_browser);
     const char* text = gtk_entry_get_text(GTK_ENTRY(entry));
     set->disable = !(text && (std::filesystem::exists(text) || strstr(text, ":/") ||
                               Glib::str_has_prefix(text, "//")));
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
 
-    set = xset_get("path_seek");
+    set = xset_get(XSetName::PATH_SEEK);
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
-    set = xset_set_cb("path_hand", (GFunc)on_protocol_handlers, file_browser);
+    set = xset_set_cb(XSetName::PATH_HAND, (GFunc)on_protocol_handlers, file_browser);
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
     gtk_widget_show_all(GTK_WIDGET(menu));
     g_signal_connect(menu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);

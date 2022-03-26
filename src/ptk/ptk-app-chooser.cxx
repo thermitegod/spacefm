@@ -218,8 +218,8 @@ app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all
 
     xset_set_window_icon(GTK_WINDOW(dlg));
 
-    int width = xset_get_int("app_dlg", XSetSetSet::X);
-    int height = xset_get_int("app_dlg", XSetSetSet::Y);
+    int width = xset_get_int(XSetName::APP_DLG, XSetSetSet::X);
+    int height = xset_get_int(XSetName::APP_DLG, XSetSetSet::Y);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
     else
@@ -451,8 +451,8 @@ on_dlg_response(GtkDialog* dlg, int id, void* user_data)
     int height = allocation.height;
     if (width && height)
     {
-        xset_set("app_dlg", XSetSetSet::X, std::to_string(width).c_str());
-        xset_set("app_dlg", XSetSetSet::Y, std::to_string(height).c_str());
+        xset_set(XSetName::APP_DLG, XSetSetSet::X, std::to_string(width).c_str());
+        xset_set(XSetName::APP_DLG, XSetSetSet::Y, std::to_string(height).c_str());
     }
 
     switch (id)
@@ -503,7 +503,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
         xset_msg_dialog(parent, GTK_MESSAGE_INFO, "MIME Type Has Handler", GTK_BUTTONS_OK, msg);
         g_slist_free(handlers_slist);
     }
-    else if (!xset_get_b("arc_def_open"))
+    else if (!xset_get_b(XSetName::ARC_DEF_OPEN))
     {
         // is archive handler set for this type?
         handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,

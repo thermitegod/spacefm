@@ -207,7 +207,7 @@ on_configure_evt_timer(FMMainWindow* main_window)
     }
     main_window_event(main_window,
                       event_handler.win_move,
-                      "evt_win_move",
+                      XSetName::EVT_WIN_MOVE,
                       0,
                       0,
                       nullptr,
@@ -253,12 +253,12 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
     if (Glib::str_has_suffix(set->name, "file"))
     {
         // get file path
-        XSet* save = xset_get("plug_ifile");
+        XSet* save = xset_get(XSetName::PLUG_IFILE);
         if (save->s) //&& std::filesystem::is_directory(save->s)
             deffolder = save->s;
         else
         {
-            if (!(deffolder = xset_get_s("go_set_default")))
+            if (!(deffolder = xset_get_s(XSetName::GO_SET_DEFAULT)))
                 deffolder = ztd::strdup("/");
         }
         path = xset_file_dialog(GTK_WIDGET(main_window),
@@ -371,14 +371,14 @@ create_plugins_menu(FMMainWindow* main_window)
 
     XSet* set;
 
-    set = xset_set_cb("plug_ifile", (GFunc)on_plugin_install, main_window);
+    set = xset_set_cb(XSetName::PLUG_IFILE, (GFunc)on_plugin_install, main_window);
     xset_set_ob1(set, "set", set);
-    set = xset_set_cb("plug_cfile", (GFunc)on_plugin_install, main_window);
+    set = xset_set_cb(XSetName::PLUG_CFILE, (GFunc)on_plugin_install, main_window);
     xset_set_ob1(set, "set", set);
 
-    set = xset_get("plug_install");
+    set = xset_get(XSetName::PLUG_INSTALL);
     xset_add_menuitem(file_browser, plug_menu, accel_group, set);
-    set = xset_get("plug_copy");
+    set = xset_get(XSetName::PLUG_COPY);
     xset_add_menuitem(file_browser, plug_menu, accel_group, set);
 
     GtkWidget* item = gtk_separator_menu_item_new();
@@ -422,19 +422,19 @@ create_devices_menu(FMMainWindow* main_window)
 
     XSet* set;
 
-    set = xset_set_cb("main_dev", (GFunc)on_devices_show, main_window);
+    set = xset_set_cb(XSetName::MAIN_DEV, (GFunc)on_devices_show, main_window);
     set->b = file_browser->side_dev ? XSetB::XSET_B_TRUE : XSetB::XSET_B_UNSET;
     xset_add_menuitem(file_browser, dev_menu, accel_group, set);
 
-    set = xset_get("separator");
+    set = xset_get(XSetName::SEPARATOR);
     xset_add_menuitem(file_browser, dev_menu, accel_group, set);
 
     ptk_location_view_dev_menu(GTK_WIDGET(file_browser), file_browser, dev_menu);
 
-    set = xset_get("separator");
+    set = xset_get(XSetName::SEPARATOR);
     xset_add_menuitem(file_browser, dev_menu, accel_group, set);
 
-    set = xset_get("dev_menu_settings");
+    set = xset_get(XSetName::DEV_MENU_SETTINGS);
     xset_add_menuitem(file_browser, dev_menu, accel_group, set);
 
     // show all
@@ -449,7 +449,7 @@ on_open_url(GtkWidget* widget, FMMainWindow* main_window)
     (void)widget;
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
-    char* url = xset_get_s("main_save_session");
+    char* url = xset_get_s(XSetName::MAIN_SAVE_SESSION);
     if (file_browser && url && url[0])
         ptk_location_view_mount_network(file_browser, url, true, true);
 }
@@ -501,14 +501,14 @@ main_window_open_terminal(FMMainWindow* main_window, bool as_root)
     if (!file_browser)
         return;
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
-    char* main_term = xset_get_s("main_terminal");
+    char* main_term = xset_get_s(XSetName::MAIN_TERMINAL);
     if (!main_term || main_term[0] == '\0')
     {
         ptk_show_error(GTK_WINDOW(parent),
                        "Terminal Not Available",
                        "Please set your terminal program in View|Preferences|Advanced");
         fm_edit_preference(GTK_WINDOW(parent), PrefDlgPage::PREF_ADVANCED);
-        main_term = xset_get_s("main_terminal");
+        main_term = xset_get_s(XSetName::MAIN_TERMINAL);
         if (!main_term || main_term[0] == '\0')
             return;
     }
@@ -570,7 +570,7 @@ main_window_rubberband_all()
                 if (a_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
                 {
                     gtk_tree_view_set_rubber_banding(GTK_TREE_VIEW(a_browser->folder_view),
-                                                     xset_get_b("rubberband"));
+                                                     xset_get_b(XSetName::RUBBERBAND));
                 }
             }
         }
@@ -602,7 +602,7 @@ update_window_icon(GtkWindow* window, GtkIconTheme* theme)
     const char* name;
     GError* error = nullptr;
 
-    XSet* set = xset_get("main_icon");
+    XSet* set = xset_get(XSetName::MAIN_ICON);
     if (set->icon)
         name = set->icon;
     else if (geteuid() == 0)
@@ -961,9 +961,9 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
 
     // show panelbar
     if (!!gtk_widget_get_visible(main_window->panelbar) !=
-        !!(!main_window->fullscreen && xset_get_b("main_pbar")))
+        !!(!main_window->fullscreen && xset_get_b(XSetName::MAIN_PBAR)))
     {
-        if (xset_get_b("main_pbar"))
+        if (xset_get_b(XSetName::MAIN_PBAR))
             gtk_widget_show(GTK_WIDGET(main_window->panelbar));
         else
             gtk_widget_hide(GTK_WIDGET(main_window->panelbar));
@@ -1125,9 +1125,9 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                     // open default tab
                     std::string folder_path;
 
-                    if (xset_get_s("go_set_default"))
+                    if (xset_get_s(XSetName::GO_SET_DEFAULT))
                     {
-                        folder_path = xset_get_s("go_set_default");
+                        folder_path = xset_get_s(XSetName::GO_SET_DEFAULT);
                     }
                     else
                     {
@@ -1143,7 +1143,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                 !gtk_widget_get_visible(GTK_WIDGET(main_window->panel[p - 1])))
                 main_window_event(main_window,
                                   event_handler.pnl_show,
-                                  "evt_pnl_show",
+                                  XSetName::EVT_PNL_SHOW,
                                   p,
                                   0,
                                   nullptr,
@@ -1181,7 +1181,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                 gtk_widget_get_visible(GTK_WIDGET(main_window->panel[p - 1])))
                 main_window_event(main_window,
                                   event_handler.pnl_show,
-                                  "evt_pnl_show",
+                                  XSetName::EVT_PNL_SHOW,
                                   p,
                                   0,
                                   nullptr,
@@ -1330,13 +1330,13 @@ rebuild_menus(FMMainWindow* main_window)
 
     // File
     newmenu = gtk_menu_new();
-    xset_set_cb("main_new_window", (GFunc)on_new_window_activate, main_window);
-    xset_set_cb("main_root_window", (GFunc)on_open_current_folder_as_root, main_window);
-    xset_set_cb("main_search", (GFunc)on_find_file_activate, main_window);
-    xset_set_cb("main_terminal", (GFunc)on_open_terminal_activate, main_window);
-    xset_set_cb("main_root_terminal", (GFunc)on_open_root_terminal_activate, main_window);
-    xset_set_cb("main_save_session", (GFunc)on_open_url, main_window);
-    xset_set_cb("main_exit", (GFunc)on_quit_activate, main_window);
+    xset_set_cb(XSetName::MAIN_NEW_WINDOW, (GFunc)on_new_window_activate, main_window);
+    xset_set_cb(XSetName::MAIN_ROOT_WINDOW, (GFunc)on_open_current_folder_as_root, main_window);
+    xset_set_cb(XSetName::MAIN_SEARCH, (GFunc)on_find_file_activate, main_window);
+    xset_set_cb(XSetName::MAIN_TERMINAL, (GFunc)on_open_terminal_activate, main_window);
+    xset_set_cb(XSetName::MAIN_ROOT_TERMINAL, (GFunc)on_open_root_terminal_activate, main_window);
+    xset_set_cb(XSetName::MAIN_SAVE_SESSION, (GFunc)on_open_url, main_window);
+    xset_set_cb(XSetName::MAIN_EXIT, (GFunc)on_quit_activate, main_window);
     menu_elements = ztd::strdup(
         "main_save_session main_search separator main_terminal main_root_terminal "
         "main_new_window main_root_window separator main_save_tabs separator main_exit");
@@ -1348,11 +1348,11 @@ rebuild_menus(FMMainWindow* main_window)
 
     // View
     newmenu = gtk_menu_new();
-    xset_set_cb("main_prefs", (GFunc)on_preference_activate, main_window);
-    xset_set_cb("main_full", (GFunc)on_fullscreen_activate, main_window);
-    xset_set_cb("main_design_mode", (GFunc)main_design_mode, main_window);
-    xset_set_cb("main_icon", (GFunc)on_main_icon, nullptr);
-    xset_set_cb("main_title", (GFunc)update_window_title, main_window);
+    xset_set_cb(XSetName::MAIN_PREFS, (GFunc)on_preference_activate, main_window);
+    xset_set_cb(XSetName::MAIN_FULL, (GFunc)on_fullscreen_activate, main_window);
+    xset_set_cb(XSetName::MAIN_DESIGN_MODE, (GFunc)main_design_mode, main_window);
+    xset_set_cb(XSetName::MAIN_ICON, (GFunc)on_main_icon, nullptr);
+    xset_set_cb(XSetName::MAIN_TITLE, (GFunc)update_window_title, main_window);
 
     int p;
     int vis_count = 0;
@@ -1366,36 +1366,36 @@ rebuild_menus(FMMainWindow* main_window)
         xset_set_b_panel(1, "show", true);
         vis_count++;
     }
-    set = xset_set_cb("panel1_show", (GFunc)show_panels_all_windows, main_window);
+    set = xset_set_cb(XSetName::PANEL1_SHOW, (GFunc)show_panels_all_windows, main_window);
     set->disable = (main_window->curpanel == 1 && vis_count == 1);
-    set = xset_set_cb("panel2_show", (GFunc)show_panels_all_windows, main_window);
+    set = xset_set_cb(XSetName::PANEL2_SHOW, (GFunc)show_panels_all_windows, main_window);
     set->disable = (main_window->curpanel == 2 && vis_count == 1);
-    set = xset_set_cb("panel3_show", (GFunc)show_panels_all_windows, main_window);
+    set = xset_set_cb(XSetName::PANEL3_SHOW, (GFunc)show_panels_all_windows, main_window);
     set->disable = (main_window->curpanel == 3 && vis_count == 1);
-    set = xset_set_cb("panel4_show", (GFunc)show_panels_all_windows, main_window);
+    set = xset_set_cb(XSetName::PANEL4_SHOW, (GFunc)show_panels_all_windows, main_window);
     set->disable = (main_window->curpanel == 4 && vis_count == 1);
 
-    xset_set_cb("main_pbar", (GFunc)show_panels_all_windows, main_window);
+    xset_set_cb(XSetName::MAIN_PBAR, (GFunc)show_panels_all_windows, main_window);
 
-    set = xset_set_cb("panel_prev", (GFunc)focus_panel, main_window);
+    set = xset_set_cb(XSetName::PANEL_PREV, (GFunc)focus_panel, main_window);
     xset_set_ob1_int(set, "panel_num", -1);
     set->disable = (vis_count == 1);
-    set = xset_set_cb("panel_next", (GFunc)focus_panel, main_window);
+    set = xset_set_cb(XSetName::PANEL_NEXT, (GFunc)focus_panel, main_window);
     xset_set_ob1_int(set, "panel_num", -2);
     set->disable = (vis_count == 1);
-    set = xset_set_cb("panel_hide", (GFunc)focus_panel, main_window);
+    set = xset_set_cb(XSetName::PANEL_HIDE, (GFunc)focus_panel, main_window);
     xset_set_ob1_int(set, "panel_num", -3);
     set->disable = (vis_count == 1);
-    set = xset_set_cb("panel_1", (GFunc)focus_panel, main_window);
+    set = xset_set_cb(XSetName::PANEL_1, (GFunc)focus_panel, main_window);
     xset_set_ob1_int(set, "panel_num", 1);
     set->disable = (main_window->curpanel == 1);
-    set = xset_set_cb("panel_2", (GFunc)focus_panel, main_window);
+    set = xset_set_cb(XSetName::PANEL_2, (GFunc)focus_panel, main_window);
     xset_set_ob1_int(set, "panel_num", 2);
     set->disable = (main_window->curpanel == 2);
-    set = xset_set_cb("panel_3", (GFunc)focus_panel, main_window);
+    set = xset_set_cb(XSetName::PANEL_3, (GFunc)focus_panel, main_window);
     xset_set_ob1_int(set, "panel_num", 3);
     set->disable = (main_window->curpanel == 3);
-    set = xset_set_cb("panel_4", (GFunc)focus_panel, main_window);
+    set = xset_set_cb(XSetName::PANEL_4, (GFunc)focus_panel, main_window);
     xset_set_ob1_int(set, "panel_num", 4);
     set->disable = (main_window->curpanel == 4);
 
@@ -1409,7 +1409,7 @@ rebuild_menus(FMMainWindow* main_window)
     xset_add_menu(file_browser, newmenu, accel_group, menu_elements);
 
     // Panel View submenu
-    set = xset_get("con_view");
+    set = xset_get(XSetName::CON_VIEW);
     str = set->menu_label;
     std::string menu_label = fmt::format("Panel {} {}", main_window->curpanel, set->menu_label);
     set->menu_label = ztd::strdup(menu_label);
@@ -1434,10 +1434,10 @@ rebuild_menus(FMMainWindow* main_window)
 
     // Bookmarks
     newmenu = gtk_menu_new();
-    set = xset_set_cb("book_show", (GFunc)on_bookmarks_show, main_window);
+    set = xset_set_cb(XSetName::BOOK_SHOW, (GFunc)on_bookmarks_show, main_window);
     set->b = file_browser->side_book ? XSetB::XSET_B_TRUE : XSetB::XSET_B_UNSET;
     xset_add_menuitem(file_browser, newmenu, accel_group, set);
-    set = xset_set_cb("book_add", (GFunc)ptk_bookmark_view_add_bookmark, file_browser);
+    set = xset_set_cb(XSetName::BOOK_ADD, (GFunc)ptk_bookmark_view_add_bookmark, file_browser);
     set->disable = false;
     xset_add_menuitem(file_browser, newmenu, accel_group, set);
     gtk_menu_shell_append(GTK_MENU_SHELL(newmenu), gtk_separator_menu_item_new());
@@ -1459,12 +1459,12 @@ rebuild_menus(FMMainWindow* main_window)
 
     // Tool
     newmenu = gtk_menu_new();
-    set = xset_get("main_tool");
+    set = xset_get(XSetName::MAIN_TOOL);
     if (!set->child)
     {
         child_set = xset_custom_new();
         child_set->menu_label = ztd::strdup("New _Command");
-        child_set->parent = ztd::strdup("main_tool");
+        child_set->parent = ztd::strdup(translate_xset_name_from(XSetName::MAIN_TOOL));
         set->child = ztd::strdup(child_set->name);
     }
     else
@@ -1476,7 +1476,7 @@ rebuild_menus(FMMainWindow* main_window)
 
     // Help
     newmenu = gtk_menu_new();
-    xset_set_cb("main_about", (GFunc)on_about_activate, main_window);
+    xset_set_cb(XSetName::MAIN_ABOUT, (GFunc)on_about_activate, main_window);
     menu_elements = ztd::strdup("main_about");
     xset_add_menu(file_browser, newmenu, accel_group, menu_elements);
     free(menu_elements);
@@ -1719,15 +1719,15 @@ fm_main_window_init(FMMainWindow* main_window)
     // restore panel sliders
     // do this after maximizing/showing window so slider positions are valid
     // in actual window size
-    int pos = xset_get_int("panel_sliders", XSetSetSet::X);
+    int pos = xset_get_int(XSetName::PANEL_SLIDERS, XSetSetSet::X);
     if (pos < 200)
         pos = 200;
     gtk_paned_set_position(GTK_PANED(main_window->hpane_top), pos);
-    pos = xset_get_int("panel_sliders", XSetSetSet::Y);
+    pos = xset_get_int(XSetName::PANEL_SLIDERS, XSetSetSet::Y);
     if (pos < 200)
         pos = 200;
     gtk_paned_set_position(GTK_PANED(main_window->hpane_bottom), pos);
-    pos = xset_get_int("panel_sliders", XSetSetSet::S);
+    pos = xset_get_int(XSetName::PANEL_SLIDERS, XSetSetSet::S);
     if (pos < 200)
         pos = -1;
     gtk_paned_set_position(GTK_PANED(main_window->vpane), pos);
@@ -1737,7 +1737,7 @@ fm_main_window_init(FMMainWindow* main_window)
     // and shows a stale menu anyway.
     // rebuild_menus( main_window );
 
-    main_window_event(main_window, nullptr, "evt_win_new", 0, 0, nullptr, 0, 0, 0, true);
+    main_window_event(main_window, nullptr, XSetName::EVT_WIN_NEW, 0, 0, nullptr, 0, 0, 0, true);
 }
 
 static void
@@ -1784,7 +1784,7 @@ fm_main_window_close(FMMainWindow* main_window)
     if (event_handler.win_close->s || event_handler.win_close->ob2_data)
         main_window_event(main_window,
                           event_handler.win_close,
-                          "evt_win_close",
+                          XSetName::EVT_WIN_CLOSE,
                           0,
                           0,
                           nullptr,
@@ -1828,15 +1828,15 @@ fm_main_window_store_positions(FMMainWindow* main_window)
         {
             pos = gtk_paned_get_position(GTK_PANED(main_window->hpane_top));
             if (pos)
-                xset_set("panel_sliders", XSetSetSet::X, std::to_string(pos).c_str());
+                xset_set(XSetName::PANEL_SLIDERS, XSetSetSet::X, std::to_string(pos).c_str());
 
             pos = gtk_paned_get_position(GTK_PANED(main_window->hpane_bottom));
             if (pos)
-                xset_set("panel_sliders", XSetSetSet::Y, std::to_string(pos).c_str());
+                xset_set(XSetName::PANEL_SLIDERS, XSetSetSet::Y, std::to_string(pos).c_str());
 
             pos = gtk_paned_get_position(GTK_PANED(main_window->vpane));
             if (pos)
-                xset_set("panel_sliders", XSetSetSet::S, std::to_string(pos).c_str());
+                xset_set(XSetName::PANEL_SLIDERS, XSetSetSet::S, std::to_string(pos).c_str());
 
             if (gtk_widget_get_visible(main_window->task_scroll))
             {
@@ -1844,7 +1844,7 @@ fm_main_window_store_positions(FMMainWindow* main_window)
                 if (pos)
                 {
                     // save absolute height
-                    xset_set("task_show_manager",
+                    xset_set(XSetName::TASK_SHOW_MANAGER,
                              XSetSetSet::X,
                              std::to_string(allocation.height - pos).c_str());
                     // LOG_INFO("CLOS  win {}x{}    task height {}   slider {}", allocation.width,
@@ -1912,7 +1912,10 @@ fm_main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
             g_signal_connect(dlg, "destroy", G_CALLBACK(gtk_widget_destroy), dlg);
             gtk_widget_show_all(dlg);
 
-            on_task_stop(nullptr, main_window->task_view, xset_get("task_stop_all"), nullptr);
+            on_task_stop(nullptr,
+                         main_window->task_view,
+                         xset_get(XSetName::TASK_STOP_ALL),
+                         nullptr);
             while (main_tasks_running(main_window))
             {
                 while (gtk_events_pending())
@@ -2164,7 +2167,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
         main_window_event(
             main_window,
             event_handler.tab_close,
-            "evt_tab_close",
+            XSetName::EVT_TAB_CLOSE,
             file_browser->mypanel,
             gtk_notebook_page_num(GTK_NOTEBOOK(main_window->notebook), GTK_WIDGET(file_browser)) +
                 1,
@@ -2199,7 +2202,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
     }
     if (gtk_notebook_get_n_pages(notebook) == 0)
     {
-        const char* path = xset_get_s("go_set_default");
+        const char* path = xset_get_s(XSetName::GO_SET_DEFAULT);
         if (!(path && path[0] != '\0'))
         {
             if (geteuid() != 0)
@@ -2221,7 +2224,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
                                           nullptr);
 
         update_window_title(nullptr, main_window);
-        if (xset_get_b("main_save_tabs"))
+        if (xset_get_b(XSetName::MAIN_SAVE_TABS))
             autosave_request_add();
         return;
     }
@@ -2242,7 +2245,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
         if (event_handler.tab_focus->s || event_handler.tab_focus->ob2_data)
             main_window_event(main_window,
                               event_handler.tab_focus,
-                              "evt_tab_focus",
+                              XSetName::EVT_TAB_FOCUS,
                               main_window->curpanel,
                               cur_tabx + 1,
                               nullptr,
@@ -2261,7 +2264,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
                                       nullptr);
 
     update_window_title(nullptr, main_window);
-    if (xset_get_b("main_save_tabs"))
+    if (xset_get_b(XSetName::MAIN_SAVE_TABS))
         autosave_request_add();
 }
 
@@ -2275,7 +2278,7 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
     if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
         main_window_event(file_browser->main_window,
                           event_handler.win_click,
-                          "evt_win_click",
+                          XSetName::EVT_WIN_CLICK,
                           0,
                           0,
                           "tabbar",
@@ -2301,13 +2304,15 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
 
             XSet* set;
 
-            set = xset_set_cb("tab_close", (GFunc)on_close_notebook_page, file_browser);
+            set = xset_set_cb(XSetName::TAB_CLOSE, (GFunc)on_close_notebook_page, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
-            set = xset_set_cb("tab_restore", (GFunc)on_restore_notebook_page, file_browser);
+            set = xset_set_cb(XSetName::TAB_RESTORE, (GFunc)on_restore_notebook_page, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
-            set = xset_set_cb("tab_new", (GFunc)ptk_file_browser_new_tab, file_browser);
+            set = xset_set_cb(XSetName::TAB_NEW, (GFunc)ptk_file_browser_new_tab, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
-            set = xset_set_cb("tab_new_here", (GFunc)ptk_file_browser_new_tab_here, file_browser);
+            set = xset_set_cb(XSetName::TAB_NEW_HERE,
+                              (GFunc)ptk_file_browser_new_tab_here,
+                              file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
             gtk_widget_show_all(GTK_WIDGET(popup));
             g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
@@ -2356,13 +2361,13 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, FMMainWindow* main_win
         ptk_file_browser_select_last(file_browser);                   // MOD restore last selections
         gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view)); // MOD
     }
-    if (xset_get_b("main_save_tabs"))
+    if (xset_get_b(XSetName::MAIN_SAVE_TABS))
         autosave_request_add();
 
     if (event_handler.tab_chdir->s || event_handler.tab_chdir->ob2_data)
         main_window_event(main_window,
                           event_handler.tab_chdir,
-                          "evt_tab_chdir",
+                          XSetName::EVT_TAB_CHDIR,
                           0,
                           0,
                           nullptr,
@@ -2581,7 +2586,7 @@ fm_main_window_add_new_tab(FMMainWindow* main_window, const char* folder_path)
     if (event_handler.tab_new->s || event_handler.tab_new->ob2_data)
         main_window_event(main_window,
                           event_handler.tab_new,
-                          "evt_tab_new",
+                          XSetName::EVT_TAB_NEW,
                           0,
                           0,
                           nullptr,
@@ -2654,7 +2659,7 @@ on_about_activate(GtkMenuItem* menuitem, void* user_data)
         gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(about_dlg), PACKAGE_VERSION);
 
         const char* name;
-        XSet* set = xset_get("main_icon");
+        XSet* set = xset_get(XSetName::MAIN_ICON);
         if (set->icon)
             name = set->icon;
         else if (geteuid() == 0)
@@ -2754,7 +2759,7 @@ set_panel_focus(FMMainWindow* main_window, PtkFileBrowser* file_browser)
     if (event_handler.pnl_focus->s || event_handler.pnl_focus->ob2_data)
         main_window_event(main_window,
                           event_handler.pnl_focus,
-                          "evt_pnl_focus",
+                          XSetName::EVT_PNL_FOCUS,
                           mw->curpanel,
                           0,
                           nullptr,
@@ -2770,7 +2775,7 @@ on_fullscreen_activate(GtkMenuItem* menuitem, FMMainWindow* main_window)
     (void)menuitem;
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
-    if (xset_get_b("main_full"))
+    if (xset_get_b(XSetName::MAIN_FULL))
     {
         if (file_browser && file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
             ptk_file_browser_save_column_widths(GTK_TREE_VIEW(file_browser->folder_view),
@@ -2785,7 +2790,7 @@ on_fullscreen_activate(GtkMenuItem* menuitem, FMMainWindow* main_window)
         main_window->fullscreen = false;
         gtk_window_unfullscreen(GTK_WINDOW(main_window));
         gtk_widget_show(main_window->menu_bar);
-        if (xset_get_b("main_pbar"))
+        if (xset_get_b(XSetName::MAIN_PBAR))
             gtk_widget_show(main_window->panelbar);
 
         if (!main_window->maximized)
@@ -2817,7 +2822,7 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
         }
     }
 
-    char* orig_fmt = xset_get_s("main_title");
+    char* orig_fmt = xset_get_s(XSetName::MAIN_TITLE);
     std::string fmt;
     if (orig_fmt)
         fmt = orig_fmt;
@@ -2886,7 +2891,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, unsigned 
     if (event_handler.tab_focus->ob2_data || event_handler.tab_focus->s)
         main_window_event(main_window,
                           event_handler.tab_focus,
-                          "evt_tab_focus",
+                          XSetName::EVT_TAB_FOCUS,
                           main_window->curpanel,
                           page_num + 1,
                           nullptr,
@@ -3171,7 +3176,7 @@ on_file_browser_sel_change(PtkFileBrowser* file_browser, FMMainWindow* main_wind
     if ((event_handler.pnl_sel->ob2_data || event_handler.pnl_sel->s) &&
         main_window_event(main_window,
                           event_handler.pnl_sel,
-                          "evt_pnl_sel",
+                          XSetName::EVT_PNL_SEL,
                           0,
                           0,
                           nullptr,
@@ -3242,7 +3247,7 @@ on_main_window_focus(GtkWidget* main_window, GdkEventFocus* event, void* user_da
     if (event_handler.win_focus->s || event_handler.win_focus->ob2_data)
         main_window_event(FM_MAIN_WINDOW(main_window),
                           event_handler.win_focus,
-                          "evt_win_focus",
+                          XSetName::EVT_WIN_FOCUS,
                           0,
                           0,
                           nullptr,
@@ -3303,7 +3308,7 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
     if ((event_handler.win_key->s || event_handler.win_key->ob2_data) &&
         main_window_event(main_window,
                           event_handler.win_key,
-                          "evt_win_key",
+                          XSetName::EVT_WIN_KEY,
                           0,
                           0,
                           nullptr,
@@ -3385,13 +3390,13 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
         return true;
 
     // special edit items
-    if (!strcmp(set->name, "edit_cut") || !strcmp(set->name, "edit_copy") ||
-        !strcmp(set->name, "edit_delete") || !strcmp(set->name, "select_all"))
+    if (set->xset_name == XSetName::EDIT_CUT || set->xset_name == XSetName::EDIT_COPY ||
+        set->xset_name == XSetName::EDIT_DELETE || set->xset_name == XSetName::SELECT_ALL)
     {
         if (!gtk_widget_is_focus(browser->folder_view))
             return false;
     }
-    else if (!strcmp(set->name, "edit_paste"))
+    else if (set->xset_name == XSetName::EDIT_PASTE)
     {
         bool side_dir_focus =
             (browser->side_dir && gtk_widget_is_focus(GTK_WIDGET(browser->side_dir)));
@@ -3413,46 +3418,46 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
         ptk_location_view_on_action(GTK_WIDGET(browser->side_dev), set);
     else if (Glib::str_has_prefix(set->name, "main_"))
     {
-        if (!strcmp(set->name, "main_new_window"))
+        if (set->xset_name == XSetName::MAIN_NEW_WINDOW)
             on_new_window_activate(nullptr, main_window);
-        else if (!strcmp(set->name, "main_root_window"))
+        else if (set->xset_name == XSetName::MAIN_ROOT_WINDOW)
             on_open_current_folder_as_root(nullptr, main_window);
-        else if (!strcmp(set->name, "main_search"))
+        else if (set->xset_name == XSetName::MAIN_SEARCH)
             on_find_file_activate(nullptr, main_window);
-        else if (!strcmp(set->name, "main_terminal"))
+        else if (set->xset_name == XSetName::MAIN_TERMINAL)
             on_open_terminal_activate(nullptr, main_window);
-        else if (!strcmp(set->name, "main_root_terminal"))
+        else if (set->xset_name == XSetName::MAIN_ROOT_TERMINAL)
             on_open_root_terminal_activate(nullptr, main_window);
-        else if (!strcmp(set->name, "main_save_session"))
+        else if (set->xset_name == XSetName::MAIN_SAVE_SESSION)
             on_open_url(nullptr, main_window);
-        else if (!strcmp(set->name, "main_exit"))
+        else if (set->xset_name == XSetName::MAIN_EXIT)
             on_quit_activate(nullptr, main_window);
-        else if (!strcmp(set->name, "main_full"))
+        else if (set->xset_name == XSetName::MAIN_FULL)
         {
-            xset_set_b("main_full", !main_window->fullscreen);
+            xset_set_b(XSetName::MAIN_FULL, !main_window->fullscreen);
             on_fullscreen_activate(nullptr, main_window);
         }
-        else if (!strcmp(set->name, "main_prefs"))
+        else if (set->xset_name == XSetName::MAIN_PREFS)
             on_preference_activate(nullptr, main_window);
-        else if (!strcmp(set->name, "main_design_mode"))
+        else if (set->xset_name == XSetName::MAIN_DESIGN_MODE)
             main_design_mode(nullptr, main_window);
-        else if (!strcmp(set->name, "main_pbar"))
+        else if (set->xset_name == XSetName::MAIN_PBAR)
             show_panels_all_windows(nullptr, main_window);
-        else if (!strcmp(set->name, "main_icon"))
+        else if (set->xset_name == XSetName::MAIN_ICON)
             on_main_icon();
-        else if (!strcmp(set->name, "main_title"))
+        else if (set->xset_name == XSetName::MAIN_TITLE)
             update_window_title(nullptr, main_window);
-        else if (!strcmp(set->name, "main_about"))
+        else if (set->xset_name == XSetName::MAIN_ABOUT)
             on_about_activate(nullptr, main_window);
     }
     else if (Glib::str_has_prefix(set->name, "panel_"))
     {
         int i;
-        if (!strcmp(set->name, "panel_prev"))
+        if (set->xset_name == XSetName::PANEL_PREV)
             i = -1;
-        else if (!strcmp(set->name, "panel_next"))
+        else if (set->xset_name == XSetName::PANEL_NEXT)
             i = -2;
-        else if (!strcmp(set->name, "panel_hide"))
+        else if (set->xset_name == XSetName::PANEL_HIDE)
             i = -3;
         else
             i = strtol(set->name, nullptr, 10);
@@ -3462,29 +3467,45 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
         on_plugin_install(nullptr, main_window, set);
     else if (Glib::str_has_prefix(set->name, "task_"))
     {
-        if (strstr(set->name, "task_manager"))
+        if (set->xset_name == XSetName::TASK_MANAGER)
             on_task_popup_show(nullptr, main_window, set->name);
-        else if (!strcmp(set->name, "task_col_reorder"))
+        else if (set->xset_name == XSetName::TASK_COL_REORDER)
             on_reorder(nullptr, GTK_WIDGET(browser->task_view));
-        else if (Glib::str_has_prefix(set->name, "task_col_"))
+        else if (set->xset_name == XSetName::TASK_COL_STATUS ||
+                 set->xset_name == XSetName::TASK_COL_COUNT ||
+                 set->xset_name == XSetName::TASK_COL_PATH ||
+                 set->xset_name == XSetName::TASK_COL_FILE ||
+                 set->xset_name == XSetName::TASK_COL_TO ||
+                 set->xset_name == XSetName::TASK_COL_PROGRESS ||
+                 set->xset_name == XSetName::TASK_COL_TOTAL ||
+                 set->xset_name == XSetName::TASK_COL_STARTED ||
+                 set->xset_name == XSetName::TASK_COL_ELAPSED ||
+                 set->xset_name == XSetName::TASK_COL_CURSPEED ||
+                 set->xset_name == XSetName::TASK_COL_CUREST ||
+                 set->xset_name == XSetName::TASK_COL_AVGSPEED ||
+                 set->xset_name == XSetName::TASK_COL_AVGEST ||
+                 set->xset_name == XSetName::TASK_COL_REORDER)
             on_task_column_selected(nullptr, browser->task_view);
-        else if (Glib::str_has_prefix(set->name, "task_stop") ||
-                 Glib::str_has_prefix(set->name, "task_pause") ||
-                 Glib::str_has_prefix(set->name, "task_que_") || !strcmp(set->name, "task_que") ||
-                 Glib::str_has_prefix(set->name, "task_resume"))
+        else if (set->xset_name == XSetName::TASK_STOP ||
+                 set->xset_name == XSetName::TASK_STOP_ALL ||
+                 set->xset_name == XSetName::TASK_PAUSE ||
+                 set->xset_name == XSetName::TASK_PAUSE_ALL ||
+                 set->xset_name == XSetName::TASK_QUE || set->xset_name == XSetName::TASK_QUE_ALL ||
+                 set->xset_name == XSetName::TASK_RESUME ||
+                 set->xset_name == XSetName::TASK_RESUME_ALL)
         {
             PtkFileTask* ptask = get_selected_task(browser->task_view);
             on_task_stop(nullptr, browser->task_view, set, ptask);
         }
-        else if (!strcmp(set->name, "task_showout"))
+        else if (set->xset_name == XSetName::TASK_SHOWOUT)
             show_task_dialog(nullptr, browser->task_view);
         else if (Glib::str_has_prefix(set->name, "task_err_"))
             on_task_popup_errset(nullptr, main_window, set->name);
     }
-    else if (!strcmp(set->name, "rubberband"))
+    else if (set->xset_name == XSetName::RUBBERBAND)
         main_window_rubberband_all();
     else
-        ptk_file_browser_on_action(browser, set->name);
+        ptk_file_browser_on_action(browser, set->xset_name);
 
     return true;
 }
@@ -3630,21 +3651,21 @@ static const std::array<const char*, 14> task_titles
     "StartTime",
 };
 
-static const std::array<std::string, 13> task_names
+static const std::array<XSetName, 13> task_names
 {
-    "task_col_status",
-    "task_col_count",
-    "task_col_path",
-    "task_col_file",
-    "task_col_to",
-    "task_col_progress",
-    "task_col_total",
-    "task_col_started",
-    "task_col_elapsed",
-    "task_col_curspeed",
-    "task_col_curest",
-    "task_col_avgspeed",
-    "task_col_avgest",
+    XSetName::TASK_COL_STATUS,
+    XSetName::TASK_COL_COUNT,
+    XSetName::TASK_COL_PATH,
+    XSetName::TASK_COL_FILE,
+    XSetName::TASK_COL_TO,
+    XSetName::TASK_COL_PROGRESS,
+    XSetName::TASK_COL_TOTAL,
+    XSetName::TASK_COL_STARTED,
+    XSetName::TASK_COL_ELAPSED,
+    XSetName::TASK_COL_CURSPEED,
+    XSetName::TASK_COL_CUREST,
+    XSetName::TASK_COL_AVGSPEED,
+    XSetName::TASK_COL_AVGEST,
 };
 // clang-format on
 
@@ -4218,9 +4239,9 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
     buf.append(fmt::format("fm_my_window_id=\"{:p}\"\n", (void*)main_window));
 
     // utils
-    esc_path = bash_quote(xset_get_s("editor"));
+    esc_path = bash_quote(xset_get_s(XSetName::EDITOR));
     buf.append(fmt::format("fm_editor={}\n", esc_path));
-    buf.append(fmt::format("fm_editor_terminal=\"{}\"\n", xset_get_b("editor") ? 1 : 0));
+    buf.append(fmt::format("fm_editor_terminal=\"{}\"\n", xset_get_b(XSetName::EDITOR) ? 1 : 0));
 
     // set
     if (set)
@@ -4424,7 +4445,7 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
     GSList* running = nullptr;
     GSList* queued = nullptr;
     bool smart;
-    smart = xset_get_b("task_q_smart");
+    smart = xset_get_b(XSetName::TASK_Q_SMART);
     if (!GTK_IS_TREE_VIEW(view))
         return;
 
@@ -4527,20 +4548,22 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, XSet* set2, PtkFileTask* ptask2
         set = XSET(g_object_get_data(G_OBJECT(item), "set"));
     else
         set = set2;
+
     if (!set || !Glib::str_has_prefix(set->name, "task_"))
         return;
 
     char* name = set->name + 5;
-    if (Glib::str_has_prefix(name, "stop"))
+    if (Glib::str_has_prefix(name, "task_stop"))
         job = MainWindowJob::JOB_STOP;
-    else if (Glib::str_has_prefix(name, "pause"))
+    else if (Glib::str_has_prefix(name, "task_pause"))
         job = MainWindowJob::JOB_PAUSE;
-    else if (Glib::str_has_prefix(name, "que"))
+    else if (Glib::str_has_prefix(name, "task_que"))
         job = MainWindowJob::JOB_QUEUE;
-    else if (Glib::str_has_prefix(name, "resume"))
+    else if (Glib::str_has_prefix(name, "task_resume"))
         job = MainWindowJob::JOB_RESUME;
     else
         return;
+
     bool all = (Glib::str_has_suffix(name, "_all"));
 
     if (all)
@@ -4601,22 +4624,22 @@ idle_set_task_height(FMMainWindow* main_window)
     gtk_widget_get_allocation(GTK_WIDGET(main_window), &allocation);
 
     // set new config panel sizes to half of window
-    if (!xset_is("panel_sliders"))
+    if (!xset_is(XSetName::PANEL_SLIDERS))
     {
         // this is not perfect because panel half-width is set before user
         // adjusts window size
-        XSet* set = xset_get("panel_sliders");
+        XSet* set = xset_get(XSetName::PANEL_SLIDERS);
         set->x = ztd::strdup(allocation.width / 2);
         set->y = ztd::strdup(allocation.width / 2);
         set->s = ztd::strdup(allocation.height / 2);
     }
 
     // restore height (in case window height changed)
-    taskh = xset_get_int("task_show_manager", XSetSetSet::X); // task height >=0.9.2
+    taskh = xset_get_int(XSetName::TASK_SHOW_MANAGER, XSetSetSet::X); // task height >=0.9.2
     if (taskh == 0)
     {
         // use pre-0.9.2 slider pos to calculate height
-        pos = xset_get_int("panel_sliders", XSetSetSet::Z); // < 0.9.2 slider pos
+        pos = xset_get_int(XSetName::PANEL_SLIDERS, XSetSetSet::Z); // < 0.9.2 slider pos
         if (pos == 0)
             taskh = 200;
         else
@@ -4657,9 +4680,9 @@ show_task_manager(FMMainWindow* main_window, bool show)
             if (pos)
             {
                 // save slider pos for version < 0.9.2 (in case of downgrade)
-                xset_set("panel_sliders", XSetSetSet::Z, std::to_string(pos).c_str());
+                xset_set(XSetName::PANEL_SLIDERS, XSetSetSet::Z, std::to_string(pos).c_str());
                 // save absolute height introduced v0.9.2
-                xset_set("task_show_manager",
+                xset_set(XSetName::TASK_SHOW_MANAGER,
                          XSetSetSet::X,
                          std::to_string(allocation.height - pos).c_str());
                 // LOG_INFO("HIDE  win {}x{}    task height {}   slider {}", allocation.width,
@@ -4694,36 +4717,38 @@ on_task_popup_show(GtkMenuItem* item, FMMainWindow* main_window, char* name2)
 
     if (name)
     {
-        if (!strcmp(name, "task_show_manager"))
+        XSetName xset_name = translate_xset_name_to(name);
+
+        if (xset_name == XSetName::TASK_SHOW_MANAGER)
         {
-            if (xset_get_b("task_show_manager"))
-                xset_set_b("task_hide_manager", false);
+            if (xset_get_b(XSetName::TASK_SHOW_MANAGER))
+                xset_set_b(XSetName::TASK_HIDE_MANAGER, false);
             else
             {
-                xset_set_b("task_hide_manager", true);
-                xset_set_b("task_show_manager", false);
+                xset_set_b(XSetName::TASK_HIDE_MANAGER, true);
+                xset_set_b(XSetName::TASK_SHOW_MANAGER, false);
             }
         }
         else
         {
-            if (xset_get_b("task_hide_manager"))
-                xset_set_b("task_show_manager", false);
+            if (xset_get_b(XSetName::TASK_HIDE_MANAGER))
+                xset_set_b(XSetName::TASK_SHOW_MANAGER, false);
             else
             {
-                xset_set_b("task_hide_manager", false);
-                xset_set_b("task_show_manager", true);
+                xset_set_b(XSetName::TASK_HIDE_MANAGER, false);
+                xset_set_b(XSetName::TASK_SHOW_MANAGER, true);
             }
         }
     }
 
-    if (xset_get_b("task_show_manager"))
+    if (xset_get_b(XSetName::TASK_SHOW_MANAGER))
         show_task_manager(main_window, true);
     else
     {
         model = gtk_tree_view_get_model(GTK_TREE_VIEW(main_window->task_view));
         if (gtk_tree_model_get_iter_first(model, &it))
             show_task_manager(main_window, true);
-        else if (xset_get_b("task_hide_manager"))
+        else if (xset_get_b(XSetName::TASK_HIDE_MANAGER))
             show_task_manager(main_window, false);
     }
 }
@@ -4741,43 +4766,45 @@ on_task_popup_errset(GtkMenuItem* item, FMMainWindow* main_window, char* name2)
     if (!name)
         return;
 
-    if (!strcmp(name, "task_err_first"))
+    XSetName xset_name = translate_xset_name_to(name);
+
+    if (xset_name == XSetName::TASK_ERR_FIRST)
     {
-        if (xset_get_b("task_err_first"))
+        if (xset_get_b(XSetName::TASK_ERR_FIRST))
         {
-            xset_set_b("task_err_any", false);
-            xset_set_b("task_err_cont", false);
+            xset_set_b(XSetName::TASK_ERR_ANY, false);
+            xset_set_b(XSetName::TASK_ERR_CONT, false);
         }
         else
         {
-            xset_set_b("task_err_any", false);
-            xset_set_b("task_err_cont", true);
+            xset_set_b(XSetName::TASK_ERR_ANY, false);
+            xset_set_b(XSetName::TASK_ERR_CONT, true);
         }
     }
-    else if (!strcmp(name, "task_err_any"))
+    else if (xset_name == XSetName::TASK_ERR_ANY)
     {
-        if (xset_get_b("task_err_any"))
+        if (xset_get_b(XSetName::TASK_ERR_ANY))
         {
-            xset_set_b("task_err_first", false);
-            xset_set_b("task_err_cont", false);
+            xset_set_b(XSetName::TASK_ERR_FIRST, false);
+            xset_set_b(XSetName::TASK_ERR_CONT, false);
         }
         else
         {
-            xset_set_b("task_err_first", false);
-            xset_set_b("task_err_cont", true);
+            xset_set_b(XSetName::TASK_ERR_FIRST, false);
+            xset_set_b(XSetName::TASK_ERR_CONT, true);
         }
     }
     else
     {
-        if (xset_get_b("task_err_cont"))
+        if (xset_get_b(XSetName::TASK_ERR_CONT))
         {
-            xset_set_b("task_err_first", false);
-            xset_set_b("task_err_any", false);
+            xset_set_b(XSetName::TASK_ERR_FIRST, false);
+            xset_set_b(XSetName::TASK_ERR_ANY, false);
         }
         else
         {
-            xset_set_b("task_err_first", true);
-            xset_set_b("task_err_any", false);
+            xset_set_b(XSetName::TASK_ERR_FIRST, true);
+            xset_set_b(XSetName::TASK_ERR_ANY, false);
         }
     }
 }
@@ -4791,36 +4818,36 @@ main_task_prepare_menu(FMMainWindow* main_window, GtkWidget* menu, GtkAccelGroup
     XSet* set_radio;
 
     GtkWidget* parent = main_window->task_view;
-    set = xset_set_cb("task_show_manager", (GFunc)on_task_popup_show, main_window);
+    set = xset_set_cb(XSetName::TASK_SHOW_MANAGER, (GFunc)on_task_popup_show, main_window);
     xset_set_ob1(set, "name", set->name);
     xset_set_ob2(set, nullptr, nullptr);
     set_radio = set;
-    set = xset_set_cb("task_hide_manager", (GFunc)on_task_popup_show, main_window);
+    set = xset_set_cb(XSetName::TASK_HIDE_MANAGER, (GFunc)on_task_popup_show, main_window);
     xset_set_ob1(set, "name", set->name);
     xset_set_ob2(set, nullptr, set_radio);
 
-    xset_set_cb("task_col_count", (GFunc)on_task_column_selected, parent);
-    xset_set_cb("task_col_path", (GFunc)on_task_column_selected, parent);
-    xset_set_cb("task_col_file", (GFunc)on_task_column_selected, parent);
-    xset_set_cb("task_col_to", (GFunc)on_task_column_selected, parent);
-    xset_set_cb("task_col_progress", (GFunc)on_task_column_selected, parent);
-    xset_set_cb("task_col_total", (GFunc)on_task_column_selected, parent);
-    xset_set_cb("task_col_started", (GFunc)on_task_column_selected, parent);
-    xset_set_cb("task_col_elapsed", (GFunc)on_task_column_selected, parent);
-    xset_set_cb("task_col_curspeed", (GFunc)on_task_column_selected, parent);
-    xset_set_cb("task_col_curest", (GFunc)on_task_column_selected, parent);
-    xset_set_cb("task_col_avgspeed", (GFunc)on_task_column_selected, parent);
-    xset_set_cb("task_col_avgest", (GFunc)on_task_column_selected, parent);
-    xset_set_cb("task_col_reorder", (GFunc)on_reorder, parent);
+    xset_set_cb(XSetName::TASK_COL_COUNT, (GFunc)on_task_column_selected, parent);
+    xset_set_cb(XSetName::TASK_COL_PATH, (GFunc)on_task_column_selected, parent);
+    xset_set_cb(XSetName::TASK_COL_FILE, (GFunc)on_task_column_selected, parent);
+    xset_set_cb(XSetName::TASK_COL_TO, (GFunc)on_task_column_selected, parent);
+    xset_set_cb(XSetName::TASK_COL_PROGRESS, (GFunc)on_task_column_selected, parent);
+    xset_set_cb(XSetName::TASK_COL_TOTAL, (GFunc)on_task_column_selected, parent);
+    xset_set_cb(XSetName::TASK_COL_STARTED, (GFunc)on_task_column_selected, parent);
+    xset_set_cb(XSetName::TASK_COL_ELAPSED, (GFunc)on_task_column_selected, parent);
+    xset_set_cb(XSetName::TASK_COL_CURSPEED, (GFunc)on_task_column_selected, parent);
+    xset_set_cb(XSetName::TASK_COL_CUREST, (GFunc)on_task_column_selected, parent);
+    xset_set_cb(XSetName::TASK_COL_AVGSPEED, (GFunc)on_task_column_selected, parent);
+    xset_set_cb(XSetName::TASK_COL_AVGEST, (GFunc)on_task_column_selected, parent);
+    xset_set_cb(XSetName::TASK_COL_REORDER, (GFunc)on_reorder, parent);
 
-    set = xset_set_cb("task_err_first", (GFunc)on_task_popup_errset, main_window);
+    set = xset_set_cb(XSetName::TASK_ERR_FIRST, (GFunc)on_task_popup_errset, main_window);
     xset_set_ob1(set, "name", set->name);
     xset_set_ob2(set, nullptr, nullptr);
     set_radio = set;
-    set = xset_set_cb("task_err_any", (GFunc)on_task_popup_errset, main_window);
+    set = xset_set_cb(XSetName::TASK_ERR_ANY, (GFunc)on_task_popup_errset, main_window);
     xset_set_ob1(set, "name", set->name);
     xset_set_ob2(set, nullptr, set_radio);
-    set = xset_set_cb("task_err_cont", (GFunc)on_task_popup_errset, main_window);
+    set = xset_set_cb(XSetName::TASK_ERR_CONT, (GFunc)on_task_popup_errset, main_window);
     xset_set_ob1(set, "name", set->name);
     xset_set_ob2(set, nullptr, set_radio);
 }
@@ -4886,7 +4913,7 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow*
     if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
         main_window_event(main_window,
                           event_handler.win_click,
-                          "evt_win_click",
+                          XSetName::EVT_WIN_CLICK,
                           0,
                           0,
                           "tasklist",
@@ -4927,14 +4954,14 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow*
                 return false;
             if (event->button == 1 && g_strcmp0(gtk_tree_view_column_get_title(col), "Status"))
                 return false;
-            const char* sname;
+            XSetName sname;
             switch (ptask->task->state_pause)
             {
                 case VFSFileTaskState::VFS_FILE_TASK_PAUSE:
-                    sname = ztd::strdup("task_que");
+                    sname = XSetName::TASK_QUE;
                     break;
                 case VFSFileTaskState::VFS_FILE_TASK_QUEUE:
-                    sname = ztd::strdup("task_resume");
+                    sname = XSetName::TASK_RESUME;
                     break;
                 case VFSFileTaskState::VFS_FILE_TASK_RUNNING:
                 case VFSFileTaskState::VFS_FILE_TASK_SIZE_TIMEOUT:
@@ -4942,7 +4969,7 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow*
                 case VFSFileTaskState::VFS_FILE_TASK_ERROR:
                 case VFSFileTaskState::VFS_FILE_TASK_FINISH:
                 default:
-                    sname = ztd::strdup("task_pause");
+                    sname = XSetName::TASK_PAUSE;
             }
             set = xset_get(sname);
             on_task_stop(nullptr, view, set, ptask);
@@ -4984,43 +5011,43 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow*
             context = xset_context_new();
             main_context_fill(file_browser, context);
 
-            set = xset_set_cb("task_stop", (GFunc)on_task_stop, view);
+            set = xset_set_cb(XSetName::TASK_STOP, (GFunc)on_task_stop, view);
             xset_set_ob1(set, "task", ptask);
             set->disable = !ptask;
 
-            set = xset_set_cb("task_pause", (GFunc)on_task_stop, view);
+            set = xset_set_cb(XSetName::TASK_PAUSE, (GFunc)on_task_stop, view);
             xset_set_ob1(set, "task", ptask);
             set->disable =
                 (!ptask || ptask->task->state_pause == VFSFileTaskState::VFS_FILE_TASK_PAUSE ||
                  (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC &&
                   !ptask->task->exec_pid));
 
-            set = xset_set_cb("task_que", (GFunc)on_task_stop, view);
+            set = xset_set_cb(XSetName::TASK_QUE, (GFunc)on_task_stop, view);
             xset_set_ob1(set, "task", ptask);
             set->disable =
                 (!ptask || ptask->task->state_pause == VFSFileTaskState::VFS_FILE_TASK_QUEUE ||
                  (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC &&
                   !ptask->task->exec_pid));
 
-            set = xset_set_cb("task_resume", (GFunc)on_task_stop, view);
+            set = xset_set_cb(XSetName::TASK_RESUME, (GFunc)on_task_stop, view);
             xset_set_ob1(set, "task", ptask);
             set->disable =
                 (!ptask || ptask->task->state_pause == VFSFileTaskState::VFS_FILE_TASK_RUNNING ||
                  (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC &&
                   !ptask->task->exec_pid));
 
-            xset_set_cb("task_stop_all", (GFunc)on_task_stop, view);
-            xset_set_cb("task_pause_all", (GFunc)on_task_stop, view);
-            xset_set_cb("task_que_all", (GFunc)on_task_stop, view);
-            xset_set_cb("task_resume_all", (GFunc)on_task_stop, view);
-            set = xset_get("task_all");
+            xset_set_cb(XSetName::TASK_STOP_ALL, (GFunc)on_task_stop, view);
+            xset_set_cb(XSetName::TASK_PAUSE_ALL, (GFunc)on_task_stop, view);
+            xset_set_cb(XSetName::TASK_QUE_ALL, (GFunc)on_task_stop, view);
+            xset_set_cb(XSetName::TASK_RESUME_ALL, (GFunc)on_task_stop, view);
+            set = xset_get(XSetName::TASK_ALL);
             set->disable = !is_tasks;
 
             const char* showout;
             showout = ztd::strdup("");
             if (ptask && ptask->pop_handler)
             {
-                xset_set_cb("task_showout", (GFunc)show_task_dialog, view);
+                xset_set_cb(XSetName::TASK_SHOWOUT, (GFunc)show_task_dialog, view);
                 showout = ztd::strdup(" task_showout");
             }
 
@@ -5111,7 +5138,7 @@ main_task_view_remove_task(PtkFileTask* ptask)
 
     if (!gtk_tree_model_get_iter_first(model, &it))
     {
-        if (xset_get_b("task_hide_manager"))
+        if (xset_get_b(XSetName::TASK_HIDE_MANAGER))
             show_task_manager(main_window, false);
     }
 
@@ -5255,12 +5282,12 @@ main_task_view_update_task(PtkFileTask* ptask)
             std::string iname;
             if (ptask->task->state_pause == VFSFileTaskState::VFS_FILE_TASK_PAUSE)
             {
-                set = xset_get("task_pause");
+                set = xset_get(XSetName::TASK_PAUSE);
                 iname = set->icon ? set->icon : "media-playback-pause";
             }
             else if (ptask->task->state_pause == VFSFileTaskState::VFS_FILE_TASK_QUEUE)
             {
-                set = xset_get("task_que");
+                set = xset_get(XSetName::TASK_QUE);
                 iname = set->icon ? set->icon : "list-add";
             }
             else if (ptask->err_count && ptask->task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
@@ -5798,7 +5825,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         else if (!strcmp(argv[i], "window_fullscreen"))
         {
-            xset_set_b("main_full", get_bool(argv[i + 1]));
+            xset_set_b(XSetName::MAIN_FULL, get_bool(argv[i + 1]));
             on_fullscreen_activate(nullptr, main_window);
         }
         else if (!strcmp(argv[i], "screen_size"))
@@ -6061,6 +6088,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         else if (Glib::str_has_prefix(argv[i], "sort_"))
         {
+            XSetName xset_name;
             if (!strcmp(argv[i] + 5, "ascend"))
             {
                 ptk_file_browser_set_sort_type(file_browser,
@@ -6070,35 +6098,35 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             else if (!strcmp(argv[i] + 5, "alphanum"))
             {
-                str = ztd::strdup("sortx_alphanum");
-                xset_set_b(str, get_bool(argv[i + 1]));
+                xset_name = XSetName::SORTX_ALPHANUM;
+                xset_set_b(xset_name, get_bool(argv[i + 1]));
             }
-            else if (!strcmp(argv[i] + 5, "natural"))
-            {
-                str = ztd::strdup("sortx_natural");
-                xset_set_b(str, get_bool(argv[i + 1]));
-            }
+            // else if (!strcmp(argv[i] + 5, "natural"))
+            //{
+            //     xset_name = XSetName::SORTX_NATURAL;
+            //     xset_set_b(xset_name, get_bool(argv[i + 1]));
+            // }
             else if (!strcmp(argv[i] + 5, "case"))
             {
-                str = ztd::strdup("sortx_case");
-                xset_set_b(str, get_bool(argv[i + 1]));
+                xset_name = XSetName::SORTX_CASE;
+                xset_set_b(xset_name, get_bool(argv[i + 1]));
             }
             else if (!strcmp(argv[i] + 5, "hidden_first"))
             {
                 if (get_bool(argv[i + 1]))
-                    str = ztd::strdup("sortx_hidfirst");
+                    xset_name = XSetName::SORTX_HIDFIRST;
                 else
-                    str = ztd::strdup("sortx_hidlast");
-                xset_set_b(str, true);
+                    xset_name = XSetName::SORTX_HIDLAST;
+                xset_set_b(xset_name, true);
             }
             else if (!strcmp(argv[i] + 5, "first"))
             {
                 if (!g_strcmp0(argv[i + 1], "files"))
-                    str = ztd::strdup("sortx_files");
+                    xset_name = XSetName::SORTX_FILES;
                 else if (!g_strcmp0(argv[i + 1], "directories"))
-                    str = ztd::strdup("sortx_directories");
+                    xset_name = XSetName::SORTX_DIRECTORIES;
                 else if (!g_strcmp0(argv[i + 1], "mixed"))
-                    str = ztd::strdup("sortx_mix");
+                    xset_name = XSetName::SORTX_MIX;
                 else
                 {
                     reply = fmt::format("spacefm: invalid {} value\n", argv[i]);
@@ -6110,7 +6138,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = fmt::format("spacefm: invalid property {}\n", argv[i]);
                 return 1;
             }
-            ptk_file_browser_set_sort_extra(file_browser, str);
+            ptk_file_browser_set_sort_extra(file_browser, xset_name);
         }
         else if (!strcmp(argv[i], "show_thumbnails"))
         {
@@ -6736,7 +6764,10 @@ main_window_socket_command(char* argv[], std::string& reply)
             else if (!strcmp(argv[i + 2], "queue") || !strcmp(argv[i + 2], "queued"))
                 ptk_file_task_pause(ptask, VFSFileTaskState::VFS_FILE_TASK_QUEUE);
             else if (!strcmp(argv[i + 2], "stop"))
-                on_task_stop(nullptr, main_window->task_view, xset_get("task_stop_all"), nullptr);
+                on_task_stop(nullptr,
+                             main_window->task_view,
+                             xset_get(XSetName::TASK_STOP_ALL),
+                             nullptr);
             else
             {
                 reply = fmt::format("spacefm: invalid queue_state '{}'\n", argv[i + 2]);
@@ -7053,7 +7084,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 // mount/unmount vol
                 if (!strcmp(argv[i], "mount"))
                     cmd = vfs_volume_get_mount_command(vol,
-                                                       xset_get_s("dev_mount_options"),
+                                                       xset_get_s(XSetName::DEV_MOUNT_OPTIONS),
                                                        &run_in_terminal);
                 else
                     cmd = vfs_volume_device_unmount_cmd(vol, &run_in_terminal);
@@ -7247,8 +7278,9 @@ main_window_socket_command(char* argv[], std::string& reply)
         main_context_fill(file_browser, context);
         if (context && context->valid)
         {
-            if (!xset_get_b("context_dlg") && xset_context_test(context, set->context, false) !=
-                                                  ItemPropContextState::CONTEXT_SHOW)
+            if (!xset_get_b(XSetName::CONTEXT_DLG) &&
+                xset_context_test(context, set->context, false) !=
+                    ItemPropContextState::CONTEXT_SHOW)
             {
                 reply = fmt::format("spacefm: item '{}' context hidden or disabled\n", argv[i]);
                 return 2;
@@ -7323,7 +7355,7 @@ main_window_socket_command(char* argv[], std::string& reply)
 }
 
 static bool
-run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset, const char* event,
+run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset, XSetName event,
           int panel, int tab, const char* focus, int keyval, int button, int state, bool visible,
           XSet* set, char* ucmd)
 {
@@ -7331,6 +7363,7 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
     int exit_status;
 
     std::string command;
+    std::string event_name = translate_xset_name_from(event);
 
     if (!ucmd)
         return false;
@@ -7343,13 +7376,13 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
     else
         inhibit = false;
 
-    if (!preset &&
-        (!strcmp(event, "evt_start") || !strcmp(event, "evt_exit") || !strcmp(event, "evt_device")))
+    if (!preset && (event == XSetName::EVT_START || event == XSetName::EVT_EXIT ||
+                    event == XSetName::EVT_DEVICE))
     {
         std::string cmd = ucmd;
+        cmd = ztd::replace(cmd, "%e", event_name);
 
-        cmd = ztd::replace(cmd, "%e", event);
-        if (!strcmp(event, "evt_device"))
+        if (event == XSetName::EVT_DEVICE)
         {
             if (!focus)
                 return false;
@@ -7369,7 +7402,7 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
             }
             cmd = ztd::replace(cmd, "%v", change);
         }
-        LOG_INFO("EVENT {} >>> {}", event, cmd);
+        LOG_INFO("EVENT {} >>> {}", event_name, cmd);
         command = fmt::format("bash -c {}", cmd);
         Glib::spawn_command_line_async(command);
         return false;
@@ -7418,7 +7451,7 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
         */
         var[1] = replace[i];
         if (var[1] == 'e')
-            cmd = ztd::replace(cmd, var, event);
+            cmd = ztd::replace(cmd, var, event_name);
         else if (ztd::contains(cmd, var))
         {
             switch (var[1])
@@ -7477,8 +7510,8 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
 
     if (!inhibit)
     {
-        LOG_INFO("EVENT {} >>> {}", event, cmd);
-        if (!strcmp(event, "evt_tab_close"))
+        LOG_INFO("EVENT {} >>> {}", event_name, cmd);
+        if (event == XSetName::EVT_TAB_CLOSE)
         {
             command = fmt::format("bash -c {}", cmd);
             // file_browser becomes invalid so spawn
@@ -7487,7 +7520,7 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
         else
         {
             // task
-            PtkFileTask* ptask = ptk_file_exec_new(event,
+            PtkFileTask* ptask = ptk_file_exec_new(event_name,
                                                    ptk_file_browser_get_cwd(file_browser),
                                                    GTK_WIDGET(file_browser),
                                                    main_window->task_view);
@@ -7501,7 +7534,7 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
         return false;
     }
 
-    LOG_INFO("REPLACE_EVENT {} >>> {}", event, cmd);
+    LOG_INFO("REPLACE_EVENT {} >>> {}", event_name, cmd);
 
     inhibit = false;
     command = fmt::format("bash -c {}", cmd);
@@ -7515,14 +7548,14 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
 }
 
 bool
-main_window_event(void* mw, XSet* preset, const char* event, int panel, int tab, const char* focus,
+main_window_event(void* mw, XSet* preset, XSetName event, int panel, int tab, const char* focus,
                   int keyval, int button, int state, bool visible)
 {
     XSet* set;
     bool inhibit = false;
 
-    // LOG_INFO("main_window_event {}", event);
-    // get set
+    // LOG_INFO("main_window_event {}", translate_xset_name_from(event));
+
     if (preset)
         set = preset;
     else

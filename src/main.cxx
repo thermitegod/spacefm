@@ -437,7 +437,7 @@ main(int argc, char* argv[])
     std::atexit(vfs_volume_finalize);
     std::atexit(single_instance_finalize);
 
-    main_window_event(nullptr, nullptr, "evt_start", 0, 0, nullptr, 0, 0, 0, false);
+    main_window_event(nullptr, nullptr, XSetName::EVT_START, 0, 0, nullptr, 0, 0, 0, false);
 
     // handle the parsed result of command line args
     if (handle_parsed_commandline_args())
@@ -448,7 +448,7 @@ main(int argc, char* argv[])
         gtk_main();
     }
 
-    main_window_event(nullptr, nullptr, "evt_exit", 0, 0, nullptr, 0, 0, 0, false);
+    main_window_event(nullptr, nullptr, XSetName::EVT_EXIT, 0, 0, nullptr, 0, 0, 0, false);
 
     std::exit(EXIT_SUCCESS);
 }
