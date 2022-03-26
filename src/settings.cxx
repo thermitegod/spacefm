@@ -2221,23 +2221,20 @@ xset_custom_new_name()
 {
     std::string setname;
 
-    do
+    while (true)
     {
-        char* hex8 = nullptr;
-        if (hex8)
-            g_free(hex8);
-        hex8 = randhex8();
-        setname = fmt::format("cstm_{}", hex8);
-        if (xset_is(setname.c_str()))
-            setname.clear();
-        else
+        setname = fmt::format("cstm_{}", randhex8());
+        if (!xset_is(setname.c_str()))
         {
             std::string path1 = Glib::build_filename(xset_get_config_dir(), "scripts", setname);
             std::string path2 = Glib::build_filename(xset_get_config_dir(), "plugin-data", setname);
-            if (std::filesystem::exists(path1) || std::filesystem::exists(path2))
-                setname.clear();
+
+            // only use free xset name if no aux data dirs exist for that name too.
+            if (!std::filesystem::exists(path1) && !std::filesystem::exists(path2))
+                break;
         }
-    } while (!setname.empty());
+    };
+
     return setname;
 }
 
