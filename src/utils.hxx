@@ -22,7 +22,7 @@ void print_command(const std::string& command) noexcept;
 void print_task_command(const char* ptask, const char* cmd) noexcept;
 void print_task_command_spawn(const std::vector<std::string>& argv, int pid) noexcept;
 
-char* randhex8() noexcept;
+const std::string randhex8() noexcept;
 
 bool have_rw_access(const std::string& path) noexcept;
 bool have_x_access(const std::string& path) noexcept;

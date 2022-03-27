@@ -1215,19 +1215,18 @@ XSet*
 add_new_handler(int mode)
 {
     // creates a new xset for a custom handler type
-    char* rand;
-    std::string name;
+    std::string setname;
 
     // get a unique new xset name
-    do
+    while (true)
     {
-        rand = randhex8();
-        name = fmt::format("{}{}", handler_cust_prefixs.at(mode), rand);
-        free(rand);
-    } while (xset_is(name));
+        setname = fmt::format("{}{}", handler_cust_prefixs.at(mode), randhex8());
+        if (!xset_is(setname))
+            break;
+    };
 
     // create and return the xset
-    XSet* set = xset_get(name);
+    XSet* set = xset_get(setname);
     set->lock = false;
     return set;
 }
@@ -2663,21 +2662,18 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
         free(file);
         return;
     }
-    char* hex8;
-    folder = nullptr;
-    while (!folder || std::filesystem::exists(folder))
+
+    std::string plug_dir;
+    while (true)
     {
-        hex8 = randhex8();
-        if (folder)
-            free(folder);
-        folder = g_build_filename(user_tmp, hex8, nullptr);
-        free(hex8);
+        plug_dir = Glib::build_filename(user_tmp, randhex8());
+        if (!std::filesystem::exists(plug_dir))
+            break;
     }
 
     // Install plugin
-    install_plugin_file(nullptr, hnd->dlg, file, folder, PluginJob::PLUGIN_JOB_COPY, nullptr);
+    install_plugin_file(nullptr, hnd->dlg, file, plug_dir, PluginJob::PLUGIN_JOB_COPY, nullptr);
     free(file);
-    free(folder);
 }
 
 static void

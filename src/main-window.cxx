@@ -239,7 +239,6 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
     XSet* set;
     char* path = nullptr;
     const char* deffolder;
-    char* plug_dir = nullptr;
     std::string msg;
     int job = PluginJob::PLUGIN_JOB_INSTALL;
 
@@ -276,6 +275,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
         save->s = g_path_get_dirname(path);
     }
 
+    std::string plug_dir;
     switch (job)
     {
         case PluginJob::PLUGIN_JOB_INSTALL:
@@ -306,7 +306,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
                 }
             }
 
-            plug_dir = g_build_filename(DATADIR, "spacefm", "plugins", plug_dir_name, nullptr);
+            plug_dir = Glib::build_filename(DATADIR, "spacefm", "plugins", plug_dir_name);
 
             if (std::filesystem::exists(plug_dir))
             {
@@ -321,7 +321,6 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
                                     msg) != GTK_RESPONSE_YES)
                 {
                     free(plug_dir_name);
-                    free(plug_dir);
                     free(path);
                     return;
                 }
@@ -343,13 +342,11 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
                 free(path);
                 return;
             }
-            while (!plug_dir || std::filesystem::exists(plug_dir))
+            while (true)
             {
-                char* hex8 = randhex8();
-                if (plug_dir)
-                    free(plug_dir);
-                plug_dir = g_build_filename(user_tmp, hex8, nullptr);
-                free(hex8);
+                plug_dir = Glib::build_filename(user_tmp, randhex8());
+                if (!std::filesystem::exists(plug_dir))
+                    break;
             }
             break;
         }
@@ -359,7 +356,6 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
 
     install_plugin_file(main_window, nullptr, path, plug_dir, job, nullptr);
     free(path);
-    free(plug_dir);
 }
 
 static GtkWidget*

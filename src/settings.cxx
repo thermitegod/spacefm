@@ -2995,8 +2995,8 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 }
 
 void
-install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* path, const char* plug_dir,
-                    int job, XSet* insert_set)
+install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& path,
+                    const std::string& plug_dir, int job, XSet* insert_set)
 {
     std::string own;
     std::string plug_dir_q = bash_quote(plug_dir);
@@ -3215,13 +3215,12 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
     save->s = g_path_get_dirname(path);
 
     // get or create tmp plugin dir
-    char* plug_dir = nullptr;
+    std::string plug_dir;
     if (!set->plugin)
     {
         char* s1 = (char*)xset_get_user_tmp_dir();
         if (!s1)
         {
-            free(plug_dir);
             free(path);
             xset_msg_dialog(parent,
                             GTK_MESSAGE_ERROR,
@@ -3230,19 +3229,17 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
                             "Unable to create temporary files");
             return;
         }
-        while (!plug_dir || std::filesystem::exists(plug_dir))
+        while (true)
         {
-            char* hex8 = randhex8();
-            if (plug_dir)
-                free(plug_dir);
-            plug_dir = g_build_filename(s1, hex8, nullptr);
-            free(hex8);
+            plug_dir = Glib::build_filename(s1, randhex8());
+            if (!std::filesystem::exists(plug_dir))
+                break;
         }
         std::filesystem::create_directories(plug_dir);
         std::filesystem::permissions(plug_dir, std::filesystem::perms::owner_all);
 
         // Create plugin file
-        char* plugin_path = g_build_filename(plug_dir, "plugin", nullptr);
+        std::string plugin_path = Glib::build_filename(plug_dir, "plugin");
 
         std::string buf = "";
 
@@ -3258,14 +3255,13 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
         set->next = s_next;
         set->parent = s_parent;
 
-        if (!xset_custom_export_files(set, plug_dir))
+        if (!xset_custom_export_files(set, plug_dir.c_str()))
         {
             if (!set->plugin)
             {
                 std::filesystem::remove_all(plug_dir);
                 LOG_INFO("Removed {}", plug_dir);
             }
-            free(plug_dir);
             free(path);
             xset_msg_dialog(parent,
                             GTK_MESSAGE_ERROR,
@@ -3276,14 +3272,13 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
         }
         if (set->menu_style == XSetMenu::XSET_MENU_SUBMENU && set->child)
         {
-            if (!xset_custom_export_write(buf, xset_get(set->child), plug_dir))
+            if (!xset_custom_export_write(buf, xset_get(set->child), plug_dir.c_str()))
             {
                 if (!set->plugin)
                 {
                     std::filesystem::remove_all(plug_dir);
                     LOG_INFO("Removed {}", plug_dir);
                 }
-                free(plug_dir);
                 free(path);
                 xset_msg_dialog(parent,
                                 GTK_MESSAGE_ERROR,
@@ -3299,8 +3294,6 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
         if (file.is_open())
             file << buf;
         file.close();
-
-        free(plugin_path);
     }
     else
         plug_dir = ztd::strdup(set->plug_dir);
@@ -3309,7 +3302,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
     // task
     PtkFileTask* ptask;
     ptask = ptk_file_exec_new("Export Plugin",
-                              plug_dir,
+                              plug_dir.c_str(),
                               parent,
                               file_browser ? file_browser->task_view : nullptr);
 
@@ -3337,7 +3330,6 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
     ptk_file_task_run(ptask);
 
     free(path);
-    free(plug_dir);
     return;
 }
 
@@ -4237,6 +4229,7 @@ xset_design_job(GtkWidget* item, XSet* set)
     char* folder;
     char* file = nullptr;
     std::string file2;
+    std::string plug_dir;
     char* custom_file;
     char* cscript;
     char* name;
@@ -4606,24 +4599,19 @@ xset_design_job(GtkWidget* item, XSet* set)
                 free(file);
                 break;
             }
-            char* hex8;
-            folder = nullptr;
-            while (!folder || std::filesystem::exists(folder))
+            while (std::filesystem::exists(plug_dir))
             {
-                hex8 = randhex8();
-                if (folder)
-                    free(folder);
-                folder = g_build_filename(user_tmp, hex8, nullptr);
-                free(hex8);
+                plug_dir = Glib::build_filename(user_tmp, randhex8());
+                if (!std::filesystem::exists(plug_dir))
+                    break;
             }
             install_plugin_file(set->browser ? set->browser->main_window : nullptr,
                                 nullptr,
                                 file,
-                                folder,
+                                plug_dir,
                                 PluginJob::PLUGIN_JOB_COPY,
                                 set);
             free(file);
-            free(folder);
             break;
         case XSetJob::XSET_JOB_IMPORT_GTK:
             // both GTK2 and GTK3 now use new location?

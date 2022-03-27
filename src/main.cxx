@@ -417,9 +417,7 @@ main(int argc, char* argv[])
 
     // Seed RNG
     // using the current time is a good enough seed
-    std::time_t epoch = std::time(nullptr);
-    std::asctime(std::localtime(&epoch));
-    srand48(epoch);
+    std::srand(std::time(nullptr));
 
     // Initialize our mime-type system
     vfs_mime_type_init();

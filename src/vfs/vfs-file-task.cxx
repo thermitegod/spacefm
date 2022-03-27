@@ -1396,11 +1396,13 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
     if (!task->exec_direct)
     {
         // get script name
-        do
+        while (true)
         {
             std::string hexname = fmt::format("{}.sh", randhex8());
             task->exec_script = Glib::build_filename(tmp, hexname);
-        } while (std::filesystem::exists(task->exec_script));
+            if (!std::filesystem::exists(task->exec_script))
+                break;
+        }
 
         // open buffer
         std::string buf = "";

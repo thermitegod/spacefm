@@ -51,15 +51,10 @@ print_task_command_spawn(const std::vector<std::string>& argv, int pid) noexcept
     LOG_INFO("SPAWN=\"{}\" pid={} ", ztd::join(argv, " "), pid);
 }
 
-char*
+const std::string
 randhex8() noexcept
 {
-    char hex[9];
-    unsigned int n = mrand48();
-    snprintf(hex, sizeof(hex), "%08x", n);
-    // LOG_INFO("rand  : {}", n);
-    // LOG_INFO("hex   : {}", hex);
-    return ztd::strdup(hex);
+    return ztd::randhex(8);
 }
 
 std::string
