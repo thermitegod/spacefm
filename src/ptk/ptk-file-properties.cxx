@@ -35,6 +35,7 @@
 #include "ptk/ptk-utils.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
+#include "vfs/vfs-file-info.hxx"
 #include "vfs/vfs-user-dir.hxx"
 #include "vfs/vfs-utils.hxx"
 

@@ -18,11 +18,7 @@
 #include <gtk/gtk.h>
 
 #include "vfs/vfs-dir.hxx"
-
-// avoids circular header dependencies
-#define INCLUDE_XSET_ENUMS
-#include "xset.hxx"
-#undef INCLUDE_XSET_ENUMS
+#include "settings.hxx"
 
 #define PTK_TYPE_FILE_BROWSER    (ptk_file_browser_get_type())
 #define PTK_FILE_BROWSER(obj)    (reinterpret_cast<PtkFileBrowser*>(obj))

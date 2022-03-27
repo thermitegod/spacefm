@@ -27,12 +27,6 @@
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 
-#define INCLUDE_XSET_ENUMS
-#include "xset.hxx"
-#undef INCLUDE_XSET_ENUMS
-
-#include "ptk/ptk-file-browser.hxx"
-
 #define XSET(obj) (static_cast<XSet*>(obj))
 
 // this determines time before item is selected by hover in single-click mode
@@ -109,6 +103,152 @@ const char* xset_get_user_tmp_dir();
 ///////////////////////////////////////////////////////////////////////////////
 // MOD extra settings below
 
+enum class XSetSetSet
+{
+    S,
+    B,
+    X,
+    Y,
+    Z,
+    KEY,
+    KEYMOD,
+    STYLE,
+    DESC,
+    TITLE,
+    MENU_LABEL,
+    ICN,
+    MENU_LABEL_CUSTOM,
+    ICON,
+    SHARED_KEY,
+    NEXT,
+    PREV,
+    PARENT,
+    CHILD,
+    CONTEXT,
+    LINE,
+    TOOL,
+    TASK,
+    TASK_POP,
+    TASK_ERR,
+    TASK_OUT,
+    RUN_IN_TERMINAL,
+    KEEP_TERMINAL,
+    SCROLL_LOCK,
+    DISABLE,
+    OPENER
+};
+
+enum class XSetCMD
+{
+    LINE,
+    SCRIPT,
+    APP,
+    BOOKMARK,
+    INVALID // Must be last
+};
+
+enum class XSetMenu
+{ // do not reorder - these values are saved in session files
+    NORMAL,
+    CHECK,
+    STRING,
+    RADIO,
+    FILEDLG,
+    FONTDLG,
+    ICON,
+    COLORDLG,
+    CONFIRM,
+    RESERVED_03,
+    RESERVED_04,
+    RESERVED_05,
+    RESERVED_06,
+    RESERVED_07,
+    RESERVED_08,
+    RESERVED_09,
+    RESERVED_10,
+    SUBMENU, // add new before submenu
+    SEP
+};
+
+enum class XSetTool
+{ // do not reorder - these values are saved in session files
+  // also update builtin_tool_name builtin_tool_icon in settings.c
+    NOT,
+    CUSTOM,
+    DEVICES,
+    BOOKMARKS,
+    TREE,
+    HOME,
+    DEFAULT,
+    UP,
+    BACK,
+    BACK_MENU,
+    FWD,
+    FWD_MENU,
+    REFRESH,
+    NEW_TAB,
+    NEW_TAB_HERE,
+    SHOW_HIDDEN,
+    SHOW_THUMB,
+    LARGE_ICONS,
+    INVALID // Must be last
+};
+
+enum class XSetJob
+{
+    KEY,
+    ICON,
+    LABEL,
+    EDIT,
+    EDIT_ROOT,
+    LINE,
+    SCRIPT,
+    CUSTOM,
+    TERM,
+    KEEP,
+    USER,
+    TASK,
+    POP,
+    ERR,
+    OUT,
+    BOOKMARK,
+    APP,
+    COMMAND,
+    SUBMENU,
+    SUBMENU_BOOK,
+    SEP,
+    ADD_TOOL,
+    IMPORT_FILE,
+    IMPORT_GTK,
+    CUT,
+    COPY,
+    PASTE,
+    REMOVE,
+    REMOVE_BOOK,
+    NORMAL,
+    CHECK,
+    CONFIRM,
+    DIALOG,
+    MESSAGE,
+    COPYNAME,
+    PROP,
+    PROP_CMD,
+    IGNORE_CONTEXT,
+    SCROLL,
+    EXPORT,
+    BROWSE_FILES,
+    BROWSE_DATA,
+    BROWSE_PLUGIN,
+    HELP,
+    HELP_NEW,
+    HELP_ADD,
+    HELP_BROWSE,
+    HELP_STYLE,
+    HELP_BOOK,
+    TOOLTIPS,
+    INVALID // Must be last
+};
+
 enum XSetB
 {
     XSET_B_UNSET,
@@ -132,6 +272,8 @@ enum class PluginUse
     BOOKMARKS,
     NORMAL
 };
+
+struct PtkFileBrowser;
 
 struct XSet
 {
