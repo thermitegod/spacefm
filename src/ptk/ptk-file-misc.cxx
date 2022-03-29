@@ -45,12 +45,23 @@
 
 struct ParentInfo
 {
+    ParentInfo(PtkFileBrowser* file_browser, const char* cwd);
+
     PtkFileBrowser* file_browser;
     const char* cwd;
 };
 
+ParentInfo::ParentInfo(PtkFileBrowser* file_browser, const char* cwd)
+{
+    this->file_browser = file_browser;
+    this->cwd = cwd;
+}
+
 struct MoveSet
 {
+    MoveSet();
+    ~MoveSet();
+
     char* full_path;
     const char* old_path;
     char* new_path;
@@ -136,6 +147,119 @@ struct MoveSet
     bool is_move;
 };
 
+MoveSet::MoveSet()
+{
+    this->full_path = nullptr;
+    this->old_path = nullptr;
+    this->new_path = nullptr;
+    this->desc = nullptr;
+    this->is_dir = false;
+    this->is_link = false;
+    this->clip_copy = false;
+    // this->create_new;
+
+    this->dlg = nullptr;
+    this->parent = nullptr;
+    this->browser = nullptr;
+
+    this->label_type = nullptr;
+    this->label_mime = nullptr;
+    this->hbox_type = nullptr;
+    this->mime_type = nullptr;
+
+    this->label_target = nullptr;
+    this->entry_target = nullptr;
+    this->hbox_target = nullptr;
+    this->browse_target = nullptr;
+
+    this->label_template = nullptr;
+    this->combo_template = nullptr;
+    this->combo_template_dir = nullptr;
+    this->hbox_template = nullptr;
+    this->browse_template = nullptr;
+
+    this->label_name = nullptr;
+    this->scroll_name = nullptr;
+    this->input_name = nullptr;
+    this->buf_name = nullptr;
+    this->blank_name = nullptr;
+
+    this->hbox_ext = nullptr;
+    this->label_ext = nullptr;
+    this->entry_ext = nullptr;
+
+    this->label_full_name = nullptr;
+    this->scroll_full_name = nullptr;
+    this->input_full_name = nullptr;
+    this->buf_full_name = nullptr;
+    this->blank_full_name = nullptr;
+
+    this->label_path = nullptr;
+    this->scroll_path = nullptr;
+    this->input_path = nullptr;
+    this->buf_path = nullptr;
+    this->blank_path = nullptr;
+
+    this->label_full_path = nullptr;
+    this->scroll_full_path = nullptr;
+    this->input_full_path = nullptr;
+    this->buf_full_path = nullptr;
+
+    this->opt_move = nullptr;
+    this->opt_copy = nullptr;
+    this->opt_link = nullptr;
+    this->opt_copy_target = nullptr;
+    this->opt_link_target = nullptr;
+    this->opt_as_root = nullptr;
+
+    this->opt_new_file = nullptr;
+    this->opt_new_folder = nullptr;
+    this->opt_new_link = nullptr;
+
+    this->options = nullptr;
+    this->browse = nullptr;
+    this->revert = nullptr;
+    this->cancel = nullptr;
+    this->next = nullptr;
+    this->open = nullptr;
+
+    this->last_widget = nullptr;
+
+    this->full_path_exists = false;
+    this->full_path_exists_dir = false;
+    this->full_path_same = false;
+    this->path_missing = false;
+    this->path_exists_file = false;
+    this->mode_change = false;
+    this->is_move = false;
+}
+
+MoveSet::~MoveSet()
+{
+    if (this->full_path)
+        free(this->full_path);
+    if (this->new_path)
+        free(this->new_path);
+    if (this->desc)
+        free(this->desc);
+    if (this->mime_type)
+        free(this->mime_type);
+}
+
+AutoOpenCreate::AutoOpenCreate()
+{
+    this->path = nullptr;
+    this->file_browser = nullptr;
+    this->callback = nullptr;
+    this->open_file = false;
+}
+
+AutoOpenCreate::~AutoOpenCreate()
+{
+    if (this->path)
+        free(this->path);
+}
+
 static void on_toggled(GtkMenuItem* item, MoveSet* mset);
 static char* get_template_dir();
 
@@ -175,11 +299,11 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTr
         file_list.push_back(file_path);
     }
     /* file_list = g_list_reverse( file_list ); */
-    PtkFileTask* ptask = ptk_file_task_new(VFSFileTaskType::VFS_FILE_TASK_DELETE,
-                                           file_list,
-                                           nullptr,
-                                           parent_win ? GTK_WINDOW(parent_win) : nullptr,
-                                           GTK_WIDGET(task_view));
+    PtkFileTask* ptask = new PtkFileTask(VFSFileTaskType::VFS_FILE_TASK_DELETE,
+                                         file_list,
+                                         nullptr,
+                                         parent_win ? GTK_WINDOW(parent_win) : nullptr,
+                                         GTK_WIDGET(task_view));
     ptk_file_task_run(ptask);
 }
 
@@ -219,11 +343,11 @@ ptk_trash_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTre
         file_list.push_back(file_path);
     }
     /* file_list = g_list_reverse( file_list ); */
-    PtkFileTask* ptask = ptk_file_task_new(VFSFileTaskType::VFS_FILE_TASK_TRASH,
-                                           file_list,
-                                           nullptr,
-                                           parent_win ? GTK_WINDOW(parent_win) : nullptr,
-                                           GTK_WIDGET(task_view));
+    PtkFileTask* ptask = new PtkFileTask(VFSFileTaskType::VFS_FILE_TASK_TRASH,
+                                         file_list,
+                                         nullptr,
+                                         parent_win ? GTK_WINDOW(parent_win) : nullptr,
+                                         GTK_WIDGET(task_view));
     ptk_file_task_run(ptask);
 }
 
@@ -2062,7 +2186,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
 
     if (!file_dir)
         return 0;
-    MoveSet* mset = g_slice_new0(MoveSet);
+
+    MoveSet* mset = new MoveSet;
     full_name = nullptr;
 
     if (!create_new)
@@ -3207,12 +3332,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     // destroy
     gtk_widget_destroy(mset->dlg);
 
-    free(mset->full_path);
-    if (mset->new_path)
-        free(mset->new_path);
-    if (mset->mime_type)
-        free(mset->mime_type);
-    g_slice_free(MoveSet, mset);
+    delete mset;
 
     return ret;
 }
@@ -3501,9 +3621,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
     char* new_dir = nullptr;
     GtkWidget* toplevel;
 
-    ParentInfo* parent = g_slice_new0(ParentInfo);
-    parent->file_browser = file_browser;
-    parent->cwd = cwd;
+    ParentInfo* parent = new ParentInfo(file_browser, cwd);
 
     GList* l;
     for (l = sel_files; l; l = l->next)
@@ -3693,7 +3811,8 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
             ptk_file_browser_emit_open(file_browser, full_path, PtkOpenAction::PTK_OPEN_DIR);
         free(new_dir);
     }
-    g_slice_free(ParentInfo, parent);
+
+    delete parent;
 }
 
 void

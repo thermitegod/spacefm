@@ -94,6 +94,30 @@ static void on_popup_open_all(GtkMenuItem* menuitem, PtkFileMenu* data);
 
 static void on_popup_canon(GtkMenuItem* menuitem, PtkFileMenu* data);
 
+PtkFileMenu::PtkFileMenu()
+{
+    this->browser = nullptr;
+    this->cwd = nullptr;
+    this->file_path = nullptr;
+    this->info = nullptr;
+    this->sel_files = nullptr;
+    this->accel_group = nullptr;
+}
+
+PtkFileMenu::~PtkFileMenu()
+{
+    if (this->info)
+        vfs_file_info_unref(this->info);
+    if (this->cwd)
+        free(this->cwd);
+    if (this->file_path)
+        free(this->file_path);
+    if (this->sel_files)
+        vfs_file_info_list_free(this->sel_files);
+    if (this->accel_group)
+        g_object_unref(this->accel_group);
+}
+
 void
 on_popup_list_large(GtkMenuItem* menuitem, PtkFileBrowser* browser)
 {
@@ -586,16 +610,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 static void
 ptk_file_menu_free(PtkFileMenu* data)
 {
-    if (data->file_path)
-        free(data->file_path);
-    if (data->info)
-        vfs_file_info_unref(data->info);
-    free(data->cwd);
-    if (data->sel_files)
-        vfs_file_info_list_free(data->sel_files);
-    if (data->accel_group)
-        g_object_unref(data->accel_group);
-    g_slice_free(PtkFileMenu, data);
+    delete data;
 }
 
 /* Retrieve popup menu for selected file(s) */
@@ -609,7 +624,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
     XSet* set_radio;
     int icon_w;
     int icon_h;
-    PtkFileMenu* data;
     int no_write_access = 0;
     int no_read_access = 0;
     XSet* set;
@@ -620,7 +634,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
     if (!browser)
         return nullptr;
 
-    data = g_slice_new0(PtkFileMenu);
+    PtkFileMenu* data = new PtkFileMenu;
 
     data->cwd = ztd::strdup(cwd);
     data->browser = browser;
@@ -716,11 +730,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
     if (!context->valid)
     {
-        // rare exception due to context_fill hacks - fb was probably destroyed
-        LOG_WARN("context_fill rare exception");
+        LOG_WARN("rare exception due to context_fill hacks - fb was probably destroyed");
         context = xset_context_new();
-        g_slice_free(XSetContext, context);
-        context = nullptr;
+        delete context;
         return nullptr;
     }
 
@@ -2388,8 +2400,8 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
 
         free(cwd);
     }
-    free(ao->path);
-    g_slice_free(AutoOpenCreate, ao);
+
+    delete ao;
 }
 
 static void
@@ -2398,7 +2410,7 @@ create_new_file(PtkFileMenu* data, int create_new)
     if (!data->cwd)
         return;
 
-    AutoOpenCreate* ao = g_slice_new0(AutoOpenCreate);
+    AutoOpenCreate* ao = new AutoOpenCreate;
     ao->path = nullptr;
     ao->file_browser = data->browser;
     ao->open_file = false;
@@ -2413,12 +2425,7 @@ create_new_file(PtkFileMenu* data, int create_new)
                                  (PtkRenameMode)create_new,
                                  ao);
     if (result == 0)
-    {
-        ao->file_browser = nullptr;
-        free(ao->path);
-        ao->path = nullptr;
-        g_slice_free(AutoOpenCreate, ao);
-    }
+        delete ao;
 }
 
 static void
@@ -2504,18 +2511,13 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         file_path = g_build_filename(cwd, vfs_file_info_get_name(info), nullptr);
     }
 
-    PtkFileMenu* data = g_slice_new0(PtkFileMenu);
+    PtkFileMenu* data = new PtkFileMenu;
     data->cwd = ztd::strdup(cwd);
     data->browser = browser;
-
+    data->sel_files = sel_files;
     data->file_path = file_path;
     if (info)
         data->info = vfs_file_info_ref(info);
-    else
-        data->info = nullptr;
-
-    data->sel_files = sel_files;
-    data->accel_group = nullptr;
 
     // action
     XSet* set = xset_get(setname);

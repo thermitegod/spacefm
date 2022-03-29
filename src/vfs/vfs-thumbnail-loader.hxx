@@ -33,12 +33,18 @@ enum VFSThumbnailSize
 
 struct VFSThumbnailRequest
 {
+    VFSThumbnailRequest(VFSFileInfo* file);
+    ~VFSThumbnailRequest();
+
     VFSFileInfo* file;
     unsigned int n_requests[VFSThumbnailSize::N_LOAD_TYPES];
 };
 
 struct VFSThumbnailLoader
 {
+    VFSThumbnailLoader(VFSDir* dir);
+    ~VFSThumbnailLoader();
+
     VFSDir* dir;
     GQueue* queue;
     VFSAsyncTask* task;

@@ -34,12 +34,6 @@
 
 // #define VFS_FILE_MONITOR_DEBUG
 
-struct VFSFileMonitorCallbackEntry
-{
-    VFSFileMonitorCallback callback;
-    void* user_data;
-};
-
 static GHashTable* monitor_hash = nullptr;
 static GIOChannel* vfs_inotify_io_channel = nullptr;
 static unsigned int vfs_inotify_io_watch = 0;
@@ -48,6 +42,42 @@ static int vfs_inotify_fd = -1;
 /* event handler of all inotify events */
 static bool vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond,
                                               void* user_data);
+
+struct VFSFileMonitorCallbackEntry
+{
+    VFSFileMonitorCallbackEntry(VFSFileMonitorCallback callback, void* user_data);
+
+    VFSFileMonitorCallback callback;
+    void* user_data;
+};
+
+VFSFileMonitorCallbackEntry::VFSFileMonitorCallbackEntry(VFSFileMonitorCallback callback,
+                                                         void* user_data)
+{
+    this->callback = callback;
+    this->user_data = user_data;
+}
+
+VFSFileMonitor::VFSFileMonitor(const char* real_path)
+{
+    // LOG_INFO("VFSFileMonitor Constructor");
+    this->ref_inc();
+
+    this->path = ztd::strdup(real_path);
+}
+
+VFSFileMonitor::~VFSFileMonitor()
+{
+    // LOG_INFO("VFSFileMonitor Destructor");
+
+    // LOG_INFO("vfs_file_monitor_remove  {}", this->wd);
+    inotify_rm_watch(vfs_inotify_fd, this->wd);
+
+    g_hash_table_remove(monitor_hash, this->path);
+    free(this->path);
+
+    this->callbacks.clear();
+}
 
 static bool
 vfs_file_monitor_connect_to_inotify()
@@ -130,27 +160,26 @@ vfs_file_monitor_add(char* path, VFSFileMonitorCallback cb, void* user_data)
     else
         real_path = resolved_path;
 
-    VFSFileMonitor* monitor =
-        static_cast<VFSFileMonitor*>(g_hash_table_lookup(monitor_hash, real_path));
+    VFSFileMonitor* monitor = VFS_FILE_MONITOR(g_hash_table_lookup(monitor_hash, real_path));
     if (!monitor)
     {
-        monitor = g_slice_new0(VFSFileMonitor);
-        monitor->path = ztd::strdup(real_path);
-
-        g_hash_table_insert(monitor_hash, monitor->path, monitor);
-
-        monitor->wd = inotify_add_watch(vfs_inotify_fd,
-                                        real_path,
-                                        IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF |
-                                            IN_MOVE | IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
-        if (monitor->wd < 0)
+        int wd = inotify_add_watch(vfs_inotify_fd,
+                                   real_path,
+                                   IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE |
+                                       IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
+        if (wd < 0)
         {
             std::string errno_msg = Glib::strerror(errno);
             LOG_ERROR("Failed to add watch on '{}' ({})", real_path, path);
             LOG_ERROR("inotify_add_watch: {}", errno_msg);
             return nullptr;
         }
-        // LOG_INFO("vfs_file_monitor_add  {} ({}) {}", real_path, path, monitor->wd);
+        // LOG_INFO("vfs_file_monitor_add  {} ({}) {}", real_path, path, wd);
+
+        monitor = new VFSFileMonitor(real_path);
+        monitor->wd = wd;
+
+        g_hash_table_insert(monitor_hash, monitor->path, monitor);
     }
 
     if (monitor)
@@ -158,12 +187,9 @@ vfs_file_monitor_add(char* path, VFSFileMonitorCallback cb, void* user_data)
         // LOG_DEBUG("monitor installed: {}, {:p}", path, monitor);
         if (cb)
         { /* Install a callback */
-            VFSFileMonitorCallbackEntry* cb_ent = g_slice_new(VFSFileMonitorCallbackEntry);
-            cb_ent->callback = cb;
-            cb_ent->user_data = user_data;
+            VFSFileMonitorCallbackEntry* cb_ent = new VFSFileMonitorCallbackEntry(cb, user_data);
             monitor->callbacks.push_back(cb_ent);
         }
-        monitor->ref_inc();
     }
     return monitor;
 }
@@ -175,15 +201,14 @@ vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* use
         return;
 
     // LOG_INFO("vfs_file_monitor_remove");
-    if (cb && !fm->callbacks.empty())
+    if (cb)
     {
         for (VFSFileMonitorCallbackEntry* cb2: fm->callbacks)
         {
-            if (cb2->callback == cb && cb2->user_data == (VFSFileMonitorCallbackEntry*)user_data)
+            if (cb2->callback == cb && cb2->user_data == VFS_FILE_MONITOR_CALLBACK_DATA(user_data))
             {
-                g_slice_free(VFSFileMonitorCallbackEntry, cb2);
-                fm->callbacks.erase(std::remove(fm->callbacks.begin(), fm->callbacks.end(), cb2),
-                                    fm->callbacks.end());
+                ztd::remove(fm->callbacks, cb2);
+                delete cb2;
                 break;
             }
         }
@@ -191,15 +216,8 @@ vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* use
 
     fm->ref_dec();
     if (fm->ref_count() == 0)
-    {
-        // LOG_INFO("vfs_file_monitor_remove  {}", fm->wd);
-        inotify_rm_watch(vfs_inotify_fd, fm->wd);
+        delete fm;
 
-        g_hash_table_remove(monitor_hash, fm->path);
-        free(fm->path);
-        fm->callbacks.clear();
-        g_slice_free(VFSFileMonitor, fm);
-    }
     // LOG_INFO("vfs_file_monitor_remove   DONE");
 }
 
@@ -208,7 +226,7 @@ vfs_file_monitor_reconnect_inotify(void* key, void* value, void* user_data)
 {
     (void)user_data;
     struct stat file_stat; // skip stat
-    VFSFileMonitor* monitor = static_cast<VFSFileMonitor*>(value);
+    VFSFileMonitor* monitor = VFS_FILE_MONITOR(value);
     const char* path = (const char*)key;
     if (lstat(path, &file_stat) != -1)
     {
@@ -235,7 +253,7 @@ vfs_file_monitor_find_monitor(void* key, void* value, void* user_data)
     (void)key;
     (void)user_data;
     int wd = GPOINTER_TO_INT(user_data);
-    VFSFileMonitor* monitor = static_cast<VFSFileMonitor*>(value);
+    VFSFileMonitor* monitor = VFS_FILE_MONITOR(value);
     return (monitor->wd == wd);
 }
 
@@ -317,9 +335,9 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
         /* FIXME: 2 different paths can have the same wd because of link
          *        This was fixed in spacefm 0.8.7 ?? */
         VFSFileMonitor* monitor =
-            static_cast<VFSFileMonitor*>(g_hash_table_find(monitor_hash,
-                                                           (GHRFunc)vfs_file_monitor_find_monitor,
-                                                           GINT_TO_POINTER(ievent->wd)));
+            VFS_FILE_MONITOR(g_hash_table_find(monitor_hash,
+                                               (GHRFunc)vfs_file_monitor_find_monitor,
+                                               GINT_TO_POINTER(ievent->wd)));
         if (monitor)
         {
             const char* file_name;

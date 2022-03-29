@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include <sys/inotify.h>
 
+#define VFS_FILE_MONITOR(obj)               (static_cast<VFSFileMonitor*>(obj))
 #define VFS_FILE_MONITOR_CALLBACK_DATA(obj) (reinterpret_cast<VFSFileMonitorCallbackEntry*>(obj))
 
 struct VFSFileMonitorCallbackEntry;
@@ -39,6 +40,9 @@ enum class VFSFileMonitorEvent
 
 struct VFSFileMonitor
 {
+    VFSFileMonitor(const char* real_path);
+    ~VFSFileMonitor();
+
     char* path;
 
     // TODO private

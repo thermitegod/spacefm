@@ -42,9 +42,17 @@ static VFSFileMonitor** mime_caches_monitor = nullptr;
 
 struct VFSMimeReloadCbEnt
 {
+    VFSMimeReloadCbEnt(GFreeFunc cb, void* user_data);
+
     GFreeFunc cb;
     void* user_data;
 };
+
+VFSMimeReloadCbEnt::VFSMimeReloadCbEnt(GFreeFunc cb, void* user_data)
+{
+    this->cb = cb;
+    this->user_data = user_data;
+}
 
 static bool
 vfs_mime_type_reload(void* user_data)
@@ -66,7 +74,7 @@ vfs_mime_type_reload(void* user_data)
     /* call all registered callbacks */
     for (l = reload_cb; l; l = l->next)
     {
-        VFSMimeReloadCbEnt* ent = static_cast<VFSMimeReloadCbEnt*>(l->data);
+        VFSMimeReloadCbEnt* ent = VFS_MIME_TYPE_CALLBACK_DATA(l->data);
         ent->cb(ent->user_data);
     }
     return false;
@@ -164,7 +172,7 @@ VFSMimeType*
 vfs_mime_type_get_from_type(const char* type)
 {
     g_rw_lock_reader_lock(&mime_hash_lock);
-    VFSMimeType* mime_type = static_cast<VFSMimeType*>(g_hash_table_lookup(mime_hash, type));
+    VFSMimeType* mime_type = VFS_MIME_TYPE(g_hash_table_lookup(mime_hash, type));
     g_rw_lock_reader_unlock(&mime_hash_lock);
 
     if (!mime_type)
@@ -196,7 +204,7 @@ vfs_mime_type_ref(VFSMimeType* mime_type)
 void
 vfs_mime_type_unref(void* mime_type_)
 {
-    VFSMimeType* mime_type = static_cast<VFSMimeType*>(mime_type_);
+    VFSMimeType* mime_type = VFS_MIME_TYPE(mime_type_);
     mime_type->ref_dec();
     if (mime_type->ref_count() == 0)
     {
@@ -340,7 +348,7 @@ static void
 free_cached_icons(void* key, void* value, void* user_data)
 {
     (void)key;
-    VFSMimeType* mime_type = static_cast<VFSMimeType*>(value);
+    VFSMimeType* mime_type = VFS_MIME_TYPE(value);
     bool big = GPOINTER_TO_INT(user_data);
     if (big)
     {
@@ -483,9 +491,7 @@ vfs_mime_type_add_action(VFSMimeType* mime_type, const char* desktop_id, char** 
 GList*
 vfs_mime_type_add_reload_cb(GFreeFunc cb, void* user_data)
 {
-    VFSMimeReloadCbEnt* ent = g_slice_new(VFSMimeReloadCbEnt);
-    ent->cb = cb;
-    ent->user_data = user_data;
+    VFSMimeReloadCbEnt* ent = new VFSMimeReloadCbEnt(cb, user_data);
     reload_cb = g_list_append(reload_cb, ent);
     return g_list_last(reload_cb);
 }
@@ -493,7 +499,7 @@ vfs_mime_type_add_reload_cb(GFreeFunc cb, void* user_data)
 void
 vfs_mime_type_remove_reload_cb(GList* cb)
 {
-    g_slice_free(VFSMimeReloadCbEnt, cb->data);
+    delete VFS_MIME_TYPE_CALLBACK_DATA(cb->data);
     reload_cb = g_list_delete_link(reload_cb, cb);
 }
 

@@ -39,6 +39,9 @@
 
 struct PtkDirTreeNode
 {
+    PtkDirTreeNode();
+    ~PtkDirTreeNode();
+
     VFSFileInfo* file;
     PtkDirTreeNode* children;
     int n_children;
@@ -107,11 +110,36 @@ static void on_file_monitor_event(VFSFileMonitor* fm, VFSFileMonitorEvent event,
 static PtkDirTreeNode* ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent,
                                              const char* path, const char* base_name);
 
-static void ptk_dir_tree_node_free(PtkDirTreeNode* node);
-
 static GObjectClass* parent_class = nullptr;
 
 static GType column_types[PTKDirTreeCol::N_DIR_TREE_COLS];
+
+PtkDirTreeNode::PtkDirTreeNode()
+{
+    this->file = nullptr;
+    this->children = nullptr;
+    this->n_children = 0;
+    this->monitor = nullptr;
+    this->n_expand = 0;
+    this->parent = nullptr;
+    this->next = nullptr;
+    this->prev = nullptr;
+    this->last = nullptr;
+    this->tree = nullptr;
+}
+
+PtkDirTreeNode::~PtkDirTreeNode()
+{
+    PtkDirTreeNode* child;
+    if (this->file)
+        vfs_file_info_unref(this->file);
+    for (child = this->children; child; child = child->next)
+    {
+        delete child;
+    }
+    if (this->monitor)
+        vfs_file_monitor_remove(this->monitor, &on_file_monitor_event, this);
+}
 
 GType
 ptk_dir_tree_get_type()
@@ -156,7 +184,7 @@ ptk_dir_tree_get_type()
 static void
 ptk_dir_tree_init(PtkDirTree* tree)
 {
-    tree->root = g_slice_new0(PtkDirTreeNode);
+    tree->root = new PtkDirTreeNode;
     tree->root->tree = tree;
     tree->root->n_children = 1;
     PtkDirTreeNode* child = ptk_dir_tree_node_new(tree, tree->root, "/", "/");
@@ -219,7 +247,7 @@ ptk_dir_tree_finalize(GObject* object)
     PtkDirTree* tree = PTK_DIR_TREE(object);
 
     if (tree->root)
-        ptk_dir_tree_node_free(tree->root);
+        delete tree->root;
 
     /* must chain up - finalize parent */
     (*parent_class->finalize)(object);
@@ -625,7 +653,7 @@ static PtkDirTreeNode*
 ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent, const char* path,
                       const char* base_name)
 {
-    PtkDirTreeNode* node = g_slice_new0(PtkDirTreeNode);
+    PtkDirTreeNode* node = new PtkDirTreeNode;
     node->tree = tree;
     node->parent = parent;
     if (path)
@@ -637,21 +665,6 @@ ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent, const char* path
         node->last = node->children;
     }
     return node;
-}
-
-static void
-ptk_dir_tree_node_free(PtkDirTreeNode* node)
-{
-    PtkDirTreeNode* child;
-    if (node->file)
-        vfs_file_info_unref(node->file);
-    for (child = node->children; child; child = child->next)
-        ptk_dir_tree_node_free(child);
-    if (node->monitor)
-    {
-        vfs_file_monitor_remove(node->monitor, &on_file_monitor_event, node);
-    }
-    g_slice_free(PtkDirTreeNode, node);
 }
 
 static char*
@@ -776,7 +789,7 @@ ptk_dir_tree_delete_child(PtkDirTree* tree, PtkDirTreeNode* child)
     if (child->next)
         child->next->prev = child->prev;
 
-    ptk_dir_tree_node_free(child);
+    delete child;
 
     if (parent->n_children == 0)
     {

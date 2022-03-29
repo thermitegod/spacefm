@@ -80,13 +80,34 @@ enum PtkLocationViewCol
 
 struct AutoOpen
 {
+    AutoOpen(PtkFileBrowser* file_browser);
+    ~AutoOpen();
+
     PtkFileBrowser* file_browser;
-    char* device_file;
     dev_t devnum;
+    char* device_file;
     char* mount_point;
     bool keep_point;
     int job;
 };
+
+AutoOpen::AutoOpen(PtkFileBrowser* file_browser)
+{
+    this->file_browser = file_browser;
+    this->devnum = 0;
+    this->device_file = nullptr;
+    this->mount_point = nullptr;
+    this->keep_point = false;
+    this->job = 0;
+}
+
+AutoOpen::~AutoOpen()
+{
+    if (this->device_file)
+        free(this->device_file);
+    if (this->mount_point)
+        free(this->mount_point);
+}
 
 static bool volume_is_visible(VFSVolume* vol);
 static void update_all();
@@ -891,9 +912,7 @@ on_autoopen_net_cb(VFSFileTask* task, AutoOpen* ao)
     if (!ao->keep_point)
         ptk_location_view_clean_mount_points();
 
-    free(ao->device_file);
-    free(ao->mount_point);
-    g_slice_free(AutoOpen, ao);
+    delete ao;
 }
 
 void
@@ -901,7 +920,7 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
                                 bool force_new_mount)
 {
     char* mount_point = nullptr;
-    netmount_t* netmount = nullptr;
+    netmount_t* netmount = new netmount_t;
 
     std::string line;
 
@@ -952,15 +971,7 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
                                                    PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
                     }
                     free(mount_point);
-                    free(netmount->url);
-                    free(netmount->fstype);
-                    free(netmount->host);
-                    free(netmount->ip);
-                    free(netmount->port);
-                    free(netmount->user);
-                    free(netmount->pass);
-                    free(netmount->path);
-                    g_slice_free(netmount_t, netmount);
+                    delete netmount;
                     return;
                 }
             }
@@ -989,15 +1000,7 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
                         "set.  Add a handler in Devices|Settings|Protocol Handlers.");
 
         free(mount_point);
-        free(netmount->url);
-        free(netmount->fstype);
-        free(netmount->host);
-        free(netmount->ip);
-        free(netmount->port);
-        free(netmount->user);
-        free(netmount->pass);
-        free(netmount->path);
-        g_slice_free(netmount_t, netmount);
+        delete netmount;
         return;
     }
 
@@ -1035,32 +1038,23 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     // autoopen
     if (!ssh_udevil) // !sync
     {
-        AutoOpen* ao;
-        ao = g_slice_new0(AutoOpen);
+        AutoOpen* ao = new AutoOpen(file_browser);
         ao->device_file = ztd::strdup(netmount->url);
         ao->devnum = 0;
-        ao->file_browser = file_browser;
         ao->mount_point = mount_point;
-        mount_point = nullptr;
+
         if (new_tab)
             ao->job = PtkOpenAction::PTK_OPEN_NEW_TAB;
         else
             ao->job = PtkOpenAction::PTK_OPEN_DIR;
+
         ptask->complete_notify = (GFunc)on_autoopen_net_cb;
         ptask->user_data = ao;
     }
     ptk_file_task_run(ptask);
 
     free(mount_point);
-    free(netmount->url);
-    free(netmount->fstype);
-    free(netmount->host);
-    free(netmount->ip);
-    free(netmount->port);
-    free(netmount->user);
-    free(netmount->pass);
-    free(netmount->path);
-    g_slice_free(netmount_t, netmount);
+    delete netmount;
 }
 
 static void
@@ -1317,8 +1311,8 @@ on_autoopen_cb(VFSFileTask* task, AutoOpen* ao)
         ao->file_browser->side_dev)
         ptk_location_view_chdir(GTK_TREE_VIEW(ao->file_browser->side_dev),
                                 ptk_file_browser_get_cwd(ao->file_browser));
-    free(ao->device_file);
-    g_slice_free(AutoOpen, ao);
+
+    delete ao;
     return false;
 }
 
@@ -1359,15 +1353,14 @@ try_mount(GtkTreeView* view, VFSVolume* vol)
     ptask->task->exec_icon = vfs_volume_get_icon(vol);
 
     // autoopen
-    AutoOpen* ao = g_slice_new0(AutoOpen);
+    AutoOpen* ao = new AutoOpen(file_browser);
     ao->devnum = vol->devnum;
-    ao->device_file = nullptr;
-    ao->file_browser = file_browser;
+
     if (xset_get_b(XSetName::DEV_NEWTAB))
         ao->job = PtkOpenAction::PTK_OPEN_NEW_TAB;
     else
         ao->job = PtkOpenAction::PTK_OPEN_DIR;
-    ao->mount_point = nullptr;
+
     ptask->complete_notify = (GFunc)on_autoopen_cb;
     ptask->user_data = ao;
     vol->inhibit_auto = true;
@@ -1427,12 +1420,10 @@ on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         ptask->task->exec_icon = vfs_volume_get_icon(vol);
 
         // autoopen
-        AutoOpen* ao = g_slice_new0(AutoOpen);
+        AutoOpen* ao = new AutoOpen(file_browser);
         ao->devnum = vol->devnum;
-        ao->device_file = nullptr;
-        ao->file_browser = file_browser;
         ao->job = PtkOpenAction::PTK_OPEN_NEW_TAB;
-        ao->mount_point = nullptr;
+
         ptask->complete_notify = (GFunc)on_autoopen_cb;
         ptask->user_data = ao;
         vol->inhibit_auto = true;
@@ -1499,12 +1490,10 @@ on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         ptask->task->exec_icon = vfs_volume_get_icon(vol);
 
         // autoopen
-        AutoOpen* ao = g_slice_new0(AutoOpen);
+        AutoOpen* ao = new AutoOpen(file_browser);
         ao->devnum = vol->devnum;
-        ao->device_file = nullptr;
-        ao->file_browser = file_browser;
         ao->job = PtkOpenAction::PTK_OPEN_DIR;
-        ao->mount_point = nullptr;
+
         ptask->complete_notify = (GFunc)on_autoopen_cb;
         ptask->user_data = ao;
         vol->inhibit_auto = true;
@@ -1542,7 +1531,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_NETWORK)
     {
         // is a network - try to get prop command
-        netmount_t* netmount = nullptr;
+        netmount_t* netmount = new netmount_t;
         if (split_network_url(vol->udi, &netmount) == 1)
         {
             cmd = ztd::null_check(vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_NET,
@@ -1552,15 +1541,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                                                          netmount,
                                                          &run_in_terminal,
                                                          nullptr));
-            free(netmount->url);
-            free(netmount->fstype);
-            free(netmount->host);
-            free(netmount->ip);
-            free(netmount->port);
-            free(netmount->user);
-            free(netmount->pass);
-            free(netmount->path);
-            g_slice_free(netmount_t, netmount);
+            delete netmount;
 
             if (cmd.empty())
             {

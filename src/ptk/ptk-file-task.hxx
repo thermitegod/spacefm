@@ -32,6 +32,10 @@ enum PTKFileTaskPtaskError
 
 struct PtkFileTask
 {
+    PtkFileTask(VFSFileTaskType type, std::vector<std::string>& src_files, const char* dest_dir,
+                GtkWindow* parent_window, GtkWidget* task_view);
+    ~PtkFileTask();
+
     VFSFileTask* task;
 
     GtkWidget* progress_dlg;
@@ -79,25 +83,20 @@ struct PtkFileTask
     char** query_new_dest;
     bool query_ret;
 
-    char* dsp_file_count;
-    char* dsp_size_tally;
-    char* dsp_elapsed;
-    char* dsp_curspeed;
-    char* dsp_curest;
-    char* dsp_avgspeed;
-    char* dsp_avgest;
+    std::string dsp_file_count;
+    std::string dsp_size_tally;
+    std::string dsp_elapsed;
+    std::string dsp_curspeed;
+    std::string dsp_curest;
+    std::string dsp_avgspeed;
+    std::string dsp_avgest;
 };
 
 void ptk_file_task_lock(PtkFileTask* ptask);
 void ptk_file_task_unlock(PtkFileTask* ptask);
 
-PtkFileTask* ptk_file_task_new(VFSFileTaskType type, std::vector<std::string>& src_files,
-                               const char* dest_dir, GtkWindow* parent_window,
-                               GtkWidget* task_view);
 PtkFileTask* ptk_file_exec_new(const std::string& item_name, const char* dir, GtkWidget* parent,
                                GtkWidget* task_view);
-
-void ptk_file_task_destroy(PtkFileTask* ptask);
 
 void ptk_file_task_set_complete_notify(PtkFileTask* ptask, GFunc callback, void* user_data);
 

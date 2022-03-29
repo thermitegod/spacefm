@@ -22,6 +22,8 @@
 
 struct EntryData
 {
+    EntryData(PtkFileBrowser* browser);
+
     PtkFileBrowser* browser;
     unsigned int seek_timer;
 };

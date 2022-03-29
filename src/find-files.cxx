@@ -66,6 +66,8 @@ enum FindFilesCol
 
 struct FindFile
 {
+    FindFile();
+
     GtkWidget* win;
     GtkWidget* search_criteria;
 
@@ -123,11 +125,85 @@ struct FindFile
     VFSAsyncTask* task;
 };
 
+FindFile::FindFile()
+{
+    this->win = nullptr;
+    this->search_criteria = nullptr;
+
+    this->fn_pattern = nullptr;
+    this->fn_pattern_entry = nullptr;
+    this->fn_case_sensitive = nullptr;
+
+    /* file content */
+    this->fc_pattern = nullptr;
+    this->fc_case_sensitive = nullptr;
+    this->fc_use_regexp = nullptr;
+
+    /* advanced options */
+    this->search_hidden = nullptr;
+
+    /* size & date */
+    this->use_size_lower = nullptr;
+    this->use_size_upper = nullptr;
+    this->size_lower = nullptr;
+    this->size_upper = nullptr;
+    this->size_lower_unit = nullptr;
+    this->size_upper_unit = nullptr;
+
+    this->date_limit = nullptr;
+    this->date1 = nullptr;
+    this->date2 = nullptr;
+
+    /* file types */
+    this->all_files = nullptr;
+    this->text_files = nullptr;
+    this->img_files = nullptr;
+    this->audio_files = nullptr;
+    this->video_files = nullptr;
+
+    /* places */
+    this->places_list = nullptr;
+    this->places_view = nullptr;
+    this->add_directory_btn = nullptr;
+    this->remove_directory_btn = nullptr;
+    this->include_sub = nullptr;
+
+    /* search result pane */
+    this->search_result = nullptr;
+    this->result_view = nullptr;
+    this->result_list = nullptr;
+
+    /* buttons */
+    this->start_btn = nullptr;
+    this->stop_btn = nullptr;
+    this->again_btn = nullptr;
+
+    this->pid = 0;
+    this->stdo = 0;
+
+    this->task = nullptr;
+}
+
 struct FoundFile
 {
+    FoundFile(VFSFileInfo* fi, char* dir_path);
+    ~FoundFile();
+
     VFSFileInfo* fi;
     char* dir_path;
 };
+
+FoundFile::FoundFile(VFSFileInfo* fi, char* dir_path)
+{
+    this->fi = fi;
+    this->dir_path = dir_path;
+}
+
+FoundFile::~FoundFile()
+{
+    if (this->dir_path)
+        free(this->dir_path);
+}
 
 static const char menu_def[] = "<ui>"
                                "<popup name=\"Popup\">"
@@ -510,9 +586,7 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
         fi = vfs_file_info_new();
         if (vfs_file_info_get(fi, path, name))
         {
-            ff = g_slice_new0(FoundFile);
-            ff->fi = fi;
-            ff->dir_path = g_path_get_dirname(path);
+            ff = new FoundFile(fi, g_path_get_dirname(path));
             g_queue_push_tail(queue, ff);
         }
         else
@@ -554,7 +628,8 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
                            ff->fi,
                            -1);
         g_object_unref(icon);
-        g_slice_free(FoundFile, ff);
+
+        delete ff;
     }
 }
 
@@ -842,7 +917,7 @@ on_date_limit_changed(GtkWidget* date_limit, FindFile* data)
 static void
 free_data(FindFile* data)
 {
-    g_slice_free(FindFile, data);
+    delete data;
 }
 
 static void
@@ -1000,7 +1075,7 @@ on_use_size_upper_toggled(GtkWidget* widget, FindFile* data)
 void
 fm_find_files(const char** search_dirs)
 {
-    FindFile* data = g_slice_new0(FindFile);
+    FindFile* data = new FindFile;
     GtkTreeIter it;
     GtkTreeViewColumn* col;
     GtkWidget* add_directory_btn;

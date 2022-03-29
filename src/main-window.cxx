@@ -5333,7 +5333,7 @@ main_task_view_update_task(PtkFileTask* ptask)
                                    MainWindowTaskCol::TASK_COL_STATUS,
                                    status3,
                                    MainWindowTaskCol::TASK_COL_COUNT,
-                                   ptask->dsp_file_count,
+                                   ptask->dsp_file_count.c_str(),
                                    MainWindowTaskCol::TASK_COL_PATH,
                                    path.c_str(),
                                    MainWindowTaskCol::TASK_COL_FILE,
@@ -5341,17 +5341,17 @@ main_task_view_update_task(PtkFileTask* ptask)
                                    MainWindowTaskCol::TASK_COL_PROGRESS,
                                    percent,
                                    MainWindowTaskCol::TASK_COL_TOTAL,
-                                   ptask->dsp_size_tally,
+                                   ptask->dsp_size_tally.c_str(),
                                    MainWindowTaskCol::TASK_COL_ELAPSED,
-                                   ptask->dsp_elapsed,
+                                   ptask->dsp_elapsed.c_str(),
                                    MainWindowTaskCol::TASK_COL_CURSPEED,
-                                   ptask->dsp_curspeed,
+                                   ptask->dsp_curspeed.c_str(),
                                    MainWindowTaskCol::TASK_COL_CUREST,
-                                   ptask->dsp_curest,
+                                   ptask->dsp_curest.c_str(),
                                    MainWindowTaskCol::TASK_COL_AVGSPEED,
-                                   ptask->dsp_avgspeed,
+                                   ptask->dsp_avgspeed.c_str(),
                                    MainWindowTaskCol::TASK_COL_AVGEST,
-                                   ptask->dsp_avgest,
+                                   ptask->dsp_avgest.c_str(),
                                    -1);
             else
                 gtk_list_store_set(GTK_LIST_STORE(model),
@@ -5359,7 +5359,7 @@ main_task_view_update_task(PtkFileTask* ptask)
                                    MainWindowTaskCol::TASK_COL_STATUS,
                                    status3,
                                    MainWindowTaskCol::TASK_COL_COUNT,
-                                   ptask->dsp_file_count,
+                                   ptask->dsp_file_count.c_str(),
                                    MainWindowTaskCol::TASK_COL_PATH,
                                    path.c_str(),
                                    MainWindowTaskCol::TASK_COL_FILE,
@@ -5367,17 +5367,17 @@ main_task_view_update_task(PtkFileTask* ptask)
                                    MainWindowTaskCol::TASK_COL_PROGRESS,
                                    percent,
                                    MainWindowTaskCol::TASK_COL_TOTAL,
-                                   ptask->dsp_size_tally,
+                                   ptask->dsp_size_tally.c_str(),
                                    MainWindowTaskCol::TASK_COL_ELAPSED,
-                                   ptask->dsp_elapsed,
+                                   ptask->dsp_elapsed.c_str(),
                                    MainWindowTaskCol::TASK_COL_CURSPEED,
-                                   ptask->dsp_curspeed,
+                                   ptask->dsp_curspeed.c_str(),
                                    MainWindowTaskCol::TASK_COL_CUREST,
-                                   ptask->dsp_curest,
+                                   ptask->dsp_curest.c_str(),
                                    MainWindowTaskCol::TASK_COL_AVGSPEED,
-                                   ptask->dsp_avgspeed,
+                                   ptask->dsp_avgspeed.c_str(),
                                    MainWindowTaskCol::TASK_COL_AVGEST,
-                                   ptask->dsp_avgest,
+                                   ptask->dsp_avgest.c_str(),
                                    -1);
         }
         else if (pixbuf)
@@ -5390,7 +5390,7 @@ main_task_view_update_task(PtkFileTask* ptask)
                                MainWindowTaskCol::TASK_COL_PROGRESS,
                                percent,
                                MainWindowTaskCol::TASK_COL_ELAPSED,
-                               ptask->dsp_elapsed,
+                               ptask->dsp_elapsed.c_str(),
                                -1);
         else
             gtk_list_store_set(GTK_LIST_STORE(model),
@@ -5400,7 +5400,7 @@ main_task_view_update_task(PtkFileTask* ptask)
                                MainWindowTaskCol::TASK_COL_PROGRESS,
                                percent,
                                MainWindowTaskCol::TASK_COL_ELAPSED,
-                               ptask->dsp_elapsed,
+                               ptask->dsp_elapsed.c_str(),
                                -1);
 
         // Clearing up
@@ -5419,17 +5419,17 @@ main_task_view_update_task(PtkFileTask* ptask)
         gtk_list_store_set(GTK_LIST_STORE(model),
                            &it,
                            MainWindowTaskCol::TASK_COL_TOTAL,
-                           ptask->dsp_size_tally,
+                           ptask->dsp_size_tally.c_str(),
                            MainWindowTaskCol::TASK_COL_ELAPSED,
-                           ptask->dsp_elapsed,
+                           ptask->dsp_elapsed.c_str(),
                            MainWindowTaskCol::TASK_COL_CURSPEED,
-                           ptask->dsp_curspeed,
+                           ptask->dsp_curspeed.c_str(),
                            MainWindowTaskCol::TASK_COL_CUREST,
-                           ptask->dsp_curest,
+                           ptask->dsp_curest.c_str(),
                            MainWindowTaskCol::TASK_COL_AVGSPEED,
-                           ptask->dsp_avgspeed,
+                           ptask->dsp_avgspeed.c_str(),
                            MainWindowTaskCol::TASK_COL_AVGEST,
-                           ptask->dsp_avgest,
+                           ptask->dsp_avgest.c_str(),
                            -1);
     }
     // LOG_INFO("DONE main_task_view_update_task");
@@ -7031,7 +7031,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             char* real_path = argv[j];
             char* device_file = nullptr;
             VFSVolume* vol = nullptr;
-            netmount_t* netmount = nullptr;
+            netmount_t* netmount = new netmount_t;
             if (!strcmp(argv[i], "unmount") && std::filesystem::is_directory(real_path))
             {
                 // unmount DIR
@@ -7099,15 +7099,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                                              netmount,
                                              &run_in_terminal,
                                              nullptr);
-                free(netmount->url);
-                free(netmount->fstype);
-                free(netmount->host);
-                free(netmount->ip);
-                free(netmount->port);
-                free(netmount->user);
-                free(netmount->pass);
-                free(netmount->path);
-                g_slice_free(netmount_t, netmount);
+                delete netmount;
             }
             if (cmd.empty())
             {
@@ -7203,25 +7195,25 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = fmt::format("spacefm: task type {} requires FILE argument(s)\n", argv[i]);
                 return 2;
             }
-            // l = g_list_reverse(l);
+            VFSFileTaskType task_type;
             if (!strcmp(argv[i], "copy"))
-                j = VFSFileTaskType::VFS_FILE_TASK_COPY;
+                task_type = VFSFileTaskType::VFS_FILE_TASK_COPY;
             else if (!strcmp(argv[i], "move"))
-                j = VFSFileTaskType::VFS_FILE_TASK_MOVE;
+                task_type = VFSFileTaskType::VFS_FILE_TASK_MOVE;
             else if (!strcmp(argv[i], "link"))
-                j = VFSFileTaskType::VFS_FILE_TASK_LINK;
+                task_type = VFSFileTaskType::VFS_FILE_TASK_LINK;
             else if (!strcmp(argv[i], "delete"))
-                j = VFSFileTaskType::VFS_FILE_TASK_DELETE;
+                task_type = VFSFileTaskType::VFS_FILE_TASK_DELETE;
             else if (!strcmp(argv[i], "trash"))
-                j = VFSFileTaskType::VFS_FILE_TASK_TRASH;
+                task_type = VFSFileTaskType::VFS_FILE_TASK_TRASH;
             else
                 return 1; // failsafe
             PtkFileTask* ptask =
-                ptk_file_task_new((VFSFileTaskType)j,
-                                  file_list,
-                                  target_dir,
-                                  GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
-                                  file_browser->task_view);
+                new PtkFileTask(task_type,
+                                file_list,
+                                target_dir,
+                                GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
+                                file_browser->task_view);
             ptk_file_task_run(ptask);
             reply = fmt::format("#!{}\n{}\n# Note: $new_task_id not valid until approx one "
                                 "half second after task  start\nnew_task_window={}\n"

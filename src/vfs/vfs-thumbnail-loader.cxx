@@ -42,61 +42,79 @@ static void* thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loa
 static void thumbnail_request_free(VFSThumbnailRequest* req);
 static bool on_thumbnail_idle(VFSThumbnailLoader* loader);
 
+VFSThumbnailRequest::VFSThumbnailRequest(VFSFileInfo* file)
+{
+    this->file = vfs_file_info_ref(file);
+}
+
+VFSThumbnailRequest::~VFSThumbnailRequest()
+{
+    vfs_file_info_unref(this->file);
+}
+
+VFSThumbnailLoader::VFSThumbnailLoader(VFSDir* dir)
+{
+    this->idle_handler = 0;
+    this->dir = g_object_ref(dir);
+    this->queue = g_queue_new();
+    this->update_queue = g_queue_new();
+    this->task = vfs_async_task_new((VFSAsyncFunc)thumbnail_loader_thread, this);
+}
+
+VFSThumbnailLoader::~VFSThumbnailLoader()
+{
+    if (this->idle_handler)
+    {
+        g_source_remove(this->idle_handler);
+        this->idle_handler = 0;
+    }
+
+    // stop the running thread, if any.
+    vfs_async_task_cancel(this->task);
+
+    if (this->idle_handler)
+    {
+        g_source_remove(this->idle_handler);
+        this->idle_handler = 0;
+    }
+
+    g_object_unref(this->task);
+
+    if (this->queue)
+    {
+        g_queue_foreach(this->queue, (GFunc)thumbnail_request_free, nullptr);
+        g_queue_free(this->queue);
+    }
+    if (this->update_queue)
+    {
+        g_queue_foreach(this->update_queue, (GFunc)vfs_file_info_unref, nullptr);
+        g_queue_free(this->update_queue);
+    }
+    // LOG_DEBUG("FREE THUMBNAIL LOADER");
+
+    // prevent recursive unref called from vfs_dir_finalize
+    this->dir->thumbnail_loader = nullptr;
+    g_object_unref(this->dir);
+}
+
 VFSThumbnailLoader*
 vfs_thumbnail_loader_new(VFSDir* dir)
 {
-    VFSThumbnailLoader* loader = g_slice_new0(VFSThumbnailLoader);
-    loader->idle_handler = 0;
-    loader->dir = g_object_ref(dir);
-    loader->queue = g_queue_new();
-    loader->update_queue = g_queue_new();
-    loader->task = vfs_async_task_new((VFSAsyncFunc)thumbnail_loader_thread, loader);
+    VFSThumbnailLoader* loader = new VFSThumbnailLoader(dir);
     return loader;
 }
 
 void
 vfs_thumbnail_loader_free(VFSThumbnailLoader* loader)
 {
-    if (loader->idle_handler)
-    {
-        g_source_remove(loader->idle_handler);
-        loader->idle_handler = 0;
-    }
-
-    // stop the running thread, if any.
-    vfs_async_task_cancel(loader->task);
-
-    if (loader->idle_handler)
-    {
-        g_source_remove(loader->idle_handler);
-        loader->idle_handler = 0;
-    }
-
-    g_object_unref(loader->task);
-
-    if (loader->queue)
-    {
-        g_queue_foreach(loader->queue, (GFunc)thumbnail_request_free, nullptr);
-        g_queue_free(loader->queue);
-    }
-    if (loader->update_queue)
-    {
-        g_queue_foreach(loader->update_queue, (GFunc)vfs_file_info_unref, nullptr);
-        g_queue_free(loader->update_queue);
-    }
-    // LOG_DEBUG("FREE THUMBNAIL LOADER");
-
-    // prevent recursive unref called from vfs_dir_finalize
-    loader->dir->thumbnail_loader = nullptr;
-    g_object_unref(loader->dir);
+    delete loader;
 }
 
 static void
 thumbnail_request_free(VFSThumbnailRequest* req)
 {
-    vfs_file_info_unref(req->file);
-    g_slice_free(VFSThumbnailRequest, req);
     // LOG_DEBUG("FREE REQUEST!");
+    delete req;
 }
 
 static bool
@@ -251,8 +269,7 @@ vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big)
     }
     else
     {
-        req = g_slice_new0(VFSThumbnailRequest);
-        req->file = vfs_file_info_ref(file);
+        req = new VFSThumbnailRequest(file);
         g_queue_push_tail(dir->thumbnail_loader->queue, req);
     }
 

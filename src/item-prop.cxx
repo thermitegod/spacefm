@@ -84,6 +84,9 @@ enum ItemPropItemType
 
 struct ContextData
 {
+    ContextData();
+    ~ContextData();
+
     GtkWidget* dlg;
     GtkWidget* parent;
     GtkWidget* notebook;
@@ -154,6 +157,86 @@ struct ContextData
     GtkWidget* opt_hbox_task;
     GtkWidget* open_browser;
 };
+
+ContextData::ContextData()
+{
+    this->dlg = nullptr;
+    this->parent = nullptr;
+    this->notebook = nullptr;
+    this->context = nullptr;
+    this->set = nullptr;
+    this->temp_cmd_line = nullptr;
+    // this->script_stat;
+    this->script_stat_valid = false;
+    this->reset_command = false;
+
+    // Menu Item Page
+    this->item_type = nullptr;
+    this->item_name = nullptr;
+    this->item_key = nullptr;
+    this->item_icon = nullptr;
+    this->target_vbox = nullptr;
+    this->target_label = nullptr;
+    this->item_target = nullptr;
+    this->item_choose = nullptr;
+    this->item_browse = nullptr;
+    this->icon_choose_btn = nullptr;
+
+    // Context Page
+    this->vbox_context = nullptr;
+    this->view = nullptr;
+    this->btn_remove = nullptr;
+    this->btn_add = nullptr;
+    this->btn_apply = nullptr;
+    this->btn_ok = nullptr;
+
+    this->box_sub = nullptr;
+    this->box_comp = nullptr;
+    this->box_value = nullptr;
+    this->box_match = nullptr;
+    this->box_action = nullptr;
+    this->current_value = nullptr;
+    this->test = nullptr;
+
+    this->hbox_match = nullptr;
+    this->frame = nullptr;
+    this->ignore_context = nullptr;
+    this->hbox_opener = nullptr;
+    this->opener = nullptr;
+
+    // Command Page
+    this->cmd_opt_line = nullptr;
+    this->cmd_opt_script = nullptr;
+    this->cmd_edit = nullptr;
+    this->cmd_edit_root = nullptr;
+    this->cmd_line_label = nullptr;
+    this->cmd_scroll_script = nullptr;
+    this->cmd_script = nullptr;
+    this->cmd_opt_normal = nullptr;
+    this->cmd_opt_checkbox = nullptr;
+    this->cmd_opt_confirm = nullptr;
+    this->cmd_opt_input = nullptr;
+    this->cmd_vbox_msg = nullptr;
+    this->cmd_scroll_msg = nullptr;
+    this->cmd_msg = nullptr;
+    this->opt_terminal = nullptr;
+    this->opt_keep_term = nullptr;
+    this->cmd_user = nullptr;
+    this->opt_task = nullptr;
+    this->opt_task_pop = nullptr;
+    this->opt_task_err = nullptr;
+    this->opt_task_out = nullptr;
+    this->opt_scroll = nullptr;
+    this->opt_hbox_task = nullptr;
+    this->open_browser = nullptr;
+}
+
+ContextData::~ContextData()
+{
+    if (this->temp_cmd_line)
+        free(this->temp_cmd_line);
+    gtk_widget_destroy(this->dlg);
+}
 
 // clang-format off
 static const std::array<const char*, 38> context_subs
@@ -1561,11 +1644,9 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
 
     if (!context || !set)
         return;
-    ContextData* ctxt = g_slice_new0(ContextData);
+    ContextData* ctxt = new ContextData;
     ctxt->context = context;
     ctxt->set = set;
-    ctxt->script_stat_valid = ctxt->reset_command = false;
-    ctxt->parent = nullptr;
     if (set->browser)
         ctxt->parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
@@ -2395,7 +2476,5 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
         xset_set(XSetName::CONTEXT_DLG, XSetSetSet::Y, std::to_string(height).c_str());
     }
 
-    gtk_widget_destroy(ctxt->dlg);
-    free(ctxt->temp_cmd_line);
-    g_slice_free(ContextData, ctxt);
+    delete ctxt;
 }

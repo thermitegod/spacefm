@@ -57,6 +57,9 @@ static const std::array<const char*, 12> chmod_names{"owner_r",
 
 struct FilePropertiesDialogData
 {
+    FilePropertiesDialogData();
+    ~FilePropertiesDialogData();
+
     char* dir_path;
     GList* file_list;
     GtkWidget* dlg;
@@ -87,6 +90,51 @@ struct FilePropertiesDialogData
     unsigned int update_label_timer;
     GtkWidget* recurse;
 };
+
+FilePropertiesDialogData::FilePropertiesDialogData()
+{
+    this->dir_path = nullptr;
+    this->file_list = nullptr;
+    this->dlg = nullptr;
+
+    this->owner = nullptr;
+    this->group = nullptr;
+    this->owner_name = nullptr;
+    this->group_name = nullptr;
+
+    this->mtime = nullptr;
+    this->orig_mtime = nullptr;
+    this->atime = nullptr;
+    this->orig_atime = nullptr;
+
+    // this->chmod_btns[ChmodActionType::N_CHMOD_ACTIONS];
+    // this->chmod_states[ChmodActionType::N_CHMOD_ACTIONS];
+
+    this->total_size_label = nullptr;
+    this->size_on_disk_label = nullptr;
+    this->count_label = nullptr;
+    this->total_size = 0;
+    this->size_on_disk = 0;
+    this->total_count = 0;
+    this->total_count_dir = 0;
+    this->cancel = false;
+    this->done = false;
+    this->calc_size_thread = nullptr;
+    this->update_label_timer = 0;
+    this->recurse = nullptr;
+}
+
+FilePropertiesDialogData::~FilePropertiesDialogData()
+{
+    if (this->owner_name)
+        free(this->owner_name);
+    if (this->group_name)
+        free(this->group_name);
+    if (this->orig_mtime)
+        free(this->orig_mtime);
+    if (this->orig_atime)
+        free(this->orig_atime);
+}
 
 static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data);
 
@@ -258,7 +306,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
         gtk_tree_model_get(model, &it, 2, &action, -1);
         if (!action)
         {
-            VFSMimeType* mime = static_cast<VFSMimeType*>(user_data);
+            VFSMimeType* mime = VFS_MIME_TYPE(user_data);
             GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(combo));
             action = (char*)
                 ptk_choose_app_for_mime_type(GTK_WINDOW(parent), mime, false, true, true, true);
@@ -336,7 +384,6 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     GtkNotebook* notebook = GTK_NOTEBOOK(gtk_builder_get_object(builder, "notebook"));
     xset_set_window_icon(GTK_WINDOW(dlg));
 
-    FilePropertiesDialogData* data;
     bool need_calc_size = true;
 
     VFSFileInfo* file;
@@ -370,7 +417,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, -1);
 
-    data = g_slice_new0(FilePropertiesDialogData);
+    FilePropertiesDialogData* data = new FilePropertiesDialogData;
     data->update_label_timer = 0;
     /* FIXME: When will the data be freed??? */
     g_object_set_data(G_OBJECT(dlg), "DialogData", data);
@@ -378,6 +425,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     data->dlg = dlg;
 
     data->dir_path = ztd::strdup(dir_path);
+
     disp_path = g_filename_display_name(dir_path);
     // gtk_label_set_text( GTK_LABEL( location ), disp_path );
     gtk_entry_set_text(GTK_ENTRY(location), disp_path);
@@ -888,11 +936,11 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                     file_list.push_back(file_path);
                 }
 
-                ptask = ptk_file_task_new(VFSFileTaskType::VFS_FILE_TASK_CHMOD_CHOWN,
-                                          file_list,
-                                          nullptr,
-                                          GTK_WINDOW(gtk_widget_get_parent(GTK_WIDGET(dialog))),
-                                          nullptr);
+                ptask = new PtkFileTask(VFSFileTaskType::VFS_FILE_TASK_CHMOD_CHOWN,
+                                        file_list,
+                                        nullptr,
+                                        GTK_WINDOW(gtk_widget_get_parent(GTK_WIDGET(dialog))),
+                                        nullptr);
                 // MOD
                 ptk_file_task_set_recursive(
                     ptask,
@@ -914,15 +962,11 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
             }
         }
 
-        free(data->owner_name);
-        free(data->group_name);
-        free(data->orig_mtime);
-        free(data->orig_atime);
         /*
          *NOTE: File operation chmod/chown will free the list when it is done,
          *and we only need to free it when there is no file operation applyed.
          */
-        g_slice_free(FilePropertiesDialogData, data);
+        delete data;
     }
 
     gtk_widget_destroy(GTK_WIDGET(dialog));

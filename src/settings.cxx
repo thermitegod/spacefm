@@ -99,7 +99,6 @@ static XSet* xset_new_builtin_toolitem(XSetTool tool_type);
 static void xset_custom_insert_after(XSet* target, XSet* set);
 static XSet* xset_custom_copy(XSet* set, bool copy_next, bool delete_set);
 static XSetSetSet xset_set_set_encode(const std::string& var);
-static void xset_free(XSet* set);
 static void xset_remove(XSet* set);
 
 static const char* enter_command_line =
@@ -709,127 +708,137 @@ xset_get_user_tmp_dir()
 static void
 xset_free_all()
 {
-    for (XSet* set: xsets)
+    while (true)
     {
+        if (xsets.empty())
+            break;
+
+        XSet* set = xsets.back();
+        xsets.pop_back();
+
         if (set->ob2_data && Glib::str_has_prefix(set->name, "evt_"))
         {
             g_list_foreach((GList*)set->ob2_data, (GFunc)free, nullptr);
             g_list_free((GList*)set->ob2_data);
         }
-        xset_free(set);
-        g_slice_free(XSet, set);
+
+        delete set;
     }
-    xsets.clear();
+
     set_last = nullptr;
 
     if (xset_context)
-    {
-        xset_context_new();
-        g_slice_free(XSetContext, xset_context);
-        xset_context = nullptr;
-    }
-}
-
-static void
-xset_free(XSet* set)
-{
-    if (set->name)
-        free(set->name);
-    if (set->s)
-        free(set->s);
-    if (set->x)
-        free(set->x);
-    if (set->y)
-        free(set->y);
-    if (set->z)
-        free(set->z);
-    if (set->menu_label)
-        free(set->menu_label);
-    if (set->shared_key)
-        free(set->shared_key);
-    if (set->icon)
-        free(set->icon);
-    if (set->desc)
-        free(set->desc);
-    if (set->title)
-        free(set->title);
-    if (set->next)
-        free(set->next);
-    if (set->parent)
-        free(set->parent);
-    if (set->child)
-        free(set->child);
-    if (set->prev)
-        free(set->prev);
-    if (set->line)
-        free(set->line);
-    if (set->context)
-        free(set->context);
-    if (set->plugin)
-    {
-        if (set->plug_dir)
-            free(set->plug_dir);
-        if (set->plug_name)
-            free(set->plug_name);
-    }
+        delete xset_context;
 }
 
 static void
 xset_remove(XSet* set)
 {
-    xset_free(set);
-    g_slice_free(XSet, set);
     xsets.erase(std::remove(xsets.begin(), xsets.end(), set), xsets.end());
+
+    delete set;
+
     set_last = nullptr;
+}
+
+XSet::XSet(const std::string& name, XSetName xset_name)
+{
+    // LOG_INFO("XSet Constructor");
+
+    this->name = ztd::strdup(name);
+    this->xset_name = xset_name;
+
+    this->b = XSetB::XSET_B_UNSET;
+    this->s = nullptr;
+    this->x = nullptr;
+    this->y = nullptr;
+    this->z = nullptr;
+    this->disable = false;
+    this->menu_label = nullptr;
+    this->menu_style = XSetMenu::NORMAL;
+    this->cb_func = nullptr;
+    this->cb_data = nullptr;
+    this->ob1 = nullptr;
+    this->ob1_data = nullptr;
+    this->ob2 = nullptr;
+    this->ob2_data = nullptr;
+    this->key = 0;
+    this->keymod = 0;
+    this->shared_key = nullptr;
+    this->icon = nullptr;
+    this->desc = nullptr;
+    this->title = nullptr;
+    this->next = nullptr;
+    this->context = nullptr;
+    this->tool = XSetTool::NOT;
+    this->lock = true;
+    this->plugin = false;
+
+    // custom ( !lock )
+    this->prev = nullptr;
+    this->parent = nullptr;
+    this->child = nullptr;
+    this->line = nullptr;
+    this->task = false;
+    this->task_pop = false;
+    this->task_err = false;
+    this->task_out = false;
+    this->in_terminal = false;
+    this->keep_terminal = false;
+    this->scroll_lock = false;
+    this->opener = 0;
+}
+
+XSet::~XSet()
+{
+    // LOG_INFO("XSet Destructor");
+
+    if (this->name)
+        free(this->name);
+    if (this->s)
+        free(this->s);
+    if (this->x)
+        free(this->x);
+    if (this->y)
+        free(this->y);
+    if (this->z)
+        free(this->z);
+    if (this->menu_label)
+        free(this->menu_label);
+    if (this->shared_key)
+        free(this->shared_key);
+    if (this->icon)
+        free(this->icon);
+    if (this->desc)
+        free(this->desc);
+    if (this->title)
+        free(this->title);
+    if (this->next)
+        free(this->next);
+    if (this->parent)
+        free(this->parent);
+    if (this->child)
+        free(this->child);
+    if (this->prev)
+        free(this->prev);
+    if (this->line)
+        free(this->line);
+    if (this->context)
+        free(this->context);
+    if (this->plugin)
+    {
+        if (this->plug_dir)
+            free(this->plug_dir);
+        if (this->plug_name)
+            free(this->plug_name);
+    }
 }
 
 static XSet*
 xset_new(const std::string& name, XSetName xset_name)
 {
-    XSet* set = g_slice_new(XSet);
+    XSet* set = new XSet(name, xset_name);
 
-    set->name = ztd::strdup(name);
-    set->xset_name = xset_name;
-
-    set->b = XSetB::XSET_B_UNSET;
-    set->s = nullptr;
-    set->x = nullptr;
-    set->y = nullptr;
-    set->z = nullptr;
-    set->disable = false;
-    set->menu_label = nullptr;
-    set->menu_style = XSetMenu::NORMAL;
-    set->cb_func = nullptr;
-    set->cb_data = nullptr;
-    set->ob1 = nullptr;
-    set->ob1_data = nullptr;
-    set->ob2 = nullptr;
-    set->ob2_data = nullptr;
-    set->key = 0;
-    set->keymod = 0;
-    set->shared_key = nullptr;
-    set->icon = nullptr;
-    set->desc = nullptr;
-    set->title = nullptr;
-    set->next = nullptr;
-    set->context = nullptr;
-    set->tool = XSetTool::NOT;
-    set->lock = true;
-    set->plugin = false;
-
-    // custom ( !lock )
-    set->prev = nullptr;
-    set->parent = nullptr;
-    set->child = nullptr;
-    set->line = nullptr;
-    set->task = false;
-    set->task_pop = false;
-    set->task_err = false;
-    set->task_out = false;
-    set->in_terminal = false;
-    set->keep_terminal = false;
-    set->scroll_lock = false;
-    set->opener = 0;
     return set;
 }
 
@@ -1908,26 +1917,34 @@ read_root_settings()
     file.close();
 }
 
+XSetContext::XSetContext()
+{
+    // LOG_INFO("XSetContext Constructor");
+
+    this->valid = false;
+    for (std::size_t i = 0; i < this->var.size(); ++i)
+        this->var[i] = nullptr;
+}
+
+XSetContext::~XSetContext()
+{
+    // LOG_INFO("XSetContext Destructor");
+
+    this->valid = false;
+    for (std::size_t i = 0; i < this->var.size(); ++i)
+    {
+        if (this->var[i])
+            free(this->var[i]);
+        this->var[i] = nullptr;
+    }
+}
+
 XSetContext*
 xset_context_new()
 {
-    if (!xset_context)
-    {
-        xset_context = g_slice_new0(XSetContext);
-        xset_context->valid = false;
-        for (std::size_t i = 0; i < xset_context->var.size(); ++i)
-            xset_context->var[i] = nullptr;
-    }
-    else
-    {
-        xset_context->valid = false;
-        for (std::size_t i = 0; i < xset_context->var.size(); ++i)
-        {
-            if (xset_context->var[i])
-                free(xset_context->var[i]);
-            xset_context->var[i] = nullptr;
-        }
-    }
+    if (xset_context)
+        delete xset_context;
+    xset_context = new XSetContext();
     return xset_context;
 }
 
@@ -2938,12 +2955,29 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
 
 struct PluginData
 {
+    PluginData();
+    ~PluginData();
+
     FMMainWindow* main_window;
     GtkWidget* handler_dlg;
     char* plug_dir;
     XSet* set;
     PluginJob job;
 };
+
+PluginData::PluginData()
+{
+    this->main_window = nullptr;
+    this->handler_dlg = nullptr;
+    this->plug_dir = nullptr;
+    this->set = nullptr;
+}
+
+PluginData::~PluginData()
+{
+    if (this->plug_dir)
+        free(this->plug_dir);
+}
 
 static void
 on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
@@ -3111,8 +3145,8 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
         }
         free(plugin);
     }
-    free(plugin_data->plug_dir);
-    g_slice_free(PluginData, plugin_data);
+
+    delete plugin_data;
 }
 
 static void
@@ -3148,8 +3182,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
     ptask->task->exec_export = false;
     ptask->task->exec_as_user = "root";
 
-    PluginData* plugin_data = g_slice_new0(PluginData);
-    plugin_data->main_window = nullptr;
+    PluginData* plugin_data = new PluginData;
     plugin_data->plug_dir = ztd::strdup(set->plug_dir);
     plugin_data->set = set;
     plugin_data->job = PluginJob::REMOVE;
@@ -3247,7 +3280,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& p
     ptask->task->exec_show_error = true;
     ptask->task->exec_export = false;
 
-    PluginData* plugin_data = g_slice_new0(PluginData);
+    PluginData* plugin_data = new PluginData;
     plugin_data->main_window = main_window;
     plugin_data->handler_dlg = handler_dlg;
     plugin_data->plug_dir = ztd::strdup(plug_dir);

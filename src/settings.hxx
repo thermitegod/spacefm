@@ -279,6 +279,9 @@ struct PtkFileBrowser;
 
 struct XSet
 {
+    XSet(const std::string& name, XSetName xset_name);
+    ~XSet();
+
     char* name;
     XSetName xset_name;
 
@@ -359,7 +362,10 @@ extern std::vector<std::string> xset_cmd_history;
 
 struct XSetContext
 {
-    bool valid;
+    XSetContext();
+    ~XSetContext();
+
+    bool valid{false};
     std::array<char*, 40> var;
 };
 

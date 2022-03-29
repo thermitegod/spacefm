@@ -50,6 +50,9 @@ enum VFSVolumeDeviceType
 
 struct netmount_t
 {
+    netmount_t();
+    ~netmount_t();
+
     char* url;
     char* fstype;
     char* host;
@@ -62,6 +65,9 @@ struct netmount_t
 
 struct VFSVolume
 {
+    VFSVolume();
+    ~VFSVolume();
+
     dev_t devnum;
     int device_type;
     char* device_file;

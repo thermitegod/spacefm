@@ -29,6 +29,9 @@
 
 struct PtkFileMenu
 {
+    PtkFileMenu();
+    ~PtkFileMenu();
+
     PtkFileBrowser* browser;
     char* cwd;
     char* file_path;

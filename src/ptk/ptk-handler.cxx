@@ -133,6 +133,9 @@ static const char* script_header = "#!/bin/bash\n";
 
 struct HandlerData
 {
+    HandlerData();
+    ~HandlerData();
+
     GtkWidget* dlg;
     GtkWidget* parent;
     int mode;
@@ -153,9 +156,11 @@ struct HandlerData
     GtkTextBuffer* buf_handler_compress;
     GtkTextBuffer* buf_handler_extract;
     GtkTextBuffer* buf_handler_list;
+
     bool compress_changed;
     bool extract_changed;
     bool list_changed;
+
     GtkWidget* chkbtn_handler_compress_term;
     GtkWidget* chkbtn_handler_extract_term;
     GtkWidget* chkbtn_handler_list_term;
@@ -170,6 +175,54 @@ struct HandlerData
     GtkWidget* btn_defaults0;
     GtkWidget* icon_choose_btn;
 };
+
+HandlerData::HandlerData()
+{
+    this->dlg = nullptr;
+    this->parent = nullptr;
+
+    this->mode = 0;
+    this->changed = false;
+
+    this->browser = nullptr;
+
+    this->view_handlers = nullptr;
+    this->list = nullptr;
+    this->chkbtn_handler_enabled = nullptr;
+    this->entry_handler_name = nullptr;
+    this->entry_handler_mime = nullptr;
+    this->entry_handler_extension = nullptr;
+    this->entry_handler_icon = nullptr;
+    this->view_handler_compress = nullptr;
+    this->view_handler_extract = nullptr;
+    this->view_handler_list = nullptr;
+    this->buf_handler_compress = nullptr;
+    this->buf_handler_extract = nullptr;
+    this->buf_handler_list = nullptr;
+
+    this->compress_changed = false;
+    this->extract_changed = false;
+    this->list_changed = false;
+
+    this->chkbtn_handler_compress_term = nullptr;
+    this->chkbtn_handler_extract_term = nullptr;
+    this->chkbtn_handler_list_term = nullptr;
+    this->btn_remove = nullptr;
+    this->btn_add = nullptr;
+    this->btn_apply = nullptr;
+    this->btn_up = nullptr;
+    this->btn_down = nullptr;
+    this->btn_ok = nullptr;
+    this->btn_cancel = nullptr;
+    this->btn_defaults = nullptr;
+    this->btn_defaults0 = nullptr;
+    this->icon_choose_btn = nullptr;
+}
+
+HandlerData::~HandlerData()
+{
+    gtk_widget_destroy(this->dlg);
+}
 
 struct Handler
 {
@@ -2287,8 +2340,7 @@ restore_defaults(HandlerData* hnd, bool all)
             return;
 
         // create fake xset
-        XSet* set = g_slice_new(XSet);
-        set->name = (char*)handler->setname;
+        XSet* set = new XSet(ztd::strdup(handler->setname), XSetName::CUSTOM);
         set->menu_label = (char*)handler->handler_name;
         set->s = (char*)handler->type;
         set->x = (char*)handler->ext;
@@ -2302,7 +2354,7 @@ restore_defaults(HandlerData* hnd, bool all)
         // show fake xset values
         config_load_handler_settings(set, nullptr, handler, hnd);
 
-        g_slice_free(XSet, set);
+        delete set;
     }
 }
 
@@ -2818,7 +2870,7 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
 {
     std::string str;
 
-    HandlerData* hnd = g_slice_new0(HandlerData);
+    HandlerData* hnd = new HandlerData;
     hnd->mode = mode;
 
     /* Create handlers dialog
@@ -2826,8 +2878,7 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
      * compilation warning */
     if (file_browser)
         hnd->parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser->main_window));
-    else
-        hnd->parent = nullptr;
+
     hnd->browser = file_browser;
     hnd->dlg = gtk_dialog_new_with_buttons(
         dialog_titles.at(mode),
@@ -3385,6 +3436,5 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
     }
 
     // Clearing up dialog
-    gtk_widget_destroy(hnd->dlg);
-    g_slice_free(HandlerData, hnd);
+    delete hnd;
 }

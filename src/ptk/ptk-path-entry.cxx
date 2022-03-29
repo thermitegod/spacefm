@@ -42,6 +42,12 @@ enum PTKPathEntryCol
     N_COLS
 };
 
+EntryData::EntryData(PtkFileBrowser* file_browser)
+{
+    this->browser = file_browser;
+    this->seek_timer = 0;
+}
+
 static char*
 get_cwd(GtkEntry* entry)
 {
@@ -710,7 +716,7 @@ on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars, unsigne
 static void
 entry_data_free(EntryData* edata)
 {
-    g_slice_free(EntryData, edata);
+    delete edata;
 }
 
 GtkWidget*
@@ -720,9 +726,7 @@ ptk_path_entry_new(PtkFileBrowser* file_browser)
     gtk_entry_set_has_frame(GTK_ENTRY(entry), true);
     gtk_widget_set_size_request(entry, 50, -1);
 
-    EntryData* edata = g_slice_new0(EntryData);
-    edata->browser = file_browser;
-    edata->seek_timer = 0;
+    EntryData* edata = new EntryData(file_browser);
 
     g_signal_connect(entry, "focus-in-event", G_CALLBACK(on_focus_in), nullptr);
     g_signal_connect(entry, "focus-out-event", G_CALLBACK(on_focus_out), nullptr);

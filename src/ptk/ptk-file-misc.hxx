@@ -24,6 +24,9 @@
 
 struct AutoOpenCreate
 {
+    AutoOpenCreate();
+    ~AutoOpenCreate();
+
     char* path;
     PtkFileBrowser* file_browser;
     GFunc callback;
