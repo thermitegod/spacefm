@@ -75,15 +75,11 @@ bool mime_type_is_executable_file(const char* file_path, const char* mime_type);
 char* mime_type_get_desc_icon(const char* type, const char* locale, char** icon_name);
 
 /*
- * Iterate through all mime caches
- * Can be used to hook file alteration monitor for the cache files to handle reloading.
- */
-// void mime_cache_foreach(GFunc func, void* user_data);
-
-/*
  * Get mime caches
  */
-std::vector<MimeCache*> mime_type_get_caches(std::size_t* n);
+std::vector<MimeCache>& mime_type_get_caches(std::size_t* n);
+
+void mime_type_regen_all_caches();
 
 /* max magic extent of all caches */
 extern uint32_t mime_cache_max_extent;

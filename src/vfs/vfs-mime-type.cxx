@@ -58,7 +58,7 @@ static bool
 vfs_mime_type_reload(void* user_data)
 {
     (void)user_data;
-    GList* l;
+
     /* FIXME: process mime database reloading properly. */
     /* Remove all items in the hash table */
 
@@ -71,12 +71,8 @@ vfs_mime_type_reload(void* user_data)
 
     // LOG_DEBUG("reload mime-types");
 
-    /* call all registered callbacks */
-    for (l = reload_cb; l; l = l->next)
-    {
-        VFSMimeReloadCbEnt* ent = VFS_MIME_TYPE_CALLBACK_DATA(l->data);
-        ent->cb(ent->user_data);
-    }
+    mime_type_regen_all_caches();
+
     return false;
 }
 
@@ -86,26 +82,15 @@ on_mime_cache_changed(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char*
 {
     (void)fm;
     (void)file_name;
-    MimeCache* cache = static_cast<MimeCache*>(user_data);
+
     switch (event)
     {
         case VFSFileMonitorEvent::VFS_FILE_MONITOR_CREATE:
         case VFSFileMonitorEvent::VFS_FILE_MONITOR_DELETE:
-            /* NOTE: FAM sometimes generate incorrect "delete" notification for non-existent files.
-             *  So if the cache is not loaded originally (the cache file is non-existent), we skip
-             * it.
-             */
-            if (!cache->buffer)
-                return;
-
-            FMT_FALLTHROUGH;
         case VFSFileMonitorEvent::VFS_FILE_MONITOR_CHANGE:
-            mime_cache_reload(cache);
-            // LOG_DEBUG("reload cache: {}", file_name);
+            // LOG_DEBUG("reloading all mime caches");
             if (reload_callback_id == 0)
                 reload_callback_id = g_idle_add((GSourceFunc)vfs_mime_type_reload, nullptr);
-            break;
-        default:
             break;
     }
 }
@@ -117,17 +102,21 @@ vfs_mime_type_init()
 
     /* install file alteration monitor for mime-cache */
     std::size_t n_caches;
-    std::vector<MimeCache*> caches = mime_type_get_caches(&n_caches);
+    std::vector<MimeCache> caches = mime_type_get_caches(&n_caches);
     mime_caches_monitor = g_new0(VFSFileMonitor*, n_caches);
     for (std::size_t i = 0; i < n_caches; ++i)
     {
         // MOD NOTE1  check to see if path exists - otherwise it later tries to
         //  remove nullptr fm with inotify which caused segfault
-        VFSFileMonitor* fm;
-        if (std::filesystem::exists(caches[i]->file_path))
-            fm = vfs_file_monitor_add(caches[i]->file_path, on_mime_cache_changed, caches[i]);
-        else
-            fm = nullptr;
+        if (!std::filesystem::exists(caches[i].get_file_path()))
+        {
+            mime_caches_monitor[i] = nullptr;
+            continue;
+        }
+
+        VFSFileMonitor* fm =
+            vfs_file_monitor_add(caches[i].get_file_path().c_str(), on_mime_cache_changed, nullptr);
+
         mime_caches_monitor[i] = fm;
     }
     mime_hash = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, vfs_mime_type_unref);
@@ -138,11 +127,11 @@ vfs_mime_type_clean()
 {
     /* remove file alteration monitor for mime-cache */
     std::size_t n_caches;
-    std::vector<MimeCache*> caches = mime_type_get_caches(&n_caches);
+    std::vector<MimeCache> caches = mime_type_get_caches(&n_caches);
     for (std::size_t i = 0; i < n_caches; ++i)
     {
         if (mime_caches_monitor[i]) // MOD added if !nullptr - see NOTE1 above
-            vfs_file_monitor_remove(mime_caches_monitor[i], on_mime_cache_changed, caches[i]);
+            vfs_file_monitor_remove(mime_caches_monitor[i], on_mime_cache_changed, nullptr);
     }
     free(mime_caches_monitor);
 

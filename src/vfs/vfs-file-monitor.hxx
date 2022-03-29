@@ -79,7 +79,7 @@ bool vfs_file_monitor_init();
  * cb: callback function to be called when file event happens.
  * user_data: user data to be passed to callback function.
  */
-VFSFileMonitor* vfs_file_monitor_add(char* path, VFSFileMonitorCallback cb, void* user_data);
+VFSFileMonitor* vfs_file_monitor_add(const char* path, VFSFileMonitorCallback cb, void* user_data);
 
 /*
  * Remove previously installed monitor.

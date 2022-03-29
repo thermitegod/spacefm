@@ -136,10 +136,10 @@ vfs_file_monitor_init()
 }
 
 VFSFileMonitor*
-vfs_file_monitor_add(char* path, VFSFileMonitorCallback cb, void* user_data)
+vfs_file_monitor_add(const char* path, VFSFileMonitorCallback cb, void* user_data)
 {
     char resolved_path[PATH_MAX];
-    char* real_path;
+    const char* real_path;
 
     // LOG_INFO("vfs_file_monitor_add  {}", path);
 
@@ -158,7 +158,9 @@ vfs_file_monitor_add(char* path, VFSFileMonitorCallback cb, void* user_data)
         real_path = path; // fallback
     }
     else
+    {
         real_path = resolved_path;
+    }
 
     VFSFileMonitor* monitor = VFS_FILE_MONITOR(g_hash_table_lookup(monitor_hash, real_path));
     if (!monitor)

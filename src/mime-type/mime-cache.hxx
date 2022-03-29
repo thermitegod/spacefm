@@ -17,43 +17,62 @@
 
 #pragma once
 
-struct MimeCache
+#include <vector>
+
+class MimeCache
 {
-    char* file_path;
-    bool has_reverse_suffix : 1; /* since mime.cache v1.1, shared mime info v0.4 */
-    bool has_str_weight : 1;     /* since mime.cache v1.1, shared mime info v0.4 */
-    const char* buffer;
-    unsigned int size;
+  public:
+    MimeCache(const std::string& file_path);
+    ~MimeCache();
 
-    uint32_t n_alias;
-    const char* alias;
+    void reload();
 
-    uint32_t n_parents;
-    const char* parents;
+    const char* lookup_literal(const char* filename);
+    const char* lookup_suffix(const char* filename, const char** suffix_pos);
+    const char* lookup_magic(const char* data, int len);
+    const char* lookup_glob(const char* filename, int* glob_len);
+    std::vector<const char*> lookup_parents(const char* mime_type);
+    const char* lookup_alias(const char* mime_type);
 
-    uint32_t n_literals;
-    const char* literals;
+    const std::string& get_file_path();
+    uint32_t get_magic_max_extent();
 
-    uint32_t n_globs;
-    const char* globs;
+  private:
+    std::string m_file_path;
 
-    uint32_t n_suffix_roots;
-    const char* suffix_roots;
+    // since mime.cache v1.1, shared mime info v0.4
+    bool m_has_reverse_suffix{true};
+    bool m_has_str_weight{true};
 
-    uint32_t n_magics;
-    uint32_t magic_max_extent;
-    const char* magics;
+    const char* m_buffer{nullptr};
+    std::size_t m_buffer_size{0};
+
+    uint32_t m_n_alias{0};
+    const char* m_alias{nullptr};
+
+    uint32_t m_n_parents{0};
+    const char* m_parents{nullptr};
+
+    uint32_t m_n_literals{0};
+    const char* m_literals{nullptr};
+
+    uint32_t m_n_globs{0};
+    const char* m_globs{nullptr};
+
+    uint32_t m_n_suffix_roots{0};
+    const char* m_suffix_roots{nullptr};
+
+    uint32_t m_n_magics{0};
+    uint32_t m_magic_max_extent{0};
+    const char* m_magics{nullptr};
+
+    void load_mime_file();
+    const char* lookup_str_in_entries(const char* entries, uint32_t n, const char* str);
+    bool magic_rule_match(const char* buf, const char* rule, const char* data, int len);
+    bool magic_match(const char* buf, const char* magic, const char* data, int len);
+    const char* lookup_suffix_nodes(const char* buf, const char* nodes, uint32_t n,
+                                    const char* name);
+    const char* lookup_reverse_suffix_nodes(const char* buf, const char* nodes, uint32_t n,
+                                            const char* name, const char* suffix,
+                                            const char** suffix_pos);
 };
-
-MimeCache* mime_cache_new(const char* file_path);
-bool mime_cache_load(MimeCache* cache, const char* file_path);
-void mime_cache_reload(MimeCache* cache);
-void mime_cache_free(MimeCache* cache);
-
-const char* mime_cache_lookup_literal(MimeCache* cache, const char* filename);
-const char* mime_cache_lookup_glob(MimeCache* cache, const char* filename, int* glob_len);
-const char* mime_cache_lookup_suffix(MimeCache* cache, const char* filename,
-                                     const char** suffix_pos);
-const char* mime_cache_lookup_magic(MimeCache* cache, const char* data, int len);
-std::vector<const char*> mime_cache_lookup_parents(MimeCache* cache, const char* mime_type);
-const char* mime_cache_lookup_alias(MimeCache* cache, const char* mime_type);
