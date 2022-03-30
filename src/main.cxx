@@ -18,6 +18,8 @@
 #include <string>
 #include <filesystem>
 
+#include <vector>
+
 #include <stdio.h>
 
 #include <fmt/format.h>
@@ -212,7 +214,18 @@ handle_parsed_commandline_args()
     {
         // find files
         init_folder();
-        fm_find_files((const char**)cli_flags.files);
+
+        std::vector<const char*> search_dirs;
+        char** dir;
+        for (dir = cli_flags.files; *dir; ++dir)
+        {
+            if (!*dir)
+                continue;
+            if (std::filesystem::is_directory(*dir))
+                search_dirs.push_back(*dir);
+        }
+
+        fm_find_files(search_dirs);
         cli_flags.find_files = false;
     }
     else if (cli_flags.daemon_mode)

@@ -1073,7 +1073,7 @@ on_use_size_upper_toggled(GtkWidget* widget, FindFile* data)
 }
 
 void
-fm_find_files(const char** search_dirs)
+fm_find_files(std::vector<const char*> search_dirs)
 {
     FindFile* data = new FindFile;
     GtkTreeIter it;
@@ -1148,14 +1148,10 @@ fm_find_files(const char** search_dirs)
     remove_directory_btn = GTK_WIDGET(gtk_builder_get_object(builder, "remove_directory_btn"));
     data->include_sub = GTK_WIDGET(gtk_builder_get_object(builder, "include_sub"));
 
-    if (search_dirs)
+    for (const char* dir: search_dirs)
     {
-        const char** dir;
-        for (dir = search_dirs; *dir; ++dir)
-        {
-            if (std::filesystem::is_directory(*dir))
-                gtk_list_store_insert_with_values(data->places_list, &it, 0, 0, *dir, -1);
-        }
+        if (std::filesystem::is_directory(dir))
+            gtk_list_store_insert_with_values(data->places_list, &it, 0, 0, dir, -1);
     }
 
     gtk_tree_view_set_model(GTK_TREE_VIEW(data->places_view), GTK_TREE_MODEL(data->places_list));

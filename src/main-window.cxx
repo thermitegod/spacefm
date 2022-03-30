@@ -459,14 +459,14 @@ on_find_file_activate(GtkMenuItem* menuitem, void* user_data)
 {
     (void)menuitem;
     FMMainWindow* main_window = static_cast<FMMainWindow*>(user_data);
-    const char* dirs[2];
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
     const char* cwd = ptk_file_browser_get_cwd(file_browser);
 
-    dirs[0] = cwd;
-    dirs[1] = nullptr;
-    fm_find_files(dirs);
+    std::vector<const char*> search_dirs;
+    search_dirs.push_back(cwd);
+
+    fm_find_files(search_dirs);
 }
 
 static void

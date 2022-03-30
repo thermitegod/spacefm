@@ -17,4 +17,6 @@
 
 #pragma once
 
-void fm_find_files(const char** search_dirs);
+#include <vector>
+
+void fm_find_files(std::vector<const char*> search_dirs);
