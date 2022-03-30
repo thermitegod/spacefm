@@ -17,8 +17,6 @@
 
 #pragma once
 
-#include <glib.h>
-
 struct MimeCache
 {
     char* file_path;
@@ -57,5 +55,5 @@ const char* mime_cache_lookup_glob(MimeCache* cache, const char* filename, int* 
 const char* mime_cache_lookup_suffix(MimeCache* cache, const char* filename,
                                      const char** suffix_pos);
 const char* mime_cache_lookup_magic(MimeCache* cache, const char* data, int len);
-const char** mime_cache_lookup_parents(MimeCache* cache, const char* mime_type);
+std::vector<const char*> mime_cache_lookup_parents(MimeCache* cache, const char* mime_type);
 const char* mime_cache_lookup_alias(MimeCache* cache, const char* mime_type);

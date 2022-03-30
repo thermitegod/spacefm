@@ -580,15 +580,14 @@ mime_type_is_subclass(const char* type, const char* parent)
 
     for (MimeCache* cache: caches)
     {
-        const char** parents = mime_cache_lookup_parents(cache, type);
-        if (parents)
+        std::vector<const char*> parents = mime_cache_lookup_parents(cache, type);
+        if (parents.empty())
+            break;
+
+        for (const char* p: parents)
         {
-            const char** p;
-            for (p = parents; *p; ++p)
-            {
-                if (!strcmp(parent, *p))
-                    return true;
-            }
+            if (!strcmp(parent, p))
+                return true;
         }
     }
     return false;

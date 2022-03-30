@@ -15,9 +15,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <vector>
+
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <fnmatch.h>
+
+#include <glib.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -508,23 +512,23 @@ mime_cache_lookup_glob(MimeCache* cache, const char* filename, int* glob_len)
     return type;
 }
 
-const char**
+std::vector<const char*>
 mime_cache_lookup_parents(MimeCache* cache, const char* mime_type)
 {
+    std::vector<const char*> result;
+
     const char* parents = lookup_str_in_entries(cache, cache->parents, cache->n_parents, mime_type);
     if (!parents)
-        return nullptr;
+        return result;
+
     uint32_t n = VAL32(parents, 0);
     parents += 4;
 
-    const char** result = (const char**)g_new(char*, n + 1);
-
-    for (unsigned int i = 0; i < n; ++i)
+    for (std::size_t i = 0; i < n; ++i)
     {
         uint32_t parent_off = VAL32(parents, i * 4);
         const char* parent = cache->buffer + parent_off;
-        result[i] = parent;
+        result.push_back(parent);
     }
-    result[n] = nullptr;
     return result;
 }
