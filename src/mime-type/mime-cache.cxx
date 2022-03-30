@@ -219,7 +219,7 @@ magic_match(const char* buf, const char* magic, const char* data, int len)
     uint32_t rules_off = VAL32(magic, 12);
     const char* rule = buf + rules_off;
 
-    for (unsigned int i = 0; i < n_rules; ++i, rule += 32)
+    for (std::size_t i = 0; i < n_rules; ++i, rule += 32)
         if (magic_rule_match(buf, rule, data, len))
             return true;
     return false;
@@ -233,7 +233,7 @@ mime_cache_lookup_magic(MimeCache* cache, const char* data, int len)
     if (!data || (len == 0) || !magic)
         return nullptr;
 
-    for (unsigned int i = 0; i < cache->n_magics; ++i, magic += 16)
+    for (std::size_t i = 0; i < cache->n_magics; ++i, magic += 16)
     {
         if (magic_match(cache->buffer, magic, data, len))
         {
@@ -311,7 +311,7 @@ lookup_reverse_suffix_nodes(const char* buf, const char* nodes, uint32_t n, cons
     uint32_t uchar = suffix ? g_unichar_tolower(g_utf8_get_char(suffix)) : 0;
     // LOG_DEBUG("{}: suffix= '{}'", name, suffix);
 
-    for (unsigned int i = 0; i < n; ++i)
+    for (std::size_t i = 0; i < n; ++i)
     {
         const char* node = nodes + i * 12;
         uint32_t ch = VAL32(node, 0);

@@ -49,7 +49,7 @@ struct MimeCache
 
 MimeCache* mime_cache_new(const char* file_path);
 bool mime_cache_load(MimeCache* cache, const char* file_path);
-bool mime_cache_reload(MimeCache* cache);
+void mime_cache_reload(MimeCache* cache);
 void mime_cache_free(MimeCache* cache);
 
 const char* mime_cache_lookup_literal(MimeCache* cache, const char* filename);

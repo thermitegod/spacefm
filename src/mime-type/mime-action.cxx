@@ -161,8 +161,7 @@ remove_actions(const std::string mime_type, std::vector<std::string> actions)
         return;
     }
 
-    unsigned long r;
-    for (r = 0; r < removed.size(); ++r)
+    for (std::size_t r = 0; r < removed.size(); ++r)
     {
         // LOG_INFO("    {}", removed[r]);
         std::string rem = removed.at(r);
@@ -238,16 +237,14 @@ get_actions(const std::string& dir, const std::string& type, std::vector<std::st
             {
                 continue;
             }
-            unsigned long i;
-            for (i = 0; i < apps.size(); ++i)
+            for (std::size_t i = 0; i < apps.size(); ++i)
             {
                 //  LOG_INFO("            {}", apps[i]);
                 //  check if removed
                 is_removed = false;
                 if (!removed.empty() && n > 0)
                 {
-                    unsigned long r;
-                    for (r = 0; r < removed.size(); ++r)
+                    for (std::size_t r = 0; r < removed.size(); ++r)
                     {
                         if (ztd::same(removed[r].data(), apps[i].data()))
                         {
@@ -663,8 +660,7 @@ get_default_action(const char* dir, const char* type, void* user_data)
                 break;
             }
 
-            unsigned long i;
-            for (i = 0; i < apps.size(); ++i)
+            for (std::size_t i = 0; i < apps.size(); ++i)
             {
                 if (apps[i][0] != '\0')
                 {
@@ -774,8 +770,7 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
         else // if (ztd::same(group, "Default Applications"))
             group_block = MimeTypeAction::MIME_TYPE_ACTION_REMOVE;
 
-        unsigned long i;
-        for (i = 0; i < apps.size(); ++i)
+        for (std::size_t i = 0; i < apps.size(); ++i)
         {
             if (apps[i][0] != '\0')
             {

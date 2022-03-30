@@ -83,7 +83,7 @@ char* mime_type_get_desc_icon(const char* type, const char* locale, char** icon_
 /*
  * Get mime caches
  */
-MimeCache** mime_type_get_caches(int* n);
+std::vector<MimeCache*> mime_type_get_caches(std::size_t* n);
 
 /* max magic extent of all caches */
 extern uint32_t mime_cache_max_extent;

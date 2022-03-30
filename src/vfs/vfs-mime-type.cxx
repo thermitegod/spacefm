@@ -116,11 +116,10 @@ vfs_mime_type_init()
     mime_type_init();
 
     /* install file alteration monitor for mime-cache */
-    int n_caches;
-    MimeCache** caches = mime_type_get_caches(&n_caches);
+    std::size_t n_caches;
+    std::vector<MimeCache*> caches = mime_type_get_caches(&n_caches);
     mime_caches_monitor = g_new0(VFSFileMonitor*, n_caches);
-    int i;
-    for (i = 0; i < n_caches; ++i)
+    for (std::size_t i = 0; i < n_caches; ++i)
     {
         // MOD NOTE1  check to see if path exists - otherwise it later tries to
         //  remove nullptr fm with inotify which caused segfault
@@ -138,10 +137,9 @@ void
 vfs_mime_type_clean()
 {
     /* remove file alteration monitor for mime-cache */
-    int n_caches;
-    MimeCache** caches = mime_type_get_caches(&n_caches);
-    int i;
-    for (i = 0; i < n_caches; ++i)
+    std::size_t n_caches;
+    std::vector<MimeCache*> caches = mime_type_get_caches(&n_caches);
+    for (std::size_t i = 0; i < n_caches; ++i)
     {
         if (mime_caches_monitor[i]) // MOD added if !nullptr - see NOTE1 above
             vfs_file_monitor_remove(mime_caches_monitor[i], on_mime_cache_changed, caches[i]);

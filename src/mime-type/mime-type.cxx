@@ -44,11 +44,11 @@
 /* max extent used to checking text files */
 #define TEXT_MAX_EXTENT 512
 
-static void mime_cache_foreach(GFunc func, void* user_data);
 static bool mime_type_is_subclass(const char* type, const char* parent);
 
-static MimeCache** caches = nullptr;
 static std::size_t n_caches = 0;
+std::vector<MimeCache*> caches;
+
 uint32_t mime_cache_max_extent = 0;
 
 /* allocated buffer used for mime magic checking to
@@ -79,14 +79,13 @@ mime_type_get_by_filename(const char* filename, struct stat* statbuf)
     const char* type = nullptr;
     const char* suffix_pos = nullptr;
     const char* prev_suffix_pos = (const char*)-1;
-    MimeCache* cache;
 
     if (statbuf && S_ISDIR(statbuf->st_mode))
         return XDG_MIME_TYPE_DIRECTORY;
 
-    for (unsigned int i = 0; !type && i < n_caches; ++i)
+    for (std::size_t i = 0; !type && i < n_caches; ++i)
     {
-        cache = caches[i];
+        MimeCache* cache = caches.at(i);
         type = mime_cache_lookup_literal(cache, filename);
         if (!type)
         {
@@ -105,7 +104,7 @@ mime_type_get_by_filename(const char* filename, struct stat* statbuf)
         int glob_len = 0;
         for (unsigned int i = 0; !type && i < n_caches; ++i)
         {
-            cache = caches[i];
+            MimeCache* cache = caches[i];
             const char* matched_type;
             matched_type = mime_cache_lookup_glob(cache, filename, &glob_len);
             /* according to the mime.cache 1.0 spec, we should use the longest glob matched. */
@@ -205,8 +204,10 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
             }
             if (data != (char*)-1)
             {
-                for (unsigned int i = 0; !type && i < n_caches; ++i)
-                    type = mime_cache_lookup_magic(caches[i], data, len);
+                for (std::size_t i = 0; !type && i < caches.size(); ++i)
+                {
+                    type = mime_cache_lookup_magic(caches.at(i), data, len);
+                }
 
                 /* Check for executable file */
                 if (!type && have_x_access(filepath))
@@ -434,53 +435,50 @@ mime_cache_load_all()
 
     std::vector<std::string> dirs = vfs_system_data_dir();
     n_caches = dirs.size();
-    caches = (MimeCache**)g_slice_alloc(dirs.size() * sizeof(MimeCache*));
 
     std::string path = Glib::build_filename(vfs_user_data_dir(), filename);
-    caches[0] = mime_cache_new(path.c_str());
+    caches.push_back(mime_cache_new(path.c_str()));
     if (caches[0]->magic_max_extent > mime_cache_max_extent)
         mime_cache_max_extent = caches[0]->magic_max_extent;
 
-    // for (const std::string& sys_dir: vfs_system_data_dir())
-    for (std::size_t i = 0; i < dirs.size(); ++i)
+    for (std::size_t i = 0; i < n_caches; ++i)
     {
         path = Glib::build_filename(dirs[i], filename);
-        caches[i] = mime_cache_new(path.c_str());
+        caches.push_back(mime_cache_new(path.c_str()));
         if (caches[i]->magic_max_extent > mime_cache_max_extent)
             mime_cache_max_extent = caches[i]->magic_max_extent;
     }
+
     mime_magic_buf = static_cast<char*>(g_malloc(mime_cache_max_extent));
-    return;
 }
 
 /* free all mime.cache files on the system */
 static void
 mime_cache_free_all()
 {
-    mime_cache_foreach((GFunc)mime_cache_free, nullptr);
-    g_slice_free1(n_caches * sizeof(MimeCache*), caches);
-    n_caches = 0;
-    caches = nullptr;
+    while (true)
+    {
+        if (caches.empty())
+            break;
+
+        MimeCache* cache = caches.back();
+        caches.pop_back();
+
+        mime_cache_free(cache);
+    }
+
     mime_cache_max_extent = 0;
 
     free(mime_magic_buf);
     mime_magic_buf = nullptr;
 }
-
-/* Iterate through all mime caches */
-static void
-mime_cache_foreach(GFunc func, void* user_data)
-{
-    for (unsigned int i = 0; i < n_caches; ++i)
-        func(caches[i], user_data);
-}
-
-bool
+void
 mime_cache_reload(MimeCache* cache)
 {
-    bool ret = mime_cache_load(cache, cache->file_path);
+    mime_cache_load(cache, cache->file_path);
+
     /* recalculate max magic extent */
-    for (unsigned int i = 0; i < n_caches; ++i)
+    for (std::size_t i = 0; i < n_caches; ++i)
     {
         if (caches[i]->magic_max_extent > mime_cache_max_extent)
             mime_cache_max_extent = caches[i]->magic_max_extent;
@@ -491,8 +489,6 @@ mime_cache_reload(MimeCache* cache)
     mime_magic_buf = (char*)g_realloc(mime_magic_buf, mime_cache_max_extent);
 
     G_UNLOCK(mime_magic_buf);
-
-    return ret;
 }
 
 static bool
@@ -582,9 +578,9 @@ mime_type_is_subclass(const char* type, const char* parent)
     if (!strcmp(type, parent))
         return true;
 
-    for (unsigned int i = 0; i < n_caches; ++i)
+    for (MimeCache* cache: caches)
     {
-        const char** parents = mime_cache_lookup_parents(caches[i], type);
+        const char** parents = mime_cache_lookup_parents(cache, type);
         if (parents)
         {
             const char** p;
@@ -601,8 +597,8 @@ mime_type_is_subclass(const char* type, const char* parent)
 /*
  * Get mime caches
  */
-MimeCache**
-mime_type_get_caches(int* n)
+std::vector<MimeCache*>
+mime_type_get_caches(std::size_t* n)
 {
     *n = n_caches;
     return caches;
