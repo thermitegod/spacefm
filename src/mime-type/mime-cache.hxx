@@ -40,10 +40,6 @@ class MimeCache
   private:
     std::string m_file_path;
 
-    // since mime.cache v1.1, shared mime info v0.4
-    bool m_has_reverse_suffix{true};
-    bool m_has_str_weight{true};
-
     const char* m_buffer{nullptr};
     std::size_t m_buffer_size{0};
 
