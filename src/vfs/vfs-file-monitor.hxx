@@ -43,7 +43,7 @@ struct VFSFileMonitor
     VFSFileMonitor(const char* real_path);
     ~VFSFileMonitor();
 
-    char* path;
+    const char* path;
 
     // TODO private
     int wd;
