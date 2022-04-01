@@ -16,6 +16,8 @@
 #include <string>
 #include <filesystem>
 
+#include <map>
+
 #include <iostream>
 #include <fstream>
 
@@ -63,7 +65,6 @@ static void vfs_dir_monitor_callback(VFSFileMonitor* fm, VFSFileMonitorEvent eve
 
 static void on_mime_type_reload(void* user_data);
 
-static void update_changed_files(void* key, void* data, void* user_data);
 static bool notify_file_change(void* user_data);
 static bool update_file_info(VFSDir* dir, VFSFileInfo* file);
 
@@ -82,7 +83,8 @@ enum VFSDirSignal
 static unsigned int signals[VFSDirSignal::N_SIGNALS] = {0};
 static GObjectClass* parent_class = nullptr;
 
-static GHashTable* dir_hash = nullptr;
+static std::map<const char*, VFSDir*> dir_map;
+
 static GList* mime_cb = nullptr;
 static unsigned int change_notify_timeout = 0;
 
@@ -248,26 +250,21 @@ vfs_dir_finalize(GObject* obj)
     }
     if (dir->path)
     {
-        if (dir_hash)
+        dir_map.erase(dir->path);
+
+        /* There is no VFSDir instance */
+        if (dir_map.size() == 0)
         {
-            g_hash_table_remove(dir_hash, dir->path);
+            vfs_mime_type_remove_reload_cb(mime_cb);
+            mime_cb = nullptr;
 
-            /* There is no VFSDir instance */
-            if (g_hash_table_size(dir_hash) == 0)
+            if (change_notify_timeout)
             {
-                g_hash_table_destroy(dir_hash);
-                dir_hash = nullptr;
-
-                vfs_mime_type_remove_reload_cb(mime_cb);
-                mime_cb = nullptr;
-
-                if (change_notify_timeout)
-                {
-                    g_source_remove(change_notify_timeout);
-                    change_notify_timeout = 0;
-                }
+                g_source_remove(change_notify_timeout);
+                change_notify_timeout = 0;
             }
         }
+
         free(dir->path);
         free(dir->disp_path);
         dir->path = dir->disp_path = nullptr;
@@ -684,35 +681,31 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
 }
 
 static void
-update_changed_files(void* key, void* data, void* user_data)
+update_changed_files(const char* key, VFSDir* dir)
 {
     (void)key;
-    (void)user_data;
-    VFSDir* dir = static_cast<VFSDir*>(data);
 
-    if (!dir->changed_files.empty())
+    if (dir->changed_files.empty())
+        return;
+
+    vfs_dir_lock(dir);
+    for (VFSFileInfo* file: dir->changed_files)
     {
-        vfs_dir_lock(dir);
-        for (VFSFileInfo* file: dir->changed_files)
+        if (update_file_info(dir, file))
         {
-            if (update_file_info(dir, file))
-            {
-                g_signal_emit(dir, signals[VFSDirSignal::FILE_CHANGED_SIGNAL], 0, file);
-                vfs_file_info_unref(file);
-            }
-            // else was deleted, signaled, and unrefed in update_file_info
+            g_signal_emit(dir, signals[VFSDirSignal::FILE_CHANGED_SIGNAL], 0, file);
+            vfs_file_info_unref(file);
         }
-        dir->changed_files.clear();
-        vfs_dir_unlock(dir);
+        // else was deleted, signaled, and unrefed in update_file_info
     }
+    dir->changed_files.clear();
+    vfs_dir_unlock(dir);
 }
 
 static void
-update_created_files(void* key, void* data, void* user_data)
+update_created_files(const char* key, VFSDir* dir)
 {
     (void)key;
-    (void)user_data;
-    VFSDir* dir = static_cast<VFSDir*>(data);
 
     if (dir->created_files)
     {
@@ -761,8 +754,13 @@ static bool
 notify_file_change(void* user_data)
 {
     (void)user_data;
-    g_hash_table_foreach(dir_hash, update_changed_files, nullptr);
-    g_hash_table_foreach(dir_hash, update_created_files, nullptr);
+
+    std::map<const char*, VFSDir*>::iterator it;
+    for (it = dir_map.begin(); it != dir_map.end(); it++)
+    {
+        update_changed_files(it->first, it->second);
+        update_created_files(it->first, it->second);
+    }
     /* remove the timeout */
     change_notify_timeout = 0;
     return false;
@@ -774,8 +772,13 @@ vfs_dir_flush_notify_cache()
     if (change_notify_timeout)
         g_source_remove(change_notify_timeout);
     change_notify_timeout = 0;
-    g_hash_table_foreach(dir_hash, update_changed_files, nullptr);
-    g_hash_table_foreach(dir_hash, update_created_files, nullptr);
+
+    std::map<const char*, VFSDir*>::iterator it;
+    for (it = dir_map.begin(); it != dir_map.end(); it++)
+    {
+        update_changed_files(it->first, it->second);
+        update_created_files(it->first, it->second);
+    }
 }
 
 /* Callback function which will be called when monitored events happen */
@@ -805,10 +808,20 @@ vfs_dir_monitor_callback(VFSFileMonitor* fm, VFSFileMonitorEvent event, const ch
 VFSDir*
 vfs_dir_get_by_path_soft(const char* path)
 {
-    if (!dir_hash || !path)
+    if (!path)
         return nullptr;
 
-    VFSDir* dir = static_cast<VFSDir*>(g_hash_table_lookup(dir_hash, path));
+    VFSDir* dir = nullptr;
+
+    try
+    {
+        dir = dir_map.at(path);
+    }
+    catch (std::out_of_range)
+    {
+        dir = nullptr;
+    }
+
     if (dir)
         g_object_ref(dir);
     return dir;
@@ -822,13 +835,16 @@ vfs_dir_get_by_path(const char* path)
 
     VFSDir* dir = nullptr;
 
-    if (!dir_hash)
+    if (!dir_map.empty())
     {
-        dir_hash = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, nullptr);
-    }
-    else
-    {
-        dir = static_cast<VFSDir*>(g_hash_table_lookup(dir_hash, path));
+        try
+        {
+            dir = dir_map.at(path);
+        }
+        catch (std::out_of_range)
+        {
+            dir = nullptr;
+        }
     }
 
     if (!mime_cb)
@@ -842,16 +858,15 @@ vfs_dir_get_by_path(const char* path)
     {
         dir = vfs_dir_new(path);
         vfs_dir_load(dir); /* asynchronous operation */
-        g_hash_table_insert(dir_hash, (void*)dir->path, (void*)dir);
+        dir_map.insert({dir->path, dir});
     }
     return dir;
 }
 
 static void
-reload_mime_type(char* key, VFSDir* dir, void* user_data)
+reload_mime_type(const char* key, VFSDir* dir)
 {
     (void)key;
-    (void)user_data;
 
     if (!dir || dir->file_list.empty())
         return;
@@ -878,19 +893,23 @@ static void
 on_mime_type_reload(void* user_data)
 {
     (void)user_data;
-    if (!dir_hash)
-        return;
     // LOG_DEBUG("reload mime-type");
-    g_hash_table_foreach(dir_hash, (GHFunc)reload_mime_type, nullptr);
+    std::map<const char*, VFSDir*>::iterator it;
+    for (it = dir_map.begin(); it != dir_map.end(); it++)
+    {
+        reload_mime_type(it->first, it->second);
+    }
 }
 
 void
-vfs_dir_foreach(GHFunc func, void* user_data)
+vfs_dir_foreach(VFSDirForeachFunc func, void* user_data)
 {
-    if (!dir_hash)
-        return;
     // LOG_DEBUG("reload mime-type");
-    g_hash_table_foreach(dir_hash, (GHFunc)func, user_data);
+    std::map<const char*, VFSDir*>::iterator it;
+    for (it = dir_map.begin(); it != dir_map.end(); it++)
+    {
+        func(it->first, it->second, user_data);
+    }
 }
 
 void

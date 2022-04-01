@@ -69,6 +69,8 @@ struct VFSDirClass
     /*  void (*update_mime) ( VFSDir* dir ); */
 };
 
+typedef void (*VFSDirForeachFunc)(const char* parh, VFSDir* dir, void* user_data);
+
 void vfs_dir_lock(VFSDir* dir);
 void vfs_dir_unlock(VFSDir* dir);
 
@@ -91,6 +93,6 @@ void vfs_dir_flush_notify_cache();
 bool vfs_dir_add_hidden(const std::string& path, const std::string& file_name);
 
 /* call function "func" for every VFSDir instances */
-void vfs_dir_foreach(GHFunc func, void* user_data);
+void vfs_dir_foreach(VFSDirForeachFunc func, void* user_data);
 
 void vfs_dir_monitor_mime();

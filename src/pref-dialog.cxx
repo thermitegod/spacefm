@@ -207,9 +207,9 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
 
             /* unload old thumbnails (icons of *.desktop files will be unloaded here, too)  */
             if (big_icon != app_settings.big_icon_size)
-                vfs_dir_foreach((GHFunc)dir_unload_thumbnails, GINT_TO_POINTER(1));
+                vfs_dir_foreach(&dir_unload_thumbnails, GINT_TO_POINTER(1));
             if (small_icon != app_settings.small_icon_size)
-                vfs_dir_foreach((GHFunc)dir_unload_thumbnails, GINT_TO_POINTER(0));
+                vfs_dir_foreach(&dir_unload_thumbnails, GINT_TO_POINTER(0));
 
             app_settings.big_icon_size = big_icon;
             app_settings.small_icon_size = small_icon;
