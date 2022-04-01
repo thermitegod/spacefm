@@ -59,7 +59,7 @@ VFSMimeType* vfs_mime_type_get_from_type(const char* type);
 
 VFSMimeType* vfs_mime_type_new(const char* type_name);
 void vfs_mime_type_ref(VFSMimeType* mime_type);
-void vfs_mime_type_unref(void* mime_type_);
+void vfs_mime_type_unref(VFSMimeType* mime_type);
 
 GdkPixbuf* vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big);
 

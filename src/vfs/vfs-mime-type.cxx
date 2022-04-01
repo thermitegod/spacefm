@@ -18,6 +18,10 @@
 #include <string>
 #include <filesystem>
 
+#include <map>
+
+#include <mutex>
+
 #include <glibmm.h>
 
 #include <gtk/gtk.h>
@@ -30,8 +34,8 @@
 
 #include "vfs/vfs-utils.hxx"
 
-static GHashTable* mime_hash = nullptr;
-static GRWLock mime_hash_lock;
+static std::map<const char*, VFSMimeType*> mime_map;
+std::mutex mime_map_lock;
 
 static unsigned int reload_callback_id = 0;
 static GList* reload_cb = nullptr;
@@ -62,9 +66,14 @@ vfs_mime_type_reload(void* user_data)
     /* FIXME: process mime database reloading properly. */
     /* Remove all items in the hash table */
 
-    g_rw_lock_writer_lock(&mime_hash_lock);
-    g_hash_table_foreach_remove(mime_hash, (GHRFunc)gtk_true, nullptr);
-    g_rw_lock_writer_unlock(&mime_hash_lock);
+    mime_map_lock.lock();
+    std::map<const char*, VFSMimeType*>::iterator it;
+    for (it = mime_map.begin(); it != mime_map.end(); it++)
+    {
+        vfs_mime_type_unref(it->second);
+    }
+    mime_map.clear();
+    mime_map_lock.unlock();
 
     g_source_remove(reload_callback_id);
     reload_callback_id = 0;
@@ -119,7 +128,6 @@ vfs_mime_type_init()
 
         mime_caches_monitor[i] = fm;
     }
-    mime_hash = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, vfs_mime_type_unref);
 }
 
 void
@@ -137,7 +145,12 @@ vfs_mime_type_clean()
 
     mime_type_finalize();
 
-    g_hash_table_destroy(mime_hash);
+    std::map<const char*, VFSMimeType*>::iterator it;
+    for (it = mime_map.begin(); it != mime_map.end(); it++)
+    {
+        vfs_mime_type_unref(it->second);
+    }
+    mime_map.clear();
 }
 
 VFSMimeType*
@@ -158,16 +171,24 @@ vfs_mime_type_get_from_file(const char* file_path, const char* base_name, struct
 VFSMimeType*
 vfs_mime_type_get_from_type(const char* type)
 {
-    g_rw_lock_reader_lock(&mime_hash_lock);
-    VFSMimeType* mime_type = VFS_MIME_TYPE(g_hash_table_lookup(mime_hash, type));
-    g_rw_lock_reader_unlock(&mime_hash_lock);
+    mime_map_lock.lock();
+    VFSMimeType* mime_type = nullptr;
+    try
+    {
+        mime_type = mime_map.at(type);
+    }
+    catch (std::out_of_range)
+    {
+        mime_type = nullptr;
+    }
+    mime_map_lock.unlock();
 
     if (!mime_type)
     {
         mime_type = vfs_mime_type_new(type);
-        g_rw_lock_reader_lock(&mime_hash_lock);
-        g_hash_table_insert(mime_hash, mime_type->type, mime_type);
-        g_rw_lock_writer_unlock(&mime_hash_lock);
+        mime_map_lock.lock();
+        mime_map.insert({mime_type->type, mime_type});
+        mime_map_lock.unlock();
     }
     vfs_mime_type_ref(mime_type);
     return mime_type;
@@ -189,9 +210,8 @@ vfs_mime_type_ref(VFSMimeType* mime_type)
 }
 
 void
-vfs_mime_type_unref(void* mime_type_)
+vfs_mime_type_unref(VFSMimeType* mime_type)
 {
-    VFSMimeType* mime_type = VFS_MIME_TYPE(mime_type_);
     mime_type->ref_dec();
     if (mime_type->ref_count() == 0)
     {
@@ -200,7 +220,6 @@ vfs_mime_type_unref(void* mime_type_)
             g_object_unref(mime_type->big_icon);
         if (mime_type->small_icon)
             g_object_unref(mime_type->small_icon);
-        /* g_strfreev( mime_type->actions ); */
 
         g_slice_free(VFSMimeType, mime_type);
     }
@@ -332,12 +351,11 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
 }
 
 static void
-free_cached_icons(void* key, void* value, void* user_data)
+free_cached_icons(const char* key, VFSMimeType* mime_type, bool big_icons)
 {
     (void)key;
-    VFSMimeType* mime_type = VFS_MIME_TYPE(value);
-    bool big = GPOINTER_TO_INT(user_data);
-    if (big)
+
+    if (big_icons)
     {
         if (mime_type->big_icon)
         {
@@ -358,20 +376,27 @@ free_cached_icons(void* key, void* value, void* user_data)
 void
 vfs_mime_type_set_icon_size(int big, int small)
 {
-    g_rw_lock_reader_lock(&mime_hash_lock);
+    mime_map_lock.lock();
+    std::map<const char*, VFSMimeType*>::iterator it;
     if (big != big_icon_size)
     {
         big_icon_size = big;
         /* Unload old cached icons */
-        g_hash_table_foreach(mime_hash, free_cached_icons, GINT_TO_POINTER(1));
+        for (it = mime_map.begin(); it != mime_map.end(); it++)
+        {
+            free_cached_icons(it->first, it->second, true);
+        }
     }
     if (small != small_icon_size)
     {
         small_icon_size = small;
         /* Unload old cached icons */
-        g_hash_table_foreach(mime_hash, free_cached_icons, GINT_TO_POINTER(0));
+        for (it = mime_map.begin(); it != mime_map.end(); it++)
+        {
+            free_cached_icons(it->first, it->second, false);
+        }
     }
-    g_rw_lock_writer_unlock(&mime_hash_lock);
+    mime_map_lock.unlock();
 }
 
 void
