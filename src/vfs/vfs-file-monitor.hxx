@@ -30,7 +30,7 @@
 
 struct VFSFileMonitorCallbackEntry;
 
-enum VFSFileMonitorEvent
+enum class VFSFileMonitorEvent
 {
     VFS_FILE_MONITOR_CREATE,
     VFS_FILE_MONITOR_DELETE,
