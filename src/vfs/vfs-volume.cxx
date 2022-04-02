@@ -1,14 +1,23 @@
-/*
- * SpaceFM vfs-volume-nohal.c
- *
+/**
  * Copyright (C) 2014 IgnorantGuru <ignorantguru@gmx.com>
- * Copyright (C) 2006 Hong Jen Yee (PCMan) <pcman.tw (AT) gmail.com>
+ * Copyright (C) 2006 Hong Jen Yee (PCMan) <pcman.tw@gmail.com>
  *
- * License: See COPYING file
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
  *
- * udev & mount monitor code by IgnorantGuru
- * device info code uses code excerpts from freedesktop's udisks v1.0.4
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+
+// udev & mount monitor code by IgnorantGuru
+// device info code uses code excerpts from freedesktop's udisks v1.0.4
 
 #include <string>
 #include <filesystem>
