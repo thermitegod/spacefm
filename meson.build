@@ -269,6 +269,7 @@ sources = [
   'src/pref-dialog.cxx',
   'src/settings.cxx',
   'src/socket.cxx',
+  'src/type-conversion.cxx',
   'src/utils.cxx',
   'src/window-reference.cxx',
   'src/xset.cxx',

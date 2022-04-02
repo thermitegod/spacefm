@@ -21,6 +21,7 @@
 
 #include <fmt/format.h>
 
+#include <glib.h>
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -41,6 +42,9 @@
 #include "vfs/vfs-user-dir.hxx"
 
 #include "ptk/ptk-handler.hxx"
+
+#include "type-conversion.hxx"
+
 #include "utils.hxx"
 
 struct ParentInfo
@@ -3564,15 +3568,7 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
 
         LOG_INFO("EXEC({})={}", desktop.get_full_path(), desktop.get_exec());
 
-        //////////
-        std::vector<std::string> open_files;
-        GList* l;
-        for (l = files; l; l = l->next)
-        {
-            std::string open_file = (char*)(l->data);
-            open_files.push_back(open_file);
-        }
-        //////////
+        std::vector<std::string> open_files = glist_t_char_to_vector_t_string(files);
 
         try
         {
