@@ -197,12 +197,8 @@ calc_size(void* user_data)
         if (data->cancel)
             break;
         VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
-        char* path = g_build_filename(data->dir_path, vfs_file_info_get_name(file), nullptr);
-        if (path)
-        {
-            calc_total_size_of_files(path, data);
-            free(path);
-        }
+        std::string path = Glib::build_filename(data->dir_path, vfs_file_info_get_name(file));
+        calc_total_size_of_files(path.c_str(), data);
     }
     data->done = true;
     return nullptr;
@@ -660,11 +656,11 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         if (vfs_file_info_is_symlink(file))
         {
             gtk_label_set_markup_with_mnemonic(GTK_LABEL(label_name), "<b>Link _Name:</b>");
-            disp_path = g_build_filename(dir_path, file->name.c_str(), nullptr);
+            std::string disp_sym_path = Glib::build_filename(dir_path, file->name);
 
             try
             {
-                std::string target_path = std::filesystem::read_symlink(disp_path);
+                std::string target_path = std::filesystem::read_symlink(disp_sym_path);
 
                 gtk_entry_set_text(GTK_ENTRY(target), target_path.c_str());
 
@@ -681,7 +677,6 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
                 gtk_entry_set_text(GTK_ENTRY(target), "( read link error )");
             }
 
-            free(disp_path);
             gtk_widget_show(target);
             gtk_widget_show(label_target);
         }
@@ -779,7 +774,6 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
     gid_t gid;
 
     GList* l;
-    char* file_path;
     GtkAllocation allocation;
 
     gtk_widget_get_allocation(GTK_WIDGET(dialog), &allocation);
@@ -824,10 +818,9 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 for (l = data->file_list; l; l = l->next)
                 {
                     file = static_cast<VFSFileInfo*>(l->data);
-                    file_path = g_build_filename(data->dir_path, file->name.c_str(), nullptr);
+                    std::string file_path = Glib::build_filename(data->dir_path, file->name);
                     quoted_path = bash_quote(file_path);
                     g_string_append_printf(gstr, " %s", quoted_path.c_str());
-                    free(file_path);
                 }
 
                 std::string cmd;
@@ -931,8 +924,8 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 for (l = data->file_list; l; l = l->next)
                 {
                     file = static_cast<VFSFileInfo*>(l->data);
-                    file_path =
-                        g_build_filename(data->dir_path, vfs_file_info_get_name(file), nullptr);
+                    std::string file_path =
+                        Glib::build_filename(data->dir_path, vfs_file_info_get_name(file));
                     file_list.push_back(file_path);
                 }
 

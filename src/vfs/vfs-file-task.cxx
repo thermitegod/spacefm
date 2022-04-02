@@ -778,7 +778,7 @@ vfs_file_task_move(VFSFileTask* task, const std::string& src_file)
 
     char* file_name = g_path_get_basename(src_file.c_str());
 
-    char* dest_file = g_build_filename(task->dest_dir.c_str(), file_name, nullptr);
+    std::string dest_file = Glib::build_filename(task->dest_dir, file_name);
 
     free(file_name);
 
@@ -804,7 +804,9 @@ vfs_file_task_move(VFSFileTask* task, const std::string& src_file)
         }
     }
     else
+    {
         vfs_file_task_error(task, errno, "Accessing", src_file);
+    }
 }
 
 static void
@@ -902,9 +904,9 @@ vfs_file_task_link(VFSFileTask* task, const std::string& src_file)
         return;
 
     char* file_name = g_path_get_basename(src_file.c_str());
-    char* old_dest_file = g_build_filename(task->dest_dir.c_str(), file_name, nullptr);
+    std::string old_dest_file = Glib::build_filename(task->dest_dir, file_name);
     free(file_name);
-    char* dest_file = old_dest_file;
+    std::string dest_file = old_dest_file;
 
     // MOD  setup task for check overwrite
     if (should_abort(task))
@@ -969,7 +971,6 @@ vfs_file_task_link(VFSFileTask* task, const std::string& src_file)
 
     if (new_dest_file)
         free(new_dest_file);
-    free(old_dest_file);
 }
 
 static void

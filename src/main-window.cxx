@@ -3039,7 +3039,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
                 std::string file_path;
                 std::string target;
 
-                file_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
+                file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
                 target = std::filesystem::absolute(file_path);
                 if (!target.empty())
                 {
@@ -3047,7 +3047,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
                     if (target.at(0) != '/')
                     {
                         // relative link
-                        full_target = g_build_filename(cwd, target.c_str(), nullptr);
+                        full_target = Glib::build_filename(cwd, target);
                         target_path = full_target;
                     }
                     else
@@ -3734,9 +3734,8 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
         else
         {
             c->var[ItemPropContext::CONTEXT_NAME] = ztd::strdup(vfs_file_info_get_name(file));
-            path = g_build_filename(c->var[ItemPropContext::CONTEXT_DIR],
-                                    c->var[ItemPropContext::CONTEXT_NAME],
-                                    nullptr);
+            path = ztd::strdup(Glib::build_filename(c->var[ItemPropContext::CONTEXT_DIR],
+                                                    c->var[ItemPropContext::CONTEXT_NAME]));
             c->var[ItemPropContext::CONTEXT_IS_DIR] = path && std::filesystem::is_directory(path)
                                                           ? ztd::strdup("true")
                                                           : ztd::strdup("false");
@@ -4009,7 +4008,7 @@ get_task_view_window(GtkWidget* view)
 void
 main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
 {
-    char* path;
+    std::string path;
     std::string esc_path;
     PtkFileTask* ptask;
 
@@ -4042,13 +4041,15 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         // cwd
         bool cwd_needs_quote;
         const char* cwd = ptk_file_browser_get_cwd(a_browser);
-        if ((cwd_needs_quote = !!strchr(cwd, '\'')))
+        if ((cwd_needs_quote = ztd::contains(cwd, "\"")))
         {
-            std::string path2 = bash_quote(cwd);
-            buf.append(fmt::format("\nfm_pwd_panel[{}]={}\n", p, path2));
+            path = bash_quote(cwd);
+            buf.append(fmt::format("\nfm_pwd_panel[{}]={}\n", p, path));
         }
         else
+        {
             buf.append(fmt::format("\nfm_pwd_panel[{}]=\"{}\"\n", p, cwd));
+        }
         buf.append(fmt::format("\nfm_tab_panel[{}]=\"{}\"\n", p, i + 1));
 
         // selected files
@@ -4060,17 +4061,16 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
             for (l = sel_files; l; l = l->next)
             {
                 path = (char*)vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data));
-                if (!cwd_needs_quote && !strchr(path, '"'))
+                if (!cwd_needs_quote && ztd::contains(path, "\""))
                     buf.append(fmt::format("\"{}{}{}\"\n",
                                            cwd,
                                            (cwd[0] != '\0' && cwd[1] == '\0') ? "" : "/",
                                            path));
                 else
                 {
-                    path = g_build_filename(cwd, path, nullptr);
+                    path = Glib::build_filename(cwd, path);
                     esc_path = bash_quote(path);
                     buf.append(fmt::format("{}\n", esc_path));
-                    free(path);
                 }
             }
             buf.append(fmt::format(")\n"));
@@ -4081,13 +4081,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
                 for (l = sel_files; l; l = l->next)
                 {
                     path = (char*)vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data));
-                    if (!strchr(path, '"'))
-                        buf.append(fmt::format("\"{}\"\n", path));
-                    else
-                    {
-                        esc_path = bash_quote(path);
-                        buf.append(fmt::format("{}\n", esc_path));
-                    }
+                    buf.append(fmt::format("{}\n", bash_quote(path)));
                 }
                 buf.append(fmt::format(")\n"));
             }
@@ -4099,10 +4093,11 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         // bookmark
         if (a_browser->side_book)
         {
-            path = ptk_bookmark_view_get_selected_dir(GTK_TREE_VIEW(a_browser->side_book));
-            if (path)
+            const char* sel_path =
+                ptk_bookmark_view_get_selected_dir(GTK_TREE_VIEW(a_browser->side_book));
+            if (sel_path)
             {
-                esc_path = bash_quote(path);
+                esc_path = bash_quote(sel_path);
                 if (file_browser == a_browser)
                     buf.append(fmt::format("fm_bookmark={}\n", esc_path));
                 buf.append(fmt::format("fm_panel{}_bookmark={}\n", p, esc_path));
@@ -4199,16 +4194,16 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         {
             PtkFileBrowser* t_browser = PTK_FILE_BROWSER(
                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), i));
-            std::string path2 = bash_quote(ptk_file_browser_get_cwd(t_browser));
-            buf.append(fmt::format("fm_pwd_panel{}_tab[{}]={}\n", p, i + 1, path2));
+            path = bash_quote(ptk_file_browser_get_cwd(t_browser));
+            buf.append(fmt::format("fm_pwd_panel{}_tab[{}]={}\n", p, i + 1, path));
             if (p == file_browser->mypanel)
             {
-                buf.append(fmt::format("fm_pwd_tab[{}]={}\n", i + 1, path2));
+                buf.append(fmt::format("fm_pwd_tab[{}]={}\n", i + 1, path));
             }
             if (file_browser == t_browser)
             {
                 // my browser
-                buf.append(fmt::format("fm_pwd={}\n", path2));
+                buf.append(fmt::format("fm_pwd={}\n", path));
                 buf.append(fmt::format("fm_panel=\"{}\"\n", p));
                 buf.append(fmt::format("fm_tab=\"{}\"\n", i + 1));
             }
@@ -4249,32 +4244,31 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         // cmd_dir
         if (set->plugin)
         {
-            path = g_build_filename(set->plug_dir, "files", nullptr);
+            path = Glib::build_filename(set->plug_dir, "files");
             if (!std::filesystem::exists(path))
             {
-                free(path);
-                path = g_build_filename(set->plug_dir, set->plug_name, nullptr);
+                path = Glib::build_filename(set->plug_dir, set->plug_name);
             }
         }
         else
         {
-            path = g_build_filename(xset_get_config_dir(), "scripts", set->name, nullptr);
+            path = Glib::build_filename(xset_get_config_dir(), "scripts", set->name);
         }
         esc_path = bash_quote(path);
         buf.append(fmt::format("fm_cmd_dir={}\n", esc_path));
-        free(path);
 
         // cmd_data
         if (set->plugin)
         {
             XSet* mset = xset_get_plugin_mirror(set);
-            path = g_build_filename(xset_get_config_dir(), "plugin-data", mset->name, nullptr);
+            path = Glib::build_filename(xset_get_config_dir(), "plugin-data", mset->name);
         }
         else
-            path = g_build_filename(xset_get_config_dir(), "plugin-data", set->name, nullptr);
+        {
+            path = Glib::build_filename(xset_get_config_dir(), "plugin-data", set->name);
+        }
         esc_path = bash_quote(path);
         buf.append(fmt::format("fm_cmd_data={}\n", esc_path));
-        free(path);
 
         // plugin_dir
         if (set->plugin)

@@ -582,7 +582,8 @@ _locate_desktop_file(const char* dir, const char* unused, const void* desktop_id
     (void)unused;
     bool found = false;
 
-    char* path = g_build_filename(dir, "applications", (const char*)desktop_id, nullptr);
+    std::string desktop_path = Glib::build_filename(dir, "applications", (const char*)desktop_id);
+    char* path = ztd::strdup(desktop_path);
 
     char* sep = (char*)strchr((const char*)desktop_id, '-');
     if (sep)
@@ -601,7 +602,9 @@ _locate_desktop_file(const char* dir, const char* unused, const void* desktop_id
             sep = strchr(sep + 1, '-');
         }
         else
+        {
             break;
+        }
     } while (!found);
 
     if (found)
@@ -609,9 +612,10 @@ _locate_desktop_file(const char* dir, const char* unused, const void* desktop_id
     free(path);
 
     // sfm 0.8.7 some desktop files listed by the app chooser are in subdirs
-    path = g_build_filename(dir, "applications", nullptr);
-    sep = _locate_desktop_file_recursive(path, (const char*)desktop_id, true);
-    free(path);
+    std::string desktop_recursive_path = Glib::build_filename(dir, "applications");
+    sep = _locate_desktop_file_recursive(desktop_recursive_path.c_str(),
+                                         (const char*)desktop_id,
+                                         true);
     return sep;
 }
 

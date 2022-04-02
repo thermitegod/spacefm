@@ -115,8 +115,7 @@ ptk_clipboard_copy_as_text(const char* working_dir,
     for (l = files; l; l = l->next)
     {
         VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
-        std::string file_path =
-            g_build_filename(working_dir, vfs_file_info_get_name(file), nullptr);
+        std::string file_path = Glib::build_filename(working_dir, vfs_file_info_get_name(file));
         std::string quoted = bash_quote(file_path);
         file_text = fmt::format("{} {}", file_text, quoted);
     }
@@ -184,8 +183,8 @@ ptk_clipboard_cut_or_copy_files(const char* working_dir, GList* files, bool copy
     for (l = g_list_last(files); l; l = l->prev) // sfm was reverse order
     {
         VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
-        char* file_path = g_build_filename(working_dir, vfs_file_info_get_name(file), nullptr);
-        file_list = g_list_prepend(file_list, file_path);
+        std::string file_path = Glib::build_filename(working_dir, vfs_file_info_get_name(file));
+        file_list = g_list_prepend(file_list, ztd::strdup(file_path));
     }
 
     gtk_clipboard_set_with_data(clip,

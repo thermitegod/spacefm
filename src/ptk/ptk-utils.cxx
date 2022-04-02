@@ -51,9 +51,9 @@ ptk_get_keymod(unsigned int event)
 GtkBuilder*
 _gtk_builder_new_from_file(const char* file)
 {
-    char* filename = g_build_filename(PACKAGE_UI_DIR, file, nullptr);
+    std::string filename = Glib::build_filename(PACKAGE_UI_DIR, file);
     GtkBuilder* builder = gtk_builder_new();
-    gtk_builder_add_from_file(builder, filename, nullptr);
+    gtk_builder_add_from_file(builder, filename.c_str(), nullptr);
 
     return builder;
 }

@@ -1861,7 +1861,8 @@ query_overwrite_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
             if (str && file_name && !ptask->task->current_dest.empty())
             {
                 dir_name = g_path_get_dirname(ptask->task->current_dest.c_str());
-                *ptask->query_new_dest = g_build_filename(dir_name, file_name, nullptr);
+                std::string path = Glib::build_filename(dir_name, file_name);
+                *ptask->query_new_dest = ztd::strdup(path);
                 free(file_name);
                 free(dir_name);
             }

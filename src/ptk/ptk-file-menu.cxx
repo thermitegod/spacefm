@@ -2147,14 +2147,13 @@ on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
         for (sel = data->sel_files; sel; sel = sel->next)
         {
             VFSFileInfo* file = static_cast<VFSFileInfo*>(sel->data);
-            char* full_path = g_build_filename(data->cwd, vfs_file_info_get_name(file), nullptr);
+            std::string full_path = Glib::build_filename(data->cwd, vfs_file_info_get_name(file));
             if (data->browser && std::filesystem::is_directory(full_path))
             {
                 ptk_file_browser_emit_open(data->browser,
-                                           full_path,
+                                           full_path.c_str(),
                                            PtkOpenAction::PTK_OPEN_NEW_TAB);
             }
-            free(full_path);
         }
     }
     else if (data->browser)
@@ -2178,15 +2177,15 @@ on_new_bookmark(GtkMenuItem* menuitem, PtkFileMenu* data)
     // if a single dir or file is selected, bookmark it instead of cwd
     if (data->sel_files && !data->sel_files->next)
     {
-        char* full_path = g_build_filename(
+        std::string full_path = Glib::build_filename(
             data->cwd,
-            vfs_file_info_get_name(static_cast<VFSFileInfo*>(data->sel_files->data)),
-            nullptr);
-        ptk_bookmark_view_add_bookmark(nullptr, data->browser, full_path);
-        free(full_path);
+            vfs_file_info_get_name(static_cast<VFSFileInfo*>(data->sel_files->data)));
+        ptk_bookmark_view_add_bookmark(nullptr, data->browser, full_path.c_str());
     }
     else
+    {
         ptk_bookmark_view_add_bookmark(nullptr, data->browser, nullptr);
+    }
 }
 
 static void
@@ -2488,7 +2487,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         return;
 
     const char* cwd;
-    char* file_path = nullptr;
+    std::string file_path;
     VFSFileInfo* info;
     GList* sel_files = nullptr;
 
@@ -2504,18 +2503,20 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     }
 
     if (!sel_files)
+    {
         info = nullptr;
+    }
     else
     {
         info = vfs_file_info_ref(static_cast<VFSFileInfo*>(sel_files->data));
-        file_path = g_build_filename(cwd, vfs_file_info_get_name(info), nullptr);
+        file_path = Glib::build_filename(cwd, vfs_file_info_get_name(info));
     }
 
     PtkFileMenu* data = new PtkFileMenu;
     data->cwd = ztd::strdup(cwd);
     data->browser = browser;
     data->sel_files = sel_files;
-    data->file_path = file_path;
+    data->file_path = ztd::strdup(file_path);
     if (info)
         data->info = vfs_file_info_ref(info);
 

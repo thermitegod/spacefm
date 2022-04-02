@@ -104,7 +104,7 @@ seek_path(GtkEntry* entry)
     {
         // get name prefix
         seek_name = g_path_get_basename(path);
-        char* test_path = g_build_filename(seek_dir, seek_name, nullptr);
+        std::string test_path = Glib::build_filename(seek_dir, seek_name);
         if (std::filesystem::is_directory(test_path))
         {
             // complete dir path is in entry - is it unique?
@@ -130,13 +130,11 @@ seek_path(GtkEntry* entry)
             {
                 // is unique - use as seek dir
                 free(seek_dir);
-                seek_dir = test_path;
+                seek_dir = ztd::strdup(test_path);
                 free(seek_name);
                 seek_name = nullptr;
             }
         }
-        else
-            free(test_path);
     }
     if (strcmp(seek_dir, "/") && Glib::str_has_suffix(seek_dir, "/"))
     {

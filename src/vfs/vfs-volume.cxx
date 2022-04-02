@@ -3393,9 +3393,11 @@ vfs_volume_autoexec(VFSVolume* vol)
         }
         else
         {
-            char* path = g_build_filename(vol->mount_point, "VIDEO_TS", nullptr);
+            std::string path = Glib::build_filename(vol->mount_point, "VIDEO_TS");
             if (vol->is_dvd && std::filesystem::is_directory(path))
+            {
                 command = xset_get_s(XSetName::DEV_EXEC_VIDEO);
+            }
             else
             {
                 if (xset_get_b(XSetName::DEV_AUTO_OPEN))
@@ -3427,7 +3429,6 @@ vfs_volume_autoexec(VFSVolume* vol)
                 }
                 command = xset_get_s(XSetName::DEV_EXEC_FS);
             }
-            free(path);
         }
     }
     vfs_volume_exec(vol, command);
@@ -3648,20 +3649,19 @@ unmount_if_mounted(VFSVolume* vol)
     if (!vol->device_file)
         return;
     bool run_in_terminal;
-    char* str = vfs_volume_device_unmount_cmd(vol, &run_in_terminal);
+
+    const char* str = vfs_volume_device_unmount_cmd(vol, &run_in_terminal);
     if (!str)
         return;
 
-    char* mtab_path = g_build_filename(SYSCONFDIR, "mtab", nullptr);
+    std::string mtab_path = Glib::build_filename(SYSCONFDIR, "mtab");
 
-    const char* mtab = MTAB;
+    std::string mtab = MTAB;
     if (!std::filesystem::exists(mtab))
         mtab = mtab_path;
 
     std::string line =
         fmt::format("grep -qs '^{} ' {} 2>/dev/nullptr || exit\n{}\n", vol->device_file, mtab, str);
-    free(str);
-    free(mtab_path);
     LOG_INFO("Unmount-If-Mounted: {}", line);
     exec_task(line.c_str(), run_in_terminal);
 }

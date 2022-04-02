@@ -895,8 +895,6 @@ on_file_monitor_event(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char*
 {
     PtkDirTreeNode* node = static_cast<PtkDirTreeNode*>(user_data);
 
-    char* file_path;
-
     PtkDirTreeNode* child = find_node(node, file_name);
     switch (event)
     {
@@ -908,14 +906,13 @@ on_file_monitor_event(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char*
                     child = node->children;
                 else
                     child = nullptr;
-                file_path = g_build_filename(fm->path, file_name, nullptr);
+                std::string file_path = Glib::build_filename(fm->path, file_name);
                 if (std::filesystem::is_directory(file_path))
                 {
                     ptk_dir_tree_insert_child(node->tree, node, fm->path, file_name);
                     if (child)
                         ptk_dir_tree_delete_child(node->tree, child);
                 }
-                free(file_path);
             }
             break;
         case VFSFileMonitorEvent::VFS_FILE_MONITOR_DELETE:

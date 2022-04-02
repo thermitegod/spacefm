@@ -3234,7 +3234,7 @@ static void
 show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
 {
     (void)event;
-    char* file_path = nullptr;
+    std::string file_path;
     VFSFileInfo* file;
 
     const char* cwd = ptk_file_browser_get_cwd(file_browser);
@@ -3246,7 +3246,7 @@ show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
     else
     {
         file = vfs_file_info_ref(static_cast<VFSFileInfo*>(sel_files->data));
-        file_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
+        file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
     }
 
     /*
@@ -3263,16 +3263,18 @@ show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
         time = gtk_get_current_event_time();
     }
     */
+
     char* dir_name = nullptr;
-    GtkWidget* popup =
-        ptk_file_menu_new(file_browser, file_path, file, dir_name ? dir_name : cwd, sel_files);
+    GtkWidget* popup = ptk_file_menu_new(file_browser,
+                                         file_path.c_str(),
+                                         file,
+                                         dir_name ? dir_name : cwd,
+                                         sel_files);
     if (popup)
         gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
     if (file)
         vfs_file_info_unref(file);
 
-    if (file_path)
-        free(file_path);
     if (dir_name)
         free(dir_name);
 }
@@ -3380,22 +3382,20 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
         /* an item is clicked, get its file path */
         VFSFileInfo* file;
         GtkTreeIter it;
-        char* file_path;
+        std::string file_path;
         if (tree_path && gtk_tree_model_get_iter(model, &it, tree_path))
         {
             gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
-            file_path = g_build_filename(ptk_file_browser_get_cwd(file_browser),
-                                         vfs_file_info_get_name(file),
-                                         nullptr);
+            file_path = Glib::build_filename(ptk_file_browser_get_cwd(file_browser),
+                                             vfs_file_info_get_name(file));
         }
         else /* no item is clicked */
         {
             file = nullptr;
-            file_path = nullptr;
         }
 
         /* middle button */
-        if (event->button == 2 && file_path) /* middle click on a item */
+        if (event->button == 2 && !file_path.empty()) /* middle click on a item */
         {
             /* open in new tab if its a directory */
             if (std::filesystem::is_directory(file_path))
@@ -3403,7 +3403,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
                 g_signal_emit(file_browser,
                               signals[PTKFileBrowserSignal::OPEN_ITEM_SIGNAL],
                               0,
-                              file_path,
+                              file_path.c_str(),
                               PtkOpenAction::PTK_OPEN_NEW_TAB);
             }
             ret = true;
@@ -3447,7 +3447,6 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
         }
         if (file)
             vfs_file_info_unref(file);
-        free(file_path);
         gtk_tree_path_free(tree_path);
     }
     else if (event->type == GDK_2BUTTON_PRESS && event->button == 1)
@@ -4199,7 +4198,7 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
     VFSFileInfo* file;
-    char* cursor_path = nullptr;
+    std::string cursor_path;
 
     switch (file_browser->view_mode)
     {
@@ -4221,9 +4220,8 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
         gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
         if (file)
         {
-            cursor_path = g_build_filename(ptk_file_browser_get_cwd(file_browser),
-                                           vfs_file_info_get_name(file),
-                                           nullptr);
+            cursor_path = Glib::build_filename(ptk_file_browser_get_cwd(file_browser),
+                                               vfs_file_info_get_name(file));
         }
     }
     gtk_tree_path_free(tree_path);
@@ -4260,8 +4258,8 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
     if (vfs_dir_is_file_listed(file_browser->dir))
     {
         on_dir_file_listed(file_browser->dir, false, file_browser);
-        if (cursor_path)
-            ptk_file_browser_select_file(file_browser, cursor_path);
+        if (std::filesystem::exists(cursor_path))
+            ptk_file_browser_select_file(file_browser, cursor_path.c_str());
         file_browser->busy = false;
     }
     else
@@ -4274,8 +4272,6 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
                      "file-listed",
                      G_CALLBACK(on_dir_file_listed),
                      file_browser);
-
-    free(cursor_path);
 }
 
 unsigned int
@@ -4322,7 +4318,7 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, int x, int y)
     GtkTreeViewColumn* col;
     GtkTreeIter it;
     VFSFileInfo* file;
-    char* dest_path = nullptr;
+    std::string dest_path;
 
     switch (file_browser->view_mode)
     {
@@ -4378,14 +4374,13 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, int x, int y)
         {
             if (vfs_file_info_is_dir(file))
             {
-                dest_path = g_build_filename(ptk_file_browser_get_cwd(file_browser),
-                                             vfs_file_info_get_name(file),
-                                             nullptr);
+                dest_path = Glib::build_filename(ptk_file_browser_get_cwd(file_browser),
+                                                 vfs_file_info_get_name(file));
             }
             else /* Drop on a file, not directory */
             {
                 /* Return current directory */
-                dest_path = ztd::strdup(ptk_file_browser_get_cwd(file_browser));
+                dest_path = ptk_file_browser_get_cwd(file_browser);
             }
             vfs_file_info_unref(file);
         }
@@ -4393,9 +4388,9 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, int x, int y)
     }
     else
     {
-        dest_path = ztd::strdup(ptk_file_browser_get_cwd(file_browser));
+        dest_path = ptk_file_browser_get_cwd(file_browser);
     }
-    return dest_path;
+    return ztd::strdup(dest_path);
 }
 
 static void
@@ -4578,7 +4573,7 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
     GList* sels = ptk_file_browser_get_selected_files(file_browser);
     GList* sel;
     VFSFileInfo* file;
-    char* full_path;
+    std::string full_path;
 
     /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-data-get");
@@ -4588,11 +4583,9 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
     for (sel = sels; sel; sel = g_list_next(sel))
     {
         file = static_cast<VFSFileInfo*>(sel->data);
-        full_path = g_build_filename(ptk_file_browser_get_cwd(file_browser),
-                                     vfs_file_info_get_name(file),
-                                     nullptr);
-        char* uri = g_filename_to_uri(full_path, nullptr, nullptr);
-        free(full_path);
+        full_path = Glib::build_filename(ptk_file_browser_get_cwd(file_browser),
+                                         vfs_file_info_get_name(file));
+        char* uri = g_filename_to_uri(full_path.c_str(), nullptr, nullptr);
         g_string_append(uri_list, uri);
         free(uri);
 
@@ -5146,12 +5139,12 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
         // rebuild sel_files with full paths
         std::vector<std::string> file_list;
         GList* sel;
-        char* file_path;
+        std::string file_path;
         VFSFileInfo* file;
         for (sel = sel_files; sel; sel = sel->next)
         {
             file = static_cast<VFSFileInfo*>(sel->data);
-            file_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
+            file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
             file_list.push_back(file_path);
         }
 

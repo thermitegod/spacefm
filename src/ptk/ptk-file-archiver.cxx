@@ -949,7 +949,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     const char* dest;
     GList* l;
     std::string dest_quote;
-    char* full_path = nullptr;
     std::string full_quote;
     int i;
     int n;
@@ -983,17 +982,16 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
             // Fetching file details
             file = static_cast<VFSFileInfo*>(l->data);
             mime_type = vfs_file_info_get_mime_type(file);
-            full_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
+            std::string full_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
 
             // Checking for enabled handler with non-empty command
             handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
                                                            archive_operation,
-                                                           full_path,
+                                                           full_path.c_str(),
                                                            mime_type,
                                                            true,
                                                            false,
                                                            true);
-            free(full_path);
             vfs_mime_type_unref(mime_type);
             if (handlers_slist)
             {
@@ -1154,12 +1152,12 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         file = static_cast<VFSFileInfo*>(l->data);
         mime_type = vfs_file_info_get_mime_type(file);
         // Determining file paths
-        full_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
+        std::string full_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
 
         // Get handler with non-empty command
         handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
                                                        archive_operation,
-                                                       full_path,
+                                                       full_path.c_str(),
                                                        mime_type,
                                                        true,
                                                        false,
@@ -1177,7 +1175,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         if (!handler_xset)
         {
             LOG_WARN("No archive handler/command found for file: {}", full_path);
-            free(full_path);
             continue;
         }
         LOG_INFO("Archive Handler Selected: {}", handler_xset->menu_label);
@@ -1381,9 +1378,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                                     mkparent,
                                     command,
                                     perm);
-
-        // Cleaning up
-        free(full_path);
     }
 
     /* When ran in a terminal, errors need to result in a pause so that

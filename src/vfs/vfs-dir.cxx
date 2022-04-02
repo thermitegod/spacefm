@@ -654,29 +654,27 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
         file->disp_name.clear();
     file->name.clear();
 
-    char* full_path = g_build_filename(dir->path, file_name.c_str(), nullptr);
-    if (full_path)
+    std::string full_path = Glib::build_filename(dir->path, file_name);
+
+    if (vfs_file_info_get(file, full_path.c_str(), file_name.c_str()))
     {
-        if (vfs_file_info_get(file, full_path, file_name.c_str()))
-        {
-            ret = true;
-            vfs_file_info_load_special_info(file, full_path);
-        }
-        else /* The file does not exist */
-        {
-            if (ztd::contains(dir->file_list, file))
-            {
-                ztd::remove(dir->file_list, file);
-                if (file)
-                {
-                    g_signal_emit(dir, signals[VFSDirSignal::FILE_DELETED_SIGNAL], 0, file);
-                    vfs_file_info_unref(file);
-                }
-            }
-            ret = false;
-        }
-        free(full_path);
+        ret = true;
+        vfs_file_info_load_special_info(file, full_path.c_str());
     }
+    else /* The file does not exist */
+    {
+        if (ztd::contains(dir->file_list, file))
+        {
+            ztd::remove(dir->file_list, file);
+            if (file)
+            {
+                g_signal_emit(dir, signals[VFSDirSignal::FILE_DELETED_SIGNAL], 0, file);
+                vfs_file_info_unref(file);
+            }
+        }
+        ret = false;
+    }
+
     return ret;
 }
 
@@ -718,18 +716,17 @@ update_created_files(const char* key, VFSDir* dir)
             if (!file_found)
             {
                 // file is not in dir file_list
-                char* full_path = g_build_filename(dir->path, (char*)l->data, nullptr);
+                std::string full_path = Glib::build_filename(dir->path, (char*)l->data);
                 file = vfs_file_info_new();
-                if (vfs_file_info_get(file, full_path, nullptr))
+                if (vfs_file_info_get(file, full_path.c_str(), nullptr))
                 {
                     // add new file to dir file_list
-                    vfs_file_info_load_special_info(file, full_path);
+                    vfs_file_info_load_special_info(file, full_path.c_str());
                     dir->file_list.push_back(vfs_file_info_ref(file));
                     g_signal_emit(dir, signals[VFSDirSignal::FILE_CREATED_SIGNAL], 0, file);
                 }
                 // else file does not exist in filesystem
                 vfs_file_info_unref(file);
-                free(full_path);
             }
             else
             {
@@ -875,10 +872,9 @@ reload_mime_type(const char* key, VFSDir* dir)
 
     for (VFSFileInfo* file: dir->file_list)
     {
-        char* full_path = g_build_filename(dir->path, vfs_file_info_get_name(file), nullptr);
-        vfs_file_info_reload_mime_type(file, full_path);
+        std::string full_path = Glib::build_filename(dir->path, vfs_file_info_get_name(file));
+        vfs_file_info_reload_mime_type(file, full_path.c_str());
         // LOG_DEBUG("reload {}", full_path);
-        free(full_path);
     }
 
     for (VFSFileInfo* file: dir->file_list)

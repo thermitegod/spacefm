@@ -2146,7 +2146,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
     char* context = nullptr;
     int context_action = ItemPropContextState::CONTEXT_SHOW;
     XSet* mset;
-    char* icon_file = nullptr;
+    std::string icon_file;
     // LOG_INFO("xset_add_menuitem {}", set->name);
 
     // plugin?
@@ -2161,17 +2161,12 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
     if (!icon_name)
     {
         if (set->plugin)
-            icon_file = g_build_filename(set->plug_dir, set->plug_name, "icon", nullptr);
+            icon_file = Glib::build_filename(set->plug_dir, set->plug_name, "icon");
         else
-            icon_file =
-                g_build_filename(xset_get_config_dir(), "scripts", set->name, "icon", nullptr);
-        if (!std::filesystem::exists(icon_file))
-        {
-            free(icon_file);
-            icon_file = nullptr;
-        }
-        else
-            icon_name = icon_file;
+            icon_file = Glib::build_filename(xset_get_config_dir(), "scripts", set->name, "icon");
+
+        if (std::filesystem::exists(icon_file))
+            icon_name = ztd::strdup(icon_file);
     }
     if (!context)
         context = set->context;
@@ -2235,8 +2230,6 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                             // Nothing was added to the menu (all items likely have
                             // invisible context) so destroy (hide) - issue #215
                             gtk_widget_destroy(item);
-                            if (icon_file)
-                                free(icon_file);
 
                             // next item
                             if (set->next)
@@ -2354,9 +2347,6 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     }
 
-    if (icon_file)
-        free(icon_file);
-
     // next item
     if (set->next)
     {
@@ -2369,7 +2359,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
 char*
 xset_custom_get_script(XSet* set, bool create)
 {
-    char* path;
+    std::string path;
 
     if ((strncmp(set->name, "cstm_", 5) && strncmp(set->name, "cust", 4) &&
          strncmp(set->name, "hand", 4)) ||
@@ -2378,22 +2368,21 @@ xset_custom_get_script(XSet* set, bool create)
 
     if (create)
     {
-        path = g_build_filename(xset_get_config_dir(), "scripts", set->name, nullptr);
+        path = Glib::build_filename(xset_get_config_dir(), "scripts", set->name);
         if (!std::filesystem::exists(path))
         {
             std::filesystem::create_directories(path);
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
         }
-        free(path);
     }
 
     if (set->plugin)
     {
-        path = g_build_filename(set->plug_dir, set->plug_name, "exec.sh", nullptr);
+        path = Glib::build_filename(set->plug_dir, set->plug_name, "exec.sh");
     }
     else
     {
-        path = g_build_filename(xset_get_config_dir(), "scripts", set->name, "exec.sh", nullptr);
+        path = Glib::build_filename(xset_get_config_dir(), "scripts", set->name, "exec.sh");
     }
 
     if (create && !std::filesystem::exists(path))
@@ -2413,9 +2402,9 @@ xset_custom_get_script(XSet* set, bool create)
         }
         file.close();
 
-        chmod(path, 0700);
+        chmod(path.c_str(), 0700);
     }
-    return path;
+    return ztd::strdup(path);
 }
 
 static const std::string
@@ -2996,7 +2985,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
     }
     else
     {
-        char* plugin = g_build_filename(plugin_data->plug_dir, "plugin", nullptr);
+        std::string plugin = Glib::build_filename(plugin_data->plug_dir, "plugin");
         if (std::filesystem::exists(plugin))
         {
             PluginUse use = PluginUse::NORMAL;
@@ -3143,7 +3132,6 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
             }
             clean_plugin_mirrors();
         }
-        free(plugin);
     }
 
     delete plugin_data;
@@ -3295,18 +3283,18 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& p
 static bool
 xset_custom_export_files(XSet* set, const char* plug_dir)
 {
-    char* path_src;
-    char* path_dest;
+    std::string path_src;
+    std::string path_dest;
 
     if (set->plugin)
     {
-        path_src = g_build_filename(set->plug_dir, set->plug_name, nullptr);
-        path_dest = g_build_filename(plug_dir, set->plug_name, nullptr);
+        path_src = Glib::build_filename(set->plug_dir, set->plug_name);
+        path_dest = Glib::build_filename(plug_dir, set->plug_name);
     }
     else
     {
-        path_src = g_build_filename(xset_get_config_dir(), "scripts", set->name, nullptr);
-        path_dest = g_build_filename(plug_dir, set->name, nullptr);
+        path_src = Glib::build_filename(xset_get_config_dir(), "scripts", set->name);
+        path_dest = Glib::build_filename(plug_dir, set->name);
     }
 
     if (!(std::filesystem::exists(path_src) && dir_has_files(path_src)))
@@ -3318,21 +3306,15 @@ xset_custom_export_files(XSet* set, const char* plug_dir)
             std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
             if (!std::filesystem::exists(path_dest))
             {
-                free(path_src);
-                free(path_dest);
                 return false;
             }
         }
         // skip empty or missing dirs
-        free(path_src);
-        free(path_dest);
         return true;
     }
 
     int exit_status;
     std::string command = fmt::format("cp -a {} {}", path_src, path_dest);
-    free(path_src);
-    free(path_dest);
     print_command(command);
     Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
 
@@ -3779,10 +3761,9 @@ xset_custom_activate(GtkWidget* item, XSet* set)
                     GList* l;
                     for (l = sel_files; l; l = l->next)
                     {
-                        std::string open_file = g_build_filename(
+                        const std::string open_file = Glib::build_filename(
                             cwd,
-                            vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data)),
-                            nullptr);
+                            vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data)));
 
                         open_files.push_back(open_file);
                     }
@@ -4426,6 +4407,7 @@ xset_design_job(GtkWidget* item, XSet* set)
     std::string msg;
     int response;
     char* folder;
+    std::string folder2;
     char* file = nullptr;
     std::string file2;
     std::string plug_dir;
@@ -5157,26 +5139,25 @@ xset_design_job(GtkWidget* item, XSet* set)
                 break;
             if (set->plugin)
             {
-                folder = g_build_filename(set->plug_dir, "files", nullptr);
-                if (!std::filesystem::exists(folder))
-                {
-                    free(folder);
-                    folder = g_build_filename(set->plug_dir, set->plug_name, nullptr);
-                }
+                folder2 = Glib::build_filename(set->plug_dir, "files");
+                if (!std::filesystem::exists(folder2))
+                    folder2 = Glib::build_filename(set->plug_dir, set->plug_name);
             }
             else
             {
-                folder = g_build_filename(xset_get_config_dir(), "scripts", set->name, nullptr);
+                folder2 = Glib::build_filename(xset_get_config_dir(), "scripts", set->name);
             }
-            if (!std::filesystem::exists(folder) && !set->plugin)
+            if (!std::filesystem::exists(folder2) && !set->plugin)
             {
-                std::filesystem::create_directories(folder);
-                std::filesystem::permissions(folder, std::filesystem::perms::owner_all);
+                std::filesystem::create_directories(folder2);
+                std::filesystem::permissions(folder2, std::filesystem::perms::owner_all);
             }
 
             if (set->browser)
             {
-                ptk_file_browser_emit_open(set->browser, folder, PtkOpenAction::PTK_OPEN_DIR);
+                ptk_file_browser_emit_open(set->browser,
+                                           folder2.c_str(),
+                                           PtkOpenAction::PTK_OPEN_DIR);
             }
             break;
         case XSetJob::BROWSE_DATA:
@@ -5185,20 +5166,23 @@ xset_design_job(GtkWidget* item, XSet* set)
             if (set->plugin)
             {
                 mset = xset_get_plugin_mirror(set);
-                folder =
-                    g_build_filename(xset_get_config_dir(), "plugin-data", mset->name, nullptr);
+                folder2 = Glib::build_filename(xset_get_config_dir(), "plugin-data", mset->name);
             }
             else
-                folder = g_build_filename(xset_get_config_dir(), "plugin-data", set->name, nullptr);
-            if (!std::filesystem::exists(folder))
             {
-                std::filesystem::create_directories(folder);
-                std::filesystem::permissions(folder, std::filesystem::perms::owner_all);
+                folder2 = Glib::build_filename(xset_get_config_dir(), "plugin-data", set->name);
+            }
+            if (!std::filesystem::exists(folder2))
+            {
+                std::filesystem::create_directories(folder2);
+                std::filesystem::permissions(folder2, std::filesystem::perms::owner_all);
             }
 
             if (set->browser)
             {
-                ptk_file_browser_emit_open(set->browser, folder, PtkOpenAction::PTK_OPEN_DIR);
+                ptk_file_browser_emit_open(set->browser,
+                                           folder2.c_str(),
+                                           PtkOpenAction::PTK_OPEN_DIR);
             }
             break;
         case XSetJob::BROWSE_PLUGIN:
@@ -6772,9 +6756,8 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
             gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), deffile);
         else
         {
-            path = g_build_filename(deffolder, deffile, nullptr);
-            gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path);
-            free(path);
+            std::string path2 = Glib::build_filename(deffolder, deffile);
+            gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path2.c_str());
         }
     }
 
@@ -7217,7 +7200,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     XSet* set_next;
     char* new_menu_label = nullptr;
     GdkPixbuf* pixbuf = nullptr;
-    char* icon_file = nullptr;
     std::string str;
 
     // get real icon size from gtk icon size
@@ -7278,14 +7260,10 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     if (!icon_name && set->tool == XSetTool::CUSTOM)
     {
         // custom 'icon' file?
-        icon_file = g_build_filename(xset_get_config_dir(), "scripts", set->name, "icon", nullptr);
-        if (!std::filesystem::exists(icon_file))
-        {
-            free(icon_file);
-            icon_file = nullptr;
-        }
-        else
-            icon_name = icon_file;
+        std::string icon_file =
+            Glib::build_filename(xset_get_config_dir(), "scripts", set->name, "icon");
+        if (std::filesystem::exists(icon_file))
+            icon_name = ztd::strdup(icon_file);
     }
 
     char* menu_label;
@@ -7655,7 +7633,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             return nullptr;
     }
 
-    free(icon_file);
     gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(item), -1);
 
     // LOG_INFO("    set={}   set->next={}", set->name, set->next);

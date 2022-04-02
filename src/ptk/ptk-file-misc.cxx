@@ -299,7 +299,7 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTr
     for (sel = sel_files; sel; sel = g_list_next(sel))
     {
         VFSFileInfo* file = static_cast<VFSFileInfo*>(sel->data);
-        char* file_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
+        std::string file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
         file_list.push_back(file_path);
     }
     /* file_list = g_list_reverse( file_list ); */
@@ -343,7 +343,7 @@ ptk_trash_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTre
     for (sel = sel_files; sel; sel = g_list_next(sel))
     {
         VFSFileInfo* file = static_cast<VFSFileInfo*>(sel->data);
-        char* file_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
+        std::string file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
         file_list.push_back(file_path);
     }
     /* file_list = g_list_reverse( file_list ); */
@@ -422,7 +422,7 @@ on_move_entry_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
 static void
 on_move_change(GtkWidget* widget, MoveSet* mset)
 {
-    char* full_path;
+    std::string full_path;
     char* path;
     char* cwd;
     char* str;
@@ -543,14 +543,14 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         }
 
         if (path[0] == '/')
-            full_path = g_build_filename(path, full_name.c_str(), nullptr);
+            full_path = Glib::build_filename(path, full_name);
         else
         {
             cwd = g_path_get_dirname(mset->full_path);
-            full_path = g_build_filename(cwd, path, full_name.c_str(), nullptr);
+            full_path = Glib::build_filename(cwd, path, full_name);
             free(cwd);
         }
-        gtk_text_buffer_set_text(mset->buf_full_path, full_path, -1);
+        gtk_text_buffer_set_text(mset->buf_full_path, full_path.c_str(), -1);
     }
     else if (widget == GTK_WIDGET(mset->buf_full_name))
     {
@@ -591,14 +591,14 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         }
 
         if (path[0] == '/')
-            full_path = g_build_filename(path, full_name, nullptr);
+            full_path = Glib::build_filename(path, full_name);
         else
         {
             cwd = g_path_get_dirname(mset->full_path);
-            full_path = g_build_filename(cwd, path, full_name, nullptr);
+            full_path = Glib::build_filename(cwd, path, full_name);
             free(cwd);
         }
-        gtk_text_buffer_set_text(mset->buf_full_path, full_path, -1);
+        gtk_text_buffer_set_text(mset->buf_full_path, full_path.c_str(), -1);
 
         free(full_name);
     }
@@ -629,14 +629,14 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         }
 
         if (path[0] == '/')
-            full_path = g_build_filename(path, full_name, nullptr);
+            full_path = Glib::build_filename(path, full_name);
         else
         {
             cwd = g_path_get_dirname(mset->full_path);
-            full_path = g_build_filename(cwd, path, full_name, nullptr);
+            full_path = Glib::build_filename(cwd, path, full_name);
             free(cwd);
         }
-        gtk_text_buffer_set_text(mset->buf_full_path, full_path, -1);
+        gtk_text_buffer_set_text(mset->buf_full_path, full_path.c_str(), -1);
 
         free(full_name);
     }
@@ -653,9 +653,9 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         if (full_path[0] == '\0')
             full_name = "";
         else
-            full_name = g_path_get_basename(full_path);
+            full_name = g_path_get_basename(full_path.c_str());
 
-        path = g_path_get_dirname(full_path);
+        path = g_path_get_dirname(full_path.c_str());
         if (!strcmp(path, "."))
         {
             free(path);
@@ -672,7 +672,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         {
             cwd = g_path_get_dirname(mset->full_path);
             str = path;
-            path = g_build_filename(cwd, str, nullptr);
+            path = ztd::strdup(Glib::build_filename(cwd, str));
             free(str);
             free(cwd);
         }
@@ -705,9 +705,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         {
             // update full_path for tests below
             cwd = g_path_get_dirname(mset->full_path);
-            str = full_path;
-            full_path = g_build_filename(cwd, str, nullptr);
-            free(str);
+            full_path = Glib::build_filename(cwd, full_path);
             free(cwd);
         }
     }
@@ -716,7 +714,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     if (path[0] != '/')
     {
         free(path);
-        path = g_path_get_dirname(full_path);
+        path = g_path_get_dirname(full_path.c_str());
     }
 
     // LOG_INFO("path={}   full={}", path, full_path);
@@ -730,12 +728,12 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     bool path_exists_file = false;
     bool is_move = false;
 
-    if (!strcmp(full_path, mset->full_path))
+    if (ztd::same(full_path, mset->full_path))
     {
         full_path_same = true;
         if (mset->create_new && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link)))
         {
-            if (lstat(full_path, &statbuf) == 0)
+            if (lstat(full_path.c_str(), &statbuf) == 0)
             {
                 full_path_exists = true;
                 if (std::filesystem::is_directory(full_path))
@@ -745,7 +743,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     }
     else
     {
-        if (lstat(full_path, &statbuf) == 0)
+        if (lstat(full_path.c_str(), &statbuf) == 0)
         {
             full_path_exists = true;
             if (std::filesystem::is_directory(full_path))
@@ -765,7 +763,6 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         }
     }
     free(path);
-    free(full_path);
 
     /*
         LOG_INFO("TEST")
@@ -1112,9 +1109,8 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), dir);
     else
     {
-        char* path = g_build_filename(dir, name, nullptr);
-        gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path);
-        free(path);
+        std::string path = Glib::build_filename(dir, name);
+        gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path.c_str());
     }
     free(dir);
     free(name);
@@ -2022,73 +2018,73 @@ get_template_dir()
 static GList*
 get_templates(const char* templates_dir, const char* subdir, GList* templates, bool getdir)
 {
-    char* templates_path;
-
     if (!templates_dir)
     {
-        templates_path = get_template_dir();
+        const char* templates_path = get_template_dir();
         if (templates_path)
             templates = get_templates(templates_path, nullptr, templates, getdir);
-        free(templates_path);
         return templates;
     }
 
-    templates_path = g_build_filename(templates_dir, subdir, nullptr);
+    std::string templates_path = Glib::build_filename(templates_dir, subdir);
 
-    if (std::filesystem::is_directory(templates_path))
+    if (!std::filesystem::is_directory(templates_path))
+        return templates;
+
+    std::string file_name;
+    for (const auto& file: std::filesystem::directory_iterator(templates_path))
     {
-        std::string file_name;
-        for (const auto& file: std::filesystem::directory_iterator(templates_path))
-        {
-            file_name = std::filesystem::path(file).filename();
+        file_name = std::filesystem::path(file).filename();
 
-            char* subsubdir;
-            char* path = g_build_filename(templates_path, file_name.c_str(), nullptr);
-            if (getdir)
+        std::string path = Glib::build_filename(templates_path, file_name);
+        if (getdir)
+        {
+            if (std::filesystem::is_directory(path))
             {
-                if (std::filesystem::is_directory(path))
+                std::string subsubdir;
+                if (subdir)
+                    subsubdir = Glib::build_filename(subdir, file_name);
+                else
+                    subsubdir = file_name;
+
+                std::string subsubdir_fmt = fmt::format("{}/", subsubdir);
+                templates = g_list_prepend(templates, ztd::strdup(subsubdir_fmt));
+                // prevent filesystem loops during recursive find
+                if (!std::filesystem::is_symlink(path))
+                    templates = get_templates(templates_dir, subsubdir.c_str(), templates, getdir);
+            }
+        }
+        else
+        {
+            if (std::filesystem::is_regular_file(path))
+            {
+                if (subdir)
                 {
-                    if (subdir)
-                        subsubdir = g_build_filename(subdir, file_name.c_str(), nullptr);
-                    else
-                        subsubdir = ztd::strdup(file_name);
-                    std::string subsubdir_fmt = fmt::format("{}/", subsubdir);
-                    templates = g_list_prepend(templates, ztd::strdup(subsubdir_fmt));
-                    // prevent filesystem loops during recursive find
-                    if (!std::filesystem::is_symlink(path))
-                        templates = get_templates(templates_dir, subsubdir, templates, getdir);
-                    free(subsubdir);
+                    path = Glib::build_filename(subdir, file_name);
+                    templates = g_list_prepend(templates, ztd::strdup(path));
+                }
+                else
+                {
+                    templates = g_list_prepend(templates, ztd::strdup(file_name));
                 }
             }
-            else
+            else if (std::filesystem::is_directory(path) &&
+                     // prevent filesystem loops during recursive find
+                     !std::filesystem::is_symlink(path))
             {
-                if (std::filesystem::is_regular_file(path))
+                if (subdir)
                 {
-                    if (subdir)
-                        templates =
-                            g_list_prepend(templates,
-                                           g_build_filename(subdir, file_name.c_str(), nullptr));
-                    else
-                        templates = g_list_prepend(templates, ztd::strdup(file_name));
+                    std::string subsubdir = Glib::build_filename(subdir, file_name);
+                    templates = get_templates(templates_dir, subsubdir.c_str(), templates, getdir);
                 }
-                else if (std::filesystem::is_directory(path) &&
-                         // prevent filesystem loops during recursive find
-                         !std::filesystem::is_symlink(path))
+                else
                 {
-                    if (subdir)
-                    {
-                        subsubdir = g_build_filename(subdir, file_name.c_str(), nullptr);
-                        templates = get_templates(templates_dir, subsubdir, templates, getdir);
-                        free(subsubdir);
-                    }
-                    else
-                        templates =
-                            get_templates(templates_dir, file_name.c_str(), templates, getdir);
+                    templates = get_templates(templates_dir, file_name.c_str(), templates, getdir);
                 }
             }
         }
     }
-    free(templates_path);
+
     return templates;
 }
 
@@ -2177,8 +2173,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
 {
     // TODO convert to gtk_builder (glade file)
 
-    char* full_name;
-    char* full_path;
+    char* full_name = nullptr;
     char* path;
     char* old_path;
     char* str;
@@ -2192,7 +2187,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         return 0;
 
     MoveSet* mset = new MoveSet;
-    full_name = nullptr;
 
     if (!create_new)
     {
@@ -2209,9 +2203,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         mset->is_dir = vfs_file_info_is_dir(file);
         mset->is_link = vfs_file_info_is_symlink(file);
         mset->clip_copy = clip_copy;
-        mset->full_path = g_build_filename(file_dir, full_name, nullptr);
+        mset->full_path = ztd::strdup(Glib::build_filename(file_dir, full_name));
         if (dest_dir)
-            mset->new_path = g_build_filename(dest_dir, full_name, nullptr);
+            mset->new_path = ztd::strdup(Glib::build_filename(dest_dir, full_name));
         else
             mset->new_path = ztd::strdup(mset->full_path);
         free(full_name);
@@ -2222,7 +2216,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         full_name = ztd::strdup(vfs_file_info_get_disp_name(file));
         if (!full_name)
             full_name = ztd::strdup(vfs_file_info_get_name(file));
-        mset->full_path = g_build_filename(file_dir, full_name, nullptr);
+        mset->full_path = ztd::strdup(Glib::build_filename(file_dir, full_name));
         mset->new_path = ztd::strdup(mset->full_path);
         mset->is_dir = vfs_file_info_is_dir(file); // is_dir is dynamic for create
         mset->is_link = vfs_file_info_is_symlink(file);
@@ -2844,6 +2838,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     std::string root_mkdir;
     std::string to_path;
     std::string from_path;
+    std::string full_path;
     int response;
     while ((response = gtk_dialog_run(GTK_DIALOG(mset->dlg))))
     {
@@ -2857,30 +2852,25 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             if (full_path[0] != '/')
             {
                 // update full_path to absolute
-                char* cwd = g_path_get_dirname(mset->full_path);
-                char* old_path2 = full_path;
-                full_path = g_build_filename(cwd, old_path2, nullptr);
-                free(cwd);
-                free(old_path2);
+                const char* cwd = g_path_get_dirname(mset->full_path);
+                full_path = Glib::build_filename(cwd, full_path);
             }
-            if (strchr(full_path, '\n'))
+            if (ztd::contains(full_path, "\n"))
             {
                 ptk_show_error(GTK_WINDOW(mset->dlg), "Error", "Path contains linefeeds");
-                free(full_path);
                 continue;
             }
-            full_name = g_path_get_basename(full_path);
-            path = g_path_get_dirname(full_path);
+            full_name = g_path_get_basename(full_path.c_str());
+            path = g_path_get_dirname(full_path.c_str());
             old_path = g_path_get_dirname(mset->full_path);
             bool overwrite = false;
 
             if (response == GTK_RESPONSE_APPLY)
                 ret = 2;
 
-            if (!create_new && (mset->full_path_same || !strcmp(full_path, mset->full_path)))
+            if (!create_new && (mset->full_path_same || ztd::same(full_path, mset->full_path)))
             {
                 // not changed, proceed to next file
-                free(full_path);
                 free(full_name);
                 free(path);
                 free(old_path);
@@ -2917,7 +2907,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                                         "The parent directory does not exist.  Create it?") !=
                         GTK_RESPONSE_YES)
                     {
-                        free(full_path);
                         free(full_name);
                         free(path);
                         free(old_path);
@@ -2941,7 +2930,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                             fmt::format("Error creating parent directory\n\n{}", errno_msg);
                         ptk_show_error(GTK_WINDOW(mset->dlg), "Mkdir Error", msg);
 
-                        free(full_path);
                         free(full_name);
                         free(path);
                         free(old_path);
@@ -2951,13 +2939,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                         update_new_display(path);
                 }
             }
-            else if (lstat(full_path, &statbuf) == 0)
+            else if (lstat(full_path.c_str(), &statbuf) == 0)
             {
                 // overwrite
                 if (std::filesystem::is_directory(full_path))
                 {
                     // just in case
-                    free(full_path);
                     free(full_name);
                     free(path);
                     free(old_path);
@@ -2971,7 +2958,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                                     "The file path exists.  Overwrite existing file?") !=
                     GTK_RESPONSE_YES)
                 {
-                    free(full_path);
                     free(full_name);
                     free(path);
                     free(old_path);
@@ -3019,7 +3005,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     ptask->user_data = auto_open;
                 }
                 ptk_file_task_run(ptask);
-                update_new_display(full_path);
+                update_new_display(full_path.c_str());
             }
             else if (create_new && new_file)
             {
@@ -3039,7 +3025,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                         char* tdir = get_template_dir();
                         if (tdir)
                         {
-                            from_path = g_build_filename(tdir, str, nullptr);
+                            from_path = Glib::build_filename(tdir, str);
                             if (!std::filesystem::is_regular_file(from_path))
                             {
                                 ptk_show_error(GTK_WINDOW(mset->dlg),
@@ -3048,7 +3034,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                                 free(str);
                                 free(tdir);
 
-                                free(full_path);
                                 free(full_name);
                                 free(path);
                                 free(old_path);
@@ -3088,7 +3073,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     ptask->user_data = auto_open;
                 }
                 ptk_file_task_run(ptask);
-                update_new_display(full_path);
+                update_new_display(full_path.c_str());
             }
             else if (create_new)
             {
@@ -3096,7 +3081,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 if (!new_folder)
                 {
                     // failsafe
-                    free(full_path);
                     free(full_name);
                     free(path);
                     free(old_path);
@@ -3117,7 +3101,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                         char* tdir = get_template_dir();
                         if (tdir)
                         {
-                            from_path = g_build_filename(tdir, str, nullptr);
+                            from_path = Glib::build_filename(tdir, str);
                             if (!std::filesystem::is_directory(from_path))
                             {
                                 ptk_show_error(GTK_WINDOW(mset->dlg),
@@ -3125,7 +3109,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                                                "The specified template does not exist");
                                 free(str);
                                 free(tdir);
-                                free(full_path);
                                 free(full_name);
                                 free(path);
                                 free(old_path);
@@ -3161,7 +3144,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     ptask->user_data = auto_open;
                 }
                 ptk_file_task_run(ptask);
-                update_new_display(full_path);
+                update_new_display(full_path.c_str());
             }
             else if (copy || copy_target)
             {
@@ -3180,7 +3163,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                         ptk_show_error(GTK_WINDOW(mset->dlg),
                                        "Copy Target Error",
                                        "Error determining link's target");
-                        free(full_path);
                         free(full_name);
                         free(path);
                         free(old_path);
@@ -3213,7 +3195,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 if (as_root)
                     ptask->task->exec_as_user = "root";
                 ptk_file_task_run(ptask);
-                update_new_display(full_path);
+                update_new_display(full_path.c_str());
             }
             else if (link || link_target)
             {
@@ -3230,7 +3212,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                         ptk_show_error(GTK_WINDOW(mset->dlg),
                                        "Link Target Error",
                                        "Error determining link's target");
-                        free(full_path);
                         free(full_name);
                         free(path);
                         free(old_path);
@@ -3258,7 +3239,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 if (as_root)
                     ptask->task->exec_as_user = "root";
                 ptk_file_task_run(ptask);
-                update_new_display(full_path);
+                update_new_display(full_path.c_str());
             }
             // need move?  (do move as task in case it takes a long time)
             else if (as_root || strcmp(old_path, path))
@@ -3288,12 +3269,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 if (as_root)
                     ptask->task->exec_as_user = "root";
                 ptk_file_task_run(ptask);
-                update_new_display(full_path);
+                update_new_display(full_path.c_str());
             }
             else
             {
                 // rename (does overwrite)
-                if (rename(mset->full_path, full_path) != 0)
+                if (rename(mset->full_path, full_path.c_str()) != 0)
                 {
                     // Respond to an EXDEV error by switching to a move (e.g. aufs
                     // directory rename fails due to the directory existing in
@@ -3305,16 +3286,16 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     std::string errno_msg = Glib::strerror(errno);
                     std::string msg = fmt::format("Error renaming file\n\n{}", errno_msg);
                     ptk_show_error(GTK_WINDOW(mset->dlg), "Rename Error", msg);
-                    free(full_path);
                     free(full_name);
                     free(path);
                     free(old_path);
                     continue;
                 }
                 else
-                    update_new_display(full_path);
+                {
+                    update_new_display(full_path.c_str());
+                }
             }
-            free(full_path);
             free(full_name);
             free(path);
             free(old_path);
@@ -3368,7 +3349,7 @@ ptk_show_file_properties(GtkWindow* parent_win, const char* cwd, GList* sel_file
 }
 
 static bool
-open_archives_with_handler(ParentInfo* parent, GList* sel_files, char* full_path,
+open_archives_with_handler(ParentInfo* parent, GList* sel_files, const char* full_path,
                            VFSMimeType* mime_type)
 {
     if (xset_get_b(XSetName::ARC_DEF_OPEN))
@@ -3611,7 +3592,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
     // if xnever, never execute an executable
     // if xforce, force execute of executable ignoring app_settings.no_execute
 
-    char* full_path = nullptr;
+    std::string full_path;
     GList* files_to_open = nullptr;
     GHashTable* file_list_hash = nullptr;
     char* new_dir = nullptr;
@@ -3626,162 +3607,163 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
         if (!file)
             continue;
 
-        full_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
-        if (full_path)
+        full_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
+
+        if (app_desktop)
+        { // specified app to open all files
+            files_to_open = g_list_append(files_to_open, ztd::strdup(full_path));
+        }
+        else
         {
-            if (app_desktop)
-                // specified app to open all files
-                files_to_open = g_list_append(files_to_open, full_path);
-            else
+            // No app specified - Use default app for each file
+
+            // Is a dir?  Open in browser
+            if (file_browser && std::filesystem::is_directory(full_path))
             {
-                // No app specified - Use default app for each file
-
-                // Is a dir?  Open in browser
-                if (file_browser && std::filesystem::is_directory(full_path))
+                if (!new_dir)
                 {
-                    if (!new_dir)
-                        new_dir = full_path;
-                    else
-                    {
-                        if (file_browser)
-                        {
-                            ptk_file_browser_emit_open(file_browser,
-                                                       full_path,
-                                                       PtkOpenAction::PTK_OPEN_NEW_TAB);
-                        }
-                    }
-                    continue;
+                    new_dir = ztd::strdup(full_path);
                 }
+                else
+                {
+                    if (file_browser)
+                    {
+                        ptk_file_browser_emit_open(file_browser,
+                                                   full_path.c_str(),
+                                                   PtkOpenAction::PTK_OPEN_NEW_TAB);
+                    }
+                }
+                continue;
+            }
 
-                /* If this file is an executable file, run it. */
-                if (!xnever && vfs_file_info_is_executable(file, full_path) &&
+            /* If this file is an executable file, run it. */
+            if (!xnever && vfs_file_info_is_executable(file, full_path.c_str()) &&
+                (!app_settings.no_execute || xforce))
+            {
+                Glib::spawn_command_line_async(full_path);
+                if (file_browser)
+                    ptk_file_browser_emit_open(file_browser,
+                                               full_path.c_str(),
+                                               PtkOpenAction::PTK_OPEN_FILE);
+                continue;
+            }
+
+            /* Find app to open this file and place copy in alloc_desktop.
+             * This string is freed when hash table is destroyed. */
+            std::string alloc_desktop;
+
+            VFSMimeType* mime_type = vfs_file_info_get_mime_type(file);
+
+            // has archive handler?
+            if (l == sel_files /* test first file only */ &&
+                open_archives_with_handler(parent, sel_files, full_path.c_str(), mime_type))
+            {
+                // all files were handled by open_archives_with_handler
+                vfs_mime_type_unref(mime_type);
+                break;
+            }
+
+            // if has file handler, set alloc_desktop = ###XSETNAME
+            GSList* handlers_slist =
+                ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_FILE,
+                                              PtkHandlerMount::HANDLER_MOUNT,
+                                              full_path.c_str(),
+                                              mime_type,
+                                              true,
+                                              false,
+                                              true);
+            if (handlers_slist)
+            {
+                XSet* handler_set = XSET(handlers_slist->data);
+                g_slist_free(handlers_slist);
+                alloc_desktop = fmt::format("###{}", handler_set->name);
+            }
+
+            /* The file itself is a desktop entry file. */
+            /* was: if( Glib::str_has_suffix( vfs_file_info_get_name( file ), ".desktop" ) )
+             */
+            if (alloc_desktop.empty())
+            {
+                if (file->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY &&
                     (!app_settings.no_execute || xforce))
                 {
-                    Glib::spawn_command_line_async(full_path);
-                    if (file_browser)
-                        ptk_file_browser_emit_open(file_browser,
-                                                   full_path,
-                                                   PtkOpenAction::PTK_OPEN_FILE);
-                    free(full_path);
-                    continue;
+                    alloc_desktop = full_path;
                 }
-
-                /* Find app to open this file and place copy in alloc_desktop.
-                 * This string is freed when hash table is destroyed. */
-                char* alloc_desktop = nullptr;
-
-                VFSMimeType* mime_type = vfs_file_info_get_mime_type(file);
-
-                // has archive handler?
-                if (l == sel_files /* test first file only */ &&
-                    open_archives_with_handler(parent, sel_files, full_path, mime_type))
+                else
                 {
-                    // all files were handled by open_archives_with_handler
-                    vfs_mime_type_unref(mime_type);
-                    break;
-                }
-
-                // if has file handler, set alloc_desktop = ###XSETNAME
-                GSList* handlers_slist =
-                    ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_FILE,
-                                                  PtkHandlerMount::HANDLER_MOUNT,
-                                                  full_path,
-                                                  mime_type,
-                                                  true,
-                                                  false,
-                                                  true);
-                if (handlers_slist)
-                {
-                    XSet* handler_set = XSET(handlers_slist->data);
-                    g_slist_free(handlers_slist);
-                    alloc_desktop = g_strconcat("###", handler_set->name, nullptr);
-                }
-
-                /* The file itself is a desktop entry file. */
-                /* was: if( Glib::str_has_suffix( vfs_file_info_get_name( file ), ".desktop" ) )
-                 */
-                if (!alloc_desktop)
-                {
-                    if (file->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY &&
-                        (!app_settings.no_execute || xforce))
-                        alloc_desktop = full_path;
-                    else
-                        alloc_desktop = vfs_mime_type_get_default_action(mime_type);
-                }
-
-                if (!alloc_desktop && mime_type_is_text_file(full_path, mime_type->type))
-                {
-                    /* FIXME: special handling for plain text file */
-                    vfs_mime_type_unref(mime_type);
-                    mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
                     alloc_desktop = vfs_mime_type_get_default_action(mime_type);
                 }
-
-                vfs_mime_type_unref(mime_type);
-
-                if (!alloc_desktop && vfs_file_info_is_symlink(file))
-                {
-                    // broken link?
-                    try
-                    {
-                        std::string target_path = std::filesystem::read_symlink(full_path);
-
-                        if (!std::filesystem::exists(target_path))
-                        {
-                            std::string msg = fmt::format("This symlink's target is missing or "
-                                                          "you do not have permission "
-                                                          "to access it:\n{}\n\nTarget: {}",
-                                                          full_path,
-                                                          target_path);
-                            toplevel = file_browser
-                                           ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser))
-                                           : nullptr;
-                            ptk_show_error(GTK_WINDOW(toplevel), "Broken Link", msg.c_str());
-                            free(full_path);
-                            continue;
-                        }
-                    }
-                    catch (const std::filesystem::filesystem_error& e)
-                    {
-                        LOG_WARN("{}", e.what());
-                    }
-                }
-                if (!alloc_desktop)
-                {
-                    /* Let the user choose an application */
-                    toplevel =
-                        file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser)) : nullptr;
-                    alloc_desktop = ptk_choose_app_for_mime_type(GTK_WINDOW(toplevel),
-                                                                 mime_type,
-                                                                 true,
-                                                                 true,
-                                                                 true,
-                                                                 !file_browser);
-                }
-                if (!alloc_desktop)
-                {
-                    free(full_path);
-                    continue;
-                }
-
-                // add full_path to list, update hash table
-                files_to_open = nullptr;
-                if (!file_list_hash)
-                    /* this will free the keys (alloc_desktop) when hash table
-                     * destroyed or new key inserted/replaced */
-                    file_list_hash = g_hash_table_new_full(g_str_hash, g_str_equal, free, nullptr);
-                else
-                    // get existing file list for this app
-                    files_to_open = (GList*)g_hash_table_lookup(file_list_hash, alloc_desktop);
-
-                if (alloc_desktop != full_path)
-                    /* it is not a desktop file itself - add file to list.
-                     * Otherwise use full_path as hash table key, which will
-                     * be freed when hash table is destroyed. */
-                    files_to_open = g_list_append(files_to_open, full_path);
-                // update file list in hash table
-                g_hash_table_replace(file_list_hash, alloc_desktop, files_to_open);
             }
+
+            if (alloc_desktop.empty() && mime_type_is_text_file(full_path.c_str(), mime_type->type))
+            {
+                /* FIXME: special handling for plain text file */
+                vfs_mime_type_unref(mime_type);
+                mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
+                alloc_desktop = vfs_mime_type_get_default_action(mime_type);
+            }
+
+            vfs_mime_type_unref(mime_type);
+
+            if (alloc_desktop.empty() && vfs_file_info_is_symlink(file))
+            {
+                // broken link?
+                try
+                {
+                    std::string target_path = std::filesystem::read_symlink(full_path);
+
+                    if (!std::filesystem::exists(target_path))
+                    {
+                        std::string msg = fmt::format("This symlink's target is missing or "
+                                                      "you do not have permission "
+                                                      "to access it:\n{}\n\nTarget: {}",
+                                                      full_path,
+                                                      target_path);
+                        toplevel = file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser))
+                                                : nullptr;
+                        ptk_show_error(GTK_WINDOW(toplevel), "Broken Link", msg.c_str());
+                        continue;
+                    }
+                }
+                catch (const std::filesystem::filesystem_error& e)
+                {
+                    LOG_WARN("{}", e.what());
+                }
+            }
+            if (alloc_desktop.empty())
+            {
+                /* Let the user choose an application */
+                toplevel =
+                    file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser)) : nullptr;
+                alloc_desktop = ztd::null_check(ptk_choose_app_for_mime_type(GTK_WINDOW(toplevel),
+                                                                             mime_type,
+                                                                             true,
+                                                                             true,
+                                                                             true,
+                                                                             !file_browser));
+            }
+            if (alloc_desktop.empty())
+            {
+                continue;
+            }
+
+            // add full_path to list, update hash table
+            files_to_open = nullptr;
+            if (!file_list_hash)
+                /* this will free the keys (alloc_desktop) when hash table
+                 * destroyed or new key inserted/replaced */
+                file_list_hash = g_hash_table_new_full(g_str_hash, g_str_equal, free, nullptr);
+            else
+                // get existing file list for this app
+                files_to_open = (GList*)g_hash_table_lookup(file_list_hash, alloc_desktop.c_str());
+
+            if (!ztd::same(alloc_desktop, full_path))
+                /* it is not a desktop file itself - add file to list.
+                 * Otherwise use full_path as hash table key, which will
+                 * be freed when hash table is destroyed. */
+                files_to_open = g_list_append(files_to_open, ztd::strdup(full_path));
+            // update file list in hash table
+            g_hash_table_replace(file_list_hash, ztd::strdup(alloc_desktop), files_to_open);
         }
     }
 
@@ -3804,7 +3786,9 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
     if (new_dir)
     {
         if (file_browser)
-            ptk_file_browser_emit_open(file_browser, full_path, PtkOpenAction::PTK_OPEN_DIR);
+            ptk_file_browser_emit_open(file_browser,
+                                       full_path.c_str(),
+                                       PtkOpenAction::PTK_OPEN_DIR);
         free(new_dir);
     }
 

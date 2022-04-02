@@ -674,11 +674,14 @@ ptk_location_view_get_mount_point_dir(const char* name)
         if (!have_rw_access(parent.c_str()))
             parent.clear();
     }
-    if (!std::filesystem::exists(parent))
-        return g_build_filename(vfs_user_cache_dir().c_str(), "spacefm-mount", name, nullptr);
 
-    char* path = g_build_filename(parent.c_str(), name, nullptr);
-    return path;
+    std::string path;
+    if (!std::filesystem::exists(parent))
+        path = Glib::build_filename(vfs_user_cache_dir(), "spacefm-mount", name);
+    else
+        path = Glib::build_filename(parent, name);
+
+    return ztd::strdup(path);
 }
 
 void
@@ -2654,7 +2657,6 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
     const char* icon2 = nullptr;
     const char* icon3 = nullptr;
     const char* icon_name = nullptr;
-    char* icon_file = nullptr;
     XSetCMD cmd_type;
     char* menu_label = nullptr;
     GdkPixbuf* icon = nullptr;
@@ -2666,18 +2668,15 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
     if (icon_size > PANE_MAX_ICON_SIZE)
         icon_size = PANE_MAX_ICON_SIZE;
 
+    std::string icon_file;
+
     icon_name = set->icon;
     if (!icon_name && !set->lock)
     {
         // custom 'icon' file?
-        icon_file = g_build_filename(xset_get_config_dir(), "scripts", set->name, "icon", nullptr);
-        if (!std::filesystem::exists(icon_file))
-        {
-            free(icon_file);
-            icon_file = nullptr;
-        }
-        else
-            icon_name = icon_file;
+        icon_file = Glib::build_filename(xset_get_config_dir(), "scripts", set->name, "icon");
+        if (std::filesystem::exists(icon_file))
+            icon_name = ztd::strdup(icon_file);
     }
 
     // get icon name
@@ -2800,9 +2799,9 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
         }
     }
     else
+    {
         gtk_list_store_set(list, it, PtkLocationViewCol::COL_ICON, nullptr, -1);
-
-    free(icon_file);
+    }
 }
 
 static void

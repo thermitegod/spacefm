@@ -1335,14 +1335,12 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     new_handler_xset->scroll_lock = set->scroll_lock;
 
     // build copy scripts command
-    char* path_src = g_build_filename(set->plug_dir, set->plug_name, nullptr);
-    char* path_dest = g_build_filename(xset_get_config_dir(), "scripts", nullptr);
+    std::string path_src = Glib::build_filename(set->plug_dir, set->plug_name);
+    std::string path_dest = Glib::build_filename(xset_get_config_dir(), "scripts");
     std::filesystem::create_directories(path_dest);
     std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
-    free(path_dest);
-    path_dest = g_build_filename(xset_get_config_dir(), "scripts", new_handler_xset->name, nullptr);
+    path_dest = Glib::build_filename(xset_get_config_dir(), "scripts", new_handler_xset->name);
     std::string command = fmt::format("cp -a {} {}", path_src, path_dest);
-    free(path_src);
 
     // run command
     std::string* standard_output = nullptr;
@@ -1362,7 +1360,6 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     command = fmt::format("chmod -R go-rwx {}", path_dest);
     print_command(command);
     Glib::spawn_command_line_sync(command);
-    free(path_dest);
 
     // add to handler list
     if (g_strcmp0(xset_get_s(handler_conf_xsets.at(mode)), "") <= 0)
