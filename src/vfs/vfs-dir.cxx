@@ -60,7 +60,7 @@ static VFSDir* vfs_dir_new(const char* path);
 static void vfs_dir_load(VFSDir* dir);
 static void* vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir);
 
-static void vfs_dir_monitor_callback(VFSFileMonitor* fm, VFSFileMonitorEvent event,
+static void vfs_dir_monitor_callback(VFSFileMonitor* monitor, VFSFileMonitorEvent event,
                                      const char* file_name, void* user_data);
 
 static void on_mime_type_reload(void* user_data);
@@ -780,10 +780,10 @@ vfs_dir_flush_notify_cache()
 
 /* Callback function which will be called when monitored events happen */
 static void
-vfs_dir_monitor_callback(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char* file_name,
+vfs_dir_monitor_callback(VFSFileMonitor* monitor, VFSFileMonitorEvent event, const char* file_name,
                          void* user_data)
 {
-    (void)fm;
+    (void)monitor;
     VFSDir* dir = static_cast<VFSDir*>(user_data);
 
     switch (event)

@@ -23,9 +23,6 @@
 
 #include <glib.h>
 
-#include <unistd.h>
-#include <sys/inotify.h>
-
 #define VFS_FILE_MONITOR(obj)               (static_cast<VFSFileMonitor*>(obj))
 #define VFS_FILE_MONITOR_CALLBACK_DATA(obj) (reinterpret_cast<VFSFileMonitorCallbackEntry*>(obj))
 
@@ -62,7 +59,7 @@ struct VFSFileMonitor
  *  if gtk+ APIs are called in this callback, since the callback is called from
  *  IO channel handler.
  */
-typedef void (*VFSFileMonitorCallback)(VFSFileMonitor* fm, VFSFileMonitorEvent event,
+typedef void (*VFSFileMonitorCallback)(VFSFileMonitor* monitor, VFSFileMonitorEvent event,
                                        const char* file_name, void* user_data);
 
 /*
@@ -84,7 +81,7 @@ VFSFileMonitor* vfs_file_monitor_add(const char* path, VFSFileMonitorCallback cb
 /*
  * Remove previously installed monitor.
  */
-void vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* user_data);
+void vfs_file_monitor_remove(VFSFileMonitor* monitor, VFSFileMonitorCallback cb, void* user_data);
 
 /*
  * Clean up and shutdown file alteration monitor.

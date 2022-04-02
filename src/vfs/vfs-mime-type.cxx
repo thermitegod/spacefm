@@ -18,6 +18,8 @@
 #include <string>
 #include <filesystem>
 
+#include <vector>
+
 #include <map>
 
 #include <mutex>
@@ -42,7 +44,7 @@ static GList* reload_cb = nullptr;
 
 static int big_icon_size = 32, small_icon_size = 16;
 
-static VFSFileMonitor** mime_caches_monitor = nullptr;
+static std::vector<VFSFileMonitor*> mime_caches_monitors;
 
 struct VFSMimeReloadCbEnt
 {
@@ -86,10 +88,10 @@ vfs_mime_type_reload(void* user_data)
 }
 
 static void
-on_mime_cache_changed(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char* file_name,
+on_mime_cache_changed(VFSFileMonitor* monitor, VFSFileMonitorEvent event, const char* file_name,
                       void* user_data)
 {
-    (void)fm;
+    (void)monitor;
     (void)file_name;
 
     switch (event)
@@ -110,23 +112,18 @@ vfs_mime_type_init()
     mime_type_init();
 
     /* install file alteration monitor for mime-cache */
-    std::size_t n_caches;
-    std::vector<MimeCache> caches = mime_type_get_caches(&n_caches);
-    mime_caches_monitor = g_new0(VFSFileMonitor*, n_caches);
-    for (std::size_t i = 0; i < n_caches; ++i)
+    std::vector<MimeCache> caches = mime_type_get_caches();
+    for (MimeCache& cache: caches)
     {
         // MOD NOTE1  check to see if path exists - otherwise it later tries to
-        //  remove nullptr fm with inotify which caused segfault
-        if (!std::filesystem::exists(caches[i].get_file_path()))
-        {
-            mime_caches_monitor[i] = nullptr;
+        //  remove nullptr monitor with inotify which caused segfault
+        if (!std::filesystem::exists(cache.get_file_path()))
             continue;
-        }
 
-        VFSFileMonitor* fm =
-            vfs_file_monitor_add(caches[i].get_file_path().c_str(), on_mime_cache_changed, nullptr);
+        VFSFileMonitor* monitor =
+            vfs_file_monitor_add(cache.get_file_path().c_str(), on_mime_cache_changed, nullptr);
 
-        mime_caches_monitor[i] = fm;
+        mime_caches_monitors.push_back(monitor);
     }
 }
 
@@ -134,14 +131,10 @@ void
 vfs_mime_type_clean()
 {
     /* remove file alteration monitor for mime-cache */
-    std::size_t n_caches;
-    std::vector<MimeCache> caches = mime_type_get_caches(&n_caches);
-    for (std::size_t i = 0; i < n_caches; ++i)
+    for (VFSFileMonitor* mime_caches_monitor: mime_caches_monitors)
     {
-        if (mime_caches_monitor[i]) // MOD added if !nullptr - see NOTE1 above
-            vfs_file_monitor_remove(mime_caches_monitor[i], on_mime_cache_changed, nullptr);
+        vfs_file_monitor_remove(mime_caches_monitor, on_mime_cache_changed, nullptr);
     }
-    free(mime_caches_monitor);
 
     mime_type_finalize();
 

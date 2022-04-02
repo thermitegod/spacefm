@@ -21,11 +21,15 @@
 // Most of the inotify parts are taken from "menu-monitor-inotify.c" of
 // gnome-menus, which is licensed under GNU Lesser General Public License.
 
-#include <sys/stat.h>
+#include <filesystem>
 
 #include <map>
 
-#include <linux/limits.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <sys/inotify.h>
 
 #include <glibmm.h>
 
@@ -36,7 +40,7 @@
 
 // #define VFS_FILE_MONITOR_DEBUG
 
-#define BUF_LEN (1024 * (sizeof(struct inotify_event) + 16))
+#define BUF_LEN (1024 * (sizeof(inotify_event) + 16))
 
 static std::map<const char*, VFSFileMonitor*> monitor_map;
 
@@ -109,14 +113,14 @@ vfs_file_monitor_connect_to_inotify()
 static void
 vfs_file_monitor_disconnect_from_inotify()
 {
-    if (vfs_inotify_io_channel)
-    {
-        g_io_channel_unref(vfs_inotify_io_channel);
-        vfs_inotify_io_channel = nullptr;
-        g_source_remove(vfs_inotify_io_watch);
-        close(vfs_inotify_fd);
-        vfs_inotify_fd = -1;
-    }
+    if (!vfs_inotify_io_channel)
+        return;
+
+    g_io_channel_unref(vfs_inotify_io_channel);
+    vfs_inotify_io_channel = nullptr;
+    g_source_remove(vfs_inotify_io_watch);
+    close(vfs_inotify_fd);
+    vfs_inotify_fd = -1;
 }
 
 void
@@ -138,26 +142,8 @@ vfs_file_monitor_init()
 VFSFileMonitor*
 vfs_file_monitor_add(const char* path, VFSFileMonitorCallback cb, void* user_data)
 {
-    char resolved_path[PATH_MAX];
-    const char* real_path;
-
-    // LOG_INFO("vfs_file_monitor_add  {}", path);
-
     // inotify does not follow symlinks, need to get real path
-    if (std::strlen(path) > PATH_MAX - 1)
-    {
-        LOG_WARN("PATH_MAX exceeded on {}", path);
-        real_path = path; // fallback
-    }
-    else if (realpath(path, resolved_path) == nullptr)
-    {
-        LOG_WARN("realpath failed on {}", path);
-        real_path = path; // fallback
-    }
-    else
-    {
-        real_path = resolved_path;
-    }
+    const char* real_path = ztd::strdup(std::filesystem::absolute(path));
 
     VFSFileMonitor* monitor = nullptr;
 
@@ -197,28 +183,28 @@ vfs_file_monitor_add(const char* path, VFSFileMonitorCallback cb, void* user_dat
 }
 
 void
-vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* user_data)
+vfs_file_monitor_remove(VFSFileMonitor* monitor, VFSFileMonitorCallback cb, void* user_data)
 {
-    if (!fm)
+    if (!monitor)
         return;
 
     // LOG_INFO("vfs_file_monitor_remove");
     if (cb)
     {
-        for (VFSFileMonitorCallbackEntry* cb2: fm->callbacks)
+        for (VFSFileMonitorCallbackEntry* cb2: monitor->callbacks)
         {
             if (cb2->callback == cb && cb2->user_data == VFS_FILE_MONITOR_CALLBACK_DATA(user_data))
             {
-                ztd::remove(fm->callbacks, cb2);
+                ztd::remove(monitor->callbacks, cb2);
                 delete cb2;
                 break;
             }
         }
     }
 
-    fm->ref_dec();
-    if (fm->ref_count() == 0)
-        delete fm;
+    monitor->ref_dec();
+    if (monitor->ref_count() == 0)
+        delete monitor;
 
     // LOG_INFO("vfs_file_monitor_remove   DONE");
 }
@@ -226,23 +212,21 @@ vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* use
 static void
 vfs_file_monitor_reconnect_inotify(const char* path, VFSFileMonitor* monitor)
 {
-    struct stat file_stat; // skip stat
-    if (lstat(path, &file_stat) != -1)
+    if (!std::filesystem::exists(path))
+        return;
+
+    monitor->wd =
+        inotify_add_watch(vfs_inotify_fd, path, IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVE);
+    if (monitor->wd < 0)
     {
-        monitor->wd =
-            inotify_add_watch(vfs_inotify_fd, path, IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVE);
-        if (monitor->wd < 0)
-        {
-            /*
-             * FIXME: add monitor to an ancestor which does actually exist,
-             *        or do the equivalent of inotify-missing.c by maintaining
-             *        a list of monitors on non-existent files/directories
-             *        which you retry in a timeout.
-             */
-            std::string errno_msg = Glib::strerror(errno);
-            LOG_WARN("Failed to add monitor on '{}': {}", path, errno_msg);
-            return;
-        }
+        /*
+         * FIXME: add monitor to an ancestor which does actually exist,
+         *        or do the equivalent of inotify-missing.c by maintaining
+         *        a list of monitors on non-existent files/directories
+         *        which you retry in a timeout.
+         */
+        std::string errno_msg = Glib::strerror(errno);
+        LOG_WARN("Failed to add monitor on '{}': {}", path, errno_msg);
     }
 }
 
@@ -264,15 +248,16 @@ vfs_file_monitor_translate_inotify_event(int inotify_mask)
 }
 
 static void
-vfs_file_monitor_dispatch_event(VFSFileMonitor* fm, VFSFileMonitorEvent evt, const char* file_name)
+vfs_file_monitor_dispatch_event(VFSFileMonitor* monitor, VFSFileMonitorEvent evt,
+                                const char* file_name)
 {
     /* Call the callback functions */
-    if (!fm->callbacks.empty())
+    if (!monitor->callbacks.empty())
     {
-        for (VFSFileMonitorCallbackEntry* cb: fm->callbacks)
+        for (VFSFileMonitorCallbackEntry* cb: monitor->callbacks)
         {
             VFSFileMonitorCallback func = cb->callback;
-            func(fm, evt, file_name, cb->user_data);
+            func(monitor, evt, file_name, cb->user_data);
         }
     }
 }
@@ -308,19 +293,20 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
     int len;
     while ((len = read(vfs_inotify_fd, buf, BUF_LEN)) < 0 && errno == EINTR)
         ;
+
     if (len < 0)
     {
         std::string errno_msg = Glib::strerror(errno);
         LOG_WARN("Error reading inotify event: {}", errno_msg);
         return false;
     }
-
-    if (len == 0)
+    else if (len == 0)
     {
         // FIXME: handle this better?
         LOG_WARN("Error reading inotify event: supplied buffer was too small");
         return false;
     }
+
     int i = 0;
     while (i < len)
     {
@@ -362,7 +348,7 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
                                             vfs_file_monitor_translate_inotify_event(ievent->mask),
                                             file_name);
         }
-        i += sizeof(struct inotify_event) + ievent->len;
+        i += sizeof(inotify_event) + ievent->len;
     }
     return true;
 }

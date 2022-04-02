@@ -582,9 +582,8 @@ mime_type_is_subclass(const char* type, const char* parent)
  * Get mime caches
  */
 std::vector<MimeCache>&
-mime_type_get_caches(std::size_t* n)
+mime_type_get_caches()
 {
-    *n = n_caches;
     return caches;
 }
 
