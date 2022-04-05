@@ -1157,7 +1157,7 @@ info_mount_points(device_t* device)
                    encoded_root,
                    encoded_mount_point) != 6)
         {
-            LOG_WARN("Error reading /proc/self/mountinfo: Error parsing line '{}'", line);
+            LOG_WARN("Error reading {}: Error parsing line '{}'", MOUNTINFO, line);
             continue;
         }
 
@@ -1564,7 +1564,7 @@ parse_mounts(bool report)
                    encoded_root,
                    encoded_mount_point) != 6)
         {
-            LOG_WARN("Error reading /proc/self/mountinfo: Error parsing line '{}'", line);
+            LOG_WARN("Error reading {}: Error parsing line '{}'", MOUNTINFO, line);
             continue;
         }
 
@@ -1826,7 +1826,7 @@ cb_mount_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
     if (cond & ~G_IO_ERR)
         return true;
 
-    // printf ("@@@ /proc/self/mountinfo changed\n");
+    // LOG_INFO("@@@ {} changed", MOUNTINFO);
     parse_mounts(true);
 
     return true;
