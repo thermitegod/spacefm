@@ -31,6 +31,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "types.hxx"
+
 #include "ptk/ptk-location-view.hxx"
 
 #include "window-reference.hxx"
@@ -557,8 +559,7 @@ main_window_rubberband_all()
 {
     for (FMMainWindow* window: all_windows)
     {
-        int p;
-        for (p = 1; p < 5; p++)
+        for (panel_t p: PANELS)
         {
             GtkWidget* notebook = window->panel[p - 1];
             int num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
@@ -582,7 +583,7 @@ main_window_refresh_all()
 {
     for (FMMainWindow* window: all_windows)
     {
-        for (int p = 1; p < 5; p++)
+        for (panel_t p: PANELS)
         {
             int64_t notebook = (int64_t)window->panel[p - 1];
             int num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
@@ -658,8 +659,7 @@ main_window_bookmark_changed(const char* changed_set_name)
 {
     for (FMMainWindow* window: all_windows)
     {
-        int p;
-        for (p = 1; p < 5; p++)
+        for (panel_t p: PANELS)
         {
             GtkWidget* notebook = window->panel[p - 1];
             int num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
@@ -700,8 +700,7 @@ main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser)
     // do all windows all panels all tabs
     for (FMMainWindow* window: all_windows)
     {
-        int p;
-        for (p = 1; p < 5; p++)
+        for (panel_t p: PANELS)
         {
             GtkWidget* notebook = window->panel[p - 1];
             int pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
@@ -724,8 +723,7 @@ main_window_update_all_bookmark_views()
     // do all windows all panels all tabs
     for (FMMainWindow* window: all_windows)
     {
-        int p;
-        for (p = 1; p < 5; p++)
+        for (panel_t p: PANELS)
         {
             GtkWidget* notebook = window->panel[p - 1];
             int pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
@@ -782,8 +780,7 @@ main_window_toggle_thumbnails_all_windows()
     // update all windows/all panels/all browsers
     for (FMMainWindow* window: all_windows)
     {
-        int p;
-        for (p = 1; p < 5; p++)
+        for (panel_t p: PANELS)
         {
             GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
             int n = gtk_notebook_get_n_pages(notebook);
@@ -810,8 +807,8 @@ main_window_toggle_thumbnails_all_windows()
 void
 focus_panel(GtkMenuItem* item, void* mw, int p)
 {
-    int panel;
-    int hidepanel;
+    panel_t panel;
+    panel_t hidepanel;
     int panel_num;
 
     FMMainWindow* main_window = static_cast<FMMainWindow*>(mw);
@@ -928,7 +925,6 @@ static void
 show_panels(GtkMenuItem* item, FMMainWindow* main_window)
 {
     (void)item;
-    int p;
     int cur_tabx;
     bool show[5]; // array starts at 1 for clarity
     PtkFileBrowser* file_browser;
@@ -936,7 +932,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
     // save column widths and side sliders of visible panels
     if (main_window->panel_change)
     {
-        for (p = 1; p < 5; p++)
+        for (panel_t p: PANELS)
         {
             if (gtk_widget_get_visible(GTK_WIDGET(main_window->panel[p - 1])))
             {
@@ -970,20 +966,20 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
     }
 
     // all panels hidden?
-    for (p = 1; p < 5; p++)
+    for (panel_t p: PANELS)
     {
         if (xset_get_b_panel(p, "show"))
             break;
     }
-    if (p == 5)
-        xset_set_b_panel(1, "show", true);
 
-    for (p = 1; p < 5; p++)
+    for (panel_t p: PANELS)
+    {
         show[p] = xset_get_b_panel(p, "show");
+    }
 
     bool horiz;
     bool vert;
-    for (p = 1; p < 5; p++)
+    for (panel_t p: PANELS)
     {
         // panel context - how panels share horiz and vert space with other panels
         switch (p)
@@ -1225,7 +1221,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
     // current panel hidden?
     if (!xset_get_b_panel(main_window->curpanel, "show"))
     {
-        p = main_window->curpanel + 1;
+        panel_t p = main_window->curpanel + 1;
         if (p > 4)
             p = 1;
         while (p != main_window->curpanel)
@@ -1248,7 +1244,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
     set_panel_focus(main_window, nullptr);
 
     // update views all panels
-    for (p = 1; p < 5; p++)
+    for (panel_t p: PANELS)
     {
         if (show[p])
         {
@@ -1354,9 +1350,8 @@ rebuild_menus(FMMainWindow* main_window)
     xset_set_cb(XSetName::MAIN_ICON, (GFunc)on_main_icon, nullptr);
     xset_set_cb(XSetName::MAIN_TITLE, (GFunc)update_window_title, main_window);
 
-    int p;
     int vis_count = 0;
-    for (p = 1; p < 5; p++)
+    for (panel_t p: PANELS)
     {
         if (xset_get_b_panel(p, "show"))
             vis_count++;
@@ -1857,11 +1852,11 @@ fm_main_window_store_positions(FMMainWindow* main_window)
         on_task_columns_changed(main_window->task_view, nullptr);
 
         // store fb columns
-        int p, page_x;
+        int page_x;
         PtkFileBrowser* a_browser;
         if (main_window->maximized)
             main_window->opened_maximized = true; // force save of columns
-        for (p = 1; p < 5; p++)
+        for (panel_t p: PANELS)
         {
             page_x = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
             if (page_x != -1)
@@ -1991,7 +1986,7 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, int panel_num)
     if (!file_browser)
         return nullptr;
     FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
-    int panel_x = file_browser->mypanel;
+    panel_t panel_x = file_browser->mypanel;
 
     switch (panel_num)
     {
@@ -2034,7 +2029,7 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, int panel_num, char* fil
     if (!file_browser)
         return;
     FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
-    int panel_x = file_browser->mypanel;
+    panel_t panel_x = file_browser->mypanel;
 
     switch (panel_num)
     {
@@ -2737,7 +2732,6 @@ delayed_focus_file_browser(PtkFileBrowser* file_browser)
 void
 set_panel_focus(FMMainWindow* main_window, PtkFileBrowser* file_browser)
 {
-    int p;
     // int pages;
     // GtkWidget* notebook;
 
@@ -2748,7 +2742,7 @@ set_panel_focus(FMMainWindow* main_window, PtkFileBrowser* file_browser)
     if (!mw)
         mw = static_cast<FMMainWindow*>(file_browser->main_window);
 
-    for (p = 1; p < 5; p++)
+    for (panel_t p: PANELS)
     {
         // notebook = mw->panel[p - 1];
         // pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
@@ -3875,9 +3869,9 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
     }
 
     // panels
-    int i, p;
+    int i;
     int panel_count = 0;
-    for (p = 1; p < 5; p++)
+    for (panel_t p: PANELS)
     {
         if (!xset_get_b_panel(p, "show"))
             continue;
@@ -3937,7 +3931,7 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
         c->var[ItemPropContext::CONTEXT_TAB] = ztd::strdup("");
     if (!c->var[ItemPropContext::CONTEXT_TAB_COUNT])
         c->var[ItemPropContext::CONTEXT_TAB_COUNT] = ztd::strdup("");
-    for (p = 1; p < 5; p++)
+    for (panel_t p: PANELS)
     {
         if (!c->var[ItemPropContext::CONTEXT_PANEL1_DIR + p - 1])
             c->var[ItemPropContext::CONTEXT_PANEL1_DIR + p - 1] = ztd::strdup("");
@@ -4020,8 +4014,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
     // buf.append("\n\ncp $0 /tmp\n\n");
 
     // panels
-    int p;
-    for (p = 1; p < 5; p++)
+    for (panel_t p: PANELS)
     {
         PtkFileBrowser* a_browser;
 

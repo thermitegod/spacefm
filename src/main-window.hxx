@@ -17,6 +17,8 @@
 
 #include <vector>
 
+#include "types.hxx"
+
 #include <gtk/gtk.h>
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-file-task.hxx"
@@ -52,7 +54,9 @@ struct FMMainWindow
     GtkWidget* panelbar;
     GtkWidget* panel_btn[4];
     GtkWidget* panel_image[4];
-    int curpanel;
+
+    panel_t curpanel;
+
     GtkWidget* hpane_top;
     GtkWidget* hpane_bottom;
     GtkWidget* vpane;

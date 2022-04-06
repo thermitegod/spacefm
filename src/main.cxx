@@ -29,6 +29,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "types.hxx"
+
 #include "main-window.hxx"
 #include "window-reference.hxx"
 
@@ -114,7 +116,7 @@ static void
 open_in_tab(FMMainWindow** main_window, const char* real_path)
 {
     XSet* set;
-    int p;
+    panel_t panel;
     // create main window if needed
     if (!*main_window)
     {
@@ -124,22 +126,24 @@ open_in_tab(FMMainWindow** main_window, const char* real_path)
 
         // preload panel?
         if (cli_flags.panel > 0 && cli_flags.panel < 5)
-            // user specified panel
-            p = cli_flags.panel;
+        { // user specified panel
+            panel = cli_flags.panel;
+        }
         else
         {
             // use first visible panel
-            for (p = 1; p < 5; p++)
+            for (panel_t p: PANELS)
             {
                 if (xset_get_b_panel(p, "show"))
+                {
+                    panel = p;
                     break;
+                }
             }
         }
-        if (p == 5)
-            p = 1; // no panels were visible (unlikely)
 
         // set panel to load real_path on window creation
-        set = xset_get_panel(p, "show");
+        set = xset_get_panel(panel, "show");
         set->ob1 = ztd::strdup(real_path);
         set->b = XSetB::XSET_B_TRUE;
 

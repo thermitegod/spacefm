@@ -43,6 +43,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "types.hxx"
+
 #include "settings.hxx"
 #include "main-window.hxx"
 #include "item-prop.hxx"
@@ -572,7 +574,7 @@ save_settings(void* main_window_ptr)
     {
         if (save_tabs)
         {
-            for (int p = 1; p < 5; p++)
+            for (panel_t p: PANELS)
             {
                 XSet* set = xset_get_panel(p, "show");
                 if (GTK_IS_NOTEBOOK(main_window->panel[p - 1]))
@@ -612,7 +614,7 @@ save_settings(void* main_window_ptr)
         else
         {
             // clear saved tabs
-            for (int p = 1; p < 5; p++)
+            for (panel_t p: PANELS)
             {
                 XSet* set = xset_get_panel(p, "show");
                 if (set->s)
@@ -884,7 +886,7 @@ xset_get(XSetName name)
 }
 
 XSet*
-xset_get_panel(int panel, const std::string& name)
+xset_get_panel(panel_t panel, const std::string& name)
 {
     std::string fullname = fmt::format("panel{}_{}", panel, name);
     XSet* set = xset_get(fullname);
@@ -892,7 +894,7 @@ xset_get_panel(int panel, const std::string& name)
 }
 
 XSet*
-xset_get_panel_mode(int panel, const std::string& name, const char mode)
+xset_get_panel_mode(panel_t panel, const std::string& name, const char mode)
 {
     // FMT BUG - need to use std::to_string on char
     // otherwise it gets ignored and not added to new string
@@ -920,7 +922,7 @@ xset_get_s(const std::string& name)
 }
 
 char*
-xset_get_s_panel(int panel, const std::string& name)
+xset_get_s_panel(panel_t panel, const std::string& name)
 {
     std::string fullname = fmt::format("panel{}_{}", panel, name);
     return xset_get_s(fullname);
@@ -941,14 +943,14 @@ xset_get_b(const std::string& name)
 }
 
 bool
-xset_get_b_panel(int panel, const std::string& name)
+xset_get_b_panel(panel_t panel, const std::string& name)
 {
     std::string fullname = fmt::format("panel{}_{}", panel, name);
     return xset_get_b(fullname);
 }
 
 bool
-xset_get_b_panel_mode(int panel, const std::string& name, const char mode)
+xset_get_b_panel_mode(panel_t panel, const std::string& name, const char mode)
 {
     // FMT BUG - need to use std::to_string on char
     // otherwise it gets ignored and not added to new string
@@ -1011,7 +1013,7 @@ xset_set_b(const std::string& name, bool bval)
 }
 
 XSet*
-xset_set_b_panel(int panel, const std::string& name, bool bval)
+xset_set_b_panel(panel_t panel, const std::string& name, bool bval)
 {
     std::string fullname = fmt::format("panel{}_{}", panel, name);
     XSet* set = xset_set_b(fullname, bval);
@@ -1019,7 +1021,7 @@ xset_set_b_panel(int panel, const std::string& name, bool bval)
 }
 
 XSet*
-xset_set_b_panel_mode(int panel, const std::string& name, const char mode, bool bval)
+xset_set_b_panel_mode(panel_t panel, const std::string& name, const char mode, bool bval)
 {
     // FMT BUG - need to use std::to_string on char
     // otherwise it gets ignored and not added to new string
@@ -1102,7 +1104,7 @@ xset_get_int(const std::string& name, XSetSetSet var)
 }
 
 int
-xset_get_int_panel(int panel, const std::string& name, XSetSetSet var)
+xset_get_int_panel(panel_t panel, const std::string& name, XSetSetSet var)
 {
     std::string fullname = fmt::format("panel{}_{}", panel, name);
     return xset_get_int(fullname, var);
@@ -1327,7 +1329,7 @@ xset_set_cb(const std::string& name, GFunc cb_func, void* cb_data)
 }
 
 XSet*
-xset_set_cb_panel(int panel, const std::string& name, GFunc cb_func, void* cb_data)
+xset_set_cb_panel(panel_t panel, const std::string& name, GFunc cb_func, void* cb_data)
 {
     std::string fullname = fmt::format("panel{}_{}", panel, name);
     XSet* set = xset_set_cb(fullname, cb_func, cb_data);
@@ -1663,7 +1665,7 @@ xset_set(const std::string& name, XSetSetSet var, const char* value)
 }
 
 XSet*
-xset_set_panel(int panel, const std::string& name, XSetSetSet var, const char* value)
+xset_set_panel(panel_t panel, const std::string& name, XSetSetSet var, const char* value)
 {
     std::string fullname = fmt::format("panel{}_{}", panel, name);
     XSet* set = xset_set(fullname, var, value);
@@ -9239,8 +9241,7 @@ xset_defaults()
     xset_set(XSetName::ROWN_ROOT_USER2, XSetSetSet::MENU_LABEL, "root:user2");
 
     // PANELS
-    int p;
-    for (p = 1; p < 5; p++)
+    for (panel_t p: PANELS)
     {
         set = xset_set_panel(p, "show_toolbox", XSetSetSet::MENU_LABEL, "_Toolbar");
         set->menu_style = XSetMenu::CHECK;

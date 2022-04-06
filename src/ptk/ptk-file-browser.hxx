@@ -20,6 +20,8 @@
 #include "vfs/vfs-dir.hxx"
 #include "settings.hxx"
 
+#include "types.hxx"
+
 #define PTK_TYPE_FILE_BROWSER    (ptk_file_browser_get_type())
 #define PTK_FILE_BROWSER(obj)    (reinterpret_cast<PtkFileBrowser*>(obj))
 #define PTK_IS_FILE_BROWSER(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_FILE_BROWSER))
@@ -113,7 +115,7 @@ struct PtkFileBrowser
     unsigned int single_click_timeout;
 
     // MOD
-    int mypanel;
+    panel_t mypanel;
     GtkWidget* mynotebook;
     GtkWidget* task_view;
     void* main_window;

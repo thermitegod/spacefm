@@ -26,6 +26,8 @@
 
 #include <glibmm.h>
 
+#include "types.hxx"
+
 #include "pref-dialog.hxx"
 #include "main-window.hxx"
 
@@ -117,7 +119,6 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
     PtkFileBrowser* file_browser;
     bool use_si_prefix;
     GtkNotebook* notebook;
-    int p;
 
     GtkWidget* tab_label;
     /* interface settings */
@@ -142,7 +143,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             // update all windows/all panels
             for (FMMainWindow* window: fm_main_window_get_all())
             {
-                for (p = 1; p < 5; p++)
+                for (panel_t p: PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
                     n = gtk_notebook_get_n_pages(notebook);
@@ -161,7 +162,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             // update all windows/all panels/all browsers
             for (FMMainWindow* window: fm_main_window_get_all())
             {
-                for (p = 1; p < 5; p++)
+                for (panel_t p: PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
                     n = gtk_notebook_get_n_pages(notebook);
@@ -217,7 +218,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             // update all windows/all panels/all browsers
             for (FMMainWindow* window: fm_main_window_get_all())
             {
-                for (p = 1; p < 5; p++)
+                for (panel_t p: PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
                     n = gtk_notebook_get_n_pages(notebook);
@@ -280,7 +281,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             // update all windows/all panels/all browsers
             for (FMMainWindow* window: fm_main_window_get_all())
             {
-                for (p = 1; p < 5; p++)
+                for (panel_t p: PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
                     n = gtk_notebook_get_n_pages(notebook);
@@ -301,7 +302,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             // update all windows/all panels/all browsers
             for (FMMainWindow* window: fm_main_window_get_all())
             {
-                for (p = 1; p < 5; p++)
+                for (panel_t p: PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
                     n = gtk_notebook_get_n_pages(notebook);

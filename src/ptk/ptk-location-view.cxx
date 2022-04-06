@@ -32,6 +32,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "types.hxx"
+
 #include "ptk/ptk-location-view.hxx"
 #include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-utils.hxx"
@@ -181,8 +183,7 @@ update_change_detection()
     // update all windows/all panels/all browsers
     for (FMMainWindow* window: fm_main_window_get_all())
     {
-        int p;
-        for (p = 1; p < 5; p++)
+        for (panel_t p: PANELS)
         {
             GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
             int n = gtk_notebook_get_n_pages(notebook);
