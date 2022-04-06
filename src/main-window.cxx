@@ -7054,7 +7054,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                       Glib::str_has_prefix(real_path, "//")))
             {
                 // mount URL
-                if (split_network_url(real_path, &netmount) != 1)
+                if (split_network_url(real_path, &netmount) != SplitNetworkURL::VALID_NETWORK_URL)
                 {
                     // not a valid url
                     reply = fmt::format("spacefm: invalid TARGET '{}'\n", argv[j]);

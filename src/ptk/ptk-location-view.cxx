@@ -928,7 +928,7 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     std::string line;
 
     // split url
-    if (split_network_url(url, &netmount) != 1)
+    if (split_network_url(url, &netmount) != SplitNetworkURL::VALID_NETWORK_URL)
     {
         // not a valid url
         xset_msg_dialog(GTK_WIDGET(file_browser),
@@ -1535,7 +1535,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     {
         // is a network - try to get prop command
         netmount_t* netmount = new netmount_t;
-        if (split_network_url(vol->udi, &netmount) == 1)
+        if (split_network_url(vol->udi, &netmount) == SplitNetworkURL::VALID_NETWORK_URL)
         {
             cmd = ztd::null_check(vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_NET,
                                                          PtkHandlerMount::HANDLER_PROP,

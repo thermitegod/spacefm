@@ -48,6 +48,13 @@ enum VFSVolumeDeviceType
     DEVICE_TYPE_OTHER // eg fuseiso mounted file
 };
 
+enum class SplitNetworkURL
+{
+    NOT_A_NETWORK_URL,
+    VALID_NETWORK_URL,
+    INVALID_NETWORK_URL,
+};
+
 struct netmount_t
 {
     // netmount_t();
@@ -128,7 +135,7 @@ const std::string vfs_volume_device_info(VFSVolume* vol);
 char* vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options,
                              netmount_t* netmount, bool* run_in_terminal, char** mount_point);
 
-int split_network_url(const char* url, netmount_t** netmount);
+SplitNetworkURL split_network_url(const char* url, netmount_t** netmount);
 bool vfs_volume_dir_avoid_changes(const char* dir);
 dev_t get_device_parent(dev_t dev);
 bool path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file,

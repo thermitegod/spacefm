@@ -2319,13 +2319,12 @@ mtab_fstype_is_handled_by_protocol(const char* mtab_fstype)
     return found;
 }
 
-int
+SplitNetworkURL
 split_network_url(const char* url, netmount_t** netmount)
-{ // returns 0=not a network url  1=valid network url  2=invalid network url
+{
     if (!url || !netmount)
-        return 0;
+        return SplitNetworkURL::NOT_A_NETWORK_URL;
 
-    int ret;
     char* str;
     char* str2;
     char* orig_url = ztd::strdup(url);
@@ -2342,7 +2341,7 @@ split_network_url(const char* url, netmount_t** netmount)
         {
             delete nm;
             free(orig_url);
-            return 0;
+            return SplitNetworkURL::NOT_A_NETWORK_URL;
         }
         nm->fstype = ztd::strdup("smb");
         is_colon = false;
@@ -2353,7 +2352,7 @@ split_network_url(const char* url, netmount_t** netmount)
         {
             delete nm;
             free(orig_url);
-            return 0;
+            return SplitNetworkURL::NOT_A_NETWORK_URL;
         }
         str[0] = '\0';
         nm->fstype = g_strstrip(ztd::strdup(xurl));
@@ -2361,7 +2360,7 @@ split_network_url(const char* url, netmount_t** netmount)
         {
             delete nm;
             free(orig_url);
-            return 0;
+            return SplitNetworkURL::NOT_A_NETWORK_URL;
         }
         str[0] = ':';
         is_colon = true;
@@ -2379,7 +2378,7 @@ split_network_url(const char* url, netmount_t** netmount)
         {
             delete nm;
             free(orig_url);
-            return 0;
+            return SplitNetworkURL::NOT_A_NETWORK_URL;
         }
         nm->fstype = ztd::strdup("nfs");
         str[0] = '\0';
@@ -2391,10 +2390,10 @@ split_network_url(const char* url, netmount_t** netmount)
     {
         delete nm;
         free(orig_url);
-        return 0;
+        return SplitNetworkURL::NOT_A_NETWORK_URL;
     }
 
-    ret = 1;
+    SplitNetworkURL ret = SplitNetworkURL::VALID_NETWORK_URL;
 
     // parse
     if (is_colon && (str = strchr(xurl, ':')))
@@ -2471,7 +2470,7 @@ split_network_url(const char* url, netmount_t** netmount)
     // check user pass port
     if ((nm->user && strchr(nm->user, ' ')) || (nm->pass && strchr(nm->pass, ' ')) ||
         (nm->port && strchr(nm->port, ' ')))
-        ret = 2;
+        ret = SplitNetworkURL::INVALID_NETWORK_URL;
 #endif
 
     *netmount = nm;
@@ -2502,7 +2501,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         return nullptr;
 
     netmount_t* netmount = new netmount_t;
-    if (split_network_url(name, &netmount) == 1)
+    if (split_network_url(name, &netmount) == SplitNetworkURL::VALID_NETWORK_URL)
     {
         // network URL
         volume = new VFSVolume;
@@ -3109,7 +3108,7 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
     {
         case VFSVolumeDeviceType::DEVICE_TYPE_NETWORK:
             // is a network - try to get unmount command
-            if (split_network_url(vol->udi, &netmount) == 1)
+            if (split_network_url(vol->udi, &netmount) == SplitNetworkURL::VALID_NETWORK_URL)
             {
                 command = vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_NET,
                                                  PtkHandlerMount::HANDLER_UNMOUNT,
