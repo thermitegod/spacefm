@@ -50,17 +50,17 @@ enum VFSVolumeDeviceType
 
 struct netmount_t
 {
-    netmount_t();
-    ~netmount_t();
+    // netmount_t();
+    // ~netmount_t();
 
-    char* url;
-    char* fstype;
-    char* host;
-    char* ip;
-    char* port;
-    char* user;
-    char* pass;
-    char* path;
+    const char* url{nullptr};
+    const char* fstype{nullptr};
+    const char* host{nullptr};
+    const char* ip{nullptr};
+    const char* port{nullptr};
+    const char* user{nullptr};
+    const char* pass{nullptr};
+    const char* path{nullptr};
 };
 
 struct VFSVolume

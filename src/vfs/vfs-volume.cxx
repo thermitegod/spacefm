@@ -101,38 +101,6 @@ VFSVolume::~VFSVolume()
         free(this->fs_type);
 }
 
-netmount_t::netmount_t()
-{
-    this->url = nullptr;
-    this->fstype = nullptr;
-    this->host = nullptr;
-    this->ip = nullptr;
-    this->port = nullptr;
-    this->user = nullptr;
-    this->pass = nullptr;
-    this->path = nullptr;
-}
-
-netmount_t::~netmount_t()
-{
-    if (this->url)
-        free(this->url);
-    if (this->fstype)
-        free(this->fstype);
-    if (this->host)
-        free(this->host);
-    if (this->ip)
-        free(this->ip);
-    if (this->port)
-        free(this->port);
-    if (this->user)
-        free(this->user);
-    if (this->pass)
-        free(this->pass);
-    if (this->path)
-        free(this->path);
-}
-
 struct VFSVolumeCallbackData
 {
     VFSVolumeCallback cb;
@@ -2400,12 +2368,8 @@ split_network_url(const char* url, netmount_t** netmount)
 
         // remove ...# from start of protocol
         // eg curlftpfs mtab url looks like: curlftpfs#ftp://hostname/
-        if (nm->fstype && (str = strchr(nm->fstype, '#')))
-        {
-            str2 = nm->fstype;
-            nm->fstype = ztd::strdup(str + 1);
-            free(str2);
-        }
+        if (nm->fstype && ztd::contains(nm->fstype, "#"))
+            nm->fstype = ztd::strdup(ztd::rpartition(nm->fstype, "#")[2]);
     }
     else if ((str = strstr(xurl, ":/")))
     { // host:/path
@@ -2545,7 +2509,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         volume->devnum = devnum;
         volume->device_type = VFSVolumeDeviceType::DEVICE_TYPE_NETWORK;
         volume->should_autounmount = false;
-        volume->udi = netmount->url;
+        volume->udi = ztd::strdup(netmount->url);
         volume->label = netmount->host;
         volume->fs_type = mtab_fstype ? mtab_fstype : ztd::strdup("");
         volume->size = 0;
