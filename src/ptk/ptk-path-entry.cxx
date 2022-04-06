@@ -29,6 +29,7 @@
 
 #include "main-window.hxx"
 
+#include "ptk/ptk-utils.hxx"
 #include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-location-view.hxx"
 
@@ -403,8 +404,8 @@ static bool
 on_key_press(GtkWidget* entry, GdkEventKey* evt, EntryData* edata)
 {
     (void)edata;
-    int keymod = (evt->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_SUPER_MASK |
-                                GDK_HYPER_MASK | GDK_META_MASK));
+
+    unsigned int keymod = ptk_get_keymod(evt->state);
 
     switch (evt->keyval)
     {
@@ -588,8 +589,7 @@ on_button_release(GtkEntry* entry, GdkEventButton* evt, void* user_data)
     if (GDK_BUTTON_RELEASE != evt->type)
         return false;
 
-    int keymod = (evt->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_SUPER_MASK |
-                                GDK_HYPER_MASK | GDK_META_MASK));
+    unsigned int keymod = ptk_get_keymod(evt->state);
 
     if (1 == evt->button && keymod == GDK_CONTROL_MASK)
     {

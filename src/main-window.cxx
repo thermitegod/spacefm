@@ -3268,9 +3268,7 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
     if (event->keyval == 0)
         return false;
 
-    unsigned int keymod;
-    keymod = (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_SUPER_MASK |
-                              GDK_HYPER_MASK | GDK_META_MASK));
+    unsigned int keymod = ptk_get_keymod(event->state);
 
     if ((event->keyval == GDK_KEY_Home && (keymod == 0 || keymod == GDK_SHIFT_MASK)) ||
         (event->keyval == GDK_KEY_End && (keymod == 0 || keymod == GDK_SHIFT_MASK)) ||
