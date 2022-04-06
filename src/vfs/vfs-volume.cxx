@@ -22,6 +22,7 @@
 #include <string>
 #include <filesystem>
 
+#include <array>
 #include <vector>
 
 #include <chrono>
@@ -51,9 +52,23 @@
 
 #define MOUNTINFO "/proc/self/mountinfo"
 #define MTAB      "/proc/mounts"
-#define HIDDEN_NON_BLOCK_FS                                                                    \
-    "devpts proc fusectl pstore sysfs tmpfs devtmpfs ramfs aufs overlayfs cgroup binfmt_misc " \
-    "rpc_pipefs fuse.gvfsd-fuse"
+
+static const std::array<const char*, 14> HIDDEN_NON_BLOCK_FS{
+    "devpts",
+    "proc",
+    "fusectl",
+    "pstore",
+    "sysfs",
+    "tmpfs",
+    "devtmpfs",
+    "ramfs",
+    "aufs",
+    "overlayfs",
+    "cgroup",
+    "binfmt_misc",
+    "rpc_pipefs",
+    "fuse.gvfsd-fuse",
+};
 
 static VFSVolume* vfs_volume_read_by_device(struct udev_device* udevice);
 static VFSVolume* vfs_volume_read_by_mount(dev_t devnum, const char* mount_points);
@@ -2586,7 +2601,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         // a non-block device is mounted - do we want to include it?
         // is a protocol handler present?
         bool keep = mtab_fstype_is_handled_by_protocol(mtab_fstype);
-        if (!keep && !strstr(HIDDEN_NON_BLOCK_FS, mtab_fstype))
+        if (!keep && ztd::contains(HIDDEN_NON_BLOCK_FS, (const char*)mtab_fstype))
         {
             // no protocol handler and not blacklisted - show anyway?
             keep = Glib::str_has_prefix(point, vfs_user_cache_dir().c_str()) ||
