@@ -63,7 +63,7 @@ save_to_file(const std::string& path, const std::string& data)
     std::filesystem::permissions(path, std::filesystem::perms::owner_all);
 }
 
-typedef char* (*DataDirFunc)(const char* dir, const char* mime_type, void* user_data);
+using DataDirFunc = char* (*)(const char* dir, const char* mime_type, void* user_data);
 
 static char*
 data_dir_foreach(DataDirFunc func, const char* mime_type, void* user_data)

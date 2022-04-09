@@ -24,8 +24,7 @@
 #define VFS_ASYNC_TASK(obj) (reinterpret_cast<VFSAsyncTask*>(obj))
 
 struct VFSAsyncTask;
-typedef void* (*VFSAsyncFunc)(VFSAsyncTask*, void*);
-
+using VFSAsyncFunc = void* (*)(VFSAsyncTask*, void*);
 struct VFSAsyncTask
 {
     GObject parent;

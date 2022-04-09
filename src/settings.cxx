@@ -90,7 +90,7 @@ EventHandler event_handler;
 
 std::vector<std::string> xset_cmd_history;
 
-typedef void (*SettingsParseFunc)(std::string& line);
+using SettingsParseFunc = void (*)(std::string& line);
 
 static void xset_free_all();
 static void xset_default_keys();

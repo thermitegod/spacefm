@@ -69,7 +69,7 @@ struct VFSDirClass
     /*  void (*update_mime) ( VFSDir* dir ); */
 };
 
-typedef void (*VFSDirForeachFunc)(const char* parh, VFSDir* dir, void* user_data);
+using VFSDirForeachFunc = void (*)(const char* parh, VFSDir* dir, void* user_data);
 
 void vfs_dir_lock(VFSDir* dir);
 void vfs_dir_unlock(VFSDir* dir);

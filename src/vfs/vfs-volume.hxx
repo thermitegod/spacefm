@@ -106,7 +106,7 @@ struct VFSVolume
     void* open_main_window;
 };
 
-typedef void (*VFSVolumeCallback)(VFSVolume* vol, VFSVolumeState state, void* user_data);
+using VFSVolumeCallback = void (*)(VFSVolume* vol, VFSVolumeState state, void* user_data);
 
 bool vfs_volume_init();
 

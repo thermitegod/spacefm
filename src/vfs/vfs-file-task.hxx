@@ -94,8 +94,8 @@ enum VFSExecType
 
 struct VFSFileTask;
 
-typedef bool (*VFSFileTaskStateCallback)(VFSFileTask* task, VFSFileTaskState state,
-                                         void* state_data, void* user_data);
+using VFSFileTaskStateCallback = bool (*)(VFSFileTask* task, VFSFileTaskState state,
+                                          void* state_data, void* user_data);
 
 struct VFSFileTask
 {

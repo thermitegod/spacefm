@@ -59,8 +59,8 @@ struct VFSFileMonitor
  *  if gtk+ APIs are called in this callback, since the callback is called from
  *  IO channel handler.
  */
-typedef void (*VFSFileMonitorCallback)(VFSFileMonitor* monitor, VFSFileMonitorEvent event,
-                                       const char* file_name, void* user_data);
+using VFSFileMonitorCallback = void (*)(VFSFileMonitor* monitor, VFSFileMonitorEvent event,
+                                        const char* file_name, void* user_data);
 
 /*
  * Init monitor:

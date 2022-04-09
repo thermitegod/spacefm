@@ -203,8 +203,10 @@ g_cclosure_marshal_VOID__POINTER_INT(GClosure* closure, GValue* return_value,
     (void)return_value;
     (void)n_param_values;
     (void)invocation_hint;
-    typedef void (
-        *GMarshalFunc_VOID__POINTER_INT)(void* data1, void* arg_1, int arg_2, void* data2);
+
+    using GMarshalFunc_VOID__POINTER_INT =
+        void (*)(void* data1, void* arg_1, int arg_2, void* data2);
+
     GMarshalFunc_VOID__POINTER_INT callback;
     GCClosure* cc = (GCClosure*)closure;
     void* data1;
