@@ -482,7 +482,7 @@ info_is_system_internal(device_t* device)
     const char* value;
 
     if ((value = udev_device_get_property_value(device->udevice, "UDISKS_SYSTEM_INTERNAL")))
-        return strtol(value, nullptr, 10) != 0;
+        return std::stol(value) != 0;
 
     /* A Linux MD device is system internal if, and only if
      *
@@ -846,7 +846,7 @@ info_drive_properties(device_t* device)
     // is_ejectable
     if ((value = udev_device_get_property_value(device->udevice, "ID_DRIVE_EJECTABLE")))
     {
-        drive_is_ejectable = strtol(value, nullptr, 10) != 0;
+        drive_is_ejectable = std::stol(value) != 0;
     }
     else
     {
@@ -927,7 +927,7 @@ info_drive_properties(device_t* device)
     }
     if ((value = udev_device_get_property_value(device->udevice, "ID_DRIVE_DETACHABLE")))
     {
-        drive_can_detach = strtol(value, nullptr, 10) != 0;
+        drive_can_detach = std::stol(value) != 0;
     }
     device->drive_can_detach = drive_can_detach;
 }
@@ -970,7 +970,7 @@ info_device_properties(device_t* device)
 
     partition_scheme = udev_device_get_property_value(device->udevice, "UDISKS_PARTITION_SCHEME");
     if ((value = udev_device_get_property_value(device->udevice, "UDISKS_PARTITION_TYPE")))
-        partition_type = strtol(value, nullptr, 10);
+        partition_type = std::stol(value);
     if (!g_strcmp0(partition_scheme, "mbr") &&
         (partition_type == 0x05 || partition_type == 0x0f || partition_type == 0x85))
     {
@@ -1010,12 +1010,12 @@ info_device_properties(device_t* device)
     {
         bool is_cd, is_floppy;
         if ((value = udev_device_get_property_value(device->udevice, "ID_CDROM")))
-            is_cd = strtol(value, nullptr, 10) != 0;
+            is_cd = std::stol(value) != 0;
         else
             is_cd = false;
 
         if ((value = udev_device_get_property_value(device->udevice, "ID_DRIVE_FLOPPY")))
-            is_floppy = strtol(value, nullptr, 10) != 0;
+            is_floppy = std::stol(value) != 0;
         else
             is_floppy = false;
 
@@ -1032,10 +1032,10 @@ info_device_properties(device_t* device)
             }
         }
         else if ((value = udev_device_get_property_value(device->udevice, "ID_CDROM_MEDIA")))
-            media_available = (strtol(value, nullptr, 10) == 1);
+            media_available = (std::stol(value) == 1);
     }
     else if ((value = udev_device_get_property_value(device->udevice, "ID_CDROM_MEDIA")))
-        media_available = (strtol(value, nullptr, 10) == 1);
+        media_available = (std::stol(value) == 1);
     else
         media_available = true;
     device->device_is_media_available = media_available;
@@ -1194,7 +1194,7 @@ info_partition_table(device_t* device)
      * identifying partition tables set up by kpartx for multipath etc.
      */
     if ((value = udev_device_get_property_value(device->udevice, "UDISKS_PARTITION_TABLE")) &&
-        strtol(value, nullptr, 10) == 1)
+        std::stol(value) == 1)
     {
         // clang-format off
         device->partition_table_scheme = ztd::strdup(udev_device_get_property_value(device->udevice, "UDISKS_PARTITION_TABLE_SCHEME"));
@@ -1277,7 +1277,7 @@ info_partition(device_t* device)
         // clang-format on
 
         if (slave_sysfs_path != nullptr && scheme != nullptr && number != nullptr &&
-            strtol(number, nullptr, 10) > 0)
+            std::stol(number) > 0)
         {
             device->partition_scheme = ztd::strdup(scheme);
             device->partition_size = ztd::strdup(size);
@@ -1315,7 +1315,7 @@ info_partition(device_t* device)
         unsigned int n;
         for (n = std::strlen(s) - 1; n >= 0 && g_ascii_isdigit(s[n]); n--)
             ;
-        device->partition_number = ztd::strdup(strtol(s + n + 1, nullptr, 0));
+        device->partition_number = ztd::strdup(std::stol(s + n + 1, nullptr, 0));
         is_partition = true;
     }
 
@@ -1344,7 +1344,7 @@ info_optical_disc(device_t* device)
 {
     const char* optical_state = udev_device_get_property_value(device->udevice, "ID_CDROM");
 
-    if (optical_state && strtol(optical_state, nullptr, 10) != 0)
+    if (optical_state && std::stol(optical_state) != 0)
     {
         device->device_is_optical_disc = true;
 
@@ -2147,17 +2147,16 @@ vfs_volume_read_by_device(struct udev_device* udevice)
     volume->requires_eject = device->drive_is_media_ejectable;
     volume->is_mountable = device->device_is_media_available;
     volume->is_audiocd = (device->device_is_optical_disc && device->optical_disc_num_audio_tracks &&
-                          strtol(device->optical_disc_num_audio_tracks, nullptr, 10) > 0);
+                          std::stol(device->optical_disc_num_audio_tracks) > 0);
     volume->is_dvd = (device->drive_media && strstr(device->drive_media, "optical_dvd"));
     volume->is_blank = (device->device_is_optical_disc && device->optical_disc_is_blank);
     volume->is_mounted = device->device_is_mounted;
-    volume->is_user_visible = device->device_presentation_hide
-                                  ? !strtol(device->device_presentation_hide, nullptr, 10)
-                                  : true;
+    volume->is_user_visible =
+        device->device_presentation_hide ? !std::stol(device->device_presentation_hide) : true;
     volume->ever_mounted = false;
     volume->open_main_window = nullptr;
     volume->nopolicy = device->device_presentation_nopolicy
-                           ? strtol(device->device_presentation_nopolicy, nullptr, 10)
+                           ? std::stol(device->device_presentation_nopolicy)
                            : false;
     volume->mount_point = nullptr;
     if (device->mount_points && device->mount_points[0] != '\0')

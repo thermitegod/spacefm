@@ -1086,7 +1086,7 @@ xset_get_int_set(XSet* set, XSetSetSet var)
 
     if (!varstring)
         return 0;
-    return strtol(varstring, nullptr, 10);
+    return std::stol(varstring);
 }
 
 int
@@ -1491,13 +1491,13 @@ xset_set_set(XSet* set, XSetSetSet var, const std::string& value)
             set->z = ztd::strdup(value);
             break;
         case XSetSetSet::KEY:
-            set->key = std::stoi(value);
+            set->key = std::stoul(value);
             break;
         case XSetSetSet::KEYMOD:
-            set->keymod = std::stoi(value);
+            set->keymod = std::stoul(value);
             break;
         case XSetSetSet::STYLE:
-            set->menu_style = (XSetMenu)std::stoi(value);
+            set->menu_style = XSetMenu(std::stoi(value));
             break;
         case XSetSetSet::DESC:
             if (set->desc)

@@ -372,8 +372,7 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
         thumb_mtime = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::MTime");
     }
 
-    if (!thumbnail || (w < size && h < size) || !thumb_mtime ||
-        strtol(thumb_mtime, nullptr, 10) != mtime)
+    if (!thumbnail || (w < size && h < size) || !thumb_mtime || std::stol(thumb_mtime) != mtime)
     {
         if (thumbnail)
             g_object_unref(thumbnail);

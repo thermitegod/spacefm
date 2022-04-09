@@ -2730,7 +2730,7 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
         default:
             if (set->menu_style != XSetMenu::CHECK)
                 icon1 = icon_name;
-            cmd_type = set->x ? XSetCMD(strtol(set->x, nullptr, 10)) : XSetCMD::INVALID;
+            cmd_type = set->x ? XSetCMD(std::stol(set->x)) : XSetCMD::INVALID;
             if (!set->lock && cmd_type == XSetCMD::BOOKMARK)
             {
                 // Bookmark
@@ -3064,8 +3064,7 @@ ptk_bookmark_view_chdir(GtkTreeView* view, PtkFileBrowser* file_browser, bool re
     // cur dir is already selected?
     XSet* set = get_selected_bookmark_set(view);
     if (set && !set->lock && set->z && set->menu_style < XSetMenu::SUBMENU && set->x &&
-        XSetCMD(strtol(set->x, nullptr, 10)) == XSetCMD::BOOKMARK &&
-        Glib::str_has_prefix(set->z, cwd))
+        XSetCMD(std::stol(set->x)) == XSetCMD::BOOKMARK && Glib::str_has_prefix(set->z, cwd))
     {
         char* sep = strchr(set->z, ';');
         if (sep)
@@ -3113,7 +3112,7 @@ ptk_bookmark_view_get_selected_dir(GtkTreeView* view)
     XSet* set = get_selected_bookmark_set(view);
     if (set)
     {
-        XSetCMD cmd_type = set->x ? XSetCMD(strtol(set->x, nullptr, 10)) : XSetCMD::INVALID;
+        XSetCMD cmd_type = set->x ? XSetCMD(std::stol(set->x)) : XSetCMD::INVALID;
         if (!set->lock && cmd_type == XSetCMD::BOOKMARK && set->z)
         {
             char* sep = strchr(set->z, ';');

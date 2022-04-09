@@ -1048,9 +1048,9 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                 set->s = ztd::strdup(set_old->s ? set_old->s : "0");
             }
             // load dynamic slider positions for this panel context
-            main_window->panel_slide_x[p - 1] = set->x ? strtol(set->x, nullptr, 10) : 0;
-            main_window->panel_slide_y[p - 1] = set->y ? strtol(set->y, nullptr, 10) : 0;
-            main_window->panel_slide_s[p - 1] = set->s ? strtol(set->s, nullptr, 10) : 0;
+            main_window->panel_slide_x[p - 1] = set->x ? std::stol(set->x) : 0;
+            main_window->panel_slide_y[p - 1] = set->y ? std::stol(set->y) : 0;
+            main_window->panel_slide_s[p - 1] = set->s ? std::stol(set->s) : 0;
             // LOG_INFO("loaded panel {}", p);
             if (!gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1])))
             {
@@ -1097,7 +1097,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                     if (set->x && !set->ob1)
                     {
                         // set current tab
-                        cur_tabx = strtol(set->x, nullptr, 10);
+                        cur_tabx = std::stol(set->x);
                         if (cur_tabx >= 0 && cur_tabx < gtk_notebook_get_n_pages(GTK_NOTEBOOK(
                                                             main_window->panel[p - 1])))
                         {
@@ -3454,7 +3454,7 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
         else if (set->xset_name == XSetName::PANEL_HIDE)
             i = -3;
         else
-            i = strtol(set->name, nullptr, 10);
+            i = std::stol(set->name);
         focus_panel(nullptr, main_window, i);
     }
     else if (Glib::str_has_prefix(set->name, "plug_"))
@@ -5689,7 +5689,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = fmt::format("spacefm: option {} requires an argument\n", argv[i]);
                 return 1;
             }
-            panel = strtol(argv[i + 1], nullptr, 10);
+            panel = std::stol(argv[i + 1]);
             i += 2;
             continue;
         }
@@ -5700,7 +5700,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = fmt::format("spacefm: option {} requires an argument\n", argv[i]);
                 return 1;
             }
-            tab = strtol(argv[i + 1], nullptr, 10);
+            tab = std::stol(argv[i + 1]);
             i += 2;
             continue;
         }
@@ -5782,15 +5782,15 @@ main_window_socket_command(char* argv[], std::string& reply)
                 {
                     if (argv[i + 2])
                     {
-                        width = strtol(argv[i + 1], nullptr, 10);
-                        height = strtol(argv[i + 2], nullptr, 10);
+                        width = std::stol(argv[i + 1]);
+                        height = std::stol(argv[i + 2]);
                     }
                 }
                 else
                 {
                     str[0] = '\0';
-                    width = strtol(argv[i + 1], nullptr, 10);
-                    height = strtol(str + 1, nullptr, 10);
+                    width = std::stol(argv[i + 1]);
+                    height = std::stol(str + 1);
                 }
             }
             if (height < 1 || width < 1)
@@ -5824,7 +5824,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             width = -1;
             if (argv[i + 1])
-                width = strtol(argv[i + 1], nullptr, 10);
+                width = std::stol(argv[i + 1]);
             if (width < 0)
             {
                 reply = "spacefm: invalid slider value\n";
@@ -5852,7 +5852,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 else if (!strcmp(argv[i + 1], "hide"))
                     width = -3;
                 else
-                    width = strtol(argv[i + 1], nullptr, 10);
+                    width = std::stol(argv[i + 1]);
             }
             if (width == 0 || width < -3 || width > 4)
             {
@@ -5892,7 +5892,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 else if (!strcmp(argv[i + 1], "close"))
                     width = -3;
                 else
-                    width = strtol(argv[i + 1], nullptr, 10);
+                    width = std::stol(argv[i + 1]);
             }
             if (width == 0 || width < -3 ||
                 width > gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[panel - 1])))
@@ -5984,7 +5984,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             width = -1;
             if (argv[i + 1])
-                width = strtol(argv[i + 1], nullptr, 10);
+                width = std::stol(argv[i + 1]);
             if (width < 0)
             {
                 reply = "spacefm: invalid slider value\n";
@@ -6004,7 +6004,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         { // COLUMN WIDTH
             width = 0;
             if (argv[i + 1] && argv[i + 2])
-                width = strtol(argv[i + 2], nullptr, 10);
+                width = std::stol(argv[i + 2]);
             if (width < 1)
             {
                 reply = "spacefm: invalid column width\n";
@@ -6175,8 +6175,8 @@ main_window_socket_command(char* argv[], std::string& reply)
                 }
                 else
                 {
-                    width = strtol(argv[i + 2], nullptr, 10);
-                    height = argv[i + 3] ? strtol(argv[i + 3], nullptr, 10) : -1;
+                    width = std::stol(argv[i + 2]);
+                    height = argv[i + 3] ? std::stol(argv[i + 3]) : -1;
                 }
                 gtk_editable_set_position(GTK_EDITABLE(file_browser->path_bar), -1);
                 gtk_editable_select_region(GTK_EDITABLE(file_browser->path_bar), width, height);
@@ -6715,7 +6715,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 ptask->task->percent = 50;
             else
             {
-                j = strtol(argv[i + 2], nullptr, 10);
+                j = std::stol(argv[i + 2]);
                 if (j < 0)
                     j = 0;
                 if (j > 100)
@@ -7225,8 +7225,8 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         // this only handles keys assigned to menu items
         GdkEventKey* event = (GdkEventKey*)gdk_event_new(GDK_KEY_PRESS);
-        event->keyval = (unsigned int)strtol(argv[i], nullptr, 0);
-        event->state = argv[i + 1] ? (unsigned int)strtol(argv[i + 1], nullptr, 0) : 0;
+        event->keyval = std::stoul(argv[i], nullptr, 0);
+        event->state = argv[i + 1] ? std::stoul(argv[i + 1], nullptr, 0) : 0;
         if (event->keyval)
         {
             gtk_window_present(GTK_WINDOW(main_window));

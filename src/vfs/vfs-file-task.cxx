@@ -1078,7 +1078,7 @@ vfs_file_task_get_cpids(Glib::Pid pid)
         char* pida = ztd::strdup(pids);
         nl[0] = '\n';
         pids = nl + 1;
-        Glib::Pid pidi = strtol(pida, nullptr, 10);
+        Glib::Pid pidi = std::stol(pida);
         free(pida);
         if (pidi)
         {
@@ -1110,7 +1110,7 @@ vfs_file_task_kill_cpids(char* cpids, int signal)
         char* pida = ztd::strdup(pids);
         nl[0] = '\n';
         pids = nl + 1;
-        Glib::Pid pidi = strtol(pida, nullptr, 10);
+        Glib::Pid pidi = std::stol(pida);
         free(pida);
         if (pidi)
         {

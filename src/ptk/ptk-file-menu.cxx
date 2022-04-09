@@ -2614,7 +2614,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
             else if (!strcmp(set->name, "open_in_panel_next"))
                 i = -2;
             else
-                i = strtol(set->name, nullptr, 10);
+                i = std::stol(set->name);
             main_window_open_in_panel(data->browser, i, data->file_path);
         }
         else if (Glib::str_has_prefix(set->name, "opentab_"))
@@ -2628,7 +2628,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
                 else if (set->xset_name == XSetName::OPENTAB_NEXT)
                     i = -2;
                 else
-                    i = strtol(set->name, nullptr, 10);
+                    i = std::stol(set->name);
                 ptk_file_browser_open_in_tab(data->browser, i, data->file_path);
             }
         }

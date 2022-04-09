@@ -1605,7 +1605,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
                 {
                     // get column width for this panel context
                     set = xset_get_panel_mode(p, column_names.at(j), mode);
-                    width = set->y ? strtol(set->y, nullptr, 10) : 100;
+                    width = set->y ? std::stol(set->y) : 100;
                     // LOG_INFO("        {}\t{}", width, title );
                     if (width)
                     {
@@ -4090,7 +4090,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
             gtk_tree_view_column_set_min_width(col, 50);
             gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
             XSet* set = xset_get_panel_mode(p, column_names.at(j), mode);
-            int width = set->y ? strtol(set->y, nullptr, 10) : 100;
+            int width = set->y ? std::stol(set->y) : 100;
             if (width)
             {
                 if (cols.at(j) == PTKFileListCol::COL_FILE_NAME && !app_settings.always_show_tabs &&
@@ -6060,7 +6060,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
             else if (set->xset_name == XSetName::TAB_RESTORE)
                 i = -4;
             else
-                i = strtol(set->name, nullptr, 10);
+                i = std::stol(set->name);
             ptk_file_browser_go_tab(nullptr, browser, i);
         }
     }
