@@ -155,7 +155,7 @@ static GtkDirectionType folder_view_auto_scroll_direction = GTK_DIR_TAB_FORWARD;
 /*  Drag & Drop/Clipboard targets  */
 static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 
-#define GDK_ACTION_ALL (GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK)
+#define GDK_ACTION_ALL GdkDragAction(GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK)
 
 // must match main-window.c  main_window_socket_command
 static const std::array<const char*, 6> column_titles{"Name",
@@ -3914,12 +3914,12 @@ create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode view_mode)
                 GdkModifierType(GDK_CONTROL_MASK | GDK_BUTTON1_MASK | GDK_BUTTON3_MASK),
                 drag_targets,
                 G_N_ELEMENTS(drag_targets),
-                (GdkDragAction)GDK_ACTION_ALL);
+                GDK_ACTION_ALL);
 
             exo_icon_view_enable_model_drag_dest(EXO_ICON_VIEW(folder_view),
                                                  drag_targets,
                                                  G_N_ELEMENTS(drag_targets),
-                                                 (GdkDragAction)GDK_ACTION_ALL);
+                                                 GDK_ACTION_ALL);
 
             g_signal_connect((void*)folder_view,
                              "item-activated",
@@ -3965,12 +3965,12 @@ create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode view_mode)
                 GdkModifierType(GDK_CONTROL_MASK | GDK_BUTTON1_MASK | GDK_BUTTON3_MASK),
                 drag_targets,
                 G_N_ELEMENTS(drag_targets),
-                (GdkDragAction)GDK_ACTION_ALL);
+                GDK_ACTION_ALL);
 
             gtk_tree_view_enable_model_drag_dest(GTK_TREE_VIEW(folder_view),
                                                  drag_targets,
                                                  G_N_ELEMENTS(drag_targets),
-                                                 (GdkDragAction)GDK_ACTION_ALL);
+                                                 GDK_ACTION_ALL);
 
             g_signal_connect((void*)folder_view,
                              "row_activated",
