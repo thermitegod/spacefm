@@ -219,7 +219,8 @@ void ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_brows
                                      const char* search_key); // sfm
 void ptk_file_browser_canon(PtkFileBrowser* file_browser, const char* path);
 
-void ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser, GList* files, char* cwd);
+void ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser, GList* files,
+                                            const char* cwd);
 
 void ptk_file_browser_file_properties(PtkFileBrowser* file_browser, int page);
 
@@ -227,7 +228,7 @@ void ptk_file_browser_view_as_icons(PtkFileBrowser* file_browser);
 void ptk_file_browser_view_as_compact_list(PtkFileBrowser* file_browser);
 void ptk_file_browser_view_as_list(PtkFileBrowser* file_browser);
 
-void ptk_file_browser_hide_selected(PtkFileBrowser* file_browser, GList* files, char* cwd);
+void ptk_file_browser_hide_selected(PtkFileBrowser* file_browser, GList* files, const char* cwd);
 
 void ptk_file_browser_show_thumbnails(PtkFileBrowser* file_browser, int max_file_size);
 
@@ -250,10 +251,10 @@ bool ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
                                      PtkFileBrowser* file_browser);
 void ptk_file_browser_rebuild_toolbars(PtkFileBrowser* file_browser);
 void ptk_file_browser_focus_me(PtkFileBrowser* file_browser);
-void ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, int tab_num, char* file_path);
+void ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, int tab_num, const char* file_path);
 void ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
-                                    GList* sel_files, char* cwd);
-void ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
+                                    GList* sel_files, const char* cwd);
+void ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, const char* cwd,
                               XSetName setname);
 void ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname);
 GList* folder_view_get_selected_items(PtkFileBrowser* file_browser, GtkTreeModel** model);

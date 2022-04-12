@@ -33,8 +33,8 @@ struct PtkFileMenu
     ~PtkFileMenu();
 
     PtkFileBrowser* browser;
-    char* cwd;
-    char* file_path;
+    const char* cwd;
+    const char* file_path;
     VFSFileInfo* info;
     GList* sel_files;
     GtkAccelGroup* accel_group;

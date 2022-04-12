@@ -4893,7 +4893,7 @@ on_folder_view_drag_end(GtkWidget* widget, GdkDragContext* drag_context,
 }
 
 void
-ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser, GList* files, char* cwd)
+ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser, GList* files, const char* cwd)
 {
     if (!file_browser)
         return;
@@ -4985,7 +4985,7 @@ ptk_file_browser_open_selected_files(PtkFileBrowser* file_browser)
 }
 
 void
-ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
+ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, const char* cwd,
                          XSetName setname)
 {
     if (!file_browser || !sel_files)
@@ -5082,7 +5082,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
          setname == XSetName::MOVE_LOC || setname == XSetName::MOVE_LOC_LAST) &&
         !copy_dest && !move_dest)
     {
-        char* folder;
+        const char* folder;
         set2 = xset_get(XSetName::COPY_LOC_LAST);
         if (set2->desc)
             folder = set2->desc;
@@ -5168,7 +5168,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
 }
 
 void
-ptk_file_browser_hide_selected(PtkFileBrowser* file_browser, GList* files, char* cwd)
+ptk_file_browser_hide_selected(PtkFileBrowser* file_browser, GList* files, const char* cwd)
 {
     if (xset_msg_dialog(
             GTK_WIDGET(file_browser),
@@ -5826,7 +5826,7 @@ ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, int t)
 }
 
 void
-ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, int tab_num, char* file_path)
+ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, int tab_num, const char* file_path)
 {
     int page_x;
     GtkWidget* notebook = file_browser->mynotebook;
@@ -5859,7 +5859,7 @@ ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, int tab_num, char* fi
 
 void
 ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser, GList* sel_files,
-                               char* cwd)
+                               const char* cwd)
 {
     if (!sel_files)
         return;

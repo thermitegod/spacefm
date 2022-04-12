@@ -124,7 +124,7 @@ char* main_window_get_panel_cwd(PtkFileBrowser* file_browser, int panel_num);
 void main_window_get_counts(PtkFileBrowser* file_browser, int* panel_count, int* tab_count,
                             int* tab_num);
 bool main_window_panel_is_visible(PtkFileBrowser* file_browser, int panel);
-void main_window_open_in_panel(PtkFileBrowser* file_browser, int panel_num, char* file_path);
+void main_window_open_in_panel(PtkFileBrowser* file_browser, int panel_num, const char* file_path);
 void main_window_rubberband_all();
 void main_window_refresh_all();
 void main_window_bookmark_changed(const char* changed_set_name);

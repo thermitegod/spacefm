@@ -2024,7 +2024,7 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, int panel_num)
 }
 
 void
-main_window_open_in_panel(PtkFileBrowser* file_browser, int panel_num, char* file_path)
+main_window_open_in_panel(PtkFileBrowser* file_browser, int panel_num, const char* file_path)
 {
     if (!file_browser)
         return;

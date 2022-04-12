@@ -3848,7 +3848,8 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
 }
 
 void
-ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd, char* setname)
+ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, const char* cwd,
+                      const char* setname)
 {
     /*
      * root_copy_loc    copy to location
@@ -3897,7 +3898,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
     }
     else
     {
-        char* folder;
+        const char* folder;
         set = xset_get(setname);
         if (set->desc)
             folder = set->desc;

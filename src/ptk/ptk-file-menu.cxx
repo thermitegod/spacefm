@@ -108,10 +108,10 @@ PtkFileMenu::~PtkFileMenu()
 {
     if (this->info)
         vfs_file_info_unref(this->info);
-    if (this->cwd)
-        free(this->cwd);
-    if (this->file_path)
-        free(this->file_path);
+    // if (this->cwd)
+    //     free(this->cwd);
+    // if (this->file_path)
+    //   free(this->file_path);
     if (this->sel_files)
         vfs_file_info_list_free(this->sel_files);
     if (this->accel_group)

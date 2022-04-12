@@ -59,9 +59,8 @@ void ptk_show_file_properties(GtkWindow* parent_win, const char* cwd, GList* sel
 void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_desktop,
                              PtkFileBrowser* file_browser, bool xforce, bool xnever);
 
-void ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc callback); // sfm
-
-void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
-                           char* setname); // sfm
+void ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc callback);
+void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, const char* cwd,
+                           const char* setname);
 
 char* get_real_link_target(const char* link_path);
