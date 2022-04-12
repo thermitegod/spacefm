@@ -186,23 +186,17 @@ FindFile::FindFile()
 
 struct FoundFile
 {
-    FoundFile(VFSFileInfo* fi, char* dir_path);
-    ~FoundFile();
+    FoundFile(VFSFileInfo* fi, const char* dir_path);
+    // ~FoundFile();
 
     VFSFileInfo* fi;
-    char* dir_path;
+    const char* dir_path;
 };
 
-FoundFile::FoundFile(VFSFileInfo* fi, char* dir_path)
+FoundFile::FoundFile(VFSFileInfo* fi, const char* dir_path)
 {
     this->fi = fi;
     this->dir_path = dir_path;
-}
-
-FoundFile::~FoundFile()
-{
-    if (this->dir_path)
-        free(this->dir_path);
 }
 
 static const char menu_def[] = "<ui>"

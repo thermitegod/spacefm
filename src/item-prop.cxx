@@ -667,7 +667,7 @@ on_context_action_changed(GtkComboBox* box, ContextData* ctxt)
 }
 
 static char*
-context_display(int sub, int comp, char* value)
+context_display(int sub, int comp, const char* value)
 {
     std::string disp;
     if (value[0] == '\0' || value[0] == ' ' || Glib::str_has_suffix(value, " "))
