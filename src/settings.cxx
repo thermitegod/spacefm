@@ -8942,14 +8942,14 @@ xset_defaults()
     set->b = XSET_B_TRUE;
 
     // mark all labels and icons as default
-    for (XSet* set: xsets)
+    for (XSet* set2: xsets)
     {
-        if (set->lock)
+        if (set2->lock)
         {
-            if (set->in_terminal)
-                set->in_terminal = false;
-            if (set->keep_terminal)
-                set->keep_terminal = false;
+            if (set2->in_terminal)
+                set2->in_terminal = false;
+            if (set2->keep_terminal)
+                set2->keep_terminal = false;
         }
     }
 }

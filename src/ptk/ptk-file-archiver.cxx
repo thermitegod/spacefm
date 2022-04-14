@@ -523,12 +523,12 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                            -1);
         if ((handler_xset = xset_is(xset_name)))
         {
-            bool error = ptk_handler_load_script(HANDLER_MODE_ARC,
-                                                 HANDLER_COMPRESS,
-                                                 handler_xset,
-                                                 GTK_TEXT_VIEW(view),
-                                                 command,
-                                                 error_message);
+            error = ptk_handler_load_script(HANDLER_MODE_ARC,
+                                            HANDLER_COMPRESS,
+                                            handler_xset,
+                                            GTK_TEXT_VIEW(view),
+                                            command,
+                                            error_message);
             if (error)
             {
                 xset_msg_dialog(GTK_WIDGET(dlg),
@@ -642,11 +642,11 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 // Get command from text view
                 GtkTextBuffer* buf;
                 buf = gtk_text_view_get_buffer(view);
-                GtkTextIter iter;
+                GtkTextIter titer;
                 GtkTextIter siter;
                 gtk_text_buffer_get_start_iter(buf, &siter);
-                gtk_text_buffer_get_end_iter(buf, &iter);
-                command = gtk_text_buffer_get_text(buf, &siter, &iter, false);
+                gtk_text_buffer_get_end_iter(buf, &titer);
+                command = gtk_text_buffer_get_text(buf, &siter, &titer, false);
 
                 // reject command that contains only whitespace and comments
                 if (ptk_handler_command_is_empty(command))

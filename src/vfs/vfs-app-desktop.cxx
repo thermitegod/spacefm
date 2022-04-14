@@ -323,8 +323,6 @@ void
 VFSAppDesktop::exec_desktop(const std::string& working_dir, std::vector<std::string>& file_paths)
 {
     std::string cmd = translate_app_exec_to_command_line(file_paths);
-    std::string app_name = get_disp_name();
-
     if (cmd.empty())
         return;
 

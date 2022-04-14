@@ -2733,10 +2733,10 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             {
                 // update full_path to absolute
                 char* cwd = g_path_get_dirname(mset->full_path);
-                char* old_path = full_path;
-                full_path = g_build_filename(cwd, old_path, nullptr);
+                char* old_path2 = full_path;
+                full_path = g_build_filename(cwd, old_path2, nullptr);
                 g_free(cwd);
-                g_free(old_path);
+                g_free(old_path2);
             }
             if (strchr(full_path, '\n'))
             {

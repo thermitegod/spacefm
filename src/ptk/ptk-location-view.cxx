@@ -4037,11 +4037,11 @@ on_bookmark_key_press_event(GtkWidget* w, GdkEventKey* event, PtkFileBrowser* fi
 }
 
 static int
-is_row_separator(GtkTreeModel* model, GtkTreeIter* it, PtkFileBrowser* file_browser)
+is_row_separator(GtkTreeModel* tree_model, GtkTreeIter* it, PtkFileBrowser* file_browser)
 {
     (void)file_browser;
     const int is_sep = 0;
-    gtk_tree_model_get(model, it, COL_DATA, &is_sep, -1);
+    gtk_tree_model_get(tree_model, it, COL_DATA, &is_sep, -1);
     return is_sep;
 }
 

@@ -66,6 +66,7 @@ struct FMPrefDlg
 };
 
 static FMPrefDlg* data = nullptr;
+
 static const int tool_icon_sizes[] = {0,
                                       GTK_ICON_SIZE_MENU,
                                       GTK_ICON_SIZE_SMALL_TOOLBAR,
@@ -428,36 +429,40 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
 }
 
 static void
-on_date_format_changed(GtkComboBox* widget, FMPrefDlg* data)
+on_date_format_changed(GtkComboBox* widget, FMPrefDlg* fm_data)
 {
     (void)widget;
     char buf[128];
     const char* etext;
 
     std::time_t now = std::time(nullptr);
-    etext = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(data->date_format))));
+    etext = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(fm_data->date_format))));
     strftime(buf, sizeof(buf), etext, localtime(&now));
-    gtk_label_set_text(GTK_LABEL(data->date_display), buf);
+    gtk_label_set_text(GTK_LABEL(fm_data->date_display), buf);
 }
 
 static void
-on_single_click_toggled(GtkWidget* widget, FMPrefDlg* data)
+on_single_click_toggled(GtkWidget* widget, FMPrefDlg* fm_data)
 {
     (void)widget;
-    gtk_widget_set_sensitive(data->single_hover,
-                             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->single_click)));
+    gtk_widget_set_sensitive(
+        fm_data->single_hover,
+        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(fm_data->single_click)));
 }
 
 static void
-on_show_thumbnail_toggled(GtkWidget* widget, FMPrefDlg* data)
+on_show_thumbnail_toggled(GtkWidget* widget, FMPrefDlg* fm_data)
 {
     (void)widget;
-    gtk_widget_set_sensitive(data->max_thumb_size,
-                             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->show_thumbnail)));
-    gtk_widget_set_sensitive(data->thumb_label1,
-                             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->show_thumbnail)));
-    gtk_widget_set_sensitive(data->thumb_label2,
-                             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->show_thumbnail)));
+    gtk_widget_set_sensitive(
+        fm_data->max_thumb_size,
+        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(fm_data->show_thumbnail)));
+    gtk_widget_set_sensitive(
+        fm_data->thumb_label1,
+        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(fm_data->show_thumbnail)));
+    gtk_widget_set_sensitive(
+        fm_data->thumb_label2,
+        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(fm_data->show_thumbnail)));
 }
 
 bool

@@ -379,8 +379,8 @@ create_plugins_menu(FMMainWindow* main_window)
     gtk_menu_shell_append(GTK_MENU_SHELL(plug_menu), item);
 
     plugins = xset_get_plugins();
-    for (XSet* set: plugins)
-        xset_add_menuitem(file_browser, plug_menu, accel_group, set);
+    for (XSet* set2: plugins)
+        xset_add_menuitem(file_browser, plug_menu, accel_group, set2);
     if (!plugins.empty())
         xset_clear_plugins(plugins);
 
@@ -3313,12 +3313,11 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
 {
     // LOG_INFO("main_keypress {} {}", event->keyval, event->state);
 
-    XSet* set;
     PtkFileBrowser* browser;
 
     if (known_set)
     {
-        set = known_set;
+        XSet* set = known_set;
         return on_main_window_keypress_found_key(main_window, set);
     }
 
@@ -7396,9 +7395,9 @@ main_window_socket_command(char* argv[], char** reply)
             if (!l)
             {
                 // remove replace event
-                char* str2 = str;
-                str = g_strdup_printf("*%s", str2);
-                g_free(str2);
+                char* str3 = str;
+                str = g_strdup_printf("*%s", str3);
+                g_free(str3);
                 l = g_list_find_custom((GList*)set->ob2_data, str, (GCompareFunc)g_strcmp0);
             }
             g_free(str);

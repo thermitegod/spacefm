@@ -45,10 +45,11 @@ cflags_opt += [
 
   #[ '-Wall' ],
   #[ '-Wextra' ],
-  #[ '-Wshadow' ],
+  [ '-Wshadow' ],
   #[ '-Wconversion' ],
   #[ '-fsanitize=undefined,address' ],
 
+  # TODO - fix these warnings
   [ '-Wno-deprecated-declarations' ],
   [ '-Wno-unused-variable' ],
   [ '-Wno-format-pedantic' ],

@@ -717,7 +717,6 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
 
     GList* l;
     char* file_path;
-    VFSFileInfo* file;
     GtkAllocation allocation;
 
     gtk_widget_get_allocation(GTK_WIDGET(dialog), &allocation);
@@ -749,6 +748,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
         {
             bool mod_change;
             PtkFileTask* task;
+            VFSFileInfo* file;
             // change file dates
             char* cmd = nullptr;
             std::string quoted_time;
@@ -765,7 +765,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 GString* gstr = g_string_new(nullptr);
                 for (l = data->file_list; l; l = l->next)
                 {
-                    VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
+                    file = static_cast<VFSFileInfo*>(l->data);
                     file_path = g_build_filename(data->dir_path, file->name.c_str(), nullptr);
                     quoted_path = bash_quote(file_path);
                     g_string_append_printf(gstr, " %s", quoted_path.c_str());

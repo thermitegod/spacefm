@@ -2753,6 +2753,8 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
 void
 ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handler_set)
 {
+    char* str;
+
     HandlerData* hnd = g_slice_new0(HandlerData);
     hnd->mode = mode;
 
@@ -2804,7 +2806,7 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
 
     // Generating left-hand side of dialog
     GtkWidget* lbl_handlers = gtk_label_new(nullptr);
-    char* str = g_strdup_printf("<b>%s</b>", dialog_mnemonics[mode]);
+    str = g_strdup_printf("<b>%s</b>", dialog_mnemonics[mode]);
     gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handlers), str);
     g_free(str);
     gtk_widget_set_halign(GTK_WIDGET(lbl_handlers), GTK_ALIGN_START);
@@ -3308,7 +3310,7 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
     if (width && height)
     {
         // They are - saving
-        char* str = g_strdup_printf("%d", width);
+        str = g_strdup_printf("%d", width);
         xset_set(handler_conf_xset[HANDLER_MODE_ARC], "x", str);
         g_free(str);
         str = g_strdup_printf("%d", height);
