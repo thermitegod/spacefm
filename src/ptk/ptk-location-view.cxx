@@ -687,7 +687,7 @@ ptk_location_view_clean_mount_points()
     {
         std::string command = fmt::format("{} -c \"sleep 1 ; {} clean\"", BASHPATH, udevil);
         print_command(command);
-        g_spawn_command_line_async(command.c_str(), nullptr);
+        Glib::spawn_command_line_async(command);
     }
     g_free(udevil);
 }

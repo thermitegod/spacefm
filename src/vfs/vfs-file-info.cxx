@@ -21,6 +21,8 @@
 #include <grp.h>
 #include <pwd.h>
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -560,20 +562,11 @@ bool
 vfs_file_info_open_file(VFSFileInfo* fi, const char* file_path, GError** err)
 {
     bool ret = false;
-    char* argv[2];
 
     if (vfs_file_info_is_executable(fi, file_path))
     {
-        argv[0] = (char*)file_path;
-        argv[1] = nullptr;
-        ret = g_spawn_async(nullptr,
-                            argv,
-                            nullptr,
-                            GSpawnFlags(G_SPAWN_STDOUT_TO_DEV_NULL | G_SPAWN_SEARCH_PATH),
-                            nullptr,
-                            nullptr,
-                            nullptr,
-                            err);
+        std::string command = fmt::format("{}", file_path);
+        Glib::spawn_command_line_async(command);
     }
     else
     {

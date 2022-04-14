@@ -5163,20 +5163,9 @@ on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn
         if (ptask->pop_handler)
         {
             // show custom dialog
-            char* argv[4];
-            argv[0] = g_strdup("bash");
-            argv[1] = g_strdup("-c");
-            argv[2] = g_strdup(ptask->pop_handler);
-            argv[3] = nullptr;
-            LOG_INFO("TASK_POPUP >>> {}", argv[2]);
-            g_spawn_async(nullptr,
-                          argv,
-                          nullptr,
-                          G_SPAWN_SEARCH_PATH,
-                          nullptr,
-                          nullptr,
-                          nullptr,
-                          nullptr);
+            LOG_INFO("TASK_POPUP >>> {}", ptask->pop_handler);
+            std::string command = fmt::format("bash -c {}", ptask->pop_handler);
+            Glib::spawn_command_line_async(command);
         }
         else
         {
@@ -7394,8 +7383,9 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
           XSet* set, char* ucmd)
 {
     bool inhibit;
-    char* argv[4];
     int exit_status;
+
+    std::string command;
 
     if (!ucmd)
         return false;
@@ -7434,21 +7424,9 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
             }
             cmd = ztd::replace(cmd, "%v", change);
         }
-        argv[0] = g_strdup("bash");
-        argv[1] = g_strdup("-c");
-        argv[2] = (char*)cmd.c_str();
-        argv[3] = nullptr;
-        LOG_INFO("EVENT {} >>> {}", event, argv[2]);
-        // g_spawn_command_line_async( cmd, nullptr );
-        // system( cmd );
-        g_spawn_async(nullptr,
-                      argv,
-                      nullptr,
-                      G_SPAWN_SEARCH_PATH,
-                      nullptr,
-                      nullptr,
-                      nullptr,
-                      nullptr);
+        LOG_INFO("EVENT {} >>> {}", event, cmd);
+        command = fmt::format("bash -c {}", cmd);
+        Glib::spawn_command_line_async(command);
         return false;
     }
 
@@ -7558,19 +7536,9 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
         LOG_INFO("EVENT {} >>> {}", event, cmd);
         if (!strcmp(event, "evt_tab_close"))
         {
+            command = fmt::format("bash -c {}", cmd);
             // file_browser becomes invalid so spawn
-            argv[0] = g_strdup("bash");
-            argv[1] = g_strdup("-c");
-            argv[2] = (char*)cmd.c_str();
-            argv[3] = nullptr;
-            g_spawn_async(nullptr,
-                          argv,
-                          nullptr,
-                          G_SPAWN_SEARCH_PATH,
-                          nullptr,
-                          nullptr,
-                          nullptr,
-                          nullptr);
+            Glib::spawn_command_line_async(command);
         }
         else
         {
@@ -7589,26 +7557,15 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
         return false;
     }
 
-    argv[0] = g_strdup("bash");
-    argv[1] = g_strdup("-c");
-    argv[2] = (char*)cmd.c_str();
-    argv[3] = nullptr;
-    LOG_INFO("REPLACE_EVENT {} >>> {}", event, argv[2]);
+    LOG_INFO("REPLACE_EVENT {} >>> {}", event, cmd);
+
     inhibit = false;
-    if (g_spawn_sync(nullptr,
-                     argv,
-                     nullptr,
-                     G_SPAWN_SEARCH_PATH,
-                     nullptr,
-                     nullptr,
-                     nullptr,
-                     nullptr,
-                     &exit_status,
-                     nullptr))
-    {
-        if (WIFEXITED(exit_status) && WEXITSTATUS(exit_status) == 0)
-            inhibit = true;
-    }
+    command = fmt::format("bash -c {}", cmd);
+    Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
+
+    if (WIFEXITED(exit_status) && WEXITSTATUS(exit_status) == 0)
+        inhibit = true;
+
     LOG_INFO("REPLACE_EVENT ? {}", inhibit ? "true" : "false");
     return inhibit;
 }

@@ -1037,11 +1037,11 @@ on_mime_change_timer(void* user_data)
     // LOG_INFO("MIME-UPDATE on_timer");
     command = fmt::format("update-mime-database {}/mime", vfs_user_data_dir());
     print_command(command);
-    g_spawn_command_line_async(command.c_str(), nullptr);
+    Glib::spawn_command_line_async(command);
 
     command = fmt::format("update-desktop-database {}/applications", vfs_user_data_dir());
     print_command(command);
-    g_spawn_command_line_async(command.c_str(), nullptr);
+    Glib::spawn_command_line_async(command);
 
     g_source_remove(mime_change_timer);
     mime_change_timer = 0;

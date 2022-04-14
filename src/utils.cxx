@@ -25,8 +25,9 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "settings.hxx"
 #include "extern.hxx"
+
+#include "settings.hxx"
 
 #include "utils.hxx"
 
@@ -160,7 +161,7 @@ open_in_prog(const char* path)
     const std::string qpath = bash_quote(path);
     const std::string command = fmt::format("{} {}", exe, qpath);
     print_command(command);
-    g_spawn_command_line_async(command.c_str(), nullptr);
+    Glib::spawn_command_line_async(command);
 }
 
 std::string

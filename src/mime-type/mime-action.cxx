@@ -42,6 +42,8 @@
 
 #include "vfs/vfs-user-dir.hxx"
 
+#include "utils.hxx"
+
 #include "mime-action.hxx"
 
 static bool
@@ -113,24 +115,10 @@ apps_dir_foreach(DataDirFunc func, const char* mime_type, void* user_data)
 static void
 update_desktop_database()
 {
-    char* argv[3];
-    argv[0] = g_find_program_in_path("update-desktop-database");
-    if (G_UNLIKELY(!argv[0]))
-        return;
-    argv[1] = g_build_filename(vfs_user_data_dir().c_str(), "applications", nullptr);
-    argv[2] = nullptr;
-    g_spawn_sync(nullptr,
-                 argv,
-                 nullptr,
-                 (GSpawnFlags)0,
-                 nullptr,
-                 nullptr,
-                 nullptr,
-                 nullptr,
-                 nullptr,
-                 nullptr);
-    g_free(argv[0]);
-    g_free(argv[1]);
+    std::string path = Glib::build_filename(vfs_user_data_dir(), "applications");
+    std::string command = fmt::format("update-desktop-database {}", path);
+    print_command(command);
+    Glib::spawn_command_line_sync(command);
 }
 
 static int

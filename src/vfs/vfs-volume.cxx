@@ -3459,7 +3459,7 @@ vfs_volume_autoexec(VFSVolume* vol)
                         std::string quote_path = bash_quote(vol->mount_point);
                         std::string cmd = fmt::format("{} -t {}", exe, quote_path);
                         print_command(cmd);
-                        g_spawn_command_line_async(cmd.c_str(), nullptr);
+                        Glib::spawn_command_line_async(cmd);
                     }
                 }
                 command = xset_get_s("dev_exec_fs");

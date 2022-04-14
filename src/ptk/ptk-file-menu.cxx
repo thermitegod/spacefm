@@ -1705,11 +1705,11 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         case APP_JOB_UPDATE:
             command = fmt::format("update-mime-database {}/mime", vfs_user_data_dir());
             print_command(command);
-            g_spawn_command_line_async(command.c_str(), nullptr);
+            Glib::spawn_command_line_async(command);
 
             command = fmt::format("update-desktop-database {}/applications", vfs_user_data_dir());
             print_command(command);
-            g_spawn_command_line_async(command.c_str(), nullptr);
+            Glib::spawn_command_line_async(command);
             break;
         default:
             break;
