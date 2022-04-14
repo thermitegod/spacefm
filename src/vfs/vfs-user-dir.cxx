@@ -1,11 +1,19 @@
-/*
+/**
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
  *
- * License: See COPYING file
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <string>
-#include <filesystem>
 
 #include <glibmm.h>
 
@@ -14,8 +22,9 @@
 
 #include "vfs/vfs-user-dir.hxx"
 
-struct VFSDirXDG
+class VFSDirXDG
 {
+  public:
     // GUserDirectory
     // clang-format off
     const std::string user_desktop{Glib::get_user_special_dir(Glib::UserDirectory::DESKTOP)};
@@ -37,9 +46,12 @@ struct VFSDirXDG
 
     // System
     const std::vector<std::string> sys_data{Glib::get_system_data_dirs()};
+
+    // Current runtime dir
+    const std::string current_dir{Glib::get_current_dir()};
 };
 
-VFSDirXDG vfs_dir_xdg;
+VFSDirXDG vfs_dir_xdg = VFSDirXDG();
 
 const std::string&
 vfs_user_desktop_dir() noexcept
@@ -125,8 +137,8 @@ vfs_system_data_dir() noexcept
     return vfs_dir_xdg.sys_data;
 }
 
-std::string
+const std::string&
 vfs_current_dir() noexcept
 {
-    return Glib::get_current_dir();
+    return vfs_dir_xdg.current_dir;
 }
