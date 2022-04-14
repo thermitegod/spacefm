@@ -21,6 +21,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
 #include <time.h>
+#include <glibmm.h>
 #endif
 
 #include <ztd/ztd.hxx>
@@ -161,7 +162,7 @@ vfs_exec_on_screen(GdkScreen* screen, const char* work_dir, char** argv, char** 
         ctx = sn_launcher_context_new(display, gdk_screen_get_number(screen));
 
         sn_launcher_context_set_description(ctx, disp_name);
-        sn_launcher_context_set_name(ctx, g_get_prgname());
+        sn_launcher_context_set_name(ctx, Glib::get_prgname().c_str());
         sn_launcher_context_set_binary_name(ctx, argv[0]);
 
         sn_launcher_context_set_workspace(ctx, tvsn_get_active_workspace_number(screen));
@@ -172,7 +173,7 @@ vfs_exec_on_screen(GdkScreen* screen, const char* work_dir, char** argv, char** 
         */
         /* std::time( &cur_time ); */
         sn_launcher_context_initiate(ctx,
-                                     g_get_prgname(),
+                                     Glib::get_prgname().c_str(),
                                      argv[0],
                                      gtk_get_current_event_time() /*cur_time*/);
 
