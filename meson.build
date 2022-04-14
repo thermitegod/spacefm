@@ -111,13 +111,6 @@ if get_option('mmap')
   pre_args += '-DHAVE_MMAP'
 endif
 
-if get_option('xxhash')
-  pre_args += '-DUSE_XXHASH'
-  lib_xxhash = meson.get_compiler('c').find_library('xxhash', required : false)
-else
-  lib_xxhash = meson.get_compiler('c').find_library('xxhash', required : false)
-endif
-
 foreach a : pre_args
   add_project_arguments(a, language : ['c', 'cpp'])
 endforeach
@@ -209,8 +202,6 @@ spacefm = build_target(
 
     x11_dep,
     exo_dep,
-
-    lib_xxhash,
 
     spdlog_dep,
     fmt_dep,

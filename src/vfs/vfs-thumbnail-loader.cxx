@@ -34,10 +34,6 @@
 #include "vfs/vfs-user-dir.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 
-#ifdef USE_XXHASH
-#include "xxhash.h"
-#endif
-
 #include "utils.hxx"
 
 enum VFSThumbnailSize
@@ -334,14 +330,10 @@ static GdkPixbuf*
 vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int size,
                    std::time_t mtime)
 {
-    std::string file_name;
-    std::string mtime_str;
-
-    std::string thumbnail_file;
     int w;
     int h;
     struct stat statbuf;
-    int create_size = size;
+    int create_size;
 
     if (size > 256)
         create_size = 512;
@@ -374,17 +366,12 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
         }
     }
 
-#ifdef USE_XXHASH
-    XXH64_hash_t hash = XXH3_64bits(uri.c_str(), uri.length());
-    file_name = fmt::format("{}.png", hash);
-#else
-    GChecksum* cs = g_checksum_new(G_CHECKSUM_MD5);
-    g_checksum_update(cs, uri.c_str(), uri.length());
-    file_name = fmt::format("{}.png", g_checksum_get_string(cs));
-    g_checksum_free(cs);
-#endif
+    Glib::Checksum check = Glib::Checksum();
+    const std::string file_hash = check.compute_checksum(Glib::Checksum::Type::MD5, uri.data());
+    const std::string file_name = fmt::format("{}.png", file_hash);
 
-    thumbnail_file = Glib::build_filename(vfs_user_cache_dir(), "thumbnails/normal", file_name);
+    const std::string thumbnail_file =
+        Glib::build_filename(vfs_user_cache_dir(), "thumbnails/normal", file_name);
 
     // LOG_INFO("{}", thumbnail_file);
 
@@ -426,6 +413,8 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
                                                          nullptr);
             if (thumbnail)
             {
+                std::string mtime_str;
+
                 // Note: gdk_pixbuf_apply_embedded_orientation returns a new
                 // pixbuf or same with incremented ref count, so unref
                 GdkPixbuf* thumbnail_old = thumbnail;
