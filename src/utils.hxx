@@ -22,8 +22,9 @@ void print_task_command(const char* ptask, const char* cmd);
 void print_task_command_spawn(std::vector<std::string> argv, int pid);
 
 char* randhex8();
-bool have_rw_access(const char* path);
-bool have_x_access(const char* path);
+
+bool have_rw_access(const std::string& path);
+bool have_x_access(const std::string& path);
 
 bool dir_has_files(const std::string& path);
 

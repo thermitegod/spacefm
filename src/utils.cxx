@@ -89,19 +89,15 @@ replace_line_subs(const std::string& line)
 }
 
 bool
-have_x_access(const char* path)
+have_x_access(const std::string& path)
 {
-    if (!path)
-        return false;
-    return (faccessat(0, path, R_OK | X_OK, AT_EACCESS) == 0);
+    return (faccessat(0, path.c_str(), R_OK | X_OK, AT_EACCESS) == 0);
 }
 
 bool
-have_rw_access(const char* path)
+have_rw_access(const std::string& path)
 {
-    if (!path)
-        return false;
-    return (faccessat(0, path, R_OK | W_OK, AT_EACCESS) == 0);
+    return (faccessat(0, path.c_str(), R_OK | W_OK, AT_EACCESS) == 0);
 }
 
 bool

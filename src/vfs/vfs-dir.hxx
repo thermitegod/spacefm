@@ -89,7 +89,7 @@ void vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* 
 void vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file);
 void vfs_dir_flush_notify_cache();
 
-bool vfs_dir_add_hidden(const char* path, const char* file_name); // MOD added
+bool vfs_dir_add_hidden(const std::string& path, const std::string& file_name);
 
 /* call function "func" for every VFSDir instances */
 void vfs_dir_foreach(GHFunc func, void* user_data);

@@ -16,6 +16,9 @@
 #include <string>
 #include <filesystem>
 
+#include <iostream>
+#include <fstream>
+
 #include <cassert>
 
 #include <fcntl.h>
@@ -44,8 +47,8 @@ static void vfs_dir_set_property(GObject* obj, unsigned int prop_id, const GValu
 static void vfs_dir_get_property(GObject* obj, unsigned int prop_id, GValue* value,
                                  GParamSpec* pspec);
 
-static char* gethidden(const char* path);                        // MOD added
-static bool ishidden(const char* hidden, const char* file_name); // MOD added
+static std::string gethidden(const std::string& path);
+static bool ishidden(const std::string& hidden, const std::string& file_name);
 
 /* constructor is private */
 static VFSDir* vfs_dir_new(const char* path);
@@ -503,95 +506,53 @@ on_list_task_finished(VFSAsyncTask* task, bool is_cancelled, VFSDir* dir)
     dir->load_complete = true;
 }
 
-static char*
-gethidden(const char* path) // MOD added
+static std::string
+gethidden(const std::string& path)
 {
+    std::string hidden;
+
     // Read .hidden into string
-    char* hidden_path = g_build_filename(path, ".hidden", nullptr);
+    std::string hidden_path = Glib::build_filename(path, ".hidden");
 
     // test access first because open() on missing file may cause
     // long delay on nfs
-    if (faccessat(0, hidden_path, R_OK, AT_EACCESS) != 0)
-    {
-        g_free(hidden_path);
-        return nullptr;
-    }
+    if (!have_rw_access(hidden_path))
+        return hidden;
 
-    int fd = open(hidden_path, O_RDONLY);
-    g_free(hidden_path);
-    if (fd != -1)
+    std::string line;
+    std::ifstream file(hidden_path);
+    if (file.is_open())
     {
-        struct stat s; // skip stat
-        if (fstat(fd, &s) != -1)
+        while (std::getline(file, line))
         {
-            char* buf = static_cast<char*>(g_malloc(s.st_size + 1));
-            if ((s.st_size = read(fd, buf, s.st_size)) != -1)
-            {
-                buf[s.st_size] = 0;
-                close(fd);
-                return buf;
-            }
-            else
-                g_free(buf);
+            hidden.append(line + '\n');
         }
-        close(fd);
     }
-    return nullptr;
+    file.close();
+
+    return hidden;
 }
 
 static bool
-ishidden(const char* hidden, const char* file_name) // MOD added
-{                                                   // assumes hidden,file_name != nullptr
-    char c;
-    char* str = (char*)strstr(hidden, file_name);
-    while (str)
-    {
-        if (str == hidden)
-        {
-            // file_name is at start of buffer
-            c = hidden[strlen(file_name)];
-            if (c == '\n' || c == '\0')
-                return true;
-        }
-        else
-        {
-            c = str[strlen(file_name)];
-            if (str[-1] == '\n' && (c == '\n' || c == '\0'))
-                return true;
-        }
-        str = strstr(++str, file_name);
-    }
+ishidden(const std::string& hidden, const std::string& file_name)
+{
+    if (ztd::contains(hidden, file_name + '\n'))
+        return true;
     return false;
 }
 
 bool
-vfs_dir_add_hidden(const char* path, const char* file_name)
+vfs_dir_add_hidden(const std::string& path, const std::string& file_name)
 {
-    bool ret = true;
-    char* hidden = gethidden(path);
+    std::string file_path = Glib::build_filename(path, ".hidden");
 
-    if (!(hidden && ishidden(hidden, file_name)))
-    {
-        char* buf = g_strdup_printf("%s\n", file_name);
-        char* file_path = g_build_filename(path, ".hidden", nullptr);
-        int fd = open(file_path, O_WRONLY | O_CREAT | O_APPEND, 0644);
-        g_free(file_path);
+    std::ofstream file(file_path);
+    if (!file.is_open())
+        return false;
+    file << fmt::format("{}\n", file_name);
+    file.close();
 
-        if (fd != -1)
-        {
-            if (write(fd, buf, strlen(buf)) == -1)
-                ret = false;
-            close(fd);
-        }
-        else
-            ret = false;
-
-        g_free(buf);
-    }
-
-    if (hidden)
-        g_free(hidden);
-    return ret;
+    return true;
 }
 
 static void
@@ -626,7 +587,7 @@ vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
         if (dir_content)
         {
             // MOD  dir contains .hidden file?
-            char* hidden = gethidden(dir->path);
+            std::string hidden = gethidden(dir->path);
 
             while (!vfs_async_task_is_cancelled(dir->task) &&
                    (file_name = g_dir_read_name(dir_content)))
@@ -636,11 +597,12 @@ vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
                     continue;
 
                 // MOD ignore if in .hidden
-                if (hidden && ishidden(hidden, file_name))
+                if (ishidden(hidden, file_name))
                 {
                     dir->xhidden_count++;
                     continue;
                 }
+
                 VFSFileInfo* file = vfs_file_info_new();
                 if (vfs_file_info_get(file, full_path, file_name))
                 {
@@ -660,8 +622,6 @@ vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
                 g_free(full_path);
             }
             g_dir_close(dir_content);
-            if (hidden)
-                g_free(hidden);
         }
     }
     return nullptr;
