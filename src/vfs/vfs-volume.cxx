@@ -2603,7 +2603,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         /* get device_file from ~/.mtab.fuseiso
          * hack - sleep for 0.2 seconds here because sometimes the
          * .mtab.fuseiso file is not updated until after new device is detected. */
-        g_usleep(200000);
+        Glib::usleep(200000);
         std::string mtab_file = Glib::build_filename(vfs_user_home_dir(), ".mtab.fuseiso");
         char* new_name = nullptr;
         if (path_is_mounted_mtab(mtab_file.c_str(), point, &new_name, nullptr) && new_name &&

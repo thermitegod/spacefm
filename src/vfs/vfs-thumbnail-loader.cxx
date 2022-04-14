@@ -179,7 +179,7 @@ thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
                 vfs_file_info_load_thumbnail(req->file, full_path.c_str(), load_big);
                 // Slow down for debugging.
                 // LOG_DEBUG("DELAY!!");
-                // g_usleep(G_USEC_PER_SEC/2);
+                // Glib::usleep(G_USEC_PER_SEC/2);
                 // LOG_DEBUG("thumbnail loaded: %s", req->file);
             }
             need_update = true;
