@@ -371,8 +371,7 @@ load_settings(const char* config_dir)
         if (std::filesystem::is_directory(xdg_path))
         {
             command = fmt::format("cp -r {} '{}'", xdg_path, settings_config_dir);
-            print_command(command);
-            g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
+            Glib::spawn_command_line_sync(command);
 
             std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
         }
@@ -402,7 +401,7 @@ load_settings(const char* config_dir)
                                   "git config commit.gpgsign false\"",
                                   BASHPATH,
                                   settings_config_dir);
-            g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
+            Glib::spawn_command_line_sync(command);
             LOG_INFO("Initialized git repo at: {}", git_path);
         }
         else if (G_LIKELY(std::filesystem::exists(session)))
@@ -411,7 +410,7 @@ load_settings(const char* config_dir)
                                   "git commit -m 'Session File' 1>/dev/null\"",
                                   BASHPATH,
                                   settings_config_dir);
-            g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
+            Glib::spawn_command_line_sync(command);
             LOG_INFO("Updated git copy of: {}", session);
         }
         else if (std::filesystem::exists(git_path))
@@ -419,8 +418,7 @@ load_settings(const char* config_dir)
             command = fmt::format("{} -c \"cd {} && git checkout session\"",
                                   BASHPATH,
                                   settings_config_dir);
-            print_command(command);
-            g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
+            Glib::spawn_command_line_sync(command);
             LOG_INFO("Checked out: {}", session);
         }
     }
@@ -2254,11 +2252,11 @@ xset_custom_copy_files(XSet* src, XSet* dest)
     std::string path_dest;
     std::string command;
 
-    char* stdout = nullptr;
-    char* stderr = nullptr;
-    std::string msg;
-    bool ret;
+    std::string* standard_output = nullptr;
+    std::string* standard_error = nullptr;
     int exit_status;
+
+    std::string msg;
 
     // LOG_INFO("xset_custom_copy_files( {}, {} )", src->name, dest->name);
 
@@ -2279,22 +2277,16 @@ xset_custom_copy_files(XSet* src, XSet* dest)
 
     // LOG_INFO("    path_dest={}", path_dest );
     print_command(command);
-    ret = g_spawn_command_line_sync(command.c_str(), &stdout, &stderr, &exit_status, nullptr);
-    LOG_INFO("{}{}", stdout, stderr);
-
-    if (!ret || (exit_status && WIFEXITED(exit_status)))
+    Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);
+    LOG_INFO("{}{}", *standard_output, *standard_error);
+    if (exit_status && WIFEXITED(exit_status))
     {
-        msg = fmt::format("An error occured copying command files\n\n{}", stderr ? stderr : "");
+        msg = fmt::format("An error occured copying command files\n\n{}", *standard_error);
         xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", GTK_BUTTONS_OK, msg);
     }
-    if (stderr)
-        g_free(stderr);
-    if (stdout)
-        g_free(stdout);
-    stderr = stdout = nullptr;
     command = fmt::format("chmod -R go-rwx {}", path_dest);
     print_command(command);
-    g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
+    Glib::spawn_command_line_sync(command);
 
     // copy data dir
     XSet* mset = xset_get_plugin_mirror(src);
@@ -2303,24 +2295,17 @@ xset_custom_copy_files(XSet* src, XSet* dest)
     {
         path_dest = Glib::build_filename(xset_get_config_dir(), "plugin-data", dest->name);
         command = fmt::format("cp -a {} {}", path_src, path_dest);
-        stderr = stdout = nullptr;
         print_command(command);
-        ret = g_spawn_command_line_sync(command.c_str(), &stdout, &stderr, &exit_status, nullptr);
-        LOG_INFO("{}{}", stdout, stderr);
-        if (!ret || (exit_status && WIFEXITED(exit_status)))
+        Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);
+        LOG_INFO("{}{}", *standard_output, *standard_error);
+        if (exit_status && WIFEXITED(exit_status))
         {
-            msg = fmt::format("An error occured copying command data files\n\n{}",
-                              stderr ? stderr : "");
+            msg = fmt::format("An error occured copying command data files\n\n{}", *standard_error);
             xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", GTK_BUTTONS_OK, msg);
         }
-        if (stderr)
-            g_free(stderr);
-        if (stdout)
-            g_free(stdout);
-        stderr = stdout = nullptr;
         command = fmt::format("chmod -R go-rwx {}", path_dest);
         print_command(command);
-        g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
+        Glib::spawn_command_line_sync(command);
     }
 }
 
@@ -3064,8 +3049,6 @@ xset_custom_export_files(XSet* set, const char* plug_dir)
 {
     char* path_src;
     char* path_dest;
-    char* stdout = nullptr;
-    char* stderr = nullptr;
 
     if (set->plugin)
     {
@@ -3098,17 +3081,14 @@ xset_custom_export_files(XSet* set, const char* plug_dir)
         return true;
     }
 
+    int exit_status;
     std::string command = fmt::format("cp -a {} {}", path_src, path_dest);
     g_free(path_src);
     g_free(path_dest);
     print_command(command);
-    bool ret = g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
-    if (stderr)
-        g_free(stderr);
-    if (stdout)
-        g_free(stdout);
+    Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
 
-    return ret;
+    return !!exit_status;
 }
 
 static bool

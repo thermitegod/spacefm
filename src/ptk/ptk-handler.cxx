@@ -27,6 +27,8 @@
 
 #include <fnmatch.h>
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -1264,28 +1266,23 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     g_free(path_src);
 
     // run command
-    char* stdout = nullptr;
-    char* stderr = nullptr;
-    std::string msg;
-    bool ret;
+    std::string* standard_output = nullptr;
+    std::string* standard_error = nullptr;
     int exit_status;
-    print_command(command);
-    ret = g_spawn_command_line_sync(command.c_str(), &stdout, &stderr, &exit_status, nullptr);
-    LOG_INFO("{}{}", stdout, stderr);
 
-    if (!ret || (exit_status && WIFEXITED(exit_status)))
+    std::string msg;
+
+    print_command(command);
+    Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);
+    LOG_INFO("{}{}", *standard_output, *standard_error);
+    if (exit_status && WIFEXITED(exit_status))
     {
-        msg = fmt::format("An error occured copying command files\n\n{}", stderr ? stderr : "");
+        msg = fmt::format("An error occured copying command files\n\n{}", *standard_error);
         xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", GTK_BUTTONS_OK, msg);
     }
-    if (stderr)
-        g_free(stderr);
-    if (stdout)
-        g_free(stdout);
-    stderr = stdout = nullptr;
     command = g_strdup_printf("chmod -R go-rwx %s", path_dest);
     print_command(command);
-    g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
+    Glib::spawn_command_line_sync(command);
     g_free(path_dest);
 
     // add to handler list

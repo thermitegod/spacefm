@@ -1502,7 +1502,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 
                 // need to copy
                 command = fmt::format("cp -a  {} {}", share_desktop, path);
-                g_spawn_command_line_sync(command.c_str(), nullptr, nullptr, nullptr, nullptr);
+                Glib::spawn_command_line_sync(command);
                 g_free(share_desktop);
                 if (!std::filesystem::exists(path))
                     return;

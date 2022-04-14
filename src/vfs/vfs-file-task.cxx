@@ -1062,48 +1062,49 @@ vfs_file_task_chown_chmod(char* src_file, VFSFileTask* task)
 
 char*
 vfs_file_task_get_cpids(GPid pid)
-{ // get child pids recursively as multi-line string
+{
+    // get child pids recursively as multi-line string
     if (!pid)
         return nullptr;
 
-    char* stdout = nullptr;
+    std::string* standard_output = nullptr;
+    int exit_status;
 
     std::string command = fmt::format("/bin/ps h --ppid {} -o pid", pid);
     print_command(command);
-    bool ret = g_spawn_command_line_sync(command.c_str(), &stdout, nullptr, nullptr, nullptr);
-    if (ret && stdout && stdout[0] != '\0' && strchr(stdout, '\n'))
+    Glib::spawn_command_line_sync(command.c_str(), standard_output, nullptr, &exit_status);
+
+    if (standard_output->empty())
+        return nullptr;
+
+    char* cpids = g_strdup(standard_output->c_str());
+    // get grand cpids recursively
+    char* pids = g_strdup(standard_output->c_str());
+    char* nl;
+    while ((nl = strchr(pids, '\n')))
     {
-        char* cpids = g_strdup(stdout);
-        // get grand cpids recursively
-        char* pids = stdout;
-        char* nl;
-        while ((nl = strchr(pids, '\n')))
+        nl[0] = '\0';
+        char* pida = g_strdup(pids);
+        nl[0] = '\n';
+        pids = nl + 1;
+        GPid pidi = strtol(pida, nullptr, 10);
+        g_free(pida);
+        if (pidi)
         {
-            nl[0] = '\0';
-            char* pida = g_strdup(pids);
-            nl[0] = '\n';
-            pids = nl + 1;
-            GPid pidi = strtol(pida, nullptr, 10);
-            g_free(pida);
-            if (pidi)
+            char* gcpids;
+            if ((gcpids = vfs_file_task_get_cpids(pidi)))
             {
-                char* gcpids;
-                if ((gcpids = vfs_file_task_get_cpids(pidi)))
-                {
-                    char* old_cpids = cpids;
-                    cpids = g_strdup_printf("%s%s", old_cpids, gcpids);
-                    g_free(old_cpids);
-                    g_free(gcpids);
-                }
+                char* old_cpids = cpids;
+                cpids = g_strdup_printf("%s%s", old_cpids, gcpids);
+                g_free(old_cpids);
+                g_free(gcpids);
             }
         }
-        g_free(stdout);
-        // LOG_INFO("vfs_file_task_get_cpids {}[{}]", pid, cpids );
-        return cpids;
     }
-    if (stdout)
-        g_free(stdout);
-    return nullptr;
+    g_free(pids);
+
+    // LOG_INFO("vfs_file_task_get_cpids {}[{}]", pid, cpids );
+    return cpids;
 }
 
 void
@@ -1267,21 +1268,12 @@ get_xxhash(const char* path)
         return nullptr;
     }
 
-    char* stdout;
-    char* sum = nullptr;
+    std::string* standard_output = nullptr;
     std::string command = fmt::format("{} {}", xxhash, path);
     print_command(command);
-    if (g_spawn_command_line_sync(command.c_str(), &stdout, nullptr, nullptr, nullptr))
-    {
-        sum = g_strndup(stdout, 64);
-        g_free(stdout);
-        if (strlen(sum) != 64)
-        {
-            g_free(sum);
-            sum = nullptr;
-        }
-    }
-    return sum;
+    Glib::spawn_command_line_sync(command, standard_output);
+
+    return g_strdup(standard_output->c_str());
 }
 
 static void

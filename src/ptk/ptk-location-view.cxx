@@ -1938,17 +1938,18 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 
     // no handler command - show default properties
     char* df;
-    char* udisks;
     char* lsof;
     char* infobash;
     char* path;
     char* flags;
     char* old_flags;
-    char* uuid = nullptr;
-    char* fstab = nullptr;
-    char* info;
 
-    char* fstab_path = g_build_filename(SYSCONFDIR, "fstab", nullptr);
+    std::string info;
+
+    std::string* uuid = nullptr;
+    std::string* fstab = nullptr;
+
+    std::string fstab_path = Glib::build_filename(SYSCONFDIR, "fstab");
 
     char* base = g_path_get_basename(vol->device_file);
     if (base)
@@ -1960,29 +1961,24 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                               BASHPATH,
                               base);
         print_command(command);
-        g_spawn_command_line_sync(command.c_str(), &uuid, nullptr, nullptr, nullptr);
+        Glib::spawn_command_line_sync(command, uuid);
 
-        if (uuid && strlen(uuid) < 9)
-        {
-            g_free(uuid);
+        if (uuid && uuid->length() < 9)
             uuid = nullptr;
-        }
+
         if (uuid)
         {
-            if ((old_flags = strchr(uuid, '\n')))
-                old_flags[0] = '\0';
-
             command = fmt::format("{} -c \"cat {} | grep -e '{}' -e '{}'\"",
                                   BASHPATH,
                                   fstab_path,
-                                  uuid,
+                                  *uuid,
                                   vol->device_file);
             // command = g_strdup_printf( "bash -c \"cat /etc/fstab | grep -e ^[#\\ ]*UUID=$(/bin/ls
             // -l
             // /dev/disk/by-uuid | grep \\.\\./%s | sed 's/.* \\([a-fA-F0-9\-]*\\) -> \.*/\\1/')\\
             // */ -e '^[# ]*%s '\"", base, vol->device_file );
             print_command(command);
-            g_spawn_command_line_sync(command.c_str(), &fstab, nullptr, nullptr, nullptr);
+            Glib::spawn_command_line_sync(command, fstab);
         }
 
         if (!fstab)
@@ -1990,41 +1986,26 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
             command =
                 fmt::format("{} -c \"cat {} | grep '{}'\"", BASHPATH, fstab_path, vol->device_file);
             print_command(command);
-            g_spawn_command_line_sync(command.c_str(), &fstab, nullptr, nullptr, nullptr);
+            Glib::spawn_command_line_sync(command, fstab);
         }
 
-        if (fstab && strlen(fstab) < 9)
-        {
-            g_free(fstab);
+        if (fstab && fstab->length() < 9)
             fstab = nullptr;
-        }
     }
-    g_free(fstab_path);
 
     // LOG_INFO("dev   = {}", vol->device_file);
     // LOG_INFO("uuid  = {}", uuid);
     // LOG_INFO("fstab = {}", fstab);
     if (uuid && fstab)
-    {
-        info =
-            g_strdup_printf("echo FSTAB ; echo '%s'; echo INFO ; echo 'UUID=%s' ; ", fstab, uuid);
-        g_free(uuid);
-        g_free(fstab);
-    }
+        info = fmt::format("echo FSTAB ; echo '{}'; echo INFO ; echo 'UUID={}' ; ", *fstab, *uuid);
     else if (uuid && !fstab)
-    {
-        info = g_strdup_printf(
-            "echo FSTAB ; echo '( not found )' ; echo ; echo INFO ; echo 'UUID=%s' ; ",
-            uuid);
-        g_free(uuid);
-    }
+        info =
+            fmt::format("echo FSTAB ; echo '( not found )' ; echo ; echo INFO ; echo 'UUID={}' ; ",
+                        *uuid);
     else if (!uuid && fstab)
-    {
-        info = g_strdup_printf("echo FSTAB ; echo '%s' ; echo INFO ; ", fstab);
-        g_free(fstab);
-    }
+        info = fmt::format("echo FSTAB ; echo '{}' ; echo INFO ; ", *fstab);
     else
-        info = g_strdup_printf("echo FSTAB ; echo '( not found )' ; echo ; echo INFO ; ");
+        info = ("echo FSTAB ; echo '( not found )' ; echo ; echo INFO ; ");
 
     flags = g_strdup_printf("echo %s ; echo '%s'       ", "DEVICE", vol->device_file);
     if (vol->is_removable)
@@ -2162,7 +2143,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     }
 
     std::string udisks_info = vfs_volume_device_info(vol);
-    udisks = g_strdup_printf("%s\ncat << EOF\n%s\nEOF\necho ; ", info, udisks_info.c_str());
+    std::string udisks = fmt::format("{}\ncat << EOF\n{}\nEOF\necho ; ", info, udisks_info);
 
     if (vol->is_mounted)
     {
@@ -2210,7 +2191,6 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     // task->task->exec_keep_tmp = true;
     ptk_file_task_run(task);
     g_free(df);
-    g_free(udisks);
     g_free(lsof);
     g_free(infobash);
 }
