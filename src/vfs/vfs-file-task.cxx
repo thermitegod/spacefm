@@ -16,6 +16,8 @@
 #include <string>
 #include <filesystem>
 
+#include <vector>
+
 #include <iostream>
 #include <fstream>
 
@@ -33,6 +35,8 @@
 #include "vfs/vfs-volume.hxx"
 
 #include "utils.hxx"
+
+#include "vfs/vfs-user-dir.hxx"
 
 #include "vfs/vfs-file-task.hxx"
 #include "vfs/vfs-file-trash.hxx"
@@ -1295,13 +1299,12 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
 {
     // this function is now thread safe but is not currently run in
     // another thread because gio adds watches to main loop thread anyway
-    char* su = nullptr;
+    std::string tmp;
+    std::string su;
     std::string msg;
-    char* terminal = nullptr;
-    char** terminalv = nullptr;
+    std::string terminal;
     char* sum_script = nullptr;
     GtkWidget* parent = nullptr;
-    char buf[PATH_MAX + 1];
 
     // LOG_INFO("vfs_file_task_exec");
     // task->exec_keep_tmp = true;
@@ -1334,7 +1337,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         {
             // get su programs
             su = get_valid_su();
-            if (!su)
+            if (su.empty())
             {
                 msg = "Configure a valid Terminal SU command in View|Preferences|Advanced";
                 LOG_WARN(msg);
@@ -1345,23 +1348,25 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
                                 "Terminal SU Not Available",
                                 GTK_BUTTONS_OK,
                                 msg);
-                goto _exit_with_error_lean;
+                call_state_callback(task, VFS_FILE_TASK_FINISH);
+                // LOG_INFO("vfs_file_task_exec DONE ERROR");
+                return;
             }
         }
     }
 
     // make tmpdir
-    const char* tmp;
     tmp = xset_get_user_tmp_dir();
-
-    if (!tmp || !std::filesystem::is_directory(tmp))
+    if (!std::filesystem::is_directory(tmp))
     {
         msg = "Cannot create temporary directory";
         LOG_WARN(msg);
         // do not use xset_msg_dialog if non-main thread
         // vfs_file_task_exec_error(task, 0, str);
         xset_msg_dialog(parent, GTK_MESSAGE_ERROR, "Error", GTK_BUTTONS_OK, msg);
-        goto _exit_with_error_lean;
+        call_state_callback(task, VFS_FILE_TASK_FINISH);
+        // LOG_INFO("vfs_file_task_exec DONE ERROR");
+        return;
     }
 
     // get terminal
@@ -1373,13 +1378,8 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     if (task->exec_terminal)
     {
         // get terminal
-        char* str = g_strdup(xset_get_s("main_terminal"));
-        g_strstrip(str);
-        terminalv = g_strsplit(str, " ", 0);
-        g_free(str);
-        if (terminalv && terminalv[0] && terminalv[0][0] != '\0')
-            terminal = g_find_program_in_path(terminalv[0]);
-        if (!(terminal && terminal[0] == '/'))
+        terminal = Glib::find_program_in_path(xset_get_s("main_terminal"));
+        if (terminal.empty())
         {
             msg = "Please set a valid terminal program in View|Preferences|Advanced";
             LOG_WARN(msg);
@@ -1390,15 +1390,10 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
                             "Terminal Not Available",
                             GTK_BUTTONS_OK,
                             msg);
-            goto _exit_with_error_lean;
-        }
-        // resolve x-terminal-emulator link (may be recursive link)
-        else if (strstr(terminal, "x-terminal-emulator") && realpath(terminal, buf) != nullptr)
-        {
-            g_free(terminal);
-            g_free(terminalv[0]);
-            terminal = g_strdup(buf);
-            terminalv[0] = g_strdup(buf);
+
+            call_state_callback(task, VFS_FILE_TASK_FINISH);
+            // LOG_INFO("vfs_file_task_exec DONE ERROR");
+            return;
         }
     }
 
@@ -1409,7 +1404,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         do
         {
             std::string hexname = fmt::format("{}-tmp.sh", randhex8());
-            task->exec_script = g_build_filename(tmp, hexname.c_str(), nullptr);
+            task->exec_script = Glib::build_filename(tmp, hexname);
         } while (std::filesystem::exists(task->exec_script));
 
         // open buffer
@@ -1422,9 +1417,22 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         if (task->exec_export && (task->exec_browser || task->exec_desktop))
         {
             if (task->exec_browser)
+            {
                 main_write_exports(task, task->current_dest.c_str(), buf);
+            }
             else
-                goto _exit_with_error;
+            {
+                vfs_file_task_exec_error(task, errno, "Error writing temporary file");
+
+                if (!task->exec_keep_tmp)
+                {
+                    if (std::filesystem::exists(task->exec_script))
+                        std::filesystem::remove(task->exec_script);
+                }
+                call_state_callback(task, VFS_FILE_TASK_FINISH);
+                // LOG_INFO("vfs_file_task_exec DONE ERROR");
+                return;
+            }
         }
         else
         {
@@ -1468,7 +1476,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         buf.append(fmt::format("{}\nfm_err=$?\n", task->exec_command));
 
         // build - press enter to close
-        if (terminal && task->exec_keep_terminal)
+        if (!terminal.empty() && task->exec_keep_terminal)
         {
             if (geteuid() == 0 || ztd::same(task->exec_as_user, "root"))
                 buf.append(fmt::format("\necho;read -p '[ Finished ]  Press Enter to close: '\n"));
@@ -1488,9 +1496,23 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
 
         std::ofstream file(task->exec_script);
         if (file.is_open())
+        {
             file << buf;
+        }
         else
-            goto _exit_with_error;
+        {
+            vfs_file_task_exec_error(task, errno, "Error writing temporary file");
+
+            if (!task->exec_keep_tmp)
+            {
+                if (std::filesystem::exists(task->exec_script))
+                    std::filesystem::remove(task->exec_script);
+            }
+            call_state_callback(task, VFS_FILE_TASK_FINISH);
+            // LOG_INFO("vfs_file_task_exec DONE ERROR");
+            return;
+        }
+
         file.close();
 
         // set permissions
@@ -1504,46 +1526,34 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     task->percent = 50;
 
     // Spawn
-    GPid pid;
-    char* argv[35];
+    std::vector<std::string> argv;
+
+    Glib::Pid pid;
     int out, err;
-    int a;
-    char* use_su;
+    std::string use_su;
     bool single_arg;
     char* auth;
     int i;
 
-    a = 0;
     single_arg = false;
     auth = nullptr;
 
-    if (terminal)
+    if (!terminal.empty())
     {
         // terminal
-        argv[a++] = terminal;
-
-        // terminal options - add <=9 options
-        for (i = 0; terminalv[i]; i++)
-        {
-            if (i == 0 || a > 9 || terminalv[i][0] == '\0')
-                g_free(terminalv[i]);
-            else
-                argv[a++] = terminalv[i]; // steal
-        }
-        g_free(terminalv); // all strings freed or stolen
-        terminalv = nullptr;
+        argv.push_back(terminal);
 
         // automatic terminal options
-        if (strstr(terminal, "xfce4-terminal") || g_str_has_suffix(terminal, "/terminal"))
-            argv[a++] = g_strdup("--disable-server");
+        if (ztd::contains(terminal, "xfce4-terminal") || ztd::contains(terminal, "/terminal"))
+            argv.push_back("--disable-server");
 
         // add option to execute command in terminal
-        if (strstr(terminal, "xfce4-terminal") || strstr(terminal, "terminator") ||
-            g_str_has_suffix(terminal, "/terminal")) // xfce
-            argv[a++] = g_strdup("-x");
-        else if (strstr(terminal, "sakura"))
+        if (ztd::contains(terminal, "xfce4-terminal") || ztd::contains(terminal, "terminator") ||
+            ztd::endswith(terminal, "/terminal")) // xfce
+            argv.push_back("-x");
+        else if (ztd::contains(terminal, "sakura"))
         {
-            argv[a++] = g_strdup("-x");
+            argv.push_back("-x");
             single_arg = true;
         }
         else
@@ -1551,7 +1561,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
              * others needs the entire command quoted and passed as a single
              * argument to -e.  SpaceFM uses spacefm-auth to run commands,
              * so only a single argument is ever used as the command. */
-            argv[a++] = g_strdup("-e");
+            argv.push_back("-e");
 
         use_su = su;
     }
@@ -1559,20 +1569,20 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     if (!task->exec_as_user.empty())
     {
         // su
-        argv[a++] = g_strdup(use_su);
+        argv.push_back(use_su);
         if (!ztd::same(task->exec_as_user, "root"))
         {
-            if (strcmp(use_su, "/bin/su"))
-                argv[a++] = g_strdup("-u");
-            argv[a++] = g_strdup(task->exec_as_user.c_str());
+            if (!ztd::same(use_su, "/bin/su"))
+                argv.push_back("-u");
+            argv.push_back(task->exec_as_user);
         }
 
-        if (!strcmp(use_su, "/bin/su"))
+        if (ztd::same(use_su, "/bin/su"))
         {
             // /bin/su
-            argv[a++] = g_strdup("-s");
-            argv[a++] = g_strdup(BASHPATH); // shell spec
-            argv[a++] = g_strdup("-c");
+            argv.push_back("-s");
+            argv.push_back(BASHPATH);
+            argv.push_back("-c");
             single_arg = true;
         }
     }
@@ -1594,105 +1604,67 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         // spacefm-auth
         if (single_arg)
         {
-            argv[a++] = g_strdup_printf("%s %s %s %s %s",
-                                        BASHPATH,
-                                        auth,
-                                        ztd::same(task->exec_as_user, "root") ? "root" : "",
-                                        task->exec_script.c_str(),
-                                        sum_script);
+            tmp = fmt::format("{} {} {} {} {}",
+                              BASHPATH,
+                              auth,
+                              ztd::same(task->exec_as_user, "root") ? "root" : "",
+                              task->exec_script,
+                              sum_script);
+            argv.push_back(tmp);
             g_free(auth);
         }
         else
         {
-            argv[a++] = g_strdup(BASHPATH);
-            argv[a++] = auth;
+            argv.push_back(BASHPATH);
+            argv.push_back(auth);
             if (ztd::same(task->exec_as_user, "root"))
-                argv[a++] = g_strdup("root");
-            argv[a++] = g_strdup(task->exec_script.c_str());
-            argv[a++] = g_strdup(sum_script);
+                argv.push_back("root");
+            argv.push_back(task->exec_script);
+            argv.push_back(sum_script);
         }
         g_free(sum_script);
     }
     else if (task->exec_direct)
     {
         // add direct args - not currently used
-        if (single_arg)
-        {
-            argv[a++] = g_strjoinv(" ", &task->exec_argv[0]);
-            for (i = 0; i < 7; i++)
-            {
-                if (!task->exec_argv[i])
-                    break;
-                g_free(task->exec_argv[i]);
-            }
-        }
-        else
-        {
-            for (i = 0; i < 7; i++)
-            {
-                if (!task->exec_argv[i])
-                    break;
-                argv[a++] = task->exec_argv[i];
-            }
-        }
+        argv = task->exec_argv;
     }
     else
     {
-        if (single_arg)
+        argv.push_back(BASHPATH);
+        argv.push_back(task->exec_script);
+        argv.push_back("run");
+    }
+
+    try
+    {
+        if (task->exec_sync)
         {
-            argv[a++] = g_strdup_printf("%s %s run", BASHPATH, task->exec_script.c_str());
+            Glib::spawn_async_with_pipes(task->dest_dir,
+                                         argv,
+                                         Glib::SpawnFlags::DO_NOT_REAP_CHILD,
+                                         Glib::SlotSpawnChildSetup(),
+                                         &pid,
+                                         nullptr,
+                                         &out,
+                                         &err);
         }
         else
         {
-            argv[a++] = g_strdup(BASHPATH);
-            argv[a++] = g_strdup(task->exec_script.c_str());
-            argv[a++] = g_strdup("run");
+            Glib::spawn_async_with_pipes(task->dest_dir,
+                                         argv,
+                                         Glib::SpawnFlags::DO_NOT_REAP_CHILD,
+                                         Glib::SlotSpawnChildSetup(),
+                                         &pid,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr);
         }
     }
-
-    argv[a++] = nullptr;
-    if (su)
-        g_free(su);
-
-    bool result;
-
-    char* first_arg;
-    first_arg = g_strdup(argv[0]);
-    if (task->exec_sync)
+    catch (const Glib::SpawnError& e)
     {
-        result =
-            g_spawn_async_with_pipes(!task->dest_dir.empty() ? task->dest_dir.c_str() : nullptr,
-                                     argv,
-                                     nullptr,
-                                     G_SPAWN_DO_NOT_REAP_CHILD,
-                                     nullptr,
-                                     nullptr,
-                                     &pid,
-                                     nullptr,
-                                     &out,
-                                     &err,
-                                     nullptr);
-    }
-    else
-    {
-        result =
-            g_spawn_async_with_pipes(!task->dest_dir.empty() ? task->dest_dir.c_str() : nullptr,
-                                     argv,
-                                     nullptr,
-                                     G_SPAWN_DO_NOT_REAP_CHILD,
-                                     nullptr,
-                                     nullptr,
-                                     &pid,
-                                     nullptr,
-                                     nullptr,
-                                     nullptr,
-                                     nullptr);
-    }
+        LOG_ERROR("    glib_error_code={}", e.code());
 
-    print_task_command_spawn(argv, pid);
-
-    if (!result)
-    {
         if (errno)
             LOG_INFO("    result={} ( {} )", errno, g_strerror(errno));
 
@@ -1701,15 +1673,19 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
             if (std::filesystem::exists(task->exec_script))
                 std::filesystem::remove(task->exec_script);
         }
-        msg = fmt::format(
-            "Error executing '{}'\nSee stdout (run spacefm in a terminal) for debug info",
-            first_arg);
-        g_free(first_arg);
+        std::string cmd = ztd::join(argv, " ");
+        msg = fmt::format("Error executing '{}'\nGlib Spawn Error Code {}, {}\nRun in a terminal "
+                          "for full debug info\n",
+                          cmd,
+                          e.code(),
+                          std::string(Glib::strerror(e.code())));
         vfs_file_task_exec_error(task, errno, msg);
         call_state_callback(task, VFS_FILE_TASK_FINISH);
+        // LOG_INFO("vfs_file_task_exec DONE ERROR");
         return;
     }
-    g_free(first_arg);
+
+    print_task_command_spawn(argv, pid);
 
     if (!task->exec_sync)
     {
@@ -1760,24 +1736,6 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
 
     // LOG_INFO("vfs_file_task_exec DONE");
     return; // exit thread
-
-    // out and err can/should be closed too?
-
-_exit_with_error:
-    vfs_file_task_exec_error(task, errno, "Error writing temporary file");
-    g_string_free((GString*)buf, true);
-
-    if (!task->exec_keep_tmp)
-    {
-        if (std::filesystem::exists(task->exec_script))
-            std::filesystem::remove(task->exec_script);
-    }
-_exit_with_error_lean:
-    g_strfreev(terminalv);
-    g_free(terminal);
-    g_free(su);
-    call_state_callback(task, VFS_FILE_TASK_FINISH);
-    // LOG_INFO("vfs_file_task_exec DONE ERROR");
 }
 
 static bool

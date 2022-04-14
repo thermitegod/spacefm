@@ -19,7 +19,7 @@
 
 void print_command(const std::string& command);
 void print_task_command(const char* ptask, const char* cmd);
-void print_task_command_spawn(char* argv[], int pid);
+void print_task_command_spawn(std::vector<std::string> argv, int pid);
 
 char* randhex8();
 bool have_rw_access(const char* path);
@@ -38,4 +38,4 @@ std::string clean_label(const std::string& menu_label, bool kill_special, bool e
 
 char* unescape(const char* t);
 
-char* get_valid_su();
+std::string get_valid_su();

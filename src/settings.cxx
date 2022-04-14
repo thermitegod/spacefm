@@ -469,9 +469,7 @@ load_settings(const char* config_dir)
     }
 
     // MOD su command discovery (sets default)
-    char* set_su = get_valid_su();
-    if (set_su)
-        g_free(set_su);
+    get_valid_su();
 
     // MOD terminal discovery
     char* terminal = xset_get_s("main_terminal");

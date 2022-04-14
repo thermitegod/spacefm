@@ -44,16 +44,13 @@ print_task_command(const char* ptask, const char* cmd)
 }
 
 void
-print_task_command_spawn(char* argv[], int pid)
+print_task_command_spawn(std::vector<std::string> argv, int pid)
 {
     LOG_INFO("SPAWN=");
-    int i = 0;
-    while (argv[i])
+    for (std::string arg: argv)
     {
-        LOG_INFO("  {}", argv[i]);
-        i++;
+        LOG_INFO("  {}", arg);
     }
-
     LOG_INFO("    pid = {}", pid);
 }
 
@@ -245,42 +242,22 @@ unescape(const char* t)
     return s;
 }
 
-char*
-get_valid_su() // may return nullptr
+std::string
+get_valid_su()
 {
-    unsigned int i;
-    char* use_su = nullptr;
-
-    use_su = g_strdup(xset_get_s("su_command"));
-
-    if (use_su)
+    std::string use_su;
+    if (!xset_get_s("su_command"))
     {
-        // is Prefs use_su in list of valid su commands?
-        for (i = 0; i < G_N_ELEMENTS(su_commands); i++)
+        for (std::size_t i = 0; i < G_N_ELEMENTS(su_commands); i++)
         {
-            if (!strcmp(su_commands[i], use_su))
+            use_su = Glib::find_program_in_path(su_commands[i]);
+            if (!use_su.empty())
                 break;
         }
-        if (i == G_N_ELEMENTS(su_commands))
-        {
-            // not in list - invalid
-            g_free(use_su);
-            use_su = nullptr;
-        }
+        if (use_su.empty())
+            use_su = su_commands[0];
+        xset_set("su_command", "s", use_su.c_str());
     }
-    if (!use_su)
-    {
-        // discovery
-        for (i = 0; i < G_N_ELEMENTS(su_commands); i++)
-        {
-            if ((use_su = g_find_program_in_path(su_commands[i])))
-                break;
-        }
-        if (!use_su)
-            use_su = g_strdup(su_commands[0]);
-        xset_set("su_command", "s", use_su);
-    }
-    char* su_path = g_find_program_in_path(use_su);
-    g_free(use_su);
+    std::string su_path = Glib::find_program_in_path(use_su);
     return su_path;
 }

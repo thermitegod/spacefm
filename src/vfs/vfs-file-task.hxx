@@ -17,6 +17,11 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
+#include <glibmm.h>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -152,16 +157,16 @@ struct VFSFileTask
     bool exec_keep_terminal;
     bool exec_export;
     bool exec_direct;
-    char* exec_argv[7]; // for exec_direct, command ignored
-                        // for su commands, must use bash -c
-                        // as su does not execute binaries
+    std::vector<std::string> exec_argv; // for exec_direct, command ignored
+                                        // for su commands, must use bash -c
+                                        // as su does not execute binaries
     std::string exec_script;
     bool exec_keep_tmp; // diagnostic to keep temp files
     void* exec_browser;
     void* exec_desktop;
     std::string exec_as_user;
     std::string exec_icon;
-    GPid exec_pid;
+    Glib::Pid exec_pid;
     int exec_exit_status;
     unsigned int child_watch;
     bool exec_is_error;

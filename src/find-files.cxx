@@ -21,7 +21,11 @@
 #include <string>
 #include <filesystem>
 
+#include <vector>
+
 #include <chrono>
+
+#include <glibmm.h>
 
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -304,33 +308,28 @@ get_date_offset(GtkCalendar* calendar)
     return std::abs(offset);
 }
 
-static char**
+static std::vector<std::string>
 compose_command(FindFile* data)
 {
-    GArray* argv = g_array_sized_new(true, true, sizeof(char*), 10);
-    char* arg;
-    char* tmp;
+    std::vector<std::string> argv;
+    std::string tmp;
+
     GtkTreeIter it;
     char size_units[] = {"ckMG"};
-    int idx;
-    bool print = false;
 
-    arg = g_strdup("find");
-    g_array_append_val(argv, arg);
-    arg = g_strdup("-H");
-    g_array_append_val(argv, arg);
+    argv.push_back("find");
+    argv.push_back("-H");
 
     if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(data->places_list), &it))
     {
         do
         {
+            char* arg;
             gtk_tree_model_get(GTK_TREE_MODEL(data->places_list), &it, 0, &arg, -1);
-            if (arg)
+            if (arg && *arg)
             {
-                if (*arg)
-                    g_array_append_val(argv, arg);
-                else
-                    g_free(arg);
+                argv.push_back(arg);
+                g_free(arg);
             }
         } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(data->places_list), &it));
     }
@@ -338,168 +337,134 @@ compose_command(FindFile* data)
     /* if include sub is excluded */ // MOD added
     if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->include_sub)))
     {
-        arg = g_strdup("-maxdepth");
-        g_array_append_val(argv, arg);
-        arg = g_strdup("1");
-        g_array_append_val(argv, arg);
+        argv.push_back("-maxdepth");
+        argv.push_back("1");
     }
 
     /* if hidden files is excluded */
     if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->search_hidden)))
     {
-        arg = g_strdup("-name");
-        g_array_append_val(argv, arg);
-        arg = g_strdup(".*");
-        g_array_append_val(argv, arg);
-        arg = g_strdup("-prune");
-        g_array_append_val(argv, arg);
-        arg = g_strdup("-or");
-        g_array_append_val(argv, arg);
+        argv.push_back("-name");
+        argv.push_back(".");
+        argv.push_back("-prune");
+        argv.push_back("-or");
     }
 
     /* if lower limit of file size is set */
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_size_lower)))
     {
-        arg = g_strdup("-size");
-        g_array_append_val(argv, arg);
-
-        tmp = g_strdup_printf(
-            "+%u%c",
-            gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->size_lower)),
-            size_units[gtk_combo_box_get_active(GTK_COMBO_BOX(data->size_lower_unit))]);
-        g_array_append_val(argv, tmp);
+        argv.push_back("-size");
+        tmp =
+            fmt::format("+{}{}",
+                        gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->size_lower)),
+                        size_units[gtk_combo_box_get_active(GTK_COMBO_BOX(data->size_lower_unit))]);
+        argv.push_back(tmp);
     }
 
     /* if upper limit of file size is set */
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_size_upper)))
     {
-        arg = g_strdup("-size");
-        g_array_append_val(argv, arg);
-
-        tmp = g_strdup_printf(
-            "-%u%c",
-            gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->size_upper)),
-            size_units[gtk_combo_box_get_active(GTK_COMBO_BOX(data->size_upper_unit))]);
-
-        arg = g_strdup(tmp + 1);
-        g_array_append_val(argv, arg);
+        argv.push_back("-size");
+        tmp =
+            fmt::format("-{}{}",
+                        gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->size_upper)),
+                        size_units[gtk_combo_box_get_active(GTK_COMBO_BOX(data->size_upper_unit))]);
+        argv.push_back(tmp);
     }
 
     /* If -name is used */
-    tmp = (char*)gtk_entry_get_text(GTK_ENTRY(data->fn_pattern_entry));
-    if (tmp && strcmp(tmp, "*"))
+    tmp = ztd::null_check(gtk_entry_get_text(GTK_ENTRY(data->fn_pattern_entry)));
+    if (ztd::contains(tmp, "*"))
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->fn_case_sensitive)))
-            arg = g_strdup("-name");
+            argv.push_back("-name");
         else
-            arg = g_strdup("-iname");
-        g_array_append_val(argv, arg);
+            argv.push_back("-iname");
 
-        arg = g_strdup(tmp);
-        g_array_append_val(argv, arg);
+        argv.push_back(tmp);
     }
 
     /* match by mtime */
-    idx = gtk_combo_box_get_active(GTK_COMBO_BOX(data->date_limit));
+    int idx = gtk_combo_box_get_active(GTK_COMBO_BOX(data->date_limit));
     if (idx > 0)
     {
         if (idx == 5) /* range */
         {
-            arg = g_strdup("(");
-            g_array_append_val(argv, arg);
+            argv.push_back("(");
 
-            arg = g_strdup("-mtime");
-            g_array_append_val(argv, arg);
+            argv.push_back("-mtime");
 
             /* date1 */
-            arg = g_strdup_printf("-%d", get_date_offset(GTK_CALENDAR(data->date1)));
-            g_array_append_val(argv, arg);
+            tmp = fmt::format("-{}", get_date_offset(GTK_CALENDAR(data->date1)));
+            argv.push_back(tmp);
 
-            arg = g_strdup("-mtime");
-            g_array_append_val(argv, arg);
+            argv.push_back("-mtime");
 
             /* date2 */
-            arg = g_strdup_printf("+%d", get_date_offset(GTK_CALENDAR(data->date2)));
-            g_array_append_val(argv, arg);
+            tmp = fmt::format("+{}", get_date_offset(GTK_CALENDAR(data->date2)));
+            argv.push_back(tmp);
 
-            arg = g_strdup(")");
-            g_array_append_val(argv, arg);
+            argv.push_back(")");
         }
         else
         {
-            arg = g_strdup("-mtime");
-            g_array_append_val(argv, arg);
+            argv.push_back("-mtime");
 
             switch (idx)
             {
                 case 1: /* within one day */
-                    arg = g_strdup("-1");
+                    argv.push_back("-1");
                     break;
                 case 2: /* within one week */
-                    arg = g_strdup("-7");
+                    argv.push_back("-7");
                     break;
                 case 3: /* within one month */
-                    arg = g_strdup("-30");
+                    argv.push_back("-30");
                     break;
                 case 4: /* within one year */
-                    arg = g_strdup("-365");
+                    argv.push_back("-365");
                     break;
                 default:
+                    argv.push_back("-1");
                     break;
             }
-            g_array_append_val(argv, arg);
         }
     }
 
     /* grep text inside files */
-    tmp = (char*)gtk_entry_get_text(GTK_ENTRY(data->fc_pattern));
-    if (tmp && *tmp)
+    bool print = false;
+    tmp = ztd::null_check(gtk_entry_get_text(GTK_ENTRY(data->fc_pattern)));
+    if (!tmp.empty())
     {
         print = true;
 
         /* ensure we only call 'grep' on regular files */
-        arg = g_strdup("-type");
-        g_array_append_val(argv, arg);
-        arg = g_strdup("f");
-        g_array_append_val(argv, arg);
+        argv.push_back("-type");
+        argv.push_back("f");
 
-        arg = g_strdup("-exec");
-        g_array_append_val(argv, arg);
-
-        arg = g_strdup("grep");
-        g_array_append_val(argv, arg);
+        argv.push_back("-exec");
+        argv.push_back("grep");
 
         if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->fc_case_sensitive)))
-        {
-            arg = g_strdup("-i");
-            g_array_append_val(argv, arg);
-        }
+            argv.push_back("-i");
 
-        arg = g_strdup("--files-with-matches");
-        g_array_append_val(argv, arg);
+        argv.push_back("--files-with-matches");
 
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->fc_use_regexp)))
-            arg = g_strdup("--regexp");
+            argv.push_back("--regexp");
         else
-            arg = g_strdup("--fixed-strings");
-        g_array_append_val(argv, arg);
+            argv.push_back("--fixed-strings");
 
-        arg = g_strdup(tmp);
-        g_array_append_val(argv, arg);
+        argv.push_back(tmp);
 
-        arg = g_strdup("{}");
-        g_array_append_val(argv, arg);
-
-        arg = g_strdup(";");
-        g_array_append_val(argv, arg);
+        argv.push_back("{}");
+        argv.push_back(";");
     }
 
     if (!print)
-    {
-        arg = g_strdup("-print");
-        g_array_append_val(argv, arg);
-    }
-    return (char**)g_array_free(argv, false);
+        argv.push_back("-print");
+
+    return argv;
 }
 
 static void
@@ -649,7 +614,6 @@ on_search_finish(VFSAsyncTask* task, bool cancelled, FindFile* data)
 static void
 on_start_search(GtkWidget* btn, FindFile* data)
 {
-    char** argv;
     GError* err = nullptr;
     char* cmd_line;
     GtkAllocation allocation;
@@ -673,38 +637,27 @@ on_start_search(GtkWidget* btn, FindFile* data)
     gtk_widget_hide(btn);
     gtk_widget_show(data->stop_btn);
 
-    argv = compose_command(data);
+    std::vector<std::string> argv = compose_command(data);
 
-    cmd_line = g_strjoinv(" ", argv);
-    LOG_DEBUG("find command: {}", cmd_line);
-    g_free(cmd_line);
-    if (g_spawn_async_with_pipes(vfs_user_home_dir().c_str(),
+    LOG_DEBUG("find command: {}", ztd::join(argv, " "));
+
+    Glib::spawn_async_with_pipes(vfs_user_home_dir(),
                                  argv,
-                                 nullptr,
-                                 GSpawnFlags::G_SPAWN_SEARCH_PATH,
-                                 nullptr,
-                                 nullptr,
+                                 Glib::SpawnFlags::SEARCH_PATH,
+                                 Glib::SlotSpawnChildSetup(),
                                  &data->pid,
                                  nullptr,
                                  &data->stdo,
-                                 nullptr,
-                                 &err))
-    {
-        GdkCursor* busy_cursor;
-        data->task = vfs_async_task_new((VFSAsyncFunc)search_thread, data);
-        g_signal_connect(data->task, "finish", G_CALLBACK(on_search_finish), data);
-        vfs_async_task_execute(data->task);
+                                 nullptr);
 
-        busy_cursor = gdk_cursor_new_for_display(nullptr, GDK_WATCH);
-        gdk_window_set_cursor(gtk_widget_get_window(data->search_result), busy_cursor);
-        g_object_unref(busy_cursor);
-    }
-    else
-    {
-        g_error_free(err);
-    }
+    GdkCursor* busy_cursor;
+    data->task = vfs_async_task_new((VFSAsyncFunc)search_thread, data);
+    g_signal_connect(data->task, "finish", G_CALLBACK(on_search_finish), data);
+    vfs_async_task_execute(data->task);
 
-    g_strfreev(argv);
+    busy_cursor = gdk_cursor_new_for_display(nullptr, GDK_WATCH);
+    gdk_window_set_cursor(gtk_widget_get_window(data->search_result), busy_cursor);
+    g_object_unref(busy_cursor);
 }
 
 static void
