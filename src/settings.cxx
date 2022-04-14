@@ -3484,17 +3484,14 @@ xset_custom_activate(GtkWidget* item, XSet* set)
                 {
                     // get file list
                     GList* sel_files;
-                    GdkScreen* screen;
                     if (set->browser)
                     {
                         sel_files = ptk_file_browser_get_selected_files(set->browser);
-                        screen = gtk_widget_get_screen(GTK_WIDGET(set->browser));
                     }
                     else
                     {
                         sel_files = nullptr;
                         cwd = g_strdup("/");
-                        screen = gdk_screen_get_default();
                     }
 
                     std::vector<std::string> open_files;
@@ -3512,7 +3509,7 @@ xset_custom_activate(GtkWidget* item, XSet* set)
 
                     // open in app
                     GError* err = nullptr;
-                    if (!desktop.open_files(screen, cwd, open_files, &err))
+                    if (!desktop.open_files(cwd, open_files, &err))
                     {
                         ptk_show_error(parent ? GTK_WINDOW(parent) : nullptr,
                                        "Error",

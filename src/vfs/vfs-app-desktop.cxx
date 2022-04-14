@@ -28,7 +28,6 @@
 // sfm breaks vfs independence for exec_in_terminal
 #include "ptk/ptk-file-task.hxx"
 
-#include "vfs/vfs-execute.hxx"
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-user-dir.hxx"
 
@@ -253,8 +252,8 @@ VFSAppDesktop::exec_in_terminal(const std::string& app_name, const std::string& 
 }
 
 bool
-VFSAppDesktop::open_files(GdkScreen* screen, const std::string& working_dir,
-                          std::vector<std::string>& file_paths, GError** err)
+VFSAppDesktop::open_files(const std::string& working_dir, std::vector<std::string>& file_paths,
+                          GError** err)
 {
     if (!get_exec())
     {
@@ -267,12 +266,9 @@ VFSAppDesktop::open_files(GdkScreen* screen, const std::string& working_dir,
         return false;
     }
 
-    if (!screen)
-        screen = gdk_screen_get_default();
-
     if (open_multiple_files())
     {
-        exec_desktop(screen, working_dir, file_paths, err);
+        exec_desktop(working_dir, file_paths);
     }
     else
     {
@@ -282,18 +278,17 @@ VFSAppDesktop::open_files(GdkScreen* screen, const std::string& working_dir,
             std::vector<std::string> open_files;
             open_files.push_back(open_file);
 
-            exec_desktop(screen, working_dir, open_files, err);
+            exec_desktop(working_dir, open_files);
         }
     }
     return true;
 }
 
 void
-VFSAppDesktop::exec_desktop(GdkScreen* screen, const std::string& working_dir,
-                            std::vector<std::string>& file_paths, GError** err)
+VFSAppDesktop::exec_desktop(const std::string& working_dir, std::vector<std::string>& file_paths)
 {
     std::string cmd = translate_app_exec_to_command_line(file_paths);
-    std::string sn_desc = get_disp_name();
+    std::string app_name = get_disp_name();
 
     if (cmd.empty())
         return;
@@ -302,23 +297,11 @@ VFSAppDesktop::exec_desktop(GdkScreen* screen, const std::string& working_dir,
 
     if (use_terminal())
     {
-        exec_in_terminal(sn_desc, !m_path.empty() ? m_path : working_dir, cmd);
+        std::string app_name = get_disp_name();
+        exec_in_terminal(app_name, !m_path.empty() ? m_path : working_dir, cmd);
     }
     else
     {
-        char** argv = nullptr;
-        int argc = 0;
-        if (g_shell_parse_argv(cmd.c_str(), &argc, &argv, nullptr))
-        {
-            vfs_exec_on_screen(screen,
-                               !m_path.empty() ? m_path.c_str() : working_dir.c_str(),
-                               argv,
-                               nullptr,
-                               sn_desc.c_str(),
-                               GSpawnFlags(VFS_EXEC_DEFAULT_FLAGS),
-                               m_startup,
-                               err);
-            g_strfreev(argv);
-        }
+        Glib::spawn_command_line_async(cmd);
     }
 }

@@ -103,10 +103,6 @@ if get_option('nonlatin')
   pre_args += '-DHAVE_NONLATIN'
 endif
 
-if get_option('sn')
-  pre_args += '-DHAVE_SN'
-endif
-
 if get_option('deprecated-hw')
   pre_args += '-DHAVE_DEPRECATED_HW'
 endif
@@ -183,7 +179,6 @@ sources = [
   'src/vfs/vfs-app-desktop.cxx',
   'src/vfs/vfs-async-task.cxx',
   'src/vfs/vfs-dir.cxx',
-  'src/vfs/vfs-execute.cxx',
   'src/vfs/vfs-file-info.cxx',
   'src/vfs/vfs-file-monitor.cxx',
   'src/vfs/vfs-file-task.cxx',

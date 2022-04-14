@@ -33,7 +33,6 @@
 #include "ptk/ptk-location-view.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
-#include "vfs/vfs-execute.hxx"
 #include "vfs/vfs-user-dir.hxx"
 
 #include "ptk/ptk-handler.hxx"
@@ -3417,12 +3416,6 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
     {
         VFSAppDesktop desktop(check_desktop_name(app_desktop));
 
-        GdkScreen* screen;
-        if (parent->file_browser)
-            screen = gtk_widget_get_screen(GTK_WIDGET(parent->file_browser));
-        else
-            screen = gdk_screen_get_default();
-
         LOG_INFO("EXEC({})={}", desktop.get_full_path(), desktop.get_exec());
         GError* err = nullptr;
 
@@ -3436,7 +3429,7 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
         }
         //////////
 
-        if (!desktop.open_files(screen, parent->cwd, open_files, &err))
+        if (!desktop.open_files(parent->cwd, open_files, &err))
         {
             GtkWidget* toplevel = parent->file_browser
                                       ? gtk_widget_get_toplevel(GTK_WIDGET(parent->file_browser))
@@ -3520,32 +3513,9 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                 if (!xnever && vfs_file_info_is_executable(file, full_path) &&
                     (!app_settings.no_execute || xforce))
                 {
-                    char* argv[2] = {full_path, nullptr};
-                    GdkScreen* screen = file_browser
-                                            ? gtk_widget_get_screen(GTK_WIDGET(file_browser))
-                                            : gdk_screen_get_default();
-                    GError* err = nullptr;
-                    if (!vfs_exec_on_screen(screen,
-                                            cwd,
-                                            argv,
-                                            nullptr,
-                                            vfs_file_info_get_disp_name(file),
-                                            (GSpawnFlags)VFS_EXEC_DEFAULT_FLAGS,
-                                            true,
-                                            &err))
-                    {
-                        toplevel = file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser))
-                                                : nullptr;
-                        ptk_show_error(GTK_WINDOW(toplevel), "Error", err->message);
-                        g_error_free(err);
-                    }
-                    else
-                    {
-                        if (G_LIKELY(file_browser))
-                        {
-                            ptk_file_browser_emit_open(file_browser, full_path, PTK_OPEN_FILE);
-                        }
-                    }
+                    Glib::spawn_command_line_async(full_path);
+                    if (G_LIKELY(file_browser))
+                        ptk_file_browser_emit_open(file_browser, full_path, PTK_OPEN_FILE);
                     g_free(full_path);
                     continue;
                 }

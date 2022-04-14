@@ -461,7 +461,7 @@ open_file(const char* path)
             std::vector<std::string> open_files;
             open_files.push_back(open_file);
 
-            opened = desktop.open_files(gdk_screen_get_default(), nullptr, open_files, &err);
+            opened = desktop.open_files(vfs_current_dir(), open_files, &err);
             g_free(app_name);
         }
         else

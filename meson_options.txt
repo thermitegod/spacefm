@@ -1,11 +1,5 @@
 #preprocessor
 option(
-  'sn',
-  type : 'boolean',
-  value : false,
-  description : 'enable desktop startup notifications',
-)
-option(
   'deprecated-hw',
   type : 'boolean',
   value : false,

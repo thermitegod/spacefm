@@ -580,8 +580,7 @@ vfs_file_info_open_file(VFSFileInfo* fi, const char* file_path, GError** err)
             std::vector<std::string> open_files;
             open_files.push_back(open_file);
 
-            // FIXME: working dir is needed
-            ret = desktop.open_files(gdk_screen_get_default(), nullptr, open_files, err);
+            ret = desktop.open_files(vfs_current_dir(), open_files, err);
             g_free(app_name);
         }
         vfs_mime_type_unref(mime_type);
