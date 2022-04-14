@@ -312,7 +312,7 @@ check_dest_in_src(VFSFileTask* task, const char* src_dir)
     if (!(!task->dest_dir.empty() && realpath(task->dest_dir.c_str(), real_dest_path)))
         return false;
 
-    if (realpath(src_dir, real_src_path) && g_str_has_prefix(real_dest_path, real_src_path) &&
+    if (realpath(src_dir, real_src_path) && Glib::str_has_prefix(real_dest_path, real_src_path) &&
         (len = strlen(real_src_path)) &&
         (real_dest_path[len] == '/' || real_dest_path[len] == '\0'))
     {

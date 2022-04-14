@@ -1448,7 +1448,8 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             // and the actions for text/plain, so removing an app may appear to not
             // work if that app is still associated with text/plain
             vfs_mime_type_remove_action(mime_type, desktop.get_name());
-            if (strcmp(mime_type->type, "text/plain") && g_str_has_prefix(mime_type->type, "text/"))
+            if (strcmp(mime_type->type, "text/plain") &&
+                Glib::str_has_prefix(mime_type->type, "text/"))
                 xset_msg_dialog(
                     GTK_WIDGET(data->browser),
                     GTK_MESSAGE_INFO,
@@ -2467,7 +2468,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     // action
     char* xname;
     XSet* set = xset_get(setname);
-    if (g_str_has_prefix(set->name, "open_") && !g_str_has_prefix(set->name, "open_in_"))
+    if (Glib::str_has_prefix(set->name, "open_") && !Glib::str_has_prefix(set->name, "open_in_"))
     {
         xname = set->name + 5;
         if (!strcmp(xname, "edit"))
@@ -2481,7 +2482,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         else if (!strcmp(xname, "all"))
             on_popup_open_all(nullptr, data);
     }
-    else if (g_str_has_prefix(set->name, "arc_"))
+    else if (Glib::str_has_prefix(set->name, "arc_"))
     {
         xname = set->name + 4;
         if (!strcmp(xname, "extract"))
@@ -2493,7 +2494,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         else if (!strcmp(xname, "conf2"))
             on_archive_show_config(nullptr, data);
     }
-    else if (g_str_has_prefix(set->name, "new_"))
+    else if (Glib::str_has_prefix(set->name, "new_"))
     {
         xname = set->name + 4;
         if (!strcmp(xname, "file"))
@@ -2514,7 +2515,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         on_popup_file_properties_activate(nullptr, data);
     else if (!strcmp(set->name, "prop_perm"))
         on_popup_file_permissions_activate(nullptr, data);
-    else if (g_str_has_prefix(set->name, "edit_"))
+    else if (Glib::str_has_prefix(set->name, "edit_"))
     {
         xname = set->name + 5;
         if (!strcmp(xname, "cut"))
@@ -2543,12 +2544,14 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         on_popup_copy_text_activate(nullptr, data);
     else if (!strcmp(set->name, "copy_parent"))
         on_popup_copy_parent_activate(nullptr, data);
-    else if (g_str_has_prefix(set->name, "copy_loc") || g_str_has_prefix(set->name, "copy_tab_") ||
-             g_str_has_prefix(set->name, "copy_panel_") ||
-             g_str_has_prefix(set->name, "move_loc") || g_str_has_prefix(set->name, "move_tab_") ||
-             g_str_has_prefix(set->name, "move_panel_"))
+    else if (Glib::str_has_prefix(set->name, "copy_loc") ||
+             Glib::str_has_prefix(set->name, "copy_tab_") ||
+             Glib::str_has_prefix(set->name, "copy_panel_") ||
+             Glib::str_has_prefix(set->name, "move_loc") ||
+             Glib::str_has_prefix(set->name, "move_tab_") ||
+             Glib::str_has_prefix(set->name, "move_panel_"))
         on_copycmd(nullptr, data, set);
-    else if (g_str_has_prefix(set->name, "root_"))
+    else if (Glib::str_has_prefix(set->name, "root_"))
     {
         xname = set->name + 5;
         if (!strcmp(xname, "copy_loc") || !strcmp(xname, "move2") || !strcmp(xname, "delete") ||
@@ -2559,7 +2562,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     {
         // browser only
         int i;
-        if (g_str_has_prefix(set->name, "open_in_panel"))
+        if (Glib::str_has_prefix(set->name, "open_in_panel"))
         {
             xname = set->name + 13;
             if (!strcmp(xname, "prev"))
@@ -2570,7 +2573,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
                 i = strtol(xname, nullptr, 10);
             main_window_open_in_panel(data->browser, i, data->file_path);
         }
-        else if (g_str_has_prefix(set->name, "opentab_"))
+        else if (Glib::str_has_prefix(set->name, "opentab_"))
         {
             xname = set->name + 8;
             if (!strcmp(xname, "new"))

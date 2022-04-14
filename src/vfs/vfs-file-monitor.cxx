@@ -368,7 +368,7 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
                 desc = "DELETE";
             else if ( ievent->mask & ( IN_MODIFY | IN_ATTRIB ) )
                 desc = "CHANGE";
-            if ( !strcmp( monitor->path, "/tmp" ) && g_str_has_prefix( file_name, "vte" ) )
+            if ( !strcmp( monitor->path, "/tmp" ) && Glib::str_has_prefix( file_name, "vte" ) )
             { } // due to current vte scroll problems creating and deleting massive numbers of
             // /tmp/vte8CBO7V types of files, ignore these (creates feedback loop when
             // spacefm is run in terminal because each printf triggers a scroll,

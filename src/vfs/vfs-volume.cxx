@@ -532,7 +532,8 @@ info_drive_connection(device_t* device)
                 const char* sysfs_name;
 
                 sysfs_name = g_strrstr(s, "/");
-                if (g_str_has_prefix(sysfs_name + 1, "floppy.") && device->drive_vendor == nullptr)
+                if (Glib::str_has_prefix(sysfs_name + 1, "floppy.") &&
+                    device->drive_vendor == nullptr)
                 {
                     device->drive_vendor = g_strdup("Floppy Drive");
                     connection_interface = "platform";
@@ -875,7 +876,7 @@ info_device_properties(device_t* device)
     {
         media_available = true;
     }
-    else if (g_str_has_prefix(device->devnode, "/dev/loop"))
+    else if (Glib::str_has_prefix(device->devnode, "/dev/loop"))
         media_available = false;
     else if (device->device_is_removable)
     {
@@ -939,8 +940,8 @@ info_device_properties(device_t* device)
     while (entry)
     {
         const char* entry_name = udev_list_entry_get_name(entry);
-        if (entry_name && (g_str_has_prefix(entry_name, "/dev/disk/by-id/") ||
-                           g_str_has_prefix(entry_name, "/dev/disk/by-uuid/")))
+        if (entry_name && (Glib::str_has_prefix(entry_name, "/dev/disk/by-id/") ||
+                           Glib::str_has_prefix(entry_name, "/dev/disk/by-uuid/")))
         {
             device->device_by_id = g_strdup(entry_name);
             break;
@@ -1106,7 +1107,7 @@ info_partition_table(device_t* device)
             partition_count = 0;
             while ((name = g_dir_read_name(dir)) != nullptr)
             {
-                if (g_str_has_prefix(name, s))
+                if (Glib::str_has_prefix(name, s))
                 {
                     partition_count++;
                 }
@@ -1574,7 +1575,7 @@ parse_mounts(bool report)
             if (sep && sscanf(sep + 3, "%s %s", typebuf, mount_source) == 2)
             {
                 // LOG_INFO("    source={}", mount_source);
-                if (g_str_has_prefix(mount_source, "/dev/"))
+                if (Glib::str_has_prefix(mount_source, "/dev/"))
                 {
                     /* is a subdir mount on a local device, eg a bind mount
                      * so don't include this mount point */
@@ -2010,7 +2011,7 @@ vfs_volume_set_info(VFSVolume* volume)
             {
                 if (volume->is_mounted)
                 {
-                    if (g_str_has_prefix(volume->device_file, "/dev/loop"))
+                    if (Glib::str_has_prefix(volume->device_file, "/dev/loop"))
                         volume->icon = "dev_icon_file";
                     else
                         volume->icon = "dev_icon_internal_mounted";
@@ -2124,7 +2125,7 @@ vfs_volume_set_info(VFSVolume* volume)
     }
     if (!strncmp(volume->device_file, "/dev/", 5))
         disp_device = g_strdup(volume->device_file + 5);
-    else if (g_str_has_prefix(volume->device_file, "curlftpfs#"))
+    else if (Glib::str_has_prefix(volume->device_file, "curlftpfs#"))
         disp_device = g_strdup(volume->device_file + 10);
     else
         disp_device = g_strdup(volume->device_file);
@@ -2191,7 +2192,7 @@ vfs_volume_read_by_device(struct udev_device* udevice)
         return nullptr;
     device_t* device = device_alloc(udevice);
     if (!device_get_info(device) || !device->devnode || device->devnum == 0 ||
-        !g_str_has_prefix(device->devnode, "/dev/"))
+        !Glib::str_has_prefix(device->devnode, "/dev/"))
     {
         device_free(device);
         return nullptr;
@@ -2404,7 +2405,7 @@ split_network_url(const char* url, netmount_t** netmount)
 
     // get protocol
     bool is_colon;
-    if (g_str_has_prefix(xurl, "//"))
+    if (Glib::str_has_prefix(xurl, "//"))
     { // //host...
         if (xurl[2] == '\0')
             goto _net_free;
@@ -2640,14 +2641,15 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         if (!keep && !strstr(HIDDEN_NON_BLOCK_FS, mtab_fstype))
         {
             // no protocol handler and not blacklisted - show anyway?
-            keep = g_str_has_prefix(point, vfs_user_cache_dir().c_str()) ||
-                   g_str_has_prefix(point, "/media/") || g_str_has_prefix(point, "/run/media/") ||
-                   g_str_has_prefix(mtab_fstype, "fuse.");
+            keep = Glib::str_has_prefix(point, vfs_user_cache_dir().c_str()) ||
+                   Glib::str_has_prefix(point, "/media/") ||
+                   Glib::str_has_prefix(point, "/run/media/") ||
+                   Glib::str_has_prefix(mtab_fstype, "fuse.");
             if (!keep)
             {
                 // in Auto-Mount|Mount Dirs ?
                 char* mount_parent = ptk_location_view_get_mount_point_dir(nullptr);
-                keep = g_str_has_prefix(point, mount_parent);
+                keep = Glib::str_has_prefix(point, mount_parent);
                 g_free(mount_parent);
             }
         }
@@ -4070,7 +4072,7 @@ vfs_volume_dir_avoid_changes(const char* dir)
                 {
                     while (ptr[0] == ' ' || ptr[0] == ',')
                         ptr++;
-                    if (g_str_has_prefix(ptr, fstype) &&
+                    if (Glib::str_has_prefix(ptr, fstype) &&
                         (ptr[len] == ' ' || ptr[len] == ',' || ptr[len] == '\0'))
                     {
                         LOG_INFO("Change Detection Blacklist: fstype '{}' on {}", fstype, dir);
@@ -4083,8 +4085,8 @@ vfs_volume_dir_avoid_changes(const char* dir)
             }
         }
         /* blacklist these types for no change detection (if not block device)
-        ret = (    g_str_has_prefix( fstype, "nfs" )    // nfs nfs4 etc
-                || ( g_str_has_prefix( fstype, "fuse" ) &&
+        ret = (    Glib::str_has_prefix( fstype, "nfs" )    // nfs nfs4 etc
+                || ( Glib::str_has_prefix( fstype, "fuse" ) &&
                             strcmp( fstype, "fuseblk" ) ) // fuse fuse.sshfs curlftpfs(fuse) etc
                 || strstr( fstype, "cifs" )
                 || !strcmp( fstype, "smbfs" )

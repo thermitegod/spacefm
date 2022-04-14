@@ -593,7 +593,7 @@ ptk_location_view_get_mount_point_dir(const char* name)
     XSet* set = xset_get("dev_automount_dirs");
     if (set->s)
     {
-        if (g_str_has_prefix(set->s, "~/"))
+        if (Glib::str_has_prefix(set->s, "~/"))
             parent = Glib::build_filename(vfs_user_home_dir(), set->s + 2);
         else
             parent = set->s;
@@ -733,7 +733,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
                     g_strstrip(parent_dir);
                     while (g_str_has_suffix(parent_dir, "-"))
                         parent_dir[strlen(parent_dir) - 1] = '\0';
-                    while (g_str_has_prefix(parent_dir, "-"))
+                    while (Glib::str_has_prefix(parent_dir, "-"))
                     {
                         str = parent_dir;
                         parent_dir = g_strdup(str + 1);
@@ -2329,7 +2329,7 @@ volume_is_visible(VFSVolume* vol)
         return xset_get_b("dev_show_file");
 
     // loop
-    if (g_str_has_prefix(vol->device_file, "/dev/loop"))
+    if (Glib::str_has_prefix(vol->device_file, "/dev/loop"))
     {
         if (vol->is_mounted && xset_get_b("dev_show_file"))
             return true;
@@ -2339,8 +2339,8 @@ volume_is_visible(VFSVolume* vol)
     }
 
     // ramfs CONFIG_BLK_DEV_RAM causes multiple entries of /dev/ram*
-    if (!vol->is_mounted && g_str_has_prefix(vol->device_file, "/dev/ram") && vol->device_file[8] &&
-        g_ascii_isdigit(vol->device_file[8]))
+    if (!vol->is_mounted && Glib::str_has_prefix(vol->device_file, "/dev/ram") &&
+        vol->device_file[8] && g_ascii_isdigit(vol->device_file[8]))
         return false;
 
     // internal?
@@ -2384,7 +2384,7 @@ ptk_location_view_on_action(GtkWidget* view, XSet* set)
         on_root_fstab(nullptr, view);
     else if (!strcmp(set->name, "dev_root_udevil"))
         on_root_udevil(nullptr, view);
-    else if (g_str_has_prefix(set->name, "dev_icon_"))
+    else if (Glib::str_has_prefix(set->name, "dev_icon_"))
         update_volume_icons();
     else if (!strcmp(set->name, "dev_dispname"))
         update_names();
@@ -2402,7 +2402,7 @@ ptk_location_view_on_action(GtkWidget* view, XSet* set)
     {
         // require vol != nullptr
         char* xname;
-        if (g_str_has_prefix(set->name, "dev_menu_"))
+        if (Glib::str_has_prefix(set->name, "dev_menu_"))
         {
             xname = set->name + 9;
             if (!strcmp(xname, "remove"))
@@ -2420,7 +2420,7 @@ ptk_location_view_on_action(GtkWidget* view, XSet* set)
             else if (!strcmp(xname, "remount"))
                 on_remount(nullptr, vol, view);
         }
-        else if (g_str_has_prefix(set->name, "dev_root_"))
+        else if (Glib::str_has_prefix(set->name, "dev_root_"))
         {
             xname = set->name + 9;
             if (!strcmp(xname, "mount"))
@@ -2498,7 +2498,7 @@ show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browse
     xset_set_ob1(set, "view", view);
 
     if (vol && vol->device_type == DEVICE_TYPE_NETWORK &&
-        (g_str_has_prefix(vol->device_file, "//") || strstr(vol->device_file, ":/")))
+        (Glib::str_has_prefix(vol->device_file, "//") || strstr(vol->device_file, ":/")))
         str = g_strdup(" dev_menu_mark");
     else
         str = g_strdup("");
@@ -2751,7 +2751,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, unsig
 
     // Bookmark Device
     if (vol && vol->device_type == DEVICE_TYPE_NETWORK &&
-        (g_str_has_prefix(vol->device_file, "//") || strstr(vol->device_file, ":/")))
+        (Glib::str_has_prefix(vol->device_file, "//") || strstr(vol->device_file, ":/")))
     {
         set = xset_get("dev_menu_mark");
         item = gtk_menu_item_new_with_mnemonic(set->menu_label);
@@ -3153,7 +3153,7 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
                     menu_label = g_strdup(set->z);
 
                 if (!icon_name &&
-                    !(set->z && (strstr(set->z, ":/") || g_str_has_prefix(set->z, "//"))))
+                    !(set->z && (strstr(set->z, ":/") || Glib::str_has_prefix(set->z, "//"))))
                 {
                     // is non-network bookmark with no custom icon
                     if (global_icon_bookmark)
@@ -3310,7 +3310,7 @@ on_bookmark_device(GtkMenuItem* item, VFSVolume* vol)
     // udi is the original user-entered URL, if available, else mtab url
     const char* url = vol->udi;
 
-    if (g_str_has_prefix(url, "curlftpfs#"))
+    if (Glib::str_has_prefix(url, "curlftpfs#"))
         url += 10;
 
     if (file_browser->side_book)
@@ -3436,7 +3436,7 @@ find_cwd_match_bookmark(XSet* parent_set, const char* cwd, bool recurse, XSet* s
     while (set)
     {
         if (no_skip && set->z && set->x && !set->lock && set->x[0] == '3' /* XSET_CMD_BOOKMARK */ &&
-            set->menu_style < XSET_MENU_SUBMENU && g_str_has_prefix(set->z, cwd))
+            set->menu_style < XSET_MENU_SUBMENU && Glib::str_has_prefix(set->z, cwd))
         {
             // found a possible match - confirm
             char* sep = strchr(set->z, ';');
@@ -3480,7 +3480,7 @@ ptk_bookmark_view_chdir(GtkTreeView* view, PtkFileBrowser* file_browser, bool re
     // cur dir is already selected?
     XSet* set = get_selected_bookmark_set(view);
     if (set && !set->lock && set->z && set->menu_style < XSET_MENU_SUBMENU && set->x &&
-        strtol(set->x, nullptr, 10) == XSET_CMD_BOOKMARK && g_str_has_prefix(set->z, cwd))
+        strtol(set->x, nullptr, 10) == XSET_CMD_BOOKMARK && Glib::str_has_prefix(set->z, cwd))
     {
         char* sep = strchr(set->z, ';');
         if (sep)

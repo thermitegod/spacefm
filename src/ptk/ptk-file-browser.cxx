@@ -568,7 +568,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
             ptk_file_browser_select_pattern(nullptr, file_browser, str.c_str());
         }
     }
-    else if ((text[0] != '/' && strstr(text, ":/")) || g_str_has_prefix(text, "//"))
+    else if ((text[0] != '/' && strstr(text, ":/")) || Glib::str_has_prefix(text, "//"))
     {
         save_command_history(GTK_ENTRY(entry));
         ptk_location_view_mount_network(file_browser, text, false, false);
@@ -1870,7 +1870,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
         }
 
         // convert ~ to /home/user for smarter bookmarks
-        if (g_str_has_prefix(path, "~/") || !g_strcmp0(path, "~"))
+        if (Glib::str_has_prefix(path, "~/") || !g_strcmp0(path, "~"))
         {
             msg = g_strdup_printf("%s%s", vfs_user_home_dir().c_str(), path + 1);
             g_free(path);
@@ -2991,7 +2991,7 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const char* seek_dir,
                 it_dir = it;
                 break;
             }
-            if (g_str_has_prefix(name, seek_name))
+            if (Glib::str_has_prefix(name, seek_name))
             {
                 // prefix found
                 if (vfs_file_info_is_dir(file))
@@ -3699,7 +3699,7 @@ folder_view_search_equal(GtkTreeModel* model, int col, const char* key, GtkTreeI
         if (start && end)
             no_match = !strstr(name, keyp);
         else if (start)
-            no_match = !g_str_has_prefix(name, keyp);
+            no_match = !Glib::str_has_prefix(name, keyp);
         else if (end)
             no_match = !g_str_has_suffix(name, keyp);
         else
@@ -4954,7 +4954,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
         move_dest = g_strdup(set2->desc);
     }
 
-    if ((g_str_has_prefix(setname, "copy_loc") || g_str_has_prefix(setname, "move_loc")) &&
+    if ((Glib::str_has_prefix(setname, "copy_loc") || Glib::str_has_prefix(setname, "move_loc")) &&
         !copy_dest && !move_dest)
     {
         char* folder;
@@ -4970,7 +4970,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
                                       nullptr);
         if (path && std::filesystem::is_directory(path))
         {
-            if (g_str_has_prefix(setname, "copy_loc"))
+            if (Glib::str_has_prefix(setname, "copy_loc"))
                 copy_dest = path;
             else
                 move_dest = path;
@@ -5263,7 +5263,7 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, const char* setnam
 
     XSet* set = xset_get(setname);
 
-    if (!g_str_has_prefix(set->name, "sortx_"))
+    if (!Glib::str_has_prefix(set->name, "sortx_"))
         return;
 
     const char* name = set->name + 6;
@@ -5879,7 +5879,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
 
     // LOG_INFO("ptk_file_browser_on_action {}", set->name);
 
-    if (g_str_has_prefix(set->name, "book_"))
+    if (Glib::str_has_prefix(set->name, "book_"))
     {
         xname = set->name + 5;
         if (!strcmp(xname, "icon") || !strcmp(xname, "menu_icon"))
@@ -5890,7 +5890,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
                                    ? gtk_entry_get_text(GTK_ENTRY(browser->path_bar))
                                    : nullptr;
             if (text && (std::filesystem::exists(text) || strstr(text, ":/") ||
-                         g_str_has_prefix(text, "//")))
+                         Glib::str_has_prefix(text, "//")))
                 ptk_bookmark_view_add_bookmark(nullptr, browser, text);
             else
                 ptk_bookmark_view_add_bookmark(nullptr, browser, nullptr);
@@ -5898,7 +5898,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
         else if (!strcmp(xname, "open") && browser->side_book)
             ptk_bookmark_view_on_open_reverse(nullptr, browser);
     }
-    else if (g_str_has_prefix(set->name, "go_"))
+    else if (Glib::str_has_prefix(set->name, "go_"))
     {
         xname = set->name + 3;
         if (!strcmp(xname, "back"))
@@ -5914,7 +5914,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
         else if (!strcmp(xname, "set_default"))
             ptk_file_browser_set_default_folder(nullptr, browser);
     }
-    else if (g_str_has_prefix(set->name, "tab_"))
+    else if (Glib::str_has_prefix(set->name, "tab_"))
     {
         xname = set->name + 4;
         if (!strcmp(xname, "new"))
@@ -5936,7 +5936,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
             ptk_file_browser_go_tab(nullptr, browser, i);
         }
     }
-    else if (g_str_has_prefix(set->name, "focus_"))
+    else if (Glib::str_has_prefix(set->name, "focus_"))
     {
         xname = set->name + 6;
         if (!strcmp(xname, "path_bar"))
@@ -5957,7 +5957,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
         ptk_file_browser_refresh(nullptr, browser);
     else if (!strcmp(set->name, "view_thumb"))
         main_window_toggle_thumbnails_all_windows();
-    else if (g_str_has_prefix(set->name, "sortby_"))
+    else if (Glib::str_has_prefix(set->name, "sortby_"))
     {
         xname = set->name + 7;
         i = -3;
@@ -5987,11 +5987,11 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
             set->b = browser->sort_order == i ? XSET_B_TRUE : XSET_B_FALSE;
         on_popup_sortby(nullptr, browser, i);
     }
-    else if (g_str_has_prefix(set->name, "sortx_"))
+    else if (Glib::str_has_prefix(set->name, "sortx_"))
         ptk_file_browser_set_sort_extra(browser, set->name);
     else if (!strcmp(set->name, "path_help"))
         ptk_path_entry_help(nullptr, GTK_WIDGET(browser));
-    else if (g_str_has_prefix(set->name, "panel"))
+    else if (Glib::str_has_prefix(set->name, "panel"))
     {
         i = 0;
         if (strlen(set->name) > 6)
@@ -6015,7 +6015,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
             }
             else if (!strcmp(xname, "show")) // main View|Panel N
                 show_panels_all_windows(nullptr, static_cast<FMMainWindow*>(browser->main_window));
-            else if (g_str_has_prefix(xname, "show_")) // shared key
+            else if (Glib::str_has_prefix(xname, "show_")) // shared key
             {
                 set2 = xset_get_panel_mode(browser->mypanel, xname, mode);
                 set2->b = set2->b == XSET_B_TRUE ? XSET_B_UNSET : XSET_B_TRUE;
@@ -6040,7 +6040,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
                     on_popup_list_large(nullptr, browser);
                 }
             }
-            else if (g_str_has_prefix(xname, "detcol_") // shared key
+            else if (Glib::str_has_prefix(xname, "detcol_") // shared key
                      && browser->view_mode == PTK_FB_LIST_VIEW)
             {
                 set2 = xset_get_panel_mode(browser->mypanel, xname, mode);
@@ -6049,7 +6049,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
             }
         }
     }
-    else if (g_str_has_prefix(set->name, "status_"))
+    else if (Glib::str_has_prefix(set->name, "status_"))
     {
         xname = set->name + 7;
         if (!strcmp(xname, "border") || !strcmp(xname, "text"))
@@ -6058,7 +6058,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
                  !strcmp(xname, "hide"))
             on_status_middle_click_config(nullptr, set);
     }
-    else if (g_str_has_prefix(set->name, "paste_"))
+    else if (Glib::str_has_prefix(set->name, "paste_"))
     {
         xname = set->name + 6;
         if (!strcmp(xname, "link"))
@@ -6068,7 +6068,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
         else if (!strcmp(xname, "as"))
             ptk_file_misc_paste_as(browser, ptk_file_browser_get_cwd(browser), nullptr);
     }
-    else if (g_str_has_prefix(set->name, "select_"))
+    else if (Glib::str_has_prefix(set->name, "select_"))
     {
         xname = set->name + 7;
         if (!strcmp(xname, "all"))

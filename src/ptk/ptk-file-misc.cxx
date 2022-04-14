@@ -1013,7 +1013,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
             dir = get_template_dir();
             if (dir)
             {
-                if (g_str_has_prefix(new_path, dir) && new_path[strlen(dir)] == '/')
+                if (Glib::str_has_prefix(new_path, dir) && new_path[strlen(dir)] == '/')
                     path = new_path + strlen(dir) + 1;
                 g_free(dir);
             }
@@ -3405,7 +3405,7 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
 {
     XSet* handler_set;
 
-    if (app_desktop && g_str_has_prefix(app_desktop, "###") &&
+    if (app_desktop && Glib::str_has_prefix(app_desktop, "###") &&
         (handler_set = xset_is(app_desktop + 3)) && files)
     {
         // is a handler

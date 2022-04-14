@@ -18,6 +18,8 @@
 #include <string>
 #include <filesystem>
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -254,7 +256,7 @@ handle_parsed_commandline_args()
                 else
                     open_file(real_path.c_str());
             }
-            else if ((*file[0] != '/' && strstr(*file, ":/")) || g_str_has_prefix(*file, "//"))
+            else if ((*file[0] != '/' && strstr(*file, ":/")) || Glib::str_has_prefix(*file, "//"))
             {
                 if (main_window)
                     main_window_open_network(main_window, *file, true);

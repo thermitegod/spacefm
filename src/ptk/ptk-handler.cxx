@@ -1382,8 +1382,9 @@ config_load_handler_settings(XSet* handler_xset, char* handler_xset_name, const 
     gtk_widget_set_sensitive(GTK_WIDGET(hnd->btn_up), true);
     gtk_widget_set_sensitive(GTK_WIDGET(hnd->btn_down), true);
     gtk_widget_set_sensitive(GTK_WIDGET(hnd->chkbtn_handler_enabled), true);
-    gtk_widget_set_sensitive(GTK_WIDGET(hnd->btn_defaults0),
-                             g_str_has_prefix(handler_xset->name, handler_def_prefix[hnd->mode]));
+    gtk_widget_set_sensitive(
+        GTK_WIDGET(hnd->btn_defaults0),
+        Glib::str_has_prefix(handler_xset->name, handler_def_prefix[hnd->mode]));
 
     /* Configuring widgets with handler settings. Only name, MIME and
      * extension warrant a warning
@@ -1512,7 +1513,7 @@ populate_archive_handlers(HandlerData* hnd, XSet* def_handler_set)
     int i;
     for (i = 0; archive_handlers[i] != nullptr; ++i)
     {
-        if (g_str_has_prefix(archive_handlers[i], handler_cust_prefix[hnd->mode]))
+        if (Glib::str_has_prefix(archive_handlers[i], handler_cust_prefix[hnd->mode]))
         {
             // Fetching handler  - ignoring invalid handler xset names
             XSet* handler_xset = xset_is(archive_handlers[i]);
@@ -2183,7 +2184,7 @@ restore_defaults(HandlerData* hnd, bool all)
         char* xset_name;
         gtk_tree_model_get(model, &it, COL_XSET_NAME, &xset_name, -1);
         // a default handler is selected?
-        if (!(xset_name && g_str_has_prefix(xset_name, handler_def_prefix[hnd->mode])))
+        if (!(xset_name && Glib::str_has_prefix(xset_name, handler_def_prefix[hnd->mode])))
         {
             g_free(xset_name);
             return;
@@ -2596,7 +2597,8 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
             if (!set_sel)
                 return; // nothing selected - failsafe
 
-            if (g_str_has_prefix(set_sel->name, handler_def_prefix[hnd->mode]) && set_sel->disable)
+            if (Glib::str_has_prefix(set_sel->name, handler_def_prefix[hnd->mode]) &&
+                set_sel->disable)
             {
                 // is an unsaved default handler, click Defaults then Apply to save
                 restore_defaults(hnd, false);

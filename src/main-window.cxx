@@ -1101,7 +1101,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                         if (tab_dir[0] != '\0')
                         {
                             // open saved tab
-                            if (g_str_has_prefix(tab_dir, "~/"))
+                            if (Glib::str_has_prefix(tab_dir, "~/"))
                             {
                                 // convert ~ to /home/user for hacked session files
                                 str = g_strdup_printf("%s%s",
@@ -3387,7 +3387,7 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
 #endif
             {
                 // shared key match
-                if (g_str_has_prefix(set->name, "panel"))
+                if (Glib::str_has_prefix(set->name, "panel"))
                 {
                     // use current panel's set
                     browser =
@@ -3471,10 +3471,10 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
         return true;
 
     // handlers
-    if (g_str_has_prefix(set->name, "dev_"))
+    if (Glib::str_has_prefix(set->name, "dev_"))
         ptk_location_view_on_action(GTK_WIDGET(browser->side_dev), set);
 
-    else if (g_str_has_prefix(set->name, "main_"))
+    else if (Glib::str_has_prefix(set->name, "main_"))
     {
         xname = set->name + 5;
         if (!strcmp(xname, "new_window"))
@@ -3509,7 +3509,7 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
         else if (!strcmp(xname, "about"))
             on_about_activate(nullptr, main_window);
     }
-    else if (g_str_has_prefix(set->name, "panel_"))
+    else if (Glib::str_has_prefix(set->name, "panel_"))
     {
         xname = set->name + 6;
         if (!strcmp(xname, "prev"))
@@ -3522,27 +3522,27 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
             i = strtol(xname, nullptr, 10);
         focus_panel(nullptr, main_window, i);
     }
-    else if (g_str_has_prefix(set->name, "plug_"))
+    else if (Glib::str_has_prefix(set->name, "plug_"))
         on_plugin_install(nullptr, main_window, set);
-    else if (g_str_has_prefix(set->name, "task_"))
+    else if (Glib::str_has_prefix(set->name, "task_"))
     {
         xname = set->name + 5;
         if (strstr(xname, "_manager"))
             on_task_popup_show(nullptr, main_window, set->name);
         else if (!strcmp(xname, "col_reorder"))
             on_reorder(nullptr, GTK_WIDGET(browser->task_view));
-        else if (g_str_has_prefix(xname, "col_"))
+        else if (Glib::str_has_prefix(xname, "col_"))
             on_task_column_selected(nullptr, browser->task_view);
-        else if (g_str_has_prefix(xname, "stop") || g_str_has_prefix(xname, "pause") ||
-                 g_str_has_prefix(xname, "que_") || !strcmp(xname, "que") ||
-                 g_str_has_prefix(xname, "resume"))
+        else if (Glib::str_has_prefix(xname, "stop") || Glib::str_has_prefix(xname, "pause") ||
+                 Glib::str_has_prefix(xname, "que_") || !strcmp(xname, "que") ||
+                 Glib::str_has_prefix(xname, "resume"))
         {
             PtkFileTask* ptask = get_selected_task(browser->task_view);
             on_task_stop(nullptr, browser->task_view, set, ptask);
         }
         else if (!strcmp(xname, "showout"))
             show_task_dialog(nullptr, browser->task_view);
-        else if (g_str_has_prefix(xname, "err_"))
+        else if (Glib::str_has_prefix(xname, "err_"))
             on_task_popup_errset(nullptr, main_window, set->name);
     }
     else if (!strcmp(set->name, "rubberband"))
@@ -4633,17 +4633,17 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, XSet* set2, PtkFileTask* task2)
         set = XSET(g_object_get_data(G_OBJECT(item), "set"));
     else
         set = set2;
-    if (!set || !g_str_has_prefix(set->name, "task_"))
+    if (!set || !Glib::str_has_prefix(set->name, "task_"))
         return;
 
     char* name = set->name + 5;
-    if (g_str_has_prefix(name, "stop"))
+    if (Glib::str_has_prefix(name, "stop"))
         job = JOB_STOP;
-    else if (g_str_has_prefix(name, "pause"))
+    else if (Glib::str_has_prefix(name, "pause"))
         job = JOB_PAUSE;
-    else if (g_str_has_prefix(name, "que"))
+    else if (Glib::str_has_prefix(name, "que"))
         job = JOB_QUEUE;
-    else if (g_str_has_prefix(name, "resume"))
+    else if (Glib::str_has_prefix(name, "resume"))
         job = JOB_RESUME;
     else
         return;
@@ -6011,34 +6011,34 @@ main_window_socket_command(char* argv[], char** reply)
         else if (g_str_has_suffix(argv[i], "_visible"))
         {
             bool use_mode = false;
-            if (g_str_has_prefix(argv[i], "devices_"))
+            if (Glib::str_has_prefix(argv[i], "devices_"))
             {
                 str = g_strdup("show_devmon");
                 use_mode = true;
             }
-            else if (g_str_has_prefix(argv[i], "bookmarks_"))
+            else if (Glib::str_has_prefix(argv[i], "bookmarks_"))
             {
                 str = g_strdup("show_book");
                 use_mode = true;
             }
-            else if (g_str_has_prefix(argv[i], "dirtree_"))
+            else if (Glib::str_has_prefix(argv[i], "dirtree_"))
             {
                 str = g_strdup("show_dirtree");
                 use_mode = true;
             }
-            else if (g_str_has_prefix(argv[i], "toolbar_"))
+            else if (Glib::str_has_prefix(argv[i], "toolbar_"))
             {
                 str = g_strdup("show_toolbox");
                 use_mode = true;
             }
-            else if (g_str_has_prefix(argv[i], "sidetoolbar_"))
+            else if (Glib::str_has_prefix(argv[i], "sidetoolbar_"))
             {
                 str = g_strdup("show_sidebar");
                 use_mode = true;
             }
-            else if (g_str_has_prefix(argv[i], "hidden_files_"))
+            else if (Glib::str_has_prefix(argv[i], "hidden_files_"))
                 str = g_strdup("show_hidden");
-            else if (g_str_has_prefix(argv[i], "panel"))
+            else if (Glib::str_has_prefix(argv[i], "panel"))
             {
                 j = argv[i][5] - 48;
                 if (j < 1 || j > 4)
@@ -6154,7 +6154,7 @@ main_window_socket_command(char* argv[], char** reply)
             }
             ptk_file_browser_set_sort_order(file_browser, (PtkFBSortOrder)j);
         }
-        else if (g_str_has_prefix(argv[i], "sort_"))
+        else if (Glib::str_has_prefix(argv[i], "sort_"))
         {
             if (!strcmp(argv[i] + 5, "ascend"))
             {
@@ -6427,34 +6427,34 @@ main_window_socket_command(char* argv[], char** reply)
         else if (g_str_has_suffix(argv[i], "_visible"))
         {
             bool use_mode = false;
-            if (g_str_has_prefix(argv[i], "devices_"))
+            if (Glib::str_has_prefix(argv[i], "devices_"))
             {
                 str = g_strdup("show_devmon");
                 use_mode = true;
             }
-            else if (g_str_has_prefix(argv[i], "bookmarks_"))
+            else if (Glib::str_has_prefix(argv[i], "bookmarks_"))
             {
                 str = g_strdup("show_book");
                 use_mode = true;
             }
-            else if (g_str_has_prefix(argv[i], "dirtree_"))
+            else if (Glib::str_has_prefix(argv[i], "dirtree_"))
             {
                 str = g_strdup("show_dirtree");
                 use_mode = true;
             }
-            else if (g_str_has_prefix(argv[i], "toolbar_"))
+            else if (Glib::str_has_prefix(argv[i], "toolbar_"))
             {
                 str = g_strdup("show_toolbox");
                 use_mode = true;
             }
-            else if (g_str_has_prefix(argv[i], "sidetoolbar_"))
+            else if (Glib::str_has_prefix(argv[i], "sidetoolbar_"))
             {
                 str = g_strdup("show_sidebar");
                 use_mode = true;
             }
-            else if (g_str_has_prefix(argv[i], "hidden_files_"))
+            else if (Glib::str_has_prefix(argv[i], "hidden_files_"))
                 str = g_strdup("show_hidden");
-            else if (g_str_has_prefix(argv[i], "panel"))
+            else if (Glib::str_has_prefix(argv[i], "panel"))
             {
                 j = argv[i][5] - 48;
                 if (j < 1 || j > 4)
@@ -6550,7 +6550,7 @@ main_window_socket_command(char* argv[], char** reply)
             }
             *reply = g_strdup_printf("%s\n", str);
         }
-        else if (g_str_has_prefix(argv[i], "sort_"))
+        else if (Glib::str_has_prefix(argv[i], "sort_"))
         {
             if (!strcmp(argv[i] + 5, "ascend"))
                 *reply =
@@ -7123,7 +7123,7 @@ main_window_socket_command(char* argv[], char** reply)
             }
             else if (!strcmp(argv[i], "mount") &&
                      ((real_path[0] != '/' && strstr(real_path, ":/")) ||
-                      g_str_has_prefix(real_path, "//")))
+                      Glib::str_has_prefix(real_path, "//")))
             {
                 // mount URL
                 if (split_network_url(real_path, &netmount) != 1)

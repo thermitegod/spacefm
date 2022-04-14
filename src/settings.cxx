@@ -700,7 +700,7 @@ xset_free_all()
 {
     for (XSet* set: xsets)
     {
-        if (set->ob2_data && g_str_has_prefix(set->name, "evt_"))
+        if (set->ob2_data && Glib::str_has_prefix(set->name, "evt_"))
         {
             g_list_foreach((GList*)set->ob2_data, (GFunc)g_free, nullptr);
             g_list_free((GList*)set->ob2_data);
@@ -1110,7 +1110,7 @@ xset_write(std::string& buf)
     {
         // hack to not save default handlers - this allows default handlers
         // to be updated more easily
-        if (set->disable && set->name[0] == 'h' && g_str_has_prefix(set->name, "hand"))
+        if (set->disable && set->name[0] == 'h' && Glib::str_has_prefix(set->name, "hand"))
             continue;
         xset_write_set(buf, set);
     }
@@ -1593,7 +1593,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
             pinned = 0;
             for (XSet* set3: xsets)
             {
-                if (set3->next && g_str_has_prefix(set3->name, "open_all_type_"))
+                if (set3->next && Glib::str_has_prefix(set3->name, "open_all_type_"))
                 {
                     tset = open_all_tset = set3;
                     while (tset->next)
@@ -1906,7 +1906,7 @@ xset_custom_get_bookmark_icon(XSet* set, int icon_size)
 
     if (!set->lock && xset_get_int_set(set, "x") == XSET_CMD_BOOKMARK)
     {
-        if (!set->icon && (set->z && (strstr(set->z, ":/") || g_str_has_prefix(set->z, "//"))))
+        if (!set->icon && (set->z && (strstr(set->z, ":/") || Glib::str_has_prefix(set->z, "//"))))
         {
             // a bookmarked URL - show network icon
             XSet* set2 = xset_get("dev_icon_network");
@@ -1917,7 +1917,7 @@ xset_custom_get_bookmark_icon(XSet* set, int icon_size)
             icon2 = g_strdup("user-bookmarks");
             icon3 = g_strdup("gnome-fs-directory");
         }
-        else if (set->z && (strstr(set->z, ":/") || g_str_has_prefix(set->z, "//")))
+        else if (set->z && (strstr(set->z, ":/") || Glib::str_has_prefix(set->z, "//")))
         {
             // a bookmarked URL - show custom or network icon
             icon1 = g_strdup(set->icon);
@@ -2404,7 +2404,7 @@ _redo:
     {
         while ((name = g_dir_read_name(dir)))
         {
-            if (strlen(name) == 13 && g_str_has_prefix(name, "cstm_") && !xset_is(name))
+            if (strlen(name) == 13 && Glib::str_has_prefix(name, "cstm_") && !xset_is(name))
             {
                 g_dir_close(dir);
 
@@ -2558,7 +2558,7 @@ xset_parse_plugin(const char* plug_dir, const char* line, int use)
     else
         prefix = g_strdup("cstm_");
 
-    if (g_str_has_prefix(name, prefix))
+    if (Glib::str_has_prefix(name, prefix))
     {
         set = xset_get_by_plug_name(plug_dir, name);
         xset_set_set_int(set, var, value);
@@ -3133,13 +3133,13 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
         std::string type;
         if (!strcmp(set->name, "main_book"))
             type = "bookmarks";
-        else if (g_str_has_prefix(set->name, "hand_arc_"))
+        else if (Glib::str_has_prefix(set->name, "hand_arc_"))
             type = "archive-handler";
-        else if (g_str_has_prefix(set->name, "hand_fs_"))
+        else if (Glib::str_has_prefix(set->name, "hand_fs_"))
             type = "device-handler";
-        else if (g_str_has_prefix(set->name, "hand_net_"))
+        else if (Glib::str_has_prefix(set->name, "hand_net_"))
             type = "protocol-handler";
-        else if (g_str_has_prefix(set->name, "hand_f_"))
+        else if (Glib::str_has_prefix(set->name, "hand_f_"))
             type = "file-handler";
         else
             type = "plugin";
@@ -3292,12 +3292,12 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
     bool new_tab = !new_window && in_new_tab;
 
     // convert ~ to /home/user for smarter bookmarks
-    if (g_str_has_prefix(url, "~/") || !g_strcmp0(url, "~"))
+    if (Glib::str_has_prefix(url, "~/") || !g_strcmp0(url, "~"))
         use_url = g_strdup_printf("%s%s", vfs_user_home_dir().c_str(), url + 1);
     else
         use_url = url;
 
-    if ((use_url[0] != '/' && strstr(use_url, ":/")) || g_str_has_prefix(use_url, "//"))
+    if ((use_url[0] != '/' && strstr(use_url, ":/")) || Glib::str_has_prefix(use_url, "//"))
     {
         // network
         if (file_browser)
@@ -4045,7 +4045,7 @@ xset_set_key(GtkWidget* parent, XSet* set)
         name = clean_label(set->menu_label, false, true);
     else if (set->tool > XSET_TOOL_CUSTOM)
         name = xset_get_builtin_toolitem_label(set->tool);
-    else if (g_str_has_prefix(set->name, "open_all_type_"))
+    else if (Glib::str_has_prefix(set->name, "open_all_type_"))
     {
         keyset = xset_get("open_all");
         name = clean_label(keyset->menu_label, false, true);
@@ -4286,7 +4286,7 @@ xset_design_job(GtkWidget* item, XSet* set)
         case XSET_JOB_BOOKMARK:
         case XSET_JOB_APP:
         case XSET_JOB_COMMAND:
-            if (g_str_has_prefix(set->name, "open_all_type_"))
+            if (Glib::str_has_prefix(set->name, "open_all_type_"))
             {
                 name = set->name + 14;
                 msg = fmt::format(
@@ -4404,7 +4404,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             break;
         case XSET_JOB_SUBMENU:
         case XSET_JOB_SUBMENU_BOOK:
-            if (g_str_has_prefix(set->name, "open_all_type_"))
+            if (Glib::str_has_prefix(set->name, "open_all_type_"))
             {
                 name = set->name + 14;
                 msg = fmt::format(
@@ -4927,7 +4927,7 @@ xset_job_is_valid(XSet* set, int job)
     }
 
     // control open_all item
-    if (g_str_has_prefix(set->name, "open_all_type_"))
+    if (Glib::str_has_prefix(set->name, "open_all_type_"))
         open_all = true;
 
     switch (job)
@@ -5153,7 +5153,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
         no_paste = xset_clipboard_in_set(insert_set);
 
     // control open_all item
-    // if (g_str_has_prefix(set->name, "open_all_type_"))
+    // if (Glib::str_has_prefix(set->name, "open_all_type_"))
     //    open_all = true;
 
     GtkWidget* design_menu = gtk_menu_new();

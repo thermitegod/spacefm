@@ -19,6 +19,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <glibmm.h>
+
 #include <gtk/gtk.h>
 
 #include <fnmatch.h>
@@ -382,10 +384,10 @@ xset_context_test(XSetContext* context, char* rules, bool def_disable)
                     test = !strstr(context->var[sub], eleval);
                     break;
                 case CONTEXT_COMP_BEGINS:
-                    test = g_str_has_prefix(context->var[sub], eleval);
+                    test = Glib::str_has_prefix(context->var[sub], eleval);
                     break;
                 case CONTEXT_COMP_NBEGINS:
-                    test = !g_str_has_prefix(context->var[sub], eleval);
+                    test = !Glib::str_has_prefix(context->var[sub], eleval);
                     break;
                 case CONTEXT_COMP_ENDS:
                     test = g_str_has_suffix(context->var[sub], eleval);

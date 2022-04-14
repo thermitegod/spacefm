@@ -103,7 +103,7 @@ seek_path(GtkEntry* entry)
             {
                 while (count < 2 && (name = g_dir_read_name(dir)))
                 {
-                    if (g_str_has_prefix(name, seek_name))
+                    if (Glib::str_has_prefix(name, seek_name))
                     {
                         full_path = g_build_filename(seek_dir, name, nullptr);
                         if (std::filesystem::is_directory(full_path))
@@ -156,7 +156,7 @@ match_func_cmd(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it,
     GtkTreeModel* model = gtk_entry_completion_get_model(completion);
     gtk_tree_model_get(model, it, COL_NAME, &name, -1);
 
-    if (name && key && g_str_has_prefix(name, key))
+    if (name && key && Glib::str_has_prefix(name, key))
     {
         g_free(name);
         return true;
@@ -196,7 +196,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
     const char* text = gtk_entry_get_text(entry);
     if (text &&
         (text[0] == '$' || text[0] == '+' || text[0] == '&' || text[0] == '!' || text[0] == '%' ||
-         (text[0] != '/' && strstr(text, ":/")) || g_str_has_prefix(text, "//")))
+         (text[0] != '/' && strstr(text, ":/")) || Glib::str_has_prefix(text, "//")))
     {
         // command history
         list = GTK_LIST_STORE(gtk_entry_completion_get_model(completion));
@@ -338,7 +338,7 @@ insert_complete(GtkEntry* entry)
                 if (++count > 1)
                     break;
             }
-            else if (g_str_has_prefix(name, prefix_name))
+            else if (Glib::str_has_prefix(name, prefix_name))
             {
                 // prefix matches
                 count++;
@@ -655,7 +655,7 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
     set = xset_set_cb("book_add", (GFunc)on_add_bookmark, file_browser);
     const char* text = gtk_entry_get_text(GTK_ENTRY(entry));
     set->disable = !(text && (std::filesystem::exists(text) || strstr(text, ":/") ||
-                              g_str_has_prefix(text, "//")));
+                              Glib::str_has_prefix(text, "//")));
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
 
     set = xset_get("path_seek");
