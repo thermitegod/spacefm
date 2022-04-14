@@ -572,46 +572,43 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, VFSMimeType* mime_type, bool foc
 static void
 load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* task)
 {
-    GDir* dir = g_dir_open(dir_path, 0, nullptr);
-    if (dir)
+    if (!std::filesystem::is_directory(dir_path))
+        return;
+
+    std::string file_path;
+    std::string file_name;
+    for (const auto& file: std::filesystem::directory_iterator(dir_path))
     {
-        const char* name;
-        char* path;
-        while ((name = g_dir_read_name(dir)))
+        vfs_async_task_lock(task);
+        if (task->cancel)
         {
-            vfs_async_task_lock(task);
-            if (task->cancel)
-            {
-                vfs_async_task_unlock(task);
-                break;
-            }
             vfs_async_task_unlock(task);
-
-            path = g_build_filename(dir_path, name, nullptr);
-            if (std::filesystem::is_directory(path))
-            {
-                /* recursively load sub dirs */
-                load_all_apps_in_dir(path, list, task);
-                g_free(path);
-                continue;
-            }
-            if (!g_str_has_suffix(name, ".desktop"))
-                continue;
-
-            vfs_async_task_lock(task);
-            if (task->cancel)
-            {
-                vfs_async_task_unlock(task);
-                break;
-            }
-            vfs_async_task_unlock(task);
-
-            /* There are some operations using GTK+, so lock may be needed. */
-            add_list_item(list, path);
-
-            g_free(path);
+            break;
         }
-        g_dir_close(dir);
+        vfs_async_task_unlock(task);
+
+        file_name = std::filesystem::path(file).filename();
+
+        file_path = Glib::build_filename(dir_path, file_name);
+        if (std::filesystem::is_directory(file_path))
+        {
+            /* recursively load sub dirs */
+            load_all_apps_in_dir(file_path.c_str(), list, task);
+            continue;
+        }
+        if (!Glib::str_has_suffix(file_name, ".desktop"))
+            continue;
+
+        vfs_async_task_lock(task);
+        if (task->cancel)
+        {
+            vfs_async_task_unlock(task);
+            break;
+        }
+        vfs_async_task_unlock(task);
+
+        /* There are some operations using GTK+, so lock may be needed. */
+        add_list_item(list, file_path.c_str());
     }
 }
 

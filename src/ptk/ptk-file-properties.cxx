@@ -27,6 +27,7 @@
 #include "ptk/ptk-utils.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
+#include "vfs/vfs-user-dir.hxx"
 #include "vfs/vfs-utils.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
@@ -102,18 +103,18 @@ calc_total_size_of_files(const char* path, FilePropertiesDialogData* data)
     data->total_size += file_stat.st_size;
     data->size_on_disk += (file_stat.st_blocks << 9); /* block x 512 */
 
-    GDir* dir = g_dir_open(path, 0, nullptr);
-    if (dir)
+    if (std::filesystem::is_directory(path))
     {
-        const char* name;
-        ++data->total_count_dir;
-        while (!data->cancel && (name = g_dir_read_name(dir)))
+        std::string file_name;
+        for (const auto& file: std::filesystem::directory_iterator(path))
         {
-            char* full_path = g_build_filename(path, name, nullptr);
-            lstat(full_path, &file_stat);
+            file_name = std::filesystem::path(file).filename();
+
+            std::string full_path = Glib::build_filename(path, file_name);
+            lstat(full_path.c_str(), &file_stat);
             if (S_ISDIR(file_stat.st_mode))
             {
-                calc_total_size_of_files(full_path, data);
+                calc_total_size_of_files(full_path.c_str(), data);
             }
             else
             {
@@ -121,12 +122,12 @@ calc_total_size_of_files(const char* path, FilePropertiesDialogData* data)
                 data->size_on_disk += (file_stat.st_blocks << 9);
                 ++data->total_count;
             }
-            g_free(full_path);
         }
-        g_dir_close(dir);
     }
     else
+    {
         ++data->total_count;
+    }
 }
 
 static void*

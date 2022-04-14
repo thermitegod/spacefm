@@ -1093,35 +1093,31 @@ info_partition_table(device_t* device)
      * the parents name as a prefix (e.g. for parent sda then sda1,
      * sda2, sda3 ditto md0, md0p1 etc. etc. will work).
      */
-    if (!is_partition_table)
+
+    if (!is_partition_table && std::filesystem::is_directory(device->native_path))
     {
-        char* s;
-        GDir* dir;
+        const char* s = g_path_get_basename(device->native_path);
 
-        s = g_path_get_basename(device->native_path);
-        if ((dir = g_dir_open(device->native_path, 0, nullptr)) != nullptr)
+        unsigned int partition_count;
+        const char* name;
+
+        partition_count = 0;
+
+        std::string file_name;
+        for (const auto& file: std::filesystem::directory_iterator(device->native_path))
         {
-            unsigned int partition_count;
-            const char* name;
+            file_name = std::filesystem::path(file).filename();
 
-            partition_count = 0;
-            while ((name = g_dir_read_name(dir)) != nullptr)
-            {
-                if (Glib::str_has_prefix(name, s))
-                {
-                    partition_count++;
-                }
-            }
-            g_dir_close(dir);
-
-            if (partition_count > 0)
-            {
-                device->partition_table_scheme = g_strdup("");
-                device->partition_table_count = g_strdup_printf("%d", partition_count);
-                is_partition_table = true;
-            }
+            if (Glib::str_has_prefix(file_name, s))
+                partition_count++;
         }
-        g_free(s);
+
+        if (partition_count > 0)
+        {
+            device->partition_table_scheme = g_strdup("");
+            device->partition_table_count = g_strdup_printf("%d", partition_count);
+            is_partition_table = true;
+        }
     }
 
     device->device_is_partition_table = is_partition_table;

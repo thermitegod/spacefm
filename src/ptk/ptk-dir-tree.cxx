@@ -21,10 +21,13 @@
 
 #include <cassert>
 
+#include <glibmm.h>
+
 #include <gdk/gdk.h>
 
 #include "settings.hxx"
 
+#include "vfs/vfs-user-dir.hxx"
 #include "vfs/vfs-utils.hxx"
 
 #include "ptk/ptk-dir-tree.hxx"
@@ -702,6 +705,7 @@ void
 ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_path)
 {
     (void)tree_path;
+
     PtkDirTreeNode* node = static_cast<PtkDirTreeNode*>(iter->user_data);
     ++node->n_expand;
     if (node->n_expand > 1 || node->n_children > 1)
@@ -710,21 +714,20 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
     PtkDirTreeNode* place_holder = node->children;
     char* path = dir_path_from_tree_node(tree, node);
 
-    GDir* dir = g_dir_open(path, 0, nullptr);
-    if (dir)
+    if (std::filesystem::is_directory(path))
     {
         node->monitor = vfs_file_monitor_add(path, &on_file_monitor_event, node);
-        const char* name = nullptr;
-        while ((name = g_dir_read_name(dir)))
+
+        std::string file_path;
+        std::string file_name;
+        for (const auto& file: std::filesystem::directory_iterator(path))
         {
-            char* file_path = g_build_filename(path, name, nullptr);
+            file_name = std::filesystem::path(file).filename();
+
+            file_path = Glib::build_filename(path, file_name);
             if (std::filesystem::is_directory(file_path))
-            {
-                ptk_dir_tree_insert_child(tree, node, file_path, name);
-            }
-            g_free(file_path);
+                ptk_dir_tree_insert_child(tree, node, file_path.c_str(), file_name.c_str());
         }
-        g_dir_close(dir);
 
         if (node->n_children > 1)
         {

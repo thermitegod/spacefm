@@ -556,33 +556,34 @@ mime_type_add_action(const char* type, const char* desktop_id, char** custom_des
 
 static char*
 _locate_desktop_file_recursive(const char* path, const char* desktop_id, bool first)
-{ // if first is true, just search for subdirs not desktop_id (already searched)
-    const char* name;
-
-    GDir* dir = g_dir_open(path, 0, nullptr);
-    if (!dir)
-        return nullptr;
+{
+    // if first is true, just search for subdirs not desktop_id (already searched)
 
     char* found = nullptr;
-    while ((name = g_dir_read_name(dir)))
+
+    if (std::filesystem::is_directory(path))
     {
-        char* sub_path = g_build_filename(path, name, nullptr);
-        if (std::filesystem::is_directory(sub_path))
+        std::string file_name;
+        for (const auto& file: std::filesystem::directory_iterator(path))
         {
-            if ((found = _locate_desktop_file_recursive(sub_path, desktop_id, false)))
+            file_name = std::filesystem::path(file).filename();
+
+            std::string sub_path = Glib::build_filename(path, file_name);
+            if (std::filesystem::is_directory(sub_path))
             {
-                g_free(sub_path);
+                found = _locate_desktop_file_recursive(sub_path.c_str(), desktop_id, false);
+                if (found)
+                    break;
+            }
+            else if (!first && ztd::same(file_name, desktop_id) &&
+                     std::filesystem::is_regular_file(sub_path))
+            {
+                found = g_strdup(sub_path.c_str());
                 break;
             }
         }
-        else if (!first && !strcmp(name, desktop_id) && std::filesystem::is_regular_file(sub_path))
-        {
-            found = sub_path;
-            break;
-        }
-        g_free(sub_path);
     }
-    g_dir_close(dir);
+
     return found;
 }
 

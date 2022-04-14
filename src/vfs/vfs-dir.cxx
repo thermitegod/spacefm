@@ -586,8 +586,6 @@ static void*
 vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
 {
     (void)task;
-    const char* file_name;
-    char* full_path;
 
     dir->file_listed = false;
     dir->load_complete = false;
@@ -597,46 +595,43 @@ vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
         /* Install file alteration monitor */
         dir->monitor = vfs_file_monitor_add(dir->path, vfs_dir_monitor_callback, dir);
 
-        GDir* dir_content = g_dir_open(dir->path, 0, nullptr);
+        // MOD  dir contains .hidden file?
+        std::string hidden = gethidden(dir->path);
 
-        if (dir_content)
+        std::string file_name;
+        std::string full_path;
+        for (const auto& file: std::filesystem::directory_iterator(dir->path))
         {
-            // MOD  dir contains .hidden file?
-            std::string hidden = gethidden(dir->path);
+            if (vfs_async_task_is_cancelled(dir->task))
+                break;
 
-            while (!vfs_async_task_is_cancelled(dir->task) &&
-                   (file_name = g_dir_read_name(dir_content)))
+            file_name = std::filesystem::path(file).filename();
+
+            full_path = Glib::build_filename(dir->path, file_name);
+
+            // MOD ignore if in .hidden
+            if (ishidden(hidden, file_name))
             {
-                full_path = g_build_filename(dir->path, file_name, nullptr);
-                if (!full_path)
-                    continue;
-
-                // MOD ignore if in .hidden
-                if (ishidden(hidden, file_name))
-                {
-                    dir->xhidden_count++;
-                    continue;
-                }
-
-                VFSFileInfo* file = vfs_file_info_new();
-                if (vfs_file_info_get(file, full_path, file_name))
-                {
-                    vfs_dir_lock(dir);
-
-                    /* Special processing for desktop directory */
-                    vfs_file_info_load_special_info(file, full_path);
-
-                    dir->file_list.push_back(file);
-
-                    vfs_dir_unlock(dir);
-                }
-                else
-                {
-                    vfs_file_info_unref(file);
-                }
-                g_free(full_path);
+                dir->xhidden_count++;
+                continue;
             }
-            g_dir_close(dir_content);
+
+            VFSFileInfo* fi = vfs_file_info_new();
+            if (vfs_file_info_get(fi, full_path.c_str(), file_name.c_str()))
+            {
+                vfs_dir_lock(dir);
+
+                /* Special processing for desktop directory */
+                vfs_file_info_load_special_info(fi, full_path.c_str());
+
+                dir->file_list.push_back(fi);
+
+                vfs_dir_unlock(dir);
+            }
+            else
+            {
+                vfs_file_info_unref(fi);
+            }
         }
     }
     return nullptr;

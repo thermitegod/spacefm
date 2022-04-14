@@ -646,40 +646,39 @@ ptk_location_view_clean_mount_points()
      * build also requires it. */
 
     // clean cache and Auto-Mount|Mount Dirs  (eg for fuse mounts)
-    char* path;
+    std::string path;
     int i;
     for (i = 0; i < 2; i++)
     {
-        char* del_path;
-
         if (i == 0)
-            path = g_build_filename(vfs_user_cache_dir().c_str(), "spacefm-mount", nullptr);
+            path = Glib::build_filename(vfs_user_cache_dir(), "spacefm-mount");
         else // i == 1
         {
-            del_path = ptk_location_view_get_mount_point_dir(nullptr);
-            if (!g_strcmp0(del_path, path))
+            char* del_path = ptk_location_view_get_mount_point_dir(nullptr);
+            if (!g_strcmp0(del_path, path.c_str()))
             {
                 // Auto-Mount|Mount Dirs is not set or valid
                 g_free(del_path);
                 break;
             }
-            g_free(path);
             path = del_path;
+            g_free(del_path);
         }
-        GDir* dir;
-        if ((dir = g_dir_open(path, 0, nullptr)) != nullptr)
+
+        if (std::filesystem::is_directory(path))
         {
-            const char* name;
-            while ((name = g_dir_read_name(dir)) != nullptr)
+            std::string file_name;
+            for (const auto& file: std::filesystem::directory_iterator(path))
             {
-                del_path = g_build_filename(path, name, nullptr);
-                std::filesystem::remove_all(del_path); // removes empty, non-mounted directories
-                g_free(del_path);
+                file_name = std::filesystem::path(file).filename();
+
+                std::string del_path = Glib::build_filename(path, file_name);
+
+                // removes empty, non-mounted directories
+                std::filesystem::remove_all(del_path);
             }
-            g_dir_close(dir);
         }
     }
-    g_free(path);
 
     // clean udevil mount points
     std::string udevil = Glib::find_program_in_path("udevil");

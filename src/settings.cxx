@@ -2393,29 +2393,21 @@ clean_plugin_mirrors()
     }
 
     // remove plugin-data for non-existent xsets
-    const char* name;
-    char* command;
-    GDir* dir;
-    char* path = g_build_filename(xset_get_config_dir(), "plugin-data", nullptr);
-_redo:
-    dir = g_dir_open(path, 0, nullptr);
-    if (dir)
+    std::string path = Glib::build_filename(xset_get_config_dir(), "plugin-data");
+    if (std::filesystem::is_directory(path))
     {
-        while ((name = g_dir_read_name(dir)))
+        std::string file_name;
+        for (const auto& file: std::filesystem::directory_iterator(path))
         {
-            if (strlen(name) == 13 && Glib::str_has_prefix(name, "cstm_") && !xset_is(name))
+            file_name = std::filesystem::path(file).filename();
+            if (Glib::str_has_prefix(file_name, "cstm_") && !xset_is(file_name.c_str()))
             {
-                g_dir_close(dir);
-
-                std::string plugin_path = fmt::format("{}/{}", path, name);
+                std::string plugin_path = fmt::format("{}/{}", path, file_name);
                 std::filesystem::remove_all(plugin_path);
-                LOG_INFO("Removed {}/{}", path, name);
-                goto _redo;
+                LOG_INFO("Removed {}/{}", path, file_name);
             }
         }
-        g_dir_close(dir);
     }
-    g_free(path);
 }
 
 static void

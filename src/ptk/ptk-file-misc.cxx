@@ -1911,22 +1911,24 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
     }
 
     templates_path = g_build_filename(templates_dir, subdir, nullptr);
-    GDir* dir = g_dir_open(templates_path, 0, nullptr);
-    if (dir)
+
+    if (std::filesystem::is_directory(templates_path))
     {
-        const char* name;
-        while ((name = g_dir_read_name(dir)))
+        std::string file_name;
+        for (const auto& file: std::filesystem::directory_iterator(templates_path))
         {
+            file_name = std::filesystem::path(file).filename();
+
             char* subsubdir;
-            char* path = g_build_filename(templates_path, name, nullptr);
+            char* path = g_build_filename(templates_path, file_name.c_str(), nullptr);
             if (getdir)
             {
                 if (std::filesystem::is_directory(path))
                 {
                     if (subdir)
-                        subsubdir = g_build_filename(subdir, name, nullptr);
+                        subsubdir = g_build_filename(subdir, file_name.c_str(), nullptr);
                     else
-                        subsubdir = g_strdup(name);
+                        subsubdir = g_strdup(file_name.c_str());
                     templates = g_list_prepend(templates, g_strdup_printf("%s/", subsubdir));
                     // prevent filesystem loops during recursive find
                     if (!std::filesystem::is_symlink(path))
@@ -1940,9 +1942,10 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
                 {
                     if (subdir)
                         templates =
-                            g_list_prepend(templates, g_build_filename(subdir, name, nullptr));
+                            g_list_prepend(templates,
+                                           g_build_filename(subdir, file_name.c_str(), nullptr));
                     else
-                        templates = g_list_prepend(templates, g_strdup(name));
+                        templates = g_list_prepend(templates, g_strdup(file_name.c_str()));
                 }
                 else if (std::filesystem::is_directory(path) &&
                          // prevent filesystem loops during recursive find
@@ -1950,17 +1953,16 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
                 {
                     if (subdir)
                     {
-                        subsubdir = g_build_filename(subdir, name, nullptr);
+                        subsubdir = g_build_filename(subdir, file_name.c_str(), nullptr);
                         templates = get_templates(templates_dir, subsubdir, templates, getdir);
                         g_free(subsubdir);
                     }
                     else
-                        templates = get_templates(templates_dir, name, templates, getdir);
+                        templates =
+                            get_templates(templates_dir, file_name.c_str(), templates, getdir);
                 }
             }
-            g_free(path);
         }
-        g_dir_close(dir);
     }
     g_free(templates_path);
     return templates;

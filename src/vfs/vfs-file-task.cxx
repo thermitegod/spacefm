@@ -354,7 +354,6 @@ update_file_display(const char* path)
 static bool
 vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_file)
 {
-    const char* file_name;
     struct stat file_stat;
     char buffer[4096];
     int rfd;
@@ -399,38 +398,26 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
             std::filesystem::permissions(dest_file, std::filesystem::perms::owner_all);
         }
 
-        if (std::filesystem::exists(src_file))
+        if (std::filesystem::is_directory(src_file))
         {
             struct utimbuf times;
             vfs_file_task_lock(task);
             task->progress += file_stat.st_size;
             vfs_file_task_unlock(task);
 
-            GError* error = nullptr;
-            GDir* dir = g_dir_open(src_file, 0, &error);
-            if (dir)
+            std::string sub_src_file;
+            std::string sub_dest_file;
+            std::string file_name;
+            for (const auto& file: std::filesystem::directory_iterator(src_file))
             {
-                while ((file_name = g_dir_read_name(dir)))
-                {
-                    if (should_abort(task))
-                        break;
-                    char* sub_src_file = g_build_filename(src_file, file_name, nullptr);
-                    char* sub_dest_file = g_build_filename(dest_file, file_name, nullptr);
-                    if (!vfs_file_task_do_copy(task, sub_src_file, sub_dest_file) && !copy_fail)
-                        copy_fail = true;
-                    g_free(sub_dest_file);
-                    g_free(sub_src_file);
-                }
-                g_dir_close(dir);
-            }
-            else if (error)
-            {
-                std::string msg = fmt::format("\n{}\n", error->message);
-                g_error_free(error);
-                vfs_file_task_exec_error(task, 0, msg);
-                copy_fail = true;
+                file_name = std::filesystem::path(file).filename();
                 if (should_abort(task))
-                    goto _return_;
+                    break;
+                sub_src_file = Glib::build_filename(src_file, file_name);
+                sub_dest_file = Glib::build_filename(dest_file, file_name);
+                if (!vfs_file_task_do_copy(task, sub_src_file.c_str(), sub_dest_file.c_str()) &&
+                    !copy_fail)
+                    copy_fail = true;
             }
 
             chmod(dest_file, file_stat.st_mode);
@@ -690,34 +677,22 @@ vfs_file_task_do_move(VFSFileTask* task, const char* src_file,
     if (S_ISDIR(file_stat.st_mode) && std::filesystem::is_directory(dest_file))
     {
         // moving a directory onto a directory that exists
-        GError* error = nullptr;
-        GDir* dir = g_dir_open(src_file, 0, &error);
-        if (dir)
+        std::string sub_src_file;
+        std::string sub_dest_file;
+        std::string file_name;
+        for (const auto& file: std::filesystem::directory_iterator(src_file))
         {
-            const char* file_name;
-            char* sub_src_file;
-            char* sub_dest_file;
-            while ((file_name = g_dir_read_name(dir)))
-            {
-                if (should_abort(task))
-                    break;
-                sub_src_file = g_build_filename(src_file, file_name, nullptr);
-                sub_dest_file = g_build_filename(dest_file, file_name, nullptr);
-                vfs_file_task_do_move(task, sub_src_file, sub_dest_file);
-                g_free(sub_dest_file);
-                g_free(sub_src_file);
-            }
-            g_dir_close(dir);
-            // remove moved src dir if empty
-            if (!should_abort(task))
-                std::filesystem::remove_all(src_file);
+            file_name = std::filesystem::path(file).filename();
+            if (should_abort(task))
+                break;
+            sub_src_file = Glib::build_filename(src_file, file_name);
+            sub_dest_file = Glib::build_filename(dest_file, file_name);
+            vfs_file_task_do_move(task, sub_src_file.c_str(), sub_dest_file.c_str());
         }
-        else if (error)
-        {
-            std::string msg = fmt::format("\n{}\n", error->message);
-            g_error_free(error);
-            vfs_file_task_exec_error(task, 0, msg);
-        }
+        // remove moved src dir if empty
+        if (!should_abort(task))
+            std::filesystem::remove_all(src_file);
+
         return 0;
     }
 
@@ -824,7 +799,7 @@ vfs_file_task_trash(char* src_file, VFSFileTask* task)
 }
 
 static void
-vfs_file_task_delete(char* src_file, VFSFileTask* task)
+vfs_file_task_delete(const char* src_file, VFSFileTask* task)
 {
     if (should_abort(task))
         return;
@@ -843,26 +818,14 @@ vfs_file_task_delete(char* src_file, VFSFileTask* task)
 
     if (S_ISDIR(file_stat.st_mode))
     {
-        GError* error = nullptr;
-        GDir* dir = g_dir_open(src_file, 0, &error);
-        if (dir)
+        std::string file_name;
+        for (const auto& file: std::filesystem::directory_iterator(src_file))
         {
-            const char* file_name;
-            while ((file_name = g_dir_read_name(dir)))
-            {
-                if (should_abort(task))
-                    break;
-                char* sub_src_file = g_build_filename(src_file, file_name, nullptr);
-                vfs_file_task_delete(sub_src_file, task);
-                g_free(sub_src_file);
-            }
-            g_dir_close(dir);
-        }
-        else if (error)
-        {
-            std::string msg = fmt::format("\n{}\n", error->message);
-            g_error_free(error);
-            vfs_file_task_exec_error(task, 0, msg);
+            file_name = std::filesystem::path(file).filename();
+            if (should_abort(task))
+                break;
+            std::string sub_src_file = Glib::build_filename(src_file, file_name);
+            vfs_file_task_delete(sub_src_file.c_str(), task);
         }
 
         if (should_abort(task))
@@ -967,7 +930,7 @@ vfs_file_task_link(char* src_file, VFSFileTask* task)
 }
 
 static void
-vfs_file_task_chown_chmod(char* src_file, VFSFileTask* task)
+vfs_file_task_chown_chmod(const char* src_file, VFSFileTask* task)
 {
     if (should_abort(task))
         return;
@@ -1029,34 +992,14 @@ vfs_file_task_chown_chmod(char* src_file, VFSFileTask* task)
 
         if (S_ISDIR(src_stat.st_mode) && task->recursive)
         {
-            GError* error = nullptr;
-            GDir* dir = g_dir_open(src_file, 0, &error);
-            if (dir)
+            std::string file_name;
+            for (const auto& file: std::filesystem::directory_iterator(src_file))
             {
-                const char* file_name;
-                while ((file_name = g_dir_read_name(dir)))
-                {
-                    if (should_abort(task))
-                        break;
-                    char* sub_src_file = g_build_filename(src_file, file_name, nullptr);
-                    vfs_file_task_chown_chmod(sub_src_file, task);
-                    g_free(sub_src_file);
-                }
-                g_dir_close(dir);
-            }
-            else if (error)
-            {
-                std::string msg = fmt::format("\n{}\n", error->message);
-                g_error_free(error);
-                vfs_file_task_exec_error(task, 0, msg);
+                file_name = std::filesystem::path(file).filename();
                 if (should_abort(task))
-                    return;
-            }
-            else
-            {
-                vfs_file_task_error(task, errno, "Accessing", src_file);
-                if (should_abort(task))
-                    return;
+                    break;
+                std::string sub_src_file = Glib::build_filename(src_file, file_name);
+                vfs_file_task_chown_chmod(sub_src_file.c_str(), task);
             }
         }
     }
@@ -2134,25 +2077,20 @@ get_total_size_of_dir(VFSFileTask* task, const char* path, off_t* size, struct s
     if (S_ISLNK(file_stat.st_mode) || !S_ISDIR(file_stat.st_mode))
         return;
 
-    GDir* dir = g_dir_open(path, 0, nullptr);
-    if (dir)
+    std::string file_name;
+    for (const auto& file: std::filesystem::directory_iterator(path))
     {
-        const char* name;
-        while ((name = g_dir_read_name(dir)))
+        file_name = std::filesystem::path(file).filename();
+        if (task->state == VFS_FILE_TASK_SIZE_TIMEOUT || task->abort)
+            break;
+        std::string full_path = Glib::build_filename(path, file_name);
+        if (lstat(full_path.c_str(), &file_stat) != -1)
         {
-            if (task->state == VFS_FILE_TASK_SIZE_TIMEOUT || task->abort)
-                break;
-            char* full_path = g_build_filename(path, name, nullptr);
-            if (lstat(full_path, &file_stat) != -1)
-            {
-                if (S_ISDIR(file_stat.st_mode))
-                    get_total_size_of_dir(task, full_path, size, &file_stat);
-                else
-                    *size += file_stat.st_size;
-            }
-            g_free(full_path);
+            if (S_ISDIR(file_stat.st_mode))
+                get_total_size_of_dir(task, full_path.c_str(), size, &file_stat);
+            else
+                *size += file_stat.st_size;
         }
-        g_dir_close(dir);
     }
 }
 
