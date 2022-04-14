@@ -277,12 +277,13 @@ vfs_dir_finalize(GObject* obj)
         dir->thumbnail_loader = nullptr;
     }
 
-    if (dir->file_list)
+    if (!dir->file_list.empty())
     {
-        g_list_foreach(dir->file_list, (GFunc)vfs_file_info_unref, nullptr);
-        g_list_free(dir->file_list);
-        dir->file_list = nullptr;
-        dir->n_files = 0;
+        for (VFSFileInfo* file: dir->file_list)
+        {
+            vfs_file_info_unref(file);
+        }
+        dir->file_list.clear();
     }
 
     if (!dir->changed_files.empty())
@@ -323,17 +324,15 @@ vfs_dir_set_property(GObject* obj, unsigned int prop_id, const GValue* value, GP
     (void)pspec;
 }
 
-static GList*
+static VFSFileInfo*
 vfs_dir_find_file(VFSDir* dir, const char* file_name, VFSFileInfo* file)
 {
-    GList* l;
-    for (l = dir->file_list; l; l = l->next)
+    for (VFSFileInfo* file2: dir->file_list)
     {
-        VFSFileInfo* file2 = static_cast<VFSFileInfo*>(l->data);
         if (file == file2)
-            return l;
+            return file2;
         if (ztd::same(file2->name, file_name))
-            return l;
+            return file2;
     }
     return nullptr;
 }
@@ -373,20 +372,27 @@ vfs_dir_emit_file_deleted(VFSDir* dir, const char* file_name, VFSFileInfo* file)
         file = nullptr;
         /* clear the whole list */
         vfs_dir_lock(dir);
-        g_list_foreach(dir->file_list, (GFunc)vfs_file_info_unref, nullptr);
-        g_list_free(dir->file_list);
-        dir->file_list = nullptr;
+
+        if (!dir->file_list.empty())
+        {
+            for (VFSFileInfo* file2: dir->file_list)
+            {
+                vfs_file_info_unref(file2);
+            }
+            dir->file_list.clear();
+        }
+
         vfs_dir_unlock(dir);
 
         g_signal_emit(dir, signals[FILE_DELETED_SIGNAL], 0, file);
         return;
     }
 
-    GList* l = vfs_dir_find_file(dir, file_name, file);
-    if (l)
+    VFSFileInfo* file_found = vfs_dir_find_file(dir, file_name, file);
+    if (file_found)
     {
-        VFSFileInfo* file_found = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data));
-        if (!std::count(dir->changed_files.begin(), dir->changed_files.end(), file_found))
+        file_found = vfs_file_info_ref(file_found);
+        if (!ztd::contains(dir->changed_files, file_found))
         {
             dir->changed_files.push_back(file_found);
             if (change_notify_timeout == 0)
@@ -399,7 +405,9 @@ vfs_dir_emit_file_deleted(VFSDir* dir, const char* file_name, VFSFileInfo* file)
             }
         }
         else
+        {
             vfs_file_info_unref(file_found);
+        }
     }
 }
 
@@ -421,15 +429,16 @@ vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* file,
 
     vfs_dir_lock(dir);
 
-    GList* l = vfs_dir_find_file(dir, file_name, file);
-    if (l)
+    VFSFileInfo* file_found = vfs_dir_find_file(dir, file_name, file);
+    if (file_found)
     {
-        file = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data));
-        if (!std::count(dir->changed_files.begin(), dir->changed_files.end(), file))
+        file_found = vfs_file_info_ref(file_found);
+
+        if (!ztd::contains(dir->changed_files, file_found))
         {
             if (force)
             {
-                dir->changed_files.push_back(file);
+                dir->changed_files.push_back(file_found);
                 if (change_notify_timeout == 0)
                 {
                     change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
@@ -439,9 +448,9 @@ vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* file,
                                                                nullptr);
                 }
             }
-            else if (update_file_info(dir, file)) // update file info the first time
+            else if (update_file_info(dir, file_found)) // update file info the first time
             {
-                dir->changed_files.push_back(file);
+                dir->changed_files.push_back(file_found);
                 if (change_notify_timeout == 0)
                 {
                     change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
@@ -450,11 +459,13 @@ vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* file,
                                                                nullptr,
                                                                nullptr);
                 }
-                g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, file);
+                g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, file_found);
             }
         }
         else
-            vfs_file_info_unref(file);
+        {
+            vfs_file_info_unref(file_found);
+        }
     }
 
     vfs_dir_unlock(dir);
@@ -464,14 +475,18 @@ void
 vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file)
 {
     vfs_dir_lock(dir);
-    GList* l = vfs_dir_find_file(dir, file->name.c_str(), file);
-    if (l)
+
+    VFSFileInfo* file_found = vfs_dir_find_file(dir, file->name.c_str(), file);
+    if (file_found)
     {
-        assert(file == static_cast<VFSFileInfo*>(l->data));
-        file = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data));
+        assert(file == file_found);
+        file = vfs_file_info_ref(file_found);
     }
     else
+    {
         file = nullptr;
+    }
+
     vfs_dir_unlock(dir);
 
     if (file)
@@ -611,9 +626,9 @@ vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
                     /* Special processing for desktop directory */
                     vfs_file_info_load_special_info(file, full_path);
 
-                    dir->file_list = g_list_prepend(dir->file_list, file);
+                    dir->file_list.push_back(file);
+
                     vfs_dir_unlock(dir);
-                    ++dir->n_files;
                 }
                 else
                 {
@@ -654,12 +669,9 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
         }
         else /* The file doesn't exist */
         {
-            GList* l;
-            l = g_list_find(dir->file_list, file);
-            if (l)
+            if (ztd::contains(dir->file_list, file))
             {
-                dir->file_list = g_list_delete_link(dir->file_list, l);
-                --dir->n_files;
+                ztd::remove(dir->file_list, file);
                 if (file)
                 {
                     g_signal_emit(dir, signals[FILE_DELETED_SIGNAL], 0, file);
@@ -711,8 +723,8 @@ update_created_files(void* key, void* data, void* user_data)
         for (l = dir->created_files; l; l = l->next)
         {
             VFSFileInfo* file;
-            GList* ll;
-            if (!(ll = vfs_dir_find_file(dir, (char*)l->data, nullptr)))
+            VFSFileInfo* file_found = vfs_dir_find_file(dir, (char*)l->data, nullptr);
+            if (!file_found)
             {
                 // file is not in dir file_list
                 char* full_path = g_build_filename(dir->path, (char*)l->data, nullptr);
@@ -721,8 +733,7 @@ update_created_files(void* key, void* data, void* user_data)
                 {
                     // add new file to dir file_list
                     vfs_file_info_load_special_info(file, full_path);
-                    dir->file_list = g_list_prepend(dir->file_list, vfs_file_info_ref(file));
-                    ++dir->n_files;
+                    dir->file_list.push_back(vfs_file_info_ref(file));
                     g_signal_emit(dir, signals[FILE_CREATED_SIGNAL], 0, file);
                 }
                 // else file doesn't exist in filesystem
@@ -732,7 +743,7 @@ update_created_files(void* key, void* data, void* user_data)
             else
             {
                 // file already exists in dir file_list
-                file = vfs_file_info_ref(static_cast<VFSFileInfo*>(ll->data));
+                file = vfs_file_info_ref(file_found);
                 if (update_file_info(dir, file))
                 {
                     g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, file);
@@ -798,25 +809,24 @@ static void
 reload_icons(const char* path, VFSDir* dir, void* user_data)
 {
     (void)user_data;
-    GList* l;
-    for (l = dir->file_list; l; l = l->next)
+
+    for (VFSFileInfo* file: dir->file_list)
     {
-        VFSFileInfo* fi = static_cast<VFSFileInfo*>(l->data);
         /* It's a desktop entry file */
-        if (fi->flags & VFS_FILE_INFO_DESKTOP_ENTRY)
+        if (file->flags & VFS_FILE_INFO_DESKTOP_ENTRY)
         {
-            char* file_path = g_build_filename(path, fi->name.c_str(), nullptr);
-            if (fi->big_thumbnail)
+            char* file_path = g_build_filename(path, file->name.c_str(), nullptr);
+            if (file->big_thumbnail)
             {
-                g_object_unref(fi->big_thumbnail);
-                fi->big_thumbnail = nullptr;
+                g_object_unref(file->big_thumbnail);
+                file->big_thumbnail = nullptr;
             }
-            if (fi->small_thumbnail)
+            if (file->small_thumbnail)
             {
-                g_object_unref(fi->small_thumbnail);
-                fi->small_thumbnail = nullptr;
+                g_object_unref(file->small_thumbnail);
+                file->small_thumbnail = nullptr;
             }
-            vfs_file_info_load_special_info(fi, file_path);
+            vfs_file_info_load_special_info(file, file_path);
             g_free(file_path);
         }
     }
@@ -884,26 +894,25 @@ reload_mime_type(char* key, VFSDir* dir, void* user_data)
 {
     (void)key;
     (void)user_data;
-    GList* l;
-    VFSFileInfo* file;
 
-    if (!dir || !dir->file_list)
+    if (!dir || dir->file_list.empty())
         return;
+
     vfs_dir_lock(dir);
-    for (l = dir->file_list; l; l = l->next)
+
+    for (VFSFileInfo* file: dir->file_list)
     {
-        file = static_cast<VFSFileInfo*>(l->data);
         char* full_path = g_build_filename(dir->path, vfs_file_info_get_name(file), nullptr);
         vfs_file_info_reload_mime_type(file, full_path);
         // LOG_DEBUG("reload {}", full_path);
         g_free(full_path);
     }
 
-    for (l = dir->file_list; l; l = l->next)
+    for (VFSFileInfo* file: dir->file_list)
     {
-        file = static_cast<VFSFileInfo*>(l->data);
         g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, file);
     }
+
     vfs_dir_unlock(dir);
 }
 
@@ -929,49 +938,32 @@ vfs_dir_foreach(GHFunc func, void* user_data)
 void
 vfs_dir_unload_thumbnails(VFSDir* dir, bool is_big)
 {
-    GList* l;
-    VFSFileInfo* file;
-    char* file_path;
-
     vfs_dir_lock(dir);
-    if (is_big)
+    for (VFSFileInfo* file: dir->file_list)
     {
-        for (l = dir->file_list; l; l = l->next)
+        if (is_big)
         {
-            file = static_cast<VFSFileInfo*>(l->data);
             if (file->big_thumbnail)
             {
                 g_object_unref(file->big_thumbnail);
                 file->big_thumbnail = nullptr;
             }
-            /* This is a desktop entry file, so the icon needs reload
-                 FIXME: This is not a good way to do things, but there is no better way now.  */
-            if (file->flags & VFS_FILE_INFO_DESKTOP_ENTRY)
-            {
-                file_path = g_build_filename(dir->path, file->name.c_str(), nullptr);
-                vfs_file_info_load_special_info(file, file_path);
-                g_free(file_path);
-            }
         }
-    }
-    else
-    {
-        for (l = dir->file_list; l; l = l->next)
+        else
         {
-            file = static_cast<VFSFileInfo*>(l->data);
             if (file->small_thumbnail)
             {
                 g_object_unref(file->small_thumbnail);
                 file->small_thumbnail = nullptr;
             }
-            /* This is a desktop entry file, so the icon needs reload
-                 FIXME: This is not a good way to do things, but there is no better way now.  */
-            if (file->flags & VFS_FILE_INFO_DESKTOP_ENTRY)
-            {
-                file_path = g_build_filename(dir->path, file->name.c_str(), nullptr);
-                vfs_file_info_load_special_info(file, file_path);
-                g_free(file_path);
-            }
+        }
+
+        /* This is a desktop entry file, so the icon needs reload
+             FIXME: This is not a good way to do things, but there is no better way now.  */
+        if (file->flags & VFS_FILE_INFO_DESKTOP_ENTRY)
+        {
+            std::string file_path = Glib::build_filename(dir->path, file->name);
+            vfs_file_info_load_special_info(file, file_path.c_str());
         }
     }
     vfs_dir_unlock(dir);

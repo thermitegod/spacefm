@@ -4191,7 +4191,7 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
 unsigned int
 ptk_file_browser_get_n_all_files(PtkFileBrowser* file_browser)
 {
-    return file_browser->dir ? file_browser->dir->n_files : 0;
+    return file_browser->dir ? file_browser->dir->file_list.size() : 0;
 }
 
 unsigned int

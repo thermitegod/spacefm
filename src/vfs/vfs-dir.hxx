@@ -34,8 +34,7 @@ struct VFSDir
 
     char* path;
     char* disp_path;
-    GList* file_list;
-    int n_files;
+    std::vector<VFSFileInfo*> file_list;
 
     /*<private>*/
     VFSFileMonitor* monitor;

@@ -304,15 +304,13 @@ ptk_file_list_set_dir(PtkFileList* list, VFSDir* dir)
     g_signal_connect(list->dir, "file-deleted", G_CALLBACK(ptk_file_list_file_deleted), list);
     g_signal_connect(list->dir, "file-changed", G_CALLBACK(_ptk_file_list_file_changed), list);
 
-    if (dir && dir->file_list)
+    if (dir && !dir->file_list.empty())
     {
-        GList* l;
-        for (l = dir->file_list; l; l = l->next)
+        for (VFSFileInfo* file: dir->file_list)
         {
-            if (list->show_hidden || (static_cast<VFSFileInfo*>(l->data))->disp_name[0] != '.')
+            if (list->show_hidden || file->disp_name.at(0) != '.')
             {
-                list->files = g_list_prepend(list->files,
-                                             vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data)));
+                list->files = g_list_prepend(list->files, vfs_file_info_ref(file));
                 ++list->n_files;
             }
         }
@@ -508,7 +506,7 @@ ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTree
     PtkFileList* list = PTK_FILE_LIST(tree_model);
 
     /* No rows => no first row */
-    if (list->dir->n_files == 0)
+    if (list->dir->file_list.size() == 0)
         return false;
 
     /* Set iter to first item in list */
