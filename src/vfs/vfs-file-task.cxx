@@ -1265,8 +1265,8 @@ _unref_channel:
 static char*
 get_xxhash(const char* path)
 {
-    const char* xxhash = g_find_program_in_path("/usr/bin/xxh128sum");
-    if (!xxhash)
+    std::string xxhash = Glib::find_program_in_path("xxh128sum");
+    if (xxhash.empty())
     {
         LOG_WARN("Missing program xxhash");
         return nullptr;
@@ -1531,12 +1531,9 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     Glib::Pid pid;
     int out, err;
     std::string use_su;
-    bool single_arg;
-    char* auth;
+    bool single_arg = false;
+    std::string auth;
     int i;
-
-    single_arg = false;
-    auth = nullptr;
 
     if (!terminal.empty())
     {
@@ -1590,8 +1587,8 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     if (sum_script)
     {
         // spacefm-auth exists?
-        auth = g_find_program_in_path("spacefm-auth");
-        if (!auth)
+        auth = Glib::find_program_in_path("spacefm-auth");
+        if (auth.empty())
         {
             g_free(sum_script);
             sum_script = nullptr;
@@ -1599,7 +1596,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         }
     }
 
-    if (sum_script && auth)
+    if (sum_script && !auth.empty())
     {
         // spacefm-auth
         if (single_arg)
@@ -1611,7 +1608,6 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
                               task->exec_script,
                               sum_script);
             argv.push_back(tmp);
-            g_free(auth);
         }
         else
         {

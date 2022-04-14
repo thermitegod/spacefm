@@ -385,7 +385,7 @@ load_settings(const char* config_dir)
 
     if (config_settings.git_backed_settings)
     {
-        if (!g_find_program_in_path("git"))
+        if (Glib::find_program_in_path("git").empty())
         {
             LOG_ERROR("git backed settings enabled but git is not installed");
             config_settings.git_backed_settings = false;
@@ -478,12 +478,11 @@ load_settings(const char* config_dir)
         unsigned int i;
         for (i = 0; i < G_N_ELEMENTS(terminal_programs); i++)
         {
-            char* term;
-            if ((term = g_find_program_in_path(terminal_programs[i])))
+            std::string term = Glib::find_program_in_path(terminal_programs[i]);
+            if (!term.empty())
             {
                 xset_set("main_terminal", "s", terminal_programs[i]);
                 xset_set_b("main_terminal", true); // discovery
-                g_free(term);
                 break;
             }
         }

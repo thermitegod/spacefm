@@ -27,6 +27,8 @@
 
 #include <exo/exo.h>
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -1017,7 +1019,7 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
             else if (path[0] != '/')
             {
                 str = path;
-                path = g_find_program_in_path(str);
+                path = g_strdup(Glib::find_program_in_path(str).c_str());
                 g_free(str);
             }
         }

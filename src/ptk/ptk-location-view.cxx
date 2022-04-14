@@ -682,14 +682,13 @@ ptk_location_view_clean_mount_points()
     g_free(path);
 
     // clean udevil mount points
-    char* udevil = g_find_program_in_path("udevil");
-    if (udevil)
+    std::string udevil = Glib::find_program_in_path("udevil");
+    if (!udevil.empty())
     {
         std::string command = fmt::format("{} -c \"sleep 1 ; {} clean\"", BASHPATH, udevil);
         print_command(command);
         Glib::spawn_command_line_async(command);
     }
-    g_free(udevil);
 }
 
 char*
@@ -1937,12 +1936,10 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     }
 
     // no handler command - show default properties
-    char* df;
-    char* lsof;
-    char* infobash;
-    char* path;
-    char* flags;
-    char* old_flags;
+    std::string df;
+    std::string lsof;
+    std::string path;
+    std::string flags;
 
     std::string info;
 
@@ -2007,124 +2004,59 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else
         info = ("echo FSTAB ; echo '( not found )' ; echo ; echo INFO ; ");
 
-    flags = g_strdup_printf("echo %s ; echo '%s'       ", "DEVICE", vol->device_file);
+    flags = fmt::format("echo DEVICE ; echo '{}'       ", vol->device_file);
     if (vol->is_removable)
-    {
-        old_flags = flags;
-        flags = g_strdup_printf("%s removable", flags);
-        g_free(old_flags);
-    }
+        flags = fmt::format("{} removable", flags);
     else
-    {
-        old_flags = flags;
-        flags = g_strdup_printf("%s internal", flags);
-        g_free(old_flags);
-    }
+        flags = fmt::format("{} internal", flags);
 
     if (vol->requires_eject)
-    {
-        old_flags = flags;
-        flags = g_strdup_printf("%s ejectable", flags);
-        g_free(old_flags);
-    }
+        flags = fmt::format("{} ejectable", flags);
 
     if (vol->is_optical)
-    {
-        old_flags = flags;
-        flags = g_strdup_printf("%s optical", flags);
-        g_free(old_flags);
-    }
+        flags = fmt::format("{} optical", flags);
+
     if (vol->is_table)
-    {
-        old_flags = flags;
-        flags = g_strdup_printf("%s table", flags);
-        g_free(old_flags);
-    }
+        flags = fmt::format("{} table", flags);
+
     if (vol->is_floppy)
-    {
-        old_flags = flags;
-        flags = g_strdup_printf("%s floppy", flags);
-        g_free(old_flags);
-    }
+        flags = fmt::format("{} floppy", flags);
 
     if (!vol->is_user_visible)
-    {
-        old_flags = flags;
-        flags = g_strdup_printf("%s policy_hide", flags);
-        g_free(old_flags);
-    }
+        flags = fmt::format("{} policy_hide", flags);
+
     if (vol->nopolicy)
-    {
-        old_flags = flags;
-        flags = g_strdup_printf("%s policy_noauto", flags);
-        g_free(old_flags);
-    }
+        flags = fmt::format("{} policy_noauto", flags);
 
     if (vol->is_mounted)
-    {
-        old_flags = flags;
-        flags = g_strdup_printf("%s mounted", flags);
-        g_free(old_flags);
-    }
+        flags = fmt::format("{} mounted", flags);
     else if (vol->is_mountable && !vol->is_table)
-    {
-        old_flags = flags;
-        flags = g_strdup_printf("%s mountable", flags);
-        g_free(old_flags);
-    }
+        flags = fmt::format("{} mountable", flags);
     else
-    {
-        old_flags = flags;
-        flags = g_strdup_printf("%s no_media", flags);
-        g_free(old_flags);
-    }
+        flags = fmt::format("{} no_media", flags);
 
     if (vol->is_blank)
-    {
-        old_flags = flags;
-        flags = g_strdup_printf("%s blank", flags);
-        g_free(old_flags);
-    }
+        flags = fmt::format("{} blank", flags);
+
     if (vol->is_audiocd)
-    {
-        old_flags = flags;
-        flags = g_strdup_printf("%s audiocd", flags);
-        g_free(old_flags);
-    }
+        flags = fmt::format("{} audiocd", flags);
+
     if (vol->is_dvd)
-    {
-        old_flags = flags;
-        flags = g_strdup_printf("%s dvd", flags);
-        g_free(old_flags);
-    }
+        flags = fmt::format("{} dvd", flags);
 
     if (vol->is_mounted)
-    {
-        old_flags = flags;
-        flags = g_strdup_printf(
-            "%s ; mount | grep \"%s \" | sed 's/\\/dev.*\\( on .*\\)/\\1/' ; echo ; ",
-            flags,
-            vol->device_file);
-        g_free(old_flags);
-    }
+        flags =
+            fmt::format("%s ; mount | grep \"{} \" | sed 's/\\/dev.*\\( on .*\\)/\\1/' ; echo ; ",
+                        flags,
+                        vol->device_file);
     else
-    {
-        old_flags = flags;
-        flags = g_strdup_printf("%s ; echo ; ", flags);
-        g_free(old_flags);
-    }
+        flags = fmt::format("{} ; echo ; ", flags);
 
     if (vol->is_mounted)
     {
-        path = g_find_program_in_path("df");
-        if (!path)
-            df = g_strdup("echo USAGE ; echo \"( please install df )\" ; echo ; ");
-        else
-        {
-            std::string esc_path = bash_quote(vol->mount_point);
-            df = g_strdup_printf("echo USAGE ; %s -hT %s ; echo ; ", path, esc_path.c_str());
-            g_free(path);
-        }
+        path = Glib::find_program_in_path("df");
+        std::string esc_path = bash_quote(vol->mount_point);
+        df = fmt::format("echo USAGE ; {} -hT {} ; echo ; ", path, esc_path);
     }
     else
     {
@@ -2132,14 +2064,14 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         {
             std::string size_str;
             size_str = vfs_file_size_to_string_format(vol->size, true);
-            df = g_strdup_printf("echo USAGE ; echo \"%s      %s  %s  ( not mounted )\" ; echo ; ",
-                                 vol->device_file,
-                                 vol->fs_type ? vol->fs_type : "",
-                                 size_str.c_str());
+            df = fmt::format("echo USAGE ; echo \"{}      {}  {}  ( not mounted )\" ; echo ; ",
+                             vol->device_file,
+                             vol->fs_type ? vol->fs_type : "",
+                             size_str);
         }
         else
-            df = g_strdup_printf("echo USAGE ; echo \"%s      ( no media )\" ; echo ; ",
-                                 vol->device_file);
+            df = fmt::format("echo USAGE ; echo \"{}      ( no media )\" ; echo ; ",
+                             vol->device_file);
     }
 
     std::string udisks_info = vfs_volume_device_info(vol);
@@ -2147,41 +2079,21 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 
     if (vol->is_mounted)
     {
-        path = g_find_program_in_path("lsof");
-        if (!path)
-            lsof = g_strdup_printf("echo %s ; echo \"( %s lsof )\" ; echo ; ",
-                                   "PROCESSES",
-                                   "please install");
+        path = Glib::find_program_in_path("lsof");
+        if (!strcmp(vol->mount_point, "/"))
+            lsof =
+                fmt::format("echo {} ; {} -w | grep /$ | head -n 500 ; echo ; ", "PROCESSES", path);
         else
         {
-            if (!strcmp(vol->mount_point, "/"))
-                lsof = g_strdup_printf("echo %s ; %s -w | grep /$ | head -n 500 ; echo ; ",
-                                       "PROCESSES",
-                                       path);
-            else
-            {
-                std::string esc_path = bash_quote(vol->mount_point);
-                lsof = g_strdup_printf("echo %s ; %s -w %s | head -n 500 ; echo ; ",
-                                       "PROCESSES",
-                                       path,
-                                       esc_path.c_str());
-            }
-            g_free(path);
+            std::string esc_path = bash_quote(vol->mount_point);
+            lsof = fmt::format("echo {} ; {} -w {} | head -n 500 ; echo ; ",
+                               "PROCESSES",
+                               path,
+                               esc_path);
         }
     }
-    else
-        lsof = g_strdup("");
-    /*  not desirable ?
-        if ( path = g_find_program_in_path( "infobash" ) )
-        {
-            infobash = g_strdup_printf( "echo SYSTEM ; %s -v3 0 ; echo ; ", path );
-            g_free( path );
-        }
-        else
-    */
-    infobash = g_strdup("");
 
-    task->task->exec_command = fmt::format("{}{}{}{}{}", flags, df, udisks, lsof, infobash);
+    task->task->exec_command = fmt::format("{}{}{}{}", flags, df, udisks, lsof);
     task->task->exec_sync = true;
     task->task->exec_popup = true;
     task->task->exec_show_output = true;
@@ -2190,9 +2102,6 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     task->task->exec_icon = vfs_volume_get_icon(vol);
     // task->task->exec_keep_tmp = true;
     ptk_file_task_run(task);
-    g_free(df);
-    g_free(lsof);
-    g_free(infobash);
 }
 
 static void

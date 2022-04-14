@@ -513,7 +513,7 @@ main_window_open_terminal(FMMainWindow* main_window, bool as_root)
                                           GTK_WIDGET(file_browser),
                                           file_browser->task_view);
 
-    task->task->exec_command = g_find_program_in_path(main_term);
+    task->task->exec_command = Glib::find_program_in_path(main_term);
     if (as_root)
         task->task->exec_as_user = "root";
     task->task->exec_sync = false;

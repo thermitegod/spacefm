@@ -19,6 +19,8 @@
 
 #include <gtk/gtk.h>
 
+#include <glibmm.h>
+
 #include "pref-dialog.hxx"
 #include "main-window.hxx"
 
@@ -109,7 +111,6 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
     GtkNotebook* notebook;
     int p;
     FMMainWindow* a_window;
-    char* str;
 
     GtkWidget* tab_label;
     /* interface settings */
@@ -319,23 +320,24 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         g_free(s);
 
         // terminal su command
-        char* custom_su = nullptr;
+        std::string custom_su;
         if (config_settings.terminal_su)
             // get su from /etc/spacefm/spacefm.conf
-            custom_su = g_find_program_in_path(config_settings.terminal_su);
+            custom_su = Glib::find_program_in_path(config_settings.terminal_su);
         int idx = gtk_combo_box_get_active(GTK_COMBO_BOX(data->su_command));
         if (idx > -1)
         {
-            if (custom_su)
+            if (!custom_su.empty())
             {
                 if (idx == 0)
-                    xset_set("su_command", "s", custom_su);
+                    xset_set("su_command", "s", custom_su.c_str());
                 else
                     xset_set("su_command", "s", su_commands[idx - 1]);
-                g_free(custom_su);
             }
             else
+            {
                 xset_set("su_command", "s", su_commands[idx]);
+            }
         }
 
         // MOD editors
@@ -375,16 +377,12 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             root_set_change = true;
         }
         // report missing terminal
-        if ((str = strchr(terminal, ' ')))
-            str[0] = '\0';
-        str = g_find_program_in_path(terminal);
-        if (!str)
+        std::string term = Glib::find_program_in_path(terminal);
+        if (term.empty())
         {
-            str = g_strdup_printf("Unable to find terminal program '%s'", terminal);
-            ptk_show_error(GTK_WINDOW(dlg), "Error", str);
+            std::string msg = fmt::format("Unable to find terminal program '{}'", terminal);
+            ptk_show_error(GTK_WINDOW(dlg), "Error", msg);
         }
-        g_free(str);
-        g_free(terminal);
 
         /* save to config file */
         save_settings(nullptr);
@@ -628,41 +626,40 @@ fm_edit_preference(GtkWindow* parent, int page)
         // terminal su
         int idx;
         GtkTreeIter it;
-        char* custom_su = nullptr;
-        char* use_su;
+        std::string custom_su;
+        std::string use_su;
         data->su_command = GTK_WIDGET(gtk_builder_get_object(builder, "su_command"));
         use_su = xset_get_s("su_command");
         if (config_settings.terminal_su)
             // get su from /etc/spacefm/spacefm.conf
-            custom_su = g_find_program_in_path(config_settings.terminal_su);
-        if (custom_su)
+            custom_su = Glib::find_program_in_path(config_settings.terminal_su);
+        if (!custom_su.empty())
         {
             GtkListStore* su_list =
                 GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(data->su_command)));
             gtk_list_store_prepend(su_list, &it);
-            gtk_list_store_set(GTK_LIST_STORE(su_list), &it, 0, custom_su, -1);
+            gtk_list_store_set(GTK_LIST_STORE(su_list), &it, 0, custom_su.c_str(), -1);
         }
-        if (!use_su)
+        if (use_su.empty())
             idx = 0;
-        else if (custom_su && !g_strcmp0(custom_su, use_su))
+        else if (ztd::same(custom_su, use_su))
             idx = 0;
         else
         {
             unsigned int i;
             for (i = 0; i < G_N_ELEMENTS(su_commands); i++)
             {
-                if (!strcmp(su_commands[i], use_su))
+                if (ztd::same(su_commands[i], use_su))
                     break;
             }
             if (i == G_N_ELEMENTS(su_commands))
                 idx = 0;
-            else if (custom_su)
+            else if (!custom_su.empty())
                 idx = i + 1;
             else
                 idx = i;
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(data->su_command), idx);
-        g_free(custom_su);
 
         // date format
         data->date_format = GTK_WIDGET(gtk_builder_get_object(builder, "date_format"));

@@ -3112,8 +3112,8 @@ char*
 vfs_volume_device_mount_cmd(VFSVolume* vol, const char* options, bool* run_in_terminal)
 {
     char* command = nullptr;
-    char* s1;
     *run_in_terminal = false;
+
     command = vfs_volume_handler_cmd(HANDLER_MODE_FS,
                                      HANDLER_MOUNT,
                                      vol,
@@ -3124,28 +3124,44 @@ vfs_volume_device_mount_cmd(VFSVolume* vol, const char* options, bool* run_in_te
     if (!command)
     {
         // discovery
-        if ((s1 = g_find_program_in_path("udevil")))
+        std::string s1;
+
+        s1 = Glib::find_program_in_path("udevil");
+        if (!s1.empty())
         {
             // udevil
             if (options && options[0] != '\0')
-                command = g_strdup_printf("%s mount %s -o '%s'", s1, vol->device_file, options);
+                command =
+                    g_strdup_printf("%s mount %s -o '%s'", s1.c_str(), vol->device_file, options);
             else
-                command = g_strdup_printf("%s mount %s", s1, vol->device_file);
+                command = g_strdup_printf("%s mount %s", s1.c_str(), vol->device_file);
+
+            return command;
         }
-        else if ((s1 = g_find_program_in_path("pmount")))
+
+        s1 = Glib::find_program_in_path("pmount");
+        if (!s1.empty())
         {
             // pmount
-            command = g_strdup_printf("%s %s", s1, vol->device_file);
+            command = g_strdup_printf("%s %s", s1.c_str(), vol->device_file);
+
+            return command;
         }
-        else if ((s1 = g_find_program_in_path("udisksctl")))
+
+        s1 = Glib::find_program_in_path("udisksctl");
+        if (!s1.empty())
         {
             // udisks2
             if (options && options[0] != '\0')
-                command = g_strdup_printf("%s mount -b %s -o '%s'", s1, vol->device_file, options);
+                command = g_strdup_printf("%s mount -b %s -o '%s'",
+                                          s1.c_str(),
+                                          vol->device_file,
+                                          options);
             else
-                command = g_strdup_printf("%s mount -b %s", s1, vol->device_file);
+                command = g_strdup_printf("%s mount -b %s", s1.c_str(), vol->device_file);
+
+            return command;
         }
-        g_free(s1);
     }
     return command;
 }
@@ -3154,7 +3170,6 @@ char*
 vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
 {
     char* command = nullptr;
-    char* s1;
     std::string pointq = "";
     *run_in_terminal = false;
 
@@ -3231,25 +3246,32 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
     if (!command)
     {
         // discovery
+        std::string s1;
+
         pointq = bash_quote(vol->device_type == DEVICE_TYPE_BLOCK || !vol->is_mounted
                                 ? vol->device_file
                                 : vol->mount_point);
-        if ((s1 = g_find_program_in_path("udevil")))
+
+        s1 = Glib::find_program_in_path("udevil");
+        if (!s1.empty())
         {
             // udevil
-            command = g_strdup_printf("%s umount %s", s1, pointq.c_str());
+            command = g_strdup_printf("%s umount %s", s1.c_str(), pointq.c_str());
         }
-        else if ((s1 = g_find_program_in_path("pumount")))
+
+        s1 = Glib::find_program_in_path("pumount");
+        if (!s1.empty())
         {
             // pmount
-            command = g_strdup_printf("%s %s", s1, pointq.c_str());
+            command = g_strdup_printf("%s %s", s1.c_str(), pointq.c_str());
         }
-        else if ((s1 = g_find_program_in_path("udisksctl")))
+
+        s1 = Glib::find_program_in_path("udisksctl");
+        if (!s1.empty())
         {
             // udisks2
-            command = g_strdup_printf("%s unmount -b %s", s1, pointq.c_str());
+            command = g_strdup_printf("%s unmount -b %s", s1.c_str(), pointq.c_str());
         }
-        g_free(s1);
         *run_in_terminal = false;
     }
     return command;
