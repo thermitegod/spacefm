@@ -15,12 +15,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cstdint>
-
-#ifdef HAVE_MMAP
-#include <sys/mman.h>
-#endif
-
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <fnmatch.h>
@@ -67,14 +61,6 @@ mime_cache_new(const char* file_path)
 static void
 mime_cache_unload(MimeCache* cache, bool clear)
 {
-    if (G_LIKELY(cache->buffer))
-    {
-#ifdef HAVE_MMAP
-        munmap((char*)cache->buffer, cache->size);
-#else
-        g_free(cache->buffer);
-#endif
-    }
     g_free(cache->file_path);
     if (clear)
         memset(cache, 0, sizeof(MimeCache));
@@ -113,19 +99,9 @@ mime_cache_load(MimeCache* cache, const char* file_path)
     }
 
     char* buffer = nullptr;
-#ifdef HAVE_MMAP
-    buffer = (char*)mmap(nullptr, statbuf.st_size, PROT_READ, MAP_SHARED, fd, 0);
-#else
-    buffer = g_malloc(statbuf.st_size);
-    if (buffer)
-        read(fd, buffer, statbuf.st_size);
-    else
-        buffer = (void*)-1;
-#endif
+    buffer = (char*)g_malloc(statbuf.st_size);
+    read(fd, buffer, statbuf.st_size);
     close(fd);
-
-    if (buffer == (void*)-1)
-        return false;
 
     unsigned int majv = VAL16(buffer, MAJOR_VERSION);
     unsigned int minv = VAL16(buffer, MINOR_VERSION);
@@ -133,11 +109,7 @@ mime_cache_load(MimeCache* cache, const char* file_path)
     /* Check version */
     if (majv > LIB_MAJOR_VERSION || minv > LIB_MAX_MINOR_VERSION || minv < LIB_MIN_MINOR_VERSION)
     {
-#ifdef HAVE_MMAP
-        munmap(buffer, statbuf.st_size);
-#else
         g_free(buffer);
-#endif
         return false;
     }
 

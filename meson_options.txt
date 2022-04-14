@@ -6,12 +6,6 @@ option(
   description : 'enable support for firewire, audiocd, dvd, cdrom, floppy <TODO>',
 )
 option(
-  'mmap',
-  type : 'boolean',
-  value : true,
-  description : 'build with mmap support',
-)
-option(
   'nonlatin',
   type : 'boolean',
   value : false,

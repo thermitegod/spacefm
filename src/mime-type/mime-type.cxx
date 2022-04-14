@@ -37,20 +37,6 @@
 #include "mime-type/mime-type.hxx"
 #include "mime-type/mime-cache.hxx"
 
-/*
- * FIXME:
- * Currently, mmap cannot be used because of the limitation of mmap.
- * When a file is mapped for mime-type sniffing (checking file magic),
- * they could be deleted during the check and hence result in Bus error.
- * (Refer to the man page of mmap for detail)
- * So here I undef HAVE_MMAP to disable the implementation using mmap.
- */
-#undef HAVE_MMAP
-
-#ifdef HAVE_MMAP
-#include <sys/mman.h>
-#endif
-
 /* max extent used to checking text files */
 #define TEXT_MAX_EXTENT 512
 
@@ -196,9 +182,6 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
         {
             int len =
                 mime_cache_max_extent < statbuf->st_size ? mime_cache_max_extent : statbuf->st_size;
-#ifdef HAVE_MMAP
-            data = (char*)mmap(nullptr, len, PROT_READ, MAP_SHARED, fd, 0);
-#else
             /*
              * FIXME: Can g_alloca() be used here? It's very fast, but is it safe?
              * Actually, we can allocate a block of memory with the size of mime_cache_max_extent,
@@ -221,7 +204,6 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
                     g_free(data);
                 data = (char*)-1;
             }
-#endif
             if (data != (char*)-1)
             {
                 for (unsigned int i = 0; !type && i < n_caches; ++i)
@@ -239,14 +221,10 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
                         type = XDG_MIME_TYPE_PLAIN_TEXT;
                 }
 
-#ifdef HAVE_MMAP
-                munmap((char*)data, len);
-#else
                 if (G_LIKELY(data == mime_magic_buf))
                     G_UNLOCK(mime_magic_buf); /* unlock the common buffer */
                 else                          /* we use our own buffer */
                     g_free(data);
-#endif
             }
             close(fd);
         }
@@ -369,16 +347,12 @@ _mime_type_get_desc_icon(const char* file_path, const char* locale, bool is_loca
     }
 
     char* buffer;
-#ifdef HAVE_MMAP
-    buffer = static_cast<char*>(mmap(nullptr, statbuf.st_size, PROT_READ, MAP_SHARED, fd, 0));
-#else
     buffer = static_cast<char*>(g_malloc(statbuf.st_size));
     if (read(fd, buffer, statbuf.st_size) == -1)
     {
         g_free(buffer);
         buffer = (char*)-1;
     }
-#endif
     close(fd);
     if (G_UNLIKELY(buffer == (void*)-1))
         return nullptr;
@@ -400,11 +374,8 @@ _mime_type_get_desc_icon(const char* file_path, const char* locale, bool is_loca
     if (is_local && icon_name && *icon_name == nullptr)
         *icon_name = parse_xml_icon(buffer, statbuf.st_size, is_local);
 
-#ifdef HAVE_MMAP
-    munmap(buffer, statbuf.st_size);
-#else
     g_free(buffer);
-#endif
+
     return desc;
 }
 
@@ -581,17 +552,9 @@ mime_type_is_text_file(const char* file_path, const char* mime_type)
         {
             if (S_ISREG(statbuf.st_mode))
             {
-#ifdef HAVE_MMAP
-                char* data;
-                rlen = statbuf.st_size < TEXT_MAX_EXTENT ? statbuf.st_size : TEXT_MAX_EXTENT;
-                data = (char*)mmap(nullptr, rlen, PROT_READ, MAP_SHARED, file, 0);
-                ret = mime_type_is_data_plain_text(data, rlen);
-                munmap((char*)data, rlen);
-#else
                 unsigned char data[TEXT_MAX_EXTENT];
                 rlen = read(file, data, sizeof(data));
                 ret = mime_type_is_data_plain_text((char*)data, rlen);
-#endif
             }
         }
         close(file);

@@ -107,10 +107,6 @@ if get_option('deprecated-hw')
   pre_args += '-DHAVE_DEPRECATED_HW'
 endif
 
-if get_option('mmap')
-  pre_args += '-DHAVE_MMAP'
-endif
-
 foreach a : pre_args
   add_project_arguments(a, language : ['c', 'cpp'])
 endforeach
