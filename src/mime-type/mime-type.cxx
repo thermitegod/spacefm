@@ -22,6 +22,9 @@
 
 #include <vector>
 
+#include <iostream>
+#include <fstream>
+
 #include <fcntl.h>
 
 #include <fmt/core.h>
@@ -327,30 +330,19 @@ parse_xml_desc(const char* buf, std::size_t len, const char* locale)
 static char*
 _mime_type_get_desc_icon(const char* file_path, const char* locale, bool is_local, char** icon_name)
 {
-    struct stat statbuf; // skip stat
-
-    // char file_path[ 256 ];  //sfm to improve speed, file_path is passed
-
-    // g_snprintf( file_path, 256, "%s/mime/%s.xml", data_dir, type );
-
-    int fd = open(file_path, O_RDONLY, 0);
-    if (fd == -1)
+    std::string line;
+    std::ifstream file(file_path);
+    if (!file.is_open())
         return nullptr;
-    if (fstat(fd, &statbuf) == -1)
-    {
-        close(fd);
-        return nullptr;
-    }
 
-    char* buffer;
-    buffer = static_cast<char*>(g_malloc(statbuf.st_size));
-    if (read(fd, buffer, statbuf.st_size) == -1)
+    std::string buffer;
+    while (std::getline(file, line))
     {
-        g_free(buffer);
-        buffer = (char*)-1;
+        buffer.append(line);
     }
-    close(fd);
-    if (buffer == (void*)-1)
+    file.close();
+
+    if (buffer.empty())
         return nullptr;
 
     char* _locale = nullptr;
@@ -363,14 +355,12 @@ _mime_type_get_desc_icon(const char* file_path, const char* locale, bool is_loca
         else
             locale = langs[0];
     }
-    char* desc = parse_xml_desc(buffer, statbuf.st_size, locale);
+    char* desc = parse_xml_desc(buffer.c_str(), buffer.size(), locale);
     g_free(_locale);
 
     // only look for <icon /> tag in .local
     if (is_local && icon_name && *icon_name == nullptr)
-        *icon_name = parse_xml_icon(buffer, statbuf.st_size, is_local);
-
-    g_free(buffer);
+        *icon_name = parse_xml_icon(buffer.c_str(), buffer.size(), is_local);
 
     return desc;
 }
