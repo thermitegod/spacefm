@@ -36,6 +36,4 @@ std::string bash_quote(const std::string& str);
 
 std::string clean_label(const std::string& menu_label, bool kill_special, bool escape);
 
-char* unescape(const char* t);
-
 std::string get_valid_su();
