@@ -24,6 +24,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include <glibmm.h>
+
 #include "vfs/vfs-user-dir.hxx"
 
 #include "main-window.hxx"
@@ -216,20 +218,13 @@ on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
 static void
 get_socket_name(char* buf, int len)
 {
-    char* dpy = g_strdup(g_getenv("DISPLAY"));
-    if (dpy && !strcmp(dpy, ":0.0"))
-    {
-        // treat :0.0 as :0 to prevent multiple instances on screen 0
-        g_free(dpy);
-        dpy = g_strdup(":0");
-    }
-    g_snprintf(buf,
-               len,
-               "%s/spacefm-%s%s.socket",
-               vfs_user_runtime_dir().c_str(),
-               g_get_user_name(),
-               dpy);
-    g_free(dpy);
+    std::string dpy = g_strdup(Glib::getenv("DISPLAY").c_str());
+    // treat :0.0 as :0 to prevent multiple instances on screen 0
+    if (ztd::same(dpy, ":0.0"))
+        dpy = ":0";
+    std::string socket_path =
+        fmt::format("{}/spacefm-{}{}.socket", vfs_user_runtime_dir(), Glib::get_user_name(), dpy);
+    g_snprintf(buf, len, "%s", socket_path.c_str());
 }
 
 [[noreturn]] static void

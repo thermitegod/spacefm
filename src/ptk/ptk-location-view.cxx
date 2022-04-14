@@ -607,7 +607,7 @@ ptk_location_view_get_mount_point_dir(const char* name)
             switch (i)
             {
                 case 0: // $USER
-                    value = g_get_user_name();
+                    value = Glib::get_user_name();
                     break;
                 case 1: // $UID
                     value = fmt::format("{}", geteuid());

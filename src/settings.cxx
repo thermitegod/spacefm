@@ -1681,7 +1681,8 @@ read_root_settings()
     if (geteuid() == 0)
         return;
 
-    std::string root_set_path = fmt::format("{}/spacefm/{}-as-root", SYSCONFDIR, g_get_user_name());
+    std::string root_set_path =
+        fmt::format("{}/spacefm/{}-as-root", SYSCONFDIR, Glib::get_user_name());
     if (!std::filesystem::exists(root_set_path))
         root_set_path = fmt::format("{}/spacefm/{}-as-root", SYSCONFDIR, geteuid());
 

@@ -18,6 +18,8 @@
 
 #include <vector>
 
+#include <glibmm.h>
+
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
 
@@ -4306,14 +4308,12 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
     buf.append(fmt::format("\nfm_files=(\"${{fm_panel{}_files[@]}}\")\n", file_browser->mypanel));
     buf.append(fmt::format("fm_file=\"${{fm_panel{}_files[0]}}\"\n", file_browser->mypanel));
     buf.append(fmt::format("fm_filename=\"${{fm_filenames[0]}}\"\n"));
+
     // user
-    const char* this_user = g_get_user_name();
-    if (this_user)
-    {
-        esc_path = bash_quote(this_user);
-        buf.append(fmt::format("fm_user={}\n", esc_path));
-        // g_free( this_user );  DON'T
-    }
+    std::string this_user = Glib::get_user_name();
+    esc_path = bash_quote(this_user);
+    buf.append(fmt::format("fm_user={}\n", esc_path));
+
     // variable value
     if (value)
     {

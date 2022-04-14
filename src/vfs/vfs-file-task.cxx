@@ -24,6 +24,8 @@
 #include <fcntl.h>
 #include <utime.h>
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -1448,7 +1450,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         if (task->exec_write_root && geteuid() != 0)
         {
             const std::string root_set_path =
-                fmt::format("{}/spacefm/{}-as-root", SYSCONFDIR, g_get_user_name());
+                fmt::format("{}/spacefm/{}-as-root", SYSCONFDIR, Glib::get_user_name());
             write_root_settings(buf, root_set_path);
         }
 
