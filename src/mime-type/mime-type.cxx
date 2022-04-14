@@ -22,13 +22,14 @@
 
 #include <vector>
 
-#include <cstdint>
-
 #include <fcntl.h>
 
 #include <fmt/core.h>
 
 #include <glibmm.h>
+
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
 
 #include "utils.hxx"
 
@@ -39,11 +40,6 @@
 
 /* max extent used to checking text files */
 #define TEXT_MAX_EXTENT 512
-
-const char xdg_mime_type_unknown[] = "application/octet-stream";
-const char xdg_mime_type_directory[] = "inode/directory";
-const char xdg_mime_type_executable[] = "application/x-executable";
-const char xdg_mime_type_plain_text[] = "text/plain";
 
 static void mime_cache_foreach(GFunc func, void* user_data);
 static bool mime_type_is_subclass(const char* type, const char* parent);
@@ -566,16 +562,14 @@ bool
 mime_type_is_executable_file(const char* file_path, const char* mime_type)
 {
     if (!mime_type)
-    {
         mime_type = mime_type_get_by_file(file_path, nullptr, nullptr);
-    }
 
     /*
      * Only executable types can be executale.
      * Since some common types, such as application/x-shellscript,
      * are not in mime database, we have to add them ourselves.
      */
-    if (mime_type != XDG_MIME_TYPE_UNKNOWN &&
+    if (!ztd::same(mime_type, XDG_MIME_TYPE_UNKNOWN) &&
         (mime_type_is_subclass(mime_type, XDG_MIME_TYPE_EXECUTABLE) ||
          mime_type_is_subclass(mime_type, "application/x-shellscript")))
     {

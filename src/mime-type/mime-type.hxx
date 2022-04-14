@@ -24,14 +24,10 @@
 #include "mime-action.hxx"
 #include "mime-cache.hxx"
 
-extern const char xdg_mime_type_unknown[];
-#define XDG_MIME_TYPE_UNKNOWN xdg_mime_type_unknown
-extern const char xdg_mime_type_directory[];
-#define XDG_MIME_TYPE_DIRECTORY xdg_mime_type_directory
-extern const char xdg_mime_type_executable[];
-#define XDG_MIME_TYPE_EXECUTABLE xdg_mime_type_executable
-extern const char xdg_mime_type_plain_text[];
-#define XDG_MIME_TYPE_PLAIN_TEXT xdg_mime_type_plain_text
+#define XDG_MIME_TYPE_UNKNOWN    "application/octet-stream"
+#define XDG_MIME_TYPE_DIRECTORY  "inode/directory"
+#define XDG_MIME_TYPE_EXECUTABLE "application/x-executable"
+#define XDG_MIME_TYPE_PLAIN_TEXT "text/plain"
 
 /* Initialize the library */
 void mime_type_init();
