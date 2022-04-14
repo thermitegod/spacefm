@@ -32,6 +32,9 @@
 
 #include <vector>
 
+#include <iostream>
+#include <fstream>
+
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -47,20 +50,14 @@
 
 #include "mime-action.hxx"
 
-static bool
-save_to_file(const char* path, const char* data, long len)
+static void
+save_to_file(const std::string& path, const std::string& data)
 {
-    int fd = creat(path, 0644);
-    if (fd == -1)
-        return false;
-
-    if (write(fd, data, len) == -1)
-    {
-        close(fd);
-        return false;
-    }
-    close(fd);
-    return true;
+    std::ofstream file(path);
+    if (file.is_open())
+        file << data;
+    file.close();
+    std::filesystem::permissions(path, std::filesystem::perms::owner_all);
 }
 
 static const std::string group_desktop = "Desktop Entry";
@@ -526,7 +523,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
             break;
     }
 
-    save_to_file(path.c_str(), file_content.c_str(), file_content.size());
+    save_to_file(path, file_content);
 
     /* execute update-desktop-database" to update mimeinfo.cache */
     update_desktop_database();
@@ -891,6 +888,6 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
     if (data_changed)
     {
         Glib::ustring data = kf->to_data();
-        save_to_file(path.c_str(), data.c_str(), data.size());
+        save_to_file(path, data);
     }
 }
