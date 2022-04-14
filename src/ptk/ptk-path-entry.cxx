@@ -175,7 +175,7 @@ match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it, voi
     key = (const char*)g_object_get_data(G_OBJECT(completion), "fn");
     gtk_tree_model_get(model, it, COL_NAME, &name, -1);
 
-    if (G_LIKELY(name))
+    if (name)
     {
         if (*key == 0 || g_ascii_strncasecmp(name, key, strlen(key)) == 0)
         {
@@ -598,14 +598,14 @@ on_button_release(GtkEntry* entry, GdkEventButton* evt, void* user_data)
               text[0] == '%' || text[0] == '\0'))
         {
             int pos = gtk_editable_get_position(GTK_EDITABLE(entry));
-            if (G_LIKELY(text && *text))
+            if (text && *text)
             {
                 const char* sep = g_utf8_offset_to_pointer(text, pos);
-                if (G_LIKELY(sep))
+                if (sep)
                 {
                     while (*sep && *sep != '/')
                         sep = g_utf8_next_char(sep);
-                    if (G_UNLIKELY(sep == text))
+                    if (sep == text)
                     {
                         if ('/' == *sep)
                             ++sep;

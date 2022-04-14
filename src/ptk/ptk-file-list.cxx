@@ -97,7 +97,7 @@ GType
 ptk_file_list_get_type()
 {
     static GType type = 0;
-    if (G_UNLIKELY(!type))
+    if (!type)
     {
         static const GTypeInfo type_info = {sizeof(PtkFileListClass),
                                             nullptr, /* base_init */
@@ -767,8 +767,7 @@ ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, VFSFileInfo* fi)
     for (l = list->files; l; l = l->next)
     {
         VFSFileInfo* fi2 = static_cast<VFSFileInfo*>(l->data);
-        if (G_UNLIKELY(fi2 == fi ||
-                       !strcmp(vfs_file_info_get_name(fi), vfs_file_info_get_name(fi2))))
+        if (fi2 == fi || !strcmp(vfs_file_info_get_name(fi), vfs_file_info_get_name(fi2)))
         {
             it->stamp = list->stamp;
             it->user_data = l;
@@ -792,7 +791,7 @@ ptk_file_list_file_created(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
     for (l = list->files; l; l = l->next)
     {
         VFSFileInfo* file2 = static_cast<VFSFileInfo*>(l->data);
-        if (G_UNLIKELY(file == file2))
+        if (file == file2)
         {
             /* The file is already in the list */
             return;
@@ -856,7 +855,7 @@ ptk_file_list_file_deleted(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
     GtkTreePath* path;
 
     /* If there is no file info, that means the dir itself was deleted. */
-    if (G_UNLIKELY(!file))
+    if (!file)
     {
         /* Clear the whole list */
         path = gtk_tree_path_new_from_indices(0, -1);

@@ -174,14 +174,14 @@ vfs_async_thread_cleanup(VFSAsyncTask* task, bool finalize)
         g_source_remove(task->idle_id);
         task->idle_id = 0;
     }
-    if (G_LIKELY(task->thread))
+    if (task->thread)
     {
         g_thread_join(task->thread);
         task->thread = nullptr;
         task->finished = true;
         /* Only emit the signal when we are not finalizing.
             Emitting signal on an object during destruction is not allowed. */
-        if (G_LIKELY(!finalize))
+        if (!finalize)
             g_signal_emit(task, signals[FINISH_SIGNAL], 0, task->cancelled);
     }
 }

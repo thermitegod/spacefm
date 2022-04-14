@@ -205,7 +205,7 @@ get_actions(const std::string& dir, const std::string& type, std::vector<std::st
             opened = false;
         }
 
-        if (G_LIKELY(opened))
+        if (opened)
         {
             if (n == 0)
             {
@@ -452,7 +452,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
     char* cust = nullptr;
     Glib::ustring file_content;
 
-    if (G_LIKELY(g_str_has_suffix(desktop_id, ".desktop")))
+    if (g_str_has_suffix(desktop_id, ".desktop"))
     {
         const auto kf = Glib::KeyFile::create();
         filename = mime_type_locate_desktop_file(nullptr, desktop_id);

@@ -233,7 +233,7 @@ vfs_file_info_get_big_icon(VFSFileInfo* fi)
     /* get special icons for special files, especially for
        some desktop icons */
 
-    if (G_UNLIKELY(fi->flags != VFS_FILE_INFO_NONE))
+    if (fi->flags != VFS_FILE_INFO_NONE)
     {
         int w, h;
         int icon_size;
@@ -255,9 +255,9 @@ vfs_file_info_get_big_icon(VFSFileInfo* fi)
                 g_object_unref(fi->big_thumbnail);
                 fi->big_thumbnail = nullptr;
             }
-            if (G_LIKELY(icon_name))
+            if (icon_name)
             {
-                if (G_UNLIKELY(icon_name[0] == '/'))
+                if (icon_name[0] == '/')
                     fi->big_thumbnail = gdk_pixbuf_new_from_file(icon_name, nullptr);
                 else
                     fi->big_thumbnail =
@@ -270,7 +270,7 @@ vfs_file_info_get_big_icon(VFSFileInfo* fi)
         }
         return fi->big_thumbnail ? g_object_ref(fi->big_thumbnail) : nullptr;
     }
-    if (G_UNLIKELY(!fi->mime_type))
+    if (!fi->mime_type)
         return nullptr;
     return vfs_mime_type_get_icon(fi->mime_type, true);
 }
@@ -281,7 +281,7 @@ vfs_file_info_get_small_icon(VFSFileInfo* fi)
     if (fi->flags & VFS_FILE_INFO_DESKTOP_ENTRY && fi->small_thumbnail) // sfm
         return g_object_ref(fi->small_thumbnail);
 
-    if (G_UNLIKELY(!fi->mime_type))
+    if (!fi->mime_type)
         return nullptr;
     return vfs_mime_type_get_icon(fi->mime_type, false);
 }
@@ -365,13 +365,13 @@ get_file_perm_string(std::string& perm, mode_t mode)
         perm.append("d");
     else if (S_ISLNK(mode))
         perm.append("l");
-    else if (G_UNLIKELY(S_ISCHR(mode)))
+    else if (S_ISCHR(mode))
         perm.append("c");
-    else if (G_UNLIKELY(S_ISBLK(mode)))
+    else if (S_ISBLK(mode))
         perm.append("b");
-    else if (G_UNLIKELY(S_ISFIFO(mode)))
+    else if (S_ISFIFO(mode))
         perm.append("p");
-    else if (G_UNLIKELY(S_ISSOCK(mode)))
+    else if (S_ISSOCK(mode))
         perm.append("s");
     else
         perm.append("-");
@@ -386,9 +386,9 @@ get_file_perm_string(std::string& perm, mode_t mode)
     else
         perm.append("-");
 
-    if (G_UNLIKELY(mode & S_ISUID))
+    if (mode & S_ISUID)
     {
-        if (G_LIKELY(mode & S_IXUSR))
+        if (mode & S_IXUSR)
             perm.append("s");
         else
             perm.append("S");
@@ -410,9 +410,9 @@ get_file_perm_string(std::string& perm, mode_t mode)
         perm.append("w");
     else
         perm.append("-");
-    if (G_UNLIKELY(mode & S_ISGID))
+    if (mode & S_ISGID)
     {
-        if (G_LIKELY(mode & S_IXGRP))
+        if (mode & S_IXGRP)
             perm.append("s");
         else
             perm.append("S");
@@ -434,9 +434,9 @@ get_file_perm_string(std::string& perm, mode_t mode)
         perm.append("w");
     else
         perm.append("-");
-    if (G_UNLIKELY(mode & S_ISVTX))
+    if (mode & S_ISVTX)
     {
-        if (G_LIKELY(mode & S_IXOTH))
+        if (mode & S_IXOTH)
             perm.append("t");
         else
             perm.append("T");
@@ -617,7 +617,7 @@ vfs_file_info_load_thumbnail(VFSFileInfo* fi, const char* full_path, bool big)
     }
     GdkPixbuf* thumbnail =
         vfs_thumbnail_load_for_file(full_path, big ? big_thumb_size : small_thumb_size, fi->mtime);
-    if (G_LIKELY(thumbnail))
+    if (thumbnail)
     {
         if (big)
             fi->big_thumbnail = thumbnail;
@@ -644,7 +644,7 @@ vfs_file_info_set_thumbnail_size(int big, int small)
 void
 vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
 {
-    /*if ( G_LIKELY(fi->type) && G_UNLIKELY(fi->type->name, "application/x-desktop") ) */
+    /*if (fi->type && fi->type->name, "application/x-desktop") */
     if (ztd::same(fi->name, ".desktop"))
     {
         char* file_dir = g_path_get_dirname(file_path);
@@ -667,13 +667,13 @@ vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
             if (!fi->big_thumbnail)
             {
                 icon = desktop.get_icon(big_size);
-                if (G_LIKELY(icon))
+                if (icon)
                     fi->big_thumbnail = icon;
             }
             if (!fi->small_thumbnail)
             {
                 icon = desktop.get_icon(small_size);
-                if (G_LIKELY(icon))
+                if (icon)
                     fi->small_thumbnail = icon;
             }
         }

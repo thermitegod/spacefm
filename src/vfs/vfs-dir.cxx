@@ -86,7 +86,7 @@ GType
 vfs_dir_get_type()
 {
     static GType type = G_TYPE_INVALID;
-    if (G_UNLIKELY(type == G_TYPE_INVALID))
+    if (type == G_TYPE_INVALID)
     {
         static const GTypeInfo info = {
             sizeof(VFSDirClass),
@@ -223,7 +223,7 @@ vfs_dir_finalize(GObject* obj)
     {
     } while (g_source_remove_by_user_data(dir));
 
-    if (G_UNLIKELY(dir->task))
+    if (dir->task)
     {
         g_signal_handlers_disconnect_by_func(dir->task, (void*)on_list_task_finished, dir);
         /* FIXME: should we generate a "file-list" signal to indicate the dir loading was cancelled?
@@ -239,7 +239,7 @@ vfs_dir_finalize(GObject* obj)
     }
     if (dir->path)
     {
-        if (G_LIKELY(dir_hash))
+        if (dir_hash)
         {
             g_hash_table_remove(dir_hash, dir->path);
 
@@ -267,7 +267,7 @@ vfs_dir_finalize(GObject* obj)
         dir->path = dir->disp_path = nullptr;
     }
     // LOG_DEBUG("dir->thumbnail_loader: {:p}", dir->thumbnail_loader);
-    if (G_UNLIKELY(dir->thumbnail_loader))
+    if (dir->thumbnail_loader)
     {
         // LOG_DEBUG("FREE THUMBNAIL LOADER IN VFSDIR");
         vfs_thumbnail_loader_free(dir->thumbnail_loader);
@@ -327,7 +327,7 @@ vfs_dir_find_file(VFSDir* dir, const char* file_name, VFSFileInfo* file)
     for (l = dir->file_list; l; l = l->next)
     {
         VFSFileInfo* file2 = static_cast<VFSFileInfo*>(l->data);
-        if (G_UNLIKELY(file == file2))
+        if (file == file2)
             return l;
         if (ztd::same(file2->name, file_name))
             return l;
@@ -344,7 +344,7 @@ vfs_dir_emit_file_created(VFSDir* dir, const char* file_name, bool force)
     // if ( !force && dir->avoid_changes )
     //    return;
 
-    if (G_UNLIKELY(!strcmp(file_name, dir->path)))
+    if (!strcmp(file_name, dir->path))
     {
         // Special Case: The directory itself was created?
         return;
@@ -364,7 +364,7 @@ vfs_dir_emit_file_created(VFSDir* dir, const char* file_name, bool force)
 void
 vfs_dir_emit_file_deleted(VFSDir* dir, const char* file_name, VFSFileInfo* file)
 {
-    if (G_UNLIKELY(!strcmp(file_name, dir->path)))
+    if (!strcmp(file_name, dir->path))
     {
         /* Special Case: The directory itself was deleted... */
         file = nullptr;
@@ -380,7 +380,7 @@ vfs_dir_emit_file_deleted(VFSDir* dir, const char* file_name, VFSFileInfo* file)
     }
 
     GList* l = vfs_dir_find_file(dir, file_name, file);
-    if (G_LIKELY(l))
+    if (l)
     {
         VFSFileInfo* file_found = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data));
         if (!std::count(dir->changed_files.begin(), dir->changed_files.end(), file_found))
@@ -409,7 +409,7 @@ vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* file,
     if (!force && dir->avoid_changes)
         return;
 
-    if (G_UNLIKELY(!strcmp(file_name, dir->path)))
+    if (!strcmp(file_name, dir->path))
     {
         // Special Case: The directory itself was changed
         g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, nullptr);
@@ -419,7 +419,7 @@ vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* file,
     vfs_dir_lock(dir);
 
     GList* l = vfs_dir_find_file(dir, file_name, file);
-    if (G_LIKELY(l))
+    if (l)
     {
         file = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data));
         if (!std::count(dir->changed_files.begin(), dir->changed_files.end(), file))
@@ -436,7 +436,7 @@ vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* file,
                                                                nullptr);
                 }
             }
-            else if (G_LIKELY(update_file_info(dir, file))) // update file info the first time
+            else if (update_file_info(dir, file)) // update file info the first time
             {
                 dir->changed_files.push_back(file);
                 if (change_notify_timeout == 0)
@@ -471,7 +471,7 @@ vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file)
         file = nullptr;
     vfs_dir_unlock(dir);
 
-    if (G_LIKELY(file))
+    if (file)
     {
         g_signal_emit(dir, signals[THUMBNAIL_LOADED_SIGNAL], 0, file);
         vfs_file_info_unref(file);
@@ -522,7 +522,7 @@ gethidden(const char* path) // MOD added
     if (fd != -1)
     {
         struct stat s; // skip stat
-        if (G_LIKELY(fstat(fd, &s) != -1))
+        if (fstat(fd, &s) != -1)
         {
             char* buf = static_cast<char*>(g_malloc(s.st_size + 1));
             if ((s.st_size = read(fd, buf, s.st_size)) != -1)
@@ -597,7 +597,7 @@ vfs_dir_add_hidden(const char* path, const char* file_name)
 static void
 vfs_dir_load(VFSDir* dir)
 {
-    if (G_LIKELY(dir->path))
+    if (dir->path)
     {
         dir->disp_path = g_filename_display_name(dir->path);
         dir->task = vfs_async_task_new((VFSAsyncFunc)vfs_dir_load_thread, dir);
@@ -642,7 +642,7 @@ vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
                     continue;
                 }
                 VFSFileInfo* file = vfs_file_info_new();
-                if (G_LIKELY(vfs_file_info_get(file, full_path, file_name)))
+                if (vfs_file_info_get(file, full_path, file_name))
                 {
                     vfs_dir_lock(dir);
 
@@ -685,9 +685,9 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
     file->name.clear();
 
     char* full_path = g_build_filename(dir->path, file_name.c_str(), nullptr);
-    if (G_LIKELY(full_path))
+    if (full_path)
     {
-        if (G_LIKELY(vfs_file_info_get(file, full_path, file_name.c_str())))
+        if (vfs_file_info_get(file, full_path, file_name.c_str()))
         {
             ret = true;
             vfs_file_info_load_special_info(file, full_path);
@@ -696,7 +696,7 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
         {
             GList* l;
             l = g_list_find(dir->file_list, file);
-            if (G_UNLIKELY(l))
+            if (l)
             {
                 dir->file_list = g_list_delete_link(dir->file_list, l);
                 --dir->n_files;
@@ -873,7 +873,7 @@ on_theme_changed(GtkIconTheme* icon_theme, void* user_data)
 VFSDir*
 vfs_dir_get_by_path_soft(const char* path)
 {
-    if (G_UNLIKELY(!dir_hash || !path))
+    if (!dir_hash || !path)
         return nullptr;
 
     VFSDir* dir = static_cast<VFSDir*>(g_hash_table_lookup(dir_hash, path));
@@ -887,9 +887,9 @@ vfs_dir_get_by_path(const char* path)
 {
     VFSDir* dir = nullptr;
 
-    g_return_val_if_fail(G_UNLIKELY(path), nullptr);
+    g_return_val_if_fail(path, nullptr);
 
-    if (G_UNLIKELY(!dir_hash))
+    if (!dir_hash)
     {
         dir_hash = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, nullptr);
         if (theme_change_notify == 0)
@@ -903,7 +903,7 @@ vfs_dir_get_by_path(const char* path)
         dir = static_cast<VFSDir*>(g_hash_table_lookup(dir_hash, path));
     }
 
-    if (G_UNLIKELY(!mime_cb))
+    if (!mime_cb)
         mime_cb = vfs_mime_type_add_reload_cb(on_mime_type_reload, nullptr);
 
     if (dir)
@@ -927,7 +927,7 @@ reload_mime_type(char* key, VFSDir* dir, void* user_data)
     GList* l;
     VFSFileInfo* file;
 
-    if (G_UNLIKELY(!dir || !dir->file_list))
+    if (!dir || !dir->file_list)
         return;
     vfs_dir_lock(dir);
     for (l = dir->file_list; l; l = l->next)

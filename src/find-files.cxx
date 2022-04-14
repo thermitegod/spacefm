@@ -151,11 +151,11 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
             for (l = files; l; l = l->next)
             {
                 file = static_cast<VFSFileInfo*>(l->data);
-                if (G_UNLIKELY(!file))
+                if (!file)
                     continue;
 
                 full_path = g_build_filename(dir, vfs_file_info_get_name(file), nullptr);
-                if (G_LIKELY(full_path))
+                if (full_path)
                 {
                     if (std::filesystem::is_directory(full_path))
                     {

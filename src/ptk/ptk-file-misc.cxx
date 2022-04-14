@@ -2074,7 +2074,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         if (!file)
             return 0;
         // special processing for files with inconsistent real name and display name
-        if (G_UNLIKELY(vfs_file_info_is_desktop_entry(file)))
+        if (vfs_file_info_is_desktop_entry(file))
             full_name = g_filename_display_name(file->name.c_str());
         if (!full_name)
             full_name = g_strdup(vfs_file_info_get_disp_name(file));
@@ -3481,11 +3481,11 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
     for (l = sel_files; l; l = l->next)
     {
         VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
-        if (G_UNLIKELY(!file))
+        if (!file)
             continue;
 
         full_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
-        if (G_LIKELY(full_path))
+        if (full_path)
         {
             if (app_desktop)
                 // specified app to open all files
@@ -3495,13 +3495,13 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                 // No app specified - Use default app for each file
 
                 // Is a dir?  Open in browser
-                if (G_LIKELY(file_browser) && std::filesystem::is_directory(full_path))
+                if (file_browser && std::filesystem::is_directory(full_path))
                 {
                     if (!new_dir)
                         new_dir = full_path;
                     else
                     {
-                        if (G_LIKELY(file_browser))
+                        if (file_browser)
                         {
                             ptk_file_browser_emit_open(file_browser, full_path, PTK_OPEN_NEW_TAB);
                         }
@@ -3514,7 +3514,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                     (!app_settings.no_execute || xforce))
                 {
                     Glib::spawn_command_line_async(full_path);
-                    if (G_LIKELY(file_browser))
+                    if (file_browser)
                         ptk_file_browser_emit_open(file_browser, full_path, PTK_OPEN_FILE);
                     g_free(full_path);
                     continue;
@@ -3654,7 +3654,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
 
     if (new_dir)
     {
-        if (G_LIKELY(file_browser))
+        if (file_browser)
             ptk_file_browser_emit_open(file_browser, full_path, PTK_OPEN_DIR);
         g_free(new_dir);
     }

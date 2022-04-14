@@ -226,13 +226,13 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
 
     if (big)
     {
-        if (G_LIKELY(mime_type->big_icon)) /* big icon */
+        if (mime_type->big_icon) /* big icon */
             return g_object_ref(mime_type->big_icon);
         size = big_icon_size;
     }
     else /* small icon */
     {
-        if (G_LIKELY(mime_type->small_icon))
+        if (mime_type->small_icon)
             return g_object_ref(mime_type->small_icon);
         size = small_icon_size;
     }
@@ -240,12 +240,12 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
     GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
     GdkPixbuf* icon = nullptr;
 
-    if (G_UNLIKELY(!strcmp(mime_type->type, XDG_MIME_TYPE_DIRECTORY)))
+    if (!strcmp(mime_type->type, XDG_MIME_TYPE_DIRECTORY))
     {
         icon = vfs_load_icon(icon_theme, "gtk-directory", size);
-        if (G_UNLIKELY(!icon))
+        if (!icon)
             icon = vfs_load_icon(icon_theme, "gnome-fs-directory", size);
-        if (G_UNLIKELY(!icon))
+        if (!icon)
             icon = vfs_load_icon(icon_theme, "folder", size);
         if (big)
             mime_type->big_icon = icon;
@@ -304,14 +304,14 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
                 icon = vfs_load_icon(icon_theme, icon_name, size);
             }
             /* try gnome-mime-foo */
-            if (G_UNLIKELY(!icon))
+            if (!icon)
             {
                 icon_name[11] = '\0'; /* strlen("gnome-mime-") = 11 */
                 strncat(icon_name, mime_type->type, (sep - mime_type->type));
                 icon = vfs_load_icon(icon_theme, icon_name, size);
             }
             /* try foo-x-generic */
-            if (G_UNLIKELY(!icon))
+            if (!icon)
             {
                 strncpy(icon_name, mime_type->type, (sep - mime_type->type));
                 icon_name[(sep - mime_type->type)] = '\0';
@@ -321,10 +321,10 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
         }
     }
 
-    if (G_UNLIKELY(!icon))
+    if (!icon)
     {
         /* prevent endless recursion of XDG_MIME_TYPE_UNKNOWN */
-        if (G_LIKELY(strcmp(mime_type->type, XDG_MIME_TYPE_UNKNOWN)))
+        if (strcmp(mime_type->type, XDG_MIME_TYPE_UNKNOWN))
         {
             /* FIXME: fallback to icon of parent mime-type */
             VFSMimeType* unknown;
@@ -407,10 +407,10 @@ vfs_mime_type_get_type(VFSMimeType* mime_type)
 const char*
 vfs_mime_type_get_description(VFSMimeType* mime_type)
 {
-    if (G_UNLIKELY(!mime_type->description))
+    if (!mime_type->description)
     {
         mime_type->description = mime_type_get_desc_icon(mime_type->type, nullptr, nullptr);
-        if (G_UNLIKELY(!mime_type->description || !*mime_type->description))
+        if (!mime_type->description || !*mime_type->description)
         {
             LOG_WARN("mime-type {} has no description (comment)", mime_type->type);
             VFSMimeType* vfs_mime = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);

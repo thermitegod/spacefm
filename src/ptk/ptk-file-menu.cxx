@@ -1298,7 +1298,7 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     if (data->info)
     {
         mime_type = vfs_file_info_get_mime_type(data->info);
-        if (G_LIKELY(!mime_type))
+        if (!mime_type)
         {
             mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
         }

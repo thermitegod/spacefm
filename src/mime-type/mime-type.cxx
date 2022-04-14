@@ -82,14 +82,14 @@ mime_type_get_by_filename(const char* filename, struct stat* statbuf)
     const char* prev_suffix_pos = (const char*)-1;
     MimeCache* cache;
 
-    if (G_UNLIKELY(statbuf && S_ISDIR(statbuf->st_mode)))
+    if (statbuf && S_ISDIR(statbuf->st_mode))
         return XDG_MIME_TYPE_DIRECTORY;
 
     for (unsigned int i = 0; !type && i < n_caches; ++i)
     {
         cache = caches[i];
         type = mime_cache_lookup_literal(cache, filename);
-        if (G_LIKELY(!type))
+        if (!type)
         {
             const char* _type = mime_cache_lookup_suffix(cache, filename, &suffix_pos);
             if (_type && suffix_pos < prev_suffix_pos)
@@ -100,7 +100,7 @@ mime_type_get_by_filename(const char* filename, struct stat* statbuf)
         }
     }
 
-    if (G_UNLIKELY(!type)) /* glob matching */
+    if (!type) /* glob matching */
     {
         int max_glob_len = 0;
         int glob_len = 0;
@@ -143,7 +143,7 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
     /* IMPORTANT!! vfs-file-info.c:vfs_file_info_reload_mime_type() depends
      * on this function only using the st_mode from statbuf.
      * Also see vfs-dir.c:vfs_dir_load_thread */
-    if (statbuf == nullptr || G_UNLIKELY(S_ISLNK(statbuf->st_mode)))
+    if (statbuf == nullptr || S_ISLNK(statbuf->st_mode))
     {
         statbuf = &_statbuf;
         if (stat(filepath, statbuf) == -1)
@@ -156,22 +156,22 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
     if (basename == nullptr)
     {
         basename = g_utf8_strrchr(filepath, -1, '/');
-        if (G_LIKELY(basename))
+        if (basename)
             ++basename;
         else
             basename = filepath;
     }
 
-    if (G_LIKELY(basename))
+    if (basename)
     {
         type = mime_type_get_by_filename(basename, statbuf);
-        if (G_LIKELY(strcmp(type, XDG_MIME_TYPE_UNKNOWN)))
+        if (strcmp(type, XDG_MIME_TYPE_UNKNOWN))
             return type;
         type = nullptr;
     }
 
     // sfm added check for reg or link due to hangs on fifo and chr dev
-    if (G_LIKELY(statbuf->st_size > 0 && (S_ISREG(statbuf->st_mode) || S_ISLNK(statbuf->st_mode))))
+    if (statbuf->st_size > 0 && (S_ISREG(statbuf->st_mode) || S_ISLNK(statbuf->st_mode)))
     {
         int fd = -1;
         char* data;
@@ -189,16 +189,16 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
              * will be a nightmare, so...
              */
             /* try to lock the common buffer */
-            if (G_LIKELY(G_TRYLOCK(mime_magic_buf)))
+            if (G_TRYLOCK(mime_magic_buf))
                 data = mime_magic_buf;
             else /* the buffer is in use, allocate new one */
                 data = static_cast<char*>(g_malloc(len));
 
             len = read(fd, data, len);
 
-            if (G_UNLIKELY(len == -1))
+            if (len == -1)
             {
-                if (G_LIKELY(data == mime_magic_buf))
+                if (data == mime_magic_buf)
                     G_UNLOCK(mime_magic_buf);
                 else
                     g_free(data);
@@ -221,7 +221,7 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
                         type = XDG_MIME_TYPE_PLAIN_TEXT;
                 }
 
-                if (G_LIKELY(data == mime_magic_buf))
+                if (data == mime_magic_buf)
                     G_UNLOCK(mime_magic_buf); /* unlock the common buffer */
                 else                          /* we use our own buffer */
                     g_free(data);
@@ -297,33 +297,33 @@ parse_xml_desc(const char* buf, std::size_t len, const char* locale)
     static const char end_comment_tag[] = "</comment>";
 
     eng_comment = g_strstr_len(buf, len, "<comment>"); /* default English comment */
-    if (G_UNLIKELY(!eng_comment))                      /* This xml file is invalid */
+    if (!eng_comment)                                  /* This xml file is invalid */
         return nullptr;
     len -= 9;
     eng_comment += 9;
     comment_end = g_strstr_len(eng_comment, len, end_comment_tag); /* find </comment> */
-    if (G_UNLIKELY(!comment_end))
+    if (!comment_end)
         return nullptr;
     std::size_t eng_comment_len = comment_end - eng_comment;
 
-    if (G_LIKELY(locale))
+    if (locale)
     {
         char target[64];
         int target_len = g_snprintf(target, 64, "<comment xml:lang=\"%s\">", locale);
         buf = comment_end + 10;
         len = (buf_end - buf);
-        if (G_LIKELY((comment = g_strstr_len(buf, len, target))))
+        if ((comment = g_strstr_len(buf, len, target)))
         {
             len -= target_len;
             comment += target_len;
             comment_end = g_strstr_len(comment, len, end_comment_tag); /* find </comment> */
-            if (G_LIKELY(comment_end))
+            if (comment_end)
                 comment_len = (comment_end - comment);
             else
                 comment = nullptr;
         }
     }
-    if (G_LIKELY(comment))
+    if (comment)
         return g_strndup(comment, comment_len);
     return g_strndup(eng_comment, eng_comment_len);
 }
@@ -338,9 +338,9 @@ _mime_type_get_desc_icon(const char* file_path, const char* locale, bool is_loca
     // g_snprintf( file_path, 256, "%s/mime/%s.xml", data_dir, type );
 
     int fd = open(file_path, O_RDONLY, 0);
-    if (G_UNLIKELY(fd == -1))
+    if (fd == -1)
         return nullptr;
-    if (G_UNLIKELY(fstat(fd, &statbuf) == -1))
+    if (fstat(fd, &statbuf) == -1)
     {
         close(fd);
         return nullptr;
@@ -354,7 +354,7 @@ _mime_type_get_desc_icon(const char* file_path, const char* locale, bool is_loca
         buffer = (char*)-1;
     }
     close(fd);
-    if (G_UNLIKELY(buffer == (void*)-1))
+    if (buffer == (void*)-1)
         return nullptr;
 
     char* _locale = nullptr;
@@ -416,7 +416,7 @@ mime_type_get_desc_icon(const char* type, const char* locale, char** icon_name)
         if (faccessat(0, file_path.c_str(), F_OK, AT_EACCESS) != -1)
         {
             desc = _mime_type_get_desc_icon(file_path.c_str(), locale, false, icon_name);
-            if (G_LIKELY(desc))
+            if (desc)
                 return desc;
         }
     }
@@ -512,7 +512,7 @@ mime_cache_reload(MimeCache* cache)
 static bool
 mime_type_is_data_plain_text(const char* data, int len)
 {
-    if (G_LIKELY(len >= 0 && data))
+    if (len >= 0 && data)
     {
         for (int i = 0; i < len; ++i)
         {
@@ -594,7 +594,7 @@ static bool
 mime_type_is_subclass(const char* type, const char* parent)
 {
     /* special case, the type specified is identical to the parent type. */
-    if (G_UNLIKELY(!strcmp(type, parent)))
+    if (!strcmp(type, parent))
         return true;
 
     for (unsigned int i = 0; i < n_caches; ++i)

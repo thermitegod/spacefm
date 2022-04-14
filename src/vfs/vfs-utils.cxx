@@ -34,12 +34,12 @@ vfs_load_icon(GtkIconTheme* theme, const char* icon_name, int size)
     if (!inf && icon_name[0] == '/')
         return gdk_pixbuf_new_from_file_at_size(icon_name, size, size, nullptr);
 
-    if (G_UNLIKELY(!inf))
+    if (!inf)
         return nullptr;
 
     const char* file = gtk_icon_info_get_filename(inf);
     GdkPixbuf* icon = nullptr;
-    if (G_LIKELY(file))
+    if (file)
         icon = gdk_pixbuf_new_from_file_at_size(file, size, size, nullptr);
     else
     {

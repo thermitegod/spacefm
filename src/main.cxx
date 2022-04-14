@@ -109,10 +109,10 @@ open_in_tab(FMMainWindow** main_window, const char* real_path)
     XSet* set;
     int p;
     // create main window if needed
-    if (G_UNLIKELY(!*main_window))
+    if (!*main_window)
     {
         // initialize things required by folder view
-        if (G_UNLIKELY(!cli_flags.daemon_mode))
+        if (!cli_flags.daemon_mode)
             init_folder();
 
         // preload panel?
@@ -189,7 +189,7 @@ handle_parsed_commandline_args()
     app_settings.load_saved_tabs = !cli_flags.no_tabs;
 
     // no files were specified from cli
-    if (G_LIKELY(!cli_flags.files))
+    if (!cli_flags.files)
         cli_flags.files = default_files;
 
     // get the last active window on this desktop, if available
@@ -276,10 +276,10 @@ handle_parsed_commandline_args()
     else if (!check_socket_daemon())
     {
         // no files specified, just create window with default tabs
-        if (G_UNLIKELY(!main_window))
+        if (!main_window)
         {
             // initialize things required by folder view
-            if (G_UNLIKELY(!cli_flags.daemon_mode))
+            if (!cli_flags.daemon_mode)
                 init_folder();
             fm_main_window_store_positions(nullptr);
             main_window = FM_MAIN_WINDOW(fm_main_window_new());
@@ -349,7 +349,7 @@ main(int argc, char* argv[])
 
     // initialize GTK+ and parse the command line arguments
     GError* err = nullptr;
-    if (G_UNLIKELY(!gtk_init_with_args(&argc, &argv, "", opt_entries, nullptr, &err)))
+    if (!gtk_init_with_args(&argc, &argv, "", opt_entries, nullptr, &err))
     {
         LOG_INFO("{}", err->message);
         g_error_free(err);
@@ -385,7 +385,7 @@ main(int argc, char* argv[])
     // and won't reach here.
 
     // initialize the file alteration monitor
-    if (G_UNLIKELY(!vfs_file_monitor_init()))
+    if (!vfs_file_monitor_init())
     {
         ptk_show_error(nullptr,
                        "Error",

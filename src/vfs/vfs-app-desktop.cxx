@@ -177,12 +177,12 @@ VFSAppDesktop::get_icon(int size)
     }
 
     // fallback to generic icon
-    if (G_UNLIKELY(!icon))
+    if (!icon)
     {
         theme = gtk_icon_theme_get_default();
         icon = vfs_load_icon(theme, "application-x-executable", size);
         // fallback to generic icon
-        if (G_UNLIKELY(!icon))
+        if (!icon)
             icon = vfs_load_icon(theme, "gnome-mime-application-x-executable", size);
     }
     return icon;

@@ -404,7 +404,7 @@ load_settings(const char* config_dir)
             Glib::spawn_command_line_sync(command);
             LOG_INFO("Initialized git repo at: {}", git_path);
         }
-        else if (G_LIKELY(std::filesystem::exists(session)))
+        else if (std::filesystem::exists(session))
         {
             command = fmt::format("{} -c \"cd {} && git add session && "
                                   "git commit -m 'Session File' 1>/dev/null\"",
@@ -620,7 +620,7 @@ save_settings(void* main_window_ptr)
     }
 
     /* save settings */
-    if (G_UNLIKELY(!std::filesystem::exists(settings_config_dir)))
+    if (!std::filesystem::exists(settings_config_dir))
     {
         std::filesystem::create_directories(settings_config_dir);
         std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);

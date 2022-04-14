@@ -109,7 +109,7 @@ GType
 ptk_dir_tree_get_type()
 {
     static GType type = 0;
-    if (G_UNLIKELY(!type))
+    if (!type)
     {
         static const GTypeInfo type_info = {sizeof(PtkDirTreeClass),
                                             nullptr, /* base_init */
@@ -357,7 +357,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column, 
     switch (column)
     {
         case COL_DIR_TREE_ICON:
-            if (G_UNLIKELY(!info))
+            if (!info)
                 return;
             int icon_size;
             GtkIconTheme* icon_theme;
@@ -369,9 +369,9 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column, 
                 icon_size = PANE_MAX_ICON_SIZE;
 
             icon = vfs_load_icon(icon_theme, "gtk-directory", icon_size);
-            if (G_UNLIKELY(!icon))
+            if (!icon)
                 icon = vfs_load_icon(icon_theme, "gnome-fs-directory", icon_size);
-            if (G_UNLIKELY(!icon))
+            if (!icon)
                 icon = vfs_load_icon(icon_theme, "folder", icon_size);
             if (icon)
             {
@@ -380,13 +380,13 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column, 
             }
             break;
         case COL_DIR_TREE_DISP_NAME:
-            if (G_LIKELY(info))
+            if (info)
                 g_value_set_string(value, vfs_file_info_get_disp_name(info));
             else
                 g_value_set_string(value, "( no subdirectory )"); // no sub directory
             break;
         case COL_DIR_TREE_INFO:
-            if (G_UNLIKELY(!info))
+            if (!info)
                 return;
             g_value_set_pointer(value, vfs_file_info_ref(info));
             break;
@@ -480,7 +480,7 @@ ptk_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTree
     g_return_val_if_fail(PTK_IS_DIR_TREE(tree_model), false);
     PtkDirTree* tree = PTK_DIR_TREE(tree_model);
 
-    if (G_LIKELY(parent))
+    if (parent)
     {
         parent_node = static_cast<PtkDirTreeNode*>(parent->user_data);
         g_return_val_if_fail(parent_node, false);
@@ -510,7 +510,7 @@ ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIte
 
     PtkDirTree* tree = PTK_DIR_TREE(tree_model);
     PtkDirTreeNode* node = static_cast<PtkDirTreeNode*>(child->user_data);
-    if (G_LIKELY(node->parent != tree->root))
+    if (node->parent != tree->root)
     {
         iter->user_data = node->parent;
         iter->user_data2 = iter->user_data3 = nullptr;
@@ -752,7 +752,7 @@ ptk_dir_tree_collapse_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* path
         /* place holder */
         if (node->n_children == 1 && !node->children->file)
             return;
-        if (G_LIKELY(node->monitor))
+        if (node->monitor)
         {
             vfs_file_monitor_remove(node->monitor, &on_file_monitor_event, node);
             node->monitor = nullptr;
@@ -780,7 +780,7 @@ find_node(PtkDirTreeNode* parent, const char* name)
     PtkDirTreeNode* child;
     for (child = parent->children; child; child = child->next)
     {
-        if (G_LIKELY(child->file) && !strcmp(vfs_file_info_get_name(child->file), name))
+        if (child->file && !strcmp(vfs_file_info_get_name(child->file), name))
         {
             return child;
         }
@@ -800,7 +800,7 @@ on_file_monitor_event(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char*
     switch (event)
     {
         case VFS_FILE_MONITOR_CREATE:
-            if (G_LIKELY(!child))
+            if (!child)
             {
                 /* remove place holder */
                 if (node->n_children == 1 && !node->children->file)
@@ -818,7 +818,7 @@ on_file_monitor_event(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char*
             }
             break;
         case VFS_FILE_MONITOR_DELETE:
-            if (G_LIKELY(child))
+            if (child)
             {
                 ptk_dir_tree_delete_child(node->tree, child);
             }

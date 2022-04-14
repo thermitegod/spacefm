@@ -186,7 +186,7 @@ vfs_file_monitor_add(char* path, VFSFileMonitorCallback cb, void* user_data)
         // LOG_INFO("vfs_file_monitor_add  {} ({}) {}", real_path, path, monitor->wd);
     }
 
-    if (G_LIKELY(monitor))
+    if (monitor)
     {
         // LOG_DEBUG("monitor installed: {}, {:p}", path, monitor);
         if (cb)
@@ -355,7 +355,7 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
             static_cast<VFSFileMonitor*>(g_hash_table_find(monitor_hash,
                                                            (GHRFunc)vfs_file_monitor_find_monitor,
                                                            GINT_TO_POINTER(ievent->wd)));
-        if (G_LIKELY(monitor))
+        if (monitor)
         {
             const char* file_name;
             file_name = ievent->len > 0 ? ievent->name : monitor->path;

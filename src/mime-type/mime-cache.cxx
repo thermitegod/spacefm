@@ -53,7 +53,7 @@ MimeCache*
 mime_cache_new(const char* file_path)
 {
     MimeCache* cache = g_slice_new0(MimeCache);
-    if (G_LIKELY(file_path))
+    if (file_path)
         mime_cache_load(cache, file_path);
     return cache;
 }
@@ -172,7 +172,7 @@ magic_rule_match(const char* buf, const char* rule, const char* data, int len)
         const char* value = buf + val_off;
         /* FIXME: word_size and byte order are not supported! */
 
-        if (G_UNLIKELY(mask_off > 0)) /* compare with mask applied */
+        if (mask_off > 0) /* compare with mask applied */
         {
             unsigned int i = 0;
             const char* mask = buf + mask_off;
@@ -230,7 +230,7 @@ mime_cache_lookup_magic(MimeCache* cache, const char* data, int len)
 {
     const char* magic = cache->magics;
 
-    if (G_UNLIKELY(!data || (len == 0) || !magic))
+    if (!data || (len == 0) || !magic)
         return nullptr;
 
     for (unsigned int i = 0; i < cache->n_magics; ++i, magic += 16)
@@ -316,7 +316,7 @@ lookup_reverse_suffix_nodes(const char* buf, const char* nodes, uint32_t n, cons
         const char* node = nodes + i * 12;
         uint32_t ch = VAL32(node, 0);
         const char* _suffix_pos = suffix;
-        if (G_LIKELY(ch))
+        if (ch)
         {
             if (ch == uchar)
             {
@@ -360,7 +360,7 @@ mime_cache_lookup_suffix(MimeCache* cache, const char* filename, const char** su
     const char* mime_type = nullptr;
     const char* ret = nullptr;
 
-    if (G_UNLIKELY(!filename || !*filename || n == 0))
+    if (!filename || !*filename || n == 0)
         return nullptr;
     if (cache->has_reverse_suffix) /* since mime.cache ver: 1.1 */
     {
@@ -421,7 +421,7 @@ lookup_str_in_entries(MimeCache* cache, const char* entries, int n, const char* 
     int lower = 0;
     int middle = upper / 2;
 
-    if (G_LIKELY(entries && str && *str))
+    if (entries && str && *str)
     {
         /* binary search */
         while (upper >= lower)
@@ -460,7 +460,7 @@ mime_cache_lookup_literal(MimeCache* cache, const char* filename)
         int lower = 0;
         int middle = upper / 2;
 
-        if (G_LIKELY(entries && filename && *filename))
+        if (entries && filename && *filename)
         {
             /* binary search */
             while (upper >= lower)

@@ -142,13 +142,13 @@ on_thumbnail_idle(VFSThumbnailLoader* loader)
 static void*
 thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
 {
-    while (G_LIKELY(!vfs_async_task_is_cancelled(task)))
+    while (!vfs_async_task_is_cancelled(task))
     {
         vfs_async_task_lock(task);
         VFSThumbnailRequest* req =
             static_cast<VFSThumbnailRequest*>(g_queue_pop_head(loader->queue));
         vfs_async_task_unlock(task);
-        if (G_UNLIKELY(!req))
+        if (!req)
             break;
         // LOG_DEBUG("pop: {}", req->file->name);
 
@@ -233,7 +233,7 @@ vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big)
     bool new_task = false;
 
     // LOG_DEBUG("request thumbnail: {}, is_big: {}", file->name, is_big);
-    if (G_UNLIKELY(!dir->thumbnail_loader))
+    if (!dir->thumbnail_loader)
     {
         dir->thumbnail_loader = vfs_thumbnail_loader_new(dir);
         new_task = true;
@@ -241,7 +241,7 @@ vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big)
 
     VFSThumbnailLoader* loader = dir->thumbnail_loader;
 
-    if (G_UNLIKELY(!loader->task))
+    if (!loader->task)
     {
         loader->task = vfs_async_task_new((VFSAsyncFunc)thumbnail_loader_thread, loader);
         new_task = true;
@@ -282,7 +282,7 @@ vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
 {
     VFSThumbnailLoader* loader;
 
-    if (G_UNLIKELY((loader = dir->thumbnail_loader)))
+    if ((loader = dir->thumbnail_loader))
     {
         vfs_async_task_lock(loader->task);
         // LOG_DEBUG("TRY TO CANCEL REQUESTS!!");
@@ -375,7 +375,7 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
 
     // LOG_INFO("{}", thumbnail_file);
 
-    if (G_UNLIKELY(mtime == 0))
+    if (mtime == 0)
     {
         if (stat(file_path.c_str(), &statbuf) != -1)
             mtime = statbuf.st_mtime;

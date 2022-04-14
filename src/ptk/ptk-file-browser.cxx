@@ -165,7 +165,7 @@ GType
 ptk_file_browser_get_type()
 {
     static GType type = G_TYPE_INVALID;
-    if (G_UNLIKELY(type == G_TYPE_INVALID))
+    if (type == G_TYPE_INVALID)
     {
         static const GTypeInfo info = {
             sizeof(PtkFileBrowserClass),
@@ -2248,7 +2248,7 @@ on_dir_file_listed(VFSDir* dir, bool is_cancelled, PtkFileBrowser* file_browser)
 {
     file_browser->n_sel_files = 0;
 
-    if (G_LIKELY(!is_cancelled))
+    if (!is_cancelled)
     {
         g_signal_connect(dir, "file-created", G_CALLBACK(on_folder_content_changed), file_browser);
         g_signal_connect(dir, "file-deleted", G_CALLBACK(on_file_deleted), file_browser);
@@ -2292,7 +2292,7 @@ on_dir_file_listed(VFSDir* dir, bool is_cancelled, PtkFileBrowser* file_browser)
     //            reduce unnecessary code?
     if (file_browser->view_mode == PTK_FB_COMPACT_VIEW)
     { // sfm why is this needed for compact view???
-        if (G_LIKELY(!is_cancelled) && file_browser->file_list)
+        if (!is_cancelled && file_browser->file_list)
         {
             show_thumbnails(file_browser,
                             PTK_FILE_LIST(file_browser->file_list),
@@ -4280,7 +4280,7 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, int x, int y)
 
     if (tree_path)
     {
-        if (G_UNLIKELY(!gtk_tree_model_get_iter(model, &it, tree_path)))
+        if (!gtk_tree_model_get_iter(model, &it, tree_path))
             return nullptr;
 
         gtk_tree_model_get(model, &it, COL_FILE_INFO, &file, -1);

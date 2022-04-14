@@ -75,10 +75,10 @@ filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
         return true;
 
     gtk_tree_model_get(model, iter, COL_DIR_TREE_INFO, &file, -1);
-    if (G_LIKELY(file))
+    if (file)
     {
         const char* name = vfs_file_info_get_name(file);
-        if (G_UNLIKELY(name && name[0] == '.'))
+        if (name && name[0] == '.')
         {
             vfs_file_info_unref(file);
             return false;
@@ -149,7 +149,7 @@ ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
                                            nullptr,
                                            nullptr);
 
-    if (G_UNLIKELY(!dir_tree_view_data))
+    if (!dir_tree_view_data)
         dir_tree_view_data = g_quark_from_static_string("show_hidden");
     g_object_set_qdata(G_OBJECT(dir_tree_view), dir_tree_view_data, GINT_TO_POINTER(show_hidden));
     model = get_dir_tree_model();
@@ -323,7 +323,7 @@ get_dir_tree_model()
 {
     static PtkDirTree* dir_tree_model = nullptr;
 
-    if (G_UNLIKELY(!dir_tree_model))
+    if (!dir_tree_model)
     {
         dir_tree_model = ptk_dir_tree_new();
         g_object_add_weak_pointer(G_OBJECT(dir_tree_model), (void**)GTK_WIDGET(&dir_tree_model));

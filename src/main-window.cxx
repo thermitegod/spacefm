@@ -131,7 +131,7 @@ GType
 fm_main_window_get_type()
 {
     static GType type = G_TYPE_INVALID;
-    if (G_UNLIKELY(type == G_TYPE_INVALID))
+    if (type == G_TYPE_INVALID)
     {
         static const GTypeInfo info = {
             sizeof(FMMainWindowClass),
@@ -2984,7 +2984,7 @@ static void
 on_file_browser_open_item(PtkFileBrowser* file_browser, const char* path, PtkOpenAction action,
                           FMMainWindow* main_window)
 {
-    if (G_LIKELY(path))
+    if (path)
     {
         switch (action)
         {
@@ -3146,7 +3146,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
             {
                 file = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data));
 
-                if (G_UNLIKELY(!file))
+                if (!file)
                     continue;
 
                 if (vfs_file_info_is_dir(file))
@@ -4150,7 +4150,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
             for (l = sel_files; l; l = l->next)
             {
                 path = (char*)vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data));
-                if (G_LIKELY(!cwd_needs_quote && !strchr(path, '"')))
+                if (!cwd_needs_quote && !strchr(path, '"'))
                     buf.append(fmt::format("\"{}{}{}\"\n",
                                            cwd,
                                            (cwd[0] != '\0' && cwd[1] == '\0') ? "" : "/",
@@ -4171,7 +4171,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
                 for (l = sel_files; l; l = l->next)
                 {
                     path = (char*)vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data));
-                    if (G_LIKELY(!strchr(path, '"')))
+                    if (!strchr(path, '"'))
                         buf.append(fmt::format("\"{}\"\n", path));
                     else
                     {
