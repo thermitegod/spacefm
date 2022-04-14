@@ -443,8 +443,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     else /* Add available actions to the option menu */
     {
         GtkTreeIter it;
-        char** action;
-        char** actions;
+        std::vector<std::string> actions;
 
         mime = vfs_file_info_get_mime_type(file);
         actions = vfs_mime_type_get_actions(mime);
@@ -458,15 +457,23 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(open_with), renderer, true);
         gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(open_with), renderer, "text", 1, nullptr);
         model = gtk_list_store_new(3, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
-        if (actions)
+        if (!actions.empty())
         {
-            for (action = actions; *action; ++action)
+            for (std::string action: actions)
             {
-                VFSAppDesktop desktop(*action);
+                VFSAppDesktop desktop(action);
                 GdkPixbuf* icon;
                 gtk_list_store_append(model, &it);
                 icon = desktop.get_icon(20);
-                gtk_list_store_set(model, &it, 0, icon, 1, desktop.get_disp_name(), 2, *action, -1);
+                gtk_list_store_set(model,
+                                   &it,
+                                   0,
+                                   icon,
+                                   1,
+                                   desktop.get_disp_name(),
+                                   2,
+                                   action.c_str(),
+                                   -1);
                 if (icon)
                     g_object_unref(icon);
             }

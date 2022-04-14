@@ -424,52 +424,17 @@ vfs_mime_type_get_description(VFSMimeType* mime_type)
     return mime_type->description;
 }
 
-/*
- * Join two string vector containing app lists to generate a new one.
- * Duplicated app will be removed.
- */
-char**
-vfs_mime_type_join_actions(char** list1, unsigned long len1, char** list2, unsigned long len2)
-{
-    char** ret = nullptr;
-
-    if (len1 > 0 || len2 > 0)
-        ret = g_new0(char*, len1 + len2 + 1);
-
-    unsigned long i;
-    for (i = 0; i < len1; ++i)
-    {
-        ret[i] = g_strdup(list1[i]);
-    }
-
-    unsigned long j;
-    unsigned long k;
-    for (j = 0, k = 0; j < len2; ++j)
-    {
-        for (i = 0; i < len1; ++i)
-        {
-            if (!strcmp(ret[i], list2[j]))
-                break;
-        }
-        if (i >= len1)
-        {
-            ret[len1 + k] = g_strdup(list2[j]);
-            ++k;
-        }
-    }
-    return ret;
-}
-
-char**
+std::vector<std::string>
 vfs_mime_type_get_actions(VFSMimeType* mime_type)
 {
-    return (char**)mime_type_get_actions(mime_type->type);
+    return mime_type_get_actions(mime_type->type);
 }
 
 char*
 vfs_mime_type_get_default_action(VFSMimeType* mime_type)
 {
-    char* def = (char*)mime_type_get_default_action(mime_type->type);
+    char* def = mime_type_get_default_action(mime_type->type);
+
     /* FIXME:
      * If default app is not set, choose one from all availble actions.
      * Is there any better way to do this?
@@ -477,12 +442,9 @@ vfs_mime_type_get_default_action(VFSMimeType* mime_type)
      */
     if (!def)
     {
-        char** actions = mime_type_get_actions(mime_type->type);
-        if (actions)
-        {
-            def = g_strdup(actions[0]);
-            g_strfreev(actions);
-        }
+        std::vector<std::string> actions = mime_type_get_actions(mime_type->type);
+        if (!actions.empty())
+            def = g_strdup(actions.at(0).c_str());
     }
     return def;
 }

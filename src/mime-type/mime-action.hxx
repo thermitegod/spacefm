@@ -17,6 +17,9 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include <glib.h>
 
 enum MimeTypeAction
@@ -28,10 +31,8 @@ enum MimeTypeAction
 
 /*
  *  Get a list of applications supporting this mime-type
- * The returned string array was newly allocated, and should be
- * freed with g_strfreev() when no longer used.
  */
-char** mime_type_get_actions(const char* type);
+std::vector<std::string> mime_type_get_actions(const std::string& type);
 
 /*
  * Add an applications used to open this mime-type
@@ -57,7 +58,7 @@ void mime_type_add_action(const char* type, const char* desktop_id, char** custo
  *
  * The old defaults.list is also checked.
  */
-char* mime_type_get_default_action(const char* type);
+char* mime_type_get_default_action(const std::string& type);
 
 /*
  * Set applications used to open or never used to open this mime-type

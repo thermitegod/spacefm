@@ -21,6 +21,7 @@
 #include <vector>
 
 #include <glibmm.h>
+#include <glibmm/keyfile.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -41,49 +42,83 @@ VFSAppDesktop::VFSAppDesktop(const std::string& open_file_name)
 
     bool load;
 
-    GKeyFile* file = g_key_file_new();
+    const auto kf = Glib::KeyFile::create();
 
     if (g_path_is_absolute(open_file_name.c_str()))
     {
         m_file_name = g_path_get_basename(open_file_name.c_str());
         m_full_path = open_file_name;
-        load = g_key_file_load_from_file(file, open_file_name.c_str(), G_KEY_FILE_NONE, nullptr);
+        load = kf->load_from_file(open_file_name, Glib::KeyFile::Flags::NONE);
     }
     else
     {
         m_file_name = open_file_name;
-        const std::string relative_path = Glib::build_filename("applications", m_file_name);
-        char* full_path_c;
-        load = g_key_file_load_from_data_dirs(file,
-                                              relative_path.c_str(),
-                                              &full_path_c,
-                                              G_KEY_FILE_NONE,
-                                              nullptr);
-        if (full_path_c)
-            m_full_path = full_path_c;
-        g_free(full_path_c);
+        std::string relative_path = Glib::build_filename("applications", m_file_name);
+        load = kf->load_from_data_dirs(relative_path, m_full_path, Glib::KeyFile::Flags::NONE);
     }
 
     if (load)
     {
         static const std::string desktop_entry = "Desktop Entry";
+        Glib::ustring g_disp_name, g_exec, g_icon_name, g_path;
 
-        // clang-format off
-        m_disp_name = ztd::null_check(g_key_file_get_locale_string(file, desktop_entry.c_str(), "Name", nullptr, nullptr));
-        m_exec = ztd::null_check(g_key_file_get_string(file, desktop_entry.c_str(), "Exec", nullptr));
-        m_icon_name = ztd::null_check(g_key_file_get_string(file, desktop_entry.c_str(), "Icon", nullptr));
-        m_path = ztd::null_check(g_key_file_get_string(file, desktop_entry.c_str(), "Path", nullptr));
-        m_terminal = g_key_file_get_boolean(file, desktop_entry.c_str(), "Terminal", nullptr);
-        m_hidden = g_key_file_get_boolean(file, desktop_entry.c_str(), "NoDisplay", nullptr);
-        m_startup = g_key_file_get_boolean(file, desktop_entry.c_str(), "StartupNotify", nullptr);
-        // clang-format on
+        try
+        {
+            g_disp_name = kf->get_string(desktop_entry, "Name");
+            if (!g_disp_name.empty())
+                m_disp_name = g_disp_name;
+        }
+        catch (Glib::KeyFileError)
+        {
+            m_disp_name = "";
+        }
+
+        try
+        {
+            g_exec = kf->get_string(desktop_entry, "Exec");
+            if (!g_exec.empty())
+                m_exec = g_exec;
+        }
+        catch (Glib::KeyFileError)
+        {
+            m_exec = "";
+        }
+
+        try
+        {
+            g_icon_name = kf->get_string(desktop_entry, "Icon");
+            if (!g_icon_name.empty())
+                m_icon_name = g_icon_name;
+        }
+        catch (Glib::KeyFileError)
+        {
+            m_icon_name = "";
+        }
+
+        try
+        {
+            g_path = kf->get_string(desktop_entry, "Path");
+            if (!g_path.empty())
+                m_path = g_path;
+        }
+        catch (Glib::KeyFileError)
+        {
+            m_path = "";
+        }
+
+        try
+        {
+            m_terminal = kf->get_boolean(desktop_entry, "Terminal");
+        }
+        catch (Glib::KeyFileError)
+        {
+            m_terminal = false;
+        }
     }
     else
     {
         m_exec = m_file_name;
     }
-
-    g_key_file_free(file);
 }
 
 VFSAppDesktop::~VFSAppDesktop()

@@ -582,7 +582,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                   const char* cwd, GList* sel_files)
 { // either desktop or browser must be non-nullptr
 
-    char** app;
     const char* app_name = nullptr;
     char* name;
     char* desc;
@@ -654,7 +653,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
     // Get mime type and apps
     VFSMimeType* mime_type;
-    char** apps;
+    std::vector<std::string> apps;
     if (info)
     {
         mime_type = vfs_file_info_get_mime_type(info);
@@ -664,7 +663,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
     else
     {
         mime_type = nullptr;
-        apps = nullptr;
         context->var[CONTEXT_MIME] = g_strdup("");
     }
 
@@ -850,26 +848,20 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
         if (is_text)
         {
-            char **tmp, **txt_apps;
+            std::vector<std::string> txt_apps;
             VFSMimeType* txt_type;
-            int len1, len2;
             txt_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
             txt_apps = vfs_mime_type_get_actions(txt_type);
-            if (txt_apps)
-            {
-                len1 = apps ? g_strv_length(apps) : 0;
-                len2 = g_strv_length(txt_apps);
-                tmp = apps;
-                apps = vfs_mime_type_join_actions(apps, len1, txt_apps, len2);
-                g_strfreev(txt_apps);
-                g_strfreev(tmp);
-            }
+            if (!txt_apps.empty())
+                apps = ztd::merge(apps, txt_apps);
             vfs_mime_type_unref(txt_type);
         }
-        if (apps)
+        if (!apps.empty())
         {
-            for (app = apps; *app; ++app)
+            for (std::string app: apps)
             {
+#if 0
+                // TODO - FIXME
                 if ((app - apps) == 1 && !handlers_slist)
                 {
                     // Add a separator after default app if no handlers listed
@@ -877,13 +869,14 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                     gtk_widget_show(GTK_WIDGET(item));
                     gtk_container_add(GTK_CONTAINER(submenu), GTK_WIDGET(item));
                 }
+#endif
 
-                VFSAppDesktop desktop(*app);
+                VFSAppDesktop desktop(app);
                 app_name = desktop.get_disp_name();
                 if (app_name)
                     app_menu_item = gtk_menu_item_new_with_label(app_name);
                 else
-                    app_menu_item = gtk_menu_item_new_with_label(*app);
+                    app_menu_item = gtk_menu_item_new_with_label(app.c_str());
 
                 gtk_container_add(GTK_CONTAINER(submenu), app_menu_item);
                 g_signal_connect(G_OBJECT(app_menu_item),
@@ -901,10 +894,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                                  (void*)data);
                 g_object_set_data_full(G_OBJECT(app_menu_item),
                                        "desktop_file",
-                                       g_strdup(*app),
+                                       g_strdup(app.c_str()),
                                        g_free);
             }
-            g_strfreev(apps);
         }
 
         // open with other

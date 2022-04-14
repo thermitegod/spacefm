@@ -17,6 +17,9 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include <atomic>
 
 #include <gdk/gdk.h>
@@ -70,7 +73,7 @@ const char* vfs_mime_type_get_description(VFSMimeType* mime_type);
  * Get available actions (applications) for this mime-type
  * returned vector should be freed with g_strfreev when not needed.
  */
-char** vfs_mime_type_get_actions(VFSMimeType* mime_type);
+std::vector<std::string> vfs_mime_type_get_actions(VFSMimeType* mime_type);
 
 /* returned string should be freed with g_strfreev when not needed. */
 char* vfs_mime_type_get_default_action(VFSMimeType* mime_type);
@@ -84,9 +87,6 @@ void vfs_mime_type_add_action(VFSMimeType* mime_type, const char* desktop_id,
                               char** custom_desktop);
 
 void vfs_mime_type_append_action(const char* type, const char* desktop_id);
-
-char** vfs_mime_type_join_actions(char** list1, unsigned long len1, char** list2,
-                                  unsigned long len2);
 
 GList* vfs_mime_type_add_reload_cb(GFreeFunc cb, void* user_data);
 

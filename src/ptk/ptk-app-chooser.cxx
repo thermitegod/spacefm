@@ -139,22 +139,20 @@ create_model_from_mime_type(VFSMimeType* mime_type)
         gtk_list_store_new(N_COLS, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
     if (mime_type)
     {
-        char** apps = vfs_mime_type_get_actions(mime_type);
+        std::vector<std::string> apps = vfs_mime_type_get_actions(mime_type);
         const char* type = vfs_mime_type_get_type(mime_type);
-        if (!apps && mime_type_is_text_file(nullptr, type))
+        if (apps.empty() && mime_type_is_text_file(nullptr, type))
         {
             mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
             apps = vfs_mime_type_get_actions(mime_type);
             vfs_mime_type_unref(mime_type);
         }
-        if (apps)
+        if (!apps.empty())
         {
-            char** app;
-            for (app = apps; *app; ++app)
+            for (std::string app: apps)
             {
-                add_list_item(list, *app);
+                add_list_item(list, g_strdup(app.c_str()));
             }
-            g_strfreev(apps);
         }
     }
     return GTK_TREE_MODEL(list);
