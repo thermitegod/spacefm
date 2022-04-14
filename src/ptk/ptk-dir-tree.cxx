@@ -734,7 +734,7 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
             ptk_dir_tree_delete_child(tree, place_holder);
         }
     }
-    g_free(path);
+    free(path);
 }
 
 void
@@ -817,7 +817,7 @@ on_file_monitor_event(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char*
                     if (child)
                         ptk_dir_tree_delete_child(node->tree, child);
                 }
-                g_free(file_path);
+                free(file_path);
             }
             break;
         case VFS_FILE_MONITOR_DELETE:

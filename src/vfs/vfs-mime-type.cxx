@@ -146,7 +146,7 @@ vfs_mime_type_clean()
         if (mime_caches_monitor[i]) // MOD added if !nullptr - see NOTE1 above
             vfs_file_monitor_remove(mime_caches_monitor[i], on_mime_cache_changed, caches[i]);
     }
-    g_free(mime_caches_monitor);
+    free(mime_caches_monitor);
 
     mime_type_finalize();
 
@@ -208,7 +208,7 @@ vfs_mime_type_unref(void* mime_type_)
     mime_type->ref_dec();
     if (mime_type->ref_count() == 0)
     {
-        g_free(mime_type->type);
+        free(mime_type->type);
         if (mime_type->big_icon)
             g_object_unref(mime_type->big_icon);
         if (mime_type->small_icon)
@@ -262,14 +262,14 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
     {
         if (xml_icon[0])
             icon = vfs_load_icon(icon_theme, xml_icon, size);
-        g_free(xml_icon);
+        free(xml_icon);
     }
     if (xml_desc)
     {
         if (!mime_type->description && xml_desc[0])
             mime_type->description = xml_desc;
         else
-            g_free(xml_desc);
+            free(xml_desc);
     }
     if (!mime_type->description)
     {
@@ -465,7 +465,7 @@ vfs_mime_type_set_default_action(VFSMimeType* mime_type, const char* desktop_id)
     if (cust_desktop)
         desktop_id = cust_desktop;
     mime_type_update_association(mime_type->type, desktop_id, MIME_TYPE_ACTION_DEFAULT);
-    g_free(cust_desktop);
+    free(cust_desktop);
 }
 
 void

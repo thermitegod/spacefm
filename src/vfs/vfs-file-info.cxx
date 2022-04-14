@@ -264,9 +264,9 @@ vfs_file_info_get_big_icon(VFSFileInfo* fi)
                         vfs_load_icon(gtk_icon_theme_get_default(), icon_name, icon_size);
             }
             if (fi->big_thumbnail)
-                g_object_set_data_full(G_OBJECT(fi->big_thumbnail), "name", icon_name, g_free);
+                g_object_set_data_full(G_OBJECT(fi->big_thumbnail), "name", icon_name, free);
             else
-                g_free(icon_name);
+                free(icon_name);
         }
         return fi->big_thumbnail ? g_object_ref(fi->big_thumbnail) : nullptr;
     }
@@ -581,7 +581,7 @@ vfs_file_info_open_file(VFSFileInfo* fi, const char* file_path, GError** err)
             open_files.push_back(open_file);
 
             ret = desktop.open_files(vfs_current_dir(), open_files, err);
-            g_free(app_name);
+            free(app_name);
         }
         vfs_mime_type_unref(mime_type);
     }
@@ -677,7 +677,7 @@ vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
                     fi->small_thumbnail = icon;
             }
         }
-        g_free(file_dir);
+        free(file_dir);
     }
 }
 

@@ -212,7 +212,7 @@ static void
 vfs_dir_clear(VFSDir* dir)
 {
     g_mutex_clear(dir->mutex);
-    g_free(dir->mutex);
+    free(dir->mutex);
 }
 
 /* destructor */
@@ -265,8 +265,8 @@ vfs_dir_finalize(GObject* obj)
                 theme_change_notify = 0;
             }
         }
-        g_free(dir->path);
-        g_free(dir->disp_path);
+        free(dir->path);
+        free(dir->disp_path);
         dir->path = dir->disp_path = nullptr;
     }
     // LOG_DEBUG("dir->thumbnail_loader: {:p}", dir->thumbnail_loader);
@@ -297,7 +297,7 @@ vfs_dir_finalize(GObject* obj)
 
     if (dir->created_files)
     {
-        g_slist_foreach(dir->created_files, (GFunc)g_free, nullptr);
+        g_slist_foreach(dir->created_files, (GFunc)free, nullptr);
         g_slist_free(dir->created_files);
         dir->created_files = nullptr;
     }
@@ -675,7 +675,7 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
             }
             ret = false;
         }
-        g_free(full_path);
+        free(full_path);
     }
     return ret;
 }
@@ -733,7 +733,7 @@ update_created_files(void* key, void* data, void* user_data)
                 }
                 // else file doesn't exist in filesystem
                 vfs_file_info_unref(file);
-                g_free(full_path);
+                free(full_path);
             }
             else
             {
@@ -746,7 +746,7 @@ update_created_files(void* key, void* data, void* user_data)
                 }
                 // else was deleted, signaled, and unrefed in update_file_info
             }
-            g_free((char*)l->data); // free file_name string
+            free((char*)l->data); // free file_name string
         }
         g_slist_free(dir->created_files);
         dir->created_files = nullptr;
@@ -822,7 +822,7 @@ reload_icons(const char* path, VFSDir* dir, void* user_data)
                 file->small_thumbnail = nullptr;
             }
             vfs_file_info_load_special_info(file, file_path);
-            g_free(file_path);
+            free(file_path);
         }
     }
 }
@@ -900,7 +900,7 @@ reload_mime_type(char* key, VFSDir* dir, void* user_data)
         char* full_path = g_build_filename(dir->path, vfs_file_info_get_name(file), nullptr);
         vfs_file_info_reload_mime_type(file, full_path);
         // LOG_DEBUG("reload {}", full_path);
-        g_free(full_path);
+        free(full_path);
     }
 
     for (VFSFileInfo* file: dir->file_list)

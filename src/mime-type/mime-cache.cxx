@@ -61,7 +61,7 @@ mime_cache_new(const char* file_path)
 static void
 mime_cache_unload(MimeCache* cache, bool clear)
 {
-    g_free(cache->file_path);
+    free(cache->file_path);
     if (clear)
         memset(cache, 0, sizeof(MimeCache));
 }
@@ -109,7 +109,7 @@ mime_cache_load(MimeCache* cache, const char* file_path)
     /* Check version */
     if (majv > LIB_MAJOR_VERSION || minv > LIB_MAX_MINOR_VERSION || minv < LIB_MIN_MINOR_VERSION)
     {
-        g_free(buffer);
+        free(buffer);
         return false;
     }
 

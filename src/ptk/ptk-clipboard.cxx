@@ -69,7 +69,7 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, un
             file_name = g_filename_display_name((char*)l->data);
         }
         g_string_append(list, file_name);
-        g_free(file_name);
+        free(file_name);
 
         if (gtk_selection_data_get_target(selection_data) != uri_list_target)
             g_string_append_c(list, '\n');
@@ -94,7 +94,7 @@ clipboard_clean_data(GtkClipboard* clipboard, void* user_data)
     // LOG_DEBUG("clean clipboard!");
     if (clipboard_file_list)
     {
-        g_list_foreach(clipboard_file_list, (GFunc)g_free, nullptr);
+        g_list_foreach(clipboard_file_list, (GFunc)free, nullptr);
         g_list_free(clipboard_file_list);
         clipboard_file_list = nullptr;
     }
@@ -144,11 +144,11 @@ ptk_clipboard_copy_name(const char* working_dir,
         else
             file_text = g_strdup_printf("%s%s\n", file_text, vfs_file_info_get_name(file));
         fcount++;
-        g_free(str);
+        free(str);
     }
     gtk_clipboard_set_text(clip, file_text, -1);
     gtk_clipboard_set_text(clip_primary, file_text, -1);
-    g_free(file_text);
+    free(file_text);
 }
 
 void
@@ -196,7 +196,7 @@ ptk_clipboard_cut_or_copy_files(const char* working_dir, GList* files, bool copy
                                 clipboard_clean_data,
                                 nullptr);
 
-    g_free(targets);
+    free(targets);
 
     clipboard_file_list = file_list;
     clipboard_action = copy ? GDK_ACTION_COPY : GDK_ACTION_MOVE;
@@ -237,7 +237,7 @@ ptk_clipboard_copy_file_list(char** path, bool copy)
                                 clipboard_get_data,
                                 clipboard_clean_data,
                                 nullptr);
-    g_free(targets);
+    free(targets);
 
     clipboard_file_list = file_list;
     clipboard_action = copy ? GDK_ACTION_COPY : GDK_ACTION_MOVE;
@@ -470,7 +470,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
                 {
                     // canonicalize target
                     char* str = get_real_link_target(file_path);
-                    g_free(file_path);
+                    free(file_path);
                     file_path = str;
                 }
                 if (file_path)
@@ -481,7 +481,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
                     else
                     {
                         missing_targets++;
-                        g_free(file_path);
+                        free(file_path);
                     }
                 }
             }

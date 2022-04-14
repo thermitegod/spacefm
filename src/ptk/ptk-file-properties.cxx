@@ -144,7 +144,7 @@ calc_size(void* user_data)
         if (path)
         {
             calc_total_size_of_files(path, data);
-            g_free(path);
+            free(path);
         }
     }
     data->done = true;
@@ -170,13 +170,13 @@ on_update_labels(FilePropertiesDialogData* data)
     {
         count_dir = g_strdup_printf("%d directory", data->total_count_dir);
         count = g_strdup_printf("%d file, %s", data->total_count, count_dir);
-        g_free(count_dir);
+        free(count_dir);
     }
     else
         count = g_strdup_printf("%d files", data->total_count);
 
     gtk_label_set_text(data->count_label, count);
-    g_free(count);
+    free(count);
 
     if (data->done)
         data->update_label_timer = 0;
@@ -229,7 +229,7 @@ combo_sep(GtkTreeModel* model, GtkTreeIter* it, void* user_data)
         gtk_tree_model_get(model, it, i, &tmp, -1);
         if (tmp)
         {
-            g_free(tmp);
+            free(tmp);
             return false;
         }
     }
@@ -266,10 +266,10 @@ on_combo_change(GtkComboBox* combo, void* user_data)
                         if (!strcmp(tmp, action))
                         {
                             exist = true;
-                            g_free(tmp);
+                            free(tmp);
                             break;
                         }
-                        g_free(tmp);
+                        free(tmp);
                     } while (gtk_tree_model_iter_next(model, &it));
                 }
 
@@ -296,7 +296,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
 
                 if (exist)
                     gtk_combo_box_set_active_iter(combo, &it);
-                g_free(action);
+                free(action);
             }
             else
             {
@@ -373,7 +373,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     disp_path = g_filename_display_name(dir_path);
     // gtk_label_set_text( GTK_LABEL( location ), disp_path );
     gtk_entry_set_text(GTK_ENTRY(location), disp_path);
-    g_free(disp_path);
+    free(disp_path);
 
     data->total_size_label = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(builder, "total_size")));
     data->size_on_disk_label =
@@ -421,7 +421,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
                                     vfs_mime_type_get_description(mime),
                                     vfs_mime_type_get_type(mime));
         gtk_label_set_text(GTK_LABEL(mime_type), file_type);
-        g_free(file_type);
+        free(file_type);
         vfs_mime_type_unref(mime);
     }
     else
@@ -531,7 +531,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         {
             char* disp_name = g_filename_display_name(file->name.c_str());
             gtk_entry_set_text(GTK_ENTRY(name), disp_name);
-            g_free(disp_name);
+            free(disp_name);
         }
         else
         {
@@ -611,15 +611,15 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
                     // relative link to absolute
                     char* str = target_path;
                     target_path = g_build_filename(dir_path, str, nullptr);
-                    g_free(str);
+                    free(str);
                 }
                 if (!std::filesystem::exists(target_path))
                     gtk_label_set_text(GTK_LABEL(mime_type), "( broken link )");
-                g_free(target_path);
+                free(target_path);
             }
             else
                 gtk_entry_set_text(GTK_ENTRY(target), "( read link error )");
-            g_free(disp_path);
+            free(disp_path);
             gtk_widget_show(target);
             gtk_widget_show(label_target);
         }
@@ -728,10 +728,10 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
     {
         char* str = g_strdup_printf("%d", width);
         xset_set("app_dlg", "s", str);
-        g_free(str);
+        free(str);
         str = g_strdup_printf("%d", height);
         xset_set("app_dlg", "z", str);
-        g_free(str);
+        free(str);
     }
 
     FilePropertiesDialogData* data =
@@ -770,7 +770,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                     file_path = g_build_filename(data->dir_path, file->name.c_str(), nullptr);
                     quoted_path = bash_quote(file_path);
                     g_string_append_printf(gstr, " %s", quoted_path.c_str());
-                    g_free(file_path);
+                    free(file_path);
                 }
 
                 if (new_mtime)
@@ -820,7 +820,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                         VFSMimeType* mime = vfs_file_info_get_mime_type(file);
                         vfs_mime_type_set_default_action(mime, action);
                         vfs_mime_type_unref(mime);
-                        g_free(action);
+                        free(action);
                     }
                 }
             }
@@ -904,10 +904,10 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
             }
         }
 
-        g_free(data->owner_name);
-        g_free(data->group_name);
-        g_free(data->orig_mtime);
-        g_free(data->orig_atime);
+        free(data->owner_name);
+        free(data->group_name);
+        free(data->orig_mtime);
+        free(data->orig_atime);
         /*
          *NOTE: File operation chmod/chown will free the list when it's done,
          *and we only need to free it when there is no file operation applyed.

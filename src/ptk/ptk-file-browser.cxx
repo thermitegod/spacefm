@@ -338,7 +338,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
         pos = gtk_paned_get_position(GTK_PANED(file_browser->hpane));
         if (!main_window->fullscreen)
         {
-            g_free(set->x);
+            free(set->x);
             set->x = g_strdup_printf("%d", pos);
         }
         main_window->panel_slide_x[p - 1] = pos;
@@ -351,7 +351,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
         pos = gtk_paned_get_position(GTK_PANED(file_browser->side_vpane_top));
         if (!main_window->fullscreen)
         {
-            g_free(set->y);
+            free(set->y);
             set->y = g_strdup_printf("%d", pos);
         }
         main_window->panel_slide_y[p - 1] = pos;
@@ -360,7 +360,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
         pos = gtk_paned_get_position(GTK_PANED(file_browser->side_vpane_bottom));
         if (!main_window->fullscreen)
         {
-            g_free(set->s);
+            free(set->s);
             set->s = g_strdup_printf("%d", pos);
         }
         main_window->panel_slide_s[p - 1] = pos;
@@ -442,7 +442,7 @@ ptk_file_browser_select_file(PtkFileBrowser* file_browser, const char* path)
             }
         } while (gtk_tree_model_iter_next(model, &it));
     }
-    g_free(name);
+    free(name);
 }
 
 static void
@@ -516,8 +516,8 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
         trim_command = g_strstrip(command);
         if (trim_command[0] == '\0')
         {
-            g_free(command);
-            g_free(prefix);
+            free(command);
+            free(prefix);
             ptk_path_entry_help(entry, GTK_WIDGET(file_browser));
             gtk_editable_set_position(GTK_EDITABLE(entry), -1);
             return;
@@ -532,11 +532,11 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
         cwd = ptk_file_browser_get_cwd(file_browser);
         PtkFileTask* task;
         task = ptk_file_exec_new(task_name, cwd, GTK_WIDGET(file_browser), file_browser->task_view);
-        g_free(task_name);
+        free(task_name);
         // don't free cwd!
         task->task->exec_browser = file_browser;
         task->task->exec_command = replace_line_subs(trim_command);
-        g_free(command);
+        free(command);
         if (as_root)
             task->task->exec_as_user = "root";
         if (!as_task)
@@ -556,7 +556,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
         str = prefix;
         prefix = g_strdup_printf("%s%s", str.c_str(), is_space ? " " : "");
         gtk_entry_set_text(GTK_ENTRY(entry), prefix);
-        g_free(prefix);
+        free(prefix);
         gtk_editable_set_position(GTK_EDITABLE(entry), -1);
     }
     else if (!final_path_exists && text[0] == '%')
@@ -601,7 +601,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
                 dir_path = g_path_get_dirname(final_path.c_str());
                 if (!ztd::contains(dir_path, ptk_file_browser_get_cwd(file_browser)))
                 {
-                    g_free(file_browser->select_path);
+                    free(file_browser->select_path);
                     file_browser->select_path = g_strdup(final_path.c_str());
                     ptk_file_browser_chdir(file_browser,
                                            dir_path.c_str(),
@@ -920,7 +920,7 @@ ptk_file_browser_rebuild_toolbars(PtkFileBrowser* file_browser)
         rebuild_toolbox(nullptr, file_browser);
         char* disp_path = g_filename_display_name(ptk_file_browser_get_cwd(file_browser));
         gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), disp_path);
-        g_free(disp_path);
+        free(disp_path);
     }
     if (file_browser->side_toolbar)
         rebuild_side_toolbox(nullptr, file_browser);
@@ -1030,7 +1030,7 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
     xset_set_ob2(set, nullptr, set_radio);
 
     xset_add_menu(file_browser, menu, accel_group, desc);
-    g_free(desc);
+    free(desc);
     gtk_widget_show_all(menu);
     g_signal_connect(menu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
 }
@@ -1198,12 +1198,12 @@ ptk_file_browser_finalize(GObject* obj)
         g_object_unref(G_OBJECT(file_browser->file_list));
     }
 
-    g_free(file_browser->status_bar_custom);
-    g_free(file_browser->seek_name);
+    free(file_browser->status_bar_custom);
+    free(file_browser->seek_name);
     file_browser->seek_name = nullptr;
-    g_free(file_browser->book_set_name);
+    free(file_browser->book_set_name);
     file_browser->book_set_name = nullptr;
-    g_free(file_browser->select_path);
+    free(file_browser->select_path);
     file_browser->select_path = nullptr;
     for (unsigned int i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); i++)
     {
@@ -1698,7 +1698,7 @@ ptk_file_browser_update_tab_label(PtkFileBrowser* file_browser)
     }
     else
         gtk_label_set_width_chars(text, 30);
-    g_free(name);
+    free(name);
 }
 
 void
@@ -1709,7 +1709,7 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
     if (file_browser->select_path)
     {
         ptk_file_browser_select_file(file_browser, file_browser->select_path);
-        g_free(file_browser->select_path);
+        free(file_browser->select_path);
         file_browser->select_path = nullptr;
         return;
     }
@@ -1873,7 +1873,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
         if (Glib::str_has_prefix(path, "~/") || !g_strcmp0(path, "~"))
         {
             msg = g_strdup_printf("%s%s", vfs_user_home_dir().c_str(), path + 1);
-            g_free(path);
+            free(path);
             path = msg;
         }
     }
@@ -1889,8 +1889,8 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
                            "Error",
                            msg);
             if (path)
-                g_free(path);
-            g_free(msg);
+                free(path);
+            free(msg);
         }
         return false;
     }
@@ -1905,7 +1905,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                            "Error",
                            msg);
-            g_free(msg);
+            free(msg);
         }
         return false;
     }
@@ -1944,7 +1944,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
                 if (file_browser->curHistory && file_browser->curHistory->next)
                 {
                     /* clear old forward history */
-                    g_list_foreach(file_browser->curHistory->next, (GFunc)g_free, nullptr);
+                    g_list_foreach(file_browser->curHistory->next, (GFunc)free, nullptr);
                     g_list_free(file_browser->curHistory->next);
                     file_browser->curHistory->next = nullptr;
                 }
@@ -2019,7 +2019,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
     file_browser->dir = vfs_dir_get_by_path(path);
 
     if (!file_browser->curHistory || path != (char*)file_browser->curHistory->data)
-        g_free(path);
+        free(path);
 
     g_signal_emit(file_browser, signals[BEGIN_CHDIR_SIGNAL], 0);
 
@@ -2042,7 +2042,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
     if (!inhibit_focus)
         gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), disp_path);
 
-    g_free(disp_path);
+    free(disp_path);
 
     enable_toolbar(file_browser);
     return true;
@@ -2202,10 +2202,10 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
 
     char* val = g_strdup_printf("%d", col);
     xset_set_panel(file_browser->mypanel, "list_detailed", "x", val);
-    g_free(val);
+    free(val);
     val = g_strdup_printf("%d", file_browser->sort_type);
     xset_set_panel(file_browser->mypanel, "list_detailed", "y", val);
-    g_free(val);
+    free(val);
 }
 
 static void
@@ -2323,13 +2323,13 @@ ptk_file_browser_canon(PtkFileBrowser* file_browser, const char* path)
         char* dir_path = g_path_get_dirname(canon);
         if (dir_path && strcmp(dir_path, cwd))
         {
-            g_free(file_browser->select_path);
+            free(file_browser->select_path);
             file_browser->select_path = g_strdup(canon);
             ptk_file_browser_chdir(file_browser, dir_path, PTK_FB_CHDIR_ADD_HISTORY);
         }
         else
             ptk_file_browser_select_file(file_browser, canon);
-        g_free(dir_path);
+        free(dir_path);
         gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
     }
 }
@@ -2374,7 +2374,7 @@ ptk_file_browser_go_up(GtkWidget* item, PtkFileBrowser* file_browser)
     char* parent_dir = g_path_get_dirname(ptk_file_browser_get_cwd(file_browser));
     if (strcmp(parent_dir, ptk_file_browser_get_cwd(file_browser)))
         ptk_file_browser_chdir(file_browser, parent_dir, PTK_FB_CHDIR_ADD_HISTORY);
-    g_free(parent_dir);
+    free(parent_dir);
 }
 
 void
@@ -2578,7 +2578,7 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
         // key is all lowercase so do icase search
         icase = true;
     }
-    g_free(lower_key);
+    free(lower_key);
 
     // get model, treesel, and stop signals
     switch (file_browser->view_mode)
@@ -2628,7 +2628,7 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
             bool select = fnmatch(key, name, 0) == 0;
 
             if (icase)
-                g_free(name);
+                free(name);
 
             // do selection and scroll to first selected
             path = gtk_tree_model_get_path(GTK_TREE_MODEL(PTK_FILE_LIST(file_browser->file_list)),
@@ -2911,13 +2911,13 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const char* seek_dir,
     if (seek_dir && g_strcmp0(cwd, seek_dir))
     {
         // change dir
-        g_free(file_browser->seek_name);
+        free(file_browser->seek_name);
         file_browser->seek_name = g_strdup(seek_name);
         file_browser->inhibit_focus = true;
         if (!ptk_file_browser_chdir(file_browser, seek_dir, PTK_FB_CHDIR_ADD_HISTORY))
         {
             file_browser->inhibit_focus = false;
-            g_free(file_browser->seek_name);
+            free(file_browser->seek_name);
             file_browser->seek_name = nullptr;
         }
         // return here to allow dir to load
@@ -3203,9 +3203,9 @@ show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
         vfs_file_info_unref(file);
 
     if (file_path)
-        g_free(file_path);
+        free(file_path);
     if (dir_name)
-        g_free(dir_name);
+        free(dir_name);
 }
 
 /* invoke popup menu via shortcut key */
@@ -3377,7 +3377,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
         }
         if (file)
             vfs_file_info_unref(file);
-        g_free(file_path);
+        free(file_path);
         gtk_tree_path_free(tree_path);
     }
     else if (event->type == GDK_2BUTTON_PRESS && event->button == 1)
@@ -3502,7 +3502,7 @@ on_dir_tree_update_sel(PtkFileBrowser* file_browser)
             if (ptk_file_browser_chdir(file_browser, dir_path, PTK_FB_CHDIR_ADD_HISTORY))
                 gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), dir_path);
         }
-        g_free(dir_path);
+        free(dir_path);
     }
     return false;
 }
@@ -3596,7 +3596,7 @@ ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_brow
                 int width = gtk_tree_view_column_get_width(col);
                 if (width > 0)
                 {
-                    g_free(set->y);
+                    free(set->y);
                     set->y = g_strdup_printf("%d", width);
                     // LOG_INFO("        {}\t{}", width, title);
                 }
@@ -3632,7 +3632,7 @@ on_folder_view_columns_changed(GtkTreeView* view, PtkFileBrowser* file_browser)
         {
             // save column position
             XSet* set = xset_get_panel(file_browser->mypanel, column_names[j]);
-            g_free(set->x);
+            free(set->x);
             set->x = g_strdup_printf("%d", i);
         }
     }
@@ -3681,7 +3681,7 @@ folder_view_search_equal(GtkTreeModel* model, int col, const char* key, GtkTreeI
     {
         char* key2 = g_strdup_printf("*%s*", key);
         no_match = fnmatch(key2, name, 0) != 0;
-        g_free(key2);
+        free(key2);
     }
     else
     {
@@ -3704,10 +3704,10 @@ folder_view_search_equal(GtkTreeModel* model, int col, const char* key, GtkTreeI
             no_match = !g_str_has_suffix(name, keyp);
         else
             no_match = !strstr(name, key);
-        g_free(key2);
+        free(key2);
     }
-    g_free(lower_name);
-    g_free(lower_key);
+    free(lower_name);
+    free(lower_key);
     return no_match; // return false for match
 }
 
@@ -4177,7 +4177,7 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
     else
     {
         file_browser->busy = true;
-        g_free(file_browser->select_path);
+        free(file_browser->select_path);
         file_browser->select_path = g_strdup(cursor_path);
     }
     g_signal_connect(file_browser->dir,
@@ -4185,7 +4185,7 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
                      G_CALLBACK(on_dir_file_listed),
                      file_browser);
 
-    g_free(cursor_path);
+    free(cursor_path);
 }
 
 unsigned int
@@ -4297,7 +4297,7 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, int x, int y)
                                 {
                                     char* old_dest = dest_path;
                                     dest_path = g_file_read_link( old_dest, nullptr );
-                                    g_free( old_dest );
+                                    free( old_dest );
                                 }
                 */
             }
@@ -4368,7 +4368,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                                 {
                                     // different devices - store source device
                                     file_browser->drag_source_dev = statbuf.st_dev;
-                                    g_free(file_path);
+                                    free(file_path);
                                     break;
                                 }
                                 else if (file_browser->drag_source_inode == 0)
@@ -4379,10 +4379,10 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                                     {
                                         file_browser->drag_source_inode = statbuf.st_ino;
                                     }
-                                    g_free(src_dir);
+                                    free(src_dir);
                                 }
                             }
-                            g_free(file_path);
+                            free(file_path);
                         }
                     }
                     if (file_browser->drag_source_dev != dest_dev ||
@@ -4396,7 +4396,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     // stat failed
                     gdk_drag_status(drag_context, GDK_ACTION_COPY, time);
 
-                g_free(dest_dir);
+                free(dest_dir);
                 g_strfreev(list);
                 file_browser->pending_drag_status = false;
                 return;
@@ -4457,7 +4457,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                         }
                         g_list_foreach(files, (GFunc)g_free, nullptr);
                         g_list_free(files);
-                        g_free(dest_dir);
+                        free(dest_dir);
                         return;
                     }
                     else /* Accept the drop and perform file actions */
@@ -4471,12 +4471,12 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                         ptk_file_task_run(task);
                     }
                 }
-                g_free(dest_dir);
+                free(dest_dir);
                 gtk_drag_finish(drag_context, true, false, time);
                 return;
             }
         }
-        g_free(dest_dir);
+        free(dest_dir);
     }
 
     /* If we are only getting drag status, not finished. */
@@ -4515,9 +4515,9 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
                                      vfs_file_info_get_name(file),
                                      nullptr);
         char* uri = g_filename_to_uri(full_path, nullptr, nullptr);
-        g_free(full_path);
+        free(full_path);
         g_string_append(uri_list, uri);
-        g_free(uri);
+        free(uri);
 
         g_string_append(uri_list, "\n");
     }
@@ -5004,7 +5004,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
                             "Invalid Destination",
                             GTK_BUTTONS_OK,
                             "Destination same as source");
-            g_free(dest_dir);
+            free(dest_dir);
             return;
         }
 
@@ -5028,7 +5028,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
                               GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                               file_browser->task_view);
         ptk_file_task_run(task);
-        g_free(dest_dir);
+        free(dest_dir);
     }
     else
     {
@@ -5096,7 +5096,7 @@ ptk_file_browser_file_properties(PtkFileBrowser* file_browser, int page)
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
     ptk_show_file_properties(GTK_WINDOW(parent), dir_name ? dir_name : cwd, sel_files, page);
     vfs_file_info_list_free(sel_files);
-    g_free(dir_name);
+    free(dir_name);
 }
 
 void
@@ -5179,7 +5179,7 @@ on_dir_tree_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrowser* f
                                   0,
                                   file_path,
                                   PTK_OPEN_NEW_TAB);
-                    g_free(file_path);
+                    free(file_path);
                     vfs_file_info_unref(file);
                 }
             }
@@ -5321,7 +5321,7 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, const char* setnam
         val = g_strdup_printf("%d", set->b == XSET_B_TRUE ? XSET_B_FALSE : XSET_B_TRUE);
         xset_set_panel(panel, "sort_extra", "z", val);
     }
-    g_free(val);
+    free(val);
     ptk_file_list_sort(list);
 }
 
@@ -5857,7 +5857,7 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser, 
     PtkFileTask* task =
         ptk_file_exec_new(set->menu_label, cwd, GTK_WIDGET(file_browser), file_browser->task_view);
     task->task->exec_command = g_strdup_printf("%s %s %s", prog, cmd, file_paths.c_str());
-    g_free(cmd);
+    free(cmd);
     task->task->exec_browser = file_browser;
     task->task->exec_sync = true;
     task->task->exec_show_error = true;
@@ -6000,7 +6000,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
             xname[1] = '\0';
             i = strtol(xname, nullptr, 10);
             xname[1] = '_';
-            g_free(xname);
+            free(xname);
         }
         // LOG_INFO("ACTION panelN={}  {}", i, set->name[5]);
         if (i > 0 && i < 5)

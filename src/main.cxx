@@ -344,7 +344,7 @@ main(int argc, char* argv[])
             int ret = send_socket_command(argc, argv, &reply);
             if (reply && reply[0])
                 fmt::print("{}", reply);
-            g_free(reply);
+            free(reply);
             std::exit(ret);
         }
     }
@@ -450,7 +450,7 @@ open_file(const char* path)
     if (app_name)
     {
         opened = vfs_file_info_open_file(file, path, &err);
-        g_free(app_name);
+        free(app_name);
     }
     else
     {
@@ -464,7 +464,7 @@ open_file(const char* path)
             open_files.push_back(open_file);
 
             opened = desktop.open_files(vfs_current_dir(), open_files, &err);
-            g_free(app_name);
+            free(app_name);
         }
         else
             opened = true;

@@ -482,7 +482,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
 
         name = g_strndup(desktop_id, strlen(desktop_id) - 8);
         cust_template = g_strdup_printf("%s-usercustom-%%d.desktop", name);
-        g_free(name);
+        free(name);
 
         file_content = kf->to_data();
     }
@@ -503,7 +503,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
             *p = '\0';
         file_content = g_strdup_printf(file_templ, name, desktop_id, mime_type);
         cust_template = g_strdup_printf("%s-usercreated-%%d.desktop", name);
-        g_free(name);
+        free(name);
     }
 
     /* generate unique file name */
@@ -518,7 +518,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
         cust = g_strdup_printf(cust_template, i);
         path = Glib::build_filename(dir, cust); /* test if the filename already exists */
         if (std::filesystem::exists(path))
-            g_free(cust);
+            free(cust);
         else /* this generated filename can be used */
             break;
     }
@@ -551,7 +551,7 @@ mime_type_add_action(const char* type, const char* desktop_id, char** custom_des
     if (custom_desktop)
         *custom_desktop = cust;
     else
-        g_free(cust);
+        free(cust);
 }
 
 static char*
@@ -617,12 +617,12 @@ _locate_desktop_file(const char* dir, const char* unused, const void* desktop_id
 
     if (found)
         return path;
-    g_free(path);
+    free(path);
 
     // sfm 0.8.7 some desktop files listed by the app chooser are in subdirs
     path = g_build_filename(dir, "applications", nullptr);
     sep = _locate_desktop_file_recursive(path, (const char*)desktop_id, true);
-    g_free(path);
+    free(path);
     return sep;
 }
 
@@ -836,7 +836,7 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
                 // copy other apps to new list preserving order
                 str = new_action;
                 new_action = g_strdup_printf("%s%s;", str ? str : "", apps.at(i).c_str());
-                g_free(str);
+                free(str);
             }
         }
 
@@ -855,7 +855,7 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
                     else // if ( action == MIME_TYPE_ACTION_APPEND )
                         new_action =
                             g_strdup_printf("%s%s;", new_action ? new_action : "", desktop_id);
-                    g_free(str);
+                    free(str);
                 }
                 if (new_action)
                     kf->set_string(groups[k], type, new_action);
@@ -873,7 +873,7 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
                     // add to end of Removed list
                     str = new_action;
                     new_action = g_strdup_printf("%s%s;", new_action ? new_action : "", desktop_id);
-                    g_free(str);
+                    free(str);
                 }
                 if (new_action)
                     kf->set_string(groups[k], type, new_action);
@@ -882,7 +882,7 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
                 data_changed = true;
             }
         }
-        g_free(new_action);
+        free(new_action);
     }
 
     // save updated mimeapps.list

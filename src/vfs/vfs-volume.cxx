@@ -237,9 +237,9 @@ sysfs_get_double(const char* dir, const char* attribute)
     if (g_file_get_contents(filename, &contents, nullptr, nullptr))
     {
         result = atof(contents);
-        g_free(contents);
+        free(contents);
     }
-    g_free(filename);
+    free(filename);
 
     return result;
 }
@@ -253,7 +253,7 @@ sysfs_get_string(const char* dir, const char* attribute)
     {
         result = g_strdup("");
     }
-    g_free(filename);
+    free(filename);
 
     return result;
 }
@@ -267,9 +267,9 @@ sysfs_get_int(const char* dir, const char* attribute)
     if (g_file_get_contents(filename, &contents, nullptr, nullptr))
     {
         result = strtol(contents, nullptr, 0);
-        g_free(contents);
+        free(contents);
     }
-    g_free(filename);
+    free(filename);
 
     return result;
 }
@@ -283,9 +283,9 @@ sysfs_get_uint64(const char* dir, const char* attribute)
     if (g_file_get_contents(filename, &contents, nullptr, nullptr))
     {
         result = strtoll(contents, nullptr, 0);
-        g_free(contents);
+        free(contents);
     }
-    g_free(filename);
+    free(filename);
 
     return result;
 }
@@ -299,7 +299,7 @@ sysfs_file_exists(const char* dir, const char* attribute)
     {
         result = true;
     }
-    g_free(filename);
+    free(filename);
 
     return result;
 }
@@ -330,9 +330,9 @@ sysfs_resolve_link(const char* sysfs_path, const char* name)
             // g_debug ("resolved_path='%s'", resolved_path);
             found_it = true;
         }
-        g_free(absolute_path);
+        free(absolute_path);
     }
-    g_free(full_path);
+    free(full_path);
 
     if (found_it)
         return g_strdup(resolved_path);
@@ -396,7 +396,7 @@ info_drive_connection(device_t* device)
         if (p != nullptr)
         {
             char* subsystem = g_path_get_basename(p);
-            g_free(p);
+            free(p);
 
             if (!strcmp(subsystem, "scsi"))
             {
@@ -418,7 +418,7 @@ info_drive_connection(device_t* device)
                     {
                         device->drive_vendor = _dupv8(vendor);
                     }
-                    g_free(vendor);
+                    free(vendor);
                 }
 
                 model = sysfs_get_string(s, "model");
@@ -430,7 +430,7 @@ info_drive_connection(device_t* device)
                     {
                         device->drive_model = _dupv8(model);
                     }
-                    g_free(model);
+                    free(model);
                 }
 
                 /* TODO: need to improve this code; we probably need the kernel to export more
@@ -495,7 +495,7 @@ info_drive_connection(device_t* device)
                     {
                         device->drive_model = _dupv8(model);
                     }
-                    g_free(model);
+                    free(model);
                 }
 
                 char* serial = sysfs_get_string(s, "serial");
@@ -508,7 +508,7 @@ info_drive_connection(device_t* device)
                         /* this is formatted as a hexnumber; drop the leading 0x */
                         device->drive_serial = _dupv8(serial + 2);
                     }
-                    g_free(serial);
+                    free(serial);
                 }
 
                 /* TODO: use hwrev and fwrev files? */
@@ -521,7 +521,7 @@ info_drive_connection(device_t* device)
                     {
                         device->drive_revision = _dupv8(revision);
                     }
-                    g_free(revision);
+                    free(revision);
                 }
 
                 /* TODO: interface speed; the kernel driver knows; would be nice
@@ -540,7 +540,7 @@ info_drive_connection(device_t* device)
                 }
             }
 
-            g_free(subsystem);
+            free(subsystem);
         }
 
         /* advance up the chain */
@@ -561,7 +561,7 @@ info_drive_connection(device_t* device)
         device->drive_connection_speed = connection_speed;
     }
 
-    g_free(s);
+    free(s);
 }
 
 static const struct
@@ -758,7 +758,7 @@ info_drive_properties(device_t* device)
         {
             g_ptr_array_add(media_compat_array, (void*)"flash_sdhc");
         }
-        g_free(type);
+        free(type);
     }
     g_ptr_array_sort(media_compat_array, (GCompareFunc)ptr_str_array_compare);
     g_ptr_array_add(media_compat_array, nullptr);
@@ -814,7 +814,7 @@ info_device_properties(device_t* device)
     if (!device->native_path || !device->devnode || device->devnum == 0)
     {
         if (device->native_path)
-            g_free(device->native_path);
+            free(device->native_path);
         device->native_path = nullptr;
         device->devnum = 0;
         return;
@@ -1033,10 +1033,10 @@ info_mount_points(device_t* device)
                 mounts = g_list_prepend(mounts, mount_point);
             }
             else
-                g_free(mount_point);
+                free(mount_point);
         }
     }
-    g_free(contents);
+    free(contents);
     g_strfreev(lines);
 
     if (mounts)
@@ -1052,9 +1052,9 @@ info_mount_points(device_t* device)
         {
             old_points = points;
             points = g_strdup_printf("%s, %s", old_points, (char*)l->data);
-            g_free(old_points);
+            free(old_points);
         }
-        g_list_foreach(mounts, (GFunc)g_free, nullptr);
+        g_list_foreach(mounts, (GFunc)free, nullptr);
         g_list_free(mounts);
         return points;
     }
@@ -1124,10 +1124,10 @@ info_partition_table(device_t* device)
     if (!is_partition_table)
     {
         if (device->partition_table_scheme)
-            g_free(device->partition_table_scheme);
+            free(device->partition_table_scheme);
         device->partition_table_scheme = nullptr;
         if (device->partition_table_count)
-            g_free(device->partition_table_count);
+            free(device->partition_table_count);
         device->partition_table_count = nullptr;
     }
 }
@@ -1257,47 +1257,47 @@ device_free(device_t* device)
     if (!device)
         return;
 
-    g_free(device->native_path);
-    g_free(device->mount_points);
-    g_free(device->devnode);
+    free(device->native_path);
+    free(device->mount_points);
+    free(device->devnode);
 
-    g_free(device->device_presentation_hide);
-    g_free(device->device_presentation_nopolicy);
-    g_free(device->device_presentation_name);
-    g_free(device->device_presentation_icon_name);
-    g_free(device->device_automount_hint);
-    g_free(device->device_by_id);
-    g_free(device->id_usage);
-    g_free(device->id_type);
-    g_free(device->id_version);
-    g_free(device->id_uuid);
-    g_free(device->id_label);
+    free(device->device_presentation_hide);
+    free(device->device_presentation_nopolicy);
+    free(device->device_presentation_name);
+    free(device->device_presentation_icon_name);
+    free(device->device_automount_hint);
+    free(device->device_by_id);
+    free(device->id_usage);
+    free(device->id_type);
+    free(device->id_version);
+    free(device->id_uuid);
+    free(device->id_label);
 
-    g_free(device->drive_vendor);
-    g_free(device->drive_model);
-    g_free(device->drive_revision);
-    g_free(device->drive_serial);
-    g_free(device->drive_wwn);
-    g_free(device->drive_connection_interface);
-    g_free(device->drive_media_compatibility);
-    g_free(device->drive_media);
+    free(device->drive_vendor);
+    free(device->drive_model);
+    free(device->drive_revision);
+    free(device->drive_serial);
+    free(device->drive_wwn);
+    free(device->drive_connection_interface);
+    free(device->drive_media_compatibility);
+    free(device->drive_media);
 
-    g_free(device->partition_scheme);
-    g_free(device->partition_number);
-    g_free(device->partition_type);
-    g_free(device->partition_label);
-    g_free(device->partition_uuid);
-    g_free(device->partition_flags);
-    g_free(device->partition_offset);
-    g_free(device->partition_size);
-    g_free(device->partition_alignment_offset);
+    free(device->partition_scheme);
+    free(device->partition_number);
+    free(device->partition_type);
+    free(device->partition_label);
+    free(device->partition_uuid);
+    free(device->partition_flags);
+    free(device->partition_offset);
+    free(device->partition_size);
+    free(device->partition_alignment_offset);
 
-    g_free(device->partition_table_scheme);
-    g_free(device->partition_table_count);
+    free(device->partition_table_scheme);
+    free(device->partition_table_count);
 
-    g_free(device->optical_disc_num_tracks);
-    g_free(device->optical_disc_num_audio_tracks);
-    g_free(device->optical_disc_num_sessions);
+    free(device->optical_disc_num_tracks);
+    free(device->optical_disc_num_audio_tracks);
+    free(device->optical_disc_num_sessions);
     g_slice_free(device_t, device);
 }
 
@@ -1586,7 +1586,7 @@ parse_mounts(bool report)
         mount_point = g_strcompress(encoded_mount_point);
         if (!mount_point || mount_point[0] == '\0')
         {
-            g_free(mount_point);
+            free(mount_point);
             continue;
         }
 
@@ -1625,7 +1625,7 @@ parse_mounts(bool report)
                     {
                         // is block device with subdir mount - ignore
                         udev_device_unref(udevice);
-                        g_free(mount_point);
+                        free(mount_point);
                         continue;
                     }
                 }
@@ -1649,7 +1649,7 @@ parse_mounts(bool report)
                     if (subdir_mount)
                     {
                         // is block device with subdir mount - ignore
-                        g_free(mount_point);
+                        free(mount_point);
                         continue;
                     }
                     // add
@@ -1670,9 +1670,9 @@ parse_mounts(bool report)
             devmount->mounts = g_list_prepend(devmount->mounts, mount_point);
         }
         else
-            g_free(mount_point);
+            free(mount_point);
     }
-    g_free(contents);
+    free(contents);
     g_strfreev(lines);
     // LOG_INFO("LINES DONE");
     // translate each mount points list to string
@@ -1690,9 +1690,9 @@ parse_mounts(bool report)
         {
             old_points = points;
             points = g_strdup_printf("%s, %s", old_points, (char*)m->data);
-            g_free(old_points);
+            free(old_points);
         }
-        g_list_foreach(devmount->mounts, (GFunc)g_free, nullptr);
+        g_list_foreach(devmount->mounts, (GFunc)free, nullptr);
         g_list_free(devmount->mounts);
         devmount->mounts = nullptr;
         devmount->mount_points = points;
@@ -1718,8 +1718,8 @@ parse_mounts(bool report)
                     // LOG_INFO("    freed");
                     // no change to mount points, so remove from old list
                     devmount = static_cast<devmount_t*>(found->data);
-                    g_free(devmount->mount_points);
-                    g_free(devmount->fstype);
+                    free(devmount->mount_points);
+                    free(devmount->fstype);
                     devmounts = g_list_remove(devmounts, devmount);
                     g_slice_free(devmount_t, devmount);
                 }
@@ -1751,8 +1751,8 @@ parse_mounts(bool report)
         }
         else
         {
-            g_free(devmount->mount_points);
-            g_free(devmount->fstype);
+            free(devmount->mount_points);
+            free(devmount->fstype);
             g_slice_free(devmount_t, devmount);
         }
     }
@@ -1778,7 +1778,7 @@ parse_mounts(bool report)
                 LOG_INFO("mount changed: {}", devnode);
                 if ((volume = vfs_volume_read_by_device(udevice)))
                     vfs_volume_device_added(volume, true); // frees volume if needed
-                g_free(devnode);
+                free(devnode);
             }
             else
             {
@@ -1796,8 +1796,8 @@ parse_mounts(bool report)
                     vfs_volume_nonblock_removed(devnum);
             }
             udev_device_unref(udevice);
-            g_free(devmount->mount_points);
-            g_free(devmount->fstype);
+            free(devmount->mount_points);
+            free(devmount->fstype);
             g_slice_free(devmount_t, devmount);
         }
         g_list_free(changed);
@@ -1816,8 +1816,8 @@ free_devmounts()
     for (l = devmounts; l; l = l->next)
     {
         devmount = static_cast<devmount_t*>(l->data);
-        g_free(devmount->mount_points);
-        g_free(devmount->fstype);
+        free(devmount->mount_points);
+        free(devmount->fstype);
         g_slice_free(devmount_t, devmount);
     }
     g_list_free(devmounts);
@@ -1943,7 +1943,7 @@ cb_udev_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
                 vfs_volume_device_removed(udevice);
             // what to do for move action?
         }
-        g_free(devnode);
+        free(devnode);
         udev_device_unref(udevice);
     }
     return true;
@@ -1952,10 +1952,10 @@ cb_udev_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
 static void
 vfs_free_volume_members(VFSVolume* volume)
 {
-    g_free(volume->device_file);
-    g_free(volume->udi);
-    g_free(volume->mount_point);
-    g_free(volume->disp_name);
+    free(volume->device_file);
+    free(volume->udi);
+    free(volume->mount_point);
+    free(volume->disp_name);
 }
 
 void
@@ -2060,7 +2060,7 @@ vfs_volume_set_info(VFSVolume* volume)
             {
                 if (volume->fs_type && volume->fs_type[0] == '\0')
                 {
-                    g_free(volume->fs_type);
+                    free(volume->fs_type);
                     volume->fs_type = nullptr;
                 }
                 if (!volume->fs_type)
@@ -2168,12 +2168,12 @@ vfs_volume_set_info(VFSVolume* volume)
 
     volume->disp_name = g_filename_display_name(parameter.c_str());
 
-    g_free(disp_size);
-    g_free(disp_mount);
-    g_free(disp_device);
-    g_free(disp_fstype);
-    g_free(disp_id);
-    g_free(disp_devnum);
+    free(disp_size);
+    free(disp_mount);
+    free(disp_device);
+    free(disp_fstype);
+    free(disp_id);
+    free(disp_devnum);
 
     if (!volume->udi)
         volume->udi = g_strdup(volume->device_file);
@@ -2297,7 +2297,7 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
         // read from a custom mtab file, eg ~/.mtab.fuseiso
         if (!g_file_get_contents(mtab_file, &contents, nullptr, nullptr))
         {
-            g_free(mtab_path);
+            free(mtab_path);
             return false;
         }
     }
@@ -2307,11 +2307,11 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
         {
             LOG_WARN("Error reading {}: {}", mtab_path, error->message);
             g_error_free(error);
-            g_free(mtab_path);
+            free(mtab_path);
             return false;
         }
     }
-    g_free(mtab_path);
+    free(mtab_path);
     lines = g_strsplit(contents, "\n", 0);
     unsigned int n;
     for (n = 0; lines[n] != nullptr; n++)
@@ -2335,9 +2335,9 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
             ret = true;
             break;
         }
-        g_free(point);
+        free(point);
     }
-    g_free(contents);
+    free(contents);
     g_strfreev(lines);
     return ret;
 }
@@ -2425,7 +2425,7 @@ split_network_url(const char* url, netmount_t** netmount)
         {
             str2 = nm->fstype;
             nm->fstype = g_strdup(str + 1);
-            g_free(str2);
+            free(str2);
         }
     }
     else if ((str = strstr(xurl, ":/")))
@@ -2508,8 +2508,8 @@ split_network_url(const char* url, netmount_t** netmount)
             nm->host = g_strdup(xurl);
         }
     }
-    g_free(trim_url);
-    g_free(orig_url);
+    free(trim_url);
+    free(orig_url);
 
     // check host
     if (!nm->host)
@@ -2527,16 +2527,16 @@ split_network_url(const char* url, netmount_t** netmount)
     return ret;
 
 _net_free:
-    g_free(nm->url);
-    g_free(nm->fstype);
-    g_free(nm->host);
-    g_free(nm->ip);
-    g_free(nm->port);
-    g_free(nm->user);
-    g_free(nm->pass);
-    g_free(nm->path);
+    free(nm->url);
+    free(nm->fstype);
+    free(nm->host);
+    free(nm->ip);
+    free(nm->port);
+    free(nm->user);
+    free(nm->pass);
+    free(nm->path);
     g_slice_free(netmount_t, nm);
-    g_free(orig_url);
+    free(orig_url);
     return 0;
 }
 
@@ -2586,12 +2586,12 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         volume->inhibit_auto = false;
 
         // free unused netmount
-        g_free(netmount->ip);
-        g_free(netmount->port);
-        g_free(netmount->user);
-        g_free(netmount->pass);
-        g_free(netmount->path);
-        g_free(netmount->fstype);
+        free(netmount->ip);
+        free(netmount->port);
+        free(netmount->user);
+        free(netmount->pass);
+        free(netmount->path);
+        free(netmount->fstype);
         g_slice_free(netmount_t, netmount);
     }
     else if (!g_strcmp0(mtab_fstype, "fuse.fuseiso"))
@@ -2606,11 +2606,11 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         if (path_is_mounted_mtab(mtab_file.c_str(), point, &new_name, nullptr) && new_name &&
             new_name[0])
         {
-            g_free(name);
+            free(name);
             name = new_name;
             new_name = nullptr;
         }
-        g_free(new_name);
+        free(new_name);
 
         // create a volume
         volume = g_slice_new0(VFSVolume);
@@ -2646,7 +2646,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
                 // in Auto-Mount|Mount Dirs ?
                 char* mount_parent = ptk_location_view_get_mount_point_dir(nullptr);
                 keep = Glib::str_has_prefix(point, mount_parent);
-                g_free(mount_parent);
+                free(mount_parent);
             }
         }
         // mount point must be readable
@@ -2672,9 +2672,9 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         }
         else
         {
-            g_free(name);
-            g_free(mtab_fstype);
-            g_free(point);
+            free(name);
+            free(mtab_fstype);
+            free(point);
             return nullptr;
         }
     }
@@ -2890,7 +2890,7 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
                     if (mount_point)
                         *mount_point = point_dir;
                     else
-                        g_free(point_dir);
+                        free(point_dir);
                 }
                 else
                 {
@@ -2956,7 +2956,7 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
                     if (mount_point)
                         *mount_point = point_dir;
                     else
-                        g_free(point_dir);
+                        free(point_dir);
                 }
                 else
                 {
@@ -3050,14 +3050,14 @@ vfs_volume_is_automount(VFSVolume* vol)
                 test = g_strdup_printf(" -%s ", value);
             if (strstr(showhidelist, test))
             {
-                g_free(test);
-                g_free(showhidelist);
+                free(test);
+                free(showhidelist);
                 return (j == 0);
             }
-            g_free(test);
+            free(test);
         }
     }
-    g_free(showhidelist);
+    free(showhidelist);
 
     // udisks no?
     if (vol->nopolicy && !xset_get_b("dev_ignore_udisks_nopolicy"))
@@ -3185,14 +3185,14 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
                                                  netmount,
                                                  run_in_terminal,
                                                  nullptr);
-                g_free(netmount->url);
-                g_free(netmount->fstype);
-                g_free(netmount->host);
-                g_free(netmount->ip);
-                g_free(netmount->port);
-                g_free(netmount->user);
-                g_free(netmount->pass);
-                g_free(netmount->path);
+                free(netmount->url);
+                free(netmount->fstype);
+                free(netmount->host);
+                free(netmount->ip);
+                free(netmount->port);
+                free(netmount->user);
+                free(netmount->pass);
+                free(netmount->path);
                 g_slice_free(netmount_t, netmount);
 
                 // igtodo is this redundant?
@@ -3344,7 +3344,7 @@ vfs_volume_get_mount_options(VFSVolume* vol, char* options)
                 newoptr[1] = '\0';
                 newoptr++;
             }
-            g_free(test);
+            free(test);
         }
         else if ((plus = strchr(single, '+')))
         {
@@ -3366,16 +3366,16 @@ vfs_volume_get_mount_options(VFSVolume* vol, char* options)
                     newoptr[1] = '\0';
                     newoptr++;
                 }
-                g_free(test);
+                free(test);
             }
-            g_free(singlefs);
+            free(singlefs);
         }
-        g_free(single);
+        free(single);
         ptr = comma + 1;
     }
     newoptr--;
     newoptr[0] = '\0';
-    g_free(opts);
+    free(opts);
     if (newo[1] == '\0')
         return nullptr;
     else
@@ -3387,7 +3387,7 @@ vfs_volume_get_mount_command(VFSVolume* vol, char* default_options, bool* run_in
 {
     char* options = vfs_volume_get_mount_options(vol, default_options);
     char* command = vfs_volume_device_mount_cmd(vol, options, run_in_terminal);
-    g_free(options);
+    free(options);
     return command;
 }
 
@@ -3484,7 +3484,7 @@ vfs_volume_autoexec(VFSVolume* vol)
                 }
                 command = xset_get_s("dev_exec_fs");
             }
-            g_free(path);
+            free(path);
         }
     }
     vfs_volume_exec(vol, command);
@@ -3501,7 +3501,7 @@ vfs_volume_autounmount(VFSVolume* vol)
     {
         LOG_INFO("Auto-Unmount: {}", line);
         exec_task(line, run_in_terminal);
-        g_free(line);
+        free(line);
     }
     else
         LOG_INFO("Auto-Unmount: error: no unmount command available");
@@ -3525,7 +3525,7 @@ vfs_volume_automount(VFSVolume* vol)
     {
         LOG_INFO("Automount: {}", line);
         exec_task(line, run_in_terminal);
-        g_free(line);
+        free(line);
     }
     else
         LOG_INFO("Automount: error: no mount command available");
@@ -3626,7 +3626,7 @@ vfs_volume_device_added(VFSVolume* volume, bool automount)
             if (changed_mount_point)
             {
                 main_window_refresh_all_tabs_matching(changed_mount_point);
-                g_free(changed_mount_point);
+                free(changed_mount_point);
             }
             return;
         }
@@ -3720,11 +3720,11 @@ unmount_if_mounted(VFSVolume* vol)
                                  vol->device_file,
                                  mtab,
                                  str);
-    g_free(str);
-    g_free(mtab_path);
+    free(str);
+    free(mtab_path);
     LOG_INFO("Unmount-If-Mounted: {}", line);
     exec_task(line, run_in_terminal);
-    g_free(line);
+    free(line);
 }
 
 static bool
@@ -4140,14 +4140,14 @@ get_device_parent(dev_t dev)
     if (!native_path || !sysfs_file_exists(native_path, "start"))
     {
         // not a partition if no "start"
-        g_free(native_path);
+        free(native_path);
         return 0;
     }
 
     char* parent = g_path_get_dirname(native_path);
-    g_free(native_path);
+    free(native_path);
     udevice = udev_device_new_from_syspath(udev, parent);
-    g_free(parent);
+    free(parent);
     if (!udevice)
         return 0;
     dev_t retdev = udev_device_get_devnum(udevice);

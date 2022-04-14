@@ -755,7 +755,7 @@ ptk_file_list_sort(PtkFileList* list)
     GtkTreePath* path = gtk_tree_path_new();
     gtk_tree_model_rows_reordered(GTK_TREE_MODEL(list), path, nullptr, new_order);
     gtk_tree_path_free(path);
-    g_free(new_order);
+    free(new_order);
 }
 
 bool

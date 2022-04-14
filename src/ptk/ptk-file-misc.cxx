@@ -157,7 +157,7 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTr
 
         int ret = gtk_dialog_run(GTK_DIALOG(dlg));
         gtk_widget_destroy(dlg);
-        g_free(msg);
+        free(msg);
         if (ret != GTK_RESPONSE_YES)
             return;
     }
@@ -202,7 +202,7 @@ ptk_trash_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTre
 
         int ret = gtk_dialog_run(GTK_DIALOG(dlg));
         gtk_widget_destroy(dlg);
-        g_free(msg);
+        free(msg);
         if (ret != GTK_RESPONSE_YES)
             return;
     }
@@ -373,7 +373,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         name = gtk_text_buffer_get_text(mset->buf_name, &siter, &iter, false);
         if (name[0] == '\0')
         {
-            g_free(name);
+            free(name);
             name = nullptr;
         }
         ext = (char*)gtk_entry_get_text(mset->entry_ext);
@@ -394,7 +394,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         else
             full_name = g_strdup("");
         if (name)
-            g_free(name);
+            free(name);
         gtk_text_buffer_set_text(mset->buf_full_name, full_name, -1);
 
         // update full_path
@@ -403,15 +403,15 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         path = gtk_text_buffer_get_text(mset->buf_path, &siter, &iter, false);
         if (!strcmp(path, "."))
         {
-            g_free(path);
+            free(path);
             path = g_path_get_dirname(mset->full_path);
         }
         else if (!strcmp(path, ".."))
         {
-            g_free(path);
+            free(path);
             cwd = g_path_get_dirname(mset->full_path);
             path = g_path_get_dirname(cwd);
-            g_free(cwd);
+            free(cwd);
         }
 
         if (path[0] == '/')
@@ -420,11 +420,11 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         {
             cwd = g_path_get_dirname(mset->full_path);
             full_path = g_build_filename(cwd, path, full_name, nullptr);
-            g_free(cwd);
+            free(cwd);
         }
         gtk_text_buffer_set_text(mset->buf_full_path, full_path, -1);
 
-        g_free(full_name);
+        free(full_name);
     }
     else if (widget == GTK_WIDGET(mset->buf_full_name))
     {
@@ -449,15 +449,15 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         path = gtk_text_buffer_get_text(mset->buf_path, &siter, &iter, false);
         if (!strcmp(path, "."))
         {
-            g_free(path);
+            free(path);
             path = g_path_get_dirname(mset->full_path);
         }
         else if (!strcmp(path, ".."))
         {
-            g_free(path);
+            free(path);
             cwd = g_path_get_dirname(mset->full_path);
             path = g_path_get_dirname(cwd);
-            g_free(cwd);
+            free(cwd);
         }
 
         if (path[0] == '/')
@@ -466,11 +466,11 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         {
             cwd = g_path_get_dirname(mset->full_path);
             full_path = g_build_filename(cwd, path, full_name, nullptr);
-            g_free(cwd);
+            free(cwd);
         }
         gtk_text_buffer_set_text(mset->buf_full_path, full_path, -1);
 
-        g_free(full_name);
+        free(full_name);
     }
     else if (widget == GTK_WIDGET(mset->buf_path))
     {
@@ -485,15 +485,15 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         path = gtk_text_buffer_get_text(mset->buf_path, &siter, &iter, false);
         if (!strcmp(path, "."))
         {
-            g_free(path);
+            free(path);
             path = g_path_get_dirname(mset->full_path);
         }
         else if (!strcmp(path, ".."))
         {
-            g_free(path);
+            free(path);
             cwd = g_path_get_dirname(mset->full_path);
             path = g_path_get_dirname(cwd);
-            g_free(cwd);
+            free(cwd);
         }
 
         if (path[0] == '/')
@@ -502,11 +502,11 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         {
             cwd = g_path_get_dirname(mset->full_path);
             full_path = g_build_filename(cwd, path, full_name, nullptr);
-            g_free(cwd);
+            free(cwd);
         }
         gtk_text_buffer_set_text(mset->buf_full_path, full_path, -1);
 
-        g_free(full_name);
+        free(full_name);
     }
     else // if ( widget == GTK_WIDGET( mset->buf_full_path ) )
     {
@@ -526,23 +526,23 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         path = g_path_get_dirname(full_path);
         if (!strcmp(path, "."))
         {
-            g_free(path);
+            free(path);
             path = g_path_get_dirname(mset->full_path);
         }
         else if (!strcmp(path, ".."))
         {
-            g_free(path);
+            free(path);
             cwd = g_path_get_dirname(mset->full_path);
             path = g_path_get_dirname(cwd);
-            g_free(cwd);
+            free(cwd);
         }
         else if (path[0] != '/')
         {
             cwd = g_path_get_dirname(mset->full_path);
             str = path;
             path = g_build_filename(cwd, str, nullptr);
-            g_free(str);
-            g_free(cwd);
+            free(str);
+            free(cwd);
         }
         std::string name;
         std::string ext;
@@ -574,15 +574,15 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
             cwd = g_path_get_dirname(mset->full_path);
             str = full_path;
             full_path = g_build_filename(cwd, str, nullptr);
-            g_free(str);
-            g_free(cwd);
+            free(str);
+            free(cwd);
         }
     }
 
     // change relative path to absolute
     if (path[0] != '/')
     {
-        g_free(path);
+        free(path);
         path = g_path_get_dirname(full_path);
     }
 
@@ -631,8 +631,8 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
             is_move = strcmp(path, mset->old_path);
         }
     }
-    g_free(path);
-    g_free(full_path);
+    free(path);
+    free(full_path);
 
     /*
         LOG_INFO("TEST")
@@ -752,7 +752,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         gtk_widget_set_sensitive(mset->next,
                                  (path && path[0] != '\0' &&
                                   !(full_path_same && full_path_exists) && !full_path_exists_dir));
-        g_free(path);
+        free(path);
     }
 
     if (mset->open)
@@ -817,7 +817,7 @@ select_input(GtkWidget* widget, MoveSet* mset)
             char* full_name = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
             std::string ext;
             std::string name = get_name_extension(full_name, ext);
-            g_free(full_name);
+            free(full_name);
             gtk_text_buffer_get_iter_at_offset(buf, &iter, g_utf8_strlen(name.c_str(), -1));
         }
         else
@@ -978,10 +978,10 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     {
         char* path = g_build_filename(dir, name, nullptr);
         gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path);
-        g_free(path);
+        free(path);
     }
-    g_free(dir);
-    g_free(name);
+    free(dir);
+    free(name);
 
     int width = xset_get_int("move_dlg_help", "x");
     int height = xset_get_int("move_dlg_help", "y");
@@ -1015,11 +1015,11 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
             {
                 if (Glib::str_has_prefix(new_path, dir) && new_path[strlen(dir)] == '/')
                     path = new_path + strlen(dir) + 1;
-                g_free(dir);
+                free(dir);
             }
         }
         gtk_entry_set_text(GTK_ENTRY(w), path);
-        g_free(new_path);
+        free(new_path);
     }
 
     GtkAllocation allocation;
@@ -1030,10 +1030,10 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     {
         char* str = g_strdup_printf("%d", width);
         xset_set("move_dlg_help", "x", str);
-        g_free(str);
+        free(str);
         str = g_strdup_printf("%d", height);
         xset_set("move_dlg_help", "y", str);
-        g_free(str);
+        free(str);
     }
 
     gtk_widget_destroy(dlg);
@@ -1110,7 +1110,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     gtk_text_buffer_get_end_iter(mset->buf_path, &iter);
     char* path = gtk_text_buffer_get_text(mset->buf_path, &siter, &iter, false);
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), path);
-    g_free(path);
+    free(path);
 
     if (mode_default != MODE_PARENT)
     {
@@ -1118,7 +1118,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
         gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
         path = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
         gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), path);
-        g_free(path);
+        free(path);
     }
 
     gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), false);
@@ -1173,7 +1173,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
                         path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
                         str = g_path_get_basename(path);
                         gtk_text_buffer_set_text(mset->buf_full_name, str, -1);
-                        g_free(str);
+                        free(str);
                         break;
                     case MODE_PARENT:
                         path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dlg));
@@ -1184,7 +1184,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
                         gtk_text_buffer_set_text(mset->buf_full_path, path, -1);
                         break;
                 }
-                g_free(path);
+                free(path);
                 break;
             }
         }
@@ -1199,10 +1199,10 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     {
         str = g_strdup_printf("%d", width);
         xset_set("move_dlg_help", "x", str);
-        g_free(str);
+        free(str);
         str = g_strdup_printf("%d", height);
         xset_set("move_dlg_help", "y", str);
-        g_free(str);
+        free(str);
     }
 
     // save mode
@@ -1212,7 +1212,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
         {
             str = g_strdup_printf("%d", i);
             xset_set("move_dlg_help", "z", str);
-            g_free(str);
+            free(str);
             break;
         }
     }
@@ -1260,8 +1260,8 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
         char* new_path = g_path_get_dirname(full_path);
 
         bool rename = (!strcmp(mset->old_path, new_path) || !strcmp(new_path, "."));
-        g_free(new_path);
-        g_free(full_path);
+        free(new_path);
+        free(full_path);
 
         if (move)
         {
@@ -1319,7 +1319,7 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
         desc = mset->desc;
     char* title = g_strdup_printf("%s %s%s", action, desc, root_msg);
     gtk_window_set_title(GTK_WINDOW(mset->dlg), title);
-    g_free(title);
+    free(title);
 
     if (btn_label)
         gtk_button_set_label(GTK_BUTTON(mset->next), btn_label);
@@ -1775,7 +1775,7 @@ copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
     gtk_text_buffer_get_end_iter(buf, &iter);
     char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
     gtk_clipboard_set_text(clip, text, -1);
-    g_free(text);
+    free(text);
 }
 
 static bool
@@ -1845,7 +1845,7 @@ get_unique_name(const char* dir, const char* ext)
     {
         name = g_strdup_printf("%s.%s", base, ext);
         path = g_build_filename(dir, name, nullptr);
-        g_free(name);
+        free(name);
     }
     else
         path = g_build_filename(dir, base, nullptr);
@@ -1854,7 +1854,7 @@ get_unique_name(const char* dir, const char* ext)
     struct stat statbuf;
     while (lstat(path, &statbuf) == 0) // need to see broken symlinks
     {
-        g_free(path);
+        free(path);
         if (n == 1000)
             return g_strdup(base);
         if (ext && ext[0] != '\0')
@@ -1862,7 +1862,7 @@ get_unique_name(const char* dir, const char* ext)
         else
             name = g_strdup_printf("%s%d", base, n++);
         path = g_build_filename(dir, name, nullptr);
-        g_free(name);
+        free(name);
     }
     return path;
 }
@@ -1906,7 +1906,7 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
         templates_path = get_template_dir();
         if (templates_path)
             templates = get_templates(templates_path, nullptr, templates, getdir);
-        g_free(templates_path);
+        free(templates_path);
         return templates;
     }
 
@@ -1933,7 +1933,7 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
                     // prevent filesystem loops during recursive find
                     if (!std::filesystem::is_symlink(path))
                         templates = get_templates(templates_dir, subsubdir, templates, getdir);
-                    g_free(subsubdir);
+                    free(subsubdir);
                 }
             }
             else
@@ -1955,7 +1955,7 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
                     {
                         subsubdir = g_build_filename(subdir, file_name.c_str(), nullptr);
                         templates = get_templates(templates_dir, subsubdir, templates, getdir);
-                        g_free(subsubdir);
+                        free(subsubdir);
                     }
                     else
                         templates =
@@ -1964,7 +1964,7 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
             }
         }
     }
-    g_free(templates_path);
+    free(templates_path);
     return templates;
 }
 
@@ -2003,17 +2003,17 @@ on_template_changed(GtkWidget* widget, MoveSet* mset)
     if (lstat(full_path, &statbuf) == 0) // need to see broken symlinks
     {
         char* dir = g_path_get_dirname(full_path);
-        g_free(full_path);
+        free(full_path);
         full_path = get_unique_name(dir, str);
         if (full_path)
         {
             gtk_text_buffer_set_text(mset->buf_full_path, full_path, -1);
         }
-        g_free(dir);
+        free(dir);
     }
-    g_free(full_path);
+    free(full_path);
 
-    g_free(text);
+    free(text);
 }
 
 static bool
@@ -2021,7 +2021,7 @@ update_new_display_delayed(char* path)
 {
     char* dir_path = g_path_get_dirname(path);
     VFSDir* vdir = vfs_dir_get_by_path_soft(dir_path);
-    g_free(dir_path);
+    free(dir_path);
     if (vdir && vdir->avoid_changes)
     {
         VFSFileInfo* file = vfs_file_info_new();
@@ -2032,7 +2032,7 @@ update_new_display_delayed(char* path)
     }
     if (vdir)
         g_object_unref(vdir);
-    g_free(path);
+    free(path);
     return false;
 }
 
@@ -2091,7 +2091,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             mset->new_path = g_build_filename(dest_dir, full_name, nullptr);
         else
             mset->new_path = g_strdup(mset->full_path);
-        g_free(full_name);
+        free(full_name);
         full_name = nullptr;
     }
     else if (create_new == PTK_RENAME_NEW_LINK && file)
@@ -2147,7 +2147,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         GtkDialogFlags(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
         nullptr,
         nullptr);
-    // g_free( title );
+    // free( title );
     gtk_window_set_role(GTK_WINDOW(mset->dlg), "rename_dialog");
 
     // Buttons
@@ -2241,7 +2241,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     }
     mset->label_mime = GTK_LABEL(gtk_label_new(type));
     gtk_label_set_ellipsize(mset->label_mime, PANGO_ELLIPSIZE_MIDDLE);
-    g_free(type);
+    free(type);
 
     gtk_label_set_selectable(mset->label_mime, true);
     gtk_widget_set_halign(GTK_WIDGET(mset->label_mime), GTK_ALIGN_START);
@@ -2335,7 +2335,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             {
                 gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template),
                                                (char*)l->data);
-                g_free(l->data);
+                free(l->data);
             }
             g_list_free(templates);
         }
@@ -2366,7 +2366,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             {
                 gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template_dir),
                                                (char*)l->data);
-                g_free(l->data);
+                free(l->data);
             }
             g_list_free(templates);
         }
@@ -2737,13 +2737,13 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 char* cwd = g_path_get_dirname(mset->full_path);
                 char* old_path2 = full_path;
                 full_path = g_build_filename(cwd, old_path2, nullptr);
-                g_free(cwd);
-                g_free(old_path2);
+                free(cwd);
+                free(old_path2);
             }
             if (strchr(full_path, '\n'))
             {
                 ptk_show_error(GTK_WINDOW(mset->dlg), "Error", "Path contains linefeeds");
-                g_free(full_path);
+                free(full_path);
                 continue;
             }
             full_name = g_path_get_basename(full_path);
@@ -2758,10 +2758,10 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             if (!create_new && (mset->full_path_same || !strcmp(full_path, mset->full_path)))
             {
                 // not changed, proceed to next file
-                g_free(full_path);
-                g_free(full_name);
-                g_free(path);
-                g_free(old_path);
+                free(full_path);
+                free(full_name);
+                free(path);
+                free(old_path);
                 break;
             }
 
@@ -2798,7 +2798,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 }
                 if (as_root)
                 {
-                    g_free(root_mkdir);
+                    free(root_mkdir);
                     to_path = bash_quote(path);
                     root_mkdir = g_strdup_printf("mkdir -p %s && ", to_path.c_str());
                 }
@@ -2812,7 +2812,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                         msg = g_strdup_printf("Error creating parent directory\n\n%s",
                                               strerror(errno));
                         ptk_show_error(GTK_WINDOW(mset->dlg), "Mkdir Error", msg);
-                        g_free(msg);
+                        free(msg);
                         goto _continue_free;
                     }
                     else
@@ -2840,14 +2840,14 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 // new link task
                 task_name = g_strdup_printf("Create Link%s", root_msg);
                 PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
-                g_free(task_name);
+                free(task_name);
 
                 str = g_strdup(gtk_entry_get_text(mset->entry_target));
                 g_strstrip(str);
                 while (g_str_has_suffix(str, "/") && str[1] != '\0')
                     str[g_utf8_strlen(str, -1) - 1] = '\0';
                 from_path = bash_quote(str);
-                g_free(str);
+                free(str);
                 to_path = bash_quote(full_path);
 
                 if (overwrite)
@@ -2901,15 +2901,15 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                                 ptk_show_error(GTK_WINDOW(mset->dlg),
                                                "Template Missing",
                                                "The specified template does not exist");
-                                g_free(str);
-                                g_free(tdir);
+                                free(str);
+                                free(tdir);
                                 goto _continue_free;
                             }
-                            g_free(tdir);
+                            free(tdir);
                             from_path = bash_quote(from_path);
                         }
                     }
-                    g_free(str);
+                    free(str);
                 }
                 to_path = bash_quote(full_path);
                 char* over_cmd;
@@ -2920,14 +2920,14 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
 
                 task_name = g_strdup_printf("Create New File%s", root_msg);
                 PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
-                g_free(task_name);
+                free(task_name);
                 if (from_path.empty())
                     task->task->exec_command =
                         fmt::format("{}{}touch {}", root_mkdir, over_cmd, to_path);
                 else
                     task->task->exec_command =
                         fmt::format("{}{}cp -f {} {}", root_mkdir, over_cmd, from_path, to_path);
-                g_free(over_cmd);
+                free(over_cmd);
                 task->task->exec_sync = true;
                 task->task->exec_popup = false;
                 task->task->exec_show_output = false;
@@ -2971,21 +2971,21 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                                 ptk_show_error(GTK_WINDOW(mset->dlg),
                                                "Template Missing",
                                                "The specified template does not exist");
-                                g_free(str);
-                                g_free(tdir);
+                                free(str);
+                                free(tdir);
                                 goto _continue_free;
                             }
-                            g_free(tdir);
+                            free(tdir);
                             from_path = bash_quote(from_path);
                         }
                     }
-                    g_free(str);
+                    free(str);
                 }
                 to_path = bash_quote(full_path);
 
                 task_name = g_strdup_printf("Create New Directory%s", root_msg);
                 PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
-                g_free(task_name);
+                free(task_name);
                 if (from_path.empty())
                     task->task->exec_command = fmt::format("{}mkdir {}", root_mkdir, to_path);
                 else
@@ -3013,7 +3013,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 // copy task
                 task_name = g_strdup_printf("Copy%s", root_msg);
                 PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
-                g_free(task_name);
+                free(task_name);
                 char* over_opt = nullptr;
                 to_path = bash_quote(full_path);
                 if (copy || !mset->is_link)
@@ -3029,7 +3029,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                         goto _continue_free;
                     }
                     from_path = bash_quote(str);
-                    g_free(str);
+                    free(str);
                 }
                 if (overwrite)
                     over_opt = g_strdup(" --remove-destination");
@@ -3046,7 +3046,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     task->task->exec_command =
                         fmt::format("{}cp -Pf{} {} {}", root_mkdir, over_opt, from_path, to_path);
                 }
-                g_free(over_opt);
+                free(over_opt);
                 task->task->exec_sync = true;
                 task->task->exec_popup = false;
                 task->task->exec_show_output = false;
@@ -3062,7 +3062,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 // link task
                 task_name = g_strdup_printf("Create Link%s", root_msg);
                 PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
-                g_free(task_name);
+                free(task_name);
                 if (link || !mset->is_link)
                     from_path = bash_quote(mset->full_path);
                 else
@@ -3076,7 +3076,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                         goto _continue_free;
                     }
                     from_path = bash_quote(str);
-                    g_free(str);
+                    free(str);
                 }
                 to_path = bash_quote(full_path);
                 if (overwrite)
@@ -3107,7 +3107,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 // EXDEV error
                 task_name = g_strdup_printf("Move%s", root_msg);
                 PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
-                g_free(task_name);
+                free(task_name);
                 from_path = bash_quote(mset->full_path);
                 to_path = bash_quote(full_path);
                 if (overwrite)
@@ -3144,22 +3144,22 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     // Unknown error has occurred - alert user as usual
                     msg = g_strdup_printf("Error renaming file\n\n%s", strerror(errno));
                     ptk_show_error(GTK_WINDOW(mset->dlg), "Rename Error", msg);
-                    g_free(msg);
+                    free(msg);
                     goto _continue_free;
                 }
                 else
                     update_new_display(full_path);
             }
-            g_free(full_path);
-            g_free(full_name);
-            g_free(path);
-            g_free(old_path);
+            free(full_path);
+            free(full_name);
+            free(path);
+            free(old_path);
             break;
         _continue_free:
-            g_free(full_path);
-            g_free(full_name);
-            g_free(path);
-            g_free(old_path);
+            free(full_path);
+            free(full_name);
+            free(path);
+            free(old_path);
         }
         else if (response == GTK_RESPONSE_CANCEL || response == GTK_RESPONSE_DELETE_EVENT)
         {
@@ -3177,13 +3177,13 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     // destroy
     gtk_widget_destroy(mset->dlg);
 
-    g_free(root_mkdir);
+    free(root_mkdir);
 
-    g_free(mset->full_path);
+    free(mset->full_path);
     if (mset->new_path)
-        g_free(mset->new_path);
+        free(mset->new_path);
     if (mset->mime_type)
-        g_free(mset->mime_type);
+        free(mset->mime_type);
     g_slice_free(MoveSet, mset);
 
     return ret;
@@ -3458,7 +3458,7 @@ free_file_list_hash(void* key, void* value, void* user_data)
     (void)user_data;
     const char* app_desktop = (const char*)key;
     GList* files = (GList*)value;
-    g_list_foreach(files, (GFunc)g_free, nullptr);
+    g_list_foreach(files, (GFunc)free, nullptr);
     g_list_free(files);
 }
 
@@ -3518,7 +3518,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                     Glib::spawn_command_line_async(full_path);
                     if (file_browser)
                         ptk_file_browser_emit_open(file_browser, full_path, PTK_OPEN_FILE);
-                    g_free(full_path);
+                    free(full_path);
                     continue;
                 }
 
@@ -3590,12 +3590,12 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                                            ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser))
                                            : nullptr;
                             ptk_show_error(GTK_WINDOW(toplevel), "Broken Link", msg);
-                            g_free(msg);
-                            g_free(full_path);
-                            g_free(target_path);
+                            free(msg);
+                            free(full_path);
+                            free(target_path);
                             continue;
                         }
-                        g_free(target_path);
+                        free(target_path);
                     }
                 }
                 if (!alloc_desktop)
@@ -3612,7 +3612,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                 }
                 if (!alloc_desktop)
                 {
-                    g_free(full_path);
+                    free(full_path);
                     continue;
                 }
 
@@ -3621,8 +3621,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                 if (!file_list_hash)
                     /* this will free the keys (alloc_desktop) when hash table
                      * destroyed or new key inserted/replaced */
-                    file_list_hash =
-                        g_hash_table_new_full(g_str_hash, g_str_equal, g_free, nullptr);
+                    file_list_hash = g_hash_table_new_full(g_str_hash, g_str_equal, free, nullptr);
                 else
                     // get existing file list for this app
                     files_to_open = (GList*)g_hash_table_lookup(file_list_hash, alloc_desktop);
@@ -3642,7 +3641,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
     {
         // specified app to open all files
         open_files_with_app(parent, files_to_open, app_desktop);
-        g_list_foreach(files_to_open, (GFunc)g_free, nullptr);
+        g_list_foreach(files_to_open, (GFunc)free, nullptr);
         g_list_free(files_to_open);
     }
     else if (file_list_hash)
@@ -3658,7 +3657,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
     {
         if (file_browser)
             ptk_file_browser_emit_open(file_browser, full_path, PTK_OPEN_DIR);
-        g_free(new_dir);
+        free(new_dir);
     }
     g_slice_free(ParentInfo, parent);
 }
@@ -3686,14 +3685,14 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
         if (!ptk_rename_file(file_browser, file_dir, file, cwd, !is_cut, PTK_RENAME, nullptr))
         {
             vfs_file_info_unref(file);
-            g_free(file_dir);
+            free(file_dir);
             missing_targets = 0;
             break;
         }
         vfs_file_info_unref(file);
-        g_free(file_dir);
+        free(file_dir);
     }
-    g_list_foreach(files, (GFunc)g_free, nullptr);
+    g_list_foreach(files, (GFunc)free, nullptr);
     g_list_free(files);
 
     if (missing_targets > 0)
@@ -3741,8 +3740,8 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
         file_path_q = bash_quote(file_path);
         str = file_paths;
         file_paths = g_strdup_printf("%s %s", file_paths, file_path_q.c_str());
-        g_free(str);
-        g_free(file_path);
+        free(str);
+        free(file_path);
         item_count++;
     }
 
@@ -3758,10 +3757,10 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
                                 "DELETE AS ROOT",
                                 str) != GTK_RESPONSE_YES)
             {
-                g_free(str);
+                free(str);
                 return;
             }
-            g_free(str);
+            free(str);
         }
         cmd = g_strdup_printf("rm -r %s", file_paths);
         task_name = g_strdup("Delete As Root");
@@ -3797,17 +3796,17 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
                 cmd = g_strdup_printf("cp -r %s %s", file_paths, quote_path.c_str());
             }
 
-            g_free(path);
+            free(path);
         }
         else
             return;
     }
-    g_free(file_paths);
+    free(file_paths);
 
     // root task
     PtkFileTask* task =
         ptk_file_exec_new(task_name, cwd, parent, file_browser ? file_browser->task_view : nullptr);
-    g_free(task_name);
+    free(task_name);
     task->task->exec_command = cmd;
     task->task->exec_sync = true;
     task->task->exec_popup = false;

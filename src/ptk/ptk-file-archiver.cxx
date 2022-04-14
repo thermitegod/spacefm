@@ -135,7 +135,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
         return;
 
     std::string name = g_path_get_basename(path);
-    g_free(path);
+    free(path);
 
     // Fetching the combo model
     GtkListStore* list = GTK_LIST_STORE(g_object_get_data(G_OBJECT(dlg), "combo-model"));
@@ -180,7 +180,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
                     len = extension.size();
             }
         }
-        g_free(xset_name);
+        free(xset_name);
     } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(list), &iter));
 
     // Cropping current extension if found
@@ -211,7 +211,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
             // Updating new archive filename
             gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), new_name.c_str());
         }
-        g_free(xset_name);
+        free(xset_name);
     }
 
     // Loading command
@@ -295,7 +295,7 @@ replace_archive_subs(const char* line, const char* n, const char* N, const char*
             // no more percents - copy end of string
             old_s = s;
             s = g_strdup_printf("%s%s", s, ptr);
-            g_free(old_s);
+            free(old_s);
             break;
         }
         if (percent[1] == 'n' && n)
@@ -314,7 +314,7 @@ replace_archive_subs(const char* line, const char* n, const char* N, const char*
             percent[1] = '\0';
             old_s = s;
             s = g_strdup_printf("%s%s", s, ptr);
-            g_free(old_s);
+            free(old_s);
             percent[1] = '%';
             ptr = percent + 2;
             continue;
@@ -326,7 +326,7 @@ replace_archive_subs(const char* line, const char* n, const char* N, const char*
             percent[1] = '\0';
             old_s = s;
             s = g_strdup_printf("%s%s", s, ptr);
-            g_free(old_s);
+            free(old_s);
             percent[1] = ch; // restore character after percent
             ptr = percent + 1;
             continue;
@@ -335,7 +335,7 @@ replace_archive_subs(const char* line, const char* n, const char* N, const char*
         percent[0] = '\0'; // change % to end of string
         old_s = s;
         s = g_strdup_printf("%s%s%s", s, ptr, sub);
-        g_free(old_s);
+        free(old_s);
         percent[0] = '%'; // restore %
         ptr = percent + 2;
     }
@@ -465,7 +465,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                                COL_HANDLER_EXTENSIONS,
                                extensions,
                                -1);
-            g_free(extensions);
+            free(extensions);
 
             // Is last used handler?
             if (!g_strcmp0(xset_name, handler_xset->name))
@@ -539,14 +539,14 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 error_message.clear();
             }
         }
-        g_free(xset_name);
+        free(xset_name);
     }
     else
     {
         // Recording the fact getting the iter failed
         LOG_WARN("Unable to fetch the iter from handler ordinal {}!", format);
     };
-    g_free(str);
+    free(str);
 
     // Mnemonically attaching widgets to labels
     gtk_label_set_mnemonic_widget(GTK_LABEL(lbl_archive_format), combo);
@@ -579,7 +579,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                               ext.c_str(),
                               nullptr);
         gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), dest_file);
-        g_free(dest_file);
+        free(dest_file);
         dest_file = nullptr;
     }
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd);
@@ -618,7 +618,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                     // Unable to fetch iter from combo box - warning user and
                     // exiting
                     LOG_WARN("Unable to fetch iter from combobox!");
-                    g_free(dest_file);
+                    free(dest_file);
                     gtk_widget_destroy(dlg);
                     return;
                 }
@@ -634,7 +634,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 handler_xset = xset_get(xset_name);
                 // Saving selected archive handler name as default
                 xset_set("arc_dlg", "s", xset_name);
-                g_free(xset_name);
+                free(xset_name);
 
                 // run in the terminal or not
                 run_in_terminal = handler_xset->in_terminal;
@@ -762,10 +762,10 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     {
         str = g_strdup_printf("%d", width);
         xset_set("arc_dlg", "x", str);
-        g_free(str);
+        free(str);
         str = g_strdup_printf("%d", height);
         xset_set("arc_dlg", "y", str);
-        g_free(str);
+        free(str);
     }
 
     // Destroying dialog
@@ -833,7 +833,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 // due to tar interpreting it as option
                 s1 = g_strdup_printf("./%s", desc.c_str());
                 desc = bash_quote(s1);
-                g_free(s1);
+                free(s1);
             }
             else
                 desc = bash_quote(desc);
@@ -859,9 +859,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                                             cmd_to_run,
                                             "\n[[ $? -eq 0 ]] || fm_handle_err\n",
                                             nullptr);
-                g_free(s1);
+                free(s1);
             }
-            g_free(cmd_to_run);
+            free(cmd_to_run);
         }
     }
     else
@@ -881,7 +881,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 // due to tar interpreting it as option
                 s1 = g_strdup_printf("./%s", desc.c_str());
                 first = bash_quote(s1);
-                g_free(s1);
+                free(s1);
             }
             else
                 first = bash_quote(desc);
@@ -899,14 +899,14 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                         // due to tar interpreting it as option
                         s1 = g_strdup_printf("./%s", desc.c_str());
                         desc = bash_quote(s1);
-                        g_free(s1);
+                        free(s1);
                     }
                     else
                         desc = bash_quote(desc);
 
                     str = all;
                     all = g_strdup_printf("%s%s%s", all, all[0] ? " " : "", desc.c_str());
-                    g_free(str);
+                    free(str);
                 }
             }
         }
@@ -926,10 +926,10 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
 
         // Enforce error check
         final_command = g_strconcat(cmd_to_run, "\n[[ $? -eq 0 ]] || fm_handle_err\n", nullptr);
-        g_free(cmd_to_run);
-        g_free(all);
+        free(cmd_to_run);
+        free(all);
     }
-    g_free(dest_file);
+    free(dest_file);
 
     /* When ran in a terminal, errors need to result in a pause so that
      * the user can review the situation - in any case an error check
@@ -937,8 +937,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     str = generate_bash_error_function(run_in_terminal, nullptr);
     s1 = final_command;
     final_command = g_strconcat(str, "\n\n", final_command, nullptr);
-    g_free(str);
-    g_free(s1);
+    free(str);
+    free(s1);
 
     /* Cleaning up - final_command does not need freeing, as this
      * is freed by the task */
@@ -949,7 +949,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                                           cwd,
                                           file_browser ? GTK_WIDGET(file_browser) : nullptr,
                                           file_browser ? file_browser->task_view : nullptr);
-    g_free(task_name);
+    free(task_name);
 
     /* Setting correct exec reference - probably causes different bash
      * to be output */
@@ -1046,7 +1046,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                                                            true,
                                                            false,
                                                            true);
-            g_free(full_path);
+            free(full_path);
             vfs_mime_type_unref(mime_type);
             if (handlers_slist)
             {
@@ -1227,7 +1227,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         if (!handler_xset)
         {
             LOG_WARN("No archive handler/command found for file: {}", full_path);
-            g_free(full_path);
+            free(full_path);
             continue;
         }
         LOG_INFO("Archive Handler Selected: {}", handler_xset->menu_label);
@@ -1353,14 +1353,14 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                 // Looping to find a path that doesnt exist
                 while (lstat(parent_path, &statbuf) == 0)
                 {
-                    g_free(parent_path);
+                    free(parent_path);
                     parent_path = g_strdup_printf("%s-%s%d", parent_orig, "copy", ++n);
                 }
-                g_free(parent_orig);
+                free(parent_orig);
 
                 // Generating shell command to make directory
                 parent_quote = bash_quote(parent_path);
-                g_free(mkparent);
+                free(mkparent);
                 mkparent = g_strdup_printf(""
                                            "mkdir -p %s || fm_handle_err\n"
                                            "cd %s || fm_handle_err\n",
@@ -1376,7 +1376,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                 {
                     /* deliberately omitting fm_handle_error - only a
                      * convenience function */
-                    g_free(perm);
+                    free(perm);
                     perm = g_strdup_printf("chmod -R u+rwX %s\n", parent_quote.c_str());
                 }
                 parent_quote.clear();
@@ -1417,9 +1417,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
             }
 
             // Cleaning up
-            g_free(filename);
-            g_free(filename_no_archive_ext);
-            g_free(parent_path);
+            free(filename);
+            free(filename_no_archive_ext);
+            free(parent_path);
         }
 
         // Substituting %x %g %G
@@ -1443,9 +1443,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                                     perm);
 
         // Cleaning up
-        g_free(full_path);
-        g_free(mkparent);
-        g_free(perm);
+        free(full_path);
+        free(mkparent);
+        free(perm);
     }
 
     /* When ran in a terminal, errors need to result in a pause so that
@@ -1454,7 +1454,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     std::string str;
     str = generate_bash_error_function(in_term, create_parent ? parent_quote.c_str() : nullptr);
     final_command = g_strconcat(str.c_str(), "\n", final_command.c_str(), nullptr);
-    g_free(choose_dir);
+    free(choose_dir);
     g_strfreev(archive_handlers);
 
     // Creating task
@@ -1463,7 +1463,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                                           cwd,
                                           dlgparent,
                                           file_browser ? file_browser->task_view : nullptr);
-    g_free(task_name);
+    free(task_name);
 
     /* Setting correct exec reference - probably causes different bash
      * to be output */

@@ -161,7 +161,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
                     {
                         ptk_file_browser_emit_open(file_browser, full_path, PTK_OPEN_NEW_TAB);
                     }
-                    g_free(full_path);
+                    free(full_path);
                 }
             }
         }
@@ -202,9 +202,9 @@ on_open_files(GAction* action, FindFile* data)
         return;
 
     // sfm this frees list when new value inserted - caused segfault
-    // hash = g_hash_table_new_full( g_str_hash, g_str_equal, (GDestroyNotify)g_free, open_files ?
+    // hash = g_hash_table_new_full( g_str_hash, g_str_equal, (GDestroyNotify)free, open_files ?
     // (GDestroyNotify)vfs_file_info_list_free : nullptr );
-    hash = g_hash_table_new_full(g_str_hash, g_str_equal, (GDestroyNotify)g_free, nullptr);
+    hash = g_hash_table_new_full(g_str_hash, g_str_equal, (GDestroyNotify)free, nullptr);
 
     for (row = rows; row; row = row->next)
     {
@@ -230,7 +230,7 @@ on_open_files(GAction* action, FindFile* data)
             else
             {
                 if (g_hash_table_lookup(hash, dir))
-                    g_free(dir);
+                    free(dir);
                 g_hash_table_insert(hash, dir, nullptr);
             }
         }
@@ -329,7 +329,7 @@ compose_command(FindFile* data)
             if (arg && *arg)
             {
                 argv.push_back(arg);
-                g_free(arg);
+                free(arg);
             }
         } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(data->places_list), &it));
     }
@@ -512,7 +512,7 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
         {
             vfs_file_info_unref(fi);
         }
-        g_free(name);
+        free(name);
 
         /* we queue the found files, and not add them to the tree view direclty.
          * when we queued more than 10 files, we add them at once. I think
@@ -625,10 +625,10 @@ on_start_search(GtkWidget* btn, FindFile* data)
     {
         char* str = g_strdup_printf("%d", width);
         xset_set("main_search", "x", str);
-        g_free(str);
+        free(str);
         str = g_strdup_printf("%d", height);
         xset_set("main_search", "y", str);
-        g_free(str);
+        free(str);
     }
 
     gtk_widget_hide(data->search_criteria);
@@ -683,10 +683,10 @@ on_search_again(GtkWidget* btn, FindFile* data)
     {
         char* str = g_strdup_printf("%d", width);
         xset_set("main_search", "x", str);
-        g_free(str);
+        free(str);
         str = g_strdup_printf("%d", height);
         xset_set("main_search", "y", str);
-        g_free(str);
+        free(str);
     }
 
     gtk_widget_show(data->search_criteria);
@@ -742,7 +742,7 @@ on_add_search_browse(GtkWidget* menu, FindFile* data)
     {
         char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
         add_search_dir(data, path);
-        g_free(path);
+        free(path);
     }
     gtk_widget_destroy(dlg);
 }

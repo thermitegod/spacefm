@@ -88,7 +88,7 @@ seek_path(GtkEntry* entry)
     if (!(seek_dir && std::filesystem::is_directory(seek_dir)))
     {
         // entry does not contain a valid dir
-        g_free(seek_dir);
+        free(seek_dir);
         return false;
     }
     if (!g_str_has_suffix(path, "/"))
@@ -120,14 +120,14 @@ seek_path(GtkEntry* entry)
             if (count == 1)
             {
                 // is unique - use as seek dir
-                g_free(seek_dir);
+                free(seek_dir);
                 seek_dir = test_path;
-                g_free(seek_name);
+                free(seek_name);
                 seek_name = nullptr;
             }
         }
         else
-            g_free(test_path);
+            free(test_path);
     }
     if (strcmp(seek_dir, "/") && g_str_has_suffix(seek_dir, "/"))
     {
@@ -135,8 +135,8 @@ seek_path(GtkEntry* entry)
         seek_dir[strlen(seek_dir) - 1] = '\0';
     }
     ptk_file_browser_seek_path(edata->browser, seek_dir, seek_name);
-    g_free(seek_dir);
-    g_free(seek_name);
+    free(seek_dir);
+    free(seek_name);
     return false;
 }
 
@@ -162,10 +162,10 @@ match_func_cmd(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it,
 
     if (name && key && Glib::str_has_prefix(name, key))
     {
-        g_free(name);
+        free(name);
         return true;
     }
-    g_free(name);
+    free(name);
     return false;
 }
 
@@ -183,10 +183,10 @@ match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it, voi
     {
         if (*key == 0 || g_ascii_strncasecmp(name, key, strlen(key)) == 0)
         {
-            g_free(name);
+            free(name);
             return true;
         }
-        g_free(name);
+        free(name);
     }
     return false;
 }
@@ -225,16 +225,16 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
             fn = (char*)sep + 1;
         else
             fn = (char*)text;
-        g_object_set_data_full(G_OBJECT(completion), "fn", g_strdup(fn), (GDestroyNotify)g_free);
+        g_object_set_data_full(G_OBJECT(completion), "fn", g_strdup(fn), (GDestroyNotify)free);
 
         char* new_dir = get_cwd(entry);
         const char* old_dir = (const char*)g_object_get_data(G_OBJECT(completion), "cwd");
         if (old_dir && new_dir && g_ascii_strcasecmp(old_dir, new_dir) == 0)
         {
-            g_free(new_dir);
+            free(new_dir);
             return;
         }
-        g_object_set_data_full(G_OBJECT(completion), "cwd", new_dir, g_free);
+        g_object_set_data_full(G_OBJECT(completion), "cwd", new_dir, free);
         list = GTK_LIST_STORE(gtk_entry_completion_get_model(completion));
         gtk_list_store_clear(list);
         if (new_dir)
@@ -268,8 +268,8 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
                                        COL_PATH,
                                        (char*)l->data,
                                        -1);
-                    g_free(disp_name);
-                    g_free((char*)l->data);
+                    free(disp_name);
+                    free((char*)l->data);
                 }
                 g_slist_free(name_list);
 
@@ -451,7 +451,7 @@ on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIt
                                         nullptr);
 
         gtk_entry_set_text(GTK_ENTRY(entry), path);
-        g_free(path);
+        free(path);
         gtk_editable_set_position(GTK_EDITABLE(entry), -1);
         g_signal_handlers_unblock_matched(G_OBJECT(entry),
                                           G_SIGNAL_MATCH_FUNC,
@@ -603,7 +603,7 @@ on_button_release(GtkEntry* entry, GdkEventButton* evt, void* user_data)
                     char* path = g_strndup(text, (sep - text));
                     gtk_entry_set_text(entry, path);
                     gtk_editable_set_position(GTK_EDITABLE(entry), -1);
-                    g_free(path);
+                    free(path);
                     gtk_widget_activate(GTK_WIDGET(entry));
                 }
             }
@@ -621,7 +621,7 @@ on_button_release(GtkEntry* entry, GdkEventButton* evt, void* user_data)
             gtk_entry_set_text(entry, str.c_str());
             gtk_widget_activate(GTK_WIDGET(entry));
         }
-        g_free(clip_text);
+        free(clip_text);
         return true;
     }
     return false;
@@ -688,7 +688,7 @@ on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars, unsigne
         unquote[strlen(unquote) - 1] = '\0';
         cleaned = ztd::replace(unquote, "'\\''", "'");
         new_text = g_strdup(cleaned.c_str());
-        g_free(unquote);
+        free(unquote);
     }
 
     if (new_text)

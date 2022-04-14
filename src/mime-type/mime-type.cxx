@@ -200,7 +200,7 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
                 if (data == mime_magic_buf)
                     G_UNLOCK(mime_magic_buf);
                 else
-                    g_free(data);
+                    free(data);
                 data = (char*)-1;
             }
             if (data != (char*)-1)
@@ -223,7 +223,7 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
                 if (data == mime_magic_buf)
                     G_UNLOCK(mime_magic_buf); /* unlock the common buffer */
                 else                          /* we use our own buffer */
-                    g_free(data);
+                    free(data);
             }
             close(fd);
         }
@@ -356,7 +356,7 @@ _mime_type_get_desc_icon(const char* file_path, const char* locale, bool is_loca
             locale = langs[0];
     }
     char* desc = parse_xml_desc(buffer.c_str(), buffer.size(), locale);
-    g_free(_locale);
+    free(_locale);
 
     // only look for <icon /> tag in .local
     if (is_local && icon_name && *icon_name == nullptr)
@@ -419,7 +419,7 @@ void
 mime_type_init()
 {
     mime_cache_load_all();
-    //    table = g_hash_table_new_full( g_str_hash, g_str_equal, g_free,
+    //    table = g_hash_table_new_full( g_str_hash, g_str_equal, free,
     //    (GDestroyNotify)mime_type_unref );
 }
 
@@ -463,7 +463,7 @@ mime_cache_free_all()
     caches = nullptr;
     mime_cache_max_extent = 0;
 
-    g_free(mime_magic_buf);
+    free(mime_magic_buf);
     mime_magic_buf = nullptr;
 }
 

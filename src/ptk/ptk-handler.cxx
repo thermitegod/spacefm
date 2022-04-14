@@ -753,7 +753,7 @@ ptk_handler_get_command(int mode, int cmd, XSet* handler_set)
                                   modes[mode],
                                   mode == HANDLER_MODE_ARC ? cmds_arc[cmd] : cmds_mnt[cmd]);
     std::string script = ztd::replace(def_script, "/exec.sh", str);
-    g_free(def_script);
+    free(def_script);
     if (std::filesystem::exists(script))
         return g_strdup(script.c_str());
 
@@ -806,7 +806,7 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
                                           modes[mode],
                                           mode == HANDLER_MODE_ARC ? cmds_arc[cmd] : cmds_mnt[cmd]);
     script = ztd::replace(def_script, "/exec.sh", script_name);
-    g_free(def_script);
+    free(def_script);
     // load script
     // bool modified = false;
     bool start = true;
@@ -884,7 +884,7 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
         std::filesystem::create_directories(parent_dir);
         std::filesystem::permissions(parent_dir, std::filesystem::perms::owner_all);
     }
-    g_free(parent_dir);
+    free(parent_dir);
     // name script
     std::string script;
     std::string str;
@@ -892,7 +892,7 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
                       modes[mode],
                       mode == HANDLER_MODE_ARC ? cmds_arc[cmd] : cmds_mnt[cmd]);
     script = ztd::replace(def_script, "/exec.sh", str);
-    g_free(def_script);
+    free(def_script);
     // get text
     std::string text;
     if (view)
@@ -1109,7 +1109,7 @@ string_copy_free(char** s, const char* src)
 {
     char* discard = *s;
     *s = g_strdup(src);
-    g_free(discard);
+    free(discard);
 }
 
 void
@@ -1182,9 +1182,9 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
             // add a missing default handler to the list
             str = list;
             list = g_strconcat(list, list[0] ? " " : "", handler->xset_name, nullptr);
-            g_free(str);
+            free(str);
         }
-        g_free(testlist);
+        free(testlist);
         testlist = g_strdup_printf("%s ", list);
         if (add_missing || strstr(testlist, testname))
         {
@@ -1209,11 +1209,11 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
                 set->disable = true;
             }
         }
-        g_free(testlist);
-        g_free(testname);
+        free(testlist);
+        free(testname);
     }
     // update handler list
-    g_free(set_conf->s);
+    free(set_conf->s);
     set_conf->s = list;
 }
 
@@ -1227,15 +1227,15 @@ add_new_handler(int mode)
     // get a unique new xset name
     do
     {
-        g_free(name);
+        free(name);
         rand = randhex8();
         name = g_strconcat(handler_cust_prefix[mode], rand, nullptr);
-        g_free(rand);
+        free(rand);
     } while (xset_is(name));
 
     // create and return the xset
     XSet* set = xset_get(name);
-    g_free(name);
+    free(name);
     set->lock = false;
     return set;
 }
@@ -1260,10 +1260,10 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     char* path_dest = g_build_filename(xset_get_config_dir(), "scripts", nullptr);
     std::filesystem::create_directories(path_dest);
     std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
-    g_free(path_dest);
+    free(path_dest);
     path_dest = g_build_filename(xset_get_config_dir(), "scripts", new_handler_xset->name, nullptr);
     std::string command = fmt::format("cp -a {} {}", path_src, path_dest);
-    g_free(path_src);
+    free(path_src);
 
     // run command
     std::string* standard_output = nullptr;
@@ -1283,7 +1283,7 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     command = g_strdup_printf("chmod -R go-rwx %s", path_dest);
     print_command(command);
     Glib::spawn_command_line_sync(command);
-    g_free(path_dest);
+    free(path_dest);
 
     // add to handler list
     if (g_strcmp0(xset_get_s(handler_conf_xset[mode]), "") <= 0)
@@ -1297,7 +1297,7 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
         char* new_handlers_list =
             g_strdup_printf("%s %s", new_handler_xset->name, xset_get_s(handler_conf_xset[mode]));
         xset_set(handler_conf_xset[mode], "s", new_handlers_list);
-        g_free(new_handlers_list);
+        free(new_handlers_list);
     }
 
     // have handler dialog open?
@@ -1351,7 +1351,7 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
                        COL_HANDLER_NAME,
                        dis_name,
                        -1);
-    g_free(dis_name);
+    free(dis_name);
 
     // Activating the new handler - the normal loading code
     // automatically kicks in
@@ -1533,7 +1533,7 @@ populate_archive_handlers(HandlerData* hnd, XSet* def_handler_set)
                                    COL_HANDLER_NAME,
                                    dis_name,
                                    -1);
-                g_free(dis_name);
+                free(dis_name);
                 if (def_handler_set == handler_xset)
                     def_handler_iter = iter;
             }
@@ -1594,13 +1594,13 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
         {
             archive_handlers = g_strdup_printf("%s %s", archive_handlers, xset_name);
         }
-        g_free(archive_handlers_temp);
-        g_free(xset_name);
+        free(archive_handlers_temp);
+        free(xset_name);
     } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(hnd->list), &iter));
 
     // Saving the new archive handlers list
     xset_set(handler_conf_xset[hnd->mode], "s", archive_handlers);
-    g_free(archive_handlers);
+    free(archive_handlers);
 
     // Saving settings
     autosave_request();
@@ -1731,7 +1731,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                            COL_HANDLER_NAME,
                            dis_name,
                            -1);
-        g_free(dis_name);
+        free(dis_name);
 
         // Updating available archive handlers list
         if (g_strcmp0(xset_get_s(handler_conf_xset[hnd->mode]), "") <= 0)
@@ -1748,7 +1748,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
             xset_set(handler_conf_xset[hnd->mode], "s", new_handlers_list);
 
             // Clearing up
-            g_free(new_handlers_list);
+            free(new_handlers_list);
         }
 
         // Activating the new handler - the normal loading code
@@ -1796,7 +1796,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                                COL_HANDLER_NAME,
                                dis_name,
                                -1);
-            g_free(dis_name);
+            free(dis_name);
         }
 
         // Saving archive handler
@@ -1892,7 +1892,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                         new_archive_handlers_s =
                             g_strdup_printf("%s %s", new_archive_handlers_s, archive_handlers[i]);
                     }
-                    g_free(new_archive_handlers_s_temp);
+                    free(new_archive_handlers_s_temp);
                 }
             }
         }
@@ -1938,7 +1938,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
 
         // Clearing up
         g_strfreev(archive_handlers);
-        g_free(new_archive_handlers_s);
+        free(new_archive_handlers_s);
     }
     else if (GTK_WIDGET(widget) == GTK_WIDGET(hnd->btn_up) ||
              GTK_WIDGET(widget) == GTK_WIDGET(hnd->btn_down))
@@ -1984,8 +1984,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
     }
 
 _clean_exit:
-    g_free(xset_name);
-    g_free(handler_name_from_model);
+    free(xset_name);
+    free(handler_name_from_model);
 }
 
 static void
@@ -2010,7 +2010,7 @@ on_configure_changed(GtkTreeSelection* selection, HandlerData* hnd)
 
     // Loading new archive handler values
     config_load_handler_settings(nullptr, xset_name, nullptr, hnd);
-    g_free(xset_name);
+    free(xset_name);
     hnd->changed = hnd->compress_changed = hnd->extract_changed = hnd->list_changed = false;
     gtk_widget_set_sensitive(hnd->btn_apply, false);
 
@@ -2186,7 +2186,7 @@ restore_defaults(HandlerData* hnd, bool all)
         // a default handler is selected?
         if (!(xset_name && Glib::str_has_prefix(xset_name, handler_def_prefix[hnd->mode])))
         {
-            g_free(xset_name);
+            free(xset_name);
             return;
         }
 
@@ -2240,7 +2240,7 @@ restore_defaults(HandlerData* hnd, bool all)
                 break;
             }
         }
-        g_free(xset_name);
+        free(xset_name);
         if (!found_handler)
             return;
 
@@ -2386,9 +2386,9 @@ validate_archive_handler(HandlerData* hnd)
     }
 
 _cleanup:
-    g_free(handler_compress);
-    g_free(handler_extract);
-    g_free(handler_list);
+    free(handler_compress);
+    free(handler_extract);
+    free(handler_list);
 
     // Validation passed
     return ret;
@@ -2433,14 +2433,14 @@ on_activate_link(GtkLabel* label, char* uri, HandlerData* hnd)
     char* xset_name = nullptr;
     gtk_tree_model_get(model, &it, COL_XSET_NAME, &xset_name, -1);
     XSet* set = xset_is(xset_name);
-    g_free(xset_name);
+    free(xset_name);
     if (!(set && !set->disable && set->b == XSET_B_TRUE))
         return true;
     char* script = ptk_handler_get_command(hnd->mode, action, set);
     if (!script)
         return true;
     xset_edit(hnd->dlg, script, false, false);
-    g_free(script);
+    free(script);
     return true;
 }
 
@@ -2465,7 +2465,7 @@ on_textview_keypress(GtkWidget* widget, GdkEventKey* event, HandlerData* hnd)
                     return false;
                 char* uri = g_strdup_printf("%d", keymod);
                 on_activate_link(nullptr, uri, hnd);
-                g_free(uri);
+                free(uri);
                 return true;
             }
             break;
@@ -2534,7 +2534,7 @@ on_icon_choose_button_clicked(GtkWidget* widget, HandlerData* hnd)
     if (new_icon)
     {
         gtk_entry_set_text(GTK_ENTRY(hnd->entry_handler_icon), new_icon);
-        g_free(new_icon);
+        free(new_icon);
     }
 }
 
@@ -2556,7 +2556,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     {
         gtk_tree_model_get(model, &it, COL_XSET_NAME, &xset_name, -1);
         set_sel = xset_is(xset_name);
-        g_free(xset_name);
+        free(xset_name);
     }
 
     // determine job
@@ -2583,7 +2583,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
             if (!file)
                 return;
             if (save->s)
-                g_free(save->s);
+                free(save->s);
             save->s = g_path_get_dirname(file);
             break;
         case HANDLER_JOB_RESTORE_ALL:
@@ -2621,7 +2621,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
                         "Error Creating Temp Directory",
                         GTK_BUTTONS_OK,
                         "Unable to create temporary directory");
-        g_free(file);
+        free(file);
         return;
     }
     char* hex8;
@@ -2630,15 +2630,15 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     {
         hex8 = randhex8();
         if (folder)
-            g_free(folder);
+            free(folder);
         folder = g_build_filename(user_tmp, hex8, nullptr);
-        g_free(hex8);
+        free(hex8);
     }
 
     // Install plugin
     install_plugin_file(nullptr, hnd->dlg, file, folder, PLUGIN_JOB_COPY, nullptr);
-    g_free(file);
-    g_free(folder);
+    free(file);
+    free(folder);
 }
 
 static void
@@ -2732,7 +2732,7 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
             set->desc = g_strdup("arc_def_open arc_def_ex arc_def_exto arc_def_list separator "
                                  "arc_def_parent arc_def_write");
             xset_add_menuitem(hnd->browser, popup, accel_group, set);
-            g_free(set->desc);
+            free(set->desc);
             set->desc = old_desc;
         }
         else if (hnd->mode == HANDLER_MODE_FS)
@@ -2808,7 +2808,7 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
     GtkWidget* lbl_handlers = gtk_label_new(nullptr);
     str = g_strdup_printf("<b>%s</b>", dialog_mnemonics[mode]);
     gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handlers), str);
-    g_free(str);
+    free(str);
     gtk_widget_set_halign(GTK_WIDGET(lbl_handlers), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(lbl_handlers), GTK_ALIGN_START);
 
@@ -3117,17 +3117,17 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
     GtkWidget* lbl_edit0 = gtk_label_new(nullptr);
     str = g_strdup_printf("<a href=\"%d\">%s</a>", 0, "Edit");
     gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit0), str);
-    g_free(str);
+    free(str);
     g_signal_connect(G_OBJECT(lbl_edit0), "activate-link", G_CALLBACK(on_activate_link), hnd);
     GtkWidget* lbl_edit1 = gtk_label_new(nullptr);
     str = g_strdup_printf("<a href=\"%d\">%s</a>", 1, "Edit");
     gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit1), str);
-    g_free(str);
+    free(str);
     g_signal_connect(G_OBJECT(lbl_edit1), "activate-link", G_CALLBACK(on_activate_link), hnd);
     GtkWidget* lbl_edit2 = gtk_label_new(nullptr);
     str = g_strdup_printf("<a href=\"%d\">%s</a>", 2, "Edit");
     gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit2), str);
-    g_free(str);
+    free(str);
     g_signal_connect(G_OBJECT(lbl_edit2), "activate-link", G_CALLBACK(on_activate_link), hnd);
 
     /* Creating container boxes - at this point the dialog already comes
@@ -3312,10 +3312,10 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
         // They are - saving
         str = g_strdup_printf("%d", width);
         xset_set(handler_conf_xset[HANDLER_MODE_ARC], "x", str);
-        g_free(str);
+        free(str);
         str = g_strdup_printf("%d", height);
         xset_set(handler_conf_xset[HANDLER_MODE_ARC], "y", str);
-        g_free(str);
+        free(str);
     }
 
     // Clearing up dialog

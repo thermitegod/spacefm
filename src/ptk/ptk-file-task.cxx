@@ -141,14 +141,14 @@ save_progress_dialog_size(PtkFileTask* ptask)
         xset_set("task_pop_top", "s", s);
     else
         xset_set("task_pop_top", "x", s);
-    g_free(s);
+    free(s);
 
     s = g_strdup_printf("%d", allocation.height);
     if (ptask->task->type == VFS_FILE_TASK_EXEC)
         xset_set("task_pop_top", "z", s);
     else
         xset_set("task_pop_top", "y", s);
-    g_free(s);
+    free(s);
 }
 
 void
@@ -203,14 +203,14 @@ ptk_file_task_destroy(PtkFileTask* ptask)
     gtk_text_buffer_set_text(ptask->log_buf, "", -1);
     g_object_unref(ptask->log_buf);
 
-    g_free(ptask->dsp_file_count);
-    g_free(ptask->dsp_size_tally);
-    g_free(ptask->dsp_elapsed);
-    g_free(ptask->dsp_curspeed);
-    g_free(ptask->dsp_curest);
-    g_free(ptask->dsp_avgspeed);
-    g_free(ptask->dsp_avgest);
-    g_free(ptask->pop_handler);
+    free(ptask->dsp_file_count);
+    free(ptask->dsp_size_tally);
+    free(ptask->dsp_elapsed);
+    free(ptask->dsp_curspeed);
+    free(ptask->dsp_curest);
+    free(ptask->dsp_avgspeed);
+    free(ptask->dsp_avgest);
+    free(ptask->pop_handler);
 
     g_slice_free(PtkFileTask, ptask);
     // LOG_INFO("ptk_file_task_destroy DONE ptask={:p}", fmt::ptr(ptask));
@@ -370,7 +370,7 @@ static bool
 ptk_file_task_kill_cpids(char* cpids)
 {
     vfs_file_task_kill_cpids(cpids, SIGKILL);
-    g_free(cpids);
+    free(cpids);
     return false;
 }
 
@@ -1062,17 +1062,17 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             // Copy: <src basename>
             str = g_filename_display_basename(task->current_file.c_str());
             ufile_path = g_markup_printf_escaped("<b>%s</b>", str);
-            g_free(str);
+            free(str);
 
             // From: <src_dir>
             str = g_path_get_dirname(task->current_file.c_str());
             usrc_dir = g_filename_display_name(str);
-            g_free(str);
+            free(str);
             if (!(usrc_dir[0] == '/' && usrc_dir[1] == '\0'))
             {
                 str = usrc_dir;
                 usrc_dir = g_strdup_printf("%s/", str);
-                g_free(str);
+                free(str);
             }
 
             // To: <dest_dir> OR <dest_file>
@@ -1083,15 +1083,15 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
                 if (strcmp(str, str2))
                 {
                     // source and dest filenames differ, user renamed - show all
-                    g_free(str);
-                    g_free(str2);
+                    free(str);
+                    free(str2);
                     udest = g_filename_display_name(task->current_dest.c_str());
                 }
                 else
                 {
                     // source and dest filenames same - show dest dir only
-                    g_free(str);
-                    g_free(str2);
+                    free(str);
+                    free(str2);
                     str = g_path_get_dirname(task->current_dest.c_str());
                     if (str[0] == '/' && str[1] == '\0')
                         udest = g_filename_display_name(str);
@@ -1099,9 +1099,9 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
                     {
                         str2 = g_filename_display_name(str);
                         udest = g_strdup_printf("%s/", str2);
-                        g_free(str2);
+                        free(str2);
                     }
-                    g_free(str);
+                    free(str);
                 }
             }
         }
@@ -1117,7 +1117,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         {
             str = udest;
             udest = g_strdup_printf("%s/", str);
-            g_free(str);
+            free(str);
         }
     }
     gtk_label_set_markup(ptask->from, ufile_path);
@@ -1125,9 +1125,9 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         gtk_label_set_text(ptask->src_dir, usrc_dir);
     if (ptask->to)
         gtk_label_set_text(ptask->to, udest);
-    g_free(ufile_path);
-    g_free(usrc_dir);
-    g_free(udest);
+    free(ufile_path);
+    free(usrc_dir);
+    free(udest);
 
     // progress bar
     if (task->type != VFS_FILE_TASK_EXEC || ptask->task->custom_percent)
@@ -1195,7 +1195,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         gtk_label_set_text(ptask->current, stats);
         // gtk_progress_bar_set_text( ptask->progress_bar, g_strdup_printf( "%d %%   %s",
         // task->percent, stats ) );
-        g_free(stats);
+        free(stats);
     }
 
     // error/output log
@@ -1319,7 +1319,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         }
     }
     gtk_label_set_text(ptask->errors, errs);
-    g_free(errs);
+    free(errs);
     // LOG_INFO("ptk_file_task_progress_update DONE ptask={:p}", fmt::ptr(ptask));
 }
 
@@ -1443,9 +1443,9 @@ ptk_file_task_update(PtkFileTask* ptask)
         elapsed2 = g_strdup(elapsed);
     unsigned int secs = (timer_elapsed - (hours * 3600) - (mins * 60));
     char* elapsed3 = g_strdup_printf("%s:%02d", elapsed2, secs);
-    g_free(elapsed);
-    g_free(elapsed2);
-    g_free(ptask->dsp_elapsed);
+    free(elapsed);
+    free(elapsed2);
+    free(ptask->dsp_elapsed);
     ptask->dsp_elapsed = elapsed3;
 
     if (task->type != VFS_FILE_TASK_EXEC)
@@ -1537,17 +1537,17 @@ ptk_file_task_update(PtkFileTask* ptask)
         else
             remain2 = fmt::format(":{:02}", remain);
 
-        g_free(ptask->dsp_file_count);
+        free(ptask->dsp_file_count);
         ptask->dsp_file_count = g_strdup(file_count.c_str());
-        g_free(ptask->dsp_size_tally);
+        free(ptask->dsp_size_tally);
         ptask->dsp_size_tally = g_strdup(size_tally.c_str());
-        g_free(ptask->dsp_curspeed);
+        free(ptask->dsp_curspeed);
         ptask->dsp_curspeed = g_strdup(speed1.c_str());
-        g_free(ptask->dsp_avgspeed);
+        free(ptask->dsp_avgspeed);
         ptask->dsp_avgspeed = g_strdup(speed2.c_str());
-        g_free(ptask->dsp_curest);
+        free(ptask->dsp_curest);
         ptask->dsp_curest = g_strdup(remain1.c_str());
-        g_free(ptask->dsp_avgest);
+        free(ptask->dsp_avgest);
         ptask->dsp_avgest = g_strdup(remain2.c_str());
         ;
     }
@@ -1565,7 +1565,7 @@ ptk_file_task_update(PtkFileTask* ptask)
         // insert into log
         gtk_text_buffer_get_iter_at_mark(ptask->log_buf, &iter, ptask->log_end);
         gtk_text_buffer_insert(ptask->log_buf, &iter, text, -1);
-        g_free(text);
+        free(text);
         ptask->log_appended = true;
 
         // trim log ?  (less than 64K and 800 lines)
@@ -1767,7 +1767,7 @@ on_query_input_keypress(GtkWidget* widget, GdkEventKey* event, PtkFileTask* ptas
             gtk_dialog_response(GTK_DIALOG(dlg), RESPONSE_RENAME);
         else
             gtk_dialog_response(GTK_DIALOG(dlg), RESPONSE_AUTO_RENAME);
-        g_free(new_name);
+        free(new_name);
         return true;
     }
     return false;
@@ -1780,7 +1780,7 @@ on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input)
     char* new_name = multi_input_get_text(query_input);
     const char* old_name = (const char*)g_object_get_data(G_OBJECT(query_input), "old_name");
     bool can_rename = new_name && (0 != strcmp(new_name, old_name));
-    g_free(new_name);
+    free(new_name);
     GtkWidget* dlg = gtk_widget_get_toplevel(query_input);
     if (!GTK_IS_DIALOG(dlg))
         return;
@@ -1844,10 +1844,10 @@ query_overwrite_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
             {
                 dir_name = g_path_get_dirname(ptask->task->current_dest.c_str());
                 *ptask->query_new_dest = g_build_filename(dir_name, file_name, nullptr);
-                g_free(file_name);
-                g_free(dir_name);
+                free(file_name);
+                free(dir_name);
             }
-            g_free(str);
+            free(str);
             break;
         case RESPONSE_PAUSE:
             ptk_file_task_pause(ptask, VFS_FILE_TASK_PAUSE);
@@ -1872,10 +1872,10 @@ query_overwrite_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
             GPOINTER_TO_INT((void*)g_object_get_data(G_OBJECT(dlg), "has_overwrite_btn"));
         str = g_strdup_printf("%d", allocation.width);
         xset_set("task_popups", has_overwrite_btn ? "x" : "s", str);
-        g_free(str);
+        free(str);
         str = g_strdup_printf("%d", allocation.height);
         xset_set("task_popups", has_overwrite_btn ? "y" : "z", str);
-        g_free(str);
+        free(str);
     }
 
     gtk_widget_destroy(GTK_WIDGET(dlg));
@@ -2051,11 +2051,11 @@ query_overwrite(PtkFileTask* ptask)
             title = "Filename Exists";
             message = "<b>Filename already exists.</b>  Please rename or select an action.";
 
-            g_free(dest_size);
-            g_free(dest_time);
-            g_free(src_size);
-            g_free(src_time);
-            g_free(src_rel);
+            free(dest_size);
+            free(dest_time);
+            free(src_size);
+            free(src_time);
+            free(src_rel);
         }
     }
     else
@@ -2084,12 +2084,12 @@ query_overwrite(PtkFileTask* ptask)
 
     int pos = ext_disp ? g_utf8_strlen(base_name_disp, -1) - g_utf8_strlen(ext_disp, -1) - 1 : -1;
 
-    g_free(base_name);
-    g_free(unique_name);
-    g_free(ext_disp);
-    g_free(src_dir);
-    g_free(dest_dir);
-    g_free(new_name_plain);
+    free(base_name);
+    free(unique_name);
+    free(ext_disp);
+    free(src_dir);
+    free(dest_dir);
+    free(new_name_plain);
 
     // create dialog
     if (ptask->progress_dlg)
@@ -2240,7 +2240,7 @@ query_overwrite(PtkFileTask* ptask)
                      "changed",
                      G_CALLBACK(on_multi_input_changed),
                      query_input);
-    g_object_set_data_full(G_OBJECT(query_input), "old_name", base_name_disp, g_free);
+    g_object_set_data_full(G_OBJECT(query_input), "old_name", base_name_disp, free);
     gtk_widget_set_size_request(GTK_WIDGET(query_input), -1, 60);
     gtk_widget_set_size_request(GTK_WIDGET(scroll), -1, 60);
     GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(query_input));
@@ -2268,14 +2268,14 @@ query_overwrite(PtkFileTask* ptask)
     gtk_container_add(GTK_CONTAINER(align), GTK_WIDGET(hbox));
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(align), false, true, 0);
 
-    g_free(src_dir_disp);
-    g_free(dest_dir_disp);
-    g_free(new_name);
-    g_free(from_size_str);
-    g_free(to_size_str);
+    free(src_dir_disp);
+    free(dest_dir_disp);
+    free(new_name);
+    free(from_size_str);
+    free(to_size_str);
 
     // update displays (mutex is already locked)
-    g_free(ptask->dsp_curspeed);
+    free(ptask->dsp_curspeed);
     ptask->dsp_curspeed = g_strdup_printf("stalled");
     ptk_file_task_progress_update(ptask);
     if (ptask->task_view &&

@@ -402,7 +402,7 @@ receive_socket_command(int client, GString* args)
     write(client, &cmd, sizeof(char)); // send exit status
     if (reply && reply[0])
         write(client, reply, strlen(reply)); // send reply or error msg
-    g_free(reply);
+    free(reply);
 }
 
 int

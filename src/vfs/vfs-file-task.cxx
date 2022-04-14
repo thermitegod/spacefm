@@ -94,7 +94,7 @@ static void
 vfs_file_task_clear(VFSFileTask* task)
 {
     g_mutex_clear(task->mutex);
-    g_free(task->mutex);
+    free(task->mutex);
 }
 
 static void
@@ -158,11 +158,11 @@ vfs_file_task_get_unique_name(const char* dest_dir, const char* base_name, const
     struct stat dest_stat;
     char* new_name = g_strdup_printf("%s%s%s", base_name, ext && ext[0] ? "." : "", ext ? ext : "");
     char* new_dest_file = g_build_filename(dest_dir, new_name, nullptr);
-    g_free(new_name);
+    free(new_name);
     unsigned int n = 1;
     while (n && lstat(new_dest_file, &dest_stat) == 0)
     {
-        g_free(new_dest_file);
+        free(new_dest_file);
         new_name = g_strdup_printf("%s-%s%d%s%s",
                                    base_name,
                                    "copy",
@@ -170,11 +170,11 @@ vfs_file_task_get_unique_name(const char* dest_dir, const char* base_name, const
                                    ext && ext[0] ? "." : "",
                                    ext ? ext : "");
         new_dest_file = g_build_filename(dest_dir, new_name, nullptr);
-        g_free(new_name);
+        free(new_name);
     }
     if (n == 0)
     {
-        g_free(new_dest_file);
+        free(new_dest_file);
         return nullptr;
     }
     return new_dest_file;
@@ -222,11 +222,11 @@ check_overwrite(VFSFileTask* task, const char* dest_file, bool* dest_exists, cha
             char* old_name = g_path_get_basename(dest_file);
             char* dest_dir = g_path_get_dirname(dest_file);
             std::string base_name = get_name_extension(old_name, ext);
-            g_free(old_name);
+            free(old_name);
             *new_dest_file =
                 vfs_file_task_get_unique_name(dest_dir, base_name.c_str(), ext.c_str());
             *dest_exists = false;
-            g_free(dest_dir);
+            free(dest_dir);
             if (*new_dest_file)
                 return !task->abort;
             // else ran out of names - fall through to query user
@@ -260,13 +260,13 @@ check_overwrite(VFSFileTask* task, const char* dest_file, bool* dest_exists, cha
             // may pause here - user may change overwrite mode
             if (should_abort(task))
             {
-                g_free(new_dest);
+                free(new_dest);
                 return false;
             }
 
             if (task->overwrite_mode != VFS_FILE_TASK_RENAME)
             {
-                g_free(new_dest);
+                free(new_dest);
                 new_dest = nullptr;
                 switch (task->overwrite_mode)
                 {
@@ -338,7 +338,7 @@ update_file_display(const char* path)
     // blocking stat call in GUI thread during writes
     char* dir_path = g_path_get_dirname(path);
     VFSDir* vdir = vfs_dir_get_by_path_soft(dir_path);
-    g_free(dir_path);
+    free(dir_path);
     if (vdir && vdir->avoid_changes)
     {
         VFSFileInfo* file = vfs_file_info_new();
@@ -610,14 +610,14 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
         }
     }
     if (new_dest_file)
-        g_free(new_dest_file);
+        free(new_dest_file);
     if (!copy_fail && task->error_first)
         task->error_first = false;
     return !copy_fail;
 _return_:
 
     if (new_dest_file)
-        g_free(new_dest_file);
+        free(new_dest_file);
     return false;
 }
 
@@ -629,9 +629,9 @@ vfs_file_task_copy(char* src_file, VFSFileTask* task)
 
     file_name = g_path_get_basename(src_file);
     dest_file = g_build_filename(task->dest_dir.c_str(), file_name, nullptr);
-    g_free(file_name);
+    free(file_name);
     vfs_file_task_do_copy(task, src_file, dest_file);
-    g_free(dest_file);
+    free(dest_file);
 }
 
 static int
@@ -705,7 +705,7 @@ vfs_file_task_do_move(VFSFileTask* task, const char* src_file,
         vfs_file_task_error(task, errno, "Renaming", src_file);
         if (should_abort(task))
         {
-            g_free(new_dest_file);
+            free(new_dest_file);
             return 0;
         }
     }
@@ -720,7 +720,7 @@ vfs_file_task_do_move(VFSFileTask* task, const char* src_file,
     vfs_file_task_unlock(task);
 
     if (new_dest_file)
-        g_free(new_dest_file);
+        free(new_dest_file);
     return 0;
 }
 
@@ -738,7 +738,7 @@ vfs_file_task_move(char* src_file, VFSFileTask* task)
 
     char* dest_file = g_build_filename(task->dest_dir.c_str(), file_name, nullptr);
 
-    g_free(file_name);
+    free(file_name);
 
     struct stat src_stat;
     struct stat dest_stat;
@@ -861,7 +861,7 @@ vfs_file_task_link(char* src_file, VFSFileTask* task)
 
     char* file_name = g_path_get_basename(src_file);
     char* old_dest_file = g_build_filename(task->dest_dir.c_str(), file_name, nullptr);
-    g_free(file_name);
+    free(file_name);
     char* dest_file = old_dest_file;
 
     // MOD  setup task for check overwrite
@@ -925,8 +925,8 @@ vfs_file_task_link(char* src_file, VFSFileTask* task)
     vfs_file_task_unlock(task);
 
     if (new_dest_file)
-        g_free(new_dest_file);
-    g_free(old_dest_file);
+        free(new_dest_file);
+    free(old_dest_file);
 }
 
 static void
@@ -1035,7 +1035,7 @@ vfs_file_task_get_cpids(GPid pid)
         nl[0] = '\n';
         pids = nl + 1;
         GPid pidi = strtol(pida, nullptr, 10);
-        g_free(pida);
+        free(pida);
         if (pidi)
         {
             char* gcpids;
@@ -1043,12 +1043,12 @@ vfs_file_task_get_cpids(GPid pid)
             {
                 char* old_cpids = cpids;
                 cpids = g_strdup_printf("%s%s", old_cpids, gcpids);
-                g_free(old_cpids);
-                g_free(gcpids);
+                free(old_cpids);
+                free(gcpids);
             }
         }
     }
-    g_free(pids);
+    free(pids);
 
     // LOG_INFO("vfs_file_task_get_cpids {}[{}]", pid, cpids );
     return cpids;
@@ -1069,7 +1069,7 @@ vfs_file_task_kill_cpids(char* cpids, int signal)
         nl[0] = '\n';
         pids = nl + 1;
         GPid pidi = strtol(pida, nullptr, 10);
-        g_free(pida);
+        free(pida);
         if (pidi)
         {
             // LOG_INFO("KILL_CPID pidi={} signal={}", pidi, signal );
@@ -1086,7 +1086,7 @@ cb_exec_child_cleanup(GPid pid, int status, char* tmp_file)
     if (tmp_file)
     {
         std::filesystem::remove(tmp_file);
-        g_free(tmp_file);
+        free(tmp_file);
     }
     LOG_INFO("async child finished  pid={} status={}", pid, status);
 }
@@ -1533,7 +1533,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         auth = Glib::find_program_in_path("spacefm-auth");
         if (auth.empty())
         {
-            g_free(sum_script);
+            free(sum_script);
             sum_script = nullptr;
             LOG_WARN("spacefm-auth not found in path - this reduces your security");
         }
@@ -1561,7 +1561,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
             argv.push_back(task->exec_script);
             argv.push_back(sum_script);
         }
-        g_free(sum_script);
+        free(sum_script);
     }
     else if (task->exec_direct)
     {
@@ -1949,7 +1949,7 @@ vfs_file_task_run(VFSFileTask* task)
         {
             char* dir = g_path_get_dirname((char*)task->src_paths->data);
             task->avoid_changes = vfs_volume_dir_avoid_changes(dir);
-            g_free(dir);
+            free(dir);
         }
         else
             task->avoid_changes = vfs_volume_dir_avoid_changes(task->dest_dir.c_str());

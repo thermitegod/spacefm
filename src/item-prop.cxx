@@ -288,12 +288,12 @@ get_rule_next(char** s, int* sub, int* comp, char** value)
     if (!vs)
         return false;
     *sub = strtol(vs, nullptr, 10);
-    g_free(vs);
+    free(vs);
     if (*sub < 0 || *sub >= static_cast<int>(G_N_ELEMENTS(context_sub)))
         return false;
     vs = get_element_next(s);
     *comp = strtol(vs, nullptr, 10);
-    g_free(vs);
+    free(vs);
     if (*comp < 0 || *comp >= static_cast<int>(G_N_ELEMENTS(context_comp)))
         return false;
     if (!(*value = get_element_next(s)))
@@ -328,14 +328,14 @@ xset_context_test(XSetContext* context, char* rules, bool def_disable)
     if (!(s = get_element_next(&elements)))
         return 0;
     action = strtol(s, nullptr, 10);
-    g_free(s);
+    free(s);
     if (action < 0 || action > 3)
         return 0;
 
     if (!(s = get_element_next(&elements)))
         return 0;
     match = strtol(s, nullptr, 10);
-    g_free(s);
+    free(s);
     if (match < 0 || match > 3)
         return 0;
 
@@ -416,9 +416,9 @@ xset_context_test(XSetContext* context, char* rules, bool def_disable)
                         // case insensitive
                         char* str = g_utf8_strdown(context->var[sub], -1);
                         test = fnmatch(s, str, 0);
-                        g_free(str);
+                        free(str);
                     }
-                    g_free(s);
+                    free(s);
                     if (comp == CONTEXT_COMP_MATCH)
                         test = !test;
                     break;
@@ -445,7 +445,7 @@ xset_context_test(XSetContext* context, char* rules, bool def_disable)
             else
                 eleval[0] = '\0';
         } while (eleval[0] != '\0');
-        g_free(value);
+        free(value);
 
         if (test)
         {
@@ -533,7 +533,7 @@ context_build(ContextData* ctxt)
                                           sub,
                                           comp,
                                           value);
-            g_free(old_context);
+            free(old_context);
         } while (gtk_tree_model_iter_next(model, &it));
     }
     return new_context;
@@ -623,8 +623,8 @@ on_context_button_press(GtkWidget* widget, ContextData* ctxt)
                            CONTEXT_COL_VALUE,
                            value,
                            -1);
-        g_free(disp);
-        g_free(value);
+        free(disp);
+        free(value);
         gtk_widget_set_sensitive(GTK_WIDGET(ctxt->btn_ok), true);
         if (widget == GTK_WIDGET(ctxt->btn_add))
             gtk_tree_selection_select_iter(gtk_tree_view_get_selection(GTK_TREE_VIEW(ctxt->view)),
@@ -661,12 +661,12 @@ on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
     if (def_comp)
     {
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_comp), strtol(def_comp, nullptr, 10));
-        g_free(def_comp);
+        free(def_comp);
     }
     while ((value = get_element_next(&elements)))
     {
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_value), value);
-        g_free(value);
+        free(value);
     }
     gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(ctxt->box_value))), "");
     if (ctxt->context && ctxt->context->valid)
@@ -791,7 +791,7 @@ enable_options(ContextData* ctxt)
         char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
         if (text && !strcmp(text, "Are you sure?"))
             gtk_text_buffer_set_text(buf, "", -1);
-        g_free(text);
+        free(text);
     }
 }
 
@@ -820,7 +820,7 @@ command_script_stat(ContextData* ctxt)
         ctxt->script_stat_valid = true;
     else
         ctxt->script_stat_valid = false;
-    g_free(script);
+    free(script);
 }
 
 void
@@ -848,7 +848,7 @@ get_text_view(GtkTextView* view)
     char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
     if (!(text && text[0]))
     {
-        g_free(text);
+        free(text);
         return nullptr;
     }
     std::string text2 = text;
@@ -895,7 +895,7 @@ load_command_script(ContextData* ctxt, XSet* set)
     gtk_text_view_set_editable(GTK_TEXT_VIEW(ctxt->cmd_script), !set->plugin && have_access);
     gtk_text_buffer_set_modified(buf, modified);
     command_script_stat(ctxt);
-    g_free(script);
+    free(script);
     if (have_access && geteuid() != 0)
         gtk_widget_hide(ctxt->cmd_edit_root);
     else
@@ -939,7 +939,7 @@ save_command_script(ContextData* ctxt, bool query)
 
     file.close();
 
-    g_free(text);
+    free(text);
 }
 
 static void
@@ -959,7 +959,7 @@ on_script_toggled(GtkWidget* item, ContextData* ctxt)
     {
         // set to script
         gtk_widget_hide(ctxt->cmd_line_label);
-        g_free(ctxt->temp_cmd_line);
+        free(ctxt->temp_cmd_line);
         ctxt->temp_cmd_line = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_script));
         load_command_script(ctxt, ctxt->set);
     }
@@ -1013,17 +1013,17 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
             path = g_strdup(g_strstrip(text));
             if (path[0] == '\0' || (path[0] != '/' && !g_ascii_isalnum(path[0])))
             {
-                g_free(path);
+                free(path);
                 path = nullptr;
             }
             else if (path[0] != '/')
             {
                 str = path;
                 path = g_strdup(Glib::find_program_in_path(str).c_str());
-                g_free(str);
+                free(str);
             }
         }
-        g_free(text);
+        free(text);
         if (!(path && mime_type_is_text_file(path, nullptr)))
         {
             xset_msg_dialog(GTK_WIDGET(ctxt->dlg),
@@ -1032,7 +1032,7 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
                             GTK_BUTTONS_OK,
                             "The command line does not begin with a text file (script) to be "
                             "opened, or the script was not found in your $PATH.");
-            g_free(path);
+            free(path);
             return;
         }
     }
@@ -1046,7 +1046,7 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
     {
         xset_edit(ctxt->dlg, path, btn == ctxt->cmd_edit_root, btn != ctxt->cmd_edit_root);
     }
-    g_free(path);
+    free(path);
 }
 
 static void
@@ -1063,7 +1063,7 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
             folder = g_build_filename(ctxt->set->plug_dir, "files", nullptr);
             if (!std::filesystem::exists(folder))
             {
-                g_free(folder);
+                free(folder);
                 folder = g_build_filename(ctxt->set->plug_dir, ctxt->set->plug_name, nullptr);
             }
         }
@@ -1104,7 +1104,7 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
         return;
     if (folder && std::filesystem::is_directory(folder))
         open_in_prog(folder);
-    g_free(folder);
+    free(folder);
 }
 
 static void
@@ -1258,9 +1258,9 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
                                              add_path);
             GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->item_target));
             gtk_text_buffer_set_text(buf, new_path, -1);
-            g_free(new_path);
-            g_free(add_path);
-            g_free(old_path);
+            free(new_path);
+            free(add_path);
+            free(old_path);
         }
     }
     else
@@ -1285,7 +1285,7 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
                 GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->item_target));
                 gtk_text_buffer_set_text(buf, app, -1);
             }
-            g_free(app);
+            free(app);
             vfs_mime_type_unref(mime_type);
         }
         else
@@ -1300,7 +1300,7 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
             {
                 GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->item_target));
                 gtk_text_buffer_set_text(buf, exec_path, -1);
-                g_free(exec_path);
+                free(exec_path);
             }
         }
     }
@@ -1348,7 +1348,7 @@ replace_item_props(ContextData* ctxt)
 
         if (x >= 0)
         {
-            g_free(rset->x);
+            free(rset->x);
             if (x == 0)
                 rset->x = nullptr;
             else
@@ -1358,10 +1358,10 @@ replace_item_props(ContextData* ctxt)
         {
             // target
             char* str = multi_input_get_text(ctxt->item_target);
-            g_free(rset->z);
+            free(rset->z);
             rset->z = str ? g_strstrip(str) : nullptr;
             // run as user
-            g_free(rset->y);
+            free(rset->y);
             rset->y = g_strdup(gtk_entry_get_text(GTK_ENTRY(ctxt->cmd_user)));
             // menu style
             if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_checkbox)))
@@ -1373,11 +1373,11 @@ replace_item_props(ContextData* ctxt)
             else
                 rset->menu_style = XSET_MENU_NORMAL;
             // style msg
-            g_free(rset->desc);
+            free(rset->desc);
             rset->desc = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_msg));
         }
         // command line
-        g_free(rset->line);
+        free(rset->line);
         if (x == XSET_CMD_LINE)
         {
             rset->line = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_script));
@@ -1429,7 +1429,7 @@ replace_item_props(ContextData* ctxt)
             // built-in label has been changed from default, save it
             rset->in_terminal = true;
 
-        g_free(rset->menu_label);
+        free(rset->menu_label);
         if (rset->tool > XSET_TOOL_CUSTOM &&
             !g_strcmp0(gtk_entry_get_text(GTK_ENTRY(ctxt->item_name)),
                        xset_get_builtin_toolitem_label(rset->tool)))
@@ -1445,7 +1445,7 @@ replace_item_props(ContextData* ctxt)
     //( rset->menu_style != XSET_MENU_CHECK || rset->tool ) )
     {
         char* old_icon = g_strdup(mset->icon);
-        g_free(mset->icon);
+        free(mset->icon);
         const char* icon_name = gtk_entry_get_text(GTK_ENTRY(ctxt->item_icon));
         if (icon_name && icon_name[0])
             mset->icon = g_strdup(icon_name);
@@ -1455,7 +1455,7 @@ replace_item_props(ContextData* ctxt)
         if (rset->lock && g_strcmp0(old_icon, mset->icon))
             // built-in icon has been changed from default, save it
             rset->keep_terminal = true;
-        g_free(old_icon);
+        free(old_icon);
     }
 
     // Ignore Context
@@ -1520,7 +1520,7 @@ on_icon_choose_button_clicked(GtkWidget* widget, ContextData* ctxt)
     if (new_icon)
     {
         gtk_entry_set_text(GTK_ENTRY(ctxt->item_icon), new_icon);
-        g_free(new_icon);
+        free(new_icon);
     }
 }
 
@@ -1929,17 +1929,17 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
         if (i < 0 || i > 3)
             i = 0;
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_action), i);
-        g_free(match);
-        g_free(action);
+        free(match);
+        free(action);
     }
     else
     {
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_match), 0);
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_action), 0);
         if (match)
-            g_free(match);
+            free(match);
         if (action)
-            g_free(action);
+            free(action);
     }
     // set rules
     int sub, comp;
@@ -1961,9 +1961,9 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
                            CONTEXT_COL_VALUE,
                            value,
                            -1);
-        g_free(disp);
+        free(disp);
         if (value)
-            g_free(value);
+            free(value);
     }
     gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_sub), 0);
 
@@ -2153,8 +2153,8 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
                           "Command Dir",
                           dir_has_files(path) ? "" : "(no files)");
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str);
-    g_free(str);
-    g_free(path);
+    free(str);
+    free(path);
 
     path = g_build_filename(xset_get_config_dir(),
                             "plugin-data",
@@ -2164,14 +2164,14 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
                           "Data Dir",
                           dir_has_files(path) ? "" : "(no files)");
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str);
-    g_free(str);
-    g_free(path);
+    free(str);
+    free(path);
 
     if (rset->plugin)
     {
         str = g_strdup_printf("%s  $fm_plugin_dir", "Plugin Dir");
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str);
-        g_free(str);
+        free(str);
     }
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(ctxt->open_browser), false, true, 8);
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(hbox), false, true, 0);
@@ -2230,7 +2230,7 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), item_type_str);
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->item_type), 0);
         gtk_widget_set_sensitive(ctxt->item_type, false);
-        g_free(item_type_str);
+        free(item_type_str);
     }
 
     ctxt->temp_cmd_line = !set->lock ? g_strdup(rset->line) : nullptr;
@@ -2359,7 +2359,7 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
         {
             case GTK_RESPONSE_OK:
                 if (mset->context)
-                    g_free(mset->context);
+                    free(mset->context);
                 mset->context = context_build(ctxt);
                 replace_item_props(ctxt);
                 exit_loop = true;
@@ -2380,13 +2380,13 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     {
         str = g_strdup_printf("%d", width);
         xset_set("context_dlg", "x", str);
-        g_free(str);
+        free(str);
         str = g_strdup_printf("%d", height);
         xset_set("context_dlg", "y", str);
-        g_free(str);
+        free(str);
     }
 
     gtk_widget_destroy(ctxt->dlg);
-    g_free(ctxt->temp_cmd_line);
+    free(ctxt->temp_cmd_line);
     g_slice_free(ContextData, ctxt);
 }

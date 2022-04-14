@@ -72,9 +72,9 @@ sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_dat
         if (name_b)
         {
             ret = g_ascii_strcasecmp(name_a, name_b);
-            g_free(name_b);
+            free(name_b);
         }
-        g_free(name_a);
+        free(name_a);
     }
     return ret;
 }
@@ -98,10 +98,10 @@ add_list_item(GtkListStore* list, const char* path)
                 if (!g_strcmp0(file, name))
                 {
                     // already exists
-                    g_free(file);
+                    free(file);
                     return;
                 }
-                g_free(file);
+                free(file);
             }
         } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(list), &it));
     }
@@ -214,7 +214,7 @@ app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all
     if (mime_desc)
     {
         gtk_label_set_text(GTK_LABEL(file_type), mime_desc);
-        g_free(mime_desc);
+        free(mime_desc);
     }
     /* Don't set default handler for directories and files with unknown type */
     if (!show_default ||
@@ -410,13 +410,13 @@ on_browse_btn_clicked(GtkButton* button, void* user_data)
             {
                 char* app_name = g_path_get_basename(filename);
                 gtk_entry_set_text(entry, app_name);
-                g_free(app_name);
+                free(app_name);
             }
             else
             {
                 gtk_entry_set_text(entry, filename);
             }
-            g_free(filename);
+            free(filename);
             gtk_widget_set_sensitive(GTK_WIDGET(notebook), gtk_entry_get_text_length(entry) == 0);
             gtk_widget_grab_focus(GTK_WIDGET(entry));
             gtk_editable_set_position(GTK_EDITABLE(entry), -1);
@@ -439,10 +439,10 @@ on_dlg_response(GtkDialog* dlg, int id, void* user_data)
     {
         char* str = g_strdup_printf("%d", width);
         xset_set("app_dlg", "x", str);
-        g_free(str);
+        free(str);
         str = g_strdup_printf("%d", height);
         xset_set("app_dlg", "y", str);
-        g_free(str);
+        free(str);
     }
 
     switch (id)
@@ -559,7 +559,7 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, VFSMimeType* mime_type, bool foc
             {
                 char* custom = nullptr;
                 vfs_mime_type_add_action(mime_type, app, &custom);
-                g_free(app);
+                free(app);
                 app = custom;
             }
         }

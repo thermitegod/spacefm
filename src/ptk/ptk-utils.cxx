@@ -109,8 +109,8 @@ transpose_nonlatin_keypress(GdkEventKey* event)
                 break;
             }
         }
-        g_free(keys);
-        g_free(keyvals);
+        free(keys);
+        free(keyvals);
     }
 }
 #endif

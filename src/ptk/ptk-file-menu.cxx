@@ -266,14 +266,14 @@ on_popup_sortby(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, int order)
             v = GTK_SORT_DESCENDING;
         val = g_strdup_printf("%d", v);
         xset_set_panel(file_browser->mypanel, "list_detailed", "y", val);
-        g_free(val);
+        free(val);
         ptk_file_browser_set_sort_type(file_browser, (GtkSortType)v);
     }
     else
     {
         val = g_strdup_printf("%d", sort_order);
         xset_set_panel(file_browser->mypanel, "list_detailed", "x", val);
-        g_free(val);
+        free(val);
         ptk_file_browser_set_sort_order(file_browser, (PtkFBSortOrder)sort_order);
     }
 }
@@ -423,7 +423,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                             p,
                             p);
         xset_set_set(set, XSET_SET_SET_DESC, desc);
-        g_free(desc);
+        free(desc);
         set = xset_set_cb("rubberband", (GFunc)main_window_rubberband_all, nullptr);
         set->disable = false;
     }
@@ -544,7 +544,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                         p,
                         p);
     xset_set_set(set, XSET_SET_SET_DESC, desc);
-    g_free(desc);
+    free(desc);
     set = xset_get("con_view");
     set->disable = !browser->file_list;
     desc = g_strdup_printf("panel%d_show_toolbox panel%d_show_sidebar panel%d_show_devmon "
@@ -557,7 +557,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                            p,
                            p);
     xset_set_set(set, XSET_SET_SET_DESC, desc);
-    g_free(desc);
+    free(desc);
     xset_add_menuitem(browser, menu, accel_group, set);
 }
 
@@ -565,10 +565,10 @@ static void
 ptk_file_menu_free(PtkFileMenu* data)
 {
     if (data->file_path)
-        g_free(data->file_path);
+        free(data->file_path);
     if (data->info)
         vfs_file_info_unref(data->info);
-    g_free(data->cwd);
+    free(data->cwd);
     if (data->sel_files)
         vfs_file_info_list_free(data->sel_files);
     if (data->accel_group)
@@ -895,7 +895,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                 g_object_set_data_full(G_OBJECT(app_menu_item),
                                        "desktop_file",
                                        g_strdup(app.c_str()),
-                                       g_free);
+                                       free);
             }
         }
 
@@ -920,20 +920,20 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         set->lock = true;
         set->menu_style = XSET_MENU_NORMAL;
         if (set->shared_key)
-            g_free(set->shared_key);
+            free(set->shared_key);
         set->shared_key = g_strdup("open_all");
         set2 = xset_get("open_all");
         if (set->menu_label)
-            g_free(set->menu_label);
+            free(set->menu_label);
         set->menu_label = g_strdup(set2->menu_label);
         if (set->context)
         {
-            g_free(set->context);
+            free(set->context);
             set->context = nullptr;
         }
         item = GTK_MENU_ITEM(xset_add_menuitem(browser, submenu, accel_group, set));
         if (set->menu_label)
-            g_free(set->menu_label);
+            free(set->menu_label);
         set->menu_label = nullptr; // don't bother to save this
 
         // Edit / Dir
@@ -967,7 +967,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                     set = xset_set_cb(name, (GFunc)on_open_in_tab, data);
                     xset_set_ob1_int(set, "tab_num", i);
                     set->disable = (i > tab_count) || (i == tab_num);
-                    g_free(name);
+                    free(name);
                 }
 
                 set = xset_set_cb("open_in_panelprev", (GFunc)on_open_in_panel, data);
@@ -983,7 +983,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                     set = xset_set_cb(name, (GFunc)on_open_in_panel, data);
                     xset_set_ob1_int(set, "panel_num", i);
                     // set->disable = ( p == i );
-                    g_free(name);
+                    free(name);
                 }
 
                 set = xset_get("open_in_tab");
@@ -1057,7 +1057,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
             set = xset_set_cb(name, (GFunc)ptk_file_browser_go_tab, browser);
             xset_set_ob1_int(set, "tab_num", i);
             set->disable = (i > tab_count) || (i == tab_num);
-            g_free(name);
+            free(name);
         }
         set = xset_get("con_go");
         xset_add_menuitem(browser, popup, accel_group, set);
@@ -1163,12 +1163,12 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         {
             char* str = g_strdup_printf("copy_tab_%d", i);
             set = xset_get(str);
-            g_free(str);
+            free(str);
             set->disable = (i > tab_count) || (i == tab_num);
 
             str = g_strdup_printf("move_tab_%d", i);
             set = xset_get(str);
-            g_free(str);
+            free(str);
             set->disable = (i > tab_count) || (i == tab_num);
 
             if (i > 4)
@@ -1178,12 +1178,12 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
             str = g_strdup_printf("copy_panel_%d", i);
             set = xset_get(str);
-            g_free(str);
+            free(str);
             set->disable = (i == p) || !b;
 
             str = g_strdup_printf("move_panel_%d", i);
             set = xset_get(str);
-            g_free(str);
+            free(str);
             set->disable = (i == p) || !b;
         }
 
@@ -1266,7 +1266,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         else
             desc = g_strdup_printf("prop_info prop_perm prop_quick prop_root");
         xset_set_set(set, XSET_SET_SET_DESC, desc);
-        g_free(desc);
+        free(desc);
         xset_add_menuitem(browser, popup, accel_group, set);
     }
 
@@ -1321,7 +1321,7 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
         ptk_open_files_with_app(data->cwd, sel_files, app, data->browser, false, false);
         if (sel_files != data->sel_files)
             g_list_free(sel_files);
-        g_free(app);
+        free(app);
     }
     vfs_mime_type_unref(mime_type);
 }
@@ -1473,7 +1473,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     vfs_mime_type_locate_desktop_file(nullptr, desktop.get_name());
                 if (!(share_desktop && ztd::same(share_desktop, path)))
                 {
-                    g_free(share_desktop);
+                    free(share_desktop);
                     return;
                 }
 
@@ -1489,14 +1489,14 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                     GTK_BUTTONS_YES_NO,
                                     msg) != GTK_RESPONSE_YES)
                 {
-                    g_free(share_desktop);
+                    free(share_desktop);
                     break;
                 }
 
                 // need to copy
                 command = fmt::format("cp -a  {} {}", share_desktop, path);
                 Glib::spawn_command_line_sync(command);
-                g_free(share_desktop);
+                free(share_desktop);
                 if (!std::filesystem::exists(path))
                     return;
             }
@@ -1506,7 +1506,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             str = get_shared_desktop_file_location(desktop.get_name());
             if (str)
                 xset_edit(GTK_WIDGET(data->browser), str, false, true);
-            g_free(str);
+            free(str);
             break;
         case APP_JOB_EDIT_LIST:
             // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
@@ -1536,7 +1536,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             path = str;
             if (ztd::endswith(path, ".desktop") && !ztd::contains(path, "/") && mime_type)
                 vfs_mime_type_append_action(mime_type->type, path.c_str());
-            g_free(str);
+            free(str);
             break;
         case APP_JOB_BROWSE:
             path = Glib::build_filename(vfs_user_data_dir(), "applications");
@@ -1552,7 +1552,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 path = g_path_get_dirname(str);
             else
                 path = "/usr/share/applications";
-            g_free(str);
+            free(str);
             if (data->browser)
                 ptk_file_browser_emit_open(data->browser, path.c_str(), PTK_OPEN_NEW_TAB);
             break;
@@ -1567,7 +1567,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             {
                 str = g_strdup_printf("%s.xml", mime_type->type);
                 char* usr_path = g_build_filename("/usr/share/mime", str, nullptr);
-                g_free(str);
+                free(str);
 
                 if (std::filesystem::exists(usr_path))
                     msg = fmt::format("The file '{}' does not exist.\n\nBy copying '{}' to '{}' "
@@ -1590,7 +1590,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                     GTK_BUTTONS_YES_NO,
                                     msg) != GTK_RESPONSE_YES)
                 {
-                    g_free(usr_path);
+                    free(usr_path);
                     break;
                 }
 
@@ -1646,10 +1646,10 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                         str = g_strdup_printf("%s\n\n%s</mime-info>\n", msg.c_str(), start);
                     else
                         str = nullptr;
-                    g_free(contents);
+                    free(contents);
                     contents = str;
                 }
-                g_free(usr_path);
+                free(usr_path);
 
                 if (!contents)
                     contents = g_strdup_printf("%s\n\n<!-- insert your patterns below "
@@ -1663,7 +1663,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 
                 file.close();
 
-                g_free(contents);
+                free(contents);
             }
             if (std::filesystem::exists(path))
                 xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, false);
@@ -1673,7 +1673,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         case APP_JOB_VIEW_TYPE:
             str = g_strdup_printf("%s.xml", mime_type->type);
             path = g_build_filename("/usr/share/mime", str, nullptr);
-            g_free(str);
+            free(str);
             if (std::filesystem::exists(path))
                 xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, true);
             break;
@@ -1950,7 +1950,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
 
         char* desk_path = get_shared_desktop_file_location(desktop.get_name());
         gtk_widget_set_sensitive(GTK_WIDGET(newitem), !!desk_path);
-        g_free(desk_path);
+        free(desk_path);
     }
 
     // /usr applications/
@@ -2092,7 +2092,7 @@ on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
             {
                 ptk_file_browser_emit_open(data->browser, full_path, PTK_OPEN_NEW_TAB);
             }
-            g_free(full_path);
+            free(full_path);
         }
     }
     else if (data->browser)
@@ -2121,7 +2121,7 @@ on_new_bookmark(GtkMenuItem* menuitem, PtkFileMenu* data)
             vfs_file_info_get_name(static_cast<VFSFileInfo*>(data->sel_files->data)),
             nullptr);
         ptk_bookmark_view_add_bookmark(nullptr, data->browser, full_path);
-        g_free(full_path);
+        free(full_path);
     }
     else
         ptk_bookmark_view_add_bookmark(nullptr, data->browser, nullptr);
@@ -2334,9 +2334,9 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
             }
         }
 
-        g_free(cwd);
+        free(cwd);
     }
-    g_free(ao->path);
+    free(ao->path);
     g_slice_free(AutoOpenCreate, ao);
 }
 
@@ -2363,7 +2363,7 @@ create_new_file(PtkFileMenu* data, int create_new)
     if (result == 0)
     {
         ao->file_browser = nullptr;
-        g_free(ao->path);
+        free(ao->path);
         ao->path = nullptr;
         g_slice_free(AutoOpenCreate, ao);
     }

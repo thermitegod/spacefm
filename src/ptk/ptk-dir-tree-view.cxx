@@ -576,7 +576,7 @@ dir_tree_view_get_drop_dir(GtkWidget* view, int x, int y)
         {
             char* old_dest = dest_path;
             dest_path = g_file_read_link( old_dest, nullptr );
-            g_free( old_dest );
+            free( old_dest );
         }
     */
     return dest_path;
@@ -621,10 +621,10 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                             if (stat(file_path, &statbuf) == 0 && statbuf.st_dev != dest_dev)
                             {
                                 file_browser->drag_source_dev_tree = statbuf.st_dev;
-                                g_free(file_path);
+                                free(file_path);
                                 break;
                             }
-                            g_free(file_path);
+                            free(file_path);
                         }
                     }
                     if (file_browser->drag_source_dev_tree != dest_dev)
@@ -637,7 +637,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                     // stat failed
                     gdk_drag_status(drag_context, GDK_ACTION_COPY, time);
 
-                g_free(dest_dir);
+                free(dest_dir);
                 g_strfreev(list);
                 file_browser->pending_drag_status_tree = false;
                 return;
@@ -697,11 +697,11 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                         ptk_file_task_run(task);
                     }
                 }
-                g_free(dest_dir);
+                free(dest_dir);
                 gtk_drag_finish(drag_context, true, false, time);
                 return;
             }
-            g_free(dest_dir);
+            free(dest_dir);
         }
         else
             LOG_WARN("bad dest_dir in on_dir_tree_view_drag_data_received");

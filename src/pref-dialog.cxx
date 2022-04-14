@@ -259,7 +259,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                 xset_set("date_format", "s", "%Y-%m-%d %H:%M");
             else
                 xset_set("date_format", "s", etext);
-            g_free(etext);
+            free(etext);
             app_settings.date_format = xset_get_s("date_format");
             need_refresh = true;
         }
@@ -318,7 +318,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
 
         char* s = g_strdup_printf("%d", gtk_combo_box_get_active(GTK_COMBO_BOX(data->drag_action)));
         xset_set("drag_action", "x", s);
-        g_free(s);
+        free(s);
 
         // terminal su command
         std::string custom_su;
@@ -423,7 +423,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         }
     }
     gtk_widget_destroy(GTK_WIDGET(dlg));
-    g_free(data);
+    free(data);
     data = nullptr;
     WindowReference::decrease();
 }

@@ -230,7 +230,7 @@ vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* use
         inotify_rm_watch(vfs_inotify_fd, fm->wd);
 
         g_hash_table_remove(monitor_hash, fm->path);
-        g_free(fm->path);
+        free(fm->path);
         g_array_free(fm->callbacks, true);
         g_slice_free(VFSFileMonitor, fm);
     }

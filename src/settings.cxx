@@ -567,7 +567,7 @@ save_settings(void* main_window_ptr)
                     {
                         if (set->s)
                         {
-                            g_free(set->s);
+                            free(set->s);
                             set->s = nullptr;
                         }
                         char* tabs = g_strdup("");
@@ -581,16 +581,16 @@ save_settings(void* main_window_ptr)
                             tabs = g_strdup_printf("%s///%s",
                                                    old_tabs,
                                                    ptk_file_browser_get_cwd(file_browser));
-                            g_free(old_tabs);
+                            free(old_tabs);
                         }
                         if (tabs[0] != '\0')
                             set->s = tabs;
                         else
-                            g_free(tabs);
+                            free(tabs);
 
                         // save current tab
                         if (set->x)
-                            g_free(set->x);
+                            free(set->x);
                         set->x = g_strdup_printf(
                             "%d",
                             gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1])));
@@ -606,12 +606,12 @@ save_settings(void* main_window_ptr)
                 set = xset_get_panel(p, "show");
                 if (set->s)
                 {
-                    g_free(set->s);
+                    free(set->s);
                     set->s = nullptr;
                 }
                 if (set->x)
                 {
-                    g_free(set->x);
+                    free(set->x);
                     set->x = nullptr;
                 }
             }
@@ -701,7 +701,7 @@ xset_free_all()
     {
         if (set->ob2_data && Glib::str_has_prefix(set->name, "evt_"))
         {
-            g_list_foreach((GList*)set->ob2_data, (GFunc)g_free, nullptr);
+            g_list_foreach((GList*)set->ob2_data, (GFunc)free, nullptr);
             g_list_free((GList*)set->ob2_data);
         }
         xset_free(set);
@@ -722,43 +722,43 @@ static void
 xset_free(XSet* set)
 {
     if (set->name)
-        g_free(set->name);
+        free(set->name);
     if (set->s)
-        g_free(set->s);
+        free(set->s);
     if (set->x)
-        g_free(set->x);
+        free(set->x);
     if (set->y)
-        g_free(set->y);
+        free(set->y);
     if (set->z)
-        g_free(set->z);
+        free(set->z);
     if (set->menu_label)
-        g_free(set->menu_label);
+        free(set->menu_label);
     if (set->shared_key)
-        g_free(set->shared_key);
+        free(set->shared_key);
     if (set->icon)
-        g_free(set->icon);
+        free(set->icon);
     if (set->desc)
-        g_free(set->desc);
+        free(set->desc);
     if (set->title)
-        g_free(set->title);
+        free(set->title);
     if (set->next)
-        g_free(set->next);
+        free(set->next);
     if (set->parent)
-        g_free(set->parent);
+        free(set->parent);
     if (set->child)
-        g_free(set->child);
+        free(set->child);
     if (set->prev)
-        g_free(set->prev);
+        free(set->prev);
     if (set->line)
-        g_free(set->line);
+        free(set->line);
     if (set->context)
-        g_free(set->context);
+        free(set->context);
     if (set->plugin)
     {
         if (set->plug_dir)
-            g_free(set->plug_dir);
+            free(set->plug_dir);
         if (set->plug_name)
-            g_free(set->plug_name);
+            free(set->plug_name);
     }
 }
 
@@ -842,7 +842,7 @@ xset_get_panel(int panel, const char* name)
 {
     char* fullname = g_strdup_printf("panel%d_%s", panel, name);
     XSet* set = xset_get(fullname);
-    g_free(fullname);
+    free(fullname);
     return set;
 }
 
@@ -851,7 +851,7 @@ xset_get_panel_mode(int panel, const char* name, const char mode)
 {
     char* fullname = g_strdup_printf("panel%d_%s%d", panel, name, mode);
     XSet* set = xset_get(fullname);
-    g_free(fullname);
+    free(fullname);
     return set;
 }
 
@@ -870,7 +870,7 @@ xset_get_s_panel(int panel, const char* name)
 {
     char* fullname = g_strdup_printf("panel%d_%s", panel, name);
     char* s = xset_get_s(fullname);
-    g_free(fullname);
+    free(fullname);
     return s;
 }
 
@@ -886,7 +886,7 @@ xset_get_b_panel(int panel, const char* name)
 {
     char* fullname = g_strdup_printf("panel%d_%s", panel, name);
     bool b = xset_get_b(fullname);
-    g_free(fullname);
+    free(fullname);
     return b;
 }
 
@@ -895,7 +895,7 @@ xset_get_b_panel_mode(int panel, const char* name, const char mode)
 {
     char* fullname = g_strdup_printf("panel%d_%s%d", panel, name, mode);
     bool b = xset_get_b(fullname);
-    g_free(fullname);
+    free(fullname);
     return b;
 }
 
@@ -937,7 +937,7 @@ xset_set_b_panel(int panel, const char* name, bool bval)
 {
     char* fullname = g_strdup_printf("panel%d_%s", panel, name);
     XSet* set = xset_set_b(fullname, bval);
-    g_free(fullname);
+    free(fullname);
     return set;
 }
 
@@ -946,7 +946,7 @@ xset_set_b_panel_mode(int panel, const char* name, const char mode, bool bval)
 {
     char* fullname = g_strdup_printf("panel%d_%s%d", panel, name, mode);
     XSet* set = xset_set_b(fullname, bval);
-    g_free(fullname);
+    free(fullname);
     return set;
 }
 
@@ -985,7 +985,7 @@ xset_get_int_panel(int panel, const char* name, const char* var)
 {
     char* fullname = g_strdup_printf("panel%d_%s", panel, name);
     int i = xset_get_int(fullname, var);
-    g_free(fullname);
+    free(fullname);
     return i;
 }
 
@@ -1178,7 +1178,7 @@ xset_set_cb_panel(int panel, const char* name, GFunc cb_func, void* cb_data)
 {
     char* fullname = g_strdup_printf("panel%d_%s", panel, name);
     XSet* set = xset_set_cb(fullname, cb_func, cb_data);
-    g_free(fullname);
+    free(fullname);
     return set;
 }
 
@@ -1186,7 +1186,7 @@ XSet*
 xset_set_ob1_int(XSet* set, const char* ob1, int ob1_int)
 {
     if (set->ob1)
-        g_free(set->ob1);
+        free(set->ob1);
     set->ob1 = g_strdup(ob1);
     set->ob1_data = GINT_TO_POINTER(ob1_int);
     return set;
@@ -1196,7 +1196,7 @@ XSet*
 xset_set_ob1(XSet* set, const char* ob1, void* ob1_data)
 {
     if (set->ob1)
-        g_free(set->ob1);
+        free(set->ob1);
     set->ob1 = g_strdup(ob1);
     set->ob1_data = ob1_data;
     return set;
@@ -1206,7 +1206,7 @@ XSet*
 xset_set_ob2(XSet* set, const char* ob2, void* ob2_data)
 {
     if (set->ob2)
-        g_free(set->ob2);
+        free(set->ob2);
     set->ob2 = g_strdup(ob2);
     set->ob2_data = ob2_data;
     return set;
@@ -1295,7 +1295,7 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
     {
         case XSET_SET_SET_S:
             if (set->s)
-                g_free(set->s);
+                free(set->s);
             set->s = g_strdup(value);
             break;
         case XSET_SET_SET_B:
@@ -1306,17 +1306,17 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
             break;
         case XSET_SET_SET_X:
             if (set->x)
-                g_free(set->x);
+                free(set->x);
             set->x = g_strdup(value);
             break;
         case XSET_SET_SET_Y:
             if (set->y)
-                g_free(set->y);
+                free(set->y);
             set->y = g_strdup(value);
             break;
         case XSET_SET_SET_Z:
             if (set->z)
-                g_free(set->z);
+                free(set->z);
             set->z = g_strdup(value);
             break;
         case XSET_SET_SET_KEY:
@@ -1330,18 +1330,18 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
             break;
         case XSET_SET_SET_DESC:
             if (set->desc)
-                g_free(set->desc);
+                free(set->desc);
             set->desc = g_strdup(value);
             break;
         case XSET_SET_SET_TITLE:
             if (set->title)
-                g_free(set->title);
+                free(set->title);
             set->title = g_strdup(value);
             break;
         case XSET_SET_SET_LBL:
             // lbl is only used >= 0.9.0 for changed lock default menu_label
             if (set->menu_label)
-                g_free(set->menu_label);
+                free(set->menu_label);
             set->menu_label = g_strdup(value);
             if (set->lock)
                 // indicate that menu label is not default and should be saved
@@ -1350,7 +1350,7 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
         case XSET_SET_SET_ICN:
             // icn is only used >= 0.9.0 for changed lock default icon
             if (set->icon)
-                g_free(set->icon);
+                free(set->icon);
             set->icon = g_strdup(value);
             if (set->lock)
                 // indicate that icon is not default and should be saved
@@ -1362,7 +1362,7 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
             if (!set->lock || g_strcmp0(set->menu_label, value))
             {
                 if (set->menu_label)
-                    g_free(set->menu_label);
+                    free(set->menu_label);
                 set->menu_label = g_strdup(value);
                 if (set->lock)
                     // indicate that menu label is not default and should be saved
@@ -1376,37 +1376,37 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
             break;
         case XSET_SET_SET_SHARED_KEY:
             if (set->shared_key)
-                g_free(set->shared_key);
+                free(set->shared_key);
             set->shared_key = g_strdup(value);
             break;
         case XSET_SET_SET_NEXT:
             if (set->next)
-                g_free(set->next);
+                free(set->next);
             set->next = g_strdup(value);
             break;
         case XSET_SET_SET_PREV:
             if (set->prev)
-                g_free(set->prev);
+                free(set->prev);
             set->prev = g_strdup(value);
             break;
         case XSET_SET_SET_PARENT:
             if (set->parent)
-                g_free(set->parent);
+                free(set->parent);
             set->parent = g_strdup(value);
             break;
         case XSET_SET_SET_CHILD:
             if (set->child)
-                g_free(set->child);
+                free(set->child);
             set->child = g_strdup(value);
             break;
         case XSET_SET_SET_CXT:
             if (set->context)
-                g_free(set->context);
+                free(set->context);
             set->context = g_strdup(value);
             break;
         case XSET_SET_SET_LINE:
             if (set->line)
-                g_free(set->line);
+                free(set->line);
             set->line = g_strdup(value);
             break;
         case XSET_SET_SET_TOOL:
@@ -1486,7 +1486,7 @@ xset_set_panel(int panel, const char* name, const char* var, const char* value)
 {
     char* fullname = g_strdup_printf("panel%d_%s", panel, name);
     XSet* set = xset_set(fullname, var, value);
-    g_free(fullname);
+    free(fullname);
     return set;
 }
 
@@ -1710,17 +1710,17 @@ read_root_settings()
             {
                 if (set->s)
                 {
-                    g_free(set->s);
+                    free(set->s);
                     set->s = nullptr;
                 }
                 if (set->x)
                 {
-                    g_free(set->x);
+                    free(set->x);
                     set->x = nullptr;
                 }
                 if (set->y)
                 {
-                    g_free(set->y);
+                    free(set->y);
                     set->y = nullptr;
                 }
                 set->b = XSET_B_UNSET;
@@ -1756,7 +1756,7 @@ xset_context_new()
         for (i = 0; i < G_N_ELEMENTS(xset_context->var); i++)
         {
             if (xset_context->var[i])
-                g_free(xset_context->var[i]);
+                free(xset_context->var[i]);
             xset_context->var[i] = nullptr;
         }
     }
@@ -1863,7 +1863,7 @@ xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
                 char* name = g_path_get_basename(set->z);
                 if (name && name[0])
                     icon_new = vfs_load_icon(icon_theme, name, icon_size);
-                g_free(name);
+                free(name);
             }
         }
 
@@ -1996,7 +1996,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                 g_build_filename(xset_get_config_dir(), "scripts", set->name, "icon", nullptr);
         if (!std::filesystem::exists(icon_file))
         {
-            g_free(icon_file);
+            free(icon_file);
             icon_file = nullptr;
         }
         else
@@ -2088,7 +2088,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                 // Application
                 char* menu_label = xset_custom_get_app_name_icon(set, &app_icon, icon_size);
                 item = xset_new_menuitem(menu_label, nullptr);
-                g_free(menu_label);
+                free(menu_label);
             }
             else if (!set->lock && cmd_type == XSET_CMD_BOOKMARK)
             {
@@ -2157,7 +2157,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
 
 _next_item:
     if (icon_file)
-        g_free(icon_file);
+        free(icon_file);
 
     // next item
     if (set->next)
@@ -2186,7 +2186,7 @@ xset_custom_get_script(XSet* set, bool create)
             std::filesystem::create_directories(path);
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
         }
-        g_free(path);
+        free(path);
     }
 
     if (set->plugin)
@@ -2422,10 +2422,10 @@ xset_set_plugin_mirror(XSet* pset)
                 if (!strcmp(set->child, pset->plug_name) && !strcmp(set->parent, pset->plug_dir))
                 {
                     if (set->shared_key)
-                        g_free(set->shared_key);
+                        free(set->shared_key);
                     set->shared_key = g_strdup(pset->name);
                     if (pset->shared_key)
-                        g_free(pset->shared_key);
+                        free(pset->shared_key);
                     pset->shared_key = g_strdup(set->name);
                     return;
                 }
@@ -2562,12 +2562,12 @@ xset_parse_plugin(const char* plug_dir, const char* line, int use)
                 if (!strncmp(set->prev, "cstm_", 5))
                 {
                     set2 = xset_get_by_plug_name(plug_dir, set->prev);
-                    g_free(set->prev);
+                    free(set->prev);
                     set->prev = g_strdup(set2->name);
                 }
                 else
                 {
-                    g_free(set->prev);
+                    free(set->prev);
                     set->prev = nullptr;
                 }
             }
@@ -2576,12 +2576,12 @@ xset_parse_plugin(const char* plug_dir, const char* line, int use)
                 if (!strncmp(set->next, "cstm_", 5))
                 {
                     set2 = xset_get_by_plug_name(plug_dir, set->next);
-                    g_free(set->next);
+                    free(set->next);
                     set->next = g_strdup(set2->name);
                 }
                 else
                 {
-                    g_free(set->next);
+                    free(set->next);
                     set->next = nullptr;
                 }
             }
@@ -2590,12 +2590,12 @@ xset_parse_plugin(const char* plug_dir, const char* line, int use)
                 if (!strncmp(set->parent, "cstm_", 5))
                 {
                     set2 = xset_get_by_plug_name(plug_dir, set->parent);
-                    g_free(set->parent);
+                    free(set->parent);
                     set->parent = g_strdup(set2->name);
                 }
                 else
                 {
-                    g_free(set->parent);
+                    free(set->parent);
                     set->parent = nullptr;
                 }
             }
@@ -2604,12 +2604,12 @@ xset_parse_plugin(const char* plug_dir, const char* line, int use)
                 if (!strncmp(set->child, "cstm_", 5))
                 {
                     set2 = xset_get_by_plug_name(plug_dir, set->child);
-                    g_free(set->child);
+                    free(set->child);
                     set->child = g_strdup(set2->name);
                 }
                 else
                 {
-                    g_free(set->child);
+                    free(set->child);
                     set->child = nullptr;
                 }
             }
@@ -2809,7 +2809,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                     if (plugin_data->set->next)
                     {
                         XSet* set_next = xset_get(plugin_data->set->next);
-                        g_free(set_next->prev);
+                        free(set_next->prev);
                         set_next->prev = g_strdup(set->name); // last bookmark
                     }
                     plugin_data->set->next = g_strdup(newset->name);
@@ -2853,7 +2853,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                     if (plugin_data->set->next)
                     {
                         XSet* set_next = xset_get(plugin_data->set->next);
-                        g_free(set_next->prev);
+                        free(set_next->prev);
                         set_next->prev = g_strdup(newset->name);
                     }
                     plugin_data->set->next = g_strdup(newset->name);
@@ -2899,9 +2899,9 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
             }
             clean_plugin_mirrors();
         }
-        g_free(plugin);
+        free(plugin);
     }
-    g_free(plugin_data->plug_dir);
+    free(plugin_data->plug_dir);
     g_slice_free(PluginData, plugin_data);
 }
 
@@ -3059,21 +3059,21 @@ xset_custom_export_files(XSet* set, const char* plug_dir)
             std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
             if (!std::filesystem::exists(path_dest))
             {
-                g_free(path_src);
-                g_free(path_dest);
+                free(path_src);
+                free(path_dest);
                 return false;
             }
         }
         // skip empty or missing dirs
-        g_free(path_src);
-        g_free(path_dest);
+        free(path_src);
+        free(path_dest);
         return true;
     }
 
     int exit_status;
     std::string command = fmt::format("cp -a {} {}", path_src, path_dest);
-    g_free(path_src);
-    g_free(path_dest);
+    free(path_src);
+    free(path_dest);
     print_command(command);
     Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
 
@@ -3151,7 +3151,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
     if (!path)
         return;
     if (save->s)
-        g_free(save->s);
+        free(save->s);
     save->s = g_path_get_dirname(path);
 
     // get or create tmp plugin dir
@@ -3165,9 +3165,9 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
         {
             char* hex8 = randhex8();
             if (plug_dir)
-                g_free(plug_dir);
+                free(plug_dir);
             plug_dir = g_build_filename(s1, hex8, nullptr);
-            g_free(hex8);
+            free(hex8);
         }
         std::filesystem::create_directories(plug_dir);
         std::filesystem::permissions(plug_dir, std::filesystem::perms::owner_all);
@@ -3203,7 +3203,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
             file << buf;
         file.close();
 
-        g_free(plugin_path);
+        free(plugin_path);
     }
     else
         plug_dir = g_strdup(set->plug_dir);
@@ -3238,8 +3238,8 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
     task->task->exec_browser = file_browser;
     ptk_file_task_run(task);
 
-    g_free(path);
-    g_free(plug_dir);
+    free(path);
+    free(plug_dir);
     return;
 
 _rmtmp_error:
@@ -3249,8 +3249,8 @@ _rmtmp_error:
         LOG_INFO("Removed {}", plug_dir);
     }
 _export_error:
-    g_free(plug_dir);
-    g_free(path);
+    free(plug_dir);
+    free(path);
     xset_msg_dialog(parent,
                     GTK_MESSAGE_ERROR,
                     "Export Error",
@@ -3351,7 +3351,7 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
             else
                 open_in_prog(dir);
         }
-        g_free(dir);
+        free(dir);
     }
     else
     {
@@ -3545,7 +3545,7 @@ xset_custom_activate(GtkWidget* item, XSet* set)
                     url = g_strstrip(url);
                     if (url[0])
                         open_spec(set->browser, url, true);
-                    g_free(url);
+                    free(url);
                     if (sep)
                     {
                         sep[0] = ';';
@@ -3645,7 +3645,7 @@ xset_custom_remove(XSet* set)
         set_prev = xset_get(set->prev);
         // LOG_INFO("        set->prev = {} ({})", set_prev->name, set_prev->menu_label);
         if (set_prev->next)
-            g_free(set_prev->next);
+            free(set_prev->next);
         if (set->next)
             set_prev->next = g_strdup(set->next);
         else
@@ -3655,7 +3655,7 @@ xset_custom_remove(XSet* set)
     {
         set_next = xset_get(set->next);
         if (set_next->prev)
-            g_free(set_next->prev);
+            free(set_next->prev);
         if (set->prev)
             set_next->prev = g_strdup(set->prev);
         else
@@ -3665,7 +3665,7 @@ xset_custom_remove(XSet* set)
             {
                 set_parent = xset_get(set->parent);
                 if (set_parent->child)
-                    g_free(set_parent->child);
+                    free(set_parent->child);
                 set_parent->child = g_strdup(set_next->name);
                 set_next->parent = g_strdup(set->parent);
             }
@@ -3682,7 +3682,7 @@ xset_custom_remove(XSet* set)
             set_child->menu_label = g_strdup("New _Command");
         }
         if (set_parent->child)
-            g_free(set_parent->child);
+            free(set_parent->child);
         set_parent->child = g_strdup(set_child->name);
         set_child->parent = g_strdup(set->parent);
         return set_child;
@@ -3708,19 +3708,19 @@ xset_custom_insert_after(XSet* target, XSet* set)
 
     if (set->parent)
     {
-        g_free(set->parent);
+        free(set->parent);
         set->parent = nullptr;
     }
 
-    g_free(set->prev);
-    g_free(set->next);
+    free(set->prev);
+    free(set->next);
     set->prev = g_strdup(target->name);
     set->next = target->next; // steal string
     if (target->next)
     {
         target_next = xset_get(target->next);
         if (target_next->prev)
-            g_free(target_next->prev);
+            free(target_next->prev);
         target_next->prev = g_strdup(set->name);
     }
     target->next = g_strdup(set->name);
@@ -4041,7 +4041,7 @@ xset_set_key(GtkWidget* parent, XSet* set)
         keyset = xset_get("open_all");
         name = clean_label(keyset->menu_label, false, true);
         if (set->shared_key)
-            g_free(set->shared_key);
+            free(set->shared_key);
         set->shared_key = g_strdup("open_all");
     }
     else
@@ -4171,7 +4171,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 // built-in icon has been changed from default, save it
                 set->keep_terminal = true;
             }
-            g_free(old_icon);
+            free(old_icon);
             break;
         case XSET_JOB_LABEL:
             break;
@@ -4183,7 +4183,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 if (!cscript)
                     break;
                 xset_edit(parent, cscript, false, true);
-                g_free(cscript);
+                free(cscript);
             }
             break;
         case XSET_JOB_EDIT_ROOT:
@@ -4194,7 +4194,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 if (!cscript)
                     break;
                 xset_edit(parent, cscript, true, false);
-                g_free(cscript);
+                free(cscript);
             }
             break;
         case XSET_JOB_COPYNAME:
@@ -4211,7 +4211,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 if (!cscript)
                     break;
                 gtk_clipboard_set_text(clip, cscript, -1);
-                g_free(cscript);
+                free(cscript);
             }
             else if (cmd_type == XSET_CMD_APP)
             {
@@ -4236,7 +4236,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             if (!cscript)
                 break;
             xset_edit(parent, cscript, false, false);
-            g_free(cscript);
+            free(cscript);
             break;
         case XSET_JOB_CUSTOM:
             if (set->z && set->z[0] != '\0')
@@ -4257,10 +4257,10 @@ xset_design_job(GtkWidget* item, XSet* set)
             {
                 xset_set_set(set, XSET_SET_SET_X, "2");
                 xset_set_set(set, XSET_SET_SET_Z, custom_file);
-                g_free(custom_file);
+                free(custom_file);
             }
-            g_free(file);
-            g_free(folder);
+            free(file);
+            free(folder);
             break;
         case XSET_JOB_USER:
             if (!set->plugin)
@@ -4308,7 +4308,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                                           "",
                                           false))
                     {
-                        g_free(name);
+                        free(name);
                         break;
                     }
                     file = nullptr;
@@ -4330,7 +4330,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                     vfs_mime_type_unref(mime_type);
                     if (!(file && file[0]))
                     {
-                        g_free(file);
+                        free(file);
                         break;
                     }
                     name = nullptr;
@@ -4348,7 +4348,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                                             nullptr);
                     if (!(file && file[0]))
                     {
-                        g_free(file);
+                        free(file);
                         break;
                     }
                     name = g_path_get_basename(file);
@@ -4371,7 +4371,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                     xset_item_prop_dlg(xset_context, newset, 2);
                     break;
                 case XSET_JOB_APP:
-                    g_free(newset->x);
+                    free(newset->x);
                     newset->x = g_strdup("2"); // XSET_CMD_APP
                     // unset these to save session space
                     newset->task = false;
@@ -4380,7 +4380,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                     newset->keep_terminal = false;
                     break;
                 case XSET_JOB_BOOKMARK:
-                    g_free(newset->x);
+                    free(newset->x);
                     newset->x = g_strdup("3"); // XSET_CMD_BOOKMARK
                     // unset these to save session space
                     newset->task = false;
@@ -4488,7 +4488,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             if (!file)
                 break;
             if (save->s)
-                g_free(save->s);
+                free(save->s);
             save->s = g_path_get_dirname(file);
 
             // Make Plugin Dir
@@ -4501,7 +4501,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                                 "Error Creating Temp Directory",
                                 GTK_BUTTONS_OK,
                                 "Unable to create temporary directory");
-                g_free(file);
+                free(file);
                 break;
             }
             char* hex8;
@@ -4510,9 +4510,9 @@ xset_design_job(GtkWidget* item, XSet* set)
             {
                 hex8 = randhex8();
                 if (folder)
-                    g_free(folder);
+                    free(folder);
                 folder = g_build_filename(user_tmp, hex8, nullptr);
-                g_free(hex8);
+                free(hex8);
             }
             install_plugin_file(set->browser ? set->browser->main_window : nullptr,
                                 nullptr,
@@ -4520,8 +4520,8 @@ xset_design_job(GtkWidget* item, XSet* set)
                                 folder,
                                 PLUGIN_JOB_COPY,
                                 set);
-            g_free(file);
-            g_free(folder);
+            free(file);
+            free(folder);
             break;
         case XSET_JOB_IMPORT_GTK:
             // both GTK2 and GTK3 now use new location?
@@ -4631,7 +4631,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                                   name);
                 buttons = GTK_BUTTONS_OK_CANCEL;
             }
-            g_free(name);
+            free(name);
             bool is_bookmark_or_app;
             is_bookmark_or_app = !set->lock && set->menu_style < XSET_MENU_SUBMENU &&
                                  (cmd_type == XSET_CMD_BOOKMARK || cmd_type == XSET_CMD_APP) &&
@@ -4676,7 +4676,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 // added a new default item to submenu from a bookmark
                 folder = set->browser ? (char*)ptk_file_browser_get_cwd(set->browser)
                                       : (char*)vfs_user_desktop_dir().c_str();
-                g_free(childset->menu_label);
+                free(childset->menu_label);
                 childset->menu_label = g_path_get_basename(folder);
                 childset->z = g_strdup(folder);
                 childset->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
@@ -4689,13 +4689,13 @@ xset_design_job(GtkWidget* item, XSet* set)
             else if (set->tool)
             {
                 update_toolbars = true;
-                g_free(name);
-                g_free(prog);
+                free(name);
+                free(prog);
                 name = prog = nullptr;
             }
             else
             {
-                g_free(prog);
+                free(prog);
                 prog = nullptr;
             }
 
@@ -4706,8 +4706,8 @@ xset_design_job(GtkWidget* item, XSet* set)
                 main_window_bookmark_changed(prog);
             else if (name)
                 main_window_bookmark_changed(name);
-            g_free(name);
-            g_free(prog);
+            free(name);
+            free(prog);
             break;
         case XSET_JOB_EXPORT:
             if ((!set->lock || !g_strcmp0(set->name, "main_book")) && set->tool <= XSET_TOOL_CUSTOM)
@@ -4773,7 +4773,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 folder = g_build_filename(set->plug_dir, "files", nullptr);
                 if (!std::filesystem::exists(folder))
                 {
-                    g_free(folder);
+                    free(folder);
                     folder = g_build_filename(set->plug_dir, set->plug_name, nullptr);
                 }
             }
@@ -5341,7 +5341,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
                                                    (GdkModifierType)0,
                                                    GTK_ACCEL_VISIBLE);
                 }
-                g_free(script);
+                free(script);
             }
         }
         else if (xset_get_int_set(set, "x") == XSET_CMD_LINE)
@@ -5774,7 +5774,7 @@ xset_menu_cb(GtkWidget* item, XSet* set)
                                             rset->s,
                                             "foobar.xyz");
                     // LOG_INFO("file={}", file);
-                    g_free(file);
+                    free(file);
                 }
                 break;
             case XSET_MENU_ICON:
@@ -5801,7 +5801,7 @@ xset_menu_cb(GtkWidget* item, XSet* set)
                 char* scolor;
                 scolor = xset_color_dialog(parent, rset->title, rset->s);
                 if (rset->s)
-                    g_free(rset->s);
+                    free(rset->s);
                 rset->s = scolor;
                 if (cb_func)
                     cb_func(item, cb_data);
@@ -5873,10 +5873,10 @@ on_multi_input_insert(GtkTextBuffer* buf)
     char* all = gtk_text_buffer_get_text(buf, &siter, &iter, false);
     if (!strchr(all, '\n'))
     {
-        g_free(all);
+        free(all);
         return;
     }
-    g_free(all);
+    free(all);
 
     // delete selected text that was pasted over
     if (gtk_text_buffer_get_selection_bounds(buf, &siter, &iter))
@@ -5934,8 +5934,8 @@ on_multi_input_insert(GtkTextBuffer* buf)
                                       (void*)on_multi_input_insert,
                                       nullptr);
 
-    g_free(a);
-    g_free(b);
+    free(a);
+    free(b);
 }
 
 char*
@@ -5952,7 +5952,7 @@ multi_input_get_text(GtkWidget* input)
     char* ret = gtk_text_buffer_get_text(buf, &siter, &iter, false);
     if (ret && ret[0] == '\0')
     {
-        g_free(ret);
+        free(ret);
         ret = nullptr;
     }
     return ret;
@@ -6207,7 +6207,7 @@ xset_text_dialog(GtkWidget* parent, const std::string& title, const std::string&
                 else
                 {
                     if (*answer)
-                        g_free(*answer);
+                        free(*answer);
                     trim_ans = g_strdup(ans);
                     trim_ans = g_strstrip(trim_ans);
                     if (ans && trim_ans[0] != '\0')
@@ -6216,8 +6216,8 @@ xset_text_dialog(GtkWidget* parent, const std::string& title, const std::string&
                         *answer = nullptr;
                     if (ans)
                     {
-                        g_free(trim_ans);
-                        g_free(ans);
+                        free(trim_ans);
+                        free(ans);
                     }
                     ret = true;
                     exit_loop = true;
@@ -6245,11 +6245,11 @@ xset_text_dialog(GtkWidget* parent, const std::string& title, const std::string&
                 // show icon chooser
                 char* new_icon;
                 new_icon = xset_icon_chooser_dialog(GTK_WINDOW(dlg), icon);
-                g_free(icon);
+                free(icon);
                 if (new_icon)
                 {
                     gtk_text_buffer_set_text(buf, new_icon, -1);
-                    g_free(new_icon);
+                    free(new_icon);
                 }
                 exit_loop = true;
                 break;
@@ -6331,7 +6331,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
         {
             path = g_build_filename(deffolder, deffile, nullptr);
             gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path);
-            g_free(path);
+            free(path);
         }
     }
 
@@ -6816,7 +6816,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
         icon_file = g_build_filename(xset_get_config_dir(), "scripts", set->name, "icon", nullptr);
         if (!std::filesystem::exists(icon_file))
         {
-            g_free(icon_file);
+            free(icon_file);
             icon_file = nullptr;
         }
         else
@@ -6910,7 +6910,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 str = clean_label(new_menu_label, false, false);
                 gtk_widget_set_tooltip_text(ebox, str.c_str());
             }
-            g_free(new_menu_label);
+            free(new_menu_label);
             break;
         case XSET_MENU_CHECK:
             if (!icon_name && set->tool > XSET_TOOL_CUSTOM && set->tool < XSET_TOOL_INVALID)
@@ -7067,7 +7067,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 str = clean_label(menu_label, false, false);
                 gtk_widget_set_tooltip_text(ebox, str.c_str());
             }
-            g_free(new_menu_label);
+            free(new_menu_label);
 
             // reset menu_label for below
             menu_label = set->menu_label;
@@ -7153,7 +7153,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             return nullptr;
     }
 
-    g_free(icon_file);
+    free(icon_file);
     gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(item), -1);
 
 // LOG_INFO("    set={}   set->next={}", set->name, set->next);
