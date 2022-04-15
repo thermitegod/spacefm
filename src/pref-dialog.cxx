@@ -324,7 +324,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->confirm_delete));
 
         std::string s = std::to_string(gtk_combo_box_get_active(GTK_COMBO_BOX(data->drag_action)));
-        xset_set(XSetName::DRAG_ACTION, XSetSetSet::X, s.c_str());
+        xset_set(XSetName::DRAG_ACTION, XSetSetSet::X, s);
 
         // terminal su command
         std::string custom_su;
@@ -337,7 +337,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             if (!custom_su.empty())
             {
                 if (idx == 0)
-                    xset_set(XSetName::SU_COMMAND, XSetSetSet::S, custom_su.c_str());
+                    xset_set(XSetName::SU_COMMAND, XSetSetSet::S, custom_su);
                 else
                     xset_set(XSetName::SU_COMMAND, XSetSetSet::S, su_commands.at(idx - 1));
             }
@@ -376,13 +376,12 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
 
         // MOD terminal
         char* old_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
-        char* terminal = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(data->terminal));
-        g_strstrip(terminal);
-        if (g_strcmp0(terminal, old_terminal))
+        const char* sel_terminal =
+            gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(data->terminal));
+        std::string terminal = ztd::strip(sel_terminal);
+        if (!ztd::same(terminal, old_terminal))
         {
-            xset_set(XSetName::MAIN_TERMINAL,
-                     XSetSetSet::S,
-                     terminal[0] == '\0' ? nullptr : terminal);
+            xset_set(XSetName::MAIN_TERMINAL, XSetSetSet::S, terminal);
             root_set_change = true;
         }
         // report missing terminal

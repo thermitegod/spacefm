@@ -2245,14 +2245,11 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
     //        ptk_file_browser_set_sort_order( PTK_FILE_BROWSER( file_browser ),
     //        app_settings.sort_order );
 
-    xset_set_panel(file_browser->mypanel,
-                   "list_detailed",
-                   XSetSetSet::X,
-                   std::to_string(col).c_str());
+    xset_set_panel(file_browser->mypanel, "list_detailed", XSetSetSet::X, std::to_string(col));
     xset_set_panel(file_browser->mypanel,
                    "list_detailed",
                    XSetSetSet::Y,
-                   std::to_string(file_browser->sort_type).c_str());
+                   std::to_string(file_browser->sort_type));
 }
 
 static void
@@ -5416,7 +5413,7 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname)
     else if (set->xset_name == XSetName::SORTX_CASE)
     {
         list->sort_case = set->b == XSetB::XSET_B_TRUE;
-        xset_set_panel(panel, "sort_extra", XSetSetSet::X, std::to_string(set->b).c_str());
+        xset_set_panel(panel, "sort_extra", XSetSetSet::X, std::to_string(set->b));
     }
     else if (set->xset_name == XSetName::SORTX_DIRECTORIES)
     {
@@ -5424,7 +5421,7 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname)
         xset_set_panel(panel,
                        "sort_extra",
                        XSetSetSet::Y,
-                       std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST).c_str());
+                       std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST));
     }
     else if (set->xset_name == XSetName::SORTX_FILES)
     {
@@ -5432,7 +5429,7 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname)
         xset_set_panel(panel,
                        "sort_extra",
                        XSetSetSet::Y,
-                       std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_LAST).c_str());
+                       std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_LAST));
     }
     else if (set->xset_name == XSetName::SORTX_MIX)
     {
@@ -5440,22 +5437,21 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname)
         xset_set_panel(panel,
                        "sort_extra",
                        XSetSetSet::Y,
-                       std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED).c_str());
+                       std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED));
     }
     else if (set->xset_name == XSetName::SORTX_HIDFIRST)
     {
         list->sort_hidden_first = set->b == XSetB::XSET_B_TRUE;
-        xset_set_panel(panel, "sort_extra", XSetSetSet::Z, std::to_string(set->b).c_str());
+        xset_set_panel(panel, "sort_extra", XSetSetSet::Z, std::to_string(set->b));
     }
     else if (set->xset_name == XSetName::SORTX_HIDLAST)
     {
         list->sort_hidden_first = set->b != XSetB::XSET_B_TRUE;
-        xset_set_panel(
-            panel,
-            "sort_extra",
-            XSetSetSet::Z,
-            std::to_string(set->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_FALSE : XSetB::XSET_B_TRUE)
-                .c_str());
+        xset_set_panel(panel,
+                       "sort_extra",
+                       XSetSetSet::Z,
+                       std::to_string(set->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_FALSE
+                                                                   : XSetB::XSET_B_TRUE));
     }
     ptk_file_list_sort(list);
 }

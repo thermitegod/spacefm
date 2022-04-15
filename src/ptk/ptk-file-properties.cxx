@@ -782,8 +782,8 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
     int height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::APP_DLG, XSetSetSet::S, std::to_string(width).c_str());
-        xset_set(XSetName::APP_DLG, XSetSetSet::Z, std::to_string(height).c_str());
+        xset_set(XSetName::APP_DLG, XSetSetSet::S, std::to_string(width));
+        xset_set(XSetName::APP_DLG, XSetSetSet::Z, std::to_string(height));
     }
 
     FilePropertiesDialogData* data =

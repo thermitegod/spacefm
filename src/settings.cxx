@@ -479,7 +479,7 @@ load_settings(const char* config_dir)
     if (app_settings.date_format.empty())
     {
         app_settings.date_format = "%Y-%m-%d %H:%M";
-        xset_set(XSetName::DATE_FORMAT, XSetSetSet::S, app_settings.date_format.c_str());
+        xset_set(XSetName::DATE_FORMAT, XSetSetSet::S, app_settings.date_format);
     }
 
     // MOD su command discovery (sets default)
@@ -495,7 +495,7 @@ load_settings(const char* config_dir)
             if (term.empty())
                 continue;
 
-            xset_set(XSetName::MAIN_TERMINAL, XSetSetSet::S, terminal.c_str());
+            xset_set(XSetName::MAIN_TERMINAL, XSetSetSet::S, terminal);
             xset_set_b(XSetName::MAIN_TERMINAL, true); // discovery
             break;
         }
@@ -1286,14 +1286,14 @@ xset_parse(std::string& line)
         // custom
         if (ztd::same(token, set_last->name))
         {
-            xset_set_set(set_last, var, value.c_str());
+            xset_set_set(set_last, var, value);
         }
         else
         {
             set_last = xset_get(token);
             if (set_last->lock)
                 set_last->lock = false;
-            xset_set_set(set_last, var, value.c_str());
+            xset_set_set(set_last, var, value);
         }
     }
     else
@@ -1301,11 +1301,11 @@ xset_parse(std::string& line)
         // normal (lock)
         if (ztd::same(token, set_last->name))
         {
-            xset_set_set(set_last, var, value.c_str());
+            xset_set_set(set_last, var, value);
         }
         else
         {
-            set_last = xset_set(token, var, value.c_str());
+            set_last = xset_set(token, var, value);
         }
     }
 }
@@ -1457,7 +1457,7 @@ xset_set_set_encode(const std::string& var)
 }
 
 XSet*
-xset_set_set(XSet* set, XSetSetSet var, const char* value)
+xset_set_set(XSet* set, XSetSetSet var, const std::string& value)
 {
     if (!set)
         return nullptr;
@@ -1470,7 +1470,7 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
             set->s = ztd::strdup(value);
             break;
         case XSetSetSet::B:
-            if (!strcmp(value, "1"))
+            if (ztd::same(value, "1"))
                 set->b = XSetB::XSET_B_TRUE;
             else
                 set->b = XSetB::XSET_B_FALSE;
@@ -1491,13 +1491,13 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
             set->z = ztd::strdup(value);
             break;
         case XSetSetSet::KEY:
-            set->key = strtol(value, nullptr, 10);
+            set->key = std::stoi(value);
             break;
         case XSetSetSet::KEYMOD:
-            set->keymod = strtol(value, nullptr, 10);
+            set->keymod = std::stoi(value);
             break;
         case XSetSetSet::STYLE:
-            set->menu_style = (XSetMenu)strtol(value, nullptr, 10);
+            set->menu_style = (XSetMenu)std::stoi(value);
             break;
         case XSetSetSet::DESC:
             if (set->desc)
@@ -1530,7 +1530,7 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
         case XSetSetSet::MENU_LABEL_CUSTOM:
             // pre-0.9.0 menu_label or >= 0.9.0 custom item label
             // only save if custom or not default label
-            if (!set->lock || g_strcmp0(set->menu_label, value))
+            if (!set->lock || !ztd::same(set->menu_label, value))
             {
                 if (set->menu_label)
                     free(set->menu_label);
@@ -1642,7 +1642,7 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
 }
 
 static XSet*
-_xset_set(XSet* set, XSetSetSet var, const char* value)
+_xset_set(XSet* set, XSetSetSet var, const std::string& value)
 {
     if (!set->lock || (var != XSetSetSet::STYLE && var != XSetSetSet::DESC &&
                        var != XSetSetSet::TITLE && var != XSetSetSet::SHARED_KEY))
@@ -1651,21 +1651,21 @@ _xset_set(XSet* set, XSetSetSet var, const char* value)
 }
 
 XSet*
-xset_set(XSetName name, XSetSetSet var, const char* value)
+xset_set(XSetName name, XSetSetSet var, const std::string& value)
 {
     XSet* set = xset_get(name);
     return _xset_set(set, var, value);
 }
 
 XSet*
-xset_set(const std::string& name, XSetSetSet var, const char* value)
+xset_set(const std::string& name, XSetSetSet var, const std::string& value)
 {
     XSet* set = xset_get(name);
     return _xset_set(set, var, value);
 }
 
 XSet*
-xset_set_panel(panel_t panel, const std::string& name, XSetSetSet var, const char* value)
+xset_set_panel(panel_t panel, const std::string& name, XSetSetSet var, const std::string& value)
 {
     std::string fullname = fmt::format("panel{}_{}", panel, name);
     XSet* set = xset_set(fullname, var, value);
@@ -2768,7 +2768,7 @@ xset_parse_plugin(const char* plug_dir, const std::string& line, PluginUse use)
         return;
     }
     set = xset_get_by_plug_name(plug_dir, name);
-    xset_set_set(set, var, value.c_str());
+    xset_set_set(set, var, value);
 
     if (use >= PluginUse::BOOKMARKS)
     {
@@ -6499,12 +6499,8 @@ xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
     gtk_widget_get_allocation(GTK_WIDGET(icon_chooser), &allocation);
     if (allocation.width && allocation.height)
     {
-        std::string str;
-
-        str = fmt::format("{}", allocation.width);
-        xset_set(XSetName::MAIN_ICON, XSetSetSet::X, str.c_str());
-        str = fmt::format("{}", allocation.height);
-        xset_set(XSetName::MAIN_ICON, XSetSetSet::Y, str.c_str());
+        xset_set(XSetName::MAIN_ICON, XSetSetSet::X, std::to_string(allocation.width));
+        xset_set(XSetName::MAIN_ICON, XSetSetSet::Y, std::to_string(allocation.height));
     }
     gtk_widget_destroy(icon_chooser);
 
@@ -6702,13 +6698,8 @@ xset_text_dialog(GtkWidget* parent, const std::string& title, const std::string&
     height = allocation.height;
     if (width && height)
     {
-        std::string str;
-
-        str = fmt::format("{}", width);
-        xset_set(XSetName::TEXT_DLG, XSetSetSet::S, str.c_str());
-
-        str = fmt::format("{}", height);
-        xset_set(XSetName::TEXT_DLG, XSetSetSet::Z, str.c_str());
+        xset_set(XSetName::TEXT_DLG, XSetSetSet::S, std::to_string(width));
+        xset_set(XSetName::TEXT_DLG, XSetSetSet::Z, std::to_string(height));
     }
     gtk_widget_destroy(dlg);
     return ret;
@@ -6784,12 +6775,8 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
     height = allocation.height;
     if (width && height)
     {
-        std::string str;
-
-        str = fmt::format("{}", width);
-        xset_set(XSetName::FILE_DLG, XSetSetSet::X, str.c_str());
-        str = fmt::format("{}", height);
-        xset_set(XSetName::FILE_DLG, XSetSetSet::Y, str.c_str());
+        xset_set(XSetName::FILE_DLG, XSetSetSet::X, std::to_string(width));
+        xset_set(XSetName::FILE_DLG, XSetSetSet::Y, std::to_string(height));
     }
 
     if (response == GTK_RESPONSE_OK)

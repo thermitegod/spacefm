@@ -205,7 +205,7 @@ get_valid_su() noexcept
         }
         if (use_su.empty())
             use_su = su_commands.at(0);
-        xset_set(XSetName::SU_COMMAND, XSetSetSet::S, use_su.c_str());
+        xset_set(XSetName::SU_COMMAND, XSetSetSet::S, use_su);
     }
     std::string su_path = Glib::find_program_in_path(use_su);
     return su_path;

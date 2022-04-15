@@ -400,15 +400,16 @@ XSet* xset_set_b(const std::string& name, bool bval);
 XSet* xset_set_b_panel(panel_t panel, const std::string& name, bool bval);
 XSet* xset_set_b_panel_mode(panel_t panel, const std::string& name, char mode, bool bval);
 
-XSet* xset_set_panel(panel_t panel, const std::string& name, XSetSetSet var, const char* value);
+XSet* xset_set_panel(panel_t panel, const std::string& name, XSetSetSet var,
+                     const std::string& value);
 
 XSet* xset_set_cb(XSetName name, GFunc cb_func, void* cb_data);
 XSet* xset_set_cb(const std::string& name, GFunc cb_func, void* cb_data);
 XSet* xset_set_cb_panel(panel_t panel, const std::string& name, GFunc cb_func, void* cb_data);
 
-XSet* xset_set(XSetName name, XSetSetSet var, const char* value);
-XSet* xset_set(const std::string& name, XSetSetSet var, const char* value);
-XSet* xset_set_set(XSet* set, XSetSetSet var, const char* value);
+XSet* xset_set(XSetName name, XSetSetSet var, const std::string& value);
+XSet* xset_set(const std::string& name, XSetSetSet var, const std::string& value);
+XSet* xset_set_set(XSet* set, XSetSetSet var, const std::string& value);
 
 void xset_set_key(GtkWidget* parent, XSet* set);
 

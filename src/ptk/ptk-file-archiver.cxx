@@ -735,8 +735,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::ARC_DLG, XSetSetSet::X, std::to_string(width).c_str());
-        xset_set(XSetName::ARC_DLG, XSetSetSet::Y, std::to_string(height).c_str());
+        xset_set(XSetName::ARC_DLG, XSetSetSet::X, std::to_string(width));
+        xset_set(XSetName::ARC_DLG, XSetSetSet::Y, std::to_string(height));
     }
 
     // Destroying dialog
@@ -1108,11 +1108,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         height = allocation.height;
         if (width && height)
         {
-            std::string str;
-            str = fmt::format("{}", width);
-            xset_set(XSetName::ARC_DLG, XSetSetSet::X, str.c_str());
-            str = fmt::format("{}", height);
-            xset_set(XSetName::ARC_DLG, XSetSetSet::Y, str.c_str());
+            xset_set(XSetName::ARC_DLG, XSetSetSet::X, std::to_string(width));
+            xset_set(XSetName::ARC_DLG, XSetSetSet::Y, std::to_string(height));
         }
 
         // Destroying dialog

@@ -1823,15 +1823,15 @@ fm_main_window_store_positions(FMMainWindow* main_window)
         {
             pos = gtk_paned_get_position(GTK_PANED(main_window->hpane_top));
             if (pos)
-                xset_set(XSetName::PANEL_SLIDERS, XSetSetSet::X, std::to_string(pos).c_str());
+                xset_set(XSetName::PANEL_SLIDERS, XSetSetSet::X, std::to_string(pos));
 
             pos = gtk_paned_get_position(GTK_PANED(main_window->hpane_bottom));
             if (pos)
-                xset_set(XSetName::PANEL_SLIDERS, XSetSetSet::Y, std::to_string(pos).c_str());
+                xset_set(XSetName::PANEL_SLIDERS, XSetSetSet::Y, std::to_string(pos));
 
             pos = gtk_paned_get_position(GTK_PANED(main_window->vpane));
             if (pos)
-                xset_set(XSetName::PANEL_SLIDERS, XSetSetSet::S, std::to_string(pos).c_str());
+                xset_set(XSetName::PANEL_SLIDERS, XSetSetSet::S, std::to_string(pos));
 
             if (gtk_widget_get_visible(main_window->task_scroll))
             {
@@ -1841,7 +1841,7 @@ fm_main_window_store_positions(FMMainWindow* main_window)
                     // save absolute height
                     xset_set(XSetName::TASK_SHOW_MANAGER,
                              XSetSetSet::X,
-                             std::to_string(allocation.height - pos).c_str());
+                             std::to_string(allocation.height - pos));
                     // LOG_INFO("CLOS  win {}x{}    task height {}   slider {}", allocation.width,
                     // allocation.height, allocation.height - pos, pos);
                 }
@@ -4347,7 +4347,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
         {
             XSet* set = xset_get(task_names.at(j));
             // save column position
-            xset_set_set(set, XSetSetSet::X, std::to_string(i).c_str());
+            xset_set_set(set, XSetSetSet::X, std::to_string(i));
             // if the window was opened maximized and stayed maximized, or the
             // window is unmaximized and not fullscreen, save the columns
             if ((!main_window->maximized || main_window->opened_maximized) &&
@@ -4357,7 +4357,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
                 if (width) // manager unshown, all widths are zero
                 {
                     // save column width
-                    xset_set_set(set, XSetSetSet::Y, std::to_string(width).c_str());
+                    xset_set_set(set, XSetSetSet::Y, std::to_string(width));
                 }
             }
             // set column visibility
@@ -4667,11 +4667,11 @@ show_task_manager(FMMainWindow* main_window, bool show)
             if (pos)
             {
                 // save slider pos for version < 0.9.2 (in case of downgrade)
-                xset_set(XSetName::PANEL_SLIDERS, XSetSetSet::Z, std::to_string(pos).c_str());
+                xset_set(XSetName::PANEL_SLIDERS, XSetSetSet::Z, std::to_string(pos));
                 // save absolute height introduced v0.9.2
                 xset_set(XSetName::TASK_SHOW_MANAGER,
                          XSetSetSet::X,
-                         std::to_string(allocation.height - pos).c_str());
+                         std::to_string(allocation.height - pos));
                 // LOG_INFO("HIDE  win {}x{}    task height {}   slider {}", allocation.width,
                 // allocation.height, allocation.height - pos, pos);
             }

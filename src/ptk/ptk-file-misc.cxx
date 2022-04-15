@@ -1160,8 +1160,8 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::X, std::to_string(width).c_str());
-        xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::Y, std::to_string(height).c_str());
+        xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::X, std::to_string(width));
+        xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::Y, std::to_string(height));
     }
 
     gtk_widget_destroy(dlg);
@@ -1325,8 +1325,8 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::X, std::to_string(width).c_str());
-        xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::Y, std::to_string(height).c_str());
+        xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::X, std::to_string(width));
+        xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::Y, std::to_string(height));
     }
 
     // save mode
@@ -1334,7 +1334,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
         {
-            xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::Z, std::to_string(i).c_str());
+            xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::Z, std::to_string(i));
             break;
         }
     }

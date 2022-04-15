@@ -2469,8 +2469,8 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::CONTEXT_DLG, XSetSetSet::X, std::to_string(width).c_str());
-        xset_set(XSetName::CONTEXT_DLG, XSetSetSet::Y, std::to_string(height).c_str());
+        xset_set(XSetName::CONTEXT_DLG, XSetSetSet::X, std::to_string(width));
+        xset_set(XSetName::CONTEXT_DLG, XSetSetSet::Y, std::to_string(height));
     }
 
     delete ctxt;

@@ -292,10 +292,7 @@ on_popup_sortby(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, int order)
             v = GTK_SORT_ASCENDING;
         else
             v = GTK_SORT_DESCENDING;
-        xset_set_panel(file_browser->mypanel,
-                       "list_detailed",
-                       XSetSetSet::Y,
-                       std::to_string(v).c_str());
+        xset_set_panel(file_browser->mypanel, "list_detailed", XSetSetSet::Y, std::to_string(v));
         ptk_file_browser_set_sort_type(file_browser, (GtkSortType)v);
     }
     else
@@ -303,7 +300,7 @@ on_popup_sortby(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, int order)
         xset_set_panel(file_browser->mypanel,
                        "list_detailed",
                        XSetSetSet::X,
-                       std::to_string(sort_order).c_str());
+                       std::to_string(sort_order));
         ptk_file_browser_set_sort_order(file_browser, (PtkFBSortOrder)sort_order);
     }
 }
@@ -457,7 +454,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                            p,
                            p,
                            p);
-        xset_set_set(set, XSetSetSet::DESC, desc.c_str());
+        xset_set_set(set, XSetSetSet::DESC, desc);
         set = xset_set_cb(XSetName::RUBBERBAND, (GFunc)main_window_rubberband_all, nullptr);
         set->disable = false;
     }
@@ -591,7 +588,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                        p,
                        p,
                        p);
-    xset_set_set(set, XSetSetSet::DESC, desc.c_str());
+    xset_set_set(set, XSetSetSet::DESC, desc);
     set = xset_get(XSetName::CON_VIEW);
     set->disable = !browser->file_list;
     desc = fmt::format("panel{}_show_toolbox panel{}_show_sidebar panel{}_show_devmon "
@@ -603,7 +600,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                        p,
                        p,
                        p);
-    xset_set_set(set, XSetSetSet::DESC, desc.c_str());
+    xset_set_set(set, XSetSetSet::DESC, desc);
     xset_add_menuitem(browser, menu, accel_group, set);
 }
 
@@ -620,7 +617,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 { // either desktop or browser must be non-nullptr
 
     const char* app_name = nullptr;
-    char* desc;
     XSet* set_radio;
     int icon_w;
     int icon_h;
@@ -1309,12 +1305,12 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         set->disable = !sel_files;
 
         set = xset_get(XSetName::CON_PROP);
+        std::string desc;
         if (geteuid() == 0)
-            desc = ztd::strdup("prop_info prop_perm prop_root");
+            desc = "prop_info prop_perm prop_root";
         else
-            desc = ztd::strdup("prop_info prop_perm prop_quick prop_root");
+            desc = "prop_info prop_perm prop_quick prop_root";
         xset_set_set(set, XSetSetSet::DESC, desc);
-        free(desc);
         xset_add_menuitem(browser, popup, accel_group, set);
     }
 

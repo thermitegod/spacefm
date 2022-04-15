@@ -451,8 +451,8 @@ on_dlg_response(GtkDialog* dlg, int id, void* user_data)
     int height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::APP_DLG, XSetSetSet::X, std::to_string(width).c_str());
-        xset_set(XSetName::APP_DLG, XSetSetSet::Y, std::to_string(height).c_str());
+        xset_set(XSetName::APP_DLG, XSetSetSet::X, std::to_string(width));
+        xset_set(XSetName::APP_DLG, XSetSetSet::Y, std::to_string(height));
     }
 
     switch (id)
