@@ -817,8 +817,8 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
         std::ifstream file(script);
         if (!file.is_open())
         {
-            error_message =
-                fmt::format("Error reading file '{}':\n\n{}", script, g_strerror(errno));
+            std::string errno_msg = Glib::strerror(errno);
+            error_message = fmt::format("Error reading file '{}':\n\n{}", script, errno_msg);
             return true;
         }
         else
@@ -918,8 +918,8 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
     }
     else
     {
-        error_message =
-            fmt::format("{} '{}':\n\n{}", "Error writing to file", script, g_strerror(errno));
+        std::string errno_msg = Glib::strerror(errno);
+        error_message = fmt::format("{} '{}':\n\n{}", "Error writing to file", script, errno_msg);
         return true;
     }
     file.close();

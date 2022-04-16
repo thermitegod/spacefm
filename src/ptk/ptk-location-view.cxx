@@ -799,7 +799,10 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
     std::filesystem::permissions(point, std::filesystem::perms::owner_all);
 
     if (!std::filesystem::is_directory(point))
-        LOG_WARN("Error creating mount point directory '{}': {}", point, g_strerror(errno));
+    {
+        std::string errno_msg = Glib::strerror(errno);
+        LOG_WARN("Error creating mount point directory '{}': {}", point, errno_msg);
+    }
 
     return point;
 }

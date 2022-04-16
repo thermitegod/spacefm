@@ -224,7 +224,8 @@ vfs_file_monitor_reconnect_inotify(void* key, void* value, void* user_data)
              *        a list of monitors on non-existent files/directories
              *        which you retry in a timeout.
              */
-            LOG_WARN("Failed to add monitor on '{}': {}", path, g_strerror(errno));
+            std::string errno_msg = Glib::strerror(errno);
+            LOG_WARN("Failed to add monitor on '{}': {}", path, errno_msg);
             return;
         }
     }
@@ -303,7 +304,8 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
         ;
     if (len < 0)
     {
-        LOG_WARN("Error reading inotify event: {}", g_strerror(errno));
+        std::string errno_msg = Glib::strerror(errno);
+        LOG_WARN("Error reading inotify event: {}", errno_msg);
         return false;
     }
 

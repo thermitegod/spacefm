@@ -871,7 +871,8 @@ load_command_script(ContextData* ctxt, XSet* set)
         std::ifstream file(script);
         if (!file.is_open())
         {
-            LOG_WARN("error reading file {}: {}", script, g_strerror(errno));
+            std::string errno_msg = Glib::strerror(errno);
+            LOG_WARN("error reading file {}: {}", script, errno_msg);
         }
         else
         {
