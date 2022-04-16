@@ -503,12 +503,12 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
         ptk_file_task_run(task);
 
         if (missing_targets > 0)
-            ptk_show_error(parent_win ? GTK_WINDOW(parent_win) : nullptr,
-                           g_strdup_printf("Error"),
-                           g_strdup_printf("%i target%s missing",
-                                           missing_targets,
-                                           missing_targets > 1 ? g_strdup_printf("s are")
-                                                               : g_strdup_printf(" is")));
+            ptk_show_error(
+                parent_win ? GTK_WINDOW(parent_win) : nullptr,
+                ztd::strdup("Error"),
+                g_strdup_printf("%i target%s missing",
+                                missing_targets,
+                                missing_targets > 1 ? ztd::strdup("s are") : ztd::strdup(" is")));
     }
     gtk_selection_data_free(sel_data);
 }

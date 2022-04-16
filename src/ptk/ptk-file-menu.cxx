@@ -1263,9 +1263,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
         set = xset_get("con_prop");
         if (geteuid() == 0)
-            desc = g_strdup_printf("prop_info prop_perm prop_root");
+            desc = ztd::strdup("prop_info prop_perm prop_root");
         else
-            desc = g_strdup_printf("prop_info prop_perm prop_quick prop_root");
+            desc = ztd::strdup("prop_info prop_perm prop_quick prop_root");
         xset_set_set(set, XSET_SET_SET_DESC, desc);
         free(desc);
         xset_add_menuitem(browser, popup, accel_group, set);

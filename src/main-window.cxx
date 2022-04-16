@@ -1358,7 +1358,7 @@ rebuild_menus(FMMainWindow* main_window)
     xset_set_cb("main_root_terminal", (GFunc)on_open_root_terminal_activate, main_window);
     xset_set_cb("main_save_session", (GFunc)on_open_url, main_window);
     xset_set_cb("main_exit", (GFunc)on_quit_activate, main_window);
-    menu_elements = g_strdup_printf(
+    menu_elements = ztd::strdup(
         "main_save_session main_search separator main_terminal main_root_terminal "
         "main_new_window main_root_window separator main_save_tabs separator main_exit");
     xset_add_menu(file_browser, newmenu, accel_group, menu_elements);
@@ -1420,9 +1420,9 @@ rebuild_menus(FMMainWindow* main_window)
     xset_set_ob1_int(set, "panel_num", 4);
     set->disable = (main_window->curpanel == 4);
 
-    menu_elements = g_strdup_printf(
-        "panel1_show panel2_show panel3_show panel4_show main_pbar main_focus_panel");
-    char* menu_elements2 = g_strdup_printf(
+    menu_elements =
+        ztd::strdup("panel1_show panel2_show panel3_show panel4_show main_pbar main_focus_panel");
+    char* menu_elements2 = ztd::strdup(
         "separator main_tasks main_auto separator main_title main_icon main_full separator "
         "main_design_mode main_prefs");
 
@@ -1497,7 +1497,7 @@ rebuild_menus(FMMainWindow* main_window)
     // Help
     newmenu = gtk_menu_new();
     xset_set_cb("main_about", (GFunc)on_about_activate, main_window);
-    menu_elements = g_strdup_printf("main_about");
+    menu_elements = ztd::strdup("main_about");
     xset_add_menu(file_browser, newmenu, accel_group, menu_elements);
     free(menu_elements);
     gtk_widget_show_all(GTK_WIDGET(newmenu));

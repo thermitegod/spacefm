@@ -257,8 +257,7 @@ generate_bash_error_function(bool run_in_terminal, const char* parent_quote)
         finished_with_errors = ztd::strdup("[ Finished With Errors ]");
     }
 
-    return g_strdup_printf(""
-                           "fm_handle_err(){\n"
+    return g_strdup_printf("fm_handle_err(){\n"
                            "    fm_err=$?\n"
                            "%s%s%s"
                            "    if [ $fm_err -ne 0 ];then\n"
@@ -944,7 +943,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
      * is freed by the task */
 
     // Creating task
-    char* task_name = g_strdup_printf("Archive");
+    char* task_name = ztd::strdup("Archive");
     PtkFileTask* task = ptk_file_exec_new(task_name,
                                           cwd,
                                           file_browser ? GTK_WIDGET(file_browser) : nullptr,
@@ -1361,8 +1360,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                 // Generating shell command to make directory
                 parent_quote = bash_quote(parent_path);
                 free(mkparent);
-                mkparent = g_strdup_printf(""
-                                           "mkdir -p %s || fm_handle_err\n"
+                mkparent = g_strdup_printf("mkdir -p %s || fm_handle_err\n"
                                            "cd %s || fm_handle_err\n",
                                            parent_quote.c_str(),
                                            parent_quote.c_str());

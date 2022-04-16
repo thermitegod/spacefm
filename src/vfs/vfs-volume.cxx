@@ -2031,7 +2031,7 @@ vfs_volume_set_info(VFSVolume* volume)
     {
         case DEVICE_TYPE_BLOCK:
             if (volume->is_floppy && !volume->udi)
-                disp_id = g_strdup_printf(":floppy");
+                disp_id = ztd::strdup(":floppy");
             else if (volume->udi)
             {
                 if ((lastcomma = strrchr(volume->udi, '/')))
@@ -2052,7 +2052,7 @@ vfs_volume_set_info(VFSVolume* volume)
                 }
             }
             else if (volume->is_optical)
-                disp_id = g_strdup_printf(":optical");
+                disp_id = ztd::strdup(":optical");
             if (!disp_id)
                 disp_id = ztd::strdup("");
             // table type
@@ -2092,7 +2092,7 @@ vfs_volume_set_info(VFSVolume* volume)
         if (volume->mount_point && volume->mount_point[0] != '\0')
             disp_mount = g_strdup_printf("%s", volume->mount_point);
         else
-            disp_mount = g_strdup_printf("???");
+            disp_mount = ztd::strdup("???");
     }
     else if (volume->is_mountable) // has_media
     {
@@ -2111,7 +2111,7 @@ vfs_volume_set_info(VFSVolume* volume)
         }
         else
             disp_size = ztd::strdup("");
-        disp_mount = g_strdup_printf("---");
+        disp_mount = ztd::strdup("---");
     }
     else
     {

@@ -2452,13 +2452,13 @@ show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browse
     xset_set_ob1(set, "set", set);
 
     set = xset_get("dev_menu_settings");
-    menu_elements = g_strdup_printf(
+    menu_elements = ztd::strdup(
         "dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf dev_mount_options "
         "dev_change separator dev_single dev_newtab dev_icon");
     xset_set_set(set, XSET_SET_SET_DESC, menu_elements);
     free(menu_elements);
 
-    menu_elements = g_strdup_printf("separator dev_menu_root separator dev_prop dev_menu_settings");
+    menu_elements = ztd::strdup("separator dev_menu_root separator dev_prop dev_menu_settings");
     xset_add_menu(file_browser, popup, accel_group, menu_elements);
     free(menu_elements);
 
@@ -3311,10 +3311,10 @@ ptk_bookmark_view_get_first_bookmark(XSet* book_set)
     if (!book_set->child)
     {
         child_set = xset_custom_new();
-        child_set->menu_label = g_strdup_printf("Home");
+        child_set->menu_label = ztd::strdup("Home");
         child_set->z = ztd::strdup(vfs_user_home_dir());
         child_set->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
-        child_set->parent = g_strdup_printf("main_book");
+        child_set->parent = ztd::strdup("main_book");
         book_set->child = ztd::strdup(child_set->name);
         child_set->task = false;
         child_set->task_err = false;

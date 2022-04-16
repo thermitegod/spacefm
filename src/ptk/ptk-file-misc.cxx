@@ -2213,8 +2213,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         }
         else
         {
-            mset->mime_type = g_strdup_printf("inode/symlink");
-            type = g_strdup_printf("symbolic link ( inode/symlink )");
+            mset->mime_type = ztd::strdup("inode/symlink");
+            type = ztd::strdup("symbolic link ( inode/symlink )");
         }
     }
     else if (file)
@@ -2230,13 +2230,13 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         }
         else
         {
-            mset->mime_type = g_strdup_printf("?");
+            mset->mime_type = ztd::strdup("?");
             type = ztd::strdup(mset->mime_type);
         }
     }
     else // create
     {
-        mset->mime_type = g_strdup_printf("?");
+        mset->mime_type = ztd::strdup("?");
         type = ztd::strdup(mset->mime_type);
     }
     mset->label_mime = GTK_LABEL(gtk_label_new(type));
@@ -3703,12 +3703,12 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
         if (file_browser)
             parent = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser)));
 
-        ptk_show_error(parent,
-                       g_strdup_printf("Error"),
-                       g_strdup_printf("%i target%s missing",
-                                       missing_targets,
-                                       missing_targets > 1 ? g_strdup_printf("s are")
-                                                           : g_strdup_printf(" is")));
+        ptk_show_error(
+            parent,
+            ztd::strdup("Error"),
+            g_strdup_printf("%i target%s missing",
+                            missing_targets,
+                            missing_targets > 1 ? ztd::strdup("s are") : ztd::strdup(" is")));
     }
 }
 

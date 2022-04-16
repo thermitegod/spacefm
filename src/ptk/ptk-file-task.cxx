@@ -1238,14 +1238,14 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             if (task->err_count && task->type != VFS_FILE_TASK_EXEC)
             {
                 if (ptask->err_mode == PTASK_ERROR_FIRST)
-                    errs = g_strdup_printf("Error  ( Stop If First )");
+                    errs = ztd::strdup("Error  ( Stop If First )");
                 else if (ptask->err_mode == PTASK_ERROR_ANY)
-                    errs = g_strdup_printf("Error  ( Stop On Any )");
+                    errs = ztd::strdup("Error  ( Stop On Any )");
                 else
                     errs = g_strdup_printf("Stopped with %d error", task->err_count);
             }
             else
-                errs = g_strdup_printf("Stopped");
+                errs = ztd::strdup("Stopped");
         }
         else
         {
@@ -1254,7 +1254,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
                 if (task->err_count)
                     errs = g_strdup_printf("Finished with %d error", task->err_count);
                 else
-                    errs = g_strdup_printf("Done");
+                    errs = ztd::strdup("Done");
             }
             else
             {
@@ -1262,16 +1262,16 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
                     errs = g_strdup_printf("Finished with error  ( exit status %d )",
                                            task->exec_exit_status);
                 else if (task->exec_is_error)
-                    errs = g_strdup_printf("Finished with error");
+                    errs = ztd::strdup("Finished with error");
                 else
-                    errs = g_strdup_printf("Done");
+                    errs = ztd::strdup("Done");
             }
         }
     }
     else if (task->state_pause == VFS_FILE_TASK_PAUSE)
     {
         if (task->type != VFS_FILE_TASK_EXEC)
-            errs = g_strdup_printf("Paused");
+            errs = ztd::strdup("Paused");
         else
         {
             if (task->exec_pid)
@@ -1286,7 +1286,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     else if (task->state_pause == VFS_FILE_TASK_QUEUE)
     {
         if (task->type != VFS_FILE_TASK_EXEC)
-            errs = g_strdup_printf("Queued");
+            errs = ztd::strdup("Queued");
         else
         {
             if (task->exec_pid)
@@ -1305,7 +1305,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             if (task->err_count)
                 errs = g_strdup_printf("Running with %d error", task->err_count);
             else
-                errs = g_strdup_printf("Running...");
+                errs = ztd::strdup("Running...");
         }
         else
         {
@@ -2276,7 +2276,7 @@ query_overwrite(PtkFileTask* ptask)
 
     // update displays (mutex is already locked)
     free(ptask->dsp_curspeed);
-    ptask->dsp_curspeed = g_strdup_printf("stalled");
+    ptask->dsp_curspeed = ztd::strdup("stalled");
     ptk_file_task_progress_update(ptask);
     if (ptask->task_view &&
         gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(ptask->task_view))))
