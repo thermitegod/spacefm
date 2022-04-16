@@ -234,7 +234,11 @@ static GtkTreeModelFlags
 ptk_dir_tree_get_flags(GtkTreeModel* tree_model)
 {
     (void)tree_model;
-    g_return_val_if_fail(PTK_IS_DIR_TREE(tree_model), (GtkTreeModelFlags)0);
+    if (!PTK_IS_DIR_TREE(tree_model))
+    {
+        LOG_ERROR("!PTK_IS_DIR_TREE(tree_model)");
+        return (GtkTreeModelFlags)0;
+    }
     return GTK_TREE_MODEL_ITERS_PERSIST;
 }
 
@@ -249,8 +253,16 @@ static GType
 ptk_dir_tree_get_column_type(GtkTreeModel* tree_model, int index)
 {
     (void)tree_model;
-    g_return_val_if_fail(PTK_IS_DIR_TREE(tree_model), G_TYPE_INVALID);
-    g_return_val_if_fail(index < G_N_ELEMENTS(column_types) && index >= 0, G_TYPE_INVALID);
+    if (!PTK_IS_DIR_TREE(tree_model))
+    {
+        LOG_ERROR("!PTK_IS_DIR_TREE(tree_model)");
+        return G_TYPE_INVALID;
+    }
+    if (index > (int)G_N_ELEMENTS(column_types))
+    {
+        LOG_ERROR("index > (int)G_N_ELEMENTS(column_types)");
+        return G_TYPE_INVALID;
+    }
     return column_types[index];
 }
 
@@ -324,14 +336,35 @@ ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
     PtkDirTree* tree = PTK_DIR_TREE(tree_model);
 
-    g_return_val_if_fail(tree, nullptr);
-    g_return_val_if_fail(iter->stamp == tree->stamp, nullptr);
-    g_return_val_if_fail(iter != nullptr, nullptr);
-    g_return_val_if_fail(iter->user_data != nullptr, nullptr);
+    if (!tree)
+    {
+        LOG_ERROR("!tree");
+        return nullptr;
+    }
+    if (!iter)
+    {
+        LOG_ERROR("!iter");
+        return nullptr;
+    }
+    if (iter->stamp != tree->stamp)
+    {
+        LOG_ERROR("iter->stamp != tree->stamp");
+        return nullptr;
+    }
+    if (!iter->user_data)
+    {
+        LOG_ERROR("!iter->user_data");
+        return nullptr;
+    }
 
     GtkTreePath* path = gtk_tree_path_new();
     PtkDirTreeNode* node = static_cast<PtkDirTreeNode*>(iter->user_data);
-    g_return_val_if_fail(node->parent != nullptr, (GtkTreePath*)(-1));
+
+    if (!node->parent)
+    {
+        LOG_ERROR("!node->parent");
+        return (GtkTreePath*)(-1);
+    }
 
     while (node != tree->root)
     {
@@ -414,7 +447,11 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column, 
 static gboolean
 ptk_dir_tree_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
-    g_return_val_if_fail(PTK_IS_DIR_TREE(tree_model), false);
+    if (!PTK_IS_DIR_TREE(tree_model))
+    {
+        LOG_ERROR("!PTK_IS_DIR_TREE(tree_model)");
+        return false;
+    }
 
     if (iter == nullptr || iter->user_data == nullptr)
         return false;
@@ -438,9 +475,18 @@ static gboolean
 ptk_dir_tree_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent)
 {
     PtkDirTreeNode* parent_node;
-    g_return_val_if_fail(parent == nullptr || parent->user_data != nullptr, false);
+    // if (parent || !parent->user_data)
+    // {
+    //     LOG_ERROR("!PTK_IS_DIR_TREE(tree_model)");
+    //     return false;
+    // }
 
-    g_return_val_if_fail(PTK_IS_DIR_TREE(tree_model), false);
+    if (!PTK_IS_DIR_TREE(tree_model))
+    {
+        LOG_ERROR("!PTK_IS_DIR_TREE(tree_model)");
+        return false;
+    }
+
     PtkDirTree* tree = PTK_DIR_TREE(tree_model);
 
     if (parent)
@@ -466,7 +512,11 @@ static gboolean
 ptk_dir_tree_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
     (void)tree_model;
-    g_return_val_if_fail(iter != nullptr, false);
+    if (!iter)
+    {
+        LOG_ERROR("!iter");
+        return false;
+    }
     PtkDirTreeNode* node = static_cast<PtkDirTreeNode*>(iter->user_data);
     return node->n_children != 0;
 }
@@ -475,7 +525,11 @@ static int
 ptk_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
     PtkDirTreeNode* node;
-    g_return_val_if_fail(PTK_IS_DIR_TREE(tree_model), -1);
+    if (!PTK_IS_DIR_TREE(tree_model))
+    {
+        LOG_ERROR("!PTK_IS_DIR_TREE(tree_model)");
+        return -1;
+    }
 
     PtkDirTree* tree = PTK_DIR_TREE(tree_model);
 
@@ -484,7 +538,12 @@ ptk_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
         node = tree->root;
     else
         node = static_cast<PtkDirTreeNode*>(iter->user_data);
-    g_return_val_if_fail(node != nullptr, -1);
+
+    if (!node)
+    {
+        LOG_ERROR("!node");
+        return -1;
+    }
     return node->n_children;
 }
 
@@ -493,13 +552,21 @@ ptk_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTree
 {
     PtkDirTreeNode* parent_node;
 
-    g_return_val_if_fail(PTK_IS_DIR_TREE(tree_model), false);
+    if (!PTK_IS_DIR_TREE(tree_model))
+    {
+        LOG_ERROR("!PTK_IS_DIR_TREE(tree_model)");
+        return false;
+    }
     PtkDirTree* tree = PTK_DIR_TREE(tree_model);
 
     if (parent)
     {
         parent_node = static_cast<PtkDirTreeNode*>(parent->user_data);
-        g_return_val_if_fail(parent_node, false);
+        if (!parent_node)
+        {
+            LOG_ERROR("!parent_node");
+            return false;
+        }
     }
     else
     {
@@ -522,7 +589,11 @@ ptk_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTree
 static gboolean
 ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* child)
 {
-    g_return_val_if_fail(iter != nullptr && child != nullptr, false);
+    if (!iter && !child)
+    {
+        LOG_ERROR("!iter && !child");
+        return false;
+    }
 
     PtkDirTree* tree = PTK_DIR_TREE(tree_model);
     PtkDirTreeNode* node = static_cast<PtkDirTreeNode*>(child->user_data);
@@ -786,7 +857,8 @@ ptk_dir_tree_collapse_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* path
 char*
 ptk_dir_tree_get_dir_path(PtkDirTree* tree, GtkTreeIter* iter)
 {
-    g_return_val_if_fail(iter->user_data != nullptr, nullptr);
+    if (!iter->user_data)
+        return nullptr;
     return dir_path_from_tree_node(tree, static_cast<PtkDirTreeNode*>(iter->user_data));
 }
 

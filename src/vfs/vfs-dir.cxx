@@ -850,9 +850,10 @@ vfs_dir_get_by_path_soft(const char* path)
 VFSDir*
 vfs_dir_get_by_path(const char* path)
 {
-    VFSDir* dir = nullptr;
+    if (!path)
+        return nullptr;
 
-    g_return_val_if_fail(path, nullptr);
+    VFSDir* dir = nullptr;
 
     if (!dir_hash)
     {
