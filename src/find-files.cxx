@@ -286,25 +286,21 @@ static GtkActionEntry menu_actions[] = {
 static int
 get_date_offset(GtkCalendar* calendar)
 {
-    /* FIXME: I think we need a better implementation for this */
-    GDate* date;
-    GDate* today;
-    unsigned int d, m, y;
     int offset;
-    std::time_t timeval = std::time(nullptr);
-    struct tm* lt = localtime(&timeval);
 
+    std::time_t timeval = std::time(nullptr);
+    struct tm* lt = std::localtime(&timeval);
+
+    unsigned int d, m, y;
     gtk_calendar_get_date(calendar, &y, &m, &d);
 
-    date = g_date_new_dmy((GDateDay)d, (GDateMonth)m, (GDateYear)y);
-    today = g_date_new_dmy((GDateDay)lt->tm_mday,
-                           (GDateMonth)lt->tm_mon,
-                           (GDateYear)lt->tm_year + 1900);
+    Glib::Date date = Glib::Date(Glib::Date::Day(d), Glib::Date::Month(m), Glib::Date::Year(y));
+    Glib::Date today = Glib::Date(Glib::Date::Day(lt->tm_mday),
+                                  Glib::Date::Month(lt->tm_mon),
+                                  Glib::Date::Year(lt->tm_year + 1900));
 
-    offset = g_date_days_between(date, today);
+    offset = today.days_between(date);
 
-    g_date_free(date);
-    g_date_free(today);
     return std::abs(offset);
 }
 
