@@ -606,7 +606,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
                 if (!ztd::contains(dir_path, ptk_file_browser_get_cwd(file_browser)))
                 {
                     free(file_browser->select_path);
-                    file_browser->select_path = ztd::strdup(final_path.c_str());
+                    file_browser->select_path = ztd::strdup(final_path);
                     ptk_file_browser_chdir(file_browser,
                                            dir_path.c_str(),
                                            PTK_FB_CHDIR_ADD_HISTORY);

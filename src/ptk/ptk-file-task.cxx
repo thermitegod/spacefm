@@ -1538,17 +1538,17 @@ ptk_file_task_update(PtkFileTask* ptask)
             remain2 = fmt::format(":{:02}", remain);
 
         free(ptask->dsp_file_count);
-        ptask->dsp_file_count = ztd::strdup(file_count.c_str());
+        ptask->dsp_file_count = ztd::strdup(file_count);
         free(ptask->dsp_size_tally);
-        ptask->dsp_size_tally = ztd::strdup(size_tally.c_str());
+        ptask->dsp_size_tally = ztd::strdup(size_tally);
         free(ptask->dsp_curspeed);
-        ptask->dsp_curspeed = ztd::strdup(speed1.c_str());
+        ptask->dsp_curspeed = ztd::strdup(speed1);
         free(ptask->dsp_avgspeed);
-        ptask->dsp_avgspeed = ztd::strdup(speed2.c_str());
+        ptask->dsp_avgspeed = ztd::strdup(speed2);
         free(ptask->dsp_curest);
-        ptask->dsp_curest = ztd::strdup(remain1.c_str());
+        ptask->dsp_curest = ztd::strdup(remain1);
         free(ptask->dsp_avgest);
-        ptask->dsp_avgest = ztd::strdup(remain2.c_str());
+        ptask->dsp_avgest = ztd::strdup(remain2);
         ;
     }
 

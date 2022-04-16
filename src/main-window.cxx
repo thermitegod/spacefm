@@ -3851,7 +3851,7 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
         c->var[CONTEXT_DEVICE] = ztd::strdup(vol->device_file);
         if (!c->var[CONTEXT_DEVICE])
             c->var[CONTEXT_DEVICE] = ztd::strdup("");
-        c->var[CONTEXT_DEVICE_LABEL] = ztd::strdup(vol->label.c_str());
+        c->var[CONTEXT_DEVICE_LABEL] = ztd::strdup(vol->label);
         if (!c->var[CONTEXT_DEVICE_LABEL])
             c->var[CONTEXT_DEVICE_LABEL] = ztd::strdup("");
         c->var[CONTEXT_DEVICE_MOUNT_POINT] = ztd::strdup(vol->mount_point);
@@ -4047,8 +4047,8 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
         c->var[CONTEXT_TASK_TYPE] = ztd::strdup(job_titles[ptask->task->type]);
         if (ptask->task->type == VFS_FILE_TASK_EXEC)
         {
-            c->var[CONTEXT_TASK_NAME] = ztd::strdup(ptask->task->current_file.c_str());
-            c->var[CONTEXT_TASK_DIR] = ztd::strdup(ptask->task->dest_dir.c_str());
+            c->var[CONTEXT_TASK_NAME] = ztd::strdup(ptask->task->current_file);
+            c->var[CONTEXT_TASK_DIR] = ztd::strdup(ptask->task->dest_dir);
         }
         else
         {

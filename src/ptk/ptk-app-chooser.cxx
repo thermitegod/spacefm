@@ -151,7 +151,7 @@ create_model_from_mime_type(VFSMimeType* mime_type)
         {
             for (std::string app: apps)
             {
-                add_list_item(list, ztd::strdup(app.c_str()));
+                add_list_item(list, ztd::strdup(app));
             }
         }
     }

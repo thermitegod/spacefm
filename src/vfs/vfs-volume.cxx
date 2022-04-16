@@ -3010,7 +3010,7 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
     }
 
     *run_in_terminal = terminal;
-    return ztd::strdup(command.c_str());
+    return ztd::strdup(command);
 }
 
 static bool
@@ -3202,7 +3202,7 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
                     if (vol->is_mounted)
                         pointq = bash_quote(vol->mount_point);
                     std::string command2 = ztd::replace(command, "%a", pointq);
-                    command = ztd::strdup(command2.c_str());
+                    command = ztd::strdup(command2);
                 }
             }
             break;
@@ -3224,7 +3224,7 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
                     if (vol->is_mounted)
                         pointq = bash_quote(vol->mount_point);
                     std::string command2 = ztd::replace(command, "%a", pointq);
-                    command = ztd::strdup(command2.c_str());
+                    command = ztd::strdup(command2);
                 }
             }
             break;

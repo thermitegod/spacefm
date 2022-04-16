@@ -324,7 +324,7 @@ load_conf()
 
     /* Set default config values */
     config_settings.terminal_su = nullptr;
-    config_settings.tmp_dir = ztd::strdup(vfs_user_cache_dir().c_str());
+    config_settings.tmp_dir = ztd::strdup(vfs_user_cache_dir());
     config_settings.font_view_icon = default_font.c_str();
     config_settings.font_view_compact = default_font.c_str();
     config_settings.font_general = default_font.c_str();
@@ -4607,7 +4607,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 break;
             }
             if (set->menu_label && set->menu_label[0])
-                name = ztd::strdup(clean_label(set->menu_label, false, false).c_str());
+                name = ztd::strdup(clean_label(set->menu_label, false, false));
             else
             {
                 if (!set->lock && set->z && set->menu_style < XSET_MENU_SUBMENU &&

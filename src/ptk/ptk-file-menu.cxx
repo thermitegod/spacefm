@@ -895,7 +895,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                                  (void*)data);
                 g_object_set_data_full(G_OBJECT(app_menu_item),
                                        "desktop_file",
-                                       ztd::strdup(app.c_str()),
+                                       ztd::strdup(app),
                                        free);
             }
         }

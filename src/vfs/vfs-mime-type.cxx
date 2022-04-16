@@ -444,7 +444,7 @@ vfs_mime_type_get_default_action(VFSMimeType* mime_type)
     {
         std::vector<std::string> actions = mime_type_get_actions(mime_type->type);
         if (!actions.empty())
-            def = ztd::strdup(actions.at(0).c_str());
+            def = ztd::strdup(actions.at(0));
     }
     return def;
 }

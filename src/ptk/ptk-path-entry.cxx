@@ -251,7 +251,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
 
                     std::string full_path = Glib::build_filename(new_dir, file_name);
                     if (std::filesystem::is_directory(full_path))
-                        name_list = g_slist_prepend(name_list, ztd::strdup(full_path.c_str()));
+                        name_list = g_slist_prepend(name_list, ztd::strdup(full_path));
                 }
 
                 // add sorted list to liststore
@@ -343,7 +343,7 @@ insert_complete(GtkEntry* entry)
                 // prefix matches
                 count++;
                 if (long_prefix.empty())
-                    long_prefix = ztd::strdup(file_name.c_str());
+                    long_prefix = ztd::strdup(file_name);
                 else
                 {
                     i = 0;
@@ -675,7 +675,7 @@ on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars, unsigne
     {
         // remove linefeeds from pasted text
         cleaned = ztd::replace(text, "\n", "");
-        text = new_text = ztd::strdup(cleaned.c_str());
+        text = new_text = ztd::strdup(cleaned);
     }
 
     // remove leading spaces for test
@@ -688,7 +688,7 @@ on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars, unsigne
         char* unquote = ztd::strdup(text + 1);
         unquote[strlen(unquote) - 1] = '\0';
         cleaned = ztd::replace(unquote, "'\\''", "'");
-        new_text = ztd::strdup(cleaned.c_str());
+        new_text = ztd::strdup(cleaned);
         free(unquote);
     }
 

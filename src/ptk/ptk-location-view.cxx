@@ -727,7 +727,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
                 if (netmount->path)
                 {
                     parent_dir_str = ztd::replace(netmount->path, "/", "-");
-                    parent_dir = ztd::strdup(parent_dir_str.c_str());
+                    parent_dir = ztd::strdup(parent_dir_str);
                     g_strstrip(parent_dir);
                     while (g_str_has_suffix(parent_dir, "-"))
                         parent_dir[strlen(parent_dir) - 1] = '\0';
@@ -769,7 +769,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
     {
         g_strstrip(mname);
         std::string cleaned = ztd::replace(mname, " ", "");
-        mname = ztd::strdup(cleaned.c_str());
+        mname = ztd::strdup(cleaned);
     }
 
     if (mname && !mname[0])
@@ -1862,7 +1862,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
             {
                 std::string pointq = bash_quote(vol->mount_point);
                 std::string cmd2 = ztd::replace(cmd, "%a", pointq);
-                cmd = ztd::strdup(cmd2.c_str());
+                cmd = ztd::strdup(cmd2);
             }
         }
         else
@@ -1891,7 +1891,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
             std::string pointq = bash_quote(vol->mount_point);
             std::string cmd2;
             cmd2 = ztd::replace(cmd, "%a", pointq);
-            cmd = ztd::strdup(cmd2.c_str());
+            cmd = ztd::strdup(cmd2);
         }
     }
     else
@@ -2200,7 +2200,7 @@ volume_is_visible(VFSVolume* vol)
             if (i == 0)
                 value = vol->device_file;
             else if (i == 1)
-                value = ztd::strdup(vol->label.c_str());
+                value = ztd::strdup(vol->label);
             else
             {
                 if ((value = vol->udi))
@@ -3312,7 +3312,7 @@ ptk_bookmark_view_get_first_bookmark(XSet* book_set)
     {
         child_set = xset_custom_new();
         child_set->menu_label = g_strdup_printf("Home");
-        child_set->z = ztd::strdup(vfs_user_home_dir().c_str());
+        child_set->z = ztd::strdup(vfs_user_home_dir());
         child_set->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
         child_set->parent = g_strdup_printf("main_book");
         book_set->child = ztd::strdup(child_set->name);

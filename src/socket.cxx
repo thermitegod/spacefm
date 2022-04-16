@@ -218,7 +218,7 @@ on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
 static void
 get_socket_name(char* buf, int len)
 {
-    std::string dpy = ztd::strdup(Glib::getenv("DISPLAY").c_str());
+    std::string dpy = ztd::strdup(Glib::getenv("DISPLAY"));
     // treat :0.0 as :0 to prevent multiple instances on screen 0
     if (ztd::same(dpy, ":0.0"))
         dpy = ":0";

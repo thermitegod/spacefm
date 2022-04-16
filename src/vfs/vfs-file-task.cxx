@@ -1024,9 +1024,9 @@ vfs_file_task_get_cpids(GPid pid)
     if (standard_output->empty())
         return nullptr;
 
-    char* cpids = ztd::strdup(standard_output->c_str());
+    char* cpids = ztd::strdup(standard_output);
     // get grand cpids recursively
-    char* pids = ztd::strdup(standard_output->c_str());
+    char* pids = ztd::strdup(standard_output);
     char* nl;
     while ((nl = strchr(pids, '\n')))
     {
@@ -1220,7 +1220,7 @@ get_xxhash(const char* path)
     print_command(command);
     Glib::spawn_command_line_sync(command, standard_output);
 
-    return ztd::strdup(standard_output->c_str());
+    return ztd::strdup(standard_output);
 }
 
 static void
@@ -1633,7 +1633,7 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
         g_child_watch_add(pid,
                           (GChildWatchFunc)cb_exec_child_cleanup,
                           !task->exec_keep_tmp && !task->exec_direct && task->exec_script.c_str()
-                              ? ztd::strdup(task->exec_script.c_str())
+                              ? ztd::strdup(task->exec_script)
                               : nullptr);
         call_state_callback(task, VFS_FILE_TASK_FINISH);
         return;

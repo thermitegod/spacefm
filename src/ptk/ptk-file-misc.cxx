@@ -1893,7 +1893,7 @@ get_template_dir()
             }
         }
     }
-    return ztd::strdup(templates_path.c_str());
+    return ztd::strdup(templates_path);
 }
 
 static GList*
@@ -1928,7 +1928,7 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
                     if (subdir)
                         subsubdir = g_build_filename(subdir, file_name.c_str(), nullptr);
                     else
-                        subsubdir = ztd::strdup(file_name.c_str());
+                        subsubdir = ztd::strdup(file_name);
                     templates = g_list_prepend(templates, g_strdup_printf("%s/", subsubdir));
                     // prevent filesystem loops during recursive find
                     if (!std::filesystem::is_symlink(path))
@@ -1945,7 +1945,7 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
                             g_list_prepend(templates,
                                            g_build_filename(subdir, file_name.c_str(), nullptr));
                     else
-                        templates = g_list_prepend(templates, ztd::strdup(file_name.c_str()));
+                        templates = g_list_prepend(templates, ztd::strdup(file_name));
                 }
                 else if (std::filesystem::is_directory(path) &&
                          // prevent filesystem loops during recursive find

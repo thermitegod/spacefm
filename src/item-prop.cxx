@@ -855,7 +855,7 @@ get_text_view(GtkTextView* view)
     text2 = ztd::replace(text2, "\\n", "\n");
     text2 = ztd::replace(text2, "\\t", "\t");
 
-    return ztd::strdup(text2.c_str());
+    return ztd::strdup(text2);
 }
 
 static void
@@ -1019,7 +1019,7 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
             else if (path[0] != '/')
             {
                 str = path;
-                path = ztd::strdup(Glib::find_program_in_path(str).c_str());
+                path = ztd::strdup(Glib::find_program_in_path(str));
                 free(str);
             }
         }
