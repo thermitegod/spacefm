@@ -46,7 +46,7 @@ static bool sel_func(GtkTreeSelection* selection, GtkTreeModel* model, GtkTreePa
                      bool path_currently_selected, void* data);
 
 /*  Drag & Drop/Clipboard targets  */
-static GtkTargetEntry drag_targets[] = {{g_strdup("text/uri-list"), 0, 0}};
+static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 
 // MOD drag n drop...
 static void on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context,
@@ -656,7 +656,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                 while (*puri)
                 {
                     if (**puri == '/')
-                        file_path = g_strdup(*puri);
+                        file_path = ztd::strdup(*puri);
                     else
                         file_path = g_filename_from_uri(*puri, nullptr, nullptr);
 

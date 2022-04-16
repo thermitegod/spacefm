@@ -151,7 +151,7 @@ static unsigned int folder_view_auto_scroll_timer = 0;
 static GtkDirectionType folder_view_auto_scroll_direction = GTK_DIR_TAB_FORWARD;
 
 /*  Drag & Drop/Clipboard targets  */
-static GtkTargetEntry drag_targets[] = {{g_strdup("text/uri-list"), 0, 0}};
+static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 
 #define GDK_ACTION_ALL (GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK)
 
@@ -501,7 +501,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
         bool as_root = false;
         bool in_terminal = false;
         bool as_task = true;
-        char* prefix = g_strdup("");
+        char* prefix = ztd::strdup("");
         while (text[0] == '$' || text[0] == '+' || text[0] == '&' || text[0] == '!')
         {
             if (text[0] == '+')
@@ -516,7 +516,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
             text++;
         }
         bool is_space = text[0] == ' ';
-        command = g_strdup(text);
+        command = ztd::strdup(text);
         trim_command = g_strstrip(command);
         if (trim_command[0] == '\0')
         {
@@ -532,7 +532,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
         // task
         char* task_name;
         const char* cwd;
-        task_name = g_strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
+        task_name = ztd::strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
         cwd = ptk_file_browser_get_cwd(file_browser);
         PtkFileTask* task;
         task = ptk_file_exec_new(task_name, cwd, GTK_WIDGET(file_browser), file_browser->task_view);
@@ -606,7 +606,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
                 if (!ztd::contains(dir_path, ptk_file_browser_get_cwd(file_browser)))
                 {
                     free(file_browser->select_path);
-                    file_browser->select_path = g_strdup(final_path.c_str());
+                    file_browser->select_path = ztd::strdup(final_path.c_str());
                     ptk_file_browser_chdir(file_browser,
                                            dir_path.c_str(),
                                            PTK_FB_CHDIR_ADD_HISTORY);
@@ -1662,7 +1662,7 @@ ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
     if (set->icon && set->icon[0] != '\0')
         icon_name = set->icon;
     else
-        icon_name = g_strdup("gtk-yes");
+        icon_name = ztd::strdup("gtk-yes");
     gtk_image_set_from_icon_name(GTK_IMAGE(file_browser->status_image),
                                  icon_name,
                                  GTK_ICON_SIZE_MENU);
@@ -1859,7 +1859,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
 
     if (folder_path)
     {
-        path = g_strdup(folder_path);
+        path = ztd::strdup(folder_path);
         /* remove redundent '/' */
         if (strcmp(path, "/"))
         {
@@ -2328,7 +2328,7 @@ ptk_file_browser_canon(PtkFileBrowser* file_browser, const char* path)
         if (dir_path && strcmp(dir_path, cwd))
         {
             free(file_browser->select_path);
-            file_browser->select_path = g_strdup(canon);
+            file_browser->select_path = ztd::strdup(canon);
             ptk_file_browser_chdir(file_browser, dir_path, PTK_FB_CHDIR_ADD_HISTORY);
         }
         else
@@ -2916,7 +2916,7 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const char* seek_dir,
     {
         // change dir
         free(file_browser->seek_name);
-        file_browser->seek_name = g_strdup(seek_name);
+        file_browser->seek_name = ztd::strdup(seek_name);
         file_browser->inhibit_focus = true;
         if (!ptk_file_browser_chdir(file_browser, seek_dir, PTK_FB_CHDIR_ADD_HISTORY))
         {
@@ -3691,7 +3691,7 @@ folder_view_search_equal(GtkTreeModel* model, int col, const char* key, GtkTreeI
     {
         bool end = g_str_has_suffix(key, "$");
         bool start = !end && (strlen(key) < 3);
-        char* key2 = g_strdup(key);
+        char* key2 = ztd::strdup(key);
         char* keyp = key2;
         if (key[0] == '^')
         {
@@ -4182,7 +4182,7 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
     {
         file_browser->busy = true;
         free(file_browser->select_path);
-        file_browser->select_path = g_strdup(cursor_path);
+        file_browser->select_path = ztd::strdup(cursor_path);
     }
     g_signal_connect(file_browser->dir,
                      "file-listed",
@@ -4308,7 +4308,7 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, int x, int y)
             else /* Drop on a file, not directory */
             {
                 /* Return current directory */
-                dest_path = g_strdup(ptk_file_browser_get_cwd(file_browser));
+                dest_path = ztd::strdup(ptk_file_browser_get_cwd(file_browser));
             }
             vfs_file_info_unref(file);
         }
@@ -4316,7 +4316,7 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, int x, int y)
     }
     else
     {
-        dest_path = g_strdup(ptk_file_browser_get_cwd(file_browser));
+        dest_path = ztd::strdup(ptk_file_browser_get_cwd(file_browser));
     }
     return dest_path;
 }
@@ -4418,7 +4418,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                 while (*puri)
                 {
                     if (**puri == '/')
-                        file_path = g_strdup(*puri);
+                        file_path = ztd::strdup(*puri);
                     else
                         file_path = g_filename_from_uri(*puri, nullptr, nullptr);
 
@@ -4938,7 +4938,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
     else if (!strcmp(setname, "copy_loc_last"))
     {
         set2 = xset_get("copy_loc_last");
-        copy_dest = g_strdup(set2->desc);
+        copy_dest = ztd::strdup(set2->desc);
     }
     else if (!strcmp(setname, "move_tab_prev"))
         move_dest = main_window_get_tab_cwd(file_browser, -1);
@@ -4955,7 +4955,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
     else if (!strcmp(setname, "move_loc_last"))
     {
         set2 = xset_get("copy_loc_last");
-        move_dest = g_strdup(set2->desc);
+        move_dest = ztd::strdup(set2->desc);
     }
 
     if ((Glib::str_has_prefix(setname, "copy_loc") || Glib::str_has_prefix(setname, "move_loc")) &&
@@ -6000,7 +6000,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
         i = 0;
         if (strlen(set->name) > 6)
         {
-            xname = g_strdup(set->name + 5);
+            xname = ztd::strdup(set->name + 5);
             xname[1] = '\0';
             i = strtol(xname, nullptr, 10);
             xname[1] = '_';

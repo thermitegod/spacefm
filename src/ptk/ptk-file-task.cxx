@@ -60,7 +60,7 @@ ptk_file_exec_new(const char* item_name, const char* dir, GtkWidget* parent, Gtk
     GtkWidget* parent_win = nullptr;
     if (parent)
         parent_win = gtk_widget_get_toplevel(GTK_WIDGET(parent));
-    char* file = g_strdup(item_name);
+    char* file = ztd::strdup(item_name);
     GList* files = nullptr;
     files = g_list_prepend(files, file);
     return ptk_file_task_new(VFS_FILE_TASK_EXEC, files, dir, GTK_WINDOW(parent_win), task_view);
@@ -100,13 +100,13 @@ ptk_file_task_new(VFSFileTaskType type, GList* src_files, const char* dest_dir,
     ptask->log_appended = false;
     ptask->restart_timeout = false;
 
-    ptask->dsp_file_count = g_strdup("");
-    ptask->dsp_size_tally = g_strdup("");
-    ptask->dsp_elapsed = g_strdup("");
-    ptask->dsp_curspeed = g_strdup("");
-    ptask->dsp_curest = g_strdup("");
-    ptask->dsp_avgspeed = g_strdup("");
-    ptask->dsp_avgest = g_strdup("");
+    ptask->dsp_file_count = ztd::strdup("");
+    ptask->dsp_size_tally = ztd::strdup("");
+    ptask->dsp_elapsed = ztd::strdup("");
+    ptask->dsp_curspeed = ztd::strdup("");
+    ptask->dsp_curest = ztd::strdup("");
+    ptask->dsp_avgspeed = ztd::strdup("");
+    ptask->dsp_avgest = ztd::strdup("");
 
     ptask->progress_count = 0;
     ptask->pop_handler = nullptr;
@@ -447,17 +447,17 @@ set_button_states(PtkFileTask* ptask)
     {
         case VFS_FILE_TASK_PAUSE:
             label = "Q_ueue";
-            // iconset = g_strdup("task_que");
+            // iconset = ztd::strdup("task_que");
             //  icon = "list-add";
             break;
         case VFS_FILE_TASK_QUEUE:
             label = "Res_ume";
-            // iconset = g_strdup("task_resume");
+            // iconset = ztd::strdup("task_resume");
             //  icon = "media-playback-start";
             break;
         default:
             label = "Pa_use";
-            // iconset = g_strdup("task_pause");
+            // iconset = ztd::strdup("task_pause");
             //  icon = "media-playback-pause";
             break;
     }
@@ -1431,7 +1431,7 @@ ptk_file_task_update(PtkFileTask* ptask)
     char* elapsed;
     char* elapsed2;
     if (hours == 0)
-        elapsed = g_strdup("");
+        elapsed = ztd::strdup("");
     else
         elapsed = g_strdup_printf("%d", hours);
     unsigned int mins = (timer_elapsed - (hours * 3600)) / 60;
@@ -1440,7 +1440,7 @@ ptk_file_task_update(PtkFileTask* ptask)
     else if (mins > 0)
         elapsed2 = g_strdup_printf("%d", mins);
     else
-        elapsed2 = g_strdup(elapsed);
+        elapsed2 = ztd::strdup(elapsed);
     unsigned int secs = (timer_elapsed - (hours * 3600) - (mins * 60));
     char* elapsed3 = g_strdup_printf("%s:%02d", elapsed2, secs);
     free(elapsed);
@@ -1538,17 +1538,17 @@ ptk_file_task_update(PtkFileTask* ptask)
             remain2 = fmt::format(":{:02}", remain);
 
         free(ptask->dsp_file_count);
-        ptask->dsp_file_count = g_strdup(file_count.c_str());
+        ptask->dsp_file_count = ztd::strdup(file_count.c_str());
         free(ptask->dsp_size_tally);
-        ptask->dsp_size_tally = g_strdup(size_tally.c_str());
+        ptask->dsp_size_tally = ztd::strdup(size_tally.c_str());
         free(ptask->dsp_curspeed);
-        ptask->dsp_curspeed = g_strdup(speed1.c_str());
+        ptask->dsp_curspeed = ztd::strdup(speed1.c_str());
         free(ptask->dsp_avgspeed);
-        ptask->dsp_avgspeed = g_strdup(speed2.c_str());
+        ptask->dsp_avgspeed = ztd::strdup(speed2.c_str());
         free(ptask->dsp_curest);
-        ptask->dsp_curest = g_strdup(remain1.c_str());
+        ptask->dsp_curest = ztd::strdup(remain1.c_str());
         free(ptask->dsp_avgest);
-        ptask->dsp_avgest = g_strdup(remain2.c_str());
+        ptask->dsp_avgest = ztd::strdup(remain2.c_str());
         ;
     }
 
@@ -1982,18 +1982,18 @@ query_overwrite(PtkFileTask* ptask)
             if (S_ISLNK(src_stat.st_mode))
                 src_link = "\t<b>( link )</b>";
             else
-                src_link = g_strdup("");
+                src_link = ztd::strdup("");
             if (S_ISLNK(dest_stat.st_mode))
                 dest_link = "\t<b>( link )</b>";
             else
-                dest_link = g_strdup("");
+                dest_link = ztd::strdup("");
             if (S_ISLNK(src_stat.st_mode) && !S_ISLNK(dest_stat.st_mode))
                 link_warn = "\t<b>! overwrite file with link !</b>";
             else
-                link_warn = g_strdup("");
+                link_warn = ztd::strdup("");
             if (src_stat.st_size == dest_stat.st_size)
             {
-                src_size = g_strdup("<b>( same size )</b>");
+                src_size = ztd::strdup("<b>( same size )</b>");
                 src_rel_size = nullptr;
             }
             else
@@ -2007,7 +2007,7 @@ query_overwrite(PtkFileTask* ptask)
             }
             if (src_stat.st_mtime == dest_stat.st_mtime)
             {
-                src_time = g_strdup("<b>( same time )</b>\t");
+                src_time = ztd::strdup("<b>( same time )</b>\t");
                 src_rel_time = nullptr;
             }
             else
@@ -2016,7 +2016,7 @@ query_overwrite(PtkFileTask* ptask)
                          sizeof(buf),
                          app_settings.date_format.c_str(),
                          localtime(&src_stat.st_mtime));
-                src_time = g_strdup(buf);
+                src_time = ztd::strdup(buf);
                 if (src_stat.st_mtime > dest_stat.st_mtime)
                     src_rel_time = "newer";
                 else
@@ -2028,7 +2028,7 @@ query_overwrite(PtkFileTask* ptask)
                      sizeof(buf),
                      app_settings.date_format.c_str(),
                      localtime(&dest_stat.st_mtime));
-            dest_time = g_strdup(buf);
+            dest_time = ztd::strdup(buf);
 
             src_rel = g_strdup_printf("%s%s%s%s%s",
                                       src_rel_time || src_rel_size ? "<b>( " : "",

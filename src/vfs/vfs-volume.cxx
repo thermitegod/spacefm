@@ -167,7 +167,7 @@ _dupv8(const char* s)
     }
     else
     {
-        return g_strdup(s);
+        return ztd::strdup(s);
     }
 }
 
@@ -251,7 +251,7 @@ sysfs_get_string(const char* dir, const char* attribute)
     char* filename = g_build_filename(dir, attribute, nullptr);
     if (!g_file_get_contents(filename, &result, nullptr, nullptr))
     {
-        result = g_strdup("");
+        result = ztd::strdup("");
     }
     free(filename);
 
@@ -335,7 +335,7 @@ sysfs_resolve_link(const char* sysfs_path, const char* name)
     free(full_path);
 
     if (found_it)
-        return g_strdup(resolved_path);
+        return ztd::strdup(resolved_path);
     else
         return nullptr;
 }
@@ -386,7 +386,7 @@ info_drive_connection(device_t* device)
     uint64_t connection_speed = 0;
 
     /* walk up the device tree to figure out the subsystem */
-    char* s = g_strdup(device->native_path);
+    char* s = ztd::strdup(device->native_path);
     do
     {
         char* model;
@@ -535,7 +535,7 @@ info_drive_connection(device_t* device)
                 if (Glib::str_has_prefix(sysfs_name + 1, "floppy.") &&
                     device->drive_vendor == nullptr)
                 {
-                    device->drive_vendor = g_strdup("Floppy Drive");
+                    device->drive_vendor = ztd::strdup("Floppy Drive");
                     connection_interface = "platform";
                 }
             }
@@ -557,7 +557,7 @@ info_drive_connection(device_t* device)
 
     if (connection_interface != nullptr)
     {
-        device->drive_connection_interface = g_strdup(connection_interface);
+        device->drive_connection_interface = ztd::strdup(connection_interface);
         device->drive_connection_speed = connection_speed;
     }
 
@@ -663,7 +663,7 @@ info_drive_properties(device_t* device)
     }
     else if ((value = udev_device_get_property_value(device->udevice, "ID_VENDOR")))
     {
-        device->drive_vendor = g_strdup(value);
+        device->drive_vendor = ztd::strdup(value);
     }
 
     // model
@@ -675,12 +675,12 @@ info_drive_properties(device_t* device)
     }
     else if ((value = udev_device_get_property_value(device->udevice, "ID_MODEL")))
     {
-        device->drive_model = g_strdup(value);
+        device->drive_model = ztd::strdup(value);
     }
 
     // revision
     device->drive_revision =
-        g_strdup(udev_device_get_property_value(device->udevice, "ID_REVISION"));
+        ztd::strdup(udev_device_get_property_value(device->udevice, "ID_REVISION"));
 
     // serial
     if ((value = udev_device_get_property_value(device->udevice, "ID_SCSI_SERIAL")))
@@ -689,21 +689,21 @@ info_drive_properties(device_t* device)
          * http://git.kernel.org/?p=linux/hotplug/udev.git;a=commit;h=4e9fdfccbdd16f0cfdb5c8fa8484a8ba0f2e69d3
          * for details
          */
-        device->drive_serial = g_strdup(value);
+        device->drive_serial = ztd::strdup(value);
     }
     else if ((value = udev_device_get_property_value(device->udevice, "ID_SERIAL_SHORT")))
     {
-        device->drive_serial = g_strdup(value);
+        device->drive_serial = ztd::strdup(value);
     }
 
     // wwn
     if ((value = udev_device_get_property_value(device->udevice, "ID_WWN_WITH_EXTENSION")))
     {
-        device->drive_wwn = g_strdup(value + 2);
+        device->drive_wwn = ztd::strdup(value + 2);
     }
     else if ((value = udev_device_get_property_value(device->udevice, "ID_WWN")))
     {
-        device->drive_wwn = g_strdup(value + 2);
+        device->drive_wwn = ztd::strdup(value + 2);
     }
 
     /* pick up some things (vendor, model, connection_interface, connection_speed)
@@ -784,7 +784,7 @@ info_drive_properties(device_t* device)
         if (media_in_drive == nullptr)
             media_in_drive = ((const char**)media_compat_array->pdata)[0];
     }
-    device->drive_media = g_strdup(media_in_drive);
+    device->drive_media = ztd::strdup(media_in_drive);
     g_ptr_array_free(media_compat_array, true);
 
     // drive_can_detach
@@ -806,11 +806,11 @@ info_device_properties(device_t* device)
 {
     const char* value;
 
-    device->native_path = g_strdup(udev_device_get_syspath(device->udevice));
-    device->devnode = g_strdup(udev_device_get_devnode(device->udevice));
+    device->native_path = ztd::strdup(udev_device_get_syspath(device->udevice));
+    device->devnode = ztd::strdup(udev_device_get_devnode(device->udevice));
     device->devnum = udev_device_get_devnum(device->udevice);
-    // device->major = g_strdup( udev_device_get_property_value( device->udevice, "MAJOR") );
-    // device->minor = g_strdup( udev_device_get_property_value( device->udevice, "MINOR") );
+    // device->major = ztd::strdup( udev_device_get_property_value( device->udevice, "MAJOR") );
+    // device->minor = ztd::strdup( udev_device_get_property_value( device->udevice, "MINOR") );
     if (!device->native_path || !device->devnode || device->devnum == 0)
     {
         if (device->native_path)
@@ -826,11 +826,11 @@ info_device_properties(device_t* device)
     // clang-format off
     device->device_is_removable = sysfs_get_int(device->native_path, "removable");
 
-    device->device_presentation_hide = g_strdup(udev_device_get_property_value(device->udevice, "UDISKS_PRESENTATION_HIDE"));
-    device->device_presentation_nopolicy = g_strdup(udev_device_get_property_value(device->udevice, "UDISKS_PRESENTATION_NOPOLICY"));
-    device->device_presentation_name = g_strdup(udev_device_get_property_value(device->udevice, "UDISKS_PRESENTATION_NAME"));
-    device->device_presentation_icon_name = g_strdup(udev_device_get_property_value(device->udevice, "UDISKS_PRESENTATION_ICON_NAME"));
-    device->device_automount_hint = g_strdup(udev_device_get_property_value(device->udevice, "UDISKS_AUTOMOUNT_HINT"));
+    device->device_presentation_hide = ztd::strdup(udev_device_get_property_value(device->udevice, "UDISKS_PRESENTATION_HIDE"));
+    device->device_presentation_nopolicy = ztd::strdup(udev_device_get_property_value(device->udevice, "UDISKS_PRESENTATION_NOPOLICY"));
+    device->device_presentation_name = ztd::strdup(udev_device_get_property_value(device->udevice, "UDISKS_PRESENTATION_NAME"));
+    device->device_presentation_icon_name = ztd::strdup(udev_device_get_property_value(device->udevice, "UDISKS_PRESENTATION_ICON_NAME"));
+    device->device_automount_hint = ztd::strdup(udev_device_get_property_value(device->udevice, "UDISKS_AUTOMOUNT_HINT"));
     // clang-format on
 
     // filesystem properties
@@ -848,10 +848,10 @@ info_device_properties(device_t* device)
     else
     {
         // clang-format off
-        device->id_usage = g_strdup(udev_device_get_property_value(device->udevice, "ID_FS_USAGE"));
-        device->id_type = g_strdup(udev_device_get_property_value(device->udevice, "ID_FS_TYPE"));
-        device->id_version = g_strdup(udev_device_get_property_value(device->udevice, "ID_FS_VERSION"));
-        device->id_uuid = g_strdup(udev_device_get_property_value(device->udevice, "ID_FS_UUID"));
+        device->id_usage = ztd::strdup(udev_device_get_property_value(device->udevice, "ID_FS_USAGE"));
+        device->id_type = ztd::strdup(udev_device_get_property_value(device->udevice, "ID_FS_TYPE"));
+        device->id_version = ztd::strdup(udev_device_get_property_value(device->udevice, "ID_FS_VERSION"));
+        device->id_uuid = ztd::strdup(udev_device_get_property_value(device->udevice, "ID_FS_UUID"));
         // clang-format on
 
         if ((value = udev_device_get_property_value(device->udevice, "ID_FS_LABEL_ENC")))
@@ -862,7 +862,7 @@ info_device_properties(device_t* device)
         }
         else if ((value = udev_device_get_property_value(device->udevice, "ID_FS_LABEL")))
         {
-            device->id_label = g_strdup(value);
+            device->id_label = ztd::strdup(value);
         }
     }
 
@@ -943,7 +943,7 @@ info_device_properties(device_t* device)
         if (entry_name && (Glib::str_has_prefix(entry_name, "/dev/disk/by-id/") ||
                            Glib::str_has_prefix(entry_name, "/dev/disk/by-uuid/")))
         {
-            device->device_by_id = g_strdup(entry_name);
+            device->device_by_id = ztd::strdup(entry_name);
             break;
         }
         entry = udev_list_entry_get_next(entry);
@@ -967,7 +967,7 @@ info_mount_points(device_t* device)
             if ((static_cast<devmount_t*>(l->data))->major == dmajor &&
                 (static_cast<devmount_t*>(l->data))->minor == dminor)
             {
-                return g_strdup((static_cast<devmount_t*>(l->data))->mount_points);
+                return ztd::strdup((static_cast<devmount_t*>(l->data))->mount_points);
             }
         }
         return nullptr;
@@ -1046,7 +1046,7 @@ info_mount_points(device_t* device)
         GList* l;
         // Sort the list to ensure that shortest mount paths appear first
         mounts = g_list_sort(mounts, (GCompareFunc)g_strcmp0);
-        points = g_strdup((char*)mounts->data);
+        points = ztd::strdup((char*)mounts->data);
         l = mounts;
         while ((l = l->next))
         {
@@ -1075,8 +1075,8 @@ info_partition_table(device_t* device)
         strtol(value, nullptr, 10) == 1)
     {
         // clang-format off
-        device->partition_table_scheme = g_strdup(udev_device_get_property_value(device->udevice, "UDISKS_PARTITION_TABLE_SCHEME"));
-        device->partition_table_count = g_strdup(udev_device_get_property_value(device->udevice, "UDISKS_PARTITION_TABLE_COUNT"));
+        device->partition_table_scheme = ztd::strdup(udev_device_get_property_value(device->udevice, "UDISKS_PARTITION_TABLE_SCHEME"));
+        device->partition_table_count = ztd::strdup(udev_device_get_property_value(device->udevice, "UDISKS_PARTITION_TABLE_COUNT"));
         // clang-format on
         is_partition_table = true;
     }
@@ -1114,7 +1114,7 @@ info_partition_table(device_t* device)
 
         if (partition_count > 0)
         {
-            device->partition_table_scheme = g_strdup("");
+            device->partition_table_scheme = ztd::strdup("");
             device->partition_table_count = g_strdup_printf("%d", partition_count);
             is_partition_table = true;
         }
@@ -1158,15 +1158,15 @@ info_partition(device_t* device)
         if (slave_sysfs_path != nullptr && scheme != nullptr && number != nullptr &&
             strtol(number, nullptr, 10) > 0)
         {
-            device->partition_scheme = g_strdup(scheme);
-            device->partition_size = g_strdup(size);
-            device->partition_type = g_strdup(type);
-            device->partition_label = g_strdup(label);
-            device->partition_uuid = g_strdup(uuid);
-            device->partition_flags = g_strdup(flags);
-            device->partition_offset = g_strdup(offset);
-            device->partition_alignment_offset = g_strdup(alignment_offset);
-            device->partition_number = g_strdup(number);
+            device->partition_scheme = ztd::strdup(scheme);
+            device->partition_size = ztd::strdup(size);
+            device->partition_type = ztd::strdup(type);
+            device->partition_label = ztd::strdup(label);
+            device->partition_uuid = ztd::strdup(uuid);
+            device->partition_flags = ztd::strdup(flags);
+            device->partition_offset = ztd::strdup(offset);
+            device->partition_alignment_offset = ztd::strdup(alignment_offset);
+            device->partition_number = ztd::strdup(number);
             is_partition = true;
         }
     }
@@ -1236,9 +1236,9 @@ info_optical_disc(device_t* device)
         device->device_is_optical_disc = true;
 
         // clang-format off
-        device->optical_disc_num_tracks = g_strdup(udev_device_get_property_value(device->udevice, "ID_CDROM_MEDIA_TRACK_COUNT"));
-        device->optical_disc_num_audio_tracks = g_strdup(udev_device_get_property_value(device->udevice, "ID_CDROM_MEDIA_TRACK_COUNT_AUDIO"));
-        device->optical_disc_num_sessions = g_strdup(udev_device_get_property_value(device->udevice, "ID_CDROM_MEDIA_SESSION_COUNT"));
+        device->optical_disc_num_tracks = ztd::strdup(udev_device_get_property_value(device->udevice, "ID_CDROM_MEDIA_TRACK_COUNT"));
+        device->optical_disc_num_audio_tracks = ztd::strdup(udev_device_get_property_value(device->udevice, "ID_CDROM_MEDIA_TRACK_COUNT_AUDIO"));
+        device->optical_disc_num_sessions = ztd::strdup(udev_device_get_property_value(device->udevice, "ID_CDROM_MEDIA_SESSION_COUNT"));
 
         const char* cdrom_disc_state = udev_device_get_property_value(device->udevice, "ID_CDROM_MEDIA_STATE");
 
@@ -1633,7 +1633,7 @@ parse_mounts(bool report)
                 devmount->major = major;
                 devmount->minor = minor;
                 devmount->mount_points = nullptr;
-                devmount->fstype = g_strdup(fstype);
+                devmount->fstype = ztd::strdup(fstype);
                 devmount->mounts = nullptr;
                 newmounts = g_list_prepend(newmounts, devmount);
             }
@@ -1657,7 +1657,7 @@ parse_mounts(bool report)
                     devmount->major = major;
                     devmount->minor = minor;
                     devmount->mount_points = nullptr;
-                    devmount->fstype = g_strdup(fstype);
+                    devmount->fstype = ztd::strdup(fstype);
                     devmount->mounts = nullptr;
                     newmounts = g_list_prepend(newmounts, devmount);
                 }
@@ -1685,7 +1685,7 @@ parse_mounts(bool report)
         // Sort the list to ensure that shortest mount paths appear first
         devmount->mounts = g_list_sort(devmount->mounts, (GCompareFunc)g_strcmp0);
         m = devmount->mounts;
-        points = g_strdup((char*)m->data);
+        points = ztd::strdup((char*)m->data);
         while ((m = m->next))
         {
             old_points = points;
@@ -1732,8 +1732,8 @@ parse_mounts(bool report)
                 devmount_t* devcopy = g_slice_new0(devmount_t);
                 devcopy->major = devmount->major;
                 devcopy->minor = devmount->minor;
-                devcopy->mount_points = g_strdup(devmount->mount_points);
-                devcopy->fstype = g_strdup(devmount->fstype);
+                devcopy->mount_points = ztd::strdup(devmount->mount_points);
+                devcopy->fstype = ztd::strdup(devmount->fstype);
                 devcopy->mounts = nullptr;
                 changed = g_list_prepend(changed, devcopy);
             }
@@ -1771,7 +1771,7 @@ parse_mounts(bool report)
             devnum = makedev(devmount->major, devmount->minor);
             udevice = udev_device_new_from_devnum(udev, 'b', devnum);
             if (udevice)
-                devnode = g_strdup(udev_device_get_devnode(udevice));
+                devnode = ztd::strdup(udev_device_get_devnode(udevice));
             if (devnode)
             {
                 // block device
@@ -1918,7 +1918,7 @@ cb_udev_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
     if ((udevice = udev_monitor_receive_device(umonitor)))
     {
         const char* action = udev_device_get_action(udevice);
-        char* devnode = g_strdup(udev_device_get_devnode(udevice));
+        char* devnode = ztd::strdup(udev_device_get_devnode(udevice));
         if (action)
         {
             // print action
@@ -2054,7 +2054,7 @@ vfs_volume_set_info(VFSVolume* volume)
             else if (volume->is_optical)
                 disp_id = g_strdup_printf(":optical");
             if (!disp_id)
-                disp_id = g_strdup("");
+                disp_id = ztd::strdup("");
             // table type
             if (volume->is_table)
             {
@@ -2064,11 +2064,11 @@ vfs_volume_set_info(VFSVolume* volume)
                     volume->fs_type = nullptr;
                 }
                 if (!volume->fs_type)
-                    volume->fs_type = g_strdup("table");
+                    volume->fs_type = ztd::strdup("table");
             }
             break;
         default:
-            disp_id = g_strdup(volume->udi);
+            disp_id = ztd::strdup(volume->udi);
             break;
     }
 
@@ -2088,7 +2088,7 @@ vfs_volume_set_info(VFSVolume* volume)
             disp_size = g_strdup_printf("%s", size_str.c_str());
         }
         else
-            disp_size = g_strdup("");
+            disp_size = ztd::strdup("");
         if (volume->mount_point && volume->mount_point[0] != '\0')
             disp_mount = g_strdup_printf("%s", volume->mount_point);
         else
@@ -2110,25 +2110,25 @@ vfs_volume_set_info(VFSVolume* volume)
             disp_size = g_strdup_printf("%s", size_str.c_str());
         }
         else
-            disp_size = g_strdup("");
+            disp_size = ztd::strdup("");
         disp_mount = g_strdup_printf("---");
     }
     else
     {
         disp_label = "[no media]";
-        disp_size = g_strdup("");
-        disp_mount = g_strdup("");
+        disp_size = ztd::strdup("");
+        disp_mount = ztd::strdup("");
     }
     if (!strncmp(volume->device_file, "/dev/", 5))
-        disp_device = g_strdup(volume->device_file + 5);
+        disp_device = ztd::strdup(volume->device_file + 5);
     else if (Glib::str_has_prefix(volume->device_file, "curlftpfs#"))
-        disp_device = g_strdup(volume->device_file + 10);
+        disp_device = ztd::strdup(volume->device_file + 10);
     else
-        disp_device = g_strdup(volume->device_file);
+        disp_device = ztd::strdup(volume->device_file);
     if (volume->fs_type && volume->fs_type[0] != '\0')
-        disp_fstype = g_strdup(volume->fs_type); // g_strdup_printf( "-%s", volume->fs_type );
+        disp_fstype = ztd::strdup(volume->fs_type); // g_strdup_printf( "-%s", volume->fs_type );
     else
-        disp_fstype = g_strdup("");
+        disp_fstype = ztd::strdup("");
     disp_devnum = g_strdup_printf("%lu:%lu", MAJOR(volume->devnum), MINOR(volume->devnum));
 
     std::string value;
@@ -2176,7 +2176,7 @@ vfs_volume_set_info(VFSVolume* volume)
     free(disp_devnum);
 
     if (!volume->udi)
-        volume->udi = g_strdup(volume->device_file);
+        volume->udi = ztd::strdup(volume->device_file);
 }
 
 static VFSVolume*
@@ -2198,8 +2198,8 @@ vfs_volume_read_by_device(struct udev_device* udevice)
     volume = g_slice_new0(VFSVolume);
     volume->devnum = device->devnum;
     volume->device_type = DEVICE_TYPE_BLOCK;
-    volume->device_file = g_strdup(device->devnode);
-    volume->udi = g_strdup(device->device_by_id);
+    volume->device_file = ztd::strdup(device->devnode);
+    volume->udi = ztd::strdup(device->device_by_id);
     volume->should_autounmount = false;
     volume->is_optical = device->device_is_optical_disc;
     volume->is_table = device->device_is_partition_table;
@@ -2228,16 +2228,16 @@ vfs_volume_read_by_device(struct udev_device* udevice)
         if ((comma = strchr(device->mount_points, ',')))
         {
             comma[0] = '\0';
-            volume->mount_point = g_strdup(device->mount_points);
+            volume->mount_point = ztd::strdup(device->mount_points);
             comma[0] = ',';
         }
         else
-            volume->mount_point = g_strdup(device->mount_points);
+            volume->mount_point = ztd::strdup(device->mount_points);
     }
     volume->size = device->device_size;
     if (device->id_label)
         volume->label = device->id_label;
-    volume->fs_type = g_strdup(device->id_type);
+    volume->fs_type = ztd::strdup(device->id_type);
     volume->disp_name = nullptr;
     volume->automount_time = 0;
     volume->inhibit_auto = false;
@@ -2387,7 +2387,7 @@ split_network_url(const char* url, netmount_t** netmount)
     int ret;
     char* str;
     char* str2;
-    char* orig_url = g_strdup(url);
+    char* orig_url = ztd::strdup(url);
     char* xurl = orig_url;
     netmount_t* nm = g_slice_new0(netmount_t);
     nm->fstype = nullptr; // protocol
@@ -2397,7 +2397,7 @@ split_network_url(const char* url, netmount_t** netmount)
     nm->user = nullptr;
     nm->pass = nullptr;
     nm->path = nullptr;
-    nm->url = g_strdup(url);
+    nm->url = ztd::strdup(url);
 
     // get protocol
     bool is_colon;
@@ -2405,7 +2405,7 @@ split_network_url(const char* url, netmount_t** netmount)
     { // //host...
         if (xurl[2] == '\0')
             goto _net_free;
-        nm->fstype = g_strdup("smb");
+        nm->fstype = ztd::strdup("smb");
         is_colon = false;
     }
     else if ((str = strstr(xurl, "://")))
@@ -2413,7 +2413,7 @@ split_network_url(const char* url, netmount_t** netmount)
         if (xurl[0] == ':' || xurl[0] == '/')
             goto _net_free;
         str[0] = '\0';
-        nm->fstype = g_strstrip(g_strdup(xurl));
+        nm->fstype = g_strstrip(ztd::strdup(xurl));
         if (nm->fstype[0] == '\0')
             goto _net_free;
         str[0] = ':';
@@ -2424,7 +2424,7 @@ split_network_url(const char* url, netmount_t** netmount)
         if (nm->fstype && (str = strchr(nm->fstype, '#')))
         {
             str2 = nm->fstype;
-            nm->fstype = g_strdup(str + 1);
+            nm->fstype = ztd::strdup(str + 1);
             free(str2);
         }
     }
@@ -2433,9 +2433,9 @@ split_network_url(const char* url, netmount_t** netmount)
         // note: sshfs also uses this URL format in mtab, but mtab_fstype == fuse.sshfs
         if (xurl[0] == ':' || xurl[0] == '/')
             goto _net_free;
-        nm->fstype = g_strdup("nfs");
+        nm->fstype = ztd::strdup("nfs");
         str[0] = '\0';
-        nm->host = g_strdup(xurl);
+        nm->host = ztd::strdup(xurl);
         str[0] = ':';
         is_colon = true;
     }
@@ -2453,7 +2453,7 @@ split_network_url(const char* url, netmount_t** netmount)
         xurl++;
 
     char* trim_url;
-    trim_url = g_strdup(xurl);
+    trim_url = ztd::strdup(xurl);
 
     // user:pass
     if ((str = strchr(xurl, '@')))
@@ -2468,17 +2468,17 @@ split_network_url(const char* url, netmount_t** netmount)
         {
             str2[0] = '\0';
             if (str2[1] != '\0')
-                nm->pass = g_strdup(str2 + 1);
+                nm->pass = ztd::strdup(str2 + 1);
         }
         if (xurl[0] != '\0')
-            nm->user = g_strdup(xurl);
+            nm->user = ztd::strdup(xurl);
         xurl = str + 1;
     }
 
     // path
     if ((str = strchr(xurl, '/')))
     {
-        nm->path = g_strdup(str);
+        nm->path = ztd::strdup(str);
         str[0] = '\0';
     }
 
@@ -2492,9 +2492,9 @@ split_network_url(const char* url, netmount_t** netmount)
             {
                 str[0] = '\0';
                 if (xurl[1] != '\0')
-                    nm->host = g_strdup(xurl + 1);
+                    nm->host = ztd::strdup(xurl + 1);
                 if (str[1] == ':' && str[2] != '\0')
-                    nm->port = g_strdup(str + 1);
+                    nm->port = ztd::strdup(str + 1);
             }
         }
         else if (xurl[0] != '\0')
@@ -2503,9 +2503,9 @@ split_network_url(const char* url, netmount_t** netmount)
             {
                 str[0] = '\0';
                 if (str[1] != '\0')
-                    nm->port = g_strdup(str + 1);
+                    nm->port = ztd::strdup(str + 1);
             }
-            nm->host = g_strdup(xurl);
+            nm->host = ztd::strdup(xurl);
         }
     }
     free(trim_url);
@@ -2513,7 +2513,7 @@ split_network_url(const char* url, netmount_t** netmount)
 
     // check host
     if (!nm->host)
-        nm->host = g_strdup("");
+        nm->host = ztd::strdup("");
 
     /*
     // check user pass port
@@ -2551,7 +2551,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         return nullptr;
 
     // get single mount point
-    char* point = g_strdup(mount_points);
+    char* point = ztd::strdup(mount_points);
     if ((str = strchr(point, ',')))
         str[0] = '\0';
     g_strstrip(point);
@@ -2574,7 +2574,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         volume->should_autounmount = false;
         volume->udi = netmount->url;
         volume->label = netmount->host;
-        volume->fs_type = mtab_fstype ? mtab_fstype : g_strdup("");
+        volume->fs_type = mtab_fstype ? mtab_fstype : ztd::strdup("");
         volume->size = 0;
         volume->device_file = name;
         volume->is_mounted = true;
@@ -2617,7 +2617,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         volume->devnum = devnum;
         volume->device_type = DEVICE_TYPE_OTHER;
         volume->device_file = name;
-        volume->udi = g_strdup(name);
+        volume->udi = ztd::strdup(name);
         volume->should_autounmount = false;
         volume->fs_type = mtab_fstype;
         volume->size = 0;
@@ -2658,7 +2658,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
             volume->devnum = devnum;
             volume->device_type = DEVICE_TYPE_OTHER;
             volume->device_file = name;
-            volume->udi = g_strdup(name);
+            volume->udi = ztd::strdup(name);
             volume->should_autounmount = false;
             volume->fs_type = mtab_fstype;
             volume->size = 0;
@@ -3010,7 +3010,7 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
     }
 
     *run_in_terminal = terminal;
-    return g_strdup(command.c_str());
+    return ztd::strdup(command.c_str());
 }
 
 static bool
@@ -3202,7 +3202,7 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
                     if (vol->is_mounted)
                         pointq = bash_quote(vol->mount_point);
                     std::string command2 = ztd::replace(command, "%a", pointq);
-                    command = g_strdup(command2.c_str());
+                    command = ztd::strdup(command2.c_str());
                 }
             }
             break;
@@ -3224,7 +3224,7 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
                     if (vol->is_mounted)
                         pointq = bash_quote(vol->mount_point);
                     std::string command2 = ztd::replace(command, "%a", pointq);
-                    command = g_strdup(command2.c_str());
+                    command = ztd::strdup(command2.c_str());
                 }
             }
             break;
@@ -3379,7 +3379,7 @@ vfs_volume_get_mount_options(VFSVolume* vol, char* options)
     if (newo[1] == '\0')
         return nullptr;
     else
-        return g_strdup(newo + 1);
+        return ztd::strdup(newo + 1);
 }
 
 char*
@@ -3397,7 +3397,7 @@ exec_task(const char* command, bool run_in_terminal)
     if (!(command && command[0]))
         return;
 
-    GList* files = g_list_prepend(nullptr, g_strdup("exec_task"));
+    GList* files = g_list_prepend(nullptr, ztd::strdup("exec_task"));
 
     PtkFileTask* task = ptk_file_task_new(VFS_FILE_TASK_EXEC, files, "/", nullptr, nullptr);
     task->task->exec_action = "exec_task";
@@ -3551,17 +3551,17 @@ vfs_volume_device_added(VFSVolume* volume, bool automount)
 
             // detect changed mount point
             if (!was_mounted && volume->is_mounted)
-                changed_mount_point = g_strdup(volume->mount_point);
+                changed_mount_point = ztd::strdup(volume->mount_point);
             else if (was_mounted && !volume->is_mounted)
-                changed_mount_point = g_strdup(volume2->mount_point);
+                changed_mount_point = ztd::strdup(volume2->mount_point);
 
             vfs_free_volume_members(volume);
-            volume2->udi = g_strdup(volume->udi);
-            volume2->device_file = g_strdup(volume->device_file);
+            volume2->udi = ztd::strdup(volume->udi);
+            volume2->device_file = ztd::strdup(volume->device_file);
             volume2->label = volume->label;
-            volume2->mount_point = g_strdup(volume->mount_point);
+            volume2->mount_point = ztd::strdup(volume->mount_point);
             volume2->icon = volume->icon;
-            volume2->disp_name = g_strdup(volume->disp_name);
+            volume2->disp_name = ztd::strdup(volume->disp_name);
             volume2->is_mounted = volume->is_mounted;
             volume2->is_mountable = volume->is_mountable;
             volume2->is_optical = volume->is_optical;
@@ -4134,7 +4134,7 @@ get_device_parent(dev_t dev)
     struct udev_device* udevice = udev_device_new_from_devnum(udev, 'b', dev);
     if (!udevice)
         return 0;
-    char* native_path = g_strdup(udev_device_get_syspath(udevice));
+    char* native_path = ztd::strdup(udev_device_get_syspath(udevice));
     udev_device_unref(udevice);
 
     if (!native_path || !sysfs_file_exists(native_path, "start"))

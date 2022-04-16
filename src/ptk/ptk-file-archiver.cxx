@@ -248,13 +248,13 @@ generate_bash_error_function(bool run_in_terminal, const char* parent_quote)
     const char* finished_with_errors = nullptr;
     if (run_in_terminal)
     {
-        error_pause = g_strdup("read -p");
-        finished_with_errors = g_strdup("[ Finished With Errors ]  Press Enter to close: ");
+        error_pause = ztd::strdup("read -p");
+        finished_with_errors = ztd::strdup("[ Finished With Errors ]  Press Enter to close: ");
     }
     else
     {
-        error_pause = g_strdup("echo");
-        finished_with_errors = g_strdup("[ Finished With Errors ]");
+        error_pause = ztd::strdup("echo");
+        finished_with_errors = ztd::strdup("[ Finished With Errors ]");
     }
 
     return g_strdup_printf(""
@@ -283,9 +283,9 @@ replace_archive_subs(const char* line, const char* n, const char* N, const char*
     char ch;
 
     if (!line)
-        return g_strdup("");
+        return ztd::strdup("");
 
-    char* s = g_strdup("");
+    char* s = ztd::strdup("");
     char* ptr = (char*)line;
     while (ptr[0])
     {
@@ -870,7 +870,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
          * Obtaining valid quoted UTF8 file name %o for archive to create */
         udest_file = g_filename_display_name(dest_file);
         udest_quote = bash_quote(udest_file);
-        char* all = g_strdup("");
+        char* all = ztd::strdup("");
         std::string first;
         if (files)
         {
@@ -913,7 +913,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
         else
         {
             // no files selected!
-            first = g_strdup("");
+            first = ztd::strdup("");
         }
 
         // Replace sub vars  %n %N %o
@@ -1245,8 +1245,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         // Archive to list or extract:
         full_quote = bash_quote(full_path); // %x
         std::string extract_target;         // %g or %G
-        char* mkparent = g_strdup("");
-        perm = g_strdup("");
+        char* mkparent = ztd::strdup("");
+        perm = ztd::strdup("");
         std::string extension;
 
         if (list_contents)
@@ -1272,7 +1272,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
              * needed if a parent directory must be created, and if the
              * extraction target is a file without the handler extension
              * filename is g_strdup'd to get rid of the const */
-            char* filename = g_strdup(vfs_file_info_get_name(file));
+            char* filename = ztd::strdup(vfs_file_info_get_name(file));
             char* filename_no_archive_ext = nullptr;
 
             /* Looping for all extensions registered with the current
@@ -1296,7 +1296,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                             n = strlen(filename) - strlen(extension.c_str());
                             char ch = filename[n];
                             filename[n] = '\0';
-                            filename_no_archive_ext = g_strdup(filename);
+                            filename_no_archive_ext = ztd::strdup(filename);
                             filename[n] = ch;
                             break;
                         }
@@ -1309,7 +1309,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
              * extensions specified for the handler (they are optional)
              * - making sure filename_no_archive_ext is set in this case */
             if (!filename_no_archive_ext)
-                filename_no_archive_ext = g_strdup(filename);
+                filename_no_archive_ext = ztd::strdup(filename);
 
             /* Now the extraction filename is obtained, determine the
              * normal filename without the extension */
@@ -1347,7 +1347,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                 /* Determining full path of parent directory to make
                  * (also used later in '%g' substitution) */
                 parent_path = g_build_filename(dest, filename_no_archive_ext, nullptr);
-                char* parent_orig = g_strdup(parent_path);
+                char* parent_orig = ztd::strdup(parent_path);
                 n = 1;
 
                 // Looping to find a path that doesnt exist

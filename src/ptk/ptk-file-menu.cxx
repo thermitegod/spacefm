@@ -602,10 +602,10 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
     data = g_slice_new0(PtkFileMenu);
 
-    data->cwd = g_strdup(cwd);
+    data->cwd = ztd::strdup(cwd);
     data->browser = browser;
 
-    data->file_path = g_strdup(file_path);
+    data->file_path = ztd::strdup(file_path);
     if (info)
         data->info = vfs_file_info_ref(info);
     else
@@ -658,32 +658,33 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
     {
         mime_type = vfs_file_info_get_mime_type(info);
         apps = vfs_mime_type_get_actions(mime_type);
-        context->var[CONTEXT_MIME] = g_strdup(vfs_mime_type_get_type(mime_type));
+        context->var[CONTEXT_MIME] = ztd::strdup(vfs_mime_type_get_type(mime_type));
     }
     else
     {
         mime_type = nullptr;
-        context->var[CONTEXT_MIME] = g_strdup("");
+        context->var[CONTEXT_MIME] = ztd::strdup("");
     }
 
     // context
     if (file_path)
         context->var[CONTEXT_NAME] = g_path_get_basename(file_path);
     else
-        context->var[CONTEXT_NAME] = g_strdup("");
-    context->var[CONTEXT_DIR] = g_strdup(cwd);
-    context->var[CONTEXT_READ_ACCESS] = no_read_access ? g_strdup("false") : g_strdup("true");
-    context->var[CONTEXT_WRITE_ACCESS] = no_write_access ? g_strdup("false") : g_strdup("true");
-    context->var[CONTEXT_IS_TEXT] = is_text ? g_strdup("true") : g_strdup("false");
-    context->var[CONTEXT_IS_DIR] = is_dir ? g_strdup("true") : g_strdup("false");
+        context->var[CONTEXT_NAME] = ztd::strdup("");
+    context->var[CONTEXT_DIR] = ztd::strdup(cwd);
+    context->var[CONTEXT_READ_ACCESS] = no_read_access ? ztd::strdup("false") : ztd::strdup("true");
+    context->var[CONTEXT_WRITE_ACCESS] =
+        no_write_access ? ztd::strdup("false") : ztd::strdup("true");
+    context->var[CONTEXT_IS_TEXT] = is_text ? ztd::strdup("true") : ztd::strdup("false");
+    context->var[CONTEXT_IS_DIR] = is_dir ? ztd::strdup("true") : ztd::strdup("false");
     context->var[CONTEXT_MUL_SEL] =
-        sel_files && sel_files->next ? g_strdup("true") : g_strdup("false");
-    context->var[CONTEXT_CLIP_FILES] = is_clip ? g_strdup("true") : g_strdup("false");
+        sel_files && sel_files->next ? ztd::strdup("true") : ztd::strdup("false");
+    context->var[CONTEXT_CLIP_FILES] = is_clip ? ztd::strdup("true") : ztd::strdup("false");
     if (info)
         context->var[CONTEXT_IS_LINK] =
-            vfs_file_info_is_symlink(info) ? g_strdup("true") : g_strdup("false");
+            vfs_file_info_is_symlink(info) ? ztd::strdup("true") : ztd::strdup("false");
     else
-        context->var[CONTEXT_IS_LINK] = g_strdup("false");
+        context->var[CONTEXT_IS_LINK] = ztd::strdup("false");
 
     if (browser)
         main_context_fill(browser, context);
@@ -894,7 +895,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                                  (void*)data);
                 g_object_set_data_full(G_OBJECT(app_menu_item),
                                        "desktop_file",
-                                       g_strdup(app.c_str()),
+                                       ztd::strdup(app.c_str()),
                                        free);
             }
         }
@@ -912,7 +913,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         // Default
         std::string plain_type = "";
         if (mime_type)
-            plain_type = g_strdup(vfs_mime_type_get_type(mime_type));
+            plain_type = ztd::strdup(vfs_mime_type_get_type(mime_type));
         plain_type = ztd::replace(plain_type, "-", "_");
         plain_type = ztd::replace(plain_type, " ", "");
         plain_type = fmt::format("open_all_type_{}", plain_type);
@@ -921,11 +922,11 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         set->menu_style = XSET_MENU_NORMAL;
         if (set->shared_key)
             free(set->shared_key);
-        set->shared_key = g_strdup("open_all");
+        set->shared_key = ztd::strdup("open_all");
         set2 = xset_get("open_all");
         if (set->menu_label)
             free(set->menu_label);
-        set->menu_label = g_strdup(set2->menu_label);
+        set->menu_label = ztd::strdup(set2->menu_label);
         if (set->context)
         {
             free(set->context);
@@ -1834,24 +1835,24 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
 
     // Set Default
     newitem = app_menu_additem(app_menu,
-                               g_strdup("_Set As Default"),
-                               g_strdup("document-save"),
+                               ztd::strdup("_Set As Default"),
+                               ztd::strdup("document-save"),
                                APP_JOB_DEFAULT,
                                app_item,
                                data);
 
     // Remove
     newitem = app_menu_additem(app_menu,
-                               g_strdup("_Remove"),
-                               g_strdup("edit-delete"),
+                               ztd::strdup("_Remove"),
+                               ztd::strdup("edit-delete"),
                                APP_JOB_REMOVE,
                                app_item,
                                data);
 
     // Add
     newitem = app_menu_additem(app_menu,
-                               g_strdup("_Add..."),
-                               g_strdup("list-add"),
+                               ztd::strdup("_Add..."),
+                               ztd::strdup("list-add"),
                                APP_JOB_ADD,
                                app_item,
                                data);
@@ -1866,29 +1867,29 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
         if (std::filesystem::exists(path))
         {
             str = ztd::replace(desktop.get_name(), ".desktop", "._desktop");
-            icon = g_strdup("Edit");
+            icon = ztd::strdup("Edit");
         }
         else
         {
             str = ztd::replace(desktop.get_name(), ".desktop", "._desktop");
             str = fmt::format("{} (*copy)", str);
-            icon = g_strdup("document-new");
+            icon = ztd::strdup("document-new");
         }
         newitem = app_menu_additem(app_menu, str.c_str(), icon, APP_JOB_EDIT, app_item, data);
     }
 
     // mimeapps.list
     newitem = app_menu_additem(app_menu,
-                               g_strdup("_mimeapps.list"),
-                               g_strdup("Edit"),
+                               ztd::strdup("_mimeapps.list"),
+                               ztd::strdup("Edit"),
                                APP_JOB_EDIT_LIST,
                                app_item,
                                data);
 
     // applications/
     newitem = app_menu_additem(app_menu,
-                               g_strdup("appli_cations/"),
-                               g_strdup("folder"),
+                               ztd::strdup("appli_cations/"),
+                               ztd::strdup("folder"),
                                APP_JOB_BROWSE,
                                app_item,
                                data);
@@ -1906,21 +1907,21 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
         str = ztd::replace(type, "/", "-");
         str = fmt::format("{}._xml", str);
 
-        icon = g_strdup("Edit");
+        icon = ztd::strdup("Edit");
     }
     else
     {
         str = ztd::replace(type, "/", "-");
         str = fmt::format("{}._xml (*new)", str);
 
-        icon = g_strdup("document-new");
+        icon = ztd::strdup("document-new");
     }
     newitem = app_menu_additem(app_menu, str.c_str(), icon, APP_JOB_EDIT_TYPE, app_item, data);
 
     // mime/packages/
     newitem = app_menu_additem(app_menu,
-                               g_strdup("mime/pac_kages/"),
-                               g_strdup("folder"),
+                               ztd::strdup("mime/pac_kages/"),
+                               ztd::strdup("folder"),
                                APP_JOB_BROWSE_MIME,
                                app_item,
                                data);
@@ -1943,7 +1944,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     {
         newitem = app_menu_additem(submenu,
                                    desktop.get_name(),
-                                   g_strdup("text-x-generic"),
+                                   ztd::strdup("text-x-generic"),
                                    APP_JOB_VIEW,
                                    app_item,
                                    data);
@@ -1955,8 +1956,8 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
 
     // /usr applications/
     newitem = app_menu_additem(submenu,
-                               g_strdup("appli_cations/"),
-                               g_strdup("folder"),
+                               ztd::strdup("appli_cations/"),
+                               ztd::strdup("folder"),
                                APP_JOB_BROWSE_SHARED,
                                app_item,
                                data);
@@ -1971,7 +1972,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     str = g_strdup_printf("%s._xml", type);
     newitem = app_menu_additem(submenu,
                                str.c_str(),
-                               g_strdup("text-x-generic"),
+                               ztd::strdup("text-x-generic"),
                                APP_JOB_VIEW_TYPE,
                                app_item,
                                data);
@@ -1979,8 +1980,8 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
 
     // /usr *Overrides.xml
     newitem = app_menu_additem(submenu,
-                               g_strdup("_Overrides.xml"),
-                               g_strdup("Edit"),
+                               ztd::strdup("_Overrides.xml"),
+                               ztd::strdup("Edit"),
                                APP_JOB_VIEW_OVER,
                                app_item,
                                data);
@@ -1989,8 +1990,8 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
 
     // mime/packages/
     newitem = app_menu_additem(submenu,
-                               g_strdup("mime/pac_kages/"),
-                               g_strdup("folder"),
+                               ztd::strdup("mime/pac_kages/"),
+                               ztd::strdup("folder"),
                                APP_JOB_BROWSE_MIME_USR,
                                app_item,
                                data);
@@ -2453,7 +2454,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     }
 
     PtkFileMenu* data = g_slice_new0(PtkFileMenu);
-    data->cwd = g_strdup(cwd);
+    data->cwd = ztd::strdup(cwd);
     data->browser = browser;
 
     data->file_path = file_path;

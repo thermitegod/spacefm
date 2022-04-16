@@ -94,7 +94,7 @@ static const char* press_enter_to_close = "[ Finished ]  Press Enter to close";
 static const char* keep_term_when_done = "\\n[[ $? -eq 0 ]] || ( read -p '%s: ' )\\n\"";
 
 /*  Drag & Drop/Clipboard targets  */
-static GtkTargetEntry drag_targets[] = {{g_strdup("text/uri-list"), 0, 0}};
+static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 
 static void
 on_model_destroy(void* data, GObject* object)
@@ -715,7 +715,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
                 // else if ( device->id_uuid && device->id_uuid[0] != '\0' )
                 //    mname = g_strdup_printf( "%s-%s", bdev, device->id_uuid );
                 else
-                    mname = g_strdup(bdev);
+                    mname = ztd::strdup(bdev);
                 free(bdev);
             }
             break;
@@ -727,14 +727,14 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
                 if (netmount->path)
                 {
                     parent_dir_str = ztd::replace(netmount->path, "/", "-");
-                    parent_dir = g_strdup(parent_dir_str.c_str());
+                    parent_dir = ztd::strdup(parent_dir_str.c_str());
                     g_strstrip(parent_dir);
                     while (g_str_has_suffix(parent_dir, "-"))
                         parent_dir[strlen(parent_dir) - 1] = '\0';
                     while (Glib::str_has_prefix(parent_dir, "-"))
                     {
                         str = parent_dir;
-                        parent_dir = g_strdup(str + 1);
+                        parent_dir = ztd::strdup(str + 1);
                         free(str);
                     }
                     if (parent_dir[0] == '\0' || !g_utf8_validate(parent_dir, -1, nullptr) ||
@@ -754,7 +754,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
                 free(parent_dir);
             }
             else
-                mname = g_strdup(netmount->fstype);
+                mname = ztd::strdup(netmount->fstype);
             break;
         case HANDLER_MODE_FILE:
             if (path)
@@ -769,7 +769,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
     {
         g_strstrip(mname);
         std::string cleaned = ztd::replace(mname, " ", "");
-        mname = g_strdup(cleaned.c_str());
+        mname = ztd::strdup(cleaned.c_str());
     }
 
     if (mname && !mname[0])
@@ -778,13 +778,13 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
         mname = nullptr;
     }
     if (!mname)
-        mname = g_strdup("mount");
+        mname = ztd::strdup("mount");
 
     // complete mount point
     char* point1 = ptk_location_view_get_mount_point_dir(mname);
     free(mname);
     int r = 2;
-    char* point = g_strdup(point1);
+    char* point = ztd::strdup(point1);
 
     // attempt to remove existing dir - succeeds only if empty and unmounted
     std::filesystem::remove_all(point);
@@ -848,7 +848,7 @@ on_autoopen_net_cb(VFSFileTask* task, AutoOpen* ao)
     {
         // copy the user-entered url to udi
         free(device_file_vol->udi);
-        device_file_vol->udi = g_strdup(ao->device_file);
+        device_file_vol->udi = ztd::strdup(ao->device_file);
 
         // mark as special mount
         device_file_vol->should_autounmount = true;
@@ -979,7 +979,7 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     else if (run_in_terminal)
         keepterm = g_strdup_printf("[[ $? -eq 0 ]] || ( read -p '%s: ' )\n", press_enter_to_close);
     else
-        keepterm = g_strdup("");
+        keepterm = ztd::strdup("");
 
     line = fmt::format("{}{}\n{}", ssh_udevil ? "echo Connecting...\n\n" : "", cmd, keepterm);
     free(keepterm);
@@ -1008,7 +1008,7 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     {
         AutoOpen* ao;
         ao = g_slice_new0(AutoOpen);
-        ao->device_file = g_strdup(netmount->url);
+        ao->device_file = ztd::strdup(netmount->url);
         ao->devnum = 0;
         ao->file_browser = file_browser;
         ao->mount_point = mount_point;
@@ -1115,7 +1115,7 @@ on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     XSet* set = xset_get("dev_root_mount");
     char* options = vfs_volume_get_mount_options(vol, xset_get_s("dev_mount_options"));
     if (!options)
-        options = g_strdup("");
+        options = ztd::strdup("");
     std::string msg =
         fmt::format("Enter mount command:\n\nUse:\n\t%%%%v\tdevice file ( {} )"
                     "\n\t%%%%o\tvolume-specific mount options\n\t\t( {} )\n\nNote: fstab "
@@ -1124,8 +1124,8 @@ on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                     options);
 
     if (!set->s)
-        set->s = g_strdup(set->z);
-    char* old_set_s = g_strdup(set->s);
+        set->s = ztd::strdup(set->z);
+    char* old_set_s = ztd::strdup(set->s);
 
     if (xset_text_dialog(view,
                          "Mount As Root",
@@ -1179,8 +1179,8 @@ on_umount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                                   "\n\nEDIT WITH CARE   This command is run as root",
                                   vol->device_file);
     if (!set->s)
-        set->s = g_strdup(set->z);
-    char* old_set_s = g_strdup(set->s);
+        set->s = ztd::strdup(set->z);
+    char* old_set_s = ztd::strdup(set->s);
 
     if (xset_text_dialog(view,
                          "Unmount As Root",
@@ -1297,7 +1297,7 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         if (vol->device_type == DEVICE_TYPE_BLOCK && (vol->is_optical || vol->requires_eject))
             eject = g_strdup_printf("\neject %s", vol->device_file);
         else
-            eject = g_strdup("\nexit 0");
+            eject = ztd::strdup("\nexit 0");
 
         if (!file_browser && !run_in_terminal && vol->device_type == DEVICE_TYPE_BLOCK)
         {
@@ -1309,12 +1309,12 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                                    vol->device_file,
                                    vol->device_file);
             // sleep .2 here to ensure spacefm -g isn't killed too quickly causing hang
-            wait_done = g_strdup("\n( sleep .2; kill $waitp 2>/dev/null ) &");
+            wait_done = ztd::strdup("\n( sleep .2; kill $waitp 2>/dev/null ) &");
         }
         else
         {
-            wait = g_strdup("");
-            wait_done = g_strdup("");
+            wait = ztd::strdup("");
+            wait_done = ztd::strdup("");
         }
         if (run_in_terminal)
             line = fmt::format("echo 'Unmounting {}...'\n{}{}\nif [ $? -ne 0 ];then\n    "
@@ -1710,7 +1710,7 @@ on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                                     vol->device_file,
                                     vol->device_file);
         else
-            eject = g_strdup("");
+            eject = ztd::strdup("");
 
         if (run_in_terminal)
             line = fmt::format("echo 'Unmounting {}...'\nsync\n{}\nif [ $? -ne 0 ];then\n    "
@@ -1862,7 +1862,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
             {
                 std::string pointq = bash_quote(vol->mount_point);
                 std::string cmd2 = ztd::replace(cmd, "%a", pointq);
-                cmd = g_strdup(cmd2.c_str());
+                cmd = ztd::strdup(cmd2.c_str());
             }
         }
         else
@@ -1891,7 +1891,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
             std::string pointq = bash_quote(vol->mount_point);
             std::string cmd2;
             cmd2 = ztd::replace(cmd, "%a", pointq);
-            cmd = g_strdup(cmd2.c_str());
+            cmd = ztd::strdup(cmd2.c_str());
         }
     }
     else
@@ -2127,7 +2127,7 @@ on_showhide(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                           devid);
     }
     else
-        msg = g_strdup(set->desc);
+        msg = ztd::strdup(set->desc);
     if (xset_text_dialog(view, set->title, msg, "", set->s, &set->s, "", false))
         update_all();
 }
@@ -2156,7 +2156,7 @@ on_automountlist(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                           devid);
     }
     else
-        msg = g_strdup(set->desc);
+        msg = ztd::strdup(set->desc);
     if (xset_text_dialog(view, set->title, msg, "", set->s, &set->s, "", false))
     {
         // update view / automount all?
@@ -2200,7 +2200,7 @@ volume_is_visible(VFSVolume* vol)
             if (i == 0)
                 value = vol->device_file;
             else if (i == 1)
-                value = g_strdup(vol->label.c_str());
+                value = ztd::strdup(vol->label.c_str());
             else
             {
                 if ((value = vol->udi))
@@ -2407,9 +2407,9 @@ show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browse
 
     if (vol && vol->device_type == DEVICE_TYPE_NETWORK &&
         (Glib::str_has_prefix(vol->device_file, "//") || strstr(vol->device_file, ":/")))
-        str = g_strdup(" dev_menu_mark");
+        str = ztd::strdup(" dev_menu_mark");
     else
-        str = g_strdup("");
+        str = ztd::strdup("");
 
     char* menu_elements =
         g_strdup_printf("dev_menu_remove dev_menu_reload dev_menu_unmount dev_menu_sync separator "
@@ -2857,7 +2857,7 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
                 upath = g_filename_to_utf8(tpath.c_str(), -1, nullptr, &upath_len, nullptr);
             }
             else if (line.substr(0, 9) == "file://~/")
-                name = g_strdup("Home");
+                name = ztd::strdup("Home");
             else if (line.substr(0, 2) == "//" || line.find(":/"))
                 upath = line;
             else
@@ -2870,7 +2870,7 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
             XSet* newset = xset_custom_new();
             newset->z = const_cast<char*>(upath.c_str());
             newset->menu_label = const_cast<char*>(name.c_str());
-            newset->x = g_strdup("3"); // XSET_CMD_BOOKMARK
+            newset->x = ztd::strdup("3"); // XSET_CMD_BOOKMARK
             // unset these to save session space
             newset->task = false;
             newset->task_err = false;
@@ -2878,8 +2878,8 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
             newset->keep_terminal = false;
             if (set_prev)
             {
-                newset->prev = g_strdup(set_prev->name);
-                set_prev->next = g_strdup(newset->name);
+                newset->prev = ztd::strdup(set_prev->name);
+                set_prev->next = ztd::strdup(newset->name);
             }
             else
                 set_first = newset;
@@ -2909,8 +2909,8 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
             if (!set->child)
             {
                 // make set_first the child
-                set->child = g_strdup(set_first->name);
-                set_first->parent = g_strdup(set->name);
+                set->child = ztd::strdup(set_first->name);
+                set_first->parent = ztd::strdup(set->name);
             }
             else
             {
@@ -2920,8 +2920,8 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
                     set = xset_get(set->next);
                 if (set_first && set)
                 {
-                    set->next = g_strdup(set_first->name);
-                    set_first->prev = g_strdup(set->name);
+                    set->next = ztd::strdup(set_first->name);
+                    set_first->prev = ztd::strdup(set->name);
                 }
             }
         }
@@ -3033,16 +3033,16 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
                     icon = global_icon_submenu;
                 else if ((set2 = xset_get("book_menu_icon")) && set2->icon)
                 {
-                    icon1 = g_strdup(set2->icon);
-                    icon2 = g_strdup("gnome-fs-directory");
-                    icon3 = g_strdup("gtk-directory");
+                    icon1 = ztd::strdup(set2->icon);
+                    icon2 = ztd::strdup("gnome-fs-directory");
+                    icon3 = ztd::strdup("gtk-directory");
                     is_submenu = true;
                 }
                 else
                 {
-                    icon1 = g_strdup("gnome-fs-directory");
-                    icon2 = g_strdup("gtk-directory");
-                    icon3 = g_strdup("folder");
+                    icon1 = ztd::strdup("gnome-fs-directory");
+                    icon2 = ztd::strdup("gtk-directory");
+                    icon3 = ztd::strdup("folder");
                     is_submenu = true;
                 }
             }
@@ -3058,7 +3058,7 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
             {
                 // Bookmark
                 if (!(set->menu_label && set->menu_label[0]))
-                    menu_label = g_strdup(set->z);
+                    menu_label = ztd::strdup(set->z);
 
                 if (!icon_name &&
                     !(set->z && (strstr(set->z, ":/") || Glib::str_has_prefix(set->z, "//"))))
@@ -3085,10 +3085,10 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
                     if (set->menu_style == XSET_MENU_CHECK && icon_name && set->b == XSET_B_TRUE)
                     {
                         icon1 = icon_name;
-                        icon2 = g_strdup("gtk-execute");
+                        icon2 = ztd::strdup("gtk-execute");
                     }
                     else
-                        icon1 = g_strdup("gtk-execute");
+                        icon1 = ztd::strdup("gtk-execute");
                 }
             }
             break;
@@ -3255,10 +3255,10 @@ on_bookmark_device(GtkMenuItem* item, VFSVolume* vol)
 
     // create new bookmark
     newset = xset_custom_new();
-    newset->menu_label = g_strdup(url);
-    newset->z = g_strdup(url);
+    newset->menu_label = ztd::strdup(url);
+    newset->z = ztd::strdup(url);
     newset->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
-    newset->prev = g_strdup(sel_set->name);
+    newset->prev = ztd::strdup(sel_set->name);
     newset->next = sel_set->next; // steal string
     newset->task = false;
     newset->task_err = false;
@@ -3268,9 +3268,9 @@ on_bookmark_device(GtkMenuItem* item, VFSVolume* vol)
     {
         XSet* sel_set_next = xset_get(sel_set->next);
         free(sel_set_next->prev);
-        sel_set_next->prev = g_strdup(newset->name);
+        sel_set_next->prev = ztd::strdup(newset->name);
     }
-    sel_set->next = g_strdup(newset->name);
+    sel_set->next = ztd::strdup(newset->name);
 
     main_window_bookmark_changed(newset->name);
 }
@@ -3312,10 +3312,10 @@ ptk_bookmark_view_get_first_bookmark(XSet* book_set)
     {
         child_set = xset_custom_new();
         child_set->menu_label = g_strdup_printf("Home");
-        child_set->z = g_strdup(vfs_user_home_dir().c_str());
+        child_set->z = ztd::strdup(vfs_user_home_dir().c_str());
         child_set->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
         child_set->parent = g_strdup_printf("main_book");
-        book_set->child = g_strdup(child_set->name);
+        book_set->child = ztd::strdup(child_set->name);
         child_set->task = false;
         child_set->task_err = false;
         child_set->task_out = false;
@@ -3350,7 +3350,7 @@ find_cwd_match_bookmark(XSet* parent_set, const char* cwd, bool recurse, XSet* s
             char* sep = strchr(set->z, ';');
             if (sep)
                 sep[0] = '\0';
-            char* url = g_strstrip(g_strdup(set->z));
+            char* url = g_strstrip(ztd::strdup(set->z));
             if (sep)
                 sep[0] = ';';
             if (!g_strcmp0(cwd, url))
@@ -3393,7 +3393,7 @@ ptk_bookmark_view_chdir(GtkTreeView* view, PtkFileBrowser* file_browser, bool re
         char* sep = strchr(set->z, ';');
         if (sep)
             sep[0] = '\0';
-        char* url = g_strstrip(g_strdup(set->z));
+        char* url = g_strstrip(ztd::strdup(set->z));
         if (sep)
             sep[0] = ';';
         if (!strcmp(url, cwd))
@@ -3418,7 +3418,7 @@ ptk_bookmark_view_chdir(GtkTreeView* view, PtkFileBrowser* file_browser, bool re
     if (set && parent_set && (!start_set || g_strcmp0(parent_set->name, start_set->name)))
     {
         free(file_browser->book_set_name);
-        file_browser->book_set_name = g_strdup(parent_set->name);
+        file_browser->book_set_name = ztd::strdup(parent_set->name);
         ptk_bookmark_view_reload_list(view, parent_set);
     }
 
@@ -3438,7 +3438,7 @@ ptk_bookmark_view_get_selected_dir(GtkTreeView* view)
             char* sep = strchr(set->z, ';');
             if (sep)
                 sep[0] = '\0';
-            char* url = g_strstrip(g_strdup(set->z));
+            char* url = g_strstrip(ztd::strdup(set->z));
             if (sep)
                 sep[0] = ';';
             if (!url[0])
@@ -3518,9 +3518,9 @@ ptk_bookmark_view_add_bookmark(GtkMenuItem* menuitem, PtkFileBrowser* file_brows
     // create new bookmark
     newset = xset_custom_new();
     newset->menu_label = g_path_get_basename(url);
-    newset->z = g_strdup(url);
+    newset->z = ztd::strdup(url);
     newset->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
-    newset->prev = g_strdup(sel_set->name);
+    newset->prev = ztd::strdup(sel_set->name);
     newset->next = sel_set->next; // steal string
     newset->task = false;
     newset->task_err = false;
@@ -3531,9 +3531,9 @@ ptk_bookmark_view_add_bookmark(GtkMenuItem* menuitem, PtkFileBrowser* file_brows
     {
         XSet* sel_set_next = xset_get(sel_set->next);
         free(sel_set_next->prev);
-        sel_set_next->prev = g_strdup(newset->name);
+        sel_set_next->prev = ztd::strdup(newset->name);
     }
-    sel_set->next = g_strdup(newset->name);
+    sel_set->next = ztd::strdup(newset->name);
 
     main_window_bookmark_changed(newset->name);
     if (file_browser->side_book)
@@ -3559,7 +3559,7 @@ ptk_bookmark_view_xset_changed(GtkTreeView* view, PtkFileBrowser* file_browser,
         {
             // The loaded book set has been deleted
             free(file_browser->book_set_name);
-            file_browser->book_set_name = g_strdup("main_book");
+            file_browser->book_set_name = ztd::strdup("main_book");
             ptk_bookmark_view_reload_list(view, xset_get("main_book"));
         }
         return;
@@ -3635,7 +3635,7 @@ activate_bookmark_item(XSet* sel_set, GtkTreeView* view, PtkFileBrowser* file_br
         if ((set = xset_is(set->parent)))
         {
             free(file_browser->book_set_name);
-            file_browser->book_set_name = g_strdup(set->name);
+            file_browser->book_set_name = ztd::strdup(set->name);
             ptk_bookmark_view_reload_list(view, set);
             if (xset_get_b_panel(file_browser->mypanel, "book_fol"))
                 ptk_bookmark_view_chdir(view, file_browser, false);
@@ -3645,7 +3645,7 @@ activate_bookmark_item(XSet* sel_set, GtkTreeView* view, PtkFileBrowser* file_br
     {
         // enter submenu
         free(file_browser->book_set_name);
-        file_browser->book_set_name = g_strdup(sel_set->name);
+        file_browser->book_set_name = ztd::strdup(sel_set->name);
         ptk_bookmark_view_reload_list(view, sel_set);
     }
     else
@@ -3825,16 +3825,16 @@ on_bookmark_drag_end(GtkWidget* widget, GdkDragContext* drag_context, PtkFileBro
         // is NOT at top
         free(set_clipboard1->prev);
         free(set_clipboard1->next);
-        set_clipboard1->prev = g_strdup(set->name);
+        set_clipboard1->prev = ztd::strdup(set->name);
         set_clipboard1->next = set->next; // swap string
         if (set->next)
         {
             set_next = xset_get(set->next);
             if (set_next->prev)
                 free(set_next->prev);
-            set_next->prev = g_strdup(set_clipboard1->name);
+            set_next->prev = ztd::strdup(set_clipboard1->name);
         }
-        set->next = g_strdup(set_clipboard1->name);
+        set->next = ztd::strdup(set_clipboard1->name);
     }
     else
     {
@@ -3843,10 +3843,10 @@ on_bookmark_drag_end(GtkWidget* widget, GdkDragContext* drag_context, PtkFileBro
         free(set_clipboard1->prev);
         free(set_clipboard1->next);
         free(set_clipboard1->parent);
-        set_clipboard1->parent = g_strdup(book_set->name);
+        set_clipboard1->parent = ztd::strdup(book_set->name);
         set_clipboard1->prev = nullptr;
         set_clipboard1->next = book_set->child; // swap string
-        book_set->child = g_strdup(set_clipboard1->name);
+        book_set->child = ztd::strdup(set_clipboard1->name);
 
         if (set_clipboard1->next)
         {
@@ -3854,7 +3854,7 @@ on_bookmark_drag_end(GtkWidget* widget, GdkDragContext* drag_context, PtkFileBro
             free(set_next->parent);
             set_next->parent = nullptr;
             free(set_next->prev);
-            set_next->prev = g_strdup(set_clipboard1->name);
+            set_next->prev = ztd::strdup(set_clipboard1->name);
         }
     }
     main_window_bookmark_changed(file_browser->book_set_name);
@@ -4128,13 +4128,13 @@ ptk_bookmark_view_new(PtkFileBrowser* file_browser)
 
     // fill list
     if (!file_browser->book_set_name)
-        file_browser->book_set_name = g_strdup("main_book");
+        file_browser->book_set_name = ztd::strdup("main_book");
     XSet* set = xset_is(file_browser->book_set_name);
     if (!set)
     {
         set = xset_get("main_book");
         free(file_browser->book_set_name);
-        file_browser->book_set_name = g_strdup("main_book");
+        file_browser->book_set_name = ztd::strdup("main_book");
     }
     ptk_bookmark_view_reload_list(GTK_TREE_VIEW(view), set);
 

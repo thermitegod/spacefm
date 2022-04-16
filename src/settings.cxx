@@ -324,7 +324,7 @@ load_conf()
 
     /* Set default config values */
     config_settings.terminal_su = nullptr;
-    config_settings.tmp_dir = g_strdup(vfs_user_cache_dir().c_str());
+    config_settings.tmp_dir = ztd::strdup(vfs_user_cache_dir().c_str());
     config_settings.font_view_icon = default_font.c_str();
     config_settings.font_view_compact = default_font.c_str();
     config_settings.font_general = default_font.c_str();
@@ -570,7 +570,7 @@ save_settings(void* main_window_ptr)
                             free(set->s);
                             set->s = nullptr;
                         }
-                        char* tabs = g_strdup("");
+                        char* tabs = ztd::strdup("");
                         int g;
                         for (g = 0; g < pages; g++)
                         {
@@ -775,7 +775,7 @@ static XSet*
 xset_new(const char* name)
 {
     XSet* set = g_slice_new(XSet);
-    set->name = g_strdup(name);
+    set->name = ztd::strdup(name);
 
     set->b = XSET_B_UNSET;
     set->s = nullptr;
@@ -1187,7 +1187,7 @@ xset_set_ob1_int(XSet* set, const char* ob1, int ob1_int)
 {
     if (set->ob1)
         free(set->ob1);
-    set->ob1 = g_strdup(ob1);
+    set->ob1 = ztd::strdup(ob1);
     set->ob1_data = GINT_TO_POINTER(ob1_int);
     return set;
 }
@@ -1197,7 +1197,7 @@ xset_set_ob1(XSet* set, const char* ob1, void* ob1_data)
 {
     if (set->ob1)
         free(set->ob1);
-    set->ob1 = g_strdup(ob1);
+    set->ob1 = ztd::strdup(ob1);
     set->ob1_data = ob1_data;
     return set;
 }
@@ -1207,7 +1207,7 @@ xset_set_ob2(XSet* set, const char* ob2, void* ob2_data)
 {
     if (set->ob2)
         free(set->ob2);
-    set->ob2 = g_strdup(ob2);
+    set->ob2 = ztd::strdup(ob2);
     set->ob2_data = ob2_data;
     return set;
 }
@@ -1296,7 +1296,7 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
         case XSET_SET_SET_S:
             if (set->s)
                 free(set->s);
-            set->s = g_strdup(value);
+            set->s = ztd::strdup(value);
             break;
         case XSET_SET_SET_B:
             if (!strcmp(value, "1"))
@@ -1307,17 +1307,17 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
         case XSET_SET_SET_X:
             if (set->x)
                 free(set->x);
-            set->x = g_strdup(value);
+            set->x = ztd::strdup(value);
             break;
         case XSET_SET_SET_Y:
             if (set->y)
                 free(set->y);
-            set->y = g_strdup(value);
+            set->y = ztd::strdup(value);
             break;
         case XSET_SET_SET_Z:
             if (set->z)
                 free(set->z);
-            set->z = g_strdup(value);
+            set->z = ztd::strdup(value);
             break;
         case XSET_SET_SET_KEY:
             set->key = strtol(value, nullptr, 10);
@@ -1331,18 +1331,18 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
         case XSET_SET_SET_DESC:
             if (set->desc)
                 free(set->desc);
-            set->desc = g_strdup(value);
+            set->desc = ztd::strdup(value);
             break;
         case XSET_SET_SET_TITLE:
             if (set->title)
                 free(set->title);
-            set->title = g_strdup(value);
+            set->title = ztd::strdup(value);
             break;
         case XSET_SET_SET_LBL:
             // lbl is only used >= 0.9.0 for changed lock default menu_label
             if (set->menu_label)
                 free(set->menu_label);
-            set->menu_label = g_strdup(value);
+            set->menu_label = ztd::strdup(value);
             if (set->lock)
                 // indicate that menu label is not default and should be saved
                 set->in_terminal = true;
@@ -1351,7 +1351,7 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
             // icn is only used >= 0.9.0 for changed lock default icon
             if (set->icon)
                 free(set->icon);
-            set->icon = g_strdup(value);
+            set->icon = ztd::strdup(value);
             if (set->lock)
                 // indicate that icon is not default and should be saved
                 set->keep_terminal = true;
@@ -1363,7 +1363,7 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
             {
                 if (set->menu_label)
                     free(set->menu_label);
-                set->menu_label = g_strdup(value);
+                set->menu_label = ztd::strdup(value);
                 if (set->lock)
                     // indicate that menu label is not default and should be saved
                     set->in_terminal = true;
@@ -1377,37 +1377,37 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
         case XSET_SET_SET_SHARED_KEY:
             if (set->shared_key)
                 free(set->shared_key);
-            set->shared_key = g_strdup(value);
+            set->shared_key = ztd::strdup(value);
             break;
         case XSET_SET_SET_NEXT:
             if (set->next)
                 free(set->next);
-            set->next = g_strdup(value);
+            set->next = ztd::strdup(value);
             break;
         case XSET_SET_SET_PREV:
             if (set->prev)
                 free(set->prev);
-            set->prev = g_strdup(value);
+            set->prev = ztd::strdup(value);
             break;
         case XSET_SET_SET_PARENT:
             if (set->parent)
                 free(set->parent);
-            set->parent = g_strdup(value);
+            set->parent = ztd::strdup(value);
             break;
         case XSET_SET_SET_CHILD:
             if (set->child)
                 free(set->child);
-            set->child = g_strdup(value);
+            set->child = ztd::strdup(value);
             break;
         case XSET_SET_SET_CXT:
             if (set->context)
                 free(set->context);
-            set->context = g_strdup(value);
+            set->context = ztd::strdup(value);
             break;
         case XSET_SET_SET_LINE:
             if (set->line)
                 free(set->line);
-            set->line = g_strdup(value);
+            set->line = ztd::strdup(value);
             break;
         case XSET_SET_SET_TOOL:
             set->tool = XSetTool(std::stoi(value));
@@ -1562,7 +1562,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
 
                 // get mime type open_all_type set
                 std::string str;
-                char* open_all_name = g_strdup(context->var[CONTEXT_MIME]);
+                char* open_all_name = ztd::strdup(context->var[CONTEXT_MIME]);
                 if (open_all_name)
                     str = open_all_name;
                 else
@@ -1846,7 +1846,7 @@ xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
             VFSAppDesktop desktop(set->z);
 
             if (!(set->menu_label && set->menu_label[0]))
-                menu_label = g_strdup(desktop.get_disp_name());
+                menu_label = ztd::strdup(desktop.get_disp_name());
             if (set->icon)
                 icon_new = vfs_load_icon(icon_theme, set->icon, icon_size);
             if (!icon_new)
@@ -1883,10 +1883,10 @@ xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
 
     if (!menu_label)
     {
-        menu_label =
-            set->menu_label && set->menu_label[0] ? g_strdup(set->menu_label) : g_strdup(set->z);
+        menu_label = set->menu_label && set->menu_label[0] ? ztd::strdup(set->menu_label)
+                                                           : ztd::strdup(set->z);
         if (!menu_label)
-            menu_label = g_strdup("Application");
+            menu_label = ztd::strdup("Application");
     }
     return menu_label;
 }
@@ -1910,46 +1910,46 @@ xset_custom_get_bookmark_icon(XSet* set, int icon_size)
             // a bookmarked URL - show network icon
             XSet* set2 = xset_get("dev_icon_network");
             if (set2->icon)
-                icon1 = g_strdup(set2->icon);
+                icon1 = ztd::strdup(set2->icon);
             else
-                icon1 = g_strdup("gtk-network");
-            icon2 = g_strdup("user-bookmarks");
-            icon3 = g_strdup("gnome-fs-directory");
+                icon1 = ztd::strdup("gtk-network");
+            icon2 = ztd::strdup("user-bookmarks");
+            icon3 = ztd::strdup("gnome-fs-directory");
         }
         else if (set->z && (strstr(set->z, ":/") || Glib::str_has_prefix(set->z, "//")))
         {
             // a bookmarked URL - show custom or network icon
-            icon1 = g_strdup(set->icon);
+            icon1 = ztd::strdup(set->icon);
             XSet* set2 = xset_get("dev_icon_network");
             if (set2->icon)
-                icon2 = g_strdup(set2->icon);
+                icon2 = ztd::strdup(set2->icon);
             else
-                icon2 = g_strdup("gtk-network");
-            icon3 = g_strdup("user-bookmarks");
+                icon2 = ztd::strdup("gtk-network");
+            icon3 = ztd::strdup("user-bookmarks");
         }
         else if (!set->icon && book_icon_set_cached->icon)
         {
-            icon1 = g_strdup(book_icon_set_cached->icon);
-            icon2 = g_strdup("user-bookmarks");
-            icon3 = g_strdup("gnome-fs-directory");
+            icon1 = ztd::strdup(book_icon_set_cached->icon);
+            icon2 = ztd::strdup("user-bookmarks");
+            icon3 = ztd::strdup("gnome-fs-directory");
         }
         else if (set->icon && book_icon_set_cached->icon)
         {
-            icon1 = g_strdup(set->icon);
-            icon2 = g_strdup(book_icon_set_cached->icon);
-            icon3 = g_strdup("user-bookmarks");
+            icon1 = ztd::strdup(set->icon);
+            icon2 = ztd::strdup(book_icon_set_cached->icon);
+            icon3 = ztd::strdup("user-bookmarks");
         }
         else if (set->icon)
         {
-            icon1 = g_strdup(set->icon);
-            icon2 = g_strdup("user-bookmarks");
-            icon3 = g_strdup("gnome-fs-directory");
+            icon1 = ztd::strdup(set->icon);
+            icon2 = ztd::strdup("user-bookmarks");
+            icon3 = ztd::strdup("gnome-fs-directory");
         }
         else
         {
-            icon1 = g_strdup("user-bookmarks");
-            icon2 = g_strdup("gnome-fs-directory");
-            icon3 = g_strdup("gtk-directory");
+            icon1 = ztd::strdup("user-bookmarks");
+            icon2 = ztd::strdup("gnome-fs-directory");
+            icon3 = ztd::strdup("gtk-directory");
         }
         if (icon1)
             icon_new = vfs_load_icon(icon_theme, icon1, icon_size);
@@ -2317,17 +2317,17 @@ xset_custom_copy(XSet* set, bool copy_next, bool delete_set)
         mset = xset_get_plugin_mirror(set);
 
     XSet* newset = xset_custom_new();
-    newset->menu_label = g_strdup(set->menu_label);
-    newset->s = g_strdup(set->s);
-    newset->x = g_strdup(set->x);
-    newset->y = g_strdup(set->y);
-    newset->z = g_strdup(set->z);
-    newset->desc = g_strdup(set->desc);
-    newset->title = g_strdup(set->title);
+    newset->menu_label = ztd::strdup(set->menu_label);
+    newset->s = ztd::strdup(set->s);
+    newset->x = ztd::strdup(set->x);
+    newset->y = ztd::strdup(set->y);
+    newset->z = ztd::strdup(set->z);
+    newset->desc = ztd::strdup(set->desc);
+    newset->title = ztd::strdup(set->title);
     newset->b = set->b;
     newset->menu_style = set->menu_style;
-    newset->context = g_strdup(mset->context);
-    newset->line = g_strdup(set->line);
+    newset->context = ztd::strdup(mset->context);
+    newset->line = ztd::strdup(set->line);
 
     newset->task = mset->task;
     newset->task_pop = mset->task_pop;
@@ -2338,9 +2338,9 @@ xset_custom_copy(XSet* set, bool copy_next, bool delete_set)
     newset->scroll_lock = mset->scroll_lock;
 
     if (!mset->icon && set->plugin)
-        newset->icon = g_strdup(set->icon);
+        newset->icon = ztd::strdup(set->icon);
     else
-        newset->icon = g_strdup(mset->icon);
+        newset->icon = ztd::strdup(mset->icon);
 
     xset_custom_copy_files(set, newset);
     newset->tool = set->tool;
@@ -2350,8 +2350,8 @@ xset_custom_copy(XSet* set, bool copy_next, bool delete_set)
         XSet* set_child = xset_get(set->child);
         // LOG_INFO("    copy submenu {}", set_child->name);
         XSet* newchild = xset_custom_copy(set_child, true, delete_set);
-        newset->child = g_strdup(newchild->name);
-        newchild->parent = g_strdup(newset->name);
+        newset->child = ztd::strdup(newchild->name);
+        newchild->parent = ztd::strdup(newset->name);
     }
 
     if (copy_next && set->next)
@@ -2359,8 +2359,8 @@ xset_custom_copy(XSet* set, bool copy_next, bool delete_set)
         XSet* set_next = xset_get(set->next);
         // LOG_INFO("    copy next {}", set_next->name);
         XSet* newnext = xset_custom_copy(set_next, true, delete_set);
-        newnext->prev = g_strdup(newset->name);
-        newset->next = g_strdup(newnext->name);
+        newnext->prev = ztd::strdup(newset->name);
+        newset->next = ztd::strdup(newnext->name);
     }
 
     // when copying imported plugin file, discard mirror xset
@@ -2423,10 +2423,10 @@ xset_set_plugin_mirror(XSet* pset)
                 {
                     if (set->shared_key)
                         free(set->shared_key);
-                    set->shared_key = g_strdup(pset->name);
+                    set->shared_key = ztd::strdup(pset->name);
                     if (pset->shared_key)
                         free(pset->shared_key);
-                    pset->shared_key = g_strdup(set->name);
+                    pset->shared_key = ztd::strdup(set->name);
                     return;
                 }
             }
@@ -2445,10 +2445,10 @@ xset_get_plugin_mirror(XSet* set)
         return xset_get(set->shared_key);
 
     XSet* newset = xset_custom_new();
-    newset->desc = g_strdup("@plugin@mirror@");
-    newset->parent = g_strdup(set->plug_dir);
-    newset->child = g_strdup(set->plug_name);
-    newset->shared_key = g_strdup(set->name); // this will not be saved
+    newset->desc = ztd::strdup("@plugin@mirror@");
+    newset->parent = ztd::strdup(set->plug_dir);
+    newset->child = ztd::strdup(set->plug_name);
+    newset->shared_key = ztd::strdup(set->name); // this will not be saved
     newset->task = set->task;
     newset->task_pop = set->task_pop;
     newset->task_err = set->task_err;
@@ -2456,11 +2456,11 @@ xset_get_plugin_mirror(XSet* set)
     newset->in_terminal = set->in_terminal;
     newset->keep_terminal = set->keep_terminal;
     newset->scroll_lock = set->scroll_lock;
-    newset->context = g_strdup(set->context);
+    newset->context = ztd::strdup(set->context);
     newset->opener = set->opener;
     newset->b = set->b;
-    newset->s = g_strdup(set->s);
-    set->shared_key = g_strdup(newset->name);
+    newset->s = ztd::strdup(set->s);
+    set->shared_key = ztd::strdup(newset->name);
     return newset;
 }
 
@@ -2511,8 +2511,8 @@ xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
     std::string setname = xset_custom_new_name();
 
     XSet* set = xset_new(setname.c_str());
-    set->plug_dir = g_strdup(plug_dir);
-    set->plug_name = g_strdup(plug_name);
+    set->plug_dir = ztd::strdup(plug_dir);
+    set->plug_name = ztd::strdup(plug_name);
     set->plugin = true;
     set->lock = false;
     xsets.push_back(set);
@@ -2547,7 +2547,7 @@ xset_parse_plugin(const char* plug_dir, const char* line, int use)
         prefix = handler_prefix[use];
     }
     else
-        prefix = g_strdup("cstm_");
+        prefix = ztd::strdup("cstm_");
 
     if (Glib::str_has_prefix(name, prefix))
     {
@@ -2563,7 +2563,7 @@ xset_parse_plugin(const char* plug_dir, const char* line, int use)
                 {
                     set2 = xset_get_by_plug_name(plug_dir, set->prev);
                     free(set->prev);
-                    set->prev = g_strdup(set2->name);
+                    set->prev = ztd::strdup(set2->name);
                 }
                 else
                 {
@@ -2577,7 +2577,7 @@ xset_parse_plugin(const char* plug_dir, const char* line, int use)
                 {
                     set2 = xset_get_by_plug_name(plug_dir, set->next);
                     free(set->next);
-                    set->next = g_strdup(set2->name);
+                    set->next = ztd::strdup(set2->name);
                 }
                 else
                 {
@@ -2591,7 +2591,7 @@ xset_parse_plugin(const char* plug_dir, const char* line, int use)
                 {
                     set2 = xset_get_by_plug_name(plug_dir, set->parent);
                     free(set->parent);
-                    set->parent = g_strdup(set2->name);
+                    set->parent = ztd::strdup(set2->name);
                 }
                 else
                 {
@@ -2605,7 +2605,7 @@ xset_parse_plugin(const char* plug_dir, const char* line, int use)
                 {
                     set2 = xset_get_by_plug_name(plug_dir, set->child);
                     free(set->child);
-                    set->child = g_strdup(set2->name);
+                    set->child = ztd::strdup(set2->name);
                 }
                 else
                 {
@@ -2804,15 +2804,15 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                             break;
                     } while ((set = xset_get(set->next)));
                     // set now points to last bookmark
-                    newset->prev = g_strdup(plugin_data->set->name);
+                    newset->prev = ztd::strdup(plugin_data->set->name);
                     set->next = plugin_data->set->next; // steal
                     if (plugin_data->set->next)
                     {
                         XSet* set_next = xset_get(plugin_data->set->next);
                         free(set_next->prev);
-                        set_next->prev = g_strdup(set->name); // last bookmark
+                        set_next->prev = ztd::strdup(set->name); // last bookmark
                     }
-                    plugin_data->set->next = g_strdup(newset->name);
+                    plugin_data->set->next = ztd::strdup(newset->name);
                     // find parent
                     set = newset;
                     while (set->prev)
@@ -2848,15 +2848,15 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                 {
                     // paste after insert_set (plugin_data->set)
                     XSet* newset = xset_custom_copy(set, false, true);
-                    newset->prev = g_strdup(plugin_data->set->name);
+                    newset->prev = ztd::strdup(plugin_data->set->name);
                     newset->next = plugin_data->set->next; // steal
                     if (plugin_data->set->next)
                     {
                         XSet* set_next = xset_get(plugin_data->set->next);
                         free(set_next->prev);
-                        set_next->prev = g_strdup(newset->name);
+                        set_next->prev = ztd::strdup(newset->name);
                     }
-                    plugin_data->set->next = g_strdup(newset->name);
+                    plugin_data->set->next = ztd::strdup(newset->name);
                     if (plugin_data->set->tool)
                         newset->tool = XSET_TOOL_CUSTOM;
                     else
@@ -2940,7 +2940,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 
     PluginData* plugin_data = g_slice_new0(PluginData);
     plugin_data->main_window = nullptr;
-    plugin_data->plug_dir = g_strdup(set->plug_dir);
+    plugin_data->plug_dir = ztd::strdup(set->plug_dir);
     plugin_data->set = set;
     plugin_data->job = PLUGIN_JOB_REMOVE;
     task->complete_notify = (GFunc)on_install_plugin_cb;
@@ -3024,7 +3024,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* path, co
     PluginData* plugin_data = g_slice_new0(PluginData);
     plugin_data->main_window = main_window;
     plugin_data->handler_dlg = handler_dlg;
-    plugin_data->plug_dir = g_strdup(plug_dir);
+    plugin_data->plug_dir = ztd::strdup(plug_dir);
     plugin_data->job = job;
     plugin_data->set = insert_set;
     task->complete_notify = (GFunc)on_install_plugin_cb;
@@ -3115,7 +3115,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
     else
     {
         if (!(deffolder = xset_get_s("go_set_default")))
-            deffolder = g_strdup("/");
+            deffolder = ztd::strdup("/");
     }
 
     if (!set->plugin)
@@ -3206,7 +3206,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
         free(plugin_path);
     }
     else
-        plug_dir = g_strdup(set->plug_dir);
+        plug_dir = ztd::strdup(set->plug_dir);
 
     // tar and delete tmp files
     // task
@@ -3325,7 +3325,7 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
                 }
                 else
                 {
-                    file_browser->select_path = g_strdup(use_url);
+                    file_browser->select_path = ztd::strdup(use_url);
                     ptk_file_browser_emit_open(file_browser,
                                                dir,
                                                new_tab ? PTK_OPEN_NEW_TAB : PTK_OPEN_DIR);
@@ -3341,7 +3341,7 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
                         if (file_browser)
                         {
                             // select path in new browser
-                            file_browser->select_path = g_strdup(use_url);
+                            file_browser->select_path = ztd::strdup(use_url);
                             // usually this is not ready but try anyway
                             ptk_file_browser_select_file(file_browser, use_url);
                         }
@@ -3480,7 +3480,7 @@ xset_custom_activate(GtkWidget* item, XSet* set)
                     else
                     {
                         sel_files = nullptr;
-                        cwd = g_strdup("/");
+                        cwd = ztd::strdup("/");
                     }
 
                     std::vector<std::string> open_files;
@@ -3541,7 +3541,7 @@ xset_custom_activate(GtkWidget* item, XSet* set)
                 {
                     if ((sep = strchr(specs, ';')))
                         sep[0] = '\0';
-                    url = g_strdup(specs);
+                    url = ztd::strdup(specs);
                     url = g_strstrip(url);
                     if (url[0])
                         open_spec(set->browser, url, true);
@@ -3647,7 +3647,7 @@ xset_custom_remove(XSet* set)
         if (set_prev->next)
             free(set_prev->next);
         if (set->next)
-            set_prev->next = g_strdup(set->next);
+            set_prev->next = ztd::strdup(set->next);
         else
             set_prev->next = nullptr;
     }
@@ -3657,7 +3657,7 @@ xset_custom_remove(XSet* set)
         if (set_next->prev)
             free(set_next->prev);
         if (set->prev)
-            set_next->prev = g_strdup(set->prev);
+            set_next->prev = ztd::strdup(set->prev);
         else
         {
             set_next->prev = nullptr;
@@ -3666,8 +3666,8 @@ xset_custom_remove(XSet* set)
                 set_parent = xset_get(set->parent);
                 if (set_parent->child)
                     free(set_parent->child);
-                set_parent->child = g_strdup(set_next->name);
-                set_next->parent = g_strdup(set->parent);
+                set_parent->child = ztd::strdup(set_next->name);
+                set_next->parent = ztd::strdup(set->parent);
             }
         }
     }
@@ -3679,12 +3679,12 @@ xset_custom_remove(XSet* set)
         else
         {
             set_child = xset_custom_new();
-            set_child->menu_label = g_strdup("New _Command");
+            set_child->menu_label = ztd::strdup("New _Command");
         }
         if (set_parent->child)
             free(set_parent->child);
-        set_parent->child = g_strdup(set_child->name);
-        set_child->parent = g_strdup(set->parent);
+        set_parent->child = ztd::strdup(set_child->name);
+        set_child->parent = ztd::strdup(set->parent);
         return set_child;
     }
     return nullptr;
@@ -3714,16 +3714,16 @@ xset_custom_insert_after(XSet* target, XSet* set)
 
     free(set->prev);
     free(set->next);
-    set->prev = g_strdup(target->name);
+    set->prev = ztd::strdup(target->name);
     set->next = target->next; // steal string
     if (target->next)
     {
         target_next = xset_get(target->next);
         if (target_next->prev)
             free(target_next->prev);
-        target_next->prev = g_strdup(set->name);
+        target_next->prev = ztd::strdup(set->name);
     }
-    target->next = g_strdup(set->name);
+    target->next = ztd::strdup(set->name);
     if (target->tool)
     {
         if (set->tool < XSET_TOOL_CUSTOM)
@@ -3878,7 +3878,7 @@ xset_get_keyname(XSet* set, int key_val, int key_mod)
     if (mod && mod[0] && !mod[1] && g_ascii_isalpha(mod[0]))
         mod[0] = g_ascii_toupper(mod[0]);
     else if (!mod)
-        mod = g_strdup("NA");
+        mod = ztd::strdup("NA");
 #endif
 
     if (keymod)
@@ -4042,7 +4042,7 @@ xset_set_key(GtkWidget* parent, XSet* set)
         name = clean_label(keyset->menu_label, false, true);
         if (set->shared_key)
             free(set->shared_key);
-        set->shared_key = g_strdup("open_all");
+        set->shared_key = ztd::strdup("open_all");
     }
     else
         name = "( no name )";
@@ -4161,7 +4161,7 @@ xset_design_job(GtkWidget* item, XSet* set)
         case XSET_JOB_ICON:
             mset = xset_get_plugin_mirror(set);
             char* old_icon;
-            old_icon = g_strdup(mset->icon);
+            old_icon = ztd::strdup(mset->icon);
             // Note: xset_text_dialog uses the title passed to know this is an
             // icon chooser, so it adds a Choose button.  If you change the title,
             // change xset_text_dialog.
@@ -4246,7 +4246,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             }
             else
             {
-                folder = g_strdup("/usr/bin");
+                folder = ztd::strdup("/usr/bin");
                 file = nullptr;
             }
             if ((custom_file = xset_file_dialog(parent,
@@ -4298,7 +4298,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             switch (job)
             {
                 case XSET_JOB_COMMAND:
-                    name = g_strdup("New _Command");
+                    name = ztd::strdup("New _Command");
                     if (!xset_text_dialog(parent,
                                           "Set Item Name",
                                           enter_menu_name_new,
@@ -4372,7 +4372,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                     break;
                 case XSET_JOB_APP:
                     free(newset->x);
-                    newset->x = g_strdup("2"); // XSET_CMD_APP
+                    newset->x = ztd::strdup("2"); // XSET_CMD_APP
                     // unset these to save session space
                     newset->task = false;
                     newset->task_err = false;
@@ -4381,7 +4381,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                     break;
                 case XSET_JOB_BOOKMARK:
                     free(newset->x);
-                    newset->x = g_strdup("3"); // XSET_CMD_BOOKMARK
+                    newset->x = ztd::strdup("3"); // XSET_CMD_BOOKMARK
                     // unset these to save session space
                     newset->task = false;
                     newset->task_err = false;
@@ -4435,15 +4435,15 @@ xset_design_job(GtkWidget* item, XSet* set)
 
             // add submenu child
             childset = xset_custom_new();
-            newset->child = g_strdup(childset->name);
-            childset->parent = g_strdup(newset->name);
+            newset->child = ztd::strdup(childset->name);
+            childset->parent = ztd::strdup(newset->name);
             if (job == XSET_JOB_SUBMENU_BOOK || xset_is_main_bookmark(set))
             {
                 // adding new submenu from a bookmark - fill with bookmark
                 folder = set->browser ? (char*)ptk_file_browser_get_cwd(set->browser)
                                       : (char*)vfs_user_desktop_dir().c_str();
                 childset->menu_label = g_path_get_basename(folder);
-                childset->z = g_strdup(folder);
+                childset->z = ztd::strdup(folder);
                 childset->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
                 // unset these to save session space
                 childset->task = false;
@@ -4452,7 +4452,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 childset->keep_terminal = false;
             }
             else
-                childset->menu_label = g_strdup("New _Command");
+                childset->menu_label = ztd::strdup("New _Command");
             main_window_bookmark_changed(newset->name);
             break;
         case XSET_JOB_SEP:
@@ -4478,7 +4478,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             else
             {
                 if (!(folder = xset_get_s("go_set_default")))
-                    folder = g_strdup("/");
+                    folder = ztd::strdup("/");
             }
             file = xset_file_dialog(GTK_WIDGET(parent),
                                     GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -4607,14 +4607,14 @@ xset_design_job(GtkWidget* item, XSet* set)
                 break;
             }
             if (set->menu_label && set->menu_label[0])
-                name = g_strdup(clean_label(set->menu_label, false, false).c_str());
+                name = ztd::strdup(clean_label(set->menu_label, false, false).c_str());
             else
             {
                 if (!set->lock && set->z && set->menu_style < XSET_MENU_SUBMENU &&
                     (cmd_type == XSET_CMD_BOOKMARK || cmd_type == XSET_CMD_APP))
-                    name = g_strdup(set->z);
+                    name = ztd::strdup(set->z);
                 else
-                    name = g_strdup("( no name )");
+                    name = ztd::strdup("( no name )");
             }
             if (set->child && set->menu_style == XSET_MENU_SUBMENU)
             {
@@ -4657,8 +4657,8 @@ xset_design_job(GtkWidget* item, XSet* set)
             }
 
             // remove
-            name = g_strdup(set->name);
-            prog = g_strdup(set->parent);
+            name = ztd::strdup(set->name);
+            prog = ztd::strdup(set->parent);
 
             if (job == XSET_JOB_REMOVE && set->parent /* maybe only item in sub */
                 && xset_is_main_bookmark(set))
@@ -4678,7 +4678,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                                       : (char*)vfs_user_desktop_dir().c_str();
                 free(childset->menu_label);
                 childset->menu_label = g_path_get_basename(folder);
-                childset->z = g_strdup(folder);
+                childset->z = ztd::strdup(folder);
                 childset->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
                 // unset these to save session space
                 childset->task = false;
@@ -4721,7 +4721,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             break;
         case XSET_JOB_CONFIRM:
             if (!set->desc)
-                set->desc = g_strdup("Are you sure?");
+                set->desc = ztd::strdup("Are you sure?");
             if (xset_text_dialog(parent,
                                  "Dialog Message",
                                  "Enter the message to be displayed in this "
@@ -5714,7 +5714,7 @@ xset_menu_cb(GtkWidget* item, XSet* set)
                 std::string msg = rset->desc;
                 char* default_str = nullptr;
                 if (rset->title && rset->lock)
-                    title = g_strdup(rset->title);
+                    title = ztd::strdup(rset->title);
                 else
                     title = clean_label(rset->menu_label, false, false);
                 if (rset->lock)
@@ -6208,7 +6208,7 @@ xset_text_dialog(GtkWidget* parent, const std::string& title, const std::string&
                 {
                     if (*answer)
                         free(*answer);
-                    trim_ans = g_strdup(ans);
+                    trim_ans = ztd::strdup(ans);
                     trim_ans = g_strstrip(trim_ans);
                     if (ans && trim_ans[0] != '\0')
                         *answer = g_filename_from_utf8(trim_ans, -1, nullptr, nullptr, nullptr);
@@ -6414,7 +6414,7 @@ xset_color_dialog(GtkWidget* parent, char* title, char* defcolor)
             break;
         default:
             // cancel, delete_event
-            scolor = g_strdup(defcolor);
+            scolor = ztd::strdup(defcolor);
             break;
     }
 
@@ -6786,7 +6786,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
         goto _next_toolitem;
     }
     if (set->tool > XSET_TOOL_CUSTOM && set->tool < XSET_TOOL_INVALID && !set->shared_key)
-        set->shared_key = g_strdup(builtin_tool_shared_key[set->tool]);
+        set->shared_key = ztd::strdup(builtin_tool_shared_key[set->tool]);
 
     // builtin toolitems don't have menu_style set
     int menu_style;
@@ -6858,7 +6858,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 // Bookmark
                 pixbuf = xset_custom_get_bookmark_icon(set, real_icon_size);
                 if (!(set->menu_label && set->menu_label[0]))
-                    new_menu_label = g_strdup(set->z);
+                    new_menu_label = ztd::strdup(set->z);
             }
 
             if (pixbuf)
@@ -6870,7 +6870,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 image =
                     xset_get_image(icon_name ? icon_name : "gtk-execute", (GtkIconSize)icon_size);
             if (!new_menu_label)
-                new_menu_label = g_strdup(menu_label);
+                new_menu_label = ztd::strdup(menu_label);
 
             // can't use gtk_tool_button_new because icon doesn't obey size
             // btn = GTK_WIDGET( gtk_tool_button_new( image, new_menu_label ) );
@@ -7201,8 +7201,8 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
         // toolbar is empty - add default items
         set_child = xset_new_builtin_toolitem(
             strstr(set_parent->name, "tool_r") ? XSET_TOOL_REFRESH : XSET_TOOL_DEVICES);
-        set_parent->child = g_strdup(set_child->name);
-        set_child->parent = g_strdup(set_parent->name);
+        set_parent->child = ztd::strdup(set_child->name);
+        set_child->parent = ztd::strdup(set_parent->name);
         if (!strstr(set_parent->name, "tool_r"))
         {
             if (strstr(set_parent->name, "tool_s"))
@@ -7551,8 +7551,8 @@ xset_defaults()
     set->menu_style = XSET_MENU_STRING;
     xset_set_set(set, XSET_SET_SET_TITLE, "Change Detection Blacklist");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-edit");
-    set->s = g_strdup("cifs curlftpfs ftpfs fuse.sshfs nfs smbfs");
-    set->z = g_strdup(set->s);
+    set->s = ztd::strdup("cifs curlftpfs ftpfs fuse.sshfs nfs smbfs");
+    set->z = ztd::strdup(set->s);
 
     set = xset_set("dev_fs_cnf", "label", "_Device Handlers");
     xset_set_set(set, XSET_SET_SET_ICON, "gtk-preferences");
@@ -8005,12 +8005,12 @@ xset_defaults()
     // Note: xset_text_dialog uses the title passed to know this is an
     // icon chooser, so it adds a Choose button.  If you change the title,
     // change xset_text_dialog.
-    set->title = g_strdup("Set Window Icon");
-    set->desc = g_strdup("Enter an icon name, icon file path, or stock item name:\n\nOr click "
-                         "Choose to select an icon.  Not all icons may work properly due to "
-                         "various issues.\n\nProvided alternate SpaceFM "
-                         "icons:\n\tspacefm-[48|128]-[cube|pyramid]-[blue|green|red]\n\tspacefm-"
-                         "48-folder-[blue|red]\n\nFor example: spacefm-48-pyramid-green");
+    set->title = ztd::strdup("Set Window Icon");
+    set->desc = ztd::strdup("Enter an icon name, icon file path, or stock item name:\n\nOr click "
+                            "Choose to select an icon.  Not all icons may work properly due to "
+                            "various issues.\n\nProvided alternate SpaceFM "
+                            "icons:\n\tspacefm-[48|128]-[cube|pyramid]-[blue|green|red]\n\tspacefm-"
+                            "48-folder-[blue|red]\n\nFor example: spacefm-48-pyramid-green");
     // x and y store global icon chooser dialog size
 
     set = xset_set("main_full", "lbl", "_Fullscreen");
@@ -8071,8 +8071,8 @@ xset_defaults()
     set = xset_set("task_col_status", "lbl", "_Status");
     set->menu_style = XSET_MENU_CHECK;
     set->b = XSET_B_TRUE;
-    set->x = g_strdup("0");   // column position
-    set->y = g_strdup("130"); // column width
+    set->x = ztd::strdup("0");   // column position
+    set->y = ztd::strdup("130"); // column width
 
     set = xset_set("task_col_count", "lbl", "_Count");
     set->menu_style = XSET_MENU_CHECK;
@@ -8097,13 +8097,13 @@ xset_defaults()
     set->menu_style = XSET_MENU_CHECK;
     set->b = XSET_B_TRUE;
     set->x = g_strdup_printf("%d", 5);
-    set->y = g_strdup("100");
+    set->y = ztd::strdup("100");
 
     set = xset_set("task_col_total", "lbl", "T_otal");
     set->menu_style = XSET_MENU_CHECK;
     set->b = XSET_B_TRUE;
     set->x = g_strdup_printf("%d", 6);
-    set->y = g_strdup("120");
+    set->y = ztd::strdup("120");
 
     set = xset_set("task_col_started", "lbl", "Sta_rted");
     set->menu_style = XSET_MENU_CHECK;
@@ -8113,7 +8113,7 @@ xset_defaults()
     set->menu_style = XSET_MENU_CHECK;
     set->b = XSET_B_TRUE;
     set->x = g_strdup_printf("%d", 8);
-    set->y = g_strdup("70");
+    set->y = ztd::strdup("70");
 
     set = xset_set("task_col_curspeed", "lbl", "C_urrent Speed");
     set->menu_style = XSET_MENU_CHECK;
@@ -8128,12 +8128,12 @@ xset_defaults()
     set = xset_set("task_col_avgspeed", "lbl", "_Average Speed");
     set->menu_style = XSET_MENU_CHECK;
     set->x = g_strdup_printf("%d", 11);
-    set->y = g_strdup("60");
+    set->y = ztd::strdup("60");
 
     set = xset_set("task_col_avgest", "lbl", "A_verage Remain");
     set->menu_style = XSET_MENU_CHECK;
     set->x = g_strdup_printf("%d", 12);
-    set->y = g_strdup("65");
+    set->y = ztd::strdup("65");
 
     set = xset_set("task_col_reorder", "lbl", "Reor_der");
 
@@ -8371,8 +8371,8 @@ xset_defaults()
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-save-as");
 
     set = xset_get("arc_dlg");
-    set->b = XSET_B_TRUE;   // Extract To - Create Subdirectory
-    set->z = g_strdup("1"); // Extract To - Write Access
+    set->b = XSET_B_TRUE;      // Extract To - Create Subdirectory
+    set->z = ztd::strdup("1"); // Extract To - Write Access
 
     set = xset_set("tab_new", "lbl", "_Tab");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-add");
@@ -8907,7 +8907,7 @@ xset_defaults()
         set = xset_get_panel(p, "sort_extra");
         set->b = XSET_B_TRUE;                         // sort_natural
         set->x = g_strdup_printf("%d", XSET_B_FALSE); // sort_case
-        set->y = g_strdup("1"); // PTK_LIST_SORT_DIR_FIRST from ptk-file-list.hxx
+        set->y = ztd::strdup("1"); // PTK_LIST_SORT_DIR_FIRST from ptk-file-list.hxx
         set->z = g_strdup_printf("%d", XSET_B_TRUE); // sort_hidden_first
 
         set = xset_set_panel(p, "book_fol", "lbl", "Follow _Dir");

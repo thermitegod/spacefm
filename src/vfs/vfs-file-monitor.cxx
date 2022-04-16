@@ -131,7 +131,7 @@ vfs_file_monitor_add(char* path, VFSFileMonitorCallback cb, void* user_data)
     if (!monitor)
     {
         monitor = g_slice_new0(VFSFileMonitor);
-        monitor->path = g_strdup(real_path);
+        monitor->path = ztd::strdup(real_path);
 
         monitor->callbacks = g_array_new(false, false, sizeof(VFSFileMonitorCallbackEntry));
         g_hash_table_insert(monitor_hash, monitor->path, monitor);
@@ -146,34 +146,35 @@ vfs_file_monitor_add(char* path, VFSFileMonitorCallback cb, void* user_data)
             switch (errno)
             {
                 case EACCES:
-                    msg = g_strdup("EACCES Read access to the given directory is not permitted.");
+                    msg =
+                        ztd::strdup("EACCES Read access to the given directory is not permitted.");
                     break;
                 case EBADF:
-                    msg = g_strdup("EBADF The given file descriptor is not valid.");
+                    msg = ztd::strdup("EBADF The given file descriptor is not valid.");
                     break;
                 case EFAULT:
-                    msg = g_strdup("EFAULT Pathname points outside of the process's accessible "
-                                   "address space.");
+                    msg = ztd::strdup("EFAULT Pathname points outside of the process's accessible "
+                                      "address space.");
                     break;
                 case EINVAL:
-                    msg = g_strdup("EINVAL The given event mask contains no valid events; "
-                                   "or fd is not an inotify file descriptor.");
+                    msg = ztd::strdup("EINVAL The given event mask contains no valid events; "
+                                      "or fd is not an inotify file descriptor.");
                     break;
                 case ENOENT:
-                    msg = g_strdup("ENOENT A directory component in pathname does not exist "
-                                   "or is a dangling symbolic link.");
+                    msg = ztd::strdup("ENOENT A directory component in pathname does not exist "
+                                      "or is a dangling symbolic link.");
                     break;
                 case ENOMEM:
-                    msg = g_strdup("ENOMEM Insufficient kernel memory was available.");
+                    msg = ztd::strdup("ENOMEM Insufficient kernel memory was available.");
                     break;
                 case ENOSPC:
-                    msg = g_strdup(
+                    msg = ztd::strdup(
                         "ENOSPC The user limit on the total number of inotify watches (cat "
                         "/proc/sys/fs/inotify/max_user_watches) was reached or the kernel failed "
                         "to allocate a needed resource.");
                     break;
                 default:
-                    msg = g_strdup("??? Unknown error.");
+                    msg = ztd::strdup("??? Unknown error.");
                     break;
             }
             LOG_WARN("Failed to add watch on '{}' ('{}'): inotify_add_watch errno {} {}",

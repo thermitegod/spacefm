@@ -271,7 +271,7 @@ get_element_next(char** s)
     {
         if (*s[0] == '\0')
             return (*s = nullptr);
-        ret = g_strdup(*s);
+        ret = ztd::strdup(*s);
         *s = nullptr;
         return ret;
     }
@@ -297,7 +297,7 @@ get_rule_next(char** s, int* sub, int* comp, char** value)
     if (*comp < 0 || *comp >= static_cast<int>(G_N_ELEMENTS(context_comp)))
         return false;
     if (!(*value = get_element_next(s)))
-        *value = g_strdup("");
+        *value = ztd::strdup("");
     return true;
 }
 
@@ -855,7 +855,7 @@ get_text_view(GtkTextView* view)
     text2 = ztd::replace(text2, "\\n", "\n");
     text2 = ztd::replace(text2, "\\t", "\t");
 
-    return g_strdup(text2.c_str());
+    return ztd::strdup(text2.c_str());
 }
 
 static void
@@ -1010,7 +1010,7 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
                 str[0] = '\0';
             if ((str = strchr(text, '\n')))
                 str[0] = '\0';
-            path = g_strdup(g_strstrip(text));
+            path = ztd::strdup(g_strstrip(text));
             if (path[0] == '\0' || (path[0] != '/' && !g_ascii_isalnum(path[0])))
             {
                 free(path);
@@ -1019,7 +1019,7 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
             else if (path[0] != '/')
             {
                 str = path;
-                path = g_strdup(Glib::find_program_in_path(str).c_str());
+                path = ztd::strdup(Glib::find_program_in_path(str).c_str());
                 free(str);
             }
         }
@@ -1098,7 +1098,7 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
     {
         // Plugin Dir
         if (ctxt->set->plugin && ctxt->set->plug_dir)
-            folder = g_strdup(ctxt->set->plug_dir);
+            folder = ztd::strdup(ctxt->set->plug_dir);
     }
     else
         return;
@@ -1362,7 +1362,7 @@ replace_item_props(ContextData* ctxt)
             rset->z = str ? g_strstrip(str) : nullptr;
             // run as user
             free(rset->y);
-            rset->y = g_strdup(gtk_entry_get_text(GTK_ENTRY(ctxt->cmd_user)));
+            rset->y = ztd::strdup(gtk_entry_get_text(GTK_ENTRY(ctxt->cmd_user)));
             // menu style
             if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_checkbox)))
                 rset->menu_style = XSET_MENU_CHECK;
@@ -1391,7 +1391,7 @@ replace_item_props(ContextData* ctxt)
                                 "by selecting Script on the Command tab.");
         }
         else
-            rset->line = g_strdup(ctxt->temp_cmd_line);
+            rset->line = ztd::strdup(ctxt->temp_cmd_line);
 
         // run options
         mset->in_terminal = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_terminal)) &&
@@ -1436,7 +1436,7 @@ replace_item_props(ContextData* ctxt)
             // don't save default label of builtin toolitems
             rset->menu_label = nullptr;
         else
-            rset->menu_label = g_strdup(gtk_entry_get_text(GTK_ENTRY(ctxt->item_name)));
+            rset->menu_label = ztd::strdup(gtk_entry_get_text(GTK_ENTRY(ctxt->item_name)));
     }
     // icon
     if (rset->menu_style != XSET_MENU_RADIO && rset->menu_style != XSET_MENU_SEP)
@@ -1444,11 +1444,11 @@ replace_item_props(ContextData* ctxt)
     // toolbar checkbox items have icon
     //( rset->menu_style != XSET_MENU_CHECK || rset->tool ) )
     {
-        char* old_icon = g_strdup(mset->icon);
+        char* old_icon = ztd::strdup(mset->icon);
         free(mset->icon);
         const char* icon_name = gtk_entry_get_text(GTK_ENTRY(ctxt->item_icon));
         if (icon_name && icon_name[0])
-            mset->icon = g_strdup(icon_name);
+            mset->icon = ztd::strdup(icon_name);
         else
             mset->icon = nullptr;
 
@@ -2189,13 +2189,13 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
                                         "Built-In Toolbar Item",
                                         xset_get_builtin_toolitem_label(set->tool));
     else if (rset->menu_style == XSET_MENU_SUBMENU)
-        item_type_str = g_strdup("Submenu");
+        item_type_str = ztd::strdup("Submenu");
     else if (rset->menu_style == XSET_MENU_SEP)
-        item_type_str = g_strdup("Separator");
+        item_type_str = ztd::strdup("Separator");
     else if (set->lock)
     {
         // built-in
-        item_type_str = g_strdup("Built-In Command");
+        item_type_str = ztd::strdup("Built-In Command");
     }
     else
     {
@@ -2233,7 +2233,7 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
         free(item_type_str);
     }
 
-    ctxt->temp_cmd_line = !set->lock ? g_strdup(rset->line) : nullptr;
+    ctxt->temp_cmd_line = !set->lock ? ztd::strdup(rset->line) : nullptr;
     if (set->lock || rset->menu_style == XSET_MENU_SUBMENU || rset->menu_style == XSET_MENU_SEP ||
         set->tool > XSET_TOOL_CUSTOM)
     {

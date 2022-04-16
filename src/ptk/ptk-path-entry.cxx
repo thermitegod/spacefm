@@ -225,7 +225,8 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
             fn = (char*)sep + 1;
         else
             fn = (char*)text;
-        g_object_set_data_full(G_OBJECT(completion), "fn", g_strdup(fn), (GDestroyNotify)free);
+
+        g_object_set_data_full(G_OBJECT(completion), "fn", ztd::strdup(fn), (GDestroyNotify)free);
 
         char* new_dir = get_cwd(entry);
         const char* old_dir = (const char*)g_object_get_data(G_OBJECT(completion), "cwd");
@@ -250,7 +251,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
 
                     std::string full_path = Glib::build_filename(new_dir, file_name);
                     if (std::filesystem::is_directory(full_path))
-                        name_list = g_slist_prepend(name_list, g_strdup(full_path.c_str()));
+                        name_list = g_slist_prepend(name_list, ztd::strdup(full_path.c_str()));
                 }
 
                 // add sorted list to liststore
@@ -342,7 +343,7 @@ insert_complete(GtkEntry* entry)
                 // prefix matches
                 count++;
                 if (long_prefix.empty())
-                    long_prefix = g_strdup(file_name.c_str());
+                    long_prefix = ztd::strdup(file_name.c_str());
                 else
                 {
                     i = 0;
@@ -674,7 +675,7 @@ on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars, unsigne
     {
         // remove linefeeds from pasted text
         cleaned = ztd::replace(text, "\n", "");
-        text = new_text = g_strdup(cleaned.c_str());
+        text = new_text = ztd::strdup(cleaned.c_str());
     }
 
     // remove leading spaces for test
@@ -684,10 +685,10 @@ on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars, unsigne
     if (text[0] == '\'' && g_str_has_suffix(text, "'") && text[1] != '\0')
     {
         // path is quoted - assume bash quote
-        char* unquote = g_strdup(text + 1);
+        char* unquote = ztd::strdup(text + 1);
         unquote[strlen(unquote) - 1] = '\0';
         cleaned = ztd::replace(unquote, "'\\''", "'");
-        new_text = g_strdup(cleaned.c_str());
+        new_text = ztd::strdup(cleaned.c_str());
         free(unquote);
     }
 

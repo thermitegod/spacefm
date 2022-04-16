@@ -656,14 +656,14 @@ static char*
 ptk_handler_get_text_view(GtkTextView* view)
 {
     if (!view)
-        return g_strdup("");
+        return ztd::strdup("");
     GtkTextBuffer* buf = gtk_text_view_get_buffer(view);
     GtkTextIter iter, siter;
     gtk_text_buffer_get_start_iter(buf, &siter);
     gtk_text_buffer_get_end_iter(buf, &iter);
     char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
     if (!text)
-        return g_strdup("");
+        return ztd::strdup("");
     return text;
 }
 
@@ -736,7 +736,7 @@ ptk_handler_get_command(int mode, int cmd, XSet* handler_set)
                         break;
                 }
 
-                return g_strdup(command);
+                return ztd::strdup(command);
             }
         }
         return nullptr;
@@ -755,7 +755,7 @@ ptk_handler_get_command(int mode, int cmd, XSet* handler_set)
     std::string script = ztd::replace(def_script, "/exec.sh", str);
     free(def_script);
     if (std::filesystem::exists(script))
-        return g_strdup(script.c_str());
+        return ztd::strdup(script.c_str());
 
     LOG_WARN("ptk_handler_get_command missing script for custom {}", handler_set->name);
     return nullptr;
@@ -1043,7 +1043,7 @@ ptk_handler_file_has_handlers(int mode, int cmd, const char* path, VFSMimeType* 
     if (path && strchr(path, ' '))
     {
         std::string cleaned = ztd::replace(path, " ", "_");
-        under_path = g_strdup(cleaned.c_str());
+        under_path = ztd::strdup(cleaned.c_str());
     }
     else
         under_path = (char*)path;
@@ -1108,7 +1108,7 @@ static void
 string_copy_free(char** s, const char* src)
 {
     char* discard = *s;
-    *s = g_strdup(src);
+    *s = ztd::strdup(src);
     free(discard);
 }
 
@@ -1144,12 +1144,12 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
     }
 
     set_conf = xset_get(handler_conf_xset[mode]);
-    list = g_strdup(set_conf->s);
+    list = ztd::strdup(set_conf->s);
 
     if (!list)
     {
         // create default list - eg sets arc_conf2 ->s
-        list = g_strdup("");
+        list = ztd::strdup("");
         overwrite = add_missing = true;
     }
 
@@ -1247,10 +1247,10 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     XSet* new_handler_xset = add_new_handler(mode);
     new_handler_xset->b = set->b;
     new_handler_xset->disable = false; // not default - save in session
-    new_handler_xset->menu_label = g_strdup(set->menu_label);
-    new_handler_xset->icon = g_strdup(set->icon);
-    new_handler_xset->s = g_strdup(set->s); // Mime Type(s) or whitelist
-    new_handler_xset->x = g_strdup(set->x); // Extension(s) or blacklist
+    new_handler_xset->menu_label = ztd::strdup(set->menu_label);
+    new_handler_xset->icon = ztd::strdup(set->icon);
+    new_handler_xset->s = ztd::strdup(set->s); // Mime Type(s) or whitelist
+    new_handler_xset->x = ztd::strdup(set->x); // Extension(s) or blacklist
     new_handler_xset->in_terminal = set->in_terminal;
     new_handler_xset->keep_terminal = set->keep_terminal;
     new_handler_xset->scroll_lock = set->scroll_lock;
@@ -1579,7 +1579,7 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
 
     // Looping for all handlers
     char* xset_name;
-    char* archive_handlers = g_strdup("");
+    char* archive_handlers = ztd::strdup("");
     char* archive_handlers_temp;
     do
     {
@@ -1588,7 +1588,7 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
         archive_handlers_temp = archive_handlers;
         if (!g_strcmp0(archive_handlers, ""))
         {
-            archive_handlers = g_strdup(xset_name);
+            archive_handlers = ztd::strdup(xset_name);
         }
         else
         {
@@ -1865,7 +1865,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         const char* archive_handlers_s = xset_get_s(handler_conf_xset[hnd->mode]);
         char** archive_handlers =
             archive_handlers_s ? g_strsplit(archive_handlers_s, " ", -1) : nullptr;
-        char* new_archive_handlers_s = g_strdup("");
+        char* new_archive_handlers_s = ztd::strdup("");
         char* new_archive_handlers_s_temp;
 
         // Looping for handlers (nullptr-terminated list)
@@ -1885,7 +1885,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                     new_archive_handlers_s_temp = new_archive_handlers_s;
                     if (!g_strcmp0(new_archive_handlers_s, ""))
                     {
-                        new_archive_handlers_s = g_strdup(archive_handlers[i]);
+                        new_archive_handlers_s = ztd::strdup(archive_handlers[i]);
                     }
                     else
                     {
@@ -2573,7 +2573,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
             else
             {
                 if (!(folder = xset_get_s("go_set_default")))
-                    folder = g_strdup("/");
+                    folder = ztd::strdup("/");
             }
             file = xset_file_dialog(GTK_WIDGET(hnd->dlg),
                                     GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -2729,8 +2729,8 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
             // temp remove unwanted items from Archive Defaults submenu
             set = xset_get("arc_default");
             char* old_desc = set->desc;
-            set->desc = g_strdup("arc_def_open arc_def_ex arc_def_exto arc_def_list separator "
-                                 "arc_def_parent arc_def_write");
+            set->desc = ztd::strdup("arc_def_open arc_def_ex arc_def_exto arc_def_list separator "
+                                    "arc_def_parent arc_def_write");
             xset_add_menuitem(hnd->browser, popup, accel_group, set);
             free(set->desc);
             set->desc = old_desc;
@@ -2945,11 +2945,11 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
 
     GtkWidget* lbl_handler_compress = gtk_label_new(nullptr);
     if (mode == HANDLER_MODE_ARC)
-        str = g_strdup("<b>Co_mpress:</b>");
+        str = ztd::strdup("<b>Co_mpress:</b>");
     else if (mode == HANDLER_MODE_FILE)
-        str = g_strdup("<b>Open Co_mmand:</b>");
+        str = ztd::strdup("<b>Open Co_mmand:</b>");
     else
-        str = g_strdup("<b>_Mount:</b>");
+        str = ztd::strdup("<b>_Mount:</b>");
     gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handler_compress), str);
     gtk_widget_set_halign(GTK_WIDGET(lbl_handler_compress), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(lbl_handler_compress), GTK_ALIGN_END);

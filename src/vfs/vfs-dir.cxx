@@ -352,7 +352,7 @@ vfs_dir_emit_file_created(VFSDir* dir, const char* file_name, bool force)
         return;
     }
 
-    dir->created_files = g_slist_append(dir->created_files, g_strdup(file_name));
+    dir->created_files = g_slist_append(dir->created_files, ztd::strdup(file_name));
     if (change_notify_timeout == 0)
     {
         change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
@@ -502,7 +502,7 @@ static VFSDir*
 vfs_dir_new(const char* path)
 {
     VFSDir* dir = static_cast<VFSDir*>(g_object_new(VFS_TYPE_DIR, nullptr));
-    dir->path = g_strdup(path);
+    dir->path = ztd::strdup(path);
 
     dir->avoid_changes = vfs_volume_dir_avoid_changes(path);
     // LOG_INFO("vfs_dir_new {}  avoid_changes={}", dir->path, dir->avoid_changes ? "true" :

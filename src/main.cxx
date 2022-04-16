@@ -135,7 +135,7 @@ open_in_tab(FMMainWindow** main_window, const char* real_path)
 
         // set panel to load real_path on window creation
         set = xset_get_panel(p, "show");
-        set->ob1 = g_strdup(real_path);
+        set->ob1 = ztd::strdup(real_path);
         set->b = XSET_B_TRUE;
 
         // create new window
@@ -153,7 +153,7 @@ open_in_tab(FMMainWindow** main_window, const char* real_path)
             {
                 // set panel to load real_path on panel load
                 set = xset_get_panel(cli_flags.panel, "show");
-                set->ob1 = g_strdup(real_path);
+                set->ob1 = ztd::strdup(real_path);
                 tab_added = true;
                 set->b = XSET_B_TRUE;
                 show_panels_all_windows(nullptr, *main_window);

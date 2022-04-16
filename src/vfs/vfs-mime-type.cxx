@@ -190,7 +190,7 @@ VFSMimeType*
 vfs_mime_type_new(const char* type_name)
 {
     VFSMimeType* mime_type = g_slice_new0(VFSMimeType);
-    mime_type->type = g_strdup(type_name);
+    mime_type->type = ztd::strdup(type_name);
     mime_type->ref_inc();
     return mime_type;
 }
@@ -277,7 +277,7 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
         VFSMimeType* vfs_mime = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
         if (vfs_mime)
         {
-            mime_type->description = g_strdup(vfs_mime_type_get_description(vfs_mime));
+            mime_type->description = ztd::strdup(vfs_mime_type_get_description(vfs_mime));
             vfs_mime_type_unref(vfs_mime);
         }
     }
@@ -416,7 +416,7 @@ vfs_mime_type_get_description(VFSMimeType* mime_type)
             VFSMimeType* vfs_mime = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
             if (vfs_mime)
             {
-                mime_type->description = g_strdup(vfs_mime_type_get_description(vfs_mime));
+                mime_type->description = ztd::strdup(vfs_mime_type_get_description(vfs_mime));
                 vfs_mime_type_unref(vfs_mime);
             }
         }
@@ -444,7 +444,7 @@ vfs_mime_type_get_default_action(VFSMimeType* mime_type)
     {
         std::vector<std::string> actions = mime_type_get_actions(mime_type->type);
         if (!actions.empty())
-            def = g_strdup(actions.at(0).c_str());
+            def = ztd::strdup(actions.at(0).c_str());
     }
     return def;
 }
@@ -482,7 +482,7 @@ vfs_mime_type_add_action(VFSMimeType* mime_type, const char* desktop_id, char** 
     if (!g_str_has_suffix(desktop_id, ".desktop"))
         mime_type_add_action(mime_type->type, desktop_id, custom_desktop);
     else if (custom_desktop) // sfm
-        *custom_desktop = g_strdup(desktop_id);
+        *custom_desktop = ztd::strdup(desktop_id);
 }
 
 static void

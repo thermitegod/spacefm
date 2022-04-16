@@ -282,7 +282,7 @@ parse_xml_icon(const char* buf, std::size_t len, bool is_local)
     if (icon_tag == end_tag)
         return nullptr; // blank name
 
-    return g_strdup(icon_tag);
+    return ztd::strdup(icon_tag);
 }
 
 static char*

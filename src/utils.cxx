@@ -62,7 +62,7 @@ randhex8()
     snprintf(hex, sizeof(hex), "%08x", n);
     // LOG_INFO("rand  : {}", n);
     // LOG_INFO("hex   : {}", hex);
-    return g_strdup(hex);
+    return ztd::strdup(hex);
 }
 
 std::string

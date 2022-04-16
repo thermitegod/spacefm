@@ -345,7 +345,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
 
     char buf[64];
     char buf2[64];
-    const char* time_format = g_strdup("%Y-%m-%d %H:%M:%S");
+    const char* time_format = ztd::strdup("%Y-%m-%d %H:%M:%S");
 
     char* disp_path;
     char* file_type;
@@ -369,7 +369,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     data->file_list = sel_files;
     data->dlg = dlg;
 
-    data->dir_path = g_strdup(dir_path);
+    data->dir_path = ztd::strdup(dir_path);
     disp_path = g_filename_display_name(dir_path);
     // gtk_label_set_text( GTK_LABEL( location ), disp_path );
     gtk_entry_set_text(GTK_ENTRY(location), disp_path);
@@ -574,18 +574,18 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         //                    vfs_file_info_get_disp_mtime( file ) );
         strftime(buf, sizeof(buf), time_format, localtime(vfs_file_info_get_mtime(file)));
         gtk_entry_set_text(GTK_ENTRY(data->mtime), buf);
-        data->orig_mtime = g_strdup(buf);
+        data->orig_mtime = ztd::strdup(buf);
 
         strftime(buf, sizeof(buf), time_format, localtime(vfs_file_info_get_atime(file)));
         gtk_entry_set_text(GTK_ENTRY(data->atime), buf);
-        data->orig_atime = g_strdup(buf);
+        data->orig_atime = ztd::strdup(buf);
 
         // Permissions
         owner_group = (char*)vfs_file_info_get_disp_owner(file);
         tmp = strchr(owner_group, ':');
         data->owner_name = g_strndup(owner_group, tmp - owner_group);
         gtk_entry_set_text(GTK_ENTRY(data->owner), data->owner_name);
-        data->group_name = g_strdup(tmp + 1);
+        data->group_name = ztd::strdup(tmp + 1);
         gtk_entry_set_text(GTK_ENTRY(data->group), data->group_name);
 
         for (i = 0; i < N_CHMOD_ACTIONS; ++i)

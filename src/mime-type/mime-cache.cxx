@@ -83,7 +83,7 @@ mime_cache_load(MimeCache* cache, const char* file_path)
     mime_cache_unload(cache, true);
 
     /* Store the file path */
-    cache->file_path = g_strdup(file_path);
+    cache->file_path = ztd::strdup(file_path);
 
     /* Open the file and map it into memory */
     int fd = open(file_path, O_RDONLY, 0);

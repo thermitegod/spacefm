@@ -125,7 +125,7 @@ static std::vector<std::string> closed_tabs_restore;
 static unsigned int theme_change_notify = 0;
 
 //  Drag & Drop/Clipboard targets
-static GtkTargetEntry drag_targets[] = {{g_strdup("text/uri-list"), 0, 0}};
+static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 
 GType
 fm_main_window_get_type()
@@ -251,7 +251,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
         else
         {
             if (!(deffolder = xset_get_s("go_set_default")))
-                deffolder = g_strdup("/");
+                deffolder = ztd::strdup("/");
         }
         path = xset_file_dialog(GTK_WIDGET(main_window),
                                 GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -600,9 +600,9 @@ update_window_icon(GtkWindow* window, GtkIconTheme* theme)
     if (set->icon)
         name = set->icon;
     else if (geteuid() == 0)
-        name = g_strdup("spacefm-root");
+        name = ztd::strdup("spacefm-root");
     else
-        name = g_strdup("spacefm");
+        name = ztd::strdup("spacefm");
 
     GdkPixbuf* icon = gtk_icon_theme_load_icon(theme, name, 48, (GtkIconLookupFlags)0, &error);
     if (icon)
@@ -1053,9 +1053,9 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                 xset_set_b_panel_mode(p, "detcol_date", mode, xset_get_b_panel(p, "detcol_date"));
                 set_old = xset_get_panel(p, "slider_positions");
                 set = xset_get_panel_mode(p, "slider_positions", mode);
-                set->x = g_strdup(set_old->x ? set_old->x : "0");
-                set->y = g_strdup(set_old->y ? set_old->y : "0");
-                set->s = g_strdup(set_old->s ? set_old->s : "0");
+                set->x = ztd::strdup(set_old->x ? set_old->x : "0");
+                set->y = ztd::strdup(set_old->y ? set_old->y : "0");
+                set->s = ztd::strdup(set_old->s ? set_old->s : "0");
             }
             free(str);
             // load dynamic slider positions for this panel context
@@ -1083,19 +1083,19 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                         tabs += 3;
                         if (!strncmp(tabs, "////", 4))
                         {
-                            tab_dir = g_strdup("/");
+                            tab_dir = ztd::strdup("/");
                             tabs++;
                         }
                         else if ((end = strstr(tabs, "///")))
                         {
                             end[0] = '\0';
-                            tab_dir = g_strdup(tabs);
+                            tab_dir = ztd::strdup(tabs);
                             end[0] = '/';
                             tabs = end;
                         }
                         else
                         {
-                            tab_dir = g_strdup(tabs);
+                            tab_dir = ztd::strdup(tabs);
                             tabs = nullptr;
                         }
                         if (tab_dir[0] != '\0')
@@ -1117,7 +1117,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                                 if (geteuid() != 0)
                                     folder_path = vfs_user_home_dir().c_str();
                                 else
-                                    folder_path = g_strdup("/");
+                                    folder_path = ztd::strdup("/");
                             }
                             fm_main_window_add_new_tab(main_window, folder_path);
                             tab_added = true;
@@ -1155,7 +1155,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                         if (geteuid() != 0)
                             folder_path = vfs_user_home_dir().c_str();
                         else
-                            folder_path = g_strdup("/");
+                            folder_path = ztd::strdup("/");
                     }
                     fm_main_window_add_new_tab(main_window, folder_path);
                 }
@@ -1483,9 +1483,9 @@ rebuild_menus(FMMainWindow* main_window)
     if (!set->child)
     {
         child_set = xset_custom_new();
-        child_set->menu_label = g_strdup("New _Command");
-        child_set->parent = g_strdup("main_tool");
-        set->child = g_strdup(child_set->name);
+        child_set->menu_label = ztd::strdup("New _Command");
+        child_set->parent = ztd::strdup("main_tool");
+        set->child = ztd::strdup(child_set->name);
     }
     else
         child_set = xset_get(set->child);
@@ -1583,7 +1583,7 @@ fm_main_window_init(FMMainWindow* main_window)
         if (set->icon && set->icon[0] != '\0')
             icon_name = set->icon;
         else
-            icon_name = g_strdup("gtk-yes");
+            icon_name = ztd::strdup("gtk-yes");
         main_window->panel_image[i] = xset_get_image(icon_name, GTK_ICON_SIZE_MENU);
         gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(main_window->panel_btn[i]),
                                         main_window->panel_image[i]);
@@ -2022,7 +2022,7 @@ main_window_get_tab_cwd(PtkFileBrowser* file_browser, int tab_num)
 
     if (page_x > -1 && page_x < pages)
     {
-        return g_strdup(ptk_file_browser_get_cwd(
+        return ztd::strdup(ptk_file_browser_get_cwd(
             PTK_FILE_BROWSER(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), page_x))));
     }
     else
@@ -2068,7 +2068,7 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, int panel_num)
 
     GtkWidget* notebook = main_window->panel[panel_x - 1];
     int page_x = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
-    return g_strdup(ptk_file_browser_get_cwd(
+    return ztd::strdup(ptk_file_browser_get_cwd(
         PTK_FILE_BROWSER(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), page_x))));
 }
 
@@ -2252,7 +2252,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
             if (geteuid() != 0)
                 path = vfs_user_home_dir().c_str();
             else
-                path = g_strdup("/");
+                path = ztd::strdup("/");
         }
         fm_main_window_add_new_tab(main_window, path);
         a_browser = PTK_FILE_BROWSER(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0));
@@ -2693,9 +2693,9 @@ on_about_activate(GtkMenuItem* menuitem, void* user_data)
         if (set->icon)
             name = set->icon;
         else if (geteuid() == 0)
-            name = g_strdup("spacefm-root");
+            name = ztd::strdup("spacefm-root");
         else
-            name = g_strdup("spacefm");
+            name = ztd::strdup("spacefm");
         gtk_about_dialog_set_logo_icon_name(GTK_ABOUT_DIALOG(about_dlg), name);
 
         // g_object_add_weak_pointer(G_OBJECT(about_dlg), (void*)&about_dlg);
@@ -2843,7 +2843,7 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
 
     if (file_browser->dir && file_browser->dir->disp_path)
     {
-        disp_path = g_strdup(file_browser->dir->disp_path);
+        disp_path = ztd::strdup(file_browser->dir->disp_path);
         disp_name = g_path_get_basename(disp_path);
     }
     else
@@ -2856,8 +2856,8 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
         }
         else
         {
-            disp_name = g_strdup("");
-            disp_path = g_strdup("");
+            disp_name = ztd::strdup("");
+            disp_path = ztd::strdup("");
         }
     }
 
@@ -2975,7 +2975,7 @@ main_window_open_network(FMMainWindow* main_window, const char* path, bool new_t
         PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
     if (!file_browser)
         return;
-    char* str = g_strdup(path);
+    char* str = ztd::strdup(path);
     ptk_location_view_mount_network(file_browser, str, new_tab, false);
     free(str);
 }
@@ -3749,14 +3749,14 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
     if (!c->var[CONTEXT_NAME])
     {
         // if name is set, assume we don't need all selected files info
-        c->var[CONTEXT_DIR] = g_strdup(ptk_file_browser_get_cwd(file_browser));
+        c->var[CONTEXT_DIR] = ztd::strdup(ptk_file_browser_get_cwd(file_browser));
         if (!c->var[CONTEXT_DIR])
-            c->var[CONTEXT_DIR] = g_strdup("");
+            c->var[CONTEXT_DIR] = ztd::strdup("");
         else
         {
             c->var[CONTEXT_WRITE_ACCESS] = ptk_file_browser_no_access(c->var[CONTEXT_DIR], nullptr)
-                                               ? g_strdup("false")
-                                               : g_strdup("true");
+                                               ? ztd::strdup("false")
+                                               : ztd::strdup("true");
         }
 
         if ((sel_files = ptk_file_browser_get_selected_files(file_browser)))
@@ -3765,34 +3765,35 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
             file = nullptr;
         if (!file)
         {
-            c->var[CONTEXT_NAME] = g_strdup("");
-            c->var[CONTEXT_IS_DIR] = g_strdup("false");
-            c->var[CONTEXT_IS_TEXT] = g_strdup("false");
-            c->var[CONTEXT_IS_LINK] = g_strdup("false");
-            c->var[CONTEXT_MIME] = g_strdup("");
-            c->var[CONTEXT_MUL_SEL] = g_strdup("false");
+            c->var[CONTEXT_NAME] = ztd::strdup("");
+            c->var[CONTEXT_IS_DIR] = ztd::strdup("false");
+            c->var[CONTEXT_IS_TEXT] = ztd::strdup("false");
+            c->var[CONTEXT_IS_LINK] = ztd::strdup("false");
+            c->var[CONTEXT_MIME] = ztd::strdup("");
+            c->var[CONTEXT_MUL_SEL] = ztd::strdup("false");
         }
         else
         {
-            c->var[CONTEXT_NAME] = g_strdup(vfs_file_info_get_name(file));
+            c->var[CONTEXT_NAME] = ztd::strdup(vfs_file_info_get_name(file));
             path = g_build_filename(c->var[CONTEXT_DIR], c->var[CONTEXT_NAME], nullptr);
-            c->var[CONTEXT_IS_DIR] =
-                path && std::filesystem::is_directory(path) ? g_strdup("true") : g_strdup("false");
+            c->var[CONTEXT_IS_DIR] = path && std::filesystem::is_directory(path)
+                                         ? ztd::strdup("true")
+                                         : ztd::strdup("false");
             c->var[CONTEXT_IS_TEXT] =
-                vfs_file_info_is_text(file, path) ? g_strdup("true") : g_strdup("false");
+                vfs_file_info_is_text(file, path) ? ztd::strdup("true") : ztd::strdup("false");
             c->var[CONTEXT_IS_LINK] =
-                vfs_file_info_is_symlink(file) ? g_strdup("true") : g_strdup("false");
+                vfs_file_info_is_symlink(file) ? ztd::strdup("true") : ztd::strdup("false");
 
             mime_type = vfs_file_info_get_mime_type(file);
             if (mime_type)
             {
-                c->var[CONTEXT_MIME] = g_strdup(vfs_mime_type_get_type(mime_type));
+                c->var[CONTEXT_MIME] = ztd::strdup(vfs_mime_type_get_type(mime_type));
                 vfs_mime_type_unref(mime_type);
             }
             else
-                c->var[CONTEXT_MIME] = g_strdup("");
+                c->var[CONTEXT_MIME] = ztd::strdup("");
 
-            c->var[CONTEXT_MUL_SEL] = sel_files->next ? g_strdup("true") : g_strdup("false");
+            c->var[CONTEXT_MUL_SEL] = sel_files->next ? ztd::strdup("true") : ztd::strdup("false");
 
             vfs_file_info_unref(file);
             free(path);
@@ -3805,7 +3806,7 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
     }
 
     if (!c->var[CONTEXT_IS_ROOT])
-        c->var[CONTEXT_IS_ROOT] = geteuid() == 0 ? g_strdup("true") : g_strdup("false");
+        c->var[CONTEXT_IS_ROOT] = geteuid() == 0 ? ztd::strdup("true") : ztd::strdup("false");
 
     if (!c->var[CONTEXT_CLIP_FILES])
     {
@@ -3814,9 +3815,9 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
                 clip,
                 gdk_atom_intern("x-special/gnome-copied-files", false)) &&
             !gtk_clipboard_wait_is_target_available(clip, gdk_atom_intern("text/uri-list", false)))
-            c->var[CONTEXT_CLIP_FILES] = g_strdup("false");
+            c->var[CONTEXT_CLIP_FILES] = ztd::strdup("false");
         else
-            c->var[CONTEXT_CLIP_FILES] = g_strdup("true");
+            c->var[CONTEXT_CLIP_FILES] = ztd::strdup("true");
     }
 
     if (!c->var[CONTEXT_CLIP_TEXT])
@@ -3824,7 +3825,7 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
         if (!clip)
             clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
         c->var[CONTEXT_CLIP_TEXT] =
-            gtk_clipboard_wait_is_text_available(clip) ? g_strdup("true") : g_strdup("false");
+            gtk_clipboard_wait_is_text_available(clip) ? ztd::strdup("true") : ztd::strdup("false");
     }
 
     // hack - Due to ptk_file_browser_update_views main iteration, fb tab may be destroyed
@@ -3838,32 +3839,32 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
         if (!GTK_IS_WIDGET(file_browser->side_book))
             return;
         c->var[CONTEXT_BOOKMARK] =
-            g_strdup(ptk_bookmark_view_get_selected_dir(GTK_TREE_VIEW(file_browser->side_book)));
+            ztd::strdup(ptk_bookmark_view_get_selected_dir(GTK_TREE_VIEW(file_browser->side_book)));
     }
     if (!c->var[CONTEXT_BOOKMARK])
-        c->var[CONTEXT_BOOKMARK] = g_strdup("");
+        c->var[CONTEXT_BOOKMARK] = ztd::strdup("");
 
     // device
     if (file_browser->side_dev &&
         (vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(file_browser->side_dev))))
     {
-        c->var[CONTEXT_DEVICE] = g_strdup(vol->device_file);
+        c->var[CONTEXT_DEVICE] = ztd::strdup(vol->device_file);
         if (!c->var[CONTEXT_DEVICE])
-            c->var[CONTEXT_DEVICE] = g_strdup("");
-        c->var[CONTEXT_DEVICE_LABEL] = g_strdup(vol->label.c_str());
+            c->var[CONTEXT_DEVICE] = ztd::strdup("");
+        c->var[CONTEXT_DEVICE_LABEL] = ztd::strdup(vol->label.c_str());
         if (!c->var[CONTEXT_DEVICE_LABEL])
-            c->var[CONTEXT_DEVICE_LABEL] = g_strdup("");
-        c->var[CONTEXT_DEVICE_MOUNT_POINT] = g_strdup(vol->mount_point);
+            c->var[CONTEXT_DEVICE_LABEL] = ztd::strdup("");
+        c->var[CONTEXT_DEVICE_MOUNT_POINT] = ztd::strdup(vol->mount_point);
         if (!c->var[CONTEXT_DEVICE_MOUNT_POINT])
-            c->var[CONTEXT_DEVICE_MOUNT_POINT] = g_strdup("");
-        c->var[CONTEXT_DEVICE_UDI] = g_strdup(vol->udi);
+            c->var[CONTEXT_DEVICE_MOUNT_POINT] = ztd::strdup("");
+        c->var[CONTEXT_DEVICE_UDI] = ztd::strdup(vol->udi);
         if (!c->var[CONTEXT_DEVICE_UDI])
-            c->var[CONTEXT_DEVICE_UDI] = g_strdup("");
-        c->var[CONTEXT_DEVICE_FSTYPE] = g_strdup(vol->fs_type);
+            c->var[CONTEXT_DEVICE_UDI] = ztd::strdup("");
+        c->var[CONTEXT_DEVICE_FSTYPE] = ztd::strdup(vol->fs_type);
         if (!c->var[CONTEXT_DEVICE_FSTYPE])
-            c->var[CONTEXT_DEVICE_FSTYPE] = g_strdup("");
+            c->var[CONTEXT_DEVICE_FSTYPE] = ztd::strdup("");
 
-        char* flags = g_strdup("");
+        char* flags = ztd::strdup("");
         char* old_flags;
         if (vol->is_removable)
         {
@@ -3959,12 +3960,12 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
     }
     else
     {
-        c->var[CONTEXT_DEVICE] = g_strdup("");
-        c->var[CONTEXT_DEVICE_LABEL] = g_strdup("");
-        c->var[CONTEXT_DEVICE_MOUNT_POINT] = g_strdup("");
-        c->var[CONTEXT_DEVICE_UDI] = g_strdup("");
-        c->var[CONTEXT_DEVICE_FSTYPE] = g_strdup("");
-        c->var[CONTEXT_DEVICE_PROP] = g_strdup("");
+        c->var[CONTEXT_DEVICE] = ztd::strdup("");
+        c->var[CONTEXT_DEVICE_LABEL] = ztd::strdup("");
+        c->var[CONTEXT_DEVICE_MOUNT_POINT] = ztd::strdup("");
+        c->var[CONTEXT_DEVICE_UDI] = ztd::strdup("");
+        c->var[CONTEXT_DEVICE_FSTYPE] = ztd::strdup("");
+        c->var[CONTEXT_DEVICE_PROP] = ztd::strdup("");
     }
 
     // panels
@@ -3986,20 +3987,20 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
             continue;
 
         panel_count++;
-        c->var[CONTEXT_PANEL1_DIR + p - 1] = g_strdup(ptk_file_browser_get_cwd(a_browser));
+        c->var[CONTEXT_PANEL1_DIR + p - 1] = ztd::strdup(ptk_file_browser_get_cwd(a_browser));
 
         if (a_browser->side_dev &&
             (vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(a_browser->side_dev))))
-            c->var[CONTEXT_PANEL1_DEVICE + p - 1] = g_strdup(vol->device_file);
+            c->var[CONTEXT_PANEL1_DEVICE + p - 1] = ztd::strdup(vol->device_file);
 
         // panel has files selected?
         if (a_browser->view_mode == PTK_FB_ICON_VIEW || a_browser->view_mode == PTK_FB_COMPACT_VIEW)
         {
             sel_files = folder_view_get_selected_items(a_browser, &model);
             if (sel_files)
-                c->var[CONTEXT_PANEL1_SEL + p - 1] = g_strdup("true");
+                c->var[CONTEXT_PANEL1_SEL + p - 1] = ztd::strdup("true");
             else
-                c->var[CONTEXT_PANEL1_SEL + p - 1] = g_strdup("false");
+                c->var[CONTEXT_PANEL1_SEL + p - 1] = ztd::strdup("false");
             g_list_foreach(sel_files, (GFunc)gtk_tree_path_free, nullptr);
             g_list_free(sel_files);
         }
@@ -4008,12 +4009,12 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
             GtkTreeSelection* tree_sel =
                 gtk_tree_view_get_selection(GTK_TREE_VIEW(a_browser->folder_view));
             if (gtk_tree_selection_count_selected_rows(tree_sel) > 0)
-                c->var[CONTEXT_PANEL1_SEL + p - 1] = g_strdup("true");
+                c->var[CONTEXT_PANEL1_SEL + p - 1] = ztd::strdup("true");
             else
-                c->var[CONTEXT_PANEL1_SEL + p - 1] = g_strdup("false");
+                c->var[CONTEXT_PANEL1_SEL + p - 1] = ztd::strdup("false");
         }
         else
-            c->var[CONTEXT_PANEL1_SEL + p - 1] = g_strdup("false");
+            c->var[CONTEXT_PANEL1_SEL + p - 1] = ztd::strdup("false");
 
         if (file_browser == a_browser)
         {
@@ -4026,48 +4027,48 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
     c->var[CONTEXT_PANEL_COUNT] = g_strdup_printf("%d", panel_count);
     c->var[CONTEXT_PANEL] = g_strdup_printf("%d", file_browser->mypanel);
     if (!c->var[CONTEXT_TAB])
-        c->var[CONTEXT_TAB] = g_strdup("");
+        c->var[CONTEXT_TAB] = ztd::strdup("");
     if (!c->var[CONTEXT_TAB_COUNT])
-        c->var[CONTEXT_TAB_COUNT] = g_strdup("");
+        c->var[CONTEXT_TAB_COUNT] = ztd::strdup("");
     for (p = 1; p < 5; p++)
     {
         if (!c->var[CONTEXT_PANEL1_DIR + p - 1])
-            c->var[CONTEXT_PANEL1_DIR + p - 1] = g_strdup("");
+            c->var[CONTEXT_PANEL1_DIR + p - 1] = ztd::strdup("");
         if (!c->var[CONTEXT_PANEL1_SEL + p - 1])
-            c->var[CONTEXT_PANEL1_SEL + p - 1] = g_strdup("false");
+            c->var[CONTEXT_PANEL1_SEL + p - 1] = ztd::strdup("false");
         if (!c->var[CONTEXT_PANEL1_DEVICE + p - 1])
-            c->var[CONTEXT_PANEL1_DEVICE + p - 1] = g_strdup("");
+            c->var[CONTEXT_PANEL1_DEVICE + p - 1] = ztd::strdup("");
     }
 
     // tasks
     const char* job_titles[] = {"move", "copy", "trash", "delete", "link", "change", "run"};
     if ((ptask = get_selected_task(file_browser->task_view)))
     {
-        c->var[CONTEXT_TASK_TYPE] = g_strdup(job_titles[ptask->task->type]);
+        c->var[CONTEXT_TASK_TYPE] = ztd::strdup(job_titles[ptask->task->type]);
         if (ptask->task->type == VFS_FILE_TASK_EXEC)
         {
-            c->var[CONTEXT_TASK_NAME] = g_strdup(ptask->task->current_file.c_str());
-            c->var[CONTEXT_TASK_DIR] = g_strdup(ptask->task->dest_dir.c_str());
+            c->var[CONTEXT_TASK_NAME] = ztd::strdup(ptask->task->current_file.c_str());
+            c->var[CONTEXT_TASK_DIR] = ztd::strdup(ptask->task->dest_dir.c_str());
         }
         else
         {
-            c->var[CONTEXT_TASK_NAME] = g_strdup("");
+            c->var[CONTEXT_TASK_NAME] = ztd::strdup("");
             ptk_file_task_lock(ptask);
             if (!ptask->task->current_file.empty())
                 c->var[CONTEXT_TASK_DIR] = g_path_get_dirname(ptask->task->current_file.c_str());
             else
-                c->var[CONTEXT_TASK_DIR] = g_strdup("");
+                c->var[CONTEXT_TASK_DIR] = ztd::strdup("");
             ptk_file_task_unlock(ptask);
         }
     }
     else
     {
-        c->var[CONTEXT_TASK_TYPE] = g_strdup("");
-        c->var[CONTEXT_TASK_NAME] = g_strdup("");
-        c->var[CONTEXT_TASK_DIR] = g_strdup("");
+        c->var[CONTEXT_TASK_TYPE] = ztd::strdup("");
+        c->var[CONTEXT_TASK_NAME] = ztd::strdup("");
+        c->var[CONTEXT_TASK_DIR] = ztd::strdup("");
     }
     if (!main_window->task_view || !GTK_IS_TREE_VIEW(main_window->task_view))
-        c->var[CONTEXT_TASK_COUNT] = g_strdup("0");
+        c->var[CONTEXT_TASK_COUNT] = ztd::strdup("0");
     else
     {
         model_task = gtk_tree_view_get_model(GTK_TREE_VIEW(main_window->task_view));
@@ -5036,13 +5037,13 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow*
             switch (ptask->task->state_pause)
             {
                 case VFS_FILE_TASK_PAUSE:
-                    sname = g_strdup("task_que");
+                    sname = ztd::strdup("task_que");
                     break;
                 case VFS_FILE_TASK_QUEUE:
-                    sname = g_strdup("task_resume");
+                    sname = ztd::strdup("task_resume");
                     break;
                 default:
-                    sname = g_strdup("task_pause");
+                    sname = ztd::strdup("task_pause");
             }
             set = xset_get(sname);
             on_task_stop(nullptr, view, set, ptask);
@@ -5107,11 +5108,11 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow*
             set->disable = !is_tasks;
 
             const char* showout;
-            showout = g_strdup("");
+            showout = ztd::strdup("");
             if (ptask && ptask->pop_handler)
             {
                 xset_set_cb("task_showout", (GFunc)show_task_dialog, view);
-                showout = g_strdup(" task_showout");
+                showout = ztd::strdup(" task_showout");
             }
 
             main_task_prepare_menu(main_window, popup, accel_group);
@@ -5262,7 +5263,7 @@ main_task_view_update_task(PtkFileTask* ptask)
         // new row
         char buf[64];
         strftime(buf, sizeof(buf), "%H:%M", localtime(&ptask->task->start_time));
-        char* started = g_strdup(buf);
+        char* started = ztd::strdup(buf);
         gtk_list_store_insert_with_values(GTK_LIST_STORE(model),
                                           &it,
                                           0,
@@ -5331,7 +5332,7 @@ main_task_view_update_task(PtkFileTask* ptask)
         else if (ptask->task->state_pause == VFS_FILE_TASK_QUEUE)
             status3 = g_strdup_printf("%s %s", "queued", status);
         else
-            status3 = g_strdup(status);
+            status3 = ztd::strdup(status);
 
         // update icon if queue state changed
         pixbuf = nullptr;
@@ -5682,7 +5683,7 @@ unescape(const char* t)
     if (!t)
         return nullptr;
 
-    char* s = g_strdup(t);
+    char* s = ztd::strdup(t);
 
     int i = 0, j = 0;
     while (t[i])
@@ -5753,7 +5754,7 @@ main_window_socket_command(char* argv[], char** reply)
     *reply = nullptr;
     if (!(argv && argv[0]))
     {
-        *reply = g_strdup("spacefm: invalid socket command\n");
+        *reply = ztd::strdup("spacefm: invalid socket command\n");
         return 1;
     }
 
@@ -5797,7 +5798,7 @@ main_window_socket_command(char* argv[], char** reply)
     {
         if (!(main_window = fm_main_window_get_last_active()))
         {
-            *reply = g_strdup("spacefm: invalid window\n");
+            *reply = ztd::strdup("spacefm: invalid window\n");
             return 2;
         }
     }
@@ -5855,7 +5856,7 @@ main_window_socket_command(char* argv[], char** reply)
     {
         if (!argv[i])
         {
-            *reply = g_strdup("spacefm: command set requires an argument\n");
+            *reply = ztd::strdup("spacefm: command set requires an argument\n");
             return 1;
         }
         if (!strcmp(argv[i], "window_size") || !strcmp(argv[i], "window_position"))
@@ -5913,7 +5914,7 @@ main_window_socket_command(char* argv[], char** reply)
                 width = strtol(argv[i + 1], nullptr, 10);
             if (width < 0)
             {
-                *reply = g_strdup("spacefm: invalid slider value\n");
+                *reply = ztd::strdup("spacefm: invalid slider value\n");
                 return 2;
             }
             if (!strcmp(argv[i] + 7, "vslider_top"))
@@ -5942,7 +5943,7 @@ main_window_socket_command(char* argv[], char** reply)
             }
             if (width == 0 || width < -3 || width > 4)
             {
-                *reply = g_strdup("spacefm: invalid panel number\n");
+                *reply = ztd::strdup("spacefm: invalid panel number\n");
                 return 2;
             }
             focus_panel(nullptr, (void*)main_window, width);
@@ -5983,7 +5984,7 @@ main_window_socket_command(char* argv[], char** reply)
             if (width == 0 || width < -3 ||
                 width > gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[panel - 1])))
             {
-                *reply = g_strdup("spacefm: invalid tab number\n");
+                *reply = ztd::strdup("spacefm: invalid tab number\n");
                 return 2;
             }
             ptk_file_browser_go_tab(nullptr, file_browser, width);
@@ -6012,31 +6013,31 @@ main_window_socket_command(char* argv[], char** reply)
             bool use_mode = false;
             if (Glib::str_has_prefix(argv[i], "devices_"))
             {
-                str = g_strdup("show_devmon");
+                str = ztd::strdup("show_devmon");
                 use_mode = true;
             }
             else if (Glib::str_has_prefix(argv[i], "bookmarks_"))
             {
-                str = g_strdup("show_book");
+                str = ztd::strdup("show_book");
                 use_mode = true;
             }
             else if (Glib::str_has_prefix(argv[i], "dirtree_"))
             {
-                str = g_strdup("show_dirtree");
+                str = ztd::strdup("show_dirtree");
                 use_mode = true;
             }
             else if (Glib::str_has_prefix(argv[i], "toolbar_"))
             {
-                str = g_strdup("show_toolbox");
+                str = ztd::strdup("show_toolbox");
                 use_mode = true;
             }
             else if (Glib::str_has_prefix(argv[i], "sidetoolbar_"))
             {
-                str = g_strdup("show_sidebar");
+                str = ztd::strdup("show_sidebar");
                 use_mode = true;
             }
             else if (Glib::str_has_prefix(argv[i], "hidden_files_"))
-                str = g_strdup("show_hidden");
+                str = ztd::strdup("show_hidden");
             else if (Glib::str_has_prefix(argv[i], "panel"))
             {
                 j = argv[i][5] - 48;
@@ -6070,7 +6071,7 @@ main_window_socket_command(char* argv[], char** reply)
                 width = strtol(argv[i + 1], nullptr, 10);
             if (width < 0)
             {
-                *reply = g_strdup("spacefm: invalid slider value\n");
+                *reply = ztd::strdup("spacefm: invalid slider value\n");
                 return 2;
             }
             if (!strcmp(argv[i] + 6, "hslider_top"))
@@ -6090,7 +6091,7 @@ main_window_socket_command(char* argv[], char** reply)
                 width = strtol(argv[i + 2], nullptr, 10);
             if (width < 1)
             {
-                *reply = g_strdup("spacefm: invalid column width\n");
+                *reply = ztd::strdup("spacefm: invalid column width\n");
                 return 2;
             }
             if (file_browser->view_mode == PTK_FB_LIST_VIEW)
@@ -6164,35 +6165,35 @@ main_window_socket_command(char* argv[], char** reply)
             }
             else if (!strcmp(argv[i] + 5, "alphanum"))
             {
-                str = g_strdup("sortx_alphanum");
+                str = ztd::strdup("sortx_alphanum");
                 xset_set_b(str, get_bool(argv[i + 1]));
             }
             else if (!strcmp(argv[i] + 5, "natural"))
             {
-                str = g_strdup("sortx_natural");
+                str = ztd::strdup("sortx_natural");
                 xset_set_b(str, get_bool(argv[i + 1]));
             }
             else if (!strcmp(argv[i] + 5, "case"))
             {
-                str = g_strdup("sortx_case");
+                str = ztd::strdup("sortx_case");
                 xset_set_b(str, get_bool(argv[i + 1]));
             }
             else if (!strcmp(argv[i] + 5, "hidden_first"))
             {
                 if (get_bool(argv[i + 1]))
-                    str = g_strdup("sortx_hidfirst");
+                    str = ztd::strdup("sortx_hidfirst");
                 else
-                    str = g_strdup("sortx_hidlast");
+                    str = ztd::strdup("sortx_hidlast");
                 xset_set_b(str, true);
             }
             else if (!strcmp(argv[i] + 5, "first"))
             {
                 if (!g_strcmp0(argv[i + 1], "files"))
-                    str = g_strdup("sortx_files");
+                    str = ztd::strdup("sortx_files");
                 else if (!g_strcmp0(argv[i + 1], "directories"))
-                    str = g_strdup("sortx_directories");
+                    str = ztd::strdup("sortx_directories");
                 else if (!g_strcmp0(argv[i + 1], "mixed"))
-                    str = g_strdup("sortx_mix");
+                    str = ztd::strdup("sortx_mix");
                 else
                 {
                     *reply = g_strdup_printf("spacefm: invalid %s value\n", argv[i]);
@@ -6229,7 +6230,7 @@ main_window_socket_command(char* argv[], char** reply)
             else
             {
                 free(file_browser->status_bar_custom);
-                file_browser->status_bar_custom = g_strdup(argv[i + 1]);
+                file_browser->status_bar_custom = ztd::strdup(argv[i + 1]);
             }
             fm_main_window_update_status_bar(main_window, file_browser);
         }
@@ -6263,7 +6264,7 @@ main_window_socket_command(char* argv[], char** reply)
         {
             if (argv[i + 1] && !g_utf8_validate(argv[i + 1], -1, nullptr))
             {
-                *reply = g_strdup("spacefm: text is not valid UTF-8\n");
+                *reply = ztd::strdup("spacefm: text is not valid UTF-8\n");
                 return 2;
             }
             GtkClipboard* clip =
@@ -6393,15 +6394,15 @@ main_window_socket_command(char* argv[], char** reply)
         else if (!strcmp(argv[i], "focused_pane"))
         {
             if (file_browser->folder_view && gtk_widget_is_focus(file_browser->folder_view))
-                str = g_strdup("filelist");
+                str = ztd::strdup("filelist");
             else if (file_browser->side_dev && gtk_widget_is_focus(file_browser->side_dev))
-                str = g_strdup("devices");
+                str = ztd::strdup("devices");
             else if (file_browser->side_book && gtk_widget_is_focus(file_browser->side_book))
-                str = g_strdup("bookmarks");
+                str = ztd::strdup("bookmarks");
             else if (file_browser->side_dir && gtk_widget_is_focus(file_browser->side_dir))
-                str = g_strdup("dirtree");
+                str = ztd::strdup("dirtree");
             else if (file_browser->path_bar && gtk_widget_is_focus(file_browser->path_bar))
-                str = g_strdup("pathbar");
+                str = ztd::strdup("pathbar");
             else
                 str = nullptr;
             if (str)
@@ -6428,31 +6429,31 @@ main_window_socket_command(char* argv[], char** reply)
             bool use_mode = false;
             if (Glib::str_has_prefix(argv[i], "devices_"))
             {
-                str = g_strdup("show_devmon");
+                str = ztd::strdup("show_devmon");
                 use_mode = true;
             }
             else if (Glib::str_has_prefix(argv[i], "bookmarks_"))
             {
-                str = g_strdup("show_book");
+                str = ztd::strdup("show_book");
                 use_mode = true;
             }
             else if (Glib::str_has_prefix(argv[i], "dirtree_"))
             {
-                str = g_strdup("show_dirtree");
+                str = ztd::strdup("show_dirtree");
                 use_mode = true;
             }
             else if (Glib::str_has_prefix(argv[i], "toolbar_"))
             {
-                str = g_strdup("show_toolbox");
+                str = ztd::strdup("show_toolbox");
                 use_mode = true;
             }
             else if (Glib::str_has_prefix(argv[i], "sidetoolbar_"))
             {
-                str = g_strdup("show_sidebar");
+                str = ztd::strdup("show_sidebar");
                 use_mode = true;
             }
             else if (Glib::str_has_prefix(argv[i], "hidden_files_"))
-                str = g_strdup("show_hidden");
+                str = ztd::strdup("show_hidden");
             else if (Glib::str_has_prefix(argv[i], "panel"))
             {
                 j = argv[i][5] - 48;
@@ -6527,22 +6528,22 @@ main_window_socket_command(char* argv[], char** reply)
             switch (file_browser->sort_order)
             {
                 case PTK_FB_SORT_BY_NAME:
-                    str = g_strdup("name");
+                    str = ztd::strdup("name");
                     break;
                 case PTK_FB_SORT_BY_SIZE:
-                    str = g_strdup("size");
+                    str = ztd::strdup("size");
                     break;
                 case PTK_FB_SORT_BY_TYPE:
-                    str = g_strdup("type");
+                    str = ztd::strdup("type");
                     break;
                 case PTK_FB_SORT_BY_PERM:
-                    str = g_strdup("permission");
+                    str = ztd::strdup("permission");
                     break;
                 case PTK_FB_SORT_BY_OWNER:
-                    str = g_strdup("owner");
+                    str = ztd::strdup("owner");
                     break;
                 case PTK_FB_SORT_BY_MTIME:
-                    str = g_strdup("modified");
+                    str = ztd::strdup("modified");
                     break;
                 default:
                     return 0;
@@ -6580,13 +6581,13 @@ main_window_socket_command(char* argv[], char** reply)
                 switch (xset_get_int_panel(file_browser->mypanel, "sort_extra", "y"))
                 {
                     case 0:
-                        str = g_strdup("mixed");
+                        str = ztd::strdup("mixed");
                         break;
                     case 1:
-                        str = g_strdup("directories");
+                        str = ztd::strdup("directories");
                         break;
                     case 2:
-                        str = g_strdup("files");
+                        str = ztd::strdup("files");
                         break;
                     default:
                         return 0; // failsafe for known
@@ -6836,7 +6837,7 @@ main_window_socket_command(char* argv[], char** reply)
         {
             free(ptask->pop_handler);
             if (argv[i + 2] && argv[i + 2][0] != '\0')
-                ptask->pop_handler = g_strdup(argv[i + 2]);
+                ptask->pop_handler = ztd::strdup(argv[i + 2]);
             else
                 ptask->pop_handler = nullptr;
             return 0;
@@ -6922,13 +6923,13 @@ main_window_socket_command(char* argv[], char** reply)
         else if (!strcmp(argv[i + 1], "queue_state"))
         {
             if (ptask->task->state_pause == VFS_FILE_TASK_RUNNING)
-                str = g_strdup("run");
+                str = ztd::strdup("run");
             else if (ptask->task->state_pause == VFS_FILE_TASK_PAUSE)
-                str = g_strdup("pause");
+                str = ztd::strdup("pause");
             else if (ptask->task->state_pause == VFS_FILE_TASK_QUEUE)
-                str = g_strdup("queue");
+                str = ztd::strdup("queue");
             else
-                str = g_strdup("stop"); // failsafe
+                str = ztd::strdup("stop"); // failsafe
             *reply = g_strdup_printf("%s\n", str);
             return 0;
         }
@@ -7118,7 +7119,7 @@ main_window_socket_command(char* argv[], char** reply)
             else if (stat(real_path, &statbuf) == 0 && S_ISBLK(statbuf.st_mode))
             {
                 // block device eg /dev/sda1
-                device_file = g_strdup(real_path);
+                device_file = ztd::strdup(real_path);
             }
             else if (!strcmp(argv[i], "mount") &&
                      ((real_path[0] != '/' && strstr(real_path, ":/")) ||
@@ -7243,7 +7244,7 @@ main_window_socket_command(char* argv[], char** reply)
                 {
                     if (argv[j][0] == '/')
                         // absolute path
-                        str = g_strdup(argv[j]);
+                        str = ztd::strdup(argv[j]);
                     else
                     {
                         // relative path
@@ -7456,13 +7457,13 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
             switch (state)
             {
                 case VFS_VOLUME_ADDED:
-                    change = g_strdup("added");
+                    change = ztd::strdup("added");
                     break;
                 case VFS_VOLUME_REMOVED:
-                    change = g_strdup("removed");
+                    change = ztd::strdup("removed");
                     break;
                 default:
-                    change = g_strdup("changed");
+                    change = ztd::strdup("changed");
                     break;
             }
             cmd = ztd::replace(cmd, "%v", change);
@@ -7481,18 +7482,18 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
 
     if (set == event_handler.win_click)
     {
-        replace = g_strdup("ewptfbm");
+        replace = ztd::strdup("ewptfbm");
         state = (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_SUPER_MASK |
                           GDK_HYPER_MASK | GDK_META_MASK));
     }
     else if (set == event_handler.win_key)
-        replace = g_strdup("ewptkm");
+        replace = ztd::strdup("ewptkm");
     else if (set == event_handler.pnl_show)
-        replace = g_strdup("ewptfv");
+        replace = ztd::strdup("ewptfv");
     else if (set == event_handler.tab_chdir)
-        replace = g_strdup("ewptd");
+        replace = ztd::strdup("ewptd");
     else
-        replace = g_strdup("ewpt");
+        replace = ztd::strdup("ewpt");
 
     char* str;
     std::string rep;

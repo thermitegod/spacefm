@@ -251,8 +251,8 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         }
 
         // date format
-        char* etext =
-            g_strdup(gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(data->date_format)))));
+        char* etext = ztd::strdup(
+            gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(data->date_format)))));
         if (g_strcmp0(etext, xset_get_s("date_format")))
         {
             if (etext[0] == '\0')

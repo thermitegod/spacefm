@@ -234,7 +234,7 @@ get_real_link_target(const char* link_path)
         return nullptr;
 
     // canonicalize target
-    if (!(target_path = g_strdup(realpath(link_path, buf))))
+    if (!(target_path = ztd::strdup(realpath(link_path, buf))))
     {
         /* fall back to immediate target if canonical target
          * missing.
@@ -388,11 +388,11 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         if (name && ext)
             full_name = g_strdup_printf("%s.%s", name, ext);
         else if (name && !ext)
-            full_name = g_strdup(name);
+            full_name = ztd::strdup(name);
         else if (!name && ext)
-            full_name = g_strdup(ext);
+            full_name = ztd::strdup(ext);
         else
-            full_name = g_strdup("");
+            full_name = ztd::strdup("");
         if (name)
             free(name);
         gtk_text_buffer_set_text(mset->buf_full_name, full_name, -1);
@@ -747,7 +747,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
 
     if (mset->create_new && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link)))
     {
-        path = g_strdup(gtk_entry_get_text(GTK_ENTRY(mset->entry_target)));
+        path = ztd::strdup(gtk_entry_get_text(GTK_ENTRY(mset->entry_target)));
         g_strstrip(path);
         gtk_widget_set_sensitive(mset->next,
                                  (path && path[0] != '\0' &&
@@ -921,7 +921,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         else
         {
             dir = g_path_get_dirname(mset->full_path);
-            name = text[0] != '\0' ? g_strdup(text) : nullptr;
+            name = text[0] != '\0' ? ztd::strdup(text) : nullptr;
         }
     }
     else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
@@ -939,7 +939,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
             dir = get_template_dir();
             if (!dir)
                 dir = g_path_get_dirname(mset->full_path);
-            name = g_strdup(text);
+            name = ztd::strdup(text);
         }
     }
     else
@@ -957,7 +957,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
             dir = get_template_dir();
             if (!dir)
                 dir = g_path_get_dirname(mset->full_path);
-            name = g_strdup(text);
+            name = ztd::strdup(text);
         }
     }
 
@@ -1241,14 +1241,14 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     const char* desc = nullptr;
     if (mset->create_new)
     {
-        btn_label = g_strdup("Create");
-        action = g_strdup("Create New");
+        btn_label = ztd::strdup("Create");
+        action = ztd::strdup("Create New");
         if (new_file)
-            desc = g_strdup("File");
+            desc = ztd::strdup("File");
         else if (new_folder)
-            desc = g_strdup("Directory");
+            desc = ztd::strdup("Directory");
         else if (new_link)
-            desc = g_strdup("Link");
+            desc = ztd::strdup("Link");
     }
     else
     {
@@ -1265,47 +1265,47 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
 
         if (move)
         {
-            btn_label = rename ? g_strdup("Rename") : g_strdup("Move");
-            action = g_strdup("Move");
+            btn_label = rename ? ztd::strdup("Rename") : ztd::strdup("Move");
+            action = ztd::strdup("Move");
         }
         else if (copy)
         {
-            btn_label = g_strdup("C_opy");
-            action = g_strdup("Copy");
+            btn_label = ztd::strdup("C_opy");
+            action = ztd::strdup("Copy");
         }
         else if (link)
         {
-            btn_label = g_strdup("_Link");
-            action = g_strdup("Create Link To");
+            btn_label = ztd::strdup("_Link");
+            action = ztd::strdup("Create Link To");
         }
         else if (copy_target)
         {
-            btn_label = g_strdup("C_opy");
-            action = g_strdup("Copy");
-            desc = g_strdup("Link Target");
+            btn_label = ztd::strdup("C_opy");
+            action = ztd::strdup("Copy");
+            desc = ztd::strdup("Link Target");
         }
         else if (link_target)
         {
-            btn_label = g_strdup("_Link");
-            action = g_strdup("Create Link To");
-            desc = g_strdup("Target");
+            btn_label = ztd::strdup("_Link");
+            action = ztd::strdup("Create Link To");
+            desc = ztd::strdup("Target");
         }
     }
 
     const char* root_msg;
     if (as_root)
-        root_msg = g_strdup(" As Root");
+        root_msg = ztd::strdup(" As Root");
     else
-        root_msg = g_strdup("");
+        root_msg = ztd::strdup("");
 
     // Window Icon
     const char* win_icon;
     if (as_root)
-        win_icon = g_strdup("gtk-dialog-warning");
+        win_icon = ztd::strdup("gtk-dialog-warning");
     else if (mset->create_new)
-        win_icon = g_strdup("gtk-new");
+        win_icon = ztd::strdup("gtk-new");
     else
-        win_icon = g_strdup("gtk-edit");
+        win_icon = ztd::strdup("gtk-edit");
     GdkPixbuf* pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
                                                  win_icon,
                                                  16,
@@ -1840,7 +1840,7 @@ get_unique_name(const char* dir, const char* ext)
     char* name;
     char* path;
 
-    char* base = g_strdup("new");
+    char* base = ztd::strdup("new");
     if (ext && ext[0] != '\0')
     {
         name = g_strdup_printf("%s.%s", base, ext);
@@ -1856,7 +1856,7 @@ get_unique_name(const char* dir, const char* ext)
     {
         free(path);
         if (n == 1000)
-            return g_strdup(base);
+            return ztd::strdup(base);
         if (ext && ext[0] != '\0')
             name = g_strdup_printf("%s%d.%s", base, n++, ext);
         else
@@ -1893,7 +1893,7 @@ get_template_dir()
             }
         }
     }
-    return g_strdup(templates_path.c_str());
+    return ztd::strdup(templates_path.c_str());
 }
 
 static GList*
@@ -1928,7 +1928,7 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
                     if (subdir)
                         subsubdir = g_build_filename(subdir, file_name.c_str(), nullptr);
                     else
-                        subsubdir = g_strdup(file_name.c_str());
+                        subsubdir = ztd::strdup(file_name.c_str());
                     templates = g_list_prepend(templates, g_strdup_printf("%s/", subsubdir));
                     // prevent filesystem loops during recursive find
                     if (!std::filesystem::is_symlink(path))
@@ -1945,7 +1945,7 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
                             g_list_prepend(templates,
                                            g_build_filename(subdir, file_name.c_str(), nullptr));
                     else
-                        templates = g_list_prepend(templates, g_strdup(file_name.c_str()));
+                        templates = g_list_prepend(templates, ztd::strdup(file_name.c_str()));
                 }
                 else if (std::filesystem::is_directory(path) &&
                          // prevent filesystem loops during recursive find
@@ -1976,8 +1976,8 @@ on_template_changed(GtkWidget* widget, MoveSet* mset)
 
     if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
         return;
-    char* text =
-        g_strdup(gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(mset->combo_template)))));
+    char* text = ztd::strdup(
+        gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(mset->combo_template)))));
     if (text)
     {
         g_strstrip(text);
@@ -2041,9 +2041,9 @@ update_new_display(const char* path)
 {
     // for devices like nfs, emit created so the new file is shown
     // update now
-    update_new_display_delayed(g_strdup(path));
+    update_new_display_delayed(ztd::strdup(path));
     // update a little later for exec tasks
-    g_timeout_add(1500, (GSourceFunc)update_new_display_delayed, g_strdup(path));
+    g_timeout_add(1500, (GSourceFunc)update_new_display_delayed, ztd::strdup(path));
 }
 
 int
@@ -2057,7 +2057,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     char* full_path;
     char* path;
     char* old_path;
-    char* root_mkdir = g_strdup("");
+    char* root_mkdir = ztd::strdup("");
     char* task_name;
     char* str;
     GtkWidget* task_view = nullptr;
@@ -2079,9 +2079,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         if (vfs_file_info_is_desktop_entry(file))
             full_name = g_filename_display_name(file->name.c_str());
         if (!full_name)
-            full_name = g_strdup(vfs_file_info_get_disp_name(file));
+            full_name = ztd::strdup(vfs_file_info_get_disp_name(file));
         if (!full_name)
-            full_name = g_strdup(vfs_file_info_get_name(file));
+            full_name = ztd::strdup(vfs_file_info_get_name(file));
 
         mset->is_dir = vfs_file_info_is_dir(file);
         mset->is_link = vfs_file_info_is_symlink(file);
@@ -2090,17 +2090,17 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         if (dest_dir)
             mset->new_path = g_build_filename(dest_dir, full_name, nullptr);
         else
-            mset->new_path = g_strdup(mset->full_path);
+            mset->new_path = ztd::strdup(mset->full_path);
         free(full_name);
         full_name = nullptr;
     }
     else if (create_new == PTK_RENAME_NEW_LINK && file)
     {
-        full_name = g_strdup(vfs_file_info_get_disp_name(file));
+        full_name = ztd::strdup(vfs_file_info_get_disp_name(file));
         if (!full_name)
-            full_name = g_strdup(vfs_file_info_get_name(file));
+            full_name = ztd::strdup(vfs_file_info_get_name(file));
         mset->full_path = g_build_filename(file_dir, full_name, nullptr);
-        mset->new_path = g_strdup(mset->full_path);
+        mset->new_path = ztd::strdup(mset->full_path);
         mset->is_dir = vfs_file_info_is_dir(file); // is_dir is dynamic for create
         mset->is_link = vfs_file_info_is_symlink(file);
         mset->clip_copy = false;
@@ -2108,7 +2108,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     else
     {
         mset->full_path = get_unique_name(file_dir, nullptr);
-        mset->new_path = g_strdup(mset->full_path);
+        mset->new_path = ztd::strdup(mset->full_path);
         mset->is_dir = false; // is_dir is dynamic for create
         mset->is_link = false;
         mset->clip_copy = false;
@@ -2127,11 +2127,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     // Dialog
     const char* root_msg;
     if (mset->is_link)
-        mset->desc = g_strdup("Link");
+        mset->desc = ztd::strdup("Link");
     else if (mset->is_dir)
-        mset->desc = g_strdup("Directory");
+        mset->desc = ztd::strdup("Directory");
     else
-        mset->desc = g_strdup("File");
+        mset->desc = ztd::strdup("File");
 
     mset->browser = file_browser;
 
@@ -2222,7 +2222,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         VFSMimeType* mime_type = vfs_file_info_get_mime_type(file);
         if (mime_type)
         {
-            mset->mime_type = g_strdup(vfs_mime_type_get_type(mime_type));
+            mset->mime_type = ztd::strdup(vfs_mime_type_get_type(mime_type));
             type = g_strdup_printf(" %s ( %s )",
                                    vfs_mime_type_get_description(mime_type),
                                    mset->mime_type);
@@ -2231,13 +2231,13 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         else
         {
             mset->mime_type = g_strdup_printf("?");
-            type = g_strdup(mset->mime_type);
+            type = ztd::strdup(mset->mime_type);
         }
     }
     else // create
     {
         mset->mime_type = g_strdup_printf("?");
-        type = g_strdup(mset->mime_type);
+        type = ztd::strdup(mset->mime_type);
     }
     mset->label_mime = GTK_LABEL(gtk_label_new(type));
     gtk_label_set_ellipsize(mset->label_mime, PANGO_ELLIPSIZE_MIDDLE);
@@ -2842,7 +2842,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 free(task_name);
 
-                str = g_strdup(gtk_entry_get_text(mset->entry_target));
+                str = ztd::strdup(gtk_entry_get_text(mset->entry_target));
                 g_strstrip(str);
                 while (g_str_has_suffix(str, "/") && str[1] != '\0')
                     str[g_utf8_strlen(str, -1) - 1] = '\0';
@@ -2869,7 +2869,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     task->task->exec_as_user = "root";
                 if (auto_open)
                 {
-                    auto_open->path = g_strdup(full_path);
+                    auto_open->path = ztd::strdup(full_path);
                     auto_open->open_file = (response == GTK_RESPONSE_APPLY);
                     task->complete_notify = auto_open->callback;
                     task->user_data = auto_open;
@@ -2916,7 +2916,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 if (overwrite)
                     over_cmd = g_strdup_printf("rm -f %s && ", to_path.c_str());
                 else
-                    over_cmd = g_strdup("");
+                    over_cmd = ztd::strdup("");
 
                 task_name = g_strdup_printf("Create New File%s", root_msg);
                 PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
@@ -2937,7 +2937,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     task->task->exec_as_user = "root";
                 if (auto_open)
                 {
-                    auto_open->path = g_strdup(full_path);
+                    auto_open->path = ztd::strdup(full_path);
                     auto_open->open_file = (response == GTK_RESPONSE_APPLY);
                     task->complete_notify = auto_open->callback;
                     task->user_data = auto_open;
@@ -3000,7 +3000,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     task->task->exec_as_user = "root";
                 if (auto_open)
                 {
-                    auto_open->path = g_strdup(full_path);
+                    auto_open->path = ztd::strdup(full_path);
                     auto_open->open_file = (response == GTK_RESPONSE_APPLY);
                     task->complete_notify = auto_open->callback;
                     task->user_data = auto_open;
@@ -3032,9 +3032,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     free(str);
                 }
                 if (overwrite)
-                    over_opt = g_strdup(" --remove-destination");
+                    over_opt = ztd::strdup(" --remove-destination");
                 if (!over_opt)
-                    over_opt = g_strdup("");
+                    over_opt = ztd::strdup("");
 
                 if (mset->is_dir)
                 {
@@ -3726,7 +3726,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
     char* task_name;
 
     GtkWidget* parent = GTK_WIDGET(file_browser);
-    char* file_paths = g_strdup("");
+    char* file_paths = ztd::strdup("");
     GList* sel;
     char* file_path;
     std::string file_path_q;
@@ -3763,7 +3763,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
             free(str);
         }
         cmd = g_strdup_printf("rm -r %s", file_paths);
-        task_name = g_strdup("Delete As Root");
+        task_name = ztd::strdup("Delete As Root");
     }
     else
     {
@@ -3785,13 +3785,13 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
 
             if (!strcmp(setname, "root_move2"))
             {
-                task_name = g_strdup("Move As Root");
+                task_name = ztd::strdup("Move As Root");
                 // problem: no warning if already exists
                 cmd = g_strdup_printf("mv -f %s %s", file_paths, quote_path.c_str());
             }
             else
             {
-                task_name = g_strdup("Copy As Root");
+                task_name = ztd::strdup("Copy As Root");
                 // problem: no warning if already exists
                 cmd = g_strdup_printf("cp -r %s %s", file_paths, quote_path.c_str());
             }

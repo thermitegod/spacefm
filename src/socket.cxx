@@ -218,7 +218,7 @@ on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
 static void
 get_socket_name(char* buf, int len)
 {
-    std::string dpy = g_strdup(Glib::getenv("DISPLAY").c_str());
+    std::string dpy = ztd::strdup(Glib::getenv("DISPLAY").c_str());
     // treat :0.0 as :0 to prevent multiple instances on screen 0
     if (ztd::same(dpy, ":0.0"))
         dpy = ":0";
@@ -387,7 +387,7 @@ receive_socket_command(int client, GString* args)
     std::string inode_tag = get_inode_tag();
     if (argv && strcmp(inode_tag.c_str(), argv[0]))
     {
-        reply = g_strdup("spacefm: invalid socket command user\n");
+        reply = ztd::strdup("spacefm: invalid socket command user\n");
         cmd = 1;
         LOG_WARN("invalid socket command user");
     }
@@ -468,7 +468,7 @@ send_socket_command(int argc, char* argv[], char** reply)
     int ret;
     if (sock_reply->len != 0)
     {
-        *reply = g_strdup(sock_reply->str + 1);
+        *reply = ztd::strdup(sock_reply->str + 1);
         ret = sock_reply->str[0];
     }
     else

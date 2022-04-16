@@ -132,7 +132,7 @@ ptk_clipboard_copy_name(const char* working_dir,
     GList* l;
     int fcount = 0;
 
-    char* file_text = g_strdup("");
+    char* file_text = ztd::strdup("");
     for (l = files; l; l = l->next)
     {
         VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
@@ -174,10 +174,10 @@ ptk_clipboard_cut_or_copy_files(const char* working_dir, GList* files, bool copy
     n_targets += 2;
     targets = g_renew(GtkTargetEntry, targets, n_targets);
     GtkTargetEntry* new_target = g_new0(GtkTargetEntry, 1);
-    new_target->target = g_strdup("x-special/gnome-copied-files");
+    new_target->target = ztd::strdup("x-special/gnome-copied-files");
     memmove(&(targets[n_targets - 2]), new_target, sizeof(GtkTargetEntry));
     new_target = g_new0(GtkTargetEntry, 1);
-    new_target->target = g_strdup("text/uri-list");
+    new_target->target = ztd::strdup("text/uri-list");
     memmove(&(targets[n_targets - 1]), new_target, sizeof(GtkTargetEntry));
 
     gtk_target_list_unref(target_list);
@@ -215,10 +215,10 @@ ptk_clipboard_copy_file_list(char** path, bool copy)
     n_targets += 2;
     targets = g_renew(GtkTargetEntry, targets, n_targets);
     GtkTargetEntry* new_target = g_new0(GtkTargetEntry, 1);
-    new_target->target = g_strdup("x-special/gnome-copied-files");
+    new_target->target = ztd::strdup("x-special/gnome-copied-files");
     memmove(&(targets[n_targets - 2]), new_target, sizeof(GtkTargetEntry));
     new_target = g_new0(GtkTargetEntry, 1);
-    new_target->target = g_strdup("text/uri-list");
+    new_target->target = ztd::strdup("text/uri-list");
     memmove(&(targets[n_targets - 1]), new_target, sizeof(GtkTargetEntry));
 
     gtk_target_list_unref(target_list);
@@ -227,7 +227,7 @@ ptk_clipboard_copy_file_list(char** path, bool copy)
     while (*file_path)
     {
         if (*file_path[0] == '/')
-            file_list = g_list_append(file_list, g_strdup(*file_path));
+            file_list = g_list_append(file_list, ztd::strdup(*file_path));
         file_path++;
     }
 

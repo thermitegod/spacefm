@@ -543,7 +543,7 @@ mime_type_add_action(const char* type, const char* desktop_id, char** custom_des
     if (mime_type_has_action(type, desktop_id))
     {
         if (custom_desktop)
-            *custom_desktop = g_strdup(desktop_id);
+            *custom_desktop = ztd::strdup(desktop_id);
         return;
     }
 
@@ -578,7 +578,7 @@ _locate_desktop_file_recursive(const char* path, const char* desktop_id, bool fi
             else if (!first && ztd::same(file_name, desktop_id) &&
                      std::filesystem::is_regular_file(sub_path))
             {
-                found = g_strdup(sub_path.c_str());
+                found = ztd::strdup(sub_path.c_str());
                 break;
             }
         }
@@ -680,7 +680,7 @@ get_default_action(const char* dir, const char* type, void* user_data)
                     if (mime_type_locate_desktop_file(nullptr, apps.at(i).c_str()))
                     {
                         // LOG_INFO("            EXISTS");
-                        return g_strdup(apps.at(i).c_str());
+                        return ztd::strdup(apps.at(i).c_str());
                     }
                 }
             }

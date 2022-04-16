@@ -151,7 +151,7 @@ create_model_from_mime_type(VFSMimeType* mime_type)
         {
             for (std::string app: apps)
             {
-                add_list_item(list, g_strdup(app.c_str()));
+                add_list_item(list, ztd::strdup(app.c_str()));
             }
         }
     }
@@ -347,7 +347,7 @@ app_chooser_dialog_get_selected_app(GtkWidget* dlg)
     char* app = (char*)gtk_entry_get_text(entry);
     if (app && *app)
     {
-        return g_strdup(app);
+        return ztd::strdup(app);
     }
 
     GtkNotebook* notebook = GTK_NOTEBOOK(GTK_WIDGET(gtk_builder_get_object(builder, "notebook")));
@@ -405,7 +405,7 @@ on_browse_btn_clicked(GtkButton* button, void* user_data)
             GtkNotebook* notebook =
                 GTK_NOTEBOOK(GTK_WIDGET(gtk_builder_get_object(builder, "notebook")));
             /* FIXME: path shouldn't be hard-coded */
-            const char* app_path = g_strdup("/usr/share/applications");
+            const char* app_path = ztd::strdup("/usr/share/applications");
             if (Glib::str_has_prefix(filename, app_path) && g_str_has_suffix(filename, ".desktop"))
             {
                 char* app_name = g_path_get_basename(filename);
