@@ -36,7 +36,7 @@
 
 #include "utils.hxx"
 
-VFSAppDesktop::VFSAppDesktop(const std::string& open_file_name)
+VFSAppDesktop::VFSAppDesktop(const std::string& open_file_name) noexcept
 {
     // LOG_INFO("VFSAppDesktop constructor");
 
@@ -121,19 +121,19 @@ VFSAppDesktop::VFSAppDesktop(const std::string& open_file_name)
     }
 }
 
-VFSAppDesktop::~VFSAppDesktop()
+VFSAppDesktop::~VFSAppDesktop() noexcept
 {
     // LOG_INFO("VFSAppDesktop destructor");
 }
 
 const char*
-VFSAppDesktop::get_name()
+VFSAppDesktop::get_name() noexcept
 {
     return m_file_name.c_str();
 }
 
 const char*
-VFSAppDesktop::get_disp_name()
+VFSAppDesktop::get_disp_name() noexcept
 {
     if (!m_disp_name.empty())
         return m_disp_name.c_str();
@@ -141,31 +141,31 @@ VFSAppDesktop::get_disp_name()
 }
 
 const char*
-VFSAppDesktop::get_exec()
+VFSAppDesktop::get_exec() noexcept
 {
     return m_exec.c_str();
 }
 
 bool
-VFSAppDesktop::use_terminal()
+VFSAppDesktop::use_terminal() noexcept
 {
     return m_terminal;
 }
 
 const char*
-VFSAppDesktop::get_full_path()
+VFSAppDesktop::get_full_path() noexcept
 {
     return m_full_path.c_str();
 }
 
 const char*
-VFSAppDesktop::get_icon_name()
+VFSAppDesktop::get_icon_name() noexcept
 {
     return m_icon_name.c_str();
 }
 
 GdkPixbuf*
-VFSAppDesktop::get_icon(int size)
+VFSAppDesktop::get_icon(int size) noexcept
 {
     GtkIconTheme* theme;
     GdkPixbuf* icon = nullptr;
@@ -189,7 +189,7 @@ VFSAppDesktop::get_icon(int size)
 }
 
 bool
-VFSAppDesktop::open_multiple_files()
+VFSAppDesktop::open_multiple_files() noexcept
 {
     if (!m_exec.empty())
     {
@@ -201,7 +201,7 @@ VFSAppDesktop::open_multiple_files()
 }
 
 std::string
-VFSAppDesktop::translate_app_exec_to_command_line(std::vector<std::string>& file_list)
+VFSAppDesktop::translate_app_exec_to_command_line(std::vector<std::string>& file_list) noexcept
 {
     // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
 
@@ -271,7 +271,7 @@ VFSAppDesktop::translate_app_exec_to_command_line(std::vector<std::string>& file
 
 void
 VFSAppDesktop::exec_in_terminal(const std::string& app_name, const std::string& cwd,
-                                const std::string& cmd)
+                                const std::string& cmd) noexcept
 {
     // task
     PtkFileTask* task = ptk_file_exec_new(app_name.c_str(), cwd.c_str(), nullptr, nullptr);
@@ -287,18 +287,12 @@ VFSAppDesktop::exec_in_terminal(const std::string& app_name, const std::string& 
 }
 
 bool
-VFSAppDesktop::open_files(const std::string& working_dir, std::vector<std::string>& file_paths,
-                          GError** err)
+VFSAppDesktop::open_files(const std::string& working_dir, std::vector<std::string>& file_paths)
 {
     if (!get_exec())
     {
-        g_set_error(err,
-                    G_SPAWN_ERROR,
-                    G_SPAWN_ERROR_FAILED,
-                    "%s\n\n%s",
-                    "Command not found",
-                    get_name());
-        return false;
+        std::string msg = fmt::format("Command not found\n\n{}", get_name());
+        throw VFSAppDesktopException(msg);
     }
 
     if (open_multiple_files())
@@ -320,7 +314,8 @@ VFSAppDesktop::open_files(const std::string& working_dir, std::vector<std::strin
 }
 
 void
-VFSAppDesktop::exec_desktop(const std::string& working_dir, std::vector<std::string>& file_paths)
+VFSAppDesktop::exec_desktop(const std::string& working_dir,
+                            std::vector<std::string>& file_paths) noexcept
 {
     std::string cmd = translate_app_exec_to_command_line(file_paths);
     if (cmd.empty())

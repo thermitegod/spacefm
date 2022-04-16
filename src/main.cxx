@@ -443,47 +443,36 @@ open_file(const char* path)
     VFSFileInfo* file = vfs_file_info_new();
     vfs_file_info_get(file, path, nullptr);
     VFSMimeType* mime_type = vfs_file_info_get_mime_type(file);
-    bool opened = false;
-    GError* err = nullptr;
 
     char* app_name = vfs_mime_type_get_default_action(mime_type);
-    if (app_name)
-    {
-        opened = vfs_file_info_open_file(file, path, &err);
-        free(app_name);
-    }
-    else
+    if (!app_name)
     {
         app_name = ptk_choose_app_for_mime_type(nullptr, mime_type, true, true, true, false);
-        if (app_name)
+        if (!app_name)
         {
-            VFSAppDesktop desktop(app_name);
-
-            std::string open_file = path;
-            std::vector<std::string> open_files;
-            open_files.push_back(open_file);
-
-            opened = desktop.open_files(vfs_current_dir(), open_files, &err);
-            free(app_name);
+            LOG_ERROR("no application to open file: {}", path);
+            return;
         }
-        else
-            opened = true;
     }
 
-    if (!opened)
+    VFSAppDesktop desktop(app_name);
+
+    std::string open_file = path;
+    std::vector<std::string> open_files;
+    open_files.push_back(open_file);
+
+    try
     {
-        const char* error_msg;
-        if (err && err->message)
-            error_msg = err->message;
-        else
-            error_msg = "Don't know how to open the file";
-
-        std::string disp_path = g_filename_display_name(path);
-        std::string msg = fmt::format("Unable to open file:\n\"{}\"\n{}", disp_path, error_msg);
-        ptk_show_error(nullptr, "Error", msg);
-        if (err)
-            g_error_free(err);
+        desktop.open_files(vfs_current_dir(), open_files);
     }
+    catch (const VFSAppDesktopException& e)
+    {
+        std::string disp_path = g_filename_display_name(path);
+        std::string msg = fmt::format("Unable to open file:\n\"{}\"\n{}", disp_path, e.what());
+        ptk_show_error(nullptr, "Error", e.what());
+    }
+
+    free(app_name);
     vfs_mime_type_unref(mime_type);
     vfs_file_info_unref(file);
 }

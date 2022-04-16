@@ -554,40 +554,6 @@ vfs_file_info_is_text(VFSFileInfo* fi, const char* file_path)
     return mime_type_is_text_file(file_path, fi->mime_type->type);
 }
 
-/*
- * Run default action of specified file.
- * Full path of the file is required by this function.
- */
-bool
-vfs_file_info_open_file(VFSFileInfo* fi, const char* file_path, GError** err)
-{
-    bool ret = false;
-
-    if (vfs_file_info_is_executable(fi, file_path))
-    {
-        std::string command = fmt::format("{}", file_path);
-        Glib::spawn_command_line_async(command);
-    }
-    else
-    {
-        VFSMimeType* mime_type = vfs_file_info_get_mime_type(fi);
-        char* app_name = vfs_mime_type_get_default_action(mime_type);
-        if (app_name)
-        {
-            VFSAppDesktop desktop(app_name);
-
-            std::string open_file = file_path;
-            std::vector<std::string> open_files;
-            open_files.push_back(open_file);
-
-            ret = desktop.open_files(vfs_current_dir(), open_files, err);
-            free(app_name);
-        }
-        vfs_mime_type_unref(mime_type);
-    }
-    return ret;
-}
-
 mode_t
 vfs_file_info_get_mode(VFSFileInfo* fi)
 {

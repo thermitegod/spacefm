@@ -3419,7 +3419,6 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
         VFSAppDesktop desktop(check_desktop_name(app_desktop));
 
         LOG_INFO("EXEC({})={}", desktop.get_full_path(), desktop.get_exec());
-        GError* err = nullptr;
 
         //////////
         std::vector<std::string> open_files;
@@ -3431,13 +3430,16 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
         }
         //////////
 
-        if (!desktop.open_files(parent->cwd, open_files, &err))
+        try
+        {
+            desktop.open_files(parent->cwd, open_files);
+        }
+        catch (const VFSAppDesktopException& e)
         {
             GtkWidget* toplevel = parent->file_browser
                                       ? gtk_widget_get_toplevel(GTK_WIDGET(parent->file_browser))
                                       : nullptr;
-            ptk_show_error(GTK_WINDOW(toplevel), "Error", err->message);
-            g_error_free(err);
+            ptk_show_error(GTK_WINDOW(toplevel), "Error", e.what());
         }
     }
     return true;

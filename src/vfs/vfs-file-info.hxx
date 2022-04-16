@@ -132,12 +132,6 @@ bool vfs_file_info_is_executable(VFSFileInfo* fi, const char* file_path);
 /* Full path of the file is required by this function */
 bool vfs_file_info_is_text(VFSFileInfo* fi, const char* file_path);
 
-/*
- * Run default action of specified file.
- * Full path of the file is required by this function.
- */
-bool vfs_file_info_open_file(VFSFileInfo* fi, const char* file_path, GError** err);
-
 void vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path);
 
 void vfs_file_info_list_free(GList* list);

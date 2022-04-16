@@ -20,25 +20,25 @@
 #include <string>
 #include <vector>
 
-#include <glib.h>
+#include <exception>
+
 #include <gtk/gtk.h>
 
 class VFSAppDesktop
 {
   public:
-    VFSAppDesktop(const std::string& open_file_name);
-    ~VFSAppDesktop();
+    VFSAppDesktop(const std::string& open_file_name) noexcept;
+    ~VFSAppDesktop() noexcept;
 
-    const char* get_name();
-    const char* get_disp_name();
-    const char* get_exec();
-    const char* get_full_path();
-    GdkPixbuf* get_icon(int size);
-    const char* get_icon_name();
-    bool use_terminal();
-    bool open_multiple_files();
-    bool open_files(const std::string& working_dir, std::vector<std::string>& file_paths,
-                    GError** err);
+    const char* get_name() noexcept;
+    const char* get_disp_name() noexcept;
+    const char* get_exec() noexcept;
+    const char* get_full_path() noexcept;
+    GdkPixbuf* get_icon(int size) noexcept;
+    const char* get_icon_name() noexcept;
+    bool use_terminal() noexcept;
+    bool open_multiple_files() noexcept;
+    bool open_files(const std::string& working_dir, std::vector<std::string>& file_paths);
 
   private:
     // desktop entry spec keys
@@ -50,8 +50,30 @@ class VFSAppDesktop
     std::string m_full_path;
     bool m_terminal{false};
 
-    std::string translate_app_exec_to_command_line(std::vector<std::string>& file_list);
+    std::string translate_app_exec_to_command_line(std::vector<std::string>& file_list) noexcept;
     void exec_in_terminal(const std::string& app_name, const std::string& cwd,
-                          const std::string& cmd);
-    void exec_desktop(const std::string& working_dir, std::vector<std::string>& file_paths);
+                          const std::string& cmd) noexcept;
+    void exec_desktop(const std::string& working_dir,
+                      std::vector<std::string>& file_paths) noexcept;
+};
+
+class VFSAppDesktopException: virtual public std::exception
+{
+  protected:
+    std::string error_message;
+
+  public:
+    explicit VFSAppDesktopException(const std::string& msg) : error_message(msg)
+    {
+    }
+
+    virtual ~VFSAppDesktopException() throw()
+    {
+    }
+
+    virtual const char*
+    what() const throw()
+    {
+        return error_message.c_str();
+    }
 };

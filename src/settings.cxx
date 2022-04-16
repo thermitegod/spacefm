@@ -3497,14 +3497,15 @@ xset_custom_activate(GtkWidget* item, XSet* set)
                     }
 
                     // open in app
-                    GError* err = nullptr;
-                    if (!desktop.open_files(cwd, open_files, &err))
+                    try
                     {
-                        ptk_show_error(parent ? GTK_WINDOW(parent) : nullptr,
-                                       "Error",
-                                       err->message);
-                        g_error_free(err);
+                        desktop.open_files(cwd, open_files);
                     }
+                    catch (const VFSAppDesktopException& e)
+                    {
+                        ptk_show_error(parent ? GTK_WINDOW(parent) : nullptr, "Error", e.what());
+                    }
+
                     if (sel_files)
                     {
                         g_list_foreach(sel_files, (GFunc)vfs_file_info_unref, nullptr);
