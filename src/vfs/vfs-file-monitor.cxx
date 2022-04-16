@@ -25,6 +25,8 @@
 
 #include <linux/limits.h>
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -144,46 +146,9 @@ vfs_file_monitor_add(char* path, VFSFileMonitorCallback cb, void* user_data)
                                             IN_MOVE | IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
         if (monitor->wd < 0)
         {
-            const char* msg;
-            switch (errno)
-            {
-                case EACCES:
-                    msg =
-                        ztd::strdup("EACCES Read access to the given directory is not permitted.");
-                    break;
-                case EBADF:
-                    msg = ztd::strdup("EBADF The given file descriptor is not valid.");
-                    break;
-                case EFAULT:
-                    msg = ztd::strdup("EFAULT Pathname points outside of the process's accessible "
-                                      "address space.");
-                    break;
-                case EINVAL:
-                    msg = ztd::strdup("EINVAL The given event mask contains no valid events; "
-                                      "or fd is not an inotify file descriptor.");
-                    break;
-                case ENOENT:
-                    msg = ztd::strdup("ENOENT A directory component in pathname does not exist "
-                                      "or is a dangling symbolic link.");
-                    break;
-                case ENOMEM:
-                    msg = ztd::strdup("ENOMEM Insufficient kernel memory was available.");
-                    break;
-                case ENOSPC:
-                    msg = ztd::strdup(
-                        "ENOSPC The user limit on the total number of inotify watches (cat "
-                        "/proc/sys/fs/inotify/max_user_watches) was reached or the kernel failed "
-                        "to allocate a needed resource.");
-                    break;
-                default:
-                    msg = ztd::strdup("??? Unknown error.");
-                    break;
-            }
-            LOG_WARN("Failed to add watch on '{}' ('{}'): inotify_add_watch errno {} {}",
-                     real_path,
-                     path,
-                     errno,
-                     msg);
+            std::string errno_msg = Glib::strerror(errno);
+            LOG_ERROR("Failed to add watch on '{}' ({})", real_path, path);
+            LOG_ERROR("inotify_add_watch: {}", errno_msg);
             return nullptr;
         }
         // LOG_INFO("vfs_file_monitor_add  {} ({}) {}", real_path, path, monitor->wd);
