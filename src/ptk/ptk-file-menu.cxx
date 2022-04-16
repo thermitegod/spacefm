@@ -2019,29 +2019,28 @@ on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data)
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
     unsigned int keymod = ptk_get_keymod(event->state);
 
-    switch (event->type)
+    if (event->type == GDK_BUTTON_RELEASE)
     {
-        case GDK_BUTTON_RELEASE:
-            if (event->button == 1 && keymod == 0)
-            {
-                // user released left button - due to an apparent gtk bug, activate
-                // doesn't always fire on this event so handle it ourselves
-                // see also settings.c xset_design_cb()
-                // test: gtk2 Crux theme with touchpad on Edit|Copy To|Location
-                // https://github.com/IgnorantGuru/spacefm/issues/31
-                // https://github.com/IgnorantGuru/spacefm/issues/228
-                if (menu)
-                    gtk_menu_shell_deactivate(GTK_MENU_SHELL(menu));
-                gtk_menu_item_activate(GTK_MENU_ITEM(item));
-                return true;
-            }
-            // true for issue #521 where a right-click also left-clicks the first
-            // menu item in some GTK2/3 themes.
+        if (event->button == 1 && keymod == 0)
+        {
+            // user released left button - due to an apparent gtk bug, activate
+            // doesn't always fire on this event so handle it ourselves
+            // see also settings.c xset_design_cb()
+            // test: gtk2 Crux theme with touchpad on Edit|Copy To|Location
+            // https://github.com/IgnorantGuru/spacefm/issues/31
+            // https://github.com/IgnorantGuru/spacefm/issues/228
+            if (menu)
+                gtk_menu_shell_deactivate(GTK_MENU_SHELL(menu));
+            gtk_menu_item_activate(GTK_MENU_ITEM(item));
             return true;
-            break;
-        default:
-            return false;
-            break;
+        }
+        // true for issue #521 where a right-click also left-clicks the first
+        // menu item in some GTK2/3 themes.
+        return true;
+    }
+    else if (event->type != GDK_BUTTON_PRESS)
+    {
+        return false;
     }
 
     switch (event->button)

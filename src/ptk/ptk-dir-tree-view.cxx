@@ -678,9 +678,9 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                     case GDK_ACTION_LINK:
                         file_action = VFS_FILE_TASK_LINK;
                         break;
-                        /* FIXME:
-                          GDK_ACTION_DEFAULT, GDK_ACTION_PRIVATE, and GDK_ACTION_ASK are not handled
-                        */
+                    case GDK_ACTION_DEFAULT:
+                    case GDK_ACTION_PRIVATE:
+                    case GDK_ACTION_ASK:
                     default:
                         break;
                 }

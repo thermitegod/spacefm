@@ -2069,6 +2069,21 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                 case XSET_MENU_SEP:
                     item = gtk_separator_menu_item_new();
                     break;
+                case XSET_MENU_NORMAL:
+                case XSET_MENU_STRING:
+                case XSET_MENU_FILEDLG:
+                case XSET_MENU_FONTDLG:
+                case XSET_MENU_ICON:
+                case XSET_MENU_COLORDLG:
+                case XSET_MENU_CONFIRM:
+                case XSET_MENU_RESERVED_03:
+                case XSET_MENU_RESERVED_04:
+                case XSET_MENU_RESERVED_05:
+                case XSET_MENU_RESERVED_06:
+                case XSET_MENU_RESERVED_07:
+                case XSET_MENU_RESERVED_08:
+                case XSET_MENU_RESERVED_09:
+                case XSET_MENU_RESERVED_10:
                 default:
                     break;
             }
@@ -3423,6 +3438,23 @@ xset_custom_activate(GtkWidget* item, XSet* set)
         case XSET_MENU_STRING:
             value = mset->s;
             break;
+        case XSET_MENU_NORMAL:
+        case XSET_MENU_RADIO:
+        case XSET_MENU_FILEDLG:
+        case XSET_MENU_FONTDLG:
+        case XSET_MENU_ICON:
+        case XSET_MENU_COLORDLG:
+        case XSET_MENU_CONFIRM:
+        case XSET_MENU_RESERVED_03:
+        case XSET_MENU_RESERVED_04:
+        case XSET_MENU_RESERVED_05:
+        case XSET_MENU_RESERVED_06:
+        case XSET_MENU_RESERVED_07:
+        case XSET_MENU_RESERVED_08:
+        case XSET_MENU_RESERVED_09:
+        case XSET_MENU_RESERVED_10:
+        case XSET_MENU_SUBMENU:
+        case XSET_MENU_SEP:
         default:
             value = set->menu_label;
             break;
@@ -5804,8 +5836,18 @@ xset_menu_cb(GtkWidget* item, XSet* set)
                 rset->s = scolor;
                 if (cb_func)
                     cb_func(item, cb_data);
+                break;
             }
-            break;
+            case XSET_MENU_NORMAL:
+            case XSET_MENU_RESERVED_03:
+            case XSET_MENU_RESERVED_04:
+            case XSET_MENU_RESERVED_05:
+            case XSET_MENU_RESERVED_06:
+            case XSET_MENU_RESERVED_07:
+            case XSET_MENU_RESERVED_08:
+            case XSET_MENU_RESERVED_09:
+            case XSET_MENU_RESERVED_10:
+            case XSET_MENU_SUBMENU:
             default:
                 if (cb_func)
                     cb_func(item, cb_data);
@@ -6803,6 +6845,17 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
         case XSET_TOOL_FWD_MENU:
             menu_style = XSET_MENU_SUBMENU;
             break;
+        case XSET_TOOL_NOT:
+        case XSET_TOOL_CUSTOM:
+        case XSET_TOOL_HOME:
+        case XSET_TOOL_DEFAULT:
+        case XSET_TOOL_UP:
+        case XSET_TOOL_BACK:
+        case XSET_TOOL_FWD:
+        case XSET_TOOL_REFRESH:
+        case XSET_TOOL_NEW_TAB:
+        case XSET_TOOL_NEW_TAB_HERE:
+        case XSET_TOOL_INVALID:
         default:
             menu_style = set->menu_style;
     }
@@ -7015,6 +7068,22 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                         if (set_child)
                             menu_label = set_child->menu_label;
                         break;
+                    case XSET_TOOL_NOT:
+                    case XSET_TOOL_DEVICES:
+                    case XSET_TOOL_BOOKMARKS:
+                    case XSET_TOOL_TREE:
+                    case XSET_TOOL_HOME:
+                    case XSET_TOOL_DEFAULT:
+                    case XSET_TOOL_UP:
+                    case XSET_TOOL_BACK:
+                    case XSET_TOOL_FWD:
+                    case XSET_TOOL_REFRESH:
+                    case XSET_TOOL_NEW_TAB:
+                    case XSET_TOOL_NEW_TAB_HERE:
+                    case XSET_TOOL_SHOW_HIDDEN:
+                    case XSET_TOOL_SHOW_THUMB:
+                    case XSET_TOOL_LARGE_ICONS:
+                    case XSET_TOOL_INVALID:
                     default:
                         if (!set->menu_label)
                             menu_label = (char*)xset_get_builtin_toolitem_label(set->tool);

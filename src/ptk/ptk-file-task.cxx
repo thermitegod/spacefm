@@ -455,6 +455,11 @@ set_button_states(PtkFileTask* ptask)
             // iconset = ztd::strdup("task_resume");
             //  icon = "media-playback-start";
             break;
+        case VFS_FILE_TASK_RUNNING:
+        case VFS_FILE_TASK_SIZE_TIMEOUT:
+        case VFS_FILE_TASK_QUERY_OVERWRITE:
+        case VFS_FILE_TASK_ERROR:
+        case VFS_FILE_TASK_FINISH:
         default:
             label = "Pa_use";
             // iconset = ztd::strdup("task_pause");
@@ -1731,6 +1736,10 @@ on_vfs_file_task_state_cb(VFSFileTask* task, VFSFileTaskState state, void* state
                 main_task_pause_all_queued(ptask);
             }
             break;
+        case VFS_FILE_TASK_RUNNING:
+        case VFS_FILE_TASK_SIZE_TIMEOUT:
+        case VFS_FILE_TASK_PAUSE:
+        case VFS_FILE_TASK_QUEUE:
         default:
             break;
     }

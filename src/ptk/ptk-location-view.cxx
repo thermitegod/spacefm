@@ -466,6 +466,9 @@ on_volume_event(VFSVolume* vol, VFSVolumeState state, void* user_data)
             else
                 update_volume(vol);
             break;
+        case VFS_VOLUME_MOUNTED:
+        case VFS_VOLUME_UNMOUNTED:
+        case VFS_VOLUME_EJECT:
         default:
             break;
     }
@@ -2723,30 +2726,27 @@ on_dev_menu_button_press(GtkWidget* item, GdkEventButton* event, VFSVolume* vol)
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
     unsigned int keymod = ptk_get_keymod(event->state);
 
-    switch (event->type)
+    if (event->type == GDK_BUTTON_RELEASE)
     {
-        case GDK_BUTTON_RELEASE:
-            if (event->button == 1 && keymod == 0)
-            {
-                // user released left button - due to an apparent gtk bug, activate
-                // doesn't always fire on this event so handle it ourselves
-                // see also settings.c xset_design_cb()
-                // test: gtk2 Crux theme with touchpad on Edit|Copy To|Location
-                // https://github.com/IgnorantGuru/spacefm/issues/31
-                // https://github.com/IgnorantGuru/spacefm/issues/228
-                if (menu)
-                    gtk_menu_shell_deactivate(GTK_MENU_SHELL(menu));
+        if (event->button == 1 && keymod == 0)
+        {
+            // user released left button - due to an apparent gtk bug, activate
+            // doesn't always fire on this event so handle it ourselves
+            // see also settings.c xset_design_cb()
+            // test: gtk2 Crux theme with touchpad on Edit|Copy To|Location
+            // https://github.com/IgnorantGuru/spacefm/issues/31
+            // https://github.com/IgnorantGuru/spacefm/issues/228
+            if (menu)
+                gtk_menu_shell_deactivate(GTK_MENU_SHELL(menu));
 
-                gtk_menu_item_activate(GTK_MENU_ITEM(item));
-                return true;
-            }
-            return false;
-            break;
-        case GDK_BUTTON_PRESS:
-            break;
-        default:
-            return false;
+            gtk_menu_item_activate(GTK_MENU_ITEM(item));
+            return true;
+        }
+        return false;
+        return false;
     }
+    else if (event->type != GDK_BUTTON_PRESS)
+        return false;
 
     show_dev_design_menu(menu, item, vol, event->button, event->time);
     return true;
@@ -3052,6 +3052,23 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
         case XSET_MENU_SEP:
             is_sep = true;
             break;
+        case XSET_MENU_NORMAL:
+        case XSET_MENU_CHECK:
+        case XSET_MENU_STRING:
+        case XSET_MENU_RADIO:
+        case XSET_MENU_FILEDLG:
+        case XSET_MENU_FONTDLG:
+        case XSET_MENU_ICON:
+        case XSET_MENU_COLORDLG:
+        case XSET_MENU_CONFIRM:
+        case XSET_MENU_RESERVED_03:
+        case XSET_MENU_RESERVED_04:
+        case XSET_MENU_RESERVED_05:
+        case XSET_MENU_RESERVED_06:
+        case XSET_MENU_RESERVED_07:
+        case XSET_MENU_RESERVED_08:
+        case XSET_MENU_RESERVED_09:
+        case XSET_MENU_RESERVED_10:
         default:
             if (set->menu_style != XSET_MENU_CHECK)
                 icon1 = icon_name;

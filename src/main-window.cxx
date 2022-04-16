@@ -5042,6 +5042,11 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow*
                 case VFS_FILE_TASK_QUEUE:
                     sname = ztd::strdup("task_resume");
                     break;
+                case VFS_FILE_TASK_RUNNING:
+                case VFS_FILE_TASK_SIZE_TIMEOUT:
+                case VFS_FILE_TASK_QUERY_OVERWRITE:
+                case VFS_FILE_TASK_ERROR:
+                case VFS_FILE_TASK_FINISH:
                 default:
                     sname = ztd::strdup("task_pause");
             }

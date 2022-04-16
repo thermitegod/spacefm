@@ -683,6 +683,13 @@ ptk_file_browser_add_toolbar_widget(void* set_ptr, GtkWidget* widget)
         case XSET_TOOL_LARGE_ICONS:
             x = 9;
             break;
+        case XSET_TOOL_NOT:
+        case XSET_TOOL_HOME:
+        case XSET_TOOL_DEFAULT:
+        case XSET_TOOL_REFRESH:
+        case XSET_TOOL_NEW_TAB:
+        case XSET_TOOL_NEW_TAB_HERE:
+        case XSET_TOOL_INVALID:
         default:
             return;
     }
@@ -4440,9 +4447,9 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     case GDK_ACTION_LINK:
                         file_action = VFS_FILE_TASK_LINK;
                         break;
-                        /* FIXME:
-                          GDK_ACTION_DEFAULT, GDK_ACTION_PRIVATE, and GDK_ACTION_ASK are not handled
-                        */
+                    case GDK_ACTION_DEFAULT:
+                    case GDK_ACTION_PRIVATE:
+                    case GDK_ACTION_ASK:
                     default:
                         break;
                 }

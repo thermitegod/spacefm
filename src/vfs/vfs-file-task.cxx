@@ -281,8 +281,10 @@ check_overwrite(VFSFileTask* task, const char* dest_file, bool* dest_exists, cha
                         }
                         return true;
                         break;
+                    case VFS_FILE_TASK_SKIP_ALL:
                     case VFS_FILE_TASK_AUTO_RENAME:
-                        break;
+                    case VFS_FILE_TASK_SKIP:
+                    case VFS_FILE_TASK_RENAME:
                     default:
                         return false;
                 }
@@ -1815,14 +1817,18 @@ vfs_file_task_thread(VFSFileTask* task)
             off_t exlimit;
             switch (task->type)
             {
-                case VFS_FILE_TASK_TRASH:
                 case VFS_FILE_TASK_MOVE:
                 case VFS_FILE_TASK_COPY:
+                case VFS_FILE_TASK_TRASH:
                     exlimit = 10485760; // 10M
                     break;
                 case VFS_FILE_TASK_DELETE:
                     exlimit = 5368709120; // 5G
                     break;
+                case VFS_FILE_TASK_LINK:
+                case VFS_FILE_TASK_CHMOD_CHOWN:
+                case VFS_FILE_TASK_EXEC:
+                case VFS_FILE_TASK_LAST:
                 default:
                     exlimit = 0; // always exception for other types
                     break;
