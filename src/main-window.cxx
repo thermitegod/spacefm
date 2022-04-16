@@ -239,10 +239,10 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
     if (!set)
         return;
 
-    if (g_str_has_suffix(set->name, "cfile") || g_str_has_suffix(set->name, "curl"))
+    if (Glib::str_has_suffix(set->name, "cfile") || Glib::str_has_suffix(set->name, "curl"))
         job = PLUGIN_JOB_COPY;
 
-    if (g_str_has_suffix(set->name, "file"))
+    if (Glib::str_has_suffix(set->name, "file"))
     {
         // get file path
         XSet* save = xset_get("plug_ifile");
@@ -4647,7 +4647,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, XSet* set2, PtkFileTask* task2)
         job = JOB_RESUME;
     else
         return;
-    bool all = (g_str_has_suffix(name, "_all"));
+    bool all = (Glib::str_has_suffix(name, "_all"));
 
     if (all)
     {
@@ -6008,7 +6008,7 @@ main_window_socket_command(char* argv[], char** reply)
                                      panel,
                                      tab);
         }
-        else if (g_str_has_suffix(argv[i], "_visible"))
+        else if (Glib::str_has_suffix(argv[i], "_visible"))
         {
             bool use_mode = false;
             if (Glib::str_has_prefix(argv[i], "devices_"))
@@ -6424,7 +6424,7 @@ main_window_socket_command(char* argv[], char** reply)
         else if (!strcmp(argv[i], "new_tab"))
         {
         }
-        else if (g_str_has_suffix(argv[i], "_visible"))
+        else if (Glib::str_has_suffix(argv[i], "_visible"))
         {
             bool use_mode = false;
             if (Glib::str_has_prefix(argv[i], "devices_"))

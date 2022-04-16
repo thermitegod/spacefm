@@ -370,7 +370,7 @@ receive_socket_command(int client, GString* args)
 
     if (args->str[1])
     {
-        if (g_str_has_suffix(args->str, "\n\n"))
+        if (Glib::str_has_suffix(args->str, "\n\n"))
         {
             // remove empty strings at tail
             args->str[args->len - 1] = '\0';

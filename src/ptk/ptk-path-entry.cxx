@@ -91,7 +91,7 @@ seek_path(GtkEntry* entry)
         free(seek_dir);
         return false;
     }
-    if (!g_str_has_suffix(path, "/"))
+    if (!Glib::str_has_suffix(path, "/"))
     {
         // get name prefix
         seek_name = g_path_get_basename(path);
@@ -129,7 +129,7 @@ seek_path(GtkEntry* entry)
         else
             free(test_path);
     }
-    if (strcmp(seek_dir, "/") && g_str_has_suffix(seek_dir, "/"))
+    if (strcmp(seek_dir, "/") && Glib::str_has_suffix(seek_dir, "/"))
     {
         // strip trialing slash
         seek_dir[std::strlen(seek_dir) - 1] = '\0';
@@ -317,7 +317,7 @@ insert_complete(GtkEntry* entry)
     std::string full_path;
     std::string long_prefix;
 
-    if (g_str_has_suffix(prefix, "/"))
+    if (Glib::str_has_suffix(prefix, "/"))
         prefix_name = nullptr;
     else
         prefix_name = g_path_get_basename(prefix);
@@ -682,7 +682,7 @@ on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars, unsigne
     while (text[0] == ' ')
         text++;
 
-    if (text[0] == '\'' && g_str_has_suffix(text, "'") && text[1] != '\0')
+    if (text[0] == '\'' && Glib::str_has_suffix(text, "'") && text[1] != '\0')
     {
         // path is quoted - assume bash quote
         char* unquote = ztd::strdup(text + 1);

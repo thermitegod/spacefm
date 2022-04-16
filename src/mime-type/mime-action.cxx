@@ -338,7 +338,7 @@ mime_type_has_action(const char* type, const char* desktop_id)
     Glib::ustring name;
 
     bool found = false;
-    bool is_desktop = g_str_has_suffix(desktop_id, ".desktop");
+    bool is_desktop = Glib::str_has_suffix(desktop_id, ".desktop");
 
     if (is_desktop)
     {
@@ -452,7 +452,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
     char* cust = nullptr;
     Glib::ustring file_content;
 
-    if (g_str_has_suffix(desktop_id, ".desktop"))
+    if (Glib::str_has_suffix(desktop_id, ".desktop"))
     {
         const auto kf = Glib::KeyFile::create();
         filename = mime_type_locate_desktop_file(nullptr, desktop_id);

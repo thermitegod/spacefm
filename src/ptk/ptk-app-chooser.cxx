@@ -406,7 +406,8 @@ on_browse_btn_clicked(GtkButton* button, void* user_data)
                 GTK_NOTEBOOK(GTK_WIDGET(gtk_builder_get_object(builder, "notebook")));
             /* FIXME: path shouldn't be hard-coded */
             const char* app_path = ztd::strdup("/usr/share/applications");
-            if (Glib::str_has_prefix(filename, app_path) && g_str_has_suffix(filename, ".desktop"))
+            if (Glib::str_has_prefix(filename, app_path) &&
+                Glib::str_has_suffix(filename, ".desktop"))
             {
                 char* app_name = g_path_get_basename(filename);
                 gtk_entry_set_text(entry, app_name);

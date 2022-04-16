@@ -24,6 +24,8 @@
 
 #include <sstream>
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -1289,7 +1291,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                         // add a dot to extension
                         extension = g_strconcat(".", extension.c_str(), nullptr);
                         // Checking if the current extension is being used
-                        if (g_str_has_suffix(filename, extension.c_str()))
+                        if (Glib::str_has_suffix(filename, extension.c_str()))
                         {
                             // It is - determining filename without extension
                             n = std::strlen(filename) - std::strlen(extension.c_str());

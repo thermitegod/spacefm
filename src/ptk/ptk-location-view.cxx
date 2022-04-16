@@ -729,7 +729,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
                     parent_dir_str = ztd::replace(netmount->path, "/", "-");
                     parent_dir = ztd::strdup(parent_dir_str);
                     g_strstrip(parent_dir);
-                    while (g_str_has_suffix(parent_dir, "-"))
+                    while (Glib::str_has_suffix(parent_dir, "-"))
                         parent_dir[std::strlen(parent_dir) - 1] = '\0';
                     while (Glib::str_has_prefix(parent_dir, "-"))
                     {

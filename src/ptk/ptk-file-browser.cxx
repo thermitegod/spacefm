@@ -3692,7 +3692,7 @@ folder_view_search_equal(GtkTreeModel* model, int col, const char* key, GtkTreeI
     }
     else
     {
-        bool end = g_str_has_suffix(key, "$");
+        bool end = Glib::str_has_suffix(key, "$");
         bool start = !end && (std::strlen(key) < 3);
         char* key2 = ztd::strdup(key);
         char* keyp = key2;
@@ -3708,7 +3708,7 @@ folder_view_search_equal(GtkTreeModel* model, int col, const char* key, GtkTreeI
         else if (start)
             no_match = !Glib::str_has_prefix(name, keyp);
         else if (end)
-            no_match = !g_str_has_suffix(name, keyp);
+            no_match = !Glib::str_has_suffix(name, keyp);
         else
             no_match = !strstr(name, key);
         free(key2);

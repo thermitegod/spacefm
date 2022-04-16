@@ -392,10 +392,10 @@ xset_context_test(XSetContext* context, char* rules, bool def_disable)
                     test = !Glib::str_has_prefix(context->var[sub], eleval);
                     break;
                 case CONTEXT_COMP_ENDS:
-                    test = g_str_has_suffix(context->var[sub], eleval);
+                    test = Glib::str_has_suffix(context->var[sub], eleval);
                     break;
                 case CONTEXT_COMP_NENDS:
-                    test = !g_str_has_suffix(context->var[sub], eleval);
+                    test = !Glib::str_has_suffix(context->var[sub], eleval);
                     break;
                 case CONTEXT_COMP_LESS:
                     test = strtol(context->var[sub], nullptr, 10) < strtol(eleval, nullptr, 10);
@@ -581,7 +581,7 @@ static char*
 context_display(int sub, int comp, char* value)
 {
     char* disp;
-    if (value[0] == '\0' || value[0] == ' ' || g_str_has_suffix(value, " "))
+    if (value[0] == '\0' || value[0] == ' ' || Glib::str_has_suffix(value, " "))
         disp = g_strdup_printf("%s %s \"%s\"", context_sub[sub], context_comp[comp], value);
     else
         disp = g_strdup_printf("%s %s %s", context_sub[sub], context_comp[comp], value);

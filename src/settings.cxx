@@ -1841,7 +1841,7 @@ xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
 
     if (!set->lock && xset_get_int_set(set, "x") == XSET_CMD_APP)
     {
-        if (set->z && g_str_has_suffix(set->z, ".desktop"))
+        if (set->z && Glib::str_has_suffix(set->z, ".desktop"))
         {
             VFSAppDesktop desktop(set->z);
 
@@ -3466,7 +3466,7 @@ xset_custom_activate(GtkWidget* item, XSet* set)
                 xset_item_prop_dlg(xset_context, set, 0);
                 return;
             }
-            else if (g_str_has_suffix(set->z, ".desktop"))
+            else if (Glib::str_has_suffix(set->z, ".desktop"))
             {
                 VFSAppDesktop desktop(set->z);
                 if (desktop.get_exec() && desktop.get_exec()[0] != '\0')
