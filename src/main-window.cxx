@@ -5807,14 +5807,12 @@ main_window_socket_command(char* argv[], char** reply)
         main_window = nullptr;
         for (FMMainWindow* window2: all_windows)
         {
-            str = g_strdup_printf("%p", window2);
-            if (!strcmp(str, window))
+            std::string str2 = fmt::format("{:p}", (void*)window2);
+            if (ztd::same(str2, window))
             {
                 main_window = window2;
-                free(str);
                 break;
             }
-            free(str);
         }
         if (!main_window)
         {
@@ -6004,7 +6002,7 @@ main_window_socket_command(char* argv[], char** reply)
                                      "new_tab_number=%d\n",
                                      BASHPATH,
                                      SHELL_SETTINGS,
-                                     main_window,
+                                     (void*)main_window,
                                      panel,
                                      tab);
         }
@@ -6744,13 +6742,9 @@ main_window_socket_command(char* argv[], char** reply)
             do
             {
                 gtk_tree_model_get(model, &it, TASK_COL_DATA, &ptask, -1);
-                str = g_strdup_printf("%p", ptask);
-                if (!strcmp(str, argv[i]))
-                {
-                    free(str);
+                std::string str2 = fmt::format("{:p}", (void*)ptask);
+                if (ztd::same(str2, argv[i]))
                     break;
-                }
-                free(str);
                 ptask = nullptr;
             } while (gtk_tree_model_iter_next(model, &it));
         }
@@ -6866,13 +6860,9 @@ main_window_socket_command(char* argv[], char** reply)
             do
             {
                 gtk_tree_model_get(model, &it, TASK_COL_DATA, &ptask, -1);
-                str = g_strdup_printf("%p", ptask);
-                if (!strcmp(str, argv[i]))
-                {
-                    free(str);
+                std::string str2 = fmt::format("{:p}", (void*)ptask);
+                if (ztd::same(str2, argv[i]))
                     break;
-                }
-                free(str);
                 ptask = nullptr;
             } while (gtk_tree_model_iter_next(model, &it));
         }
@@ -7041,8 +7031,8 @@ main_window_socket_command(char* argv[], char** reply)
                                     "new_task_id=%p\n",
                                     BASHPATH,
                                     SHELL_SETTINGS,
-                                    main_window,
-                                    ptask);
+                                    (void*)main_window,
+                                    (void*)ptask);
         }
         else if (!strcmp(argv[i], "edit") || !strcmp(argv[i], "web"))
         {
@@ -7294,8 +7284,8 @@ main_window_socket_command(char* argv[], char** reply)
                                      "new_task_id=%p\n",
                                      BASHPATH,
                                      SHELL_SETTINGS,
-                                     main_window,
-                                     ptask);
+                                     (void*)main_window,
+                                     (void*)ptask);
         }
         else
         {
