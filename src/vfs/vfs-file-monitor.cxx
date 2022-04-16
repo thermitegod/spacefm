@@ -30,6 +30,8 @@
 
 #include "vfs/vfs-file-monitor.hxx"
 
+// #define VFS_FILE_MONITOR_DEBUG
+
 struct VFSFileMonitorCallbackEntry
 {
     VFSFileMonitorCallback callback;
@@ -359,26 +361,21 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
         if (monitor)
         {
             const char* file_name;
-            file_name = ievent->len > 0 ? ievent->name : monitor->path;
-            /*
-            //MOD for debug output only
+            file_name = ievent->len > 0 ? (char*)ievent->name : monitor->path;
+
+#ifdef VFS_FILE_MONITOR_DEBUG
             char* desc;
-            if ( ievent->mask & ( IN_CREATE | IN_MOVED_TO ) )
-                desc = "CREATE";
-            else if ( ievent->mask & ( IN_DELETE | IN_MOVED_FROM | IN_DELETE_SELF | IN_UNMOUNT ) )
-                desc = "DELETE";
-            else if ( ievent->mask & ( IN_MODIFY | IN_ATTRIB ) )
-                desc = "CHANGE";
-            if ( !strcmp( monitor->path, "/tmp" ) && Glib::str_has_prefix( file_name, "vte" ) )
-            { } // due to current vte scroll problems creating and deleting massive numbers of
-            // /tmp/vte8CBO7V types of files, ignore these (creates feedback loop when
-            // spacefm is run in terminal because each printf triggers a scroll,
-            // which triggers another printf below, which triggers another file change)
-            // https://bugs.launchpad.net/ubuntu/+source/vte/+bug/778872
-            else
-                LOG_INFO("inotify-event {}: {}///{}", desc, monitor->path, file_name);
-            //LOG_DEBUG("inotify ({}) :{}", ievent->mask, file_name);
-            */
+            if (ievent->mask & (IN_CREATE | IN_MOVED_TO))
+                desc = ztd::strdup("CREATE");
+            else if (ievent->mask & (IN_DELETE | IN_MOVED_FROM | IN_DELETE_SELF | IN_UNMOUNT))
+                desc = ztd::strdup("DELETE");
+            else if (ievent->mask & (IN_MODIFY | IN_ATTRIB))
+                desc = ztd::strdup("CHANGE");
+
+            LOG_INFO("inotify-event {}: {}///{}", desc, monitor->path, file_name);
+            LOG_DEBUG("inotify ({}) :{}", ievent->mask, file_name);
+#endif
+
             vfs_file_monitor_dispatch_event(monitor,
                                             vfs_file_monitor_translate_inotify_event(ievent->mask),
                                             file_name);
