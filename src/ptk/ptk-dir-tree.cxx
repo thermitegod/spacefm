@@ -25,6 +25,9 @@
 
 #include <gdk/gdk.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "settings.hxx"
 
 #include "vfs/vfs-user-dir.hxx"
@@ -347,15 +350,25 @@ ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
 static void
 ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column, GValue* value)
 {
-    (void)tree_model;
-    g_return_if_fail(PTK_IS_DIR_TREE(tree_model));
-    g_return_if_fail(iter != nullptr);
-    g_return_if_fail(column < G_N_ELEMENTS(column_types));
-
-    g_value_init(value, column_types[column]);
+    if (!PTK_IS_DIR_TREE(tree_model))
+    {
+        LOG_ERROR("!PTK_IS_DIR_TREE(tree_model)");
+        return;
+    }
+    if (!iter)
+    {
+        LOG_ERROR("!iter");
+        return;
+    }
+    if (column > (int)G_N_ELEMENTS(column_types))
+    {
+        LOG_ERROR("column > (int)G_N_ELEMENTS(column_types)");
+        return;
+    }
 
     PtkDirTreeNode* node = static_cast<PtkDirTreeNode*>(iter->user_data);
-    g_return_if_fail(node != nullptr);
+
+    g_value_init(value, column_types[column]);
     VFSFileInfo* info = node->file;
     switch (column)
     {
@@ -796,8 +809,8 @@ on_file_monitor_event(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char*
                       void* user_data)
 {
     PtkDirTreeNode* node = static_cast<PtkDirTreeNode*>(user_data);
+
     char* file_path;
-    g_return_if_fail(node);
 
     PtkDirTreeNode* child = find_node(node, file_name);
     switch (event)

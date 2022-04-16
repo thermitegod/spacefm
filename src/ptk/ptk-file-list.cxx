@@ -396,14 +396,25 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column,
     PtkFileList* list = PTK_FILE_LIST(tree_model);
     GdkPixbuf* icon;
 
-    g_return_if_fail(PTK_IS_FILE_LIST(tree_model));
-    g_return_if_fail(iter != nullptr);
-    g_return_if_fail(column < G_N_ELEMENTS(column_types));
-
-    g_value_init(value, column_types[column]);
+    if (!PTK_IS_FILE_LIST(tree_model))
+    {
+        LOG_ERROR("!PTK_IS_FILE_LIST(tree_model)");
+        return;
+    }
+    if (!iter)
+    {
+        LOG_ERROR("!iter");
+        return;
+    }
+    if (column > (int)G_N_ELEMENTS(column_types))
+    {
+        LOG_ERROR("column > (int)G_N_ELEMENTS(column_types)");
+        return;
+    }
 
     GList* l = (GList*)iter->user_data;
-    g_return_if_fail(l != nullptr);
+
+    g_value_init(value, column_types[column]);
 
     VFSFileInfo* info = static_cast<VFSFileInfo*>(iter->user_data2);
 

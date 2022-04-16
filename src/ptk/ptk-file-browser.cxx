@@ -199,7 +199,11 @@ g_cclosure_marshal_VOID__POINTER_INT(GClosure* closure, GValue* return_value,
     void* data1;
     void* data2;
 
-    g_return_if_fail(n_param_values == 3);
+    if (n_param_values != 3)
+    {
+        LOG_ERROR("g_cclosure_marshal_VOID__POINTER_INT n_param_values != 3");
+        return;
+    }
 
     if (G_CCLOSURE_SWAP_DATA(closure))
     {
