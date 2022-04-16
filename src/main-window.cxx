@@ -2455,7 +2455,7 @@ fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
         tab_text = gtk_label_new("");
 
     gtk_label_set_ellipsize(GTK_LABEL(tab_text), PANGO_ELLIPSIZE_MIDDLE);
-    if (strlen(gtk_label_get_text(GTK_LABEL(tab_text))) < 30)
+    if (std::strlen(gtk_label_get_text(GTK_LABEL(tab_text))) < 30)
     {
         gtk_label_set_ellipsize(GTK_LABEL(tab_text), PANGO_ELLIPSIZE_NONE);
         gtk_label_set_width_chars(GTK_LABEL(tab_text), -1);
@@ -2528,7 +2528,7 @@ fm_main_window_update_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
         name = g_path_get_basename(path);
         gtk_label_set_text(text, name);
         gtk_label_set_ellipsize(text, PANGO_ELLIPSIZE_MIDDLE);
-        if (strlen(name) < 30)
+        if (std::strlen(name) < 30)
         {
             gtk_label_set_ellipsize(text, PANGO_ELLIPSIZE_NONE);
             gtk_label_set_width_chars(text, -1);

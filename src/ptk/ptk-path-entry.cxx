@@ -132,7 +132,7 @@ seek_path(GtkEntry* entry)
     if (strcmp(seek_dir, "/") && g_str_has_suffix(seek_dir, "/"))
     {
         // strip trialing slash
-        seek_dir[strlen(seek_dir) - 1] = '\0';
+        seek_dir[std::strlen(seek_dir) - 1] = '\0';
     }
     ptk_file_browser_seek_path(edata->browser, seek_dir, seek_name);
     free(seek_dir);
@@ -181,7 +181,7 @@ match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it, voi
 
     if (name)
     {
-        if (*key == 0 || g_ascii_strncasecmp(name, key, strlen(key)) == 0)
+        if (*key == 0 || g_ascii_strncasecmp(name, key, std::strlen(key)) == 0)
         {
             free(name);
             return true;
@@ -686,7 +686,7 @@ on_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars, unsigne
     {
         // path is quoted - assume bash quote
         char* unquote = ztd::strdup(text + 1);
-        unquote[strlen(unquote) - 1] = '\0';
+        unquote[std::strlen(unquote) - 1] = '\0';
         cleaned = ztd::replace(unquote, "'\\''", "'");
         new_text = ztd::strdup(cleaned);
         free(unquote);

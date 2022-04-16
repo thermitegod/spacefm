@@ -678,13 +678,13 @@ dir_path_from_tree_node(PtkDirTree* tree, PtkDirTreeNode* node)
     char* p;
 
     for (len = 1, l = names; l; l = l->next)
-        len += strlen((char*)l->data) + 1;
+        len += std::strlen((char*)l->data) + 1;
     char* dir_path = static_cast<char*>(g_malloc(len));
 
     for (p = dir_path, l = names; l; l = l->next)
     {
         name = (char*)l->data;
-        len = strlen(name);
+        len = std::strlen(name);
         memcpy(p, name, len * sizeof(char));
         p += len;
         if (l->next && strcmp(name, "/"))

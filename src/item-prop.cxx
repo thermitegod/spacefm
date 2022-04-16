@@ -1381,7 +1381,7 @@ replace_item_props(ContextData* ctxt)
         if (x == XSET_CMD_LINE)
         {
             rset->line = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_script));
-            if (rset->line && strlen(rset->line) > 2000)
+            if (rset->line && std::strlen(rset->line) > 2000)
                 xset_msg_dialog(ctxt->dlg,
                                 GTK_MESSAGE_WARNING,
                                 "Command Line Too Long",

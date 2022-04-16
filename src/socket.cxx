@@ -401,7 +401,7 @@ receive_socket_command(int client, GString* args)
     // send response
     write(client, &cmd, sizeof(char)); // send exit status
     if (reply && reply[0])
-        write(client, reply, strlen(reply)); // send reply or error msg
+        write(client, reply, std::strlen(reply)); // send reply or error msg
     free(reply);
 }
 
@@ -440,14 +440,14 @@ send_socket_command(int argc, char* argv[], char** reply)
 
     // send inode tag
     std::string inode_tag = get_inode_tag();
-    write(sock, inode_tag.c_str(), strlen(inode_tag.c_str()));
+    write(sock, inode_tag.c_str(), std::strlen(inode_tag.c_str()));
     write(sock, "\n", 1);
 
     // send arguments
     int i;
     for (i = 2; i < argc; i++)
     {
-        write(sock, argv[i], strlen(argv[i]));
+        write(sock, argv[i], std::strlen(argv[i]));
         write(sock, "\n", 1);
     }
     write(sock, "\n", 1);

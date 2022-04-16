@@ -1001,7 +1001,7 @@ info_mount_points(device_t* device)
         char* mount_point;
         // dev_t dev;
 
-        if (strlen(lines[n]) == 0)
+        if (std::strlen(lines[n]) == 0)
             continue;
 
         if (sscanf(lines[n],
@@ -1192,7 +1192,7 @@ info_partition(device_t* device)
 
         char* s = device->native_path;
         unsigned int n;
-        for (n = strlen(s) - 1; n >= 0 && g_ascii_isdigit(s[n]); n--)
+        for (n = std::strlen(s) - 1; n >= 0 && g_ascii_isdigit(s[n]); n--)
             ;
         device->partition_number = g_strdup_printf("%ld", strtol(s + n + 1, nullptr, 0));
         /*
@@ -1455,7 +1455,7 @@ device_show_info(device_t* device, std::string& info)
         info.append(fmt::format("    ejectable:                 {}\n", device->drive_is_media_ejectable));
         info.append(fmt::format("    media:                     {}\n", device->drive_media ? device->drive_media : ""));
         info.append(fmt::format("      compat:                  {}\n", device->drive_media_compatibility ? device->drive_media_compatibility : ""));
-        if (device->drive_connection_interface == nullptr || strlen(device->drive_connection_interface) == 0)
+        if (device->drive_connection_interface == nullptr || std::strlen(device->drive_connection_interface) == 0)
             info.append(fmt::format("    interface:                 (unknown)\n"));
         else
             info.append(fmt::format("    interface:                 {}\n", device->drive_connection_interface));
@@ -1540,7 +1540,7 @@ parse_mounts(bool report)
         char* mount_point;
         char* fstype;
 
-        if (strlen(lines[n]) == 0)
+        if (std::strlen(lines[n]) == 0)
             continue;
 
         if (sscanf(lines[n],
@@ -3283,7 +3283,7 @@ vfs_volume_get_mount_options(VFSVolume* vol, char* options)
     bool trailing = false;
     int j = -1;
     char news[16384];
-    for (unsigned int i = 0; i < strlen(options); i++)
+    for (unsigned int i = 0; i < std::strlen(options); i++)
     {
         if (leading && (options[i] == ' ' || options[i] == ','))
             continue;
@@ -3339,7 +3339,7 @@ vfs_volume_get_mount_options(VFSVolume* vol, char* options)
             {
                 // add option
                 strncpy(newoptr, single, sizeof(char));
-                newoptr = newo + strlen(newo);
+                newoptr = newo + std::strlen(newo);
                 newoptr[0] = ',';
                 newoptr[1] = '\0';
                 newoptr++;
@@ -3361,7 +3361,7 @@ vfs_volume_get_mount_options(VFSVolume* vol, char* options)
                 {
                     // add +fs option
                     strncpy(newoptr, single, sizeof(char));
-                    newoptr = newo + strlen(newo);
+                    newoptr = newo + std::strlen(newo);
                     newoptr[0] = ',';
                     newoptr[1] = '\0';
                     newoptr++;
@@ -4082,7 +4082,7 @@ vfs_volume_dir_avoid_changes(const char* dir)
         if (fstype && fstype[0])
         {
             // fstype listed in change detection blacklist?
-            int len = strlen(fstype);
+            int len = std::strlen(fstype);
             char* ptr;
             if ((ptr = xset_get_s("dev_change")))
             {

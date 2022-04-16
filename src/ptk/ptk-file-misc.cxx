@@ -1013,8 +1013,8 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
             dir = get_template_dir();
             if (dir)
             {
-                if (Glib::str_has_prefix(new_path, dir) && new_path[strlen(dir)] == '/')
-                    path = new_path + strlen(dir) + 1;
+                if (Glib::str_has_prefix(new_path, dir) && new_path[std::strlen(dir)] == '/')
+                    path = new_path + std::strlen(dir) + 1;
                 free(dir);
             }
         }

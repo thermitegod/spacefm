@@ -1695,7 +1695,7 @@ ptk_file_browser_update_tab_label(PtkFileBrowser* file_browser)
     name = g_path_get_basename(ptk_file_browser_get_cwd(file_browser));
     gtk_label_set_text(text, name);
     gtk_label_set_ellipsize(text, PANGO_ELLIPSIZE_MIDDLE);
-    if (strlen(name) < 30)
+    if (std::strlen(name) < 30)
     {
         gtk_label_set_ellipsize(text, PANGO_ELLIPSIZE_NONE);
         gtk_label_set_width_chars(text, -1);
@@ -1863,7 +1863,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
         /* remove redundent '/' */
         if (strcmp(path, "/"))
         {
-            char* path_end = path + strlen(path) - 1;
+            char* path_end = path + std::strlen(path) - 1;
             for (; path_end > path; --path_end)
             {
                 if (*path_end != '/')
@@ -3690,7 +3690,7 @@ folder_view_search_equal(GtkTreeModel* model, int col, const char* key, GtkTreeI
     else
     {
         bool end = g_str_has_suffix(key, "$");
-        bool start = !end && (strlen(key) < 3);
+        bool start = !end && (std::strlen(key) < 3);
         char* key2 = ztd::strdup(key);
         char* keyp = key2;
         if (key[0] == '^')
@@ -3699,7 +3699,7 @@ folder_view_search_equal(GtkTreeModel* model, int col, const char* key, GtkTreeI
             start = true;
         }
         if (end)
-            key2[strlen(key2) - 1] = '\0';
+            key2[std::strlen(key2) - 1] = '\0';
         if (start && end)
             no_match = !strstr(name, keyp);
         else if (start)
@@ -5997,7 +5997,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
     else if (Glib::str_has_prefix(set->name, "panel"))
     {
         i = 0;
-        if (strlen(set->name) > 6)
+        if (std::strlen(set->name) > 6)
         {
             xname = ztd::strdup(set->name + 5);
             xname[1] = '\0';

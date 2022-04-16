@@ -367,7 +367,7 @@ mime_cache_lookup_suffix(MimeCache* cache, const char* filename, const char** su
         const char* suffix;
         const char* leaf_node;
         const char* _suffix_pos = (const char*)-1;
-        int fn_len = strlen(filename);
+        int fn_len = std::strlen(filename);
         suffix = g_utf8_find_prev_char(filename, filename + fn_len);
         leaf_node =
             lookup_reverse_suffix_nodes(cache->buffer, root, n, filename, suffix, &_suffix_pos);

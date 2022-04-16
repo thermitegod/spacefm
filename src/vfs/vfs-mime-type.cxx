@@ -306,7 +306,7 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
             /* try gnome-mime-foo */
             if (!icon)
             {
-                icon_name[11] = '\0'; /* strlen("gnome-mime-") = 11 */
+                icon_name[11] = '\0'; /* std::strlen("gnome-mime-") = 11 */
                 strncat(icon_name, mime_type->type, (sep - mime_type->type));
                 icon = vfs_load_icon(icon_theme, icon_name, size);
             }

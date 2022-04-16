@@ -730,7 +730,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
                     parent_dir = ztd::strdup(parent_dir_str);
                     g_strstrip(parent_dir);
                     while (g_str_has_suffix(parent_dir, "-"))
-                        parent_dir[strlen(parent_dir) - 1] = '\0';
+                        parent_dir[std::strlen(parent_dir) - 1] = '\0';
                     while (Glib::str_has_prefix(parent_dir, "-"))
                     {
                         str = parent_dir;
@@ -738,7 +738,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
                         free(str);
                     }
                     if (parent_dir[0] == '\0' || !g_utf8_validate(parent_dir, -1, nullptr) ||
-                        strlen(parent_dir) > 30)
+                        std::strlen(parent_dir) > 30)
                     {
                         free(parent_dir);
                         parent_dir = nullptr;

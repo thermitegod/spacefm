@@ -480,7 +480,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
         kf->set_string(group_desktop, "X-MimeType-Derived", desktop_id);
         kf->set_string(group_desktop, "NoDisplay", "true");
 
-        name = g_strndup(desktop_id, strlen(desktop_id) - 8);
+        name = g_strndup(desktop_id, std::strlen(desktop_id) - 8);
         cust_template = g_strdup_printf("%s-usercustom-%%d.desktop", name);
         free(name);
 

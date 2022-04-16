@@ -117,7 +117,7 @@ vfs_file_monitor_add(char* path, VFSFileMonitorCallback cb, void* user_data)
         return nullptr;
 
     // inotify does not follow symlinks, need to get real path
-    if (strlen(path) > PATH_MAX - 1)
+    if (std::strlen(path) > PATH_MAX - 1)
     {
         LOG_WARN("PATH_MAX exceeded on {}", path);
         real_path = path; // fallback
