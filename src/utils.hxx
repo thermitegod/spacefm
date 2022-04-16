@@ -17,24 +17,24 @@
 
 #include <string>
 
-void print_command(const std::string& command);
-void print_task_command(const char* ptask, const char* cmd);
-void print_task_command_spawn(std::vector<std::string> argv, int pid);
+void print_command(const std::string& command) noexcept;
+void print_task_command(const char* ptask, const char* cmd) noexcept;
+void print_task_command_spawn(std::vector<std::string> argv, int pid) noexcept;
 
-char* randhex8();
+char* randhex8() noexcept;
 
-bool have_rw_access(const std::string& path);
-bool have_x_access(const std::string& path);
+bool have_rw_access(const std::string& path) noexcept;
+bool have_x_access(const std::string& path) noexcept;
 
-bool dir_has_files(const std::string& path);
+bool dir_has_files(const std::string& path) noexcept;
 
-std::string replace_line_subs(const std::string& line);
-std::string get_name_extension(const std::string& full_name, std::string& ext);
-const std::string get_prog_executable();
-void open_in_prog(const char* path);
+std::string replace_line_subs(const std::string& line) noexcept;
+std::string get_name_extension(const std::string& full_name, std::string& ext) noexcept;
+const std::string get_prog_executable() noexcept;
+void open_in_prog(const char* path) noexcept;
 
-std::string bash_quote(const std::string& str);
+std::string bash_quote(const std::string& str) noexcept;
 
-std::string clean_label(const std::string& menu_label, bool kill_special, bool escape);
+std::string clean_label(const std::string& menu_label, bool kill_special, bool escape) noexcept;
 
 std::string get_valid_su();

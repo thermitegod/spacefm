@@ -32,19 +32,19 @@
 #include "utils.hxx"
 
 void
-print_command(const std::string& command)
+print_command(const std::string& command) noexcept
 {
     LOG_INFO("COMMAND={}", command);
 }
 
 void
-print_task_command(const char* ptask, const char* cmd)
+print_task_command(const char* ptask, const char* cmd) noexcept
 {
     LOG_INFO("TASK_COMMAND({:p})={}", ptask, cmd);
 }
 
 void
-print_task_command_spawn(std::vector<std::string> argv, int pid)
+print_task_command_spawn(std::vector<std::string> argv, int pid) noexcept
 {
     LOG_INFO("SPAWN=");
     for (std::string arg: argv)
@@ -55,7 +55,7 @@ print_task_command_spawn(std::vector<std::string> argv, int pid)
 }
 
 char*
-randhex8()
+randhex8() noexcept
 {
     char hex[9];
     unsigned int n = mrand48();
@@ -66,7 +66,7 @@ randhex8()
 }
 
 std::string
-replace_line_subs(const std::string& line)
+replace_line_subs(const std::string& line) noexcept
 {
     std::string cmd = line;
 
@@ -89,19 +89,19 @@ replace_line_subs(const std::string& line)
 }
 
 bool
-have_x_access(const std::string& path)
+have_x_access(const std::string& path) noexcept
 {
     return (faccessat(0, path.c_str(), R_OK | X_OK, AT_EACCESS) == 0);
 }
 
 bool
-have_rw_access(const std::string& path)
+have_rw_access(const std::string& path) noexcept
 {
     return (faccessat(0, path.c_str(), R_OK | W_OK, AT_EACCESS) == 0);
 }
 
 bool
-dir_has_files(const std::string& path)
+dir_has_files(const std::string& path) noexcept
 {
     if (!std::filesystem::is_directory(path))
         return false;
@@ -116,7 +116,7 @@ dir_has_files(const std::string& path)
 }
 
 std::string
-get_name_extension(const std::string& full_name, std::string& ext)
+get_name_extension(const std::string& full_name, std::string& ext) noexcept
 {
     if (std::filesystem::is_directory(full_name))
         return full_name;
@@ -142,13 +142,13 @@ get_name_extension(const std::string& full_name, std::string& ext)
 }
 
 const std::string
-get_prog_executable()
+get_prog_executable() noexcept
 {
     return std::filesystem::read_symlink("/proc/self/exe");
 }
 
 void
-open_in_prog(const char* path)
+open_in_prog(const char* path) noexcept
 {
     const std::string exe = get_prog_executable();
     const std::string qpath = bash_quote(path);
@@ -158,7 +158,7 @@ open_in_prog(const char* path)
 }
 
 std::string
-bash_quote(const std::string& str)
+bash_quote(const std::string& str) noexcept
 {
     if (str.empty())
         return "\"\"";
@@ -168,7 +168,7 @@ bash_quote(const std::string& str)
 }
 
 std::string
-clean_label(const std::string& menu_label, bool kill_special, bool escape)
+clean_label(const std::string& menu_label, bool kill_special, bool escape) noexcept
 {
     if (menu_label.empty())
         return "";
