@@ -337,7 +337,7 @@ vfs_file_info_get_disp_mtime(VFSFileInfo* fi)
         strftime(buf,
                  sizeof(buf),
                  app_settings.date_format.c_str(), //"%Y-%m-%d %H:%M",
-                 localtime(&fi->mtime));
+                 std::localtime(&fi->mtime));
         fi->disp_mtime = buf;
     }
     return fi->disp_mtime.c_str();

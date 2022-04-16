@@ -572,11 +572,11 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         // Modified / Accessed
         // gtk_entry_set_text( GTK_ENTRY( mtime ),
         //                    vfs_file_info_get_disp_mtime( file ) );
-        strftime(buf, sizeof(buf), time_format, localtime(vfs_file_info_get_mtime(file)));
+        strftime(buf, sizeof(buf), time_format, std::localtime(vfs_file_info_get_mtime(file)));
         gtk_entry_set_text(GTK_ENTRY(data->mtime), buf);
         data->orig_mtime = ztd::strdup(buf);
 
-        strftime(buf, sizeof(buf), time_format, localtime(vfs_file_info_get_atime(file)));
+        strftime(buf, sizeof(buf), time_format, std::localtime(vfs_file_info_get_atime(file)));
         gtk_entry_set_text(GTK_ENTRY(data->atime), buf);
         data->orig_atime = ztd::strdup(buf);
 

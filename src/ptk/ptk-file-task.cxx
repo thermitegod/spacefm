@@ -2015,7 +2015,7 @@ query_overwrite(PtkFileTask* ptask)
                 strftime(buf,
                          sizeof(buf),
                          app_settings.date_format.c_str(),
-                         localtime(&src_stat.st_mtime));
+                         std::localtime(&src_stat.st_mtime));
                 src_time = ztd::strdup(buf);
                 if (src_stat.st_mtime > dest_stat.st_mtime)
                     src_rel_time = "newer";
@@ -2027,7 +2027,7 @@ query_overwrite(PtkFileTask* ptask)
             strftime(buf,
                      sizeof(buf),
                      app_settings.date_format.c_str(),
-                     localtime(&dest_stat.st_mtime));
+                     std::localtime(&dest_stat.st_mtime));
             dest_time = ztd::strdup(buf);
 
             src_rel = g_strdup_printf("%s%s%s%s%s",

@@ -437,7 +437,7 @@ on_date_format_changed(GtkComboBox* widget, FMPrefDlg* fm_data)
 
     std::time_t now = std::time(nullptr);
     etext = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(fm_data->date_format))));
-    strftime(buf, sizeof(buf), etext, localtime(&now));
+    strftime(buf, sizeof(buf), etext, std::localtime(&now));
     gtk_label_set_text(GTK_LABEL(fm_data->date_display), buf);
 }
 

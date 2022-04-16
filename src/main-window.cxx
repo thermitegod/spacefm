@@ -5262,7 +5262,7 @@ main_task_view_update_task(PtkFileTask* ptask)
     {
         // new row
         char buf[64];
-        strftime(buf, sizeof(buf), "%H:%M", localtime(&ptask->task->start_time));
+        strftime(buf, sizeof(buf), "%H:%M", std::localtime(&ptask->task->start_time));
         char* started = ztd::strdup(buf);
         gtk_list_store_insert_with_values(GTK_LIST_STORE(model),
                                           &it,
