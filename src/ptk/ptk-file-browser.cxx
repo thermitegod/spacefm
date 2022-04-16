@@ -5731,44 +5731,44 @@ void
 ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser, GList* sel_files,
                                char* cwd)
 {
-    char* name;
-    const char* prog;
-    bool as_root = false;
-    const char* user1 = "1000";
-    const char* user2 = "1001";
-    char* myuser = g_strdup_printf("%d", geteuid());
-
     if (!sel_files)
         return;
+
+    char* name;
+    std::string prog;
+    bool as_root = false;
+    std::string user1 = "1000";
+    std::string user2 = "1001";
+    std::string myuser = ztd::strdup(fmt::format("{}", geteuid()));
 
     XSet* set = XSET(g_object_get_data(G_OBJECT(item), "set"));
     if (!set || !file_browser)
         return;
 
-    if (!strncmp(set->name, "perm_", 5))
+    if (ztd::startswith(set->name, "perm_"))
     {
         name = set->name + 5;
-        if (!strncmp(name, "go", 2) || !strncmp(name, "ugo", 3))
+        if (ztd::startswith(name, "go") || ztd::startswith(name, "ugo"))
             prog = "chmod -R";
         else
             prog = "chmod";
     }
-    else if (!strncmp(set->name, "rperm_", 6))
+    else if (ztd::startswith(set->name, "rperm_"))
     {
         name = set->name + 6;
-        if (!strncmp(name, "go", 2) || !strncmp(name, "ugo", 3))
+        if (ztd::startswith(name, "go") || ztd::startswith(name, "ugo"))
             prog = "chmod -R";
         else
             prog = "chmod";
         as_root = true;
     }
-    else if (!strncmp(set->name, "own_", 4))
+    else if (ztd::startswith(set->name, "own_"))
     {
         name = set->name + 4;
         prog = "chown";
         as_root = true;
     }
-    else if (!strncmp(set->name, "rown_", 5))
+    else if (ztd::startswith(set->name, "rown_"))
     {
         name = set->name + 5;
         prog = "chown -R";
@@ -5777,73 +5777,73 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser, 
     else
         return;
 
-    char* cmd;
-    if (!strcmp(name, "r"))
-        cmd = g_strdup_printf("u+r-wx,go-rwx");
-    else if (!strcmp(name, "rw"))
-        cmd = g_strdup_printf("u+rw-x,go-rwx");
-    else if (!strcmp(name, "rwx"))
-        cmd = g_strdup_printf("u+rwx,go-rwx");
-    else if (!strcmp(name, "r_r"))
-        cmd = g_strdup_printf("u+r-wx,g+r-wx,o-rwx");
-    else if (!strcmp(name, "rw_r"))
-        cmd = g_strdup_printf("u+rw-x,g+r-wx,o-rwx");
-    else if (!strcmp(name, "rw_rw"))
-        cmd = g_strdup_printf("u+rw-x,g+rw-x,o-rwx");
-    else if (!strcmp(name, "rwxr_x"))
-        cmd = g_strdup_printf("u+rwx,g+rx-w,o-rwx");
-    else if (!strcmp(name, "rwxrwx"))
-        cmd = g_strdup_printf("u+rwx,g+rwx,o-rwx");
-    else if (!strcmp(name, "r_r_r"))
-        cmd = g_strdup_printf("ugo+r,ugo-wx");
-    else if (!strcmp(name, "rw_r_r"))
-        cmd = g_strdup_printf("u+rw-x,go+r-wx");
-    else if (!strcmp(name, "rw_rw_rw"))
-        cmd = g_strdup_printf("ugo+rw-x");
-    else if (!strcmp(name, "rwxr_r"))
-        cmd = g_strdup_printf("u+rwx,go+r-wx");
-    else if (!strcmp(name, "rwxr_xr_x"))
-        cmd = g_strdup_printf("u+rwx,go+rx-w");
-    else if (!strcmp(name, "rwxrwxrwx"))
-        cmd = g_strdup_printf("ugo+rwx,-t");
-    else if (!strcmp(name, "rwxrwxrwt"))
-        cmd = g_strdup_printf("ugo+rwx,+t");
-    else if (!strcmp(name, "unstick"))
-        cmd = g_strdup_printf("-t");
-    else if (!strcmp(name, "stick"))
-        cmd = g_strdup_printf("+t");
-    else if (!strcmp(name, "go_w"))
-        cmd = g_strdup_printf("go-w");
-    else if (!strcmp(name, "go_rwx"))
-        cmd = g_strdup_printf("go-rwx");
-    else if (!strcmp(name, "ugo_w"))
-        cmd = g_strdup_printf("ugo+w");
-    else if (!strcmp(name, "ugo_rx"))
-        cmd = g_strdup_printf("ugo+rX");
-    else if (!strcmp(name, "ugo_rwx"))
-        cmd = g_strdup_printf("ugo+rwX");
-    else if (!strcmp(name, "myuser"))
-        cmd = g_strdup_printf("%s:%s", myuser, myuser);
-    else if (!strcmp(name, "myuser_users"))
-        cmd = g_strdup_printf("%s:users", myuser);
-    else if (!strcmp(name, "user1"))
-        cmd = g_strdup_printf("%s:%s", user1, user1);
-    else if (!strcmp(name, "user1_users"))
-        cmd = g_strdup_printf("%s:users", user1);
-    else if (!strcmp(name, "user2"))
-        cmd = g_strdup_printf("%s:%s", user2, user2);
-    else if (!strcmp(name, "user2_users"))
-        cmd = g_strdup_printf("%s:users", user2);
-    else if (!strcmp(name, "root"))
-        cmd = g_strdup_printf("root:root");
-    else if (!strcmp(name, "root_users"))
-        cmd = g_strdup_printf("root:users");
-    else if (!strcmp(name, "root_myuser"))
-        cmd = g_strdup_printf("root:%s", myuser);
-    else if (!strcmp(name, "root_user1"))
-        cmd = g_strdup_printf("root:%s", user1);
-    else if (!strcmp(name, "root_user2"))
-        cmd = g_strdup_printf("root:%s", user2);
+    std::string cmd;
+    if (ztd::same(name, "r"))
+        cmd = "u+r-wx,go-rwx";
+    else if (ztd::same(name, "rw"))
+        cmd = "u+rw-x,go-rwx";
+    else if (ztd::same(name, "rwx"))
+        cmd = "u+rwx,go-rwx";
+    else if (ztd::same(name, "r_r"))
+        cmd = "u+r-wx,g+r-wx,o-rwx";
+    else if (ztd::same(name, "rw_r"))
+        cmd = "u+rw-x,g+r-wx,o-rwx";
+    else if (ztd::same(name, "rw_rw"))
+        cmd = "u+rw-x,g+rw-x,o-rwx";
+    else if (ztd::same(name, "rwxr_x"))
+        cmd = "u+rwx,g+rx-w,o-rwx";
+    else if (ztd::same(name, "rwxrwx"))
+        cmd = "u+rwx,g+rwx,o-rwx";
+    else if (ztd::same(name, "r_r_r"))
+        cmd = "ugo+r,ugo-wx";
+    else if (ztd::same(name, "rw_r_r"))
+        cmd = "u+rw-x,go+r-wx";
+    else if (ztd::same(name, "rw_rw_rw"))
+        cmd = "ugo+rw-x";
+    else if (ztd::same(name, "rwxr_r"))
+        cmd = "u+rwx,go+r-wx";
+    else if (ztd::same(name, "rwxr_xr_x"))
+        cmd = "u+rwx,go+rx-w";
+    else if (ztd::same(name, "rwxrwxrwx"))
+        cmd = "ugo+rwx,-t";
+    else if (ztd::same(name, "rwxrwxrwt"))
+        cmd = "ugo+rwx,+t";
+    else if (ztd::same(name, "unstick"))
+        cmd = "-t";
+    else if (ztd::same(name, "stick"))
+        cmd = "+t";
+    else if (ztd::same(name, "go_w"))
+        cmd = "go-w";
+    else if (ztd::same(name, "go_rwx"))
+        cmd = "go-rwx";
+    else if (ztd::same(name, "ugo_w"))
+        cmd = "ugo+w";
+    else if (ztd::same(name, "ugo_rx"))
+        cmd = "ugo+rX";
+    else if (ztd::same(name, "ugo_rwx"))
+        cmd = "ugo+rwX";
+    else if (ztd::same(name, "myuser"))
+        cmd = fmt::format("{}:{}", myuser, myuser);
+    else if (ztd::same(name, "myuser_users"))
+        cmd = fmt::format("{}:users", myuser);
+    else if (ztd::same(name, "user1"))
+        cmd = fmt::format("{}:{}", user1, user1);
+    else if (ztd::same(name, "user1_users"))
+        cmd = fmt::format("{}:users", user1);
+    else if (ztd::same(name, "user2"))
+        cmd = fmt::format("{}:{}", user2, user2);
+    else if (ztd::same(name, "user2_users"))
+        cmd = fmt::format("{}:users", user2);
+    else if (ztd::same(name, "root"))
+        cmd = "root:root";
+    else if (ztd::same(name, "root_users"))
+        cmd = "root:users";
+    else if (ztd::same(name, "root_myuser"))
+        cmd = fmt::format("root:{}", myuser);
+    else if (ztd::same(name, "root_user1"))
+        cmd = fmt::format("root:{}", user1);
+    else if (ztd::same(name, "root_user2"))
+        cmd = fmt::format("root:{}", user2);
     else
         return;
 
@@ -5860,8 +5860,7 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser, 
     // task
     PtkFileTask* task =
         ptk_file_exec_new(set->menu_label, cwd, GTK_WIDGET(file_browser), file_browser->task_view);
-    task->task->exec_command = g_strdup_printf("%s %s %s", prog, cmd, file_paths.c_str());
-    free(cmd);
+    task->task->exec_command = ztd::strdup(fmt::format("{} {} {}", prog, cmd, file_paths));
     task->task->exec_browser = file_browser;
     task->task->exec_sync = true;
     task->task->exec_show_error = true;
