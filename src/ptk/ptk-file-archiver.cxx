@@ -1005,7 +1005,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     char* full_path = nullptr;
     std::string full_quote;
     char* perm = nullptr;
-    char* s1 = nullptr;
     int i;
     int n;
     int res;

@@ -2720,7 +2720,8 @@ fm_main_window_add_new_window(FMMainWindow* main_window)
             app_settings.height = allocation.height;
         }
     }
-    GtkWidget* new_win = fm_main_window_new();
+    // GtkWidget* new_win = fm_main_window_new();
+    fm_main_window_new();
 }
 
 static void
@@ -2768,7 +2769,6 @@ set_panel_focus(FMMainWindow* main_window, PtkFileBrowser* file_browser)
 {
     int p;
     // int pages;
-    int cur_tabx;
     // GtkWidget* notebook;
 
     if (!file_browser && !main_window)
@@ -7495,7 +7495,6 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
     else
         replace = ztd::strdup("ewpt");
 
-    char* str;
     std::string rep;
     char var[3];
     var[0] = '%';

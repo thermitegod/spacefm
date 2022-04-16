@@ -1827,7 +1827,7 @@ xset_new_menuitem(const char* label, const char* icon)
         item = gtk_menu_item_new_with_mnemonic(label);
     if (!(icon && icon[0]))
         return item;
-    GtkWidget* image = xset_get_image(icon, GTK_ICON_SIZE_MENU);
+    // GtkWidget* image = xset_get_image(icon, GTK_ICON_SIZE_MENU);
 
     return item;
 }
@@ -3261,7 +3261,6 @@ _export_error:
 static void
 open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
 {
-    char* tilde_url = nullptr;
     const char* use_url;
 
     bool new_window = false;
@@ -3904,7 +3903,6 @@ static bool
 on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
 {
     (void)widget;
-    GList* l;
     int* newkey = (int*)g_object_get_data(G_OBJECT(dlg), "newkey");
     int* newkeymod = (int*)g_object_get_data(G_OBJECT(dlg), "newkeymod");
     GtkWidget* btn = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "btn"));

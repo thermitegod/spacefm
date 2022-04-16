@@ -105,13 +105,11 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
     int small_icon;
     int tool_icon;
     bool single_click;
-    bool root_bar;
     bool root_set_change = false;
     PtkFileBrowser* file_browser;
     bool use_si_prefix;
     GtkNotebook* notebook;
     int p;
-    FMMainWindow* a_window;
 
     GtkWidget* tab_label;
     /* interface settings */

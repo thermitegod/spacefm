@@ -440,8 +440,6 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column,
         return;
     }
 
-    GList* l = (GList*)iter->user_data;
-
     g_value_init(value, column_types[column]);
 
     VFSFileInfo* info = static_cast<VFSFileInfo*>(iter->user_data2);

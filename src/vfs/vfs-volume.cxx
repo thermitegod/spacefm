@@ -1099,7 +1099,6 @@ info_partition_table(device_t* device)
         const char* s = g_path_get_basename(device->native_path);
 
         unsigned int partition_count;
-        const char* name;
 
         partition_count = 0;
 

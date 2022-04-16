@@ -2766,7 +2766,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             }
 
             // determine job
-            bool move = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_move));
+            // bool move = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_move));
             bool copy = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_copy));
             bool link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_link));
             bool copy_target =
@@ -3457,8 +3457,8 @@ open_files_with_each_app(void* key, void* value, void* user_data)
 static void
 free_file_list_hash(void* key, void* value, void* user_data)
 {
+    (void)key;
     (void)user_data;
-    const char* app_desktop = (const char*)key;
     GList* files = (GList*)value;
     g_list_foreach(files, (GFunc)free, nullptr);
     g_list_free(files);

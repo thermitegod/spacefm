@@ -588,7 +588,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
     XSet* set_radio;
     int icon_w;
     int icon_h;
-    GtkWidget* app_img;
     PtkFileMenu* data;
     int no_write_access = 0;
     int no_read_access = 0;
@@ -1726,13 +1725,12 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
         static_cast<const char*>(g_object_get_data(G_OBJECT(item), "desktop_file"));
     VFSAppDesktop desktop(desktop_file);
     // else if app menu, data will be set
-    PtkFileMenu* app_data = static_cast<PtkFileMenu*>(g_object_get_data(G_OBJECT(item), "data"));
+    // PtkFileMenu* app_data = static_cast<PtkFileMenu*>(g_object_get_data(G_OBJECT(item), "data"));
 
     unsigned int keymod = ptk_get_keymod(event->state);
 
     if (keymod == 0)
     {
-        const char* help = nullptr;
         switch (event->keyval)
         {
             case GDK_KEY_F2:
@@ -1831,7 +1829,6 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     VFSAppDesktop desktop(desktop_file);
 
     GtkWidget* app_menu = gtk_menu_new();
-    GtkAccelGroup* accel_group = gtk_accel_group_new();
 
     // Set Default
     newitem = app_menu_additem(app_menu,

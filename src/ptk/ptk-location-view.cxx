@@ -2628,7 +2628,6 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, unsig
     GtkWidget* item;
     GtkWidget* popup = gtk_menu_new();
 
-    GtkWidget* image;
     set = xset_get("dev_menu_remove");
     item = gtk_menu_item_new_with_mnemonic(set->menu_label);
     g_object_set_data(G_OBJECT(item), "view", view);
@@ -2805,9 +2804,9 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     xset_set_cb("dev_ignore_udisks_hide", (GFunc)update_all, nullptr);
     xset_set_cb("dev_show_hide_volumes", (GFunc)on_showhide, vol);
     set = xset_set_cb("dev_automount_optical", (GFunc)update_all, nullptr);
-    bool auto_optical = set->b == XSET_B_TRUE;
+    // bool auto_optical = set->b == XSET_B_TRUE;
     set = xset_set_cb("dev_automount_removable", (GFunc)update_all, nullptr);
-    bool auto_removable = set->b == XSET_B_TRUE;
+    // bool auto_removable = set->b == XSET_B_TRUE;
     xset_set_cb("dev_ignore_udisks_nopolicy", (GFunc)update_all, nullptr);
     xset_set_cb("dev_automount_volumes", (GFunc)on_automountlist, vol);
     xset_set_cb("dev_change", (GFunc)update_change_detection, nullptr);

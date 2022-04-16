@@ -1481,7 +1481,6 @@ vfs_file_task_exec(char* src_file, VFSFileTask* task)
     std::string use_su;
     bool single_arg = false;
     std::string auth;
-    int i;
 
     if (!terminal.empty())
     {

@@ -343,8 +343,6 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     GtkWidget* mime_type = GTK_WIDGET(gtk_builder_get_object(builder, "mime_type"));
     GtkWidget* open_with = GTK_WIDGET(gtk_builder_get_object(builder, "open_with"));
 
-    char buf[64];
-    char buf2[64];
     const char* time_format = ztd::strdup("%Y-%m-%d %H:%M:%S");
 
     char* disp_path;
@@ -542,6 +540,8 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         }
 
         gtk_editable_set_editable(GTK_EDITABLE(name), false);
+
+        char buf[64];
 
         if (!vfs_file_info_is_dir(file))
         {

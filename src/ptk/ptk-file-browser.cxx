@@ -1600,7 +1600,6 @@ GtkWidget*
 ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view, void* main_window)
 {
     PtkFBViewMode view_mode;
-    PangoFontDescription* font_desc;
     PtkFileBrowser* file_browser =
         static_cast<PtkFileBrowser*>(g_object_new(PTK_TYPE_FILE_BROWSER, nullptr));
 
@@ -3426,9 +3425,7 @@ on_folder_view_button_release_event(GtkWidget* widget, GdkEventButton* event,
                                     PtkFileBrowser* file_browser) // sfm
 { // on left-click release on file, if not dnd or rubberbanding, unselect files
     (void)widget;
-    GtkTreeModel* model;
     GtkTreePath* tree_path = nullptr;
-    GtkTreeSelection* tree_sel;
 
     if (file_browser->is_drag || event->button != 1 || file_browser->skip_release ||
         (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK)))
@@ -4610,8 +4607,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, int 
 
     GtkScrolledWindow* scroll = GTK_SCROLLED_WINDOW(gtk_widget_get_parent(widget));
 
-    GtkAdjustment* vadj = gtk_scrolled_window_get_vadjustment(scroll);
-    double vpos = gtk_adjustment_get_value(vadj);
+    // GtkAdjustment* vadj = gtk_scrolled_window_get_vadjustment(scroll);
     gtk_widget_get_allocation(widget, &allocation);
 
     if (y < 32)
@@ -5201,7 +5197,7 @@ static GtkWidget*
 ptk_file_browser_create_dir_tree(PtkFileBrowser* file_browser)
 {
     GtkWidget* dir_tree = ptk_dir_tree_view_new(file_browser, file_browser->show_hidden_files);
-    GtkTreeSelection* dir_tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(dir_tree));
+    // GtkTreeSelection* dir_tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(dir_tree));
     g_signal_connect(dir_tree,
                      "row-activated",
                      G_CALLBACK(on_dir_tree_row_activated),
@@ -5853,7 +5849,6 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser, 
     std::string file_paths = "";
     GList* sel;
     std::string file_path;
-    char* str;
     for (sel = sel_files; sel; sel = sel->next)
     {
         file_path = bash_quote(vfs_file_info_get_name(static_cast<VFSFileInfo*>(sel->data)));

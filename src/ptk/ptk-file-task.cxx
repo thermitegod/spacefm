@@ -681,7 +681,6 @@ on_error_combo_changed(GtkComboBox* box, PtkFileTask* ptask)
 void
 ptk_file_task_progress_open(PtkFileTask* ptask)
 {
-    GtkTable* table;
     GtkLabel* label;
 
     // clang-format off
@@ -719,7 +718,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 
     // Buttons
     // Pause
-    XSet* set = xset_get("task_pause");
+    // XSet* set = xset_get("task_pause");
 
     ptask->progress_btn_pause = gtk_button_new_with_mnemonic("Pa_use");
 
@@ -2154,7 +2153,7 @@ query_overwrite(PtkFileTask* ptask)
                            GTK_RESPONSE_CANCEL,
                            nullptr);
 
-    XSet* set = xset_get("task_pause");
+    // XSet* set = xset_get("task_pause");
     gtk_widget_set_sensitive(btn_pause, !!ptask->task_view);
 
     // labels

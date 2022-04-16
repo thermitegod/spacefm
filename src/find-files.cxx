@@ -610,8 +610,6 @@ on_search_finish(VFSAsyncTask* task, bool cancelled, FindFile* data)
 static void
 on_start_search(GtkWidget* btn, FindFile* data)
 {
-    GError* err = nullptr;
-    char* cmd_line;
     GtkAllocation allocation;
 
     gtk_widget_get_allocation(GTK_WIDGET(data->win), &allocation);
@@ -779,7 +777,6 @@ on_add_search_folder(GtkWidget* btn, FindFile* data)
 {
     GtkWidget* menu = gtk_menu_new();
     GtkWidget* item;
-    // GtkWidget* img;
 
     item = gtk_menu_item_new_with_label("Browse...");
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
@@ -1001,7 +998,6 @@ fm_find_files(const char** search_dirs)
     GtkTreeViewColumn* col;
     GtkWidget* add_directory_btn;
     GtkWidget* remove_directory_btn;
-    GtkWidget* img;
 
     GtkBuilder* builder = _gtk_builder_new_from_file("find-files3.ui");
     data->win = GTK_WIDGET(gtk_builder_get_object(builder, "win"));
