@@ -210,6 +210,6 @@ void vfs_file_task_abort(VFSFileTask* task);
 
 void vfs_file_task_free(VFSFileTask* task);
 
-char* vfs_file_task_get_cpids(GPid pid);
+char* vfs_file_task_get_cpids(Glib::Pid pid);
 void vfs_file_task_kill_cpids(char* cpids, int signal);
 char* vfs_file_task_get_unique_name(const char* dest_dir, const char* base_name, const char* ext);

@@ -114,7 +114,7 @@ struct FindFile
     GtkWidget* stop_btn;
     GtkWidget* again_btn;
 
-    GPid pid;
+    Glib::Pid pid;
     int stdo;
 
     VFSAsyncTask* task;

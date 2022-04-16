@@ -1008,7 +1008,7 @@ vfs_file_task_chown_chmod(const char* src_file, VFSFileTask* task)
 }
 
 char*
-vfs_file_task_get_cpids(GPid pid)
+vfs_file_task_get_cpids(Glib::Pid pid)
 {
     // get child pids recursively as multi-line string
     if (!pid)
@@ -1034,7 +1034,7 @@ vfs_file_task_get_cpids(GPid pid)
         char* pida = ztd::strdup(pids);
         nl[0] = '\n';
         pids = nl + 1;
-        GPid pidi = strtol(pida, nullptr, 10);
+        Glib::Pid pidi = strtol(pida, nullptr, 10);
         free(pida);
         if (pidi)
         {
@@ -1068,7 +1068,7 @@ vfs_file_task_kill_cpids(char* cpids, int signal)
         char* pida = ztd::strdup(pids);
         nl[0] = '\n';
         pids = nl + 1;
-        GPid pidi = strtol(pida, nullptr, 10);
+        Glib::Pid pidi = strtol(pida, nullptr, 10);
         free(pida);
         if (pidi)
         {
@@ -1079,7 +1079,7 @@ vfs_file_task_kill_cpids(char* cpids, int signal)
 }
 
 static void
-cb_exec_child_cleanup(GPid pid, int status, char* tmp_file)
+cb_exec_child_cleanup(Glib::Pid pid, int status, char* tmp_file)
 { // delete tmp files after async task terminates
     // LOG_INFO("cb_exec_child_cleanup pid={} status={} file={}", pid, status, tmp_file );
     g_spawn_close_pid(pid);
@@ -1092,7 +1092,7 @@ cb_exec_child_cleanup(GPid pid, int status, char* tmp_file)
 }
 
 static void
-cb_exec_child_watch(GPid pid, int status, VFSFileTask* task)
+cb_exec_child_watch(Glib::Pid pid, int status, VFSFileTask* task)
 {
     bool bad_status = false;
     g_spawn_close_pid(pid);
