@@ -32,7 +32,7 @@ struct AutoSave
     // returns false when killed:
     template<class R, class P>
     bool
-    wait(std::chrono::duration<R, P> const& time)
+    wait(std::chrono::duration<R, P> const& time) noexcept
     {
         std::unique_lock<std::mutex> lock(m);
         return !cv.wait_for(lock,
@@ -43,7 +43,7 @@ struct AutoSave
                             });
     }
     void
-    kill()
+    kill() noexcept
     {
         std::unique_lock<std::mutex> lock(m);
         terminate = true;
@@ -66,7 +66,7 @@ AutoSave autosave;
 std::vector<std::future<void>> threads;
 
 static void
-autosave_thread()
+autosave_thread() noexcept
 {
     const std::chrono::duration<unsigned int> duration(autosave.timer);
     while (autosave.wait(duration))
@@ -82,21 +82,21 @@ autosave_thread()
 }
 
 void
-autosave_request()
+autosave_request() noexcept
 {
     // LOG_INFO("AUTOSAVE request add");
     autosave.request.store(true);
 }
 
 void
-autosave_cancel()
+autosave_cancel() noexcept
 {
     // LOG_INFO("AUTOSAVE request cancel");
     autosave.request.store(false);
 }
 
 void
-autosave_init()
+autosave_init() noexcept
 {
     // LOG_INFO("AUTOSAVE init");
     threads.push_back(std::async(std::launch::async,
@@ -107,7 +107,7 @@ autosave_init()
 }
 
 void
-autosave_terminate()
+autosave_terminate() noexcept
 {
     // LOG_INFO("AUTOSAVE kill thread");
     autosave.kill();
