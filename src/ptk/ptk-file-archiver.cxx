@@ -283,73 +283,24 @@ generate_bash_error_function(bool run_in_terminal, const char* parent_quote)
     return script;
 }
 
-static char*
-replace_archive_subs(const char* line, const char* n, const char* N, const char* o, const char* x,
-                     const char* g)
+static const std::string
+replace_archive_subs(const std::string& line, const std::string& n, const std::string& N,
+                     const std::string& o, const std::string& x, const std::string& g)
 {
-    char* old_s;
-    char* sub;
-    char* percent;
-    char ch;
+    std::string new_line = line;
 
-    if (!line)
-        return ztd::strdup("");
+    new_line = ztd::replace(new_line, "%n", n);
+    new_line = ztd::replace(new_line, "%N", N);
+    new_line = ztd::replace(new_line, "%o", o);
+    new_line = ztd::replace(new_line, "%O", o);
+    new_line = ztd::replace(new_line, "%x", x);
+    new_line = ztd::replace(new_line, "%g", g);
+    new_line = ztd::replace(new_line, "%G", g);
 
-    char* s = ztd::strdup("");
-    char* ptr = (char*)line;
-    while (ptr[0])
-    {
-        percent = strchr(ptr, '%');
-        if (!percent)
-        {
-            // no more percents - copy end of string
-            old_s = s;
-            s = g_strdup_printf("%s%s", s, ptr);
-            free(old_s);
-            break;
-        }
-        if (percent[1] == 'n' && n)
-            sub = (char*)n;
-        else if (percent[1] == 'N' && N)
-            sub = (char*)N;
-        else if ((percent[1] == 'o' || percent[1] == 'O') && o)
-            sub = (char*)o;
-        else if (percent[1] == 'x' && x)
-            sub = (char*)x;
-        else if ((percent[1] == 'g' || percent[1] == 'G') && g)
-            sub = (char*)g;
-        else if (percent[1] == '%')
-        {
-            // double percent %% - reduce to single and skip
-            percent[1] = '\0';
-            old_s = s;
-            s = g_strdup_printf("%s%s", s, ptr);
-            free(old_s);
-            percent[1] = '%';
-            ptr = percent + 2;
-            continue;
-        }
-        else
-        {
-            // not recognized % - copy ptr to percent literally
-            ch = percent[1]; // save the character after percent, change to null
-            percent[1] = '\0';
-            old_s = s;
-            s = g_strdup_printf("%s%s", s, ptr);
-            free(old_s);
-            percent[1] = ch; // restore character after percent
-            ptr = percent + 1;
-            continue;
-        }
-        // copy ptr to percent - 1 and sub
-        percent[0] = '\0'; // change % to end of string
-        old_s = s;
-        s = g_strdup_printf("%s%s%s", s, ptr, sub);
-        free(old_s);
-        percent[0] = '%'; // restore %
-        ptr = percent + 2;
-    }
-    return s;
+    // double percent %% - reduce to single
+    new_line = ztd::replace(new_line, "%%", "%");
+
+    return new_line;
 }
 
 void
@@ -789,7 +740,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     std::string udest_quote;
     std::string s1;
     std::string final_command;
-    char* cmd_to_run;
+    std::string cmd_to_run;
 
     // Dealing with separate archives for each source file/directory ('%O')
     GList* l;
@@ -847,13 +798,12 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 desc = bash_quote(desc);
 
             // Replace sub vars  %n %N %O (and erroneous %o treat as %O)
-            cmd_to_run =
-                replace_archive_subs(command.c_str(),
-                                     i == 0 ? desc.c_str() : "", // first run only %n = desc
-                                     desc.c_str(), // Replace %N with nth file (NOT ALL FILES)
-                                     udest_quote.c_str(),
-                                     nullptr,
-                                     nullptr);
+            cmd_to_run = replace_archive_subs(command,
+                                              i == 0 ? desc : "", // first run only %n = desc
+                                              desc, // Replace %N with nth file (NOT ALL FILES)
+                                              udest_quote,
+                                              "",
+                                              "");
 
             // Appending to final command as appropriate
             if (i == 0)
@@ -864,7 +814,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                                             final_command,
                                             cmd_to_run);
             }
-            free(cmd_to_run);
         }
     }
     else
@@ -916,16 +865,10 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
         }
 
         // Replace sub vars  %n %N %o
-        cmd_to_run = replace_archive_subs(command.c_str(),
-                                          first.c_str(),
-                                          all.c_str(),
-                                          udest_quote.c_str(),
-                                          nullptr,
-                                          nullptr);
+        cmd_to_run = replace_archive_subs(command, first, all, udest_quote, "", "");
 
         // Enforce error check
         final_command = fmt::format("{}\n[[ $? -eq 0 ]] || fm_handle_err\n", cmd_to_run);
-        free(cmd_to_run);
     }
     free(dest_file);
 
@@ -1406,12 +1349,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         }
 
         // Substituting %x %g %G
-        command = replace_archive_subs(command.c_str(),
-                                       nullptr,
-                                       nullptr,
-                                       nullptr,
-                                       full_quote.c_str(),
-                                       extract_target.c_str());
+        command = replace_archive_subs(command, "", "", "", full_quote, extract_target);
 
         /* Finally constructing command to run, taking into account more than
          * one archive to list/extract. The mkparent command itself has error
