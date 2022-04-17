@@ -38,17 +38,6 @@
 #include "autosave.hxx"
 #include "utils.hxx"
 
-#define MOUNT_EXAMPLE                                                                            \
-    "# Enter mount command or leave blank for auto:\n\n\n# # Examples: (remove # to enable a "   \
-    "mount command)\n#\n# # udevil:\n#     udevil mount -o '%o' %v\n#\n# # pmount: (does not "   \
-    "accept mount options)\n#     pmount %v\n#\n# # udisks v2:\n#     udisksctl mount -b %v -o " \
-    "'%o'\n"
-
-#define UNMOUNT_EXAMPLE                                                                           \
-    "# Enter unmount command or leave blank for auto:\n\n\n# # Examples: (remove # to enable an " \
-    "unmount command)\n#\n# # udevil:\n#     udevil umount %v\n#\n# # pmount:\n#     pumount "    \
-    "%v\n#\n# # udisks v2:\n#     udisksctl unmount -b %v\n#\n"
-
 #define INFO_EXAMPLE                                                                            \
     "# Enter command to show properties or leave blank for auto:\n\n\n# # Example:\n\n# echo "  \
     "MOUNT\n# mount | grep \" on %a \"\n# echo\n# echo PROCESSES\n# /usr/bin/lsof -w \"%a\" | " \
@@ -397,9 +386,14 @@ const Handler handlers_fs[] = {
      "Default",
      "*",
      "",
-     MOUNT_EXAMPLE,
+     "# Enter mount command or leave blank for auto:\n\n\n# # Examples: (remove # to enable a "
+     "mount command)\n#\n# # udevil:\n#     udevil mount -o '%o' %v\n#\n# # pmount: (does not "
+     "accept mount options)\n#     pmount %v\n#\n# # udisks v2:\n#     udisksctl mount -b %v -o "
+     "'%o'\n",
      false,
-     UNMOUNT_EXAMPLE,
+     "# Enter unmount command or leave blank for auto:\n\n\n# # Examples: (remove # to enable an "
+     "unmount command)\n#\n# # udevil:\n#     udevil umount %v\n#\n# # pmount:\n#     pumount "
+     "%v\n#\n# # udisks v2:\n#     udisksctl unmount -b %v\n#\n",
      false,
      INFO_EXAMPLE,
      false}};
