@@ -2042,7 +2042,16 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                             // Nothing was added to the menu (all items likely have
                             // invisible context) so destroy (hide) - issue #215
                             gtk_widget_destroy(item);
-                            goto _next_item;
+                            if (icon_file)
+                                free(icon_file);
+
+                            // next item
+                            if (set->next)
+                            {
+                                set_next = xset_get(set->next);
+                                xset_add_menuitem(file_browser, menu, accel_group, set_next);
+                            }
+                            return item;
                         }
                     }
                     break;
@@ -2150,7 +2159,6 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     }
 
-_next_item:
     if (icon_file)
         free(icon_file);
 
@@ -3169,7 +3177,16 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
     {
         char* s1 = (char*)xset_get_user_tmp_dir();
         if (!s1)
-            goto _export_error;
+        {
+            free(plug_dir);
+            free(path);
+            xset_msg_dialog(parent,
+                            GTK_MESSAGE_ERROR,
+                            "Export Error",
+                            GTK_BUTTONS_OK,
+                            "Unable to create temporary files");
+            return;
+        }
         while (!plug_dir || std::filesystem::exists(plug_dir))
         {
             char* hex8 = randhex8();
@@ -3199,11 +3216,39 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
         set->parent = s_parent;
 
         if (!xset_custom_export_files(set, plug_dir))
-            goto _rmtmp_error;
+        {
+            if (!set->plugin)
+            {
+                std::filesystem::remove_all(plug_dir);
+                LOG_INFO("Removed {}", plug_dir);
+            }
+            free(plug_dir);
+            free(path);
+            xset_msg_dialog(parent,
+                            GTK_MESSAGE_ERROR,
+                            "Export Error",
+                            GTK_BUTTONS_OK,
+                            "Unable to create temporary files");
+            return;
+        }
         if (set->menu_style == XSET_MENU_SUBMENU && set->child)
         {
             if (!xset_custom_export_write(buf, xset_get(set->child), plug_dir))
-                goto _rmtmp_error;
+            {
+                if (!set->plugin)
+                {
+                    std::filesystem::remove_all(plug_dir);
+                    LOG_INFO("Removed {}", plug_dir);
+                }
+                free(plug_dir);
+                free(path);
+                xset_msg_dialog(parent,
+                                GTK_MESSAGE_ERROR,
+                                "Export Error",
+                                GTK_BUTTONS_OK,
+                                "Unable to create temporary files");
+                return;
+            }
         }
         buf.append("\n");
 
@@ -3250,21 +3295,6 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
     free(path);
     free(plug_dir);
     return;
-
-_rmtmp_error:
-    if (!set->plugin)
-    {
-        std::filesystem::remove_all(plug_dir);
-        LOG_INFO("Removed {}", plug_dir);
-    }
-_export_error:
-    free(plug_dir);
-    free(path);
-    xset_msg_dialog(parent,
-                    GTK_MESSAGE_ERROR,
-                    "Export Error",
-                    GTK_BUTTONS_OK,
-                    "Unable to create temporary files");
 }
 
 static void
@@ -6821,7 +6851,13 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     if (set->tool >= XSET_TOOL_INVALID)
     {
         // looks like an unknown built-in toolitem from a future version - skip
-        goto _next_toolitem;
+        if (set->next)
+        {
+            set_next = xset_is(set->next);
+            // LOG_INFO("    NEXT {}", set_next->name);
+            xset_add_toolitem(parent, file_browser, toolbar, icon_size, set_next, show_tooltips);
+        }
+        return item;
     }
     if (set->tool > XSET_TOOL_CUSTOM && set->tool < XSET_TOOL_INVALID && !set->shared_key)
         set->shared_key = ztd::strdup(builtin_tool_shared_key[set->tool]);
@@ -7221,9 +7257,8 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     free(icon_file);
     gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(item), -1);
 
-// LOG_INFO("    set={}   set->next={}", set->name, set->next);
-// next toolitem
-_next_toolitem:
+    // LOG_INFO("    set={}   set->next={}", set->name, set->next);
+    // next toolitem
     if (set->next)
     {
         set_next = xset_is(set->next);

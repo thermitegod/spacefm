@@ -2380,18 +2380,54 @@ split_network_url(const char* url, netmount_t** netmount)
     if (Glib::str_has_prefix(xurl, "//"))
     { // //host...
         if (xurl[2] == '\0')
-            goto _net_free;
+        {
+            free(nm->url);
+            free(nm->fstype);
+            free(nm->host);
+            free(nm->ip);
+            free(nm->port);
+            free(nm->user);
+            free(nm->pass);
+            free(nm->path);
+            g_slice_free(netmount_t, nm);
+            free(orig_url);
+            return 0;
+        }
         nm->fstype = ztd::strdup("smb");
         is_colon = false;
     }
     else if ((str = strstr(xurl, "://")))
     { // protocol://host...
         if (xurl[0] == ':' || xurl[0] == '/')
-            goto _net_free;
+        {
+            free(nm->url);
+            free(nm->fstype);
+            free(nm->host);
+            free(nm->ip);
+            free(nm->port);
+            free(nm->user);
+            free(nm->pass);
+            free(nm->path);
+            g_slice_free(netmount_t, nm);
+            free(orig_url);
+            return 0;
+        }
         str[0] = '\0';
         nm->fstype = g_strstrip(ztd::strdup(xurl));
         if (nm->fstype[0] == '\0')
-            goto _net_free;
+        {
+            free(nm->url);
+            free(nm->fstype);
+            free(nm->host);
+            free(nm->ip);
+            free(nm->port);
+            free(nm->user);
+            free(nm->pass);
+            free(nm->path);
+            g_slice_free(netmount_t, nm);
+            free(orig_url);
+            return 0;
+        }
         str[0] = ':';
         is_colon = true;
 
@@ -2408,7 +2444,20 @@ split_network_url(const char* url, netmount_t** netmount)
     { // host:/path
         // note: sshfs also uses this URL format in mtab, but mtab_fstype == fuse.sshfs
         if (xurl[0] == ':' || xurl[0] == '/')
-            goto _net_free;
+
+        {
+            free(nm->url);
+            free(nm->fstype);
+            free(nm->host);
+            free(nm->ip);
+            free(nm->port);
+            free(nm->user);
+            free(nm->pass);
+            free(nm->path);
+            g_slice_free(netmount_t, nm);
+            free(orig_url);
+            return 0;
+        }
         nm->fstype = ztd::strdup("nfs");
         str[0] = '\0';
         nm->host = ztd::strdup(xurl);
@@ -2416,7 +2465,19 @@ split_network_url(const char* url, netmount_t** netmount)
         is_colon = true;
     }
     else
-        goto _net_free;
+    {
+        free(nm->url);
+        free(nm->fstype);
+        free(nm->host);
+        free(nm->ip);
+        free(nm->port);
+        free(nm->user);
+        free(nm->pass);
+        free(nm->path);
+        g_slice_free(netmount_t, nm);
+        free(orig_url);
+        return 0;
+    }
 
     ret = 1;
 
@@ -2501,19 +2562,6 @@ split_network_url(const char* url, netmount_t** netmount)
 
     *netmount = nm;
     return ret;
-
-_net_free:
-    free(nm->url);
-    free(nm->fstype);
-    free(nm->host);
-    free(nm->ip);
-    free(nm->port);
-    free(nm->user);
-    free(nm->pass);
-    free(nm->path);
-    g_slice_free(netmount_t, nm);
-    free(orig_url);
-    return 0;
 }
 
 static VFSVolume*
@@ -3758,17 +3806,47 @@ vfs_volume_init()
     if (!umonitor)
     {
         LOG_INFO("cannot create udev monitor");
-        goto finish_;
+        if (umonitor)
+        {
+            udev_monitor_unref(umonitor);
+            umonitor = nullptr;
+        }
+        if (udev)
+        {
+            udev_unref(udev);
+            udev = nullptr;
+        }
+        return true;
     }
     if (udev_monitor_enable_receiving(umonitor))
     {
         LOG_INFO("cannot enable udev monitor receiving");
-        goto finish_;
+        if (umonitor)
+        {
+            udev_monitor_unref(umonitor);
+            umonitor = nullptr;
+        }
+        if (udev)
+        {
+            udev_unref(udev);
+            udev = nullptr;
+        }
+        return true;
     }
     if (udev_monitor_filter_add_match_subsystem_devtype(umonitor, "block", nullptr))
     {
         LOG_INFO("cannot set udev filter");
-        goto finish_;
+        if (umonitor)
+        {
+            udev_monitor_unref(umonitor);
+            umonitor = nullptr;
+        }
+        if (udev)
+        {
+            udev_unref(udev);
+            udev = nullptr;
+        }
+        return true;
     }
 
     int ufd;
@@ -3776,7 +3854,17 @@ vfs_volume_init()
     if (ufd == 0)
     {
         LOG_INFO("scannot get udev monitor socket file descriptor");
-        goto finish_;
+        if (umonitor)
+        {
+            udev_monitor_unref(umonitor);
+            umonitor = nullptr;
+        }
+        if (udev)
+        {
+            udev_unref(udev);
+            udev = nullptr;
+        }
+        return true;
     }
     global_inhibit_auto = true; // don't autoexec during startup
 
@@ -3811,18 +3899,6 @@ vfs_volume_init()
     // start resume autoexec timer
     g_timeout_add_seconds(3, (GSourceFunc)on_cancel_inhibit_timer, nullptr);
 
-    return true;
-finish_:
-    if (umonitor)
-    {
-        udev_monitor_unref(umonitor);
-        umonitor = nullptr;
-    }
-    if (udev)
-    {
-        udev_unref(udev);
-        udev = nullptr;
-    }
     return true;
 }
 

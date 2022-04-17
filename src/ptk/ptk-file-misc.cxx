@@ -2775,7 +2775,13 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                                         GTK_BUTTONS_YES_NO,
                                         "The parent directory does not exist.  Create it?") !=
                         GTK_RESPONSE_YES)
-                        goto _continue_free;
+                    {
+                        free(full_path);
+                        free(full_name);
+                        free(path);
+                        free(old_path);
+                        continue;
+                    }
                 }
                 if (as_root)
                 {
@@ -2793,7 +2799,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                         std::string msg =
                             fmt::format("Error creating parent directory\n\n{}", errno_msg);
                         ptk_show_error(GTK_WINDOW(mset->dlg), "Mkdir Error", msg);
-                        goto _continue_free;
+
+                        free(full_path);
+                        free(full_name);
+                        free(path);
+                        free(old_path);
+                        continue;
                     }
                     else
                         update_new_display(path);
@@ -2803,7 +2814,14 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             {
                 // overwrite
                 if (std::filesystem::is_directory(full_path))
-                    goto _continue_free; // just in case
+                {
+                    // just in case
+                    free(full_path);
+                    free(full_name);
+                    free(path);
+                    free(old_path);
+                    continue;
+                }
                 if (xset_msg_dialog(mset->parent,
                                     GTK_MESSAGE_WARNING,
                                     "Overwrite Existing File",
@@ -2811,7 +2829,13 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                                     "OVERWRITE WARNING",
                                     "The file path exists.  Overwrite existing file?") !=
                     GTK_RESPONSE_YES)
-                    goto _continue_free;
+                {
+                    free(full_path);
+                    free(full_name);
+                    free(path);
+                    free(old_path);
+                    continue;
+                }
                 overwrite = true;
             }
 
@@ -2883,7 +2907,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                                                "The specified template does not exist");
                                 free(str);
                                 free(tdir);
-                                goto _continue_free;
+
+                                free(full_path);
+                                free(full_name);
+                                free(path);
+                                free(old_path);
+                                continue;
                             }
                             free(tdir);
                             from_path = bash_quote(from_path);
@@ -2926,7 +2955,14 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             {
                 // new directory task
                 if (!new_folder)
-                    goto _continue_free; // failsafe
+                {
+                    // failsafe
+                    free(full_path);
+                    free(full_name);
+                    free(path);
+                    free(old_path);
+                    continue;
+                }
                 if (gtk_widget_get_visible(
                         gtk_widget_get_parent(GTK_WIDGET(mset->combo_template_dir))) &&
                     (str = gtk_combo_box_text_get_active_text(
@@ -2950,7 +2986,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                                                "The specified template does not exist");
                                 free(str);
                                 free(tdir);
-                                goto _continue_free;
+                                free(full_path);
+                                free(full_name);
+                                free(path);
+                                free(old_path);
+                                continue;
                             }
                             free(tdir);
                             from_path = bash_quote(from_path);
@@ -3003,7 +3043,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                         ptk_show_error(GTK_WINDOW(mset->dlg),
                                        "Copy Target Error",
                                        "Error determining link's target");
-                        goto _continue_free;
+                        free(full_path);
+                        free(full_name);
+                        free(path);
+                        free(old_path);
+                        continue;
                     }
                     from_path = bash_quote(str);
                     free(str);
@@ -3050,7 +3094,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                         ptk_show_error(GTK_WINDOW(mset->dlg),
                                        "Link Target Error",
                                        "Error determining link's target");
-                        goto _continue_free;
+                        free(full_path);
+                        free(full_name);
+                        free(path);
+                        free(old_path);
+                        continue;
                     }
                     from_path = bash_quote(str);
                     free(str);
@@ -3122,7 +3170,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     std::string errno_msg = Glib::strerror(errno);
                     std::string msg = fmt::format("Error renaming file\n\n{}", errno_msg);
                     ptk_show_error(GTK_WINDOW(mset->dlg), "Rename Error", msg);
-                    goto _continue_free;
+                    free(full_path);
+                    free(full_name);
+                    free(path);
+                    free(old_path);
+                    continue;
                 }
                 else
                     update_new_display(full_path);
@@ -3132,11 +3184,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             free(path);
             free(old_path);
             break;
-        _continue_free:
-            free(full_path);
-            free(full_name);
-            free(path);
-            free(old_path);
         }
         else if (response == GTK_RESPONSE_CANCEL || response == GTK_RESPONSE_DELETE_EVENT)
         {
@@ -3526,7 +3573,8 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                 }
 
                 /* The file itself is a desktop entry file. */
-                /* was: if( Glib::str_has_suffix( vfs_file_info_get_name( file ), ".desktop" ) ) */
+                /* was: if( Glib::str_has_suffix( vfs_file_info_get_name( file ), ".desktop" ) )
+                 */
                 if (!alloc_desktop)
                 {
                     if (file->flags & VFS_FILE_INFO_DESKTOP_ENTRY &&
@@ -3554,11 +3602,11 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                     {
                         if (!std::filesystem::exists(target_path))
                         {
-                            std::string msg = fmt::format(
-                                "This symlink's target is missing or you do not have permission "
-                                "to access it:\n{}\n\nTarget: {}",
-                                full_path,
-                                target_path);
+                            std::string msg = fmt::format("This symlink's target is missing or "
+                                                          "you do not have permission "
+                                                          "to access it:\n{}\n\nTarget: {}",
+                                                          full_path,
+                                                          target_path);
                             toplevel = file_browser
                                            ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser))
                                            : nullptr;

@@ -2248,7 +2248,19 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
         a_browser = PTK_FILE_BROWSER(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0));
         if (GTK_IS_WIDGET(a_browser))
             ptk_file_browser_update_views(nullptr, a_browser);
-        goto _done_close;
+
+        g_signal_handlers_unblock_matched(main_window->notebook,
+                                          G_SIGNAL_MATCH_FUNC,
+                                          0,
+                                          0,
+                                          nullptr,
+                                          (void*)on_folder_notebook_switch_pape,
+                                          nullptr);
+
+        update_window_title(nullptr, main_window);
+        if (xset_get_b("main_save_tabs"))
+            autosave_request();
+        return;
     }
 
     // update view of new current tab
@@ -2277,7 +2289,6 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
                               false);
     }
 
-_done_close:
     g_signal_handlers_unblock_matched(main_window->notebook,
                                       G_SIGNAL_MATCH_FUNC,
                                       0,
@@ -4470,12 +4481,19 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_task)
         queued = g_slist_append(queued, new_task);
 
     if (!queued || (!smart && running))
-        goto _done;
+    {
+        g_slist_free(queued);
+        g_slist_free(running);
+        return;
+    }
 
     if (!smart)
     {
         ptk_file_task_pause(static_cast<PtkFileTask*>(queued->data), VFS_FILE_TASK_RUNNING);
-        goto _done;
+
+        g_slist_free(queued);
+        g_slist_free(running);
+        return;
     }
 
     // smart
@@ -4513,7 +4531,6 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_task)
             continue;
         }
     }
-_done:
     g_slist_free(queued);
     g_slist_free(running);
 }
@@ -5648,7 +5665,10 @@ main_window_socket_command(char* argv[], std::string& reply)
         if (!strcmp(argv[i], "--window"))
         {
             if (!argv[i + 1])
-                goto _missing_arg;
+            {
+                reply = fmt::format("spacefm: option {} requires an argument\n", argv[i]);
+                return 1;
+            }
             window = argv[i + 1];
             i += 2;
             continue;
@@ -5656,7 +5676,10 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (!strcmp(argv[i], "--panel"))
         {
             if (!argv[i + 1])
-                goto _missing_arg;
+            {
+                reply = fmt::format("spacefm: option {} requires an argument\n", argv[i]);
+                return 1;
+            }
             panel = strtol(argv[i + 1], nullptr, 10);
             i += 2;
             continue;
@@ -5664,15 +5687,15 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (!strcmp(argv[i], "--tab"))
         {
             if (!argv[i + 1])
-                goto _missing_arg;
+            {
+                reply = fmt::format("spacefm: option {} requires an argument\n", argv[i]);
+                return 1;
+            }
             tab = strtol(argv[i + 1], nullptr, 10);
             i += 2;
             continue;
         }
         reply = fmt::format("spacefm: invalid option '{}'\n", argv[i]);
-        return 1;
-    _missing_arg:
-        reply = fmt::format("spacefm: option {} requires an argument\n", argv[i]);
         return 1;
     }
 
@@ -5934,7 +5957,10 @@ main_window_socket_command(char* argv[], std::string& reply)
             else
                 str = nullptr;
             if (!str)
-                goto _invalid_set;
+            {
+                reply = fmt::format("spacefm: invalid property {}\n", argv[i]);
+                return 1;
+            }
             if (use_mode)
                 xset_set_b_panel_mode(panel,
                                       str,
@@ -6082,7 +6108,10 @@ main_window_socket_command(char* argv[], std::string& reply)
                 }
             }
             else
-                goto _invalid_set;
+            {
+                reply = fmt::format("spacefm: invalid property {}\n", argv[i]);
+                return 1;
+            }
             ptk_file_browser_set_sort_extra(file_browser, str);
         }
         else if (!strcmp(argv[i], "show_thumbnails"))
@@ -6218,7 +6247,6 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         else
         {
-        _invalid_set:
             reply = fmt::format("spacefm: invalid property {}\n", argv[i]);
             return 1;
         }
@@ -6348,7 +6376,10 @@ main_window_socket_command(char* argv[], std::string& reply)
             else
                 str = nullptr;
             if (!str)
-                goto _invalid_get;
+            {
+                reply = fmt::format("spacefm: invalid property {}\n", argv[i]);
+                return 1;
+            }
             if (use_mode)
                 reply = fmt::format(
                     "{}\n",
@@ -6473,7 +6504,10 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = fmt::format("{}\n", str);
             }
             else
-                goto _invalid_get;
+            {
+                reply = fmt::format("spacefm: invalid property {}\n", argv[i]);
+                return 1;
+            }
         }
         else if (!strcmp(argv[i], "show_thumbnails"))
         {
@@ -6598,7 +6632,6 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         else
         {
-        _invalid_get:
             reply = fmt::format("spacefm: invalid property {}\n", argv[i]);
             return 1;
         }

@@ -1658,7 +1658,9 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         if (!handler_xset)
         {
             LOG_WARN("Unable to fetch the xset for the archive handler '%s'", handler_name);
-            goto _clean_exit;
+            free(xset_name);
+            free(handler_name_from_model);
+            return;
         }
     }
 
@@ -1666,7 +1668,11 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
     {
         // Exiting if there is no handler to add
         if (!(handler_name && handler_name[0]))
-            goto _clean_exit;
+        {
+            free(xset_name);
+            free(handler_name_from_model);
+            return;
+        }
 
         // Adding new handler as a copy of the current active handler
         XSet* new_handler_xset = add_new_handler(hnd->mode);
@@ -1771,7 +1777,11 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
     {
         // Exiting if apply has been pressed when no handlers are present
         if (xset_name == nullptr)
-            goto _clean_exit;
+        {
+            free(xset_name);
+            free(handler_name_from_model);
+            return;
+        }
 
         // Validating - to be saved even with invalid commands
         validate_archive_handler(hnd);
@@ -1849,14 +1859,22 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
     {
         // Exiting if remove has been pressed when no handlers are present
         if (xset_name == nullptr)
-            goto _clean_exit;
+        {
+            free(xset_name);
+            free(handler_name_from_model);
+            return;
+        }
 
         if (xset_msg_dialog(hnd->dlg,
                             GTK_MESSAGE_WARNING,
                             "Confirm Remove",
                             GTK_BUTTONS_YES_NO,
                             "Permanently remove the selected handler?") != GTK_RESPONSE_YES)
-            goto _clean_exit;
+        {
+            free(xset_name);
+            free(handler_name_from_model);
+            return;
+        }
 
         // Updating available archive handlers list - fetching current
         // handlers
@@ -1942,13 +1960,21 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
              GTK_WIDGET(widget) == GTK_WIDGET(hnd->btn_down))
     {
         if (!handler_xset)
+        {
             // no row selected
-            goto _clean_exit;
+            free(xset_name);
+            free(handler_name_from_model);
+            return;
+        }
 
         // Note: gtk_tree_model_iter_previous requires GTK3, so not using
         GtkTreeIter iter_prev;
         if (!gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter))
-            goto _clean_exit;
+        {
+            free(xset_name);
+            free(handler_name_from_model);
+            return;
+        }
         iter_prev = iter;
         do
         {
@@ -1959,7 +1985,12 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                 if (GTK_WIDGET(widget) == GTK_WIDGET(hnd->btn_up))
                     iter = iter_prev;
                 else if (!gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter))
-                    goto _clean_exit; // was last row
+                {
+                    // was last row
+                    free(xset_name);
+                    free(handler_name_from_model);
+                    return;
+                }
                 break;
             }
             iter_prev = iter;
@@ -1981,7 +2012,6 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                         error_message);
     }
 
-_clean_exit:
     free(xset_name);
     free(handler_name_from_model);
 }
@@ -2342,8 +2372,11 @@ validate_archive_handler(HandlerData* hnd)
                             "%%O: Resulting archive per source "
                             "file/directory");
             gtk_widget_grab_focus(hnd->view_handler_compress);
-            ret = false;
-            goto _cleanup;
+
+            free(handler_compress);
+            free(handler_extract);
+            free(handler_list);
+            return false;
         }
     }
 
@@ -2361,8 +2394,11 @@ validate_archive_handler(HandlerData* hnd)
                         "command:\n\n%%x: "
                         "Archive to extract");
         gtk_widget_grab_focus(hnd->view_handler_extract);
-        ret = false;
-        goto _cleanup;
+
+        free(handler_compress);
+        free(handler_extract);
+        free(handler_list);
+        return false;
     }
 
     if (g_strcmp0(handler_list, "") != 0 && (!g_strstr_len(handler_list, -1, "%x")))
@@ -2379,11 +2415,13 @@ validate_archive_handler(HandlerData* hnd)
                         "command:\n\n%%x: "
                         "Archive to list");
         gtk_widget_grab_focus(hnd->view_handler_list);
-        ret = false;
-        goto _cleanup;
+
+        free(handler_compress);
+        free(handler_extract);
+        free(handler_list);
+        return false;
     }
 
-_cleanup:
     free(handler_compress);
     free(handler_extract);
     free(handler_list);

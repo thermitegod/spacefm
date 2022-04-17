@@ -240,7 +240,15 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
     {
         it = parent_it;
         tree_path = gtk_tree_model_get_path(model, &parent_it);
-        goto _found;
+
+        g_strfreev(dirs);
+        gtk_tree_selection_select_path(gtk_tree_view_get_selection(dir_tree_view), tree_path);
+
+        gtk_tree_view_scroll_to_cell(dir_tree_view, tree_path, nullptr, false, 0.5, 0.5);
+
+        gtk_tree_path_free(tree_path);
+
+        return true;
     }
 
     char** dir;
@@ -283,7 +291,7 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
             tree_path = nullptr;
         }
     }
-_found:
+
     g_strfreev(dirs);
     gtk_tree_selection_select_path(gtk_tree_view_get_selection(dir_tree_view), tree_path);
 

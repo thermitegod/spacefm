@@ -373,10 +373,18 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
     if (S_ISDIR(file_stat.st_mode))
     {
         if (check_dest_in_src(task, src_file))
-            goto _return_;
+        {
+            if (new_dest_file)
+                free(new_dest_file);
+            return false;
+        }
 
         if (!check_overwrite(task, dest_file, &dest_exists, &new_dest_file))
-            goto _return_;
+        {
+            if (new_dest_file)
+                free(new_dest_file);
+            return false;
+        }
         if (new_dest_file)
         {
             dest_file = new_dest_file;
@@ -430,7 +438,9 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
                     vfs_file_task_error(task, errno, "Removing", src_file);
                     copy_fail = true;
                     if (should_abort(task))
-                        goto _return_;
+                        if (new_dest_file)
+                            free(new_dest_file);
+                    return false;
                 }
             }
         }
@@ -446,7 +456,11 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
         {
             buffer[rfd] = '\0'; // MOD terminate buffer string
             if (!check_overwrite(task, dest_file, &dest_exists, &new_dest_file))
-                goto _return_;
+            {
+                if (new_dest_file)
+                    free(new_dest_file);
+                return false;
+            }
 
             if (new_dest_file)
             {
@@ -463,7 +477,9 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
                 if (std::filesystem::exists(dest_file) && errno != 2 /* no such file */)
                 {
                     vfs_file_task_error(task, errno, "Removing", dest_file);
-                    goto _return_;
+                    if (new_dest_file)
+                        free(new_dest_file);
+                    return false;
                 }
             }
 
@@ -503,7 +519,9 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
             if (!check_overwrite(task, dest_file, &dest_exists, &new_dest_file))
             {
                 close(rfd);
-                goto _return_;
+                if (new_dest_file)
+                    free(new_dest_file);
+                return false;
             }
 
             if (new_dest_file)
@@ -522,7 +540,9 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
                 {
                     vfs_file_task_error(task, errno, "Removing", dest_file);
                     close(rfd);
-                    goto _return_;
+                    if (new_dest_file)
+                        free(new_dest_file);
+                    return false;
                 }
             }
 
@@ -607,11 +627,6 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
     if (!copy_fail && task->error_first)
         task->error_first = false;
     return !copy_fail;
-_return_:
-
-    if (new_dest_file)
-        free(new_dest_file);
-    return false;
 }
 
 static void
@@ -1164,14 +1179,32 @@ cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, VFSFileTask* task)
     else if (!(cond & G_IO_IN))
     {
         if ((cond & G_IO_HUP))
-            goto _unref_channel;
+        {
+            g_io_channel_unref(channel);
+            if (channel == task->exec_channel_out)
+                task->exec_channel_out = nullptr;
+            else if (channel == task->exec_channel_err)
+                task->exec_channel_err = nullptr;
+            if (!task->exec_channel_out && !task->exec_channel_err && !task->exec_pid)
+                call_state_callback(task, VFS_FILE_TASK_FINISH);
+            return false;
+        }
         else
+        {
             return true;
+        }
     }
     else if (!(fcntl(g_io_channel_unix_get_fd(channel), F_GETFL) != -1 || errno != EBADF))
     {
         // bad file descriptor - occurs with stop on fast output
-        goto _unref_channel;
+        g_io_channel_unref(channel);
+        if (channel == task->exec_channel_out)
+            task->exec_channel_out = nullptr;
+        else if (channel == task->exec_channel_err)
+            task->exec_channel_err = nullptr;
+        if (!task->exec_channel_out && !task->exec_channel_err && !task->exec_pid)
+            call_state_callback(task, VFS_FILE_TASK_FINISH);
+        return false;
     }
 
     // GError *error = nullptr;
@@ -1184,16 +1217,6 @@ cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, VFSFileTask* task)
         LOG_INFO("cb_exec_out_watch: g_io_channel_read_chars != G_IO_STATUS_NORMAL");
 
     return true;
-
-_unref_channel:
-    g_io_channel_unref(channel);
-    if (channel == task->exec_channel_out)
-        task->exec_channel_out = nullptr;
-    else if (channel == task->exec_channel_err)
-        task->exec_channel_err = nullptr;
-    if (!task->exec_channel_out && !task->exec_channel_err && !task->exec_pid)
-        call_state_callback(task, VFS_FILE_TASK_FINISH);
-    return false;
 }
 
 static char*
@@ -1699,7 +1722,16 @@ vfs_file_task_thread(VFSFileTask* task)
                      (GFunc)vfs_file_task_chown_chmod,
                      (GFunc)vfs_file_task_exec};
     if (task->type < VFS_FILE_TASK_MOVE || task->type >= VFS_FILE_TASK_LAST)
-        goto _exit_thread;
+    {
+        task->state = VFS_FILE_TASK_RUNNING;
+        if (size_timeout)
+            g_source_remove_by_user_data(task);
+        if (task->state_cb)
+        {
+            call_state_callback(task, VFS_FILE_TASK_FINISH);
+        }
+        return nullptr;
+    }
 
     vfs_file_task_lock(task);
     task->state = VFS_FILE_TASK_RUNNING;
@@ -1708,7 +1740,16 @@ vfs_file_task_thread(VFSFileTask* task)
     vfs_file_task_unlock(task);
 
     if (task->abort)
-        goto _exit_thread;
+    {
+        task->state = VFS_FILE_TASK_RUNNING;
+        if (size_timeout)
+            g_source_remove_by_user_data(task);
+        if (task->state_cb)
+        {
+            call_state_callback(task, VFS_FILE_TASK_FINISH);
+        }
+        return nullptr;
+    }
 
     /* Calculate total size of all files */
     if (task->recursive)
@@ -1732,7 +1773,16 @@ vfs_file_task_thread(VFSFileTask* task)
                 vfs_file_task_unlock(task);
             }
             if (task->abort)
-                goto _exit_thread;
+            {
+                task->state = VFS_FILE_TASK_RUNNING;
+                if (size_timeout)
+                    g_source_remove_by_user_data(task);
+                if (task->state_cb)
+                {
+                    call_state_callback(task, VFS_FILE_TASK_FINISH);
+                }
+                return nullptr;
+            }
             if (task->state == VFS_FILE_TASK_SIZE_TIMEOUT)
                 break;
         }
@@ -1751,7 +1801,14 @@ vfs_file_task_thread(VFSFileTask* task)
             {
                 vfs_file_task_error(task, errno, "Accessing", task->dest_dir.c_str());
                 task->abort = true;
-                goto _exit_thread;
+                task->state = VFS_FILE_TASK_RUNNING;
+                if (size_timeout)
+                    g_source_remove_by_user_data(task);
+                if (task->state_cb)
+                {
+                    call_state_callback(task, VFS_FILE_TASK_FINISH);
+                }
+                return nullptr;
             }
             dest_dev = file_stat.st_dev;
         }
@@ -1782,7 +1839,16 @@ vfs_file_task_thread(VFSFileTask* task)
                 }
             }
             if (task->abort)
-                goto _exit_thread;
+            {
+                task->state = VFS_FILE_TASK_RUNNING;
+                if (size_timeout)
+                    g_source_remove_by_user_data(task);
+                if (task->state_cb)
+                {
+                    call_state_callback(task, VFS_FILE_TASK_FINISH);
+                }
+                return nullptr;
+            }
             if (task->state == VFS_FILE_TASK_SIZE_TIMEOUT)
                 break;
         }
@@ -1792,7 +1858,16 @@ vfs_file_task_thread(VFSFileTask* task)
         add_task_dev(task, file_stat.st_dev);
 
     if (task->abort)
-        goto _exit_thread;
+    {
+        task->state = VFS_FILE_TASK_RUNNING;
+        if (size_timeout)
+            g_source_remove_by_user_data(task);
+        if (task->state_cb)
+        {
+            call_state_callback(task, VFS_FILE_TASK_FINISH);
+        }
+        return nullptr;
+    }
 
     // cancel the timer
     if (size_timeout)
@@ -1837,11 +1912,19 @@ vfs_file_task_thread(VFSFileTask* task)
     }
     task->state = VFS_FILE_TASK_RUNNING;
     if (should_abort(task))
-        goto _exit_thread;
+    {
+        task->state = VFS_FILE_TASK_RUNNING;
+        if (size_timeout)
+            g_source_remove_by_user_data(task);
+        if (task->state_cb)
+        {
+            call_state_callback(task, VFS_FILE_TASK_FINISH);
+        }
+        return nullptr;
+    }
 
     g_list_foreach(task->src_paths, funcs[task->type], task);
 
-_exit_thread:
     task->state = VFS_FILE_TASK_RUNNING;
     if (size_timeout)
         g_source_remove_by_user_data(task);

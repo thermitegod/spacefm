@@ -2898,6 +2898,38 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
     focus_folder_view(file_browser);
 }
 
+static void
+ptk_file_browser_restore_sig(PtkFileBrowser* file_browser, GtkTreeSelection* tree_sel)
+{
+    // restore signals and trigger sel change
+    switch (file_browser->view_mode)
+    {
+        case PTK_FB_ICON_VIEW:
+        case PTK_FB_COMPACT_VIEW:
+            g_signal_handlers_unblock_matched(file_browser->folder_view,
+                                              G_SIGNAL_MATCH_FUNC,
+                                              0,
+                                              0,
+                                              nullptr,
+                                              (void*)on_folder_view_item_sel_change,
+                                              nullptr);
+            on_folder_view_item_sel_change(EXO_ICON_VIEW(file_browser->folder_view), file_browser);
+            break;
+        case PTK_FB_LIST_VIEW:
+            g_signal_handlers_unblock_matched(tree_sel,
+                                              G_SIGNAL_MATCH_FUNC,
+                                              0,
+                                              0,
+                                              nullptr,
+                                              (void*)on_folder_view_item_sel_change,
+                                              nullptr);
+            on_folder_view_item_sel_change(EXO_ICON_VIEW(tree_sel), file_browser);
+            break;
+        default:
+            break;
+    }
+}
+
 void
 ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const char* seek_dir,
                            const char* seek_name)
@@ -2964,7 +2996,10 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const char* seek_dir,
     }
 
     if (!GTK_IS_TREE_MODEL(model))
-        goto _restore_sig;
+    {
+        ptk_file_browser_restore_sig(file_browser, tree_sel);
+        return;
+    }
 
     // test rows - give preference to matching dir, else match file
     GtkTreeIter it_file;
@@ -3008,13 +3043,19 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const char* seek_dir,
     else
         it = it_file;
     if (!it.stamp)
-        goto _restore_sig;
+    {
+        ptk_file_browser_restore_sig(file_browser, tree_sel);
+        return;
+    }
 
     // do selection and scroll to selected
     GtkTreePath* path;
     path = gtk_tree_model_get_path(GTK_TREE_MODEL(PTK_FILE_LIST(file_browser->file_list)), &it);
     if (!path)
-        goto _restore_sig;
+    {
+        ptk_file_browser_restore_sig(file_browser, tree_sel);
+        return;
+    }
 
     switch (file_browser->view_mode)
     {
@@ -3055,34 +3096,7 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const char* seek_dir,
     }
     gtk_tree_path_free(path);
 
-_restore_sig:
-    // restore signals and trigger sel change
-    switch (file_browser->view_mode)
-    {
-        case PTK_FB_ICON_VIEW:
-        case PTK_FB_COMPACT_VIEW:
-            g_signal_handlers_unblock_matched(file_browser->folder_view,
-                                              G_SIGNAL_MATCH_FUNC,
-                                              0,
-                                              0,
-                                              nullptr,
-                                              (void*)on_folder_view_item_sel_change,
-                                              nullptr);
-            on_folder_view_item_sel_change(EXO_ICON_VIEW(file_browser->folder_view), file_browser);
-            break;
-        case PTK_FB_LIST_VIEW:
-            g_signal_handlers_unblock_matched(tree_sel,
-                                              G_SIGNAL_MATCH_FUNC,
-                                              0,
-                                              0,
-                                              nullptr,
-                                              (void*)on_folder_view_item_sel_change,
-                                              nullptr);
-            on_folder_view_item_sel_change(EXO_ICON_VIEW(tree_sel), file_browser);
-            break;
-        default:
-            break;
-    }
+    ptk_file_browser_restore_sig(file_browser, tree_sel);
 }
 
 /* signal handlers */
