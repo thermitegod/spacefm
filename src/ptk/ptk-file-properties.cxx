@@ -156,27 +156,29 @@ on_update_labels(FilePropertiesDialogData* data)
 {
     std::string size_str;
 
-    size_str = vfs_file_size_to_string_format(data->total_size, true);
-    size_str = fmt::format("{} ( {} bytes )", size_str, (uint64_t)data->total_size);
+    size_str = fmt::format("{} ( {} bytes )",
+                           vfs_file_size_to_string_format(data->total_size, true),
+                           (uint64_t)data->total_size);
     gtk_label_set_text(data->total_size_label, size_str.c_str());
 
-    size_str = vfs_file_size_to_string_format(data->size_on_disk, true);
-    size_str = fmt::format("{} ( {} bytes )", size_str, (uint64_t)data->size_on_disk);
+    size_str = fmt::format("{} ( {} bytes )",
+                           vfs_file_size_to_string_format(data->size_on_disk, true),
+                           (uint64_t)data->size_on_disk);
     gtk_label_set_text(data->size_on_disk_label, size_str.c_str());
 
-    char* count;
-    char* count_dir;
+    std::string count;
+    std::string count_dir;
     if (data->total_count_dir)
     {
-        count_dir = g_strdup_printf("%d directory", data->total_count_dir);
-        count = g_strdup_printf("%d file, %s", data->total_count, count_dir);
-        free(count_dir);
+        count_dir = fmt::format("{} directory", data->total_count_dir);
+        count = fmt::format("{} file, {}", data->total_count, count_dir);
     }
     else
-        count = g_strdup_printf("%d files", data->total_count);
+    {
+        count = fmt::format("{} files", data->total_count);
+    }
 
-    gtk_label_set_text(data->count_label, count);
-    free(count);
+    gtk_label_set_text(data->count_label, count.c_str());
 
     if (data->done)
         data->update_label_timer = 0;
@@ -346,7 +348,6 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     const char* time_format = ztd::strdup("%Y-%m-%d %H:%M:%S");
 
     char* disp_path;
-    char* file_type;
 
     int i;
     GList* l;
@@ -414,12 +415,13 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     file = static_cast<VFSFileInfo*>(sel_files->data);
     if (same_type)
     {
+        std::string file_type;
+
         mime = vfs_file_info_get_mime_type(file);
-        file_type = g_strdup_printf("%s\n%s",
-                                    vfs_mime_type_get_description(mime),
-                                    vfs_mime_type_get_type(mime));
-        gtk_label_set_text(GTK_LABEL(mime_type), file_type);
-        free(file_type);
+        file_type = fmt::format("{}\n{}",
+                                vfs_mime_type_get_description(mime),
+                                vfs_mime_type_get_type(mime));
+        gtk_label_set_text(GTK_LABEL(mime_type), file_type.c_str());
         vfs_mime_type_unref(mime);
     }
     else
@@ -726,12 +728,8 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
     int height = allocation.height;
     if (width && height)
     {
-        char* str = g_strdup_printf("%d", width);
-        xset_set("app_dlg", "s", str);
-        free(str);
-        str = g_strdup_printf("%d", height);
-        xset_set("app_dlg", "z", str);
-        free(str);
+        xset_set("app_dlg", "s", std::to_string(width).c_str());
+        xset_set("app_dlg", "z", std::to_string(height).c_str());
     }
 
     FilePropertiesDialogData* data =
@@ -751,7 +749,6 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
             PtkFileTask* task;
             VFSFileInfo* file;
             // change file dates
-            char* cmd = nullptr;
             std::string quoted_time;
             std::string quoted_path;
             const char* new_mtime = gtk_entry_get_text(data->mtime);
@@ -773,25 +770,26 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                     free(file_path);
                 }
 
+                std::string cmd;
                 if (new_mtime)
                 {
                     quoted_time = bash_quote(new_mtime);
-                    cmd = g_strdup_printf("touch --no-dereference --no-create -m -d %s%s",
-                                          quoted_time.c_str(),
-                                          gstr->str);
+                    cmd = fmt::format("touch --no-dereference --no-create -m -d {}{}",
+                                      quoted_time,
+                                      gstr->str);
                 }
                 if (new_atime)
                 {
                     quoted_time = bash_quote(new_atime);
                     quoted_path = cmd; // temp str
-                    cmd = g_strdup_printf("%s%stouch --no-dereference --no-create -a -d %s%s",
-                                          cmd ? cmd : "",
-                                          cmd ? "\n" : "",
-                                          quoted_time.c_str(),
-                                          gstr->str);
+                    cmd = fmt::format("{}{}touch --no-dereference --no-create -a -d {}{}",
+                                      cmd,
+                                      cmd.empty() ? "" : "\n",
+                                      quoted_time,
+                                      gstr->str);
                 }
                 g_string_free(gstr, true);
-                if (cmd)
+                if (!cmd.empty())
                 {
                     task = ptk_file_exec_new("Change File Date", "/", GTK_WIDGET(dialog), nullptr);
                     task->task->exec_command = cmd;

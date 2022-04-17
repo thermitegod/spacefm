@@ -447,12 +447,15 @@ static char*
 make_custom_desktop_file(const char* desktop_id, const char* mime_type)
 {
     Glib::ustring filename;
-    char* name = nullptr;
-    char* cust_template = nullptr;
-    char* cust = nullptr;
+    std::string name;
+    std::string cust_template;
+    std::string cust;
     Glib::ustring file_content;
 
-    if (Glib::str_has_suffix(desktop_id, ".desktop"))
+    static const std::string desktop_ext = ".desktop";
+    static const std::string replace_txt = "<REPLACE_TXT>";
+
+    if (Glib::str_has_suffix(desktop_id, desktop_ext))
     {
         const auto kf = Glib::KeyFile::create();
         filename = mime_type_locate_desktop_file(nullptr, desktop_id);
@@ -480,30 +483,28 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
         kf->set_string(group_desktop, "X-MimeType-Derived", desktop_id);
         kf->set_string(group_desktop, "NoDisplay", "true");
 
-        name = g_strndup(desktop_id, std::strlen(desktop_id) - 8);
-        cust_template = g_strdup_printf("%s-usercustom-%%d.desktop", name);
-        free(name);
+        name = ztd::removesuffix(desktop_id, desktop_ext);
+        cust_template = fmt::format("{}-usercustom-{}.desktop", name, replace_txt);
 
         file_content = kf->to_data();
     }
     else /* it's not a desktop_id, but a command */
     {
-        char* p;
-        const char file_templ[] = "[Desktop Entry]\n"
-                                  "Encoding=UTF-8\n"
-                                  "Name=%s\n"
-                                  "Exec=%s\n"
-                                  "MimeType=%s\n"
-                                  "Icon=exec\n"
-                                  "Terminal=false\n"
-                                  "NoDisplay=true\n";
         /* Make a user-created desktop file for the command */
-        name = g_path_get_basename(desktop_id);
-        if ((p = strchr(name, ' '))) /* FIXME: skip command line arguments. is this safe? */
-            *p = '\0';
-        file_content = g_strdup_printf(file_templ, name, desktop_id, mime_type);
-        cust_template = g_strdup_printf("%s-usercreated-%%d.desktop", name);
-        free(name);
+        name = Glib::path_get_basename(desktop_id);
+        cust_template = fmt::format("{}-usercreated-{}.desktop", name, replace_txt);
+
+        file_content = fmt::format("[Desktop Entry]\n"
+                                   "Encoding=UTF-8\n"
+                                   "Name={}\n"
+                                   "Exec={}\n"
+                                   "MimeType={}\n"
+                                   "Icon=exec\n"
+                                   "Terminal=false\n"
+                                   "NoDisplay=true\n",
+                                   name,
+                                   desktop_id,
+                                   mime_type);
     }
 
     /* generate unique file name */
@@ -511,24 +512,20 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
     std::filesystem::create_directories(dir);
     std::filesystem::permissions(dir, std::filesystem::perms::owner_all);
     std::string path;
-    unsigned int i;
-    for (i = 0;; ++i)
+    for (unsigned int i = 0;; ++i)
     {
         /* generate the basename */
-        cust = g_strdup_printf(cust_template, i);
+        cust = ztd::replace(cust_template, replace_txt, std::to_string(i));
         path = Glib::build_filename(dir, cust); /* test if the filename already exists */
-        if (std::filesystem::exists(path))
-            free(cust);
-        else /* this generated filename can be used */
+        if (!std::filesystem::exists(path))     /* this generated filename can be used */
             break;
     }
-
     save_to_file(path, file_content);
 
     /* execute update-desktop-database" to update mimeinfo.cache */
     update_desktop_database();
 
-    return cust;
+    return ztd::strdup(cust);
 }
 
 /*
@@ -725,7 +722,6 @@ mime_type_get_default_action(const std::string& mime_type)
 void
 mime_type_update_association(const char* type, const char* desktop_id, int action)
 {
-    const char* groups[] = {"Default Applications", "Added Associations", "Removed Associations"};
     bool data_changed = false;
 
     if (!(type && type[0] != '\0' && desktop_id && desktop_id[0] != '\0'))
@@ -753,16 +749,19 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
         return;
     }
 
-    for (unsigned int k = 0; k < G_N_ELEMENTS(groups); k++)
+    std::vector<std::string> groups{"Default Applications",
+                                    "Added Associations",
+                                    "Removed Associations"};
+
+    for (std::string group: groups)
     {
-        char* str;
-        char* new_action = nullptr;
+        std::string new_action;
         bool is_present = false;
 
         std::vector<Glib::ustring> apps;
         try
         {
-            apps = kf->get_string_list(groups[k], type);
+            apps = kf->get_string_list(group, type);
             if (apps.empty())
                 return;
         }
@@ -770,6 +769,14 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
         {
             return;
         }
+
+        MimeTypeAction group_block;
+        if (ztd::same(group, "Default Applications"))
+            group_block = MIME_TYPE_ACTION_DEFAULT;
+        else if (ztd::same(group, "Default Applications"))
+            group_block = MIME_TYPE_ACTION_APPEND;
+        else // if (ztd::same(group, "Default Applications"))
+            group_block = MIME_TYPE_ACTION_REMOVE;
 
         unsigned long i;
         for (i = 0; i < apps.size(); ++i)
@@ -781,8 +788,8 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
                     switch (action)
                     {
                         case MIME_TYPE_ACTION_DEFAULT:
-                            // found desktop_id already in groups[k] list
-                            if (k < 2)
+                            // found desktop_id already in group list
+                            if (group_block < MIME_TYPE_ACTION_REMOVE)
                             {
                                 // Default Applications or Added Associations
                                 if (i == 0)
@@ -802,7 +809,7 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
                             }
                             break;
                         case MIME_TYPE_ACTION_APPEND:
-                            if (k < 2)
+                            if (group_block < MIME_TYPE_ACTION_REMOVE)
                             {
                                 // Default or Added - already present, skip change
                                 is_present = true;
@@ -816,7 +823,7 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
                             }
                             break;
                         case MIME_TYPE_ACTION_REMOVE:
-                            if (k < 2)
+                            if (group_block < MIME_TYPE_ACTION_REMOVE)
                             {
                                 // Default or Added - remove it
                                 is_present = true;
@@ -834,55 +841,48 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
                     }
                 }
                 // copy other apps to new list preserving order
-                str = new_action;
-                new_action = g_strdup_printf("%s%s;", str ? str : "", apps.at(i).c_str());
-                free(str);
+                new_action = fmt::format("{}{};", new_action, apps.at(i).c_str());
             }
         }
 
         // update key string if needed
         if (action < MIME_TYPE_ACTION_REMOVE)
         {
-            if ((k < 2 && !is_present) || (k == 2 && is_present))
+            if ((group_block < MIME_TYPE_ACTION_REMOVE && !is_present) ||
+                (group_block == MIME_TYPE_ACTION_REMOVE && is_present))
             {
-                if (k < 2)
+                if (group_block < MIME_TYPE_ACTION_REMOVE)
                 {
                     // add to front of Default or Added list
-                    str = new_action;
                     if (action == MIME_TYPE_ACTION_DEFAULT)
-                        new_action =
-                            g_strdup_printf("%s;%s", desktop_id, new_action ? new_action : "");
+                        new_action = fmt::format("{};{}", desktop_id, new_action);
                     else // if ( action == MIME_TYPE_ACTION_APPEND )
-                        new_action =
-                            g_strdup_printf("%s%s;", new_action ? new_action : "", desktop_id);
-                    free(str);
+                        new_action = fmt::format("{}{};", new_action, desktop_id);
                 }
-                if (new_action)
-                    kf->set_string(groups[k], type, new_action);
+                if (!new_action.empty())
+                    kf->set_string(group, type, new_action);
                 else
-                    kf->remove_key(groups[k], type);
+                    kf->remove_key(group, type);
                 data_changed = true;
             }
         }
         else // if ( action == MIME_TYPE_ACTION_REMOVE )
         {
-            if ((k < 2 && is_present) || (k == 2 && !is_present))
+            if ((group_block < MIME_TYPE_ACTION_REMOVE && is_present) ||
+                (group_block == MIME_TYPE_ACTION_REMOVE && !is_present))
             {
-                if (k == 2)
+                if (group_block == MIME_TYPE_ACTION_REMOVE)
                 {
                     // add to end of Removed list
-                    str = new_action;
-                    new_action = g_strdup_printf("%s%s;", new_action ? new_action : "", desktop_id);
-                    free(str);
+                    new_action = fmt::format("{}{};", new_action, desktop_id);
                 }
-                if (new_action)
-                    kf->set_string(groups[k], type, new_action);
+                if (!new_action.empty())
+                    kf->set_string(group, type, new_action);
                 else
-                    kf->remove_key(groups[k], type);
+                    kf->remove_key(group, type);
                 data_changed = true;
             }
         }
-        free(new_action);
     }
 
     // save updated mimeapps.list

@@ -144,12 +144,12 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTr
     {
         // count
         int count = g_list_length(sel_files);
-        char* msg = g_strdup_printf("Delete %d selected item ?", count);
+        std::string msg = fmt::format("Delete {} selected item ?", count);
         GtkWidget* dlg = gtk_message_dialog_new(parent_win,
                                                 GTK_DIALOG_MODAL,
                                                 GTK_MESSAGE_WARNING,
                                                 GTK_BUTTONS_YES_NO,
-                                                msg,
+                                                msg.c_str(),
                                                 nullptr);
         gtk_dialog_set_default_response(GTK_DIALOG(dlg), GTK_RESPONSE_YES); // MOD
         gtk_window_set_title(GTK_WINDOW(dlg), "Confirm Delete");
@@ -157,7 +157,6 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTr
 
         int ret = gtk_dialog_run(GTK_DIALOG(dlg));
         gtk_widget_destroy(dlg);
-        free(msg);
         if (ret != GTK_RESPONSE_YES)
             return;
     }
@@ -189,12 +188,12 @@ ptk_trash_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTre
     {
         // count
         int count = g_list_length(sel_files);
-        char* msg = g_strdup_printf("Trash %d selected item ?", count);
+        std::string msg = fmt::format("Trash {} selected item ?", count);
         GtkWidget* dlg = gtk_message_dialog_new(parent_win,
                                                 GTK_DIALOG_MODAL,
                                                 GTK_MESSAGE_WARNING,
                                                 GTK_BUTTONS_YES_NO,
-                                                msg,
+                                                msg.c_str(),
                                                 nullptr);
         gtk_dialog_set_default_response(GTK_DIALOG(dlg), GTK_RESPONSE_YES); // MOD
         gtk_window_set_title(GTK_WINDOW(dlg), "Confirm Trash");
@@ -202,7 +201,6 @@ ptk_trash_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTre
 
         int ret = gtk_dialog_run(GTK_DIALOG(dlg));
         gtk_widget_destroy(dlg);
-        free(msg);
         if (ret != GTK_RESPONSE_YES)
             return;
     }
@@ -1028,12 +1026,8 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     height = allocation.height;
     if (width && height)
     {
-        char* str = g_strdup_printf("%d", width);
-        xset_set("move_dlg_help", "x", str);
-        free(str);
-        str = g_strdup_printf("%d", height);
-        xset_set("move_dlg_help", "y", str);
-        free(str);
+        xset_set("move_dlg_help", "x", std::to_string(width).c_str());
+        xset_set("move_dlg_help", "y", std::to_string(height).c_str());
     }
 
     gtk_widget_destroy(dlg);
@@ -1082,7 +1076,6 @@ static void
 on_browse_button_press(GtkWidget* widget, MoveSet* mset)
 {
     (void)widget;
-    char* str;
     GtkTextIter iter;
     GtkTextIter siter;
     int mode_default = MODE_PARENT;
@@ -1167,6 +1160,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
         {
             if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
             {
+                char* str;
                 switch (i)
                 {
                     case MODE_FILENAME:
@@ -1197,12 +1191,8 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     height = allocation.height;
     if (width && height)
     {
-        str = g_strdup_printf("%d", width);
-        xset_set("move_dlg_help", "x", str);
-        free(str);
-        str = g_strdup_printf("%d", height);
-        xset_set("move_dlg_help", "y", str);
-        free(str);
+        xset_set("move_dlg_help", "x", std::to_string(width).c_str());
+        xset_set("move_dlg_help", "y", std::to_string(height).c_str());
     }
 
     // save mode
@@ -1210,9 +1200,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
         {
-            str = g_strdup_printf("%d", i);
-            xset_set("move_dlg_help", "z", str);
-            free(str);
+            xset_set("move_dlg_help", "z", std::to_string(i).c_str());
             break;
         }
     }
@@ -1317,9 +1305,8 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     // title
     if (!desc)
         desc = mset->desc;
-    char* title = g_strdup_printf("%s %s%s", action, desc, root_msg);
-    gtk_window_set_title(GTK_WINDOW(mset->dlg), title);
-    free(title);
+    std::string title = fmt::format("{} {}{}", action, desc, root_msg);
+    gtk_window_set_title(GTK_WINDOW(mset->dlg), title.c_str());
 
     if (btn_label)
         gtk_button_set_label(GTK_BUTTON(mset->next), btn_label);
@@ -1838,34 +1825,31 @@ on_label_button_press(GtkWidget* widget, GdkEventButton* event, MoveSet* mset)
 static char*
 get_unique_name(const char* dir, const char* ext)
 {
-    char* name;
-    char* path;
+    std::string name;
+    std::string path;
 
-    char* base = ztd::strdup("new");
+    std::string base = "new";
     if (ext && ext[0] != '\0')
     {
-        name = g_strdup_printf("%s.%s", base, ext);
-        path = g_build_filename(dir, name, nullptr);
-        free(name);
+        name = fmt::format("{}.{}", base, ext);
+        path = Glib::build_filename(dir, name);
     }
     else
-        path = g_build_filename(dir, base, nullptr);
+        path = Glib::build_filename(dir, base);
 
     int n = 2;
     struct stat statbuf;
-    while (lstat(path, &statbuf) == 0) // need to see broken symlinks
+    while (lstat(path.c_str(), &statbuf) == 0) // need to see broken symlinks
     {
-        free(path);
         if (n == 1000)
             return ztd::strdup(base);
         if (ext && ext[0] != '\0')
-            name = g_strdup_printf("%s%d.%s", base, n++, ext);
+            name = fmt::format("{}{}.{}", base, n++, ext);
         else
-            name = g_strdup_printf("%s%d", base, n++);
-        path = g_build_filename(dir, name, nullptr);
-        free(name);
+            name = fmt::format("{}{}", base, n++);
+        path = Glib::build_filename(dir, name);
     }
-    return path;
+    return ztd::strdup(path);
 }
 
 static char*
@@ -2058,8 +2042,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     char* full_path;
     char* path;
     char* old_path;
-    char* root_mkdir = ztd::strdup("");
-    char* task_name;
     char* str;
     GtkWidget* task_view = nullptr;
     int ret = 1;
@@ -2193,22 +2175,20 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     // Entries
 
     // Type
-    char* type;
+    std::string type;
     mset->label_type = GTK_LABEL(gtk_label_new(nullptr));
     gtk_label_set_markup_with_mnemonic(mset->label_type, "<b>Type:</b>");
     if (mset->is_link)
     {
-        // mset->mime_type = g_strdup_printf( "inode/symlink" );
-        // type = g_strdup_printf( "symbolic link ( inode/symlink )" );
         path = g_file_read_link(mset->full_path, nullptr);
         if (path)
         {
             mset->mime_type = path;
             if (std::filesystem::exists(path))
-                type = g_strdup_printf("Link-> %s", path);
+                type = fmt::format("Link-> {}", path);
             else
             {
-                type = g_strdup_printf("!Link-> %s (missing)", path);
+                type = fmt::format("!Link-> {} (missing)", path);
                 target_missing = true;
             }
         }
@@ -2224,15 +2204,15 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         if (mime_type)
         {
             mset->mime_type = ztd::strdup(vfs_mime_type_get_type(mime_type));
-            type = g_strdup_printf(" %s ( %s )",
-                                   vfs_mime_type_get_description(mime_type),
-                                   mset->mime_type);
+            type = fmt::format(" {} ( {} )",
+                               vfs_mime_type_get_description(mime_type),
+                               mset->mime_type);
             vfs_mime_type_unref(mime_type);
         }
         else
         {
             mset->mime_type = ztd::strdup("?");
-            type = ztd::strdup(mset->mime_type);
+            type = mset->mime_type;
         }
     }
     else // create
@@ -2240,9 +2220,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         mset->mime_type = ztd::strdup("?");
         type = ztd::strdup(mset->mime_type);
     }
-    mset->label_mime = GTK_LABEL(gtk_label_new(type));
+    mset->label_mime = GTK_LABEL(gtk_label_new(type.c_str()));
     gtk_label_set_ellipsize(mset->label_mime, PANGO_ELLIPSIZE_MIDDLE);
-    free(type);
 
     gtk_label_set_selectable(mset->label_mime, true);
     gtk_widget_set_halign(GTK_WIDGET(mset->label_mime), GTK_ALIGN_START);
@@ -2720,6 +2699,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     g_signal_connect(G_OBJECT(mset->cancel), "focus", G_CALLBACK(on_button_focus), mset);
 
     // run
+    std::string task_name;
+    std::string root_mkdir;
     std::string to_path;
     std::string from_path;
     int response;
@@ -2751,7 +2732,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             path = g_path_get_dirname(full_path);
             old_path = g_path_get_dirname(mset->full_path);
             bool overwrite = false;
-            char* msg;
 
             if (response == GTK_RESPONSE_APPLY)
                 ret = 2;
@@ -2799,9 +2779,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 }
                 if (as_root)
                 {
-                    free(root_mkdir);
                     to_path = bash_quote(path);
-                    root_mkdir = g_strdup_printf("mkdir -p %s && ", to_path.c_str());
+                    root_mkdir = fmt::format("mkdir -p {} && ", to_path);
                 }
                 else
                 {
@@ -2810,10 +2789,10 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
 
                     if (std::filesystem::is_directory(path))
                     {
-                        msg = g_strdup_printf("Error creating parent directory\n\n%s",
-                                              strerror(errno));
+                        std::string errno_msg = Glib::strerror(errno);
+                        std::string msg =
+                            fmt::format("Error creating parent directory\n\n{}", errno_msg);
                         ptk_show_error(GTK_WINDOW(mset->dlg), "Mkdir Error", msg);
-                        free(msg);
                         goto _continue_free;
                     }
                     else
@@ -2839,9 +2818,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             if (create_new && new_link)
             {
                 // new link task
-                task_name = g_strdup_printf("Create Link%s", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
-                free(task_name);
+                task_name = fmt::format("Create Link{}", root_msg);
+                PtkFileTask* task =
+                    ptk_file_exec_new(task_name.c_str(), nullptr, mset->parent, task_view);
 
                 str = ztd::strdup(gtk_entry_get_text(mset->entry_target));
                 g_strstrip(str);
@@ -2913,22 +2892,19 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     free(str);
                 }
                 to_path = bash_quote(full_path);
-                char* over_cmd;
+                std::string over_cmd;
                 if (overwrite)
-                    over_cmd = g_strdup_printf("rm -f %s && ", to_path.c_str());
-                else
-                    over_cmd = ztd::strdup("");
+                    over_cmd = fmt::format("rm -f {} && ", to_path);
 
-                task_name = g_strdup_printf("Create New File%s", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
-                free(task_name);
+                task_name = fmt::format("Create New File{}", root_msg);
+                PtkFileTask* task =
+                    ptk_file_exec_new(task_name.c_str(), nullptr, mset->parent, task_view);
                 if (from_path.empty())
                     task->task->exec_command =
                         fmt::format("{}{}touch {}", root_mkdir, over_cmd, to_path);
                 else
                     task->task->exec_command =
                         fmt::format("{}{}cp -f {} {}", root_mkdir, over_cmd, from_path, to_path);
-                free(over_cmd);
                 task->task->exec_sync = true;
                 task->task->exec_popup = false;
                 task->task->exec_show_output = false;
@@ -2984,9 +2960,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 }
                 to_path = bash_quote(full_path);
 
-                task_name = g_strdup_printf("Create New Directory%s", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
-                free(task_name);
+                task_name = fmt::format("Create New Directory{}", root_msg);
+                PtkFileTask* task =
+                    ptk_file_exec_new(task_name.c_str(), nullptr, mset->parent, task_view);
                 if (from_path.empty())
                     task->task->exec_command = fmt::format("{}mkdir {}", root_mkdir, to_path);
                 else
@@ -3012,9 +2988,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             else if (copy || copy_target)
             {
                 // copy task
-                task_name = g_strdup_printf("Copy%s", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
-                free(task_name);
+                task_name = fmt::format("Copy{}", root_msg);
+                PtkFileTask* task =
+                    ptk_file_exec_new(task_name.c_str(), nullptr, mset->parent, task_view);
                 char* over_opt = nullptr;
                 to_path = bash_quote(full_path);
                 if (copy || !mset->is_link)
@@ -3061,9 +3037,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             else if (link || link_target)
             {
                 // link task
-                task_name = g_strdup_printf("Create Link%s", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
-                free(task_name);
+                task_name = fmt::format("Create Link{}", root_msg);
+                PtkFileTask* task =
+                    ptk_file_exec_new(task_name.c_str(), nullptr, mset->parent, task_view);
                 if (link || !mset->is_link)
                     from_path = bash_quote(mset->full_path);
                 else
@@ -3106,9 +3082,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             _move_task:
                 // move task - this is jumped to from the below rename block on
                 // EXDEV error
-                task_name = g_strdup_printf("Move%s", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
-                free(task_name);
+                task_name = fmt::format("Move{}", root_msg);
+                PtkFileTask* task =
+                    ptk_file_exec_new(task_name.c_str(), nullptr, mset->parent, task_view);
                 from_path = bash_quote(mset->full_path);
                 to_path = bash_quote(full_path);
                 if (overwrite)
@@ -3143,9 +3119,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                         goto _move_task;
 
                     // Unknown error has occurred - alert user as usual
-                    msg = g_strdup_printf("Error renaming file\n\n%s", strerror(errno));
+                    std::string errno_msg = Glib::strerror(errno);
+                    std::string msg = fmt::format("Error renaming file\n\n{}", errno_msg);
                     ptk_show_error(GTK_WINDOW(mset->dlg), "Rename Error", msg);
-                    free(msg);
                     goto _continue_free;
                 }
                 else
@@ -3177,8 +3153,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
 
     // destroy
     gtk_widget_destroy(mset->dlg);
-
-    free(root_mkdir);
 
     free(mset->full_path);
     if (mset->new_path)
@@ -3387,20 +3361,16 @@ check_desktop_name(const char* app_desktop)
     // Check whether this is an app desktop file or just a command line
     if (Glib::str_has_suffix(app_desktop, ".desktop"))
         return app_desktop;
-    else
-    {
-        // Not a desktop entry name
-        // If we are lucky enough, there might be a desktop entry
-        // for this program
-        const char* name = g_strconcat(app_desktop, ".desktop", nullptr);
-        if (std::filesystem::exists(name))
-            return name;
-        else
-        {
-            // fallback
-            return app_desktop;
-        }
-    }
+
+    // Not a desktop entry name
+    // If we are lucky enough, there might be a desktop entry
+    // for this program
+    std::string name = fmt::format("{}.desktop", app_desktop);
+    if (std::filesystem::exists(name))
+        return ztd::strdup(name);
+
+    // fallback
+    return app_desktop;
 }
 
 static bool
@@ -3584,16 +3554,15 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                     {
                         if (!std::filesystem::exists(target_path))
                         {
-                            char* msg = g_strdup_printf(
+                            std::string msg = fmt::format(
                                 "This symlink's target is missing or you do not have permission "
-                                "to access it:\n%s\n\nTarget: %s",
+                                "to access it:\n{}\n\nTarget: {}",
                                 full_path,
                                 target_path);
                             toplevel = file_browser
                                            ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser))
                                            : nullptr;
-                            ptk_show_error(GTK_WINDOW(toplevel), "Broken Link", msg);
-                            free(msg);
+                            ptk_show_error(GTK_WINDOW(toplevel), "Broken Link", msg.c_str());
                             free(full_path);
                             free(target_path);
                             continue;
@@ -3704,12 +3673,10 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
         if (file_browser)
             parent = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser)));
 
-        ptk_show_error(
-            parent,
-            ztd::strdup("Error"),
-            g_strdup_printf("%i target%s missing",
-                            missing_targets,
-                            missing_targets > 1 ? ztd::strdup("s are") : ztd::strdup(" is")));
+        std::string msg = fmt::format("{} target{} missing",
+                                      missing_targets,
+                                      missing_targets > 1 ? "s are" : " is");
+        ptk_show_error(parent, "Error", msg);
     }
 }
 
@@ -3725,26 +3692,21 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
         return;
     XSet* set;
     char* path;
-    char* cmd;
-    char* task_name;
+    std::string cmd;
+    std::string task_name;
 
     GtkWidget* parent = GTK_WIDGET(file_browser);
-    char* file_paths = ztd::strdup("");
+    std::string file_paths;
     GList* sel;
-    char* file_path;
     std::string file_path_q;
-    char* str;
     int item_count = 0;
     for (sel = sel_files; sel; sel = sel->next)
     {
-        file_path = g_build_filename(cwd,
-                                     vfs_file_info_get_name(static_cast<VFSFileInfo*>(sel->data)),
-                                     nullptr);
+        std::string file_path;
+        file_path =
+            Glib::build_filename(cwd, vfs_file_info_get_name(static_cast<VFSFileInfo*>(sel->data)));
         file_path_q = bash_quote(file_path);
-        str = file_paths;
-        file_paths = g_strdup_printf("%s %s", file_paths, file_path_q.c_str());
-        free(str);
-        free(file_path);
+        file_paths = fmt::format("{} {}", file_paths, file_path_q);
         item_count++;
     }
 
@@ -3752,21 +3714,19 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
     {
         if (!app_settings.no_confirm)
         {
-            str = g_strdup_printf("Delete %d selected item as root ?", item_count);
+            std::string msg = fmt::format("Delete {} selected item as root ?", item_count);
             if (xset_msg_dialog(parent,
                                 GTK_MESSAGE_WARNING,
                                 "Confirm Delete As Root",
                                 GTK_BUTTONS_YES_NO,
                                 "DELETE AS ROOT",
-                                str) != GTK_RESPONSE_YES)
+                                msg) != GTK_RESPONSE_YES)
             {
-                free(str);
                 return;
             }
-            free(str);
         }
-        cmd = g_strdup_printf("rm -r %s", file_paths);
-        task_name = ztd::strdup("Delete As Root");
+        cmd = fmt::format("rm -r {}", file_paths);
+        task_name = "Delete As Root";
     }
     else
     {
@@ -3788,28 +3748,30 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
 
             if (!strcmp(setname, "root_move2"))
             {
-                task_name = ztd::strdup("Move As Root");
+                task_name = "Move As Root";
                 // problem: no warning if already exists
-                cmd = g_strdup_printf("mv -f %s %s", file_paths, quote_path.c_str());
+                cmd = fmt::format("mv -f {} {}", file_paths, quote_path.c_str());
             }
             else
             {
-                task_name = ztd::strdup("Copy As Root");
+                task_name = "Copy As Root";
                 // problem: no warning if already exists
-                cmd = g_strdup_printf("cp -r %s %s", file_paths, quote_path.c_str());
+                cmd = fmt::format("cp -r {} {}", file_paths, quote_path.c_str());
             }
 
             free(path);
         }
         else
+        {
             return;
+        }
     }
-    free(file_paths);
 
     // root task
-    PtkFileTask* task =
-        ptk_file_exec_new(task_name, cwd, parent, file_browser ? file_browser->task_view : nullptr);
-    free(task_name);
+    PtkFileTask* task = ptk_file_exec_new(task_name.c_str(),
+                                          cwd,
+                                          parent,
+                                          file_browser ? file_browser->task_view : nullptr);
     task->task->exec_command = cmd;
     task->task->exec_sync = true;
     task->task->exec_popup = false;

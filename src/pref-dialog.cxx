@@ -314,9 +314,8 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         app_settings.no_confirm =
             !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->confirm_delete));
 
-        char* s = g_strdup_printf("%d", gtk_combo_box_get_active(GTK_COMBO_BOX(data->drag_action)));
-        xset_set("drag_action", "x", s);
-        free(s);
+        std::string s = std::to_string(gtk_combo_box_get_active(GTK_COMBO_BOX(data->drag_action)));
+        xset_set("drag_action", "x", s.c_str());
 
         // terminal su command
         std::string custom_su;

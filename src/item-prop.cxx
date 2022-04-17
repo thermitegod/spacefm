@@ -580,12 +580,12 @@ on_context_action_changed(GtkComboBox* box, ContextData* ctxt)
 static char*
 context_display(int sub, int comp, char* value)
 {
-    char* disp;
+    std::string disp;
     if (value[0] == '\0' || value[0] == ' ' || Glib::str_has_suffix(value, " "))
-        disp = g_strdup_printf("%s %s \"%s\"", context_sub[sub], context_comp[comp], value);
+        disp = fmt::format("{} {} \"{}\"", context_sub[sub], context_comp[comp], value);
     else
-        disp = g_strdup_printf("%s %s %s", context_sub[sub], context_comp[comp], value);
-    return disp;
+        disp = fmt::format("{} {} {}", context_sub[sub], context_comp[comp], value);
+    return ztd::strdup(disp);
 }
 
 static void
@@ -1253,13 +1253,12 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
         if (add_path && add_path[0])
         {
             char* old_path = multi_input_get_text(ctxt->item_target);
-            char* new_path = g_strdup_printf("%s%s%s",
-                                             old_path && old_path[0] ? old_path : "",
-                                             old_path && old_path[0] ? "; " : "",
-                                             add_path);
+            std::string new_path = fmt::format("%s%s%s",
+                                               old_path && old_path[0] ? old_path : "",
+                                               old_path && old_path[0] ? "; " : "",
+                                               add_path);
             GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->item_target));
-            gtk_text_buffer_set_text(buf, new_path, -1);
-            free(new_path);
+            gtk_text_buffer_set_text(buf, new_path.c_str(), -1);
             free(add_path);
             free(old_path);
         }
@@ -1353,7 +1352,7 @@ replace_item_props(ContextData* ctxt)
             if (x == 0)
                 rset->x = nullptr;
             else
-                rset->x = g_strdup_printf("%d", x);
+                rset->x = ztd::strdup(std::to_string(x));
         }
         if (!rset->plugin)
         {
@@ -1550,7 +1549,6 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     GtkTreeViewColumn* col;
     GtkCellRenderer* renderer;
     int x;
-    char* str;
 
     if (!context || !set)
         return;
@@ -2145,34 +2143,28 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     ctxt->open_browser = gtk_combo_box_text_new();
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->open_browser), false);
 
+    std::string str;
     char* path;
     if (rset->plugin)
         path = g_build_filename(rset->plug_dir, rset->plug_name, nullptr);
     else
         path = g_build_filename(xset_get_config_dir(), "scripts", rset->name, nullptr);
-    str = g_strdup_printf("%s  $fm_cmd_dir  %s",
-                          "Command Dir",
-                          dir_has_files(path) ? "" : "(no files)");
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str);
-    free(str);
+    str = fmt::format("Command Dir  $fm_cmd_dir  {}", dir_has_files(path) ? "" : "(no files)");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str.c_str());
     free(path);
 
     path = g_build_filename(xset_get_config_dir(),
                             "plugin-data",
                             rset->plugin ? mset->name : rset->name,
                             nullptr);
-    str = g_strdup_printf("%s  $fm_cmd_data  %s",
-                          "Data Dir",
-                          dir_has_files(path) ? "" : "(no files)");
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str);
-    free(str);
+    str = fmt::format("Data Dir  $fm_cmd_data  {}", dir_has_files(path) ? "" : "(no files)");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str.c_str());
     free(path);
 
     if (rset->plugin)
     {
-        str = g_strdup_printf("%s  $fm_plugin_dir", "Plugin Dir");
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str);
-        free(str);
+        str = "Plugin Dir  $fm_plugin_dir";
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str.c_str());
     }
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(ctxt->open_browser), false, true, 8);
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(hbox), false, true, 0);
@@ -2184,19 +2176,18 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     // type
     int item_type = -1;
 
-    char* item_type_str = nullptr;
+    std::string item_type_str;
     if (set->tool > XSET_TOOL_CUSTOM)
-        item_type_str = g_strdup_printf("%s: %s",
-                                        "Built-In Toolbar Item",
-                                        xset_get_builtin_toolitem_label(set->tool));
+        item_type_str =
+            fmt::format("Built-In Toolbar Item: {}", xset_get_builtin_toolitem_label(set->tool));
     else if (rset->menu_style == XSET_MENU_SUBMENU)
-        item_type_str = ztd::strdup("Submenu");
+        item_type_str = "Submenu";
     else if (rset->menu_style == XSET_MENU_SEP)
-        item_type_str = ztd::strdup("Separator");
+        item_type_str = "Separator";
     else if (set->lock)
     {
         // built-in
-        item_type_str = ztd::strdup("Built-In Command");
+        item_type_str = "Built-In Command";
     }
     else
     {
@@ -2226,12 +2217,11 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
         // g_signal_connect( G_OBJECT( ctxt->item_type ), "changed",
         //                  G_CALLBACK( on_item_type_changed ), ctxt );
     }
-    if (item_type_str)
+    if (!item_type_str.empty())
     {
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), item_type_str);
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), item_type_str.c_str());
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->item_type), 0);
         gtk_widget_set_sensitive(ctxt->item_type, false);
-        free(item_type_str);
     }
 
     ctxt->temp_cmd_line = !set->lock ? ztd::strdup(rset->line) : nullptr;
@@ -2379,12 +2369,8 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     height = allocation.height;
     if (width && height)
     {
-        str = g_strdup_printf("%d", width);
-        xset_set("context_dlg", "x", str);
-        free(str);
-        str = g_strdup_printf("%d", height);
-        xset_set("context_dlg", "y", str);
-        free(str);
+        xset_set("context_dlg", "x", std::to_string(width).c_str());
+        xset_set("context_dlg", "y", std::to_string(height).c_str());
     }
 
     gtk_widget_destroy(ctxt->dlg);

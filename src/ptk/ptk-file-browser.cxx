@@ -345,7 +345,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
         if (!main_window->fullscreen)
         {
             free(set->x);
-            set->x = g_strdup_printf("%d", pos);
+            set->x = ztd::strdup(std::to_string(pos));
         }
         main_window->panel_slide_x[p - 1] = pos;
         // LOG_INFO("    slide_x = {}", pos);
@@ -358,7 +358,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
         if (!main_window->fullscreen)
         {
             free(set->y);
-            set->y = g_strdup_printf("%d", pos);
+            set->y = ztd::strdup(std::to_string(pos));
         }
         main_window->panel_slide_y[p - 1] = pos;
         // LOG_INFO("    slide_y = {}  ", pos);
@@ -367,7 +367,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
         if (!main_window->fullscreen)
         {
             free(set->s);
-            set->s = g_strdup_printf("%d", pos);
+            set->s = ztd::strdup(std::to_string(pos));
         }
         main_window->panel_slide_s[p - 1] = pos;
         // LOG_INFO("slide_s = {}", pos);
@@ -491,19 +491,17 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
     std::string dir_path = g_filename_from_utf8(text, -1, nullptr, nullptr, nullptr);
     std::string final_path = std::filesystem::absolute(dir_path);
 
-    std::string str;
     bool final_path_exists = std::filesystem::exists(final_path);
 
     if (!final_path_exists &&
         (text[0] == '$' || text[0] == '+' || text[0] == '&' || text[0] == '!' || text[0] == '\0'))
     {
         // command
-        char* command;
-        char* trim_command;
+        std::string command;
         bool as_root = false;
         bool in_terminal = false;
         bool as_task = true;
-        char* prefix = ztd::strdup("");
+        std::string prefix;
         while (text[0] == '$' || text[0] == '+' || text[0] == '&' || text[0] == '!')
         {
             if (text[0] == '+')
@@ -513,17 +511,13 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
             else if (text[0] == '!')
                 as_root = true;
 
-            str = prefix;
-            prefix = g_strdup_printf("%s%c", str.c_str(), text[0]);
+            prefix = fmt::format("{}{}", prefix, text[0]);
             text++;
         }
         bool is_space = text[0] == ' ';
-        command = ztd::strdup(text);
-        trim_command = g_strstrip(command);
-        if (trim_command[0] == '\0')
+        command = ztd::strip(text);
+        if (command.empty())
         {
-            free(command);
-            free(prefix);
             ptk_path_entry_help(entry, GTK_WIDGET(file_browser));
             gtk_editable_set_position(GTK_EDITABLE(entry), -1);
             return;
@@ -541,8 +535,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
         free(task_name);
         // don't free cwd!
         task->task->exec_browser = file_browser;
-        task->task->exec_command = replace_line_subs(trim_command);
-        free(command);
+        task->task->exec_command = replace_line_subs(command);
         if (as_root)
             task->task->exec_as_user = "root";
         if (!as_task)
@@ -559,15 +552,13 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
         // gtk_widget_grab_focus( GTK_WIDGET( file_browser->folder_view ) );
 
         // reset entry text
-        str = prefix;
-        prefix = g_strdup_printf("%s%s", str.c_str(), is_space ? " " : "");
-        gtk_entry_set_text(GTK_ENTRY(entry), prefix);
-        free(prefix);
+        prefix = fmt::format("{}{}", prefix, is_space ? " " : "");
+        gtk_entry_set_text(GTK_ENTRY(entry), prefix.c_str());
         gtk_editable_set_position(GTK_EDITABLE(entry), -1);
     }
     else if (!final_path_exists && text[0] == '%')
     {
-        str = ztd::strip(++text);
+        const std::string str = ztd::strip(++text);
         if (!str.empty())
         {
             save_command_history(GTK_ENTRY(entry));
@@ -1021,8 +1012,8 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
     XSetContext* context = xset_context_new();
     main_context_fill(file_browser, context);
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    char* desc =
-        g_strdup_printf("separator panel%d_icon_status status_middle", file_browser->mypanel);
+    const std::string desc =
+        fmt::format("separator panel{}_icon_status status_middle", file_browser->mypanel);
 
     xset_set_cb_panel(file_browser->mypanel,
                       "icon_status",
@@ -1042,8 +1033,7 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
     xset_set_cb("status_hide", (GFunc)on_status_middle_click_config, set);
     xset_set_ob2(set, nullptr, set_radio);
 
-    xset_add_menu(file_browser, menu, accel_group, desc);
-    free(desc);
+    xset_add_menu(file_browser, menu, accel_group, desc.c_str());
     gtk_widget_show_all(menu);
     g_signal_connect(menu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
 }
@@ -1848,8 +1838,6 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
     bool cancel = false;
     GtkWidget* folder_view = file_browser->folder_view;
     // LOG_INFO("ptk_file_browser_chdir");
-    char* path;
-    char* msg;
 
     bool inhibit_focus = file_browser->inhibit_focus;
     // file_browser->button_press = false;
@@ -1864,6 +1852,9 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
 
     if (!folder_path)
         return false;
+
+    char* path;
+    std::string msg;
 
     if (folder_path)
     {
@@ -1884,9 +1875,8 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
         // convert ~ to /home/user for smarter bookmarks
         if (Glib::str_has_prefix(path, "~/") || !g_strcmp0(path, "~"))
         {
-            msg = g_strdup_printf("%s%s", vfs_user_home_dir().c_str(), path + 1);
-            free(path);
-            path = msg;
+            msg = fmt::format("{}{}", vfs_user_home_dir(), path + 1);
+            path = ztd::strdup(msg);
         }
     }
     else
@@ -1896,13 +1886,12 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
     {
         if (!inhibit_focus)
         {
-            msg = g_strdup_printf("Directory doesn't exist\n\n%s", path);
+            msg = fmt::format("Directory doesn't exist\n\n{}", path);
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                            "Error",
                            msg);
             if (path)
                 free(path);
-            free(msg);
         }
         return false;
     }
@@ -1918,7 +1907,6 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                            "Error",
                            msg);
-            free(msg);
         }
         return false;
     }
@@ -2213,12 +2201,11 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
     //        ptk_file_browser_set_sort_order( PTK_FILE_BROWSER( file_browser ),
     //        app_settings.sort_order );
 
-    char* val = g_strdup_printf("%d", col);
-    xset_set_panel(file_browser->mypanel, "list_detailed", "x", val);
-    free(val);
-    val = g_strdup_printf("%d", file_browser->sort_type);
-    xset_set_panel(file_browser->mypanel, "list_detailed", "y", val);
-    free(val);
+    xset_set_panel(file_browser->mypanel, "list_detailed", "x", std::to_string(col).c_str());
+    xset_set_panel(file_browser->mypanel,
+                   "list_detailed",
+                   "y",
+                   std::to_string(file_browser->sort_type).c_str());
 }
 
 static void
@@ -3608,7 +3595,7 @@ ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_brow
                 if (width > 0)
                 {
                     free(set->y);
-                    set->y = g_strdup_printf("%d", width);
+                    set->y = ztd::strdup(std::to_string(width));
                     // LOG_INFO("        {}\t{}", width, title);
                 }
             }
@@ -3644,7 +3631,7 @@ on_folder_view_columns_changed(GtkTreeView* view, PtkFileBrowser* file_browser)
             // save column position
             XSet* set = xset_get_panel(file_browser->mypanel, column_names[j]);
             free(set->x);
-            set->x = g_strdup_printf("%d", i);
+            set->x = ztd::strdup(std::to_string(i));
         }
     }
 }
@@ -3690,9 +3677,8 @@ folder_view_search_equal(GtkTreeModel* model, int col, const char* key, GtkTreeI
 
     if (strchr(key, '*') || strchr(key, '?'))
     {
-        char* key2 = g_strdup_printf("*%s*", key);
-        no_match = fnmatch(key2, name, 0) != 0;
-        free(key2);
+        std::string key2 = fmt::format("*{}*", key);
+        no_match = fnmatch(key2.c_str(), name, 0) != 0;
     }
     else
     {
@@ -5281,7 +5267,6 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, const char* setnam
     if (!list)
         return;
     int panel = file_browser->mypanel;
-    char* val = nullptr;
 
     if (!strcmp(name, "alphanum"))
     {
@@ -5298,40 +5283,36 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, const char* setnam
     else if (!strcmp(name, "case"))
     {
         list->sort_case = set->b == XSET_B_TRUE;
-        val = g_strdup_printf("%d", set->b);
-        xset_set_panel(panel, "sort_extra", "x", val);
+        xset_set_panel(panel, "sort_extra", "x", std::to_string(set->b).c_str());
     }
     else if (!strcmp(name, "directories"))
     {
         list->sort_dir = PTK_LIST_SORT_DIR_FIRST;
-        val = g_strdup_printf("%d", PTK_LIST_SORT_DIR_FIRST);
-        xset_set_panel(panel, "sort_extra", "y", val);
+        xset_set_panel(panel, "sort_extra", "y", std::to_string(PTK_LIST_SORT_DIR_FIRST).c_str());
     }
     else if (!strcmp(name, "files"))
     {
         list->sort_dir = PTK_LIST_SORT_DIR_LAST;
-        val = g_strdup_printf("%d", PTK_LIST_SORT_DIR_LAST);
-        xset_set_panel(panel, "sort_extra", "y", val);
+        xset_set_panel(panel, "sort_extra", "y", std::to_string(PTK_LIST_SORT_DIR_LAST).c_str());
     }
     else if (!strcmp(name, "mix"))
     {
         list->sort_dir = PTK_LIST_SORT_DIR_MIXED;
-        val = g_strdup_printf("%d", PTK_LIST_SORT_DIR_MIXED);
-        xset_set_panel(panel, "sort_extra", "y", val);
+        xset_set_panel(panel, "sort_extra", "y", std::to_string(PTK_LIST_SORT_DIR_MIXED).c_str());
     }
     else if (!strcmp(name, "hidfirst"))
     {
         list->sort_hidden_first = set->b == XSET_B_TRUE;
-        val = g_strdup_printf("%d", set->b);
-        xset_set_panel(panel, "sort_extra", "z", val);
+        xset_set_panel(panel, "sort_extra", "z", std::to_string(set->b).c_str());
     }
     else if (!strcmp(name, "hidlast"))
     {
         list->sort_hidden_first = set->b != XSET_B_TRUE;
-        val = g_strdup_printf("%d", set->b == XSET_B_TRUE ? XSET_B_FALSE : XSET_B_TRUE);
-        xset_set_panel(panel, "sort_extra", "z", val);
+        xset_set_panel(panel,
+                       "sort_extra",
+                       "z",
+                       std::to_string(set->b == XSET_B_TRUE ? XSET_B_FALSE : XSET_B_TRUE).c_str());
     }
-    free(val);
     ptk_file_list_sort(list);
 }
 

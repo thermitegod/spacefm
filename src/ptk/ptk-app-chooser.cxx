@@ -192,7 +192,6 @@ app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all
     GtkBuilder* builder = _gtk_builder_new_from_file("appchooserdlg3.ui");
     GtkWidget* dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
     GtkWidget* file_type = GTK_WIDGET(gtk_builder_get_object(builder, "file_type"));
-    char* mime_desc;
     GtkTreeView* view;
     GtkTreeModel* model;
     GtkEntry* entry;
@@ -209,13 +208,10 @@ app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all
     else
         gtk_window_set_default_size(GTK_WINDOW(dlg), 600, 600);
 
-    mime_desc =
-        g_strdup_printf(" %s\n ( %s )", vfs_mime_type_get_description(mime_type), mime_type->type);
-    if (mime_desc)
-    {
-        gtk_label_set_text(GTK_LABEL(file_type), mime_desc);
-        free(mime_desc);
-    }
+    std::string mime_desc =
+        fmt::format(" {}\n ( {} )", vfs_mime_type_get_description(mime_type), mime_type->type);
+    gtk_label_set_text(GTK_LABEL(file_type), mime_desc.c_str());
+
     /* Don't set default handler for directories and files with unknown type */
     if (!show_default ||
         /*  !strcmp( vfs_mime_type_get_type( mime_type ), XDG_MIME_TYPE_UNKNOWN ) || */
@@ -438,12 +434,8 @@ on_dlg_response(GtkDialog* dlg, int id, void* user_data)
     int height = allocation.height;
     if (width && height)
     {
-        char* str = g_strdup_printf("%d", width);
-        xset_set("app_dlg", "x", str);
-        free(str);
-        str = g_strdup_printf("%d", height);
-        xset_set("app_dlg", "y", str);
-        free(str);
+        xset_set("app_dlg", "x", std::to_string(width).c_str());
+        xset_set("app_dlg", "y", std::to_string(height).c_str());
     }
 
     switch (id)

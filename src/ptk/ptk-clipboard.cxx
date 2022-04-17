@@ -132,23 +132,20 @@ ptk_clipboard_copy_name(const char* working_dir,
     GList* l;
     int fcount = 0;
 
-    char* file_text = ztd::strdup("");
+    std::string file_text;
     for (l = files; l; l = l->next)
     {
         VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
-        char* str = file_text;
         if (fcount == 0)
-            file_text = g_strdup_printf("%s", vfs_file_info_get_name(file));
+            file_text = fmt::format("{}", vfs_file_info_get_name(file));
         else if (fcount == 1)
-            file_text = g_strdup_printf("%s\n%s\n", file_text, vfs_file_info_get_name(file));
+            file_text = fmt::format("{}\n{}\n", file_text, vfs_file_info_get_name(file));
         else
-            file_text = g_strdup_printf("%s%s\n", file_text, vfs_file_info_get_name(file));
+            file_text = fmt::format("{}{}\n", file_text, vfs_file_info_get_name(file));
         fcount++;
-        free(str);
     }
-    gtk_clipboard_set_text(clip, file_text, -1);
-    gtk_clipboard_set_text(clip_primary, file_text, -1);
-    free(file_text);
+    gtk_clipboard_set_text(clip, file_text.c_str(), -1);
+    gtk_clipboard_set_text(clip_primary, file_text.c_str(), -1);
 }
 
 void
@@ -503,12 +500,13 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
         ptk_file_task_run(task);
 
         if (missing_targets > 0)
-            ptk_show_error(
-                parent_win ? GTK_WINDOW(parent_win) : nullptr,
-                ztd::strdup("Error"),
-                g_strdup_printf("%i target%s missing",
-                                missing_targets,
-                                missing_targets > 1 ? ztd::strdup("s are") : ztd::strdup(" is")));
+        {
+            std::string msg =
+                fmt::format("{} target{} missing",
+                            missing_targets,
+                            missing_targets > 1 ? ztd::strdup("s are") : ztd::strdup(" is"));
+            ptk_show_error(parent_win ? GTK_WINDOW(parent_win) : nullptr, "Error", msg);
+        }
     }
     gtk_selection_data_free(sel_data);
 }

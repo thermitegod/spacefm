@@ -591,9 +591,10 @@ save_settings(void* main_window_ptr)
                         // save current tab
                         if (set->x)
                             free(set->x);
-                        set->x = g_strdup_printf(
-                            "%d",
-                            gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1])));
+
+                        int current_page =
+                            gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
+                        set->x = ztd::strdup(std::to_string(current_page));
                     }
                 }
             }
@@ -4468,7 +4469,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                                       : (char*)vfs_user_desktop_dir().c_str();
                 childset->menu_label = g_path_get_basename(folder);
                 childset->z = ztd::strdup(folder);
-                childset->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
+                childset->x = ztd::strdup(std::to_string(XSET_CMD_BOOKMARK));
                 // unset these to save session space
                 childset->task = false;
                 childset->task_err = false;
@@ -4703,7 +4704,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 free(childset->menu_label);
                 childset->menu_label = g_path_get_basename(folder);
                 childset->z = ztd::strdup(folder);
-                childset->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
+                childset->x = ztd::strdup(std::to_string(XSET_CMD_BOOKMARK));
                 // unset these to save session space
                 childset->task = false;
                 childset->task_err = false;
@@ -8141,63 +8142,63 @@ xset_defaults()
 
     set = xset_set("task_col_count", "lbl", "_Count");
     set->menu_style = XSET_MENU_CHECK;
-    set->x = g_strdup_printf("%d", 1);
+    set->x = ztd::strdup("1");
 
     set = xset_set("task_col_path", "lbl", "_Directory");
     set->menu_style = XSET_MENU_CHECK;
     set->b = XSET_B_TRUE;
-    set->x = g_strdup_printf("%d", 2);
+    set->x = ztd::strdup("2");
 
     set = xset_set("task_col_file", "lbl", "_Item");
     set->menu_style = XSET_MENU_CHECK;
     set->b = XSET_B_TRUE;
-    set->x = g_strdup_printf("%d", 3);
+    set->x = ztd::strdup("3");
 
     set = xset_set("task_col_to", "lbl", "_To");
     set->menu_style = XSET_MENU_CHECK;
     set->b = XSET_B_TRUE;
-    set->x = g_strdup_printf("%d", 4);
+    set->x = ztd::strdup("4");
 
     set = xset_set("task_col_progress", "lbl", "_Progress");
     set->menu_style = XSET_MENU_CHECK;
     set->b = XSET_B_TRUE;
-    set->x = g_strdup_printf("%d", 5);
+    set->x = ztd::strdup("5");
     set->y = ztd::strdup("100");
 
     set = xset_set("task_col_total", "lbl", "T_otal");
     set->menu_style = XSET_MENU_CHECK;
     set->b = XSET_B_TRUE;
-    set->x = g_strdup_printf("%d", 6);
+    set->x = ztd::strdup("6");
     set->y = ztd::strdup("120");
 
     set = xset_set("task_col_started", "lbl", "Sta_rted");
     set->menu_style = XSET_MENU_CHECK;
-    set->x = g_strdup_printf("%d", 7);
+    set->x = ztd::strdup("7");
 
     set = xset_set("task_col_elapsed", "lbl", "_Elapsed");
     set->menu_style = XSET_MENU_CHECK;
     set->b = XSET_B_TRUE;
-    set->x = g_strdup_printf("%d", 8);
+    set->x = ztd::strdup("8");
     set->y = ztd::strdup("70");
 
     set = xset_set("task_col_curspeed", "lbl", "C_urrent Speed");
     set->menu_style = XSET_MENU_CHECK;
     set->b = XSET_B_TRUE;
-    set->x = g_strdup_printf("%d", 9);
+    set->x = ztd::strdup("9");
 
     set = xset_set("task_col_curest", "lbl", "Current Re_main");
     set->menu_style = XSET_MENU_CHECK;
     set->b = XSET_B_TRUE;
-    set->x = g_strdup_printf("%d", 10);
+    set->x = ztd::strdup("10");
 
     set = xset_set("task_col_avgspeed", "lbl", "_Average Speed");
     set->menu_style = XSET_MENU_CHECK;
-    set->x = g_strdup_printf("%d", 11);
+    set->x = ztd::strdup("11");
     set->y = ztd::strdup("60");
 
     set = xset_set("task_col_avgest", "lbl", "A_verage Remain");
     set->menu_style = XSET_MENU_CHECK;
-    set->x = g_strdup_printf("%d", 12);
+    set->x = ztd::strdup("12");
     set->y = ztd::strdup("65");
 
     set = xset_set("task_col_reorder", "lbl", "Reor_der");
@@ -8935,45 +8936,45 @@ xset_defaults()
 
         set = xset_set_panel(p, "detcol_name", "lbl", "_Name");
         set->menu_style = XSET_MENU_CHECK;
-        set->b = XSET_B_TRUE;              // visible
-        set->x = g_strdup_printf("%d", 0); // position
+        set->b = XSET_B_TRUE;      // visible
+        set->x = ztd::strdup("0"); // position
 
         set = xset_set_panel(p, "detcol_size", "lbl", "_Size");
         set->menu_style = XSET_MENU_CHECK;
         set->b = XSET_B_TRUE;
-        set->x = g_strdup_printf("%d", 1);
+        set->x = ztd::strdup("1");
         if (p != 1)
             xset_set_set(set, XSET_SET_SET_SHARED_KEY, "panel1_detcol_size");
 
         set = xset_set_panel(p, "detcol_type", "lbl", "_Type");
         set->menu_style = XSET_MENU_CHECK;
-        set->x = g_strdup_printf("%d", 2);
+        set->x = ztd::strdup("2");
         if (p != 1)
             xset_set_set(set, XSET_SET_SET_SHARED_KEY, "panel1_detcol_type");
 
         set = xset_set_panel(p, "detcol_perm", "lbl", "_Permission");
         set->menu_style = XSET_MENU_CHECK;
-        set->x = g_strdup_printf("%d", 3);
+        set->x = ztd::strdup("3");
         if (p != 1)
             xset_set_set(set, XSET_SET_SET_SHARED_KEY, "panel1_detcol_perm");
 
         set = xset_set_panel(p, "detcol_owner", "lbl", "_Owner");
         set->menu_style = XSET_MENU_CHECK;
-        set->x = g_strdup_printf("%d", 4);
+        set->x = ztd::strdup("4");
         if (p != 1)
             xset_set_set(set, XSET_SET_SET_SHARED_KEY, "panel1_detcol_owner");
 
         set = xset_set_panel(p, "detcol_date", "lbl", "_Modified");
         set->menu_style = XSET_MENU_CHECK;
-        set->x = g_strdup_printf("%d", 5);
+        set->x = ztd::strdup("5");
         if (p != 1)
             xset_set_set(set, XSET_SET_SET_SHARED_KEY, "panel1_detcol_date");
 
         set = xset_get_panel(p, "sort_extra");
-        set->b = XSET_B_TRUE;                         // sort_natural
-        set->x = g_strdup_printf("%d", XSET_B_FALSE); // sort_case
+        set->b = XSET_B_TRUE;                               // sort_natural
+        set->x = ztd::strdup(std::to_string(XSET_B_FALSE)); // sort_case
         set->y = ztd::strdup("1"); // PTK_LIST_SORT_DIR_FIRST from ptk-file-list.hxx
-        set->z = g_strdup_printf("%d", XSET_B_TRUE); // sort_hidden_first
+        set->z = ztd::strdup(std::to_string(XSET_B_TRUE)); // sort_hidden_first
 
         set = xset_set_panel(p, "book_fol", "lbl", "Follow _Dir");
         set->menu_style = XSET_MENU_CHECK;

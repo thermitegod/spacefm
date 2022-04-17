@@ -33,6 +33,8 @@
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-handler.hxx"
 
+#include "vfs/vfs-user-dir.hxx"
+
 #include "settings.hxx"
 
 #include "autosave.hxx"
@@ -81,7 +83,7 @@ archive_handler_get_first_extension(XSet* handler_xset)
                 if (!first_ext.empty())
                 {
                     // add a dot to extension
-                    first_ext = g_strconcat(".", first_ext.c_str(), nullptr);
+                    first_ext = fmt::format(".{}", first_ext);
                     break;
                 }
             }
@@ -241,39 +243,44 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     }
 }
 
-static char*
+static std::string
 generate_bash_error_function(bool run_in_terminal, const char* parent_quote)
 {
     /* When ran in a terminal, errors need to result in a pause so that
      * the user can review the situation. Even outside a terminal, IG
      * has requested text is output
      * No translation for security purposes */
-    const char* error_pause = nullptr;
-    const char* finished_with_errors = nullptr;
+    std::string error_pause;
+    std::string finished_with_errors;
+
+    std::string script;
+
     if (run_in_terminal)
     {
-        error_pause = ztd::strdup("read -p");
-        finished_with_errors = ztd::strdup("[ Finished With Errors ]  Press Enter to close: ");
+        error_pause = "read -p";
+        finished_with_errors = "[ Finished With Errors ]  Press Enter to close: ";
     }
     else
     {
-        error_pause = ztd::strdup("echo");
-        finished_with_errors = ztd::strdup("[ Finished With Errors ]");
+        error_pause = "echo";
+        finished_with_errors = "[ Finished With Errors ]";
     }
 
-    return g_strdup_printf("fm_handle_err(){\n"
-                           "    fm_err=$?\n"
-                           "%s%s%s"
-                           "    if [ $fm_err -ne 0 ];then\n"
-                           "       echo;%s \"%s\"\n"
-                           "       exit $fm_err\n"
-                           "    fi\n"
-                           "}",
-                           parent_quote ? "    rmdir --ignore-fail-on-non-empty " : "",
-                           parent_quote ? parent_quote : "",
-                           parent_quote ? "\n" : "",
-                           error_pause,
-                           finished_with_errors);
+    script = fmt::format("fm_handle_err(){{\n"
+                         "    fm_err=$?\n"
+                         "{}{}{}"
+                         "    if [ $fm_err -ne 0 ];then\n"
+                         "       echo;{} \"{}\"\n"
+                         "       exit $fm_err\n"
+                         "    fi\n"
+                         "}}",
+                         parent_quote ? "    rmdir --ignore-fail-on-non-empty " : "",
+                         parent_quote ? parent_quote : "",
+                         parent_quote ? "\n" : "",
+                         error_pause,
+                         finished_with_errors);
+
+    return script;
 }
 
 static char*
@@ -428,7 +435,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
 
     // Looping for handlers (nullptr-terminated list)
     GtkTreeIter iter;
-    char* extensions;
     XSet* handler_xset;
     // Get xset name of last used handler
     char* xset_name = xset_get_s("arc_dlg"); // do not free
@@ -463,15 +469,15 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
             gtk_list_store_append(GTK_LIST_STORE(list), &iter);
 
             // Adding to model
-            extensions = g_strconcat(handler_xset->menu_label, " (", handler_xset->x, ")", nullptr);
+            std::string extensions;
+            extensions = fmt::format("{} ( {} ) ", handler_xset->menu_label, handler_xset->x);
             gtk_list_store_set(GTK_LIST_STORE(list),
                                &iter,
                                COL_XSET_NAME,
                                archive_handlers[i],
                                COL_HANDLER_EXTENSIONS,
-                               extensions,
+                               extensions.c_str(),
                                -1);
-            free(extensions);
 
             // Is last used handler?
             if (!g_strcmp0(xset_name, handler_xset->name))
@@ -518,8 +524,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
 
     /* Loading command for handler, based off the format handler */
     // Obtaining iterator from string turned into a path into the model
-    char* str = g_strdup_printf("%d", format);
-    if (gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(list), &iter, str))
+    if (gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(list),
+                                            &iter,
+                                            std::to_string(format).c_str()))
     {
         gtk_tree_model_get(GTK_TREE_MODEL(list),
                            &iter,
@@ -554,7 +561,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
         // Recording the fact getting the iter failed
         LOG_WARN("Unable to fetch the iter from handler ordinal {}!", format);
     };
-    free(str);
 
     // Mnemonically attaching widgets to labels
     gtk_label_set_mnemonic_widget(GTK_LABEL(lbl_archive_format), combo);
@@ -768,12 +774,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     height = allocation.height;
     if (width && height)
     {
-        str = g_strdup_printf("%d", width);
-        xset_set("arc_dlg", "x", str);
-        free(str);
-        str = g_strdup_printf("%d", height);
-        xset_set("arc_dlg", "y", str);
-        free(str);
+        xset_set("arc_dlg", "x", std::to_string(width).c_str());
+        xset_set("arc_dlg", "y", std::to_string(height).c_str());
     }
 
     // Destroying dialog
@@ -785,8 +787,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     std::string ext;
     std::string udest_file;
     std::string udest_quote;
-    char* s1;
-    char* final_command;
+    std::string s1;
+    std::string final_command;
     char* cmd_to_run;
 
     // Dealing with separate archives for each source file/directory ('%O')
@@ -820,15 +822,14 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 /* For subsequent archives, base archive name on the filename
                  * being compressed, in the user-selected dir */
                 std::string dest_dir = g_path_get_dirname(dest_file);
-                udest_file = g_strconcat(dest_dir.c_str(), "/", desc.c_str(), ext.c_str(), nullptr);
+                udest_file = fmt::format("{}/{}{}", dest_dir, desc, ext);
 
                 // Looping to find a path that doesnt exist
                 struct stat statbuf;
                 n = 1;
                 while (lstat(udest_file.c_str(), &statbuf) == 0)
                 {
-                    udest_file =
-                        fmt::format("{}/{}-{}{}{}", dest_dir, desc.c_str(), "copy", ++n, ext);
+                    udest_file = fmt::format("{}/{}-{}{}{}", dest_dir, desc, "copy", ++n, ext);
                 }
             }
             udest_quote = bash_quote(udest_file);
@@ -839,9 +840,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
             {
                 // special handling for filename starting with a dash
                 // due to tar interpreting it as option
-                s1 = g_strdup_printf("./%s", desc.c_str());
+                s1 = fmt::format("./{}", desc);
                 desc = bash_quote(s1);
-                free(s1);
             }
             else
                 desc = bash_quote(desc);
@@ -857,17 +857,12 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
 
             // Appending to final command as appropriate
             if (i == 0)
-                final_command =
-                    g_strconcat(cmd_to_run, "\n[[ $? -eq 0 ]] || fm_handle_err\n", nullptr);
+                final_command = fmt::format("{}\n[[ $? -eq 0 ]] || fm_handle_err\n", cmd_to_run);
             else
             {
-                s1 = final_command;
-                final_command = g_strconcat(final_command,
-                                            "echo\n",
-                                            cmd_to_run,
-                                            "\n[[ $? -eq 0 ]] || fm_handle_err\n",
-                                            nullptr);
-                free(s1);
+                final_command = fmt::format("{}echo\n{}\n[[ $? -eq 0 ]] || fm_handle_err\n",
+                                            final_command,
+                                            cmd_to_run);
             }
             free(cmd_to_run);
         }
@@ -878,7 +873,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
          * Obtaining valid quoted UTF8 file name %o for archive to create */
         udest_file = g_filename_display_name(dest_file);
         udest_quote = bash_quote(udest_file);
-        char* all = ztd::strdup("");
+        std::string all;
         std::string first;
         if (files)
         {
@@ -887,9 +882,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
             {
                 // special handling for filename starting with a dash
                 // due to tar interpreting it as option
-                s1 = g_strdup_printf("./%s", desc.c_str());
+                s1 = fmt::format("./{}", desc);
                 first = bash_quote(s1);
-                free(s1);
             }
             else
                 first = bash_quote(desc);
@@ -905,16 +899,13 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                     {
                         // special handling for filename starting with a dash
                         // due to tar interpreting it as option
-                        s1 = g_strdup_printf("./%s", desc.c_str());
+                        s1 = fmt::format("./{}", desc);
                         desc = bash_quote(s1);
-                        free(s1);
                     }
                     else
                         desc = bash_quote(desc);
 
-                    str = all;
-                    all = g_strdup_printf("%s%s%s", all, all[0] ? " " : "", desc.c_str());
-                    free(str);
+                    all = fmt::format("{}{}{}", all, all.at(0) ? " " : "", desc);
                 }
             }
         }
@@ -927,26 +918,22 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
         // Replace sub vars  %n %N %o
         cmd_to_run = replace_archive_subs(command.c_str(),
                                           first.c_str(),
-                                          all,
+                                          all.c_str(),
                                           udest_quote.c_str(),
                                           nullptr,
                                           nullptr);
 
         // Enforce error check
-        final_command = g_strconcat(cmd_to_run, "\n[[ $? -eq 0 ]] || fm_handle_err\n", nullptr);
+        final_command = fmt::format("{}\n[[ $? -eq 0 ]] || fm_handle_err\n", cmd_to_run);
         free(cmd_to_run);
-        free(all);
     }
     free(dest_file);
 
     /* When ran in a terminal, errors need to result in a pause so that
      * the user can review the situation - in any case an error check
      * needs to be made */
-    str = generate_bash_error_function(run_in_terminal, nullptr);
-    s1 = final_command;
-    final_command = g_strconcat(str, "\n\n", final_command, nullptr);
-    free(str);
-    free(s1);
+    std::string str = generate_bash_error_function(run_in_terminal, nullptr);
+    final_command = fmt::format("{}\n\n{}", str, final_command);
 
     /* Cleaning up - final_command does not need freeing, as this
      * is freed by the task */
@@ -1011,7 +998,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     std::string dest_quote;
     char* full_path = nullptr;
     std::string full_quote;
-    char* perm = nullptr;
     int i;
     int n;
     int res;
@@ -1252,8 +1238,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         // Archive to list or extract:
         full_quote = bash_quote(full_path); // %x
         std::string extract_target;         // %g or %G
-        char* mkparent = ztd::strdup("");
-        perm = ztd::strdup("");
+        std::string mkparent;
+        std::string perm;
         std::string extension;
 
         if (list_contents)
@@ -1295,7 +1281,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                     if (!extension.empty())
                     {
                         // add a dot to extension
-                        extension = g_strconcat(".", extension.c_str(), nullptr);
+                        extension = fmt::format(".{}", extension);
                         // Checking if the current extension is being used
                         if (Glib::str_has_suffix(filename, extension.c_str()))
                         {
@@ -1327,7 +1313,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
             if (extension.empty())
                 extension = "";
             else
-                extension = g_strconcat(".", extension.c_str(), nullptr);
+                extension = fmt::format(".{}", extension);
 
             /* Get extraction command - Doing this here as parent
              * directory creation needs access to the command. */
@@ -1347,31 +1333,26 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
             /* Dealing with creation of parent directory if needed -
              * never create a parent directory if '%G' is used - this is
              * an override substitution for the sake of gzip */
-            char* parent_path;
-            parent_path = nullptr;
+            std::string parent_path;
             if (create_parent && !ztd::contains(command, "%G"))
             {
                 /* Determining full path of parent directory to make
                  * (also used later in '%g' substitution) */
-                parent_path = g_build_filename(dest, filename_no_archive_ext, nullptr);
-                char* parent_orig = ztd::strdup(parent_path);
+                parent_path = Glib::build_filename(dest, filename_no_archive_ext);
                 n = 1;
 
                 // Looping to find a path that doesnt exist
-                while (lstat(parent_path, &statbuf) == 0)
+                while (lstat(parent_path.c_str(), &statbuf) == 0)
                 {
-                    free(parent_path);
-                    parent_path = g_strdup_printf("%s-%s%d", parent_orig, "copy", ++n);
+                    parent_path = fmt::format("{}-copy{}", parent_path, ++n);
                 }
-                free(parent_orig);
 
                 // Generating shell command to make directory
                 parent_quote = bash_quote(parent_path);
-                free(mkparent);
-                mkparent = g_strdup_printf("mkdir -p %s || fm_handle_err\n"
-                                           "cd %s || fm_handle_err\n",
-                                           parent_quote.c_str(),
-                                           parent_quote.c_str());
+                mkparent = fmt::format("mkdir -p {} || fm_handle_err\n"
+                                       "cd {} || fm_handle_err\n",
+                                       parent_quote,
+                                       parent_quote);
 
                 /* Dealing with the need to make extracted files writable if
                  * desired (e.g. a tar of files originally archived from a CD
@@ -1382,8 +1363,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                 {
                     /* deliberately omitting fm_handle_error - only a
                      * convenience function */
-                    free(perm);
-                    perm = g_strdup_printf("chmod -R u+rwX %s\n", parent_quote.c_str());
+                    perm = fmt::format("chmod -R u+rwX {}\n", parent_quote);
                 }
                 parent_quote.clear();
             }
@@ -1404,9 +1384,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                 /* Creating extraction target, taking into account whether
                  * a parent directory has been created or not - target is
                  * guaranteed not to exist so as to avoid overwriting */
-                extract_target = g_build_filename(create_parent ? parent_path : dest,
-                                                  filename_no_archive_ext,
-                                                  nullptr);
+                extract_target = Glib::build_filename(create_parent ? parent_path : dest,
+                                                      filename_no_archive_ext);
                 n = 1;
 
                 // Looping to find a path that doesnt exist
@@ -1414,18 +1393,16 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                 {
                     std::string str2 =
                         fmt::format("{}-{}{}{}", filename_no_ext, "copy", ++n, extension);
-                    extract_target =
-                        g_build_filename(create_parent ? parent_path : dest, str2.c_str(), nullptr);
+                    extract_target = Glib::build_filename(create_parent ? parent_path : dest, str2);
                 }
 
                 // Quoting target
-                extract_target = bash_quote(extract_target.c_str());
+                extract_target = bash_quote(extract_target);
             }
 
             // Cleaning up
             free(filename);
             free(filename_no_archive_ext);
-            free(parent_path);
         }
 
         // Substituting %x %g %G
@@ -1450,8 +1427,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
 
         // Cleaning up
         free(full_path);
-        free(mkparent);
-        free(perm);
     }
 
     /* When ran in a terminal, errors need to result in a pause so that
@@ -1459,17 +1434,16 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
      * needs to be made */
     std::string str;
     str = generate_bash_error_function(in_term, create_parent ? parent_quote.c_str() : nullptr);
-    final_command = g_strconcat(str.c_str(), "\n", final_command.c_str(), nullptr);
+    final_command = fmt::format("{}\n{}", str, final_command);
     free(choose_dir);
     g_strfreev(archive_handlers);
 
     // Creating task
-    char* task_name = g_strdup_printf("Extract %s", vfs_file_info_get_name(file));
-    PtkFileTask* task = ptk_file_exec_new(task_name,
+    std::string task_name = fmt::format("Extract {}", vfs_file_info_get_name(file));
+    PtkFileTask* task = ptk_file_exec_new(task_name.c_str(),
                                           cwd,
                                           dlgparent,
                                           file_browser ? file_browser->task_view : nullptr);
-    free(task_name);
 
     /* Setting correct exec reference - probably causes different bash
      * to be output */

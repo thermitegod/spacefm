@@ -136,19 +136,19 @@ save_progress_dialog_size(PtkFileTask* ptask)
 
     gtk_widget_get_allocation(GTK_WIDGET(ptask->progress_dlg), &allocation);
 
-    char* s = g_strdup_printf("%d", allocation.width);
-    if (ptask->task->type == VFS_FILE_TASK_EXEC)
-        xset_set("task_pop_top", "s", s);
-    else
-        xset_set("task_pop_top", "x", s);
-    free(s);
+    std::string s;
 
-    s = g_strdup_printf("%d", allocation.height);
+    s = fmt::format("{}", allocation.width);
     if (ptask->task->type == VFS_FILE_TASK_EXEC)
-        xset_set("task_pop_top", "z", s);
+        xset_set("task_pop_top", "s", s.c_str());
     else
-        xset_set("task_pop_top", "y", s);
-    free(s);
+        xset_set("task_pop_top", "x", s.c_str());
+
+    s = fmt::format("{}", allocation.height);
+    if (ptask->task->type == VFS_FILE_TASK_EXEC)
+        xset_set("task_pop_top", "z", s.c_str());
+    else
+        xset_set("task_pop_top", "y", s.c_str());
 }
 
 void
@@ -1014,8 +1014,6 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     char* str;
     char* str2;
     char percent_str[16];
-    char* stats;
-    char* errs;
 
     if (!ptask->progress_dlg)
     {
@@ -1168,38 +1166,37 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     // progress
     if (task->type != VFS_FILE_TASK_EXEC)
     {
+        std::string stats;
+
         if (ptask->complete)
         {
             if (ptask->pop_detail)
-                stats = g_strdup_printf("#%s (%s) [%s] @avg %s",
-                                        ptask->dsp_file_count,
-                                        ptask->dsp_size_tally,
-                                        ptask->dsp_elapsed,
-                                        ptask->dsp_avgspeed);
+                stats = fmt::format("#{}  ({}) [{}] @avg {}",
+                                    ptask->dsp_file_count,
+                                    ptask->dsp_size_tally,
+                                    ptask->dsp_elapsed,
+                                    ptask->dsp_avgspeed);
             else
-                stats = g_strdup_printf("%s  (%s)", ptask->dsp_size_tally, ptask->dsp_avgspeed);
+                stats = fmt::format("{} ({})", ptask->dsp_size_tally, ptask->dsp_avgspeed);
         }
         else
         {
             if (ptask->pop_detail)
-                stats = g_strdup_printf("#%s (%s) [%s] @cur %s (%s) @avg %s (%s)",
-                                        ptask->dsp_file_count,
-                                        ptask->dsp_size_tally,
-                                        ptask->dsp_elapsed,
-                                        ptask->dsp_curspeed,
-                                        ptask->dsp_curest,
-                                        ptask->dsp_avgspeed,
-                                        ptask->dsp_avgest);
+                stats = fmt::format("#{} ({}) [{}] @cur {} ({}) @avg {} ({})",
+                                    ptask->dsp_file_count,
+                                    ptask->dsp_size_tally,
+                                    ptask->dsp_elapsed,
+                                    ptask->dsp_curspeed,
+                                    ptask->dsp_curest,
+                                    ptask->dsp_avgspeed,
+                                    ptask->dsp_avgest);
             else
-                stats = g_strdup_printf("%s  (%s)  %s remaining",
-                                        ptask->dsp_size_tally,
-                                        ptask->dsp_avgspeed,
-                                        ptask->dsp_avgest);
+                stats = fmt::format("{}  ({})  {} remaining",
+                                    ptask->dsp_size_tally,
+                                    ptask->dsp_avgspeed,
+                                    ptask->dsp_avgest);
         }
-        gtk_label_set_text(ptask->current, stats);
-        // gtk_progress_bar_set_text( ptask->progress_bar, g_strdup_printf( "%d %%   %s",
-        // task->percent, stats ) );
-        free(stats);
+        gtk_label_set_text(ptask->current, stats.c_str());
     }
 
     // error/output log
@@ -1235,6 +1232,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     }
 
     // status
+    std::string errs;
     if (ptask->complete)
     {
         if (ptask->aborted)
@@ -1242,47 +1240,47 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             if (task->err_count && task->type != VFS_FILE_TASK_EXEC)
             {
                 if (ptask->err_mode == PTASK_ERROR_FIRST)
-                    errs = ztd::strdup("Error  ( Stop If First )");
+                    errs = "Error  ( Stop If First )";
                 else if (ptask->err_mode == PTASK_ERROR_ANY)
-                    errs = ztd::strdup("Error  ( Stop On Any )");
+                    errs = "Error  ( Stop On Any )";
                 else
-                    errs = g_strdup_printf("Stopped with %d error", task->err_count);
+                    errs = fmt::format("Stopped with {} error", task->err_count);
             }
             else
-                errs = ztd::strdup("Stopped");
+                errs = "Stopped";
         }
         else
         {
             if (task->type != VFS_FILE_TASK_EXEC)
             {
                 if (task->err_count)
-                    errs = g_strdup_printf("Finished with %d error", task->err_count);
+                    errs = fmt::format("Finished with {} error", task->err_count);
                 else
-                    errs = ztd::strdup("Done");
+                    errs = "Done";
             }
             else
             {
                 if (task->exec_exit_status)
-                    errs = g_strdup_printf("Finished with error  ( exit status %d )",
-                                           task->exec_exit_status);
+                    errs = fmt::format("Finished with error  ( exit status {} )",
+                                       task->exec_exit_status);
                 else if (task->exec_is_error)
-                    errs = ztd::strdup("Finished with error");
+                    errs = "Finished with error";
                 else
-                    errs = ztd::strdup("Done");
+                    errs = "Done";
             }
         }
     }
     else if (task->state_pause == VFS_FILE_TASK_PAUSE)
     {
         if (task->type != VFS_FILE_TASK_EXEC)
-            errs = ztd::strdup("Paused");
+            errs = "Paused";
         else
         {
             if (task->exec_pid)
-                errs = g_strdup_printf("Paused  ( pid %d )", task->exec_pid);
+                errs = fmt::format("Paused  ( pid {} )", task->exec_pid);
             else
             {
-                errs = g_strdup_printf("Paused  ( exit status %d )", task->exec_exit_status);
+                errs = fmt::format("Paused  ( exit status {} )", task->exec_exit_status);
                 set_button_states(ptask);
             }
         }
@@ -1294,10 +1292,10 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         else
         {
             if (task->exec_pid)
-                errs = g_strdup_printf("Queued  ( pid %d )", task->exec_pid);
+                errs = fmt::format("Queued  ( pid {} )", task->exec_pid);
             else
             {
-                errs = g_strdup_printf("Queued  ( exit status %d )", task->exec_exit_status);
+                errs = fmt::format("Queued  ( exit status {} )", task->exec_exit_status);
                 set_button_states(ptask);
             }
         }
@@ -1307,23 +1305,22 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         if (task->type != VFS_FILE_TASK_EXEC)
         {
             if (task->err_count)
-                errs = g_strdup_printf("Running with %d error", task->err_count);
+                errs = fmt::format("Running with {} error", task->err_count);
             else
-                errs = ztd::strdup("Running...");
+                errs = "Running...";
         }
         else
         {
             if (task->exec_pid)
-                errs = g_strdup_printf("Running...  ( pid %d )", task->exec_pid);
+                errs = fmt::format("Running...  ( pid {} )", task->exec_pid);
             else
             {
-                errs = g_strdup_printf("Running...  ( exit status %d )", task->exec_exit_status);
+                errs = fmt::format("Running...  ( exit status {} )", task->exec_exit_status);
                 set_button_states(ptask);
             }
         }
     }
-    gtk_label_set_text(ptask->errors, errs);
-    free(errs);
+    gtk_label_set_text(ptask->errors, errs.c_str());
     // LOG_INFO("ptk_file_task_progress_update DONE ptask={:p}", fmt::ptr(ptask));
 }
 
@@ -1432,25 +1429,21 @@ ptk_file_task_update(PtkFileTask* ptask)
 
     // elapsed
     unsigned int hours = timer_elapsed / 3600.0;
-    char* elapsed;
-    char* elapsed2;
-    if (hours == 0)
-        elapsed = ztd::strdup("");
-    else
-        elapsed = g_strdup_printf("%d", hours);
+    std::string elapsed;
+    std::string elapsed2;
+    if (hours != 0)
+        elapsed = fmt::format("{}", hours);
     unsigned int mins = (timer_elapsed - (hours * 3600)) / 60;
     if (hours > 0)
-        elapsed2 = g_strdup_printf("%s:%02d", elapsed, mins);
+        elapsed2 = fmt::format("{}:{:02d}", elapsed, mins);
     else if (mins > 0)
-        elapsed2 = g_strdup_printf("%d", mins);
+        elapsed2 = fmt::format("{}", mins);
     else
-        elapsed2 = ztd::strdup(elapsed);
+        elapsed2 = elapsed;
     unsigned int secs = (timer_elapsed - (hours * 3600) - (mins * 60));
-    char* elapsed3 = g_strdup_printf("%s:%02d", elapsed2, secs);
-    free(elapsed);
-    free(elapsed2);
+    std::string elapsed3 = fmt::format("{}:{:02d}", elapsed2, secs);
     free(ptask->dsp_elapsed);
-    ptask->dsp_elapsed = elapsed3;
+    ptask->dsp_elapsed = ztd::strdup(elapsed3);
 
     if (task->type != VFS_FILE_TASK_EXEC)
     {
@@ -1553,7 +1546,6 @@ ptk_file_task_update(PtkFileTask* ptask)
         ptask->dsp_curest = ztd::strdup(remain1);
         free(ptask->dsp_avgest);
         ptask->dsp_avgest = ztd::strdup(remain2);
-        ;
     }
 
     // move log lines from add_log_buf to log_buf
@@ -1878,12 +1870,12 @@ query_overwrite_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
     {
         int has_overwrite_btn =
             GPOINTER_TO_INT((void*)g_object_get_data(G_OBJECT(dlg), "has_overwrite_btn"));
-        str = g_strdup_printf("%d", allocation.width);
-        xset_set("task_popups", has_overwrite_btn ? "x" : "s", str);
-        free(str);
-        str = g_strdup_printf("%d", allocation.height);
-        xset_set("task_popups", has_overwrite_btn ? "y" : "z", str);
-        free(str);
+        xset_set("task_popups",
+                 has_overwrite_btn ? "x" : "s",
+                 std::to_string(allocation.width).c_str());
+        xset_set("task_popups",
+                 has_overwrite_btn ? "y" : "z",
+                 std::to_string(allocation.height).c_str());
     }
 
     gtk_widget_destroy(GTK_WIDGET(dlg));

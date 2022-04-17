@@ -617,12 +617,8 @@ on_start_search(GtkWidget* btn, FindFile* data)
     int height = allocation.height;
     if (width && height)
     {
-        char* str = g_strdup_printf("%d", width);
-        xset_set("main_search", "x", str);
-        free(str);
-        str = g_strdup_printf("%d", height);
-        xset_set("main_search", "y", str);
-        free(str);
+        xset_set("main_search", "x", std::to_string(width).c_str());
+        xset_set("main_search", "y", std::to_string(height).c_str());
     }
 
     gtk_widget_hide(data->search_criteria);
@@ -675,12 +671,8 @@ on_search_again(GtkWidget* btn, FindFile* data)
     int height = allocation.height;
     if (width && height)
     {
-        char* str = g_strdup_printf("%d", width);
-        xset_set("main_search", "x", str);
-        free(str);
-        str = g_strdup_printf("%d", height);
-        xset_set("main_search", "y", str);
-        free(str);
+        xset_set("main_search", "x", std::to_string(width).c_str());
+        xset_set("main_search", "y", std::to_string(height).c_str());
     }
 
     gtk_widget_show(data->search_criteria);

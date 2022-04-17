@@ -715,10 +715,10 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
                     mname = g_strdup_printf("%s-%.20s", bdev, str);
                     free(str);
                 }
-                // else if ( device->id_uuid && device->id_uuid[0] != '\0' )
-                //    mname = g_strdup_printf( "%s-%s", bdev, device->id_uuid );
                 else
+                {
                     mname = ztd::strdup(bdev);
+                }
                 free(bdev);
             }
             break;
@@ -787,14 +787,13 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
     char* point1 = ptk_location_view_get_mount_point_dir(mname);
     free(mname);
     int r = 2;
-    char* point = ztd::strdup(point1);
+    std::string point = ztd::strdup(point1);
 
     // attempt to remove existing dir - succeeds only if empty and unmounted
     std::filesystem::remove_all(point);
     while (std::filesystem::exists(point))
     {
-        free(point);
-        point = g_strdup_printf("%s-%d", point1, r++);
+        point = fmt::format("{}-{}", point1, r++);
         std::filesystem::remove_all(point);
     }
     free(point1);
@@ -807,7 +806,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
         LOG_WARN("Error creating mount point directory '{}': {}", point, errno_msg);
     }
 
-    return point;
+    return ztd::strdup(point);
 }
 
 static void
@@ -945,7 +944,17 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
                                                    volume->mount_point,
                                                    PTK_FB_CHDIR_ADD_HISTORY);
                     }
-                    goto _net_free;
+                    free(mount_point);
+                    free(netmount->url);
+                    free(netmount->fstype);
+                    free(netmount->host);
+                    free(netmount->ip);
+                    free(netmount->port);
+                    free(netmount->user);
+                    free(netmount->pass);
+                    free(netmount->path);
+                    g_slice_free(netmount_t, netmount);
+                    return;
                 }
             }
         }
@@ -971,31 +980,40 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
                         GTK_BUTTONS_OK,
                         "No network handler is configured for this URL, or no mount command is "
                         "set.  Add a handler in Devices|Settings|Protocol Handlers.");
-        goto _net_free;
+
+        free(mount_point);
+        free(netmount->url);
+        free(netmount->fstype);
+        free(netmount->host);
+        free(netmount->ip);
+        free(netmount->port);
+        free(netmount->user);
+        free(netmount->pass);
+        free(netmount->path);
+        g_slice_free(netmount_t, netmount);
+        return;
     }
 
     // task
-    char* keepterm;
+    std::string keepterm;
     if (ssh_udevil)
-        keepterm = g_strdup_printf("if [ $? -ne 0 ];then\n    read -p \"%s\"\nelse\n    echo;"
-                                   "read -p \"Press Enter to close (closing this window may "
-                                   "unmount sshfs)\"\nfi\n",
-                                   press_enter_to_close);
+        keepterm = fmt::format("if [ $? -ne 0 ];then\n    read -p \"{}\"\nelse\n    echo;"
+                               "read -p \"Press Enter to close (closing this window may "
+                               "unmount sshfs)\"\nfi\n",
+                               press_enter_to_close);
 
     else if (run_in_terminal)
-        keepterm = g_strdup_printf("[[ $? -eq 0 ]] || ( read -p '%s: ' )\n", press_enter_to_close);
-    else
-        keepterm = ztd::strdup("");
+        keepterm = fmt::format("[[ $? -eq 0 ]] || ( read -p '{}: ' )\n", press_enter_to_close);
 
     line = fmt::format("{}{}\n{}", ssh_udevil ? "echo Connecting...\n\n" : "", cmd, keepterm);
-    free(keepterm);
     free(cmd);
 
     PtkFileTask* task;
-    char* task_name;
-    task_name = g_strdup_printf("Open URL %s", netmount->url);
-    task = ptk_file_exec_new(task_name, nullptr, GTK_WIDGET(file_browser), file_browser->task_view);
-    free(task_name);
+    std::string task_name = fmt::format("Open URL {}", netmount->url);
+    task = ptk_file_exec_new(task_name.c_str(),
+                             nullptr,
+                             GTK_WIDGET(file_browser),
+                             file_browser->task_view);
     task->task->exec_command = line;
     task->task->exec_sync = !ssh_udevil;
     task->task->exec_export = true;
@@ -1028,7 +1046,6 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     }
     ptk_file_task_run(task);
 
-_net_free:
     free(mount_point);
     free(netmount->url);
     free(netmount->fstype);
@@ -1084,12 +1101,11 @@ on_mount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         popup_missing_mount(view, 0);
         return;
     }
-    char* task_name = g_strdup_printf("Mount %s", vol->device_file);
-    PtkFileTask* task = ptk_file_exec_new(task_name,
+    std::string task_name = fmt::format("Mount {}", vol->device_file);
+    PtkFileTask* task = ptk_file_exec_new(task_name.c_str(),
                                           nullptr,
                                           view,
                                           file_browser ? file_browser->task_view : nullptr);
-    free(task_name);
 
     std::string keep_term = "";
     if (run_in_terminal)
@@ -1153,9 +1169,9 @@ on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         // task
         PtkFileBrowser* file_browser =
             static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
-        char* task_name = g_strdup_printf("Mount As Root %s", vol->device_file);
-        PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
-        free(task_name);
+        std::string task_name = fmt::format("Mount As Root {}", vol->device_file);
+        PtkFileTask* task =
+            ptk_file_exec_new(task_name.c_str(), nullptr, view, file_browser->task_view);
         task->task->exec_command = cmd;
         task->task->exec_write_root = change_root;
         task->task->exec_as_user = "root";
@@ -1206,9 +1222,9 @@ on_umount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         cmd = fmt::format("echo {}; echo; {}", cmd, cmd);
         PtkFileBrowser* file_browser =
             static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
-        char* task_name = g_strdup_printf("Unmount As Root %s", vol->device_file);
-        PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
-        free(task_name);
+        std::string task_name = fmt::format("Unmount As Root {}", vol->device_file);
+        PtkFileTask* task =
+            ptk_file_exec_new(task_name.c_str(), nullptr, view, file_browser->task_view);
         task->task->exec_command = cmd;
         task->task->exec_write_root = change_root;
         task->task->exec_as_user = "root";
@@ -1245,12 +1261,11 @@ on_umount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         popup_missing_mount(view, 1);
         return;
     }
-    char* task_name = g_strdup_printf("Unmount %s", vol->device_file);
-    PtkFileTask* task = ptk_file_exec_new(task_name,
+    std::string task_name = fmt::format("Unmount {}", vol->device_file);
+    PtkFileTask* task = ptk_file_exec_new(task_name.c_str(),
                                           nullptr,
                                           view,
                                           file_browser ? file_browser->task_view : nullptr);
-    free(task_name);
 
     std::string keep_term = "";
     if (run_in_terminal)
@@ -1288,9 +1303,9 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (vfs_volume_is_mounted(vol))
     {
         // task
-        char* wait;
-        char* wait_done;
-        char* eject;
+        std::string wait;
+        std::string wait_done;
+        std::string eject;
         bool run_in_terminal;
 
         char* unmount = vfs_volume_device_unmount_cmd(vol, &run_in_terminal);
@@ -1301,26 +1316,21 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         }
 
         if (vol->device_type == DEVICE_TYPE_BLOCK && (vol->is_optical || vol->requires_eject))
-            eject = g_strdup_printf("\neject %s", vol->device_file);
+            eject = fmt::format("\neject {}", vol->device_file);
         else
-            eject = ztd::strdup("\nexit 0");
+            eject = "\nexit 0";
 
         if (!file_browser && !run_in_terminal && vol->device_type == DEVICE_TYPE_BLOCK)
         {
             std::string exe = get_prog_executable();
             // run from desktop window - show a pending dialog
-            wait = g_strdup_printf("%s -g --title 'Remove %s' --label '\\nPlease wait while device "
-                                   "%s is synced and unmounted...' >/dev/null &\nwaitp=$!\n",
-                                   exe.c_str(),
-                                   vol->device_file,
-                                   vol->device_file);
+            wait = fmt::format("%s -g --title 'Remove %s' --label '\\nPlease wait while device "
+                               "%s is synced and unmounted...' >/dev/null &\nwaitp=$!\n",
+                               exe,
+                               vol->device_file,
+                               vol->device_file);
             // sleep .2 here to ensure spacefm -g isn't killed too quickly causing hang
-            wait_done = ztd::strdup("\n( sleep .2; kill $waitp 2>/dev/null ) &");
-        }
-        else
-        {
-            wait = ztd::strdup("");
-            wait_done = ztd::strdup("");
+            wait_done = "\n( sleep .2; kill $waitp 2>/dev/null ) &";
         }
         if (run_in_terminal)
             line = fmt::format("echo 'Unmounting {}...'\n{}{}\nif [ $? -ne 0 ];then\n    "
@@ -1337,15 +1347,11 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                                unmount,
                                wait_done,
                                eject);
-        free(eject);
-        free(wait);
-        free(wait_done);
-        char* task_name = g_strdup_printf("Remove %s", vol->device_file);
-        task = ptk_file_exec_new(task_name,
+        std::string task_name = fmt::format("Remove {}", vol->device_file);
+        task = ptk_file_exec_new(task_name.c_str(),
                                  nullptr,
                                  view,
                                  file_browser ? file_browser->task_view : nullptr);
-        free(task_name);
         task->task->exec_command = line;
         task->task->exec_sync = !run_in_terminal;
         task->task->exec_export = !!file_browser;
@@ -1358,12 +1364,11 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     {
         // task
         line = fmt::format("eject {}", vol->device_file);
-        char* task_name = g_strdup_printf("Remove %s", vol->device_file);
-        task = ptk_file_exec_new(task_name,
+        std::string task_name = fmt::format("Remove {}", vol->device_file);
+        task = ptk_file_exec_new(task_name.c_str(),
                                  nullptr,
                                  view,
                                  file_browser ? file_browser->task_view : nullptr);
-        free(task_name);
         task->task->exec_command = line;
         task->task->exec_sync = false;
         task->task->exec_show_error = false;
@@ -1373,12 +1378,11 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     {
         // task
         line = "sync";
-        char* task_name = g_strdup_printf("Remove %s", vol->device_file);
-        task = ptk_file_exec_new(task_name,
+        std::string task_name = fmt::format("Remove {}", vol->device_file);
+        task = ptk_file_exec_new(task_name.c_str(),
                                  nullptr,
                                  view,
                                  file_browser ? file_browser->task_view : nullptr);
-        free(task_name);
         task->task->exec_command = line;
         task->task->exec_sync = false;
         task->task->exec_show_error = false;
@@ -1439,10 +1443,9 @@ try_mount(GtkTreeView* view, VFSVolume* vol)
         popup_missing_mount(GTK_WIDGET(view), 0);
         return false;
     }
-    char* task_name = g_strdup_printf("Mount %s", vol->device_file);
+    std::string task_name = fmt::format("Mount {}", vol->device_file);
     PtkFileTask* task =
-        ptk_file_exec_new(task_name, nullptr, GTK_WIDGET(view), file_browser->task_view);
-    free(task_name);
+        ptk_file_exec_new(task_name.c_str(), nullptr, GTK_WIDGET(view), file_browser->task_view);
     std::string keep_term = "";
     if (run_in_terminal)
         keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
@@ -1508,9 +1511,9 @@ on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         }
 
         // task
-        char* task_name = g_strdup_printf("Mount %s", vol->device_file);
-        PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
-        free(task_name);
+        std::string task_name = fmt::format("Mount {}", vol->device_file);
+        PtkFileTask* task =
+            ptk_file_exec_new(task_name.c_str(), nullptr, view, file_browser->task_view);
         std::string keep_term = "";
         if (run_in_terminal)
             keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
@@ -1577,12 +1580,11 @@ on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         }
 
         // task
-        char* task_name = g_strdup_printf("Mount %s", vol->device_file);
-        PtkFileTask* task = ptk_file_exec_new(task_name,
+        std::string task_name = fmt::format("Mount {}", vol->device_file);
+        PtkFileTask* task = ptk_file_exec_new(task_name.c_str(),
                                               nullptr,
                                               view,
                                               file_browser ? file_browser->task_view : nullptr);
-        free(task_name);
         std::string keep_term = "";
         if (run_in_terminal)
             keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
@@ -1643,9 +1645,9 @@ on_remount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     }
 
     // task
-    char* task_name = g_strdup_printf("Remount %s", vol->device_file);
-    PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
-    free(task_name);
+    std::string task_name = fmt::format("Remount {}", vol->device_file);
+    PtkFileTask* task =
+        ptk_file_exec_new(task_name.c_str(), nullptr, view, file_browser->task_view);
     if (vfs_volume_is_mounted(vol))
     {
         // udisks can't remount, so unmount and mount
@@ -1729,9 +1731,8 @@ on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
             line = fmt::format("sync\n{}\nif [ $? -ne 0 ];then\n    exit 1{}\nfi", unmount, eject);
         free(eject);
         free(unmount);
-        char* task_name = g_strdup_printf("Reload %s", vol->device_file);
-        task = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
-        free(task_name);
+        std::string task_name = fmt::format("Reload %s", vol->device_file);
+        task = ptk_file_exec_new(task_name.c_str(), nullptr, view, file_browser->task_view);
         task->task->exec_command = line;
         task->task->exec_sync = !run_in_terminal;
         task->task->exec_export = true;
@@ -1744,9 +1745,8 @@ on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     {
         // task
         line = fmt::format("eject {}; sleep 0.3; eject -t {}", vol->device_file, vol->device_file);
-        char* task_name = g_strdup_printf("Reload %s", vol->device_file);
-        task = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
-        free(task_name);
+        std::string task_name = fmt::format("Reload %s", vol->device_file);
+        task = ptk_file_exec_new(task_name.c_str(), nullptr, view, file_browser->task_view);
         task->task->exec_command = line;
         task->task->exec_sync = false;
         task->task->exec_show_error = false;
@@ -1913,12 +1913,11 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     // Note: file_browser may be nullptr
     if (!GTK_IS_WIDGET(file_browser))
         file_browser = nullptr;
-    char* task_name = g_strdup_printf("Properties %s", vol->device_file);
-    PtkFileTask* task = ptk_file_exec_new(task_name,
+    std::string task_name = fmt::format("Properties {}", vol->device_file);
+    PtkFileTask* task = ptk_file_exec_new(task_name.c_str(),
                                           nullptr,
                                           file_browser ? GTK_WIDGET(file_browser) : view,
                                           file_browser ? file_browser->task_view : nullptr);
-    free(task_name);
     task->task->exec_browser = file_browser;
 
     if (cmd)
@@ -1975,10 +1974,6 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                                   fstab_path,
                                   *uuid,
                                   vol->device_file);
-            // command = g_strdup_printf( "bash -c \"cat /etc/fstab | grep -e ^[#\\ ]*UUID=$(/bin/ls
-            // -l
-            // /dev/disk/by-uuid | grep \\.\\./%s | sed 's/.* \\([a-fA-F0-9\-]*\\) -> \.*/\\1/')\\
-            // */ -e '^[# ]*%s '\"", base, vol->device_file );
             print_command(command);
             Glib::spawn_command_line_sync(command, fstab);
         }
@@ -2417,12 +2412,13 @@ show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browse
     else
         str = ztd::strdup("");
 
-    char* menu_elements =
-        g_strdup_printf("dev_menu_remove dev_menu_reload dev_menu_unmount dev_menu_sync separator "
-                        "dev_menu_open dev_menu_tab dev_menu_mount dev_menu_remount%s",
-                        str);
-    xset_add_menu(file_browser, popup, accel_group, menu_elements);
-    free(menu_elements);
+    std::string menu_elements;
+
+    menu_elements =
+        fmt::format("dev_menu_remove dev_menu_reload dev_menu_unmount dev_menu_sync separator "
+                    "dev_menu_open dev_menu_tab dev_menu_mount dev_menu_remount{}",
+                    str);
+    xset_add_menu(file_browser, popup, accel_group, menu_elements.c_str());
 
     set = xset_set_cb("dev_prop", (GFunc)on_prop, vol);
     xset_set_ob1(set, "view", view);
@@ -2458,15 +2454,12 @@ show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browse
     xset_set_ob1(set, "set", set);
 
     set = xset_get("dev_menu_settings");
-    menu_elements = ztd::strdup(
-        "dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf dev_mount_options "
-        "dev_change separator dev_single dev_newtab dev_icon");
-    xset_set_set(set, XSET_SET_SET_DESC, menu_elements);
-    free(menu_elements);
+    menu_elements = "dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
+                    "dev_mount_options dev_change separator dev_single dev_newtab dev_icon";
+    xset_set_set(set, XSET_SET_SET_DESC, menu_elements.c_str());
 
-    menu_elements = ztd::strdup("separator dev_menu_root separator dev_prop dev_menu_settings");
-    xset_add_menu(file_browser, popup, accel_group, menu_elements);
-    free(menu_elements);
+    menu_elements = "separator dev_menu_root separator dev_prop dev_menu_settings";
+    xset_add_menu(file_browser, popup, accel_group, menu_elements.c_str());
 
     gtk_widget_show_all(GTK_WIDGET(popup));
 
@@ -2817,11 +2810,12 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     xset_set_ob1(set, "set", set);
 
     set = xset_get("dev_menu_settings");
-    char* desc = g_strdup_printf("dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
-                                 "dev_mount_options dev_change%s",
-                                 file_browser ? " dev_newtab" : "");
-    xset_set_set(set, XSET_SET_SET_DESC, desc);
-    free(desc);
+
+    std::string desc =
+        fmt::format("dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
+                    "dev_mount_options dev_change{}",
+                    file_browser ? " dev_newtab" : "");
+    xset_set_set(set, XSET_SET_SET_DESC, desc.c_str());
 }
 
 void
@@ -3175,9 +3169,7 @@ ptk_bookmark_view_reload_list(GtkTreeView* view, XSet* book_set)
 
     // Add top item
     gtk_list_store_insert(list, &it, ++pos);
-    std::string name;
-    name = clean_label(book_set->menu_label, false, false);
-    // char* name = g_strdup_printf( "[ %s ]", str );
+    std::string name = clean_label(book_set->menu_label, false, false);
     gtk_list_store_set(list, &it, COL_NAME, name.c_str(), -1);
     gtk_list_store_set(list, &it, COL_PATH, book_set->name, -1);
     // icon
@@ -3276,7 +3268,7 @@ on_bookmark_device(GtkMenuItem* item, VFSVolume* vol)
     newset = xset_custom_new();
     newset->menu_label = ztd::strdup(url);
     newset->z = ztd::strdup(url);
-    newset->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
+    newset->x = ztd::strdup(std::to_string(XSET_CMD_BOOKMARK));
     newset->prev = ztd::strdup(sel_set->name);
     newset->next = sel_set->next; // steal string
     newset->task = false;
@@ -3335,7 +3327,7 @@ ptk_bookmark_view_get_first_bookmark(XSet* book_set)
         child_set = xset_custom_new();
         child_set->menu_label = ztd::strdup("Home");
         child_set->z = ztd::strdup(vfs_user_home_dir());
-        child_set->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
+        child_set->x = ztd::strdup(std::to_string(XSET_CMD_BOOKMARK));
         child_set->parent = ztd::strdup("main_book");
         book_set->child = ztd::strdup(child_set->name);
         child_set->task = false;
@@ -3541,7 +3533,7 @@ ptk_bookmark_view_add_bookmark(GtkMenuItem* menuitem, PtkFileBrowser* file_brows
     newset = xset_custom_new();
     newset->menu_label = g_path_get_basename(url);
     newset->z = ztd::strdup(url);
-    newset->x = g_strdup_printf("%d", XSET_CMD_BOOKMARK);
+    newset->x = ztd::strdup(std::to_string(XSET_CMD_BOOKMARK));
     newset->prev = ztd::strdup(sel_set->name);
     newset->next = sel_set->next; // steal string
     newset->task = false;
@@ -3935,8 +3927,10 @@ show_bookmarks_menu(GtkTreeView* view, PtkFileBrowser* file_browser, unsigned in
     set = xset_get("book_settings");
     if (set->desc)
         free(set->desc);
-    set->desc = g_strdup_printf("book_single book_newtab panel%d_book_fol book_icon book_menu_icon",
-                                file_browser->mypanel);
+    std::string desc =
+        fmt::format("book_single book_newtab panel{}_book_fol book_icon book_menu_icon",
+                    file_browser->mypanel);
+    set->desc = ztd::strdup(desc);
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     xset_add_menuitem(file_browser, popup, accel_group, set);
     gtk_menu_shell_prepend(GTK_MENU_SHELL(popup), gtk_separator_menu_item_new());

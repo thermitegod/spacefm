@@ -1028,9 +1028,10 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
         {
             // shown
             // test if panel and mode exists
-            char* str =
-                g_strdup_printf("panel%d_slider_positions%d", p, main_window->panel_context[p - 1]);
-            if (!(set = xset_is(str)))
+            std::string xset_name =
+                fmt::format("panel{}_slider_positions{}", p, main_window->panel_context[p - 1]);
+            set = xset_is(xset_name);
+            if (!set)
             {
                 // no config exists for this panel and mode - copy
                 // printf ("no config for %d, %d\n", p, main_window->panel_context[p-1] );
@@ -1057,7 +1058,6 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                 set->y = ztd::strdup(set_old->y ? set_old->y : "0");
                 set->s = ztd::strdup(set_old->s ? set_old->s : "0");
             }
-            free(str);
             // load dynamic slider positions for this panel context
             main_window->panel_slide_x[p - 1] = set->x ? strtol(set->x, nullptr, 10) : 0;
             main_window->panel_slide_y[p - 1] = set->y ? strtol(set->y, nullptr, 10) : 0;
@@ -1072,6 +1072,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                 set = xset_get_panel(p, "show");
                 if ((set->s && app_settings.load_saved_tabs) || set->ob1)
                 {
+                    char* str;
                     // set->ob1 is preload path
                     tabs_add = g_strdup_printf("%s%s%s",
                                                set->s && app_settings.load_saved_tabs ? set->s : "",
@@ -1104,9 +1105,9 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                             if (Glib::str_has_prefix(tab_dir, "~/"))
                             {
                                 // convert ~ to /home/user for hacked session files
-                                str = g_strdup_printf("%s%s",
-                                                      vfs_user_home_dir().c_str(),
-                                                      tab_dir + 1);
+                                std::string path =
+                                    fmt::format("{}{}", vfs_user_home_dir(), tab_dir + 1);
+                                str = ztd::strdup(path);
                                 free(tab_dir);
                                 tab_dir = str;
                             }
@@ -1432,7 +1433,8 @@ rebuild_menus(FMMainWindow* main_window)
     // Panel View submenu
     set = xset_get("con_view");
     str = set->menu_label;
-    set->menu_label = g_strdup_printf("%s %d %s", "Panel", main_window->curpanel, set->menu_label);
+    std::string menu_label = fmt::format("Panel {} {}", main_window->curpanel, set->menu_label);
+    set->menu_label = ztd::strdup(menu_label);
     ptk_file_menu_add_panel_view_menu(file_browser, newmenu, accel_group);
     free(set->menu_label);
     set->menu_label = str;
@@ -1518,7 +1520,6 @@ static void
 fm_main_window_init(FMMainWindow* main_window)
 {
     int i;
-    const char* icon_name;
     XSet* set;
 
     main_window->configure_evt_timer = 0;
@@ -1573,18 +1574,19 @@ fm_main_window_init(FMMainWindow* main_window)
     // gtk_widget_modify_bg( main_window->panelbar, GTK_STATE_NORMAL,
     //                                    &GTK_WIDGET( main_window )
     //                                    ->style->bg[ GTK_STATE_NORMAL ] );
+
     for (i = 0; i < 4; i++)
     {
+        std::string icon_name;
         main_window->panel_btn[i] = GTK_WIDGET(gtk_toggle_tool_button_new());
-        icon_name = g_strdup_printf("Show Panel %d", i + 1);
-        gtk_tool_button_set_label(GTK_TOOL_BUTTON(main_window->panel_btn[i]), icon_name);
-        free((char*)icon_name);
+        icon_name = fmt::format("Show Panel {}", i + 1);
+        gtk_tool_button_set_label(GTK_TOOL_BUTTON(main_window->panel_btn[i]), icon_name.c_str());
         set = xset_get_panel(i + 1, "icon_status");
         if (set->icon && set->icon[0] != '\0')
             icon_name = set->icon;
         else
-            icon_name = ztd::strdup("gtk-yes");
-        main_window->panel_image[i] = xset_get_image(icon_name, GTK_ICON_SIZE_MENU);
+            icon_name = "gtk-yes";
+        main_window->panel_image[i] = xset_get_image(icon_name.c_str(), GTK_ICON_SIZE_MENU);
         gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(main_window->panel_btn[i]),
                                         main_window->panel_image[i]);
         gtk_toolbar_insert(GTK_TOOLBAR(main_window->panelbar),
@@ -1851,7 +1853,6 @@ fm_main_window_store_positions(FMMainWindow* main_window)
     {
         // store width/height + sliders
         int pos;
-        char* posa;
         GtkAllocation allocation;
         gtk_widget_get_allocation(GTK_WIDGET(main_window), &allocation);
 
@@ -1864,36 +1865,25 @@ fm_main_window_store_positions(FMMainWindow* main_window)
         {
             pos = gtk_paned_get_position(GTK_PANED(main_window->hpane_top));
             if (pos)
-            {
-                posa = g_strdup_printf("%d", pos);
-                xset_set("panel_sliders", "x", posa);
-                free(posa);
-            }
+                xset_set("panel_sliders", "x", std::to_string(pos).c_str());
 
             pos = gtk_paned_get_position(GTK_PANED(main_window->hpane_bottom));
             if (pos)
-            {
-                posa = g_strdup_printf("%d", pos);
-                xset_set("panel_sliders", "y", posa);
-                free(posa);
-            }
+                xset_set("panel_sliders", "y", std::to_string(pos).c_str());
 
             pos = gtk_paned_get_position(GTK_PANED(main_window->vpane));
             if (pos)
-            {
-                posa = g_strdup_printf("%d", pos);
-                xset_set("panel_sliders", "s", posa);
-                free(posa);
-            }
+                xset_set("panel_sliders", "s", std::to_string(pos).c_str());
+
             if (gtk_widget_get_visible(main_window->task_scroll))
             {
                 pos = gtk_paned_get_position(GTK_PANED(main_window->task_vpane));
                 if (pos)
                 {
                     // save absolute height
-                    posa = g_strdup_printf("%d", allocation.height - pos);
-                    xset_set("task_show_manager", "x", posa);
-                    free(posa);
+                    xset_set("task_show_manager",
+                             "x",
+                             std::to_string(allocation.height - pos).c_str());
                     // LOG_INFO("CLOS  win {}x{}    task height {}   slider {}", allocation.width,
                     // allocation.height, allocation.height - pos, pos);
                 }
@@ -2831,20 +2821,16 @@ on_fullscreen_activate(GtkMenuItem* menuitem, FMMainWindow* main_window)
 static void
 set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
 {
-    char* disp_path;
-    char* disp_name;
-    char* tab_count = nullptr;
-    char* tab_num = nullptr;
-    char* panel_count = nullptr;
-    char* panel_num = nullptr;
+    std::string disp_path;
+    std::string disp_name;
 
     if (!file_browser || !main_window)
         return;
 
     if (file_browser->dir && file_browser->dir->disp_path)
     {
-        disp_path = ztd::strdup(file_browser->dir->disp_path);
-        disp_name = g_path_get_basename(disp_path);
+        disp_path = file_browser->dir->disp_path;
+        disp_name = g_path_get_basename(disp_path.c_str());
     }
     else
     {
@@ -2852,12 +2838,7 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
         if (path)
         {
             disp_path = g_filename_display_name(path);
-            disp_name = g_path_get_basename(disp_path);
-        }
-        else
-        {
-            disp_name = ztd::strdup("");
-            disp_path = ztd::strdup("");
+            disp_name = g_path_get_basename(disp_path.c_str());
         }
     }
 
@@ -2874,21 +2855,11 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
         // get panel/tab info
         int ipanel_count = 0, itab_count = 0, itab_num = 0;
         main_window_get_counts(file_browser, &ipanel_count, &itab_count, &itab_num);
-        panel_count = g_strdup_printf("%d", ipanel_count);
-        tab_count = g_strdup_printf("%d", itab_count);
-        tab_num = g_strdup_printf("%d", itab_num);
-        panel_count = g_strdup_printf("%d", ipanel_count);
-        panel_num = g_strdup_printf("%d", main_window->curpanel);
 
-        fmt = ztd::replace(fmt, "%t", tab_num);
-        fmt = ztd::replace(fmt, "%T", tab_count);
-        fmt = ztd::replace(fmt, "%p", panel_num);
-        fmt = ztd::replace(fmt, "%P", panel_count);
-
-        free(panel_count);
-        free(tab_count);
-        free(tab_num);
-        free(panel_num);
+        fmt = ztd::replace(fmt, "%t", std::to_string(itab_num));
+        fmt = ztd::replace(fmt, "%T", std::to_string(itab_count));
+        fmt = ztd::replace(fmt, "%p", std::to_string(main_window->curpanel));
+        fmt = ztd::replace(fmt, "%P", std::to_string(ipanel_count));
     }
     if (ztd::contains(fmt, "*") && !main_tasks_running(main_window))
         fmt = ztd::replace(fmt, "*", "");
@@ -2896,9 +2867,6 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
         fmt = ztd::replace(fmt, "%n", disp_name);
     if (orig_fmt && ztd::contains(orig_fmt, "%d"))
         fmt = ztd::replace(fmt, "%d", disp_path);
-
-    free(disp_name);
-    free(disp_path);
 
     gtk_window_set_title(GTK_WINDOW(main_window), fmt.c_str());
 }
@@ -3393,10 +3361,9 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
                         PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
                     if (browser)
                     {
-                        char* new_set_name =
-                            g_strdup_printf("panel%d%s", browser->mypanel, set->name + 6);
+                        std::string new_set_name =
+                            fmt::format("panel{}{}", browser->mypanel, set->name + 6);
                         set = xset_get(new_set_name);
-                        free(new_set_name);
                     }
                     else
                         return false; // failsafe
@@ -3864,99 +3831,42 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
         if (!c->var[CONTEXT_DEVICE_FSTYPE])
             c->var[CONTEXT_DEVICE_FSTYPE] = ztd::strdup("");
 
-        char* flags = ztd::strdup("");
-        char* old_flags;
+        std::string flags;
         if (vol->is_removable)
-        {
-            old_flags = flags;
-            flags = g_strdup_printf("%s removable", flags);
-            free(old_flags);
-        }
+            flags = fmt::format("{} removable", flags);
         else
-        {
-            old_flags = flags;
-            flags = g_strdup_printf("%s internal", flags);
-            free(old_flags);
-        }
+            flags = fmt::format("{} internal", flags);
 
         if (vol->requires_eject)
-        {
-            old_flags = flags;
-            flags = g_strdup_printf("%s ejectable", flags);
-            free(old_flags);
-        }
+            flags = fmt::format("{} ejectable", flags);
 
         if (vol->is_optical)
-        {
-            old_flags = flags;
-            flags = g_strdup_printf("%s optical", flags);
-            free(old_flags);
-        }
+            flags = fmt::format("{} optical", flags);
         if (vol->is_table)
-        {
-            old_flags = flags;
-            flags = g_strdup_printf("%s table", flags);
-            free(old_flags);
-        }
+            flags = fmt::format("{} table", flags);
         if (vol->is_floppy)
-        {
-            old_flags = flags;
-            flags = g_strdup_printf("%s floppy", flags);
-            free(old_flags);
-        }
+            flags = fmt::format("{} floppy", flags);
 
         if (!vol->is_user_visible)
-        {
-            old_flags = flags;
-            flags = g_strdup_printf("%s policy_hide", flags);
-            free(old_flags);
-        }
+            flags = fmt::format("{} policy_hide", flags);
         if (vol->nopolicy)
-        {
-            old_flags = flags;
-            flags = g_strdup_printf("%s policy_noauto", flags);
-            free(old_flags);
-        }
+            flags = fmt::format("{} policy_noauto", flags);
 
         if (vol->is_mounted)
-        {
-            old_flags = flags;
-            flags = g_strdup_printf("%s mounted", flags);
-            free(old_flags);
-        }
+            flags = fmt::format("{} mounted", flags);
         else if (vol->is_mountable && !vol->is_table)
-        {
-            old_flags = flags;
-            flags = g_strdup_printf("%s mountable", flags);
-            free(old_flags);
-        }
+            flags = fmt::format("{} mountable", flags);
         else
-        {
-            old_flags = flags;
-            flags = g_strdup_printf("%s no_media", flags);
-            free(old_flags);
-        }
+            flags = fmt::format("{} no_media", flags);
 
         if (vol->is_blank)
-        {
-            old_flags = flags;
-            flags = g_strdup_printf("%s blank", flags);
-            free(old_flags);
-        }
+            flags = fmt::format("{} blank", flags);
         if (vol->is_audiocd)
-        {
-            old_flags = flags;
-            flags = g_strdup_printf("%s audiocd", flags);
-            free(old_flags);
-        }
+            flags = fmt::format("{} audiocd", flags);
         if (vol->is_dvd)
-        {
-            old_flags = flags;
-            flags = g_strdup_printf("%s dvd", flags);
-            free(old_flags);
-        }
+            flags = fmt::format("{} dvd", flags);
 
-        c->var[CONTEXT_DEVICE_PROP] = flags;
+        c->var[CONTEXT_DEVICE_PROP] = ztd::strdup(flags);
     }
     else
     {
@@ -4018,14 +3928,13 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
 
         if (file_browser == a_browser)
         {
-            c->var[CONTEXT_TAB] = g_strdup_printf("%d", i + 1);
-            c->var[CONTEXT_TAB_COUNT] =
-                g_strdup_printf("%d",
-                                gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1])));
+            c->var[CONTEXT_TAB] = ztd::strdup(std::to_string(i + 1));
+            c->var[CONTEXT_TAB_COUNT] = ztd::strdup(
+                std::to_string(gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1]))));
         }
     }
-    c->var[CONTEXT_PANEL_COUNT] = g_strdup_printf("%d", panel_count);
-    c->var[CONTEXT_PANEL] = g_strdup_printf("%d", file_browser->mypanel);
+    c->var[CONTEXT_PANEL_COUNT] = ztd::strdup(std::to_string(panel_count));
+    c->var[CONTEXT_PANEL] = ztd::strdup(std::to_string(file_browser->mypanel));
     if (!c->var[CONTEXT_TAB])
         c->var[CONTEXT_TAB] = ztd::strdup("");
     if (!c->var[CONTEXT_TAB_COUNT])
@@ -4079,7 +3988,7 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
             while (gtk_tree_model_iter_next(model_task, &it))
                 task_count++;
         }
-        c->var[CONTEXT_TASK_COUNT] = g_strdup_printf("%d", task_count);
+        c->var[CONTEXT_TASK_COUNT] = ztd::strdup(std::to_string(task_count));
     }
 
     c->valid = true;
@@ -4449,9 +4358,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
         {
             XSet* set = xset_get(task_names[j]);
             // save column position
-            char* pos = g_strdup_printf("%d", i);
-            xset_set_set(set, XSET_SET_SET_X, pos);
-            free(pos);
+            xset_set_set(set, XSET_SET_SET_X, std::to_string(i).c_str());
             // if the window was opened maximized and stayed maximized, or the
             // window is unmaximized and not fullscreen, save the columns
             if ((!main_window->maximized || main_window->opened_maximized) &&
@@ -4461,9 +4368,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
                 if (width) // manager unshown, all widths are zero
                 {
                     // save column width
-                    pos = g_strdup_printf("%d", width);
-                    xset_set_set(set, XSET_SET_SET_Y, pos);
-                    free(pos);
+                    xset_set_set(set, XSET_SET_SET_Y, std::to_string(width).c_str());
                 }
             }
             // set column visibility
@@ -4712,9 +4617,9 @@ idle_set_task_height(FMMainWindow* main_window)
         // this isn't perfect because panel half-width is set before user
         // adjusts window size
         XSet* set = xset_get("panel_sliders");
-        set->x = g_strdup_printf("%d", allocation.width / 2);
-        set->y = g_strdup_printf("%d", allocation.width / 2);
-        set->s = g_strdup_printf("%d", allocation.height / 2);
+        set->x = ztd::strdup(std::to_string(allocation.width / 2));
+        set->y = ztd::strdup(std::to_string(allocation.width / 2));
+        set->s = ztd::strdup(std::to_string(allocation.height / 2));
     }
 
     // restore height (in case window height changed)
@@ -4763,13 +4668,9 @@ show_task_manager(FMMainWindow* main_window, bool show)
             if (pos)
             {
                 // save slider pos for version < 0.9.2 (in case of downgrade)
-                char* posa = g_strdup_printf("%d", pos);
-                xset_set("panel_sliders", "z", posa);
-                free(posa);
+                xset_set("panel_sliders", "z", std::to_string(pos).c_str());
                 // save absolute height introduced v0.9.2
-                posa = g_strdup_printf("%d", allocation.height - pos);
-                xset_set("task_show_manager", "x", posa);
-                free(posa);
+                xset_set("task_show_manager", "x", std::to_string(allocation.height - pos).c_str());
                 // LOG_INFO("HIDE  win {}x{}    task height {}   slider {}", allocation.width,
                 // allocation.height, allocation.height - pos, pos);
             }
@@ -5004,6 +4905,8 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow*
                           true))
         return false;
 
+    std::string menu_elements;
+
     switch (event->button)
     {
         case 1:
@@ -5122,14 +5025,12 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow*
 
             main_task_prepare_menu(main_window, popup, accel_group);
 
-            char* menu_elements;
-            menu_elements = g_strdup_printf(
-                "task_stop separator task_pause task_que task_resume%s task_all separator "
+            menu_elements = fmt::format(
+                "task_stop separator task_pause task_que task_resume{} task_all separator "
                 "task_show_manager "
                 "task_hide_manager separator task_columns task_popups task_errors task_queue",
                 showout);
-            xset_add_menu(file_browser, popup, accel_group, menu_elements);
-            free(menu_elements);
+            xset_add_menu(file_browser, popup, accel_group, menu_elements.c_str());
 
             gtk_widget_show_all(GTK_WIDGET(popup));
             g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
@@ -5287,8 +5188,8 @@ main_task_view_update_task(PtkFileTask* ptask)
     if (ptask->task->state_pause == VFS_FILE_TASK_RUNNING || ptask->pause_change_view)
     {
         // update row
-        const char* path;
-        const char* file;
+        std::string path;
+        std::string file;
 
         int percent = ptask->task->percent;
         if (percent < 0)
@@ -5305,13 +5206,12 @@ main_task_view_update_task(PtkFileTask* ptask)
         }
         else
         {
-            path = ptask->task->dest_dir.c_str(); // cwd
-            file = g_strdup_printf("( %s )", ptask->task->current_file.c_str());
+            path = ptask->task->dest_dir; // cwd
+            file = fmt::format("( {} )", ptask->task->current_file);
         }
 
         // status
         const char* status;
-        char* status2 = nullptr;
         char* status3;
         if (ptask->task->type != VFS_FILE_TASK_EXEC)
         {
@@ -5319,9 +5219,9 @@ main_task_view_update_task(PtkFileTask* ptask)
                 status = job_titles[ptask->task->type];
             else
             {
-                status2 =
-                    g_strdup_printf("%d error %s", ptask->err_count, job_titles[ptask->task->type]);
-                status = status2;
+                std::string str =
+                    fmt::format("{} error {}", ptask->err_count, job_titles[ptask->task->type]);
+                status = ztd::strdup(str);
             }
         }
         else
@@ -5332,12 +5232,21 @@ main_task_view_update_task(PtkFileTask* ptask)
             else
                 status = job_titles[ptask->task->type];
         }
+
         if (ptask->task->state_pause == VFS_FILE_TASK_PAUSE)
-            status3 = g_strdup_printf("%s %s", "paused", status);
+        {
+            std::string str = fmt::format("paused {}", status);
+            status3 = ztd::strdup(str);
+        }
         else if (ptask->task->state_pause == VFS_FILE_TASK_QUEUE)
-            status3 = g_strdup_printf("%s %s", "queued", status);
+        {
+            std::string str = fmt::format("queued {}", status);
+            status3 = ztd::strdup(str);
+        }
         else
+        {
             status3 = ztd::strdup(status);
+        }
 
         // update icon if queue state changed
         pixbuf = nullptr;
@@ -5396,9 +5305,9 @@ main_task_view_update_task(PtkFileTask* ptask)
                                    TASK_COL_COUNT,
                                    ptask->dsp_file_count,
                                    TASK_COL_PATH,
-                                   path,
+                                   path.c_str(),
                                    TASK_COL_FILE,
-                                   file,
+                                   file.c_str(),
                                    TASK_COL_PROGRESS,
                                    percent,
                                    TASK_COL_TOTAL,
@@ -5422,9 +5331,9 @@ main_task_view_update_task(PtkFileTask* ptask)
                                    TASK_COL_COUNT,
                                    ptask->dsp_file_count,
                                    TASK_COL_PATH,
-                                   path,
+                                   path.c_str(),
                                    TASK_COL_FILE,
-                                   file,
+                                   file.c_str(),
                                    TASK_COL_PROGRESS,
                                    percent,
                                    TASK_COL_TOTAL,
@@ -5465,7 +5374,6 @@ main_task_view_update_task(PtkFileTask* ptask)
                                -1);
 
         // Clearing up
-        free(status2);
         free(status3);
         if (pixbuf)
             g_object_unref(pixbuf);

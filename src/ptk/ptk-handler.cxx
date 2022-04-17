@@ -1222,20 +1222,18 @@ add_new_handler(int mode)
 {
     // creates a new xset for a custom handler type
     char* rand;
-    char* name = nullptr;
+    std::string name;
 
     // get a unique new xset name
     do
     {
-        free(name);
         rand = randhex8();
-        name = g_strconcat(handler_cust_prefix[mode], rand, nullptr);
+        name = fmt::format("{}{}", handler_cust_prefix[mode], rand);
         free(rand);
     } while (xset_is(name));
 
     // create and return the xset
     XSet* set = xset_get(name);
-    free(name);
     set->lock = false;
     return set;
 }
@@ -2410,7 +2408,7 @@ on_textview_popup(GtkTextView* input, GtkMenu* menu, HandlerData* hnd)
 }
 
 static bool
-on_activate_link(GtkLabel* label, char* uri, HandlerData* hnd)
+on_activate_link(GtkLabel* label, const char* uri, HandlerData* hnd)
 {
     (void)label;
     // click apply to save handler
@@ -2463,9 +2461,7 @@ on_textview_keypress(GtkWidget* widget, GdkEventKey* event, HandlerData* hnd)
                     keymod = 2;
                 else
                     return false;
-                char* uri = g_strdup_printf("%d", keymod);
-                on_activate_link(nullptr, uri, hnd);
-                free(uri);
+                on_activate_link(nullptr, std::to_string(keymod).c_str(), hnd);
                 return true;
             }
             break;
@@ -3310,12 +3306,8 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
     if (width && height)
     {
         // They are - saving
-        str = g_strdup_printf("%d", width);
-        xset_set(handler_conf_xset[HANDLER_MODE_ARC], "x", str);
-        free(str);
-        str = g_strdup_printf("%d", height);
-        xset_set(handler_conf_xset[HANDLER_MODE_ARC], "y", str);
-        free(str);
+        xset_set(handler_conf_xset[HANDLER_MODE_ARC], "x", std::to_string(width).c_str());
+        xset_set(handler_conf_xset[HANDLER_MODE_ARC], "y", std::to_string(height).c_str());
     }
 
     // Clearing up dialog

@@ -156,28 +156,19 @@ char*
 vfs_file_task_get_unique_name(const char* dest_dir, const char* base_name, const char* ext)
 { // returns nullptr if all names used; otherwise newly allocated string
     struct stat dest_stat;
-    char* new_name = g_strdup_printf("%s%s%s", base_name, ext && ext[0] ? "." : "", ext ? ext : "");
-    char* new_dest_file = g_build_filename(dest_dir, new_name, nullptr);
-    free(new_name);
+    std::string new_name =
+        fmt::format("{}{}{}", base_name, ext && ext[0] ? "." : "", ext ? ext : "");
+    std::string new_dest_file = Glib::build_filename(dest_dir, new_name);
     unsigned int n = 1;
-    while (n && lstat(new_dest_file, &dest_stat) == 0)
+    while (n && lstat(new_dest_file.c_str(), &dest_stat) == 0)
     {
-        free(new_dest_file);
-        new_name = g_strdup_printf("%s-%s%d%s%s",
-                                   base_name,
-                                   "copy",
-                                   ++n,
-                                   ext && ext[0] ? "." : "",
-                                   ext ? ext : "");
-        new_dest_file = g_build_filename(dest_dir, new_name, nullptr);
-        free(new_name);
+        new_name =
+            fmt::format("{}-copy{}{}{}", base_name, ++n, ext && ext[0] ? "." : "", ext ? ext : "");
+        new_dest_file = Glib::build_filename(dest_dir, new_name);
     }
     if (n == 0)
-    {
-        free(new_dest_file);
         return nullptr;
-    }
-    return new_dest_file;
+    return ztd::strdup(new_dest_file);
 }
 
 /*
@@ -1026,7 +1017,7 @@ vfs_file_task_get_cpids(Glib::Pid pid)
     if (standard_output->empty())
         return nullptr;
 
-    char* cpids = ztd::strdup(standard_output);
+    std::string cpids = ztd::strdup(standard_output);
     // get grand cpids recursively
     char* pids = ztd::strdup(standard_output);
     char* nl;
@@ -1040,12 +1031,10 @@ vfs_file_task_get_cpids(Glib::Pid pid)
         free(pida);
         if (pidi)
         {
-            char* gcpids;
-            if ((gcpids = vfs_file_task_get_cpids(pidi)))
+            char* gcpids = vfs_file_task_get_cpids(pidi);
+            if (gcpids)
             {
-                char* old_cpids = cpids;
-                cpids = g_strdup_printf("%s%s", old_cpids, gcpids);
-                free(old_cpids);
+                cpids = fmt::format("{}{}", cpids, gcpids);
                 free(gcpids);
             }
         }
@@ -1053,7 +1042,7 @@ vfs_file_task_get_cpids(Glib::Pid pid)
     free(pids);
 
     // LOG_INFO("vfs_file_task_get_cpids {}[{}]", pid, cpids );
-    return cpids;
+    return ztd::strdup(cpids);
 }
 
 void

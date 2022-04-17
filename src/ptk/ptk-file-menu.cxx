@@ -249,7 +249,6 @@ on_popup_sort_extra(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, XSet* s
 void
 on_popup_sortby(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, int order)
 {
-    char* val;
     int v;
 
     int sort_order;
@@ -264,16 +263,15 @@ on_popup_sortby(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, int order)
             v = GTK_SORT_ASCENDING;
         else
             v = GTK_SORT_DESCENDING;
-        val = g_strdup_printf("%d", v);
-        xset_set_panel(file_browser->mypanel, "list_detailed", "y", val);
-        free(val);
+        xset_set_panel(file_browser->mypanel, "list_detailed", "y", std::to_string(v).c_str());
         ptk_file_browser_set_sort_type(file_browser, (GtkSortType)v);
     }
     else
     {
-        val = g_strdup_printf("%d", sort_order);
-        xset_set_panel(file_browser->mypanel, "list_detailed", "x", val);
-        free(val);
+        xset_set_panel(file_browser->mypanel,
+                       "list_detailed",
+                       "x",
+                       std::to_string(sort_order).c_str());
         ptk_file_browser_set_sort_order(file_browser, (PtkFBSortOrder)sort_order);
     }
 }
@@ -369,7 +367,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 {
     XSet* set;
     XSet* set_radio;
-    char* desc;
+    std::string desc;
 
     if (!browser || !menu || !browser->file_list)
         return;
@@ -414,16 +412,14 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 
         xset_set_cb("view_reorder_col", (GFunc)on_reorder, browser);
         set = xset_set("view_columns", "disable", "0");
-        desc =
-            g_strdup_printf("panel%d_detcol_size panel%d_detcol_type panel%d_detcol_perm "
-                            "panel%d_detcol_owner panel%d_detcol_date separator view_reorder_col",
-                            p,
-                            p,
-                            p,
-                            p,
-                            p);
-        xset_set_set(set, XSET_SET_SET_DESC, desc);
-        free(desc);
+        desc = fmt::format("panel{}_detcol_size panel{}_detcol_type panel{}_detcol_perm "
+                           "panel{}_detcol_owner panel{}_detcol_date separator view_reorder_col",
+                           p,
+                           p,
+                           p,
+                           p,
+                           p);
+        xset_set_set(set, XSET_SET_SET_DESC, desc.c_str());
         set = xset_set_cb("rubberband", (GFunc)main_window_rubberband_all, nullptr);
         set->disable = false;
     }
@@ -536,28 +532,25 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     }
 
     set = xset_get("view_list_style");
-    desc =
-        g_strdup_printf("panel%d_list_detailed panel%d_list_compact panel%d_list_icons separator "
-                        "view_thumb panel%d_list_large rubberband",
-                        p,
-                        p,
-                        p,
-                        p);
-    xset_set_set(set, XSET_SET_SET_DESC, desc);
-    free(desc);
+    desc = fmt::format("panel{}_list_detailed panel{}_list_compact panel{}_list_icons separator "
+                       "view_thumb panel{}_list_large rubberband",
+                       p,
+                       p,
+                       p,
+                       p);
+    xset_set_set(set, XSET_SET_SET_DESC, desc.c_str());
     set = xset_get("con_view");
     set->disable = !browser->file_list;
-    desc = g_strdup_printf("panel%d_show_toolbox panel%d_show_sidebar panel%d_show_devmon "
-                           "panel%d_show_book panel%d_show_dirtree separator panel%d_show_hidden "
-                           "view_list_style view_sortby view_columns separator view_refresh",
-                           p,
-                           p,
-                           p,
-                           p,
-                           p,
-                           p);
-    xset_set_set(set, XSET_SET_SET_DESC, desc);
-    free(desc);
+    desc = fmt::format("panel{}_show_toolbox panel{}_show_sidebar panel{}_show_devmon "
+                       "panel{}_show_book panel{}_show_dirtree separator panel{}_show_hidden "
+                       "view_list_style view_sortby view_columns separator view_refresh",
+                       p,
+                       p,
+                       p,
+                       p,
+                       p,
+                       p);
+    xset_set_set(set, XSET_SET_SET_DESC, desc.c_str());
     xset_add_menuitem(browser, menu, accel_group, set);
 }
 
@@ -583,7 +576,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 { // either desktop or browser must be non-nullptr
 
     const char* app_name = nullptr;
-    char* name;
     char* desc;
     XSet* set_radio;
     int icon_w;
@@ -963,11 +955,10 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                 set = xset_set_cb("opentab_new", (GFunc)on_popup_open_in_new_tab_activate, data);
                 for (int i = 1; i < 11; i++)
                 {
-                    name = g_strdup_printf("opentab_%d", i);
+                    std::string name = fmt::format("opentab_{}", i);
                     set = xset_set_cb(name, (GFunc)on_open_in_tab, data);
                     xset_set_ob1_int(set, "tab_num", i);
                     set->disable = (i > tab_count) || (i == tab_num);
-                    free(name);
                 }
 
                 set = xset_set_cb("open_in_panelprev", (GFunc)on_open_in_panel, data);
@@ -979,11 +970,10 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
                 for (int i = 1; i < 5; i++)
                 {
-                    name = g_strdup_printf("open_in_panel%d", i);
+                    std::string name = fmt::format("open_in_panel{}", i);
                     set = xset_set_cb(name, (GFunc)on_open_in_panel, data);
                     xset_set_ob1_int(set, "panel_num", i);
                     // set->disable = ( p == i );
-                    free(name);
                 }
 
                 set = xset_get("open_in_tab");
@@ -1053,11 +1043,10 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
         for (int i = 1; i < 11; i++)
         {
-            name = g_strdup_printf("tab_%d", i);
+            std::string name = fmt::format("tab_{}", i);
             set = xset_set_cb(name, (GFunc)ptk_file_browser_go_tab, browser);
             xset_set_ob1_int(set, "tab_num", i);
             set->disable = (i > tab_count) || (i == tab_num);
-            free(name);
         }
         set = xset_get("con_go");
         xset_add_menuitem(browser, popup, accel_group, set);
@@ -1161,14 +1150,13 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         bool b;
         for (int i = 1; i < 11; i++)
         {
-            char* str = g_strdup_printf("copy_tab_%d", i);
+            std::string str;
+            str = fmt::format("copy_tab_{}", i);
             set = xset_get(str);
-            free(str);
             set->disable = (i > tab_count) || (i == tab_num);
 
-            str = g_strdup_printf("move_tab_%d", i);
+            str = fmt::format("move_tab_{}", i);
             set = xset_get(str);
-            free(str);
             set->disable = (i > tab_count) || (i == tab_num);
 
             if (i > 4)
@@ -1176,14 +1164,12 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
             b = main_window_panel_is_visible(browser, i);
 
-            str = g_strdup_printf("copy_panel_%d", i);
+            str = fmt::format("copy_panel_{}", i);
             set = xset_get(str);
-            free(str);
             set->disable = (i == p) || !b;
 
-            str = g_strdup_printf("move_panel_%d", i);
+            str = fmt::format("move_panel_{}", i);
             set = xset_get(str);
-            free(str);
             set->disable = (i == p) || !b;
         }
 
@@ -1351,29 +1337,24 @@ on_popup_open_all(GtkMenuItem* menuitem, PtkFileMenu* data)
 static void
 on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
-    const char* app = nullptr;
-
     XSet* handler_set = XSET(g_object_get_data(G_OBJECT(menuitem), "handler_set"));
 
     const char* desktop_file =
         static_cast<const char*>(g_object_get_data(G_OBJECT(menuitem), "desktop_file"));
     VFSAppDesktop desktop(desktop_file);
 
-    if (handler_set)
-    {
-        // is a file handler
-        app = g_strconcat("###", handler_set->name, nullptr);
-    }
+    std::string app;
 
+    // is a file handler
+    if (handler_set)
+        app = fmt::format("###{}", handler_set->name);
     else
-    {
         app = desktop.get_name();
-    }
 
     GList* sel_files = data->sel_files;
     if (!sel_files)
         sel_files = g_list_prepend(sel_files, data->info);
-    ptk_open_files_with_app(data->cwd, sel_files, app, data->browser, false, false);
+    ptk_open_files_with_app(data->cwd, sel_files, app.c_str(), data->browser, false, false);
     if (sel_files != data->sel_files)
         g_list_free(sel_files);
 }
@@ -1565,9 +1546,8 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             path = Glib::build_filename(vfs_user_data_dir(), "mime/packages", str2);
             if (!std::filesystem::exists(path))
             {
-                str = g_strdup_printf("%s.xml", mime_type->type);
-                char* usr_path = g_build_filename("/usr/share/mime", str, nullptr);
-                free(str);
+                std::string xml_file = fmt::format("{}.xml", mime_type->type);
+                std::string usr_path = Glib::build_filename("/usr/share/mime", xml_file);
 
                 if (std::filesystem::exists(usr_path))
                     msg = fmt::format("The file '{}' does not exist.\n\nBy copying '{}' to '{}' "
@@ -1590,7 +1570,6 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                     GTK_BUTTONS_YES_NO,
                                     msg) != GTK_RESPONSE_YES)
                 {
-                    free(usr_path);
                     break;
                 }
 
@@ -1626,7 +1605,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 
                 // build from /usr/share/mime type ?
                 char* contents = nullptr;
-                if (g_file_get_contents(usr_path, &contents, nullptr, nullptr))
+                if (g_file_get_contents(usr_path.c_str(), &contents, nullptr, nullptr))
                 {
                     char* start = nullptr;
                     if ((str = strstr(contents, "\n<mime-type ")))
@@ -1649,7 +1628,6 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     free(contents);
                     contents = str;
                 }
-                free(usr_path);
 
                 if (!contents)
                     contents = g_strdup_printf("%s\n\n<!-- insert your patterns below "
@@ -1671,9 +1649,8 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             vfs_dir_monitor_mime();
             break;
         case APP_JOB_VIEW_TYPE:
-            str = g_strdup_printf("%s.xml", mime_type->type);
-            path = g_build_filename("/usr/share/mime", str, nullptr);
-            free(str);
+            str2 = fmt::format("{}.xml", mime_type->type);
+            path = Glib::build_filename("/usr/share/mime", str2);
             if (std::filesystem::exists(path))
                 xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, true);
             break;
@@ -1964,9 +1941,10 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     gtk_container_add(GTK_CONTAINER(submenu), gtk_separator_menu_item_new());
 
     // /usr *.xml
-    str = g_strdup_printf("%s.xml", type);
-    path = g_build_filename("/usr/share/mime", str.c_str(), nullptr);
-    str = g_strdup_printf("%s._xml", type);
+    str = fmt::format("{}.xml", type);
+    path = Glib::build_filename("/usr/share/mime", str);
+    str = fmt::format("{}._xml", type);
+
     newitem = app_menu_additem(submenu,
                                str.c_str(),
                                ztd::strdup("text-x-generic"),
