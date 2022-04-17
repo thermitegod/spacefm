@@ -630,28 +630,28 @@ save_settings(void* main_window_ptr)
 
     // clang-format off
     buf.append("[General]\n");
-    buf.append(fmt::format("show_thumbnail={:d}\n", app_settings.show_thumbnail));
-    buf.append(fmt::format("max_thumb_size={}\n", app_settings.max_thumb_size >> 10));
-    buf.append(fmt::format("big_icon_size={}\n", app_settings.big_icon_size));
-    buf.append(fmt::format("small_icon_size={}\n", app_settings.small_icon_size));
-    buf.append(fmt::format("tool_icon_size={}\n", app_settings.tool_icon_size));
-    buf.append(fmt::format("single_click={:d}\n", app_settings.single_click));
-    buf.append(fmt::format("no_single_hover={:d}\n", app_settings.no_single_hover));
-    buf.append(fmt::format("sort_order={}\n", app_settings.sort_order));
-    buf.append(fmt::format("sort_type={}\n", app_settings.sort_type));
-    buf.append(fmt::format("use_si_prefix={:d}\n", app_settings.use_si_prefix));
-    buf.append(fmt::format("no_execute={:d}\n", app_settings.no_execute));
-    buf.append(fmt::format("no_confirm={:d}\n", app_settings.no_confirm));
-    buf.append(fmt::format("no_confirm_trash={:d}\n", app_settings.no_confirm_trash));
+    buf.append(fmt::format("show_thumbnail=\"{:d}\"\n", app_settings.show_thumbnail));
+    buf.append(fmt::format("max_thumb_size=\"{}\"\n", app_settings.max_thumb_size >> 10));
+    buf.append(fmt::format("big_icon_size=\"{}\"\n", app_settings.big_icon_size));
+    buf.append(fmt::format("small_icon_size=\"{}\"\n", app_settings.small_icon_size));
+    buf.append(fmt::format("tool_icon_size=\"{}\"\n", app_settings.tool_icon_size));
+    buf.append(fmt::format("single_click=\"{:d}\"\n", app_settings.single_click));
+    buf.append(fmt::format("no_single_hover=\"{:d}\"\n", app_settings.no_single_hover));
+    buf.append(fmt::format("sort_order=\"{}\"\n", app_settings.sort_order));
+    buf.append(fmt::format("sort_type=\"{}\"\n", app_settings.sort_type));
+    buf.append(fmt::format("use_si_prefix=\"{:d}\"\n", app_settings.use_si_prefix));
+    buf.append(fmt::format("no_execute=\"{:d}\"\n", app_settings.no_execute));
+    buf.append(fmt::format("no_confirm=\"{:d}\"\n", app_settings.no_confirm));
+    buf.append(fmt::format("no_confirm_trash=\"{:d}\"\n", app_settings.no_confirm_trash));
 
     buf.append("\n[Window]\n");
-    buf.append(fmt::format("width={}\n", app_settings.width));
-    buf.append(fmt::format("height={}\n", app_settings.height));
-    buf.append(fmt::format("maximized={:d}\n", app_settings.maximized));
+    buf.append(fmt::format("width=\"{}\"\n", app_settings.width));
+    buf.append(fmt::format("height=\"{}\"\n", app_settings.height));
+    buf.append(fmt::format("maximized=\"{:d}\"\n", app_settings.maximized));
 
     buf.append("\n[Interface]\n");
-    buf.append(fmt::format("always_show_tabs={:d}\n", app_settings.always_show_tabs));
-    buf.append(fmt::format("show_close_tab_buttons={:d}\n", app_settings.show_close_tab_buttons));
+    buf.append(fmt::format("always_show_tabs=\"{:d}\"\n", app_settings.always_show_tabs));
+    buf.append(fmt::format("show_close_tab_buttons=\"{:d}\"\n", app_settings.show_close_tab_buttons));
 
     buf.append("\n[MOD]\n");
     xset_write(buf);
@@ -1016,17 +1016,17 @@ xset_write_set(std::string& buf, XSet* set)
     if (set->plugin)
         return;
     if (set->s)
-        buf.append(fmt::format("{}-s={}\n", set->name, set->s));
+        buf.append(fmt::format("{}-s=\"{}\"\n", set->name, set->s));
     if (set->x)
-        buf.append(fmt::format("{}-x={}\n", set->name, set->x));
+        buf.append(fmt::format("{}-x=\"{}\"\n", set->name, set->x));
     if (set->y)
-        buf.append(fmt::format("{}-y={}\n", set->name, set->y));
+        buf.append(fmt::format("{}-y=\"{}\"\n", set->name, set->y));
     if (set->z)
-        buf.append(fmt::format("{}-z={}\n", set->name, set->z));
+        buf.append(fmt::format("{}-z=\"{}\"\n", set->name, set->z));
     if (set->key)
-        buf.append(fmt::format("{}-key={}\n", set->name, set->key));
+        buf.append(fmt::format("{}-key=\"{}\"\n", set->name, set->key));
     if (set->keymod)
-        buf.append(fmt::format("{}-keymod={}\n", set->name, set->keymod));
+        buf.append(fmt::format("{}-keymod=\"{}\"\n", set->name, set->keymod));
     // menu label
     if (set->menu_label)
     {
@@ -1035,12 +1035,12 @@ xset_write_set(std::string& buf, XSet* set)
             // built-in
             if (set->in_terminal && set->menu_label && set->menu_label[0])
                 // only save lbl if menu_label was customized
-                buf.append(fmt::format("{}-menu_label={}\n", set->name, set->menu_label));
+                buf.append(fmt::format("{}-menu_label=\"{}\"\n", set->name, set->menu_label));
         }
         else
         {
             // custom
-            buf.append(fmt::format("{}-menu_label_custom={}\n", set->name, set->menu_label));
+            buf.append(fmt::format("{}-menu_label_custom=\"{}\"\n", set->name, set->menu_label));
         }
     }
     // icon
@@ -1049,55 +1049,55 @@ xset_write_set(std::string& buf, XSet* set)
         // built-in
         if (set->keep_terminal)
             // only save icn if icon was customized
-            buf.append(fmt::format("{}-icn={}\n", set->name, set->icon ? set->icon : ""));
+            buf.append(fmt::format("{}-icn=\"{}\"\n", set->name, set->icon ? set->icon : ""));
     }
     else if (set->icon)
     {
         // custom
-        buf.append(fmt::format("{}-icon={}\n", set->name, set->icon));
+        buf.append(fmt::format("{}-icon=\"{}\"\n", set->name, set->icon));
     }
 
     if (set->next)
-        buf.append(fmt::format("{}-next={}\n", set->name, set->next));
+        buf.append(fmt::format("{}-next=\"{}\"\n", set->name, set->next));
     if (set->child)
-        buf.append(fmt::format("{}-child={}\n", set->name, set->child));
+        buf.append(fmt::format("{}-child=\"{}\"\n", set->name, set->child));
     if (set->context)
-        buf.append(fmt::format("{}-context={}\n", set->name, set->context));
+        buf.append(fmt::format("{}-context=\"{}\"\n", set->name, set->context));
     if (set->b != XSET_B_UNSET)
-        buf.append(fmt::format("{}-b={}\n", set->name, set->b));
+        buf.append(fmt::format("{}-b=\"{}\"\n", set->name, set->b));
     if (set->tool != XSET_TOOL_NOT)
-        buf.append(fmt::format("{}-tool={}\n", set->name, set->tool));
+        buf.append(fmt::format("{}-tool=\"{}\"\n", set->name, set->tool));
 
     if (!set->lock)
     {
         if (set->menu_style)
-            buf.append(fmt::format("{}-style={}\n", set->name, set->menu_style));
+            buf.append(fmt::format("{}-style=\"{}\"\n", set->name, set->menu_style));
         if (set->desc)
-            buf.append(fmt::format("{}-desc={}\n", set->name, set->desc));
+            buf.append(fmt::format("{}-desc=\"{}\"\n", set->name, set->desc));
         if (set->title)
-            buf.append(fmt::format("{}-title={}\n", set->name, set->title));
+            buf.append(fmt::format("{}-title=\"{}\"\n", set->name, set->title));
         if (set->prev)
-            buf.append(fmt::format("{}-prev={}\n", set->name, set->prev));
+            buf.append(fmt::format("{}-prev=\"{}\"\n", set->name, set->prev));
         if (set->parent)
-            buf.append(fmt::format("{}-parent={}\n", set->name, set->parent));
+            buf.append(fmt::format("{}-parent=\"{}\"\n", set->name, set->parent));
         if (set->line)
-            buf.append(fmt::format("{}-line={}\n", set->name, set->line));
+            buf.append(fmt::format("{}-line=\"{}\"\n", set->name, set->line));
         if (set->task)
-            buf.append(fmt::format("{}-task={:d}\n", set->name, set->task));
+            buf.append(fmt::format("{}-task=\"{:d}\"\n", set->name, set->task));
         if (set->task_pop)
-            buf.append(fmt::format("{}-task_pop={:d}\n", set->name, set->task_pop));
+            buf.append(fmt::format("{}-task_pop=\"{:d}\"\n", set->name, set->task_pop));
         if (set->task_err)
-            buf.append(fmt::format("{}-task_err={:d}\n", set->name, set->task_err));
+            buf.append(fmt::format("{}-task_err=\"{:d}\"\n", set->name, set->task_err));
         if (set->task_out)
-            buf.append(fmt::format("{}-task_out={:d}\n", set->name, set->task_out));
+            buf.append(fmt::format("{}-task_out=\"{:d}\"\n", set->name, set->task_out));
         if (set->in_terminal)
-            buf.append(fmt::format("{}-run_in_terminal={:d}\n", set->name, set->in_terminal));
+            buf.append(fmt::format("{}-run_in_terminal=\"{:d}\"\n", set->name, set->in_terminal));
         if (set->keep_terminal)
-            buf.append(fmt::format("{}-keep_terminal={:d}\n", set->name, set->keep_terminal));
+            buf.append(fmt::format("{}-keep_terminal=\"{:d}\"\n", set->name, set->keep_terminal));
         if (set->scroll_lock)
-            buf.append(fmt::format("{}-scroll_lock={:d}\n", set->name, set->scroll_lock));
+            buf.append(fmt::format("{}-scroll_lock=\"{:d}\"\n", set->name, set->scroll_lock));
         if (set->opener != 0)
-            buf.append(fmt::format("{}-opener={}\n", set->name, set->opener));
+            buf.append(fmt::format("{}-opener=\"{}\"\n", set->name, set->opener));
     }
 }
 
