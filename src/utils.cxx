@@ -200,14 +200,14 @@ get_valid_su()
     std::string use_su;
     if (!xset_get_s("su_command"))
     {
-        for (std::size_t i = 0; i < G_N_ELEMENTS(su_commands); i++)
+        for (std::size_t i = 0; i < terminal_programs.size(); ++i)
         {
-            use_su = Glib::find_program_in_path(su_commands[i]);
+            use_su = Glib::find_program_in_path(su_commands.at(i));
             if (!use_su.empty())
                 break;
         }
         if (use_su.empty())
-            use_su = su_commands[0];
+            use_su = su_commands.at(0);
         xset_set("su_command", "s", use_su.c_str());
     }
     std::string su_path = Glib::find_program_in_path(use_su);

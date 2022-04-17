@@ -330,11 +330,11 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                 if (idx == 0)
                     xset_set("su_command", "s", custom_su.c_str());
                 else
-                    xset_set("su_command", "s", su_commands[idx - 1]);
+                    xset_set("su_command", "s", su_commands.at(idx - 1).c_str());
             }
             else
             {
-                xset_set("su_command", "s", su_commands[idx]);
+                xset_set("su_command", "s", su_commands.at(idx).c_str());
             }
         }
 
@@ -525,24 +525,24 @@ fm_edit_preference(GtkWindow* parent, int page)
         gtk_widget_set_sensitive(data->thumb_label1, app_settings.show_thumbnail);
         gtk_widget_set_sensitive(data->thumb_label2, app_settings.show_thumbnail);
 
-        for (unsigned int i = 0; i < G_N_ELEMENTS(terminal_programs); ++i)
+        for (const std::string& terminal: terminal_programs)
         {
-            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->terminal),
-                                           terminal_programs[i]);
+            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->terminal), terminal.c_str());
         }
 
-        char* terminal = xset_get_s("main_terminal");
-        if (terminal)
+        char* main_terminal = xset_get_s("main_terminal");
+        if (main_terminal)
         {
-            unsigned int i;
-            for (i = 0; i < G_N_ELEMENTS(terminal_programs); ++i)
+            std::size_t i;
+            for (i = 0; i < terminal_programs.size(); ++i)
             {
-                if (!strcmp(terminal_programs[i], terminal))
+                if (ztd::same(main_terminal, terminal_programs.at(i)))
                     break;
             }
-            if (i >= G_N_ELEMENTS(terminal_programs))
+
+            if (i >= terminal_programs.size())
             { /* Found */
-                gtk_combo_box_text_prepend_text(GTK_COMBO_BOX_TEXT(data->terminal), terminal);
+                gtk_combo_box_text_prepend_text(GTK_COMBO_BOX_TEXT(data->terminal), main_terminal);
                 i = 0;
             }
             gtk_combo_box_set_active(GTK_COMBO_BOX(data->terminal), i);
@@ -648,13 +648,13 @@ fm_edit_preference(GtkWindow* parent, int page)
             idx = 0;
         else
         {
-            unsigned int i;
-            for (i = 0; i < G_N_ELEMENTS(su_commands); i++)
+            std::size_t i;
+            for (i = 0; i < su_commands.size(); ++i)
             {
-                if (ztd::same(su_commands[i], use_su))
+                if (ztd::same(su_commands.at(i), use_su))
                     break;
             }
-            if (i == G_N_ELEMENTS(su_commands))
+            if (i == su_commands.size())
                 idx = 0;
             else if (!custom_su.empty())
                 idx = i + 1;

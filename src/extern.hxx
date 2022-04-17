@@ -15,24 +15,36 @@
 
 #pragma once
 
-static const char* terminal_programs[] = // for pref-dialog.c
-    {"terminal",
-     "xfce4-terminal",
-     "aterm",
-     "Eterm",
-     "mlterm",
-     "mrxvt",
-     "rxvt",
-     "sakura",
-     "terminator",
-     "urxvt",
-     "xterm",
-     "x-terminal-emulator",
-     "qterminal"};
+#include <string>
+
+#include <array>
 
 // clang-format off
-static const char* su_commands[] = // order and contents must match prefdlg.ui
-    {"/bin/su",
-     "/usr/bin/sudo",
-     "/usr/bin/doas"};
+
+// for pref-dialog.c
+const std::array<std::string, 13> terminal_programs
+{
+    "terminal",
+    "xfce4-terminal",
+    "aterm",
+    "Eterm",
+    "mlterm",
+    "mrxvt",
+    "rxvt",
+    "sakura",
+    "terminator",
+    "urxvt",
+    "xterm",
+    "x-terminal-emulator",
+    "qterminal"
+};
+
+// order and contents must match prefdlg.ui
+const std::array<std::string, 3> su_commands
+{
+    "/bin/su",
+    "/usr/bin/sudo",
+    "/usr/bin/doas"
+};
+
 // clang-format on

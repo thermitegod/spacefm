@@ -472,19 +472,18 @@ load_settings(const char* config_dir)
     get_valid_su();
 
     // MOD terminal discovery
-    char* terminal = xset_get_s("main_terminal");
-    if (!terminal || terminal[0] == '\0')
+    char* main_terminal = xset_get_s("main_terminal");
+    if (!main_terminal || main_terminal[0] == '\0')
     {
-        unsigned int i;
-        for (i = 0; i < G_N_ELEMENTS(terminal_programs); i++)
+        for (const std::string& terminal: terminal_programs)
         {
-            std::string term = Glib::find_program_in_path(terminal_programs[i]);
-            if (!term.empty())
-            {
-                xset_set("main_terminal", "s", terminal_programs[i]);
-                xset_set_b("main_terminal", true); // discovery
-                break;
-            }
+            std::string term = Glib::find_program_in_path(terminal);
+            if (term.empty())
+                continue;
+
+            xset_set("main_terminal", "s", terminal.c_str());
+            xset_set_b("main_terminal", true); // discovery
+            break;
         }
     }
 
