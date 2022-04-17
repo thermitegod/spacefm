@@ -669,7 +669,7 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
             ret = true;
             vfs_file_info_load_special_info(file, full_path);
         }
-        else /* The file doesn't exist */
+        else /* The file does not exist */
         {
             if (ztd::contains(dir->file_list, file))
             {
@@ -738,7 +738,7 @@ update_created_files(void* key, void* data, void* user_data)
                     dir->file_list.push_back(vfs_file_info_ref(file));
                     g_signal_emit(dir, signals[VFSDirSignal::FILE_CREATED_SIGNAL], 0, file);
                 }
-                // else file doesn't exist in filesystem
+                // else file does not exist in filesystem
                 vfs_file_info_unref(file);
                 free(full_path);
             }
@@ -814,7 +814,7 @@ reload_icons(const char* path, VFSDir* dir, void* user_data)
 
     for (VFSFileInfo* file: dir->file_list)
     {
-        /* It's a desktop entry file */
+        /* It is a desktop entry file */
         if (file->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY)
         {
             char* file_path = g_build_filename(path, file->name.c_str(), nullptr);

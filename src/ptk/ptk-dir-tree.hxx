@@ -44,7 +44,7 @@ struct PtkDirTree
     /* <private> */
 
     PtkDirTreeNode* root;
-    /* GtkSortType sort_order; */ /* I don't want to support this :-( */
+    /* GtkSortType sort_order; */ /* I do not want to support this :-( */
     /* Random integer to check whether an iter belongs to our model */
     int stamp;
 };

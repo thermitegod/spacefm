@@ -202,7 +202,7 @@ check_overwrite(VFSFileTask* task, const std::string& dest_file, bool* dest_exis
             *dest_exists = !lstat(dest_file.c_str(), &dest_stat);
             if (ztd::same(task->current_file, task->current_dest))
             {
-                // src and dest are same file - don't overwrite (truncates)
+                // src and dest are same file - do not overwrite (truncates)
                 // occurs if user pauses task and changes overwrite mode
                 return false;
             }
@@ -277,7 +277,7 @@ check_overwrite(VFSFileTask* task, const std::string& dest_file, bool* dest_exis
                         *dest_exists = !lstat(dest_file.c_str(), &dest_stat);
                         if (ztd::same(task->current_file, task->current_dest))
                         {
-                            // src and dest are same file - don't overwrite (truncates)
+                            // src and dest are same file - do not overwrite (truncates)
                             // occurs if user pauses task and changes overwrite mode
                             return false;
                         }
@@ -749,7 +749,7 @@ vfs_file_task_do_move(VFSFileTask* task, const std::string& src_file, const std:
         }
     }
 
-    // don't chmod link
+    // do not chmod link
     else if (!std::filesystem::is_symlink(dest_file))
         chmod(dest_file.c_str(), file_stat.st_mode);
 
@@ -1005,7 +1005,7 @@ vfs_file_task_chown_chmod(VFSFileTask* task, const std::string& src_file)
             int i;
             for (i = 0; i < ChmodActionType::N_CHMOD_ACTIONS; ++i)
             {
-                if (task->chmod_actions[i] == 2) /* Don't change */
+                if (task->chmod_actions[i] == 2) /* Do not change */
                     continue;
                 if (task->chmod_actions[i] == 0) /* Remove this bit */
                     new_mode &= ~chmod_flags.at(i);
@@ -1787,7 +1787,7 @@ vfs_file_task_thread(VFSFileTask* task)
         {
             if (lstat(src_path.c_str(), &file_stat) == -1)
             {
-                // don't report error here since its reported later
+                // do not report error here since its reported later
                 // vfs_file_task_error( task, errno, "Accessing", (char*)l->data );
             }
             else
@@ -1843,7 +1843,7 @@ vfs_file_task_thread(VFSFileTask* task)
         {
             if (lstat(src_path.c_str(), &file_stat) == -1)
             {
-                // don't report error here since it's reported later
+                // do not report error here since it is reported later
                 // vfs_file_task_error( task, errno, "Accessing", ( char* ) l->data );
             }
             else
@@ -2062,7 +2062,7 @@ vfs_file_task_run(VFSFileTask* task)
     }
     else
     {
-        // don't use another thread for exec since gio adds watches to main
+        // do not use another thread for exec since gio adds watches to main
         // loop thread anyway
         task->thread = nullptr;
         vfs_file_task_exec(task, task->src_paths.at(0));
@@ -2173,7 +2173,7 @@ get_total_size_of_dir(VFSFileTask* task, const std::string& path, off_t* size,
     else if ((unsigned int)file_stat.st_dev != GPOINTER_TO_UINT(task->devs->data))
         add_task_dev(task, file_stat.st_dev);
 
-    // Don't follow symlinks
+    // Do not follow symlinks
     if (S_ISLNK(file_stat.st_mode) || !S_ISDIR(file_stat.st_mode))
         return;
 

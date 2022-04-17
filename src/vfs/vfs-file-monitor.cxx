@@ -289,7 +289,7 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
                                      (GHFunc)vfs_file_monitor_reconnect_inotify,
                                      nullptr);
         }
-        // don't need to remove the event source since
+        // do not need to remove the event source since
         // it has been removed by vfs_monitor_disconnect_from_inotify()
         return true;
     }

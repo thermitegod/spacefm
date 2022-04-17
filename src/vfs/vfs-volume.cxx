@@ -415,7 +415,7 @@ info_drive_connection(device_t* device)
                 if (vendor != nullptr)
                 {
                     g_strstrip(vendor);
-                    /* Don't overwrite what we set earlier from ID_VENDOR */
+                    /* Do not overwrite what we set earlier from ID_VENDOR */
                     if (device->drive_vendor == nullptr)
                     {
                         device->drive_vendor = _dupv8(vendor);
@@ -427,7 +427,7 @@ info_drive_connection(device_t* device)
                 if (model != nullptr)
                 {
                     g_strstrip(model);
-                    /* Don't overwrite what we set earlier from ID_MODEL */
+                    /* Do not overwrite what we set earlier from ID_MODEL */
                     if (device->drive_model == nullptr)
                     {
                         device->drive_model = _dupv8(model);
@@ -492,7 +492,7 @@ info_drive_connection(device_t* device)
                 if (model != nullptr)
                 {
                     g_strstrip(model);
-                    /* Don't overwrite what we set earlier from ID_MODEL */
+                    /* Do not overwrite what we set earlier from ID_MODEL */
                     if (device->drive_model == nullptr)
                     {
                         device->drive_model = _dupv8(model);
@@ -504,7 +504,7 @@ info_drive_connection(device_t* device)
                 if (serial != nullptr)
                 {
                     g_strstrip(serial);
-                    /* Don't overwrite what we set earlier from ID_SERIAL */
+                    /* Do not overwrite what we set earlier from ID_SERIAL */
                     if (device->drive_serial == nullptr)
                     {
                         /* this is formatted as a hexnumber; drop the leading 0x */
@@ -518,7 +518,7 @@ info_drive_connection(device_t* device)
                 if (revision != nullptr)
                 {
                     g_strstrip(revision);
-                    /* Don't overwrite what we set earlier from ID_REVISION */
+                    /* Do not overwrite what we set earlier from ID_REVISION */
                     if (device->drive_revision == nullptr)
                     {
                         device->drive_revision = _dupv8(revision);
@@ -740,7 +740,7 @@ info_drive_properties(device_t* device)
 
         g_ptr_array_add(media_compat_array, (void*)drive_media_mapping[n].media_name);
     }
-    /* special handling for SDIO since we don't yet have a sdio_id helper in udev to set properties
+    /* special handling for SDIO since we do not yet have a sdio_id helper in udev to set properties
      */
     if (!g_strcmp0(device->drive_connection_interface, "sdio"))
     {
@@ -775,12 +775,12 @@ info_drive_properties(device_t* device)
             if (udev_device_get_property_value(device->udevice, media_mapping[n].udev_property) ==
                 nullptr)
                 continue;
-            // should this be media_mapping[n] ?  doesn't matter, same?
+            // should this be media_mapping[n] ?  does not matter, same?
             media_in_drive = drive_media_mapping[n].media_name;
             break;
         }
-        /* If the media isn't set (from e.g. udev rules), just pick the first one in media_compat -
-         * note that this may be nullptr (if we don't know what media is compatible with the drive)
+        /* If the media is not set (from e.g. udev rules), just pick the first one in media_compat -
+         * note that this may be nullptr (if we do not know what media is compatible with the drive)
          * which is OK.
          */
         if (media_in_drive == nullptr)
@@ -923,7 +923,7 @@ info_device_properties(device_t* device)
         device->device_is_read_only = (sysfs_get_int(device->native_path, "ro") != 0);
         /* This is not available on all devices so fall back to 512 if unavailable.
          *
-         * Another way to get this information is the BLKSSZGET ioctl but we don't want
+         * Another way to get this information is the BLKSSZGET ioctl but we do not want
          * to open the device. Ideally vol_id would export it.
          */
         block_size = sysfs_get_uint64(device->native_path, "queue/hw_sector_size");
@@ -1169,7 +1169,7 @@ info_partition(device_t* device)
         }
     }
 
-    /* Also handle the case where we are partitioned by the kernel and don't have
+    /* Also handle the case where we are partitioned by the kernel and do not have
      * any UDISKS_PARTITION_* properties.
      *
      * This works without any udev UDISKS_PARTITION_* properties and is
@@ -1572,7 +1572,7 @@ parse_mounts(bool report)
                 if (Glib::str_has_prefix(mount_source, "/dev/"))
                 {
                     /* is a subdir mount on a local device, eg a bind mount
-                     * so don't include this mount point */
+                     * so do not include this mount point */
                     // LOG_INFO("        local");
                     continue;
                 }
@@ -1637,7 +1637,7 @@ parse_mounts(bool report)
             }
             else
             {
-                // initial load !report don't add non-block devices
+                // initial load !report do not add non-block devices
                 devnum = makedev(major, minor);
                 udevice = udev_device_new_from_devnum(udev, 'b', devnum);
                 if (udevice)
@@ -3882,7 +3882,7 @@ vfs_volume_init()
         }
         return true;
     }
-    global_inhibit_auto = true; // don't autoexec during startup
+    global_inhibit_auto = true; // do not autoexec during startup
 
     uchannel = g_io_channel_unix_new(ufd);
     g_io_channel_set_flags(uchannel, G_IO_FLAG_NONBLOCK, nullptr);

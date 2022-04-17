@@ -1399,7 +1399,7 @@ xset_set_set(XSet* set, XSetSetSet var, const char* value)
         case XSetSetSet::XSET_SET_SET_ICON:
             // pre-0.9.0 icon or >= 0.9.0 custom item icon
             // only save if custom or not default icon
-            // also check that stock name doesn't match
+            // also check that stock name does not match
             break;
         case XSetSetSet::XSET_SET_SET_SHARED_KEY:
             if (set->shared_key)
@@ -2889,7 +2889,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
             else if (plugin_data->job == PluginJob::PLUGIN_JOB_COPY)
             {
                 // copy
-                set->plugin_top = false; // don't show tmp plugin in Plugins menu
+                set->plugin_top = false; // do not show tmp plugin in Plugins menu
                 if (plugin_data->set)
                 {
                     // paste after insert_set (plugin_data->set)
@@ -3666,7 +3666,7 @@ xset_custom_activate(GtkWidget* item, XSet* set)
     // task
     std::string task_name = clean_label(set->menu_label, false, false);
     PtkFileTask* ptask = ptk_file_exec_new(task_name, cwd, parent, task_view);
-    // don't free cwd!
+    // do not free cwd!
     ptask->task->exec_browser = set->browser;
     ptask->task->exec_command = command;
     ptask->task->exec_set = set;
@@ -5056,13 +5056,13 @@ xset_job_is_valid(XSet* set, int job)
             else if (set->plugin)
                 no_paste = true;
             else if (set == set_clipboard && clipboard_is_cut)
-                // don't allow cut paste to self
+                // do not allow cut paste to self
                 no_paste = true;
             else if (set_clipboard->tool > XSetTool::XSET_TOOL_CUSTOM && !set->tool)
-                // don't allow paste of builtin tool item to menu
+                // do not allow paste of builtin tool item to menu
                 no_paste = true;
             else if (set_clipboard->menu_style == XSetMenu::XSET_MENU_SUBMENU)
-                // don't allow paste of submenu to self or below
+                // do not allow paste of submenu to self or below
                 no_paste = xset_clipboard_in_set(set);
             return !no_paste;
         case XSetJob::XSET_JOB_REMOVE:
@@ -5245,13 +5245,13 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
     else if (insert_set->plugin)
         no_paste = true;
     else if (insert_set == set_clipboard && clipboard_is_cut)
-        // don't allow cut paste to self
+        // do not allow cut paste to self
         no_paste = true;
     else if (set_clipboard->tool > XSetTool::XSET_TOOL_CUSTOM && !insert_set->tool)
-        // don't allow paste of builtin tool item to menu
+        // do not allow paste of builtin tool item to menu
         no_paste = true;
     else if (set_clipboard->menu_style == XSetMenu::XSET_MENU_SUBMENU)
-        // don't allow paste of submenu to self or below
+        // do not allow paste of submenu to self or below
         no_paste = xset_clipboard_in_set(insert_set);
 
     // control open_all item
@@ -5536,7 +5536,7 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set)
         if (event->button == 1 && keymod == 0)
         {
             // user released left button - due to an apparent gtk bug, activate
-            // doesn't always fire on this event so handle it ourselves
+            // does not always fire on this event so handle it ourselves
             // see also ptk-file-menu.c on_app_button_press()
             // test: gtk2 Crux theme with touchpad on Edit|Copy To|Location
             // https://github.com/IgnorantGuru/spacefm/issues/31
@@ -5657,7 +5657,7 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set)
             xset_design_show_menu(menu, set, nullptr, event->button, event->time);
         return true;
     }
-    return false; // true won't stop activate on button-press (will on release)
+    return false; // true will not stop activate on button-press (will on release)
 }
 
 bool
@@ -6474,7 +6474,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
     int height = xset_get_int("file_dlg", "y");
     if (width && height)
     {
-        // filechooser won't honor default size or size request ?
+        // filechooser will not honor default size or size request ?
         gtk_widget_show_all(dlg);
         gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER_ALWAYS);
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
@@ -6566,7 +6566,7 @@ xset_builtin_tool_activate(const char tool_type, XSet* set, GdkEventButton* even
     PtkFileBrowser* file_browser = nullptr;
     FMMainWindow* main_window = fm_main_window_get_last_active();
 
-    // set may be a submenu that doesn't match tool_type
+    // set may be a submenu that does not match tool_type
     if (!(set && !set->lock && tool_type > XSetTool::XSET_TOOL_CUSTOM))
     {
         LOG_WARN("xset_builtin_tool_activate invalid");
@@ -6935,7 +6935,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
         !set->shared_key)
         set->shared_key = ztd::strdup(builtin_tool_shared_key[set->tool]);
 
-    // builtin toolitems don't have menu_style set
+    // builtin toolitems do not have menu_style set
     int menu_style;
     switch (set->tool)
     {
@@ -7031,13 +7031,13 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             if (!new_menu_label)
                 new_menu_label = ztd::strdup(menu_label);
 
-            // can't use gtk_tool_button_new because icon doesn't obey size
+            // cannot use gtk_tool_button_new because icon does not obey size
             // btn = GTK_WIDGET( gtk_tool_button_new( image, new_menu_label ) );
             btn = GTK_WIDGET(gtk_button_new());
             gtk_widget_show(image);
             gtk_button_set_image(GTK_BUTTON(btn), image);
             gtk_button_set_relief(GTK_BUTTON(btn), GTK_RELIEF_NONE);
-            // These don't seem to do anything
+            // These do not seem to do anything
             gtk_widget_set_margin_start(btn, 0);
             gtk_widget_set_margin_end(btn, 0);
             gtk_widget_set_margin_top(btn, 0);
@@ -7080,7 +7080,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 image =
                     xset_get_image(icon_name ? icon_name : "gtk-execute", (GtkIconSize)icon_size);
 
-            // can't use gtk_tool_button_new because icon doesn't obey size
+            // cannot use gtk_tool_button_new because icon does not obey size
             // btn = GTK_WIDGET( gtk_toggle_tool_button_new() );
             // gtk_tool_button_set_icon_widget( GTK_TOOL_BUTTON( btn ), image );
             // gtk_tool_button_set_label( GTK_TOOL_BUTTON( btn ), set->menu_label );
@@ -7206,7 +7206,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 image =
                     xset_get_image(icon_name ? icon_name : "gtk-directory", (GtkIconSize)icon_size);
 
-            // can't use gtk_tool_button_new because icon doesn't obey size
+            // cannot use gtk_tool_button_new because icon does not obey size
             // btn = GTK_WIDGET( gtk_tool_button_new( image, menu_label ) );
             btn = GTK_WIDGET(gtk_button_new());
             gtk_widget_show(image);
@@ -7399,7 +7399,7 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
 
     xset_add_toolitem(parent, file_browser, toolbar, icon_size, set_child, show_tooltips);
 
-    // These don't seem to do anything
+    // These do not seem to do anything
     gtk_container_set_border_width(GTK_CONTAINER(toolbar), 0);
     gtk_widget_set_margin_start(toolbar, 0);
     gtk_widget_set_margin_end(toolbar, 0);
@@ -7695,7 +7695,7 @@ xset_defaults()
         "OPTION-FSTYPE.\n\nExample:  nosuid, sync+vfat, sync+ntfs, noatime, noatime-ext4\nThis "
         "will add nosuid and noatime for all filesystem types, add sync for vfat and ntfs only, "
         "and remove noatime for ext4.\n\nNote: Some options, such as nosuid, may be added by the "
-        "mount program even if you don't include them.  Options in fstab take precedence.  "
+        "mount program even if you do not include them.  Options in fstab take precedence.  "
         "pmount and some handlers may ignore options set here.");
     set->menu_style = XSetMenu::XSET_MENU_STRING;
     xset_set_set(set, XSetSetSet::XSET_SET_SET_TITLE, "Default Mount Options");
@@ -7714,7 +7714,7 @@ xset_defaults()
         "using the form OPTION+FSTYPE or OPTION-FSTYPE.\n\nExample:  nosuid, sync+vfat, "
         "sync+ntfs, noatime, noatime-ext4\nThis will add nosuid and noatime for all filesystem "
         "types, add sync for vfat and ntfs only, and remove noatime for ext4.\n\nNote: Some "
-        "options, such as nosuid, may be added by the mount program even if you don't include "
+        "options, such as nosuid, may be added by the mount program even if you do not include "
         "them.  Options in fstab take precedence.  pmount ignores options set here.");
     xset_set_set(set, XSetSetSet::XSET_SET_SET_S, "noexec, nosuid, noatime");
 

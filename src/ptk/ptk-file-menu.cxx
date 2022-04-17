@@ -502,7 +502,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     xset_set_ob2(set, nullptr, set_radio);
     set->b = browser->sort_type == GTK_SORT_DESCENDING ? XSetB::XSET_B_TRUE : XSetB::XSET_B_FALSE;
 
-    // this crashes if !browser->file_list so don't allow
+    // this crashes if !browser->file_list so do not allow
     if (browser->file_list)
     {
         set = xset_set_cb("sortx_alphanum", (GFunc)on_popup_sort_extra, browser);
@@ -952,7 +952,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         item = GTK_MENU_ITEM(xset_add_menuitem(browser, submenu, accel_group, set));
         if (set->menu_label)
             free(set->menu_label);
-        set->menu_label = nullptr; // don't bother to save this
+        set->menu_label = nullptr; // do not bother to save this
 
         // Edit / Dir
         if ((is_dir && browser) || (is_text && sel_files && !sel_files->next))
@@ -2044,7 +2044,7 @@ on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data)
         if (event->button == 1 && keymod == 0)
         {
             // user released left button - due to an apparent gtk bug, activate
-            // doesn't always fire on this event so handle it ourselves
+            // does not always fire on this event so handle it ourselves
             // see also settings.c xset_design_cb()
             // test: gtk2 Crux theme with touchpad on Edit|Copy To|Location
             // https://github.com/IgnorantGuru/spacefm/issues/31
@@ -2091,7 +2091,7 @@ on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data)
         default:
             break;
     }
-    return false; // true won't stop activate on button-press (will on release)
+    return false; // true will not stop activate on button-press (will on release)
 }
 
 static void

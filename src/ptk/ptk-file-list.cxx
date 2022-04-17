@@ -778,7 +778,7 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
     else
     {
         // non-natural
-        /* FIXME: don't compare utf8 as ascii ?  This is done to avoid casefolding
+        /* FIXME: do not compare utf8 as ascii ?  This is done to avoid casefolding
          * and caching expenses and seems to work
          * NOTE: both g_ascii_strcasecmp and g_ascii_strncasecmp appear to be
          * case insensitive when used on utf8

@@ -887,7 +887,7 @@ on_autoopen_net_cb(VFSFileTask* task, AutoOpen* ao)
         device_file_vol->should_autounmount = true;
 
         // open in browser
-        // if fuse fails, device may be in mtab even though mount point doesn't
+        // if fuse fails, device may be in mtab even though mount point does not
         // exist, so test for mount point exists
         if (GTK_IS_WIDGET(ao->file_browser) &&
             std::filesystem::is_directory(device_file_vol->mount_point))
@@ -1355,7 +1355,7 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                                exe,
                                vol->device_file,
                                vol->device_file);
-            // sleep .2 here to ensure spacefm -g isn't killed too quickly causing hang
+            // sleep .2 here to ensure spacefm -g is not killed too quickly causing hang
             wait_done = "\n( sleep .2; kill $waitp 2>/dev/null ) &";
         }
         if (run_in_terminal)
@@ -1677,7 +1677,7 @@ on_remount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
     if (vfs_volume_is_mounted(vol))
     {
-        // udisks can't remount, so unmount and mount
+        // udisks cannot remount, so unmount and mount
         char* unmount_command = vfs_volume_device_unmount_cmd(vol, &unmount_in_terminal);
         if (!unmount_command)
         {
@@ -2626,7 +2626,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, unsig
         case 1:
             // left-click - mount & open
             // device opener?  note that context may be based on devices list sel
-            // won't work for desktop because no DesktopWindow currently available
+            // will not work for desktop because no DesktopWindow currently available
             if (file_browser && xset_opener(file_browser, 2))
                 return;
 
@@ -2748,7 +2748,7 @@ on_dev_menu_button_press(GtkWidget* item, GdkEventButton* event, VFSVolume* vol)
         if (event->button == 1 && keymod == 0)
         {
             // user released left button - due to an apparent gtk bug, activate
-            // doesn't always fire on this event so handle it ourselves
+            // does not always fire on this event so handle it ourselves
             // see also settings.c xset_design_cb()
             // test: gtk2 Crux theme with touchpad on Edit|Copy To|Location
             // https://github.com/IgnorantGuru/spacefm/issues/31
@@ -3767,7 +3767,7 @@ on_bookmark_drag_begin(GtkWidget* widget, GdkDragContext* drag_context,
     if (!file_browser)
         return;
 
-    // don't activate row if drag was begun
+    // do not activate row if drag was begun
     file_browser->bookmark_button_press = false;
 
     // reset tracking inserted/deleted row (for auto DND handler moved a bookmark)
@@ -4049,7 +4049,7 @@ static bool
 on_bookmark_button_release_event(GtkTreeView* view, GdkEventButton* evt,
                                  PtkFileBrowser* file_browser)
 {
-    // don't activate row if drag was begun
+    // do not activate row if drag was begun
     if (evt->type != GDK_BUTTON_RELEASE || !file_browser->bookmark_button_press)
         return false;
     file_browser->bookmark_button_press = false;
@@ -4116,9 +4116,9 @@ ptk_bookmark_view_new(PtkFileBrowser* file_browser)
 
     GtkWidget* view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(list));
 
-    /* gtk_tree_view_new_with_model adds a ref so we don't need original ref
+    /* gtk_tree_view_new_with_model adds a ref so we do not need original ref
      * Otherwise on_bookmark_model_destroy was not running - list model
-     * wasn't being freed? */
+     * was not being freed? */
     g_object_unref(list);
 
     GtkIconTheme* icon_theme = gtk_icon_theme_get_default();

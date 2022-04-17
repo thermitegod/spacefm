@@ -127,7 +127,7 @@ static const std::array<const char*, 3> cmds_mnt
 };
 // clang-format on
 
-/* don't change this script header or it will break header detection on
+/* do not change this script header or it will break header detection on
  * existing scripts! */
 static const char* script_header = "#!/bin/bash\n";
 
@@ -185,7 +185,7 @@ struct Handler
     const char* list_cmd;     // or info              (script)
     bool list_term;           //                      set->scroll_lock
     /*  save as custom item                                 set->lock = false
-        if handler equals default, don't save in session    set->disable = true
+        if handler equals default, do not save in session    set->disable = true
         icon (file handlers only)                           set->icon
     */
 };
@@ -867,7 +867,7 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
     if (!def_script)
     {
         LOG_WARN("save_handler_script unable to get script for custom {}", handler_set->name);
-        error_message = "Error: unable to save command (can't get script path?)";
+        error_message = "Error: unable to save command (cannot get script path?)";
         return true;
     }
     // create parent dir
@@ -1199,7 +1199,7 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
                     set->scroll_lock = handler->list_term;
                 set->b = XSetB::XSET_B_TRUE;
                 set->lock = false;
-                // handler equals default, so don't save in session
+                // handler equals default, so do not save in session
                 set->disable = true;
             }
         }
@@ -2102,7 +2102,7 @@ on_handlers_key_press(GtkWidget* widget, GdkEventKey* evt, HandlerData* hnd)
 {
     (void)widget;
     (void)evt;
-    // Current handler hasn't been changed?
+    // Current handler has not been changed?
     if (!hnd->changed /* was !gtk_widget_get_sensitive( hnd->btn_apply )*/)
         return false;
 
@@ -2114,7 +2114,7 @@ on_handlers_key_press(GtkWidget* widget, GdkEventKey* evt, HandlerData* hnd)
         on_configure_button_press(GTK_BUTTON(hnd->btn_apply), hnd);
     else
         hnd->changed = false;
-    return true; // false doesn't retain key after dialog shown
+    return true; // false does not retain key after dialog shown
 }
 
 static bool
@@ -2325,7 +2325,7 @@ validate_archive_handler(HandlerData* hnd)
         return false;
     }
 
-    // MIME and Pathname can't both be empty
+    // MIME and Pathname cannot both be empty
     if (g_strcmp0(handler_mime, "") <= 0 && g_strcmp0(handler_extension, "") <= 0)
     {
         xset_msg_dialog(GTK_WIDGET(hnd->dlg),
@@ -2874,7 +2874,7 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
     // gtk_tree_view_set_model adds a ref
     g_object_unref(hnd->list);
 
-    /*igcr probably doesn't need to be single click, as you're not using row
+    /*igcr probably does not need to be single click, as you are not using row
      * activation, only selection changed? */
     // gtk_tree_view_set_single_click(GTK_TREE_VIEW(hnd->view_handlers)), true);
     gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(hnd->view_handlers), false);
@@ -3212,7 +3212,7 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
     gtk_box_pack_start(GTK_BOX(vbox_settings), hnd->chkbtn_handler_enabled, false, false, 4);
     gtk_box_pack_start(GTK_BOX(vbox_settings), GTK_WIDGET(grid), false, false, 4);
 
-    /* view_handlers isn't added but view_scroll is - view_handlers is
+    /* view_handlers is not added but view_scroll is - view_handlers is
      * inside view_scroll. No padding added to get it to align with the
      * enabled widget on the right side */
     gtk_box_pack_start(GTK_BOX(vbox_handlers), GTK_WIDGET(view_scroll), true, true, 0);

@@ -272,7 +272,7 @@ handle_parsed_commandline_args()
             }
             else
             {
-                std::string err_msg = fmt::format("File doesn't exist:\n\n{}", real_path);
+                std::string err_msg = fmt::format("File does not exist:\n\n{}", real_path);
                 ptk_show_error(nullptr, "Error", err_msg);
             }
         }
@@ -386,7 +386,7 @@ main(int argc, char* argv[])
     single_instance_check();
     // If we reach this point, we are the first instance.
     // Subsequent processes will exit() inside single_instance_check
-    // and won't reach here.
+    // and will not reach here.
 
     // initialize the file alteration monitor
     if (!vfs_file_monitor_init())

@@ -197,13 +197,13 @@ vfs_async_task_real_cancel(VFSAsyncTask* task, bool finalize)
      * NOTE: Well, this dirty hack is needed. Since the function is always
      * called from main thread, the GTK+ main loop may have this gdk lock locked
      * when this function gets called.  However, our task running in another thread
-     * might need to use GTK+, too. If we don't release the gdk lock in main thread
+     * might need to use GTK+, too. If we do not release the gdk lock in main thread
      * temporarily, the task in another thread will be blocked due to waiting for
      * the gdk lock locked by our main thread, and hence cannot be finished.
      * Then we'll end up in endless waiting for that thread to finish, the so-called deadlock.
      *
      * The doc of GTK+ really sucks. GTK+ use this GTK_THREADS_ENTER everywhere internally,
-     * but the behavior of the lock is not well-documented. So it's very difficult for use
+     * but the behavior of the lock is not well-documented. So it is very difficult for use
      * to get things right.
      */
 

@@ -345,7 +345,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     gtk_box_pack_start(GTK_BOX(hbox_top), lbl_command, false, true, 2);
 
     // Generating a ComboBox with model behind, and saving model for use
-    // in callback - now that archive handlers are custom, can't rely on
+    // in callback - now that archive handlers are custom, cannot rely on
     // presence or a particular order
     // Model is xset name then extensions the handler deals with
     GtkListStore* list = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
@@ -560,7 +560,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     int height = xset_get_int("arc_dlg", "y");
     if (width && height)
     {
-        // filechooser won't honor default size or size request ?
+        // filechooser will not honor default size or size request ?
         gtk_widget_show_all(dlg);
         gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER_ALWAYS);
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
@@ -827,7 +827,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     }
     else
     {
-        /* '%O' isn't present - the normal single command is needed
+        /* '%O' is not present - the normal single command is needed
          * Obtaining valid quoted UTF8 file name %o for archive to create */
         udest_file = g_filename_display_name(dest_file);
         udest_quote = bash_quote(udest_file);
@@ -970,7 +970,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         list_contents ? PTKFileArchiverArc::ARC_LIST : PTKFileArchiverArc::ARC_EXTRACT;
     keep_term = list_contents;
 
-    /* Ensuring archives are actually present in files, if this hasn't already
+    /* Ensuring archives are actually present in files, if this has not already
      * been verified - i.e. the function was triggered by a keyboard shortcut */
     if (!archive_presence_checked)
     {
@@ -1010,11 +1010,11 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     if (file_browser)
         dlgparent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser->main_window));
 
-    // Checking if extract to directory hasn't been specified
+    // Checking if extract to directory has not been specified
     if (!dest_dir && !list_contents)
     {
-        /* It hasn't - generating dialog to ask user. Only dealing with
-         * user-writable contents if the user isn't root */
+        /* It has not - generating dialog to ask user. Only dealing with
+         * user-writable contents if the user is not root */
         GtkWidget* dlg = gtk_file_chooser_dialog_new("Extract To",
                                                      dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
                                                      GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
@@ -1058,7 +1058,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         int height = xset_get_int("arc_dlg", "y");
         if (width && height)
         {
-            // filechooser won't honor default size or size request ?
+            // filechooser will not honor default size or size request ?
             gtk_widget_show_all(dlg);
             gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER_ALWAYS);
             gtk_window_resize(GTK_WINDOW(dlg), width, height);
@@ -1311,7 +1311,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
 
                 /* Dealing with the need to make extracted files writable if
                  * desired (e.g. a tar of files originally archived from a CD
-                 * will be readonly). Root users don't obey such access
+                 * will be readonly). Root users do not obey such access
                  * permissions and making such owned files writeable may be a
                  * security issue */
                 if (write_access && geteuid() != 0)
@@ -1324,7 +1324,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
             }
             else
             {
-                // Parent directory doesn't need to be created
+                // Parent directory does not need to be created
                 create_parent = false;
             }
 

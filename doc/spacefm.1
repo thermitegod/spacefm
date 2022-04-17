@@ -23,7 +23,7 @@ SpaceFM's command line usage
 .P
 -r, --reuse-tab              Open folder in current tab of last used window
 .P
--n, --no-saved-tabs          Don't load saved tabs
+-n, --no-saved-tabs          Do not load saved tabs
 .P
 -w, --new-window             Open folders in new window
 .P
@@ -124,7 +124,7 @@ To mount and open a device (see Device Handlers), or open an already mounted dev
     spacefm /dev/sdd1
 
 .SH GTK Themes
-The GTK theme you're using may have a significant impact on SpaceFM's performance, and a non-working theme may create dysfunctional behavior. Because multiple panels in SpaceFM use many GUI elements, some themes cause SpaceFM to run more slowly. For example, the Clearlooks GTK2 theme has been observed to be very slow with SpaceFM, while the Raleigh theme is quite fast.
+The GTK theme you are using may have a significant impact on SpaceFM's performance, and a non-working theme may create dysfunctional behavior. Because multiple panels in SpaceFM use many GUI elements, some themes cause SpaceFM to run more slowly. For example, the Clearlooks GTK2 theme has been observed to be very slow with SpaceFM, while the Raleigh theme is quite fast.
 
 SpaceFM may be built to use GTK v2 or v3. To see if your installed copy of SpaceFM is using GTK2 or GTK3 themes, run spacefm --version
 .P
@@ -150,13 +150,13 @@ Exec=env GTK2_RC_FILES=/usr/share/themes/Raleigh/gtk-2.0/gtkrc spacefm
 When using GTK3, theme choice becomes especially important because themes are often broken with every minor GTK3 release, and a theme not made specifically for your current version of GTK3 can cause memory leaks, GUI glitches, and other severe problems visible in SpaceFM. To determine if your theme is the cause of problems, run SpaceFM in a terminal to see any warnings, and also compare behavior with Adwaita (default GNOME theme).
 
 .SH Daemon Mode
-If you want SpaceFM always running in the background, ready to quickly open windows and automount volumes, but don't want it to manage the desktop, start a daemon instance of SpaceFM:
+If you want SpaceFM always running in the background, ready to quickly open windows and automount volumes, but do not want it to manage the desktop, start a daemon instance of SpaceFM:
 
     spacefm -d
 No window will open in this case, but an instance will be started if not already running, and it will continue running for the duration of your X login session. You can also start the daemon from your login script. For example, if using Openbox, add this line to ~/.config/openbox/autostart.sh:
 
     (sleep 2 && spacefm -d) &
-One particular use for daemon mode is to make sure leftover folders in /media are removed. SpaceFM can unmount removable devices on exit to prevent folders remaining in /media at shutdown (if you check option Settings|Auto-Mount|Unmount On Exit). If running as a normal instance, this means devices will be unmounted whenever you close the last SpaceFM window. When running as a daemon (or as a desktop manager daemon), devices won't be unmounted until you logoff.
+One particular use for daemon mode is to make sure leftover folders in /media are removed. SpaceFM can unmount removable devices on exit to prevent folders remaining in /media at shutdown (if you check option Settings|Auto-Mount|Unmount On Exit). If running as a normal instance, this means devices will be unmounted whenever you close the last SpaceFM window. When running as a daemon (or as a desktop manager daemon), devices will not be unmounted until you logoff.
 
 To stop a daemon mode instance, send SpaceFM a quit signal:
 

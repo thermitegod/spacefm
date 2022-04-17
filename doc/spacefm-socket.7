@@ -442,7 +442,7 @@ Display values for a task are shown in the Task Manager, and also in task popup 
 
 As with all methods, by default the set-task method will apply to the current tab in the current panel of the last used SpaceFM window. You can also specify a particular window, panel, and/or tab using the --window, --panel, and/or --tab OPTIONS.
 
-The set-task method requires a TASKID, which indicates what task is being modified. There are two ways to obtain the TASKID. One is to use the exported bash variable $fm_my_task, which refers to the current command task. The other is to use $fm_task_id, which refers to the task currently selected in the task list when the current task is run. Note that a TASKID is only valid in the window in which the task is currently running, so it's generally appropriate to specify a WINDOWID ($fm_my_window) with the --window option to ensure the correct window is accessed.
+The set-task method requires a TASKID, which indicates what task is being modified. There are two ways to obtain the TASKID. One is to use the exported bash variable $fm_my_task, which refers to the current command task. The other is to use $fm_task_id, which refers to the task currently selected in the task list when the current task is run. Note that a TASKID is only valid in the window in which the task is currently running, so it is generally appropriate to specify a WINDOWID ($fm_my_window) with the --window option to ensure the correct window is accessed.
 
 Note that when using $fm_my_task, the TASKID will not be valid when the command is first run -
 .B it usually takes about a half second for a task to appear in the task manager.
@@ -683,7 +683,7 @@ NOTE: Prior to SpaceFM 1.0.4, the 'activate' method was called 'show-menu', and 
 .br
 Usage: spacefm -s add-event EVENT COMMAND ...
 
-The add-event method is used to dynamically add an asynchronous handler command to an event, such that when EVENT occurs, COMMAND will be run asynchronously (SpaceFM won't wait for it to finish).
+The add-event method is used to dynamically add an asynchronous handler command to an event, such that when EVENT occurs, COMMAND will be run asynchronously (SpaceFM will not wait for it to finish).
 
 COMMAND is a bash command line. If any arguments follow it, they are added to the command before it is passed to bash. For all events except evt_start, evt_exit, evt_tab_close, and evt_device, the exported bash variables can be used in the command. COMMAND also accepts event substitution variables, which will vary with the event type.
 
@@ -731,7 +731,7 @@ For example, the following command will add a handler to the evt_win_click event
     spacefm -s replace-event evt_win_click 'if [ "%b" != "2" ]; then exit 1; fi; \\
         spacefm -g --label "\\nMiddle button was clicked" --button ok &'
 
-Note the ampersand (&) after the 'spacefm -g' command. This runs the command asynchronously (run and forget) so the exit status is returned immediately and it doesn't cause a lag in the GUI.
+Note the ampersand (&) after the 'spacefm -g' command. This runs the command asynchronously (run and forget) so the exit status is returned immediately and it does not cause a lag in the GUI.
 
 .P
 .B remove-event
@@ -778,7 +778,7 @@ Because the sleep and spacefm command are within parentheses, they are both back
 .B evt_win_key (Window|Keypress) %e %w %p %t %k %m
 Occurs when the user presses a key in most areas of a SpaceFM window. The key code pressed is available via the substitution variable %k, and any key modifier (eg Ctrl+C) via %m.
 
-If a handler set for the evt_win_key event is synchronous (has an asterisk prefix or is added with the replace-event method), and it returns a zero exit status, the built-in handler for the event will be inhibited (SpaceFM will not react to the keypress in most cases, even if it's assigned to a menu item).
+If a handler set for the evt_win_key event is synchronous (has an asterisk prefix or is added with the replace-event method), and it returns a zero exit status, the built-in handler for the event will be inhibited (SpaceFM will not react to the keypress in most cases, even if it is assigned to a menu item).
 .P
 .B evt_win_close (Window|Close) %e %w %p %t
 Occurs whenever a SpaceFM window is closed, including the last window of the instance.

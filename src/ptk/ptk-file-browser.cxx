@@ -547,7 +547,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
         ptask =
             ptk_file_exec_new(task_name, cwd, GTK_WIDGET(file_browser), file_browser->task_view);
         free(task_name);
-        // don't free cwd!
+        // do not free cwd!
         ptask->task->exec_browser = file_browser;
         ptask->task->exec_command = replace_line_subs(command);
         if (as_root)
@@ -1065,7 +1065,7 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
 static void
 ptk_file_browser_init(PtkFileBrowser* file_browser)
 {
-    file_browser->mypanel = 0; // don't load font yet in ptk_path_entry_new
+    file_browser->mypanel = 0; // do not load font yet in ptk_path_entry_new
     file_browser->path_bar = ptk_path_entry_new(file_browser);
     g_signal_connect(file_browser->path_bar,
                      "activate",
@@ -1135,7 +1135,7 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
         GTK_CONTAINER(gtk_statusbar_get_message_area(GTK_STATUSBAR(file_browser->status_bar))));
     file_browser->status_label = GTK_LABEL(children->data);
     g_list_free(children);
-    // don't know panel yet
+    // do not know panel yet
     file_browser->status_image = xset_get_image("gtk-yes", GTK_ICON_SIZE_MENU);
     gtk_box_pack_start(GTK_BOX(file_browser->status_bar),
                        file_browser->status_image,
@@ -1872,7 +1872,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
     file_browser->is_drag = false;
     file_browser->menu_shown = false;
     if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW || app_settings.single_click)
-        /* sfm 1.0.6 don't reset skip_release for Icon/Compact to prevent file
+        /* sfm 1.0.6 do not reset skip_release for Icon/Compact to prevent file
            under cursor being selected when entering dir with double-click.
            Reset is conditional here to avoid possible but unlikely unintended
            breakage elsewhere. */
@@ -1914,7 +1914,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
     {
         if (!inhibit_focus)
         {
-            msg = fmt::format("Directory doesn't exist\n\n{}", path);
+            msg = fmt::format("Directory does not exist\n\n{}", path);
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                            "Error",
                            msg);
@@ -2174,7 +2174,7 @@ on_folder_content_changed(VFSDir* dir, VFSFileInfo* file, PtkFileBrowser* file_b
     {
         // The current directory itself changed
         if (!std::filesystem::is_directory(ptk_file_browser_get_cwd(file_browser)))
-            // current directory doesn't exist - was renamed
+            // current directory does not exist - was renamed
             on_close_notebook_page(nullptr, file_browser);
     }
     else
@@ -2591,7 +2591,7 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
         key = search_key;
     else
     {
-        // get pattern from user  (store in ob1 so it's not saved)
+        // get pattern from user  (store in ob1 so it is not saved)
         XSet* set = xset_get("select_patt");
         if (!xset_text_dialog(
                 GTK_WIDGET(file_browser),
@@ -3396,7 +3396,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
         }
         else if (event->button == 3) /* right click */
         {
-            /* cancel all selection, and select the item if it's not selected */
+            /* cancel all selection, and select the item if it is not selected */
             switch (file_browser->view_mode)
             {
                 case PtkFBViewMode::PTK_FB_ICON_VIEW:
@@ -3500,7 +3500,7 @@ on_folder_view_button_release_event(GtkWidget* widget, GdkEventButton* event,
              * caused a left-click to not unselect other files.  However, this
              * caused file under cursor to be selected when entering directory by
              * double-click in Icon/Compact styles.  To correct this, 1.0.6
-             * conditionally sets skip_release on GDK_2BUTTON_PRESS, and doesn't
+             * conditionally sets skip_release on GDK_2BUTTON_PRESS, and does not
              * reset skip_release in ptk_file_browser_chdir(). */
             tree_path = exo_icon_view_get_path_at_pos(EXO_ICON_VIEW(widget), event->x, event->y);
             model = exo_icon_view_get_model(EXO_ICON_VIEW(widget));
@@ -4367,7 +4367,7 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, int x, int y)
                 dest_path = g_build_filename(ptk_file_browser_get_cwd(file_browser),
                                              vfs_file_info_get_name(file),
                                              nullptr);
-                /*  this isn't needed?
+                /*  this is not needed?
                                 // dest_path is a link? resolve
                                 if ( std::filesystem::is_symlink(dest_path))
                                 {
@@ -4404,7 +4404,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
     PtkFileBrowser* file_browser = static_cast<PtkFileBrowser*>(user_data);
     char* dest_dir;
     char* file_path;
-    /*  Don't call the default handler  */
+    /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-data-received");
 
     if ((gtk_selection_data_get_length(sel_data) >= 0) &&
@@ -4575,7 +4575,7 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
     VFSFileInfo* file;
     char* full_path;
 
-    /*  Don't call the default handler  */
+    /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-data-get");
 
     // drag_context->suggested_action = GDK_ACTION_MOVE;
@@ -4603,7 +4603,7 @@ static void
 on_folder_view_drag_begin(GtkWidget* widget, GdkDragContext* drag_context,
                           PtkFileBrowser* file_browser)
 {
-    /*  Don't call the default handler  */
+    /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-begin");
     gtk_drag_set_icon_default(drag_context);
     file_browser->is_drag = true;
@@ -4670,7 +4670,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, int 
 {
     GtkAllocation allocation;
 
-    /*  Don't call the default handler  */
+    /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-motion");
 
     GtkScrolledWindow* scroll = GTK_SCROLLED_WINDOW(gtk_widget_get_parent(widget));
@@ -4837,7 +4837,7 @@ on_folder_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, unsig
 {
     (void)drag_context;
     (void)time;
-    /*  Don't call the default handler  */
+    /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-leave");
     file_browser->drag_source_dev = 0;
     file_browser->drag_source_inode = 0;
@@ -4858,7 +4858,7 @@ on_folder_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, int x,
     (void)y;
     (void)file_browser;
     GdkAtom target = gdk_atom_intern("text/uri-list", false);
-    /*  Don't call the default handler  */
+    /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-drop");
 
     gtk_drag_get_data(widget, drag_context, target, time);
@@ -5446,7 +5446,7 @@ ptk_file_browser_set_sort_type(PtkFileBrowser* file_browser, GtkSortType order)
     }
 }
 
-/* FIXME: Don't recreate the view if previous view is compact view */
+/* FIXME: Do not recreate the view if previous view is compact view */
 void
 ptk_file_browser_view_as_icons(PtkFileBrowser* file_browser)
 {
@@ -5470,7 +5470,7 @@ ptk_file_browser_view_as_icons(PtkFileBrowser* file_browser)
     gtk_container_add(GTK_CONTAINER(file_browser->folder_view_scroll), file_browser->folder_view);
 }
 
-/* FIXME: Don't recreate the view if previous view is icon view */
+/* FIXME: Do not recreate the view if previous view is icon view */
 void
 ptk_file_browser_view_as_compact_list(PtkFileBrowser* file_browser)
 {

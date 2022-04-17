@@ -192,7 +192,7 @@ ptk_file_task_destroy(PtkFileTask* ptask)
     {
         // LOG_INFO("    g_io_channel_shutdown");
         // channel shutdowns are needed to stop channel reads after task ends.
-        // Can't be placed in cb_exec_child_watch because it causes single
+        // Cannot be placed in cb_exec_child_watch because it causes single
         // line output to be lost
         if (ptask->task->exec_channel_out)
             g_io_channel_shutdown(ptask->task->exec_channel_out, true, nullptr);
@@ -1655,10 +1655,10 @@ ptk_file_task_update(PtkFileTask* ptask)
             {
                 ptask->keep_dlg = true;
                 ptk_file_task_progress_open(ptask);
-                // If error opens dialog after command finishes, gtk won't
+                // If error opens dialog after command finishes, gtk will not
                 // scroll to end on initial attempts, so force_scroll
                 // ensures it will try to scroll again - still sometimes
-                // doesn't work
+                // does not work
                 ptask->force_scroll = ptask->complete && !task->exec_scroll_lock;
             }
         }
@@ -2331,7 +2331,7 @@ query_overwrite(PtkFileTask* ptask)
 
     gtk_widget_grab_focus(query_input);
 
-    // can't run gtk_dialog_run here because it doesn't unlock a low level
+    // cannot run gtk_dialog_run here because it does not unlock a low level
     // mutex when run from inside the timer handler
     return;
 }

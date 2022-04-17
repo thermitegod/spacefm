@@ -241,17 +241,17 @@ static const std::array<const char*, 38> context_sub_lists
 static const std::array<const char*, 12> context_comps
 {
     "equals",
-    "doesn't equal",
+    "does not equal",
     "contains",
-    "doesn't contain",
+    "does not contain",
     "begins with",
-    "doesn't begin with",
+    "does not begin with",
     "ends with",
-    "doesn't end with",
+    "does not end with",
     "is less than",
     "is greater than",
     "matches",
-    "doesn't match",
+    "does not match",
 };
 
 static const std::array<const char*, 3> item_types
@@ -1431,7 +1431,7 @@ replace_item_props(ContextData* ctxt)
         {
             if (gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->opener)) > -1)
                 mset->opener = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->opener));
-            // otherwise don't change for forward compat
+            // otherwise do not change for forward compat
         }
         else
             // reset if not applicable
@@ -1449,7 +1449,7 @@ replace_item_props(ContextData* ctxt)
         if (rset->tool > XSetTool::XSET_TOOL_CUSTOM &&
             !g_strcmp0(gtk_entry_get_text(GTK_ENTRY(ctxt->item_name)),
                        xset_get_builtin_toolitem_label(rset->tool)))
-            // don't save default label of builtin toolitems
+            // do not save default label of builtin toolitems
             rset->menu_label = nullptr;
         else
             rset->menu_label = ztd::strdup(gtk_entry_get_text(GTK_ENTRY(ctxt->item_name)));
@@ -1797,8 +1797,9 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->box_match), false);
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_match), "matches any rule:");
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_match), "matches all rules:");
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_match), "doesn't match any rule:");
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_match), "doesn't match all rules:");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_match), "does not match any rule:");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_match),
+                                   "does not match all rules:");
     g_signal_connect(G_OBJECT(ctxt->box_match),
                      "changed",
                      G_CALLBACK(on_context_action_changed),

@@ -229,7 +229,7 @@ app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all
         fmt::format(" {}\n ( {} )", vfs_mime_type_get_description(mime_type), mime_type->type);
     gtk_label_set_text(GTK_LABEL(file_type), mime_desc.c_str());
 
-    /* Don't set default handler for directories and files with unknown type */
+    /* Do not set default handler for directories and files with unknown type */
     if (!show_default ||
         /*  !strcmp( vfs_mime_type_get_type( mime_type ), XDG_MIME_TYPE_UNKNOWN ) || */
         (!strcmp(vfs_mime_type_get_type(mime_type), XDG_MIME_TYPE_DIRECTORY) && !dir_default))
@@ -417,7 +417,7 @@ on_browse_btn_clicked(GtkButton* button, void* user_data)
             GtkEntry* entry = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "cmdline")));
             GtkNotebook* notebook =
                 GTK_NOTEBOOK(GTK_WIDGET(gtk_builder_get_object(builder, "notebook")));
-            /* FIXME: path shouldn't be hard-coded */
+            /* FIXME: path should not be hard-coded */
             const char* app_path = ztd::strdup("/usr/share/applications");
             if (Glib::str_has_prefix(filename, app_path) &&
                 Glib::str_has_suffix(filename, ".desktop"))

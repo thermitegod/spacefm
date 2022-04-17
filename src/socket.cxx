@@ -115,7 +115,7 @@ on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
         g_string_append_len(args, buf, r);
         if (args->str[0] == SocketEvent::CMD_SOCKET_CMD && args->len > 1 &&
             args->str[args->len - 2] == '\n' && args->str[args->len - 1] == '\n')
-            // because SocketEvent::CMD_SOCKET_CMD doesn't immediately close the socket
+            // because SocketEvent::CMD_SOCKET_CMD does not immediately close the socket
             // data is terminated by two linefeeds to prevent read blocking
             break;
     }

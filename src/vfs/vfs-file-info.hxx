@@ -65,7 +65,7 @@ struct VFSFileInfo
     GdkPixbuf* big_thumbnail;      // thumbnail of the file
     GdkPixbuf* small_thumbnail;    // thumbnail of the file
 
-    VFSFileInfoFlag flags; // if it's a special file
+    VFSFileInfoFlag flags; // if it is a special file
 
     void ref_inc();
     void ref_dec();

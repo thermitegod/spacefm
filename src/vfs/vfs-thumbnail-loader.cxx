@@ -386,7 +386,7 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
     }
 
     // if mtime of video being thumbnailed is less than 5 sec ago,
-    // don't create a thumbnail. This means that newly created video
+    // do not create a thumbnail. This means that newly created video
     // files will not have a thumbnail until a refresh.
     if (file_is_video && std::time(nullptr) - mtime < 5)
         return nullptr;

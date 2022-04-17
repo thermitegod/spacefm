@@ -82,7 +82,7 @@ void vfs_mime_type_set_default_action(VFSMimeType* mime_type, const char* deskto
 
 void vfs_mime_type_remove_action(VFSMimeType* mime_type, const char* desktop_id);
 
-/* If user-custom desktop file is created, it's returned in custom_desktop. */
+/* If user-custom desktop file is created, it is returned in custom_desktop. */
 void vfs_mime_type_add_action(VFSMimeType* mime_type, const char* desktop_id,
                               char** custom_desktop);
 

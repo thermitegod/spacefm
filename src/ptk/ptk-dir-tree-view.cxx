@@ -109,7 +109,7 @@ ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
     gtk_tree_view_set_headers_visible(dir_tree_view, false);
     gtk_tree_view_set_enable_tree_lines(dir_tree_view, true);
 
-    // MOD enabled DND   FIXME: Temporarily disable drag & drop since it doesn't work right now.
+    // MOD enabled DND   FIXME: Temporarily disable drag & drop since it does not work right now.
     /*    exo_icon_view_enable_model_drag_dest (
                 EXO_ICON_VIEW( dir_tree_view ),
                 drag_targets, G_N_ELEMENTS( drag_targets ), GDK_ACTION_ALL ); */
@@ -584,7 +584,7 @@ dir_tree_view_get_drop_dir(GtkWidget* view, int x, int y)
         }
         gtk_tree_path_free(tree_path);
     }
-    /*  this isn't needed?
+    /*  this is not needed?
         // dest_path is a link? resolve
         if ( dest_path && std::filesystem::is_symlink(dest_path))
         {
@@ -605,7 +605,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
     (void)info;
     PtkFileBrowser* file_browser = static_cast<PtkFileBrowser*>(user_data);
 
-    /*  Don't call the default handler  */
+    /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-data-received");
 
     if ((gtk_selection_data_get_length(sel_data) >= 0) &&
@@ -740,7 +740,7 @@ on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, int 
     (void)file_browser;
     GdkAtom target = gdk_atom_intern("text/uri-list", false);
 
-    /*  Don't call the default handler  */
+    /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-drop");
 
     gtk_drag_get_data(widget, drag_context, target, time);

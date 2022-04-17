@@ -123,7 +123,7 @@ mime_type_get_by_filename(const char* filename, struct stat* statbuf)
 /*
  * Get mime-type info of the specified file (slow, but more accurate):
  * To determine the mime-type of the file, mime_type_get_by_filename() is
- * tried first.  If the mime-type couldn't be determined, the content of
+ * tried first.  If the mime-type could not be determined, the content of
  * the file will be checked, which is much more time-consuming.
  * If statbuf is not nullptr, it will be used to determine if the file is a directory,
  * or if the file is an executable file; otherwise, the function will call stat()
@@ -182,9 +182,9 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
             int len =
                 mime_cache_max_extent < statbuf->st_size ? mime_cache_max_extent : statbuf->st_size;
             /*
-             * FIXME: Can g_alloca() be used here? It's very fast, but is it safe?
+             * FIXME: Can g_alloca() be used here? It is very fast, but is it safe?
              * Actually, we can allocate a block of memory with the size of mime_cache_max_extent,
-             * then we don't need to  do dynamic allocation/free every time, but multi-threading
+             * then we do not need to  do dynamic allocation/free every time, but multi-threading
              * will be a nightmare, so...
              */
             /* try to lock the common buffer */
@@ -384,7 +384,7 @@ mime_type_get_desc_icon(const char* type, const char* locale, char** icon_name)
      * higher priority than system_data_dirs, but in most cases, there was
      * no file, or very few files in user_data_dir, so checking it first will
      * result in many unnecessary open() system calls, yealding bad performance.
-     * Since the spec really sucks, we don't follow it here.
+     * Since the spec really sucks, we do not follow it here.
      */
 
     file_path = fmt::format("{}/mime/{}.xml", vfs_user_data_dir(), type);

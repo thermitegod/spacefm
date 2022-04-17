@@ -49,7 +49,7 @@ const char* mime_type_get_by_filename(const char* filename, struct stat* statbuf
 /*
  * Get mime-type info of the specified file (slow, but more accurate):
  * To determine the mime-type of the file, mime_type_get_by_filename() is
- * tried first.  If the mime-type couldn't be determined, the content of
+ * tried first.  If the mime-type could not be determined, the content of
  * the file will be checked, which is much more time-consuming.
  * If statbuf is not nullptr, it will be used to determine if the file is a directory,
  * or if the file is an executable file; otherwise, the function will call stat()

@@ -280,7 +280,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
                     } while (gtk_tree_model_iter_next(model, &it));
                 }
 
-                if (!exist) /* It didn't exist */
+                if (!exist) /* It did not exist */
                 {
                     VFSAppDesktop desktop(action);
 
@@ -435,13 +435,13 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     }
 
     /* Open with...
-     * Don't show this option menu if files of different types are selected,
+     * Do not show this option menu if files of different types are selected,
      * ,the selected file is a directory, or its type is unknown.
      */
     if (!same_type || vfs_file_info_is_desktop_entry(file) ||
         vfs_file_info_is_executable(file, nullptr))
     {
-        /* if open with shouldn't show, destroy it. */
+        /* if open with should not show, destroy it. */
         gtk_widget_destroy(open_with);
         open_with = nullptr;
         gtk_widget_destroy(GTK_WIDGET(gtk_builder_get_object(builder, "open_with_label")));
@@ -522,7 +522,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         for (i = 0; i < ChmodActionType::N_CHMOD_ACTIONS; ++i)
         {
             gtk_toggle_button_set_inconsistent(data->chmod_btns[i], true);
-            data->chmod_states[i] = 2; /* Don't touch this bit */
+            data->chmod_states[i] = 2; /* Do not touch this bit */
             g_signal_connect(G_OBJECT(data->chmod_btns[i]),
                              "toggled",
                              G_CALLBACK(on_chmod_btn_toggled),
@@ -552,7 +552,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
 
         if (!vfs_file_info_is_dir(file))
         {
-            /* Only single "file" is selected, so we don't need to
+            /* Only single "file" is selected, so we do not need to
                 caculate total file size */
             need_calc_size = false;
 
@@ -857,14 +857,14 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
             {
                 if (gtk_toggle_button_get_inconsistent(data->chmod_btns[i]))
                 {
-                    data->chmod_states[i] = 2; /* Don't touch this bit */
+                    data->chmod_states[i] = 2; /* Do not touch this bit */
                 }
                 else if (data->chmod_states[i] != gtk_toggle_button_get_active(data->chmod_btns[i]))
                 {
                     mod_change = true;
                     data->chmod_states[i] = gtk_toggle_button_get_active(data->chmod_btns[i]);
                 }
-                else /* Don't change this bit */
+                else /* Do not change this bit */
                 {
                     data->chmod_states[i] = 2;
                 }
@@ -900,7 +900,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 ptk_file_task_run(ptask);
 
                 /*
-                 * This file list will be freed by file operation, so we don't
+                 * This file list will be freed by file operation, so we do not
                  * need to do this. Just set the pointer to nullptr.
                  */
                 data->file_list = nullptr;
@@ -912,7 +912,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
         free(data->orig_mtime);
         free(data->orig_atime);
         /*
-         *NOTE: File operation chmod/chown will free the list when it's done,
+         *NOTE: File operation chmod/chown will free the list when it is done,
          *and we only need to free it when there is no file operation applyed.
          */
         g_slice_free(FilePropertiesDialogData, data);

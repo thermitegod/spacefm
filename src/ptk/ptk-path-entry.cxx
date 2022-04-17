@@ -438,7 +438,7 @@ on_insert_prefix(GtkEntryCompletion* completion, char* prefix, GtkWidget* entry)
     (void)completion;
     (void)prefix;
     (void)entry;
-    // don't use the default handler because it inserts partial names
+    // do not use the default handler because it inserts partial names
     return true;
 }
 

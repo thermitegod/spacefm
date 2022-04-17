@@ -113,13 +113,13 @@ Shell variables usable in custom commands
    # Copy selected files to panel 2
    # make sure panel 2 is visible ?
    # and files are selected ?
-   # and current panel isn't 2 ?
+   # and current panel is not 2 ?
    if [ "${fm_pwd_panel[2]}" != "" ] \\
                && [ "${fm_files[0]}" != "" ] \\
                && [ "$fm_panel" != 2 ];then
        cp "${fm_files[@]}" "${fm_pwd_panel[2]}"
    else
-       echo "Can't copy to panel 2"
+       echo "Cannot copy to panel 2"
        exit 1    # shows error if 'Popup Error' enabled
    fi
 

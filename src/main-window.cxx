@@ -178,7 +178,7 @@ fm_main_window_class_init(FMMainWindowClass* klass)
     widget_class->delete_event = fm_main_window_delete_event;
     widget_class->window_state_event = fm_main_window_window_state_event;
 
-    /*  this works but desktop_window doesn't
+    /*  this works but desktop_window does not
     g_signal_new ( "task-notify",
                        G_TYPE_FROM_CLASS ( klass ),
                        G_SIGNAL_RUN_FIRST,
@@ -694,8 +694,8 @@ void
 main_window_refresh_all_tabs_matching(const char* path)
 {
     (void)path;
-    // This function actually closes the tabs because refresh doesn't work.
-    // dir objects have multiple refs and unreffing them all wouldn't finalize
+    // This function actually closes the tabs because refresh does not work.
+    // dir objects have multiple refs and unreffing them all would not finalize
     // the dir object for unknown reason.
 
     // This breaks auto open of tabs on automount
@@ -927,7 +927,7 @@ show_panels_all_windows(GtkMenuItem* item, FMMainWindow* main_window)
     show_panels(nullptr, main_window);
 
     // do other windows
-    main_window->panel_change = false; // don't save columns for other windows
+    main_window->panel_change = false; // do not save columns for other windows
     for (FMMainWindow* window: all_windows)
     {
         if (main_window != window)
@@ -1552,7 +1552,7 @@ fm_main_window_init(FMMainWindow* main_window)
 
     /* Start building GUI */
     /*
-    NOTE: gtk_window_set_icon_name doesn't work under some WMs, such as IceWM.
+    NOTE: gtk_window_set_icon_name does not work under some WMs, such as IceWM.
     gtk_window_set_icon_name( GTK_WINDOW( main_window ),
                               "gnome-fs-directory" ); */
     if (theme_change_notify == 0)
@@ -2572,7 +2572,7 @@ fm_main_window_add_new_tab(FMMainWindow* main_window, const char* folder_path)
         return;
     // LOG_INFO("fm_main_window_add_new_tab fb={:p}", fmt::ptr(file_browser));
     ptk_file_browser_set_single_click(file_browser, app_settings.single_click);
-    // FIXME: this shouldn't be hard-code
+    // FIXME: this should not be hard-code
     ptk_file_browser_set_single_click_timeout(file_browser,
                                               app_settings.no_single_hover ? 0
                                                                            : SINGLE_CLICK_TIMEOUT);
@@ -3050,7 +3050,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
     unsigned int num_vis;
     uint64_t total_size;
 
-    // note: total size won't include content changes since last selection change
+    // note: total size will not include content changes since last selection change
     num_sel = ptk_file_browser_get_n_sel(file_browser, &total_size);
     num_vis = ptk_file_browser_get_n_visible_files(file_browser);
 
@@ -3249,7 +3249,7 @@ on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, int x, int y
     (void)y;
     (void)time;
     GtkNotebook* notebook = GTK_NOTEBOOK(gtk_widget_get_parent(GTK_WIDGET(file_browser)));
-    // TODO: Add a timeout here and don't set current page immediately
+    // TODO: Add a timeout here and do not set current page immediately
     int idx = gtk_notebook_page_num(notebook, GTK_WIDGET(file_browser));
     gtk_notebook_set_current_page(notebook, idx);
     return false;
@@ -3736,7 +3736,7 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
 
     if (!c->var[ItemPropContext::CONTEXT_NAME])
     {
-        // if name is set, assume we don't need all selected files info
+        // if name is set, assume we do not need all selected files info
         c->var[ItemPropContext::CONTEXT_DIR] = ztd::strdup(ptk_file_browser_get_cwd(file_browser));
         if (!c->var[ItemPropContext::CONTEXT_DIR])
             c->var[ItemPropContext::CONTEXT_DIR] = ztd::strdup("");
@@ -4654,7 +4654,7 @@ idle_set_task_height(FMMainWindow* main_window)
     // set new config panel sizes to half of window
     if (!xset_is("panel_sliders"))
     {
-        // this isn't perfect because panel half-width is set before user
+        // this is not perfect because panel half-width is set before user
         // adjusts window size
         XSet* set = xset_get("panel_sliders");
         set->x = ztd::strdup(allocation.width / 2);

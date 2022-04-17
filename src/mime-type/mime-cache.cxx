@@ -27,7 +27,7 @@
 #define LIB_MAJOR_VERSION 1
 /* FIXME: since mime-cache 1.2, weight is splitted into three parts
  * only lower 8 bit contains weight, and higher bits are flags and case-sensitivity.
- * anyway, since we don't support weight at all, it'll be fixed later.
+ * anyway, since we do not support weight at all, it will be fixed later.
  * We claimed that we support 1.2 to cheat pcmanfm as a temporary quick dirty fix
  * for the broken file manager, but this should be correctly done in the future.
  * Weight and case-sensitivity are not handled now. */
@@ -451,7 +451,7 @@ const char*
 mime_cache_lookup_literal(MimeCache* cache, const char* filename)
 {
     /* FIXME: weight is used in literal lookup after mime.cache v1.1.
-     * However, it's poorly documented. So I've no idea how to implement this. */
+     * However, it is poorly documented. So I have no idea how to implement this. */
     if (cache->has_str_weight)
     {
         const char* entries = cache->literals;

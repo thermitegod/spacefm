@@ -213,7 +213,7 @@ vfs_file_info_reload_mime_type(VFSFileInfo* fi, const char* full_path)
     /* convert VFSFileInfo to struct stat */
     /* In current implementation, only st_mode is used in
        mime-type detection, so let's save some CPU cycles
-       and don't copy unused fields.
+       and do not copy unused fields.
     */
     file_stat.st_mode = fi->mode;
 

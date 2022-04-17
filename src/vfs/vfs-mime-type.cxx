@@ -480,11 +480,11 @@ vfs_mime_type_remove_action(VFSMimeType* mime_type, const char* desktop_id)
                                  MimeTypeAction::MIME_TYPE_ACTION_REMOVE);
 }
 
-/* If user-custom desktop file is created, it's returned in custom_desktop. */
+/* If user-custom desktop file is created, it is returned in custom_desktop. */
 void
 vfs_mime_type_add_action(VFSMimeType* mime_type, const char* desktop_id, char** custom_desktop)
 {
-    // MOD  don't create custom desktop file if desktop_id is not a command
+    // MOD  do not create custom desktop file if desktop_id is not a command
     if (!Glib::str_has_suffix(desktop_id, ".desktop"))
         mime_type_add_action(mime_type->type, desktop_id, custom_desktop);
     else if (custom_desktop) // sfm

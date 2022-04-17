@@ -228,7 +228,7 @@ get_actions(const std::string& dir, const std::string& type, std::vector<std::st
                 }
             }
 
-            // mimeinfo.cache has only MIME Cache; others don't have it
+            // mimeinfo.cache has only MIME Cache; others do not have it
             int k;
             for (k = (n == 0 ? 0 : 2); k < (n == 0 ? 2 : 3); k++)
             {
@@ -495,7 +495,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
 
         file_content = kf->to_data();
     }
-    else /* it's not a desktop_id, but a command */
+    else /* it is not a desktop_id, but a command */
     {
         /* Make a user-created desktop file for the command */
         name = Glib::path_get_basename(desktop_id);
@@ -690,7 +690,7 @@ get_default_action(const char* dir, const char* type, void* user_data)
             }
 
             if (n == 1)
-                break; // defaults.list doesn't have Added Associations
+                break; // defaults.list does not have Added Associations
         }
 
         if (ztd::same(dir, vfs_user_config_dir()))

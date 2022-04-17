@@ -241,7 +241,7 @@ get_real_link_target(const char* link_path)
     {
         /* fall back to immediate target if canonical target
          * missing.
-         * g_file_read_link() doesn't behave like readlink,
+         * g_file_read_link() does not behave like readlink,
          * gives nothing if final target missing */
         ssize_t len = readlink(link_path, buf, PATH_MAX);
         if (len > 0)
@@ -990,7 +990,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     int height = xset_get_int("move_dlg_help", "y");
     if (width && height)
     {
-        // filechooser won't honor default size or size request ?
+        // filechooser will not honor default size or size request ?
         gtk_widget_show_all(dlg);
         gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER_ALWAYS);
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
@@ -1148,7 +1148,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     int height = xset_get_int("move_dlg_help", "y");
     if (width && height)
     {
-        // filechooser won't honor default size or size request ?
+        // filechooser will not honor default size or size request ?
         gtk_widget_show_all(dlg);
         gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER_ALWAYS);
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
@@ -1864,7 +1864,7 @@ get_template_dir()
 
     if (ztd::same(templates_path, vfs_user_home_dir()))
     {
-        /* If $XDG_TEMPLATES_DIR == $HOME this means it is disabled. Don't
+        /* If $XDG_TEMPLATES_DIR == $HOME this means it is disabled. Do not
          * recurse it as this is too many files/directories and may slow
          * dialog open and cause filesystem find loops.
          * https://wiki.freedesktop.org/www/Software/xdg-user-dirs/ */
@@ -3242,7 +3242,7 @@ open_archives_with_handler(ParentInfo* parent, GList* sel_files, char* full_path
 {
     if (xset_get_b("arc_def_open"))
         // user has open archives with app option enabled
-        return false; // don't handle these files
+        return false; // do not handle these files
 
     bool extract_here = xset_get_b("arc_def_ex");
     const char* dest_dir = nullptr;
@@ -3266,9 +3266,9 @@ open_archives_with_handler(ParentInfo* parent, GList* sel_files, char* full_path
         cmd = PtkHandlerArchive::HANDLER_LIST;
     }
     else
-        return false; // don't handle these files
+        return false; // do not handle these files
 
-    // type or pathname has archive handler? - don't test command non-empty
+    // type or pathname has archive handler? - do not test command non-empty
     // here because only applies to first file
     GSList* handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
                                                            cmd,
@@ -3288,7 +3288,7 @@ open_archives_with_handler(ParentInfo* parent, GList* sel_files, char* full_path
                                   true);
         return true; // all files handled
     }
-    return false; // don't handle these files
+    return false; // do not handle these files
 }
 
 static void
@@ -3383,7 +3383,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
                               parent->cwd,
                               parent->file_browser ? GTK_WIDGET(parent->file_browser) : nullptr,
                               parent->file_browser ? parent->file_browser->task_view : nullptr);
-        // don't free cwd!
+        // do not free cwd!
         ptask->task->exec_browser = parent->file_browser;
         ptask->task->exec_command = command_final;
         if (handler_set->icon)
@@ -3651,7 +3651,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                     files_to_open = (GList*)g_hash_table_lookup(file_list_hash, alloc_desktop);
 
                 if (alloc_desktop != full_path)
-                    /* it's not a desktop file itself - add file to list.
+                    /* it is not a desktop file itself - add file to list.
                      * Otherwise use full_path as hash table key, which will
                      * be freed when hash table is destroyed. */
                     files_to_open = g_list_append(files_to_open, full_path);

@@ -911,7 +911,7 @@ on_file_monitor_event(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char*
                 ptk_dir_tree_delete_child(node->tree, child);
             }
             break;
-            /* //MOD Change isn't needed?  Creates this warning and triggers subsequent
+            /* //MOD Change is not needed?  Creates this warning and triggers subsequent
              * errors and causes visible redrawing problems:
             Gtk-CRITICAL **: /tmp/buildd/gtk+2.0-2.24.3/gtk/gtktreeview.c:6072
             (validate_visible_area): assertion `has_next' failed. There is a disparity between the

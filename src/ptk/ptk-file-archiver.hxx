@@ -32,7 +32,7 @@ enum PTKFileArchiverArc
     ARC_LIST
 };
 
-// Pass file_browser or desktop depending on where you're calling from
+// Pass file_browser or desktop depending on where you are calling from
 void ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char* cwd);
 void ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char* cwd,
                                const char* dest_dir, int job, bool archive_presence_checked);
