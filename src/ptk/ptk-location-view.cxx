@@ -3293,7 +3293,7 @@ on_bookmark_device(GtkMenuItem* item, VFSVolume* vol)
     newset = xset_custom_new();
     newset->menu_label = ztd::strdup(url);
     newset->z = ztd::strdup(url);
-    newset->x = ztd::strdup(std::to_string(XSetCMD::XSET_CMD_BOOKMARK));
+    newset->x = ztd::strdup(XSetCMD::XSET_CMD_BOOKMARK);
     newset->prev = ztd::strdup(sel_set->name);
     newset->next = sel_set->next; // steal string
     newset->task = false;
@@ -3352,7 +3352,7 @@ ptk_bookmark_view_get_first_bookmark(XSet* book_set)
         child_set = xset_custom_new();
         child_set->menu_label = ztd::strdup("Home");
         child_set->z = ztd::strdup(vfs_user_home_dir());
-        child_set->x = ztd::strdup(std::to_string(XSetCMD::XSET_CMD_BOOKMARK));
+        child_set->x = ztd::strdup(XSetCMD::XSET_CMD_BOOKMARK);
         child_set->parent = ztd::strdup("main_book");
         book_set->child = ztd::strdup(child_set->name);
         child_set->task = false;
@@ -3560,7 +3560,7 @@ ptk_bookmark_view_add_bookmark(GtkMenuItem* menuitem, PtkFileBrowser* file_brows
     newset = xset_custom_new();
     newset->menu_label = g_path_get_basename(url);
     newset->z = ztd::strdup(url);
-    newset->x = ztd::strdup(std::to_string(XSetCMD::XSET_CMD_BOOKMARK));
+    newset->x = ztd::strdup(XSetCMD::XSET_CMD_BOOKMARK);
     newset->prev = ztd::strdup(sel_set->name);
     newset->next = sel_set->next; // steal string
     newset->task = false;

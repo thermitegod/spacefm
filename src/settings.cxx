@@ -593,7 +593,7 @@ save_settings(void* main_window_ptr)
 
                         int current_page =
                             gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
-                        set->x = ztd::strdup(std::to_string(current_page));
+                        set->x = ztd::strdup(current_page);
                     }
                 }
             }
@@ -4530,7 +4530,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                                       : (char*)vfs_user_desktop_dir().c_str();
                 childset->menu_label = g_path_get_basename(folder);
                 childset->z = ztd::strdup(folder);
-                childset->x = ztd::strdup(std::to_string(XSetCMD::XSET_CMD_BOOKMARK));
+                childset->x = ztd::strdup(XSetCMD::XSET_CMD_BOOKMARK);
                 // unset these to save session space
                 childset->task = false;
                 childset->task_err = false;
@@ -4768,7 +4768,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 free(childset->menu_label);
                 childset->menu_label = g_path_get_basename(folder);
                 childset->z = ztd::strdup(folder);
-                childset->x = ztd::strdup(std::to_string(XSetCMD::XSET_CMD_BOOKMARK));
+                childset->x = ztd::strdup(XSetCMD::XSET_CMD_BOOKMARK);
                 // unset these to save session space
                 childset->task = false;
                 childset->task_err = false;
@@ -9079,10 +9079,10 @@ xset_defaults()
             xset_set_set(set, XSetSetSet::XSET_SET_SET_SHARED_KEY, "panel1_detcol_date");
 
         set = xset_get_panel(p, "sort_extra");
-        set->b = XSetB::XSET_B_TRUE;                               // sort_natural
-        set->x = ztd::strdup(std::to_string(XSetB::XSET_B_FALSE)); // sort_case
-        set->y = ztd::strdup("1"); // PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST
-        set->z = ztd::strdup(std::to_string(XSetB::XSET_B_TRUE)); // sort_hidden_first
+        set->b = XSetB::XSET_B_TRUE;               // sort_natural
+        set->x = ztd::strdup(XSetB::XSET_B_FALSE); // sort_case
+        set->y = ztd::strdup("1");                 // PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST
+        set->z = ztd::strdup(XSetB::XSET_B_TRUE);  // sort_hidden_first
 
         set = xset_set_panel(p, "book_fol", "menu_label", "Follow _Dir");
         set->menu_style = XSetMenu::XSET_MENU_CHECK;

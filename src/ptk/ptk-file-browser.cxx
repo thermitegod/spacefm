@@ -344,7 +344,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
         if (!main_window->fullscreen)
         {
             free(set->x);
-            set->x = ztd::strdup(std::to_string(pos));
+            set->x = ztd::strdup(pos);
         }
         main_window->panel_slide_x[p - 1] = pos;
         // LOG_INFO("    slide_x = {}", pos);
@@ -357,7 +357,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
         if (!main_window->fullscreen)
         {
             free(set->y);
-            set->y = ztd::strdup(std::to_string(pos));
+            set->y = ztd::strdup(pos);
         }
         main_window->panel_slide_y[p - 1] = pos;
         // LOG_INFO("    slide_y = {}  ", pos);
@@ -366,7 +366,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
         if (!main_window->fullscreen)
         {
             free(set->s);
-            set->s = ztd::strdup(std::to_string(pos));
+            set->s = ztd::strdup(pos);
         }
         main_window->panel_slide_s[p - 1] = pos;
         // LOG_INFO("slide_s = {}", pos);
@@ -3649,7 +3649,7 @@ ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_brow
                 if (width > 0)
                 {
                     free(set->y);
-                    set->y = ztd::strdup(std::to_string(width));
+                    set->y = ztd::strdup(width);
                     // LOG_INFO("        {}\t{}", width, title);
                 }
             }
@@ -3685,7 +3685,7 @@ on_folder_view_columns_changed(GtkTreeView* view, PtkFileBrowser* file_browser)
             // save column position
             XSet* set = xset_get_panel(file_browser->mypanel, column_names[j]);
             free(set->x);
-            set->x = ztd::strdup(std::to_string(i));
+            set->x = ztd::strdup(i);
         }
     }
 }

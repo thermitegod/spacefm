@@ -3959,13 +3959,13 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
 
         if (file_browser == a_browser)
         {
-            c->var[ItemPropContext::CONTEXT_TAB] = ztd::strdup(std::to_string(i + 1));
+            c->var[ItemPropContext::CONTEXT_TAB] = ztd::strdup(i + 1);
             c->var[ItemPropContext::CONTEXT_TAB_COUNT] = ztd::strdup(
                 std::to_string(gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1]))));
         }
     }
-    c->var[ItemPropContext::CONTEXT_PANEL_COUNT] = ztd::strdup(std::to_string(panel_count));
-    c->var[ItemPropContext::CONTEXT_PANEL] = ztd::strdup(std::to_string(file_browser->mypanel));
+    c->var[ItemPropContext::CONTEXT_PANEL_COUNT] = ztd::strdup(panel_count);
+    c->var[ItemPropContext::CONTEXT_PANEL] = ztd::strdup(file_browser->mypanel);
     if (!c->var[ItemPropContext::CONTEXT_TAB])
         c->var[ItemPropContext::CONTEXT_TAB] = ztd::strdup("");
     if (!c->var[ItemPropContext::CONTEXT_TAB_COUNT])
@@ -4020,7 +4020,7 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
             while (gtk_tree_model_iter_next(model_task, &it))
                 task_count++;
         }
-        c->var[ItemPropContext::CONTEXT_TASK_COUNT] = ztd::strdup(std::to_string(task_count));
+        c->var[ItemPropContext::CONTEXT_TASK_COUNT] = ztd::strdup(task_count);
     }
 
     c->valid = true;
@@ -4657,9 +4657,9 @@ idle_set_task_height(FMMainWindow* main_window)
         // this isn't perfect because panel half-width is set before user
         // adjusts window size
         XSet* set = xset_get("panel_sliders");
-        set->x = ztd::strdup(std::to_string(allocation.width / 2));
-        set->y = ztd::strdup(std::to_string(allocation.width / 2));
-        set->s = ztd::strdup(std::to_string(allocation.height / 2));
+        set->x = ztd::strdup(allocation.width / 2);
+        set->y = ztd::strdup(allocation.width / 2);
+        set->s = ztd::strdup(allocation.height / 2);
     }
 
     // restore height (in case window height changed)

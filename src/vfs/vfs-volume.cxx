@@ -1111,7 +1111,7 @@ info_partition_table(device_t* device)
         if (partition_count > 0)
         {
             device->partition_table_scheme = ztd::strdup("");
-            device->partition_table_count = ztd::strdup(std::to_string(partition_count));
+            device->partition_table_count = ztd::strdup(partition_count);
             is_partition_table = true;
         }
     }
@@ -1179,18 +1179,18 @@ info_partition(device_t* device)
         uint64_t size = sysfs_get_uint64(device->native_path, "size");
         uint64_t alignment_offset = sysfs_get_uint64(device->native_path, "alignment_offset");
 
-        device->partition_size = ztd::strdup(std::to_string(size * 512));
-        device->partition_alignment_offset = ztd::strdup(std::to_string(alignment_offset));
+        device->partition_size = ztd::strdup(size * 512);
+        device->partition_alignment_offset = ztd::strdup(alignment_offset);
 
         uint64_t offset =
             sysfs_get_uint64(device->native_path, "start") * device->device_block_size;
-        device->partition_offset = ztd::strdup(std::to_string(offset));
+        device->partition_offset = ztd::strdup(offset);
 
         char* s = device->native_path;
         unsigned int n;
         for (n = std::strlen(s) - 1; n >= 0 && g_ascii_isdigit(s[n]); n--)
             ;
-        device->partition_number = ztd::strdup(std::to_string(strtol(s + n + 1, nullptr, 0)));
+        device->partition_number = ztd::strdup(strtol(s + n + 1, nullptr, 0));
         /*
       s = g_strdup (device->priv->native_path);
       for (n = strlen (s) - 1; n >= 0 && s[n] != '/'; n--)

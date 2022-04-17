@@ -1360,7 +1360,7 @@ replace_item_props(ContextData* ctxt)
             if (x == 0)
                 rset->x = nullptr;
             else
-                rset->x = ztd::strdup(std::to_string(x));
+                rset->x = ztd::strdup(x);
         }
         if (!rset->plugin)
         {
