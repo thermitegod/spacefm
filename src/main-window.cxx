@@ -3435,9 +3435,6 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
     if (!browser)
         return true;
 
-    char* xname;
-    int i;
-
     // special edit items
     if (!strcmp(set->name, "edit_cut") || !strcmp(set->name, "edit_copy") ||
         !strcmp(set->name, "edit_delete") || !strcmp(set->name, "select_all"))
@@ -3465,76 +3462,74 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
     // handlers
     if (Glib::str_has_prefix(set->name, "dev_"))
         ptk_location_view_on_action(GTK_WIDGET(browser->side_dev), set);
-
     else if (Glib::str_has_prefix(set->name, "main_"))
     {
-        xname = set->name + 5;
-        if (!strcmp(xname, "new_window"))
+        if (!strcmp(set->name, "main_new_window"))
             on_new_window_activate(nullptr, main_window);
-        else if (!strcmp(xname, "root_window"))
+        else if (!strcmp(set->name, "main_root_window"))
             on_open_current_folder_as_root(nullptr, main_window);
-        else if (!strcmp(xname, "search"))
+        else if (!strcmp(set->name, "main_search"))
             on_find_file_activate(nullptr, main_window);
-        else if (!strcmp(xname, "terminal"))
+        else if (!strcmp(set->name, "main_terminal"))
             on_open_terminal_activate(nullptr, main_window);
-        else if (!strcmp(xname, "root_terminal"))
+        else if (!strcmp(set->name, "main_root_terminal"))
             on_open_root_terminal_activate(nullptr, main_window);
-        else if (!strcmp(xname, "save_session"))
+        else if (!strcmp(set->name, "main_save_session"))
             on_open_url(nullptr, main_window);
-        else if (!strcmp(xname, "exit"))
+        else if (!strcmp(set->name, "main_exit"))
             on_quit_activate(nullptr, main_window);
-        else if (!strcmp(xname, "full"))
+        else if (!strcmp(set->name, "main_full"))
         {
             xset_set_b("main_full", !main_window->fullscreen);
             on_fullscreen_activate(nullptr, main_window);
         }
-        else if (!strcmp(xname, "prefs"))
+        else if (!strcmp(set->name, "main_prefs"))
             on_preference_activate(nullptr, main_window);
-        else if (!strcmp(xname, "design_mode"))
+        else if (!strcmp(set->name, "main_design_mode"))
             main_design_mode(nullptr, main_window);
-        else if (!strcmp(xname, "pbar"))
+        else if (!strcmp(set->name, "main_pbar"))
             show_panels_all_windows(nullptr, main_window);
-        else if (!strcmp(xname, "icon"))
+        else if (!strcmp(set->name, "main_icon"))
             on_main_icon();
-        else if (!strcmp(xname, "title"))
+        else if (!strcmp(set->name, "main_title"))
             update_window_title(nullptr, main_window);
-        else if (!strcmp(xname, "about"))
+        else if (!strcmp(set->name, "main_about"))
             on_about_activate(nullptr, main_window);
     }
     else if (Glib::str_has_prefix(set->name, "panel_"))
     {
-        xname = set->name + 6;
-        if (!strcmp(xname, "prev"))
+        int i;
+        if (!strcmp(set->name, "panel_prev"))
             i = -1;
-        else if (!strcmp(xname, "next"))
+        else if (!strcmp(set->name, "panel_next"))
             i = -2;
-        else if (!strcmp(xname, "hide"))
+        else if (!strcmp(set->name, "panel_hide"))
             i = -3;
         else
-            i = strtol(xname, nullptr, 10);
+            i = strtol(set->name, nullptr, 10);
         focus_panel(nullptr, main_window, i);
     }
     else if (Glib::str_has_prefix(set->name, "plug_"))
         on_plugin_install(nullptr, main_window, set);
     else if (Glib::str_has_prefix(set->name, "task_"))
     {
-        xname = set->name + 5;
-        if (strstr(xname, "_manager"))
+        if (strstr(set->name, "task_manager"))
             on_task_popup_show(nullptr, main_window, set->name);
-        else if (!strcmp(xname, "col_reorder"))
+        else if (!strcmp(set->name, "task_col_reorder"))
             on_reorder(nullptr, GTK_WIDGET(browser->task_view));
-        else if (Glib::str_has_prefix(xname, "col_"))
+        else if (Glib::str_has_prefix(set->name, "task_col_"))
             on_task_column_selected(nullptr, browser->task_view);
-        else if (Glib::str_has_prefix(xname, "stop") || Glib::str_has_prefix(xname, "pause") ||
-                 Glib::str_has_prefix(xname, "que_") || !strcmp(xname, "que") ||
-                 Glib::str_has_prefix(xname, "resume"))
+        else if (Glib::str_has_prefix(set->name, "task_stop") ||
+                 Glib::str_has_prefix(set->name, "task_pause") ||
+                 Glib::str_has_prefix(set->name, "task_que_") || !strcmp(set->name, "task_que") ||
+                 Glib::str_has_prefix(set->name, "task_resume"))
         {
             PtkFileTask* ptask = get_selected_task(browser->task_view);
             on_task_stop(nullptr, browser->task_view, set, ptask);
         }
-        else if (!strcmp(xname, "showout"))
+        else if (!strcmp(set->name, "task_showout"))
             show_task_dialog(nullptr, browser->task_view);
-        else if (Glib::str_has_prefix(xname, "err_"))
+        else if (Glib::str_has_prefix(set->name, "task_err_"))
             on_task_popup_errset(nullptr, main_window, set->name);
     }
     else if (!strcmp(set->name, "rubberband"))

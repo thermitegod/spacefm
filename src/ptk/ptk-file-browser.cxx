@@ -5954,7 +5954,6 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser, 
 void
 ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
 {
-    char* xname;
     int i = 0;
     XSet* set = xset_get(setname);
     FMMainWindow* main_window = static_cast<FMMainWindow*>(browser->main_window);
@@ -5964,10 +5963,9 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
 
     if (Glib::str_has_prefix(set->name, "book_"))
     {
-        xname = set->name + 5;
-        if (!strcmp(xname, "icon") || !strcmp(xname, "menu_icon"))
+        if (!strcmp(set->name, "book_icon") || !strcmp(set->name, "book_menu_icon"))
             ptk_bookmark_view_update_icons(nullptr, browser);
-        else if (!strcmp(xname, "add"))
+        else if (!strcmp(set->name, "book_add"))
         {
             const char* text = browser->path_bar && gtk_widget_has_focus(browser->path_bar)
                                    ? gtk_entry_get_text(GTK_ENTRY(browser->path_bar))
@@ -5978,59 +5976,56 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
             else
                 ptk_bookmark_view_add_bookmark(nullptr, browser, nullptr);
         }
-        else if (!strcmp(xname, "open") && browser->side_book)
+        else if (!strcmp(set->name, "book_open") && browser->side_book)
             ptk_bookmark_view_on_open_reverse(nullptr, browser);
     }
     else if (Glib::str_has_prefix(set->name, "go_"))
     {
-        xname = set->name + 3;
-        if (!strcmp(xname, "back"))
+        if (!strcmp(set->name, "go_back"))
             ptk_file_browser_go_back(nullptr, browser);
-        else if (!strcmp(xname, "forward"))
+        else if (!strcmp(set->name, "go_forward"))
             ptk_file_browser_go_forward(nullptr, browser);
-        else if (!strcmp(xname, "up"))
+        else if (!strcmp(set->name, "go_up"))
             ptk_file_browser_go_up(nullptr, browser);
-        else if (!strcmp(xname, "home"))
+        else if (!strcmp(set->name, "go_home"))
             ptk_file_browser_go_home(nullptr, browser);
-        else if (!strcmp(xname, "default"))
+        else if (!strcmp(set->name, "go_default"))
             ptk_file_browser_go_default(nullptr, browser);
-        else if (!strcmp(xname, "set_default"))
+        else if (!strcmp(set->name, "go_set_default"))
             ptk_file_browser_set_default_folder(nullptr, browser);
     }
     else if (Glib::str_has_prefix(set->name, "tab_"))
     {
-        xname = set->name + 4;
-        if (!strcmp(xname, "new"))
+        if (!strcmp(set->name, "tab_new"))
             ptk_file_browser_new_tab(nullptr, browser);
-        else if (!strcmp(xname, "new_here"))
+        else if (!strcmp(set->name, "tab_new_here"))
             ptk_file_browser_new_tab_here(nullptr, browser);
         else
         {
-            if (!strcmp(xname, "prev"))
+            if (!strcmp(set->name, "tab_prev"))
                 i = -1;
-            else if (!strcmp(xname, "next"))
+            else if (!strcmp(set->name, "tab_next"))
                 i = -2;
-            else if (!strcmp(xname, "close"))
+            else if (!strcmp(set->name, "tab_close"))
                 i = -3;
-            else if (!strcmp(xname, "restore"))
+            else if (!strcmp(set->name, "tab_restore"))
                 i = -4;
             else
-                i = strtol(xname, nullptr, 10);
+                i = strtol(set->name, nullptr, 10);
             ptk_file_browser_go_tab(nullptr, browser, i);
         }
     }
     else if (Glib::str_has_prefix(set->name, "focus_"))
     {
-        xname = set->name + 6;
-        if (!strcmp(xname, "path_bar"))
+        if (!strcmp(set->name, "focus_path_bar"))
             i = 0;
-        else if (!strcmp(xname, "filelist"))
+        else if (!strcmp(set->name, "focus_filelist"))
             i = 4;
-        else if (!strcmp(xname, "dirtree"))
+        else if (!strcmp(set->name, "focus_dirtree"))
             i = 1;
-        else if (!strcmp(xname, "book"))
+        else if (!strcmp(set->name, "focus_book"))
             i = 2;
-        else if (!strcmp(xname, "device"))
+        else if (!strcmp(set->name, "focus_device"))
             i = 3;
         ptk_file_browser_focus(nullptr, browser, i);
     }
@@ -6042,27 +6037,26 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
         main_window_toggle_thumbnails_all_windows();
     else if (Glib::str_has_prefix(set->name, "sortby_"))
     {
-        xname = set->name + 7;
         i = -3;
-        if (!strcmp(xname, "name"))
+        if (!strcmp(set->name, "sortby_name"))
             i = PtkFBSortOrder::PTK_FB_SORT_BY_NAME;
-        else if (!strcmp(xname, "size"))
+        else if (!strcmp(set->name, "sortby_size"))
             i = PtkFBSortOrder::PTK_FB_SORT_BY_SIZE;
-        else if (!strcmp(xname, "type"))
+        else if (!strcmp(set->name, "sortby_type"))
             i = PtkFBSortOrder::PTK_FB_SORT_BY_TYPE;
-        else if (!strcmp(xname, "perm"))
+        else if (!strcmp(set->name, "sortby_perm"))
             i = PtkFBSortOrder::PTK_FB_SORT_BY_PERM;
-        else if (!strcmp(xname, "owner"))
+        else if (!strcmp(set->name, "sortby_owner"))
             i = PtkFBSortOrder::PTK_FB_SORT_BY_OWNER;
-        else if (!strcmp(xname, "date"))
+        else if (!strcmp(set->name, "sortby_date"))
             i = PtkFBSortOrder::PTK_FB_SORT_BY_MTIME;
-        else if (!strcmp(xname, "ascend"))
+        else if (!strcmp(set->name, "sortby_ascend"))
         {
             i = -1;
             set->b =
                 browser->sort_type == GTK_SORT_ASCENDING ? XSetB::XSET_B_TRUE : XSetB::XSET_B_FALSE;
         }
-        else if (!strcmp(xname, "descend"))
+        else if (!strcmp(set->name, "sortby_descend"))
         {
             i = -2;
             set->b = browser->sort_type == GTK_SORT_DESCENDING ? XSetB::XSET_B_TRUE
@@ -6078,46 +6072,41 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
         ptk_path_entry_help(nullptr, GTK_WIDGET(browser));
     else if (Glib::str_has_prefix(set->name, "panel"))
     {
-        i = 0;
-        if (std::strlen(set->name) > 6)
-        {
-            xname = ztd::strdup(set->name + 5);
-            xname[1] = '\0';
-            i = strtol(xname, nullptr, 10);
-            xname[1] = '_';
-            free(xname);
-        }
-        // LOG_INFO("ACTION panelN={}  {}", i, set->name[5]);
+        int panel_num = set->name[5];
+
+        // LOG_INFO("ACTION panelN={}  {}", panel_num, set->name[5]);
+
         if (i > 0 && i < 5)
         {
             XSet* set2;
-            xname = set->name + 7;
-            if (!strcmp(xname, "show_hidden")) // shared key
+            std::string fullxname = fmt::format("panel{}_", panel_num);
+            std::string xname = ztd::removeprefix(set->name, fullxname);
+            if (ztd::same(xname, "show_hidden")) // shared key
             {
                 ptk_file_browser_show_hidden_files(
                     browser,
                     xset_get_b_panel(browser->mypanel, "show_hidden"));
             }
-            else if (!strcmp(xname, "show")) // main View|Panel N
+            else if (ztd::same(xname, "show")) // main View|Panel N
                 show_panels_all_windows(nullptr, static_cast<FMMainWindow*>(browser->main_window));
             else if (Glib::str_has_prefix(xname, "show_")) // shared key
             {
                 set2 = xset_get_panel_mode(browser->mypanel, xname, mode);
                 set2->b = set2->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_UNSET : XSetB::XSET_B_TRUE;
                 update_views_all_windows(nullptr, browser);
-                if (!strcmp(xname, "show_book") && browser->side_book)
+                if (ztd::same(xname, "show_book") && browser->side_book)
                 {
                     ptk_bookmark_view_chdir(GTK_TREE_VIEW(browser->side_book), browser, true);
                     gtk_widget_grab_focus(GTK_WIDGET(browser->side_book));
                 }
             }
-            else if (!strcmp(xname, "list_detailed")) // shared key
+            else if (ztd::same(xname, "list_detailed")) // shared key
                 on_popup_list_detailed(nullptr, browser);
-            else if (!strcmp(xname, "list_icons")) // shared key
+            else if (ztd::same(xname, "list_icons")) // shared key
                 on_popup_list_icons(nullptr, browser);
-            else if (!strcmp(xname, "list_compact")) // shared key
+            else if (ztd::same(xname, "list_compact")) // shared key
                 on_popup_list_compact(nullptr, browser);
-            else if (!strcmp(xname, "list_large")) // shared key
+            else if (ztd::same(xname, "list_large")) // shared key
             {
                 if (browser->view_mode != PtkFBViewMode::PTK_FB_ICON_VIEW)
                 {
@@ -6136,35 +6125,34 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, char* setname)
     }
     else if (Glib::str_has_prefix(set->name, "status_"))
     {
-        xname = set->name + 7;
-        if (!strcmp(xname, "border") || !strcmp(xname, "text"))
+        if (!strcmp(set->name, "status_border") || !strcmp(set->name, "status_text"))
             on_status_effect_change(nullptr, browser);
-        else if (!strcmp(xname, "name") || !strcmp(xname, "path") || !strcmp(xname, "info") ||
-                 !strcmp(xname, "hide"))
+        else if (!strcmp(set->name, "status_name") || !strcmp(set->name, "status_path") ||
+                 !strcmp(set->name, "status_info") || !strcmp(set->name, "status_hide"))
             on_status_middle_click_config(nullptr, set);
     }
     else if (Glib::str_has_prefix(set->name, "paste_"))
     {
-        xname = set->name + 6;
-        if (!strcmp(xname, "link"))
+        if (!strcmp(set->name, "paste_link"))
             ptk_file_browser_paste_link(browser);
-        else if (!strcmp(xname, "target"))
+        else if (!strcmp(set->name, "paste_target"))
             ptk_file_browser_paste_target(browser);
-        else if (!strcmp(xname, "as"))
+        else if (!strcmp(set->name, "paste_as"))
             ptk_file_misc_paste_as(browser, ptk_file_browser_get_cwd(browser), nullptr);
     }
     else if (Glib::str_has_prefix(set->name, "select_"))
     {
-        xname = set->name + 7;
-        if (!strcmp(xname, "all"))
+        if (!strcmp(set->name, "select_all"))
             ptk_file_browser_select_all(nullptr, browser);
-        else if (!strcmp(xname, "un"))
+        else if (!strcmp(set->name, "select_un"))
             ptk_file_browser_unselect_all(nullptr, browser);
-        else if (!strcmp(xname, "invert"))
+        else if (!strcmp(set->name, "select_invert"))
             ptk_file_browser_invert_selection(nullptr, browser);
-        else if (!strcmp(xname, "patt"))
+        else if (!strcmp(set->name, "select_patt"))
             ptk_file_browser_select_pattern(nullptr, browser, nullptr);
     }
     else // all the rest require ptkfilemenu data
+    {
         ptk_file_menu_action(browser, set->name);
+    }
 }

@@ -2337,31 +2337,28 @@ ptk_location_view_on_action(GtkWidget* view, XSet* set)
     else
     {
         // require vol != nullptr
-        char* xname;
         if (Glib::str_has_prefix(set->name, "dev_menu_"))
         {
-            xname = set->name + 9;
-            if (!strcmp(xname, "remove"))
+            if (!strcmp(set->name, "dev_menu_remove"))
                 on_eject(nullptr, vol, view);
-            else if (!strcmp(xname, "unmount"))
+            else if (!strcmp(set->name, "dev_menu_unmount"))
                 on_umount(nullptr, vol, view);
-            else if (!strcmp(xname, "reload"))
+            else if (!strcmp(set->name, "dev_menu_reload"))
                 on_reload(nullptr, vol, view);
-            else if (!strcmp(xname, "open"))
+            else if (!strcmp(set->name, "dev_menu_open"))
                 on_open(nullptr, vol, view);
-            else if (!strcmp(xname, "tab"))
+            else if (!strcmp(set->name, "dev_menu_tab"))
                 on_open_tab(nullptr, vol, view);
-            else if (!strcmp(xname, "mount"))
+            else if (!strcmp(set->name, "dev_menu_mount"))
                 on_mount(nullptr, vol, view);
-            else if (!strcmp(xname, "remount"))
+            else if (!strcmp(set->name, "dev_menu_remount"))
                 on_remount(nullptr, vol, view);
         }
         else if (Glib::str_has_prefix(set->name, "dev_root_"))
         {
-            xname = set->name + 9;
-            if (!strcmp(xname, "mount"))
+            if (!strcmp(set->name, "dev_root_mount"))
                 on_mount_root(nullptr, vol, view);
-            else if (!strcmp(xname, "unmount"))
+            else if (!strcmp(set->name, "dev_root_unmount"))
                 on_umount_root(nullptr, vol, view);
         }
         else if (!strcmp(set->name, "dev_prop"))

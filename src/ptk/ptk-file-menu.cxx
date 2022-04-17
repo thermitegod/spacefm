@@ -2487,46 +2487,42 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     data->accel_group = nullptr;
 
     // action
-    char* xname;
     XSet* set = xset_get(setname);
     if (Glib::str_has_prefix(set->name, "open_") && !Glib::str_has_prefix(set->name, "open_in_"))
     {
-        xname = set->name + 5;
-        if (!strcmp(xname, "edit"))
+        if (!strcmp(set->name, "open_edit"))
             xset_edit(GTK_WIDGET(data->browser), data->file_path, false, true);
-        else if (!strcmp(xname, "edit_root"))
+        else if (!strcmp(set->name, "open_edit_root"))
             xset_edit(GTK_WIDGET(data->browser), data->file_path, true, false);
-        else if (!strcmp(xname, "other"))
+        else if (!strcmp(set->name, "open_other"))
             on_popup_open_with_another_activate(nullptr, data);
-        else if (!strcmp(xname, "execute"))
+        else if (!strcmp(set->name, "open_execute"))
             on_popup_open_activate(nullptr, data);
-        else if (!strcmp(xname, "all"))
+        else if (!strcmp(set->name, "open_all"))
             on_popup_open_all(nullptr, data);
     }
     else if (Glib::str_has_prefix(set->name, "arc_"))
     {
-        xname = set->name + 4;
-        if (!strcmp(xname, "extract"))
+        if (!strcmp(set->name, "arc_extract"))
             on_popup_extract_here_activate(nullptr, data);
-        else if (!strcmp(xname, "extractto"))
+        else if (!strcmp(set->name, "arc_extractto"))
             on_popup_extract_to_activate(nullptr, data);
-        else if (!strcmp(xname, "extract"))
+        else if (!strcmp(set->name, "arc_extract"))
             on_popup_extract_list_activate(nullptr, data);
-        else if (!strcmp(xname, "conf2"))
+        else if (!strcmp(set->name, "arc_conf2"))
             on_archive_show_config(nullptr, data);
     }
     else if (Glib::str_has_prefix(set->name, "new_"))
     {
-        xname = set->name + 4;
-        if (!strcmp(xname, "file"))
+        if (!strcmp(set->name, "new_file"))
             on_popup_new_text_file_activate(nullptr, data);
-        else if (!strcmp(xname, "directory"))
+        else if (!strcmp(set->name, "new_directory"))
             on_popup_new_folder_activate(nullptr, data);
-        else if (!strcmp(xname, "link"))
+        else if (!strcmp(set->name, "new_link"))
             on_popup_new_link_activate(nullptr, data);
-        else if (!strcmp(xname, "bookmark"))
+        else if (!strcmp(set->name, "new_bookmark"))
             ptk_bookmark_view_add_bookmark(nullptr, browser, nullptr);
-        else if (!strcmp(xname, "archive"))
+        else if (!strcmp(set->name, "new_archive"))
         {
             if (browser)
                 on_popup_compress_activate(nullptr, data);
@@ -2538,22 +2534,21 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         on_popup_file_permissions_activate(nullptr, data);
     else if (Glib::str_has_prefix(set->name, "edit_"))
     {
-        xname = set->name + 5;
-        if (!strcmp(xname, "cut"))
+        if (!strcmp(set->name, "edit_cut"))
             on_popup_cut_activate(nullptr, data);
-        else if (!strcmp(xname, "copy"))
+        else if (!strcmp(set->name, "edit_copy"))
             on_popup_copy_activate(nullptr, data);
-        else if (!strcmp(xname, "paste"))
+        else if (!strcmp(set->name, "edit_paste"))
             on_popup_paste_activate(nullptr, data);
-        else if (!strcmp(xname, "rename"))
+        else if (!strcmp(set->name, "edit_rename"))
             on_popup_rename_activate(nullptr, data);
-        else if (!strcmp(xname, "delete"))
+        else if (!strcmp(set->name, "edit_delete"))
             on_popup_delete_activate(nullptr, data);
-        else if (!strcmp(xname, "trash"))
+        else if (!strcmp(set->name, "edit_trash"))
             on_popup_trash_activate(nullptr, data);
-        else if (!strcmp(xname, "hide"))
+        else if (!strcmp(set->name, "edit_hide"))
             on_hide_file(nullptr, data);
-        else if (!strcmp(xname, "canon"))
+        else if (!strcmp(set->name, "edit_canon"))
         {
             if (browser)
                 on_popup_canon(nullptr, data);
@@ -2574,9 +2569,8 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         on_copycmd(nullptr, data, set);
     else if (Glib::str_has_prefix(set->name, "root_"))
     {
-        xname = set->name + 5;
-        if (!strcmp(xname, "copy_loc") || !strcmp(xname, "move2") || !strcmp(xname, "delete") ||
-            !strcmp(xname, "trash"))
+        if (!strcmp(set->name, "root_copy_loc") || !strcmp(set->name, "root_move2") ||
+            !strcmp(set->name, "root_delete") || !strcmp(set->name, "root_trash"))
             on_popup_rootcmd_activate(nullptr, data, set);
     }
     else if (browser)
@@ -2585,28 +2579,26 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         int i;
         if (Glib::str_has_prefix(set->name, "open_in_panel"))
         {
-            xname = set->name + 13;
-            if (!strcmp(xname, "prev"))
+            if (!strcmp(set->name, "open_in_panel_prev"))
                 i = -1;
-            else if (!strcmp(xname, "next"))
+            else if (!strcmp(set->name, "open_in_panel_next"))
                 i = -2;
             else
-                i = strtol(xname, nullptr, 10);
+                i = strtol(set->name, nullptr, 10);
             main_window_open_in_panel(data->browser, i, data->file_path);
         }
         else if (Glib::str_has_prefix(set->name, "opentab_"))
         {
-            xname = set->name + 8;
-            if (!strcmp(xname, "new"))
+            if (!strcmp(set->name, "opentab_new"))
                 on_popup_open_in_new_tab_activate(nullptr, data);
             else
             {
-                if (!strcmp(xname, "prev"))
+                if (!strcmp(set->name, "opentab_prev"))
                     i = -1;
-                else if (!strcmp(xname, "next"))
+                else if (!strcmp(set->name, "opentab_next"))
                     i = -2;
                 else
-                    i = strtol(xname, nullptr, 10);
+                    i = strtol(set->name, nullptr, 10);
                 ptk_file_browser_open_in_tab(data->browser, i, data->file_path);
             }
         }
