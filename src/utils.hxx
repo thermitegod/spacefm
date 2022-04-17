@@ -16,10 +16,11 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 void print_command(const std::string& command) noexcept;
 void print_task_command(const char* ptask, const char* cmd) noexcept;
-void print_task_command_spawn(std::vector<std::string> argv, int pid) noexcept;
+void print_task_command_spawn(const std::vector<std::string>& argv, int pid) noexcept;
 
 char* randhex8() noexcept;
 

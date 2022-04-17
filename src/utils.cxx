@@ -44,14 +44,9 @@ print_task_command(const char* ptask, const char* cmd) noexcept
 }
 
 void
-print_task_command_spawn(std::vector<std::string> argv, int pid) noexcept
+print_task_command_spawn(const std::vector<std::string>& argv, int pid) noexcept
 {
-    LOG_INFO("SPAWN=");
-    for (const std::string& arg: argv)
-    {
-        LOG_INFO("  {}", arg);
-    }
-    LOG_INFO("    pid = {}", pid);
+    LOG_INFO("SPAWN=\"{}\" pid={} ", ztd::join(argv, " "), pid);
 }
 
 char*
