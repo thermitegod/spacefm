@@ -47,7 +47,7 @@ void
 print_task_command_spawn(std::vector<std::string> argv, int pid) noexcept
 {
     LOG_INFO("SPAWN=");
-    for (std::string arg: argv)
+    for (const std::string& arg: argv)
     {
         LOG_INFO("  {}", arg);
     }

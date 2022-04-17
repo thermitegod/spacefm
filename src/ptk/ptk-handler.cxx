@@ -962,7 +962,7 @@ ptk_handler_values_in_list(const std::string list, const std::vector<std::string
             required = false;
         }
         match = false;
-        for (std::string handler: values)
+        for (const std::string& handler: values)
         {
             if (fnmatch(element, handler.c_str(), 0) == 0)
             {

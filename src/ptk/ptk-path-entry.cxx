@@ -205,7 +205,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
         // command history
         list = GTK_LIST_STORE(gtk_entry_completion_get_model(completion));
         gtk_list_store_clear(list);
-        for (std::string cmd: xset_cmd_history)
+        for (const std::string& cmd: xset_cmd_history)
         {
             gtk_list_store_append(list, &it);
             gtk_list_store_set(list, &it, COL_NAME, cmd.c_str(), COL_PATH, cmd.c_str(), -1);

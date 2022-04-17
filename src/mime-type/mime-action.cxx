@@ -82,7 +82,7 @@ data_dir_foreach(DataDirFunc func, const char* mime_type, void* user_data)
         return ret;
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
-    for (std::string sys_dir: vfs_system_data_dir())
+    for (const std::string& sys_dir: vfs_system_data_dir())
     {
         dir = Glib::build_filename(sys_dir, "applications");
         if ((ret = func(dir.c_str(), mime_type, user_data)))
@@ -102,7 +102,7 @@ apps_dir_foreach(DataDirFunc func, const char* mime_type, void* user_data)
     if ((ret = func(dir.c_str(), mime_type, user_data)))
         return ret;
 
-    for (std::string sys_dir: vfs_system_data_dir())
+    for (const std::string& sys_dir: vfs_system_data_dir())
     {
         if ((ret = func(sys_dir.c_str(), mime_type, user_data)))
             return ret;
@@ -297,7 +297,7 @@ mime_type_get_actions(const std::string& mime_type)
     get_actions(dir, mime_type, actions);
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
-    for (std::string sys_dir: vfs_system_data_dir())
+    for (const std::string& sys_dir: vfs_system_data_dir())
     {
         dir = Glib::build_filename(sys_dir, "applications");
         get_actions(dir, mime_type, actions);
@@ -391,7 +391,7 @@ mime_type_has_action(const char* type, const char* desktop_id)
     std::vector<std::string> actions = mime_type_get_actions(type);
     if (!actions.empty())
     {
-        for (std::string action: actions)
+        for (const std::string& action: actions)
         {
             /* Try to match directly by desktop_id first */
             if (is_desktop && ztd::same(action, desktop_id))
@@ -753,7 +753,7 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
                                     "Added Associations",
                                     "Removed Associations"};
 
-    for (std::string group: groups)
+    for (const std::string& group: groups)
     {
         std::string new_action;
         bool is_present = false;

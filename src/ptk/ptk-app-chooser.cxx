@@ -149,7 +149,7 @@ create_model_from_mime_type(VFSMimeType* mime_type)
         }
         if (!apps.empty())
         {
-            for (std::string app: apps)
+            for (const std::string& app: apps)
             {
                 add_list_item(list, ztd::strdup(app));
             }
@@ -615,7 +615,7 @@ load_all_known_apps_thread(VFSAsyncTask* task)
     dir = Glib::build_filename(vfs_user_data_dir(), "applications");
     load_all_apps_in_dir(dir.c_str(), list, task);
 
-    for (std::string sys_dir: vfs_system_data_dir())
+    for (const std::string& sys_dir: vfs_system_data_dir())
     {
         dir = Glib::build_filename(sys_dir, "applications");
         load_all_apps_in_dir(dir.c_str(), list, task);

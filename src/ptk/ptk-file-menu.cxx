@@ -850,7 +850,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         }
         if (!apps.empty())
         {
-            for (std::string app: apps)
+            for (const std::string& app: apps)
             {
 #if 0
                 // TODO - FIXME
@@ -1383,7 +1383,7 @@ get_shared_desktop_file_location(const char* name)
 {
     char* ret;
 
-    for (std::string sys_dir: vfs_system_data_dir())
+    for (const std::string& sys_dir: vfs_system_data_dir())
     {
         if ((ret = vfs_mime_type_locate_desktop_file(sys_dir.c_str(), name)))
             return ret;

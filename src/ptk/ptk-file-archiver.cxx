@@ -76,7 +76,7 @@ archive_handler_get_first_extension(XSet* handler_xset)
 
         if (!pathnames.empty())
         {
-            for (std::string path: pathnames)
+            for (const std::string& path: pathnames)
             {
                 // getting just the extension of the pathname list element
                 std::string name = get_name_extension(path, first_ext);

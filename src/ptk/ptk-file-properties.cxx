@@ -460,7 +460,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         model = gtk_list_store_new(3, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
         if (!actions.empty())
         {
-            for (std::string action: actions)
+            for (const std::string& action: actions)
             {
                 VFSAppDesktop desktop(action);
                 GdkPixbuf* icon;
