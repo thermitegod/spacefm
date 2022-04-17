@@ -4030,7 +4030,7 @@ vfs_volume_get_icon(VFSVolume* vol)
 {
     if (vol->icon.empty())
         return nullptr;
-    XSet* set = xset_get(vol->icon.c_str());
+    XSet* set = xset_get(vol->icon);
     return set->icon;
 }
 

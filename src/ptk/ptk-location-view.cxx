@@ -3316,9 +3316,12 @@ ptk_bookmark_view_update_icons(GtkIconTheme* icon_theme, PtkFileBrowser* file_br
         global_icon_submenu = nullptr;
     }
 
-    XSet* book_set = xset_is(file_browser->book_set_name);
-    if (book_set)
-        ptk_bookmark_view_reload_list(view, book_set);
+    if (file_browser->book_set_name)
+    {
+        XSet* book_set = xset_is(file_browser->book_set_name);
+        if (book_set)
+            ptk_bookmark_view_reload_list(view, book_set);
+    }
 }
 
 XSet*

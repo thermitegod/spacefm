@@ -168,8 +168,9 @@ on_format_changed(GtkComboBox* combo, void* user_data)
                            &xset_name,
                            // COL_HANDLER_EXTENSIONS, &extensions,
                            -1);
-        if ((handler_xset = xset_is(xset_name)))
+        if (xset_name)
         {
+            handler_xset = xset_is(xset_name);
             // Obtaining archive extension
             extension = archive_handler_get_first_extension(handler_xset);
 
@@ -202,8 +203,9 @@ on_format_changed(GtkComboBox* combo, void* user_data)
                            &xset_name,
                            // COL_HANDLER_EXTENSIONS, &extensions,
                            -1);
-        if ((handler_xset = xset_is(xset_name)))
+        if (xset_name)
         {
+            handler_xset = xset_is(xset_name);
             // Obtaining archive extension
             extension = archive_handler_get_first_extension(handler_xset);
 
@@ -435,6 +437,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     int i;
     for (i = 0; archive_handlers[i] != nullptr; ++i)
     {
+        if (!archive_handlers[i])
+            continue;
+
         // Fetching handler
         handler_xset = xset_is(archive_handlers[i]);
 
@@ -522,8 +527,10 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                            &xset_name,
                            // COL_HANDLER_EXTENSIONS, &extensions,
                            -1);
-        if ((handler_xset = xset_is(xset_name)))
+        if (xset_name)
         {
+            handler_xset = xset_is(xset_name);
+
             error = ptk_handler_load_script(HANDLER_MODE_ARC,
                                             HANDLER_COMPRESS,
                                             handler_xset,

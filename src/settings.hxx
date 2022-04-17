@@ -355,32 +355,32 @@ struct XSetContext
 
 void xset_set_window_icon(GtkWindow* win);
 
-XSet* xset_is(const char* name);
-XSet* xset_get(const char* name);
+XSet* xset_is(const std::string& name);
+XSet* xset_get(const std::string& name);
 
-XSet* xset_get_panel(int panel, const char* name);
-XSet* xset_get_panel_mode(int panel, const char* name, char mode);
+XSet* xset_get_panel(int panel, const std::string& name);
+XSet* xset_get_panel_mode(int panel, const std::string& name, char mode);
 
-int xset_get_int(const char* name, const char* var);
-int xset_get_int_panel(int panel, const char* name, const char* var);
+int xset_get_int(const std::string& name, const char* var);
+int xset_get_int_panel(int panel, const std::string& name, const char* var);
 
-char* xset_get_s(const char* name);
-char* xset_get_s_panel(int panel, const char* name);
+char* xset_get_s(const std::string& name);
+char* xset_get_s_panel(int panel, const std::string& name);
 
-bool xset_get_b(const char* name);
-bool xset_get_b_panel(int panel, const char* name);
-bool xset_get_b_panel_mode(int panel, const char* name, char mode);
+bool xset_get_b(const std::string& name);
+bool xset_get_b_panel(int panel, const std::string& name);
+bool xset_get_b_panel_mode(int panel, const std::string& name, char mode);
 
-XSet* xset_set_b(const char* name, bool bval);
-XSet* xset_set_b_panel(int panel, const char* name, bool bval);
-XSet* xset_set_b_panel_mode(int panel, const char* name, char mode, bool bval);
+XSet* xset_set_b(const std::string& name, bool bval);
+XSet* xset_set_b_panel(int panel, const std::string& name, bool bval);
+XSet* xset_set_b_panel_mode(int panel, const std::string& name, char mode, bool bval);
 
-XSet* xset_set_panel(int panel, const char* name, const char* var, const char* value);
+XSet* xset_set_panel(int panel, const std::string& name, const char* var, const char* value);
 
-XSet* xset_set_cb(const char* name, GFunc cb_func, void* cb_data);
-XSet* xset_set_cb_panel(int panel, const char* name, GFunc cb_func, void* cb_data);
+XSet* xset_set_cb(const std::string& name, GFunc cb_func, void* cb_data);
+XSet* xset_set_cb_panel(int panel, const std::string& name, GFunc cb_func, void* cb_data);
 
-XSet* xset_set(const char* name, const char* var, const char* value);
+XSet* xset_set(const std::string& name, const char* var, const char* value);
 XSet* xset_set_set(XSet* set, XSetSetSet var, const char* value);
 
 void xset_set_key(GtkWidget* parent, XSet* set);
@@ -404,7 +404,7 @@ void xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* s
 GtkWidget* xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned int button,
                                  uint32_t time);
 void xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
-                   char* elements);
+                   const char* elements);
 GtkWidget* xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu,
                              GtkAccelGroup* accel_group, XSet* set);
 GtkWidget* xset_get_image(const char* icon, GtkIconSize icon_size);
