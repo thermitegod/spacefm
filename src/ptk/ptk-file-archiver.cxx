@@ -63,7 +63,8 @@ archive_handler_get_first_extension(XSet* handler_xset)
     // Function deals with the possibility that a handler is responsible
     // for multiple MIME types and therefore file extensions. Functions
     // like archive creation need only one extension
-    std::string first_ext;
+    std::string ext;
+
     if (handler_xset && handler_xset->x)
     {
         // find first extension
@@ -82,20 +83,20 @@ archive_handler_get_first_extension(XSet* handler_xset)
             for (const std::string& path: pathnames)
             {
                 // getting just the extension of the pathname list element
-                std::string name = get_name_extension(path, first_ext);
-                if (!first_ext.empty())
+                const auto namepack = get_name_extension(path);
+                ext = namepack.second;
+                if (!ext.empty())
                 {
                     // add a dot to extension
-                    first_ext = fmt::format(".{}", first_ext);
+                    ext = fmt::format(".{}", ext);
                     break;
                 }
             }
         }
     }
-    if (!first_ext.empty())
-        return first_ext;
-    else
+    if (ext.empty())
         return "";
+    return ext;
 }
 
 static bool
@@ -1232,7 +1233,10 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                 for (i = 0; pathnames[i]; ++i)
                 {
                     // getting just the extension of the pathname list element
-                    filename_no_ext = get_name_extension(pathnames[i], extension);
+                    const auto namepack = get_name_extension(pathnames[i]);
+                    filename_no_ext = namepack.first;
+                    extension = namepack.second;
+
                     if (!extension.empty())
                     {
                         // add a dot to extension
@@ -1261,7 +1265,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
 
             /* Now the extraction filename is obtained, determine the
              * normal filename without the extension */
-            filename_no_ext = get_name_extension(filename_no_archive_ext, extension);
+            const auto namepack = get_name_extension(filename_no_archive_ext);
+            filename_no_ext = namepack.first;
+            extension = namepack.second;
 
             /* 'Completing' the extension and dealing with files with
              * no extension */

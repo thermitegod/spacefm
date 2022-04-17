@@ -432,14 +432,16 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         char* full_name;
 
         mset->last_widget = GTK_WIDGET(mset->input_full_name);
-        // update name & ext
-        std::string name;
-        std::string ext;
 
+        // update name & ext
         gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
         full_name = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
-        name = get_name_extension(full_name, ext);
+
+        const auto namepack = get_name_extension(full_name);
+        std::string name = namepack.first;
+        std::string ext = namepack.second;
+
         gtk_text_buffer_set_text(mset->buf_name, name.c_str(), -1);
         if (!ext.empty())
             gtk_entry_set_text(mset->entry_ext, ext.c_str());
@@ -549,10 +551,11 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
             free(str);
             free(cwd);
         }
-        std::string name;
-        std::string ext;
 
-        name = get_name_extension(full_name, ext);
+        const auto namepack = get_name_extension(full_name);
+        std::string name = namepack.first;
+        std::string ext = namepack.second;
+
         gtk_text_buffer_set_text(mset->buf_name, name.c_str(), -1);
         if (!ext.empty())
             gtk_entry_set_text(mset->entry_ext, ext.c_str());
@@ -820,8 +823,11 @@ select_input(GtkWidget* widget, MoveSet* mset)
             gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
             gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
             char* full_name = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
-            std::string ext;
-            std::string name = get_name_extension(full_name, ext);
+
+            const auto namepack = get_name_extension(full_name);
+            std::string name = namepack.first;
+            std::string ext = namepack.second;
+
             free(full_name);
             gtk_text_buffer_get_iter_at_offset(buf, &iter, g_utf8_strlen(name.c_str(), -1));
         }

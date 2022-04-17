@@ -18,6 +18,8 @@
 #include <iostream>
 #include <filesystem>
 
+#include <utility>
+
 #include <fcntl.h>
 
 #include <fmt/format.h>
@@ -107,30 +109,33 @@ dir_has_files(const std::string& path) noexcept
     return false;
 }
 
-const std::string
-get_name_extension(const std::string& full_name, std::string& ext) noexcept
+const std::pair<std::string, std::string>
+get_name_extension(const std::string& full_name) noexcept
 {
     if (std::filesystem::is_directory(full_name))
-        return full_name;
+        return {full_name, ""};
 
-    std::filesystem::path name = std::filesystem::path(full_name);
-    // std::string filename = name.filename();
-    std::string basename = name.stem();
-    std::string parent = name.parent_path();
-    ext = name.extension();
+    if (!ztd::contains(full_name, "."))
+        return {full_name, ""};
 
-    if (ext.empty())
-        return full_name;
+    std::string fullpath_filebase;
+    std::string file_ext;
 
-    if (ztd::contains(full_name, ".tar" + ext))
+    if (ztd::contains(full_name, ".tar."))
     {
-        ext = ".tar" + ext;
-        basename = name.stem().stem();
+        // compressed tar archive
+        const auto parts = ztd::rpartition(full_name, ".tar.");
+        fullpath_filebase = parts[0];
+        file_ext = fmt::format("tar.{}", parts[2]);
     }
-    // remove '.'
-    ext.erase(0, 1);
+    else
+    {
+        const auto parts = ztd::rpartition(full_name, ".");
+        fullpath_filebase = parts[0];
+        file_ext = parts[2];
+    }
 
-    return Glib::build_filename(parent, basename);
+    return {fullpath_filebase, file_ext};
 }
 
 const std::string

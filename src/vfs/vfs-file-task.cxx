@@ -220,13 +220,15 @@ check_overwrite(VFSFileTask* task, const std::string& dest_file, bool* dest_exis
                 return !task->abort;
 
             // auto-rename
-            std::string ext;
             char* old_name = g_path_get_basename(dest_file.c_str());
             char* dest_dir = g_path_get_dirname(dest_file.c_str());
-            std::string base_name = get_name_extension(old_name, ext);
+
+            const auto namepack = get_name_extension(old_name);
+            std::string name = namepack.first;
+            std::string ext = namepack.second;
+
             free(old_name);
-            *new_dest_file =
-                vfs_file_task_get_unique_name(dest_dir, base_name.c_str(), ext.c_str());
+            *new_dest_file = vfs_file_task_get_unique_name(dest_dir, name.c_str(), ext.c_str());
             *dest_exists = false;
             free(dest_dir);
             if (*new_dest_file)

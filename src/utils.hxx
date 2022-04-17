@@ -18,6 +18,8 @@
 #include <string>
 #include <vector>
 
+#include <utility>
+
 void print_command(const std::string& command) noexcept;
 void print_task_command(const char* ptask, const char* cmd) noexcept;
 void print_task_command_spawn(const std::vector<std::string>& argv, int pid) noexcept;
@@ -30,7 +32,8 @@ bool have_x_access(const std::string& path) noexcept;
 bool dir_has_files(const std::string& path) noexcept;
 
 const std::string replace_line_subs(const std::string& line) noexcept;
-const std::string get_name_extension(const std::string& full_name, std::string& ext) noexcept;
+
+const std::pair<std::string, std::string> get_name_extension(const std::string& full_name) noexcept;
 
 const std::string get_prog_executable() noexcept;
 void open_in_prog(const char* path) noexcept;

@@ -2096,8 +2096,10 @@ query_overwrite(PtkFileTask* ptask)
     char* dest_dir = g_path_get_dirname(ptask->task->current_dest.c_str());
     char* dest_dir_disp = g_filename_display_name(dest_dir);
 
-    std::string ext;
-    std::string name = get_name_extension(base_name, ext);
+    const auto namepack = get_name_extension(base_name);
+    std::string name = namepack.first;
+    std::string ext = namepack.second;
+
     char* ext_disp = !ext.empty() ? g_filename_display_name(ext.c_str()) : nullptr;
     char* unique_name = vfs_file_task_get_unique_name(dest_dir, name.c_str(), ext.c_str());
     char* new_name_plain = unique_name ? g_path_get_basename(unique_name) : nullptr;
