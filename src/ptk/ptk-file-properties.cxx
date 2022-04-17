@@ -746,7 +746,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
         if (response_id == GTK_RESPONSE_OK)
         {
             bool mod_change;
-            PtkFileTask* task;
+            PtkFileTask* ptask;
             VFSFileInfo* file;
             // change file dates
             std::string quoted_time;
@@ -791,13 +791,13 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 g_string_free(gstr, true);
                 if (!cmd.empty())
                 {
-                    task = ptk_file_exec_new("Change File Date", "/", GTK_WIDGET(dialog), nullptr);
-                    task->task->exec_command = cmd;
-                    task->task->exec_sync = true;
-                    task->task->exec_export = false;
-                    task->task->exec_show_output = true;
-                    task->task->exec_show_error = true;
-                    ptk_file_task_run(task);
+                    ptask = ptk_file_exec_new("Change File Date", "/", GTK_WIDGET(dialog), nullptr);
+                    ptask->task->exec_command = cmd;
+                    ptask->task->exec_sync = true;
+                    ptask->task->exec_export = false;
+                    ptask->task->exec_show_output = true;
+                    ptask->task->exec_show_error = true;
+                    ptk_file_task_run(ptask);
                 }
             }
 
@@ -876,23 +876,23 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                     file_list.push_back(file_path);
                 }
 
-                task = ptk_file_task_new(VFS_FILE_TASK_CHMOD_CHOWN,
-                                         file_list,
-                                         nullptr,
-                                         GTK_WINDOW(gtk_widget_get_parent(GTK_WIDGET(dialog))),
-                                         nullptr);
+                ptask = ptk_file_task_new(VFS_FILE_TASK_CHMOD_CHOWN,
+                                          file_list,
+                                          nullptr,
+                                          GTK_WINDOW(gtk_widget_get_parent(GTK_WIDGET(dialog))),
+                                          nullptr);
                 // MOD
                 ptk_file_task_set_recursive(
-                    task,
+                    ptask,
                     gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->recurse)));
                 if (mod_change)
                 {
                     /* If the permissions of file has been changed by the user */
-                    ptk_file_task_set_chmod(task, data->chmod_states);
+                    ptk_file_task_set_chmod(ptask, data->chmod_states);
                 }
                 /* For chown */
-                ptk_file_task_set_chown(task, uid, gid);
-                ptk_file_task_run(task);
+                ptk_file_task_set_chown(ptask, uid, gid);
+                ptk_file_task_run(ptask);
 
                 /*
                  * This file list will be freed by file operation, so we don't

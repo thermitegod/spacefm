@@ -883,36 +883,36 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
 
     // Creating task
     char* task_name = ztd::strdup("Archive");
-    PtkFileTask* task = ptk_file_exec_new(task_name,
-                                          cwd,
-                                          file_browser ? GTK_WIDGET(file_browser) : nullptr,
-                                          file_browser ? file_browser->task_view : nullptr);
+    PtkFileTask* ptask = ptk_file_exec_new(task_name,
+                                           cwd,
+                                           file_browser ? GTK_WIDGET(file_browser) : nullptr,
+                                           file_browser ? file_browser->task_view : nullptr);
     free(task_name);
 
     /* Setting correct exec reference - probably causes different bash
      * to be output */
     if (file_browser)
-        task->task->exec_browser = file_browser;
+        ptask->task->exec_browser = file_browser;
 
     // Using terminals for certain handlers
     if (run_in_terminal)
     {
-        task->task->exec_terminal = true;
-        task->task->exec_sync = false;
+        ptask->task->exec_terminal = true;
+        ptask->task->exec_sync = false;
     }
     else
-        task->task->exec_sync = true;
+        ptask->task->exec_sync = true;
 
     // Final configuration, setting custom icon
-    task->task->exec_command = final_command;
-    task->task->exec_show_error = true;
-    task->task->exec_export = true; // Setup SpaceFM bash variables
+    ptask->task->exec_command = final_command;
+    ptask->task->exec_show_error = true;
+    ptask->task->exec_export = true; // Setup SpaceFM bash variables
     XSet* set = xset_get("new_archive");
     if (set->icon)
-        task->task->exec_icon = set->icon;
+        ptask->task->exec_icon = set->icon;
 
     // Running task
-    ptk_file_task_run(task);
+    ptk_file_task_run(ptask);
 }
 
 static void
@@ -1378,32 +1378,32 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
 
     // Creating task
     std::string task_name = fmt::format("Extract {}", vfs_file_info_get_name(file));
-    PtkFileTask* task = ptk_file_exec_new(task_name,
-                                          cwd,
-                                          dlgparent,
-                                          file_browser ? file_browser->task_view : nullptr);
+    PtkFileTask* ptask = ptk_file_exec_new(task_name,
+                                           cwd,
+                                           dlgparent,
+                                           file_browser ? file_browser->task_view : nullptr);
 
     /* Setting correct exec reference - probably causes different bash
      * to be output */
     if (file_browser)
-        task->task->exec_browser = file_browser;
+        ptask->task->exec_browser = file_browser;
 
     // Configuring task
-    task->task->exec_command = final_command;
-    task->task->exec_browser = file_browser;
-    task->task->exec_sync = !in_term;
-    task->task->exec_show_error = true;
-    task->task->exec_scroll_lock = false;
-    task->task->exec_show_output = list_contents && !in_term;
-    task->task->exec_terminal = in_term;
-    task->task->exec_keep_terminal = keep_term;
-    task->task->exec_export = true; // Setup SpaceFM bash variables
+    ptask->task->exec_command = final_command;
+    ptask->task->exec_browser = file_browser;
+    ptask->task->exec_sync = !in_term;
+    ptask->task->exec_show_error = true;
+    ptask->task->exec_scroll_lock = false;
+    ptask->task->exec_show_output = list_contents && !in_term;
+    ptask->task->exec_terminal = in_term;
+    ptask->task->exec_keep_terminal = keep_term;
+    ptask->task->exec_export = true; // Setup SpaceFM bash variables
 
     // Setting custom icon
     XSet* set = xset_get("arc_extract");
     if (set->icon)
-        task->task->exec_icon = set->icon;
+        ptask->task->exec_icon = set->icon;
 
     // Running task
-    ptk_file_task_run(task);
+    ptk_file_task_run(ptask);
 }

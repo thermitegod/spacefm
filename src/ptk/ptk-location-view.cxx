@@ -1008,21 +1008,22 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     line = fmt::format("{}{}\n{}", ssh_udevil ? "echo Connecting...\n\n" : "", cmd, keepterm);
     free(cmd);
 
-    PtkFileTask* task;
+    PtkFileTask* ptask;
     std::string task_name = fmt::format("Open URL {}", netmount->url);
-    task = ptk_file_exec_new(task_name, nullptr, GTK_WIDGET(file_browser), file_browser->task_view);
-    task->task->exec_command = line;
-    task->task->exec_sync = !ssh_udevil;
-    task->task->exec_export = true;
-    task->task->exec_browser = file_browser;
-    task->task->exec_popup = false;
-    task->task->exec_show_output = false;
-    task->task->exec_show_error = true;
-    task->task->exec_terminal = run_in_terminal;
-    task->task->exec_keep_terminal = false;
+    ptask =
+        ptk_file_exec_new(task_name, nullptr, GTK_WIDGET(file_browser), file_browser->task_view);
+    ptask->task->exec_command = line;
+    ptask->task->exec_sync = !ssh_udevil;
+    ptask->task->exec_export = true;
+    ptask->task->exec_browser = file_browser;
+    ptask->task->exec_popup = false;
+    ptask->task->exec_show_output = false;
+    ptask->task->exec_show_error = true;
+    ptask->task->exec_terminal = run_in_terminal;
+    ptask->task->exec_keep_terminal = false;
     XSet* set;
     set = xset_get("dev_icon_network");
-    task->task->exec_icon = set->icon;
+    ptask->task->exec_icon = set->icon;
 
     // autoopen
     if (!ssh_udevil) // !sync
@@ -1038,10 +1039,10 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
             ao->job = PTK_OPEN_NEW_TAB;
         else
             ao->job = PTK_OPEN_DIR;
-        task->complete_notify = (GFunc)on_autoopen_net_cb;
-        task->user_data = ao;
+        ptask->complete_notify = (GFunc)on_autoopen_net_cb;
+        ptask->user_data = ao;
     }
-    ptk_file_task_run(task);
+    ptk_file_task_run(ptask);
 
     free(mount_point);
     free(netmount->url);
@@ -1099,27 +1100,27 @@ on_mount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         return;
     }
     std::string task_name = fmt::format("Mount {}", vol->device_file);
-    PtkFileTask* task = ptk_file_exec_new(task_name,
-                                          nullptr,
-                                          view,
-                                          file_browser ? file_browser->task_view : nullptr);
+    PtkFileTask* ptask = ptk_file_exec_new(task_name,
+                                           nullptr,
+                                           view,
+                                           file_browser ? file_browser->task_view : nullptr);
 
     std::string keep_term = "";
     if (run_in_terminal)
         keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
 
-    task->task->exec_command = fmt::format("{}{}", line, keep_term);
+    ptask->task->exec_command = fmt::format("{}{}", line, keep_term);
     free(line);
-    task->task->exec_sync = !run_in_terminal;
-    task->task->exec_export = !!file_browser;
-    task->task->exec_browser = file_browser;
-    task->task->exec_popup = false;
-    task->task->exec_show_output = false;
-    task->task->exec_show_error = true;
-    task->task->exec_terminal = run_in_terminal;
-    task->task->exec_icon = vfs_volume_get_icon(vol);
+    ptask->task->exec_sync = !run_in_terminal;
+    ptask->task->exec_export = !!file_browser;
+    ptask->task->exec_browser = file_browser;
+    ptask->task->exec_popup = false;
+    ptask->task->exec_show_output = false;
+    ptask->task->exec_show_error = true;
+    ptask->task->exec_terminal = run_in_terminal;
+    ptask->task->exec_icon = vfs_volume_get_icon(vol);
     vol->inhibit_auto = true;
-    ptk_file_task_run(task);
+    ptk_file_task_run(ptask);
 }
 
 static void
@@ -1167,18 +1168,18 @@ on_mount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         PtkFileBrowser* file_browser =
             static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
         std::string task_name = fmt::format("Mount As Root {}", vol->device_file);
-        PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
-        task->task->exec_command = cmd;
-        task->task->exec_write_root = change_root;
-        task->task->exec_as_user = "root";
-        task->task->exec_sync = true;
-        task->task->exec_popup = false;
-        task->task->exec_show_output = false;
-        task->task->exec_show_error = true;
-        task->task->exec_export = false;
-        task->task->exec_browser = file_browser;
-        task->task->exec_icon = vfs_volume_get_icon(vol);
-        ptk_file_task_run(task);
+        PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
+        ptask->task->exec_command = cmd;
+        ptask->task->exec_write_root = change_root;
+        ptask->task->exec_as_user = "root";
+        ptask->task->exec_sync = true;
+        ptask->task->exec_popup = false;
+        ptask->task->exec_show_output = false;
+        ptask->task->exec_show_error = true;
+        ptask->task->exec_export = false;
+        ptask->task->exec_browser = file_browser;
+        ptask->task->exec_icon = vfs_volume_get_icon(vol);
+        ptk_file_task_run(ptask);
     }
     free(options);
 }
@@ -1219,18 +1220,18 @@ on_umount_root(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         PtkFileBrowser* file_browser =
             static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
         std::string task_name = fmt::format("Unmount As Root {}", vol->device_file);
-        PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
-        task->task->exec_command = cmd;
-        task->task->exec_write_root = change_root;
-        task->task->exec_as_user = "root";
-        task->task->exec_sync = true;
-        task->task->exec_popup = false;
-        task->task->exec_show_output = false;
-        task->task->exec_show_error = true;
-        task->task->exec_export = false;
-        task->task->exec_browser = file_browser;
-        task->task->exec_icon = vfs_volume_get_icon(vol);
-        ptk_file_task_run(task);
+        PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
+        ptask->task->exec_command = cmd;
+        ptask->task->exec_write_root = change_root;
+        ptask->task->exec_as_user = "root";
+        ptask->task->exec_sync = true;
+        ptask->task->exec_popup = false;
+        ptask->task->exec_show_output = false;
+        ptask->task->exec_show_error = true;
+        ptask->task->exec_export = false;
+        ptask->task->exec_browser = file_browser;
+        ptask->task->exec_icon = vfs_volume_get_icon(vol);
+        ptk_file_task_run(ptask);
     }
 }
 
@@ -1257,31 +1258,31 @@ on_umount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         return;
     }
     std::string task_name = fmt::format("Unmount {}", vol->device_file);
-    PtkFileTask* task = ptk_file_exec_new(task_name,
-                                          nullptr,
-                                          view,
-                                          file_browser ? file_browser->task_view : nullptr);
+    PtkFileTask* ptask = ptk_file_exec_new(task_name,
+                                           nullptr,
+                                           view,
+                                           file_browser ? file_browser->task_view : nullptr);
 
     std::string keep_term = "";
     if (run_in_terminal)
         keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
-    task->task->exec_command = fmt::format("{}{}", line, keep_term);
+    ptask->task->exec_command = fmt::format("{}{}", line, keep_term);
     free(line);
-    task->task->exec_sync = !run_in_terminal;
-    task->task->exec_export = !!file_browser;
-    task->task->exec_browser = file_browser;
-    task->task->exec_popup = false;
-    task->task->exec_show_output = false;
-    task->task->exec_show_error = true;
-    task->task->exec_terminal = run_in_terminal;
-    task->task->exec_icon = vfs_volume_get_icon(vol);
-    ptk_file_task_run(task);
+    ptask->task->exec_sync = !run_in_terminal;
+    ptask->task->exec_export = !!file_browser;
+    ptask->task->exec_browser = file_browser;
+    ptask->task->exec_popup = false;
+    ptask->task->exec_show_output = false;
+    ptask->task->exec_show_error = true;
+    ptask->task->exec_terminal = run_in_terminal;
+    ptask->task->exec_icon = vfs_volume_get_icon(vol);
+    ptk_file_task_run(ptask);
 }
 
 static void
 on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 {
-    PtkFileTask* task;
+    PtkFileTask* ptask;
     GtkWidget* view;
     if (!item)
         view = view2;
@@ -1343,47 +1344,47 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                                wait_done,
                                eject);
         std::string task_name = fmt::format("Remove {}", vol->device_file);
-        task = ptk_file_exec_new(task_name,
-                                 nullptr,
-                                 view,
-                                 file_browser ? file_browser->task_view : nullptr);
-        task->task->exec_command = line;
-        task->task->exec_sync = !run_in_terminal;
-        task->task->exec_export = !!file_browser;
-        task->task->exec_browser = file_browser;
-        task->task->exec_show_error = true;
-        task->task->exec_terminal = run_in_terminal;
-        task->task->exec_icon = vfs_volume_get_icon(vol);
+        ptask = ptk_file_exec_new(task_name,
+                                  nullptr,
+                                  view,
+                                  file_browser ? file_browser->task_view : nullptr);
+        ptask->task->exec_command = line;
+        ptask->task->exec_sync = !run_in_terminal;
+        ptask->task->exec_export = !!file_browser;
+        ptask->task->exec_browser = file_browser;
+        ptask->task->exec_show_error = true;
+        ptask->task->exec_terminal = run_in_terminal;
+        ptask->task->exec_icon = vfs_volume_get_icon(vol);
     }
     else if (vol->device_type == DEVICE_TYPE_BLOCK && (vol->is_optical || vol->requires_eject))
     {
         // task
         line = fmt::format("eject {}", vol->device_file);
         std::string task_name = fmt::format("Remove {}", vol->device_file);
-        task = ptk_file_exec_new(task_name,
-                                 nullptr,
-                                 view,
-                                 file_browser ? file_browser->task_view : nullptr);
-        task->task->exec_command = line;
-        task->task->exec_sync = false;
-        task->task->exec_show_error = false;
-        task->task->exec_icon = vfs_volume_get_icon(vol);
+        ptask = ptk_file_exec_new(task_name,
+                                  nullptr,
+                                  view,
+                                  file_browser ? file_browser->task_view : nullptr);
+        ptask->task->exec_command = line;
+        ptask->task->exec_sync = false;
+        ptask->task->exec_show_error = false;
+        ptask->task->exec_icon = vfs_volume_get_icon(vol);
     }
     else
     {
         // task
         line = "sync";
         std::string task_name = fmt::format("Remove {}", vol->device_file);
-        task = ptk_file_exec_new(task_name,
-                                 nullptr,
-                                 view,
-                                 file_browser ? file_browser->task_view : nullptr);
-        task->task->exec_command = line;
-        task->task->exec_sync = false;
-        task->task->exec_show_error = false;
-        task->task->exec_icon = vfs_volume_get_icon(vol);
+        ptask = ptk_file_exec_new(task_name,
+                                  nullptr,
+                                  view,
+                                  file_browser ? file_browser->task_view : nullptr);
+        ptask->task->exec_command = line;
+        ptask->task->exec_sync = false;
+        ptask->task->exec_show_error = false;
+        ptask->task->exec_icon = vfs_volume_get_icon(vol);
     }
-    ptk_file_task_run(task);
+    ptk_file_task_run(ptask);
 }
 
 static bool
@@ -1439,21 +1440,21 @@ try_mount(GtkTreeView* view, VFSVolume* vol)
         return false;
     }
     std::string task_name = fmt::format("Mount {}", vol->device_file);
-    PtkFileTask* task =
+    PtkFileTask* ptask =
         ptk_file_exec_new(task_name, nullptr, GTK_WIDGET(view), file_browser->task_view);
     std::string keep_term = "";
     if (run_in_terminal)
         keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
-    task->task->exec_command = fmt::format("{}{}", line, keep_term);
+    ptask->task->exec_command = fmt::format("{}{}", line, keep_term);
     free(line);
-    task->task->exec_sync = true;
-    task->task->exec_export = true;
-    task->task->exec_browser = file_browser;
-    task->task->exec_popup = false;
-    task->task->exec_show_output = false;
-    task->task->exec_show_error = true; // set to true for error on click
-    task->task->exec_terminal = run_in_terminal;
-    task->task->exec_icon = vfs_volume_get_icon(vol);
+    ptask->task->exec_sync = true;
+    ptask->task->exec_export = true;
+    ptask->task->exec_browser = file_browser;
+    ptask->task->exec_popup = false;
+    ptask->task->exec_show_output = false;
+    ptask->task->exec_show_error = true; // set to true for error on click
+    ptask->task->exec_terminal = run_in_terminal;
+    ptask->task->exec_icon = vfs_volume_get_icon(vol);
 
     // autoopen
     AutoOpen* ao = g_slice_new0(AutoOpen);
@@ -1465,11 +1466,11 @@ try_mount(GtkTreeView* view, VFSVolume* vol)
     else
         ao->job = PTK_OPEN_DIR;
     ao->mount_point = nullptr;
-    task->complete_notify = (GFunc)on_autoopen_cb;
-    task->user_data = ao;
+    ptask->complete_notify = (GFunc)on_autoopen_cb;
+    ptask->user_data = ao;
     vol->inhibit_auto = true;
 
-    ptk_file_task_run(task);
+    ptk_file_task_run(ptask);
 
     return vfs_volume_is_mounted(vol);
 }
@@ -1507,20 +1508,20 @@ on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 
         // task
         std::string task_name = fmt::format("Mount {}", vol->device_file);
-        PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
+        PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
         std::string keep_term = "";
         if (run_in_terminal)
             keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
-        task->task->exec_command = fmt::format("{}{}", line, keep_term);
+        ptask->task->exec_command = fmt::format("{}{}", line, keep_term);
         free(line);
-        task->task->exec_sync = true;
-        task->task->exec_export = true;
-        task->task->exec_browser = file_browser;
-        task->task->exec_popup = false;
-        task->task->exec_show_output = false;
-        task->task->exec_show_error = true;
-        task->task->exec_terminal = run_in_terminal;
-        task->task->exec_icon = vfs_volume_get_icon(vol);
+        ptask->task->exec_sync = true;
+        ptask->task->exec_export = true;
+        ptask->task->exec_browser = file_browser;
+        ptask->task->exec_popup = false;
+        ptask->task->exec_show_output = false;
+        ptask->task->exec_show_error = true;
+        ptask->task->exec_terminal = run_in_terminal;
+        ptask->task->exec_icon = vfs_volume_get_icon(vol);
 
         // autoopen
         AutoOpen* ao = g_slice_new0(AutoOpen);
@@ -1529,11 +1530,11 @@ on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         ao->file_browser = file_browser;
         ao->job = PTK_OPEN_NEW_TAB;
         ao->mount_point = nullptr;
-        task->complete_notify = (GFunc)on_autoopen_cb;
-        task->user_data = ao;
+        ptask->complete_notify = (GFunc)on_autoopen_cb;
+        ptask->user_data = ao;
         vol->inhibit_auto = true;
 
-        ptk_file_task_run(task);
+        ptk_file_task_run(ptask);
     }
     else
         ptk_file_browser_emit_open(file_browser, vol->mount_point, PTK_OPEN_NEW_TAB);
@@ -1575,23 +1576,23 @@ on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 
         // task
         std::string task_name = fmt::format("Mount {}", vol->device_file);
-        PtkFileTask* task = ptk_file_exec_new(task_name,
-                                              nullptr,
-                                              view,
-                                              file_browser ? file_browser->task_view : nullptr);
+        PtkFileTask* ptask = ptk_file_exec_new(task_name,
+                                               nullptr,
+                                               view,
+                                               file_browser ? file_browser->task_view : nullptr);
         std::string keep_term = "";
         if (run_in_terminal)
             keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
-        task->task->exec_command = fmt::format("{}{}", line, keep_term);
+        ptask->task->exec_command = fmt::format("{}{}", line, keep_term);
         free(line);
-        task->task->exec_sync = true;
-        task->task->exec_export = !!file_browser;
-        task->task->exec_browser = file_browser;
-        task->task->exec_popup = false;
-        task->task->exec_show_output = false;
-        task->task->exec_show_error = true;
-        task->task->exec_terminal = run_in_terminal;
-        task->task->exec_icon = vfs_volume_get_icon(vol);
+        ptask->task->exec_sync = true;
+        ptask->task->exec_export = !!file_browser;
+        ptask->task->exec_browser = file_browser;
+        ptask->task->exec_popup = false;
+        ptask->task->exec_show_output = false;
+        ptask->task->exec_show_error = true;
+        ptask->task->exec_terminal = run_in_terminal;
+        ptask->task->exec_icon = vfs_volume_get_icon(vol);
 
         // autoopen
         AutoOpen* ao = g_slice_new0(AutoOpen);
@@ -1600,11 +1601,11 @@ on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         ao->file_browser = file_browser;
         ao->job = PTK_OPEN_DIR;
         ao->mount_point = nullptr;
-        task->complete_notify = (GFunc)on_autoopen_cb;
-        task->user_data = ao;
+        ptask->complete_notify = (GFunc)on_autoopen_cb;
+        ptask->user_data = ao;
         vol->inhibit_auto = true;
 
-        ptk_file_task_run(task);
+        ptk_file_task_run(ptask);
     }
     else if (file_browser)
         ptk_file_browser_emit_open(file_browser, vol->mount_point, PTK_OPEN_DIR);
@@ -1640,7 +1641,7 @@ on_remount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 
     // task
     std::string task_name = fmt::format("Remount {}", vol->device_file);
-    PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
+    PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
     if (vfs_volume_is_mounted(vol))
     {
         // udisks can't remount, so unmount and mount
@@ -1667,24 +1668,24 @@ on_remount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     }
     else
         line = mount_command;
-    task->task->exec_command = line;
-    task->task->exec_sync = !mount_in_terminal && !unmount_in_terminal;
-    task->task->exec_export = true;
-    task->task->exec_browser = file_browser;
-    task->task->exec_popup = false;
-    task->task->exec_show_output = false;
-    task->task->exec_show_error = true;
-    task->task->exec_terminal = mount_in_terminal || unmount_in_terminal;
-    task->task->exec_icon = vfs_volume_get_icon(vol);
+    ptask->task->exec_command = line;
+    ptask->task->exec_sync = !mount_in_terminal && !unmount_in_terminal;
+    ptask->task->exec_export = true;
+    ptask->task->exec_browser = file_browser;
+    ptask->task->exec_popup = false;
+    ptask->task->exec_show_output = false;
+    ptask->task->exec_show_error = true;
+    ptask->task->exec_terminal = mount_in_terminal || unmount_in_terminal;
+    ptask->task->exec_icon = vfs_volume_get_icon(vol);
     vol->inhibit_auto = true;
-    ptk_file_task_run(task);
+    ptk_file_task_run(ptask);
 }
 
 static void
 on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 {
     std::string line;
-    PtkFileTask* task;
+    PtkFileTask* ptask;
 
     GtkWidget* view;
     if (!item)
@@ -1725,29 +1726,29 @@ on_reload(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         free(eject);
         free(unmount);
         std::string task_name = fmt::format("Reload %s", vol->device_file);
-        task = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
-        task->task->exec_command = line;
-        task->task->exec_sync = !run_in_terminal;
-        task->task->exec_export = true;
-        task->task->exec_browser = file_browser;
-        task->task->exec_show_error = true;
-        task->task->exec_terminal = run_in_terminal;
-        task->task->exec_icon = vfs_volume_get_icon(vol);
+        ptask = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
+        ptask->task->exec_command = line;
+        ptask->task->exec_sync = !run_in_terminal;
+        ptask->task->exec_export = true;
+        ptask->task->exec_browser = file_browser;
+        ptask->task->exec_show_error = true;
+        ptask->task->exec_terminal = run_in_terminal;
+        ptask->task->exec_icon = vfs_volume_get_icon(vol);
     }
     else if (vol->is_optical || vol->requires_eject)
     {
         // task
         line = fmt::format("eject {}; sleep 0.3; eject -t {}", vol->device_file, vol->device_file);
         std::string task_name = fmt::format("Reload %s", vol->device_file);
-        task = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
-        task->task->exec_command = line;
-        task->task->exec_sync = false;
-        task->task->exec_show_error = false;
-        task->task->exec_icon = vfs_volume_get_icon(vol);
+        ptask = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
+        ptask->task->exec_command = line;
+        ptask->task->exec_sync = false;
+        ptask->task->exec_show_error = false;
+        ptask->task->exec_icon = vfs_volume_get_icon(vol);
     }
     else
         return;
-    ptk_file_task_run(task);
+    ptk_file_task_run(ptask);
     //    vol->ever_mounted = false;
 }
 
@@ -1767,18 +1768,18 @@ on_sync(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     PtkFileBrowser* file_browser =
         static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
 
-    PtkFileTask* task = ptk_file_exec_new("Sync", nullptr, view, file_browser->task_view);
-    task->task->exec_browser = nullptr;
-    task->task->exec_action = "sync";
-    task->task->exec_command = "sync";
-    task->task->exec_sync = true;
-    task->task->exec_popup = false;
-    task->task->exec_show_output = false;
-    task->task->exec_show_error = true;
-    task->task->exec_terminal = false;
-    task->task->exec_export = false;
-    // task->task->exec_icon =  "start-here";
-    ptk_file_task_run(task);
+    PtkFileTask* ptask = ptk_file_exec_new("Sync", nullptr, view, file_browser->task_view);
+    ptask->task->exec_browser = nullptr;
+    ptask->task->exec_action = "sync";
+    ptask->task->exec_command = "sync";
+    ptask->task->exec_sync = true;
+    ptask->task->exec_popup = false;
+    ptask->task->exec_show_output = false;
+    ptask->task->exec_show_error = true;
+    ptask->task->exec_terminal = false;
+    ptask->task->exec_export = false;
+    // ptask->task->exec_icon =  "start-here";
+    ptk_file_task_run(ptask);
 }
 
 static void
@@ -1907,28 +1908,28 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (!GTK_IS_WIDGET(file_browser))
         file_browser = nullptr;
     std::string task_name = fmt::format("Properties {}", vol->device_file);
-    PtkFileTask* task = ptk_file_exec_new(task_name,
-                                          nullptr,
-                                          file_browser ? GTK_WIDGET(file_browser) : view,
-                                          file_browser ? file_browser->task_view : nullptr);
-    task->task->exec_browser = file_browser;
+    PtkFileTask* ptask = ptk_file_exec_new(task_name,
+                                           nullptr,
+                                           file_browser ? GTK_WIDGET(file_browser) : view,
+                                           file_browser ? file_browser->task_view : nullptr);
+    ptask->task->exec_browser = file_browser;
 
     if (cmd)
     {
-        task->task->exec_command = cmd;
-        task->task->exec_sync = !run_in_terminal;
-        task->task->exec_export = !!file_browser;
-        task->task->exec_browser = file_browser;
-        task->task->exec_popup = true;
-        task->task->exec_show_output = true;
-        task->task->exec_terminal = run_in_terminal;
-        task->task->exec_keep_terminal = run_in_terminal;
-        task->task->exec_scroll_lock = true;
-        task->task->exec_icon = vfs_volume_get_icon(vol);
-        // task->task->exec_keep_tmp = true;
+        ptask->task->exec_command = cmd;
+        ptask->task->exec_sync = !run_in_terminal;
+        ptask->task->exec_export = !!file_browser;
+        ptask->task->exec_browser = file_browser;
+        ptask->task->exec_popup = true;
+        ptask->task->exec_show_output = true;
+        ptask->task->exec_terminal = run_in_terminal;
+        ptask->task->exec_keep_terminal = run_in_terminal;
+        ptask->task->exec_scroll_lock = true;
+        ptask->task->exec_icon = vfs_volume_get_icon(vol);
+        // ptask->task->exec_keep_tmp = true;
         std::string command = cmd;
         print_command(command);
-        ptk_file_task_run(task);
+        ptk_file_task_run(ptask);
         return;
     }
 
@@ -2086,15 +2087,15 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         }
     }
 
-    task->task->exec_command = fmt::format("{}{}{}{}", flags, df, udisks, lsof);
-    task->task->exec_sync = true;
-    task->task->exec_popup = true;
-    task->task->exec_show_output = true;
-    task->task->exec_export = false;
-    task->task->exec_scroll_lock = true;
-    task->task->exec_icon = vfs_volume_get_icon(vol);
-    // task->task->exec_keep_tmp = true;
-    ptk_file_task_run(task);
+    ptask->task->exec_command = fmt::format("{}{}{}{}", flags, df, udisks, lsof);
+    ptask->task->exec_sync = true;
+    ptask->task->exec_popup = true;
+    ptask->task->exec_show_output = true;
+    ptask->task->exec_export = false;
+    ptask->task->exec_scroll_lock = true;
+    ptask->task->exec_icon = vfs_volume_get_icon(vol);
+    // ptask->task->exec_keep_tmp = true;
+    ptk_file_task_run(ptask);
 }
 
 static void

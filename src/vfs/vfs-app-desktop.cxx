@@ -274,16 +274,16 @@ VFSAppDesktop::exec_in_terminal(const std::string& app_name, const std::string& 
                                 const std::string& cmd) noexcept
 {
     // task
-    PtkFileTask* task = ptk_file_exec_new(app_name, cwd.c_str(), nullptr, nullptr);
+    PtkFileTask* ptask = ptk_file_exec_new(app_name, cwd.c_str(), nullptr, nullptr);
 
-    task->task->exec_command = cmd;
+    ptask->task->exec_command = cmd;
 
-    task->task->exec_terminal = true;
-    // task->task->exec_keep_terminal = true;  // for test only
-    task->task->exec_sync = false;
-    task->task->exec_export = false;
+    ptask->task->exec_terminal = true;
+    // ptask->task->exec_keep_terminal = true;  // for test only
+    ptask->task->exec_sync = false;
+    ptask->task->exec_export = false;
 
-    ptk_file_task_run(task);
+    ptk_file_task_run(ptask);
 }
 
 bool

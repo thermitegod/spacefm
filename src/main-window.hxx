@@ -108,8 +108,8 @@ FMMainWindow* fm_main_window_get_on_current_desktop();
  */
 const std::vector<FMMainWindow*> fm_main_window_get_all();
 
-void main_task_view_update_task(PtkFileTask* task);
-void main_task_view_remove_task(PtkFileTask* task);
+void main_task_view_update_task(PtkFileTask* ptask);
+void main_task_view_remove_task(PtkFileTask* ptask);
 void main_task_pause_all_queued(PtkFileTask* ptask);
 void main_task_start_queued(GtkWidget* view, PtkFileTask* new_task);
 void on_restore_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser);

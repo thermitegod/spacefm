@@ -3419,13 +3419,13 @@ exec_task(const char* command, bool run_in_terminal)
     std::vector<std::string> file_list;
     file_list.push_back("exec_task");
 
-    PtkFileTask* task = ptk_file_task_new(VFS_FILE_TASK_EXEC, file_list, "/", nullptr, nullptr);
-    task->task->exec_action = "exec_task";
-    task->task->exec_command = command;
-    task->task->exec_sync = false;
-    task->task->exec_export = false;
-    task->task->exec_terminal = run_in_terminal;
-    ptk_file_task_run(task);
+    PtkFileTask* ptask = ptk_file_task_new(VFS_FILE_TASK_EXEC, file_list, "/", nullptr, nullptr);
+    ptask->task->exec_action = "exec_task";
+    ptask->task->exec_command = command;
+    ptask->task->exec_sync = false;
+    ptask->task->exec_export = false;
+    ptask->task->exec_terminal = run_in_terminal;
+    ptk_file_task_run(ptask);
 }
 
 static void

@@ -408,14 +408,14 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                                 "Save Root Settings",
                                 GTK_BUTTONS_OK,
                                 msg);
-                PtkFileTask* task =
+                PtkFileTask* ptask =
                     ptk_file_exec_new("Save Root Settings", nullptr, nullptr, nullptr);
-                task->task->exec_command = "echo";
-                task->task->exec_as_user = "root";
-                task->task->exec_sync = false;
-                task->task->exec_export = false;
-                task->task->exec_write_root = true;
-                ptk_file_task_run(task);
+                ptask->task->exec_command = "echo";
+                ptask->task->exec_as_user = "root";
+                ptask->task->exec_sync = false;
+                ptask->task->exec_export = false;
+                ptask->task->exec_write_root = true;
+                ptk_file_task_run(ptask);
             }
         }
     }

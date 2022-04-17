@@ -170,12 +170,12 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTr
         file_list.push_back(file_path);
     }
     /* file_list = g_list_reverse( file_list ); */
-    PtkFileTask* task = ptk_file_task_new(VFS_FILE_TASK_DELETE,
-                                          file_list,
-                                          nullptr,
-                                          parent_win ? GTK_WINDOW(parent_win) : nullptr,
-                                          GTK_WIDGET(task_view));
-    ptk_file_task_run(task);
+    PtkFileTask* ptask = ptk_file_task_new(VFS_FILE_TASK_DELETE,
+                                           file_list,
+                                           nullptr,
+                                           parent_win ? GTK_WINDOW(parent_win) : nullptr,
+                                           GTK_WIDGET(task_view));
+    ptk_file_task_run(ptask);
 }
 
 void
@@ -214,12 +214,12 @@ ptk_trash_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTre
         file_list.push_back(file_path);
     }
     /* file_list = g_list_reverse( file_list ); */
-    PtkFileTask* task = ptk_file_task_new(VFS_FILE_TASK_TRASH,
-                                          file_list,
-                                          nullptr,
-                                          parent_win ? GTK_WINDOW(parent_win) : nullptr,
-                                          GTK_WIDGET(task_view));
-    ptk_file_task_run(task);
+    PtkFileTask* ptask = ptk_file_task_new(VFS_FILE_TASK_TRASH,
+                                           file_list,
+                                           nullptr,
+                                           parent_win ? GTK_WINDOW(parent_win) : nullptr,
+                                           GTK_WIDGET(task_view));
+    ptk_file_task_run(ptask);
 }
 
 char*
@@ -2843,7 +2843,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             {
                 // new link task
                 task_name = fmt::format("Create Link{}", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
 
                 str = ztd::strdup(gtk_entry_get_text(mset->entry_target));
                 g_strstrip(str);
@@ -2855,29 +2855,29 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
 
                 if (overwrite)
                 {
-                    task->task->exec_command =
+                    ptask->task->exec_command =
                         fmt::format("{}ln -sf {} {}", root_mkdir, from_path, to_path);
                 }
                 else
                 {
-                    task->task->exec_command =
+                    ptask->task->exec_command =
                         fmt::format("{}ln -s {} {}", root_mkdir, from_path, to_path);
                 }
-                task->task->exec_sync = true;
-                task->task->exec_popup = false;
-                task->task->exec_show_output = false;
-                task->task->exec_show_error = true;
-                task->task->exec_export = false;
+                ptask->task->exec_sync = true;
+                ptask->task->exec_popup = false;
+                ptask->task->exec_show_output = false;
+                ptask->task->exec_show_error = true;
+                ptask->task->exec_export = false;
                 if (as_root)
-                    task->task->exec_as_user = "root";
+                    ptask->task->exec_as_user = "root";
                 if (auto_open)
                 {
                     auto_open->path = ztd::strdup(full_path);
                     auto_open->open_file = (response == GTK_RESPONSE_APPLY);
-                    task->complete_notify = auto_open->callback;
-                    task->user_data = auto_open;
+                    ptask->complete_notify = auto_open->callback;
+                    ptask->user_data = auto_open;
                 }
-                ptk_file_task_run(task);
+                ptk_file_task_run(ptask);
                 update_new_display(full_path);
             }
             else if (create_new && new_file)
@@ -2925,28 +2925,28 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     over_cmd = fmt::format("rm -f {} && ", to_path);
 
                 task_name = fmt::format("Create New File{}", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 if (from_path.empty())
-                    task->task->exec_command =
+                    ptask->task->exec_command =
                         fmt::format("{}{}touch {}", root_mkdir, over_cmd, to_path);
                 else
-                    task->task->exec_command =
+                    ptask->task->exec_command =
                         fmt::format("{}{}cp -f {} {}", root_mkdir, over_cmd, from_path, to_path);
-                task->task->exec_sync = true;
-                task->task->exec_popup = false;
-                task->task->exec_show_output = false;
-                task->task->exec_show_error = true;
-                task->task->exec_export = false;
+                ptask->task->exec_sync = true;
+                ptask->task->exec_popup = false;
+                ptask->task->exec_show_output = false;
+                ptask->task->exec_show_error = true;
+                ptask->task->exec_export = false;
                 if (as_root)
-                    task->task->exec_as_user = "root";
+                    ptask->task->exec_as_user = "root";
                 if (auto_open)
                 {
                     auto_open->path = ztd::strdup(full_path);
                     auto_open->open_file = (response == GTK_RESPONSE_APPLY);
-                    task->complete_notify = auto_open->callback;
-                    task->user_data = auto_open;
+                    ptask->complete_notify = auto_open->callback;
+                    ptask->user_data = auto_open;
                 }
-                ptk_file_task_run(task);
+                ptk_file_task_run(ptask);
                 update_new_display(full_path);
             }
             else if (create_new)
@@ -2999,34 +2999,34 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 to_path = bash_quote(full_path);
 
                 task_name = fmt::format("Create New Directory{}", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 if (from_path.empty())
-                    task->task->exec_command = fmt::format("{}mkdir {}", root_mkdir, to_path);
+                    ptask->task->exec_command = fmt::format("{}mkdir {}", root_mkdir, to_path);
                 else
-                    task->task->exec_command =
+                    ptask->task->exec_command =
                         fmt::format("{}cp -rL {} {}", root_mkdir, from_path, to_path);
-                task->task->exec_sync = true;
-                task->task->exec_popup = false;
-                task->task->exec_show_output = false;
-                task->task->exec_show_error = true;
-                task->task->exec_export = false;
+                ptask->task->exec_sync = true;
+                ptask->task->exec_popup = false;
+                ptask->task->exec_show_output = false;
+                ptask->task->exec_show_error = true;
+                ptask->task->exec_export = false;
                 if (as_root)
-                    task->task->exec_as_user = "root";
+                    ptask->task->exec_as_user = "root";
                 if (auto_open)
                 {
                     auto_open->path = ztd::strdup(full_path);
                     auto_open->open_file = (response == GTK_RESPONSE_APPLY);
-                    task->complete_notify = auto_open->callback;
-                    task->user_data = auto_open;
+                    ptask->complete_notify = auto_open->callback;
+                    ptask->user_data = auto_open;
                 }
-                ptk_file_task_run(task);
+                ptk_file_task_run(ptask);
                 update_new_display(full_path);
             }
             else if (copy || copy_target)
             {
                 // copy task
                 task_name = fmt::format("Copy{}", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 char* over_opt = nullptr;
                 to_path = bash_quote(full_path);
                 if (copy || !mset->is_link)
@@ -3055,30 +3055,30 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
 
                 if (mset->is_dir)
                 {
-                    task->task->exec_command =
+                    ptask->task->exec_command =
                         fmt::format("{}cp -Pfr {} {}", root_mkdir, from_path, to_path);
                 }
                 else
                 {
-                    task->task->exec_command =
+                    ptask->task->exec_command =
                         fmt::format("{}cp -Pf{} {} {}", root_mkdir, over_opt, from_path, to_path);
                 }
                 free(over_opt);
-                task->task->exec_sync = true;
-                task->task->exec_popup = false;
-                task->task->exec_show_output = false;
-                task->task->exec_show_error = true;
-                task->task->exec_export = false;
+                ptask->task->exec_sync = true;
+                ptask->task->exec_popup = false;
+                ptask->task->exec_show_output = false;
+                ptask->task->exec_show_error = true;
+                ptask->task->exec_export = false;
                 if (as_root)
-                    task->task->exec_as_user = "root";
-                ptk_file_task_run(task);
+                    ptask->task->exec_as_user = "root";
+                ptk_file_task_run(ptask);
                 update_new_display(full_path);
             }
             else if (link || link_target)
             {
                 // link task
                 task_name = fmt::format("Create Link{}", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 if (link || !mset->is_link)
                     from_path = bash_quote(mset->full_path);
                 else
@@ -3101,22 +3101,22 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 to_path = bash_quote(full_path);
                 if (overwrite)
                 {
-                    task->task->exec_command =
+                    ptask->task->exec_command =
                         fmt::format("{}ln -sf {} {}", root_mkdir, from_path, to_path);
                 }
                 else
                 {
-                    task->task->exec_command =
+                    ptask->task->exec_command =
                         fmt::format("{}ln -s {} {}", root_mkdir, from_path, to_path);
                 }
-                task->task->exec_sync = true;
-                task->task->exec_popup = false;
-                task->task->exec_show_output = false;
-                task->task->exec_show_error = true;
-                task->task->exec_export = false;
+                ptask->task->exec_sync = true;
+                ptask->task->exec_popup = false;
+                ptask->task->exec_show_output = false;
+                ptask->task->exec_show_error = true;
+                ptask->task->exec_export = false;
                 if (as_root)
-                    task->task->exec_as_user = "root";
-                ptk_file_task_run(task);
+                    ptask->task->exec_as_user = "root";
+                ptk_file_task_run(ptask);
                 update_new_display(full_path);
             }
             // need move?  (do move as task in case it takes a long time)
@@ -3126,27 +3126,27 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 // move task - this is jumped to from the below rename block on
                 // EXDEV error
                 task_name = fmt::format("Move{}", root_msg);
-                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 from_path = bash_quote(mset->full_path);
                 to_path = bash_quote(full_path);
                 if (overwrite)
                 {
-                    task->task->exec_command =
+                    ptask->task->exec_command =
                         fmt::format("{}mv -f {} {}", root_mkdir, from_path, to_path);
                 }
                 else
                 {
-                    task->task->exec_command =
+                    ptask->task->exec_command =
                         fmt::format("{}mv {} {}", root_mkdir, from_path, to_path);
                 }
-                task->task->exec_sync = true;
-                task->task->exec_popup = false;
-                task->task->exec_show_output = false;
-                task->task->exec_show_error = true;
-                task->task->exec_export = false;
+                ptask->task->exec_sync = true;
+                ptask->task->exec_popup = false;
+                ptask->task->exec_show_output = false;
+                ptask->task->exec_show_error = true;
+                ptask->task->exec_export = false;
                 if (as_root)
-                    task->task->exec_as_user = "root";
-                ptk_file_task_run(task);
+                    ptask->task->exec_as_user = "root";
+                ptk_file_task_run(ptask);
                 update_new_display(full_path);
             }
             else
@@ -3373,23 +3373,23 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
         }
 
         // Run task
-        PtkFileTask* task =
+        PtkFileTask* ptask =
             ptk_file_exec_new(handler_set->menu_label,
                               parent->cwd,
                               parent->file_browser ? GTK_WIDGET(parent->file_browser) : nullptr,
                               parent->file_browser ? parent->file_browser->task_view : nullptr);
         // don't free cwd!
-        task->task->exec_browser = parent->file_browser;
-        task->task->exec_command = command_final;
+        ptask->task->exec_browser = parent->file_browser;
+        ptask->task->exec_command = command_final;
         if (handler_set->icon)
-            task->task->exec_icon = handler_set->icon;
-        task->task->exec_terminal = handler_set->in_terminal;
-        task->task->exec_keep_terminal = false;
+            ptask->task->exec_icon = handler_set->icon;
+        ptask->task->exec_terminal = handler_set->in_terminal;
+        ptask->task->exec_keep_terminal = false;
         // file handlers store Run As Task in keep_terminal
-        task->task->exec_sync = handler_set->keep_terminal;
-        task->task->exec_show_error = task->task->exec_sync;
-        task->task->exec_export = true;
-        ptk_file_task_run(task);
+        ptask->task->exec_sync = handler_set->keep_terminal;
+        ptask->task->exec_show_error = ptask->task->exec_sync;
+        ptask->task->exec_export = true;
+        ptk_file_task_run(ptask);
 
         if (multiple)
             break;
@@ -3810,14 +3810,14 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
     }
 
     // root task
-    PtkFileTask* task =
+    PtkFileTask* ptask =
         ptk_file_exec_new(task_name, cwd, parent, file_browser ? file_browser->task_view : nullptr);
-    task->task->exec_command = cmd;
-    task->task->exec_sync = true;
-    task->task->exec_popup = false;
-    task->task->exec_show_output = false;
-    task->task->exec_show_error = true;
-    task->task->exec_export = false;
-    task->task->exec_as_user = "root";
-    ptk_file_task_run(task);
+    ptask->task->exec_command = cmd;
+    ptask->task->exec_sync = true;
+    ptask->task->exec_popup = false;
+    ptask->task->exec_show_output = false;
+    ptask->task->exec_show_error = true;
+    ptask->task->exec_export = false;
+    ptask->task->exec_as_user = "root";
+    ptk_file_task_run(ptask);
 }

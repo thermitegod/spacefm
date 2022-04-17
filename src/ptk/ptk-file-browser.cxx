@@ -530,25 +530,26 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
         const char* cwd;
         task_name = ztd::strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
         cwd = ptk_file_browser_get_cwd(file_browser);
-        PtkFileTask* task;
-        task = ptk_file_exec_new(task_name, cwd, GTK_WIDGET(file_browser), file_browser->task_view);
+        PtkFileTask* ptask;
+        ptask =
+            ptk_file_exec_new(task_name, cwd, GTK_WIDGET(file_browser), file_browser->task_view);
         free(task_name);
         // don't free cwd!
-        task->task->exec_browser = file_browser;
-        task->task->exec_command = replace_line_subs(command);
+        ptask->task->exec_browser = file_browser;
+        ptask->task->exec_command = replace_line_subs(command);
         if (as_root)
-            task->task->exec_as_user = "root";
+            ptask->task->exec_as_user = "root";
         if (!as_task)
-            task->task->exec_sync = false;
+            ptask->task->exec_sync = false;
         else
-            task->task->exec_sync = !in_terminal;
-        task->task->exec_show_output = true;
-        task->task->exec_show_error = true;
-        task->task->exec_export = true;
-        task->task->exec_terminal = in_terminal;
-        task->task->exec_keep_terminal = as_task;
-        // task->task->exec_keep_tmp = true;
-        ptk_file_task_run(task);
+            ptask->task->exec_sync = !in_terminal;
+        ptask->task->exec_show_output = true;
+        ptask->task->exec_show_error = true;
+        ptask->task->exec_export = true;
+        ptask->task->exec_terminal = in_terminal;
+        ptask->task->exec_keep_terminal = as_task;
+        // ptask->task->exec_keep_tmp = true;
+        ptk_file_task_run(ptask);
         // gtk_widget_grab_focus( GTK_WIDGET( file_browser->folder_view ) );
 
         // reset entry text
@@ -4468,12 +4469,12 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     else /* Accept the drop and perform file actions */
                     {
                         GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
-                        PtkFileTask* task = ptk_file_task_new(file_action,
-                                                              file_list,
-                                                              dest_dir,
-                                                              GTK_WINDOW(parent_win),
-                                                              file_browser->task_view);
-                        ptk_file_task_run(task);
+                        PtkFileTask* ptask = ptk_file_task_new(file_action,
+                                                               file_list,
+                                                               dest_dir,
+                                                               GTK_WINDOW(parent_win),
+                                                               file_browser->task_view);
+                        ptk_file_task_run(ptask);
                     }
                 }
                 free(dest_dir);
@@ -5025,13 +5026,13 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
         }
 
         // task
-        PtkFileTask* task =
+        PtkFileTask* ptask =
             ptk_file_task_new((VFSFileTaskType)file_action,
                               file_list,
                               dest_dir,
                               GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                               file_browser->task_view);
-        ptk_file_task_run(task);
+        ptk_file_task_run(ptask);
         free(dest_dir);
     }
     else
@@ -5852,17 +5853,17 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser, 
     }
 
     // task
-    PtkFileTask* task =
+    PtkFileTask* ptask =
         ptk_file_exec_new(set->menu_label, cwd, GTK_WIDGET(file_browser), file_browser->task_view);
-    task->task->exec_command = ztd::strdup(fmt::format("{} {} {}", prog, cmd, file_paths));
-    task->task->exec_browser = file_browser;
-    task->task->exec_sync = true;
-    task->task->exec_show_error = true;
-    task->task->exec_show_output = false;
-    task->task->exec_export = false;
+    ptask->task->exec_command = ztd::strdup(fmt::format("{} {} {}", prog, cmd, file_paths));
+    ptask->task->exec_browser = file_browser;
+    ptask->task->exec_sync = true;
+    ptask->task->exec_show_error = true;
+    ptask->task->exec_show_output = false;
+    ptask->task->exec_export = false;
     if (as_root)
-        task->task->exec_as_user = "root";
-    ptk_file_task_run(task);
+        ptask->task->exec_as_user = "root";
+    ptk_file_task_run(ptask);
 }
 
 void

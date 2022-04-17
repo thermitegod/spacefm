@@ -94,7 +94,7 @@ static void show_panels(GtkMenuItem* item, FMMainWindow* main_window);
 static GtkWidget* main_task_view_new(FMMainWindow* main_window);
 static void on_task_popup_show(GtkMenuItem* item, FMMainWindow* main_window, char* name2);
 static bool main_tasks_running(FMMainWindow* main_window);
-static void on_task_stop(GtkMenuItem* item, GtkWidget* view, XSet* set2, PtkFileTask* task2);
+static void on_task_stop(GtkMenuItem* item, GtkWidget* view, XSet* set2, PtkFileTask* ptask2);
 static void on_preference_activate(GtkMenuItem* menuitem, void* user_data);
 static void main_task_prepare_menu(FMMainWindow* main_window, GtkWidget* menu,
                                    GtkAccelGroup* accel_group);
@@ -473,18 +473,18 @@ on_open_current_folder_as_root(GtkMenuItem* menuitem, void* user_data)
     if (!file_browser)
         return;
     // root task
-    PtkFileTask* task = ptk_file_exec_new("Open Root Window",
-                                          ptk_file_browser_get_cwd(file_browser),
-                                          GTK_WIDGET(file_browser),
-                                          file_browser->task_view);
+    PtkFileTask* ptask = ptk_file_exec_new("Open Root Window",
+                                           ptk_file_browser_get_cwd(file_browser),
+                                           GTK_WIDGET(file_browser),
+                                           file_browser->task_view);
     const std::string exe = get_prog_executable();
     const std::string cwd = bash_quote(ptk_file_browser_get_cwd(file_browser));
-    task->task->exec_command = fmt::format("HOME=/root {} {}", exe, cwd);
-    task->task->exec_as_user = "root";
-    task->task->exec_sync = false;
-    task->task->exec_export = false;
-    task->task->exec_browser = nullptr;
-    ptk_file_task_run(task);
+    ptask->task->exec_command = fmt::format("HOME=/root {} {}", exe, cwd);
+    ptask->task->exec_as_user = "root";
+    ptask->task->exec_sync = false;
+    ptask->task->exec_export = false;
+    ptask->task->exec_browser = nullptr;
+    ptk_file_task_run(ptask);
 }
 
 static void
@@ -508,18 +508,18 @@ main_window_open_terminal(FMMainWindow* main_window, bool as_root)
     }
 
     // task
-    PtkFileTask* task = ptk_file_exec_new("Open Terminal",
-                                          ptk_file_browser_get_cwd(file_browser),
-                                          GTK_WIDGET(file_browser),
-                                          file_browser->task_view);
+    PtkFileTask* ptask = ptk_file_exec_new("Open Terminal",
+                                           ptk_file_browser_get_cwd(file_browser),
+                                           GTK_WIDGET(file_browser),
+                                           file_browser->task_view);
 
-    task->task->exec_command = Glib::find_program_in_path(main_term);
+    ptask->task->exec_command = Glib::find_program_in_path(main_term);
     if (as_root)
-        task->task->exec_as_user = "root";
-    task->task->exec_sync = false;
-    task->task->exec_export = true;
-    task->task->exec_browser = file_browser;
-    ptk_file_task_run(task);
+        ptask->task->exec_as_user = "root";
+    ptask->task->exec_sync = false;
+    ptask->task->exec_export = true;
+    ptask->task->exec_browser = file_browser;
+    ptk_file_task_run(ptask);
 }
 
 static void
@@ -4445,7 +4445,7 @@ main_task_pause_all_queued(PtkFileTask* ptask)
 }
 
 void
-main_task_start_queued(GtkWidget* view, PtkFileTask* new_task)
+main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
 {
     GtkTreeModel* model;
     GtkTreeIter it;
@@ -4475,10 +4475,10 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_task)
         } while (gtk_tree_model_iter_next(model, &it));
     }
 
-    if (new_task && new_task->task && !new_task->complete &&
-        new_task->task->state_pause == VFS_FILE_TASK_QUEUE &&
-        new_task->task->state == VFS_FILE_TASK_RUNNING)
-        queued = g_slist_append(queued, new_task);
+    if (new_ptask && new_ptask->task && !new_ptask->complete &&
+        new_ptask->task->state_pause == VFS_FILE_TASK_QUEUE &&
+        new_ptask->task->state == VFS_FILE_TASK_RUNNING)
+        queued = g_slist_append(queued, new_ptask);
 
     if (!queued || (!smart && running))
     {
@@ -4536,7 +4536,7 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_task)
 }
 
 static void
-on_task_stop(GtkMenuItem* item, GtkWidget* view, XSet* set2, PtkFileTask* task2)
+on_task_stop(GtkMenuItem* item, GtkWidget* view, XSet* set2, PtkFileTask* ptask2)
 {
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
@@ -4581,7 +4581,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, XSet* set2, PtkFileTask* task2)
         if (item)
             ptask = static_cast<PtkFileTask*>(g_object_get_data(G_OBJECT(item), "task"));
         else
-            ptask = task2;
+            ptask = ptask2;
         if (!ptask)
             return;
     }
@@ -7480,16 +7480,16 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
         else
         {
             // task
-            PtkFileTask* task = ptk_file_exec_new(event,
-                                                  ptk_file_browser_get_cwd(file_browser),
-                                                  GTK_WIDGET(file_browser),
-                                                  main_window->task_view);
-            task->task->exec_browser = file_browser;
-            task->task->exec_command = cmd;
-            task->task->exec_icon = set->icon;
-            task->task->exec_sync = false;
-            task->task->exec_export = true;
-            ptk_file_task_run(task);
+            PtkFileTask* ptask = ptk_file_exec_new(event,
+                                                   ptk_file_browser_get_cwd(file_browser),
+                                                   GTK_WIDGET(file_browser),
+                                                   main_window->task_view);
+            ptask->task->exec_browser = file_browser;
+            ptask->task->exec_command = cmd;
+            ptask->task->exec_icon = set->icon;
+            ptask->task->exec_sync = false;
+            ptask->task->exec_export = true;
+            ptk_file_task_run(ptask);
         }
         return false;
     }

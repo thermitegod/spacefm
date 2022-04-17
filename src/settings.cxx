@@ -2928,28 +2928,28 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
             return;
         }
     }
-    PtkFileTask* task =
+    PtkFileTask* ptask =
         ptk_file_exec_new("Uninstall Plugin", nullptr, parent, file_browser->task_view);
 
     const std::string plug_dir_q = bash_quote(set->plug_dir);
 
-    task->task->exec_command = fmt::format("rm -rf {}", plug_dir_q);
-    task->task->exec_sync = true;
-    task->task->exec_popup = false;
-    task->task->exec_show_output = false;
-    task->task->exec_show_error = true;
-    task->task->exec_export = false;
-    task->task->exec_as_user = "root";
+    ptask->task->exec_command = fmt::format("rm -rf {}", plug_dir_q);
+    ptask->task->exec_sync = true;
+    ptask->task->exec_popup = false;
+    ptask->task->exec_show_output = false;
+    ptask->task->exec_show_error = true;
+    ptask->task->exec_export = false;
+    ptask->task->exec_as_user = "root";
 
     PluginData* plugin_data = g_slice_new0(PluginData);
     plugin_data->main_window = nullptr;
     plugin_data->plug_dir = ztd::strdup(set->plug_dir);
     plugin_data->set = set;
     plugin_data->job = PLUGIN_JOB_REMOVE;
-    task->complete_notify = (GFunc)on_install_plugin_cb;
-    task->user_data = plugin_data;
+    ptask->complete_notify = (GFunc)on_install_plugin_cb;
+    ptask->user_data = plugin_data;
 
-    ptk_file_task_run(task);
+    ptk_file_task_run(ptask);
 }
 
 void
@@ -2962,10 +2962,11 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* path, co
 
     FMMainWindow* main_window = static_cast<FMMainWindow*>(main_win);
     // task
-    PtkFileTask* task = ptk_file_exec_new("Install Plugin",
-                                          nullptr,
-                                          main_win ? GTK_WIDGET(main_window) : nullptr,
-                                          main_win ? main_window->task_view : nullptr);
+    PtkFileTask* ptask;
+    ptask = ptk_file_exec_new("Install Plugin",
+                              nullptr,
+                              main_win ? GTK_WIDGET(main_window) : nullptr,
+                              main_win ? main_window->task_view : nullptr);
 
     switch (job)
     {
@@ -2973,7 +2974,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* path, co
             // install
             own =
                 fmt::format("chown -R root:root {} && chmod -R go+rX-w {}", plug_dir_q, plug_dir_q);
-            task->task->exec_as_user = "root";
+            ptask->task->exec_as_user = "root";
             break;
         case PLUGIN_JOB_COPY:
             // copy to clipboard or import to menu
@@ -3019,7 +3020,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* path, co
             book = " || [ -e main_book ]";
     }
 
-    task->task->exec_command = fmt::format(
+    ptask->task->exec_command = fmt::format(
         "rm -rf {} ; mkdir -p {} && cd {} && tar --exclude='/*' --keep-old-files -xf {} ; "
         "err=$? ; if [ $err -ne 0 ] || [ ! -e plugin ] {} ; then rm -rf {} ; echo 'Error "
         "installing "
@@ -3032,11 +3033,11 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* path, co
         plug_dir_q,
         own);
 
-    task->task->exec_sync = true;
-    task->task->exec_popup = false;
-    task->task->exec_show_output = false;
-    task->task->exec_show_error = true;
-    task->task->exec_export = false;
+    ptask->task->exec_sync = true;
+    ptask->task->exec_popup = false;
+    ptask->task->exec_show_output = false;
+    ptask->task->exec_show_error = true;
+    ptask->task->exec_export = false;
 
     PluginData* plugin_data = g_slice_new0(PluginData);
     plugin_data->main_window = main_window;
@@ -3044,10 +3045,10 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const char* path, co
     plugin_data->plug_dir = ztd::strdup(plug_dir);
     plugin_data->job = job;
     plugin_data->set = insert_set;
-    task->complete_notify = (GFunc)on_install_plugin_cb;
-    task->user_data = plugin_data;
+    ptask->complete_notify = (GFunc)on_install_plugin_cb;
+    ptask->user_data = plugin_data;
 
-    ptk_file_task_run(task);
+    ptk_file_task_run(ptask);
 }
 
 static bool
@@ -3264,33 +3265,34 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 
     // tar and delete tmp files
     // task
-    PtkFileTask* task;
-    task = ptk_file_exec_new("Export Plugin",
-                             plug_dir,
-                             parent,
-                             file_browser ? file_browser->task_view : nullptr);
+    PtkFileTask* ptask;
+    ptask = ptk_file_exec_new("Export Plugin",
+                              plug_dir,
+                              parent,
+                              file_browser ? file_browser->task_view : nullptr);
 
     plug_dir_q = bash_quote(plug_dir);
     path_q = bash_quote(path);
     if (!set->plugin)
-        task->task->exec_command =
+        ptask->task->exec_command =
             fmt::format("tar --numeric-owner -cJf {} * ; err=$? ; rm -rf {} ; "
                         "if [ $err -ne 0 ];then rm -f {} ; fi ; exit $err",
                         path_q,
                         plug_dir_q,
                         path_q);
     else
-        task->task->exec_command = fmt::format("tar --numeric-owner -cJf {} * ; err=$? ; "
-                                               "if [ $err -ne 0 ] ; then rm -f {} ; fi ; exit $err",
-                                               path_q,
-                                               path_q);
-    task->task->exec_sync = true;
-    task->task->exec_popup = false;
-    task->task->exec_show_output = false;
-    task->task->exec_show_error = true;
-    task->task->exec_export = false;
-    task->task->exec_browser = file_browser;
-    ptk_file_task_run(task);
+        ptask->task->exec_command =
+            fmt::format("tar --numeric-owner -cJf {} * ; err=$? ; "
+                        "if [ $err -ne 0 ] ; then rm -f {} ; fi ; exit $err",
+                        path_q,
+                        path_q);
+    ptask->task->exec_sync = true;
+    ptask->task->exec_popup = false;
+    ptask->task->exec_show_output = false;
+    ptask->task->exec_show_error = true;
+    ptask->task->exec_export = false;
+    ptask->task->exec_browser = file_browser;
+    ptk_file_task_run(ptask);
 
     free(path);
     free(plug_dir);
@@ -3618,33 +3620,33 @@ xset_custom_activate(GtkWidget* item, XSet* set)
 
     // task
     std::string task_name = clean_label(set->menu_label, false, false);
-    PtkFileTask* task = ptk_file_exec_new(task_name, cwd, parent, task_view);
+    PtkFileTask* ptask = ptk_file_exec_new(task_name, cwd, parent, task_view);
     // don't free cwd!
-    task->task->exec_browser = set->browser;
-    task->task->exec_command = command;
-    task->task->exec_set = set;
+    ptask->task->exec_browser = set->browser;
+    ptask->task->exec_command = command;
+    ptask->task->exec_set = set;
 
     if (set->y && set->y[0] != '\0')
-        task->task->exec_as_user = set->y;
+        ptask->task->exec_as_user = set->y;
 
     if (set->plugin && set->shared_key && mset->icon)
-        task->task->exec_icon = mset->icon;
+        ptask->task->exec_icon = mset->icon;
     else if (set->icon)
-        task->task->exec_icon = set->icon;
+        ptask->task->exec_icon = set->icon;
 
-    task->task->current_dest = value; // temp storage
-    task->task->exec_terminal = mset->in_terminal;
-    task->task->exec_keep_terminal = mset->keep_terminal;
-    task->task->exec_sync = !app_no_sync && mset->task;
-    task->task->exec_popup = mset->task_pop;
-    task->task->exec_show_output = mset->task_out;
-    task->task->exec_show_error = mset->task_err;
-    task->task->exec_scroll_lock = mset->scroll_lock;
-    task->task->exec_checksum = set->plugin;
-    task->task->exec_export = true;
-    // task->task->exec_keep_tmp = true;
+    ptask->task->current_dest = value; // temp storage
+    ptask->task->exec_terminal = mset->in_terminal;
+    ptask->task->exec_keep_terminal = mset->keep_terminal;
+    ptask->task->exec_sync = !app_no_sync && mset->task;
+    ptask->task->exec_popup = mset->task_pop;
+    ptask->task->exec_show_output = mset->task_out;
+    ptask->task->exec_show_error = mset->task_err;
+    ptask->task->exec_scroll_lock = mset->scroll_lock;
+    ptask->task->exec_checksum = set->plugin;
+    ptask->task->exec_export = true;
+    // ptask->task->exec_keep_tmp = true;
 
-    ptk_file_task_run(task);
+    ptk_file_task_run(ptask);
 }
 
 void
@@ -3901,13 +3903,13 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     // task
     std::string task_name = fmt::format("Edit {}", path);
     std::string cwd = g_path_get_dirname(path);
-    PtkFileTask* task = ptk_file_exec_new(task_name, cwd.c_str(), dlgparent, nullptr);
-    task->task->exec_command = editor;
-    task->task->exec_sync = false;
-    task->task->exec_terminal = terminal;
+    PtkFileTask* ptask = ptk_file_exec_new(task_name, cwd.c_str(), dlgparent, nullptr);
+    ptask->task->exec_command = editor;
+    ptask->task->exec_sync = false;
+    ptask->task->exec_terminal = terminal;
     if (as_root)
-        task->task->exec_as_user = "root";
-    ptk_file_task_run(task);
+        ptask->task->exec_as_user = "root";
+    ptk_file_task_run(ptask);
 }
 
 std::string
