@@ -366,7 +366,7 @@ receive_socket_command(int client, GString* args)
 {
     char** argv;
     char cmd;
-    char* reply = nullptr;
+    std::string reply;
 
     if (args->str[1])
     {
@@ -394,15 +394,14 @@ receive_socket_command(int client, GString* args)
     else
     {
         // process command and get reply
-        cmd = main_window_socket_command(argv ? argv + 1 : nullptr, &reply);
+        cmd = main_window_socket_command(argv ? argv + 1 : nullptr, reply);
     }
     g_strfreev(argv);
 
     // send response
     write(client, &cmd, sizeof(char)); // send exit status
-    if (reply && reply[0])
-        write(client, reply, std::strlen(reply)); // send reply or error msg
-    free(reply);
+    if (!reply.empty())
+        write(client, reply.c_str(), reply.size()); // send reply or error msg
 }
 
 int
