@@ -30,6 +30,7 @@
 #include <string>
 #include <filesystem>
 
+#include <array>
 #include <vector>
 
 #include <iostream>
@@ -186,12 +187,15 @@ get_actions(const std::string& dir, const std::string& type, std::vector<std::st
     // LOG_INFO("get_actions( {}, {} )\n", dir, type);
     std::vector<Glib::ustring> removed;
 
-    const char* names[] = {"mimeapps.list", "mimeinfo.cache"};
-    const char* groups[] = {"Default Applications", "Added Associations", "MIME Cache"};
+    const std::array<std::string, 2> names{"mimeapps.list", "mimeinfo.cache"};
+    const std::array<std::string, 3> groups{"Default Applications",
+                                            "Added Associations",
+                                            "MIME Cache"};
+
     // LOG_INFO("get_actions( {}/, {} )", dir, type);
-    for (unsigned int n = 0; n < G_N_ELEMENTS(names); n++)
+    for (std::size_t n = 0; n < names.size(); ++n)
     {
-        std::string path = Glib::build_filename(dir, names[n]);
+        std::string path = Glib::build_filename(dir, names.at(n));
         // LOG_INFO( "    {}", path);
         const auto kf = Glib::KeyFile::create();
         bool opened;
@@ -221,6 +225,7 @@ get_actions(const std::string& dir, const std::string& type, std::vector<std::st
                     continue;
                 }
             }
+
             // mimeinfo.cache has only MIME Cache; others don't have it
             int k;
             for (k = (n == 0 ? 0 : 2); k < (n == 0 ? 2 : 3); k++)
@@ -230,7 +235,7 @@ get_actions(const std::string& dir, const std::string& type, std::vector<std::st
                 std::vector<Glib::ustring> apps;
                 try
                 {
-                    apps = kf->get_string_list(groups[k], type);
+                    apps = kf->get_string_list(groups.at(k), type);
                     // if (apps.empty())
                     //     return nullptr;
                 }
@@ -637,12 +642,12 @@ get_default_action(const char* dir, const char* type, void* user_data)
     (void)user_data;
     // LOG_INFO("get_default_action( {}, {} )", dir, type);
     // search these files in dir for the first existing default app
-    const char* names[] = {"mimeapps.list", "defaults.list"};
-    const char* groups[] = {"Default Applications", "Added Associations"};
+    const std::array<std::string, 2> names{"mimeapps.list", "defaults.list"};
+    const std::array<std::string, 3> groups{"Default Applications", "Added Associations"};
 
-    for (unsigned int n = 0; n < G_N_ELEMENTS(names); n++)
+    for (std::size_t n = 0; n < names.size(); ++n)
     {
-        std::string path = Glib::build_filename(dir, names[n]);
+        std::string path = Glib::build_filename(dir, names.at(n));
         // LOG_INFO("    path = {}", path);
         const auto kf = Glib::KeyFile::create();
         try
@@ -654,12 +659,12 @@ get_default_action(const char* dir, const char* type, void* user_data)
             return nullptr;
         }
 
-        for (unsigned int k = 0; k < G_N_ELEMENTS(groups); k++)
+        for (std::size_t k = 0; k < groups.size(); ++k)
         {
             std::vector<Glib::ustring> apps;
             try
             {
-                apps = kf->get_string_list(groups[k], type);
+                apps = kf->get_string_list(groups.at(k), type);
                 if (apps.empty())
                     break;
             }
