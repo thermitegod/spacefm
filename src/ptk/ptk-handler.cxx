@@ -1681,7 +1681,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                 ? XSET_B_TRUE
                 : XSET_B_FALSE;
         new_handler_xset->disable = false; // not default - save in session
-        xset_set_set(new_handler_xset, XSET_SET_SET_LABEL, handler_name);
+        xset_set_set(new_handler_xset, XSET_SET_SET_MENU_LABEL, handler_name);
         xset_set_set(new_handler_xset, XSET_SET_SET_S,
                      handler_mime); // Mime Type(s) or whitelist
         xset_set_set(new_handler_xset,
@@ -1811,7 +1811,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         handler_xset->b = handler_enabled ? XSET_B_TRUE : XSET_B_UNSET;
         bool was_default = handler_xset->disable;
         handler_xset->disable = false; // not default - save in session
-        xset_set_set(handler_xset, XSET_SET_SET_LABEL, handler_name);
+        xset_set_set(handler_xset, XSET_SET_SET_MENU_LABEL, handler_name);
         xset_set_set(handler_xset, XSET_SET_SET_S, handler_mime);
         xset_set_set(handler_xset, XSET_SET_SET_X, handler_extension);
         handler_xset->in_terminal = handler_compress_term;

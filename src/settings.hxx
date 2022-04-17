@@ -112,27 +112,27 @@ enum XSetSetSet
     XSET_SET_SET_STYLE,
     XSET_SET_SET_DESC,
     XSET_SET_SET_TITLE,
-    XSET_SET_SET_LBL,
+    XSET_SET_SET_MENU_LABEL,
     XSET_SET_SET_ICN,
-    XSET_SET_SET_LABEL,
+    XSET_SET_SET_MENU_LABEL_CUSTOM,
     XSET_SET_SET_ICON,
     XSET_SET_SET_SHARED_KEY,
     XSET_SET_SET_NEXT,
     XSET_SET_SET_PREV,
     XSET_SET_SET_PARENT,
     XSET_SET_SET_CHILD,
-    XSET_SET_SET_CXT,
+    XSET_SET_SET_CONTEXT,
     XSET_SET_SET_LINE,
     XSET_SET_SET_TOOL,
     XSET_SET_SET_TASK,
     XSET_SET_SET_TASK_POP,
     XSET_SET_SET_TASK_ERR,
     XSET_SET_SET_TASK_OUT,
-    XSET_SET_SET_TERM,
-    XSET_SET_SET_KEEP,
-    XSET_SET_SET_SCROLL,
+    XSET_SET_SET_RUN_IN_TERMINAL,
+    XSET_SET_SET_KEEP_TERMINAL,
+    XSET_SET_SET_SCROLL_LOCK,
     XSET_SET_SET_DISABLE,
-    XSET_SET_SET_OP
+    XSET_SET_SET_OPENER
 };
 
 enum XSetB
@@ -272,15 +272,15 @@ struct XSet
 {
     char* name;
 
-    XSetB b; // tri-state 0=unset(false) 1=true 2=false
-    char* s;
-    char* x;
-    char* y;
-    char* z;      // for menu_string locked, stores default
-    bool disable; // not saved, default false
-    char* menu_label;
-    XSetMenu menu_style; // not saved or read if locked
-    char* icon;
+    XSetB b;                 // saved, tri-state enum 0=unset(false) 1=true 2=false
+    char* s;                 // saved
+    char* x;                 // saved
+    char* y;                 // saved
+    char* z;                 // saved, for menu_string locked, stores default
+    bool disable;            // not saved, default false
+    char* menu_label;        // saved
+    XSetMenu menu_style;     // saved if ( !lock ), or read if locked
+    char* icon;              // saved
     GFunc cb_func;           // not saved
     void* cb_data;           // not saved
     char* ob1;               // not saved
@@ -288,38 +288,38 @@ struct XSet
     char* ob2;               // not saved
     void* ob2_data;          // not saved
     PtkFileBrowser* browser; // not saved - set automatically
-    unsigned int key;
-    unsigned int keymod;
-    char* shared_key; // not saved
-    char* desc;       // not saved or read if locked
-    char* title;      // not saved or read if locked
-    char* next;
-    char* context;
-    XSetTool tool;
-    bool lock; // not saved, default true
+    unsigned int key;        // saved
+    unsigned int keymod;     // saved
+    char* shared_key;        // not saved
+    char* desc;              // saved if ( !lock ), or read if locked
+    char* title;             // saved if ( !lock ), or read if locked
+    char* next;              // saved
+    char* context;           // saved
+    XSetTool tool;           // saved
+    bool lock;               // not saved, default true
 
     // Custom Command ( !lock )
-    char* prev;
-    char* parent;
-    char* child;
-    char* line; // or help if lock
+    char* prev;   // saved
+    char* parent; // saved
+    char* child;  // saved
+    char* line;   // saved or help if lock
     // x = XSET_CMD_LINE..XSET_CMD_BOOKMARK
     // y = user
     // z = custom executable
-    bool task;
-    bool task_pop;
-    bool task_err;
-    bool task_out;
-    bool in_terminal;   // or save menu_label if lock
-    bool keep_terminal; // or save icon if lock
-    bool scroll_lock;
-    char opener;
+    bool task;          // saved
+    bool task_pop;      // saved
+    bool task_err;      // saved
+    bool task_out;      // saved
+    bool in_terminal;   // saved, or save menu_label if lock
+    bool keep_terminal; // saved, or save icon if lock
+    bool scroll_lock;   // saved
+    char opener;        // saved
 
     // Plugin (not saved at all)
-    bool plugin;
-    bool plugin_top;
-    char* plug_name;
-    char* plug_dir;
+    bool plugin;     // not saved
+    bool plugin_top; // not saved
+    char* plug_name; // not saved
+    char* plug_dir;  // not saved
 };
 
 // cache these for speed in event handlers
