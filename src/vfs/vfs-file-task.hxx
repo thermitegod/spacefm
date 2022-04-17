@@ -22,6 +22,8 @@
 
 #include <glibmm.h>
 
+#include <ztd/ztd.hxx>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -118,7 +120,7 @@ struct VFSFileTask
     std::time_t start_time;
     off_t last_speed;
     off_t last_progress;
-    GTimer* timer;
+    ztd::timer timer;
     double last_elapsed;
     unsigned int current_item;
     int err_count;

@@ -493,7 +493,7 @@ ptk_file_task_pause(PtkFileTask* ptask, int state)
         {
             sig = SIGSTOP;
             ptask->task->state_pause = (VFSFileTaskState)state;
-            g_timer_stop(ptask->task->timer);
+            ptask->task->timer.stop();
         }
         else if (state == VFS_FILE_TASK_QUEUE)
         {
@@ -504,7 +504,7 @@ ptk_file_task_pause(PtkFileTask* ptask, int state)
         {
             sig = SIGCONT;
             ptask->task->state_pause = VFS_FILE_TASK_RUNNING;
-            g_timer_continue(ptask->task->timer);
+            ptask->task->timer.start();
         }
 
         if (sig && ptask->task->exec_pid)
@@ -1367,7 +1367,7 @@ ptk_file_task_update(PtkFileTask* ptask)
 
     VFSFileTask* task = ptask->task;
     off_t cur_speed;
-    double timer_elapsed = g_timer_elapsed(task->timer, nullptr);
+    double timer_elapsed = task->timer.elapsed();
 
     if (task->type == VFS_FILE_TASK_EXEC)
     {
@@ -1701,15 +1701,15 @@ on_vfs_file_task_state_cb(VFSFileTask* task, VFSFileTaskState state, void* state
             ptask->query_new_dest = (char**)state_data;
             *ptask->query_new_dest = nullptr;
             ptask->query_cond = g_cond_new();
-            g_timer_stop(task->timer);
+            task->timer.stop();
             g_cond_wait(ptask->query_cond, task->mutex);
             g_cond_free(ptask->query_cond);
             ptask->query_cond = nullptr;
             ret = ptask->query_ret;
-            task->last_elapsed = g_timer_elapsed(task->timer, nullptr);
+            task->last_elapsed = task->timer.elapsed();
             task->last_progress = task->progress;
             task->last_speed = 0;
-            g_timer_continue(task->timer);
+            task->timer.start();
             vfs_file_task_unlock(task);
             break;
         case VFS_FILE_TASK_ERROR:

@@ -136,16 +136,16 @@ should_abort(VFSFileTask* task)
     {
         // paused or queued - suspend thread
         vfs_file_task_lock(task);
-        g_timer_stop(task->timer);
+        task->timer.stop();
         task->pause_cond = g_cond_new();
         g_cond_wait(task->pause_cond, task->mutex);
         // resume
         g_cond_free(task->pause_cond);
         task->pause_cond = nullptr;
-        task->last_elapsed = g_timer_elapsed(task->timer, nullptr);
+        task->last_elapsed = task->timer.elapsed();
         task->last_progress = task->progress;
         task->last_speed = 0;
-        g_timer_continue(task->timer);
+        task->timer.start();
         task->state_pause = VFS_FILE_TASK_RUNNING;
         vfs_file_task_unlock(task);
     }
@@ -2002,7 +2002,7 @@ vfs_task_new(VFSFileTaskType type, GList* src_files, const char* dest_dir)
     task->last_speed = 0;
     task->last_progress = 0;
     task->current_item = 0;
-    task->timer = g_timer_new();
+    task->timer = ztd::timer();
     task->last_elapsed = 0;
     return task;
 }
@@ -2058,7 +2058,7 @@ vfs_file_task_try_abort(VFSFileTask* task)
     {
         vfs_file_task_lock(task);
         g_cond_broadcast(task->pause_cond);
-        task->last_elapsed = g_timer_elapsed(task->timer, nullptr);
+        task->last_elapsed = task->timer.elapsed();
         task->last_progress = task->progress;
         task->last_speed = 0;
         vfs_file_task_unlock(task);
@@ -2066,7 +2066,7 @@ vfs_file_task_try_abort(VFSFileTask* task)
     else
     {
         vfs_file_task_lock(task);
-        task->last_elapsed = g_timer_elapsed(task->timer, nullptr);
+        task->last_elapsed = task->timer.elapsed();
         task->last_progress = task->progress;
         task->last_speed = 0;
         vfs_file_task_unlock(task);
@@ -2103,8 +2103,6 @@ vfs_file_task_free(VFSFileTask* task)
 
     gtk_text_buffer_set_text(task->add_log_buf, "", -1);
     g_object_unref(task->add_log_buf);
-
-    g_timer_destroy(task->timer);
 
     g_slice_free(VFSFileTask, task);
 }
