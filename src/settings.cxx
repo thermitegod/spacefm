@@ -2269,7 +2269,7 @@ xset_custom_new_name()
     while (true)
     {
         setname = fmt::format("cstm_{}", randhex8());
-        if (!xset_is(setname.c_str()))
+        if (!xset_is(setname))
         {
             std::string path1 = Glib::build_filename(xset_get_config_dir(), "scripts", setname);
             std::string path2 = Glib::build_filename(xset_get_config_dir(), "plugin-data", setname);
@@ -2441,7 +2441,7 @@ clean_plugin_mirrors()
         for (const auto& file: std::filesystem::directory_iterator(path))
         {
             file_name = std::filesystem::path(file).filename();
-            if (Glib::str_has_prefix(file_name, "cstm_") && !xset_is(file_name.c_str()))
+            if (Glib::str_has_prefix(file_name, "cstm_") && !xset_is(file_name))
             {
                 std::string plugin_path = fmt::format("{}/{}", path, file_name);
                 std::filesystem::remove_all(plugin_path);
@@ -2551,7 +2551,7 @@ xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
     // add new
     std::string setname = xset_custom_new_name();
 
-    XSet* set = xset_new(setname.c_str());
+    XSet* set = xset_new(setname);
     set->plug_dir = ztd::strdup(plug_dir);
     set->plug_name = ztd::strdup(plug_name);
     set->plugin = true;
@@ -3882,7 +3882,7 @@ xset_custom_new()
     std::string setname = xset_custom_new_name();
 
     XSet* set;
-    set = xset_get(setname.c_str());
+    set = xset_get(setname);
     set->lock = false;
     set->keep_terminal = true;
     set->task = true;
@@ -3934,13 +3934,13 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     // replacements
     const std::string quoted_path = bash_quote(path);
     if (ztd::contains(editor, "%f"))
-        editor = ztd::replace(editor, "%f", quoted_path.c_str());
+        editor = ztd::replace(editor, "%f", quoted_path);
     else if (ztd::contains(editor, "%F"))
-        editor = ztd::replace(editor, "%F", quoted_path.c_str());
+        editor = ztd::replace(editor, "%F", quoted_path);
     else if (ztd::contains(editor, "%u"))
-        editor = ztd::replace(editor, "%u", quoted_path.c_str());
+        editor = ztd::replace(editor, "%u", quoted_path);
     else if (ztd::contains(editor, "%U"))
-        editor = ztd::replace(editor, "%U", quoted_path.c_str());
+        editor = ztd::replace(editor, "%U", quoted_path);
     else
         editor = fmt::format("{} {}", editor, quoted_path);
     editor = fmt::format("{} {}", editor, quoted_path);
