@@ -16,6 +16,9 @@
 #include <string>
 #include <filesystem>
 
+#include <array>
+#include <vector>
+
 #include <iostream>
 #include <fstream>
 
@@ -149,7 +152,7 @@ struct ContextData
 };
 
 // clang-format off
-static const char* context_sub[] =
+static const std::array<const char*, 38> context_subs
 {
     "MIME Type",
     "Filename",
@@ -191,7 +194,7 @@ static const char* context_sub[] =
     "Panel 4 Device",
 };
 
-static const char* context_sub_list[] =
+static const std::array<const char*, 38> context_sub_lists
 {
     "4%%%%%application/%%%%%audio/%%%%%audio/ || video/%%%%%image/%%%%%inode/directory%%%%%text/%%%%%video/%%%%%application/x-bzip||application/x-bzip-compressed-tar||application/x-gzip||application/zstd||application/x-lz4||application/zip||application/x-7z-compressed||application/x-bzip2||application/x-bzip2-compressed-tar||application/x-xz-compressed-tar||application/x-compressed-tar||application/x-rar",  //"MIME Type",
     "6%%%%%archive_types || .gz || .bz2 || .7z || .xz || .zst || .lz4 || .txz || .tgz || .tzst || .tlz4 || .zip || .rar || .tar || .tar.gz || .tar.xz || .tar.zst || .tar.lz4 || .tar.bz2 || .tar.7z%%%%%audio_types || .mp3 || .MP3 || .m3u || .wav || .wma || .aac || .ac3 || .opus || . flac || .ram || .m4a || .ogg%%%%%image_types || .jpg || .jpeg || .gif || .png || .xpm%%%%%video_types || .mp4 || .MP4 || .avi || .AVI || .mkv || .mpeg || .mpg || .flv || .vob || .asf || .rm || .m2ts || .mov",  //"Filename",
@@ -233,7 +236,7 @@ static const char* context_sub_list[] =
     "0%%%%%dev/sdb1%%%%%/dev/sdc1%%%%%/dev/sdd1%%%%%/dev/sr0"  //"Panel 4 Device"
 };
 
-static const char* context_comp[] =
+static const std::array<const char*, 12> context_comps
 {
     "equals",
     "doesn't equal",
@@ -249,7 +252,7 @@ static const char* context_comp[] =
     "doesn't match",
 };
 
-static const char* item_types[] =
+static const std::array<const char*, 3> item_types
 {
     "Bookmark",
     "Application",
@@ -287,12 +290,12 @@ get_rule_next(char** s, int* sub, int* comp, char** value)
         return false;
     *sub = strtol(vs, nullptr, 10);
     free(vs);
-    if (*sub < 0 || *sub >= static_cast<int>(G_N_ELEMENTS(context_sub)))
+    if (*sub < 0 || *sub >= (int)context_subs.size())
         return false;
     vs = get_element_next(s);
     *comp = strtol(vs, nullptr, 10);
     free(vs);
-    if (*comp < 0 || *comp >= static_cast<int>(G_N_ELEMENTS(context_comp)))
+    if (*comp < 0 || *comp >= (int)context_comps.size())
         return false;
     if (!(*value = get_element_next(s)))
         *value = ztd::strdup("");
@@ -588,9 +591,9 @@ context_display(int sub, int comp, char* value)
 {
     std::string disp;
     if (value[0] == '\0' || value[0] == ' ' || Glib::str_has_suffix(value, " "))
-        disp = fmt::format("{} {} \"{}\"", context_sub[sub], context_comp[comp], value);
+        disp = fmt::format("{} {} \"{}\"", context_subs[sub], context_comps[comp], value);
     else
-        disp = fmt::format("{} {} {}", context_sub[sub], context_comp[comp], value);
+        disp = fmt::format("{} {} {}", context_subs[sub], context_comps[comp], value);
     return ztd::strdup(disp);
 }
 
@@ -662,7 +665,7 @@ on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
     int sub = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_sub));
     if (sub < 0)
         return;
-    char* elements = (char*)context_sub_list[sub];
+    char* elements = ztd::strdup(context_sub_lists[sub]);
     char* def_comp = get_element_next(&elements);
     if (def_comp)
     {
@@ -677,6 +680,8 @@ on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
     gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(ctxt->box_value))), "");
     if (ctxt->context && ctxt->context->valid)
         gtk_label_set_text(ctxt->current_value, ctxt->context->var[sub]);
+
+    free(elements);
 }
 
 static void
@@ -1766,14 +1771,18 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     // boxes
     ctxt->box_sub = gtk_combo_box_text_new();
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->box_sub), false);
-    for (unsigned int i = 0; i < G_N_ELEMENTS(context_sub); i++)
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_sub), context_sub[i]);
+    for (const char* context_sub: context_subs)
+    {
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_sub), context_sub);
+    }
     g_signal_connect(G_OBJECT(ctxt->box_sub), "changed", G_CALLBACK(on_context_sub_changed), ctxt);
 
     ctxt->box_comp = gtk_combo_box_text_new();
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->box_comp), false);
-    for (unsigned int i = 0; i < G_N_ELEMENTS(context_comp); i++)
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_comp), context_comp[i]);
+    for (const char* context_comp: context_comps)
+    {
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_comp), context_comp);
+    }
 
     ctxt->box_value = gtk_combo_box_text_new_with_entry();
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->box_value), false);
@@ -2206,8 +2215,11 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     else
     {
         // custom command
-        for (unsigned int i = 0; i < G_N_ELEMENTS(item_types); i++)
-            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), item_types[i]);
+
+        for (const char* item_type2: item_types)
+        {
+            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), item_type2);
+        }
         x = rset->x ? strtol(rset->x, nullptr, 10) : 0;
 
         switch (x)

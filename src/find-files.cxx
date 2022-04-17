@@ -21,6 +21,7 @@
 #include <string>
 #include <filesystem>
 
+#include <array>
 #include <vector>
 
 #include <chrono>
@@ -319,7 +320,7 @@ compose_command(FindFile* data)
     std::string tmp;
 
     GtkTreeIter it;
-    char size_units[] = {"ckMG"};
+    std::array<char, 4> size_units{'c', 'k', 'M', 'G'};
 
     argv.push_back("find");
     argv.push_back("-H");
@@ -358,10 +359,10 @@ compose_command(FindFile* data)
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_size_lower)))
     {
         argv.push_back("-size");
-        tmp =
-            fmt::format("+{}{}",
-                        gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->size_lower)),
-                        size_units[gtk_combo_box_get_active(GTK_COMBO_BOX(data->size_lower_unit))]);
+        tmp = fmt::format(
+            "+{}{}",
+            gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->size_lower)),
+            size_units.at(gtk_combo_box_get_active(GTK_COMBO_BOX(data->size_lower_unit))));
         argv.push_back(tmp);
     }
 
@@ -369,10 +370,10 @@ compose_command(FindFile* data)
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_size_upper)))
     {
         argv.push_back("-size");
-        tmp =
-            fmt::format("-{}{}",
-                        gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->size_upper)),
-                        size_units[gtk_combo_box_get_active(GTK_COMBO_BOX(data->size_upper_unit))]);
+        tmp = fmt::format(
+            "-{}{}",
+            gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->size_upper)),
+            size_units.at(gtk_combo_box_get_active(GTK_COMBO_BOX(data->size_upper_unit))));
         argv.push_back(tmp);
     }
 

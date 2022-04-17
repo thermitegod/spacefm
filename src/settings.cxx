@@ -19,6 +19,7 @@
 #include <string>
 #include <filesystem>
 
+#include <array>
 #include <vector>
 
 #include <iostream>
@@ -116,7 +117,10 @@ static const char* enter_menu_name_new =
     "character as a shortcut key if desired.\n\nTIP: To change this item later, right-click on "
     "the item to open the Design Menu.";
 
-static const char* builtin_tool_name[] = { // must match XSetTool::XSET_TOOL_ enum
+// clang-format off
+// must match XSetTool::XSET_TOOL_ enum
+static const std::array<const char*, 18> builtin_tool_name
+{
     nullptr,
     nullptr,
     "Show Devices",
@@ -134,9 +138,12 @@ static const char* builtin_tool_name[] = { // must match XSetTool::XSET_TOOL_ en
     "New Tab Here",
     "Show Hidden",
     "Show Thumbnails",
-    "Large Icons"};
+    "Large Icons"
+};
 
-static const char* builtin_tool_icon[] = { // must match XSetTool::XSET_TOOL_ enum
+// must match XSetTool::XSET_TOOL_ enum
+static const std::array<const char*, 18> builtin_tool_icon
+{
     nullptr,
     nullptr,
     "gtk-harddisk",
@@ -154,9 +161,12 @@ static const char* builtin_tool_icon[] = { // must match XSetTool::XSET_TOOL_ en
     "gtk-add",
     "gtk-apply",
     nullptr,
-    "zoom-in"};
+    "zoom-in"
+};
 
-static const char* builtin_tool_shared_key[] = { // must match XSetTool::XSET_TOOL_ enum
+// must match XSetTool::XSET_TOOL_ enum
+static const std::array<const char*, 18> builtin_tool_shared_key
+{
     nullptr,
     nullptr,
     "panel1_show_devmon",
@@ -174,7 +184,9 @@ static const char* builtin_tool_shared_key[] = { // must match XSetTool::XSET_TO
     "tab_new_here",
     "panel1_show_hidden",
     "view_thumb",
-    "panel1_list_large"};
+    "panel1_list_large"
+};
+//clang-format on
 
 static void
 parse_general_settings(std::string& line)
@@ -1757,18 +1769,17 @@ read_root_settings()
 XSetContext*
 xset_context_new()
 {
-    unsigned int i;
     if (!xset_context)
     {
         xset_context = g_slice_new0(XSetContext);
         xset_context->valid = false;
-        for (i = 0; i < G_N_ELEMENTS(xset_context->var); i++)
+        for (std::size_t i = 0; i < xset_context->var.size(); ++i)
             xset_context->var[i] = nullptr;
     }
     else
     {
         xset_context->valid = false;
-        for (i = 0; i < G_N_ELEMENTS(xset_context->var); i++)
+        for (std::size_t i = 0; i < xset_context->var.size(); ++i)
         {
             if (xset_context->var[i])
                 free(xset_context->var[i]);
@@ -2555,8 +2566,11 @@ xset_parse_plugin(const char* plug_dir, const char* line, int use)
     char* value;
     XSet* set;
     XSet* set2;
-    const char* prefix;
-    const char* handler_prefix[] = {"hand_arc_", "hand_fs_", "hand_net_", "hand_f_"};
+    std::string prefix;
+    const std::array<std::string, 4> handler_prefix{"hand_arc_",
+                                                    "hand_fs_",
+                                                    "hand_net_",
+                                                    "hand_f_"};
 
     if (!sep)
         return;
@@ -2572,10 +2586,10 @@ xset_parse_plugin(const char* plug_dir, const char* line, int use)
     if (use < PluginUse::PLUGIN_USE_BOOKMARKS)
     {
         // handler
-        prefix = handler_prefix[use];
+        prefix = handler_prefix.at(use);
     }
     else
-        prefix = ztd::strdup("cstm_");
+        prefix = "cstm_";
 
     if (Glib::str_has_prefix(name, prefix))
     {
@@ -5362,7 +5376,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
         g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(XSetJob::XSET_JOB_HELP_ADD));
         g_signal_connect(submenu, "key_press_event", G_CALLBACK(xset_design_menu_keypress), set);
 
-        for (unsigned int i = XSetTool::XSET_TOOL_DEVICES; i < G_N_ELEMENTS(builtin_tool_name); i++)
+        for (std::size_t i = XSetTool::XSET_TOOL_DEVICES; i < builtin_tool_name.size(); i++)
         {
             newitem = xset_design_additem(submenu,
                                           builtin_tool_name[i],
@@ -7333,13 +7347,13 @@ void
 xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,
                   XSet* set_parent, bool show_tooltips)
 {
-    const char default_tools[] = {XSetTool::XSET_TOOL_BOOKMARKS,
-                                  XSetTool::XSET_TOOL_TREE,
-                                  XSetTool::XSET_TOOL_NEW_TAB_HERE,
-                                  XSetTool::XSET_TOOL_BACK_MENU,
-                                  XSetTool::XSET_TOOL_FWD_MENU,
-                                  XSetTool::XSET_TOOL_UP,
-                                  XSetTool::XSET_TOOL_DEFAULT};
+    const std::array<XSetTool, 7> default_tools{XSetTool::XSET_TOOL_BOOKMARKS,
+                                                XSetTool::XSET_TOOL_TREE,
+                                                XSetTool::XSET_TOOL_NEW_TAB_HERE,
+                                                XSetTool::XSET_TOOL_BACK_MENU,
+                                                XSetTool::XSET_TOOL_FWD_MENU,
+                                                XSetTool::XSET_TOOL_UP,
+                                                XSetTool::XSET_TOOL_DEFAULT};
     int i;
     int stop_b4;
     XSet* set;
@@ -7370,11 +7384,11 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             if (strstr(set_parent->name, "tool_s"))
                 stop_b4 = 2;
             else
-                stop_b4 = G_N_ELEMENTS(default_tools);
+                stop_b4 = default_tools.size();
             set_target = set_child;
             for (i = 0; i < stop_b4; i++)
             {
-                set = xset_new_builtin_toolitem(XSetTool(default_tools[i]));
+                set = xset_new_builtin_toolitem(default_tools.at(i));
                 xset_custom_insert_after(set_target, set);
                 set_target = set;
             }

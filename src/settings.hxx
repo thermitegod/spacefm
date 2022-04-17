@@ -20,6 +20,7 @@
 
 #include <string>
 
+#include <array>
 #include <vector>
 
 #include <glib.h>
@@ -350,7 +351,7 @@ extern std::vector<std::string> xset_cmd_history;
 struct XSetContext
 {
     bool valid;
-    char* var[40];
+    std::array<char*, 40> var;
 };
 
 void xset_set_window_icon(GtkWindow* win);

@@ -19,6 +19,7 @@
 #include <string>
 #include <filesystem>
 
+#include <array>
 #include <vector>
 
 #include <iostream>
@@ -94,7 +95,7 @@ static const char* press_enter_to_close = "[ Finished ]  Press Enter to close";
 static const char* keep_term_when_done = "\\n[[ $? -eq 0 ]] || ( read -p '%s: ' )\\n\"";
 
 /*  Drag & Drop/Clipboard targets  */
-static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
+// static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 
 static void
 on_model_destroy(void* data, GObject* object)
@@ -621,11 +622,16 @@ ptk_location_view_get_mount_point_dir(const char* name)
         else
             parent = set->s;
 
-        const char* varname[] = {"$USER", "$UID", "$HOME", "$XDG_RUNTIME_DIR", "$XDG_CACHE_HOME"};
-        for (unsigned int i = 0; i < G_N_ELEMENTS(varname); i++)
+        const std::array<const char*, 5> varnames{"$USER",
+                                                  "$UID",
+                                                  "$HOME",
+                                                  "$XDG_RUNTIME_DIR",
+                                                  "$XDG_CACHE_HOME"};
+        for (std::size_t i = 0; i < varnames.size(); ++i)
         {
-            if (!ztd::contains(parent, varname[i]))
+            if (!ztd::contains(parent, varnames.at(i)))
                 continue;
+
             std::string value;
             switch (i)
             {
@@ -647,7 +653,7 @@ ptk_location_view_get_mount_point_dir(const char* name)
                 default:
                     value = "";
             }
-            parent = ztd::replace(parent, varname[i], value);
+            parent = ztd::replace(parent, varnames.at(i), value);
         }
         std::filesystem::create_directories(parent);
         std::filesystem::permissions(parent, std::filesystem::perms::owner_all);

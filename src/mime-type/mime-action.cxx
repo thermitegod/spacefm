@@ -755,9 +755,9 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
         return;
     }
 
-    std::vector<std::string> groups{"Default Applications",
-                                    "Added Associations",
-                                    "Removed Associations"};
+    std::array<std::string, 3> groups{"Default Applications",
+                                      "Added Associations",
+                                      "Removed Associations"};
 
     for (const std::string& group: groups)
     {

@@ -20,6 +20,7 @@
 
 #include <string>
 
+#include <array>
 #include <vector>
 
 #include <sstream>
@@ -1330,7 +1331,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
             // LOG_INFO("dest       : {}", dest);
 
             // Singular file extraction target (e.g. stdout-redirected gzip)
-            std::vector<std::string> keys{"%g", "%G"};
+            std::array<std::string, 2> keys{"%g", "%G"};
             if (ztd::contains(command, keys))
             {
                 /* Creating extraction target, taking into account whether

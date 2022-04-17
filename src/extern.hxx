@@ -22,7 +22,7 @@
 // clang-format off
 
 // for pref-dialog.c
-const std::array<std::string, 13> terminal_programs
+const std::array<const char*, 13> terminal_programs
 {
     "terminal",
     "xfce4-terminal",
@@ -40,7 +40,7 @@ const std::array<std::string, 13> terminal_programs
 };
 
 // order and contents must match prefdlg.ui
-const std::array<std::string, 3> su_commands
+const std::array<const char*, 3> su_commands
 {
     "/bin/su",
     "/usr/bin/sudo",

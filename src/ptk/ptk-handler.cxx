@@ -20,6 +20,7 @@
 #include <string>
 #include <filesystem>
 
+#include <array>
 #include <vector>
 
 #include <iostream>
@@ -60,7 +61,7 @@ enum PtkHandlerCol
 
 // clang-format off
 // xset name prefixes of default handlers
-static const char* handler_def_prefix[] =
+static const std::array<const char*, 4> handler_def_prefixs
 {
     "hand_arc_+",
     "hand_fs_+",
@@ -69,7 +70,7 @@ static const char* handler_def_prefix[] =
 };
 
 // xset name prefixes of custom handlers
-static const char* handler_cust_prefix[] =
+static const std::array<const char*, 4> handler_cust_prefixs
 {
     "hand_arc_",
     "hand_fs_",
@@ -77,7 +78,7 @@ static const char* handler_cust_prefix[] =
     "hand_f_"
 };
 
-static const char* handler_conf_xset[] =
+static const std::array<std::string, 4> handler_conf_xsets
 {
     "arc_conf2",
     "dev_fs_cnf",
@@ -85,7 +86,7 @@ static const char* handler_conf_xset[] =
     "open_hand"
 };
 
-static const char* dialog_titles[] =
+static const std::array<const char*, 4> dialog_titles
 {
     "Archive Handlers",
     "Device Handlers",
@@ -93,7 +94,7 @@ static const char* dialog_titles[] =
     "File Handlers",
 };
 
-static const char* dialog_mnemonics[] =
+static const std::array<const char*, 4> dialog_mnemonics
 {
     "Archive Hand_lers",
     "Device Hand_lers",
@@ -101,7 +102,7 @@ static const char* dialog_mnemonics[] =
     "File Hand_lers",
 };
 
-static const char* modes[] =
+static const std::array<const char*, 4> modes
 {
     "archive",
     "device",
@@ -109,14 +110,14 @@ static const char* modes[] =
     "file"
 };
 
-static const char* cmds_arc[] =
+static const std::array<const char*, 3> cmds_arc
 {
     "compress",
     "extract",
     "list"
 };
 
-static const char* cmds_mnt[] =
+static const std::array<const char*, 3> cmds_mnt
 {
     "mount",
     "unmount",
@@ -739,8 +740,8 @@ ptk_handler_get_command(int mode, int cmd, XSet* handler_set)
     // name script
     std::string str =
         fmt::format("/hand-{}-{}.sh",
-                    modes[mode],
-                    mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc[cmd] : cmds_mnt[cmd]);
+                    modes.at(mode),
+                    mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
     std::string script = ztd::replace(def_script, "/exec.sh", str);
     free(def_script);
     if (std::filesystem::exists(script))
@@ -793,8 +794,8 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
     // name script
     std::string script_name =
         fmt::format("/hand-{}-{}.sh",
-                    modes[mode],
-                    mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc[cmd] : cmds_mnt[cmd]);
+                    modes.at(mode),
+                    mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
     script = ztd::replace(def_script, "/exec.sh", script_name);
     free(def_script);
     // load script
@@ -878,9 +879,10 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
     // name script
     std::string script;
     std::string str;
-    str = fmt::format("/hand-{}-{}.sh",
-                      modes[mode],
-                      mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc[cmd] : cmds_mnt[cmd]);
+    str =
+        fmt::format("/hand-{}-{}.sh",
+                    modes.at(mode),
+                    mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
     script = ztd::replace(def_script, "/exec.sh", str);
     free(def_script);
     // get text
@@ -1039,7 +1041,7 @@ ptk_handler_file_has_handlers(int mode, int cmd, const char* path, VFSMimeType* 
         under_path = (char*)path;
 
     // parsing handlers space-separated list
-    if ((ptr = xset_get_s(handler_conf_xset[mode])))
+    if ((ptr = xset_get_s(handler_conf_xsets.at(mode))))
     {
         while (ptr[0])
         {
@@ -1133,7 +1135,7 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
             return;
     }
 
-    set_conf = xset_get(handler_conf_xset[mode]);
+    set_conf = xset_get(handler_conf_xsets.at(mode));
     list = ztd::strdup(set_conf->s);
 
     if (!list)
@@ -1218,7 +1220,7 @@ add_new_handler(int mode)
     do
     {
         rand = randhex8();
-        name = fmt::format("{}{}", handler_cust_prefix[mode], rand);
+        name = fmt::format("{}{}", handler_cust_prefixs.at(mode), rand);
         free(rand);
     } while (xset_is(name));
 
@@ -1274,17 +1276,18 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     free(path_dest);
 
     // add to handler list
-    if (g_strcmp0(xset_get_s(handler_conf_xset[mode]), "") <= 0)
+    if (g_strcmp0(xset_get_s(handler_conf_xsets.at(mode)), "") <= 0)
     {
         // No handlers present - adding new handler
-        xset_set(handler_conf_xset[mode], "s", new_handler_xset->name);
+        xset_set(handler_conf_xsets.at(mode), "s", new_handler_xset->name);
     }
     else
     {
         // Adding new handler to handlers
-        char* new_handlers_list =
-            g_strdup_printf("%s %s", new_handler_xset->name, xset_get_s(handler_conf_xset[mode]));
-        xset_set(handler_conf_xset[mode], "s", new_handlers_list);
+        char* new_handlers_list = g_strdup_printf("%s %s",
+                                                  new_handler_xset->name,
+                                                  xset_get_s(handler_conf_xsets.at(mode)));
+        xset_set(handler_conf_xsets.at(mode), "s", new_handlers_list);
         free(new_handlers_list);
     }
 
@@ -1373,7 +1376,7 @@ config_load_handler_settings(XSet* handler_xset, char* handler_xset_name, const 
     gtk_widget_set_sensitive(GTK_WIDGET(hnd->chkbtn_handler_enabled), true);
     gtk_widget_set_sensitive(
         GTK_WIDGET(hnd->btn_defaults0),
-        Glib::str_has_prefix(handler_xset->name, handler_def_prefix[hnd->mode]));
+        Glib::str_has_prefix(handler_xset->name, handler_def_prefixs.at(hnd->mode)));
 
     /* Configuring widgets with handler settings. Only name, MIME and
      * extension warrant a warning
@@ -1484,7 +1487,7 @@ populate_archive_handlers(HandlerData* hnd, XSet* def_handler_set)
 {
     /* Fetching available archive handlers (literally gets member s from
      * the xset) - user-defined order has already been set */
-    char* archive_handlers_s = xset_get_s(handler_conf_xset[hnd->mode]);
+    char* archive_handlers_s = xset_get_s(handler_conf_xsets.at(hnd->mode));
 
     // Making sure archive handlers are available
     if (!archive_handlers_s)
@@ -1502,7 +1505,7 @@ populate_archive_handlers(HandlerData* hnd, XSet* def_handler_set)
     int i;
     for (i = 0; archive_handlers[i] != nullptr; ++i)
     {
-        if (Glib::str_has_prefix(archive_handlers[i], handler_cust_prefix[hnd->mode]))
+        if (Glib::str_has_prefix(archive_handlers[i], handler_cust_prefixs.at(hnd->mode)))
         {
             // Fetching handler  - ignoring invalid handler xset names
             XSet* handler_xset = xset_is(archive_handlers[i]);
@@ -1594,7 +1597,7 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
     } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(hnd->list), &iter));
 
     // Saving the new archive handlers list
-    xset_set(handler_conf_xset[hnd->mode], "s", archive_handlers);
+    xset_set(handler_conf_xsets.at(hnd->mode), "s", archive_handlers);
     free(archive_handlers);
 
     // Saving settings
@@ -1737,18 +1740,18 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         free(dis_name);
 
         // Updating available archive handlers list
-        if (g_strcmp0(xset_get_s(handler_conf_xset[hnd->mode]), "") <= 0)
+        if (g_strcmp0(xset_get_s(handler_conf_xsets.at(hnd->mode)), "") <= 0)
         {
             // No handlers present - adding new handler
-            xset_set(handler_conf_xset[hnd->mode], "s", new_handler_xset->name);
+            xset_set(handler_conf_xsets.at(hnd->mode), "s", new_handler_xset->name);
         }
         else
         {
             // Adding new handler to handlers
             char* new_handlers_list = g_strdup_printf("%s %s",
                                                       new_handler_xset->name,
-                                                      xset_get_s(handler_conf_xset[hnd->mode]));
-            xset_set(handler_conf_xset[hnd->mode], "s", new_handlers_list);
+                                                      xset_get_s(handler_conf_xsets.at(hnd->mode)));
+            xset_set(handler_conf_xsets.at(hnd->mode), "s", new_handlers_list);
 
             // Clearing up
             free(new_handlers_list);
@@ -1878,7 +1881,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
 
         // Updating available archive handlers list - fetching current
         // handlers
-        const char* archive_handlers_s = xset_get_s(handler_conf_xset[hnd->mode]);
+        const char* archive_handlers_s = xset_get_s(handler_conf_xsets.at(hnd->mode));
         char** archive_handlers =
             archive_handlers_s ? g_strsplit(archive_handlers_s, " ", -1) : nullptr;
         char* new_archive_handlers_s = ztd::strdup("");
@@ -1914,7 +1917,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         }
 
         // Finally updating handlers
-        xset_set(handler_conf_xset[hnd->mode], "s", new_archive_handlers_s);
+        xset_set(handler_conf_xsets.at(hnd->mode), "s", new_archive_handlers_s);
 
         // Deleting xset
         xset_custom_delete(handler_xset, false);
@@ -2212,7 +2215,7 @@ restore_defaults(HandlerData* hnd, bool all)
         char* xset_name;
         gtk_tree_model_get(model, &it, PtkHandlerCol::COL_XSET_NAME, &xset_name, -1);
         // a default handler is selected?
-        if (!(xset_name && Glib::str_has_prefix(xset_name, handler_def_prefix[hnd->mode])))
+        if (!(xset_name && Glib::str_has_prefix(xset_name, handler_def_prefixs.at(hnd->mode))))
         {
             free(xset_name);
             return;
@@ -2313,7 +2316,7 @@ validate_archive_handler(HandlerData* hnd)
          * that the created dialog does not have an icon set */
         xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                         GTK_MESSAGE_WARNING,
-                        dialog_titles[hnd->mode],
+                        dialog_titles.at(hnd->mode),
                         GTK_BUTTONS_OK,
                         "Please enter a valid handler name.");
         gtk_widget_grab_focus(hnd->entry_handler_name);
@@ -2325,7 +2328,7 @@ validate_archive_handler(HandlerData* hnd)
     {
         xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                         GTK_MESSAGE_WARNING,
-                        dialog_titles[hnd->mode],
+                        dialog_titles.at(hnd->mode),
                         GTK_BUTTONS_OK,
                         "Please enter a valid MIME Type or Pathname pattern.");
         gtk_widget_grab_focus(hnd->entry_handler_mime);
@@ -2357,7 +2360,7 @@ validate_archive_handler(HandlerData* hnd)
         {
             xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                             GTK_MESSAGE_WARNING,
-                            dialog_titles[hnd->mode],
+                            dialog_titles.at(hnd->mode),
                             GTK_BUTTONS_OK,
                             "The following "
                             "substitution variables should probably be in the "
@@ -2387,7 +2390,7 @@ validate_archive_handler(HandlerData* hnd)
          * have an icon set */
         xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                         GTK_MESSAGE_WARNING,
-                        dialog_titles[hnd->mode],
+                        dialog_titles.at(hnd->mode),
                         GTK_BUTTONS_OK,
                         "The following "
                         "variables should probably be in the extraction "
@@ -2408,7 +2411,7 @@ validate_archive_handler(HandlerData* hnd)
          * have an icon set */
         xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                         GTK_MESSAGE_WARNING,
-                        dialog_titles[hnd->mode],
+                        dialog_titles.at(hnd->mode),
                         GTK_BUTTONS_OK,
                         "The following "
                         "variables should probably be in the list "
@@ -2631,7 +2634,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
             if (!set_sel)
                 return; // nothing selected - failsafe
 
-            if (Glib::str_has_prefix(set_sel->name, handler_def_prefix[hnd->mode]) &&
+            if (Glib::str_has_prefix(set_sel->name, handler_def_prefixs.at(hnd->mode)) &&
                 set_sel->disable)
             {
                 // is an unsaved default handler, click Defaults then Apply to save
@@ -2679,13 +2682,16 @@ static void
 on_archive_default(GtkMenuItem* menuitem, XSet* set)
 {
     (void)menuitem;
-    const char* arcname[] = {"arc_def_open", "arc_def_ex", "arc_def_exto", "arc_def_list"};
-    for (unsigned int i = 0; i < G_N_ELEMENTS(arcname); i++)
+    const std::array<std::string, 4> arcnames{"arc_def_open",
+                                              "arc_def_ex",
+                                              "arc_def_exto",
+                                              "arc_def_list"};
+    for (const std::string& arcname: arcnames)
     {
-        if (!strcmp(set->name, arcname[i]))
+        if (ztd::same(set->name, arcname))
             set->b = XSetB::XSET_B_TRUE;
         else
-            xset_set_b(arcname[i], false);
+            xset_set_b(arcname, false);
     }
 }
 
@@ -2810,7 +2816,7 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
         hnd->parent = nullptr;
     hnd->browser = file_browser;
     hnd->dlg = gtk_dialog_new_with_buttons(
-        dialog_titles[mode],
+        dialog_titles.at(mode),
         hnd->parent ? GTK_WINDOW(hnd->parent) : nullptr,
         GtkDialogFlags(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
         nullptr,
@@ -2826,8 +2832,8 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
     xset_set_window_icon(GTK_WINDOW(hnd->dlg));
 
     // Setting saved dialog size
-    int width = xset_get_int(handler_conf_xset[PtkHandlerMode::HANDLER_MODE_ARC], "x");
-    int height = xset_get_int(handler_conf_xset[PtkHandlerMode::HANDLER_MODE_ARC], "y");
+    int width = xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), "x");
+    int height = xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), "y");
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(hnd->dlg), width, height);
 
@@ -2849,9 +2855,8 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
 
     // Generating left-hand side of dialog
     GtkWidget* lbl_handlers = gtk_label_new(nullptr);
-    str = g_strdup_printf("<b>%s</b>", dialog_mnemonics[mode]);
-    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handlers), str);
-    free(str);
+    std::string markup = fmt::format("<b>{}</b>", dialog_mnemonics.at(mode));
+    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handlers), markup.c_str());
     gtk_widget_set_halign(GTK_WIDGET(lbl_handlers), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(lbl_handlers), GTK_ALIGN_START);
 
@@ -3358,10 +3363,10 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handle
     if (width && height)
     {
         // They are - saving
-        xset_set(handler_conf_xset[PtkHandlerMode::HANDLER_MODE_ARC],
+        xset_set(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC),
                  "x",
                  std::to_string(width).c_str());
-        xset_set(handler_conf_xset[PtkHandlerMode::HANDLER_MODE_ARC],
+        xset_set(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC),
                  "y",
                  std::to_string(height).c_str());
     }

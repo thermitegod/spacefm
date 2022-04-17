@@ -16,6 +16,7 @@
 #include <string>
 #include <filesystem>
 
+#include <array>
 #include <vector>
 
 #include <glibmm.h>
@@ -2870,7 +2871,7 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
     else
         fmt = "%d";
 
-    std::vector<std::string> keys{"%t", "%T", "%p", "%P"};
+    std::array<std::string, 4> keys{"%t", "%T", "%p", "%P"};
     if (ztd::contains(fmt, keys))
     {
         // get panel/tab info
@@ -3664,7 +3665,7 @@ enum MainWindowTaskCol
 };
 
 // clang-format off
-static const char* task_titles[] =
+static const std::array<const char*, 14> task_titles
 {
     // If you change "Status", also change it in on_task_button_press_event
     "Status",
@@ -3683,7 +3684,7 @@ static const char* task_titles[] =
     "StartTime",
 };
 
-static const char* task_names[] =
+static const std::array<std::string, 13> task_names
 {
     "task_col_status",
     "task_col_count",
@@ -3981,10 +3982,11 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
     }
 
     // tasks
-    const char* job_titles[] = {"move", "copy", "trash", "delete", "link", "change", "run"};
+    const std::array<const char*, 7>
+        job_titles{"move", "copy", "trash", "delete", "link", "change", "run"};
     if ((ptask = get_selected_task(file_browser->task_view)))
     {
-        c->var[ItemPropContext::CONTEXT_TASK_TYPE] = ztd::strdup(job_titles[ptask->task->type]);
+        c->var[ItemPropContext::CONTEXT_TASK_TYPE] = ztd::strdup(job_titles.at(ptask->task->type));
         if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
         {
             c->var[ItemPropContext::CONTEXT_TASK_NAME] = ztd::strdup(ptask->task->current_file);
@@ -4328,8 +4330,9 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
     // tasks
     if ((ptask = get_selected_task(file_browser->task_view)))
     {
-        const char* job_titles[] = {"move", "copy", "trash", "delete", "link", "change", "run"};
-        buf.append(fmt::format("\nfm_task_type=\"{}\"\n", job_titles[ptask->task->type]));
+        const std::array<const char*, 7>
+            job_titles{"move", "copy", "trash", "delete", "link", "change", "run"};
+        buf.append(fmt::format("\nfm_task_type=\"{}\"\n", job_titles.at(ptask->task->type)));
         if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
         {
             esc_path = bash_quote(ptask->task->dest_dir);
@@ -4383,12 +4386,12 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
         int j;
         for (j = 0; j < 13; j++)
         {
-            if (!strcmp(title, task_titles[j]))
+            if (ztd::same(title, task_titles.at(j)))
                 break;
         }
         if (j != 13)
         {
-            XSet* set = xset_get(task_names[j]);
+            XSet* set = xset_get(task_names.at(j));
             // save column position
             xset_set_set(set, XSetSetSet::XSET_SET_SET_X, std::to_string(i).c_str());
             // if the window was opened maximized and stayed maximized, or the
@@ -4404,7 +4407,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
                 }
             }
             // set column visibility
-            gtk_tree_view_column_set_visible(col, xset_get_b(task_names[j]));
+            gtk_tree_view_column_set_visible(col, xset_get_b(task_names.at(j)));
         }
     }
 }
@@ -5181,7 +5184,7 @@ main_task_view_update_task(PtkFileTask* ptask)
 
     // LOG_INFO("main_task_view_update_task  ptask={}", ptask);
     // clang-format off
-    const char* job_titles[] = {"moving",
+    const std::array<const char*, 7> job_titles{"moving",
                                 "copying",
                                 "trashing",
                                 "deleting",
@@ -5262,26 +5265,23 @@ main_task_view_update_task(PtkFileTask* ptask)
         }
 
         // status
-        const char* status;
+        std::string status;
         char* status3;
         if (ptask->task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
         {
             if (!ptask->err_count)
-                status = job_titles[ptask->task->type];
+                status = job_titles.at(ptask->task->type);
             else
-            {
-                std::string str =
-                    fmt::format("{} error {}", ptask->err_count, job_titles[ptask->task->type]);
-                status = ztd::strdup(str);
-            }
+                status =
+                    fmt::format("{} error {}", ptask->err_count, job_titles.at(ptask->task->type));
         }
         else
         {
             // exec task
             if (!ptask->task->exec_action.empty())
-                status = ptask->task->exec_action.c_str();
+                status = ptask->task->exec_action;
             else
-                status = job_titles[ptask->task->type];
+                status = job_titles.at(ptask->task->type);
         }
 
         if (ptask->task->state_pause == VFSFileTaskState::VFS_FILE_TASK_PAUSE)
@@ -5461,33 +5461,29 @@ main_task_view_update_task(PtkFileTask* ptask)
 static GtkWidget*
 main_task_view_new(FMMainWindow* main_window)
 {
-    int i;
-    int j;
-    int width;
     GtkTreeViewColumn* col;
     GtkCellRenderer* renderer;
     GtkCellRenderer* pix_renderer;
 
-    int cols[] = {MainWindowTaskCol::TASK_COL_STATUS,
-                  MainWindowTaskCol::TASK_COL_COUNT,
-                  MainWindowTaskCol::TASK_COL_PATH,
-                  MainWindowTaskCol::TASK_COL_FILE,
-                  MainWindowTaskCol::TASK_COL_TO,
-                  MainWindowTaskCol::TASK_COL_PROGRESS,
-                  MainWindowTaskCol::TASK_COL_TOTAL,
-                  MainWindowTaskCol::TASK_COL_STARTED,
-                  MainWindowTaskCol::TASK_COL_ELAPSED,
-                  MainWindowTaskCol::TASK_COL_CURSPEED,
-                  MainWindowTaskCol::TASK_COL_CUREST,
-                  MainWindowTaskCol::TASK_COL_AVGSPEED,
-                  MainWindowTaskCol::TASK_COL_AVGEST,
-                  MainWindowTaskCol::TASK_COL_STARTTIME,
-                  MainWindowTaskCol::TASK_COL_ICON,
-                  MainWindowTaskCol::TASK_COL_DATA};
-    int num_cols = G_N_ELEMENTS(cols);
+    const std::array<int, 16> cols{MainWindowTaskCol::TASK_COL_STATUS,
+                                   MainWindowTaskCol::TASK_COL_COUNT,
+                                   MainWindowTaskCol::TASK_COL_PATH,
+                                   MainWindowTaskCol::TASK_COL_FILE,
+                                   MainWindowTaskCol::TASK_COL_TO,
+                                   MainWindowTaskCol::TASK_COL_PROGRESS,
+                                   MainWindowTaskCol::TASK_COL_TOTAL,
+                                   MainWindowTaskCol::TASK_COL_STARTED,
+                                   MainWindowTaskCol::TASK_COL_ELAPSED,
+                                   MainWindowTaskCol::TASK_COL_CURSPEED,
+                                   MainWindowTaskCol::TASK_COL_CUREST,
+                                   MainWindowTaskCol::TASK_COL_AVGSPEED,
+                                   MainWindowTaskCol::TASK_COL_AVGEST,
+                                   MainWindowTaskCol::TASK_COL_STARTTIME,
+                                   MainWindowTaskCol::TASK_COL_ICON,
+                                   MainWindowTaskCol::TASK_COL_DATA};
 
     // Model
-    GtkListStore* list = gtk_list_store_new(num_cols,
+    GtkListStore* list = gtk_list_store_new(cols.size(),
                                             G_TYPE_STRING,
                                             G_TYPE_STRING,
                                             G_TYPE_STRING,
@@ -5515,7 +5511,8 @@ main_task_view_new(FMMainWindow* main_window)
     // gtk_tree_view_set_single_click_timeout(GTK_TREE_VIEW(view), SINGLE_CLICK_TIMEOUT);
 
     // Columns
-    for (i = 0; i < 13; i++)
+    int j;
+    for (int i = 0; i < 13; i++)
     {
         col = gtk_tree_view_column_new();
         gtk_tree_view_column_set_resizable(col, true);
@@ -5525,7 +5522,7 @@ main_task_view_new(FMMainWindow* main_window)
         // column order
         for (j = 0; j < 13; j++)
         {
-            if (xset_get_int(task_names[j], "x") == i)
+            if (xset_get_int(task_names.at(j), "x") == i)
                 break;
         }
         if (j == 13)
@@ -5533,13 +5530,13 @@ main_task_view_new(FMMainWindow* main_window)
         else
         {
             // column width
-            width = xset_get_int(task_names[j], "y");
+            int width = xset_get_int(task_names.at(j), "y");
             if (width == 0)
                 width = 80;
             gtk_tree_view_column_set_fixed_width(col, width);
         }
 
-        switch (cols[j])
+        switch (cols.at(j))
         {
             case MainWindowTaskCol::TASK_COL_STATUS:
                 // Icon and Text
@@ -5565,18 +5562,18 @@ main_task_view_new(FMMainWindow* main_window)
                 // Progress Bar
                 renderer = gtk_cell_renderer_progress_new();
                 gtk_tree_view_column_pack_start(col, renderer, true);
-                gtk_tree_view_column_set_attributes(col, renderer, "value", cols[j], nullptr);
+                gtk_tree_view_column_set_attributes(col, renderer, "value", cols.at(j), nullptr);
                 break;
             default:
                 // Text Column
                 renderer = gtk_cell_renderer_text_new();
                 gtk_tree_view_column_pack_start(col, renderer, true);
-                gtk_tree_view_column_set_attributes(col, renderer, "text", cols[j], nullptr);
+                gtk_tree_view_column_set_attributes(col, renderer, "text", cols.at(j), nullptr);
 
                 // ellipsize some columns
-                if (cols[j] == MainWindowTaskCol::TASK_COL_FILE ||
-                    cols[j] == MainWindowTaskCol::TASK_COL_PATH ||
-                    cols[j] == MainWindowTaskCol::TASK_COL_TO)
+                if (cols.at(j) == MainWindowTaskCol::TASK_COL_FILE ||
+                    cols.at(j) == MainWindowTaskCol::TASK_COL_PATH ||
+                    cols.at(j) == MainWindowTaskCol::TASK_COL_TO)
                 {
                     GValue val = GValue();
                     g_value_init(&val, G_TYPE_CHAR);
@@ -5588,9 +5585,9 @@ main_task_view_new(FMMainWindow* main_window)
         }
 
         gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
-        gtk_tree_view_column_set_title(col, task_titles[j]);
+        gtk_tree_view_column_set_title(col, task_titles.at(j));
         gtk_tree_view_column_set_reorderable(col, true);
-        gtk_tree_view_column_set_visible(col, xset_get_b(task_names[j]));
+        gtk_tree_view_column_set_visible(col, xset_get_b(task_names.at(j)));
         if (j == MainWindowTaskCol::TASK_COL_FILE) //|| j == MainWindowTaskCol::TASK_COL_PATH || j
                                                    //== MainWindowTaskCol::TASK_COL_TO
         {
@@ -5693,7 +5690,12 @@ main_window_socket_command(char* argv[], std::string& reply)
     int width;
     GtkWidget* widget;
     // must match file-browser.c
-    const char* column_titles[] = {"Name", "Size", "Type", "Permission", "Owner", "Modified"};
+    const std::array<const char*, 6> column_titles{"Name",
+                                                   "Size",
+                                                   "Type",
+                                                   "Permission",
+                                                   "Owner",
+                                                   "Modified"};
 
     if (!(argv && argv[0]))
     {
@@ -6055,19 +6057,22 @@ main_window_socket_command(char* argv[], std::string& reply)
                     str = (char*)gtk_tree_view_column_get_title(col);
                     if (!g_strcmp0(argv[i + 1], str))
                         break;
-                    if (!g_strcmp0(argv[i + 1], "name") && !g_strcmp0(str, column_titles[0]))
+                    if (!g_strcmp0(argv[i + 1], "name") && !g_strcmp0(str, column_titles.at(0)))
                         break;
-                    else if (!g_strcmp0(argv[i + 1], "size") && !g_strcmp0(str, column_titles[1]))
+                    else if (!g_strcmp0(argv[i + 1], "size") &&
+                             !g_strcmp0(str, column_titles.at(1)))
                         break;
-                    else if (!g_strcmp0(argv[i + 1], "type") && !g_strcmp0(str, column_titles[2]))
+                    else if (!g_strcmp0(argv[i + 1], "type") &&
+                             !g_strcmp0(str, column_titles.at(2)))
                         break;
                     else if (!g_strcmp0(argv[i + 1], "permission") &&
-                             !g_strcmp0(str, column_titles[3]))
+                             !g_strcmp0(str, column_titles.at(3)))
                         break;
-                    else if (!g_strcmp0(argv[i + 1], "owner") && !g_strcmp0(str, column_titles[4]))
+                    else if (!g_strcmp0(argv[i + 1], "owner") &&
+                             !g_strcmp0(str, column_titles.at(4)))
                         break;
                     else if (!g_strcmp0(argv[i + 1], "modified") &&
-                             !g_strcmp0(str, column_titles[5]))
+                             !g_strcmp0(str, column_titles.at(5)))
                         break;
                 }
                 if (j == 6)
@@ -6456,19 +6461,22 @@ main_window_socket_command(char* argv[], std::string& reply)
                     str = (char*)gtk_tree_view_column_get_title(col);
                     if (!g_strcmp0(argv[i + 1], str))
                         break;
-                    if (!g_strcmp0(argv[i + 1], "name") && !g_strcmp0(str, column_titles[0]))
+                    if (!g_strcmp0(argv[i + 1], "name") && !g_strcmp0(str, column_titles.at(0)))
                         break;
-                    else if (!g_strcmp0(argv[i + 1], "size") && !g_strcmp0(str, column_titles[1]))
+                    else if (!g_strcmp0(argv[i + 1], "size") &&
+                             !g_strcmp0(str, column_titles.at(1)))
                         break;
-                    else if (!g_strcmp0(argv[i + 1], "type") && !g_strcmp0(str, column_titles[2]))
+                    else if (!g_strcmp0(argv[i + 1], "type") &&
+                             !g_strcmp0(str, column_titles.at(2)))
                         break;
                     else if (!g_strcmp0(argv[i + 1], "permission") &&
-                             !g_strcmp0(str, column_titles[3]))
+                             !g_strcmp0(str, column_titles.at(3)))
                         break;
-                    else if (!g_strcmp0(argv[i + 1], "owner") && !g_strcmp0(str, column_titles[4]))
+                    else if (!g_strcmp0(argv[i + 1], "owner") &&
+                             !g_strcmp0(str, column_titles.at(4)))
                         break;
                     else if (!g_strcmp0(argv[i + 1], "modified") &&
-                             !g_strcmp0(str, column_titles[5]))
+                             !g_strcmp0(str, column_titles.at(5)))
                         break;
                 }
                 if (j == 6)

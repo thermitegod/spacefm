@@ -18,6 +18,7 @@
 #include <string>
 #include <string_view>
 
+#include <array>
 #include <vector>
 
 #include <glibmm.h>
@@ -193,7 +194,7 @@ VFSAppDesktop::open_multiple_files() noexcept
 {
     if (!m_exec.empty())
     {
-        std::vector<std::string> keys{"%U", "%F"};
+        std::array<std::string, 2> keys{"%U", "%F"};
         if (ztd::contains(m_exec, keys))
             return true;
     }
@@ -209,7 +210,7 @@ VFSAppDesktop::translate_app_exec_to_command_line(std::vector<std::string>& file
 
     bool add_files = false;
 
-    std::vector<std::string> open_files_keys{"%F", "%U"};
+    std::array<std::string, 2> open_files_keys{"%F", "%U"};
     if (ztd::contains(cmd, open_files_keys))
     {
         std::string tmp;
@@ -226,7 +227,7 @@ VFSAppDesktop::translate_app_exec_to_command_line(std::vector<std::string>& file
         add_files = true;
     }
 
-    std::vector<std::string> open_file_keys{"%f", "%u"};
+    std::array<std::string, 2> open_file_keys{"%f", "%u"};
     if (ztd::contains(cmd, open_file_keys))
     {
         std::string tmp;

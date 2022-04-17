@@ -16,6 +16,9 @@
 #include <string>
 #include <filesystem>
 
+#include <array>
+#include <vector>
+
 #include <iostream>
 #include <fstream>
 
@@ -329,13 +332,16 @@ static void
 on_archive_default(GtkMenuItem* menuitem, XSet* set)
 {
     (void)menuitem;
-    const char* arcname[] = {"arc_def_open", "arc_def_ex", "arc_def_exto", "arc_def_list"};
-    for (unsigned int i = 0; i < G_N_ELEMENTS(arcname); i++)
+    const std::array<std::string, 4> arcnames{"arc_def_open",
+                                              "arc_def_ex",
+                                              "arc_def_exto",
+                                              "arc_def_list"};
+    for (const std::string& arcname: arcnames)
     {
-        if (!strcmp(set->name, arcname[i]))
+        if (ztd::same(set->name, arcname))
             set->b = XSetB::XSET_B_TRUE;
         else
-            xset_set_b(arcname[i], false);
+            xset_set_b(arcname, false);
     }
 }
 
@@ -1128,7 +1134,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         xset_set_cb("select_invert", (GFunc)ptk_file_browser_invert_selection, browser);
         xset_set_cb("select_patt", (GFunc)on_popup_select_pattern, data);
 
-        static const char* copycmd[] = {
+        const std::array<std::string, 40> copycmds{
             "copy_loc",        "copy_loc_last", "copy_tab_prev", "copy_tab_next", "copy_tab_1",
             "copy_tab_2",      "copy_tab_3",    "copy_tab_4",    "copy_tab_5",    "copy_tab_6",
             "copy_tab_7",      "copy_tab_8",    "copy_tab_9",    "copy_tab_10",   "copy_panel_prev",
@@ -1137,9 +1143,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
             "move_tab_2",      "move_tab_3",    "move_tab_4",    "move_tab_5",    "move_tab_6",
             "move_tab_7",      "move_tab_8",    "move_tab_9",    "move_tab_10",   "move_panel_prev",
             "move_panel_next", "move_panel_1",  "move_panel_2",  "move_panel_3",  "move_panel_4"};
-        for (unsigned int i = 0; i < G_N_ELEMENTS(copycmd); i++)
+        for (const std::string& copycmd: copycmds)
         {
-            set = xset_set_cb(copycmd[i], (GFunc)on_copycmd, data);
+            set = xset_set_cb(copycmd, (GFunc)on_copycmd, data);
             xset_set_ob1(set, "set", set);
         }
 
@@ -1235,7 +1241,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         set = xset_set_cb("prop_info", (GFunc)on_popup_file_properties_activate, data);
         set = xset_set_cb("prop_perm", (GFunc)on_popup_file_permissions_activate, data);
 
-        static const char* permcmd[] = {
+        const std::array<std::string, 63> permcmds{
             "perm_r",           "perm_rw",           "perm_rwx",         "perm_r_r",
             "perm_rw_r",        "perm_rw_rw",        "perm_rwxr_x",      "perm_rwxrwx",
             "perm_r_r_r",       "perm_rw_r_r",       "perm_rw_rw_rw",    "perm_rwxr_r",
@@ -1252,9 +1258,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
             "rown_myuser",      "rown_myuser_users", "rown_user1",       "rown_user1_users",
             "rown_user2",       "rown_user2_users",  "rown_root",        "rown_root_users",
             "rown_root_myuser", "rown_root_user1",   "rown_root_user2"};
-        for (unsigned int i = 0; i < G_N_ELEMENTS(permcmd); i++)
+        for (const std::string& permcmd: permcmds)
         {
-            set = xset_set_cb(permcmd[i], (GFunc)on_permission, data);
+            set = xset_set_cb(permcmd, (GFunc)on_permission, data);
             xset_set_ob1(set, "set", set);
         }
 

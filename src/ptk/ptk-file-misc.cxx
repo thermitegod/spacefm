@@ -16,6 +16,9 @@
 #include <string>
 #include <filesystem>
 
+#include <array>
+#include <vector>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -3330,7 +3333,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
     std::string fm_filenames = "fm_filenames=(\n";
     std::string fm_files = "fm_files=(\n";
     // command looks like it handles multiple files ?
-    std::vector<std::string> keys{"%N", "%F", "fm_files[", "fm_filenames["};
+    std::array<std::string, 4> keys{"%N", "%F", "fm_files[", "fm_filenames["};
     bool multiple = ztd::contains(command, keys);
     if (multiple)
     {

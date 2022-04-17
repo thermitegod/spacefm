@@ -16,6 +16,9 @@
 #include <string>
 #include <filesystem>
 
+#include <array>
+#include <vector>
+
 #include <gtk/gtk.h>
 
 #include "ptk/ptk-file-properties.hxx"
@@ -33,18 +36,18 @@
 #include "ptk/ptk-app-chooser.hxx"
 #include "utils.hxx"
 
-static const char* chmod_names[] = {"owner_r",
-                                    "owner_w",
-                                    "owner_x",
-                                    "group_r",
-                                    "group_w",
-                                    "group_x",
-                                    "others_r",
-                                    "others_w",
-                                    "others_x",
-                                    "set_uid",
-                                    "set_gid",
-                                    "sticky"};
+static const std::array<const char*, 12> chmod_names{"owner_r",
+                                                     "owner_w",
+                                                     "owner_x",
+                                                     "group_r",
+                                                     "group_w",
+                                                     "group_x",
+                                                     "others_r",
+                                                     "others_w",
+                                                     "others_x",
+                                                     "set_uid",
+                                                     "set_gid",
+                                                     "sticky"};
 
 struct FilePropertiesDialogData
 {
@@ -386,7 +389,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     for (i = 0; i < ChmodActionType::N_CHMOD_ACTIONS; ++i)
     {
         data->chmod_btns[i] =
-            GTK_TOGGLE_BUTTON(GTK_WIDGET(gtk_builder_get_object(builder, chmod_names[i])));
+            GTK_TOGGLE_BUTTON(GTK_WIDGET(gtk_builder_get_object(builder, chmod_names.at(i))));
     }
 
     // MOD
@@ -594,7 +597,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         {
             if (data->chmod_states[i] != 2) /* allow to touch this bit */
             {
-                data->chmod_states[i] = (vfs_file_info_get_mode(file) & chmod_flags[i] ? 1 : 0);
+                data->chmod_states[i] = (vfs_file_info_get_mode(file) & chmod_flags.at(i) ? 1 : 0);
                 gtk_toggle_button_set_active(data->chmod_btns[i], data->chmod_states[i]);
             }
         }

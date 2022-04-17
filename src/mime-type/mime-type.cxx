@@ -430,7 +430,7 @@ mime_type_init()
 static void
 mime_cache_load_all()
 {
-    const char filename[] = "/mime/mime.cache";
+    std::string filename = "/mime/mime.cache";
 
     std::vector<std::string> dirs = vfs_system_data_dir();
     n_caches = dirs.size();

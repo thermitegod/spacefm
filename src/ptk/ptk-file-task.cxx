@@ -13,6 +13,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <array>
+#include <vector>
+
 #include <chrono>
 
 #include <sys/wait.h>
@@ -698,14 +701,14 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     GtkLabel* label;
 
     // clang-format off
-    const char* actions[] = {"Move: ",
+    const std::array<const char*, 7> actions{"Move: ",
                              "Copy: ",
                              "Trash: ",
                              "Delete: ",
                              "Link: ",
                              "Change: ",
                              "Run: "};
-    const char* titles[] = {"Moving...",
+    const std::array<const char*, 7> titles{"Moving...",
                             "Copying...",
                             "Trashing...",
                             "Deleting...",
@@ -721,7 +724,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 
     VFSFileTask* task = ptask->task;
 
-    ptask->progress_dlg = gtk_dialog_new_with_buttons(titles[task->type],
+    ptask->progress_dlg = gtk_dialog_new_with_buttons(titles.at(task->type),
                                                       nullptr /*was task->parent_window*/,
                                                       (GtkDialogFlags)0,
                                                       nullptr,
@@ -763,7 +766,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     int row = 0;
 
     /* Copy/Move/Link: */
-    label = GTK_LABEL(gtk_label_new(actions[task->type]));
+    label = GTK_LABEL(gtk_label_new(actions.at(task->type)));
     gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(label), GTK_ALIGN_CENTER);
     gtk_grid_attach(grid, GTK_WIDGET(label), 0, row, 1, 1);
@@ -875,13 +878,13 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     GtkWidget* overwrite_align;
     if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
-        static const char* overwrite_options[] = {"Ask",
-                                                  "Overwrite All",
-                                                  "Skip All",
-                                                  "Auto Rename"};
-        static const char* error_options[] = {"Stop If Error First",
-                                              "Stop On Any Error",
-                                              "Continue"};
+        static const std::array<const char*, 4> overwrite_options{"Ask",
+                                                                  "Overwrite All",
+                                                                  "Skip All",
+                                                                  "Auto Rename"};
+        static const std::array<const char*, 3> error_options{"Stop If Error First",
+                                                              "Stop On Any Error",
+                                                              "Continue"};
 
         bool overtask = task->type == VFSFileTaskType::VFS_FILE_TASK_MOVE ||
                         task->type == VFSFileTaskType::VFS_FILE_TASK_COPY ||
@@ -889,13 +892,15 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
         ptask->overwrite_combo = gtk_combo_box_text_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(ptask->overwrite_combo), false);
         gtk_widget_set_sensitive(ptask->overwrite_combo, overtask);
-        for (unsigned int i = 0; i < G_N_ELEMENTS(overwrite_options); i++)
+        for (const char* overwrite_option: overwrite_options)
+        {
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ptask->overwrite_combo),
-                                           overwrite_options[i]);
+                                           overwrite_option);
+        }
         if (overtask)
             gtk_combo_box_set_active(
                 GTK_COMBO_BOX(ptask->overwrite_combo),
-                task->overwrite_mode < G_N_ELEMENTS(overwrite_options) ? task->overwrite_mode : 0);
+                task->overwrite_mode < overwrite_options.size() ? task->overwrite_mode : 0);
         g_signal_connect(G_OBJECT(ptask->overwrite_combo),
                          "changed",
                          G_CALLBACK(on_overwrite_combo_changed),
@@ -903,12 +908,12 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 
         ptask->error_combo = gtk_combo_box_text_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(ptask->error_combo), false);
-        for (unsigned int i = 0; i < G_N_ELEMENTS(error_options); i++)
-            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ptask->error_combo),
-                                           error_options[i]);
+        for (const char* error_option: error_options)
+        {
+            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ptask->error_combo), error_option);
+        }
         gtk_combo_box_set_active(GTK_COMBO_BOX(ptask->error_combo),
-                                 ptask->err_mode < G_N_ELEMENTS(error_options) ? ptask->err_mode
-                                                                               : 0);
+                                 ptask->err_mode < error_options.size() ? ptask->err_mode : 0);
         g_signal_connect(G_OBJECT(ptask->error_combo),
                          "changed",
                          G_CALLBACK(on_error_combo_changed),

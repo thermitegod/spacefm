@@ -18,6 +18,8 @@
 #pragma once
 
 #include <string>
+
+#include <array>
 #include <vector>
 
 #include <glibmm.h>
@@ -57,7 +59,7 @@ enum ChmodActionType
     N_CHMOD_ACTIONS
 };
 
-extern const mode_t chmod_flags[];
+extern const std::array<mode_t, 12> chmod_flags;
 
 enum VFSFileTaskState
 {

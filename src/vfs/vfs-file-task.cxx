@@ -16,6 +16,7 @@
 #include <string>
 #include <filesystem>
 
+#include <array>
 #include <vector>
 
 #include <iostream>
@@ -41,18 +42,18 @@
 #include "vfs/vfs-file-task.hxx"
 #include "vfs/vfs-file-trash.hxx"
 
-const mode_t chmod_flags[] = {S_IRUSR,
-                              S_IWUSR,
-                              S_IXUSR,
-                              S_IRGRP,
-                              S_IWGRP,
-                              S_IXGRP,
-                              S_IROTH,
-                              S_IWOTH,
-                              S_IXOTH,
-                              S_ISUID,
-                              S_ISGID,
-                              S_ISVTX};
+const std::array<mode_t, 12> chmod_flags{S_IRUSR,
+                                         S_IWUSR,
+                                         S_IXUSR,
+                                         S_IRGRP,
+                                         S_IWGRP,
+                                         S_IXGRP,
+                                         S_IROTH,
+                                         S_IWOTH,
+                                         S_IXOTH,
+                                         S_ISUID,
+                                         S_ISGID,
+                                         S_ISVTX,};
 
 /*
  * void get_total_size_of_dir( const char* path, off_t* size )
@@ -1005,9 +1006,9 @@ vfs_file_task_chown_chmod(VFSFileTask* task, const std::string& src_file)
                 if (task->chmod_actions[i] == 2) /* Don't change */
                     continue;
                 if (task->chmod_actions[i] == 0) /* Remove this bit */
-                    new_mode &= ~chmod_flags[i];
+                    new_mode &= ~chmod_flags.at(i);
                 else /* Add this bit */
-                    new_mode |= chmod_flags[i];
+                    new_mode |= chmod_flags.at(i);
             }
             if (new_mode != src_stat.st_mode)
             {

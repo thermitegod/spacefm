@@ -15,6 +15,9 @@
 
 #include <chrono>
 
+#include <array>
+#include <vector>
+
 #include "window-reference.hxx"
 
 #include <gtk/gtk.h>
@@ -67,20 +70,23 @@ struct FMPrefDlg
 
 static FMPrefDlg* data = nullptr;
 
-static const int tool_icon_sizes[] = {0,
-                                      GTK_ICON_SIZE_MENU,
-                                      GTK_ICON_SIZE_SMALL_TOOLBAR,
-                                      GTK_ICON_SIZE_LARGE_TOOLBAR,
-                                      GTK_ICON_SIZE_BUTTON,
-                                      GTK_ICON_SIZE_DND,
-                                      GTK_ICON_SIZE_DIALOG};
+static const std::array<int, 7> tool_icon_sizes{0,
+                                                GTK_ICON_SIZE_MENU,
+                                                GTK_ICON_SIZE_SMALL_TOOLBAR,
+                                                GTK_ICON_SIZE_LARGE_TOOLBAR,
+                                                GTK_ICON_SIZE_BUTTON,
+                                                GTK_ICON_SIZE_DND,
+                                                GTK_ICON_SIZE_DIALOG};
 // also change max_icon_size in settings.c & lists in prefdlg.ui prefdlg2.ui
 // see create_size in vfs-thumbnail-loader.c:_vfs_thumbnail_load()
-static const int big_icon_sizes[] = {512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22};
-static const int small_icon_sizes[] =
-    {512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22, 16, 12};
-static const char* date_formats[] = {"%Y-%m-%d %H:%M", "%Y-%m-%d", "%Y-%m-%d %H:%M:%S"};
-static const int drag_actions[] = {0, 1, 2, 3};
+static const std::array<int, 13>
+    big_icon_sizes{512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22};
+static const std::array<int, 15>
+    small_icon_sizes{512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22, 16, 12};
+static const std::array<const char*, 3> date_formats{"%Y-%m-%d %H:%M",
+                                                     "%Y-%m-%d",
+                                                     "%Y-%m-%d %H:%M:%S"};
+static const std::array<int, 4> drag_actions{0, 1, 2, 3};
 
 static void
 dir_unload_thumbnails(const char* path, VFSDir* dir, void* user_data)
@@ -330,11 +336,11 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                 if (idx == 0)
                     xset_set("su_command", "s", custom_su.c_str());
                 else
-                    xset_set("su_command", "s", su_commands.at(idx - 1).c_str());
+                    xset_set("su_command", "s", su_commands.at(idx - 1));
             }
             else
             {
-                xset_set("su_command", "s", su_commands.at(idx).c_str());
+                xset_set("su_command", "s", su_commands.at(idx));
             }
         }
 
@@ -548,33 +554,32 @@ fm_edit_preference(GtkWindow* parent, int page)
             gtk_combo_box_set_active(GTK_COMBO_BOX(data->terminal), i);
         }
 
-        for (unsigned int i = 0; i < G_N_ELEMENTS(big_icon_sizes); ++i)
+        for (int big_icon_size: big_icon_sizes)
         {
-            if (big_icon_sizes[i] == app_settings.big_icon_size)
+            if (big_icon_size == app_settings.big_icon_size)
             {
-                ibig_icon = i;
+                ibig_icon = big_icon_size;
                 break;
             }
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(data->big_icon_size), ibig_icon);
 
-        for (unsigned int i = 0; i < G_N_ELEMENTS(small_icon_sizes); ++i)
+        for (int small_icon_size: small_icon_sizes)
         {
-            if (small_icon_sizes[i] == app_settings.small_icon_size)
+            if (small_icon_size == app_settings.small_icon_size)
             {
-                ismall_icon = i;
+                ismall_icon = small_icon_size;
                 break;
             }
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(data->small_icon_size), ismall_icon);
 
-        // sfm
         itool_icon = 0;
-        for (unsigned int i = 0; i < G_N_ELEMENTS(tool_icon_sizes); ++i)
+        for (int tool_icon_size: tool_icon_sizes)
         {
-            if (tool_icon_sizes[i] == app_settings.tool_icon_size)
+            if (tool_icon_size == app_settings.tool_icon_size)
             {
-                itool_icon = i;
+                itool_icon = tool_icon_size;
                 break;
             }
         }
@@ -608,13 +613,12 @@ fm_edit_preference(GtkWindow* parent, int page)
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->root_bar), xset_get_b("root_bar"));
         gtk_widget_set_sensitive(data->root_bar, geteuid() == 0);
 
-        int drag_action = xset_get_int("drag_action", "x");
         int drag_action_set = 0;
-        for (unsigned int i = 0; i < G_N_ELEMENTS(drag_actions); ++i)
+        for (int drag_action: drag_actions)
         {
-            if (drag_actions[i] == drag_action)
+            if (drag_action == xset_get_int("drag_action", "x"))
             {
-                drag_action_set = i;
+                drag_action_set = drag_action;
                 break;
             }
         }
@@ -670,20 +674,20 @@ fm_edit_preference(GtkWindow* parent, int page)
         gtk_combo_box_set_model(GTK_COMBO_BOX(data->date_format), model);
         gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(data->date_format), 0);
         g_object_unref(model);
-        for (unsigned int i = 0; i < G_N_ELEMENTS(date_formats); ++i)
+        for (const char* date_format: date_formats)
         {
-            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->date_format), date_formats[i]);
+            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->date_format), date_format);
         }
         char* date_s = xset_get_s("date_format");
         if (date_s)
         {
-            unsigned int i;
-            for (i = 0; i < G_N_ELEMENTS(date_formats); ++i)
+            std::size_t i;
+            for (i = 0; i < date_formats.size(); ++i)
             {
-                if (!strcmp(date_formats[i], date_s))
+                if (ztd::same(date_formats.at(i), date_s))
                     break;
             }
-            if (i >= G_N_ELEMENTS(date_formats))
+            if (i >= date_formats.size())
             {
                 gtk_combo_box_text_prepend_text(GTK_COMBO_BOX_TEXT(data->date_format), date_s);
                 i = 0;
