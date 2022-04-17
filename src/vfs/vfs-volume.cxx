@@ -3416,9 +3416,10 @@ exec_task(const char* command, bool run_in_terminal)
     if (!(command && command[0]))
         return;
 
-    GList* files = g_list_prepend(nullptr, ztd::strdup("exec_task"));
+    std::vector<std::string> file_list;
+    file_list.push_back("exec_task");
 
-    PtkFileTask* task = ptk_file_task_new(VFS_FILE_TASK_EXEC, files, "/", nullptr, nullptr);
+    PtkFileTask* task = ptk_file_task_new(VFS_FILE_TASK_EXEC, file_list, "/", nullptr, nullptr);
     task->task->exec_action = "exec_task";
     task->task->exec_command = command;
     task->task->exec_sync = false;

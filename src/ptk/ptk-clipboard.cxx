@@ -296,22 +296,16 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, const char* dest_dir, GtkTreeVi
     {
         char** puri;
         char** uri_list;
-        GList* files = nullptr;
+        std::vector<std::string> file_list;
         puri = uri_list = g_uri_list_extract_uris(uri_list_str);
         while (*puri)
         {
             char* file_path = g_filename_from_uri(*puri, nullptr, nullptr);
             if (file_path)
-            {
-                files = g_list_prepend(files, file_path);
-            }
+                file_list.push_back(file_path);
             ++puri;
         }
         g_strfreev(uri_list);
-
-        // sfm
-        if (files)
-            files = g_list_reverse(files);
 
         /*
          * If only one item is selected and the item is a
@@ -320,7 +314,7 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, const char* dest_dir, GtkTreeVi
          */
 
         PtkFileTask* task = ptk_file_task_new(action,
-                                              files,
+                                              file_list,
                                               dest_dir,
                                               parent_win ? GTK_WINDOW(parent_win) : nullptr,
                                               GTK_WIDGET(task_view));
@@ -379,23 +373,20 @@ ptk_clipboard_paste_links(GtkWindow* parent_win, const char* dest_dir, GtkTreeVi
     {
         char** puri;
         char** uri_list;
-        GList* files = nullptr;
+        std::vector<std::string> file_list;
+
         puri = uri_list = g_uri_list_extract_uris(uri_list_str);
         while (*puri)
         {
             char* file_path = g_filename_from_uri(*puri, nullptr, nullptr);
             if (file_path)
-                files = g_list_prepend(files, file_path);
+                file_list.push_back(file_path);
             ++puri;
         }
         g_strfreev(uri_list);
 
-        // sfm
-        if (files)
-            files = g_list_reverse(files);
-
         PtkFileTask* task = ptk_file_task_new(action,
-                                              files,
+                                              file_list,
                                               dest_dir,
                                               parent_win ? GTK_WINDOW(parent_win) : nullptr,
                                               task_view ? GTK_WIDGET(task_view) : nullptr);
@@ -456,7 +447,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
         int missing_targets = 0;
         char** puri;
         char** uri_list;
-        GList* files = nullptr;
+        std::vector<std::string> file_list;
         puri = uri_list = g_uri_list_extract_uris(uri_list_str);
         while (*puri)
         {
@@ -474,7 +465,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
                 {
                     struct stat stat;
                     if (lstat(file_path, &stat) == 0) // need to see broken symlinks
-                        files = g_list_prepend(files, file_path);
+                        file_list.push_back(file_path);
                     else
                     {
                         missing_targets++;
@@ -486,12 +477,8 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
         }
         g_strfreev(uri_list);
 
-        // sfm
-        if (files)
-            files = g_list_reverse(files);
-
         PtkFileTask* task = ptk_file_task_new(action,
-                                              files,
+                                              file_list,
                                               dest_dir,
                                               parent_win ? GTK_WINDOW(parent_win) : nullptr,
                                               GTK_WIDGET(task_view));

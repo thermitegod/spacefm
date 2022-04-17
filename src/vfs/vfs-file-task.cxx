@@ -63,10 +63,10 @@ const mode_t chmod_flags[] = {S_IRUSR,
  * calculation is cancelled.
  * NOTE: *size should be set to zero before calling this function.
  */
-static void get_total_size_of_dir(VFSFileTask* task, const char* path, off_t* size,
+static void get_total_size_of_dir(VFSFileTask* task, const std::string& path, off_t* size,
                                   struct stat* have_stat);
-static void vfs_file_task_error(VFSFileTask* task, int errnox, const char* action,
-                                const char* target);
+static void vfs_file_task_error(VFSFileTask* task, int errnox, const std::string& action,
+                                const std::string& target);
 static void vfs_file_task_exec_error(VFSFileTask* task, int errnox, const std::string& action);
 static void add_task_dev(VFSFileTask* task, dev_t dev);
 static bool should_abort(VFSFileTask* task);
@@ -153,17 +153,24 @@ should_abort(VFSFileTask* task)
 }
 
 char*
-vfs_file_task_get_unique_name(const char* dest_dir, const char* base_name, const char* ext)
+vfs_file_task_get_unique_name(const std::string& dest_dir, const std::string& base_name,
+                              const std::string& ext)
 { // returns nullptr if all names used; otherwise newly allocated string
     struct stat dest_stat;
-    std::string new_name =
-        fmt::format("{}{}{}", base_name, ext && ext[0] ? "." : "", ext ? ext : "");
+    std::string new_name;
+    if (ext.empty())
+        new_name = base_name;
+    else
+        new_name = fmt::format("{}.{}", base_name, ext);
     std::string new_dest_file = Glib::build_filename(dest_dir, new_name);
     unsigned int n = 1;
     while (n && lstat(new_dest_file.c_str(), &dest_stat) == 0)
     {
-        new_name =
-            fmt::format("{}-copy{}{}{}", base_name, ++n, ext && ext[0] ? "." : "", ext ? ext : "");
+        if (ext.empty())
+            new_name = fmt::format("{}-copy{}", base_name, ++n);
+        else
+            new_name = fmt::format("{}-copy{}.{}", base_name, ++n, ext);
+
         new_dest_file = Glib::build_filename(dest_dir, new_name);
     }
     if (n == 0)
@@ -178,7 +185,8 @@ vfs_file_task_get_unique_name(const char* dest_dir, const char* base_name, const
  * The returned string is the new destination file chosen by the user
  */
 static bool
-check_overwrite(VFSFileTask* task, const char* dest_file, bool* dest_exists, char** new_dest_file)
+check_overwrite(VFSFileTask* task, const std::string& dest_file, bool* dest_exists,
+                char** new_dest_file)
 {
     struct stat dest_stat;
     char* new_dest;
@@ -188,7 +196,7 @@ check_overwrite(VFSFileTask* task, const char* dest_file, bool* dest_exists, cha
         *new_dest_file = nullptr;
         if (task->overwrite_mode == VFS_FILE_TASK_OVERWRITE_ALL)
         {
-            *dest_exists = !lstat(dest_file, &dest_stat);
+            *dest_exists = !lstat(dest_file.c_str(), &dest_stat);
             if (ztd::same(task->current_file, task->current_dest))
             {
                 // src and dest are same file - don't overwrite (truncates)
@@ -199,19 +207,19 @@ check_overwrite(VFSFileTask* task, const char* dest_file, bool* dest_exists, cha
         }
         if (task->overwrite_mode == VFS_FILE_TASK_SKIP_ALL)
         {
-            *dest_exists = !lstat(dest_file, &dest_stat);
+            *dest_exists = !lstat(dest_file.c_str(), &dest_stat);
             return !*dest_exists;
         }
         if (task->overwrite_mode == VFS_FILE_TASK_AUTO_RENAME)
         {
-            *dest_exists = !lstat(dest_file, &dest_stat);
+            *dest_exists = !lstat(dest_file.c_str(), &dest_stat);
             if (!*dest_exists)
                 return !task->abort;
 
             // auto-rename
             std::string ext;
-            char* old_name = g_path_get_basename(dest_file);
-            char* dest_dir = g_path_get_dirname(dest_file);
+            char* old_name = g_path_get_basename(dest_file.c_str());
+            char* dest_dir = g_path_get_dirname(dest_file.c_str());
             std::string base_name = get_name_extension(old_name, ext);
             free(old_name);
             *new_dest_file =
@@ -223,14 +231,14 @@ check_overwrite(VFSFileTask* task, const char* dest_file, bool* dest_exists, cha
             // else ran out of names - fall through to query user
         }
 
-        *dest_exists = !lstat(dest_file, &dest_stat);
+        *dest_exists = !lstat(dest_file.c_str(), &dest_stat);
         if (!*dest_exists)
             return !task->abort;
 
         // dest exists - query user
         if (!task->state_cb) // failsafe
             return false;
-        const char* use_dest_file = dest_file;
+        const char* use_dest_file = ztd::strdup(dest_file);
         do
         {
             // destination file exists
@@ -263,7 +271,7 @@ check_overwrite(VFSFileTask* task, const char* dest_file, bool* dest_exists, cha
                 {
                     case VFS_FILE_TASK_OVERWRITE:
                     case VFS_FILE_TASK_OVERWRITE_ALL:
-                        *dest_exists = !lstat(dest_file, &dest_stat);
+                        *dest_exists = !lstat(dest_file.c_str(), &dest_stat);
                         if (ztd::same(task->current_file, task->current_dest))
                         {
                             // src and dest are same file - don't overwrite (truncates)
@@ -296,7 +304,7 @@ check_overwrite(VFSFileTask* task, const char* dest_file, bool* dest_exists, cha
 }
 
 static bool
-check_dest_in_src(VFSFileTask* task, const char* src_dir)
+check_dest_in_src(VFSFileTask* task, const std::string& src_dir)
 {
     char real_src_path[PATH_MAX];
     char real_dest_path[PATH_MAX];
@@ -305,12 +313,12 @@ check_dest_in_src(VFSFileTask* task, const char* src_dir)
     if (!(!task->dest_dir.empty() && realpath(task->dest_dir.c_str(), real_dest_path)))
         return false;
 
-    if (realpath(src_dir, real_src_path) && Glib::str_has_prefix(real_dest_path, real_src_path) &&
-        (len = std::strlen(real_src_path)) &&
+    if (realpath(src_dir.c_str(), real_src_path) &&
+        Glib::str_has_prefix(real_dest_path, real_src_path) && (len = std::strlen(real_src_path)) &&
         (real_dest_path[len] == '/' || real_dest_path[len] == '\0'))
     {
         // source is contained in destination dir
-        std::string disp_src = g_filename_display_name(src_dir);
+        std::string disp_src = g_filename_display_name(src_dir.c_str());
         std::string disp_dest = g_filename_display_name(task->dest_dir.c_str());
         std::string err = fmt::format("Destination directory \"{}\" is contained in source \"{}\"",
                                       disp_dest,
@@ -325,17 +333,17 @@ check_dest_in_src(VFSFileTask* task, const char* src_dir)
 }
 
 static void
-update_file_display(const char* path)
+update_file_display(const std::string& path)
 {
     // for devices like nfs, emit created and flush to avoid a
     // blocking stat call in GUI thread during writes
-    char* dir_path = g_path_get_dirname(path);
+    char* dir_path = g_path_get_dirname(path.c_str());
     VFSDir* vdir = vfs_dir_get_by_path_soft(dir_path);
     free(dir_path);
     if (vdir && vdir->avoid_changes)
     {
         VFSFileInfo* file = vfs_file_info_new();
-        vfs_file_info_get(file, path, nullptr);
+        vfs_file_info_get(file, path.c_str(), nullptr);
         vfs_dir_emit_file_created(vdir, vfs_file_info_get_name(file), true);
         vfs_file_info_unref(file);
         vfs_dir_flush_notify_cache();
@@ -345,18 +353,11 @@ update_file_display(const char* path)
 }
 
 static bool
-vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_file)
+vfs_file_task_do_copy(VFSFileTask* task, const std::string& src_file, const std::string& dest_file)
 {
-    struct stat file_stat;
-    char buffer[4096];
-    int rfd;
-    int wfd;
-    char* new_dest_file = nullptr;
-    bool dest_exists;
-    bool copy_fail = false;
-
     if (should_abort(task))
         return false;
+
     // LOG_INFO("vfs_file_task_do_copy( {}, {} )", src_file, dest_file);
     vfs_file_task_lock(task);
     task->current_file = src_file;
@@ -364,13 +365,20 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
     task->current_item++;
     vfs_file_task_unlock(task);
 
-    if (lstat(src_file, &file_stat) == -1)
+    struct stat file_stat;
+    if (lstat(src_file.c_str(), &file_stat) == -1)
     {
         vfs_file_task_error(task, errno, "Accessing", src_file);
         return false;
     }
 
-    if (S_ISDIR(file_stat.st_mode))
+    char* new_dest_file = nullptr;
+    bool dest_exists;
+    bool copy_fail = false;
+
+    std::string actual_dest_file = dest_file;
+
+    if (std::filesystem::is_directory(src_file))
     {
         if (check_dest_in_src(task, src_file))
         {
@@ -378,8 +386,7 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
                 free(new_dest_file);
             return false;
         }
-
-        if (!check_overwrite(task, dest_file, &dest_exists, &new_dest_file))
+        if (!check_overwrite(task, actual_dest_file, &dest_exists, &new_dest_file))
         {
             if (new_dest_file)
                 free(new_dest_file);
@@ -387,16 +394,16 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
         }
         if (new_dest_file)
         {
-            dest_file = new_dest_file;
+            actual_dest_file = new_dest_file;
             vfs_file_task_lock(task);
-            task->current_dest = dest_file;
+            task->current_dest = actual_dest_file;
             vfs_file_task_unlock(task);
         }
 
         if (!dest_exists)
         {
-            std::filesystem::create_directories(dest_file);
-            std::filesystem::permissions(dest_file, std::filesystem::perms::owner_all);
+            std::filesystem::create_directories(actual_dest_file);
+            std::filesystem::permissions(actual_dest_file, std::filesystem::perms::owner_all);
         }
 
         if (std::filesystem::is_directory(src_file))
@@ -415,19 +422,18 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
                 if (should_abort(task))
                     break;
                 sub_src_file = Glib::build_filename(src_file, file_name);
-                sub_dest_file = Glib::build_filename(dest_file, file_name);
-                if (!vfs_file_task_do_copy(task, sub_src_file.c_str(), sub_dest_file.c_str()) &&
-                    !copy_fail)
+                sub_dest_file = Glib::build_filename(actual_dest_file, file_name);
+                if (!vfs_file_task_do_copy(task, sub_src_file, sub_dest_file) && !copy_fail)
                     copy_fail = true;
             }
 
-            chmod(dest_file, file_stat.st_mode);
+            chmod(actual_dest_file.c_str(), file_stat.st_mode);
             times.actime = file_stat.st_atime;
             times.modtime = file_stat.st_mtime;
-            utime(dest_file, &times);
+            utime(actual_dest_file.c_str(), &times);
 
             if (task->avoid_changes)
-                update_file_display(dest_file);
+                update_file_display(actual_dest_file);
 
             /* Move files to different device: Need to delete source dir */
             if ((task->type == VFS_FILE_TASK_MOVE) && !should_abort(task) && !copy_fail)
@@ -446,16 +452,28 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
         }
         else
         {
-            vfs_file_task_error(task, errno, "Creating Dir", dest_file);
+            vfs_file_task_error(task, errno, "Creating Dir", actual_dest_file);
             copy_fail = true;
         }
     }
-    else if (S_ISLNK(file_stat.st_mode))
+    else if (std::filesystem::is_symlink(src_file))
     {
-        if ((rfd = readlink(src_file, buffer, sizeof(buffer) - 1)) > 0)
+        bool read_symlink = false;
+
+        std::string target_path;
+        try
         {
-            buffer[rfd] = '\0'; // MOD terminate buffer string
-            if (!check_overwrite(task, dest_file, &dest_exists, &new_dest_file))
+            target_path = std::filesystem::read_symlink(src_file);
+            read_symlink = true;
+        }
+        catch (const std::filesystem::filesystem_error& e)
+        {
+            LOG_WARN("{}", e.what());
+        }
+
+        if (read_symlink)
+        {
+            if (!check_overwrite(task, actual_dest_file, &dest_exists, &new_dest_file))
             {
                 if (new_dest_file)
                     free(new_dest_file);
@@ -464,27 +482,27 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
 
             if (new_dest_file)
             {
-                dest_file = new_dest_file;
+                actual_dest_file = new_dest_file;
                 vfs_file_task_lock(task);
-                task->current_dest = dest_file;
+                task->current_dest = actual_dest_file;
                 vfs_file_task_unlock(task);
             }
 
             // MOD delete it first to prevent exists error
             if (dest_exists)
             {
-                std::filesystem::remove(dest_file);
-                if (std::filesystem::exists(dest_file) && errno != 2 /* no such file */)
+                std::filesystem::remove(actual_dest_file);
+                if (std::filesystem::exists(actual_dest_file) && errno != 2 /* no such file */)
                 {
-                    vfs_file_task_error(task, errno, "Removing", dest_file);
+                    vfs_file_task_error(task, errno, "Removing", actual_dest_file);
                     if (new_dest_file)
                         free(new_dest_file);
                     return false;
                 }
             }
 
-            std::filesystem::create_symlink(buffer, dest_file);
-            if (std::filesystem::is_symlink(dest_file))
+            std::filesystem::create_symlink(target_path, actual_dest_file);
+            if (std::filesystem::is_symlink(actual_dest_file))
             {
                 /* Move files to different device: Need to delete source files */
                 if ((task->type == VFS_FILE_TASK_MOVE) && !copy_fail)
@@ -502,7 +520,7 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
             }
             else
             {
-                vfs_file_task_error(task, errno, "Creating Link", dest_file);
+                vfs_file_task_error(task, errno, "Creating Link", actual_dest_file);
                 copy_fail = true;
             }
         }
@@ -514,9 +532,13 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
     }
     else
     {
-        if ((rfd = open(src_file, O_RDONLY)) >= 0)
+        char buffer[4096];
+        int rfd;
+        int wfd;
+
+        if ((rfd = open(src_file.c_str(), O_RDONLY)) >= 0)
         {
-            if (!check_overwrite(task, dest_file, &dest_exists, &new_dest_file))
+            if (!check_overwrite(task, actual_dest_file, &dest_exists, &new_dest_file))
             {
                 close(rfd);
                 if (new_dest_file)
@@ -526,19 +548,19 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
 
             if (new_dest_file)
             {
-                dest_file = new_dest_file;
+                actual_dest_file = new_dest_file;
                 vfs_file_task_lock(task);
-                task->current_dest = dest_file;
+                task->current_dest = actual_dest_file;
                 vfs_file_task_unlock(task);
             }
 
             // MOD if dest is a symlink, delete it first to prevent overwriting target!
-            if (std::filesystem::is_symlink(dest_file))
+            if (std::filesystem::is_symlink(actual_dest_file))
             {
-                std::filesystem::remove(dest_file);
+                std::filesystem::remove(actual_dest_file);
                 if (std::filesystem::exists(src_file))
                 {
-                    vfs_file_task_error(task, errno, "Removing", dest_file);
+                    vfs_file_task_error(task, errno, "Removing", actual_dest_file);
                     close(rfd);
                     if (new_dest_file)
                         free(new_dest_file);
@@ -546,11 +568,11 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
                 }
             }
 
-            if ((wfd = creat(dest_file, file_stat.st_mode | S_IWUSR)) >= 0)
+            if ((wfd = creat(actual_dest_file.c_str(), file_stat.st_mode | S_IWUSR)) >= 0)
             {
                 // sshfs becomes unresponsive with this, nfs is okay with it
-                // if ( task->avoid_changes )
-                //    emit_created( dest_file );
+                // if (task->avoid_changes)
+                //    emit_created(actual_dest_file);
                 struct utimbuf times;
                 ssize_t rsize;
                 while ((rsize = read(rfd, buffer, sizeof(buffer))) > 0)
@@ -569,7 +591,7 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
                     }
                     else
                     {
-                        vfs_file_task_error(task, errno, "Writing", dest_file);
+                        vfs_file_task_error(task, errno, "Writing", actual_dest_file);
                         copy_fail = true;
                         break;
                     }
@@ -577,25 +599,25 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
                 close(wfd);
                 if (copy_fail)
                 {
-                    std::filesystem::remove(dest_file);
+                    std::filesystem::remove(actual_dest_file);
                     if (std::filesystem::exists(src_file) && errno != 2 /* no such file */)
                     {
-                        vfs_file_task_error(task, errno, "Removing", dest_file);
+                        vfs_file_task_error(task, errno, "Removing", actual_dest_file);
                         copy_fail = true;
                     }
                 }
                 else
                 {
-                    // MOD don't chmod link
-                    if (!std::filesystem::is_symlink(dest_file))
+                    // MOD do not chmod link
+                    if (!std::filesystem::is_symlink(actual_dest_file))
                     {
-                        chmod(dest_file, file_stat.st_mode);
+                        chmod(actual_dest_file.c_str(), file_stat.st_mode);
                         times.actime = file_stat.st_atime;
                         times.modtime = file_stat.st_mtime;
-                        utime(dest_file, &times);
+                        utime(actual_dest_file.c_str(), &times);
                     }
                     if (task->avoid_changes)
-                        update_file_display(dest_file);
+                        update_file_display(actual_dest_file);
 
                     /* Move files to different device: Need to delete source files */
                     if ((task->type == VFS_FILE_TASK_MOVE) && !should_abort(task))
@@ -611,7 +633,7 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
             }
             else
             {
-                vfs_file_task_error(task, errno, "Creating", dest_file);
+                vfs_file_task_error(task, errno, "Creating", actual_dest_file);
                 copy_fail = true;
             }
             close(rfd);
@@ -622,6 +644,7 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
             copy_fail = true;
         }
     }
+
     if (new_dest_file)
         free(new_dest_file);
     if (!copy_fail && task->error_first)
@@ -630,24 +653,23 @@ vfs_file_task_do_copy(VFSFileTask* task, const char* src_file, const char* dest_
 }
 
 static void
-vfs_file_task_copy(char* src_file, VFSFileTask* task)
+vfs_file_task_copy(VFSFileTask* task, const std::string& src_file)
 {
-    char* file_name;
-    char* dest_file;
+    std::string file_name;
+    std::string dest_file;
 
-    file_name = g_path_get_basename(src_file);
-    dest_file = g_build_filename(task->dest_dir.c_str(), file_name, nullptr);
-    free(file_name);
+    file_name = g_path_get_basename(src_file.c_str());
+    dest_file = Glib::build_filename(task->dest_dir, file_name);
     vfs_file_task_do_copy(task, src_file, dest_file);
-    free(dest_file);
 }
 
 static int
-vfs_file_task_do_move(VFSFileTask* task, const char* src_file,
-                      const char* dest_file) // MOD void to int
+vfs_file_task_do_move(VFSFileTask* task, const std::string& src_file, const std::string& dest_path)
 {
     if (should_abort(task))
         return 0;
+
+    std::string dest_file = dest_path;
 
     vfs_file_task_lock(task);
     task->current_file = src_file;
@@ -657,7 +679,7 @@ vfs_file_task_do_move(VFSFileTask* task, const char* src_file,
 
     // LOG_DEBUG("move '{}' to '{}'", src_file, dest_file);
     struct stat file_stat;
-    if (lstat(src_file, &file_stat) == -1)
+    if (lstat(src_file.c_str(), &file_stat) == -1)
     {
         vfs_file_task_error(task, errno, "Accessing", src_file);
         return 0;
@@ -682,7 +704,7 @@ vfs_file_task_do_move(VFSFileTask* task, const char* src_file,
         vfs_file_task_unlock(task);
     }
 
-    if (S_ISDIR(file_stat.st_mode) && std::filesystem::is_directory(dest_file))
+    if (std::filesystem::is_directory(dest_file))
     {
         // moving a directory onto a directory that exists
         std::string sub_src_file;
@@ -704,12 +726,14 @@ vfs_file_task_do_move(VFSFileTask* task, const char* src_file,
         return 0;
     }
 
-    int result = rename(src_file, dest_file);
+    std::error_code err;
+    std::filesystem::rename(src_file, dest_file, err);
 
-    if (result != 0)
+    if (err.value() != 0)
     {
-        if (result == -1 && errno == EXDEV) // MOD Invalid cross-link device
+        if (err.value() == -1 && errno == EXDEV) // Invalid cross-link device
             return 18;
+
         vfs_file_task_error(task, errno, "Renaming", src_file);
         if (should_abort(task))
         {
@@ -717,9 +741,10 @@ vfs_file_task_do_move(VFSFileTask* task, const char* src_file,
             return 0;
         }
     }
-    // MOD don't chmod link
+
+    // don't chmod link
     else if (!std::filesystem::is_symlink(dest_file))
-        chmod(dest_file, file_stat.st_mode);
+        chmod(dest_file.c_str(), file_stat.st_mode);
 
     vfs_file_task_lock(task);
     task->progress += file_stat.st_size;
@@ -733,7 +758,7 @@ vfs_file_task_do_move(VFSFileTask* task, const char* src_file,
 }
 
 static void
-vfs_file_task_move(char* src_file, VFSFileTask* task)
+vfs_file_task_move(VFSFileTask* task, const std::string& src_file)
 {
     if (should_abort(task))
         return;
@@ -742,7 +767,7 @@ vfs_file_task_move(char* src_file, VFSFileTask* task)
     task->current_file = src_file;
     vfs_file_task_unlock(task);
 
-    char* file_name = g_path_get_basename(src_file);
+    char* file_name = g_path_get_basename(src_file.c_str());
 
     char* dest_file = g_build_filename(task->dest_dir.c_str(), file_name, nullptr);
 
@@ -750,7 +775,7 @@ vfs_file_task_move(char* src_file, VFSFileTask* task)
 
     struct stat src_stat;
     struct stat dest_stat;
-    if (lstat(src_file, &src_stat) == 0 && stat(task->dest_dir.c_str(), &dest_stat) == 0)
+    if (lstat(src_file.c_str(), &src_stat) == 0 && stat(task->dest_dir.c_str(), &dest_stat) == 0)
     {
         /* Not on the same device */
         if (src_stat.st_dev != dest_stat.st_dev)
@@ -761,7 +786,7 @@ vfs_file_task_move(char* src_file, VFSFileTask* task)
         else
         {
             // LOG_INFO("on the same dev: {}", src_file);
-            if (vfs_file_task_do_move(task, src_file, dest_file) == EXDEV) // MOD
+            if (vfs_file_task_do_move(task, src_file.c_str(), dest_file) == EXDEV)
             {
                 // MOD Invalid cross-device link (st_dev not always accurate test)
                 // so now redo move as copy
@@ -774,7 +799,7 @@ vfs_file_task_move(char* src_file, VFSFileTask* task)
 }
 
 static void
-vfs_file_task_trash(char* src_file, VFSFileTask* task)
+vfs_file_task_trash(VFSFileTask* task, const std::string& src_file)
 {
     if (should_abort(task))
         return;
@@ -785,7 +810,7 @@ vfs_file_task_trash(char* src_file, VFSFileTask* task)
     vfs_file_task_unlock(task);
 
     struct stat file_stat;
-    if (lstat(src_file, &file_stat) == -1)
+    if (lstat(src_file.c_str(), &file_stat) == -1)
     {
         vfs_file_task_error(task, errno, "Accessing", src_file);
         return;
@@ -807,7 +832,7 @@ vfs_file_task_trash(char* src_file, VFSFileTask* task)
 }
 
 static void
-vfs_file_task_delete(const char* src_file, VFSFileTask* task)
+vfs_file_task_delete(VFSFileTask* task, const std::string& src_file)
 {
     if (should_abort(task))
         return;
@@ -818,7 +843,7 @@ vfs_file_task_delete(const char* src_file, VFSFileTask* task)
     vfs_file_task_unlock(task);
 
     struct stat file_stat;
-    if (lstat(src_file, &file_stat) == -1)
+    if (lstat(src_file.c_str(), &file_stat) == -1)
     {
         vfs_file_task_error(task, errno, "Accessing", src_file);
         return;
@@ -833,7 +858,7 @@ vfs_file_task_delete(const char* src_file, VFSFileTask* task)
             if (should_abort(task))
                 break;
             std::string sub_src_file = Glib::build_filename(src_file, file_name);
-            vfs_file_task_delete(sub_src_file.c_str(), task);
+            vfs_file_task_delete(task, sub_src_file);
         }
 
         if (should_abort(task))
@@ -862,12 +887,12 @@ vfs_file_task_delete(const char* src_file, VFSFileTask* task)
 }
 
 static void
-vfs_file_task_link(char* src_file, VFSFileTask* task)
+vfs_file_task_link(VFSFileTask* task, const std::string& src_file)
 {
     if (should_abort(task))
         return;
 
-    char* file_name = g_path_get_basename(src_file);
+    char* file_name = g_path_get_basename(src_file.c_str());
     char* old_dest_file = g_build_filename(task->dest_dir.c_str(), file_name, nullptr);
     free(file_name);
     char* dest_file = old_dest_file;
@@ -875,6 +900,7 @@ vfs_file_task_link(char* src_file, VFSFileTask* task)
     // MOD  setup task for check overwrite
     if (should_abort(task))
         return;
+
     vfs_file_task_lock(task);
     task->current_file = src_file;
     task->current_dest = old_dest_file;
@@ -882,7 +908,7 @@ vfs_file_task_link(char* src_file, VFSFileTask* task)
     vfs_file_task_unlock(task);
 
     struct stat src_stat;
-    if (stat(src_file, &src_stat) == -1)
+    if (stat(src_file.c_str(), &src_stat) == -1)
     {
         // MOD allow link to broken symlink
         if (errno != 2 || !std::filesystem::is_symlink(src_file))
@@ -938,7 +964,7 @@ vfs_file_task_link(char* src_file, VFSFileTask* task)
 }
 
 static void
-vfs_file_task_chown_chmod(const char* src_file, VFSFileTask* task)
+vfs_file_task_chown_chmod(VFSFileTask* task, const std::string& src_file)
 {
     if (should_abort(task))
         return;
@@ -950,13 +976,13 @@ vfs_file_task_chown_chmod(const char* src_file, VFSFileTask* task)
     // LOG_DEBUG("chmod_chown: {}", src_file);
 
     struct stat src_stat;
-    if (lstat(src_file, &src_stat) == 0)
+    if (lstat(src_file.c_str(), &src_stat) == 0)
     {
         /* chown */
         int result;
         if (!task->uid || !task->gid)
         {
-            result = chown(src_file, task->uid, task->gid);
+            result = chown(src_file.c_str(), task->uid, task->gid);
             if (result != 0)
             {
                 vfs_file_task_error(task, errno, "chown", src_file);
@@ -981,7 +1007,7 @@ vfs_file_task_chown_chmod(const char* src_file, VFSFileTask* task)
             }
             if (new_mode != src_stat.st_mode)
             {
-                result = chmod(src_file, new_mode);
+                result = chmod(src_file.c_str(), new_mode);
                 if (result != 0)
                 {
                     vfs_file_task_error(task, errno, "chmod", src_file);
@@ -1007,7 +1033,7 @@ vfs_file_task_chown_chmod(const char* src_file, VFSFileTask* task)
                 if (should_abort(task))
                     break;
                 std::string sub_src_file = Glib::build_filename(src_file, file_name);
-                vfs_file_task_chown_chmod(sub_src_file.c_str(), task);
+                vfs_file_task_chown_chmod(task, sub_src_file);
             }
         }
     }
@@ -1220,7 +1246,7 @@ cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, VFSFileTask* task)
 }
 
 static char*
-get_xxhash(const char* path)
+get_xxhash(const std::string& path)
 {
     std::string xxhash = Glib::find_program_in_path("xxh128sum");
     if (xxhash.empty())
@@ -1257,7 +1283,7 @@ vfs_file_task_exec_error(VFSFileTask* task, int errnox, const std::string& actio
 }
 
 static void
-vfs_file_task_exec(char* src_file, VFSFileTask* task)
+vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
 {
     // this function is now thread safe but is not currently run in
     // another thread because gio adds watches to main loop thread anyway
@@ -1709,18 +1735,10 @@ on_size_timeout(VFSFileTask* task)
 static void*
 vfs_file_task_thread(VFSFileTask* task)
 {
-    GList* l;
     struct stat file_stat;
     unsigned int size_timeout = 0;
     dev_t dest_dev = 0;
     off_t size;
-    GFunc funcs[] = {(GFunc)vfs_file_task_move,
-                     (GFunc)vfs_file_task_copy,
-                     (GFunc)vfs_file_task_trash,
-                     (GFunc)vfs_file_task_delete,
-                     (GFunc)vfs_file_task_link,
-                     (GFunc)vfs_file_task_chown_chmod,
-                     (GFunc)vfs_file_task_exec};
     if (task->type < VFS_FILE_TASK_MOVE || task->type >= VFS_FILE_TASK_LAST)
     {
         task->state = VFS_FILE_TASK_RUNNING;
@@ -1735,7 +1753,7 @@ vfs_file_task_thread(VFSFileTask* task)
 
     vfs_file_task_lock(task);
     task->state = VFS_FILE_TASK_RUNNING;
-    task->current_file = task->src_paths ? (char*)task->src_paths->data : nullptr;
+    task->current_file = task->src_paths.at(0);
     task->total_size = 0;
     vfs_file_task_unlock(task);
 
@@ -1757,9 +1775,9 @@ vfs_file_task_thread(VFSFileTask* task)
         // start timer to limit the amount of time to spend on this - can be
         // VERY slow for network filesystems
         size_timeout = g_timeout_add_seconds(5, (GSourceFunc)on_size_timeout, task);
-        for (l = task->src_paths; l; l = l->next)
+        for (const std::string& src_path: task->src_paths)
         {
-            if (lstat((char*)l->data, &file_stat) == -1)
+            if (lstat(src_path.c_str(), &file_stat) == -1)
             {
                 // don't report error here since its reported later
                 // vfs_file_task_error( task, errno, "Accessing", (char*)l->data );
@@ -1767,7 +1785,7 @@ vfs_file_task_thread(VFSFileTask* task)
             else
             {
                 size = 0;
-                get_total_size_of_dir(task, (char*)l->data, &size, &file_stat);
+                get_total_size_of_dir(task, src_path, &size, &file_stat);
                 vfs_file_task_lock(task);
                 task->total_size += size;
                 vfs_file_task_unlock(task);
@@ -1813,9 +1831,9 @@ vfs_file_task_thread(VFSFileTask* task)
             dest_dev = file_stat.st_dev;
         }
 
-        for (l = task->src_paths; l; l = l->next)
+        for (const std::string& src_path: task->src_paths)
         {
-            if (lstat((char*)l->data, &file_stat) == -1)
+            if (lstat(src_path.c_str(), &file_stat) == -1)
             {
                 // don't report error here since it's reported later
                 // vfs_file_task_error( task, errno, "Accessing", ( char* ) l->data );
@@ -1826,7 +1844,7 @@ vfs_file_task_thread(VFSFileTask* task)
                 {
                     // recursive size
                     size = 0;
-                    get_total_size_of_dir(task, (char*)l->data, &size, &file_stat);
+                    get_total_size_of_dir(task, src_path, &size, &file_stat);
                     vfs_file_task_lock(task);
                     task->total_size += size;
                     vfs_file_task_unlock(task);
@@ -1923,7 +1941,36 @@ vfs_file_task_thread(VFSFileTask* task)
         return nullptr;
     }
 
-    g_list_foreach(task->src_paths, funcs[task->type], task);
+    for (const std::string& src_path: task->src_paths)
+    {
+        switch (task->type)
+        {
+            case VFS_FILE_TASK_MOVE:
+                vfs_file_task_move(task, src_path);
+                break;
+            case VFS_FILE_TASK_COPY:
+                vfs_file_task_copy(task, src_path);
+                break;
+            case VFS_FILE_TASK_TRASH:
+                vfs_file_task_trash(task, src_path);
+                break;
+            case VFS_FILE_TASK_DELETE:
+                vfs_file_task_delete(task, src_path);
+                break;
+            case VFS_FILE_TASK_LINK:
+                vfs_file_task_link(task, src_path);
+                break;
+            case VFS_FILE_TASK_CHMOD_CHOWN:
+                vfs_file_task_chown_chmod(task, src_path);
+                break;
+            case VFS_FILE_TASK_EXEC:
+                vfs_file_task_exec(task, src_path);
+                break;
+            case VFS_FILE_TASK_LAST:
+            default:
+                break;
+        }
+    }
 
     task->state = VFS_FILE_TASK_RUNNING;
     if (size_timeout)
@@ -1940,7 +1987,7 @@ vfs_file_task_thread(VFSFileTask* task)
  * freed after file operation has been completed
  */
 VFSFileTask*
-vfs_task_new(VFSFileTaskType type, GList* src_files, const char* dest_dir)
+vfs_task_new(VFSFileTaskType type, std::vector<std::string>& src_files, const char* dest_dir)
 {
     VFSFileTask* task = g_slice_new0(VFSFileTask);
 
@@ -1948,47 +1995,8 @@ vfs_task_new(VFSFileTaskType type, GList* src_files, const char* dest_dir)
     task->src_paths = src_files;
     if (dest_dir)
         task->dest_dir = dest_dir;
-    // task->current_file = nullptr;
-    // task->current_dest = nullptr;
 
     task->recursive = (task->type == VFS_FILE_TASK_COPY || task->type == VFS_FILE_TASK_DELETE);
-
-    task->err_count = 0;
-    task->abort = false;
-    task->error_first = true;
-    task->custom_percent = false;
-
-    task->exec_type = VFS_EXEC_NORMAL;
-    // task->exec_action = nullptr;
-    // task->exec_command = std::string();
-    task->exec_sync = true;
-    task->exec_popup = false;
-    task->exec_show_output = false;
-    task->exec_show_error = false;
-    task->exec_terminal = false;
-    task->exec_keep_terminal = false;
-    task->exec_export = false;
-    task->exec_direct = false;
-    // task->exec_as_user = nullptr;
-    // task->exec_icon = nullptr;
-    // task->exec_script = nullptr;
-    task->exec_keep_tmp = false;
-    task->exec_browser = nullptr;
-    task->exec_desktop = nullptr;
-    task->exec_pid = 0;
-    task->child_watch = 0;
-    task->exec_is_error = false;
-    task->exec_scroll_lock = false;
-    task->exec_write_root = false;
-    task->exec_checksum = false;
-    task->exec_set = nullptr;
-    task->exec_cond = nullptr;
-    task->exec_ptask = nullptr;
-
-    task->pause_cond = nullptr;
-    task->state_pause = VFS_FILE_TASK_RUNNING;
-    task->queue_start = false;
-    task->devs = nullptr;
 
     vfs_file_task_init(task);
 
@@ -1999,11 +2007,8 @@ vfs_task_new(VFSFileTaskType type, GList* src_files, const char* dest_dir)
     gtk_text_buffer_add_mark(task->add_log_buf, task->add_log_end, &iter);
 
     task->start_time = std::time(nullptr);
-    task->last_speed = 0;
-    task->last_progress = 0;
-    task->current_item = 0;
     task->timer = ztd::timer();
-    task->last_elapsed = 0;
+
     return task;
 }
 
@@ -2030,14 +2035,16 @@ vfs_file_task_run(VFSFileTask* task)
 {
     if (task->type != VFS_FILE_TASK_EXEC)
     {
-        if (task->type == VFS_FILE_TASK_CHMOD_CHOWN && task->src_paths->data)
+        if (task->type == VFS_FILE_TASK_CHMOD_CHOWN && !task->src_paths.empty())
         {
-            char* dir = g_path_get_dirname((char*)task->src_paths->data);
+            char* dir = g_path_get_dirname(task->src_paths.at(0).c_str());
             task->avoid_changes = vfs_volume_dir_avoid_changes(dir);
             free(dir);
         }
         else
+        {
             task->avoid_changes = vfs_volume_dir_avoid_changes(task->dest_dir.c_str());
+        }
 
         task->thread = g_thread_new("task_run", (GThreadFunc)vfs_file_task_thread, task);
     }
@@ -2046,7 +2053,7 @@ vfs_file_task_run(VFSFileTask* task)
         // don't use another thread for exec since gio adds watches to main
         // loop thread anyway
         task->thread = nullptr;
-        vfs_file_task_exec((char*)task->src_paths->data, task);
+        vfs_file_task_exec(task, task->src_paths.at(0));
     }
 }
 
@@ -2089,11 +2096,6 @@ vfs_file_task_abort(VFSFileTask* task)
 void
 vfs_file_task_free(VFSFileTask* task)
 {
-    if (task->src_paths)
-    {
-        g_list_foreach(task->src_paths, (GFunc)g_free, nullptr);
-        g_list_free(task->src_paths);
-    }
     g_slist_free(task->devs);
 
     if (task->chmod_actions)
@@ -2136,7 +2138,8 @@ add_task_dev(VFSFileTask* task, dev_t dev)
  * NOTE: *size should be set to zero before calling this function.
  */
 static void
-get_total_size_of_dir(VFSFileTask* task, const char* path, off_t* size, struct stat* have_stat)
+get_total_size_of_dir(VFSFileTask* task, const std::string& path, off_t* size,
+                      struct stat* have_stat)
 {
     if (task->abort)
         return;
@@ -2145,7 +2148,7 @@ get_total_size_of_dir(VFSFileTask* task, const char* path, off_t* size, struct s
 
     if (have_stat)
         file_stat = *have_stat;
-    else if (lstat(path, &file_stat) == -1)
+    else if (lstat(path.c_str(), &file_stat) == -1)
         return;
 
     *size += file_stat.st_size;
@@ -2170,7 +2173,7 @@ get_total_size_of_dir(VFSFileTask* task, const char* path, off_t* size, struct s
         if (lstat(full_path.c_str(), &file_stat) != -1)
         {
             if (S_ISDIR(file_stat.st_mode))
-                get_total_size_of_dir(task, full_path.c_str(), size, &file_stat);
+                get_total_size_of_dir(task, full_path, size, &file_stat);
             else
                 *size += file_stat.st_size;
         }
@@ -2197,7 +2200,8 @@ vfs_file_task_set_state_callback(VFSFileTask* task, VFSFileTaskStateCallback cb,
 }
 
 static void
-vfs_file_task_error(VFSFileTask* task, int errnox, const char* action, const char* target)
+vfs_file_task_error(VFSFileTask* task, int errnox, const std::string& action,
+                    const std::string& target)
 {
     task->error = errnox;
     std::string errno_msg = Glib::strerror(errnox);

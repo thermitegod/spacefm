@@ -61,14 +61,14 @@ ptk_file_exec_new(const std::string& item_name, const char* dir, GtkWidget* pare
     GtkWidget* parent_win = nullptr;
     if (parent)
         parent_win = gtk_widget_get_toplevel(GTK_WIDGET(parent));
-    char* file = ztd::strdup(item_name);
-    GList* files = nullptr;
-    files = g_list_prepend(files, file);
-    return ptk_file_task_new(VFS_FILE_TASK_EXEC, files, dir, GTK_WINDOW(parent_win), task_view);
+
+    std::vector<std::string> file_list;
+    file_list.push_back(item_name);
+    return ptk_file_task_new(VFS_FILE_TASK_EXEC, file_list, dir, GTK_WINDOW(parent_win), task_view);
 }
 
 PtkFileTask*
-ptk_file_task_new(VFSFileTaskType type, GList* src_files, const char* dest_dir,
+ptk_file_task_new(VFSFileTaskType type, std::vector<std::string>& src_files, const char* dest_dir,
                   GtkWindow* parent_window, GtkWidget* task_view)
 {
     // LOG_INFO("ptk_file_task_new");

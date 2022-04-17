@@ -7118,6 +7118,8 @@ main_window_socket_command(char* argv[], std::string& reply)
                     return 2;
                 }
             }
+            std::string str5;
+            std::vector<std::string> file_list;
             l = nullptr; // file list
             char* target_dir = nullptr;
             for (; argv[j]; j++)
@@ -7139,7 +7141,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 {
                     if (argv[j][0] == '/')
                         // absolute path
-                        str = ztd::strdup(argv[j]);
+                        str5 = ztd::strdup(argv[j]);
                     else
                     {
                         // relative path
@@ -7153,17 +7155,17 @@ main_window_socket_command(char* argv[], std::string& reply)
                             g_list_free(l);
                             return 2;
                         }
-                        str = g_build_filename(opt_cwd, argv[j], nullptr);
+                        str5 = Glib::build_filename(opt_cwd, argv[j]);
                     }
-                    l = g_list_prepend(l, str);
+                    file_list.push_back(str5);
                 }
             }
-            if (!l || (strcmp(argv[i], "delete") && !target_dir))
+            if (file_list.empty() || (strcmp(argv[i], "delete") && !target_dir))
             {
                 reply = fmt::format("spacefm: task type {} requires FILE argument(s)\n", argv[i]);
                 return 2;
             }
-            l = g_list_reverse(l);
+            // l = g_list_reverse(l);
             if (!strcmp(argv[i], "copy"))
                 j = VFS_FILE_TASK_COPY;
             else if (!strcmp(argv[i], "move"))
@@ -7178,7 +7180,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 return 1; // failsafe
             PtkFileTask* ptask =
                 ptk_file_task_new((VFSFileTaskType)j,
-                                  l,
+                                  file_list,
                                   target_dir,
                                   GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                                   file_browser->task_view);

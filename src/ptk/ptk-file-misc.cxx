@@ -161,13 +161,13 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTr
             return;
     }
 
-    GList* file_list = nullptr;
+    std::vector<std::string> file_list;
     GList* sel;
     for (sel = sel_files; sel; sel = g_list_next(sel))
     {
         VFSFileInfo* file = static_cast<VFSFileInfo*>(sel->data);
         char* file_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
-        file_list = g_list_prepend(file_list, file_path);
+        file_list.push_back(file_path);
     }
     /* file_list = g_list_reverse( file_list ); */
     PtkFileTask* task = ptk_file_task_new(VFS_FILE_TASK_DELETE,
@@ -205,13 +205,13 @@ ptk_trash_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTre
             return;
     }
 
-    GList* file_list = nullptr;
+    std::vector<std::string> file_list;
     GList* sel;
     for (sel = sel_files; sel; sel = g_list_next(sel))
     {
         VFSFileInfo* file = static_cast<VFSFileInfo*>(sel->data);
         char* file_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
-        file_list = g_list_prepend(file_list, file_path);
+        file_list.push_back(file_path);
     }
     /* file_list = g_list_reverse( file_list ); */
     PtkFileTask* task = ptk_file_task_new(VFS_FILE_TASK_TRASH,

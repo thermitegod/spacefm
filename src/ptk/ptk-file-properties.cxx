@@ -867,13 +867,13 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
 
             if (!uid || !gid || mod_change)
             {
-                GList* file_list = nullptr;
+                std::vector<std::string> file_list;
                 for (l = data->file_list; l; l = l->next)
                 {
                     file = static_cast<VFSFileInfo*>(l->data);
                     file_path =
                         g_build_filename(data->dir_path, vfs_file_info_get_name(file), nullptr);
-                    file_list = g_list_prepend(file_list, file_path);
+                    file_list.push_back(file_path);
                 }
 
                 task = ptk_file_task_new(VFS_FILE_TASK_CHMOD_CHOWN,

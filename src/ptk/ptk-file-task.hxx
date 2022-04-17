@@ -91,8 +91,9 @@ struct PtkFileTask
 void ptk_file_task_lock(PtkFileTask* ptask);
 void ptk_file_task_unlock(PtkFileTask* ptask);
 
-PtkFileTask* ptk_file_task_new(VFSFileTaskType type, GList* src_files, const char* dest_dir,
-                               GtkWindow* parent_window, GtkWidget* task_view);
+PtkFileTask* ptk_file_task_new(VFSFileTaskType type, std::vector<std::string>& src_files,
+                               const char* dest_dir, GtkWindow* parent_window,
+                               GtkWidget* task_view);
 PtkFileTask* ptk_file_exec_new(const std::string& item_name, const char* dir, GtkWidget* parent,
                                GtkWidget* task_view);
 

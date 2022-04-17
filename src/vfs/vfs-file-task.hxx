@@ -89,54 +89,55 @@ enum VFSExecType
 
 struct VFSFileTask;
 
-typedef bool (*VFSFileTaskStateCallback)(VFSFileTask*, VFSFileTaskState state, void* state_data,
-                                         void* user_data);
+typedef bool (*VFSFileTaskStateCallback)(VFSFileTask* task, VFSFileTaskState state,
+                                         void* state_data, void* user_data);
 
 struct VFSFileTask
 {
     VFSFileTaskType type;
-    GList* src_paths;     // All source files. This list will be freed
-                          // after file operation is completed.
-    std::string dest_dir; // Destinaton directory
+    std::vector<std::string> src_paths; // All source files. This list will be freed
+                                        // after file operation is completed.
+    std::string dest_dir;               // Destinaton directory
     bool avoid_changes;
-    GSList* devs;
+    GSList* devs{nullptr};
 
     VFSFileTaskOverwriteMode overwrite_mode;
-    bool recursive; /* Apply operation to all files under directories
-                     * recursively. This is default to copy/delete,
-                     * and should be set manually for chown/chmod. */
+    bool recursive; // Apply operation to all files under directories
+                    // recursively. This is default to copy/delete,
+                    // and should be set manually for chown/chmod.
 
-    /* For chown */
+    // For chown
     uid_t uid;
     gid_t gid;
 
-    /* For chmod */
-    unsigned char* chmod_actions; /* If chmod is not needed, this should be nullptr */
+    // For chmod
+    unsigned char* chmod_actions; // If chmod is not needed, this should be nullptr
 
-    off_t total_size; /* Total size of the files to be processed, in bytes */
-    off_t progress;   /* Total size of current processed files, in btytes */
-    int percent;      /* progress (percentage) */
-    bool custom_percent;
-    std::time_t start_time;
-    off_t last_speed;
-    off_t last_progress;
+    off_t total_size; // Total size of the files to be processed, in bytes
+    off_t progress;   // Total size of current processed files, in btytes
+    int percent{0};   // progress (percentage)
+    bool custom_percent{false};
+    off_t last_speed{0};
+    off_t last_progress{0};
+    double last_elapsed{0.0};
+    unsigned int current_item{0};
+
     ztd::timer timer;
-    double last_elapsed;
-    unsigned int current_item;
-    int err_count;
+    std::time_t start_time;
 
     std::string current_file; // copy of Current processed file
     std::string current_dest; // copy of Current destination file
 
-    int error;
-    bool error_first;
+    int err_count{0};
+    int error{0};
+    bool error_first{true};
 
     GThread* thread;
     VFSFileTaskState state;
-    VFSFileTaskState state_pause;
-    bool abort;
-    GCond* pause_cond;
-    bool queue_start;
+    VFSFileTaskState state_pause{VFS_FILE_TASK_RUNNING};
+    bool abort{false};
+    GCond* pause_cond{nullptr};
+    bool queue_start{false};
 
     VFSFileTaskStateCallback state_cb;
     void* state_cb_data;
@@ -148,45 +149,42 @@ struct VFSFileTask
     GtkTextMark* add_log_end;
 
     // MOD run task
-    VFSExecType exec_type;
+    VFSExecType exec_type{VFS_EXEC_NORMAL};
     std::string exec_action;
     std::string exec_command;
-    bool exec_sync;
-    bool exec_popup;
-    bool exec_show_output;
-    bool exec_show_error;
-    bool exec_terminal;
-    bool exec_keep_terminal;
-    bool exec_export;
-    bool exec_direct;
+    bool exec_sync{true};
+    bool exec_popup{false};
+    bool exec_show_output{false};
+    bool exec_show_error{false};
+    bool exec_terminal{false};
+    bool exec_keep_terminal{false};
+    bool exec_export{false};
+    bool exec_direct{false};
     std::vector<std::string> exec_argv; // for exec_direct, command ignored
                                         // for su commands, must use bash -c
                                         // as su does not execute binaries
     std::string exec_script;
-    bool exec_keep_tmp; // diagnostic to keep temp files
-    void* exec_browser;
-    void* exec_desktop;
+    bool exec_keep_tmp{false}; // diagnostic to keep temp files
+    void* exec_browser{nullptr};
+    void* exec_desktop{nullptr};
     std::string exec_as_user;
     std::string exec_icon;
     Glib::Pid exec_pid;
-    int exec_exit_status;
-    unsigned int child_watch;
-    bool exec_is_error;
+    int exec_exit_status{0};
+    unsigned int child_watch{0};
+    bool exec_is_error{false};
     GIOChannel* exec_channel_out;
     GIOChannel* exec_channel_err;
-    bool exec_scroll_lock;
-    bool exec_write_root;
-    bool exec_checksum;
-    void* exec_set;
-    GCond* exec_cond;
-    void* exec_ptask;
+    bool exec_scroll_lock{false};
+    bool exec_write_root{false};
+    bool exec_checksum{false};
+    void* exec_set{nullptr};
+    GCond* exec_cond{nullptr};
+    void* exec_ptask{nullptr};
 };
 
-/*
- * source_files sould be a newly allocated list, and it will be
- * freed after file operation has been completed
- */
-VFSFileTask* vfs_task_new(VFSFileTaskType task_type, GList* src_files, const char* dest_dir);
+VFSFileTask* vfs_task_new(VFSFileTaskType task_type, std::vector<std::string>& src_files,
+                          const char* dest_dir);
 
 void vfs_file_task_lock(VFSFileTask* task);
 void vfs_file_task_unlock(VFSFileTask* task);
@@ -214,4 +212,5 @@ void vfs_file_task_free(VFSFileTask* task);
 
 char* vfs_file_task_get_cpids(Glib::Pid pid);
 void vfs_file_task_kill_cpids(char* cpids, int signal);
-char* vfs_file_task_get_unique_name(const char* dest_dir, const char* base_name, const char* ext);
+char* vfs_file_task_get_unique_name(const std::string& dest_dir, const std::string& base_name,
+                                    const std::string& ext);

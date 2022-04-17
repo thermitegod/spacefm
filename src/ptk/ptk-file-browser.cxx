@@ -4412,7 +4412,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
             }
             if (puri)
             {
-                GList* files = nullptr;
+                std::vector<std::string> file_list;
                 if ((gdk_drag_context_get_selected_action(drag_context) &
                      (GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK)) == 0)
                 {
@@ -4428,7 +4428,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                         file_path = g_filename_from_uri(*puri, nullptr, nullptr);
 
                     if (file_path)
-                        files = g_list_prepend(files, file_path);
+                        file_list.push_back(file_path);
                     ++puri;
                 }
                 g_strfreev(list);
@@ -4452,7 +4452,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                         break;
                 }
 
-                if (files)
+                if (!file_list.empty())
                 {
                     // LOG_INFO("dest_dir = {}", dest_dir);
 
@@ -4461,11 +4461,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     {
                         struct stat statbuf; // skip stat
                         if (stat(dest_dir, &statbuf) == 0)
-                        {
                             file_browser->pending_drag_status = false;
-                        }
-                        g_list_foreach(files, (GFunc)g_free, nullptr);
-                        g_list_free(files);
                         free(dest_dir);
                         return;
                     }
@@ -4473,7 +4469,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     {
                         GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
                         PtkFileTask* task = ptk_file_task_new(file_action,
-                                                              files,
+                                                              file_list,
                                                               dest_dir,
                                                               GTK_WINDOW(parent_win),
                                                               file_browser->task_view);
@@ -5017,7 +5013,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
         }
 
         // rebuild sel_files with full paths
-        GList* file_list = nullptr;
+        std::vector<std::string> file_list;
         GList* sel;
         char* file_path;
         VFSFileInfo* file;
@@ -5025,7 +5021,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, char* c
         {
             file = static_cast<VFSFileInfo*>(sel->data);
             file_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
-            file_list = g_list_prepend(file_list, file_path);
+            file_list.push_back(file_path);
         }
 
         // task

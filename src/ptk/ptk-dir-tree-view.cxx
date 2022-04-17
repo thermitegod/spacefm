@@ -653,7 +653,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
 
             if (puri)
             {
-                GList* files = nullptr;
+                std::vector<std::string> file_list;
                 if ((gdk_drag_context_get_selected_action(drag_context) &
                      (GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK)) == 0)
                 {
@@ -669,7 +669,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                         file_path = g_filename_from_uri(*puri, nullptr, nullptr);
 
                     if (file_path)
-                        files = g_list_prepend(files, file_path);
+                        file_list.push_back(file_path);
                     ++puri;
                 }
                 g_strfreev(list);
@@ -692,13 +692,13 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                     default:
                         break;
                 }
-                if (files)
+                if (!file_list.empty())
                 {
                     /* Accept the drop and perform file actions */
                     {
                         GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
                         PtkFileTask* task = ptk_file_task_new(file_action,
-                                                              files,
+                                                              file_list,
                                                               dest_dir,
                                                               GTK_WINDOW(parent_win),
                                                               file_browser->task_view);
