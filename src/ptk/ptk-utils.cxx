@@ -15,6 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -25,7 +27,7 @@
 void
 ptk_show_error(GtkWindow* parent, const std::string& title, const std::string& message)
 {
-    std::string msg = ztd::replace(message.c_str(), "%", "%%");
+    std::string msg = Glib::Markup::escape_text(message);
     GtkWidget* dlg = gtk_message_dialog_new(parent,
                                             GTK_DIALOG_MODAL,
                                             GTK_MESSAGE_ERROR,

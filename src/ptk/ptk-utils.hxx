@@ -24,8 +24,8 @@
 #include <glib.h>
 
 // The string 'message' can contain pango markups.
-// If special characters like < and > are used in the string,
-// they should be escaped with g_markup_escape_text().
+// Special markup characters can also be used and will be
+// escaped in this function.
 void ptk_show_error(GtkWindow* parent, const std::string& title, const std::string& message);
 
 unsigned int ptk_get_keymod(unsigned int event);

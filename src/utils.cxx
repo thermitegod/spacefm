@@ -173,23 +173,23 @@ clean_label(const std::string& menu_label, bool kill_special, bool escape) noexc
     if (menu_label.empty())
         return "";
 
-    std::string new_menu_label;
+    std::string new_menu_label = menu_label;
 
     if (ztd::contains(menu_label, "\\_"))
     {
-        new_menu_label = ztd::replace(menu_label, "\\_", "@UNDERSCORE@");
-        new_menu_label = ztd::replace(menu_label, "_", "");
-        new_menu_label = ztd::replace(menu_label, "@UNDERSCORE@", "_");
+        new_menu_label = ztd::replace(new_menu_label, "\\_", "@UNDERSCORE@");
+        new_menu_label = ztd::replace(new_menu_label, "_", "");
+        new_menu_label = ztd::replace(new_menu_label, "@UNDERSCORE@", "_");
     }
     else
-        new_menu_label = ztd::replace(menu_label, "_", "");
+        new_menu_label = ztd::replace(new_menu_label, "_", "");
     if (kill_special)
     {
-        new_menu_label = ztd::replace(menu_label, "&", "");
-        new_menu_label = ztd::replace(menu_label, " ", "-");
+        new_menu_label = ztd::replace(new_menu_label, "&", "");
+        new_menu_label = ztd::replace(new_menu_label, " ", "-");
     }
     else if (escape)
-        new_menu_label = g_markup_escape_text(menu_label.c_str(), -1);
+        new_menu_label = Glib::Markup::escape_text(new_menu_label);
 
     return new_menu_label;
 }

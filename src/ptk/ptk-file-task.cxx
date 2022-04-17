@@ -1042,7 +1042,10 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         if (task->type != VFS_FILE_TASK_EXEC)
             ufile_path = nullptr;
         else
-            ufile_path = g_markup_printf_escaped("<b>%s</b>", task->current_file.c_str());
+        {
+            std::string escaped_markup = Glib::Markup::escape_text(task->current_file);
+            ufile_path = ztd::strdup(fmt::format("<b>{}</b>", escaped_markup));
+        }
 
         if (ptask->aborted)
             window_title = "Stopped";
@@ -1055,7 +1058,10 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         }
         gtk_window_set_title(GTK_WINDOW(ptask->progress_dlg), window_title);
         if (!ufile_path)
-            ufile_path = g_markup_printf_escaped("<b>( %s )</b>", window_title);
+        {
+            std::string escaped_markup = Glib::Markup::escape_text(window_title);
+            ufile_path = ztd::strdup(fmt::format("<b>( {} )</b>", escaped_markup));
+        }
     }
     else if (!task->current_file.empty())
     {
@@ -1063,7 +1069,8 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         {
             // Copy: <src basename>
             str = g_filename_display_basename(task->current_file.c_str());
-            ufile_path = g_markup_printf_escaped("<b>%s</b>", str);
+            std::string escaped_markup = Glib::Markup::escape_text(str);
+            ufile_path = ztd::strdup(fmt::format("<b>{}</b>", escaped_markup));
             free(str);
 
             // From: <src_dir>
@@ -1108,7 +1115,10 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             }
         }
         else
-            ufile_path = g_markup_printf_escaped("<b>%s</b>", task->current_file.c_str());
+        {
+            std::string escaped_markup = Glib::Markup::escape_text(task->current_file);
+            ufile_path = ztd::strdup(fmt::format("<b>{}</b>", escaped_markup));
+        }
     }
     else
         ufile_path = nullptr;
