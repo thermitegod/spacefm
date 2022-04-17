@@ -39,6 +39,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <fmt/format.h>
+
 #include <glibmm.h>
 #include <glibmm/keyfile.h>
 

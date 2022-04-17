@@ -21,6 +21,8 @@
 
 #include <cassert>
 
+#include <fmt/format.h>
+
 #include <fcntl.h>
 
 #include <glibmm.h>

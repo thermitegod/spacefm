@@ -22,6 +22,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <fmt/format.h>
+
 #include <glibmm.h>
 
 #include <gtk/gtk.h>

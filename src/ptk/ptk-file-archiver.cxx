@@ -25,6 +25,8 @@
 
 #include <sstream>
 
+#include <fmt/format.h>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>

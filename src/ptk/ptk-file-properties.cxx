@@ -19,6 +19,8 @@
 #include <array>
 #include <vector>
 
+#include <fmt/format.h>
+
 #include <gtk/gtk.h>
 
 #include "ptk/ptk-file-properties.hxx"

@@ -27,6 +27,8 @@
 #include <fcntl.h>
 #include <utime.h>
 
+#include <fmt/format.h>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>

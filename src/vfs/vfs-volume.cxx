@@ -30,6 +30,8 @@
 #include <fcntl.h>
 #include <linux/kdev_t.h>
 
+#include <fmt/format.h>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>

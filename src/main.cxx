@@ -18,6 +18,8 @@
 #include <string>
 #include <filesystem>
 
+#include <fmt/format.h>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>

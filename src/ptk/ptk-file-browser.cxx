@@ -24,6 +24,8 @@
 #include <fnmatch.h>
 #include <fcntl.h>
 
+#include <fmt/format.h>
+
 #include <exo/exo.h>
 
 #include <glibmm.h>

@@ -20,6 +20,8 @@
 
 #include "window-reference.hxx"
 
+#include <fmt/format.h>
+
 #include <gtk/gtk.h>
 
 #include <glibmm.h>

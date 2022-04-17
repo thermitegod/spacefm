@@ -15,6 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <fmt/format.h>
+
 #include "settings.hxx"
 
 #include "vfs/vfs-utils.hxx"

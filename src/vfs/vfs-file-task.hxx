@@ -29,6 +29,9 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 enum VFSFileTaskType
 {
     VFS_FILE_TASK_MOVE,

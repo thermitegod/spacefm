@@ -23,6 +23,8 @@
 
 #include <sys/stat.h>
 
+#include <fmt/format.h>
+
 #include <glibmm.h>
 
 #include <libffmpegthumbnailer/imagetypes.h>

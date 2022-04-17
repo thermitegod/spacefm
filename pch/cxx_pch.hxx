@@ -57,7 +57,7 @@
 #include <cstdio>
 
 // FMT
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 // GTK
 #include <gtk/gtk.h>

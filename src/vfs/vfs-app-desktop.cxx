@@ -21,6 +21,8 @@
 #include <array>
 #include <vector>
 
+#include <fmt/format.h>
+
 #include <glibmm.h>
 #include <glibmm/keyfile.h>
 

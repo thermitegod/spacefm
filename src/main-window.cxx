@@ -26,6 +26,8 @@
 
 #include <malloc.h>
 
+#include <fmt/format.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 

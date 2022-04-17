@@ -24,6 +24,8 @@
 
 #include <fcntl.h>
 
+#include <fmt/format.h>
+
 #include <glibmm.h>
 
 #include <glib.h>

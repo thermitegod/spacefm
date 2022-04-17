@@ -21,6 +21,8 @@
 
 #include <linux/kdev_t.h>
 
+#include <fmt/format.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
