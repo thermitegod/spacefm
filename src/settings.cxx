@@ -552,7 +552,6 @@ load_settings(const char* config_dir)
 void
 save_settings(void* main_window_ptr)
 {
-    XSet* set;
     FMMainWindow* main_window;
     // LOG_INFO("save_settings");
 
@@ -567,12 +566,11 @@ save_settings(void* main_window_ptr)
 
     if (GTK_IS_WIDGET(main_window))
     {
-        int p;
         if (save_tabs)
         {
-            for (p = 1; p < 5; p++)
+            for (int p = 1; p < 5; p++)
             {
-                set = xset_get_panel(p, "show");
+                XSet* set = xset_get_panel(p, "show");
                 if (GTK_IS_NOTEBOOK(main_window->panel[p - 1]))
                 {
                     int pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1]));
@@ -583,23 +581,18 @@ save_settings(void* main_window_ptr)
                             free(set->s);
                             set->s = nullptr;
                         }
-                        char* tabs = ztd::strdup("");
-                        int g;
-                        for (g = 0; g < pages; g++)
+                        std::string tabs;
+                        for (int g = 0; g < pages; g++)
                         {
                             PtkFileBrowser* file_browser = PTK_FILE_BROWSER(
                                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]),
                                                           g));
-                            char* old_tabs = tabs;
-                            tabs = g_strdup_printf("%s///%s",
-                                                   old_tabs,
-                                                   ptk_file_browser_get_cwd(file_browser));
-                            free(old_tabs);
+                            tabs = fmt::format("{}{}{}",
+                                               tabs,
+                                               CONFIG_FILE_TABS_DELIM,
+                                               ptk_file_browser_get_cwd(file_browser));
                         }
-                        if (tabs[0] != '\0')
-                            set->s = tabs;
-                        else
-                            free(tabs);
+                        set->s = ztd::strdup(tabs);
 
                         // save current tab
                         if (set->x)
@@ -615,9 +608,9 @@ save_settings(void* main_window_ptr)
         else
         {
             // clear saved tabs
-            for (p = 1; p < 5; p++)
+            for (int p = 1; p < 5; p++)
             {
-                set = xset_get_panel(p, "show");
+                XSet* set = xset_get_panel(p, "show");
                 if (set->s)
                 {
                     free(set->s);

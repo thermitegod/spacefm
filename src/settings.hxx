@@ -37,6 +37,9 @@
 // This limits the small icon size for side panes and task list
 #define PANE_MAX_ICON_SIZE 48
 
+// delimiter used in config file for tabs
+#define CONFIG_FILE_TABS_DELIM "///"
+
 struct AppSettings
 {
     // General Settings

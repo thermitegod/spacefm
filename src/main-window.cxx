@@ -943,16 +943,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
     (void)item;
     int p;
     int cur_tabx;
-    const char* folder_path;
-    XSet* set;
-    char* tabs;
-    char* end;
-    char* tab_dir;
-    char* tabs_add;
     bool show[5]; // array starts at 1 for clarity
-    bool tab_added;
-    bool horiz;
-    bool vert;
     PtkFileBrowser* file_browser;
 
     // save column widths and side sliders of visible panels
@@ -1003,6 +994,8 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
     for (p = 1; p < 5; p++)
         show[p] = xset_get_b_panel(p, "show");
 
+    bool horiz;
+    bool vert;
     for (p = 1; p < 5; p++)
     {
         // panel context - how panels share horiz and vert space with other panels
@@ -1039,6 +1032,8 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
         {
             // shown
             // test if panel and mode exists
+            XSet* set;
+
             std::string xset_name =
                 fmt::format("panel{}_slider_positions{}", p, main_window->panel_context[p - 1]);
             set = xset_is(xset_name);
@@ -1076,6 +1071,8 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
             // LOG_INFO("loaded panel {}", p);
             if (!gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1])))
             {
+                bool tab_added;
+
                 main_window->notebook = main_window->panel[p - 1];
                 main_window->curpanel = p;
                 // load saved tabs
@@ -1083,58 +1080,36 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                 set = xset_get_panel(p, "show");
                 if ((set->s && app_settings.load_saved_tabs) || set->ob1)
                 {
-                    char* str;
+                    std::string tabs_add;
+                    std::vector<std::string> tab_dirs;
+
                     // set->ob1 is preload path
-                    tabs_add = g_strdup_printf("%s%s%s",
-                                               set->s && app_settings.load_saved_tabs ? set->s : "",
-                                               set->ob1 ? "///" : "",
-                                               set->ob1 ? set->ob1 : "");
-                    tabs = tabs_add;
-                    while (tabs && !strncmp(tabs, "///", 3))
+                    tabs_add = fmt::format("{}{}{}",
+                                           set->s && app_settings.load_saved_tabs ? set->s : "",
+                                           set->ob1 ? CONFIG_FILE_TABS_DELIM : "",
+                                           set->ob1 ? set->ob1 : "");
+
+                    tab_dirs = ztd::split(tabs_add, CONFIG_FILE_TABS_DELIM);
+
+                    for (const std::string& tab_dir: tab_dirs)
                     {
-                        tabs += 3;
-                        if (!strncmp(tabs, "////", 4))
+                        if (tab_dir.empty())
+                            continue;
+
+                        std::string folder_path;
+                        if (std::filesystem::is_directory(tab_dir))
                         {
-                            tab_dir = ztd::strdup("/");
-                            tabs++;
-                        }
-                        else if ((end = strstr(tabs, "///")))
-                        {
-                            end[0] = '\0';
-                            tab_dir = ztd::strdup(tabs);
-                            end[0] = '/';
-                            tabs = end;
+                            folder_path = tab_dir;
                         }
                         else
                         {
-                            tab_dir = ztd::strdup(tabs);
-                            tabs = nullptr;
+                            if (geteuid() != 0)
+                                folder_path = vfs_user_home_dir();
+                            else
+                                folder_path = "/";
                         }
-                        if (tab_dir[0] != '\0')
-                        {
-                            // open saved tab
-                            if (Glib::str_has_prefix(tab_dir, "~/"))
-                            {
-                                // convert ~ to /home/user for hacked session files
-                                std::string path =
-                                    fmt::format("{}{}", vfs_user_home_dir(), tab_dir + 1);
-                                str = ztd::strdup(path);
-                                free(tab_dir);
-                                tab_dir = str;
-                            }
-                            if (std::filesystem::is_directory(tab_dir))
-                                folder_path = tab_dir;
-                            else if (!(folder_path = xset_get_s("go_set_default")))
-                            {
-                                if (geteuid() != 0)
-                                    folder_path = vfs_user_home_dir().c_str();
-                                else
-                                    folder_path = ztd::strdup("/");
-                            }
-                            fm_main_window_add_new_tab(main_window, folder_path);
-                            tab_added = true;
-                        }
-                        free(tab_dir);
+                        fm_main_window_add_new_tab(main_window, folder_path.c_str());
+                        tab_added = true;
                     }
                     if (set->x && !set->ob1)
                     {
@@ -1157,19 +1132,24 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                     }
                     free(set->ob1);
                     set->ob1 = nullptr;
-                    free(tabs_add);
                 }
                 if (!tab_added)
                 {
                     // open default tab
-                    if (!(folder_path = xset_get_s("go_set_default")))
+                    std::string folder_path;
+
+                    if (xset_get_s("go_set_default"))
+                    {
+                        folder_path = xset_get_s("go_set_default");
+                    }
+                    else
                     {
                         if (geteuid() != 0)
-                            folder_path = vfs_user_home_dir().c_str();
+                            folder_path = vfs_user_home_dir();
                         else
-                            folder_path = ztd::strdup("/");
+                            folder_path = "/";
                     }
-                    fm_main_window_add_new_tab(main_window, folder_path);
+                    fm_main_window_add_new_tab(main_window, folder_path.c_str());
                 }
             }
             if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
