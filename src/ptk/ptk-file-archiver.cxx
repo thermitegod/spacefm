@@ -1378,7 +1378,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
 
     // Creating task
     std::string task_name = fmt::format("Extract {}", vfs_file_info_get_name(file));
-    PtkFileTask* task = ptk_file_exec_new(task_name.c_str(),
+    PtkFileTask* task = ptk_file_exec_new(task_name,
                                           cwd,
                                           dlgparent,
                                           file_browser ? file_browser->task_view : nullptr);

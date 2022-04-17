@@ -55,7 +55,8 @@ ptk_file_task_trylock(PtkFileTask* ptask)
 }
 
 PtkFileTask*
-ptk_file_exec_new(const char* item_name, const char* dir, GtkWidget* parent, GtkWidget* task_view)
+ptk_file_exec_new(const std::string& item_name, const char* dir, GtkWidget* parent,
+                  GtkWidget* task_view)
 {
     GtkWidget* parent_win = nullptr;
     if (parent)

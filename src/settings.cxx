@@ -3618,7 +3618,7 @@ xset_custom_activate(GtkWidget* item, XSet* set)
 
     // task
     std::string task_name = clean_label(set->menu_label, false, false);
-    PtkFileTask* task = ptk_file_exec_new(task_name.c_str(), cwd, parent, task_view);
+    PtkFileTask* task = ptk_file_exec_new(task_name, cwd, parent, task_view);
     // don't free cwd!
     task->task->exec_browser = set->browser;
     task->task->exec_command = command;
@@ -3901,7 +3901,7 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     // task
     std::string task_name = fmt::format("Edit {}", path);
     std::string cwd = g_path_get_dirname(path);
-    PtkFileTask* task = ptk_file_exec_new(task_name.c_str(), cwd.c_str(), dlgparent, nullptr);
+    PtkFileTask* task = ptk_file_exec_new(task_name, cwd.c_str(), dlgparent, nullptr);
     task->task->exec_command = editor;
     task->task->exec_sync = false;
     task->task->exec_terminal = terminal;

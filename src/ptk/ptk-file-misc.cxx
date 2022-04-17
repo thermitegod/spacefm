@@ -2843,8 +2843,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             {
                 // new link task
                 task_name = fmt::format("Create Link{}", root_msg);
-                PtkFileTask* task =
-                    ptk_file_exec_new(task_name.c_str(), nullptr, mset->parent, task_view);
+                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
 
                 str = ztd::strdup(gtk_entry_get_text(mset->entry_target));
                 g_strstrip(str);
@@ -2926,8 +2925,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     over_cmd = fmt::format("rm -f {} && ", to_path);
 
                 task_name = fmt::format("Create New File{}", root_msg);
-                PtkFileTask* task =
-                    ptk_file_exec_new(task_name.c_str(), nullptr, mset->parent, task_view);
+                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 if (from_path.empty())
                     task->task->exec_command =
                         fmt::format("{}{}touch {}", root_mkdir, over_cmd, to_path);
@@ -3001,8 +2999,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 to_path = bash_quote(full_path);
 
                 task_name = fmt::format("Create New Directory{}", root_msg);
-                PtkFileTask* task =
-                    ptk_file_exec_new(task_name.c_str(), nullptr, mset->parent, task_view);
+                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 if (from_path.empty())
                     task->task->exec_command = fmt::format("{}mkdir {}", root_mkdir, to_path);
                 else
@@ -3029,8 +3026,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             {
                 // copy task
                 task_name = fmt::format("Copy{}", root_msg);
-                PtkFileTask* task =
-                    ptk_file_exec_new(task_name.c_str(), nullptr, mset->parent, task_view);
+                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 char* over_opt = nullptr;
                 to_path = bash_quote(full_path);
                 if (copy || !mset->is_link)
@@ -3082,8 +3078,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             {
                 // link task
                 task_name = fmt::format("Create Link{}", root_msg);
-                PtkFileTask* task =
-                    ptk_file_exec_new(task_name.c_str(), nullptr, mset->parent, task_view);
+                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 if (link || !mset->is_link)
                     from_path = bash_quote(mset->full_path);
                 else
@@ -3131,8 +3126,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 // move task - this is jumped to from the below rename block on
                 // EXDEV error
                 task_name = fmt::format("Move{}", root_msg);
-                PtkFileTask* task =
-                    ptk_file_exec_new(task_name.c_str(), nullptr, mset->parent, task_view);
+                PtkFileTask* task = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 from_path = bash_quote(mset->full_path);
                 to_path = bash_quote(full_path);
                 if (overwrite)
@@ -3816,10 +3810,8 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
     }
 
     // root task
-    PtkFileTask* task = ptk_file_exec_new(task_name.c_str(),
-                                          cwd,
-                                          parent,
-                                          file_browser ? file_browser->task_view : nullptr);
+    PtkFileTask* task =
+        ptk_file_exec_new(task_name, cwd, parent, file_browser ? file_browser->task_view : nullptr);
     task->task->exec_command = cmd;
     task->task->exec_sync = true;
     task->task->exec_popup = false;

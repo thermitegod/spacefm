@@ -6915,7 +6915,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 cmd.append(fmt::format(" {}", argv[j]));
 
             PtkFileTask* ptask =
-                ptk_file_exec_new(opt_title ? opt_title : cmd.c_str(),
+                ptk_file_exec_new(opt_title ? opt_title : cmd,
                                   opt_cwd ? opt_cwd : ptk_file_browser_get_cwd(file_browser),
                                   GTK_WIDGET(file_browser),
                                   file_browser->task_view);

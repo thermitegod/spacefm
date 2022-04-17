@@ -274,7 +274,7 @@ VFSAppDesktop::exec_in_terminal(const std::string& app_name, const std::string& 
                                 const std::string& cmd) noexcept
 {
     // task
-    PtkFileTask* task = ptk_file_exec_new(app_name.c_str(), cwd.c_str(), nullptr, nullptr);
+    PtkFileTask* task = ptk_file_exec_new(app_name, cwd.c_str(), nullptr, nullptr);
 
     task->task->exec_command = cmd;
 
