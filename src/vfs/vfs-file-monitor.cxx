@@ -137,7 +137,6 @@ vfs_file_monitor_add(char* path, VFSFileMonitorCallback cb, void* user_data)
         monitor = g_slice_new0(VFSFileMonitor);
         monitor->path = ztd::strdup(real_path);
 
-        monitor->callbacks = g_array_new(false, false, sizeof(VFSFileMonitorCallbackEntry));
         g_hash_table_insert(monitor_hash, monitor->path, monitor);
 
         monitor->wd = inotify_add_watch(vfs_inotify_fd,
@@ -159,10 +158,10 @@ vfs_file_monitor_add(char* path, VFSFileMonitorCallback cb, void* user_data)
         // LOG_DEBUG("monitor installed: {}, {:p}", path, monitor);
         if (cb)
         { /* Install a callback */
-            VFSFileMonitorCallbackEntry cb_ent;
-            cb_ent.callback = cb;
-            cb_ent.user_data = user_data;
-            monitor->callbacks = g_array_append_val(monitor->callbacks, cb_ent);
+            VFSFileMonitorCallbackEntry* cb_ent = g_slice_new(VFSFileMonitorCallbackEntry);
+            cb_ent->callback = cb;
+            cb_ent->user_data = user_data;
+            monitor->callbacks.push_back(cb_ent);
         }
         monitor->ref_inc();
     }
@@ -176,16 +175,15 @@ vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* use
         return;
 
     // LOG_INFO("vfs_file_monitor_remove");
-    if (cb && fm->callbacks)
+    if (cb && !fm->callbacks.empty())
     {
-        VFSFileMonitorCallbackEntry* callbacks =
-            VFS_FILE_MONITOR_CALLBACK_DATA(fm->callbacks->data);
-        unsigned int i;
-        for (i = 0; i < fm->callbacks->len; ++i)
+        for (VFSFileMonitorCallbackEntry* cb2: fm->callbacks)
         {
-            if (callbacks[i].callback == cb && callbacks[i].user_data == user_data)
+            if (cb2->callback == cb && cb2->user_data == (VFSFileMonitorCallbackEntry*)user_data)
             {
-                fm->callbacks = g_array_remove_index_fast(fm->callbacks, i);
+                g_slice_free(VFSFileMonitorCallbackEntry, cb2);
+                fm->callbacks.erase(std::remove(fm->callbacks.begin(), fm->callbacks.end(), cb2),
+                                    fm->callbacks.end());
                 break;
             }
         }
@@ -199,7 +197,7 @@ vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* use
 
         g_hash_table_remove(monitor_hash, fm->path);
         free(fm->path);
-        g_array_free(fm->callbacks, true);
+        fm->callbacks.clear();
         g_slice_free(VFSFileMonitor, fm);
     }
     // LOG_INFO("vfs_file_monitor_remove   DONE");
@@ -259,18 +257,15 @@ vfs_file_monitor_translate_inotify_event(int inotify_mask)
 }
 
 static void
-vfs_file_monitor_dispatch_event(VFSFileMonitor* monitor, VFSFileMonitorEvent evt,
-                                const char* file_name)
+vfs_file_monitor_dispatch_event(VFSFileMonitor* fm, VFSFileMonitorEvent evt, const char* file_name)
 {
     /* Call the callback functions */
-    if (monitor->callbacks && monitor->callbacks->len)
+    if (!fm->callbacks.empty())
     {
-        VFSFileMonitorCallbackEntry* cb = VFS_FILE_MONITOR_CALLBACK_DATA(monitor->callbacks->data);
-        unsigned int i;
-        for (i = 0; i < monitor->callbacks->len; ++i)
+        for (VFSFileMonitorCallbackEntry* cb: fm->callbacks)
         {
-            VFSFileMonitorCallback func = cb[i].callback;
-            func(monitor, evt, file_name, cb[i].user_data);
+            VFSFileMonitorCallback func = cb->callback;
+            func(fm, evt, file_name, cb->user_data);
         }
     }
 }

@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include <atomic>
 
 #include <glib.h>
@@ -25,6 +27,8 @@
 #include <sys/inotify.h>
 
 #define VFS_FILE_MONITOR_CALLBACK_DATA(obj) (reinterpret_cast<VFSFileMonitorCallbackEntry*>(obj))
+
+struct VFSFileMonitorCallbackEntry;
 
 enum VFSFileMonitorEvent
 {
@@ -39,7 +43,7 @@ struct VFSFileMonitor
 
     // TODO private
     int wd;
-    GArray* callbacks;
+    std::vector<VFSFileMonitorCallbackEntry*> callbacks;
 
     void ref_inc();
     void ref_dec();
