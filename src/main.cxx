@@ -136,7 +136,7 @@ open_in_tab(FMMainWindow** main_window, const char* real_path)
         // set panel to load real_path on window creation
         set = xset_get_panel(p, "show");
         set->ob1 = ztd::strdup(real_path);
-        set->b = XSET_B_TRUE;
+        set->b = XSetB::XSET_B_TRUE;
 
         // create new window
         fm_main_window_store_positions(nullptr);
@@ -155,14 +155,14 @@ open_in_tab(FMMainWindow** main_window, const char* real_path)
                 set = xset_get_panel(cli_flags.panel, "show");
                 set->ob1 = ztd::strdup(real_path);
                 tab_added = true;
-                set->b = XSET_B_TRUE;
+                set->b = XSetB::XSET_B_TRUE;
                 show_panels_all_windows(nullptr, *main_window);
             }
             else if (!gtk_widget_get_visible((*main_window)->panel[cli_flags.panel - 1]))
             {
                 // show panel
                 set = xset_get_panel(cli_flags.panel, "show");
-                set->b = XSET_B_TRUE;
+                set->b = XSetB::XSET_B_TRUE;
                 show_panels_all_windows(nullptr, *main_window);
             }
             (*main_window)->curpanel = cli_flags.panel;
@@ -296,7 +296,7 @@ handle_parsed_commandline_args()
                 // show panel
                 XSet* set;
                 set = xset_get_panel(cli_flags.panel, "show");
-                set->b = XSET_B_TRUE;
+                set->b = XSetB::XSET_B_TRUE;
                 show_panels_all_windows(nullptr, main_window);
             }
             focus_panel(nullptr, (void*)main_window, cli_flags.panel);

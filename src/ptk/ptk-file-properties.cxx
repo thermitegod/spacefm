@@ -62,8 +62,8 @@ struct FilePropertiesDialogData
     GtkEntry* atime;
     char* orig_atime;
 
-    GtkToggleButton* chmod_btns[N_CHMOD_ACTIONS];
-    unsigned char chmod_states[N_CHMOD_ACTIONS];
+    GtkToggleButton* chmod_btns[ChmodActionType::N_CHMOD_ACTIONS];
+    unsigned char chmod_states[ChmodActionType::N_CHMOD_ACTIONS];
 
     GtkLabel* total_size_label;
     GtkLabel* size_on_disk_label;
@@ -383,7 +383,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     data->mtime = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "mtime")));
     data->atime = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "atime")));
 
-    for (i = 0; i < N_CHMOD_ACTIONS; ++i)
+    for (i = 0; i < ChmodActionType::N_CHMOD_ACTIONS; ++i)
     {
         data->chmod_btns[i] =
             GTK_TOGGLE_BUTTON(GTK_WIDGET(gtk_builder_get_object(builder, chmod_names[i])));
@@ -514,7 +514,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         data->orig_mtime = nullptr;
         data->orig_atime = nullptr;
 
-        for (i = 0; i < N_CHMOD_ACTIONS; ++i)
+        for (i = 0; i < ChmodActionType::N_CHMOD_ACTIONS; ++i)
         {
             gtk_toggle_button_set_inconsistent(data->chmod_btns[i], true);
             data->chmod_states[i] = 2; /* Don't touch this bit */
@@ -590,7 +590,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
         data->group_name = ztd::strdup(tmp + 1);
         gtk_entry_set_text(GTK_ENTRY(data->group), data->group_name);
 
-        for (i = 0; i < N_CHMOD_ACTIONS; ++i)
+        for (i = 0; i < ChmodActionType::N_CHMOD_ACTIONS; ++i)
         {
             if (data->chmod_states[i] != 2) /* allow to touch this bit */
             {
@@ -848,7 +848,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
             }
 
             int i;
-            for (i = 0; i < N_CHMOD_ACTIONS; ++i)
+            for (i = 0; i < ChmodActionType::N_CHMOD_ACTIONS; ++i)
             {
                 if (gtk_toggle_button_get_inconsistent(data->chmod_btns[i]))
                 {
@@ -876,7 +876,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                     file_list.push_back(file_path);
                 }
 
-                ptask = ptk_file_task_new(VFS_FILE_TASK_CHMOD_CHOWN,
+                ptask = ptk_file_task_new(VFSFileTaskType::VFS_FILE_TASK_CHMOD_CHOWN,
                                           file_list,
                                           nullptr,
                                           GTK_WINDOW(gtk_widget_get_parent(GTK_WIDGET(dialog))),

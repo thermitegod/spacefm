@@ -91,7 +91,7 @@ static void on_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file, PtkFileList* lis
 
 static GObjectClass* parent_class = nullptr;
 
-static GType column_types[N_FILE_LIST_COLS];
+static GType column_types[PTKFileListCol::N_FILE_LIST_COLS];
 
 GType
 ptk_file_list_get_type()
@@ -177,16 +177,16 @@ ptk_file_list_tree_model_init(GtkTreeModelIface* iface)
     iface->iter_nth_child = ptk_file_list_iter_nth_child;
     iface->iter_parent = ptk_file_list_iter_parent;
 
-    column_types[COL_FILE_BIG_ICON] = GDK_TYPE_PIXBUF;
-    column_types[COL_FILE_SMALL_ICON] = GDK_TYPE_PIXBUF;
-    column_types[COL_FILE_NAME] = G_TYPE_STRING;
-    column_types[COL_FILE_DESC] = G_TYPE_STRING;
-    column_types[COL_FILE_SIZE] = G_TYPE_STRING;
-    column_types[COL_FILE_DESC] = G_TYPE_STRING;
-    column_types[COL_FILE_PERM] = G_TYPE_STRING;
-    column_types[COL_FILE_OWNER] = G_TYPE_STRING;
-    column_types[COL_FILE_MTIME] = G_TYPE_STRING;
-    column_types[COL_FILE_INFO] = G_TYPE_POINTER;
+    column_types[PTKFileListCol::COL_FILE_BIG_ICON] = GDK_TYPE_PIXBUF;
+    column_types[PTKFileListCol::COL_FILE_SMALL_ICON] = GDK_TYPE_PIXBUF;
+    column_types[PTKFileListCol::COL_FILE_NAME] = G_TYPE_STRING;
+    column_types[PTKFileListCol::COL_FILE_DESC] = G_TYPE_STRING;
+    column_types[PTKFileListCol::COL_FILE_SIZE] = G_TYPE_STRING;
+    column_types[PTKFileListCol::COL_FILE_DESC] = G_TYPE_STRING;
+    column_types[PTKFileListCol::COL_FILE_PERM] = G_TYPE_STRING;
+    column_types[PTKFileListCol::COL_FILE_OWNER] = G_TYPE_STRING;
+    column_types[PTKFileListCol::COL_FILE_MTIME] = G_TYPE_STRING;
+    column_types[PTKFileListCol::COL_FILE_INFO] = G_TYPE_POINTER;
 }
 
 static void
@@ -333,7 +333,7 @@ static int
 ptk_file_list_get_n_columns(GtkTreeModel* tree_model)
 {
     (void)tree_model;
-    return N_FILE_LIST_COLS;
+    return PTKFileListCol::N_FILE_LIST_COLS;
 }
 
 static GType
@@ -446,10 +446,10 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column,
 
     switch (column)
     {
-        case COL_FILE_BIG_ICON:
+        case PTKFileListCol::COL_FILE_BIG_ICON:
             icon = nullptr;
             /* special file can use special icons saved as thumbnails*/
-            if (info->flags == VFS_FILE_INFO_NONE &&
+            if (info->flags == VFSFileInfoFlag::VFS_FILE_INFO_NONE &&
                 (list->max_thumbnail > info->size /*vfs_file_info_get_size( info )*/
                  || (list->max_thumbnail != 0 && vfs_file_info_is_video(info))))
                 icon = vfs_file_info_get_big_thumbnail(info);
@@ -462,7 +462,7 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column,
                 g_object_unref(icon);
             }
             break;
-        case COL_FILE_SMALL_ICON:
+        case PTKFileListCol::COL_FILE_SMALL_ICON:
             icon = nullptr;
             /* special file can use special icons saved as thumbnails*/
             if (list->max_thumbnail > info->size /*vfs_file_info_get_size( info )*/
@@ -476,10 +476,10 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column,
                 g_object_unref(icon);
             }
             break;
-        case COL_FILE_NAME:
+        case PTKFileListCol::COL_FILE_NAME:
             g_value_set_string(value, vfs_file_info_get_disp_name(info));
             break;
-        case COL_FILE_SIZE:
+        case PTKFileListCol::COL_FILE_SIZE:
             if (S_ISDIR(info->mode) ||
                 (S_ISLNK(info->mode) &&
                  !strcmp(vfs_mime_type_get_type(info->mime_type), XDG_MIME_TYPE_DIRECTORY)))
@@ -487,19 +487,19 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column,
             else
                 g_value_set_string(value, vfs_file_info_get_disp_size(info));
             break;
-        case COL_FILE_DESC:
+        case PTKFileListCol::COL_FILE_DESC:
             g_value_set_string(value, vfs_file_info_get_mime_type_desc(info));
             break;
-        case COL_FILE_PERM:
+        case PTKFileListCol::COL_FILE_PERM:
             g_value_set_string(value, vfs_file_info_get_disp_perm(info));
             break;
-        case COL_FILE_OWNER:
+        case PTKFileListCol::COL_FILE_OWNER:
             g_value_set_string(value, vfs_file_info_get_disp_owner(info));
             break;
-        case COL_FILE_MTIME:
+        case PTKFileListCol::COL_FILE_MTIME:
             g_value_set_string(value, vfs_file_info_get_disp_mtime(info));
             break;
-        case COL_FILE_INFO:
+        case PTKFileListCol::COL_FILE_INFO:
             g_value_set_pointer(value, vfs_file_info_ref(info));
             break;
         default:
@@ -684,17 +684,17 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
     int result;
 
     // dirs before/after files
-    if (list->sort_dir != PTK_LIST_SORT_DIR_MIXED)
+    if (list->sort_dir != PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED)
     {
         result = vfs_file_info_is_dir(file_a) - vfs_file_info_is_dir(file_b);
         if (result != 0)
-            return list->sort_dir == PTK_LIST_SORT_DIR_FIRST ? -result : result;
+            return list->sort_dir == PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST ? -result : result;
     }
 
     // by column
     switch (list->sort_col)
     {
-        case COL_FILE_SIZE:
+        case PTKFileListCol::COL_FILE_SIZE:
             if (file_a->size > file_b->size)
                 result = 1;
             else if (file_a->size == file_b->size)
@@ -702,7 +702,7 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
             else
                 result = -1;
             break;
-        case COL_FILE_MTIME:
+        case PTKFileListCol::COL_FILE_MTIME:
             if (file_a->mtime > file_b->mtime)
                 result = 1;
             else if (file_a->mtime == file_b->mtime)
@@ -710,15 +710,15 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
             else
                 result = -1;
             break;
-        case COL_FILE_DESC:
+        case PTKFileListCol::COL_FILE_DESC:
             result = g_ascii_strcasecmp(vfs_file_info_get_mime_type_desc(file_a),
                                         vfs_file_info_get_mime_type_desc(file_b));
             break;
-        case COL_FILE_PERM:
+        case PTKFileListCol::COL_FILE_PERM:
             result =
                 strcmp(vfs_file_info_get_disp_perm(file_a), vfs_file_info_get_disp_perm(file_b));
             break;
-        case COL_FILE_OWNER:
+        case PTKFileListCol::COL_FILE_OWNER:
             result = g_ascii_strcasecmp(vfs_file_info_get_disp_owner(file_a),
                                         vfs_file_info_get_disp_owner(file_b));
             break;

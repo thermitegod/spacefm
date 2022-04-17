@@ -35,7 +35,7 @@ enum VFSAsyncSignal
     N_SIGNALS
 };
 
-static unsigned int signals[N_SIGNALS] = {0};
+static unsigned int signals[VFSAsyncSignal::N_SIGNALS] = {0};
 
 GType
 vfs_async_task_get_type()
@@ -73,16 +73,17 @@ vfs_async_task_class_init(VFSAsyncTaskClass* klass)
 
     klass->finish = vfs_async_task_finish;
 
-    signals[FINISH_SIGNAL] = g_signal_new("finish",
-                                          G_TYPE_FROM_CLASS(klass),
-                                          G_SIGNAL_RUN_FIRST,
-                                          G_STRUCT_OFFSET(VFSAsyncTaskClass, finish),
-                                          nullptr,
-                                          nullptr,
-                                          g_cclosure_marshal_VOID__BOOLEAN,
-                                          G_TYPE_NONE,
-                                          1,
-                                          G_TYPE_BOOLEAN);
+    signals[VFSAsyncSignal::FINISH_SIGNAL] =
+        g_signal_new("finish",
+                     G_TYPE_FROM_CLASS(klass),
+                     G_SIGNAL_RUN_FIRST,
+                     G_STRUCT_OFFSET(VFSAsyncTaskClass, finish),
+                     nullptr,
+                     nullptr,
+                     g_cclosure_marshal_VOID__BOOLEAN,
+                     G_TYPE_NONE,
+                     1,
+                     G_TYPE_BOOLEAN);
 }
 
 static void
@@ -182,7 +183,7 @@ vfs_async_thread_cleanup(VFSAsyncTask* task, bool finalize)
         /* Only emit the signal when we are not finalizing.
             Emitting signal on an object during destruction is not allowed. */
         if (!finalize)
-            g_signal_emit(task, signals[FINISH_SIGNAL], 0, task->cancelled);
+            g_signal_emit(task, signals[VFSAsyncSignal::FINISH_SIGNAL], 0, task->cancelled);
     }
 }
 

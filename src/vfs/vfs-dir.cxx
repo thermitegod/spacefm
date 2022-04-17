@@ -77,7 +77,7 @@ enum VFSDirSignal
     N_SIGNALS
 };
 
-static unsigned int signals[N_SIGNALS] = {0};
+static unsigned int signals[VFSDirSignal::N_SIGNALS] = {0};
 static GObjectClass* parent_class = nullptr;
 
 static GHashTable* dir_hash = nullptr;
@@ -124,68 +124,73 @@ vfs_dir_class_init(VFSDirClass* klass)
      * file-created is emitted when there is a new file created in the dir.
      * The param is VFSFileInfo of the newly created file.
      */
-    signals[FILE_CREATED_SIGNAL] = g_signal_new("file-created",
-                                                G_TYPE_FROM_CLASS(klass),
-                                                G_SIGNAL_RUN_FIRST,
-                                                G_STRUCT_OFFSET(VFSDirClass, file_created),
-                                                nullptr,
-                                                nullptr,
-                                                g_cclosure_marshal_VOID__POINTER,
-                                                G_TYPE_NONE,
-                                                1,
-                                                G_TYPE_POINTER);
+    signals[VFSDirSignal::FILE_CREATED_SIGNAL] =
+        g_signal_new("file-created",
+                     G_TYPE_FROM_CLASS(klass),
+                     G_SIGNAL_RUN_FIRST,
+                     G_STRUCT_OFFSET(VFSDirClass, file_created),
+                     nullptr,
+                     nullptr,
+                     g_cclosure_marshal_VOID__POINTER,
+                     G_TYPE_NONE,
+                     1,
+                     G_TYPE_POINTER);
 
     /*
      * file-deleted is emitted when there is a file deleted in the dir.
      * The param is VFSFileInfo of the newly created file.
      */
-    signals[FILE_DELETED_SIGNAL] = g_signal_new("file-deleted",
-                                                G_TYPE_FROM_CLASS(klass),
-                                                G_SIGNAL_RUN_FIRST,
-                                                G_STRUCT_OFFSET(VFSDirClass, file_deleted),
-                                                nullptr,
-                                                nullptr,
-                                                g_cclosure_marshal_VOID__POINTER,
-                                                G_TYPE_NONE,
-                                                1,
-                                                G_TYPE_POINTER);
+    signals[VFSDirSignal::FILE_DELETED_SIGNAL] =
+        g_signal_new("file-deleted",
+                     G_TYPE_FROM_CLASS(klass),
+                     G_SIGNAL_RUN_FIRST,
+                     G_STRUCT_OFFSET(VFSDirClass, file_deleted),
+                     nullptr,
+                     nullptr,
+                     g_cclosure_marshal_VOID__POINTER,
+                     G_TYPE_NONE,
+                     1,
+                     G_TYPE_POINTER);
 
     /*
      * file-changed is emitted when there is a file changed in the dir.
      * The param is VFSFileInfo of the newly created file.
      */
-    signals[FILE_CHANGED_SIGNAL] = g_signal_new("file-changed",
-                                                G_TYPE_FROM_CLASS(klass),
-                                                G_SIGNAL_RUN_FIRST,
-                                                G_STRUCT_OFFSET(VFSDirClass, file_changed),
-                                                nullptr,
-                                                nullptr,
-                                                g_cclosure_marshal_VOID__POINTER,
-                                                G_TYPE_NONE,
-                                                1,
-                                                G_TYPE_POINTER);
+    signals[VFSDirSignal::FILE_CHANGED_SIGNAL] =
+        g_signal_new("file-changed",
+                     G_TYPE_FROM_CLASS(klass),
+                     G_SIGNAL_RUN_FIRST,
+                     G_STRUCT_OFFSET(VFSDirClass, file_changed),
+                     nullptr,
+                     nullptr,
+                     g_cclosure_marshal_VOID__POINTER,
+                     G_TYPE_NONE,
+                     1,
+                     G_TYPE_POINTER);
 
-    signals[THUMBNAIL_LOADED_SIGNAL] = g_signal_new("thumbnail-loaded",
-                                                    G_TYPE_FROM_CLASS(klass),
-                                                    G_SIGNAL_RUN_FIRST,
-                                                    G_STRUCT_OFFSET(VFSDirClass, thumbnail_loaded),
-                                                    nullptr,
-                                                    nullptr,
-                                                    g_cclosure_marshal_VOID__POINTER,
-                                                    G_TYPE_NONE,
-                                                    1,
-                                                    G_TYPE_POINTER);
+    signals[VFSDirSignal::THUMBNAIL_LOADED_SIGNAL] =
+        g_signal_new("thumbnail-loaded",
+                     G_TYPE_FROM_CLASS(klass),
+                     G_SIGNAL_RUN_FIRST,
+                     G_STRUCT_OFFSET(VFSDirClass, thumbnail_loaded),
+                     nullptr,
+                     nullptr,
+                     g_cclosure_marshal_VOID__POINTER,
+                     G_TYPE_NONE,
+                     1,
+                     G_TYPE_POINTER);
 
-    signals[FILE_LISTED_SIGNAL] = g_signal_new("file-listed",
-                                               G_TYPE_FROM_CLASS(klass),
-                                               G_SIGNAL_RUN_FIRST,
-                                               G_STRUCT_OFFSET(VFSDirClass, file_listed),
-                                               nullptr,
-                                               nullptr,
-                                               g_cclosure_marshal_VOID__BOOLEAN,
-                                               G_TYPE_NONE,
-                                               1,
-                                               G_TYPE_BOOLEAN);
+    signals[VFSDirSignal::FILE_LISTED_SIGNAL] =
+        g_signal_new("file-listed",
+                     G_TYPE_FROM_CLASS(klass),
+                     G_SIGNAL_RUN_FIRST,
+                     G_STRUCT_OFFSET(VFSDirClass, file_listed),
+                     nullptr,
+                     nullptr,
+                     g_cclosure_marshal_VOID__BOOLEAN,
+                     G_TYPE_NONE,
+                     1,
+                     G_TYPE_BOOLEAN);
 }
 
 /* constructor */
@@ -384,7 +389,7 @@ vfs_dir_emit_file_deleted(VFSDir* dir, const char* file_name, VFSFileInfo* file)
 
         vfs_dir_unlock(dir);
 
-        g_signal_emit(dir, signals[FILE_DELETED_SIGNAL], 0, file);
+        g_signal_emit(dir, signals[VFSDirSignal::FILE_DELETED_SIGNAL], 0, file);
         return;
     }
 
@@ -423,7 +428,7 @@ vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* file,
     if (!strcmp(file_name, dir->path))
     {
         // Special Case: The directory itself was changed
-        g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, nullptr);
+        g_signal_emit(dir, signals[VFSDirSignal::FILE_CHANGED_SIGNAL], 0, nullptr);
         return;
     }
 
@@ -459,7 +464,7 @@ vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* file,
                                                                nullptr,
                                                                nullptr);
                 }
-                g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, file_found);
+                g_signal_emit(dir, signals[VFSDirSignal::FILE_CHANGED_SIGNAL], 0, file_found);
             }
         }
         else
@@ -491,7 +496,7 @@ vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file)
 
     if (file)
     {
-        g_signal_emit(dir, signals[THUMBNAIL_LOADED_SIGNAL], 0, file);
+        g_signal_emit(dir, signals[VFSDirSignal::THUMBNAIL_LOADED_SIGNAL], 0, file);
         vfs_file_info_unref(file);
     }
 }
@@ -516,7 +521,7 @@ on_list_task_finished(VFSAsyncTask* task, bool is_cancelled, VFSDir* dir)
     (void)task;
     g_object_unref(dir->task);
     dir->task = nullptr;
-    g_signal_emit(dir, signals[FILE_LISTED_SIGNAL], 0, is_cancelled);
+    g_signal_emit(dir, signals[VFSDirSignal::FILE_LISTED_SIGNAL], 0, is_cancelled);
     dir->file_listed = true;
     dir->load_complete = true;
 }
@@ -669,7 +674,7 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
                 ztd::remove(dir->file_list, file);
                 if (file)
                 {
-                    g_signal_emit(dir, signals[FILE_DELETED_SIGNAL], 0, file);
+                    g_signal_emit(dir, signals[VFSDirSignal::FILE_DELETED_SIGNAL], 0, file);
                     vfs_file_info_unref(file);
                 }
             }
@@ -694,7 +699,7 @@ update_changed_files(void* key, void* data, void* user_data)
         {
             if (update_file_info(dir, file))
             {
-                g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, file);
+                g_signal_emit(dir, signals[VFSDirSignal::FILE_CHANGED_SIGNAL], 0, file);
                 vfs_file_info_unref(file);
             }
             // else was deleted, signaled, and unrefed in update_file_info
@@ -729,7 +734,7 @@ update_created_files(void* key, void* data, void* user_data)
                     // add new file to dir file_list
                     vfs_file_info_load_special_info(file, full_path);
                     dir->file_list.push_back(vfs_file_info_ref(file));
-                    g_signal_emit(dir, signals[FILE_CREATED_SIGNAL], 0, file);
+                    g_signal_emit(dir, signals[VFSDirSignal::FILE_CREATED_SIGNAL], 0, file);
                 }
                 // else file doesn't exist in filesystem
                 vfs_file_info_unref(file);
@@ -741,7 +746,7 @@ update_created_files(void* key, void* data, void* user_data)
                 file = vfs_file_info_ref(file_found);
                 if (update_file_info(dir, file))
                 {
-                    g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, file);
+                    g_signal_emit(dir, signals[VFSDirSignal::FILE_CHANGED_SIGNAL], 0, file);
                     vfs_file_info_unref(file);
                 }
                 // else was deleted, signaled, and unrefed in update_file_info
@@ -785,13 +790,13 @@ vfs_dir_monitor_callback(VFSFileMonitor* fm, VFSFileMonitorEvent event, const ch
 
     switch (event)
     {
-        case VFS_FILE_MONITOR_CREATE:
+        case VFSFileMonitorEvent::VFS_FILE_MONITOR_CREATE:
             vfs_dir_emit_file_created(dir, file_name, false);
             break;
-        case VFS_FILE_MONITOR_DELETE:
+        case VFSFileMonitorEvent::VFS_FILE_MONITOR_DELETE:
             vfs_dir_emit_file_deleted(dir, file_name, nullptr);
             break;
-        case VFS_FILE_MONITOR_CHANGE:
+        case VFSFileMonitorEvent::VFS_FILE_MONITOR_CHANGE:
             vfs_dir_emit_file_changed(dir, file_name, nullptr, false);
             break;
         default:
@@ -808,7 +813,7 @@ reload_icons(const char* path, VFSDir* dir, void* user_data)
     for (VFSFileInfo* file: dir->file_list)
     {
         /* It's a desktop entry file */
-        if (file->flags & VFS_FILE_INFO_DESKTOP_ENTRY)
+        if (file->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY)
         {
             char* file_path = g_build_filename(path, file->name.c_str(), nullptr);
             if (file->big_thumbnail)
@@ -906,7 +911,7 @@ reload_mime_type(char* key, VFSDir* dir, void* user_data)
 
     for (VFSFileInfo* file: dir->file_list)
     {
-        g_signal_emit(dir, signals[FILE_CHANGED_SIGNAL], 0, file);
+        g_signal_emit(dir, signals[VFSDirSignal::FILE_CHANGED_SIGNAL], 0, file);
     }
 
     vfs_dir_unlock(dir);
@@ -956,7 +961,7 @@ vfs_dir_unload_thumbnails(VFSDir* dir, bool is_big)
 
         /* This is a desktop entry file, so the icon needs reload
              FIXME: This is not a good way to do things, but there is no better way now.  */
-        if (file->flags & VFS_FILE_INFO_DESKTOP_ENTRY)
+        if (file->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY)
         {
             std::string file_path = Glib::build_filename(dir->path, file->name);
             vfs_file_info_load_special_info(file, file_path.c_str());

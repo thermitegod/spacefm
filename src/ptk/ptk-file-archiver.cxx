@@ -109,13 +109,13 @@ archive_handler_run_in_term(XSet* handler_xset, int operation)
     int ret;
     switch (operation)
     {
-        case ARC_COMPRESS:
+        case PTKFileArchiverArc::ARC_COMPRESS:
             ret = handler_xset->in_terminal;
             break;
-        case ARC_EXTRACT:
+        case PTKFileArchiverArc::ARC_EXTRACT:
             ret = handler_xset->keep_terminal;
             break;
-        case ARC_LIST:
+        case PTKFileArchiverArc::ARC_LIST:
             ret = handler_xset->scroll_lock;
             break;
         default:
@@ -124,7 +124,7 @@ archive_handler_run_in_term(XSet* handler_xset, int operation)
                      operation);
             return false;
     }
-    return ret == XSET_B_TRUE;
+    return ret == XSetB::XSET_B_TRUE;
 }
 
 static void
@@ -166,9 +166,10 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     {
         gtk_tree_model_get(GTK_TREE_MODEL(list),
                            &iter,
-                           COL_XSET_NAME,
+                           PTKFileArchiverCol::COL_XSET_NAME,
                            &xset_name,
-                           // COL_HANDLER_EXTENSIONS, &extensions,
+                           // PTKFileArchiverExtensionsCol::COL_HANDLER_EXTENSIONS,
+                           // &extensions,
                            -1);
         if (xset_name)
         {
@@ -201,9 +202,10 @@ on_format_changed(GtkComboBox* combo, void* user_data)
         // You have to fetch both items here
         gtk_tree_model_get(GTK_TREE_MODEL(list),
                            &iter,
-                           COL_XSET_NAME,
+                           PTKFileArchiverCol::COL_XSET_NAME,
                            &xset_name,
-                           // COL_HANDLER_EXTENSIONS, &extensions,
+                           // PTKFileArchiverExtensionsCol::COL_HANDLER_EXTENSIONS,
+                           // &extensions,
                            -1);
         if (xset_name)
         {
@@ -226,8 +228,8 @@ on_format_changed(GtkComboBox* combo, void* user_data)
         GtkTextView* view = (GtkTextView*)g_object_get_data(G_OBJECT(dlg), "view");
         std::string error_message;
         std::string command;
-        bool error = ptk_handler_load_script(HANDLER_MODE_ARC,
-                                             HANDLER_COMPRESS,
+        bool error = ptk_handler_load_script(PtkHandlerMode::HANDLER_MODE_ARC,
+                                             PtkHandlerArchive::HANDLER_COMPRESS,
                                              handler_xset,
                                              GTK_TEXT_VIEW(view),
                                              command,
@@ -356,7 +358,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo),
                                    renderer,
                                    "text",
-                                   COL_HANDLER_EXTENSIONS,
+                                   PTKFileArchiverExtensionsCol::COL_HANDLER_EXTENSIONS,
                                    nullptr);
 
     // Fetching available archive handlers
@@ -374,7 +376,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                         "No archive handlers "
                         "configured. You must add a handler before "
                         "creating an archive.");
-        ptk_handler_show_config(HANDLER_MODE_ARC, file_browser, nullptr);
+        ptk_handler_show_config(PtkHandlerMode::HANDLER_MODE_ARC, file_browser, nullptr);
         return;
     }
 
@@ -400,7 +402,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
         // Fetching handler
         handler_xset = xset_is(archive_handlers[i]);
 
-        if (handler_xset && handler_xset->b == XSET_B_TRUE)
+        if (handler_xset && handler_xset->b == XSetB::XSET_B_TRUE)
         /* Checking to see if handler is enabled, can cope with
          * compression and the extension is set - dealing with empty
          * command yet 'run in terminal' still ticked
@@ -424,9 +426,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
             extensions = fmt::format("{} ( {} ) ", handler_xset->menu_label, handler_xset->x);
             gtk_list_store_set(GTK_LIST_STORE(list),
                                &iter,
-                               COL_XSET_NAME,
+                               PTKFileArchiverCol::COL_XSET_NAME,
                                archive_handlers[i],
-                               COL_HANDLER_EXTENSIONS,
+                               PTKFileArchiverExtensionsCol::COL_HANDLER_EXTENSIONS,
                                extensions.c_str(),
                                -1);
 
@@ -481,16 +483,17 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     {
         gtk_tree_model_get(GTK_TREE_MODEL(list),
                            &iter,
-                           COL_XSET_NAME,
+                           PTKFileArchiverCol::COL_XSET_NAME,
                            &xset_name,
-                           // COL_HANDLER_EXTENSIONS, &extensions,
+                           // PTKFileArchiverExtensionsCol::COL_HANDLER_EXTENSIONS,
+                           // &extensions,
                            -1);
         if (xset_name)
         {
             handler_xset = xset_is(xset_name);
 
-            error = ptk_handler_load_script(HANDLER_MODE_ARC,
-                                            HANDLER_COMPRESS,
+            error = ptk_handler_load_script(PtkHandlerMode::HANDLER_MODE_ARC,
+                                            PtkHandlerArchive::HANDLER_COMPRESS,
                                             handler_xset,
                                             GTK_TEXT_VIEW(view),
                                             command,
@@ -591,9 +594,10 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 // Fetching model data
                 gtk_tree_model_get(GTK_TREE_MODEL(list),
                                    &iter,
-                                   COL_XSET_NAME,
+                                   PTKFileArchiverCol::COL_XSET_NAME,
                                    &xset_name,
-                                   // COL_HANDLER_EXTENSIONS, &extensions,
+                                   // PTKFileArchiverExtensionsCol::COL_HANDLER_EXTENSIONS,
+                                   // &extensions,
                                    -1);
 
                 handler_xset = xset_get(xset_name);
@@ -625,8 +629,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                     continue;
                 }
                 // Getting prior command for comparison
-                error = ptk_handler_load_script(HANDLER_MODE_ARC,
-                                                HANDLER_COMPRESS,
+                error = ptk_handler_load_script(PtkHandlerMode::HANDLER_MODE_ARC,
+                                                PtkHandlerArchive::HANDLER_COMPRESS,
                                                 handler_xset,
                                                 nullptr,
                                                 compress_command,
@@ -646,12 +650,13 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                     {
                         // commmand was default - need to save all commands
                         // get default extract command from const
-                        compress_command = ptk_handler_get_command(HANDLER_MODE_ARC,
-                                                                   HANDLER_EXTRACT,
-                                                                   handler_xset);
+                        compress_command =
+                            ptk_handler_get_command(PtkHandlerMode::HANDLER_MODE_ARC,
+                                                    PtkHandlerArchive::HANDLER_EXTRACT,
+                                                    handler_xset);
                         // write extract command script
-                        error = ptk_handler_save_script(HANDLER_MODE_ARC,
-                                                        HANDLER_EXTRACT,
+                        error = ptk_handler_save_script(PtkHandlerMode::HANDLER_MODE_ARC,
+                                                        PtkHandlerArchive::HANDLER_EXTRACT,
                                                         handler_xset,
                                                         nullptr,
                                                         compress_command,
@@ -663,11 +668,12 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                         }
 
                         // get default list command from const
-                        compress_command =
-                            ptk_handler_get_command(HANDLER_MODE_ARC, HANDLER_LIST, handler_xset);
+                        compress_command = ptk_handler_get_command(PtkHandlerMode::HANDLER_MODE_ARC,
+                                                                   PtkHandlerArchive::HANDLER_LIST,
+                                                                   handler_xset);
                         // write list command script
-                        error = ptk_handler_save_script(HANDLER_MODE_ARC,
-                                                        HANDLER_LIST,
+                        error = ptk_handler_save_script(PtkHandlerMode::HANDLER_MODE_ARC,
+                                                        PtkHandlerArchive::HANDLER_LIST,
                                                         handler_xset,
                                                         nullptr,
                                                         compress_command,
@@ -681,8 +687,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                         handler_xset->disable = false; // not default handler now
                     }
                     // save updated compress command
-                    error = ptk_handler_save_script(HANDLER_MODE_ARC,
-                                                    HANDLER_COMPRESS,
+                    error = ptk_handler_save_script(PtkHandlerMode::HANDLER_MODE_ARC,
+                                                    PtkHandlerArchive::HANDLER_COMPRESS,
                                                     handler_xset,
                                                     nullptr,
                                                     command,
@@ -707,7 +713,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                  * config dialog then exit, as this dialog would need to be
                  * reconstructed if changes occur */
                 gtk_widget_destroy(dlg);
-                ptk_handler_show_config(HANDLER_MODE_ARC, file_browser, nullptr);
+                ptk_handler_show_config(PtkHandlerMode::HANDLER_MODE_ARC, file_browser, nullptr);
                 return;
             default:
                 // Destroying dialog
@@ -948,16 +954,17 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     GSList* handlers_slist = nullptr;
 
     // Making sure files to act on have been passed
-    if (!files || job == HANDLER_COMPRESS)
+    if (!files || job == PtkHandlerArchive::HANDLER_COMPRESS)
         return;
 
     /* Detecting whether this function call is actually to list the
      * contents of the archive or not... */
-    list_contents = job == HANDLER_LIST;
+    list_contents = job == PtkHandlerArchive::HANDLER_LIST;
 
     /* Setting desired archive operation and keeping in terminal while
      * listing */
-    int archive_operation = list_contents ? ARC_LIST : ARC_EXTRACT;
+    int archive_operation =
+        list_contents ? PTKFileArchiverArc::ARC_LIST : PTKFileArchiverArc::ARC_EXTRACT;
     keep_term = list_contents;
 
     /* Ensuring archives are actually present in files, if this hasn't already
@@ -975,7 +982,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
             full_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
 
             // Checking for enabled handler with non-empty command
-            handlers_slist = ptk_handler_file_has_handlers(HANDLER_MODE_ARC,
+            handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
                                                            archive_operation,
                                                            full_path,
                                                            mime_type,
@@ -1078,7 +1085,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
                      * config dialog then exit, as this dialog would need to be
                      * reconstructed if changes occur */
                     gtk_widget_destroy(dlg);
-                    ptk_handler_show_config(HANDLER_MODE_ARC, file_browser, nullptr);
+                    ptk_handler_show_config(PtkHandlerMode::HANDLER_MODE_ARC,
+                                            file_browser,
+                                            nullptr);
                     return;
                 default:
                     // Destroying dialog
@@ -1143,7 +1152,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         full_path = g_build_filename(cwd, vfs_file_info_get_name(file), nullptr);
 
         // Get handler with non-empty command
-        handlers_slist = ptk_handler_file_has_handlers(HANDLER_MODE_ARC,
+        handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
                                                        archive_operation,
                                                        full_path,
                                                        mime_type,
@@ -1188,8 +1197,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         if (list_contents)
         {
             // List archive contents only
-            bool error = ptk_handler_load_script(HANDLER_MODE_ARC,
-                                                 HANDLER_LIST,
+            bool error = ptk_handler_load_script(PtkHandlerMode::HANDLER_MODE_ARC,
+                                                 PtkHandlerArchive::HANDLER_LIST,
                                                  handler_xset,
                                                  nullptr,
                                                  command,
@@ -1260,8 +1269,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
 
             /* Get extraction command - Doing this here as parent
              * directory creation needs access to the command. */
-            bool error = ptk_handler_load_script(HANDLER_MODE_ARC,
-                                                 HANDLER_EXTRACT,
+            bool error = ptk_handler_load_script(PtkHandlerMode::HANDLER_MODE_ARC,
+                                                 PtkHandlerArchive::HANDLER_EXTRACT,
                                                  handler_xset,
                                                  nullptr,
                                                  command,

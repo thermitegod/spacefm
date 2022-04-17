@@ -109,7 +109,7 @@ static void ptk_dir_tree_node_free(PtkDirTreeNode* node);
 
 static GObjectClass* parent_class = nullptr;
 
-static GType column_types[N_DIR_TREE_COLS];
+static GType column_types[PTKDirTreeCol::N_DIR_TREE_COLS];
 
 GType
 ptk_dir_tree_get_type()
@@ -192,9 +192,9 @@ ptk_dir_tree_tree_model_init(GtkTreeModelIface* iface)
     iface->iter_nth_child = ptk_dir_tree_iter_nth_child;
     iface->iter_parent = ptk_dir_tree_iter_parent;
 
-    column_types[COL_DIR_TREE_ICON] = GDK_TYPE_PIXBUF;
-    column_types[COL_DIR_TREE_DISP_NAME] = G_TYPE_STRING;
-    column_types[COL_DIR_TREE_INFO] = G_TYPE_POINTER;
+    column_types[PTKDirTreeCol::COL_DIR_TREE_ICON] = GDK_TYPE_PIXBUF;
+    column_types[PTKDirTreeCol::COL_DIR_TREE_DISP_NAME] = G_TYPE_STRING;
+    column_types[PTKDirTreeCol::COL_DIR_TREE_INFO] = G_TYPE_POINTER;
 }
 
 static void
@@ -246,7 +246,7 @@ static int
 ptk_dir_tree_get_n_columns(GtkTreeModel* tree_model)
 {
     (void)tree_model;
-    return N_DIR_TREE_COLS;
+    return PTKDirTreeCol::N_DIR_TREE_COLS;
 }
 
 static GType
@@ -405,7 +405,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column, 
     VFSFileInfo* info = node->file;
     switch (column)
     {
-        case COL_DIR_TREE_ICON:
+        case PTKDirTreeCol::COL_DIR_TREE_ICON:
             if (!info)
                 return;
             int icon_size;
@@ -428,13 +428,13 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column, 
                 g_object_unref(icon);
             }
             break;
-        case COL_DIR_TREE_DISP_NAME:
+        case PTKDirTreeCol::COL_DIR_TREE_DISP_NAME:
             if (info)
                 g_value_set_string(value, vfs_file_info_get_disp_name(info));
             else
                 g_value_set_string(value, "( no subdirectory )"); // no sub directory
             break;
-        case COL_DIR_TREE_INFO:
+        case PTKDirTreeCol::COL_DIR_TREE_INFO:
             if (!info)
                 return;
             g_value_set_pointer(value, vfs_file_info_ref(info));
@@ -887,7 +887,7 @@ on_file_monitor_event(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char*
     PtkDirTreeNode* child = find_node(node, file_name);
     switch (event)
     {
-        case VFS_FILE_MONITOR_CREATE:
+        case VFSFileMonitorEvent::VFS_FILE_MONITOR_CREATE:
             if (!child)
             {
                 /* remove place holder */
@@ -905,7 +905,7 @@ on_file_monitor_event(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char*
                 free(file_path);
             }
             break;
-        case VFS_FILE_MONITOR_DELETE:
+        case VFSFileMonitorEvent::VFS_FILE_MONITOR_DELETE:
             if (child)
             {
                 ptk_dir_tree_delete_child(node->tree, child);
@@ -919,7 +919,7 @@ on_file_monitor_event(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char*
             model has changed without letting the view know.  Any display from now on is likely to
             be incorrect.
             */
-        case VFS_FILE_MONITOR_CHANGE:
+        case VFSFileMonitorEvent::VFS_FILE_MONITOR_CHANGE:
             break;
         default:
             break;

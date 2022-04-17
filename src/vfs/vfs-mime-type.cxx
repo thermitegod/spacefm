@@ -85,8 +85,8 @@ on_mime_cache_changed(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char*
     MimeCache* cache = static_cast<MimeCache*>(user_data);
     switch (event)
     {
-        case VFS_FILE_MONITOR_CREATE:
-        case VFS_FILE_MONITOR_DELETE:
+        case VFSFileMonitorEvent::VFS_FILE_MONITOR_CREATE:
+        case VFSFileMonitorEvent::VFS_FILE_MONITOR_DELETE:
             /* NOTE: FAM sometimes generate incorrect "delete" notification for non-existent files.
              *  So if the cache is not loaded originally (the cache file is non-existent), we skip
              * it.
@@ -95,7 +95,7 @@ on_mime_cache_changed(VFSFileMonitor* fm, VFSFileMonitorEvent event, const char*
                 return;
 
             FMT_FALLTHROUGH;
-        case VFS_FILE_MONITOR_CHANGE:
+        case VFSFileMonitorEvent::VFS_FILE_MONITOR_CHANGE:
             mime_cache_reload(cache);
             // LOG_DEBUG("reload cache: {}", file_name);
             if (reload_callback_id == 0)
@@ -466,14 +466,18 @@ vfs_mime_type_set_default_action(VFSMimeType* mime_type, const char* desktop_id)
     vfs_mime_type_add_action(mime_type, desktop_id, &cust_desktop);
     if (cust_desktop)
         desktop_id = cust_desktop;
-    mime_type_update_association(mime_type->type, desktop_id, MIME_TYPE_ACTION_DEFAULT);
+    mime_type_update_association(mime_type->type,
+                                 desktop_id,
+                                 MimeTypeAction::MIME_TYPE_ACTION_DEFAULT);
     free(cust_desktop);
 }
 
 void
 vfs_mime_type_remove_action(VFSMimeType* mime_type, const char* desktop_id)
 {
-    mime_type_update_association(mime_type->type, desktop_id, MIME_TYPE_ACTION_REMOVE);
+    mime_type_update_association(mime_type->type,
+                                 desktop_id,
+                                 MimeTypeAction::MIME_TYPE_ACTION_REMOVE);
 }
 
 /* If user-custom desktop file is created, it's returned in custom_desktop. */
@@ -527,7 +531,7 @@ vfs_mime_type_locate_desktop_file(const char* dir, const char* desktop_id)
 void
 vfs_mime_type_append_action(const char* type, const char* desktop_id)
 {
-    mime_type_update_association(type, desktop_id, MIME_TYPE_ACTION_APPEND);
+    mime_type_update_association(type, desktop_id, MimeTypeAction::MIME_TYPE_ACTION_APPEND);
 }
 
 void

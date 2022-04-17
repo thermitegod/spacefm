@@ -35,40 +35,19 @@ enum VFSVolumeState
 {
     VFS_VOLUME_ADDED,
     VFS_VOLUME_REMOVED,
-    VFS_VOLUME_MOUNTED,   /* Not implemented */
-    VFS_VOLUME_UNMOUNTED, /* Not implemented */
+    VFS_VOLUME_MOUNTED,   // Not implemented
+    VFS_VOLUME_UNMOUNTED, // Not implemented
     VFS_VOLUME_EJECT,
     VFS_VOLUME_CHANGED
 };
 
-struct VFSVolume;
+enum VFSVolumeDeviceType
+{
+    DEVICE_TYPE_BLOCK,
+    DEVICE_TYPE_NETWORK,
+    DEVICE_TYPE_OTHER // eg fuseiso mounted file
+};
 
-typedef void (*VFSVolumeCallback)(VFSVolume* vol, VFSVolumeState state, void* user_data);
-
-bool vfs_volume_init();
-
-void vfs_volume_finalize();
-
-const std::vector<VFSVolume*> vfs_volume_get_all_volumes();
-
-void vfs_volume_add_callback(VFSVolumeCallback cb, void* user_data);
-
-void vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data);
-
-const char* vfs_volume_get_disp_name(VFSVolume* vol);
-
-const char* vfs_volume_get_mount_point(VFSVolume* vol);
-
-const char* vfs_volume_get_device(VFSVolume* vol);
-
-const char* vfs_volume_get_fstype(VFSVolume* vol);
-
-const char* vfs_volume_get_icon(VFSVolume* vol);
-
-bool vfs_volume_is_mounted(VFSVolume* vol);
-
-/* HAL build also needs this for file handler
- * ptk_location_view_create_mount_point() */
 struct netmount_t
 {
     char* url;
@@ -79,13 +58,6 @@ struct netmount_t
     char* user;
     char* pass;
     char* path;
-};
-
-enum VFSVolumeDeviceType
-{
-    DEVICE_TYPE_BLOCK,
-    DEVICE_TYPE_NETWORK,
-    DEVICE_TYPE_OTHER // eg fuseiso mounted file
 };
 
 struct VFSVolume
@@ -120,6 +92,25 @@ struct VFSVolume
     std::time_t automount_time;
     void* open_main_window;
 };
+
+typedef void (*VFSVolumeCallback)(VFSVolume* vol, VFSVolumeState state, void* user_data);
+
+bool vfs_volume_init();
+
+void vfs_volume_finalize();
+
+const std::vector<VFSVolume*> vfs_volume_get_all_volumes();
+
+void vfs_volume_add_callback(VFSVolumeCallback cb, void* user_data);
+void vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data);
+
+const char* vfs_volume_get_disp_name(VFSVolume* vol);
+const char* vfs_volume_get_mount_point(VFSVolume* vol);
+const char* vfs_volume_get_device(VFSVolume* vol);
+const char* vfs_volume_get_fstype(VFSVolume* vol);
+const char* vfs_volume_get_icon(VFSVolume* vol);
+
+bool vfs_volume_is_mounted(VFSVolume* vol);
 
 char* vfs_volume_get_mount_command(VFSVolume* vol, char* default_options, bool* run_in_terminal);
 char* vfs_volume_get_mount_options(VFSVolume* vol, char* options);

@@ -64,7 +64,11 @@ ptk_file_exec_new(const std::string& item_name, const char* dir, GtkWidget* pare
 
     std::vector<std::string> file_list;
     file_list.push_back(item_name);
-    return ptk_file_task_new(VFS_FILE_TASK_EXEC, file_list, dir, GTK_WINDOW(parent_win), task_view);
+    return ptk_file_task_new(VFSFileTaskType::VFS_FILE_TASK_EXEC,
+                             file_list,
+                             dir,
+                             GTK_WINDOW(parent_win),
+                             task_view);
 }
 
 PtkFileTask*
@@ -87,11 +91,11 @@ ptk_file_task_new(VFSFileTaskType type, std::vector<std::string>& src_files, con
     ptask->keep_dlg = false;
     ptask->err_count = 0;
     if (xset_get_b("task_err_any"))
-        ptask->err_mode = PTASK_ERROR_ANY;
+        ptask->err_mode = PTKFileTaskPtaskError::PTASK_ERROR_ANY;
     else if (xset_get_b("task_err_first"))
-        ptask->err_mode = PTASK_ERROR_FIRST;
+        ptask->err_mode = PTKFileTaskPtaskError::PTASK_ERROR_FIRST;
     else
-        ptask->err_mode = PTASK_ERROR_CONT;
+        ptask->err_mode = PTKFileTaskPtaskError::PTASK_ERROR_CONT;
 
     GtkTextIter iter;
     ptask->log_buf = gtk_text_buffer_new(nullptr);
@@ -117,10 +121,10 @@ ptk_file_task_new(VFSFileTaskType type, std::vector<std::string>& src_files, con
     ptask->query_new_dest = nullptr;
 
     // queue task
-    if (ptask->task->exec_sync && ptask->task->type != VFS_FILE_TASK_EXEC &&
-        ptask->task->type != VFS_FILE_TASK_LINK && ptask->task->type != VFS_FILE_TASK_CHMOD_CHOWN &&
-        xset_get_b("task_q_new"))
-        ptk_file_task_pause(ptask, VFS_FILE_TASK_QUEUE);
+    if (ptask->task->exec_sync && ptask->task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC &&
+        ptask->task->type != VFSFileTaskType::VFS_FILE_TASK_LINK &&
+        ptask->task->type != VFSFileTaskType::VFS_FILE_TASK_CHMOD_CHOWN && xset_get_b("task_q_new"))
+        ptk_file_task_pause(ptask, VFSFileTaskState::VFS_FILE_TASK_QUEUE);
 
     // GThread *self = g_thread_self ();
     // LOG_INFO("GUI_THREAD = {:p}", fmt::ptr(self));
@@ -140,13 +144,13 @@ save_progress_dialog_size(PtkFileTask* ptask)
     std::string s;
 
     s = fmt::format("{}", allocation.width);
-    if (ptask->task->type == VFS_FILE_TASK_EXEC)
+    if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
         xset_set("task_pop_top", "s", s.c_str());
     else
         xset_set("task_pop_top", "x", s.c_str());
 
     s = fmt::format("{}", allocation.height);
-    if (ptask->task->type == VFS_FILE_TASK_EXEC)
+    if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
         xset_set("task_pop_top", "z", s.c_str());
     else
         xset_set("task_pop_top", "y", s.c_str());
@@ -179,7 +183,7 @@ ptk_file_task_destroy(PtkFileTask* ptask)
         gtk_widget_destroy(ptask->progress_dlg);
         ptask->progress_dlg = nullptr;
     }
-    if (ptask->task->type == VFS_FILE_TASK_EXEC)
+    if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
         // LOG_INFO("    g_io_channel_shutdown");
         // channel shutdowns are needed to stop channel reads after task ends.
@@ -257,12 +261,12 @@ on_progress_timer(PtkFileTask* ptask)
     if (ptask->task->queue_start)
     {
         ptask->task->queue_start = false;
-        if (ptask->task->state_pause == VFS_FILE_TASK_RUNNING)
-            ptk_file_task_pause(ptask, VFS_FILE_TASK_RUNNING);
+        if (ptask->task->state_pause == VFSFileTaskState::VFS_FILE_TASK_RUNNING)
+            ptk_file_task_pause(ptask, VFSFileTaskState::VFS_FILE_TASK_RUNNING);
         else
             main_task_start_queued(ptask->task_view, ptask);
-        if (ptask->timeout && ptask->task->state_pause != VFS_FILE_TASK_RUNNING &&
-            ptask->task->state == VFS_FILE_TASK_RUNNING)
+        if (ptask->timeout && ptask->task->state_pause != VFSFileTaskState::VFS_FILE_TASK_RUNNING &&
+            ptask->task->state == VFSFileTaskState::VFS_FILE_TASK_RUNNING)
         {
             // task is waiting in queue so list it
             g_source_remove(ptask->timeout);
@@ -291,8 +295,8 @@ on_progress_timer(PtkFileTask* ptask)
         main_task_view_remove_task(ptask);
         main_task_start_queued(ptask->task_view, nullptr);
     }
-    else if (ptask->task->state_pause != VFS_FILE_TASK_RUNNING && !ptask->pause_change &&
-             ptask->task->type != VFS_FILE_TASK_EXEC)
+    else if (ptask->task->state_pause != VFSFileTaskState::VFS_FILE_TASK_RUNNING &&
+             !ptask->pause_change && ptask->task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
         return true;
 
     ptk_file_task_update(ptask);
@@ -330,7 +334,7 @@ ptk_file_task_add_main(PtkFileTask* ptask)
         ptk_file_task_progress_open(ptask);
     }
 
-    if (ptask->task->state_pause != VFS_FILE_TASK_RUNNING && !ptask->pause_change)
+    if (ptask->task->state_pause != VFSFileTaskState::VFS_FILE_TASK_RUNNING && !ptask->pause_change)
         ptask->pause_change = ptask->pause_change_view = true;
 
     on_progress_timer(ptask);
@@ -347,7 +351,7 @@ ptk_file_task_run(PtkFileTask* ptask)
     ptask->timeout = g_timeout_add(500, (GSourceFunc)ptk_file_task_add_main, ptask);
     ptask->progress_timer = 0;
     vfs_file_task_run(ptask->task);
-    if (ptask->task->type == VFS_FILE_TASK_EXEC)
+    if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
         if ((ptask->complete || !ptask->task->exec_sync) && ptask->timeout)
         {
@@ -386,13 +390,13 @@ ptk_file_task_cancel(PtkFileTask* ptask)
         ptask->timeout = 0;
     }
     ptask->aborted = true;
-    if (ptask->task->type == VFS_FILE_TASK_EXEC)
+    if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
         ptask->keep_dlg = true;
 
         // resume task for task list responsiveness
-        if (ptask->task->state_pause != VFS_FILE_TASK_RUNNING)
-            ptk_file_task_pause(ptask, VFS_FILE_TASK_RUNNING);
+        if (ptask->task->state_pause != VFSFileTaskState::VFS_FILE_TASK_RUNNING)
+            ptk_file_task_pause(ptask, VFSFileTaskState::VFS_FILE_TASK_RUNNING);
 
         vfs_file_task_abort(ptask->task);
 
@@ -446,28 +450,29 @@ set_button_states(PtkFileTask* ptask)
 
     switch (ptask->task->state_pause)
     {
-        case VFS_FILE_TASK_PAUSE:
+        case VFSFileTaskState::VFS_FILE_TASK_PAUSE:
             label = "Q_ueue";
             // iconset = ztd::strdup("task_que");
             //  icon = "list-add";
             break;
-        case VFS_FILE_TASK_QUEUE:
+        case VFSFileTaskState::VFS_FILE_TASK_QUEUE:
             label = "Res_ume";
             // iconset = ztd::strdup("task_resume");
             //  icon = "media-playback-start";
             break;
-        case VFS_FILE_TASK_RUNNING:
-        case VFS_FILE_TASK_SIZE_TIMEOUT:
-        case VFS_FILE_TASK_QUERY_OVERWRITE:
-        case VFS_FILE_TASK_ERROR:
-        case VFS_FILE_TASK_FINISH:
+        case VFSFileTaskState::VFS_FILE_TASK_RUNNING:
+        case VFSFileTaskState::VFS_FILE_TASK_SIZE_TIMEOUT:
+        case VFSFileTaskState::VFS_FILE_TASK_QUERY_OVERWRITE:
+        case VFSFileTaskState::VFS_FILE_TASK_ERROR:
+        case VFSFileTaskState::VFS_FILE_TASK_FINISH:
         default:
             label = "Pa_use";
             // iconset = ztd::strdup("task_pause");
             //  icon = "media-playback-pause";
             break;
     }
-    sens = sens && !(ptask->task->type == VFS_FILE_TASK_EXEC && !ptask->task->exec_pid);
+    sens = sens &&
+           !(ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC && !ptask->task->exec_pid);
 
     /*
     XSet* set = xset_get(iconset);
@@ -483,19 +488,20 @@ set_button_states(PtkFileTask* ptask)
 void
 ptk_file_task_pause(PtkFileTask* ptask, int state)
 {
-    if (ptask->task->type == VFS_FILE_TASK_EXEC)
+    if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
         // exec task
         // ptask->keep_dlg = true;
         int sig;
-        if (state == VFS_FILE_TASK_PAUSE ||
-            (ptask->task->state_pause == VFS_FILE_TASK_RUNNING && state == VFS_FILE_TASK_QUEUE))
+        if (state == VFSFileTaskState::VFS_FILE_TASK_PAUSE ||
+            (ptask->task->state_pause == VFSFileTaskState::VFS_FILE_TASK_RUNNING &&
+             state == VFSFileTaskState::VFS_FILE_TASK_QUEUE))
         {
             sig = SIGSTOP;
             ptask->task->state_pause = (VFSFileTaskState)state;
             ptask->task->timer.stop();
         }
-        else if (state == VFS_FILE_TASK_QUEUE)
+        else if (state == VFSFileTaskState::VFS_FILE_TASK_QUEUE)
         {
             sig = 0;
             ptask->task->state_pause = (VFSFileTaskState)state;
@@ -503,7 +509,7 @@ ptk_file_task_pause(PtkFileTask* ptask, int state)
         else
         {
             sig = SIGCONT;
-            ptask->task->state_pause = VFS_FILE_TASK_RUNNING;
+            ptask->task->state_pause = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
             ptask->task->timer.start();
         }
 
@@ -517,10 +523,10 @@ ptk_file_task_pause(PtkFileTask* ptask, int state)
                 vfs_file_task_kill_cpids(cpids, sig);
         }
     }
-    else if (state == VFS_FILE_TASK_PAUSE)
-        ptask->task->state_pause = VFS_FILE_TASK_PAUSE;
-    else if (state == VFS_FILE_TASK_QUEUE)
-        ptask->task->state_pause = VFS_FILE_TASK_QUEUE;
+    else if (state == VFSFileTaskState::VFS_FILE_TASK_PAUSE)
+        ptask->task->state_pause = VFSFileTaskState::VFS_FILE_TASK_PAUSE;
+    else if (state == VFSFileTaskState::VFS_FILE_TASK_QUEUE)
+        ptask->task->state_pause = VFSFileTaskState::VFS_FILE_TASK_QUEUE;
     else
     {
         // Resume
@@ -530,7 +536,7 @@ ptk_file_task_pause(PtkFileTask* ptask, int state)
             g_cond_broadcast(ptask->task->pause_cond);
             ptk_file_task_unlock(ptask);
         }
-        ptask->task->state_pause = VFS_FILE_TASK_RUNNING;
+        ptask->task->state_pause = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
     }
     set_button_states(ptask);
     ptask->pause_change = ptask->pause_change_view = true;
@@ -569,17 +575,17 @@ on_progress_dlg_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
             ptk_file_task_cancel(ptask);
             break;
         case GTK_RESPONSE_NO: // Pause btn
-            if (ptask->task->state_pause == VFS_FILE_TASK_PAUSE)
+            if (ptask->task->state_pause == VFSFileTaskState::VFS_FILE_TASK_PAUSE)
             {
-                ptk_file_task_pause(ptask, VFS_FILE_TASK_QUEUE);
+                ptk_file_task_pause(ptask, VFSFileTaskState::VFS_FILE_TASK_QUEUE);
             }
-            else if (ptask->task->state_pause == VFS_FILE_TASK_QUEUE)
+            else if (ptask->task->state_pause == VFSFileTaskState::VFS_FILE_TASK_QUEUE)
             {
-                ptk_file_task_pause(ptask, VFS_FILE_TASK_RUNNING);
+                ptk_file_task_pause(ptask, VFSFileTaskState::VFS_FILE_TASK_RUNNING);
             }
             else
             {
-                ptk_file_task_pause(ptask, VFS_FILE_TASK_PAUSE);
+                ptk_file_task_pause(ptask, VFSFileTaskState::VFS_FILE_TASK_PAUSE);
             }
             main_task_start_queued(ptask->task_view, nullptr);
             break;
@@ -626,7 +632,7 @@ set_progress_icon(PtkFileTask* ptask)
     GdkPixbuf* pixbuf;
     VFSFileTask* task = ptask->task;
 
-    if (task->state_pause != VFS_FILE_TASK_RUNNING)
+    if (task->state_pause != VFSFileTaskState::VFS_FILE_TASK_RUNNING)
         pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
                                           "media-playback-pause",
                                           16,
@@ -638,20 +644,22 @@ set_progress_icon(PtkFileTask* ptask)
                                           16,
                                           GTK_ICON_LOOKUP_USE_BUILTIN,
                                           nullptr);
-    else if (task->type == VFS_FILE_TASK_MOVE || task->type == VFS_FILE_TASK_COPY ||
-             task->type == VFS_FILE_TASK_LINK || task->type == VFS_FILE_TASK_TRASH)
+    else if (task->type == VFSFileTaskType::VFS_FILE_TASK_MOVE ||
+             task->type == VFSFileTaskType::VFS_FILE_TASK_COPY ||
+             task->type == VFSFileTaskType::VFS_FILE_TASK_LINK ||
+             task->type == VFSFileTaskType::VFS_FILE_TASK_TRASH)
         pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
                                           "stock_copy",
                                           16,
                                           GTK_ICON_LOOKUP_USE_BUILTIN,
                                           nullptr);
-    else if (task->type == VFS_FILE_TASK_DELETE)
+    else if (task->type == VFSFileTaskType::VFS_FILE_TASK_DELETE)
         pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
                                           "stock_delete",
                                           16,
                                           GTK_ICON_LOOKUP_USE_BUILTIN,
                                           nullptr);
-    else if (task->type == VFS_FILE_TASK_EXEC && !task->exec_icon.empty())
+    else if (task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC && !task->exec_icon.empty())
         pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
                                           task->exec_icon.c_str(),
                                           16,
@@ -766,7 +774,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     gtk_label_set_selectable(ptask->from, true);
     gtk_grid_attach(grid, GTK_WIDGET(ptask->from), 1, row, 1, 1);
 
-    if (task->type != VFS_FILE_TASK_EXEC)
+    if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
         // From: <src directory>
         row++;
@@ -825,9 +833,9 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     gtk_widget_set_valign(GTK_WIDGET(label), GTK_ALIGN_CENTER);
     gtk_grid_attach(grid, GTK_WIDGET(label), 0, row, 1, 1);
     const char* status;
-    if (task->state_pause == VFS_FILE_TASK_PAUSE)
+    if (task->state_pause == VFSFileTaskState::VFS_FILE_TASK_PAUSE)
         status = "Paused";
-    else if (task->state_pause == VFS_FILE_TASK_QUEUE)
+    else if (task->state_pause == VFSFileTaskState::VFS_FILE_TASK_QUEUE)
         status = "Queued";
     else
         status = "Running...";
@@ -865,7 +873,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 
     // Overwrite & Error
     GtkWidget* overwrite_align;
-    if (task->type != VFS_FILE_TASK_EXEC)
+    if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
         static const char* overwrite_options[] = {"Ask",
                                                   "Overwrite All",
@@ -875,8 +883,9 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
                                               "Stop On Any Error",
                                               "Continue"};
 
-        bool overtask = task->type == VFS_FILE_TASK_MOVE || task->type == VFS_FILE_TASK_COPY ||
-                        task->type == VFS_FILE_TASK_LINK;
+        bool overtask = task->type == VFSFileTaskType::VFS_FILE_TASK_MOVE ||
+                        task->type == VFSFileTaskType::VFS_FILE_TASK_COPY ||
+                        task->type == VFSFileTaskType::VFS_FILE_TASK_LINK;
         ptask->overwrite_combo = gtk_combo_box_text_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(ptask->overwrite_combo), false);
         gtk_widget_set_sensitive(ptask->overwrite_combo, overtask);
@@ -941,7 +950,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
                            5);
 
     int win_width, win_height;
-    if (task->type == VFS_FILE_TASK_EXEC)
+    if (task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
         win_width = xset_get_int("task_pop_top", "s");
         win_height = xset_get_int("task_pop_top", "z");
@@ -1040,7 +1049,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         if (ptask->error_combo)
             gtk_widget_set_sensitive(ptask->error_combo, false);
 
-        if (task->type != VFS_FILE_TASK_EXEC)
+        if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
             ufile_path = nullptr;
         else
         {
@@ -1066,7 +1075,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     }
     else if (!task->current_file.empty())
     {
-        if (task->type != VFS_FILE_TASK_EXEC)
+        if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
         {
             // Copy: <src basename>
             str = g_filename_display_basename(task->current_file.c_str());
@@ -1143,7 +1152,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     free(udest);
 
     // progress bar
-    if (task->type != VFS_FILE_TASK_EXEC || ptask->task->custom_percent)
+    if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC || ptask->task->custom_percent)
     {
         if (task->percent >= 0)
         {
@@ -1168,14 +1177,15 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(ptask->progress_bar), true);
         }
     }
-    else if (task->type == VFS_FILE_TASK_EXEC && task->state_pause == VFS_FILE_TASK_RUNNING)
+    else if (task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC &&
+             task->state_pause == VFSFileTaskState::VFS_FILE_TASK_RUNNING)
     {
         gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(ptask->progress_bar), false);
         gtk_progress_bar_pulse(ptask->progress_bar);
     }
 
     // progress
-    if (task->type != VFS_FILE_TASK_EXEC)
+    if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
         std::string stats;
 
@@ -1248,11 +1258,11 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     {
         if (ptask->aborted)
         {
-            if (task->err_count && task->type != VFS_FILE_TASK_EXEC)
+            if (task->err_count && task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
             {
-                if (ptask->err_mode == PTASK_ERROR_FIRST)
+                if (ptask->err_mode == PTKFileTaskPtaskError::PTASK_ERROR_FIRST)
                     errs = "Error  ( Stop If First )";
-                else if (ptask->err_mode == PTASK_ERROR_ANY)
+                else if (ptask->err_mode == PTKFileTaskPtaskError::PTASK_ERROR_ANY)
                     errs = "Error  ( Stop On Any )";
                 else
                     errs = fmt::format("Stopped with {} error", task->err_count);
@@ -1262,7 +1272,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         }
         else
         {
-            if (task->type != VFS_FILE_TASK_EXEC)
+            if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
             {
                 if (task->err_count)
                     errs = fmt::format("Finished with {} error", task->err_count);
@@ -1281,9 +1291,9 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             }
         }
     }
-    else if (task->state_pause == VFS_FILE_TASK_PAUSE)
+    else if (task->state_pause == VFSFileTaskState::VFS_FILE_TASK_PAUSE)
     {
-        if (task->type != VFS_FILE_TASK_EXEC)
+        if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
             errs = "Paused";
         else
         {
@@ -1296,9 +1306,9 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             }
         }
     }
-    else if (task->state_pause == VFS_FILE_TASK_QUEUE)
+    else if (task->state_pause == VFSFileTaskState::VFS_FILE_TASK_QUEUE)
     {
-        if (task->type != VFS_FILE_TASK_EXEC)
+        if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
             errs = ztd::strdup("Queued");
         else
         {
@@ -1313,7 +1323,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     }
     else
     {
-        if (task->type != VFS_FILE_TASK_EXEC)
+        if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
         {
             if (task->err_count)
                 errs = fmt::format("Running with {} error", task->err_count);
@@ -1369,7 +1379,7 @@ ptk_file_task_update(PtkFileTask* ptask)
     off_t cur_speed;
     double timer_elapsed = task->timer.elapsed();
 
-    if (task->type == VFS_FILE_TASK_EXEC)
+    if (task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
         // test for zombie process
         int status = 0;
@@ -1408,7 +1418,7 @@ ptk_file_task_update(PtkFileTask* ptask)
     else
     {
         // cur speed
-        if (task->state_pause == VFS_FILE_TASK_RUNNING)
+        if (task->state_pause == VFSFileTaskState::VFS_FILE_TASK_RUNNING)
         {
             double since_last = timer_elapsed - task->last_elapsed;
             if (since_last >= 2.0)
@@ -1456,7 +1466,7 @@ ptk_file_task_update(PtkFileTask* ptask)
     free(ptask->dsp_elapsed);
     ptask->dsp_elapsed = ztd::strdup(elapsed3);
 
-    if (task->type != VFS_FILE_TASK_EXEC)
+    if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
         std::string file_count;
         std::string size_tally;
@@ -1481,11 +1491,11 @@ ptk_file_task_update(PtkFileTask* ptask)
         if (task->last_speed != 0)
             // use speed of last 2 sec interval if available
             cur_speed = task->last_speed;
-        if (cur_speed == 0 || task->state_pause != VFS_FILE_TASK_RUNNING)
+        if (cur_speed == 0 || task->state_pause != VFSFileTaskState::VFS_FILE_TASK_RUNNING)
         {
-            if (task->state_pause == VFS_FILE_TASK_PAUSE)
+            if (task->state_pause == VFSFileTaskState::VFS_FILE_TASK_PAUSE)
                 speed1 = "paused";
-            else if (task->state_pause == VFS_FILE_TASK_QUEUE)
+            else if (task->state_pause == VFSFileTaskState::VFS_FILE_TASK_QUEUE)
                 speed1 = "queued";
             else
                 speed1 = "stalled";
@@ -1596,7 +1606,7 @@ ptk_file_task_update(PtkFileTask* ptask)
             gtk_text_buffer_get_start_iter(ptask->log_buf, &siter);
             gtk_text_buffer_delete(ptask->log_buf, &siter, &iter);
             gtk_text_buffer_get_start_iter(ptask->log_buf, &siter);
-            if (task->type == VFS_FILE_TASK_EXEC)
+            if (task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
                 gtk_text_buffer_insert(
                     ptask->log_buf,
                     &siter,
@@ -1610,7 +1620,7 @@ ptk_file_task_update(PtkFileTask* ptask)
                     -1);
         }
 
-        if (task->type == VFS_FILE_TASK_EXEC && task->exec_show_output)
+        if (task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC && task->exec_show_output)
         {
             if (!ptask->keep_dlg)
                 ptask->keep_dlg = true;
@@ -1625,12 +1635,14 @@ ptk_file_task_update(PtkFileTask* ptask)
 
     if (!ptask->progress_dlg)
     {
-        if (task->type != VFS_FILE_TASK_EXEC && ptask->err_count != task->err_count)
+        if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC &&
+            ptask->err_count != task->err_count)
         {
             ptask->keep_dlg = true;
             ptk_file_task_progress_open(ptask);
         }
-        else if (task->type == VFS_FILE_TASK_EXEC && ptask->err_count != task->err_count)
+        else if (task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC &&
+                 ptask->err_count != task->err_count)
         {
             if (!ptask->aborted && task->exec_show_error)
             {
@@ -1646,14 +1658,16 @@ ptk_file_task_update(PtkFileTask* ptask)
     }
     else
     {
-        if (task->type != VFS_FILE_TASK_EXEC && ptask->err_count != task->err_count)
+        if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC &&
+            ptask->err_count != task->err_count)
         {
             ptask->keep_dlg = true;
-            if (ptask->complete || ptask->err_mode == PTASK_ERROR_ANY ||
-                (task->error_first && ptask->err_mode == PTASK_ERROR_FIRST))
+            if (ptask->complete || ptask->err_mode == PTKFileTaskPtaskError::PTASK_ERROR_ANY ||
+                (task->error_first && ptask->err_mode == PTKFileTaskPtaskError::PTASK_ERROR_FIRST))
                 gtk_window_present(GTK_WINDOW(ptask->progress_dlg));
         }
-        else if (task->type == VFS_FILE_TASK_EXEC && ptask->err_count != task->err_count)
+        else if (task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC &&
+                 ptask->err_count != task->err_count)
         {
             if (!ptask->aborted && task->exec_show_error)
             {
@@ -1681,20 +1695,20 @@ on_vfs_file_task_state_cb(VFSFileTask* task, VFSFileTaskState state, void* state
 
     switch (state)
     {
-        case VFS_FILE_TASK_FINISH:
-            // LOG_INFO("VFS_FILE_TASK_FINISH");
+        case VFSFileTaskState::VFS_FILE_TASK_FINISH:
+            // LOG_INFO("VFSFileTaskState::VFS_FILE_TASK_FINISH");
 
             ptask->complete = true;
 
             vfs_file_task_lock(task);
-            if (task->type != VFS_FILE_TASK_EXEC)
+            if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
                 task->current_file.clear();
             ptask->progress_count = 50; // trigger fast display
             vfs_file_task_unlock(task);
             // gtk_signal_emit_by_name( G_OBJECT( ptask->signal_widget ), "task-notify",
             //                                                                 ptask );
             break;
-        case VFS_FILE_TASK_QUERY_OVERWRITE:
+        case VFSFileTaskState::VFS_FILE_TASK_QUERY_OVERWRITE:
             // 0; GThread *self = g_thread_self ();
             // LOG_INFO("TASK_THREAD = {:p}", fmt::ptr(self));
             vfs_file_task_lock(task);
@@ -1712,19 +1726,20 @@ on_vfs_file_task_state_cb(VFSFileTask* task, VFSFileTaskState state, void* state
             task->timer.start();
             vfs_file_task_unlock(task);
             break;
-        case VFS_FILE_TASK_ERROR:
-            // LOG_INFO("VFS_FILE_TASK_ERROR");
+        case VFSFileTaskState::VFS_FILE_TASK_ERROR:
+            // LOG_INFO("VFSFileTaskState::VFS_FILE_TASK_ERROR");
             vfs_file_task_lock(task);
             task->err_count++;
             // LOG_INFO("    ptask->item_count = {}", task->current_item );
 
-            if (task->type == VFS_FILE_TASK_EXEC)
+            if (task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
             {
                 task->exec_is_error = true;
                 ret = false;
             }
-            else if (ptask->err_mode == PTASK_ERROR_ANY ||
-                     (task->error_first && ptask->err_mode == PTASK_ERROR_FIRST))
+            else if (ptask->err_mode == PTKFileTaskPtaskError::PTASK_ERROR_ANY ||
+                     (task->error_first &&
+                      ptask->err_mode == PTKFileTaskPtaskError::PTASK_ERROR_FIRST))
             {
                 ret = false;
                 ptask->aborted = true;
@@ -1739,10 +1754,10 @@ on_vfs_file_task_state_cb(VFSFileTask* task, VFSFileTaskState state, void* state
                 main_task_pause_all_queued(ptask);
             }
             break;
-        case VFS_FILE_TASK_RUNNING:
-        case VFS_FILE_TASK_SIZE_TIMEOUT:
-        case VFS_FILE_TASK_PAUSE:
-        case VFS_FILE_TASK_QUEUE:
+        case VFSFileTaskState::VFS_FILE_TASK_RUNNING:
+        case VFSFileTaskState::VFS_FILE_TASK_SIZE_TIMEOUT:
+        case VFSFileTaskState::VFS_FILE_TASK_PAUSE:
+        case VFSFileTaskState::VFS_FILE_TASK_QUEUE:
         default:
             break;
     }
@@ -1812,32 +1827,38 @@ query_overwrite_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
     switch (response)
     {
         case RESPONSE_OVERWRITEALL:
-            vfs_file_task_set_overwrite_mode(ptask->task, VFS_FILE_TASK_OVERWRITE_ALL);
+            vfs_file_task_set_overwrite_mode(ptask->task,
+                                             VFSFileTaskOverwriteMode::VFS_FILE_TASK_OVERWRITE_ALL);
             if (ptask->progress_dlg)
                 gtk_combo_box_set_active(GTK_COMBO_BOX(ptask->overwrite_combo),
-                                         VFS_FILE_TASK_OVERWRITE_ALL);
+                                         VFSFileTaskOverwriteMode::VFS_FILE_TASK_OVERWRITE_ALL);
             break;
         case RESPONSE_OVERWRITE:
-            vfs_file_task_set_overwrite_mode(ptask->task, VFS_FILE_TASK_OVERWRITE);
+            vfs_file_task_set_overwrite_mode(ptask->task,
+                                             VFSFileTaskOverwriteMode::VFS_FILE_TASK_OVERWRITE);
             break;
         case RESPONSE_SKIPALL:
-            vfs_file_task_set_overwrite_mode(ptask->task, VFS_FILE_TASK_SKIP_ALL);
+            vfs_file_task_set_overwrite_mode(ptask->task,
+                                             VFSFileTaskOverwriteMode::VFS_FILE_TASK_SKIP_ALL);
             if (ptask->progress_dlg)
                 gtk_combo_box_set_active(GTK_COMBO_BOX(ptask->overwrite_combo),
-                                         VFS_FILE_TASK_SKIP_ALL);
+                                         VFSFileTaskOverwriteMode::VFS_FILE_TASK_SKIP_ALL);
             break;
         case RESPONSE_SKIP:
-            vfs_file_task_set_overwrite_mode(ptask->task, VFS_FILE_TASK_SKIP);
+            vfs_file_task_set_overwrite_mode(ptask->task,
+                                             VFSFileTaskOverwriteMode::VFS_FILE_TASK_SKIP);
             break;
         case RESPONSE_AUTO_RENAME_ALL:
-            vfs_file_task_set_overwrite_mode(ptask->task, VFS_FILE_TASK_AUTO_RENAME);
+            vfs_file_task_set_overwrite_mode(ptask->task,
+                                             VFSFileTaskOverwriteMode::VFS_FILE_TASK_AUTO_RENAME);
             if (ptask->progress_dlg)
                 gtk_combo_box_set_active(GTK_COMBO_BOX(ptask->overwrite_combo),
-                                         VFS_FILE_TASK_AUTO_RENAME);
+                                         VFSFileTaskOverwriteMode::VFS_FILE_TASK_AUTO_RENAME);
             break;
         case RESPONSE_AUTO_RENAME:
         case RESPONSE_RENAME:
-            vfs_file_task_set_overwrite_mode(ptask->task, VFS_FILE_TASK_RENAME);
+            vfs_file_task_set_overwrite_mode(ptask->task,
+                                             VFSFileTaskOverwriteMode::VFS_FILE_TASK_RENAME);
             if (response == RESPONSE_AUTO_RENAME)
             {
                 GtkWidget* auto_button =
@@ -1861,9 +1882,10 @@ query_overwrite_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
             free(str);
             break;
         case RESPONSE_PAUSE:
-            ptk_file_task_pause(ptask, VFS_FILE_TASK_PAUSE);
+            ptk_file_task_pause(ptask, VFSFileTaskState::VFS_FILE_TASK_PAUSE);
             main_task_start_queued(ptask->task_view, ptask);
-            vfs_file_task_set_overwrite_mode(ptask->task, VFS_FILE_TASK_RENAME);
+            vfs_file_task_set_overwrite_mode(ptask->task,
+                                             VFSFileTaskOverwriteMode::VFS_FILE_TASK_RENAME);
             ptask->restart_timeout = false;
             break;
         case GTK_RESPONSE_DELETE_EVENT: // escape was pressed or window closed
@@ -1950,9 +1972,9 @@ query_overwrite(PtkFileTask* ptask)
     const char* from_disp;
     const char* message;
 
-    if (ptask->task->type == VFS_FILE_TASK_MOVE)
+    if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_MOVE)
         from_disp = "Moving from directory:";
-    else if (ptask->task->type == VFS_FILE_TASK_LINK)
+    else if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_LINK)
         from_disp = "Linking from directory:";
     else
         from_disp = "Copying from directory:";

@@ -34,8 +34,8 @@ enum VFSFileTaskType
     VFS_FILE_TASK_TRASH,
     VFS_FILE_TASK_DELETE,
     VFS_FILE_TASK_LINK,
-    VFS_FILE_TASK_CHMOD_CHOWN, /* These two kinds of operation have lots in common,
-                                * so put them together to reduce duplicated disk I/O */
+    VFS_FILE_TASK_CHMOD_CHOWN, // These two kinds of operation have lots in common,
+                               // so put them together to reduce duplicated disk I/O
     VFS_FILE_TASK_EXEC,        // MOD
     VFS_FILE_TASK_LAST
 };
@@ -73,12 +73,12 @@ enum VFSFileTaskState
 enum VFSFileTaskOverwriteMode
 {
     // do not reposition first four values
-    VFS_FILE_TASK_OVERWRITE,     /* Overwrite current dest file / Ask */
-    VFS_FILE_TASK_OVERWRITE_ALL, /* Overwrite all existing files without prompt */
-    VFS_FILE_TASK_SKIP_ALL,      /* Don't try to overwrite any files */
-    VFS_FILE_TASK_AUTO_RENAME,   /* Assign a new unique name */
-    VFS_FILE_TASK_SKIP,          /* Don't overwrite current file */
-    VFS_FILE_TASK_RENAME         /* Rename file */
+    VFS_FILE_TASK_OVERWRITE,     // Overwrite current dest file / Ask
+    VFS_FILE_TASK_OVERWRITE_ALL, // Overwrite all existing files without prompt
+    VFS_FILE_TASK_SKIP_ALL,      // Don't try to overwrite any files
+    VFS_FILE_TASK_AUTO_RENAME,   // Assign a new unique name
+    VFS_FILE_TASK_SKIP,          // Don't overwrite current file
+    VFS_FILE_TASK_RENAME         // Rename file
 };
 
 enum VFSExecType
@@ -134,7 +134,7 @@ struct VFSFileTask
 
     GThread* thread;
     VFSFileTaskState state;
-    VFSFileTaskState state_pause{VFS_FILE_TASK_RUNNING};
+    VFSFileTaskState state_pause{VFSFileTaskState::VFS_FILE_TASK_RUNNING};
     bool abort{false};
     GCond* pause_cond{nullptr};
     bool queue_start{false};
@@ -149,7 +149,7 @@ struct VFSFileTask
     GtkTextMark* add_log_end;
 
     // MOD run task
-    VFSExecType exec_type{VFS_EXEC_NORMAL};
+    VFSExecType exec_type{VFSExecType::VFS_EXEC_NORMAL};
     std::string exec_action;
     std::string exec_command;
     bool exec_sync{true};

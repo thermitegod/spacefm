@@ -243,16 +243,16 @@ static VFSFileMonitorEvent
 vfs_file_monitor_translate_inotify_event(int inotify_mask)
 {
     if (inotify_mask & (IN_CREATE | IN_MOVED_TO))
-        return VFS_FILE_MONITOR_CREATE;
+        return VFSFileMonitorEvent::VFS_FILE_MONITOR_CREATE;
     else if (inotify_mask & (IN_DELETE | IN_MOVED_FROM | IN_DELETE_SELF | IN_UNMOUNT))
-        return VFS_FILE_MONITOR_DELETE;
+        return VFSFileMonitorEvent::VFS_FILE_MONITOR_DELETE;
     else if (inotify_mask & (IN_MODIFY | IN_ATTRIB))
-        return VFS_FILE_MONITOR_CHANGE;
+        return VFSFileMonitorEvent::VFS_FILE_MONITOR_CHANGE;
     else
     {
         // IN_IGNORED not handled
         // LOG_WARN("translate_inotify_event mask not handled {}", inotify_mask);
-        return VFS_FILE_MONITOR_CHANGE;
+        return VFSFileMonitorEvent::VFS_FILE_MONITOR_CHANGE;
     }
 }
 

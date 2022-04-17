@@ -46,16 +46,24 @@ init_list_view(GtkTreeView* view)
 
     renderer = gtk_cell_renderer_pixbuf_new();
     gtk_tree_view_column_pack_start(col, renderer, false);
-    gtk_tree_view_column_set_attributes(col, renderer, "pixbuf", COL_APP_ICON, nullptr);
+    gtk_tree_view_column_set_attributes(col,
+                                        renderer,
+                                        "pixbuf",
+                                        PTKAppChooser::COL_APP_ICON,
+                                        nullptr);
 
     renderer = gtk_cell_renderer_text_new();
     gtk_tree_view_column_pack_start(col, renderer, true);
-    gtk_tree_view_column_set_attributes(col, renderer, "text", COL_APP_NAME, nullptr);
+    gtk_tree_view_column_set_attributes(col,
+                                        renderer,
+                                        "text",
+                                        PTKAppChooser::COL_APP_NAME,
+                                        nullptr);
 
     gtk_tree_view_append_column(view, col);
 
     // add tooltip
-    gtk_tree_view_set_tooltip_column(view, COL_FULL_PATH);
+    gtk_tree_view_set_tooltip_column(view, PTKAppChooser::COL_FULL_PATH);
 }
 
 static int
@@ -64,11 +72,11 @@ sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_dat
     (void)user_data;
     char* name_a;
     int ret = 0;
-    gtk_tree_model_get(model, a, COL_APP_NAME, &name_a, -1);
+    gtk_tree_model_get(model, a, PTKAppChooser::COL_APP_NAME, &name_a, -1);
     if (name_a)
     {
         char* name_b;
-        gtk_tree_model_get(model, b, COL_APP_NAME, &name_b, -1);
+        gtk_tree_model_get(model, b, PTKAppChooser::COL_APP_NAME, &name_b, -1);
         if (name_b)
         {
             ret = g_ascii_strcasecmp(name_a, name_b);
@@ -90,7 +98,11 @@ add_list_item(GtkListStore* list, const char* path)
         do
         {
             char* file = nullptr;
-            gtk_tree_model_get(GTK_TREE_MODEL(list), &it, COL_DESKTOP_FILE, &file, -1);
+            gtk_tree_model_get(GTK_TREE_MODEL(list),
+                               &it,
+                               PTKAppChooser::COL_DESKTOP_FILE,
+                               &file,
+                               -1);
             if (file)
             {
                 VFSAppDesktop desktop(path);
@@ -119,13 +131,13 @@ add_list_item(GtkListStore* list, const char* path)
     gtk_list_store_append(list, &it);
     gtk_list_store_set(list,
                        &it,
-                       COL_APP_ICON,
+                       PTKAppChooser::COL_APP_ICON,
                        icon,
-                       COL_APP_NAME,
+                       PTKAppChooser::COL_APP_NAME,
                        desktop.get_disp_name(),
-                       COL_DESKTOP_FILE,
+                       PTKAppChooser::COL_DESKTOP_FILE,
                        desktop.get_name(),
-                       COL_FULL_PATH,
+                       PTKAppChooser::COL_FULL_PATH,
                        tooltip.c_str(),
                        -1);
     if (icon)
@@ -135,8 +147,11 @@ add_list_item(GtkListStore* list, const char* path)
 static GtkTreeModel*
 create_model_from_mime_type(VFSMimeType* mime_type)
 {
-    GtkListStore* list =
-        gtk_list_store_new(N_COLS, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+    GtkListStore* list = gtk_list_store_new(PTKAppChooser::N_COLS,
+                                            GDK_TYPE_PIXBUF,
+                                            G_TYPE_STRING,
+                                            G_TYPE_STRING,
+                                            G_TYPE_STRING);
     if (mime_type)
     {
         std::vector<std::string> apps = vfs_mime_type_get_actions(mime_type);
@@ -271,12 +286,12 @@ on_load_all_apps_finish(VFSAsyncTask* task, bool is_cancelled, GtkWidget* dlg)
     GtkTreeView* view = GTK_TREE_VIEW(g_object_get_data(G_OBJECT(task), "view"));
 
     gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(model),
-                                    COL_APP_NAME,
+                                    PTKAppChooser::COL_APP_NAME,
                                     sort_by_name,
                                     nullptr,
                                     nullptr);
     gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(model),
-                                         COL_APP_NAME,
+                                         PTKAppChooser::COL_APP_NAME,
                                          GTK_SORT_ASCENDING);
 
     gtk_tree_view_set_model(view, model);
@@ -310,7 +325,7 @@ on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, unsigned int pag
                 busy);
             g_object_unref(busy);
 
-            GtkListStore* list = gtk_list_store_new(N_COLS,
+            GtkListStore* list = gtk_list_store_new(PTKAppChooser::N_COLS,
                                                     GDK_TYPE_PIXBUF,
                                                     G_TYPE_STRING,
                                                     G_TYPE_STRING,
@@ -356,7 +371,7 @@ app_chooser_dialog_get_selected_app(GtkWidget* dlg)
     GtkTreeIter it;
     if (gtk_tree_selection_get_selected(tree_sel, &model, &it))
     {
-        gtk_tree_model_get(model, &it, COL_DESKTOP_FILE, &app, -1);
+        gtk_tree_model_get(model, &it, PTKAppChooser::COL_DESKTOP_FILE, &app, -1);
     }
     else
         app = nullptr;
@@ -467,8 +482,8 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
 {
     // is file handler set for this type?
     std::string msg;
-    GSList* handlers_slist = ptk_handler_file_has_handlers(HANDLER_MODE_FILE,
-                                                           HANDLER_MOUNT,
+    GSList* handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_FILE,
+                                                           PtkHandlerMount::HANDLER_MOUNT,
                                                            nullptr,
                                                            mime_type,
                                                            false,
@@ -489,8 +504,8 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
     else if (!xset_get_b("arc_def_open"))
     {
         // is archive handler set for this type?
-        handlers_slist = ptk_handler_file_has_handlers(HANDLER_MODE_ARC,
-                                                       HANDLER_EXTRACT,
+        handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
+                                                       PtkHandlerArchive::HANDLER_EXTRACT,
                                                        nullptr,
                                                        mime_type,
                                                        false,

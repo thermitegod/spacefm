@@ -158,7 +158,7 @@ match_func_cmd(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it,
     (void)user_data;
     char* name = nullptr;
     GtkTreeModel* model = gtk_entry_completion_get_model(completion);
-    gtk_tree_model_get(model, it, COL_NAME, &name, -1);
+    gtk_tree_model_get(model, it, PTKPathEntryCol::COL_NAME, &name, -1);
 
     if (name && key && Glib::str_has_prefix(name, key))
     {
@@ -177,7 +177,7 @@ match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it, voi
     GtkTreeModel* model = gtk_entry_completion_get_model(completion);
 
     key = (const char*)g_object_get_data(G_OBJECT(completion), "fn");
-    gtk_tree_model_get(model, it, COL_NAME, &name, -1);
+    gtk_tree_model_get(model, it, PTKPathEntryCol::COL_NAME, &name, -1);
 
     if (name)
     {
@@ -208,7 +208,13 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
         for (const std::string& cmd: xset_cmd_history)
         {
             gtk_list_store_append(list, &it);
-            gtk_list_store_set(list, &it, COL_NAME, cmd.c_str(), COL_PATH, cmd.c_str(), -1);
+            gtk_list_store_set(list,
+                               &it,
+                               PTKPathEntryCol::COL_NAME,
+                               cmd.c_str(),
+                               PTKPathEntryCol::COL_PATH,
+                               cmd.c_str(),
+                               -1);
         }
         gtk_entry_completion_set_match_func(completion,
                                             (GtkEntryCompletionMatchFunc)match_func_cmd,
@@ -264,9 +270,9 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
                     gtk_list_store_append(list, &it);
                     gtk_list_store_set(list,
                                        &it,
-                                       COL_NAME,
+                                       PTKPathEntryCol::COL_NAME,
                                        disp_name,
-                                       COL_PATH,
+                                       PTKPathEntryCol::COL_PATH,
                                        (char*)l->data,
                                        -1);
                     free(disp_name);
@@ -440,7 +446,7 @@ on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIt
 {
     (void)completion;
     char* path = nullptr;
-    gtk_tree_model_get(model, iter, COL_PATH, &path, -1);
+    gtk_tree_model_get(model, iter, PTKPathEntryCol::COL_PATH, &path, -1);
     if (path && path[0])
     {
         g_signal_handlers_block_matched(G_OBJECT(entry),
@@ -473,20 +479,23 @@ on_focus_in(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
     (void)evt;
     (void)user_data;
     GtkEntryCompletion* completion = gtk_entry_completion_new();
-    GtkListStore* list = gtk_list_store_new(N_COLS, G_TYPE_STRING, G_TYPE_STRING);
+    GtkListStore* list = gtk_list_store_new(PTKPathEntryCol::N_COLS, G_TYPE_STRING, G_TYPE_STRING);
 
     gtk_entry_completion_set_minimum_key_length(completion, 1);
     gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(list));
     g_object_unref(list);
 
-    /* gtk_entry_completion_set_text_column( completion, COL_PATH ); */
+    /* gtk_entry_completion_set_text_column( completion, PTKPathEntryCol::COL_PATH ); */
 
     // Following line causes GTK3 to show both columns, so skip this and use
-    // custom match-selected handler to insert COL_PATH
-    // g_object_set( completion, "text-column", COL_PATH, nullptr );
+    // custom match-selected handler to insert PTKPathEntryCol::COL_PATH
+    // g_object_set( completion, "text-column", PTKPathEntryCol::COL_PATH, nullptr );
     GtkCellRenderer* render = gtk_cell_renderer_text_new();
     gtk_cell_layout_pack_start((GtkCellLayout*)completion, render, true);
-    gtk_cell_layout_add_attribute((GtkCellLayout*)completion, render, "text", COL_NAME);
+    gtk_cell_layout_add_attribute((GtkCellLayout*)completion,
+                                  render,
+                                  "text",
+                                  PTKPathEntryCol::COL_NAME);
 
     // gtk_entry_completion_set_inline_completion( completion, true );
     gtk_entry_completion_set_popup_set_width(completion, true);
@@ -513,7 +522,7 @@ static void
 on_protocol_handlers(GtkWidget* widget, PtkFileBrowser* file_browser)
 {
     (void)widget;
-    ptk_handler_show_config(HANDLER_MODE_NET, file_browser, nullptr);
+    ptk_handler_show_config(PtkHandlerMode::HANDLER_MODE_NET, file_browser, nullptr);
 }
 
 static void

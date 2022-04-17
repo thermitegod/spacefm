@@ -74,7 +74,7 @@ filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
     if (show_hidden)
         return true;
 
-    gtk_tree_model_get(model, iter, COL_DIR_TREE_INFO, &file, -1);
+    gtk_tree_model_get(model, iter, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
     if (file)
     {
         const char* name = vfs_file_info_get_name(file);
@@ -133,13 +133,17 @@ ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
     gtk_tree_view_column_set_attributes(col,
                                         renderer,
                                         "pixbuf",
-                                        COL_DIR_TREE_ICON,
+                                        PTKDirTreeCol::COL_DIR_TREE_ICON,
                                         "info",
-                                        COL_DIR_TREE_INFO,
+                                        PTKDirTreeCol::COL_DIR_TREE_INFO,
                                         nullptr);
     renderer = gtk_cell_renderer_text_new();
     gtk_tree_view_column_pack_start(col, renderer, true);
-    gtk_tree_view_column_set_attributes(col, renderer, "text", COL_DIR_TREE_DISP_NAME, nullptr);
+    gtk_tree_view_column_set_attributes(col,
+                                        renderer,
+                                        "text",
+                                        PTKDirTreeCol::COL_DIR_TREE_DISP_NAME,
+                                        nullptr);
 
     gtk_tree_view_append_column(dir_tree_view, col);
 
@@ -263,7 +267,7 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
         VFSFileInfo* info;
         do
         {
-            gtk_tree_model_get(model, &it, COL_DIR_TREE_INFO, &info, -1);
+            gtk_tree_model_get(model, &it, PTKDirTreeCol::COL_DIR_TREE_INFO, &info, -1);
             if (!info)
                 continue;
             if (!strcmp(vfs_file_info_get_name(info), *dir))
@@ -355,7 +359,7 @@ sel_func(GtkTreeSelection* selection, GtkTreeModel* model, GtkTreePath* path,
 
     if (!gtk_tree_model_get_iter(model, &it, path))
         return false;
-    gtk_tree_model_get(model, &it, COL_DIR_TREE_INFO, &file, -1);
+    gtk_tree_model_get(model, &it, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
     if (!file)
         return false;
     vfs_file_info_unref(file);
@@ -425,7 +429,9 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrows
                 {
                     // right click
                     char* dir_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
-                    if (ptk_file_browser_chdir(browser, dir_path, PTK_FB_CHDIR_ADD_HISTORY))
+                    if (ptk_file_browser_chdir(browser,
+                                               dir_path,
+                                               PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY))
                     {
                         /* show right-click menu
                          * This simulates a right-click in the file list when
@@ -522,7 +528,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* br
 
             char* dir_path;
             dir_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
-            if (ptk_file_browser_chdir(browser, dir_path, PTK_FB_CHDIR_ADD_HISTORY))
+            if (ptk_file_browser_chdir(browser, dir_path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY))
             {
                 /* show right-click menu
                  * This simulates a right-click in the file list when
@@ -569,7 +575,7 @@ dir_tree_view_get_drop_dir(GtkWidget* view, int x, int y)
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
         if (gtk_tree_model_get_iter(model, &it, tree_path))
         {
-            gtk_tree_model_get(model, &it, COL_DIR_TREE_INFO, &file, -1);
+            gtk_tree_model_get(model, &it, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
             if (file)
             {
                 dest_path = ptk_dir_view_get_dir_path(model, &it);
@@ -678,13 +684,13 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                 switch (gdk_drag_context_get_selected_action(drag_context))
                 {
                     case GDK_ACTION_COPY:
-                        file_action = VFS_FILE_TASK_COPY;
+                        file_action = VFSFileTaskType::VFS_FILE_TASK_COPY;
                         break;
                     case GDK_ACTION_MOVE:
-                        file_action = VFS_FILE_TASK_MOVE;
+                        file_action = VFSFileTaskType::VFS_FILE_TASK_MOVE;
                         break;
                     case GDK_ACTION_LINK:
-                        file_action = VFS_FILE_TASK_LINK;
+                        file_action = VFSFileTaskType::VFS_FILE_TASK_LINK;
                         break;
                     case GDK_ACTION_DEFAULT:
                     case GDK_ACTION_PRIVATE:

@@ -64,9 +64,9 @@ char* mime_type_get_default_action(const std::string& type);
  * Set applications used to open or never used to open this mime-type
  * desktop_id is the name of *.desktop file.
  * action ==
- *     MIME_TYPE_ACTION_DEFAULT - make desktop_id the default app
- *     MIME_TYPE_ACTION_APPEND  - add desktop_id to Default and Added apps
- *     MIME_TYPE_ACTION_REMOVE  - add desktop id to Removed apps
+ *     MimeTypeAction::MIME_TYPE_ACTION_DEFAULT - make desktop_id the default app
+ *     MimeTypeAction::MIME_TYPE_ACTION_APPEND  - add desktop_id to Default and Added apps
+ *     MimeTypeAction::MIME_TYPE_ACTION_REMOVE  - add desktop id to Removed apps
  *
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  */

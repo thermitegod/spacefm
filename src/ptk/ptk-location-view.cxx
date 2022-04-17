@@ -129,14 +129,18 @@ update_volume_icons()
     {
         do
         {
-            gtk_tree_model_get(model, &it, COL_DATA, &vol, -1);
+            gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
             if (vol)
             {
                 if (vfs_volume_get_icon(vol))
                     icon = vfs_load_icon(icon_theme, vfs_volume_get_icon(vol), icon_size);
                 else
                     icon = nullptr;
-                gtk_list_store_set(GTK_LIST_STORE(model), &it, COL_ICON, icon, -1);
+                gtk_list_store_set(GTK_LIST_STORE(model),
+                                   &it,
+                                   PtkLocationViewCol::COL_ICON,
+                                   icon,
+                                   -1);
                 if (icon)
                     g_object_unref(icon);
             }
@@ -203,7 +207,7 @@ update_all()
             {
                 do
                 {
-                    gtk_tree_model_get(model, &it, COL_DATA, &v, -1);
+                    gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &v, -1);
                 } while (v != volume && gtk_tree_model_iter_next(model, &it));
                 havevol = (v == volume);
             }
@@ -245,7 +249,7 @@ update_names()
         {
             do
             {
-                gtk_tree_model_get(model, &it, COL_DATA, &v, -1);
+                gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &v, -1);
             } while (v != volume && gtk_tree_model_iter_next(model, &it));
             if (v == volume)
                 update_volume(volume);
@@ -266,7 +270,7 @@ ptk_location_view_chdir(GtkTreeView* location_view, const char* cur_dir)
         do
         {
             VFSVolume* vol;
-            gtk_tree_model_get(model, &it, COL_DATA, &vol, -1);
+            gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
             const char* mount_point = vfs_volume_get_mount_point(vol);
             if (mount_point && !strcmp(cur_dir, mount_point))
             {
@@ -295,7 +299,7 @@ ptk_location_view_get_selected_vol(GtkTreeView* location_view)
     if (gtk_tree_selection_get_selected(tree_sel, nullptr, &it))
     {
         VFSVolume* vol;
-        gtk_tree_model_get(model, &it, COL_DATA, &vol, -1);
+        gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
         return vol;
     }
     return nullptr;
@@ -315,14 +319,14 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
         return;
 
     VFSVolume* vol;
-    gtk_tree_model_get(model, &it, COL_DATA, &vol, -1);
+    gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
     if (!vol)
         return;
 
     if (xset_opener(file_browser, 2))
         return;
 
-    if (!vfs_volume_is_mounted(vol) && vol->device_type == DEVICE_TYPE_BLOCK)
+    if (!vfs_volume_is_mounted(vol) && vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK)
     {
         try_mount(view, vol);
         if (vfs_volume_is_mounted(vol))
@@ -330,7 +334,11 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
             const char* mount_point = vfs_volume_get_mount_point(vol);
             if (mount_point && mount_point[0] != '\0')
             {
-                gtk_list_store_set(GTK_LIST_STORE(model), &it, COL_PATH, mount_point, -1);
+                gtk_list_store_set(GTK_LIST_STORE(model),
+                                   &it,
+                                   PtkLocationViewCol::COL_PATH,
+                                   mount_point,
+                                   -1);
             }
         }
     }
@@ -338,13 +346,17 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
     {
         if (xset_get_b("dev_newtab"))
         {
-            ptk_file_browser_emit_open(file_browser, vol->mount_point, PTK_OPEN_NEW_TAB);
+            ptk_file_browser_emit_open(file_browser,
+                                       vol->mount_point,
+                                       PtkOpenAction::PTK_OPEN_NEW_TAB);
             ptk_location_view_chdir(view, ptk_file_browser_get_cwd(file_browser));
         }
         else
         {
             if (strcmp(vol->mount_point, ptk_file_browser_get_cwd(file_browser)))
-                ptk_file_browser_chdir(file_browser, vol->mount_point, PTK_FB_CHDIR_ADD_HISTORY);
+                ptk_file_browser_chdir(file_browser,
+                                       vol->mount_point,
+                                       PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
         }
     }
 }
@@ -394,7 +406,7 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
 {
     if (!model)
     {
-        GtkListStore* list = gtk_list_store_new(N_COLS,
+        GtkListStore* list = gtk_list_store_new(PtkLocationViewCol::N_COLS,
                                                 GDK_TYPE_PIXBUF,
                                                 G_TYPE_STRING,
                                                 G_TYPE_STRING,
@@ -422,17 +434,25 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
     GtkTreeViewColumn* col = gtk_tree_view_column_new();
     GtkCellRenderer* renderer = gtk_cell_renderer_pixbuf_new();
     gtk_tree_view_column_pack_start(col, renderer, false);
-    gtk_tree_view_column_set_attributes(col, renderer, "pixbuf", COL_ICON, nullptr);
+    gtk_tree_view_column_set_attributes(col,
+                                        renderer,
+                                        "pixbuf",
+                                        PtkLocationViewCol::COL_ICON,
+                                        nullptr);
 
     renderer = gtk_cell_renderer_text_new();
     // g_signal_connect( renderer, "edited", G_CALLBACK(on_bookmark_edited), view );  //MOD
     gtk_tree_view_column_pack_start(col, renderer, true);
-    gtk_tree_view_column_set_attributes(col, renderer, "text", COL_NAME, nullptr);
+    gtk_tree_view_column_set_attributes(col,
+                                        renderer,
+                                        "text",
+                                        PtkLocationViewCol::COL_NAME,
+                                        nullptr);
     gtk_tree_view_column_set_min_width(col, 10);
 
     if (GTK_IS_TREE_SORTABLE(model)) // why is this needed to stop error on new tab?
         gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(model),
-                                             COL_NAME,
+                                             PtkLocationViewCol::COL_NAME,
                                              GTK_SORT_ASCENDING); // MOD
 
     gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
@@ -454,21 +474,21 @@ on_volume_event(VFSVolume* vol, VFSVolumeState state, void* user_data)
     (void)user_data;
     switch (state)
     {
-        case VFS_VOLUME_ADDED:
+        case VFSVolumeState::VFS_VOLUME_ADDED:
             add_volume(vol, true);
             break;
-        case VFS_VOLUME_REMOVED:
+        case VFSVolumeState::VFS_VOLUME_REMOVED:
             remove_volume(vol);
             break;
-        case VFS_VOLUME_CHANGED: // CHANGED may occur before ADDED !
+        case VFSVolumeState::VFS_VOLUME_CHANGED: // CHANGED may occur before ADDED !
             if (!volume_is_visible(vol))
                 remove_volume(vol);
             else
                 update_volume(vol);
             break;
-        case VFS_VOLUME_MOUNTED:
-        case VFS_VOLUME_UNMOUNTED:
-        case VFS_VOLUME_EJECT:
+        case VFSVolumeState::VFS_VOLUME_MOUNTED:
+        case VFSVolumeState::VFS_VOLUME_UNMOUNTED:
+        case VFSVolumeState::VFS_VOLUME_EJECT:
         default:
             break;
     }
@@ -487,7 +507,7 @@ add_volume(VFSVolume* vol, bool set_icon)
     {
         do
         {
-            gtk_tree_model_get(model, &it, COL_DATA, &v, -1);
+            gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &v, -1);
         } while (v != vol && gtk_tree_model_iter_next(model, &it));
     }
     if (v == vol)
@@ -502,11 +522,11 @@ add_volume(VFSVolume* vol, bool set_icon)
     gtk_list_store_insert_with_values(GTK_LIST_STORE(model),
                                       &it,
                                       0,
-                                      COL_NAME,
+                                      PtkLocationViewCol::COL_NAME,
                                       vfs_volume_get_disp_name(vol),
-                                      COL_PATH,
+                                      PtkLocationViewCol::COL_PATH,
                                       mnt,
-                                      COL_DATA,
+                                      PtkLocationViewCol::COL_DATA,
                                       vol,
                                       -1);
     if (set_icon)
@@ -516,7 +536,7 @@ add_volume(VFSVolume* vol, bool set_icon)
         if (icon_size > PANE_MAX_ICON_SIZE)
             icon_size = PANE_MAX_ICON_SIZE;
         GdkPixbuf* icon = vfs_load_icon(icon_theme, vfs_volume_get_icon(vol), icon_size);
-        gtk_list_store_set(GTK_LIST_STORE(model), &it, COL_ICON, icon, -1);
+        gtk_list_store_set(GTK_LIST_STORE(model), &it, PtkLocationViewCol::COL_ICON, icon, -1);
         if (icon)
             g_object_unref(icon);
     }
@@ -535,7 +555,7 @@ remove_volume(VFSVolume* vol)
     {
         do
         {
-            gtk_tree_model_get(model, &it, COL_DATA, &v, -1);
+            gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &v, -1);
         } while (v != vol && gtk_tree_model_iter_next(model, &it));
     }
     if (v != vol)
@@ -556,7 +576,7 @@ update_volume(VFSVolume* vol)
     {
         do
         {
-            gtk_tree_model_get(model, &it, COL_DATA, &v, -1);
+            gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &v, -1);
         } while (v != vol && gtk_tree_model_iter_next(model, &it));
     }
     if (v != vol)
@@ -573,11 +593,11 @@ update_volume(VFSVolume* vol)
     GdkPixbuf* icon = vfs_load_icon(icon_theme, vfs_volume_get_icon(vol), icon_size);
     gtk_list_store_set(GTK_LIST_STORE(model),
                        &it,
-                       COL_ICON,
+                       PtkLocationViewCol::COL_ICON,
                        icon,
-                       COL_NAME,
+                       PtkLocationViewCol::COL_NAME,
                        vfs_volume_get_disp_name(vol),
-                       COL_PATH,
+                       PtkLocationViewCol::COL_PATH,
                        vfs_volume_get_mount_point(vol),
                        -1);
     if (icon)
@@ -701,7 +721,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
     char* str;
     switch (mode)
     {
-        case HANDLER_MODE_FS:
+        case PtkHandlerMode::HANDLER_MODE_FS:
             if (vol)
             {
                 char* bdev = g_path_get_basename(vol->device_file);
@@ -722,7 +742,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
                 free(bdev);
             }
             break;
-        case HANDLER_MODE_NET:
+        case PtkHandlerMode::HANDLER_MODE_NET:
             if (netmount->host && g_utf8_validate(netmount->host, -1, nullptr))
             {
                 char* parent_dir = nullptr;
@@ -759,7 +779,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
             else
                 mname = ztd::strdup(netmount->fstype);
             break;
-        case HANDLER_MODE_FILE:
+        case PtkHandlerMode::HANDLER_MODE_FILE:
             if (path)
                 mname = g_path_get_basename(path);
             break;
@@ -868,7 +888,7 @@ on_autoopen_net_cb(VFSFileTask* task, AutoOpen* ao)
                                        device_file_vol->mount_point,
                                        (PtkOpenAction)ao->job);
 
-            if (ao->job == PTK_OPEN_NEW_TAB && GTK_IS_WIDGET(ao->file_browser))
+            if (ao->job == PtkOpenAction::PTK_OPEN_NEW_TAB && GTK_IS_WIDGET(ao->file_browser))
             {
                 if (ao->file_browser->side_dev)
                     ptk_location_view_chdir(GTK_TREE_VIEW(ao->file_browser->side_dev),
@@ -935,14 +955,14 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
                     {
                         ptk_file_browser_emit_open(file_browser,
                                                    volume->mount_point,
-                                                   PTK_OPEN_NEW_TAB);
+                                                   PtkOpenAction::PTK_OPEN_NEW_TAB);
                     }
                     else
                     {
                         if (strcmp(volume->mount_point, ptk_file_browser_get_cwd(file_browser)))
                             ptk_file_browser_chdir(file_browser,
                                                    volume->mount_point,
-                                                   PTK_FB_CHDIR_ADD_HISTORY);
+                                                   PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
                     }
                     free(mount_point);
                     free(netmount->url);
@@ -965,8 +985,8 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     bool ssh_udevil;
     char* cmd;
     ssh_udevil = false;
-    cmd = vfs_volume_handler_cmd(HANDLER_MODE_NET,
-                                 HANDLER_MOUNT,
+    cmd = vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_NET,
+                                 PtkHandlerMount::HANDLER_MOUNT,
                                  nullptr,
                                  nullptr,
                                  netmount,
@@ -1036,9 +1056,9 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
         ao->mount_point = mount_point;
         mount_point = nullptr;
         if (new_tab)
-            ao->job = PTK_OPEN_NEW_TAB;
+            ao->job = PtkOpenAction::PTK_OPEN_NEW_TAB;
         else
-            ao->job = PTK_OPEN_DIR;
+            ao->job = PtkOpenAction::PTK_OPEN_DIR;
         ptask->complete_notify = (GFunc)on_autoopen_net_cb;
         ptask->user_data = ao;
     }
@@ -1311,12 +1331,14 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
             return;
         }
 
-        if (vol->device_type == DEVICE_TYPE_BLOCK && (vol->is_optical || vol->requires_eject))
+        if (vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK &&
+            (vol->is_optical || vol->requires_eject))
             eject = fmt::format("\neject {}", vol->device_file);
         else
             eject = "\nexit 0";
 
-        if (!file_browser && !run_in_terminal && vol->device_type == DEVICE_TYPE_BLOCK)
+        if (!file_browser && !run_in_terminal &&
+            vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK)
         {
             std::string exe = get_prog_executable();
             // run from desktop window - show a pending dialog
@@ -1332,14 +1354,16 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
             line = fmt::format("echo 'Unmounting {}...'\n{}{}\nif [ $? -ne 0 ];then\n    "
                                "read -p '{}: '\n    exit 1\nelse\n    {}\nfi",
                                vol->device_file,
-                               vol->device_type == DEVICE_TYPE_BLOCK ? "sync\n" : "",
+                               vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK ? "sync\n"
+                                                                                          : "",
                                unmount,
                                press_enter_to_close,
                                eject);
         else
             line = fmt::format("{}{}{}\nuerr=$?{}\nif [ $uerr -ne 0 ];then\n    exit 1\nfi{}",
                                wait,
-                               vol->device_type == DEVICE_TYPE_BLOCK ? "sync\n" : "",
+                               vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK ? "sync\n"
+                                                                                          : "",
                                unmount,
                                wait_done,
                                eject);
@@ -1356,7 +1380,8 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         ptask->task->exec_terminal = run_in_terminal;
         ptask->task->exec_icon = vfs_volume_get_icon(vol);
     }
-    else if (vol->device_type == DEVICE_TYPE_BLOCK && (vol->is_optical || vol->requires_eject))
+    else if (vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK &&
+             (vol->is_optical || vol->requires_eject))
     {
         // task
         line = fmt::format("eject {}", vol->device_file);
@@ -1412,7 +1437,7 @@ on_autoopen_cb(VFSFileTask* task, AutoOpen* ao)
             break;
         }
     }
-    if (GTK_IS_WIDGET(ao->file_browser) && ao->job == PTK_OPEN_NEW_TAB &&
+    if (GTK_IS_WIDGET(ao->file_browser) && ao->job == PtkOpenAction::PTK_OPEN_NEW_TAB &&
         ao->file_browser->side_dev)
         ptk_location_view_chdir(GTK_TREE_VIEW(ao->file_browser->side_dev),
                                 ptk_file_browser_get_cwd(ao->file_browser));
@@ -1462,9 +1487,9 @@ try_mount(GtkTreeView* view, VFSVolume* vol)
     ao->device_file = nullptr;
     ao->file_browser = file_browser;
     if (xset_get_b("dev_newtab"))
-        ao->job = PTK_OPEN_NEW_TAB;
+        ao->job = PtkOpenAction::PTK_OPEN_NEW_TAB;
     else
-        ao->job = PTK_OPEN_DIR;
+        ao->job = PtkOpenAction::PTK_OPEN_DIR;
     ao->mount_point = nullptr;
     ptask->complete_notify = (GFunc)on_autoopen_cb;
     ptask->user_data = ao;
@@ -1528,7 +1553,7 @@ on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         ao->devnum = vol->devnum;
         ao->device_file = nullptr;
         ao->file_browser = file_browser;
-        ao->job = PTK_OPEN_NEW_TAB;
+        ao->job = PtkOpenAction::PTK_OPEN_NEW_TAB;
         ao->mount_point = nullptr;
         ptask->complete_notify = (GFunc)on_autoopen_cb;
         ptask->user_data = ao;
@@ -1537,7 +1562,7 @@ on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         ptk_file_task_run(ptask);
     }
     else
-        ptk_file_browser_emit_open(file_browser, vol->mount_point, PTK_OPEN_NEW_TAB);
+        ptk_file_browser_emit_open(file_browser, vol->mount_point, PtkOpenAction::PTK_OPEN_NEW_TAB);
 }
 
 static void
@@ -1599,7 +1624,7 @@ on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         ao->devnum = vol->devnum;
         ao->device_file = nullptr;
         ao->file_browser = file_browser;
-        ao->job = PTK_OPEN_DIR;
+        ao->job = PtkOpenAction::PTK_OPEN_DIR;
         ao->mount_point = nullptr;
         ptask->complete_notify = (GFunc)on_autoopen_cb;
         ptask->user_data = ao;
@@ -1608,7 +1633,7 @@ on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         ptk_file_task_run(ptask);
     }
     else if (file_browser)
-        ptk_file_browser_emit_open(file_browser, vol->mount_point, PTK_OPEN_DIR);
+        ptk_file_browser_emit_open(file_browser, vol->mount_point, PtkOpenAction::PTK_OPEN_DIR);
     else
         open_in_prog(vol->mount_point);
 }
@@ -1827,14 +1852,14 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 
     // use handler command if available
     bool run_in_terminal;
-    if (vol->device_type == DEVICE_TYPE_NETWORK)
+    if (vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_NETWORK)
     {
         // is a network - try to get prop command
         netmount_t* netmount = nullptr;
         if (split_network_url(vol->udi, &netmount) == 1)
         {
-            cmd = vfs_volume_handler_cmd(HANDLER_MODE_NET,
-                                         HANDLER_PROP,
+            cmd = vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_NET,
+                                         PtkHandlerMount::HANDLER_PROP,
                                          vol,
                                          nullptr,
                                          netmount,
@@ -1868,11 +1893,11 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         else
             return;
     }
-    else if (vol->device_type == DEVICE_TYPE_OTHER &&
+    else if (vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_OTHER &&
              mtab_fstype_is_handled_by_protocol(vol->fs_type))
     {
-        cmd = vfs_volume_handler_cmd(HANDLER_MODE_NET,
-                                     HANDLER_PROP,
+        cmd = vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_NET,
+                                     PtkHandlerMount::HANDLER_PROP,
                                      vol,
                                      nullptr,
                                      nullptr,
@@ -1895,8 +1920,8 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         }
     }
     else
-        cmd = vfs_volume_handler_cmd(HANDLER_MODE_FS,
-                                     HANDLER_PROP,
+        cmd = vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_FS,
+                                     PtkHandlerMount::HANDLER_PROP,
                                      vol,
                                      nullptr,
                                      nullptr,
@@ -2170,9 +2195,9 @@ on_handler_show_config(GtkMenuItem* item, GtkWidget* view, XSet* set2)
         set = XSET(g_object_get_data(G_OBJECT(item), "set"));
 
     if (!g_strcmp0(set->name, "dev_fs_cnf"))
-        mode = HANDLER_MODE_FS;
+        mode = PtkHandlerMode::HANDLER_MODE_FS;
     else if (!g_strcmp0(set->name, "dev_net_cnf"))
-        mode = HANDLER_MODE_NET;
+        mode = PtkHandlerMode::HANDLER_MODE_NET;
     else
         return;
     PtkFileBrowser* file_browser =
@@ -2224,11 +2249,11 @@ volume_is_visible(VFSVolume* vol)
     free(showhidelist);
 
     // network
-    if (vol->device_type == DEVICE_TYPE_NETWORK)
+    if (vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_NETWORK)
         return xset_get_b("dev_show_net");
 
     // other - eg fuseiso mounted file
-    if (vol->device_type == DEVICE_TYPE_OTHER)
+    if (vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_OTHER)
         return xset_get_b("dev_show_file");
 
     // loop
@@ -2357,7 +2382,7 @@ show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browse
     set->disable = !vol; //!( vol && vol->is_mounted );
     set = xset_set_cb("dev_menu_reload", (GFunc)on_reload, vol);
     xset_set_ob1(set, "view", view);
-    set->disable = !(vol && vol->device_type == DEVICE_TYPE_BLOCK);
+    set->disable = !(vol && vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK);
     set = xset_set_cb("dev_menu_sync", (GFunc)on_sync, vol);
     xset_set_ob1(set, "view", view);
     set = xset_set_cb("dev_menu_open", (GFunc)on_open, vol);
@@ -2393,14 +2418,14 @@ show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browse
     xset_set_cb("dev_ignore_udisks_hide", (GFunc)update_all, nullptr);
     xset_set_cb("dev_show_hide_volumes", (GFunc)on_showhide, vol);
     set = xset_set_cb("dev_automount_optical", (GFunc)update_all, nullptr);
-    bool auto_optical = set->b == XSET_B_TRUE;
+    bool auto_optical = set->b == XSetB::XSET_B_TRUE;
     set = xset_set_cb("dev_automount_removable", (GFunc)update_all, nullptr);
-    bool auto_removable = set->b == XSET_B_TRUE;
+    bool auto_removable = set->b == XSetB::XSET_B_TRUE;
     xset_set_cb("dev_ignore_udisks_nopolicy", (GFunc)update_all, nullptr);
     set = xset_set_cb("dev_automount_volumes", (GFunc)on_automountlist, vol);
     xset_set_ob1(set, "view", view);
 
-    if (vol && vol->device_type == DEVICE_TYPE_NETWORK &&
+    if (vol && vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_NETWORK &&
         (Glib::str_has_prefix(vol->device_file, "//") || strstr(vol->device_file, ":/")))
         str = ztd::strdup(" dev_menu_mark");
     else
@@ -2450,7 +2475,7 @@ show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browse
     set = xset_get("dev_menu_settings");
     menu_elements = "dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
                     "dev_mount_options dev_change separator dev_single dev_newtab dev_icon";
-    xset_set_set(set, XSET_SET_SET_DESC, menu_elements.c_str());
+    xset_set_set(set, XSetSetSet::XSET_SET_SET_DESC, menu_elements.c_str());
 
     menu_elements = "separator dev_menu_root separator dev_prop dev_menu_settings";
     xset_add_menu(file_browser, popup, accel_group, menu_elements.c_str());
@@ -2500,7 +2525,7 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data)
         if (gtk_tree_model_get_iter(model, &it, tree_path))
         {
             gtk_tree_selection_select_iter(tree_sel, &it);
-            gtk_tree_model_get(model, &it, COL_DATA, &vol, -1);
+            gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
         }
     }
 
@@ -2650,7 +2675,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, unsig
     gtk_widget_set_sensitive(item, !!vol);
 
     // Bookmark Device
-    if (vol && vol->device_type == DEVICE_TYPE_NETWORK &&
+    if (vol && vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_NETWORK &&
         (Glib::str_has_prefix(vol->device_file, "//") || strstr(vol->device_file, ":/")))
     {
         set = xset_get("dev_menu_mark");
@@ -2791,9 +2816,9 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     xset_set_cb("dev_ignore_udisks_hide", (GFunc)update_all, nullptr);
     xset_set_cb("dev_show_hide_volumes", (GFunc)on_showhide, vol);
     set = xset_set_cb("dev_automount_optical", (GFunc)update_all, nullptr);
-    // bool auto_optical = set->b == XSET_B_TRUE;
+    // bool auto_optical = set->b == XSetB::XSET_B_TRUE;
     set = xset_set_cb("dev_automount_removable", (GFunc)update_all, nullptr);
-    // bool auto_removable = set->b == XSET_B_TRUE;
+    // bool auto_removable = set->b == XSetB::XSET_B_TRUE;
     xset_set_cb("dev_ignore_udisks_nopolicy", (GFunc)update_all, nullptr);
     xset_set_cb("dev_automount_volumes", (GFunc)on_automountlist, vol);
     xset_set_cb("dev_change", (GFunc)update_change_detection, nullptr);
@@ -2809,7 +2834,7 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
         fmt::format("dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
                     "dev_mount_options dev_change{}",
                     file_browser ? " dev_newtab" : "");
-    xset_set_set(set, XSET_SET_SET_DESC, desc.c_str());
+    xset_set_set(set, XSetSetSet::XSET_SET_SET_DESC, desc.c_str());
 }
 
 void
@@ -2860,7 +2885,7 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
             XSet* newset = xset_custom_new();
             newset->z = const_cast<char*>(upath.c_str());
             newset->menu_label = const_cast<char*>(name.c_str());
-            newset->x = ztd::strdup("3"); // XSET_CMD_BOOKMARK
+            newset->x = ztd::strdup("3"); // XSetCMD::XSET_CMD_BOOKMARK
             // unset these to save session space
             newset->task = false;
             newset->task_err = false;
@@ -2934,7 +2959,7 @@ get_selected_bookmark_set(GtkTreeView* view)
     GtkTreeIter it;
     GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(view);
     if (gtk_tree_selection_get_selected(tree_sel, nullptr, &it))
-        gtk_tree_model_get(GTK_TREE_MODEL(list), &it, COL_PATH, &name, -1);
+        gtk_tree_model_get(GTK_TREE_MODEL(list), &it, PtkLocationViewCol::COL_PATH, &name, -1);
     XSet* set = xset_is(name);
     free(name);
     return set;
@@ -2959,7 +2984,11 @@ select_bookmark(GtkTreeView* view, XSet* set)
     {
         do
         {
-            gtk_tree_model_get(GTK_TREE_MODEL(list), &it, COL_PATH, &set_name, -1);
+            gtk_tree_model_get(GTK_TREE_MODEL(list),
+                               &it,
+                               PtkLocationViewCol::COL_PATH,
+                               &set_name,
+                               -1);
             if (set_name && !strcmp(set->name, set_name))
             {
                 // found in list
@@ -3015,7 +3044,7 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
     // get icon name
     switch (set->menu_style)
     {
-        case XSET_MENU_SUBMENU:
+        case XSetMenu::XSET_MENU_SUBMENU:
             icon1 = icon_name;
             if (!icon1)
             {
@@ -3037,31 +3066,31 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
                 }
             }
             break;
-        case XSET_MENU_SEP:
+        case XSetMenu::XSET_MENU_SEP:
             is_sep = true;
             break;
-        case XSET_MENU_NORMAL:
-        case XSET_MENU_CHECK:
-        case XSET_MENU_STRING:
-        case XSET_MENU_RADIO:
-        case XSET_MENU_FILEDLG:
-        case XSET_MENU_FONTDLG:
-        case XSET_MENU_ICON:
-        case XSET_MENU_COLORDLG:
-        case XSET_MENU_CONFIRM:
-        case XSET_MENU_RESERVED_03:
-        case XSET_MENU_RESERVED_04:
-        case XSET_MENU_RESERVED_05:
-        case XSET_MENU_RESERVED_06:
-        case XSET_MENU_RESERVED_07:
-        case XSET_MENU_RESERVED_08:
-        case XSET_MENU_RESERVED_09:
-        case XSET_MENU_RESERVED_10:
+        case XSetMenu::XSET_MENU_NORMAL:
+        case XSetMenu::XSET_MENU_CHECK:
+        case XSetMenu::XSET_MENU_STRING:
+        case XSetMenu::XSET_MENU_RADIO:
+        case XSetMenu::XSET_MENU_FILEDLG:
+        case XSetMenu::XSET_MENU_FONTDLG:
+        case XSetMenu::XSET_MENU_ICON:
+        case XSetMenu::XSET_MENU_COLORDLG:
+        case XSetMenu::XSET_MENU_CONFIRM:
+        case XSetMenu::XSET_MENU_RESERVED_03:
+        case XSetMenu::XSET_MENU_RESERVED_04:
+        case XSetMenu::XSET_MENU_RESERVED_05:
+        case XSetMenu::XSET_MENU_RESERVED_06:
+        case XSetMenu::XSET_MENU_RESERVED_07:
+        case XSetMenu::XSET_MENU_RESERVED_08:
+        case XSetMenu::XSET_MENU_RESERVED_09:
+        case XSetMenu::XSET_MENU_RESERVED_10:
         default:
-            if (set->menu_style != XSET_MENU_CHECK)
+            if (set->menu_style != XSetMenu::XSET_MENU_CHECK)
                 icon1 = icon_name;
             cmd_type = set->x ? strtol(set->x, nullptr, 10) : -1;
-            if (!set->lock && cmd_type == XSET_CMD_BOOKMARK)
+            if (!set->lock && cmd_type == XSetCMD::XSET_CMD_BOOKMARK)
             {
                 // Bookmark
                 if (!(set->menu_label && set->menu_label[0]))
@@ -3079,17 +3108,19 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
                 else
                     icon = xset_custom_get_bookmark_icon(set, icon_size);
             }
-            else if (!set->lock && cmd_type == XSET_CMD_APP)
+            else if (!set->lock && cmd_type == XSetCMD::XSET_CMD_APP)
             {
                 // Application
                 menu_label = xset_custom_get_app_name_icon(set, &icon, icon_size);
             }
-            else if (!icon1 && (cmd_type == XSET_CMD_APP || cmd_type == XSET_CMD_LINE ||
-                                cmd_type == XSET_CMD_SCRIPT))
+            else if (!icon1 &&
+                     (cmd_type == XSetCMD::XSET_CMD_APP || cmd_type == XSetCMD::XSET_CMD_LINE ||
+                      cmd_type == XSetCMD::XSET_CMD_SCRIPT))
             {
-                if (set->menu_style != XSET_MENU_CHECK || set->b == XSET_B_TRUE)
+                if (set->menu_style != XSetMenu::XSET_MENU_CHECK || set->b == XSetB::XSET_B_TRUE)
                 {
-                    if (set->menu_style == XSET_MENU_CHECK && icon_name && set->b == XSET_B_TRUE)
+                    if (set->menu_style == XSetMenu::XSET_MENU_CHECK && icon_name &&
+                        set->b == XSetB::XSET_B_TRUE)
                     {
                         icon1 = icon_name;
                         icon2 = ztd::strdup("gtk-execute");
@@ -3104,14 +3135,14 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
     // add label and xset name
     std::string name;
     name = clean_label(menu_label ? menu_label : set->menu_label, false, false);
-    gtk_list_store_set(list, it, COL_NAME, name.c_str(), -1);
-    gtk_list_store_set(list, it, COL_PATH, set->name, -1);
-    gtk_list_store_set(list, it, COL_DATA, is_sep, -1);
+    gtk_list_store_set(list, it, PtkLocationViewCol::COL_NAME, name.c_str(), -1);
+    gtk_list_store_set(list, it, PtkLocationViewCol::COL_PATH, set->name, -1);
+    gtk_list_store_set(list, it, PtkLocationViewCol::COL_DATA, is_sep, -1);
     free(menu_label);
 
     // add icon
     if (icon)
-        gtk_list_store_set(list, it, COL_ICON, icon, -1);
+        gtk_list_store_set(list, it, PtkLocationViewCol::COL_ICON, icon, -1);
     else if (icon1)
     {
         GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
@@ -3121,7 +3152,7 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
         if (!icon && icon3)
             icon = vfs_load_icon(icon_theme, icon3, icon_size);
 
-        gtk_list_store_set(list, it, COL_ICON, icon, -1);
+        gtk_list_store_set(list, it, PtkLocationViewCol::COL_ICON, icon, -1);
 
         if (icon)
         {
@@ -3132,7 +3163,7 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
         }
     }
     else
-        gtk_list_store_set(list, it, COL_ICON, nullptr, -1);
+        gtk_list_store_set(list, it, PtkLocationViewCol::COL_ICON, nullptr, -1);
 
     free(icon_file);
 }
@@ -3164,8 +3195,8 @@ ptk_bookmark_view_reload_list(GtkTreeView* view, XSet* book_set)
     // Add top item
     gtk_list_store_insert(list, &it, ++pos);
     std::string name = clean_label(book_set->menu_label, false, false);
-    gtk_list_store_set(list, &it, COL_NAME, name.c_str(), -1);
-    gtk_list_store_set(list, &it, COL_PATH, book_set->name, -1);
+    gtk_list_store_set(list, &it, PtkLocationViewCol::COL_NAME, name.c_str(), -1);
+    gtk_list_store_set(list, &it, PtkLocationViewCol::COL_PATH, book_set->name, -1);
     // icon
     GtkIconTheme* icon_theme;
     GdkPixbuf* icon = nullptr;
@@ -3179,7 +3210,7 @@ ptk_bookmark_view_reload_list(GtkTreeView* view, XSet* book_set)
         icon = vfs_load_icon(icon_theme, "gtk-go-up", icon_size);
     if (icon)
     {
-        gtk_list_store_set(list, &it, COL_ICON, icon, -1);
+        gtk_list_store_set(list, &it, PtkLocationViewCol::COL_ICON, icon, -1);
         g_object_unref(icon);
     }
 
@@ -3262,7 +3293,7 @@ on_bookmark_device(GtkMenuItem* item, VFSVolume* vol)
     newset = xset_custom_new();
     newset->menu_label = ztd::strdup(url);
     newset->z = ztd::strdup(url);
-    newset->x = ztd::strdup(std::to_string(XSET_CMD_BOOKMARK));
+    newset->x = ztd::strdup(std::to_string(XSetCMD::XSET_CMD_BOOKMARK));
     newset->prev = ztd::strdup(sel_set->name);
     newset->next = sel_set->next; // steal string
     newset->task = false;
@@ -3321,7 +3352,7 @@ ptk_bookmark_view_get_first_bookmark(XSet* book_set)
         child_set = xset_custom_new();
         child_set->menu_label = ztd::strdup("Home");
         child_set->z = ztd::strdup(vfs_user_home_dir());
-        child_set->x = ztd::strdup(std::to_string(XSET_CMD_BOOKMARK));
+        child_set->x = ztd::strdup(std::to_string(XSetCMD::XSET_CMD_BOOKMARK));
         child_set->parent = ztd::strdup("main_book");
         book_set->child = ztd::strdup(child_set->name);
         child_set->task = false;
@@ -3351,8 +3382,9 @@ find_cwd_match_bookmark(XSet* parent_set, const char* cwd, bool recurse, XSet* s
     XSet* set = xset_is(parent_set->child);
     while (set)
     {
-        if (no_skip && set->z && set->x && !set->lock && set->x[0] == '3' /* XSET_CMD_BOOKMARK */ &&
-            set->menu_style < XSET_MENU_SUBMENU && Glib::str_has_prefix(set->z, cwd))
+        if (no_skip && set->z && set->x && !set->lock &&
+            set->x[0] == '3' /* XSetCMD::XSET_CMD_BOOKMARK */ &&
+            set->menu_style < XSetMenu::XSET_MENU_SUBMENU && Glib::str_has_prefix(set->z, cwd))
         {
             // found a possible match - confirm
             char* sep = strchr(set->z, ';');
@@ -3370,7 +3402,7 @@ find_cwd_match_bookmark(XSet* parent_set, const char* cwd, bool recurse, XSet* s
             }
             free(url);
         }
-        else if (set->menu_style == XSET_MENU_SUBMENU && recurse && set->child)
+        else if (set->menu_style == XSetMenu::XSET_MENU_SUBMENU && recurse && set->child)
         {
             // set is a parent - recurse contents
             XSet* found_set;
@@ -3395,8 +3427,9 @@ ptk_bookmark_view_chdir(GtkTreeView* view, PtkFileBrowser* file_browser, bool re
 
     // cur dir is already selected?
     XSet* set = get_selected_bookmark_set(view);
-    if (set && !set->lock && set->z && set->menu_style < XSET_MENU_SUBMENU && set->x &&
-        strtol(set->x, nullptr, 10) == XSET_CMD_BOOKMARK && Glib::str_has_prefix(set->z, cwd))
+    if (set && !set->lock && set->z && set->menu_style < XSetMenu::XSET_MENU_SUBMENU && set->x &&
+        strtol(set->x, nullptr, 10) == XSetCMD::XSET_CMD_BOOKMARK &&
+        Glib::str_has_prefix(set->z, cwd))
     {
         char* sep = strchr(set->z, ';');
         if (sep)
@@ -3441,7 +3474,7 @@ ptk_bookmark_view_get_selected_dir(GtkTreeView* view)
     if (set)
     {
         int cmd_type = set->x ? strtol(set->x, nullptr, 10) : -1;
-        if (!set->lock && cmd_type == XSET_CMD_BOOKMARK && set->z)
+        if (!set->lock && cmd_type == XSetCMD::XSET_CMD_BOOKMARK && set->z)
         {
             char* sep = strchr(set->z, ';');
             if (sep)
@@ -3527,7 +3560,7 @@ ptk_bookmark_view_add_bookmark(GtkMenuItem* menuitem, PtkFileBrowser* file_brows
     newset = xset_custom_new();
     newset->menu_label = g_path_get_basename(url);
     newset->z = ztd::strdup(url);
-    newset->x = ztd::strdup(std::to_string(XSET_CMD_BOOKMARK));
+    newset->x = ztd::strdup(std::to_string(XSetCMD::XSET_CMD_BOOKMARK));
     newset->prev = ztd::strdup(sel_set->name);
     newset->next = sel_set->next; // steal string
     newset->task = false;
@@ -3593,7 +3626,11 @@ ptk_bookmark_view_xset_changed(GtkTreeView* view, PtkFileBrowser* file_browser,
     {
         do
         {
-            gtk_tree_model_get(GTK_TREE_MODEL(list), &it, COL_PATH, &set_name, -1);
+            gtk_tree_model_get(GTK_TREE_MODEL(list),
+                               &it,
+                               PtkLocationViewCol::COL_PATH,
+                               &set_name,
+                               -1);
             if (set_name && !strcmp(changed_name, set_name))
             {
                 // found in list
@@ -3649,7 +3686,7 @@ activate_bookmark_item(XSet* sel_set, GtkTreeView* view, PtkFileBrowser* file_br
                 ptk_bookmark_view_chdir(view, file_browser, false);
         }
     }
-    else if (sel_set->menu_style == XSET_MENU_SUBMENU)
+    else if (sel_set->menu_style == XSetMenu::XSET_MENU_SUBMENU)
     {
         // enter submenu
         free(file_browser->book_set_name);
@@ -3664,15 +3701,15 @@ activate_bookmark_item(XSet* sel_set, GtkTreeView* view, PtkFileBrowser* file_br
         {
             // temporarily reverse the New Tab setting
             set = xset_get("book_newtab");
-            set->b = set->b == XSET_B_TRUE ? XSET_B_UNSET : XSET_B_TRUE;
+            set->b = set->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_UNSET : XSetB::XSET_B_TRUE;
         }
         xset_menu_cb(nullptr, sel_set); // activate
         if (reverse)
         {
             // restore the New Tab setting
-            set->b = set->b == XSET_B_TRUE ? XSET_B_UNSET : XSET_B_TRUE;
+            set->b = set->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_UNSET : XSetB::XSET_B_TRUE;
         }
-        if (sel_set->menu_style == XSET_MENU_CHECK)
+        if (sel_set->menu_style == XSetMenu::XSET_MENU_CHECK)
             main_window_bookmark_changed(sel_set->name);
     }
 }
@@ -3761,7 +3798,7 @@ on_bookmark_drag_end(GtkWidget* widget, GdkDragContext* drag_context, PtkFileBro
     // get inserted xset name
     gtk_tree_model_get(GTK_TREE_MODEL(list),
                        &file_browser->book_iter_inserted,
-                       COL_PATH,
+                       PtkLocationViewCol::COL_PATH,
                        &inserted_name,
                        -1);
     file_browser->book_iter_inserted.stamp = 0;
@@ -3788,7 +3825,11 @@ on_bookmark_drag_end(GtkWidget* widget, GdkDragContext* drag_context, PtkFileBro
     {
         do
         {
-            gtk_tree_model_get(GTK_TREE_MODEL(list), &it, COL_PATH, &set_name, -1);
+            gtk_tree_model_get(GTK_TREE_MODEL(list),
+                               &it,
+                               PtkLocationViewCol::COL_PATH,
+                               &set_name,
+                               -1);
             if (set_name && !strcmp(inserted_name, set_name))
             {
                 // found in list
@@ -3813,7 +3854,11 @@ on_bookmark_drag_end(GtkWidget* widget, GdkDragContext* drag_context, PtkFileBro
         prev_name = nullptr;
     else
     {
-        gtk_tree_model_get(GTK_TREE_MODEL(list), &it_prev, COL_PATH, &prev_name, -1);
+        gtk_tree_model_get(GTK_TREE_MODEL(list),
+                           &it_prev,
+                           PtkLocationViewCol::COL_PATH,
+                           &prev_name,
+                           -1);
         if (!prev_name)
         {
             ptk_bookmark_view_reload_list(view, xset_get(file_browser->book_set_name));
@@ -4050,15 +4095,18 @@ is_row_separator(GtkTreeModel* tree_model, GtkTreeIter* it, PtkFileBrowser* file
 {
     (void)file_browser;
     const int is_sep = 0;
-    gtk_tree_model_get(tree_model, it, COL_DATA, &is_sep, -1);
+    gtk_tree_model_get(tree_model, it, PtkLocationViewCol::COL_DATA, &is_sep, -1);
     return is_sep;
 }
 
 GtkWidget*
 ptk_bookmark_view_new(PtkFileBrowser* file_browser)
 {
-    GtkListStore* list =
-        gtk_list_store_new(N_COLS, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN);
+    GtkListStore* list = gtk_list_store_new(PtkLocationViewCol::N_COLS,
+                                            GDK_TYPE_PIXBUF,
+                                            G_TYPE_STRING,
+                                            G_TYPE_STRING,
+                                            G_TYPE_BOOLEAN);
     g_object_weak_ref(G_OBJECT(list), on_bookmark_model_destroy, file_browser);
 
     GtkWidget* view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(list));
@@ -4091,7 +4139,11 @@ ptk_bookmark_view_new(PtkFileBrowser* file_browser)
 
     GtkCellRenderer* renderer = gtk_cell_renderer_pixbuf_new();
     gtk_tree_view_column_pack_start(col, renderer, false);
-    gtk_tree_view_column_set_attributes(col, renderer, "pixbuf", COL_ICON, nullptr);
+    gtk_tree_view_column_set_attributes(col,
+                                        renderer,
+                                        "pixbuf",
+                                        PtkLocationViewCol::COL_ICON,
+                                        nullptr);
 
     gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
     col = gtk_tree_view_column_new();
@@ -4099,7 +4151,11 @@ ptk_bookmark_view_new(PtkFileBrowser* file_browser)
     renderer = gtk_cell_renderer_text_new();
     // g_signal_connect( renderer, "edited", G_CALLBACK(on_bookmark_edited), view );
     gtk_tree_view_column_pack_start(col, renderer, true);
-    gtk_tree_view_column_set_attributes(col, renderer, "text", COL_NAME, nullptr);
+    gtk_tree_view_column_set_attributes(col,
+                                        renderer,
+                                        "text",
+                                        PtkLocationViewCol::COL_NAME,
+                                        nullptr);
 
     gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
 

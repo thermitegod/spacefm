@@ -52,6 +52,29 @@ enum ItemPropContextCol
     CONTEXT_COL_VALUE
 };
 
+enum ItemPropContextComp
+{
+    CONTEXT_COMP_EQUALS,
+    CONTEXT_COMP_NEQUALS,
+    CONTEXT_COMP_CONTAINS,
+    CONTEXT_COMP_NCONTAINS,
+    CONTEXT_COMP_BEGINS,
+    CONTEXT_COMP_NBEGINS,
+    CONTEXT_COMP_ENDS,
+    CONTEXT_COMP_NENDS,
+    CONTEXT_COMP_LESS,
+    CONTEXT_COMP_GREATER,
+    CONTEXT_COMP_MATCH,
+    CONTEXT_COMP_NMATCH
+};
+
+enum ItemPropItemType
+{
+    ITEM_TYPE_BOOKMARK,
+    ITEM_TYPE_APP,
+    ITEM_TYPE_COMMAND
+};
+
 struct ContextData
 {
     GtkWidget* dlg;
@@ -209,25 +232,7 @@ static const char* context_sub_list[] =
     "0%%%%%dev/sdb1%%%%%/dev/sdc1%%%%%/dev/sdd1%%%%%/dev/sr0",  //"Panel 3 Device",
     "0%%%%%dev/sdb1%%%%%/dev/sdc1%%%%%/dev/sdd1%%%%%/dev/sr0"  //"Panel 4 Device"
 };
-// clang-format on
 
-enum ItemPropContextComp
-{
-    CONTEXT_COMP_EQUALS,
-    CONTEXT_COMP_NEQUALS,
-    CONTEXT_COMP_CONTAINS,
-    CONTEXT_COMP_NCONTAINS,
-    CONTEXT_COMP_BEGINS,
-    CONTEXT_COMP_NBEGINS,
-    CONTEXT_COMP_ENDS,
-    CONTEXT_COMP_NENDS,
-    CONTEXT_COMP_LESS,
-    CONTEXT_COMP_GREATER,
-    CONTEXT_COMP_MATCH,
-    CONTEXT_COMP_NMATCH
-};
-
-// clang-format off
 static const char* context_comp[] =
 {
     "equals",
@@ -251,13 +256,6 @@ static const char* item_types[] =
     "Command",
 };
 // clang-format on
-
-enum ItemPropItemType
-{
-    ITEM_TYPE_BOOKMARK,
-    ITEM_TYPE_APP,
-    ITEM_TYPE_COMMAND
-};
 
 static char*
 get_element_next(char** s)
@@ -315,6 +313,7 @@ xset_context_test(XSetContext* context, char* rules, bool def_disable)
     char* eleval;
     char* sep;
     bool test;
+
     enum ItemPropContextTest
     {
         ANY,
@@ -339,8 +338,9 @@ xset_context_test(XSetContext* context, char* rules, bool def_disable)
     if (match < 0 || match > 3)
         return 0;
 
-    if (action != CONTEXT_HIDE && action != CONTEXT_SHOW && def_disable)
-        return CONTEXT_DISABLE;
+    if (action != ItemPropContextState::CONTEXT_HIDE &&
+        action != ItemPropContextState::CONTEXT_SHOW && def_disable)
+        return ItemPropContextState::CONTEXT_DISABLE;
 
     // parse rules
     bool is_rules = false;
@@ -373,38 +373,38 @@ xset_context_test(XSetContext* context, char* rules, bool def_disable)
 
             switch (comp)
             {
-                case CONTEXT_COMP_EQUALS:
+                case ItemPropContextComp::CONTEXT_COMP_EQUALS:
                     test = !strcmp(context->var[sub], eleval);
                     break;
-                case CONTEXT_COMP_NEQUALS:
+                case ItemPropContextComp::CONTEXT_COMP_NEQUALS:
                     test = strcmp(context->var[sub], eleval);
                     break;
-                case CONTEXT_COMP_CONTAINS:
+                case ItemPropContextComp::CONTEXT_COMP_CONTAINS:
                     test = !!strstr(context->var[sub], eleval);
                     break;
-                case CONTEXT_COMP_NCONTAINS:
+                case ItemPropContextComp::CONTEXT_COMP_NCONTAINS:
                     test = !strstr(context->var[sub], eleval);
                     break;
-                case CONTEXT_COMP_BEGINS:
+                case ItemPropContextComp::CONTEXT_COMP_BEGINS:
                     test = Glib::str_has_prefix(context->var[sub], eleval);
                     break;
-                case CONTEXT_COMP_NBEGINS:
+                case ItemPropContextComp::CONTEXT_COMP_NBEGINS:
                     test = !Glib::str_has_prefix(context->var[sub], eleval);
                     break;
-                case CONTEXT_COMP_ENDS:
+                case ItemPropContextComp::CONTEXT_COMP_ENDS:
                     test = Glib::str_has_suffix(context->var[sub], eleval);
                     break;
-                case CONTEXT_COMP_NENDS:
+                case ItemPropContextComp::CONTEXT_COMP_NENDS:
                     test = !Glib::str_has_suffix(context->var[sub], eleval);
                     break;
-                case CONTEXT_COMP_LESS:
+                case ItemPropContextComp::CONTEXT_COMP_LESS:
                     test = strtol(context->var[sub], nullptr, 10) < strtol(eleval, nullptr, 10);
                     break;
-                case CONTEXT_COMP_GREATER:
+                case ItemPropContextComp::CONTEXT_COMP_GREATER:
                     test = strtol(context->var[sub], nullptr, 10) > strtol(eleval, nullptr, 10);
                     break;
-                case CONTEXT_COMP_MATCH:
-                case CONTEXT_COMP_NMATCH:
+                case ItemPropContextComp::CONTEXT_COMP_MATCH:
+                case ItemPropContextComp::CONTEXT_COMP_NMATCH:
                     s = g_utf8_strdown(eleval, -1);
                     if (g_strcmp0(eleval, s))
                     {
@@ -419,11 +419,12 @@ xset_context_test(XSetContext* context, char* rules, bool def_disable)
                         free(str);
                     }
                     free(s);
-                    if (comp == CONTEXT_COMP_MATCH)
+                    if (comp == ItemPropContextComp::CONTEXT_COMP_MATCH)
                         test = !test;
                     break;
                 default:
-                    test = match == NANY || match == NALL; // failsafe
+                    test = match == ItemPropContextTest::NANY ||
+                           match == ItemPropContextTest::NALL; // failsafe
             }
 
             if (sep)
@@ -451,33 +452,34 @@ xset_context_test(XSetContext* context, char* rules, bool def_disable)
         {
             any_match = true;
             no_match = false;
-            if (match == ANY || match == NANY || match == NALL)
+            if (match == ItemPropContextTest::ANY || match == ItemPropContextTest::NANY ||
+                match == ItemPropContextTest::NALL)
                 break;
         }
         else
         {
             all_match = false;
-            if (match == ALL)
+            if (match == ItemPropContextTest::ALL)
                 break;
         }
     }
 
     if (!is_rules)
-        return CONTEXT_SHOW;
+        return ItemPropContextState::CONTEXT_SHOW;
 
     bool is_match;
     switch (match)
     {
-        case ALL:
+        case ItemPropContextTest::ALL:
             is_match = all_match;
             break;
-        case NALL:
+        case ItemPropContextTest::NALL:
             is_match = !any_match;
             break;
-        case NANY:
+        case ItemPropContextTest::NANY:
             is_match = no_match;
             break;
-        case ANY:
+        case ItemPropContextTest::ANY:
             is_match = !no_match;
             break;
         default:
@@ -486,19 +488,22 @@ xset_context_test(XSetContext* context, char* rules, bool def_disable)
 
     switch (action)
     {
-        case CONTEXT_SHOW:
-            return is_match ? CONTEXT_SHOW : CONTEXT_HIDE;
-        case CONTEXT_ENABLE:
-            return is_match ? CONTEXT_SHOW : CONTEXT_DISABLE;
-        case CONTEXT_DISABLE:
-            return is_match ? CONTEXT_DISABLE : CONTEXT_SHOW;
+        case ItemPropContextState::CONTEXT_SHOW:
+            return is_match ? ItemPropContextState::CONTEXT_SHOW
+                            : ItemPropContextState::CONTEXT_HIDE;
+        case ItemPropContextState::CONTEXT_ENABLE:
+            return is_match ? ItemPropContextState::CONTEXT_SHOW
+                            : ItemPropContextState::CONTEXT_DISABLE;
+        case ItemPropContextState::CONTEXT_DISABLE:
+            return is_match ? ItemPropContextState::CONTEXT_DISABLE
+                            : ItemPropContextState::CONTEXT_SHOW;
         default:
             break;
     }
-    // CONTEXT_HIDE
+    // ItemPropContextState::CONTEXT_HIDE
     if (is_match)
-        return CONTEXT_HIDE;
-    return def_disable ? CONTEXT_DISABLE : CONTEXT_SHOW;
+        return ItemPropContextState::CONTEXT_HIDE;
+    return def_disable ? ItemPropContextState::CONTEXT_DISABLE : ItemPropContextState::CONTEXT_SHOW;
 }
 
 static char*
@@ -520,11 +525,11 @@ context_build(ContextData* ctxt)
         {
             gtk_tree_model_get(model,
                                &it,
-                               CONTEXT_COL_VALUE,
+                               ItemPropContextCol::CONTEXT_COL_VALUE,
                                &value,
-                               CONTEXT_COL_SUB,
+                               ItemPropContextCol::CONTEXT_COL_SUB,
                                &sub,
-                               CONTEXT_COL_COMP,
+                               ItemPropContextCol::CONTEXT_COL_COMP,
                                &comp,
                                -1);
             old_context = new_context;
@@ -558,12 +563,13 @@ enable_context(ContextData* ctxt)
         if (rules)
         {
             int action = xset_context_test(ctxt->context, rules, false);
-            if (action == CONTEXT_HIDE)
+            if (action == ItemPropContextState::CONTEXT_HIDE)
                 text = "Current: Hide";
-            else if (action == CONTEXT_DISABLE)
+            else if (action == ItemPropContextState::CONTEXT_DISABLE)
                 text = "Current: Disable";
-            else if (action == CONTEXT_SHOW &&
-                     gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_action)) == CONTEXT_DISABLE)
+            else if (action == ItemPropContextState::CONTEXT_SHOW &&
+                     gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_action)) ==
+                         ItemPropContextState::CONTEXT_DISABLE)
                 text = "Current: Enable";
         }
         gtk_label_set_text(ctxt->test, text.c_str());
@@ -614,13 +620,13 @@ on_context_button_press(GtkWidget* widget, ContextData* ctxt)
         char* disp = context_display(sub, comp, value);
         gtk_list_store_set(GTK_LIST_STORE(model),
                            &it,
-                           CONTEXT_COL_DISP,
+                           ItemPropContextCol::CONTEXT_COL_DISP,
                            disp,
-                           CONTEXT_COL_SUB,
+                           ItemPropContextCol::CONTEXT_COL_SUB,
                            sub,
-                           CONTEXT_COL_COMP,
+                           ItemPropContextCol::CONTEXT_COL_COMP,
                            comp,
-                           CONTEXT_COL_VALUE,
+                           ItemPropContextCol::CONTEXT_COL_VALUE,
                            value,
                            -1);
         free(disp);
@@ -688,11 +694,11 @@ on_context_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewC
         return;
     gtk_tree_model_get(model,
                        &it,
-                       CONTEXT_COL_VALUE,
+                       ItemPropContextCol::CONTEXT_COL_VALUE,
                        &value,
-                       CONTEXT_COL_SUB,
+                       ItemPropContextCol::CONTEXT_COL_SUB,
                        &sub,
-                       CONTEXT_COL_COMP,
+                       ItemPropContextCol::CONTEXT_COL_COMP,
                        &comp,
                        -1);
     gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_sub), sub);
@@ -772,7 +778,8 @@ enable_options(ContextData* ctxt)
     gtk_widget_set_sensitive(
         ctxt->item_icon,
         !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_checkbox)) &&
-            ctxt->set->menu_style != XSET_MENU_SEP && ctxt->set->menu_style != XSET_MENU_SUBMENU);
+            ctxt->set->menu_style != XSetMenu::XSET_MENU_SEP &&
+            ctxt->set->menu_style != XSetMenu::XSET_MENU_SUBMENU);
 
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_confirm)))
     {
@@ -1131,14 +1138,14 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
     int job = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
     switch (job)
     {
-        case ITEM_TYPE_BOOKMARK:
-        case ITEM_TYPE_APP:
+        case ItemPropItemType::ITEM_TYPE_BOOKMARK:
+        case ItemPropItemType::ITEM_TYPE_APP:
             // Bookmark or App
             gtk_widget_show(ctxt->target_vbox);
             gtk_widget_hide(gtk_notebook_get_nth_page(GTK_NOTEBOOK(ctxt->notebook), 2));
             gtk_widget_hide(gtk_notebook_get_nth_page(GTK_NOTEBOOK(ctxt->notebook), 3));
 
-            if (job == ITEM_TYPE_BOOKMARK)
+            if (job == ItemPropItemType::ITEM_TYPE_BOOKMARK)
             {
                 gtk_widget_hide(ctxt->item_choose);
                 gtk_widget_hide(ctxt->hbox_opener);
@@ -1153,7 +1160,7 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
                                    "Target:  (a .desktop or executable file)");
             }
             break;
-        case ITEM_TYPE_COMMAND:
+        case ItemPropItemType::ITEM_TYPE_COMMAND:
             // Command
             gtk_widget_hide(ctxt->target_vbox);
             gtk_widget_show(ctxt->hbox_opener);
@@ -1165,7 +1172,7 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
     }
 
     // load command data
-    if (rset->x && strtol(rset->x, nullptr, 10) == XSET_CMD_SCRIPT)
+    if (rset->x && strtol(rset->x, nullptr, 10) == XSetCMD::XSET_CMD_SCRIPT)
     {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_script), true);
         gtk_widget_hide(ctxt->cmd_line_label);
@@ -1197,11 +1204,11 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
                                  mset->task_out || ctxt->reset_command);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->opt_scroll),
                                  !mset->scroll_lock || ctxt->reset_command);
-    if (rset->menu_style == XSET_MENU_CHECK)
+    if (rset->menu_style == XSetMenu::XSET_MENU_CHECK)
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_checkbox), true);
-    else if (rset->menu_style == XSET_MENU_CONFIRM)
+    else if (rset->menu_style == XSetMenu::XSET_MENU_CONFIRM)
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_confirm), true);
-    else if (rset->menu_style == XSET_MENU_STRING)
+    else if (rset->menu_style == XSetMenu::XSET_MENU_STRING)
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_input), true);
     else
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_normal), true);
@@ -1214,7 +1221,7 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
     }
 
     // TODO switch?
-    if (job < ITEM_TYPE_COMMAND)
+    if (job < ItemPropItemType::ITEM_TYPE_COMMAND)
     {
         // Bookmark or App
         buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->item_target));
@@ -1227,7 +1234,7 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
         // gtk_button_clicked( GTK_BUTTON( ctxt->item_browse ) );
     }
 
-    if (job == ITEM_TYPE_COMMAND || job == ITEM_TYPE_APP)
+    if (job == ItemPropItemType::ITEM_TYPE_COMMAND || job == ItemPropItemType::ITEM_TYPE_APP)
     {
         // Opener
         if (mset->opener > 2 || mset->opener < 0)
@@ -1242,13 +1249,13 @@ static void
 on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
 {
     int job = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->item_type));
-    if (job == ITEM_TYPE_BOOKMARK)
+    if (job == ItemPropItemType::ITEM_TYPE_BOOKMARK)
     {
         // Bookmark Browse
         char* add_path = xset_file_dialog(ctxt->dlg,
                                           GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
                                           "Choose Directory",
-                                          ctxt->context->var[CONTEXT_DIR],
+                                          ctxt->context->var[ItemPropContext::CONTEXT_DIR],
                                           nullptr);
         if (add_path && add_path[0])
         {
@@ -1270,8 +1277,9 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
         {
             // Choose
             VFSMimeType* mime_type = vfs_mime_type_get_from_type(
-                ctxt->context->var[CONTEXT_MIME] && ctxt->context->var[CONTEXT_MIME][0]
-                    ? ctxt->context->var[CONTEXT_MIME]
+                ctxt->context->var[ItemPropContext::CONTEXT_MIME] &&
+                        ctxt->context->var[ItemPropContext::CONTEXT_MIME][0]
+                    ? ctxt->context->var[ItemPropContext::CONTEXT_MIME]
                     : XDG_MIME_TYPE_UNKNOWN);
             char* app = (char*)ptk_choose_app_for_mime_type(
                 GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(ctxt->dlg))),
@@ -1313,8 +1321,8 @@ replace_item_props(ContextData* ctxt)
     XSet* rset = ctxt->set;
     XSet* mset = xset_get_plugin_mirror(rset);
 
-    if (!rset->lock && rset->menu_style != XSET_MENU_SUBMENU && rset->menu_style != XSET_MENU_SEP &&
-        rset->tool <= XSET_TOOL_CUSTOM)
+    if (!rset->lock && rset->menu_style != XSetMenu::XSET_MENU_SUBMENU &&
+        rset->menu_style != XSetMenu::XSET_MENU_SEP && rset->tool <= XSetTool::XSET_TOOL_CUSTOM)
     {
         // custom bookmark, app, or command
         bool is_bookmark_or_app = false;
@@ -1322,22 +1330,22 @@ replace_item_props(ContextData* ctxt)
 
         switch (item_type)
         {
-            case ITEM_TYPE_BOOKMARK:
-                x = XSET_CMD_BOOKMARK;
+            case ItemPropItemType::ITEM_TYPE_BOOKMARK:
+                x = XSetCMD::XSET_CMD_BOOKMARK;
                 is_bookmark_or_app = true;
                 break;
-            case ITEM_TYPE_APP:
-                x = XSET_CMD_APP;
+            case ItemPropItemType::ITEM_TYPE_APP:
+                x = XSetCMD::XSET_CMD_APP;
                 is_bookmark_or_app = true;
                 break;
-            case ITEM_TYPE_COMMAND:
+            case ItemPropItemType::ITEM_TYPE_COMMAND:
                 if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_line)))
                     // line
-                    x = XSET_CMD_LINE;
+                    x = XSetCMD::XSET_CMD_LINE;
                 else
                 {
                     // script
-                    x = XSET_CMD_SCRIPT;
+                    x = XSetCMD::XSET_CMD_SCRIPT;
                     save_command_script(ctxt, false);
                 }
                 break;
@@ -1365,20 +1373,20 @@ replace_item_props(ContextData* ctxt)
             rset->y = ztd::strdup(gtk_entry_get_text(GTK_ENTRY(ctxt->cmd_user)));
             // menu style
             if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_checkbox)))
-                rset->menu_style = XSET_MENU_CHECK;
+                rset->menu_style = XSetMenu::XSET_MENU_CHECK;
             else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_confirm)))
-                rset->menu_style = XSET_MENU_CONFIRM;
+                rset->menu_style = XSetMenu::XSET_MENU_CONFIRM;
             else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_input)))
-                rset->menu_style = XSET_MENU_STRING;
+                rset->menu_style = XSetMenu::XSET_MENU_STRING;
             else
-                rset->menu_style = XSET_MENU_NORMAL;
+                rset->menu_style = XSetMenu::XSET_MENU_NORMAL;
             // style msg
             free(rset->desc);
             rset->desc = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_msg));
         }
         // command line
         free(rset->line);
-        if (x == XSET_CMD_LINE)
+        if (x == XSetCMD::XSET_CMD_LINE)
         {
             rset->line = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_script));
             if (rset->line && std::strlen(rset->line) > 2000)
@@ -1411,7 +1419,8 @@ replace_item_props(ContextData* ctxt)
             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_scroll)) || is_bookmark_or_app;
 
         // Opener
-        if ((item_type == ITEM_TYPE_COMMAND || item_type == ITEM_TYPE_APP))
+        if ((item_type == ItemPropItemType::ITEM_TYPE_COMMAND ||
+             item_type == ItemPropItemType::ITEM_TYPE_APP))
         {
             if (gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->opener)) > -1)
                 mset->opener = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->opener));
@@ -1421,7 +1430,7 @@ replace_item_props(ContextData* ctxt)
             // reset if not applicable
             mset->opener = 0;
     }
-    if (rset->menu_style != XSET_MENU_SEP && !rset->plugin)
+    if (rset->menu_style != XSetMenu::XSET_MENU_SEP && !rset->plugin)
     {
         // name
         if (rset->lock &&
@@ -1430,7 +1439,7 @@ replace_item_props(ContextData* ctxt)
             rset->in_terminal = true;
 
         free(rset->menu_label);
-        if (rset->tool > XSET_TOOL_CUSTOM &&
+        if (rset->tool > XSetTool::XSET_TOOL_CUSTOM &&
             !g_strcmp0(gtk_entry_get_text(GTK_ENTRY(ctxt->item_name)),
                        xset_get_builtin_toolitem_label(rset->tool)))
             // don't save default label of builtin toolitems
@@ -1439,10 +1448,11 @@ replace_item_props(ContextData* ctxt)
             rset->menu_label = ztd::strdup(gtk_entry_get_text(GTK_ENTRY(ctxt->item_name)));
     }
     // icon
-    if (rset->menu_style != XSET_MENU_RADIO && rset->menu_style != XSET_MENU_SEP)
+    if (rset->menu_style != XSetMenu::XSET_MENU_RADIO &&
+        rset->menu_style != XSetMenu::XSET_MENU_SEP)
     // checkbox items in 1.0.1 allow icon due to bookmark list showing
     // toolbar checkbox items have icon
-    //( rset->menu_style != XSET_MENU_CHECK || rset->tool ) )
+    //( rset->menu_style != XSetMenu::XSET_MENU_CHECK || rset->tool ) )
     {
         char* old_icon = ztd::strdup(mset->icon);
         free(mset->icon);
@@ -1470,7 +1480,7 @@ on_script_popup(GtkTextView* input, GtkMenu* menu, void* user_data)
     (void)user_data;
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     XSet* set = xset_get("separator");
-    set->menu_style = XSET_MENU_SEP;
+    set->menu_style = XSetMenu::XSET_MENU_SEP;
     set->browser = nullptr;
     xset_add_menuitem(nullptr, GTK_WIDGET(menu), accel_group, set);
 
@@ -1723,7 +1733,11 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
     renderer = gtk_cell_renderer_text_new();
     gtk_tree_view_column_pack_start(col, renderer, true);
-    gtk_tree_view_column_set_attributes(col, renderer, "text", CONTEXT_COL_DISP, nullptr);
+    gtk_tree_view_column_set_attributes(col,
+                                        renderer,
+                                        "text",
+                                        ItemPropContextCol::CONTEXT_COL_DISP,
+                                        nullptr);
     gtk_tree_view_append_column(GTK_TREE_VIEW(ctxt->view), col);
     gtk_tree_view_column_set_expand(col, true);
 
@@ -1951,13 +1965,13 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
         gtk_list_store_append(GTK_LIST_STORE(list), &it);
         gtk_list_store_set(GTK_LIST_STORE(list),
                            &it,
-                           CONTEXT_COL_DISP,
+                           ItemPropContextCol::CONTEXT_COL_DISP,
                            disp,
-                           CONTEXT_COL_SUB,
+                           ItemPropContextCol::CONTEXT_COL_SUB,
                            sub,
-                           CONTEXT_COL_COMP,
+                           ItemPropContextCol::CONTEXT_COL_COMP,
                            comp,
-                           CONTEXT_COL_VALUE,
+                           ItemPropContextCol::CONTEXT_COL_VALUE,
                            value,
                            -1);
         free(disp);
@@ -2177,12 +2191,12 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     int item_type = -1;
 
     std::string item_type_str;
-    if (set->tool > XSET_TOOL_CUSTOM)
+    if (set->tool > XSetTool::XSET_TOOL_CUSTOM)
         item_type_str =
             fmt::format("Built-In Toolbar Item: {}", xset_get_builtin_toolitem_label(set->tool));
-    else if (rset->menu_style == XSET_MENU_SUBMENU)
+    else if (rset->menu_style == XSetMenu::XSET_MENU_SUBMENU)
         item_type_str = "Submenu";
-    else if (rset->menu_style == XSET_MENU_SEP)
+    else if (rset->menu_style == XSetMenu::XSET_MENU_SEP)
         item_type_str = "Separator";
     else if (set->lock)
     {
@@ -2198,15 +2212,15 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
 
         switch (x)
         {
-            case XSET_CMD_LINE:
-            case XSET_CMD_SCRIPT:
-                item_type = ITEM_TYPE_COMMAND;
+            case XSetCMD::XSET_CMD_LINE:
+            case XSetCMD::XSET_CMD_SCRIPT:
+                item_type = ItemPropItemType::ITEM_TYPE_COMMAND;
                 break;
-            case XSET_CMD_APP:
-                item_type = ITEM_TYPE_APP;
+            case XSetCMD::XSET_CMD_APP:
+                item_type = ItemPropItemType::ITEM_TYPE_APP;
                 break;
-            case XSET_CMD_BOOKMARK:
-                item_type = ITEM_TYPE_BOOKMARK;
+            case XSetCMD::XSET_CMD_BOOKMARK:
+                item_type = ItemPropItemType::ITEM_TYPE_BOOKMARK;
                 break;
             default:
                 item_type = -1;
@@ -2225,8 +2239,8 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     }
 
     ctxt->temp_cmd_line = !set->lock ? ztd::strdup(rset->line) : nullptr;
-    if (set->lock || rset->menu_style == XSET_MENU_SUBMENU || rset->menu_style == XSET_MENU_SEP ||
-        set->tool > XSET_TOOL_CUSTOM)
+    if (set->lock || rset->menu_style == XSetMenu::XSET_MENU_SUBMENU ||
+        rset->menu_style == XSetMenu::XSET_MENU_SEP || set->tool > XSetTool::XSET_TOOL_CUSTOM)
     {
         gtk_widget_hide(gtk_notebook_get_nth_page(GTK_NOTEBOOK(ctxt->notebook), 2));
         gtk_widget_hide(gtk_notebook_get_nth_page(GTK_NOTEBOOK(ctxt->notebook), 3));
@@ -2246,19 +2260,19 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     ctxt->reset_command = true;
 
     // name
-    if (rset->menu_style != XSET_MENU_SEP)
+    if (rset->menu_style != XSetMenu::XSET_MENU_SEP)
     {
         if (set->menu_label)
             gtk_entry_set_text(GTK_ENTRY(ctxt->item_name), set->menu_label);
-        else if (set->tool > XSET_TOOL_CUSTOM)
+        else if (set->tool > XSetTool::XSET_TOOL_CUSTOM)
             gtk_entry_set_text(GTK_ENTRY(ctxt->item_name),
                                xset_get_builtin_toolitem_label(set->tool));
     }
     else
         gtk_widget_set_sensitive(ctxt->item_name, false);
     // key
-    if (rset->menu_style < XSET_MENU_SUBMENU || set->tool == XSET_TOOL_BACK_MENU ||
-        set->tool == XSET_TOOL_FWD_MENU)
+    if (rset->menu_style < XSetMenu::XSET_MENU_SUBMENU ||
+        set->tool == XSetTool::XSET_TOOL_BACK_MENU || set->tool == XSetTool::XSET_TOOL_FWD_MENU)
     {
         std::string str2;
         XSet* keyset;
@@ -2275,13 +2289,13 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     if (rset->icon || mset->icon)
         gtk_entry_set_text(GTK_ENTRY(ctxt->item_icon), mset->icon ? mset->icon : rset->icon);
     gtk_widget_set_sensitive(ctxt->item_icon,
-                             rset->menu_style != XSET_MENU_RADIO &&
-                                 rset->menu_style != XSET_MENU_SEP);
+                             rset->menu_style != XSetMenu::XSET_MENU_RADIO &&
+                                 rset->menu_style != XSetMenu::XSET_MENU_SEP);
     // toolbar checkbox items have icon
-    //( rset->menu_style != XSET_MENU_CHECK || rset->tool ) );
+    //( rset->menu_style != XSetMenu::XSET_MENU_CHECK || rset->tool ) );
     gtk_widget_set_sensitive(ctxt->icon_choose_btn,
-                             rset->menu_style != XSET_MENU_RADIO &&
-                                 rset->menu_style != XSET_MENU_SEP);
+                             rset->menu_style != XSetMenu::XSET_MENU_RADIO &&
+                                 rset->menu_style != XSetMenu::XSET_MENU_SEP);
 
     if (set->plugin)
     {
@@ -2303,7 +2317,7 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
         // Hide Context tab
         gtk_widget_hide(gtk_notebook_get_nth_page(GTK_NOTEBOOK(ctxt->notebook), 1));
         // gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( ctxt->show_tool ),
-        //                              set->tool == XSET_B_TRUE );
+        //                              set->tool == XSetB::XSET_B_TRUE );
     }
     // else
     //    gtk_widget_hide( ctxt->show_tool );

@@ -45,7 +45,7 @@ enum VFSThumbnailSize
 
 struct VFSThumbnailRequest
 {
-    int n_requests[N_LOAD_TYPES];
+    int n_requests[VFSThumbnailSize::N_LOAD_TYPES];
     VFSFileInfo* file;
 };
 
@@ -166,7 +166,7 @@ thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
             if (req->n_requests[i] == 0)
                 continue;
 
-            bool load_big = (i == LOAD_BIG_THUMBNAIL);
+            bool load_big = (i == VFSThumbnailSize::LOAD_BIG_THUMBNAIL);
             if (!vfs_file_info_is_thumbnail_loaded(req->file, load_big))
             {
                 std::string full_path;
@@ -269,7 +269,8 @@ vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big)
         g_queue_push_tail(dir->thumbnail_loader->queue, req);
     }
 
-    ++req->n_requests[is_big ? LOAD_BIG_THUMBNAIL : LOAD_SMALL_THUMBNAIL];
+    ++req->n_requests[is_big ? VFSThumbnailSize::LOAD_BIG_THUMBNAIL
+                             : VFSThumbnailSize::LOAD_SMALL_THUMBNAIL];
 
     vfs_async_task_unlock(loader->task);
 
@@ -290,7 +291,8 @@ vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
         for (l = loader->queue->head; l;)
         {
             VFSThumbnailRequest* req = static_cast<VFSThumbnailRequest*>(l->data);
-            --req->n_requests[is_big ? LOAD_BIG_THUMBNAIL : LOAD_SMALL_THUMBNAIL];
+            --req->n_requests[is_big ? VFSThumbnailSize::LOAD_BIG_THUMBNAIL
+                                     : VFSThumbnailSize::LOAD_SMALL_THUMBNAIL];
 
             // nobody needs this
             if (req->n_requests[0] <= 0 && req->n_requests[1] <= 0)

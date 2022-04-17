@@ -170,7 +170,7 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTr
         file_list.push_back(file_path);
     }
     /* file_list = g_list_reverse( file_list ); */
-    PtkFileTask* ptask = ptk_file_task_new(VFS_FILE_TASK_DELETE,
+    PtkFileTask* ptask = ptk_file_task_new(VFSFileTaskType::VFS_FILE_TASK_DELETE,
                                            file_list,
                                            nullptr,
                                            parent_win ? GTK_WINDOW(parent_win) : nullptr,
@@ -214,7 +214,7 @@ ptk_trash_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTre
         file_list.push_back(file_path);
     }
     /* file_list = g_list_reverse( file_list ); */
-    PtkFileTask* ptask = ptk_file_task_new(VFS_FILE_TASK_TRASH,
+    PtkFileTask* ptask = ptk_file_task_new(VFSFileTaskType::VFS_FILE_TASK_TRASH,
                                            file_list,
                                            nullptr,
                                            parent_win ? GTK_WINDOW(parent_win) : nullptr,
@@ -653,8 +653,8 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         mset->full_path_same = full_path_same;
         mset->mode_change = false;
 
-        if (full_path_same &&
-            (mset->create_new == PTK_RENAME || mset->create_new == PTK_RENAME_NEW_LINK))
+        if (full_path_same && (mset->create_new == PtkRenameMode::PTK_RENAME ||
+                               mset->create_new == PtkRenameMode::PTK_RENAME_NEW_LINK))
         {
             gtk_widget_set_sensitive(
                 mset->next,
@@ -2077,7 +2077,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         free(full_name);
         full_name = nullptr;
     }
-    else if (create_new == PTK_RENAME_NEW_LINK && file)
+    else if (create_new == PtkRenameMode::PTK_RENAME_NEW_LINK && file)
     {
         full_name = ztd::strdup(vfs_file_info_get_disp_name(file));
         if (!full_name)
@@ -2655,12 +2655,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_copy), true);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), false);
     }
-    else if (create_new == PTK_RENAME_NEW_DIR)
+    else if (create_new == PtkRenameMode::PTK_RENAME_NEW_DIR)
     {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder), true);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_new_file), false);
     }
-    else if (create_new == PTK_RENAME_NEW_LINK)
+    else if (create_new == PtkRenameMode::PTK_RENAME_NEW_LINK)
     {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_new_link), true);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_new_file), false);
@@ -3247,25 +3247,25 @@ open_archives_with_handler(ParentInfo* parent, GList* sel_files, char* full_path
     if (extract_here && have_rw_access(parent->cwd))
     {
         // Extract Here
-        cmd = HANDLER_EXTRACT;
+        cmd = PtkHandlerArchive::HANDLER_EXTRACT;
         dest_dir = parent->cwd;
     }
     else if (extract_here || xset_get_b("arc_def_exto"))
     {
         // Extract Here but no write access or Extract To option
-        cmd = HANDLER_EXTRACT;
+        cmd = PtkHandlerArchive::HANDLER_EXTRACT;
     }
     else if (xset_get_b("arc_def_list"))
     {
         // List contents
-        cmd = HANDLER_LIST;
+        cmd = PtkHandlerArchive::HANDLER_LIST;
     }
     else
         return false; // don't handle these files
 
     // type or pathname has archive handler? - don't test command non-empty
     // here because only applies to first file
-    GSList* handlers_slist = ptk_handler_file_has_handlers(HANDLER_MODE_ARC,
+    GSList* handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
                                                            cmd,
                                                            full_path,
                                                            mime_type,
@@ -3299,8 +3299,8 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
     // get command - was already checked as non-empty
     std::string error_message;
     std::string command;
-    bool error = ptk_handler_load_script(HANDLER_MODE_FILE,
-                                         HANDLER_MOUNT,
+    bool error = ptk_handler_load_script(PtkHandlerMode::HANDLER_MODE_FILE,
+                                         PtkHandlerMount::HANDLER_MOUNT,
                                          handler_set,
                                          nullptr,
                                          command,
@@ -3317,7 +3317,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
     // auto mount point
     if (ztd::contains(command, "%a"))
     {
-        name = ptk_location_view_create_mount_point(HANDLER_MODE_FILE,
+        name = ptk_location_view_create_mount_point(PtkHandlerMode::HANDLER_MODE_FILE,
                                                     nullptr,
                                                     nullptr,
                                                     files && files->data ? (char*)files->data
@@ -3519,7 +3519,9 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                     {
                         if (file_browser)
                         {
-                            ptk_file_browser_emit_open(file_browser, full_path, PTK_OPEN_NEW_TAB);
+                            ptk_file_browser_emit_open(file_browser,
+                                                       full_path,
+                                                       PtkOpenAction::PTK_OPEN_NEW_TAB);
                         }
                     }
                     continue;
@@ -3531,7 +3533,9 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                 {
                     Glib::spawn_command_line_async(full_path);
                     if (file_browser)
-                        ptk_file_browser_emit_open(file_browser, full_path, PTK_OPEN_FILE);
+                        ptk_file_browser_emit_open(file_browser,
+                                                   full_path,
+                                                   PtkOpenAction::PTK_OPEN_FILE);
                     free(full_path);
                     continue;
                 }
@@ -3552,13 +3556,14 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                 }
 
                 // if has file handler, set alloc_desktop = ###XSETNAME
-                GSList* handlers_slist = ptk_handler_file_has_handlers(HANDLER_MODE_FILE,
-                                                                       HANDLER_MOUNT,
-                                                                       full_path,
-                                                                       mime_type,
-                                                                       true,
-                                                                       false,
-                                                                       true);
+                GSList* handlers_slist =
+                    ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_FILE,
+                                                  PtkHandlerMount::HANDLER_MOUNT,
+                                                  full_path,
+                                                  mime_type,
+                                                  true,
+                                                  false,
+                                                  true);
                 if (handlers_slist)
                 {
                     XSet* handler_set = XSET(handlers_slist->data);
@@ -3571,7 +3576,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
                  */
                 if (!alloc_desktop)
                 {
-                    if (file->flags & VFS_FILE_INFO_DESKTOP_ENTRY &&
+                    if (file->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY &&
                         (!app_settings.no_execute || xforce))
                         alloc_desktop = full_path;
                     else
@@ -3670,7 +3675,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
     if (new_dir)
     {
         if (file_browser)
-            ptk_file_browser_emit_open(file_browser, full_path, PTK_OPEN_DIR);
+            ptk_file_browser_emit_open(file_browser, full_path, PtkOpenAction::PTK_OPEN_DIR);
         free(new_dir);
     }
     g_slice_free(ParentInfo, parent);
@@ -3696,7 +3701,13 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
         file = vfs_file_info_new();
         vfs_file_info_get(file, file_path, nullptr);
         file_dir = g_path_get_dirname(file_path);
-        if (!ptk_rename_file(file_browser, file_dir, file, cwd, !is_cut, PTK_RENAME, nullptr))
+        if (!ptk_rename_file(file_browser,
+                             file_dir,
+                             file,
+                             cwd,
+                             !is_cut,
+                             PtkRenameMode::PTK_RENAME,
+                             nullptr))
         {
             vfs_file_info_unref(file);
             free(file_dir);
@@ -3785,7 +3796,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, char* cwd,
                                 nullptr);
         if (path && std::filesystem::is_directory(path))
         {
-            xset_set_set(set, XSET_SET_SET_DESC, path);
+            xset_set_set(set, XSetSetSet::XSET_SET_SET_DESC, path);
             std::string quote_path = bash_quote(path);
 
             if (!strcmp(setname, "root_move2"))

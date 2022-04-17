@@ -49,6 +49,15 @@ enum PtkFBChdirMode
     PTK_FB_CHDIR_FORWARD
 };
 
+enum PtkOpenAction
+{
+    PTK_OPEN_DIR,
+    PTK_OPEN_NEW_TAB,
+    PTK_OPEN_NEW_WINDOW,
+    PTK_OPEN_TERMINAL,
+    PTK_OPEN_FILE
+};
+
 struct PtkFileBrowser
 {
     /* parent class */
@@ -132,15 +141,6 @@ struct PtkFileBrowser
     GtkTreeIter book_iter_inserted;
     char* select_path;
     char* status_bar_custom;
-};
-
-enum PtkOpenAction
-{
-    PTK_OPEN_DIR,
-    PTK_OPEN_NEW_TAB,
-    PTK_OPEN_NEW_WINDOW,
-    PTK_OPEN_TERMINAL,
-    PTK_OPEN_FILE
 };
 
 struct PtkFileBrowserClass

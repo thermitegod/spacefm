@@ -111,13 +111,13 @@ on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
     while ((r = read(client, buf, sizeof(buf))) > 0)
     {
         g_string_append_len(args, buf, r);
-        if (args->str[0] == CMD_SOCKET_CMD && args->len > 1 && args->str[args->len - 2] == '\n' &&
-            args->str[args->len - 1] == '\n')
-            // because CMD_SOCKET_CMD doesn't immediately close the socket
+        if (args->str[0] == SocketEvent::CMD_SOCKET_CMD && args->len > 1 &&
+            args->str[args->len - 2] == '\n' && args->str[args->len - 1] == '\n')
+            // because SocketEvent::CMD_SOCKET_CMD doesn't immediately close the socket
             // data is terminated by two linefeeds to prevent read blocking
             break;
     }
-    if (args->str[0] == CMD_SOCKET_CMD)
+    if (args->str[0] == SocketEvent::CMD_SOCKET_CMD)
         receive_socket_command(client, args);
     shutdown(client, 2);
     close(client);
@@ -129,61 +129,61 @@ on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
     socket_daemon = false;
 
     int argx = 0;
-    if (args->str[argx] == CMD_NO_TABS)
+    if (args->str[argx] == SocketEvent::CMD_NO_TABS)
     {
         cli_flags.reuse_tab = false;
         cli_flags.no_tabs = true;
-        argx++; // another command follows CMD_NO_TABS
+        argx++; // another command follows SocketEvent::CMD_NO_TABS
     }
-    if (args->str[argx] == CMD_REUSE_TAB)
+    if (args->str[argx] == SocketEvent::CMD_REUSE_TAB)
     {
         cli_flags.reuse_tab = true;
         cli_flags.new_tab = false;
-        argx++; // another command follows CMD_REUSE_TAB
+        argx++; // another command follows SocketEvent::CMD_REUSE_TAB
     }
 
     switch (args->str[argx])
     {
-        case CMD_PANEL1:
+        case SocketEvent::CMD_PANEL1:
             cli_flags.panel = 1;
             break;
-        case CMD_PANEL2:
+        case SocketEvent::CMD_PANEL2:
             cli_flags.panel = 2;
             break;
-        case CMD_PANEL3:
+        case SocketEvent::CMD_PANEL3:
             cli_flags.panel = 3;
             break;
-        case CMD_PANEL4:
+        case SocketEvent::CMD_PANEL4:
             cli_flags.panel = 4;
             break;
-        case CMD_OPEN:
+        case SocketEvent::CMD_OPEN:
             cli_flags.new_tab = false;
             break;
-        case CMD_OPEN_PANEL1:
+        case SocketEvent::CMD_OPEN_PANEL1:
             cli_flags.new_tab = false;
             cli_flags.panel = 1;
             break;
-        case CMD_OPEN_PANEL2:
+        case SocketEvent::CMD_OPEN_PANEL2:
             cli_flags.new_tab = false;
             cli_flags.panel = 2;
             break;
-        case CMD_OPEN_PANEL3:
+        case SocketEvent::CMD_OPEN_PANEL3:
             cli_flags.new_tab = false;
             cli_flags.panel = 3;
             break;
-        case CMD_OPEN_PANEL4:
+        case SocketEvent::CMD_OPEN_PANEL4:
             cli_flags.new_tab = false;
             cli_flags.panel = 4;
             break;
-        case CMD_DAEMON_MODE:
+        case SocketEvent::CMD_DAEMON_MODE:
             socket_daemon = cli_flags.daemon_mode = true;
             g_string_free(args, true);
             return true;
-        case CMD_FIND_FILES:
+        case SocketEvent::CMD_FIND_FILES:
             cli_flags.find_files = true;
             g_string_free(args, true);
             return true;
-        case CMD_SOCKET_CMD:
+        case SocketEvent::CMD_SOCKET_CMD:
             g_string_free(args, true);
             return true;
         default:
@@ -252,40 +252,40 @@ single_instance_check()
     if (sock && connect(sock, (struct sockaddr*)&addr, addr_len) == 0)
     {
         // connected successfully
-        char cmd = CMD_OPEN_TAB;
+        char cmd = SocketEvent::CMD_OPEN_TAB;
 
         if (cli_flags.no_tabs)
         {
-            cmd = CMD_NO_TABS;
+            cmd = SocketEvent::CMD_NO_TABS;
             write(sock, &cmd, sizeof(char));
-            // another command always follows CMD_NO_TABS
-            cmd = CMD_OPEN_TAB;
+            // another command always follows SocketEvent::CMD_NO_TABS
+            cmd = SocketEvent::CMD_OPEN_TAB;
         }
         if (cli_flags.reuse_tab)
         {
-            cmd = CMD_REUSE_TAB;
+            cmd = SocketEvent::CMD_REUSE_TAB;
             write(sock, &cmd, sizeof(char));
-            // another command always follows CMD_REUSE_TAB
-            cmd = CMD_OPEN;
+            // another command always follows SocketEvent::CMD_REUSE_TAB
+            cmd = SocketEvent::CMD_OPEN;
         }
 
         if (cli_flags.daemon_mode)
-            cmd = CMD_DAEMON_MODE;
+            cmd = SocketEvent::CMD_DAEMON_MODE;
         else if (cli_flags.new_window)
         {
             if (cli_flags.panel > 0 && cli_flags.panel < 5)
-                cmd = CMD_OPEN_PANEL1 + cli_flags.panel - 1;
+                cmd = SocketEvent::CMD_OPEN_PANEL1 + cli_flags.panel - 1;
             else
-                cmd = CMD_OPEN;
+                cmd = SocketEvent::CMD_OPEN;
         }
         else if (cli_flags.find_files)
-            cmd = CMD_FIND_FILES;
+            cmd = SocketEvent::CMD_FIND_FILES;
         else if (cli_flags.panel > 0 && cli_flags.panel < 5)
-            cmd = CMD_PANEL1 + cli_flags.panel - 1;
+            cmd = SocketEvent::CMD_PANEL1 + cli_flags.panel - 1;
 
         // open a new window if no file spec
-        if (cmd == CMD_OPEN_TAB && !cli_flags.files)
-            cmd = CMD_OPEN;
+        if (cmd == SocketEvent::CMD_OPEN_TAB && !cli_flags.files)
+            cmd = SocketEvent::CMD_OPEN;
 
         write(sock, &cmd, sizeof(char));
 
@@ -434,7 +434,7 @@ send_socket_command(int argc, char* argv[], char** reply)
     }
 
     // send command
-    char cmd = CMD_SOCKET_CMD;
+    char cmd = SocketEvent::CMD_SOCKET_CMD;
     write(sock, &cmd, sizeof(char));
 
     // send inode tag

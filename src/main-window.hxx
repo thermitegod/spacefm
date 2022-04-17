@@ -24,14 +24,6 @@
 #define FM_TYPE_MAIN_WINDOW (fm_main_window_get_type())
 #define FM_MAIN_WINDOW(obj) (reinterpret_cast<FMMainWindow*>(obj))
 
-enum MainWindowPanel
-{ // how a panel shares vertical and horizontal space with other panels
-    PANEL_NEITHER,
-    PANEL_HORIZ,
-    PANEL_VERT,
-    PANEL_BOTH
-};
-
 struct FMMainWindow
 {
     /* Private */
