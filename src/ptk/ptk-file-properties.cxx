@@ -23,6 +23,9 @@
 
 #include <gtk/gtk.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "ptk/ptk-file-properties.hxx"
 
 #include <pwd.h>

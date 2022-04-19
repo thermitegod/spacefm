@@ -42,9 +42,8 @@
 #include "find-files.hxx"
 #include "pref-dialog.hxx"
 #include "socket.hxx"
-#include "settings.hxx"
-
 #include "utils.hxx"
+#include "settings.hxx"
 
 static bool folder_initialized = false;
 static bool daemon_initialized = false;

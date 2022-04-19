@@ -25,11 +25,11 @@
 
 #include <fcntl.h>
 
-#include <glibmm.h>
-
 #if defined(__GLIBC__)
 #include <malloc.h>
 #endif
+
+#include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
