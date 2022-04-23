@@ -3799,24 +3799,21 @@ void
 ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc callback)
 {
     (void)callback;
-    char* file_path;
     bool is_cut = false;
     int missing_targets;
     VFSFileInfo* file;
-    char* file_dir;
+    std::string file_dir;
 
-    GList* files = ptk_clipboard_get_file_paths(cwd, &is_cut, &missing_targets);
+    std::vector<std::string> files = ptk_clipboard_get_file_paths(cwd, &is_cut, &missing_targets);
 
-    GList* l;
-
-    for (l = files; l; l = l->next)
+    for (const std::string& file_path: files)
     {
-        file_path = (char*)l->data;
         file = vfs_file_info_new();
-        vfs_file_info_get(file, file_path, nullptr);
-        file_dir = g_path_get_dirname(file_path);
+        vfs_file_info_get(file, file_path.c_str(), nullptr);
+        file_dir = std::filesystem::path(file_path).parent_path();
+
         if (!ptk_rename_file(file_browser,
-                             file_dir,
+                             file_dir.c_str(),
                              file,
                              cwd,
                              !is_cut,
@@ -3824,15 +3821,11 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
                              nullptr))
         {
             vfs_file_info_unref(file);
-            free(file_dir);
             missing_targets = 0;
             break;
         }
         vfs_file_info_unref(file);
-        free(file_dir);
     }
-    g_list_foreach(files, (GFunc)free, nullptr);
-    g_list_free(files);
 
     if (missing_targets > 0)
     {

@@ -499,13 +499,14 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
     gtk_selection_data_free(sel_data);
 }
 
-GList*
+std::vector<std::string>
 ptk_clipboard_get_file_paths(const char* cwd, bool* is_cut, int* missing_targets)
 {
     (void)cwd;
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
     char* uri_list_str;
+    std::vector<std::string> file_list;
 
     *is_cut = false;
     *missing_targets = 0;
@@ -519,7 +520,7 @@ ptk_clipboard_get_file_paths(const char* cwd, bool* is_cut, int* missing_targets
             gtk_selection_data_get_format(sel_data) != 8)
         {
             gtk_selection_data_free(sel_data);
-            return nullptr;
+            return file_list;
         }
 
         uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
@@ -536,12 +537,12 @@ ptk_clipboard_get_file_paths(const char* cwd, bool* is_cut, int* missing_targets
         GdkAtom uri_list_target = gdk_atom_intern("text/uri-list", false);
         sel_data = gtk_clipboard_wait_for_contents(clip, uri_list_target);
         if (!sel_data)
-            return nullptr;
+            return file_list;
         if (gtk_selection_data_get_length(sel_data) <= 0 ||
             gtk_selection_data_get_format(sel_data) != 8)
         {
             gtk_selection_data_free(sel_data);
-            return nullptr;
+            return file_list;
         }
         uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
     }
@@ -549,13 +550,12 @@ ptk_clipboard_get_file_paths(const char* cwd, bool* is_cut, int* missing_targets
     if (!uri_list_str)
     {
         gtk_selection_data_free(sel_data);
-        return nullptr;
+        return file_list;
     }
 
     // create file list
     char** puri;
     char** uri_list;
-    GList* files = nullptr;
     puri = uri_list = g_uri_list_extract_uris(uri_list_str);
     while (*puri)
     {
@@ -564,7 +564,7 @@ ptk_clipboard_get_file_paths(const char* cwd, bool* is_cut, int* missing_targets
         {
             if (std::filesystem::exists(file_path))
             {
-                files = g_list_prepend(files, file_path);
+                file_list.push_back(file_path);
             }
             else
                 // no *missing_targets++ here to avoid -Wunused-value compiler warning
@@ -575,5 +575,5 @@ ptk_clipboard_get_file_paths(const char* cwd, bool* is_cut, int* missing_targets
     g_strfreev(uri_list);
     gtk_selection_data_free(sel_data);
 
-    return files;
+    return file_list;
 }
