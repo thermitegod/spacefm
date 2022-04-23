@@ -42,4 +42,4 @@ void ptk_clipboard_copy_text(const char* text); // MOD added
 void ptk_clipboard_copy_file_list(char** path, bool copy); // sfm
 
 std::vector<std::string> ptk_clipboard_get_file_paths(const char* cwd, bool* is_cut,
-                                    int* missing_targets);
+                                                      int* missing_targets);

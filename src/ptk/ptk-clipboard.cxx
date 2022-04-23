@@ -30,7 +30,7 @@
 #include "ptk/ptk-clipboard.hxx"
 
 static GdkDragAction clipboard_action = GDK_ACTION_DEFAULT;
-static GList* clipboard_file_list = nullptr;
+static std::vector<std::string> clipboard_file_list;
 
 static void
 clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, unsigned int info,
@@ -44,8 +44,10 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, un
 
     bool use_uri = false;
 
-    if (!clipboard_file_list)
+    if (clipboard_file_list.empty())
         return;
+
+    // std::string list;
 
     GString* list = g_string_sized_new(8192);
 
@@ -58,17 +60,16 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, un
     else if (gtk_selection_data_get_target(selection_data) == uri_list_target)
         use_uri = true;
 
-    GList* l;
-    for (l = clipboard_file_list; l; l = l->next)
+    for (const std::string& clipboard_file: clipboard_file_list)
     {
         char* file_name;
         if (use_uri)
         {
-            file_name = g_filename_to_uri((char*)l->data, nullptr, nullptr);
+            file_name = g_filename_to_uri(clipboard_file.c_str(), nullptr, nullptr);
         }
         else
         {
-            file_name = g_filename_display_name((char*)l->data);
+            file_name = g_filename_display_name(clipboard_file.c_str());
         }
         g_string_append(list, file_name);
         free(file_name);
@@ -94,12 +95,7 @@ clipboard_clean_data(GtkClipboard* clipboard, void* user_data)
     (void)clipboard;
     (void)user_data;
     // LOG_DEBUG("clean clipboard!");
-    if (clipboard_file_list)
-    {
-        g_list_foreach(clipboard_file_list, (GFunc)free, nullptr);
-        g_list_free(clipboard_file_list);
-        clipboard_file_list = nullptr;
-    }
+    clipboard_file_list.clear();
     clipboard_action = GDK_ACTION_DEFAULT;
 }
 
@@ -164,8 +160,7 @@ ptk_clipboard_cut_or_copy_files(const char* working_dir, GList* files, bool copy
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkTargetList* target_list = gtk_target_list_new(nullptr, 0);
     int n_targets;
-    GList* l;
-    GList* file_list = nullptr;
+    std::vector<std::string> file_list;
 
     gtk_target_list_add_text_targets(target_list, 0);
     GtkTargetEntry* targets = gtk_target_table_new_from_list(target_list, &n_targets);
@@ -180,11 +175,12 @@ ptk_clipboard_cut_or_copy_files(const char* working_dir, GList* files, bool copy
 
     gtk_target_list_unref(target_list);
 
+    GList* l;
     for (l = g_list_last(files); l; l = l->prev) // sfm was reverse order
     {
         VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
         std::string file_path = Glib::build_filename(working_dir, vfs_file_info_get_name(file));
-        file_list = g_list_prepend(file_list, ztd::strdup(file_path));
+        file_list.push_back(file_path);
     }
 
     gtk_clipboard_set_with_data(clip,
@@ -206,7 +202,7 @@ ptk_clipboard_copy_file_list(char** path, bool copy)
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkTargetList* target_list = gtk_target_list_new(nullptr, 0);
     int n_targets;
-    GList* file_list = nullptr;
+    std::vector<std::string> file_list;
 
     gtk_target_list_add_text_targets(target_list, 0);
     GtkTargetEntry* targets = gtk_target_table_new_from_list(target_list, &n_targets);
@@ -225,7 +221,7 @@ ptk_clipboard_copy_file_list(char** path, bool copy)
     while (*file_path)
     {
         if (*file_path[0] == '/')
-            file_list = g_list_append(file_list, ztd::strdup(*file_path));
+            file_list.push_back(ztd::strdup(*file_path));
         file_path++;
     }
 
