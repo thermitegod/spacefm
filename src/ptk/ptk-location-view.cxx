@@ -729,7 +729,7 @@ ptk_location_view_clean_mount_points()
     std::string udevil = Glib::find_program_in_path("udevil");
     if (!udevil.empty())
     {
-        std::string command = fmt::format("{} -c \"sleep 1 ; {} clean\"", BASHPATH, udevil);
+        std::string command = fmt::format("{} -c \"sleep 1 ; {} clean\"", BASH_PATH, udevil);
         print_command(command);
         Glib::spawn_command_line_async(command);
     }
@@ -1651,7 +1651,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         // /bin/ls -l /dev/disk/by-uuid | grep ../sdc2 | sed 's/.* \([a-fA-F0-9\-]*\) -> .*/\1/'
         command = fmt::format("{} -c \"/bin/ls -l /dev/disk/by-uuid | grep '\\.\\./{}$' | sed "
                               "'s/.* \\([a-fA-F0-9-]*\\) -> .*/\\1/'\"",
-                              BASHPATH,
+                              BASH_PATH,
                               base);
         print_command(command);
         Glib::spawn_command_line_sync(command, uuid);
@@ -1662,7 +1662,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         if (uuid)
         {
             command = fmt::format("{} -c \"cat {} | grep -e '{}' -e '{}'\"",
-                                  BASHPATH,
+                                  BASH_PATH,
                                   fstab_path,
                                   *uuid,
                                   vol->device_file);
@@ -1672,8 +1672,10 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 
         if (!fstab)
         {
-            command =
-                fmt::format("{} -c \"cat {} | grep '{}'\"", BASHPATH, fstab_path, vol->device_file);
+            command = fmt::format("{} -c \"cat {} | grep '{}'\"",
+                                  BASH_PATH,
+                                  fstab_path,
+                                  vol->device_file);
             print_command(command);
             Glib::spawn_command_line_sync(command, fstab);
         }

@@ -411,7 +411,7 @@ load_settings(const char* config_dir)
         {
             command = fmt::format("{} -c \"cd {} && git init && "
                                   "git config commit.gpgsign false\"",
-                                  BASHPATH,
+                                  BASH_PATH,
                                   settings_config_dir);
             Glib::spawn_command_line_sync(command);
             LOG_INFO("Initialized git repo at: {}", git_path);
@@ -420,7 +420,7 @@ load_settings(const char* config_dir)
         {
             command = fmt::format("{} -c \"cd {} && git add session && "
                                   "git commit -m 'Session File' 1>/dev/null\"",
-                                  BASHPATH,
+                                  BASH_PATH,
                                   settings_config_dir);
             Glib::spawn_command_line_sync(command);
             LOG_INFO("Updated git copy of: {}", session);
@@ -428,7 +428,7 @@ load_settings(const char* config_dir)
         else if (std::filesystem::exists(git_path))
         {
             command = fmt::format("{} -c \"cd {} && git checkout session\"",
-                                  BASHPATH,
+                                  BASH_PATH,
                                   settings_config_dir);
             Glib::spawn_command_line_sync(command);
             LOG_INFO("Checked out: {}", session);
@@ -2390,7 +2390,7 @@ xset_custom_get_script(XSet* set, bool create)
         std::ofstream file(path);
         if (file.is_open())
         {
-            file << fmt::format("#!{}\n", BASHPATH);
+            file << fmt::format("#!{}\n", BASH_PATH);
             file << fmt::format("{}\n\n", SHELL_SETTINGS);
             file << fmt::format("#import file manager variables\n");
             file << fmt::format("$fm_import\n\n");

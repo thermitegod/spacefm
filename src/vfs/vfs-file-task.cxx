@@ -1411,7 +1411,7 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
         std::string buf = "";
 
         // build - header
-        buf.append(fmt::format("#!{}\n{}\n#tmp exec script\n", BASHPATH, SHELL_SETTINGS));
+        buf.append(fmt::format("#!{}\n{}\n#tmp exec script\n", BASH_PATH, SHELL_SETTINGS));
 
         // build - exports
         if (task->exec_export && (task->exec_browser || task->exec_desktop))
@@ -1488,7 +1488,7 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
                                 "s\nif [ \"$s\" = 's' ];then\n    if [ \"$(whoami)\" = "
                                 "\"root\" ];then\n        "
                                 "echo '\n[ {} ]'\n    fi\n    echo\n    You are ROOT\nfi\n\n",
-                                BASHPATH));
+                                BASH_PATH));
             }
         }
 
@@ -1577,7 +1577,7 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
         {
             // /bin/su
             argv.push_back("-s");
-            argv.push_back(BASHPATH);
+            argv.push_back(BASH_PATH);
             argv.push_back("-c");
             single_arg = true;
         }
@@ -1601,7 +1601,7 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
         if (single_arg)
         {
             tmp = fmt::format("{} {} {} {} {}",
-                              BASHPATH,
+                              BASH_PATH,
                               auth,
                               ztd::same(task->exec_as_user, "root") ? "root" : "",
                               task->exec_script,
@@ -1610,7 +1610,7 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
         }
         else
         {
-            argv.push_back(BASHPATH);
+            argv.push_back(BASH_PATH);
             argv.push_back(auth);
             if (ztd::same(task->exec_as_user, "root"))
                 argv.push_back("root");
@@ -1626,7 +1626,7 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
     }
     else
     {
-        argv.push_back(BASHPATH);
+        argv.push_back(BASH_PATH);
         argv.push_back(task->exec_script);
         argv.push_back("run");
     }

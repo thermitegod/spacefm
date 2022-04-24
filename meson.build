@@ -211,7 +211,7 @@ pre_args = [
     '-DPACKAGE_BUGREPORT="TODO"',
     '-DPACKAGE_ONLINE_DOCS="TODO"',
 
-    '-DBASHPATH="/bin/bash"',
+    '-DBASH_PATH="/bin/bash"',
     '-DSHELL_SETTINGS="set -o pipefail;shopt -s failglob"',
 
     '-DG_DISABLE_ASSERT',

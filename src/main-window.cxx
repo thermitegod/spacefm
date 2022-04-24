@@ -5922,7 +5922,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             main_window_get_counts(file_browser, &i, &tab, &j);
             reply = fmt::format("#!{}\n{}\nnew_tab_window={}\nnew_tab_panel={}\n"
                                 "new_tab_number={}\n",
-                                BASHPATH,
+                                BASH_PATH,
                                 SHELL_SETTINGS,
                                 (void*)main_window,
                                 panel,
@@ -6970,7 +6970,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = fmt::format("#!{}\n{}\n# Note: $new_task_id not valid until approx one "
                                     "half second after task start\nnew_task_window={}\n"
                                     "new_task_id={}\n",
-                                    BASHPATH,
+                                    BASH_PATH,
                                     SHELL_SETTINGS,
                                     (void*)main_window,
                                     (void*)ptask);
@@ -7212,7 +7212,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             reply = fmt::format("#!{}\n{}\n# Note: $new_task_id not valid until approx one "
                                 "half second after task  start\nnew_task_window={}\n"
                                 "new_task_id={}\n",
-                                BASHPATH,
+                                BASH_PATH,
                                 SHELL_SETTINGS,
                                 (void*)main_window,
                                 (void*)ptask);
