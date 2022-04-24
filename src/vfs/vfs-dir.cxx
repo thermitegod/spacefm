@@ -279,19 +279,13 @@ vfs_dir_finalize(GObject* obj)
 
     if (!dir->file_list.empty())
     {
-        for (VFSFileInfo* file: dir->file_list)
-        {
-            vfs_file_info_unref(file);
-        }
+        vfs_file_info_list_free(dir->file_list);
         dir->file_list.clear();
     }
 
     if (!dir->changed_files.empty())
     {
-        for (VFSFileInfo* file: dir->changed_files)
-        {
-            vfs_file_info_unref(file);
-        }
+        vfs_file_info_list_free(dir->changed_files);
         dir->changed_files.clear();
     }
 
@@ -372,16 +366,8 @@ vfs_dir_emit_file_deleted(VFSDir* dir, const char* file_name, VFSFileInfo* file)
         file = nullptr;
         /* clear the whole list */
         vfs_dir_lock(dir);
-
-        if (!dir->file_list.empty())
-        {
-            for (VFSFileInfo* file2: dir->file_list)
-            {
-                vfs_file_info_unref(file2);
-            }
-            dir->file_list.clear();
-        }
-
+        vfs_file_info_list_free(dir->file_list);
+        dir->file_list.clear();
         vfs_dir_unlock(dir);
 
         g_signal_emit(dir, signals[VFSDirSignal::FILE_DELETED_SIGNAL], 0, file);

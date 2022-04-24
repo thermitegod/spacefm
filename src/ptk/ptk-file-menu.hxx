@@ -36,12 +36,14 @@ struct PtkFileMenu
     const char* cwd;
     const char* file_path;
     VFSFileInfo* info;
-    GList* sel_files;
+    std::vector<VFSFileInfo*> sel_files;
     GtkAccelGroup* accel_group;
 };
 
 GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* info,
-                             const char* cwd, GList* sel_files);
+                             const char* cwd, std::vector<VFSFileInfo*> sel_files);
+GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* info,
+                             const char* cwd);
 
 void ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                                        GtkAccelGroup* accel_group);

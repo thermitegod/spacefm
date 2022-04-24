@@ -310,7 +310,8 @@ replace_archive_subs(const std::string& line, const std::string& n, const std::s
 }
 
 void
-ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char* cwd)
+ptk_file_archiver_create(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>& sel_files,
+                         const char* cwd)
 {
     /* Generating dialog - extra nullptr on the nullptr-terminated list to
      * placate an irrelevant compilation warning. See notes in
@@ -397,8 +398,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     char* xset_name = xset_get_s(XSetName::ARC_DLG); // do not free
     int format = 4;                                  // default tar.gz
     int n = 0;
-    int i;
-    for (i = 0; archive_handlers[i] != nullptr; ++i)
+    for (int i = 0; archive_handlers[i] != nullptr; ++i)
     {
         if (!archive_handlers[i])
             continue;
@@ -542,14 +542,12 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
 
     // Populating name of archive and setting the correct directory
     char* dest_file;
-    if (files)
+    if (!sel_files.empty())
     {
         // Fetching first extension handler deals with
+        VFSFileInfo* file = sel_files.front();
         std::string ext = archive_handler_get_first_extension(handler_xset);
-        dest_file = g_strjoin(nullptr,
-                              vfs_file_info_get_disp_name(static_cast<VFSFileInfo*>(files->data)),
-                              ext.c_str(),
-                              nullptr);
+        dest_file = g_strjoin(nullptr, vfs_file_info_get_disp_name(file), ext.c_str(), nullptr);
         gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), dest_file);
         free(dest_file);
         dest_file = nullptr;
@@ -753,7 +751,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
     std::string cmd_to_run;
 
     // Dealing with separate archives for each source file/directory ('%O')
-    GList* l;
     if (ztd::contains(command, "%O"))
     {
         /* '%O' is present - the archiving command should be generated
@@ -764,9 +761,11 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
 
         /* Looping for all selected files/directories - all are used
          * when '%N' is present, only the first otherwise */
-        for (i = 0, l = files; l && (i == 0 || ztd::contains(command, "%N")); l = l->next, ++i)
+        int i = 0;
+        bool loop_once = ztd::contains(command, "%N");
+        for (VFSFileInfo* file: sel_files)
         {
-            desc = (char*)vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data));
+            desc = vfs_file_info_get_name(file);
 
             /* In %O mode, every source file is output to its own archive,
              * so the resulting archive name is based on the filename and
@@ -824,6 +823,10 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                                             final_command,
                                             cmd_to_run);
             }
+
+            if (loop_once)
+                break;
+            ++i;
         }
     }
     else
@@ -834,9 +837,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
         udest_quote = bash_quote(udest_file);
         std::string all;
         std::string first;
-        if (files)
+        if (!sel_files.empty())
         {
-            desc = (char*)vfs_file_info_get_name(static_cast<VFSFileInfo*>(files->data));
+            desc = vfs_file_info_get_name(sel_files.front());
             if (desc[0] == '-')
             {
                 // special handling for filename starting with a dash
@@ -845,15 +848,17 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 first = bash_quote(s1);
             }
             else
+            {
                 first = bash_quote(desc);
+            }
 
             /* Generating string of selected files/directories to archive if
              * '%N' is present */
             if (ztd::contains(command, "%N"))
             {
-                for (l = files; l; l = l->next)
+                for (VFSFileInfo* file: sel_files)
                 {
-                    desc = (char*)vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data));
+                    desc = vfs_file_info_get_name(file);
                     if (desc[0] == '-')
                     {
                         // special handling for filename starting with a dash
@@ -862,7 +867,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                         desc = bash_quote(s1);
                     }
                     else
+                    {
                         desc = bash_quote(desc);
+                    }
 
                     all = fmt::format("{}{}{}", all, all.at(0) ? " " : "", desc);
                 }
@@ -933,8 +940,9 @@ on_create_subfolder_toggled(GtkToggleButton* togglebutton, GtkWidget* chk_write)
 }
 
 void
-ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char* cwd,
-                          const char* dest_dir, int job, bool archive_presence_checked)
+ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>& sel_files,
+                          const char* cwd, const char* dest_dir, int job,
+                          bool archive_presence_checked)
 { /* This function is also used to list the contents of archives */
     GtkWidget* dlgparent = nullptr;
     char* choose_dir = nullptr;
@@ -944,10 +952,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     bool write_access = false;
     bool list_contents = false;
     std::string parent_quote;
-    VFSFileInfo* file;
     VFSMimeType* mime_type;
     const char* dest;
-    GList* l;
     std::string dest_quote;
     std::string full_quote;
     int i;
@@ -957,7 +963,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     GSList* handlers_slist = nullptr;
 
     // Making sure files to act on have been passed
-    if (!files || job == PtkHandlerArchive::HANDLER_COMPRESS)
+    if (sel_files.empty() || job == PtkHandlerArchive::HANDLER_COMPRESS)
         return;
 
     /* Detecting whether this function call is actually to list the
@@ -977,10 +983,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
         bool archive_found = false;
 
         // Looping for all files to attempt to list/extract
-        for (l = files; l; l = l->next)
+        for (VFSFileInfo* file: sel_files)
         {
             // Fetching file details
-            file = static_cast<VFSFileInfo*>(l->data);
             mime_type = vfs_file_info_get_mime_type(file);
             std::string full_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
 
@@ -1143,10 +1148,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     std::string final_command;
     std::string error_message;
     // Looping for all files to attempt to list/extract
-    for (l = files; l; l = l->next)
+    for (VFSFileInfo* file: sel_files)
     {
         // Fetching file details
-        file = static_cast<VFSFileInfo*>(l->data);
         mime_type = vfs_file_info_get_mime_type(file);
         // Determining file paths
         std::string full_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
@@ -1387,7 +1391,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, GList* files, const char
     g_strfreev(archive_handlers);
 
     // Creating task
-    std::string task_name = fmt::format("Extract {}", vfs_file_info_get_name(file));
+    std::string task_name = fmt::format("Extract {}", vfs_file_info_get_name(sel_files.front()));
     PtkFileTask* ptask = ptk_file_exec_new(task_name,
                                            cwd,
                                            dlgparent,

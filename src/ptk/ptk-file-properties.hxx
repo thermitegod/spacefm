@@ -19,5 +19,7 @@
 
 #include <gtk/gtk.h>
 
-GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_files,
-                                   int page);
+#include "vfs/vfs-file-info.hxx"
+
+GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
+                                   std::vector<VFSFileInfo*>& sel_files, int page);

@@ -3006,11 +3006,9 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
 
     if (num_sel > 0)
     {
-        GList* files = ptk_file_browser_get_selected_files(file_browser);
-        if (!files)
+        std::vector<VFSFileInfo*> sel_files = ptk_file_browser_get_selected_files(file_browser);
+        if (sel_files.empty())
             return;
-
-        VFSFileInfo* file;
 
         size_str = vfs_file_size_to_string_format(total_size, true);
 
@@ -3019,12 +3017,9 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
         if (num_sel == 1)
         // display file name or symlink info in status bar if one file selected
         {
-            file = vfs_file_info_ref(static_cast<VFSFileInfo*>(files->data));
+            VFSFileInfo* file = vfs_file_info_ref(sel_files.front());
             if (!file)
                 return;
-
-            g_list_foreach(files, (GFunc)vfs_file_info_unref, nullptr);
-            g_list_free(files);
 
             if (vfs_file_info_is_symlink(file))
             {
@@ -3085,11 +3080,9 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
             unsigned int count_block = 0;
             unsigned int count_char = 0;
 
-            GList* l;
-            for (l = files; l; l = l->next)
+            for (VFSFileInfo* file: sel_files)
             {
-                file = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data));
-
+                file = vfs_file_info_ref(file);
                 if (!file)
                     continue;
 
@@ -3679,10 +3672,8 @@ void
 main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
 {
     PtkFileBrowser* a_browser;
-    VFSFileInfo* file;
     VFSMimeType* mime_type;
     GtkClipboard* clip = nullptr;
-    GList* sel_files;
     VFSVolume* vol;
     PtkFileTask* ptask;
     char* path;
@@ -3700,6 +3691,8 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
 
     if (!c->var[ItemPropContext::CONTEXT_NAME])
     {
+        std::vector<VFSFileInfo*> sel_files;
+
         // if name is set, assume we do not need all selected files info
         c->var[ItemPropContext::CONTEXT_DIR] = ztd::strdup(ptk_file_browser_get_cwd(file_browser));
         if (!c->var[ItemPropContext::CONTEXT_DIR])
@@ -3712,21 +3705,11 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
                     : ztd::strdup("true");
         }
 
-        if ((sel_files = ptk_file_browser_get_selected_files(file_browser)))
-            file = vfs_file_info_ref(static_cast<VFSFileInfo*>(sel_files->data));
-        else
-            file = nullptr;
-        if (!file)
+        sel_files = ptk_file_browser_get_selected_files(file_browser);
+        if (!sel_files.empty())
         {
-            c->var[ItemPropContext::CONTEXT_NAME] = ztd::strdup("");
-            c->var[ItemPropContext::CONTEXT_IS_DIR] = ztd::strdup("false");
-            c->var[ItemPropContext::CONTEXT_IS_TEXT] = ztd::strdup("false");
-            c->var[ItemPropContext::CONTEXT_IS_LINK] = ztd::strdup("false");
-            c->var[ItemPropContext::CONTEXT_MIME] = ztd::strdup("");
-            c->var[ItemPropContext::CONTEXT_MUL_SEL] = ztd::strdup("false");
-        }
-        else
-        {
+            VFSFileInfo* file = vfs_file_info_ref(sel_files.front());
+
             c->var[ItemPropContext::CONTEXT_NAME] = ztd::strdup(vfs_file_info_get_name(file));
             path = ztd::strdup(Glib::build_filename(c->var[ItemPropContext::CONTEXT_DIR],
                                                     c->var[ItemPropContext::CONTEXT_NAME]));
@@ -3749,16 +3732,22 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
                 c->var[ItemPropContext::CONTEXT_MIME] = ztd::strdup("");
 
             c->var[ItemPropContext::CONTEXT_MUL_SEL] =
-                sel_files->next ? ztd::strdup("true") : ztd::strdup("false");
+                sel_files.size() > 1 ? ztd::strdup("true") : ztd::strdup("false");
 
             vfs_file_info_unref(file);
             free(path);
         }
-        if (sel_files)
+        else
         {
-            g_list_foreach(sel_files, (GFunc)vfs_file_info_unref, nullptr);
-            g_list_free(sel_files);
+            c->var[ItemPropContext::CONTEXT_NAME] = ztd::strdup("");
+            c->var[ItemPropContext::CONTEXT_IS_DIR] = ztd::strdup("false");
+            c->var[ItemPropContext::CONTEXT_IS_TEXT] = ztd::strdup("false");
+            c->var[ItemPropContext::CONTEXT_IS_LINK] = ztd::strdup("false");
+            c->var[ItemPropContext::CONTEXT_MIME] = ztd::strdup("");
+            c->var[ItemPropContext::CONTEXT_MUL_SEL] = ztd::strdup("false");
         }
+
+        vfs_file_info_list_free(sel_files);
     }
 
     if (!c->var[ItemPropContext::CONTEXT_IS_ROOT])
@@ -3898,7 +3887,7 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
         if (a_browser->view_mode == PtkFBViewMode::PTK_FB_ICON_VIEW ||
             a_browser->view_mode == PtkFBViewMode::PTK_FB_COMPACT_VIEW)
         {
-            sel_files = folder_view_get_selected_items(a_browser, &model);
+            GList* sel_files = folder_view_get_selected_items(a_browser, &model);
             if (sel_files)
                 c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = ztd::strdup("true");
             else
@@ -4046,14 +4035,15 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         buf.append(fmt::format("\nfm_tab_panel[{}]=\"{}\"\n", p, i + 1));
 
         // selected files
-        GList* sel_files = ptk_file_browser_get_selected_files(a_browser);
-        if (sel_files)
+        std::vector<VFSFileInfo*> sel_files;
+
+        sel_files = ptk_file_browser_get_selected_files(a_browser);
+        if (!sel_files.empty())
         {
             buf.append(fmt::format("fm_panel{}_files=(\n", p));
-            GList* l;
-            for (l = sel_files; l; l = l->next)
+            for (VFSFileInfo* file: sel_files)
             {
-                path = (char*)vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data));
+                path = vfs_file_info_get_name(file);
                 if (!cwd_needs_quote && ztd::contains(path, "\""))
                     buf.append(fmt::format("\"{}{}{}\"\n",
                                            cwd,
@@ -4071,16 +4061,15 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
             if (file_browser == a_browser)
             {
                 buf.append(fmt::format("fm_filenames=(\n"));
-                for (l = sel_files; l; l = l->next)
+                for (VFSFileInfo* file: sel_files)
                 {
-                    path = (char*)vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data));
+                    path = vfs_file_info_get_name(file);
                     buf.append(fmt::format("{}\n", bash_quote(path)));
                 }
                 buf.append(fmt::format(")\n"));
             }
 
-            g_list_foreach(sel_files, (GFunc)vfs_file_info_unref, nullptr);
-            g_list_free(sel_files);
+            vfs_file_info_list_free(sel_files);
         }
 
         // bookmark
@@ -6623,23 +6612,22 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         else if (!strcmp(argv[i], "selected_filenames") || !strcmp(argv[i], "selected_files"))
         {
-            GList* sel_files;
+            std::vector<VFSFileInfo*> sel_files;
 
             sel_files = ptk_file_browser_get_selected_files(file_browser);
-            if (!sel_files)
+            if (sel_files.empty())
                 return 0;
 
             // build bash array
             std::string str2 = "(";
-            for (l = sel_files; l; l = l->next)
+            for (VFSFileInfo* file: sel_files)
             {
-                VFSFileInfo* file = vfs_file_info_ref(static_cast<VFSFileInfo*>(l->data));
-                if (file)
-                {
-                    std::string str3 = bash_quote(vfs_file_info_get_name(file));
-                    str2.append(fmt::format("{} ", str3));
-                    vfs_file_info_unref(file);
-                }
+                file = vfs_file_info_ref(file);
+                if (!file)
+                    continue;
+                std::string str3 = bash_quote(vfs_file_info_get_name(file));
+                str2.append(fmt::format("{} ", str3));
+                vfs_file_info_unref(file);
             }
             vfs_file_info_list_free(sel_files);
             str2.append(")\n");

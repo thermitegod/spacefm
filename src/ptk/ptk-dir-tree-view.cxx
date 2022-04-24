@@ -437,8 +437,7 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrows
                          * This simulates a right-click in the file list when
                          * no files are selected (even if some are) since
                          * actions are to be taken on the dir itself. */
-                        GtkWidget* popup =
-                            ptk_file_menu_new(browser, nullptr, nullptr, dir_path, nullptr);
+                        GtkWidget* popup = ptk_file_menu_new(browser, nullptr, nullptr, dir_path);
                         if (popup)
                             gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
                         gtk_tree_path_free(tree_path);
@@ -534,7 +533,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* br
                  * This simulates a right-click in the file list when
                  * no files are selected (even if some are) since
                  * actions are to be taken on the dir itself. */
-                GtkWidget* popup = ptk_file_menu_new(browser, nullptr, nullptr, dir_path, nullptr);
+                GtkWidget* popup = ptk_file_menu_new(browser, nullptr, nullptr, dir_path);
                 if (popup)
                     gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
             }

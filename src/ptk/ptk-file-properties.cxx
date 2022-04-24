@@ -61,7 +61,7 @@ struct FilePropertiesDialogData
     ~FilePropertiesDialogData();
 
     char* dir_path;
-    GList* file_list;
+    std::vector<VFSFileInfo*> file_list;
     GtkWidget* dlg;
 
     GtkEntry* owner;
@@ -94,7 +94,6 @@ struct FilePropertiesDialogData
 FilePropertiesDialogData::FilePropertiesDialogData()
 {
     this->dir_path = nullptr;
-    this->file_list = nullptr;
     this->dlg = nullptr;
 
     this->owner = nullptr;
@@ -191,12 +190,10 @@ static void*
 calc_size(void* user_data)
 {
     FilePropertiesDialogData* data = static_cast<FilePropertiesDialogData*>(user_data);
-    GList* l;
-    for (l = data->file_list; l; l = l->next)
+    for (VFSFileInfo* file: data->file_list)
     {
         if (data->cancel)
             break;
-        VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
         std::string path = Glib::build_filename(data->dir_path, vfs_file_info_get_name(file));
         calc_total_size_of_files(path.c_str(), data);
     }
@@ -373,7 +370,8 @@ on_combo_change(GtkComboBox* combo, void* user_data)
 }
 
 GtkWidget*
-file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_files, int page)
+file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
+                        std::vector<VFSFileInfo*>& sel_files, int page)
 {
     GtkBuilder* builder = _gtk_builder_new_from_file("file_properties3.ui");
     GtkWidget* dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
@@ -381,9 +379,6 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     xset_set_window_icon(GTK_WINDOW(dlg));
 
     bool need_calc_size = true;
-
-    VFSFileInfo* file;
-    VFSMimeType* mime;
 
     const char* multiple_files = "( multiple files )";
     const char* calculating;
@@ -402,7 +397,6 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     char* disp_path;
 
     int i;
-    GList* l;
     bool same_type = true;
     bool is_dirs = false;
     char* owner_group;
@@ -445,9 +439,8 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     // MOD
     VFSMimeType* type;
     VFSMimeType* type2 = nullptr;
-    for (l = sel_files; l; l = l->next)
+    for (VFSFileInfo* file: sel_files)
     {
-        file = static_cast<VFSFileInfo*>(l->data);
         type = vfs_file_info_get_mime_type(file);
         if (!type2)
             type2 = vfs_file_info_get_mime_type(file);
@@ -465,7 +458,10 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     data->recurse = GTK_WIDGET(gtk_builder_get_object(builder, "recursive"));
     gtk_widget_set_sensitive(data->recurse, is_dirs);
 
-    file = static_cast<VFSFileInfo*>(sel_files->data);
+    VFSFileInfo* file;
+    VFSMimeType* mime;
+
+    file = sel_files.front();
     if (same_type)
     {
         std::string file_type;
@@ -559,7 +555,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
     g_object_set_data(G_OBJECT(dlg), "open_with", open_with);
 
     /* Multiple files are selected */
-    if (sel_files && sel_files->next)
+    if (sel_files.size() > 1)
     {
         gtk_widget_set_sensitive(name, false);
         gtk_entry_set_text(GTK_ENTRY(name), multiple_files);
@@ -773,7 +769,6 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
     uid_t uid;
     gid_t gid;
 
-    GList* l;
     GtkAllocation allocation;
 
     gtk_widget_get_allocation(GTK_WIDGET(dialog), &allocation);
@@ -801,7 +796,6 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
         {
             bool mod_change;
             PtkFileTask* ptask;
-            VFSFileInfo* file;
             // change file dates
             std::string quoted_time;
             std::string quoted_path;
@@ -812,12 +806,11 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
             if (!(new_atime && new_atime[0]) || !g_strcmp0(data->orig_atime, new_atime))
                 new_atime = nullptr;
 
-            if ((new_mtime || new_atime) && data->file_list)
+            if ((new_mtime || new_atime) && !data->file_list.empty())
             {
                 GString* gstr = g_string_new(nullptr);
-                for (l = data->file_list; l; l = l->next)
+                for (VFSFileInfo* file: data->file_list)
                 {
-                    file = static_cast<VFSFileInfo*>(l->data);
                     std::string file_path = Glib::build_filename(data->dir_path, file->name);
                     quoted_path = bash_quote(file_path);
                     g_string_append_printf(gstr, " %s", quoted_path.c_str());
@@ -867,7 +860,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                     gtk_tree_model_get(model, &it, 2, &action, -1);
                     if (action)
                     {
-                        file = static_cast<VFSFileInfo*>(data->file_list->data);
+                        VFSFileInfo* file = data->file_list.front();
                         VFSMimeType* mime = vfs_file_info_get_mime_type(file);
                         vfs_mime_type_set_default_action(mime, action);
                         vfs_mime_type_unref(mime);
@@ -921,9 +914,8 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
             if (!uid || !gid || mod_change)
             {
                 std::vector<std::string> file_list;
-                for (l = data->file_list; l; l = l->next)
+                for (VFSFileInfo* file: data->file_list)
                 {
-                    file = static_cast<VFSFileInfo*>(l->data);
                     std::string file_path =
                         Glib::build_filename(data->dir_path, vfs_file_info_get_name(file));
                     file_list.push_back(file_path);
@@ -949,9 +941,8 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
 
                 /*
                  * This file list will be freed by file operation, so we do not
-                 * need to do this. Just set the pointer to nullptr.
+                 * need to free it.
                  */
-                data->file_list = nullptr;
             }
         }
 

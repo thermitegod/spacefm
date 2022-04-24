@@ -52,6 +52,7 @@
 
 #include "settings.hxx"
 #include "utils.hxx"
+#include "type-conversion.hxx"
 
 static void ptk_file_browser_class_init(PtkFileBrowserClass* klass);
 static void ptk_file_browser_init(PtkFileBrowser* file_browser);
@@ -996,16 +997,19 @@ on_status_bar_button_press(GtkWidget* widget, GdkEventButton* event, PtkFileBrow
 
                 if (i < 2)
                 {
-                    GList* sel_files = ptk_file_browser_get_selected_files(file_browser);
-                    if (!sel_files)
+                    std::vector<VFSFileInfo*> sel_files;
+
+                    sel_files = ptk_file_browser_get_selected_files(file_browser);
+                    if (sel_files.empty())
                         return true;
+
                     if (i == 0)
                         ptk_clipboard_copy_name(ptk_file_browser_get_cwd(file_browser), sel_files);
                     else
                         ptk_clipboard_copy_as_text(ptk_file_browser_get_cwd(file_browser),
                                                    sel_files);
-                    g_list_foreach(sel_files, (GFunc)vfs_file_info_unref, nullptr);
-                    g_list_free(sel_files);
+
+                    vfs_file_info_list_free(sel_files);
                 }
                 else if (i == 2)
                     ptk_file_browser_file_properties(file_browser, 0);
@@ -1969,7 +1973,8 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
     }
     if (file_browser->curhistsel)
     {
-        file_browser->curhistsel->data = ptk_file_browser_get_selected_files(file_browser);
+        file_browser->curhistsel->data =
+            vector_to_glist_VFSFileInfo(ptk_file_browser_get_selected_files(file_browser));
 
         // LOG_DEBUG("set curhistsel {}", g_list_position(file_browser->histsel,
         //                                    file_browser->curhistsel));
@@ -3237,14 +3242,16 @@ show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
     VFSFileInfo* file;
 
     const char* cwd = ptk_file_browser_get_cwd(file_browser);
-    GList* sel_files = ptk_file_browser_get_selected_files(file_browser);
-    if (!sel_files)
+    std::vector<VFSFileInfo*> sel_files;
+
+    sel_files = ptk_file_browser_get_selected_files(file_browser);
+    if (sel_files.empty())
     {
         file = nullptr;
     }
     else
     {
-        file = vfs_file_info_ref(static_cast<VFSFileInfo*>(sel_files->data));
+        file = vfs_file_info_ref(sel_files.front());
         file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
     }
 
@@ -4569,9 +4576,7 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
     (void)time;
     GdkAtom type = gdk_atom_intern("text/uri-list", false);
     GString* uri_list = g_string_sized_new(8192);
-    GList* sels = ptk_file_browser_get_selected_files(file_browser);
-    GList* sel;
-    VFSFileInfo* file;
+    std::vector<VFSFileInfo*> sel_files = ptk_file_browser_get_selected_files(file_browser);
     std::string full_path;
 
     /*  Do not call the default handler  */
@@ -4579,9 +4584,8 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
 
     // drag_context->suggested_action = GDK_ACTION_MOVE;
 
-    for (sel = sels; sel; sel = g_list_next(sel))
+    for (VFSFileInfo* file: sel_files)
     {
-        file = static_cast<VFSFileInfo*>(sel->data);
         full_path = Glib::build_filename(ptk_file_browser_get_cwd(file_browser),
                                          vfs_file_info_get_name(file));
         char* uri = g_filename_to_uri(full_path.c_str(), nullptr, nullptr);
@@ -4590,8 +4594,8 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
 
         g_string_append(uri_list, "\n");
     }
-    g_list_foreach(sels, (GFunc)vfs_file_info_unref, nullptr);
-    g_list_free(sels);
+
+    vfs_file_info_list_free(sel_files);
     gtk_selection_data_set(sel_data, type, 8, (unsigned char*)uri_list->str, uri_list->len + 1);
     g_string_free(uri_list, true);
 }
@@ -4893,20 +4897,20 @@ on_folder_view_drag_end(GtkWidget* widget, GdkDragContext* drag_context,
 }
 
 void
-ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser, GList* files, const char* cwd)
+ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser,
+                                       std::vector<VFSFileInfo*>& sel_files, const char* cwd)
 {
     if (!file_browser)
         return;
+
+    if (sel_files.empty())
+        return;
+
     gtk_widget_grab_focus(file_browser->folder_view);
     gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
 
-    if (!files)
-        return;
-
-    GList* l;
-    for (l = files; l; l = l->next)
+    for (VFSFileInfo* file: sel_files)
     {
-        VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
         if (!ptk_rename_file(file_browser,
                              cwd,
                              file,
@@ -4938,15 +4942,15 @@ ptk_file_browser_paste_target(PtkFileBrowser* file_browser) // MOD added
                                 nullptr);
 }
 
-GList*
+std::vector<VFSFileInfo*>
 ptk_file_browser_get_selected_files(PtkFileBrowser* file_browser)
 {
     GtkTreeModel* model;
+    std::vector<VFSFileInfo*> file_list;
     GList* sel_files = folder_view_get_selected_items(file_browser, &model);
     if (!sel_files)
-        return nullptr;
+        return file_list;
 
-    GList* file_list = nullptr;
     GList* sel;
     for (sel = sel_files; sel; sel = g_list_next(sel))
     {
@@ -4954,17 +4958,18 @@ ptk_file_browser_get_selected_files(PtkFileBrowser* file_browser)
         VFSFileInfo* file;
         gtk_tree_model_get_iter(model, &it, (GtkTreePath*)sel->data);
         gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
-        file_list = g_list_append(file_list, file);
+        file_list.push_back(file);
     }
     g_list_foreach(sel_files, (GFunc)gtk_tree_path_free, nullptr);
     g_list_free(sel_files);
+
     return file_list;
 }
 
 static void
 ptk_file_browser_open_selected_files_with_app(PtkFileBrowser* file_browser, char* app_desktop)
 {
-    GList* sel_files = ptk_file_browser_get_selected_files(file_browser);
+    std::vector<VFSFileInfo*> sel_files = ptk_file_browser_get_selected_files(file_browser);
 
     ptk_open_files_with_app(ptk_file_browser_get_cwd(file_browser),
                             sel_files,
@@ -4985,10 +4990,10 @@ ptk_file_browser_open_selected_files(PtkFileBrowser* file_browser)
 }
 
 void
-ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, const char* cwd,
-                         XSetName setname)
+ptk_file_browser_copycmd(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>& sel_files,
+                         const char* cwd, XSetName setname)
 {
-    if (!file_browser || !sel_files)
+    if (!file_browser)
         return;
 
     XSet* set2;
@@ -5137,12 +5142,9 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, const c
 
         // rebuild sel_files with full paths
         std::vector<std::string> file_list;
-        GList* sel;
         std::string file_path;
-        VFSFileInfo* file;
-        for (sel = sel_files; sel; sel = sel->next)
+        for (VFSFileInfo* file: sel_files)
         {
-            file = static_cast<VFSFileInfo*>(sel->data);
             file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
             file_list.push_back(file_path);
         }
@@ -5168,7 +5170,8 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, GList* sel_files, const c
 }
 
 void
-ptk_file_browser_hide_selected(PtkFileBrowser* file_browser, GList* files, const char* cwd)
+ptk_file_browser_hide_selected(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>& sel_files,
+                               const char* cwd)
 {
     if (xset_msg_dialog(
             GTK_WIDGET(file_browser),
@@ -5182,26 +5185,24 @@ ptk_file_browser_hide_selected(PtkFileBrowser* file_browser, GList* files, const
         GTK_RESPONSE_OK)
         return;
 
-    VFSFileInfo* file;
-    GList* l;
-
-    if (files)
+    if (sel_files.empty())
     {
-        for (l = files; l; l = l->next)
-        {
-            file = static_cast<VFSFileInfo*>(l->data);
-            if (!vfs_dir_add_hidden(cwd, vfs_file_info_get_name(file)))
-                ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
-                               "Error",
-                               "Error hiding files");
-        }
-        // refresh from here causes a segfault occasionally
-        // ptk_file_browser_refresh( nullptr, file_browser );
-    }
-    else
         ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                        "Error",
                        "No files are selected");
+        return;
+    }
+
+    for (VFSFileInfo* file: sel_files)
+    {
+        if (!vfs_dir_add_hidden(cwd, vfs_file_info_get_name(file)))
+            ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
+                           "Error",
+                           "Error hiding files");
+    }
+
+    // refresh from here causes a segfault occasionally
+    // ptk_file_browser_refresh( nullptr, file_browser );
 }
 
 void
@@ -5211,13 +5212,13 @@ ptk_file_browser_file_properties(PtkFileBrowser* file_browser, int page)
         return;
 
     char* dir_name = nullptr;
-    GList* sel_files = ptk_file_browser_get_selected_files(file_browser);
+    std::vector<VFSFileInfo*> sel_files = ptk_file_browser_get_selected_files(file_browser);
     const char* cwd = ptk_file_browser_get_cwd(file_browser);
-    if (!sel_files)
+    if (sel_files.empty())
     {
         VFSFileInfo* file = vfs_file_info_new();
         vfs_file_info_get(file, ptk_file_browser_get_cwd(file_browser), nullptr);
-        sel_files = g_list_prepend(nullptr, file);
+        sel_files.push_back(file);
         dir_name = g_path_get_dirname(cwd);
     }
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
@@ -5858,10 +5859,10 @@ ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, int tab_num, const ch
 }
 
 void
-ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser, GList* sel_files,
-                               const char* cwd)
+ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
+                               std::vector<VFSFileInfo*>& sel_files, const char* cwd)
 {
-    if (!sel_files)
+    if (sel_files.empty())
         return;
 
     char* name;
@@ -5977,12 +5978,10 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser, 
     else
         return;
 
-    std::string file_paths = "";
-    GList* sel;
-    std::string file_path;
-    for (sel = sel_files; sel; sel = sel->next)
+    std::string file_paths;
+    for (VFSFileInfo* file: sel_files)
     {
-        file_path = bash_quote(vfs_file_info_get_name(static_cast<VFSFileInfo*>(sel->data)));
+        std::string file_path = bash_quote(vfs_file_info_get_name(file));
         file_paths = fmt::format("{} {}", file_paths, file_path);
     }
 

@@ -100,7 +100,6 @@ PtkFileMenu::PtkFileMenu()
     this->cwd = nullptr;
     this->file_path = nullptr;
     this->info = nullptr;
-    this->sel_files = nullptr;
     this->accel_group = nullptr;
 }
 
@@ -112,8 +111,8 @@ PtkFileMenu::~PtkFileMenu()
     //     free(this->cwd);
     // if (this->file_path)
     //   free(this->file_path);
-    if (this->sel_files)
-        vfs_file_info_list_free(this->sel_files);
+    vfs_file_info_list_free(this->sel_files);
+
     if (this->accel_group)
         g_object_unref(this->accel_group);
 }
@@ -613,7 +612,14 @@ ptk_file_menu_free(PtkFileMenu* data)
 /* Retrieve popup menu for selected file(s) */
 GtkWidget*
 ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* info,
-                  const char* cwd, GList* sel_files)
+                  const char* cwd)
+{
+    return ptk_file_menu_new(browser, file_path, info, cwd, {});
+}
+
+GtkWidget*
+ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* info,
+                  const char* cwd, std::vector<VFSFileInfo*> sel_files)
 { // either desktop or browser must be non-nullptr
 
     const char* app_name = nullptr;
@@ -712,7 +718,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
     context->var[ItemPropContext::CONTEXT_IS_DIR] =
         is_dir ? ztd::strdup("true") : ztd::strdup("false");
     context->var[ItemPropContext::CONTEXT_MUL_SEL] =
-        sel_files && sel_files->next ? ztd::strdup("true") : ztd::strdup("false");
+        sel_files.size() > 1 ? ztd::strdup("true") : ztd::strdup("false");
     context->var[ItemPropContext::CONTEXT_CLIP_FILES] =
         is_clip ? ztd::strdup("true") : ztd::strdup("false");
     if (info)
@@ -733,10 +739,12 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
     }
 
     // Open >
+    const bool set_disable = sel_files.empty();
+
     set = xset_get(XSetName::CON_OPEN);
-    set->disable = !(sel_files);
+    set->disable = set_disable;
     item = GTK_MENU_ITEM(xset_add_menuitem(browser, popup, accel_group, set));
-    if (sel_files)
+    if (!sel_files.empty())
     {
         GtkWidget* submenu = gtk_menu_item_get_submenu(item);
 
@@ -972,7 +980,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         set->menu_label = nullptr; // do not bother to save this
 
         // Edit / Dir
-        if ((is_dir && browser) || (is_text && sel_files && !sel_files->next))
+        if ((is_dir && browser) || (is_text && sel_files.size() == 1))
         {
             item = GTK_MENU_ITEM(gtk_separator_menu_item_new());
             gtk_menu_shell_append(GTK_MENU_SHELL(submenu), GTK_WIDGET(item));
@@ -1101,7 +1109,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         set = xset_set_cb(XSetName::NEW_DIRECTORY, (GFunc)on_popup_new_folder_activate, data);
         set = xset_set_cb(XSetName::NEW_LINK, (GFunc)on_popup_new_link_activate, data);
         set = xset_set_cb(XSetName::NEW_ARCHIVE, (GFunc)on_popup_compress_activate, data);
-        set->disable = (!sel_files);
+        set->disable = set_disable;
 
         set = xset_set_cb(XSetName::TAB_NEW, (GFunc)ptk_file_browser_new_tab, browser);
         set->disable = !browser;
@@ -1123,11 +1131,11 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
         // Edit
         set = xset_set_cb(XSetName::COPY_NAME, (GFunc)on_popup_copy_name_activate, data);
-        set->disable = !sel_files;
+        set->disable = set_disable;
         set = xset_set_cb(XSetName::COPY_PATH, (GFunc)on_popup_copy_text_activate, data);
-        set->disable = !sel_files;
+        set->disable = set_disable;
         set = xset_set_cb(XSetName::COPY_PARENT, (GFunc)on_popup_copy_parent_activate, data);
-        set->disable = !sel_files;
+        set->disable = set_disable;
         set = xset_set_cb(XSetName::PASTE_LINK, (GFunc)on_popup_paste_link_activate, data);
         set->disable = !is_clip || no_write_access;
         set = xset_set_cb(XSetName::PASTE_TARGET, (GFunc)on_popup_paste_target_activate, data);
@@ -1138,20 +1146,20 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
         set = xset_set_cb(XSetName::ROOT_COPY_LOC, (GFunc)on_popup_rootcmd_activate, data);
         xset_set_ob1(set, "set", set);
-        set->disable = !sel_files;
+        set->disable = set_disable;
         set = xset_set_cb(XSetName::ROOT_MOVE2, (GFunc)on_popup_rootcmd_activate, data);
         xset_set_ob1(set, "set", set);
-        set->disable = !sel_files;
+        set->disable = set_disable;
         set = xset_set_cb(XSetName::ROOT_DELETE, (GFunc)on_popup_rootcmd_activate, data);
         xset_set_ob1(set, "set", set);
-        set->disable = !sel_files;
+        set->disable = set_disable;
 
         set = xset_set_cb(XSetName::EDIT_HIDE, (GFunc)on_hide_file, data);
-        set->disable = !sel_files || no_write_access || !browser;
+        set->disable = set_disable || no_write_access || !browser;
 
         xset_set_cb(XSetName::SELECT_ALL, (GFunc)ptk_file_browser_select_all, data->browser);
         set = xset_set_cb(XSetName::SELECT_UN, (GFunc)ptk_file_browser_unselect_all, browser);
-        set->disable = !sel_files;
+        set->disable = set_disable;
         xset_set_cb(XSetName::SELECT_INVERT, (GFunc)ptk_file_browser_invert_selection, browser);
         xset_set_cb(XSetName::SELECT_PATT, (GFunc)on_popup_select_pattern, data);
 
@@ -1226,35 +1234,35 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         }
 
         set = xset_get(XSetName::COPY_TO);
-        set->disable = !sel_files;
+        set->disable = set_disable;
 
         set = xset_get(XSetName::MOVE_TO);
-        set->disable = !sel_files;
+        set->disable = set_disable;
 
         set = xset_get(XSetName::EDIT_ROOT);
-        set->disable = (geteuid() == 0) || !sel_files;
+        set->disable = (geteuid() == 0) || set_disable;
 
         set = xset_get(XSetName::EDIT_SUBMENU);
         xset_add_menuitem(browser, popup, accel_group, set);
     }
 
     set = xset_set_cb(XSetName::EDIT_CUT, (GFunc)on_popup_cut_activate, data);
-    set->disable = !sel_files;
+    set->disable = set_disable;
     xset_add_menuitem(browser, popup, accel_group, set);
     set = xset_set_cb(XSetName::EDIT_COPY, (GFunc)on_popup_copy_activate, data);
-    set->disable = !sel_files;
+    set->disable = set_disable;
     xset_add_menuitem(browser, popup, accel_group, set);
     set = xset_set_cb(XSetName::EDIT_PASTE, (GFunc)on_popup_paste_activate, data);
     set->disable = !is_clip || no_write_access;
     xset_add_menuitem(browser, popup, accel_group, set);
     set = xset_set_cb(XSetName::EDIT_RENAME, (GFunc)on_popup_rename_activate, data);
-    set->disable = !sel_files;
+    set->disable = set_disable;
     xset_add_menuitem(browser, popup, accel_group, set);
     set = xset_set_cb(XSetName::EDIT_TRASH, (GFunc)on_popup_trash_activate, data);
-    set->disable = !sel_files || no_write_access;
+    set->disable = set_disable || no_write_access;
     xset_add_menuitem(browser, popup, accel_group, set);
     set = xset_set_cb(XSetName::EDIT_DELETE, (GFunc)on_popup_delete_activate, data);
-    set->disable = !sel_files || no_write_access;
+    set->disable = set_disable || no_write_access;
     xset_add_menuitem(browser, popup, accel_group, set);
 
     set = xset_get(XSetName::SEPARATOR);
@@ -1299,10 +1307,10 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         }
 
         set = xset_get(XSetName::PROP_QUICK);
-        set->disable = no_write_access || !sel_files;
+        set->disable = no_write_access || set_disable;
 
         set = xset_get(XSetName::PROP_ROOT);
-        set->disable = !sel_files;
+        set->disable = set_disable;
 
         set = xset_get(XSetName::CON_PROP);
         std::string desc;
@@ -1325,12 +1333,13 @@ static void
 on_popup_open_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    GList* sel_files = data->sel_files;
-    if (!sel_files)
-        sel_files = g_list_prepend(sel_files, data->info);
+
+    std::vector<VFSFileInfo*> sel_files = data->sel_files;
+
+    if (sel_files.empty())
+        sel_files.push_back(data->info);
+
     ptk_open_files_with_app(data->cwd, sel_files, nullptr, data->browser, true, false);
-    if (sel_files != data->sel_files)
-        g_list_free(sel_files);
 }
 
 static void
@@ -1355,16 +1364,13 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     GtkWindow* parent_win = nullptr;
     if (data->browser)
         parent_win = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)));
-    char* app =
-        (char*)ptk_choose_app_for_mime_type(parent_win, mime_type, false, true, true, false);
+    char* app = ptk_choose_app_for_mime_type(parent_win, mime_type, false, true, true, false);
     if (app)
     {
-        GList* sel_files = data->sel_files;
-        if (!sel_files)
-            sel_files = g_list_prepend(sel_files, data->info);
+        std::vector<VFSFileInfo*> sel_files = data->sel_files;
+        if (sel_files.empty())
+            sel_files.push_back(data->info);
         ptk_open_files_with_app(data->cwd, sel_files, app, data->browser, false, false);
-        if (sel_files != data->sel_files)
-            g_list_free(sel_files);
         free(app);
     }
     vfs_mime_type_unref(mime_type);
@@ -1384,12 +1390,10 @@ on_popup_open_all(GtkMenuItem* menuitem, PtkFileMenu* data)
     if (xset_opener(data->browser, 1))
         return;
 
-    GList* sel_files = data->sel_files;
-    if (!sel_files)
-        sel_files = g_list_prepend(sel_files, data->info);
+    std::vector<VFSFileInfo*> sel_files = data->sel_files;
+    if (sel_files.empty())
+        sel_files.push_back(data->info);
     ptk_open_files_with_app(data->cwd, sel_files, nullptr, data->browser, false, true);
-    if (sel_files != data->sel_files)
-        g_list_free(sel_files);
 }
 
 static void
@@ -1409,12 +1413,10 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
     else
         app = desktop.get_name();
 
-    GList* sel_files = data->sel_files;
-    if (!sel_files)
-        sel_files = g_list_prepend(sel_files, data->info);
+    std::vector<VFSFileInfo*> sel_files = data->sel_files;
+    if (sel_files.empty())
+        sel_files.push_back(data->info);
     ptk_open_files_with_app(data->cwd, sel_files, app.c_str(), data->browser, false, false);
-    if (sel_files != data->sel_files)
-        g_list_free(sel_files);
 }
 
 enum PTKFileMenuAppJob
@@ -2137,12 +2139,11 @@ static void
 on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    if (data->sel_files)
+
+    if (!data->sel_files.empty())
     {
-        GList* sel;
-        for (sel = data->sel_files; sel; sel = sel->next)
+        for (VFSFileInfo* file: data->sel_files)
         {
-            VFSFileInfo* file = static_cast<VFSFileInfo*>(sel->data);
             std::string full_path = Glib::build_filename(data->cwd, vfs_file_info_get_name(file));
             if (data->browser && std::filesystem::is_directory(full_path))
             {
@@ -2170,12 +2171,12 @@ static void
 on_new_bookmark(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
+
     // if a single dir or file is selected, bookmark it instead of cwd
-    if (data->sel_files && !data->sel_files->next)
+    if (!data->sel_files.empty() && data->sel_files.size() == 1)
     {
-        std::string full_path = Glib::build_filename(
-            data->cwd,
-            vfs_file_info_get_name(static_cast<VFSFileInfo*>(data->sel_files->data)));
+        VFSFileInfo* file = data->sel_files.back();
+        std::string full_path = Glib::build_filename(data->cwd, vfs_file_info_get_name(file));
         ptk_bookmark_view_add_bookmark(nullptr, data->browser, full_path.c_str());
     }
     else
@@ -2188,16 +2189,18 @@ static void
 on_popup_cut_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    if (data->sel_files)
-        ptk_clipboard_cut_or_copy_files(data->cwd, data->sel_files, false);
+    if (data->sel_files.empty())
+        return;
+    ptk_clipboard_cut_or_copy_files(data->cwd, data->sel_files, false);
 }
 
 static void
 on_popup_copy_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    if (data->sel_files)
-        ptk_clipboard_cut_or_copy_files(data->cwd, data->sel_files, true);
+    if (data->sel_files.empty())
+        return;
+    ptk_clipboard_cut_or_copy_files(data->cwd, data->sel_files, true);
 }
 
 static void
@@ -2264,16 +2267,17 @@ static void
 on_popup_delete_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    if (data->sel_files)
+
+    if (data->sel_files.empty())
+        return;
+
+    if (data->browser)
     {
-        if (data->browser)
-        {
-            GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
-            ptk_delete_files(GTK_WINDOW(parent_win),
-                             data->cwd,
-                             data->sel_files,
-                             GTK_TREE_VIEW(data->browser->task_view));
-        }
+        GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
+        ptk_delete_files(GTK_WINDOW(parent_win),
+                         data->cwd,
+                         data->sel_files,
+                         GTK_TREE_VIEW(data->browser->task_view));
     }
 }
 
@@ -2281,16 +2285,17 @@ static void
 on_popup_trash_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    if (data->sel_files)
+
+    if (data->sel_files.empty())
+        return;
+
+    if (data->browser)
     {
-        if (data->browser)
-        {
-            GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
-            ptk_trash_files(GTK_WINDOW(parent_win),
-                            data->cwd,
-                            data->sel_files,
-                            GTK_TREE_VIEW(data->browser->task_view));
-        }
+        GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
+        ptk_trash_files(GTK_WINDOW(parent_win),
+                        data->cwd,
+                        data->sel_files,
+                        GTK_TREE_VIEW(data->browser->task_view));
     }
 }
 
@@ -2385,11 +2390,10 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
             {
                 file = vfs_file_info_new();
                 vfs_file_info_get(file, ao->path, nullptr);
-                GList* sel_files = nullptr;
-                sel_files = g_list_prepend(sel_files, file);
+                std::vector<VFSFileInfo*> sel_files;
+                sel_files.push_back(file);
                 ptk_open_files_with_app(cwd, sel_files, nullptr, ao->file_browser, false, true);
                 vfs_file_info_unref(file);
-                g_list_free(sel_files);
             }
         }
 
@@ -2411,10 +2415,14 @@ create_new_file(PtkFileMenu* data, int create_new)
     ao->open_file = false;
     if (data->browser)
         ao->callback = (GFunc)on_autoopen_create_cb;
+
+    VFSFileInfo* file = nullptr;
+    if (!data->sel_files.empty())
+        file = data->sel_files.front();
+
     int result = ptk_rename_file(data->browser,
                                  data->cwd,
-                                 data->sel_files ? static_cast<VFSFileInfo*>(data->sel_files->data)
-                                                 : nullptr,
+                                 file,
                                  nullptr,
                                  false,
                                  (PtkRenameMode)create_new,
@@ -2485,7 +2493,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     const char* cwd;
     std::string file_path;
     VFSFileInfo* info;
-    GList* sel_files = nullptr;
+    std::vector<VFSFileInfo*> sel_files;
 
     // setup data
     if (browser)
@@ -2498,13 +2506,13 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         cwd = vfs_user_desktop_dir().c_str();
     }
 
-    if (!sel_files)
+    if (sel_files.empty())
     {
         info = nullptr;
     }
     else
     {
-        info = vfs_file_info_ref(static_cast<VFSFileInfo*>(sel_files->data));
+        info = vfs_file_info_ref(sel_files.front());
         file_path = Glib::build_filename(cwd, vfs_file_info_get_name(info));
     }
 

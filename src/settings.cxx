@@ -3747,25 +3747,22 @@ xset_custom_activate(GtkWidget* item, XSet* set)
                 if (desktop.get_exec() && desktop.get_exec()[0] != '\0')
                 {
                     // get file list
-                    GList* sel_files;
+                    std::vector<VFSFileInfo*> sel_files;
                     if (set->browser)
                     {
                         sel_files = ptk_file_browser_get_selected_files(set->browser);
                     }
                     else
                     {
-                        sel_files = nullptr;
                         cwd = ztd::strdup("/");
                     }
 
                     std::vector<std::string> open_files;
 
-                    GList* l;
-                    for (l = sel_files; l; l = l->next)
+                    for (VFSFileInfo* file: sel_files)
                     {
-                        const std::string open_file = Glib::build_filename(
-                            cwd,
-                            vfs_file_info_get_name(static_cast<VFSFileInfo*>(l->data)));
+                        const std::string open_file =
+                            Glib::build_filename(cwd, vfs_file_info_get_name(file));
 
                         open_files.push_back(open_file);
                     }
@@ -3780,11 +3777,7 @@ xset_custom_activate(GtkWidget* item, XSet* set)
                         ptk_show_error(parent ? GTK_WINDOW(parent) : nullptr, "Error", e.what());
                     }
 
-                    if (sel_files)
-                    {
-                        g_list_foreach(sel_files, (GFunc)vfs_file_info_unref, nullptr);
-                        g_list_free(sel_files);
-                    }
+                    vfs_file_info_list_free(sel_files);
                 }
                 return;
             }

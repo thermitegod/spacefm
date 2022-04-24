@@ -649,10 +649,15 @@ vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
 }
 
 void
-vfs_file_info_list_free(GList* list)
+vfs_file_info_list_free(std::vector<VFSFileInfo*>& list)
 {
-    g_list_foreach(list, (GFunc)vfs_file_info_unref, nullptr);
-    g_list_free(list);
+    if (list.empty())
+        return;
+
+    for (VFSFileInfo* file: list)
+    {
+        vfs_file_info_unref(file);
+    }
 }
 
 void

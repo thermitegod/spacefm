@@ -100,17 +100,14 @@ clipboard_clean_data(GtkClipboard* clipboard, void* user_data)
 }
 
 void
-ptk_clipboard_copy_as_text(const char* working_dir,
-                           GList* files) // MOD added
-{                                        // aka copy path
+ptk_clipboard_copy_as_text(const char* working_dir, std::vector<VFSFileInfo*>& sel_files)
+{ // aka copy path
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
-    GList* l;
 
-    std::string file_text = "";
-    for (l = files; l; l = l->next)
+    std::string file_text;
+    for (VFSFileInfo* file: sel_files)
     {
-        VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
         std::string file_path = Glib::build_filename(working_dir, vfs_file_info_get_name(file));
         std::string quoted = bash_quote(file_path);
         file_text = fmt::format("{} {}", file_text, quoted);
@@ -121,18 +118,16 @@ ptk_clipboard_copy_as_text(const char* working_dir,
 
 void
 ptk_clipboard_copy_name(const char* working_dir,
-                        GList* files) // MOD added
+                        std::vector<VFSFileInfo*>& sel_files) // MOD added
 {
     (void)working_dir;
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
-    GList* l;
     int fcount = 0;
 
     std::string file_text;
-    for (l = files; l; l = l->next)
+    for (VFSFileInfo* file: sel_files)
     {
-        VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
         if (fcount == 0)
             file_text = fmt::format("{}", vfs_file_info_get_name(file));
         else if (fcount == 1)
@@ -155,7 +150,8 @@ ptk_clipboard_copy_text(const char* text) // MOD added
 }
 
 void
-ptk_clipboard_cut_or_copy_files(const char* working_dir, GList* files, bool copy)
+ptk_clipboard_cut_or_copy_files(const char* working_dir, std::vector<VFSFileInfo*>& sel_files,
+                                bool copy)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkTargetList* target_list = gtk_target_list_new(nullptr, 0);
@@ -175,10 +171,8 @@ ptk_clipboard_cut_or_copy_files(const char* working_dir, GList* files, bool copy
 
     gtk_target_list_unref(target_list);
 
-    GList* l;
-    for (l = g_list_last(files); l; l = l->prev) // sfm was reverse order
+    for (VFSFileInfo* file: sel_files)
     {
-        VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
         std::string file_path = Glib::build_filename(working_dir, vfs_file_info_get_name(file));
         file_list.push_back(file_path);
     }

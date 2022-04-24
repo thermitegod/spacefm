@@ -41,26 +41,28 @@ enum PtkRenameMode
     PTK_RENAME_NEW_LINK
 };
 
-void ptk_trash_files(GtkWindow* parent_win, const char* cwd, GList* sel_files,
+void ptk_trash_files(GtkWindow* parent_win, const char* cwd, std::vector<VFSFileInfo*>& sel_files,
                      GtkTreeView* task_view);
-void ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files,
+void ptk_delete_files(GtkWindow* parent_win, const char* cwd, std::vector<VFSFileInfo*>& sel_files,
                       GtkTreeView* task_view);
 
 int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo* file,
                     const char* dest_dir, bool clip_copy, PtkRenameMode create_new,
                     AutoOpenCreate* auto_open);
 
-void ptk_show_file_properties(GtkWindow* parent_win, const char* cwd, GList* sel_files, int page);
+void ptk_show_file_properties(GtkWindow* parent_win, const char* cwd,
+                              std::vector<VFSFileInfo*>& sel_files, int page);
 
 /* sel_files is a list of VFSFileInfo
  * app_desktop is the application used to open the files.
  * If app_desktop == nullptr, each file will be opened with its
  * default application. */
-void ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_desktop,
-                             PtkFileBrowser* file_browser, bool xforce, bool xnever);
+void ptk_open_files_with_app(const char* cwd, std::vector<VFSFileInfo*>& sel_files,
+                             const char* app_desktop, PtkFileBrowser* file_browser, bool xforce,
+                             bool xnever);
 
 void ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc callback);
-void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, const char* cwd,
-                           const char* setname);
+void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>& sel_files,
+                           const char* cwd, const char* setname);
 
 char* get_real_link_target(const char* link_path);

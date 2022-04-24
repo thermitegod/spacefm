@@ -268,23 +268,22 @@ static void on_toggled(GtkMenuItem* item, MoveSet* mset);
 static char* get_template_dir();
 
 void
-ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTreeView* task_view)
+ptk_delete_files(GtkWindow* parent_win, const char* cwd, std::vector<VFSFileInfo*>& sel_files,
+                 GtkTreeView* task_view)
 {
-    if (!sel_files)
+    if (sel_files.empty())
         return;
 
     if (!app_settings.no_confirm)
     {
-        // count
-        int count = g_list_length(sel_files);
-        std::string msg = fmt::format("Delete {} selected item ?", count);
+        std::string msg = fmt::format("Delete {} selected item ?", sel_files.size());
         GtkWidget* dlg = gtk_message_dialog_new(parent_win,
                                                 GTK_DIALOG_MODAL,
                                                 GTK_MESSAGE_WARNING,
                                                 GTK_BUTTONS_YES_NO,
                                                 msg.c_str(),
                                                 nullptr);
-        gtk_dialog_set_default_response(GTK_DIALOG(dlg), GTK_RESPONSE_YES); // MOD
+        gtk_dialog_set_default_response(GTK_DIALOG(dlg), GTK_RESPONSE_YES);
         gtk_window_set_title(GTK_WINDOW(dlg), "Confirm Delete");
         xset_set_window_icon(GTK_WINDOW(dlg));
 
@@ -295,14 +294,11 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTr
     }
 
     std::vector<std::string> file_list;
-    GList* sel;
-    for (sel = sel_files; sel; sel = g_list_next(sel))
+    for (VFSFileInfo* file: sel_files)
     {
-        VFSFileInfo* file = static_cast<VFSFileInfo*>(sel->data);
         std::string file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
         file_list.push_back(file_path);
     }
-    /* file_list = g_list_reverse( file_list ); */
     PtkFileTask* ptask = new PtkFileTask(VFSFileTaskType::VFS_FILE_TASK_DELETE,
                                          file_list,
                                          nullptr,
@@ -312,23 +308,22 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTr
 }
 
 void
-ptk_trash_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTreeView* task_view)
+ptk_trash_files(GtkWindow* parent_win, const char* cwd, std::vector<VFSFileInfo*>& sel_files,
+                GtkTreeView* task_view)
 {
-    if (!sel_files)
+    if (sel_files.empty())
         return;
 
     if (!app_settings.no_confirm_trash)
     {
-        // count
-        int count = g_list_length(sel_files);
-        std::string msg = fmt::format("Trash {} selected item ?", count);
+        std::string msg = fmt::format("Trash {} selected item ?", sel_files.size());
         GtkWidget* dlg = gtk_message_dialog_new(parent_win,
                                                 GTK_DIALOG_MODAL,
                                                 GTK_MESSAGE_WARNING,
                                                 GTK_BUTTONS_YES_NO,
                                                 msg.c_str(),
                                                 nullptr);
-        gtk_dialog_set_default_response(GTK_DIALOG(dlg), GTK_RESPONSE_YES); // MOD
+        gtk_dialog_set_default_response(GTK_DIALOG(dlg), GTK_RESPONSE_YES);
         gtk_window_set_title(GTK_WINDOW(dlg), "Confirm Trash");
         xset_set_window_icon(GTK_WINDOW(dlg));
 
@@ -339,14 +334,11 @@ ptk_trash_files(GtkWindow* parent_win, const char* cwd, GList* sel_files, GtkTre
     }
 
     std::vector<std::string> file_list;
-    GList* sel;
-    for (sel = sel_files; sel; sel = g_list_next(sel))
+    for (VFSFileInfo* file: sel_files)
     {
-        VFSFileInfo* file = static_cast<VFSFileInfo*>(sel->data);
         std::string file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
         file_list.push_back(file_path);
     }
-    /* file_list = g_list_reverse( file_list ); */
     PtkFileTask* ptask = new PtkFileTask(VFSFileTaskType::VFS_FILE_TASK_TRASH,
                                          file_list,
                                          nullptr,
@@ -3323,15 +3315,18 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
 }
 
 void
-ptk_show_file_properties(GtkWindow* parent_win, const char* cwd, GList* sel_files, int page)
+ptk_show_file_properties(GtkWindow* parent_win, const char* cwd,
+                         std::vector<VFSFileInfo*>& sel_files, int page)
 {
     GtkWidget* dlg;
 
-    if (sel_files)
+    if (!sel_files.empty())
     {
         /* Make a copy of the list */
-        sel_files = g_list_copy(sel_files);
-        g_list_foreach(sel_files, (GFunc)vfs_file_info_ref, nullptr);
+        // for (VFSFileInfo* file: sel_files)
+        // {
+        //     vfs_file_info_ref(file);
+        // }
 
         dlg = file_properties_dlg_new(parent_win, cwd, sel_files, page);
     }
@@ -3340,17 +3335,24 @@ ptk_show_file_properties(GtkWindow* parent_win, const char* cwd, GList* sel_file
         // no files selected, use cwd as file
         VFSFileInfo* file = vfs_file_info_new();
         vfs_file_info_get(file, cwd, nullptr);
-        sel_files = g_list_prepend(nullptr, vfs_file_info_ref(file));
+        // sel_files.push_back(vfs_file_info_ref(file));
+        sel_files.push_back(file);
         char* parent_dir = g_path_get_dirname(cwd);
         dlg = file_properties_dlg_new(parent_win, parent_dir, sel_files, page);
     }
-    g_signal_connect_swapped(dlg, "destroy", G_CALLBACK(vfs_file_info_list_free), sel_files);
+
+    // disabling this should not cause leaks since
+    // ref count increments are also disabled above?
+    // g_signal_connect_swapped(dlg,
+    //                         "destroy",
+    //                         G_CALLBACK(vfs_file_info_list_free),
+    //                         vector_to_glist_VFSFileInfo(sel_files));
     gtk_widget_show(dlg);
 }
 
 static bool
-open_archives_with_handler(ParentInfo* parent, GList* sel_files, const char* full_path,
-                           VFSMimeType* mime_type)
+open_archives_with_handler(ParentInfo* parent, std::vector<VFSFileInfo*>& sel_files,
+                           const char* full_path, VFSMimeType* mime_type)
 {
     if (xset_get_b(XSetName::ARC_DEF_OPEN))
         // user has open archives with app option enabled
@@ -3586,8 +3588,9 @@ free_file_list_hash(void* key, void* value, void* user_data)
 }
 
 void
-ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_desktop,
-                        PtkFileBrowser* file_browser, bool xforce, bool xnever)
+ptk_open_files_with_app(const char* cwd, std::vector<VFSFileInfo*>& sel_files,
+                        const char* app_desktop, PtkFileBrowser* file_browser, bool xforce,
+                        bool xnever)
 {
     // if xnever, never execute an executable
     // if xforce, force execute of executable ignoring app_settings.no_execute
@@ -3600,10 +3603,8 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
 
     ParentInfo* parent = new ParentInfo(file_browser, cwd);
 
-    GList* l;
-    for (l = sel_files; l; l = l->next)
+    for (VFSFileInfo* file: sel_files)
     {
-        VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
         if (!file)
             continue;
 
@@ -3655,7 +3656,7 @@ ptk_open_files_with_app(const char* cwd, GList* sel_files, const char* app_deskt
             VFSMimeType* mime_type = vfs_file_info_get_mime_type(file);
 
             // has archive handler?
-            if (l == sel_files /* test first file only */ &&
+            if (!sel_files.empty() &&
                 open_archives_with_handler(parent, sel_files, full_path.c_str(), mime_type))
             {
                 // all files were handled by open_archives_with_handler
@@ -3841,15 +3842,15 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
 }
 
 void
-ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, const char* cwd,
-                      const char* setname)
+ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>& sel_files,
+                      const char* cwd, const char* setname)
 {
     /*
      * root_copy_loc    copy to location
      * root_move2       move to
      * root_delete      delete
      */
-    if (!setname || !file_browser || !sel_files)
+    if (!setname || !file_browser)
         return;
     XSet* set;
     char* path;
@@ -3858,14 +3859,12 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, GList* sel_files, const char
 
     GtkWidget* parent = GTK_WIDGET(file_browser);
     std::string file_paths;
-    GList* sel;
     std::string file_path_q;
     int item_count = 0;
-    for (sel = sel_files; sel; sel = sel->next)
+    for (VFSFileInfo* file: sel_files)
     {
         std::string file_path;
-        file_path =
-            Glib::build_filename(cwd, vfs_file_info_get_name(static_cast<VFSFileInfo*>(sel->data)));
+        file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
         file_path_q = bash_quote(file_path);
         file_paths = fmt::format("{} {}", file_paths, file_path_q);
         item_count++;

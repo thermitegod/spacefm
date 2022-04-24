@@ -50,6 +50,8 @@
 #include "ptk/ptk-file-misc.hxx"
 #include "ptk/ptk-utils.hxx"
 
+#include "type-conversion.hxx"
+
 #include "find-files.hxx"
 
 enum FindFilesCol
@@ -209,36 +211,38 @@ static const char menu_def[] = "<ui>"
 static bool
 open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
 {
-    if (files)
+    if (!files)
+        return false;
+
+    std::vector<VFSFileInfo*> sel_files = glist_to_vector_VFSFileInfo(files);
+
+    /*igtodo test passing file_browser here? */
+    ptk_open_files_with_app(dir, sel_files, nullptr, nullptr, false, true);
+
+    // sfm open selected dirs
+    if (file_browser)
     {
-        /*igtodo test passing file_browser here? */
-        ptk_open_files_with_app(dir, files, nullptr, nullptr, false, true);
+        GList* l;
+        VFSFileInfo* file;
 
-        // sfm open selected dirs
-        if (file_browser)
+        for (l = files; l; l = l->next)
         {
-            GList* l;
-            VFSFileInfo* file;
+            file = static_cast<VFSFileInfo*>(l->data);
+            if (!file)
+                continue;
 
-            for (l = files; l; l = l->next)
+            std::string full_path = Glib::build_filename(dir, vfs_file_info_get_name(file));
+            if (std::filesystem::is_directory(full_path))
             {
-                file = static_cast<VFSFileInfo*>(l->data);
-                if (!file)
-                    continue;
-
-                std::string full_path = Glib::build_filename(dir, vfs_file_info_get_name(file));
-                if (std::filesystem::is_directory(full_path))
-                {
-                    ptk_file_browser_emit_open(file_browser,
-                                               full_path.c_str(),
-                                               PtkOpenAction::PTK_OPEN_NEW_TAB);
-                }
+                ptk_file_browser_emit_open(file_browser,
+                                           full_path.c_str(),
+                                           PtkOpenAction::PTK_OPEN_NEW_TAB);
             }
         }
-        vfs_file_info_list_free(files); // sfm moved free list to here
-        return true;
     }
-    return false;
+
+    vfs_file_info_list_free(sel_files);
+    return true;
 }
 
 static void

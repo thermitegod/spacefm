@@ -137,4 +137,4 @@ bool vfs_file_info_is_text(VFSFileInfo* fi, const char* file_path);
 
 void vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path);
 
-void vfs_file_info_list_free(GList* list);
+void vfs_file_info_list_free(std::vector<VFSFileInfo*>& list);

@@ -18,6 +18,12 @@
 
 #include <glib.h>
 
+#include "vfs/vfs-file-info.hxx"
+
+/**
+ * std::string
+ */
+
 std::vector<std::string>
 glist_t_char_to_vector_t_string(GList* list)
 {
@@ -29,4 +35,32 @@ glist_t_char_to_vector_t_string(GList* list)
         vec.push_back(open_file);
     }
     return vec;
+}
+
+/**
+ * VFSFileInfo
+ */
+
+std::vector<VFSFileInfo*>
+glist_to_vector_VFSFileInfo(GList* list)
+{
+    std::vector<VFSFileInfo*> vec;
+    GList* l;
+    for (l = list; l; l = l->next)
+    {
+        VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
+        vec.push_back(file);
+    }
+    return vec;
+}
+
+GList*
+vector_to_glist_VFSFileInfo(std::vector<VFSFileInfo*> list)
+{
+    GList* l = nullptr;
+    for (VFSFileInfo* file: list)
+    {
+        l = g_list_append(l, file);
+    }
+    return l;
 }
