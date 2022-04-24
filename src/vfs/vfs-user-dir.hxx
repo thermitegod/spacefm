@@ -36,3 +36,6 @@ const std::string& vfs_user_runtime_dir() noexcept;
 const std::vector<std::string>& vfs_system_data_dir() noexcept;
 
 const std::string& vfs_current_dir() noexcept;
+
+const std::string& vfs_user_get_config_dir() noexcept;
+void vfs_user_set_config_dir(const char* config_dir) noexcept;

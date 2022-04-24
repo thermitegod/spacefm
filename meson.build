@@ -36,6 +36,7 @@ version = meson.project_version()
 prefix = get_option('prefix')
 bindir = join_paths(prefix, get_option('bindir'))
 datadir = join_paths(prefix, get_option('datadir'))
+libdir = join_paths(prefix, get_option('libdir'), package)
 sysconfdir = get_option('sysconfdir')
 localedir = join_paths(prefix, get_option('localedir'))
 mandir = join_paths(prefix, get_option('mandir'))
@@ -196,6 +197,7 @@ data_args = []
 data_args += '-DDATADIR="/usr/share"'
 data_args += '-DSYSCONFDIR="/etc"'
 data_args += '-DPACKAGE_UI_DIR="/usr/share/spacefm/ui"'
+data_args += '-DPACKAGE_SCRIPTS_PATH="/usr/share/spacefm/scripts"'
 
 foreach a : data_args
   add_project_arguments(a, language : ['c', 'cpp'])
@@ -219,6 +221,8 @@ pre_args = [
     '-DG_DISABLE_CHECKS',
     '-DG_LOG_DOMAIN="SpaceFM"',
     #'-DG_DEBUG=fatal_warnings',
+
+    '-DLIBDIR_PATH="@0@"'.format(libdir),
 
     '-DGTKMM_DISABLE_DEPRECATED',
     '-DGDKMM_DISABLE_DEPRECATED',
@@ -268,6 +272,7 @@ sources = [
   'src/main.cxx',
   'src/main-window.cxx',
   'src/pref-dialog.cxx',
+  'src/scripts.cxx',
   'src/settings.cxx',
   'src/socket.cxx',
   'src/type-conversion.cxx',
@@ -342,9 +347,11 @@ spacefm = build_target(
   cpp_pch: 'pch/cxx_pch.hxx',
 )
 
-install_data('scripts/spacefm-auth', install_dir : bindir)
 install_data('etc/spacefm.conf', install_dir : sysconfdir / 'spacefm')
 
 install_subdir('data/applications', install_dir : datadir)
 install_subdir('data/ui', install_dir : datadir / target_name)
 install_subdir('data/icons', install_dir : datadir)
+
+# SCRIPTS
+install_subdir('scripts', install_dir : datadir / target_name / 'scripts')

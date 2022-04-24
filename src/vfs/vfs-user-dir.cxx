@@ -47,6 +47,9 @@ class VFSDirXDG
 
     // Current runtime dir
     const std::string current_dir{Glib::get_current_dir()};
+
+    // Program config dir
+    std::string config_dir{Glib::build_filename(user_config, PACKAGE_NAME)};
 };
 
 VFSDirXDG vfs_dir_xdg = VFSDirXDG();
@@ -139,4 +142,18 @@ const std::string&
 vfs_current_dir() noexcept
 {
     return vfs_dir_xdg.current_dir;
+}
+
+void
+vfs_user_set_config_dir(const char* config_dir) noexcept
+{
+    if (!config_dir)
+        return;
+    vfs_dir_xdg.config_dir = config_dir;
+}
+
+const std::string&
+vfs_user_get_config_dir() noexcept
+{
+    return vfs_dir_xdg.config_dir;
 }

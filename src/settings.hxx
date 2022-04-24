@@ -97,7 +97,7 @@ struct ConfigSettings
 extern ConfigSettings config_settings;
 
 void load_conf();
-void load_settings(const char* config_dir);
+void load_settings();
 void autosave_settings();
 void save_settings(void* main_window_ptr);
 void free_settings();

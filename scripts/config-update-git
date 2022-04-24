@@ -1,0 +1,134 @@
+#!/usr/bin/env python
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+import argparse
+import os
+import sys
+
+import shlex
+import subprocess
+
+from pathlib import Path
+
+from loguru import logger
+
+###############################
+
+class Execute:
+    def __init__(self, cmd: str, *, sh_wrap: bool = False,
+                 to_stdout: bool = False, shell: bool = False,
+                 blocking: bool = True):
+        """
+        :param cmd:
+            shell command to run
+        :param sh_wrap:
+            wrap command in 'sh -c ""', required if using pipes
+        :param to_stdout:
+            send output to stdout, required if using get_out().
+            Can also be used to silence command output.
+        :param shell:
+            use subprocess arg shell=True
+        :param blocking:
+            use a non blocking version of subprocess, ignores to_stdout
+        """
+
+        super().__init__()
+
+        self.__cmd: str = cmd
+        self.__out: str = ''
+
+        if sh_wrap:
+            self.__cmd = f'sh -c "{self.__cmd}"'
+
+        self.__cmd = shlex.split(self.__cmd)
+
+        if not blocking:
+            subprocess.Popen(self.__cmd,
+                             stdout=subprocess.PIPE,
+                             shell=shell,
+                             start_new_session=True)
+            return
+
+        if to_stdout:
+            out = subprocess.run(self.__cmd,
+                                 stdout=subprocess.PIPE,
+                                 shell=shell)
+            self.__out = out.stdout.decode('utf-8')
+        else:
+            # need to use to_stdout to get the generated output,
+            # will return none if get_out() is used instead of ''
+            # when tyring to assign to self.__out
+            subprocess.run(self.__cmd)
+
+    def get_out(self):
+        return self.__out
+
+###############################
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-c', '--config-dir',
+                    metavar='DIR',
+                    nargs=1,
+                    help='User config dir')
+parser.add_argument('-f', '--config-file',
+                    metavar='FILENAME',
+                    nargs=1,
+                    help='User config file name')
+debug = parser.add_argument_group('debug')
+debug.add_argument('-L', '--loglevel',
+                   default='ERROR',
+                   metavar='LEVEL',
+                   type=str.upper,
+                   choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING',
+                            'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
+                   help='Levels: %(choices)s')
+args = parser.parse_args()
+
+logger.remove()
+logger.add(sys.stdout, level=args.loglevel, colorize=True)
+
+# logger.info(f'dir  {args.config_dir}')
+# logger.info(f'file {args.config_file}')
+
+if not args.config_dir:
+    logger.error(f'Missing arg --config-dir')
+    raise SystemExit
+if not args.config_file:
+    logger.error(f'Missing arg --config-file')
+    raise SystemExit
+
+config_dir: Path = Path(args.config_dir[0])
+config_file: Path = Path(args.config_file[0])
+
+session_path: Path = Path(config_dir / config_file)
+
+git_path: Path = Path(config_dir / '.git')
+
+if not config_dir.exists():
+    config_dir.mkdir(parents=True, exist_ok=True)
+
+os.chdir(config_dir)
+
+if not git_path.is_dir():
+    Execute('git init', to_stdout=True)
+    Execute('git config commit.gpgsign false', to_stdout=True)
+    logger.info(f'Initialized git repo at {config_dir}')
+elif session_path.is_file():
+    Execute('git add session')
+    Execute('git commit -m \'Session File\'', to_stdout=True)
+    logger.info(f'Updated git copy of {session_path}')
+elif git_path.is_dir():
+    Execute('git checkout session', to_stdout=True)
+    logger.info(f'Checked out {session_path}')

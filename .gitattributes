@@ -11,7 +11,4 @@
 *.hxx   text diff=cpp
 
 # Other
-.tx export-ignore
-packages export-ignore
-data/html/spacefm-mansrc-en.html export-ignore
 .gitattributes export-ignore

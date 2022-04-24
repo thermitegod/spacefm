@@ -50,6 +50,8 @@
 #include "main-window.hxx"
 #include "item-prop.hxx"
 
+#include "scripts.hxx"
+
 #include "autosave.hxx"
 #include "extern.hxx"
 #include "utils.hxx"
@@ -64,7 +66,8 @@
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/ptk-location-view.hxx"
 
-#define CONFIG_FILE_VERSION "101" // 3.0.0
+#define CONFIG_FILE_VERSION  "101" // 3.0.0
+#define CONFIG_FILE_FILENAME "session"
 
 AppSettings app_settings = AppSettings();
 ConfigSettings config_settings = ConfigSettings();
@@ -363,19 +366,16 @@ load_conf()
 }
 
 void
-load_settings(const char* config_dir)
+load_settings()
 {
     app_settings.load_saved_tabs = true;
 
-    if (config_dir)
-        settings_config_dir = config_dir;
-    else
-        settings_config_dir = Glib::build_filename(vfs_user_config_dir(), "spacefm");
+    settings_config_dir = vfs_user_get_config_dir();
 
     // MOD extra settings
     xset_defaults();
 
-    const std::string session = Glib::build_filename(settings_config_dir, "session");
+    const std::string session = Glib::build_filename(settings_config_dir, CONFIG_FILE_FILENAME);
 
     std::string command;
 
@@ -409,32 +409,32 @@ load_settings(const char* config_dir)
 
     if (config_settings.git_backed_settings)
     {
-        std::string git_path = Glib::build_filename(settings_config_dir, ".git");
-        if (!std::filesystem::exists(git_path))
+        const std::string& command_script = get_script_path(Scripts::CONFIG_UPDATE_GIT);
+
+        if (script_exists(command_script))
         {
-            command = fmt::format("{} -c \"cd {} && git init && "
-                                  "git config commit.gpgsign false\"",
-                                  BASH_PATH,
-                                  settings_config_dir);
-            Glib::spawn_command_line_sync(command);
-            LOG_INFO("Initialized git repo at: {}", git_path);
+            const std::string command_args = fmt::format(
+                "{} --config-dir {} --config-file {}",
+                command_script,
+                settings_config_dir,
+                CONFIG_FILE_FILENAME);
+
+            Glib::spawn_command_line_sync(command_args);
         }
-        else if (std::filesystem::exists(session))
+    }
+    else
+    {
+        const std::string& command_script = get_script_path(Scripts::CONFIG_UPDATE);
+
+        if (script_exists(command_script))
         {
-            command = fmt::format("{} -c \"cd {} && git add session && "
-                                  "git commit -m 'Session File' 1>/dev/null\"",
-                                  BASH_PATH,
-                                  settings_config_dir);
-            Glib::spawn_command_line_sync(command);
-            LOG_INFO("Updated git copy of: {}", session);
-        }
-        else if (std::filesystem::exists(git_path))
-        {
-            command = fmt::format("{} -c \"cd {} && git checkout session\"",
-                                  BASH_PATH,
-                                  settings_config_dir);
-            Glib::spawn_command_line_sync(command);
-            LOG_INFO("Checked out: {}", session);
+            const std::string command_args = fmt::format(
+                "{} --config-dir {} --config-file {}",
+                command_script,
+                settings_config_dir,
+                CONFIG_FILE_FILENAME);
+
+            Glib::spawn_command_line_sync(command_args);
         }
     }
 
@@ -471,6 +471,10 @@ load_settings(const char* config_dir)
             }
         }
         file.close();
+    }
+    else
+    {
+        LOG_INFO("No config file found, using defaults.");
     }
 
     // MOD turn off fullscreen
@@ -671,7 +675,7 @@ save_settings(void* main_window_ptr)
     // clang-format on
 
     // move
-    std::string path = Glib::build_filename(settings_config_dir, "session");
+    std::string path = Glib::build_filename(settings_config_dir, CONFIG_FILE_FILENAME);
     std::ofstream file(path);
     if (file.is_open())
         file << buf;

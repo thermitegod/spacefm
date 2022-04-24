@@ -439,8 +439,11 @@ main(int argc, char* argv[])
     // Initialize our mime-type system
     vfs_mime_type_init();
 
+    // Set current config dir
+    vfs_user_set_config_dir(cli_flags.config_dir);
+
     // load config file
-    load_settings(cli_flags.config_dir);
+    load_settings();
 
     // start autosave thread
     autosave_init(autosave_settings);

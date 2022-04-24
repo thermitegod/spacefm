@@ -38,6 +38,7 @@
 #include "main-window.hxx"
 #include "vfs/vfs-volume.hxx"
 
+#include "scripts.hxx"
 #include "utils.hxx"
 
 #include "vfs/vfs-user-dir.hxx"
@@ -1578,12 +1579,11 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
     if (sum_script)
     {
         // spacefm-auth exists?
-        auth = Glib::find_program_in_path("spacefm-auth");
-        if (auth.empty())
+        auth = get_script_path(Scripts::SPACEFM_AUTH);
+        if (!script_exists(auth))
         {
             free(sum_script);
             sum_script = nullptr;
-            LOG_WARN("spacefm-auth not found in path - this reduces your security");
         }
     }
 
