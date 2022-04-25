@@ -49,12 +49,12 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, un
 
     // std::string list;
 
-    GString* list = g_string_sized_new(8192);
+    std::string list;
 
     if (gtk_selection_data_get_target(selection_data) == gnome_target)
     {
         const char* action = clipboard_action == GDK_ACTION_MOVE ? "cut\n" : "copy\n";
-        g_string_append(list, action);
+        list.append(action);
         use_uri = true;
     }
     else if (gtk_selection_data_get_target(selection_data) == uri_list_target)
@@ -71,22 +71,18 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, un
         {
             file_name = g_filename_display_name(clipboard_file.c_str());
         }
-        g_string_append(list, file_name);
+        list.append(file_name);
         free(file_name);
 
-        if (gtk_selection_data_get_target(selection_data) != uri_list_target)
-            g_string_append_c(list, '\n');
-        else
-            g_string_append(list, "\n");
+        list.append("\n");
     }
 
     gtk_selection_data_set(selection_data,
                            gtk_selection_data_get_target(selection_data),
                            8,
-                           (unsigned char*)list->str,
-                           list->len + 1);
-    // LOG_DEBUG("clipboard data: \n\n{}\n\n", list->str);
-    g_string_free(list, true);
+                           (const unsigned char*)list.c_str(),
+                           list.size());
+    // LOG_DEBUG("clipboard data: \n\n{}\n\n", list);
 }
 
 static void

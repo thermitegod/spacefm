@@ -4575,7 +4575,7 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
     (void)info;
     (void)time;
     GdkAtom type = gdk_atom_intern("text/uri-list", false);
-    GString* uri_list = g_string_sized_new(8192);
+    std::string uri_list;
     std::vector<VFSFileInfo*> sel_files = ptk_file_browser_get_selected_files(file_browser);
     std::string full_path;
 
@@ -4589,15 +4589,17 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
         full_path = Glib::build_filename(ptk_file_browser_get_cwd(file_browser),
                                          vfs_file_info_get_name(file));
         char* uri = g_filename_to_uri(full_path.c_str(), nullptr, nullptr);
-        g_string_append(uri_list, uri);
+        uri_list.append(uri);
         free(uri);
-
-        g_string_append(uri_list, "\n");
+        uri_list.append("\n");
     }
 
     vfs_file_info_list_free(sel_files);
-    gtk_selection_data_set(sel_data, type, 8, (unsigned char*)uri_list->str, uri_list->len + 1);
-    g_string_free(uri_list, true);
+    gtk_selection_data_set(sel_data,
+                           type,
+                           8,
+                           (const unsigned char*)uri_list.c_str(),
+                           uri_list.size());
 }
 
 static void

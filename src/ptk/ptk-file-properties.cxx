@@ -808,12 +808,12 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
 
             if ((new_mtime || new_atime) && !data->file_list.empty())
             {
-                GString* gstr = g_string_new(nullptr);
+                std::string str;
                 for (VFSFileInfo* file: data->file_list)
                 {
                     std::string file_path = Glib::build_filename(data->dir_path, file->name);
                     quoted_path = bash_quote(file_path);
-                    g_string_append_printf(gstr, " %s", quoted_path.c_str());
+                    str.append(fmt::format(" {}", quoted_path));
                 }
 
                 std::string cmd;
@@ -822,7 +822,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                     quoted_time = bash_quote(new_mtime);
                     cmd = fmt::format("touch --no-dereference --no-create -m -d {}{}",
                                       quoted_time,
-                                      gstr->str);
+                                      str);
                 }
                 if (new_atime)
                 {
@@ -832,9 +832,8 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                                       cmd,
                                       cmd.empty() ? "" : "\n",
                                       quoted_time,
-                                      gstr->str);
+                                      str);
                 }
-                g_string_free(gstr, true);
                 if (!cmd.empty())
                 {
                     ptask = ptk_file_exec_new("Change File Date", "/", GTK_WIDGET(dialog), nullptr);
