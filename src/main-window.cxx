@@ -5754,7 +5754,8 @@ main_window_socket_command(char* argv[], std::string& reply)
         gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[panel - 1]), tab - 1));
 
     // command
-    if (ztd::same(argv[0], "set"))
+    const std::string socket_cmd = argv[0];
+    if (ztd::same(socket_cmd, "set"))
     {
         if (!argv[i])
         {
@@ -6256,12 +6257,12 @@ main_window_socket_command(char* argv[], std::string& reply)
             return 1;
         }
     }
-    else if (ztd::same(argv[0], "get"))
+    else if (ztd::same(socket_cmd, "get"))
     {
         // get
         if (!argv[i])
         {
-            reply = fmt::format("spacefm: command {} requires an argument\n", argv[0]);
+            reply = fmt::format("spacefm: command {} requires an argument\n", socket_cmd);
             return 1;
         }
         if (ztd::same(argv[i], "window_size") || ztd::same(argv[i], "window_position"))
@@ -6642,11 +6643,11 @@ main_window_socket_command(char* argv[], std::string& reply)
             return 1;
         }
     }
-    else if (ztd::same(argv[0], "set-task"))
+    else if (ztd::same(socket_cmd, "set-task"))
     { // TASKNUM PROPERTY [VALUE]
         if (!(argv[i] && argv[i + 1]))
         {
-            reply = fmt::format("spacefm: {} requires two arguments\n", argv[0]);
+            reply = fmt::format("spacefm: {} requires two arguments\n", socket_cmd);
             return 1;
         }
 
@@ -6763,11 +6764,11 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         gtk_list_store_set(GTK_LIST_STORE(model), &it, j, argv[i + 2], -1);
     }
-    else if (ztd::same(argv[0], "get-task"))
+    else if (ztd::same(socket_cmd, "get-task"))
     { // TASKNUM PROPERTY
         if (!(argv[i] && argv[i + 1]))
         {
-            reply = fmt::format("spacefm: {} requires two arguments\n", argv[0]);
+            reply = fmt::format("spacefm: {} requires two arguments\n", socket_cmd);
             return 1;
         }
 
@@ -6859,11 +6860,11 @@ main_window_socket_command(char* argv[], std::string& reply)
             reply = fmt::format("{}\n", str);
         free(str);
     }
-    else if (ztd::same(argv[0], "run-task"))
+    else if (ztd::same(socket_cmd, "run-task"))
     { // TYPE [OPTIONS] ...
         if (!(argv[i] && argv[i + 1]))
         {
-            reply = fmt::format("spacefm: {} requires two arguments\n", argv[0]);
+            reply = fmt::format("spacefm: {} requires two arguments\n", socket_cmd);
             return 1;
         }
         if (ztd::same(argv[i], "cmd") || ztd::same(argv[i], "command"))
@@ -6916,7 +6917,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             if (!argv[j])
             {
-                reply = fmt::format("spacefm: {} requires two arguments\n", argv[0]);
+                reply = fmt::format("spacefm: {} requires two arguments\n", socket_cmd);
                 return 1;
             }
             std::string cmd = "";
@@ -6970,7 +6971,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             if (!argv[j])
             {
-                reply = fmt::format("spacefm: {} requires two arguments\n", argv[0]);
+                reply = fmt::format("spacefm: {} requires two arguments\n", socket_cmd);
                 return 1;
             }
             if (ztd::same(argv[i], "edit"))
@@ -6993,7 +6994,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             if (!argv[j])
             {
-                reply = fmt::format("spacefm: task type {} requires TARGET argument\n", argv[0]);
+                reply = fmt::format("spacefm: task type {} requires TARGET argument\n", socket_cmd);
                 return 1;
             }
 
@@ -7201,11 +7202,11 @@ main_window_socket_command(char* argv[], std::string& reply)
             return 2;
         }
     }
-    else if (ztd::same(argv[0], "emit-key"))
+    else if (ztd::same(socket_cmd, "emit-key"))
     { // KEYCODE [KEYMOD]
         if (!argv[i])
         {
-            reply = fmt::format("spacefm: command {} requires an argument\n", argv[0]);
+            reply = fmt::format("spacefm: command {} requires an argument\n", socket_cmd);
             return 1;
         }
         // this only handles keys assigned to menu items
@@ -7225,11 +7226,11 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         gdk_event_free((GdkEvent*)event);
     }
-    else if (ztd::same(argv[0], "activate"))
+    else if (ztd::same(socket_cmd, "activate"))
     {
         if (!argv[i])
         {
-            reply = fmt::format("spacefm: command {} requires an argument\n", argv[0]);
+            reply = fmt::format("spacefm: command {} requires an argument\n", socket_cmd);
             return 1;
         }
         XSet* set = xset_find_custom(argv[i]);
@@ -7266,14 +7267,14 @@ main_window_socket_command(char* argv[], std::string& reply)
             on_main_window_keypress(nullptr, nullptr, set);
         }
     }
-    else if (ztd::same(argv[0], "add-event") || ztd::same(argv[0], "replace-event") ||
-             ztd::same(argv[0], "remove-event"))
+    else if (ztd::same(socket_cmd, "add-event") || ztd::same(socket_cmd, "replace-event") ||
+             ztd::same(socket_cmd, "remove-event"))
     {
         XSet* set;
 
         if (!(argv[i] && argv[i + 1]))
         {
-            reply = fmt::format("spacefm: {} requires two arguments\n", argv[0]);
+            reply = fmt::format("spacefm: {} requires two arguments\n", socket_cmd);
             return 1;
         }
         if (!(set = xset_is(argv[i])))
@@ -7282,12 +7283,12 @@ main_window_socket_command(char* argv[], std::string& reply)
             return 2;
         }
         // build command
-        std::string str2 = (ztd::same(argv[0], "replace-event") ? "*" : "");
+        std::string str2 = (ztd::same(socket_cmd, "replace-event") ? "*" : "");
         for (j = i + 1; argv[j]; j++)
             str2.append(fmt::format("{}{}", j == i + 1 ? "" : " ", argv[j]));
         str = (char*)str2.c_str();
         // modify list
-        if (ztd::same(argv[0], "remove-event"))
+        if (ztd::same(socket_cmd, "remove-event"))
         {
             l = g_list_find_custom((GList*)set->ob2_data, str, (GCompareFunc)g_strcmp0);
             if (!l)
@@ -7312,7 +7313,7 @@ main_window_socket_command(char* argv[], std::string& reply)
     }
     else
     {
-        reply = fmt::format("spacefm: invalid socket method '{}'\n", argv[0]);
+        reply = fmt::format("spacefm: invalid socket method '{}'\n", socket_cmd);
         return 1;
     }
     return 0;
