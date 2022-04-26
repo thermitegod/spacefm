@@ -5767,21 +5767,15 @@ main_window_socket_command(char* argv[], std::string& reply)
             height = width = 0;
             if (argv[i + 1])
             {
-                str = strchr(argv[i + 1], 'x');
-                if (!str)
+                // size format '620x480'
+                if (!ztd::contains(argv[i + 1], "x"))
                 {
-                    if (argv[i + 2])
-                    {
-                        width = std::stol(argv[i + 1]);
-                        height = std::stol(argv[i + 2]);
-                    }
+                    reply = fmt::format("spacefm: invalid size format {}\n", argv[i + 1]);
+                    return 2;
                 }
-                else
-                {
-                    str[0] = '\0';
-                    width = std::stol(argv[i + 1]);
-                    height = std::stol(str + 1);
-                }
+                auto size = ztd::split(argv[i + 1], "x");
+                width = std::stol(size[0]);
+                height = std::stol(size[1]);
             }
             if (height < 1 || width < 1)
             {
