@@ -5820,11 +5820,11 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = "spacefm: invalid slider value\n";
                 return 2;
             }
-            if (ztd::same(argv[i] + 7, "vslider_top"))
+            if (ztd::same(argv[i], "window_vslider_top"))
                 widget = main_window->hpane_top;
-            else if (ztd::same(argv[i] + 7, "vslider_bottom"))
+            else if (ztd::same(argv[i], "window_vslider_bottom"))
                 widget = main_window->hpane_bottom;
-            else if (ztd::same(argv[i] + 7, "hslider"))
+            else if (ztd::same(argv[i], "window_hslider"))
                 widget = main_window->vpane;
             else
                 widget = main_window->task_vpane;
@@ -5980,9 +5980,9 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = "spacefm: invalid slider value\n";
                 return 2;
             }
-            if (ztd::same(argv[i] + 6, "hslider_top"))
+            if (ztd::same(argv[i], "panel_hslider_top"))
                 widget = file_browser->side_vpane_top;
-            else if (ztd::same(argv[i] + 6, "hslider_bottom"))
+            else if (ztd::same(argv[i], "panel_hslider_bottom"))
                 widget = file_browser->side_vpane_bottom;
             else
                 widget = file_browser->hpane;
@@ -6063,29 +6063,29 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (Glib::str_has_prefix(argv[i], "sort_"))
         {
             XSetName xset_name;
-            if (ztd::same(argv[i] + 5, "ascend"))
+            if (ztd::same(argv[i], "sort_ascend"))
             {
                 ptk_file_browser_set_sort_type(file_browser,
                                                get_bool(argv[i + 1]) ? GTK_SORT_ASCENDING
                                                                      : GTK_SORT_DESCENDING);
                 return 0;
             }
-            else if (ztd::same(argv[i] + 5, "alphanum"))
+            else if (ztd::same(argv[i], "sort_alphanum"))
             {
                 xset_name = XSetName::SORTX_ALPHANUM;
                 xset_set_b(xset_name, get_bool(argv[i + 1]));
             }
-            // else if (ztd::same(argv[i] + 5, "natural"))
+            // else if (ztd::same(argv[i], "sort_natural"))
             //{
             //     xset_name = XSetName::SORTX_NATURAL;
             //     xset_set_b(xset_name, get_bool(argv[i + 1]));
             // }
-            else if (ztd::same(argv[i] + 5, "case"))
+            else if (ztd::same(argv[i], "sort_case"))
             {
                 xset_name = XSetName::SORTX_CASE;
                 xset_set_b(xset_name, get_bool(argv[i + 1]));
             }
-            else if (ztd::same(argv[i] + 5, "hidden_first"))
+            else if (ztd::same(argv[i], "sort_hidden_first"))
             {
                 if (get_bool(argv[i + 1]))
                     xset_name = XSetName::SORTX_HIDFIRST;
@@ -6093,7 +6093,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                     xset_name = XSetName::SORTX_HIDLAST;
                 xset_set_b(xset_name, true);
             }
-            else if (ztd::same(argv[i] + 5, "first"))
+            else if (ztd::same(argv[i], "sort_first"))
             {
                 if (ztd::same(argv[i + 1], "files"))
                     xset_name = XSetName::SORTX_FILES;
@@ -6292,11 +6292,11 @@ main_window_socket_command(char* argv[], std::string& reply)
                  ztd::same(argv[i], "window_vslider_bottom") ||
                  ztd::same(argv[i], "window_hslider") || ztd::same(argv[i], "window_tslider"))
         {
-            if (ztd::same(argv[i] + 7, "vslider_top"))
+            if (ztd::same(argv[i], "window_vslider_top"))
                 widget = main_window->hpane_top;
-            else if (ztd::same(argv[i] + 7, "vslider_bottom"))
+            else if (ztd::same(argv[i], "window_vslider_bottom"))
                 widget = main_window->hpane_bottom;
-            else if (ztd::same(argv[i] + 7, "hslider"))
+            else if (ztd::same(argv[i], "window_hslider"))
                 widget = main_window->vpane;
             else
                 widget = main_window->task_vpane;
@@ -6396,9 +6396,9 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (ztd::same(argv[i], "panel_hslider_top") ||
                  ztd::same(argv[i], "panel_hslider_bottom") || ztd::same(argv[i], "panel_vslider"))
         {
-            if (ztd::same(argv[i] + 6, "hslider_top"))
+            if (ztd::same(argv[i], "panel_hslider_top"))
                 widget = file_browser->side_vpane_top;
-            else if (ztd::same(argv[i] + 6, "hslider_bottom"))
+            else if (ztd::same(argv[i], "panel_hslider_bottom"))
                 widget = file_browser->side_vpane_bottom;
             else
                 widget = file_browser->hpane;
@@ -6469,15 +6469,15 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         else if (Glib::str_has_prefix(argv[i], "sort_"))
         {
-            if (ztd::same(argv[i] + 5, "ascend"))
+            if (ztd::same(argv[i], "sort_ascend"))
                 reply = fmt::format("{}\n", file_browser->sort_type == GTK_SORT_ASCENDING ? 1 : 0);
 #if 0
-            else if (ztd::same(argv[i] + 5, "natural"))
+            else if (ztd::same(argv[i], "sort_natural"))
 #endif
-            else if (ztd::same(argv[i] + 5, "alphanum"))
+            else if (ztd::same(argv[i], "sort_alphanum"))
                 reply = fmt::format("{}\n",
                                     xset_get_b_panel(file_browser->mypanel, "sort_extra") ? 1 : 0);
-            else if (ztd::same(argv[i] + 5, "case"))
+            else if (ztd::same(argv[i], "sort_case"))
                 reply = fmt::format("{}\n",
                                     xset_get_b_panel(file_browser->mypanel, "sort_extra") &&
                                             xset_get_int_panel(file_browser->mypanel,
@@ -6485,14 +6485,14 @@ main_window_socket_command(char* argv[], std::string& reply)
                                                                XSetSetSet::X) == XSetB::XSET_B_TRUE
                                         ? 1
                                         : 0);
-            else if (ztd::same(argv[i] + 5, "hidden_first"))
+            else if (ztd::same(argv[i], "sort_hidden_first"))
                 reply = fmt::format("{}\n",
                                     xset_get_int_panel(file_browser->mypanel,
                                                        "sort_extra",
                                                        XSetSetSet::Z) == XSetB::XSET_B_TRUE
                                         ? 1
                                         : 0);
-            else if (ztd::same(argv[i] + 5, "first"))
+            else if (ztd::same(argv[i], "sort_first"))
             {
                 switch (xset_get_int_panel(file_browser->mypanel, "sort_extra", XSetSetSet::Y))
                 {
