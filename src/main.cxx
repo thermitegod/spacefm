@@ -368,9 +368,9 @@ main(int argc, char* argv[])
     if (argc > 1)
     {
         // socket_command?
-        if (!strcmp(argv[1], "-s") || !strcmp(argv[1], "--socket-cmd"))
+        if (ztd::same(argv[1], "-s") || ztd::same(argv[1], "--socket-cmd"))
         {
-            if (argv[2] && (!strcmp(argv[2], "help") || !strcmp(argv[2], "--help")))
+            if (argv[2] && (ztd::same(argv[2], "help") || ztd::same(argv[2], "--help")))
             {
                 fmt::print("For help run, man spacefm-socket\n");
                 std::exit(EXIT_SUCCESS);
