@@ -7293,6 +7293,10 @@ main_window_socket_command(char* argv[], std::string& reply)
             l = g_list_append((GList*)set->ob2_data, ztd::strdup(str));
         set->ob2_data = (void*)l;
     }
+    else if (ztd::same(socket_cmd, "ping"))
+    {
+        reply = "pong\n";
+    }
     else
     {
         reply = fmt::format("spacefm: invalid socket method '{}'\n", socket_cmd);
