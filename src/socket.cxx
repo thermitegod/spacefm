@@ -23,10 +23,10 @@
 
 #include <fmt/format.h>
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
-
-#include <glibmm.h>
 
 #include "vfs/vfs-user-dir.hxx"
 
@@ -62,7 +62,7 @@ static bool socket_daemon = false;
 
 static void get_socket_name(char* buf, int len);
 static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data);
-static void receive_socket_command(int client, GString* args);
+static void receive_socket_command(int client, const std::string& args);
 
 bool
 check_socket_daemon()
@@ -108,18 +108,18 @@ on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
         return true;
 
     static char buf[1024];
-    GString* args = g_string_new_len(nullptr, 2048);
-    int r;
+    std::string args;
+    std::size_t r;
     while ((r = read(client, buf, sizeof(buf))) > 0)
     {
-        g_string_append_len(args, buf, r);
-        if (args->str[0] == SocketEvent::CMD_SOCKET_CMD && args->len > 1 &&
-            args->str[args->len - 2] == '\n' && args->str[args->len - 1] == '\n')
+        args.append(buf, r);
+        if (args[0] == SocketEvent::CMD_SOCKET_CMD && args.size() > 1 &&
+            args[args.size() - 2] == '\n' && args[args.size() - 1] == '\n')
             // because SocketEvent::CMD_SOCKET_CMD does not immediately close the socket
             // data is terminated by two linefeeds to prevent read blocking
             break;
     }
-    if (args->str[0] == SocketEvent::CMD_SOCKET_CMD)
+    if (args[0] == SocketEvent::CMD_SOCKET_CMD)
         receive_socket_command(client, args);
     shutdown(client, 2);
     close(client);
@@ -130,21 +130,21 @@ on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
     cli_flags.no_tabs = false;
     socket_daemon = false;
 
-    int argx = 0;
-    if (args->str[argx] == SocketEvent::CMD_NO_TABS)
+    std::size_t argx = 0;
+    if (args[argx] == SocketEvent::CMD_NO_TABS)
     {
         cli_flags.reuse_tab = false;
         cli_flags.no_tabs = true;
         argx++; // another command follows SocketEvent::CMD_NO_TABS
     }
-    if (args->str[argx] == SocketEvent::CMD_REUSE_TAB)
+    if (args[argx] == SocketEvent::CMD_REUSE_TAB)
     {
         cli_flags.reuse_tab = true;
         cli_flags.new_tab = false;
         argx++; // another command follows SocketEvent::CMD_REUSE_TAB
     }
 
-    switch (args->str[argx])
+    switch (args[argx])
     {
         case SocketEvent::CMD_PANEL1:
             cli_flags.panel = 1;
@@ -179,24 +179,20 @@ on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
             break;
         case SocketEvent::CMD_DAEMON_MODE:
             socket_daemon = cli_flags.daemon_mode = true;
-            g_string_free(args, true);
             return true;
         case SocketEvent::CMD_FIND_FILES:
             cli_flags.find_files = true;
-            g_string_free(args, true);
             return true;
         case SocketEvent::CMD_SOCKET_CMD:
-            g_string_free(args, true);
             return true;
         default:
             break;
     }
 
-    if (args->str[argx + 1])
-        cli_flags.files = g_strsplit(args->str + argx + 1, "\n", 0);
+    if (args[argx + 1])
+        cli_flags.files = g_strsplit(args.c_str() + argx + 1, "\n", 0);
     else
         cli_flags.files = nullptr;
-    g_string_free(args, true);
 
     if (cli_flags.files)
     {
@@ -367,24 +363,14 @@ single_instance_finalize()
 }
 
 static void
-receive_socket_command(int client, GString* args)
+receive_socket_command(int client, const std::string& args)
 {
-    char** argv;
+    char** argv = nullptr;
     char cmd;
     std::string reply;
 
-    if (args->str[1])
-    {
-        if (Glib::str_has_suffix(args->str, "\n\n"))
-        {
-            // remove empty strings at tail
-            args->str[args->len - 1] = '\0';
-            args->str[args->len - 2] = '\0';
-        }
-        argv = g_strsplit(args->str + 1, "\n", 0);
-    }
-    else
-        argv = nullptr;
+    if (!args.empty())
+        argv = g_strsplit(args.c_str() + 1, "\n", 0);
 
     // check inode tag - was socket command sent from the same filesystem?
     // eg this helps deter use of socket commands sent from a chroot jail
@@ -410,19 +396,18 @@ receive_socket_command(int client, GString* args)
 }
 
 int
-send_socket_command(int argc, char* argv[], char** reply)
+send_socket_command(int argc, char* argv[], std::string& reply)
 {
-    *reply = nullptr;
     if (argc < 3)
     {
-        LOG_ERROR("socket-cmd requires an argument");
+        reply = "socket-cmd requires an argument\n";
         return EXIT_FAILURE;
     }
 
     // create socket
     if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
     {
-        LOG_ERROR("failed to create socket");
+        reply = "failed to create socket\n";
         return EXIT_FAILURE;
     }
 
@@ -434,7 +419,7 @@ send_socket_command(int argc, char* argv[], char** reply)
 
     if (connect(sock, (struct sockaddr*)&addr, addr_len) != 0)
     {
-        LOG_ERROR("could not connect to socket (not running? or DISPLAY not set?)");
+        reply = "could not connect to socket (not running? or DISPLAY not set?)\n";
         return EXIT_FAILURE;
     }
 
@@ -448,8 +433,7 @@ send_socket_command(int argc, char* argv[], char** reply)
     write(sock, "\n", 1);
 
     // send arguments
-    int i;
-    for (i = 2; i < argc; i++)
+    for (int i = 2; i < argc; i++)
     {
         write(sock, argv[i], std::strlen(argv[i]));
         write(sock, "\n", 1);
@@ -457,29 +441,25 @@ send_socket_command(int argc, char* argv[], char** reply)
     write(sock, "\n", 1);
 
     // get response
-    GString* sock_reply = g_string_new_len(nullptr, 2048);
-    int r;
-    static char buf[1024];
-
+    std::string sock_reply;
+    std::size_t r;
+    char buf[1024];
     while ((r = read(sock, buf, sizeof(buf))) > 0)
-        g_string_append_len(sock_reply, buf, r);
+    {
+        sock_reply.append(buf, r);
+    }
 
     // close socket
     shutdown(sock, 2);
     close(sock);
 
     // set reply
-    int ret;
-    if (sock_reply->len != 0)
-    {
-        *reply = ztd::strdup(sock_reply->str + 1);
-        ret = sock_reply->str[0];
-    }
-    else
+    if (sock_reply.size() == 0)
     {
         LOG_ERROR("invalid response from socket");
-        ret = EXIT_FAILURE;
+        return EXIT_FAILURE;
     }
-    g_string_free(sock_reply, true);
-    return ret;
+
+    reply = sock_reply.substr(1);
+    return sock_reply[0];
 }

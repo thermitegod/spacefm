@@ -372,14 +372,13 @@ main(int argc, char* argv[])
         {
             if (argv[2] && (ztd::same(argv[2], "help") || ztd::same(argv[2], "--help")))
             {
-                fmt::print("For help run, man spacefm-socket\n");
+                fmt::print("For help run, 'man spacefm-socket'\n");
                 std::exit(EXIT_SUCCESS);
             }
-            char* reply = nullptr;
-            int ret = send_socket_command(argc, argv, &reply);
-            if (reply && reply[0])
-                fmt::print("{}", reply);
-            free(reply);
+            std::string sock_reply;
+            int ret = send_socket_command(argc, argv, sock_reply);
+            if (!sock_reply.empty())
+                fmt::print("{}", sock_reply);
             std::exit(ret);
         }
     }

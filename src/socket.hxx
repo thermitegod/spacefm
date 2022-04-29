@@ -39,4 +39,4 @@ extern CliFlags cli_flags;
 bool check_socket_daemon();
 bool single_instance_check();
 void single_instance_finalize();
-int send_socket_command(int argc, char* argv[], char** reply);
+int send_socket_command(int argc, char* argv[], std::string& reply);
