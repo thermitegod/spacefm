@@ -620,7 +620,7 @@ update_window_icon(GtkWindow* window, GtkIconTheme* theme)
     else if (error != nullptr)
     {
         // An error occured on loading the icon
-        LOG_ERROR("spacefm: Unable to load the window icon '{}' in - update_window_icon - {}",
+        LOG_ERROR("Unable to load the window icon '{}' in - update_window_icon - {}",
                   name,
                   error->message);
         g_error_free(error);
@@ -5649,7 +5649,7 @@ main_window_socket_command(char* argv[], std::string& reply)
 
     if (!(argv && argv[0]))
     {
-        reply = "spacefm: invalid socket command\n";
+        reply = "invalid socket command";
         return 1;
     }
 
@@ -5661,7 +5661,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             if (!argv[i + 1])
             {
-                reply = fmt::format("spacefm: option {} requires an argument\n", argv[i]);
+                reply = fmt::format("option {} requires an argument", argv[i]);
                 return 1;
             }
             window = argv[i + 1];
@@ -5672,7 +5672,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             if (!argv[i + 1])
             {
-                reply = fmt::format("spacefm: option {} requires an argument\n", argv[i]);
+                reply = fmt::format("option {} requires an argument", argv[i]);
                 return 1;
             }
             panel = std::stol(argv[i + 1]);
@@ -5683,14 +5683,14 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             if (!argv[i + 1])
             {
-                reply = fmt::format("spacefm: option {} requires an argument\n", argv[i]);
+                reply = fmt::format("option {} requires an argument", argv[i]);
                 return 1;
             }
             tab = std::stol(argv[i + 1]);
             i += 2;
             continue;
         }
-        reply = fmt::format("spacefm: invalid option '{}'\n", argv[i]);
+        reply = fmt::format("invalid option '{}'", argv[i]);
         return 1;
     }
 
@@ -5699,7 +5699,7 @@ main_window_socket_command(char* argv[], std::string& reply)
     {
         if (!(main_window = fm_main_window_get_last_active()))
         {
-            reply = "spacefm: invalid window\n";
+            reply = "invalid window";
             return 2;
         }
     }
@@ -5717,7 +5717,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         if (!main_window)
         {
-            reply = fmt::format("spacefm: invalid window {}\n", window);
+            reply = fmt::format("invalid window {}", window);
             return 2;
         }
     }
@@ -5727,13 +5727,13 @@ main_window_socket_command(char* argv[], std::string& reply)
         panel = main_window->curpanel;
     if (panel < 1 || panel > 4)
     {
-        reply = fmt::format("spacefm: invalid panel {}\n", panel);
+        reply = fmt::format("invalid panel {}", panel);
         return 2;
     }
     if (!xset_get_b_panel(panel, "show") ||
         gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[panel - 1])) == -1)
     {
-        reply = fmt::format("spacefm: panel {} is not visible\n", panel);
+        reply = fmt::format("panel {} is not visible", panel);
         return 2;
     }
 
@@ -5744,7 +5744,7 @@ main_window_socket_command(char* argv[], std::string& reply)
     }
     if (tab < 1 || tab > gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[panel - 1])))
     {
-        reply = fmt::format("spacefm: invalid tab {}\n", tab);
+        reply = fmt::format("invalid tab {}", tab);
         return 2;
     }
     file_browser = PTK_FILE_BROWSER(
@@ -5756,7 +5756,7 @@ main_window_socket_command(char* argv[], std::string& reply)
     {
         if (!argv[i])
         {
-            reply = "spacefm: command set requires an argument\n";
+            reply = "command set requires an argument";
             return 1;
         }
         if (ztd::same(argv[i], "window_size") || ztd::same(argv[i], "window_position"))
@@ -5767,7 +5767,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 // size format '620x480'
                 if (!ztd::contains(argv[i + 1], "x"))
                 {
-                    reply = fmt::format("spacefm: invalid size format {}\n", argv[i + 1]);
+                    reply = fmt::format("invalid size format {}", argv[i + 1]);
                     return 2;
                 }
                 auto size = ztd::split(argv[i + 1], "x");
@@ -5776,7 +5776,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             if (height < 1 || width < 1)
             {
-                reply = fmt::format("spacefm: invalid {} value\n", argv[i]);
+                reply = fmt::format("invalid {} value", argv[i]);
                 return 2;
             }
             if (ztd::same(argv[i], "window_size"))
@@ -5808,7 +5808,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 width = std::stol(argv[i + 1]);
             if (width < 0)
             {
-                reply = "spacefm: invalid slider value\n";
+                reply = "invalid slider value";
                 return 2;
             }
             if (ztd::same(argv[i], "window_vslider_top"))
@@ -5837,7 +5837,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             if (width == 0 || width < -3 || width > 4)
             {
-                reply = "spacefm: invalid panel number\n";
+                reply = "invalid panel number";
                 return 2;
             }
             focus_panel(nullptr, (void*)main_window, width);
@@ -5878,7 +5878,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (width == 0 || width < -3 ||
                 width > gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[panel - 1])))
             {
-                reply = "spacefm: invalid tab number\n";
+                reply = "invalid tab number";
                 return 2;
             }
             ptk_file_browser_go_tab(nullptr, file_browser, width);
@@ -5894,13 +5894,12 @@ main_window_socket_command(char* argv[], std::string& reply)
             else
                 fm_main_window_add_new_tab(main_window, argv[i + 1]);
             main_window_get_counts(file_browser, &i, &tab, &j);
-            reply = fmt::format("#!{}\n{}\nnew_tab_window={}\nnew_tab_panel={}\n"
-                                "new_tab_number={}\n",
-                                BASH_PATH,
-                                SHELL_SETTINGS,
+            reply = fmt::format("new_tab_window={}\nnew_tab_panel={}\n"
+                                "new_tab_number={}\nnew_tab_path={}",
                                 (void*)main_window,
                                 panel,
-                                tab);
+                                tab,
+                                argv[i + 1]);
         }
         else if (Glib::str_has_suffix(argv[i], "_visible"))
         {
@@ -5939,7 +5938,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 j = argv[i][5] - 48;
                 if (j < 1 || j > 4)
                 {
-                    reply = fmt::format("spacefm: invalid property {}\n", argv[i]);
+                    reply = fmt::format("invalid property {}", argv[i]);
                     return 2;
                 }
                 xset_set_b_panel(j, "show", get_bool(argv[i + 1]));
@@ -5948,7 +5947,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             if (str.empty())
             {
-                reply = fmt::format("spacefm: invalid property {}\n", argv[i]);
+                reply = fmt::format("invalid property {}", argv[i]);
                 return 1;
             }
             if (use_mode)
@@ -5968,7 +5967,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 width = std::stol(argv[i + 1]);
             if (width < 0)
             {
-                reply = "spacefm: invalid slider value\n";
+                reply = "invalid slider value";
                 return 2;
             }
             if (ztd::same(argv[i], "panel_hslider_top"))
@@ -5988,7 +5987,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 width = std::stol(argv[i + 2]);
             if (width < 1)
             {
-                reply = "spacefm: invalid column width\n";
+                reply = "invalid column width";
                 return 2;
             }
             if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
@@ -6022,7 +6021,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 }
                 if (j == 6)
                 {
-                    reply = fmt::format("spacefm: invalid column name '{}'\n", argv[i + 1]);
+                    reply = fmt::format("invalid column name '{}'", argv[i + 1]);
                     return 2;
                 }
                 gtk_tree_view_column_set_fixed_width(col, width);
@@ -6049,7 +6048,7 @@ main_window_socket_command(char* argv[], std::string& reply)
 
             if (j == -10)
             {
-                reply = fmt::format("spacefm: invalid column name '{}'\n", argv[i + 1]);
+                reply = fmt::format("invalid column name '{}'", argv[i + 1]);
                 return 2;
             }
             ptk_file_browser_set_sort_order(file_browser, (PtkFBSortOrder)j);
@@ -6097,13 +6096,13 @@ main_window_socket_command(char* argv[], std::string& reply)
                     xset_name = XSetName::SORTX_MIX;
                 else
                 {
-                    reply = fmt::format("spacefm: invalid {} value\n", argv[i]);
+                    reply = fmt::format("invalid {} value", argv[i]);
                     return 2;
                 }
             }
             else
             {
-                reply = fmt::format("spacefm: invalid property {}\n", argv[i]);
+                reply = fmt::format("invalid property {}", argv[i]);
                 return 1;
             }
             ptk_file_browser_set_sort_extra(file_browser, xset_name);
@@ -6169,7 +6168,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             if (argv[i + 1] && !g_utf8_validate(argv[i + 1], -1, nullptr))
             {
-                reply = "spacefm: text is not valid UTF-8\n";
+                reply = "text is not valid UTF-8";
                 return 2;
             }
             GtkClipboard* clip =
@@ -6183,7 +6182,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             if (!argv[i + 1])
             {
-                reply = fmt::format("spacefm: {} requires a file path\n", argv[i]);
+                reply = fmt::format("{} requires a file path", argv[i]);
                 return 1;
             }
             std::string contents;
@@ -6193,13 +6192,12 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             catch (const Glib::FileError& e)
             {
-                reply = fmt::format("spacefm: error reading file '{}'\n", argv[i + 1]);
+                reply = fmt::format("error reading file '{}'", argv[i + 1]);
                 return 2;
             }
             if (!g_utf8_validate(contents.c_str(), -1, nullptr))
             {
-                reply = fmt::format("spacefm: file '{}' does not contain valid UTF-8 text\n",
-                                    argv[i + 1]);
+                reply = fmt::format("file '{}' does not contain valid UTF-8 text", argv[i + 1]);
                 return 2;
             }
             GtkClipboard* clip = gtk_clipboard_get(ztd::same(argv[i], "clipboard_from_file")
@@ -6232,12 +6230,12 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             if (!argv[i + 1])
             {
-                reply = fmt::format("spacefm: {} requires a directory path\n", argv[i]);
+                reply = fmt::format("{} requires a directory path", argv[i]);
                 return 1;
             }
             if (!std::filesystem::is_directory(argv[i + 1]))
             {
-                reply = fmt::format("spacefm: directory '{}' does not exist\n", argv[i + 1]);
+                reply = fmt::format("directory '{}' does not exist", argv[i + 1]);
                 return 1;
             }
             ptk_file_browser_chdir(file_browser,
@@ -6246,7 +6244,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         else
         {
-            reply = fmt::format("spacefm: invalid property {}\n", argv[i]);
+            reply = fmt::format("invalid property {}", argv[i]);
             return 1;
         }
     }
@@ -6255,7 +6253,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         // get
         if (!argv[i])
         {
-            reply = fmt::format("spacefm: command {} requires an argument\n", socket_cmd);
+            reply = fmt::format("command {} requires an argument", socket_cmd);
             return 1;
         }
         if (ztd::same(argv[i], "window_size") || ztd::same(argv[i], "window_position"))
@@ -6264,22 +6262,22 @@ main_window_socket_command(char* argv[], std::string& reply)
                 gtk_window_get_size(GTK_WINDOW(main_window), &width, &height);
             else
                 gtk_window_get_position(GTK_WINDOW(main_window), &width, &height);
-            reply = fmt::format("{}x{}\n", width, height);
+            reply = fmt::format("{}x{}", width, height);
         }
         else if (ztd::same(argv[i], "window_maximized"))
         {
-            reply = fmt::format("{}\n", !!main_window->maximized);
+            reply = fmt::format("{}", !!main_window->maximized);
         }
         else if (ztd::same(argv[i], "window_fullscreen"))
         {
-            reply = fmt::format("{}\n", !!main_window->fullscreen);
+            reply = fmt::format("{}", !!main_window->fullscreen);
         }
         else if (ztd::same(argv[i], "screen_size"))
         {
             GdkRectangle workarea = GdkRectangle();
             gdk_monitor_get_workarea(gdk_display_get_primary_monitor(gdk_display_get_default()),
                                      &workarea);
-            reply = fmt::format("{}x{}\n", workarea.width, workarea.height);
+            reply = fmt::format("{}x{}", workarea.width, workarea.height);
         }
         else if (ztd::same(argv[i], "window_vslider_top") ||
                  ztd::same(argv[i], "window_vslider_bottom") ||
@@ -6293,11 +6291,11 @@ main_window_socket_command(char* argv[], std::string& reply)
                 widget = main_window->vpane;
             else
                 widget = main_window->task_vpane;
-            reply = fmt::format("{}\n", gtk_paned_get_position(GTK_PANED(widget)));
+            reply = fmt::format("{}", gtk_paned_get_position(GTK_PANED(widget)));
         }
         else if (ztd::same(argv[i], "focused_panel"))
         {
-            reply = fmt::format("{}\n", main_window->curpanel);
+            reply = fmt::format("{}", main_window->curpanel);
         }
         else if (ztd::same(argv[i], "focused_pane"))
         {
@@ -6312,11 +6310,11 @@ main_window_socket_command(char* argv[], std::string& reply)
             else if (file_browser->path_bar && gtk_widget_is_focus(file_browser->path_bar))
                 str = "pathbar";
             if (!str.empty())
-                reply = fmt::format("{}\n", str);
+                reply = fmt::format("{}", str);
         }
         else if (ztd::same(argv[i], "current_tab"))
         {
-            reply = fmt::format("{}\n",
+            reply = fmt::format("{}",
                                 gtk_notebook_page_num(GTK_NOTEBOOK(main_window->panel[panel - 1]),
                                                       GTK_WIDGET(file_browser)) +
                                     1);
@@ -6324,7 +6322,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (ztd::same(argv[i], "tab_count"))
         {
             main_window_get_counts(file_browser, &panel, &tab, &j);
-            reply = fmt::format("{}\n", tab);
+            reply = fmt::format("{}", tab);
         }
         else if (ztd::same(argv[i], "new_tab"))
         {
@@ -6366,23 +6364,23 @@ main_window_socket_command(char* argv[], std::string& reply)
                 j = argv[i][5] - 48;
                 if (j < 1 || j > 4)
                 {
-                    reply = fmt::format("spacefm: invalid property {}\n", argv[i]);
+                    reply = fmt::format("invalid property {}", argv[i]);
                     return 2;
                 }
-                reply = fmt::format("{}\n", xset_get_b_panel(j, "show"));
+                reply = fmt::format("{}", xset_get_b_panel(j, "show"));
                 return 0;
             }
             if (str.empty())
             {
-                reply = fmt::format("spacefm: invalid property {}\n", argv[i]);
+                reply = fmt::format("invalid property {}", argv[i]);
                 return 1;
             }
             if (use_mode)
                 reply = fmt::format(
-                    "{}\n",
+                    "{}",
                     !!xset_get_b_panel_mode(panel, str, main_window->panel_context[panel - 1]));
             else
-                reply = fmt::format("{}\n", !!xset_get_b_panel(panel, str));
+                reply = fmt::format("{}", !!xset_get_b_panel(panel, str));
         }
         else if (ztd::same(argv[i], "panel_hslider_top") ||
                  ztd::same(argv[i], "panel_hslider_bottom") || ztd::same(argv[i], "panel_vslider"))
@@ -6393,7 +6391,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 widget = file_browser->side_vpane_bottom;
             else
                 widget = file_browser->hpane;
-            reply = fmt::format("{}\n", gtk_paned_get_position(GTK_PANED(widget)));
+            reply = fmt::format("{}", gtk_paned_get_position(GTK_PANED(widget)));
         }
         else if (ztd::same(argv[i], "column_width"))
         { // COLUMN
@@ -6428,10 +6426,10 @@ main_window_socket_command(char* argv[], std::string& reply)
                 }
                 if (j == 6)
                 {
-                    reply = fmt::format("spacefm: invalid column name '{}'\n", argv[i + 1]);
+                    reply = fmt::format("invalid column name '{}'", argv[i + 1]);
                     return 2;
                 }
-                reply = fmt::format("{}\n", gtk_tree_view_column_get_width(col));
+                reply = fmt::format("{}", gtk_tree_view_column_get_width(col));
             }
         }
         else if (ztd::same(argv[i], "sort_by"))
@@ -6459,20 +6457,20 @@ main_window_socket_command(char* argv[], std::string& reply)
                 default:
                     return 0;
             }
-            reply = fmt::format("{}\n", str);
+            reply = fmt::format("{}", str);
         }
         else if (Glib::str_has_prefix(argv[i], "sort_"))
         {
             if (ztd::same(argv[i], "sort_ascend"))
-                reply = fmt::format("{}\n", file_browser->sort_type == GTK_SORT_ASCENDING ? 1 : 0);
+                reply = fmt::format("{}", file_browser->sort_type == GTK_SORT_ASCENDING ? 1 : 0);
 #if 0
             else if (ztd::same(argv[i], "sort_natural"))
 #endif
             else if (ztd::same(argv[i], "sort_alphanum"))
-                reply = fmt::format("{}\n",
+                reply = fmt::format("{}",
                                     xset_get_b_panel(file_browser->mypanel, "sort_extra") ? 1 : 0);
             else if (ztd::same(argv[i], "sort_case"))
-                reply = fmt::format("{}\n",
+                reply = fmt::format("{}",
                                     xset_get_b_panel(file_browser->mypanel, "sort_extra") &&
                                             xset_get_int_panel(file_browser->mypanel,
                                                                "sort_extra",
@@ -6480,7 +6478,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                                         ? 1
                                         : 0);
             else if (ztd::same(argv[i], "sort_hidden_first"))
-                reply = fmt::format("{}\n",
+                reply = fmt::format("{}",
                                     xset_get_int_panel(file_browser->mypanel,
                                                        "sort_extra",
                                                        XSetSetSet::Z) == XSetB::XSET_B_TRUE
@@ -6502,30 +6500,30 @@ main_window_socket_command(char* argv[], std::string& reply)
                     default:
                         return 0; // failsafe for known
                 }
-                reply = fmt::format("{}\n", str);
+                reply = fmt::format("{}", str);
             }
             else
             {
-                reply = fmt::format("spacefm: invalid property {}\n", argv[i]);
+                reply = fmt::format("invalid property {}", argv[i]);
                 return 1;
             }
         }
         else if (ztd::same(argv[i], "show_thumbnails"))
         {
-            reply = fmt::format("{}\n", app_settings.show_thumbnail ? 1 : 0);
+            reply = fmt::format("{}", app_settings.show_thumbnail ? 1 : 0);
         }
         else if (ztd::same(argv[i], "large_icons"))
         {
-            reply = fmt::format("{}\n", file_browser->large_icons ? 1 : 0);
+            reply = fmt::format("{}", file_browser->large_icons ? 1 : 0);
         }
         else if (ztd::same(argv[i], "statusbar_text"))
         {
-            reply = fmt::format("{}\n", gtk_label_get_text(GTK_LABEL(file_browser->status_label)));
+            reply = fmt::format("{}", gtk_label_get_text(GTK_LABEL(file_browser->status_label)));
         }
         else if (ztd::same(argv[i], "pathbar_text"))
         {
             if (GTK_IS_WIDGET(file_browser->path_bar))
-                reply = fmt::format("{}\n", gtk_entry_get_text(GTK_ENTRY(file_browser->path_bar)));
+                reply = fmt::format("{}", gtk_entry_get_text(GTK_ENTRY(file_browser->path_bar)));
         }
         else if (ztd::same(argv[i], "clipboard_text") ||
                  ztd::same(argv[i], "clipboard_primary_text"))
@@ -6580,13 +6578,13 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (!clip_txt)
                 return 0;
             // build bash array
-            std::vector<std::string> pathv = ztd::split(clip_txt, "\n");
+            std::vector<std::string> pathv = ztd::split(clip_txt, "");
             str = "(";
             for (const std::string& path: pathv)
             {
                 str.append(fmt::format("{} ", bash_quote(path)));
             }
-            str.append(")\n");
+            str.append(")");
 
             reply = str;
         }
@@ -6610,7 +6608,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 vfs_file_info_unref(file);
             }
             vfs_file_info_list_free(sel_files);
-            str.append(")\n");
+            str.append(")");
             reply = str;
         }
         else if (ztd::same(argv[i], "selected_pattern"))
@@ -6618,11 +6616,11 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         else if (ztd::same(argv[i], "current_dir"))
         {
-            reply = fmt::format("{}\n", ptk_file_browser_get_cwd(file_browser));
+            reply = fmt::format("{}", ptk_file_browser_get_cwd(file_browser));
         }
         else
         {
-            reply = fmt::format("spacefm: invalid property {}\n", argv[i]);
+            reply = fmt::format("invalid property {}", argv[i]);
             return 1;
         }
     }
@@ -6630,7 +6628,7 @@ main_window_socket_command(char* argv[], std::string& reply)
     { // TASKNUM PROPERTY [VALUE]
         if (!(argv[i] && argv[i + 1]))
         {
-            reply = fmt::format("spacefm: {} requires two arguments\n", socket_cmd);
+            reply = fmt::format("{} requires two arguments", socket_cmd);
             return 1;
         }
 
@@ -6651,12 +6649,12 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         if (!ptask)
         {
-            reply = fmt::format("spacefm: invalid task '{}'\n", argv[i]);
+            reply = fmt::format("invalid task '{}'", argv[i]);
             return 2;
         }
         if (ptask->task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
         {
-            reply = fmt::format("spacefm: internal task {} is read-only\n", argv[i]);
+            reply = fmt::format("internal task {} is read-only", argv[i]);
             return 2;
         }
 
@@ -6707,7 +6705,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (ztd::same(argv[i + 1], "elapsed") || ztd::same(argv[i + 1], "started") ||
                  ztd::same(argv[i + 1], "status"))
         {
-            reply = fmt::format("spacefm: task property '{}' is read-only\n", argv[i + 1]);
+            reply = fmt::format("task property '{}' is read-only", argv[i + 1]);
             return 2;
         }
         else if (ztd::same(argv[i + 1], "queue_state"))
@@ -6725,7 +6723,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                              nullptr);
             else
             {
-                reply = fmt::format("spacefm: invalid queue_state '{}'\n", argv[i + 2]);
+                reply = fmt::format("invalid queue_state '{}'", argv[i + 2]);
                 return 2;
             }
             main_task_start_queued(main_window->task_view, nullptr);
@@ -6742,7 +6740,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         else
         {
-            reply = fmt::format("spacefm: invalid task property '{}'\n", argv[i + 1]);
+            reply = fmt::format("invalid task property '{}'", argv[i + 1]);
             return 2;
         }
         gtk_list_store_set(GTK_LIST_STORE(model), &it, j, argv[i + 2], -1);
@@ -6751,7 +6749,7 @@ main_window_socket_command(char* argv[], std::string& reply)
     { // TASKNUM PROPERTY
         if (!(argv[i] && argv[i + 1]))
         {
-            reply = fmt::format("spacefm: {} requires two arguments\n", socket_cmd);
+            reply = fmt::format("{} requires two arguments", socket_cmd);
             return 1;
         }
 
@@ -6772,7 +6770,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         if (!ptask)
         {
-            reply = fmt::format("spacefm: invalid task '{}'\n", argv[i]);
+            reply = fmt::format("invalid task '{}'", argv[i]);
             return 2;
         }
 
@@ -6781,7 +6779,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             ptk_file_task_lock(ptask);
             if (!ptask->task->exec_icon.empty())
-                reply = fmt::format("{}\n", ptask->task->exec_icon.c_str());
+                reply = fmt::format("{}", ptask->task->exec_icon.c_str());
             ptk_file_task_unlock(ptask);
             return 0;
         }
@@ -6795,7 +6793,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             j = MainWindowTaskCol::TASK_COL_TO;
         else if (ztd::same(argv[i + 1], "progress"))
         {
-            reply = fmt::format("{}\n", ptask->task->percent);
+            reply = fmt::format("{}", ptask->task->percent);
             return 0;
         }
         else if (ztd::same(argv[i + 1], "total"))
@@ -6824,31 +6822,31 @@ main_window_socket_command(char* argv[], std::string& reply)
                 str = "queue";
             else
                 str = "stop"; // failsafe
-            reply = fmt::format("{}\n", str);
+            reply = fmt::format("{}", str);
             return 0;
         }
         else if (ztd::same(argv[i + 1], "popup_handler"))
         {
             if (ptask->pop_handler)
-                reply = fmt::format("{}\n", ptask->pop_handler);
+                reply = fmt::format("{}", ptask->pop_handler);
             return 0;
         }
         else
         {
-            reply = fmt::format("spacefm: invalid task property '{}'\n", argv[i + 1]);
+            reply = fmt::format("invalid task property '{}'", argv[i + 1]);
             return 2;
         }
         char* str2;
         gtk_tree_model_get(model, &it, j, &str2, -1);
         if (str2)
-            reply = fmt::format("{}\n", str2);
+            reply = fmt::format("{}", str2);
         free(str2);
     }
     else if (ztd::same(socket_cmd, "run-task"))
     { // TYPE [OPTIONS] ...
         if (!(argv[i] && argv[i + 1]))
         {
-            reply = fmt::format("spacefm: {} requires two arguments\n", socket_cmd);
+            reply = fmt::format("{} requires two arguments", socket_cmd);
             return 1;
         }
         if (ztd::same(argv[i], "cmd") || ztd::same(argv[i], "command"))
@@ -6889,19 +6887,19 @@ main_window_socket_command(char* argv[], std::string& reply)
                     opt_cwd = argv[++j];
                     if (!(opt_cwd && opt_cwd[0] == '/' && std::filesystem::is_directory(opt_cwd)))
                     {
-                        reply = fmt::format("spacefm: no such directory '{}'\n", opt_cwd);
+                        reply = fmt::format("no such directory '{}'", opt_cwd);
                         return 2;
                     }
                 }
                 else
                 {
-                    reply = fmt::format("spacefm: invalid {} task option '{}'\n", argv[i], argv[j]);
+                    reply = fmt::format("invalid {} task option '{}'", argv[i], argv[j]);
                     return 2;
                 }
             }
             if (!argv[j])
             {
-                reply = fmt::format("spacefm: {} requires two arguments\n", socket_cmd);
+                reply = fmt::format("{} requires two arguments", socket_cmd);
                 return 1;
             }
             std::string cmd = "";
@@ -6929,11 +6927,9 @@ main_window_socket_command(char* argv[], std::string& reply)
                 gtk_window_present(GTK_WINDOW(main_window));
             ptk_file_task_run(ptask);
             if (opt_task)
-                reply = fmt::format("#!{}\n{}\n# Note: $new_task_id not valid until approx one "
+                reply = fmt::format("Note: $new_task_id not valid until approx one "
                                     "half second after task start\nnew_task_window={}\n"
-                                    "new_task_id={}\n",
-                                    BASH_PATH,
-                                    SHELL_SETTINGS,
+                                    "new_task_id={}",
                                     (void*)main_window,
                                     (void*)ptask);
         }
@@ -6949,20 +6945,20 @@ main_window_socket_command(char* argv[], std::string& reply)
                     opt_root = true;
                 else
                 {
-                    reply = fmt::format("spacefm: invalid {} task option '{}'\n", argv[i], argv[j]);
+                    reply = fmt::format("invalid {} task option '{}'", argv[i], argv[j]);
                     return 2;
                 }
             }
             if (!argv[j])
             {
-                reply = fmt::format("spacefm: {} requires two arguments\n", socket_cmd);
+                reply = fmt::format("{} requires two arguments", socket_cmd);
                 return 1;
             }
             if (ztd::same(argv[i], "edit"))
             {
                 if (!(argv[j][0] == '/' && std::filesystem::exists(argv[j])))
                 {
-                    reply = fmt::format("spacefm: no such file '{}'\n", argv[j]);
+                    reply = fmt::format("no such file '{}'", argv[j]);
                     return 2;
                 }
                 xset_edit(GTK_WIDGET(file_browser), argv[j], opt_root, !opt_root);
@@ -6973,12 +6969,12 @@ main_window_socket_command(char* argv[], std::string& reply)
             // mount or unmount TARGET
             for (j = i + 1; argv[j] && argv[j][0] == '-'; j++)
             {
-                reply = fmt::format("spacefm: invalid {} task option '{}'\n", argv[i], argv[j]);
+                reply = fmt::format("invalid {} task option '{}'", argv[i], argv[j]);
                 return 2;
             }
             if (!argv[j])
             {
-                reply = fmt::format("spacefm: task type {} requires TARGET argument\n", socket_cmd);
+                reply = fmt::format("task type {} requires TARGET argument", socket_cmd);
                 return 1;
             }
 
@@ -6998,7 +6994,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                         // NON-block device - try to find vol by mount point
                         if (!(vol = vfs_volume_get_by_device_or_point(device_file, real_path)))
                         {
-                            reply = fmt::format("spacefm: invalid TARGET '{}'\n", argv[j]);
+                            reply = fmt::format("invalid TARGET '{}'", argv[j]);
                             return 2;
                         }
                         free(device_file);
@@ -7019,7 +7015,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 if (split_network_url(real_path, &netmount) != SplitNetworkURL::VALID_NETWORK_URL)
                 {
                     // not a valid url
-                    reply = fmt::format("spacefm: invalid TARGET '{}'\n", argv[j]);
+                    reply = fmt::format("invalid TARGET '{}'", argv[j]);
                     return 2;
                 }
             }
@@ -7059,7 +7055,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             if (cmd.empty())
             {
-                reply = fmt::format("spacefm: invalid TARGET '{}'\n", argv[j]);
+                reply = fmt::format("invalid TARGET '{}'", argv[j]);
                 return 2;
             }
             // Task
@@ -7095,13 +7091,13 @@ main_window_socket_command(char* argv[], std::string& reply)
                     opt_cwd = argv[++j];
                     if (!(opt_cwd && opt_cwd[0] == '/' && std::filesystem::is_directory(opt_cwd)))
                     {
-                        reply = fmt::format("spacefm: no such directory '{}'\n", opt_cwd);
+                        reply = fmt::format("no such directory '{}'", opt_cwd);
                         return 2;
                     }
                 }
                 else
                 {
-                    reply = fmt::format("spacefm: invalid {} task option '{}'\n", argv[i], argv[j]);
+                    reply = fmt::format("invalid {} task option '{}'", argv[i], argv[j]);
                     return 2;
                 }
             }
@@ -7115,7 +7111,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                     // last argument - use as TARGET
                     if (argv[j][0] != '/')
                     {
-                        reply = fmt::format("spacefm: no such directory '{}'\n", argv[j]);
+                        reply = fmt::format("no such directory '{}'", argv[j]);
                         g_list_foreach(l, (GFunc)free, nullptr);
                         g_list_free(l);
                         return 2;
@@ -7134,10 +7130,9 @@ main_window_socket_command(char* argv[], std::string& reply)
                         // relative path
                         if (!opt_cwd)
                         {
-                            reply = fmt::format(
-                                "spacefm: relative path '{}' requires %s option --dir DIR\n",
-                                argv[j],
-                                argv[i]);
+                            reply = fmt::format("relative path '{}' requires %s option --dir DIR",
+                                                argv[j],
+                                                argv[i]);
                             g_list_foreach(l, (GFunc)free, nullptr);
                             g_list_free(l);
                             return 2;
@@ -7149,7 +7144,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             if (file_list.empty() || (!ztd::same(argv[i], "delete") && !target_dir))
             {
-                reply = fmt::format("spacefm: task type {} requires FILE argument(s)\n", argv[i]);
+                reply = fmt::format("task type {} requires FILE argument(s)", argv[i]);
                 return 2;
             }
             VFSFileTaskType task_type;
@@ -7172,17 +7167,15 @@ main_window_socket_command(char* argv[], std::string& reply)
                                 GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                                 file_browser->task_view);
             ptk_file_task_run(ptask);
-            reply = fmt::format("#!{}\n{}\n# Note: $new_task_id not valid until approx one "
+            reply = fmt::format("# Note: $new_task_id not valid until approx one "
                                 "half second after task  start\nnew_task_window={}\n"
-                                "new_task_id={}\n",
-                                BASH_PATH,
-                                SHELL_SETTINGS,
+                                "new_task_id={}",
                                 (void*)main_window,
                                 (void*)ptask);
         }
         else
         {
-            reply = fmt::format("spacefm: invalid task type '{}'\n", argv[i]);
+            reply = fmt::format("invalid task type '{}'", argv[i]);
             return 2;
         }
     }
@@ -7190,7 +7183,7 @@ main_window_socket_command(char* argv[], std::string& reply)
     { // KEYCODE [KEYMOD]
         if (!argv[i])
         {
-            reply = fmt::format("spacefm: command {} requires an argument\n", socket_cmd);
+            reply = fmt::format("command {} requires an argument", socket_cmd);
             return 1;
         }
         // this only handles keys assigned to menu items
@@ -7204,7 +7197,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         else
         {
-            reply = fmt::format("spacefm: invalid keycode '{}'\n", argv[i]);
+            reply = fmt::format("invalid keycode '{}'", argv[i]);
             gdk_event_free((GdkEvent*)event);
             return 2;
         }
@@ -7214,13 +7207,13 @@ main_window_socket_command(char* argv[], std::string& reply)
     {
         if (!argv[i])
         {
-            reply = fmt::format("spacefm: command {} requires an argument\n", socket_cmd);
+            reply = fmt::format("command {} requires an argument", socket_cmd);
             return 1;
         }
         XSet* set = xset_find_custom(argv[i]);
         if (!set)
         {
-            reply = fmt::format("spacefm: custom command or submenu '{}' not found\n", argv[i]);
+            reply = fmt::format("custom command or submenu '{}' not found", argv[i]);
             return 2;
         }
         XSetContext* context = xset_context_new();
@@ -7231,7 +7224,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 xset_context_test(context, set->context, false) !=
                     ItemPropContextState::CONTEXT_SHOW)
             {
-                reply = fmt::format("spacefm: item '{}' context hidden or disabled\n", argv[i]);
+                reply = fmt::format("item '{}' context hidden or disabled", argv[i]);
                 return 2;
             }
         }
@@ -7258,12 +7251,12 @@ main_window_socket_command(char* argv[], std::string& reply)
 
         if (!(argv[i] && argv[i + 1]))
         {
-            reply = fmt::format("spacefm: {} requires two arguments\n", socket_cmd);
+            reply = fmt::format("{} requires two arguments", socket_cmd);
             return 1;
         }
         if (!(set = xset_is(argv[i])))
         {
-            reply = fmt::format("spacefm: invalid event type '{}'\n", argv[i]);
+            reply = fmt::format("invalid event type '{}'", argv[i]);
             return 2;
         }
         // build command
@@ -7284,7 +7277,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             if (!l)
             {
-                reply = "spacefm: event handler not found\n";
+                reply = "event handler not found";
                 return 2;
             }
             l = g_list_remove((GList*)set->ob2_data, l->data);
@@ -7295,11 +7288,11 @@ main_window_socket_command(char* argv[], std::string& reply)
     }
     else if (ztd::same(socket_cmd, "ping"))
     {
-        reply = "pong\n";
+        reply = "pong";
     }
     else
     {
-        reply = fmt::format("spacefm: invalid socket method '{}'\n", socket_cmd);
+        reply = fmt::format("invalid socket method '{}'", socket_cmd);
         return 1;
     }
     return 0;

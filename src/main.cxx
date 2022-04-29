@@ -378,7 +378,7 @@ main(int argc, char* argv[])
             std::string sock_reply;
             int ret = send_socket_command(argc, argv, sock_reply);
             if (!sock_reply.empty())
-                fmt::print("{}", sock_reply);
+                fmt::print("{}\n", sock_reply);
             std::exit(ret);
         }
     }

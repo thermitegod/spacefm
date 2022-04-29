@@ -378,9 +378,9 @@ receive_socket_command(int client, const std::string& args)
     std::string inode_tag = get_inode_tag();
     if (argv && strcmp(inode_tag.c_str(), argv[0]))
     {
-        reply = ztd::strdup("spacefm: invalid socket command user\n");
         cmd = 1;
-        LOG_WARN("invalid socket command user");
+        reply = "invalid socket command user";
+        LOG_WARN("{}", reply);
     }
     else
     {
@@ -400,14 +400,14 @@ send_socket_command(int argc, char* argv[], std::string& reply)
 {
     if (argc < 3)
     {
-        reply = "socket-cmd requires an argument\n";
+        reply = "socket-cmd requires an argument";
         return EXIT_FAILURE;
     }
 
     // create socket
     if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
     {
-        reply = "failed to create socket\n";
+        reply = "failed to create socket";
         return EXIT_FAILURE;
     }
 
@@ -419,7 +419,7 @@ send_socket_command(int argc, char* argv[], std::string& reply)
 
     if (connect(sock, (struct sockaddr*)&addr, addr_len) != 0)
     {
-        reply = "could not connect to socket (not running? or DISPLAY not set?)\n";
+        reply = "could not connect to socket (not running? or DISPLAY not set?)";
         return EXIT_FAILURE;
     }
 
