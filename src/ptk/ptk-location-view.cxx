@@ -123,7 +123,6 @@ update_volume_icons()
     VFSVolume* vol;
 
     // GtkListStore* list = GTK_LIST_STORE( model );
-    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
     int icon_size = app_settings.small_icon_size;
     if (icon_size > PANE_MAX_ICON_SIZE)
         icon_size = PANE_MAX_ICON_SIZE;
@@ -136,7 +135,7 @@ update_volume_icons()
             if (vol)
             {
                 if (vfs_volume_get_icon(vol))
-                    icon = vfs_load_icon(icon_theme, vfs_volume_get_icon(vol), icon_size);
+                    icon = vfs_load_icon(vfs_volume_get_icon(vol), icon_size);
                 else
                     icon = nullptr;
                 gtk_list_store_set(GTK_LIST_STORE(model),
@@ -534,11 +533,10 @@ add_volume(VFSVolume* vol, bool set_icon)
                                       -1);
     if (set_icon)
     {
-        GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
         int icon_size = app_settings.small_icon_size;
         if (icon_size > PANE_MAX_ICON_SIZE)
             icon_size = PANE_MAX_ICON_SIZE;
-        GdkPixbuf* icon = vfs_load_icon(icon_theme, vfs_volume_get_icon(vol), icon_size);
+        GdkPixbuf* icon = vfs_load_icon(vfs_volume_get_icon(vol), icon_size);
         gtk_list_store_set(GTK_LIST_STORE(model), &it, PtkLocationViewCol::COL_ICON, icon, -1);
         if (icon)
             g_object_unref(icon);
@@ -588,12 +586,11 @@ update_volume(VFSVolume* vol)
         return;
     }
 
-    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
     int icon_size = app_settings.small_icon_size;
     if (icon_size > PANE_MAX_ICON_SIZE)
         icon_size = PANE_MAX_ICON_SIZE;
 
-    GdkPixbuf* icon = vfs_load_icon(icon_theme, vfs_volume_get_icon(vol), icon_size);
+    GdkPixbuf* icon = vfs_load_icon(vfs_volume_get_icon(vol), icon_size);
     gtk_list_store_set(GTK_LIST_STORE(model),
                        &it,
                        PtkLocationViewCol::COL_ICON,
@@ -3150,12 +3147,11 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
         gtk_list_store_set(list, it, PtkLocationViewCol::COL_ICON, icon, -1);
     else if (icon1)
     {
-        GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
-        icon = vfs_load_icon(icon_theme, icon1, icon_size);
+        icon = vfs_load_icon(icon1, icon_size);
         if (!icon && icon2)
-            icon = vfs_load_icon(icon_theme, icon2, icon_size);
+            icon = vfs_load_icon(icon2, icon_size);
         if (!icon && icon3)
-            icon = vfs_load_icon(icon_theme, icon3, icon_size);
+            icon = vfs_load_icon(icon3, icon_size);
 
         gtk_list_store_set(list, it, PtkLocationViewCol::COL_ICON, icon, -1);
 
@@ -3203,16 +3199,14 @@ ptk_bookmark_view_reload_list(GtkTreeView* view, XSet* book_set)
     gtk_list_store_set(list, &it, PtkLocationViewCol::COL_NAME, name.c_str(), -1);
     gtk_list_store_set(list, &it, PtkLocationViewCol::COL_PATH, book_set->name, -1);
     // icon
-    GtkIconTheme* icon_theme;
     GdkPixbuf* icon = nullptr;
-    icon_theme = gtk_icon_theme_get_default();
     int icon_size = app_settings.small_icon_size;
     if (icon_size > PANE_MAX_ICON_SIZE)
         icon_size = PANE_MAX_ICON_SIZE;
     if (book_set->icon /*&& !strcmp( book_set->name, "main_book" )*/)
-        icon = vfs_load_icon(icon_theme, book_set->icon, icon_size);
+        icon = vfs_load_icon(book_set->icon, icon_size);
     if (!icon)
-        icon = vfs_load_icon(icon_theme, "gtk-go-up", icon_size);
+        icon = vfs_load_icon("gtk-go-up", icon_size);
     if (icon)
     {
         gtk_list_store_set(list, &it, PtkLocationViewCol::COL_ICON, icon, -1);

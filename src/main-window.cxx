@@ -2407,7 +2407,6 @@ fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
     GtkWidget* close_btn;
     GtkWidget* close_icon;
     GdkPixbuf* pixbuf = nullptr;
-    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
     /* Create tab label */
     evt_box = GTK_EVENT_BOX(gtk_event_box_new());
@@ -2417,7 +2416,7 @@ fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
     XSet* set = xset_get_panel(file_browser->mypanel, "icon_tab");
     if (set->icon)
     {
-        pixbuf = vfs_load_icon(icon_theme, set->icon, 16);
+        pixbuf = vfs_load_icon(set->icon, 16);
         if (pixbuf)
         {
             tab_icon = gtk_image_new_from_pixbuf(pixbuf);

@@ -262,8 +262,7 @@ vfs_file_info_get_big_icon(VFSFileInfo* fi)
                 if (icon_name[0] == '/')
                     fi->big_thumbnail = gdk_pixbuf_new_from_file(icon_name, nullptr);
                 else
-                    fi->big_thumbnail =
-                        vfs_load_icon(gtk_icon_theme_get_default(), icon_name, icon_size);
+                    fi->big_thumbnail = vfs_load_icon(icon_name, icon_size);
             }
             if (fi->big_thumbnail)
                 g_object_set_data_full(G_OBJECT(fi->big_thumbnail), "name", icon_name, free);

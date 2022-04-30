@@ -409,19 +409,17 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column, 
             if (!info)
                 return;
             int icon_size;
-            GtkIconTheme* icon_theme;
             GdkPixbuf* icon;
             // icon = vfs_file_info_get_small_icon( info );
-            icon_theme = gtk_icon_theme_get_default();
             icon_size = app_settings.small_icon_size;
             if (icon_size > PANE_MAX_ICON_SIZE)
                 icon_size = PANE_MAX_ICON_SIZE;
 
-            icon = vfs_load_icon(icon_theme, "gtk-directory", icon_size);
+            icon = vfs_load_icon("gtk-directory", icon_size);
             if (!icon)
-                icon = vfs_load_icon(icon_theme, "gnome-fs-directory", icon_size);
+                icon = vfs_load_icon("gnome-fs-directory", icon_size);
             if (!icon)
-                icon = vfs_load_icon(icon_theme, "folder", icon_size);
+                icon = vfs_load_icon("folder", icon_size);
             if (icon)
             {
                 g_value_set_object(value, icon);

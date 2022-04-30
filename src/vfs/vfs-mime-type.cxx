@@ -239,16 +239,15 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
         size = small_icon_size;
     }
 
-    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
     GdkPixbuf* icon = nullptr;
 
     if (!strcmp(mime_type->type, XDG_MIME_TYPE_DIRECTORY))
     {
-        icon = vfs_load_icon(icon_theme, "gtk-directory", size);
+        icon = vfs_load_icon("gtk-directory", size);
         if (!icon)
-            icon = vfs_load_icon(icon_theme, "gnome-fs-directory", size);
+            icon = vfs_load_icon("gnome-fs-directory", size);
         if (!icon)
-            icon = vfs_load_icon(icon_theme, "folder", size);
+            icon = vfs_load_icon("folder", size);
         if (big)
             mime_type->big_icon = icon;
         else
@@ -263,7 +262,7 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
     if (xml_icon)
     {
         if (xml_icon[0])
-            icon = vfs_load_icon(icon_theme, xml_icon, size);
+            icon = vfs_load_icon(xml_icon, size);
         free(xml_icon);
     }
     if (xml_desc)
@@ -295,7 +294,7 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
             strncpy(icon_name, mime_type->type, sizeof(icon_name));
             icon_name[(sep - mime_type->type)] = '-';
             /* is there an icon named foo-bar? */
-            icon = vfs_load_icon(icon_theme, icon_name, size);
+            icon = vfs_load_icon(icon_name, size);
             if (!icon)
             {
                 /* maybe we can find a legacy icon named gnome-mime-foo-bar */
@@ -303,14 +302,14 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
                 strncat(icon_name, mime_type->type, (sep - mime_type->type));
                 strcat(icon_name, "-");
                 strcat(icon_name, sep + 1);
-                icon = vfs_load_icon(icon_theme, icon_name, size);
+                icon = vfs_load_icon(icon_name, size);
             }
             /* try gnome-mime-foo */
             if (!icon)
             {
                 icon_name[11] = '\0'; /* std::strlen("gnome-mime-") = 11 */
                 strncat(icon_name, mime_type->type, (sep - mime_type->type));
-                icon = vfs_load_icon(icon_theme, icon_name, size);
+                icon = vfs_load_icon(icon_name, size);
             }
             /* try foo-x-generic */
             if (!icon)
@@ -318,7 +317,7 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
                 strncpy(icon_name, mime_type->type, (sep - mime_type->type));
                 icon_name[(sep - mime_type->type)] = '\0';
                 strcat(icon_name, "-x-generic");
-                icon = vfs_load_icon(icon_theme, icon_name, size);
+                icon = vfs_load_icon(icon_name, size);
             }
         }
     }
@@ -336,7 +335,7 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
         }
         else /* unknown */
         {
-            icon = vfs_load_icon(icon_theme, "unknown", size);
+            icon = vfs_load_icon("unknown", size);
         }
     }
 

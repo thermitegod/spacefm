@@ -1852,7 +1852,6 @@ xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
 {
     char* menu_label = nullptr;
     GdkPixbuf* icon_new = nullptr;
-    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
     if (!set->lock && xset_get_int_set(set, "x") == XSetCMD::XSET_CMD_APP)
     {
@@ -1863,7 +1862,7 @@ xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
             if (!(set->menu_label && set->menu_label[0]))
                 menu_label = ztd::strdup(desktop.get_disp_name());
             if (set->icon)
-                icon_new = vfs_load_icon(icon_theme, set->icon, icon_size);
+                icon_new = vfs_load_icon(set->icon, icon_size);
             if (!icon_new)
                 icon_new = desktop.get_icon(icon_size);
         }
@@ -1871,13 +1870,13 @@ xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
         {
             // not a desktop file - probably executable
             if (set->icon)
-                icon_new = vfs_load_icon(icon_theme, set->icon, icon_size);
+                icon_new = vfs_load_icon(set->icon, icon_size);
             if (!icon_new && set->z)
             {
                 // guess icon name from executable name
                 char* name = g_path_get_basename(set->z);
                 if (name && name[0])
-                    icon_new = vfs_load_icon(icon_theme, name, icon_size);
+                    icon_new = vfs_load_icon(name, icon_size);
                 free(name);
             }
         }
@@ -1885,7 +1884,7 @@ xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
         if (!icon_new)
         {
             // fallback
-            icon_new = vfs_load_icon(icon_theme, "gtk-execute", icon_size);
+            icon_new = vfs_load_icon("gtk-execute", icon_size);
         }
     }
     else
@@ -1913,7 +1912,6 @@ xset_custom_get_bookmark_icon(XSet* set, int icon_size)
     const char* icon1 = nullptr;
     const char* icon2 = nullptr;
     const char* icon3 = nullptr;
-    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
     if (!book_icon_set_cached)
         book_icon_set_cached = xset_get("book_icon");
@@ -1967,11 +1965,11 @@ xset_custom_get_bookmark_icon(XSet* set, int icon_size)
             icon3 = ztd::strdup("gtk-directory");
         }
         if (icon1)
-            icon_new = vfs_load_icon(icon_theme, icon1, icon_size);
+            icon_new = vfs_load_icon(icon1, icon_size);
         if (!icon_new && icon2)
-            icon_new = vfs_load_icon(icon_theme, icon2, icon_size);
+            icon_new = vfs_load_icon(icon2, icon_size);
         if (!icon_new && icon3)
-            icon_new = vfs_load_icon(icon_theme, icon3, icon_size);
+            icon_new = vfs_load_icon(icon3, icon_size);
     }
     else
         LOG_WARN("xset_custom_get_bookmark_icon set is not XSetCMD::XSET_CMD_BOOKMARK");

@@ -170,23 +170,20 @@ VFSAppDesktop::get_icon_name() noexcept
 GdkPixbuf*
 VFSAppDesktop::get_icon(int size) noexcept
 {
-    GtkIconTheme* theme;
     GdkPixbuf* icon = nullptr;
 
     if (m_icon_name.c_str())
     {
-        theme = gtk_icon_theme_get_default();
-        icon = vfs_load_icon(theme, m_icon_name.c_str(), size);
+        icon = vfs_load_icon(m_icon_name.c_str(), size);
     }
 
     // fallback to generic icon
     if (!icon)
     {
-        theme = gtk_icon_theme_get_default();
-        icon = vfs_load_icon(theme, "application-x-executable", size);
+        icon = vfs_load_icon("application-x-executable", size);
         // fallback to generic icon
         if (!icon)
-            icon = vfs_load_icon(theme, "gnome-mime-application-x-executable", size);
+            icon = vfs_load_icon("gnome-mime-application-x-executable", size);
     }
     return icon;
 }

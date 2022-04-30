@@ -25,13 +25,16 @@
 #include "vfs/vfs-utils.hxx"
 
 GdkPixbuf*
-vfs_load_icon(GtkIconTheme* theme, const char* icon_name, int size)
+vfs_load_icon(const char* icon_name, int size)
 {
     if (!icon_name)
         return nullptr;
 
-    GtkIconInfo* inf = gtk_icon_theme_lookup_icon(
-        theme,
+    GtkIconInfo* inf = nullptr;
+    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
+
+    inf = gtk_icon_theme_lookup_icon(
+        icon_theme,
         icon_name,
         size,
         GtkIconLookupFlags(GTK_ICON_LOOKUP_USE_BUILTIN | GTK_ICON_LOOKUP_FORCE_SIZE));
@@ -51,8 +54,8 @@ vfs_load_icon(GtkIconTheme* theme, const char* icon_name, int size)
         icon = gtk_icon_info_get_builtin_pixbuf(inf);
         g_object_ref(icon);
     }
-    g_object_unref(inf);
-
+    // if (inf)
+    //     g_object_unref(inf);
     return icon;
 }
 
