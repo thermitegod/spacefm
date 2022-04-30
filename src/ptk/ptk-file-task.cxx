@@ -636,42 +636,40 @@ set_progress_icon(PtkFileTask* ptask)
 {
     GdkPixbuf* pixbuf;
     VFSFileTask* task = ptask->task;
+    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
     if (task->state_pause != VFSFileTaskState::VFS_FILE_TASK_RUNNING)
-        pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
+        pixbuf = gtk_icon_theme_load_icon(icon_theme,
                                           "media-playback-pause",
                                           16,
                                           GTK_ICON_LOOKUP_USE_BUILTIN,
                                           nullptr);
     else if (task->err_count)
-        pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
-                                          "error",
-                                          16,
-                                          GTK_ICON_LOOKUP_USE_BUILTIN,
-                                          nullptr);
+        pixbuf =
+            gtk_icon_theme_load_icon(icon_theme, "error", 16, GTK_ICON_LOOKUP_USE_BUILTIN, nullptr);
     else if (task->type == VFSFileTaskType::VFS_FILE_TASK_MOVE ||
              task->type == VFSFileTaskType::VFS_FILE_TASK_COPY ||
              task->type == VFSFileTaskType::VFS_FILE_TASK_LINK ||
              task->type == VFSFileTaskType::VFS_FILE_TASK_TRASH)
-        pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
+        pixbuf = gtk_icon_theme_load_icon(icon_theme,
                                           "stock_copy",
                                           16,
                                           GTK_ICON_LOOKUP_USE_BUILTIN,
                                           nullptr);
     else if (task->type == VFSFileTaskType::VFS_FILE_TASK_DELETE)
-        pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
+        pixbuf = gtk_icon_theme_load_icon(icon_theme,
                                           "stock_delete",
                                           16,
                                           GTK_ICON_LOOKUP_USE_BUILTIN,
                                           nullptr);
     else if (task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC && !task->exec_icon.empty())
-        pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
+        pixbuf = gtk_icon_theme_load_icon(icon_theme,
                                           task->exec_icon.c_str(),
                                           16,
                                           GTK_ICON_LOOKUP_USE_BUILTIN,
                                           nullptr);
     else
-        pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
+        pixbuf = gtk_icon_theme_load_icon(icon_theme,
                                           "gtk-execute",
                                           16,
                                           GTK_ICON_LOOKUP_USE_BUILTIN,

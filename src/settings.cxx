@@ -7410,11 +7410,11 @@ xset_set_window_icon(GtkWindow* win)
         name = "spacefm-root";
     else
         name = "spacefm";
-    GtkIconTheme* theme = gtk_icon_theme_get_default();
-    if (!theme)
+    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
+    if (!icon_theme)
         return;
     GError* error = nullptr;
-    GdkPixbuf* icon = gtk_icon_theme_load_icon(theme, name, 48, (GtkIconLookupFlags)0, &error);
+    GdkPixbuf* icon = gtk_icon_theme_load_icon(icon_theme, name, 48, (GtkIconLookupFlags)0, &error);
     if (icon)
     {
         gtk_window_set_icon(GTK_WINDOW(win), icon);

@@ -44,7 +44,6 @@
 
 static GtkTreeModel* model = nullptr;
 static int n_vols = 0;
-static unsigned int theme_changed = 0; /* GtkIconTheme::"changed" handler */
 
 static GdkPixbuf* global_icon_bookmark = nullptr;
 static GdkPixbuf* global_icon_submenu = nullptr;
@@ -107,9 +106,6 @@ on_model_destroy(void* data, GObject* object)
 
     model = nullptr;
     n_vols = 0;
-
-    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
-    g_signal_handler_disconnect(icon_theme, theme_changed);
 }
 
 void
@@ -416,9 +412,6 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
         g_object_weak_ref(G_OBJECT(list), on_model_destroy, nullptr);
         model = GTK_TREE_MODEL(list);
         ptk_location_view_init_model(list);
-        GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
-        theme_changed =
-            g_signal_connect(icon_theme, "changed", G_CALLBACK(update_volume_icons), nullptr);
     }
     else
     {
@@ -4114,13 +4107,6 @@ ptk_bookmark_view_new(PtkFileBrowser* file_browser)
      * Otherwise on_bookmark_model_destroy was not running - list model
      * was not being freed? */
     g_object_unref(list);
-
-    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
-    if (icon_theme)
-        g_signal_connect(icon_theme,
-                         "changed",
-                         G_CALLBACK(ptk_bookmark_view_update_icons),
-                         file_browser);
 
     // no dnd if using auto-reorderable unless you code reorder dnd manually
     //    gtk_tree_view_enable_model_drag_dest (

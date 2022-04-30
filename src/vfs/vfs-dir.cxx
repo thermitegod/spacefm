@@ -85,7 +85,6 @@ static GObjectClass* parent_class = nullptr;
 static GHashTable* dir_hash = nullptr;
 static GList* mime_cb = nullptr;
 static unsigned int change_notify_timeout = 0;
-static unsigned int theme_change_notify = 0;
 
 GType
 vfs_dir_get_type()
@@ -267,9 +266,6 @@ vfs_dir_finalize(GObject* obj)
                     g_source_remove(change_notify_timeout);
                     change_notify_timeout = 0;
                 }
-
-                g_signal_handler_disconnect(gtk_icon_theme_get_default(), theme_change_notify);
-                theme_change_notify = 0;
             }
         }
         free(dir->path);
@@ -806,42 +802,6 @@ vfs_dir_monitor_callback(VFSFileMonitor* fm, VFSFileMonitorEvent event, const ch
     }
 }
 
-/* called on every VFSDir when icon theme got changed */
-static void
-reload_icons(const char* path, VFSDir* dir, void* user_data)
-{
-    (void)user_data;
-
-    for (VFSFileInfo* file: dir->file_list)
-    {
-        /* It is a desktop entry file */
-        if (file->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY)
-        {
-            char* file_path = g_build_filename(path, file->name.c_str(), nullptr);
-            if (file->big_thumbnail)
-            {
-                g_object_unref(file->big_thumbnail);
-                file->big_thumbnail = nullptr;
-            }
-            if (file->small_thumbnail)
-            {
-                g_object_unref(file->small_thumbnail);
-                file->small_thumbnail = nullptr;
-            }
-            vfs_file_info_load_special_info(file, file_path);
-            free(file_path);
-        }
-    }
-}
-
-static void
-on_theme_changed(GtkIconTheme* icon_theme, void* user_data)
-{
-    (void)icon_theme;
-    (void)user_data;
-    g_hash_table_foreach(dir_hash, (GHFunc)reload_icons, nullptr);
-}
-
 VFSDir*
 vfs_dir_get_by_path_soft(const char* path)
 {
@@ -865,11 +825,6 @@ vfs_dir_get_by_path(const char* path)
     if (!dir_hash)
     {
         dir_hash = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, nullptr);
-        if (theme_change_notify == 0)
-            theme_change_notify = g_signal_connect(gtk_icon_theme_get_default(),
-                                                   "changed",
-                                                   G_CALLBACK(on_theme_changed),
-                                                   nullptr);
     }
     else
     {

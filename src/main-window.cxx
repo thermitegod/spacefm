@@ -125,8 +125,6 @@ static std::vector<FMMainWindow*> all_windows;
 
 static std::vector<std::string> closed_tabs_restore;
 
-static unsigned int theme_change_notify = 0;
-
 //  Drag & Drop/Clipboard targets
 static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 
@@ -628,21 +626,13 @@ update_window_icon(GtkWindow* window, GtkIconTheme* theme)
 }
 
 static void
-update_window_icons(GtkIconTheme* theme, GtkWindow* window)
-{
-    (void)window;
-    for (FMMainWindow* window2: all_windows)
-    {
-        update_window_icon(GTK_WINDOW(window2), theme);
-    }
-}
-
-static void
 on_main_icon()
 {
+    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
+
     for (FMMainWindow* window: all_windows)
     {
-        update_window_icon(GTK_WINDOW(window), gtk_icon_theme_get_default());
+        update_window_icon(GTK_WINDOW(window), icon_theme);
     }
 }
 
@@ -1531,13 +1521,6 @@ fm_main_window_init(FMMainWindow* main_window)
     NOTE: gtk_window_set_icon_name does not work under some WMs, such as IceWM.
     gtk_window_set_icon_name( GTK_WINDOW( main_window ),
                               "gnome-fs-directory" ); */
-    if (theme_change_notify == 0)
-    {
-        theme_change_notify = g_signal_connect(gtk_icon_theme_get_default(),
-                                               "changed",
-                                               G_CALLBACK(update_window_icons),
-                                               nullptr);
-    }
     update_window_icon(GTK_WINDOW(main_window), gtk_icon_theme_get_default());
 
     main_window->main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -1759,21 +1742,13 @@ fm_main_window_init(FMMainWindow* main_window)
 static void
 fm_main_window_finalize(GObject* obj)
 {
-    all_windows.erase(std::remove(all_windows.begin(), all_windows.end(), FM_MAIN_WINDOW(obj)),
-                      all_windows.end());
+    ztd::remove(all_windows, FM_MAIN_WINDOW(obj));
+
     --n_windows;
 
     g_object_unref((FM_MAIN_WINDOW(obj))->wgroup);
 
     WindowReference::decrease();
-
-    /* Remove the monitor for changes of the bookmarks */
-    //    ptk_bookmarks_remove_callback( ( GFunc ) on_bookmarks_change, obj );
-    if (n_windows == 0)
-    {
-        g_signal_handler_disconnect(gtk_icon_theme_get_default(), theme_change_notify);
-        theme_change_notify = 0;
-    }
 
     G_OBJECT_CLASS(parent_class)->finalize(obj);
 }
@@ -5303,13 +5278,15 @@ main_task_view_update_task(PtkFileTask* ptask)
             if (icon_size > PANE_MAX_ICON_SIZE)
                 icon_size = PANE_MAX_ICON_SIZE;
 
-            pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
+            GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
+
+            pixbuf = gtk_icon_theme_load_icon(icon_theme,
                                               iname.c_str(),
                                               icon_size,
                                               (GtkIconLookupFlags)GTK_ICON_LOOKUP_USE_BUILTIN,
                                               nullptr);
             if (!pixbuf)
-                pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
+                pixbuf = gtk_icon_theme_load_icon(icon_theme,
                                                   "gtk-execute",
                                                   icon_size,
                                                   (GtkIconLookupFlags)GTK_ICON_LOOKUP_USE_BUILTIN,

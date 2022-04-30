@@ -40,10 +40,6 @@ static int big_icon_size = 32, small_icon_size = 16;
 
 static VFSFileMonitor** mime_caches_monitor = nullptr;
 
-static unsigned int theme_change_notify = 0;
-
-static void on_icon_theme_changed(GtkIconTheme* icon_theme, void* user_data);
-
 struct VFSMimeReloadCbEnt
 {
     GFreeFunc cb;
@@ -128,17 +124,11 @@ vfs_mime_type_init()
         mime_caches_monitor[i] = fm;
     }
     mime_hash = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, vfs_mime_type_unref);
-    GtkIconTheme* theme = gtk_icon_theme_get_default();
-    theme_change_notify =
-        g_signal_connect(theme, "changed", G_CALLBACK(on_icon_theme_changed), nullptr);
 }
 
 void
 vfs_mime_type_clean()
 {
-    GtkIconTheme* theme = gtk_icon_theme_get_default();
-    g_signal_handler_disconnect(theme, theme_change_notify);
-
     /* remove file alteration monitor for mime-cache */
     int n_caches;
     MimeCache** caches = mime_type_get_caches(&n_caches);
@@ -488,20 +478,6 @@ vfs_mime_type_add_action(VFSMimeType* mime_type, const char* desktop_id, char** 
         mime_type_add_action(mime_type->type, desktop_id, custom_desktop);
     else if (custom_desktop) // sfm
         *custom_desktop = ztd::strdup(desktop_id);
-}
-
-static void
-on_icon_theme_changed(GtkIconTheme* icon_theme, void* user_data)
-{
-    (void)icon_theme;
-    (void)user_data;
-    /* reload_mime_icons */
-    g_rw_lock_reader_lock(&mime_hash_lock);
-
-    g_hash_table_foreach(mime_hash, free_cached_icons, GINT_TO_POINTER(1));
-    g_hash_table_foreach(mime_hash, free_cached_icons, GINT_TO_POINTER(0));
-
-    g_rw_lock_writer_unlock(&mime_hash_lock);
 }
 
 GList*
