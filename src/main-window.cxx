@@ -6954,36 +6954,20 @@ main_window_socket_command(char* argv[], std::string& reply)
                                     (void*)main_window,
                                     (void*)ptask);
         }
-        else if (ztd::same(socket_property, "edit") || ztd::same(socket_property, "web"))
+        else if (ztd::same(socket_property, "edit"))
         {
-            // edit or web
-            // edit [--as-root] FILE
-            // web URL
-            bool opt_root = false;
-            for (j = i + 1; argv[j] && argv[j][0] == '-'; j++)
-            {
-                if (ztd::same(socket_property, "edit") && ztd::same(argv[j], "--as-root"))
-                    opt_root = true;
-                else
-                {
-                    reply = fmt::format("invalid {} task option '{}'", socket_property, argv[j]);
-                    return 2;
-                }
-            }
-            if (!argv[j])
+            // edit FILE
+            if (!argv[i + 1])
             {
                 reply = fmt::format("{} requires two arguments", socket_cmd);
                 return 1;
             }
-            if (ztd::same(socket_property, "edit"))
+            if (!std::filesystem::is_regular_file(argv[i + 1]))
             {
-                if (!(argv[j][0] == '/' && std::filesystem::exists(argv[j])))
-                {
-                    reply = fmt::format("no such file '{}'", argv[j]);
-                    return 2;
-                }
-                xset_edit(GTK_WIDGET(file_browser), argv[j], opt_root, !opt_root);
+                reply = fmt::format("no such file '{}'", argv[i + 1]);
+                return 2;
             }
+            xset_edit(GTK_WIDGET(file_browser), argv[i + 1], false, true);
         }
         else if (ztd::same(socket_property, "mount") || ztd::same(socket_property, "unmount"))
         {
