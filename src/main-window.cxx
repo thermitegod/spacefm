@@ -5657,7 +5657,9 @@ main_window_socket_command(char* argv[], std::string& reply)
     int i = 1;
     while (argv[i] && argv[i][0] == '-')
     {
-        if (ztd::same(argv[i], "--window"))
+        const std::string socket_property = argv[i];
+
+        if (ztd::same(socket_property, "--window"))
         {
             if (!argv[i + 1])
             {
@@ -5668,7 +5670,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             i += 2;
             continue;
         }
-        else if (ztd::same(argv[i], "--panel"))
+        else if (ztd::same(socket_property, "--panel"))
         {
             if (!argv[i + 1])
             {
@@ -5679,7 +5681,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             i += 2;
             continue;
         }
-        else if (ztd::same(argv[i], "--tab"))
+        else if (ztd::same(socket_property, "--tab"))
         {
             if (!argv[i + 1])
             {
@@ -5708,8 +5710,8 @@ main_window_socket_command(char* argv[], std::string& reply)
         main_window = nullptr;
         for (FMMainWindow* window2: all_windows)
         {
-            std::string str2 = fmt::format("{:p}", (void*)window2);
-            if (ztd::same(str2, window))
+            str = fmt::format("{:p}", (void*)window2);
+            if (ztd::same(str, window))
             {
                 main_window = window2;
                 break;
@@ -5751,7 +5753,18 @@ main_window_socket_command(char* argv[], std::string& reply)
         gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[panel - 1]), tab - 1));
 
     // command
-    const std::string socket_cmd = argv[0];
+    const std::string socket_cmd = argv[i - 1];
+    const std::string socket_property = argv[i];
+
+    /*
+    LOG_INFO("argv[i-2]={}", argv[i-2]);
+    LOG_INFO("argv[i-1]={}", argv[i-1]);
+    LOG_INFO("argv[i+0]={}", argv[i]);
+    LOG_INFO("argv[i+1]={}", argv[i+1]);
+    LOG_INFO("argv[i+2]={}", argv[i+2]);
+    LOG_INFO("argv[i+3]={}", argv[i+3]);
+    */
+
     if (ztd::same(socket_cmd, "set"))
     {
         if (!argv[i])
@@ -5759,7 +5772,8 @@ main_window_socket_command(char* argv[], std::string& reply)
             reply = "command set requires an argument";
             return 1;
         }
-        if (ztd::same(argv[i], "window_size") || ztd::same(argv[i], "window_position"))
+        if (ztd::same(socket_property, "window_size") ||
+            ztd::same(socket_property, "window_position"))
         {
             height = width = 0;
             if (argv[i + 1])
@@ -5779,29 +5793,30 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = fmt::format("invalid {} value", argv[i]);
                 return 2;
             }
-            if (ztd::same(argv[i], "window_size"))
+            if (ztd::same(socket_property, "window_size"))
                 gtk_window_resize(GTK_WINDOW(main_window), width, height);
             else
                 gtk_window_move(GTK_WINDOW(main_window), width, height);
         }
-        else if (ztd::same(argv[i], "window_maximized"))
+        else if (ztd::same(socket_property, "window_maximized"))
         {
             if (get_bool(argv[i + 1]))
                 gtk_window_maximize(GTK_WINDOW(main_window));
             else
                 gtk_window_unmaximize(GTK_WINDOW(main_window));
         }
-        else if (ztd::same(argv[i], "window_fullscreen"))
+        else if (ztd::same(socket_property, "window_fullscreen"))
         {
             xset_set_b(XSetName::MAIN_FULL, get_bool(argv[i + 1]));
             on_fullscreen_activate(nullptr, main_window);
         }
-        else if (ztd::same(argv[i], "screen_size"))
+        else if (ztd::same(socket_property, "screen_size"))
         {
         }
-        else if (ztd::same(argv[i], "window_vslider_top") ||
-                 ztd::same(argv[i], "window_vslider_bottom") ||
-                 ztd::same(argv[i], "window_hslider") || ztd::same(argv[i], "window_tslider"))
+        else if (ztd::same(socket_property, "window_vslider_top") ||
+                 ztd::same(socket_property, "window_vslider_bottom") ||
+                 ztd::same(socket_property, "window_hslider") ||
+                 ztd::same(socket_property, "window_tslider"))
         {
             width = -1;
             if (argv[i + 1])
@@ -5811,17 +5826,17 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = "invalid slider value";
                 return 2;
             }
-            if (ztd::same(argv[i], "window_vslider_top"))
+            if (ztd::same(socket_property, "window_vslider_top"))
                 widget = main_window->hpane_top;
-            else if (ztd::same(argv[i], "window_vslider_bottom"))
+            else if (ztd::same(socket_property, "window_vslider_bottom"))
                 widget = main_window->hpane_bottom;
-            else if (ztd::same(argv[i], "window_hslider"))
+            else if (ztd::same(socket_property, "window_hslider"))
                 widget = main_window->vpane;
             else
                 widget = main_window->task_vpane;
             gtk_paned_set_position(GTK_PANED(widget), width);
         }
-        else if (ztd::same(argv[i], "focused_panel"))
+        else if (ztd::same(socket_property, "focused_panel"))
         {
             width = 0;
             if (argv[i + 1])
@@ -5842,7 +5857,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             focus_panel(nullptr, (void*)main_window, width);
         }
-        else if (ztd::same(argv[i], "focused_pane"))
+        else if (ztd::same(socket_property, "focused_pane"))
         {
             widget = nullptr;
             if (argv[i + 1])
@@ -5861,7 +5876,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (GTK_IS_WIDGET(widget))
                 gtk_widget_grab_focus(widget);
         }
-        else if (ztd::same(argv[i], "current_tab"))
+        else if (ztd::same(socket_property, "current_tab"))
         {
             width = 0;
             if (argv[i + 1])
@@ -5883,10 +5898,10 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             ptk_file_browser_go_tab(nullptr, file_browser, width);
         }
-        else if (ztd::same(argv[i], "tab_count"))
+        else if (ztd::same(socket_property, "tab_count"))
         {
         }
-        else if (ztd::same(argv[i], "new_tab"))
+        else if (ztd::same(socket_property, "new_tab"))
         {
             focus_panel(nullptr, (void*)main_window, panel);
             if (!(argv[i + 1] && std::filesystem::is_directory(argv[i + 1])))
@@ -5901,39 +5916,39 @@ main_window_socket_command(char* argv[], std::string& reply)
                                 tab,
                                 argv[i + 1]);
         }
-        else if (Glib::str_has_suffix(argv[i], "_visible"))
+        else if (Glib::str_has_suffix(socket_property, "_visible"))
         {
             bool use_mode = false;
-            if (Glib::str_has_prefix(argv[i], "devices_"))
+            if (Glib::str_has_prefix(socket_property, "devices_"))
             {
                 str = "show_devmon";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(argv[i], "bookmarks_"))
+            else if (Glib::str_has_prefix(socket_property, "bookmarks_"))
             {
                 str = "show_book";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(argv[i], "dirtree_"))
+            else if (Glib::str_has_prefix(socket_property, "dirtree_"))
             {
                 str = "show_dirtree";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(argv[i], "toolbar_"))
+            else if (Glib::str_has_prefix(socket_property, "toolbar_"))
             {
                 str = "show_toolbox";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(argv[i], "sidetoolbar_"))
+            else if (Glib::str_has_prefix(socket_property, "sidetoolbar_"))
             {
                 str = "show_sidebar";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(argv[i], "hidden_files_"))
+            else if (Glib::str_has_prefix(socket_property, "hidden_files_"))
             {
                 str = "show_hidden";
             }
-            else if (Glib::str_has_prefix(argv[i], "panel"))
+            else if (Glib::str_has_prefix(socket_property, "panel"))
             {
                 j = argv[i][5] - 48;
                 if (j < 1 || j > 4)
@@ -5959,8 +5974,9 @@ main_window_socket_command(char* argv[], std::string& reply)
                 xset_set_b_panel(panel, str, get_bool(argv[i + 1]));
             update_views_all_windows(nullptr, file_browser);
         }
-        else if (ztd::same(argv[i], "panel_hslider_top") ||
-                 ztd::same(argv[i], "panel_hslider_bottom") || ztd::same(argv[i], "panel_vslider"))
+        else if (ztd::same(socket_property, "panel_hslider_top") ||
+                 ztd::same(socket_property, "panel_hslider_bottom") ||
+                 ztd::same(socket_property, "panel_vslider"))
         {
             width = -1;
             if (argv[i + 1])
@@ -5970,9 +5986,9 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = "invalid slider value";
                 return 2;
             }
-            if (ztd::same(argv[i], "panel_hslider_top"))
+            if (ztd::same(socket_property, "panel_hslider_top"))
                 widget = file_browser->side_vpane_top;
-            else if (ztd::same(argv[i], "panel_hslider_bottom"))
+            else if (ztd::same(socket_property, "panel_hslider_bottom"))
                 widget = file_browser->side_vpane_bottom;
             else
                 widget = file_browser->hpane;
@@ -5980,7 +5996,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             ptk_file_browser_slider_release(nullptr, nullptr, file_browser);
             update_views_all_windows(nullptr, file_browser);
         }
-        else if (ztd::same(argv[i], "column_width"))
+        else if (ztd::same(socket_property, "column_width"))
         { // COLUMN WIDTH
             width = 0;
             if (argv[i + 1] && argv[i + 2])
@@ -6027,7 +6043,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 gtk_tree_view_column_set_fixed_width(col, width);
             }
         }
-        else if (ztd::same(argv[i], "sort_by"))
+        else if (ztd::same(socket_property, "sort_by"))
         { // COLUMN
             j = -10;
             if (!argv[i + 1])
@@ -6053,32 +6069,32 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             ptk_file_browser_set_sort_order(file_browser, (PtkFBSortOrder)j);
         }
-        else if (Glib::str_has_prefix(argv[i], "sort_"))
+        else if (Glib::str_has_prefix(socket_property, "sort_"))
         {
             XSetName xset_name;
-            if (ztd::same(argv[i], "sort_ascend"))
+            if (ztd::same(socket_property, "sort_ascend"))
             {
                 ptk_file_browser_set_sort_type(file_browser,
                                                get_bool(argv[i + 1]) ? GTK_SORT_ASCENDING
                                                                      : GTK_SORT_DESCENDING);
                 return 0;
             }
-            else if (ztd::same(argv[i], "sort_alphanum"))
+            else if (ztd::same(socket_property, "sort_alphanum"))
             {
                 xset_name = XSetName::SORTX_ALPHANUM;
                 xset_set_b(xset_name, get_bool(argv[i + 1]));
             }
-            // else if (ztd::same(argv[i], "sort_natural"))
+            // else if (ztd::same(socket_property, "sort_natural"))
             //{
             //     xset_name = XSetName::SORTX_NATURAL;
             //     xset_set_b(xset_name, get_bool(argv[i + 1]));
             // }
-            else if (ztd::same(argv[i], "sort_case"))
+            else if (ztd::same(socket_property, "sort_case"))
             {
                 xset_name = XSetName::SORTX_CASE;
                 xset_set_b(xset_name, get_bool(argv[i + 1]));
             }
-            else if (ztd::same(argv[i], "sort_hidden_first"))
+            else if (ztd::same(socket_property, "sort_hidden_first"))
             {
                 if (get_bool(argv[i + 1]))
                     xset_name = XSetName::SORTX_HIDFIRST;
@@ -6086,7 +6102,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                     xset_name = XSetName::SORTX_HIDLAST;
                 xset_set_b(xset_name, true);
             }
-            else if (ztd::same(argv[i], "sort_first"))
+            else if (ztd::same(socket_property, "sort_first"))
             {
                 if (ztd::same(argv[i + 1], "files"))
                     xset_name = XSetName::SORTX_FILES;
@@ -6107,12 +6123,12 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             ptk_file_browser_set_sort_extra(file_browser, xset_name);
         }
-        else if (ztd::same(argv[i], "show_thumbnails"))
+        else if (ztd::same(socket_property, "show_thumbnails"))
         {
             if (app_settings.show_thumbnail != get_bool(argv[i + 1]))
                 main_window_toggle_thumbnails_all_windows();
         }
-        else if (ztd::same(argv[i], "large_icons"))
+        else if (ztd::same(socket_property, "large_icons"))
         {
             if (file_browser->view_mode != PtkFBViewMode::PTK_FB_ICON_VIEW)
             {
@@ -6123,7 +6139,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 update_views_all_windows(nullptr, file_browser);
             }
         }
-        else if (ztd::same(argv[i], "statusbar_text"))
+        else if (ztd::same(socket_property, "statusbar_text"))
         {
             if (!(argv[i + 1] && argv[i + 1][0]))
             {
@@ -6137,7 +6153,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             fm_main_window_update_status_bar(main_window, file_browser);
         }
-        else if (ztd::same(argv[i], "pathbar_text"))
+        else if (ztd::same(socket_property, "pathbar_text"))
         { // TEXT [[SELSTART] SELEND]
             if (!GTK_IS_WIDGET(file_browser->path_bar))
                 return 0;
@@ -6163,22 +6179,22 @@ main_window_socket_command(char* argv[], std::string& reply)
                 gtk_widget_grab_focus(file_browser->path_bar);
             }
         }
-        else if (ztd::same(argv[i], "clipboard_text") ||
-                 ztd::same(argv[i], "clipboard_primary_text"))
+        else if (ztd::same(socket_property, "clipboard_text") ||
+                 ztd::same(socket_property, "clipboard_primary_text"))
         {
             if (argv[i + 1] && !g_utf8_validate(argv[i + 1], -1, nullptr))
             {
                 reply = "text is not valid UTF-8";
                 return 2;
             }
-            GtkClipboard* clip =
-                gtk_clipboard_get(ztd::same(argv[i], "clipboard_text") ? GDK_SELECTION_CLIPBOARD
-                                                                       : GDK_SELECTION_PRIMARY);
+            GtkClipboard* clip = gtk_clipboard_get(ztd::same(socket_property, "clipboard_text")
+                                                       ? GDK_SELECTION_CLIPBOARD
+                                                       : GDK_SELECTION_PRIMARY);
             str = unescape(argv[i + 1] ? argv[i + 1] : "");
             gtk_clipboard_set_text(clip, str.c_str(), -1);
         }
-        else if (ztd::same(argv[i], "clipboard_from_file") ||
-                 ztd::same(argv[i], "clipboard_primary_from_file"))
+        else if (ztd::same(socket_property, "clipboard_from_file") ||
+                 ztd::same(socket_property, "clipboard_primary_from_file"))
         {
             if (!argv[i + 1])
             {
@@ -6200,17 +6216,19 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = fmt::format("file '{}' does not contain valid UTF-8 text", argv[i + 1]);
                 return 2;
             }
-            GtkClipboard* clip = gtk_clipboard_get(ztd::same(argv[i], "clipboard_from_file")
+            GtkClipboard* clip = gtk_clipboard_get(ztd::same(socket_property, "clipboard_from_file")
                                                        ? GDK_SELECTION_CLIPBOARD
                                                        : GDK_SELECTION_PRIMARY);
             gtk_clipboard_set_text(clip, contents.c_str(), -1);
         }
-        else if (ztd::same(argv[i], "clipboard_cut_files") ||
-                 ztd::same(argv[i], "clipboard_copy_files"))
+        else if (ztd::same(socket_property, "clipboard_cut_files") ||
+                 ztd::same(socket_property, "clipboard_copy_files"))
         {
-            ptk_clipboard_copy_file_list(argv + i + 1, ztd::same(argv[i], "clipboard_copy_files"));
+            ptk_clipboard_copy_file_list(argv + i + 1,
+                                         ztd::same(socket_property, "clipboard_copy_files"));
         }
-        else if (ztd::same(argv[i], "selected_filenames") || ztd::same(argv[i], "selected_files"))
+        else if (ztd::same(socket_property, "selected_filenames") ||
+                 ztd::same(socket_property, "selected_files"))
         {
             if (!argv[i + 1] || argv[i + 1][0] == '\0')
                 // unselect all
@@ -6218,7 +6236,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             else
                 ptk_file_browser_select_file_list(file_browser, argv + i + 1, true);
         }
-        else if (ztd::same(argv[i], "selected_pattern"))
+        else if (ztd::same(socket_property, "selected_pattern"))
         {
             if (!argv[i + 1])
                 // unselect all
@@ -6226,7 +6244,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             else
                 ptk_file_browser_select_pattern(nullptr, file_browser, argv[i + 1]);
         }
-        else if (ztd::same(argv[i], "current_dir"))
+        else if (ztd::same(socket_property, "current_dir"))
         {
             if (!argv[i + 1])
             {
@@ -6256,48 +6274,50 @@ main_window_socket_command(char* argv[], std::string& reply)
             reply = fmt::format("command {} requires an argument", socket_cmd);
             return 1;
         }
-        if (ztd::same(argv[i], "window_size") || ztd::same(argv[i], "window_position"))
+        if (ztd::same(socket_property, "window_size") ||
+            ztd::same(socket_property, "window_position"))
         {
-            if (ztd::same(argv[i], "window_size"))
+            if (ztd::same(socket_property, "window_size"))
                 gtk_window_get_size(GTK_WINDOW(main_window), &width, &height);
             else
                 gtk_window_get_position(GTK_WINDOW(main_window), &width, &height);
             reply = fmt::format("{}x{}", width, height);
         }
-        else if (ztd::same(argv[i], "window_maximized"))
+        else if (ztd::same(socket_property, "window_maximized"))
         {
             reply = fmt::format("{}", !!main_window->maximized);
         }
-        else if (ztd::same(argv[i], "window_fullscreen"))
+        else if (ztd::same(socket_property, "window_fullscreen"))
         {
             reply = fmt::format("{}", !!main_window->fullscreen);
         }
-        else if (ztd::same(argv[i], "screen_size"))
+        else if (ztd::same(socket_property, "screen_size"))
         {
             GdkRectangle workarea = GdkRectangle();
             gdk_monitor_get_workarea(gdk_display_get_primary_monitor(gdk_display_get_default()),
                                      &workarea);
             reply = fmt::format("{}x{}", workarea.width, workarea.height);
         }
-        else if (ztd::same(argv[i], "window_vslider_top") ||
-                 ztd::same(argv[i], "window_vslider_bottom") ||
-                 ztd::same(argv[i], "window_hslider") || ztd::same(argv[i], "window_tslider"))
+        else if (ztd::same(socket_property, "window_vslider_top") ||
+                 ztd::same(socket_property, "window_vslider_bottom") ||
+                 ztd::same(socket_property, "window_hslider") ||
+                 ztd::same(socket_property, "window_tslider"))
         {
-            if (ztd::same(argv[i], "window_vslider_top"))
+            if (ztd::same(socket_property, "window_vslider_top"))
                 widget = main_window->hpane_top;
-            else if (ztd::same(argv[i], "window_vslider_bottom"))
+            else if (ztd::same(socket_property, "window_vslider_bottom"))
                 widget = main_window->hpane_bottom;
-            else if (ztd::same(argv[i], "window_hslider"))
+            else if (ztd::same(socket_property, "window_hslider"))
                 widget = main_window->vpane;
             else
                 widget = main_window->task_vpane;
             reply = fmt::format("{}", gtk_paned_get_position(GTK_PANED(widget)));
         }
-        else if (ztd::same(argv[i], "focused_panel"))
+        else if (ztd::same(socket_property, "focused_panel"))
         {
             reply = fmt::format("{}", main_window->curpanel);
         }
-        else if (ztd::same(argv[i], "focused_pane"))
+        else if (ztd::same(socket_property, "focused_pane"))
         {
             if (file_browser->folder_view && gtk_widget_is_focus(file_browser->folder_view))
                 str = "filelist";
@@ -6312,54 +6332,54 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (!str.empty())
                 reply = fmt::format("{}", str);
         }
-        else if (ztd::same(argv[i], "current_tab"))
+        else if (ztd::same(socket_property, "current_tab"))
         {
             reply = fmt::format("{}",
                                 gtk_notebook_page_num(GTK_NOTEBOOK(main_window->panel[panel - 1]),
                                                       GTK_WIDGET(file_browser)) +
                                     1);
         }
-        else if (ztd::same(argv[i], "tab_count"))
+        else if (ztd::same(socket_property, "tab_count"))
         {
             main_window_get_counts(file_browser, &panel, &tab, &j);
             reply = fmt::format("{}", tab);
         }
-        else if (ztd::same(argv[i], "new_tab"))
+        else if (ztd::same(socket_property, "new_tab"))
         {
         }
-        else if (Glib::str_has_suffix(argv[i], "_visible"))
+        else if (Glib::str_has_suffix(socket_property, "_visible"))
         {
             bool use_mode = false;
-            if (Glib::str_has_prefix(argv[i], "devices_"))
+            if (Glib::str_has_prefix(socket_property, "devices_"))
             {
                 str = "show_devmon";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(argv[i], "bookmarks_"))
+            else if (Glib::str_has_prefix(socket_property, "bookmarks_"))
             {
                 str = "show_book";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(argv[i], "dirtree_"))
+            else if (Glib::str_has_prefix(socket_property, "dirtree_"))
             {
                 str = "show_dirtree";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(argv[i], "toolbar_"))
+            else if (Glib::str_has_prefix(socket_property, "toolbar_"))
             {
                 str = "show_toolbox";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(argv[i], "sidetoolbar_"))
+            else if (Glib::str_has_prefix(socket_property, "sidetoolbar_"))
             {
                 str = "show_sidebar";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(argv[i], "hidden_files_"))
+            else if (Glib::str_has_prefix(socket_property, "hidden_files_"))
             {
                 str = "show_hidden";
             }
-            else if (Glib::str_has_prefix(argv[i], "panel"))
+            else if (Glib::str_has_prefix(socket_property, "panel"))
             {
                 j = argv[i][5] - 48;
                 if (j < 1 || j > 4)
@@ -6382,18 +6402,19 @@ main_window_socket_command(char* argv[], std::string& reply)
             else
                 reply = fmt::format("{}", !!xset_get_b_panel(panel, str));
         }
-        else if (ztd::same(argv[i], "panel_hslider_top") ||
-                 ztd::same(argv[i], "panel_hslider_bottom") || ztd::same(argv[i], "panel_vslider"))
+        else if (ztd::same(socket_property, "panel_hslider_top") ||
+                 ztd::same(socket_property, "panel_hslider_bottom") ||
+                 ztd::same(socket_property, "panel_vslider"))
         {
-            if (ztd::same(argv[i], "panel_hslider_top"))
+            if (ztd::same(socket_property, "panel_hslider_top"))
                 widget = file_browser->side_vpane_top;
-            else if (ztd::same(argv[i], "panel_hslider_bottom"))
+            else if (ztd::same(socket_property, "panel_hslider_bottom"))
                 widget = file_browser->side_vpane_bottom;
             else
                 widget = file_browser->hpane;
             reply = fmt::format("{}", gtk_paned_get_position(GTK_PANED(widget)));
         }
-        else if (ztd::same(argv[i], "column_width"))
+        else if (ztd::same(socket_property, "column_width"))
         { // COLUMN
             if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
             {
@@ -6432,7 +6453,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = fmt::format("{}", gtk_tree_view_column_get_width(col));
             }
         }
-        else if (ztd::same(argv[i], "sort_by"))
+        else if (ztd::same(socket_property, "sort_by"))
         { // COLUMN
             switch (file_browser->sort_order)
             {
@@ -6459,17 +6480,17 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             reply = fmt::format("{}", str);
         }
-        else if (Glib::str_has_prefix(argv[i], "sort_"))
+        else if (Glib::str_has_prefix(socket_property, "sort_"))
         {
-            if (ztd::same(argv[i], "sort_ascend"))
+            if (ztd::same(socket_property, "sort_ascend"))
                 reply = fmt::format("{}", file_browser->sort_type == GTK_SORT_ASCENDING ? 1 : 0);
 #if 0
-            else if (ztd::same(argv[i], "sort_natural"))
+            else if (ztd::same(socket_property, "sort_natural"))
 #endif
-            else if (ztd::same(argv[i], "sort_alphanum"))
+            else if (ztd::same(socket_property, "sort_alphanum"))
                 reply = fmt::format("{}",
                                     xset_get_b_panel(file_browser->mypanel, "sort_extra") ? 1 : 0);
-            else if (ztd::same(argv[i], "sort_case"))
+            else if (ztd::same(socket_property, "sort_case"))
                 reply = fmt::format("{}",
                                     xset_get_b_panel(file_browser->mypanel, "sort_extra") &&
                                             xset_get_int_panel(file_browser->mypanel,
@@ -6477,14 +6498,14 @@ main_window_socket_command(char* argv[], std::string& reply)
                                                                XSetSetSet::X) == XSetB::XSET_B_TRUE
                                         ? 1
                                         : 0);
-            else if (ztd::same(argv[i], "sort_hidden_first"))
+            else if (ztd::same(socket_property, "sort_hidden_first"))
                 reply = fmt::format("{}",
                                     xset_get_int_panel(file_browser->mypanel,
                                                        "sort_extra",
                                                        XSetSetSet::Z) == XSetB::XSET_B_TRUE
                                         ? 1
                                         : 0);
-            else if (ztd::same(argv[i], "sort_first"))
+            else if (ztd::same(socket_property, "sort_first"))
             {
                 switch (xset_get_int_panel(file_browser->mypanel, "sort_extra", XSetSetSet::Y))
                 {
@@ -6508,37 +6529,37 @@ main_window_socket_command(char* argv[], std::string& reply)
                 return 1;
             }
         }
-        else if (ztd::same(argv[i], "show_thumbnails"))
+        else if (ztd::same(socket_property, "show_thumbnails"))
         {
             reply = fmt::format("{}", app_settings.show_thumbnail ? 1 : 0);
         }
-        else if (ztd::same(argv[i], "large_icons"))
+        else if (ztd::same(socket_property, "large_icons"))
         {
             reply = fmt::format("{}", file_browser->large_icons ? 1 : 0);
         }
-        else if (ztd::same(argv[i], "statusbar_text"))
+        else if (ztd::same(socket_property, "statusbar_text"))
         {
             reply = fmt::format("{}", gtk_label_get_text(GTK_LABEL(file_browser->status_label)));
         }
-        else if (ztd::same(argv[i], "pathbar_text"))
+        else if (ztd::same(socket_property, "pathbar_text"))
         {
             if (GTK_IS_WIDGET(file_browser->path_bar))
                 reply = fmt::format("{}", gtk_entry_get_text(GTK_ENTRY(file_browser->path_bar)));
         }
-        else if (ztd::same(argv[i], "clipboard_text") ||
-                 ztd::same(argv[i], "clipboard_primary_text"))
+        else if (ztd::same(socket_property, "clipboard_text") ||
+                 ztd::same(socket_property, "clipboard_primary_text"))
         {
-            GtkClipboard* clip =
-                gtk_clipboard_get(ztd::same(argv[i], "clipboard_text") ? GDK_SELECTION_CLIPBOARD
-                                                                       : GDK_SELECTION_PRIMARY);
+            GtkClipboard* clip = gtk_clipboard_get(ztd::same(socket_property, "clipboard_text")
+                                                       ? GDK_SELECTION_CLIPBOARD
+                                                       : GDK_SELECTION_PRIMARY);
             reply = gtk_clipboard_wait_for_text(clip);
         }
-        else if (ztd::same(argv[i], "clipboard_from_file") ||
-                 ztd::same(argv[i], "clipboard_primary_from_file"))
+        else if (ztd::same(socket_property, "clipboard_from_file") ||
+                 ztd::same(socket_property, "clipboard_primary_from_file"))
         {
         }
-        else if (ztd::same(argv[i], "clipboard_cut_files") ||
-                 ztd::same(argv[i], "clipboard_copy_files"))
+        else if (ztd::same(socket_property, "clipboard_cut_files") ||
+                 ztd::same(socket_property, "clipboard_copy_files"))
         {
             GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
             GdkAtom gnome_target;
@@ -6562,13 +6583,13 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             if (!strncmp((char*)gtk_selection_data_get_data(sel_data), "cut", 3))
             {
-                if (ztd::same(argv[i], "clipboard_copy_files"))
+                if (ztd::same(socket_property, "clipboard_copy_files"))
                 {
                     gtk_selection_data_free(sel_data);
                     return 0;
                 }
             }
-            else if (ztd::same(argv[i], "clipboard_cut_files"))
+            else if (ztd::same(socket_property, "clipboard_cut_files"))
             {
                 gtk_selection_data_free(sel_data);
                 return 0;
@@ -6588,7 +6609,8 @@ main_window_socket_command(char* argv[], std::string& reply)
 
             reply = str;
         }
-        else if (ztd::same(argv[i], "selected_filenames") || ztd::same(argv[i], "selected_files"))
+        else if (ztd::same(socket_property, "selected_filenames") ||
+                 ztd::same(socket_property, "selected_files"))
         {
             std::vector<VFSFileInfo*> sel_files;
 
@@ -6603,18 +6625,17 @@ main_window_socket_command(char* argv[], std::string& reply)
                 file = vfs_file_info_ref(file);
                 if (!file)
                     continue;
-                const std::string str2 = bash_quote(vfs_file_info_get_name(file));
-                str.append(fmt::format("{} ", str2));
+                str.append(fmt::format("{} ", bash_quote(vfs_file_info_get_name(file))));
                 vfs_file_info_unref(file);
             }
             vfs_file_info_list_free(sel_files);
             str.append(")");
             reply = str;
         }
-        else if (ztd::same(argv[i], "selected_pattern"))
+        else if (ztd::same(socket_property, "selected_pattern"))
         {
         }
-        else if (ztd::same(argv[i], "current_dir"))
+        else if (ztd::same(socket_property, "current_dir"))
         {
             reply = fmt::format("{}", ptk_file_browser_get_cwd(file_browser));
         }
@@ -6849,7 +6870,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             reply = fmt::format("{} requires two arguments", socket_cmd);
             return 1;
         }
-        if (ztd::same(argv[i], "cmd") || ztd::same(argv[i], "command"))
+        if (ztd::same(socket_property, "cmd") || ztd::same(socket_property, "command"))
         {
             // custom command task
             // cmd [--task [--popup] [--scroll]] [--terminal]
@@ -6893,7 +6914,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 }
                 else
                 {
-                    reply = fmt::format("invalid {} task option '{}'", argv[i], argv[j]);
+                    reply = fmt::format("invalid {} task option '{}'", socket_property, argv[j]);
                     return 2;
                 }
             }
@@ -6933,7 +6954,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                                     (void*)main_window,
                                     (void*)ptask);
         }
-        else if (ztd::same(argv[i], "edit") || ztd::same(argv[i], "web"))
+        else if (ztd::same(socket_property, "edit") || ztd::same(socket_property, "web"))
         {
             // edit or web
             // edit [--as-root] FILE
@@ -6941,11 +6962,11 @@ main_window_socket_command(char* argv[], std::string& reply)
             bool opt_root = false;
             for (j = i + 1; argv[j] && argv[j][0] == '-'; j++)
             {
-                if (ztd::same(argv[i], "edit") && ztd::same(argv[j], "--as-root"))
+                if (ztd::same(socket_property, "edit") && ztd::same(argv[j], "--as-root"))
                     opt_root = true;
                 else
                 {
-                    reply = fmt::format("invalid {} task option '{}'", argv[i], argv[j]);
+                    reply = fmt::format("invalid {} task option '{}'", socket_property, argv[j]);
                     return 2;
                 }
             }
@@ -6954,7 +6975,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = fmt::format("{} requires two arguments", socket_cmd);
                 return 1;
             }
-            if (ztd::same(argv[i], "edit"))
+            if (ztd::same(socket_property, "edit"))
             {
                 if (!(argv[j][0] == '/' && std::filesystem::exists(argv[j])))
                 {
@@ -6964,12 +6985,12 @@ main_window_socket_command(char* argv[], std::string& reply)
                 xset_edit(GTK_WIDGET(file_browser), argv[j], opt_root, !opt_root);
             }
         }
-        else if (ztd::same(argv[i], "mount") || ztd::same(argv[i], "unmount"))
+        else if (ztd::same(socket_property, "mount") || ztd::same(socket_property, "unmount"))
         {
             // mount or unmount TARGET
             for (j = i + 1; argv[j] && argv[j][0] == '-'; j++)
             {
-                reply = fmt::format("invalid {} task option '{}'", argv[i], argv[j]);
+                reply = fmt::format("invalid {} task option '{}'", socket_property, argv[j]);
                 return 2;
             }
             if (!argv[j])
@@ -6984,7 +7005,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             char* device_file = nullptr;
             VFSVolume* vol = nullptr;
             netmount_t* netmount = new netmount_t;
-            if (ztd::same(argv[i], "unmount") && std::filesystem::is_directory(real_path))
+            if (ztd::same(socket_property, "unmount") && std::filesystem::is_directory(real_path))
             {
                 // unmount DIR
                 if (path_is_mounted_mtab(nullptr, real_path, &device_file, nullptr) && device_file)
@@ -7007,7 +7028,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 // block device eg /dev/sda1
                 device_file = ztd::strdup(real_path);
             }
-            else if (ztd::same(argv[i], "mount") &&
+            else if (ztd::same(socket_property, "mount") &&
                      ((real_path[0] != '/' && strstr(real_path, ":/")) ||
                       Glib::str_has_prefix(real_path, "//")))
             {
@@ -7034,7 +7055,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (vol)
             {
                 // mount/unmount vol
-                if (ztd::same(argv[i], "mount"))
+                if (ztd::same(socket_property, "mount"))
                     cmd = vfs_volume_get_mount_command(vol,
                                                        xset_get_s(XSetName::DEV_MOUNT_OPTIONS),
                                                        &run_in_terminal);
@@ -7059,7 +7080,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 return 2;
             }
             // Task
-            PtkFileTask* ptask = ptk_file_exec_new(argv[i],
+            PtkFileTask* ptask = ptk_file_exec_new(socket_property,
                                                    ptk_file_browser_get_cwd(file_browser),
                                                    GTK_WIDGET(file_browser),
                                                    file_browser->task_view);
@@ -7073,9 +7094,9 @@ main_window_socket_command(char* argv[], std::string& reply)
             ptask->task->exec_scroll_lock = false;
             ptk_file_task_run(ptask);
         }
-        else if (ztd::same(argv[i], "copy") || ztd::same(argv[i], "move") ||
-                 ztd::same(argv[i], "link") || ztd::same(argv[i], "delete") ||
-                 ztd::same(argv[i], "trash"))
+        else if (ztd::same(socket_property, "copy") || ztd::same(socket_property, "move") ||
+                 ztd::same(socket_property, "link") || ztd::same(socket_property, "delete") ||
+                 ztd::same(socket_property, "trash"))
         {
             // built-in task
             // copy SOURCE FILENAME [...] TARGET
@@ -7097,7 +7118,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 }
                 else
                 {
-                    reply = fmt::format("invalid {} task option '{}'", argv[i], argv[j]);
+                    reply = fmt::format("invalid {} task option '{}'", socket_property, argv[j]);
                     return 2;
                 }
             }
@@ -7106,7 +7127,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             char* target_dir = nullptr;
             for (; argv[j]; j++)
             {
-                if (!ztd::same(argv[i], "delete") && !argv[j + 1])
+                if (!ztd::same(socket_property, "delete") && !argv[j + 1])
                 {
                     // last argument - use as TARGET
                     if (argv[j][0] != '/')
@@ -7142,21 +7163,21 @@ main_window_socket_command(char* argv[], std::string& reply)
                     file_list.push_back(str);
                 }
             }
-            if (file_list.empty() || (!ztd::same(argv[i], "delete") && !target_dir))
+            if (file_list.empty() || (!ztd::same(socket_property, "delete") && !target_dir))
             {
                 reply = fmt::format("task type {} requires FILE argument(s)", argv[i]);
                 return 2;
             }
             VFSFileTaskType task_type;
-            if (ztd::same(argv[i], "copy"))
+            if (ztd::same(socket_property, "copy"))
                 task_type = VFSFileTaskType::VFS_FILE_TASK_COPY;
-            else if (ztd::same(argv[i], "move"))
+            else if (ztd::same(socket_property, "move"))
                 task_type = VFSFileTaskType::VFS_FILE_TASK_MOVE;
-            else if (ztd::same(argv[i], "link"))
+            else if (ztd::same(socket_property, "link"))
                 task_type = VFSFileTaskType::VFS_FILE_TASK_LINK;
-            else if (ztd::same(argv[i], "delete"))
+            else if (ztd::same(socket_property, "delete"))
                 task_type = VFSFileTaskType::VFS_FILE_TASK_DELETE;
-            else if (ztd::same(argv[i], "trash"))
+            else if (ztd::same(socket_property, "trash"))
                 task_type = VFSFileTaskType::VFS_FILE_TASK_TRASH;
             else
                 return 1; // failsafe
@@ -7188,7 +7209,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         // this only handles keys assigned to menu items
         GdkEventKey* event = (GdkEventKey*)gdk_event_new(GDK_KEY_PRESS);
-        event->keyval = std::stoul(argv[i], nullptr, 0);
+        event->keyval = std::stoul(socket_property, nullptr, 0);
         event->state = argv[i + 1] ? std::stoul(argv[i + 1], nullptr, 0) : 0;
         if (event->keyval)
         {
