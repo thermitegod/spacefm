@@ -23,4 +23,4 @@
 
 GdkPixbuf* vfs_load_icon(GtkIconTheme* theme, const char* icon_name, int size);
 
-std::string vfs_file_size_to_string_format(uint64_t size, bool decimal);
+const std::string vfs_file_size_to_string_format(std::uint64_t size_in_bytes, bool decimal);

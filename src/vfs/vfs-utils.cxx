@@ -56,77 +56,17 @@ vfs_load_icon(GtkIconTheme* theme, const char* icon_name, int size)
     return icon;
 }
 
-std::string
-vfs_file_size_to_string_format(uint64_t size, bool decimal)
+const std::string
+vfs_file_size_to_string_format(std::uint64_t size_in_bytes, bool decimal)
 {
-    std::string file_size;
-    std::string unit;
-
-    float val;
-
-    if (size > ((uint64_t)1) << 40)
+    if (app_settings.use_si_prefix)
     {
-        if (app_settings.use_si_prefix)
-        {
-            unit = "TB";
-            val = ((float)size) / ((float)1000000000000);
-        }
-        else
-        {
-            unit = "TiB";
-            val = ((float)size) / ((uint64_t)1 << 40);
-        }
-    }
-    else if (size > ((uint64_t)1) << 30)
-    {
-        if (app_settings.use_si_prefix)
-        {
-            unit = "GB";
-            val = ((float)size) / ((float)1000000000);
-        }
-        else
-        {
-            unit = "GiB";
-            val = ((float)size) / ((uint64_t)1 << 30);
-        }
-    }
-    else if (size > ((uint64_t)1 << 20))
-    {
-        if (app_settings.use_si_prefix)
-        {
-            unit = "MB";
-            val = ((float)size) / ((float)1000000);
-        }
-        else
-        {
-            unit = "MiB";
-            val = ((float)size) / ((uint64_t)1 << 20);
-        }
-    }
-    else if (size > ((uint64_t)1 << 10))
-    {
-        if (app_settings.use_si_prefix)
-        {
-            unit = "KB";
-            val = ((float)size) / ((float)1000);
-        }
-        else
-        {
-            unit = "KiB";
-            val = ((float)size) / ((uint64_t)1 << 10);
-        }
+        ztd::FileSizeSI filesize(size_in_bytes);
+        return filesize.get_formated_size(decimal ? 1 : 0);
     }
     else
     {
-        unit = "B";
-        file_size = fmt::format("{} {}", size, unit);
-        return file_size;
+        ztd::FileSize filesize(size_in_bytes);
+        return filesize.get_formated_size(decimal ? 1 : 0);
     }
-
-    if (decimal)
-        file_size = fmt::format("{:.1f} {}", val, unit);
-    else
-        file_size = fmt::format("{:.0f} {}", val, unit);
-
-    return file_size;
 }
