@@ -82,4 +82,4 @@ std::vector<MimeCache>& mime_type_get_caches();
 void mime_type_regen_all_caches();
 
 /* max magic extent of all caches */
-extern uint32_t mime_cache_max_extent;
+extern std::uint32_t mime_cache_max_extent;

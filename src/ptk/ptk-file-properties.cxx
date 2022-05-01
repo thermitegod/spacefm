@@ -211,12 +211,12 @@ on_update_labels(FilePropertiesDialogData* data)
 
     size_str = fmt::format("{} ( {} bytes )",
                            vfs_file_size_to_string_format(data->total_size, true),
-                           (uint64_t)data->total_size);
+                           (std::uint64_t)data->total_size);
     gtk_label_set_text(data->total_size_label, size_str.c_str());
 
     size_str = fmt::format("{} ( {} bytes )",
                            vfs_file_size_to_string_format(data->size_on_disk, true),
-                           (uint64_t)data->size_on_disk);
+                           (std::uint64_t)data->size_on_disk);
     gtk_label_set_text(data->size_on_disk_label, size_str.c_str());
 
     std::string count;
@@ -608,7 +608,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
                        sizeof(buf),
                        "%s  ( %lu bytes )",
                        vfs_file_info_get_disp_size(file),
-                       (uint64_t)vfs_file_info_get_size(file));
+                       (std::uint64_t)vfs_file_info_get_size(file));
             gtk_label_set_text(data->total_size_label, buf);
 
             std::string size_str =
@@ -618,7 +618,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
                        sizeof(buf),
                        "%s  ( %lu bytes )",
                        size_str.c_str(),
-                       (uint64_t)vfs_file_info_get_blocks(file) * 512);
+                       (std::uint64_t)vfs_file_info_get_blocks(file) * 512);
             gtk_label_set_text(data->size_on_disk_label, buf);
 
             gtk_label_set_text(data->count_label, "1 file");

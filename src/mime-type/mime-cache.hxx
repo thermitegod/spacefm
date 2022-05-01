@@ -35,7 +35,7 @@ class MimeCache
     const char* lookup_alias(const char* mime_type);
 
     const std::string& get_file_path();
-    uint32_t get_magic_max_extent();
+    std::uint32_t get_magic_max_extent();
 
   private:
     std::string m_file_path;
@@ -43,32 +43,32 @@ class MimeCache
     const char* m_buffer{nullptr};
     std::size_t m_buffer_size{0};
 
-    uint32_t m_n_alias{0};
+    std::uint32_t m_n_alias{0};
     const char* m_alias{nullptr};
 
-    uint32_t m_n_parents{0};
+    std::uint32_t m_n_parents{0};
     const char* m_parents{nullptr};
 
-    uint32_t m_n_literals{0};
+    std::uint32_t m_n_literals{0};
     const char* m_literals{nullptr};
 
-    uint32_t m_n_globs{0};
+    std::uint32_t m_n_globs{0};
     const char* m_globs{nullptr};
 
-    uint32_t m_n_suffix_roots{0};
+    std::uint32_t m_n_suffix_roots{0};
     const char* m_suffix_roots{nullptr};
 
-    uint32_t m_n_magics{0};
-    uint32_t m_magic_max_extent{0};
+    std::uint32_t m_n_magics{0};
+    std::uint32_t m_magic_max_extent{0};
     const char* m_magics{nullptr};
 
     void load_mime_file();
-    const char* lookup_str_in_entries(const char* entries, uint32_t n, const char* str);
+    const char* lookup_str_in_entries(const char* entries, std::uint32_t n, const char* str);
     bool magic_rule_match(const char* buf, const char* rule, const char* data, int len);
     bool magic_match(const char* buf, const char* magic, const char* data, int len);
-    const char* lookup_suffix_nodes(const char* buf, const char* nodes, uint32_t n,
+    const char* lookup_suffix_nodes(const char* buf, const char* nodes, std::uint32_t n,
                                     const char* name);
-    const char* lookup_reverse_suffix_nodes(const char* buf, const char* nodes, uint32_t n,
+    const char* lookup_reverse_suffix_nodes(const char* buf, const char* nodes, std::uint32_t n,
                                             const char* name, const char* suffix,
                                             const char** suffix_pos);
 };

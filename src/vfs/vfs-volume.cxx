@@ -208,8 +208,8 @@ struct device_t
     char* device_presentation_icon_name;
     char* device_automount_hint;
     char* device_by_id;
-    uint64_t device_size;
-    uint64_t device_block_size;
+    std::uint64_t device_size;
+    std::uint64_t device_block_size;
     char* id_usage;
     char* id_type;
     char* id_version;
@@ -222,7 +222,7 @@ struct device_t
     char* drive_serial;
     char* drive_wwn;
     char* drive_connection_interface;
-    uint64_t drive_connection_speed;
+    std::uint64_t drive_connection_speed;
     char* drive_media_compatibility;
     char* drive_media;
     bool drive_is_media_ejectable;
@@ -466,7 +466,7 @@ sysfs_get_int(const char* dir, const char* attribute)
     return std::stoi(contents);
 }
 
-static uint64_t
+static std::uint64_t
 sysfs_get_uint64(const char* dir, const char* attribute)
 {
     std::string contents;
@@ -551,7 +551,7 @@ static void
 info_drive_connection(device_t* device)
 {
     const char* connection_interface = nullptr;
-    uint64_t connection_speed = 0;
+    std::uint64_t connection_speed = 0;
 
     /* walk up the device tree to figure out the subsystem */
     char* s = ztd::strdup(device->native_path);
@@ -1075,9 +1075,9 @@ info_device_properties(device_t* device)
     /* device_size, device_block_size and device_is_read_only properties */
     if (device->device_is_media_available)
     {
-        uint64_t block_size;
+        std::uint64_t block_size;
 
-        device->device_size = sysfs_get_uint64(device->native_path, "size") * ((uint64_t)512);
+        device->device_size = sysfs_get_uint64(device->native_path, "size") * ((std::uint64_t)512);
         device->device_is_read_only = (sysfs_get_int(device->native_path, "ro") != 0);
         /* This is not available on all devices so fall back to 512 if unavailable.
          *
@@ -1333,13 +1333,13 @@ info_partition(device_t* device)
      */
     if (!is_partition && sysfs_file_exists(device->native_path, "start"))
     {
-        uint64_t size = sysfs_get_uint64(device->native_path, "size");
-        uint64_t alignment_offset = sysfs_get_uint64(device->native_path, "alignment_offset");
+        std::uint64_t size = sysfs_get_uint64(device->native_path, "size");
+        std::uint64_t alignment_offset = sysfs_get_uint64(device->native_path, "alignment_offset");
 
         device->partition_size = ztd::strdup(size * 512);
         device->partition_alignment_offset = ztd::strdup(alignment_offset);
 
-        uint64_t offset =
+        std::uint64_t offset =
             sysfs_get_uint64(device->native_path, "start") * device->device_block_size;
         device->partition_offset = ztd::strdup(offset);
 

@@ -3251,7 +3251,7 @@ show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
 
     /*
     int button;
-    uint32_t time;
+    std::uint32_t time;
     if (event)
     {
         button = event->button;
@@ -5570,7 +5570,7 @@ ptk_file_browser_view_as_list(PtkFileBrowser* file_browser)
 }
 
 unsigned int
-ptk_file_browser_get_n_sel(PtkFileBrowser* file_browser, uint64_t* sel_size)
+ptk_file_browser_get_n_sel(PtkFileBrowser* file_browser, std::uint64_t* sel_size)
 {
     if (sel_size)
         *sel_size = file_browser->sel_size;

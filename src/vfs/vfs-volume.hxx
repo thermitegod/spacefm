@@ -75,7 +75,7 @@ struct VFSVolume
     char* disp_name;
     std::string icon;
     char* mount_point;
-    uint64_t size;
+    std::uint64_t size;
     std::string label;
     char* fs_type;
 

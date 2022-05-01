@@ -806,7 +806,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, in
             GdkDragAction suggested_action;
             GdkDragAction action;
 
-            uint32_t start_time;
+            std::uint32_t start_time;
 
             GdkDevice* device;
 

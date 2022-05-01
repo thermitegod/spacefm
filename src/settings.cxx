@@ -5517,7 +5517,7 @@ xset_design_additem(GtkWidget* menu, const char* label, XSetJob job, XSet* set)
 
 GtkWidget*
 xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned int button,
-                      uint32_t time)
+                      std::uint32_t time)
 {
     GtkWidget* newitem;
     GtkWidget* submenu;

@@ -55,7 +55,7 @@
 static bool on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data);
 static bool app_menu_keypress(GtkWidget* widget, GdkEventKey* event, PtkFileMenu* data);
 static void show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data,
-                          unsigned int button, uint32_t time);
+                          unsigned int button, std::uint32_t time);
 
 /* Signal handlers for popup menu */
 static void on_popup_open_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
@@ -1844,7 +1844,7 @@ app_menu_additem(GtkWidget* menu, const char* label, const char* stock_icon, int
 
 static void
 show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned int button,
-              uint32_t time)
+              std::uint32_t time)
 {
     (void)button;
     (void)time;

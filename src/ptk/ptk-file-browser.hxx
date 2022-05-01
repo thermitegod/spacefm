@@ -178,7 +178,7 @@ const char* ptk_file_browser_get_cwd(PtkFileBrowser* file_browser);
 unsigned int ptk_file_browser_get_n_all_files(PtkFileBrowser* file_browser);
 unsigned int ptk_file_browser_get_n_visible_files(PtkFileBrowser* file_browser);
 
-unsigned int ptk_file_browser_get_n_sel(PtkFileBrowser* file_browser, uint64_t* sel_size);
+unsigned int ptk_file_browser_get_n_sel(PtkFileBrowser* file_browser, std::uint64_t* sel_size);
 
 void ptk_file_browser_go_back(GtkWidget* item, PtkFileBrowser* file_browser);
 

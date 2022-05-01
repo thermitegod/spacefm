@@ -3004,7 +3004,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
 
     unsigned int num_sel;
     unsigned int num_vis;
-    uint64_t total_size;
+    std::uint64_t total_size;
 
     // note: total size will not include content changes since last selection change
     num_sel = ptk_file_browser_get_n_sel(file_browser, &total_size);

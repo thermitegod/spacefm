@@ -38,8 +38,8 @@
 #define LIB_MINOR_VERSION 2
 
 /* handle byte order here */
-#define VAL16(buffer, idx) GUINT16_FROM_BE(*(uint16_t*)(buffer + idx))
-#define VAL32(buffer, idx) GUINT32_FROM_BE(*(uint32_t*)(buffer + idx))
+#define VAL16(buffer, idx) GUINT16_FROM_BE(*(std::uint16_t*)(buffer + idx))
+#define VAL32(buffer, idx) GUINT32_FROM_BE(*(std::uint32_t*)(buffer + idx))
 
 /* cache header */
 #define MAJOR_VERSION  0
@@ -101,7 +101,7 @@ MimeCache::load_mime_file()
         return;
     }
 
-    uint32_t offset;
+    std::uint32_t offset;
 
     m_buffer = buffer;
     m_buffer_size = statbuf.st_size;
@@ -175,7 +175,7 @@ const char*
 MimeCache::lookup_suffix(const char* filename, const char** suffix_pos)
 {
     const char* root = m_suffix_roots;
-    uint32_t n = m_n_suffix_roots;
+    std::uint32_t n = m_n_suffix_roots;
     const char* mime_type = nullptr;
     const char* ret = nullptr;
 
@@ -249,12 +249,12 @@ MimeCache::lookup_parents(const char* mime_type)
     if (!parents)
         return result;
 
-    uint32_t n = VAL32(parents, 0);
+    std::uint32_t n = VAL32(parents, 0);
     parents += 4;
 
     for (std::size_t i = 0; i < n; ++i)
     {
-        uint32_t parent_off = VAL32(parents, i * 4);
+        std::uint32_t parent_off = VAL32(parents, i * 4);
         const char* parent = m_buffer + parent_off;
         result.push_back(parent);
     }
@@ -273,14 +273,14 @@ MimeCache::get_file_path()
     return m_file_path;
 }
 
-uint32_t
+std::uint32_t
 MimeCache::get_magic_max_extent()
 {
     return m_magic_max_extent;
 }
 
 const char*
-MimeCache::lookup_str_in_entries(const char* entries, uint32_t n, const char* str)
+MimeCache::lookup_str_in_entries(const char* entries, std::uint32_t n, const char* str)
 {
     int upper = n;
     int lower = 0;
@@ -311,17 +311,17 @@ MimeCache::lookup_str_in_entries(const char* entries, uint32_t n, const char* st
 bool
 MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data, int len)
 {
-    uint32_t offset = VAL32(rule, 0);
-    uint32_t range = VAL32(rule, 4);
+    std::uint32_t offset = VAL32(rule, 0);
+    std::uint32_t range = VAL32(rule, 4);
 
-    uint32_t max_offset = offset + range;
-    uint32_t val_len = VAL32(rule, 12);
+    std::uint32_t max_offset = offset + range;
+    std::uint32_t val_len = VAL32(rule, 12);
 
-    for (; offset < max_offset && (offset + val_len) <= static_cast<uint32_t>(len); ++offset)
+    for (; offset < max_offset && (offset + val_len) <= static_cast<std::uint32_t>(len); ++offset)
     {
         bool match = false;
-        uint32_t val_off = VAL32(rule, 16);
-        uint32_t mask_off = VAL32(rule, 20);
+        std::uint32_t val_off = VAL32(rule, 16);
+        std::uint32_t mask_off = VAL32(rule, 20);
         const char* value = buf + val_off;
         /* FIXME: word_size and byte order are not supported! */
 
@@ -346,10 +346,10 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data,
 
         if (match)
         {
-            uint32_t n_children = VAL32(rule, 24);
+            std::uint32_t n_children = VAL32(rule, 24);
             if (n_children > 0)
             {
-                uint32_t first_child_off = VAL32(rule, 28);
+                std::uint32_t first_child_off = VAL32(rule, 28);
                 unsigned int i;
                 rule = buf + first_child_off;
                 for (i = 0; i < n_children; ++i, rule += 32)
@@ -370,8 +370,8 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data,
 bool
 MimeCache::magic_match(const char* buf, const char* magic, const char* data, int len)
 {
-    uint32_t n_rules = VAL32(magic, 8);
-    uint32_t rules_off = VAL32(magic, 12);
+    std::uint32_t n_rules = VAL32(magic, 8);
+    std::uint32_t rules_off = VAL32(magic, 12);
     const char* rule = buf + rules_off;
 
     for (std::size_t i = 0; i < n_rules; ++i, rule += 32)
@@ -381,9 +381,10 @@ MimeCache::magic_match(const char* buf, const char* magic, const char* data, int
 }
 
 const char*
-MimeCache::lookup_suffix_nodes(const char* buf, const char* nodes, uint32_t n, const char* name)
+MimeCache::lookup_suffix_nodes(const char* buf, const char* nodes, std::uint32_t n,
+                               const char* name)
 {
-    uint32_t uchar = g_unichar_tolower(g_utf8_get_char(name));
+    std::uint32_t uchar = g_unichar_tolower(g_utf8_get_char(name));
 
     /* binary search */
     int upper = n;
@@ -393,7 +394,7 @@ MimeCache::lookup_suffix_nodes(const char* buf, const char* nodes, uint32_t n, c
     while (upper >= lower)
     {
         const char* node = nodes + middle * 16;
-        uint32_t ch = VAL32(node, 0);
+        std::uint32_t ch = VAL32(node, 0);
 
         if (uchar < ch)
             upper = middle - 1;
@@ -401,18 +402,18 @@ MimeCache::lookup_suffix_nodes(const char* buf, const char* nodes, uint32_t n, c
             lower = middle + 1;
         else /* uchar == ch */
         {
-            uint32_t n_children = VAL32(node, 8);
+            std::uint32_t n_children = VAL32(node, 8);
             name = g_utf8_next_char(name);
 
             if (n_children > 0)
             {
-                uint32_t first_child_off;
+                std::uint32_t first_child_off;
                 if (uchar == 0)
                     return nullptr;
 
                 if (!name || name[0] == 0)
                 {
-                    uint32_t offset = VAL32(node, 4);
+                    std::uint32_t offset = VAL32(node, 4);
                     return offset ? buf + offset : nullptr;
                 }
                 first_child_off = VAL32(node, 12);
@@ -422,7 +423,7 @@ MimeCache::lookup_suffix_nodes(const char* buf, const char* nodes, uint32_t n, c
             {
                 if (!name || name[0] == 0)
                 {
-                    uint32_t offset = VAL32(node, 4);
+                    std::uint32_t offset = VAL32(node, 4);
                     return offset ? buf + offset : nullptr;
                 }
                 return nullptr;
@@ -439,27 +440,27 @@ MimeCache::lookup_suffix_nodes(const char* buf, const char* nodes, uint32_t n, c
  *        2. Should consider weight of suffix nodes
  */
 const char*
-MimeCache::lookup_reverse_suffix_nodes(const char* buf, const char* nodes, uint32_t n,
+MimeCache::lookup_reverse_suffix_nodes(const char* buf, const char* nodes, std::uint32_t n,
                                        const char* name, const char* suffix,
                                        const char** suffix_pos)
 {
     const char* ret = nullptr;
     const char* cur_suffix_pos = (const char*)suffix + 1;
 
-    uint32_t uchar = suffix ? g_unichar_tolower(g_utf8_get_char(suffix)) : 0;
+    std::uint32_t uchar = suffix ? g_unichar_tolower(g_utf8_get_char(suffix)) : 0;
     // LOG_DEBUG("{}: suffix= '{}'", name, suffix);
 
     for (std::size_t i = 0; i < n; ++i)
     {
         const char* node = nodes + i * 12;
-        uint32_t ch = VAL32(node, 0);
+        std::uint32_t ch = VAL32(node, 0);
         const char* _suffix_pos = suffix;
         if (ch)
         {
             if (ch == uchar)
             {
-                uint32_t n_children = VAL32(node, 4);
-                uint32_t first_child_off = VAL32(node, 8);
+                std::uint32_t n_children = VAL32(node, 4);
+                std::uint32_t first_child_off = VAL32(node, 8);
                 const char* leaf_node =
                     lookup_reverse_suffix_nodes(buf,
                                                 buf + first_child_off,
@@ -476,7 +477,7 @@ MimeCache::lookup_reverse_suffix_nodes(const char* buf, const char* nodes, uint3
         }
         else /* ch == 0 */
         {
-            /* uint32_t weight = VAL32(node, 8); */
+            /* std::uint32_t weight = VAL32(node, 8); */
             /* suffix is found in the tree! */
 
             if (suffix < cur_suffix_pos)
