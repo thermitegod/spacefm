@@ -49,7 +49,7 @@ static void vfs_dir_set_property(GObject* obj, unsigned int prop_id, const GValu
 static void vfs_dir_get_property(GObject* obj, unsigned int prop_id, GValue* value,
                                  GParamSpec* pspec);
 
-static std::string gethidden(const std::string& path);
+static const std::string gethidden(const std::string& path);
 static bool ishidden(const std::string& hidden, const std::string& file_name);
 
 /* constructor is private */
@@ -528,7 +528,7 @@ on_list_task_finished(VFSAsyncTask* task, bool is_cancelled, VFSDir* dir)
     dir->load_complete = true;
 }
 
-static std::string
+static const std::string
 gethidden(const std::string& path)
 {
     std::string hidden;

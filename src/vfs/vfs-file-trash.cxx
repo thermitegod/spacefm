@@ -73,7 +73,7 @@ Trash::device(const std::string& path)
     return dev;
 }
 
-std::string
+const std::string
 Trash::toplevel(const std::string& path)
 {
     dev_t dev = device(path);
@@ -165,7 +165,7 @@ TrashDir::TrashDir(const std::string& path, dev_t device) : m_path(path), m_devi
     create_trash_dir();
 }
 
-std::string
+const std::string
 TrashDir::unique_name(const std::string& path)
 {
     std::string filename = std::filesystem::path(path).filename();

@@ -203,7 +203,7 @@ VFSAppDesktop::open_multiple_files() noexcept
     return false;
 }
 
-std::string
+const std::string
 VFSAppDesktop::translate_app_exec_to_command_line(std::vector<std::string>& file_list) noexcept
 {
     // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables

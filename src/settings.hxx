@@ -397,7 +397,7 @@ XSet* xset_set_ob2(XSet* set, const char* ob2, void* ob2_data);
 XSetContext* xset_context_new();
 XSet* xset_get_plugin_mirror(XSet* set);
 char* xset_custom_get_script(XSet* set, bool create);
-std::string xset_get_keyname(XSet* set, int key_val, int key_mod);
+const std::string xset_get_keyname(XSet* set, int key_val, int key_mod);
 
 XSet* xset_custom_new();
 void xset_custom_delete(XSet* set, bool delete_next);

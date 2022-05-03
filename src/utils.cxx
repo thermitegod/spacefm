@@ -57,7 +57,7 @@ randhex8() noexcept
     return ztd::randhex(8);
 }
 
-std::string
+const std::string
 replace_line_subs(const std::string& line) noexcept
 {
     std::string cmd = line;
@@ -107,7 +107,7 @@ dir_has_files(const std::string& path) noexcept
     return false;
 }
 
-std::string
+const std::string
 get_name_extension(const std::string& full_name, std::string& ext) noexcept
 {
     if (std::filesystem::is_directory(full_name))
@@ -149,7 +149,7 @@ open_in_prog(const char* path) noexcept
     Glib::spawn_command_line_async(command);
 }
 
-std::string
+const std::string
 bash_quote(const std::string& str) noexcept
 {
     if (str.empty())
@@ -159,7 +159,7 @@ bash_quote(const std::string& str) noexcept
     return s1;
 }
 
-std::string
+const std::string
 clean_label(const std::string& menu_label, bool kill_special, bool escape) noexcept
 {
     if (menu_label.empty())
@@ -186,8 +186,8 @@ clean_label(const std::string& menu_label, bool kill_special, bool escape) noexc
     return new_menu_label;
 }
 
-std::string
-get_valid_su()
+const std::string
+get_valid_su() noexcept
 {
     std::string use_su;
     if (!xset_get_s("su_command"))

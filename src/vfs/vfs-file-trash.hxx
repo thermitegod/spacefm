@@ -60,7 +60,7 @@ class Trash
     virtual ~Trash();
 
     // Find the toplevel directory (mount point) for the device that 'path' is on.
-    static std::string toplevel(const std::string& path);
+    static const std::string toplevel(const std::string& path);
 
     // Return the trash dir to use for 'path'.
     TrashDir* trash_dir(const std::string& path);
@@ -87,7 +87,7 @@ class TrashDir
     TrashDir(const std::string& path, dev_t device);
 
     // Return the full path for this trash directory.
-    [[nodiscard]] std::string
+    [[nodiscard]] const std::string
     trash_path() const
     {
         return m_path;
@@ -101,21 +101,21 @@ class TrashDir
     }
 
     // Return the path of the "files" subdirectory of this trash dir.
-    [[nodiscard]] std::string
+    [[nodiscard]] const std::string
     files_path() const
     {
         return m_path + "/files";
     }
 
     // Return the path of the "info" subdirectory of this trash dir.
-    [[nodiscard]] std::string
+    [[nodiscard]] const std::string
     info_path() const
     {
         return m_path + "/info";
     }
 
     // Get a unique name for use within the trash directory
-    std::string unique_name(const std::string& path);
+    const std::string unique_name(const std::string& path);
 
     void create_trash_dir();
 

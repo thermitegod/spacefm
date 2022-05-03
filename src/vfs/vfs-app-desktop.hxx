@@ -50,7 +50,8 @@ class VFSAppDesktop
     std::string m_full_path;
     bool m_terminal{false};
 
-    std::string translate_app_exec_to_command_line(std::vector<std::string>& file_list) noexcept;
+    const std::string
+    translate_app_exec_to_command_line(std::vector<std::string>& file_list) noexcept;
     void exec_in_terminal(const std::string& app_name, const std::string& cwd,
                           const std::string& cmd) noexcept;
     void exec_desktop(const std::string& working_dir,

@@ -57,7 +57,7 @@ enum PTKFileArchiverExtensionsCol
     COL_HANDLER_EXTENSIONS = 1
 };
 
-static std::string
+static const std::string
 archive_handler_get_first_extension(XSet* handler_xset)
 {
     // Function deals with the possibility that a handler is responsible

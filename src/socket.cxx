@@ -70,7 +70,7 @@ check_socket_daemon()
     return socket_daemon;
 }
 
-static std::string
+static const std::string
 get_inode_tag()
 {
     struct stat stat_buf;

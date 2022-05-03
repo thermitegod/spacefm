@@ -29,13 +29,15 @@ bool have_x_access(const std::string& path) noexcept;
 
 bool dir_has_files(const std::string& path) noexcept;
 
-std::string replace_line_subs(const std::string& line) noexcept;
-std::string get_name_extension(const std::string& full_name, std::string& ext) noexcept;
+const std::string replace_line_subs(const std::string& line) noexcept;
+const std::string get_name_extension(const std::string& full_name, std::string& ext) noexcept;
+
 const std::string get_prog_executable() noexcept;
 void open_in_prog(const char* path) noexcept;
 
-std::string bash_quote(const std::string& str) noexcept;
+const std::string bash_quote(const std::string& str) noexcept;
 
-std::string clean_label(const std::string& menu_label, bool kill_special, bool escape) noexcept;
+const std::string clean_label(const std::string& menu_label, bool kill_special,
+                              bool escape) noexcept;
 
-std::string get_valid_su();
+const std::string get_valid_su() noexcept;

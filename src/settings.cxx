@@ -2260,7 +2260,7 @@ xset_custom_get_script(XSet* set, bool create)
     return path;
 }
 
-static std::string
+static const std::string
 xset_custom_new_name()
 {
     std::string setname;
@@ -3948,7 +3948,7 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     ptk_file_task_run(ptask);
 }
 
-std::string
+const std::string
 xset_get_keyname(XSet* set, int key_val, int key_mod)
 {
     int keyval;
