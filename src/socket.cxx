@@ -224,8 +224,11 @@ get_socket_name(char* buf, int len)
     // treat :0.0 as :0 to prevent multiple instances on screen 0
     if (ztd::same(dpy, ":0.0"))
         dpy = ":0";
-    std::string socket_path =
-        fmt::format("{}/spacefm-{}{}.socket", vfs_user_runtime_dir(), Glib::get_user_name(), dpy);
+    std::string socket_path = fmt::format("{}/{}-{}{}.socket",
+                                          vfs_user_runtime_dir(),
+                                          PACKAGE_NAME,
+                                          Glib::get_user_name(),
+                                          dpy);
     g_snprintf(buf, len, "%s", socket_path.c_str());
 }
 

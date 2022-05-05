@@ -304,7 +304,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
                 }
             }
 
-            plug_dir = Glib::build_filename(DATADIR, "spacefm", "plugins", plug_dir_name);
+            plug_dir = Glib::build_filename(DATADIR, PACKAGE_NAME, "plugins", plug_dir_name);
 
             if (std::filesystem::exists(plug_dir))
             {

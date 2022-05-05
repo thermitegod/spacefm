@@ -345,9 +345,9 @@ load_conf()
 
     // load spacefm.conf
     std::string config_path =
-        Glib::build_filename(vfs_user_config_dir(), "spacefm", "spacefm.conf");
+        Glib::build_filename(vfs_user_config_dir(), PACKAGE_NAME, "spacefm.conf");
     if (!std::filesystem::exists(config_path))
-        config_path = Glib::build_filename(SYSCONFDIR, "spacefm", "spacefm.conf");
+        config_path = Glib::build_filename(SYSCONFDIR, PACKAGE_NAME, "spacefm.conf");
 
     std::string line;
     std::ifstream file(config_path);
@@ -381,7 +381,7 @@ load_settings(const char* config_dir)
     if (!std::filesystem::exists(settings_config_dir))
     {
         // copy /etc/xdg/spacefm
-        std::string xdg_path = Glib::build_filename(settings_config_dir, "xdg", "spacefm");
+        std::string xdg_path = Glib::build_filename(settings_config_dir, "xdg", PACKAGE_NAME);
         if (std::filesystem::is_directory(xdg_path))
         {
             command = fmt::format("cp -r {} '{}'", xdg_path, settings_config_dir);
@@ -700,7 +700,7 @@ xset_get_user_tmp_dir()
     if (settings_user_tmp_dir.empty() && std::filesystem::exists(settings_user_tmp_dir))
         return settings_user_tmp_dir.c_str();
 
-    settings_user_tmp_dir = Glib::build_filename(config_settings.tmp_dir, "spacefm");
+    settings_user_tmp_dir = Glib::build_filename(config_settings.tmp_dir, PACKAGE_NAME);
     std::filesystem::create_directories(settings_user_tmp_dir);
     std::filesystem::permissions(settings_user_tmp_dir, std::filesystem::perms::owner_all);
 
@@ -1670,9 +1670,10 @@ write_root_saver(std::string& buf, const std::string& path, const char* name, co
 bool
 write_root_settings(std::string& buf, const std::string& path)
 {
-    buf.append(fmt::format("\n#save root settings\nmkdir -p {}/spacefm\n"
+    buf.append(fmt::format("\n#save root settings\nmkdir -p {}/{}\n"
                            "echo -e '#SpaceFM As-Root Session File\\n\\' >| '{}'\n",
                            SYSCONFDIR,
+                           PACKAGE_NAME,
                            path));
 
     for (XSet* set: xsets)
@@ -1694,7 +1695,7 @@ write_root_settings(std::string& buf, const std::string& path)
         }
     }
 
-    buf.append(fmt::format("chmod -R go-w+rX {}/spacefm\n\n", SYSCONFDIR));
+    buf.append(fmt::format("chmod -R go-w+rX {}/{}\n\n", SYSCONFDIR, PACKAGE_NAME));
     return true;
 }
 
@@ -1705,9 +1706,9 @@ read_root_settings()
         return;
 
     std::string root_set_path =
-        fmt::format("{}/spacefm/{}-as-root", SYSCONFDIR, Glib::get_user_name());
+        fmt::format("{}/{}/{}-as-root", SYSCONFDIR, PACKAGE_NAME, Glib::get_user_name());
     if (!std::filesystem::exists(root_set_path))
-        root_set_path = fmt::format("{}/spacefm/{}-as-root", SYSCONFDIR, geteuid());
+        root_set_path = fmt::format("{}/{}/{}-as-root", SYSCONFDIR, PACKAGE_NAME, geteuid());
 
     std::string line;
     std::ifstream file(root_set_path);
@@ -3193,12 +3194,12 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
         else
             type = "plugin";
 
-        deffile = fmt::format("{}.spacefm-{}.tar.xz", s1, type);
+        deffile = fmt::format("{}-{}-{}.tar.xz", s1, PACKAGE_NAME, type);
     }
     else
     {
         std::string s1 = g_path_get_basename(set->plug_dir);
-        deffile = fmt::format("{}.spacefm-plugin.tar.xz", s1);
+        deffile = fmt::format("{}-{}-plugin.tar.xz", s1, PACKAGE_NAME);
     }
 
     char* path = xset_file_dialog(parent,

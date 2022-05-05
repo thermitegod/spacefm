@@ -1447,7 +1447,7 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
         if (task->exec_write_root && geteuid() != 0)
         {
             const std::string root_set_path =
-                fmt::format("{}/spacefm/{}-as-root", SYSCONFDIR, Glib::get_user_name());
+                fmt::format("{}/{}/{}-as-root", SYSCONFDIR, PACKAGE_NAME, Glib::get_user_name());
             write_root_settings(buf, root_set_path);
         }
 
