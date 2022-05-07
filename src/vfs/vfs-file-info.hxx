@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <atomic>
 #include <chrono>
 
@@ -106,7 +108,7 @@ time_t* vfs_file_info_get_mtime(VFSFileInfo* fi);
 time_t* vfs_file_info_get_atime(VFSFileInfo* fi);
 
 void vfs_file_info_set_thumbnail_size(int big, int small);
-bool vfs_file_info_load_thumbnail(VFSFileInfo* fi, const char* full_path, bool big);
+bool vfs_file_info_load_thumbnail(VFSFileInfo* fi, const std::string& full_path, bool big);
 bool vfs_file_info_is_thumbnail_loaded(VFSFileInfo* fi, bool big);
 
 GdkPixbuf* vfs_file_info_get_big_icon(VFSFileInfo* fi);

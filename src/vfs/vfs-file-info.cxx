@@ -571,7 +571,7 @@ vfs_file_info_is_thumbnail_loaded(VFSFileInfo* fi, bool big)
 }
 
 bool
-vfs_file_info_load_thumbnail(VFSFileInfo* fi, const char* full_path, bool big)
+vfs_file_info_load_thumbnail(VFSFileInfo* fi, const std::string& full_path, bool big)
 {
     if (big)
     {

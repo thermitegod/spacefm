@@ -171,10 +171,9 @@ thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
             bool load_big = (i == VFSThumbnailSize::LOAD_BIG_THUMBNAIL);
             if (!vfs_file_info_is_thumbnail_loaded(req->file, load_big))
             {
-                std::string full_path;
-                full_path =
-                    g_build_filename(loader->dir->path, vfs_file_info_get_name(req->file), nullptr);
-                vfs_file_info_load_thumbnail(req->file, full_path.c_str(), load_big);
+                std::string full_path =
+                    Glib::build_filename(loader->dir->path, vfs_file_info_get_name(req->file));
+                vfs_file_info_load_thumbnail(req->file, full_path, load_big);
                 // Slow down for debugging.
                 // LOG_DEBUG("DELAY!!");
                 // Glib::usleep(G_USEC_PER_SEC/2);
@@ -334,42 +333,6 @@ static GdkPixbuf*
 vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int size,
                    std::time_t mtime)
 {
-    int w;
-    int h;
-    struct stat statbuf;
-    int create_size;
-
-    if (size > 256)
-        create_size = 512;
-    else if (size > 128)
-        create_size = 256;
-    else
-        create_size = 128;
-
-    bool file_is_video = false;
-    VFSMimeType* mimetype = vfs_mime_type_get_from_file_name(file_path.c_str());
-    if (mimetype)
-    {
-        if (!strncmp(vfs_mime_type_get_type(mimetype), "video/", 6))
-            file_is_video = true;
-        vfs_mime_type_unref(mimetype);
-    }
-
-    if (!file_is_video)
-    {
-        // image format cannot be recognized
-        if (!gdk_pixbuf_get_file_info(file_path.c_str(), &w, &h))
-            return nullptr;
-
-        // If the image itself is very small, we should load it directly
-        if (w <= create_size && h <= create_size)
-        {
-            if (w <= size && h <= size)
-                return gdk_pixbuf_new_from_file(file_path.c_str(), nullptr);
-            return gdk_pixbuf_new_from_file_at_size(file_path.c_str(), size, size, nullptr);
-        }
-    }
-
     Glib::Checksum check = Glib::Checksum();
     const std::string file_hash = check.compute_checksum(Glib::Checksum::Type::MD5, uri.data());
     const std::string file_name = fmt::format("{}.png", file_hash);
@@ -381,6 +344,7 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
 
     if (mtime == 0)
     {
+        struct stat statbuf;
         if (stat(file_path.c_str(), &statbuf) != -1)
             mtime = statbuf.st_mtime;
     }
@@ -388,15 +352,18 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
     // if mtime of video being thumbnailed is less than 5 sec ago,
     // do not create a thumbnail. This means that newly created video
     // files will not have a thumbnail until a refresh.
-    if (file_is_video && std::time(nullptr) - mtime < 5)
+    if (std::time(nullptr) - mtime < 5)
         return nullptr;
 
     // load existing thumbnail
-    GdkPixbuf* thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
-
-    const char* thumb_mtime;
-    if (thumbnail)
+    int w;
+    int h;
+    const char* thumb_mtime = nullptr;
+    GdkPixbuf* thumbnail = nullptr;
+    if (std::filesystem::is_regular_file(thumbnail_file))
     {
+        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
+
         w = gdk_pixbuf_get_width(thumbnail);
         h = gdk_pixbuf_get_height(thumbnail);
         thumb_mtime = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::MTime");
@@ -409,56 +376,26 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
             g_object_unref(thumbnail);
 
         // create new thumbnail
-        if (!file_is_video)
+        try
         {
-            thumbnail = gdk_pixbuf_new_from_file_at_size(file_path.c_str(),
-                                                         create_size,
-                                                         create_size,
-                                                         nullptr);
-            if (thumbnail)
-            {
-                std::string mtime_str;
+            ffmpegthumbnailer::VideoThumbnailer video_thumb;
+            // video_thumb.setLogCallback(nullptr);
+            // video_thumb.clearFilters();
+            video_thumb.setSeekPercentage(25);
+            video_thumb.setThumbnailSize(128);
+            video_thumb.setMaintainAspectRatio(true);
+            video_thumb.generateThumbnail(file_path,
+                                          ThumbnailerImageType::Png,
+                                          thumbnail_file,
+                                          nullptr);
+        }
+        catch (...) // std::logic_error
+        {
+            // file cannot be opened
+            return nullptr;
+        }
 
-                // Note: gdk_pixbuf_apply_embedded_orientation returns a new
-                // pixbuf or same with incremented ref count, so unref
-                GdkPixbuf* thumbnail_old = thumbnail;
-                thumbnail = gdk_pixbuf_apply_embedded_orientation(thumbnail);
-                g_object_unref(thumbnail_old);
-                mtime_str = fmt::format("{}", mtime);
-                gdk_pixbuf_save(thumbnail,
-                                thumbnail_file.c_str(),
-                                "png",
-                                nullptr,
-                                "tEXt::Thumb::URI",
-                                uri.c_str(),
-                                "tEXt::Thumb::MTime",
-                                mtime_str.c_str(),
-                                nullptr);
-            }
-        }
-        else
-        {
-            try
-            {
-                ffmpegthumbnailer::VideoThumbnailer video_thumb;
-                video_thumb.setSeekPercentage(25);
-                video_thumb.setThumbnailSize(128);
-                video_thumb.setMaintainAspectRatio(true);
-                // video_thumb.clearFilters();
-                video_thumb.generateThumbnail(file_path,
-                                              ThumbnailerImageType::Png,
-                                              thumbnail_file,
-                                              nullptr);
-            }
-            catch (...) // std::logic_error
-            {
-                // Video file cannot be opened
-                if (thumbnail)
-                    g_object_unref(thumbnail);
-                return nullptr;
-            }
-            thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
-        }
+        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
     }
 
     GdkPixbuf* result = nullptr;
