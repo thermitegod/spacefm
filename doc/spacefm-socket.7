@@ -1,4 +1,4 @@
-.TH spacefm-socket 7 "January 2022"
+.TH spacefm-socket 7 "May 2022"
 
 .SH NAME
 .B spacefm-socket
@@ -171,8 +171,7 @@ COMMAND... <Run COMMAND in DIR>
 copy|move|link [--dir DIR] FILE|DIR... TARGET
                                 Copy|Move|Link FILE(s) or DIR(s) to TARGET dir
 delete [--dir DIR] FILE|DIR...  Recursively delete FILE(s) or DIR(s)
-edit [--as-root] FILE           Open FILE in user's or root's text editor
-web URL                         Open URL in user's web browser
+edit FILE                       Open FILE in user's text editor
 mount DEVICE|URL                Mount DEVICE or URL
 unmount DEVICE|DIR              Unmount DEVICE or mount point DIR
 
@@ -243,9 +242,15 @@ Methods represent different kinds of socket commands:
 .br
 Usage: spacefm -s set [OPTIONS] PROPERTY [VALUE...]
 
-The set method sets a property to one or more values. Different properties accept different kinds of values. To see what values a property accepts, look the property up in the Help Reference.
+The set method sets a property to one or more values. Different properties
+accept different kinds of values. To see what values a property accepts,
+look the property up in the Help Reference.
 
-As with all methods, by default the set method will apply to the current tab in the current panel of the last used SpaceFM window. You can also specify a particular window, panel, and/or tab using the --window, --panel, and/or --tab OPTIONS. (The WINDOWID used by the --window option is obtained from the $fm_my_window bash variable.) For example:
+As with all methods, by default the set method will apply to the current tab
+in the current panel of the last used SpaceFM window. You can also specify a
+particular window, panel, and/or tab using the --window, --panel, and/or --tab
+OPTIONS. (The WINDOWID used by the --window option is obtained from
+the $fm_my_window bash variable.) For example:
 
     spacefm -s set --window $fm_my_window --panel 3 --tab 2 pathbar_text "/"
 .P
@@ -337,15 +342,18 @@ Usage: spacefm -s get [OPTIONS] PROPERTY
 
 The get method gets a property's value. The reply is written to stdout.
 
-As with all methods, by default the get method will apply to the current tab in the current panel of the last used SpaceFM window. You can also specify a particular window, panel, and/or tab using the --window, --panel, and/or --tab OPTIONS.
+As with all methods, by default the get method will apply to the current
+tab in the current panel of the last used SpaceFM window. You can also
+specify a particular window, panel, and/or tab using the --window, --panel,
+and/or --tab OPTIONS.
 
 The reply to a get can be saved in a bash variable directly:
 
     size="$(spacefm -s get window_size)"
     echo "$size"
-Or, the reply can be tested directly:
-    if [ "$(spacefm -s get clipboard_text)" == "" ]; then
-	echo "The clipboard is empty"
+    # Or, the reply can be tested directly:
+    if [ "$(spacefm -s get clipboard_text)" == "" ];then
+        echo "The clipboard is empty"
     fi
 .P
 .B Examples using the get method:
@@ -383,7 +391,8 @@ Or, the reply can be tested directly:
 .B When the clipboard contains cut or copied files,
 clipboard_text will contain the paths of the files, one per line, as text.
 
-Or, when getting the value of clipboard_copy_files or clipboard_cut_files, SpaceFM will reply with an array of quoted paths. For example:
+Or, when getting the value of clipboard_copy_files or clipboard_cut_files,
+SpaceFM will reply with an array of quoted paths. For example:
 
     # First copy some files to the clipboard:
     spacefm -s set clipboard_copy_files /etc/fstab /etc/hosts
@@ -392,7 +401,10 @@ Or, when getting the value of clipboard_copy_files or clipboard_cut_files, Space
     spacefm -s get clipboard_copy_files
     ('/etc/fstab' '/etc/hosts' )
 
-The returned value in the above example is intended to be saved to a bash array using eval. For example, the following script reads the copied files into an array, prints each member of the array, one per line, then calculates the MD5 sums of the files by passing the array to md5sum as a list:
+The returned value in the above example is intended to be saved to a bash
+array using eval. For example, the following script reads the copied files
+into an array, prints each member of the array, one per line, then calculates
+the MD5 sums of the files by passing the array to md5sum as a list:
 
     #!/bin/bash
     # Read the copied files into an array:
@@ -409,10 +421,16 @@ The returned value in the above example is intended to be saved to a bash array 
         md5sum "${copied_files[@]}"
     fi
 
-Note that when files have been copied to the clipboard, clipboard_copy_files will contain the list, and clipboard_cut_files will be empty. When files have been cut to the clipboard, clipboard_cut_files will contain the list, and clipboard_copy_files will be empty.
-Traditionally, when cut files are successfully copied to another location, you should then delete them from their original location, whereas files which have merely been copied to the clipboard are never deleted.
+Note that when files have been copied to the clipboard, clipboard_copy_files
+will contain the list, and clipboard_cut_files will be empty. When files have
+been cut to the clipboard, clipboard_cut_files will contain the list, and
+clipboard_copy_files will be empty.
+Traditionally, when cut files are successfully copied to another location,
+you should then delete them from their original location, whereas files which
+have merely been copied to the clipboard are never deleted.
 
-Likewise, when getting the value of selected_filenames, SpaceFM will reply with an array of quoted filenames. For example:
+Likewise, when getting the value of selected_filenames, SpaceFM will reply
+with an array of quoted filenames. For example:
 
     #!/bin/bash
     # Read the selected filenames into an array:
@@ -436,21 +454,39 @@ Likewise, when getting the value of selected_filenames, SpaceFM will reply with 
 Usage: spacefm -s set-task [OPTIONS] TASKID TASKPROPERTY [VALUE...]
 .P
 
-The set-task method is used to change the display values for a task, and also to stop, pause, queue, or resume a task, by setting a task property. Different task properties accept different kinds of values. To see what values a task property accepts, look the task property up in the Help Reference.
+The set-task method is used to change the display values for a task, and
+also to stop, pause, queue, or resume a task, by setting a task property.
+Different task properties accept different kinds of values. To see what
+values a task property accepts, look the task property up in the Help Reference.
 
-Display values for a task are shown in the Task Manager, and also in task popup dialogs. These include such things as the Item, Total, Current, Remain, and other columns, the progress bar percentage, etc.
+Display values for a task are shown in the Task Manager, and also in task
+popup dialogs. These include such things as the Item, Total, Current,
+Remain, and other columns, the progress bar percentage, etc.
 
-As with all methods, by default the set-task method will apply to the current tab in the current panel of the last used SpaceFM window. You can also specify a particular window, panel, and/or tab using the --window, --panel, and/or --tab OPTIONS.
+As with all methods, by default the set-task method will apply to the current
+tab in the current panel of the last used SpaceFM window. You can also
+specify a particular window, panel, and/or tab using the --window, --panel,
+and/or --tab OPTIONS.
 
-The set-task method requires a TASKID, which indicates what task is being modified. There are two ways to obtain the TASKID. One is to use the exported bash variable $fm_my_task, which refers to the current command task. The other is to use $fm_task_id, which refers to the task currently selected in the task list when the current task is run. Note that a TASKID is only valid in the window in which the task is currently running, so it is generally appropriate to specify a WINDOWID ($fm_my_window) with the --window option to ensure the correct window is accessed.
+The set-task method requires a TASKID, which indicates what task is being
+modified. There are two ways to obtain the TASKID. One is to use the exported
+bash variable $fm_my_task, which refers to the current command task. The
+other is to use $fm_task_id, which refers to the task currently selected
+in the task list when the current task is run. Note that a TASKID is only
+valid in the window in which the task is currently running, so it is generally
+appropriate to specify a WINDOWID ($fm_my_window) with the --window option to
+ensure the correct window is accessed.
 
 Note that when using $fm_my_task, the TASKID will not be valid when the command is first run -
 .B it usually takes about a half second for a task to appear in the task manager.
-If your script uses $fm_my_task immediately, it should plan for the socket command to fail until the task is shown in the task manager, or it can use a small delay (sleep 0.75) before sending task-related socket commands.
+If your script uses $fm_my_task immediately, it should plan for the socket command
+to fail until the task is shown in the task manager, or it can use a small
+delay (sleep 0.75) before sending task-related socket commands.
 
 Also,
 .Bif a custom command is run from the SpaceFM desktop manager menu,
-note that there is no task manager or window associated with the task, so the TASKID will not be valid in socket commands.
+note that there is no task manager or window associated with the task, so
+the TASKID will not be valid in socket commands.
 
 Examples using the set-task method:
 
@@ -466,7 +502,12 @@ Examples using the set-task method:
     # Pause my task:
     spacefm -s set-task --window $fm_my_window $fm_my_task queue_state pause
 
-The task property 'popup_handler', which accepts a bash command line, allows you to set a command to be run when the user clicks on the task in the Task Manager. Normally a click opens a task's popup dialog, but if popup_handler is set, that command will be run instead. This allows you to integrate your custom command's dialog into SpaceFM. The following script, to be run as a custom command script in SpaceFM, demonstrates this property's use:
+The task property 'popup_handler', which accepts a bash command line, allows
+you to set a command to be run when the user clicks on the task in the Task
+Manager. Normally a click opens a task's popup dialog, but if popup_handler
+is set, that command will be run instead. This allows you to integrate your
+custom command's dialog into SpaceFM. The following script, to be run as a
+custom command script in SpaceFM, demonstrates this property's use:
 
     #!/bin/bash
     # Set a custom task dialog in SpaceFM.
@@ -493,8 +534,14 @@ The task property 'popup_handler', which accepts a bash command line, allows you
     rm -f "$cmdpipe"
     exit
 .P
-Running the above command script within SpaceFM will show the dialog. Anytime you click on the task in the list, the dialog will be raised. Note that the popup_handler command is only run when the user clicks on the task in the list. It is not run when the normal task popup dialog is raised due to a task's Popup settings.
-When popup_handler is set, the additional Show Output menu item will appear in the right-click context menu for the task, which opens the normal popup dialog.
+Running the above command script within SpaceFM will show the dialog. Anytime
+you click on the task in the list, the dialog will be raised. Note that the
+popup_handler command is only run when the user clicks on the task in the list.
+It is not run when the normal task popup dialog is raised due to a task's
+Popup settings.
+
+When popup_handler is set, the additional Show Output menu item will appear
+in the right-click context menu for the task, which opens the normal popup dialog.
 get-task
 
 .P
@@ -502,7 +549,9 @@ get-task
 .br
 Usage: spacefm -s get-task [OPTIONS] TASKID TASKPROPERTY
 
-The get-task method gets a task property's value. The reply is written to stdout. For instructions on saving the reply to a variable or testing it directly, see the examples in get.
+The get-task method gets a task property's value. The reply is written to
+stdout. For instructions on saving the reply to a variable or testing it directly,
+see the examples in get.
 
 As with the set-task method, get-task requires a TASKID, and passing a WINDOWID is also recommended.
 
@@ -523,17 +572,28 @@ Examples using the get-task method:
 .br
 Usage: spacefm -s run-task [OPTIONS] TASKTYPE [TYPEOPTIONS] ARGUMENTS
 
-The run-task method is used to tell a running SpaceFM window to start a new task. A task may run an asynchronous command (run and forget), a command run as a SpaceFM task (shown in the Task Manager if it runs for more than one half second), or an internal task to copy, move, or delete files, or create links. A task can also be used to run a command in the user's configured terminal, open a file in the user's configured text editor, or open a URL in the user's web browser.
+The run-task method is used to tell a running SpaceFM window to start a new
+task. A task may run an asynchronous command (run and forget), a command run
+as a SpaceFM task (shown in the Task Manager if it runs for more than one
+half second), or an internal task to copy, move, or delete files, or create
+links. A task can also be used to run a command in the user's configured
+terminal, or open a file in the user's configured text editor.
 
-To run a task in a particular SpaceFM window, or with the exported bash variables of a particular tab, --window, --panel, and --tab OPTIONS may be included.
+To run a task in a particular SpaceFM window, or with the exported bash
+variables of a particular tab, --window, --panel, and --tab OPTIONS may be included.
 
 Each TASKTYPE accepts a different set of TYPEOPTIONS and ARGUMENTS, as detailed below.
 
 .B cmd [--task] [--popup] [--scroll] [--terminal] [--icon ICON] [--dir DIR] COMMAND...
 
-The cmd (or 'command') TASKTYPE is used to run a program or bash command. Exported bash variables may be used in any COMMAND - just remember to include the $fm_import line in your command or script. Note that the contents of the variables will reflect the window, panel, and tab active for the socket command, not necessarily the focused tab of SpaceFM.
+The cmd (or 'command') TASKTYPE is used to run a program or bash command. Exported
+bash variables may be used in any COMMAND - just remember to include the $fm_import
+line in your command or script. Note that the contents of the variables will reflect
+the window, panel, and tab active for the socket command, not necessarily the focused
+tab of SpaceFM.
 
-By default COMMAND is run asynchronously (run and forgotten). It will not appear in the Task Manager, and no popup will be shown. For example:
+By default COMMAND is run asynchronously (run and forgotten). It will not appear
+in the Task Manager, and no popup will be shown. For example:
 
     spacefm -s run-task cmd touch /tmp/a_new_file
 cmd also accepts the following TYPEOPTIONS:
@@ -541,23 +601,33 @@ cmd also accepts the following TYPEOPTIONS:
 .B TYPEOPTION
 
 .B --task
-Run COMMAND as a SpaceFM task and list it in the Task Manager if it runs for more than one half second, and show a popup dialog if the command's exit status is non-zero. This is equivalent to custom command options Run As Task plus Popup Error.
+Run COMMAND as a SpaceFM task and list it in the Task Manager if it runs for more
+than one half second, and show a popup dialog if the command's exit status is
+non-zero. This is equivalent to custom command options Run As Task plus Popup Error.
 
 .B --popup
-Run COMMAND as a SpaceFM task and show a popup dialog if the task runs for longer than one half second or produces output or an error. This is equivalent to custom command options Run As Task plus Popup Output plus Popup Error.
+Run COMMAND as a SpaceFM task and show a popup dialog if the task runs for longer
+than one half second or produces output or an error. This is equivalent to custom
+command options Run As Task plus Popup Output plus Popup Error.
 
 .B --scroll
-If option --task or --popup is used with --scroll, the scrollbar in the popup will be moved down, equivalent to custom command option Scroll.
+If option --task or --popup is used with --scroll, the scrollbar in the popup will
+be moved down, equivalent to custom command option Scroll.
 
 .B --terminal
-Run COMMAND in the user's configured terminal emulator. This is equivalent to custom command option Run In Terminal. Generally this option is used without --task or --popup.
+Run COMMAND in the user's configured terminal emulator. This is equivalent to custom
+command option Run In Terminal. Generally this option is used without --task or --popup.
 
 .B --icon ICON
-Use ICON as the task's icon in the Task Manager and popup dialog, where ICON is an icon name or absolute path. Not all icons may be shown due to various issues.
+Use ICON as the task's icon in the Task Manager and popup dialog, where ICON is an
+icon name or absolute path. Not all icons may be shown due to various issues.
 
 .B --dir DIR
-Start COMMAND in working directory DIR. If not specified, SpaceFM's current working directory is used.
-If the --task or --popup options are used, meaning the task is run as a SpaceFM task, the command will return values for $new_task_id and $new_task_window, to be used in future socket commands for this running task. For example:
+Start COMMAND in working directory DIR. If not specified, SpaceFM's current working
+directory is used.
+If the --task or --popup options are used, meaning the task is run as a SpaceFM
+task, the command will return values for $new_task_id and $new_task_window, to
+be used in future socket commands for this running task. For example:
 
     spacefm -s run-task cmd --popup 'while true; do date; sleep 1; done'
     #!/bin/bash
@@ -571,66 +641,85 @@ The output can be evaluated in one step like so (note the double-quoted backtick
     echo "Task window is $new_task_window and ID is $new_task_id."
     Task window is 0x207a030 and ID is 0x23432a0.
 
-Note when attempting to use $new_task_id in socket commands, the task ID will not be recognized until the task is listed in the Task Manager, which takes about one half second (if the command runs that long).
+Note when attempting to use $new_task_id in socket commands, the task ID will
+not be recognized until the task is listed in the Task Manager, which takes about
+one half second (if the command runs that long).
 
 .B copy|move|link [--dir DIR] FILE|DIR... TARGET
 
-The copy, move, and link TASKTYPEs start an internal SpaceFM task to copy, move, or create links to files and folders. The task will be listed in the Task Manager if it runs for longer than one half second. If files already exist in the TARGET directory, the SpaceFM overwrite query dialog will be shown as usual.
+The copy, move, and link TASKTYPEs start an internal SpaceFM task to copy, move,
+or create links to files and folders. The task will be listed in the Task Manager
+if it runs for longer than one half second. If files already exist in the TARGET
+directory, the SpaceFM overwrite query dialog will be shown as usual.
 
-FILE(s) and DIR(s) may be specified as absolute paths. Or, if the --dir DIR option is used to specify an (absolute) source directory, they may be relative to DIR. Each FILE and DIR specified must exist. TARGET, which is required as the last argument, specifies an absolute destination directory.
+FILE(s) and DIR(s) may be specified as absolute paths. Or, if the --dir DIR option
+is used to specify an (absolute) source directory, they may be relative to DIR.
+Each FILE and DIR specified must exist. TARGET, which is required as the last
+argument, specifies an absolute destination directory.
 
 For example:
 
     spacefm -s run-task copy /etc/fstab /etc/hosts /tmp
 
-The above command will copy the files 'fstab' and 'hosts' from /etc to /tmp. Also, the following command is equivalent:
+The above command will copy the files 'fstab' and 'hosts' from /etc to /tmp. Also,
+the following command is equivalent:
 
     spacefm -s run-task copy --dir /etc fstab hosts /tmp
 
-In the above case, a source directory is specified so that simple filenames may be used in place of absolute paths.
+In the above case, a source directory is specified so that simple filenames may be
+used in place of absolute paths.
 Another example, to create links to files and folders:
 
     spacefm -s run-task link /etc /etc/fstab /tmp
 
-The above command will create links to the folder /etc and the file /etc/fstab, placing them in /tmp.
-As with the cmd TASKTYPE, copy, move, and link TASKTYPEs will output $new_task_window and $new_task_id for evaluation and later use.
+The above command will create links to the folder /etc and the file /etc/fstab,
+placing them in /tmp. As with the cmd TASKTYPE, copy, move, and link TASKTYPEs will
+output $new_task_window and $new_task_id for evaluation and later use.
 
 .B delete [--dir DIR] FILE|DIR...
 
-The delete TASKTYPE starts an internal SpaceFM task to recursively delete files and folders. The task will be listed in the Task Manager if it runs for longer than one half second.
+The delete TASKTYPE starts an internal SpaceFM task to recursively delete
+files and folders. The task will be listed in the Task Manager if it runs
+for longer than one half second.
 
-FILE(s) and DIR(s) may be specified as absolute paths. Or, if the --dir DIR option is used to specify an (absolute) source directory, they may be relative to DIR. Each FILE and DIR must exist.
+FILE(s) and DIR(s) may be specified as absolute paths. Or, if the --dir DIR
+option is used to specify an (absolute) source directory, they may be
+relative to DIR. Each FILE and DIR must exist.
 
-WARNING: No confirmation dialog is shown to the user before files are deleted permanently. If you want a confirmation dialog, your command or script must show one itself. Also note that any specified folders are deleted recursively.
+WARNING: No confirmation dialog is shown to the user before files are
+deleted permanently. If you want a confirmation dialog, your command or
+script must show one itself. Also note that any specified folders are
+deleted recursively.
 
 For example, to delete the links created in the previous example:
 
     spacefm -s run-task delete /tmp/etc /tmp/fstab
 
-As with the cmd TASKTYPE, the delete TASKTYPE will output $new_task_window and $new_task_id for evaluation and later use.
+As with the cmd TASKTYPE, the delete TASKTYPE will output $new_task_window
+and $new_task_id for evaluation and later use.
 
-.B edit [--as-root] FILE
+.B edit FILE
 
-The edit TASKTYPE opens FILE in the user's configured text editor (set in View|Preferences|Advanced). Or, if the --as-root option is included, FILE is opened in the user's configured root editor. This task type is always asynchronous (run and forgotten). For example:
+The edit TASKTYPE opens FILE in the user's configured text
+editor (set in View|Preferences|Advanced). This task type is always
+asynchronous (run and forgotten). For example:
 
     spacefm -s run-task edit /etc/fstab
 
-IMPORTANT: If sharing a plugin which does anything as root, please be sure to include this information clearly in the plugin's description.
-web URL
-
-The web TASKTYPE opens URL in the user's configured or auto-discovered web browser (set in Help|Options|Browser). This task type is always asynchronous (run and forgotten). For example:
-
-    spacefm -s run-task web http://ignorantguru.github.io/spacefm/
-
-IMPORTANT: If sharing a plugin which open URLs in the user's browser, please be sure to include this information clearly in the plugin's description.
+IMPORTANT: If sharing a plugin which does anything as root, please be sure
+to include this information clearly in the plugin's description.
 
 .B mount DEVICE|URL
 
-The mount TASKTYPE uses the appropriate device or protocol handler to mount a DEVICE (eg /dev/sdd1) or URL (eg ftp://mirrors.kernel.org/). This task type may produce an error pop-up message, but does not set an error status on failure. For example:
+The mount TASKTYPE uses the appropriate device or protocol handler to
+mount a DEVICE (eg /dev/sdd1) or URL (eg ftp://mirrors.kernel.org/). This
+task type may produce an error pop-up message, but does not set an error
+status on failure. For example:
 
     spacefm -s run-task mount /dev/sdd1
 
-Note: If you want to both mount and open a device or URL in SpaceFM's file manager, consider using:
+Note: If you want to both mount and open a device or URL in
+SpaceFM's file manager, consider using:
 
     spacefm /dev/sdd1
     or
@@ -638,7 +727,10 @@ Note: If you want to both mount and open a device or URL in SpaceFM's file manag
 
 .B unmount DEVICE|DIR
 
-The unmount TASKTYPE uses the appropriate device or protocol handler to unmount a DEVICE (eg /dev/sdd1) or mount point DIR. This task type may produce an error pop-up message, but does not set an error status on failure. For example:
+The unmount TASKTYPE uses the appropriate device or protocol handler
+to unmount a DEVICE (eg /dev/sdd1) or mount point DIR. This task type
+may produce an error pop-up message, but does not set an error status
+on failure. For example:
 
     spacefm -s run-task unmount /dev/sdd1
 
@@ -647,35 +739,53 @@ The unmount TASKTYPE uses the appropriate device or protocol handler to unmount 
 .br
 Usage: spacefm -s emit-key [OPTIONS] KEYCODE [MODIFIER]
 
-The emit-key method activates the menu or toolbar item with the given shortcut key, as if the user had pressed the key combination.
+The emit-key method activates the menu or toolbar item with the given
+shortcut key, as if the user had pressed the key combination.
 
-The KEYCODE and MODIFIER for a given key combination can be seen by right-clicking on an item, selecting Key Shortcut, and pressing the key combination.
+The KEYCODE and MODIFIER for a given key combination can be seen by
+right-clicking on an item, selecting Key Shortcut, and pressing the
+key combination.
 
-For example, to activate the menu item associated with Ctrl+C (associated with Copy by default):
+For example, to activate the menu item associated with
+Ctrl+C (associated with Copy by default):
 
     spacefm -s emit-key 0x63 0x4
 
-The KEYCODE and MODIFIER may also be specifed as decimal numbers by omitting the '0x' hexadecimal prefix.
+The KEYCODE and MODIFIER may also be specifed as decimal numbers by
+omitting the '0x' hexadecimal prefix.
 
 .P
 .B activate
 .br
 Usage: spacefm -s activate [OPTIONS] NAME
 
-The activate method is used to activate (run) a custom command, bookmark, or application from any menu or toolbar. Or, if the named item is a custom submenu, the submenu will be shown as a popup menu.
+The activate method is used to activate (run) a custom command,
+bookmark, or application from any menu or toolbar. Or, if the named
+item is a custom submenu, the submenu will be shown as a popup menu.
 
-NAME is the name of the item or submenu as it appears in the menu (underscores may be omitted). If multiple items have NAME as their name, only one will be activated. Alternatively, you can specify the internal name of the command, found in the command directory name, such as "cstm_782d52a7".
+NAME is the name of the item or submenu as it appears in the
+menu (underscores may be omitted). If multiple items have NAME
+as their name, only one will be activated. Alternatively, you
+can specify the internal name of the command, found in the command
+directory name, such as "cstm_782d52a7".
 
-For example, add a submenu anywhere named "My Gizmos", and add one or more commands inside the submenu. To make it popup:
+For example, add a submenu anywhere named "My Gizmos", and add
+one or more commands inside the submenu. To make it popup:
 
     spacefm -s activate 'My Gizmos'
 
-When using activate to open a popup menu from within an evt_win_click event handler for the file list, a small delay may be needed before the menu is shown to prevent it from closing immediately when the mouse button is released:
+When using activate to open a popup menu from within an
+evt_win_click event handler for the file list, a small delay may
+be needed before the menu is shown to prevent it from closing
+immediately when the mouse button is released:
 
     *if [ "%b" != "2" ]; then exit 1; fi; ( sleep .2; spacefm -s activate "A-C" ) &
 
-Because the sleep and spacefm commands are within parentheses, they are both backgrounded by the ampersand (&), preventing a lag in the GUI.
-NOTE: Prior to SpaceFM 1.0.4, the 'activate' method was called 'show-menu', and only worked for submenus, not commands. As of 1.0.4, 'show-menu' is deprecated yet still accepted in lieu of 'activate'.
+Because the sleep and spacefm commands are within parentheses, they
+are both backgrounded by the ampersand (&), preventing a lag in the GUI.
+NOTE: Prior to SpaceFM 1.0.4, the 'activate' method was called 'show-menu',
+and only worked for submenus, not commands. As of 1.0.4, 'show-menu' is
+deprecated yet still accepted in lieu of 'activate'.
 
 
 .P
@@ -683,23 +793,41 @@ NOTE: Prior to SpaceFM 1.0.4, the 'activate' method was called 'show-menu', and 
 .br
 Usage: spacefm -s add-event EVENT COMMAND ...
 
-The add-event method is used to dynamically add an asynchronous handler command to an event, such that when EVENT occurs, COMMAND will be run asynchronously (SpaceFM will not wait for it to finish).
+The add-event method is used to dynamically add an asynchronous handler
+command to an event, such that when EVENT occurs, COMMAND will be run
+asynchronously (SpaceFM will not wait for it to finish).
 
-COMMAND is a bash command line. If any arguments follow it, they are added to the command before it is passed to bash. For all events except evt_start, evt_exit, evt_tab_close, and evt_device, the exported bash variables can be used in the command. COMMAND also accepts event substitution variables, which will vary with the event type.
+COMMAND is a bash command line. If any arguments follow it, they are
+added to the command before it is passed to bash. For all events except
+evt_start, evt_exit, evt_tab_close, and evt_device, the exported bash
+variables can be used in the command. COMMAND also accepts event
+substitution variables, which will vary with the event type.
 
-add-event may be used any number of times to add additional event handler commands to the same or different event types.
+add-event may be used any number of times to add additional event handler
+commands to the same or different event types.
 
-Note that COMMAND will continue to run anytime EVENT occurs during the lifetime of the current SpaceFM instance, so be sure to remove the handler when your script is finished using it.
+Note that COMMAND will continue to run anytime EVENT occurs during the
+lifetime of the current SpaceFM instance, so be sure to remove the
+handler when your script is finished using it.
 
-In addition to adding dynamic event handlers, you can also set static event handlers using the View|Event Manager menu.
+In addition to adding dynamic event handlers, you can also set static
+event handlers using the View|Event Manager menu.
 
-Note that a single SpaceFM instance may open multiple windows, so your handler will run when events occur in any window. The handler can test for a specific window using the %w (window ID) substitution variable in the command (which will correspond to a task's $fm_my_window bash variable).
+Note that a single SpaceFM instance may open multiple windows, so your
+handler will run when events occur in any window. The handler can test
+for a specific window using the %w (window ID) substitution variable in
+the command (which will correspond to a task's $fm_my_window bash variable).
 
-For example, the following command will add a handler to the evt_pnl_sel (selection has changed) event, such that anytime the user changes the selection of files in the file list, the status bar will be set to display the first selected file's path:
+For example, the following command will add a handler to the
+evt_pnl_sel (selection has changed) event, such that anytime the user
+changes the selection of files in the file list, the status bar will be
+set to display the first selected file's path:
 
     spacefm -s add-event evt_pnl_sel 'spacefm -s set statusbar_text "$fm_file"'
 
-Note that to preserve the quotes and dollar sign for bash to evaluate, the entire command is single-quoted and passed as a single argument. Alternatively, escaping those characters yields the same result:
+Note that to preserve the quotes and dollar sign for bash to evaluate,
+the entire command is single-quoted and passed as a single argument.
+Alternatively, escaping those characters yields the same result:
 
     spacefm -s add-event evt_pnl_sel spacefm -s set statusbar_text \\"\\$fm_file\\"
 
@@ -710,119 +838,227 @@ Note that to preserve the quotes and dollar sign for bash to evaluate, the entir
 .br
 Usage: spacefm -s replace-event EVENT COMMAND ...
 
-The replace-event method is used to dynamically add a synchronous handler command to an event, such that when EVENT occurs, COMMAND will be run synchronously (SpaceFM will wait for it to finish, and will examine the exit status).
+The replace-event method is used to dynamically add a synchronous handler
+command to an event, such that when EVENT occurs, COMMAND will be run
+synchronously (SpaceFM will wait for it to finish, and will examine the exit status).
 
-Because the command is run synchronously, SpaceFM's GUI will freeze while the command is being run. Your command should return a quick exit status to make this freeze minimal, then spawn a process to continue to perform whatever actions are desired.
+Because the command is run synchronously, SpaceFM's GUI will freeze while
+the command is being run. Your command should return a quick exit status
+to make this freeze minimal, then spawn a process to continue to perform
+whatever actions are desired.
 
-For event types evt_win_click (a mouse click), evt_win_key (a keypress), and evt_pnl_sel (file selection changed), SpaceFM will use the exit status of your command to determine whether SpaceFM's built-in handler for the event type should run after your command. If the exit status is zero, this will inhibit the built-in handler. For example, if the user clicks the right mouse button, and your command returns zero exit status, SpaceFM will not show the right-click context menu normally shown by the built-in handler.
+For event types evt_win_click (a mouse click), evt_win_key (a keypress),
+and evt_pnl_sel (file selection changed), SpaceFM will use the exit status
+of your command to determine whether SpaceFM's built-in handler for the
+event type should run after your command. If the exit status is zero,
+this will inhibit the built-in handler. For example, if the user clicks
+the right mouse button, and your command returns zero exit status,
+SpaceFM will not show the right-click context menu normally shown by
+the built-in handler.
 
-If more than one replace-event is set for a evt_win_click, evt_win_key, or evt_pnl_sel event type (including one set in the View|Event Manager menu), any zero exit status will inhibit the built-in handler.
+If more than one replace-event is set for a evt_win_click, evt_win_key,
+or evt_pnl_sel event type (including one set in the View|Event Manager menu),
+any zero exit status will inhibit the built-in handler.
 
-Using replace-event to set a handler for an event type other than evt_win_click, evt_win_key or evt_pnl_sel will cause the command to run synchronously (SpaceFM will wait for it and it will freeze the GUI until it exits) but the exit status will have no effect. (These events are notification only, so there is no built-in handler to inhibit.)
+Using replace-event to set a handler for an event type other than
+evt_win_click, evt_win_key or evt_pnl_sel will cause the command to run
+synchronously (SpaceFM will wait for it and it will freeze the GUI until
+it exits) but the exit status will have no effect. (These events are
+notification only, so there is no built-in handler to inhibit.)
 
-COMMAND is a bash command line. If any arguments follow it, they are added to the command before it is passed to bash. Exported bash variables may NOT be used in COMMAND. COMMAND also accepts event substitution variables, which will vary with the event type.
+COMMAND is a bash command line. If any arguments follow it, they are
+added to the command before it is passed to bash. Exported bash variables
+may NOT be used in COMMAND. COMMAND also accepts event substitution
+variables, which will vary with the event type.
 
-replace-event may be used any number of times to add additional synchronous event handler commands to the same or different event types.
+replace-event may be used any number of times to add additional synchronous
+event handler commands to the same or different event types.
 
-Note that COMMAND will continue to run anytime EVENT occurs during the lifetime of the current SpaceFM instance, so be sure to remove the handler when your script is finished using it.
+Note that COMMAND will continue to run anytime EVENT occurs during the
+lifetime of the current SpaceFM instance, so be sure to remove the handler
+when your script is finished using it.
 
-For example, the following command will add a handler to the evt_win_click event. If the user clicks a button other than the middle mouse button (%b = 2), the command returns exit status 1, so the built-in handler is used. But if the user clicks the middle mouse button, then a dialog message is displayed, and the command returns 0 (the default status on success), inhibiting the built-in handler.
+For example, the following command will add a handler to the
+evt_win_click event. If the user clicks a button other than the middle
+mouse button (%b = 2), the command returns exit status 1, so the built-in
+handler is used. But if the user clicks the middle mouse button, then a
+dialog message is displayed, and the command returns 0 (the default status
+on success), inhibiting the built-in handler.
 
     spacefm -s replace-event evt_win_click 'if [ "%b" != "2" ]; then exit 1; fi; \\
         spacefm -g --label "\\nMiddle button was clicked" --button ok &'
 
-Note the ampersand (&) after the 'spacefm -g' command. This runs the command asynchronously (run and forget) so the exit status is returned immediately and it does not cause a lag in the GUI.
+Note the ampersand (&) after the 'spacefm -g' command. This runs the
+command asynchronously (run and forget) so the exit status is returned
+immediately and it does not cause a lag in the GUI.
 
 .P
 .B remove-event
 .br
 Usage: spacefm -s remove-event EVENT COMMAND ...
 
-The remove-event method removes an event handler previously set with the add-event or replace-event methods. You must pass remove-event the exact same EVENT and COMMAND that you passed when adding the handler.
+The remove-event method removes an event handler previously set with
+the add-event or replace-event methods. You must pass remove-event the
+exact same EVENT and COMMAND that you passed when adding the handler.
 
-Because all handlers continue to run for the lifetime of the current SpaceFM instance, your scripts should remove all handlers they have added before finishing. When the SpaceFM instance exits, all dynamic event handlers are automatically removed. (If you want dynamic handlers to always be present, use the evt_start event to add them.)
+Because all handlers continue to run for the lifetime of the current
+SpaceFM instance, your scripts should remove all handlers they have added
+before finishing. When the SpaceFM instance exits, all dynamic event
+handlers are automatically removed. (If you want dynamic handlers to always
+be present, use the evt_start event to add them.)
 
 remove-event cannot remove static handlers set in the View|Event Manager menu.
 
 .SH Events
-Events represent actions or changes in the GUI, such as the user closing a tab, selecting a file, or opening a new window. SpaceFM has built-in handlers for these events, which update the GUI, open menus, or take other actions. You can also add your own handlers for events, commands which are run to take a custom action after the event occurs. In some cases your custom handler can replace the action normally taken by SpaceFM's built-in handler, allowing you to modify the default behavior in the GUI.
+Events represent actions or changes in the GUI, such as the user closing
+a tab, selecting a file, or opening a new window. SpaceFM has built-in
+handlers for these events, which update the GUI, open menus, or take other
+actions. You can also add your own handlers for events, commands which are
+run to take a custom action after the event occurs. In some cases your custom
+handler can replace the action normally taken by SpaceFM's built-in handler,
+allowing you to modify the default behavior in the GUI.
 
-Event handlers can be added in the Event Manager menu. Those handler commands always run until you remove them. Dynamic event handlers can also be added using the add-event or replace-event socket methods. These handlers will remain in effect until you remove them with the remove-event method, or until the SpaceFM instance exits.
+Event handlers can be added in the Event Manager menu. Those handler commands
+always run until you remove them. Dynamic event handlers can also be added
+using the add-event or replace-event socket methods. These handlers will remain
+in effect until you remove them with the remove-event method, or until the
+SpaceFM instance exits.
 
-The following events are available. The name in parentheses is the event name as found in the Event Manager menu. Any event substitution variables available with the event are shown after it (eg %e). evt_start (Instance|Start) %e
-Occurs only once per instance when the SpaceFM instance first starts. Note that a single SpaceFM instance may open multiple windows. This is a good event to use to add any dynamic event handlers which you always want running.
+The following events are available. The name in parentheses is the event name
+as found in the Event Manager menu. Any event substitution variables available
+with the event are shown after it (eg %e). evt_start (Instance|Start) %e
+Occurs only once per instance when the SpaceFM instance first starts. Note that
+a single SpaceFM instance may open multiple windows. This is a good event to use
+to add any dynamic event handlers which you always want running.
 .P
 .B evt_exit (Instance|Exit) %e
-Occurs only once per instance when the SpaceFM instance exits. If a daemon or desktop manager instance is running, this event will occur when the user logs out. Otherwise, the instance will exit when the last SpaceFM window is closed.
+Occurs only once per instance when the SpaceFM instance exits. If a daemon or
+desktop manager instance is running, this event will occur when the user logs
+out. Otherwise, the instance will exit when the last SpaceFM window is closed.
 .P
 .B evt_win_new (Window|New) %e %w %p %t
 Occurs whenever a new SpaceFM window is opened, including the initial window.
 .P
 .B evt_win_focus (Window|Focus) %e %w %p %t
-Occurs whenever a SpaceFM window receives focus. For example, if you switch to another window in your window manager, then switch back to a SpaceFM window, this event will occur.
+Occurs whenever a SpaceFM window receives focus. For example, if you switch
+to another window in your window manager, then switch back to a SpaceFM window,
+this event will occur.
 .P
 .B evt_win_move (Window|Move) %e %w %p %t
-Occurs whenever a SpaceFM window is moved or resized. Note that during resizing, any handler for this event may be run multiple times (up to five times per second).
+Occurs whenever a SpaceFM window is moved or resized. Note that during resizing,
+any handler for this event may be run multiple times (up to five times per second).
 .P
 .B evt_win_click (Window|Click) %e %w %p %t %b %m %f
-Occurs when the user clicks the mouse in most areas of a SpaceFM window. The mouse button pressed is available via the substitution variable %b, any key modifier (eg Ctrl+Click) via %m, and the window element which received the click via %f.
+Occurs when the user clicks the mouse in most areas of a SpaceFM window. The
+mouse button pressed is available via the substitution variable %b, any key
+modifier (eg Ctrl+Click) via %m, and the window element which received the click via %f.
 
-If a handler set for the evt_win_click event is synchronous (has an asterisk prefix or is added with the replace-event method), and it returns a zero exit status, the built-in handler for the event will be inhibited.
+If a handler set for the evt_win_click event is synchronous (has an asterisk
+prefix or is added with the replace-event method), and it returns a zero exit
+status, the built-in handler for the event will be inhibited.
 
-When using activate to show a popup menu from within an evt_win_click event handler, a small delay may be needed before the menu is shown to prevent it from closing immediately when the mouse button is released:
+When using activate to show a popup menu from within an evt_win_click event
+handler, a small delay may be needed before the menu is shown to prevent it
+from closing immediately when the mouse button is released:
 
     *if [ "%b" != "2" ]; then exit 1; fi; ( sleep .2; spacefm -s activate "A-C" ) &
 
-Because the sleep and spacefm command are within parentheses, they are both backgrounded by the ampersand (&), preventing a lag in the GUI.
+Because the sleep and spacefm command are within parentheses, they are both
+backgrounded by the ampersand (&), preventing a lag in the GUI.
 .P
 .B evt_win_key (Window|Keypress) %e %w %p %t %k %m
-Occurs when the user presses a key in most areas of a SpaceFM window. The key code pressed is available via the substitution variable %k, and any key modifier (eg Ctrl+C) via %m.
+Occurs when the user presses a key in most areas of a SpaceFM window. The key
+code pressed is available via the substitution variable %k, and any key
+modifier (eg Ctrl+C) via %m.
 
-If a handler set for the evt_win_key event is synchronous (has an asterisk prefix or is added with the replace-event method), and it returns a zero exit status, the built-in handler for the event will be inhibited (SpaceFM will not react to the keypress in most cases, even if it is assigned to a menu item).
+If a handler set for the evt_win_key event is synchronous (has an asterisk
+prefix or is added with the replace-event method), and it returns a zero exit
+status, the built-in handler for the event will be inhibited (SpaceFM will not
+react to the keypress in most cases, even if it is assigned to a menu item).
 .P
 .B evt_win_close (Window|Close) %e %w %p %t
 Occurs whenever a SpaceFM window is closed, including the last window of the instance.
 .P
 .B evt_pnl_focus (Panel|Focus) %e %w %p %t
-Occurs whenever a panel gets focus. Any handler command for this event will be run whenever a user clicks in the panel, even if the panel is not changed. The command will also be run if the user switches focus to another panel.
+Occurs whenever a panel gets focus. Any handler command for this event will
+be run whenever a user clicks in the panel, even if the panel is not
+changed. The command will also be run if the user switches focus to another panel.
 .P
 .B evt_pnl_show (Panel|Show) %e %w %p %t %f %v
-Occurs whenever a panel or panel element is shown or hidden. The element shown or hidden is available via the substitution variable %f (panelN|filelist|devices|bookmarks|dirtree|pathbar), and the element's visibility (shown or hidden) is available via %v (1=shown or 0=hidden).
+Occurs whenever a panel or panel element is shown or hidden. The element
+shown or hidden is available via the substitution
+variable %f (panelN|filelist|devices|bookmarks|dirtree|pathbar), and the
+element's visibility (shown or hidden) is available via %v (1=shown or 0=hidden).
 .P
 .B evt_pnl_sel (Panel|Select) %e %w %p %t
 Occurs whenever the file selection in a panel changes.
 
-If a handler set for the evt_pnl_sel event is synchronous (has an asterisk prefix or is added with the replace-event method), and it returns a zero exit status, the built-in handler for the event will be inhibited. (The built-in handler for evt_pnl_sel updates the contents of the panel's status bar, so if you want to handle this yourself, you can inhibit it.)
+If a handler set for the evt_pnl_sel event is synchronous (has an asterisk
+prefix or is added with the replace-event method), and it returns a zero exit
+status, the built-in handler for the event will be inhibited. (The built-in
+handler for evt_pnl_sel updates the contents of the panel's status bar, so
+if you want to handle this yourself, you can inhibit it.)
 .P
 .B evt_tab_new (Tab|New) %e %w %p %t
-Occurs whenever a new tab is added to a panel, including initial tabs when the window is opened or the panel is first shown.
+Occurs whenever a new tab is added to a panel, including initial tabs when
+the window is opened or the panel is first shown.
 .P
 .B evt_tab_chdir (Tab|Change Dir) %e %w %p %t %d
-Occurs whenever a tab changes directory, such as when a new tab opens, or the user navigates to a different directory. %d will be replaced with the quoted new directory of the tab.
+Occurs whenever a tab changes directory, such as when a new tab opens, or
+the user navigates to a different directory. %d will be replaced with the
+quoted new directory of the tab.
 .P
 .B evt_tab_focus (Tab|Focus) %e %w %p %t
-Occurs whenever a tab gets focus within a panel. For example, changing tabs will trigger this event. However, merely switching panels will trigger the evt_pnl_focus event, but not evt_tab_focus.
+Occurs whenever a tab gets focus within a panel. For example, changing tabs
+will trigger this event. However, merely switching panels will trigger the
+evt_pnl_focus event, but not evt_tab_focus.
 .P
 .B evt_tab_close (Tab|Close) %e %w %p %t
-Occurs whenever a tab is closed. The tab number which was closed is available via the substitution variable %t, and its panel via %p. (Note that closing a tab changes panel focus to the panel containing the tab being closed.)
+Occurs whenever a tab is closed. The tab number which was closed is available
+via the substitution variable %t, and its panel via %p. (Note that closing a
+tab changes panel focus to the panel containing the tab being closed.)
 
-Note that exported bash variables cannot be used in the handler commands for evt_tab_close.
+Note that exported bash variables cannot be used in the handler commands
+for evt_tab_close.
 .P
 .B evt_device (Device) %e %f %v
-Occurs whenever a device is added, removed, or otherwise changes state (mounted, unmounted, media inserted, etc). The device file is available via the substitution variable %f, and the change via %v (added|removed|changed).
+Occurs whenever a device is added, removed, or otherwise changes
+state (mounted, unmounted, media inserted, etc). The device file is
+available via the substitution variable %f, and the change
+via %v (added|removed|changed).
 
-Note that exported bash variables cannot be used in the handler commands for evt_device.
+Note that exported bash variables cannot be used in the handler commands
+for evt_device.
 
 .SH Event Manager
-The Event Manager submenu, located in the main menu bar's View menu, is used to configure static event handler commands to be run when events occur. Each item in this menu opens a dialog in which a program name or bash command line can be entered. The dialog for each event type also explains when the event occurs and what event substitution variables are available for use in the command for that event.
+The Event Manager submenu, located in the main menu bar's View menu, is
+used to configure static event handler commands to be run when events
+occur. Each item in this menu opens a dialog in which a program name or
+bash command line can be entered. The dialog for each event type also
+explains when the event occurs and what event substitution variables are
+available for use in the command for that event.
 
-Socket commands are of particular use in these command lines. For example, to alter the default text in the status bar so that it shows only the filename of the first selected file, set Events|Panel|Select (an event which occurs when the file selection in a panel changes) to:
+Socket commands are of particular use in these command lines. For example,
+to alter the default text in the status bar so that it shows only the
+filename of the first selected file, set Events|Panel|Select (an event
+which occurs when the file selection in a panel changes) to:
 
     spacefm -s set statusbar_text "$fm_filename"
 
-Any command line set in the Event Manager menu which is prefixed with an asterisk (*) as the first character, will be run synchronously, as if it was added with the replace-event method. (The asterisk is removed before the command is run.) This means the GUI will freeze while SpaceFM waits for the command to exit. For evt_win_click, evt_win_key, and evt_pnl_sel event types, a zero exit status will also inhibit the built-in handler.
+Any command line set in the Event Manager menu which is prefixed with
+an asterisk (*) as the first character, will be run synchronously, as if
+it was added with the replace-event method. (The asterisk is removed
+before the command is run.) This means the GUI will freeze while SpaceFM
+waits for the command to exit. For evt_win_click, evt_win_key,
+and evt_pnl_sel event types, a zero exit status will also inhibit
+the built-in handler.
 
-In addition to setting commands in the Event Manager menu, you can also add event handler commands dynamically using the add-event or replace-event socket command methods.
+In addition to setting commands in the Event Manager menu, you can also
+add event handler commands dynamically using the add-event or
+replace-event socket command methods.
+
+.SH NOTES
+These man pages are an almost verbatim copy of the html user manual
 
 .SH SEE ALSO
 .BR spacefm (1)

@@ -1,4 +1,4 @@
-.TH spacefm-gui 7 "December 2021"
+.TH spacefm-gui 7 "May 2022"
 
 .SH NAME
 .B spacefm-gui
@@ -7,160 +7,231 @@
 SpaceFM's gui construction
 
 .SH Panels
-SpaceFM includes up to four file manager panels in each window. Each panel represents a complete file manager, including tabbed directory contents and optionally shown side panes, toolbars, path bar, and status bar. Each panel can be hidden or shown via the View menu, or via the Panel Bar located to the right of the main menu bar.
+SpaceFM includes up to four file manager panels in each window. Each panel
+represents a complete file manager, including tabbed directory contents and
+optionally shown side panes, toolbars, path bar, and status bar. Each panel
+can be hidden or shown via the View menu, or via the Panel Bar located to
+the right of the main menu bar.
 
-If shown, panels 1 and 2 are next to each other in the top half of the window, and panels 3 and 4 are in the bottom half. This allows horizontally arranged panels, vertically arranged panels, and combinations of both.
+If shown, panels 1 and 2 are next to each other in the top half of the
+window, and panels 3 and 4 are in the bottom half. This allows horizontally
+arranged panels, vertically arranged panels, and combinations of both.
 
 .B NOTE:
-SpaceFM's main menu bar (File, View, etc.) is mostly used for program-wide settings and functions. Most adjustments for an individual panel's appearance can be made by right-clicking on the file list and selecting the View context menu (also available in the main View menu). This View menu will allow you to set which side panes and toolbars are visible in a panel, add and remove file list columns, set the list style and font, set the sort method, etc.
+SpaceFM's main menu bar (File, View, etc.) is mostly used for program-wide
+settings and functions. Most adjustments for an individual panel's appearance
+can be made by right-clicking on the file list and selecting the View context
+menu (also available in the main View menu). This View menu will allow you to
+set which side panes and toolbars are visible in a panel, add and remove file
+list columns, set the list style, set the sort method, etc.
 .P
 .B Panel Memory
 .P
-The best way to use SpaceFM's memory for panel configurations is to select the panels you want visible, then arrange each panel as you want it to appear. Hide or show side panes and adjust their sizes, choose file list columns and adjust their widths, choose which toolbars are visible, etc. Each time you select a different combination of panels, you may need to do some further configuration until SpaceFM gets to know all the combinations you use and how you like them arranged.
+The best way to use SpaceFM's memory for panel configurations is to select
+the panels you want visible, then arrange each panel as you want it to appear.
+Hide or show side panes and adjust their sizes, choose file list columns and
+adjust their widths, choose which toolbars are visible, etc. Each time you
+select a different combination of panels, you may need to do some further
+configuration until SpaceFM gets to know all the combinations you use and
+how you like them arranged.
 .P
 .B How It Works
 .P
-Many settings in each panel are specific to that panel. For example, a different font can be set for the file list or other panes in each panel. Also, each panel may have a different view style (Detailed, Compact, or Icons), different file list columns visible, different side panes visible, etc.
+Many settings in each panel are specific to that panel.
+Also, each panel may have a different view style (Detailed, Compact, or Icons),
+different file list columns visible, different side panes visible, etc.
 
-Some panel settings use a four-state memory, and these settings may be different depending on the panel's relationship to other panels in the window. The four states are:
+Some panel settings use a four-state memory, and these settings may be different
+depending on the panel's relationship to other panels in the window. The four states are:
 
-.br
-	panel is shown by itself in the window
-.br
-	panel has a horizonal neighboring panel
-.br
-	panel has a vertical neighboring panel
-.br
-	panel has both horizontal and vertical neighboring panels
+    panel is shown by itself in the window
+    panel has a horizonal neighboring panel
+    panel has a vertical neighboring panel
+    panel has both horizontal and vertical neighboring panels
 
-The four-state memory of each panel allows SpaceFM to remember how you configured each panel in combination with other panels. This makes it easier to show and hide panels on the fly without having to readjust columns, side panes, etc. SpaceFM will remember the selected columns (visibility), column widths, side pane visibility and sizes, and toolbar visibility for each state of each panel.
+The four-state memory of each panel allows SpaceFM to remember how you configured
+each panel in combination with other panels. This makes it easier to show and hide
+panels on the fly without having to readjust columns, side panes, etc. SpaceFM will
+remember the selected columns (visibility), column widths, side pane visibility and
+sizes, and toolbar visibility for each state of each panel.
 
-For more advanced users, note that socket commands can be used to adjust panel configurations from a command or script. When set as event handlers, adjustments can be made automatically when GUI or other events occur, such as showing/hiding a panel or changing window size.
+For more advanced users, note that socket commands can be used to adjust panel
+configurations from a command or script. When set as event handlers, adjustments
+can be made automatically when GUI or other events occur, such as showing/hiding a
+panel or changing window size.
 .P
 .B Maximized & Fullscreen
 .P
-If you maximize the SpaceFM window, any changes to column widths are not remembered (in any panel or in the task manager). This means that you can change column widths while maximized, and when you return to an unmaximized window state, your columns widths will revert to their original sizes.
+If you maximize the SpaceFM window, any changes to column widths are not
+remembered (in any panel or in the task manager). This means that you can change
+column widths while maximized, and when you return to an unmaximized window state,
+your columns widths will revert to their original sizes.
 
-However, if you exit SpaceFM while the window is maximized, your column widths will be saved. When you restart SpaceFM it will open maximized, and any changes to column widths thereafter will be remembered while maximized (unless you unmaximize and maximize again).
+However, if you exit SpaceFM while the window is maximized, your column widths
+will be saved. When you restart SpaceFM it will open maximized, and any changes
+to column widths thereafter will be remembered while maximized (unless you unmaximize
+and maximize again).
 
-In fullscreen mode, neither changes to column widths nor to side pane heights are remembered. When you return to non-fullscreen mode, these will revert to their original sizes.
+In fullscreen mode, neither changes to column widths nor to side pane heights are
+remembered. When you return to non-fullscreen mode, these will revert to their
+original sizes.
 .P
 .B Focus Highlighting
 .P
-SpaceFM is designed so that for most purposes, it is not necessary to know which panel has the focus. By right-clicking in a panel, the context menu shown will be specific to that panel. (Window level commands and settings are available via the main menu bar.)
+SpaceFM is designed so that for most purposes, it is not necessary to know which
+panel has the focus. By right-clicking in a panel, the context menu shown will be
+specific to that panel. (Window level commands and settings are available via the
+main menu bar.)
 
-However, sometimes it is necessary to know which panel has focus, such as when using keyboard shortcuts on selected files, or using a custom command or plugin in the main menus. For this purpose, SpaceFM provides an icon at the right of each panel's status bar. This icon will be enabled for the panel which has focus.
+However, sometimes it is necessary to know which panel has focus, such as when using
+keyboard shortcuts on selected files, or using a custom command or plugin in the main
+menus. For this purpose, SpaceFM provides an icon at the right of each panel's
+status bar. This icon will be enabled for the panel which has focus.
 
-If you would like a more prominent reminder, it is possible to set custom highlight colors for the focused panel's status bar text and background. To set highlight colors, right-click on the status bar of the panel and select Highlight Text or Highlight Bar. Each panel may use different highlight colors, or the same.
+If you would like a more prominent reminder, it is possible to set custom highlight
+colors for the focused panel's status bar text and background. To set highlight
+colors, right-click on the status bar of the panel and select Highlight Text or
+Highlight Bar. Each panel may use different highlight colors, or the same.
 
 .SH Path Bar
-SpaceFM's Path Bar (location bar) is located in each panel above the file list in the panel's main toolbar. At its simplest, the Path Bar allows you to see the current folder's path, and you can enter a new path and press Enter to change to another folder.
+SpaceFM's Path Bar (location bar) is located in each panel above the file list in
+the panel's main toolbar. At its simplest, the Path Bar allows you to see the
+current folder's path, and you can enter a new path and press Enter to change to
+another folder.
 
-TIP: To place the cursor in the Path Bar, you can use Go|Focus|Path Bar, accessed from the right-click menu of the file list. By default, this is assigned to key shortcut Ctrl+L.
+TIP: To place the cursor in the Path Bar, you can use Go|Focus|Path Bar, accessed
+from the right-click menu of the file list. By default, this is assigned to key shortcut Ctrl+L.
 
-In addition to displaying and accepting a folder path, SpaceFM's Path Bar has additional methods and uses as detailed below.
+In addition to displaying and accepting a folder path, SpaceFM's Path Bar has
+additional methods and uses as detailed below.
 Editing Keys
 .P
 .B
 .P
 When the cursor is in the Path Bar, the following editing key combinations can be used:
 
-.br
-	Key Combo			Result
-.br
-	Shift+Backspace	Clear the entry
-.br
-	Ctrl+Backspace		Backspace to the previous separator
-.br
-	Ctrl+Left			Jump to previous separator
-.br
-	Ctrl+Right		Jump to next separator
-.br
-	Tab				Complete entry
+    Key Combo           Result
+    Shift+Backspace     Clear the entry
+    Ctrl+Backspace      Backspace to the previous separator
+    Ctrl+Left           Jump to previous separator
+    Ctrl+Right          Jump to next separator
+    Tab                 Complete entry
 
-When the Path Bar has focus, it will steal the following keypresses (even if they are set as key shortcuts): visible characters without a modifier key, Enter, Home, Shift+Home, End, Shift+End, Delete, Tab, Backspace, Left, Shift+Left, Right, Shift+Right.
+When the Path Bar has focus, it will steal the following keypresses (even if they
+are set as key shortcuts): visible characters without a modifier key, Enter, Home,
+Shift+Home, End, Shift+End, Delete, Tab, Backspace, Left, Shift+Left, Right, Shift+Right.
 .P
 .B Auto Seek
 .P
-By default, the Path Bar will auto seek, which means that as you type in the Path Bar, the current directory will change automatically, and any partial filename typed will select the first matching directory or file found in the file list. You can turn off auto seek by right-clicking on the Path Bar and unchecking option Auto Seek. In this case, you will need to press the Enter key to change to the directory entered.
+By default, the Path Bar will auto seek, which means that as you type in the Path Bar,
+the current directory will change automatically, and any partial filename typed will
+select the first matching directory or file found in the file list. You can turn off
+auto seek by right-clicking on the Path Bar and unchecking option Auto Seek. In this
+case, you will need to press the Enter key to change to the directory entered.
 
-To locate files within the current directory, use Find-As_You-Type Search or Actions|Select By Pattern.
+To locate files within the current directory, use Find-As_You-Type Search or
+Actions|Select By Pattern.
 .P
 .B Completion
 .P
-As you are entering a directory path in the Path Bar, completion will be active. For example, if you enter "/us", a drop down box will appear listing /usr (and any other directories that may begin with "/us" on your system). You can press Tab to complete the entry automatically ("/us" will be completed to "/usr/", or as much as possible if there are multiple matches). If multiple possibilities are listed, press Down Arrow to select the desired completion and press Enter (or select it using the mouse).
+As you are entering a directory path in the Path Bar, completion will be active. For
+example, if you enter "/us", a drop down box will appear listing /usr (and any other
+directories that may begin with "/us" on your system). You can press Tab to complete
+the entry automatically ("/us" will be completed to "/usr/", or as much as possible
+if there are multiple matches). If multiple possibilities are listed, press Down Arrow
+to select the desired completion and press Enter (or select it using the mouse).
 .P
 .B Breadcrumbs
 .P
-The Breadcrumbs feature allows you to Ctrl+Click on a portion of the path in the Path Bar to trim the path back. This will also immediately change to the new path. For example, if the path is currently /usr/share/spacefm/plugins and you Ctrl+Click on the name 'share', the path will change to /usr/share. This provides a convenient way to go up to a specific directory.
+The Breadcrumbs feature allows you to Ctrl+Click on a portion of the path in the
+Path Bar to trim the path back. This will also immediately change to the new path. For
+example, if the path is currently /usr/share/spacefm/plugins and you Ctrl+Click on the
+name 'share', the path will change to /usr/share. This provides a convenient way to go
+up to a specific directory.
 .P
 .B Middle-Click Auto Seek
 .P
-A middle-click in the Path Bar will replace the contents of the Path Bar with the contents of the primary clipboard, and will seek to the location. The primary clipboard is set simply by selecting text in any application. For example, if you select the text "/etc/fstab" in your editor, then middle click in SpaceFM's path bar, the directory will change to /etc and the 'fstab' file will be selected. If you do not want to replace the contents of the Path Bar, and merely want to insert the primary clipboard text (the usual behavior of middle-click), hold down a modifier key while you click, such as Ctrl or Shift.
+A middle-click in the Path Bar will replace the contents of the Path Bar with the
+contents of the primary clipboard, and will seek to the location. The primary clipboard
+is set simply by selecting text in any application. For example, if you select the
+text "/etc/fstab" in your editor, then middle click in SpaceFM's path bar, the directory
+will change to /etc and the 'fstab' file will be selected. If you do not want to replace
+the contents of the Path Bar, and merely want to insert the primary clipboard text (the
+usual behavior of middle-click), hold down a modifier key while you click,
+such as Ctrl or Shift.
 .P
 .B File Path or Device
 .P
-The path to a file may be entered or pasted in the Path Bar. When you press Enter, SpaceFM will change to the directory containing the file and will select the file in the file list.
+The path to a file may be entered or pasted in the Path Bar. When you press Enter,
+SpaceFM will change to the directory containing the file and will select the file
+in the file list.
 
-Also, a device file (eg /dev/sdd1) may be entered in the path bar. The device will be mounted if needed, and the mount point directory of the device will be opened.
+Also, a device file (eg /dev/sdd1) may be entered in the path bar. The device will
+be mounted if needed, and the mount point directory of the device will be opened.
 .P
 .B Protocol URL
 .P
-Any entry in the Path Bar which looks like a protocol, such as ftp://mirrors.kernel.org/, will be opened with the associated protocol handler. If a fileystem is mounted, SpaceFM will usually open the mount point directory automatically. If the Devices List has option Settings|Show|Mounted Networks checked, the filesystem may be listed.
+Any entry in the Path Bar which looks like a protocol, such as
+ftp://mirrors.kernel.org/, will be opened with the associated protocol handler. If a
+fileystem is mounted, SpaceFM will usually open the mount point directory
+automatically. If the Devices List has option Settings|Show|Mounted Networks checked,
+the filesystem may be listed.
 
 Regardless of the protocol, most of SpaceFM's default protocol handlers accept URLs in the format:
 
     PROTOCOL://USERNAME:PASSWORD@HOST:PORT/SHARE
-WARNING: Including a password in the URL is a very unsafe mode of use, as your password is included in the command line and may be written to temporary and/or system files by SpaceFM or mount helpers. See documentation specific to the filesystem for other authentication methods offered, or enter your password when prompted.
+WARNING: Including a password in the URL is a very unsafe mode of use, as your
+password is included in the command line and may be written to temporary and/or
+system files by SpaceFM or mount helpers. See documentation specific to the filesystem
+for other authentication methods offered, or enter your password when prompted.
 
 Some parts of the above URL format may be omitted. Examples include:
 
-.br
-	ftp://mirrors.kernel.org
-.br
-	smb://user:pass@10.0.0.1:50/docs
-.br
-	ssh://user@sys.domain
-.br
-	mtp://
-.br
-	NFS and Samba (cifs) URLs may also be in the alternate formats:
-.br
-	NFSHOST:/SHARE
-.br
-	//SAMBAHOST/SHARE
+    ftp://mirrors.kernel.org
+    smb://user:pass@10.0.0.1:50/docs
+    ssh://user@sys.domain
+    mtp://
+    NFS and Samba (cifs) URLs may also be in the alternate formats:
+    NFSHOST:/SHARE
+    //SAMBAHOST/SHARE
 
-For additional URL examples, see URL protocols and formats handled by udevil, which natively uses the same URL formats supported by SpaceFM.
-In addition, custom protocol handlers may be added which accept URLs in the above formats, or in any format you prefer.
+For additional URL examples, see URL protocols and formats handled by udevil, which
+natively uses the same URL formats supported by SpaceFM.
+In addition, custom protocol handlers may be added which accept URLs in the above
+formats, or in any format you prefer.
 
-URLs may also be opened via the main menu bar's File|Open URL item, which is equivalent to entering them in the Path Bar, or on the command line.
+URLs may also be opened via the main menu bar's File|Open URL item, which is equivalent
+to entering them in the Path Bar, or on the command line.
 
-TIP: You can sometimes right-click on a mounted network in the Devices List and select Bookmark to bookmark the URL for future use. Or, right-click on the Path Bar containing a URL and select New Bookmark. Or, edit an existing bookmark to contain a URL target.
+TIP: You can sometimes right-click on a mounted network in the Devices List and select
+Bookmark to bookmark the URL for future use. Or, right-click on the Path Bar containing
+a URL and select New Bookmark. Or, edit an existing bookmark to contain a URL target.
 .P
 .B Command Line
 .P
-In addition, a bash command line can be entered in the Path Bar. This is a convenient way to run a command without having to manually open a terminal.
+In addition, a bash command line can be entered in the Path Bar. This is a convenient
+way to run a command without having to manually open a terminal.
 
 One or more command prefixes are required to tell SpaceFM how to run your command:
 
-.br
-	Prefix	Result
-.br
-	$	run as task
-.br
-	&	run and forget
-.br
-	+	run in terminal
-.br
-	!	run as root
-.br
+    Prefix  Result
+    $       run as task
+    &       run and forget
+    +       run in terminal
+    !       run as root
 
-A Path Bar entry is interpreted as a command only if at least one of the above prefixes preceeds the command. A space after the prefix(es) is optional. For example, enter in the Path Bar:
+A Path Bar entry is interpreted as a command only if at least one of the above
+prefixes preceeds the command. A space after the prefix(es) is optional. For example,
+enter in the Path Bar:
 
     $ ls
 .P
-When you press Enter, ls will be run for the current directory, and a dialog will open showing the output. When using prefix '$', the command is run as a task (it will be listed in the Task Manager if it takes longer than a half second to run), and a popup dialog will open only if the command produces output or an error.
-In addition, the substitution variables defined in Command Line, and the bash script variables described in Command Script may also be used in Path Bar command lines.
+When you press Enter, ls will be run for the current directory, and a dialog will
+open showing the output. When using prefix '$', the command is run as a task (it
+will be listed in the Task Manager if it takes longer than a half second to run),
+and a popup dialog will open only if the command produces output or an error.
+In addition, the substitution variables defined in Command Line, and the bash script
+variables described in Command Script may also be used in Path Bar command lines.
 
 For example, to open a dialog showing the path of the current directory:
 
@@ -170,127 +241,234 @@ Or to run umount in a terminal (+) as root (!) passing it the currently selected
 
     +! umount %v
 .P
-When a plus sign (+) prefix is included, the command is run in a terminal, not as a task. When an exclamation point (!) prefix is included, the command is run as root.
+When a plus sign (+) prefix is included, the command is run in a terminal, not as
+a task. When an exclamation point (!) prefix is included, the command is run as root.
 
-If the ampersand (&) prefix is included, the command is run and forgotten (no error or output will be shown). This is useful for starting an application. For example:
+If the ampersand (&) prefix is included, the command is run and forgotten (no error
+or output will be shown). This is useful for starting an application. For example:
 
     & firefox
 .P
-For a reminder of prefixes and substitution variables, enter a lone dollar sign ($) in the Path Bar and press Enter. Or press F1 while the Path Bar has focus to open this manual.
+For a reminder of prefixes and substitution variables, enter a lone dollar sign ($)
+in the Path Bar and press Enter. Or press F1 while the Path Bar has focus to open
+this manual.
 .P
 .B Command History
 .P
-SpaceFM also keeps a command history. As you enter a command, any commands previously entered will be shown in a popup. Use Up/Down Arrow keys to select a previous command and press Enter, or click it.
+SpaceFM also keeps a command history. As you enter a command, any commands previously
+entered will be shown in a popup. Use Up/Down Arrow keys to select a previous command
+and press Enter, or click it.
 Select By Pattern
-If a percent sign (%) prefix is entered in the Path Bar, SpaceFM treats the rest of the text as a file selection pattern. This function is equivalent to right-clicking on the file list and selecting Actions|Select By Pattern. For example, enter in the Path Bar:
+If a percent sign (%) prefix is entered in the Path Bar, SpaceFM treats the rest of
+the text as a file selection pattern. This function is equivalent to right-clicking
+on the file list and selecting Actions|Select By Pattern. For example, enter in the
+Path Bar:
 
     % *.avi
 .P
-When you press Enter, all filenames in the file list ending in ".avi" will be selected, and all other files will be unselected. If your pattern contains any uppercase characters, the matching will be case sensitive. For additional wildcard characters and pattern specifics, see IEEE Pattern Matching Notation.
+When you press Enter, all filenames in the file list ending in ".avi" will be
+selected, and all other files will be unselected. If your pattern contains any
+uppercase characters, the matching will be case sensitive. For additional wildcard
+characters and pattern specifics, see IEEE Pattern Matching Notation.
 See also: Find-As-You-Type Search.
-.P
-.B Font
-.P
-The font used in the Path Bar can be customised (this is a per panel setting). Right-click on the Path Bar and select Font.
 
 .SH Find-As-You-Type Search
-When the file list has focus (click on the file list), pressing an alphanumeric key will open the Find-As-You-Type search box in the lower right corner of the file list, allowing you to quickly jump to a file. Press down or up arrow, or scroll wheel up/down, to go to the next or previous matched filename.
+When the file list has focus (click on the file list), pressing an alphanumeric key
+will open the Find-As-You-Type search box in the lower right corner of the file list,
+allowing you to quickly jump to a file. Press down or up arrow, or scroll wheel up/down,
+to go to the next or previous matched filename.
 
 In addition, Find-As-You-Type Search supports the following modes:
 .P
-.br
-	Pattern Mode: If the search key contains at least one asterisk (*) or question mark (?), a glob substring search is used. (An asterisk is automatically added before and after your key before testing.) For pattern usage see IEEE Pattern Matching Notation.
+.SS Pattern Mode:
+If the search key contains at least one asterisk (*) or question mark (?), a glob
+substring search is used. (An asterisk is automatically added before and after
+your key before testing.) For pattern usage see IEEE Pattern Matching Notation.
 
-.br
-	Non-Pattern Mode: If your key does not contain an asterisk (*) or question mark (?), a normal substring search is performed, with the following new special characters recognized:
+.SS Non-Pattern Mode:
+If your key does not contain an asterisk (*) or question mark (?), a normal substring
+search is performed, with the following new special characters recognized:
 
-.br
-		If the search key begins with a caret (^), or the search key is less than three characters, the search will match names beginning with your key.
-.br
-		If the search key is longer than two characters and does not begin with a caret (^), a case insensitive substring search is conducted (this means if you type any part of a filename, the cursor will select the first filename which contains that string of characters.)
-.br
-		If your key ends with a dollar sign ($), the search will match names ending with your key.
-.br
-		You can use both a caret and dollar sign to constrain both. (Other regex characters and wildcards are not supported in this mode.)
+If the search key begins with a caret (^), or the search key is less than three
+characters, the search will match names beginning with your key.
 
-.br
-	Anytime you use an uppercase letter anywhere in your search key, the search mode becomes case sensitive.
+If the search key is longer than two characters and does not begin with a caret (^), a
+case insensitive substring search is conducted (this means if you type any part of a
+filename, the cursor will select the first filename which contains that string of
+characters.)
 
-.br
-	Regardless of mode, you can press down or up arrow, or scroll wheel down/up, to go to the next or previous matched filename.
+If your key ends with a dollar sign ($), the search will match names ending with your key.
+
+You can use both a caret and dollar sign to constrain both. (Other regex characters
+and wildcards are not supported in this mode.)
+
+Anytime you use an uppercase letter anywhere in your search key, the search mode
+becomes case sensitive.
+
+Regardless of mode, you can press down or up arrow, or scroll wheel down/up, to go
+to the next or previous matched filename.
 
 .SH Rename Dialog
-SpaceFM's Rename Dialog, accessed by right-clicking on a file and selecting Rename, does much more than rename files. It can move, copy, or create a link to the selected file or directory. It can also copy the target of a selected link, or create a new link to the target. By checking As Root, the function will be performed as the root user.
+SpaceFM's Rename Dialog, accessed by right-clicking on a file and selecting Rename,
+does much more than rename files. It can move, copy, or create a link to the selected
+file or directory. It can also copy the target of a selected link, or create a new
+link to the target. By checking As Root, the function will be performed as the root user.
 
-The Option button allows you to add and remove fields from the dialog. The selected fields, which are extra-large for easy editing of long filenames, show different parts of the selected path, such as the name and extension, full filename, parent, or path. As you edit the file's path, you will be advised if the entered path already exists. If you use a path which does not exist, SpaceFM will create the necessary parents automatically. The Confirm Create option determines if you will be prompted before parents are created.
+The Option button allows you to add and remove fields from the dialog. The selected
+fields, which are extra-large for easy editing of long filenames, show different parts
+of the selected path, such as the name and extension, full filename, parent, or path.
+As you edit the file's path, you will be advised if the entered path already exists.
+If you use a path which does not exist, SpaceFM will create the necessary parents
+automatically. The Confirm Create option determines if you will be prompted before
+parents are created.
 
-The Browse button allows you to browse for a filename, parent, or path, and insert it into the dialog.
+The Browse button allows you to browse for a filename, parent, or path, and insert
+it into the dialog.
 
-TIPS: To select all the text in an entry, click the entry's label (eg 'Filename:'), press the Alt key shortcut, or use Tab. To quickly copy an entry's text to the clipboard, double- or middle-click on the entry's label (eg 'Filename:'). Multiple files can be selected in the file browser to rename a batch of files.
+TIPS: To select all the text in an entry, click the entry's label (eg 'Filename:'),
+press the Alt key shortcut, or use Tab. To quickly copy an entry's text to the clipboard,
+double- or middle-click on the entry's label (eg 'Filename:'). Multiple files can be
+selected in the file browser to rename a batch of files.
 
 .SH New File/Folder Dialog
-The New File/Folder Dialog is opened by right-clicking on the file list and selecting New|File, Folder, or Link. This dialog works similarly to the Rename Dialog, allowing you to create files and folders in other paths, create as root, create relative links (eg a link to ../filename.txt), and create new files and folders using templates.
+The New File/Folder Dialog is opened by right-clicking on the file list and
+selecting New|File, Folder, or Link. This dialog works similarly to the Rename Dialog,
+allowing you to create files and folders in other paths, create as root, create
+relative links (eg a link to ../filename.txt), and create new files and folders
+using templates.
 
-SpaceFM looks in $XDG_TEMPLATES_DIR/, ~/Templates/, or ~/.templates/ to find template files. Templates are simply empty or partially filled files (of any type) used to create new files, so instead of an empty file you get a copy of the template file. You can place any files or links to files in your Templates folder. Subfolders in the templates folder can also be used to create new folders pre-filled with a set of files, or to organize templates.
+SpaceFM looks in $XDG_TEMPLATES_DIR/, ~/Templates/, or ~/.templates/ to find template
+files. Templates are simply empty or partially filled files (of any type) used to
+create new files, so instead of an empty file you get a copy of the template file.
+You can place any files or links to files in your Templates folder. Subfolders in
+the templates folder can also be used to create new folders pre-filled with a set
+of files, or to organize templates.
 
-After you have finished entering the path for your new file or folder, you can press Create to create it, or the '& Open' button to create and open the file or folder in one step.
+After you have finished entering the path for your new file or folder, you can
+press Create to create it, or the '& Open' button to create and open the file
+or folder in one step.
 
 .SH
 Bookmarks
-SpaceFM's main Bookmarks menu works like most other menus - you can right-click in the menu to add custom menu items, and to cut, copy, and paste items to other menus. Custom menu items may be bookmarks which open folders, but they may also run commands or applications. This means that items in SpaceFM's bookmarks can run socket commands to open folders in specific panels, change view settings, run external programs, and perform other automated tasks.
+SpaceFM's main Bookmarks menu works like most other menus - you can right-click
+in the menu to add custom menu items, and to cut, copy, and paste items to other
+menus. Custom menu items may be bookmarks which open folders, but they may also
+run commands or applications. This means that items in SpaceFM's bookmarks can
+run socket commands to open folders in specific panels, change view settings,
+run external programs, and perform other automated tasks.
 .P
 .B Bookmarks Side Pane
 .P
-Items added to the Bookmarks menu may be shown in the Bookmarks side pane of each panel. To show the Bookmarks pane, select Show Bookmarks from the main Bookmarks menu, or right-click on a file and select View|Bookmarks.
+Items added to the Bookmarks menu may be shown in the Bookmarks side pane of
+each panel. To show the Bookmarks pane, select Show Bookmarks from the main
+Bookmarks menu, or right-click on a file and select View|Bookmarks.
 
-Right-click in the Bookmarks pane and enter the Settings submenu to adjust behavior. The Single Click option determines if a single- or double-click is required to open an item. New Tab, if checked, will open bookmarks in a new tab. Bookmark Icon and Submenu Icon are used to set the default icons used in the list, and individual item icons can also be configured via their Properties. The Font setting adjusts the font and font size used in the Bookmarks side pane.
+Right-click in the Bookmarks pane and enter the Settings submenu to adjust
+behavior. The Single Click option determines if a single- or double-click is
+required to open an item. New Tab, if checked, will open bookmarks in a new
+tab. Bookmark Icon and Submenu Icon are used to set the default icons used in
+the list, and individual item icons can also be configured via their Properties.
 
-Finally, the Follow Dir option will cause the Bookmarks pane to follow the current directory. If a bookmark matches the current directory, it will be highlighted. If the matching bookmark is in a submenu, the submenu will be opened.
+Finally, the Follow Dir option will cause the Bookmarks pane to follow the
+current directory. If a bookmark matches the current directory, it will be
+highlighted. If the matching bookmark is in a submenu, the submenu will be opened.
 
-Follow Dir is a per-panel setting. For example, you can turn it on in the Bookmarks pane of Panel 1, and turn it off in Panel 2. When Follow Dir is off, the bookmark selection will not change automatically.
+Follow Dir is a per-panel setting. For example, you can turn it on in the
+Bookmarks pane of Panel 1, and turn it off in Panel 2. When Follow Dir is off,
+the bookmark selection will not change automatically.
 
-Tips:
-.br
-If you do not want SpaceFM to select a bookmark via Follow Dir, prefix the bookmark's target with a semicolon (;). Also note that SpaceFM's bookmarks can target multiple directories, URLs, and devices. Only the first target is used by the Follow Dir function.
+.B Tips:
+If you do not want SpaceFM to select a bookmark via Follow Dir, prefix the
+bookmark's target with a semicolon (;). Also note that SpaceFM's bookmarks
+can target multiple directories, URLs, and devices. Only the first target
+is used by the Follow Dir function.
 
-.br
-To reorder items in the Bookmarks pane, drag them. Note that drag-n-drop in this pane currently only allows items to be reordered, not moved to other locations. To move an item to a submenu, or to another SpaceFM menu or toolbar, you must use Cut and Paste, or Export/Import.
+To reorder items in the Bookmarks pane, drag them. Note that drag-n-drop
+in this pane currently only allows items to be reordered, not moved to
+other locations. To move an item to a submenu, or to another SpaceFM menu
+or toolbar, you must use Cut and Paste, or Export/Import.
 
-.br
-The Open item in the context menu of the Bookmarks pane (seen by right-clicking in the pane) will obey the reverse of the New Tab setting. For example, if New Tab is enabled, choosing Open will not open a new tab. Opening a bookmark by clicking on it with the middle mouse button also reverses New Tab behavior.
+The Open item in the context menu of the Bookmarks pane (seen by right-clicking
+in the pane) will obey the reverse of the New Tab setting. For example, if
+New Tab is enabled, choosing Open will not open a new tab. Opening a bookmark
+by clicking on it with the middle mouse button also reverses New Tab behavior.
 
-.br
-The Open item and the Settings submenu of the context menu of the Bookmarks pane can have custom items added after them or within Settings using Design Mode. Click once on the Settings submenu to close it, then right-click on it for the design menu, or right-click on the Open item, or on one of the items within the Settings submenu.
+The Open item and the Settings submenu of the context menu of the Bookmarks
+pane can have custom items added after them or within Settings using Design
+Mode. Click once on the Settings submenu to close it, then right-click on it
+for the design menu, or right-click on the Open item, or on one of the items
+within the Settings submenu.
 
-.br
-Selecting Copy on any item of type Bookmark (in any menu or in the side pane) will also copy the bookmark target to the text and primary clipboards (in addition to copying the menu item to the design clipboard for pasting into another menu or toolbar).
+Selecting Copy on any item of type Bookmark (in any menu or in the side pane)
+will also copy the bookmark target to the text and primary clipboards (in
+addition to copying the menu item to the design clipboard for pasting into
+another menu or toolbar).
 
 .P
 .B Adding A Bookmark
 .P
-To add a new bookmark targeting the current directory, select New Bookmark from the Bookmarks menu (a key shortcut may also be assigned to this item - right-click on it to set one), or right-click in the Bookmarks pane or menu and select New|Bookmark (which will ask you to select a directory target).
+To add a new bookmark targeting the current directory, select New Bookmark
+from the Bookmarks menu (a key shortcut may also be assigned to this
+item - right-click on it to set one), or right-click in the Bookmarks pane
+or menu and select New|Bookmark (which will ask you to select a directory target).
 
-To bookmark a single selected file or directory, or otherwise the current directory, right-click on the file list and select New|Bookmark.
+To bookmark a single selected file or directory, or otherwise the current
+directory, right-click on the file list and select New|Bookmark.
 
-To bookmark a mounted URL, in some cases you can right-click on the URL in the Devices List and select Bookmark. Or, a URL or file/dir path in the Path Bar may be bookmarked by right-clicking on the Path Bar and selecting New Bookmark.
+To bookmark a mounted URL, in some cases you can right-click on the URL
+in the Devices List and select Bookmark. Or, a URL or file/dir path in
+the Path Bar may be bookmarked by right-clicking on the Path Bar and
+selecting New Bookmark.
 
 To view or adjust the properties of a bookmark, right-click on it and select Properties.
 
-Note: The Properties dialog of all custom menu items includes a Context tab which determines when and how menu items are displayed based on the file browser's current context. Note that Context settings do not affect display of bookmarks in the Bookmarks side pane, which always shows all bookmarks. The Context settings WILL affect how items are shown in the main Bookmarks menu.
+Note: The Properties dialog of all custom menu items includes a Context
+tab which determines when and how menu items are displayed based on the
+file browser's current context. Note that Context settings do not affect
+display of bookmarks in the Bookmarks side pane, which always shows all
+bookmarks. The Context settings WILL affect how items are shown in the
+main Bookmarks menu.
 .P
 .B Exporting Bookmarks
 .P
-Any single item or submenu of items in Bookmarks may be exported to a SpaceFM plugin file by right-clicking on the item and selecting Export. Plugin files created in this way can also be imported into any other menu.
+Any single item or submenu of items in Bookmarks may be exported to a
+SpaceFM plugin file by right-clicking on the item and selecting Export. Plugin
+files created in this way can also be imported into any other menu.
 
-To export all items in Bookmarks, right-click on "Bookmarks" - the top item in the Bookmarks side pane - and select Export. This will create a special plugin file named "Bookmarks.spacefm-bookmarks.tar.gz". This file may then be imported into any SpaceFM menu, or into the Bookmarks side pane, by right-clicking and selecting Import|File. Note that this bookmarks plugin file CANNOT be installed or imported via the main Plugins menu.
+To export all items in Bookmarks, right-click on "Bookmarks" - the top item
+in the Bookmarks side pane - and select Export. This will create a special
+plugin file named "Bookmarks.spacefm-bookmarks.tar.gz". This file may then
+be imported into any SpaceFM menu, or into the Bookmarks side pane, by
+right-clicking and selecting Import|File. Note that this bookmarks plugin
+file CANNOT be installed or imported via the main Plugins menu.
 .P
 .B Importing GTK Bookmarks
 .P
-Some GNOME applications store bookmarks in GTK's bookmarks file (~/.config/gtk-3.0/bookmarks or the older ~/.gtk-bookmarks). This is a plain text file which can be edited manually. While SpaceFM is not a GNOME application and does not store its bookmarks in this file (the format of the file cannot store SpaceFM's specialized bookmarks and submenus), SpaceFM can import the contents of this file. To do so, right-click on an item in the Booksmarks side pane and select New|Import|GTK Bookmarks. All bookmarks will be imported into the current submenu (or, if you right-clicked on a submenu, then into the selected submenu).
+Some GNOME applications store bookmarks in GTK's bookmarks
+file (~/.config/gtk-3.0/bookmarks or the older ~/.gtk-bookmarks). This is a
+plain text file which can be edited manually. While SpaceFM is not a GNOME
+application and does not store its bookmarks in this file (the format of the
+file cannot store SpaceFM's specialized bookmarks and submenus), SpaceFM can
+import the contents of this file. To do so, right-click on an item in the
+Booksmarks side pane and select New|Import|GTK Bookmarks. All bookmarks will
+be imported into the current submenu (or, if you right-clicked on a submenu,
+then into the selected submenu).
 
-IMPORTANT: Note that importing hundreds of bookmarks into SpaceFM is not recommended. Due to their integration with the menu system, this may cause performance lags in the GUI. If you have many GTK bookmarks, you may wish to edit the file before importing it, or import them into a submenu and keep only those you need.
+IMPORTANT: Note that importing hundreds of bookmarks into SpaceFM is not
+recommended. Due to their integration with the menu system, this may cause
+performance lags in the GUI. If you have many GTK bookmarks, you may wish
+to edit the file before importing it, or import them into a submenu and keep
+only those you need.
 
-In addition to importing GTK's bookmarks, these bookmarks are also shown in the GTK file and folder chooser dialogs used in SpaceFM. You will see the GTK bookmarks listed in the upper-left 'Places' pane of these dialogs, and you can use the plus (+) and minus (-) buttons there to add or remove bookmarks from that list (which will update the ~/.config/gtk-3.0/bookmarks file). Changing bookmarks in this 'Places' list has no effect on SpaceFM's Bookmarks menu.
+In addition to importing GTK's bookmarks, these bookmarks are also shown in
+the GTK file and folder chooser dialogs used in SpaceFM. You will see the GTK
+bookmarks listed in the upper-left 'Places' pane of these dialogs, and you can
+use the plus (+) and minus (-) buttons there to add or remove bookmarks from
+that list (which will update the ~/.config/gtk-3.0/bookmarks file). Changing
+bookmarks in this 'Places' list has no effect on SpaceFM's Bookmarks menu.
+
+.SH NOTES
+These man pages are an almost verbatim copy of the html user manual
 
 .SH SEE ALSO
 .BR spacefm (1)

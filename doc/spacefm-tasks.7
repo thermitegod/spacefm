@@ -1,4 +1,4 @@
-.TH spacefm-tasks 7 "December 2021"
+.TH spacefm-tasks 7 "May 2022"
 
 .SH NAME
 .B spacefm-tasks
@@ -6,6 +6,489 @@
 .SH DESCRIPTION
 TODO
 
+.SH Task Manager
+Each SpaceFM window includes a single Task Manager which centrally manages the tasks
+of all panels in the window. The Task Manager is designed to eliminate annoying popup
+dialogs which interfere with user multi-tasking, and allows you to continue working
+while large files are being copied, etc. The Task Manager lists running tasks,
+automatically manages the task queue, allows you to stop, pause, queue, or resume
+tasks manually, and opens popup dialogs. Like most parts of SpaceFM, the Task Manager
+can also be customised with your own commands to control or interact with running tasks.
+
+A task is a job initiated by the user, such as copying a file. Tasks come in two
+varieties: internal and exec. Internal tasks handle built-in functions such as a
+copying, moving, and deleting files, while an exec task runs an executable or script,
+either initiated from within SpaceFM's built-in functions (such as running udevil to
+unmount a device) or from a custom command. The output of exec tasks is also collected
+and shown in the popup dialog's output monitor.
+
+The Task Manager is located at the bottom of the SpaceFM window, below all panels. It
+has two display modes: Show and Auto-Hide. If option View|Task Manager|Show Manager
+is selected, the Task Manager is always visible, even when no tasks are running. Or,
+if option View|Task Manager|Auto-Hide Manager is selected (the default), the Task
+Manager will become visible when tasks are running, and will be automatically hidden
+from view when the last task completes. The size of the Task Manager may be adjusted
+by dragging the pane separator above it.
+
+When a task is initiated in any panel and runs for longer than about one half second,
+it will be listed in the Task Manager, and the Task Manager will be shown if in
+Auto-Hide mode. If a task finishes in less than about one half second, the task will
+not be listed. New tasks are added to the end of the task list. When a task
+completes (successfully or with errors), it is immediately removed from the list.
+
+Task Manager columns provide information on each task, and each column can be hidden
+or moved, allowing you to control what information is shown.
+
+A single left-click on a task in the list, anywhere except in the Status column,
+will open a popup dialog showing the task's stats, a progress bar, and an output
+monitor. For internal tasks (copy, move, etc), the output monitor is used to show
+errors. For exec tasks, the output monitor shows the combined stdout and stderr
+output of the command as its produced.
+
+A single left-click on the Status of a task, or a middle-click anywhere on a listed
+task will change its state (running, queued, or paused). Click repeatedly to achieve
+the desired state.
+
+A right-click on a task shows the Task Manager's menu, which allows you to stop,
+pause, queue, and resume tasks, and also contains options for the
+Task Manager. (These same options may also be accessed via the main menu bar's
+View|Task Manager submenu.)
+
+.SH Queue
+Each task listed in the Task Manager may be in one of three
+states: running, paused, or queued.
+
+A running task is currently executing - files are being copied, or an
+executable is running, etc.
+
+A paused task has been halted. For internal tasks such as copy and move,
+the task thread is halted until you resume the task. For exec tasks (eg a
+custom command running an executable, or SpaceFM running udevil to unmount
+a device), the process has been sent a SIGSTOP signal as described in Pause.
+
+A queued task is also halted. The only difference is that the Task Manager
+will automatically resume running a queued task when other tasks complete,
+whereas a paused task will never resume automatically.
+
+A task's state (running, paused, or queued) can be changed by the user, and
+in some cases may be changed automatically.
+
+Simply, the queue is used to prevent all tasks from running simultaneously,
+which can impact performance. For example, copying two sets of files to the
+same drive simultaneously is often slower than first copying one set, then
+the other (due to drive seeking and other issues). Thus it may be desirable
+to queue the second task, so it will remain halted until the first
+task is completed.
+
+If option View|Task Manager|Queue|Queue New Tasks is checked (the default),
+new tasks are automatically queued when initiated, rather than run
+immediately. SpaceFM will automatically determine when to resume the queued
+tasks, depending on option View|Task Manager|Queue|Smart Queue. Or, you can
+always manually Resume, Pause or Stop a task to remove it from the queue.
+
+.SH Menu
+The Task Manager's context menu allows you to control tasks and set Task Manager
+options. The menu is opened by right-clicking on the list. The options found on
+this menu are also available in the main menu bar's View|Task Manager
+submenu (convenient if the Task Manager is hidden).
+
+The context menu contains the following items:
+
+.SS Stop
+Stop is used to stop the selected task. If the task is internal (such as copying
+files), SpaceFM will terminate the task thread, and the task will be removed
+from the Task Manager.
+
+If the task is an exec task (eg a custom command running an executable, or SpaceFM
+running udevil to unmount a device), the process, and all its child processes, are
+sent a SIGTERM signal. This will usually cause the processes to terminate, but not
+always. So SpaceFM will also send a SIGKILL signal to all the processes several
+seconds later. An exec task will not be removed from the Task Manager until its
+process terminates. This means that if a process is hung and cannot be stopped
+with SIGKILL, selecting Stop may have no effect.
+
+If the command was run as another user, such as root, selecting Stop will cause
+a prompt for the user's password (or root's password depending on your configured
+su program) to open. This password is required to send the SIGTERM and SIGKILL
+signals to the process running as another user. (You can see the exact commands
+being issued by running SpaceFM from a terminal and observing its stdout output.)
+
+Paused and queued tasks may also be stopped.
+
+You can also stop a task by clicking the Stop button in the task's popup dialog.
+
+.SS Pause
+Pause temporarily halts a task, putting it into a paused state. It will remain
+in the paused state until you Resume, Queue or Stop it, and will never be
+automatically resumed or queued while paused.
+
+If the task is internal (such as copying files), SpaceFM will suspend the task
+thread. Any files currently being read or written will remain open as long as
+the task is paused.
+
+If the task is an exec task, the process, and all its child processes, are
+sent a SIGSTOP signal. This is similar to pressing Ctrl+S in a terminal while
+a command is running; it will often cause the process to temporarily halt
+execution. In some cases, a process will not halt on a SIGSTOP signal, but
+the Task Manager will still list it as being in a 'paused' state until you
+Resume the task.
+
+If the command was run as another user, such as root, selecting Pause will
+cause a prompt for the user's password (or root's password depending on your
+configured su program) to open. This password is required to send the SIGSTOP
+signal to the process running as another user. (You can see the exact commands
+being issued by running SpaceFM from a terminal and observing its stdout output.)
+
+If you change the menu icon for Pause, the new icon will also be used as
+the 'paused' icon in the task list.
+
+You can also pause a task by clicking the Pause button in the task's popup
+dialog, left-clicking on the Status of a task in the Task Manager list, or
+by middle-clicking on a task in the list.
+
+.SS Queue
+Selecting Queue will change the selected task's state to queued. In this state,
+the task is halted, but will resume automatically when other tasks complete.
+
+Note that selecting Queue on a running task may seem to have no effect. This is
+because the task may be queued, but then may automatically be removed from the
+queue and resumed by the Task Manager. There is no way to force a task to stay
+in the queue (but you can Pause it).
+
+If you change the menu icon for Queue, the new icon will also be used as
+the 'queued' icon in the task list.
+
+You can also queue a task by clicking the Queue button in the task's popup
+dialog, left-clicking on the Status of a task in the Task Manager list, or by
+middle-clicking on a task in the list.
+
+.SS Resume
+Resume starts the selected task, changing its state to running. If it was in
+the queue it will be removed from the queue and resumed, regardless of how it
+conflicts with other running tasks.
+
+If the task is an exec task, the process, and all its child processes, are sent
+a SIGCONT signal. This is similar to pressing Ctrl+Q in a terminal after a
+command has been halted with Ctrl+S. If the original SIGSTOP halted the execution,
+SIGCONT should resume it. If SIGSTOP did not halt execution, SIGCONT will
+generally have no effect, except that the Task Manager will now list
+the task as 'running'.
+
+If the command was run as another user, such as root, selecting Resume will
+cause a prompt for the user's password (or root's password depending on your
+configured su program) to open. This password is required to send the SIGCONT
+signal to the process running as another user. (You can see the exact commands
+being issued by running SpaceFM from a terminal and observing
+its stdout output.)
+
+You can also resume a task by clicking the Resume button in the task's popup
+dialog, left-clicking on the Status of a task in the Task Manager list, or by
+middle-clicking on a task in the list. Tasks may also be resumed automatically
+by the Task Manager if they are queued.
+
+.SS Show Output
+The Show Output menu item will only appear if a custom popup handler has been
+set for the selected task. Show Output will raise the normal popup dialog for
+the task, showing any stdout/stderr output. This is particularly useful
+for debugging.
+
+Note that any custom menu items added directly after Show Output will also only
+appear for tasks with a custom popup handler.
+
+.SS All Tasks
+The All Tasks submenu is used to place all listed tasks into the selected
+state. The Stop, Pause, Queue, and Resume menu items in this submenu have the
+same effect as detailed above, except that all tasks are affected.
+
+Selecting All Tasks|Queue will place all tasks in the 'queued' state momentarily,
+but note that one or more of the tasks may then be automatically removed from
+the queue and resumed.
+
+.SS Show Manager
+The Task Manager has two display modes: Show and Auto-Hide. If option Show Manager
+is selected, the Task Manager is always visible, even when no tasks are
+running. The size of the Task Manager may be adjusted by dragging the pane
+separator above it.
+
+This option is also available via the main menu bar's View|Task Manager
+submenu. You may also associate a key shortcut with it.
+
+.SS Auto-Hide Manager
+If option Auto-Hide Manager is selected (the default), the Task Manager will
+become visible at the bottom of the window when any tasks are running, and will
+be hidden when the last task completes. This is a window space-saving feature.
+
+Although there is no option to hide the Task Manager while tasks are listed, you
+can effectively hide it if desired by dragging the pane separator to the very
+bottom of the window. However, if you do so you should enable option
+View|Task Manager|Popups|Popup All Tasks, so that you are aware that tasks are
+running. This combination of a zero-height Task Manager and Popup All Tasks makes
+SpaceFM behave like a conventional file manager, showing a popup dialog when
+performing a task, rather than showing a list of tasks. You can also enable option
+View|Task Manager|Popups|Stay On Top if desired.
+
+.SS Columns
+The Columns submenu is used to select which columns are visible in the Task Manager,
+and to select a font for the Task Manager. Each column provides information about
+the listed tasks. The following columns are available:
+
+    Column          Information
+    Count           The number of items processed thus far
+    Folder          Directory containing current item
+    Item            Filename of current item, or command name
+    To              The task's destination directory, eg where files are being copied to
+    Progress        A progress bar with percentage label
+    Total           The task's processed and total sizes
+    Started         Time task was started
+    Elapsed         Elapsed running time of task
+    Current Speed   The current speed of the task (based on previous 2 second interval)
+    Current Remain  Estimated time remaining based on Current Speed
+    Average Speed   The average speed of the task
+    Average Remain  Estimated time remaining based on Average Speed
+
+The current item refers to the file currently being processed in the
+task (copied, etc). For exec tasks, the Item column shows the name of the
+command in parentheses.
+
+The Status column, which shows the task icon, current state (queued or paused)
+and task action (copying, moving, etc.), is not included in the Columns submenu
+because its visibility not optional.
+
+The Reorder menu item shows a reminder: "To change the order of the columns, drag
+the column header to the desired location."
+
+The Font menu item allows you to set a font for the Task Manager's list columns. Narrow
+fonts work well.
+
+Note: The Columns submenu, and other Task Manager options, can also be found in the
+main menu bar's View|Task Manager submenu.
+
+.SS Popups|Popup All Tasks
+The Popups submenu is used to configure the Task Manager's behavior for opening popup
+dialogs. If option Popup All Tasks is checked, a popup dialog will automatically open
+for any task which runs for longer than about one half second. If the task finishes
+successfully, the popup will automatically close. If errors occur, it will remain
+open for you to view the error messages.
+
+If option Popup All Tasks is unchecked, a popup dialog will open for an internal task
+only if an error occurs. For custom commands, the popup behavior will depend on the
+command's popup settings. Note that if Popup All Tasks is checked, this overrides the
+command's popup settings.
+
+Popup All Tasks makes SpaceFM behave like a conventional file manager with regard to
+progress dialogs. If the option is enabled, it is also feasible to effectively hide
+the Task Manager by dragging the pane separator to the very bottom of the window when
+unneeded. You will still be aware of tasks running due to the popups. Option Stay On
+Top also works well with this approach.
+
+.SS Popups|Stay On Top
+If option Stay On Top is checked, any task's popup dialog, whether opened automatically
+or manually, will stay on top of the SpaceFM window. However, you can still click on
+visible portions of the main window. Changing this setting has no effect on dialogs
+which are already open.
+
+If unchecked, popup dialogs may be placed beneath the main window.
+
+.SS Popups|Above Others
+If option Above Others is checked, any task's popup dialog will be kept above all other
+windows when initially shown. Note that some window managers do not support keeping
+windows above others, and your window manager settings may override this behavior.
+
+.SS Popups|All Workspaces
+If option All Workspaces is checked, any task's popup dialog will appear on all
+workspaces/desktops (will be set as sticky) when initially shown. Note that some
+window managers do not support sticking windows, and your window manager settings
+may override this behavior.
+
+.SS Popups|Detailed Stats
+Detailed Stats affects how task stats are displayed in the 'Progress:' line of popup
+dialogs (seen in internal task dialogs only).
+
+If unchecked, a brief stats line is shown. For example:
+
+Progress: 204 M / 350 M (26 M/s) :05 remaining
+In the above example, 204 MB of 350 MB has been processed at an average speed
+of 26 MB/s. The estimated time remaining until the task finishes is 5 seconds.
+If option Detailed Stats is checked, more detailed stats are shown. For example:
+
+Progress: #1 (204 M / 350 M) [:08] @cur 31 M/s (:06) @avg 26 M/s (:05)
+The additional stats include the item count (#1), the elapsed running time of the
+task (8 seconds), the current speed of the task (31 M/s), and the estimated time
+remaining at the current speed (6 seconds). The current speed is measured based on
+the speed over the previous two second interval, whereas the average speed is based
+on the entire time the task has been running. The current speed is a more accurate
+measure of what is happening right now, and will fluctuate more, while the average
+speed is a better measure of the overall performance. The time remaining estimate
+based on the current speed shows how long the task will continue if it continues
+at the current speed. The time remaining estimate based on the average speed tends
+to be a more accurate estimate in general.
+
+The information shown in the 'Progress:' line will match the information shown in
+the corresponding Task Manager columns.
+
+.SS Popups|Overwrite Option
+If Overwrite Option is checked, the popup dialogs for internal tasks will show a
+drop-down list which displays and allows you to change the overwrite mode of the
+task. The list is not shown for exec tasks. For more information see Popup Dialog.
+
+.SS Popups|Error Option
+If Error Option is checked, the popup dialogs for internal tasks will show a
+drop-down list which displays and allows you to change the error handling mode of
+the task. The list is not shown for exec tasks. For more information see Popup Dialog.
+
+.SS Popups|Font
+The Font menu item allows you to set a font to be used in the output monitor of popup
+dialogs. For example, you might choose a fixed width font to make the monitor look
+more like a terminal.
+
+This font may also be set by right-clicking on the output monitor of any task's popup
+dialog and selecting Font from the context menu.
+
+The dialog font you select will be used for new dialogs only; currently open dialogs
+will not be affected. (You can close a dialog and re-open it to see the change.)
+
+.SS Errors
+The Errors submenu contains a set of radio options which control how errors in
+internal tasks (such as copy and move) are handled by default. (These options
+have no effect on exec tasks such as custom commands.)
+
+If option Stop If Error First is selected (the default), the task will be stopped
+by the Task Manager if an error occurs AND that error is encountered before the task
+has successfully processed one file. If an error occurs on later files in the task,
+the Task Manager will open a popup dialog to show the error, but subsequent actions
+in the task will continue to run. For example, if there are more files to be copied,
+SpaceFM will attempt to copy them despite any errors on previous files.
+
+Stop If Error First is provided as a convenience option. Usually if the first action
+of a task fails, the rest of the task will fail as well, so it might as well be stopped
+rather than producing a long list of errors for every file in the task.
+
+If option Stop On Any Error is instead selected, the Task Manager will stop if any
+error is encountered in the task, regardless of whether the error occurs on the first
+or later actions.
+
+If option Continue is selected, the Task Manager will never stop an internal task
+due to errors. It will present the popup dialog on each error, and will list the
+errors in the output monitor, but subsequent actions in the task will continue. For
+example, if a set of files is being copied, and only one file in the middle produces
+a copy error, all the other files will still be copied. The popup dialog will show
+the error(s) for the file(s) which failed.
+
+Continue is especially useful when copying large sets of files. If the task stops on
+errors, you might start the task and leave the computer, only to return to find that
+only a few files were copied before a single error stopped the entire task. If the
+task continues on errors, you'll return to find all the files copied except those
+with errors. You can then correct the problem files without having to restart and
+wait for the entire task again.
+
+You can also change the error mode on a per task basis if View|Task Manager|Popups|Error
+Option is checked.
+
+.SS Queue|Queue New Tasks
+If option Queue New Tasks is checked (the default), new internal tasks are queued
+instead of being run immediately. (exec tasks such as custom commands are never
+queued automatically.) The Task Manager will then automatically resume the task when
+other tasks finish. When you start new tasks while other tasks are still running,
+Queue New Tasks improves performance by not running all the tasks simultaneously
+(though some tasks may be run concurrently, depending on option Smart Queue).
+
+If unchecked, new tasks are always run immediately, even if other tasks are already
+running, and the Task Manager will never automatically queue any task.
+
+Regardless of how Queue New Tasks is set, you can always manually Queue,
+Pause or Resume any task.
+
+.SS Queue|Smart Queue
+The Smart Queue option determines under what conditions the Task Manager will remove
+a task from the queue and resume it. If UNchecked, the queue is simple - only one
+internal task is run at a time, and other tasks are queued. (exec tasks such as
+custom commands are always run regardless of option Smart Queue.) When a task
+finishes, the next task is removed from the queue and resumed. If you always want
+SpaceFM to do only one file operation at a time, uncheck option Smart Queue. However,
+this may be less efficient.
+
+If option Smart Queue is checked (the default), the Task Manager is more sophisticated
+in its handling of the queue to improve both performance and convenience. In general,
+tasks will not be run concurrently, but the following exceptions may be made if Smart
+Queue is checked:
+
+.SS Different Disks Exception
+If two or more tasks involve files on mutually exclusive disks (parent devices), the
+Task Manager will run them concurrently.
+
+To determine what devices a task involves, SpaceFM makes a list of all devices (and
+their parent devices, if the device is a partition) holding every file in the task,
+as well as the device of the destination directory, if applicable. If any devices in
+this list are the same as the devices in another task's devices list, the two tasks
+conflict and will not be run concurrently. Note that if the files of two tasks are
+located on different partitions on the same disk, they will conflict, and only one
+of the tasks will run. Note that all of the devices of the task are examined when a
+queue decision is made, not just the device of the file currently in use by the task.
+
+The reason for this exception is that if two tasks involve mutually exclusive disks,
+there is usually much less of a performance loss by running them together. On the
+other hand, if two tasks share files on the same disk, running them together may
+cause excessive drive seeking as different files are concurrently read and
+written. Thus no exception is made for such tasks, and only one is resumed at a time.
+
+.SS Size Exceptions
+Often while copying a set of large files, you may want to perform a quick operation
+on a set of small files. Because the latter task is brief, it is reasonably efficient
+to allow it to run concurrently. This way you don't have to wait for the longer task
+to finish before your quick task is run.
+
+When a task involves copying or moving a set of files less than 10 MB in total size,
+an exception is made which allows the task to run immediately, even if other tasks
+are running on the same devices. An exception is also made when a task involves
+deleting a set of files less than 5 GB in total size. This allows small tasks
+to run immediately.
+
+.SS Functional Exceptions
+Internal tasks involving creating links, and changing file permissions or ownership
+are typically very fast as little data is written to disk. Thus an exception is
+always made for these task types - they are run immediately.
+
+Also note that you can always manually Queue, Pause or Resume any task, regardless
+of the Task Manager's queue settings. For example, if you want a task to run
+immediately even though the Task Manager made no exception for it, you
+can Resume it yourself.
+
+.SS Queue|Pause On Error
+If option Pause On Error is checked, when an error occurs in any running task,
+all queued tasks will be paused. Tasks which are already running will not be
+paused. The task in which the error occurs may continue running as well, depending
+on its error mode.
+
+The paused tasks will not resume until you manually resume them.
+
+Pause On Error is something of a paranoia setting - it ensures that if an error
+occurs, later tasks (which may depend on files in the task with errors) are suspended
+until you can examine the problem.
+
+.SS Custom Menus
+As with most menus, it is also possible to add your own custom menu items and
+submenus to the Task Manager's context menu using Design Mode. This allows you to
+add commands which can control or interact with running tasks.
+
+There are several provided bash variables which your commands can use to get
+information about the currently selected task:
+
+    "fm_task_type"            currently SELECTED task type (eg 'run','copy')
+    "fm_task_name"            selected task name (custom menu item name)
+    "fm_task_pwd"             selected task working directory ( same as %t )
+    "fm_task_pid"             selected task pid               ( same as %p )
+    "fm_task_command"         selected task command
+
+Note that the PID of the task refers to the initial process started by SpaceFM. The
+actual process you want to control may be a child of this PID.
+
+For example, to add a custom command which opens the working directory of the
+currently selected task, use this command line:
+
+    spacefm "$fm_task_pwd"
+
+.SH NOTES
+These man pages are an almost verbatim copy of the html user manual
 
 .SH SEE ALSO
 .BR spacefm (1)

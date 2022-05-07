@@ -1,4 +1,4 @@
-.TH spacefm 1 "December 2021"
+.TH spacefm 1 "May 2022"
 
 .SH NAME
 .B spacefm
@@ -29,21 +29,15 @@ SpaceFM's command line usage
 .P
 -p, --panel=P                Open folders in panel 'P' (1-4)
 .P
---show-pref=N                Show Preferences ('N' is the Pref tab number)
-.P
 -d, --daemon-mode            Run as a daemon
 .P
--c, --config-dir=DIR         Use DIR as configuration directory
+-c, --config=DIR             Use DIR as configuration directory
+.P
+-G, --disable-git            Do not use git to keep session history
 .P
 -f, --find-files             Show File Search
 .P
--g, --dialog                 Show a custom dialog (See -g help)
-.P
 -s, --socket-cmd             Send a socket command (See -s help)
-.P
---profile=PROFILE            No function - for compatibility only
-.P
---no-desktop                 No function - for compatibility only
 .P
 --version                    Show version information
 .P
@@ -52,8 +46,7 @@ SpaceFM's command line usage
 
 
 .SH Opening Windows
-To open an initial SpaceFM window, run 'spacefm' with or without a folder specification:
-
+    # To open an initial SpaceFM window:
     spacefm
 
     # or to open a folder:
@@ -64,17 +57,17 @@ To open an initial SpaceFM window, run 'spacefm' with or without a folder specif
 
     # or to not open saved tabs:
     spacefm -n
-To open an additional folder in a new tab of the last used SpaceFM window on the current workspace:
 
+    # To open an additional folder in a new tab of the last used SpaceFM window on the current workspace:
     spacefm /etc
-To open a folder in the current tab of the last used SpaceFM window on the current workspace:
 
+    # To open a folder in the current tab of the last used SpaceFM window on the current workspace:
     spacefm -r /etc
-To simply bring the SpaceFM window to the top of other windows:
 
+    # To simply bring the SpaceFM window to the top of other windows:
     spacefm -r
-To open a second window:
 
+    # To open a second window:
     spacefm -w
 
     # or to open a specified folder in a second window:
@@ -82,12 +75,19 @@ To open a second window:
 
     # or to open a second window without loading saved tabs:
     spacefm -wn
-To open a File Search window:
 
+    # To open a File Search window:
     spacefm --find-files
-SpaceFM maintains a socket for each user/display combination, so when you open multiple windows using the same user and display, all windows are run from a single instance of SpaceFM. Unless a daemon or the desktop manager is running, SpaceFM will exit when all windows are closed.
 
-When a window is closed, the current folder tabs are saved to your session file if option File|Save Tabs is checked. The next time you run SpaceFM, these folder tabs will be re-opened in addition to opening tabs for any folders you specify on the command line (unless you specify -n on the command line).
+SpaceFM maintains a socket for each user/display combination, so when you
+open multiple windows using the same user and display, all windows are run
+from a single instance of SpaceFM. Unless a daemon or the desktop manager
+is running, SpaceFM will exit when all windows are closed.
+
+When a window is closed, the current folder tabs are saved to your session
+file if option File|Save Tabs is checked. The next time you run SpaceFM,
+these folder tabs will be re-opened in addition to opening tabs for any
+folders you specify on the command line (unless you specify -n on the command line).
 
 To specify a specific panel in which to open a folder:
 
@@ -96,7 +96,9 @@ To specify a specific panel in which to open a folder:
 To simply show and focus panel 2 in the last used window:
 
     spacefm --panel=2
-As a more advanced example, consider wanting to open multiple SpaceFM windows, each containing different folder tabs in each panel, using a single command. For this, use a script like this to start SpaceFM:
+As a more advanced example, consider wanting to open multiple SpaceFM windows,
+each containing different folder tabs in each panel, using a single
+command. For this, use a script like this to start SpaceFM:
 
     #!/bin/bash
 
@@ -111,10 +113,15 @@ As a more advanced example, consider wanting to open multiple SpaceFM windows, e
     sleep 0.2
     # add two tabs to panel 2 of second window
     spacefm -rn --panel=2 /sbin /var
-The sleep commands give time for the socket to be created and the newly created window to become the last used window. A shorter sleep time of 0.1 may also work on your system.
+
+The sleep commands give time for the socket to be created and the newly
+created window to become the last used window. A shorter sleep time of 0.1
+may also work on your system.
 
 .SH Opening Files, URLs, and Devices
-If you specify a file rather than a folder on the command line, SpaceFM will open the file using the default MIME application for this file type (File Handlers are not used), but will not open a SpaceFM window:
+If you specify a file rather than a folder on the command line, SpaceFM
+will open the file using the default MIME application for this file
+type (File Handlers are not used), but will not open a SpaceFM window:
 
     # open a file:
     spacefm /etc/fstab
@@ -124,45 +131,48 @@ To mount and open a device (see Device Handlers), or open an already mounted dev
     spacefm /dev/sdd1
 
 .SH GTK Themes
-The GTK theme you are using may have a significant impact on SpaceFM's performance, and a non-working theme may create dysfunctional behavior. Because multiple panels in SpaceFM use many GUI elements, some themes cause SpaceFM to run more slowly. For example, the Clearlooks GTK2 theme has been observed to be very slow with SpaceFM, while the Raleigh theme is quite fast.
+The GTK theme you are using may have a significant impact on SpaceFM's
+performance, and a non-working theme may create dysfunctional behavior. Because
+multiple panels in SpaceFM use many GUI elements, some themes cause SpaceFM
+to run more slowly.
 
-SpaceFM may be built to use GTK v2 or v3. To see if your installed copy of SpaceFM is using GTK2 or GTK3 themes, run spacefm --version
-.P
-.B GTK 2
-.P
-When using GTK2, it is possible to use a specific theme just for SpaceFM, overriding your default theme. For example, to use the Raleigh theme (if installed), run SpaceFM like this:
-
-    GTK2_RC_FILES=/usr/share/themes/Raleigh/gtk-2.0/gtkrc spacefm
-You can also test SpaceFM's speed with no theme, which should be faster than any theme:
-
-    GTK2_RC_FILES="" spacefm
-To specify a GTK2 theme within a desktop file, copy SpaceFM's desktop file to your home folder:
-
-    mkdir -p ~/.local/share/applications
-    cp /usr/share/applications/spacefm.desktop ~/.local/share/applications/
-    # OR
-    cp /usr/local/share/applications/spacefm.desktop ~/.local/share/applications/
-Then open ~/.local/share/applications/spacefm.desktop in your editor and set the Exec= line using env. For example:
-Exec=env GTK2_RC_FILES=/usr/share/themes/Raleigh/gtk-2.0/gtkrc spacefm
 .P
 .B GTK 3
 .P
-When using GTK3, theme choice becomes especially important because themes are often broken with every minor GTK3 release, and a theme not made specifically for your current version of GTK3 can cause memory leaks, GUI glitches, and other severe problems visible in SpaceFM. To determine if your theme is the cause of problems, run SpaceFM in a terminal to see any warnings, and also compare behavior with Adwaita (default GNOME theme).
+When using GTK3, theme choice becomes especially important because themes are
+often broken with every minor GTK3 release, and a theme not made specifically
+for your current version of GTK3 can cause memory leaks, GUI glitches, and other
+severe problems visible in SpaceFM. To determine if your theme is the cause of
+problems, run SpaceFM in a terminal to see any warnings, and also compare
+behavior with Adwaita (default GNOME theme).
 
 .SH Daemon Mode
-If you want SpaceFM always running in the background, ready to quickly open windows and automount volumes, but do not want it to manage the desktop, start a daemon instance of SpaceFM:
+If you want SpaceFM always running in the background, ready to quickly open
+windows and automount volumes, but do not want it to manage the desktop, start
+a daemon instance of SpaceFM:
 
     spacefm -d
-No window will open in this case, but an instance will be started if not already running, and it will continue running for the duration of your X login session. You can also start the daemon from your login script. For example, if using Openbox, add this line to ~/.config/openbox/autostart.sh:
+
+No window will open in this case, but an instance will be started if not already
+running, and it will continue running for the duration of your X login session. You
+can also start the daemon from your login script. For example, if using Openbox,
+add this line to ~/.config/openbox/autostart.sh:
 
     (sleep 2 && spacefm -d) &
-One particular use for daemon mode is to make sure leftover folders in /media are removed. SpaceFM can unmount removable devices on exit to prevent folders remaining in /media at shutdown (if you check option Settings|Auto-Mount|Unmount On Exit). If running as a normal instance, this means devices will be unmounted whenever you close the last SpaceFM window. When running as a daemon (or as a desktop manager daemon), devices will not be unmounted until you logoff.
+
+One particular use for daemon mode is to make sure leftover folders in /media
+are removed. SpaceFM can unmount removable devices on exit to prevent folders
+remaining in /media at
+shutdown (if you check option Settings|Auto-Mount|Unmount On Exit). If running
+as a normal instance, this means devices will be unmounted whenever you close
+the last SpaceFM window. When running as a daemon (or as a desktop manager daemon),
+devices will not be unmounted until you logoff.
 
 To stop a daemon mode instance, send SpaceFM a quit signal:
 
     killall spacefm
 
-.SH Notes
+.SH NOTES
 These man pages are an almost verbatim copy of the html user manual
 
 .SH SEE ALSO

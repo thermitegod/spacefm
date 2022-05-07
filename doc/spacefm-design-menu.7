@@ -1,10 +1,1424 @@
-.TH spacefm-design-menu 7 "December 2021"
+.TH spacefm-design-menu 7 "May 2022"
 
 .SH NAME
 .B spacefm-design-menu
 
 .SH DESCRIPTION
 TODO
+
+.SH INTRODUCTION
+SpaceFM's Design Mode allows you to change the name, shortcut key and icon
+of menu, toolbar and bookmark items; access help for an item; and set menu
+items to be disabled or hidden based on your context rules. You may add
+custom commands, applications, bookmarks, and submenus to any position in
+menus and toolbars, and save your custom items as plugins. Custom items
+can be cut/copied/pasted from/to bookmarks, toolbars, and menus. All of this
+is controlled from the Design Menu.
+
+To open the Design Menu, simply right-click on a menu item, bookmark, or
+toolbar item. The Design Menu is available for most menus in SpaceFM, including
+in the right-click menu of the desktop.
+
+To open the Design Menu using a shortcut key, press F2 while a menu item is
+highlighted. To open the Design Menu for a submenu, first close the submenu
+(by clicking on it), then right-click on the submenu name. Or, press F2 while
+the submenu is highlighted.
+
+While Design Mode works in almost all menus, a good place to practice is the
+Tools menu, which is reserved for your custom menu items.
+
+When working with Design Mode, it is important to distinguish between two types
+of items: built-in and custom. Built-in items, such as Rename on the file list
+context menu, are part of the SpaceFM program, whereas custom items are items
+you have added. Design Mode can be used on both types of items, but in different
+ways. For example, custom items can be removed, while built-in menu items
+cannot (although they can be hidden). You will note that some of the Design
+Menu's functions will be disabled or enabled depending on the type of item.
+
+Custom items in SpaceFM are like word processor macros - they allow you to
+automate tasks. You might create a quick custom item just for today's use and
+delete it when you're done, while other items may become a regular part of your
+file manager use.
+
+Custom items come in several varieties: a Bookmark (which opens a folder, group
+of folders, URLs, or mounts a device), an Application (which starts an application
+or runs an executable), a Command (which runs a command line or script), a
+Separator (a line separating items in a menu or toolbar), and a Submenu (a menu
+containing more custom items).
+
+.SH DESIGN MENU
+When you right-click on a menu item, bookmark, or toolbar item, or press F2 while
+a menu item is highlighted, you will be presented with a menu which gives you
+extensive control over how the item is displayed and performs.
+
+TIP: For help with a menu item in the Design Menu itself, highlight the Design
+Menu item and press F1.
+
+.SS Cut
+The next items on the Design Menu, including Cut, Copy, and Paste, allow you
+to move and copy custom items. Items are cut, copied, and pasted in a similar
+way to how you cut, copy, and paste files or text, except that instead of the
+main clipboard, the design clipboard is used.
+
+Cut cuts the current item onto the design clipboard. This will not affect the
+contents of your main (text & files) clipboard. You will not observe any change
+in the menu after cutting an item - until you paste it. You cannot cut built-in
+items (except on the toolbar), only custom ones. You can cut and copy submenus,
+which copies all the items within the submenu recursively.
+
+You can also cut a menu item using a design mode shortcut instead of the Design
+Menu. Highlight the menu item and press Ctrl+X, or use the mouse shortcut
+Alt + Left-or-Right-Click.
+
+.SS Copy
+Similarly, Copy copies the current item onto the design clipboard. Again, you will
+not observe any immediate change to the menu after copying an item, until you paste
+it. You cannot copy built-in items (except on the toolbar), only custom ones.
+
+Note: When copying an item of type Bookmark, the bookmark target will also be copied
+to the text and primary clipboards.
+
+You can also copy a menu item using a design mode shortcut instead of the Design
+Menu. Highlight the menu item and press Ctrl+C, or use the mouse shortcut
+Ctrl + Left-or-Right-Click.
+
+.SS Paste
+If you previously cut or copied an item onto the design clipboard, it can be pasted
+into a menu, toolbar or the Booksmarks list. Determine where you want to paste the
+item, right-click on an existing item to open the Design Menu, and select Paste. The
+item will be copied or moved from its original location and will be placed after the
+item you clicked on.
+
+For example, to move a custom menu item named 'Test' from the Tools menu to the file
+list's context menu: Open the Tools menu and right-click on 'Test' to open the Design
+Menu. Select Cut. Now right-click on the file list and right-click on a menu item,
+such as 'Rename'. Select Paste in the Design Menu. Right-click again on the file list
+and you will see your 'Test' command has been moved from the Tools menu and has been
+placed immediately after the 'Rename' item.
+
+When copying a custom item, note that everything contained in the item is copied,
+including any command script, extra files you added to the command or data directories,
+settings, etc.
+
+You can also copy plugins from the Plugins menu (although you cannot cut them). When
+a plugin, which is root-installed and -protected, is copied, the copy is no longer
+protected by root. The copy is now a custom item which you can alter in any way. Copying
+a plugin provides a means of changing and customising it. It can also then be exported
+and reinstalled as a plugin. See the Plugins section for details.
+
+Paste, Cut, and Copy can also be used on the separators between items. To move a
+custom item to directly after a separator, copy the item to the Design Menu,
+right-click on a separator, and select Paste. You can also cut, copy, and paste the
+separators themselves, providing they are not built-in.
+
+You can also paste a menu item using a design mode shortcut instead of the Design Menu.
+Highlight the menu item and press Ctrl+V, or use the mouse shortcut Shift + Left-or-Right-Click.
+
+.SS Remove
+Remove is used to remove any custom item. It cannot be used on built-in items, except
+in a toolbar. When used on a plugin, Remove will uninstall the plugin (root password required).
+
+Unless you have unchecked option View|Preferences|Interface|Confirm delete/remove,
+you will be presented with a confirmation dialog before the item is removed.
+
+IMPORTANT: When a custom item is removed, all files and settings are deleted, including
+any extra files you added to the command directory, any files stored in the command's
+data directory, and the command script. When a plugin is uninstalled using Remove, the
+plugin is removed for all users, and all settings, files and plugin-data for the
+plugin are deleted.
+
+WHEN REMOVING A SUBMENU, all commands and submenus contained within it are
+deleted as described above.
+
+Note that a submenu in SpaceFM can never be empty. As a result, if you remove the last
+item from a submenu, a new custom item named "New Command" or a default bookmark will
+automatically be added to it.
+
+You can also remove a menu item using a design mode shortcut instead of the Design
+Menu. Highlight the menu item and press the Delete key, or use the mouse shortcut
+Ctrl + Shift + Middle-Click.
+
+.SS Export
+The Export item, which is only available for custom items, will open a save dialog,
+allowing you to save the custom item into a plugin file. This is how plugins are
+created for SpaceFM - you create a custom item, then simply export it.
+
+Once your item has been exported to a plugin file, the file can then be used to
+import the item back into either the Plugins menu or another menu or toolbar, or
+can be shared with other users of SpaceFM. Exporting also provides a mechanism for
+backing up custom items - the plugin file acts as a backup copy of your item which
+can always be imported into any SpaceFM session.
+
+When using export on a plugin, a new plugin file is created - generally this creates
+a copy of the original plugin (unless you modified the installed plugin files as root).
+
+You can also export a group of custom items into one plugin file by exporting a custom
+submenu, which means the plugin file will contain all items and submenus contained in
+the submenu. This provides way to share multiple related plugins in a single plugin file.
+
+For more information on plugins, please see the Plugins section.
+
+.SS New|Bookmark
+The New submenu of the Design Menu allows you to add a new custom item of a
+particular type: Bookmark, Application, Command, Submenu, or Separator.
+
+New|Bookmark adds a new custom item of type Bookmark after the current item. You will
+be prompted to select a single target folder, and the Bookmark item will be added. To
+make further changes to your Bookmark item, right-click on it and select Properties.
+A Bookmark item's target may be a single folder to be opened when you activate the
+item, or it can be a semicolon-separated list of target folders, URLs, or devices.
+
+Bookmarks in SpaceFM may be placed into any menu or toolbar, not just the Bookmarks menu.
+
+.SS New|Application
+New|Application adds a new custom item of type Application after the current item.
+Initially, you will be prompted to select an application from a list of applications
+installed on your system, and the Application item will be added. To make further
+changes to your Application item, right-click on it and select Properties. An Application
+item's target may be a .desktop file or an executable file, as detailed in Item Properties.
+
+.SS New|Command
+New|Command adds a new custom item of type Command after the current item. You will be
+prompted to enter a name for the new command. Next, the Item Properties dialog will open
+to the Command page, allowing you to enter your command line(s) to be run, or to edit a
+command script.
+
+The command line accepts anything you would normally enter in a bash command line. It
+can be as simple as a program's name you want to run when this menu item is selected,
+or may include multiple lines and variables. For more information, please see the
+Command page.
+
+For example, right-click on a menu item and select New|Command. Enter 'Current Time'
+for the item name. For the command line, enter:
+
+    date
+
+And click OK. When you click the new 'Current Time' menu item, a dialog will open
+showing you the current date and time.
+
+You can also add a new Command menu item using a design mode shortcut instead of the
+Design Menu. Highlight the menu item where you want to insert the new Command item,
+and press the Insert key, or use the mouse shortcut Ctrl + Shift + Left-or-Right-Click.
+
+.SS New|Submenu
+New|Submenu adds a new submenu into the menu or toolbar after the current item. You
+will be prompted for the new submenu's name. Because a submenu in SpaceFM can never
+be empty, a new Command item named "New Command" or a default bookmark will automatically
+be added to the new submenu.
+
+.SS New|Separator
+New|Separator adds a new separator line into the menu or toolbar after the current
+item. Design Mode works on separators too - right-click on a separator to open its
+Design Menu, which allows you to remove it, change its context rules, or paste items
+after it.
+
+.SS New|Import
+The New|Import submenu allows you to import a plugin file or URL, inserting it as a
+new menu item or toolbar item after the current item. This is similar to using
+Plugins|Import, except that the new item is inserted immediately rather than copied
+to the design clipboard.
+
+When imported into other menus, a plugin loses root protection and becomes a normal custom item.
+
+.SS Add
+The Add submenu will only appear in the Design Menu when it is opened by right-clicking
+on a toolbar item. This menu allows you to add built-in items to the toolbar. These items
+have preset functions, but you can change their name, shortcut key, and icon. Once added,
+they can be cut, copied and pasted (within toolbars only).
+
+.SS Tooltips
+The Tooltips checkbox item will only be visible in the Design Menu when it is opened
+by right-clicking on a toolbar item. Checking the Tooltips option will cause tooltips
+to be shown when the mouse hovers over a toolbar item (the item's name is shown). This
+setting is global (for all toolbars).
+
+.SS Help
+Help opens contextual help for an item. For built-in items, the SpaceFM user's manual
+will be opened in your browser. If no help is currently available, Help will be
+disabled. [Note: Because the user's manual is still incomplete, not all items will
+have specific help available.]
+
+Your browser may be customised in Help|Options|Browser, and a custom location for the
+user's manual can be set in Help|Options|Manual Location.
+
+For custom items, including plugins, Help will open the plain text README file for the
+item in your text editor. If no README file exists for a custom menu item, selecting
+Help will create one for you to edit.
+
+You can also open help for a menu item using a design mode shortcut instead of
+the Design Menu. Highlight the menu item and press F1, or use the mouse
+shortcut Alt + Middle-Click. F1 may also be used from within the Design Menu
+itself to show help for a Design Menu item.
+
+.SS Key Shortcut
+Key Shortcut opens a dialog which allows you to bind any shortcut key to the current
+item, and to change or unset an existing shortcut key. When you select Key Shortcut,
+a dialog will open asking you to press your key combination (for example Ctrl+G),
+and the keycode will be displayed. If the key combination is already in use, you
+will be told what function the key is currently assigned to and be given the option
+to replace the current assignment. Once you have pressed the desired key combination,
+click the Set button. Or, to unset the current key assignment, leaving no key assigned
+to this menu item, click the Unset button. The Key Shortcut option can be used on
+built-in and custom items, but cannot be used on a submenu.
+
+After you have set a key combination, when you reopen the menu the new key shortcut
+will be displayed in the menu.
+
+TIP: To use only the keyboard in the Set Key dialog, press a key combination and
+then press Enter to click the Set button. Or, to click Unset, press the Escape key
+twice. To cancel, simply close the dialog (usually Alt-F4).
+
+NOTE: Due to SpaceFM's literal use of keycodes, turning Caps Lock on or changing
+your keyboard layout may cause some key shortcuts to not respond. For example,
+pressing Ctrl+C with Caps Lock on will not activate 'Copy' because the 'C' key
+returns a different code than with Caps Lock off. Also note that some keycodes
+for non-Latin keyboard layouts are converted to their approximate Latin equivalent
+[SpaceFM 1.0.3 and later]. If such a conversion is made, the original keycode will
+be shown in square brackets.
+
+You can also change the key for a menu item using a design mode shortcut instead of
+the Design Menu. Highlight the menu item and press Ctrl+K, or use the mouse shortcut
+Ctrl + Middle-Click.
+
+.SS Edit Command
+Appearing only for custom items of type Command where the command is set to a command
+line, Edit Command opens the Item Properties dialog to the Command page.
+
+You can also edit an item's command line using a design mode shortcut instead of the
+Design Menu. Highlight the menu item and press F4 or Ctrl+E, or use the mouse
+shortcut Middle-Click.
+
+.SS Edit Script
+Appearing only for custom items of type Command where the command is set to a script,
+Edit Script opens the command script in your configured editor.
+
+You can also edit an item's script using a design mode shortcut instead of the
+Design Menu. Highlight the menu item and press F4 or Ctrl+E, or use the mouse
+shortcut Middle-Click.
+
+.SS Properties
+Properties opens the Item Properties dialog for the current item, allowing you to
+change properties for the item as detailed in Item Properties below.
+
+You can also open Item Properties for a menu item using a design mode shortcut instead
+of the Design Menu. Highlight the menu item and press F3, or use the mouse shortcut
+Ctrl + Alt + Middle-Click.
+
+.SH PROPERTIES
+The Item Properties dialog allows you to view and change the properties of
+built-in or custom menu and toolbar items. To open the dialog, right-click on
+a menu item, toolbar item, or bookmark and select Properties, or highlight a
+menu item and press F3.
+
+.SS Type
+The Menu/Toolbar Item tab of the Item Properties dialog provides basic settings for the item.
+
+The Type drop-down list shows the current type of the item: Built-In Command, Bookmark,
+Application, Command, Submenu, or Separator. If the type is Bookmark, Application or
+Command, you can change the type by selecting another type from the list.
+
+An item's type determines what properties you can view and change, and how the item
+appears and behaves.
+
+.SS Name
+The Name entry allows you to change an item's name as it appears in the menu, and
+is used as the tooltip for toolbar items. Precede a character with an underscore
+(_) to underline that character as a shortcut key (mnemonic) if desired (or use \_
+to escape a literal underscore in the name). You can change the name of both built-in
+and custom items. You cannot change the name of plugins in the Plugins menu.
+
+Note: In GTK >= 3.10, you must press the Alt key to see the mnemonics underlined.
+
+For items of type Bookmark, the Name entry may be left empty, in which case the
+target of the Bookmark will be displayed as the item name.
+
+For items of type Application, the Name entry may also be left empty, in which case
+the application's name (derived from the .desktop file's Name= key), or the executable's
+name will be displayed as the item name.
+
+.SS Key
+The Key button shows the current key shortcut set for this item, if any. Clicking the
+button will open the Set Key dialog which allows you to set a key shortcut. Clicking
+the button is equivalent to selecting Key Shortcut directly from the Design Menu.
+
+You can also change the key for an item using a design mode shortcut instead of the Design
+Menu. Highlight the menu item and press Ctrl+K, or use the mouse shortcut Ctrl + Middle-Click.
+
+.SS Icon
+The Icon entry allows you to set or change an icon for an item. Enter an icon name such
+as 'folder', a stock item name such as 'GTK_STOCK_OPEN' or 'gtk-open', or an absolute
+path to an icon file.
+
+For best results, use an icon name or stock name so that the icon can be automatically
+sized. When using an absolute path, the icon may not be sized correctly. Due to various
+issues, not all icons may work. If an icon fails to load, you will see a broken icon
+image instead. If successful, the icon will appear in the menu next to the menu item,
+and will also be used in the task list when a command is run.
+
+To remove an icon, simply clear the text box where the icon name is entered and click
+OK. (For plugins, clearing the box will show the default icon for the plugin, if any.)
+
+To browse the available icons on your system, open /usr/share/icons/. When you enter
+an icon name, GTK will search there for an appropriate icon, and will also
+search ~/.icons/ and ~/.local/share/icons/.
+
+For items of type Bookmark, if no icon is specified, the default icon is used, set by
+right-clicking on the Bookmarks side pane and selecting Settings|Bookmark Icon.
+
+For items of type Application, if no icon is specified, the application's
+icon (derived from the .desktop file's Icon= key) will be displayed as the item icon.
+
+You can also change the icon for an item using a design mode shortcut instead of
+the Item Properties dialog. Highlight the menu item and press Ctrl+I, or use the
+mouse shortcut Shift + Middle-Click.
+
+.SS Target
+The Target(s) entry and associated Browse button will only appear if an item is
+of type Bookmark or Application. This entry allows you to control what is opened
+when the item is activated.
+
+
+.SS Bookmark Targets
+For Bookmark items, the Targets list may contain a single folder to be opened,
+or may contain a semicolon-separated list of folders, URLs, and/or devices.
+For example:
+
+    /etc; /usr/bin; ftp://mirrors.kernel.org; /dev/sr0
+
+When the above example is activated, four tabs will be opened: two
+containing /etc and /usr/bin; the ftp site will be mounted and opened in a
+third tab; and the disc in /dev/sr0 will be mounted and opened in the fourth.
+
+When the Targets list contains a single folder or URL, whether it is opened in
+a new tab or in the current tab is determined by the New Tab setting for
+bookmarks, found by right-clicking on the Bookmarks side pane and selecting
+Settings. If the Targets list contains multiple paths or URLs, each is opened
+in a new tab.
+
+Finally, the Targets list for a Bookmark may contain the path to a file, in
+which case the directory containing the file will be opened, and the file will
+be selected in the file list. For example:
+
+    /etc/fstab
+
+Clicking the Browse button will allow you to select a folder which will be added
+to the Targets list. Tip: To prevent the Bookmarks side pane's Follow Dir option
+selecting a particular bookmark automatically, prefix the targets with a semicolon
+and Follow Dir will ignore it (only the first target is used by Follow Dir). For example:
+
+    ;/etc
+
+.SS Application Target
+For Application items, the Target entry may contain the name of a .desktop file
+(spacefm.desktop), the full path of a .desktop file, the name of an executable
+file (binary or script, eg spacefm), or the full path of an executable file (/usr/bin/spacefm).
+
+When specifying an executable file, note that selected filenames will NOT be
+passed to the executable when it is run. (To do so, use a menu item of type
+Command.) When specifying a .desktop file, what is passed to the command is
+determined by the substitution variables in the Exec= key of the .desktop file.
+
+When specifying a .desktop file, it is generally recommended to leave the
+Name and Icon fields empty so the .desktop file's values are used automatically.
+
+Clicking the Browse button will allow you to select an application from a
+list of applications installed on your system.
+
+NOTE: When exporting an item, the target field will be exported with the plugin
+even if Bookmark or Application is no longer the selected item type. Before distributing a
+plugin, be sure to open or extract the archive and examine all files in your text editor to
+be clear on what data you are sharing.
+
+.SS Context
+The Context page of the Item Properties dialog allows you to set rules which
+determine when and how a menu item appears in the menu. Context rules can be
+set for both built-in and custom items, including plugins and separators. Context
+cannot be set for toolbar items (except items in custom toolbar submenus), and
+context will not apply to items when they are shown in the Bookmarks side pane.
+
+Context refers to the state of the entire file browser window or desktop when
+a menu is shown. For example, the MIME type of the currently selected file is
+one subject of the context. Another context subject is the filename of the
+selected file. Another is any device that is currently selected in the Devices
+list. There are many subjects which can be used in context rules.
+
+By default, the top line of the context dialog reads "Show item if context
+matches any rule:", and is followed by an empty rule box. When the rule box
+is empty, the item will always be shown regardless of context.
+
+You can change 'Show item if context matches any rule:' to 'Enable item if
+context matches any rule:'. If the action is to 'Show', its opposite is to
+hide. If the action is to 'Enable', then its opposite to disable. Thus if we
+change the top line to read 'Enable item if context matches any rule:', then
+the menu item will be enabled or disabled depending on context, but will never
+be completely hidden from view in the menu. Or, to reverse the logic, action
+can be set to 'Hide' or 'Disable' when any rule is matched.
+
+The 'matches any rules:' box can also be changed so that it requires all rules
+to be matched instead of just one. This is like putting an AND between the
+rules, instead of OR. Or you can reverse the matching logic by choosing one
+of the 'doesn't match' options.
+
+.SS Composing Rules
+Rather than using an arcane syntax, context rules are composed using words
+and phrases, which make the rules readable sentences. To compose a new rule,
+use the Edit Rule box. There are many context subjects available in the
+drop-down list, but "MIME Type" and "Filename" are generally the most useful.
+
+The box to the right of the subject allows you to choose a verb, or a
+relationship between the subject and its value. In the case of "matches"
+or "doesn't match", wildcards may be used (eg "Filename matches *.jpg").
+If the test pattern contains any uppercase characters, the test is
+case-sensitive. For additional wildcard characters and pattern specifics,
+see IEEE Pattern Matching Notation.
+
+The box below the subject and verb will contain the value to be used as a
+test. You can enter custom text in this box or click the arrow at the right
+to select a common value. Each subject chosen will have a different list of
+common values.
+
+Below the value box is a 'Value:' label, which may or may not show a value.
+This label shows the subject's value in the current context. When you opened
+the Design Menu, the file browser had a context - perhaps some files or a
+device were selected, the browser was in a particular directory, etc. For
+example, if a file is selected when you open the properties dialog, and the
+subject is set to 'MIME Type', then the selected file's MIME type will appear
+next to 'Value:'. If no file is selected, then 'Value:' will show
+nothing. (Tip: You can quickly copy a value into the value box by
+double-clicking it.)
+
+The context dialog will let you know the result of the current set of rules
+given the current context. Below the rules box to the right, you will see
+a 'Current:' label. For example if it reads "Current: Show", then for the
+current context and set of rules, this menu item will be shown in the menu.
+If instead it reads "Current: Hide", then the menu item will be hidden from
+view for the current context - it will not appear in the menu.
+
+.SS An Example Set Of Rules
+As an example, we will add a rule which shows the current menu item when
+the selected file is an audio file. Note that when determining the context,
+only the type and name of the first selected file is considered. If multiple
+files are selected, this can be determined, but the type of each selected
+file cannot be individually tested.
+
+For this example, set the rule subject to 'MIME Type' and set the
+verb (the box to the right of subject) to 'begins with'. Below these,
+choose 'audio/' from the drop-down list of common values.
+
+Now the words in the Edit Rule box should read 'MIME Type... begins
+with... audio/'. To add this rule to the rule box above, click the
+Add button. 'MIME Type begins with audio/' will be added to the list
+of rules. For this rule to be satisfied, the MIME type of the first
+selected file must begin with the text "audio/". Thus a file of type
+"audio/mpeg" (an MP3 file), or of type "audio/x-wav" (a WAV file) would
+match this rule, but a file of type "video/x-msvideo" (an AVI video file)
+would not. (You can see the MIME type of any file by right-clicking on it
+in the file list and selecting Properties|Info.) In this example, our rule
+will only match the context if the first selected file is an audio file.
+
+Now set the top line to read 'Enable item if context matches any rule:'. We
+now have a context rule set which reads 'Enable item if context matches any
+rule: MIME Type begins with audio/'.
+
+Click OK to accept this rule set. Then select an audio file in the file browser's
+file list. Open the menu where your item appears, and it will be enabled for use.
+Next select another kind of file, such as a text or video file. Open the menu again,
+and the menu item will be disabled.
+
+In order to open the Design Menu again for this menu item, you must first select
+an audio file (you cannot open the Design Menu on a disabled menu item). Or you
+can temporarily check option Ignore Context (see below) to access all menu items.
+
+.SS Additional Features
+The context dialog includes a few more features for editing rules. To remove a
+rule, click the rule, then click the Remove button. If all rules are removed
+and you click OK, the item will be shown regardless of context.
+
+To change a rule in the list, click the rule, then edit the rule using the Edit
+Rule box. When the rule is how you want it to appear, click the Apply button to
+update the rule in the list.
+
+The best way to learn to use the context rules is to practice with a file
+selected. In this way you can use the 'Value:' and 'Current:' labels to see
+context values and observe the result of changing the rules.
+
+Some context subjects are boolean - they will equal 'true' or 'false' (these
+words must be in English even if the rest of the rule is translated). For
+example, the rule subject 'Multiple Selected' will always
+equal 'true' or 'false', depending on whether more than one file is selected
+in the file list of the current panel. Thus if your custom menu item is designed
+to work with only one selected file, you might set a context rule to disable it
+if the user has selected multiple files.
+
+Other context subjects, such as 'Panel Count', contain a number, and you can test
+whether they are equal to, less than, or greater than a value. For example, the
+rule 'Panel Count is greater than 1' will only match if the user has multiple
+panels shown.
+
+As a more advanced use, it's also possible to use || (or) or && (and) in the
+test value to provide a list of possibilities (use || or &&, but not both in
+the same rule). For example, this rule:
+    MIME Type begins with audio/ || video/
+
+causes two tests to be performed. If the MIME Type begins with 'audio/' OR
+the MIME Type begins with 'video/', then the rule matches. Likewise, the rule:
+    Device Properties contains dvd && blank
+
+also causes two tests to be performed. If the Device Properties value (which
+provides information about the currently selected device) contains the
+word 'dvd', AND it contains the word 'blank', then the rule matches. This
+context rule would match if the currently selected device contained a blank DVD.
+
+.SS Automatic Context
+It is important to note that built-in menu items sometimes have an automatic
+context, which is evaluated before any rules you add. For example, the file
+list's Paste menu item is disabled if the clipboard is empty. No rule you
+add will cause it to be enabled in this case, although you can still add a
+rule to hide it.
+
+Custom menu items added directly after the Default menu item in the file
+list's Open context menu have an automatic pre-context - they only appear
+if the MIME type of the first selected file matches the MIME type when the
+custom item was added. This provides an easy way to add an item with an
+automatic context based on MIME type, and may also be used to setup a file
+handler (see below).
+
+Custom menu items added directly after Show Output in the Task Manager's
+context menu will also only appear for tasks with a custom popup handler.
+
+Also, custom submenus which are empty due to all of their children being
+hidden based on context are hidden automatically.
+
+Note: Custom menu items when shown in the Bookmarks side pane will not
+respond to Context rules, and will always be shown.
+
+.SS Impossible Context
+Note that it IS possible to set an impossible context for an item - a set
+of rules which will never match. In this case the item will never be shown. This
+can be used to permanently hide or disable an item you don't use. This can also
+happen accidently, which is one reason why Ignore Context (see below) is
+provided. For example, the rule Directory equals "" will never match (because
+Directory is always set).
+Use As Handler For
+Visible only for Command or Application items, the 'If enabled, use as
+handler for' drop-down list on the Context page is used to set this item
+as a default handler. For example, if set to "files", and you open one or
+more files, if this item is shown and enabled based on its context rules,
+then this item will be run, rather than the default MIME application. This
+option is used to define a file handler for specific file types (or based
+on any context rules).
+
+If set to 'files', note that no files are passed to a command on the command
+line. You must use variables in your command line or script to pass files to
+it. If the menu item is of type Application, what is passed will depend on
+the Exec= line of the application's .desktop file.
+
+If set to 'devices', clicking on a device in the Devices list will cause the
+item to be run rather than the applicable device handler. Variables %v, "$fm_device",
+or other variables may be used in your command.
+
+If more than one item is set as a handler and each is enabled, multiple items
+will be run each time files or devices are opened.
+
+As noted above, custom menu items added directly after the Open|Default menu
+item have an automatic pre-context - they only appear if the MIME file type
+of the first selected file matches the MIME type when the custom item was
+added. This provides an easy way to set a custom handler for a given MIME type. Simply
+select a file of the desired type, right-click on it and add your custom item directly
+after the Open|Default menu item. Next, select option 'use as handler for files'. Your
+custom item will be used to open files when the MIME type matches. Or, you can set
+additional context rules to determine when your handler is used.
+
+'Use as handler for' currently has no effect on files or devices opened from the
+SpaceFM desktop. Also, when imported or installed, plugins lose their 'Use as
+handler for' setting (by design - you can add it back after import if desired).
+
+Ignore Context (see below) has no effect on the handler being  context-enabled - its
+context will be tested even if global option Ignore Context is checked.
+
+.SS Ignore Context
+The 'Ignore Context / Show All (global setting)' option, if checked, causes all
+context rules to be ignored, and all menu items shown regardless of context. This
+is a global setting - it disables context rules in all windows of the current instance.
+
+If you need to change the context of an item you have disabled or hidden, you can
+either select the appropriate file to create a context where the item is shown and
+enabled, or you can open the Item Properties dialog for any other item and check
+option 'Ignore Context'. This will allow you to then access the Design Menu of all
+items and change their context rules. When you are finished, you can uncheck
+option 'Ignore Context'.
+
+Note that Ignore Context does not affect the automatic context of built-in
+items - for example, even with Ignore Context checked, the file list's Paste menu
+item will always be disabled if the clipboard is empty.
+
+.SS Command
+Shown only for menu items of type Command, the Command page of the Item Properties
+dialog allows you to set command line(s) to be run by this menu item, or edit a
+command script, depending on which radio button is selected: Command Line or Script.
+
+.SS Command Line
+When Command Line is selected, the command is executed as one or more bash
+command lines. At its simplest, the command line may simply be the name of a
+program to run, but any valid bash line may be used, as the command lines are
+inserted into a temporary bash script when run.
+
+You may use the following substitution variables in command lines:
+
+    %F  selected files
+    %f  first selected file
+    %N  selected filenames
+    %n  first selected filename
+    %d  current directory
+    %v  selected device (eg /dev/sda1)
+    %m  device mount point (eg /media/dvd)
+    %l  device label
+    %b  selected bookmark
+    %t  selected task directory
+    %p  task pid
+    %a  menu item value
+
+For example, to calculate the MD5 sum of all selected filenames, use this command line:
+
+    md5sum %N
+
+Before your command is run, the substitution variables will be replaced with their
+current values. Do NOT place quotes around substitution variables - they will be
+quoted automatically when required.
+
+Bash variables, described below, may also be used in command lines (bash variables
+SHOULD in general be "double quoted").
+
+To experiment with variables, use the echo command to simply print their values. For
+example, the following command line will print the current directory:
+
+    echo %d
+
+Command lines may also contain bash scripts containing multiple commands. For example,
+this command line will print the current time, once per second, for ten seconds, then stop:
+
+    while (( x < 10 )); do date; sleep 1; (( x++ )); done
+
+Environment variables can also be included. For example, to run claws-mail using a
+custom DISPLAY variable in a command line:
+
+    DISPLAY=:1 claws-mail
+
+.SS Open In Editor
+The Open In Editor button will examine the first part of the command line. If the
+first part is a text file (a script), it will be opened in your editor.
+
+NOTE: When exporting a Command menu item, the value of the command line will be
+exported with the plugin even if Command Line is no longer the selected command type,
+or if the menu item type is changed. Before distributing a plugin, be sure to open or
+extract the archive and examine all files in your text editor to be clear on what data
+you are sharing.
+
+.SS Command Script
+When Script is selected on the Command page, a default bash script will be created
+for the command. Similar to command lines, bash commands may be entered in the script,
+or open it in your editor and save it. There is no need to organize your scripts,
+because you can always use Properties from the Design Menu to access the script of
+any Command menu item.
+
+At its simplest, a command script is simply a list of commands that could be entered
+in a terminal. The script executes each command in sequence, allowing you to automate
+common command-line tasks. You can also use tests and loops in scripts to make them
+more capable. For more information on writing scripts, see the Bash Scripting Guide.
+
+Command scripts can also evolve into small, full-featured applications using SpaceFM
+Dialog to show custom dialogs from within the script, and socket commands to manipulate
+elements of the SpaceFM window. Your script can also replace the default task popup
+dialog by setting a custom popup handler.
+
+The substitution variables used above in command lines may NOT be used in a command
+script. Instead, bash variables are preloaded for your use (these variables may be
+used in command lines or a script).
+
+Or, if you would like to use another script as your default, save it
+as ~/.config/spacefm/scripts/default-script. It is recommended that you
+include the example variables shown above at the end of your default script.
+
+.SS Script Directories
+If your script requires additional files to work, they should be placed in the
+command directory. You can refer to this directory in your script
+as "$fm_cmd_dir". Files in this directory should not be modified by the script.
+
+If your script needs to save changing, persistent data to the user's home
+folder (to keep track of user preferences, for example), the data directory
+should be used ("$fm_cmd_data"). Because this directory may not already exist,
+always run this command before using it:
+
+    mkdir -p "$fm_cmd_data"
+
+If your script needs a temporary directory to work in, you can create one
+automatically using this convenience function:
+
+    tmp="$(fm_new_tmp)"
+
+Your new, empty temporary directory will be created, and its path will be
+placed in $tmp by the above command. Before the end of your script, be sure
+to clean up by destroying the temporary directory:
+
+    rm -rf "$tmp"
+
+When you export a Command menu item, the command script and any files in the
+command directory are included in the plugin file. When you remove a command,
+all of these files AND the data directory are deleted!
+
+.SS Open In Editor & Root Editor
+The Open In Editor button will save and open the command script in your
+editor. Simply edit the script and save it in your editor. The Root Editor button,
+if shown, can be used to open a root-owned script in root's editor.
+
+You can also open the command script in your editor directly from the Design Menu
+with Edit Script or using a design mode shortcut instead of the Design Menu. Highlight
+the menu item and press F4 or Ctrl+E, or use the mouse shortcut Middle-Click.
+
+.SS Run Options
+Shown only for items of type Command, the Options page of the Item Properties
+dialog allows you to set additional options which determine how your command behaves. The
+Run Options section determines how SpaceFM will run your command when the item is activated.
+
+.SS Run As Task
+Run As Task, which is enabled by default for new commands, changes several aspects of
+how your command is run. If Run As Task is UNchecked, the command is run
+asynchronously - it is run and forgotten by SpaceFM. This is useful for running a program
+such as Firefox, for example. SpaceFM doesn't need to wait for Firefox to finish or
+monitor its output - it can be run and forgotten. For commands which simply start applications
+or produce no output, you may want to uncheck Run As Task.
+
+If Run As Task is checked, then the command is run synchronously - as a child process
+of SpaceFM. SpaceFM's Task Manager will monitor the task, and if the task runs for
+longer than about one half second, the Task Manager will auto-show and the task will
+be listed. When the task finishes, it will be removed from the list. This can be used
+to monitor a task and to know when it has completed. (When a command is run from the
+desktop menu, no Task Manager is shown for the task, but a popup may be shown automatically.)
+
+In addition, any output from the task (stdout and stderr), will be collected in an
+output monitor. To raise this monitor, click on the task in the Task Manager. (The
+output monitor can also be set to raise automatically on certain events - see Popup
+options below for details.)
+
+SpaceFM's output monitor is designed to display text output to be used for monitoring
+the output of commands as they run, or to display a final result. However, the output
+monitor is not a terminal and does not allow you to enter input. If your command
+requires interaction, you will need to use Run In Terminal instead.
+
+To stop a task prematurely, raise the output monitor and click the Stop button, or
+right-click on the task in the Task Manager and select Stop. When SpaceFM stops a
+task, it sends the process and all its child processes a SIGTERM signal, followed
+several seconds later by SIGKILL signals. If the process was run as another user,
+you will be prompted to enter the user's password (or root's password) again to
+stop the task.
+
+When the Run In Terminal option is checked, the Run As Task option will be unchecked
+automatically as a convenience. Although not normally useful, it is possible to use
+these options together (just check Run As Task again after checking Run In Terminal). When
+both are checked, the terminal window itself is run as a task, the output monitor will
+generally be empty, and errors may not be detected. Mostly this is useful only for
+monitoring when the command has finished (when the terminal window closes, it will be
+removed from the Task Manager). Note that some terminal emulators cannot be run as a
+task by SpaceFM because the emulator does not start a new instance.
+
+.SS Popup Task
+The Popup Task/Error/Output and Scroll options are only enabled if Run As Task is
+checked. If Popup Task is checked, the popup dialog for the task will be raised as
+soon as the task is added to the Task Manager, even if no output has occured. The
+output monitor will not be shown if the task completes in less than about one
+half second.
+
+Use Popup Task if you want a popup anytime the task runs for more than a moment. When
+the task finishes, the popup will remain, allowing you to review any output. You can
+also close the monitor prematurely while the task is still running by clicking the
+Close button - the task will continue running in the Task Manager.
+
+Note that the global Task Manager setting Popup All Tasks, if checked, takes
+predecence - the task will popup even if the command's Popup Task option is
+unchecked. (However, unlike Popup Task, Popup All Tasks will not cause the popup
+to remain when the command has finished, unless an error occurs.)
+
+By default, Popup Task is unchecked in new commands.
+
+.SS Popup Error
+If Popup Error is checked and the exit status of your command is not zero, a
+popup dialog will be raised to show the error. Popup Error only has an effect
+at the moment the command finishes. If unchecked, the exit status is ignored.
+
+Popup Error provides a convenient way to get feedback on the success of your
+command. When the command finishes successfully it will simply be removed from
+the Task Manager. However, if an error occurs then the popup will be raised.
+
+Even if your command does not produce a usuable exit status, you can terminate
+your command line or script with a non-zero exit status to trigger the error
+popup. For example:
+
+    if [ ! -e file.output ]; then exit 1; fi
+
+(If the file 'file.output' does not exist, then exit with exit status 1,
+triggering an error popup if Popup Error is checked.)
+
+By default, Popup Error is checked in new commands.
+
+.SS Popup Output
+If Popup Output is checked, a popup dialog will be shown the first time
+the command produces output (even if the task runs so quickly that it is
+not shown in the Task Manager). Note that if you close the popup dialog
+while the command is still running, further output will NOT reopen it,
+but you can open it again by clicking on the task.
+
+Popup Output can be used to alert you when your task has produced output. By
+default, it is checked in new commands.
+
+.SS Scroll Output
+The Scroll Output option, which is checked by default for new commands, determines
+the auto-scroll behavior of the output monitor. If checked, the monitor will
+automatically scroll down to the end of the output (unless the user has moved
+the scrollbar up from the bottom position). If unchecked, the output will not
+automatically scroll to the end.
+
+With some commands, it's useful to read the output from the top and scroll down
+manually. For example, if you right-click on a device in the Devices list and
+select Properties, you will see a non-auto-scrolling output monitor - the
+cursor stays at the very beginning of the output so you can read it.
+
+With other commands, you're most interested in the end of the output, so you
+want the output monitor to behave like a terminal and scroll to the end as
+new output is added. For example, errors usually appear at the end, so if
+you want to know why the command stopped prematurely, you're most interested
+in the end of the output. When you want the output monitor to behave like a
+terminal in this regard, check Scroll Output.
+
+Even if Scroll Output is checked, you can always manually move the scrollbar
+up to inhibit auto-scrolling.
+
+.SS Run In Terminal
+If your command is a command-line program which produces much output, or you
+need to be able to interact with it (eg enter a password), check the Run In
+Terminal option on the Options page.
+
+Each time your command is run, a terminal will be opened and the command will
+be run within it. The terminal program used is configured globally
+in View|Preferences|Advanced|Terminal.
+
+When you check the Run In Terminal option, the Run As Task option will be
+unchecked automatically as a convenience. If you do want both Run In Terminal
+and Run As Task, you can then check Run As Task as well. If you do so, normally
+nothing will be shown in the output monitor.
+
+Note that gnome-terminal, konsole, lxterminal, and urxvtc lack
+a --disable-server or similar option to force a new instance to be started for
+each terminal window. This means that these terminals cannot generally be used
+successfully with a combination of both the Run In Terminal and Run As Task
+options, unless no other terminal window is open when the command is run. Thus
+use of these terminals may prevent SpaceFM working correctly in some cases. For
+example, if a handler mounts a protocol in a terminal, the mount point may not
+be automatically opened when the mount command finishes. If you really want to
+use these terminals, you can, but you should note that not all functions may
+work as expected.
+
+.SS Keep Terminal Open
+Enabled by default when using Run In Terminal, Keep Terminal Open will cause the
+terminal to stay open even after the command or program has finished. This is
+useful for programs which produce some output and then exit. Without Keep
+Terminal Open, the terminal window would close before you had a chance to
+read the output.
+
+When Keep Terminal Open is enabled, after the command finishes you will be
+presented with a message like:
+
+    [ Finished ]  Press Enter to close or s + Enter for a shell:
+
+To close the window, simply press Enter. If you want to enter an interactive
+bash shell, press s then Enter. When finished with the shell, type 'exit'.
+
+With other programs or commands, it is not useful for the terminal to be held
+open after the command has finished. For these commands, uncheck Keep Terminal Open.
+
+.SS Run As User
+If a username is entered in the Run As User field, when the command is run,
+your configured terminal or graphical su program will be used to run the command
+as this username, instead of as the current SpaceFM user. Depending on the su program
+used, you will be prompted to enter either the user's password or root's password.
+
+To run a command as root, "root" may be entered as the Run As User username. However,
+running commands as root in this way is generally NOT recommended. Because the command
+line or script is generally saved with normal user permissions, you are running a
+command which is not protected by root, as root. This may compromise your system
+security at the root level.
+
+To run commands more safely as root, consider exporting the command and installing
+it as a plugin. Plugins enjoy root protection from modification, so when they are
+run as root, you have more assurance that they have not been tampered with.
+
+Another option is to run SpaceFM itself as root when needed (select File|Root Window). In
+this way, all commands and settings are stored in root's home (/root/.config/spacefm),
+and are protected by root. Yet running SpaceFM as root puts much power at your
+fingertips - accidentally deleting a file or folder may render your system unusable!
+When run as root, everything you do in the file browser is done as root, including
+opening applications. At the very least, be sure to have an up-to-date system backup
+if running SpaceFM as root. It is your responsibility to evaluate this option for
+your purposes.
+
+When running a custom command as another non-root user, depending on the permissions
+of your SpaceFM config and scripts directories, this user may not have permission
+to access the command directory, including the command script. To avoid this
+limitation, you can use a command line, or use a script which is in a mutually
+accessible directory.
+
+To run a command as the current user, simply leave the Run As User field empty.
+
+.SS Style
+The Style section of the Options page of the Item Properties dialog allows
+you to choose whether the item acts as a normal menu item, a checkbox, a confirmation
+dialog, or an input dialog.
+
+.SS Normal
+If your menu item's style is set to Normal, it will be displayed as a normal menu
+item, with an optional icon to the left, and a key shortcut to the right, or as a
+toolbar item. When clicked, your command will be run immediately. Normal is the
+default style for new commands.
+
+.SS Checkbox
+If your menu item's style is set to Checkbox, it will be displayed as a checkbox menu
+item with a checkbox to the left, and a key shortcut to the right. No icon will be
+displayed. The checkbox will contain or not contain a checkmark. Each time the user
+clicks the menu item, the checkbox will be toggled (if checked it will uncheck; if
+unchecked it will check), just like the checkbox menu items you are accustomed
+to. After the checkbox is toggled, your command will be run.
+
+On the toolbar, a Checkbox style item will appear as an icon, and clicking it will
+show the button depressed. In the Bookmarks list, an icon will be shown when a
+Checkbox style item is checked, and no icon will be shown when it is unchecked.
+
+Your command can read the value of the checkbox using the variable $fm_value (or %a
+in command lines). This will equal 1 if checked, or 0 if unchecked. This allows your
+command to take different actions depending on the state of the checkbox.
+
+For example, add a new Command menu item called 'Checker'. Then open the Properties
+dialog for the new item and select style Checkbox. Enter or paste this command line
+on the Command page:
+
+    if [ $fm_value -eq 1 ]; then echo "Box is checked"; else echo "Box is unchecked"; fi
+
+Now when you click your menu item, you will be told if the box is checked or
+unchecked - each time you click the item, it will change.
+
+.SS Confirmation
+If your command's style is set to Confirmation, it will be displayed as a normal menu
+item with an optional icon to the left, and a key shortcut to the right. When the item
+is clicked, the user will be presented with a confirmation dialog with OK and Cancel
+buttons. If the user clicks OK, your command will then be run. If the user clicks
+Cancel, the command will not be run. There is also a Help button in this dialog which
+opens the README file for this command.
+
+To set or change the message which appears in the dialog, set your message in the
+Confirmation/Input Message entry on the Options page.
+
+Alternatively, to show a dialog while your script is running, or to easily create
+custom dialogs, see SpaceFM Dialog.
+
+.SS Input
+If your command's style is set to Input, it will be displayed as a normal menu
+item with an optional icon to the left, and a key shortcut to the right. When the
+item is clicked, the user will be prompted to enter text. If the user clicks OK,
+your command will then be run. If the user clicks Cancel, the command will not be
+run. There is also a Help button in this dialog which opens the README file
+for this command.
+
+Your custom command can read the text entered by the user using the
+variable $fm_value (or %a in command lines). The last text entered in the box
+will be remembered and will be the default entry next time the item is clicked.
+
+For example, add a new menu item called 'Your Name'. Then open the Properties
+dialog for the new item and select style Input. Enter 'Please enter your name:'
+as the message. Enter or paste this command line on the Command page:
+
+    echo "Your name is $fm_value."
+
+When you click the menu item, you will be asked for your name, and if you click
+OK, told your name.
+
+Alternatively, to show a dialog while your script is running, or to easily create
+custom dialogs, see SpaceFM Dialog.
+
+NOTE: When exporting a command, the last value entered in the input dialog will be
+exported with the plugin, even if Input is no longer the selected style. Before
+distributing a plugin, be sure to open or extract the archive and examine all files
+in your text editor to be clear on what data you are sharing.
+Open In Browser
+The Open In Browser drop-down list is located at the bottom of the Options page of
+the Item Properties dialog. Each Command item has several directories where associated
+files are stored, and Open In Browser allows you to conveniently open these
+directories. Simply select a directory and it will be opened. This can be used
+to browse a plugin's files as a security check before running the plugin. When
+designing more complex scripts, this facility can be used to help manage
+associated files.
+
+.SS Command Dir $fm_cmd_dir
+Opens the command directory ($fm_cmd_dir). The command directory contains
+the command script if any (exec.sh), as well as other files you may have added
+for use by the command. The command directory's path will typically be:
+
+    ~/.config/spacefm/scripts/cstm_00000000/
+
+Or for a plugin:
+
+    /usr/share/spacefm/plugins/PLUGIN-FILENAME/cstm_00000000/
+
+(/usr/local may also be used depending on install location)
+
+While you may modify files in the command directory when creating and maintaining
+your command, the command script should not modify files in this directory while
+the command is running. The reason is that if you later install the command as a
+plugin, it will probably no longer have write access to this directory.
+
+When exporting a Command item, all files in the command directory are included in
+the plugin file. There are several special files: 'exec.sh' is the command
+script, if any. 'icon' is a custom icon file for the command or plugin - it
+will automatically be shown if no icon is set. You can also include a 'README'
+file in this directory which describes your command or plugin.
+
+All files in the command directory are deleted when the item or plugin is removed!
+
+.SS Data Dir $fm_cmd_data
+Command items may also have an associated data directory ($fm_cmd_data), which
+may or may not exist. The data directory is used to store persistent settings
+or data used by the command or plugin. The data directory's path for both normal
+menu items and plugins will typically be:
+
+    ~/.config/spacefm/plugin-data/cstm_00000000/
+
+This directory must be created on demand, so if you plan to use it in a script,
+first make sure it exists:
+
+    mkdir -p "$fm_cmd_data"
+
+SpaceFM does not automatically store any files in this directory - it is entirely
+up to you or the plugin creator how it is used. To see what persistent data a
+plugin is storing in your home folder, examine the Data Dir.
+
+All files in the data directory are deleted when the item or plugin is removed!
+
+.SS Plugin Dir $fm_plugin_dir
+Plugin Dir will only be listed for plugins. It opens the top level of a
+plugin's directories ($fm_plugin_dir), so you can browse all its files (except
+its data directory, which is stored in the user's home folder). The plugin
+directory's path will typically be:
+
+    ~/.config/spacefm/plugins/PLUGIN-FILENAME/
+
+Plugins may contain multiple items (a submenu plugin), so this directory may
+have several command directories within it, but will at least contain one command
+directory as well as a 'plugin' file which defines the contents of the plugin. Review
+the contents of this file, but it should NOT be edited.
+
+Before using a plugin obtained from another user, browse Plugin Dir to make sure
+you understand what each command does. Keep in mind that plugins can do anything
+on your system which the current user is permitted to do.
+
+The plugin directory contained a mirror copy of the contents of the plugin archive
+file (eg Example.spacefm-plugin.tar.gz) when the plugin was installed. Its contents
+will not change unless the directory contents are modified by the root user.
+
+.SH Toolbars
+SpaceFM includes two toolbars in each panel: the main Toolbar above the file list,
+and a Side Toolbar shown above the side panes. To show or hide the Toolbar or Side
+Toolbar in a given panel, right-click on the file list and check or
+uncheck View|Toolbar or View|Side Toolbar.
+
+Toolbars can be customised using Design Mode by right-clicking on a toolbar item. You
+can also middle-click on a toolbar item to open its Item Properties dialog or
+script. Each panel's toolbars are configured independently of other panels.
+
+In addition to adding or pasting the usual custom items in a toolbar, you can also
+use the Add submenu of the Design Menu to add built-in tool items. These items have
+preset functions, but you can change their name and icon. Once added, they can be
+cut, copied and pasted within toolbars only. There are also two built-in submenus
+in the Add submenu: Back History and Forward History. If shown, these will display
+not only a back/forward button, but also a menu button which opens a drop-down list
+showing path history for the current browser tab.
+
+When adding or pasting a custom submenu into a toolbar, it will also be displayed as
+a button with a smaller menu button next to it. The large button will have the
+icon (and tooltip) of the first item in the submenu (unless a custom icon is set
+for the submenu), and clicking this button will activate that first item. To use
+other items in the submenu, click the smaller menu button. Design Mode can also be
+used within this menu by right-clicking on a menu item. To set properties for the
+submenu itself, right-click on either button.
+
+Menu and bookmark items can be pasted and imported to the toolbars, and custom
+toolbar items can be cut/copied and pasted elsewhere. Design Mode mouse
+shortcuts (see below) may also be used on toolbar items.
+
+TIP: If you want to create a toolbar button which shows a custom submenu from another
+menu, without copying the submenu to the toolbar, you can use a socket command to
+show the submenu as a popup menu instead. To do so, add a New|Command to the
+toolbar (where "Menu Name" is the name of the existing custom submenu):
+
+    spacefm -s activate "Menu Name"
+
+.SH SHORTCUTS
+In addition to right-clicking on a menu item and using the Design Menu, design
+mode keyboard and mouse shortcuts are also available. These shortcuts are NOT
+required - all you really need to know is 'right-click opens the Design Menu'.
+
+To use these shortcuts, highlight the menu item (hover your mouse cursor over it,
+or use the keyboard arrows to highlight the menu item), then use the key or mouse
+combo shown below. These shortcuts are only available for use when a menu is
+open. On a toolbar item, mouse shortcuts may be used.
+
+    Design Mode Shortcuts
+    ===========================================
+    Action          Key Combo       Mouse Combo
+    ===========================================
+    Design Menu     F2 or Menu      Right
+    Cut             Ctrl+X          Alt+Left-or-Right
+    Copy            Ctrl+C          Ctrl+Left-or-Right
+    Paste           Ctrl+V          Shift+Left-or-Right
+    New Command     Insert          Ctrl+Shift+Left-or-Right
+    Edit Command    F4 or Ctrl+E    Middle
+    Help            F1              Alt+Middle
+    Set Key         Ctrl+K          Ctrl+Middle
+    Set Icon        Ctrl+I          Shift+Middle
+    Remove          Delete          Ctrl+Shift+Middle
+    Properties      F3              Ctrl+Alt+Middle
+
+These shortcuts will also work after the Design Menu has been shown.
+
+The F1 keyboard shortcut is special in that it can also be used to show
+help on items in the Design Menu itself. Highlight a Design Menu
+item (such as Export) and press F1.
+
+If the shortcut action is not available for the current item (for example,
+performing Remove on a built-in menu item), the Design Menu will be opened instead.
+
+NOTE: Some window managers may be configured to use some of these mouse
+combos for other purposes. For these to work within SpaceFM, you may need
+to disable them in your window manager.
+
+.SH MIME Menu
+Although SpaceFM does not include a full-featured MIME editor, SpaceFM's MIME
+menu makes it easy to find and edit all the files needed to customise your MIME
+database, and in some cases will create and edit the files for you. One example
+is the 'Choose...' menu item on the file list context menu's Open submenu, which
+lets you choose or set a default application for a MIME type. Choosing an application
+will cause SpaceFM to edit your mimeapps.list file, setting the application as the default.
+
+When you right-click on a file in the file list, the Open submenu shows applications
+associated with the (first selected) file's MIME type (eg text/plain). If you
+right-click on one of these listed applications, or press F2 while the menu item
+is highlighted, you will be presented with a menu which allows you to configure
+MIME associations and definitions for this file type. (Note that other methods
+may also be used to open files.)
+
+TIP: For help with a menu item in the MIME menu itself,
+highlight the MIME menu item and press F1.
+
+IMPORTANT: Changes made with this menu may affect other programs on your system
+which use the MIME database, not just SpaceFM. However, some programs use other
+means for determining file types, or some combination of several methods, so not
+all MIME changes made in SpaceFM will be reflected in all programs.
+
+For more elaborate MIME adjustments, consider using a dedicated MIME editor.
+How MIME Works
+SpaceFM uses freedesktop.org's shared-mime-info database to determine file types,
+display file type names, determine and adjust associated applications, and
+determine and adjust the default application for a type. (Note that other methods
+may also be used to open files, and that you can create file handlers to bypass
+MIME associations.)
+
+It helps to know some basics about how MIME works so you can better control how
+your system handles file types. Note that SpaceFM is not fully compliant with
+all freedesktop specifications. Where this manual and their specifications differ,
+this manual is authoritative on SpaceFM's behavior.
+
+MIME knows what applications are installed on your system by examining .desktop
+files. When an application is installed, it will usually install one or more .desktop
+files for itself to /usr/share/applications or /usr/local/share/applications.
+These .desktop files determine the display name of the application (which may
+differ from the executable's name), translated display names, the command used
+to execute the application, an icon for the application, what MIME file types
+the application can open, and other specifics.
+
+If you would like to change anything in an application's .desktop file, the
+correct way to do so is to copy the desktop file to ~/.local/share/applications
+in your home folder, and make changes in the copy. (Changes made directly
+in /usr/share/applications may be lost when the software is upgraded.) You can
+also add your own custom .desktop files to run programs or scripts. When MIME
+looks for a desktop file, first it looks in ~/.local/share/applications, then
+in /usr/local/share/applications, and then in /usr/share/applications, using
+the first copy it finds. Thus copies in your home folder always take precedence,
+and will not be modified when software is upgraded.
+
+Anytime .desktop files are created or changed, the MIME desktop database needs
+to be updated. A user's database can be updated by the user running:
+
+    update-desktop-database ~/.local/share/applications
+
+This command examines all the desktop files and will create files
+named 'mimeinfo.cache' which contain all the relevant information for fast
+access. The mimeinfo.cache files should never be edited directly.
+To determine what applications are associated with a given MIME type (what
+applications can be used to open files of that type), SpaceFM and many other
+programs will build a list of applications by examining the mimeinfo.cache
+files in ~/.local/share/applications, /usr/local/share/applications,
+and /usr/share/applications.
+
+Sometimes a distro, admin, or user may want to associate default or additional
+applications with a MIME type, or remove unwanted associations. Information
+about default applications, and added and removed associations are placed in
+mimeapps.list files located in the applications
+directories. ~/.config/mimeapps.list (or the older
+location: ~/.local/share/applications/mimeapps.list) in the user's home folder
+takes precedence. Distros and admins may also use files named 'defaults.list'
+to associate applications, although modification of these files by the user
+is now deprecated - change mimeapps.list instead. (SpaceFM will never modify
+defaults.list, but may read it.)
+
+To define MIME types, xml files are used. These may determine a file type
+using a filename glob (eg *.txt), or may base determination on a file's
+contents. freedesktop supplies basic definitions, and additional ones may
+be added in /usr/share/mime/packages. Any definitions placed in Overrides.xml
+will override other definitions. Users can add xml files to add custom MIME
+types or to change existing definitions. These are usually placed
+in ~/.local/share/mime/packages. After adding or changing these files, run:
+
+    update-mime-database ~/.local/share/mime
+
+Or to update the system-wide database:
+
+    sudo update-mime-database
+
+At startup, SpaceFM reads and caches these xml files to know how to recognize
+all the file types on your system. Because they are cached, you may need to
+restart SpaceFM after changing MIME type definitions.
+
+For other adjustments, see the MIME menu items below.
+
+.SS Set As Default
+Selecting Set As Default will set the selected application as the default
+application for the selected file's MIME type. In SpaceFM this will move
+the application to the top of the Open submenu.
+
+Specifically, SpaceFM will edit your ~/.config/mimeapps.list file, adding
+the application's .desktop file to the beginning of the list for the given
+MIME type in [Default Applications] and [Added Associations], and will remove
+it from [Removed Associations] if present.
+
+.SS Remove
+Selecting Remove will remove the selected application's association with the
+selected file's MIME type for the current user. It will generally no longer
+appear in the Open submenu for this file type.
+
+Specifically, SpaceFM will edit your ~/.config/mimeapps.list file, removing
+the application's .desktop file for the given MIME type in [Default Applications]
+and [Added Associations], and will add it to [Removed Associations]
+for the given MIME type.
+
+To restore an association that you have removed, use Add...
+
+NOTE: When compiling the list of applications to appear in the Open submenu
+for a text file, SpaceFM will include applications associated with the MIME
+type (eg text/html) and applications associated with the generic 'text/plain'. If you
+select Remove on an application, it will be removed as an associated application for
+the MIME type (eg text/html), but will NOT be removed as an associated application for
+text/plain (unless the MIME type is text/plain). Thus using Remove may not remove the
+application from the Open submenu for this type, unless you also remove it from
+text/plain. Text files are the only files with this behavior.
+
+.SS Add...
+Selecting Add... will open the same dialog as the 'Choose...' item on the Open
+submenu, allowing you to select an application or enter a command to be associated
+with this MIME type. The application won't be made the default unless you check
+option 'Set as default' in the dialog. The application or command will then appear
+as an associated application in the Open submenu for this MIME type.
+
+Specifically, SpaceFM will edit your ~/.config/mimeapps.list file, adding the
+application's .desktop file to the list for the given MIME type
+in [Default Applications] and [Added Associations], and will remove it
+from [Removed Associations] if present. If you entered a command instead of
+choosing an application from the list, a custom desktop file will be created
+for your command in ~/.local/share/applications/.
+
+.SS application.desktop
+The next item on the MIME menu will be the name of the .desktop file for the
+selected application (eg spacefm.desktop). Selecting this item will open the
+copy of the desktop file located in ~/.local/share/applications/ using your
+text editor, allowing you to customise the .desktop file. For example, you
+can change the application's name (how it appears in the menu), the icon as
+it appears in the menu (add an <icon name="icon-name"/> tag), or the command
+run when the application is selected. Edit the file and save it.
+
+If "(*copy)" appears next to the .desktop filename on the menu, this means that
+no copy of the desktop file currently exists in ~/.local/share/applications/. If
+you select it, SpaceFM will automatically copy the desktop file
+from /usr/share/applications/ to ~/.local/share/applications/, and will then
+open the copy in your text editor. The copy in ~/.local/share/applications/
+always takes precedence over other locations.
+
+.SS mimeapps.list
+Selecting mimeapps.list will simply open ~/.config/mimeapps.list (or the older
+location: ~/.local/share/applications/mimeapps.list) in your text editor, allowing
+you to examine added and removed associations, and edit them.
+
+If you edit this file, be careful to use its default formatting. Any changes you
+make to this file will immediately take effect.
+
+.SS applications/
+Selecting applications/ will open the ~/.local/share/applications/ folder in a
+new tab. This folder contains your local copies of .desktop files.
+(See How MIME Works above.)
+
+.SS mime-type.xml
+The next item on the MIME menu will be the name of an xml file which can be used
+to redefine this MIME type (eg text-plain.xml) for the current user. Selecting this
+item will open the file located in ~/.local/share/mime/packages/ using your text
+editor, allowing you to customise the MIME type definition. For example, you can
+change what filename extensions (globs) are used, or change the name of the file
+type as it appears in the Type column of the file list. Edit the file and save it.
+You may then need to run 'update-mime-database ~/.local/share/mime' and/or restart
+SpaceFM for the changes to take effect. (SpaceFM will run update-mime-database for
+you if you opened the file using this menu item.)
+
+If "(*new)" appears next to the xml filename on the menu, this means that the xml
+file doesn't currently exist in ~/.local/share/mime/packages/. If you select it,
+SpaceFM will automatically create the xml file using the definition in /usr/share/mime
+as a template (if present), and will then open the new xml file in your text editor.
+The copy in ~/.local/share/mime/packages/ always takes precedence over other locations.
+
+You can also use this menu item simply to see the MIME type of the selected file.
+For example, if the name of this menu item is "application-zip.xml", then you know
+the MIME type is "application/zip".
+
+.SS mime/packages/
+Selecting mime/packages/ will open the ~/.local/share/mime/packages/ folder in a
+new tab. This folder contains your custom xml files used to redefine MIME
+types (see mime-type.xml above). After adding, editing, or removing files from this
+folder, you may then need to run 'update-mime-database ~/.local/share/mime' and/or
+restart SpaceFM for the changes to take effect.
+
+.SS usr/
+The usr/ submenu gives you access to files and folders in /usr/share/applications/
+and /usr/share/mime/packages/ (or in some cases, /usr/local/share/...).
+
+For example, to see the original .desktop file for an application, select the .desktop
+file in the usr/ submenu. It will be opened in your editor, but can only be edited
+by root. (Normally it is useless to edit files in /usr/share, as a software upgrade
+may overwrite it. Instead, to make system-wide changes, place a copy
+in /usr/local/share/applications and edit that. To make changes for a single user
+only, place a copy in ~/.local/share/applications/).
+
+Likewise, to see the system-wide MIME type definition for the current MIME type,
+select the xml file in the /usr submenu.
+
+The Overrides.xml file, if present, will be opened as root to allow you to edit it.
+This is one place where you can define system-wide changes to MIME types. (Or you
+can copy your custom xml files to /usr/share/mime/packages/). When making changes
+here you must run 'sudo update-mime-database' and restart SpaceFM.
+
+.SH NOTES
+These man pages are an almost verbatim copy of the html user manual
 
 .SH SEE ALSO
 .BR spacefm (1)

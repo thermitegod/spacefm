@@ -1,10 +1,850 @@
-.TH spacefm-devices 7 "December 2021"
+.TH spacefm-devices 7 "May 2022"
 
 .SH NAME
 .B spacefm-devices
 
 .SH DESCRIPTION
 TODO
+
+.SH INTRODUCTION
+SpaceFM includes a programmable udev-based device manager which
+lists device volumes, allows you to mount and unmount devices,
+and detects changes, insertions, and removals. On events,
+SpaceFM can auto-mount and auto-open devices, and run commands
+you specify. In addition, perform-as-root commands allow you to
+mount and unmount as root; change volume labels; and check,
+format, erase, backup, and restore partitions. Like most parts
+of SpaceFM, the behavior and appearance of the device manager is
+customisable.
+
+Whenever SpaceFM is running, whether a window is visible or not, a
+volume monitor is running to monitor device events and take actions.
+The volume monitor requires the udevd daemon to be running for device
+event detection, and enabling kernel polling is recommended.
+
+SpaceFM mounts and unmounts devices using customisable
+Device Handlers which can use udevil (a mount program developed
+specifically for SpaceFM), pmount, the udisks command line tool
+(v1 or v2), or any program you specify. To troubleshoot behavior,
+you can run the same command lines in a terminal that SpaceFM uses,
+or create your own custom handlers or menu items to manipulate devices.
+
+NOTE: If you choose to use udisks with SpaceFM, note that SpaceFM does
+not configure udisks. It merely runs the udisks command  line tool to
+mount and unmount devices (unless you install udevil, pmount or
+specify another program). If you receive the common 'Not Authorized'
+or other similar errors from udisks when mounting, or you are prompted
+for a password, this indicates that udisks (and policykit, etc.) are
+not properly installed or configured. This must be corrected in your
+system configuration, not in SpaceFM. Installing udevil is the quickest
+way to solve such problems.
+
+To have the device manager always running, responding to events even
+while no SpaceFM windows are open, run SpaceFM as a daemon.
+
+When testing the device manager, it may be useful to run the
+initial instance of SpaceFM in a terminal so that you can see
+additional diagnostic output as it's running. Just open a terminal
+window and run
+
+    spacefm.
+
+.SH LIST
+Each panel or tab in SpaceFM can display a Devices list to show devices
+and permit configuration of the underlying volume monitor. A Devices list
+is one interface to the volume monitor's information and actions. Even
+if multiple Devices lists are displayed or multiple SpaceFM windows are
+open, only one volume monitor will be running.
+
+To show or hide a Devices list in each panel, right-click on the file
+list and check or uncheck option View|Devices. You can also show or
+hide the list using the 'Devices' toggle tool item on a toolbar.
+
+The Devices list will display only removable and optical devices. If
+your Devices list is empty, this means there are no removable or
+optical devices with media, the udevd daemon is not installed or is
+not working properly on your system, or you may need to enable kernel
+polling for media detection. To show or hide additional devices, use
+the Show submenu.
+
+You can mount and open a device in the Devices list by simply
+left-clicking on it. The behavior of a left-click will vary depending
+on options New Tab and Single Click.
+
+Right-click on a device to show the Devices context menu.
+
+Middle-clicking on a device is equivalent to right-clicking on the
+device and selecting Remove / Eject. Thus to quickly remove a device,
+just middle-click on it.
+
+.SH MENU
+Similar to the Devices List, SpaceFM's main menu bar and the desktop
+menu include Devices menus which list currently shown devices. Click
+on a device to mount and open it, or right-click on a device for
+additional options. Right-clicking on a device in these menus or in
+the Devices List shows the context menu described below. As in the
+Devices List, you can also middle-click on a device in the menu
+to 'Remove / Eject'.
+
+Like most menus in SpaceFM, to see the help for any menu item,
+hover your mouse cursor over the menu item and press F1. Alternatively,
+right-click on the menu item and select Help in the Design Menu.
+
+The Devices context menu includes: (not all items may be shown)
+
+.SS Remove / Eject
+The 'Remove / Eject' item is used to remove a device and eject
+media. When you click 'Remove / Eject', first a full sync is
+performed to ensure all data has been commited to all disks. If
+the sync takes longer than about one half second, the Task Manager
+will auto-show and will list the Remove command as running. Do not
+remove a device until the Task Manager shows this command has
+finished, or data may not be properly written, which can cause
+data loss. (If using 'Remove / Eject' from the Devices menu on
+the desktop, a popup dialog will show removal progress.) Note
+that if all other filesystems don't sync immediately, this may
+prolong the Remove command. In that case, you can use Unmount
+instead, which only does a filesystem-specific sync.
+
+Next, if the volume is mounted, it will be unmounted, and if the
+device is ejectable, it will be ejected. If the device is removable,
+it is safe to remove it once the 'Remove / Eject' command has
+completed without errors, and any lights on the device indicate
+activity has stopped. (Even after the sync and unmount has finished,
+it may take a second or two for the device to stop flashing due
+to hardware caches. If the device has no activity indicator, it
+is best to wait 5 seconds before removing it.)
+
+If you click 'Remove / Eject' and nothing seems to happen, this
+also indicates the device is ready to be removed.
+
+When a device is removed or unmounted, any tabs showing directories
+on the device may be automatically closed.
+
+Middle-clicking on a device in the Devices list is equivalent to
+right-clicking the device and selecting 'Remove / Eject'. Thus to
+quickly remove a device, just middle-click on it.
+
+NOTE: SpaceFM does NOT disable or power-down usb ports or spin
+down disks when removing a device, it merely performs a sync to
+ensure data is written. Usually this is sufficient to prevent
+data loss. If powering down is required for your device, you
+must add a custom command to the Devices menu, or add the
+applicable command or option to the unmount handler.
+
+.SS Unmount
+Unmount will simply run an unmount command on the selected
+device. The unmount command from the appropriate Device Handler
+will be run- by default, udevil, pumount, or the udisks command
+line tool will be used. No general sync is performed (but a
+filesystem-specific sync is performed by umount). If the command
+takes longer than about one half second, the Task Manager will
+auto-show and the Unmount command will be listed until finished.
+Do not remove a device until the Task Manager shows this command
+has finished, or data may not be properly written, which can
+cause data loss. (If using 'Unmount' from the Devices menu on
+the desktop, a popup dialog will show removal progress.) (Even
+after the unmount has finished, it may take a second or two
+for the device to stop flashing due to hardware caches. If
+the device has no activity indicator, it is best to wait 5
+seconds before removing it.)
+
+.SS Open
+Selecting Open will cause the selected device to be mounted
+if it is not already mounted, and then the mount point directory
+of the device will be opened in the current tab. If an error
+occurs, the error will be shown. If the command takes longer
+than about one half second, the Task Manager will auto-show
+and the Open command will be listed until finished.
+
+You can also open a device by simply left-clicking on it. The
+behavior of a left-click will vary depending on options
+New Tab and Single Click.
+
+To mount, SpaceFM runs the mount command from the appropriate
+Device Handler for the selected device. By default, udevil,
+pmount, or the udisks command line tool will be used. The
+mount point will be determined automatically by the mount
+program or handler, usually an automatically created subfolder
+in /media or /run/media/$USER. If it was automatically created,
+this subfolder will be automatically removed when the device
+is unmounted.
+
+If the device has an entry in /etc/fstab, that mount point
+may be used instead, and its mount directory will not be
+removed when unmounted.
+
+The device will generally be mounted using SpaceFM's Mount
+Options. If the device has an fstab entry, options specified
+there may take precedence, depending on your mount program,
+which may also automatically add or change some mount options.
+
+pmount does not support conventional mount options, so when
+using pmount as the mount command, options set in Mount
+Options will be ignored. Instead, you can include pmount's
+command line options in the device handler. Open In Tab
+works similarly to open, except that the device's mount
+point directory will be opened in a new tab, instead of
+reusing the current tab. This is also the default behavior
+of a left-click on a device if option New Tab is checked.
+Again, a left-click will not display an error, while selecting
+Tab will.
+
+.SS Mount
+Mount will simply run a mount command on the selected device.
+The mount command from the appropriate Device Handler will be
+run - by default, udevil, pumount, or the udisks command line
+tool will be used. The mount point will be determined
+automatically by the mount program or handler, usually an
+automatically created subfolder in /media or /run/media/$USER.
+If the command takes longer than about one half second, the
+Task Manager will auto-show and the Mount command will be
+listed until finished.
+
+The device will generally be mounted using SpaceFM's Mount
+Options. If the device has an fstab entry, options specified
+there may take precedence. The mount program may also
+automatically add or change some mount options.
+
+pmount does not support conventional mount options, so when
+using pmount as the mount command, options set in Mount
+Options will be ignored. Instead, you can include pmount's
+command line options in the device handler.
+
+pmount does not support conventional mount options, so when
+using pmount as the mount command, options set here will be
+ignored. Instead, you can include pmount's command line
+options in the device handler.
+
+.SS Bookmark
+The Bookmark item will only be shown if the selected device
+is a mounted network. This item allows you to create a
+bookmark which will automatically mount the network. Some
+mounted networks are not recognized. To create a URL bookmark
+manually, enter the URL in the Path Bar, right-click in the
+Path Bar, and select New Bookmark.
+
+Note: Any custom menu items you add directly after the Bookmark
+menu item in the Devices menu will also only appear if the
+selected device is a mounted network, providing an automatic
+context.
+
+.SS Root
+The Root submenu allows you to perform actions on a device as
+root. Dialog messages should be read carefully when using any
+command in the Root submenu, because actions performed as root
+can affect any aspect of your system. SpaceFM will explain what
+is about to happen and will let you examine the final command
+line before it is executed.
+
+For details, see the Root section below.
+
+.SS Settings
+The Settings submenu allows you to (globally) configure the
+appearance of the Devices list, controlling what devices are
+listed, how they are listed, what icons are used, etc., and
+also allows you to set the volume monitor to run commands on
+various events, such as device insertions, etc.
+
+For details, see the Settings section below.
+
+.SS Properties
+The Properties item will gather and show information about
+the currently selected device.
+
+If mounted, any mtab lines related to the device will be
+shown in DEVICE, showing you how and where the device is mounted.
+
+USAGE will show information about the filesystem on the device.
+
+If the device has any related lines in the /etc/fstab file,
+these will be listed in FSTAB. These may include lines which
+are disabled (# comments).
+
+In the INFO section, the device's UUID will be listed if
+known, as well as detailed information from udev on the
+device's properties.
+
+The PROCESSES section, shown for mounted devices, uses lsof
+to display any processes which are using the device. Sometimes
+when unmounting a device, you will receive an error that the
+device is in use. You can check this processes list to see
+what is holding the device open.
+
+.SS Custom Menus
+As with most menus, it is also possible to add your own
+custom menu items and submenus to the Devices menu. This
+allows you to add commands which can take actions based
+on the currently selected device in one or more panels.
+
+There are several provided bash variables which your
+commands can use to get information about the currently
+selected device:
+
+    "$fm_device"              selected device (eg /dev/sr0)  (same as %v)
+    "$fm_device_udi"          device ID
+    "$fm_device_mount_point"  device mount point if mounted  (eg /media/dvd) (%m)
+    "$fm_device_label"        device volume label            (same as %l)
+    "$fm_device_fstype"       device fs_type (eg vfat)
+    "$fm_device_size"         device volume size in bytes
+    "$fm_device_display_name" device display name
+    "$fm_device_icon"         icon currently shown for this device
+    $fm_device_is_mounted     device is mounted (0=no or 1=yes)
+    $fm_device_is_optical     device is an optical drive (0 or 1)
+    $fm_device_is_table       a partition table (usually a whole device)
+    $fm_device_is_floppy      device is a floppy drive (0 or 1)
+    $fm_device_is_removable   device appears to be removable (0 or 1)
+    $fm_device_is_audiocd     optical device contains an audio CD (0 or 1)
+    $fm_device_is_dvd         optical device contains a DVD (0 or 1)
+    $fm_device_is_blank       device contains blank media (0 or 1)
+    $fm_device_is_mountable   device APPEARS to be mountable (0 or 1)
+    $fm_device_nopolicy       policy_noauto set (no automount) (0 or 1)
+
+    "$fm_panel3_device"       panel 3 selected device (eg /dev/sdd1)
+    "$fm_panel3_device_udi"   panel 3 device ID
+    ...                       (all these are the same as above for each panel)
+
+For example, to add a custom command which shows the size of the currently
+selected device in bytes, use this command line:
+
+    echo "$fm_device_size"
+
+.SH Settings
+The Settings submenu is your interface for controlling
+the appearance and behavior of the Devices list and
+volume monitor. Options include:
+Show|Internal Drives
+By default, the Devices list will only show removable
+and optical drives, while hiding internal system drives.
+If option Show|Internal Drives is checked, internal system
+drives will also be shown in the Devices list. For the root
+user, option Show|Internal Drives is checked by default.
+
+Internal drives are often treated differently by mount
+programs. You may not be able to mount or unmount them
+as a normal (non-root) user without making changes to
+/etc/fstab or to the mount program's configuration.
+
+Note that some external esata drives report themselves
+as internal, so they may not be shown unless Show|Internal
+Drives is checked. Another solution with these drives is
+to enter an exception for them in Show|Volumes.
+
+.SS Show|Empty Drives
+By default, the Devices list will only show drives which
+contain media, and will hide empty drives. If option
+Show|Empty Drives is checked, drives not containing
+media will also be shown.
+
+Properties can still be obtained on empty drives, and
+you can use Remove or Reload to open or close the tray.
+
+NOTE: For proper detection of media, enabling kernel
+polling may be required.
+
+.SS Show|Partition Tables
+By default, the Devices list will not show devices
+which contain partition tables, such as a whole device
+file (eg /dev/sda) which contains the primary partition
+table in its MBR, or a partition (eg /dev/sda4) which
+contains the extended partition table. Normally you
+will not work with these device files so it is not
+useful to show them. If you do want them shown, check
+option Show|Partition Tables. If the device is internal,
+option Show|Internal Drives is also required.
+
+IMPORTANT: For some purposes, a whole device file,
+such as /dev/sda, designates not just the primary
+partition table, but also the entire device including
+partitions (/dev/sda1, /dev/sda2, etc.) Thus if you
+format /dev/sda, for example, you will overwrite all
+partitions on the entire device.
+
+However, in some cases a device uses no partitions,
+and the entire device has been formatted with a single
+filesystem. In this case, the Devices list does not
+consider the whole device file a partition table, so
+option Show|Partition Tables will have no effect on
+it being shown.
+
+The size displayed for a whole device file (eg /dev/sda)
+will generally be the size of the entire device
+(including all partitions), regardless of whether
+it contains a partition table or a filesystem.
+
+Specifically, SpaceFM considers a device to be a
+partition table if its udev properties include a
+'partition table:' line, or the device is a partition
+of type 0x05 (extended partition).
+
+.SS Show|Mounted Networks
+By default, the Devices list will show recognized
+mounted network filesystems (eg nfs, cifs, etc).
+This enables you to click on the network to open it's
+mount point directory, or right-click on it to use the
+Unmount and Bookmark menu items. If you do not want mounted
+networks listed, uncheck option Show|Mounted Networks.
+
+.SS Show|Mounted Other
+By default, the Devices list will show files mounted to
+loop devices, and other non-block devices, such as
+mounted fuse filesystems. For example, if you right-click
+on an ISO file and select Open|Mount ISO, the ISO file
+will be mounted so you can browse its contents. You can
+then click on this device in the Devices list to open
+it's mount point directory, or right-click on it to use
+Remove or Unmount.
+
+If you do not want mounted files and non-block device
+filesystems listed, uncheck option Show|Mounted Other.
+Show|Ignore Hide Policy
+Some devices may have their udev property
+UDISKS_PRESENTATION_HIDE set to 1. This is a hint to software
+that the device should be hidden. By default, SpaceFM
+will honor these hints and hide such devices. To ignore
+such hints, check option Show|Ignore Hide Policy.
+
+The hide policy of a device can be seen by selecting
+Properties for the device and observing the value of
+'presentation hide:' in the INFO section.
+
+To ignore UDISKS_PRESENTATION_HIDE for a specific
+device, use Show|Volumes.
+
+.SS Show|Volumes
+The Show|Volumes dialog allows you to specify display
+exceptions for some devices. When deciding whether to
+show or hide a device in the Devices list, SpaceFM will
+first consult the Show|Volumes list. If the device is
+present, it will be shown or hidden based on its entry
+in this list. All other show or hide settings will be
+ignored for this device.
+
+One example use for Show|Volumes is to show an external
+esata drive which is erroneously identified by udev as
+internal. Even if option Show|Internal Drives is
+unchecked, the drive will be shown if listed in Show|Volumes.
+
+Show|Volumes opens a dialog which allows you to specify
+device files, volume labels, or device IDs in a
+space-separated list. There must be a space between
+entries and a plus or minus sign directly before each
+item. This list is case-sensitive.
+
+For example, to force showing device /dev/sdd1, include:
+    +/dev/sdd1
+
+Or, to force hiding of /dev/sdd1, include:
+    -/dev/sdd1
+
+The '/dev/' portion of the device file MUST be included.
+
+Devices can also be identified by volume label.
+For example, to always hide a device with volume
+label "Label With Space" use:
+    -Label With Space
+
+DO NOT use quotes to enclose the label, even if it contains spaces.
+
+Finally, a device's ID may be used:
+    +ata-OCZ-part4
+
+For example, this list in Show|Volumes:
+    +/dev/sdd1 -Label With Space +ata-OCZ-part4
+
+would cause /dev/sdd1 and the OCZ device to be shown,
+and the volume with label "Label With Space" to be hidden.
+
+.SS Show|Display Name
+Display Name opens a dialog which allows you to edit
+the display name format used for the Devices list.
+This controls how device names are displayed.
+
+In addition to separator characters of your choice,
+the following substitution variables may be used:
+
+    %v  device filename (eg sdd1)
+    %s  total size (eg 800G)
+    %t  fstype (eg ext4)
+    %l  volume label (eg Label or [no media])
+    %m  mount point if mounted, or ---
+    %i  device ID
+
+A device in the list is guaranteed to have a unique,
+non-blank device filename - no two will be alike.
+The other values may be duplicated or empty in
+some cases.
+
+After you click OK, the display names of the currently
+shown devices will be updated. The list is sorted
+alphabetically, ignoring spaces.
+
+.SS Auto Mount|Mount Optical
+The Auto Mount submenu allows you to control the
+auto-mounting behavior of the volume monitor. This
+determines what happens when a new device or new
+medium is inserted, whether a new tab is opened,
+and the auto-unmount behavior.
+
+IMPORTANT: If you have multiple auto-mount solutions
+installed and running, this can create confusing
+behavior. For example, if you use devmon, then when
+using SpaceFM's auto-mount features, it is best to
+disable devmon.
+
+If option Mount Optical is checked, optical devices
+such as CD/DVD drives will be automatically mounted
+when media is inserted, and at SpaceFM startup.
+
+TIP: For additional information on what the volume
+monitor is doing, try running SpaceFM in a terminal.
+Information on devices being auto-mounted will be
+printed to the terminal, and error messages generated
+by your command may be seen there as well.
+
+.SS Auto Mount|Mount Removable
+If option Mount Removable is checked, the device
+will be automatically mounted whenever a removable
+device is inserted, and at SpaceFM startup.
+
+.SS Auto Mount|Ignore No Policy
+Some devices may have their udev property
+UDISKS_PRESENTATION_NOPOLICY set to 1. This is a
+hint to software that the device should not be
+automatically mounted. By default, SpaceFM will honor
+these hints and not auto-mount such devices. To ignore
+such hints, check option Show|Ignore No Policy.
+
+The policy of a device can be seen by selecting
+Properties for the device and observing the value
+of 'presentation nopolicy:' in the INFO section.
+
+To ignore UDISKS_PRESENTATION_NOPOLICY for a
+specific device, use Mount|Volumes.
+
+.SS Auto Mount|Mount Volumes
+The Mount Volumes list works similarly to the
+Show|Volumes list, except that it determines what
+devices will or will not be auto-mounted (and
+auto-unmounted, if option Unmount On Exit is checked).
+When deciding whether to auto-mount a device, SpaceFM
+will first consult the Mount Volumes list. If the
+device is present, it will or will not be auto-mounted
+based on its entry in this list. All other auto-mount
+settings will be ignored for this device.
+
+Mount Volumes opens a dialog which allows you to
+specify device files, volume labels, or device IDs
+in a space-separated list. There must be a space
+between entries and a plus or minus sign directly
+before each item. This list is case-sensitive.
+
+For example, to force auto-mounting of device /dev/sdc1, include:
+    +/dev/sdc1
+
+Or, to inhibit auto-mounting of /dev/sdc1, include:
+    -/dev/sdc1
+
+The '/dev/' portion of the device file MUST be included.
+
+Devices can also be identified by volume label.
+For example, to inhibit auto-mounting of a device
+with volume label "Label With Space" use:
+    -Label With Space
+
+DO NOT use quotes to enclose the label, even if it contains spaces.
+
+Finally, a device's ID may be used:
+    +ata-OCZ-part4
+
+For example, this list in Mount Volumes:
+    +/dev/sdc1 -Label With Space +ata-OCZ-part4
+
+would cause /dev/sdc1 and the OCZ device to be
+auto-mounted, and the volume with label "Label
+With Space" to not be auto-mounted.
+
+.SS Auto Mount|Mount Dirs
+This dialog allows you to enter a single directory
+where SpaceFM should automatically create mount
+point directories for fuse and similar filesystems
+(%a in handler commands). This directory must be
+user-writable (do NOT use /media); if it doesn't
+already exist, it will be created (including parents).
+For best results with all handlers, avoid spaces
+and other special characters. If left blank,
+~/.cache/spacefm/ (or $XDG_CACHE_HOME/spacefm/) is used.
+
+The following variables are recognized and will be
+replaced with their current
+value: $USER $UID $HOME $XDG_RUNTIME_DIR $XDG_CACHE_HOME
+
+Note that some handlers or mount programs may not
+obey this setting. It will only be used by handlers
+which use %a in their mount or open commands.
+
+Anytime a device, protocol or file handler uses %a
+to automatically create a mount point, the specified
+directory will be used as the parent. This applies
+to both manual and automatic mounts.
+
+Note that empty subdirectories will be routinely and
+automatically removed from the specified directory.
+
+.SS Auto Mount|Open Tab
+If option Open Tab is checked, when a device is
+auto-mounted by SpaceFM, a new tab will be opened
+for the mount point directory of the device. If
+unchecked, the mount point directory will not be
+automatically opened.
+
+Note that the Open Tab option only affects what
+happens after a device is auto-mounted by SpaceFM.
+It has no effect on devices mounted by other means,
+nor does it apply to devices mounted by user action
+within SpaceFM.
+
+.SS Auto Mount|Unmount On Exit
+If option Unmount On Exit is checked, any device which
+would normally be auto-mounted by SpaceFM (based on
+auto-mount settings) will be unmounted when SpaceFM
+exits. Exit occurs when the last SpaceFM window is
+closed, unless a daemon or desktop manager daemon
+is running. Note that if SpaceFM is killed with
+SIGKILL (such as when you logout of your X session),
+the automatic unmount will NOT occur. (To unmount
+all devices before or just after X logoff, consider
+running devmon --unmount-all (devmon is distributed
+with udevil).
+
+When mounting a device, if there is no fstab entry
+for the device, your mount program may create a
+subfolder for the device mount point in /media
+or /run/media/$USER. If you or SpaceFM unmounts
+the device, this subfolder will be removed. However,
+if you logoff without unmounting the device, the
+subfolder may be left behind. In order to avoid
+these subfolders accumulating in /media, SpaceFM
+can unmount devices on exit.
+
+If you don't check option Unmount On Exit, you may
+need to unmount devices in some other way before
+logging off to avoid these /media subfolders accumulating.
+
+.SS Auto Run|On Mount
+Auto Run|On Mount opens a dialog which allows you
+to set a command line to be run when a removable
+drive or optical data disc is auto-mounted by SpaceFM.
+This command can be as simple as a program name to be
+run, or can be a one line bash script. The following
+substitution variables may be used in the command line:
+
+    %v  device (eg /dev/sda1)
+    %l  device volume label
+    %m  device mount point (eg /media/disk)
+
+Note: When the command is run, %v, %l, and %m refer
+to the device being added or removed, not the device
+which is currently selected in the Devices list.
+
+For this command to be run, the device must be
+auto-mounted by SpaceFM. It will not be run for
+devices mounted by other means, or for devices
+mounted by user action within SpaceFM.
+
+The command will not be run for devices which are
+auto-mounted at SpaceFM's initial startup. Thus
+Auto Run affects devices you add after SpaceFM is running.
+
+For additional information on what the volume monitor
+is doing, try running SpaceFM in a terminal. Information
+on devices being auto-mounted will be printed to the
+terminal, and error messages generated by your command
+may be seen there as well.
+
+For example, to automatically add a mounted volume to
+traydevice, set the On Mount command line to:
+
+    traydevice %v
+Another example: To have notify-send alert you of new drive mounts:
+
+    notify-send --icon=block-device --urgency=low "Volume %l has been mounted"
+
+.SS Auto Run|On Audio CD
+Similar to Auto Run|On Mount, Auto Run|On Audio CD
+opens a dialog which allows you to set a command line
+to be run when an audio CD is inserted in a qualified
+optical device.
+
+The command will be run only if: a) option Mount
+Optical is checked, AND b) the device qualifies
+for auto-mounting based on Mount Volumes
+(ie it is not inhibited).
+
+The command will not be run for media which is already
+inserted during SpaceFM's initial startup. Thus
+Auto Run|On Audio CD affects media you insert after
+SpaceFM is running.
+
+For example, to set an audio CD to automatically
+start playing in the mpv media player, set the On
+Audio CD command line to:
+
+    mpv cdda://%v
+
+.SS Auto Run|On Video DVD
+Similar to Auto Run|On Audio CD, Auto Run|On Video
+DVD opens a dialog which allows you to set a command
+line to be run when a video DVD is inserted in a
+qualified optical device.
+
+The command will be run only if: a) the device is
+auto-mounted by SpaceFM, AND b) the device
+contains a video DVD.
+
+The command will not be run for devices which are
+auto-mounted at SpaceFM's initial startup, nor will
+it be run for devices mounted by other means, nor for
+devices mounted by user action within SpaceFM.
+
+For example, to set a video DVD to automatically start
+in the mpv media player, set the On Video DVD
+command line to:
+
+    mpv dvd://%v
+
+.SS Auto Run|On Insert
+Auto Run|On Insert opens a dialog which allows you to
+set a command line to be run when any device is inserted.
+This allows you to connect your command to the
+insertion (device added) event.
+
+Auto-mount settings have no impact on this function.
+
+Note that when inserting a single drive, your command
+may be run several times - once for each device file
+added. For example, if you insert device /dev/sdd
+which contains one partition /dev/sdd1, your command
+will be run once with %v=/dev/sdd and once
+with %v=/dev/sdd1. It is up to your command or script
+to discard events for unwanted devices or partitions.
+A script can run one of these commands to get current
+information on a device's status:
+
+    udevil info /dev/sdX
+    udisks --show-info /dev/sdX
+    udisksctl info -b /dev/sdX
+
+For greater control, an event handler may be set for event evt_device.
+
+.SS Auto Run|On Unmount
+Auto Run|On Unmount opens a dialog which allows you to
+set a command line to be run when any device is unmounted
+by any means.
+
+Auto-mount settings have no impact on this function.
+
+For example, to automatically remove the drive from traydevice,
+set the On Unmount command line to:
+
+    pkill -f "traydevice %v"
+For greater control, an event handler may be set for event evt_device.
+
+.SS Auto Run|On Remove
+Auto Run|On Remove opens a dialog which allows you to set a
+command line to be run when any device is removed. This allows
+you to connect your command to the removal event.
+
+The device must be removed. Ejection of media will not
+cause this command to be run.
+
+Auto-mount settings have no impact on this function.
+
+Note that when removing a single drive, your command may be
+ run several times - once for each device file removed.
+ For example, if you remove device /dev/sdd which contains
+ one partition /dev/sdd1, your command will be run once
+ with %v=/dev/sdd and once with %v=/dev/sdd1. It is up to
+ your command or script to discard events for unwanted
+ devices or partitions. Note that when the command is
+ run, %v equals the device file which has been removed,
+ not the device file which is selected in the Devices list.
+
+For greater control, an event handler may be set for event evt_device.
+Device Handlers
+Opens the Device Handlers configuration dialog.
+Protocol Handlers
+Opens the Protocol Handlers configuration dialog.
+Mount Options
+Mount Options opens a dialog which allows you to set default
+mount options. These options may be used in Device Handlers
+via the substitution variable %o, and are used by the default
+mount command for all mounts, including auto-mounts.
+
+In addition to regular options, you can also specify options
+to be added or removed for a specific filesystem type by using
+the form OPTION+FSTYPE or OPTION-FSTYPE.
+
+For example, this set of options:
+    nosuid, sync+vfat, sync+ntfs, noatime, noatime-ext4
+
+will add nosuid and noatime for all filesystem types, add sync
+for vfat and ntfs only, and remove noatime for ext4.
+
+Note that only handlers which use the %o substitution variable
+will use options specified here. They will not apply to mounts
+performed by other handlers.
+
+Note that some options, such as nosuid or noatime, may be added
+by your mount program even if you don't include them. For
+example, if using udevil, you may need to also change the default
+options in /etc/udevil/udevil.conf. Also, options specified
+in /etc/fstab may take precedence over options specified
+in Mount Options.
+
+pmount does not support conventional mount options, so when
+using pmount as the mount command, options set here will be
+ignored. Instead, you can include pmount's command line options
+in the appropriate Device Handler.
+Change Detection
+Change Detection opens a dialog which allows you to enter a
+comma- or space-separated list of filesystems which should
+NOT be monitored for changes to files. This setting only
+affects non-block devices (such as nfs or fuse), and is usually
+used to prevent SpaceFM becoming unresponsive with network filesystems.
+
+When SpaceFM opens a directory in a tab, normally it will
+detect changes, for example if you edit or change the
+properties or sizes of files in the directory. Because SpaceFM
+works directly with the kernel for file information, and because
+some network filesystems become temporarily unresponsive when
+busy, this can cause SpaceFM to become temporarily unresponsive
+to mouse clicks, etc.
+
+To prevent this, the device's filesystem can be listed in the
+Change Detection Blacklist. In this case, SpaceFM will not detect
+changes to files, load thumbnails, or load subdirectory sizes,
+and you will need to manually refresh the file list view to see
+file changes. To do so, right-click on the file list and select
+View|Refresh, or press F5.
+
+Note that even if the filesystem is listed in Change Detection,
+new files created in the directory, or files which are renamed
+or deleted, will be detected and read.
+
+An alternative approach to blacklisting filesystems is to close
+the tab containing the filesystem while a copy is in progress to
+that directory.
+
+.SS New Tab
+If option New Tab is checked, when a device is opened with a
+single or double click (depending on option Single Click), the
+mount point directory will be opened in a new tab in the current
+panel. If unchecked, the mount point directory will be opened
+in the current tab.
+
+.SH NOTES
+These man pages are an almost verbatim copy of the html user manual
 
 .SH SEE ALSO
 .BR spacefm (1)

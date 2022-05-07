@@ -1,10 +1,147 @@
-.TH spacefm-plugins 7 "December 2021"
+.TH spacefm-plugins 7 "May 2022"
 
 .SH NAME
 .B spacefm-plugins
 
 .SH DESCRIPTION
 TODO
+
+.SH Introduction
+Like any plugin, a SpaceFM plugin extends the features of the file manager. What's
+different about SpaceFM plugins is how readily they're created. Any custom item can
+be turned into a plugin simply by exporting it to a plugin file. SpaceFM plugins use
+an open format which can include additional files, and can also store persistent data
+between sessions. SpaceFM plugins can do anything a bash script can do - which means
+just about anything.
+
+Plugins can be shared and obtained in the SpaceFM Wiki.
+
+It is your responsibility to evaluate the safety and applicability to your purposes of all plugins.
+
+.SH Import
+You can import plugins into any SpaceFM menu or toolbar.
+
+To do so, use Plugins|Import|File to import a plugin file, or Plugins|Import|URL to
+import directly from URL. No root password is required. The plugin will be copied to
+the design clipboard. You may then use Paste on the Design Menu to paste the item
+into any location in any supported menu. As with any custom items, you cannot paste
+the item into some parts of the Plugins menu and the file browser's Open menu.
+
+If option Plugins|Import|Verbose is checked, after the plugin has been copied to
+the design clipboard, you'll see a message reminding you what to do next.
+
+When installed or imported, plugins lose any key shortcut which was saved with
+the plugin, and also lose their Use as handler for context setting. These settings
+must be manually added after installation/import if desired.
+
+Alternatively, you can use New|Import on the Design Menu to import and paste
+a plugin in one step.
+
+Note: Exported bookmarks in a "spacefm-bookmarks" plugin file cannot be installed
+or imported via the Plugins menu, but can be imported into other menus.
+
+.SH Uninstall
+To uninstall a plugin, use Remove on the Design Menu. You will be prompted for the
+root password, and all files and settings associated with the plugin will be removed.
+
+If the installed plugin is a submenu plugin, you can only remove the top submenu
+of the plugin. You cannot remove individual items from within it.
+
+.SH Creation And Files
+The best way to create a plugin, whether for your own use or for others, is to
+create a custom command. Develop the command to work the way you want, and set
+any Design Mode options for how the command is best run. When you're ready to
+create the plugin, simply use Export on the Design Menu to save the
+command to a plugin file.
+
+A plugin may also contain multiple related commands and submenus of commands. To
+create such a plugin, simply export a submenu.
+
+Exporting commands as plugins also provides a way to back up commands. By exporting
+it to a plugin file, your custom item becomes portable and self-contained - you can
+always use the plugin file to import it back into any SpaceFM session, either as a
+normal custom item, or as an installed plugin.
+
+.SS Plugin File
+The SpaceFM plugin file uses a simple and open format. The plugin file is simply
+a tar.gz archive. This allows you to open any plugin file and examine its contents
+using your text editor. With the possible exception of any extra files included
+within the plugin, all files are plain text files. When creating plugins, try to
+honor this design by using open, accessible text file formats.
+
+A plugin file, such as Example.spacefm-plugin.tar.gz, contains a single file
+named 'plugin' which SpaceFM uses to define the contents of the plugin. This file
+is plain text and can be viewed in your editor, but should NOT be edited. In
+addition, plugin files contain one or more command directories, one for each command
+in the plugin. Plugins may be a single command, or they may be a single submenu which
+contains an unlimited number of commands and submenus. Thus a set of commands with
+related functions can be distributed as a single submenu plugin. (To create a submenu
+plugin, simply export a submenu.)
+
+TIP: If you have a larger plugin, you can manually convert it to tar.xz format and
+SpaceFM will accept it (only tar.gz or tar.xz).
+
+.SS Extra Files
+Additional files required by your plugin can be added to the command directory, which
+may be opened using Open In Browser on the Options page of the Item Properties
+dialog. When the command is exported, these files will be included in the plugin
+file. The command script (exec.sh) is located in the command directory. Files in
+the command directory should be considered read-only (once your plugin is
+installed, your script will probably not have permission to modify them).
+
+You may also add a file named 'icon'. SpaceFM will automatically display this
+icon for the plugin if no other icon is set in the Item Properties. Small icons
+work best, as your icon may not be resized. If you don't want to include a
+custom 'icon' file, you can also simply set a standard icon for the command using
+the Design Menu. Users can also override your default icon in this way. Keep in
+mind that the user may be using a different icon theme than you are, so try to
+stick with common icon names. Using an absolute path for the icon is not recommended.
+
+In addition, adding a README file to the command directory is recommended. This file
+will be created automatically if you select Help from the Design Menu. This file
+explains what your plugin does, how to use it, and may include an email address,
+website, license terms, etc.
+
+If multiple commands in your plugin need to access shared files, it is possible to
+place them in the top level of the plugin file, the plugin directory. SpaceFM won't
+do this for you automatically when exporting a command, but you can add them using
+an archive application after the plugin file has been created. Or, if your plugin is
+already installed and you added files to its plugin directory, these files WILL be
+included in the plugin file when the plugin is exported again. Your scripts can access
+this directory using "$fm_plugin_dir". To browse it, use Open In Browser on the Options
+page of the Item Properties dialog. One limitation of using this directory is that if a
+user copies commands from within your plugin submenu to another menu, the files in the
+plugin directory will NOT be included. Thus, it may be better to include all of a
+command's required files in its command directory instead. In this way, each command
+is complete when copied elsewhere. Or, if multiple commands needs to access the same
+files, consider creating a config directory in the user's home
+directory (eg ~/.config/spacefm-plugin-myexample) for your plugin.
+
+.SS Data Files
+If necessary, your plugin can maintain changing, persistent data files in the
+user's home folder to store user preferences and other changing data. Your script
+should store these files only in the data directory ("$fm_cmd_data", accessed via
+Open In Browser on the Options page of the Item Properties dialog). Data files are
+NOT included when the command or plugin is exported, and they are deleted when the
+item or plugin is removed. Each command or plugin has its own data directory. If
+you need to populate the data directory with initial files, consider making your script
+copy them from the command directory when it is first run. Because it is located in
+the user's home folder, you should always document what files you are storing in the
+data directory. Most plugins do not require any data files.
+
+Remember that the data directory may not exist, so make sure your script always
+creates it before attempting to use it. Place this command in the
+initial part of your script:
+
+    mkdir -p "$fm_cmd_data"
+
+Before distributing a plugin, be sure to open or extract the archive and examine
+all files in your text editor to be clear on what data you are sharing. For
+example, some entries may be included in the plugin file even if they are
+currently disabled in the command.
+
+.SH NOTES
+These man pages are an almost verbatim copy of the html user manual
 
 .SH SEE ALSO
 .BR spacefm (1)
