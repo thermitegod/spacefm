@@ -18,6 +18,8 @@
 #include <string>
 #include <filesystem>
 
+#include <stdio.h>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>
@@ -327,6 +329,21 @@ main(int argc, char* argv[])
 {
     // logging init
     ztd::Logger->initialize();
+
+    // FIXME - This directs all writes to stderr into /dev/null, should try
+    // and only have writes from ffmpeg get redirected.
+    //
+    // This is only done because ffmpeg, through libffmpegthumbnailer,
+    // will output its warnings/errors when files are having their thumbnails generated. Which
+    // floods stderr with messages that the user can do nothing about, such as
+    // 'deprecated pixel format used, make sure you did set range correctly'
+    //
+    // An alternative solution to this would be to use Glib::spawn_command_line_sync
+    // and redirecting that output to /dev/null, but that would involve using the
+    // libffmpegthumbnailer CLI program and not the C++ interface. Not a solution that I want to do.
+    //
+    // In closing stderr is not used by this program for output, and this should only affect ffmpeg.
+    freopen("/dev/null", "w", stderr);
 
     // load spacefm.conf
     load_conf();
