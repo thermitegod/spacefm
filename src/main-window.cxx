@@ -7336,17 +7336,17 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
             if (!focus)
                 return false;
             cmd = ztd::replace(cmd, "%f", focus);
-            const char* change;
+            std::string change;
             switch (state)
             {
                 case VFSVolumeState::VFS_VOLUME_ADDED:
-                    change = ztd::strdup("added");
+                    change = "added";
                     break;
                 case VFSVolumeState::VFS_VOLUME_REMOVED:
-                    change = ztd::strdup("removed");
+                    change = "removed";
                     break;
                 default:
-                    change = ztd::strdup("changed");
+                    change = "changed";
                     break;
             }
             cmd = ztd::replace(cmd, "%v", change);
@@ -7361,100 +7361,97 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
         return false;
 
     // replace vars
-    const char* replace;
-
+    std::string replace;
     if (set == event_handler.win_click)
     {
-        replace = ztd::strdup("ewptfbm");
+        replace = "%e %w %p %t %f %b %m";
         state = (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_SUPER_MASK |
                           GDK_HYPER_MASK | GDK_META_MASK));
     }
     else if (set == event_handler.win_key)
-        replace = ztd::strdup("ewptkm");
-    else if (set == event_handler.pnl_show)
-        replace = ztd::strdup("ewptfv");
-    else if (set == event_handler.tab_chdir)
-        replace = ztd::strdup("ewptd");
-    else
-        replace = ztd::strdup("ewpt");
-
-    std::string rep;
-    char var[3];
-    var[0] = '%';
-    var[2] = '\0';
-    int i = 0;
-    std::string cmd = ucmd;
-    while (replace[i])
     {
-        /*
-        %w  windowid
-        %p  panel
-        %t  tab
-        %f  focus
-        %e  event
-        %k  keycode
-        %m  modifier
-        %b  button
-        %v  visible
-        %d  cwd
-        */
-        var[1] = replace[i];
-        if (var[1] == 'e')
-            cmd = ztd::replace(cmd, var, event_name);
-        else if (ztd::contains(cmd, var))
+        replace = "%e %w %p %t %k %m";
+    }
+    else if (set == event_handler.pnl_show)
+    {
+        replace = "%e %w %p %t %f %v";
+    }
+    else if (set == event_handler.tab_chdir)
+    {
+        replace = "%e %w %p %t %d";
+    }
+    else
+    {
+        replace = "%e %w %p %t";
+    }
+
+    /**
+     * %w  windowid
+     * %p  panel
+     * %t  tab
+     * %f  focus
+     * %e  event
+     * %k  keycode
+     * %m  modifier
+     * %b  button
+     * %v  visible
+     * %d  cwd
+     */
+    std::string rep;
+    std::string cmd = ucmd;
+    if (ztd::contains(replace, "%f"))
+    {
+        if (!focus)
         {
-            switch (var[1])
-            {
-                case 'f':
-                    if (!focus)
-                    {
-                        rep = fmt::format("panel{}", panel);
-                        cmd = ztd::replace(cmd, var, rep);
-                    }
-                    else
-                        cmd = ztd::replace(cmd, var, focus);
-                    break;
-                case 'w':
-                    rep = fmt::format("{:p}", (void*)main_window);
-                    cmd = ztd::replace(cmd, var, rep);
-                    break;
-                case 'p':
-                    rep = fmt::format("{}", panel);
-                    cmd = ztd::replace(cmd, var, rep);
-                    break;
-                case 't':
-                    rep = fmt::format("{}", tab);
-                    cmd = ztd::replace(cmd, var, rep);
-                    break;
-                case 'v':
-                    cmd = ztd::replace(cmd, var, visible ? "1" : "0");
-                    break;
-                case 'k':
-                    rep = fmt::format("{:#x}", keyval);
-                    cmd = ztd::replace(cmd, var, rep);
-                    break;
-                case 'b':
-                    rep = fmt::format("{}", button);
-                    cmd = ztd::replace(cmd, var, rep);
-                    break;
-                case 'm':
-                    rep = fmt::format("{:#x}", state);
-                    cmd = ztd::replace(cmd, var, rep);
-                    break;
-                case 'd':
-                    if (file_browser)
-                    {
-                        rep = bash_quote(ptk_file_browser_get_cwd(file_browser));
-                        cmd = ztd::replace(cmd, var, rep);
-                    }
-                    break;
-                default:
-                    // failsafe
-                    return false;
-                    break;
-            }
+            rep = fmt::format("panel{}", panel);
+            cmd = ztd::replace(cmd, "%f", rep);
         }
-        i++;
+        else
+        {
+            cmd = ztd::replace(cmd, "%f", focus);
+        }
+    }
+    else if (ztd::contains(replace, "%w"))
+    {
+        rep = fmt::format("{:p}", (void*)main_window);
+        cmd = ztd::replace(cmd, "%w", rep);
+    }
+    else if (ztd::contains(replace, "%p"))
+    {
+        rep = fmt::format("{}", panel);
+        cmd = ztd::replace(cmd, "%p", rep);
+    }
+    else if (ztd::contains(replace, "%t"))
+    {
+        rep = fmt::format("{}", tab);
+        cmd = ztd::replace(cmd, "%t", rep);
+    }
+    else if (ztd::contains(replace, "%v"))
+    {
+        cmd = ztd::replace(cmd, "%v", visible ? "1" : "0");
+    }
+    else if (ztd::contains(replace, "%k"))
+    {
+        rep = fmt::format("{:#x}", keyval);
+        cmd = ztd::replace(cmd, "%k", rep);
+    }
+    else if (ztd::contains(replace, "%b"))
+    {
+        rep = fmt::format("{}", button);
+        cmd = ztd::replace(cmd, "%b", rep);
+    }
+    else if (ztd::contains(replace, "%m"))
+    {
+        rep = fmt::format("{:#x}", state);
+        cmd = ztd::replace(cmd, "%m", rep);
+    }
+    else if (ztd::contains(replace, "%d"))
+    {
+        if (file_browser)
+        {
+            rep = bash_quote(ptk_file_browser_get_cwd(file_browser));
+            cmd = ztd::replace(cmd, "%d", rep);
+        }
     }
 
     if (!inhibit)
