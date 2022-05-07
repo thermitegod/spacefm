@@ -27,6 +27,8 @@
  * free the list after calling this function.
  */
 
+#define PTK_FILE_MENU(obj) (static_cast<PtkFileMenu*>(obj))
+
 struct PtkFileMenu
 {
     PtkFileMenu();

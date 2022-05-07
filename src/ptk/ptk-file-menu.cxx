@@ -122,7 +122,7 @@ on_popup_list_large(GtkMenuItem* menuitem, PtkFileBrowser* browser)
 {
     (void)menuitem;
     int p = browser->mypanel;
-    FMMainWindow* main_window = static_cast<FMMainWindow*>(browser->main_window);
+    FMMainWindow* main_window = FM_MAIN_WINDOW(browser->main_window);
     char mode = main_window->panel_context[p - 1];
 
     xset_set_b_panel_mode(p, "list_large", mode, xset_get_b_panel(p, "list_large"));
@@ -311,7 +311,7 @@ on_popup_detailed_column(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
     if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
     {
         // get visiblity for correct mode
-        FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
+        FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
         int p = file_browser->mypanel;
         char mode = main_window->panel_context[p - 1];
 
@@ -335,7 +335,7 @@ on_popup_toggle_view(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
 {
     (void)menuitem;
     // get visiblity for correct mode
-    FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
+    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
     int p = file_browser->mypanel;
     char mode = main_window->panel_context[p - 1];
 
@@ -407,7 +407,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
         return;
     int p = browser->mypanel;
 
-    FMMainWindow* main_window = static_cast<FMMainWindow*>(browser->main_window);
+    FMMainWindow* main_window = FM_MAIN_WINDOW(browser->main_window);
     char mode = main_window->panel_context[p - 1];
 
     bool show_side = false;
@@ -534,50 +534,52 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     if (browser->file_list)
     {
         set = xset_set_cb(XSetName::SORTX_ALPHANUM, (GFunc)on_popup_sort_extra, browser);
-        set->b = PTK_FILE_LIST(browser->file_list)->sort_alphanum ? XSetB::XSET_B_TRUE
-                                                                  : XSetB::XSET_B_FALSE;
+        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_alphanum ? XSetB::XSET_B_TRUE
+                                                                              : XSetB::XSET_B_FALSE;
         set = xset_set_cb(XSetName::SORTX_CASE, (GFunc)on_popup_sort_extra, browser);
-        set->b =
-            PTK_FILE_LIST(browser->file_list)->sort_case ? XSetB::XSET_B_TRUE : XSetB::XSET_B_FALSE;
-        set->disable = !PTK_FILE_LIST(browser->file_list)->sort_alphanum;
+        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_case ? XSetB::XSET_B_TRUE
+                                                                          : XSetB::XSET_B_FALSE;
+        set->disable = !PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_alphanum;
 
 #if 0
         set = xset_set_cb(XSetName::SORTX_NATURAL, (GFunc)on_popup_sort_extra, browser);
-        set->b = PTK_FILE_LIST(browser->file_list)->sort_natural ? XSetB::XSET_B_TRUE : XSetB::XSET_B_FALSE;
+        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_natural ? XSetB::XSET_B_TRUE : XSetB::XSET_B_FALSE;
         set = xset_set_cb(XSetName::SORTX_CASE, (GFunc)on_popup_sort_extra, browser);
-        set->b = PTK_FILE_LIST(browser->file_list)->sort_case ? XSetB::XSET_B_TRUE : XSetB::XSET_B_FALSE;
-        set->disable = !PTK_FILE_LIST(browser->file_list)->sort_natural;
+        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_case ? XSetB::XSET_B_TRUE : XSetB::XSET_B_FALSE;
+        set->disable = !PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_natural;
 #endif
 
         set = xset_set_cb(XSetName::SORTX_DIRECTORIES, (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, nullptr);
-        set->b = PTK_FILE_LIST(browser->file_list)->sort_dir ==
+        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_dir ==
                          PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST
                      ? XSetB::XSET_B_TRUE
                      : XSetB::XSET_B_FALSE;
         set_radio = set;
         set = xset_set_cb(XSetName::SORTX_FILES, (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, set_radio);
-        set->b = PTK_FILE_LIST(browser->file_list)->sort_dir ==
+        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_dir ==
                          PTKFileListSortDir::PTK_LIST_SORT_DIR_LAST
                      ? XSetB::XSET_B_TRUE
                      : XSetB::XSET_B_FALSE;
         set = xset_set_cb(XSetName::SORTX_MIX, (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, set_radio);
-        set->b = PTK_FILE_LIST(browser->file_list)->sort_dir ==
+        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_dir ==
                          PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED
                      ? XSetB::XSET_B_TRUE
                      : XSetB::XSET_B_FALSE;
 
         set = xset_set_cb(XSetName::SORTX_HIDFIRST, (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, nullptr);
-        set->b = PTK_FILE_LIST(browser->file_list)->sort_hidden_first ? XSetB::XSET_B_TRUE
-                                                                      : XSetB::XSET_B_FALSE;
+        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_hidden_first
+                     ? XSetB::XSET_B_TRUE
+                     : XSetB::XSET_B_FALSE;
         set_radio = set;
         set = xset_set_cb(XSetName::SORTX_HIDLAST, (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, set_radio);
-        set->b = PTK_FILE_LIST(browser->file_list)->sort_hidden_first ? XSetB::XSET_B_FALSE
-                                                                      : XSetB::XSET_B_TRUE;
+        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_hidden_first
+                     ? XSetB::XSET_B_FALSE
+                     : XSetB::XSET_B_TRUE;
     }
 
     set = xset_get(XSetName::VIEW_LIST_STYLE);
@@ -1402,8 +1404,7 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     XSet* handler_set = XSET(g_object_get_data(G_OBJECT(menuitem), "handler_set"));
 
-    const char* desktop_file =
-        static_cast<const char*>(g_object_get_data(G_OBJECT(menuitem), "desktop_file"));
+    const char* desktop_file = CONST_CHAR(g_object_get_data(G_OBJECT(menuitem), "desktop_file"));
     VFSAppDesktop desktop(desktop_file);
 
     std::string app;
@@ -1463,14 +1464,13 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 
     std::string command;
 
-    const char* desktop_file =
-        static_cast<const char*>(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
+    const char* desktop_file = CONST_CHAR(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
     VFSAppDesktop desktop(desktop_file);
     if (!desktop.get_name())
         return;
 
     int job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
-    PtkFileMenu* data = static_cast<PtkFileMenu*>(g_object_get_data(G_OBJECT(item), "data"));
+    PtkFileMenu* data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
     if (!(data && data->info))
         return;
 
@@ -1772,11 +1772,10 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
         return false;
 
     // if original menu, desktop will be set
-    const char* desktop_file =
-        static_cast<const char*>(g_object_get_data(G_OBJECT(item), "desktop_file"));
+    const char* desktop_file = CONST_CHAR(g_object_get_data(G_OBJECT(item), "desktop_file"));
     VFSAppDesktop desktop(desktop_file);
     // else if app menu, data will be set
-    // PtkFileMenu* app_data = static_cast<PtkFileMenu*>(g_object_get_data(G_OBJECT(item), "data"));
+    // PtkFileMenu* app_data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
 
     unsigned int keymod = ptk_get_keymod(event->state);
 
@@ -1875,8 +1874,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     else
         type = "unknown";
 
-    const char* desktop_file =
-        static_cast<const char*>(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
+    const char* desktop_file = CONST_CHAR(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
     VFSAppDesktop desktop(desktop_file);
 
     GtkWidget* app_menu = gtk_menu_new();

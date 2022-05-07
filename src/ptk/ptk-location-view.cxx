@@ -192,7 +192,7 @@ update_change_detection()
             for (i = 0; i < n; ++i)
             {
                 PtkFileBrowser* file_browser =
-                    PTK_FILE_BROWSER(gtk_notebook_get_nth_page(notebook, i));
+                    PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                 const char* pwd;
                 if (file_browser && (pwd = ptk_file_browser_get_cwd(file_browser)))
                 {
@@ -1090,7 +1090,7 @@ on_mount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (!vol->device_file)
         return;
     PtkFileBrowser* file_browser =
-        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
+        PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
     // Note: file_browser may be nullptr
     if (!GTK_IS_WIDGET(file_browser))
         file_browser = nullptr;
@@ -1138,7 +1138,7 @@ on_umount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     PtkFileBrowser* file_browser =
-        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
+        PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
     // Note: file_browser may be nullptr
     if (!GTK_IS_WIDGET(file_browser))
         file_browser = nullptr;
@@ -1183,7 +1183,7 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     PtkFileBrowser* file_browser =
-        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
+        PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
     // Note: file_browser may be nullptr
     if (!GTK_IS_WIDGET(file_browser))
         file_browser = nullptr;
@@ -1326,7 +1326,7 @@ try_mount(GtkTreeView* view, VFSVolume* vol)
     if (!view || !vol)
         return false;
     PtkFileBrowser* file_browser =
-        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
+        PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
     if (!file_browser)
         return false;
     // task
@@ -1385,10 +1385,10 @@ on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     if (view)
-        file_browser =
-            static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
+        file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
     else
-        file_browser = PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(nullptr));
+        file_browser =
+            PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(nullptr));
 
     if (!file_browser || !vol)
         return;
@@ -1448,10 +1448,10 @@ on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     if (view)
-        file_browser =
-            static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
+        file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
     else
-        file_browser = PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(nullptr));
+        file_browser =
+            PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(nullptr));
 
     if (!vol)
         return;
@@ -1528,7 +1528,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         return;
 
     PtkFileBrowser* file_browser =
-        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
+        PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
 
     // use handler command if available
     bool run_in_terminal;
@@ -1877,7 +1877,7 @@ on_handler_show_config(GtkMenuItem* item, GtkWidget* view, XSet* set2)
     else
         return;
     PtkFileBrowser* file_browser =
-        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
+        PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
     ptk_handler_show_config(mode, file_browser, nullptr);
 }
 
@@ -2145,7 +2145,7 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data)
 
     // LOG_INFO("on_button_press_event   view = {}", view);
     PtkFileBrowser* file_browser =
-        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
+        PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
     ptk_file_browser_focus_me(file_browser);
 
     if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
@@ -2255,8 +2255,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, unsig
 
     GtkWidget* view = GTK_WIDGET(g_object_get_data(G_OBJECT(menu), "parent"));
     if (xset_get_b(XSetName::DEV_NEWTAB))
-        file_browser =
-            static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
+        file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
     else
         file_browser = nullptr;
 
@@ -2532,8 +2531,8 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
 
             // add new bookmark
             XSet* newset = xset_custom_new();
-            newset->z = const_cast<char*>(upath.c_str());
-            newset->menu_label = const_cast<char*>(name.c_str());
+            newset->z = ztd::strdup(upath);
+            newset->menu_label = ztd::strdup(name);
             newset->x = ztd::strdup("3"); // XSetCMD::BOOKMARK
             // unset these to save session space
             newset->task = false;
@@ -2884,7 +2883,7 @@ on_bookmark_device(GtkMenuItem* item, VFSVolume* vol)
 {
     GtkWidget* view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     PtkFileBrowser* file_browser =
-        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(view), "file_browser"));
+        PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
     if (!file_browser)
         return;
 
@@ -2934,7 +2933,7 @@ on_bookmark_device(GtkMenuItem* item, VFSVolume* vol)
     newset = xset_custom_new();
     newset->menu_label = ztd::strdup(url);
     newset->z = ztd::strdup(url);
-    newset->x = ztd::strdup(static_cast<int>(XSetCMD::BOOKMARK));
+    newset->x = ztd::strdup(INT(XSetCMD::BOOKMARK));
     newset->prev = ztd::strdup(sel_set->name);
     newset->next = sel_set->next; // steal string
     newset->task = false;
@@ -2993,7 +2992,7 @@ ptk_bookmark_view_get_first_bookmark(XSet* book_set)
         child_set = xset_custom_new();
         child_set->menu_label = ztd::strdup("Home");
         child_set->z = ztd::strdup(vfs_user_home_dir());
-        child_set->x = ztd::strdup(static_cast<int>(XSetCMD::BOOKMARK));
+        child_set->x = ztd::strdup(INT(XSetCMD::BOOKMARK));
         child_set->parent = ztd::strdup(translate_xset_name_from(XSetName::MAIN_BOOK));
         book_set->child = ztd::strdup(child_set->name);
         child_set->task = false;
@@ -3152,7 +3151,7 @@ ptk_bookmark_view_add_bookmark(GtkMenuItem* menuitem, PtkFileBrowser* file_brows
     XSet* sel_set;
 
     if (menuitem || !url)
-        url = ptk_file_browser_get_cwd(PTK_FILE_BROWSER(file_browser));
+        url = ptk_file_browser_get_cwd(file_browser);
 
     if (file_browser->side_book)
     {
@@ -3203,7 +3202,7 @@ ptk_bookmark_view_add_bookmark(GtkMenuItem* menuitem, PtkFileBrowser* file_brows
     newset = xset_custom_new();
     newset->menu_label = ztd::strdup(Glib::path_get_basename(url));
     newset->z = ztd::strdup(url);
-    newset->x = ztd::strdup(static_cast<int>(XSetCMD::BOOKMARK));
+    newset->x = ztd::strdup(INT(XSetCMD::BOOKMARK));
     newset->prev = ztd::strdup(sel_set->name);
     newset->next = sel_set->next; // steal string
     newset->task = false;

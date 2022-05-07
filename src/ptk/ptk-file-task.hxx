@@ -23,6 +23,8 @@
 
 #include "settings.hxx"
 
+#define PTK_FILE_TASK(obj) (static_cast<PtkFileTask*>(obj))
+
 enum PTKFileTaskPtaskError
 {
     PTASK_ERROR_FIRST,

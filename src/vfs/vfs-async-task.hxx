@@ -20,8 +20,10 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#define VFS_ASYNC_TASK(obj)             (static_cast<VFSAsyncTask*>(obj))
+#define VFS_ASYNC_TASK_REINTERPRET(obj) (reinterpret_cast<VFSAsyncTask*>(obj))
+
 #define VFS_ASYNC_TASK_TYPE (vfs_async_task_get_type())
-#define VFS_ASYNC_TASK(obj) (reinterpret_cast<VFSAsyncTask*>(obj))
 
 struct VFSAsyncTask;
 using VFSAsyncFunc = void* (*)(VFSAsyncTask*, void*);

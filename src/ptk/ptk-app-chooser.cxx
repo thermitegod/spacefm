@@ -462,7 +462,7 @@ on_dlg_response(GtkDialog* dlg, int id, void* user_data)
         case GTK_RESPONSE_NONE:
         case GTK_RESPONSE_DELETE_EVENT:
             /* cancel app loading on dialog closing... */
-            task = static_cast<VFSAsyncTask*>(g_object_get_data(G_OBJECT(dlg), "task"));
+            task = VFS_ASYNC_TASK(g_object_get_data(G_OBJECT(dlg), "task"));
             if (task)
             {
                 // LOG_INFO("app-chooser.cxx -> vfs_async_task_cancel");

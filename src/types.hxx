@@ -19,6 +19,11 @@
 
 #include <cstdint>
 
+#define INT(obj)        (static_cast<int>(obj))
+#define UINT(obj)       (static_cast<unsigned int>(obj))
+#define CHAR(obj)       (static_cast<char*>(obj))
+#define CONST_CHAR(obj) (static_cast<const char*>(obj))
+
 #define MAX_PANELS 4
 
 // using signed type because neg values are treated as

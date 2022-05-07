@@ -314,7 +314,7 @@ ptk_dir_view_get_dir_path(GtkTreeModel* model, GtkTreeIter* it)
 
     gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(model), &real_it, it);
     GtkTreeModel* tree = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(model));
-    return ptk_dir_tree_get_dir_path(PTK_DIR_TREE(tree), &real_it);
+    return ptk_dir_tree_get_dir_path(PTK_DIR_TREE_REINTERPRET(tree), &real_it);
 }
 
 /* Return a newly allocated string containing path of current selected dir. */
@@ -593,7 +593,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                                     void* user_data) // MOD added
 {
     (void)info;
-    PtkFileBrowser* file_browser = static_cast<PtkFileBrowser*>(user_data);
+    PtkFileBrowser* file_browser = PTK_FILE_BROWSER(user_data);
 
     /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-data-received");

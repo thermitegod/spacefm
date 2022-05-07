@@ -61,7 +61,7 @@ get_cwd(GtkEntry* entry)
     else if (path[0] != '$' && path[0] != '+' && path[0] != '&' && path[0] != '!' &&
              path[0] != '\0' && path[0] != ' ')
     {
-        EntryData* edata = static_cast<EntryData*>(g_object_get_data(G_OBJECT(entry), "edata"));
+        EntryData* edata = ENTRY_DATA(g_object_get_data(G_OBJECT(entry), "edata"));
         if (edata && edata->browser)
         {
             const std::string real_path = std::filesystem::absolute(path);
@@ -77,7 +77,7 @@ seek_path(GtkEntry* entry)
 {
     if (!GTK_IS_ENTRY(entry))
         return false;
-    EntryData* edata = static_cast<EntryData*>(g_object_get_data(G_OBJECT(entry), "edata"));
+    EntryData* edata = ENTRY_DATA(g_object_get_data(G_OBJECT(entry), "edata"));
     if (!(edata && edata->browser))
         return false;
     if (edata->seek_timer)
@@ -151,7 +151,7 @@ seek_path(GtkEntry* entry)
 static void
 seek_path_delayed(GtkEntry* entry, unsigned int delay)
 {
-    EntryData* edata = static_cast<EntryData*>(g_object_get_data(G_OBJECT(entry), "edata"));
+    EntryData* edata = ENTRY_DATA(g_object_get_data(G_OBJECT(entry), "edata"));
     if (!(edata && edata->browser))
         return;
     // user is still typing - restart timer

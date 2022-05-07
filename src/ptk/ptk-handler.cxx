@@ -41,6 +41,8 @@
 #include "autosave.hxx"
 #include "utils.hxx"
 
+#define HANDLER_DATA(obj) (static_cast<HandlerData*>(obj))
+
 #define INFO_EXAMPLE                                                                            \
     "# Enter command to show properties or leave blank for auto:\n\n\n# # Example:\n\n# echo "  \
     "MOUNT\n# mount | grep \" on %a \"\n# echo\n# echo PROCESSES\n# /usr/bin/lsof -w \"%a\" | " \
@@ -1375,10 +1377,9 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
     }
 
     // have handler dialog open?
-    HandlerData* hnd =
-        handler_dlg && GTK_IS_WIDGET(handler_dlg)
-            ? static_cast<HandlerData*>(g_object_get_data(G_OBJECT(handler_dlg), "hnd"))
-            : nullptr;
+    HandlerData* hnd = handler_dlg && GTK_IS_WIDGET(handler_dlg)
+                           ? HANDLER_DATA(g_object_get_data(G_OBJECT(handler_dlg), "hnd"))
+                           : nullptr;
     if (!(hnd && hnd->dlg == handler_dlg && hnd->mode == mode))
     {
         // dialog not shown or invalid

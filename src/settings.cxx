@@ -567,7 +567,7 @@ save_settings(void* main_window_ptr)
     // save tabs
     bool save_tabs = xset_get_b(XSetName::MAIN_SAVE_TABS);
     if (main_window_ptr)
-        main_window = static_cast<FMMainWindow*>(main_window_ptr);
+        main_window = FM_MAIN_WINDOW(main_window_ptr);
     else
         main_window = fm_main_window_get_last_active();
 
@@ -591,7 +591,7 @@ save_settings(void* main_window_ptr)
                         std::string tabs;
                         for (int g = 0; g < pages; g++)
                         {
-                            PtkFileBrowser* file_browser = PTK_FILE_BROWSER(
+                            PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
                                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]),
                                                           g));
                             tabs = fmt::format("{}{}{}",
@@ -1195,13 +1195,12 @@ xset_write_set(std::string& buf, XSet* set)
     if (set->b != XSetB::XSET_B_UNSET)
         buf.append(fmt::format("{}-b=\"{}\"\n", set->name, set->b));
     if (set->tool != XSetTool::NOT)
-        buf.append(fmt::format("{}-tool=\"{}\"\n", set->name, static_cast<int>(set->tool)));
+        buf.append(fmt::format("{}-tool=\"{}\"\n", set->name, INT(set->tool)));
 
     if (!set->lock)
     {
         if (set->menu_style != XSetMenu::NORMAL)
-            buf.append(
-                fmt::format("{}-style=\"{}\"\n", set->name, static_cast<int>(set->menu_style)));
+            buf.append(fmt::format("{}-style=\"{}\"\n", set->name, INT(set->menu_style)));
         if (set->desc)
             buf.append(fmt::format("{}-desc=\"{}\"\n", set->name, set->desc));
         if (set->title)
@@ -3071,7 +3070,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                 else
                 {
                     // TODO
-                    ptk_handler_import(static_cast<int>(use), plugin_data->handler_dlg, set);
+                    ptk_handler_import(INT(use), plugin_data->handler_dlg, set);
                 }
             }
             else if (plugin_data->job == PluginJob::COPY)
@@ -3189,7 +3188,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& p
     std::string plug_dir_q = bash_quote(plug_dir);
     std::string file_path_q = bash_quote(path);
 
-    FMMainWindow* main_window = static_cast<FMMainWindow*>(main_win);
+    FMMainWindow* main_window = FM_MAIN_WINDOW(main_win);
     // task
     PtkFileTask* ptask;
     ptask = ptk_file_exec_new("Install Plugin",
@@ -3524,14 +3523,15 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
         FMMainWindow* main_window = fm_main_window_get_on_current_desktop();
         if (!main_window)
         {
-            main_window = FM_MAIN_WINDOW(fm_main_window_new());
+            main_window = FM_MAIN_WINDOW_REINTERPRET(fm_main_window_new());
             gtk_window_set_default_size(GTK_WINDOW(main_window),
                                         app_settings.width,
                                         app_settings.height);
             gtk_widget_show(GTK_WIDGET(main_window));
             new_window = !xset_get_b(XSetName::MAIN_SAVE_TABS);
         }
-        file_browser = PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
+        file_browser =
+            PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
         gtk_window_present(GTK_WINDOW(main_window));
     }
     bool new_tab = !new_window && in_new_tab;
@@ -3588,11 +3588,10 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
                                                        : PtkOpenAction::PTK_OPEN_DIR);
                     if (new_tab)
                     {
-                        FMMainWindow* main_window_last =
-                            static_cast<FMMainWindow*>(file_browser->main_window);
+                        FMMainWindow* main_window_last = FM_MAIN_WINDOW(file_browser->main_window);
                         file_browser =
                             main_window_last
-                                ? PTK_FILE_BROWSER(
+                                ? PTK_FILE_BROWSER_REINTERPRET(
                                       fm_main_window_get_current_file_browser(main_window_last))
                                 : nullptr;
                         if (file_browser)
@@ -4808,7 +4807,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                                       : (char*)vfs_user_desktop_dir().c_str();
                 childset->menu_label = ztd::strdup(Glib::path_get_basename(folder));
                 childset->z = ztd::strdup(folder);
-                childset->x = ztd::strdup(static_cast<int>(XSetCMD::BOOKMARK));
+                childset->x = ztd::strdup(INT(XSetCMD::BOOKMARK));
                 // unset these to save session space
                 childset->task = false;
                 childset->task_err = false;
@@ -5039,7 +5038,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 free(childset->menu_label);
                 childset->menu_label = ztd::strdup(Glib::path_get_basename(folder));
                 childset->z = ztd::strdup(folder);
-                childset->x = ztd::strdup(static_cast<int>(XSetCMD::BOOKMARK));
+                childset->x = ztd::strdup(INT(XSetCMD::BOOKMARK));
                 // unset these to save session space
                 childset->task = false;
                 childset->task_err = false;
@@ -5501,7 +5500,7 @@ xset_design_additem(GtkWidget* menu, const char* label, XSetJob job, XSet* set)
     GtkWidget* item;
     item = gtk_menu_item_new_with_mnemonic(label);
 
-    g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(static_cast<int>(job)));
+    g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(INT(job)));
     gtk_container_add(GTK_CONTAINER(menu), item);
     g_signal_connect(item, "activate", G_CALLBACK(xset_design_job), set);
     return item;
@@ -5678,7 +5677,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
         g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(XSetJob::HELP_ADD));
         g_signal_connect(submenu, "key_press_event", G_CALLBACK(xset_design_menu_keypress), set);
 
-        for (std::size_t i = static_cast<int>(XSetTool::DEVICES); i < builtin_tool_name.size(); i++)
+        for (std::size_t i = INT(XSetTool::DEVICES); i < builtin_tool_name.size(); i++)
         {
             newitem =
                 xset_design_additem(submenu, builtin_tool_name[i], XSetJob::ADD_TOOL, insert_set);
@@ -6842,7 +6841,8 @@ xset_builtin_tool_activate(XSetTool tool_type, XSet* set, GdkEventButton* event)
     // get current browser, panel, and mode
     if (main_window)
     {
-        file_browser = PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(main_window));
+        file_browser =
+            PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
         p = file_browser->mypanel;
         mode = main_window->panel_context[p - 1];
     }
@@ -6929,7 +6929,7 @@ xset_get_builtin_toolitem_label(XSetTool tool_type)
 {
     if (tool_type < XSetTool::DEVICES || tool_type >= XSetTool::INVALID)
         return nullptr;
-    return builtin_tool_name[static_cast<int>(tool_type)];
+    return builtin_tool_name[INT(tool_type)];
 }
 
 static XSet*
@@ -6959,8 +6959,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
     unsigned int keymod = ptk_get_keymod(event->state);
 
     // get and focus browser
-    PtkFileBrowser* file_browser =
-        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(widget), "browser"));
+    PtkFileBrowser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
     if (!PTK_IS_FILE_BROWSER(file_browser))
         return true;
     ptk_file_browser_focus_me(file_browser);
@@ -7100,8 +7099,7 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
         return on_tool_icon_button_press(widget, event, set);
 
     // get and focus browser
-    PtkFileBrowser* file_browser =
-        static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(widget), "browser"));
+    PtkFileBrowser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
     if (!PTK_IS_FILE_BROWSER(file_browser))
         return true;
     ptk_file_browser_focus_me(file_browser);
@@ -7196,7 +7194,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
         return item;
     }
     if (set->tool > XSetTool::CUSTOM && set->tool < XSetTool::INVALID && !set->shared_key)
-        set->shared_key = ztd::strdup(builtin_tool_shared_key[static_cast<int>(set->tool)]);
+        set->shared_key = ztd::strdup(builtin_tool_shared_key[INT(set->tool)]);
 
     // builtin toolitems do not have menu_style set
     XSetMenu menu_style;
@@ -7264,8 +7262,8 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 if (icon_name)
                     image = xset_get_image(icon_name, (GtkIconSize)icon_size);
                 else if (set->tool > XSetTool::CUSTOM && set->tool < XSetTool::INVALID)
-                    image = xset_get_image(builtin_tool_icon[static_cast<int>(set->tool)],
-                                           (GtkIconSize)icon_size);
+                    image =
+                        xset_get_image(builtin_tool_icon[INT(set->tool)], (GtkIconSize)icon_size);
             }
             else if (!set->lock && cmd_type == XSetCMD::APP)
             {
@@ -7334,8 +7332,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
         case XSetMenu::CHECK:
             if (!icon_name && set->tool > XSetTool::CUSTOM && set->tool < XSetTool::INVALID)
                 // builtin tool item
-                image = xset_get_image(builtin_tool_icon[static_cast<int>(set->tool)],
-                                       (GtkIconSize)icon_size);
+                image = xset_get_image(builtin_tool_icon[INT(set->tool)], (GtkIconSize)icon_size);
             else
                 image =
                     xset_get_image(icon_name ? icon_name : "gtk-execute", (GtkIconSize)icon_size);
@@ -7392,7 +7389,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 // take the user icon from the first item in the submenu
                 icon_name = set_child->icon;
             else if (!icon_name && set->tool > XSetTool::CUSTOM && set->tool < XSetTool::INVALID)
-                icon_name = builtin_tool_icon[static_cast<int>(set->tool)];
+                icon_name = builtin_tool_icon[INT(set->tool)];
             else if (!icon_name && set_child && set->tool == XSetTool::CUSTOM)
             {
                 // take the auto icon from the first item in the submenu
@@ -7430,10 +7427,10 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 switch (set->tool)
                 {
                     case XSetTool::BACK_MENU:
-                        menu_label = (char*)builtin_tool_name[static_cast<int>(XSetTool::BACK)];
+                        menu_label = (char*)builtin_tool_name[INT(XSetTool::BACK)];
                         break;
                     case XSetTool::FWD_MENU:
-                        menu_label = (char*)builtin_tool_name[static_cast<int>(XSetTool::FWD)];
+                        menu_label = (char*)builtin_tool_name[INT(XSetTool::FWD)];
                         break;
                     case XSetTool::CUSTOM:
                         if (set_child)

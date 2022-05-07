@@ -1673,7 +1673,7 @@ static bool
 on_vfs_file_task_state_cb(VFSFileTask* task, VFSFileTaskState state, void* state_data,
                           void* user_data)
 {
-    PtkFileTask* ptask = static_cast<PtkFileTask*>(user_data);
+    PtkFileTask* ptask = PTK_FILE_TASK(user_data);
     bool ret = true;
 
     switch (state)

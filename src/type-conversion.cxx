@@ -48,7 +48,7 @@ glist_to_vector_VFSFileInfo(GList* list)
     GList* l;
     for (l = list; l; l = l->next)
     {
-        VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
+        VFSFileInfo* file = VFS_FILE_INFO(l->data);
         vec.push_back(file);
     }
     return vec;

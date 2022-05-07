@@ -138,6 +138,8 @@ FilePropertiesDialogData::~FilePropertiesDialogData()
         free(this->orig_atime);
 }
 
+#define FILE_PROPERTIES_DIALOG_DATA(obj) (static_cast<FilePropertiesDialogData*>(obj))
+
 static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data);
 
 /*
@@ -192,7 +194,7 @@ calc_total_size_of_files(const char* path, FilePropertiesDialogData* data)
 static void*
 calc_size(void* user_data)
 {
-    FilePropertiesDialogData* data = static_cast<FilePropertiesDialogData*>(user_data);
+    FilePropertiesDialogData* data = FILE_PROPERTIES_DIALOG_DATA(user_data);
     for (VFSFileInfo* file: data->file_list)
     {
         if (data->cancel)
@@ -781,7 +783,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
     }
 
     FilePropertiesDialogData* data =
-        static_cast<FilePropertiesDialogData*>(g_object_get_data(G_OBJECT(dialog), "DialogData"));
+        FILE_PROPERTIES_DIALOG_DATA(g_object_get_data(G_OBJECT(dialog), "DialogData"));
     if (data)
     {
         if (data->update_label_timer)

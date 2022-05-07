@@ -231,7 +231,7 @@ vfs_dir_clear(VFSDir* dir)
 static void
 vfs_dir_finalize(GObject* obj)
 {
-    VFSDir* dir = VFS_DIR(obj);
+    VFSDir* dir = VFS_DIR_REINTERPRET(obj);
     // LOG_INFO("vfs_dir_finalize  {}", dir->path);
     do
     {
@@ -490,7 +490,7 @@ vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file)
 static VFSDir*
 vfs_dir_new(const char* path)
 {
-    VFSDir* dir = static_cast<VFSDir*>(g_object_new(VFS_TYPE_DIR, nullptr));
+    VFSDir* dir = VFS_DIR(g_object_new(VFS_TYPE_DIR, nullptr));
     dir->path = ztd::strdup(path);
 
     dir->avoid_changes = vfs_volume_dir_avoid_changes(path);
@@ -773,7 +773,7 @@ vfs_dir_monitor_callback(VFSFileMonitor* monitor, VFSFileMonitorEvent event, con
                          void* user_data)
 {
     (void)monitor;
-    VFSDir* dir = static_cast<VFSDir*>(user_data);
+    VFSDir* dir = VFS_DIR(user_data);
 
     switch (event)
     {

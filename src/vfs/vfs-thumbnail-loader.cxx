@@ -126,7 +126,7 @@ on_thumbnail_idle(VFSThumbnailLoader* loader)
     // LOG_DEBUG("ENTER ON_THUMBNAIL_IDLE");
     vfs_async_task_lock(loader->task);
 
-    while ((file = static_cast<VFSFileInfo*>(g_queue_pop_head(loader->update_queue))))
+    while ((file = VFS_FILE_INFO(g_queue_pop_head(loader->update_queue))))
     {
         vfs_dir_emit_thumbnail_loaded(loader->dir, file);
         vfs_file_info_unref(file);

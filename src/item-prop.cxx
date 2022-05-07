@@ -1444,7 +1444,7 @@ replace_item_props(ContextData* ctxt)
             if (x == XSetCMD::LINE)
                 rset->x = nullptr;
             else
-                rset->x = ztd::strdup(static_cast<int>(x));
+                rset->x = ztd::strdup(INT(x));
         }
         if (!rset->plugin)
         {

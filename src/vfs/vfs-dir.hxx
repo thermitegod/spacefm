@@ -25,8 +25,10 @@
 #include "vfs/vfs-file-info.hxx"
 #include "vfs/vfs-async-task.hxx"
 
+#define VFS_DIR(obj)             (static_cast<VFSDir*>(obj))
+#define VFS_DIR_REINTERPRET(obj) (reinterpret_cast<VFSDir*>(obj))
+
 #define VFS_TYPE_DIR (vfs_dir_get_type())
-#define VFS_DIR(obj) (reinterpret_cast<VFSDir*>(obj))
 
 struct VFSDir
 {

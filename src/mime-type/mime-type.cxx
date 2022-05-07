@@ -34,6 +34,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "types.hxx"
+
 #include "utils.hxx"
 
 #include "vfs/vfs-user-dir.hxx"
@@ -184,7 +186,7 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
             if (G_TRYLOCK(mime_magic_buf))
                 data = mime_magic_buf;
             else /* the buffer is in use, allocate new one */
-                data = static_cast<char*>(g_malloc(len));
+                data = CHAR(g_malloc(len));
 
             len = read(fd, data, len);
 
@@ -437,7 +439,7 @@ mime_type_init()
             mime_cache_max_extent = caches[i].get_magic_max_extent();
     }
 
-    mime_magic_buf = static_cast<char*>(g_malloc(mime_cache_max_extent));
+    mime_magic_buf = CHAR(g_malloc(mime_cache_max_extent));
 }
 
 /* free all mime.cache files on the system */

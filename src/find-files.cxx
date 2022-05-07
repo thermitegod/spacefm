@@ -202,6 +202,8 @@ FoundFile::FoundFile(VFSFileInfo* fi, const std::string& dir_path)
     this->dir_path = dir_path;
 }
 
+#define FOUND_FILE(obj) (static_cast<FoundFile*>(obj))
+
 static const char menu_def[] = "<ui>"
                                "<popup name=\"Popup\">"
                                "<menuitem name=\"Open\" action=\"OpenAction\" />"
@@ -228,7 +230,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
 
         for (l = files; l; l = l->next)
         {
-            file = static_cast<VFSFileInfo*>(l->data);
+            file = VFS_FILE_INFO(l->data);
             if (!file)
                 continue;
 
@@ -332,8 +334,8 @@ on_open_files(GAction* action, FindFile* data)
                 // app_settings.height );
             }
             gtk_window_present(GTK_WINDOW(w));
-            file_browser =
-                PTK_FILE_BROWSER(fm_main_window_get_current_file_browser(FM_MAIN_WINDOW(w)));
+            file_browser = PTK_FILE_BROWSER_REINTERPRET(
+                fm_main_window_get_current_file_browser(FM_MAIN_WINDOW_REINTERPRET(w)));
         }
         g_hash_table_foreach_steal(hash, (GHRFunc)open_file, file_browser);
     }
@@ -598,7 +600,7 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
         //            return;
     }
 
-    while ((ff = static_cast<FoundFile*>(g_queue_pop_head(queue))))
+    while ((ff = FOUND_FILE(g_queue_pop_head(queue))))
     {
         gtk_list_store_append(data->result_list, &it);
         icon = vfs_file_info_get_small_icon(ff->fi);

@@ -25,8 +25,10 @@
 
 #include "vfs/vfs-dir.hxx"
 
+#define PTK_FILE_LIST(obj)             (static_cast<PtkFileList*>(obj))
+#define PTK_FILE_LIST_REINTERPRET(obj) (reinterpret_cast<PtkFileList*>(obj))
+
 #define PTK_TYPE_FILE_LIST    (ptk_file_list_get_type())
-#define PTK_FILE_LIST(obj)    (reinterpret_cast<PtkFileList*>(obj))
 #define PTK_IS_FILE_LIST(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_FILE_LIST))
 
 /* Columns of directory view */

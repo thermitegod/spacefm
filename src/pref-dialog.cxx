@@ -168,7 +168,8 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                     n = gtk_notebook_get_n_pages(notebook);
                     for (i = 0; i < n; ++i)
                     {
-                        file_browser = PTK_FILE_BROWSER(gtk_notebook_get_nth_page(notebook, i));
+                        file_browser =
+                            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                         tab_label = fm_main_window_create_tab_label(window, file_browser);
                         gtk_notebook_set_tab_label(notebook, GTK_WIDGET(file_browser), tab_label);
                         fm_main_window_update_tab_label(window,
@@ -224,7 +225,8 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                     n = gtk_notebook_get_n_pages(notebook);
                     for (i = 0; i < n; ++i)
                     {
-                        file_browser = PTK_FILE_BROWSER(gtk_notebook_get_nth_page(notebook, i));
+                        file_browser =
+                            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                         // update views
                         gtk_widget_destroy(file_browser->folder_view);
                         file_browser->folder_view = nullptr;
@@ -287,7 +289,8 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                     n = gtk_notebook_get_n_pages(notebook);
                     for (i = 0; i < n; ++i)
                     {
-                        file_browser = PTK_FILE_BROWSER(gtk_notebook_get_nth_page(notebook, i));
+                        file_browser =
+                            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                         ptk_file_browser_set_single_click(file_browser, app_settings.single_click);
                     }
                 }
@@ -308,7 +311,8 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                     n = gtk_notebook_get_n_pages(notebook);
                     for (i = 0; i < n; ++i)
                     {
-                        file_browser = PTK_FILE_BROWSER(gtk_notebook_get_nth_page(notebook, i));
+                        file_browser =
+                            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                         ptk_file_browser_set_single_click_timeout(
                             file_browser,
                             app_settings.no_single_hover ? 0 : SINGLE_CLICK_TIMEOUT);

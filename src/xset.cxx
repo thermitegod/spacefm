@@ -22,6 +22,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "types.hxx"
+
 #include "xset.hxx"
 
 // clang-format off
@@ -740,7 +742,7 @@ translate_xset_name_from(XSetName name)
     }
     catch (std::out_of_range)
     {
-        std::string msg = fmt::format("XSetName:: Not Implemented: {}", static_cast<int>(name));
+        std::string msg = fmt::format("XSetName:: Not Implemented: {}", INT(name));
         throw InvalidXSetName(msg);
     }
 }

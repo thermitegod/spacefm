@@ -48,6 +48,8 @@
 
 #include "utils.hxx"
 
+#define PARENT_INFO(obj) (static_cast<ParentInfo*>(obj))
+
 struct ParentInfo
 {
     ParentInfo(PtkFileBrowser* file_browser, const char* cwd);
@@ -3503,7 +3505,7 @@ open_files_with_each_app(void* key, void* value, void* user_data)
 {
     char* app_desktop = (char*)key; // is const unless handler
     GList* files = (GList*)value;
-    ParentInfo* parent = static_cast<ParentInfo*>(user_data);
+    ParentInfo* parent = PARENT_INFO(user_data);
     open_files_with_app(parent, files, app_desktop);
 }
 

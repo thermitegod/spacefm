@@ -41,6 +41,8 @@
 #define VAL16(buffer, idx) GUINT16_FROM_BE(*(std::uint16_t*)(buffer + idx))
 #define VAL32(buffer, idx) GUINT32_FROM_BE(*(std::uint32_t*)(buffer + idx))
 
+#define UINT32(obj) (static_cast<std::uint32_t>(obj))
+
 /* cache header */
 #define MAJOR_VERSION  0
 #define MINOR_VERSION  2
@@ -317,7 +319,7 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data,
     std::uint32_t max_offset = offset + range;
     std::uint32_t val_len = VAL32(rule, 12);
 
-    for (; offset < max_offset && (offset + val_len) <= static_cast<std::uint32_t>(len); ++offset)
+    for (; offset < max_offset && (offset + val_len) <= UINT32(len); ++offset)
     {
         bool match = false;
         std::uint32_t val_off = VAL32(rule, 16);

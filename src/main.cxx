@@ -150,7 +150,7 @@ open_in_tab(FMMainWindow** main_window, const char* real_path)
 
         // create new window
         fm_main_window_store_positions(nullptr);
-        *main_window = FM_MAIN_WINDOW(fm_main_window_new());
+        *main_window = FM_MAIN_WINDOW_REINTERPRET(fm_main_window_new());
     }
     else
     {
@@ -305,7 +305,7 @@ handle_parsed_commandline_args()
             if (!cli_flags.daemon_mode)
                 init_folder();
             fm_main_window_store_positions(nullptr);
-            main_window = FM_MAIN_WINDOW(fm_main_window_new());
+            main_window = FM_MAIN_WINDOW_REINTERPRET(fm_main_window_new());
         }
         gtk_window_present(GTK_WINDOW(main_window));
 

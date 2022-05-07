@@ -353,7 +353,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
 {
     (void)event;
     int pos;
-    FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
+    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
     int p = file_browser->mypanel;
     char mode = main_window->panel_context[p - 1];
 
@@ -403,7 +403,7 @@ ptk_file_browser_select_file(PtkFileBrowser* file_browser, const char* path)
     GtkTreeModel* model = nullptr;
     VFSFileInfo* file;
 
-    PtkFileList* list = PTK_FILE_LIST(file_browser->file_list);
+    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(file_browser->file_list);
     if (file_browser->view_mode == PtkFBViewMode::PTK_FB_ICON_VIEW ||
         file_browser->view_mode == PtkFBViewMode::PTK_FB_COMPACT_VIEW)
     {
@@ -637,7 +637,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
         gtk_editable_set_position(GTK_EDITABLE(entry), -1);
 
         // inhibit auto seek because if multiple completions will change dir
-        EntryData* edata = static_cast<EntryData*>(g_object_get_data(G_OBJECT(entry), "edata"));
+        EntryData* edata = ENTRY_DATA(g_object_get_data(G_OBJECT(entry), "edata"));
         if (edata && edata->seek_timer)
         {
             g_source_remove(edata->seek_timer);
@@ -843,7 +843,7 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     if (!file_browser)
         return;
 
-    FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
+    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
     int p = file_browser->mypanel;
     char mode = main_window ? main_window->panel_context[p - 1] : 0;
 
@@ -910,7 +910,7 @@ static void
 rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
 {
     (void)widget;
-    FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
+    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
     int p = file_browser->mypanel;
     char mode = main_window ? main_window->panel_context[p - 1] : 0;
 
@@ -1218,7 +1218,7 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
 static void
 ptk_file_browser_finalize(GObject* obj)
 {
-    PtkFileBrowser* file_browser = PTK_FILE_BROWSER(obj);
+    PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(obj);
     // LOG_INFO("ptk_file_browser_finalize");
     if (file_browser->dir)
     {
@@ -1299,7 +1299,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     // LOG_INFO("ptk_file_browser_update_views fb={:p}  (panel {})", file_browser,
     // file_browser->mypanel);
 
-    FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
+    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
     // hide/show browser widgets based on user settings
     int p = file_browser->mypanel;
     char mode = main_window->panel_context[p - 1];
@@ -1645,8 +1645,7 @@ GtkWidget*
 ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view, void* main_window)
 {
     PtkFBViewMode view_mode;
-    PtkFileBrowser* file_browser =
-        static_cast<PtkFileBrowser*>(g_object_new(PTK_TYPE_FILE_BROWSER, nullptr));
+    PtkFileBrowser* file_browser = PTK_FILE_BROWSER(g_object_new(PTK_TYPE_FILE_BROWSER, nullptr));
 
     file_browser->mypanel = curpanel;
     file_browser->mynotebook = notebook;
@@ -1688,7 +1687,7 @@ ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
         xset_get_b_panel_mode(
             file_browser->mypanel,
             "list_large",
-            (static_cast<FMMainWindow*>(main_window))->panel_context[file_browser->mypanel - 1]);
+            (FM_MAIN_WINDOW(main_window))->panel_context[file_browser->mypanel - 1]);
     file_browser->folder_view = create_folder_view(file_browser, view_mode);
 
     gtk_container_add(GTK_CONTAINER(file_browser->folder_view_scroll), file_browser->folder_view);
@@ -1820,7 +1819,7 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
     if (element && element->data)
     {
         // LOG_INFO("    select files");
-        PtkFileList* list = PTK_FILE_LIST(file_browser->file_list);
+        PtkFileList* list = PTK_FILE_LIST_REINTERPRET(file_browser->file_list);
         GtkTreeSelection* tree_sel;
         bool firstsel = true;
         if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
@@ -1832,7 +1831,7 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
                 // g_debug ("find a file");
                 GtkTreeIter it;
                 GtkTreePath* tp;
-                VFSFileInfo* file = static_cast<VFSFileInfo*>(l->data);
+                VFSFileInfo* file = VFS_FILE_INFO(l->data);
                 if (ptk_file_list_find_iter(list, &it, file))
                 {
                     // g_debug ("found file");
@@ -2249,9 +2248,9 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
     file_browser->sort_order = (PtkFBSortOrder)col;
     // MOD enable following to make column click permanent sort
     //    app_settings.sort_order = col;
-    //    if ( file_browser )
-    //        ptk_file_browser_set_sort_order( PTK_FILE_BROWSER( file_browser ),
-    //        app_settings.sort_order );
+    //    if (file_browser)
+    //        ptk_file_browser_set_sort_order(file_browser),
+    //        app_settings.sort_order);
 
     xset_set_panel(file_browser->mypanel, "list_detailed", XSetSetSet::X, std::to_string(col));
     xset_set_panel(file_browser->mypanel,
@@ -2347,7 +2346,7 @@ on_dir_file_listed(VFSDir* dir, bool is_cancelled, PtkFileBrowser* file_browser)
         if (!is_cancelled && file_browser->file_list)
         {
             show_thumbnails(file_browser,
-                            PTK_FILE_LIST(file_browser->file_list),
+                            PTK_FILE_LIST_REINTERPRET(file_browser->file_list),
                             file_browser->large_icons,
                             file_browser->max_thumbnail);
         }
@@ -2438,7 +2437,7 @@ ptk_file_browser_go_home(GtkWidget* item, PtkFileBrowser* file_browser)
 {
     (void)item;
     focus_folder_view(file_browser);
-    ptk_file_browser_chdir(PTK_FILE_BROWSER(file_browser),
+    ptk_file_browser_chdir(file_browser,
                            vfs_user_home_dir().c_str(),
                            PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
 }
@@ -2450,17 +2449,13 @@ ptk_file_browser_go_default(GtkWidget* item, PtkFileBrowser* file_browser)
     focus_folder_view(file_browser);
     const char* path = xset_get_s(XSetName::GO_SET_DEFAULT);
     if (path && path[0] != '\0')
-        ptk_file_browser_chdir(PTK_FILE_BROWSER(file_browser),
-                               path,
-                               PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+        ptk_file_browser_chdir(file_browser, path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
     else if (geteuid() != 0)
-        ptk_file_browser_chdir(PTK_FILE_BROWSER(file_browser),
+        ptk_file_browser_chdir(file_browser,
                                vfs_user_home_dir().c_str(),
                                PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
     else
-        ptk_file_browser_chdir(PTK_FILE_BROWSER(file_browser),
-                               "/",
-                               PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+        ptk_file_browser_chdir(file_browser, "/", PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
 }
 
 void
@@ -2691,8 +2686,9 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
                 free(name);
 
             // do selection and scroll to first selected
-            path = gtk_tree_model_get_path(GTK_TREE_MODEL(PTK_FILE_LIST(file_browser->file_list)),
-                                           &it);
+            path = gtk_tree_model_get_path(
+                GTK_TREE_MODEL(PTK_FILE_LIST_REINTERPRET(file_browser->file_list)),
+                &it);
 
             switch (file_browser->view_mode)
             {
@@ -2863,9 +2859,9 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
                 select = !do_select;
 
             // do selection and scroll to first selected
-            GtkTreePath* path =
-                gtk_tree_model_get_path(GTK_TREE_MODEL(PTK_FILE_LIST(file_browser->file_list)),
-                                        &it);
+            GtkTreePath* path = gtk_tree_model_get_path(
+                GTK_TREE_MODEL(PTK_FILE_LIST_REINTERPRET(file_browser->file_list)),
+                &it);
 
             switch (file_browser->view_mode)
             {
@@ -3114,7 +3110,9 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const char* seek_dir,
 
     // do selection and scroll to selected
     GtkTreePath* path;
-    path = gtk_tree_model_get_path(GTK_TREE_MODEL(PTK_FILE_LIST(file_browser->file_list)), &it);
+    path =
+        gtk_tree_model_get_path(GTK_TREE_MODEL(PTK_FILE_LIST_REINTERPRET(file_browser->file_list)),
+                                &it);
     if (!path)
     {
         ptk_file_browser_restore_sig(file_browser, tree_sel);
@@ -3661,7 +3659,7 @@ ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_brow
     if (file_browser->view_mode != PtkFBViewMode::PTK_FB_LIST_VIEW)
         return;
 
-    FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
+    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
 
     // if the window was opened maximized and stayed maximized, or the window is
     // unmaximized and not fullscreen, save the columns
@@ -4074,7 +4072,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
                                   PTKFileListCol::COL_FILE_OWNER,
                                   PTKFileListCol::COL_FILE_MTIME};
 
-    FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
+    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
     int p = file_browser->mypanel;
     char mode = main_window->panel_context[p - 1];
 
@@ -4089,7 +4087,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
         std::size_t j;
         for (j = 0; j < cols.size(); j++)
         {
-            if (xset_get_int_panel(p, column_names.at(j), XSetSetSet::X) == static_cast<int>(i))
+            if (xset_get_int_panel(p, column_names.at(j), XSetSetSet::X) == INT(i))
                 break;
         }
         if (j == cols.size())
@@ -4116,7 +4114,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
 
                     // below causes increasing reduction of column every time new tab is
                     // added and closed - undesirable
-                    PtkFileBrowser* first_fb = PTK_FILE_BROWSER(
+                    PtkFileBrowser* first_fb = PTK_FILE_BROWSER_REINTERPRET(
                         gtk_notebook_get_nth_page(GTK_NOTEBOOK(file_browser->mynotebook), 0));
 
                     if (first_fb && first_fb->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW &&
@@ -4410,7 +4408,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
     (void)x;
     (void)y;
     (void)info;
-    PtkFileBrowser* file_browser = static_cast<PtkFileBrowser*>(user_data);
+    PtkFileBrowser* file_browser = PTK_FILE_BROWSER(user_data);
     char* dest_dir;
     /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-data-received");
@@ -5233,8 +5231,7 @@ on_popup_file_properties_activate(GtkMenuItem* menuitem, void* user_data)
 {
     (void)menuitem;
     GObject* popup = G_OBJECT(user_data);
-    PtkFileBrowser* file_browser =
-        static_cast<PtkFileBrowser*>(g_object_get_data(popup, "PtkFileBrowser"));
+    PtkFileBrowser* file_browser = PTK_FILE_BROWSER(g_object_get_data(popup, "PtkFileBrowser"));
     ptk_file_browser_file_properties(file_browser, 0);
 }
 
@@ -5370,7 +5367,7 @@ file_list_order_from_sort_order(PtkFBSortOrder order)
 void
 ptk_file_browser_read_sort_extra(PtkFileBrowser* file_browser)
 {
-    PtkFileList* list = PTK_FILE_LIST(file_browser->file_list);
+    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(file_browser->file_list);
     if (!list)
         return;
 
@@ -5397,7 +5394,7 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname)
     if (!Glib::str_has_prefix(set->name, "sortx_"))
         return;
 
-    PtkFileList* list = PTK_FILE_LIST(file_browser->file_list);
+    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(file_browser->file_list);
     if (!list)
         return;
     int panel = file_browser->mypanel;
@@ -5505,7 +5502,7 @@ ptk_file_browser_view_as_icons(PtkFileBrowser* file_browser)
         return;
 
     show_thumbnails(file_browser,
-                    PTK_FILE_LIST(file_browser->file_list),
+                    PTK_FILE_LIST_REINTERPRET(file_browser->file_list),
                     true,
                     file_browser->max_thumbnail);
 
@@ -5529,7 +5526,7 @@ ptk_file_browser_view_as_compact_list(PtkFileBrowser* file_browser)
         return;
 
     show_thumbnails(file_browser,
-                    PTK_FILE_LIST(file_browser->file_list),
+                    PTK_FILE_LIST_REINTERPRET(file_browser->file_list),
                     file_browser->large_icons,
                     file_browser->max_thumbnail);
 
@@ -5553,7 +5550,7 @@ ptk_file_browser_view_as_list(PtkFileBrowser* file_browser)
         return;
 
     show_thumbnails(file_browser,
-                    PTK_FILE_LIST(file_browser->file_list),
+                    PTK_FILE_LIST_REINTERPRET(file_browser->file_list),
                     file_browser->large_icons,
                     file_browser->max_thumbnail);
 
@@ -5636,7 +5633,7 @@ ptk_file_browser_show_thumbnails(PtkFileBrowser* file_browser, int max_file_size
     if (file_browser->file_list)
     {
         show_thumbnails(file_browser,
-                        PTK_FILE_LIST(file_browser->file_list),
+                        PTK_FILE_LIST_REINTERPRET(file_browser->file_list),
                         file_browser->large_icons,
                         max_file_size);
     }
@@ -5721,7 +5718,7 @@ ptk_file_browser_focus(GtkMenuItem* item, PtkFileBrowser* file_browser, int job2
     else
         job = job2;
 
-    FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
+    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
     int p = file_browser->mypanel;
     char mode = main_window->panel_context[p - 1];
     switch (job)
@@ -5853,7 +5850,7 @@ ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, int tab_num, const ch
     if (page_x > -1 && page_x < pages && page_x != cur_page)
     {
         PtkFileBrowser* a_browser =
-            PTK_FILE_BROWSER(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), page_x));
+            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), page_x));
 
         ptk_file_browser_chdir(a_browser, file_path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
     }
@@ -6005,7 +6002,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
 {
     int i = 0;
     XSet* set = xset_get(setname);
-    FMMainWindow* main_window = static_cast<FMMainWindow*>(browser->main_window);
+    FMMainWindow* main_window = FM_MAIN_WINDOW(browser->main_window);
     char mode = main_window->panel_context[browser->mypanel - 1];
 
     // LOG_INFO("ptk_file_browser_on_action {}", set->name);
@@ -6137,7 +6134,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
                     xset_get_b_panel(browser->mypanel, "show_hidden"));
             }
             else if (ztd::same(xname, "show")) // main View|Panel N
-                show_panels_all_windows(nullptr, static_cast<FMMainWindow*>(browser->main_window));
+                show_panels_all_windows(nullptr, FM_MAIN_WINDOW(browser->main_window));
             else if (Glib::str_has_prefix(xname, "show_")) // shared key
             {
                 set2 = xset_get_panel_mode(browser->mypanel, xname, mode);

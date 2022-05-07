@@ -23,8 +23,10 @@
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-file-task.hxx"
 
+#define FM_MAIN_WINDOW(obj)             (static_cast<FMMainWindow*>(obj))
+#define FM_MAIN_WINDOW_REINTERPRET(obj) (reinterpret_cast<FMMainWindow*>(obj))
+
 #define FM_TYPE_MAIN_WINDOW (fm_main_window_get_type())
-#define FM_MAIN_WINDOW(obj) (reinterpret_cast<FMMainWindow*>(obj))
 
 struct FMMainWindow
 {

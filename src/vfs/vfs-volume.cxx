@@ -112,6 +112,8 @@ static std::vector<VFSVolume*> volumes;
 static GArray* callbacks = nullptr;
 static bool global_inhibit_auto = false;
 
+#define DEVMOUNT_T(obj) (static_cast<devmount_t*>(obj))
+
 struct devmount_t
 {
     devmount_t(dev_t major, dev_t minor);
@@ -1093,10 +1095,9 @@ info_mount_points(device_t* device)
         GList* l;
         for (l = devmounts; l; l = l->next)
         {
-            if ((static_cast<devmount_t*>(l->data))->major == dmajor &&
-                (static_cast<devmount_t*>(l->data))->minor == dminor)
+            if ((DEVMOUNT_T(l->data))->major == dmajor && (DEVMOUNT_T(l->data))->minor == dminor)
             {
-                return ztd::strdup((static_cast<devmount_t*>(l->data))->mount_points);
+                return ztd::strdup((DEVMOUNT_T(l->data))->mount_points);
             }
         }
         return nullptr;
@@ -1595,10 +1596,9 @@ parse_mounts(bool report)
         devmount = nullptr;
         for (l = newmounts; l; l = l->next)
         {
-            if ((static_cast<devmount_t*>(l->data))->major == major &&
-                (static_cast<devmount_t*>(l->data))->minor == minor)
+            if ((DEVMOUNT_T(l->data))->major == major && (DEVMOUNT_T(l->data))->minor == minor)
             {
-                devmount = static_cast<devmount_t*>(l->data);
+                devmount = DEVMOUNT_T(l->data);
                 break;
             }
         }
@@ -1662,7 +1662,7 @@ parse_mounts(bool report)
     std::string points;
     for (l = newmounts; l; l = l->next)
     {
-        devmount = static_cast<devmount_t*>(l->data);
+        devmount = DEVMOUNT_T(l->data);
         // Sort the list to ensure that shortest mount paths appear first
         devmount->mounts = g_list_sort(devmount->mounts, (GCompareFunc)g_strcmp0);
         GList* m = devmount->mounts;
@@ -1684,19 +1684,18 @@ parse_mounts(bool report)
     {
         for (l = newmounts; l; l = l->next)
         {
-            devmount = static_cast<devmount_t*>(l->data);
+            devmount = DEVMOUNT_T(l->data);
             // LOG_INFO("finding {}:{}", devmount->major, devmount->minor);
             found =
                 g_list_find_custom(devmounts, (const void*)devmount, (GCompareFunc)cmp_devmounts);
             if (found)
             {
                 // LOG_INFO("    found");
-                if (!g_strcmp0((static_cast<devmount_t*>(found->data))->mount_points,
-                               devmount->mount_points))
+                if (!g_strcmp0((DEVMOUNT_T(found->data))->mount_points, devmount->mount_points))
                 {
                     // LOG_INFO("    freed");
                     // no change to mount points, so remove from old list
-                    devmount = static_cast<devmount_t*>(found->data);
+                    devmount = DEVMOUNT_T(found->data);
                     devmounts = g_list_remove(devmounts, devmount);
                     delete devmount;
                 }
@@ -1718,7 +1717,7 @@ parse_mounts(bool report)
     // any remaining devices in old list have changed mount status
     for (l = devmounts; l; l = l->next)
     {
-        devmount = static_cast<devmount_t*>(l->data);
+        devmount = DEVMOUNT_T(l->data);
         // LOG_INFO("remain {}:{}", devmount->major, devmount->minor );
         if (report)
             changed = g_list_prepend(changed, devmount);
@@ -1736,7 +1735,7 @@ parse_mounts(bool report)
         for (l = changed; l; l = l->next)
         {
             devnode = nullptr;
-            devmount = static_cast<devmount_t*>(l->data);
+            devmount = DEVMOUNT_T(l->data);
             devnum = makedev(devmount->major, devmount->minor);
             udevice = udev_device_new_from_devnum(udev, 'b', devnum);
             if (udevice)
@@ -1781,7 +1780,7 @@ free_devmounts()
     GList* l;
     for (l = devmounts; l; l = l->next)
     {
-        devmount_t* devmount = static_cast<devmount_t*>(l->data);
+        devmount_t* devmount = DEVMOUNT_T(l->data);
         delete devmount;
     }
     g_list_free(devmounts);
@@ -1795,9 +1794,8 @@ get_devmount_fstype(unsigned int major, unsigned int minor)
 
     for (l = devmounts; l; l = l->next)
     {
-        if ((static_cast<devmount_t*>(l->data))->major == major &&
-            (static_cast<devmount_t*>(l->data))->minor == minor)
-            return (static_cast<devmount_t*>(l->data))->fstype;
+        if ((DEVMOUNT_T(l->data))->major == major && (DEVMOUNT_T(l->data))->minor == minor)
+            return (DEVMOUNT_T(l->data))->fstype;
     }
     return nullptr;
 }
