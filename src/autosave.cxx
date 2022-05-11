@@ -24,7 +24,6 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "settings.hxx"
 #include "autosave.hxx"
 
 struct AutoSave
@@ -66,7 +65,7 @@ AutoSave autosave;
 std::vector<std::future<void>> threads;
 
 static void
-autosave_thread() noexcept
+autosave_thread(void (*autosave_func)(void)) noexcept
 {
     const std::chrono::duration<unsigned int> duration(autosave.timer);
     while (autosave.wait(duration))
@@ -76,7 +75,7 @@ autosave_thread() noexcept
         {
             // LOG_INFO("AUTOSAVE save_settings");
             autosave.request.store(false);
-            save_settings(nullptr);
+            autosave_func();
         }
     }
 }
@@ -96,13 +95,13 @@ autosave_cancel() noexcept
 }
 
 void
-autosave_init() noexcept
+autosave_init(void (*autosave_func)(void)) noexcept
 {
     // LOG_INFO("AUTOSAVE init");
     threads.push_back(std::async(std::launch::async,
-                                 []
+                                 [autosave_func]
                                  {
-                                     autosave_thread();
+                                     autosave_thread(autosave_func);
                                  }));
 }
 

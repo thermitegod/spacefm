@@ -429,7 +429,7 @@ main(int argc, char* argv[])
     load_settings(cli_flags.config_dir);
 
     // start autosave thread
-    autosave_init();
+    autosave_init(autosave_settings);
 
     std::atexit(ztd::Logger->shutdown);
     std::atexit(free_settings);

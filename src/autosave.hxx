@@ -18,5 +18,5 @@
 void autosave_request() noexcept;
 void autosave_cancel() noexcept;
 
-void autosave_init() noexcept;
+void autosave_init(void (*autosave_func)(void)) noexcept;
 void autosave_terminate() noexcept;

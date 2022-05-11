@@ -550,6 +550,12 @@ load_settings(const char* config_dir)
 }
 
 void
+autosave_settings()
+{
+    save_settings(nullptr);
+}
+
+void
 save_settings(void* main_window_ptr)
 {
     FMMainWindow* main_window;
