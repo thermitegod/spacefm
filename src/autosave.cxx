@@ -81,14 +81,14 @@ autosave_thread(void (*autosave_func)(void)) noexcept
 }
 
 void
-autosave_request() noexcept
+autosave_request_add() noexcept
 {
     // LOG_INFO("AUTOSAVE request add");
     autosave.request.store(true);
 }
 
 void
-autosave_cancel() noexcept
+autosave_request_cancel() noexcept
 {
     // LOG_INFO("AUTOSAVE request cancel");
     autosave.request.store(false);

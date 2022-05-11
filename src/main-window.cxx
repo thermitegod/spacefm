@@ -728,7 +728,7 @@ main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser)
             }
         }
     }
-    autosave_request();
+    autosave_request_add();
 }
 
 void
@@ -783,7 +783,7 @@ update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser)
             }
         }
     }
-    autosave_request();
+    autosave_request_add();
 }
 
 void
@@ -934,7 +934,7 @@ show_panels_all_windows(GtkMenuItem* item, FMMainWindow* main_window)
             show_panels(nullptr, window);
     }
 
-    autosave_request();
+    autosave_request_add();
 }
 
 static void
@@ -1916,7 +1916,7 @@ fm_main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
 
     // save settings
     app_settings.maximized = main_window->maximized;
-    autosave_cancel();
+    autosave_request_cancel();
     save_settings(main_window);
 
     // tasks running?
@@ -2250,7 +2250,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
 
         update_window_title(nullptr, main_window);
         if (xset_get_b("main_save_tabs"))
-            autosave_request();
+            autosave_request_add();
         return;
     }
 
@@ -2290,7 +2290,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
 
     update_window_title(nullptr, main_window);
     if (xset_get_b("main_save_tabs"))
-        autosave_request();
+        autosave_request_add();
 }
 
 static bool
@@ -2385,7 +2385,7 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, FMMainWindow* main_win
         gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view)); // MOD
     }
     if (xset_get_b("main_save_tabs"))
-        autosave_request();
+        autosave_request_add();
 
     if (event_handler.tab_chdir->s || event_handler.tab_chdir->ob2_data)
         main_window_event(main_window,
@@ -2724,7 +2724,7 @@ on_new_window_activate(GtkMenuItem* menuitem, void* user_data)
     (void)menuitem;
     FMMainWindow* main_window = static_cast<FMMainWindow*>(user_data);
 
-    autosave_cancel();
+    autosave_request_cancel();
     fm_main_window_store_positions(main_window);
     save_settings(main_window);
 

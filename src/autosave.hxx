@@ -15,8 +15,8 @@
 
 #pragma once
 
-void autosave_request() noexcept;
-void autosave_cancel() noexcept;
+void autosave_request_add() noexcept;
+void autosave_request_cancel() noexcept;
 
 void autosave_init(void (*autosave_func)(void)) noexcept;
 void autosave_terminate() noexcept;

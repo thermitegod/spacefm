@@ -5005,7 +5005,7 @@ xset_design_job(GtkWidget* item, XSet* set)
         main_window_rebuild_all_toolbars(set ? set->browser : nullptr);
 
     // autosave
-    autosave_request();
+    autosave_request_add();
 }
 
 static bool
@@ -5951,7 +5951,7 @@ xset_menu_cb(GtkWidget* item, XSet* set)
     }
 
     if (rset->menu_style)
-        autosave_request();
+        autosave_request_add();
 }
 
 int

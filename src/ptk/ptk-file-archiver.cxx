@@ -708,7 +708,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, GList* files, const char*
                 }
 
                 // Saving settings
-                autosave_request();
+                autosave_request_add();
                 exit_loop = true;
                 break;
             case GTK_RESPONSE_NONE:
