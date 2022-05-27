@@ -26,16 +26,14 @@ class VFSDirXDG
 {
   public:
     // GUserDirectory
-    // clang-format off
     const std::string user_desktop{Glib::get_user_special_dir(Glib::UserDirectory::DESKTOP)};
     const std::string user_documents{Glib::get_user_special_dir(Glib::UserDirectory::DOCUMENTS)};
     const std::string user_download{Glib::get_user_special_dir(Glib::UserDirectory::DOWNLOAD)};
     const std::string user_music{Glib::get_user_special_dir(Glib::UserDirectory::MUSIC)};
     const std::string user_pictures{Glib::get_user_special_dir(Glib::UserDirectory::PICTURES)};
-    const std::string user_public_share{Glib::get_user_special_dir(Glib::UserDirectory::PUBLIC_SHARE)};
+    const std::string user_share{Glib::get_user_special_dir(Glib::UserDirectory::PUBLIC_SHARE)};
     const std::string user_template{Glib::get_user_special_dir(Glib::UserDirectory::TEMPLATES)};
     const std::string user_videos{Glib::get_user_special_dir(Glib::UserDirectory::VIDEOS)};
-    // clang-format on
 
     // User
     const std::string user_home{Glib::get_home_dir()};
@@ -86,7 +84,7 @@ vfs_user_pictures_dir() noexcept
 const std::string&
 vfs_user_public_share_dir() noexcept
 {
-    return vfs_dir_xdg.user_public_share;
+    return vfs_dir_xdg.user_share;
 }
 
 const std::string&

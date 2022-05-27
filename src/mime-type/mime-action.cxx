@@ -63,9 +63,6 @@ save_to_file(const std::string& path, const std::string& data)
     std::filesystem::permissions(path, std::filesystem::perms::owner_all);
 }
 
-static const std::string group_desktop = "Desktop Entry";
-static const std::string key_mime_type = "MimeType";
-
 typedef char* (*DataDirFunc)(const char* dir, const char* mime_type, void* user_data);
 
 static char*
@@ -127,22 +124,23 @@ static void
 remove_actions(const std::string mime_type, std::vector<std::string> actions)
 {
     // LOG_INFO("remove_actions( {} )", type);
+
     const auto kf = Glib::KeyFile::create();
-
-    std::string path;
-
-    // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    path = Glib::build_filename(vfs_user_config_dir(), "mimeapps.list");
     try
     {
+        // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
+        const std::string path = Glib::build_filename(vfs_user_config_dir(), "mimeapps.list");
+
         kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
     }
     catch (Glib::FileError)
     {
-        // $XDG_DATA_HOME=[~/.local]/share/applications/mimeapps.list
-        path = Glib::build_filename(vfs_user_data_dir(), "applications/mimeapps.list");
         try
         {
+            // $XDG_DATA_HOME=[~/.local]/share/applications/mimeapps.list
+            const std::string path =
+                Glib::build_filename(vfs_user_data_dir(), "applications/mimeapps.list");
+
             kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
         }
         catch (Glib::FileError)
@@ -197,92 +195,84 @@ get_actions(const std::string& dir, const std::string& type, std::vector<std::st
     // LOG_INFO("get_actions( {}/, {} )", dir, type);
     for (std::size_t n = 0; n < names.size(); ++n)
     {
-        std::string path = Glib::build_filename(dir, names.at(n));
+        const std::string path = Glib::build_filename(dir, names.at(n));
         // LOG_INFO( "    {}", path);
         const auto kf = Glib::KeyFile::create();
-        bool opened;
-
         try
         {
-            opened = kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
+            kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
         }
         catch (Glib::FileError)
         {
-            opened = false;
+            continue;
         }
 
-        if (opened)
+        if (n == 0)
         {
-            if (n == 0)
+            // get removed associations in this dir
+            try
             {
-                // get removed associations in this dir
-                try
-                {
-                    removed = kf->get_string_list("Removed Associations", type);
-                    // if (removed.empty())
-                    //     continue;
-                }
-                catch (...) // Glib::KeyFileError, Glib::FileError
-                {
-                    continue;
-                }
+                removed = kf->get_string_list("Removed Associations", type);
+                // if (removed.empty())
+                //     continue;
             }
-
-            // mimeinfo.cache has only MIME Cache; others do not have it
-            int k;
-            for (k = (n == 0 ? 0 : 2); k < (n == 0 ? 2 : 3); k++)
+            catch (...) // Glib::KeyFileError, Glib::FileError
             {
-                // LOG_INFO("        {} [{}]", groups[k], k);
-                bool is_removed;
-                std::vector<Glib::ustring> apps;
-                try
+                continue;
+            }
+        }
+
+        // mimeinfo.cache has only MIME Cache; others do not have it
+        for (int k = (n == 0 ? 0 : 2); k < (n == 0 ? 2 : 3); k++)
+        {
+            // LOG_INFO("        {} [{}]", groups[k], k);
+            bool is_removed;
+            std::vector<Glib::ustring> apps;
+            try
+            {
+                apps = kf->get_string_list(groups.at(k), type);
+                // if (apps.empty())
+                //     return nullptr;
+            }
+            catch (...) // Glib::KeyFileError, Glib::FileError
+            {
+                continue;
+            }
+            unsigned long i;
+            for (i = 0; i < apps.size(); ++i)
+            {
+                //  LOG_INFO("            {}", apps[i]);
+                //  check if removed
+                is_removed = false;
+                if (!removed.empty() && n > 0)
                 {
-                    apps = kf->get_string_list(groups.at(k), type);
-                    // if (apps.empty())
-                    //     return nullptr;
-                }
-                catch (...) // Glib::KeyFileError, Glib::FileError
-                {
-                    continue;
-                }
-                unsigned long i;
-                for (i = 0; i < apps.size(); ++i)
-                {
-                    //  LOG_INFO("            {}", apps[i]);
-                    //  check if removed
-                    is_removed = false;
-                    if (!removed.empty() && n > 0)
+                    unsigned long r;
+                    for (r = 0; r < removed.size(); ++r)
                     {
-                        unsigned long r;
-                        for (r = 0; r < removed.size(); ++r)
+                        if (ztd::same(removed[r].data(), apps[i].data()))
                         {
-                            if (ztd::same(removed.at(r).data(), apps.at(i).data()))
-                            {
-                                // LOG_INFO("                REMOVED");
-                                is_removed = true;
-                                break;
-                            }
+                            // LOG_INFO("                REMOVED");
+                            is_removed = true;
+                            break;
                         }
                     }
-                    std::string app = apps.at(i);
-                    if (!is_removed && !ztd::contains(actions, app))
+                }
+                std::string app = apps.at(i);
+                if (!is_removed && !ztd::contains(actions, app))
+                {
+                    /* check for app existence */
+                    if (mime_type_locate_desktop_file(nullptr, apps.at(i).c_str()))
                     {
-                        /* check for app existence */
-                        if (mime_type_locate_desktop_file(nullptr, apps.at(i).c_str()))
-                        {
-                            // LOG_INFO("                EXISTS");
-                            actions.push_back(app);
-                        }
-                        else
-                        {
-                            // LOG_INFO("                MISSING");
-                        }
+                        // LOG_INFO("                EXISTS");
+                        actions.push_back(app);
+                    }
+                    else
+                    {
+                        // LOG_INFO("                MISSING");
                     }
                 }
             }
         }
-        if (ztd::same(dir, vfs_user_config_dir()))
-            break; // no mimeinfo.cache in ~/.config
     }
 }
 
@@ -349,9 +339,9 @@ mime_type_has_action(const char* type, const char* desktop_id)
 
     if (is_desktop)
     {
-        const auto kf = Glib::KeyFile::create();
-        Glib::ustring filename = mime_type_locate_desktop_file(nullptr, desktop_id);
+        const Glib::ustring filename = mime_type_locate_desktop_file(nullptr, desktop_id);
 
+        const auto kf = Glib::KeyFile::create();
         try
         {
             kf->load_from_file(filename, Glib::KeyFile::Flags::NONE);
@@ -364,7 +354,7 @@ mime_type_has_action(const char* type, const char* desktop_id)
         std::vector<Glib::ustring> types;
         try
         {
-            types = kf->get_string_list(group_desktop, key_mime_type);
+            types = kf->get_string_list("Desktop Entry", "MimeType");
             if (types.empty())
                 return false;
         }
@@ -386,8 +376,8 @@ mime_type_has_action(const char* type, const char* desktop_id)
 
         if (!found) /* get the content of desktop file for comparison */
         {
-            cmd = kf->get_string(group_desktop, "Exec");
-            name = kf->get_string(group_desktop, "Name");
+            cmd = kf->get_string("Desktop Entry", "Exec");
+            name = kf->get_string("Desktop Entry", "Name");
         }
     }
     else
@@ -408,11 +398,10 @@ mime_type_has_action(const char* type, const char* desktop_id)
             }
             else /* Then, try to match by "Exec" and "Name" keys */
             {
-                Glib::ustring name2;
-                Glib::ustring cmd2;
-                Glib::ustring filename = mime_type_locate_desktop_file(nullptr, action.c_str());
-                const auto kf = Glib::KeyFile::create();
+                const Glib::ustring filename =
+                    mime_type_locate_desktop_file(nullptr, action.c_str());
 
+                const auto kf = Glib::KeyFile::create();
                 try
                 {
                     kf->load_from_file(filename, Glib::KeyFile::Flags::NONE);
@@ -422,12 +411,12 @@ mime_type_has_action(const char* type, const char* desktop_id)
                     return false;
                 }
 
-                cmd2 = kf->get_string(group_desktop, "Exec");
+                const Glib::ustring cmd2 = kf->get_string("Desktop Entry", "Exec");
                 if (ztd::same(cmd.data(), cmd2.data())) /* 2 desktop files have same "Exec" */
                 {
                     if (is_desktop)
                     {
-                        name2 = kf->get_string(group_desktop, "Name");
+                        const Glib::ustring name2 = kf->get_string("Desktop Entry", "Name");
                         /* Then, check if the "Name" keys of 2 desktop files are the same. */
                         if (ztd::same(name.data(), name2.data()))
                         {
@@ -453,7 +442,6 @@ mime_type_has_action(const char* type, const char* desktop_id)
 static char*
 make_custom_desktop_file(const char* desktop_id, const char* mime_type)
 {
-    Glib::ustring filename;
     std::string name;
     std::string cust_template;
     std::string cust;
@@ -464,9 +452,9 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
 
     if (Glib::str_has_suffix(desktop_id, desktop_ext))
     {
-        const auto kf = Glib::KeyFile::create();
-        filename = mime_type_locate_desktop_file(nullptr, desktop_id);
+        const Glib::ustring filename = mime_type_locate_desktop_file(nullptr, desktop_id);
 
+        const auto kf = Glib::KeyFile::create();
         try
         {
             kf->load_from_file(filename, Glib::KeyFile::Flags::KEEP_TRANSLATIONS);
@@ -485,10 +473,10 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
 
         const std::vector<Glib::ustring> mime_types{mime_type};
         /* set our mime-type */
-        kf->set_string_list(group_desktop, key_mime_type, mime_types);
+        kf->set_string_list("Desktop Entry", "MimeType", mime_types);
         /* store id of original desktop file, for future use. */
-        kf->set_string(group_desktop, "X-MimeType-Derived", desktop_id);
-        kf->set_string(group_desktop, "NoDisplay", "true");
+        kf->set_string("Desktop Entry", "X-MimeType-Derived", desktop_id);
+        kf->set_string("Desktop Entry", "NoDisplay", "true");
 
         name = ztd::removesuffix(desktop_id, desktop_ext);
         cust_template = fmt::format("{}-usercustom-{}.desktop", name, replace_txt);
@@ -649,7 +637,7 @@ get_default_action(const char* dir, const char* type, void* user_data)
 
     for (std::size_t n = 0; n < names.size(); ++n)
     {
-        std::string path = Glib::build_filename(dir, names.at(n));
+        const std::string path = Glib::build_filename(dir, names.at(n));
         // LOG_INFO("    path = {}", path);
         const auto kf = Glib::KeyFile::create();
         try
@@ -743,11 +731,11 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
         return;
     }
 
+    // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
+    const std::string path = Glib::build_filename(vfs_user_config_dir(), "mimeapps.list");
+
     // Load current mimeapps.list content, if available
     const auto kf = Glib::KeyFile::create();
-    // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    std::string path = Glib::build_filename(vfs_user_config_dir(), "mimeapps.list");
-
     try
     {
         kf->load_from_file(path, Glib::KeyFile::Flags::NONE);

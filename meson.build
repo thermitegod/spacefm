@@ -210,13 +210,20 @@ pre_args = [
     '-DPACKAGE_VERSION="@0@"'.format(meson.project_version()),
     '-DPACKAGE_BUGREPORT="TODO"',
     '-DPACKAGE_ONLINE_DOCS="TODO"',
-    '-DBASHPATH="/bin/bash"', # TODO - set in meson_options.txt
+
+    '-DBASHPATH="/bin/bash"',
     '-DSHELL_SETTINGS="set -o pipefail;shopt -s failglob"',
+
     '-DG_DISABLE_ASSERT',
     '-DG_DISABLE_CAST_CHECKS',
     '-DG_DISABLE_CHECKS',
     '-DG_LOG_DOMAIN="SpaceFM"',
-    #'-DG_DEBUG=fatal_warnings'
+    #'-DG_DEBUG=fatal_warnings',
+
+    '-DGTKMM_DISABLE_DEPRECATED',
+    '-DGDKMM_DISABLE_DEPRECATED',
+    '-DGLIBMM_DISABLE_DEPRECATED',
+    '-DGIOMM_DISABLE_DEPRECATED',
     ]
 
 if get_option('nonlatin')

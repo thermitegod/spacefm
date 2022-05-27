@@ -173,55 +173,22 @@ _dupv8(const char* s)
     }
 }
 
-/* unescapes things like \x20 to " " and ensures the returned string is valid UTF-8.
+/**
+ * unescapes things like \x20 to " " and ensures the returned string is valid UTF-8.
  *
  * see volume_id_encode_string() in extras/volume_id/lib/volume_id.c in the
  * udev tree for the encoder
  */
-static char*
+static const std::string
 decode_udev_encoded_string(const char* str)
 {
-    GString* s = g_string_new(nullptr);
-    unsigned int n;
-    for (n = 0; str[n] != '\0'; n++)
-    {
-        if (str[n] == '\\')
-        {
-            int val;
+    if (!str)
+        return "";
 
-            if (str[n + 1] != 'x' || str[n + 2] == '\0' || str[n + 3] == '\0')
-            {
-                LOG_INFO("malformed encoded string '{}'", str);
-                break;
-            }
-
-            val = (g_ascii_xdigit_value(str[n + 2]) << 4) | g_ascii_xdigit_value(str[n + 3]);
-
-            g_string_append_c(s, val);
-
-            n += 3;
-        }
-        else
-        {
-            g_string_append_c(s, str[n]);
-        }
-    }
-
-    char* ret;
-    const char* end_valid;
-    if (!g_utf8_validate(s->str, -1, &end_valid))
-    {
-        LOG_INFO("The string '{}' is not valid UTF-8", s->str);
-        LOG_INFO("Invalid characters begins at '{}'", end_valid);
-        ret = strndup(s->str, end_valid - s->str);
-        g_string_free(s, true);
-    }
-    else
-    {
-        ret = g_string_free(s, false);
-    }
-
-    return ret;
+    const std::string decode = ztd::strip(ztd::replace(str, "\\x20", " "));
+    // LOG_DEBUG("udev encoded string: {}", str);
+    // LOG_DEBUG("udev decoded string: {}", decode);
+    return decode;
 }
 
 static int
@@ -649,7 +616,6 @@ info_drive_properties(device_t* device)
     const char* media_in_drive;
     bool drive_is_ejectable;
     bool drive_can_detach;
-    char* decoded_string;
     unsigned int n;
     const char* value;
 
@@ -659,9 +625,7 @@ info_drive_properties(device_t* device)
     // vendor
     if ((value = udev_device_get_property_value(device->udevice, "ID_VENDOR_ENC")))
     {
-        decoded_string = decode_udev_encoded_string(value);
-        g_strstrip(decoded_string);
-        device->drive_vendor = decoded_string;
+        device->drive_vendor = ztd::strdup(decode_udev_encoded_string(value));
     }
     else if ((value = udev_device_get_property_value(device->udevice, "ID_VENDOR")))
     {
@@ -671,9 +635,7 @@ info_drive_properties(device_t* device)
     // model
     if ((value = udev_device_get_property_value(device->udevice, "ID_MODEL_ENC")))
     {
-        decoded_string = decode_udev_encoded_string(value);
-        g_strstrip(decoded_string);
-        device->drive_model = decoded_string;
+        device->drive_model = ztd::strdup(decode_udev_encoded_string(value));
     }
     else if ((value = udev_device_get_property_value(device->udevice, "ID_MODEL")))
     {
@@ -836,7 +798,6 @@ info_device_properties(device_t* device)
     // clang-format on
 
     // filesystem properties
-    char* decoded_string;
     const char* partition_scheme;
     int partition_type = 0;
 
@@ -858,9 +819,7 @@ info_device_properties(device_t* device)
 
         if ((value = udev_device_get_property_value(device->udevice, "ID_FS_LABEL_ENC")))
         {
-            decoded_string = decode_udev_encoded_string(value);
-            g_strstrip(decoded_string);
-            device->id_label = decoded_string;
+            device->id_label = ztd::strdup(decode_udev_encoded_string(value));
         }
         else if ((value = udev_device_get_property_value(device->udevice, "ID_FS_LABEL")))
         {
