@@ -730,8 +730,8 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
         return list->sort_order == GTK_SORT_ASCENDING ? result : -result;
 
     // hidden first/last
-    bool hidden_a = file_a->disp_name.at(0) == '.' || file_a->disp_name.at(0) == '#';
-    bool hidden_b = file_b->disp_name.at(0) == '.' || file_b->disp_name.at(0) == '#';
+    bool hidden_a = file_a->disp_name.at(0) == '.';
+    bool hidden_b = file_b->disp_name.at(0) == '.';
     if (hidden_a && !hidden_b)
         result = list->sort_hidden_first ? -1 : 1;
     else if (!hidden_a && hidden_b)
