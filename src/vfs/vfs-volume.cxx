@@ -390,10 +390,11 @@ ptr_str_array_compare(const char** a, const char** b)
 }
 
 static double
-sysfs_get_double(const char* dir, const char* attribute)
+sysfs_get_double(const std::string& dir, const std::string& attribute)
 {
+    const std::string filename = Glib::build_filename(dir, attribute);
+
     std::string contents;
-    std::string filename = Glib::build_filename(dir, attribute);
     try
     {
         contents = Glib::file_get_contents(filename);
@@ -405,27 +406,29 @@ sysfs_get_double(const char* dir, const char* attribute)
     return std::stod(contents);
 }
 
-static char*
-sysfs_get_string(const char* dir, const char* attribute)
+static const std::string
+sysfs_get_string(const std::string& dir, const std::string& attribute)
 {
+    const std::string filename = Glib::build_filename(dir, attribute);
+
     std::string result;
-    std::string filename = Glib::build_filename(dir, attribute);
     try
     {
         result = Glib::file_get_contents(filename);
     }
     catch (Glib::FileError)
     {
-        return ztd::strdup("");
+        result = "";
     }
-    return ztd::strdup(result);
+    return ztd::strip(result);
 }
 
 static int
-sysfs_get_int(const char* dir, const char* attribute)
+sysfs_get_int(const std::string& dir, const std::string& attribute)
 {
+    const std::string filename = Glib::build_filename(dir, attribute);
+
     std::string contents;
-    std::string filename = Glib::build_filename(dir, attribute);
     try
     {
         contents = Glib::file_get_contents(filename);
@@ -438,10 +441,11 @@ sysfs_get_int(const char* dir, const char* attribute)
 }
 
 static std::uint64_t
-sysfs_get_uint64(const char* dir, const char* attribute)
+sysfs_get_uint64(const std::string& dir, const std::string& attribute)
 {
+    const std::string filename = Glib::build_filename(dir, attribute);
+
     std::string contents;
-    std::string filename = Glib::build_filename(dir, attribute);
     try
     {
         contents = Glib::file_get_contents(filename);
@@ -454,9 +458,9 @@ sysfs_get_uint64(const char* dir, const char* attribute)
 }
 
 static bool
-sysfs_file_exists(const char* dir, const char* attribute)
+sysfs_file_exists(const std::string& dir, const std::string& attribute)
 {
-    std::string filename = Glib::build_filename(dir, attribute);
+    const std::string filename = Glib::build_filename(dir, attribute);
     if (std::filesystem::exists(filename))
         return true;
     return false;
@@ -528,7 +532,6 @@ info_drive_connection(device_t* device)
     char* s = ztd::strdup(device->native_path);
     do
     {
-        char* model;
         char* p = sysfs_resolve_link(s, "subsystem");
         if (!device->device_is_removable && sysfs_get_int(s, "removable") != 0)
             device->device_is_removable = true;
@@ -548,28 +551,24 @@ info_drive_connection(device_t* device)
                  *  - replaces whitespace with _
                  *  - is missing for e.g. Firewire
                  */
-                char* vendor = sysfs_get_string(s, "vendor");
-                if (vendor != nullptr)
+                const std::string vendor = sysfs_get_string(s, "vendor");
+                if (!vendor.empty())
                 {
-                    g_strstrip(vendor);
                     /* Do not overwrite what we set earlier from ID_VENDOR */
                     if (device->drive_vendor == nullptr)
                     {
                         device->drive_vendor = ztd::strdup(vendor);
                     }
-                    free(vendor);
                 }
 
-                model = sysfs_get_string(s, "model");
-                if (model != nullptr)
+                const std::string model = sysfs_get_string(s, "model");
+                if (!model.empty())
                 {
-                    g_strstrip(model);
                     /* Do not overwrite what we set earlier from ID_MODEL */
                     if (device->drive_model == nullptr)
                     {
                         device->drive_model = ztd::strdup(model);
                     }
-                    free(model);
                 }
 
                 /* TODO: need to improve this code; we probably need the kernel to export more
@@ -625,42 +624,36 @@ info_drive_connection(device_t* device)
                  * e.g. Panasonic, Sandisk etc.
                  */
 
-                model = sysfs_get_string(s, "name");
-                if (model != nullptr)
+                const std::string model = sysfs_get_string(s, "name");
+                if (!model.empty())
                 {
-                    g_strstrip(model);
                     /* Do not overwrite what we set earlier from ID_MODEL */
                     if (device->drive_model == nullptr)
                     {
                         device->drive_model = ztd::strdup(model);
                     }
-                    free(model);
                 }
 
-                char* serial = sysfs_get_string(s, "serial");
-                if (serial != nullptr)
+                const std::string serial = sysfs_get_string(s, "serial");
+                if (!serial.empty())
                 {
-                    g_strstrip(serial);
                     /* Do not overwrite what we set earlier from ID_SERIAL */
                     if (device->drive_serial == nullptr)
                     {
                         /* this is formatted as a hexnumber; drop the leading 0x */
-                        device->drive_serial = ztd::strdup(serial + 2);
+                        device->drive_serial = ztd::strdup(ztd::removeprefix(serial, "0x"));
                     }
-                    free(serial);
                 }
 
                 /* TODO: use hwrev and fwrev files? */
-                char* revision = sysfs_get_string(s, "date");
-                if (revision != nullptr)
+                const std::string revision = sysfs_get_string(s, "date");
+                if (!revision.empty())
                 {
-                    g_strstrip(revision);
                     /* Do not overwrite what we set earlier from ID_REVISION */
                     if (device->drive_revision == nullptr)
                     {
                         device->drive_revision = ztd::strdup(revision);
                     }
-                    free(revision);
                 }
 
                 /* TODO: interface speed; the kernel driver knows; would be nice
@@ -876,23 +869,20 @@ info_drive_properties(device_t* device)
      */
     if (!g_strcmp0(device->drive_connection_interface, "sdio"))
     {
-        char* type;
+        const std::string type = sysfs_get_string(device->native_path, "../../type");
 
-        type = sysfs_get_string(device->native_path, "../../type");
-        g_strstrip(type);
-        if (!g_strcmp0(type, "MMC"))
+        if (ztd::same(type, "MMC"))
         {
             g_ptr_array_add(media_compat_array, (void*)"flash_mmc");
         }
-        else if (!g_strcmp0(type, "SD"))
+        else if (ztd::same(type, "SD"))
         {
             g_ptr_array_add(media_compat_array, (void*)"flash_sd");
         }
-        else if (!g_strcmp0(type, "SDHC"))
+        else if (ztd::same(type, "SDHC"))
         {
             g_ptr_array_add(media_compat_array, (void*)"flash_sdhc");
         }
-        free(type);
     }
     g_ptr_array_sort(media_compat_array, (GCompareFunc)ptr_str_array_compare);
     g_ptr_array_add(media_compat_array, nullptr);
