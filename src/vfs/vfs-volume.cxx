@@ -466,11 +466,12 @@ sysfs_file_exists(const std::string& dir, const std::string& attribute)
     return false;
 }
 
-static char*
-sysfs_resolve_link(const char* sysfs_path, const char* name)
+static const std::string
+sysfs_resolve_link(const std::string& sysfs_path, const std::string& name)
 {
+    const std::string full_path = Glib::build_filename(sysfs_path, name);
+
     std::string target_path;
-    std::string full_path = Glib::build_filename(sysfs_path, name);
     try
     {
         target_path = std::filesystem::read_symlink(full_path);
@@ -478,9 +479,9 @@ sysfs_resolve_link(const char* sysfs_path, const char* name)
     catch (const std::filesystem::filesystem_error& e)
     {
         // LOG_WARN("{}", e.what());
-        return nullptr;
+        return "";
     }
-    return ztd::strdup(target_path);
+    return target_path;
 }
 
 static bool
@@ -525,22 +526,25 @@ info_is_system_internal(device_t* device)
 static void
 info_drive_connection(device_t* device)
 {
-    const char* connection_interface = nullptr;
+    std::string connection_interface;
     std::uint64_t connection_speed = 0;
 
     /* walk up the device tree to figure out the subsystem */
-    char* s = ztd::strdup(device->native_path);
-    do
+    if (!device->native_path)
+        return;
+    std::string s = device->native_path;
+
+    while (true)
     {
-        char* p = sysfs_resolve_link(s, "subsystem");
         if (!device->device_is_removable && sysfs_get_int(s, "removable") != 0)
             device->device_is_removable = true;
-        if (p != nullptr)
-        {
-            char* subsystem = g_path_get_basename(p);
-            free(p);
 
-            if (!strcmp(subsystem, "scsi"))
+        const std::string p = sysfs_resolve_link(s, "subsystem");
+        if (!p.empty())
+        {
+            const std::string subsystem = Glib::path_get_basename(p);
+
+            if (ztd::same(subsystem, "scsi"))
             {
                 connection_interface = "scsi";
                 connection_speed = 0;
@@ -581,7 +585,7 @@ info_drive_connection(device_t* device)
                     break;
                 }
             }
-            else if (!strcmp(subsystem, "usb"))
+            else if (ztd::same(subsystem, "usb"))
             {
                 double usb_speed;
 
@@ -596,7 +600,7 @@ info_drive_connection(device_t* device)
                     break;
                 }
             }
-            else if (!strcmp(subsystem, "firewire") || !strcmp(subsystem, "ieee1394"))
+            else if (ztd::same(subsystem, "firewire") || ztd::same(subsystem, "ieee1394"))
             {
                 /* TODO: krh has promised a speed file in sysfs; theoretically, the speed can
                  *       be anything from 100, 200, 400, 800 and 3200. Till then we just hardcode
@@ -607,7 +611,7 @@ info_drive_connection(device_t* device)
                 connection_speed = 400 * (1000 * 1000);
                 break;
             }
-            else if (!strcmp(subsystem, "mmc"))
+            else if (ztd::same(subsystem, "mmc"))
             {
                 /* TODO: what about non-SD, e.g. MMC? Is that another bus? */
                 connection_interface = "sdio";
@@ -659,41 +663,32 @@ info_drive_connection(device_t* device)
                 /* TODO: interface speed; the kernel driver knows; would be nice
                  * if it could export it */
             }
-            else if (!strcmp(subsystem, "platform"))
+            else if (ztd::same(subsystem, "platform"))
             {
-                const char* sysfs_name;
-
-                sysfs_name = g_strrstr(s, "/");
-                if (Glib::str_has_prefix(sysfs_name + 1, "floppy.") &&
-                    device->drive_vendor == nullptr)
+                const std::string sysfs_name = ztd::rpartition(s, "/")[0];
+                if (Glib::str_has_prefix(sysfs_name, "floppy.") && device->drive_vendor == nullptr)
                 {
                     device->drive_vendor = ztd::strdup("Floppy Drive");
                     connection_interface = "platform";
                 }
             }
-
-            free(subsystem);
         }
 
         /* advance up the chain */
-        p = g_strrstr(s, "/");
-        if (p == nullptr)
+        if (!ztd::contains(s, "/"))
             break;
-        *p = '\0';
+        s = ztd::rpartition(s, "/")[0];
 
         /* but stop at the root */
-        if (!strcmp(s, "/sys/devices"))
+        if (ztd::same(s, "/sys/devices"))
             break;
+    }
 
-    } while (true);
-
-    if (connection_interface != nullptr)
+    if (!connection_interface.empty())
     {
         device->drive_connection_interface = ztd::strdup(connection_interface);
         device->drive_connection_speed = connection_speed;
     }
-
-    free(s);
 }
 
 static const struct
