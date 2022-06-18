@@ -2462,24 +2462,27 @@ split_network_url(const char* url, netmount_t** netmount)
 static VFSVolume*
 vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
 { // read a non-block device
-    VFSVolume* volume;
-    char* str;
-
     if (devnum == 0 || !mount_points)
         return nullptr;
 
-    // get single mount point
-    char* point = ztd::strdup(mount_points);
-    if ((str = strchr(point, ',')))
-        str[0] = '\0';
-    g_strstrip(point);
-    if (!(point && point[0] == '/'))
+    VFSVolume* volume;
+
+    // check mount path has path sep
+    std::string point = mount_points;
+    if (!ztd::contains(point, "/"))
         return nullptr;
+
+    // get single mount point
+    if (ztd::contains(point, ","))
+        point = ztd::partition(point, ",")[0];
+
+    // LOG_INFO("vfs_volume_read_by_mount point: {}", point);
 
     // get device name
     char* name = nullptr;
     char* mtab_fstype = nullptr;
-    if (!(path_is_mounted_mtab(nullptr, point, &name, &mtab_fstype) && name && name[0] != '\0'))
+    if (!(path_is_mounted_mtab(nullptr, point.c_str(), &name, &mtab_fstype) && name &&
+          name[0] != '\0'))
         return nullptr;
 
     netmount_t* netmount = new netmount_t;
@@ -2498,7 +2501,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         volume->is_mounted = true;
         volume->ever_mounted = true;
         volume->open_main_window = nullptr;
-        volume->mount_point = point;
+        volume->mount_point = ztd::strdup(point);
         volume->disp_name = nullptr;
         volume->automount_time = 0;
         volume->inhibit_auto = false;
@@ -2515,8 +2518,8 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         Glib::usleep(200000);
         std::string mtab_file = Glib::build_filename(vfs_user_home_dir(), ".mtab.fuseiso");
         char* new_name = nullptr;
-        if (path_is_mounted_mtab(mtab_file.c_str(), point, &new_name, nullptr) && new_name &&
-            new_name[0])
+        if (path_is_mounted_mtab(mtab_file.c_str(), point.c_str(), &new_name, nullptr) &&
+            new_name && new_name[0])
         {
             free(name);
             name = new_name;
@@ -2536,7 +2539,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         volume->is_mounted = true;
         volume->ever_mounted = true;
         volume->open_main_window = nullptr;
-        volume->mount_point = point;
+        volume->mount_point = ztd::strdup(point);
         volume->disp_name = nullptr;
         volume->automount_time = 0;
         volume->inhibit_auto = false;
@@ -2562,7 +2565,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
             }
         }
         // mount point must be readable
-        keep = keep && (geteuid() == 0 || faccessat(0, point, R_OK, AT_EACCESS) == 0);
+        keep = keep && (geteuid() == 0 || faccessat(0, point.c_str(), R_OK, AT_EACCESS) == 0);
         if (keep)
         {
             // create a volume
@@ -2577,7 +2580,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
             volume->is_mounted = true;
             volume->ever_mounted = true;
             volume->open_main_window = nullptr;
-            volume->mount_point = point;
+            volume->mount_point = ztd::strdup(point);
             volume->disp_name = nullptr;
             volume->automount_time = 0;
             volume->inhibit_auto = false;
@@ -2586,7 +2589,6 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         {
             free(name);
             free(mtab_fstype);
-            free(point);
             return nullptr;
         }
     }
