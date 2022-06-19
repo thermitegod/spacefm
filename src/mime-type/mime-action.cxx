@@ -63,53 +63,6 @@ save_to_file(const std::string& path, const std::string& data)
     std::filesystem::permissions(path, std::filesystem::perms::owner_all);
 }
 
-using DataDirFunc = char* (*)(const char* dir, const char* mime_type, void* user_data);
-
-static char*
-data_dir_foreach(DataDirFunc func, const char* mime_type, void* user_data)
-{
-    char* ret = nullptr;
-
-    std::string dir;
-
-    // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    if ((ret = func(vfs_user_config_dir().c_str(), mime_type, user_data)))
-        return ret;
-
-    // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
-    dir = Glib::build_filename(vfs_user_data_dir(), "applications");
-    if ((ret = func(dir.c_str(), mime_type, user_data)))
-        return ret;
-
-    // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
-    for (const std::string& sys_dir: vfs_system_data_dir())
-    {
-        dir = Glib::build_filename(sys_dir, "applications");
-        if ((ret = func(dir.c_str(), mime_type, user_data)))
-            return ret;
-    }
-
-    return ret;
-}
-
-static char*
-apps_dir_foreach(DataDirFunc func, const char* mime_type, void* user_data)
-{
-    char* ret = nullptr;
-
-    std::string dir = vfs_user_data_dir();
-
-    if ((ret = func(dir.c_str(), mime_type, user_data)))
-        return ret;
-
-    for (const std::string& sys_dir: vfs_system_data_dir())
-    {
-        if ((ret = func(sys_dir.c_str(), mime_type, user_data)))
-            return ret;
-    }
-    return ret;
-}
-
 static void
 update_desktop_database()
 {
@@ -577,9 +530,8 @@ _locate_desktop_file_recursive(const char* path, const char* desktop_id, bool fi
 }
 
 static char*
-_locate_desktop_file(const char* dir, const char* unused, const void* desktop_id)
+_locate_desktop_file(const char* dir, const void* desktop_id)
 { // sfm 0.7.8 modified + 0.8.7 modified
-    (void)unused;
     bool found = false;
 
     std::string desktop_path = Glib::build_filename(dir, "applications", (const char*)desktop_id);
@@ -623,14 +575,26 @@ char*
 mime_type_locate_desktop_file(const char* dir, const char* desktop_id)
 {
     if (dir)
-        return _locate_desktop_file(dir, nullptr, (void*)desktop_id);
-    return apps_dir_foreach((DataDirFunc)_locate_desktop_file, nullptr, (void*)desktop_id);
+        return _locate_desktop_file(dir, (void*)desktop_id);
+
+    char* ret = nullptr;
+
+    const std::string data_dir = vfs_user_data_dir();
+
+    if ((ret = _locate_desktop_file(data_dir.c_str(), (void*)desktop_id)))
+        return ret;
+
+    for (const std::string& sys_dir: vfs_system_data_dir())
+    {
+        if ((ret = _locate_desktop_file(sys_dir.c_str(), (void*)desktop_id)))
+            return ret;
+    }
+    return ret;
 }
 
 static char*
-get_default_action(const char* dir, const char* type, void* user_data)
+get_default_action(const char* dir, const char* type)
 {
-    (void)user_data;
     // LOG_INFO("get_default_action( {}, {} )", dir, type);
     // search these files in dir for the first existing default app
     const std::array<std::string, 2> names{"mimeapps.list", "defaults.list"};
@@ -701,7 +665,29 @@ char*
 mime_type_get_default_action(const std::string& mime_type)
 {
     /* FIXME: need to check parent types if default action of current type is not set. */
-    return data_dir_foreach((DataDirFunc)get_default_action, mime_type.c_str(), nullptr);
+
+    char* ret = nullptr;
+
+    std::string dir;
+
+    // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
+    if ((ret = get_default_action(vfs_user_config_dir().c_str(), mime_type.c_str())))
+        return ret;
+
+    // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
+    dir = Glib::build_filename(vfs_user_data_dir(), "applications");
+    if ((ret = get_default_action(dir.c_str(), mime_type.c_str())))
+        return ret;
+
+    // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
+    for (const std::string& sys_dir: vfs_system_data_dir())
+    {
+        dir = Glib::build_filename(sys_dir, "applications");
+        if ((ret = get_default_action(dir.c_str(), mime_type.c_str())))
+            return ret;
+    }
+
+    return ret;
 }
 
 /*
