@@ -4412,7 +4412,6 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
     (void)info;
     PtkFileBrowser* file_browser = static_cast<PtkFileBrowser*>(user_data);
     char* dest_dir;
-    char* file_path;
     /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-data-received");
 
@@ -4446,20 +4445,19 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                         file_browser->drag_source_dev = dest_dev;
                         for (; *puri; ++puri)
                         {
-                            file_path = g_filename_from_uri(*puri, nullptr, nullptr);
-                            if (file_path && stat(file_path, &statbuf) == 0)
+                            const std::string file_path = Glib::filename_from_uri(*puri);
+                            if (stat(file_path.c_str(), &statbuf) == 0)
                             {
                                 if (statbuf.st_dev != dest_dev)
                                 {
                                     // different devices - store source device
                                     file_browser->drag_source_dev = statbuf.st_dev;
-                                    free(file_path);
                                     break;
                                 }
                                 else if (file_browser->drag_source_inode == 0)
                                 {
                                     // same device - store source parent inode
-                                    char* src_dir = g_path_get_dirname(file_path);
+                                    char* src_dir = g_path_get_dirname(file_path.c_str());
                                     if (src_dir && stat(src_dir, &statbuf) == 0)
                                     {
                                         file_browser->drag_source_inode = statbuf.st_ino;
@@ -4467,7 +4465,6 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                                     free(src_dir);
                                 }
                             }
-                            free(file_path);
                         }
                     }
                     if (file_browser->drag_source_dev != dest_dev ||
@@ -4478,8 +4475,9 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                         gdk_drag_status(drag_context, GDK_ACTION_MOVE, time);
                 }
                 else
-                    // stat failed
+                { // stat failed
                     gdk_drag_status(drag_context, GDK_ACTION_COPY, time);
+                }
 
                 free(dest_dir);
                 g_strfreev(list);
@@ -4496,16 +4494,15 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                 }
                 gtk_drag_finish(drag_context, true, false, time);
 
-                while (*puri)
+                for (; *puri; ++puri)
                 {
+                    std::string file_path;
                     if (**puri == '/')
-                        file_path = ztd::strdup(*puri);
+                        file_path = *puri;
                     else
-                        file_path = g_filename_from_uri(*puri, nullptr, nullptr);
+                        file_path = Glib::filename_from_uri(*puri);
 
-                    if (file_path)
-                        file_list.push_back(file_path);
-                    ++puri;
+                    file_list.push_back(file_path);
                 }
                 g_strfreev(list);
 

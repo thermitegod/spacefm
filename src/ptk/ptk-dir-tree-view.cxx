@@ -604,42 +604,40 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
         char* dest_dir = dir_tree_view_get_drop_dir(widget, x, y);
         if (dest_dir)
         {
-            char* file_path;
             char** list;
             char** puri;
             puri = list = gtk_selection_data_get_uris(sel_data);
             if (file_browser->pending_drag_status_tree)
             {
                 // We only want to update drag status, not really want to drop
-                dev_t dest_dev;
                 struct stat statbuf; // skip stat
                 if (stat(dest_dir, &statbuf) == 0)
                 {
-                    dest_dev = statbuf.st_dev;
+                    dev_t dest_dev = statbuf.st_dev;
                     if (file_browser->drag_source_dev_tree == 0)
                     {
                         file_browser->drag_source_dev_tree = dest_dev;
                         for (; *puri; ++puri)
                         {
-                            file_path = g_filename_from_uri(*puri, nullptr, nullptr);
-                            if (stat(file_path, &statbuf) == 0 && statbuf.st_dev != dest_dev)
+                            const std::string file_path = Glib::filename_from_uri(*puri);
+                            if (stat(file_path.c_str(), &statbuf) == 0 &&
+                                statbuf.st_dev != dest_dev)
                             {
                                 file_browser->drag_source_dev_tree = statbuf.st_dev;
-                                free(file_path);
                                 break;
                             }
-                            free(file_path);
                         }
                     }
                     if (file_browser->drag_source_dev_tree != dest_dev)
-                        // src and dest are on different devices */
+                        // src and dest are on different devices
                         gdk_drag_status(drag_context, GDK_ACTION_COPY, time);
                     else
                         gdk_drag_status(drag_context, GDK_ACTION_MOVE, time);
                 }
                 else
-                    // stat failed
+                { // stat failed
                     gdk_drag_status(drag_context, GDK_ACTION_COPY, time);
+                }
 
                 free(dest_dir);
                 g_strfreev(list);
@@ -657,16 +655,15 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                 }
                 gtk_drag_finish(drag_context, true, false, time);
 
-                while (*puri)
+                for (; *puri; ++puri)
                 {
+                    std::string file_path;
                     if (**puri == '/')
-                        file_path = ztd::strdup(*puri);
+                        file_path = *puri;
                     else
-                        file_path = g_filename_from_uri(*puri, nullptr, nullptr);
+                        file_path = Glib::filename_from_uri(*puri);
 
-                    if (file_path)
-                        file_list.push_back(file_path);
-                    ++puri;
+                    file_list.push_back(file_path);
                 }
                 g_strfreev(list);
 

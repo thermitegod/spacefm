@@ -28,6 +28,7 @@
 #include <fmt/format.h>
 
 #include <glibmm.h>
+#include <glibmm/convert.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -2497,7 +2498,6 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
     {
         std::string name;
         std::string upath;
-        std::string tpath;
 
         while (std::getline(file, line))
         {
@@ -2510,7 +2510,7 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
             if (sep == std::string::npos)
                 continue;
 
-            tpath = g_filename_from_uri(line.c_str(), nullptr, nullptr);
+            const std::string tpath = Glib::filename_from_uri(line);
             if (std::filesystem::exists(tpath))
             {
                 unsigned long upath_len;

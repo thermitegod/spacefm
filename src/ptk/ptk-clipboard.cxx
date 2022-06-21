@@ -35,6 +35,24 @@
 static GdkDragAction clipboard_action = GDK_ACTION_DEFAULT;
 static std::vector<std::string> clipboard_file_list;
 
+static const std::vector<std::string>
+uri_list_extract_uris(const char* uri_list_str)
+{
+    std::vector<std::string> uri_list;
+
+    char** c_uri;
+    char** c_uri_list;
+    c_uri = c_uri_list = g_uri_list_extract_uris(uri_list_str);
+
+    for (; *c_uri; ++c_uri)
+    {
+        uri_list.push_back(*c_uri);
+    }
+    g_strfreev(c_uri_list);
+
+    return uri_list;
+}
+
 static void
 clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, unsigned int info,
                    void* user_data)
@@ -282,18 +300,23 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, const char* dest_dir, GtkTreeVi
 
     if (uri_list_str)
     {
-        char** puri;
-        char** uri_list;
         std::vector<std::string> file_list;
-        puri = uri_list = g_uri_list_extract_uris(uri_list_str);
-        while (*puri)
+
+        const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
+        for (const std::string& uri: uri_list)
         {
-            char* file_path = g_filename_from_uri(*puri, nullptr, nullptr);
-            if (file_path)
-                file_list.push_back(file_path);
-            ++puri;
+            std::string file_path;
+            try
+            {
+                file_path = Glib::filename_from_uri(uri);
+            }
+            catch (Glib::ConvertError)
+            {
+                continue;
+            }
+
+            file_list.push_back(file_path);
         }
-        g_strfreev(uri_list);
 
         /*
          * If only one item is selected and the item is a
@@ -359,19 +382,23 @@ ptk_clipboard_paste_links(GtkWindow* parent_win, const char* dest_dir, GtkTreeVi
 
     if (uri_list_str)
     {
-        char** puri;
-        char** uri_list;
         std::vector<std::string> file_list;
 
-        puri = uri_list = g_uri_list_extract_uris(uri_list_str);
-        while (*puri)
+        const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
+        for (const std::string& uri: uri_list)
         {
-            char* file_path = g_filename_from_uri(*puri, nullptr, nullptr);
-            if (file_path)
-                file_list.push_back(file_path);
-            ++puri;
+            std::string file_path;
+            try
+            {
+                file_path = Glib::filename_from_uri(uri);
+            }
+            catch (Glib::ConvertError)
+            {
+                continue;
+            }
+
+            file_list.push_back(file_path);
         }
-        g_strfreev(uri_list);
 
         PtkFileTask* ptask = new PtkFileTask(action,
                                              file_list,
@@ -433,37 +460,37 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
     if (uri_list_str)
     {
         int missing_targets = 0;
-        char** puri;
-        char** uri_list;
+
         std::vector<std::string> file_list;
-        puri = uri_list = g_uri_list_extract_uris(uri_list_str);
-        while (*puri)
+
+        const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
+        for (const std::string& uri: uri_list)
         {
-            char* file_path = g_filename_from_uri(*puri, nullptr, nullptr);
-            if (file_path)
+            std::string file_path;
+            try
             {
-                if (std::filesystem::is_symlink(file_path))
-                {
-                    // canonicalize target
-                    char* str = get_real_link_target(file_path);
-                    free(file_path);
-                    file_path = str;
-                }
-                if (file_path)
-                {
-                    struct stat stat;
-                    if (lstat(file_path, &stat) == 0) // need to see broken symlinks
-                        file_list.push_back(file_path);
-                    else
-                    {
-                        missing_targets++;
-                        free(file_path);
-                    }
-                }
+                file_path = Glib::filename_from_uri(uri);
             }
-            ++puri;
+            catch (Glib::ConvertError)
+            {
+                continue;
+            }
+
+            if (std::filesystem::is_symlink(file_path))
+            { // canonicalize target
+                file_path = get_real_link_target(file_path.c_str());
+            }
+
+            struct stat stat;
+            if (lstat(file_path.c_str(), &stat) == 0)
+            { // need to see broken symlinks
+                file_list.push_back(file_path);
+            }
+            else
+            {
+                missing_targets++;
+            }
         }
-        g_strfreev(uri_list);
 
         PtkFileTask* ptask = new PtkFileTask(action,
                                              file_list,
@@ -541,25 +568,29 @@ ptk_clipboard_get_file_paths(const char* cwd, bool* is_cut, int* missing_targets
     }
 
     // create file list
-    char** puri;
-    char** uri_list;
-    puri = uri_list = g_uri_list_extract_uris(uri_list_str);
-    while (*puri)
+    const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
+    for (const std::string& uri: uri_list)
     {
-        char* file_path = g_filename_from_uri(*puri, nullptr, nullptr);
-        if (file_path)
+        std::string file_path;
+        try
         {
-            if (std::filesystem::exists(file_path))
-            {
-                file_list.push_back(file_path);
-            }
-            else
-                // no *missing_targets++ here to avoid -Wunused-value compiler warning
-                *missing_targets = *missing_targets + 1;
+            file_path = Glib::filename_from_uri(uri);
         }
-        ++puri;
+        catch (Glib::ConvertError)
+        {
+            continue;
+        }
+
+        if (std::filesystem::exists(file_path))
+        {
+            file_list.push_back(file_path);
+        }
+        else
+        { // no *missing_targets++ here to avoid -Wunused-value compiler warning
+            *missing_targets = *missing_targets + 1;
+        }
     }
-    g_strfreev(uri_list);
+
     gtk_selection_data_free(sel_data);
 
     return file_list;

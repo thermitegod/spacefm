@@ -434,7 +434,7 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
 GdkPixbuf*
 vfs_thumbnail_load_for_uri(const std::string& uri, int size, std::time_t mtime)
 {
-    std::string file = g_filename_from_uri(uri.c_str(), nullptr, nullptr);
+    const std::string file = Glib::filename_from_uri(uri);
     GdkPixbuf* ret = vfs_thumbnail_load(file, uri, size, mtime);
     return ret;
 }
