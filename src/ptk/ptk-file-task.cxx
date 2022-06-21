@@ -1076,10 +1076,9 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
         {
             // Copy: <src basename>
-            str = g_filename_display_basename(task->current_file.c_str());
-            std::string escaped_markup = Glib::Markup::escape_text(str);
+            const std::string name = Glib::filename_display_basename(task->current_file);
+            std::string escaped_markup = Glib::Markup::escape_text(name);
             ufile_path = ztd::strdup(fmt::format("<b>{}</b>", escaped_markup));
-            free(str);
 
             // From: <src_dir>
             str = g_path_get_dirname(task->current_file.c_str());

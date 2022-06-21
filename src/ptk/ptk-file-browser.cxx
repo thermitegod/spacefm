@@ -2127,9 +2127,8 @@ add_history_menu_item(PtkFileBrowser* file_browser, GtkWidget* menu, GList* l)
 {
     GtkWidget* menu_item;
     // GtkWidget* folder_image;
-    char* disp_name;
-    disp_name = g_filename_display_basename((char*)l->data);
-    menu_item = gtk_menu_item_new_with_label(disp_name);
+    const std::string disp_name = Glib::filename_display_basename((char*)l->data);
+    menu_item = gtk_menu_item_new_with_label(disp_name.c_str());
     g_object_set_data(G_OBJECT(menu_item), "path", l);
     // folder_image = gtk_image_new_from_icon_name("gnome-fs-directory", GTK_ICON_SIZE_MENU);
     g_signal_connect(menu_item,

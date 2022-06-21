@@ -29,6 +29,7 @@
 #include <fmt/format.h>
 
 #include <glibmm.h>
+#include <glibmm/convert.h>
 
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -567,7 +568,6 @@ finish_search(FindFile* data)
 static void
 process_found_files(FindFile* data, GQueue* queue, const char* path)
 {
-    char* name;
     GtkTreeIter it;
     VFSFileInfo* fi;
     GdkPixbuf* icon;
@@ -575,9 +575,9 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
 
     if (path)
     {
-        name = g_filename_display_basename(path);
+        const std::string name = Glib::filename_display_basename(path);
         fi = vfs_file_info_new();
-        if (vfs_file_info_get(fi, path, name))
+        if (vfs_file_info_get(fi, path, name.c_str()))
         {
             ff = new FoundFile(fi, g_path_get_dirname(path));
             g_queue_push_tail(queue, ff);
@@ -586,7 +586,6 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
         {
             vfs_file_info_unref(fi);
         }
-        free(name);
 
         /* we queue the found files, and not add them to the tree view direclty.
          * when we queued more than 10 files, we add them at once. I think

@@ -19,6 +19,7 @@
 #include <fmt/format.h>
 
 #include <glibmm.h>
+#include <glibmm/convert.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -269,20 +270,18 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
 
                 // add sorted list to liststore
                 GSList* l;
-                char* disp_name;
                 name_list = g_slist_sort(name_list, (GCompareFunc)g_strcmp0);
                 for (l = name_list; l; l = l->next)
                 {
-                    disp_name = g_filename_display_basename((char*)l->data);
+                    const std::string disp_name = Glib::filename_display_basename((char*)l->data);
                     gtk_list_store_append(list, &it);
                     gtk_list_store_set(list,
                                        &it,
                                        PTKPathEntryCol::COL_NAME,
-                                       disp_name,
+                                       disp_name.c_str(),
                                        PTKPathEntryCol::COL_PATH,
                                        (char*)l->data,
                                        -1);
-                    free(disp_name);
                     free((char*)l->data);
                 }
                 g_slist_free(name_list);
