@@ -1081,7 +1081,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             ufile_path = ztd::strdup(fmt::format("<b>{}</b>", escaped_markup));
 
             // From: <src_dir>
-            str = g_path_get_dirname(task->current_file.c_str());
+            str = Glib::path_get_dirname(task->current_file);
             usrc_dir = Glib::filename_display_name(str);
             if (!ztd::same(usrc_dir, "/"))
             {
@@ -1101,7 +1101,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
                 else
                 {
                     // source and dest filenames same - show dest dir only
-                    str = g_path_get_dirname(task->current_dest.c_str());
+                    str = Glib::path_get_dirname(task->current_dest);
                     if (ztd::same(str, "/"))
                     {
                         udest = Glib::filename_display_name(str);
@@ -1804,7 +1804,6 @@ static void
 query_overwrite_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
 {
     std::string file_name;
-    char* dir_name;
     char* str;
 
     switch (response)
@@ -1857,10 +1856,9 @@ query_overwrite_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
             file_name = Glib::filename_from_utf8(str);
             if (str && !file_name.empty() && !ptask->task->current_dest.empty())
             {
-                dir_name = g_path_get_dirname(ptask->task->current_dest.c_str());
-                std::string path = Glib::build_filename(dir_name, file_name.c_str());
+                const std::string dir_name = Glib::path_get_dirname(ptask->task->current_dest);
+                const std::string path = Glib::build_filename(dir_name, file_name);
                 *ptask->query_new_dest = ztd::strdup(path);
-                free(dir_name);
             }
             free(str);
             break;
@@ -2070,9 +2068,9 @@ query_overwrite(PtkFileTask* ptask)
     // filenames
     char* base_name = ztd::strdup(Glib::path_get_basename(ptask->task->current_dest));
     char* base_name_disp = ztd::strdup(Glib::filename_display_name(base_name)); // auto free
-    char* src_dir = g_path_get_dirname(ptask->task->current_file.c_str());
+    char* src_dir = ztd::strdup(Glib::path_get_dirname(ptask->task->current_file));
     char* src_dir_disp = ztd::strdup(Glib::filename_display_name(src_dir));
-    char* dest_dir = g_path_get_dirname(ptask->task->current_dest.c_str());
+    char* dest_dir = ztd::strdup(Glib::path_get_dirname(ptask->task->current_dest));
     char* dest_dir_disp = ztd::strdup(Glib::filename_display_name(dest_dir));
 
     const auto namepack = get_name_extension(base_name);

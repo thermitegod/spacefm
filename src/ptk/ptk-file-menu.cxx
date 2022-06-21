@@ -1593,7 +1593,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         case PTKFileMenuAppJob::APP_JOB_BROWSE_SHARED:
             str = get_shared_desktop_file_location(desktop.get_name());
             if (str)
-                path = g_path_get_dirname(str);
+                path = Glib::path_get_dirname(str);
             else
                 path = "/usr/share/applications";
             free(str);
@@ -2363,11 +2363,11 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
 
     if (ao->path && GTK_IS_WIDGET(ao->file_browser) && std::filesystem::exists(ao->path))
     {
-        char* cwd = g_path_get_dirname(ao->path);
+        const std::string cwd = Glib::path_get_dirname(ao->path);
         VFSFileInfo* file;
 
         // select file
-        if (!g_strcmp0(cwd, ptk_file_browser_get_cwd(ao->file_browser)))
+        if (ztd::same(cwd, ptk_file_browser_get_cwd(ao->file_browser)))
         {
             file = vfs_file_info_new();
             vfs_file_info_get(file, ao->path, nullptr);
@@ -2393,12 +2393,15 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
                 vfs_file_info_get(file, ao->path, nullptr);
                 std::vector<VFSFileInfo*> sel_files;
                 sel_files.push_back(file);
-                ptk_open_files_with_app(cwd, sel_files, nullptr, ao->file_browser, false, true);
+                ptk_open_files_with_app(cwd.c_str(),
+                                        sel_files,
+                                        nullptr,
+                                        ao->file_browser,
+                                        false,
+                                        true);
                 vfs_file_info_unref(file);
             }
         }
-
-        free(cwd);
     }
 
     delete ao;

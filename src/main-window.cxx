@@ -273,7 +273,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
             return;
         if (save->s)
             free(save->s);
-        save->s = g_path_get_dirname(path);
+        save->s = ztd::strdup(Glib::path_get_dirname(path));
     }
 
     std::string plug_dir;
@@ -3944,7 +3944,7 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
             ptk_file_task_lock(ptask);
             if (!ptask->task->current_file.empty())
                 c->var[ItemPropContext::CONTEXT_TASK_DIR] =
-                    g_path_get_dirname(ptask->task->current_file.c_str());
+                    ztd::strdup(Glib::path_get_dirname(ptask->task->current_file));
             else
                 c->var[ItemPropContext::CONTEXT_TASK_DIR] = ztd::strdup("");
             ptk_file_task_unlock(ptask);
@@ -5202,7 +5202,7 @@ main_task_view_update_task(PtkFileTask* ptask)
         {
             if (!ptask->task->current_file.empty())
             {
-                path = g_path_get_dirname(ptask->task->current_file.c_str());
+                path = Glib::path_get_dirname(ptask->task->current_file);
                 file = Glib::path_get_basename(ptask->task->current_file);
             }
         }

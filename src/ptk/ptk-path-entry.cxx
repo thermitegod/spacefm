@@ -54,16 +54,19 @@ get_cwd(GtkEntry* entry)
 {
     const char* path = gtk_entry_get_text(entry);
     if (path[0] == '/')
-        return g_path_get_dirname(path);
+    {
+        const std::string cwd = Glib::path_get_dirname(path);
+        return ztd::strdup(cwd);
+    }
     else if (path[0] != '$' && path[0] != '+' && path[0] != '&' && path[0] != '!' &&
              path[0] != '\0' && path[0] != ' ')
     {
         EntryData* edata = static_cast<EntryData*>(g_object_get_data(G_OBJECT(entry), "edata"));
         if (edata && edata->browser)
         {
-            std::string real_path = std::filesystem::absolute(path);
-            char* ret = g_path_get_dirname(real_path.c_str());
-            return ret;
+            const std::string real_path = std::filesystem::absolute(path);
+            const std::string ret = Glib::path_get_dirname(real_path);
+            return ztd::strdup(ret);
         }
     }
     return nullptr;

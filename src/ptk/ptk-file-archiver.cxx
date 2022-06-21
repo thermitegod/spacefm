@@ -782,7 +782,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>
             {
                 /* For subsequent archives, base archive name on the filename
                  * being compressed, in the user-selected dir */
-                std::string dest_dir = g_path_get_dirname(dest_file);
+                const std::string dest_dir = Glib::path_get_dirname(dest_file);
                 udest_file = fmt::format("{}/{}{}", dest_dir, desc, ext);
 
                 // Looping to find a path that doesnt exist

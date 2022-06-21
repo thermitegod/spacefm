@@ -4090,10 +4090,9 @@ get_device_parent(dev_t dev)
         return 0;
     }
 
-    char* parent = g_path_get_dirname(native_path);
+    const std::string parent = Glib::path_get_dirname(native_path);
     free(native_path);
-    udevice = udev_device_new_from_syspath(udev, parent);
-    free(parent);
+    udevice = udev_device_new_from_syspath(udev, parent.c_str());
     if (!udevice)
         return 0;
     dev_t retdev = udev_device_get_devnum(udevice);

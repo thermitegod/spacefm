@@ -222,7 +222,7 @@ check_overwrite(VFSFileTask* task, const std::string& dest_file, bool* dest_exis
 
             // auto-rename
             const std::string old_name = Glib::path_get_basename(dest_file);
-            const std::string dest_dir = g_path_get_dirname(dest_file.c_str());
+            const std::string dest_dir = Glib::path_get_dirname(dest_file);
 
             const auto namepack = get_name_extension(old_name);
             std::string name = namepack.first;
@@ -346,9 +346,8 @@ update_file_display(const std::string& path)
 {
     // for devices like nfs, emit created and flush to avoid a
     // blocking stat call in GUI thread during writes
-    char* dir_path = g_path_get_dirname(path.c_str());
-    VFSDir* vdir = vfs_dir_get_by_path_soft(dir_path);
-    free(dir_path);
+    const std::string dir_path = Glib::path_get_dirname(path);
+    VFSDir* vdir = vfs_dir_get_by_path_soft(dir_path.c_str());
     if (vdir && vdir->avoid_changes)
     {
         VFSFileInfo* file = vfs_file_info_new();
@@ -2048,9 +2047,8 @@ vfs_file_task_run(VFSFileTask* task)
     {
         if (task->type == VFSFileTaskType::VFS_FILE_TASK_CHMOD_CHOWN && !task->src_paths.empty())
         {
-            char* dir = g_path_get_dirname(task->src_paths.at(0).c_str());
-            task->avoid_changes = vfs_volume_dir_avoid_changes(dir);
-            free(dir);
+            const std::string dir = Glib::path_get_dirname(task->src_paths.at(0));
+            task->avoid_changes = vfs_volume_dir_avoid_changes(dir.c_str());
         }
         else
         {

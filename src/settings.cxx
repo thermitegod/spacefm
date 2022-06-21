@@ -3394,7 +3394,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
         return;
     if (save->s)
         free(save->s);
-    save->s = g_path_get_dirname(path);
+    save->s = ztd::strdup(Glib::path_get_dirname(path));
 
     // get or create tmp plugin dir
     std::string plug_dir;
@@ -3569,12 +3569,12 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
     else if (std::filesystem::exists(use_url))
     {
         // file - open dir and select file
-        char* dir = g_path_get_dirname(use_url.c_str());
-        if (dir && std::filesystem::is_directory(dir))
+        const std::string dir = Glib::path_get_dirname(use_url);
+        if (std::filesystem::is_directory(dir))
         {
             if (file_browser)
             {
-                if (!new_tab && !strcmp(dir, ptk_file_browser_get_cwd(file_browser)))
+                if (!new_tab && ztd::same(dir, ptk_file_browser_get_cwd(file_browser)))
                 {
                     ptk_file_browser_select_file(file_browser, use_url.c_str());
                     gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
@@ -3583,7 +3583,7 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
                 {
                     file_browser->select_path = ztd::strdup(use_url);
                     ptk_file_browser_emit_open(file_browser,
-                                               dir,
+                                               dir.c_str(),
                                                new_tab ? PtkOpenAction::PTK_OPEN_NEW_TAB
                                                        : PtkOpenAction::PTK_OPEN_DIR);
                     if (new_tab)
@@ -3606,9 +3606,10 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
                 }
             }
             else
-                open_in_prog(dir);
+            {
+                open_in_prog(dir.c_str());
+            }
         }
-        free(dir);
     }
     else
     {
@@ -4111,8 +4112,8 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     editor = fmt::format("{} {}", editor, quoted_path);
 
     // task
-    std::string task_name = fmt::format("Edit {}", path);
-    std::string cwd = g_path_get_dirname(path);
+    const std::string task_name = fmt::format("Edit {}", path);
+    const std::string cwd = Glib::path_get_dirname(path);
     PtkFileTask* ptask = ptk_file_exec_new(task_name, cwd.c_str(), dlgparent, nullptr);
     ptask->task->exec_command = editor;
     ptask->task->exec_sync = false;
@@ -4511,26 +4512,23 @@ xset_design_job(GtkWidget* item, XSet* set)
         case XSetJob::CUSTOM:
             if (set->z && set->z[0] != '\0')
             {
-                folder = g_path_get_dirname(set->z);
-                file = ztd::strdup(Glib::path_get_basename(set->z));
+                folder2 = Glib::path_get_dirname(set->z);
+                file2 = ztd::strdup(Glib::path_get_basename(set->z));
             }
             else
             {
-                folder = ztd::strdup("/usr/bin");
-                file = nullptr;
+                folder2 = "/usr/bin";
             }
             if ((custom_file = xset_file_dialog(parent,
                                                 GTK_FILE_CHOOSER_ACTION_OPEN,
                                                 "Choose Custom Executable",
-                                                folder,
-                                                file)))
+                                                folder2.c_str(),
+                                                file2.c_str())))
             {
                 xset_set_set(set, XSetSetSet::X, "2");
                 xset_set_set(set, XSetSetSet::Z, custom_file);
                 free(custom_file);
             }
-            free(file);
-            free(folder);
             break;
         case XSetJob::USER:
             if (!set->plugin)
@@ -4856,7 +4854,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 break;
             if (save->s)
                 free(save->s);
-            save->s = g_path_get_dirname(file);
+            save->s = ztd::strdup(Glib::path_get_dirname(file));
 
             // Make Plugin Dir
             const char* user_tmp;

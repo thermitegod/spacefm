@@ -962,13 +962,12 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
         return true;
     }
     // create parent dir
-    char* parent_dir = g_path_get_dirname(def_script);
+    const std::string parent_dir = Glib::path_get_dirname(def_script);
     if (!std::filesystem::is_directory(parent_dir))
     {
         std::filesystem::create_directories(parent_dir);
         std::filesystem::permissions(parent_dir, std::filesystem::perms::owner_all);
     }
-    free(parent_dir);
     // name script
     std::string script;
     std::string str;
@@ -2681,7 +2680,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
                 return;
             if (save->s)
                 free(save->s);
-            save->s = g_path_get_dirname(file);
+            save->s = ztd::strdup(Glib::path_get_dirname(file));
             break;
         case PtkHandlerJob::HANDLER_JOB_RESTORE_ALL:
             restore_defaults(hnd, true);

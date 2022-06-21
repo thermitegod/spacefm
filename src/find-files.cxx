@@ -189,14 +189,14 @@ FindFile::FindFile()
 
 struct FoundFile
 {
-    FoundFile(VFSFileInfo* fi, const char* dir_path);
+    FoundFile(VFSFileInfo* fi, const std::string& dir_path);
     // ~FoundFile();
 
     VFSFileInfo* fi;
-    const char* dir_path;
+    std::string dir_path;
 };
 
-FoundFile::FoundFile(VFSFileInfo* fi, const char* dir_path)
+FoundFile::FoundFile(VFSFileInfo* fi, const std::string& dir_path)
 {
     this->fi = fi;
     this->dir_path = dir_path;
@@ -579,7 +579,7 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
         fi = vfs_file_info_new();
         if (vfs_file_info_get(fi, path, name.c_str()))
         {
-            ff = new FoundFile(fi, g_path_get_dirname(path));
+            ff = new FoundFile(fi, Glib::path_get_dirname(path));
             g_queue_push_tail(queue, ff);
         }
         else
@@ -609,7 +609,7 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
                            FindFilesCol::COL_NAME,
                            vfs_file_info_get_disp_name(ff->fi),
                            FindFilesCol::COL_DIR,
-                           ff->dir_path, /* FIXME: non-UTF8? */
+                           ff->dir_path.c_str(), /* FIXME: non-UTF8? */
                            FindFilesCol::COL_TYPE,
                            vfs_file_info_get_mime_type_desc(ff->fi),
                            FindFilesCol::COL_SIZE,

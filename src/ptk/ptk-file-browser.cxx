@@ -618,7 +618,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
             else
             {
                 // open dir and select file
-                dir_path = g_path_get_dirname(final_path.c_str());
+                dir_path = Glib::path_get_dirname(final_path);
                 if (!ztd::contains(dir_path, ptk_file_browser_get_cwd(file_browser)))
                 {
                     free(file_browser->select_path);
@@ -2372,18 +2372,19 @@ ptk_file_browser_canon(PtkFileBrowser* file_browser, const char* path)
     else if (std::filesystem::exists(canon))
     {
         // open dir and select file
-        char* dir_path = g_path_get_dirname(canon);
-        if (dir_path && strcmp(dir_path, cwd))
+        const std::string dir_path = Glib::path_get_dirname(canon);
+        if (!ztd::same(dir_path, cwd))
         {
             free(file_browser->select_path);
             file_browser->select_path = ztd::strdup(canon);
             ptk_file_browser_chdir(file_browser,
-                                   dir_path,
+                                   dir_path.c_str(),
                                    PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
         }
         else
+        {
             ptk_file_browser_select_file(file_browser, canon);
-        free(dir_path);
+        }
         gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
     }
 }
@@ -2425,10 +2426,11 @@ ptk_file_browser_go_up(GtkWidget* item, PtkFileBrowser* file_browser)
 {
     (void)item;
     focus_folder_view(file_browser);
-    char* parent_dir = g_path_get_dirname(ptk_file_browser_get_cwd(file_browser));
-    if (strcmp(parent_dir, ptk_file_browser_get_cwd(file_browser)))
-        ptk_file_browser_chdir(file_browser, parent_dir, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
-    free(parent_dir);
+    const std::string parent_dir = Glib::path_get_dirname(ptk_file_browser_get_cwd(file_browser));
+    if (!ztd::same(parent_dir, ptk_file_browser_get_cwd(file_browser)))
+        ptk_file_browser_chdir(file_browser,
+                               parent_dir.c_str(),
+                               PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
 }
 
 void
@@ -4455,12 +4457,11 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                                 else if (file_browser->drag_source_inode == 0)
                                 {
                                     // same device - store source parent inode
-                                    char* src_dir = g_path_get_dirname(file_path.c_str());
-                                    if (src_dir && stat(src_dir, &statbuf) == 0)
+                                    const std::string src_dir = Glib::path_get_dirname(file_path);
+                                    if (stat(src_dir.c_str(), &statbuf) == 0)
                                     {
                                         file_browser->drag_source_inode = statbuf.st_ino;
                                     }
-                                    free(src_dir);
                                 }
                             }
                         }
@@ -5209,7 +5210,7 @@ ptk_file_browser_file_properties(PtkFileBrowser* file_browser, int page)
     if (!file_browser)
         return;
 
-    char* dir_name = nullptr;
+    std::string dir_name;
     std::vector<VFSFileInfo*> sel_files = ptk_file_browser_get_selected_files(file_browser);
     const char* cwd = ptk_file_browser_get_cwd(file_browser);
     if (sel_files.empty())
@@ -5217,12 +5218,14 @@ ptk_file_browser_file_properties(PtkFileBrowser* file_browser, int page)
         VFSFileInfo* file = vfs_file_info_new();
         vfs_file_info_get(file, ptk_file_browser_get_cwd(file_browser), nullptr);
         sel_files.push_back(file);
-        dir_name = g_path_get_dirname(cwd);
+        dir_name = Glib::path_get_dirname(cwd);
     }
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
-    ptk_show_file_properties(GTK_WINDOW(parent), dir_name ? dir_name : cwd, sel_files, page);
+    ptk_show_file_properties(GTK_WINDOW(parent),
+                             !dir_name.empty() ? dir_name.c_str() : cwd,
+                             sel_files,
+                             page);
     vfs_file_info_list_free(sel_files);
-    free(dir_name);
 }
 
 void

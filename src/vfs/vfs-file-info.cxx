@@ -615,7 +615,7 @@ vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
     /*if (fi->type && fi->type->name, "application/x-desktop") */
     if (ztd::same(fi->name, ".desktop"))
     {
-        char* file_dir = g_path_get_dirname(file_path);
+        const std::string file_dir = Glib::path_get_dirname(file_path);
 
         fi->flags = (VFSFileInfoFlag)(fi->flags | VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY);
         VFSAppDesktop desktop(file_path);
@@ -645,7 +645,6 @@ vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
                     fi->small_thumbnail = icon;
             }
         }
-        free(file_dir);
     }
 }
 
