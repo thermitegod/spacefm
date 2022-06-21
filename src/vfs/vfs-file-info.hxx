@@ -84,7 +84,7 @@ VFSFileInfo* vfs_file_info_new();
 VFSFileInfo* vfs_file_info_ref(VFSFileInfo* fi);
 void vfs_file_info_unref(VFSFileInfo* fi);
 
-bool vfs_file_info_get(VFSFileInfo* fi, const char* file_path, const char* base_name);
+bool vfs_file_info_get(VFSFileInfo* fi, const std::string& file_path);
 
 const char* vfs_file_info_get_name(VFSFileInfo* fi);
 const char* vfs_file_info_get_disp_name(VFSFileInfo* fi);

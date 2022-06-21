@@ -606,7 +606,7 @@ vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
             }
 
             VFSFileInfo* fi = vfs_file_info_new();
-            if (vfs_file_info_get(fi, full_path.c_str(), file_name.c_str()))
+            if (vfs_file_info_get(fi, full_path))
             {
                 vfs_dir_lock(dir);
 
@@ -645,7 +645,7 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
 
     std::string full_path = Glib::build_filename(dir->path, file_name);
 
-    if (vfs_file_info_get(file, full_path.c_str(), file_name.c_str()))
+    if (vfs_file_info_get(file, full_path))
     {
         ret = true;
         vfs_file_info_load_special_info(file, full_path.c_str());
@@ -707,7 +707,7 @@ update_created_files(const char* key, VFSDir* dir)
                 // file is not in dir file_list
                 std::string full_path = Glib::build_filename(dir->path, (char*)l->data);
                 file = vfs_file_info_new();
-                if (vfs_file_info_get(file, full_path.c_str(), nullptr))
+                if (vfs_file_info_get(file, full_path))
                 {
                     // add new file to dir file_list
                     vfs_file_info_load_special_info(file, full_path.c_str());

@@ -2368,7 +2368,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
         if (ztd::same(cwd, ptk_file_browser_get_cwd(ao->file_browser)))
         {
             file = vfs_file_info_new();
-            vfs_file_info_get(file, ao->path, nullptr);
+            vfs_file_info_get(file, ao->path);
             vfs_dir_emit_file_created(ao->file_browser->dir, vfs_file_info_get_name(file), true);
             vfs_file_info_unref(file);
             vfs_dir_flush_notify_cache();
@@ -2388,7 +2388,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
             else
             {
                 file = vfs_file_info_new();
-                vfs_file_info_get(file, ao->path, nullptr);
+                vfs_file_info_get(file, ao->path);
                 std::vector<VFSFileInfo*> sel_files;
                 sel_files.push_back(file);
                 ptk_open_files_with_app(cwd.c_str(),

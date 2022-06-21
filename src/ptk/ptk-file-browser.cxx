@@ -5214,7 +5214,7 @@ ptk_file_browser_file_properties(PtkFileBrowser* file_browser, int page)
     if (sel_files.empty())
     {
         VFSFileInfo* file = vfs_file_info_new();
-        vfs_file_info_get(file, ptk_file_browser_get_cwd(file_browser), nullptr);
+        vfs_file_info_get(file, ptk_file_browser_get_cwd(file_browser));
         sel_files.push_back(file);
         dir_name = Glib::path_get_dirname(cwd);
     }

@@ -657,13 +657,14 @@ static PtkDirTreeNode*
 ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent, const char* path,
                       const char* base_name)
 {
+    (void)base_name;
     PtkDirTreeNode* node = new PtkDirTreeNode;
     node->tree = tree;
     node->parent = parent;
     if (path)
     {
         node->file = vfs_file_info_new();
-        vfs_file_info_get(node->file, path, base_name);
+        vfs_file_info_get(node->file, path);
         node->n_children = 1;
         node->children = ptk_dir_tree_node_new(tree, node, nullptr, nullptr);
         node->last = node->children;

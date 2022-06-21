@@ -474,7 +474,7 @@ static void
 open_file(const char* path)
 {
     VFSFileInfo* file = vfs_file_info_new();
-    vfs_file_info_get(file, path, nullptr);
+    vfs_file_info_get(file, path);
     VFSMimeType* mime_type = vfs_file_info_get_mime_type(file);
 
     char* app_name = vfs_mime_type_get_default_action(mime_type);

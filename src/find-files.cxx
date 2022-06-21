@@ -577,9 +577,8 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
 
     if (path)
     {
-        const std::string name = Glib::filename_display_basename(path);
         fi = vfs_file_info_new();
-        if (vfs_file_info_get(fi, path, name.c_str()))
+        if (vfs_file_info_get(fi, path))
         {
             ff = new FoundFile(fi, Glib::path_get_dirname(path));
             g_queue_push_tail(queue, ff);

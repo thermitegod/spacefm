@@ -2109,7 +2109,7 @@ update_new_display_delayed(char* path)
     if (vdir && vdir->avoid_changes)
     {
         VFSFileInfo* file = vfs_file_info_new();
-        vfs_file_info_get(file, path, nullptr);
+        vfs_file_info_get(file, path);
         vfs_dir_emit_file_created(vdir, vfs_file_info_get_name(file), true);
         vfs_file_info_unref(file);
         vfs_dir_flush_notify_cache();
@@ -3264,7 +3264,7 @@ ptk_show_file_properties(GtkWindow* parent_win, const char* cwd,
     {
         // no files selected, use cwd as file
         VFSFileInfo* file = vfs_file_info_new();
-        vfs_file_info_get(file, cwd, nullptr);
+        vfs_file_info_get(file, cwd);
         // sel_files.push_back(vfs_file_info_ref(file));
         sel_files.push_back(file);
         const std::string parent_dir = Glib::path_get_dirname(cwd);
@@ -3742,7 +3742,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
     for (const std::string& file_path: files)
     {
         file = vfs_file_info_new();
-        vfs_file_info_get(file, file_path.c_str(), nullptr);
+        vfs_file_info_get(file, file_path);
         file_dir = std::filesystem::path(file_path).parent_path();
 
         if (!ptk_rename_file(file_browser,
