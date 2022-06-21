@@ -26,6 +26,7 @@
 #include <fmt/format.h>
 
 #include <glibmm.h>
+#include <glibmm/convert.h>
 
 #include <libffmpegthumbnailer/imagetypes.h>
 #include <libffmpegthumbnailer/videothumbnailer.h>
@@ -441,7 +442,7 @@ vfs_thumbnail_load_for_uri(const std::string& uri, int size, std::time_t mtime)
 GdkPixbuf*
 vfs_thumbnail_load_for_file(const std::string& file, int size, std::time_t mtime)
 {
-    std::string uri = g_filename_to_uri(file.c_str(), nullptr, nullptr);
+    const std::string uri = Glib::filename_to_uri(file);
     GdkPixbuf* ret = vfs_thumbnail_load(file, uri, size, mtime);
     return ret;
 }

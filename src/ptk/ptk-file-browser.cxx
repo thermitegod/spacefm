@@ -26,6 +26,9 @@
 
 #include <fmt/format.h>
 
+#include <glibmm.h>
+#include <glibmm/convert.h>
+
 #include <exo/exo.h>
 
 #include <glibmm.h>
@@ -4577,7 +4580,6 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
     GdkAtom type = gdk_atom_intern("text/uri-list", false);
     std::string uri_list;
     std::vector<VFSFileInfo*> sel_files = ptk_file_browser_get_selected_files(file_browser);
-    std::string full_path;
 
     /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-data-get");
@@ -4586,12 +4588,11 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
 
     for (VFSFileInfo* file: sel_files)
     {
-        full_path = Glib::build_filename(ptk_file_browser_get_cwd(file_browser),
-                                         vfs_file_info_get_name(file));
-        char* uri = g_filename_to_uri(full_path.c_str(), nullptr, nullptr);
-        uri_list.append(uri);
-        free(uri);
-        uri_list.append("\n");
+        const std::string full_path = Glib::build_filename(ptk_file_browser_get_cwd(file_browser),
+                                                           vfs_file_info_get_name(file));
+        const std::string uri = Glib::filename_to_uri(full_path);
+
+        uri_list.append(fmt::format("{}\n", uri));
     }
 
     vfs_file_info_list_free(sel_files);

@@ -18,6 +18,9 @@
 
 #include <fmt/format.h>
 
+#include <glibmm.h>
+#include <glibmm/convert.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -47,41 +50,39 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, un
     if (clipboard_file_list.empty())
         return;
 
-    // std::string list;
-
-    std::string list;
+    std::string uri_list;
 
     if (gtk_selection_data_get_target(selection_data) == gnome_target)
     {
         const char* action = clipboard_action == GDK_ACTION_MOVE ? "cut\n" : "copy\n";
-        list.append(action);
+        uri_list.append(action);
         use_uri = true;
     }
     else if (gtk_selection_data_get_target(selection_data) == uri_list_target)
+    {
         use_uri = true;
+    }
 
     for (const std::string& clipboard_file: clipboard_file_list)
     {
-        char* file_name;
+        std::string file_name;
         if (use_uri)
         {
-            file_name = g_filename_to_uri(clipboard_file.c_str(), nullptr, nullptr);
+            file_name = Glib::filename_to_uri(clipboard_file);
         }
         else
         {
             file_name = g_filename_display_name(clipboard_file.c_str());
         }
-        list.append(file_name);
-        free(file_name);
 
-        list.append("\n");
+        uri_list.append(fmt::format("{}\n", file_name));
     }
 
     gtk_selection_data_set(selection_data,
                            gtk_selection_data_get_target(selection_data),
                            8,
-                           (const unsigned char*)list.c_str(),
-                           list.size());
+                           (const unsigned char*)uri_list.c_str(),
+                           uri_list.size());
     // LOG_DEBUG("clipboard data: \n\n{}\n\n", list);
 }
 
