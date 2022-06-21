@@ -47,7 +47,7 @@ VFSAppDesktop::VFSAppDesktop(const std::string& open_file_name) noexcept
 
     const auto kf = Glib::KeyFile::create();
 
-    if (g_path_is_absolute(open_file_name.c_str()))
+    if (Glib::path_is_absolute(open_file_name))
     {
         m_file_name = Glib::path_get_basename(open_file_name);
         m_full_path = open_file_name;
