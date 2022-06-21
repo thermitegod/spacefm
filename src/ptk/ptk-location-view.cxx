@@ -2513,15 +2513,20 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
             const std::string tpath = Glib::filename_from_uri(line);
             if (std::filesystem::exists(tpath))
             {
-                unsigned long upath_len;
-                upath = g_filename_to_utf8(tpath.c_str(), -1, nullptr, &upath_len, nullptr);
+                upath = Glib::filename_to_utf8(tpath);
             }
-            else if (line.substr(0, 9) == "file://~/")
+            else if (ztd::startswith(line, "file://~/"))
+            {
                 name = ztd::strdup("Home");
-            else if (line.substr(0, 2) == "//" || line.find(":/"))
+            }
+            else if (ztd::startswith(line, "//") || ztd::contains(line, ":/"))
+            {
                 upath = line;
+            }
             else
+            {
                 continue;
+            }
 
             if (name.empty())
                 name = g_path_get_basename(upath.c_str());
