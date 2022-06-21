@@ -22,6 +22,9 @@
 
 #include <fmt/format.h>
 
+#include <glibmm.h>
+#include <glibmm/convert.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -1031,8 +1034,9 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     VFSFileTask* task = ptask->task;
 
     // current file
-    char* usrc_dir = nullptr;
-    char* udest = nullptr;
+    std::string usrc_dir;
+    std::string udest;
+
     if (ptask->complete)
     {
         gtk_widget_set_sensitive(ptask->progress_btn_stop, false);
@@ -1079,13 +1083,11 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
 
             // From: <src_dir>
             str = g_path_get_dirname(task->current_file.c_str());
-            usrc_dir = g_filename_display_name(str);
+            usrc_dir = Glib::filename_display_name(str);
             free(str);
-            if (!(usrc_dir[0] == '/' && usrc_dir[1] == '\0'))
+            if (!ztd::same(usrc_dir, "/"))
             {
-                std::string str3 = fmt::format("{}/", usrc_dir);
-                free(usrc_dir);
-                usrc_dir = ztd::strdup(str3);
+                usrc_dir = fmt::format("{}/", usrc_dir);
             }
 
             // To: <dest_dir> OR <dest_file>
@@ -1098,7 +1100,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
                     // source and dest filenames differ, user renamed - show all
                     free(str);
                     free(str2);
-                    udest = g_filename_display_name(task->current_dest.c_str());
+                    udest = Glib::filename_display_name(task->current_dest);
                 }
                 else
                 {
@@ -1107,11 +1109,11 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
                     free(str2);
                     str = g_path_get_dirname(task->current_dest.c_str());
                     if (str[0] == '/' && str[1] == '\0')
-                        udest = g_filename_display_name(str);
+                        udest = Glib::filename_display_name(str);
                     else
                     {
-                        std::string str3 = fmt::format("{}/", g_filename_display_name(str));
-                        udest = ztd::strdup(str3);
+                        const std::string f = Glib::filename_display_name(str);
+                        udest = fmt::format("{}/", f);
                     }
                     free(str);
                 }
@@ -1124,25 +1126,25 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         }
     }
     else
-        ufile_path = nullptr;
-    if (!udest && !ptask->complete && !task->dest_dir.empty())
     {
-        udest = g_filename_display_name(task->dest_dir.c_str());
-        if (!(udest[0] == '/' && udest[1] == '\0'))
+        ufile_path = nullptr;
+    }
+
+    if (udest.empty() && !ptask->complete && !task->dest_dir.empty())
+    {
+        udest = Glib::filename_display_name(task->dest_dir);
+        if (!ztd::same(udest, "/"))
         {
-            std::string str3 = fmt::format("{}/", udest);
-            free(udest);
-            udest = ztd::strdup(str3);
+            const std::string f = Glib::filename_display_name(udest);
+            udest = fmt::format("{}/", f);
         }
     }
     gtk_label_set_markup(ptask->from, ufile_path);
     if (ptask->src_dir)
-        gtk_label_set_text(ptask->src_dir, usrc_dir);
+        gtk_label_set_text(ptask->src_dir, usrc_dir.c_str());
     if (ptask->to)
-        gtk_label_set_text(ptask->to, udest);
+        gtk_label_set_text(ptask->to, udest.c_str());
     free(ufile_path);
-    free(usrc_dir);
-    free(udest);
 
     // progress bar
     if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC || ptask->task->custom_percent)
@@ -2073,20 +2075,21 @@ query_overwrite(PtkFileTask* ptask)
 
     // filenames
     char* base_name = g_path_get_basename(ptask->task->current_dest.c_str());
-    char* base_name_disp = g_filename_display_name(base_name); // auto free
+    char* base_name_disp = ztd::strdup(Glib::filename_display_name(base_name)); // auto free
     char* src_dir = g_path_get_dirname(ptask->task->current_file.c_str());
-    char* src_dir_disp = g_filename_display_name(src_dir);
+    char* src_dir_disp = ztd::strdup(Glib::filename_display_name(src_dir));
     char* dest_dir = g_path_get_dirname(ptask->task->current_dest.c_str());
-    char* dest_dir_disp = g_filename_display_name(dest_dir);
+    char* dest_dir_disp = ztd::strdup(Glib::filename_display_name(dest_dir));
 
     const auto namepack = get_name_extension(base_name);
     std::string name = namepack.first;
     std::string ext = namepack.second;
 
-    char* ext_disp = !ext.empty() ? g_filename_display_name(ext.c_str()) : nullptr;
+    char* ext_disp = !ext.empty() ? ztd::strdup(Glib::filename_display_name(ext)) : nullptr;
     char* unique_name = vfs_file_task_get_unique_name(dest_dir, name.c_str(), ext.c_str());
     char* new_name_plain = unique_name ? g_path_get_basename(unique_name) : nullptr;
-    char* new_name = new_name_plain ? g_filename_display_name(new_name_plain) : nullptr;
+    char* new_name =
+        new_name_plain ? ztd::strdup(Glib::filename_display_name(new_name_plain)) : nullptr;
 
     int pos = ext_disp ? g_utf8_strlen(base_name_disp, -1) - g_utf8_strlen(ext_disp, -1) - 1 : -1;
 

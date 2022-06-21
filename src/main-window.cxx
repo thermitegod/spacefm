@@ -20,6 +20,7 @@
 #include <vector>
 
 #include <glibmm.h>
+#include <glibmm/convert.h>
 
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
@@ -2811,7 +2812,7 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
         const char* path = ptk_file_browser_get_cwd(file_browser);
         if (path)
         {
-            disp_path = g_filename_display_name(path);
+            disp_path = Glib::filename_display_name(path);
             disp_name = g_path_get_basename(disp_path.c_str());
         }
     }

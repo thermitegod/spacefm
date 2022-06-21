@@ -23,6 +23,7 @@
 
 #include <glib.h>
 #include <glibmm.h>
+#include <glibmm/convert.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -2165,7 +2166,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
 {
     // TODO convert to gtk_builder (glade file)
 
-    char* full_name = nullptr;
     char* path;
     char* old_path;
     char* str;
@@ -2184,13 +2184,15 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     {
         if (!file)
             return 0;
+
+        std::string full_name;
         // special processing for files with inconsistent real name and display name
         if (vfs_file_info_is_desktop_entry(file))
-            full_name = g_filename_display_name(file->name.c_str());
-        if (!full_name)
-            full_name = ztd::strdup(vfs_file_info_get_disp_name(file));
-        if (!full_name)
-            full_name = ztd::strdup(vfs_file_info_get_name(file));
+            full_name = Glib::filename_display_name(file->name);
+        if (full_name.empty())
+            full_name = vfs_file_info_get_disp_name(file);
+        if (full_name.empty())
+            full_name = vfs_file_info_get_name(file);
 
         mset->is_dir = vfs_file_info_is_dir(file);
         mset->is_link = vfs_file_info_is_symlink(file);
@@ -2200,13 +2202,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             mset->new_path = ztd::strdup(Glib::build_filename(dest_dir, full_name));
         else
             mset->new_path = ztd::strdup(mset->full_path);
-        free(full_name);
-        full_name = nullptr;
     }
     else if (create_new == PtkRenameMode::PTK_RENAME_NEW_LINK && file)
     {
-        full_name = ztd::strdup(vfs_file_info_get_disp_name(file));
-        if (!full_name)
+        std::string full_name = vfs_file_info_get_disp_name(file);
+        if (full_name.empty())
             full_name = ztd::strdup(vfs_file_info_get_name(file));
         mset->full_path = ztd::strdup(Glib::build_filename(file_dir, full_name));
         mset->new_path = ztd::strdup(mset->full_path);
@@ -2852,7 +2852,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 ptk_show_error(GTK_WINDOW(mset->dlg), "Error", "Path contains linefeeds");
                 continue;
             }
-            full_name = g_path_get_basename(full_path.c_str());
+            char* full_name = g_path_get_basename(full_path.c_str());
             path = g_path_get_dirname(full_path.c_str());
             old_path = g_path_get_dirname(mset->full_path);
             bool overwrite = false;

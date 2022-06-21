@@ -34,6 +34,7 @@
 #include <fmt/format.h>
 
 #include <glibmm.h>
+#include <glibmm/convert.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -2101,7 +2102,6 @@ vfs_volume_set_info(VFSVolume* volume)
         parameter = value;
     }
 
-    // volume->disp_name = g_filename_to_utf8( parameter, -1, nullptr, nullptr, nullptr );
     while (ztd::contains(parameter, "  "))
     {
         parameter = ztd::replace(parameter, "  ", " ");
@@ -2110,7 +2110,7 @@ vfs_volume_set_info(VFSVolume* volume)
     // remove leading spaces
     parameter = ztd::lstrip(parameter);
 
-    volume->disp_name = g_filename_display_name(parameter.c_str());
+    volume->disp_name = ztd::strdup(Glib::filename_display_name(parameter));
 
     if (!volume->udi)
         volume->udi = ztd::strdup(volume->device_file);

@@ -25,6 +25,9 @@
 
 #include <fmt/format.h>
 
+#include <glibmm.h>
+#include <glibmm/convert.h>
+
 #include <fcntl.h>
 
 #if defined(__GLIBC__)
@@ -561,7 +564,7 @@ vfs_dir_load(VFSDir* dir)
 {
     if (dir->path)
     {
-        dir->disp_path = g_filename_display_name(dir->path);
+        dir->disp_path = ztd::strdup(Glib::filename_display_name(dir->path));
         dir->task = vfs_async_task_new((VFSAsyncFunc)vfs_dir_load_thread, dir);
         g_signal_connect(dir->task, "finish", G_CALLBACK(on_list_task_finished), dir);
         vfs_async_task_execute(dir->task);

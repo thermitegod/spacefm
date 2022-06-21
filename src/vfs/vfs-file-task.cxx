@@ -30,6 +30,7 @@
 #include <fmt/format.h>
 
 #include <glibmm.h>
+#include <glibmm/convert.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -323,11 +324,12 @@ check_dest_in_src(VFSFileTask* task, const std::string& src_dir)
         (real_dest_path[len] == '/' || real_dest_path[len] == '\0'))
     {
         // source is contained in destination dir
-        std::string disp_src = g_filename_display_name(src_dir.c_str());
-        std::string disp_dest = g_filename_display_name(task->dest_dir.c_str());
-        std::string err = fmt::format("Destination directory \"{}\" is contained in source \"{}\"",
-                                      disp_dest,
-                                      disp_src);
+        const std::string disp_src = Glib::filename_display_name(src_dir);
+        const std::string disp_dest = Glib::filename_display_name(task->dest_dir);
+        const std::string err =
+            fmt::format("Destination directory \"{}\" is contained in source \"{}\"",
+                        disp_dest,
+                        disp_src);
         append_add_log(task, err);
         if (task->state_cb)
             task->state_cb(task,

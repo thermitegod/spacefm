@@ -955,9 +955,9 @@ ptk_file_browser_rebuild_toolbars(PtkFileBrowser* file_browser)
     if (file_browser->toolbar)
     {
         rebuild_toolbox(nullptr, file_browser);
-        char* disp_path = g_filename_display_name(ptk_file_browser_get_cwd(file_browser));
-        gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), disp_path);
-        free(disp_path);
+        const std::string disp_path =
+            Glib::filename_display_name(ptk_file_browser_get_cwd(file_browser));
+        gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), disp_path.c_str());
     }
     if (file_browser->side_toolbar)
         rebuild_side_toolbox(nullptr, file_browser);
@@ -2090,11 +2090,10 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
 
     ptk_file_browser_update_tab_label(file_browser);
 
-    char* disp_path = g_filename_display_name(ptk_file_browser_get_cwd(file_browser));
+    const std::string disp_path =
+        Glib::filename_display_name(ptk_file_browser_get_cwd(file_browser));
     if (!inhibit_focus)
-        gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), disp_path);
-
-    free(disp_path);
+        gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), disp_path.c_str());
 
     enable_toolbar(file_browser);
     return true;

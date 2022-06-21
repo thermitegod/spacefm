@@ -21,6 +21,9 @@
 
 #include <fmt/format.h>
 
+#include <glibmm.h>
+#include <glibmm/convert.h>
+
 #include <gtk/gtk.h>
 
 #include <ztd/ztd.hxx>
@@ -394,8 +397,6 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
 
     const char* time_format = ztd::strdup("%Y-%m-%d %H:%M:%S");
 
-    char* disp_path;
-
     int i;
     bool same_type = true;
     bool is_dirs = false;
@@ -416,10 +417,9 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
 
     data->dir_path = ztd::strdup(dir_path);
 
-    disp_path = g_filename_display_name(dir_path);
-    // gtk_label_set_text( GTK_LABEL( location ), disp_path );
-    gtk_entry_set_text(GTK_ENTRY(location), disp_path);
-    free(disp_path);
+    const std::string disp_path = Glib::filename_display_name(dir_path);
+    // gtk_label_set_text(GTK_LABEL(location), disp_path.c_str());
+    gtk_entry_set_text(GTK_ENTRY(location), disp_path.c_str());
 
     data->total_size_label = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(builder, "total_size")));
     data->size_on_disk_label =
@@ -578,9 +578,8 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
         /* special processing for files with special display names */
         if (vfs_file_info_is_desktop_entry(file))
         {
-            char* disp_name = g_filename_display_name(file->name.c_str());
-            gtk_entry_set_text(GTK_ENTRY(name), disp_name);
-            free(disp_name);
+            const std::string disp_name = Glib::filename_display_name(file->name);
+            gtk_entry_set_text(GTK_ENTRY(name), disp_name.c_str());
         }
         else
         {

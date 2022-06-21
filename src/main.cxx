@@ -25,6 +25,7 @@
 #include <fmt/format.h>
 
 #include <glibmm.h>
+#include <glibmm/convert.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -499,9 +500,10 @@ open_file(const char* path)
     }
     catch (const VFSAppDesktopException& e)
     {
-        std::string disp_path = g_filename_display_name(path);
-        std::string msg = fmt::format("Unable to open file:\n\"{}\"\n{}", disp_path, e.what());
-        ptk_show_error(nullptr, "Error", e.what());
+        const std::string disp_path = Glib::filename_display_name(path);
+        const std::string msg =
+            fmt::format("Unable to open file:\n\"{}\"\n{}", disp_path, e.what());
+        ptk_show_error(nullptr, "Error", msg);
     }
 
     free(app_name);

@@ -28,6 +28,7 @@
 #include <fmt/format.h>
 
 #include <glibmm.h>
+#include <glibmm/convert.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -775,7 +776,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>
             if (i == 0)
             {
                 // First archive - use user-selected destination
-                udest_file = g_filename_display_name(dest_file);
+                udest_file = Glib::filename_display_name(dest_file);
             }
             else
             {
@@ -833,7 +834,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>
     {
         /* '%O' is not present - the normal single command is needed
          * Obtaining valid quoted UTF8 file name %o for archive to create */
-        udest_file = g_filename_display_name(dest_file);
+        udest_file = Glib::filename_display_name(dest_file);
         udest_quote = bash_quote(udest_file);
         std::string all;
         std::string first;
