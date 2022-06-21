@@ -508,7 +508,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
         return;
 
     // Convert to on-disk encoding
-    std::string dir_path = g_filename_from_utf8(text, -1, nullptr, nullptr, nullptr);
+    std::string dir_path = Glib::filename_from_utf8(text);
     std::string final_path = std::filesystem::absolute(dir_path);
 
     bool final_path_exists = std::filesystem::exists(final_path);

@@ -32,6 +32,7 @@
 #include <fmt/format.h>
 
 #include <glibmm.h>
+#include <glibmm/convert.h>
 
 #include <gtk/gtk.h>
 
@@ -6602,8 +6603,7 @@ xset_text_dialog(GtkWidget* parent, const std::string& title, const std::string&
             gtk_widget_set_sensitive(btn_default, false);
     }
 
-    char* ans;
-    char* trim_ans;
+    std::string ans;
     int response;
     char* icon;
     bool ret = false;
@@ -6616,7 +6616,7 @@ xset_text_dialog(GtkWidget* parent, const std::string& title, const std::string&
                 gtk_text_buffer_get_start_iter(buf, &siter);
                 gtk_text_buffer_get_end_iter(buf, &iter);
                 ans = gtk_text_buffer_get_text(buf, &siter, &iter, false);
-                if (strchr(ans, '\n'))
+                if (ztd::contains(ans, "\n"))
                 {
                     ptk_show_error(GTK_WINDOW(dlgparent),
                                    "Error",
@@ -6626,17 +6626,13 @@ xset_text_dialog(GtkWidget* parent, const std::string& title, const std::string&
                 {
                     if (*answer)
                         free(*answer);
-                    trim_ans = ztd::strdup(ans);
-                    trim_ans = g_strstrip(trim_ans);
-                    if (ans && trim_ans[0] != '\0')
-                        *answer = g_filename_from_utf8(trim_ans, -1, nullptr, nullptr, nullptr);
-                    else
+
+                    ans = ztd::strip(ans);
+                    if (ans.empty())
                         *answer = nullptr;
-                    if (ans)
-                    {
-                        free(trim_ans);
-                        free(ans);
-                    }
+                    else
+                        *answer = ztd::strdup(Glib::filename_from_utf8(ans));
+
                     ret = true;
                     exit_loop = true;
                     break;

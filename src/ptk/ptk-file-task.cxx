@@ -1807,7 +1807,7 @@ on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input)
 static void
 query_overwrite_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
 {
-    char* file_name;
+    std::string file_name;
     char* dir_name;
     char* str;
 
@@ -1858,13 +1858,12 @@ query_overwrite_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
                     GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "query_input"));
                 str = multi_input_get_text(query_input);
             }
-            file_name = g_filename_from_utf8(str, -1, nullptr, nullptr, nullptr);
-            if (str && file_name && !ptask->task->current_dest.empty())
+            file_name = Glib::filename_from_utf8(str);
+            if (str && !file_name.empty() && !ptask->task->current_dest.empty())
             {
                 dir_name = g_path_get_dirname(ptask->task->current_dest.c_str());
-                std::string path = Glib::build_filename(dir_name, file_name);
+                std::string path = Glib::build_filename(dir_name, file_name.c_str());
                 *ptask->query_new_dest = ztd::strdup(path);
-                free(file_name);
                 free(dir_name);
             }
             free(str);
