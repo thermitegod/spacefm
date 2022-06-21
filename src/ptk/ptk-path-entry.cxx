@@ -87,7 +87,7 @@ seek_path(GtkEntry* entry)
         return false;
 
     char* seek_dir;
-    char* seek_name = nullptr;
+    std::string seek_name;
     const char* path = gtk_entry_get_text(entry);
     if (!path || path[0] == '$' || path[0] == '+' || path[0] == '&' || path[0] == '!' ||
         path[0] == '\0' || path[0] == ' ' || path[0] == '%')
@@ -104,8 +104,8 @@ seek_path(GtkEntry* entry)
     if (!Glib::str_has_suffix(path, "/"))
     {
         // get name prefix
-        seek_name = g_path_get_basename(path);
-        std::string test_path = Glib::build_filename(seek_dir, seek_name);
+        seek_name = Glib::path_get_basename(path);
+        const std::string test_path = Glib::build_filename(seek_dir, seek_name);
         if (std::filesystem::is_directory(test_path))
         {
             // complete dir path is in entry - is it unique?
@@ -132,8 +132,6 @@ seek_path(GtkEntry* entry)
                 // is unique - use as seek dir
                 free(seek_dir);
                 seek_dir = ztd::strdup(test_path);
-                free(seek_name);
-                seek_name = nullptr;
             }
         }
     }
@@ -142,9 +140,8 @@ seek_path(GtkEntry* entry)
         // strip trialing slash
         seek_dir[std::strlen(seek_dir) - 1] = '\0';
     }
-    ptk_file_browser_seek_path(edata->browser, seek_dir, seek_name);
+    ptk_file_browser_seek_path(edata->browser, seek_dir, seek_name.c_str());
     free(seek_dir);
-    free(seek_name);
     return false;
 }
 
@@ -329,10 +326,8 @@ insert_complete(GtkEntry* entry)
     std::string full_path;
     std::string long_prefix;
 
-    if (Glib::str_has_suffix(prefix, "/"))
-        prefix_name = nullptr;
-    else
-        prefix_name = g_path_get_basename(prefix);
+    if (!Glib::str_has_suffix(prefix, "/"))
+        prefix_name = Glib::path_get_basename(prefix);
 
     std::string file_name;
     for (const auto& file: std::filesystem::directory_iterator(dir_path))

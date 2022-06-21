@@ -418,17 +418,18 @@ ptk_file_browser_select_file(PtkFileBrowser* file_browser, const char* path)
     }
     if (!model)
         return;
-    char* name = g_path_get_basename(path);
 
     if (gtk_tree_model_get_iter_first(model, &it))
     {
+        const std::string name = Glib::path_get_basename(path);
+
         do
         {
             gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
             if (file)
             {
                 const char* file_name = vfs_file_info_get_name(file);
-                if (!strcmp(file_name, name))
+                if (ztd::same(file_name, name))
                 {
                     GtkTreePath* tree_path = gtk_tree_model_get_path(GTK_TREE_MODEL(list), &it);
                     if (file_browser->view_mode == PtkFBViewMode::PTK_FB_ICON_VIEW ||
@@ -468,7 +469,6 @@ ptk_file_browser_select_file(PtkFileBrowser* file_browser, const char* path)
             }
         } while (gtk_tree_model_iter_next(model, &it));
     }
-    free(name);
 }
 
 static void
@@ -1726,7 +1726,6 @@ ptk_file_browser_update_tab_label(PtkFileBrowser* file_browser)
     // GtkImage* icon;
     GtkLabel* text;
     GList* children;
-    char* name;
 
     label = gtk_notebook_get_tab_label(GTK_NOTEBOOK(file_browser->mynotebook),
                                        GTK_WIDGET(file_browser));
@@ -1738,17 +1737,18 @@ ptk_file_browser_update_tab_label(PtkFileBrowser* file_browser)
 
     /* TODO: Change the icon */
 
-    name = g_path_get_basename(ptk_file_browser_get_cwd(file_browser));
-    gtk_label_set_text(text, name);
+    const std::string name = Glib::path_get_basename(ptk_file_browser_get_cwd(file_browser));
+    gtk_label_set_text(text, name.c_str());
     gtk_label_set_ellipsize(text, PANGO_ELLIPSIZE_MIDDLE);
-    if (std::strlen(name) < 30)
+    if (name.size() < 30)
     {
         gtk_label_set_ellipsize(text, PANGO_ELLIPSIZE_NONE);
         gtk_label_set_width_chars(text, -1);
     }
     else
+    {
         gtk_label_set_width_chars(text, 30);
-    free(name);
+    }
 }
 
 void

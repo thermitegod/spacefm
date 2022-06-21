@@ -115,8 +115,9 @@ vfs_file_info_get(VFSFileInfo* fi, const char* file_path, const char* base_name)
     }
     else
     {
-        fi->name = g_path_get_basename(file_path);
-        fi->disp_name = g_path_get_basename(file_path);
+        const std::string name = Glib::path_get_basename(file_path);
+        fi->name = name;
+        fi->disp_name = name;
     }
 
     if (lstat(file_path, &file_stat) == 0)

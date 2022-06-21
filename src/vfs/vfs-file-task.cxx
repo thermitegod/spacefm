@@ -221,17 +221,16 @@ check_overwrite(VFSFileTask* task, const std::string& dest_file, bool* dest_exis
                 return !task->abort;
 
             // auto-rename
-            char* old_name = g_path_get_basename(dest_file.c_str());
-            char* dest_dir = g_path_get_dirname(dest_file.c_str());
+            const std::string old_name = Glib::path_get_basename(dest_file);
+            const std::string dest_dir = g_path_get_dirname(dest_file.c_str());
 
             const auto namepack = get_name_extension(old_name);
             std::string name = namepack.first;
             std::string ext = namepack.second;
 
-            free(old_name);
-            *new_dest_file = vfs_file_task_get_unique_name(dest_dir, name.c_str(), ext.c_str());
+            *new_dest_file =
+                vfs_file_task_get_unique_name(dest_dir.c_str(), name.c_str(), ext.c_str());
             *dest_exists = false;
-            free(dest_dir);
             if (*new_dest_file)
                 return !task->abort;
             // else ran out of names - fall through to query user
@@ -666,11 +665,8 @@ vfs_file_task_do_copy(VFSFileTask* task, const std::string& src_file, const std:
 static void
 vfs_file_task_copy(VFSFileTask* task, const std::string& src_file)
 {
-    std::string file_name;
-    std::string dest_file;
-
-    file_name = g_path_get_basename(src_file.c_str());
-    dest_file = Glib::build_filename(task->dest_dir, file_name);
+    const std::string file_name = Glib::path_get_basename(src_file);
+    const std::string dest_file = Glib::build_filename(task->dest_dir, file_name);
     vfs_file_task_do_copy(task, src_file, dest_file);
 }
 
@@ -778,11 +774,8 @@ vfs_file_task_move(VFSFileTask* task, const std::string& src_file)
     task->current_file = src_file;
     vfs_file_task_unlock(task);
 
-    char* file_name = g_path_get_basename(src_file.c_str());
-
-    std::string dest_file = Glib::build_filename(task->dest_dir, file_name);
-
-    free(file_name);
+    const std::string file_name = Glib::path_get_basename(src_file);
+    const std::string dest_file = Glib::build_filename(task->dest_dir, file_name);
 
     struct stat src_stat;
     struct stat dest_stat;
@@ -905,9 +898,8 @@ vfs_file_task_link(VFSFileTask* task, const std::string& src_file)
     if (should_abort(task))
         return;
 
-    char* file_name = g_path_get_basename(src_file.c_str());
-    std::string old_dest_file = Glib::build_filename(task->dest_dir, file_name);
-    free(file_name);
+    const std::string file_name = Glib::path_get_basename(src_file);
+    const std::string old_dest_file = Glib::build_filename(task->dest_dir, file_name);
     std::string dest_file = old_dest_file;
 
     // MOD  setup task for check overwrite

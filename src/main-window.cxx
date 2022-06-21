@@ -282,7 +282,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
         case PluginJob::INSTALL:
         {
             // install job
-            char* filename = g_path_get_basename(path);
+            char* filename = ztd::strdup(Glib::path_get_basename(path));
             char* ext = strstr(filename, ".spacefm-plugin");
             if (!ext)
                 ext = strstr(filename, ".tar.gz");
@@ -2408,12 +2408,8 @@ fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
 
     if (ptk_file_browser_get_cwd(file_browser))
     {
-        char* name = g_path_get_basename(ptk_file_browser_get_cwd(file_browser));
-        if (name)
-        {
-            tab_text = gtk_label_new(name);
-            free(name);
-        }
+        const std::string name = Glib::path_get_basename(ptk_file_browser_get_cwd(file_browser));
+        tab_text = gtk_label_new(name.c_str());
     }
     else
         tab_text = gtk_label_new("");
@@ -2476,7 +2472,6 @@ fm_main_window_update_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
     // GtkImage* icon;
     GtkLabel* text;
     GList* children;
-    char* name;
 
     label =
         gtk_notebook_get_tab_label(GTK_NOTEBOOK(main_window->notebook), GTK_WIDGET(file_browser));
@@ -2489,17 +2484,18 @@ fm_main_window_update_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
 
         // TODO: Change the icon
 
-        name = g_path_get_basename(path);
-        gtk_label_set_text(text, name);
+        const std::string name = Glib::path_get_basename(path);
+        gtk_label_set_text(text, name.c_str());
         gtk_label_set_ellipsize(text, PANGO_ELLIPSIZE_MIDDLE);
-        if (std::strlen(name) < 30)
+        if (name.size() < 30)
         {
             gtk_label_set_ellipsize(text, PANGO_ELLIPSIZE_NONE);
             gtk_label_set_width_chars(text, -1);
         }
         else
+        {
             gtk_label_set_width_chars(text, 30);
-        free(name);
+        }
 
         g_list_free(children); // sfm 0.6.0 enabled
     }
@@ -2805,7 +2801,7 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
     if (file_browser->dir && file_browser->dir->disp_path)
     {
         disp_path = file_browser->dir->disp_path;
-        disp_name = g_path_get_basename(disp_path.c_str());
+        disp_name = Glib::path_get_basename(disp_path);
     }
     else
     {
@@ -2813,7 +2809,7 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
         if (path)
         {
             disp_path = Glib::filename_display_name(path);
-            disp_name = g_path_get_basename(disp_path.c_str());
+            disp_name = Glib::path_get_basename(disp_path);
         }
     }
 
@@ -5207,7 +5203,7 @@ main_task_view_update_task(PtkFileTask* ptask)
             if (!ptask->task->current_file.empty())
             {
                 path = g_path_get_dirname(ptask->task->current_file.c_str());
-                file = g_path_get_basename(ptask->task->current_file.c_str());
+                file = Glib::path_get_basename(ptask->task->current_file);
             }
         }
         else

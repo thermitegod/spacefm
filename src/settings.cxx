@@ -2035,10 +2035,8 @@ xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
             if (!icon_new && set->z)
             {
                 // guess icon name from executable name
-                char* name = g_path_get_basename(set->z);
-                if (name && name[0])
-                    icon_new = vfs_load_icon(name, icon_size);
-                free(name);
+                const std::string name = Glib::path_get_basename(set->z);
+                icon_new = vfs_load_icon(name.c_str(), icon_size);
             }
         }
 
@@ -3383,7 +3381,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
     }
     else
     {
-        std::string s1 = g_path_get_basename(set->plug_dir);
+        const std::string s1 = Glib::path_get_basename(set->plug_dir);
         deffile = fmt::format("{}-{}-plugin.tar.xz", s1, PACKAGE_NAME);
     }
 
@@ -4514,7 +4512,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             if (set->z && set->z[0] != '\0')
             {
                 folder = g_path_get_dirname(set->z);
-                file = g_path_get_basename(set->z);
+                file = ztd::strdup(Glib::path_get_basename(set->z));
             }
             else
             {
@@ -4623,7 +4621,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                         free(file);
                         break;
                     }
-                    name = g_path_get_basename(file);
+                    name = ztd::strdup(Glib::path_get_basename(file));
                     break;
                 case XSetJob::KEY:
                 case XSetJob::ICON:
@@ -4810,7 +4808,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 // adding new submenu from a bookmark - fill with bookmark
                 folder = set->browser ? (char*)ptk_file_browser_get_cwd(set->browser)
                                       : (char*)vfs_user_desktop_dir().c_str();
-                childset->menu_label = g_path_get_basename(folder);
+                childset->menu_label = ztd::strdup(Glib::path_get_basename(folder));
                 childset->z = ztd::strdup(folder);
                 childset->x = ztd::strdup(static_cast<int>(XSetCMD::BOOKMARK));
                 // unset these to save session space
@@ -5041,7 +5039,7 @@ xset_design_job(GtkWidget* item, XSet* set)
                 folder = set->browser ? (char*)ptk_file_browser_get_cwd(set->browser)
                                       : (char*)vfs_user_desktop_dir().c_str();
                 free(childset->menu_label);
-                childset->menu_label = g_path_get_basename(folder);
+                childset->menu_label = ztd::strdup(Glib::path_get_basename(folder));
                 childset->z = ztd::strdup(folder);
                 childset->x = ztd::strdup(static_cast<int>(XSetCMD::BOOKMARK));
                 // unset these to save session space

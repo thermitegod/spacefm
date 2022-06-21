@@ -143,7 +143,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     if (!path)
         return;
 
-    std::string name = g_path_get_basename(path);
+    std::string name = Glib::path_get_basename(path);
     free(path);
 
     // Fetching the combo model
@@ -198,7 +198,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     if (len)
     {
         len = name.size() - len;
-        name[len] = '\0';
+        name = name.substr(0, len);
     }
 
     // Getting at currently selected archive handler
@@ -219,7 +219,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
             extension = archive_handler_get_first_extension(handler_xset);
 
             // Appending extension to original filename
-            std::string new_name = name + extension;
+            const std::string new_name = fmt::format("{}{}", name, extension);
 
             // Updating new archive filename
             gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), new_name.c_str());

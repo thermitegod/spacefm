@@ -1219,7 +1219,7 @@ info_partition_table(device_t* device)
 
     if (!is_partition_table && std::filesystem::is_directory(device->native_path))
     {
-        const char* s = g_path_get_basename(device->native_path);
+        const std::string s = Glib::path_get_basename(device->native_path);
 
         unsigned int partition_count;
 

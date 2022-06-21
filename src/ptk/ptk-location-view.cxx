@@ -747,20 +747,19 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
         case PtkHandlerMode::HANDLER_MODE_FS:
             if (vol)
             {
-                char* bdev = g_path_get_basename(vol->device_file);
+                const std::string bdev = Glib::path_get_basename(vol->device_file);
                 if (!vol->label.empty() && vol->label.at(0) != ' ' &&
                     g_utf8_validate(vol->label.c_str(), -1, nullptr) &&
                     !ztd::contains(vol->label, "/"))
                     mname = fmt::format("{:.20s}", vol->label);
                 else if (vol->udi && vol->udi[0] != '\0' && g_utf8_validate(vol->udi, -1, nullptr))
                 {
-                    mname = fmt::format("{}-{:.20s}", bdev, g_path_get_basename(vol->udi));
+                    mname = fmt::format("{}-{:.20s}", bdev, Glib::path_get_basename(vol->udi));
                 }
                 else
                 {
                     mname = bdev;
                 }
-                free(bdev);
             }
             break;
         case PtkHandlerMode::HANDLER_MODE_NET:
@@ -801,7 +800,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
             break;
         case PtkHandlerMode::HANDLER_MODE_FILE:
             if (path)
-                mname = g_path_get_basename(path);
+                mname = Glib::path_get_basename(path);
             break;
         default:
             break;
@@ -1646,8 +1645,8 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 
     std::string fstab_path = Glib::build_filename(SYSCONFDIR, "fstab");
 
-    char* base = g_path_get_basename(vol->device_file);
-    if (base)
+    const std::string base = Glib::path_get_basename(vol->device_file);
+    if (!base.empty())
     {
         std::string command;
         // /bin/ls -l /dev/disk/by-uuid | grep ../sdc2 | sed 's/.* \([a-fA-F0-9\-]*\) -> .*/\1/'
@@ -2529,7 +2528,7 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
             }
 
             if (name.empty())
-                name = g_path_get_basename(upath.c_str());
+                name = Glib::path_get_basename(upath);
 
             // add new bookmark
             XSet* newset = xset_custom_new();
@@ -3202,7 +3201,7 @@ ptk_bookmark_view_add_bookmark(GtkMenuItem* menuitem, PtkFileBrowser* file_brows
 
     // create new bookmark
     newset = xset_custom_new();
-    newset->menu_label = g_path_get_basename(url);
+    newset->menu_label = ztd::strdup(Glib::path_get_basename(url));
     newset->z = ztd::strdup(url);
     newset->x = ztd::strdup(static_cast<int>(XSetCMD::BOOKMARK));
     newset->prev = ztd::strdup(sel_set->name);

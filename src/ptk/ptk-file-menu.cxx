@@ -705,7 +705,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
     // context
     if (file_path)
-        context->var[ItemPropContext::CONTEXT_NAME] = g_path_get_basename(file_path);
+        context->var[ItemPropContext::CONTEXT_NAME] =
+            ztd::strdup(Glib::path_get_basename(file_path));
     else
         context->var[ItemPropContext::CONTEXT_NAME] = ztd::strdup("");
     context->var[ItemPropContext::CONTEXT_DIR] = ztd::strdup(cwd);

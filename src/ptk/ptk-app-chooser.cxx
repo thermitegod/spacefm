@@ -422,9 +422,8 @@ on_browse_btn_clicked(GtkButton* button, void* user_data)
             if (Glib::str_has_prefix(filename, app_path) &&
                 Glib::str_has_suffix(filename, ".desktop"))
             {
-                char* app_name = g_path_get_basename(filename);
-                gtk_entry_set_text(entry, app_name);
-                free(app_name);
+                const std::string app_name = Glib::path_get_basename(filename);
+                gtk_entry_set_text(entry, app_name.c_str());
             }
             else
             {
