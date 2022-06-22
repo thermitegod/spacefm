@@ -354,9 +354,11 @@ vfs_file_info_get_atime(VFSFileInfo* fi)
     return &fi->atime;
 }
 
-static void
-get_file_perm_string(std::string& perm, mode_t mode)
+static const std::string
+get_file_perm_string(mode_t mode)
 {
+    std::string perm;
+
     // Special Permissions
     if (S_ISREG(mode))
         perm.append("-");
@@ -447,13 +449,15 @@ get_file_perm_string(std::string& perm, mode_t mode)
         else
             perm.append("-");
     }
+
+    return perm;
 }
 
 const char*
 vfs_file_info_get_disp_perm(VFSFileInfo* fi)
 {
     if (fi->disp_perm.empty())
-        get_file_perm_string(fi->disp_perm, fi->mode);
+        fi->disp_perm = get_file_perm_string(fi->mode);
 
     return fi->disp_perm.c_str();
 }
