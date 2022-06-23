@@ -77,8 +77,8 @@ struct FilePropertiesDialogData
     GtkEntry* atime;
     char* orig_atime;
 
-    GtkToggleButton* chmod_btns[ChmodActionType::N_CHMOD_ACTIONS];
-    unsigned char chmod_states[ChmodActionType::N_CHMOD_ACTIONS];
+    GtkToggleButton* chmod_btns[magic_enum::enum_count<ChmodActionType>()];
+    unsigned char chmod_states[magic_enum::enum_count<ChmodActionType>()];
 
     GtkLabel* total_size_label;
     GtkLabel* size_on_disk_label;
@@ -109,8 +109,8 @@ FilePropertiesDialogData::FilePropertiesDialogData()
     this->atime = nullptr;
     this->orig_atime = nullptr;
 
-    // this->chmod_btns[ChmodActionType::N_CHMOD_ACTIONS];
-    // this->chmod_states[ChmodActionType::N_CHMOD_ACTIONS];
+    // this->chmod_btns[magic_enum::enum_count<ChmodActionType>()];
+    // this->chmod_states[magic_enum::enum_count<ChmodActionType>()];
 
     this->total_size_label = nullptr;
     this->size_on_disk_label = nullptr;
@@ -399,7 +399,6 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
 
     const char* time_format = ztd::strdup("%Y-%m-%d %H:%M:%S");
 
-    int i;
     bool same_type = true;
     bool is_dirs = false;
     char* owner_group;
@@ -432,7 +431,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     data->mtime = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "mtime")));
     data->atime = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "atime")));
 
-    for (i = 0; i < ChmodActionType::N_CHMOD_ACTIONS; ++i)
+    for (std::size_t i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
     {
         data->chmod_btns[i] =
             GTK_TOGGLE_BUTTON(GTK_WIDGET(gtk_builder_get_object(builder, chmod_names.at(i))));
@@ -565,7 +564,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
         data->orig_mtime = nullptr;
         data->orig_atime = nullptr;
 
-        for (i = 0; i < ChmodActionType::N_CHMOD_ACTIONS; ++i)
+        for (std::size_t i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
         {
             gtk_toggle_button_set_inconsistent(data->chmod_btns[i], true);
             data->chmod_states[i] = 2; /* Do not touch this bit */
@@ -640,7 +639,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
         data->group_name = ztd::strdup(tmp + 1);
         gtk_entry_set_text(GTK_ENTRY(data->group), data->group_name);
 
-        for (i = 0; i < ChmodActionType::N_CHMOD_ACTIONS; ++i)
+        for (std::size_t i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
         {
             if (data->chmod_states[i] != 2) /* allow to touch this bit */
             {
@@ -893,8 +892,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 }
             }
 
-            int i;
-            for (i = 0; i < ChmodActionType::N_CHMOD_ACTIONS; ++i)
+            for (std::size_t i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
             {
                 if (gtk_toggle_button_get_inconsistent(data->chmod_btns[i]))
                 {

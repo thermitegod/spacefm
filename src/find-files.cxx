@@ -41,6 +41,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include <magic_enum.hpp>
+
 #include "window-reference.hxx"
 
 #include "vfs/vfs-volume.hxx"
@@ -64,7 +66,6 @@ enum FindFilesCol
     COL_TYPE,
     COL_MTIME,
     COL_INFO,
-    N_RES_COLS
 };
 
 struct FindFile
@@ -921,7 +922,7 @@ init_search_result(FindFile* data)
 
     gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(data->result_view)),
                                 GTK_SELECTION_MULTIPLE);
-    data->result_list = gtk_list_store_new(FindFilesCol::N_RES_COLS,
+    data->result_list = gtk_list_store_new(magic_enum::enum_count<FindFilesCol>(),
                                            GDK_TYPE_PIXBUF, /* icon */
                                            G_TYPE_STRING,   /* name */
                                            G_TYPE_STRING,   /* dir */

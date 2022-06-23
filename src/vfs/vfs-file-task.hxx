@@ -32,6 +32,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include <magic_enum.hpp>
+
 enum VFSFileTaskType
 {
     VFS_FILE_TASK_MOVE,
@@ -59,7 +61,6 @@ enum ChmodActionType
     SET_UID,
     SET_GID,
     STICKY,
-    N_CHMOD_ACTIONS
 };
 
 extern const std::array<mode_t, 12> chmod_flags;

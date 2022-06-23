@@ -23,6 +23,8 @@
 
 #include <sys/types.h>
 
+#include <magic_enum.hpp>
+
 #include "vfs/vfs-dir.hxx"
 
 #define PTK_FILE_LIST(obj)             (static_cast<PtkFileList*>(obj))
@@ -43,7 +45,6 @@ enum PTKFileListCol
     COL_FILE_OWNER,
     COL_FILE_MTIME,
     COL_FILE_INFO,
-    N_FILE_LIST_COLS
 };
 
 // sort_dir of directory view - do not change order, saved

@@ -998,8 +998,7 @@ vfs_file_task_chown_chmod(VFSFileTask* task, const std::string& src_file)
         if (task->chmod_actions)
         {
             mode_t new_mode = src_stat.st_mode;
-            int i;
-            for (i = 0; i < ChmodActionType::N_CHMOD_ACTIONS; ++i)
+            for (std::size_t i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
             {
                 if (task->chmod_actions[i] == 2) /* Do not change */
                     continue;
@@ -2026,11 +2025,11 @@ vfs_task_new(VFSFileTaskType type, std::vector<std::string>& src_files, const ch
 void
 vfs_file_task_set_chmod(VFSFileTask* task, unsigned char* chmod_actions)
 {
-    task->chmod_actions =
-        (unsigned char*)g_slice_alloc(sizeof(unsigned char) * ChmodActionType::N_CHMOD_ACTIONS);
+    task->chmod_actions = (unsigned char*)g_slice_alloc(sizeof(unsigned char) *
+                                                        magic_enum::enum_count<ChmodActionType>());
     memcpy((void*)task->chmod_actions,
            (void*)chmod_actions,
-           sizeof(unsigned char) * ChmodActionType::N_CHMOD_ACTIONS);
+           sizeof(unsigned char) * magic_enum::enum_count<ChmodActionType>());
 }
 
 void
@@ -2109,7 +2108,7 @@ vfs_file_task_free(VFSFileTask* task)
     g_slist_free(task->devs);
 
     if (task->chmod_actions)
-        g_slice_free1(sizeof(unsigned char) * ChmodActionType::N_CHMOD_ACTIONS,
+        g_slice_free1(sizeof(unsigned char) * magic_enum::enum_count<ChmodActionType>(),
                       task->chmod_actions);
 
     vfs_file_task_clear(task);

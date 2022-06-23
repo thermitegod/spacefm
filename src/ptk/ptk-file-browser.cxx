@@ -36,6 +36,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include <magic_enum.hpp>
+
 #include "ptk/ptk-utils.hxx"
 #include "ptk/ptk-file-misc.hxx"
 
@@ -145,13 +147,12 @@ enum PTKFileBrowserSignal
     CONTENT_CHANGE_SIGNAL,
     SEL_CHANGE_SIGNAL,
     PANE_MODE_CHANGE_SIGNAL,
-    N_SIGNALS
 };
 
 static void rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser);
 static void rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser);
 
-static unsigned int signals[PTKFileBrowserSignal::N_SIGNALS] = {0};
+static unsigned int signals[magic_enum::enum_count<PTKFileBrowserSignal>()] = {0};
 
 static unsigned int folder_view_auto_scroll_timer = 0;
 static GtkDirectionType folder_view_auto_scroll_direction = GTK_DIR_TAB_FORWARD;

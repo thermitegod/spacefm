@@ -20,6 +20,8 @@
 
 #include <glibmm.h>
 
+#include <magic_enum.hpp>
+
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dir.hxx"
 
@@ -34,7 +36,6 @@ enum PTKAppChooser
     COL_APP_NAME,
     COL_DESKTOP_FILE,
     COL_FULL_PATH,
-    N_COLS
 };
 
 static void load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* task);
@@ -149,7 +150,7 @@ add_list_item(GtkListStore* list, const char* path)
 static GtkTreeModel*
 create_model_from_mime_type(VFSMimeType* mime_type)
 {
-    GtkListStore* list = gtk_list_store_new(PTKAppChooser::N_COLS,
+    GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<PTKAppChooser>(),
                                             GDK_TYPE_PIXBUF,
                                             G_TYPE_STRING,
                                             G_TYPE_STRING,
@@ -327,7 +328,7 @@ on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, unsigned int pag
                 busy);
             g_object_unref(busy);
 
-            GtkListStore* list = gtk_list_store_new(PTKAppChooser::N_COLS,
+            GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<PTKAppChooser>(),
                                                     GDK_TYPE_PIXBUF,
                                                     G_TYPE_STRING,
                                                     G_TYPE_STRING,

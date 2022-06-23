@@ -23,6 +23,8 @@
 
 #include <sys/types.h>
 
+#include <magic_enum.hpp>
+
 #define PTK_DIR_TREE(obj)             (static_cast<PtkDirTree*>(obj))
 #define PTK_DIR_TREE_REINTERPRET(obj) (reinterpret_cast<PtkDirTree*>(obj))
 
@@ -35,7 +37,6 @@ enum PTKDirTreeCol
     COL_DIR_TREE_ICON,
     COL_DIR_TREE_DISP_NAME,
     COL_DIR_TREE_INFO,
-    N_DIR_TREE_COLS
 };
 
 struct PtkDirTreeNode;

@@ -39,6 +39,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include <magic_enum.hpp>
+
 #include "vfs/vfs-volume.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 #include "utils.hxx"
@@ -80,10 +82,9 @@ enum VFSDirSignal
     FILE_CHANGED_SIGNAL,
     THUMBNAIL_LOADED_SIGNAL,
     FILE_LISTED_SIGNAL,
-    N_SIGNALS
 };
 
-static unsigned int signals[VFSDirSignal::N_SIGNALS] = {0};
+static unsigned int signals[magic_enum::enum_count<VFSDirSignal>()] = {0};
 static GObjectClass* parent_class = nullptr;
 
 static std::map<const char*, VFSDir*> dir_map;

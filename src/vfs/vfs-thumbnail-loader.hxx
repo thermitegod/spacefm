@@ -22,13 +22,14 @@
 #include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-file-info.hxx"
 
+#include <magic_enum.hpp>
+
 #define VFS_THUMBNAIL_REQUEST(obj) (static_cast<VFSThumbnailRequest*>(obj))
 
 enum VFSThumbnailSize
 {
     LOAD_BIG_THUMBNAIL,
     LOAD_SMALL_THUMBNAIL,
-    N_LOAD_TYPES
 };
 
 struct VFSThumbnailRequest
@@ -37,7 +38,7 @@ struct VFSThumbnailRequest
     ~VFSThumbnailRequest();
 
     VFSFileInfo* file;
-    unsigned int n_requests[VFSThumbnailSize::N_LOAD_TYPES];
+    unsigned int n_requests[magic_enum::enum_count<VFSThumbnailSize>()];
 };
 
 struct VFSThumbnailLoader

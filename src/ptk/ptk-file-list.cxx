@@ -93,7 +93,7 @@ static void on_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file, PtkFileList* lis
 
 static GObjectClass* parent_class = nullptr;
 
-static GType column_types[PTKFileListCol::N_FILE_LIST_COLS];
+static GType column_types[magic_enum::enum_count<PTKFileListCol>()];
 
 GType
 ptk_file_list_get_type()
@@ -335,7 +335,7 @@ static int
 ptk_file_list_get_n_columns(GtkTreeModel* tree_model)
 {
     (void)tree_model;
-    return PTKFileListCol::N_FILE_LIST_COLS;
+    return magic_enum::enum_count<PTKFileListCol>();
 }
 
 static GType

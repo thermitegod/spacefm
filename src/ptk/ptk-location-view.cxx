@@ -33,6 +33,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include <magic_enum.hpp>
+
 #include "types.hxx"
 
 #include "ptk/ptk-location-view.hxx"
@@ -78,7 +80,6 @@ enum PtkLocationViewCol
     COL_NAME,
     COL_PATH,
     COL_DATA,
-    N_COLS
 };
 
 struct AutoOpen
@@ -427,7 +428,7 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
 {
     if (!model)
     {
-        GtkListStore* list = gtk_list_store_new(PtkLocationViewCol::N_COLS,
+        GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<PtkLocationViewCol>(),
                                                 GDK_TYPE_PIXBUF,
                                                 G_TYPE_STRING,
                                                 G_TYPE_STRING,
@@ -3744,7 +3745,7 @@ is_row_separator(GtkTreeModel* tree_model, GtkTreeIter* it, PtkFileBrowser* file
 GtkWidget*
 ptk_bookmark_view_new(PtkFileBrowser* file_browser)
 {
-    GtkListStore* list = gtk_list_store_new(PtkLocationViewCol::N_COLS,
+    GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<PtkLocationViewCol>(),
                                             GDK_TYPE_PIXBUF,
                                             G_TYPE_STRING,
                                             G_TYPE_STRING,

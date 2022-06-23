@@ -24,6 +24,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include <magic_enum.hpp>
+
 #include "vfs/vfs-user-dir.hxx"
 
 #include "ptk/ptk-path-entry.hxx"
@@ -40,7 +42,6 @@ enum PTKPathEntryCol
 {
     COL_NAME,
     COL_PATH,
-    N_COLS
 };
 
 EntryData::EntryData(PtkFileBrowser* file_browser)
@@ -483,7 +484,8 @@ on_focus_in(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
     (void)evt;
     (void)user_data;
     GtkEntryCompletion* completion = gtk_entry_completion_new();
-    GtkListStore* list = gtk_list_store_new(PTKPathEntryCol::N_COLS, G_TYPE_STRING, G_TYPE_STRING);
+    GtkListStore* list =
+        gtk_list_store_new(magic_enum::enum_count<PTKPathEntryCol>(), G_TYPE_STRING, G_TYPE_STRING);
 
     gtk_entry_completion_set_minimum_key_length(completion, 1);
     gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(list));

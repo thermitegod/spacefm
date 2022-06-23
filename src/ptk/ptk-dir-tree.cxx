@@ -119,7 +119,7 @@ static PtkDirTreeNode* ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* p
 
 static GObjectClass* parent_class = nullptr;
 
-static GType column_types[PTKDirTreeCol::N_DIR_TREE_COLS];
+static GType column_types[magic_enum::enum_count<PTKDirTreeCol>()];
 
 PtkDirTreeNode::PtkDirTreeNode()
 {
@@ -290,7 +290,7 @@ static int
 ptk_dir_tree_get_n_columns(GtkTreeModel* tree_model)
 {
     (void)tree_model;
-    return PTKDirTreeCol::N_DIR_TREE_COLS;
+    return magic_enum::enum_count<PTKDirTreeCol>();
 }
 
 static GType

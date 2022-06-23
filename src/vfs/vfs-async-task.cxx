@@ -17,6 +17,8 @@
 
 #include "vfs/vfs-async-task.hxx"
 
+#include <magic_enum.hpp>
+
 static void vfs_async_task_class_init(VFSAsyncTaskClass* klass);
 static void vfs_async_task_init(VFSAsyncTask* task);
 static void vfs_async_task_finalize(GObject* object);
@@ -32,10 +34,9 @@ static GObjectClass* parent_class = nullptr;
 enum VFSAsyncSignal
 {
     FINISH_SIGNAL,
-    N_SIGNALS
 };
 
-static unsigned int signals[VFSAsyncSignal::N_SIGNALS] = {0};
+static unsigned int signals[magic_enum::enum_count<VFSAsyncSignal>()] = {0};
 
 GType
 vfs_async_task_get_type()

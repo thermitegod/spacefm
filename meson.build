@@ -250,6 +250,7 @@ x11_dep = dependency('x11', required : true)
 spdlog_dep = dependency('spdlog', required : true)
 fmt_dep = dependency('fmt', required : true)
 sigc_dep = dependency('sigc++-3.0', required : true)
+magic_enum_dep = dependency('magic_enum', required : true)
 
 #gtk_dep = dependency('gtk+-4.0', required : true)
 gtk_dep = dependency('gtk+-3.0', required : true)
@@ -331,6 +332,7 @@ spacefm = build_target(
     spdlog_dep,
     fmt_dep,
     sigc_dep,
+    magic_enum_dep,
 
     libudev_dep,
     libffmpegthumbnailer_dep,
