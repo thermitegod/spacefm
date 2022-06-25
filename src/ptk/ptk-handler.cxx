@@ -414,7 +414,7 @@ static const Handler handlers_net[] = {
      *      user=USERNAME
      *      point=MOUNT_POINT
      *
-     *      eg: +ssh url=ssh://*
+     *      eg: +ssh url=ssh://...
      */
     {"hand_net_+http",
      "http & webdav",
@@ -2672,8 +2672,7 @@ static void
 on_archive_default(GtkMenuItem* menuitem, XSet* set)
 {
     const char* arcname[] = {"arc_def_open", "arc_def_ex", "arc_def_exto", "arc_def_list"};
-    int i;
-    for (i = 0; i < G_N_ELEMENTS(arcname); i++)
+    for (unsigned int i = 0; i < G_N_ELEMENTS(arcname); i++)
     {
         if (!strcmp(set->name, arcname[i]))
             set->b = XSET_B_TRUE;

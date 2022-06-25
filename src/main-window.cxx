@@ -645,13 +645,11 @@ main_window_refresh_all()
     for (l = all_windows; l; l = l->next)
     {
         FMMainWindow* main_window = (FMMainWindow*)l->data;
-        int p;
-        for (p = 1; p < 5; p++)
+        for (int p = 1; p < 5; p++)
         {
-            ssize_t notebook = (ssize_t)main_window->panel[p - 1];
-            GtkWidget* num_pages = (GtkWidget*)gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
-            int i;
-            for (i = 0; i < (int64_t)num_pages; i++)
+            int64_t notebook = (int64_t)main_window->panel[p - 1];
+            int num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
+            for (int i = 0; i < num_pages; i++)
             {
                 PtkFileBrowser* a_browser =
                     PTK_FILE_BROWSER(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), i));

@@ -307,8 +307,7 @@ static void
 on_archive_default(GtkMenuItem* menuitem, XSet* set)
 {
     const char* arcname[] = {"arc_def_open", "arc_def_ex", "arc_def_exto", "arc_def_list"};
-    int i;
-    for (i = 0; i < G_N_ELEMENTS(arcname); i++)
+    for (unsigned int i = 0; i < G_N_ELEMENTS(arcname); i++)
     {
         if (!strcmp(set->name, arcname[i]))
             set->b = XSET_B_TRUE;
@@ -558,7 +557,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
     int icon_w;
     int icon_h;
     GtkWidget* app_img;
-    int i;
     PtkFileMenu* data;
     int no_write_access = 0;
     int no_read_access = 0;
@@ -944,7 +942,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                 xset_set_ob1_int(set, "tab_num", -2);
                 set->disable = (tab_num == tab_count);
                 set = xset_set_cb("opentab_new", (GFunc)on_popup_open_in_new_tab_activate, data);
-                for (i = 1; i < 11; i++)
+                for (int i = 1; i < 11; i++)
                 {
                     name = g_strdup_printf("opentab_%d", i);
                     set = xset_set_cb(name, (GFunc)on_open_in_tab, data);
@@ -960,7 +958,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                 xset_set_ob1_int(set, "panel_num", -2);
                 set->disable = (panel_count == 1);
 
-                for (i = 1; i < 5; i++)
+                for (int i = 1; i < 5; i++)
                 {
                     name = g_strdup_printf("open_in_panel%d", i);
                     set = xset_set_cb(name, (GFunc)on_open_in_panel, data);
@@ -1032,7 +1030,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         set = xset_set_cb("tab_close", (GFunc)ptk_file_browser_go_tab, browser);
         xset_set_ob1_int(set, "tab_num", -3);
 
-        for (i = 1; i < 11; i++)
+        for (int i = 1; i < 11; i++)
         {
             name = g_strdup_printf("tab_%d", i);
             set = xset_set_cb(name, (GFunc)ptk_file_browser_go_tab, browser);
@@ -1111,7 +1109,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
             "move_tab_2",      "move_tab_3",    "move_tab_4",    "move_tab_5",    "move_tab_6",
             "move_tab_7",      "move_tab_8",    "move_tab_9",    "move_tab_10",   "move_panel_prev",
             "move_panel_next", "move_panel_1",  "move_panel_2",  "move_panel_3",  "move_panel_4"};
-        for (i = 0; i < G_N_ELEMENTS(copycmd); i++)
+        for (unsigned int i = 0; i < G_N_ELEMENTS(copycmd); i++)
         {
             set = xset_set_cb(copycmd[i], (GFunc)on_copycmd, data);
             xset_set_ob1(set, "set", set);
@@ -1140,7 +1138,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         set->disable = (panel_count < 2);
 
         bool b;
-        for (i = 1; i < 11; i++)
+        for (int i = 1; i < 11; i++)
         {
             str = g_strdup_printf("copy_tab_%d", i);
             set = xset_get(str);
@@ -1229,7 +1227,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
             "rown_myuser",      "rown_myuser_users", "rown_user1",       "rown_user1_users",
             "rown_user2",       "rown_user2_users",  "rown_root",        "rown_root_users",
             "rown_root_myuser", "rown_root_user1",   "rown_root_user2"};
-        for (i = 0; i < G_N_ELEMENTS(permcmd); i++)
+        for (unsigned int i = 0; i < G_N_ELEMENTS(permcmd); i++)
         {
             set = xset_set_cb(permcmd[i], (GFunc)on_permission, data);
             xset_set_ob1(set, "set", set);

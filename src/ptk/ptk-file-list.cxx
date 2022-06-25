@@ -97,7 +97,8 @@ ptk_file_list_get_type()
                                             nullptr, /* class_data */
                                             sizeof(PtkFileList),
                                             0, /* n_preallocs */
-                                            (GInstanceInitFunc)ptk_file_list_init};
+                                            (GInstanceInitFunc)ptk_file_list_init,
+                                            nullptr /* value_table */};
 
         static const GInterfaceInfo tree_model_info = {
             (GInterfaceInitFunc)ptk_file_list_tree_model_init,
@@ -340,7 +341,7 @@ ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
     /* we do not allow children */
     g_assert(depth == 1); /* depth 1 = top level; a list only has top level nodes and no children */
 
-    int n = indices[0]; /* the n-th top level row */
+    unsigned int n = indices[0]; /* the n-th top level row */
 
     if (n >= list->n_files || n < 0)
         return false;
@@ -531,7 +532,7 @@ ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTre
         return false;
 
     /* special case: if parent == nullptr, set iter to n-th top-level row */
-    if (n >= list->n_files || n < 0)
+    if (static_cast<unsigned int>(n) >= list->n_files) //  || n < 0)
         return false;
 
     GList* l = g_list_nth(list->files, n);

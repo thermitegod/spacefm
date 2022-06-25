@@ -593,8 +593,7 @@ ptk_location_view_get_mount_point_dir(const char* name)
                                      "$HOME",
                                      "$XDG_RUNTIME_DIR",
                                      "$XDG_CACHE_HOME"};
-            int i;
-            for (i = 0; i < G_N_ELEMENTS(varname); i++)
+            for (unsigned int i = 0; i < G_N_ELEMENTS(varname); i++)
             {
                 if (!strstr(parent, varname[i]))
                     continue;

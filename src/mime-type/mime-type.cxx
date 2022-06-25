@@ -92,13 +92,12 @@ mime_type_get_by_filename(const char* filename, struct stat* statbuf)
     const char* type = nullptr;
     const char* suffix_pos = nullptr;
     const char* prev_suffix_pos = (const char*)-1;
-    int i;
     MimeCache* cache;
 
     if (G_UNLIKELY(statbuf && S_ISDIR(statbuf->st_mode)))
         return XDG_MIME_TYPE_DIRECTORY;
 
-    for (i = 0; !type && i < n_caches; ++i)
+    for (unsigned int i = 0; !type && i < n_caches; ++i)
     {
         cache = caches[i];
         type = mime_cache_lookup_literal(cache, filename);
@@ -117,7 +116,7 @@ mime_type_get_by_filename(const char* filename, struct stat* statbuf)
     {
         int max_glob_len = 0;
         int glob_len = 0;
-        for (i = 0; !type && i < n_caches; ++i)
+        for (unsigned int i = 0; !type && i < n_caches; ++i)
         {
             cache = caches[i];
             const char* matched_type;
@@ -223,8 +222,7 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
 #endif
             if (data != (char*)-1)
             {
-                int i;
-                for (i = 0; !type && i < n_caches; ++i)
+                for (unsigned int i = 0; !type && i < n_caches; ++i)
                     type = mime_cache_lookup_magic(caches[i], data, len);
 
                 /* Check for executable file */
@@ -487,8 +485,7 @@ mime_cache_load_all()
     if (caches[0]->magic_max_extent > mime_cache_max_extent)
         mime_cache_max_extent = caches[0]->magic_max_extent;
 
-    int i;
-    for (i = 1; i < n_caches; ++i)
+    for (unsigned int i = 1; i < n_caches; ++i)
     {
         path = g_build_filename(dirs[i - 1], filename, nullptr);
         caches[i] = mime_cache_new(path);
@@ -518,18 +515,16 @@ mime_cache_free_all()
 static void
 mime_cache_foreach(GFunc func, void* user_data)
 {
-    int i;
-    for (i = 0; i < n_caches; ++i)
+    for (unsigned int i = 0; i < n_caches; ++i)
         func(caches[i], user_data);
 }
 
 bool
 mime_cache_reload(MimeCache* cache)
 {
-    int i;
     bool ret = mime_cache_load(cache, cache->file_path);
     /* recalculate max magic extent */
-    for (i = 0; i < n_caches; ++i)
+    for (unsigned int i = 0; i < n_caches; ++i)
     {
         if (caches[i]->magic_max_extent > mime_cache_max_extent)
             mime_cache_max_extent = caches[i]->magic_max_extent;
@@ -547,10 +542,9 @@ mime_cache_reload(MimeCache* cache)
 static bool
 mime_type_is_data_plain_text(const char* data, int len)
 {
-    int i;
     if (G_LIKELY(len >= 0 && data))
     {
-        for (i = 0; i < len; ++i)
+        for (int i = 0; i < len; ++i)
         {
             if (data[i] == '\0')
                 return false;
@@ -641,8 +635,7 @@ mime_type_is_subclass(const char* type, const char* parent)
     if (G_UNLIKELY(!strcmp(type, parent)))
         return true;
 
-    int i;
-    for (i = 0; i < n_caches; ++i)
+    for (unsigned int i = 0; i < n_caches; ++i)
     {
         const char** parents = mime_cache_lookup_parents(caches[i], type);
         if (parents)

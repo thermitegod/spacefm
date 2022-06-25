@@ -195,7 +195,7 @@ magic_rule_match(const char* buf, const char* rule, const char* data, int len)
     uint32_t max_offset = offset + range;
     uint32_t val_len = VAL32(rule, 12);
 
-    for (; offset < max_offset && (offset + val_len) <= len; ++offset)
+    for (; offset < max_offset && (offset + val_len) <= static_cast<uint32_t>(len); ++offset)
     {
         bool match = false;
         uint32_t val_off = VAL32(rule, 16);
@@ -205,7 +205,7 @@ magic_rule_match(const char* buf, const char* rule, const char* data, int len)
 
         if (G_UNLIKELY(mask_off > 0)) /* compare with mask applied */
         {
-            int i = 0;
+            unsigned int i = 0;
             const char* mask = buf + mask_off;
 
             for (; i < val_len; ++i)
@@ -250,8 +250,7 @@ magic_match(const char* buf, const char* magic, const char* data, int len)
     uint32_t rules_off = VAL32(magic, 12);
     const char* rule = buf + rules_off;
 
-    int i;
-    for (i = 0; i < n_rules; ++i, rule += 32)
+    for (unsigned int i = 0; i < n_rules; ++i, rule += 32)
         if (magic_rule_match(buf, rule, data, len))
             return true;
     return false;
@@ -265,8 +264,7 @@ mime_cache_lookup_magic(MimeCache* cache, const char* data, int len)
     if (G_UNLIKELY(!data || (len == 0) || !magic))
         return nullptr;
 
-    int i;
-    for (i = 0; i < cache->n_magics; ++i, magic += 16)
+    for (unsigned int i = 0; i < cache->n_magics; ++i, magic += 16)
     {
         if (magic_match(cache->buffer, magic, data, len))
         {
@@ -344,8 +342,7 @@ lookup_reverse_suffix_nodes(const char* buf, const char* nodes, uint32_t n, cons
     uint32_t uchar = suffix ? g_unichar_tolower(g_utf8_get_char(suffix)) : 0;
     // LOG_DEBUG("{}: suffix= '{}'", name, suffix);
 
-    int i;
-    for (i = 0; i < n; ++i)
+    for (unsigned int i = 0; i < n; ++i)
     {
         const char* node = nodes + i * 12;
         uint32_t ch = VAL32(node, 0);
@@ -522,13 +519,12 @@ mime_cache_lookup_glob(MimeCache* cache, const char* filename, int* glob_len)
 {
     const char* entry = cache->globs;
     const char* type = nullptr;
-    int i;
     int max_glob_len = 0;
 
     /* entry size is changed in mime.cache 1.1 */
     size_t entry_size = cache->has_str_weight ? 12 : 8;
 
-    for (i = 0; i < cache->n_globs; ++i)
+    for (unsigned int i = 0; i < cache->n_globs; ++i)
     {
         const char* glob = cache->buffer + VAL32(entry, 0);
         int _glob_len;
@@ -554,8 +550,7 @@ mime_cache_lookup_parents(MimeCache* cache, const char* mime_type)
 
     const char** result = (const char**)g_new(char*, n + 1);
 
-    uint32_t i;
-    for (i = 0; i < n; ++i)
+    for (unsigned int i = 0; i < n; ++i)
     {
         uint32_t parent_off = VAL32(parents, i * 4);
         const char* parent = cache->buffer + parent_off;

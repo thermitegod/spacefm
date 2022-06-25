@@ -109,7 +109,8 @@ ptk_dir_tree_get_type()
                                             nullptr, /* class_data */
                                             sizeof(PtkDirTree),
                                             0, /* n_preallocs */
-                                            (GInstanceInitFunc)ptk_dir_tree_init};
+                                            (GInstanceInitFunc)ptk_dir_tree_init,
+                                            nullptr /* value_table */};
 
         static const GInterfaceInfo tree_model_info = {
             (GInterfaceInitFunc)ptk_dir_tree_tree_model_init,

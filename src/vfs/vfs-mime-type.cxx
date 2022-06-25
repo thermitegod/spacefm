@@ -426,14 +426,14 @@ vfs_mime_type_join_actions(char** list1, unsigned long len1, char** list2, unsig
     if (len1 > 0 || len2 > 0)
         ret = g_new0(char*, len1 + len2 + 1);
 
-    int i;
+    unsigned long i;
     for (i = 0; i < len1; ++i)
     {
         ret[i] = g_strdup(list1[i]);
     }
 
-    int j;
-    int k;
+    unsigned long j;
+    unsigned long k;
     for (j = 0, k = 0; j < len2; ++j)
     {
         for (i = 0; i < len1; ++i)

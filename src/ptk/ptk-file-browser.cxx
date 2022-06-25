@@ -954,8 +954,7 @@ rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
 void
 ptk_file_browser_rebuild_toolbars(PtkFileBrowser* file_browser)
 {
-    int i;
-    for (i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); i++)
+    for (unsigned int i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); i++)
     {
         g_slist_free(file_browser->toolbar_widgets[i]);
         file_browser->toolbar_widgets[i] = nullptr;
@@ -994,8 +993,7 @@ on_status_bar_button_press(GtkWidget* widget, GdkEventButton* event, PtkFileBrow
         if (event->button == 2)
         {
             const char* setname[] = {"status_name", "status_path", "status_info", "status_hide"};
-            int i;
-            for (i = 0; i < G_N_ELEMENTS(setname); i++)
+            for (unsigned int i = 0; i < G_N_ELEMENTS(setname); i++)
             {
                 if (xset_get_b(setname[i]))
                 {
@@ -1035,8 +1033,7 @@ static void
 on_status_middle_click_config(GtkMenuItem* menuitem, XSet* set)
 {
     const char* setname[] = {"status_name", "status_path", "status_info", "status_hide"};
-    int i;
-    for (i = 0; i < G_N_ELEMENTS(setname); i++)
+    for (unsigned int i = 0; i < G_N_ELEMENTS(setname); i++)
     {
         if (!strcmp(set->name, setname[i]))
             set->b = XSET_B_TRUE;
@@ -1210,7 +1207,6 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
 static void
 ptk_file_browser_finalize(GObject* obj)
 {
-    int i;
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(obj);
     // LOG_INFO("ptk_file_browser_finalize");
     if (file_browser->dir)
@@ -1249,7 +1245,7 @@ ptk_file_browser_finalize(GObject* obj)
     file_browser->book_set_name = nullptr;
     g_free(file_browser->select_path);
     file_browser->select_path = nullptr;
-    for (i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); i++)
+    for (unsigned int i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); i++)
     {
         g_slist_free(file_browser->toolbar_widgets[i]);
         file_browser->toolbar_widgets[i] = nullptr;
@@ -1628,7 +1624,6 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
 GtkWidget*
 ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view, void* main_window)
 {
-    int i;
     PtkFBViewMode view_mode;
     PangoFontDescription* font_desc;
     PtkFileBrowser* file_browser = (PtkFileBrowser*)g_object_new(PTK_TYPE_FILE_BROWSER, nullptr);
@@ -1641,7 +1636,7 @@ ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
     file_browser->inhibit_focus = file_browser->busy = false;
     file_browser->seek_name = nullptr;
     file_browser->book_set_name = nullptr;
-    for (i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); i++)
+    for (unsigned int i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); i++)
         file_browser->toolbar_widgets[i] = nullptr;
 
     if (xset_get_b_panel(curpanel, "list_detailed"))
@@ -3990,8 +3985,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
     int p = file_browser->mypanel;
     char mode = main_window->panel_context[p - 1];
 
-    int i;
-    for (i = 0; i < G_N_ELEMENTS(cols); i++)
+    for (unsigned int i = 0; i < G_N_ELEMENTS(cols); i++)
     {
         col = gtk_tree_view_column_new();
         gtk_tree_view_column_set_resizable(col, true);
@@ -3999,10 +3993,10 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
         GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
 
         // column order
-        int j;
+        unsigned int j;
         for (j = 0; j < G_N_ELEMENTS(cols); j++)
         {
-            if (xset_get_int_panel(p, column_names[j], "x") == i)
+            if (xset_get_int_panel(p, column_names[j], "x") == static_cast<int>(i))
                 break;
         }
         if (j == G_N_ELEMENTS(cols))

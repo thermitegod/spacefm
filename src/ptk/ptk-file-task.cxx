@@ -660,7 +660,7 @@ on_error_combo_changed(GtkComboBox* box, PtkFileTask* ptask)
     int error_mode = gtk_combo_box_get_active(box);
     if (error_mode < 0)
         error_mode = 0;
-    ptask->err_mode = error_mode;
+    ptask->err_mode = PTKFileTaskPtaskError(error_mode);
 }
 
 void
@@ -668,7 +668,6 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 {
     GtkTable* table;
     GtkLabel* label;
-    int i;
 
     // clang-format off
     const char* actions[] = {"Move: ",
@@ -861,7 +860,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
         ptask->overwrite_combo = gtk_combo_box_text_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(ptask->overwrite_combo), false);
         gtk_widget_set_sensitive(ptask->overwrite_combo, overtask);
-        for (i = 0; i < G_N_ELEMENTS(overwrite_options); i++)
+        for (unsigned int i = 0; i < G_N_ELEMENTS(overwrite_options); i++)
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ptask->overwrite_combo),
                                            overwrite_options[i]);
         if (overtask)
@@ -875,7 +874,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 
         ptask->error_combo = gtk_combo_box_text_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(ptask->error_combo), false);
-        for (i = 0; i < G_N_ELEMENTS(error_options); i++)
+        for (unsigned int i = 0; i < G_N_ELEMENTS(error_options); i++)
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ptask->error_combo),
                                            error_options[i]);
         gtk_combo_box_set_active(GTK_COMBO_BOX(ptask->error_combo),

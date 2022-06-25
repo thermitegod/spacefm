@@ -50,8 +50,8 @@ struct PtkFileTask
     GtkTextBuffer* log_buf;
     GtkTextMark* log_end;
     bool log_appended;
-    unsigned int err_count;
-    char err_mode;
+    int err_count;
+    PTKFileTaskPtaskError err_mode;
 
     bool complete;
     bool aborted;

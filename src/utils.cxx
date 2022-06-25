@@ -340,7 +340,7 @@ unescape(const char* t)
 char*
 get_valid_su() // may return nullptr
 {
-    int i;
+    unsigned int i;
     char* use_su = nullptr;
 
     use_su = g_strdup(xset_get_s("su_command"));

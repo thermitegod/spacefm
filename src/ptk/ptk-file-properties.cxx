@@ -656,7 +656,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path, GList* sel_file
 static uid_t
 uid_from_name(const char* user_name)
 {
-    uid_t uid = -1;
+    uid_t uid;
 
     struct passwd* pw;
     pw = getpwnam(user_name);
@@ -682,7 +682,7 @@ uid_from_name(const char* user_name)
 static gid_t
 gid_from_name(const char* group_name)
 {
-    gid_t gid = -1;
+    gid_t gid;
 
     struct group* grp;
     grp = getgrnam(group_name);
@@ -708,8 +708,9 @@ gid_from_name(const char* group_name)
 static void
 on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
 {
-    uid_t uid = -1;
-    gid_t gid = -1;
+    uid_t uid;
+    gid_t gid;
+
     GList* l;
     char* file_path;
     VFSFileInfo* file;
@@ -828,7 +829,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 (!data->owner_name || strcmp(owner_name, data->owner_name)))
             {
                 uid = uid_from_name(owner_name);
-                if (uid == -1)
+                if (!uid)
                 {
                     ptk_show_error(GTK_WINDOW(dialog), "Error", "Invalid User");
                     return;
@@ -839,7 +840,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 (!data->group_name || strcmp(group_name, data->group_name)))
             {
                 gid = gid_from_name(group_name);
-                if (gid == -1)
+                if (!gid)
                 {
                     ptk_show_error(GTK_WINDOW(dialog), "Error", "Invalid Group");
                     return;
@@ -864,7 +865,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 }
             }
 
-            if (uid != -1 || gid != -1 || mod_change)
+            if (!uid || !gid || mod_change)
             {
                 GList* file_list = nullptr;
                 for (l = data->file_list; l; l = l->next)

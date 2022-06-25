@@ -458,7 +458,7 @@ load_settings(const char* config_dir)
     char* terminal = xset_get_s("main_terminal");
     if (!terminal || terminal[0] == '\0')
     {
-        int i;
+        unsigned int i;
         for (i = 0; i < G_N_ELEMENTS(terminal_programs); i++)
         {
             char* term;
@@ -1763,7 +1763,7 @@ read_root_settings()
 XSetContext*
 xset_context_new()
 {
-    int i;
+    unsigned int i;
     if (!xset_context)
     {
         xset_context = g_slice_new0(XSetContext);
@@ -4180,7 +4180,8 @@ xset_set_key(GtkWidget* parent, XSet* set)
     char* name;
     char* keymsg;
     XSet* keyset;
-    int newkey = 0, newkeymod = 0;
+    unsigned int newkey = 0;
+    unsigned int newkeymod = 0;
     GtkWidget* dlgparent = nullptr;
 
     if (set->menu_label)
@@ -4261,7 +4262,7 @@ xset_set_key(GtkWidget* parent, XSet* set)
         }
         else if (response == GTK_RESPONSE_NO)
         {
-            newkey = -1; // unset
+            newkey = 0; // unset
             newkeymod = 0;
         }
         // plugin? set shared_key to mirror if not
@@ -5315,7 +5316,6 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
 
     // XSet* mset;
     XSet* insert_set;
-    int i;
 
     // book_insert is a bookmark set to be used for Paste, etc
     insert_set = book_insert ? book_insert : set;
@@ -5474,7 +5474,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
         g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(XSET_JOB_HELP_ADD));
         g_signal_connect(submenu, "key_press_event", G_CALLBACK(xset_design_menu_keypress), set);
 
-        for (i = XSET_TOOL_DEVICES; i < G_N_ELEMENTS(builtin_tool_name); i++)
+        for (unsigned int i = XSET_TOOL_DEVICES; i < G_N_ELEMENTS(builtin_tool_name); i++)
         {
             newitem =
                 xset_design_additem(submenu, builtin_tool_name[i], XSET_JOB_ADD_TOOL, insert_set);
@@ -7545,7 +7545,7 @@ xset_defaults()
     set = xset_set("dev_menu_open", "lbl", "_Open");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-open");
 
-    set = xset_set("dev_menu_tab", "lbl", ("Devices|Open|", "Open In _Tab"));
+    set = xset_set("dev_menu_tab", "lbl", "Open In _Tab");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-add");
 
     set = xset_set("dev_menu_mount", "lbl", "_Mount");
@@ -8071,7 +8071,7 @@ xset_defaults()
                  XSET_SET_SET_DESC,
                  "evt_win_new evt_win_focus evt_win_move evt_win_click evt_win_key evt_win_close");
 
-    set = xset_set("evt_win_new", "lbl", ("View|Events|Window|", "_New"));
+    set = xset_set("evt_win_new", "lbl", "_New");
     set->menu_style = XSET_MENU_STRING;
     xset_set_set(set, XSET_SET_SET_TITLE, "Set New Window Command");
     xset_set_set(
@@ -8082,7 +8082,7 @@ xset_defaults()
         "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables (eg $fm_pwd, etc) "
         "can be used in this command.");
 
-    set = xset_set("evt_win_focus", "lbl", ("View|Events|Window|", "_Focus"));
+    set = xset_set("evt_win_focus", "lbl", "_Focus");
     set->menu_style = XSET_MENU_STRING;
     xset_set_set(set, XSET_SET_SET_TITLE, "Set Window Focus Command");
     xset_set_set(set,
@@ -8104,7 +8104,7 @@ xset_defaults()
         "can be used in this command.\n\nNote: This command may be run multiple times during "
         "resize.");
 
-    set = xset_set("evt_win_click", "lbl", ("View|Events|Window|", "_Click"));
+    set = xset_set("evt_win_click", "lbl", "_Click");
     set->menu_style = XSET_MENU_STRING;
     xset_set_set(set, XSET_SET_SET_TITLE, "Set Click Command");
     xset_set_set(
@@ -8134,7 +8134,7 @@ xset_defaults()
         "example:\n*if [ \"%%k\" != \"0xffc5\" ];then exit 1; fi; spacefm -g --label \"\\nKey "
         "F8 was pressed.\" --button ok &");
 
-    set = xset_set("evt_win_close", "lbl", ("View|Events|Window|", "Cl_ose"));
+    set = xset_set("evt_win_close", "lbl", "Cl_ose");
     set->menu_style = XSET_MENU_STRING;
     xset_set_set(set, XSET_SET_SET_TITLE, "Set Window Close Command");
     xset_set_set(set,
@@ -8148,7 +8148,7 @@ xset_defaults()
     set->menu_style = XSET_MENU_SUBMENU;
     xset_set_set(set, XSET_SET_SET_DESC, "evt_pnl_focus evt_pnl_show evt_pnl_sel");
 
-    set = xset_set("evt_pnl_focus", "lbl", ("View|Events|Panel|", "_Focus"));
+    set = xset_set("evt_pnl_focus", "lbl", "_Focus");
     set->menu_style = XSET_MENU_STRING;
     xset_set_set(set, XSET_SET_SET_TITLE, "Set Panel Focus Command");
     xset_set_set(set,
@@ -8158,7 +8158,7 @@ xset_defaults()
                  "(see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables (eg "
                  "$fm_pwd, etc) can be used in this command.");
 
-    set = xset_set("evt_pnl_show", "lbl", ("View|Events|Panel|", "_Show"));
+    set = xset_set("evt_pnl_show", "lbl", "_Show");
     set->menu_style = XSET_MENU_STRING;
     xset_set_set(set, XSET_SET_SET_TITLE, "Set Panel Show Command");
     xset_set_set(
@@ -8182,11 +8182,11 @@ xset_defaults()
         "used in this command.\n\nPrefix your command with an asterisk (*) and conditionally "
         "return exit status 0 to inhibit the default handler.");
 
-    set = xset_set("auto_tab", "lbl", ("View|Events|", "_Tab"));
+    set = xset_set("auto_tab", "lbl", "_Tab");
     set->menu_style = XSET_MENU_SUBMENU;
     xset_set_set(set, XSET_SET_SET_DESC, "evt_tab_new evt_tab_chdir evt_tab_focus evt_tab_close");
 
-    set = xset_set("evt_tab_new", "lbl", ("View|Events|Tab|", "_New"));
+    set = xset_set("evt_tab_new", "lbl", "_New");
     set->menu_style = XSET_MENU_STRING;
     xset_set_set(set, XSET_SET_SET_TITLE, "Set New Tab Command");
     xset_set_set(set,
@@ -8207,7 +8207,7 @@ xset_defaults()
         "(see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\t%%d\tnew directory\n\nExported bash "
         "variables (eg $fm_pwd, etc) can be used in this command.");
 
-    set = xset_set("evt_tab_focus", "lbl", ("View|Events|Tab|", "_Focus"));
+    set = xset_set("evt_tab_focus", "lbl", "_Focus");
     set->menu_style = XSET_MENU_STRING;
     xset_set_set(set, XSET_SET_SET_TITLE, "Set Tab Focus Command");
     xset_set_set(set,
@@ -8217,7 +8217,7 @@ xset_defaults()
                  "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables (eg "
                  "$fm_pwd, etc) can be used in this command.");
 
-    set = xset_set("evt_tab_close", "lbl", ("View|Events|Tab|", "_Close"));
+    set = xset_set("evt_tab_close", "lbl", "_Close");
     set->menu_style = XSET_MENU_STRING;
     xset_set_set(set, XSET_SET_SET_TITLE, "Set Tab Close Command");
     xset_set_set(set,
@@ -8226,7 +8226,7 @@ xset_defaults()
                  "closed:\n\nUse:\n\t%%e\tevent type  (evt_tab_close)\n\t%%w\twindow id  (see "
                  "spacefm -s help)\n\t%%p\tpanel\n\t%%t\tclosed tab");
 
-    set = xset_set("evt_device", "lbl", ("View|Events|", "_Device"));
+    set = xset_set("evt_device", "lbl", "_Device");
     set->menu_style = XSET_MENU_STRING;
     xset_set_set(set, XSET_SET_SET_TITLE, "Set Device Command");
     xset_set_set(set,
@@ -8616,7 +8616,7 @@ xset_defaults()
     set = xset_set("new_link", "lbl", "_Link");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-file");
 
-    set = xset_set("new_bookmark", "lbl", ("New|", "_Bookmark"));
+    set = xset_set("new_bookmark", "lbl", "_Bookmark");
     xset_set_set(set, XSET_SET_SET_SHARED_KEY, "book_add");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-jump-to");
 
@@ -8627,7 +8627,7 @@ xset_defaults()
     set->b = XSET_B_TRUE;   // Extract To - Create Subdirectory
     set->z = g_strdup("1"); // Extract To - Write Access
 
-    set = xset_set("tab_new", "lbl", ("New|", "_Tab"));
+    set = xset_set("tab_new", "lbl", "_Tab");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-add");
     set = xset_set("tab_new_here", "lbl", "Tab _Here");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-add");
@@ -8676,7 +8676,7 @@ xset_defaults()
     set = xset_set("focus_device", "lbl", "De_vices");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-harddisk");
 
-    set = xset_set("go_tab", "lbl", ("Go|", "_Tab"));
+    set = xset_set("go_tab", "lbl", "_Tab");
     set->menu_style = XSET_MENU_SUBMENU;
     xset_set_set(
         set,
@@ -8825,7 +8825,7 @@ xset_defaults()
     set = xset_set("copy_loc_last", "lbl", "L_ast Location");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-redo");
 
-    set = xset_set("copy_tab", "lbl", ("Edit|CopyTo|", "_Tab"));
+    set = xset_set("copy_tab", "lbl", "_Tab");
     set->menu_style = XSET_MENU_SUBMENU;
     xset_set_set(set,
                  XSET_SET_SET_DESC,
@@ -8845,7 +8845,7 @@ xset_defaults()
     xset_set("copy_tab_9", "lbl", "Tab _9");
     xset_set("copy_tab_10", "lbl", "Tab 1_0");
 
-    set = xset_set("copy_panel", "lbl", ("Edit|CopyTo|", "_Panel"));
+    set = xset_set("copy_panel", "lbl", "_Panel");
     set->menu_style = XSET_MENU_SUBMENU;
     xset_set_set(
         set,
@@ -8866,7 +8866,7 @@ xset_defaults()
     set = xset_set("move_loc", "lbl", "_Location");
     set = xset_set("move_loc_last", "lbl", "L_ast Location");
     xset_set_set(set, XSET_SET_SET_ICN, "gtk-redo");
-    set = xset_set("move_tab", "lbl", ("Edit|MoveTo|", "_Tab"));
+    set = xset_set("move_tab", "lbl", "_Tab");
     set->menu_style = XSET_MENU_SUBMENU;
     xset_set_set(set,
                  XSET_SET_SET_DESC,
@@ -8886,7 +8886,7 @@ xset_defaults()
     xset_set("move_tab_9", "lbl", "Tab _9");
     xset_set("move_tab_10", "lbl", "Tab 1_0");
 
-    set = xset_set("move_panel", "lbl", ("Edit|MoveTo|", "_Panel"));
+    set = xset_set("move_panel", "lbl", "_Panel");
     set->menu_style = XSET_MENU_SUBMENU;
     xset_set_set(
         set,
@@ -9197,7 +9197,7 @@ xset_defaults()
 }
 
 static void
-def_key(const char* name, int key, int keymod)
+def_key(const char* name, unsigned int key, unsigned int keymod)
 {
     XSet* set = xset_get(name);
 

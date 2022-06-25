@@ -211,7 +211,7 @@ vfs_file_monitor_remove(VFSFileMonitor* fm, VFSFileMonitorCallback cb, void* use
     if (cb && fm->callbacks)
     {
         VFSFileMonitorCallbackEntry* callbacks = (VFSFileMonitorCallbackEntry*)fm->callbacks->data;
-        int i;
+        unsigned int i;
         for (i = 0; i < fm->callbacks->len; ++i)
         {
             if (callbacks[i].callback == cb && callbacks[i].user_data == user_data)
@@ -292,7 +292,7 @@ dispatch_event(VFSFileMonitor* monitor, VFSFileMonitorEvent evt, const char* fil
     if (monitor->callbacks && monitor->callbacks->len)
     {
         VFSFileMonitorCallbackEntry* cb = (VFSFileMonitorCallbackEntry*)monitor->callbacks->data;
-        int i;
+        unsigned int i;
         for (i = 0; i < monitor->callbacks->len; ++i)
         {
             VFSFileMonitorCallback func = cb[i].callback;

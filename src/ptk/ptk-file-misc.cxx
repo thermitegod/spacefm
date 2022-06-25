@@ -1228,14 +1228,14 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     const char* desc = nullptr;
     if (mset->create_new)
     {
-        btn_label = g_strdup("C_reate");
-        action = ("Title|", "Create New");
+        btn_label = g_strdup("Create");
+        action = g_strdup("Create New");
         if (new_file)
-            desc = ("Title|CreateNew|", "File");
+            desc = g_strdup("File");
         else if (new_folder)
-            desc = ("Title|CreateNew|", "Directory");
+            desc = g_strdup("Directory");
         else if (new_link)
-            desc = ("Title|CreateNew|", "Link");
+            desc = g_strdup("Link");
     }
     else
     {
@@ -2531,13 +2531,13 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                                                        "Link Tar_get");
     mset->opt_as_root = gtk_check_button_new_with_mnemonic("A_s Root");
 
-    mset->opt_new_file = gtk_radio_button_new_with_mnemonic(nullptr, ("New|Radio", "Fil_e"));
+    mset->opt_new_file = gtk_radio_button_new_with_mnemonic(nullptr, "Fil_e");
     mset->opt_new_folder =
         gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(mset->opt_new_file),
-                                                       ("New|Radio", "Dir_ectory"));
+                                                       "Dir_ectory");
     mset->opt_new_link =
         gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(mset->opt_new_file),
-                                                       ("New|Radio", "_Link"));
+                                                       "_Link");
 
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_move), false);
     g_signal_connect(G_OBJECT(mset->opt_move), "focus", G_CALLBACK(on_button_focus), mset);

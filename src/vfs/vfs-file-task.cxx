@@ -974,7 +974,7 @@ vfs_file_task_chown_chmod(char* src_file, VFSFileTask* task)
     {
         /* chown */
         int result;
-        if (task->uid != -1 || task->gid != -1)
+        if (!task->uid || !task->gid)
         {
             result = chown(src_file, task->uid, task->gid);
             if (result != 0)

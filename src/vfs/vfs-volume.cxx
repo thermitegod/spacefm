@@ -1820,7 +1820,7 @@ free_devmounts()
 }
 
 static const char*
-get_devmount_fstype(int major, int minor)
+get_devmount_fstype(unsigned int major, unsigned int minor)
 {
     GList* l;
 
@@ -3324,9 +3324,8 @@ vfs_volume_get_mount_options(VFSVolume* vol, char* options)
     bool leading = true;
     bool trailing = false;
     int j = -1;
-    int i;
     char news[16384];
-    for (i = 0; i < strlen(options); i++)
+    for (unsigned int i = 0; i < strlen(options); i++)
     {
         if (leading && (options[i] == ' ' || options[i] == ','))
             continue;
@@ -4013,8 +4012,7 @@ call_callbacks(VFSVolume* vol, VFSVolumeState state)
     if (callbacks)
     {
         VFSVolumeCallbackData* e = (VFSVolumeCallbackData*)callbacks->data;
-        int i;
-        for (i = 0; i < callbacks->len; ++i)
+        for (unsigned int i = 0; i < callbacks->len; ++i)
             (*e[i].cb)(vol, state, e[i].user_data);
     }
 
@@ -4055,8 +4053,7 @@ vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data)
         return;
 
     VFSVolumeCallbackData* e = (VFSVolumeCallbackData*)callbacks->data;
-    int i;
-    for (i = 0; i < callbacks->len; ++i)
+    for (unsigned int i = 0; i < callbacks->len; ++i)
     {
         if (e[i].cb == cb && e[i].user_data == user_data)
         {

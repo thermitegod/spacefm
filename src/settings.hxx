@@ -277,8 +277,8 @@ struct XSet
     char* ob2;               // not saved
     void* ob2_data;          // not saved
     PtkFileBrowser* browser; // not saved - set automatically
-    int key;
-    int keymod;
+    unsigned int key;
+    unsigned int keymod;
     char* shared_key; // not saved
     char* desc;       // not saved or read if locked
     char* title;      // not saved or read if locked

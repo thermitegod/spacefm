@@ -133,7 +133,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     }
 
     // Loop through available handlers
-    int len = 0;
+    unsigned int len = 0;
     XSet* handler_xset;
     char* xset_name = nullptr;
     char* extension;

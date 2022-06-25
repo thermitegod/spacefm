@@ -272,12 +272,12 @@ get_rule_next(char** s, int* sub, int* comp, char** value)
         return false;
     *sub = strtol(vs, nullptr, 10);
     g_free(vs);
-    if (*sub < 0 || *sub >= G_N_ELEMENTS(context_sub))
+    if (*sub < 0 || *sub >= static_cast<int>(G_N_ELEMENTS(context_sub)))
         return false;
     vs = get_element_next(s);
     *comp = strtol(vs, nullptr, 10);
     g_free(vs);
-    if (*comp < 0 || *comp >= G_N_ELEMENTS(context_comp))
+    if (*comp < 0 || *comp >= static_cast<int>(G_N_ELEMENTS(context_comp)))
         return false;
     if (!(*value = get_element_next(s)))
         *value = g_strdup("");
@@ -1533,7 +1533,6 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
 {
     GtkTreeViewColumn* col;
     GtkCellRenderer* renderer;
-    int i;
     int x;
     char* str;
 
@@ -1739,13 +1738,13 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     // boxes
     ctxt->box_sub = gtk_combo_box_text_new();
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->box_sub), false);
-    for (i = 0; i < G_N_ELEMENTS(context_sub); i++)
+    for (unsigned int i = 0; i < G_N_ELEMENTS(context_sub); i++)
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_sub), context_sub[i]);
     g_signal_connect(G_OBJECT(ctxt->box_sub), "changed", G_CALLBACK(on_context_sub_changed), ctxt);
 
     ctxt->box_comp = gtk_combo_box_text_new();
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->box_comp), false);
-    for (i = 0; i < G_N_ELEMENTS(context_comp); i++)
+    for (unsigned int i = 0; i < G_N_ELEMENTS(context_comp); i++)
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_comp), context_comp[i]);
 
     ctxt->box_value = gtk_combo_box_text_new_with_entry();
@@ -1907,7 +1906,7 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     char* match = get_element_next(&elements);
     if (match && action)
     {
-        i = strtol(match, nullptr, 10);
+        int i = strtol(match, nullptr, 10);
         if (i < 0 || i > 3)
             i = 0;
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_match), i);
@@ -2186,7 +2185,7 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
     else
     {
         // custom command
-        for (i = 0; i < G_N_ELEMENTS(item_types); i++)
+        for (unsigned int i = 0; i < G_N_ELEMENTS(item_types); i++)
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), item_types[i]);
         x = rset->x ? strtol(rset->x, nullptr, 10) : 0;
 

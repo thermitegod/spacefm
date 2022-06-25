@@ -458,7 +458,6 @@ on_show_thumbnail_toggled(GtkWidget* widget, FMPrefDlg* data)
 bool
 fm_edit_preference(GtkWindow* parent, int page)
 {
-    int i;
     int ibig_icon = -1;
     int ismall_icon = -1;
     int itool_icon = -1;
@@ -519,7 +518,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         gtk_widget_set_sensitive(data->thumb_label1, app_settings.show_thumbnail);
         gtk_widget_set_sensitive(data->thumb_label2, app_settings.show_thumbnail);
 
-        for (i = 0; i < G_N_ELEMENTS(terminal_programs); ++i)
+        for (unsigned int i = 0; i < G_N_ELEMENTS(terminal_programs); ++i)
         {
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->terminal),
                                            terminal_programs[i]);
@@ -528,6 +527,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         char* terminal = xset_get_s("main_terminal");
         if (terminal)
         {
+            unsigned int i;
             for (i = 0; i < G_N_ELEMENTS(terminal_programs); ++i)
             {
                 if (!strcmp(terminal_programs[i], terminal))
@@ -541,7 +541,7 @@ fm_edit_preference(GtkWindow* parent, int page)
             gtk_combo_box_set_active(GTK_COMBO_BOX(data->terminal), i);
         }
 
-        for (i = 0; i < G_N_ELEMENTS(big_icon_sizes); ++i)
+        for (unsigned int i = 0; i < G_N_ELEMENTS(big_icon_sizes); ++i)
         {
             if (big_icon_sizes[i] == app_settings.big_icon_size)
             {
@@ -551,7 +551,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(data->big_icon_size), ibig_icon);
 
-        for (i = 0; i < G_N_ELEMENTS(small_icon_sizes); ++i)
+        for (unsigned int i = 0; i < G_N_ELEMENTS(small_icon_sizes); ++i)
         {
             if (small_icon_sizes[i] == app_settings.small_icon_size)
             {
@@ -563,7 +563,7 @@ fm_edit_preference(GtkWindow* parent, int page)
 
         // sfm
         itool_icon = 0;
-        for (i = 0; i < G_N_ELEMENTS(tool_icon_sizes); ++i)
+        for (unsigned int i = 0; i < G_N_ELEMENTS(tool_icon_sizes); ++i)
         {
             if (tool_icon_sizes[i] == app_settings.tool_icon_size)
             {
@@ -603,7 +603,7 @@ fm_edit_preference(GtkWindow* parent, int page)
 
         int drag_action = xset_get_int("drag_action", "x");
         int drag_action_set = 0;
-        for (i = 0; i < G_N_ELEMENTS(drag_actions); ++i)
+        for (unsigned int i = 0; i < G_N_ELEMENTS(drag_actions); ++i)
         {
             if (drag_actions[i] == drag_action)
             {
@@ -641,6 +641,7 @@ fm_edit_preference(GtkWindow* parent, int page)
             idx = 0;
         else
         {
+            unsigned int i;
             for (i = 0; i < G_N_ELEMENTS(su_commands); i++)
             {
                 if (!strcmp(su_commands[i], use_su))
@@ -663,13 +664,14 @@ fm_edit_preference(GtkWindow* parent, int page)
         gtk_combo_box_set_model(GTK_COMBO_BOX(data->date_format), model);
         gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(data->date_format), 0);
         g_object_unref(model);
-        for (i = 0; i < G_N_ELEMENTS(date_formats); ++i)
+        for (unsigned int i = 0; i < G_N_ELEMENTS(date_formats); ++i)
         {
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->date_format), date_formats[i]);
         }
         char* date_s = xset_get_s("date_format");
         if (date_s)
         {
+            unsigned int i;
             for (i = 0; i < G_N_ELEMENTS(date_formats); ++i)
             {
                 if (!strcmp(date_formats[i], date_s))

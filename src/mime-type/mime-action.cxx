@@ -199,8 +199,7 @@ get_actions(const char* dir, const char* type, GArray* actions)
     const char* names[] = {"mimeapps.list", "mimeinfo.cache"};
     const char* groups[] = {"Default Applications", "Added Associations", "MIME Cache"};
     // LOG_INFO("get_actions( {}/, {} )", dir, type);
-    int n;
-    for (n = 0; n < G_N_ELEMENTS(names); n++)
+    for (unsigned int n = 0; n < G_N_ELEMENTS(names); n++)
     {
         char* path = g_build_filename(dir, names[n], nullptr);
         // LOG_INFO( "    {}", path);
@@ -624,8 +623,7 @@ get_default_action(const char* dir, const char* type, void* user_data)
     const char* names[] = {"mimeapps.list", "defaults.list"};
     const char* groups[] = {"Default Applications", "Added Associations"};
 
-    int n;
-    for (n = 0; n < G_N_ELEMENTS(names); n++)
+    for (unsigned int n = 0; n < G_N_ELEMENTS(names); n++)
     {
         char* path = g_build_filename(dir, names[n], nullptr);
         // LOG_INFO("    path = {}", path);
@@ -634,8 +632,7 @@ get_default_action(const char* dir, const char* type, void* user_data)
         g_free(path);
         if (opened)
         {
-            int k;
-            for (k = 0; k < G_N_ELEMENTS(groups); k++)
+            for (unsigned int k = 0; k < G_N_ELEMENTS(groups); k++)
             {
                 unsigned long n_apps;
                 char** apps = g_key_file_get_string_list(file, groups[k], type, &n_apps, nullptr);
@@ -722,8 +719,7 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
     char* path = g_build_filename(vfs_user_config_dir(), "mimeapps.list", nullptr);
     g_key_file_load_from_file(file, path, G_KEY_FILE_NONE, nullptr);
 
-    int k;
-    for (k = 0; k < G_N_ELEMENTS(groups); k++)
+    for (unsigned int k = 0; k < G_N_ELEMENTS(groups); k++)
     {
         char* str;
         char* new_action = nullptr;
@@ -732,7 +728,7 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
         char** apps = g_key_file_get_string_list(file, groups[k], type, &n_apps, nullptr);
         if (apps)
         {
-            int i;
+            unsigned long i;
             for (i = 0; i < n_apps; ++i)
             {
                 g_strstrip(apps[i]);
