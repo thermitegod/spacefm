@@ -1052,11 +1052,8 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
     main_context_fill(file_browser, context);
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     char* desc =
-        g_strdup_printf("separator status_border status_text panel%d_icon_status status_middle",
-                        file_browser->mypanel);
+        g_strdup_printf("separator panel%d_icon_status status_middle" , file_browser->mypanel);
 
-    xset_set_cb("status_border", (GFunc)on_status_effect_change, file_browser);
-    xset_set_cb("status_text", (GFunc)on_status_effect_change, file_browser);
     xset_set_cb_panel(file_browser->mypanel,
                       "icon_status",
                       (GFunc)on_status_effect_change,

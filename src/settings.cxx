@@ -7971,16 +7971,6 @@ xset_defaults()
     set->b = XSET_B_TRUE;
 
     // status bar
-    set = xset_set("status_border", "lbl", "Highlight _Bar");
-    xset_set_set(set, XSET_SET_SET_TITLE, "Status Bar Highlight Color");
-    xset_set_set(set, XSET_SET_SET_ICN, "Color");
-    set->menu_style = XSET_MENU_COLORDLG;
-
-    set = xset_set("status_text", "lbl", "Highlight _Text");
-    xset_set_set(set, XSET_SET_SET_TITLE, "Status Bar Text Highlight Color");
-    xset_set_set(set, XSET_SET_SET_ICN, "Color");
-    set->menu_style = XSET_MENU_COLORDLG;
-
     set = xset_set("status_middle", "lbl", "_Middle Click");
     set->menu_style = XSET_MENU_SUBMENU;
     xset_set_set(set, XSET_SET_SET_DESC, "status_name status_path status_info status_hide");
