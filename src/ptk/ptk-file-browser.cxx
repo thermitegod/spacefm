@@ -1948,7 +1948,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
     {
         if (!inhibit_focus)
         {
-            std::string errno_msg = Glib::strerror(errno);
+            const std::string errno_msg = std::strerror(errno);
             msg = fmt::format("Unable to access {}\n\n{}", path, errno_msg);
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                            "Error",

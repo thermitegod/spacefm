@@ -2880,7 +2880,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
 
                     if (std::filesystem::is_directory(path))
                     {
-                        std::string errno_msg = Glib::strerror(errno);
+                        const std::string errno_msg = std::strerror(errno);
                         std::string msg =
                             fmt::format("Error creating parent directory\n\n{}", errno_msg);
                         ptk_show_error(GTK_WINDOW(mset->dlg), "Mkdir Error", msg);
@@ -3211,7 +3211,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                         goto _move_task;
 
                     // Unknown error has occurred - alert user as usual
-                    std::string errno_msg = Glib::strerror(errno);
+                    const std::string errno_msg = std::strerror(errno);
                     std::string msg = fmt::format("Error renaming file\n\n{}", errno_msg);
                     ptk_show_error(GTK_WINDOW(mset->dlg), "Rename Error", msg);
                     continue;

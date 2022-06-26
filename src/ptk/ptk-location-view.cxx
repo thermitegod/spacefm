@@ -834,7 +834,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
 
     if (!std::filesystem::is_directory(point))
     {
-        std::string errno_msg = Glib::strerror(errno);
+        const std::string errno_msg = std::strerror(errno);
         LOG_WARN("Error creating mount point directory '{}': {}", point, errno_msg);
     }
 

@@ -962,7 +962,7 @@ load_command_script(ContextData* ctxt, XSet* set)
         std::ifstream file(script);
         if (!file.is_open())
         {
-            std::string errno_msg = Glib::strerror(errno);
+            const std::string errno_msg = std::strerror(errno);
             LOG_WARN("error reading file {}: {}", script, errno_msg);
         }
         else

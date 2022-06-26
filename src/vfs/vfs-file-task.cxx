@@ -1272,7 +1272,7 @@ vfs_file_task_exec_error(VFSFileTask* task, int errnox, const std::string& actio
 
     if (errnox)
     {
-        std::string errno_msg = Glib::strerror(errnox);
+        const std::string errno_msg = std::strerror(errnox);
         msg = fmt::format("{}\n{}\n", action, errno_msg);
     }
     else
@@ -1654,7 +1654,7 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
 
         if (errno)
         {
-            std::string errno_msg = Glib::strerror(errno);
+            const std::string errno_msg = std::strerror(errno);
             LOG_INFO("    result={} ( {} )", errno, errno_msg);
         }
 
@@ -2214,7 +2214,7 @@ vfs_file_task_error(VFSFileTask* task, int errnox, const std::string& action,
                     const std::string& target)
 {
     task->error = errnox;
-    std::string errno_msg = Glib::strerror(errnox);
+    const std::string errno_msg = std::strerror(errnox);
     std::string msg = fmt::format("\n{} {}\nError: {}\n", action, target, errno_msg);
     append_add_log(task, msg);
     call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_ERROR);

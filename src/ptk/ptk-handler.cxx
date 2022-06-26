@@ -903,7 +903,7 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
         std::ifstream file(script);
         if (!file.is_open())
         {
-            std::string errno_msg = Glib::strerror(errno);
+            const std::string errno_msg = std::strerror(errno);
             error_message = fmt::format("Error reading file '{}':\n\n{}", script, errno_msg);
             return true;
         }
@@ -1004,7 +1004,7 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
     }
     else
     {
-        std::string errno_msg = Glib::strerror(errno);
+        const std::string errno_msg = std::strerror(errno);
         error_message = fmt::format("{} '{}':\n\n{}", "Error writing to file", script, errno_msg);
         return true;
     }
