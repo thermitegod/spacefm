@@ -482,10 +482,10 @@ xset_context_test(XSetContext* context, char* rules, bool def_disable)
                     test = !ztd::startswith(context->var[sub], eleval);
                     break;
                 case ItemPropContextComp::CONTEXT_COMP_ENDS:
-                    test = Glib::str_has_suffix(context->var[sub], eleval);
+                    test = ztd::endswith(context->var[sub], eleval);
                     break;
                 case ItemPropContextComp::CONTEXT_COMP_NENDS:
-                    test = !Glib::str_has_suffix(context->var[sub], eleval);
+                    test = !ztd::endswith(context->var[sub], eleval);
                     break;
                 case ItemPropContextComp::CONTEXT_COMP_LESS:
                     test = std::stol(context->var[sub]) < std::stol(eleval);
@@ -670,7 +670,7 @@ static char*
 context_display(int sub, int comp, const char* value)
 {
     std::string disp;
-    if (value[0] == '\0' || value[0] == ' ' || Glib::str_has_suffix(value, " "))
+    if (value[0] == '\0' || value[0] == ' ' || ztd::endswith(value, " "))
         disp = fmt::format("{} {} \"{}\"", context_subs[sub], context_comps[comp], value);
     else
         disp = fmt::format("{} {} {}", context_subs[sub], context_comps[comp], value);

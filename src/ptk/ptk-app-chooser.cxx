@@ -420,7 +420,7 @@ on_browse_btn_clicked(GtkButton* button, void* user_data)
                 GTK_NOTEBOOK(GTK_WIDGET(gtk_builder_get_object(builder, "notebook")));
             /* FIXME: path should not be hard-coded */
             const char* app_path = ztd::strdup("/usr/share/applications");
-            if (ztd::startswith(filename, app_path) && Glib::str_has_suffix(filename, ".desktop"))
+            if (ztd::startswith(filename, app_path) && ztd::endswith(filename, ".desktop"))
             {
                 const std::string app_name = Glib::path_get_basename(filename);
                 gtk_entry_set_text(entry, app_name.c_str());
@@ -605,7 +605,7 @@ load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* tas
             load_all_apps_in_dir(file_path.c_str(), list, task);
             continue;
         }
-        if (!Glib::str_has_suffix(file_name, ".desktop"))
+        if (!ztd::endswith(file_name, ".desktop"))
             continue;
 
         vfs_async_task_lock(task);

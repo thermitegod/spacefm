@@ -462,7 +462,7 @@ vfs_mime_type_set_default_action(VFSMimeType* mime_type, const char* desktop_id)
 {
     char* cust_desktop = nullptr;
     /*
-        if( ! Glib::str_has_suffix( desktop_id, ".desktop" ) )
+        if( ! ztd::endswith( desktop_id, ".desktop" ) )
             return;
     */
     vfs_mime_type_add_action(mime_type, desktop_id, &cust_desktop);
@@ -487,7 +487,7 @@ void
 vfs_mime_type_add_action(VFSMimeType* mime_type, const char* desktop_id, char** custom_desktop)
 {
     // MOD  do not create custom desktop file if desktop_id is not a command
-    if (!Glib::str_has_suffix(desktop_id, ".desktop"))
+    if (!ztd::endswith(desktop_id, ".desktop"))
         mime_type_add_action(mime_type->type, desktop_id, custom_desktop);
     else if (custom_desktop) // sfm
         *custom_desktop = ztd::strdup(desktop_id);

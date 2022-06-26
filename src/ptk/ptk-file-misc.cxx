@@ -2922,7 +2922,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
 
                 str = ztd::strdup(gtk_entry_get_text(mset->entry_target));
                 g_strstrip(str);
-                while (Glib::str_has_suffix(str, "/") && str[1] != '\0')
+                while (ztd::endswith(str, "/") && str[1] != '\0')
                     str[g_utf8_strlen(str, -1) - 1] = '\0';
                 from_path = bash_quote(str);
                 free(str);
@@ -3451,7 +3451,7 @@ static const char*
 check_desktop_name(const char* app_desktop)
 {
     // Check whether this is an app desktop file or just a command line
-    if (Glib::str_has_suffix(app_desktop, ".desktop"))
+    if (ztd::endswith(app_desktop, ".desktop"))
         return app_desktop;
 
     // Not a desktop entry name
@@ -3613,7 +3613,7 @@ ptk_open_files_with_app(const char* cwd, std::vector<VFSFileInfo*>& sel_files,
             }
 
             /* The file itself is a desktop entry file. */
-            /* was: if( Glib::str_has_suffix( vfs_file_info_get_name( file ), ".desktop" ) )
+            /* was: if( ztd::endswith( vfs_file_info_get_name( file ), ".desktop" ) )
              */
             if (alloc_desktop.empty())
             {

@@ -250,10 +250,10 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
     if (!set)
         return;
 
-    if (Glib::str_has_suffix(set->name, "cfile") || Glib::str_has_suffix(set->name, "curl"))
+    if (ztd::endswith(set->name, "cfile") || ztd::endswith(set->name, "curl"))
         job = PluginJob::COPY;
 
-    if (Glib::str_has_suffix(set->name, "file"))
+    if (ztd::endswith(set->name, "file"))
     {
         // get file path
         XSet* save = xset_get(XSetName::PLUG_IFILE);
@@ -4546,7 +4546,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, XSet* set2, PtkFileTask* ptask2
     else
         return;
 
-    bool all = (Glib::str_has_suffix(name, "_all"));
+    bool all = (ztd::endswith(name, "_all"));
 
     if (all)
     {
@@ -5923,7 +5923,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                                 tab,
                                 argv[i + 1]);
         }
-        else if (Glib::str_has_suffix(socket_property, "_visible"))
+        else if (ztd::endswith(socket_property, "_visible"))
         {
             bool use_mode = false;
             if (ztd::startswith(socket_property, "devices_"))
@@ -6354,7 +6354,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (ztd::same(socket_property, "new_tab"))
         {
         }
-        else if (Glib::str_has_suffix(socket_property, "_visible"))
+        else if (ztd::endswith(socket_property, "_visible"))
         {
             bool use_mode = false;
             if (ztd::startswith(socket_property, "devices_"))

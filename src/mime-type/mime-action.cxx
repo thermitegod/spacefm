@@ -285,7 +285,7 @@ mime_type_has_action(const char* type, const char* desktop_id)
     Glib::ustring name;
 
     bool found = false;
-    bool is_desktop = Glib::str_has_suffix(desktop_id, ".desktop");
+    bool is_desktop = ztd::endswith(desktop_id, ".desktop");
 
     if (is_desktop)
     {
@@ -400,7 +400,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
     static const std::string desktop_ext = ".desktop";
     static const std::string replace_txt = "<REPLACE_TXT>";
 
-    if (Glib::str_has_suffix(desktop_id, desktop_ext))
+    if (ztd::endswith(desktop_id, desktop_ext))
     {
         const Glib::ustring filename = mime_type_locate_desktop_file(nullptr, desktop_id);
 
