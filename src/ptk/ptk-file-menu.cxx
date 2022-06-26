@@ -1490,8 +1490,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             // and the actions for text/plain, so removing an app may appear to not
             // work if that app is still associated with text/plain
             vfs_mime_type_remove_action(mime_type, desktop.get_name());
-            if (strcmp(mime_type->type, "text/plain") &&
-                Glib::str_has_prefix(mime_type->type, "text/"))
+            if (strcmp(mime_type->type, "text/plain") && ztd::startswith(mime_type->type, "text/"))
                 xset_msg_dialog(
                     GTK_WIDGET(data->browser),
                     GTK_MESSAGE_INFO,
@@ -2528,7 +2527,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
 
     // action
     XSet* set = xset_get(setname);
-    if (Glib::str_has_prefix(set->name, "open_") && !Glib::str_has_prefix(set->name, "open_in_"))
+    if (ztd::startswith(set->name, "open_") && !ztd::startswith(set->name, "open_in_"))
     {
         if (set->xset_name == XSetName::OPEN_EDIT)
             xset_edit(GTK_WIDGET(data->browser), data->file_path, false, true);
@@ -2541,7 +2540,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         else if (set->xset_name == XSetName::OPEN_ALL)
             on_popup_open_all(nullptr, data);
     }
-    else if (Glib::str_has_prefix(set->name, "arc_"))
+    else if (ztd::startswith(set->name, "arc_"))
     {
         if (set->xset_name == XSetName::ARC_EXTRACT)
             on_popup_extract_here_activate(nullptr, data);
@@ -2552,7 +2551,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         else if (set->xset_name == XSetName::ARC_CONF2)
             on_archive_show_config(nullptr, data);
     }
-    else if (Glib::str_has_prefix(set->name, "new_"))
+    else if (ztd::startswith(set->name, "new_"))
     {
         if (set->xset_name == XSetName::NEW_FILE)
             on_popup_new_text_file_activate(nullptr, data);
@@ -2572,7 +2571,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         on_popup_file_properties_activate(nullptr, data);
     else if (set->xset_name == XSetName::PROP_PERM)
         on_popup_file_permissions_activate(nullptr, data);
-    else if (Glib::str_has_prefix(set->name, "edit_"))
+    else if (ztd::startswith(set->name, "edit_"))
     {
         if (set->xset_name == XSetName::EDIT_CUT)
             on_popup_cut_activate(nullptr, data);
@@ -2600,14 +2599,11 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         on_popup_copy_text_activate(nullptr, data);
     else if (set->xset_name == XSetName::COPY_PARENT)
         on_popup_copy_parent_activate(nullptr, data);
-    else if (Glib::str_has_prefix(set->name, "copy_loc") ||
-             Glib::str_has_prefix(set->name, "copy_tab_") ||
-             Glib::str_has_prefix(set->name, "copy_panel_") ||
-             Glib::str_has_prefix(set->name, "move_loc") ||
-             Glib::str_has_prefix(set->name, "move_tab_") ||
-             Glib::str_has_prefix(set->name, "move_panel_"))
+    else if (ztd::startswith(set->name, "copy_loc") || ztd::startswith(set->name, "copy_tab_") ||
+             ztd::startswith(set->name, "copy_panel_") || ztd::startswith(set->name, "move_loc") ||
+             ztd::startswith(set->name, "move_tab_") || ztd::startswith(set->name, "move_panel_"))
         on_copycmd(nullptr, data, set);
-    else if (Glib::str_has_prefix(set->name, "root_"))
+    else if (ztd::startswith(set->name, "root_"))
     {
         if (set->xset_name == XSetName::ROOT_COPY_LOC || set->xset_name == XSetName::ROOT_MOVE2 ||
             set->xset_name == XSetName::ROOT_DELETE || set->xset_name == XSetName::ROOT_TRASH)
@@ -2617,7 +2613,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     {
         // browser only
         int i;
-        if (Glib::str_has_prefix(set->name, "open_in_panel"))
+        if (ztd::startswith(set->name, "open_in_panel"))
         {
             if (!strcmp(set->name, "open_in_panel_prev"))
                 i = -1;
@@ -2627,7 +2623,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
                 i = std::stol(set->name);
             main_window_open_in_panel(data->browser, i, data->file_path);
         }
-        else if (Glib::str_has_prefix(set->name, "opentab_"))
+        else if (ztd::startswith(set->name, "opentab_"))
         {
             if (set->xset_name == XSetName::OPENTAB_NEW)
                 on_popup_open_in_new_tab_activate(nullptr, data);

@@ -506,8 +506,7 @@ mime_type_is_text_file(const char* file_path, const char* mime_type)
             return false;
         if (mime_type_is_subclass(mime_type, XDG_MIME_TYPE_PLAIN_TEXT))
             return true;
-        if (!Glib::str_has_prefix(mime_type, "text/") &&
-            !Glib::str_has_prefix(mime_type, "application/"))
+        if (!ztd::startswith(mime_type, "text/") && !ztd::startswith(mime_type, "application/"))
             return false;
     }
 

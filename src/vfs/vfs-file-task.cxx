@@ -319,7 +319,7 @@ check_dest_in_src(VFSFileTask* task, const std::string& src_dir)
         return false;
 
     if (realpath(src_dir.c_str(), real_src_path) &&
-        Glib::str_has_prefix(real_dest_path, real_src_path) && (len = std::strlen(real_src_path)) &&
+        ztd::startswith(real_dest_path, real_src_path) && (len = std::strlen(real_src_path)) &&
         (real_dest_path[len] == '/' || real_dest_path[len] == '\0'))
     {
         // source is contained in destination dir

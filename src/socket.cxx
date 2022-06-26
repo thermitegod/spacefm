@@ -297,7 +297,7 @@ single_instance_check()
             {
                 std::string real_path;
 
-                if ((*file[0] != '/' && strstr(*file, ":/")) || Glib::str_has_prefix(*file, "//"))
+                if ((*file[0] != '/' && strstr(*file, ":/")) || ztd::startswith(*file, "//"))
                     real_path = *file;
                 else
                 {

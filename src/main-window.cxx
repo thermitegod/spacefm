@@ -3322,7 +3322,7 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
 #endif
             {
                 // shared key match
-                if (Glib::str_has_prefix(set->name, "panel"))
+                if (ztd::startswith(set->name, "panel"))
                 {
                     // use current panel's set
                     browser = PTK_FILE_BROWSER_REINTERPRET(
@@ -3402,9 +3402,9 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
         return true;
 
     // handlers
-    if (Glib::str_has_prefix(set->name, "dev_"))
+    if (ztd::startswith(set->name, "dev_"))
         ptk_location_view_on_action(GTK_WIDGET(browser->side_dev), set);
-    else if (Glib::str_has_prefix(set->name, "main_"))
+    else if (ztd::startswith(set->name, "main_"))
     {
         if (set->xset_name == XSetName::MAIN_NEW_WINDOW)
             on_new_window_activate(nullptr, main_window);
@@ -3438,7 +3438,7 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
         else if (set->xset_name == XSetName::MAIN_ABOUT)
             on_about_activate(nullptr, main_window);
     }
-    else if (Glib::str_has_prefix(set->name, "panel_"))
+    else if (ztd::startswith(set->name, "panel_"))
     {
         int i;
         if (set->xset_name == XSetName::PANEL_PREV)
@@ -3451,9 +3451,9 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
             i = std::stol(set->name);
         focus_panel(nullptr, main_window, i);
     }
-    else if (Glib::str_has_prefix(set->name, "plug_"))
+    else if (ztd::startswith(set->name, "plug_"))
         on_plugin_install(nullptr, main_window, set);
-    else if (Glib::str_has_prefix(set->name, "task_"))
+    else if (ztd::startswith(set->name, "task_"))
     {
         if (set->xset_name == XSetName::TASK_MANAGER)
             on_task_popup_show(nullptr, main_window, set->name);
@@ -3487,7 +3487,7 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
         }
         else if (set->xset_name == XSetName::TASK_SHOWOUT)
             show_task_dialog(nullptr, browser->task_view);
-        else if (Glib::str_has_prefix(set->name, "task_err_"))
+        else if (ztd::startswith(set->name, "task_err_"))
             on_task_popup_errset(nullptr, main_window, set->name);
     }
     else if (set->xset_name == XSetName::RUBBERBAND)
@@ -4531,17 +4531,17 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, XSet* set2, PtkFileTask* ptask2
     else
         set = set2;
 
-    if (!set || !Glib::str_has_prefix(set->name, "task_"))
+    if (!set || !ztd::startswith(set->name, "task_"))
         return;
 
     char* name = set->name + 5;
-    if (Glib::str_has_prefix(name, "task_stop"))
+    if (ztd::startswith(name, "task_stop"))
         job = MainWindowJob::JOB_STOP;
-    else if (Glib::str_has_prefix(name, "task_pause"))
+    else if (ztd::startswith(name, "task_pause"))
         job = MainWindowJob::JOB_PAUSE;
-    else if (Glib::str_has_prefix(name, "task_que"))
+    else if (ztd::startswith(name, "task_que"))
         job = MainWindowJob::JOB_QUEUE;
-    else if (Glib::str_has_prefix(name, "task_resume"))
+    else if (ztd::startswith(name, "task_resume"))
         job = MainWindowJob::JOB_RESUME;
     else
         return;
@@ -5926,36 +5926,36 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (Glib::str_has_suffix(socket_property, "_visible"))
         {
             bool use_mode = false;
-            if (Glib::str_has_prefix(socket_property, "devices_"))
+            if (ztd::startswith(socket_property, "devices_"))
             {
                 str = "show_devmon";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(socket_property, "bookmarks_"))
+            else if (ztd::startswith(socket_property, "bookmarks_"))
             {
                 str = "show_book";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(socket_property, "dirtree_"))
+            else if (ztd::startswith(socket_property, "dirtree_"))
             {
                 str = "show_dirtree";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(socket_property, "toolbar_"))
+            else if (ztd::startswith(socket_property, "toolbar_"))
             {
                 str = "show_toolbox";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(socket_property, "sidetoolbar_"))
+            else if (ztd::startswith(socket_property, "sidetoolbar_"))
             {
                 str = "show_sidebar";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(socket_property, "hidden_files_"))
+            else if (ztd::startswith(socket_property, "hidden_files_"))
             {
                 str = "show_hidden";
             }
-            else if (Glib::str_has_prefix(socket_property, "panel"))
+            else if (ztd::startswith(socket_property, "panel"))
             {
                 j = argv[i][5] - 48;
                 if (j < 1 || j > 4)
@@ -6076,7 +6076,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             ptk_file_browser_set_sort_order(file_browser, (PtkFBSortOrder)j);
         }
-        else if (Glib::str_has_prefix(socket_property, "sort_"))
+        else if (ztd::startswith(socket_property, "sort_"))
         {
             XSetName xset_name;
             if (ztd::same(socket_property, "sort_ascend"))
@@ -6357,36 +6357,36 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (Glib::str_has_suffix(socket_property, "_visible"))
         {
             bool use_mode = false;
-            if (Glib::str_has_prefix(socket_property, "devices_"))
+            if (ztd::startswith(socket_property, "devices_"))
             {
                 str = "show_devmon";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(socket_property, "bookmarks_"))
+            else if (ztd::startswith(socket_property, "bookmarks_"))
             {
                 str = "show_book";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(socket_property, "dirtree_"))
+            else if (ztd::startswith(socket_property, "dirtree_"))
             {
                 str = "show_dirtree";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(socket_property, "toolbar_"))
+            else if (ztd::startswith(socket_property, "toolbar_"))
             {
                 str = "show_toolbox";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(socket_property, "sidetoolbar_"))
+            else if (ztd::startswith(socket_property, "sidetoolbar_"))
             {
                 str = "show_sidebar";
                 use_mode = true;
             }
-            else if (Glib::str_has_prefix(socket_property, "hidden_files_"))
+            else if (ztd::startswith(socket_property, "hidden_files_"))
             {
                 str = "show_hidden";
             }
-            else if (Glib::str_has_prefix(socket_property, "panel"))
+            else if (ztd::startswith(socket_property, "panel"))
             {
                 j = argv[i][5] - 48;
                 if (j < 1 || j > 4)
@@ -6487,7 +6487,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             reply = fmt::format("{}", str);
         }
-        else if (Glib::str_has_prefix(socket_property, "sort_"))
+        else if (ztd::startswith(socket_property, "sort_"))
         {
             if (ztd::same(socket_property, "sort_ascend"))
                 reply = fmt::format("{}", file_browser->sort_type == GTK_SORT_ASCENDING ? 1 : 0);
@@ -7021,7 +7021,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             else if (ztd::same(socket_property, "mount") &&
                      ((real_path[0] != '/' && strstr(real_path, ":/")) ||
-                      Glib::str_has_prefix(real_path, "//")))
+                      ztd::startswith(real_path, "//")))
             {
                 // mount URL
                 if (split_network_url(real_path, &netmount) != SplitNetworkURL::VALID_NETWORK_URL)

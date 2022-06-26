@@ -1459,7 +1459,7 @@ config_load_handler_settings(XSet* handler_xset, char* handler_xset_name, const 
     gtk_widget_set_sensitive(GTK_WIDGET(hnd->chkbtn_handler_enabled), true);
     gtk_widget_set_sensitive(
         GTK_WIDGET(hnd->btn_defaults0),
-        Glib::str_has_prefix(handler_xset->name, handler_def_prefixs.at(hnd->mode)));
+        ztd::startswith(handler_xset->name, handler_def_prefixs.at(hnd->mode)));
 
     /* Configuring widgets with handler settings. Only name, MIME and
      * extension warrant a warning
@@ -1588,7 +1588,7 @@ populate_archive_handlers(HandlerData* hnd, XSet* def_handler_set)
     int i;
     for (i = 0; archive_handlers[i] != nullptr; ++i)
     {
-        if (Glib::str_has_prefix(archive_handlers[i], handler_cust_prefixs.at(hnd->mode)))
+        if (ztd::startswith(archive_handlers[i], handler_cust_prefixs.at(hnd->mode)))
         {
             // Fetching handler  - ignoring invalid handler xset names
             XSet* handler_xset = xset_is(archive_handlers[i]);
@@ -2277,7 +2277,7 @@ restore_defaults(HandlerData* hnd, bool all)
         char* xset_name;
         gtk_tree_model_get(model, &it, PtkHandlerCol::COL_XSET_NAME, &xset_name, -1);
         // a default handler is selected?
-        if (!(xset_name && Glib::str_has_prefix(xset_name, handler_def_prefixs.at(hnd->mode))))
+        if (!(xset_name && ztd::startswith(xset_name, handler_def_prefixs.at(hnd->mode))))
         {
             free(xset_name);
             return;
@@ -2694,7 +2694,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
             if (!set_sel)
                 return; // nothing selected - failsafe
 
-            if (Glib::str_has_prefix(set_sel->name, handler_def_prefixs.at(hnd->mode)) &&
+            if (ztd::startswith(set_sel->name, handler_def_prefixs.at(hnd->mode)) &&
                 set_sel->disable)
             {
                 // is an unsaved default handler, click Defaults then Apply to save

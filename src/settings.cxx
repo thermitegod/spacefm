@@ -719,7 +719,7 @@ xset_free_all()
         XSet* set = xsets.back();
         xsets.pop_back();
 
-        if (set->ob2_data && Glib::str_has_prefix(set->name, "evt_"))
+        if (set->ob2_data && ztd::startswith(set->name, "evt_"))
         {
             g_list_foreach((GList*)set->ob2_data, (GFunc)free, nullptr);
             g_list_free((GList*)set->ob2_data);
@@ -1237,7 +1237,7 @@ xset_write(std::string& buf)
     {
         // hack to not save default handlers - this allows default handlers
         // to be updated more easily
-        if (set->disable && set->name[0] == 'h' && Glib::str_has_prefix(set->name, "hand"))
+        if (set->disable && set->name[0] == 'h' && ztd::startswith(set->name, "hand"))
             continue;
         xset_write_set(buf, set);
     }
@@ -1774,7 +1774,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
             pinned = 0;
             for (XSet* set3: xsets)
             {
-                if (set3->next && Glib::str_has_prefix(set3->name, "open_all_type_"))
+                if (set3->next && ztd::startswith(set3->name, "open_all_type_"))
                 {
                     tset = open_all_tset = set3;
                     while (tset->next)
@@ -2076,7 +2076,7 @@ xset_custom_get_bookmark_icon(XSet* set, int icon_size)
 
     if (!set->lock && XSetCMD(xset_get_int_set(set, XSetSetSet::X)) == XSetCMD::BOOKMARK)
     {
-        if (!set->icon && (set->z && (strstr(set->z, ":/") || Glib::str_has_prefix(set->z, "//"))))
+        if (!set->icon && (set->z && (strstr(set->z, ":/") || ztd::startswith(set->z, "//"))))
         {
             // a bookmarked URL - show network icon
             XSet* set2 = xset_get(XSetName::DEV_ICON_NETWORK);
@@ -2087,7 +2087,7 @@ xset_custom_get_bookmark_icon(XSet* set, int icon_size)
             icon2 = ztd::strdup("user-bookmarks");
             icon3 = ztd::strdup("gnome-fs-directory");
         }
-        else if (set->z && (strstr(set->z, ":/") || Glib::str_has_prefix(set->z, "//")))
+        else if (set->z && (strstr(set->z, ":/") || ztd::startswith(set->z, "//")))
         {
             // a bookmarked URL - show custom or network icon
             icon1 = ztd::strdup(set->icon);
@@ -2587,7 +2587,7 @@ clean_plugin_mirrors()
         for (const auto& file: std::filesystem::directory_iterator(path))
         {
             file_name = std::filesystem::path(file).filename();
-            if (Glib::str_has_prefix(file_name, "cstm_") && !xset_is(file_name))
+            if (ztd::startswith(file_name, "cstm_") && !xset_is(file_name))
             {
                 std::string plugin_path = fmt::format("{}/{}", path, file_name);
                 std::filesystem::remove_all(plugin_path);
@@ -3365,13 +3365,13 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
         std::string type;
         if (set->xset_name == XSetName::MAIN_BOOK)
             type = "bookmarks";
-        else if (Glib::str_has_prefix(set->name, "hand_arc_"))
+        else if (ztd::startswith(set->name, "hand_arc_"))
             type = "archive-handler";
-        else if (Glib::str_has_prefix(set->name, "hand_fs_"))
+        else if (ztd::startswith(set->name, "hand_fs_"))
             type = "device-handler";
-        else if (Glib::str_has_prefix(set->name, "hand_net_"))
+        else if (ztd::startswith(set->name, "hand_net_"))
             type = "protocol-handler";
-        else if (Glib::str_has_prefix(set->name, "hand_f_"))
+        else if (ztd::startswith(set->name, "hand_f_"))
             type = "file-handler";
         else
             type = "plugin";
@@ -3538,12 +3538,12 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
 
     // convert ~ to /home/user for smarter bookmarks
     std::string use_url;
-    if (Glib::str_has_prefix(url, "~/") || !g_strcmp0(url, "~"))
+    if (ztd::startswith(url, "~/") || !g_strcmp0(url, "~"))
         use_url = fmt::format("{}{}", vfs_user_home_dir(), url + 1);
     else
         use_url = url;
 
-    if ((use_url[0] != '/' && strstr(use_url.c_str(), ":/")) || Glib::str_has_prefix(use_url, "//"))
+    if ((use_url[0] != '/' && strstr(use_url.c_str(), ":/")) || ztd::startswith(use_url, "//"))
     {
         // network
         if (file_browser)
@@ -4303,7 +4303,7 @@ xset_set_key(GtkWidget* parent, XSet* set)
         name = clean_label(set->menu_label, false, true);
     else if (set->tool > XSetTool::CUSTOM)
         name = xset_get_builtin_toolitem_label(set->tool);
-    else if (Glib::str_has_prefix(set->name, "open_all_type_"))
+    else if (ztd::startswith(set->name, "open_all_type_"))
     {
         keyset = xset_get(XSetName::OPEN_ALL);
         name = clean_label(keyset->menu_label, false, true);
@@ -4544,7 +4544,7 @@ xset_design_job(GtkWidget* item, XSet* set)
         case XSetJob::BOOKMARK:
         case XSetJob::APP:
         case XSetJob::COMMAND:
-            if (Glib::str_has_prefix(set->name, "open_all_type_"))
+            if (ztd::startswith(set->name, "open_all_type_"))
             {
                 name = set->name + 14;
                 msg = fmt::format(
@@ -4758,7 +4758,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             break;
         case XSetJob::SUBMENU:
         case XSetJob::SUBMENU_BOOK:
-            if (Glib::str_has_prefix(set->name, "open_all_type_"))
+            if (ztd::startswith(set->name, "open_all_type_"))
             {
                 name = set->name + 14;
                 msg = fmt::format(
@@ -5290,7 +5290,7 @@ xset_job_is_valid(XSet* set, XSetJob job)
     }
 
     // control open_all item
-    if (Glib::str_has_prefix(set->name, "open_all_type_"))
+    if (ztd::startswith(set->name, "open_all_type_"))
         open_all = true;
 
     switch (job)
@@ -5557,7 +5557,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
         no_paste = xset_clipboard_in_set(insert_set);
 
     // control open_all item
-    // if (Glib::str_has_prefix(set->name, "open_all_type_"))
+    // if (ztd::startswith(set->name, "open_all_type_"))
     //    open_all = true;
 
     GtkWidget* design_menu = gtk_menu_new();

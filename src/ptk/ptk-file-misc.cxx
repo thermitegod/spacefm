@@ -1126,7 +1126,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
             dir = get_template_dir();
             if (!dir.empty())
             {
-                if (Glib::str_has_prefix(new_path, dir) && new_path[dir.size()] == '/')
+                if (ztd::startswith(new_path, dir) && new_path[dir.size()] == '/')
                     path = new_path + dir.size() + 1;
             }
         }
@@ -3470,7 +3470,7 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
 {
     XSet* handler_set;
 
-    if (app_desktop && Glib::str_has_prefix(app_desktop, "###") &&
+    if (app_desktop && ztd::startswith(app_desktop, "###") &&
         (handler_set = xset_is(app_desktop + 3)) && files)
     {
         // is a handler
