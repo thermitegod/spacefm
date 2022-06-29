@@ -113,7 +113,6 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
     int small_icon;
     int tool_icon;
     bool single_click;
-    bool root_set_change = false;
     PtkFileBrowser* file_browser;
     bool use_si_prefix;
     GtkNotebook* notebook;
@@ -360,20 +359,17 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             if (root_editor[0] != '\0')
             {
                 xset_set(XSetName::ROOT_EDITOR, XSetSetSet::S, root_editor);
-                root_set_change = true;
             }
         }
         else if (strcmp(root_editor, old_root_editor))
         {
             xset_set(XSetName::ROOT_EDITOR, XSetSetSet::S, root_editor);
-            root_set_change = true;
         }
         if (!!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->root_editor_terminal)) !=
             !!xset_get_b(XSetName::ROOT_EDITOR))
         {
             xset_set_b(XSetName::ROOT_EDITOR,
                        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->root_editor_terminal)));
-            root_set_change = true;
         }
 
         // MOD terminal
@@ -384,7 +380,6 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         if (!ztd::same(terminal, old_terminal))
         {
             xset_set(XSetName::MAIN_TERMINAL, XSetSetSet::S, terminal);
-            root_set_change = true;
         }
         // report missing terminal
         std::string term = Glib::find_program_in_path(terminal);
@@ -399,37 +394,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
 
         if (xset_get_b(XSetName::MAIN_TERMINAL))
         {
-            root_set_change = true;
             xset_set_b(XSetName::MAIN_TERMINAL, false);
-        }
-
-        // root settings saved?
-        if (geteuid() != 0)
-        {
-            if (root_set_change)
-            {
-                // task
-                std::string msg = fmt::format(
-                    "You will now be asked for your root password to save the root settings for "
-                    "this user to a file in {}/{}/  Supplying the password in the next "
-                    "window is recommended.  Because SpaceFM runs some commands as root via su, "
-                    "these settings are best protected by root.",
-                    SYSCONFDIR,
-                    PACKAGE_NAME);
-                xset_msg_dialog(GTK_WIDGET(dlg),
-                                GTK_MESSAGE_INFO,
-                                "Save Root Settings",
-                                GTK_BUTTONS_OK,
-                                msg);
-                PtkFileTask* ptask =
-                    ptk_file_exec_new("Save Root Settings", nullptr, nullptr, nullptr);
-                ptask->task->exec_command = "echo";
-                ptask->task->exec_as_user = "root";
-                ptask->task->exec_sync = false;
-                ptask->task->exec_export = false;
-                ptask->task->exec_write_root = true;
-                ptk_file_task_run(ptask);
-            }
         }
     }
     gtk_widget_destroy(GTK_WIDGET(dlg));

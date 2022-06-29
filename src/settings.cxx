@@ -75,7 +75,6 @@ ConfigSettings config_settings = ConfigSettings();
 // MOD settings
 static void xset_write(std::string& buf);
 static void xset_parse(std::string& line);
-static void read_root_settings();
 static void xset_defaults();
 
 std::vector<XSet*> xsets;
@@ -528,9 +527,6 @@ load_settings()
     ptk_handler_add_defaults(PtkHandlerMode::HANDLER_MODE_FS, false, false);
     ptk_handler_add_defaults(PtkHandlerMode::HANDLER_MODE_NET, false, false);
     ptk_handler_add_defaults(PtkHandlerMode::HANDLER_MODE_FILE, false, false);
-
-    // get root protected settings;wq
-    read_root_settings();
 
     // set default keys
     xset_default_keys();
@@ -1811,116 +1807,6 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
         }
     }
     return found;
-}
-
-static void
-write_root_saver(std::string& buf, const std::string& path, const char* name, const char* var,
-                 const char* value)
-{
-    if (!value)
-        return;
-
-    std::string save;
-    save = fmt::format("{}-{}={}", name, var, value);
-    save = bash_quote(save);
-    buf.append(fmt::format("echo {} >>| \"{}\"\n", save, path));
-}
-
-bool
-write_root_settings(std::string& buf, const std::string& path)
-{
-    buf.append(fmt::format("\n#save root settings\nmkdir -p {}/{}\n"
-                           "echo -e '#SpaceFM As-Root Session File\\n\\' >| '{}'\n",
-                           SYSCONFDIR,
-                           PACKAGE_NAME,
-                           path));
-
-    for (XSet* set: xsets)
-    {
-        if (set)
-        {
-            if (set->xset_name == XSetName::ROOT_EDITOR ||
-                set->xset_name == XSetName::MAIN_TERMINAL || !strncmp(set->name, "dev_fmt_", 8) ||
-                !strncmp(set->name, "label_cmd_", 8))
-            {
-                write_root_saver(buf, path, set->name, "s", set->s);
-                write_root_saver(buf, path, set->name, "x", set->x);
-                write_root_saver(buf, path, set->name, "y", set->y);
-                if (set->b != XSetB::XSET_B_UNSET)
-                    buf.append(fmt::format("echo '{}-b={}' >>| \"{}\"\n", set->name, set->b, path));
-            }
-        }
-    }
-
-    buf.append(fmt::format("chmod -R go-w+rX {}/{}\n\n", SYSCONFDIR, PACKAGE_NAME));
-    return true;
-}
-
-static void
-read_root_settings()
-{
-    if (geteuid() == 0)
-        return;
-
-    std::string root_set_path =
-        fmt::format("{}/{}/{}-as-root", SYSCONFDIR, PACKAGE_NAME, Glib::get_user_name());
-    if (!std::filesystem::exists(root_set_path))
-        root_set_path = fmt::format("{}/{}/{}-as-root", SYSCONFDIR, PACKAGE_NAME, geteuid());
-
-    std::string line;
-    std::ifstream file(root_set_path);
-
-    if (!file.is_open())
-    {
-        if (std::filesystem::exists(root_set_path))
-            LOG_WARN("Error reading root settings from {} Commands run as root may "
-                     "present a security risk",
-                     root_set_path);
-        else
-            LOG_WARN("No root settings found in {} Setting a root editor in "
-                     "Preferences should remove this warning on startup.   Otherwise commands "
-                     "run as root may present a security risk.",
-                     root_set_path);
-        return;
-    }
-
-    // clear settings
-    for (XSet* set: xsets)
-    {
-        if (set)
-        {
-            if (set->xset_name == XSetName::ROOT_EDITOR || !strncmp(set->name, "dev_fmt_", 8) ||
-                !strncmp(set->name, "label_cmd_", 8))
-            {
-                if (set->s)
-                {
-                    free(set->s);
-                    set->s = nullptr;
-                }
-                if (set->x)
-                {
-                    free(set->x);
-                    set->x = nullptr;
-                }
-                if (set->y)
-                {
-                    free(set->y);
-                    set->y = nullptr;
-                }
-                set->b = XSetB::XSET_B_UNSET;
-            }
-        }
-    }
-
-    while (std::getline(file, line))
-    {
-        if (line.empty())
-            continue;
-
-        xset_parse(line);
-    }
-
-    file.close();
 }
 
 XSetContext::XSetContext()

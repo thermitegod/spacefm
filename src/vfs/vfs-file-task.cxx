@@ -1439,14 +1439,6 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
         // build - run
         buf.append(fmt::format("#run\nif [ \"$1\" == \"run\" ];then\n\n"));
 
-        // build - write root settings
-        if (task->exec_write_root && geteuid() != 0)
-        {
-            const std::string root_set_path =
-                fmt::format("{}/{}/{}-as-root", SYSCONFDIR, PACKAGE_NAME, Glib::get_user_name());
-            write_root_settings(buf, root_set_path);
-        }
-
         // build - export vars
         if (task->exec_export)
             buf.append(fmt::format("export fm_import=\"source {}\"\n", task->exec_script));

@@ -182,7 +182,6 @@ struct VFSFileTask
     GIOChannel* exec_channel_out;
     GIOChannel* exec_channel_err;
     bool exec_scroll_lock{false};
-    bool exec_write_root{false};
     bool exec_checksum{false};
     void* exec_set{nullptr};
     GCond* exec_cond{nullptr};
