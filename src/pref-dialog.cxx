@@ -107,11 +107,11 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
     int ismall_icon = -1;
     int itool_icon = -1;
 
-    int max_thumb;
+    std::uint64_t max_thumb;
     bool show_thumbnail;
-    int big_icon;
-    int small_icon;
-    int tool_icon;
+    std::uint64_t big_icon;
+    std::uint64_t small_icon;
+    std::uint64_t tool_icon;
     bool single_click;
     PtkFileBrowser* file_browser;
     bool use_si_prefix;
@@ -526,7 +526,7 @@ fm_edit_preference(GtkWindow* parent, int page)
             gtk_combo_box_set_active(GTK_COMBO_BOX(data->terminal), i);
         }
 
-        for (int big_icon_size: big_icon_sizes)
+        for (std::uint64_t big_icon_size: big_icon_sizes)
         {
             if (big_icon_size == app_settings.big_icon_size)
             {
@@ -536,7 +536,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(data->big_icon_size), ibig_icon);
 
-        for (int small_icon_size: small_icon_sizes)
+        for (std::uint64_t small_icon_size: small_icon_sizes)
         {
             if (small_icon_size == app_settings.small_icon_size)
             {
@@ -547,7 +547,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         gtk_combo_box_set_active(GTK_COMBO_BOX(data->small_icon_size), ismall_icon);
 
         itool_icon = 0;
-        for (int tool_icon_size: tool_icon_sizes)
+        for (std::uint64_t tool_icon_size: tool_icon_sizes)
         {
             if (tool_icon_size == app_settings.tool_icon_size)
             {

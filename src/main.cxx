@@ -362,8 +362,8 @@ main(int argc, char* argv[])
     // In closing stderr is not used by this program for output, and this should only affect ffmpeg.
     freopen("/dev/null", "w", stderr);
 
-    // load spacefm.conf
-    load_conf();
+    // load /etc/spacefm.conf
+    load_etc_conf();
 
     // separate instance options
     if (argc > 1)

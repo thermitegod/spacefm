@@ -642,7 +642,6 @@ const std::map<XSetName, const std::string> xset_name_map{
     {XSetName::TEXT_DLG, "text_dlg"},
 
     // other
-    {XSetName::CONFIG_VERSION, "config_version"},
     {XSetName::BOOK_NEW, "book_new"},
     {XSetName::DRAG_ACTION, "drag_action"},
     {XSetName::EDITOR, "editor"},

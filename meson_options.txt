@@ -1,5 +1,11 @@
 #preprocessor
 option(
+  'deprecated-ini-loading',
+  type : 'boolean',
+  value : true,
+  description : 'support for reading old session files',
+)
+option(
   'deprecated-hw',
   type : 'boolean',
   value : false,

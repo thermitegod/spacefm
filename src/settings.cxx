@@ -20,6 +20,7 @@
 #include <filesystem>
 
 #include <array>
+#include <map>
 #include <vector>
 
 #include <iostream>
@@ -44,6 +45,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include <toml.hpp> // toml11
+
 #include "types.hxx"
 
 #include "settings.hxx"
@@ -66,15 +69,10 @@
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/ptk-location-view.hxx"
 
-#define CONFIG_FILE_VERSION  "101" // 3.0.0
-#define CONFIG_FILE_FILENAME "session"
-
 AppSettings app_settings = AppSettings();
 ConfigSettings config_settings = ConfigSettings();
 
 // MOD settings
-static void xset_write(std::string& buf);
-static void xset_parse(std::string& line);
 static void xset_defaults();
 
 std::vector<XSet*> xsets;
@@ -93,7 +91,11 @@ EventHandler event_handler;
 
 std::vector<std::string> xset_cmd_history;
 
+#ifdef HAVE_DEPRECATED_INI_LOADING
+static void xset_parse(std::string& line);
+
 using SettingsParseFunc = void (*)(std::string& line);
+#endif
 
 static void xset_free_all();
 static void xset_default_keys();
@@ -191,8 +193,45 @@ static const std::array<const char*, 18> builtin_tool_shared_key
     "view_thumb",
     "panel1_list_large"
 };
-//clang-format on
+// clang-format on
 
+/**
+ *  TOML data structure types for serialization
+ */
+
+// map<var, value>
+using setvars_t = std::map<std::string, std::string>;
+// map<xset_name, setvars_t>
+using xsetpak_t = std::map<std::string, setvars_t>;
+
+static const xsetpak_t xset_pack_sets();
+
+/**
+ * Config file macros
+ */
+
+// TOML config file
+#define CONFIG_FILE_VERSION  1 // 3.0.0-dev
+#define CONFIG_FILE_FILENAME "session.toml"
+
+#define CONFIG_FILE_SECTION_VERSION   "Version"
+#define CONFIG_FILE_SECTION_GENERAL   "General"
+#define CONFIG_FILE_SECTION_WINDOW    "Window"
+#define CONFIG_FILE_SECTION_INTERFACE "Interface"
+#define CONFIG_FILE_SECTION_XSET      "XSet"
+
+// TOML Plugins
+#define PLUGIN_FILE_FILENAME "plugin.toml"
+
+#define PLUGIN_FILE_SECTION_PLUGIN "Plugin"
+
+#ifdef HAVE_DEPRECATED_INI_LOADING
+// INI config file
+#define CONFIG_FILE_INI_VERSION  "101" // 3.0.0-dev
+#define CONFIG_FILE_INI_FILENAME "session"
+#endif
+
+#ifdef HAVE_DEPRECATED_INI_LOADING // Deprecated INI loader - start
 static void
 parse_general_settings(std::string& line)
 {
@@ -299,7 +338,235 @@ parse_interface_settings(std::string& line)
 }
 
 static void
-parse_conf(std::string& etc_path, std::string& line)
+xset_parse(std::string& line)
+{
+    std::size_t sep = line.find("=");
+    if (sep == std::string::npos)
+        return;
+
+    std::size_t sep2 = line.find("-");
+    if (sep2 == std::string::npos)
+        return;
+
+    line = ztd::strip(line);
+
+    if (line.at(0) == '#')
+        return;
+
+    std::string token = line.substr(0, sep2);
+    std::string value = line.substr(sep + 1, std::string::npos - 1);
+    std::string token_var = line.substr(sep2 + 1, sep - sep2 - 1);
+
+    XSetSetSet var;
+    try
+    {
+        var = xset_set_set_encode(token_var);
+    }
+    catch (const std::logic_error& e)
+    {
+        std::string msg = fmt::format("XSet parse error:\n\n{}", e.what());
+        ptk_show_error(nullptr, "Error", e.what());
+        return;
+    }
+
+    // remove any quotes
+    value = ztd::replace(value, "\"", "");
+
+    if (value.empty())
+        return;
+
+    if (ztd::startswith(token, "cstm_") || ztd::startswith(token, "hand_"))
+    {
+        // custom
+        if (ztd::same(token, set_last->name))
+        {
+            xset_set_set(set_last, var, value);
+        }
+        else
+        {
+            set_last = xset_get(token);
+            if (set_last->lock)
+                set_last->lock = false;
+            xset_set_set(set_last, var, value);
+        }
+    }
+    else
+    {
+        // normal (lock)
+        if (ztd::same(token, set_last->name))
+        {
+            xset_set_set(set_last, var, value);
+        }
+        else
+        {
+            set_last = xset_set(token, var, value);
+        }
+    }
+}
+#endif // Deprecated INI loader - end
+
+static std::uint64_t
+get_config_file_version(const toml::value& data)
+{
+    const auto& version = toml::find(data, CONFIG_FILE_SECTION_VERSION);
+
+    const auto config_version = toml::find<std::uint64_t>(version, "version");
+    return config_version;
+}
+
+static void
+config_parse_general(const toml::value& toml_data, std::uint64_t version)
+{
+    (void)version;
+
+    const auto& section = toml::find(toml_data, CONFIG_FILE_SECTION_GENERAL);
+
+    const auto show_thumbnail = toml::find<bool>(section, "show_thumbnail");
+    app_settings.show_thumbnail = show_thumbnail;
+
+    const auto max_thumb_size = toml::find<std::uint64_t>(section, "max_thumb_size");
+    app_settings.max_thumb_size = max_thumb_size << 10;
+
+    const auto big_icon_size = toml::find<std::uint64_t>(section, "icon_size_big");
+    app_settings.big_icon_size = big_icon_size;
+
+    const auto small_icon_size = toml::find<std::uint64_t>(section, "icon_size_small");
+    app_settings.small_icon_size = small_icon_size;
+
+    const auto tool_icon_size = toml::find<std::uint64_t>(section, "icon_size_tool");
+    app_settings.tool_icon_size = tool_icon_size;
+
+    const auto single_click = toml::find<bool>(section, "single_click");
+    app_settings.single_click = single_click;
+
+    const auto single_hover = toml::find<bool>(section, "single_hover");
+    app_settings.no_single_hover = !single_hover;
+
+    const auto sort_order = toml::find<std::uint64_t>(section, "sort_order");
+    app_settings.sort_order = sort_order;
+
+    const auto sort_type = toml::find<std::uint64_t>(section, "sort_type");
+    app_settings.sort_type = sort_type;
+
+    const auto use_si_prefix = toml::find<bool>(section, "use_si_prefix");
+    app_settings.use_si_prefix = use_si_prefix;
+
+    const auto click_executes = toml::find<bool>(section, "click_executes");
+    app_settings.no_execute = !click_executes;
+
+    const auto confirm = toml::find<bool>(section, "confirm");
+    app_settings.no_confirm = !confirm;
+
+    const auto confirm_delete = toml::find<bool>(section, "confirm_delete");
+    app_settings.no_confirm_trash = !confirm_delete;
+
+    const auto confirm_trash = toml::find<bool>(section, "confirm_trash");
+    app_settings.no_confirm_trash = !confirm_trash;
+}
+
+static void
+config_parse_window(const toml::value& toml_data, std::uint64_t version)
+{
+    (void)version;
+
+    const auto& section = toml::find(toml_data, CONFIG_FILE_SECTION_WINDOW);
+
+    const auto width = toml::find<std::uint64_t>(section, "width");
+    app_settings.width = width;
+
+    const auto height = toml::find<std::uint64_t>(section, "height");
+    app_settings.height = height;
+
+    const auto maximized = toml::find<bool>(section, "maximized");
+    app_settings.maximized = maximized;
+}
+
+static void
+config_parse_interface(const toml::value& toml_data, std::uint64_t version)
+{
+    (void)version;
+
+    const auto& section = toml::find(toml_data, CONFIG_FILE_SECTION_INTERFACE);
+
+    const auto always_show_tabs = toml::find<bool>(section, "always_show_tabs");
+    app_settings.always_show_tabs = always_show_tabs;
+
+    const auto show_close_tab_buttons = toml::find<bool>(section, "show_close_tab_buttons");
+    app_settings.show_close_tab_buttons = show_close_tab_buttons;
+}
+
+static void
+config_parse_xset(const toml::value& toml_data, std::uint64_t version)
+{
+    (void)version;
+
+    // loop over all of [[XSet]]
+    for (const auto& section: toml::find<toml::array>(toml_data, CONFIG_FILE_SECTION_XSET))
+    {
+        // get [XSet.name] and all vars
+        for (const auto& [toml_name, toml_vars]: section.as_table())
+        {
+            // get var and value
+            for (const auto& [toml_var, toml_value]: toml_vars.as_table())
+            {
+                std::stringstream ss_name;
+                std::stringstream ss_var;
+                std::stringstream ss_value;
+
+                ss_name << toml_name;
+                ss_var << toml_var;
+                ss_value << toml_value;
+
+                const std::string name{ss_name.str()};
+                const std::string setvar{ss_var.str()};
+                const std::string value{ztd::strip(ss_value.str(), "\"")};
+
+                // LOG_INFO("name: {} | var: {} | value: {}", name, setvar, value);
+
+                XSetSetSet var;
+                try
+                {
+                    var = xset_set_set_encode(setvar);
+                }
+                catch (const std::logic_error& e)
+                {
+                    const std::string msg = fmt::format("XSet parse error:\n\n{}", e.what());
+                    ptk_show_error(nullptr, "Error", e.what());
+                    return;
+                }
+
+                if (ztd::startswith(name, "cstm_") || ztd::startswith(name, "hand_"))
+                {
+                    if (ztd::same(name, set_last->name))
+                    { // custom
+                        xset_set_set(set_last, var, value);
+                    }
+                    else
+                    {
+                        set_last = xset_get(name);
+                        if (set_last->lock)
+                            set_last->lock = false;
+                        xset_set_set(set_last, var, value);
+                    }
+                }
+                else
+                {
+                    if (ztd::same(name, set_last->name))
+                    { // normal (lock)
+                        xset_set_set(set_last, var, value);
+                    }
+                    else
+                    {
+                        set_last = xset_set(name, var, value);
+                    }
+                }
+            }
+        }
+    }
+}
+
+static void
+parse_etc_conf(std::string& etc_path, std::string& line)
 {
     std::size_t sep = line.find("=");
     if (sep == std::string::npos)
@@ -335,7 +602,7 @@ parse_conf(std::string& etc_path, std::string& line)
 }
 
 void
-load_conf()
+load_etc_conf()
 {
     std::string default_font = "Monospace 9";
 
@@ -358,7 +625,7 @@ load_conf()
     {
         while (std::getline(file, line))
         {
-            parse_conf(config_path, line);
+            parse_etc_conf(config_path, line);
         }
     }
     file.close();
@@ -374,9 +641,21 @@ load_settings()
     // MOD extra settings
     xset_defaults();
 
+#ifdef HAVE_DEPRECATED_INI_LOADING
+    // choose which config file to load
+    std::string conf_ini = Glib::build_filename(settings_config_dir, CONFIG_FILE_INI_FILENAME);
+    std::string conf_toml = Glib::build_filename(settings_config_dir, CONFIG_FILE_FILENAME);
+    std::string& session = conf_toml;
+    bool load_deprecated_ini_config = false;
+    if (std::filesystem::exists(conf_ini) && !std::filesystem::exists(conf_toml))
+    {
+        LOG_WARN("INI config files are deprecated, loading support will be removed");
+        load_deprecated_ini_config = true;
+        session = conf_ini;
+    }
+#else
     const std::string session = Glib::build_filename(settings_config_dir, CONFIG_FILE_FILENAME);
-
-    std::string command;
+#endif
 
     if (!std::filesystem::exists(settings_config_dir))
     {
@@ -384,7 +663,7 @@ load_settings()
         std::string xdg_path = Glib::build_filename(settings_config_dir, "xdg", PACKAGE_NAME);
         if (std::filesystem::is_directory(xdg_path))
         {
-            command = fmt::format("cp -r {} '{}'", xdg_path, settings_config_dir);
+            const std::string command = fmt::format("cp -r {} '{}'", xdg_path, settings_config_dir);
             Glib::spawn_command_line_sync(command);
 
             std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
@@ -412,11 +691,12 @@ load_settings()
 
         if (script_exists(command_script))
         {
-            const std::string command_args = fmt::format(
-                "{} --config-dir {} --config-file {}",
-                command_script,
-                settings_config_dir,
-                CONFIG_FILE_FILENAME);
+            const std::string command_args =
+                fmt::format("{} --config-dir {} --config-file {} --config-version {}",
+                            command_script,
+                            settings_config_dir,
+                            CONFIG_FILE_FILENAME,
+                            CONFIG_FILE_VERSION);
 
             Glib::spawn_command_line_sync(command_args);
         }
@@ -427,11 +707,10 @@ load_settings()
 
         if (script_exists(command_script))
         {
-            const std::string command_args = fmt::format(
-                "{} --config-dir {} --config-file {}",
-                command_script,
-                settings_config_dir,
-                CONFIG_FILE_FILENAME);
+            const std::string command_args = fmt::format("{} --config-dir {} --config-file {}",
+                                                         command_script,
+                                                         settings_config_dir,
+                                                         CONFIG_FILE_FILENAME);
 
             Glib::spawn_command_line_sync(command_args);
         }
@@ -439,37 +718,71 @@ load_settings()
 
     if (std::filesystem::is_regular_file(session))
     {
-        std::string line;
-        std::ifstream file(session);
-        if (file.is_open())
-        {
-            SettingsParseFunc func = nullptr;
+#ifdef HAVE_DEPRECATED_INI_LOADING
+        if (!load_deprecated_ini_config)
+        { // TOML
+#endif
+            // LOG_INFO("Parse TOML");
 
-            while (std::getline(file, line))
+            toml::value toml_data;
+            try
             {
-                if (line.empty())
-                    continue;
-
-                if (line.at(0) == '[')
-                {
-                    if (ztd::same(line, "[General]"))
-                        func = &parse_general_settings;
-                    else if (ztd::same(line, "[Window]"))
-                        func = &parse_window_state;
-                    else if (ztd::same(line, "[Interface]"))
-                        func = &parse_interface_settings;
-                    else if (ztd::same(line, "[MOD]"))
-                        func = &xset_parse;
-                    else
-                        func = nullptr;
-                    continue;
-                }
-
-                if (func)
-                    (*func)(line);
+                toml_data = toml::parse(session);
+                // DEBUG
+                // std::cout << "###### TOML PARSE ######" << "\n\n";
+                // std::cout << toml_data << "\n\n";
             }
+            catch (const toml::syntax_error& e)
+            {
+                LOG_ERROR("Config file parsing failed: {}", e.what());
+                return;
+            }
+
+            const std::uint64_t version = get_config_file_version(toml_data);
+
+            config_parse_general(toml_data, version);
+            config_parse_window(toml_data, version);
+            config_parse_interface(toml_data, version);
+            config_parse_xset(toml_data, version);
+#ifdef HAVE_DEPRECATED_INI_LOADING
         }
-        file.close();
+        else
+        { // INI
+            // LOG_INFO("Parse INI");
+
+            std::string line;
+            std::ifstream file(session);
+            if (file.is_open())
+            {
+                SettingsParseFunc func = nullptr;
+
+                while (std::getline(file, line))
+                {
+                    if (line.empty())
+                        continue;
+
+                    if (line.at(0) == '[')
+                    {
+                        if (ztd::same(line, "[General]"))
+                            func = &parse_general_settings;
+                        else if (ztd::same(line, "[Window]"))
+                            func = &parse_window_state;
+                        else if (ztd::same(line, "[Interface]"))
+                            func = &parse_interface_settings;
+                        else if (ztd::same(line, "[MOD]"))
+                            func = &xset_parse;
+                        else
+                            func = nullptr;
+                        continue;
+                    }
+
+                    if (func)
+                        (*func)(line);
+                }
+            }
+            file.close();
+        }
+#endif
     }
     else
     {
@@ -562,8 +875,6 @@ save_settings(void* main_window_ptr)
     FMMainWindow* main_window;
     // LOG_INFO("save_settings");
 
-    xset_set(XSetName::CONFIG_VERSION, XSetSetSet::S, CONFIG_FILE_VERSION);
-
     // save tabs
     bool save_tabs = xset_get_b(XSetName::MAIN_SAVE_TABS);
     if (main_window_ptr)
@@ -639,45 +950,185 @@ save_settings(void* main_window_ptr)
         std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
     }
 
-    std::string buf = "";
+    // new values get appened at the top of the file,
+    // declare in reverse order
+    const toml::value toml_data = toml::value{
+        {CONFIG_FILE_SECTION_VERSION,
+         toml::value{
+             {"version", CONFIG_FILE_VERSION},
+         }},
 
-    // clang-format off
-    buf.append("[General]\n");
-    buf.append(fmt::format("show_thumbnail=\"{:d}\"\n", app_settings.show_thumbnail));
-    buf.append(fmt::format("max_thumb_size=\"{}\"\n", app_settings.max_thumb_size >> 10));
-    buf.append(fmt::format("big_icon_size=\"{}\"\n", app_settings.big_icon_size));
-    buf.append(fmt::format("small_icon_size=\"{}\"\n", app_settings.small_icon_size));
-    buf.append(fmt::format("tool_icon_size=\"{}\"\n", app_settings.tool_icon_size));
-    buf.append(fmt::format("single_click=\"{:d}\"\n", app_settings.single_click));
-    buf.append(fmt::format("no_single_hover=\"{:d}\"\n", app_settings.no_single_hover));
-    buf.append(fmt::format("sort_order=\"{}\"\n", app_settings.sort_order));
-    buf.append(fmt::format("sort_type=\"{}\"\n", app_settings.sort_type));
-    buf.append(fmt::format("use_si_prefix=\"{:d}\"\n", app_settings.use_si_prefix));
-    buf.append(fmt::format("no_execute=\"{:d}\"\n", app_settings.no_execute));
-    buf.append(fmt::format("no_confirm=\"{:d}\"\n", app_settings.no_confirm));
-    buf.append(fmt::format("no_confirm_trash=\"{:d}\"\n", app_settings.no_confirm_trash));
+        {CONFIG_FILE_SECTION_GENERAL,
+         toml::value{
+             {"show_thumbnail", app_settings.show_thumbnail},
+             {"max_thumb_size", app_settings.max_thumb_size >> 10},
+             {"icon_size_big", app_settings.big_icon_size},
+             {"icon_size_small", app_settings.small_icon_size},
+             {"icon_size_tool", app_settings.tool_icon_size},
+             {"single_click", app_settings.single_click},
+             {"single_hover", !app_settings.no_single_hover},
+             {"sort_order", app_settings.sort_order},
+             {"sort_type", app_settings.sort_type},
+             {"use_si_prefix", app_settings.use_si_prefix},
+             {"click_executes", !app_settings.no_execute},
+             {"confirm", !app_settings.no_confirm},
+             {"confirm_delete", !app_settings.no_confirm_delete},
+             {"confirm_trash", !app_settings.no_confirm_trash},
+         }},
 
-    buf.append("\n[Window]\n");
-    buf.append(fmt::format("width=\"{}\"\n", app_settings.width));
-    buf.append(fmt::format("height=\"{}\"\n", app_settings.height));
-    buf.append(fmt::format("maximized=\"{:d}\"\n", app_settings.maximized));
+        {CONFIG_FILE_SECTION_WINDOW,
+         toml::value{
+             {"height", app_settings.height},
+             {"width", app_settings.width},
+             {"maximized", app_settings.maximized},
+         }},
 
-    buf.append("\n[Interface]\n");
-    buf.append(fmt::format("always_show_tabs=\"{:d}\"\n", app_settings.always_show_tabs));
-    buf.append(fmt::format("show_close_tab_buttons=\"{:d}\"\n", app_settings.show_close_tab_buttons));
+        {CONFIG_FILE_SECTION_INTERFACE,
+         toml::value{
+             {"always_show_tabs", app_settings.always_show_tabs},
+             {"show_close_tab_buttons", app_settings.show_close_tab_buttons},
+         }},
 
-    buf.append("\n[MOD]\n");
-    xset_write(buf);
-    // clang-format on
+        {CONFIG_FILE_SECTION_XSET,
+         toml::value{
+             xset_pack_sets(),
+         }},
+    };
 
-    // move
-    std::string path = Glib::build_filename(settings_config_dir, CONFIG_FILE_FILENAME);
-    std::ofstream file(path);
-    if (file.is_open())
-        file << buf;
-    else
-        LOG_ERROR("saving session file failed");
-    file.close();
+    const std::string toml_path = Glib::build_filename(settings_config_dir, CONFIG_FILE_FILENAME);
+    std::ofstream toml_file(toml_path);
+    if (toml_file.is_open())
+        toml_file << toml_data;
+    toml_file.close();
+
+    // DEBUG
+    // std::cout << "###### TOML DUMP ######" << "\n\n";
+    // std::cout << toml_data << "\n\n";
+}
+
+static const setvars_t
+xset_pack_set(XSet* set)
+{
+    setvars_t setvars;
+    // hack to not save default handlers - this allows default handlers
+    // to be updated more easily
+    if (set->disable && set->name[0] == 'h' && ztd::startswith(set->name, "hand"))
+        return setvars;
+
+    if (set->plugin)
+        return setvars;
+
+    if (set->plugin)
+        return setvars;
+
+    if (set->s)
+        setvars.insert({"s", fmt::format("{}", set->s)});
+    if (set->x)
+        setvars.insert({"x", fmt::format("{}", set->x)});
+    if (set->y)
+        setvars.insert({"y", fmt::format("{}", set->y)});
+    if (set->z)
+        setvars.insert({"z", fmt::format("{}", set->z)});
+    if (set->key)
+        setvars.insert({"key", fmt::format("{}", set->key)});
+    if (set->keymod)
+        setvars.insert({"keymod", fmt::format("{}", set->keymod)});
+    // menu label
+    if (set->menu_label)
+    {
+        if (set->lock)
+        { // built-in
+            if (set->in_terminal && set->menu_label && set->menu_label[0])
+            { // only save lbl if menu_label was customized
+                setvars.insert({"menu_label", fmt::format("{}", set->menu_label)});
+            }
+        }
+        else
+        { // custom
+            setvars.insert({"menu_label_custom", fmt::format("{}", set->menu_label)});
+        }
+    }
+    // icon
+    if (set->lock)
+    { // built-in
+        if (set->keep_terminal)
+        { // only save icn if icon was customized
+            setvars.insert({"icn", fmt::format("{}", set->icon)});
+        }
+    }
+    else if (set->icon)
+    { // custom
+        setvars.insert({"icon", fmt::format("{}", set->icon)});
+    }
+
+    if (set->next)
+        setvars.insert({"next", fmt::format("{}", set->next)});
+    if (set->child)
+        setvars.insert({"child", fmt::format("{}", set->child)});
+    if (set->context)
+        setvars.insert({"context", fmt::format("{}", set->context)});
+    if (set->b != XSetB::XSET_B_UNSET)
+        setvars.insert({"b", fmt::format("{}", set->b)});
+    if (set->tool != XSetTool::NOT)
+        setvars.insert({"tool", fmt::format("{}", INT(set->tool))});
+
+    if (!set->lock)
+    {
+        if (set->menu_style != XSetMenu::NORMAL)
+            setvars.insert({"style", fmt::format("{}", INT(set->menu_style))});
+        if (set->desc)
+            setvars.insert({"desc", fmt::format("{}", set->desc)});
+        if (set->title)
+            setvars.insert({"title", fmt::format("{}", set->title)});
+        if (set->prev)
+            setvars.insert({"prev", fmt::format("{}", set->prev)});
+        if (set->parent)
+            setvars.insert({"parent", fmt::format("{}", set->parent)});
+        if (set->line)
+            setvars.insert({"line", fmt::format("{}", set->line)});
+        if (set->task)
+            setvars.insert({"task", fmt::format("{:d}", set->task)});
+        if (set->task_pop)
+            setvars.insert({"task_pop", fmt::format("{:d}", set->task_pop)});
+        if (set->task_err)
+            setvars.insert({"task_err", fmt::format("{:d}", set->task_err)});
+        if (set->task_out)
+            setvars.insert({"task_out", fmt::format("{:d}", set->task_out)});
+        if (set->in_terminal)
+            setvars.insert({"run_in_terminal", fmt::format("{:d}", set->in_terminal)});
+        if (set->keep_terminal)
+            setvars.insert({"keep_terminal", fmt::format("{:d}", set->keep_terminal)});
+        if (set->scroll_lock)
+            setvars.insert({"scroll_lock", fmt::format("{:d}", set->scroll_lock)});
+        if (set->opener != 0)
+            setvars.insert({"opener", fmt::format("{}", set->opener)});
+    }
+
+    return setvars;
+}
+
+static const xsetpak_t
+xset_pack_sets()
+{
+    // this is stupid, but it works.
+    // trying to .push_back() a toml::value into a toml::value
+    // segfaults with toml::detail::throw_bad_cast.
+    //
+    // So the whole toml::value has to get created in one go,
+    // so construct a map that toml::value can then consume.
+
+    // map layout <XSet->name, <XSet->var, XSet->value>>
+    xsetpak_t xsetpak;
+
+    for (XSet* set: xsets)
+    {
+        setvars_t setvars = xset_pack_set(set);
+
+        if (!setvars.empty())
+            xsetpak.insert({fmt::format("{}", set->name), setvars});
+    }
+
+    return xsetpak;
 }
 
 void
@@ -685,7 +1136,6 @@ free_settings()
 {
     if (!xset_cmd_history.empty())
         xset_cmd_history.clear();
-
     xset_free_all();
 }
 
@@ -1137,177 +1587,6 @@ xset_is_main_bookmark(XSet* set)
             break;
     }
     return nullptr;
-}
-
-static void
-xset_write_set(std::string& buf, XSet* set)
-{
-    if (set->plugin)
-        return;
-    if (set->s)
-        buf.append(fmt::format("{}-s=\"{}\"\n", set->name, set->s));
-    if (set->x)
-        buf.append(fmt::format("{}-x=\"{}\"\n", set->name, set->x));
-    if (set->y)
-        buf.append(fmt::format("{}-y=\"{}\"\n", set->name, set->y));
-    if (set->z)
-        buf.append(fmt::format("{}-z=\"{}\"\n", set->name, set->z));
-    if (set->key)
-        buf.append(fmt::format("{}-key=\"{}\"\n", set->name, set->key));
-    if (set->keymod)
-        buf.append(fmt::format("{}-keymod=\"{}\"\n", set->name, set->keymod));
-    // menu label
-    if (set->menu_label)
-    {
-        if (set->lock)
-        {
-            // built-in
-            if (set->in_terminal && set->menu_label && set->menu_label[0])
-                // only save lbl if menu_label was customized
-                buf.append(fmt::format("{}-menu_label=\"{}\"\n", set->name, set->menu_label));
-        }
-        else
-        {
-            // custom
-            buf.append(fmt::format("{}-menu_label_custom=\"{}\"\n", set->name, set->menu_label));
-        }
-    }
-    // icon
-    if (set->lock)
-    {
-        // built-in
-        if (set->keep_terminal)
-            // only save icn if icon was customized
-            buf.append(fmt::format("{}-icn=\"{}\"\n", set->name, set->icon ? set->icon : ""));
-    }
-    else if (set->icon)
-    {
-        // custom
-        buf.append(fmt::format("{}-icon=\"{}\"\n", set->name, set->icon));
-    }
-
-    if (set->next)
-        buf.append(fmt::format("{}-next=\"{}\"\n", set->name, set->next));
-    if (set->child)
-        buf.append(fmt::format("{}-child=\"{}\"\n", set->name, set->child));
-    if (set->context)
-        buf.append(fmt::format("{}-context=\"{}\"\n", set->name, set->context));
-    if (set->b != XSetB::XSET_B_UNSET)
-        buf.append(fmt::format("{}-b=\"{}\"\n", set->name, set->b));
-    if (set->tool != XSetTool::NOT)
-        buf.append(fmt::format("{}-tool=\"{}\"\n", set->name, INT(set->tool)));
-
-    if (!set->lock)
-    {
-        if (set->menu_style != XSetMenu::NORMAL)
-            buf.append(fmt::format("{}-style=\"{}\"\n", set->name, INT(set->menu_style)));
-        if (set->desc)
-            buf.append(fmt::format("{}-desc=\"{}\"\n", set->name, set->desc));
-        if (set->title)
-            buf.append(fmt::format("{}-title=\"{}\"\n", set->name, set->title));
-        if (set->prev)
-            buf.append(fmt::format("{}-prev=\"{}\"\n", set->name, set->prev));
-        if (set->parent)
-            buf.append(fmt::format("{}-parent=\"{}\"\n", set->name, set->parent));
-        if (set->line)
-            buf.append(fmt::format("{}-line=\"{}\"\n", set->name, set->line));
-        if (set->task)
-            buf.append(fmt::format("{}-task=\"{:d}\"\n", set->name, set->task));
-        if (set->task_pop)
-            buf.append(fmt::format("{}-task_pop=\"{:d}\"\n", set->name, set->task_pop));
-        if (set->task_err)
-            buf.append(fmt::format("{}-task_err=\"{:d}\"\n", set->name, set->task_err));
-        if (set->task_out)
-            buf.append(fmt::format("{}-task_out=\"{:d}\"\n", set->name, set->task_out));
-        if (set->in_terminal)
-            buf.append(fmt::format("{}-run_in_terminal=\"{:d}\"\n", set->name, set->in_terminal));
-        if (set->keep_terminal)
-            buf.append(fmt::format("{}-keep_terminal=\"{:d}\"\n", set->name, set->keep_terminal));
-        if (set->scroll_lock)
-            buf.append(fmt::format("{}-scroll_lock=\"{:d}\"\n", set->name, set->scroll_lock));
-        if (set->opener != 0)
-            buf.append(fmt::format("{}-opener=\"{}\"\n", set->name, set->opener));
-    }
-}
-
-static void
-xset_write(std::string& buf)
-{
-    for (XSet* set: xsets)
-    {
-        // hack to not save default handlers - this allows default handlers
-        // to be updated more easily
-        if (set->disable && set->name[0] == 'h' && ztd::startswith(set->name, "hand"))
-            continue;
-        xset_write_set(buf, set);
-    }
-}
-
-static void
-xset_parse(std::string& line)
-{
-    std::size_t sep = line.find("=");
-    if (sep == std::string::npos)
-        return;
-
-    std::size_t sep2 = line.find("-");
-    if (sep2 == std::string::npos)
-        return;
-
-    line = ztd::strip(line);
-
-    if (line.at(0) == '#')
-        return;
-
-    std::string token = line.substr(0, sep2);
-    std::string value = line.substr(sep + 1, std::string::npos - 1);
-    std::string token_var = line.substr(sep2 + 1, sep - sep2 - 1);
-
-    XSetSetSet var;
-    try
-    {
-        var = xset_set_set_encode(token_var);
-    }
-    catch (const std::logic_error& e)
-    {
-        std::string msg = fmt::format("XSet parse error:\n\n{}", e.what());
-        ptk_show_error(nullptr, "Error", e.what());
-        return;
-    }
-
-    // remove any quotes
-    value = ztd::replace(value, "\"", "");
-
-    if (value.empty())
-        return;
-
-    if (ztd::startswith(token, "cstm_") || ztd::startswith(token, "hand_"))
-    {
-        // custom
-        if (ztd::same(token, set_last->name))
-        {
-            xset_set_set(set_last, var, value);
-        }
-        else
-        {
-            set_last = xset_get(token);
-            if (set_last->lock)
-                set_last->lock = false;
-            xset_set_set(set_last, var, value);
-        }
-    }
-    else
-    {
-        // normal (lock)
-        if (ztd::same(token, set_last->name))
-        {
-            xset_set_set(set_last, var, value);
-        }
-        else
-        {
-            set_last = xset_set(token, var, value);
-        }
-    }
 }
 
 XSet*
@@ -2580,12 +2859,13 @@ xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
 
     for (XSet* set: xsets)
     {
-        if (set->plugin && !strcmp(plug_name, set->plug_name) && !strcmp(plug_dir, set->plug_dir))
+        if (set->plugin && ztd::same(plug_name, set->plug_name) &&
+            ztd::same(plug_dir, set->plug_dir))
             return set;
     }
 
     // add new
-    std::string setname = xset_custom_new_name();
+    const std::string setname = xset_custom_new_name();
 
     XSet* set = xset_new(setname, XSetName::CUSTOM);
     set->plug_dir = ztd::strdup(plug_dir);
@@ -2593,30 +2873,16 @@ xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
     set->plugin = true;
     set->lock = false;
     xsets.push_back(set);
+
     return set;
 }
 
 static void
-xset_parse_plugin(const char* plug_dir, const std::string& line, PluginUse use)
+xset_parse_plugin(const char* plug_dir, const std::string& name, const std::string& setvar,
+                  const std::string& value, PluginUse use)
 {
-    std::size_t sep = line.find("=");
-    if (sep == std::string::npos)
-        return;
-
-    std::size_t sep2 = line.find("-");
-    if (sep2 == std::string::npos)
-        return;
-
-    std::string token = line.substr(0, sep2);
-    std::string value = line.substr(sep + 1, std::string::npos - 1);
-    std::string token_var = line.substr(sep2 + 1, sep - sep2 - 1);
-
     if (value.empty())
         return;
-
-    const char* name = line.c_str();
-    XSet* set;
-    XSet* set2;
 
     // handler
     std::string prefix;
@@ -2647,21 +2913,26 @@ xset_parse_plugin(const char* plug_dir, const std::string& line, PluginUse use)
     XSetSetSet var;
     try
     {
-        var = xset_set_set_encode(token_var);
+        var = xset_set_set_encode(setvar);
     }
     catch (const std::logic_error& e)
     {
-        std::string msg = fmt::format("Plugin load error:\n\"{}\"\n{}", plug_dir, e.what());
-        ptk_show_error(nullptr, "Error", e.what());
+        const std::string msg = fmt::format("Plugin load error:\n\"{}\"\n{}", plug_dir, e.what());
+        LOG_ERROR("{}", msg);
+        ptk_show_error(nullptr, "Plugin Load Error", msg);
         return;
     }
-    set = xset_get_by_plug_name(plug_dir, name);
+
+    XSet* set;
+    XSet* set2;
+
+    set = xset_get_by_plug_name(plug_dir, name.c_str());
     xset_set_set(set, var, value);
 
     if (use >= PluginUse::BOOKMARKS)
     {
         // map plug names to new set names (does not apply to handlers)
-        if (set->prev && ztd::same(token_var, "prev"))
+        if (set->prev && var == XSetSetSet::PREV)
         {
             if (ztd::startswith(set->prev, "cstm_"))
             {
@@ -2675,7 +2946,7 @@ xset_parse_plugin(const char* plug_dir, const std::string& line, PluginUse use)
                 set->prev = nullptr;
             }
         }
-        else if (set->next && ztd::same(token_var, "next"))
+        else if (set->next && var == XSetSetSet::NEXT)
         {
             if (ztd::startswith(set->next, "cstm_"))
             {
@@ -2689,7 +2960,7 @@ xset_parse_plugin(const char* plug_dir, const std::string& line, PluginUse use)
                 set->next = nullptr;
             }
         }
-        else if (set->parent && ztd::same(token_var, "parent"))
+        else if (set->parent && var == XSetSetSet::PARENT)
         {
             if (ztd::startswith(set->parent, "cstm_"))
             {
@@ -2703,7 +2974,7 @@ xset_parse_plugin(const char* plug_dir, const std::string& line, PluginUse use)
                 set->parent = nullptr;
             }
         }
-        else if (set->child && ztd::same(token_var, "child"))
+        else if (set->child && var == XSetSetSet::CHILD)
         {
             if (ztd::startswith(set->child, "cstm_"))
             {
@@ -2723,8 +2994,6 @@ xset_parse_plugin(const char* plug_dir, const std::string& line, PluginUse use)
 XSet*
 xset_import_plugin(const char* plug_dir, PluginUse* use)
 {
-    bool func;
-
     if (use)
         *use = PluginUse::NORMAL;
 
@@ -2746,76 +3015,87 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
     }
 
     // read plugin file into xsets
-    bool plugin_good = false;
-    std::string plugin = Glib::build_filename(plug_dir, "plugin");
+    const std::string plugin = Glib::build_filename(plug_dir, PLUGIN_FILE_FILENAME);
 
-    std::string line;
-    std::ifstream file(plugin);
-    if (!file.is_open())
+    if (!std::filesystem::exists(plugin))
+        return nullptr;
+
+    toml::value toml_data;
+    try
     {
-        LOG_WARN("Error reading plugin file {}", plugin);
+        toml_data = toml::parse(plugin);
+        // DEBUG
+        // std::cout << "###### TOML PARSE ######" << "\n\n";
+        // std::cout << toml_data << "\n\n";
+    }
+    catch (const toml::syntax_error& e)
+    {
+        const std::string msg =
+            fmt::format("Plugin file parsing failed:\n\"{}\"\n{}", plugin, e.what());
+        LOG_ERROR("{}", msg);
+        ptk_show_error(nullptr, "Plugin Load Error", msg);
         return nullptr;
     }
 
-    if (file.is_open())
+    bool plugin_good = false;
+
+    // const std::uint64_t version = get_config_file_version(toml_data);
+
+    // loop over all of [[Plugin]]
+    for (const auto& section: toml::find<toml::array>(toml_data, PLUGIN_FILE_SECTION_PLUGIN))
     {
-        while (std::getline(file, line))
+        // get [Plugin.name] and all vars
+        for (const auto& [toml_name, toml_vars]: section.as_table())
         {
-            if (line.empty())
-                continue;
-
-            if (line.at(0) == '[')
+            // get var and value
+            for (const auto& [toml_var, toml_value]: toml_vars.as_table())
             {
-                if (ztd::same(line, "[Plugin]"))
-                    func = true;
-                else
-                    func = false;
-                continue;
-            }
+                std::stringstream ss_name;
+                std::stringstream ss_var;
+                std::stringstream ss_value;
 
-            if (func)
-            {
-                std::size_t sep = line.find("=");
-                if (sep == std::string::npos)
-                    continue;
+                ss_name << toml_name;
+                ss_var << toml_var;
+                ss_value << toml_value;
 
-                std::string token = line.substr(0, sep);
-                std::string value = line.substr(sep + 1, std::string::npos - 1);
+                const std::string name{ss_name.str()};
+                const std::string var{ss_var.str()};
+                const std::string value{ztd::strip(ss_value.str(), "\"")};
+
+                // LOG_INFO("name: {} | var: {} | value: {}", name, var, value);
 
                 if (use && *use == PluginUse::NORMAL)
                 {
-                    if (ztd::same(token, "main_book-child"))
+                    if (ztd::same(name, "main_book-child"))
                     {
                         // This plugin is an export of all bookmarks
                         *use = PluginUse::BOOKMARKS;
                     }
-                    else if (token.substr(0, 5) == "hand_")
+                    else if (ztd::startswith(name, "hand_"))
                     {
-                        if (token.substr(0, 8) == "hand_fs_")
+                        if (ztd::startswith(name, "hand_fs_"))
                             *use = PluginUse::HAND_FS;
-                        else if (token.substr(0, 9) == "hand_arc_")
+                        else if (ztd::startswith(name, "hand_arc_"))
                             *use = PluginUse::HAND_ARC;
-                        else if (token.substr(0, 9) == "hand_net_")
+                        else if (ztd::startswith(name, "hand_net_"))
                             *use = PluginUse::HAND_NET;
-                        else if (token.substr(0, 7) == "hand_f_")
+                        else if (ztd::startswith(name, "hand_f_"))
                             *use = PluginUse::HAND_FILE;
                     }
                 }
-                xset_parse_plugin(plug_dir, token, use ? *use : PluginUse::NORMAL);
+                xset_parse_plugin(plug_dir, name, var, value, use ? *use : PluginUse::NORMAL);
                 if (!plugin_good)
                     plugin_good = true;
             }
         }
     }
 
-    file.close();
-
     // clean plugin sets, set type
     bool top = true;
     XSet* rset = nullptr;
     for (XSet* set: xsets)
     {
-        if (set->plugin && !strcmp(plug_dir, set->plug_dir))
+        if (set->plugin && ztd::same(plug_dir, set->plug_dir))
         {
             set->key = 0;
             set->keymod = 0;
@@ -2875,7 +3155,8 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
     }
     else
     {
-        std::string plugin = Glib::build_filename(plugin_data->plug_dir, "plugin");
+        const std::string plugin =
+            Glib::build_filename(plugin_data->plug_dir, PLUGIN_FILE_FILENAME);
         if (std::filesystem::exists(plugin))
         {
             PluginUse use = PluginUse::NORMAL;
@@ -3171,7 +3452,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& p
 }
 
 static bool
-xset_custom_export_files(XSet* set, const char* plug_dir)
+xset_custom_export_files(XSet* set, const std::string& plug_dir)
 {
     std::string path_src;
     std::string path_dest;
@@ -3212,19 +3493,22 @@ xset_custom_export_files(XSet* set, const char* plug_dir)
 }
 
 static bool
-xset_custom_export_write(std::string& buf, XSet* set, const char* plug_dir)
+xset_custom_export_write(xsetpak_t& xsetpak, XSet* set, const std::string& plug_dir)
 { // recursively write set, submenu sets, and next sets
-    xset_write_set(buf, set);
+    xsetpak_t xsetpak_local{{fmt::format("{}", set->name), xset_pack_set(set)}};
+
+    xsetpak.insert(xsetpak_local.begin(), xsetpak_local.end());
+
     if (!xset_custom_export_files(set, plug_dir))
         return false;
     if (set->menu_style == XSetMenu::SUBMENU && set->child)
     {
-        if (!xset_custom_export_write(buf, xset_get(set->child), plug_dir))
+        if (!xset_custom_export_write(xsetpak, xset_get(set->child), plug_dir))
             return false;
     }
     if (set->next)
     {
-        if (!xset_custom_export_write(buf, xset_get(set->next), plug_dir))
+        if (!xset_custom_export_write(xsetpak, xset_get(set->next), plug_dir))
             return false;
     }
     return true;
@@ -3235,9 +3519,6 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 {
     const char* deffolder;
     std::string deffile;
-
-    std::string plug_dir_q;
-    std::string path_q;
 
     // get new plugin filename
     XSet* save = xset_get(XSetName::PLUG_CFILE);
@@ -3310,23 +3591,23 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
         std::filesystem::permissions(plug_dir, std::filesystem::perms::owner_all);
 
         // Create plugin file
-        std::string plugin_path = Glib::build_filename(plug_dir, "plugin");
+        // const std::string plugin_path = Glib::build_filename(plug_dir, PLUGIN_FILE_FILENAME);
 
-        std::string buf = "";
-
-        buf.append("[Plugin]\n");
-        xset_write_set(buf, xset_get(XSetName::CONFIG_VERSION));
-
+        // Do not want to store plugins prev/next/parent
+        // TODO - Better way
         char* s_prev = set->prev;
         char* s_next = set->next;
         char* s_parent = set->parent;
-        set->prev = set->next = set->parent = nullptr;
-        xset_write_set(buf, set);
+        set->prev = nullptr;
+        set->next = nullptr;
+        set->parent = nullptr;
+        xsetpak_t xsetpak{{fmt::format("{}", set->name), xset_pack_set(set)}};
         set->prev = s_prev;
         set->next = s_next;
         set->parent = s_parent;
+        //
 
-        if (!xset_custom_export_files(set, plug_dir.c_str()))
+        if (!xset_custom_export_files(set, plug_dir))
         {
             if (!set->plugin)
             {
@@ -3343,7 +3624,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
         }
         if (set->menu_style == XSetMenu::SUBMENU && set->child)
         {
-            if (!xset_custom_export_write(buf, xset_get(set->child), plug_dir.c_str()))
+            if (!xset_custom_export_write(xsetpak, xset_get(set->child), plug_dir))
             {
                 if (!set->plugin)
                 {
@@ -3359,15 +3640,29 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
                 return;
             }
         }
-        buf.append("\n");
+
+        // Plugin TOML
+        const toml::value toml_data = toml::value{
+            {CONFIG_FILE_SECTION_VERSION,
+             toml::value{
+                 {"version", CONFIG_FILE_VERSION},
+             }},
+
+            {PLUGIN_FILE_SECTION_PLUGIN,
+             toml::value{
+                 xsetpak,
+             }},
+        };
 
         std::ofstream file(path);
         if (file.is_open())
-            file << buf;
+            file << toml_data;
         file.close();
     }
     else
+    {
         plug_dir = ztd::strdup(set->plug_dir);
+    }
 
     // tar and delete tmp files
     // task
@@ -3377,8 +3672,8 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
                               parent,
                               file_browser ? file_browser->task_view : nullptr);
 
-    plug_dir_q = bash_quote(plug_dir);
-    path_q = bash_quote(path);
+    const std::string plug_dir_q = bash_quote(plug_dir);
+    const std::string path_q = bash_quote(path);
     if (!set->plugin)
         ptask->task->exec_command =
             fmt::format("tar --numeric-owner -cJf {} * ; err=$? ; rm -rf {} ; "

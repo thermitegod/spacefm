@@ -50,10 +50,10 @@ logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
 if not args.config_dir:
     logger.error(f'Missing arg --config-dir')
-    raise SystemExit
+    raise SystemExit(1)
 if not args.config_file:
     logger.error(f'Missing arg --config-file')
-    raise SystemExit
+    raise SystemExit(1)
 
 config_dir: Path = Path(args.config_dir[0])
 config_file: Path = Path(args.config_file[0])

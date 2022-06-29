@@ -230,8 +230,8 @@ pre_args = [
     '-DGIOMM_DISABLE_DEPRECATED',
     ]
 
-if get_option('nonlatin')
-  pre_args += '-DHAVE_NONLATIN'
+if get_option('deprecated-ini-loading')
+  pre_args += '-DHAVE_DEPRECATED_INI_LOADING'
 endif
 
 if get_option('deprecated-hw')
@@ -255,6 +255,7 @@ spdlog_dep = dependency('spdlog', required : true)
 fmt_dep = dependency('fmt', required : true)
 sigc_dep = dependency('sigc++-3.0', required : true)
 magic_enum_dep = dependency('magic_enum', required : true)
+toml11_dep = dependency('toml11', required : true)
 
 #gtk_dep = dependency('gtk+-4.0', required : true)
 gtk_dep = dependency('gtk+-3.0', required : true)
@@ -338,6 +339,7 @@ spacefm = build_target(
     fmt_dep,
     sigc_dep,
     magic_enum_dep,
+    toml11_dep,
 
     libudev_dep,
     libffmpegthumbnailer_dep,

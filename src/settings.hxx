@@ -46,30 +46,30 @@ struct AppSettings
 {
     // General Settings
     bool show_thumbnail{false};
-    int max_thumb_size{8 << 20};
+    std::uint64_t max_thumb_size{8 << 20};
 
-    int big_icon_size{48};
-    int small_icon_size{22};
-    int tool_icon_size{0};
+    std::uint64_t big_icon_size{48};
+    std::uint64_t small_icon_size{22};
+    std::uint64_t tool_icon_size{22};
 
     bool single_click{false};
     bool no_single_hover{false};
 
     bool no_execute{true};
     bool no_confirm{false};
-    // bool no_confirm_delete{false}; // probably too dangerous
+    bool no_confirm_delete{false};
     bool no_confirm_trash{true};
     bool load_saved_tabs{true};
     std::string date_format{""};
 
     // Sort by name, size, time
-    int sort_order{0};
+    std::uint64_t sort_order{0};
     // ascending, descending
-    int sort_type{0};
+    std::uint64_t sort_type{0};
 
     // Window State
-    int width{640};
-    int height{480};
+    std::uint64_t width{640};
+    std::uint64_t height{480};
     bool maximized{false};
 
     // Interface
@@ -96,7 +96,7 @@ struct ConfigSettings
 
 extern ConfigSettings config_settings;
 
-void load_conf();
+void load_etc_conf();
 void load_settings();
 void autosave_settings();
 void save_settings(void* main_window_ptr);
