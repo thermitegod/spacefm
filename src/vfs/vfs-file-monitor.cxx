@@ -278,8 +278,7 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
             // Disconnected from inotify server, but there are still monitors, reconnect
             if (vfs_file_monitor_connect_to_inotify())
             {
-                std::map<const char*, VFSFileMonitor*>::iterator it;
-                for (it = monitor_map.begin(); it != monitor_map.end(); it++)
+                for (auto it = monitor_map.begin(); it != monitor_map.end(); ++it)
                 {
                     vfs_file_monitor_reconnect_inotify(it->first, it->second);
                 }
@@ -316,8 +315,7 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
 
         VFSFileMonitor* monitor = nullptr;
 
-        std::map<const char*, VFSFileMonitor*>::iterator it;
-        for (it = monitor_map.begin(); it != monitor_map.end(); it++)
+        for (auto it = monitor_map.begin(); it != monitor_map.end(); ++it)
         {
             if (it->second->wd != ievent->wd)
                 continue;

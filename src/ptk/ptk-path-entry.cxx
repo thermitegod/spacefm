@@ -270,9 +270,8 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
                 }
 
                 // add sorted list to liststore
-                GSList* l;
                 name_list = g_slist_sort(name_list, (GCompareFunc)g_strcmp0);
-                for (l = name_list; l; l = l->next)
+                for (GSList* l = name_list; l; l = l->next)
                 {
                     const std::string disp_name = Glib::filename_display_basename((char*)l->data);
                     gtk_list_store_append(list, &it);

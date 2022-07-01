@@ -279,8 +279,7 @@ static bool
 combo_sep(GtkTreeModel* model, GtkTreeIter* it, void* user_data)
 {
     (void)user_data;
-    int i;
-    for (i = 2; i > 0; --i)
+    for (int i = 2; i > 0; --i)
     {
         char* tmp;
         gtk_tree_model_get(model, it, i, &tmp, -1);

@@ -69,8 +69,7 @@ vfs_mime_type_reload(void* user_data)
     /* Remove all items in the hash table */
 
     mime_map_lock.lock();
-    std::map<const char*, VFSMimeType*>::iterator it;
-    for (it = mime_map.begin(); it != mime_map.end(); it++)
+    for (auto it = mime_map.begin(); it != mime_map.end(); ++it)
     {
         vfs_mime_type_unref(it->second);
     }
@@ -138,8 +137,7 @@ vfs_mime_type_clean()
 
     mime_type_finalize();
 
-    std::map<const char*, VFSMimeType*>::iterator it;
-    for (it = mime_map.begin(); it != mime_map.end(); it++)
+    for (auto it = mime_map.begin(); it != mime_map.end(); ++it)
     {
         vfs_mime_type_unref(it->second);
     }
@@ -370,12 +368,11 @@ void
 vfs_mime_type_set_icon_size(int big, int small)
 {
     mime_map_lock.lock();
-    std::map<const char*, VFSMimeType*>::iterator it;
     if (big != big_icon_size)
     {
         big_icon_size = big;
         /* Unload old cached icons */
-        for (it = mime_map.begin(); it != mime_map.end(); it++)
+        for (auto it = mime_map.begin(); it != mime_map.end(); ++it)
         {
             free_cached_icons(it->first, it->second, true);
         }
@@ -384,7 +381,7 @@ vfs_mime_type_set_icon_size(int big, int small)
     {
         small_icon_size = small;
         /* Unload old cached icons */
-        for (it = mime_map.begin(); it != mime_map.end(); it++)
+        for (auto it = mime_map.begin(); it != mime_map.end(); ++it)
         {
             free_cached_icons(it->first, it->second, false);
         }

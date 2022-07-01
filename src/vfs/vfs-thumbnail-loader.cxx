@@ -167,8 +167,7 @@ thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
         }
 
         bool need_update = false;
-        int i;
-        for (i = 0; i < 2; ++i)
+        for (int i = 0; i < 2; ++i)
         {
             if (req->n_requests[i] == 0)
                 continue;
@@ -292,8 +291,7 @@ vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
     {
         vfs_async_task_lock(loader->task);
         // LOG_DEBUG("TRY TO CANCEL REQUESTS!!");
-        GList* l;
-        for (l = loader->queue->head; l;)
+        for (GList* l = loader->queue->head; l;)
         {
             VFSThumbnailRequest* req = VFS_THUMBNAIL_REQUEST(l->data);
             --req->n_requests[is_big ? VFSThumbnailSize::LOAD_BIG_THUMBNAIL

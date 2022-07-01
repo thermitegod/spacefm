@@ -698,8 +698,7 @@ update_created_files(const char* key, VFSDir* dir)
     if (dir->created_files)
     {
         vfs_dir_lock(dir);
-        GSList* l;
-        for (l = dir->created_files; l; l = l->next)
+        for (GSList* l = dir->created_files; l; l = l->next)
         {
             VFSFileInfo* file;
             VFSFileInfo* file_found = vfs_dir_find_file(dir, (char*)l->data, nullptr);
@@ -742,8 +741,7 @@ notify_file_change(void* user_data)
 {
     (void)user_data;
 
-    std::map<const char*, VFSDir*>::iterator it;
-    for (it = dir_map.begin(); it != dir_map.end(); it++)
+    for (auto it = dir_map.begin(); it != dir_map.end(); ++it)
     {
         update_changed_files(it->first, it->second);
         update_created_files(it->first, it->second);
@@ -760,8 +758,7 @@ vfs_dir_flush_notify_cache()
         g_source_remove(change_notify_timeout);
     change_notify_timeout = 0;
 
-    std::map<const char*, VFSDir*>::iterator it;
-    for (it = dir_map.begin(); it != dir_map.end(); it++)
+    for (auto it = dir_map.begin(); it != dir_map.end(); ++it)
     {
         update_changed_files(it->first, it->second);
         update_created_files(it->first, it->second);
@@ -880,8 +877,7 @@ on_mime_type_reload(void* user_data)
 {
     (void)user_data;
     // LOG_DEBUG("reload mime-type");
-    std::map<const char*, VFSDir*>::iterator it;
-    for (it = dir_map.begin(); it != dir_map.end(); it++)
+    for (auto it = dir_map.begin(); it != dir_map.end(); ++it)
     {
         reload_mime_type(it->first, it->second);
     }
@@ -891,8 +887,7 @@ void
 vfs_dir_foreach(VFSDirForeachFunc func, void* user_data)
 {
     // LOG_DEBUG("reload mime-type");
-    std::map<const char*, VFSDir*>::iterator it;
-    for (it = dir_map.begin(); it != dir_map.end(); it++)
+    for (auto it = dir_map.begin(); it != dir_map.end(); ++it)
     {
         func(it->first, it->second, user_data);
     }

@@ -227,7 +227,7 @@ MimeCache::lookup_glob(const char* filename, int* glob_len)
     /* entry size is changed in mime.cache 1.1 */
     std::size_t entry_size = 12;
 
-    for (unsigned int i = 0; i < m_n_globs; ++i)
+    for (std::size_t i = 0; i < m_n_globs; ++i)
     {
         const char* glob = m_buffer + VAL32(entry, 0);
         int _glob_len;
@@ -329,9 +329,9 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data,
 
         if (mask_off > 0) /* compare with mask applied */
         {
-            unsigned int i = 0;
             const char* mask = buf + mask_off;
 
+            std::size_t i = 0;
             for (; i < val_len; ++i)
             {
                 if ((data[offset + i] & mask[i]) != value[i])
@@ -352,9 +352,8 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data,
             if (n_children > 0)
             {
                 std::uint32_t first_child_off = VAL32(rule, 28);
-                unsigned int i;
                 rule = buf + first_child_off;
-                for (i = 0; i < n_children; ++i, rule += 32)
+                for (std::size_t i = 0; i < n_children; ++i, rule += 32)
                 {
                     if (magic_rule_match(buf, rule, data, len))
                         return true;

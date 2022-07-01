@@ -189,8 +189,7 @@ update_change_detection()
         {
             GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
             int n = gtk_notebook_get_n_pages(notebook);
-            int i;
-            for (i = 0; i < n; ++i)
+            for (int i = 0; i < n; ++i)
             {
                 PtkFileBrowser* file_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -695,8 +694,7 @@ ptk_location_view_clean_mount_points()
 
     // clean cache and Auto-Mount|Mount Dirs  (eg for fuse mounts)
     std::string path;
-    int i;
-    for (i = 0; i < 2; i++)
+    for (int i = 0; i < 2; ++i)
     {
         if (i == 0)
             path = Glib::build_filename(vfs_user_cache_dir(), "spacefm-mount");
@@ -825,7 +823,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
     std::filesystem::remove_all(point);
     while (std::filesystem::exists(point))
     {
-        point = fmt::format("{}-{}", point1, r++);
+        point = fmt::format("{}-{}", point1, ++r);
         std::filesystem::remove_all(point);
     }
     free(point1);
@@ -1890,9 +1888,9 @@ volume_is_visible(VFSVolume* vol)
     char* value;
 
     char* showhidelist = g_strdup_printf(" %s ", xset_get_s(XSetName::DEV_SHOW_HIDE_VOLUMES));
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; ++i)
     {
-        for (int j = 0; j < 2; j++)
+        for (int j = 0; j < 2; ++j)
         {
             if (i == 0)
                 value = vol->device_file;

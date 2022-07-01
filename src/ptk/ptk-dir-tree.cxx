@@ -339,8 +339,7 @@ ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* 
     int depth = gtk_tree_path_get_depth(path);
 
     PtkDirTreeNode* node = tree->root;
-    int i;
-    for (i = 0; i < depth; ++i)
+    for (int i = 0; i < depth; ++i)
     {
         node = get_nth_node(node, indices[i]);
         if (!node)
@@ -362,14 +361,11 @@ get_node_index(PtkDirTreeNode* parent, PtkDirTreeNode* child)
     if (!parent || !child)
         return -1;
 
-    PtkDirTreeNode* node;
-    int i;
-    for (i = 0, node = parent->children; node; node = node->next)
+    int i = 0;
+    for (PtkDirTreeNode* node = parent->children; node; node = node->next)
     {
         if (node == child)
-        {
             return i;
-        }
         ++i;
     }
     return -1;
@@ -701,14 +697,15 @@ dir_path_from_tree_node(PtkDirTree* tree, PtkDirTreeNode* node)
         node = node->parent;
     }
 
-    GSList* l;
     int len;
-    char* p;
-
+    GSList* l;
     for (len = 1, l = names; l; l = l->next)
+    {
         len += std::strlen((char*)l->data) + 1;
+    }
     char* dir_path = CHAR(g_malloc(len));
 
+    char* p;
     for (p = dir_path, l = names; l; l = l->next)
     {
         name = (char*)l->data;

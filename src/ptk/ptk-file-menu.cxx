@@ -862,8 +862,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         GtkWidget* app_menu_item;
         if (handlers_slist)
         {
-            GSList* sl;
-            for (sl = handlers_slist; sl; sl = sl->next)
+            for (GSList* sl = handlers_slist; sl; sl = sl->next)
             {
                 set = XSET(sl->data);
                 app_menu_item = gtk_menu_item_new_with_label(set->menu_label);
@@ -1009,7 +1008,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                 set = xset_set_cb(XSetName::OPENTAB_NEW,
                                   (GFunc)on_popup_open_in_new_tab_activate,
                                   data);
-                for (int i = 1; i < 11; i++)
+                for (int i = 1; i < 11; ++i)
                 {
                     std::string name = fmt::format("opentab_{}", i);
                     set = xset_set_cb(name, (GFunc)on_open_in_tab, data);
@@ -1024,7 +1023,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                 xset_set_ob1_int(set, "panel_num", -2);
                 set->disable = (panel_count == 1);
 
-                for (int i = 1; i < 5; i++)
+                for (int i = 1; i < 5; ++i)
                 {
                     std::string name = fmt::format("open_in_panel{}", i);
                     set = xset_set_cb(name, (GFunc)on_open_in_panel, data);
@@ -1097,7 +1096,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         set = xset_set_cb(XSetName::TAB_RESTORE, (GFunc)ptk_file_browser_go_tab, browser);
         xset_set_ob1_int(set, "tab_num", -4);
 
-        for (int i = 1; i < 11; i++)
+        for (int i = 1; i < 11; ++i)
         {
             std::string name = fmt::format("tab_{}", i);
             set = xset_set_cb(name, (GFunc)ptk_file_browser_go_tab, browser);
@@ -1210,8 +1209,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         set = xset_get(XSetName::MOVE_PANEL_NEXT);
         set->disable = (panel_count < 2);
 
-        bool b;
-        for (int i = 1; i < 11; i++)
+        for (int i = 1; i < 11; ++i)
         {
             std::string str;
             str = fmt::format("copy_tab_{}", i);
@@ -1225,7 +1223,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
             if (i > 4)
                 continue;
 
-            b = main_window_panel_is_visible(browser, i);
+            bool b = main_window_panel_is_visible(browser, i);
 
             str = fmt::format("copy_panel_{}", i);
             set = xset_get(str);

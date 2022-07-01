@@ -103,8 +103,6 @@ static void
 on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
 {
     (void)user_data;
-    int i;
-    int n;
     int ibig_icon = -1;
     int ismall_icon = -1;
     int itool_icon = -1;
@@ -146,7 +144,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                 for (panel_t p: PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    n = gtk_notebook_get_n_pages(notebook);
+                    int n = gtk_notebook_get_n_pages(notebook);
                     if (always_show_tabs)
                         gtk_notebook_set_show_tabs(notebook, true);
                     else if (n == 1)
@@ -165,8 +163,8 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                 for (panel_t p: PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    n = gtk_notebook_get_n_pages(notebook);
-                    for (i = 0; i < n; ++i)
+                    int n = gtk_notebook_get_n_pages(notebook);
+                    for (int i = 0; i < n; ++i)
                     {
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -222,8 +220,8 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                 for (panel_t p: PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    n = gtk_notebook_get_n_pages(notebook);
-                    for (i = 0; i < n; ++i)
+                    int n = gtk_notebook_get_n_pages(notebook);
+                    for (int i = 0; i < n; ++i)
                     {
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -286,8 +284,8 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                 for (panel_t p: PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    n = gtk_notebook_get_n_pages(notebook);
-                    for (i = 0; i < n; ++i)
+                    int n = gtk_notebook_get_n_pages(notebook);
+                    for (int i = 0; i < n; ++i)
                     {
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -308,8 +306,8 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                 for (panel_t p: PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    n = gtk_notebook_get_n_pages(notebook);
-                    for (i = 0; i < n; ++i)
+                    int n = gtk_notebook_get_n_pages(notebook);
+                    for (int i = 0; i < n; ++i)
                     {
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));

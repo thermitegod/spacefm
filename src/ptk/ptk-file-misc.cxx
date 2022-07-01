@@ -1158,10 +1158,10 @@ static void
 on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
 {
     (void)item;
-    int i;
+
     GtkWidget** mode = (GtkWidget**)g_object_get_data(G_OBJECT(dlg), "mode");
 
-    for (i = MODE_FILENAME; i <= MODE_PATH; i++)
+    for (int i = MODE_FILENAME; i <= MODE_PATH; ++i)
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
         {
@@ -1231,7 +1231,6 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), false);
 
     // Mode
-    int i;
     GtkWidget* mode[3];
     GtkWidget* hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
     mode[MODE_FILENAME] = gtk_radio_button_new_with_mnemonic(nullptr, "Fil_ename");
@@ -1243,7 +1242,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
                                                        "P_ath");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mode[mode_default]), true);
     gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new("Insert as"), false, true, 2);
-    for (i = MODE_FILENAME; i <= MODE_PATH; i++)
+    for (int i = MODE_FILENAME; i <= MODE_PATH; ++i)
     {
         gtk_widget_set_focus_on_click(GTK_WIDGET(mode[i]), false);
         g_signal_connect(G_OBJECT(mode[i]), "toggled", G_CALLBACK(on_browse_mode_toggled), dlg);
@@ -1270,7 +1269,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     // bogus GTK warning here: Unable to retrieve the file info for...
     if (response == GTK_RESPONSE_OK)
     {
-        for (i = MODE_FILENAME; i <= MODE_PATH; i++)
+        for (int i = MODE_FILENAME; i <= MODE_PATH; ++i)
         {
             if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
                 continue;
@@ -1309,7 +1308,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     }
 
     // save mode
-    for (i = MODE_FILENAME; i <= MODE_PATH; i++)
+    for (int i = MODE_FILENAME; i <= MODE_PATH; ++i)
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
         {
@@ -1956,9 +1955,9 @@ get_unique_name(const char* dir, const char* ext)
         if (n == 1000)
             return ztd::strdup(base);
         if (ext && ext[0] != '\0')
-            name = fmt::format("{}{}.{}", base, n++, ext);
+            name = fmt::format("{}{}.{}", base, ++n, ext);
         else
-            name = fmt::format("{}{}", base, n++);
+            name = fmt::format("{}{}", base, ++n);
         path = Glib::build_filename(dir, name);
     }
     return ztd::strdup(path);
@@ -2405,9 +2404,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         if (templates)
         {
             templates = g_list_sort(templates, (GCompareFunc)g_strcmp0);
-            GList* l;
             int x = 0;
-            for (l = templates; l && x++ < 500; l = l->next)
+            for (GList* l = templates; l && x++ < 500; l = l->next)
             {
                 gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template),
                                                (char*)l->data);
@@ -2437,8 +2435,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         if (templates)
         {
             templates = g_list_sort(templates, (GCompareFunc)g_strcmp0);
-            GList* l;
-            for (l = templates; l; l = l->next)
+            for (GList* l = templates; l; l = l->next)
             {
                 gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template_dir),
                                                (char*)l->data);
@@ -3338,7 +3335,6 @@ open_archives_with_handler(ParentInfo* parent, std::vector<VFSFileInfo*>& sel_fi
 static void
 open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
 {
-    GList* l;
     std::string str;
     std::string command_final;
     std::string name;
@@ -3383,7 +3379,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
     bool multiple = ztd::contains(command, keys);
     if (multiple)
     {
-        for (l = files; l; l = l->next)
+        for (GList* l = files; l; l = l->next)
         {
             // filename
             std::string quoted;
@@ -3402,7 +3398,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
     command = replace_line_subs(command);
 
     // start task(s)
-    for (l = files; l; l = l->next)
+    for (GList* l = files; l; l = l->next)
     {
         if (multiple)
         {

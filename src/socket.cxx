@@ -434,7 +434,7 @@ send_socket_command(int argc, char* argv[], std::string& reply)
     write(sock, "\n", 1);
 
     // send arguments
-    for (int i = 2; i < argc; i++)
+    for (int i = 2; i < argc; ++i)
     {
         write(sock, argv[i], std::strlen(argv[i]));
         write(sock, "\n", 1);

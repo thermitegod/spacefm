@@ -712,9 +712,8 @@ ptk_handler_command_is_empty(const std::string& command)
     if (!lines)
         return true;
 
-    int i;
     bool found = false;
-    for (i = 0; lines[i]; i++)
+    for (int i = 0; lines[i]; ++i)
     {
         g_strstrip(lines[i]);
         if (lines[i][0] != '\0' && lines[i][0] != '#')
@@ -782,7 +781,7 @@ ptk_handler_get_command(int mode, int cmd, XSet* handler_set)
                 return nullptr;
         }
 
-        for (std::size_t i = 0; i < nelements; i++)
+        for (std::size_t i = 0; i < nelements; ++i)
         {
             switch (mode)
             {
@@ -1028,11 +1027,10 @@ ptk_handler_values_in_list(const std::string list, const std::vector<std::string
         return false;
 
     // test each element for match
-    int i;
     char* element;
     bool required, match;
     bool ret = false;
-    for (i = 0; elements[i]; i++)
+    for (int i = 0; elements[i]; ++i)
     {
         if (!elements[i][0])
             continue;
@@ -1236,7 +1234,7 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
         overwrite = add_missing = true;
     }
 
-    for (std::size_t i = 0; i < nelements; i++)
+    for (std::size_t i = 0; i < nelements; ++i)
     {
         switch (mode)
         {
@@ -2306,7 +2304,7 @@ restore_defaults(HandlerData* hnd, bool all)
         }
 
         bool found_handler = false;
-        for (std::size_t i = 0; i < nelements; i++)
+        for (std::size_t i = 0; i < nelements; ++i)
         {
             switch (hnd->mode)
             {

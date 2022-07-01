@@ -774,7 +774,6 @@ info_drive_properties(device_t* device)
     const char* media_in_drive;
     bool drive_is_ejectable;
     bool drive_can_detach;
-    unsigned int n;
     const char* value;
 
     // drive identification
@@ -852,7 +851,7 @@ info_drive_properties(device_t* device)
 
     // drive_media_compatibility
     media_compat_array = g_ptr_array_new();
-    for (n = 0; drive_media_mapping[n].udev_property != nullptr; n++)
+    for (std::size_t n = 0; drive_media_mapping[n].udev_property != nullptr; ++n)
     {
         if (udev_device_get_property_value(device->udevice, drive_media_mapping[n].udev_property) ==
             nullptr)
@@ -887,7 +886,7 @@ info_drive_properties(device_t* device)
     media_in_drive = nullptr;
     if (device->device_is_media_available)
     {
-        for (n = 0; media_mapping[n].udev_property != nullptr; n++)
+        for (std::size_t n = 0; media_mapping[n].udev_property != nullptr; ++n)
         {
             if (udev_device_get_property_value(device->udevice, media_mapping[n].udev_property) ==
                 nullptr)
@@ -1077,8 +1076,7 @@ info_mount_points(device_t* device)
     // if we have the mount point list, use this instead of reading mountinfo
     if (devmounts)
     {
-        GList* l;
-        for (l = devmounts; l; l = l->next)
+        for (GList* l = devmounts; l; l = l->next)
         {
             if ((DEVMOUNT_T(l->data))->major == dmajor && (DEVMOUNT_T(l->data))->minor == dminor)
             {
@@ -1299,8 +1297,8 @@ info_partition(device_t* device)
         device->partition_offset = ztd::strdup(offset);
 
         char* s = device->native_path;
-        unsigned int n;
-        for (n = std::strlen(s) - 1; n >= 0 && g_ascii_isdigit(s[n]); n--)
+        std::size_t n;
+        for (n = std::strlen(s) - 1; n >= 0 && g_ascii_isdigit(s[n]); --n)
             ;
         device->partition_number = ztd::strdup(std::stol(s + n + 1, nullptr, 0));
         is_partition = true;
@@ -1486,7 +1484,6 @@ parse_mounts(bool report)
 
     // get all mount points for all devices
     GList* newmounts = nullptr;
-    GList* l;
     GList* changed = nullptr;
     devmount_t* devmount;
     bool subdir_mount;
@@ -1579,7 +1576,7 @@ parse_mounts(bool report)
 
         // LOG_INFO("mount_point({}:{})={}", major, minor, mount_point);
         devmount = nullptr;
-        for (l = newmounts; l; l = l->next)
+        for (GList* l = newmounts; l; l = l->next)
         {
             if ((DEVMOUNT_T(l->data))->major == major && (DEVMOUNT_T(l->data))->minor == minor)
             {
@@ -1645,7 +1642,7 @@ parse_mounts(bool report)
     // LOG_INFO("LINES DONE");
     // translate each mount points list to string
     std::string points;
-    for (l = newmounts; l; l = l->next)
+    for (GList* l = newmounts; l; l = l->next)
     {
         devmount = DEVMOUNT_T(l->data);
         // Sort the list to ensure that shortest mount paths appear first
@@ -1667,7 +1664,7 @@ parse_mounts(bool report)
     GList* found;
     if (report)
     {
-        for (l = newmounts; l; l = l->next)
+        for (GList* l = newmounts; l; l = l->next)
         {
             devmount = DEVMOUNT_T(l->data);
             // LOG_INFO("finding {}:{}", devmount->major, devmount->minor);
@@ -1700,7 +1697,7 @@ parse_mounts(bool report)
     }
     // LOG_INFO("REMAINING");
     // any remaining devices in old list have changed mount status
-    for (l = devmounts; l; l = l->next)
+    for (GList* l = devmounts; l; l = l->next)
     {
         devmount = DEVMOUNT_T(l->data);
         // LOG_INFO("remain {}:{}", devmount->major, devmount->minor );
@@ -1717,7 +1714,7 @@ parse_mounts(bool report)
     {
         VFSVolume* volume;
         char* devnode;
-        for (l = changed; l; l = l->next)
+        for (GList* l = changed; l; l = l->next)
         {
             devnode = nullptr;
             devmount = DEVMOUNT_T(l->data);
@@ -1762,8 +1759,7 @@ free_devmounts()
     if (!devmounts)
         return;
 
-    GList* l;
-    for (l = devmounts; l; l = l->next)
+    for (GList* l = devmounts; l; l = l->next)
     {
         devmount_t* devmount = DEVMOUNT_T(l->data);
         delete devmount;
@@ -1775,9 +1771,7 @@ free_devmounts()
 static const char*
 get_devmount_fstype(unsigned int major, unsigned int minor)
 {
-    GList* l;
-
-    for (l = devmounts; l; l = l->next)
+    for (GList* l = devmounts; l; l = l->next)
     {
         if ((DEVMOUNT_T(l->data))->major == major && (DEVMOUNT_T(l->data))->minor == minor)
             return (DEVMOUNT_T(l->data))->fstype;
@@ -2282,8 +2276,7 @@ mtab_fstype_is_handled_by_protocol(const char* mtab_fstype)
             // test handlers
             std::string msg;
             XSet* set;
-            int i;
-            for (i = 0; handlers[i]; i++)
+            for (int i = 0; handlers[i]; ++i)
             {
                 if (!handlers[i][0] || !(set = xset_is(handlers[i])) ||
                     set->b != XSetB::XSET_B_TRUE /* disabled */)
@@ -2692,10 +2685,9 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
         return nullptr;
 
     // test handlers
-    int i;
     bool found = false;
     std::string msg;
-    for (i = 0; handlers[i]; i++)
+    for (int i = 0; handlers[i]; ++i)
     {
         if (!handlers[i][0] || !(set = xset_is(handlers[i])) ||
             set->b != XSetB::XSET_B_TRUE /* disabled */)
@@ -2950,11 +2942,9 @@ vfs_volume_is_automount(VFSVolume* vol)
 
     std::string showhidelist =
         fmt::format(" {} ", ztd::null_check(xset_get_s(XSetName::DEV_AUTOMOUNT_VOLUMES)));
-    int i;
-    for (i = 0; i < 3; i++)
+    for (int i = 0; i < 3; ++i)
     {
-        int j;
-        for (j = 0; j < 2; j++)
+        for (int j = 0; j < 2; ++j)
         {
             if (i == 0)
                 value = vol->device_file;
@@ -3188,7 +3178,7 @@ vfs_volume_get_mount_options(VFSVolume* vol, char* options)
     bool trailing = false;
     int j = -1;
     char news[16384];
-    for (unsigned int i = 0; i < std::strlen(options); i++)
+    for (std::size_t i = 0; i < std::strlen(options); ++i)
     {
         if (leading && (options[i] == ' ' || options[i] == ','))
             continue;
@@ -3880,7 +3870,7 @@ call_callbacks(VFSVolume* vol, VFSVolumeState state)
     if (callbacks)
     {
         VFSVolumeCallbackData* e = VFS_VOLUME_CALLBACK_DATA(callbacks->data);
-        for (unsigned int i = 0; i < callbacks->len; ++i)
+        for (std::size_t i = 0; i < callbacks->len; ++i)
             (*e[i].cb)(vol, state, e[i].user_data);
     }
 
@@ -3921,7 +3911,7 @@ vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data)
         return;
 
     VFSVolumeCallbackData* e = VFS_VOLUME_CALLBACK_DATA(callbacks->data);
-    for (unsigned int i = 0; i < callbacks->len; ++i)
+    for (std::size_t i = 0; i < callbacks->len; ++i)
     {
         if (e[i].cb == cb && e[i].user_data == user_data)
         {

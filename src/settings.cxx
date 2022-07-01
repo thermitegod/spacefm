@@ -589,7 +589,7 @@ save_settings(void* main_window_ptr)
                             set->s = nullptr;
                         }
                         std::string tabs;
-                        for (int g = 0; g < pages; g++)
+                        for (int g = 0; g < pages; ++g)
                         {
                             PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
                                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]),
@@ -5677,7 +5677,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
         g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(XSetJob::HELP_ADD));
         g_signal_connect(submenu, "key_press_event", G_CALLBACK(xset_design_menu_keypress), set);
 
-        for (std::size_t i = INT(XSetTool::DEVICES); i < builtin_tool_name.size(); i++)
+        for (std::size_t i = INT(XSetTool::DEVICES); i < builtin_tool_name.size(); ++i)
         {
             newitem =
                 xset_design_additem(submenu, builtin_tool_name[i], XSetJob::ADD_TOOL, insert_set);
@@ -7629,7 +7629,6 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                                                 XSetTool::FWD_MENU,
                                                 XSetTool::UP,
                                                 XSetTool::DEFAULT};
-    int i;
     int stop_b4;
     XSet* set;
     XSet* set_target;
@@ -7660,7 +7659,7 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             else
                 stop_b4 = default_tools.size();
             set_target = set_child;
-            for (i = 0; i < stop_b4; i++)
+            for (int i = 0; i < stop_b4; ++i)
             {
                 set = xset_new_builtin_toolitem(default_tools.at(i));
                 xset_custom_insert_after(set_target, set);

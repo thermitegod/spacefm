@@ -948,7 +948,7 @@ rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
 void
 ptk_file_browser_rebuild_toolbars(PtkFileBrowser* file_browser)
 {
-    for (unsigned int i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); i++)
+    for (std::size_t i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); ++i)
     {
         g_slist_free(file_browser->toolbar_widgets[i]);
         file_browser->toolbar_widgets[i] = nullptr;
@@ -994,7 +994,7 @@ on_status_bar_button_press(GtkWidget* widget, GdkEventButton* event, PtkFileBrow
                 XSetName::STATUS_HIDE,
             };
 
-            for (std::size_t i = 0; i < setnames.size(); i++)
+            for (std::size_t i = 0; i < setnames.size(); ++i)
             {
                 if (!xset_get_b(setnames.at(i)))
                     continue;
@@ -1257,7 +1257,7 @@ ptk_file_browser_finalize(GObject* obj)
     file_browser->book_set_name = nullptr;
     free(file_browser->select_path);
     file_browser->select_path = nullptr;
-    for (unsigned int i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); i++)
+    for (std::size_t i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); ++i)
     {
         g_slist_free(file_browser->toolbar_widgets[i]);
         file_browser->toolbar_widgets[i] = nullptr;
@@ -1590,21 +1590,21 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
 
         // Set column widths for this panel context
         GtkTreeViewColumn* col;
-        int j, width;
+        int width;
         const char* title;
         XSet* set;
 
         if (GTK_IS_TREE_VIEW(file_browser->folder_view))
         {
             // LOG_INFO("    set widths   mode = {}", mode);
-            int i;
-            for (i = 0; i < 6; i++)
+            for (int i = 0; i < 6; ++i)
             {
                 col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), i);
                 if (!col)
                     break;
                 title = gtk_tree_view_column_get_title(col);
-                for (j = 0; j < 6; j++)
+                int j;
+                for (j = 0; j < 6; ++j)
                 {
                     if (ztd::same(title, column_titles.at(j)))
                         break;
@@ -1627,9 +1627,13 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
         }
     }
     else if (xset_get_b_panel(p, "list_icons"))
+    {
         ptk_file_browser_view_as_icons(file_browser);
+    }
     else if (xset_get_b_panel(p, "list_compact"))
+    {
         ptk_file_browser_view_as_compact_list(file_browser);
+    }
     else
     {
         xset_set_panel(p, "list_detailed", XSetSetSet::B, "1");
@@ -1656,7 +1660,7 @@ ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
     file_browser->inhibit_focus = file_browser->busy = false;
     file_browser->seek_name = nullptr;
     file_browser->book_set_name = nullptr;
-    for (unsigned int i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); i++)
+    for (std::size_t i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); ++i)
         file_browser->toolbar_widgets[i] = nullptr;
 
     if (xset_get_b_panel(curpanel, "list_detailed"))
@@ -3669,15 +3673,14 @@ ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_brow
         int p = file_browser->mypanel;
         char mode = main_window->panel_context[p - 1];
         // LOG_INFO("save_columns  fb={:p} (panel {})  mode = {}", fmt::ptr(file_browser), p, mode);
-        int i;
-        for (i = 0; i < 6; i++)
+        for (int i = 0; i < 6; ++i)
         {
             GtkTreeViewColumn* col = gtk_tree_view_get_column(view, i);
             if (!col)
                 return;
             const char* title = gtk_tree_view_column_get_title(col);
             int j;
-            for (j = 0; j < 6; j++)
+            for (j = 0; j < 6; ++j)
             {
                 if (ztd::same(title, column_titles.at(j)))
                     break;
@@ -3708,15 +3711,14 @@ on_folder_view_columns_changed(GtkTreeView* view, PtkFileBrowser* file_browser)
     if (file_browser->view_mode != PtkFBViewMode::PTK_FB_LIST_VIEW)
         return;
 
-    int i;
-    for (i = 0; i < 6; i++)
+    for (int i = 0; i < 6; ++i)
     {
         GtkTreeViewColumn* col = gtk_tree_view_get_column(view, i);
         if (!col)
             return;
         const char* title = gtk_tree_view_column_get_title(col);
         int j;
-        for (j = 0; j < 6; j++)
+        for (j = 0; j < 6; ++j)
         {
             if (ztd::same(title, column_titles.at(j)))
                 break;
@@ -4077,7 +4079,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
     int p = file_browser->mypanel;
     char mode = main_window->panel_context[p - 1];
 
-    for (std::size_t i = 0; i < cols.size(); i++)
+    for (std::size_t i = 0; i < cols.size(); ++i)
     {
         col = gtk_tree_view_column_new();
         gtk_tree_view_column_set_resizable(col, true);
@@ -4086,13 +4088,15 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
 
         // column order
         std::size_t j;
-        for (j = 0; j < cols.size(); j++)
+        for (j = 0; j < cols.size(); ++j)
         {
             if (xset_get_int_panel(p, column_names.at(j), XSetSetSet::X) == INT(i))
                 break;
         }
         if (j == cols.size())
-            j = i; // failsafe
+        { // failsafe
+            j = i;
+        }
         else
         {
             // column width

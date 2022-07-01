@@ -787,10 +787,10 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>
 
                 // Looping to find a path that doesnt exist
                 struct stat statbuf;
-                n = 1;
+                int c = 1;
                 while (lstat(udest_file.c_str(), &statbuf) == 0)
                 {
-                    udest_file = fmt::format("{}/{}-{}{}{}", dest_dir, desc, "copy", ++n, ext);
+                    udest_file = fmt::format("{}/{}-{}{}{}", dest_dir, desc, "copy", ++c, ext);
                 }
             }
             udest_quote = bash_quote(udest_file);
@@ -957,8 +957,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*
     const char* dest;
     std::string dest_quote;
     std::string full_quote;
-    int i;
-    int n;
     int res;
     struct stat statbuf;
     GSList* handlers_slist = nullptr;
@@ -1230,7 +1228,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*
             std::string filename_no_ext;
             if (pathnames)
             {
-                for (i = 0; pathnames[i]; ++i)
+                for (int i = 0; pathnames[i]; ++i)
                 {
                     // getting just the extension of the pathname list element
                     const auto namepack = get_name_extension(pathnames[i]);
@@ -1245,7 +1243,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*
                         if (ztd::endswith(filename, extension.c_str()))
                         {
                             // It is - determining filename without extension
-                            n = std::strlen(filename) - std::strlen(extension.c_str());
+                            std::size_t n = std::strlen(filename) - extension.size();
                             char ch = filename[n];
                             filename[n] = '\0';
                             filename_no_archive_ext = ztd::strdup(filename);
@@ -1300,7 +1298,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*
                 /* Determining full path of parent directory to make
                  * (also used later in '%g' substitution) */
                 parent_path = Glib::build_filename(dest, filename_no_archive_ext);
-                n = 1;
+                int n = 1;
 
                 // Looping to find a path that doesnt exist
                 while (lstat(parent_path.c_str(), &statbuf) == 0)
@@ -1347,7 +1345,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*
                  * guaranteed not to exist so as to avoid overwriting */
                 extract_target = Glib::build_filename(create_parent ? parent_path : dest,
                                                       filename_no_archive_ext);
-                n = 1;
+                int n = 1;
 
                 // Looping to find a path that doesnt exist
                 while (lstat(extract_target.c_str(), &statbuf) == 0)

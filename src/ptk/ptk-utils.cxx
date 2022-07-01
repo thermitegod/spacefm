@@ -76,7 +76,6 @@ transpose_nonlatin_keypress(GdkEventKey* event)
     unsigned int* keyvals;
     int n_entries;
     int level;
-    int n;
 
     GdkDisplay* display = gdk_display_get_default();
 
@@ -94,7 +93,7 @@ transpose_nonlatin_keypress(GdkEventKey* event)
                                            &keyvals,
                                            &n_entries))
     {
-        for (n = 0; n < n_entries; n++)
+        for (int n = 0; n < n_entries; ++n)
         {
             if (keys[n].group == event->group)
                 // Skip keys from the same group

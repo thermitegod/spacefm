@@ -564,8 +564,7 @@ main_window_rubberband_all()
         {
             GtkWidget* notebook = window->panel[p - 1];
             int num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
-            int i;
-            for (i = 0; i < num_pages; i++)
+            for (int i = 0; i < num_pages; ++i)
             {
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), i));
@@ -588,7 +587,7 @@ main_window_refresh_all()
         {
             int64_t notebook = (int64_t)window->panel[p - 1];
             int num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
-            for (int i = 0; i < num_pages; i++)
+            for (int i = 0; i < num_pages; ++i)
             {
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), i));
@@ -664,8 +663,7 @@ main_window_bookmark_changed(const char* changed_set_name)
         {
             GtkWidget* notebook = window->panel[p - 1];
             int num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
-            int i;
-            for (i = 0; i < num_pages; i++)
+            for (int i = 0; i < num_pages; ++i)
             {
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), i));
@@ -705,8 +703,7 @@ main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser)
         {
             GtkWidget* notebook = window->panel[p - 1];
             int pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
-            int cur_tabx;
-            for (cur_tabx = 0; cur_tabx < pages; cur_tabx++)
+            for (int cur_tabx = 0; cur_tabx < pages; ++cur_tabx)
             {
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), cur_tabx));
@@ -728,8 +725,7 @@ main_window_update_all_bookmark_views()
         {
             GtkWidget* notebook = window->panel[p - 1];
             int pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
-            int cur_tabx;
-            for (cur_tabx = 0; cur_tabx < pages; cur_tabx++)
+            for (int cur_tabx = 0; cur_tabx < pages; ++cur_tabx)
             {
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), cur_tabx));
@@ -785,8 +781,7 @@ main_window_toggle_thumbnails_all_windows()
         {
             GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
             int n = gtk_notebook_get_n_pages(notebook);
-            int i;
-            for (i = 0; i < n; ++i)
+            for (int i = 0; i < n; ++i)
             {
                 PtkFileBrowser* file_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -1265,8 +1260,7 @@ static void
 on_toggle_panelbar(GtkWidget* widget, FMMainWindow* main_window)
 {
     // LOG_INFO("on_toggle_panelbar");
-    int i;
-    for (i = 0; i < 4; i++)
+    for (int i = 0; i < 4; ++i)
     {
         if (widget == main_window->panel_btn[i])
         {
@@ -1493,7 +1487,6 @@ on_main_window_realize(GtkWidget* widget, FMMainWindow* main_window)
 static void
 fm_main_window_init(FMMainWindow* main_window)
 {
-    int i;
     XSet* set;
 
     main_window->configure_evt_timer = 0;
@@ -1542,7 +1535,7 @@ fm_main_window_init(FMMainWindow* main_window)
     //                                    &GTK_WIDGET( main_window )
     //                                    ->style->bg[ GTK_STATE_NORMAL ] );
 
-    for (i = 0; i < 4; i++)
+    for (int i = 0; i < 4; ++i)
     {
         std::string icon_name;
         main_window->panel_btn[i] = GTK_WIDGET(gtk_toggle_tool_button_new());
@@ -1604,7 +1597,7 @@ fm_main_window_init(FMMainWindow* main_window)
     main_window->hpane_top = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
     main_window->hpane_bottom = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 
-    for (i = 0; i < 4; i++)
+    for (int i = 0; i < 4; ++i)
     {
         main_window->panel[i] = gtk_notebook_new();
         gtk_notebook_set_show_border(GTK_NOTEBOOK(main_window->panel[i]), false);
@@ -2108,8 +2101,7 @@ main_window_get_counts(PtkFileBrowser* file_browser, int* panel_count, int* tab_
     // tab_num starts counting from 1
     *tab_num = gtk_notebook_page_num(GTK_NOTEBOOK(notebook), GTK_WIDGET(file_browser)) + 1;
     int count = 0;
-    int i;
-    for (i = 0; i < 4; i++)
+    for (int i = 0; i < 4; ++i)
     {
         if (gtk_widget_get_visible(main_window->panel[i]))
             count++;
@@ -4016,14 +4008,17 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
 
         if (!xset_get_b_panel(p, "show"))
             continue;
-        int i = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
-        if (i != -1)
+        int current_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
+        if (current_page != -1)
         {
             a_browser = PTK_FILE_BROWSER_REINTERPRET(
-                gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), i));
+                gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), current_page));
         }
         else
+        {
             continue;
+        }
+
         if (!a_browser || !gtk_widget_get_visible(GTK_WIDGET(a_browser)))
             continue;
 
@@ -4039,7 +4034,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         {
             buf.append(fmt::format("\nfm_pwd_panel[{}]=\"{}\"\n", p, cwd));
         }
-        buf.append(fmt::format("\nfm_tab_panel[{}]=\"{}\"\n", p, i + 1));
+        buf.append(fmt::format("\nfm_tab_panel[{}]=\"{}\"\n", p, current_page + 1));
 
         // selected files
         std::vector<VFSFileInfo*> sel_files;
@@ -4179,7 +4174,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
 
         // tabs
         int num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1]));
-        for (i = 0; i < num_pages; i++)
+        for (int i = 0; i < num_pages; ++i)
         {
             PtkFileBrowser* t_browser = PTK_FILE_BROWSER_REINTERPRET(
                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), i));
@@ -4326,15 +4321,14 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
     if (!main_window || !view)
         return;
 
-    int i;
-    for (i = 0; i < 13; i++)
+    for (int i = 0; i < 13; ++i)
     {
         GtkTreeViewColumn* col = gtk_tree_view_get_column(GTK_TREE_VIEW(view), i);
         if (!col)
             return;
         const char* title = gtk_tree_view_column_get_title(col);
         int j;
-        for (j = 0; j < 13; j++)
+        for (j = 0; j < 13; ++j)
         {
             if (ztd::same(title, task_titles.at(j)))
                 break;
@@ -4473,8 +4467,7 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
     // smart
     GSList* d;
     GSList* r;
-    GSList* q;
-    for (q = queued; q; q = q->next)
+    for (GSList* q = queued; q; q = q->next)
     {
         qtask = PTK_FILE_TASK(q->data);
         if (!qtask->task->devs)
@@ -4488,7 +4481,6 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
         for (r = running; r; r = r->next)
         {
             rtask = PTK_FILE_TASK(r->data);
-            ;
             for (d = qtask->task->devs; d; d = d->next)
             {
                 if (g_slist_find(rtask->task->devs, d->data))
@@ -5471,8 +5463,7 @@ main_task_view_new(FMMainWindow* main_window)
     // gtk_tree_view_set_single_click_timeout(GTK_TREE_VIEW(view), SINGLE_CLICK_TIMEOUT);
 
     // Columns
-    int j;
-    for (int i = 0; i < 13; i++)
+    for (int i = 0; i < 13; ++i)
     {
         col = gtk_tree_view_column_new();
         gtk_tree_view_column_set_resizable(col, true);
@@ -5480,13 +5471,16 @@ main_task_view_new(FMMainWindow* main_window)
         gtk_tree_view_column_set_min_width(col, 20);
 
         // column order
-        for (j = 0; j < 13; j++)
+        int j;
+        for (j = 0; j < 13; ++j)
         {
             if (xset_get_int(task_names.at(j), XSetSetSet::X) == i)
                 break;
         }
         if (j == 13)
-            j = i; // failsafe
+        { // failsafe
+            j = i;
+        }
         else
         {
             // column width
@@ -5635,7 +5629,6 @@ delayed_show_menu(GtkWidget* menu)
 char
 main_window_socket_command(char* argv[], std::string& reply)
 {
-    int j;
     int panel = 0;
     int tab = 0;
     char* window = nullptr;
@@ -5915,6 +5908,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 ptk_file_browser_new_tab(nullptr, file_browser);
             else
                 fm_main_window_add_new_tab(main_window, argv[i + 1]);
+            int j;
             main_window_get_counts(file_browser, &i, &tab, &j);
             reply = fmt::format("new_tab_window={}\nnew_tab_panel={}\n"
                                 "new_tab_number={}\nnew_tab_path={}",
@@ -5957,7 +5951,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             else if (ztd::startswith(socket_property, "panel"))
             {
-                j = argv[i][5] - 48;
+                int j = argv[i][5] - 48;
                 if (j < 1 || j > 4)
                 {
                     reply = fmt::format("invalid property {}", argv[i]);
@@ -6016,7 +6010,8 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
             {
                 GtkTreeViewColumn* col;
-                for (j = 0; j < 6; j++)
+                int j;
+                for (j = 0; j < 6; ++j)
                 {
                     col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), j);
                     if (!col)
@@ -6052,7 +6047,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         else if (ztd::same(socket_property, "sort_by"))
         { // COLUMN
-            j = -10;
+            PtkFBSortOrder j = PtkFBSortOrder::PTK_FB_SORT_BY_NAME;
             if (!argv[i + 1])
             {
             }
@@ -6068,13 +6063,12 @@ main_window_socket_command(char* argv[], std::string& reply)
                 j = PtkFBSortOrder::PTK_FB_SORT_BY_OWNER;
             else if (ztd::same(argv[i + 1], "modified"))
                 j = PtkFBSortOrder::PTK_FB_SORT_BY_MTIME;
-
-            if (j == -10)
+            else
             {
                 reply = fmt::format("invalid column name '{}'", argv[i + 1]);
                 return 2;
             }
-            ptk_file_browser_set_sort_order(file_browser, (PtkFBSortOrder)j);
+            ptk_file_browser_set_sort_order(file_browser, j);
         }
         else if (ztd::startswith(socket_property, "sort_"))
         {
@@ -6348,6 +6342,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         else if (ztd::same(socket_property, "tab_count"))
         {
+            int j;
             main_window_get_counts(file_browser, &panel, &tab, &j);
             reply = fmt::format("{}", tab);
         }
@@ -6388,7 +6383,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             else if (ztd::startswith(socket_property, "panel"))
             {
-                j = argv[i][5] - 48;
+                int j = argv[i][5] - 48;
                 if (j < 1 || j > 4)
                 {
                     reply = fmt::format("invalid property {}", argv[i]);
@@ -6426,7 +6421,8 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
             {
                 GtkTreeViewColumn* col;
-                for (j = 0; j < 6; j++)
+                int j;
+                for (j = 0; j < 6; ++j)
                 {
                     col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), j);
                     if (!col)
@@ -6687,6 +6683,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
 
         // set model value
+        int j;
         if (ztd::same(argv[i + 1], "icon"))
         {
             ptk_file_task_lock(ptask);
@@ -6709,7 +6706,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 ptask->task->percent = 50;
             else
             {
-                j = std::stol(argv[i + 2]);
+                j = std::stoi(argv[i + 2]);
                 if (j < 0)
                     j = 0;
                 if (j > 100)
@@ -6803,6 +6800,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
 
         // get model value
+        int j;
         if (ztd::same(argv[i + 1], "icon"))
         {
             ptk_file_task_lock(ptask);
@@ -6892,7 +6890,9 @@ main_window_socket_command(char* argv[], std::string& reply)
             const char* opt_title = nullptr;
             const char* opt_icon = nullptr;
             const char* opt_cwd = nullptr;
-            for (j = i + 1; argv[j] && argv[j][0] == '-'; j++)
+
+            int j;
+            for (j = i + 1; argv[j] && argv[j][0] == '-'; ++j)
             {
                 if (ztd::same(argv[j], "--task"))
                     opt_task = true;
@@ -6979,7 +6979,8 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (ztd::same(socket_property, "mount") || ztd::same(socket_property, "unmount"))
         {
             // mount or unmount TARGET
-            for (j = i + 1; argv[j] && argv[j][0] == '-'; j++)
+            int j;
+            for (j = i + 1; argv[j] && argv[j][0] == '-'; ++j)
             {
                 reply = fmt::format("invalid {} task option '{}'", socket_property, argv[j]);
                 return 2;
@@ -7096,7 +7097,8 @@ main_window_socket_command(char* argv[], std::string& reply)
             // delete SOURCE FILENAME [...]
             // get opts
             const char* opt_cwd = nullptr;
-            for (j = i + 1; argv[j] && argv[j][0] == '-'; j++)
+            int j;
+            for (j = i + 1; argv[j] && argv[j][0] == '-'; ++j)
             {
                 if (ztd::same(argv[j], "--dir"))
                 {
@@ -7116,7 +7118,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             std::vector<std::string> file_list;
             l = nullptr; // file list
             char* target_dir = nullptr;
-            for (; argv[j]; j++)
+            for (; argv[j]; ++j)
             {
                 if (!ztd::same(socket_property, "delete") && !argv[j + 1])
                 {
@@ -7273,7 +7275,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         // build command
         str = (ztd::same(socket_cmd, "replace-event") ? "*" : "");
-        for (j = i + 1; argv[j]; j++)
+        for (int j = i + 1; argv[j]; ++j)
             str.append(fmt::format("{}{}", j == i + 1 ? "" : " ", argv[j]));
         // modify list
         if (ztd::same(socket_cmd, "remove-event"))
@@ -7546,8 +7548,7 @@ main_window_event(void* mw, XSet* preset, XSetName event, int panel, int tab, co
     // dynamic handlers
     if (set->ob2_data)
     {
-        GList* l;
-        for (l = (GList*)set->ob2_data; l; l = l->next)
+        for (GList* l = (GList*)set->ob2_data; l; l = l->next)
         {
             if (run_event(main_window,
                           file_browser,

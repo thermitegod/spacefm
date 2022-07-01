@@ -698,8 +698,7 @@ const std::map<XSetName, const std::string> xset_name_map{
 bool
 is_in_xset_map_test(const std::string& name)
 {
-    std::map<XSetName, std::string>::iterator it;
-    for (it = xset_name_map.begin(); it != xset_name_map.end(); it++)
+    for (auto it = xset_name_map.begin(); it != xset_name_map.end(); ++it)
     {
         if (ztd::same(name, it->second))
             return true;
