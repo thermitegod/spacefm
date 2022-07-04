@@ -39,6 +39,7 @@
 #include "ptk/ptk-utils.hxx"
 
 #include "autosave.hxx"
+#include "write.hxx"
 #include "utils.hxx"
 
 #define HANDLER_DATA(obj) (static_cast<HandlerData*>(obj))
@@ -989,25 +990,19 @@ ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
         text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
     }
     else
+    {
         text = command;
+    }
 
     // LOG_INFO("WRITE {}", script);
-    // write script
-    std::ofstream file(script);
-    if (file.is_open())
-    {
-        file << script_header;
-        file << "\n";
-        file << text;
-        file << "\n";
-    }
-    else
+    const std::string data = fmt::format("{}\n{}\n", script_header, text);
+    const bool result = write_file(script, data);
+    if (!result)
     {
         const std::string errno_msg = std::strerror(errno);
-        error_message = fmt::format("{} '{}':\n\n{}", "Error writing to file", script, errno_msg);
+        error_message = fmt::format("Error writing to file: {}\n\nerrno: {}", script, errno_msg);
         return true;
     }
-    file.close();
 
     // success
     return false;

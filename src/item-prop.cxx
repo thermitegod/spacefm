@@ -38,6 +38,7 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "item-prop.hxx"
+#include "write.hxx"
 #include "utils.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
@@ -1025,11 +1026,7 @@ save_command_script(ContextData* ctxt, bool query)
     gtk_text_buffer_get_end_iter(buf, &iter);
     char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
 
-    std::ofstream file(script);
-    if (file.is_open())
-        file << text;
-
-    file.close();
+    write_file(script, text);
 
     free(text);
 }

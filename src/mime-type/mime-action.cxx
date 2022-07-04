@@ -49,6 +49,7 @@
 
 #include "vfs/vfs-user-dir.hxx"
 
+#include "write.hxx"
 #include "utils.hxx"
 
 #include "mime-action.hxx"
@@ -56,11 +57,10 @@
 static void
 save_to_file(const std::string& path, const std::string& data)
 {
-    std::ofstream file(path);
-    if (file.is_open())
-        file << data;
-    file.close();
-    std::filesystem::permissions(path, std::filesystem::perms::owner_all);
+    write_file(path, data);
+
+    if (std::filesystem::exists(path))
+        std::filesystem::permissions(path, std::filesystem::perms::owner_all);
 }
 
 static void

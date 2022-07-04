@@ -57,6 +57,7 @@
 
 #include "autosave.hxx"
 #include "extern.hxx"
+#include "write.hxx"
 #include "utils.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
@@ -996,10 +997,8 @@ save_settings(void* main_window_ptr)
     };
 
     const std::string toml_path = Glib::build_filename(settings_config_dir, CONFIG_FILE_FILENAME);
-    std::ofstream toml_file(toml_path);
-    if (toml_file.is_open())
-        toml_file << toml_data;
-    toml_file.close();
+
+    write_file(toml_path, toml_data);
 
     // DEBUG
     // std::cout << "###### TOML DUMP ######" << "\n\n";
@@ -2556,22 +2555,21 @@ xset_custom_get_script(XSet* set, bool create)
 
     if (create && !std::filesystem::exists(path))
     {
-        std::ofstream file(path);
-        if (file.is_open())
-        {
-            file << fmt::format("#!{}\n", BASH_PATH);
-            file << fmt::format("{}\n\n", SHELL_SETTINGS);
-            file << fmt::format("#import file manager variables\n");
-            file << fmt::format("$fm_import\n\n");
-            file << fmt::format("#For all spacefm variables see man page: spacefm-scripts\n\n");
-            file << fmt::format("#Start script\n");
-            file << fmt::format("\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-            file << fmt::format("#End script\n");
-            file << fmt::format("exit $?\n");
-        }
-        file.close();
+        std::string data;
+        data.append(fmt::format("#!{}\n", BASH_PATH));
+        data.append(fmt::format("{}\n\n", SHELL_SETTINGS));
+        data.append("#import file manager variables\n");
+        data.append("$fm_import\n\n");
+        data.append("#For all spacefm variables see man page: spacefm-scripts\n\n");
+        data.append("#Start script\n");
+        data.append("\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+        data.append("#End script\n");
+        data.append("exit $?\n");
 
-        chmod(path.c_str(), 0700);
+        write_file(path, data);
+
+        if (std::filesystem::exists(path))
+            std::filesystem::permissions(path, std::filesystem::perms::owner_all);
     }
     return ztd::strdup(path);
 }
@@ -3654,10 +3652,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
              }},
         };
 
-        std::ofstream file(path);
-        if (file.is_open())
-            file << toml_data;
-        file.close();
+        write_file(path, toml_data);
     }
     else
     {

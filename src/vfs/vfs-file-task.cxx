@@ -39,6 +39,7 @@
 #include "vfs/vfs-volume.hxx"
 
 #include "scripts.hxx"
+#include "write.hxx"
 #include "utils.hxx"
 
 #include "vfs/vfs-user-dir.hxx"
@@ -1479,12 +1480,8 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
 
         buf.append(fmt::format("\nexit $fm_err\nfi\n"));
 
-        std::ofstream file(task->exec_script);
-        if (file.is_open())
-        {
-            file << buf;
-        }
-        else
+        const bool result = write_file(task->exec_script, buf);
+        if (!result)
         {
             vfs_file_task_exec_error(task, errno, "Error writing temporary file");
 
@@ -1497,8 +1494,6 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
             // LOG_INFO("vfs_file_task_exec DONE ERROR");
             return;
         }
-
-        file.close();
 
         // set permissions
         chmod(task->exec_script.c_str(), 0700);

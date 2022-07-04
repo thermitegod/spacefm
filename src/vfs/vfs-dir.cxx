@@ -41,9 +41,11 @@
 
 #include <magic_enum.hpp>
 
+#include "write.hxx"
+#include "utils.hxx"
+
 #include "vfs/vfs-volume.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
-#include "utils.hxx"
 
 #include "vfs/vfs-user-dir.hxx"
 #include "vfs/vfs-dir.hxx"
@@ -549,14 +551,12 @@ ishidden(const std::string& hidden, const std::string& file_name)
 bool
 vfs_dir_add_hidden(const std::string& path, const std::string& file_name)
 {
-    std::string file_path = Glib::build_filename(path, ".hidden");
+    const std::string file_path = Glib::build_filename(path, ".hidden");
+    const std::string data = fmt::format("{}\n", file_name);
 
-    std::ofstream file(file_path);
-    if (!file.is_open())
+    const bool result = write_file(file_path, data);
+    if (!result)
         return false;
-    file << fmt::format("{}\n", file_name);
-    file.close();
-
     return true;
 }
 

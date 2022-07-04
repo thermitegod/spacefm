@@ -33,6 +33,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "write.hxx"
 #include "utils.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
@@ -1706,11 +1707,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                            msg);
                 }
 
-                // write file
-                std::ofstream file(path);
-                if (file.is_open())
-                    file << contents;
-                file.close();
+                write_file(path, contents);
             }
             if (std::filesystem::exists(path))
                 xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, false);
