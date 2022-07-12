@@ -56,6 +56,7 @@
 #include "scripts.hxx"
 
 #include "settings/app.hxx"
+#include "settings/etc.hxx"
 
 #include "autosave.hxx"
 #include "extern.hxx"
@@ -71,8 +72,6 @@
 #include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/ptk-location-view.hxx"
-
-ConfigSettings config_settings = ConfigSettings();
 
 // MOD settings
 static void xset_defaults();
@@ -568,13 +567,13 @@ config_parse_xset(const toml::value& toml_data, std::uint64_t version)
 }
 
 static void
-parse_etc_conf(std::string& etc_path, std::string& line)
+parse_etc_conf(const std::string& etc_path, const std::string& raw_line)
 {
-    std::size_t sep = line.find("=");
+    std::size_t sep = raw_line.find("=");
     if (sep == std::string::npos)
         return;
 
-    line = ztd::strip(line);
+    std::string line = ztd::strip(raw_line);
 
     if (line.at(0) == '#')
         return;
@@ -593,27 +592,21 @@ parse_etc_conf(std::string& etc_path, std::string& line)
         if (value.at(0) != '/' || !std::filesystem::exists(value))
             LOG_WARN("{}: {} '{}' file not found", etc_path, token, value);
         else if (ztd::same(token, "terminal_su"))
-            config_settings.terminal_su = value.c_str();
+            etc_settings.set_terminal_su(value);
     }
     else if (ztd::same(token, "font_view_icon"))
-        config_settings.font_view_icon = value.c_str();
+        etc_settings.set_font_view_icon(value);
     else if (ztd::same(token, "font_view_compact"))
-        config_settings.font_view_compact = value.c_str();
+        etc_settings.set_font_view_compact(value);
     else if (ztd::same(token, "font_general"))
-        config_settings.font_general = value.c_str();
+        etc_settings.set_font_general(value);
 }
 
 void
 load_etc_conf()
 {
-    std::string default_font = "Monospace 9";
-
     /* Set default config values */
-    config_settings.terminal_su = nullptr;
-    config_settings.tmp_dir = ztd::strdup(vfs_user_cache_dir());
-    config_settings.font_view_icon = default_font.c_str();
-    config_settings.font_view_compact = default_font.c_str();
-    config_settings.font_general = default_font.c_str();
+    etc_settings.set_tmp_dir(vfs_user_cache_dir());
 
     // load spacefm.conf
     std::string config_path =
@@ -678,16 +671,18 @@ load_settings()
         std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
     }
 
-    if (config_settings.git_backed_settings)
+    bool git_backed_settings = etc_settings.get_git_backed_settings();
+
+    if (git_backed_settings)
     {
         if (Glib::find_program_in_path("git").empty())
         {
             LOG_ERROR("git backed settings enabled but git is not installed");
-            config_settings.git_backed_settings = false;
+            git_backed_settings = false;
         }
     }
 
-    if (config_settings.git_backed_settings)
+    if (git_backed_settings)
     {
         const std::string& command_script = get_script_path(Scripts::CONFIG_UPDATE_GIT);
 
@@ -1154,7 +1149,7 @@ xset_get_user_tmp_dir()
     if (settings_user_tmp_dir.empty() && std::filesystem::exists(settings_user_tmp_dir))
         return settings_user_tmp_dir.c_str();
 
-    settings_user_tmp_dir = Glib::build_filename(config_settings.tmp_dir, PACKAGE_NAME);
+    settings_user_tmp_dir = Glib::build_filename(etc_settings.get_tmp_dir(), PACKAGE_NAME);
     std::filesystem::create_directories(settings_user_tmp_dir);
     std::filesystem::permissions(settings_user_tmp_dir, std::filesystem::perms::owner_all);
 

@@ -42,20 +42,6 @@
 // delimiter used in config file for tabs
 #define CONFIG_FILE_TABS_DELIM "///"
 
-struct ConfigSettings
-{
-    const char* terminal_su{nullptr};
-    const char* tmp_dir{nullptr};
-
-    const char* font_view_icon{nullptr};
-    const char* font_view_compact{nullptr};
-    const char* font_general{nullptr}; // NOOP
-
-    bool git_backed_settings{true};
-};
-
-extern ConfigSettings config_settings;
-
 void load_etc_conf();
 void load_settings();
 void autosave_settings();

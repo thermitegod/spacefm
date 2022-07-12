@@ -44,6 +44,7 @@
 #include "ptk/ptk-location-view.hxx"
 
 #include "settings/app.hxx"
+#include "settings/etc.hxx"
 
 #include "autosave.hxx"
 #include "find-files.hxx"
@@ -408,7 +409,7 @@ main(int argc, char* argv[])
     }
 
     // --disable-git
-    config_settings.git_backed_settings = !cli_flags.disable_git_settings;
+    etc_settings.set_git_backed_settings(!cli_flags.disable_git_settings);
 
     // --version
     if (cli_flags.version_opt)

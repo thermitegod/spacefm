@@ -29,6 +29,7 @@
 #include "types.hxx"
 
 #include "settings/app.hxx"
+#include "settings/etc.hxx"
 
 #include "pref-dialog.hxx"
 #include "main-window.hxx"
@@ -332,10 +333,12 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         xset_set(XSetName::DRAG_ACTION, XSetSetSet::X, s);
 
         // terminal su command
-        std::string custom_su;
-        if (config_settings.terminal_su)
-            // get su from /etc/spacefm/spacefm.conf
-            custom_su = Glib::find_program_in_path(config_settings.terminal_su);
+        std::string custom_su = etc_settings.get_terminal_su();
+        if (!custom_su.empty())
+        { // get su from /etc/spacefm/spacefm.conf
+            custom_su = Glib::find_program_in_path(custom_su);
+        }
+
         int idx = gtk_combo_box_get_active(GTK_COMBO_BOX(data->su_command));
         if (idx > -1)
         {
@@ -610,13 +613,14 @@ fm_edit_preference(GtkWindow* parent, int page)
         // terminal su
         int idx;
         GtkTreeIter it;
-        std::string custom_su;
-        std::string use_su;
         data->su_command = GTK_WIDGET(gtk_builder_get_object(builder, "su_command"));
-        use_su = xset_get_s(XSetName::SU_COMMAND);
-        if (config_settings.terminal_su)
-            // get su from /etc/spacefm/spacefm.conf
-            custom_su = Glib::find_program_in_path(config_settings.terminal_su);
+
+        std::string use_su = xset_get_s(XSetName::SU_COMMAND);
+        std::string custom_su = etc_settings.get_terminal_su();
+        if (!custom_su.empty())
+        { // get su from /etc/spacefm/spacefm.conf
+            custom_su = Glib::find_program_in_path(custom_su);
+        }
         if (!custom_su.empty())
         {
             GtkListStore* su_list =
