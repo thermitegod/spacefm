@@ -45,6 +45,7 @@
 
 #include "settings/app.hxx"
 #include "settings/etc.hxx"
+#include "settings/load_etc.hxx"
 
 #include "autosave.hxx"
 #include "find-files.hxx"

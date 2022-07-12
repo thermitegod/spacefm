@@ -283,6 +283,7 @@ sources = [
 
   'src/settings/app.cxx',
   'src/settings/etc.cxx',
+  'src/settings/load_etc.cxx',
 
   'src/mime-type/mime-action.cxx',
   'src/mime-type/mime-cache.cxx',

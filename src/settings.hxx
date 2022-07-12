@@ -42,7 +42,6 @@
 // delimiter used in config file for tabs
 #define CONFIG_FILE_TABS_DELIM "///"
 
-void load_etc_conf();
 void load_settings();
 void autosave_settings();
 void save_settings(void* main_window_ptr);
