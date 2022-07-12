@@ -43,6 +43,8 @@
 #include "ptk/ptk-app-chooser.hxx"
 #include "ptk/ptk-location-view.hxx"
 
+#include "settings/app.hxx"
+
 #include "autosave.hxx"
 #include "find-files.hxx"
 #include "pref-dialog.hxx"
@@ -84,8 +86,10 @@ init_folder()
     vfs_volume_init();
     vfs_thumbnail_init();
 
-    vfs_mime_type_set_icon_size(app_settings.big_icon_size, app_settings.small_icon_size);
-    vfs_file_info_set_thumbnail_size(app_settings.big_icon_size, app_settings.small_icon_size);
+    vfs_mime_type_set_icon_size(app_settings.get_icon_size_big(),
+                                app_settings.get_icon_size_small());
+    vfs_file_info_set_thumbnail_size(app_settings.get_icon_size_big(),
+                                     app_settings.get_icon_size_small());
 
     folder_initialized = true;
 }
@@ -198,7 +202,7 @@ handle_parsed_commandline_args()
     bool ret = true;
     char* default_files[2] = {nullptr, nullptr};
 
-    app_settings.load_saved_tabs = !cli_flags.no_tabs;
+    app_settings.set_load_saved_tabs(!cli_flags.no_tabs);
 
     // no files were specified from cli
     if (!cli_flags.files)
@@ -462,7 +466,7 @@ main(int argc, char* argv[])
     // handle the parsed result of command line args
     if (handle_parsed_commandline_args())
     {
-        app_settings.load_saved_tabs = true;
+        app_settings.set_load_saved_tabs(true);
 
         // run the main loop
         gtk_main();

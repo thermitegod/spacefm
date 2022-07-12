@@ -28,6 +28,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "settings/app.hxx"
+
 #include "main-window.hxx"
 #include "utils.hxx"
 
@@ -2018,7 +2020,7 @@ query_overwrite(PtkFileTask* ptask)
             {
                 strftime(buf,
                          sizeof(buf),
-                         app_settings.date_format.c_str(),
+                         app_settings.get_date_format().c_str(),
                          std::localtime(&src_stat.st_mtime));
                 src_time = buf;
                 if (src_stat.st_mtime > dest_stat.st_mtime)
@@ -2030,7 +2032,7 @@ query_overwrite(PtkFileTask* ptask)
             dest_size = fmt::format("{}\t( {} bytes )", size_str, dest_stat.st_size);
             strftime(buf,
                      sizeof(buf),
-                     app_settings.date_format.c_str(),
+                     app_settings.get_date_format().c_str(),
                      std::localtime(&dest_stat.st_mtime));
             dest_time = buf;
 

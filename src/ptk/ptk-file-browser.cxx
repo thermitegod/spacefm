@@ -55,6 +55,8 @@
 
 #include "vfs/vfs-user-dir.hxx"
 
+#include "settings/app.hxx"
+
 #include "settings.hxx"
 #include "utils.hxx"
 #include "type-conversion.hxx"
@@ -788,7 +790,7 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
             break;
         case XSetTool::SHOW_THUMB:
             x = 8;
-            b = app_settings.show_thumbnail;
+            b = app_settings.get_show_thumbnail();
             break;
         case XSetTool::LARGE_ICONS:
             x = 9;
@@ -876,9 +878,10 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     file_browser->toolbar = gtk_toolbar_new();
     gtk_box_pack_start(GTK_BOX(file_browser->toolbox), file_browser->toolbar, true, true, 0);
     gtk_toolbar_set_style(GTK_TOOLBAR(file_browser->toolbar), GTK_TOOLBAR_ICONS);
-    if (app_settings.tool_icon_size > 0 && app_settings.tool_icon_size <= GTK_ICON_SIZE_DIALOG)
+    if (app_settings.get_icon_size_tool() > 0 &&
+        app_settings.get_icon_size_tool() <= GTK_ICON_SIZE_DIALOG)
         gtk_toolbar_set_icon_size(GTK_TOOLBAR(file_browser->toolbar),
-                                  (GtkIconSize)app_settings.tool_icon_size);
+                                  (GtkIconSize)app_settings.get_icon_size_tool());
 
     // fill left toolbar
     xset_fill_toolbar(GTK_WIDGET(file_browser),
@@ -930,9 +933,10 @@ rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
                        true,
                        0);
     gtk_toolbar_set_style(GTK_TOOLBAR(file_browser->side_toolbar), GTK_TOOLBAR_ICONS);
-    if (app_settings.tool_icon_size > 0 && app_settings.tool_icon_size <= GTK_ICON_SIZE_DIALOG)
+    if (app_settings.get_icon_size_tool() > 0 &&
+        app_settings.get_icon_size_tool() <= GTK_ICON_SIZE_DIALOG)
         gtk_toolbar_set_icon_size(GTK_TOOLBAR(file_browser->side_toolbar),
-                                  (GtkIconSize)app_settings.tool_icon_size);
+                                  (GtkIconSize)app_settings.get_icon_size_tool());
     // fill side toolbar
     xset_fill_toolbar(GTK_WIDGET(file_browser),
                       file_browser,
@@ -1895,7 +1899,8 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
     // file_browser->button_press = false;
     file_browser->is_drag = false;
     file_browser->menu_shown = false;
-    if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW || app_settings.single_click)
+    if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW ||
+        app_settings.get_single_click())
         /* sfm 1.0.6 do not reset skip_release for Icon/Compact to prevent file
            under cursor being selected when entering dir with double-click.
            Reset is conditional here to avoid possible but unlikely unintended
@@ -2252,10 +2257,10 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
     }
     file_browser->sort_order = (PtkFBSortOrder)col;
     // MOD enable following to make column click permanent sort
-    //    app_settings.sort_order = col;
+    //    app_settings.set_sort_order(col);
     //    if (file_browser)
     //        ptk_file_browser_set_sort_order(file_browser),
-    //        app_settings.sort_order);
+    //        app_settings.get_sort_order());
 
     xset_set_panel(file_browser->mypanel, "list_detailed", XSetSetSet::X, std::to_string(col));
     xset_set_panel(file_browser->mypanel,
@@ -3484,7 +3489,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
              * file_browser->button_press to determine if row was already
              * activated or user clicked on non-row */
             ret = true;
-        else if (!app_settings.single_click)
+        else if (!app_settings.get_single_click())
             /* sfm 1.0.6 set skip_release for Icon/Compact to prevent file
              * under cursor being selected when entering dir with double-click.
              * Also see conditional reset of skip_release in
@@ -3539,7 +3544,7 @@ on_folder_view_button_release_event(GtkWidget* widget, GdkEventButton* event,
         case PtkFBViewMode::PTK_FB_LIST_VIEW:
             if (gtk_tree_view_is_rubber_banding_active(GTK_TREE_VIEW(widget)))
                 return false;
-            if (app_settings.single_click)
+            if (app_settings.get_single_click())
             {
                 model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
                 gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
@@ -3860,7 +3865,7 @@ create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode view_mode)
             exo_icon_view_set_single_click(EXO_ICON_VIEW(folder_view), file_browser->single_click);
             exo_icon_view_set_single_click_timeout(
                 EXO_ICON_VIEW(folder_view),
-                app_settings.no_single_hover ? 0 : SINGLE_CLICK_TIMEOUT);
+                app_settings.get_single_hover() ? SINGLE_CLICK_TIMEOUT : 0);
 
             gtk_cell_layout_clear(GTK_CELL_LAYOUT(folder_view));
 
@@ -3967,7 +3972,7 @@ create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode view_mode)
             // gtk_tree_view_set_single_click(GTK_TREE_VIEW(folder_view),
             // file_browser->single_click); gtk_tree_view_set_single_click_timeout(
             //    GTK_TREE_VIEW(folder_view),
-            //    app_settings.no_single_hover ? 0 : SINGLE_CLICK_TIMEOUT);
+            //    app_settings.get_single_hover() ? SINGLE_CLICK_TIMEOUT : 0);
 
             icon_size = file_browser->large_icons ? big_icon_size : small_icon_size;
 
@@ -4106,7 +4111,8 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
             int width = set->y ? std::stol(set->y) : 100;
             if (width)
             {
-                if (cols.at(j) == PTKFileListCol::COL_FILE_NAME && !app_settings.always_show_tabs &&
+                if (cols.at(j) == PTKFileListCol::COL_FILE_NAME &&
+                    !app_settings.get_always_show_tabs() &&
                     file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW &&
                     gtk_notebook_get_n_pages(GTK_NOTEBOOK(file_browser->mynotebook)) == 1)
                 {

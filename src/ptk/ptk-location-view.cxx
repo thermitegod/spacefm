@@ -45,6 +45,8 @@
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-user-dir.hxx"
 
+#include "settings/app.hxx"
+
 #include "utils.hxx"
 
 static GtkTreeModel* model = nullptr;
@@ -144,7 +146,7 @@ update_volume_icons()
     VFSVolume* vol;
 
     // GtkListStore* list = GTK_LIST_STORE( model );
-    int icon_size = app_settings.small_icon_size;
+    int icon_size = app_settings.get_icon_size_small();
     if (icon_size > PANE_MAX_ICON_SIZE)
         icon_size = PANE_MAX_ICON_SIZE;
 
@@ -201,7 +203,7 @@ update_change_detection()
                     // update thumbnail visibility
                     ptk_file_browser_show_thumbnails(
                         file_browser,
-                        app_settings.show_thumbnail ? app_settings.max_thumb_size : 0);
+                        app_settings.get_show_thumbnail() ? app_settings.get_max_thumb_size() : 0);
                 }
             }
         }
@@ -549,7 +551,7 @@ add_volume(VFSVolume* vol, bool set_icon)
                                       -1);
     if (set_icon)
     {
-        int icon_size = app_settings.small_icon_size;
+        int icon_size = app_settings.get_icon_size_small();
         if (icon_size > PANE_MAX_ICON_SIZE)
             icon_size = PANE_MAX_ICON_SIZE;
         GdkPixbuf* icon = vfs_load_icon(vfs_volume_get_icon(vol), icon_size);
@@ -602,7 +604,7 @@ update_volume(VFSVolume* vol)
         return;
     }
 
-    int icon_size = app_settings.small_icon_size;
+    int icon_size = app_settings.get_icon_size_small();
     if (icon_size > PANE_MAX_ICON_SIZE)
         icon_size = PANE_MAX_ICON_SIZE;
 
@@ -2668,7 +2670,7 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
     bool is_sep = false;
     XSet* set2;
 
-    int icon_size = app_settings.small_icon_size;
+    int icon_size = app_settings.get_icon_size_small();
     if (icon_size > PANE_MAX_ICON_SIZE)
         icon_size = PANE_MAX_ICON_SIZE;
 
@@ -2839,7 +2841,7 @@ ptk_bookmark_view_reload_list(GtkTreeView* view, XSet* book_set)
     gtk_list_store_set(list, &it, PtkLocationViewCol::COL_PATH, book_set->name, -1);
     // icon
     GdkPixbuf* icon = nullptr;
-    int icon_size = app_settings.small_icon_size;
+    int icon_size = app_settings.get_icon_size_small();
     if (icon_size > PANE_MAX_ICON_SIZE)
         icon_size = PANE_MAX_ICON_SIZE;
     if (book_set->icon /*&& book_set->xset_name == XSetName::MAIN_BOOK*/)

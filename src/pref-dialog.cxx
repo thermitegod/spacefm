@@ -28,6 +28,8 @@
 
 #include "types.hxx"
 
+#include "settings/app.hxx"
+
 #include "pref-dialog.hxx"
 #include "main-window.hxx"
 
@@ -134,9 +136,9 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         /* interface settings */
 
         always_show_tabs = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->always_show_tabs));
-        if (always_show_tabs != app_settings.always_show_tabs)
+        if (always_show_tabs != app_settings.get_always_show_tabs())
         {
-            app_settings.always_show_tabs = always_show_tabs;
+            app_settings.set_always_show_tabs(always_show_tabs);
             // update all windows/all panels
             for (FMMainWindow* window: fm_main_window_get_all())
             {
@@ -153,9 +155,9 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         }
         hide_close_tab_buttons =
             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->hide_close_tab_buttons));
-        if (hide_close_tab_buttons != app_settings.show_close_tab_buttons)
+        if (hide_close_tab_buttons != app_settings.get_show_close_tab_buttons())
         {
-            app_settings.show_close_tab_buttons = hide_close_tab_buttons;
+            app_settings.set_show_close_tab_buttons(hide_close_tab_buttons);
             // update all windows/all panels/all browsers
             for (FMMainWindow* window: fm_main_window_get_all())
             {
@@ -180,38 +182,39 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         // ===============================================================
 
         /* thumbnail settings are changed */
-        if (app_settings.show_thumbnail != show_thumbnail ||
-            app_settings.max_thumb_size != max_thumb)
+        if (app_settings.get_show_thumbnail() != show_thumbnail ||
+            app_settings.get_max_thumb_size() != max_thumb)
         {
-            app_settings.show_thumbnail = !show_thumbnail; // toggle reverses this
-            app_settings.max_thumb_size = max_thumb;
+            app_settings.set_show_thumbnail(!show_thumbnail); // toggle reverses this
+            app_settings.set_max_thumb_size(max_thumb);
             // update all windows/all panels/all browsers + desktop
             main_window_toggle_thumbnails_all_windows();
         }
 
         /* icon sizes are changed? */
         ibig_icon = gtk_combo_box_get_active(GTK_COMBO_BOX(data->big_icon_size));
-        big_icon = ibig_icon >= 0 ? big_icon_sizes[ibig_icon] : app_settings.big_icon_size;
+        big_icon = ibig_icon >= 0 ? big_icon_sizes[ibig_icon] : app_settings.get_icon_size_big();
         ismall_icon = gtk_combo_box_get_active(GTK_COMBO_BOX(data->small_icon_size));
         small_icon =
-            ismall_icon >= 0 ? small_icon_sizes[ismall_icon] : app_settings.small_icon_size;
+            ismall_icon >= 0 ? small_icon_sizes[ismall_icon] : app_settings.get_icon_size_small();
         itool_icon = gtk_combo_box_get_active(GTK_COMBO_BOX(data->tool_icon_size));
         if (itool_icon >= 0 && itool_icon <= GTK_ICON_SIZE_DIALOG)
             tool_icon = tool_icon_sizes[itool_icon];
 
-        if (big_icon != app_settings.big_icon_size || small_icon != app_settings.small_icon_size)
+        if (big_icon != app_settings.get_icon_size_big() ||
+            small_icon != app_settings.get_icon_size_small())
         {
             vfs_mime_type_set_icon_size(big_icon, small_icon);
             vfs_file_info_set_thumbnail_size(big_icon, small_icon);
 
             /* unload old thumbnails (icons of *.desktop files will be unloaded here, too)  */
-            if (big_icon != app_settings.big_icon_size)
+            if (big_icon != app_settings.get_icon_size_big())
                 vfs_dir_foreach(&dir_unload_thumbnails, GINT_TO_POINTER(1));
-            if (small_icon != app_settings.small_icon_size)
+            if (small_icon != app_settings.get_icon_size_small())
                 vfs_dir_foreach(&dir_unload_thumbnails, GINT_TO_POINTER(0));
 
-            app_settings.big_icon_size = big_icon;
-            app_settings.small_icon_size = small_icon;
+            app_settings.set_icon_size_big(big_icon);
+            app_settings.set_icon_size_small(small_icon);
 
             // update all windows/all panels/all browsers
             for (FMMainWindow* window: fm_main_window_get_all())
@@ -241,18 +244,18 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             update_volume_icons();
         }
 
-        if (tool_icon != app_settings.tool_icon_size)
+        if (tool_icon != app_settings.get_icon_size_tool())
         {
-            app_settings.tool_icon_size = tool_icon;
+            app_settings.set_icon_size_tool(tool_icon);
             main_window_rebuild_all_toolbars(nullptr);
         }
 
         /* unit settings changed? */
         bool need_refresh = false;
         use_si_prefix = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_si_prefix));
-        if (use_si_prefix != app_settings.use_si_prefix)
+        if (use_si_prefix != app_settings.get_use_si_prefix())
         {
-            app_settings.use_si_prefix = use_si_prefix;
+            app_settings.set_use_si_prefix(use_si_prefix);
             need_refresh = true;
         }
 
@@ -266,7 +269,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             else
                 xset_set(XSetName::DATE_FORMAT, XSetSetSet::S, etext);
             free(etext);
-            app_settings.date_format = xset_get_s(XSetName::DATE_FORMAT);
+            app_settings.set_date_format(xset_get_s(XSetName::DATE_FORMAT));
             need_refresh = true;
         }
         if (need_refresh)
@@ -274,9 +277,9 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
 
         /* single click changed? */
         single_click = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->single_click));
-        if (single_click != app_settings.single_click)
+        if (single_click != app_settings.get_single_click())
         {
-            app_settings.single_click = single_click;
+            app_settings.set_single_click(single_click);
             // update all windows/all panels/all browsers
             for (FMMainWindow* window: fm_main_window_get_all())
             {
@@ -288,17 +291,18 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                     {
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
-                        ptk_file_browser_set_single_click(file_browser, app_settings.single_click);
+                        ptk_file_browser_set_single_click(file_browser,
+                                                          app_settings.get_single_click());
                     }
                 }
             }
         }
 
         /* single click - hover selects changed? */
-        bool no_single_hover = !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->single_hover));
-        if (no_single_hover != app_settings.no_single_hover)
+        bool single_hover = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->single_hover));
+        if (single_hover != app_settings.get_single_hover())
         {
-            app_settings.no_single_hover = no_single_hover;
+            app_settings.set_single_hover(single_hover);
             // update all windows/all panels/all browsers
             for (FMMainWindow* window: fm_main_window_get_all())
             {
@@ -312,17 +316,17 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                         ptk_file_browser_set_single_click_timeout(
                             file_browser,
-                            app_settings.no_single_hover ? 0 : SINGLE_CLICK_TIMEOUT);
+                            app_settings.get_single_hover() ? SINGLE_CLICK_TIMEOUT : 0);
                     }
                 }
             }
         }
 
         // MOD
-        app_settings.no_execute =
-            !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->click_exec));
-        app_settings.no_confirm =
-            !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->confirm_delete));
+        app_settings.set_click_executes(
+            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->click_exec)));
+        app_settings.set_confirm_delete(
+            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->confirm_delete)));
 
         std::string s = std::to_string(gtk_combo_box_get_active(GTK_COMBO_BOX(data->drag_action)));
         xset_set(XSetName::DRAG_ACTION, XSetSetSet::X, s);
@@ -491,17 +495,17 @@ fm_edit_preference(GtkWindow* parent, int page)
         g_object_unref(model);
 
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(data->max_thumb_size),
-                                  app_settings.max_thumb_size >> 10);
+                                  app_settings.get_max_thumb_size() >> 10);
 
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->show_thumbnail),
-                                     app_settings.show_thumbnail);
+                                     app_settings.get_show_thumbnail());
         g_signal_connect(data->show_thumbnail,
                          "toggled",
                          G_CALLBACK(on_show_thumbnail_toggled),
                          data);
-        gtk_widget_set_sensitive(data->max_thumb_size, app_settings.show_thumbnail);
-        gtk_widget_set_sensitive(data->thumb_label1, app_settings.show_thumbnail);
-        gtk_widget_set_sensitive(data->thumb_label2, app_settings.show_thumbnail);
+        gtk_widget_set_sensitive(data->max_thumb_size, app_settings.get_show_thumbnail());
+        gtk_widget_set_sensitive(data->thumb_label1, app_settings.get_show_thumbnail());
+        gtk_widget_set_sensitive(data->thumb_label2, app_settings.get_show_thumbnail());
 
         for (const std::string& terminal: terminal_programs)
         {
@@ -528,7 +532,7 @@ fm_edit_preference(GtkWindow* parent, int page)
 
         for (std::uint64_t big_icon_size: big_icon_sizes)
         {
-            if (big_icon_size == app_settings.big_icon_size)
+            if (big_icon_size == app_settings.get_icon_size_big())
             {
                 ibig_icon = big_icon_size;
                 break;
@@ -538,7 +542,7 @@ fm_edit_preference(GtkWindow* parent, int page)
 
         for (std::uint64_t small_icon_size: small_icon_sizes)
         {
-            if (small_icon_size == app_settings.small_icon_size)
+            if (small_icon_size == app_settings.get_icon_size_small())
             {
                 ismall_icon = small_icon_size;
                 break;
@@ -549,7 +553,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         itool_icon = 0;
         for (std::uint64_t tool_icon_size: tool_icon_sizes)
         {
-            if (tool_icon_size == app_settings.tool_icon_size)
+            if (tool_icon_size == app_settings.get_icon_size_tool())
             {
                 itool_icon = tool_icon_size;
                 break;
@@ -558,29 +562,30 @@ fm_edit_preference(GtkWindow* parent, int page)
         gtk_combo_box_set_active(GTK_COMBO_BOX(data->tool_icon_size), itool_icon);
 
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->single_click),
-                                     app_settings.single_click);
+                                     app_settings.get_single_click());
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->single_hover),
-                                     !app_settings.no_single_hover);
-        gtk_widget_set_sensitive(data->single_hover, app_settings.single_click);
+                                     app_settings.get_single_hover());
+        gtk_widget_set_sensitive(data->single_hover, app_settings.get_single_click());
         g_signal_connect(data->single_click, "toggled", G_CALLBACK(on_single_click_toggled), data);
 
         /* Setup 'Interface' tab */
 
         data->always_show_tabs = GTK_WIDGET(gtk_builder_get_object(builder, "always_show_tabs"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->always_show_tabs),
-                                     app_settings.always_show_tabs);
+                                     app_settings.get_always_show_tabs());
 
         data->hide_close_tab_buttons =
             GTK_WIDGET(gtk_builder_get_object(builder, "hide_close_tab_buttons"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->hide_close_tab_buttons),
-                                     app_settings.show_close_tab_buttons);
+                                     app_settings.get_show_close_tab_buttons());
 
         // MOD Interface
         data->confirm_delete = GTK_WIDGET(gtk_builder_get_object(builder, "confirm_delete"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->confirm_delete),
-                                     !app_settings.no_confirm);
+                                     app_settings.get_confirm_delete());
         data->click_exec = GTK_WIDGET(gtk_builder_get_object(builder, "click_exec"));
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->click_exec), !app_settings.no_execute);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->click_exec),
+                                     app_settings.get_click_executes());
 
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->root_bar),
                                      xset_get_b(XSetName::ROOT_BAR));
@@ -598,7 +603,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         gtk_combo_box_set_active(GTK_COMBO_BOX(data->drag_action), drag_action_set);
 
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->use_si_prefix),
-                                     app_settings.use_si_prefix);
+                                     app_settings.get_use_si_prefix());
 
         // Advanced Tab ==================================================
 

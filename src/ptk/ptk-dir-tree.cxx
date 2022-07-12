@@ -33,6 +33,8 @@
 
 #include "types.hxx"
 
+#include "settings/app.hxx"
+
 #include "settings.hxx"
 
 #include "vfs/vfs-file-monitor.hxx"
@@ -451,7 +453,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column, 
             int icon_size;
             GdkPixbuf* icon;
             // icon = vfs_file_info_get_small_icon( info );
-            icon_size = app_settings.small_icon_size;
+            icon_size = app_settings.get_icon_size_small();
             if (icon_size > PANE_MAX_ICON_SIZE)
                 icon_size = PANE_MAX_ICON_SIZE;
 

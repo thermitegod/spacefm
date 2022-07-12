@@ -30,6 +30,8 @@
 
 #include "vfs/vfs-user-dir.hxx"
 
+#include "settings/app.hxx"
+
 #include "main-window.hxx"
 
 #include "socket.hxx"
@@ -207,7 +209,7 @@ on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
         }
     }
     // handle_parsed_commandline_args();
-    app_settings.load_saved_tabs = true;
+    app_settings.set_load_saved_tabs(true);
     socket_daemon = false;
 
     return true;

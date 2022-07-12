@@ -281,6 +281,8 @@ sources = [
   'src/window-reference.cxx',
   'src/xset.cxx',
 
+  'src/settings/app.cxx',
+
   'src/mime-type/mime-action.cxx',
   'src/mime-type/mime-cache.cxx',
   'src/mime-type/mime-type.cxx',

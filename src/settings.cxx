@@ -55,6 +55,8 @@
 
 #include "scripts.hxx"
 
+#include "settings/app.hxx"
+
 #include "autosave.hxx"
 #include "extern.hxx"
 #include "write.hxx"
@@ -70,7 +72,6 @@
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/ptk-location-view.hxx"
 
-AppSettings app_settings = AppSettings();
 ConfigSettings config_settings = ConfigSettings();
 
 // MOD settings
@@ -255,31 +256,31 @@ parse_general_settings(std::string& line)
         return;
 
     if (ztd::same(token, "show_thumbnail"))
-        app_settings.show_thumbnail = std::stoi(value);
+        app_settings.set_show_thumbnail(std::stoi(value));
     else if (ztd::same(token, "max_thumb_size"))
-        app_settings.max_thumb_size = std::stoi(value) << 10;
+        app_settings.set_max_thumb_size(std::stoi(value) << 10);
     else if (ztd::same(token, "big_icon_size"))
-        app_settings.big_icon_size = std::stoi(value);
+        app_settings.set_icon_size_big(std::stoi(value));
     else if (ztd::same(token, "small_icon_size"))
-        app_settings.small_icon_size = std::stoi(value);
+        app_settings.set_icon_size_small(std::stoi(value));
     else if (ztd::same(token, "tool_icon_size"))
-        app_settings.tool_icon_size = std::stoi(value);
+        app_settings.set_icon_size_tool(std::stoi(value));
     else if (ztd::same(token, "single_click"))
-        app_settings.single_click = std::stoi(value);
+        app_settings.set_single_click(std::stoi(value));
     else if (ztd::same(token, "no_single_hover"))
-        app_settings.no_single_hover = std::stoi(value);
+        app_settings.set_single_hover(std::stoi(value));
     else if (ztd::same(token, "sort_order"))
-        app_settings.sort_order = std::stoi(value);
+        app_settings.set_sort_order(std::stoi(value));
     else if (ztd::same(token, "sort_type"))
-        app_settings.sort_type = std::stoi(value);
+        app_settings.set_sort_type(std::stoi(value));
     else if (ztd::same(token, "use_si_prefix"))
-        app_settings.use_si_prefix = std::stoi(value);
+        app_settings.set_use_si_prefix(std::stoi(value));
     else if (ztd::same(token, "no_execute"))
-        app_settings.no_execute = std::stoi(value);
+        app_settings.set_click_executes(!std::stoi(value));
     else if (ztd::same(token, "no_confirm"))
-        app_settings.no_confirm = std::stoi(value);
+        app_settings.set_confirm(!std::stoi(value));
     else if (ztd::same(token, "no_confirm_trash"))
-        app_settings.no_confirm_trash = std::stoi(value);
+        app_settings.set_confirm_trash(!std::stoi(value));
 }
 
 static void
@@ -304,11 +305,11 @@ parse_window_state(std::string& line)
         return;
 
     if (ztd::same(token, "width"))
-        app_settings.width = std::stoi(value);
+        app_settings.set_width(std::stoi(value));
     else if (ztd::same(token, "height"))
-        app_settings.height = std::stoi(value);
+        app_settings.set_height(std::stoi(value));
     else if (ztd::same(token, "maximized"))
-        app_settings.maximized = std::stoi(value);
+        app_settings.set_maximized(std::stoi(value));
 }
 
 static void
@@ -333,9 +334,9 @@ parse_interface_settings(std::string& line)
         return;
 
     if (ztd::same(token, "always_show_tabs"))
-        app_settings.always_show_tabs = std::stoi(value);
+        app_settings.set_always_show_tabs(std::stoi(value));
     else if (ztd::same(token, "show_close_tab_buttons"))
-        app_settings.show_close_tab_buttons = std::stoi(value);
+        app_settings.set_show_close_tab_buttons(std::stoi(value));
 }
 
 static void
@@ -423,46 +424,46 @@ config_parse_general(const toml::value& toml_data, std::uint64_t version)
     const auto& section = toml::find(toml_data, CONFIG_FILE_SECTION_GENERAL);
 
     const auto show_thumbnail = toml::find<bool>(section, "show_thumbnail");
-    app_settings.show_thumbnail = show_thumbnail;
+    app_settings.set_show_thumbnail(show_thumbnail);
 
     const auto max_thumb_size = toml::find<std::uint64_t>(section, "max_thumb_size");
-    app_settings.max_thumb_size = max_thumb_size << 10;
+    app_settings.set_max_thumb_size(max_thumb_size << 10);
 
-    const auto big_icon_size = toml::find<std::uint64_t>(section, "icon_size_big");
-    app_settings.big_icon_size = big_icon_size;
+    const auto icon_size_big = toml::find<std::uint64_t>(section, "icon_size_big");
+    app_settings.set_icon_size_big(icon_size_big);
 
-    const auto small_icon_size = toml::find<std::uint64_t>(section, "icon_size_small");
-    app_settings.small_icon_size = small_icon_size;
+    const auto icon_size_small = toml::find<std::uint64_t>(section, "icon_size_small");
+    app_settings.set_icon_size_small(icon_size_small);
 
-    const auto tool_icon_size = toml::find<std::uint64_t>(section, "icon_size_tool");
-    app_settings.tool_icon_size = tool_icon_size;
+    const auto icon_size_tool = toml::find<std::uint64_t>(section, "icon_size_tool");
+    app_settings.set_icon_size_tool(icon_size_tool);
 
     const auto single_click = toml::find<bool>(section, "single_click");
-    app_settings.single_click = single_click;
+    app_settings.set_single_click(single_click);
 
     const auto single_hover = toml::find<bool>(section, "single_hover");
-    app_settings.no_single_hover = !single_hover;
+    app_settings.set_single_hover(single_hover);
 
     const auto sort_order = toml::find<std::uint64_t>(section, "sort_order");
-    app_settings.sort_order = sort_order;
+    app_settings.set_sort_order(sort_order);
 
     const auto sort_type = toml::find<std::uint64_t>(section, "sort_type");
-    app_settings.sort_type = sort_type;
+    app_settings.set_sort_type(sort_type);
 
     const auto use_si_prefix = toml::find<bool>(section, "use_si_prefix");
-    app_settings.use_si_prefix = use_si_prefix;
+    app_settings.set_use_si_prefix(use_si_prefix);
 
     const auto click_executes = toml::find<bool>(section, "click_executes");
-    app_settings.no_execute = !click_executes;
+    app_settings.set_click_executes(click_executes);
 
     const auto confirm = toml::find<bool>(section, "confirm");
-    app_settings.no_confirm = !confirm;
+    app_settings.set_confirm(confirm);
 
     const auto confirm_delete = toml::find<bool>(section, "confirm_delete");
-    app_settings.no_confirm_trash = !confirm_delete;
+    app_settings.set_confirm_delete(confirm_delete);
 
     const auto confirm_trash = toml::find<bool>(section, "confirm_trash");
-    app_settings.no_confirm_trash = !confirm_trash;
+    app_settings.set_confirm_trash(confirm_trash);
 }
 
 static void
@@ -473,13 +474,13 @@ config_parse_window(const toml::value& toml_data, std::uint64_t version)
     const auto& section = toml::find(toml_data, CONFIG_FILE_SECTION_WINDOW);
 
     const auto width = toml::find<std::uint64_t>(section, "width");
-    app_settings.width = width;
+    app_settings.set_width(width);
 
     const auto height = toml::find<std::uint64_t>(section, "height");
-    app_settings.height = height;
+    app_settings.set_height(height);
 
     const auto maximized = toml::find<bool>(section, "maximized");
-    app_settings.maximized = maximized;
+    app_settings.set_maximized(maximized);
 }
 
 static void
@@ -490,10 +491,10 @@ config_parse_interface(const toml::value& toml_data, std::uint64_t version)
     const auto& section = toml::find(toml_data, CONFIG_FILE_SECTION_INTERFACE);
 
     const auto always_show_tabs = toml::find<bool>(section, "always_show_tabs");
-    app_settings.always_show_tabs = always_show_tabs;
+    app_settings.set_always_show_tabs(always_show_tabs);
 
     const auto show_close_tab_buttons = toml::find<bool>(section, "show_close_tab_buttons");
-    app_settings.show_close_tab_buttons = show_close_tab_buttons;
+    app_settings.set_show_close_tab_buttons(show_close_tab_buttons);
 }
 
 static void
@@ -635,7 +636,7 @@ load_etc_conf()
 void
 load_settings()
 {
-    app_settings.load_saved_tabs = true;
+    app_settings.set_load_saved_tabs(true);
 
     settings_config_dir = vfs_user_get_config_dir();
 
@@ -793,11 +794,14 @@ load_settings()
     // MOD turn off fullscreen
     xset_set_b(XSetName::MAIN_FULL, false);
 
-    app_settings.date_format = xset_get_s(XSetName::DATE_FORMAT);
-    if (app_settings.date_format.empty())
+    char* date_format = xset_get_s(XSetName::DATE_FORMAT);
+    if (!date_format || date_format[0] == '\0')
     {
-        app_settings.date_format = "%Y-%m-%d %H:%M";
-        xset_set(XSetName::DATE_FORMAT, XSetSetSet::S, app_settings.date_format);
+        xset_set(XSetName::DATE_FORMAT, XSetSetSet::S, app_settings.get_date_format());
+    }
+    else
+    {
+        app_settings.set_date_format(date_format);
     }
 
     // MOD su command discovery (sets default)
@@ -961,33 +965,33 @@ save_settings(void* main_window_ptr)
 
         {CONFIG_FILE_SECTION_GENERAL,
          toml::value{
-             {"show_thumbnail", app_settings.show_thumbnail},
-             {"max_thumb_size", app_settings.max_thumb_size >> 10},
-             {"icon_size_big", app_settings.big_icon_size},
-             {"icon_size_small", app_settings.small_icon_size},
-             {"icon_size_tool", app_settings.tool_icon_size},
-             {"single_click", app_settings.single_click},
-             {"single_hover", !app_settings.no_single_hover},
-             {"sort_order", app_settings.sort_order},
-             {"sort_type", app_settings.sort_type},
-             {"use_si_prefix", app_settings.use_si_prefix},
-             {"click_executes", !app_settings.no_execute},
-             {"confirm", !app_settings.no_confirm},
-             {"confirm_delete", !app_settings.no_confirm_delete},
-             {"confirm_trash", !app_settings.no_confirm_trash},
+             {"show_thumbnail", app_settings.get_show_thumbnail()},
+             {"max_thumb_size", app_settings.get_max_thumb_size() >> 10},
+             {"icon_size_big", app_settings.get_icon_size_big()},
+             {"icon_size_small", app_settings.get_icon_size_small()},
+             {"icon_size_tool", app_settings.get_icon_size_tool()},
+             {"single_click", app_settings.get_single_click()},
+             {"single_hover", app_settings.get_single_hover()},
+             {"sort_order", app_settings.get_sort_order()},
+             {"sort_type", app_settings.get_sort_type()},
+             {"use_si_prefix", app_settings.get_use_si_prefix()},
+             {"click_executes", app_settings.get_click_executes()},
+             {"confirm", app_settings.get_confirm()},
+             {"confirm_delete", app_settings.get_confirm_delete()},
+             {"confirm_trash", app_settings.get_confirm_trash()},
          }},
 
         {CONFIG_FILE_SECTION_WINDOW,
          toml::value{
-             {"height", app_settings.height},
-             {"width", app_settings.width},
-             {"maximized", app_settings.maximized},
+             {"height", app_settings.get_height()},
+             {"width", app_settings.get_width()},
+             {"maximized", app_settings.get_maximized()},
          }},
 
         {CONFIG_FILE_SECTION_INTERFACE,
          toml::value{
-             {"always_show_tabs", app_settings.always_show_tabs},
-             {"show_close_tab_buttons", app_settings.show_close_tab_buttons},
+             {"always_show_tabs", app_settings.get_always_show_tabs()},
+             {"show_close_tab_buttons", app_settings.get_show_close_tab_buttons()},
          }},
 
         {CONFIG_FILE_SECTION_XSET,
@@ -3312,7 +3316,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
     if (!file_browser || !set || !set->plugin_top || !set->plug_dir)
         return;
 
-    if (!app_settings.no_confirm)
+    if (app_settings.get_confirm())
     {
         std::string msg;
         std::string label = clean_label(set->menu_label, false, false);
@@ -3705,8 +3709,8 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
         {
             main_window = FM_MAIN_WINDOW_REINTERPRET(fm_main_window_new());
             gtk_window_set_default_size(GTK_WINDOW(main_window),
-                                        app_settings.width,
-                                        app_settings.height);
+                                        app_settings.get_width(),
+                                        app_settings.get_height());
             gtk_widget_show(GTK_WIDGET(main_window));
             new_window = !xset_get_b(XSetName::MAIN_SAVE_TABS);
         }
@@ -5175,7 +5179,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             is_bookmark_or_app = !set->lock && set->menu_style < XSetMenu::SUBMENU &&
                                  (cmd_type == XSetCMD::BOOKMARK || cmd_type == XSetCMD::APP) &&
                                  set->tool <= XSetTool::CUSTOM;
-            if (set->menu_style != XSetMenu::SEP && !app_settings.no_confirm &&
+            if (set->menu_style != XSetMenu::SEP && app_settings.get_confirm() &&
                 !is_bookmark_or_app && set->tool <= XSetTool::CUSTOM)
             {
                 if (parent)

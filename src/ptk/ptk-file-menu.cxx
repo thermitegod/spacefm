@@ -44,9 +44,13 @@
 #include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-app-chooser.hxx"
+
+#include "settings/app.hxx"
+
 #include "settings.hxx"
 #include "item-prop.hxx"
 #include "main-window.hxx"
+
 #include "ptk/ptk-location-view.hxx"
 #include "ptk/ptk-file-list.hxx"
 
@@ -467,7 +471,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     set = xset_set_cb(XSetName::VIEW_THUMB,
                       (GFunc)main_window_toggle_thumbnails_all_windows,
                       nullptr);
-    set->b = app_settings.show_thumbnail ? XSetB::XSET_B_TRUE : XSetB::XSET_B_UNSET;
+    set->b = app_settings.get_show_thumbnail() ? XSetB::XSET_B_TRUE : XSetB::XSET_B_UNSET;
 
     if (browser->view_mode == PtkFBViewMode::PTK_FB_ICON_VIEW)
     {

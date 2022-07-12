@@ -20,6 +20,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "settings/app.hxx"
+
 #include "settings.hxx"
 
 #include "vfs/vfs-utils.hxx"
@@ -62,7 +64,7 @@ vfs_load_icon(const char* icon_name, int size)
 const std::string
 vfs_file_size_to_string_format(std::uint64_t size_in_bytes, bool decimal)
 {
-    if (app_settings.use_si_prefix)
+    if (app_settings.get_use_si_prefix())
     {
         ztd::FileSizeSI filesize(size_in_bytes);
         return filesize.get_formated_size(decimal ? 1 : 0);

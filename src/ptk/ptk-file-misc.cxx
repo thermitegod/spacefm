@@ -46,6 +46,8 @@
 
 #include "type-conversion.hxx"
 
+#include "settings/app.hxx"
+
 #include "utils.hxx"
 
 #define PARENT_INFO(obj) (static_cast<ParentInfo*>(obj))
@@ -277,7 +279,7 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, std::vector<VFSFileInfo
     if (sel_files.empty())
         return;
 
-    if (!app_settings.no_confirm)
+    if (app_settings.get_confirm_delete())
     {
         std::string msg = fmt::format("Delete {} selected item ?", sel_files.size());
         GtkWidget* dlg = gtk_message_dialog_new(parent_win,
@@ -317,7 +319,7 @@ ptk_trash_files(GtkWindow* parent_win, const char* cwd, std::vector<VFSFileInfo*
     if (sel_files.empty())
         return;
 
-    if (!app_settings.no_confirm_trash)
+    if (app_settings.get_confirm_trash())
     {
         std::string msg = fmt::format("Trash {} selected item ?", sel_files.size());
         GtkWidget* dlg = gtk_message_dialog_new(parent_win,
@@ -3521,7 +3523,7 @@ ptk_open_files_with_app(const char* cwd, std::vector<VFSFileInfo*>& sel_files,
                         bool xnever)
 {
     // if xnever, never execute an executable
-    // if xforce, force execute of executable ignoring app_settings.no_execute
+    // if xforce, force execute of executable ignoring app_settings.click_executes
 
     std::string full_path;
     GList* files_to_open = nullptr;
@@ -3567,7 +3569,7 @@ ptk_open_files_with_app(const char* cwd, std::vector<VFSFileInfo*>& sel_files,
 
             /* If this file is an executable file, run it. */
             if (!xnever && vfs_file_info_is_executable(file, full_path.c_str()) &&
-                (!app_settings.no_execute || xforce))
+                (app_settings.get_click_executes() || xforce))
             {
                 Glib::spawn_command_line_async(full_path);
                 if (file_browser)
@@ -3614,7 +3616,7 @@ ptk_open_files_with_app(const char* cwd, std::vector<VFSFileInfo*>& sel_files,
             if (alloc_desktop.empty())
             {
                 if (file->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY &&
-                    (!app_settings.no_execute || xforce))
+                    (app_settings.get_click_executes() || xforce))
                 {
                     alloc_desktop = full_path;
                 }
@@ -3800,7 +3802,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>& s
 
     if (!strcmp(setname, "root_delete"))
     {
-        if (!app_settings.no_confirm)
+        if (app_settings.get_confirm_delete())
         {
             std::string msg = fmt::format("Delete {} selected item as root ?", item_count);
             if (xset_msg_dialog(parent,

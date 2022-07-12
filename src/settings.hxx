@@ -42,46 +42,6 @@
 // delimiter used in config file for tabs
 #define CONFIG_FILE_TABS_DELIM "///"
 
-struct AppSettings
-{
-    // General Settings
-    bool show_thumbnail{false};
-    std::uint64_t max_thumb_size{8 << 20};
-
-    std::uint64_t big_icon_size{48};
-    std::uint64_t small_icon_size{22};
-    std::uint64_t tool_icon_size{22};
-
-    bool single_click{false};
-    bool no_single_hover{false};
-
-    bool no_execute{true};
-    bool no_confirm{false};
-    bool no_confirm_delete{false};
-    bool no_confirm_trash{true};
-    bool load_saved_tabs{true};
-    std::string date_format{""};
-
-    // Sort by name, size, time
-    std::uint64_t sort_order{0};
-    // ascending, descending
-    std::uint64_t sort_type{0};
-
-    // Window State
-    std::uint64_t width{640};
-    std::uint64_t height{480};
-    bool maximized{false};
-
-    // Interface
-    bool always_show_tabs{true};
-    bool show_close_tab_buttons{false};
-
-    // Units
-    bool use_si_prefix{false};
-};
-
-extern AppSettings app_settings;
-
 struct ConfigSettings
 {
     const char* terminal_su{nullptr};

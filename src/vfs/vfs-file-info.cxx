@@ -28,6 +28,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "settings/app.hxx"
+
 #include "settings.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
@@ -335,7 +337,7 @@ vfs_file_info_get_disp_mtime(VFSFileInfo* fi)
         char buf[64];
         strftime(buf,
                  sizeof(buf),
-                 app_settings.date_format.c_str(), //"%Y-%m-%d %H:%M",
+                 app_settings.get_date_format().c_str(), //"%Y-%m-%d %H:%M",
                  std::localtime(&fi->mtime));
         fi->disp_mtime = buf;
     }

@@ -53,6 +53,8 @@
 #include "ptk/ptk-file-misc.hxx"
 #include "ptk/ptk-utils.hxx"
 
+#include "settings/app.hxx"
+
 #include "type-conversion.hxx"
 
 #include "find-files.hxx"
@@ -328,8 +330,8 @@ on_open_files(GAction* action, FindFile* data)
             {
                 w = fm_main_window_new();
                 // now done in fm_main_window_new
-                // gtk_window_set_default_size( GTK_WINDOW( w ), app_settings.width,
-                // app_settings.height );
+                // gtk_window_set_default_size(GTK_WINDOW(w), app_settings.get_width(),
+                // app_settings.get_height());
             }
             gtk_window_present(GTK_WINDOW(w));
             file_browser = PTK_FILE_BROWSER_REINTERPRET(
@@ -344,8 +346,8 @@ on_open_files(GAction* action, FindFile* data)
         {
             w = fm_main_window_new();
             // now done in fm_main_window_new
-            // gtk_window_set_default_size( GTK_WINDOW( w ), app_settings.width, app_settings.height
-            // );
+            // gtk_window_set_default_size(GTK_WINDOW(w), app_settings.get_width(),
+            // app_settings.get_height());
         }
 
         g_hash_table_foreach(hash, (GHFunc)open_dir, w);
@@ -1162,7 +1164,7 @@ fm_find_files(std::vector<const char*> search_dirs)
     /* replace the problematic GtkTreeView with GtkTreeView */
     data->result_view = gtk_tree_view_new();
     /*
-    if (app_settings.single_click)
+    if (app_settings.get_single_click())
     {
         gtk_tree_view_set_single_click(GTK_TREE_VIEW(data->result_view), true);
         gtk_tree_view_set_single_click_timeout(GTK_TREE_VIEW(data->result_view),
