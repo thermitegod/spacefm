@@ -57,6 +57,7 @@
 
 #include "settings/app.hxx"
 #include "settings/etc.hxx"
+#include "settings/names.hxx"
 
 #include "autosave.hxx"
 #include "extern.hxx"
@@ -207,31 +208,6 @@ using xsetpak_t = std::map<std::string, setvars_t>;
 
 static const xsetpak_t xset_pack_sets();
 
-/**
- * Config file macros
- */
-
-// TOML config file
-#define CONFIG_FILE_VERSION  1 // 3.0.0-dev
-#define CONFIG_FILE_FILENAME "session.toml"
-
-#define CONFIG_FILE_SECTION_VERSION   "Version"
-#define CONFIG_FILE_SECTION_GENERAL   "General"
-#define CONFIG_FILE_SECTION_WINDOW    "Window"
-#define CONFIG_FILE_SECTION_INTERFACE "Interface"
-#define CONFIG_FILE_SECTION_XSET      "XSet"
-
-// TOML Plugins
-#define PLUGIN_FILE_FILENAME "plugin.toml"
-
-#define PLUGIN_FILE_SECTION_PLUGIN "Plugin"
-
-#ifdef HAVE_DEPRECATED_INI_LOADING
-// INI config file
-#define CONFIG_FILE_INI_VERSION  "101" // 3.0.0-dev
-#define CONFIG_FILE_INI_FILENAME "session"
-#endif
-
 #ifdef HAVE_DEPRECATED_INI_LOADING // Deprecated INI loader - start
 static void
 parse_general_settings(std::string& line)
@@ -254,31 +230,31 @@ parse_general_settings(std::string& line)
     if (value.empty())
         return;
 
-    if (ztd::same(token, "show_thumbnail"))
+    if (ztd::same(token, INI_KEY_SHOW_THUMBNAIL))
         app_settings.set_show_thumbnail(std::stoi(value));
-    else if (ztd::same(token, "max_thumb_size"))
+    else if (ztd::same(token, INI_KEY_MAX_THUMB_SIZE))
         app_settings.set_max_thumb_size(std::stoi(value) << 10);
-    else if (ztd::same(token, "big_icon_size"))
+    else if (ztd::same(token, INI_KEY_ICON_SIZE_BIG))
         app_settings.set_icon_size_big(std::stoi(value));
-    else if (ztd::same(token, "small_icon_size"))
+    else if (ztd::same(token, INI_KEY_ICON_SIZE_SMALL))
         app_settings.set_icon_size_small(std::stoi(value));
-    else if (ztd::same(token, "tool_icon_size"))
+    else if (ztd::same(token, INI_KEY_ICON_SIZE_TOOL))
         app_settings.set_icon_size_tool(std::stoi(value));
-    else if (ztd::same(token, "single_click"))
+    else if (ztd::same(token, INI_KEY_SINGLE_CLICK))
         app_settings.set_single_click(std::stoi(value));
-    else if (ztd::same(token, "no_single_hover"))
+    else if (ztd::same(token, INI_KEY_NO_SINGLE_HOVER))
         app_settings.set_single_hover(std::stoi(value));
-    else if (ztd::same(token, "sort_order"))
+    else if (ztd::same(token, INI_KEY_SORT_ORDER))
         app_settings.set_sort_order(std::stoi(value));
-    else if (ztd::same(token, "sort_type"))
+    else if (ztd::same(token, INI_KEY_SORT_TYPE))
         app_settings.set_sort_type(std::stoi(value));
-    else if (ztd::same(token, "use_si_prefix"))
+    else if (ztd::same(token, INI_KEY_USE_SI_PREFIX))
         app_settings.set_use_si_prefix(std::stoi(value));
-    else if (ztd::same(token, "no_execute"))
+    else if (ztd::same(token, INI_KEY_NO_EXECUTE))
         app_settings.set_click_executes(!std::stoi(value));
-    else if (ztd::same(token, "no_confirm"))
+    else if (ztd::same(token, INI_KEY_NO_CONFIRM))
         app_settings.set_confirm(!std::stoi(value));
-    else if (ztd::same(token, "no_confirm_trash"))
+    else if (ztd::same(token, INI_KEY_NO_CONFIRM_TRASH))
         app_settings.set_confirm_trash(!std::stoi(value));
 }
 
@@ -303,11 +279,11 @@ parse_window_state(std::string& line)
     if (value.empty())
         return;
 
-    if (ztd::same(token, "width"))
+    if (ztd::same(token, INI_KEY_WIDTH))
         app_settings.set_width(std::stoi(value));
-    else if (ztd::same(token, "height"))
+    else if (ztd::same(token, INI_KEY_HEIGHT))
         app_settings.set_height(std::stoi(value));
-    else if (ztd::same(token, "maximized"))
+    else if (ztd::same(token, INI_KEY_MAXIMIZED))
         app_settings.set_maximized(std::stoi(value));
 }
 
@@ -332,9 +308,9 @@ parse_interface_settings(std::string& line)
     if (value.empty())
         return;
 
-    if (ztd::same(token, "always_show_tabs"))
+    if (ztd::same(token, INI_KEY_SHOW_TABS))
         app_settings.set_always_show_tabs(std::stoi(value));
-    else if (ztd::same(token, "show_close_tab_buttons"))
+    else if (ztd::same(token, INI_KEY_SHOW_CLOSE))
         app_settings.set_show_close_tab_buttons(std::stoi(value));
 }
 
@@ -409,9 +385,9 @@ xset_parse(std::string& line)
 static std::uint64_t
 get_config_file_version(const toml::value& data)
 {
-    const auto& version = toml::find(data, CONFIG_FILE_SECTION_VERSION);
+    const auto& version = toml::find(data, TOML_SECTION_VERSION);
 
-    const auto config_version = toml::find<std::uint64_t>(version, "version");
+    const auto config_version = toml::find<std::uint64_t>(version, TOML_KEY_VERSION);
     return config_version;
 }
 
@@ -420,48 +396,48 @@ config_parse_general(const toml::value& toml_data, std::uint64_t version)
 {
     (void)version;
 
-    const auto& section = toml::find(toml_data, CONFIG_FILE_SECTION_GENERAL);
+    const auto& section = toml::find(toml_data, TOML_SECTION_GENERAL);
 
-    const auto show_thumbnail = toml::find<bool>(section, "show_thumbnail");
+    const auto show_thumbnail = toml::find<bool>(section, TOML_KEY_SHOW_THUMBNAIL);
     app_settings.set_show_thumbnail(show_thumbnail);
 
-    const auto max_thumb_size = toml::find<std::uint64_t>(section, "max_thumb_size");
+    const auto max_thumb_size = toml::find<std::uint64_t>(section, TOML_KEY_MAX_THUMB_SIZE);
     app_settings.set_max_thumb_size(max_thumb_size << 10);
 
-    const auto icon_size_big = toml::find<std::uint64_t>(section, "icon_size_big");
+    const auto icon_size_big = toml::find<std::uint64_t>(section, TOML_KEY_ICON_SIZE_BIG);
     app_settings.set_icon_size_big(icon_size_big);
 
-    const auto icon_size_small = toml::find<std::uint64_t>(section, "icon_size_small");
+    const auto icon_size_small = toml::find<std::uint64_t>(section, TOML_KEY_ICON_SIZE_SMALL);
     app_settings.set_icon_size_small(icon_size_small);
 
-    const auto icon_size_tool = toml::find<std::uint64_t>(section, "icon_size_tool");
+    const auto icon_size_tool = toml::find<std::uint64_t>(section, TOML_KEY_ICON_SIZE_TOOL);
     app_settings.set_icon_size_tool(icon_size_tool);
 
-    const auto single_click = toml::find<bool>(section, "single_click");
+    const auto single_click = toml::find<bool>(section, TOML_KEY_SINGLE_CLICK);
     app_settings.set_single_click(single_click);
 
-    const auto single_hover = toml::find<bool>(section, "single_hover");
+    const auto single_hover = toml::find<bool>(section, TOML_KEY_SINGLE_HOVER);
     app_settings.set_single_hover(single_hover);
 
-    const auto sort_order = toml::find<std::uint64_t>(section, "sort_order");
+    const auto sort_order = toml::find<std::uint64_t>(section, TOML_KEY_SORT_ORDER);
     app_settings.set_sort_order(sort_order);
 
-    const auto sort_type = toml::find<std::uint64_t>(section, "sort_type");
+    const auto sort_type = toml::find<std::uint64_t>(section, TOML_KEY_SORT_TYPE);
     app_settings.set_sort_type(sort_type);
 
-    const auto use_si_prefix = toml::find<bool>(section, "use_si_prefix");
+    const auto use_si_prefix = toml::find<bool>(section, TOML_KEY_USE_SI_PREFIX);
     app_settings.set_use_si_prefix(use_si_prefix);
 
-    const auto click_executes = toml::find<bool>(section, "click_executes");
+    const auto click_executes = toml::find<bool>(section, TOML_KEY_CLICK_EXECUTE);
     app_settings.set_click_executes(click_executes);
 
-    const auto confirm = toml::find<bool>(section, "confirm");
+    const auto confirm = toml::find<bool>(section, TOML_KEY_CONFIRM);
     app_settings.set_confirm(confirm);
 
-    const auto confirm_delete = toml::find<bool>(section, "confirm_delete");
+    const auto confirm_delete = toml::find<bool>(section, TOML_KEY_CONFIRM_DELETE);
     app_settings.set_confirm_delete(confirm_delete);
 
-    const auto confirm_trash = toml::find<bool>(section, "confirm_trash");
+    const auto confirm_trash = toml::find<bool>(section, TOML_KEY_CONFIRM_TRASH);
     app_settings.set_confirm_trash(confirm_trash);
 }
 
@@ -470,15 +446,15 @@ config_parse_window(const toml::value& toml_data, std::uint64_t version)
 {
     (void)version;
 
-    const auto& section = toml::find(toml_data, CONFIG_FILE_SECTION_WINDOW);
+    const auto& section = toml::find(toml_data, TOML_SECTION_WINDOW);
 
-    const auto width = toml::find<std::uint64_t>(section, "width");
-    app_settings.set_width(width);
-
-    const auto height = toml::find<std::uint64_t>(section, "height");
+    const auto height = toml::find<std::uint64_t>(section, TOML_KEY_HEIGHT);
     app_settings.set_height(height);
 
-    const auto maximized = toml::find<bool>(section, "maximized");
+    const auto width = toml::find<std::uint64_t>(section, TOML_KEY_WIDTH);
+    app_settings.set_width(width);
+
+    const auto maximized = toml::find<bool>(section, TOML_KEY_MAXIMIZED);
     app_settings.set_maximized(maximized);
 }
 
@@ -487,12 +463,12 @@ config_parse_interface(const toml::value& toml_data, std::uint64_t version)
 {
     (void)version;
 
-    const auto& section = toml::find(toml_data, CONFIG_FILE_SECTION_INTERFACE);
+    const auto& section = toml::find(toml_data, TOML_SECTION_INTERFACE);
 
-    const auto always_show_tabs = toml::find<bool>(section, "always_show_tabs");
+    const auto always_show_tabs = toml::find<bool>(section, TOML_KEY_SHOW_TABS);
     app_settings.set_always_show_tabs(always_show_tabs);
 
-    const auto show_close_tab_buttons = toml::find<bool>(section, "show_close_tab_buttons");
+    const auto show_close_tab_buttons = toml::find<bool>(section, TOML_KEY_SHOW_CLOSE);
     app_settings.set_show_close_tab_buttons(show_close_tab_buttons);
 }
 
@@ -502,7 +478,7 @@ config_parse_xset(const toml::value& toml_data, std::uint64_t version)
     (void)version;
 
     // loop over all of [[XSet]]
-    for (const auto& section: toml::find<toml::array>(toml_data, CONFIG_FILE_SECTION_XSET))
+    for (const auto& section: toml::find<toml::array>(toml_data, TOML_SECTION_XSET))
     {
         // get [XSet.name] and all vars
         for (const auto& [toml_name, toml_vars]: section.as_table())
@@ -700,13 +676,13 @@ load_settings()
 
                     if (line.at(0) == '[')
                     {
-                        if (ztd::same(line, "[General]"))
+                        if (ztd::same(line, INI_SECTION_GENERAL))
                             func = &parse_general_settings;
-                        else if (ztd::same(line, "[Window]"))
+                        else if (ztd::same(line, INI_SECTION_WINDOW))
                             func = &parse_window_state;
-                        else if (ztd::same(line, "[Interface]"))
+                        else if (ztd::same(line, INI_SECTION_INTERFACE))
                             func = &parse_interface_settings;
-                        else if (ztd::same(line, "[MOD]"))
+                        else if (ztd::same(line, INI_SECTION_MOD))
                             func = &xset_parse;
                         else
                             func = nullptr;
@@ -893,43 +869,43 @@ save_settings(void* main_window_ptr)
     // new values get appened at the top of the file,
     // declare in reverse order
     const toml::value toml_data = toml::value{
-        {CONFIG_FILE_SECTION_VERSION,
+        {TOML_SECTION_VERSION,
          toml::value{
-             {"version", CONFIG_FILE_VERSION},
+             {TOML_KEY_VERSION, CONFIG_FILE_VERSION},
          }},
 
-        {CONFIG_FILE_SECTION_GENERAL,
+        {TOML_SECTION_GENERAL,
          toml::value{
-             {"show_thumbnail", app_settings.get_show_thumbnail()},
-             {"max_thumb_size", app_settings.get_max_thumb_size() >> 10},
-             {"icon_size_big", app_settings.get_icon_size_big()},
-             {"icon_size_small", app_settings.get_icon_size_small()},
-             {"icon_size_tool", app_settings.get_icon_size_tool()},
-             {"single_click", app_settings.get_single_click()},
-             {"single_hover", app_settings.get_single_hover()},
-             {"sort_order", app_settings.get_sort_order()},
-             {"sort_type", app_settings.get_sort_type()},
-             {"use_si_prefix", app_settings.get_use_si_prefix()},
-             {"click_executes", app_settings.get_click_executes()},
-             {"confirm", app_settings.get_confirm()},
-             {"confirm_delete", app_settings.get_confirm_delete()},
-             {"confirm_trash", app_settings.get_confirm_trash()},
+             {TOML_KEY_SHOW_THUMBNAIL, app_settings.get_show_thumbnail()},
+             {TOML_KEY_MAX_THUMB_SIZE, app_settings.get_max_thumb_size() >> 10},
+             {TOML_KEY_ICON_SIZE_BIG, app_settings.get_icon_size_big()},
+             {TOML_KEY_ICON_SIZE_SMALL, app_settings.get_icon_size_small()},
+             {TOML_KEY_ICON_SIZE_TOOL, app_settings.get_icon_size_tool()},
+             {TOML_KEY_SINGLE_CLICK, app_settings.get_single_click()},
+             {TOML_KEY_SINGLE_HOVER, app_settings.get_single_hover()},
+             {TOML_KEY_SORT_ORDER, app_settings.get_sort_order()},
+             {TOML_KEY_SORT_TYPE, app_settings.get_sort_type()},
+             {TOML_KEY_USE_SI_PREFIX, app_settings.get_use_si_prefix()},
+             {TOML_KEY_CLICK_EXECUTE, app_settings.get_click_executes()},
+             {TOML_KEY_CONFIRM, app_settings.get_confirm()},
+             {TOML_KEY_CONFIRM_DELETE, app_settings.get_confirm_delete()},
+             {TOML_KEY_CONFIRM_TRASH, app_settings.get_confirm_trash()},
          }},
 
-        {CONFIG_FILE_SECTION_WINDOW,
+        {TOML_SECTION_WINDOW,
          toml::value{
-             {"height", app_settings.get_height()},
-             {"width", app_settings.get_width()},
-             {"maximized", app_settings.get_maximized()},
+             {TOML_KEY_HEIGHT, app_settings.get_height()},
+             {TOML_KEY_WIDTH, app_settings.get_width()},
+             {TOML_KEY_MAXIMIZED, app_settings.get_maximized()},
          }},
 
-        {CONFIG_FILE_SECTION_INTERFACE,
+        {TOML_SECTION_INTERFACE,
          toml::value{
-             {"always_show_tabs", app_settings.get_always_show_tabs()},
-             {"show_close_tab_buttons", app_settings.get_show_close_tab_buttons()},
+             {TOML_KEY_SHOW_TABS, app_settings.get_always_show_tabs()},
+             {TOML_KEY_SHOW_CLOSE, app_settings.get_show_close_tab_buttons()},
          }},
 
-        {CONFIG_FILE_SECTION_XSET,
+        {TOML_SECTION_XSET,
          toml::value{
              xset_pack_sets(),
          }},
@@ -3580,9 +3556,9 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 
         // Plugin TOML
         const toml::value toml_data = toml::value{
-            {CONFIG_FILE_SECTION_VERSION,
+            {TOML_SECTION_VERSION,
              toml::value{
-                 {"version", CONFIG_FILE_VERSION},
+                 {TOML_KEY_VERSION, CONFIG_FILE_VERSION},
              }},
 
             {PLUGIN_FILE_SECTION_PLUGIN,
