@@ -229,57 +229,57 @@ struct XSet
     XSet(const std::string& name, XSetName xset_name);
     ~XSet();
 
-    char* name;
+    char* name{nullptr};
     XSetName xset_name;
 
-    XSetB b;                 // saved, tri-state enum 0=unset(false) 1=true 2=false
-    char* s;                 // saved
-    char* x;                 // saved
-    char* y;                 // saved
-    char* z;                 // saved, for menu_string locked, stores default
-    bool disable;            // not saved, default false
-    char* menu_label;        // saved
-    XSetMenu menu_style;     // saved if ( !lock ), or read if locked
-    char* icon;              // saved
-    GFunc cb_func;           // not saved
-    void* cb_data;           // not saved
-    char* ob1;               // not saved
-    void* ob1_data;          // not saved
-    char* ob2;               // not saved
-    void* ob2_data;          // not saved
-    PtkFileBrowser* browser; // not saved - set automatically
-    unsigned int key;        // saved
-    unsigned int keymod;     // saved
-    char* shared_key;        // not saved
-    char* desc;              // saved if ( !lock ), or read if locked
-    char* title;             // saved if ( !lock ), or read if locked
-    char* next;              // saved
-    char* context;           // saved
-    XSetTool tool;           // saved
-    bool lock;               // not saved, default true
+    XSetB b{XSetB::XSET_B_UNSET};          // saved, tri-state enum 0=unset(false) 1=true 2=false
+    char* s{nullptr};                      // saved
+    char* x{nullptr};                      // saved
+    char* y{nullptr};                      // saved
+    char* z{nullptr};                      // saved, for menu_string locked, stores default
+    bool disable{false};                   // not saved
+    char* menu_label{nullptr};             // saved
+    XSetMenu menu_style{XSetMenu::NORMAL}; // saved if ( !lock ), or read if locked
+    GFunc cb_func{nullptr};                // not saved
+    void* cb_data{nullptr};                // not saved
+    char* ob1{nullptr};                    // not saved
+    void* ob1_data{nullptr};               // not saved
+    char* ob2{nullptr};                    // not saved
+    void* ob2_data{nullptr};               // not saved
+    PtkFileBrowser* browser{nullptr};      // not saved - set automatically
+    unsigned int key{0};                   // saved
+    unsigned int keymod{0};                // saved
+    char* shared_key{nullptr};             // not saved
+    char* icon{nullptr};                   // saved
+    char* desc{nullptr};                   // saved if ( !lock ), or read if locked
+    char* title{nullptr};                  // saved if ( !lock ), or read if locked
+    char* next{nullptr};                   // saved
+    char* context{nullptr};                // saved
+    XSetTool tool{XSetTool::NOT};          // saved
+    bool lock{true};                       // not saved
 
     // Custom Command ( !lock )
-    char* prev;   // saved
-    char* parent; // saved
-    char* child;  // saved
-    char* line;   // saved or help if lock
+    char* prev{nullptr};   // saved
+    char* parent{nullptr}; // saved
+    char* child{nullptr};  // saved
+    char* line{nullptr};   // saved or help if lock
     // x = XSetCMD::LINE..XSetCMD::BOOKMARK
     // y = user
     // z = custom executable
-    bool task;          // saved
-    bool task_pop;      // saved
-    bool task_err;      // saved
-    bool task_out;      // saved
-    bool in_terminal;   // saved, or save menu_label if lock
-    bool keep_terminal; // saved, or save icon if lock
-    bool scroll_lock;   // saved
-    char opener;        // saved
+    bool task{false};          // saved
+    bool task_pop{false};      // saved
+    bool task_err{false};      // saved
+    bool task_out{false};      // saved
+    bool in_terminal{false};   // saved, or save menu_label if lock
+    bool keep_terminal{false}; // saved, or save icon if lock
+    bool scroll_lock{false};   // saved
+    char opener{0};            // saved
 
     // Plugin (not saved at all)
-    bool plugin;     // not saved
-    bool plugin_top; // not saved
-    char* plug_name; // not saved
-    char* plug_dir;  // not saved
+    bool plugin{false};       // not saved
+    bool plugin_top{false};   // not saved
+    char* plug_name{nullptr}; // not saved
+    char* plug_dir{nullptr};  // not saved
 };
 
 // cache these for speed in event handlers

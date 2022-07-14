@@ -1114,46 +1114,6 @@ XSet::XSet(const std::string& name, XSetName xset_name)
 
     this->name = ztd::strdup(name);
     this->xset_name = xset_name;
-
-    this->b = XSetB::XSET_B_UNSET;
-    this->s = nullptr;
-    this->x = nullptr;
-    this->y = nullptr;
-    this->z = nullptr;
-    this->disable = false;
-    this->menu_label = nullptr;
-    this->menu_style = XSetMenu::NORMAL;
-    this->cb_func = nullptr;
-    this->cb_data = nullptr;
-    this->ob1 = nullptr;
-    this->ob1_data = nullptr;
-    this->ob2 = nullptr;
-    this->ob2_data = nullptr;
-    this->key = 0;
-    this->keymod = 0;
-    this->shared_key = nullptr;
-    this->icon = nullptr;
-    this->desc = nullptr;
-    this->title = nullptr;
-    this->next = nullptr;
-    this->context = nullptr;
-    this->tool = XSetTool::NOT;
-    this->lock = true;
-    this->plugin = false;
-
-    // custom ( !lock )
-    this->prev = nullptr;
-    this->parent = nullptr;
-    this->child = nullptr;
-    this->line = nullptr;
-    this->task = false;
-    this->task_pop = false;
-    this->task_err = false;
-    this->task_out = false;
-    this->in_terminal = false;
-    this->keep_terminal = false;
-    this->scroll_lock = false;
-    this->opener = 0;
 }
 
 XSet::~XSet()
