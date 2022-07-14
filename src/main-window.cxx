@@ -3332,12 +3332,14 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, xset_t kn
                         fm_main_window_get_current_file_browser(main_window));
                     if (browser)
                     {
-                        std::string new_set_name =
+                        const std::string new_set_name =
                             fmt::format("panel{}{}", browser->mypanel, set->name + 6);
                         set = xset_get(new_set_name);
                     }
                     else
-                        return false; // failsafe
+                    { // failsafe
+                        return false;
+                    }
                 }
                 return on_main_window_keypress_found_key(main_window, set);
             }
@@ -4520,7 +4522,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask
     PtkFileTask* ptask;
     xset_t set;
 
-    enum MainWindowJob
+    enum class MainWindowJob
     {
         JOB_STOP,
         JOB_PAUSE,
@@ -4537,19 +4539,18 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask
     if (!set || !ztd::startswith(set->name, "task_"))
         return;
 
-    char* name = set->name + 5;
-    if (ztd::startswith(name, "task_stop"))
+    if (ztd::startswith(set->name, "task_stop"))
         job = MainWindowJob::JOB_STOP;
-    else if (ztd::startswith(name, "task_pause"))
+    else if (ztd::startswith(set->name, "task_pause"))
         job = MainWindowJob::JOB_PAUSE;
-    else if (ztd::startswith(name, "task_que"))
+    else if (ztd::startswith(set->name, "task_que"))
         job = MainWindowJob::JOB_QUEUE;
-    else if (ztd::startswith(name, "task_resume"))
+    else if (ztd::startswith(set->name, "task_resume"))
         job = MainWindowJob::JOB_RESUME;
     else
         return;
 
-    bool all = (ztd::endswith(name, "_all"));
+    bool all = ztd::endswith(set->name, "_all");
 
     if (all)
     {

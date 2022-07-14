@@ -5875,20 +5875,21 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
     if (sel_files.empty())
         return;
 
-    char* name;
-    std::string prog;
-    bool as_root = false;
-    std::string user1 = "1000";
-    std::string user2 = "1001";
-    std::string myuser = ztd::strdup(fmt::format("{}", geteuid()));
-
     xset_t set = XSET(g_object_get_data(G_OBJECT(item), "set"));
     if (!set || !file_browser)
         return;
 
+    std::string name;
+    std::string prog;
+    bool as_root = false;
+
+    const std::string user1 = "1000";
+    const std::string user2 = "1001";
+    const std::string myuser = fmt::format("{}", geteuid());
+
     if (ztd::startswith(set->name, "perm_"))
     {
-        name = set->name + 5;
+        name = ztd::removeprefix(set->name, "perm_");
         if (ztd::startswith(name, "go") || ztd::startswith(name, "ugo"))
             prog = "chmod -R";
         else
@@ -5896,7 +5897,7 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
     }
     else if (ztd::startswith(set->name, "rperm_"))
     {
-        name = set->name + 6;
+        name = ztd::removeprefix(set->name, "rperm_");
         if (ztd::startswith(name, "go") || ztd::startswith(name, "ugo"))
             prog = "chmod -R";
         else
@@ -5905,18 +5906,20 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
     }
     else if (ztd::startswith(set->name, "own_"))
     {
-        name = set->name + 4;
+        name = ztd::removeprefix(set->name, "own_");
         prog = "chown";
         as_root = true;
     }
     else if (ztd::startswith(set->name, "rown_"))
     {
-        name = set->name + 5;
+        name = ztd::removeprefix(set->name, "rown_");
         prog = "chown -R";
         as_root = true;
     }
     else
+    {
         return;
+    }
 
     std::string cmd;
     if (ztd::same(name, "r"))
@@ -5991,7 +5994,7 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
     std::string file_paths;
     for (VFSFileInfo* file: sel_files)
     {
-        std::string file_path = bash_quote(vfs_file_info_get_name(file));
+        const std::string file_path = bash_quote(vfs_file_info_get_name(file));
         file_paths = fmt::format("{} {}", file_paths, file_path);
     }
 
