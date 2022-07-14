@@ -54,7 +54,7 @@ const char* xset_get_user_tmp_dir();
 ///////////////////////////////////////////////////////////////////////////////
 // MOD extra settings below
 
-enum class XSetSetSet
+enum class XSetVar
 {
     S,
     B,
@@ -332,9 +332,9 @@ xset_t xset_get(const std::string& name);
 xset_t xset_get_panel(panel_t panel, const std::string& name);
 xset_t xset_get_panel_mode(panel_t panel, const std::string& name, char mode);
 
-int xset_get_int(XSetName name, XSetSetSet var);
-int xset_get_int(const std::string& name, XSetSetSet var);
-int xset_get_int_panel(panel_t panel, const std::string& name, XSetSetSet var);
+int xset_get_int(XSetName name, XSetVar var);
+int xset_get_int(const std::string& name, XSetVar var);
+int xset_get_int_panel(panel_t panel, const std::string& name, XSetVar var);
 
 char* xset_get_s(XSetName name);
 char* xset_get_s(const std::string& name);
@@ -350,16 +350,16 @@ xset_t xset_set_b(const std::string& name, bool bval);
 xset_t xset_set_b_panel(panel_t panel, const std::string& name, bool bval);
 xset_t xset_set_b_panel_mode(panel_t panel, const std::string& name, char mode, bool bval);
 
-xset_t xset_set_panel(panel_t panel, const std::string& name, XSetSetSet var,
+xset_t xset_set_panel(panel_t panel, const std::string& name, XSetVar var,
                       const std::string& value);
 
 xset_t xset_set_cb(XSetName name, GFunc cb_func, void* cb_data);
 xset_t xset_set_cb(const std::string& name, GFunc cb_func, void* cb_data);
 xset_t xset_set_cb_panel(panel_t panel, const std::string& name, GFunc cb_func, void* cb_data);
 
-xset_t xset_set(XSetName name, XSetSetSet var, const std::string& value);
-xset_t xset_set(const std::string& name, XSetSetSet var, const std::string& value);
-xset_t xset_set_set(xset_t set, XSetSetSet var, const std::string& value);
+xset_t xset_set(XSetName name, XSetVar var, const std::string& value);
+xset_t xset_set(const std::string& name, XSetVar var, const std::string& value);
+xset_t xset_set_var(xset_t set, XSetVar var, const std::string& value);
 
 void xset_set_key(GtkWidget* parent, xset_t set);
 

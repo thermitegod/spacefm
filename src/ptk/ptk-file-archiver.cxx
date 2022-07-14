@@ -556,8 +556,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd);
 
     // Setting dimension and position
-    int width = xset_get_int(XSetName::ARC_DLG, XSetSetSet::X);
-    int height = xset_get_int(XSetName::ARC_DLG, XSetSetSet::Y);
+    int width = xset_get_int(XSetName::ARC_DLG, XSetVar::X);
+    int height = xset_get_int(XSetName::ARC_DLG, XSetVar::Y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -605,7 +605,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>
 
                 handler_xset = xset_get(xset_name);
                 // Saving selected archive handler name as default
-                xset_set(XSetName::ARC_DLG, XSetSetSet::S, xset_name);
+                xset_set(XSetName::ARC_DLG, XSetVar::S, xset_name);
                 free(xset_name);
 
                 // run in the terminal or not
@@ -734,8 +734,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>
     height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::ARC_DLG, XSetSetSet::X, std::to_string(width));
-        xset_set(XSetName::ARC_DLG, XSetSetSet::Y, std::to_string(height));
+        xset_set(XSetName::ARC_DLG, XSetVar::X, std::to_string(width));
+        xset_set(XSetName::ARC_DLG, XSetVar::Y, std::to_string(height));
     }
 
     // Destroying dialog
@@ -1042,7 +1042,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*
                                                                   "user-_writable");
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_parent), xset_get_b(XSetName::ARC_DLG));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_write),
-                                     xset_get_int(XSetName::ARC_DLG, XSetSetSet::Z) == 1 &&
+                                     xset_get_int(XSetName::ARC_DLG, XSetVar::Z) == 1 &&
                                          geteuid() != 0);
         gtk_widget_set_sensitive(chk_write, xset_get_b(XSetName::ARC_DLG) && geteuid() != 0);
         g_signal_connect(G_OBJECT(chk_parent),
@@ -1058,8 +1058,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*
         gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd);
 
         // Fetching saved dialog dimensions and applying
-        int width = xset_get_int(XSetName::ARC_DLG, XSetSetSet::X);
-        int height = xset_get_int(XSetName::ARC_DLG, XSetSetSet::Y);
+        int width = xset_get_int(XSetName::ARC_DLG, XSetVar::X);
+        int height = xset_get_int(XSetName::ARC_DLG, XSetVar::Y);
         if (width && height)
         {
             // filechooser will not honor default size or size request ?
@@ -1084,7 +1084,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*
                     write_access =
                         create_parent && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_write));
                     xset_set_b(XSetName::ARC_DLG, create_parent);
-                    xset_set(XSetName::ARC_DLG, XSetSetSet::Z, write_access ? "1" : "0");
+                    xset_set(XSetName::ARC_DLG, XSetVar::Z, write_access ? "1" : "0");
                     exit_loop = true;
                     break;
                 case GTK_RESPONSE_NONE:
@@ -1112,8 +1112,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*
         height = allocation.height;
         if (width && height)
         {
-            xset_set(XSetName::ARC_DLG, XSetSetSet::X, std::to_string(width));
-            xset_set(XSetName::ARC_DLG, XSetSetSet::Y, std::to_string(height));
+            xset_set(XSetName::ARC_DLG, XSetVar::X, std::to_string(width));
+            xset_set(XSetName::ARC_DLG, XSetVar::Y, std::to_string(height));
         }
 
         // Destroying dialog

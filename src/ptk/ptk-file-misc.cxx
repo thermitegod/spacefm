@@ -1098,8 +1098,8 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path.c_str());
     }
 
-    int width = xset_get_int(XSetName::MOVE_DLG_HELP, XSetSetSet::X);
-    int height = xset_get_int(XSetName::MOVE_DLG_HELP, XSetSetSet::Y);
+    int width = xset_get_int(XSetName::MOVE_DLG_HELP, XSetVar::X);
+    int height = xset_get_int(XSetName::MOVE_DLG_HELP, XSetVar::Y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -1142,8 +1142,8 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::X, std::to_string(width));
-        xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::Y, std::to_string(height));
+        xset_set(XSetName::MOVE_DLG_HELP, XSetVar::X, std::to_string(width));
+        xset_set(XSetName::MOVE_DLG_HELP, XSetVar::Y, std::to_string(height));
     }
 
     gtk_widget_destroy(dlg);
@@ -1198,7 +1198,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
 
     xset_t set = xset_get(XSetName::MOVE_DLG_HELP);
     if (set->z)
-        mode_default = xset_get_int(XSetName::MOVE_DLG_HELP, XSetSetSet::Z);
+        mode_default = xset_get_int(XSetName::MOVE_DLG_HELP, XSetVar::Z);
 
     // action create directory does not work properly so not used:
     //  it creates a directory by default with no way to stop it
@@ -1254,8 +1254,8 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     g_object_set_data(G_OBJECT(dlg), "mode", mode);
     gtk_widget_show_all(hbox);
 
-    int width = xset_get_int(XSetName::MOVE_DLG_HELP, XSetSetSet::X);
-    int height = xset_get_int(XSetName::MOVE_DLG_HELP, XSetSetSet::Y);
+    int width = xset_get_int(XSetName::MOVE_DLG_HELP, XSetVar::X);
+    int height = xset_get_int(XSetName::MOVE_DLG_HELP, XSetVar::Y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -1305,8 +1305,8 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::X, std::to_string(width));
-        xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::Y, std::to_string(height));
+        xset_set(XSetName::MOVE_DLG_HELP, XSetVar::X, std::to_string(width));
+        xset_set(XSetName::MOVE_DLG_HELP, XSetVar::Y, std::to_string(height));
     }
 
     // save mode
@@ -1314,7 +1314,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
         {
-            xset_set(XSetName::MOVE_DLG_HELP, XSetSetSet::Z, std::to_string(i));
+            xset_set(XSetName::MOVE_DLG_HELP, XSetVar::Z, std::to_string(i));
             break;
         }
     }
@@ -3833,7 +3833,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>& s
                                 nullptr);
         if (path && std::filesystem::is_directory(path))
         {
-            xset_set_set(set, XSetSetSet::DESC, path);
+            xset_set_var(set, XSetVar::DESC, path);
             std::string quote_path = bash_quote(path);
 
             if (!strcmp(setname, "root_move2"))

@@ -209,15 +209,15 @@ save_progress_dialog_size(PtkFileTask* ptask)
 
     s = std::to_string(allocation.width);
     if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
-        xset_set(XSetName::TASK_POP_TOP, XSetSetSet::S, s);
+        xset_set(XSetName::TASK_POP_TOP, XSetVar::S, s);
     else
-        xset_set(XSetName::TASK_POP_TOP, XSetSetSet::X, s);
+        xset_set(XSetName::TASK_POP_TOP, XSetVar::X, s);
 
     s = std::to_string(allocation.height);
     if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
-        xset_set(XSetName::TASK_POP_TOP, XSetSetSet::Z, s);
+        xset_set(XSetName::TASK_POP_TOP, XSetVar::Z, s);
     else
-        xset_set(XSetName::TASK_POP_TOP, XSetSetSet::Y, s);
+        xset_set(XSetName::TASK_POP_TOP, XSetVar::Y, s);
 }
 
 void
@@ -951,13 +951,13 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     int win_width, win_height;
     if (task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
-        win_width = xset_get_int(XSetName::TASK_POP_TOP, XSetSetSet::S);
-        win_height = xset_get_int(XSetName::TASK_POP_TOP, XSetSetSet::Z);
+        win_width = xset_get_int(XSetName::TASK_POP_TOP, XSetVar::S);
+        win_height = xset_get_int(XSetName::TASK_POP_TOP, XSetVar::Z);
     }
     else
     {
-        win_width = xset_get_int(XSetName::TASK_POP_TOP, XSetSetSet::X);
-        win_height = xset_get_int(XSetName::TASK_POP_TOP, XSetSetSet::Y);
+        win_width = xset_get_int(XSetName::TASK_POP_TOP, XSetVar::X);
+        win_height = xset_get_int(XSetName::TASK_POP_TOP, XSetVar::Y);
     }
     if (!win_width)
         win_width = 750;
@@ -1887,10 +1887,10 @@ query_overwrite_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
         int has_overwrite_btn =
             GPOINTER_TO_INT((void*)g_object_get_data(G_OBJECT(dlg), "has_overwrite_btn"));
         xset_set(XSetName::TASK_POPUPS,
-                 has_overwrite_btn ? XSetSetSet::X : XSetSetSet::S,
+                 has_overwrite_btn ? XSetVar::X : XSetVar::S,
                  std::to_string(allocation.width));
         xset_set(XSetName::TASK_POPUPS,
-                 has_overwrite_btn ? XSetSetSet::Y : XSetSetSet::Z,
+                 has_overwrite_btn ? XSetVar::Y : XSetVar::Z,
                  std::to_string(allocation.height));
     }
 
@@ -2118,13 +2118,13 @@ query_overwrite(PtkFileTask* ptask)
     int width, height;
     if (has_overwrite_btn)
     {
-        width = xset_get_int(XSetName::TASK_POPUPS, XSetSetSet::X);
-        height = xset_get_int(XSetName::TASK_POPUPS, XSetSetSet::Y);
+        width = xset_get_int(XSetName::TASK_POPUPS, XSetVar::X);
+        height = xset_get_int(XSetName::TASK_POPUPS, XSetVar::Y);
     }
     else
     {
-        width = xset_get_int(XSetName::TASK_POPUPS, XSetSetSet::S);
-        height = xset_get_int(XSetName::TASK_POPUPS, XSetSetSet::Z);
+        width = xset_get_int(XSetName::TASK_POPUPS, XSetVar::S);
+        height = xset_get_int(XSetName::TASK_POPUPS, XSetVar::Z);
     }
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);

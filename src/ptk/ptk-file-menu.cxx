@@ -296,14 +296,14 @@ on_popup_sortby(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, int order)
             v = GTK_SORT_ASCENDING;
         else
             v = GTK_SORT_DESCENDING;
-        xset_set_panel(file_browser->mypanel, "list_detailed", XSetSetSet::Y, std::to_string(v));
+        xset_set_panel(file_browser->mypanel, "list_detailed", XSetVar::Y, std::to_string(v));
         ptk_file_browser_set_sort_type(file_browser, (GtkSortType)v);
     }
     else
     {
         xset_set_panel(file_browser->mypanel,
                        "list_detailed",
-                       XSetSetSet::X,
+                       XSetVar::X,
                        std::to_string(sort_order));
         ptk_file_browser_set_sort_order(file_browser, (PtkFBSortOrder)sort_order);
     }
@@ -450,7 +450,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
         set->b = xset_get_panel_mode(p, "detcol_date", mode)->b;
 
         xset_set_cb(XSetName::VIEW_REORDER_COL, (GFunc)on_reorder, browser);
-        set = xset_set(XSetName::VIEW_COLUMNS, XSetSetSet::DISABLE, "0");
+        set = xset_set(XSetName::VIEW_COLUMNS, XSetVar::DISABLE, "0");
         desc = fmt::format("panel{}_detcol_size panel{}_detcol_type panel{}_detcol_perm "
                            "panel{}_detcol_owner panel{}_detcol_date separator view_reorder_col",
                            p,
@@ -458,14 +458,14 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                            p,
                            p,
                            p);
-        xset_set_set(set, XSetSetSet::DESC, desc);
+        xset_set_var(set, XSetVar::DESC, desc);
         set = xset_set_cb(XSetName::RUBBERBAND, (GFunc)main_window_rubberband_all, nullptr);
         set->disable = false;
     }
     else
     {
-        xset_set(XSetName::VIEW_COLUMNS, XSetSetSet::DISABLE, "1");
-        xset_set(XSetName::RUBBERBAND, XSetSetSet::DISABLE, "1");
+        xset_set(XSetName::VIEW_COLUMNS, XSetVar::DISABLE, "1");
+        xset_set(XSetName::RUBBERBAND, XSetVar::DISABLE, "1");
     }
 
     set = xset_set_cb(XSetName::VIEW_THUMB,
@@ -594,7 +594,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                        p,
                        p,
                        p);
-    xset_set_set(set, XSetSetSet::DESC, desc);
+    xset_set_var(set, XSetVar::DESC, desc);
     set = xset_get(XSetName::CON_VIEW);
     set->disable = !browser->file_list;
     desc = fmt::format("panel{}_show_toolbox panel{}_show_sidebar panel{}_show_devmon "
@@ -606,7 +606,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                        p,
                        p,
                        p);
-    xset_set_set(set, XSetSetSet::DESC, desc);
+    xset_set_var(set, XSetVar::DESC, desc);
     xset_add_menuitem(browser, menu, accel_group, set);
 }
 
@@ -1126,8 +1126,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         set->disable = !browser;
 
         set = xset_get(XSetName::OPEN_NEW);
-        xset_set_set(set,
-                     XSetSetSet::DESC,
+        xset_set_var(set,
+                     XSetVar::DESC,
                      "new_file new_directory new_link new_archive separator tab_new tab_new_here "
                      "new_bookmark");
 
@@ -1324,7 +1324,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
             desc = "prop_info prop_perm prop_root";
         else
             desc = "prop_info prop_perm prop_quick prop_root";
-        xset_set_set(set, XSetSetSet::DESC, desc);
+        xset_set_var(set, XSetVar::DESC, desc);
         xset_add_menuitem(browser, popup, accel_group, set);
     }
 

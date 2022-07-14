@@ -1657,8 +1657,8 @@ xset_item_prop_dlg(XSetContext* context, xset_t set, int page)
     xset_set_window_icon(GTK_WINDOW(ctxt->dlg));
     gtk_window_set_role(GTK_WINDOW(ctxt->dlg), "context_dialog");
 
-    int width = xset_get_int(XSetName::CONTEXT_DLG, XSetSetSet::X);
-    int height = xset_get_int(XSetName::CONTEXT_DLG, XSetSetSet::Y);
+    int width = xset_get_int(XSetName::CONTEXT_DLG, XSetVar::X);
+    int height = xset_get_int(XSetName::CONTEXT_DLG, XSetVar::Y);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(ctxt->dlg), width, height);
     else
@@ -2466,8 +2466,8 @@ xset_item_prop_dlg(XSetContext* context, xset_t set, int page)
     height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::CONTEXT_DLG, XSetSetSet::X, std::to_string(width));
-        xset_set(XSetName::CONTEXT_DLG, XSetSetSet::Y, std::to_string(height));
+        xset_set(XSetName::CONTEXT_DLG, XSetVar::X, std::to_string(width));
+        xset_set(XSetName::CONTEXT_DLG, XSetVar::Y, std::to_string(height));
     }
 
     delete ctxt;

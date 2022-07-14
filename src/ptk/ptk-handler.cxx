@@ -1359,14 +1359,14 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, xset_t set)
     if (g_strcmp0(xset_get_s(handler_conf_xsets.at(mode)), "") <= 0)
     {
         // No handlers present - adding new handler
-        xset_set(handler_conf_xsets.at(mode), XSetSetSet::S, new_handler_xset->name);
+        xset_set(handler_conf_xsets.at(mode), XSetVar::S, new_handler_xset->name);
     }
     else
     {
         // Adding new handler to handlers
         std::string new_handlers_list =
             fmt::format("{} {}", new_handler_xset->name, xset_get_s(handler_conf_xsets.at(mode)));
-        xset_set(handler_conf_xsets.at(mode), XSetSetSet::S, new_handlers_list);
+        xset_set(handler_conf_xsets.at(mode), XSetVar::S, new_handlers_list);
     }
 
     // have handler dialog open?
@@ -1665,7 +1665,7 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
     } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(hnd->list), &iter));
 
     // Saving the new archive handlers list
-    xset_set(handler_conf_xsets.at(hnd->mode), XSetSetSet::S, archive_handlers);
+    xset_set(handler_conf_xsets.at(hnd->mode), XSetVar::S, archive_handlers);
 
     // Saving settings
     autosave_request_add();
@@ -1748,11 +1748,10 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                 ? XSetB::XSET_B_TRUE
                 : XSetB::XSET_B_FALSE;
         new_handler_xset->disable = false; // not default - save in session
-        xset_set_set(new_handler_xset, XSetSetSet::MENU_LABEL, handler_name);
-        xset_set_set(new_handler_xset, XSetSetSet::S,
+        xset_set_var(new_handler_xset, XSetVar::MENU_LABEL, handler_name);
+        xset_set_var(new_handler_xset, XSetVar::S,
                      handler_mime); // Mime Type(s) or whitelist
-        xset_set_set(new_handler_xset,
-                     XSetSetSet::X,
+        xset_set_var(new_handler_xset, XSetVar::X,
                      handler_extension); // Extension(s) or blacklist
         new_handler_xset->in_terminal = handler_compress_term;
         new_handler_xset->keep_terminal = handler_extract_term;
@@ -1766,7 +1765,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         if (hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE)
         {
             if (handler_icon)
-                xset_set_set(new_handler_xset, XSetSetSet::ICN, handler_icon);
+                xset_set_var(new_handler_xset, XSetVar::ICN, handler_icon);
         }
         else
         {
@@ -1809,7 +1808,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         if (g_strcmp0(xset_get_s(handler_conf_xsets.at(hnd->mode)), "") <= 0)
         {
             // No handlers present - adding new handler
-            xset_set(handler_conf_xsets.at(hnd->mode), XSetSetSet::S, new_handler_xset->name);
+            xset_set(handler_conf_xsets.at(hnd->mode), XSetVar::S, new_handler_xset->name);
         }
         else
         {
@@ -1818,7 +1817,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                 fmt::format("{} {}",
                             new_handler_xset->name,
                             xset_get_s(handler_conf_xsets.at(hnd->mode)));
-            xset_set(handler_conf_xsets.at(hnd->mode), XSetSetSet::S, new_handlers_list);
+            xset_set(handler_conf_xsets.at(hnd->mode), XSetVar::S, new_handlers_list);
         }
 
         // Activating the new handler - the normal loading code
@@ -1877,9 +1876,9 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         handler_xset->b = handler_enabled ? XSetB::XSET_B_TRUE : XSetB::XSET_B_UNSET;
         bool was_default = handler_xset->disable;
         handler_xset->disable = false; // not default - save in session
-        xset_set_set(handler_xset, XSetSetSet::MENU_LABEL, handler_name);
-        xset_set_set(handler_xset, XSetSetSet::S, handler_mime);
-        xset_set_set(handler_xset, XSetSetSet::X, handler_extension);
+        xset_set_var(handler_xset, XSetVar::MENU_LABEL, handler_name);
+        xset_set_var(handler_xset, XSetVar::S, handler_mime);
+        xset_set_var(handler_xset, XSetVar::X, handler_extension);
         handler_xset->in_terminal = handler_compress_term;
         handler_xset->keep_terminal = handler_extract_term;
         if (hnd->compress_changed || was_default)
@@ -1894,7 +1893,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         if (hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE)
         {
             if (handler_icon)
-                xset_set_set(handler_xset, XSetSetSet::ICN, handler_icon);
+                xset_set_var(handler_xset, XSetVar::ICN, handler_icon);
         }
         else
         {
@@ -1973,7 +1972,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         }
 
         // Finally updating handlers
-        xset_set(handler_conf_xsets.at(hnd->mode), XSetSetSet::S, new_archive_handlers_s);
+        xset_set(handler_conf_xsets.at(hnd->mode), XSetVar::S, new_archive_handlers_s);
 
         // Deleting xset
         xset_custom_delete(handler_xset, false);
@@ -2887,10 +2886,8 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, xset_t def_handl
     xset_set_window_icon(GTK_WINDOW(hnd->dlg));
 
     // Setting saved dialog size
-    int width =
-        xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), XSetSetSet::X);
-    int height =
-        xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), XSetSetSet::Y);
+    int width = xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), XSetVar::X);
+    int height = xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), XSetVar::Y);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(hnd->dlg), width, height);
 
@@ -3418,10 +3415,10 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, xset_t def_handl
     {
         // They are - saving
         xset_set(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC),
-                 XSetSetSet::X,
+                 XSetVar::X,
                  std::to_string(width));
         xset_set(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC),
-                 XSetSetSet::Y,
+                 XSetVar::Y,
                  std::to_string(height));
     }
 

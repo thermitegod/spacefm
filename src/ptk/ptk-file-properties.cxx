@@ -403,8 +403,8 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     char* owner_group;
     char* tmp;
 
-    int width = xset_get_int(XSetName::APP_DLG, XSetSetSet::S);
-    int height = xset_get_int(XSetName::APP_DLG, XSetSetSet::Z);
+    int width = xset_get_int(XSetName::APP_DLG, XSetVar::S);
+    int height = xset_get_int(XSetName::APP_DLG, XSetVar::Z);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, -1);
 
@@ -776,8 +776,8 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
     int height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::APP_DLG, XSetSetSet::S, std::to_string(width));
-        xset_set(XSetName::APP_DLG, XSetSetSet::Z, std::to_string(height));
+        xset_set(XSetName::APP_DLG, XSetVar::S, std::to_string(width));
+        xset_set(XSetName::APP_DLG, XSetVar::Z, std::to_string(height));
     }
 
     FilePropertiesDialogData* data =

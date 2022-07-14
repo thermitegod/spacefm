@@ -1641,7 +1641,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     }
     else
     {
-        xset_set_panel(p, "list_detailed", XSetSetSet::B, "1");
+        xset_set_panel(p, "list_detailed", XSetVar::B, "1");
         ptk_file_browser_view_as_list(file_browser);
     }
 
@@ -1686,7 +1686,7 @@ ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
     }
     else
     {
-        xset_set_panel(curpanel, "list_detailed", XSetSetSet::B, "1");
+        xset_set_panel(curpanel, "list_detailed", XSetVar::B, "1");
         view_mode = PtkFBViewMode::PTK_FB_LIST_VIEW;
     }
 
@@ -2263,10 +2263,10 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
     //        ptk_file_browser_set_sort_order(file_browser),
     //        app_settings.get_sort_order());
 
-    xset_set_panel(file_browser->mypanel, "list_detailed", XSetSetSet::X, std::to_string(col));
+    xset_set_panel(file_browser->mypanel, "list_detailed", XSetVar::X, std::to_string(col));
     xset_set_panel(file_browser->mypanel,
                    "list_detailed",
-                   XSetSetSet::Y,
+                   XSetVar::Y,
                    std::to_string(file_browser->sort_type));
 }
 
@@ -2473,7 +2473,7 @@ void
 ptk_file_browser_set_default_folder(GtkWidget* item, PtkFileBrowser* file_browser)
 {
     (void)item;
-    xset_set(XSetName::GO_SET_DEFAULT, XSetSetSet::S, ptk_file_browser_get_cwd(file_browser));
+    xset_set(XSetName::GO_SET_DEFAULT, XSetVar::S, ptk_file_browser_get_cwd(file_browser));
 }
 
 void
@@ -4096,7 +4096,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
         std::size_t j;
         for (j = 0; j < cols.size(); ++j)
         {
-            if (xset_get_int_panel(p, column_names.at(j), XSetSetSet::X) == INT(i))
+            if (xset_get_int_panel(p, column_names.at(j), XSetVar::X) == INT(i))
                 break;
         }
         if (j == cols.size())
@@ -4815,7 +4815,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, int 
         /* Several different actions are available. We have to figure out a good default action. */
         else
         {
-            int drag_action = xset_get_int(XSetName::DRAG_ACTION, XSetSetSet::X);
+            int drag_action = xset_get_int(XSetName::DRAG_ACTION, XSetVar::X);
 
             switch (drag_action)
             {
@@ -5114,7 +5114,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>
             else
                 move_dest = path;
             set2 = xset_get(XSetName::COPY_LOC_LAST);
-            xset_set_set(set2, XSetSetSet::DESC, path);
+            xset_set_var(set2, XSetVar::DESC, path);
         }
         else
         {
@@ -5387,12 +5387,11 @@ ptk_file_browser_read_sort_extra(PtkFileBrowser* file_browser)
 #if 0
     list->sort_natural = xset_get_b_panel(file_browser->mypanel, "sort_extra");
 #endif
-    list->sort_case = xset_get_int_panel(file_browser->mypanel, "sort_extra", XSetSetSet::X) ==
-                      XSetB::XSET_B_TRUE;
-    list->sort_dir = xset_get_int_panel(file_browser->mypanel, "sort_extra", XSetSetSet::Y);
+    list->sort_case =
+        xset_get_int_panel(file_browser->mypanel, "sort_extra", XSetVar::X) == XSetB::XSET_B_TRUE;
+    list->sort_dir = xset_get_int_panel(file_browser->mypanel, "sort_extra", XSetVar::Y);
     list->sort_hidden_first =
-        xset_get_int_panel(file_browser->mypanel, "sort_extra", XSetSetSet::Z) ==
-        XSetB::XSET_B_TRUE;
+        xset_get_int_panel(file_browser->mypanel, "sort_extra", XSetVar::Z) == XSetB::XSET_B_TRUE;
 }
 
 void
@@ -5426,14 +5425,14 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname)
     else if (set->xset_name == XSetName::SORTX_CASE)
     {
         list->sort_case = set->b == XSetB::XSET_B_TRUE;
-        xset_set_panel(panel, "sort_extra", XSetSetSet::X, std::to_string(set->b));
+        xset_set_panel(panel, "sort_extra", XSetVar::X, std::to_string(set->b));
     }
     else if (set->xset_name == XSetName::SORTX_DIRECTORIES)
     {
         list->sort_dir = PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST;
         xset_set_panel(panel,
                        "sort_extra",
-                       XSetSetSet::Y,
+                       XSetVar::Y,
                        std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST));
     }
     else if (set->xset_name == XSetName::SORTX_FILES)
@@ -5441,7 +5440,7 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname)
         list->sort_dir = PTKFileListSortDir::PTK_LIST_SORT_DIR_LAST;
         xset_set_panel(panel,
                        "sort_extra",
-                       XSetSetSet::Y,
+                       XSetVar::Y,
                        std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_LAST));
     }
     else if (set->xset_name == XSetName::SORTX_MIX)
@@ -5449,20 +5448,20 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname)
         list->sort_dir = PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED;
         xset_set_panel(panel,
                        "sort_extra",
-                       XSetSetSet::Y,
+                       XSetVar::Y,
                        std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED));
     }
     else if (set->xset_name == XSetName::SORTX_HIDFIRST)
     {
         list->sort_hidden_first = set->b == XSetB::XSET_B_TRUE;
-        xset_set_panel(panel, "sort_extra", XSetSetSet::Z, std::to_string(set->b));
+        xset_set_panel(panel, "sort_extra", XSetVar::Z, std::to_string(set->b));
     }
     else if (set->xset_name == XSetName::SORTX_HIDLAST)
     {
         list->sort_hidden_first = set->b != XSetB::XSET_B_TRUE;
         xset_set_panel(panel,
                        "sort_extra",
-                       XSetSetSet::Z,
+                       XSetVar::Z,
                        std::to_string(set->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_FALSE
                                                                    : XSetB::XSET_B_TRUE));
     }

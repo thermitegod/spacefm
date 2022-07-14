@@ -2120,7 +2120,7 @@ show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browse
     set = xset_get(XSetName::DEV_MENU_SETTINGS);
     menu_elements = "dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
                     "dev_mount_options dev_change separator dev_single dev_newtab dev_icon";
-    xset_set_set(set, XSetSetSet::DESC, menu_elements);
+    xset_set_var(set, XSetVar::DESC, menu_elements);
 
     menu_elements = "separator dev_menu_root separator dev_prop dev_menu_settings";
     xset_add_menu(file_browser, popup, accel_group, menu_elements.c_str());
@@ -2478,7 +2478,7 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
         fmt::format("dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
                     "dev_mount_options dev_change{}",
                     file_browser ? " dev_newtab" : "");
-    xset_set_set(set, XSetSetSet::DESC, desc.c_str());
+    xset_set_var(set, XSetVar::DESC, desc.c_str());
 }
 
 void
