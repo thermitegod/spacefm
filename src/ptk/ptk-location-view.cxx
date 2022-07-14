@@ -2025,7 +2025,7 @@ ptk_location_view_on_action(GtkWidget* view, xset_t set)
 
 static void
 show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browser,
-                  unsigned int button, std::uint32_t time)
+                  unsigned int button, std::time_t time)
 {
     (void)button;
     (void)time;
@@ -2239,7 +2239,7 @@ on_dev_menu_hide(GtkWidget* widget, GtkWidget* dev_menu)
 
 static void
 show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, unsigned int button,
-                     std::uint32_t time)
+                     std::time_t time)
 {
     (void)dev_item;
     (void)time;
@@ -3571,7 +3571,7 @@ on_bookmark_row_activated(GtkTreeView* view, GtkTreePath* path, GtkTreeViewColum
 
 static void
 show_bookmarks_menu(GtkTreeView* view, PtkFileBrowser* file_browser, unsigned int button,
-                    std::uint32_t time)
+                    std::time_t time)
 {
     xset_t insert_set = nullptr;
     bool bookmark_selected = true;

@@ -3269,7 +3269,7 @@ show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
 
     /*
     int button;
-    std::uint32_t time;
+    std::time_t time;
     if (event)
     {
         button = event->button;

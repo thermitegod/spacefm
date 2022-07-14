@@ -380,7 +380,7 @@ GdkPixbuf* xset_custom_get_bookmark_icon(xset_t set, int icon_size);
 void xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set);
 
 GtkWidget* xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert,
-                                 unsigned int button, std::uint32_t time);
+                                 unsigned int button, std::time_t time);
 void xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
                    const char* elements);
 GtkWidget* xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu,
