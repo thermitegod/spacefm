@@ -204,9 +204,9 @@ on_popup_show_hidden(GtkMenuItem* menuitem, PtkFileBrowser* browser)
 }
 
 static void
-on_copycmd(GtkMenuItem* menuitem, PtkFileMenu* data, XSet* set2)
+on_copycmd(GtkMenuItem* menuitem, PtkFileMenu* data, xset_t set2)
 {
-    XSet* set;
+    xset_t set;
     if (menuitem)
         set = XSET(g_object_get_data(G_OBJECT(menuitem), "set"));
     else
@@ -218,9 +218,9 @@ on_copycmd(GtkMenuItem* menuitem, PtkFileMenu* data, XSet* set2)
 }
 
 static void
-on_popup_rootcmd_activate(GtkMenuItem* menuitem, PtkFileMenu* data, XSet* set2)
+on_popup_rootcmd_activate(GtkMenuItem* menuitem, PtkFileMenu* data, xset_t set2)
 {
-    XSet* set;
+    xset_t set;
     if (menuitem)
         set = XSET(g_object_get_data(G_OBJECT(menuitem), "set"));
     else
@@ -269,9 +269,9 @@ on_file_root_edit(GtkMenuItem* menuitem, PtkFileMenu* data)
 }
 
 static void
-on_popup_sort_extra(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, XSet* set2)
+on_popup_sort_extra(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, xset_t set2)
 {
-    XSet* set;
+    xset_t set;
     if (menuitem)
         set = XSET(g_object_get_data(G_OBJECT(menuitem), "set"));
     else
@@ -320,7 +320,7 @@ on_popup_detailed_column(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
         int p = file_browser->mypanel;
         char mode = main_window->panel_context[p - 1];
 
-        XSet* set = xset_get_panel_mode(p, "detcol_size", mode);
+        xset_t set = xset_get_panel_mode(p, "detcol_size", mode);
         set->b = xset_get_panel(p, "detcol_size")->b;
         set = xset_get_panel_mode(p, "detcol_type", mode);
         set->b = xset_get_panel(p, "detcol_type")->b;
@@ -344,7 +344,7 @@ on_popup_toggle_view(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
     int p = file_browser->mypanel;
     char mode = main_window->panel_context[p - 1];
 
-    XSet* set = xset_get_panel_mode(p, "show_toolbox", mode);
+    xset_t set = xset_get_panel_mode(p, "show_toolbox", mode);
     set->b = xset_get_panel(p, "show_toolbox")->b;
     set = xset_get_panel_mode(p, "show_devmon", mode);
     set->b = xset_get_panel(p, "show_devmon")->b;
@@ -359,7 +359,7 @@ on_popup_toggle_view(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
 }
 
 static void
-on_archive_default(GtkMenuItem* menuitem, XSet* set)
+on_archive_default(GtkMenuItem* menuitem, xset_t set)
 {
     (void)menuitem;
     const std::array<XSetName, 4> arcnames{
@@ -404,8 +404,8 @@ void
 ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                                   GtkAccelGroup* accel_group)
 {
-    XSet* set;
-    XSet* set_radio;
+    xset_t set;
+    xset_t set_radio;
     std::string desc;
 
     if (!browser || !menu || !browser->file_list)
@@ -630,13 +630,13 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 { // either desktop or browser must be non-nullptr
 
     const char* app_name = nullptr;
-    XSet* set_radio;
+    xset_t set_radio;
     int icon_w;
     int icon_h;
     int no_write_access = 0;
     int no_read_access = 0;
-    XSet* set;
-    XSet* set2;
+    xset_t set;
+    xset_t set2;
     GtkMenuItem* item;
     GSList* handlers_slist;
 
@@ -767,9 +767,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         }
 
         // Prepare archive commands
-        XSet* set_arc_extract = nullptr;
-        XSet* set_arc_extractto;
-        XSet* set_arc_list;
+        xset_t set_arc_extract = nullptr;
+        xset_t set_arc_extractto;
+        xset_t set_arc_list;
         handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
                                                        PtkHandlerArchive::HANDLER_EXTRACT,
                                                        file_path,
@@ -1405,7 +1405,7 @@ on_popup_open_all(GtkMenuItem* menuitem, PtkFileMenu* data)
 static void
 on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
-    XSet* handler_set = XSET(g_object_get_data(G_OBJECT(menuitem), "handler_set"));
+    xset_t handler_set = XSET(g_object_get_data(G_OBJECT(menuitem), "handler_set"));
 
     const char* desktop_file = CONST_CHAR(g_object_get_data(G_OBJECT(menuitem), "desktop_file"));
     VFSAppDesktop desktop(desktop_file);
@@ -1854,7 +1854,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned 
     if (!(data && data->info))
         return;
 
-    XSet* handler_set = XSET(g_object_get_data(G_OBJECT(app_item), "handler_set"));
+    xset_t handler_set = XSET(g_object_get_data(G_OBJECT(app_item), "handler_set"));
     if (handler_set)
     {
         // is a file handler - open file handler config
@@ -2525,7 +2525,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         data->info = vfs_file_info_ref(info);
 
     // action
-    XSet* set = xset_get(setname);
+    xset_t set = xset_get(setname);
     if (ztd::startswith(set->name, "open_") && !ztd::startswith(set->name, "open_in_"))
     {
         if (set->xset_name == XSetName::OPEN_EDIT)

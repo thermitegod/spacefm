@@ -122,7 +122,7 @@ init_daemon()
 static void
 open_in_tab(FMMainWindow** main_window, const char* real_path)
 {
-    XSet* set;
+    xset_t set;
     panel_t panel;
     // create main window if needed
     if (!*main_window)
@@ -321,7 +321,7 @@ handle_parsed_commandline_args()
             if (!gtk_widget_get_visible(main_window->panel[cli_flags.panel - 1]))
             {
                 // show panel
-                XSet* set;
+                xset_t set;
                 set = xset_get_panel(cli_flags.panel, "show");
                 set->b = XSetB::XSET_B_TRUE;
                 show_panels_all_windows(nullptr, main_window);

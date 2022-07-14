@@ -2275,7 +2275,7 @@ mtab_fstype_is_handled_by_protocol(const char* mtab_fstype)
         {
             // test handlers
             std::string msg;
-            XSet* set;
+            xset_t set;
             for (int i = 0; handlers[i]; ++i)
             {
                 if (!handlers[i][0] || !(set = xset_is(handlers[i])) ||
@@ -2593,7 +2593,7 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
                        netmount_t* netmount, bool* run_in_terminal, char** mount_point)
 {
     const char* handlers_list;
-    XSet* set;
+    xset_t set;
     std::vector<std::string> values;
 
     if (mount_point)
@@ -3951,7 +3951,7 @@ vfs_volume_get_icon(VFSVolume* vol)
 {
     if (vol->icon.empty())
         return nullptr;
-    XSet* set = xset_get(vol->icon);
+    xset_t set = xset_get(vol->icon);
     return set->icon;
 }
 

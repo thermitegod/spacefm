@@ -92,7 +92,7 @@ struct ContextData
     GtkWidget* parent;
     GtkWidget* notebook;
     XSetContext* context;
-    XSet* set;
+    xset_t set;
     char* temp_cmd_line;
     struct stat script_stat;
     bool script_stat_valid;
@@ -951,7 +951,7 @@ get_text_view(GtkTextView* view)
 }
 
 static void
-load_command_script(ContextData* ctxt, XSet* set)
+load_command_script(ContextData* ctxt, xset_t set)
 {
     bool modified = false;
     GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->cmd_script));
@@ -1170,7 +1170,7 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
         // Data Dir
         if (ctxt->set->plugin)
         {
-            XSet* mset = xset_get_plugin_mirror(ctxt->set);
+            xset_t mset = xset_get_plugin_mirror(ctxt->set);
             folder = Glib::build_filename(xset_get_config_dir(), "plugin-data", mset->name);
         }
         else
@@ -1202,7 +1202,7 @@ on_key_button_clicked(GtkWidget* widget, ContextData* ctxt)
     (void)widget;
     xset_set_key(ctxt->dlg, ctxt->set);
 
-    XSet* keyset;
+    xset_t keyset;
     if (ctxt->set->shared_key)
         keyset = xset_get(ctxt->set->shared_key);
     else
@@ -1214,8 +1214,8 @@ on_key_button_clicked(GtkWidget* widget, ContextData* ctxt)
 static void
 on_type_changed(GtkComboBox* box, ContextData* ctxt)
 {
-    XSet* rset = ctxt->set;
-    XSet* mset = xset_get_plugin_mirror(rset);
+    xset_t rset = ctxt->set;
+    xset_t mset = xset_get_plugin_mirror(rset);
     int job = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
     switch (job)
     {
@@ -1399,8 +1399,8 @@ static void
 replace_item_props(ContextData* ctxt)
 {
     XSetCMD x;
-    XSet* rset = ctxt->set;
-    XSet* mset = xset_get_plugin_mirror(rset);
+    xset_t rset = ctxt->set;
+    xset_t mset = xset_get_plugin_mirror(rset);
 
     if (!rset->lock && rset->menu_style != XSetMenu::SUBMENU && rset->menu_style != XSetMenu::SEP &&
         rset->tool <= XSetTool::CUSTOM)
@@ -1559,7 +1559,7 @@ on_script_popup(GtkTextView* input, GtkMenu* menu, void* user_data)
     (void)input;
     (void)user_data;
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    XSet* set = xset_get(XSetName::SEPARATOR);
+    xset_t set = xset_get(XSetName::SEPARATOR);
     set->menu_style = XSetMenu::SEP;
     set->browser = nullptr;
     xset_add_menuitem(nullptr, GTK_WIDGET(menu), accel_group, set);
@@ -1634,7 +1634,7 @@ on_target_keypress(GtkWidget* widget, GdkEventKey* event, ContextData* ctxt)
 }
 
 void
-xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
+xset_item_prop_dlg(XSetContext* context, xset_t set, int page)
 {
     GtkTreeViewColumn* col;
     GtkCellRenderer* renderer;
@@ -1988,8 +1988,8 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
                      ctxt);
 
     // plugin?
-    XSet* mset; // mirror set or set
-    XSet* rset; // real set
+    xset_t mset; // mirror set or set
+    xset_t rset; // real set
     if (set->plugin)
     {
         // set is plugin
@@ -2358,7 +2358,7 @@ xset_item_prop_dlg(XSetContext* context, XSet* set, int page)
         set->tool == XSetTool::FWD_MENU)
     {
         std::string str2;
-        XSet* keyset;
+        xset_t keyset;
         if (set->shared_key)
             keyset = xset_get(set->shared_key);
         else

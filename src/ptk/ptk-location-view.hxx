@@ -25,7 +25,7 @@
 // Location View
 GtkWidget* ptk_location_view_new(PtkFileBrowser* file_browser);
 bool ptk_location_view_chdir(GtkTreeView* location_view, const char* path);
-void ptk_location_view_on_action(GtkWidget* view, XSet* set);
+void ptk_location_view_on_action(GtkWidget* view, xset_t set);
 VFSVolume* ptk_location_view_get_selected_vol(GtkTreeView* location_view);
 void update_volume_icons();
 void ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, bool new_tab,
@@ -46,6 +46,6 @@ char* ptk_bookmark_view_get_selected_dir(GtkTreeView* view);
 void ptk_bookmark_view_update_icons(GtkIconTheme* icon_theme, PtkFileBrowser* file_browser);
 void ptk_bookmark_view_xset_changed(GtkTreeView* view, PtkFileBrowser* file_browser,
                                     const char* changed_name);
-XSet* ptk_bookmark_view_get_first_bookmark(XSet* book_set);
-void ptk_bookmark_view_import_gtk(const char* path, XSet* book_set);
+xset_t ptk_bookmark_view_get_first_bookmark(xset_t book_set);
+void ptk_bookmark_view_import_gtk(const char* path, xset_t book_set);
 void ptk_bookmark_view_on_open_reverse(GtkMenuItem* item, PtkFileBrowser* file_browser);

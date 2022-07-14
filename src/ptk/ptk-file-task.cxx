@@ -474,7 +474,7 @@ set_button_states(PtkFileTask* ptask)
            !(ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC && !ptask->task->exec_pid);
 
     /*
-    XSet* set = xset_get(iconset);
+    xset_t set = xset_get(iconset);
     if (set->icon)
         icon = set->icon;
     */
@@ -618,7 +618,7 @@ on_view_popup(GtkTextView* entry, GtkMenu* menu, void* user_data)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     xset_context_new();
 
-    XSet* set = xset_get(XSetName::SEPARATOR);
+    xset_t set = xset_get(XSetName::SEPARATOR);
     set->browser = nullptr;
     xset_add_menuitem(nullptr, GTK_WIDGET(menu), accel_group, set);
     gtk_widget_show_all(GTK_WIDGET(menu));
@@ -729,7 +729,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 
     // Buttons
     // Pause
-    // XSet* set = xset_get(XSetName::TASK_PAUSE);
+    // xset_t set = xset_get(XSetName::TASK_PAUSE);
 
     ptask->progress_btn_pause = gtk_button_new_with_mnemonic("Pa_use");
 
@@ -2158,7 +2158,7 @@ query_overwrite(PtkFileTask* ptask)
                            GTK_RESPONSE_CANCEL,
                            nullptr);
 
-    // XSet* set = xset_get(XSetName::TASK_PAUSE);
+    // xset_t set = xset_get(XSetName::TASK_PAUSE);
     gtk_widget_set_sensitive(btn_pause, !!ptask->task_view);
 
     // labels

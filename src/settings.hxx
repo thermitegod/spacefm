@@ -27,11 +27,13 @@
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 
+#include <ztd/ztd.hxx>
+
 #include "types.hxx"
 
 #include "xset.hxx"
 
-#define XSET(obj) (static_cast<XSet*>(obj))
+#define XSET(obj) (static_cast<xset_t>(obj))
 
 // this determines time before item is selected by hover in single-click mode
 #define SINGLE_CLICK_TIMEOUT 150
@@ -282,27 +284,30 @@ struct XSet
     char* plug_dir{nullptr};  // not saved
 };
 
+// using xset_t = std::unique_ptr<XSet>;
+using xset_t = ztd::raw_ptr<XSet>;
+
 // cache these for speed in event handlers
 struct EventHandler
 {
-    XSet* win_focus{nullptr};
-    XSet* win_move{nullptr};
-    XSet* win_click{nullptr};
-    XSet* win_key{nullptr};
-    XSet* win_close{nullptr};
-    XSet* pnl_show{nullptr};
-    XSet* pnl_focus{nullptr};
-    XSet* pnl_sel{nullptr};
-    XSet* tab_new{nullptr};
-    XSet* tab_chdir{nullptr};
-    XSet* tab_focus{nullptr};
-    XSet* tab_close{nullptr};
-    XSet* device{nullptr};
+    xset_t win_focus{nullptr};
+    xset_t win_move{nullptr};
+    xset_t win_click{nullptr};
+    xset_t win_key{nullptr};
+    xset_t win_close{nullptr};
+    xset_t pnl_show{nullptr};
+    xset_t pnl_focus{nullptr};
+    xset_t pnl_sel{nullptr};
+    xset_t tab_new{nullptr};
+    xset_t tab_chdir{nullptr};
+    xset_t tab_focus{nullptr};
+    xset_t tab_close{nullptr};
+    xset_t device{nullptr};
 };
 
 extern EventHandler event_handler;
 
-extern std::vector<XSet*> xsets;
+extern std::vector<xset_t> xsets;
 
 // instance-wide command history
 extern std::vector<std::string> xset_cmd_history;
@@ -318,14 +323,14 @@ struct XSetContext
 
 void xset_set_window_icon(GtkWindow* win);
 
-XSet* xset_is(XSetName name);
-XSet* xset_is(const std::string& name);
+xset_t xset_is(XSetName name);
+xset_t xset_is(const std::string& name);
 
-XSet* xset_get(XSetName name);
-XSet* xset_get(const std::string& name);
+xset_t xset_get(XSetName name);
+xset_t xset_get(const std::string& name);
 
-XSet* xset_get_panel(panel_t panel, const std::string& name);
-XSet* xset_get_panel_mode(panel_t panel, const std::string& name, char mode);
+xset_t xset_get_panel(panel_t panel, const std::string& name);
+xset_t xset_get_panel_mode(panel_t panel, const std::string& name, char mode);
 
 int xset_get_int(XSetName name, XSetSetSet var);
 int xset_get_int(const std::string& name, XSetSetSet var);
@@ -340,49 +345,49 @@ bool xset_get_b(const std::string& name);
 bool xset_get_b_panel(panel_t panel, const std::string& name);
 bool xset_get_b_panel_mode(panel_t panel, const std::string& name, char mode);
 
-XSet* xset_set_b(XSetName name, bool bval);
-XSet* xset_set_b(const std::string& name, bool bval);
-XSet* xset_set_b_panel(panel_t panel, const std::string& name, bool bval);
-XSet* xset_set_b_panel_mode(panel_t panel, const std::string& name, char mode, bool bval);
+xset_t xset_set_b(XSetName name, bool bval);
+xset_t xset_set_b(const std::string& name, bool bval);
+xset_t xset_set_b_panel(panel_t panel, const std::string& name, bool bval);
+xset_t xset_set_b_panel_mode(panel_t panel, const std::string& name, char mode, bool bval);
 
-XSet* xset_set_panel(panel_t panel, const std::string& name, XSetSetSet var,
-                     const std::string& value);
+xset_t xset_set_panel(panel_t panel, const std::string& name, XSetSetSet var,
+                      const std::string& value);
 
-XSet* xset_set_cb(XSetName name, GFunc cb_func, void* cb_data);
-XSet* xset_set_cb(const std::string& name, GFunc cb_func, void* cb_data);
-XSet* xset_set_cb_panel(panel_t panel, const std::string& name, GFunc cb_func, void* cb_data);
+xset_t xset_set_cb(XSetName name, GFunc cb_func, void* cb_data);
+xset_t xset_set_cb(const std::string& name, GFunc cb_func, void* cb_data);
+xset_t xset_set_cb_panel(panel_t panel, const std::string& name, GFunc cb_func, void* cb_data);
 
-XSet* xset_set(XSetName name, XSetSetSet var, const std::string& value);
-XSet* xset_set(const std::string& name, XSetSetSet var, const std::string& value);
-XSet* xset_set_set(XSet* set, XSetSetSet var, const std::string& value);
+xset_t xset_set(XSetName name, XSetSetSet var, const std::string& value);
+xset_t xset_set(const std::string& name, XSetSetSet var, const std::string& value);
+xset_t xset_set_set(xset_t set, XSetSetSet var, const std::string& value);
 
-void xset_set_key(GtkWidget* parent, XSet* set);
+void xset_set_key(GtkWidget* parent, xset_t set);
 
-XSet* xset_set_ob1_int(XSet* set, const char* ob1, int ob1_int);
-XSet* xset_set_ob1(XSet* set, const char* ob1, void* ob1_data);
-XSet* xset_set_ob2(XSet* set, const char* ob2, void* ob2_data);
+xset_t xset_set_ob1_int(xset_t set, const char* ob1, int ob1_int);
+xset_t xset_set_ob1(xset_t set, const char* ob1, void* ob1_data);
+xset_t xset_set_ob2(xset_t set, const char* ob2, void* ob2_data);
 
 XSetContext* xset_context_new();
-XSet* xset_get_plugin_mirror(XSet* set);
-char* xset_custom_get_script(XSet* set, bool create);
-const std::string xset_get_keyname(XSet* set, int key_val, int key_mod);
+xset_t xset_get_plugin_mirror(xset_t set);
+char* xset_custom_get_script(xset_t set, bool create);
+const std::string xset_get_keyname(xset_t set, int key_val, int key_mod);
 
-XSet* xset_custom_new();
-void xset_custom_delete(XSet* set, bool delete_next);
-XSet* xset_custom_remove(XSet* set);
-char* xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size);
-GdkPixbuf* xset_custom_get_bookmark_icon(XSet* set, int icon_size);
-void xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set);
+xset_t xset_custom_new();
+void xset_custom_delete(xset_t set, bool delete_next);
+xset_t xset_custom_remove(xset_t set);
+char* xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, int icon_size);
+GdkPixbuf* xset_custom_get_bookmark_icon(xset_t set, int icon_size);
+void xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set);
 
-GtkWidget* xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned int button,
-                                 std::uint32_t time);
+GtkWidget* xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert,
+                                 unsigned int button, std::uint32_t time);
 void xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
                    const char* elements);
 GtkWidget* xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu,
-                             GtkAccelGroup* accel_group, XSet* set);
+                             GtkAccelGroup* accel_group, xset_t set);
 GtkWidget* xset_get_image(const char* icon, GtkIconSize icon_size);
 
-XSet* xset_find_custom(const std::string& search);
+xset_t xset_find_custom(const std::string& search);
 
 int xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string& title,
                     GtkButtonsType buttons, const std::string& msg1, const std::string& msg2);
@@ -392,23 +397,23 @@ bool xset_text_dialog(GtkWidget* parent, const std::string& title, const std::st
                       const std::string& msg2, const char* defstring, char** answer,
                       const std::string& defreset, bool edit_care);
 
-void xset_menu_cb(GtkWidget* item, XSet* set);
+void xset_menu_cb(GtkWidget* item, xset_t set);
 bool xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data);
 char* xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* title,
                        const char* deffolder, const char* deffile);
 void xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root);
 void xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,
-                       XSet* set_parent, bool show_tooltips);
+                       xset_t set_parent, bool show_tooltips);
 GtkTextView* multi_input_new(GtkScrolledWindow* scrolled, const char* text);
 void multi_input_select_region(GtkWidget* input, int start, int end);
 char* multi_input_get_text(GtkWidget* input);
 
-std::vector<XSet*> xset_get_plugins();
-void xset_clear_plugins(std::vector<XSet*>& plugins);
+std::vector<xset_t> xset_get_plugins();
+void xset_clear_plugins(std::vector<xset_t>& plugins);
 
 void install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& path,
-                         const std::string& plug_dir, PluginJob job, XSet* insert_set);
-XSet* xset_import_plugin(const char* plug_dir, int* use);
+                         const std::string& plug_dir, PluginJob job, xset_t insert_set);
+xset_t xset_import_plugin(const char* plug_dir, int* use);
 void clean_plugin_mirrors();
 bool xset_opener(PtkFileBrowser* file_browser, char job);
 const char* xset_get_builtin_toolitem_label(XSetTool tool_type);

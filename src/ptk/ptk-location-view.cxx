@@ -631,7 +631,7 @@ ptk_location_view_get_mount_point_dir(const char* name)
     if (name)
         ptk_location_view_clean_mount_points();
 
-    XSet* set = xset_get(XSetName::DEV_AUTOMOUNT_DIRS);
+    xset_t set = xset_get(XSetName::DEV_AUTOMOUNT_DIRS);
     if (set->s)
     {
         if (ztd::startswith(set->s, "~/"))
@@ -1035,7 +1035,7 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     ptask->task->exec_show_error = true;
     ptask->task->exec_terminal = run_in_terminal;
     ptask->task->exec_keep_terminal = false;
-    XSet* set;
+    xset_t set;
     set = xset_get(XSetName::DEV_ICON_NETWORK);
     ptask->task->exec_icon = set->icon;
 
@@ -1809,7 +1809,7 @@ on_showhide(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
 
-    XSet* set = xset_get(XSetName::DEV_SHOW_HIDE_VOLUMES);
+    xset_t set = xset_get(XSetName::DEV_SHOW_HIDE_VOLUMES);
     if (vol)
     {
         char* devid = vol->udi;
@@ -1838,7 +1838,7 @@ on_automountlist(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     else
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
 
-    XSet* set = xset_get(XSetName::DEV_AUTOMOUNT_VOLUMES);
+    xset_t set = xset_get(XSetName::DEV_AUTOMOUNT_VOLUMES);
     if (vol)
     {
         char* devid = vol->udi;
@@ -1860,9 +1860,9 @@ on_automountlist(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 }
 
 static void
-on_handler_show_config(GtkMenuItem* item, GtkWidget* view, XSet* set2)
+on_handler_show_config(GtkMenuItem* item, GtkWidget* view, xset_t set2)
 {
-    XSet* set;
+    xset_t set;
     int mode;
 
     if (!item)
@@ -1969,7 +1969,7 @@ volume_is_visible(VFSVolume* vol)
 }
 
 void
-ptk_location_view_on_action(GtkWidget* view, XSet* set)
+ptk_location_view_on_action(GtkWidget* view, xset_t set)
 {
     // LOG_INFO("ptk_location_view_on_action");
     if (!view)
@@ -2029,7 +2029,7 @@ show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browse
 {
     (void)button;
     (void)time;
-    XSet* set;
+    xset_t set;
     char* str;
     GtkWidget* popup = gtk_menu_new();
     GtkAccelGroup* accel_group = gtk_accel_group_new();
@@ -2283,7 +2283,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, unsig
     }
 
     // create menu
-    XSet* set;
+    xset_t set;
     GtkWidget* item;
     GtkWidget* popup = gtk_menu_new();
 
@@ -2418,7 +2418,7 @@ void
 ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* menu)
 { // add currently visible devices to menu with dev design mode callback
     GtkWidget* item;
-    XSet* set;
+    xset_t set;
 
     std::vector<VFSVolume*> names;
 
@@ -2482,10 +2482,10 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
 }
 
 void
-ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
+ptk_bookmark_view_import_gtk(const char* path, xset_t book_set)
 { // import bookmarks file from spacefm < 1.0 or gtk bookmarks file
-    XSet* set_prev = nullptr;
-    XSet* set_first = nullptr;
+    xset_t set_prev = nullptr;
+    xset_t set_first = nullptr;
 
     if (!path)
         return;
@@ -2530,7 +2530,7 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
                 name = Glib::path_get_basename(upath);
 
             // add new bookmark
-            XSet* newset = xset_custom_new();
+            xset_t newset = xset_custom_new();
             newset->z = ztd::strdup(upath);
             newset->menu_label = ztd::strdup(name);
             newset->x = ztd::strdup("3"); // XSetCMD::BOOKMARK
@@ -2568,7 +2568,7 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
                     return;
                 }
             }
-            XSet* set = book_set ? book_set : xset_get(XSetName::MAIN_BOOK);
+            xset_t set = book_set ? book_set : xset_get(XSetName::MAIN_BOOK);
             if (!set->child)
             {
                 // make set_first the child
@@ -2595,7 +2595,7 @@ ptk_bookmark_view_import_gtk(const char* path, XSet* book_set)
         main_window_bookmark_changed(book_set->name);
 }
 
-static XSet*
+static xset_t
 get_selected_bookmark_set(GtkTreeView* view)
 {
     GtkListStore* list = GTK_LIST_STORE(gtk_tree_view_get_model(view));
@@ -2608,13 +2608,13 @@ get_selected_bookmark_set(GtkTreeView* view)
     GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(view);
     if (gtk_tree_selection_get_selected(tree_sel, nullptr, &it))
         gtk_tree_model_get(GTK_TREE_MODEL(list), &it, PtkLocationViewCol::COL_PATH, &name, -1);
-    XSet* set = xset_is(name);
+    xset_t set = xset_is(name);
     free(name);
     return set;
 }
 
 static void
-select_bookmark(GtkTreeView* view, XSet* set)
+select_bookmark(GtkTreeView* view, xset_t set)
 {
     GtkListStore* list = GTK_LIST_STORE(gtk_tree_view_get_model(view));
     GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(view);
@@ -2657,7 +2657,7 @@ select_bookmark(GtkTreeView* view, XSet* set)
 }
 
 static void
-update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
+update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, xset_t set)
 {
     const char* icon1 = nullptr;
     const char* icon2 = nullptr;
@@ -2668,7 +2668,7 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
     GdkPixbuf* icon = nullptr;
     bool is_submenu = false;
     bool is_sep = false;
-    XSet* set2;
+    xset_t set2;
 
     int icon_size = app_settings.get_icon_size_small();
     if (icon_size > PANE_MAX_ICON_SIZE)
@@ -2811,11 +2811,11 @@ update_bookmark_list_item(GtkListStore* list, GtkTreeIter* it, XSet* set)
 }
 
 static void
-ptk_bookmark_view_reload_list(GtkTreeView* view, XSet* book_set)
+ptk_bookmark_view_reload_list(GtkTreeView* view, xset_t book_set)
 {
     GtkTreeIter it;
     int pos = 0;
-    XSet* set;
+    xset_t set;
 
     if (!view)
         return;
@@ -2887,9 +2887,9 @@ on_bookmark_device(GtkMenuItem* item, VFSVolume* vol)
     if (!file_browser)
         return;
 
-    XSet* set;
-    XSet* newset;
-    XSet* sel_set;
+    xset_t set;
+    xset_t newset;
+    xset_t sel_set;
 
     // udi is the original user-entered URL, if available, else mtab url
     const char* url = vol->udi;
@@ -2942,7 +2942,7 @@ on_bookmark_device(GtkMenuItem* item, VFSVolume* vol)
     newset->keep_terminal = false;
     if (sel_set->next)
     {
-        XSet* sel_set_next = xset_get(sel_set->next);
+        xset_t sel_set_next = xset_get(sel_set->next);
         free(sel_set_next->prev);
         sel_set_next->prev = ztd::strdup(newset->name);
     }
@@ -2975,16 +2975,16 @@ ptk_bookmark_view_update_icons(GtkIconTheme* icon_theme, PtkFileBrowser* file_br
 
     if (file_browser->book_set_name)
     {
-        XSet* book_set = xset_is(file_browser->book_set_name);
+        xset_t book_set = xset_is(file_browser->book_set_name);
         if (book_set)
             ptk_bookmark_view_reload_list(view, book_set);
     }
 }
 
-XSet*
-ptk_bookmark_view_get_first_bookmark(XSet* book_set)
+xset_t
+ptk_bookmark_view_get_first_bookmark(xset_t book_set)
 {
-    XSet* child_set;
+    xset_t child_set;
     if (!book_set)
         book_set = xset_get(XSetName::MAIN_BOOK);
     if (!book_set->child)
@@ -3005,9 +3005,9 @@ ptk_bookmark_view_get_first_bookmark(XSet* book_set)
     return child_set;
 }
 
-static XSet*
-find_cwd_match_bookmark(XSet* parent_set, const char* cwd, bool recurse, XSet* skip_set,
-                        XSet** found_parent_set)
+static xset_t
+find_cwd_match_bookmark(xset_t parent_set, const char* cwd, bool recurse, xset_t skip_set,
+                        xset_t* found_parent_set)
 { // This function must be as FAST as possible
     *found_parent_set = nullptr;
 
@@ -3019,7 +3019,7 @@ find_cwd_match_bookmark(XSet* parent_set, const char* cwd, bool recurse, XSet* s
 
     // LOG_INFO("    scan {} {} {}", parent_set->menu_label, no_skip ? "" : "skip", recurse ?
     // "recurse" : "");
-    XSet* set = xset_is(parent_set->child);
+    xset_t set = xset_is(parent_set->child);
     while (set)
     {
         if (no_skip && set->z && set->x && !set->lock && set->x[0] == '3' /* XSetCMD::BOOKMARK */ &&
@@ -3044,7 +3044,7 @@ find_cwd_match_bookmark(XSet* parent_set, const char* cwd, bool recurse, XSet* s
         else if (set->menu_style == XSetMenu::SUBMENU && recurse && set->child)
         {
             // set is a parent - recurse contents
-            XSet* found_set;
+            xset_t found_set;
             if ((found_set = find_cwd_match_bookmark(set, cwd, true, skip_set, found_parent_set)))
                 return found_set;
         }
@@ -3065,7 +3065,7 @@ ptk_bookmark_view_chdir(GtkTreeView* view, PtkFileBrowser* file_browser, bool re
     // LOG_INFO("chdir {}", cwd);
 
     // cur dir is already selected?
-    XSet* set = get_selected_bookmark_set(view);
+    xset_t set = get_selected_bookmark_set(view);
     if (set && !set->lock && set->z && set->menu_style < XSetMenu::SUBMENU && set->x &&
         XSetCMD(std::stol(set->x)) == XSetCMD::BOOKMARK && ztd::startswith(set->z, cwd))
     {
@@ -3084,8 +3084,8 @@ ptk_bookmark_view_chdir(GtkTreeView* view, PtkFileBrowser* file_browser, bool re
     }
 
     // look in current bookmark list
-    XSet* start_set = xset_is(file_browser->book_set_name);
-    XSet* parent_set = nullptr;
+    xset_t start_set = xset_is(file_browser->book_set_name);
+    xset_t parent_set = nullptr;
     set =
         start_set ? find_cwd_match_bookmark(start_set, cwd, false, nullptr, &parent_set) : nullptr;
     if (!set && recurse)
@@ -3112,7 +3112,7 @@ ptk_bookmark_view_chdir(GtkTreeView* view, PtkFileBrowser* file_browser, bool re
 char*
 ptk_bookmark_view_get_selected_dir(GtkTreeView* view)
 {
-    XSet* set = get_selected_bookmark_set(view);
+    xset_t set = get_selected_bookmark_set(view);
     if (set)
     {
         XSetCMD cmd_type = set->x ? XSetCMD(std::stol(set->x)) : XSetCMD::INVALID;
@@ -3146,9 +3146,9 @@ ptk_bookmark_view_add_bookmark(GtkMenuItem* menuitem, PtkFileBrowser* file_brows
             return;
     }
 
-    XSet* set;
-    XSet* newset;
-    XSet* sel_set;
+    xset_t set;
+    xset_t newset;
+    xset_t sel_set;
 
     if (menuitem || !url)
         url = ptk_file_browser_get_cwd(file_browser);
@@ -3212,7 +3212,7 @@ ptk_bookmark_view_add_bookmark(GtkMenuItem* menuitem, PtkFileBrowser* file_brows
 
     if (sel_set->next)
     {
-        XSet* sel_set_next = xset_get(sel_set->next);
+        xset_t sel_set_next = xset_get(sel_set->next);
         free(sel_set_next->prev);
         sel_set_next->prev = ztd::strdup(newset->name);
     }
@@ -3232,7 +3232,7 @@ ptk_bookmark_view_xset_changed(GtkTreeView* view, PtkFileBrowser* file_browser,
     if (!(list && file_browser && file_browser->book_set_name && changed_name))
         return;
 
-    XSet* changed_set = xset_is(changed_name);
+    xset_t changed_set = xset_is(changed_name);
     if (!strcmp(file_browser->book_set_name, changed_name))
     {
         // The loaded book set itself has changed - reload list
@@ -3253,7 +3253,7 @@ ptk_bookmark_view_xset_changed(GtkTreeView* view, PtkFileBrowser* file_browser,
     bool is_child = false;
     if (changed_set)
     {
-        XSet* set = changed_set;
+        xset_t set = changed_set;
         while (set->prev)
             set = xset_get(set->prev);
         if (set->parent && !strcmp(file_browser->book_set_name, set->parent))
@@ -3305,9 +3305,10 @@ ptk_bookmark_view_xset_changed(GtkTreeView* view, PtkFileBrowser* file_browser,
 }
 
 static void
-activate_bookmark_item(XSet* sel_set, GtkTreeView* view, PtkFileBrowser* file_browser, bool reverse)
+activate_bookmark_item(xset_t sel_set, GtkTreeView* view, PtkFileBrowser* file_browser,
+                       bool reverse)
 {
-    XSet* set;
+    xset_t set;
 
     if (!sel_set || !view || !file_browser)
         return;
@@ -3363,7 +3364,7 @@ ptk_bookmark_view_on_open_reverse(GtkMenuItem* item, PtkFileBrowser* file_browse
     (void)item;
     if (!(file_browser && file_browser->side_book))
         return;
-    XSet* sel_set = get_selected_bookmark_set(GTK_TREE_VIEW(file_browser->side_book));
+    xset_t sel_set = get_selected_bookmark_set(GTK_TREE_VIEW(file_browser->side_book));
     activate_bookmark_item(sel_set, GTK_TREE_VIEW(file_browser->side_book), file_browser, true);
 }
 
@@ -3510,9 +3511,9 @@ on_bookmark_drag_end(GtkWidget* widget, GdkDragContext* drag_context, PtkFileBro
     }
 
     // Move xset - this is like a cut paste except may be inserted in top of menu
-    XSet* set_next;
-    XSet* set_clipboard1 = xset_get(inserted_name);
-    XSet* set = xset_is(prev_name); // pasted here, will be nullptr if top
+    xset_t set_next;
+    xset_t set_clipboard1 = xset_get(inserted_name);
+    xset_t set = xset_is(prev_name); // pasted here, will be nullptr if top
     if (set_clipboard1->lock || (set && set->lock))
         return; // failsafe
     xset_custom_remove(set_clipboard1);
@@ -3535,7 +3536,7 @@ on_bookmark_drag_end(GtkWidget* widget, GdkDragContext* drag_context, PtkFileBro
     else
     {
         // has been moved to top - no previous, need to change parent/child
-        XSet* book_set = xset_get(file_browser->book_set_name);
+        xset_t book_set = xset_get(file_browser->book_set_name);
         free(set_clipboard1->prev);
         free(set_clipboard1->next);
         free(set_clipboard1->parent);
@@ -3572,10 +3573,10 @@ static void
 show_bookmarks_menu(GtkTreeView* view, PtkFileBrowser* file_browser, unsigned int button,
                     std::uint32_t time)
 {
-    XSet* insert_set = nullptr;
+    xset_t insert_set = nullptr;
     bool bookmark_selected = true;
 
-    XSet* set = get_selected_bookmark_set(view);
+    xset_t set = get_selected_bookmark_set(view);
     if (!set)
     {
         // No bookmark selected so use menu set
@@ -3831,7 +3832,7 @@ ptk_bookmark_view_new(PtkFileBrowser* file_browser)
     // fill list
     if (!file_browser->book_set_name)
         file_browser->book_set_name = ztd::strdup(translate_xset_name_from(XSetName::MAIN_BOOK));
-    XSet* set = xset_is(file_browser->book_set_name);
+    xset_t set = xset_is(file_browser->book_set_name);
     if (!set)
     {
         set = xset_get(XSetName::MAIN_BOOK);

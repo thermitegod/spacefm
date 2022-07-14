@@ -361,7 +361,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
     int p = file_browser->mypanel;
     char mode = main_window->panel_context[p - 1];
 
-    XSet* set = xset_get_panel_mode(p, "slider_positions", mode);
+    xset_t set = xset_get_panel_mode(p, "slider_positions", mode);
 
     if (widget == file_browser->hpane)
     {
@@ -653,7 +653,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
 void
 ptk_file_browser_add_toolbar_widget(void* set_ptr, GtkWidget* widget)
 { // store the toolbar widget created by set for later change of status
-    XSet* set = XSET(set_ptr);
+    xset_t set = XSET(set_ptr);
 
     if (!(set && !set->lock && set->browser && set->tool != XSetTool::NOT && GTK_IS_WIDGET(widget)))
         return;
@@ -725,7 +725,7 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
     unsigned char x;
     GSList* l;
     GtkWidget* widget;
-    XSet* set = XSET(set_ptr);
+    xset_t set = XSET(set_ptr);
 
     if (set && !set->lock && set->menu_style == XSetMenu::CHECK && set->tool == XSetTool::CUSTOM)
     {
@@ -1039,7 +1039,7 @@ on_status_effect_change(GtkMenuItem* item, PtkFileBrowser* file_browser)
 }
 
 static void
-on_status_middle_click_config(GtkMenuItem* menuitem, XSet* set)
+on_status_middle_click_config(GtkMenuItem* menuitem, xset_t set)
 {
     (void)menuitem;
 
@@ -1073,10 +1073,10 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
                       "icon_status",
                       (GFunc)on_status_effect_change,
                       file_browser);
-    XSet* set = xset_get(XSetName::STATUS_NAME);
+    xset_t set = xset_get(XSetName::STATUS_NAME);
     xset_set_cb(XSetName::STATUS_NAME, (GFunc)on_status_middle_click_config, set);
     xset_set_ob2(set, nullptr, nullptr);
-    XSet* set_radio = set;
+    xset_t set_radio = set;
     set = xset_get(XSetName::STATUS_PATH);
     xset_set_cb(XSetName::STATUS_PATH, (GFunc)on_status_middle_click_config, set);
     xset_set_ob2(set, nullptr, set_radio);
@@ -1597,7 +1597,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
         GtkTreeViewColumn* col;
         int width;
         const char* title;
-        XSet* set;
+        xset_t set;
 
         if (GTK_IS_TREE_VIEW(file_browser->folder_view))
         {
@@ -1713,7 +1713,7 @@ ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
 
     // set status bar icon
     char* icon_name;
-    XSet* set = xset_get_panel(curpanel, "icon_status");
+    xset_t set = xset_get_panel(curpanel, "icon_status");
     if (set->icon && set->icon[0] != '\0')
         icon_name = set->icon;
     else
@@ -2619,7 +2619,7 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
     else
     {
         // get pattern from user  (store in ob1 so it is not saved)
-        XSet* set = xset_get(XSetName::SELECT_PATT);
+        xset_t set = xset_get(XSetName::SELECT_PATT);
         if (!xset_text_dialog(
                 GTK_WIDGET(file_browser),
                 "Select By Pattern",
@@ -3694,7 +3694,7 @@ ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_brow
             if (j != 6)
             {
                 // save column width for this panel context
-                XSet* set = xset_get_panel_mode(p, column_names.at(j), mode);
+                xset_t set = xset_get_panel_mode(p, column_names.at(j), mode);
                 int width = gtk_tree_view_column_get_width(col);
                 if (width > 0)
                 {
@@ -3732,7 +3732,7 @@ on_folder_view_columns_changed(GtkTreeView* view, PtkFileBrowser* file_browser)
         if (j != 6)
         {
             // save column position
-            XSet* set = xset_get_panel(file_browser->mypanel, column_names.at(j));
+            xset_t set = xset_get_panel(file_browser->mypanel, column_names.at(j));
             free(set->x);
             set->x = ztd::strdup(i);
         }
@@ -4108,7 +4108,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
             // column width
             gtk_tree_view_column_set_min_width(col, 50);
             gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
-            XSet* set = xset_get_panel_mode(p, column_names.at(j), mode);
+            xset_t set = xset_get_panel_mode(p, column_names.at(j), mode);
             int width = set->y ? std::stol(set->y) : 100;
             if (width)
             {
@@ -5005,7 +5005,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>
     if (!file_browser)
         return;
 
-    XSet* set2;
+    xset_t set2;
     char* copy_dest = nullptr;
     char* move_dest = nullptr;
 
@@ -5401,7 +5401,7 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname)
     if (!file_browser)
         return;
 
-    XSet* set = xset_get(setname);
+    xset_t set = xset_get(setname);
 
     if (!ztd::startswith(set->name, "sortx_"))
         return;
@@ -5882,7 +5882,7 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
     std::string user2 = "1001";
     std::string myuser = ztd::strdup(fmt::format("{}", geteuid()));
 
-    XSet* set = XSET(g_object_get_data(G_OBJECT(item), "set"));
+    xset_t set = XSET(g_object_get_data(G_OBJECT(item), "set"));
     if (!set || !file_browser)
         return;
 
@@ -6013,7 +6013,7 @@ void
 ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
 {
     int i = 0;
-    XSet* set = xset_get(setname);
+    xset_t set = xset_get(setname);
     FMMainWindow* main_window = FM_MAIN_WINDOW(browser->main_window);
     char mode = main_window->panel_context[browser->mypanel - 1];
 
@@ -6136,7 +6136,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
 
         if (i > 0 && i < 5)
         {
-            XSet* set2;
+            xset_t set2;
             std::string fullxname = fmt::format("panel{}_", panel_num);
             std::string xname = ztd::removeprefix(set->name, fullxname);
             if (ztd::same(xname, "show_hidden")) // shared key

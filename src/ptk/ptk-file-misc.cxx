@@ -1196,7 +1196,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     GtkTextIter siter;
     int mode_default = MODE_PARENT;
 
-    XSet* set = xset_get(XSetName::MOVE_DLG_HELP);
+    xset_t set = xset_get(XSetName::MOVE_DLG_HELP);
     if (set->z)
         mode_default = xset_get_int(XSetName::MOVE_DLG_HELP, XSetSetSet::Z);
 
@@ -1649,7 +1649,7 @@ on_options_button_press(GtkWidget* btn, MoveSet* mset)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     xset_context_new();
 
-    XSet* set = xset_set_cb(XSetName::MOVE_NAME, (GFunc)on_toggled, mset);
+    xset_t set = xset_set_cb(XSetName::MOVE_NAME, (GFunc)on_toggled, mset);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
     set = xset_set_cb(XSetName::MOVE_FILENAME, (GFunc)on_toggled, mset);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
@@ -3335,7 +3335,7 @@ open_archives_with_handler(ParentInfo* parent, std::vector<VFSFileInfo*>& sel_fi
 }
 
 static void
-open_files_with_handler(ParentInfo* parent, GList* files, XSet* handler_set)
+open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
 {
     std::string str;
     std::string command_final;
@@ -3466,7 +3466,7 @@ check_desktop_name(const char* app_desktop)
 static bool
 open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
 {
-    XSet* handler_set;
+    xset_t handler_set;
 
     if (app_desktop && ztd::startswith(app_desktop, "###") &&
         (handler_set = xset_is(app_desktop + 3)) && files)
@@ -3605,7 +3605,7 @@ ptk_open_files_with_app(const char* cwd, std::vector<VFSFileInfo*>& sel_files,
                                               true);
             if (handlers_slist)
             {
-                XSet* handler_set = XSET(handlers_slist->data);
+                xset_t handler_set = XSET(handlers_slist->data);
                 g_slist_free(handlers_slist);
                 alloc_desktop = fmt::format("###{}", handler_set->name);
             }
@@ -3782,7 +3782,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>& s
      */
     if (!setname || !file_browser)
         return;
-    XSet* set;
+    xset_t set;
     char* path;
     std::string cmd;
     std::string task_name;

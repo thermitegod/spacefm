@@ -753,7 +753,7 @@ ptk_handler_get_text_view(GtkTextView* view)
 }
 
 char*
-ptk_handler_get_command(int mode, int cmd, XSet* handler_set)
+ptk_handler_get_command(int mode, int cmd, xset_t handler_set)
 { /* if handler->disable, get const command, else get script path if exists */
     if (!handler_set)
         return nullptr;
@@ -847,7 +847,7 @@ ptk_handler_get_command(int mode, int cmd, XSet* handler_set)
 }
 
 bool
-ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
+ptk_handler_load_script(int mode, int cmd, xset_t handler_set, GtkTextView* view,
                         std::string& script, std::string& error_message)
 {
     // returns true if there is an error
@@ -944,7 +944,7 @@ ptk_handler_load_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
 }
 
 bool
-ptk_handler_save_script(int mode, int cmd, XSet* handler_set, GtkTextView* view,
+ptk_handler_save_script(int mode, int cmd, xset_t handler_set, GtkTextView* view,
                         const std::string command, std::string& error_message)
 {
     // returns true if there is an error
@@ -1140,7 +1140,7 @@ ptk_handler_file_has_handlers(int mode, int cmd, const char* path, VFSMimeType* 
                 delim[0] = '\0'; // set temporary end of string
 
             // Fetching handler
-            XSet* handler_set = xset_is(ptr);
+            xset_t handler_set = xset_is(ptr);
             if (delim)
                 delim[0] = ' '; // remove temporary end of string
 
@@ -1197,8 +1197,8 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
     std::size_t nelements;
     char* list;
     char* str;
-    XSet* set;
-    XSet* set_conf;
+    xset_t set;
+    xset_t set_conf;
     const Handler* handler;
 
     switch (mode)
@@ -1293,7 +1293,7 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
     set_conf->s = list;
 }
 
-XSet*
+xset_t
 add_new_handler(int mode)
 {
     // creates a new xset for a custom handler type
@@ -1308,16 +1308,16 @@ add_new_handler(int mode)
     };
 
     // create and return the xset
-    XSet* set = xset_get(setname);
+    xset_t set = xset_get(setname);
     set->lock = false;
     return set;
 }
 
 void
-ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
+ptk_handler_import(int mode, GtkWidget* handler_dlg, xset_t set)
 {
     // Adding new handler as a copy of the imported plugin set
-    XSet* new_handler_xset = add_new_handler(mode);
+    xset_t new_handler_xset = add_new_handler(mode);
     new_handler_xset->b = set->b;
     new_handler_xset->disable = false; // not default - save in session
     new_handler_xset->menu_label = ztd::strdup(set->menu_label);
@@ -1435,7 +1435,7 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, XSet* set)
 }
 
 static void
-config_load_handler_settings(XSet* handler_xset, char* handler_xset_name, const Handler* handler,
+config_load_handler_settings(xset_t handler_xset, char* handler_xset_name, const Handler* handler,
                              HandlerData* hnd)
 { // handler_xset_name optional if handler_xset passed
     // Fetching actual xset if only the name has been passed
@@ -1559,7 +1559,7 @@ config_unload_handler_settings(HandlerData* hnd)
 }
 
 static void
-populate_archive_handlers(HandlerData* hnd, XSet* def_handler_set)
+populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
 {
     /* Fetching available archive handlers (literally gets member s from
      * the xset) - user-defined order has already been set */
@@ -1584,7 +1584,7 @@ populate_archive_handlers(HandlerData* hnd, XSet* def_handler_set)
         if (ztd::startswith(archive_handlers[i], handler_cust_prefixs.at(hnd->mode)))
         {
             // Fetching handler  - ignoring invalid handler xset names
-            XSet* handler_xset = xset_is(archive_handlers[i]);
+            xset_t handler_xset = xset_is(archive_handlers[i]);
             if (handler_xset)
             {
                 // Obtaining appending iterator for treeview model
@@ -1699,7 +1699,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
     GtkTreeModel* model;
     char* handler_name_from_model = nullptr; // Used to detect renames
     char* xset_name = nullptr;
-    XSet* handler_xset = nullptr;
+    xset_t handler_xset = nullptr;
 
     // Fetching selection from treeview
     GtkTreeSelection* selection;
@@ -1742,7 +1742,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         }
 
         // Adding new handler as a copy of the current active handler
-        XSet* new_handler_xset = add_new_handler(hnd->mode);
+        xset_t new_handler_xset = add_new_handler(hnd->mode);
         new_handler_xset->b =
             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(hnd->chkbtn_handler_enabled))
                 ? XSetB::XSET_B_TRUE
@@ -2330,7 +2330,7 @@ restore_defaults(HandlerData* hnd, bool all)
             return;
 
         // create fake xset
-        XSet* set = new XSet(ztd::strdup(handler->setname), XSetName::CUSTOM);
+        xset_t set = new XSet(ztd::strdup(handler->setname), XSetName::CUSTOM);
         set->menu_label = (char*)handler->handler_name;
         set->s = (char*)handler->type;
         set->x = (char*)handler->ext;
@@ -2493,7 +2493,7 @@ on_textview_popup(GtkTextView* input, GtkMenu* menu, HandlerData* hnd)
     (void)hnd;
     // uses same xsets as item-prop.c:on_script_popup()
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    XSet* set = xset_get(XSetName::SEPARATOR);
+    xset_t set = xset_get(XSetName::SEPARATOR);
     set->menu_style = XSetMenu::SEP;
     set->browser = nullptr;
     xset_add_menuitem(nullptr, GTK_WIDGET(menu), accel_group, set);
@@ -2524,7 +2524,7 @@ on_activate_link(GtkLabel* label, const char* uri, HandlerData* hnd)
 
     char* xset_name = nullptr;
     gtk_tree_model_get(model, &it, PtkHandlerCol::COL_XSET_NAME, &xset_name, -1);
-    XSet* set = xset_is(xset_name);
+    xset_t set = xset_is(xset_name);
     free(xset_name);
     if (!(set && !set->disable && set->b == XSetB::XSET_B_TRUE))
         return true;
@@ -2637,7 +2637,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     int job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
 
     // Determine handler selected
-    XSet* set_sel = nullptr;
+    xset_t set_sel = nullptr;
     char* xset_name;
     GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(hnd->view_handlers));
     GtkTreeIter it;
@@ -2652,7 +2652,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     // determine job
     char* folder;
     char* file;
-    XSet* save;
+    xset_t save;
     switch (job)
     {
         case PtkHandlerJob::HANDLER_JOB_IMPORT_FILE:
@@ -2729,7 +2729,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
 }
 
 static void
-on_archive_default(GtkMenuItem* menuitem, XSet* set)
+on_archive_default(GtkMenuItem* menuitem, xset_t set)
 {
     (void)menuitem;
     const std::array<XSetName, 4> arcnames{
@@ -2764,7 +2764,7 @@ static void
 on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
 {
     GtkWidget* item;
-    XSet* set;
+    xset_t set;
 
     // Determine if a handler is selected
     GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(hnd->view_handlers));
@@ -2811,7 +2811,7 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
             // do NOT use set = xset_set_cb here or wrong set is passed
             xset_set_cb(XSetName::ARC_DEF_OPEN, (GFunc)on_archive_default, set);
             xset_set_ob2(set, nullptr, nullptr);
-            XSet* set_radio = set;
+            xset_t set_radio = set;
 
             set = xset_get(XSetName::ARC_DEF_EX);
             xset_set_cb(XSetName::ARC_DEF_EX, (GFunc)on_archive_default, set);
@@ -2856,7 +2856,7 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
 }
 
 void
-ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, XSet* def_handler_set)
+ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, xset_t def_handler_set)
 {
     std::string str;
 

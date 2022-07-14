@@ -69,5 +69,5 @@ enum ItemPropContext
     CONTEXT_END
 };
 
-void xset_item_prop_dlg(XSetContext* context, XSet* set, int page);
+void xset_item_prop_dlg(XSetContext* context, xset_t set, int page);
 int xset_context_test(XSetContext* context, char* rules, bool def_disable);

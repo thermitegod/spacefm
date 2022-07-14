@@ -59,7 +59,7 @@ enum PTKFileArchiverExtensionsCol
 };
 
 static const std::string
-archive_handler_get_first_extension(XSet* handler_xset)
+archive_handler_get_first_extension(xset_t handler_xset)
 {
     // Function deals with the possibility that a handler is responsible
     // for multiple MIME types and therefore file extensions. Functions
@@ -101,7 +101,7 @@ archive_handler_get_first_extension(XSet* handler_xset)
 }
 
 static bool
-archive_handler_run_in_term(XSet* handler_xset, int operation)
+archive_handler_run_in_term(xset_t handler_xset, int operation)
 {
     // Making sure a valid handler_xset has been passed
     if (!handler_xset)
@@ -164,7 +164,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
 
     // Loop through available handlers
     std::size_t len = 0;
-    XSet* handler_xset;
+    xset_t handler_xset;
     char* xset_name = nullptr;
     std::string extension;
     do
@@ -394,7 +394,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>
 
     // Looping for handlers (nullptr-terminated list)
     GtkTreeIter iter;
-    XSet* handler_xset;
+    xset_t handler_xset;
     // Get xset name of last used handler
     char* xset_name = xset_get_s(XSetName::ARC_DLG); // do not free
     int format = 4;                                  // default tar.gz
@@ -925,7 +925,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>
     ptask->task->exec_command = final_command;
     ptask->task->exec_show_error = true;
     ptask->task->exec_export = true; // Setup SpaceFM bash variables
-    XSet* set = xset_get(XSetName::NEW_ARCHIVE);
+    xset_t set = xset_get(XSetName::NEW_ARCHIVE);
     if (set->icon)
         ptask->task->exec_icon = set->icon;
 
@@ -1141,7 +1141,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*
     char* archive_handlers_s = xset_get_s(XSetName::ARC_CONF2);
     char** archive_handlers =
         archive_handlers_s ? g_strsplit(archive_handlers_s, " ", -1) : nullptr;
-    XSet* handler_xset = nullptr;
+    xset_t handler_xset = nullptr;
 
     std::string command;
     std::string final_command;
@@ -1413,7 +1413,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*
     ptask->task->exec_export = true; // Setup SpaceFM bash variables
 
     // Setting custom icon
-    XSet* set = xset_get(XSetName::ARC_EXTRACT);
+    xset_t set = xset_get(XSetName::ARC_EXTRACT);
     if (set->icon)
         ptask->task->exec_icon = set->icon;
 

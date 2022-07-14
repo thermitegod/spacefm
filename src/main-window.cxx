@@ -90,8 +90,9 @@ static bool on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, 
                                unsigned int time, PtkFileBrowser* file_browser);
 static bool on_main_window_focus(GtkWidget* main_window, GdkEventFocus* event, void* user_data);
 
-static bool on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* known_set);
-static bool on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set);
+static bool on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event,
+                                    xset_t known_set);
+static bool on_main_window_keypress_found_key(FMMainWindow* main_window, xset_t set);
 static bool on_window_button_press_event(GtkWidget* widget, GdkEventButton* event,
                                          FMMainWindow* main_window); // sfm
 static void on_new_window_activate(GtkMenuItem* menuitem, void* user_data);
@@ -102,7 +103,7 @@ static void show_panels(GtkMenuItem* item, FMMainWindow* main_window);
 static GtkWidget* main_task_view_new(FMMainWindow* main_window);
 static void on_task_popup_show(GtkMenuItem* item, FMMainWindow* main_window, char* name2);
 static bool main_tasks_running(FMMainWindow* main_window);
-static void on_task_stop(GtkMenuItem* item, GtkWidget* view, XSet* set2, PtkFileTask* ptask2);
+static void on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask2);
 static void on_preference_activate(GtkMenuItem* menuitem, void* user_data);
 static void main_task_prepare_menu(FMMainWindow* main_window, GtkWidget* menu,
                                    GtkAccelGroup* accel_group);
@@ -237,9 +238,9 @@ on_window_configure_event(GtkWindow* window, GdkEvent* event, FMMainWindow* main
 }
 
 static void
-on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
+on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, xset_t set2)
 {
-    XSet* set;
+    xset_t set;
     char* path = nullptr;
     const char* deffolder;
     std::string msg;
@@ -258,7 +259,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, XSet* set2)
     if (ztd::endswith(set->name, "file"))
     {
         // get file path
-        XSet* save = xset_get(XSetName::PLUG_IFILE);
+        xset_t save = xset_get(XSetName::PLUG_IFILE);
         if (save->s) //&& std::filesystem::is_directory(save->s)
             deffolder = save->s;
         else
@@ -372,9 +373,9 @@ create_plugins_menu(FMMainWindow* main_window)
     if (!file_browser)
         return plug_menu;
 
-    std::vector<XSet*> plugins;
+    std::vector<xset_t> plugins;
 
-    XSet* set;
+    xset_t set;
 
     set = xset_set_cb(XSetName::PLUG_IFILE, (GFunc)on_plugin_install, main_window);
     xset_set_ob1(set, "set", set);
@@ -390,7 +391,7 @@ create_plugins_menu(FMMainWindow* main_window)
     gtk_menu_shell_append(GTK_MENU_SHELL(plug_menu), item);
 
     plugins = xset_get_plugins();
-    for (XSet* set2: plugins)
+    for (xset_t set2: plugins)
         xset_add_menuitem(file_browser, plug_menu, accel_group, set2);
     if (!plugins.empty())
         xset_clear_plugins(plugins);
@@ -425,7 +426,7 @@ create_devices_menu(FMMainWindow* main_window)
     if (!file_browser)
         return dev_menu;
 
-    XSet* set;
+    xset_t set;
 
     set = xset_set_cb(XSetName::MAIN_DEV, (GFunc)on_devices_show, main_window);
     set->b = file_browser->side_dev ? XSetB::XSET_B_TRUE : XSetB::XSET_B_UNSET;
@@ -605,7 +606,7 @@ update_window_icon(GtkWindow* window, GtkIconTheme* theme)
     const char* name;
     GError* error = nullptr;
 
-    XSet* set = xset_get(XSetName::MAIN_ICON);
+    xset_t set = xset_get(XSetName::MAIN_ICON);
     if (set->icon)
         name = set->icon;
     else if (geteuid() == 0)
@@ -1013,7 +1014,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
         {
             // shown
             // test if panel and mode exists
-            XSet* set;
+            xset_t set;
 
             std::string xset_name =
                 fmt::format("panel{}_slider_positions{}", p, main_window->panel_context[p - 1]);
@@ -1022,7 +1023,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
             {
                 // no config exists for this panel and mode - copy
                 // printf ("no config for %d, %d\n", p, main_window->panel_context[p-1] );
-                XSet* set_old;
+                xset_t set_old;
                 char mode = main_window->panel_context[p - 1];
                 xset_set_b_panel_mode(p, "show_toolbox", mode, xset_get_b_panel(p, "show_toolbox"));
                 xset_set_b_panel_mode(p, "show_devmon", mode, xset_get_b_panel(p, "show_devmon"));
@@ -1310,8 +1311,8 @@ rebuild_menus(FMMainWindow* main_window)
     GtkWidget* newmenu;
     char* menu_elements;
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    XSet* set;
-    XSet* child_set;
+    xset_t set;
+    xset_t child_set;
     char* str;
 
     // LOG_INFO("rebuild_menus");
@@ -1490,7 +1491,7 @@ on_main_window_realize(GtkWidget* widget, FMMainWindow* main_window)
 static void
 fm_main_window_init(FMMainWindow* main_window)
 {
-    XSet* set;
+    xset_t set;
 
     main_window->configure_evt_timer = 0;
     main_window->fullscreen = false;
@@ -2300,7 +2301,7 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
             XSetContext* context = xset_context_new();
             main_context_fill(file_browser, context);
 
-            XSet* set;
+            xset_t set;
 
             set = xset_set_cb(XSetName::TAB_CLOSE, (GFunc)on_close_notebook_page, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
@@ -2392,7 +2393,7 @@ fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
     gtk_event_box_set_visible_window(GTK_EVENT_BOX(evt_box), false);
 
     tab_label = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    XSet* set = xset_get_panel(file_browser->mypanel, "icon_tab");
+    xset_t set = xset_get_panel(file_browser->mypanel, "icon_tab");
     if (set->icon)
     {
         pixbuf = vfs_load_icon(set->icon, 16);
@@ -2655,7 +2656,7 @@ on_about_activate(GtkMenuItem* menuitem, void* user_data)
         gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(about_dlg), PACKAGE_VERSION);
 
         const char* name;
-        XSet* set = xset_get(XSetName::MAIN_ICON);
+        xset_t set = xset_get(XSetName::MAIN_ICON);
         if (set->icon)
             name = set->icon;
         else if (geteuid() == 0)
@@ -3248,7 +3249,7 @@ on_main_window_focus(GtkWidget* main_window, GdkEventFocus* event, void* user_da
 }
 
 static bool
-on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* known_set)
+on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, xset_t known_set)
 {
     // LOG_INFO("main_keypress {} {}", event->keyval, event->state);
 
@@ -3256,7 +3257,7 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
 
     if (known_set)
     {
-        XSet* set = known_set;
+        xset_t set = known_set;
         return on_main_window_keypress_found_key(main_window, set);
     }
 
@@ -3308,7 +3309,7 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
                           true))
         return true;
 
-    for (XSet* set: xsets)
+    for (xset_t set: xsets)
     {
         if (set->shared_key)
         {
@@ -3371,7 +3372,7 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, XSet* kno
 }
 
 static bool
-on_main_window_keypress_found_key(FMMainWindow* main_window, XSet* set)
+on_main_window_keypress_found_key(FMMainWindow* main_window, xset_t set)
 {
     PtkFileBrowser* browser;
 
@@ -4006,7 +4007,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
 
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(vtask->exec_browser);
     FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
-    XSet* set = XSET(vtask->exec_set);
+    xset_t set = XSET(vtask->exec_set);
 
     buf.append("\n#source");
     // buf.append("\n\ncp $0 /tmp\n\n");
@@ -4254,7 +4255,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         // cmd_data
         if (set->plugin)
         {
-            XSet* mset = xset_get_plugin_mirror(set);
+            xset_t mset = xset_get_plugin_mirror(set);
             path = Glib::build_filename(xset_get_config_dir(), "plugin-data", mset->name);
         }
         else
@@ -4345,7 +4346,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
         }
         if (j != 13)
         {
-            XSet* set = xset_get(task_names.at(j));
+            xset_t set = xset_get(task_names.at(j));
             // save column position
             xset_set_set(set, XSetSetSet::X, std::to_string(i));
             // if the window was opened maximized and stayed maximized, or the
@@ -4512,12 +4513,12 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
 }
 
 static void
-on_task_stop(GtkMenuItem* item, GtkWidget* view, XSet* set2, PtkFileTask* ptask2)
+on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask2)
 {
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
     PtkFileTask* ptask;
-    XSet* set;
+    xset_t set;
 
     enum MainWindowJob
     {
@@ -4612,7 +4613,7 @@ idle_set_task_height(FMMainWindow* main_window)
     {
         // this is not perfect because panel half-width is set before user
         // adjusts window size
-        XSet* set = xset_get(XSetName::PANEL_SLIDERS);
+        xset_t set = xset_get(XSetName::PANEL_SLIDERS);
         set->x = ztd::strdup(allocation.width / 2);
         set->y = ztd::strdup(allocation.width / 2);
         set->s = ztd::strdup(allocation.height / 2);
@@ -4798,8 +4799,8 @@ main_task_prepare_menu(FMMainWindow* main_window, GtkWidget* menu, GtkAccelGroup
 {
     (void)menu;
     (void)accel_group;
-    XSet* set;
-    XSet* set_radio;
+    xset_t set;
+    xset_t set_radio;
 
     GtkWidget* parent = main_window->task_view;
     set = xset_set_cb(XSetName::TASK_SHOW_MANAGER, (GFunc)on_task_popup_show, main_window);
@@ -4888,7 +4889,7 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow*
     GtkTreeViewColumn* col = nullptr;
     GtkTreeIter it;
     PtkFileTask* ptask = nullptr;
-    XSet* set;
+    xset_t set;
     bool is_tasks;
 
     if (event->type != GDK_BUTTON_PRESS)
@@ -5140,7 +5141,7 @@ main_task_view_update_task(PtkFileTask* ptask)
     GtkTreeIter it;
     GdkPixbuf* pixbuf;
     const char* dest_dir;
-    XSet* set;
+    xset_t set;
 
     // LOG_INFO("main_task_view_update_task  ptask={}", ptask);
     // clang-format off
@@ -7234,7 +7235,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             reply = fmt::format("command {} requires an argument", socket_cmd);
             return 1;
         }
-        XSet* set = xset_find_custom(argv[i]);
+        xset_t set = xset_find_custom(argv[i]);
         if (!set)
         {
             reply = fmt::format("custom command or submenu '{}' not found", argv[i]);
@@ -7271,7 +7272,7 @@ main_window_socket_command(char* argv[], std::string& reply)
     else if (ztd::same(socket_cmd, "add-event") || ztd::same(socket_cmd, "replace-event") ||
              ztd::same(socket_cmd, "remove-event"))
     {
-        XSet* set;
+        xset_t set;
 
         if (!(argv[i] && argv[i + 1]))
         {
@@ -7323,9 +7324,9 @@ main_window_socket_command(char* argv[], std::string& reply)
 }
 
 static bool
-run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset, XSetName event,
+run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, XSetName event,
           int panel, int tab, const char* focus, int keyval, int button, int state, bool visible,
-          XSet* set, char* ucmd)
+          xset_t set, char* ucmd)
 {
     bool inhibit;
     int exit_status;
@@ -7513,10 +7514,10 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, XSet* preset,
 }
 
 bool
-main_window_event(void* mw, XSet* preset, XSetName event, int panel, int tab, const char* focus,
+main_window_event(void* mw, xset_t preset, XSetName event, int panel, int tab, const char* focus,
                   int keyval, int button, int state, bool visible)
 {
-    XSet* set;
+    xset_t set;
     bool inhibit = false;
 
     // LOG_INFO("main_window_event {}", translate_xset_name_from(event));

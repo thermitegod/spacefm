@@ -77,17 +77,17 @@
 // MOD settings
 static void xset_defaults();
 
-std::vector<XSet*> xsets;
-static std::vector<XSet*> keysets;
-static XSet* set_clipboard = nullptr;
+std::vector<xset_t> xsets;
+static std::vector<xset_t> keysets;
+static xset_t set_clipboard = nullptr;
 static bool clipboard_is_cut;
-static XSet* set_last;
+static xset_t set_last;
 
 std::string settings_config_dir;
 std::string settings_user_tmp_dir;
 
 static XSetContext* xset_context = nullptr;
-static XSet* book_icon_set_cached = nullptr;
+static xset_t book_icon_set_cached = nullptr;
 
 EventHandler event_handler;
 
@@ -102,13 +102,13 @@ using SettingsParseFunc = void (*)(std::string& line);
 static void xset_free_all();
 static void xset_default_keys();
 static char* xset_color_dialog(GtkWidget* parent, char* title, char* defcolor);
-static bool xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set);
-static void xset_builtin_tool_activate(XSetTool tool_type, XSet* set, GdkEventButton* event);
-static XSet* xset_new_builtin_toolitem(XSetTool tool_type);
-static void xset_custom_insert_after(XSet* target, XSet* set);
-static XSet* xset_custom_copy(XSet* set, bool copy_next, bool delete_set);
+static bool xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set);
+static void xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventButton* event);
+static xset_t xset_new_builtin_toolitem(XSetTool tool_type);
+static void xset_custom_insert_after(xset_t target, xset_t set);
+static xset_t xset_custom_copy(xset_t set, bool copy_next, bool delete_set);
 static XSetSetSet xset_set_set_encode(const std::string& var);
-static void xset_remove(XSet* set);
+static void xset_remove(xset_t set);
 
 static const char* enter_command_line =
     "Enter program or bash command line:\n\nUse:\n\t%%F\tselected files  or  %%f first selected "
@@ -804,7 +804,7 @@ save_settings(void* main_window_ptr)
         {
             for (panel_t p: PANELS)
             {
-                XSet* set = xset_get_panel(p, "show");
+                xset_t set = xset_get_panel(p, "show");
                 if (GTK_IS_NOTEBOOK(main_window->panel[p - 1]))
                 {
                     int pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1]));
@@ -844,7 +844,7 @@ save_settings(void* main_window_ptr)
             // clear saved tabs
             for (panel_t p: PANELS)
             {
-                XSet* set = xset_get_panel(p, "show");
+                xset_t set = xset_get_panel(p, "show");
                 if (set->s)
                 {
                     free(set->s);
@@ -921,7 +921,7 @@ save_settings(void* main_window_ptr)
 }
 
 static const setvars_t
-xset_pack_set(XSet* set)
+xset_pack_set(xset_t set)
 {
     setvars_t setvars;
     // hack to not save default handlers - this allows default handlers
@@ -1034,7 +1034,7 @@ xset_pack_sets()
     // map layout <XSet->name, <XSet->var, XSet->value>>
     xsetpak_t xsetpak;
 
-    for (XSet* set: xsets)
+    for (xset_t set: xsets)
     {
         setvars_t setvars = xset_pack_set(set);
 
@@ -1080,7 +1080,7 @@ xset_free_all()
         if (xsets.empty())
             break;
 
-        XSet* set = xsets.back();
+        xset_t set = xsets.back();
         xsets.pop_back();
 
         if (set->ob2_data && ztd::startswith(set->name, "evt_"))
@@ -1099,7 +1099,7 @@ xset_free_all()
 }
 
 static void
-xset_remove(XSet* set)
+xset_remove(xset_t set)
 {
     xsets.erase(std::remove(xsets.begin(), xsets.end(), set), xsets.end());
 
@@ -1161,15 +1161,15 @@ XSet::~XSet()
     }
 }
 
-static XSet*
+static xset_t
 xset_new(const std::string& name, XSetName xset_name)
 {
-    XSet* set = new XSet(name, xset_name);
+    xset_t set = new XSet(name, xset_name);
 
     return set;
 }
 
-XSet*
+xset_t
 xset_get(const std::string& name)
 {
 #ifdef XSET_MAP_TEST
@@ -1183,55 +1183,55 @@ xset_get(const std::string& name)
     }
 #endif
 
-    for (XSet* set: xsets)
+    for (xset_t set: xsets)
     {
         // check for existing xset
         if (ztd::same(name, set->name))
             return set;
     }
 
-    XSet* set = xset_new(name, translate_xset_name_to(name));
+    xset_t set = xset_new(name, translate_xset_name_to(name));
     xsets.push_back(set);
     return set;
 }
 
-XSet*
+xset_t
 xset_get(XSetName name)
 {
-    for (XSet* set: xsets)
+    for (xset_t set: xsets)
     {
         // check for existing xset
         if (name == set->xset_name)
             return set;
     }
 
-    XSet* set = xset_new(translate_xset_name_from(name), name);
+    xset_t set = xset_new(translate_xset_name_from(name), name);
     xsets.push_back(set);
     return set;
 }
 
-XSet*
+xset_t
 xset_get_panel(panel_t panel, const std::string& name)
 {
     std::string fullname = fmt::format("panel{}_{}", panel, name);
-    XSet* set = xset_get(fullname);
+    xset_t set = xset_get(fullname);
     return set;
 }
 
-XSet*
+xset_t
 xset_get_panel_mode(panel_t panel, const std::string& name, const char mode)
 {
     // FMT BUG - need to use std::to_string on char
     // otherwise it gets ignored and not added to new string
     std::string fullname = fmt::format("panel{}_{}{}", panel, name, std::to_string(mode));
-    XSet* set = xset_get(fullname);
+    xset_t set = xset_get(fullname);
     return set;
 }
 
 char*
 xset_get_s(XSetName name)
 {
-    XSet* set = xset_get(name);
+    xset_t set = xset_get(name);
     if (set)
         return set->s;
     return nullptr;
@@ -1240,7 +1240,7 @@ xset_get_s(XSetName name)
 char*
 xset_get_s(const std::string& name)
 {
-    XSet* set = xset_get(name);
+    xset_t set = xset_get(name);
     if (set)
         return set->s;
     return nullptr;
@@ -1256,14 +1256,14 @@ xset_get_s_panel(panel_t panel, const std::string& name)
 bool
 xset_get_b(XSetName name)
 {
-    XSet* set = xset_get(name);
+    xset_t set = xset_get(name);
     return (set->b == XSetB::XSET_B_TRUE);
 }
 
 bool
 xset_get_b(const std::string& name)
 {
-    XSet* set = xset_get(name);
+    xset_t set = xset_get(name);
     return (set->b == XSetB::XSET_B_TRUE);
 }
 
@@ -1284,15 +1284,15 @@ xset_get_b_panel_mode(panel_t panel, const std::string& name, const char mode)
 }
 
 static bool
-xset_get_b_set(XSet* set)
+xset_get_b_set(xset_t set)
 {
     return (set->b == XSetB::XSET_B_TRUE);
 }
 
-XSet*
+xset_t
 xset_is(XSetName name)
 {
-    for (XSet* set: xsets)
+    for (xset_t set: xsets)
     {
         // check for existing xset
         if (name == set->xset_name)
@@ -1301,10 +1301,10 @@ xset_is(XSetName name)
     return nullptr;
 }
 
-XSet*
+xset_t
 xset_is(const std::string& name)
 {
-    for (XSet* set: xsets)
+    for (xset_t set: xsets)
     {
         // check for existing xset
         if (ztd::same(name, set->name))
@@ -1313,10 +1313,10 @@ xset_is(const std::string& name)
     return nullptr;
 }
 
-XSet*
+xset_t
 xset_set_b(XSetName name, bool bval)
 {
-    XSet* set = xset_get(name);
+    xset_t set = xset_get(name);
 
     if (bval)
         set->b = XSetB::XSET_B_TRUE;
@@ -1325,10 +1325,10 @@ xset_set_b(XSetName name, bool bval)
     return set;
 }
 
-XSet*
+xset_t
 xset_set_b(const std::string& name, bool bval)
 {
-    XSet* set = xset_get(name);
+    xset_t set = xset_get(name);
 
     if (bval)
         set->b = XSetB::XSET_B_TRUE;
@@ -1337,26 +1337,26 @@ xset_set_b(const std::string& name, bool bval)
     return set;
 }
 
-XSet*
+xset_t
 xset_set_b_panel(panel_t panel, const std::string& name, bool bval)
 {
     std::string fullname = fmt::format("panel{}_{}", panel, name);
-    XSet* set = xset_set_b(fullname, bval);
+    xset_t set = xset_set_b(fullname, bval);
     return set;
 }
 
-XSet*
+xset_t
 xset_set_b_panel_mode(panel_t panel, const std::string& name, const char mode, bool bval)
 {
     // FMT BUG - need to use std::to_string on char
     // otherwise it gets ignored and not added to new string
     std::string fullname = fmt::format("panel{}_{}{}", panel, name, std::to_string(mode));
-    XSet* set = xset_set_b(fullname, bval);
+    xset_t set = xset_set_b(fullname, bval);
     return set;
 }
 
 static int
-xset_get_int_set(XSet* set, XSetSetSet var)
+xset_get_int_set(xset_t set, XSetSetSet var)
 {
     if (!set)
         return -1;
@@ -1417,14 +1417,14 @@ xset_get_int_set(XSet* set, XSetSetSet var)
 int
 xset_get_int(XSetName name, XSetSetSet var)
 {
-    XSet* set = xset_get(name);
+    xset_t set = xset_get(name);
     return xset_get_int_set(set, var);
 }
 
 int
 xset_get_int(const std::string& name, XSetSetSet var)
 {
-    XSet* set = xset_get(name);
+    xset_t set = xset_get(name);
     return xset_get_int_set(set, var);
 }
 
@@ -1435,13 +1435,13 @@ xset_get_int_panel(panel_t panel, const std::string& name, XSetSetSet var)
     return xset_get_int(fullname, var);
 }
 
-static XSet*
-xset_is_main_bookmark(XSet* set)
+static xset_t
+xset_is_main_bookmark(xset_t set)
 {
-    XSet* set_parent = nullptr;
+    xset_t set_parent = nullptr;
 
     // is this xset in main_book ?  returns immediate parent set
-    XSet* set_prev = set;
+    xset_t set_prev = set;
     while (set_prev)
     {
         if (set_prev->prev)
@@ -1463,34 +1463,34 @@ xset_is_main_bookmark(XSet* set)
     return nullptr;
 }
 
-XSet*
+xset_t
 xset_set_cb(XSetName name, GFunc cb_func, void* cb_data)
 {
-    XSet* set = xset_get(name);
+    xset_t set = xset_get(name);
     set->cb_func = cb_func;
     set->cb_data = cb_data;
     return set;
 }
 
-XSet*
+xset_t
 xset_set_cb(const std::string& name, GFunc cb_func, void* cb_data)
 {
-    XSet* set = xset_get(name);
+    xset_t set = xset_get(name);
     set->cb_func = cb_func;
     set->cb_data = cb_data;
     return set;
 }
 
-XSet*
+xset_t
 xset_set_cb_panel(panel_t panel, const std::string& name, GFunc cb_func, void* cb_data)
 {
     std::string fullname = fmt::format("panel{}_{}", panel, name);
-    XSet* set = xset_set_cb(fullname, cb_func, cb_data);
+    xset_t set = xset_set_cb(fullname, cb_func, cb_data);
     return set;
 }
 
-XSet*
-xset_set_ob1_int(XSet* set, const char* ob1, int ob1_int)
+xset_t
+xset_set_ob1_int(xset_t set, const char* ob1, int ob1_int)
 {
     if (set->ob1)
         free(set->ob1);
@@ -1499,8 +1499,8 @@ xset_set_ob1_int(XSet* set, const char* ob1, int ob1_int)
     return set;
 }
 
-XSet*
-xset_set_ob1(XSet* set, const char* ob1, void* ob1_data)
+xset_t
+xset_set_ob1(xset_t set, const char* ob1, void* ob1_data)
 {
     if (set->ob1)
         free(set->ob1);
@@ -1509,8 +1509,8 @@ xset_set_ob1(XSet* set, const char* ob1, void* ob1_data)
     return set;
 }
 
-XSet*
-xset_set_ob2(XSet* set, const char* ob2, void* ob2_data)
+xset_t
+xset_set_ob2(xset_t set, const char* ob2, void* ob2_data)
 {
     if (set->ob2)
         free(set->ob2);
@@ -1609,8 +1609,8 @@ xset_set_set_encode(const std::string& var)
     return tmp;
 }
 
-XSet*
-xset_set_set(XSet* set, XSetSetSet var, const std::string& value)
+xset_t
+xset_set_set(xset_t set, XSetSetSet var, const std::string& value)
 {
     if (!set)
         return nullptr;
@@ -1794,8 +1794,8 @@ xset_set_set(XSet* set, XSetSetSet var, const std::string& value)
     return set;
 }
 
-static XSet*
-_xset_set(XSet* set, XSetSetSet var, const std::string& value)
+static xset_t
+_xset_set(xset_t set, XSetSetSet var, const std::string& value)
 {
     if (!set->lock || (var != XSetSetSet::STYLE && var != XSetSetSet::DESC &&
                        var != XSetSetSet::TITLE && var != XSetSetSet::SHARED_KEY))
@@ -1803,35 +1803,35 @@ _xset_set(XSet* set, XSetSetSet var, const std::string& value)
     return set;
 }
 
-XSet*
+xset_t
 xset_set(XSetName name, XSetSetSet var, const std::string& value)
 {
-    XSet* set = xset_get(name);
+    xset_t set = xset_get(name);
     return _xset_set(set, var, value);
 }
 
-XSet*
+xset_t
 xset_set(const std::string& name, XSetSetSet var, const std::string& value)
 {
-    XSet* set = xset_get(name);
+    xset_t set = xset_get(name);
     return _xset_set(set, var, value);
 }
 
-XSet*
+xset_t
 xset_set_panel(panel_t panel, const std::string& name, XSetSetSet var, const std::string& value)
 {
     std::string fullname = fmt::format("panel{}_{}", panel, name);
-    XSet* set = xset_set(fullname, var, value);
+    xset_t set = xset_set(fullname, var, value);
     return set;
 }
 
-XSet*
+xset_t
 xset_find_custom(const std::string& search)
 {
     // find a custom command or submenu by label or xset name
     std::string label = clean_label(search, true, false);
 
-    for (XSet* set: xsets)
+    for (xset_t set: xsets)
     {
         if (!set->lock && ((set->menu_style == XSetMenu::SUBMENU && set->child) ||
                            (set->menu_style < XSetMenu::SUBMENU &&
@@ -1852,17 +1852,17 @@ xset_find_custom(const std::string& search)
 bool
 xset_opener(PtkFileBrowser* file_browser, const char job)
 { // find an opener for job
-    XSet* set;
-    XSet* mset;
-    XSet* open_all_set;
-    XSet* tset;
-    XSet* open_all_tset;
+    xset_t set;
+    xset_t mset;
+    xset_t open_all_set;
+    xset_t tset;
+    xset_t open_all_tset;
     XSetContext* context = nullptr;
     int context_action;
     bool found = false;
     char pinned;
 
-    for (XSet* set2: xsets)
+    for (xset_t set2: xsets)
     {
         if (!set2->lock && set2->opener == job && set2->tool == XSetTool::NOT &&
             set2->menu_style != XSetMenu::SUBMENU && set2->menu_style != XSetMenu::SEP)
@@ -1925,7 +1925,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
 
             // is set pinned to open_all_type for pre-context?
             pinned = 0;
-            for (XSet* set3: xsets)
+            for (xset_t set3: xsets)
             {
                 if (set3->next && ztd::startswith(set3->name, "open_all_type_"))
                 {
@@ -2025,7 +2025,7 @@ xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* acce
 
     for (const std::string& element: split_elements)
     {
-        XSet* set = xset_get(element);
+        xset_t set = xset_get(element);
         xset_add_menuitem(file_browser, menu, accel_group, set);
     }
 }
@@ -2051,7 +2051,7 @@ xset_new_menuitem(const char* label, const char* icon)
 }
 
 char*
-xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
+xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, int icon_size)
 {
     char* menu_label = nullptr;
     GdkPixbuf* icon_new = nullptr;
@@ -2107,7 +2107,7 @@ xset_custom_get_app_name_icon(XSet* set, GdkPixbuf** icon, int icon_size)
 }
 
 GdkPixbuf*
-xset_custom_get_bookmark_icon(XSet* set, int icon_size)
+xset_custom_get_bookmark_icon(xset_t set, int icon_size)
 {
     GdkPixbuf* icon_new = nullptr;
     const char* icon1 = nullptr;
@@ -2122,7 +2122,7 @@ xset_custom_get_bookmark_icon(XSet* set, int icon_size)
         if (!set->icon && (set->z && (strstr(set->z, ":/") || ztd::startswith(set->z, "//"))))
         {
             // a bookmarked URL - show network icon
-            XSet* set2 = xset_get(XSetName::DEV_ICON_NETWORK);
+            xset_t set2 = xset_get(XSetName::DEV_ICON_NETWORK);
             if (set2->icon)
                 icon1 = ztd::strdup(set2->icon);
             else
@@ -2134,7 +2134,7 @@ xset_custom_get_bookmark_icon(XSet* set, int icon_size)
         {
             // a bookmarked URL - show custom or network icon
             icon1 = ztd::strdup(set->icon);
-            XSet* set2 = xset_get(XSetName::DEV_ICON_NETWORK);
+            xset_t set2 = xset_get(XSetName::DEV_ICON_NETWORK);
             if (set2->icon)
                 icon2 = ztd::strdup(set2->icon);
             else
@@ -2179,16 +2179,16 @@ xset_custom_get_bookmark_icon(XSet* set, int icon_size)
 
 GtkWidget*
 xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
-                  XSet* set)
+                  xset_t set)
 {
     GtkWidget* item = nullptr;
     GtkWidget* submenu;
-    XSet* keyset;
-    XSet* set_next;
+    xset_t keyset;
+    xset_t set_next;
     char* icon_name = nullptr;
     char* context = nullptr;
     int context_action = ItemPropContextState::CONTEXT_SHOW;
-    XSet* mset;
+    xset_t mset;
     std::string icon_file;
     // LOG_INFO("xset_add_menuitem {}", set->name);
 
@@ -2227,7 +2227,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         }
         else if (set->menu_style != XSetMenu::NORMAL)
         {
-            XSet* set_radio;
+            xset_t set_radio;
             switch (set->menu_style)
             {
                 case XSetMenu::CHECK:
@@ -2400,7 +2400,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
 }
 
 char*
-xset_custom_get_script(XSet* set, bool create)
+xset_custom_get_script(xset_t set, bool create)
 {
     std::string path;
 
@@ -2472,7 +2472,7 @@ xset_custom_new_name()
 }
 
 static void
-xset_custom_copy_files(XSet* src, XSet* dest)
+xset_custom_copy_files(xset_t src, xset_t dest)
 {
     std::string path_src;
     std::string path_dest;
@@ -2515,7 +2515,7 @@ xset_custom_copy_files(XSet* src, XSet* dest)
     Glib::spawn_command_line_sync(command);
 
     // copy data dir
-    XSet* mset = xset_get_plugin_mirror(src);
+    xset_t mset = xset_get_plugin_mirror(src);
     path_src = Glib::build_filename(xset_get_config_dir(), "plugin-data", mset->name);
     if (std::filesystem::is_directory(path_src))
     {
@@ -2535,17 +2535,17 @@ xset_custom_copy_files(XSet* src, XSet* dest)
     }
 }
 
-static XSet*
-xset_custom_copy(XSet* set, bool copy_next, bool delete_set)
+static xset_t
+xset_custom_copy(xset_t set, bool copy_next, bool delete_set)
 {
     // LOG_INFO("xset_custom_copy( {}, {}, {})", set->name, copy_next ? "true" : "false",
     // delete_set ? "true" : "false");
-    XSet* mset = set;
+    xset_t mset = set;
     // if a plugin with a mirror, get the mirror
     if (set->plugin && set->shared_key)
         mset = xset_get_plugin_mirror(set);
 
-    XSet* newset = xset_custom_new();
+    xset_t newset = xset_custom_new();
     newset->menu_label = ztd::strdup(set->menu_label);
     newset->s = ztd::strdup(set->s);
     newset->x = ztd::strdup(set->x);
@@ -2576,18 +2576,18 @@ xset_custom_copy(XSet* set, bool copy_next, bool delete_set)
 
     if (set->menu_style == XSetMenu::SUBMENU && set->child)
     {
-        XSet* set_child = xset_get(set->child);
+        xset_t set_child = xset_get(set->child);
         // LOG_INFO("    copy submenu {}", set_child->name);
-        XSet* newchild = xset_custom_copy(set_child, true, delete_set);
+        xset_t newchild = xset_custom_copy(set_child, true, delete_set);
         newset->child = ztd::strdup(newchild->name);
         newchild->parent = ztd::strdup(newset->name);
     }
 
     if (copy_next && set->next)
     {
-        XSet* set_next = xset_get(set->next);
+        xset_t set_next = xset_get(set->next);
         // LOG_INFO("    copy next {}", set_next->name);
-        XSet* newnext = xset_custom_copy(set_next, true, delete_set);
+        xset_t newnext = xset_custom_copy(set_next, true, delete_set);
         newnext->prev = ztd::strdup(newset->name);
         newset->next = ztd::strdup(newnext->name);
     }
@@ -2607,7 +2607,7 @@ clean_plugin_mirrors()
     while (redo)
     {
         redo = false;
-        for (XSet* set: xsets)
+        for (xset_t set: xsets)
         {
             if (set->desc && !strcmp(set->desc, "@plugin@mirror@"))
             {
@@ -2640,9 +2640,9 @@ clean_plugin_mirrors()
 }
 
 static void
-xset_set_plugin_mirror(XSet* pset)
+xset_set_plugin_mirror(xset_t pset)
 {
-    for (XSet* set: xsets)
+    for (xset_t set: xsets)
     {
         if (set->desc && !strcmp(set->desc, "@plugin@mirror@"))
         {
@@ -2663,8 +2663,8 @@ xset_set_plugin_mirror(XSet* pset)
     }
 }
 
-XSet*
-xset_get_plugin_mirror(XSet* set)
+xset_t
+xset_get_plugin_mirror(xset_t set)
 {
     // plugin mirrors are custom xsets that save the user's key, icon
     // and run prefs for the plugin, if any
@@ -2673,7 +2673,7 @@ xset_get_plugin_mirror(XSet* set)
     if (set->shared_key)
         return xset_get(set->shared_key);
 
-    XSet* newset = xset_custom_new();
+    xset_t newset = xset_custom_new();
     newset->desc = ztd::strdup("@plugin@mirror@");
     newset->parent = ztd::strdup(set->plug_dir);
     newset->child = ztd::strdup(set->plug_name);
@@ -2694,17 +2694,17 @@ xset_get_plugin_mirror(XSet* set)
 }
 
 static int
-compare_plugin_sets(XSet* a, XSet* b)
+compare_plugin_sets(xset_t a, xset_t b)
 {
     return g_utf8_collate(a->menu_label, b->menu_label);
 }
 
-std::vector<XSet*>
+std::vector<xset_t>
 xset_get_plugins()
 { // return list of plugin sets sorted by menu_label
-    std::vector<XSet*> plugins;
+    std::vector<xset_t> plugins;
 
-    for (XSet* set: xsets)
+    for (xset_t set: xsets)
     {
         if (set->plugin && set->plugin_top && set->plug_dir)
             plugins.push_back(set);
@@ -2714,23 +2714,23 @@ xset_get_plugins()
 }
 
 void
-xset_clear_plugins(std::vector<XSet*>& plugins)
+xset_clear_plugins(std::vector<xset_t>& plugins)
 {
     if (!plugins.empty())
     {
-        for (XSet* set: plugins)
+        for (xset_t set: plugins)
             xset_remove(set);
         plugins.clear();
     }
 }
 
-static XSet*
+static xset_t
 xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
 {
     if (!plug_name)
         return nullptr;
 
-    for (XSet* set: xsets)
+    for (xset_t set: xsets)
     {
         if (set->plugin && ztd::same(plug_name, set->plug_name) &&
             ztd::same(plug_dir, set->plug_dir))
@@ -2740,7 +2740,7 @@ xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
     // add new
     const std::string setname = xset_custom_new_name();
 
-    XSet* set = xset_new(setname, XSetName::CUSTOM);
+    xset_t set = xset_new(setname, XSetName::CUSTOM);
     set->plug_dir = ztd::strdup(plug_dir);
     set->plug_name = ztd::strdup(plug_name);
     set->plugin = true;
@@ -2796,8 +2796,8 @@ xset_parse_plugin(const char* plug_dir, const std::string& name, const std::stri
         return;
     }
 
-    XSet* set;
-    XSet* set2;
+    xset_t set;
+    xset_t set2;
 
     set = xset_get_by_plug_name(plug_dir, name.c_str());
     xset_set_set(set, var, value);
@@ -2864,7 +2864,7 @@ xset_parse_plugin(const char* plug_dir, const std::string& name, const std::stri
     }
 }
 
-XSet*
+xset_t
 xset_import_plugin(const char* plug_dir, PluginUse* use)
 {
     if (use)
@@ -2876,7 +2876,7 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
     while (redo)
     {
         redo = false;
-        for (XSet* set: xsets)
+        for (xset_t set: xsets)
         {
             if (set->plugin && !strcmp(plug_dir, set->plug_dir))
             {
@@ -2965,8 +2965,8 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
 
     // clean plugin sets, set type
     bool top = true;
-    XSet* rset = nullptr;
-    for (XSet* set: xsets)
+    xset_t rset = nullptr;
+    for (xset_t set: xsets)
     {
         if (set->plugin && ztd::same(plug_dir, set->plug_dir))
         {
@@ -2993,7 +2993,7 @@ struct PluginData
     FMMainWindow* main_window;
     GtkWidget* handler_dlg;
     char* plug_dir;
-    XSet* set;
+    xset_t set;
     PluginJob job;
 };
 
@@ -3015,7 +3015,7 @@ static void
 on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
 {
     (void)task;
-    XSet* set;
+    xset_t set;
     std::string msg;
     // LOG_INFO("on_install_plugin_cb");
     if (plugin_data->job == PluginJob::REMOVE) // uninstall
@@ -3065,7 +3065,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                 {
                     // copy all bookmarks into menu
                     // paste after insert_set (plugin_data->set)
-                    XSet* newset = xset_custom_copy(set, true, true);
+                    xset_t newset = xset_custom_copy(set, true, true);
                     // get last bookmark and toolbar if needed
                     set = newset;
                     do
@@ -3082,7 +3082,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                     set->next = plugin_data->set->next; // steal
                     if (plugin_data->set->next)
                     {
-                        XSet* set_next = xset_get(plugin_data->set->next);
+                        xset_t set_next = xset_get(plugin_data->set->next);
                         free(set_next->prev);
                         set_next->prev = ztd::strdup(set->name); // last bookmark
                     }
@@ -3124,12 +3124,12 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                 if (plugin_data->set)
                 {
                     // paste after insert_set (plugin_data->set)
-                    XSet* newset = xset_custom_copy(set, false, true);
+                    xset_t newset = xset_custom_copy(set, false, true);
                     newset->prev = ztd::strdup(plugin_data->set->name);
                     newset->next = plugin_data->set->next; // steal
                     if (plugin_data->set->next)
                     {
-                        XSet* set_next = xset_get(plugin_data->set->next);
+                        xset_t set_next = xset_get(plugin_data->set->next);
                         free(set_next->prev);
                         set_next->prev = ztd::strdup(newset->name);
                     }
@@ -3182,7 +3182,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
 }
 
 static void
-xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
+xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
 {
     if (!file_browser || !set || !set->plugin_top || !set->plug_dir)
         return;
@@ -3226,7 +3226,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
 
 void
 install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& path,
-                    const std::string& plug_dir, PluginJob job, XSet* insert_set)
+                    const std::string& plug_dir, PluginJob job, xset_t insert_set)
 {
     std::string own;
     std::string plug_dir_q = bash_quote(plug_dir);
@@ -3261,7 +3261,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& p
     if (insert_set && insert_set->xset_name == XSetName::MAIN_BOOK)
     {
         // import bookmarks to end
-        XSet* set = xset_get(XSetName::MAIN_BOOK);
+        xset_t set = xset_get(XSetName::MAIN_BOOK);
         if (set->child)
         {
             set = xset_is(set->child);
@@ -3325,7 +3325,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& p
 }
 
 static bool
-xset_custom_export_files(XSet* set, const std::string& plug_dir)
+xset_custom_export_files(xset_t set, const std::string& plug_dir)
 {
     std::string path_src;
     std::string path_dest;
@@ -3366,7 +3366,7 @@ xset_custom_export_files(XSet* set, const std::string& plug_dir)
 }
 
 static bool
-xset_custom_export_write(xsetpak_t& xsetpak, XSet* set, const std::string& plug_dir)
+xset_custom_export_write(xsetpak_t& xsetpak, xset_t set, const std::string& plug_dir)
 { // recursively write set, submenu sets, and next sets
     xsetpak_t xsetpak_local{{fmt::format("{}", set->name), xset_pack_set(set)}};
 
@@ -3388,13 +3388,13 @@ xset_custom_export_write(xsetpak_t& xsetpak, XSet* set, const std::string& plug_
 }
 
 void
-xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, XSet* set)
+xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
 {
     const char* deffolder;
     std::string deffile;
 
     // get new plugin filename
-    XSet* save = xset_get(XSetName::PLUG_CFILE);
+    xset_t save = xset_get(XSetName::PLUG_CFILE);
     if (save->s) //&& std::filesystem::is_directory(save->s)
         deffolder = save->s;
     else
@@ -3677,14 +3677,14 @@ open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
 }
 
 static void
-xset_custom_activate(GtkWidget* item, XSet* set)
+xset_custom_activate(GtkWidget* item, xset_t set)
 {
     (void)item;
     GtkWidget* parent;
     GtkWidget* task_view = nullptr;
     const char* cwd;
     std::string value;
-    XSet* mset;
+    xset_t mset;
 
     // builtin toolitem?
     if (set->tool > XSetTool::CUSTOM)
@@ -3915,17 +3915,17 @@ xset_custom_activate(GtkWidget* item, XSet* set)
 }
 
 void
-xset_custom_delete(XSet* set, bool delete_next)
+xset_custom_delete(xset_t set, bool delete_next)
 {
     if (set->menu_style == XSetMenu::SUBMENU && set->child)
     {
-        XSet* set_child = xset_get(set->child);
+        xset_t set_child = xset_get(set->child);
         xset_custom_delete(set_child, true);
     }
 
     if (delete_next && set->next)
     {
-        XSet* set_next = xset_get(set->next);
+        xset_t set_next = xset_get(set->next);
         xset_custom_delete(set_next, true);
     }
 
@@ -3949,13 +3949,13 @@ xset_custom_delete(XSet* set, bool delete_next)
     xset_remove(set);
 }
 
-XSet*
-xset_custom_remove(XSet* set)
+xset_t
+xset_custom_remove(xset_t set)
 {
-    XSet* set_prev;
-    XSet* set_next;
-    XSet* set_parent;
-    XSet* set_child;
+    xset_t set_prev;
+    xset_t set_next;
+    xset_t set_parent;
+    xset_t set_child;
 
     /*
     LOG_INFO("xset_custom_remove {} ({})", set->name, set->menu_label );
@@ -4014,9 +4014,9 @@ xset_custom_remove(XSet* set)
 }
 
 static void
-xset_custom_insert_after(XSet* target, XSet* set)
+xset_custom_insert_after(xset_t target, xset_t set)
 { // inserts single set 'set', no next
-    XSet* target_next;
+    xset_t target_next;
 
     if (!set)
     {
@@ -4061,7 +4061,7 @@ xset_custom_insert_after(XSet* target, XSet* set)
 }
 
 static bool
-xset_clipboard_in_set(XSet* set)
+xset_clipboard_in_set(xset_t set)
 { // look upward to see if clipboard is in set's tree
     if (!set_clipboard || set->lock)
         return false;
@@ -4070,19 +4070,19 @@ xset_clipboard_in_set(XSet* set)
 
     if (set->parent)
     {
-        XSet* set_parent = xset_get(set->parent);
+        xset_t set_parent = xset_get(set->parent);
         if (xset_clipboard_in_set(set_parent))
             return true;
     }
 
     if (set->prev)
     {
-        XSet* set_prev = xset_get(set->prev);
+        xset_t set_prev = xset_get(set->prev);
         while (set_prev)
         {
             if (set_prev->parent)
             {
-                XSet* set_prev_parent = xset_get(set_prev->parent);
+                xset_t set_prev_parent = xset_get(set_prev->parent);
                 if (xset_clipboard_in_set(set_prev_parent))
                     return true;
                 set_prev = nullptr;
@@ -4096,12 +4096,12 @@ xset_clipboard_in_set(XSet* set)
     return false;
 }
 
-XSet*
+xset_t
 xset_custom_new()
 {
     std::string setname = xset_custom_new_name();
 
-    XSet* set;
+    xset_t set;
     set = xset_get(setname);
     set->lock = false;
     set->keep_terminal = true;
@@ -4178,7 +4178,7 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
 }
 
 const std::string
-xset_get_keyname(XSet* set, int key_val, int key_mod)
+xset_get_keyname(xset_t set, int key_val, int key_mod)
 {
     int keyval;
     int keymod;
@@ -4229,8 +4229,8 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
     int* newkey = (int*)g_object_get_data(G_OBJECT(dlg), "newkey");
     int* newkeymod = (int*)g_object_get_data(G_OBJECT(dlg), "newkeymod");
     GtkWidget* btn = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "btn"));
-    XSet* set = XSET(g_object_get_data(G_OBJECT(dlg), "set"));
-    XSet* keyset = nullptr;
+    xset_t set = XSET(g_object_get_data(G_OBJECT(dlg), "set"));
+    xset_t keyset = nullptr;
     std::string keyname;
 
     unsigned int keymod = ptk_get_keymod(event->state);
@@ -4280,7 +4280,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
     if (set->shared_key)
         keyset = xset_get(set->shared_key);
 
-    for (XSet* set2: xsets)
+    for (xset_t set2: xsets)
     {
         if (set2 && set2 != set && set2->key > 0 && set2->key == event->keyval &&
             set2->keymod == keymod && set2 != keyset)
@@ -4289,7 +4289,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
             if (set2->desc && !strcmp(set2->desc, "@plugin@mirror@") && set2->shared_key)
             {
                 // set2 is plugin mirror
-                XSet* rset = xset_get(set2->shared_key);
+                xset_t rset = xset_get(set2->shared_key);
                 if (rset->menu_label)
                     name = clean_label(rset->menu_label, false, false);
                 else
@@ -4345,11 +4345,11 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
 }
 
 void
-xset_set_key(GtkWidget* parent, XSet* set)
+xset_set_key(GtkWidget* parent, xset_t set)
 {
     std::string name;
     std::string keymsg;
-    XSet* keyset;
+    xset_t keyset;
     unsigned int newkey = 0;
     unsigned int newkeymod = 0;
     GtkWidget* dlgparent = nullptr;
@@ -4419,7 +4419,7 @@ xset_set_key(GtkWidget* parent, XSet* set)
         if (response == GTK_RESPONSE_OK && (newkey || newkeymod))
         {
             // clear duplicate key assignments
-            for (XSet* set2: xsets)
+            for (xset_t set2: xsets)
             {
                 if (set2 && set2->key > 0 && set2->key == newkey && set2->keymod == newkeymod)
                 {
@@ -4447,12 +4447,12 @@ xset_set_key(GtkWidget* parent, XSet* set)
 }
 
 static void
-xset_design_job(GtkWidget* item, XSet* set)
+xset_design_job(GtkWidget* item, xset_t set)
 {
-    XSet* newset;
-    XSet* mset;
-    XSet* childset;
-    XSet* set_next;
+    xset_t newset;
+    xset_t mset;
+    xset_t childset;
+    xset_t set_next;
     std::string msg;
     int response;
     char* folder;
@@ -4890,7 +4890,7 @@ xset_design_job(GtkWidget* item, XSet* set)
             break;
         case XSetJob::IMPORT_FILE:
             // get file path
-            XSet* save;
+            xset_t save;
             save = xset_get(XSetName::PLUG_IFILE);
             if (save->s) //&& std::filesystem::is_directory(save->s)
                 folder = save->s;
@@ -5327,7 +5327,7 @@ xset_design_job(GtkWidget* item, XSet* set)
 }
 
 static bool
-xset_job_is_valid(XSet* set, XSetJob job)
+xset_job_is_valid(xset_t set, XSetJob job)
 {
     bool no_remove = false;
     bool no_paste = false;
@@ -5436,7 +5436,7 @@ xset_job_is_valid(XSet* set, XSetJob job)
 }
 
 static bool
-xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, XSet* set)
+xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, xset_t set)
 {
     XSetJob job = XSetJob::INVALID;
 
@@ -5550,7 +5550,7 @@ set_check_menu_item_block(GtkWidget* item)
 }
 
 static GtkWidget*
-xset_design_additem(GtkWidget* menu, const char* label, XSetJob job, XSet* set)
+xset_design_additem(GtkWidget* menu, const char* label, XSetJob job, xset_t set)
 {
     GtkWidget* item;
     item = gtk_menu_item_new_with_mnemonic(label);
@@ -5562,7 +5562,7 @@ xset_design_additem(GtkWidget* menu, const char* label, XSetJob job, XSet* set)
 }
 
 GtkWidget*
-xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned int button,
+xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, unsigned int button,
                       std::uint32_t time)
 {
     GtkWidget* newitem;
@@ -5572,8 +5572,8 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
     bool no_paste = false;
     // bool open_all = false;
 
-    // XSet* mset;
-    XSet* insert_set;
+    // xset_t mset;
+    xset_t insert_set;
 
     // book_insert is a bookmark set to be used for Paste, etc
     insert_set = book_insert ? book_insert : set;
@@ -5868,7 +5868,7 @@ xset_design_show_menu(GtkWidget* menu, XSet* set, XSet* book_insert, unsigned in
 }
 
 static bool
-xset_design_cb(GtkWidget* item, GdkEventButton* event, XSet* set)
+xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
 {
     XSetJob job = XSetJob::INVALID;
 
@@ -6009,7 +6009,7 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
 {
     (void)user_data;
     XSetJob job = XSetJob::INVALID;
-    XSet* set;
+    xset_t set;
 
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(widget));
     if (item)
@@ -6111,14 +6111,14 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
 }
 
 void
-xset_menu_cb(GtkWidget* item, XSet* set)
+xset_menu_cb(GtkWidget* item, xset_t set)
 {
     GtkWidget* parent;
     GFunc cb_func = nullptr;
     void* cb_data = nullptr;
     std::string title;
-    XSet* mset; // mirror set or set
-    XSet* rset; // real set
+    xset_t mset; // mirror set or set
+    xset_t rset; // real set
 
     if (item)
     {
@@ -6877,9 +6877,9 @@ xset_color_dialog(GtkWidget* parent, char* title, char* defcolor)
 }
 
 static void
-xset_builtin_tool_activate(XSetTool tool_type, XSet* set, GdkEventButton* event)
+xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventButton* event)
 {
-    XSet* set2;
+    xset_t set2;
     int p;
     char mode;
     PtkFileBrowser* file_browser = nullptr;
@@ -6987,13 +6987,13 @@ xset_get_builtin_toolitem_label(XSetTool tool_type)
     return builtin_tool_name[INT(tool_type)];
 }
 
-static XSet*
+static xset_t
 xset_new_builtin_toolitem(XSetTool tool_type)
 {
     if (tool_type < XSetTool::DEVICES || tool_type >= XSetTool::INVALID)
         return nullptr;
 
-    XSet* set = xset_custom_new();
+    xset_t set = xset_custom_new();
     set->tool = tool_type;
     set->task = false;
     set->task_err = false;
@@ -7004,7 +7004,7 @@ xset_new_builtin_toolitem(XSetTool tool_type)
 }
 
 static bool
-on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
+on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
 {
     XSetJob job = XSetJob::INVALID;
 
@@ -7042,7 +7042,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
                         {
                             if (set->child)
                             {
-                                XSet* set_child = xset_is(set->child);
+                                xset_t set_child = xset_is(set->child);
                                 // activate first item in custom submenu
                                 xset_menu_cb(nullptr, set_child);
                             }
@@ -7144,7 +7144,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
 }
 
 static bool
-on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
+on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
 {
     // LOG_INFO("on_tool_menu_button_press  {}   button = {}", set->menu_label, event->button);
     if (event->type != GDK_BUTTON_PRESS)
@@ -7170,7 +7170,7 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, XSet* set)
         if (set->tool == XSetTool::CUSTOM)
         {
             // show custom submenu
-            XSet* set_child;
+            xset_t set_child;
             if (!(set && !set->lock && set->child && set->menu_style == XSetMenu::SUBMENU &&
                   (set_child = xset_is(set->child))))
                 return true;
@@ -7207,7 +7207,7 @@ set_gtk3_widget_padding(GtkWidget* widget, int left_right, int top_bottom)
 
 static GtkWidget*
 xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,
-                  int icon_size, XSet* set, bool show_tooltips)
+                  int icon_size, xset_t set, bool show_tooltips)
 {
     if (!set)
         return nullptr;
@@ -7224,7 +7224,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     GtkWidget* image = nullptr;
     GtkWidget* item = nullptr;
     GtkWidget* btn;
-    XSet* set_next;
+    xset_t set_next;
     char* new_menu_label = nullptr;
     GdkPixbuf* pixbuf = nullptr;
     std::string str;
@@ -7303,7 +7303,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
 
     GtkWidget* ebox;
     GtkWidget* hbox;
-    XSet* set_child;
+    xset_t set_child;
     XSetCMD cmd_type;
 
     switch (menu_style)
@@ -7675,7 +7675,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
 
 void
 xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,
-                  XSet* set_parent, bool show_tooltips)
+                  xset_t set_parent, bool show_tooltips)
 {
     const std::array<XSetTool, 7> default_tools{XSetTool::BOOKMARKS,
                                                 XSetTool::TREE,
@@ -7685,8 +7685,8 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                                                 XSetTool::UP,
                                                 XSetTool::DEFAULT};
     int stop_b4;
-    XSet* set;
-    XSet* set_target;
+    xset_t set;
+    xset_t set_target;
 
     // LOG_INFO("xset_fill_toolbar {}", set_parent->name);
     if (!(file_browser && toolbar && set_parent))
@@ -7697,7 +7697,7 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
 
     GtkIconSize icon_size = gtk_toolbar_get_icon_size(GTK_TOOLBAR(toolbar));
 
-    XSet* set_child = nullptr;
+    xset_t set_child = nullptr;
     if (set_parent->child)
         set_child = xset_is(set_parent->child);
     if (!set_child)
@@ -7744,7 +7744,7 @@ void
 xset_set_window_icon(GtkWindow* win)
 {
     const char* name;
-    XSet* set = xset_get(XSetName::MAIN_ICON);
+    xset_t set = xset_get(XSetName::MAIN_ICON);
     if (set->icon)
         name = set->icon;
     else if (geteuid() == 0)
@@ -7774,7 +7774,7 @@ xset_set_window_icon(GtkWindow* win)
 static void
 xset_defaults()
 {
-    XSet* set;
+    xset_t set;
 
     // set_last must be set (to anything)
     set_last = xset_get(XSetName::SEPARATOR);
@@ -9398,7 +9398,7 @@ xset_defaults()
     set->b = XSetB::XSET_B_TRUE;
 
     // mark all labels and icons as default
-    for (XSet* set2: xsets)
+    for (xset_t set2: xsets)
     {
         if (set2->lock)
         {
@@ -9413,14 +9413,14 @@ xset_defaults()
 static void
 def_key(XSetName name, unsigned int key, unsigned int keymod)
 {
-    XSet* set = xset_get(name);
+    xset_t set = xset_get(name);
 
     // key already set or unset?
     if (set->key != 0 || key == 0)
         return;
 
     // key combo already in use?
-    for (XSet* set2: keysets)
+    for (xset_t set2: keysets)
     {
         if (set2->key == key && set2->keymod == keymod)
             return;
@@ -9433,7 +9433,7 @@ static void
 xset_default_keys()
 {
     // read all currently set or unset keys
-    for (XSet* set: xsets)
+    for (xset_t set: xsets)
     {
         if (set->key)
             keysets.push_back(set);
