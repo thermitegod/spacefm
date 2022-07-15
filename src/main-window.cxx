@@ -826,7 +826,7 @@ focus_panel(GtkMenuItem* item, void* mw, int p)
             {
                 if (panel < 1)
                     panel = 4;
-                if (xset_get_b_panel(panel, "show"))
+                if (xset_get_b_panel(panel, XSetPanel::SHOW))
                     break;
                 panel--;
             } while (panel != main_window->curpanel - 1);
@@ -838,7 +838,7 @@ focus_panel(GtkMenuItem* item, void* mw, int p)
             {
                 if (panel > 4)
                     panel = 1;
-                if (xset_get_b_panel(panel, "show"))
+                if (xset_get_b_panel(panel, XSetPanel::SHOW))
                     break;
                 panel++;
             } while (panel != main_window->curpanel + 1);
@@ -851,7 +851,7 @@ focus_panel(GtkMenuItem* item, void* mw, int p)
             {
                 if (panel > 4)
                     panel = 1;
-                if (xset_get_b_panel(panel, "show"))
+                if (xset_get_b_panel(panel, XSetPanel::SHOW))
                     break;
                 panel++;
             } while (panel != hidepanel);
@@ -880,7 +880,7 @@ focus_panel(GtkMenuItem* item, void* mw, int p)
         }
         else if (panel_num != -3)
         {
-            xset_set_b_panel(panel, "show", true);
+            xset_set_b_panel(panel, XSetPanel::SHOW, true);
             show_panels_all_windows(nullptr, main_window);
             gtk_widget_grab_focus(GTK_WIDGET(main_window->panel[panel - 1]));
             main_window->curpanel = panel;
@@ -895,7 +895,7 @@ focus_panel(GtkMenuItem* item, void* mw, int p)
         }
         if (panel_num == -3)
         {
-            xset_set_b_panel(hidepanel, "show", false);
+            xset_set_b_panel(hidepanel, XSetPanel::SHOW, false);
             show_panels_all_windows(nullptr, main_window);
         }
     }
@@ -967,13 +967,13 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
     // all panels hidden?
     for (panel_t p: PANELS)
     {
-        if (xset_get_b_panel(p, "show"))
+        if (xset_get_b_panel(p, XSetPanel::SHOW))
             break;
     }
 
     for (panel_t p: PANELS)
     {
-        show[p] = xset_get_b_panel(p, "show");
+        show[p] = xset_get_b_panel(p, XSetPanel::SHOW);
     }
 
     bool horiz;
@@ -1025,22 +1025,52 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                 // printf ("no config for %d, %d\n", p, main_window->panel_context[p-1] );
                 xset_t set_old;
                 char mode = main_window->panel_context[p - 1];
-                xset_set_b_panel_mode(p, "show_toolbox", mode, xset_get_b_panel(p, "show_toolbox"));
-                xset_set_b_panel_mode(p, "show_devmon", mode, xset_get_b_panel(p, "show_devmon"));
+                xset_set_b_panel_mode(p,
+                                      "show_toolbox",
+                                      mode,
+                                      xset_get_b_panel(p, XSetPanel::SHOW_TOOLBOX));
+                xset_set_b_panel_mode(p,
+                                      "show_devmon",
+                                      mode,
+                                      xset_get_b_panel(p, XSetPanel::SHOW_DEVMON));
                 if (xset_is("show_dirtree"))
                     xset_set_b_panel_mode(p,
                                           "show_dirtree",
                                           mode,
-                                          xset_get_b_panel(p, "show_dirtree"));
-                xset_set_b_panel_mode(p, "show_book", mode, xset_get_b_panel(p, "show_book"));
-                xset_set_b_panel_mode(p, "show_sidebar", mode, xset_get_b_panel(p, "show_sidebar"));
-                xset_set_b_panel_mode(p, "detcol_name", mode, xset_get_b_panel(p, "detcol_name"));
-                xset_set_b_panel_mode(p, "detcol_size", mode, xset_get_b_panel(p, "detcol_size"));
-                xset_set_b_panel_mode(p, "detcol_type", mode, xset_get_b_panel(p, "detcol_type"));
-                xset_set_b_panel_mode(p, "detcol_perm", mode, xset_get_b_panel(p, "detcol_perm"));
-                xset_set_b_panel_mode(p, "detcol_owner", mode, xset_get_b_panel(p, "detcol_owner"));
-                xset_set_b_panel_mode(p, "detcol_date", mode, xset_get_b_panel(p, "detcol_date"));
-                set_old = xset_get_panel(p, "slider_positions");
+                                          xset_get_b_panel(p, XSetPanel::SHOW_DIRTREE));
+                xset_set_b_panel_mode(p,
+                                      "show_book",
+                                      mode,
+                                      xset_get_b_panel(p, XSetPanel::SHOW_BOOK));
+                xset_set_b_panel_mode(p,
+                                      "show_sidebar",
+                                      mode,
+                                      xset_get_b_panel(p, XSetPanel::SHOW_SIDEBAR));
+                xset_set_b_panel_mode(p,
+                                      "detcol_name",
+                                      mode,
+                                      xset_get_b_panel(p, XSetPanel::DETCOL_NAME));
+                xset_set_b_panel_mode(p,
+                                      "detcol_size",
+                                      mode,
+                                      xset_get_b_panel(p, XSetPanel::DETCOL_SIZE));
+                xset_set_b_panel_mode(p,
+                                      "detcol_type",
+                                      mode,
+                                      xset_get_b_panel(p, XSetPanel::DETCOL_TYPE));
+                xset_set_b_panel_mode(p,
+                                      "detcol_perm",
+                                      mode,
+                                      xset_get_b_panel(p, XSetPanel::DETCOL_PERM));
+                xset_set_b_panel_mode(p,
+                                      "detcol_owner",
+                                      mode,
+                                      xset_get_b_panel(p, XSetPanel::DETCOL_OWNER));
+                xset_set_b_panel_mode(p,
+                                      "detcol_date",
+                                      mode,
+                                      xset_get_b_panel(p, XSetPanel::DETCOL_DATE));
+                set_old = xset_get_panel(p, XSetPanel::SLIDER_POSITIONS);
                 set = xset_get_panel_mode(p, "slider_positions", mode);
                 set->x = ztd::strdup(set_old->x ? set_old->x : "0");
                 set->y = ztd::strdup(set_old->y ? set_old->y : "0");
@@ -1059,7 +1089,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                 main_window->curpanel = p;
                 // load saved tabs
                 tab_added = false;
-                set = xset_get_panel(p, "show");
+                set = xset_get_panel(p, XSetPanel::SHOW);
                 if ((set->s && app_settings.get_load_saved_tabs()) || set->ob1)
                 {
                     std::string tabs_add;
@@ -1219,14 +1249,14 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
         gtk_widget_hide(GTK_WIDGET(main_window->hpane_bottom));
 
     // current panel hidden?
-    if (!xset_get_b_panel(main_window->curpanel, "show"))
+    if (!xset_get_b_panel(main_window->curpanel, XSetPanel::SHOW))
     {
         panel_t p = main_window->curpanel + 1;
         if (p > 4)
             p = 1;
         while (p != main_window->curpanel)
         {
-            if (xset_get_b_panel(p, "show"))
+            if (xset_get_b_panel(p, XSetPanel::SHOW))
             {
                 main_window->curpanel = p;
                 main_window->notebook = main_window->panel[p - 1];
@@ -1269,7 +1299,7 @@ on_toggle_panelbar(GtkWidget* widget, FMMainWindow* main_window)
         if (widget == main_window->panel_btn[i])
         {
             xset_set_b_panel(i + 1,
-                             "show",
+                             XSetPanel::SHOW,
                              gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(widget)));
             break;
         }
@@ -1352,12 +1382,12 @@ rebuild_menus(FMMainWindow* main_window)
     int vis_count = 0;
     for (panel_t p: PANELS)
     {
-        if (xset_get_b_panel(p, "show"))
+        if (xset_get_b_panel(p, XSetPanel::SHOW))
             vis_count++;
     }
     if (!vis_count)
     {
-        xset_set_b_panel(1, "show", true);
+        xset_set_b_panel(1, XSetPanel::SHOW, true);
         vis_count++;
     }
     set = xset_set_cb(XSetName::PANEL1_SHOW, (GFunc)show_panels_all_windows, main_window);
@@ -1546,7 +1576,7 @@ fm_main_window_init(FMMainWindow* main_window)
         main_window->panel_btn[i] = GTK_WIDGET(gtk_toggle_tool_button_new());
         icon_name = fmt::format("Show Panel {}", i + 1);
         gtk_tool_button_set_label(GTK_TOOL_BUTTON(main_window->panel_btn[i]), icon_name.c_str());
-        set = xset_get_panel(i + 1, "icon_status");
+        set = xset_get_panel(i + 1, XSetPanel::ICON_STATUS);
         if (set->icon && set->icon[0] != '\0')
             icon_name = set->icon;
         else
@@ -2068,7 +2098,7 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, int panel_num, const cha
     // show panel
     if (!gtk_widget_get_visible(main_window->panel[panel_x - 1]))
     {
-        xset_set_b_panel(panel_x, "show", true);
+        xset_set_b_panel(panel_x, XSetPanel::SHOW, true);
         show_panels_all_windows(nullptr, main_window);
     }
 
@@ -2393,7 +2423,7 @@ fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
     gtk_event_box_set_visible_window(GTK_EVENT_BOX(evt_box), false);
 
     tab_label = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    xset_t set = xset_get_panel(file_browser->mypanel, "icon_tab");
+    xset_t set = xset_get_panel(file_browser->mypanel, XSetPanel::ICON_TAB);
     if (set->icon)
     {
         pixbuf = vfs_load_icon(set->icon, 16);
@@ -2532,12 +2562,14 @@ fm_main_window_add_new_tab(FMMainWindow* main_window, const char* folder_path)
         file_browser,
         app_settings.get_show_thumbnail() ? app_settings.get_max_thumb_size() : 0);
 
-    ptk_file_browser_set_sort_order(
-        file_browser,
-        (PtkFBSortOrder)xset_get_int_panel(file_browser->mypanel, "list_detailed", XSetVar::X));
-    ptk_file_browser_set_sort_type(
-        file_browser,
-        (GtkSortType)xset_get_int_panel(file_browser->mypanel, "list_detailed", XSetVar::Y));
+    ptk_file_browser_set_sort_order(file_browser,
+                                    (PtkFBSortOrder)xset_get_int_panel(file_browser->mypanel,
+                                                                       XSetPanel::LIST_DETAILED,
+                                                                       XSetVar::X));
+    ptk_file_browser_set_sort_type(file_browser,
+                                   (GtkSortType)xset_get_int_panel(file_browser->mypanel,
+                                                                   XSetPanel::LIST_DETAILED,
+                                                                   XSetVar::Y));
 
     gtk_widget_show(GTK_WIDGET(file_browser));
 
@@ -3874,7 +3906,7 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
     int panel_count = 0;
     for (panel_t p: PANELS)
     {
-        if (!xset_get_b_panel(p, "show"))
+        if (!xset_get_b_panel(p, XSetPanel::SHOW))
             continue;
         i = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
         if (i != -1)
@@ -4019,7 +4051,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
     {
         PtkFileBrowser* a_browser;
 
-        if (!xset_get_b_panel(p, "show"))
+        if (!xset_get_b_panel(p, XSetPanel::SHOW))
             continue;
         int current_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
         if (current_page != -1)
@@ -5744,7 +5776,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         reply = fmt::format("invalid panel {}", panel);
         return 2;
     }
-    if (!xset_get_b_panel(panel, "show") ||
+    if (!xset_get_b_panel(panel, XSetPanel::SHOW) ||
         gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[panel - 1])) == -1)
     {
         reply = fmt::format("panel {} is not visible", panel);
@@ -5932,33 +5964,40 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (ztd::endswith(socket_property, "_visible"))
         {
             bool use_mode = false;
+            XSetPanel xset_panel_var;
             if (ztd::startswith(socket_property, "devices_"))
             {
+                xset_panel_var = XSetPanel::SHOW_DEVMON;
                 str = "show_devmon";
                 use_mode = true;
             }
             else if (ztd::startswith(socket_property, "bookmarks_"))
             {
+                xset_panel_var = XSetPanel::SHOW_BOOK;
                 str = "show_book";
                 use_mode = true;
             }
             else if (ztd::startswith(socket_property, "dirtree_"))
             {
+                xset_panel_var = XSetPanel::SHOW_DIRTREE;
                 str = "show_dirtree";
                 use_mode = true;
             }
             else if (ztd::startswith(socket_property, "toolbar_"))
             {
+                xset_panel_var = XSetPanel::SHOW_TOOLBOX;
                 str = "show_toolbox";
                 use_mode = true;
             }
             else if (ztd::startswith(socket_property, "sidetoolbar_"))
             {
+                xset_panel_var = XSetPanel::SHOW_SIDEBAR;
                 str = "show_sidebar";
                 use_mode = true;
             }
             else if (ztd::startswith(socket_property, "hidden_files_"))
             {
+                xset_panel_var = XSetPanel::SHOW_HIDDEN;
                 str = "show_hidden";
             }
             else if (ztd::startswith(socket_property, "panel"))
@@ -5969,7 +6008,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                     reply = fmt::format("invalid property {}", argv[i]);
                     return 2;
                 }
-                xset_set_b_panel(j, "show", get_bool(argv[i + 1]));
+                xset_set_b_panel(j, XSetPanel::SHOW, get_bool(argv[i + 1]));
                 show_panels_all_windows(nullptr, main_window);
                 return 0;
             }
@@ -5979,12 +6018,16 @@ main_window_socket_command(char* argv[], std::string& reply)
                 return 1;
             }
             if (use_mode)
+            {
                 xset_set_b_panel_mode(panel,
                                       str,
                                       main_window->panel_context[panel - 1],
                                       get_bool(argv[i + 1]));
+            }
             else
-                xset_set_b_panel(panel, str, get_bool(argv[i + 1]));
+            {
+                xset_set_b_panel(panel, xset_panel_var, get_bool(argv[i + 1]));
+            }
             update_views_all_windows(nullptr, file_browser);
         }
         else if (ztd::same(socket_property, "panel_hslider_top") ||
@@ -6364,33 +6407,40 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (ztd::endswith(socket_property, "_visible"))
         {
             bool use_mode = false;
+            XSetPanel xset_panel_var;
             if (ztd::startswith(socket_property, "devices_"))
             {
+                xset_panel_var = XSetPanel::SHOW_DEVMON;
                 str = "show_devmon";
                 use_mode = true;
             }
             else if (ztd::startswith(socket_property, "bookmarks_"))
             {
+                xset_panel_var = XSetPanel::SHOW_BOOK;
                 str = "show_book";
                 use_mode = true;
             }
             else if (ztd::startswith(socket_property, "dirtree_"))
             {
+                xset_panel_var = XSetPanel::SHOW_DIRTREE;
                 str = "show_dirtree";
                 use_mode = true;
             }
             else if (ztd::startswith(socket_property, "toolbar_"))
             {
+                xset_panel_var = XSetPanel::SHOW_TOOLBOX;
                 str = "show_toolbox";
                 use_mode = true;
             }
             else if (ztd::startswith(socket_property, "sidetoolbar_"))
             {
+                xset_panel_var = XSetPanel::SHOW_SIDEBAR;
                 str = "show_sidebar";
                 use_mode = true;
             }
             else if (ztd::startswith(socket_property, "hidden_files_"))
             {
+                xset_panel_var = XSetPanel::SHOW_HIDDEN;
                 str = "show_hidden";
             }
             else if (ztd::startswith(socket_property, "panel"))
@@ -6401,7 +6451,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                     reply = fmt::format("invalid property {}", argv[i]);
                     return 2;
                 }
-                reply = fmt::format("{}", xset_get_b_panel(j, "show"));
+                reply = fmt::format("{}", xset_get_b_panel(j, XSetPanel::SHOW));
                 return 0;
             }
             if (str.empty())
@@ -6410,11 +6460,15 @@ main_window_socket_command(char* argv[], std::string& reply)
                 return 1;
             }
             if (use_mode)
+            {
                 reply = fmt::format(
                     "{}",
                     !!xset_get_b_panel_mode(panel, str, main_window->panel_context[panel - 1]));
+            }
             else
-                reply = fmt::format("{}", !!xset_get_b_panel(panel, str));
+            {
+                reply = fmt::format("{}", !!xset_get_b_panel(panel, xset_panel_var));
+            }
         }
         else if (ztd::same(socket_property, "panel_hslider_top") ||
                  ztd::same(socket_property, "panel_hslider_bottom") ||
@@ -6503,26 +6557,29 @@ main_window_socket_command(char* argv[], std::string& reply)
             else if (ztd::same(socket_property, "sort_natural"))
 #endif
             else if (ztd::same(socket_property, "sort_alphanum"))
-                reply = fmt::format("{}",
-                                    xset_get_b_panel(file_browser->mypanel, "sort_extra") ? 1 : 0);
+                reply = fmt::format(
+                    "{}",
+                    xset_get_b_panel(file_browser->mypanel, XSetPanel::SORT_EXTRA) ? 1 : 0);
             else if (ztd::same(socket_property, "sort_case"))
-                reply = fmt::format("{}",
-                                    xset_get_b_panel(file_browser->mypanel, "sort_extra") &&
-                                            xset_get_int_panel(file_browser->mypanel,
-                                                               "sort_extra",
-                                                               XSetVar::X) == XSetB::XSET_B_TRUE
-                                        ? 1
-                                        : 0);
+                reply =
+                    fmt::format("{}",
+                                xset_get_b_panel(file_browser->mypanel, XSetPanel::SORT_EXTRA) &&
+                                        xset_get_int_panel(file_browser->mypanel,
+                                                           XSetPanel::SORT_EXTRA,
+                                                           XSetVar::X) == XSetB::XSET_B_TRUE
+                                    ? 1
+                                    : 0);
             else if (ztd::same(socket_property, "sort_hidden_first"))
                 reply = fmt::format("{}",
                                     xset_get_int_panel(file_browser->mypanel,
-                                                       "sort_extra",
+                                                       XSetPanel::SORT_EXTRA,
                                                        XSetVar::Z) == XSetB::XSET_B_TRUE
                                         ? 1
                                         : 0);
             else if (ztd::same(socket_property, "sort_first"))
             {
-                switch (xset_get_int_panel(file_browser->mypanel, "sort_extra", XSetVar::Y))
+                switch (
+                    xset_get_int_panel(file_browser->mypanel, XSetPanel::SORT_EXTRA, XSetVar::Y))
                 {
                     case 0:
                         str = "mixed";

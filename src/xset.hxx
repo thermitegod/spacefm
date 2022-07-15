@@ -556,6 +556,7 @@ enum class XSetName
     PANEL1_SHOW_DIRTREE,
     PANEL1_SHOW_BOOK,
     PANEL1_SHOW_SIDEBAR,
+    PANEL1_SLIDER_POSITIONS,
     PANEL1_LIST_DETAILED,
     PANEL1_LIST_ICONS,
     PANEL1_LIST_COMPACT,
@@ -581,6 +582,7 @@ enum class XSetName
     PANEL2_SHOW_DIRTREE,
     PANEL2_SHOW_BOOK,
     PANEL2_SHOW_SIDEBAR,
+    PANEL2_SLIDER_POSITIONS,
     PANEL2_LIST_DETAILED,
     PANEL2_LIST_ICONS,
     PANEL2_LIST_COMPACT,
@@ -606,6 +608,7 @@ enum class XSetName
     PANEL3_SHOW_DIRTREE,
     PANEL3_SHOW_BOOK,
     PANEL3_SHOW_SIDEBAR,
+    PANEL3_SLIDER_POSITIONS,
     PANEL3_LIST_DETAILED,
     PANEL3_LIST_ICONS,
     PANEL3_LIST_COMPACT,
@@ -631,6 +634,7 @@ enum class XSetName
     PANEL4_SHOW_DIRTREE,
     PANEL4_SHOW_BOOK,
     PANEL4_SHOW_SIDEBAR,
+    PANEL4_SLIDER_POSITIONS,
     PANEL4_LIST_DETAILED,
     PANEL4_LIST_ICONS,
     PANEL4_LIST_COMPACT,
@@ -713,6 +717,35 @@ enum class XSetName
     TOOL_S,
 };
 
+enum class XSetPanel
+{
+    SHOW,
+    SHOW_TOOLBOX,
+    SHOW_DEVMON,
+    SHOW_DIRTREE,
+    SHOW_BOOK,
+    SHOW_SIDEBAR,
+    SLIDER_POSITIONS,
+    LIST_DETAILED,
+    LIST_ICONS,
+    LIST_COMPACT,
+    LIST_LARGE,
+    SHOW_HIDDEN,
+    ICON_TAB,
+    ICON_STATUS,
+    DETCOL_NAME,
+    DETCOL_SIZE,
+    DETCOL_TYPE,
+    DETCOL_PERM,
+    DETCOL_OWNER,
+    DETCOL_DATE,
+    SORT_EXTRA,
+    BOOK_FOL,
+    TOOL_L,
+    TOOL_R,
+    TOOL_S,
+};
+
 #ifdef XSET_MAP_TEST
 bool is_in_xset_map_test(XSetName name);
 bool is_in_xset_map_test(const std::string& name);
@@ -720,3 +753,6 @@ bool is_in_xset_map_test(const std::string& name);
 
 XSetName translate_xset_name_to(const std::string& name);
 const std::string& translate_xset_name_from(XSetName name);
+
+XSetName xset_get_xsetname_from_panel(panel_t panel, XSetPanel panel_var);
+const std::string xset_get_name_from_panel(panel_t panel, XSetPanel name);

@@ -535,6 +535,7 @@ const std::map<XSetName, const std::string> xset_name_map{
     {XSetName::PANEL1_SHOW_DIRTREE, "panel1_show_dirtree"},
     {XSetName::PANEL1_SHOW_BOOK, "panel1_show_book"},
     {XSetName::PANEL1_SHOW_SIDEBAR, "panel1_show_sidebar"},
+    {XSetName::PANEL1_SLIDER_POSITIONS, "panel1_slider_positions"},
     {XSetName::PANEL1_LIST_DETAILED, "panel1_list_detailed"},
     {XSetName::PANEL1_LIST_ICONS, "panel1_list_icons"},
     {XSetName::PANEL1_LIST_COMPACT, "panel1_list_compact"},
@@ -560,6 +561,7 @@ const std::map<XSetName, const std::string> xset_name_map{
     {XSetName::PANEL2_SHOW_DIRTREE, "panel2_show_dirtree"},
     {XSetName::PANEL2_SHOW_BOOK, "panel2_show_book"},
     {XSetName::PANEL2_SHOW_SIDEBAR, "panel2_show_sidebar"},
+    {XSetName::PANEL2_SLIDER_POSITIONS, "panel2_slider_positions"},
     {XSetName::PANEL2_LIST_DETAILED, "panel2_list_detailed"},
     {XSetName::PANEL2_LIST_ICONS, "panel2_list_icons"},
     {XSetName::PANEL2_LIST_COMPACT, "panel2_list_compact"},
@@ -585,6 +587,7 @@ const std::map<XSetName, const std::string> xset_name_map{
     {XSetName::PANEL3_SHOW_DIRTREE, "panel3_show_dirtree"},
     {XSetName::PANEL3_SHOW_BOOK, "panel3_show_book"},
     {XSetName::PANEL3_SHOW_SIDEBAR, "panel3_show_sidebar"},
+    {XSetName::PANEL3_SLIDER_POSITIONS, "panel3_slider_positions"},
     {XSetName::PANEL3_LIST_DETAILED, "panel3_list_detailed"},
     {XSetName::PANEL3_LIST_ICONS, "panel3_list_icons"},
     {XSetName::PANEL3_LIST_COMPACT, "panel3_list_compact"},
@@ -610,6 +613,7 @@ const std::map<XSetName, const std::string> xset_name_map{
     {XSetName::PANEL4_SHOW_DIRTREE, "panel4_show_dirtree"},
     {XSetName::PANEL4_SHOW_BOOK, "panel4_show_book"},
     {XSetName::PANEL4_SHOW_SIDEBAR, "panel4_show_sidebar"},
+    {XSetName::PANEL4_SLIDER_POSITIONS, "panel4_slider_positions"},
     {XSetName::PANEL4_LIST_DETAILED, "panel4_list_detailed"},
     {XSetName::PANEL4_LIST_ICONS, "panel4_list_icons"},
     {XSetName::PANEL4_LIST_COMPACT, "panel4_list_compact"},
@@ -691,6 +695,122 @@ const std::map<XSetName, const std::string> xset_name_map{
     {XSetName::TOOL_S, "tool_s"},
 };
 
+const std::map<XSetPanel, XSetName> xset_panel1_map{
+    // panel1
+    {XSetPanel::SHOW,             XSetName::PANEL1_SHOW},
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL1_SHOW_TOOLBOX},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL1_SHOW_DEVMON},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL1_SHOW_DIRTREE},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL1_SHOW_BOOK},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL1_SHOW_SIDEBAR},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL1_SLIDER_POSITIONS},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL1_LIST_DETAILED},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL1_LIST_ICONS},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL1_LIST_COMPACT},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL1_LIST_LARGE},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL1_SHOW_HIDDEN},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL1_ICON_TAB},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL1_ICON_STATUS},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL1_DETCOL_NAME},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL1_DETCOL_SIZE},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL1_DETCOL_TYPE},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL1_DETCOL_PERM},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL1_DETCOL_OWNER},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL1_DETCOL_DATE},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL1_SORT_EXTRA},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL1_BOOK_FOL},
+    {XSetPanel::TOOL_L,           XSetName::PANEL1_TOOL_L},
+    {XSetPanel::TOOL_R,           XSetName::PANEL1_TOOL_R},
+    {XSetPanel::TOOL_S,           XSetName::PANEL1_TOOL_S},
+};
+
+const std::map<XSetPanel, XSetName> xset_panel2_map{
+    // panel2
+    {XSetPanel::SHOW,             XSetName::PANEL2_SHOW},
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL2_SHOW_TOOLBOX},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL2_SHOW_DEVMON},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL2_SHOW_DIRTREE},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL2_SHOW_BOOK},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL2_SHOW_SIDEBAR},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL2_SLIDER_POSITIONS},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL2_LIST_DETAILED},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL2_LIST_ICONS},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL2_LIST_COMPACT},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL2_LIST_LARGE},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL2_SHOW_HIDDEN},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL2_ICON_TAB},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL2_ICON_STATUS},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL2_DETCOL_NAME},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL2_DETCOL_SIZE},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL2_DETCOL_TYPE},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL2_DETCOL_PERM},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL2_DETCOL_OWNER},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL2_DETCOL_DATE},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL2_SORT_EXTRA},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL2_BOOK_FOL},
+    {XSetPanel::TOOL_L,           XSetName::PANEL2_TOOL_L},
+    {XSetPanel::TOOL_R,           XSetName::PANEL2_TOOL_R},
+    {XSetPanel::TOOL_S,           XSetName::PANEL2_TOOL_S},
+};
+
+const std::map<XSetPanel, XSetName> xset_panel3_map{
+    // panel3
+    {XSetPanel::SHOW,             XSetName::PANEL3_SHOW},
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL3_SHOW_TOOLBOX},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL3_SHOW_DEVMON},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL3_SHOW_DIRTREE},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL3_SHOW_BOOK},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL3_SHOW_SIDEBAR},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL3_SLIDER_POSITIONS},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL3_LIST_DETAILED},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL3_LIST_ICONS},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL3_LIST_COMPACT},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL3_LIST_LARGE},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL3_SHOW_HIDDEN},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL3_ICON_TAB},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL3_ICON_STATUS},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL3_DETCOL_NAME},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL3_DETCOL_SIZE},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL3_DETCOL_TYPE},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL3_DETCOL_PERM},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL3_DETCOL_OWNER},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL3_DETCOL_DATE},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL3_SORT_EXTRA},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL3_BOOK_FOL},
+    {XSetPanel::TOOL_L,           XSetName::PANEL3_TOOL_L},
+    {XSetPanel::TOOL_R,           XSetName::PANEL3_TOOL_R},
+    {XSetPanel::TOOL_S,           XSetName::PANEL3_TOOL_S},
+};
+
+const std::map<XSetPanel, XSetName> xset_panel4_map{
+    // panel4
+    {XSetPanel::SHOW,             XSetName::PANEL4_SHOW},
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL4_SHOW_TOOLBOX},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL4_SHOW_DEVMON},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL4_SHOW_DIRTREE},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL4_SHOW_BOOK},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL4_SHOW_SIDEBAR},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL4_SLIDER_POSITIONS},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL4_LIST_DETAILED},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL4_LIST_ICONS},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL4_LIST_COMPACT},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL4_LIST_LARGE},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL4_SHOW_HIDDEN},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL4_ICON_TAB},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL4_ICON_STATUS},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL4_DETCOL_NAME},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL4_DETCOL_SIZE},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL4_DETCOL_TYPE},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL4_DETCOL_PERM},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL4_DETCOL_OWNER},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL4_DETCOL_DATE},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL4_SORT_EXTRA},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL4_BOOK_FOL},
+    {XSetPanel::TOOL_L,           XSetName::PANEL4_TOOL_L},
+    {XSetPanel::TOOL_R,           XSetName::PANEL4_TOOL_R},
+    {XSetPanel::TOOL_S,           XSetName::PANEL4_TOOL_S},
+};
+
 // clang-format on
 
 #ifdef XSET_MAP_TEST
@@ -743,4 +863,29 @@ translate_xset_name_from(XSetName name)
         std::string msg = fmt::format("XSetName:: Not Implemented: {}", INT(name));
         throw InvalidXSetName(msg);
     }
+}
+
+XSetName
+xset_get_xsetname_from_panel(panel_t panel, XSetPanel name)
+{
+    switch (panel)
+    {
+        case 1:
+            return xset_panel1_map.at(name);
+        case 2:
+            return xset_panel2_map.at(name);
+        case 3:
+            return xset_panel3_map.at(name);
+        case 4:
+            return xset_panel4_map.at(name);
+        default:
+            // LOG_WARN("Panel out of range, using panel 1");
+            return xset_panel1_map.at(name);
+    }
+}
+
+const std::string
+xset_get_name_from_panel(panel_t panel, XSetPanel name)
+{
+    return xset_name_map.at(xset_get_xsetname_from_panel(panel, name));
 }

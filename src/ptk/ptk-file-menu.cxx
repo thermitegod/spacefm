@@ -130,7 +130,7 @@ on_popup_list_large(GtkMenuItem* menuitem, PtkFileBrowser* browser)
     FMMainWindow* main_window = FM_MAIN_WINDOW(browser->main_window);
     char mode = main_window->panel_context[p - 1];
 
-    xset_set_b_panel_mode(p, "list_large", mode, xset_get_b_panel(p, "list_large"));
+    xset_set_b_panel_mode(p, "list_large", mode, xset_get_b_panel(p, XSetPanel::LIST_LARGE));
     update_views_all_windows(nullptr, browser);
 }
 
@@ -140,16 +140,17 @@ on_popup_list_detailed(GtkMenuItem* menuitem, PtkFileBrowser* browser)
     (void)menuitem;
     int p = browser->mypanel;
 
-    if (xset_get_b_panel(p, "list_detailed"))
+    if (xset_get_b_panel(p, XSetPanel::LIST_DETAILED))
     {
         // setting b to XSetB::XSET_B_UNSET does not work here
-        xset_set_b_panel(p, "list_icons", false);
-        xset_set_b_panel(p, "list_compact", false);
+        xset_set_b_panel(p, XSetPanel::LIST_ICONS, false);
+        xset_set_b_panel(p, XSetPanel::LIST_COMPACT, false);
     }
     else
     {
-        if (!xset_get_b_panel(p, "list_icons") && !xset_get_b_panel(p, "list_compact"))
-            xset_set_b_panel(p, "list_icons", true);
+        if (!xset_get_b_panel(p, XSetPanel::LIST_ICONS) &&
+            !xset_get_b_panel(p, XSetPanel::LIST_COMPACT))
+            xset_set_b_panel(p, XSetPanel::LIST_ICONS, true);
     }
     update_views_all_windows(nullptr, browser);
 }
@@ -160,16 +161,17 @@ on_popup_list_icons(GtkMenuItem* menuitem, PtkFileBrowser* browser)
     (void)menuitem;
     int p = browser->mypanel;
 
-    if (xset_get_b_panel(p, "list_icons"))
+    if (xset_get_b_panel(p, XSetPanel::LIST_ICONS))
     {
         // setting b to XSetB::XSET_B_UNSET does not work here
-        xset_set_b_panel(p, "list_detailed", false);
-        xset_set_b_panel(p, "list_compact", false);
+        xset_set_b_panel(p, XSetPanel::LIST_DETAILED, false);
+        xset_set_b_panel(p, XSetPanel::LIST_COMPACT, false);
     }
     else
     {
-        if (!xset_get_b_panel(p, "list_detailed") && !xset_get_b_panel(p, "list_compact"))
-            xset_set_b_panel(p, "list_detailed", true);
+        if (!xset_get_b_panel(p, XSetPanel::LIST_DETAILED) &&
+            !xset_get_b_panel(p, XSetPanel::LIST_COMPACT))
+            xset_set_b_panel(p, XSetPanel::LIST_DETAILED, true);
     }
     update_views_all_windows(nullptr, browser);
 }
@@ -180,16 +182,17 @@ on_popup_list_compact(GtkMenuItem* menuitem, PtkFileBrowser* browser)
     (void)menuitem;
     int p = browser->mypanel;
 
-    if (xset_get_b_panel(p, "list_compact"))
+    if (xset_get_b_panel(p, XSetPanel::LIST_COMPACT))
     {
         // setting b to XSetB::XSET_B_UNSET does not work here
-        xset_set_b_panel(p, "list_detailed", false);
-        xset_set_b_panel(p, "list_icons", false);
+        xset_set_b_panel(p, XSetPanel::LIST_DETAILED, false);
+        xset_set_b_panel(p, XSetPanel::LIST_ICONS, false);
     }
     else
     {
-        if (!xset_get_b_panel(p, "list_icons") && !xset_get_b_panel(p, "list_detailed"))
-            xset_set_b_panel(p, "list_detailed", true);
+        if (!xset_get_b_panel(p, XSetPanel::LIST_ICONS) &&
+            !xset_get_b_panel(p, XSetPanel::LIST_DETAILED))
+            xset_set_b_panel(p, XSetPanel::LIST_DETAILED, true);
     }
     update_views_all_windows(nullptr, browser);
 }
@@ -199,8 +202,9 @@ on_popup_show_hidden(GtkMenuItem* menuitem, PtkFileBrowser* browser)
 {
     (void)menuitem;
     if (browser)
-        ptk_file_browser_show_hidden_files(browser,
-                                           xset_get_b_panel(browser->mypanel, "show_hidden"));
+        ptk_file_browser_show_hidden_files(
+            browser,
+            xset_get_b_panel(browser->mypanel, XSetPanel::SHOW_HIDDEN));
 }
 
 static void
@@ -296,13 +300,16 @@ on_popup_sortby(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, int order)
             v = GTK_SORT_ASCENDING;
         else
             v = GTK_SORT_DESCENDING;
-        xset_set_panel(file_browser->mypanel, "list_detailed", XSetVar::Y, std::to_string(v));
+        xset_set_panel(file_browser->mypanel,
+                       XSetPanel::LIST_DETAILED,
+                       XSetVar::Y,
+                       std::to_string(v));
         ptk_file_browser_set_sort_type(file_browser, (GtkSortType)v);
     }
     else
     {
         xset_set_panel(file_browser->mypanel,
-                       "list_detailed",
+                       XSetPanel::LIST_DETAILED,
                        XSetVar::X,
                        std::to_string(sort_order));
         ptk_file_browser_set_sort_order(file_browser, (PtkFBSortOrder)sort_order);
@@ -321,15 +328,15 @@ on_popup_detailed_column(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
         char mode = main_window->panel_context[p - 1];
 
         xset_t set = xset_get_panel_mode(p, "detcol_size", mode);
-        set->b = xset_get_panel(p, "detcol_size")->b;
+        set->b = xset_get_panel(p, XSetPanel::DETCOL_SIZE)->b;
         set = xset_get_panel_mode(p, "detcol_type", mode);
-        set->b = xset_get_panel(p, "detcol_type")->b;
+        set->b = xset_get_panel(p, XSetPanel::DETCOL_TYPE)->b;
         set = xset_get_panel_mode(p, "detcol_perm", mode);
-        set->b = xset_get_panel(p, "detcol_perm")->b;
+        set->b = xset_get_panel(p, XSetPanel::DETCOL_PERM)->b;
         set = xset_get_panel_mode(p, "detcol_owner", mode);
-        set->b = xset_get_panel(p, "detcol_owner")->b;
+        set->b = xset_get_panel(p, XSetPanel::DETCOL_OWNER)->b;
         set = xset_get_panel_mode(p, "detcol_date", mode);
-        set->b = xset_get_panel(p, "detcol_date")->b;
+        set->b = xset_get_panel(p, XSetPanel::DETCOL_DATE)->b;
 
         update_views_all_windows(nullptr, file_browser);
     }
@@ -345,15 +352,15 @@ on_popup_toggle_view(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
     char mode = main_window->panel_context[p - 1];
 
     xset_t set = xset_get_panel_mode(p, "show_toolbox", mode);
-    set->b = xset_get_panel(p, "show_toolbox")->b;
+    set->b = xset_get_panel(p, XSetPanel::SHOW_TOOLBOX)->b;
     set = xset_get_panel_mode(p, "show_devmon", mode);
-    set->b = xset_get_panel(p, "show_devmon")->b;
+    set->b = xset_get_panel(p, XSetPanel::SHOW_DEVMON)->b;
     set = xset_get_panel_mode(p, "show_dirtree", mode);
-    set->b = xset_get_panel(p, "show_dirtree")->b;
+    set->b = xset_get_panel(p, XSetPanel::SHOW_DIRTREE)->b;
     set = xset_get_panel_mode(p, "show_book", mode);
-    set->b = xset_get_panel(p, "show_book")->b;
+    set->b = xset_get_panel(p, XSetPanel::SHOW_BOOK)->b;
     set = xset_get_panel_mode(p, "show_sidebar", mode);
-    set->b = xset_get_panel(p, "show_sidebar")->b;
+    set->b = xset_get_panel(p, XSetPanel::SHOW_SIDEBAR)->b;
 
     update_views_all_windows(nullptr, file_browser);
 }
@@ -417,36 +424,41 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 
     bool show_side = false;
     xset_set_cb(XSetName::VIEW_REFRESH, (GFunc)ptk_file_browser_refresh, browser);
-    set = xset_set_cb_panel(p, "show_toolbox", (GFunc)on_popup_toggle_view, browser);
+    set = xset_set_cb_panel(p, XSetPanel::SHOW_TOOLBOX, (GFunc)on_popup_toggle_view, browser);
     set->b = xset_get_panel_mode(p, "show_toolbox", mode)->b;
-    set = xset_set_cb_panel(p, "show_devmon", (GFunc)on_popup_toggle_view, browser);
+    set = xset_set_cb_panel(p, XSetPanel::SHOW_DEVMON, (GFunc)on_popup_toggle_view, browser);
     set->b = xset_get_panel_mode(p, "show_devmon", mode)->b;
     if (set->b == XSetB::XSET_B_TRUE)
         show_side = true;
-    set = xset_set_cb_panel(p, "show_dirtree", (GFunc)on_popup_toggle_view, browser);
+    set = xset_set_cb_panel(p, XSetPanel::SHOW_DIRTREE, (GFunc)on_popup_toggle_view, browser);
     set->b = xset_get_panel_mode(p, "show_dirtree", mode)->b;
     if (set->b == XSetB::XSET_B_TRUE)
         show_side = true;
-    set = xset_set_cb_panel(p, "show_book", (GFunc)on_popup_toggle_view, browser);
+    set = xset_set_cb_panel(p, XSetPanel::SHOW_BOOK, (GFunc)on_popup_toggle_view, browser);
     set->b = xset_get_panel_mode(p, "show_book", mode)->b;
     if (set->b == XSetB::XSET_B_TRUE)
         show_side = true;
-    set = xset_set_cb_panel(p, "show_sidebar", (GFunc)on_popup_toggle_view, browser);
+    set = xset_set_cb_panel(p, XSetPanel::SHOW_SIDEBAR, (GFunc)on_popup_toggle_view, browser);
     set->b = xset_get_panel_mode(p, "show_sidebar", mode)->b;
     set->disable = !show_side;
-    xset_set_cb_panel(p, "show_hidden", (GFunc)on_popup_show_hidden, browser);
+    xset_set_cb_panel(p, XSetPanel::SHOW_HIDDEN, (GFunc)on_popup_show_hidden, browser);
 
     if (browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
     {
-        set = xset_set_cb_panel(p, "detcol_size", (GFunc)on_popup_detailed_column, browser);
+        set =
+            xset_set_cb_panel(p, XSetPanel::DETCOL_SIZE, (GFunc)on_popup_detailed_column, browser);
         set->b = xset_get_panel_mode(p, "detcol_size", mode)->b;
-        set = xset_set_cb_panel(p, "detcol_type", (GFunc)on_popup_detailed_column, browser);
+        set =
+            xset_set_cb_panel(p, XSetPanel::DETCOL_TYPE, (GFunc)on_popup_detailed_column, browser);
         set->b = xset_get_panel_mode(p, "detcol_type", mode)->b;
-        set = xset_set_cb_panel(p, "detcol_perm", (GFunc)on_popup_detailed_column, browser);
+        set =
+            xset_set_cb_panel(p, XSetPanel::DETCOL_PERM, (GFunc)on_popup_detailed_column, browser);
         set->b = xset_get_panel_mode(p, "detcol_perm", mode)->b;
-        set = xset_set_cb_panel(p, "detcol_owner", (GFunc)on_popup_detailed_column, browser);
+        set =
+            xset_set_cb_panel(p, XSetPanel::DETCOL_OWNER, (GFunc)on_popup_detailed_column, browser);
         set->b = xset_get_panel_mode(p, "detcol_owner", mode)->b;
-        set = xset_set_cb_panel(p, "detcol_date", (GFunc)on_popup_detailed_column, browser);
+        set =
+            xset_set_cb_panel(p, XSetPanel::DETCOL_DATE, (GFunc)on_popup_detailed_column, browser);
         set->b = xset_get_panel_mode(p, "detcol_date", mode)->b;
 
         xset_set_cb(XSetName::VIEW_REORDER_COL, (GFunc)on_reorder, browser);
@@ -475,22 +487,22 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 
     if (browser->view_mode == PtkFBViewMode::PTK_FB_ICON_VIEW)
     {
-        set = xset_set_b_panel(p, "list_large", true);
+        set = xset_set_b_panel(p, XSetPanel::LIST_LARGE, true);
         set->disable = true;
     }
     else
     {
-        set = xset_set_cb_panel(p, "list_large", (GFunc)on_popup_list_large, browser);
+        set = xset_set_cb_panel(p, XSetPanel::LIST_LARGE, (GFunc)on_popup_list_large, browser);
         set->disable = false;
         set->b = xset_get_panel_mode(p, "list_large", mode)->b;
     }
 
-    set = xset_set_cb_panel(p, "list_detailed", (GFunc)on_popup_list_detailed, browser);
+    set = xset_set_cb_panel(p, XSetPanel::LIST_DETAILED, (GFunc)on_popup_list_detailed, browser);
     xset_set_ob2(set, nullptr, nullptr);
     set_radio = set;
-    set = xset_set_cb_panel(p, "list_icons", (GFunc)on_popup_list_icons, browser);
+    set = xset_set_cb_panel(p, XSetPanel::LIST_ICONS, (GFunc)on_popup_list_icons, browser);
     xset_set_ob2(set, nullptr, set_radio);
-    set = xset_set_cb_panel(p, "list_compact", (GFunc)on_popup_list_compact, browser);
+    set = xset_set_cb_panel(p, XSetPanel::LIST_COMPACT, (GFunc)on_popup_list_compact, browser);
     xset_set_ob2(set, nullptr, set_radio);
 
     set = xset_set_cb(XSetName::SORTBY_NAME, (GFunc)on_popup_sortby, browser);

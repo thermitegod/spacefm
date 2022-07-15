@@ -141,7 +141,7 @@ open_in_tab(FMMainWindow** main_window, const char* real_path)
             // use first visible panel
             for (panel_t p: PANELS)
             {
-                if (xset_get_b_panel(p, "show"))
+                if (xset_get_b_panel(p, XSetPanel::SHOW))
                 {
                     panel = p;
                     break;
@@ -150,7 +150,7 @@ open_in_tab(FMMainWindow** main_window, const char* real_path)
         }
 
         // set panel to load real_path on window creation
-        set = xset_get_panel(panel, "show");
+        set = xset_get_panel(panel, XSetPanel::SHOW);
         set->ob1 = ztd::strdup(real_path);
         set->b = XSetB::XSET_B_TRUE;
 
@@ -168,7 +168,7 @@ open_in_tab(FMMainWindow** main_window, const char* real_path)
             if (!gtk_notebook_get_n_pages(GTK_NOTEBOOK((*main_window)->panel[cli_flags.panel - 1])))
             {
                 // set panel to load real_path on panel load
-                set = xset_get_panel(cli_flags.panel, "show");
+                set = xset_get_panel(cli_flags.panel, XSetPanel::SHOW);
                 set->ob1 = ztd::strdup(real_path);
                 tab_added = true;
                 set->b = XSetB::XSET_B_TRUE;
@@ -177,7 +177,7 @@ open_in_tab(FMMainWindow** main_window, const char* real_path)
             else if (!gtk_widget_get_visible((*main_window)->panel[cli_flags.panel - 1]))
             {
                 // show panel
-                set = xset_get_panel(cli_flags.panel, "show");
+                set = xset_get_panel(cli_flags.panel, XSetPanel::SHOW);
                 set->b = XSetB::XSET_B_TRUE;
                 show_panels_all_windows(nullptr, *main_window);
             }
@@ -322,7 +322,7 @@ handle_parsed_commandline_args()
             {
                 // show panel
                 xset_t set;
-                set = xset_get_panel(cli_flags.panel, "show");
+                set = xset_get_panel(cli_flags.panel, XSetPanel::SHOW);
                 set->b = XSetB::XSET_B_TRUE;
                 show_panels_all_windows(nullptr, main_window);
             }

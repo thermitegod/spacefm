@@ -3058,7 +3058,8 @@ ptk_bookmark_view_chdir(GtkTreeView* view, PtkFileBrowser* file_browser, bool re
 {
     // select bookmark of cur dir if recurse and option 'Follow Dir'
     // select bookmark of cur dir if !recurse, ignoring option 'Follow Dir'
-    if (!file_browser || !view || (recurse && !xset_get_b_panel(file_browser->mypanel, "book_fol")))
+    if (!file_browser || !view ||
+        (recurse && !xset_get_b_panel(file_browser->mypanel, XSetPanel::BOOK_FOL)))
         return false;
 
     const char* cwd = ptk_file_browser_get_cwd(file_browser);
@@ -3326,7 +3327,7 @@ activate_bookmark_item(xset_t sel_set, GtkTreeView* view, PtkFileBrowser* file_b
             free(file_browser->book_set_name);
             file_browser->book_set_name = ztd::strdup(set->name);
             ptk_bookmark_view_reload_list(view, set);
-            if (xset_get_b_panel(file_browser->mypanel, "book_fol"))
+            if (xset_get_b_panel(file_browser->mypanel, XSetPanel::BOOK_FOL))
                 ptk_bookmark_view_chdir(view, file_browser, false);
         }
     }

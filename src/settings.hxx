@@ -330,32 +330,39 @@ xset_t xset_get(XSetName name);
 xset_t xset_get(const std::string& name);
 
 xset_t xset_get_panel(panel_t panel, const std::string& name);
+xset_t xset_get_panel(panel_t panel, XSetPanel name);
 xset_t xset_get_panel_mode(panel_t panel, const std::string& name, char mode);
 
 int xset_get_int(XSetName name, XSetVar var);
 int xset_get_int(const std::string& name, XSetVar var);
 int xset_get_int_panel(panel_t panel, const std::string& name, XSetVar var);
+int xset_get_int_panel(panel_t panel, XSetPanel name, XSetVar var);
 
 char* xset_get_s(XSetName name);
 char* xset_get_s(const std::string& name);
 char* xset_get_s_panel(panel_t panel, const std::string& name);
+char* xset_get_s_panel(panel_t panel, XSetPanel name);
 
 bool xset_get_b(XSetName name);
 bool xset_get_b(const std::string& name);
 bool xset_get_b_panel(panel_t panel, const std::string& name);
+bool xset_get_b_panel(panel_t panel, XSetPanel name);
 bool xset_get_b_panel_mode(panel_t panel, const std::string& name, char mode);
 
 xset_t xset_set_b(XSetName name, bool bval);
 xset_t xset_set_b(const std::string& name, bool bval);
 xset_t xset_set_b_panel(panel_t panel, const std::string& name, bool bval);
+xset_t xset_set_b_panel(panel_t panel, XSetPanel name, bool bval);
 xset_t xset_set_b_panel_mode(panel_t panel, const std::string& name, char mode, bool bval);
 
 xset_t xset_set_panel(panel_t panel, const std::string& name, XSetVar var,
                       const std::string& value);
+xset_t xset_set_panel(panel_t panel, XSetPanel name, XSetVar var, const std::string& value);
 
 xset_t xset_set_cb(XSetName name, GFunc cb_func, void* cb_data);
 xset_t xset_set_cb(const std::string& name, GFunc cb_func, void* cb_data);
 xset_t xset_set_cb_panel(panel_t panel, const std::string& name, GFunc cb_func, void* cb_data);
+xset_t xset_set_cb_panel(panel_t panel, XSetPanel name, GFunc cb_func, void* cb_data);
 
 xset_t xset_set(XSetName name, XSetVar var, const std::string& value);
 xset_t xset_set(const std::string& name, XSetVar var, const std::string& value);

@@ -804,7 +804,7 @@ save_settings(void* main_window_ptr)
         {
             for (panel_t p: PANELS)
             {
-                xset_t set = xset_get_panel(p, "show");
+                xset_t set = xset_get_panel(p, XSetPanel::SHOW);
                 if (GTK_IS_NOTEBOOK(main_window->panel[p - 1]))
                 {
                     int pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1]));
@@ -844,7 +844,7 @@ save_settings(void* main_window_ptr)
             // clear saved tabs
             for (panel_t p: PANELS)
             {
-                xset_t set = xset_get_panel(p, "show");
+                xset_t set = xset_get_panel(p, XSetPanel::SHOW);
                 if (set->s)
                 {
                     free(set->s);
@@ -1219,6 +1219,12 @@ xset_get_panel(panel_t panel, const std::string& name)
 }
 
 xset_t
+xset_get_panel(panel_t panel, XSetPanel name)
+{
+    return xset_get(xset_get_xsetname_from_panel(panel, name));
+}
+
+xset_t
 xset_get_panel_mode(panel_t panel, const std::string& name, const char mode)
 {
     // FMT BUG - need to use std::to_string on char
@@ -1253,6 +1259,12 @@ xset_get_s_panel(panel_t panel, const std::string& name)
     return xset_get_s(fullname);
 }
 
+char*
+xset_get_s_panel(panel_t panel, XSetPanel name)
+{
+    return xset_get_s(xset_get_xsetname_from_panel(panel, name));
+}
+
 bool
 xset_get_b(XSetName name)
 {
@@ -1272,6 +1284,12 @@ xset_get_b_panel(panel_t panel, const std::string& name)
 {
     std::string fullname = fmt::format("panel{}_{}", panel, name);
     return xset_get_b(fullname);
+}
+
+bool
+xset_get_b_panel(panel_t panel, XSetPanel name)
+{
+    return xset_get_b(xset_get_xsetname_from_panel(panel, name));
 }
 
 bool
@@ -1343,6 +1361,12 @@ xset_set_b_panel(panel_t panel, const std::string& name, bool bval)
     std::string fullname = fmt::format("panel{}_{}", panel, name);
     xset_t set = xset_set_b(fullname, bval);
     return set;
+}
+
+xset_t
+xset_set_b_panel(panel_t panel, XSetPanel name, bool bval)
+{
+    return xset_set_b(xset_get_xsetname_from_panel(panel, name), bval);
 }
 
 xset_t
@@ -1435,6 +1459,12 @@ xset_get_int_panel(panel_t panel, const std::string& name, XSetVar var)
     return xset_get_int(fullname, var);
 }
 
+int
+xset_get_int_panel(panel_t panel, XSetPanel name, XSetVar var)
+{
+    return xset_get_int(xset_get_xsetname_from_panel(panel, name), var);
+}
+
 static xset_t
 xset_is_main_bookmark(xset_t set)
 {
@@ -1487,6 +1517,12 @@ xset_set_cb_panel(panel_t panel, const std::string& name, GFunc cb_func, void* c
     std::string fullname = fmt::format("panel{}_{}", panel, name);
     xset_t set = xset_set_cb(fullname, cb_func, cb_data);
     return set;
+}
+
+xset_t
+xset_set_cb_panel(panel_t panel, XSetPanel name, GFunc cb_func, void* cb_data)
+{
+    return xset_set_cb(xset_get_xsetname_from_panel(panel, name), cb_func, cb_data);
 }
 
 xset_t
@@ -1823,6 +1859,12 @@ xset_set_panel(panel_t panel, const std::string& name, XSetVar var, const std::s
     std::string fullname = fmt::format("panel{}_{}", panel, name);
     xset_t set = xset_set(fullname, var, value);
     return set;
+}
+
+xset_t
+xset_set_panel(panel_t panel, XSetPanel name, XSetVar var, const std::string& value)
+{
+    return xset_set(xset_get_xsetname_from_panel(panel, name), var, value);
 }
 
 xset_t
@@ -5295,7 +5337,7 @@ xset_design_job(GtkWidget* item, xset_t set)
                 mset->scroll_lock = true;
             break;
         case XSetJob::TOOLTIPS:
-            set_next = xset_get_panel(1, "tool_l");
+            set_next = xset_get_panel(1, XSetPanel::TOOL_L);
             set_next->b =
                 set_next->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_UNSET : XSetB::XSET_B_TRUE;
             break;
@@ -5761,7 +5803,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, unsigned 
     if (set->tool != XSetTool::NOT)
     {
         newitem = xset_design_additem(design_menu, "T_ooltips", XSetJob::TOOLTIPS, set);
-        if (!xset_get_b_panel(1, "tool_l"))
+        if (!xset_get_b_panel(1, XSetPanel::TOOL_L))
             set_check_menu_item_block(newitem);
     }
 
@@ -6957,7 +6999,7 @@ xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventButton* event
             ptk_file_browser_new_tab_here(nullptr, file_browser);
             break;
         case XSetTool::SHOW_HIDDEN:
-            set2 = xset_get_panel(p, "show_hidden");
+            set2 = xset_get_panel(p, XSetPanel::SHOW_HIDDEN);
             set2->b = set2->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_UNSET : XSetB::XSET_B_TRUE;
             ptk_file_browser_show_hidden_files(file_browser, set2->b);
             break;
@@ -6967,7 +7009,7 @@ xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventButton* event
         case XSetTool::LARGE_ICONS:
             if (file_browser->view_mode != PtkFBViewMode::PTK_FB_ICON_VIEW)
             {
-                xset_set_b_panel(p, "list_large", !file_browser->large_icons);
+                xset_set_b_panel(p, XSetPanel::LIST_LARGE, !file_browser->large_icons);
                 on_popup_list_large(nullptr, file_browser);
             }
             break;
@@ -9257,115 +9299,115 @@ xset_defaults()
     // PANELS
     for (panel_t p: PANELS)
     {
-        set = xset_set_panel(p, "show_toolbox", XSetVar::MENU_LABEL, "_Toolbar");
+        set = xset_set_panel(p, XSetPanel::SHOW_TOOLBOX, XSetVar::MENU_LABEL, "_Toolbar");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_toolbox");
 
-        set = xset_set_panel(p, "show_devmon", XSetVar::MENU_LABEL, "_Devices");
+        set = xset_set_panel(p, XSetPanel::SHOW_DEVMON, XSetVar::MENU_LABEL, "_Devices");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_UNSET;
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_devmon");
 
-        set = xset_set_panel(p, "show_dirtree", XSetVar::MENU_LABEL, "T_ree");
+        set = xset_set_panel(p, XSetPanel::SHOW_DIRTREE, XSetVar::MENU_LABEL, "T_ree");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_dirtree");
 
-        set = xset_set_panel(p, "show_book", XSetVar::MENU_LABEL, "_Bookmarks");
+        set = xset_set_panel(p, XSetPanel::SHOW_BOOK, XSetVar::MENU_LABEL, "_Bookmarks");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_UNSET;
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_book");
 
-        set = xset_set_panel(p, "show_sidebar", XSetVar::MENU_LABEL, "_Side Toolbar");
+        set = xset_set_panel(p, XSetPanel::SHOW_SIDEBAR, XSetVar::MENU_LABEL, "_Side Toolbar");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_UNSET;
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_sidebar");
 
-        set = xset_set_panel(p, "list_detailed", XSetVar::MENU_LABEL, "_Detailed");
+        set = xset_set_panel(p, XSetPanel::LIST_DETAILED, XSetVar::MENU_LABEL, "_Detailed");
         set->menu_style = XSetMenu::RADIO;
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_list_detailed");
 
-        set = xset_set_panel(p, "list_icons", XSetVar::MENU_LABEL, "_Icons");
+        set = xset_set_panel(p, XSetPanel::LIST_ICONS, XSetVar::MENU_LABEL, "_Icons");
         set->menu_style = XSetMenu::RADIO;
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_list_icons");
 
-        set = xset_set_panel(p, "list_compact", XSetVar::MENU_LABEL, "_Compact");
+        set = xset_set_panel(p, XSetPanel::LIST_COMPACT, XSetVar::MENU_LABEL, "_Compact");
         set->menu_style = XSetMenu::RADIO;
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_list_compact");
 
-        set = xset_set_panel(p, "list_large", XSetVar::MENU_LABEL, "_Large Icons");
+        set = xset_set_panel(p, XSetPanel::LIST_LARGE, XSetVar::MENU_LABEL, "_Large Icons");
         set->menu_style = XSetMenu::CHECK;
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_list_large");
 
-        set = xset_set_panel(p, "show_hidden", XSetVar::MENU_LABEL, "_Hidden Files");
+        set = xset_set_panel(p, XSetPanel::SHOW_HIDDEN, XSetVar::MENU_LABEL, "_Hidden Files");
         set->menu_style = XSetMenu::CHECK;
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_hidden");
 
-        set = xset_set_panel(p, "icon_tab", XSetVar::MENU_LABEL, "_Icon");
+        set = xset_set_panel(p, XSetPanel::ICON_TAB, XSetVar::MENU_LABEL, "_Icon");
         set->menu_style = XSetMenu::ICON;
         xset_set_var(set, XSetVar::ICN, "gtk-directory");
 
-        set = xset_set_panel(p, "icon_status", XSetVar::MENU_LABEL, "_Icon");
+        set = xset_set_panel(p, XSetPanel::ICON_STATUS, XSetVar::MENU_LABEL, "_Icon");
         set->menu_style = XSetMenu::ICON;
         xset_set_var(set, XSetVar::ICN, "gtk-yes");
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_icon_status");
 
-        set = xset_set_panel(p, "detcol_name", XSetVar::MENU_LABEL, "_Name");
+        set = xset_set_panel(p, XSetPanel::DETCOL_NAME, XSetVar::MENU_LABEL, "_Name");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_TRUE; // visible
         set->x = ztd::strdup("0");   // position
 
-        set = xset_set_panel(p, "detcol_size", XSetVar::MENU_LABEL, "_Size");
+        set = xset_set_panel(p, XSetPanel::DETCOL_SIZE, XSetVar::MENU_LABEL, "_Size");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_TRUE;
         set->x = ztd::strdup("1");
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_detcol_size");
 
-        set = xset_set_panel(p, "detcol_type", XSetVar::MENU_LABEL, "_Type");
+        set = xset_set_panel(p, XSetPanel::DETCOL_TYPE, XSetVar::MENU_LABEL, "_Type");
         set->menu_style = XSetMenu::CHECK;
         set->x = ztd::strdup("2");
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_detcol_type");
 
-        set = xset_set_panel(p, "detcol_perm", XSetVar::MENU_LABEL, "_Permission");
+        set = xset_set_panel(p, XSetPanel::DETCOL_PERM, XSetVar::MENU_LABEL, "_Permission");
         set->menu_style = XSetMenu::CHECK;
         set->x = ztd::strdup("3");
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_detcol_perm");
 
-        set = xset_set_panel(p, "detcol_owner", XSetVar::MENU_LABEL, "_Owner");
+        set = xset_set_panel(p, XSetPanel::DETCOL_OWNER, XSetVar::MENU_LABEL, "_Owner");
         set->menu_style = XSetMenu::CHECK;
         set->x = ztd::strdup("4");
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_detcol_owner");
 
-        set = xset_set_panel(p, "detcol_date", XSetVar::MENU_LABEL, "_Modified");
+        set = xset_set_panel(p, XSetPanel::DETCOL_DATE, XSetVar::MENU_LABEL, "_Modified");
         set->menu_style = XSetMenu::CHECK;
         set->x = ztd::strdup("5");
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_detcol_date");
 
-        set = xset_get_panel(p, "sort_extra");
+        set = xset_get_panel(p, XSetPanel::SORT_EXTRA);
         set->b = XSetB::XSET_B_TRUE;               // sort_natural
         set->x = ztd::strdup(XSetB::XSET_B_FALSE); // sort_case
         set->y = ztd::strdup("1");                 // PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST
         set->z = ztd::strdup(XSetB::XSET_B_TRUE);  // sort_hidden_first
 
-        set = xset_set_panel(p, "book_fol", XSetVar::MENU_LABEL, "Follow _Dir");
+        set = xset_set_panel(p, XSetPanel::BOOK_FOL, XSetVar::MENU_LABEL, "Follow _Dir");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)

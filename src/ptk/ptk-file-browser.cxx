@@ -851,7 +851,7 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     int p = file_browser->mypanel;
     char mode = main_window ? main_window->panel_context[p - 1] : 0;
 
-    bool show_tooltips = !xset_get_b_panel(1, "tool_l");
+    bool show_tooltips = !xset_get_b_panel(1, XSetPanel::TOOL_L);
 
     // destroy
     if (file_browser->toolbar)
@@ -888,7 +888,7 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     xset_fill_toolbar(GTK_WIDGET(file_browser),
                       file_browser,
                       file_browser->toolbar,
-                      xset_get_panel(p, "tool_l"),
+                      xset_get_panel(p, XSetPanel::TOOL_L),
                       show_tooltips);
 
     // add pathbar
@@ -903,7 +903,7 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     xset_fill_toolbar(GTK_WIDGET(file_browser),
                       file_browser,
                       file_browser->toolbar,
-                      xset_get_panel(p, "tool_r"),
+                      xset_get_panel(p, XSetPanel::TOOL_R),
                       show_tooltips);
 
     // show
@@ -919,7 +919,7 @@ rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     int p = file_browser->mypanel;
     char mode = main_window ? main_window->panel_context[p - 1] : 0;
 
-    bool show_tooltips = !xset_get_b_panel(1, "tool_l");
+    bool show_tooltips = !xset_get_b_panel(1, XSetPanel::TOOL_L);
 
     // destroy
     if (file_browser->side_toolbar)
@@ -942,7 +942,7 @@ rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     xset_fill_toolbar(GTK_WIDGET(file_browser),
                       file_browser,
                       file_browser->side_toolbar,
-                      xset_get_panel(p, "tool_s"),
+                      xset_get_panel(p, XSetPanel::TOOL_S),
                       show_tooltips);
 
     // show
@@ -1070,7 +1070,7 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
         fmt::format("separator panel{}_icon_status status_middle", file_browser->mypanel);
 
     xset_set_cb_panel(file_browser->mypanel,
-                      "icon_status",
+                      XSetPanel::ICON_STATUS,
                       (GFunc)on_status_effect_change,
                       file_browser);
     xset_t set = xset_get(XSetName::STATUS_NAME);
@@ -1575,7 +1575,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
 
     // Large Icons - option for Detailed and Compact list views
     bool large_icons =
-        xset_get_b_panel(p, "list_icons") || xset_get_b_panel_mode(p, "list_large", mode);
+        xset_get_b_panel(p, XSetPanel::LIST_ICONS) || xset_get_b_panel_mode(p, "list_large", mode);
     if (large_icons != !!file_browser->large_icons)
     {
         if (file_browser->folder_view)
@@ -1589,7 +1589,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     }
 
     // List Styles
-    if (xset_get_b_panel(p, "list_detailed"))
+    if (xset_get_b_panel(p, XSetPanel::LIST_DETAILED))
     {
         ptk_file_browser_view_as_list(file_browser);
 
@@ -1631,22 +1631,22 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
             }
         }
     }
-    else if (xset_get_b_panel(p, "list_icons"))
+    else if (xset_get_b_panel(p, XSetPanel::LIST_ICONS))
     {
         ptk_file_browser_view_as_icons(file_browser);
     }
-    else if (xset_get_b_panel(p, "list_compact"))
+    else if (xset_get_b_panel(p, XSetPanel::LIST_COMPACT))
     {
         ptk_file_browser_view_as_compact_list(file_browser);
     }
     else
     {
-        xset_set_panel(p, "list_detailed", XSetVar::B, "1");
+        xset_set_panel(p, XSetPanel::LIST_DETAILED, XSetVar::B, "1");
         ptk_file_browser_view_as_list(file_browser);
     }
 
     // Show Hidden
-    ptk_file_browser_show_hidden_files(file_browser, xset_get_b_panel(p, "show_hidden"));
+    ptk_file_browser_show_hidden_files(file_browser, xset_get_b_panel(p, XSetPanel::SHOW_HIDDEN));
 
     // LOG_INFO("ptk_file_browser_update_views fb={:p} DONE", file_browser);
 }
@@ -1668,16 +1668,16 @@ ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
     for (std::size_t i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); ++i)
         file_browser->toolbar_widgets[i] = nullptr;
 
-    if (xset_get_b_panel(curpanel, "list_detailed"))
+    if (xset_get_b_panel(curpanel, XSetPanel::LIST_DETAILED))
         view_mode = PtkFBViewMode::PTK_FB_LIST_VIEW;
-    else if (xset_get_b_panel(curpanel, "list_icons"))
+    else if (xset_get_b_panel(curpanel, XSetPanel::LIST_ICONS))
     {
         view_mode = PtkFBViewMode::PTK_FB_ICON_VIEW;
         gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(file_browser->folder_view_scroll),
                                        GTK_POLICY_AUTOMATIC,
                                        GTK_POLICY_AUTOMATIC);
     }
-    else if (xset_get_b_panel(curpanel, "list_compact"))
+    else if (xset_get_b_panel(curpanel, XSetPanel::LIST_COMPACT))
     {
         view_mode = PtkFBViewMode::PTK_FB_COMPACT_VIEW;
         gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(file_browser->folder_view_scroll),
@@ -1686,7 +1686,7 @@ ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
     }
     else
     {
-        xset_set_panel(curpanel, "list_detailed", XSetVar::B, "1");
+        xset_set_panel(curpanel, XSetPanel::LIST_DETAILED, XSetVar::B, "1");
         view_mode = PtkFBViewMode::PTK_FB_LIST_VIEW;
     }
 
@@ -1713,7 +1713,7 @@ ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
 
     // set status bar icon
     char* icon_name;
-    xset_t set = xset_get_panel(curpanel, "icon_status");
+    xset_t set = xset_get_panel(curpanel, XSetPanel::ICON_STATUS);
     if (set->icon && set->icon[0] != '\0')
         icon_name = set->icon;
     else
@@ -2263,9 +2263,12 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
     //        ptk_file_browser_set_sort_order(file_browser),
     //        app_settings.get_sort_order());
 
-    xset_set_panel(file_browser->mypanel, "list_detailed", XSetVar::X, std::to_string(col));
     xset_set_panel(file_browser->mypanel,
-                   "list_detailed",
+                   XSetPanel::LIST_DETAILED,
+                   XSetVar::X,
+                   std::to_string(col));
+    xset_set_panel(file_browser->mypanel,
+                   XSetPanel::LIST_DETAILED,
                    XSetVar::Y,
                    std::to_string(file_browser->sort_type));
 }
@@ -5383,15 +5386,17 @@ ptk_file_browser_read_sort_extra(PtkFileBrowser* file_browser)
     if (!list)
         return;
 
-    list->sort_alphanum = xset_get_b_panel(file_browser->mypanel, "sort_extra");
+    list->sort_alphanum = xset_get_b_panel(file_browser->mypanel, XSetPanel::SORT_EXTRA);
 #if 0
-    list->sort_natural = xset_get_b_panel(file_browser->mypanel, "sort_extra");
+    list->sort_natural = xset_get_b_panel(file_browser->mypanel, XSetPanel::SORT_EXTRA);
 #endif
     list->sort_case =
-        xset_get_int_panel(file_browser->mypanel, "sort_extra", XSetVar::X) == XSetB::XSET_B_TRUE;
-    list->sort_dir = xset_get_int_panel(file_browser->mypanel, "sort_extra", XSetVar::Y);
+        xset_get_int_panel(file_browser->mypanel, XSetPanel::SORT_EXTRA, XSetVar::X) ==
+        XSetB::XSET_B_TRUE;
+    list->sort_dir = xset_get_int_panel(file_browser->mypanel, XSetPanel::SORT_EXTRA, XSetVar::Y);
     list->sort_hidden_first =
-        xset_get_int_panel(file_browser->mypanel, "sort_extra", XSetVar::Z) == XSetB::XSET_B_TRUE;
+        xset_get_int_panel(file_browser->mypanel, XSetPanel::SORT_EXTRA, XSetVar::Z) ==
+        XSetB::XSET_B_TRUE;
 }
 
 void
@@ -5413,25 +5418,25 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname)
     if (set->xset_name == XSetName::SORTX_ALPHANUM)
     {
         list->sort_alphanum = set->b == XSetB::XSET_B_TRUE;
-        xset_set_b_panel(panel, "sort_extra", list->sort_alphanum);
+        xset_set_b_panel(panel, XSetPanel::SORT_EXTRA, list->sort_alphanum);
     }
 #if 0
     else if (set->xset_name ==  XSetName::SORTX_NATURAL)
     {
         list->sort_natural = set->b == XSetB::XSET_B_TRUE;
-        xset_set_b_panel(panel, "sort_extra", list->sort_natural);
+        xset_set_b_panel(panel, XSetPanel::SORT_EXTRA, list->sort_natural);
     }
 #endif
     else if (set->xset_name == XSetName::SORTX_CASE)
     {
         list->sort_case = set->b == XSetB::XSET_B_TRUE;
-        xset_set_panel(panel, "sort_extra", XSetVar::X, std::to_string(set->b));
+        xset_set_panel(panel, XSetPanel::SORT_EXTRA, XSetVar::X, std::to_string(set->b));
     }
     else if (set->xset_name == XSetName::SORTX_DIRECTORIES)
     {
         list->sort_dir = PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST;
         xset_set_panel(panel,
-                       "sort_extra",
+                       XSetPanel::SORT_EXTRA,
                        XSetVar::Y,
                        std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST));
     }
@@ -5439,7 +5444,7 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname)
     {
         list->sort_dir = PTKFileListSortDir::PTK_LIST_SORT_DIR_LAST;
         xset_set_panel(panel,
-                       "sort_extra",
+                       XSetPanel::SORT_EXTRA,
                        XSetVar::Y,
                        std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_LAST));
     }
@@ -5447,20 +5452,20 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname)
     {
         list->sort_dir = PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED;
         xset_set_panel(panel,
-                       "sort_extra",
+                       XSetPanel::SORT_EXTRA,
                        XSetVar::Y,
                        std::to_string(PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED));
     }
     else if (set->xset_name == XSetName::SORTX_HIDFIRST)
     {
         list->sort_hidden_first = set->b == XSetB::XSET_B_TRUE;
-        xset_set_panel(panel, "sort_extra", XSetVar::Z, std::to_string(set->b));
+        xset_set_panel(panel, XSetPanel::SORT_EXTRA, XSetVar::Z, std::to_string(set->b));
     }
     else if (set->xset_name == XSetName::SORTX_HIDLAST)
     {
         list->sort_hidden_first = set->b != XSetB::XSET_B_TRUE;
         xset_set_panel(panel,
-                       "sort_extra",
+                       XSetPanel::SORT_EXTRA,
                        XSetVar::Z,
                        std::to_string(set->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_FALSE
                                                                    : XSetB::XSET_B_TRUE));
@@ -6145,7 +6150,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
             {
                 ptk_file_browser_show_hidden_files(
                     browser,
-                    xset_get_b_panel(browser->mypanel, "show_hidden"));
+                    xset_get_b_panel(browser->mypanel, XSetPanel::SHOW_HIDDEN));
             }
             else if (ztd::same(xname, "show")) // main View|Panel N
                 show_panels_all_windows(nullptr, FM_MAIN_WINDOW(browser->main_window));
@@ -6170,7 +6175,9 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
             {
                 if (browser->view_mode != PtkFBViewMode::PTK_FB_ICON_VIEW)
                 {
-                    xset_set_b_panel(browser->mypanel, "list_large", !browser->large_icons);
+                    xset_set_b_panel(browser->mypanel,
+                                     XSetPanel::LIST_LARGE,
+                                     !browser->large_icons);
                     on_popup_list_large(nullptr, browser);
                 }
             }
