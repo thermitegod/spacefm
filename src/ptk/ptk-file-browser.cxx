@@ -173,12 +173,12 @@ static const std::array<const char*, 6> column_titles{"Name",
                                                       "Owner",
                                                       "Modified"};
 
-static const std::array<const char*, 6> column_names{"detcol_name",
-                                                     "detcol_size",
-                                                     "detcol_type",
-                                                     "detcol_perm",
-                                                     "detcol_owner",
-                                                     "detcol_date"};
+static const std::array<XSetPanel, 6> column_names{XSetPanel::DETCOL_NAME,
+                                                   XSetPanel::DETCOL_SIZE,
+                                                   XSetPanel::DETCOL_TYPE,
+                                                   XSetPanel::DETCOL_PERM,
+                                                   XSetPanel::DETCOL_OWNER,
+                                                   XSetPanel::DETCOL_DATE};
 
 GType
 ptk_file_browser_get_type()
@@ -361,7 +361,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
     int p = file_browser->mypanel;
     char mode = main_window->panel_context[p - 1];
 
-    xset_t set = xset_get_panel_mode(p, "slider_positions", mode);
+    xset_t set = xset_get_panel_mode(p, XSetPanel::SLIDER_POSITIONS, mode);
 
     if (widget == file_browser->hpane)
     {
@@ -907,7 +907,7 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
                       show_tooltips);
 
     // show
-    if (xset_get_b_panel_mode(p, "show_toolbox", mode))
+    if (xset_get_b_panel_mode(p, XSetPanel::SHOW_TOOLBOX, mode))
         gtk_widget_show_all(file_browser->toolbox);
 }
 
@@ -946,7 +946,7 @@ rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
                       show_tooltips);
 
     // show
-    if (xset_get_b_panel_mode(p, "show_sidebar", mode))
+    if (xset_get_b_panel_mode(p, XSetPanel::SHOW_SIDEBAR, mode))
         gtk_widget_show_all(file_browser->side_toolbox);
 }
 
@@ -1311,7 +1311,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     char mode = main_window->panel_context[p - 1];
     bool need_enable_toolbar = false;
 
-    if (xset_get_b_panel_mode(p, "show_toolbox", mode))
+    if (xset_get_b_panel_mode(p, XSetPanel::SHOW_TOOLBOX, mode))
     {
         if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
             (!file_browser->toolbar || !gtk_widget_get_visible(file_browser->toolbox)))
@@ -1349,7 +1349,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
         gtk_widget_hide(file_browser->toolbox);
     }
 
-    if (xset_get_b_panel_mode(p, "show_sidebar", mode))
+    if (xset_get_b_panel_mode(p, XSetPanel::SHOW_SIDEBAR, mode))
     {
         if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
             (!file_browser->side_toolbox || !gtk_widget_get_visible(file_browser->side_toolbox)))
@@ -1395,7 +1395,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
         gtk_widget_hide(file_browser->side_toolbox);
     }
 
-    if (xset_get_b_panel_mode(p, "show_dirtree", mode))
+    if (xset_get_b_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode))
     {
         if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
             (!file_browser->side_dir_scroll ||
@@ -1440,7 +1440,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
         file_browser->side_dir = nullptr;
     }
 
-    if (xset_get_b_panel_mode(p, "show_book", mode))
+    if (xset_get_b_panel_mode(p, XSetPanel::SHOW_BOOK, mode))
     {
         if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
             (!file_browser->side_book_scroll ||
@@ -1484,7 +1484,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
         file_browser->side_book = nullptr;
     }
 
-    if (xset_get_b_panel_mode(p, "show_devmon", mode))
+    if (xset_get_b_panel_mode(p, XSetPanel::SHOW_DEVMON, mode))
     {
         if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
             (!file_browser->side_dev_scroll ||
@@ -1526,15 +1526,15 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
         file_browser->side_dev = nullptr;
     }
 
-    if (xset_get_b_panel_mode(p, "show_book", mode) ||
-        xset_get_b_panel_mode(p, "show_dirtree", mode))
+    if (xset_get_b_panel_mode(p, XSetPanel::SHOW_BOOK, mode) ||
+        xset_get_b_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode))
         gtk_widget_show(file_browser->side_vpane_bottom);
     else
         gtk_widget_hide(file_browser->side_vpane_bottom);
 
-    if (xset_get_b_panel_mode(p, "show_devmon", mode) ||
-        xset_get_b_panel_mode(p, "show_dirtree", mode) ||
-        xset_get_b_panel_mode(p, "show_book", mode))
+    if (xset_get_b_panel_mode(p, XSetPanel::SHOW_DEVMON, mode) ||
+        xset_get_b_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode) ||
+        xset_get_b_panel_mode(p, XSetPanel::SHOW_BOOK, mode))
         gtk_widget_show(file_browser->side_vbox);
     else
         gtk_widget_hide(file_browser->side_vbox);
@@ -1574,8 +1574,8 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     gtk_paned_set_position(GTK_PANED(file_browser->side_vpane_bottom), pos);
 
     // Large Icons - option for Detailed and Compact list views
-    bool large_icons =
-        xset_get_b_panel(p, XSetPanel::LIST_ICONS) || xset_get_b_panel_mode(p, "list_large", mode);
+    bool large_icons = xset_get_b_panel(p, XSetPanel::LIST_ICONS) ||
+                       xset_get_b_panel_mode(p, XSetPanel::LIST_LARGE, mode);
     if (large_icons != !!file_browser->large_icons)
     {
         if (file_browser->folder_view)
@@ -1696,7 +1696,7 @@ ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
         view_mode == PtkFBViewMode::PTK_FB_ICON_VIEW ||
         xset_get_b_panel_mode(
             file_browser->mypanel,
-            "list_large",
+            XSetPanel::LIST_LARGE,
             (FM_MAIN_WINDOW(main_window))->panel_context[file_browser->mypanel - 1]);
     file_browser->folder_view = create_folder_view(file_browser, view_mode);
 
@@ -5741,33 +5741,33 @@ ptk_file_browser_focus(GtkMenuItem* item, PtkFileBrowser* file_browser, int job2
     {
         case 0:
             // path bar
-            if (!xset_get_b_panel_mode(p, "show_toolbox", mode))
+            if (!xset_get_b_panel_mode(p, XSetPanel::SHOW_TOOLBOX, mode))
             {
-                xset_set_b_panel_mode(p, "show_toolbox", mode, true);
+                xset_set_b_panel_mode(p, XSetPanel::SHOW_TOOLBOX, mode, true);
                 update_views_all_windows(nullptr, file_browser);
             }
             widget = file_browser->path_bar;
             break;
         case 1:
-            if (!xset_get_b_panel_mode(p, "show_dirtree", mode))
+            if (!xset_get_b_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode))
             {
-                xset_set_b_panel_mode(p, "show_dirtree", mode, true);
+                xset_set_b_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode, true);
                 update_views_all_windows(nullptr, file_browser);
             }
             widget = file_browser->side_dir;
             break;
         case 2:
-            if (!xset_get_b_panel_mode(p, "show_book", mode))
+            if (!xset_get_b_panel_mode(p, XSetPanel::SHOW_BOOK, mode))
             {
-                xset_set_b_panel_mode(p, "show_book", mode, true);
+                xset_set_b_panel_mode(p, XSetPanel::SHOW_BOOK, mode, true);
                 update_views_all_windows(nullptr, file_browser);
             }
             widget = file_browser->side_book;
             break;
         case 3:
-            if (!xset_get_b_panel_mode(p, "show_devmon", mode))
+            if (!xset_get_b_panel_mode(p, XSetPanel::SHOW_DEVMON, mode))
             {
-                xset_set_b_panel_mode(p, "show_devmon", mode, true);
+                xset_set_b_panel_mode(p, XSetPanel::SHOW_DEVMON, mode, true);
                 update_views_all_windows(nullptr, file_browser);
             }
             widget = file_browser->side_dev;

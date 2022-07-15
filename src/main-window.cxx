@@ -410,7 +410,10 @@ on_devices_show(GtkMenuItem* item, FMMainWindow* main_window)
         return;
     int mode = main_window->panel_context[file_browser->mypanel - 1];
 
-    xset_set_b_panel_mode(file_browser->mypanel, "show_devmon", mode, !file_browser->side_dev);
+    xset_set_b_panel_mode(file_browser->mypanel,
+                          XSetPanel::SHOW_DEVMON,
+                          mode,
+                          !file_browser->side_dev);
     update_views_all_windows(nullptr, file_browser);
     if (file_browser->side_dev)
         gtk_widget_grab_focus(GTK_WIDGET(file_browser->side_dev));
@@ -1026,52 +1029,51 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                 xset_t set_old;
                 char mode = main_window->panel_context[p - 1];
                 xset_set_b_panel_mode(p,
-                                      "show_toolbox",
+                                      XSetPanel::SHOW_TOOLBOX,
                                       mode,
                                       xset_get_b_panel(p, XSetPanel::SHOW_TOOLBOX));
                 xset_set_b_panel_mode(p,
-                                      "show_devmon",
+                                      XSetPanel::SHOW_DEVMON,
                                       mode,
                                       xset_get_b_panel(p, XSetPanel::SHOW_DEVMON));
-                if (xset_is("show_dirtree"))
-                    xset_set_b_panel_mode(p,
-                                          "show_dirtree",
-                                          mode,
-                                          xset_get_b_panel(p, XSetPanel::SHOW_DIRTREE));
                 xset_set_b_panel_mode(p,
-                                      "show_book",
+                                      XSetPanel::SHOW_DIRTREE,
+                                      mode,
+                                      xset_get_b_panel(p, XSetPanel::SHOW_DIRTREE));
+                xset_set_b_panel_mode(p,
+                                      XSetPanel::SHOW_BOOK,
                                       mode,
                                       xset_get_b_panel(p, XSetPanel::SHOW_BOOK));
                 xset_set_b_panel_mode(p,
-                                      "show_sidebar",
+                                      XSetPanel::SHOW_SIDEBAR,
                                       mode,
                                       xset_get_b_panel(p, XSetPanel::SHOW_SIDEBAR));
                 xset_set_b_panel_mode(p,
-                                      "detcol_name",
+                                      XSetPanel::DETCOL_NAME,
                                       mode,
                                       xset_get_b_panel(p, XSetPanel::DETCOL_NAME));
                 xset_set_b_panel_mode(p,
-                                      "detcol_size",
+                                      XSetPanel::DETCOL_SIZE,
                                       mode,
                                       xset_get_b_panel(p, XSetPanel::DETCOL_SIZE));
                 xset_set_b_panel_mode(p,
-                                      "detcol_type",
+                                      XSetPanel::DETCOL_TYPE,
                                       mode,
                                       xset_get_b_panel(p, XSetPanel::DETCOL_TYPE));
                 xset_set_b_panel_mode(p,
-                                      "detcol_perm",
+                                      XSetPanel::DETCOL_PERM,
                                       mode,
                                       xset_get_b_panel(p, XSetPanel::DETCOL_PERM));
                 xset_set_b_panel_mode(p,
-                                      "detcol_owner",
+                                      XSetPanel::DETCOL_OWNER,
                                       mode,
                                       xset_get_b_panel(p, XSetPanel::DETCOL_OWNER));
                 xset_set_b_panel_mode(p,
-                                      "detcol_date",
+                                      XSetPanel::DETCOL_DATE,
                                       mode,
                                       xset_get_b_panel(p, XSetPanel::DETCOL_DATE));
                 set_old = xset_get_panel(p, XSetPanel::SLIDER_POSITIONS);
-                set = xset_get_panel_mode(p, "slider_positions", mode);
+                set = xset_get_panel_mode(p, XSetPanel::SLIDER_POSITIONS, mode);
                 set->x = ztd::strdup(set_old->x ? set_old->x : "0");
                 set->y = ztd::strdup(set_old->y ? set_old->y : "0");
                 set->s = ztd::strdup(set_old->s ? set_old->s : "0");
@@ -1326,7 +1328,10 @@ on_bookmarks_show(GtkMenuItem* item, FMMainWindow* main_window)
         return;
     int mode = main_window->panel_context[file_browser->mypanel - 1];
 
-    xset_set_b_panel_mode(file_browser->mypanel, "show_book", mode, !file_browser->side_book);
+    xset_set_b_panel_mode(file_browser->mypanel,
+                          XSetPanel::SHOW_BOOK,
+                          mode,
+                          !file_browser->side_book);
     update_views_all_windows(nullptr, file_browser);
     if (file_browser->side_book)
     {
@@ -5963,42 +5968,43 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         else if (ztd::endswith(socket_property, "_visible"))
         {
+            bool valid = false;
             bool use_mode = false;
             XSetPanel xset_panel_var;
             if (ztd::startswith(socket_property, "devices_"))
             {
                 xset_panel_var = XSetPanel::SHOW_DEVMON;
-                str = "show_devmon";
                 use_mode = true;
+                valid = true;
             }
             else if (ztd::startswith(socket_property, "bookmarks_"))
             {
                 xset_panel_var = XSetPanel::SHOW_BOOK;
-                str = "show_book";
                 use_mode = true;
+                valid = true;
             }
             else if (ztd::startswith(socket_property, "dirtree_"))
             {
                 xset_panel_var = XSetPanel::SHOW_DIRTREE;
-                str = "show_dirtree";
                 use_mode = true;
+                valid = true;
             }
             else if (ztd::startswith(socket_property, "toolbar_"))
             {
                 xset_panel_var = XSetPanel::SHOW_TOOLBOX;
-                str = "show_toolbox";
                 use_mode = true;
+                valid = true;
             }
             else if (ztd::startswith(socket_property, "sidetoolbar_"))
             {
                 xset_panel_var = XSetPanel::SHOW_SIDEBAR;
-                str = "show_sidebar";
                 use_mode = true;
+                valid = true;
             }
             else if (ztd::startswith(socket_property, "hidden_files_"))
             {
                 xset_panel_var = XSetPanel::SHOW_HIDDEN;
-                str = "show_hidden";
+                valid = true;
             }
             else if (ztd::startswith(socket_property, "panel"))
             {
@@ -6012,7 +6018,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 show_panels_all_windows(nullptr, main_window);
                 return 0;
             }
-            if (str.empty())
+            if (!valid)
             {
                 reply = fmt::format("invalid property {}", argv[i]);
                 return 1;
@@ -6020,7 +6026,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (use_mode)
             {
                 xset_set_b_panel_mode(panel,
-                                      str,
+                                      xset_panel_var,
                                       main_window->panel_context[panel - 1],
                                       get_bool(argv[i + 1]));
             }
@@ -6189,7 +6195,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (file_browser->view_mode != PtkFBViewMode::PTK_FB_ICON_VIEW)
             {
                 xset_set_b_panel_mode(panel,
-                                      "list_large",
+                                      XSetPanel::LIST_LARGE,
                                       main_window->panel_context[panel - 1],
                                       get_bool(argv[i + 1]));
                 update_views_all_windows(nullptr, file_browser);
@@ -6406,42 +6412,43 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         else if (ztd::endswith(socket_property, "_visible"))
         {
+            bool valid = false;
             bool use_mode = false;
             XSetPanel xset_panel_var;
             if (ztd::startswith(socket_property, "devices_"))
             {
                 xset_panel_var = XSetPanel::SHOW_DEVMON;
-                str = "show_devmon";
                 use_mode = true;
+                valid = true;
             }
             else if (ztd::startswith(socket_property, "bookmarks_"))
             {
                 xset_panel_var = XSetPanel::SHOW_BOOK;
-                str = "show_book";
                 use_mode = true;
+                valid = true;
             }
             else if (ztd::startswith(socket_property, "dirtree_"))
             {
                 xset_panel_var = XSetPanel::SHOW_DIRTREE;
-                str = "show_dirtree";
                 use_mode = true;
+                valid = true;
             }
             else if (ztd::startswith(socket_property, "toolbar_"))
             {
                 xset_panel_var = XSetPanel::SHOW_TOOLBOX;
-                str = "show_toolbox";
                 use_mode = true;
+                valid = true;
             }
             else if (ztd::startswith(socket_property, "sidetoolbar_"))
             {
                 xset_panel_var = XSetPanel::SHOW_SIDEBAR;
-                str = "show_sidebar";
                 use_mode = true;
+                valid = true;
             }
             else if (ztd::startswith(socket_property, "hidden_files_"))
             {
                 xset_panel_var = XSetPanel::SHOW_HIDDEN;
-                str = "show_hidden";
+                valid = true;
             }
             else if (ztd::startswith(socket_property, "panel"))
             {
@@ -6454,16 +6461,17 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = fmt::format("{}", xset_get_b_panel(j, XSetPanel::SHOW));
                 return 0;
             }
-            if (str.empty())
+            if (!valid)
             {
                 reply = fmt::format("invalid property {}", argv[i]);
                 return 1;
             }
             if (use_mode)
             {
-                reply = fmt::format(
-                    "{}",
-                    !!xset_get_b_panel_mode(panel, str, main_window->panel_context[panel - 1]));
+                reply = fmt::format("{}",
+                                    !!xset_get_b_panel_mode(panel,
+                                                            xset_panel_var,
+                                                            main_window->panel_context[panel - 1]));
             }
             else
             {

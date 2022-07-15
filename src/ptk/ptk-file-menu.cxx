@@ -130,7 +130,10 @@ on_popup_list_large(GtkMenuItem* menuitem, PtkFileBrowser* browser)
     FMMainWindow* main_window = FM_MAIN_WINDOW(browser->main_window);
     char mode = main_window->panel_context[p - 1];
 
-    xset_set_b_panel_mode(p, "list_large", mode, xset_get_b_panel(p, XSetPanel::LIST_LARGE));
+    xset_set_b_panel_mode(p,
+                          XSetPanel::LIST_LARGE,
+                          mode,
+                          xset_get_b_panel(p, XSetPanel::LIST_LARGE));
     update_views_all_windows(nullptr, browser);
 }
 
@@ -327,15 +330,15 @@ on_popup_detailed_column(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
         int p = file_browser->mypanel;
         char mode = main_window->panel_context[p - 1];
 
-        xset_t set = xset_get_panel_mode(p, "detcol_size", mode);
+        xset_t set = xset_get_panel_mode(p, XSetPanel::DETCOL_SIZE, mode);
         set->b = xset_get_panel(p, XSetPanel::DETCOL_SIZE)->b;
-        set = xset_get_panel_mode(p, "detcol_type", mode);
+        set = xset_get_panel_mode(p, XSetPanel::DETCOL_TYPE, mode);
         set->b = xset_get_panel(p, XSetPanel::DETCOL_TYPE)->b;
-        set = xset_get_panel_mode(p, "detcol_perm", mode);
+        set = xset_get_panel_mode(p, XSetPanel::DETCOL_PERM, mode);
         set->b = xset_get_panel(p, XSetPanel::DETCOL_PERM)->b;
-        set = xset_get_panel_mode(p, "detcol_owner", mode);
+        set = xset_get_panel_mode(p, XSetPanel::DETCOL_OWNER, mode);
         set->b = xset_get_panel(p, XSetPanel::DETCOL_OWNER)->b;
-        set = xset_get_panel_mode(p, "detcol_date", mode);
+        set = xset_get_panel_mode(p, XSetPanel::DETCOL_DATE, mode);
         set->b = xset_get_panel(p, XSetPanel::DETCOL_DATE)->b;
 
         update_views_all_windows(nullptr, file_browser);
@@ -351,15 +354,15 @@ on_popup_toggle_view(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
     int p = file_browser->mypanel;
     char mode = main_window->panel_context[p - 1];
 
-    xset_t set = xset_get_panel_mode(p, "show_toolbox", mode);
+    xset_t set = xset_get_panel_mode(p, XSetPanel::SHOW_TOOLBOX, mode);
     set->b = xset_get_panel(p, XSetPanel::SHOW_TOOLBOX)->b;
-    set = xset_get_panel_mode(p, "show_devmon", mode);
+    set = xset_get_panel_mode(p, XSetPanel::SHOW_DEVMON, mode);
     set->b = xset_get_panel(p, XSetPanel::SHOW_DEVMON)->b;
-    set = xset_get_panel_mode(p, "show_dirtree", mode);
+    set = xset_get_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode);
     set->b = xset_get_panel(p, XSetPanel::SHOW_DIRTREE)->b;
-    set = xset_get_panel_mode(p, "show_book", mode);
+    set = xset_get_panel_mode(p, XSetPanel::SHOW_BOOK, mode);
     set->b = xset_get_panel(p, XSetPanel::SHOW_BOOK)->b;
-    set = xset_get_panel_mode(p, "show_sidebar", mode);
+    set = xset_get_panel_mode(p, XSetPanel::SHOW_SIDEBAR, mode);
     set->b = xset_get_panel(p, XSetPanel::SHOW_SIDEBAR)->b;
 
     update_views_all_windows(nullptr, file_browser);
@@ -425,21 +428,21 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     bool show_side = false;
     xset_set_cb(XSetName::VIEW_REFRESH, (GFunc)ptk_file_browser_refresh, browser);
     set = xset_set_cb_panel(p, XSetPanel::SHOW_TOOLBOX, (GFunc)on_popup_toggle_view, browser);
-    set->b = xset_get_panel_mode(p, "show_toolbox", mode)->b;
+    set->b = xset_get_panel_mode(p, XSetPanel::SHOW_TOOLBOX, mode)->b;
     set = xset_set_cb_panel(p, XSetPanel::SHOW_DEVMON, (GFunc)on_popup_toggle_view, browser);
-    set->b = xset_get_panel_mode(p, "show_devmon", mode)->b;
+    set->b = xset_get_panel_mode(p, XSetPanel::SHOW_DEVMON, mode)->b;
     if (set->b == XSetB::XSET_B_TRUE)
         show_side = true;
     set = xset_set_cb_panel(p, XSetPanel::SHOW_DIRTREE, (GFunc)on_popup_toggle_view, browser);
-    set->b = xset_get_panel_mode(p, "show_dirtree", mode)->b;
+    set->b = xset_get_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode)->b;
     if (set->b == XSetB::XSET_B_TRUE)
         show_side = true;
     set = xset_set_cb_panel(p, XSetPanel::SHOW_BOOK, (GFunc)on_popup_toggle_view, browser);
-    set->b = xset_get_panel_mode(p, "show_book", mode)->b;
+    set->b = xset_get_panel_mode(p, XSetPanel::SHOW_BOOK, mode)->b;
     if (set->b == XSetB::XSET_B_TRUE)
         show_side = true;
     set = xset_set_cb_panel(p, XSetPanel::SHOW_SIDEBAR, (GFunc)on_popup_toggle_view, browser);
-    set->b = xset_get_panel_mode(p, "show_sidebar", mode)->b;
+    set->b = xset_get_panel_mode(p, XSetPanel::SHOW_SIDEBAR, mode)->b;
     set->disable = !show_side;
     xset_set_cb_panel(p, XSetPanel::SHOW_HIDDEN, (GFunc)on_popup_show_hidden, browser);
 
@@ -447,19 +450,19 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     {
         set =
             xset_set_cb_panel(p, XSetPanel::DETCOL_SIZE, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, "detcol_size", mode)->b;
+        set->b = xset_get_panel_mode(p, XSetPanel::DETCOL_SIZE, mode)->b;
         set =
             xset_set_cb_panel(p, XSetPanel::DETCOL_TYPE, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, "detcol_type", mode)->b;
+        set->b = xset_get_panel_mode(p, XSetPanel::DETCOL_TYPE, mode)->b;
         set =
             xset_set_cb_panel(p, XSetPanel::DETCOL_PERM, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, "detcol_perm", mode)->b;
+        set->b = xset_get_panel_mode(p, XSetPanel::DETCOL_PERM, mode)->b;
         set =
             xset_set_cb_panel(p, XSetPanel::DETCOL_OWNER, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, "detcol_owner", mode)->b;
+        set->b = xset_get_panel_mode(p, XSetPanel::DETCOL_OWNER, mode)->b;
         set =
             xset_set_cb_panel(p, XSetPanel::DETCOL_DATE, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, "detcol_date", mode)->b;
+        set->b = xset_get_panel_mode(p, XSetPanel::DETCOL_DATE, mode)->b;
 
         xset_set_cb(XSetName::VIEW_REORDER_COL, (GFunc)on_reorder, browser);
         set = xset_set(XSetName::VIEW_COLUMNS, XSetVar::DISABLE, "0");
@@ -494,7 +497,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     {
         set = xset_set_cb_panel(p, XSetPanel::LIST_LARGE, (GFunc)on_popup_list_large, browser);
         set->disable = false;
-        set->b = xset_get_panel_mode(p, "list_large", mode)->b;
+        set->b = xset_get_panel_mode(p, XSetPanel::LIST_LARGE, mode)->b;
     }
 
     set = xset_set_cb_panel(p, XSetPanel::LIST_DETAILED, (GFunc)on_popup_list_detailed, browser);

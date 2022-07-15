@@ -1234,6 +1234,12 @@ xset_get_panel_mode(panel_t panel, const std::string& name, const char mode)
     return set;
 }
 
+xset_t
+xset_get_panel_mode(panel_t panel, XSetPanel name, const char mode)
+{
+    return xset_get(xset_get_xsetname_from_panel_mode(panel, name, mode));
+}
+
 char*
 xset_get_s(XSetName name)
 {
@@ -1299,6 +1305,12 @@ xset_get_b_panel_mode(panel_t panel, const std::string& name, const char mode)
     // otherwise it gets ignored and not added to new string
     std::string fullname = fmt::format("panel{}_{}{}", panel, name, std::to_string(mode));
     return xset_get_b(fullname);
+}
+
+bool
+xset_get_b_panel_mode(panel_t panel, XSetPanel name, const char mode)
+{
+    return xset_get_b(xset_get_xsetname_from_panel_mode(panel, name, mode));
 }
 
 static bool
@@ -1377,6 +1389,12 @@ xset_set_b_panel_mode(panel_t panel, const std::string& name, const char mode, b
     std::string fullname = fmt::format("panel{}_{}{}", panel, name, std::to_string(mode));
     xset_t set = xset_set_b(fullname, bval);
     return set;
+}
+
+xset_t
+xset_set_b_panel_mode(panel_t panel, XSetPanel name, const char mode, bool bval)
+{
+    return xset_set_b(xset_get_xsetname_from_panel_mode(panel, name, mode), bval);
 }
 
 static int
@@ -6949,12 +6967,12 @@ xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventButton* event
     switch (tool_type)
     {
         case XSetTool::DEVICES:
-            set2 = xset_get_panel_mode(p, "show_devmon", mode);
+            set2 = xset_get_panel_mode(p, XSetPanel::SHOW_DEVMON, mode);
             set2->b = set2->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_UNSET : XSetB::XSET_B_TRUE;
             update_views_all_windows(nullptr, file_browser);
             break;
         case XSetTool::BOOKMARKS:
-            set2 = xset_get_panel_mode(p, "show_book", mode);
+            set2 = xset_get_panel_mode(p, XSetPanel::SHOW_BOOK, mode);
             set2->b = set2->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_UNSET : XSetB::XSET_B_TRUE;
             update_views_all_windows(nullptr, file_browser);
             if (file_browser->side_book)
@@ -6964,7 +6982,7 @@ xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventButton* event
             }
             break;
         case XSetTool::TREE:
-            set2 = xset_get_panel_mode(p, "show_dirtree", mode);
+            set2 = xset_get_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode);
             set2->b = set2->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_UNSET : XSetB::XSET_B_TRUE;
             update_views_all_windows(nullptr, file_browser);
             break;

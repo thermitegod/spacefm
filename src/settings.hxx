@@ -332,6 +332,7 @@ xset_t xset_get(const std::string& name);
 xset_t xset_get_panel(panel_t panel, const std::string& name);
 xset_t xset_get_panel(panel_t panel, XSetPanel name);
 xset_t xset_get_panel_mode(panel_t panel, const std::string& name, char mode);
+xset_t xset_get_panel_mode(panel_t panel, XSetPanel name, char mode);
 
 int xset_get_int(XSetName name, XSetVar var);
 int xset_get_int(const std::string& name, XSetVar var);
@@ -348,12 +349,14 @@ bool xset_get_b(const std::string& name);
 bool xset_get_b_panel(panel_t panel, const std::string& name);
 bool xset_get_b_panel(panel_t panel, XSetPanel name);
 bool xset_get_b_panel_mode(panel_t panel, const std::string& name, char mode);
+bool xset_get_b_panel_mode(panel_t panel, XSetPanel name, char mode);
 
 xset_t xset_set_b(XSetName name, bool bval);
 xset_t xset_set_b(const std::string& name, bool bval);
 xset_t xset_set_b_panel(panel_t panel, const std::string& name, bool bval);
 xset_t xset_set_b_panel(panel_t panel, XSetPanel name, bool bval);
 xset_t xset_set_b_panel_mode(panel_t panel, const std::string& name, char mode, bool bval);
+xset_t xset_set_b_panel_mode(panel_t panel, XSetPanel name, char mode, bool bval);
 
 xset_t xset_set_panel(panel_t panel, const std::string& name, XSetVar var,
                       const std::string& value);

@@ -633,6 +633,432 @@ const std::map<XSetName, const std::string> xset_name_map{
     {XSetName::PANEL4_TOOL_R, "panel4_tool_r"},
     {XSetName::PANEL4_TOOL_S, "panel4_tool_s"},
 
+    // panel modes
+
+    // panel1
+
+    // panel1 mode 0
+    {XSetName::PANEL1_SHOW_TOOLBOX_0,     "panel1_show_toolbox0"},
+    {XSetName::PANEL1_SHOW_DEVMON_0,      "panel1_show_devmon0"},
+    {XSetName::PANEL1_SHOW_DIRTREE_0,     "panel1_show_dirtree0"},
+    {XSetName::PANEL1_SHOW_BOOK_0,        "panel1_show_book0"},
+    {XSetName::PANEL1_SHOW_SIDEBAR_0,     "panel1_show_sidebar0"},
+    {XSetName::PANEL1_SLIDER_POSITIONS_0, "panel1_slider_positions0"},
+    {XSetName::PANEL1_LIST_DETAILED_0,    "panel1_list_detailed0"},
+    {XSetName::PANEL1_LIST_ICONS_0,       "panel1_list_icons0"},
+    {XSetName::PANEL1_LIST_COMPACT_0,     "panel1_list_compact0"},
+    {XSetName::PANEL1_LIST_LARGE_0,       "panel1_list_large0"},
+    {XSetName::PANEL1_SHOW_HIDDEN_0,      "panel1_show_hidden0"},
+    {XSetName::PANEL1_ICON_TAB_0,         "panel1_icon_tab0"},
+    {XSetName::PANEL1_ICON_STATUS_0,      "panel1_icon_status0"},
+    {XSetName::PANEL1_DETCOL_NAME_0,      "panel1_detcol_name0"},
+    {XSetName::PANEL1_DETCOL_SIZE_0,      "panel1_detcol_size0"},
+    {XSetName::PANEL1_DETCOL_TYPE_0,      "panel1_detcol_type0"},
+    {XSetName::PANEL1_DETCOL_PERM_0,      "panel1_detcol_perm0"},
+    {XSetName::PANEL1_DETCOL_OWNER_0,     "panel1_detcol_owner0"},
+    {XSetName::PANEL1_DETCOL_DATE_0,      "panel1_detcol_date0"},
+    {XSetName::PANEL1_SORT_EXTRA_0,       "panel1_sort_extra0"},
+    {XSetName::PANEL1_BOOK_FOL_0,         "panel1_book_fol0"},
+    {XSetName::PANEL1_TOOL_L_0,           "panel1_tool_l0"},
+    {XSetName::PANEL1_TOOL_R_0,           "panel1_tool_r0"},
+    {XSetName::PANEL1_TOOL_S_0,           "panel1_tool_s0"},
+
+    // panel1 mode 1
+    {XSetName::PANEL1_SHOW_TOOLBOX_1,     "panel1_show_toolbox1"},
+    {XSetName::PANEL1_SHOW_DEVMON_1,      "panel1_show_devmon1"},
+    {XSetName::PANEL1_SHOW_DIRTREE_1,     "panel1_show_dirtree1"},
+    {XSetName::PANEL1_SHOW_BOOK_1,        "panel1_show_book1"},
+    {XSetName::PANEL1_SHOW_SIDEBAR_1,     "panel1_show_sidebar1"},
+    {XSetName::PANEL1_SLIDER_POSITIONS_1, "panel1_slider_positions1"},
+    {XSetName::PANEL1_LIST_DETAILED_1,    "panel1_list_detailed1"},
+    {XSetName::PANEL1_LIST_ICONS_1,       "panel1_list_icons1"},
+    {XSetName::PANEL1_LIST_COMPACT_1,     "panel1_list_compact1"},
+    {XSetName::PANEL1_LIST_LARGE_1,       "panel1_list_large1"},
+    {XSetName::PANEL1_SHOW_HIDDEN_1,      "panel1_show_hidden1"},
+    {XSetName::PANEL1_ICON_TAB_1,         "panel1_icon_tab1"},
+    {XSetName::PANEL1_ICON_STATUS_1,      "panel1_icon_status1"},
+    {XSetName::PANEL1_DETCOL_NAME_1,      "panel1_detcol_name1"},
+    {XSetName::PANEL1_DETCOL_SIZE_1,      "panel1_detcol_size1"},
+    {XSetName::PANEL1_DETCOL_TYPE_1,      "panel1_detcol_type1"},
+    {XSetName::PANEL1_DETCOL_PERM_1,      "panel1_detcol_perm1"},
+    {XSetName::PANEL1_DETCOL_OWNER_1,     "panel1_detcol_owner1"},
+    {XSetName::PANEL1_DETCOL_DATE_1,      "panel1_detcol_date1"},
+    {XSetName::PANEL1_SORT_EXTRA_1,       "panel1_sort_extra1"},
+    {XSetName::PANEL1_BOOK_FOL_1,         "panel1_book_fol1"},
+    {XSetName::PANEL1_TOOL_L_1,           "panel1_tool_l1"},
+    {XSetName::PANEL1_TOOL_R_1,           "panel1_tool_r1"},
+    {XSetName::PANEL1_TOOL_S_1,           "panel1_tool_s1"},
+
+    // panel1 mode 2
+    {XSetName::PANEL1_SHOW_TOOLBOX_2,     "panel1_show_toolbox2"},
+    {XSetName::PANEL1_SHOW_DEVMON_2,      "panel1_show_devmon2"},
+    {XSetName::PANEL1_SHOW_DIRTREE_2,     "panel1_show_dirtree2"},
+    {XSetName::PANEL1_SHOW_BOOK_2,        "panel1_show_book2"},
+    {XSetName::PANEL1_SHOW_SIDEBAR_2,     "panel1_show_sidebar2"},
+    {XSetName::PANEL1_SLIDER_POSITIONS_2, "panel1_slider_positions2"},
+    {XSetName::PANEL1_LIST_DETAILED_2,    "panel1_list_detailed2"},
+    {XSetName::PANEL1_LIST_ICONS_2,       "panel1_list_icons2"},
+    {XSetName::PANEL1_LIST_COMPACT_2,     "panel1_list_compact2"},
+    {XSetName::PANEL1_LIST_LARGE_2,       "panel1_list_large2"},
+    {XSetName::PANEL1_SHOW_HIDDEN_2,      "panel1_show_hidden2"},
+    {XSetName::PANEL1_ICON_TAB_2,         "panel1_icon_tab2"},
+    {XSetName::PANEL1_ICON_STATUS_2,      "panel1_icon_status2"},
+    {XSetName::PANEL1_DETCOL_NAME_2,      "panel1_detcol_name2"},
+    {XSetName::PANEL1_DETCOL_SIZE_2,      "panel1_detcol_size2"},
+    {XSetName::PANEL1_DETCOL_TYPE_2,      "panel1_detcol_type2"},
+    {XSetName::PANEL1_DETCOL_PERM_2,      "panel1_detcol_perm2"},
+    {XSetName::PANEL1_DETCOL_OWNER_2,     "panel1_detcol_owner2"},
+    {XSetName::PANEL1_DETCOL_DATE_2,      "panel1_detcol_date2"},
+    {XSetName::PANEL1_SORT_EXTRA_2,       "panel1_sort_extra2"},
+    {XSetName::PANEL1_BOOK_FOL_2,         "panel1_book_fol2"},
+    {XSetName::PANEL1_TOOL_L_2,           "panel1_tool_l2"},
+    {XSetName::PANEL1_TOOL_R_2,           "panel1_tool_r2"},
+    {XSetName::PANEL1_TOOL_S_2,           "panel1_tool_s2"},
+
+    // panel1 mode 3
+    {XSetName::PANEL1_SHOW_TOOLBOX_3,     "panel1_show_toolbox3"},
+    {XSetName::PANEL1_SHOW_DEVMON_3,      "panel1_show_devmon3"},
+    {XSetName::PANEL1_SHOW_DIRTREE_3,     "panel1_show_dirtree3"},
+    {XSetName::PANEL1_SHOW_BOOK_3,        "panel1_show_book3"},
+    {XSetName::PANEL1_SHOW_SIDEBAR_3,     "panel1_show_sidebar3"},
+    {XSetName::PANEL1_SLIDER_POSITIONS_3, "panel1_slider_positions3"},
+    {XSetName::PANEL1_LIST_DETAILED_3,    "panel1_list_detailed3"},
+    {XSetName::PANEL1_LIST_ICONS_3,       "panel1_list_icons3"},
+    {XSetName::PANEL1_LIST_COMPACT_3,     "panel1_list_compact3"},
+    {XSetName::PANEL1_LIST_LARGE_3,       "panel1_list_large3"},
+    {XSetName::PANEL1_SHOW_HIDDEN_3,      "panel1_show_hidden3"},
+    {XSetName::PANEL1_ICON_TAB_3,         "panel1_icon_tab3"},
+    {XSetName::PANEL1_ICON_STATUS_3,      "panel1_icon_status3"},
+    {XSetName::PANEL1_DETCOL_NAME_3,      "panel1_detcol_name3"},
+    {XSetName::PANEL1_DETCOL_SIZE_3,      "panel1_detcol_size3"},
+    {XSetName::PANEL1_DETCOL_TYPE_3,      "panel1_detcol_type3"},
+    {XSetName::PANEL1_DETCOL_PERM_3,      "panel1_detcol_perm3"},
+    {XSetName::PANEL1_DETCOL_OWNER_3,     "panel1_detcol_owner3"},
+    {XSetName::PANEL1_DETCOL_DATE_3,      "panel1_detcol_date3"},
+    {XSetName::PANEL1_SORT_EXTRA_3,       "panel1_sort_extra3"},
+    {XSetName::PANEL1_BOOK_FOL_3,         "panel1_book_fol3"},
+    {XSetName::PANEL1_TOOL_L_3,           "panel1_tool_l3"},
+    {XSetName::PANEL1_TOOL_R_3,           "panel1_tool_r3"},
+    {XSetName::PANEL1_TOOL_S_3,           "panel1_tool_s3"},
+
+    // panel2
+
+    // panel2 mode 0
+    {XSetName::PANEL2_SHOW_TOOLBOX_0,     "panel2_show_toolbox0"},
+    {XSetName::PANEL2_SHOW_DEVMON_0,      "panel2_show_devmon0"},
+    {XSetName::PANEL2_SHOW_DIRTREE_0,     "panel2_show_dirtree0"},
+    {XSetName::PANEL2_SHOW_BOOK_0,        "panel2_show_book0"},
+    {XSetName::PANEL2_SHOW_SIDEBAR_0,     "panel2_show_sidebar0"},
+    {XSetName::PANEL2_SLIDER_POSITIONS_0, "panel2_slider_positions0"},
+    {XSetName::PANEL2_LIST_DETAILED_0,    "panel2_list_detailed0"},
+    {XSetName::PANEL2_LIST_ICONS_0,       "panel2_list_icons0"},
+    {XSetName::PANEL2_LIST_COMPACT_0,     "panel2_list_compact0"},
+    {XSetName::PANEL2_LIST_LARGE_0,       "panel2_list_large0"},
+    {XSetName::PANEL2_SHOW_HIDDEN_0,      "panel2_show_hidden0"},
+    {XSetName::PANEL2_ICON_TAB_0,         "panel2_icon_tab0"},
+    {XSetName::PANEL2_ICON_STATUS_0,      "panel2_icon_status0"},
+    {XSetName::PANEL2_DETCOL_NAME_0,      "panel2_detcol_name0"},
+    {XSetName::PANEL2_DETCOL_SIZE_0,      "panel2_detcol_size0"},
+    {XSetName::PANEL2_DETCOL_TYPE_0,      "panel2_detcol_type0"},
+    {XSetName::PANEL2_DETCOL_PERM_0,      "panel2_detcol_perm0"},
+    {XSetName::PANEL2_DETCOL_OWNER_0,     "panel2_detcol_owner0"},
+    {XSetName::PANEL2_DETCOL_DATE_0,      "panel2_detcol_date0"},
+    {XSetName::PANEL2_SORT_EXTRA_0,       "panel2_sort_extra0"},
+    {XSetName::PANEL2_BOOK_FOL_0,         "panel2_book_fol0"},
+    {XSetName::PANEL2_TOOL_L_0,           "panel2_tool_l0"},
+    {XSetName::PANEL2_TOOL_R_0,           "panel2_tool_r0"},
+    {XSetName::PANEL2_TOOL_S_0,           "panel2_tool_s0"},
+
+    // panel2 mode 1
+    {XSetName::PANEL2_SHOW_TOOLBOX_1,     "panel2_show_toolbox1"},
+    {XSetName::PANEL2_SHOW_DEVMON_1,      "panel2_show_devmon1"},
+    {XSetName::PANEL2_SHOW_DIRTREE_1,     "panel2_show_dirtree1"},
+    {XSetName::PANEL2_SHOW_BOOK_1,        "panel2_show_book1"},
+    {XSetName::PANEL2_SHOW_SIDEBAR_1,     "panel2_show_sidebar1"},
+    {XSetName::PANEL2_SLIDER_POSITIONS_1, "panel2_slider_positions1"},
+    {XSetName::PANEL2_LIST_DETAILED_1,    "panel2_list_detailed1"},
+    {XSetName::PANEL2_LIST_ICONS_1,       "panel2_list_icons1"},
+    {XSetName::PANEL2_LIST_COMPACT_1,     "panel2_list_compact1"},
+    {XSetName::PANEL2_LIST_LARGE_1,       "panel2_list_large1"},
+    {XSetName::PANEL2_SHOW_HIDDEN_1,      "panel2_show_hidden1"},
+    {XSetName::PANEL2_ICON_TAB_1,         "panel2_icon_tab1"},
+    {XSetName::PANEL2_ICON_STATUS_1,      "panel2_icon_status1"},
+    {XSetName::PANEL2_DETCOL_NAME_1,      "panel2_detcol_name1"},
+    {XSetName::PANEL2_DETCOL_SIZE_1,      "panel2_detcol_size1"},
+    {XSetName::PANEL2_DETCOL_TYPE_1,      "panel2_detcol_type1"},
+    {XSetName::PANEL2_DETCOL_PERM_1,      "panel2_detcol_perm1"},
+    {XSetName::PANEL2_DETCOL_OWNER_1,     "panel2_detcol_owner1"},
+    {XSetName::PANEL2_DETCOL_DATE_1,      "panel2_detcol_date1"},
+    {XSetName::PANEL2_SORT_EXTRA_1,       "panel2_sort_extra1"},
+    {XSetName::PANEL2_BOOK_FOL_1,         "panel2_book_fol1"},
+    {XSetName::PANEL2_TOOL_L_1,           "panel2_tool_l1"},
+    {XSetName::PANEL2_TOOL_R_1,           "panel2_tool_r1"},
+    {XSetName::PANEL2_TOOL_S_1,           "panel2_tool_s1"},
+
+    // panel2 mode 2
+    {XSetName::PANEL2_SHOW_TOOLBOX_2,     "panel2_show_toolbox2"},
+    {XSetName::PANEL2_SHOW_DEVMON_2,      "panel2_show_devmon2"},
+    {XSetName::PANEL2_SHOW_DIRTREE_2,     "panel2_show_dirtree2"},
+    {XSetName::PANEL2_SHOW_BOOK_2,        "panel2_show_book2"},
+    {XSetName::PANEL2_SHOW_SIDEBAR_2,     "panel2_show_sidebar2"},
+    {XSetName::PANEL2_SLIDER_POSITIONS_2, "panel2_slider_positions2"},
+    {XSetName::PANEL2_LIST_DETAILED_2,    "panel2_list_detailed2"},
+    {XSetName::PANEL2_LIST_ICONS_2,       "panel2_list_icons2"},
+    {XSetName::PANEL2_LIST_COMPACT_2,     "panel2_list_compact2"},
+    {XSetName::PANEL2_LIST_LARGE_2,       "panel2_list_large2"},
+    {XSetName::PANEL2_SHOW_HIDDEN_2,      "panel2_show_hidden2"},
+    {XSetName::PANEL2_ICON_TAB_2,         "panel2_icon_tab2"},
+    {XSetName::PANEL2_ICON_STATUS_2,      "panel2_icon_status2"},
+    {XSetName::PANEL2_DETCOL_NAME_2,      "panel2_detcol_name2"},
+    {XSetName::PANEL2_DETCOL_SIZE_2,      "panel2_detcol_size2"},
+    {XSetName::PANEL2_DETCOL_TYPE_2,      "panel2_detcol_type2"},
+    {XSetName::PANEL2_DETCOL_PERM_2,      "panel2_detcol_perm2"},
+    {XSetName::PANEL2_DETCOL_OWNER_2,     "panel2_detcol_owner2"},
+    {XSetName::PANEL2_DETCOL_DATE_2,      "panel2_detcol_date2"},
+    {XSetName::PANEL2_SORT_EXTRA_2,       "panel2_sort_extra2"},
+    {XSetName::PANEL2_BOOK_FOL_2,         "panel2_book_fol2"},
+    {XSetName::PANEL2_TOOL_L_2,           "panel2_tool_l2"},
+    {XSetName::PANEL2_TOOL_R_2,           "panel2_tool_r2"},
+    {XSetName::PANEL2_TOOL_S_2,           "panel2_tool_s2"},
+
+    // panel2 mode 3
+    {XSetName::PANEL2_SHOW_TOOLBOX_3,     "panel2_show_toolbox3"},
+    {XSetName::PANEL2_SHOW_DEVMON_3,      "panel2_show_devmon3"},
+    {XSetName::PANEL2_SHOW_DIRTREE_3,     "panel2_show_dirtree3"},
+    {XSetName::PANEL2_SHOW_BOOK_3,        "panel2_show_book3"},
+    {XSetName::PANEL2_SHOW_SIDEBAR_3,     "panel2_show_sidebar3"},
+    {XSetName::PANEL2_SLIDER_POSITIONS_3, "panel2_slider_positions3"},
+    {XSetName::PANEL2_LIST_DETAILED_3,    "panel2_list_detailed3"},
+    {XSetName::PANEL2_LIST_ICONS_3,       "panel2_list_icons3"},
+    {XSetName::PANEL2_LIST_COMPACT_3,     "panel2_list_compact3"},
+    {XSetName::PANEL2_LIST_LARGE_3,       "panel2_list_large3"},
+    {XSetName::PANEL2_SHOW_HIDDEN_3,      "panel2_show_hidden3"},
+    {XSetName::PANEL2_ICON_TAB_3,         "panel2_icon_tab3"},
+    {XSetName::PANEL2_ICON_STATUS_3,      "panel2_icon_status3"},
+    {XSetName::PANEL2_DETCOL_NAME_3,      "panel2_detcol_name3"},
+    {XSetName::PANEL2_DETCOL_SIZE_3,      "panel2_detcol_size3"},
+    {XSetName::PANEL2_DETCOL_TYPE_3,      "panel2_detcol_type3"},
+    {XSetName::PANEL2_DETCOL_PERM_3,      "panel2_detcol_perm3"},
+    {XSetName::PANEL2_DETCOL_OWNER_3,     "panel2_detcol_owner3"},
+    {XSetName::PANEL2_DETCOL_DATE_3,      "panel2_detcol_date3"},
+    {XSetName::PANEL2_SORT_EXTRA_3,       "panel2_sort_extra3"},
+    {XSetName::PANEL2_BOOK_FOL_3,         "panel2_book_fol3"},
+    {XSetName::PANEL2_TOOL_L_3,           "panel2_tool_l3"},
+    {XSetName::PANEL2_TOOL_R_3,           "panel2_tool_r3"},
+    {XSetName::PANEL2_TOOL_S_3,           "panel2_tool_s3"},
+
+    // panel3
+
+    // panel3 mode 0
+    {XSetName::PANEL3_SHOW_TOOLBOX_0,     "panel3_show_toolbox0"},
+    {XSetName::PANEL3_SHOW_DEVMON_0,      "panel3_show_devmon0"},
+    {XSetName::PANEL3_SHOW_DIRTREE_0,     "panel3_show_dirtree0"},
+    {XSetName::PANEL3_SHOW_BOOK_0,        "panel3_show_book0"},
+    {XSetName::PANEL3_SHOW_SIDEBAR_0,     "panel3_show_sidebar0"},
+    {XSetName::PANEL3_SLIDER_POSITIONS_0, "panel3_slider_positions0"},
+    {XSetName::PANEL3_LIST_DETAILED_0,    "panel3_list_detailed0"},
+    {XSetName::PANEL3_LIST_ICONS_0,       "panel3_list_icons0"},
+    {XSetName::PANEL3_LIST_COMPACT_0,     "panel3_list_compact0"},
+    {XSetName::PANEL3_LIST_LARGE_0,       "panel3_list_large0"},
+    {XSetName::PANEL3_SHOW_HIDDEN_0,      "panel3_show_hidden0"},
+    {XSetName::PANEL3_ICON_TAB_0,         "panel3_icon_tab0"},
+    {XSetName::PANEL3_ICON_STATUS_0,      "panel3_icon_status0"},
+    {XSetName::PANEL3_DETCOL_NAME_0,      "panel3_detcol_name0"},
+    {XSetName::PANEL3_DETCOL_SIZE_0,      "panel3_detcol_size0"},
+    {XSetName::PANEL3_DETCOL_TYPE_0,      "panel3_detcol_type0"},
+    {XSetName::PANEL3_DETCOL_PERM_0,      "panel3_detcol_perm0"},
+    {XSetName::PANEL3_DETCOL_OWNER_0,     "panel3_detcol_owner0"},
+    {XSetName::PANEL3_DETCOL_DATE_0,      "panel3_detcol_date0"},
+    {XSetName::PANEL3_SORT_EXTRA_0,       "panel3_sort_extra0"},
+    {XSetName::PANEL3_BOOK_FOL_0,         "panel3_book_fol0"},
+    {XSetName::PANEL3_TOOL_L_0,           "panel3_tool_l0"},
+    {XSetName::PANEL3_TOOL_R_0,           "panel3_tool_r0"},
+    {XSetName::PANEL3_TOOL_S_0,           "panel3_tool_s0"},
+
+    // panel3 mode 1
+    {XSetName::PANEL3_SHOW_TOOLBOX_1,     "panel3_show_toolbox1"},
+    {XSetName::PANEL3_SHOW_DEVMON_1,      "panel3_show_devmon1"},
+    {XSetName::PANEL3_SHOW_DIRTREE_1,     "panel3_show_dirtree1"},
+    {XSetName::PANEL3_SHOW_BOOK_1,        "panel3_show_book1"},
+    {XSetName::PANEL3_SHOW_SIDEBAR_1,     "panel3_show_sidebar1"},
+    {XSetName::PANEL3_SLIDER_POSITIONS_1, "panel3_slider_positions1"},
+    {XSetName::PANEL3_LIST_DETAILED_1,    "panel3_list_detailed1"},
+    {XSetName::PANEL3_LIST_ICONS_1,       "panel3_list_icons1"},
+    {XSetName::PANEL3_LIST_COMPACT_1,     "panel3_list_compact1"},
+    {XSetName::PANEL3_LIST_LARGE_1,       "panel3_list_large1"},
+    {XSetName::PANEL3_SHOW_HIDDEN_1,      "panel3_show_hidden1"},
+    {XSetName::PANEL3_ICON_TAB_1,         "panel3_icon_tab1"},
+    {XSetName::PANEL3_ICON_STATUS_1,      "panel3_icon_status1"},
+    {XSetName::PANEL3_DETCOL_NAME_1,      "panel3_detcol_name1"},
+    {XSetName::PANEL3_DETCOL_SIZE_1,      "panel3_detcol_size1"},
+    {XSetName::PANEL3_DETCOL_TYPE_1,      "panel3_detcol_type1"},
+    {XSetName::PANEL3_DETCOL_PERM_1,      "panel3_detcol_perm1"},
+    {XSetName::PANEL3_DETCOL_OWNER_1,     "panel3_detcol_owner1"},
+    {XSetName::PANEL3_DETCOL_DATE_1,      "panel3_detcol_date1"},
+    {XSetName::PANEL3_SORT_EXTRA_1,       "panel3_sort_extra1"},
+    {XSetName::PANEL3_BOOK_FOL_1,         "panel3_book_fol1"},
+    {XSetName::PANEL3_TOOL_L_1,           "panel3_tool_l1"},
+    {XSetName::PANEL3_TOOL_R_1,           "panel3_tool_r1"},
+    {XSetName::PANEL3_TOOL_S_1,           "panel3_tool_s1"},
+
+    // panel3 mode 2
+    {XSetName::PANEL3_SHOW_TOOLBOX_2,     "panel3_show_toolbox2"},
+    {XSetName::PANEL3_SHOW_DEVMON_2,      "panel3_show_devmon2"},
+    {XSetName::PANEL3_SHOW_DIRTREE_2,     "panel3_show_dirtree2"},
+    {XSetName::PANEL3_SHOW_BOOK_2,        "panel3_show_book2"},
+    {XSetName::PANEL3_SHOW_SIDEBAR_2,     "panel3_show_sidebar2"},
+    {XSetName::PANEL3_SLIDER_POSITIONS_2, "panel3_slider_positions2"},
+    {XSetName::PANEL3_LIST_DETAILED_2,    "panel3_list_detailed2"},
+    {XSetName::PANEL3_LIST_ICONS_2,       "panel3_list_icons2"},
+    {XSetName::PANEL3_LIST_COMPACT_2,     "panel3_list_compact2"},
+    {XSetName::PANEL3_LIST_LARGE_2,       "panel3_list_large2"},
+    {XSetName::PANEL3_SHOW_HIDDEN_2,      "panel3_show_hidden2"},
+    {XSetName::PANEL3_ICON_TAB_2,         "panel3_icon_tab2"},
+    {XSetName::PANEL3_ICON_STATUS_2,      "panel3_icon_status2"},
+    {XSetName::PANEL3_DETCOL_NAME_2,      "panel3_detcol_name2"},
+    {XSetName::PANEL3_DETCOL_SIZE_2,      "panel3_detcol_size2"},
+    {XSetName::PANEL3_DETCOL_TYPE_2,      "panel3_detcol_type2"},
+    {XSetName::PANEL3_DETCOL_PERM_2,      "panel3_detcol_perm2"},
+    {XSetName::PANEL3_DETCOL_OWNER_2,     "panel3_detcol_owner2"},
+    {XSetName::PANEL3_DETCOL_DATE_2,      "panel3_detcol_date2"},
+    {XSetName::PANEL3_SORT_EXTRA_2,       "panel3_sort_extra2"},
+    {XSetName::PANEL3_BOOK_FOL_2,         "panel3_book_fol2"},
+    {XSetName::PANEL3_TOOL_L_2,           "panel3_tool_l2"},
+    {XSetName::PANEL3_TOOL_R_2,           "panel3_tool_r2"},
+    {XSetName::PANEL3_TOOL_S_2,           "panel3_tool_s2"},
+
+    // panel13 mode 3
+    {XSetName::PANEL3_SHOW_TOOLBOX_3,     "panel3_show_toolbox3"},
+    {XSetName::PANEL3_SHOW_DEVMON_3,      "panel3_show_devmon3"},
+    {XSetName::PANEL3_SHOW_DIRTREE_3,     "panel3_show_dirtree3"},
+    {XSetName::PANEL3_SHOW_BOOK_3,        "panel3_show_book3"},
+    {XSetName::PANEL3_SHOW_SIDEBAR_3,     "panel3_show_sidebar3"},
+    {XSetName::PANEL3_SLIDER_POSITIONS_3, "panel3_slider_positions3"},
+    {XSetName::PANEL3_LIST_DETAILED_3,    "panel3_list_detailed3"},
+    {XSetName::PANEL3_LIST_ICONS_3,       "panel3_list_icons3"},
+    {XSetName::PANEL3_LIST_COMPACT_3,     "panel3_list_compact3"},
+    {XSetName::PANEL3_LIST_LARGE_3,       "panel3_list_large3"},
+    {XSetName::PANEL3_SHOW_HIDDEN_3,      "panel3_show_hidden3"},
+    {XSetName::PANEL3_ICON_TAB_3,         "panel3_icon_tab3"},
+    {XSetName::PANEL3_ICON_STATUS_3,      "panel3_icon_status3"},
+    {XSetName::PANEL3_DETCOL_NAME_3,      "panel3_detcol_name3"},
+    {XSetName::PANEL3_DETCOL_SIZE_3,      "panel3_detcol_size3"},
+    {XSetName::PANEL3_DETCOL_TYPE_3,      "panel3_detcol_type3"},
+    {XSetName::PANEL3_DETCOL_PERM_3,      "panel3_detcol_perm3"},
+    {XSetName::PANEL3_DETCOL_OWNER_3,     "panel3_detcol_owner3"},
+    {XSetName::PANEL3_DETCOL_DATE_3,      "panel3_detcol_date3"},
+    {XSetName::PANEL3_SORT_EXTRA_3,       "panel3_sort_extra3"},
+    {XSetName::PANEL3_BOOK_FOL_3,         "panel3_book_fol3"},
+    {XSetName::PANEL3_TOOL_L_3,           "panel3_tool_l3"},
+    {XSetName::PANEL3_TOOL_R_3,           "panel3_tool_r3"},
+    {XSetName::PANEL3_TOOL_S_3,           "panel3_tool_s3"},
+
+    // panel4
+
+    // panel4 mode 0
+    {XSetName::PANEL4_SHOW_TOOLBOX_0,     "panel4_show_toolbox0"},
+    {XSetName::PANEL4_SHOW_DEVMON_0,      "panel4_show_devmon0"},
+    {XSetName::PANEL4_SHOW_DIRTREE_0,     "panel4_show_dirtree0"},
+    {XSetName::PANEL4_SHOW_BOOK_0,        "panel4_show_book0"},
+    {XSetName::PANEL4_SHOW_SIDEBAR_0,     "panel4_show_sidebar0"},
+    {XSetName::PANEL4_SLIDER_POSITIONS_0, "panel4_slider_positions0"},
+    {XSetName::PANEL4_LIST_DETAILED_0,    "panel4_list_detailed0"},
+    {XSetName::PANEL4_LIST_ICONS_0,       "panel4_list_icons0"},
+    {XSetName::PANEL4_LIST_COMPACT_0,     "panel4_list_compact0"},
+    {XSetName::PANEL4_LIST_LARGE_0,       "panel4_list_large0"},
+    {XSetName::PANEL4_SHOW_HIDDEN_0,      "panel4_show_hidden0"},
+    {XSetName::PANEL4_ICON_TAB_0,         "panel4_icon_tab0"},
+    {XSetName::PANEL4_ICON_STATUS_0,      "panel4_icon_status0"},
+    {XSetName::PANEL4_DETCOL_NAME_0,      "panel4_detcol_name0"},
+    {XSetName::PANEL4_DETCOL_SIZE_0,      "panel4_detcol_size0"},
+    {XSetName::PANEL4_DETCOL_TYPE_0,      "panel4_detcol_type0"},
+    {XSetName::PANEL4_DETCOL_PERM_0,      "panel4_detcol_perm0"},
+    {XSetName::PANEL4_DETCOL_OWNER_0,     "panel4_detcol_owner0"},
+    {XSetName::PANEL4_DETCOL_DATE_0,      "panel4_detcol_date0"},
+    {XSetName::PANEL4_SORT_EXTRA_0,       "panel4_sort_extra0"},
+    {XSetName::PANEL4_BOOK_FOL_0,         "panel4_book_fol0"},
+    {XSetName::PANEL4_TOOL_L_0,           "panel4_tool_l0"},
+    {XSetName::PANEL4_TOOL_R_0,           "panel4_tool_r0"},
+    {XSetName::PANEL4_TOOL_S_0,           "panel4_tool_s0"},
+
+    // panel4 mode 1
+    {XSetName::PANEL4_SHOW_TOOLBOX_1,     "panel4_show_toolbox1"},
+    {XSetName::PANEL4_SHOW_DEVMON_1,      "panel4_show_devmon1"},
+    {XSetName::PANEL4_SHOW_DIRTREE_1,     "panel4_show_dirtree1"},
+    {XSetName::PANEL4_SHOW_BOOK_1,        "panel4_show_book1"},
+    {XSetName::PANEL4_SHOW_SIDEBAR_1,     "panel4_show_sidebar1"},
+    {XSetName::PANEL4_SLIDER_POSITIONS_1, "panel4_slider_positions1"},
+    {XSetName::PANEL4_LIST_DETAILED_1,    "panel4_list_detailed1"},
+    {XSetName::PANEL4_LIST_ICONS_1,       "panel4_list_icons1"},
+    {XSetName::PANEL4_LIST_COMPACT_1,     "panel4_list_compact1"},
+    {XSetName::PANEL4_LIST_LARGE_1,       "panel4_list_large1"},
+    {XSetName::PANEL4_SHOW_HIDDEN_1,      "panel4_show_hidden1"},
+    {XSetName::PANEL4_ICON_TAB_1,         "panel4_icon_tab1"},
+    {XSetName::PANEL4_ICON_STATUS_1,      "panel4_icon_status1"},
+    {XSetName::PANEL4_DETCOL_NAME_1,      "panel4_detcol_name1"},
+    {XSetName::PANEL4_DETCOL_SIZE_1,      "panel4_detcol_size1"},
+    {XSetName::PANEL4_DETCOL_TYPE_1,      "panel4_detcol_type1"},
+    {XSetName::PANEL4_DETCOL_PERM_1,      "panel4_detcol_perm1"},
+    {XSetName::PANEL4_DETCOL_OWNER_1,     "panel4_detcol_owner1"},
+    {XSetName::PANEL4_DETCOL_DATE_1,      "panel4_detcol_date1"},
+    {XSetName::PANEL4_SORT_EXTRA_1,       "panel4_sort_extra1"},
+    {XSetName::PANEL4_BOOK_FOL_1,         "panel4_book_fol1"},
+    {XSetName::PANEL4_TOOL_L_1,           "panel4_tool_l1"},
+    {XSetName::PANEL4_TOOL_R_1,           "panel4_tool_r1"},
+    {XSetName::PANEL4_TOOL_S_1,           "panel4_tool_s1"},
+
+    // panel4 mode 2
+    {XSetName::PANEL4_SHOW_TOOLBOX_2,     "panel4_show_toolbox2"},
+    {XSetName::PANEL4_SHOW_DEVMON_2,      "panel4_show_devmon2"},
+    {XSetName::PANEL4_SHOW_DIRTREE_2,     "panel4_show_dirtree2"},
+    {XSetName::PANEL4_SHOW_BOOK_2,        "panel4_show_book2"},
+    {XSetName::PANEL4_SHOW_SIDEBAR_2,     "panel4_show_sidebar2"},
+    {XSetName::PANEL4_SLIDER_POSITIONS_2, "panel4_slider_positions2"},
+    {XSetName::PANEL4_LIST_DETAILED_2,    "panel4_list_detailed2"},
+    {XSetName::PANEL4_LIST_ICONS_2,       "panel4_list_icons2"},
+    {XSetName::PANEL4_LIST_COMPACT_2,     "panel4_list_compact2"},
+    {XSetName::PANEL4_LIST_LARGE_2,       "panel4_list_large2"},
+    {XSetName::PANEL4_SHOW_HIDDEN_2,      "panel4_show_hidden2"},
+    {XSetName::PANEL4_ICON_TAB_2,         "panel4_icon_tab2"},
+    {XSetName::PANEL4_ICON_STATUS_2,      "panel4_icon_status2"},
+    {XSetName::PANEL4_DETCOL_NAME_2,      "panel4_detcol_name2"},
+    {XSetName::PANEL4_DETCOL_SIZE_2,      "panel4_detcol_size2"},
+    {XSetName::PANEL4_DETCOL_TYPE_2,      "panel4_detcol_type2"},
+    {XSetName::PANEL4_DETCOL_PERM_2,      "panel4_detcol_perm2"},
+    {XSetName::PANEL4_DETCOL_OWNER_2,     "panel4_detcol_owner2"},
+    {XSetName::PANEL4_DETCOL_DATE_2,      "panel4_detcol_date2"},
+    {XSetName::PANEL4_SORT_EXTRA_2,       "panel4_sort_extra2"},
+    {XSetName::PANEL4_BOOK_FOL_2,         "panel4_book_fol2"},
+    {XSetName::PANEL4_TOOL_L_2,           "panel4_tool_l2"},
+    {XSetName::PANEL4_TOOL_R_2,           "panel4_tool_r2"},
+    {XSetName::PANEL4_TOOL_S_2,           "panel4_tool_s2"},
+
+    // panel4 mode 3
+    {XSetName::PANEL4_SHOW_TOOLBOX_3,     "panel4_show_toolbox3"},
+    {XSetName::PANEL4_SHOW_DEVMON_3,      "panel4_show_devmon3"},
+    {XSetName::PANEL4_SHOW_DIRTREE_3,     "panel4_show_dirtree3"},
+    {XSetName::PANEL4_SHOW_BOOK_3,        "panel4_show_book3"},
+    {XSetName::PANEL4_SHOW_SIDEBAR_3,     "panel4_show_sidebar3"},
+    {XSetName::PANEL4_SLIDER_POSITIONS_3, "panel4_slider_positions3"},
+    {XSetName::PANEL4_LIST_DETAILED_3,    "panel4_list_detailed3"},
+    {XSetName::PANEL4_LIST_ICONS_3,       "panel4_list_icons3"},
+    {XSetName::PANEL4_LIST_COMPACT_3,     "panel4_list_compact3"},
+    {XSetName::PANEL4_LIST_LARGE_3,       "panel4_list_large3"},
+    {XSetName::PANEL4_SHOW_HIDDEN_3,      "panel4_show_hidden3"},
+    {XSetName::PANEL4_ICON_TAB_3,         "panel4_icon_tab3"},
+    {XSetName::PANEL4_ICON_STATUS_3,      "panel4_icon_status3"},
+    {XSetName::PANEL4_DETCOL_NAME_3,      "panel4_detcol_name3"},
+    {XSetName::PANEL4_DETCOL_SIZE_3,      "panel4_detcol_size3"},
+    {XSetName::PANEL4_DETCOL_TYPE_3,      "panel4_detcol_type3"},
+    {XSetName::PANEL4_DETCOL_PERM_3,      "panel4_detcol_perm3"},
+    {XSetName::PANEL4_DETCOL_OWNER_3,     "panel4_detcol_owner3"},
+    {XSetName::PANEL4_DETCOL_DATE_3,      "panel4_detcol_date3"},
+    {XSetName::PANEL4_SORT_EXTRA_3,       "panel4_sort_extra3"},
+    {XSetName::PANEL4_BOOK_FOL_3,         "panel4_book_fol3"},
+    {XSetName::PANEL4_TOOL_L_3,           "panel4_tool_l3"},
+    {XSetName::PANEL4_TOOL_R_3,           "panel4_tool_r3"},
+    {XSetName::PANEL4_TOOL_S_3,           "panel4_tool_s3"},
+
     // speed
     {XSetName::BOOK_NEWTAB, "book_newtab"},
     {XSetName::BOOK_SINGLE, "book_single"},
@@ -695,6 +1121,9 @@ const std::map<XSetName, const std::string> xset_name_map{
     {XSetName::TOOL_S, "tool_s"},
 };
 
+// panels
+
+// panel1
 const std::map<XSetPanel, XSetName> xset_panel1_map{
     // panel1
     {XSetPanel::SHOW,             XSetName::PANEL1_SHOW},
@@ -724,6 +1153,7 @@ const std::map<XSetPanel, XSetName> xset_panel1_map{
     {XSetPanel::TOOL_S,           XSetName::PANEL1_TOOL_S},
 };
 
+// panel2
 const std::map<XSetPanel, XSetName> xset_panel2_map{
     // panel2
     {XSetPanel::SHOW,             XSetName::PANEL2_SHOW},
@@ -753,6 +1183,7 @@ const std::map<XSetPanel, XSetName> xset_panel2_map{
     {XSetPanel::TOOL_S,           XSetName::PANEL2_TOOL_S},
 };
 
+// panel3
 const std::map<XSetPanel, XSetName> xset_panel3_map{
     // panel3
     {XSetPanel::SHOW,             XSetName::PANEL3_SHOW},
@@ -782,6 +1213,7 @@ const std::map<XSetPanel, XSetName> xset_panel3_map{
     {XSetPanel::TOOL_S,           XSetName::PANEL3_TOOL_S},
 };
 
+// panel4
 const std::map<XSetPanel, XSetName> xset_panel4_map{
     // panel4
     {XSetPanel::SHOW,             XSetName::PANEL4_SHOW},
@@ -809,6 +1241,464 @@ const std::map<XSetPanel, XSetName> xset_panel4_map{
     {XSetPanel::TOOL_L,           XSetName::PANEL4_TOOL_L},
     {XSetPanel::TOOL_R,           XSetName::PANEL4_TOOL_R},
     {XSetPanel::TOOL_S,           XSetName::PANEL4_TOOL_S},
+};
+
+// panel modes
+
+// panel1
+
+// panel1 mode 0
+const std::map<XSetPanel, XSetName> xset_panel1_mode0_map{
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL1_SHOW_TOOLBOX_0},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL1_SHOW_DEVMON_0},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL1_SHOW_DIRTREE_0},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL1_SHOW_BOOK_0},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL1_SHOW_SIDEBAR_0},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL1_SLIDER_POSITIONS_0},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL1_LIST_DETAILED_0},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL1_LIST_ICONS_0},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL1_LIST_COMPACT_0},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL1_LIST_LARGE_0},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL1_SHOW_HIDDEN_0},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL1_ICON_TAB_0},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL1_ICON_STATUS_0},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL1_DETCOL_NAME_0},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL1_DETCOL_SIZE_0},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL1_DETCOL_TYPE_0},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL1_DETCOL_PERM_0},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL1_DETCOL_OWNER_0},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL1_DETCOL_DATE_0},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL1_SORT_EXTRA_0},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL1_BOOK_FOL_0},
+    {XSetPanel::TOOL_L,           XSetName::PANEL1_TOOL_L_0},
+    {XSetPanel::TOOL_R,           XSetName::PANEL1_TOOL_R_0},
+    {XSetPanel::TOOL_S,           XSetName::PANEL1_TOOL_S_0},
+};
+
+// panel1 mode 1
+const std::map<XSetPanel, XSetName> xset_panel1_mode1_map{
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL1_SHOW_TOOLBOX_1},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL1_SHOW_DEVMON_1},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL1_SHOW_DIRTREE_1},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL1_SHOW_BOOK_1},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL1_SHOW_SIDEBAR_1},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL1_SLIDER_POSITIONS_1},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL1_LIST_DETAILED_1},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL1_LIST_ICONS_1},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL1_LIST_COMPACT_1},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL1_LIST_LARGE_1},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL1_SHOW_HIDDEN_1},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL1_ICON_TAB_1},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL1_ICON_STATUS_1},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL1_DETCOL_NAME_1},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL1_DETCOL_SIZE_1},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL1_DETCOL_TYPE_1},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL1_DETCOL_PERM_1},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL1_DETCOL_OWNER_1},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL1_DETCOL_DATE_1},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL1_SORT_EXTRA_1},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL1_BOOK_FOL_1},
+    {XSetPanel::TOOL_L,           XSetName::PANEL1_TOOL_L_1},
+    {XSetPanel::TOOL_R,           XSetName::PANEL1_TOOL_R_1},
+    {XSetPanel::TOOL_S,           XSetName::PANEL1_TOOL_S_1},
+};
+
+// panel1 mode 2
+const std::map<XSetPanel, XSetName> xset_panel1_mode2_map{
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL1_SHOW_TOOLBOX_2},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL1_SHOW_DEVMON_2},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL1_SHOW_DIRTREE_2},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL1_SHOW_BOOK_2},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL1_SHOW_SIDEBAR_2},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL1_SLIDER_POSITIONS_2},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL1_LIST_DETAILED_2},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL1_LIST_ICONS_2},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL1_LIST_COMPACT_2},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL1_LIST_LARGE_2},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL1_SHOW_HIDDEN_2},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL1_ICON_TAB_2},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL1_ICON_STATUS_2},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL1_DETCOL_NAME_2},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL1_DETCOL_SIZE_2},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL1_DETCOL_TYPE_2},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL1_DETCOL_PERM_2},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL1_DETCOL_OWNER_2},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL1_DETCOL_DATE_2},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL1_SORT_EXTRA_2},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL1_BOOK_FOL_2},
+    {XSetPanel::TOOL_L,           XSetName::PANEL1_TOOL_L_2},
+    {XSetPanel::TOOL_R,           XSetName::PANEL1_TOOL_R_2},
+    {XSetPanel::TOOL_S,           XSetName::PANEL1_TOOL_S_2},
+};
+
+// panel1 mode 3
+const std::map<XSetPanel, XSetName> xset_panel1_mode3_map{
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL1_SHOW_TOOLBOX_3},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL1_SHOW_DEVMON_3},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL1_SHOW_DIRTREE_3},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL1_SHOW_BOOK_3},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL1_SHOW_SIDEBAR_3},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL1_SLIDER_POSITIONS_3},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL1_LIST_DETAILED_3},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL1_LIST_ICONS_3},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL1_LIST_COMPACT_3},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL1_LIST_LARGE_3},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL1_SHOW_HIDDEN_3},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL1_ICON_TAB_3},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL1_ICON_STATUS_3},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL1_DETCOL_NAME_3},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL1_DETCOL_SIZE_3},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL1_DETCOL_TYPE_3},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL1_DETCOL_PERM_3},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL1_DETCOL_OWNER_3},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL1_DETCOL_DATE_3},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL1_SORT_EXTRA_3},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL1_BOOK_FOL_3},
+    {XSetPanel::TOOL_L,           XSetName::PANEL1_TOOL_L_3},
+    {XSetPanel::TOOL_R,           XSetName::PANEL1_TOOL_R_3},
+    {XSetPanel::TOOL_S,           XSetName::PANEL1_TOOL_S_3},
+};
+
+// panel2
+
+// panel2 mode 0
+const std::map<XSetPanel, XSetName> xset_panel2_mode0_map{
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL2_SHOW_TOOLBOX_0},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL2_SHOW_DEVMON_0},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL2_SHOW_DIRTREE_0},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL2_SHOW_BOOK_0},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL2_SHOW_SIDEBAR_0},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL2_SLIDER_POSITIONS_0},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL2_LIST_DETAILED_0},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL2_LIST_ICONS_0},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL2_LIST_COMPACT_0},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL2_LIST_LARGE_0},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL2_SHOW_HIDDEN_0},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL2_ICON_TAB_0},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL2_ICON_STATUS_0},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL2_DETCOL_NAME_0},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL2_DETCOL_SIZE_0},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL2_DETCOL_TYPE_0},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL2_DETCOL_PERM_0},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL2_DETCOL_OWNER_0},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL2_DETCOL_DATE_0},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL2_SORT_EXTRA_0},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL2_BOOK_FOL_0},
+    {XSetPanel::TOOL_L,           XSetName::PANEL2_TOOL_L_0},
+    {XSetPanel::TOOL_R,           XSetName::PANEL2_TOOL_R_0},
+    {XSetPanel::TOOL_S,           XSetName::PANEL2_TOOL_S_0},
+};
+
+// panel2 mode 1
+const std::map<XSetPanel, XSetName> xset_panel2_mode1_map{
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL2_SHOW_TOOLBOX_1},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL2_SHOW_DEVMON_1},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL2_SHOW_DIRTREE_1},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL2_SHOW_BOOK_1},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL2_SHOW_SIDEBAR_1},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL2_SLIDER_POSITIONS_1},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL2_LIST_DETAILED_1},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL2_LIST_ICONS_1},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL2_LIST_COMPACT_1},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL2_LIST_LARGE_1},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL2_SHOW_HIDDEN_1},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL2_ICON_TAB_1},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL2_ICON_STATUS_1},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL2_DETCOL_NAME_1},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL2_DETCOL_SIZE_1},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL2_DETCOL_TYPE_1},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL2_DETCOL_PERM_1},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL2_DETCOL_OWNER_1},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL2_DETCOL_DATE_1},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL2_SORT_EXTRA_1},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL2_BOOK_FOL_1},
+    {XSetPanel::TOOL_L,           XSetName::PANEL2_TOOL_L_1},
+    {XSetPanel::TOOL_R,           XSetName::PANEL2_TOOL_R_1},
+    {XSetPanel::TOOL_S,           XSetName::PANEL2_TOOL_S_1},
+};
+
+// panel2 mode 2
+const std::map<XSetPanel, XSetName> xset_panel2_mode2_map{
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL2_SHOW_TOOLBOX_2},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL2_SHOW_DEVMON_2},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL2_SHOW_DIRTREE_2},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL2_SHOW_BOOK_2},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL2_SHOW_SIDEBAR_2},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL2_SLIDER_POSITIONS_2},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL2_LIST_DETAILED_2},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL2_LIST_ICONS_2},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL2_LIST_COMPACT_2},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL2_LIST_LARGE_2},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL2_SHOW_HIDDEN_2},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL2_ICON_TAB_2},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL2_ICON_STATUS_2},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL2_DETCOL_NAME_2},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL2_DETCOL_SIZE_2},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL2_DETCOL_TYPE_2},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL2_DETCOL_PERM_2},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL2_DETCOL_OWNER_2},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL2_DETCOL_DATE_2},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL2_SORT_EXTRA_2},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL2_BOOK_FOL_2},
+    {XSetPanel::TOOL_L,           XSetName::PANEL2_TOOL_L_2},
+    {XSetPanel::TOOL_R,           XSetName::PANEL2_TOOL_R_2},
+    {XSetPanel::TOOL_S,           XSetName::PANEL2_TOOL_S_2},
+};
+
+// panel2 mode 3
+const std::map<XSetPanel, XSetName> xset_panel2_mode3_map{
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL2_SHOW_TOOLBOX_3},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL2_SHOW_DEVMON_3},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL2_SHOW_DIRTREE_3},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL2_SHOW_BOOK_3},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL2_SHOW_SIDEBAR_3},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL2_SLIDER_POSITIONS_3},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL2_LIST_DETAILED_3},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL2_LIST_ICONS_3},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL2_LIST_COMPACT_3},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL2_LIST_LARGE_3},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL2_SHOW_HIDDEN_3},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL2_ICON_TAB_3},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL2_ICON_STATUS_3},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL2_DETCOL_NAME_3},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL2_DETCOL_SIZE_3},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL2_DETCOL_TYPE_3},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL2_DETCOL_PERM_3},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL2_DETCOL_OWNER_3},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL2_DETCOL_DATE_3},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL2_SORT_EXTRA_3},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL2_BOOK_FOL_3},
+    {XSetPanel::TOOL_L,           XSetName::PANEL2_TOOL_L_3},
+    {XSetPanel::TOOL_R,           XSetName::PANEL2_TOOL_R_3},
+    {XSetPanel::TOOL_S,           XSetName::PANEL2_TOOL_S_3},
+};
+
+// panel3
+
+// panel3 mode 0
+const std::map<XSetPanel, XSetName> xset_panel3_mode0_map{
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL3_SHOW_TOOLBOX_0},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL3_SHOW_DEVMON_0},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL3_SHOW_DIRTREE_0},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL3_SHOW_BOOK_0},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL3_SHOW_SIDEBAR_0},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL3_SLIDER_POSITIONS_0},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL3_LIST_DETAILED_0},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL3_LIST_ICONS_0},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL3_LIST_COMPACT_0},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL3_LIST_LARGE_0},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL3_SHOW_HIDDEN_0},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL3_ICON_TAB_0},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL3_ICON_STATUS_0},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL3_DETCOL_NAME_0},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL3_DETCOL_SIZE_0},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL3_DETCOL_TYPE_0},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL3_DETCOL_PERM_0},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL3_DETCOL_OWNER_0},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL3_DETCOL_DATE_0},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL3_SORT_EXTRA_0},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL3_BOOK_FOL_0},
+    {XSetPanel::TOOL_L,           XSetName::PANEL3_TOOL_L_0},
+    {XSetPanel::TOOL_R,           XSetName::PANEL3_TOOL_R_0},
+    {XSetPanel::TOOL_S,           XSetName::PANEL3_TOOL_S_0},
+};
+
+// panel3 mode 1
+const std::map<XSetPanel, XSetName> xset_panel3_mode1_map{
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL3_SHOW_TOOLBOX_1},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL3_SHOW_DEVMON_1},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL3_SHOW_DIRTREE_1},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL3_SHOW_BOOK_1},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL3_SHOW_SIDEBAR_1},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL3_SLIDER_POSITIONS_1},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL3_LIST_DETAILED_1},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL3_LIST_ICONS_1},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL3_LIST_COMPACT_1},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL3_LIST_LARGE_1},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL3_SHOW_HIDDEN_1},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL3_ICON_TAB_1},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL3_ICON_STATUS_1},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL3_DETCOL_NAME_1},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL3_DETCOL_SIZE_1},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL3_DETCOL_TYPE_1},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL3_DETCOL_PERM_1},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL3_DETCOL_OWNER_1},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL3_DETCOL_DATE_1},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL3_SORT_EXTRA_1},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL3_BOOK_FOL_1},
+    {XSetPanel::TOOL_L,           XSetName::PANEL3_TOOL_L_1},
+    {XSetPanel::TOOL_R,           XSetName::PANEL3_TOOL_R_1},
+    {XSetPanel::TOOL_S,           XSetName::PANEL3_TOOL_S_1},
+};
+
+// panel3 mode 2
+const std::map<XSetPanel, XSetName> xset_panel3_mode2_map{
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL3_SHOW_TOOLBOX_2},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL3_SHOW_DEVMON_2},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL3_SHOW_DIRTREE_2},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL3_SHOW_BOOK_2},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL3_SHOW_SIDEBAR_2},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL3_SLIDER_POSITIONS_2},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL3_LIST_DETAILED_2},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL3_LIST_ICONS_2},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL3_LIST_COMPACT_2},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL3_LIST_LARGE_2},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL3_SHOW_HIDDEN_2},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL3_ICON_TAB_2},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL3_ICON_STATUS_2},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL3_DETCOL_NAME_2},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL3_DETCOL_SIZE_2},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL3_DETCOL_TYPE_2},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL3_DETCOL_PERM_2},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL3_DETCOL_OWNER_2},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL3_DETCOL_DATE_2},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL3_SORT_EXTRA_2},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL3_BOOK_FOL_2},
+    {XSetPanel::TOOL_L,           XSetName::PANEL3_TOOL_L_2},
+    {XSetPanel::TOOL_R,           XSetName::PANEL3_TOOL_R_2},
+    {XSetPanel::TOOL_S,           XSetName::PANEL3_TOOL_S_2},
+};
+
+// panel3 mode 3
+const std::map<XSetPanel, XSetName> xset_panel3_mode3_map{
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL3_SHOW_TOOLBOX_3},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL3_SHOW_DEVMON_3},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL3_SHOW_DIRTREE_3},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL3_SHOW_BOOK_3},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL3_SHOW_SIDEBAR_3},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL3_SLIDER_POSITIONS_3},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL3_LIST_DETAILED_3},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL3_LIST_ICONS_3},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL3_LIST_COMPACT_3},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL3_LIST_LARGE_3},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL3_SHOW_HIDDEN_3},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL3_ICON_TAB_3},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL3_ICON_STATUS_3},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL3_DETCOL_NAME_3},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL3_DETCOL_SIZE_3},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL3_DETCOL_TYPE_3},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL3_DETCOL_PERM_3},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL3_DETCOL_OWNER_3},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL3_DETCOL_DATE_3},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL3_SORT_EXTRA_3},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL3_BOOK_FOL_3},
+    {XSetPanel::TOOL_L,           XSetName::PANEL3_TOOL_L_3},
+    {XSetPanel::TOOL_R,           XSetName::PANEL3_TOOL_R_3},
+    {XSetPanel::TOOL_S,           XSetName::PANEL3_TOOL_S_3},
+};
+
+// panel4
+
+// panel4 mode 0
+const std::map<XSetPanel, XSetName> xset_panel4_mode0_map{
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL4_SHOW_TOOLBOX_0},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL4_SHOW_DEVMON_0},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL4_SHOW_DIRTREE_0},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL4_SHOW_BOOK_0},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL4_SHOW_SIDEBAR_0},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL4_SLIDER_POSITIONS_0},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL4_LIST_DETAILED_0},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL4_LIST_ICONS_0},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL4_LIST_COMPACT_0},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL4_LIST_LARGE_0},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL4_SHOW_HIDDEN_0},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL4_ICON_TAB_0},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL4_ICON_STATUS_0},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL4_DETCOL_NAME_0},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL4_DETCOL_SIZE_0},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL4_DETCOL_TYPE_0},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL4_DETCOL_PERM_0},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL4_DETCOL_OWNER_0},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL4_DETCOL_DATE_0},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL4_SORT_EXTRA_0},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL4_BOOK_FOL_0},
+    {XSetPanel::TOOL_L,           XSetName::PANEL4_TOOL_L_0},
+    {XSetPanel::TOOL_R,           XSetName::PANEL4_TOOL_R_0},
+    {XSetPanel::TOOL_S,           XSetName::PANEL4_TOOL_S_0},
+};
+
+// panel4 mode 1
+const std::map<XSetPanel, XSetName> xset_panel4_mode1_map{
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL4_SHOW_TOOLBOX_1},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL4_SHOW_DEVMON_1},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL4_SHOW_DIRTREE_1},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL4_SHOW_BOOK_1},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL4_SHOW_SIDEBAR_1},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL4_SLIDER_POSITIONS_1},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL4_LIST_DETAILED_1},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL4_LIST_ICONS_1},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL4_LIST_COMPACT_1},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL4_LIST_LARGE_1},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL4_SHOW_HIDDEN_1},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL4_ICON_TAB_1},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL4_ICON_STATUS_1},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL4_DETCOL_NAME_1},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL4_DETCOL_SIZE_1},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL4_DETCOL_TYPE_1},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL4_DETCOL_PERM_1},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL4_DETCOL_OWNER_1},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL4_DETCOL_DATE_1},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL4_SORT_EXTRA_1},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL4_BOOK_FOL_1},
+    {XSetPanel::TOOL_L,           XSetName::PANEL4_TOOL_L_1},
+    {XSetPanel::TOOL_R,           XSetName::PANEL4_TOOL_R_1},
+    {XSetPanel::TOOL_S,           XSetName::PANEL4_TOOL_S_1},
+};
+
+// panel4 mode 2
+const std::map<XSetPanel, XSetName> xset_panel4_mode2_map{
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL4_SHOW_TOOLBOX_2},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL4_SHOW_DEVMON_2},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL4_SHOW_DIRTREE_2},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL4_SHOW_BOOK_2},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL4_SHOW_SIDEBAR_2},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL4_SLIDER_POSITIONS_2},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL4_LIST_DETAILED_2},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL4_LIST_ICONS_2},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL4_LIST_COMPACT_2},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL4_LIST_LARGE_2},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL4_SHOW_HIDDEN_2},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL4_ICON_TAB_2},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL4_ICON_STATUS_2},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL4_DETCOL_NAME_2},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL4_DETCOL_SIZE_2},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL4_DETCOL_TYPE_2},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL4_DETCOL_PERM_2},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL4_DETCOL_OWNER_2},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL4_DETCOL_DATE_2},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL4_SORT_EXTRA_2},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL4_BOOK_FOL_2},
+    {XSetPanel::TOOL_L,           XSetName::PANEL4_TOOL_L_2},
+    {XSetPanel::TOOL_R,           XSetName::PANEL4_TOOL_R_2},
+    {XSetPanel::TOOL_S,           XSetName::PANEL4_TOOL_S_2},
+};
+
+// panel4 mode 3
+const std::map<XSetPanel, XSetName> xset_panel4_mode3_map{
+    {XSetPanel::SHOW_TOOLBOX,     XSetName::PANEL4_SHOW_TOOLBOX_3},
+    {XSetPanel::SHOW_DEVMON,      XSetName::PANEL4_SHOW_DEVMON_3},
+    {XSetPanel::SHOW_DIRTREE,     XSetName::PANEL4_SHOW_DIRTREE_3},
+    {XSetPanel::SHOW_BOOK,        XSetName::PANEL4_SHOW_BOOK_3},
+    {XSetPanel::SHOW_SIDEBAR,     XSetName::PANEL4_SHOW_SIDEBAR_3},
+    {XSetPanel::SLIDER_POSITIONS, XSetName::PANEL4_SLIDER_POSITIONS_3},
+    {XSetPanel::LIST_DETAILED,    XSetName::PANEL4_LIST_DETAILED_3},
+    {XSetPanel::LIST_ICONS,       XSetName::PANEL4_LIST_ICONS_3},
+    {XSetPanel::LIST_COMPACT,     XSetName::PANEL4_LIST_COMPACT_3},
+    {XSetPanel::LIST_LARGE,       XSetName::PANEL4_LIST_LARGE_3},
+    {XSetPanel::SHOW_HIDDEN,      XSetName::PANEL4_SHOW_HIDDEN_3},
+    {XSetPanel::ICON_TAB,         XSetName::PANEL4_ICON_TAB_3},
+    {XSetPanel::ICON_STATUS,      XSetName::PANEL4_ICON_STATUS_3},
+    {XSetPanel::DETCOL_NAME,      XSetName::PANEL4_DETCOL_NAME_3},
+    {XSetPanel::DETCOL_SIZE,      XSetName::PANEL4_DETCOL_SIZE_3},
+    {XSetPanel::DETCOL_TYPE,      XSetName::PANEL4_DETCOL_TYPE_3},
+    {XSetPanel::DETCOL_PERM,      XSetName::PANEL4_DETCOL_PERM_3},
+    {XSetPanel::DETCOL_OWNER,     XSetName::PANEL4_DETCOL_OWNER_3},
+    {XSetPanel::DETCOL_DATE,      XSetName::PANEL4_DETCOL_DATE_3},
+    {XSetPanel::SORT_EXTRA,       XSetName::PANEL4_SORT_EXTRA_3},
+    {XSetPanel::BOOK_FOL,         XSetName::PANEL4_BOOK_FOL_3},
+    {XSetPanel::TOOL_L,           XSetName::PANEL4_TOOL_L_3},
+    {XSetPanel::TOOL_R,           XSetName::PANEL4_TOOL_R_3},
+    {XSetPanel::TOOL_S,           XSetName::PANEL4_TOOL_S_3},
 };
 
 // clang-format on
@@ -865,6 +1755,8 @@ translate_xset_name_from(XSetName name)
     }
 }
 
+// panel
+
 XSetName
 xset_get_xsetname_from_panel(panel_t panel, XSetPanel name)
 {
@@ -888,4 +1780,83 @@ const std::string
 xset_get_name_from_panel(panel_t panel, XSetPanel name)
 {
     return xset_name_map.at(xset_get_xsetname_from_panel(panel, name));
+}
+
+// panel mode
+
+XSetName
+xset_get_xsetname_from_panel_mode(panel_t panel, XSetPanel name, char mode)
+{
+    switch (panel)
+    {
+        case 1:
+            switch (mode)
+            {
+                case 0:
+                    return xset_panel1_mode0_map.at(name);
+                case 1:
+                    return xset_panel1_mode1_map.at(name);
+                case 2:
+                    return xset_panel1_mode2_map.at(name);
+                case 3:
+                    return xset_panel1_mode3_map.at(name);
+                default:
+                    // LOG_WARN("out of bounds | panel {}, mode {}", panel, std::to_string(mode));
+                    return xset_panel1_mode0_map.at(name);
+            }
+        case 2:
+            switch (mode)
+            {
+                case 0:
+                    return xset_panel2_mode0_map.at(name);
+                case 1:
+                    return xset_panel2_mode1_map.at(name);
+                case 2:
+                    return xset_panel2_mode2_map.at(name);
+                case 3:
+                    return xset_panel2_mode3_map.at(name);
+                default:
+                    // LOG_WARN("out of bounds | panel {}, mode {}", panel, std::to_string(mode));
+                    return xset_panel2_mode0_map.at(name);
+            }
+        case 3:
+            switch (mode)
+            {
+                case 0:
+                    return xset_panel3_mode0_map.at(name);
+                case 1:
+                    return xset_panel3_mode1_map.at(name);
+                case 2:
+                    return xset_panel3_mode2_map.at(name);
+                case 3:
+                    return xset_panel3_mode3_map.at(name);
+                default:
+                    // LOG_WARN("out of bounds | panel {}, mode {}", panel, std::to_string(mode));
+                    return xset_panel3_mode0_map.at(name);
+            }
+        case 4:
+            switch (mode)
+            {
+                case 0:
+                    return xset_panel4_mode0_map.at(name);
+                case 1:
+                    return xset_panel4_mode1_map.at(name);
+                case 2:
+                    return xset_panel4_mode2_map.at(name);
+                case 3:
+                    return xset_panel4_mode3_map.at(name);
+                default:
+                    // LOG_WARN("out of bounds | panel {}, mode {}", panel, std::to_string(mode));
+                    return xset_panel4_mode0_map.at(name);
+            }
+        default:
+            // LOG_WARN("Panel Mode out of range: {}, using panel 1", std::to_string(mode));
+            return xset_get_xsetname_from_panel_mode(1, name, mode);
+    }
+}
+
+const std::string
+xset_get_name_from_panel_mode(panel_t panel, XSetPanel name, char mode)
+{
+    return xset_name_map.at(xset_get_xsetname_from_panel_mode(panel, name, mode));
 }
