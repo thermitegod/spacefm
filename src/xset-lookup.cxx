@@ -24,7 +24,7 @@
 
 #include "types.hxx"
 
-#include "xset.hxx"
+#include "xset-lookup.hxx"
 
 // clang-format off
 

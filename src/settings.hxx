@@ -31,7 +31,7 @@
 
 #include "types.hxx"
 
-#include "xset.hxx"
+#include "xset-lookup.hxx"
 
 #define XSET(obj) (static_cast<xset_t>(obj))
 
