@@ -17,18 +17,40 @@
 
 #include <array>
 
-#include <cstdint>
+#include <ztd/ztd.hxx>
 
-#define INT(obj)        (static_cast<int>(obj))
-#define UINT(obj)       (static_cast<unsigned int>(obj))
+#define INT(obj)        (static_cast<i32>(obj))
+#define UINT(obj)       (static_cast<u32>(obj))
 #define CHAR(obj)       (static_cast<char*>(obj))
 #define CONST_CHAR(obj) (static_cast<const char*>(obj))
 
-#define MAX_PANELS 4
+// clang-format off
 
-// using signed type because neg values are treated as
-// control codes and not a tab/panel number
-using tab_t = int64_t;
-using panel_t = int64_t;
+// better type names
+// using i8    = int8_t;
+// using i16   = int16_t;
+// using i32   = int32_t;
+// using i64   = int64_t;
+// using i128  = __int128_t;
+//
+// using u8    = uint8_t;
+// using u16   = uint16_t;
+// using u32   = uint32_t;
+// using u64   = uint64_t;
+// using u128  = __uint128_t;
+//
+// using f32   = float;
+// using f64   = double;
+//
+// using usize = size_t;
+// using isize = ssize_t;
 
-const std::array<panel_t, 4> PANELS{1, 2, 3, 4};
+// need too use signed type because neg values are treated
+// as control codes and not a tab/panel number
+using tab_t   = i64;
+using panel_t = i64;
+
+const usize MAX_PANELS = 4;
+const std::array<panel_t, MAX_PANELS> PANELS{1, 2, 3, 4};
+
+// clang-format on
