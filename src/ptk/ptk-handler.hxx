@@ -53,7 +53,6 @@ void ptk_handler_import(int mode, GtkWidget* handler_dlg, xset_t set);
 void ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, xset_t def_handler_set);
 bool ptk_handler_values_in_list(const std::string list, const std::vector<std::string>& values,
                                 std::string& msg);
-xset_t add_new_handler(int mode); // for settings.c upgrade
 bool ptk_handler_load_script(int mode, int cmd, xset_t handler_set, GtkTextView* view,
                              std::string& script, std::string& error_message);
 bool ptk_handler_save_script(int mode, int cmd, xset_t handler_set, GtkTextView* view,

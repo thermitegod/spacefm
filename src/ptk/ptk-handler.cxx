@@ -1293,7 +1293,7 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
     set_conf->s = list;
 }
 
-xset_t
+static xset_t
 add_new_handler(int mode)
 {
     // creates a new xset for a custom handler type
