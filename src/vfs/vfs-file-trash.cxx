@@ -23,6 +23,10 @@
 
 #include <sys/stat.h>
 
+#include <fmt/format.h>
+
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -30,27 +34,25 @@
 
 #include "vfs/vfs-file-trash.hxx"
 
-Trash* Trash::m_instance = nullptr;
+Trash* Trash::single_instance = nullptr;
 
 Trash*
-Trash::instance()
+Trash::instance() noexcept
 {
-    if (!m_instance)
-        m_instance = new Trash();
-
-    return m_instance;
+    if (!Trash::single_instance)
+        Trash::single_instance = new Trash();
+    return Trash::single_instance;
 }
 
-Trash::Trash()
+Trash::Trash() noexcept
 {
-    m_home_device = device(vfs_user_home_dir());
+    this->home_device = device(vfs_user_home_dir());
 
-    std::string home_trash_dir = vfs_user_data_dir();
-    home_trash_dir += "/Trash";
+    const std::string user_trash_dir = Glib::build_filename(vfs_user_data_dir(), "/Trash");
 
-    m_home_trash_dir = new TrashDir(home_trash_dir, m_home_device);
+    this->home_trash_dir = new TrashDir(user_trash_dir, this->home_device);
 
-    m_trash_dirs[m_home_device] = m_home_trash_dir;
+    this->trash_dirs[this->home_device] = this->home_trash_dir;
 }
 
 Trash::~Trash()
@@ -59,7 +61,7 @@ Trash::~Trash()
 }
 
 dev_t
-Trash::device(const std::string& path)
+Trash::device(const std::string& path) noexcept
 {
     dev_t dev = 0;
     struct stat statBuf;
@@ -74,11 +76,10 @@ Trash::device(const std::string& path)
 }
 
 const std::string
-Trash::toplevel(const std::string& path)
+Trash::toplevel(const std::string& path) noexcept
 {
     dev_t dev = device(path);
 
-    std::filesystem::path mount_parent;
     std::string mount_path = path;
     std::string last_path;
 
@@ -89,7 +90,7 @@ Trash::toplevel(const std::string& path)
     while (device(mount_path) == dev)
     {
         last_path = mount_path;
-        mount_parent = std::filesystem::path(mount_path).parent_path();
+        std::filesystem::path mount_parent = std::filesystem::path(mount_path).parent_path();
         mount_path = std::string(mount_parent);
     }
 
@@ -100,26 +101,26 @@ Trash::toplevel(const std::string& path)
 }
 
 TrashDir*
-Trash::trash_dir(const std::string& path)
+Trash::trash_dir(const std::string& path) noexcept
 {
     dev_t dev = device(path);
 
-    if (m_trash_dirs.count(dev))
-        return m_trash_dirs[dev];
+    if (this->trash_dirs.count(dev))
+        return this->trash_dirs[dev];
 
     // on another device cannot use $HOME trashcan
-    std::string top_dir = toplevel(path);
-    std::string uid = std::to_string(getuid());
-    std::string trashPath = top_dir + "/.Trash-" + uid;
+    const std::string top_dir = toplevel(path);
+    const std::string uid = std::to_string(getuid());
+    const std::string trashPath = Glib::build_filename(top_dir, fmt::format("/.Trash-{}", uid));
 
     TrashDir* trash_dir = new TrashDir(trashPath, dev);
-    m_trash_dirs[dev] = trash_dir;
+    this->trash_dirs[dev] = trash_dir;
 
     return trash_dir;
 }
 
 bool
-Trash::trash(const std::string& path)
+Trash::trash(const std::string& path) noexcept
 {
     TrashDir* trash_dir = instance()->trash_dir(path);
 
@@ -131,13 +132,13 @@ Trash::trash(const std::string& path)
         // TODO std::filesystem::rename does not support symlinks
         // should limit too only regular files and directories;
 
-        // LOG_INFO("Cannot trash symlink: {}", path);
+        // LOG_WARN("Cannot trash symlink: {}", path);
         return false;
     }
 
     trash_dir->create_trash_dir();
 
-    std::string target_name = trash_dir->unique_name(path);
+    const std::string target_name = trash_dir->unique_name(path);
     trash_dir->create_trash_info(path, target_name);
     trash_dir->move(path, target_name);
 
@@ -147,7 +148,7 @@ Trash::trash(const std::string& path)
 }
 
 bool
-Trash::restore(const std::string& path)
+Trash::restore(const std::string& path) noexcept
 {
     (void)path;
     // NOOP
@@ -155,33 +156,39 @@ Trash::restore(const std::string& path)
 }
 
 void
-Trash::empty()
+Trash::empty() noexcept
 {
     // NOOP
 }
 
-TrashDir::TrashDir(const std::string& path, dev_t device) : m_path(path), m_device(device)
+TrashDir::TrashDir(const std::string& path, dev_t device) noexcept
 {
+    this->trash_dir_path = path;
+    this->trash_dir_files_path = Glib::build_filename(this->trash_dir_path, "files");
+    this->trash_dir_info_path = Glib::build_filename(this->trash_dir_path, "info");
+    this->trash_dir_device = device;
+
     create_trash_dir();
 }
 
 const std::string
-TrashDir::unique_name(const std::string& path)
+TrashDir::unique_name(const std::string& path) const noexcept
 {
-    std::string filename = std::filesystem::path(path).filename();
-    std::string basename = std::filesystem::path(path).stem();
-    std::string ext = std::filesystem::path(path).extension();
+    const std::string filename = std::filesystem::path(path).filename();
+    const std::string basename = std::filesystem::path(path).stem();
+    const std::string ext = std::filesystem::path(path).extension();
 
     std::string to_trash_filename = filename;
-    std::string to_trash_path = files_path() + "/" + to_trash_filename;
+    const std::string to_trash_path = Glib::build_filename(files_path(), to_trash_filename);
 
     if (std::filesystem::exists(to_trash_path))
     {
         for (int i = 1; true; ++i)
         {
-            std::string ii = std::to_string(i);
-            std::string check_to_trash_filename = basename + "_" + ii + ext;
-            std::string check_to_trash_path = files_path() + "/" + check_to_trash_filename;
+            const std::string ii = std::to_string(i);
+            const std::string check_to_trash_filename = basename + "_" + ii + ext;
+            const std::string check_to_trash_path =
+                Glib::build_filename(files_path(), check_to_trash_filename);
             if (!std::filesystem::exists(check_to_trash_path))
             {
                 to_trash_filename = check_to_trash_filename;
@@ -193,7 +200,7 @@ TrashDir::unique_name(const std::string& path)
 }
 
 void
-TrashDir::check_dir_exists(const std::string& path)
+TrashDir::check_dir_exists(const std::string& path) noexcept
 {
     if (std::filesystem::is_directory(path))
         return;
@@ -204,7 +211,7 @@ TrashDir::check_dir_exists(const std::string& path)
 }
 
 void
-TrashDir::create_trash_dir()
+TrashDir::create_trash_dir() const noexcept
 {
     // LOG_DEBUG("create trash dirs {}", trash_path());
 
@@ -214,9 +221,10 @@ TrashDir::create_trash_dir()
 }
 
 void
-TrashDir::create_trash_info(const std::string& path, const std::string& target_name)
+TrashDir::create_trash_info(const std::string& path, const std::string& target_name) const noexcept
 {
-    std::string trash_info = info_path() + "/" + target_name + ".trashinfo";
+    const std::string trash_info =
+        Glib::build_filename(info_path(), fmt::format("{}.trashinfo", target_name));
 
     std::time_t t = std::time(nullptr);
     char iso_time[100];
@@ -230,10 +238,34 @@ TrashDir::create_trash_info(const std::string& path, const std::string& target_n
 }
 
 void
-TrashDir::move(const std::string& path, const std::string& target_name)
+TrashDir::move(const std::string& path, const std::string& target_name) const noexcept
 {
     // LOG_INFO("fp {}", files_path());
     // LOG_INFO("ip {}", info_path());
-    std::string target_path = files_path() + "/" + target_name;
+    const std::string target_path = Glib::build_filename(files_path(), target_name);
     std::filesystem::rename(path, target_path);
+}
+
+const std::string&
+TrashDir::trash_path() const noexcept
+{
+    return this->trash_dir_path;
+}
+
+dev_t
+TrashDir::device() const noexcept
+{
+    return this->trash_dir_device;
+}
+
+const std::string&
+TrashDir::files_path() const noexcept
+{
+    return this->trash_dir_files_path;
+}
+
+const std::string&
+TrashDir::info_path() const noexcept
+{
+    return this->trash_dir_info_path;
 }

@@ -49,15 +49,15 @@ VFSAppDesktop::VFSAppDesktop(const std::string& open_file_name) noexcept
 
     if (Glib::path_is_absolute(open_file_name))
     {
-        m_file_name = Glib::path_get_basename(open_file_name);
-        m_full_path = open_file_name;
+        this->file_name = Glib::path_get_basename(open_file_name);
+        this->full_path = open_file_name;
         load = kf->load_from_file(open_file_name, Glib::KeyFile::Flags::NONE);
     }
     else
     {
-        m_file_name = open_file_name;
-        std::string relative_path = Glib::build_filename("applications", m_file_name);
-        load = kf->load_from_data_dirs(relative_path, m_full_path, Glib::KeyFile::Flags::NONE);
+        this->file_name = open_file_name;
+        std::string relative_path = Glib::build_filename("applications", this->file_name);
+        load = kf->load_from_data_dirs(relative_path, this->full_path, Glib::KeyFile::Flags::NONE);
     }
 
     if (load)
@@ -69,58 +69,58 @@ VFSAppDesktop::VFSAppDesktop(const std::string& open_file_name) noexcept
         {
             g_disp_name = kf->get_string(desktop_entry, "Name");
             if (!g_disp_name.empty())
-                m_disp_name = g_disp_name;
+                this->disp_name = g_disp_name;
         }
         catch (Glib::KeyFileError)
         {
-            m_disp_name = "";
+            this->disp_name = "";
         }
 
         try
         {
             g_exec = kf->get_string(desktop_entry, "Exec");
             if (!g_exec.empty())
-                m_exec = g_exec;
+                this->exec = g_exec;
         }
         catch (Glib::KeyFileError)
         {
-            m_exec = "";
+            this->exec = "";
         }
 
         try
         {
             g_icon_name = kf->get_string(desktop_entry, "Icon");
             if (!g_icon_name.empty())
-                m_icon_name = g_icon_name;
+                this->icon_name = g_icon_name;
         }
         catch (Glib::KeyFileError)
         {
-            m_icon_name = "";
+            this->icon_name = "";
         }
 
         try
         {
             g_path = kf->get_string(desktop_entry, "Path");
             if (!g_path.empty())
-                m_path = g_path;
+                this->path = g_path;
         }
         catch (Glib::KeyFileError)
         {
-            m_path = "";
+            this->path = "";
         }
 
         try
         {
-            m_terminal = kf->get_boolean(desktop_entry, "Terminal");
+            this->terminal = kf->get_boolean(desktop_entry, "Terminal");
         }
         catch (Glib::KeyFileError)
         {
-            m_terminal = false;
+            this->terminal = false;
         }
     }
     else
     {
-        m_exec = m_file_name;
+        this->exec = this->file_name;
     }
 }
 
@@ -132,39 +132,39 @@ VFSAppDesktop::~VFSAppDesktop() noexcept
 const char*
 VFSAppDesktop::get_name() noexcept
 {
-    return m_file_name.c_str();
+    return this->file_name.c_str();
 }
 
 const char*
 VFSAppDesktop::get_disp_name() noexcept
 {
-    if (!m_disp_name.empty())
-        return m_disp_name.c_str();
-    return m_file_name.c_str();
+    if (!this->disp_name.empty())
+        return this->disp_name.c_str();
+    return this->file_name.c_str();
 }
 
 const char*
 VFSAppDesktop::get_exec() noexcept
 {
-    return m_exec.c_str();
+    return this->exec.c_str();
 }
 
 bool
 VFSAppDesktop::use_terminal() noexcept
 {
-    return m_terminal;
+    return this->terminal;
 }
 
 const char*
 VFSAppDesktop::get_full_path() noexcept
 {
-    return m_full_path.c_str();
+    return this->full_path.c_str();
 }
 
 const char*
 VFSAppDesktop::get_icon_name() noexcept
 {
-    return m_icon_name.c_str();
+    return this->icon_name.c_str();
 }
 
 GdkPixbuf*
@@ -172,9 +172,9 @@ VFSAppDesktop::get_icon(int size) noexcept
 {
     GdkPixbuf* icon = nullptr;
 
-    if (m_icon_name.c_str())
+    if (this->icon_name.c_str())
     {
-        icon = vfs_load_icon(m_icon_name.c_str(), size);
+        icon = vfs_load_icon(this->icon_name.c_str(), size);
     }
 
     // fallback to generic icon
@@ -191,12 +191,12 @@ VFSAppDesktop::get_icon(int size) noexcept
 bool
 VFSAppDesktop::open_multiple_files() noexcept
 {
-    if (!m_exec.empty())
-    {
-        std::array<std::string, 2> keys{"%U", "%F"};
-        if (ztd::contains(m_exec, keys))
-            return true;
-    }
+    if (this->exec.empty())
+        return false;
+
+    std::array<std::string, 2> keys{"%U", "%F"};
+    if (ztd::contains(this->exec, keys))
+        return true;
     return false;
 }
 
@@ -326,7 +326,7 @@ VFSAppDesktop::exec_desktop(const std::string& working_dir,
     if (use_terminal())
     {
         std::string app_name = get_disp_name();
-        exec_in_terminal(app_name, !m_path.empty() ? m_path : working_dir, cmd);
+        exec_in_terminal(app_name, !this->path.empty() ? this->path : working_dir, cmd);
     }
     else
     {

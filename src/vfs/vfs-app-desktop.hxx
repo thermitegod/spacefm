@@ -41,21 +41,22 @@ class VFSAppDesktop
     bool open_files(const std::string& working_dir, std::vector<std::string>& file_paths);
 
   private:
-    // desktop entry spec keys
-    std::string m_file_name;
-    std::string m_disp_name;
-    std::string m_exec;
-    std::string m_icon_name;
-    std::string m_path; // working dir
-    std::string m_full_path;
-    bool m_terminal{false};
-
     const std::string
     translate_app_exec_to_command_line(std::vector<std::string>& file_list) noexcept;
     void exec_in_terminal(const std::string& app_name, const std::string& cwd,
                           const std::string& cmd) noexcept;
     void exec_desktop(const std::string& working_dir,
                       std::vector<std::string>& file_paths) noexcept;
+
+  private:
+    // desktop entry spec keys
+    std::string file_name;
+    std::string disp_name;
+    std::string exec;
+    std::string icon_name;
+    std::string path; // working dir
+    std::string full_path;
+    bool terminal{false};
 };
 
 class VFSAppDesktopException: virtual public std::exception

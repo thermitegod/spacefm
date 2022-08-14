@@ -32,45 +32,45 @@ class Trash
 {
   public:
     // Move a file or directory into the trash.
-    static bool trash(const std::string& path);
+    static bool trash(const std::string& path) noexcept;
 
     // Restore a file or directory from the trash to its original location.
     // Currently a NOOP
-    static bool restore(const std::string& path);
+    static bool restore(const std::string& path) noexcept;
 
     // Empty all trash cans
     // Currently a NOOP
-    static void empty();
+    static void empty() noexcept;
 
     // Return the singleton object for this class. The first use will create
     // the singleton. Notice that the static methods all access the singleton,
     // too, so the first call to any of those static methods will already
     // create the singleton.
-    static Trash* instance();
+    static Trash* instance() noexcept;
 
     // return the device of the file or directory
-    static dev_t device(const std::string& path);
+    static dev_t device(const std::string& path) noexcept;
 
   protected:
     // Constructor
     // Not for public use. Use instance() or the static methods instead.
-    Trash();
+    Trash() noexcept;
 
     // Destructor.
     virtual ~Trash();
 
     // Find the toplevel directory (mount point) for the device that 'path' is on.
-    static const std::string toplevel(const std::string& path);
+    static const std::string toplevel(const std::string& path) noexcept;
 
     // Return the trash dir to use for 'path'.
-    TrashDir* trash_dir(const std::string& path);
+    TrashDir* trash_dir(const std::string& path) noexcept;
 
     // Data Members
-    static Trash* m_instance;
+    static Trash* single_instance;
 
-    dev_t m_home_device;
-    TrashDir* m_home_trash_dir{nullptr};
-    TrashDirMap m_trash_dirs;
+    dev_t home_device;
+    TrashDir* home_trash_dir{nullptr};
+    TrashDirMap trash_dirs;
 
 }; // class Trash
 
@@ -84,52 +84,38 @@ class TrashDir
 {
   public:
     // Create the trash directory and subdirectories if they do not exist.
-    TrashDir(const std::string& path, dev_t device);
+    TrashDir(const std::string& path, dev_t device) noexcept;
 
     // Return the full path for this trash directory.
-    [[nodiscard]] const std::string
-    trash_path() const
-    {
-        return m_path;
-    }
+    const std::string& trash_path() const noexcept;
 
     // Return the device (as returned from stat()) for this trash directory.
-    [[nodiscard]] dev_t
-    device() const
-    {
-        return m_device;
-    }
+    dev_t device() const noexcept;
 
     // Return the path of the "files" subdirectory of this trash dir.
-    [[nodiscard]] const std::string
-    files_path() const
-    {
-        return m_path + "/files";
-    }
+    const std::string& files_path() const noexcept;
 
     // Return the path of the "info" subdirectory of this trash dir.
-    [[nodiscard]] const std::string
-    info_path() const
-    {
-        return m_path + "/info";
-    }
+    const std::string& info_path() const noexcept;
 
     // Get a unique name for use within the trash directory
-    const std::string unique_name(const std::string& path);
+    const std::string unique_name(const std::string& path) const noexcept;
 
-    void create_trash_dir();
+    void create_trash_dir() const noexcept;
 
     // Create a .trashinfo file for a file or directory 'path'
-    void create_trash_info(const std::string& path, const std::string& target_name);
+    void create_trash_info(const std::string& path, const std::string& target_name) const noexcept;
 
     // Move a file or directory into the trash directory
-    void move(const std::string& path, const std::string& target_name);
+    void move(const std::string& path, const std::string& target_name) const noexcept;
 
   protected:
     // Create a directory if it does not exist
-    static void check_dir_exists(const std::string& dir);
+    static void check_dir_exists(const std::string& dir) noexcept;
 
     // Data Members
-    std::string m_path;
-    dev_t m_device;
+    dev_t trash_dir_device;
+    std::string trash_dir_path;
+    std::string trash_dir_files_path;
+    std::string trash_dir_info_path;
 };
