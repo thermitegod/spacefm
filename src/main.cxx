@@ -79,7 +79,7 @@ static GOptionEntry opt_entries[] =
 // clang-format on
 
 static bool handle_parsed_commandline_args();
-static void open_file(const char* path);
+static void open_file(const std::string& path);
 
 static void
 init_folder()
@@ -283,7 +283,9 @@ handle_parsed_commandline_args()
                     gtk_window_present(GTK_WINDOW(main_window));
                 }
                 else
-                    open_file(real_path.c_str());
+                {
+                    open_file(real_path);
+                }
             }
             else if ((*file[0] != '/' && strstr(*file, ":/")) || ztd::startswith(*file, "//"))
             {
@@ -485,7 +487,7 @@ main(int argc, char* argv[])
 }
 
 static void
-open_file(const char* path)
+open_file(const std::string& path)
 {
     VFSFileInfo* file = vfs_file_info_new();
     vfs_file_info_get(file, path);
