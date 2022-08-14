@@ -24,10 +24,14 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "types.hxx"
+#include "program-timer.hxx"
+
 #include "autosave.hxx"
 
-struct AutoSave
+class AutoSave
 {
+  public:
     // returns false when killed:
     template<class R, class P>
     bool
@@ -45,14 +49,15 @@ struct AutoSave
     kill() noexcept
     {
         std::unique_lock<std::mutex> lock(m);
-        terminate = true;
+        this->terminate = true;
         cv.notify_all();
     }
 
   public:
-    std::atomic<bool> request{false};
-    // const unsigned int timer{5}; // 5 seconds
-    const unsigned int timer{300}; // 5 minutes
+    std::atomic<bool> accepting_requests{false};
+    std::atomic<bool> pending_requests{false};
+    // const u64 timer{5}; // 5 seconds
+    const u64 timer{300}; // 5 minutes
 
   private:
     std::condition_variable cv;
@@ -65,16 +70,16 @@ AutoSave autosave;
 std::vector<std::future<void>> threads;
 
 static void
-autosave_thread(void (*autosave_func)(void)) noexcept
+autosave_thread(autosave_f autosave_func) noexcept
 {
-    const std::chrono::duration<unsigned int> duration(autosave.timer);
+    const std::chrono::duration<u64> duration(autosave.timer);
     while (autosave.wait(duration))
     {
         // LOG_INFO("AUTOSAVE save_thread_loop");
-        if (autosave.request)
+        if (autosave.pending_requests)
         {
             // LOG_INFO("AUTOSAVE save_settings");
-            autosave.request.store(false);
+            autosave.pending_requests.store(false);
             autosave_func();
         }
     }
@@ -84,18 +89,34 @@ void
 autosave_request_add() noexcept
 {
     // LOG_INFO("AUTOSAVE request add");
-    autosave.request.store(true);
+    if (autosave.accepting_requests)
+    {
+        autosave.pending_requests.store(true);
+    }
+    else
+    { // At program start lots of requests can be sent, this ignores them
+        if (program_timer::elapsed() >= 10.0)
+        {
+            // LOG_INFO("AUTOSAVE now accepting request add");
+            autosave.accepting_requests.store(true);
+            autosave.pending_requests.store(true);
+        }
+        // else
+        // {
+        //     LOG_INFO("AUTOSAVE ignoring request add");
+        // }
+    }
 }
 
 void
 autosave_request_cancel() noexcept
 {
     // LOG_INFO("AUTOSAVE request cancel");
-    autosave.request.store(false);
+    autosave.pending_requests.store(false);
 }
 
 void
-autosave_init(void (*autosave_func)(void)) noexcept
+autosave_init(autosave_f autosave_func) noexcept
 {
     // LOG_INFO("AUTOSAVE init");
     threads.push_back(std::async(std::launch::async,

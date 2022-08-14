@@ -15,10 +15,8 @@
 
 #pragma once
 
-using autosave_f = void (*)(void);
-
-void autosave_request_add() noexcept;
-void autosave_request_cancel() noexcept;
-
-void autosave_init(autosave_f autosave_func) noexcept;
-void autosave_terminate() noexcept;
+namespace program_timer
+{
+    void start() noexcept;
+    double elapsed() noexcept;
+} // namespace program_timer

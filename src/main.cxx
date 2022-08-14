@@ -47,7 +47,9 @@
 #include "settings/etc.hxx"
 #include "settings/load_etc.hxx"
 
+#include "program-timer.hxx"
 #include "autosave.hxx"
+
 #include "find-files.hxx"
 #include "pref-dialog.hxx"
 #include "socket.hxx"
@@ -352,6 +354,9 @@ main(int argc, char* argv[])
 {
     // logging init
     ztd::Logger->initialize();
+
+    // start program timer
+    program_timer::start();
 
     // FIXME - This directs all writes to stderr into /dev/null, should try
     // and only have writes from ffmpeg get redirected.

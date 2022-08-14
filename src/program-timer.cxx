@@ -13,12 +13,29 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
 
-using autosave_f = void (*)(void);
+#include "types.hxx"
 
-void autosave_request_add() noexcept;
-void autosave_request_cancel() noexcept;
+#include "program-timer.hxx"
 
-void autosave_init(autosave_f autosave_func) noexcept;
-void autosave_terminate() noexcept;
+class ProgramTimer
+{
+  public:
+    ztd::timer timer = ztd::timer();
+};
+
+ProgramTimer ptimer;
+
+void
+program_timer::start() noexcept
+{
+    ptimer.timer.start();
+}
+
+double
+program_timer::elapsed() noexcept
+{
+    return ptimer.timer.elapsed();
+}
