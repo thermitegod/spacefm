@@ -5795,7 +5795,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                     reply = fmt::format("invalid size format {}", argv[i + 1]);
                     return 2;
                 }
-                auto size = ztd::split(argv[i + 1], "x");
+                const auto size = ztd::split(argv[i + 1], "x");
                 width = std::stol(size[0]);
                 height = std::stol(size[1]);
             }

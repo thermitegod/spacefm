@@ -52,7 +52,7 @@ parse_bookmarks(std::string_view raw_line) noexcept
 {
     const std::string line = ztd::strip(raw_line); // remove newline
 
-    auto book_parts = ztd::rpartition(line, " ");
+    const auto book_parts = ztd::rpartition(line, " ");
 
     const std::string book_path = book_parts[0];
     const std::string book_name = book_parts[2];
