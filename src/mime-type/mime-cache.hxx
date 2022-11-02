@@ -31,7 +31,7 @@ class MimeCache
     const char* lookup_suffix(const char* filename, const char** suffix_pos);
     const char* lookup_magic(const char* data, int len);
     const char* lookup_glob(const char* filename, int* glob_len);
-    std::vector<const char*> lookup_parents(const char* mime_type);
+    const std::vector<const char*> lookup_parents(const char* mime_type);
     const char* lookup_alias(const char* mime_type);
 
     const std::string& get_file_path();

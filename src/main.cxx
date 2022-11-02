@@ -514,8 +514,7 @@ open_file(const std::string& path)
     VFSAppDesktop desktop(app_name);
 
     std::string open_file = path;
-    std::vector<std::string> open_files;
-    open_files.push_back(open_file);
+    const std::vector<std::string> open_files{open_file};
 
     try
     {

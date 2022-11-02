@@ -242,7 +242,7 @@ MimeCache::lookup_glob(const char* filename, int* glob_len)
     return type;
 }
 
-std::vector<const char*>
+const std::vector<const char*>
 MimeCache::lookup_parents(const char* mime_type)
 {
     std::vector<const char*> result;

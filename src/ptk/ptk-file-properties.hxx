@@ -22,4 +22,4 @@
 #include "vfs/vfs-file-info.hxx"
 
 GtkWidget* file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
-                                   std::vector<VFSFileInfo*>& sel_files, int page);
+                                   const std::vector<VFSFileInfo*>& sel_files, int page);

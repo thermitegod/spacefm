@@ -658,7 +658,7 @@ vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
 }
 
 void
-vfs_file_info_list_free(std::vector<VFSFileInfo*>& list)
+vfs_file_info_list_free(const std::vector<VFSFileInfo*>& list)
 {
     if (list.empty())
         return;

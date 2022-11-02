@@ -218,7 +218,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
     if (!files)
         return false;
 
-    std::vector<VFSFileInfo*> sel_files = glist_to_vector_VFSFileInfo(files);
+    const std::vector<VFSFileInfo*> sel_files = glist_to_vector_VFSFileInfo(files);
 
     /*igtodo test passing file_browser here? */
     ptk_open_files_with_app(dir, sel_files, nullptr, nullptr, false, true);
@@ -385,7 +385,7 @@ get_date_offset(GtkCalendar* calendar)
     return std::abs(offset);
 }
 
-static std::vector<std::string>
+static const std::vector<std::string>
 compose_command(FindFile* data)
 {
     std::vector<std::string> argv;
@@ -704,7 +704,7 @@ on_start_search(GtkWidget* btn, FindFile* data)
     gtk_widget_hide(btn);
     gtk_widget_show(data->stop_btn);
 
-    std::vector<std::string> argv = compose_command(data);
+    const std::vector<std::string> argv = compose_command(data);
 
     LOG_DEBUG("find command: {}", ztd::join(argv, " "));
 
@@ -1064,7 +1064,7 @@ on_use_size_upper_toggled(GtkWidget* widget, FindFile* data)
 }
 
 void
-fm_find_files(std::vector<const char*> search_dirs)
+fm_find_files(const std::vector<const char*>& search_dirs)
 {
     FindFile* data = new FindFile;
     GtkTreeIter it;

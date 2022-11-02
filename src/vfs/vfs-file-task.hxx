@@ -201,7 +201,7 @@ struct VFSFileTask
     void* exec_ptask{nullptr};
 };
 
-VFSFileTask* vfs_task_new(VFSFileTaskType task_type, std::vector<std::string>& src_files,
+VFSFileTask* vfs_task_new(VFSFileTaskType task_type, const std::vector<std::string>& src_files,
                           const char* dest_dir);
 
 void vfs_file_task_lock(VFSFileTask* task);

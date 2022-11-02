@@ -377,7 +377,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
 
 GtkWidget*
 file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
-                        std::vector<VFSFileInfo*>& sel_files, int page)
+                        const std::vector<VFSFileInfo*>& sel_files, int page)
 {
     GtkBuilder* builder = _gtk_builder_new_from_file("file_properties3.ui");
     GtkWidget* dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
@@ -493,10 +493,9 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     else /* Add available actions to the option menu */
     {
         GtkTreeIter it;
-        std::vector<std::string> actions;
+        const std::vector<std::string> actions = vfs_mime_type_get_actions(mime);
 
         mime = vfs_file_info_get_mime_type(file);
-        actions = vfs_mime_type_get_actions(mime);
         GtkCellRenderer* renderer;
         GtkListStore* model;
         gtk_cell_layout_clear(GTK_CELL_LAYOUT(open_with));

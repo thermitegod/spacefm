@@ -310,7 +310,7 @@ replace_archive_subs(const std::string& line, const std::string& n, const std::s
 }
 
 void
-ptk_file_archiver_create(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>& sel_files,
+ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFileInfo*>& sel_files,
                          const char* cwd)
 {
     /* Generating dialog - extra nullptr on the nullptr-terminated list to
@@ -940,7 +940,7 @@ on_create_subfolder_toggled(GtkToggleButton* togglebutton, GtkWidget* chk_write)
 }
 
 void
-ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>& sel_files,
+ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFileInfo*>& sel_files,
                           const char* cwd, const char* dest_dir, int job,
                           bool archive_presence_checked)
 { /* This function is also used to list the contents of archives */

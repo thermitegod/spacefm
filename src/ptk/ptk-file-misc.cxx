@@ -273,7 +273,7 @@ static void on_toggled(GtkMenuItem* item, MoveSet* mset);
 static const std::string get_template_dir();
 
 void
-ptk_delete_files(GtkWindow* parent_win, const char* cwd, std::vector<VFSFileInfo*>& sel_files,
+ptk_delete_files(GtkWindow* parent_win, const char* cwd, const std::vector<VFSFileInfo*>& sel_files,
                  GtkTreeView* task_view)
 {
     if (sel_files.empty())
@@ -313,7 +313,7 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, std::vector<VFSFileInfo
 }
 
 void
-ptk_trash_files(GtkWindow* parent_win, const char* cwd, std::vector<VFSFileInfo*>& sel_files,
+ptk_trash_files(GtkWindow* parent_win, const char* cwd, const std::vector<VFSFileInfo*>& sel_files,
                 GtkTreeView* task_view)
 {
     if (sel_files.empty())
@@ -3277,7 +3277,7 @@ ptk_show_file_properties(GtkWindow* parent_win, const char* cwd,
 }
 
 static bool
-open_archives_with_handler(ParentInfo* parent, std::vector<VFSFileInfo*>& sel_files,
+open_archives_with_handler(ParentInfo* parent, const std::vector<VFSFileInfo*>& sel_files,
                            const char* full_path, VFSMimeType* mime_type)
 {
     if (xset_get_b(XSetName::ARC_DEF_OPEN))
@@ -3478,7 +3478,7 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
 
         LOG_INFO("EXEC({})={}", desktop.get_full_path(), desktop.get_exec());
 
-        std::vector<std::string> open_files = glist_t_char_to_vector_t_string(files);
+        const std::vector<std::string> open_files = glist_t_char_to_vector_t_string(files);
 
         try
         {
@@ -3515,7 +3515,7 @@ free_file_list_hash(void* key, void* value, void* user_data)
 }
 
 void
-ptk_open_files_with_app(const char* cwd, std::vector<VFSFileInfo*>& sel_files,
+ptk_open_files_with_app(const char* cwd, const std::vector<VFSFileInfo*>& sel_files,
                         const char* app_desktop, PtkFileBrowser* file_browser, bool xforce,
                         bool xnever)
 {
@@ -3732,7 +3732,8 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
     VFSFileInfo* file;
     std::string file_dir;
 
-    std::vector<std::string> files = ptk_clipboard_get_file_paths(cwd, &is_cut, &missing_targets);
+    const std::vector<std::string> files =
+        ptk_clipboard_get_file_paths(cwd, &is_cut, &missing_targets);
 
     for (const std::string& file_path: files)
     {
@@ -3769,7 +3770,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
 }
 
 void
-ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>& sel_files,
+ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<VFSFileInfo*>& sel_files,
                       const char* cwd, const char* setname)
 {
     /*

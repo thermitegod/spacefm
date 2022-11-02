@@ -43,7 +43,7 @@ struct PtkFileMenu
 };
 
 GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* info,
-                             const char* cwd, std::vector<VFSFileInfo*> sel_files);
+                             const char* cwd, const std::vector<VFSFileInfo*>& sel_files);
 GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* info,
                              const char* cwd);
 

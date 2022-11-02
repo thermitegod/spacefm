@@ -38,15 +38,15 @@ class VFSAppDesktop
     const char* get_icon_name() noexcept;
     bool use_terminal() noexcept;
     bool open_multiple_files() noexcept;
-    bool open_files(const std::string& working_dir, std::vector<std::string>& file_paths);
+    bool open_files(const std::string& working_dir, const std::vector<std::string>& file_paths);
 
   private:
     const std::string
-    translate_app_exec_to_command_line(std::vector<std::string>& file_list) noexcept;
+    translate_app_exec_to_command_line(const std::vector<std::string>& file_list) noexcept;
     void exec_in_terminal(const std::string& app_name, const std::string& cwd,
                           const std::string& cmd) noexcept;
     void exec_desktop(const std::string& working_dir,
-                      std::vector<std::string>& file_paths) noexcept;
+                      const std::vector<std::string>& file_paths) noexcept;
 
   private:
     // desktop entry spec keys

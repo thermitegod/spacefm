@@ -34,8 +34,8 @@ enum PTKFileTaskPtaskError
 
 struct PtkFileTask
 {
-    PtkFileTask(VFSFileTaskType type, std::vector<std::string>& src_files, const char* dest_dir,
-                GtkWindow* parent_window, GtkWidget* task_view);
+    PtkFileTask(VFSFileTaskType type, const std::vector<std::string>& src_files,
+                const char* dest_dir, GtkWindow* parent_window, GtkWidget* task_view);
     ~PtkFileTask();
 
     VFSFileTask* task;

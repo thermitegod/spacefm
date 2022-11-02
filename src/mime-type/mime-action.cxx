@@ -74,7 +74,7 @@ update_desktop_database()
 
 /* Determine removed associations for this type */
 static void
-remove_actions(const std::string mime_type, std::vector<std::string> actions)
+remove_actions(const std::string mime_type, std::vector<std::string>& actions)
 {
     // LOG_INFO("remove_actions( {} )", type);
 
@@ -231,7 +231,7 @@ get_actions(const std::string& dir, const std::string& type, std::vector<std::st
     }
 }
 
-std::vector<std::string>
+const std::vector<std::string>
 mime_type_get_actions(const std::string& mime_type)
 {
     std::vector<std::string> actions;
@@ -340,7 +340,7 @@ mime_type_has_action(const char* type, const char* desktop_id)
         cmd = desktop_id;
     }
 
-    std::vector<std::string> actions = mime_type_get_actions(type);
+    const std::vector<std::string> actions = mime_type_get_actions(type);
     if (!actions.empty())
     {
         for (const std::string& action: actions)

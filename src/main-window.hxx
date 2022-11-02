@@ -111,7 +111,7 @@ FMMainWindow* fm_main_window_get_on_current_desktop();
  * The returned GList is owned and used internally by FMMainWindow, and
  * should not be freed.
  */
-const std::vector<FMMainWindow*> fm_main_window_get_all();
+const std::vector<FMMainWindow*>& fm_main_window_get_all();
 
 void main_task_view_update_task(PtkFileTask* ptask);
 void main_task_view_remove_task(PtkFileTask* ptask);

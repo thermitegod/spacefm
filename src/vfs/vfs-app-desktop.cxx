@@ -201,7 +201,8 @@ VFSAppDesktop::open_multiple_files() noexcept
 }
 
 const std::string
-VFSAppDesktop::translate_app_exec_to_command_line(std::vector<std::string>& file_list) noexcept
+VFSAppDesktop::translate_app_exec_to_command_line(
+    const std::vector<std::string>& file_list) noexcept
 {
     // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
 
@@ -287,7 +288,8 @@ VFSAppDesktop::exec_in_terminal(const std::string& app_name, const std::string& 
 }
 
 bool
-VFSAppDesktop::open_files(const std::string& working_dir, std::vector<std::string>& file_paths)
+VFSAppDesktop::open_files(const std::string& working_dir,
+                          const std::vector<std::string>& file_paths)
 {
     if (!get_exec())
     {
@@ -304,8 +306,7 @@ VFSAppDesktop::open_files(const std::string& working_dir, std::vector<std::strin
         // app does not accept multiple files, so run multiple times
         for (const std::string& open_file: file_paths)
         {
-            std::vector<std::string> open_files;
-            open_files.push_back(open_file);
+            const std::vector<std::string> open_files{open_file};
 
             exec_desktop(working_dir, open_files);
         }
@@ -315,7 +316,7 @@ VFSAppDesktop::open_files(const std::string& working_dir, std::vector<std::strin
 
 void
 VFSAppDesktop::exec_desktop(const std::string& working_dir,
-                            std::vector<std::string>& file_paths) noexcept
+                            const std::vector<std::string>& file_paths) noexcept
 {
     const std::string cmd = translate_app_exec_to_command_line(file_paths);
     if (cmd.empty())

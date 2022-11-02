@@ -79,7 +79,7 @@ const char* vfs_mime_type_get_description(VFSMimeType* mime_type);
  * Get available actions (applications) for this mime-type
  * returned vector should be freed with g_strfreev when not needed.
  */
-std::vector<std::string> vfs_mime_type_get_actions(VFSMimeType* mime_type);
+const std::vector<std::string> vfs_mime_type_get_actions(VFSMimeType* mime_type);
 
 /* returned string should be freed with g_strfreev when not needed. */
 char* vfs_mime_type_get_default_action(VFSMimeType* mime_type);

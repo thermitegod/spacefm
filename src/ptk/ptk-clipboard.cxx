@@ -115,7 +115,7 @@ clipboard_clean_data(GtkClipboard* clipboard, void* user_data)
 }
 
 void
-ptk_clipboard_copy_as_text(const char* working_dir, std::vector<VFSFileInfo*>& sel_files)
+ptk_clipboard_copy_as_text(const char* working_dir, const std::vector<VFSFileInfo*>& sel_files)
 { // aka copy path
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
@@ -133,8 +133,7 @@ ptk_clipboard_copy_as_text(const char* working_dir, std::vector<VFSFileInfo*>& s
 }
 
 void
-ptk_clipboard_copy_name(const char* working_dir,
-                        std::vector<VFSFileInfo*>& sel_files) // MOD added
+ptk_clipboard_copy_name(const char* working_dir, const std::vector<VFSFileInfo*>& sel_files)
 {
     (void)working_dir;
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -157,7 +156,7 @@ ptk_clipboard_copy_name(const char* working_dir,
 }
 
 void
-ptk_clipboard_copy_text(const char* text) // MOD added
+ptk_clipboard_copy_text(const char* text)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
@@ -166,7 +165,7 @@ ptk_clipboard_copy_text(const char* text) // MOD added
 }
 
 void
-ptk_clipboard_cut_or_copy_files(const char* working_dir, std::vector<VFSFileInfo*>& sel_files,
+ptk_clipboard_cut_or_copy_files(const char* working_dir, const std::vector<VFSFileInfo*>& sel_files,
                                 bool copy)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -515,7 +514,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
     gtk_selection_data_free(sel_data);
 }
 
-std::vector<std::string>
+const std::vector<std::string>
 ptk_clipboard_get_file_paths(const char* cwd, bool* is_cut, int* missing_targets)
 {
     (void)cwd;

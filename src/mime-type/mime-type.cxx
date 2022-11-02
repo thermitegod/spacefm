@@ -421,7 +421,7 @@ mime_type_init()
 {
     const std::string filename = "/mime/mime.cache";
 
-    std::vector<std::string> dirs = vfs_system_data_dir();
+    const std::vector<std::string> dirs = vfs_system_data_dir();
     n_caches = dirs.size();
 
     std::string path = Glib::build_filename(vfs_user_data_dir(), filename);
@@ -566,7 +566,7 @@ mime_type_is_subclass(const char* type, const char* parent)
 
     for (MimeCache& cache: caches)
     {
-        std::vector<const char*> parents = cache.lookup_parents(type);
+        const std::vector<const char*> parents = cache.lookup_parents(type);
         if (parents.empty())
             break;
 

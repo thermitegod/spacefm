@@ -1965,7 +1965,7 @@ vfs_file_task_thread(VFSFileTask* task)
  * freed after file operation has been completed
  */
 VFSFileTask*
-vfs_task_new(VFSFileTaskType type, std::vector<std::string>& src_files, const char* dest_dir)
+vfs_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files, const char* dest_dir)
 {
     VFSFileTask* task = g_slice_new0(VFSFileTask);
 

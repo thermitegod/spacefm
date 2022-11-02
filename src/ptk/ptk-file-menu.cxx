@@ -636,7 +636,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
 GtkWidget*
 ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* info,
-                  const char* cwd, std::vector<VFSFileInfo*> sel_files)
+                  const char* cwd, const std::vector<VFSFileInfo*>& sel_files)
 { // either desktop or browser must be non-nullptr
 
     const char* app_name = nullptr;
@@ -908,10 +908,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
         if (is_text)
         {
-            std::vector<std::string> txt_apps;
-            VFSMimeType* txt_type;
-            txt_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
-            txt_apps = vfs_mime_type_get_actions(txt_type);
+            VFSMimeType* txt_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
+            const std::vector<std::string> txt_apps = vfs_mime_type_get_actions(txt_type);
             if (!txt_apps.empty())
                 apps = ztd::merge(apps, txt_apps);
             vfs_mime_type_unref(txt_type);
@@ -2400,8 +2398,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
             {
                 file = vfs_file_info_new();
                 vfs_file_info_get(file, ao->path);
-                std::vector<VFSFileInfo*> sel_files;
-                sel_files.push_back(file);
+                const std::vector<VFSFileInfo*> sel_files{file};
                 ptk_open_files_with_app(cwd.c_str(),
                                         sel_files,
                                         nullptr,

@@ -32,7 +32,7 @@ enum MimeTypeAction
 /*
  *  Get a list of applications supporting this mime-type
  */
-std::vector<std::string> mime_type_get_actions(const std::string& type);
+const std::vector<std::string> mime_type_get_actions(const std::string& type);
 
 /*
  * Add an applications used to open this mime-type

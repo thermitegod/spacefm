@@ -435,7 +435,7 @@ vfs_mime_type_get_description(VFSMimeType* mime_type)
     return mime_type->description;
 }
 
-std::vector<std::string>
+const std::vector<std::string>
 vfs_mime_type_get_actions(VFSMimeType* mime_type)
 {
     return mime_type_get_actions(mime_type->type);
@@ -453,7 +453,7 @@ vfs_mime_type_get_default_action(VFSMimeType* mime_type)
      */
     if (!def)
     {
-        std::vector<std::string> actions = mime_type_get_actions(mime_type->type);
+        const std::vector<std::string> actions = mime_type_get_actions(mime_type->type);
         if (!actions.empty())
             def = ztd::strdup(actions.at(0));
     }

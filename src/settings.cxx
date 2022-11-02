@@ -1278,7 +1278,7 @@ xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* acce
     if (!elements)
         return;
 
-    std::vector<std::string> split_elements = ztd::split(elements, " ");
+    const std::vector<std::string> split_elements = ztd::split(elements, " ");
 
     for (const std::string& element: split_elements)
     {

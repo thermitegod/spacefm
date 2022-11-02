@@ -1103,7 +1103,7 @@ info_mount_points(device_t* device)
      * Note that things like space are encoded as \020.
      */
 
-    std::vector<std::string> lines = ztd::split(contents, "\n");
+    const std::vector<std::string> lines = ztd::split(contents, "\n");
     for (const std::string& line: lines)
     {
         unsigned int mount_id;
@@ -1507,7 +1507,7 @@ parse_mounts(bool report)
      * Parsers should ignore all unrecognised optional fields.
      */
 
-    std::vector<std::string> lines = ztd::split(contents, "\n");
+    const std::vector<std::string> lines = ztd::split(contents, "\n");
     for (const std::string& line: lines)
     {
         unsigned int mount_id;
@@ -2230,7 +2230,7 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
         }
     }
 
-    std::vector<std::string> lines = ztd::split(contents, "\n");
+    const std::vector<std::string> lines = ztd::split(contents, "\n");
     for (const std::string& line: lines)
     {
         if (line.size() == 0)
@@ -3285,8 +3285,7 @@ exec_task(const char* command, bool run_in_terminal)
     if (!(command && command[0]))
         return;
 
-    std::vector<std::string> file_list;
-    file_list.push_back("exec_task");
+    const std::vector<std::string> file_list{"exec_task"};
 
     PtkFileTask* ptask =
         new PtkFileTask(VFSFileTaskType::VFS_FILE_TASK_EXEC, file_list, "/", nullptr, nullptr);

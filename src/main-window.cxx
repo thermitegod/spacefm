@@ -466,8 +466,7 @@ on_find_file_activate(GtkMenuItem* menuitem, void* user_data)
         PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
     const char* cwd = ptk_file_browser_get_cwd(file_browser);
 
-    std::vector<const char*> search_dirs;
-    search_dirs.push_back(cwd);
+    const std::vector<const char*> search_dirs{cwd};
 
     fm_find_files(search_dirs);
 }
@@ -1049,17 +1048,16 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                 set = xset_get_panel(p, XSetPanel::SHOW);
                 if ((set->s && app_settings.get_load_saved_tabs()) || set->ob1)
                 {
-                    std::string tabs_add;
-                    std::vector<std::string> tab_dirs;
-
                     // set->ob1 is preload path
-                    tabs_add =
+
+                    std::string tabs_add =
                         fmt::format("{}{}{}",
                                     set->s && app_settings.get_load_saved_tabs() ? set->s : "",
                                     set->ob1 ? CONFIG_FILE_TABS_DELIM : "",
                                     set->ob1 ? set->ob1 : "");
 
-                    tab_dirs = ztd::split(tabs_add, CONFIG_FILE_TABS_DELIM);
+                    const std::vector<std::string> tab_dirs =
+                        ztd::split(tabs_add, CONFIG_FILE_TABS_DELIM);
 
                     for (const std::string& tab_dir: tab_dirs)
                     {
@@ -3024,7 +3022,8 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
 
     if (num_sel > 0)
     {
-        std::vector<VFSFileInfo*> sel_files = ptk_file_browser_get_selected_files(file_browser);
+        const std::vector<VFSFileInfo*> sel_files =
+            ptk_file_browser_get_selected_files(file_browser);
         if (sel_files.empty())
             return;
 
@@ -3531,7 +3530,7 @@ fm_main_window_get_last_active()
     return nullptr;
 }
 
-const std::vector<FMMainWindow*>
+const std::vector<FMMainWindow*>&
 fm_main_window_get_all()
 {
     return all_windows;
@@ -3723,8 +3722,6 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
 
     if (!c->var[ItemPropContext::CONTEXT_NAME])
     {
-        std::vector<VFSFileInfo*> sel_files;
-
         // if name is set, assume we do not need all selected files info
         c->var[ItemPropContext::CONTEXT_DIR] = ztd::strdup(ptk_file_browser_get_cwd(file_browser));
         if (!c->var[ItemPropContext::CONTEXT_DIR])
@@ -3737,7 +3734,8 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
                     : ztd::strdup("true");
         }
 
-        sel_files = ptk_file_browser_get_selected_files(file_browser);
+        const std::vector<VFSFileInfo*> sel_files =
+            ptk_file_browser_get_selected_files(file_browser);
         if (!sel_files.empty())
         {
             VFSFileInfo* file = vfs_file_info_ref(sel_files.front());
@@ -4063,9 +4061,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         buf.append(fmt::format("\nfm_tab_panel[{}]=\"{}\"\n", p, current_page + 1));
 
         // selected files
-        std::vector<VFSFileInfo*> sel_files;
-
-        sel_files = ptk_file_browser_get_selected_files(a_browser);
+        const std::vector<VFSFileInfo*> sel_files = ptk_file_browser_get_selected_files(a_browser);
         if (!sel_files.empty())
         {
             buf.append(fmt::format("fm_panel{}_files=(\n", p));
@@ -6629,7 +6625,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (!clip_txt)
                 return 0;
             // build bash array
-            std::vector<std::string> pathv = ztd::split(clip_txt, "");
+            const std::vector<std::string> pathv = ztd::split(clip_txt, "");
             str = "(";
             for (const std::string& path: pathv)
             {
@@ -6642,9 +6638,8 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (ztd::same(socket_property, "selected_filenames") ||
                  ztd::same(socket_property, "selected_files"))
         {
-            std::vector<VFSFileInfo*> sel_files;
-
-            sel_files = ptk_file_browser_get_selected_files(file_browser);
+            const std::vector<VFSFileInfo*> sel_files =
+                ptk_file_browser_get_selected_files(file_browser);
             if (sel_files.empty())
                 return 0;
 
