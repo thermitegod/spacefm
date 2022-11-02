@@ -14,6 +14,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <vector>
 
 #include <type_traits>
@@ -1266,14 +1268,14 @@ xset_get_b_panel(panel_t panel, XSetPanel name)
 }
 
 bool
-xset_get_b_panel_mode(panel_t panel, const std::string& name, const char mode)
+xset_get_b_panel_mode(panel_t panel, const std::string& name, MainWindowPanel mode)
 {
     xset_t set = xset_get_panel_mode(panel, name, mode);
     return set->get_b();
 }
 
 bool
-xset_get_b_panel_mode(panel_t panel, XSetPanel name, const char mode)
+xset_get_b_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode)
 {
     xset_t set = xset_get(xset_get_xsetname_from_panel_mode(panel, name, mode));
     return set->get_b();
@@ -1282,6 +1284,15 @@ xset_get_b_panel_mode(panel_t panel, XSetPanel name, const char mode)
 /**
  * B set
  */
+xset_t
+xset_set_b(xset_t set, bool bval)
+{
+    if (bval)
+        set->b = XSetB::XSET_B_TRUE;
+    else
+        set->b = XSetB::XSET_B_FALSE;
+    return set;
+}
 
 xset_t
 xset_set_b(XSetName name, bool bval)
@@ -1322,17 +1333,13 @@ xset_set_b_panel(panel_t panel, XSetPanel name, bool bval)
 }
 
 xset_t
-xset_set_b_panel_mode(panel_t panel, const std::string& name, const char mode, bool bval)
+xset_set_b_panel_mode(panel_t panel, const std::string& name, MainWindowPanel mode, bool bval)
 {
-    // FMT BUG - need to use std::to_string on char
-    // otherwise it gets ignored and not added to new string
-    std::string fullname = fmt::format("panel{}_{}{}", panel, name, std::to_string(mode));
-    xset_t set = xset_set_b(fullname, bval);
-    return set;
+    return xset_set_b(xset_get_panel_mode(panel, name, mode), bval);
 }
 
 xset_t
-xset_set_b_panel_mode(panel_t panel, XSetPanel name, const char mode, bool bval)
+xset_set_b_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode, bool bval)
 {
     return xset_set_b(xset_get_xsetname_from_panel_mode(panel, name, mode), bval);
 }
@@ -1356,17 +1363,16 @@ xset_get_panel(panel_t panel, XSetPanel name)
 }
 
 xset_t
-xset_get_panel_mode(panel_t panel, const std::string& name, const char mode)
+xset_get_panel_mode(panel_t panel, const std::string& name, MainWindowPanel mode)
 {
-    // FMT BUG - need to use std::to_string on char
-    // otherwise it gets ignored and not added to new string
-    const std::string fullname = fmt::format("panel{}_{}{}", panel, name, std::to_string(mode));
+    const std::string fullname =
+        fmt::format("panel{}_{}{}", panel, name, xset_get_window_panel_mode(mode));
     xset_t set = xset_get(fullname);
     return set;
 }
 
 xset_t
-xset_get_panel_mode(panel_t panel, XSetPanel name, const char mode)
+xset_get_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode)
 {
     return xset_get(xset_get_xsetname_from_panel_mode(panel, name, mode));
 }

@@ -383,15 +383,17 @@ bool xset_get_b(const std::string& name);
 bool xset_get_b_set(xset_t set);
 bool xset_get_b_panel(panel_t panel, const std::string& name);
 bool xset_get_b_panel(panel_t panel, XSetPanel name);
-bool xset_get_b_panel_mode(panel_t panel, const std::string& name, char mode);
-bool xset_get_b_panel_mode(panel_t panel, XSetPanel name, char mode);
+bool xset_get_b_panel_mode(panel_t panel, const std::string& name, MainWindowPanel mode);
+bool xset_get_b_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode);
 
+xset_t xset_set_b(xset_t set, bool bval);
 xset_t xset_set_b(XSetName name, bool bval);
 xset_t xset_set_b(const std::string& name, bool bval);
 xset_t xset_set_b_panel(panel_t panel, const std::string& name, bool bval);
 xset_t xset_set_b_panel(panel_t panel, XSetPanel name, bool bval);
-xset_t xset_set_b_panel_mode(panel_t panel, const std::string& name, char mode, bool bval);
-xset_t xset_set_b_panel_mode(panel_t panel, XSetPanel name, char mode, bool bval);
+xset_t xset_set_b_panel_mode(panel_t panel, const std::string& name, MainWindowPanel mode,
+                             bool bval);
+xset_t xset_set_b_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode, bool bval);
 
 // S
 char* xset_get_s(xset_t set);
@@ -418,8 +420,8 @@ char* xset_get_z(const std::string& name);
 // Panel
 xset_t xset_get_panel(panel_t panel, const std::string& name);
 xset_t xset_get_panel(panel_t panel, XSetPanel name);
-xset_t xset_get_panel_mode(panel_t panel, const std::string& name, char mode);
-xset_t xset_get_panel_mode(panel_t panel, XSetPanel name, char mode);
+xset_t xset_get_panel_mode(panel_t panel, const std::string& name, MainWindowPanel mode);
+xset_t xset_get_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode);
 
 xset_t xset_set_panel(panel_t panel, const std::string& name, XSetVar var,
                       const std::string& value);

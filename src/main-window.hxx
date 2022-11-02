@@ -15,9 +15,15 @@
 
 #pragma once
 
+#include <string>
+#include <string_view>
+
+#include <array>
+#include <map>
 #include <vector>
 
 #include "types.hxx"
+#include "xset.hxx"
 
 #include <gtk/gtk.h>
 #include "ptk/ptk-file-browser.hxx"
@@ -36,6 +42,7 @@ struct FMMainWindow
     /* protected */
     GtkWidget* main_vbox;
     GtkWidget* menu_bar;
+
     // MOD
     GtkWidget* file_menu_item;
     GtkWidget* view_menu_item;
@@ -51,7 +58,7 @@ struct FMMainWindow
     int panel_slide_x[4];
     int panel_slide_y[4];
     int panel_slide_s[4];
-    char panel_context[4];
+    std::map<panel_t, MainWindowPanel> panel_context;
     bool panel_change;
     GtkWidget* panelbar;
     GtkWidget* panel_btn[4];

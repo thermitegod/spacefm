@@ -6169,8 +6169,8 @@ static void
 xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventButton* event)
 {
     xset_t set2;
-    int p;
-    char mode;
+    panel_t p;
+    MainWindowPanel mode;
     PtkFileBrowser* file_browser = nullptr;
     FMMainWindow* main_window = fm_main_window_get_last_active();
 
@@ -6188,7 +6188,7 @@ xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventButton* event
         file_browser =
             PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
         p = file_browser->mypanel;
-        mode = main_window->panel_context[p - 1];
+        mode = main_window->panel_context.at(p);
     }
     if (!PTK_IS_FILE_BROWSER(file_browser))
         return;

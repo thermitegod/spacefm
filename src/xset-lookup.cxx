@@ -1749,6 +1749,13 @@ static const std::unordered_map<std::string_view, XSetVar> xset_var_map{
 #endif
 };
 
+static const std::unordered_map<MainWindowPanel, std::string_view> main_window_panel_mode_map{
+    {MainWindowPanel::PANEL_NEITHER, "0"sv},
+    {MainWindowPanel::PANEL_HORIZ,   "1"sv},
+    {MainWindowPanel::PANEL_VERT,    "2"sv},
+    {MainWindowPanel::PANEL_BOTH,    "3"sv},
+};
+
 // clang-format on
 
 #ifdef XSET_MAP_TEST
@@ -1833,69 +1840,57 @@ xset_get_name_from_panel(panel_t panel, XSetPanel name)
 // panel mode
 
 XSetName
-xset_get_xsetname_from_panel_mode(panel_t panel, XSetPanel name, char mode)
+xset_get_xsetname_from_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode)
 {
     switch (panel)
     {
         case 1:
             switch (mode)
             {
-                case 0:
+                case MainWindowPanel::PANEL_NEITHER:
                     return xset_panel1_mode0_map.at(name);
-                case 1:
+                case MainWindowPanel::PANEL_HORIZ:
                     return xset_panel1_mode1_map.at(name);
-                case 2:
+                case MainWindowPanel::PANEL_VERT:
                     return xset_panel1_mode2_map.at(name);
-                case 3:
+                case MainWindowPanel::PANEL_BOTH:
                     return xset_panel1_mode3_map.at(name);
-                default:
-                    // LOG_WARN("out of bounds | panel {}, mode {}", panel, std::to_string(mode));
-                    return xset_panel1_mode0_map.at(name);
             }
         case 2:
             switch (mode)
             {
-                case 0:
+                case MainWindowPanel::PANEL_NEITHER:
                     return xset_panel2_mode0_map.at(name);
-                case 1:
+                case MainWindowPanel::PANEL_HORIZ:
                     return xset_panel2_mode1_map.at(name);
-                case 2:
+                case MainWindowPanel::PANEL_VERT:
                     return xset_panel2_mode2_map.at(name);
-                case 3:
+                case MainWindowPanel::PANEL_BOTH:
                     return xset_panel2_mode3_map.at(name);
-                default:
-                    // LOG_WARN("out of bounds | panel {}, mode {}", panel, std::to_string(mode));
-                    return xset_panel2_mode0_map.at(name);
             }
         case 3:
             switch (mode)
             {
-                case 0:
+                case MainWindowPanel::PANEL_NEITHER:
                     return xset_panel3_mode0_map.at(name);
-                case 1:
+                case MainWindowPanel::PANEL_HORIZ:
                     return xset_panel3_mode1_map.at(name);
-                case 2:
+                case MainWindowPanel::PANEL_VERT:
                     return xset_panel3_mode2_map.at(name);
-                case 3:
+                case MainWindowPanel::PANEL_BOTH:
                     return xset_panel3_mode3_map.at(name);
-                default:
-                    // LOG_WARN("out of bounds | panel {}, mode {}", panel, std::to_string(mode));
-                    return xset_panel3_mode0_map.at(name);
             }
         case 4:
             switch (mode)
             {
-                case 0:
+                case MainWindowPanel::PANEL_NEITHER:
                     return xset_panel4_mode0_map.at(name);
-                case 1:
+                case MainWindowPanel::PANEL_HORIZ:
                     return xset_panel4_mode1_map.at(name);
-                case 2:
+                case MainWindowPanel::PANEL_VERT:
                     return xset_panel4_mode2_map.at(name);
-                case 3:
+                case MainWindowPanel::PANEL_BOTH:
                     return xset_panel4_mode3_map.at(name);
-                default:
-                    // LOG_WARN("out of bounds | panel {}, mode {}", panel, std::to_string(mode));
-                    return xset_panel4_mode0_map.at(name);
             }
         default:
             // LOG_WARN("Panel Mode out of range: {}, using panel 1", std::to_string(mode));
@@ -1904,7 +1899,7 @@ xset_get_xsetname_from_panel_mode(panel_t panel, XSetPanel name, char mode)
 }
 
 const std::string
-xset_get_name_from_panel_mode(panel_t panel, XSetPanel name, char mode)
+xset_get_name_from_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode)
 {
     return xset_name_map.at(xset_get_xsetname_from_panel_mode(panel, name, mode)).data();
 }
@@ -1936,4 +1931,20 @@ xset_get_name_from_xsetvar(XSetVar name)
 
     const std::string err_msg = fmt::format("NOT implemented XSetVar: {}", INT(name));
     throw std::logic_error(err_msg);
+}
+
+// main window panel mode
+
+const std::string
+xset_get_window_panel_mode(MainWindowPanel mode)
+{
+    try
+    {
+        return main_window_panel_mode_map.at(mode).data();
+    }
+    catch (std::out_of_range)
+    {
+        const std::string msg = fmt::format("MainWindowPanel:: Not Implemented: {}", INT(mode));
+        throw InvalidXSetName(msg);
+    }
 }

@@ -128,7 +128,7 @@ on_popup_list_large(GtkMenuItem* menuitem, PtkFileBrowser* browser)
     (void)menuitem;
     int p = browser->mypanel;
     FMMainWindow* main_window = FM_MAIN_WINDOW(browser->main_window);
-    char mode = main_window->panel_context[p - 1];
+    const MainWindowPanel mode = main_window->panel_context.at(p);
 
     xset_set_b_panel_mode(p,
                           XSetPanel::LIST_LARGE,
@@ -327,8 +327,8 @@ on_popup_detailed_column(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
     {
         // get visiblity for correct mode
         FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
-        int p = file_browser->mypanel;
-        char mode = main_window->panel_context[p - 1];
+        const panel_t p = file_browser->mypanel;
+        const MainWindowPanel mode = main_window->panel_context.at(p);
 
         xset_t set = xset_get_panel_mode(p, XSetPanel::DETCOL_SIZE, mode);
         set->b = xset_get_panel(p, XSetPanel::DETCOL_SIZE)->b;
@@ -351,8 +351,8 @@ on_popup_toggle_view(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
     (void)menuitem;
     // get visiblity for correct mode
     FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
-    int p = file_browser->mypanel;
-    char mode = main_window->panel_context[p - 1];
+    const panel_t p = file_browser->mypanel;
+    const MainWindowPanel mode = main_window->panel_context.at(p);
 
     xset_t set = xset_get_panel_mode(p, XSetPanel::SHOW_TOOLBOX, mode);
     set->b = xset_get_panel(p, XSetPanel::SHOW_TOOLBOX)->b;
@@ -423,7 +423,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     int p = browser->mypanel;
 
     FMMainWindow* main_window = FM_MAIN_WINDOW(browser->main_window);
-    char mode = main_window->panel_context[p - 1];
+    const MainWindowPanel mode = main_window->panel_context.at(p);
 
     bool show_side = false;
     xset_set_cb(XSetName::VIEW_REFRESH, (GFunc)ptk_file_browser_refresh, browser);

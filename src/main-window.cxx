@@ -134,14 +134,6 @@ static std::vector<std::string> closed_tabs_restore;
 //  Drag & Drop/Clipboard targets
 static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 
-enum MainWindowPanel
-{ // how a panel shares vertical and horizontal space with other panels
-    PANEL_NEITHER,
-    PANEL_HORIZ,
-    PANEL_VERT,
-    PANEL_BOTH
-};
-
 GType
 fm_main_window_get_type()
 {
@@ -408,7 +400,7 @@ on_devices_show(GtkMenuItem* item, FMMainWindow* main_window)
         PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
     if (!file_browser)
         return;
-    int mode = main_window->panel_context[file_browser->mypanel - 1];
+    const MainWindowPanel mode = main_window->panel_context[file_browser->mypanel - 1];
 
     xset_set_b_panel_mode(file_browser->mypanel,
                           XSetPanel::SHOW_DEVMON,
@@ -751,7 +743,7 @@ update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser)
     // do this browser first
     if (!file_browser)
         return;
-    int p = file_browser->mypanel;
+    const panel_t p = file_browser->mypanel;
 
     ptk_file_browser_update_views(nullptr, file_browser);
 
@@ -979,6 +971,17 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
         show[p] = xset_get_b_panel(p, XSetPanel::SHOW);
     }
 
+    // TODO - write and move this to FMMainWindow constructor
+    if (main_window->panel_context.empty())
+    {
+        main_window->panel_context = {
+            {1, MainWindowPanel::PANEL_NEITHER},
+            {2, MainWindowPanel::PANEL_NEITHER},
+            {3, MainWindowPanel::PANEL_NEITHER},
+            {4, MainWindowPanel::PANEL_NEITHER},
+        };
+    }
+
     bool horiz;
     bool vert;
     for (panel_t p: PANELS)
@@ -1005,13 +1008,13 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
         }
 
         if (horiz && vert)
-            main_window->panel_context[p - 1] = MainWindowPanel::PANEL_BOTH;
+            main_window->panel_context.at(p) = MainWindowPanel::PANEL_BOTH;
         else if (horiz)
-            main_window->panel_context[p - 1] = MainWindowPanel::PANEL_HORIZ;
+            main_window->panel_context.at(p) = MainWindowPanel::PANEL_HORIZ;
         else if (vert)
-            main_window->panel_context[p - 1] = MainWindowPanel::PANEL_VERT;
+            main_window->panel_context.at(p) = MainWindowPanel::PANEL_VERT;
         else
-            main_window->panel_context[p - 1] = MainWindowPanel::PANEL_NEITHER;
+            main_window->panel_context.at(p) = MainWindowPanel::PANEL_NEITHER;
 
         if (show[p])
         {
@@ -1019,15 +1022,13 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
             // test if panel and mode exists
             xset_t set;
 
-            std::string xset_name =
-                fmt::format("panel{}_slider_positions{}", p, main_window->panel_context[p - 1]);
-            set = xset_is(xset_name);
+            const MainWindowPanel mode = main_window->panel_context.at(p);
+
+            set = xset_is(xset_get_xsetname_from_panel_mode(p, XSetPanel::SLIDER_POSITIONS, mode));
             if (!set)
             {
-                // no config exists for this panel and mode - copy
-                // printf ("no config for %d, %d\n", p, main_window->panel_context[p-1] );
-                xset_t set_old;
-                char mode = main_window->panel_context[p - 1];
+                // LOG_WARN("no config for {}, {}", p, INT(mode));
+
                 xset_set_b_panel_mode(p,
                                       XSetPanel::SHOW_TOOLBOX,
                                       mode,
@@ -1072,7 +1073,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                                       XSetPanel::DETCOL_DATE,
                                       mode,
                                       xset_get_b_panel(p, XSetPanel::DETCOL_DATE));
-                set_old = xset_get_panel(p, XSetPanel::SLIDER_POSITIONS);
+                const xset_t set_old = xset_get_panel(p, XSetPanel::SLIDER_POSITIONS);
                 set = xset_get_panel_mode(p, XSetPanel::SLIDER_POSITIONS, mode);
                 set->x = ztd::strdup(set_old->x ? set_old->x : "0");
                 set->y = ztd::strdup(set_old->y ? set_old->y : "0");
@@ -1326,7 +1327,8 @@ on_bookmarks_show(GtkMenuItem* item, FMMainWindow* main_window)
         PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
     if (!file_browser)
         return;
-    int mode = main_window->panel_context[file_browser->mypanel - 1];
+
+    const MainWindowPanel mode = main_window->panel_context.at(file_browser->mypanel);
 
     xset_set_b_panel_mode(file_browser->mypanel,
                           XSetPanel::SHOW_BOOK,
@@ -6027,7 +6029,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             {
                 xset_set_b_panel_mode(panel,
                                       xset_panel_var,
-                                      main_window->panel_context[panel - 1],
+                                      main_window->panel_context.at(panel),
                                       get_bool(argv[i + 1]));
             }
             else
@@ -6196,7 +6198,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             {
                 xset_set_b_panel_mode(panel,
                                       XSetPanel::LIST_LARGE,
-                                      main_window->panel_context[panel - 1],
+                                      main_window->panel_context.at(panel),
                                       get_bool(argv[i + 1]));
                 update_views_all_windows(nullptr, file_browser);
             }
@@ -6471,7 +6473,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = fmt::format("{}",
                                     !!xset_get_b_panel_mode(panel,
                                                             xset_panel_var,
-                                                            main_window->panel_context[panel - 1]));
+                                                            main_window->panel_context.at(panel)));
             }
             else
             {

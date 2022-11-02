@@ -1206,6 +1206,14 @@ enum class XSetVar
     OPENER,
 };
 
+enum class MainWindowPanel
+{ // how a panel shares vertical and horizontal space with other panels
+    PANEL_NEITHER,
+    PANEL_HORIZ,
+    PANEL_VERT,
+    PANEL_BOTH
+};
+
 #ifdef XSET_MAP_TEST
 bool is_in_xset_map_test(XSetName name);
 bool is_in_xset_map_test(std::string_view name);
@@ -1217,8 +1225,12 @@ const std::string xset_get_name_from_xsetname(XSetName name);
 XSetName xset_get_xsetname_from_panel(panel_t panel, XSetPanel panel_var);
 const std::string xset_get_name_from_panel(panel_t panel, XSetPanel name);
 
-XSetName xset_get_xsetname_from_panel_mode(panel_t panel, XSetPanel name, char mode);
-const std::string xset_get_name_from_panel_mode(panel_t panel, XSetPanel name, char mode);
+XSetName xset_get_xsetname_from_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode);
+const std::string xset_get_name_from_panel_mode(panel_t panel, XSetPanel name,
+                                                MainWindowPanel mode);
 
 XSetVar xset_get_xsetvar_from_name(std::string_view name);
 const std::string xset_get_name_from_xsetvar(XSetVar name);
+
+// main window panel mode
+const std::string xset_get_window_panel_mode(MainWindowPanel mode);
