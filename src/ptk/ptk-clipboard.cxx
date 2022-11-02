@@ -90,7 +90,7 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, un
         }
         else
         {
-            file_name = Glib::filename_display_name(clipboard_file.c_str());
+            file_name = Glib::filename_display_name(clipboard_file);
         }
 
         uri_list.append(fmt::format("{}\n", file_name));

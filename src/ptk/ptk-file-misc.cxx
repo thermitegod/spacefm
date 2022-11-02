@@ -3837,13 +3837,13 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<VFSFileInf
             {
                 task_name = "Move As Root";
                 // problem: no warning if already exists
-                cmd = fmt::format("mv -f {} {}", file_paths, quote_path.c_str());
+                cmd = fmt::format("mv -f {} {}", file_paths, quote_path);
             }
             else
             {
                 task_name = "Copy As Root";
                 // problem: no warning if already exists
-                cmd = fmt::format("cp -r {} {}", file_paths, quote_path.c_str());
+                cmd = fmt::format("cp -r {} {}", file_paths, quote_path);
             }
 
             free(path);

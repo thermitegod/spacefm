@@ -395,7 +395,7 @@ mime_type_get_desc_icon(const char* type, const char* locale, char** icon_name)
     // look in system dirs
     for (const std::string& sys_dir: vfs_system_data_dir())
     {
-        file_path = fmt::format("{}/mime/{}.xml", sys_dir.c_str(), type);
+        file_path = fmt::format("{}/mime/{}.xml", sys_dir, type);
         if (faccessat(0, file_path.c_str(), F_OK, AT_EACCESS) != -1)
         {
             desc = _mime_type_get_desc_icon(file_path.c_str(), locale, false, icon_name);

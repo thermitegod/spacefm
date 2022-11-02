@@ -1239,7 +1239,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFil
                         // add a dot to extension
                         extension = fmt::format(".{}", extension);
                         // Checking if the current extension is being used
-                        if (ztd::endswith(filename, extension.c_str()))
+                        if (ztd::endswith(filename, extension))
                         {
                             // It is - determining filename without extension
                             std::size_t n = std::strlen(filename) - extension.size();

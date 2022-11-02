@@ -269,7 +269,7 @@ handle_parsed_commandline_args()
                 open_in_tab(&main_window, real_path.c_str());
                 ret = true;
             }
-            else if (std::filesystem::exists(real_path.c_str()))
+            else if (std::filesystem::exists(real_path))
             {
                 struct stat statbuf;
                 if (stat(real_path.c_str(), &statbuf) == 0 && S_ISBLK(statbuf.st_mode))

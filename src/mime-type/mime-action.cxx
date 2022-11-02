@@ -835,7 +835,7 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
                     }
                 }
                 // copy other apps to new list preserving order
-                new_action = fmt::format("{}{};", new_action, apps.at(i).c_str());
+                new_action = fmt::format("{}{};", new_action, apps.at(i).data());
             }
         }
 

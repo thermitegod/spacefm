@@ -6827,7 +6827,7 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             ptk_file_task_lock(ptask);
             if (!ptask->task->exec_icon.empty())
-                reply = fmt::format("{}", ptask->task->exec_icon.c_str());
+                reply = fmt::format("{}", ptask->task->exec_icon);
             ptk_file_task_unlock(ptask);
             return 0;
         }

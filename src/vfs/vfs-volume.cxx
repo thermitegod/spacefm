@@ -2543,7 +2543,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         if (!keep && ztd::contains(HIDDEN_NON_BLOCK_FS, (const char*)mtab_fstype))
         {
             // no protocol handler and not blacklisted - show anyway?
-            keep = ztd::startswith(point, vfs_user_cache_dir().c_str()) ||
+            keep = ztd::startswith(point, vfs_user_cache_dir()) ||
                    ztd::startswith(point, "/media/") || ztd::startswith(point, "/run/media/") ||
                    ztd::startswith(mtab_fstype, "fuse.");
             if (!keep)
@@ -2784,7 +2784,7 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
                 command = ztd::replace(command, "%o", options ? options : "");
                 command = ztd::replace(command, "%t", vol->fs_type ? vol->fs_type : "");
             }
-            if (ztd::contains(command.c_str(), "%a"))
+            if (ztd::contains(command, "%a"))
             {
                 if (action == PtkHandlerMount::HANDLER_MOUNT)
                 {
