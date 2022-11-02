@@ -222,11 +222,11 @@ get_socket_name(char* buf, int len)
     // treat :0.0 as :0 to prevent multiple instances on screen 0
     if (ztd::same(dpy, ":0.0"))
         dpy = ":0";
-    std::string socket_path = fmt::format("{}/{}-{}{}.socket",
-                                          vfs_user_runtime_dir(),
-                                          PACKAGE_NAME,
-                                          Glib::get_user_name(),
-                                          dpy);
+    const std::string socket_path = fmt::format("{}/{}-{}{}.socket",
+                                                vfs_user_runtime_dir(),
+                                                PACKAGE_NAME,
+                                                Glib::get_user_name(),
+                                                dpy);
     g_snprintf(buf, len, "%s", socket_path.c_str());
 }
 
@@ -377,7 +377,7 @@ receive_socket_command(int client, const std::string& args)
     // check inode tag - was socket command sent from the same filesystem?
     // eg this helps deter use of socket commands sent from a chroot jail
     // or from another user or system
-    std::string inode_tag = get_inode_tag();
+    const std::string inode_tag = get_inode_tag();
     if (argv && strcmp(inode_tag.c_str(), argv[0]))
     {
         cmd = 1;
@@ -431,7 +431,7 @@ send_socket_command(int argc, char* argv[], std::string& reply)
     write(sock, &cmd, sizeof(char));
 
     // send inode tag
-    std::string inode_tag = get_inode_tag();
+    const std::string inode_tag = get_inode_tag();
     write(sock, inode_tag.c_str(), std::strlen(inode_tag.c_str()));
     write(sock, "\n", 1);
 

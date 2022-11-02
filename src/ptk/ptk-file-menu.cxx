@@ -1025,7 +1025,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                                   data);
                 for (int i = 1; i < 11; ++i)
                 {
-                    std::string name = fmt::format("opentab_{}", i);
+                    const std::string name = fmt::format("opentab_{}", i);
                     set = xset_set_cb(name, (GFunc)on_open_in_tab, data);
                     xset_set_ob1_int(set, "tab_num", i);
                     set->disable = (i > tab_count) || (i == tab_num);
@@ -1040,7 +1040,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
                 for (int i = 1; i < 5; ++i)
                 {
-                    std::string name = fmt::format("open_in_panel{}", i);
+                    const std::string name = fmt::format("open_in_panel{}", i);
                     set = xset_set_cb(name, (GFunc)on_open_in_panel, data);
                     xset_set_ob1_int(set, "panel_num", i);
                     // set->disable = ( p == i );
@@ -1113,7 +1113,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
         for (int i = 1; i < 11; ++i)
         {
-            std::string name = fmt::format("tab_{}", i);
+            const std::string name = fmt::format("tab_{}", i);
             set = xset_set_cb(name, (GFunc)ptk_file_browser_go_tab, browser);
             xset_set_ob1_int(set, "tab_num", i);
             set->disable = (i > tab_count) || (i == tab_num);
@@ -1226,13 +1226,12 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
         for (int i = 1; i < 11; ++i)
         {
-            std::string str;
-            str = fmt::format("copy_tab_{}", i);
-            set = xset_get(str);
+            const std::string copy_tab = fmt::format("copy_tab_{}", i);
+            set = xset_get(copy_tab);
             set->disable = (i > tab_count) || (i == tab_num);
 
-            str = fmt::format("move_tab_{}", i);
-            set = xset_get(str);
+            const std::string move_tab = fmt::format("move_tab_{}", i);
+            set = xset_get(move_tab);
             set->disable = (i > tab_count) || (i == tab_num);
 
             if (i > 4)
@@ -1240,12 +1239,12 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
             bool b = main_window_panel_is_visible(browser, i);
 
-            str = fmt::format("copy_panel_{}", i);
-            set = xset_get(str);
+            const std::string copy_panel = fmt::format("copy_panel_{}", i);
+            set = xset_get(copy_panel);
             set->disable = (i == p) || !b;
 
-            str = fmt::format("move_panel_{}", i);
-            set = xset_get(str);
+            const std::string move_panel = fmt::format("move_panel_{}", i);
+            set = xset_get(move_panel);
             set->disable = (i == p) || !b;
         }
 
@@ -1470,7 +1469,6 @@ get_shared_desktop_file_location(const char* name)
 void
 app_job(GtkWidget* item, GtkWidget* app_item)
 {
-    std::string msg;
     std::string path;
     char* str;
     std::string str2;
@@ -1531,12 +1529,13 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     return;
                 }
 
-                msg = fmt::format("The file '{}' does not exist.\n\nBy copying '{}' to '{}' and "
-                                  "editing it, you can adjust the behavior and appearance of this "
-                                  "application for the current user.\n\nCreate this copy now?",
-                                  path,
-                                  share_desktop,
-                                  path);
+                const std::string msg =
+                    fmt::format("The file '{}' does not exist.\n\nBy copying '{}' to '{}' and "
+                                "editing it, you can adjust the behavior and appearance of this "
+                                "application for the current user.\n\nCreate this copy now?",
+                                path,
+                                share_desktop,
+                                path);
                 if (xset_msg_dialog(GTK_WIDGET(data->browser),
                                     GTK_MESSAGE_QUESTION,
                                     "Copy Desktop File",
@@ -1623,8 +1622,9 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             path = Glib::build_filename(vfs_user_data_dir(), "mime/packages", str2);
             if (!std::filesystem::exists(path))
             {
-                std::string xml_file = fmt::format("{}.xml", mime_type->type);
-                std::string usr_path = Glib::build_filename("/usr/share/mime", xml_file);
+                std::string msg;
+                const std::string xml_file = fmt::format("{}.xml", mime_type->type);
+                const std::string usr_path = Glib::build_filename("/usr/share/mime", xml_file);
 
                 if (std::filesystem::exists(usr_path))
                     msg = fmt::format("The file '{}' does not exist.\n\nBy copying '{}' to '{}' "
@@ -1689,7 +1689,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 }
                 catch (const Glib::FileError& e)
                 {
-                    std::string what = e.what();
+                    const std::string what = e.what();
                     LOG_WARN("Error reading {}: {}", usr_path, what);
                 }
 
@@ -2151,7 +2151,8 @@ on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     {
         for (VFSFileInfo* file: data->sel_files)
         {
-            std::string full_path = Glib::build_filename(data->cwd, vfs_file_info_get_name(file));
+            const std::string full_path =
+                Glib::build_filename(data->cwd, vfs_file_info_get_name(file));
             if (data->browser && std::filesystem::is_directory(full_path))
             {
                 ptk_file_browser_emit_open(data->browser,
@@ -2183,7 +2184,7 @@ on_new_bookmark(GtkMenuItem* menuitem, PtkFileMenu* data)
     if (!data->sel_files.empty() && data->sel_files.size() == 1)
     {
         VFSFileInfo* file = data->sel_files.back();
-        std::string full_path = Glib::build_filename(data->cwd, vfs_file_info_get_name(file));
+        const std::string full_path = Glib::build_filename(data->cwd, vfs_file_info_get_name(file));
         ptk_bookmark_view_add_bookmark(nullptr, data->browser, full_path.c_str());
     }
     else

@@ -124,11 +124,11 @@ add_list_item(GtkListStore* list, const char* path)
     VFSAppDesktop desktop(path);
 
     // tooltip
-    std::string tooltip = fmt::format("{}\nName={}\nExec={}{}",
-                                      desktop.get_full_path(),
-                                      desktop.get_disp_name(),
-                                      desktop.get_exec(),
-                                      desktop.use_terminal() ? "\nTerminal=true" : "");
+    const std::string tooltip = fmt::format("{}\nName={}\nExec={}{}",
+                                            desktop.get_full_path(),
+                                            desktop.get_disp_name(),
+                                            desktop.get_exec(),
+                                            desktop.use_terminal() ? "\nTerminal=true" : "");
 
     GdkPixbuf* icon = desktop.get_icon(20);
     gtk_list_store_append(list, &it);
@@ -226,7 +226,7 @@ app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all
     else
         gtk_window_set_default_size(GTK_WINDOW(dlg), 600, 600);
 
-    std::string mime_desc =
+    const std::string mime_desc =
         fmt::format(" {}\n ( {} )", vfs_mime_type_get_description(mime_type), mime_type->type);
     gtk_label_set_text(GTK_LABEL(file_type), mime_desc.c_str());
 
@@ -482,7 +482,6 @@ void
 ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
 {
     // is file handler set for this type?
-    std::string msg;
     GSList* handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_FILE,
                                                            PtkHandlerMount::HANDLER_MOUNT,
                                                            nullptr,
@@ -492,7 +491,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
                                                            true);
     if (handlers_slist)
     {
-        msg = fmt::format(
+        const std::string msg = fmt::format(
             "Note:  MIME type '{}' is currently set to open with the '{}' file handler, rather "
             "than with your associated MIME application.\n\nYou may also need to disable this "
             "handler in Open|File Handlers for this type to be opened with your associated "
@@ -514,7 +513,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
                                                        true);
         if (handlers_slist)
         {
-            msg = fmt::format(
+            const std::string msg = fmt::format(
                 "Note:  MIME type '{}' is currently set to open with the '{}' archive handler, "
                 "rather than with your associated MIME application.\n\nYou may also need to "
                 "disable this handler in Open|Archive Defaults|Archive Handlers, OR select "
@@ -584,8 +583,6 @@ load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* tas
     if (!std::filesystem::is_directory(dir_path))
         return;
 
-    std::string file_path;
-    std::string file_name;
     for (const auto& file: std::filesystem::directory_iterator(dir_path))
     {
         vfs_async_task_lock(task);
@@ -596,9 +593,8 @@ load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* tas
         }
         vfs_async_task_unlock(task);
 
-        file_name = std::filesystem::path(file).filename();
-
-        file_path = Glib::build_filename(dir_path, file_name);
+        const std::string file_name = std::filesystem::path(file).filename();
+        const std::string file_path = Glib::build_filename(dir_path, file_name);
         if (std::filesystem::is_directory(file_path))
         {
             /* recursively load sub dirs */
@@ -626,9 +622,7 @@ load_all_known_apps_thread(VFSAsyncTask* task)
 {
     GtkListStore* list = GTK_LIST_STORE(vfs_async_task_get_data(task));
 
-    std::string dir;
-
-    dir = Glib::build_filename(vfs_user_data_dir(), "applications");
+    std::string dir = Glib::build_filename(vfs_user_data_dir(), "applications");
     load_all_apps_in_dir(dir.c_str(), list, task);
 
     for (const std::string& sys_dir: vfs_system_data_dir())

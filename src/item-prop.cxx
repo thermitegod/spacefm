@@ -817,7 +817,7 @@ on_context_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars,
     if (!strchr(gtk_entry_buffer_get_text(buf), '\n'))
         return;
 
-    std::string new_text = ztd::replace(gtk_entry_buffer_get_text(buf), "\n", "");
+    const std::string new_text = ztd::replace(gtk_entry_buffer_get_text(buf), "\n", "");
     gtk_entry_buffer_set_text(buf, new_text.c_str(), -1);
 }
 
@@ -1140,7 +1140,7 @@ static void
 on_open_browser(GtkComboBox* box, ContextData* ctxt)
 {
     std::string folder;
-    int job = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
+    const int job = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
     gtk_combo_box_set_active(GTK_COMBO_BOX(box), -1);
     if (job == 0)
     {
@@ -1205,7 +1205,7 @@ on_key_button_clicked(GtkWidget* widget, ContextData* ctxt)
         keyset = xset_get(ctxt->set->shared_key);
     else
         keyset = ctxt->set;
-    std::string str = xset_get_keyname(keyset, 0, 0);
+    const std::string str = xset_get_keyname(keyset, 0, 0);
     gtk_button_set_label(GTK_BUTTON(ctxt->item_key), str.c_str());
 }
 
@@ -1339,10 +1339,10 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
         if (add_path && add_path[0])
         {
             char* old_path = multi_input_get_text(ctxt->item_target);
-            std::string new_path = fmt::format("{}{}{}",
-                                               old_path && old_path[0] ? old_path : "",
-                                               old_path && old_path[0] ? "; " : "",
-                                               add_path);
+            const std::string new_path = fmt::format("{}{}{}",
+                                                     old_path && old_path[0] ? old_path : "",
+                                                     old_path && old_path[0] ? "; " : "",
+                                                     add_path);
             GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->item_target));
             gtk_text_buffer_set_text(buf, new_path.c_str(), -1);
             free(add_path);

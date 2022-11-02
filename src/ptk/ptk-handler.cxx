@@ -833,11 +833,11 @@ ptk_handler_get_command(int mode, int cmd, xset_t handler_set)
         return nullptr;
     }
     // name script
-    std::string str =
+    const std::string str =
         fmt::format("/hand-{}-{}.sh",
                     modes.at(mode),
                     mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
-    std::string script = ztd::replace(def_script, "/exec.sh", str);
+    const std::string script = ztd::replace(def_script, "/exec.sh", str);
     free(def_script);
     if (std::filesystem::exists(script))
         return ztd::strdup(script);
@@ -887,7 +887,7 @@ ptk_handler_load_script(int mode, int cmd, xset_t handler_set, GtkTextView* view
         return true;
     }
     // name script
-    std::string script_name =
+    const std::string script_name =
         fmt::format("/hand-{}-{}.sh",
                     modes.at(mode),
                     mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
@@ -1121,11 +1121,13 @@ ptk_handler_file_has_handlers(int mode, int cmd, const char* path, VFSMimeType* 
     // replace spaces in path with underscores for matching
     if (path && strchr(path, ' '))
     {
-        std::string cleaned = ztd::replace(path, " ", "_");
+        const std::string cleaned = ztd::replace(path, " ", "_");
         under_path = ztd::strdup(cleaned);
     }
     else
+    {
         under_path = (char*)path;
+    }
 
     // parsing handlers space-separated list
     if ((ptr = xset_get_s(handler_conf_xsets.at(mode))))
@@ -1329,31 +1331,30 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, xset_t set)
     new_handler_xset->scroll_lock = set->scroll_lock;
 
     // build copy scripts command
-    std::string path_src = Glib::build_filename(set->plug_dir, set->plug_name);
+    const std::string path_src = Glib::build_filename(set->plug_dir, set->plug_name);
     std::string path_dest = Glib::build_filename(xset_get_config_dir(), "scripts");
     std::filesystem::create_directories(path_dest);
     std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
     path_dest = Glib::build_filename(xset_get_config_dir(), "scripts", new_handler_xset->name);
-    std::string command = fmt::format("cp -a {} {}", path_src, path_dest);
+    const std::string cp_command = fmt::format("cp -a {} {}", path_src, path_dest);
 
     // run command
     std::string* standard_output = nullptr;
     std::string* standard_error = nullptr;
     int exit_status;
 
-    std::string msg;
-
-    print_command(command);
-    Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);
+    print_command(cp_command);
+    Glib::spawn_command_line_sync(cp_command, standard_output, standard_error, &exit_status);
     LOG_INFO("{}{}", *standard_output, *standard_error);
     if (exit_status && WIFEXITED(exit_status))
     {
-        msg = fmt::format("An error occured copying command files\n\n{}", *standard_error);
+        const std::string msg =
+            fmt::format("An error occured copying command files\n\n{}", *standard_error);
         xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", GTK_BUTTONS_OK, msg);
     }
-    command = fmt::format("chmod -R go-rwx {}", path_dest);
-    print_command(command);
-    Glib::spawn_command_line_sync(command);
+    const std::string chmod_command = fmt::format("chmod -R go-rwx {}", path_dest);
+    print_command(chmod_command);
+    Glib::spawn_command_line_sync(chmod_command);
 
     // add to handler list
     if (g_strcmp0(xset_get_s(handler_conf_xsets.at(mode)), "") <= 0)
@@ -1364,7 +1365,7 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, xset_t set)
     else
     {
         // Adding new handler to handlers
-        std::string new_handlers_list =
+        const std::string new_handlers_list =
             fmt::format("{} {}", new_handler_xset->name, xset_get_s(handler_conf_xsets.at(mode)));
         xset_set(handler_conf_xsets.at(mode), XSetVar::S, new_handlers_list);
     }
@@ -1394,9 +1395,10 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, xset_t set)
             default:
                 return;
         }
-        msg = fmt::format("The selected {} Handler file has been imported to the {} Handlers list.",
-                          mode_name,
-                          mode_name);
+        const std::string msg =
+            fmt::format("The selected {} Handler file has been imported to the {} Handlers list.",
+                        mode_name,
+                        mode_name);
         xset_msg_dialog(nullptr, GTK_MESSAGE_INFO, "Handler Imported", GTK_BUTTONS_OK, msg);
         return;
     }
@@ -1410,9 +1412,10 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, xset_t set)
     // Adding handler to model
     const char* disabled =
         hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
-    std::string dis_name = fmt::format("{} {}",
-                                       new_handler_xset->menu_label,
-                                       new_handler_xset->b == XSetB::XSET_B_TRUE ? "" : disabled);
+    const std::string dis_name =
+        fmt::format("{} {}",
+                    new_handler_xset->menu_label,
+                    new_handler_xset->b == XSetB::XSET_B_TRUE ? "" : disabled);
     gtk_list_store_set(GTK_LIST_STORE(hnd->list),
                        &iter,
                        PtkHandlerCol::COL_XSET_NAME,
@@ -1592,7 +1595,7 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
                 // Adding handler to model
                 const char* disabled =
                     hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
-                std::string dis_name =
+                const std::string dis_name =
                     fmt::format("{} {}",
                                 handler_xset->menu_label,
                                 handler_xset->b == XSetB::XSET_B_TRUE ? "" : disabled);
@@ -1792,7 +1795,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         // Adding handler to model
         const char* disabled =
             hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
-        std::string dis_name =
+        const std::string dis_name =
             fmt::format("{} {}",
                         handler_name,
                         new_handler_xset->b == XSetB::XSET_B_TRUE ? "" : disabled);
@@ -1813,7 +1816,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         else
         {
             // Adding new handler to handlers
-            std::string new_handlers_list =
+            const std::string new_handlers_list =
                 fmt::format("{} {}",
                             new_handler_xset->name,
                             xset_get_s(handler_conf_xsets.at(hnd->mode)));
@@ -1861,7 +1864,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
             // It has - updating model
             const char* disabled =
                 hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
-            std::string dis_name =
+            const std::string dis_name =
                 fmt::format("{} {}", handler_name, handler_enabled ? "" : disabled);
             gtk_list_store_set(GTK_LIST_STORE(model),
                                &it,
@@ -2909,7 +2912,7 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, xset_t def_handl
 
     // Generating left-hand side of dialog
     GtkWidget* lbl_handlers = gtk_label_new(nullptr);
-    std::string markup = fmt::format("<b>{}</b>", dialog_mnemonics.at(mode));
+    const std::string markup = fmt::format("<b>{}</b>", dialog_mnemonics.at(mode));
     gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handlers), markup.c_str());
     gtk_widget_set_halign(GTK_WIDGET(lbl_handlers), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(lbl_handlers), GTK_ALIGN_START);

@@ -175,7 +175,7 @@ thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
             bool load_big = (i == VFSThumbnailSize::LOAD_BIG_THUMBNAIL);
             if (!vfs_file_info_is_thumbnail_loaded(req->file, load_big))
             {
-                std::string full_path =
+                const std::string full_path =
                     Glib::build_filename(loader->dir->path, vfs_file_info_get_name(req->file));
                 vfs_file_info_load_thumbnail(req->file, full_path, load_big);
                 // Slow down for debugging.

@@ -30,7 +30,7 @@ glist_t_char_to_vector_t_string(GList* list)
     std::vector<std::string> vec;
     for (GList* l = list; l; l = l->next)
     {
-        std::string open_file = (const char*)(l->data);
+        const std::string open_file = (const char*)(l->data);
         vec.push_back(open_file);
     }
     return vec;

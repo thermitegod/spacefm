@@ -27,7 +27,7 @@
 void
 ptk_show_error(GtkWindow* parent, const std::string& title, const std::string& message)
 {
-    std::string msg = Glib::Markup::escape_text(message);
+    const std::string msg = Glib::Markup::escape_text(message);
     GtkWidget* dlg = gtk_message_dialog_new(parent,
                                             GTK_DIALOG_MODAL,
                                             GTK_MESSAGE_ERROR,
@@ -51,7 +51,7 @@ ptk_get_keymod(unsigned int event)
 GtkBuilder*
 _gtk_builder_new_from_file(const char* file)
 {
-    std::string filename = Glib::build_filename(PACKAGE_UI_DIR, file);
+    const std::string filename = Glib::build_filename(PACKAGE_UI_DIR, file);
     GtkBuilder* builder = gtk_builder_new();
     gtk_builder_add_from_file(builder, filename.c_str(), nullptr);
 

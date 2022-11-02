@@ -171,7 +171,7 @@ calc_total_size_of_files(const char* path, FilePropertiesDialogData* data)
         {
             file_name = std::filesystem::path(file).filename();
 
-            std::string full_path = Glib::build_filename(path, file_name);
+            const std::string full_path = Glib::build_filename(path, file_name);
             lstat(full_path.c_str(), &file_stat);
             if (S_ISDIR(file_stat.st_mode))
             {
@@ -199,7 +199,7 @@ calc_size(void* user_data)
     {
         if (data->cancel)
             break;
-        std::string path = Glib::build_filename(data->dir_path, vfs_file_info_get_name(file));
+        const std::string path = Glib::build_filename(data->dir_path, vfs_file_info_get_name(file));
         calc_total_size_of_files(path.c_str(), data);
     }
     data->done = true;
@@ -464,12 +464,10 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     file = sel_files.front();
     if (same_type)
     {
-        std::string file_type;
-
         mime = vfs_file_info_get_mime_type(file);
-        file_type = fmt::format("{}\n{}",
-                                vfs_mime_type_get_description(mime),
-                                vfs_mime_type_get_type(mime));
+        const std::string file_type = fmt::format("{}\n{}",
+                                                  vfs_mime_type_get_description(mime),
+                                                  vfs_mime_type_get_type(mime));
         gtk_label_set_text(GTK_LABEL(mime_type), file_type.c_str());
         vfs_mime_type_unref(mime);
     }
@@ -606,7 +604,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
                        (std::uint64_t)vfs_file_info_get_size(file));
             gtk_label_set_text(data->total_size_label, buf);
 
-            std::string size_str =
+            const std::string size_str =
                 vfs_file_size_to_string_format(vfs_file_info_get_blocks(file) * 512, true);
 
             g_snprintf(buf,
@@ -651,7 +649,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
         if (vfs_file_info_is_symlink(file))
         {
             gtk_label_set_markup_with_mnemonic(GTK_LABEL(label_name), "<b>Link _Name:</b>");
-            std::string disp_sym_path = Glib::build_filename(dir_path, file->name);
+            const std::string disp_sym_path = Glib::build_filename(dir_path, file->name);
 
             try
             {
@@ -810,7 +808,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 std::string str;
                 for (VFSFileInfo* file: data->file_list)
                 {
-                    std::string file_path = Glib::build_filename(data->dir_path, file->name);
+                    const std::string file_path = Glib::build_filename(data->dir_path, file->name);
                     quoted_path = bash_quote(file_path);
                     str.append(fmt::format(" {}", quoted_path));
                 }
@@ -913,7 +911,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 std::vector<std::string> file_list;
                 for (VFSFileInfo* file: data->file_list)
                 {
-                    std::string file_path =
+                    const std::string file_path =
                         Glib::build_filename(data->dir_path, vfs_file_info_get_name(file));
                     file_list.push_back(file_path);
                 }

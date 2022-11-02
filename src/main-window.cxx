@@ -1423,7 +1423,8 @@ rebuild_menus(FMMainWindow* main_window)
     // Panel View submenu
     set = xset_get(XSetName::CON_VIEW);
     str = set->menu_label;
-    std::string menu_label = fmt::format("Panel {} {}", main_window->curpanel, set->menu_label);
+    const std::string menu_label =
+        fmt::format("Panel {} {}", main_window->curpanel, set->menu_label);
     set->menu_label = ztd::strdup(menu_label);
     ptk_file_menu_add_panel_view_menu(file_browser, newmenu, accel_group);
     free(set->menu_label);
@@ -1556,9 +1557,8 @@ fm_main_window_init(FMMainWindow* main_window)
 
     for (int i = 0; i < 4; ++i)
     {
-        std::string icon_name;
         main_window->panel_btn[i] = GTK_WIDGET(gtk_toggle_tool_button_new());
-        icon_name = fmt::format("Show Panel {}", i + 1);
+        std::string icon_name = fmt::format("Show Panel {}", i + 1);
         gtk_tool_button_set_label(GTK_TOOL_BUTTON(main_window->panel_btn[i]), icon_name.c_str());
         set = xset_get_panel(i + 1, XSetPanel::ICON_STATUS);
         if (set->icon && set->icon[0] != '\0')
@@ -2144,7 +2144,7 @@ on_restore_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
         return;
     }
 
-    std::string file_path = closed_tabs_restore.back();
+    const std::string file_path = closed_tabs_restore.back();
     closed_tabs_restore.pop_back();
     // LOG_INFO("on_restore_notebook_page path={}", file_path);
 
@@ -2993,8 +2993,6 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
 
     if (std::filesystem::exists(cwd))
     {
-        std::string total_size_str;
-
         // FIXME: statvfs support should be moved to src/vfs
         struct statvfs fs_stat;
         statvfs(cwd, &fs_stat);
@@ -3002,7 +3000,8 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
         // calc free space
         size_str = vfs_file_size_to_string_format(fs_stat.f_bsize * fs_stat.f_bavail, true);
         // calc total space
-        total_size_str = vfs_file_size_to_string_format(fs_stat.f_frsize * fs_stat.f_blocks, true);
+        const std::string total_size_str =
+            vfs_file_size_to_string_format(fs_stat.f_frsize * fs_stat.f_blocks, true);
 
         statusbar_txt.append(fmt::format(" {} / {}   ", size_str, total_size_str));
     }
@@ -3042,24 +3041,23 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
 
             if (vfs_file_info_is_symlink(file))
             {
-                std::string full_target;
-                std::string target_path;
-                std::string file_path;
-                std::string target;
-
-                file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
-                target = std::filesystem::absolute(file_path);
+                const std::string file_path =
+                    Glib::build_filename(cwd, vfs_file_info_get_name(file));
+                const std::string target = std::filesystem::absolute(file_path);
                 if (!target.empty())
                 {
+                    std::string target_path;
+
                     // LOG_INFO("LINK: {}", file_path);
                     if (target.at(0) != '/')
                     {
                         // relative link
-                        full_target = Glib::build_filename(cwd, target);
-                        target_path = full_target;
+                        target_path = Glib::build_filename(cwd, target);
                     }
                     else
+                    {
                         target_path = target;
+                    }
 
                     if (vfs_file_info_is_dir(file))
                     {
@@ -3073,19 +3071,25 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
                         struct stat results;
                         if (stat(target_path.c_str(), &results) == 0)
                         {
-                            std::string lsize =
+                            const std::string lsize =
                                 vfs_file_size_to_string_format(results.st_size, true);
                             statusbar_txt.append(fmt::format("  Link -> {} ({})", target, lsize));
                         }
                         else
+                        {
                             statusbar_txt.append(fmt::format("  !Link -> {} (missing)", target));
+                        }
                     }
                 }
                 else
+                {
                     statusbar_txt.append(fmt::format("  !Link -> (error reading target)"));
+                }
             }
             else
+            {
                 statusbar_txt.append(fmt::format("  {}", vfs_file_info_get_name(file)));
+            }
 
             vfs_file_info_unref(file);
         }
@@ -3155,7 +3159,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
         // cur dir is a symlink? canonicalize path
         if (std::filesystem::is_symlink(cwd))
         {
-            std::string canon = std::filesystem::read_symlink(cwd);
+            const std::string canon = std::filesystem::read_symlink(cwd);
             statusbar_txt.append(fmt::format("  {} -> {}", cwd, canon));
         }
         else
@@ -4207,7 +4211,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
     buf.append(fmt::format("fm_filename=\"${{fm_filenames[0]}}\"\n"));
 
     // user
-    std::string this_user = Glib::get_user_name();
+    const std::string this_user = Glib::get_user_name();
     esc_path = bash_quote(this_user);
     buf.append(fmt::format("fm_user={}\n", esc_path));
 
@@ -5080,7 +5084,7 @@ on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn
         {
             // show custom dialog
             LOG_INFO("TASK_POPUP >>> {}", ptask->pop_handler);
-            std::string command = fmt::format("bash -c {}", ptask->pop_handler);
+            const std::string command = fmt::format("bash -c {}", ptask->pop_handler);
             Glib::spawn_command_line_async(command);
         }
         else
@@ -5243,12 +5247,12 @@ main_task_view_update_task(PtkFileTask* ptask)
 
         if (ptask->task->state_pause == VFSFileTaskState::VFS_FILE_TASK_PAUSE)
         {
-            std::string str = fmt::format("paused {}", status);
+            const std::string str = fmt::format("paused {}", status);
             status3 = ztd::strdup(str);
         }
         else if (ptask->task->state_pause == VFSFileTaskState::VFS_FILE_TASK_QUEUE)
         {
-            std::string str = fmt::format("queued {}", status);
+            const std::string str = fmt::format("queued {}", status);
             status3 = ztd::strdup(str);
         }
         else
@@ -7340,7 +7344,7 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset
     int exit_status;
 
     std::string command;
-    std::string event_name = xset_get_name_from_xsetname(event);
+    const std::string event_name = xset_get_name_from_xsetname(event);
 
     if (!ucmd)
         return false;

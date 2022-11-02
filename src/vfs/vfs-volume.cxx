@@ -1093,7 +1093,7 @@ info_mount_points(device_t* device)
     }
     catch (const Glib::FileError& e)
     {
-        std::string what = e.what();
+        const std::string what = e.what();
         LOG_WARN("Error reading {}: {}", MOUNTINFO, what);
         return nullptr;
     }
@@ -1151,11 +1151,10 @@ info_mount_points(device_t* device)
 
     if (mounts)
     {
-        std::string points;
         GList* l;
         // Sort the list to ensure that shortest mount paths appear first
         mounts = g_list_sort(mounts, (GCompareFunc)g_strcmp0);
-        points = ztd::strdup((char*)mounts->data);
+        std::string points = ztd::strdup((char*)mounts->data);
         l = mounts;
         while ((l = l->next))
         {
@@ -1209,10 +1208,9 @@ info_partition_table(device_t* device)
 
         partition_count = 0;
 
-        std::string file_name;
         for (const auto& file: std::filesystem::directory_iterator(device->native_path))
         {
-            file_name = std::filesystem::path(file).filename();
+            const std::string file_name = std::filesystem::path(file).filename();
 
             if (ztd::startswith(file_name, s))
                 partition_count++;
@@ -1477,7 +1475,7 @@ parse_mounts(bool report)
     }
     catch (const Glib::FileError& e)
     {
-        std::string what = e.what();
+        const std::string what = e.what();
         LOG_WARN("Error reading {}: {}", MOUNTINFO, what);
         return;
     }
@@ -2200,7 +2198,7 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
     char encoded_point[PATH_MAX];
     char encoded_fstype[PATH_MAX];
 
-    std::string mtab_path = Glib::build_filename(SYSCONFDIR, "mtab");
+    const std::string mtab_path = Glib::build_filename(SYSCONFDIR, "mtab");
 
     std::string contents;
 
@@ -2213,7 +2211,7 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
         }
         catch (const Glib::FileError& e)
         {
-            std::string what = e.what();
+            const std::string what = e.what();
             LOG_WARN("Error reading {}: {}", mtab_file, what);
             return false;
         }
@@ -2226,7 +2224,7 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
         }
         catch (const Glib::FileError& e)
         {
-            std::string what = e.what();
+            const std::string what = e.what();
             LOG_WARN("Error reading {}: {}", MTAB, what);
             return false;
         }
@@ -2509,7 +2507,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
          * hack - sleep for 0.2 seconds here because sometimes the
          * .mtab.fuseiso file is not updated until after new device is detected. */
         Glib::usleep(200000);
-        std::string mtab_file = Glib::build_filename(vfs_user_home_dir(), ".mtab.fuseiso");
+        const std::string mtab_file = Glib::build_filename(vfs_user_home_dir(), ".mtab.fuseiso");
         char* new_name = nullptr;
         if (path_is_mounted_mtab(mtab_file.c_str(), point.c_str(), &new_name, nullptr) &&
             new_name && new_name[0])
@@ -2884,16 +2882,17 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
             {
                 // add bash variables
                 // urlq is user-entered url or (if mounted) mtab url
-                std::string urlq =
+                const std::string urlq =
                     bash_quote(action != PtkHandlerMount::HANDLER_MOUNT && vol && vol->is_mounted
                                    ? vol->udi
                                    : netmount->url);
-                std::string protoq = bash_quote(netmount->fstype); // url-derived protocol (ssh)
-                std::string hostq = bash_quote(netmount->host);
-                std::string portq = bash_quote(netmount->port);
-                std::string userq = bash_quote(netmount->user);
-                std::string passq = bash_quote(netmount->pass);
-                std::string pathq = bash_quote(netmount->path);
+                const std::string protoq =
+                    bash_quote(netmount->fstype); // url-derived protocol (ssh)
+                const std::string hostq = bash_quote(netmount->host);
+                const std::string portq = bash_quote(netmount->port);
+                const std::string userq = bash_quote(netmount->user);
+                const std::string passq = bash_quote(netmount->pass);
+                const std::string pathq = bash_quote(netmount->path);
                 // mtab fs type (fuse.ssh)
                 std::string mtabfsq;
                 std::string mtaburlq;
@@ -2940,7 +2939,7 @@ vfs_volume_is_automount(VFSVolume* vol)
         vol->device_type != VFSVolumeDeviceType::DEVICE_TYPE_BLOCK)
         return false;
 
-    std::string showhidelist =
+    const std::string showhidelist =
         fmt::format(" {} ", ztd::null_check(xset_get_s(XSetName::DEV_AUTOMOUNT_VOLUMES)));
     for (int i = 0; i < 3; ++i)
     {
@@ -3029,9 +3028,7 @@ vfs_volume_device_mount_cmd(VFSVolume* vol, const char* options, bool* run_in_te
 
     // discovery
     std::string command2;
-    std::string path;
-
-    path = Glib::find_program_in_path("udevil");
+    std::string path = Glib::find_program_in_path("udevil");
     if (!path.empty())
     {
         // udevil
@@ -3098,7 +3095,7 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
                 {
                     if (vol->is_mounted)
                         pointq = bash_quote(vol->mount_point);
-                    std::string command2 = ztd::replace(command, "%a", pointq);
+                    const std::string command2 = ztd::replace(command, "%a", pointq);
                     command = ztd::strdup(command2);
                 }
             }
@@ -3120,7 +3117,7 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
                 {
                     if (vol->is_mounted)
                         pointq = bash_quote(vol->mount_point);
-                    std::string command2 = ztd::replace(command, "%a", pointq);
+                    const std::string command2 = ztd::replace(command, "%a", pointq);
                     command = ztd::strdup(command2);
                 }
             }
@@ -3210,7 +3207,7 @@ vfs_volume_get_mount_options(VFSVolume* vol, char* options)
 
     // parse options with fs type
     // nosuid,sync+vfat,utf+vfat,nosuid-ext4
-    std::string opts = fmt::format(",{},", news);
+    const std::string opts = fmt::format(",{},", news);
     const char* fstype = vfs_volume_get_fstype(vol);
     char newo[16384];
     newo[0] = ',';
@@ -3310,8 +3307,8 @@ vfs_volume_exec(VFSVolume* vol, const char* command)
 
     std::string cmd = command;
 
-    std::string quoted_mount = bash_quote(vol->mount_point);
-    std::string quoted_label = bash_quote(vol->label);
+    const std::string quoted_mount = bash_quote(vol->mount_point);
+    const std::string quoted_label = bash_quote(vol->label);
     cmd = ztd::replace(cmd, "%m", quoted_mount);
     cmd = ztd::replace(cmd, "%l", quoted_label);
     cmd = ztd::replace(cmd, "%v", vol->device_file);
@@ -3344,7 +3341,7 @@ vfs_volume_autoexec(VFSVolume* vol)
         }
         else
         {
-            std::string path = Glib::build_filename(vol->mount_point, "VIDEO_TS");
+            const std::string path = Glib::build_filename(vol->mount_point, "VIDEO_TS");
             if (vol->is_dvd && std::filesystem::is_directory(path))
             {
                 command = xset_get_s(XSetName::DEV_EXEC_VIDEO);
@@ -3371,9 +3368,9 @@ vfs_volume_autoexec(VFSVolume* vol)
                     }
                     else
                     {
-                        std::string exe = get_prog_executable();
-                        std::string quote_path = bash_quote(vol->mount_point);
-                        std::string cmd = fmt::format("{} -t {}", exe, quote_path);
+                        const std::string exe = get_prog_executable();
+                        const std::string quote_path = bash_quote(vol->mount_point);
+                        const std::string cmd = fmt::format("{} -t {}", exe, quote_path);
                         print_command(cmd);
                         Glib::spawn_command_line_async(cmd);
                     }
@@ -3605,13 +3602,13 @@ unmount_if_mounted(VFSVolume* vol)
     if (!str)
         return;
 
-    std::string mtab_path = Glib::build_filename(SYSCONFDIR, "mtab");
+    const std::string mtab_path = Glib::build_filename(SYSCONFDIR, "mtab");
 
     std::string mtab = MTAB;
     if (!std::filesystem::exists(mtab))
         mtab = mtab_path;
 
-    std::string line =
+    const std::string line =
         fmt::format("grep -qs '^{} ' {} 2>/dev/nullptr || exit\n{}\n", vol->device_file, mtab, str);
     LOG_INFO("Unmount-If-Mounted: {}", line);
     exec_task(line.c_str(), run_in_terminal);

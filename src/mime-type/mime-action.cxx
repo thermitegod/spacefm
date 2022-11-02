@@ -66,8 +66,8 @@ save_to_file(const std::string& path, const std::string& data)
 static void
 update_desktop_database()
 {
-    std::string path = Glib::build_filename(vfs_user_data_dir(), "applications");
-    std::string command = fmt::format("update-desktop-database {}", path);
+    const std::string path = Glib::build_filename(vfs_user_data_dir(), "applications");
+    const std::string command = fmt::format("update-desktop-database {}", path);
     print_command(command);
     Glib::spawn_command_line_sync(command);
 }
@@ -117,7 +117,7 @@ remove_actions(const std::string mime_type, std::vector<std::string> actions)
     for (std::size_t r = 0; r < removed.size(); ++r)
     {
         // LOG_INFO("    {}", removed[r]);
-        std::string rem = removed.at(r);
+        const std::string rem = removed.at(r);
         if (ztd::contains(actions, rem))
         {
             ztd::remove(actions, rem);
@@ -207,7 +207,7 @@ get_actions(const std::string& dir, const std::string& type, std::vector<std::st
                         }
                     }
                 }
-                std::string app = apps.at(i);
+                const std::string app = apps.at(i);
                 if (!is_removed && !ztd::contains(actions, app))
                 {
                     /* check for app existence */
@@ -254,7 +254,7 @@ mime_type_get_actions(const std::string& mime_type)
     remove_actions(mime_type, actions);
 
     /* ensure default app is in the list */
-    std::string default_app = ztd::null_check(mime_type_get_default_action(mime_type));
+    const std::string default_app = ztd::null_check(mime_type_get_default_action(mime_type));
     if (!default_app.empty())
     {
         if (!ztd::contains(actions, default_app))
@@ -453,7 +453,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
     }
 
     /* generate unique file name */
-    std::string dir = Glib::build_filename(vfs_user_data_dir(), "applications");
+    const std::string dir = Glib::build_filename(vfs_user_data_dir(), "applications");
     std::filesystem::create_directories(dir);
     std::filesystem::permissions(dir, std::filesystem::perms::owner_all);
     std::string path;
@@ -505,12 +505,11 @@ _locate_desktop_file_recursive(const char* path, const char* desktop_id, bool fi
 
     if (std::filesystem::is_directory(path))
     {
-        std::string file_name;
         for (const auto& file: std::filesystem::directory_iterator(path))
         {
-            file_name = std::filesystem::path(file).filename();
+            const std::string file_name = std::filesystem::path(file).filename();
 
-            std::string sub_path = Glib::build_filename(path, file_name);
+            const std::string sub_path = Glib::build_filename(path, file_name);
             if (std::filesystem::is_directory(sub_path))
             {
                 found = _locate_desktop_file_recursive(sub_path.c_str(), desktop_id, false);
@@ -534,7 +533,8 @@ _locate_desktop_file(const char* dir, const void* desktop_id)
 { // sfm 0.7.8 modified + 0.8.7 modified
     bool found = false;
 
-    std::string desktop_path = Glib::build_filename(dir, "applications", (const char*)desktop_id);
+    const std::string desktop_path =
+        Glib::build_filename(dir, "applications", (const char*)desktop_id);
     char* path = ztd::strdup(desktop_path);
 
     char* sep = (char*)strchr((const char*)desktop_id, '-');
@@ -564,7 +564,7 @@ _locate_desktop_file(const char* dir, const void* desktop_id)
     free(path);
 
     // sfm 0.8.7 some desktop files listed by the app chooser are in subdirs
-    std::string desktop_recursive_path = Glib::build_filename(dir, "applications");
+    const std::string desktop_recursive_path = Glib::build_filename(dir, "applications");
     sep = _locate_desktop_file_recursive(desktop_recursive_path.c_str(),
                                          (const char*)desktop_id,
                                          true);

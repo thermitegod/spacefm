@@ -123,8 +123,9 @@ ptk_clipboard_copy_as_text(const char* working_dir, std::vector<VFSFileInfo*>& s
     std::string file_text;
     for (VFSFileInfo* file: sel_files)
     {
-        std::string file_path = Glib::build_filename(working_dir, vfs_file_info_get_name(file));
-        std::string quoted = bash_quote(file_path);
+        const std::string file_path =
+            Glib::build_filename(working_dir, vfs_file_info_get_name(file));
+        const std::string quoted = bash_quote(file_path);
         file_text = fmt::format("{} {}", file_text, quoted);
     }
     gtk_clipboard_set_text(clip, file_text.c_str(), -1);
@@ -188,7 +189,8 @@ ptk_clipboard_cut_or_copy_files(const char* working_dir, std::vector<VFSFileInfo
 
     for (VFSFileInfo* file: sel_files)
     {
-        std::string file_path = Glib::build_filename(working_dir, vfs_file_info_get_name(file));
+        const std::string file_path =
+            Glib::build_filename(working_dir, vfs_file_info_get_name(file));
         file_list.push_back(file_path);
     }
 
@@ -503,7 +505,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
 
         if (missing_targets > 0)
         {
-            std::string msg =
+            const std::string msg =
                 fmt::format("{} target{} missing",
                             missing_targets,
                             missing_targets > 1 ? ztd::strdup("s are") : ztd::strdup(" is"));

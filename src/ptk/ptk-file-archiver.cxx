@@ -69,7 +69,7 @@ archive_handler_get_first_extension(xset_t handler_xset)
     if (handler_xset && handler_xset->x)
     {
         // find first extension
-        std::string s = handler_xset->x;
+        const std::string s = handler_xset->x;
         std::stringstream ss(s);
         std::vector<std::string> pathnames;
 
@@ -260,8 +260,6 @@ generate_bash_error_function(bool run_in_terminal, const char* parent_quote)
     std::string error_pause;
     std::string finished_with_errors;
 
-    std::string script;
-
     if (run_in_terminal)
     {
         error_pause = "read -p";
@@ -273,19 +271,20 @@ generate_bash_error_function(bool run_in_terminal, const char* parent_quote)
         finished_with_errors = "[ Finished With Errors ]";
     }
 
-    script = fmt::format("fm_handle_err(){{\n"
-                         "    fm_err=$?\n"
-                         "{}{}{}"
-                         "    if [ $fm_err -ne 0 ];then\n"
-                         "       echo;{} \"{}\"\n"
-                         "       exit $fm_err\n"
-                         "    fi\n"
-                         "}}",
-                         parent_quote ? "    rmdir --ignore-fail-on-non-empty " : "",
-                         parent_quote ? parent_quote : "",
-                         parent_quote ? "\n" : "",
-                         error_pause,
-                         finished_with_errors);
+    const std::string script =
+        fmt::format("fm_handle_err(){{\n"
+                    "    fm_err=$?\n"
+                    "{}{}{}"
+                    "    if [ $fm_err -ne 0 ];then\n"
+                    "       echo;{} \"{}\"\n"
+                    "       exit $fm_err\n"
+                    "    fi\n"
+                    "}}",
+                    parent_quote ? "    rmdir --ignore-fail-on-non-empty " : "",
+                    parent_quote ? parent_quote : "",
+                    parent_quote ? "\n" : "",
+                    error_pause,
+                    finished_with_errors);
 
     return script;
 }
@@ -427,8 +426,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>
             gtk_list_store_append(GTK_LIST_STORE(list), &iter);
 
             // Adding to model
-            std::string extensions;
-            extensions = fmt::format("{} ( {} ) ", handler_xset->menu_label, handler_xset->x);
+            const std::string extensions =
+                fmt::format("{} ( {} ) ", handler_xset->menu_label, handler_xset->x);
             gtk_list_store_set(GTK_LIST_STORE(list),
                                &iter,
                                PTKFileArchiverCol::COL_XSET_NAME,
@@ -547,7 +546,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>
     {
         // Fetching first extension handler deals with
         VFSFileInfo* file = sel_files.front();
-        std::string ext = archive_handler_get_first_extension(handler_xset);
+        const std::string ext = archive_handler_get_first_extension(handler_xset);
         dest_file = g_strjoin(nullptr, vfs_file_info_get_disp_name(file), ext.c_str(), nullptr);
         gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), dest_file);
         free(dest_file);
@@ -893,7 +892,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>
     /* When ran in a terminal, errors need to result in a pause so that
      * the user can review the situation - in any case an error check
      * needs to be made */
-    std::string str = generate_bash_error_function(run_in_terminal, nullptr);
+    const std::string str = generate_bash_error_function(run_in_terminal, nullptr);
     final_command = fmt::format("{}\n\n{}", str, final_command);
 
     /* Cleaning up - final_command does not need freeing, as this
@@ -986,7 +985,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*
         {
             // Fetching file details
             mime_type = vfs_file_info_get_mime_type(file);
-            std::string full_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
+            const std::string full_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
 
             // Checking for enabled handler with non-empty command
             handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
@@ -1152,7 +1151,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*
         // Fetching file details
         mime_type = vfs_file_info_get_mime_type(file);
         // Determining file paths
-        std::string full_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
+        const std::string full_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
 
         // Get handler with non-empty command
         handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
@@ -1350,7 +1349,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*
                 // Looping to find a path that doesnt exist
                 while (lstat(extract_target.c_str(), &statbuf) == 0)
                 {
-                    std::string str2 =
+                    const std::string str2 =
                         fmt::format("{}-{}{}{}", filename_no_ext, "copy", ++n, extension);
                     extract_target = Glib::build_filename(create_parent ? parent_path : dest, str2);
                 }
@@ -1390,7 +1389,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*
     g_strfreev(archive_handlers);
 
     // Creating task
-    std::string task_name = fmt::format("Extract {}", vfs_file_info_get_name(sel_files.front()));
+    const std::string task_name =
+        fmt::format("Extract {}", vfs_file_info_get_name(sel_files.front()));
     PtkFileTask* ptask = ptk_file_exec_new(task_name,
                                            cwd,
                                            dlgparent,

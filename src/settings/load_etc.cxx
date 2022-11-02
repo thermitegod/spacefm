@@ -39,12 +39,12 @@ parse_etc_conf(const std::string& etc_path, const std::string& raw_line)
     if (sep == std::string::npos)
         return;
 
-    std::string line = ztd::strip(raw_line);
+    const std::string line = ztd::strip(raw_line);
 
     if (line.at(0) == '#')
         return;
 
-    std::string token = line.substr(0, sep);
+    const std::string token = line.substr(0, sep);
     std::string value = line.substr(sep + 1, std::string::npos - 1);
 
     // remove any quotes

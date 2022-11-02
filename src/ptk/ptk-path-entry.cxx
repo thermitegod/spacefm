@@ -126,7 +126,7 @@ seek_path(GtkEntry* entry)
 
                 if (ztd::startswith(file_name, seek_name))
                 {
-                    std::string full_path = Glib::build_filename(seek_dir, file_name);
+                    const std::string full_path = Glib::build_filename(seek_dir, file_name);
                     if (std::filesystem::is_directory(full_path))
                         count++;
                 }
@@ -260,12 +260,10 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
             {
                 GSList* name_list = nullptr;
 
-                std::string file_name;
                 for (const auto& file: std::filesystem::directory_iterator(new_dir))
                 {
-                    file_name = std::filesystem::path(file).filename();
-
-                    std::string full_path = Glib::build_filename(new_dir, file_name);
+                    const std::string file_name = std::filesystem::path(file).filename();
+                    const std::string full_path = Glib::build_filename(new_dir, file_name);
                     if (std::filesystem::is_directory(full_path))
                         name_list = g_slist_prepend(name_list, ztd::strdup(full_path));
                 }
@@ -333,10 +331,9 @@ insert_complete(GtkEntry* entry)
     if (!ztd::endswith(prefix, "/"))
         prefix_name = Glib::path_get_basename(prefix);
 
-    std::string file_name;
     for (const auto& file: std::filesystem::directory_iterator(dir_path))
     {
-        file_name = std::filesystem::path(file).filename();
+        const std::string file_name = std::filesystem::path(file).filename();
 
         full_path = Glib::build_filename(dir_path, file_name);
         if (std::filesystem::is_directory(full_path))
@@ -632,7 +629,7 @@ on_button_release(GtkEntry* entry, GdkEventButton* evt, void* user_data)
         char* clip_text = gtk_clipboard_wait_for_text(clip);
         if (clip_text && clip_text[0])
         {
-            std::string str = ztd::replace(clip_text, "\n", "");
+            const std::string str = ztd::replace(clip_text, "\n", "");
             gtk_entry_set_text(entry, str.c_str());
             gtk_widget_activate(GTK_WIDGET(entry));
         }

@@ -1321,7 +1321,7 @@ xset_set_b(const std::string& name, bool bval) noexcept
 xset_t
 xset_set_b_panel(panel_t panel, const std::string& name, bool bval) noexcept
 {
-    std::string fullname = fmt::format("panel{}_{}", panel, name);
+    const std::string fullname = fmt::format("panel{}_{}", panel, name);
     xset_t set = xset_set_b(fullname, bval);
     return set;
 }
@@ -1458,7 +1458,7 @@ xset_get_int(const std::string& name, XSetVar var) noexcept
 int
 xset_get_int_panel(panel_t panel, const std::string& name, XSetVar var) noexcept
 {
-    std::string fullname = fmt::format("panel{}_{}", panel, name);
+    const std::string fullname = fmt::format("panel{}_{}", panel, name);
     return xset_get_int(fullname, var);
 }
 
@@ -1476,7 +1476,7 @@ xset_t
 xset_set_panel(panel_t panel, const std::string& name, XSetVar var,
                const std::string& value) noexcept
 {
-    std::string fullname = fmt::format("panel{}_{}", panel, name);
+    const std::string fullname = fmt::format("panel{}_{}", panel, name);
     xset_t set = xset_set(fullname, var, value);
     return set;
 }
@@ -1512,7 +1512,7 @@ xset_set_cb(const std::string& name, GFunc cb_func, void* cb_data) noexcept
 xset_t
 xset_set_cb_panel(panel_t panel, const std::string& name, GFunc cb_func, void* cb_data) noexcept
 {
-    std::string fullname = fmt::format("panel{}_{}", panel, name);
+    const std::string fullname = fmt::format("panel{}_{}", panel, name);
     xset_t set = xset_set_cb(fullname, cb_func, cb_data);
     return set;
 }

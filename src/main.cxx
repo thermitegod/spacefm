@@ -304,7 +304,7 @@ handle_parsed_commandline_args()
             }
             else
             {
-                std::string err_msg = fmt::format("File does not exist:\n\n{}", real_path);
+                const std::string err_msg = fmt::format("File does not exist:\n\n{}", real_path);
                 ptk_show_error(nullptr, "Error", err_msg);
             }
         }
@@ -349,7 +349,7 @@ handle_parsed_commandline_args()
 static void
 tmp_clean()
 {
-    std::string tmp = xset_get_user_tmp_dir();
+    const std::string tmp = xset_get_user_tmp_dir();
     std::filesystem::remove_all(tmp);
     LOG_INFO("Removed {}", tmp);
 }

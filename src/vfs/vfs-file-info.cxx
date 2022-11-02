@@ -135,7 +135,7 @@ vfs_file_info_get(VFSFileInfo* fi, const std::string& file_path)
 
         // sfm get collate keys
         fi->collate_key = g_utf8_collate_key_for_filename(fi->disp_name.c_str(), -1);
-        std::string str = g_utf8_casefold(fi->disp_name.c_str(), -1);
+        const std::string str = g_utf8_casefold(fi->disp_name.c_str(), -1);
         fi->collate_icase_key = g_utf8_collate_key_for_filename(str.c_str(), -1);
 
         return true;
@@ -170,7 +170,7 @@ vfs_file_info_set_disp_name(VFSFileInfo* fi, const char* name)
     fi->disp_name = name;
     // sfm get new collate keys
     fi->collate_key = g_utf8_collate_key_for_filename(fi->disp_name.c_str(), -1);
-    std::string str = g_utf8_casefold(fi->disp_name.c_str(), -1);
+    const std::string str = g_utf8_casefold(fi->disp_name.c_str(), -1);
     fi->collate_icase_key = g_utf8_collate_key_for_filename(str.c_str(), -1);
 }
 
@@ -185,7 +185,7 @@ vfs_file_info_get_disp_size(VFSFileInfo* fi)
 {
     if (fi->disp_size.empty())
     {
-        std::string size_str = vfs_file_size_to_string_format(fi->size, true);
+        const std::string size_str = vfs_file_size_to_string_format(fi->size, true);
         fi->disp_size = size_str;
     }
     return fi->disp_size.c_str();
@@ -306,12 +306,12 @@ vfs_file_info_get_disp_owner(VFSFileInfo* fi)
     struct passwd* puser;
     struct group* pgroup;
 
-    std::string user_name;
-    std::string group_name;
-
     /* FIXME: user names should be cached */
     if (fi->disp_owner.empty())
     {
+        std::string user_name;
+        std::string group_name;
+
         puser = getpwuid(fi->uid);
         if (puser && puser->pw_name && *puser->pw_name)
             user_name = puser->pw_name;
@@ -324,7 +324,7 @@ vfs_file_info_get_disp_owner(VFSFileInfo* fi)
         else
             group_name = fmt::format("{}", fi->gid);
 
-        std::string str = fmt::format("{}:{}", user_name, group_name);
+        const std::string str = fmt::format("{}:{}", user_name, group_name);
         fi->disp_owner = str;
     }
     return fi->disp_owner.c_str();

@@ -688,7 +688,7 @@ load_settings()
     {
         for (const std::string& terminal: terminal_programs)
         {
-            std::string term = Glib::find_program_in_path(terminal);
+            const std::string term = Glib::find_program_in_path(terminal);
             if (term.empty())
                 continue;
 
@@ -1086,7 +1086,7 @@ xset_t
 xset_find_custom(const std::string& search)
 {
     // find a custom command or submenu by label or xset name
-    std::string label = clean_label(search, true, false);
+    const std::string label = clean_label(search, true, false);
 
     for (xset_t set: xsets)
     {
@@ -1095,7 +1095,7 @@ xset_find_custom(const std::string& search)
                             XSetCMD(xset_get_int_set(set, XSetVar::X)) <= XSetCMD::BOOKMARK)))
         {
             // custom submenu or custom command - label or name matches?
-            std::string str = clean_label(set->menu_label, true, false);
+            const std::string str = clean_label(set->menu_label, true, false);
             if (ztd::same(set->name, search) || ztd::same(str, label))
             {
                 // match
@@ -1211,7 +1211,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
             // valid
             found = true;
             set->browser = file_browser;
-            std::string clean = clean_label(set->menu_label, false, false);
+            const std::string clean = clean_label(set->menu_label, false, false);
             LOG_INFO("Selected Menu Item '{}' As Handler", clean);
             xset_menu_cb(nullptr, set); // also does custom activate
         }
@@ -1295,11 +1295,13 @@ xset_new_menuitem(const char* label, const char* icon)
     if (label && strstr(label, "\\_"))
     {
         // allow escape of underscore
-        std::string str = clean_label(label, false, false);
+        const std::string str = clean_label(label, false, false);
         item = gtk_menu_item_new_with_label(str.c_str());
     }
     else
+    {
         item = gtk_menu_item_new_with_mnemonic(label);
+    }
     if (!(icon && icon[0]))
         return item;
     // GtkWidget* image = xset_get_image(icon, GTK_ICON_SIZE_MENU);
@@ -1639,8 +1641,10 @@ xset_custom_new_name()
         setname = fmt::format("cstm_{}", randhex8());
         if (!xset_is(setname))
         {
-            std::string path1 = Glib::build_filename(xset_get_config_dir(), "scripts", setname);
-            std::string path2 = Glib::build_filename(xset_get_config_dir(), "plugin-data", setname);
+            const std::string path1 =
+                Glib::build_filename(xset_get_config_dir(), "scripts", setname);
+            const std::string path2 =
+                Glib::build_filename(xset_get_config_dir(), "plugin-data", setname);
 
             // only use free xset name if no aux data dirs exist for that name too.
             if (!std::filesystem::exists(path1) && !std::filesystem::exists(path2))
@@ -1661,8 +1665,6 @@ xset_custom_copy_files(xset_t src, xset_t dest)
     std::string* standard_output = nullptr;
     std::string* standard_error = nullptr;
     int exit_status;
-
-    std::string msg;
 
     // LOG_INFO("xset_custom_copy_files( {}, {} )", src->name, dest->name);
 
@@ -1687,7 +1689,8 @@ xset_custom_copy_files(xset_t src, xset_t dest)
     LOG_INFO("{}{}", *standard_output, *standard_error);
     if (exit_status && WIFEXITED(exit_status))
     {
-        msg = fmt::format("An error occured copying command files\n\n{}", *standard_error);
+        const std::string msg =
+            fmt::format("An error occured copying command files\n\n{}", *standard_error);
         xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", GTK_BUTTONS_OK, msg);
     }
     command = fmt::format("chmod -R go-rwx {}", path_dest);
@@ -1706,7 +1709,8 @@ xset_custom_copy_files(xset_t src, xset_t dest)
         LOG_INFO("{}{}", *standard_output, *standard_error);
         if (exit_status && WIFEXITED(exit_status))
         {
-            msg = fmt::format("An error occured copying command data files\n\n{}", *standard_error);
+            const std::string msg =
+                fmt::format("An error occured copying command data files\n\n{}", *standard_error);
             xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", GTK_BUTTONS_OK, msg);
         }
         command = fmt::format("chmod -R go-rwx {}", path_dest);
@@ -1802,16 +1806,15 @@ clean_plugin_mirrors()
     }
 
     // remove plugin-data for non-existent xsets
-    std::string path = Glib::build_filename(xset_get_config_dir(), "plugin-data");
+    const std::string path = Glib::build_filename(xset_get_config_dir(), "plugin-data");
     if (std::filesystem::is_directory(path))
     {
-        std::string file_name;
         for (const auto& file: std::filesystem::directory_iterator(path))
         {
-            file_name = std::filesystem::path(file).filename();
+            const std::string file_name = std::filesystem::path(file).filename();
             if (ztd::startswith(file_name, "cstm_") && !xset_is(file_name))
             {
-                std::string plugin_path = fmt::format("{}/{}", path, file_name);
+                const std::string plugin_path = fmt::format("{}/{}", path, file_name);
                 std::filesystem::remove_all(plugin_path);
                 LOG_INFO("Removed {}/{}", path, file_name);
             }
@@ -2190,7 +2193,6 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
 {
     (void)task;
     xset_t set;
-    std::string msg;
     // LOG_INFO("on_install_plugin_cb");
     if (plugin_data->job == PluginJob::REMOVE) // uninstall
     {
@@ -2210,7 +2212,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
             set = xset_import_plugin(plugin_data->plug_dir, &use);
             if (!set)
             {
-                msg = fmt::format(
+                const std::string msg = fmt::format(
                     "The imported plugin directory does not contain a valid plugin.\n\n({}/)",
                     plugin_data->plug_dir);
                 xset_msg_dialog(GTK_WIDGET(plugin_data->main_window),
@@ -2270,7 +2272,8 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                     clipboard_is_cut = false;
                     if (xset_get_b(XSetName::PLUG_CVERB) || plugin_data->handler_dlg)
                     {
-                        std::string label = clean_label(set->menu_label, false, false);
+                        std::string msg;
+                        const std::string label = clean_label(set->menu_label, false, false);
                         if (geteuid() == 0)
                             msg = fmt::format(
                                 "The '{}' plugin has been copied to the design clipboard.  Use "
@@ -2312,9 +2315,9 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
 
     if (app_settings.get_confirm())
     {
-        std::string msg;
-        std::string label = clean_label(set->menu_label, false, false);
-        msg = fmt::format("Uninstall the '{}' plugin?\n\n( {} )", label, set->plug_dir);
+        const std::string label = clean_label(set->menu_label, false, false);
+        const std::string msg =
+            fmt::format("Uninstall the '{}' plugin?\n\n( {} )", label, set->plug_dir);
         if (xset_msg_dialog(parent,
                             GTK_MESSAGE_WARNING,
                             "Uninstall Plugin",
@@ -2352,16 +2355,15 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& p
                     const std::string& plug_dir, PluginJob job, xset_t insert_set)
 {
     std::string own;
-    std::string plug_dir_q = bash_quote(plug_dir);
-    std::string file_path_q = bash_quote(path);
+    const std::string plug_dir_q = bash_quote(plug_dir);
+    const std::string file_path_q = bash_quote(path);
 
     FMMainWindow* main_window = FM_MAIN_WINDOW(main_win);
     // task
-    PtkFileTask* ptask;
-    ptask = ptk_file_exec_new("Install Plugin",
-                              nullptr,
-                              main_win ? GTK_WIDGET(main_window) : nullptr,
-                              main_win ? main_window->task_view : nullptr);
+    PtkFileTask* ptask = ptk_file_exec_new("Install Plugin",
+                                           nullptr,
+                                           main_win ? GTK_WIDGET(main_window) : nullptr,
+                                           main_win ? main_window->task_view : nullptr);
 
     switch (job)
     {
@@ -2445,7 +2447,7 @@ xset_custom_export_files(xset_t set, const std::string& plug_dir)
     }
 
     int exit_status;
-    std::string command = fmt::format("cp -a {} {}", path_src, path_dest);
+    const std::string command = fmt::format("cp -a {} {}", path_src, path_dest);
     print_command(command);
     Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
 
@@ -2483,7 +2485,9 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     // get new plugin filename
     xset_t save = xset_get(XSetName::PLUG_CFILE);
     if (save->s) //&& std::filesystem::is_directory(save->s)
+    {
         deffolder = save->s;
+    }
     else
     {
         if (!(deffolder = xset_get_s(XSetName::GO_SET_DEFAULT)))
@@ -2492,7 +2496,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
 
     if (!set->plugin)
     {
-        std::string s1 = clean_label(set->menu_label, true, false);
+        const std::string s1 = clean_label(set->menu_label, true, false);
         std::string type;
         if (ztd::startswith(set->name, "hand_arc_"))
             type = "archive-handler";
@@ -2826,7 +2830,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
     }
 
     // task
-    std::string task_name = clean_label(set->menu_label, false, false);
+    const std::string task_name = clean_label(set->menu_label, false, false);
     PtkFileTask* ptask = ptk_file_exec_new(task_name, cwd, parent, task_view);
     // do not free cwd!
     ptask->task->exec_browser = set->browser;
@@ -2874,8 +2878,8 @@ xset_custom_delete(xset_t set, bool delete_next)
     if (set == set_clipboard)
         set_clipboard = nullptr;
 
-    std::string path1 = Glib::build_filename(xset_get_config_dir(), "scripts", set->name);
-    std::string path2 = Glib::build_filename(xset_get_config_dir(), "plugin-data", set->name);
+    const std::string path1 = Glib::build_filename(xset_get_config_dir(), "scripts", set->name);
+    const std::string path2 = Glib::build_filename(xset_get_config_dir(), "plugin-data", set->name);
     if (std::filesystem::exists(path1))
     {
         std::filesystem::remove_all(path1);
@@ -3041,7 +3045,7 @@ xset_clipboard_in_set(xset_t set)
 xset_t
 xset_custom_new()
 {
-    std::string setname = xset_custom_new_name();
+    const std::string setname = xset_custom_new_name();
 
     xset_t set;
     set = xset_get(setname);
@@ -3290,7 +3294,6 @@ void
 xset_set_key(GtkWidget* parent, xset_t set)
 {
     std::string name;
-    std::string keymsg;
     xset_t keyset;
     unsigned int newkey = 0;
     unsigned int newkeymod = 0;
@@ -3309,11 +3312,14 @@ xset_set_key(GtkWidget* parent, xset_t set)
         set->shared_key = ztd::strdup(xset_get_name_from_xsetname(XSetName::OPEN_ALL));
     }
     else
+    {
         name = "( no name )";
+    }
 
-    keymsg = fmt::format("Press your key combination for item '{}' then click Set.  To "
-                         "remove the current key assignment, click Unset.",
-                         name);
+    const std::string keymsg =
+        fmt::format("Press your key combination for item '{}' then click Set.  To "
+                    "remove the current key assignment, click Unset.",
+                    name);
     if (parent)
         dlgparent = gtk_widget_get_toplevel(parent);
 
@@ -5593,7 +5599,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
             gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), deffile);
         else
         {
-            std::string path2 = Glib::build_filename(deffolder, deffile);
+            const std::string path2 = Glib::build_filename(deffolder, deffile);
             gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path2.c_str());
         }
     }
@@ -5940,12 +5946,12 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
 static void
 set_gtk3_widget_padding(GtkWidget* widget, int left_right, int top_bottom)
 {
-    std::string str = fmt::format("GtkWidget {{ padding-left: {}px; padding-right: {}px; "
-                                  "padding-top: {}px; padding-bottom: {}px; }}",
-                                  left_right,
-                                  left_right,
-                                  top_bottom,
-                                  top_bottom);
+    const std::string str = fmt::format("GtkWidget {{ padding-left: {}px; padding-right: {}px; "
+                                        "padding-top: {}px; padding-bottom: {}px; }}",
+                                        left_right,
+                                        left_right,
+                                        top_bottom,
+                                        top_bottom);
 
     GtkCssProvider* provider = gtk_css_provider_new();
     gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(provider), str.c_str(), -1, nullptr);
@@ -6037,7 +6043,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     if (!icon_name && set->tool == XSetTool::CUSTOM)
     {
         // custom 'icon' file?
-        std::string icon_file =
+        const std::string icon_file =
             Glib::build_filename(xset_get_config_dir(), "scripts", set->name, "icon");
         if (std::filesystem::exists(icon_file))
             icon_name = ztd::strdup(icon_file);

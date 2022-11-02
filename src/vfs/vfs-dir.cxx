@@ -519,7 +519,7 @@ gethidden(const std::string& path)
     std::string hidden;
 
     // Read .hidden into string
-    std::string hidden_path = Glib::build_filename(path, ".hidden");
+    const std::string hidden_path = Glib::build_filename(path, ".hidden");
 
     // test access first because open() on missing file may cause
     // long delay on nfs
@@ -586,18 +586,15 @@ vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
         dir->monitor = vfs_file_monitor_add(dir->path, vfs_dir_monitor_callback, dir);
 
         // MOD  dir contains .hidden file?
-        std::string hidden = gethidden(dir->path);
+        const std::string hidden = gethidden(dir->path);
 
-        std::string file_name;
-        std::string full_path;
         for (const auto& file: std::filesystem::directory_iterator(dir->path))
         {
             if (vfs_async_task_is_cancelled(dir->task))
                 break;
 
-            file_name = std::filesystem::path(file).filename();
-
-            full_path = Glib::build_filename(dir->path, file_name);
+            const std::string file_name = std::filesystem::path(file).filename();
+            const std::string full_path = Glib::build_filename(dir->path, file_name);
 
             // MOD ignore if in .hidden
             if (ishidden(hidden, file_name))
@@ -639,12 +636,12 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
     bool ret = false;
 
     /* FIXME: Dirty hack: steal the string to prevent memory allocation */
-    std::string file_name = file->name;
+    const std::string file_name = file->name;
     if (ztd::same(file->name, file->disp_name))
         file->disp_name.clear();
     file->name.clear();
 
-    std::string full_path = Glib::build_filename(dir->path, file_name);
+    const std::string full_path = Glib::build_filename(dir->path, file_name);
 
     if (vfs_file_info_get(file, full_path))
     {
@@ -705,7 +702,7 @@ update_created_files(const char* key, VFSDir* dir)
             if (!file_found)
             {
                 // file is not in dir file_list
-                std::string full_path = Glib::build_filename(dir->path, (char*)l->data);
+                const std::string full_path = Glib::build_filename(dir->path, (char*)l->data);
                 file = vfs_file_info_new();
                 if (vfs_file_info_get(file, full_path))
                 {
@@ -859,7 +856,7 @@ reload_mime_type(const char* key, VFSDir* dir)
 
     for (VFSFileInfo* file: dir->file_list)
     {
-        std::string full_path = Glib::build_filename(dir->path, vfs_file_info_get_name(file));
+        const std::string full_path = Glib::build_filename(dir->path, vfs_file_info_get_name(file));
         vfs_file_info_reload_mime_type(file, full_path.c_str());
         // LOG_DEBUG("reload {}", full_path);
     }
@@ -920,7 +917,7 @@ vfs_dir_unload_thumbnails(VFSDir* dir, bool is_big)
              FIXME: This is not a good way to do things, but there is no better way now.  */
         if (file->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY)
         {
-            std::string file_path = Glib::build_filename(dir->path, file->name);
+            const std::string file_path = Glib::build_filename(dir->path, file->name);
             vfs_file_info_load_special_info(file, file_path.c_str());
         }
     }
@@ -942,16 +939,17 @@ static bool
 on_mime_change_timer(void* user_data)
 {
     (void)user_data;
-    std::string command;
 
     // LOG_INFO("MIME-UPDATE on_timer");
-    command = fmt::format("update-mime-database {}/mime", vfs_user_data_dir());
-    print_command(command);
-    Glib::spawn_command_line_async(command);
+    const std::string mime_command =
+        fmt::format("update-mime-database {}/mime", vfs_user_data_dir());
+    print_command(mime_command);
+    Glib::spawn_command_line_async(mime_command);
 
-    command = fmt::format("update-desktop-database {}/applications", vfs_user_data_dir());
-    print_command(command);
-    Glib::spawn_command_line_async(command);
+    const std::string desk_command =
+        fmt::format("update-desktop-database {}/applications", vfs_user_data_dir());
+    print_command(desk_command);
+    Glib::spawn_command_line_async(desk_command);
 
     g_source_remove(mime_change_timer);
     mime_change_timer = 0;
@@ -982,7 +980,7 @@ vfs_dir_monitor_mime()
     // start watching for changes
     if (mime_dir)
         return;
-    std::string path = Glib::build_filename(vfs_user_data_dir(), "mime/packages", nullptr);
+    const std::string path = Glib::build_filename(vfs_user_data_dir(), "mime/packages", nullptr);
     if (std::filesystem::is_directory(path))
     {
         mime_dir = vfs_dir_get_by_path(path.c_str());

@@ -56,7 +56,7 @@ VFSAppDesktop::VFSAppDesktop(const std::string& open_file_name) noexcept
     else
     {
         this->file_name = open_file_name;
-        std::string relative_path = Glib::build_filename("applications", this->file_name);
+        const std::string relative_path = Glib::build_filename("applications", this->file_name);
         load = kf->load_from_data_dirs(relative_path, this->full_path, Glib::KeyFile::Flags::NONE);
     }
 
@@ -249,7 +249,7 @@ VFSAppDesktop::translate_app_exec_to_command_line(std::vector<std::string>& file
 
     if (ztd::contains(cmd, "%i"))
     {
-        std::string icon = fmt::format("--icon {}", get_icon_name());
+        const std::string icon = fmt::format("--icon {}", get_icon_name());
         cmd = ztd::replace(cmd, "%i", icon);
     }
 
@@ -291,7 +291,7 @@ VFSAppDesktop::open_files(const std::string& working_dir, std::vector<std::strin
 {
     if (!get_exec())
     {
-        std::string msg = fmt::format("Command not found\n\n{}", get_name());
+        const std::string msg = fmt::format("Command not found\n\n{}", get_name());
         throw VFSAppDesktopException(msg);
     }
 
@@ -317,7 +317,7 @@ void
 VFSAppDesktop::exec_desktop(const std::string& working_dir,
                             std::vector<std::string>& file_paths) noexcept
 {
-    std::string cmd = translate_app_exec_to_command_line(file_paths);
+    const std::string cmd = translate_app_exec_to_command_line(file_paths);
     if (cmd.empty())
         return;
 
@@ -325,7 +325,7 @@ VFSAppDesktop::exec_desktop(const std::string& working_dir,
 
     if (use_terminal())
     {
-        std::string app_name = get_disp_name();
+        const std::string app_name = get_disp_name();
         exec_in_terminal(app_name, !this->path.empty() ? this->path : working_dir, cmd);
     }
     else

@@ -281,7 +281,7 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, std::vector<VFSFileInfo
 
     if (app_settings.get_confirm_delete())
     {
-        std::string msg = fmt::format("Delete {} selected item ?", sel_files.size());
+        const std::string msg = fmt::format("Delete {} selected item ?", sel_files.size());
         GtkWidget* dlg = gtk_message_dialog_new(parent_win,
                                                 GTK_DIALOG_MODAL,
                                                 GTK_MESSAGE_WARNING,
@@ -301,7 +301,7 @@ ptk_delete_files(GtkWindow* parent_win, const char* cwd, std::vector<VFSFileInfo
     std::vector<std::string> file_list;
     for (VFSFileInfo* file: sel_files)
     {
-        std::string file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
+        const std::string file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
         file_list.push_back(file_path);
     }
     PtkFileTask* ptask = new PtkFileTask(VFSFileTaskType::VFS_FILE_TASK_DELETE,
@@ -321,7 +321,7 @@ ptk_trash_files(GtkWindow* parent_win, const char* cwd, std::vector<VFSFileInfo*
 
     if (app_settings.get_confirm_trash())
     {
-        std::string msg = fmt::format("Trash {} selected item ?", sel_files.size());
+        const std::string msg = fmt::format("Trash {} selected item ?", sel_files.size());
         GtkWidget* dlg = gtk_message_dialog_new(parent_win,
                                                 GTK_DIALOG_MODAL,
                                                 GTK_MESSAGE_WARNING,
@@ -341,7 +341,7 @@ ptk_trash_files(GtkWindow* parent_win, const char* cwd, std::vector<VFSFileInfo*
     std::vector<std::string> file_list;
     for (VFSFileInfo* file: sel_files)
     {
-        std::string file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
+        const std::string file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
         file_list.push_back(file_path);
     }
     PtkFileTask* ptask = new PtkFileTask(VFSFileTaskType::VFS_FILE_TASK_TRASH,
@@ -550,18 +550,17 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     }
     else if (widget == GTK_WIDGET(mset->buf_full_name))
     {
-        std::string full_name;
-
         mset->last_widget = GTK_WIDGET(mset->input_full_name);
 
         // update name & ext
         gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
-        full_name = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
+        const std::string full_name =
+            gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
 
         const auto namepack = get_name_extension(full_name);
-        std::string name = namepack.first;
-        std::string ext = namepack.second;
+        const std::string name = namepack.first;
+        const std::string ext = namepack.second;
 
         gtk_text_buffer_set_text(mset->buf_name, name.c_str(), -1);
         if (!ext.empty())
@@ -596,13 +595,12 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     }
     else if (widget == GTK_WIDGET(mset->buf_path))
     {
-        std::string full_name;
-
         mset->last_widget = GTK_WIDGET(mset->input_path);
         // update full_path
         gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
-        full_name = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
+        const std::string full_name =
+            gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
 
         gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_path, &iter);
@@ -660,8 +658,8 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         }
 
         const auto namepack = get_name_extension(full_name);
-        std::string name = namepack.first;
-        std::string ext = namepack.second;
+        const std::string name = namepack.first;
+        const std::string ext = namepack.second;
 
         gtk_text_buffer_set_text(mset->buf_name, name.c_str(), -1);
         if (!ext.empty())
@@ -926,8 +924,8 @@ select_input(GtkWidget* widget, MoveSet* mset)
             char* full_name = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
 
             const auto namepack = get_name_extension(full_name);
-            std::string name = namepack.first;
-            std::string ext = namepack.second;
+            const std::string name = namepack.first;
+            const std::string ext = namepack.second;
 
             free(full_name);
             gtk_text_buffer_get_iter_at_offset(buf, &iter, g_utf8_strlen(name.c_str(), -1));
@@ -1418,7 +1416,7 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     // title
     if (!desc)
         desc = mset->desc;
-    std::string title = fmt::format("{} {}{}", action, desc, root_msg);
+    const std::string title = fmt::format("{} {}{}", action, desc, root_msg);
     gtk_window_set_title(GTK_WINDOW(mset->dlg), title.c_str());
 
     if (btn_label)
@@ -1941,7 +1939,7 @@ get_unique_name(const char* dir, const char* ext)
     std::string name;
     std::string path;
 
-    std::string base = "new";
+    const std::string base = "new";
     if (ext && ext[0] != '\0')
     {
         name = fmt::format("{}.{}", base, ext);
@@ -1993,15 +1991,14 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
         return templates;
     }
 
-    std::string templates_path = Glib::build_filename(templates_dir, subdir);
+    const std::string templates_path = Glib::build_filename(templates_dir, subdir);
 
     if (!std::filesystem::is_directory(templates_path))
         return templates;
 
-    std::string file_name;
     for (const auto& file: std::filesystem::directory_iterator(templates_path))
     {
-        file_name = std::filesystem::path(file).filename();
+        const std::string file_name = std::filesystem::path(file).filename();
 
         std::string path = Glib::build_filename(templates_path, file_name);
         if (getdir)
@@ -2014,7 +2011,7 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
                 else
                     subsubdir = file_name;
 
-                std::string subsubdir_fmt = fmt::format("{}/", subsubdir);
+                const std::string subsubdir_fmt = fmt::format("{}/", subsubdir);
                 templates = g_list_prepend(templates, ztd::strdup(subsubdir_fmt));
                 // prevent filesystem loops during recursive find
                 if (!std::filesystem::is_symlink(path))
@@ -2041,7 +2038,7 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
             {
                 if (subdir)
                 {
-                    std::string subsubdir = Glib::build_filename(subdir, file_name);
+                    const std::string subsubdir = Glib::build_filename(subdir, file_name);
                     templates = get_templates(templates_dir, subsubdir.c_str(), templates, getdir);
                 }
                 else
@@ -2278,7 +2275,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     {
         try
         {
-            std::string target_path = std::filesystem::read_symlink(mset->full_path);
+            const std::string target_path = std::filesystem::read_symlink(mset->full_path);
 
             mset->mime_type = ztd::strdup(target_path);
             if (std::filesystem::exists(target_path))
@@ -2880,7 +2877,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     if (std::filesystem::is_directory(path))
                     {
                         const std::string errno_msg = std::strerror(errno);
-                        std::string msg =
+                        const std::string msg =
                             fmt::format("Error creating parent directory\n\n{}", errno_msg);
                         ptk_show_error(GTK_WINDOW(mset->dlg), "Mkdir Error", msg);
 
@@ -3211,7 +3208,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
 
                     // Unknown error has occurred - alert user as usual
                     const std::string errno_msg = std::strerror(errno);
-                    std::string msg = fmt::format("Error renaming file\n\n{}", errno_msg);
+                    const std::string msg = fmt::format("Error renaming file\n\n{}", errno_msg);
                     ptk_show_error(GTK_WINDOW(mset->dlg), "Rename Error", msg);
                     continue;
                 }
@@ -3455,7 +3452,7 @@ check_desktop_name(const char* app_desktop)
     // Not a desktop entry name
     // If we are lucky enough, there might be a desktop entry
     // for this program
-    std::string name = fmt::format("{}.desktop", app_desktop);
+    const std::string name = fmt::format("{}.desktop", app_desktop);
     if (std::filesystem::exists(name))
         return ztd::strdup(name);
 
@@ -3641,15 +3638,15 @@ ptk_open_files_with_app(const char* cwd, std::vector<VFSFileInfo*>& sel_files,
                 // broken link?
                 try
                 {
-                    std::string target_path = std::filesystem::read_symlink(full_path);
+                    const std::string target_path = std::filesystem::read_symlink(full_path);
 
                     if (!std::filesystem::exists(target_path))
                     {
-                        std::string msg = fmt::format("This symlink's target is missing or "
-                                                      "you do not have permission "
-                                                      "to access it:\n{}\n\nTarget: {}",
-                                                      full_path,
-                                                      target_path);
+                        const std::string msg = fmt::format("This symlink's target is missing or "
+                                                            "you do not have permission "
+                                                            "to access it:\n{}\n\nTarget: {}",
+                                                            full_path,
+                                                            target_path);
                         toplevel = file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser))
                                                 : nullptr;
                         ptk_show_error(GTK_WINDOW(toplevel), "Broken Link", msg.c_str());
@@ -3764,9 +3761,9 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
         if (file_browser)
             parent = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser)));
 
-        std::string msg = fmt::format("{} target{} missing",
-                                      missing_targets,
-                                      missing_targets > 1 ? "s are" : " is");
+        const std::string msg = fmt::format("{} target{} missing",
+                                            missing_targets,
+                                            missing_targets > 1 ? "s are" : " is");
         ptk_show_error(parent, "Error", msg);
     }
 }
@@ -3793,8 +3790,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>& s
     int item_count = 0;
     for (VFSFileInfo* file: sel_files)
     {
-        std::string file_path;
-        file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
+        const std::string file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
         file_path_q = bash_quote(file_path);
         file_paths = fmt::format("{} {}", file_paths, file_path_q);
         item_count++;
@@ -3804,7 +3800,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>& s
     {
         if (app_settings.get_confirm_delete())
         {
-            std::string msg = fmt::format("Delete {} selected item as root ?", item_count);
+            const std::string msg = fmt::format("Delete {} selected item as root ?", item_count);
             if (xset_msg_dialog(parent,
                                 GTK_MESSAGE_WARNING,
                                 "Confirm Delete As Root",
@@ -3834,7 +3830,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>& s
         if (path && std::filesystem::is_directory(path))
         {
             xset_set_var(set, XSetVar::DESC, path);
-            std::string quote_path = bash_quote(path);
+            const std::string quote_path = bash_quote(path);
 
             if (!strcmp(setname, "root_move2"))
             {

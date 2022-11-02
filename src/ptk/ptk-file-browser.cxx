@@ -479,7 +479,7 @@ ptk_file_browser_select_file(PtkFileBrowser* file_browser, const char* path)
 static void
 save_command_history(GtkEntry* entry)
 {
-    std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
+    const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
 
     if (text.empty())
         return;
@@ -1857,7 +1857,6 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
         return false;
 
     char* path;
-    std::string msg;
 
     if (folder_path)
     {
@@ -1878,7 +1877,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
         // convert ~ to /home/user for smarter bookmarks
         if (ztd::startswith(path, "~/") || ztd::startswith(path, "~"))
         {
-            msg = fmt::format("{}{}", vfs_user_home_dir(), path + 1);
+            const std::string msg = fmt::format("{}{}", vfs_user_home_dir(), path + 1);
             path = ztd::strdup(msg);
         }
     }
@@ -1889,7 +1888,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
     {
         if (!inhibit_focus)
         {
-            msg = fmt::format("Directory does not exist\n\n{}", path);
+            const std::string msg = fmt::format("Directory does not exist\n\n{}", path);
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                            "Error",
                            msg);
@@ -1904,7 +1903,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
         if (!inhibit_focus)
         {
             const std::string errno_msg = std::strerror(errno);
-            msg = fmt::format("Unable to access {}\n\n{}", path, errno_msg);
+            const std::string msg = fmt::format("Unable to access {}\n\n{}", path, errno_msg);
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                            "Error",
                            msg);
@@ -3726,7 +3725,7 @@ folder_view_search_equal(GtkTreeModel* model, int col, const char* key, GtkTreeI
 
     if (strchr(key, '*') || strchr(key, '?'))
     {
-        std::string key2 = fmt::format("*{}*", key);
+        const std::string key2 = fmt::format("*{}*", key);
         no_match = fnmatch(key2.c_str(), name, 0) != 0;
     }
     else
@@ -6080,8 +6079,8 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
         if (i > 0 && i < 5)
         {
             xset_t set2;
-            std::string fullxname = fmt::format("panel{}_", panel_num);
-            std::string xname = ztd::removeprefix(set->name, fullxname);
+            const std::string fullxname = fmt::format("panel{}_", panel_num);
+            const std::string xname = ztd::removeprefix(set->name, fullxname);
             if (ztd::same(xname, "show_hidden")) // shared key
             {
                 ptk_file_browser_show_hidden_files(

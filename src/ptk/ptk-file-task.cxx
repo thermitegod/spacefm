@@ -205,19 +205,17 @@ save_progress_dialog_size(PtkFileTask* ptask)
 
     gtk_widget_get_allocation(GTK_WIDGET(ptask->progress_dlg), &allocation);
 
-    std::string s;
-
-    s = std::to_string(allocation.width);
+    const std::string width = std::to_string(allocation.width);
     if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
-        xset_set(XSetName::TASK_POP_TOP, XSetVar::S, s);
+        xset_set(XSetName::TASK_POP_TOP, XSetVar::S, width);
     else
-        xset_set(XSetName::TASK_POP_TOP, XSetVar::X, s);
+        xset_set(XSetName::TASK_POP_TOP, XSetVar::X, width);
 
-    s = std::to_string(allocation.height);
+    const std::string height = std::to_string(allocation.height);
     if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
-        xset_set(XSetName::TASK_POP_TOP, XSetVar::Z, s);
+        xset_set(XSetName::TASK_POP_TOP, XSetVar::Z, height);
     else
-        xset_set(XSetName::TASK_POP_TOP, XSetVar::Y, s);
+        xset_set(XSetName::TASK_POP_TOP, XSetVar::Y, height);
 }
 
 void
@@ -1053,7 +1051,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             ufile_path = nullptr;
         else
         {
-            std::string escaped_markup = Glib::Markup::escape_text(task->current_file);
+            const std::string escaped_markup = Glib::Markup::escape_text(task->current_file);
             ufile_path = ztd::strdup(fmt::format("<b>{}</b>", escaped_markup));
         }
 
@@ -1069,7 +1067,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         gtk_window_set_title(GTK_WINDOW(ptask->progress_dlg), window_title);
         if (!ufile_path)
         {
-            std::string escaped_markup = Glib::Markup::escape_text(window_title);
+            const std::string escaped_markup = Glib::Markup::escape_text(window_title);
             ufile_path = ztd::strdup(fmt::format("<b>( {} )</b>", escaped_markup));
         }
     }
@@ -1118,7 +1116,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         }
         else
         {
-            std::string escaped_markup = Glib::Markup::escape_text(task->current_file);
+            const std::string escaped_markup = Glib::Markup::escape_text(task->current_file);
             ufile_path = ztd::strdup(fmt::format("<b>{}</b>", escaped_markup));
         }
     }
@@ -1454,7 +1452,7 @@ ptk_file_task_update(PtkFileTask* ptask)
     else
         elapsed2 = elapsed;
     unsigned int secs = (timer_elapsed - (hours * 3600) - (mins * 60));
-    std::string elapsed3 = fmt::format("{}:{:02d}", elapsed2, secs);
+    const std::string elapsed3 = fmt::format("{}:{:02d}", elapsed2, secs);
     ptask->dsp_elapsed = elapsed3;
 
     if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
@@ -2076,8 +2074,8 @@ query_overwrite(PtkFileTask* ptask)
     char* dest_dir_disp = ztd::strdup(Glib::filename_display_name(dest_dir));
 
     const auto namepack = get_name_extension(base_name);
-    std::string name = namepack.first;
-    std::string ext = namepack.second;
+    const std::string name = namepack.first;
+    const std::string ext = namepack.second;
 
     char* ext_disp = !ext.empty() ? ztd::strdup(Glib::filename_display_name(ext)) : nullptr;
     char* unique_name = vfs_file_task_get_unique_name(dest_dir, name.c_str(), ext.c_str());

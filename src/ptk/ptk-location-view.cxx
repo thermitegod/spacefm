@@ -685,11 +685,14 @@ ptk_location_view_clean_mount_points()
      * build also requires it. */
 
     // clean cache and Auto-Mount|Mount Dirs  (eg for fuse mounts)
-    std::string path;
     for (int i = 0; i < 2; ++i)
     {
+        std::string path;
+
         if (i == 0)
+        {
             path = Glib::build_filename(vfs_user_cache_dir(), "spacefm-mount");
+        }
         else // i == 1
         {
             char* del_path = ptk_location_view_get_mount_point_dir(nullptr);
@@ -705,12 +708,11 @@ ptk_location_view_clean_mount_points()
 
         if (std::filesystem::is_directory(path))
         {
-            std::string file_name;
             for (const auto& file: std::filesystem::directory_iterator(path))
             {
-                file_name = std::filesystem::path(file).filename();
+                const std::string file_name = std::filesystem::path(file).filename();
 
-                std::string del_path = Glib::build_filename(path, file_name);
+                const std::string del_path = Glib::build_filename(path, file_name);
 
                 // removes empty, non-mounted directories
                 std::filesystem::remove_all(del_path);
@@ -719,10 +721,10 @@ ptk_location_view_clean_mount_points()
     }
 
     // clean udevil mount points
-    std::string udevil = Glib::find_program_in_path("udevil");
+    const std::string udevil = Glib::find_program_in_path("udevil");
     if (!udevil.empty())
     {
-        std::string command = fmt::format("{} -c \"sleep 1 ; {} clean\"", BASH_PATH, udevil);
+        const std::string command = fmt::format("{} -c \"sleep 1 ; {} clean\"", BASH_PATH, udevil);
         print_command(command);
         Glib::spawn_command_line_async(command);
     }
@@ -1009,7 +1011,7 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     free(cmd);
 
     PtkFileTask* ptask;
-    std::string task_name = fmt::format("Open URL {}", netmount->url);
+    const std::string task_name = fmt::format("Open URL {}", netmount->url);
     ptask =
         ptk_file_exec_new(task_name, nullptr, GTK_WIDGET(file_browser), file_browser->task_view);
     ptask->task->exec_command = line;
@@ -1055,7 +1057,7 @@ popup_missing_mount(GtkWidget* view, int job)
         cmd = "mount";
     else
         cmd = "unmount";
-    std::string msg =
+    const std::string msg =
         fmt::format("No handler is configured for this device type, or no {} command is set. "
                     " Add a handler in Settings|Device Handlers or Protocol Handlers.",
                     cmd);
@@ -1091,7 +1093,7 @@ on_mount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         popup_missing_mount(view, 0);
         return;
     }
-    std::string task_name = fmt::format("Mount {}", vol->device_file);
+    const std::string task_name = fmt::format("Mount {}", vol->device_file);
     PtkFileTask* ptask = ptk_file_exec_new(task_name,
                                            nullptr,
                                            view,
@@ -1137,7 +1139,7 @@ on_umount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         popup_missing_mount(view, 1);
         return;
     }
-    std::string task_name = fmt::format("Unmount {}", vol->device_file);
+    const std::string task_name = fmt::format("Unmount {}", vol->device_file);
     PtkFileTask* ptask = ptk_file_exec_new(task_name,
                                            nullptr,
                                            view,
@@ -1200,7 +1202,7 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         if (!file_browser && !run_in_terminal &&
             vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK)
         {
-            std::string exe = get_prog_executable();
+            const std::string exe = get_prog_executable();
             // run from desktop window - show a pending dialog
             wait = fmt::format("{} -g --title 'Remove {}' --label '\\nPlease wait while device "
                                "{} is synced and unmounted...' >/dev/null &\nwaitp=$!\n",
@@ -1227,7 +1229,7 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                                unmount,
                                wait_done,
                                eject);
-        std::string task_name = fmt::format("Remove {}", vol->device_file);
+        const std::string task_name = fmt::format("Remove {}", vol->device_file);
         ptask = ptk_file_exec_new(task_name,
                                   nullptr,
                                   view,
@@ -1245,7 +1247,7 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     {
         // task
         line = fmt::format("eject {}", vol->device_file);
-        std::string task_name = fmt::format("Remove {}", vol->device_file);
+        const std::string task_name = fmt::format("Remove {}", vol->device_file);
         ptask = ptk_file_exec_new(task_name,
                                   nullptr,
                                   view,
@@ -1259,7 +1261,7 @@ on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     {
         // task
         line = "sync";
-        std::string task_name = fmt::format("Remove {}", vol->device_file);
+        const std::string task_name = fmt::format("Remove {}", vol->device_file);
         ptask = ptk_file_exec_new(task_name,
                                   nullptr,
                                   view,
@@ -1325,7 +1327,7 @@ try_mount(GtkTreeView* view, VFSVolume* vol)
         popup_missing_mount(GTK_WIDGET(view), 0);
         return false;
     }
-    std::string task_name = fmt::format("Mount {}", vol->device_file);
+    const std::string task_name = fmt::format("Mount {}", vol->device_file);
     PtkFileTask* ptask =
         ptk_file_exec_new(task_name, nullptr, GTK_WIDGET(view), file_browser->task_view);
     std::string keep_term = "";
@@ -1393,7 +1395,7 @@ on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         }
 
         // task
-        std::string task_name = fmt::format("Mount {}", vol->device_file);
+        const std::string task_name = fmt::format("Mount {}", vol->device_file);
         PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
         std::string keep_term = "";
         if (run_in_terminal)
@@ -1460,7 +1462,7 @@ on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         }
 
         // task
-        std::string task_name = fmt::format("Mount {}", vol->device_file);
+        const std::string task_name = fmt::format("Mount {}", vol->device_file);
         PtkFileTask* ptask = ptk_file_exec_new(task_name,
                                                nullptr,
                                                view,
@@ -1543,8 +1545,8 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
             }
             else if (ztd::contains(cmd, "%a"))
             {
-                std::string pointq = bash_quote(vol->mount_point);
-                std::string cmd2 = ztd::replace(cmd, "%a", pointq);
+                const std::string pointq = bash_quote(vol->mount_point);
+                const std::string cmd2 = ztd::replace(cmd, "%a", pointq);
                 cmd = ztd::strdup(cmd2);
             }
         }
@@ -1571,7 +1573,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         }
         else if (ztd::contains(cmd, "%a"))
         {
-            std::string pointq = bash_quote(vol->mount_point);
+            const std::string pointq = bash_quote(vol->mount_point);
             std::string cmd2;
             cmd2 = ztd::replace(cmd, "%a", pointq);
             cmd = ztd::strdup(cmd2);
@@ -1592,7 +1594,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     // Note: file_browser may be nullptr
     if (!GTK_IS_WIDGET(file_browser))
         file_browser = nullptr;
-    std::string task_name = fmt::format("Properties {}", vol->device_file);
+    const std::string task_name = fmt::format("Properties {}", vol->device_file);
     PtkFileTask* ptask = ptk_file_exec_new(task_name,
                                            nullptr,
                                            file_browser ? GTK_WIDGET(file_browser) : view,
@@ -1612,7 +1614,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         ptask->task->exec_scroll_lock = true;
         ptask->task->exec_icon = vfs_volume_get_icon(vol);
         // ptask->task->exec_keep_tmp = true;
-        std::string command = cmd;
+        const std::string command = cmd;
         print_command(command);
         ptk_file_task_run(ptask);
         return;
@@ -1629,7 +1631,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     std::string* uuid = nullptr;
     std::string* fstab = nullptr;
 
-    std::string fstab_path = Glib::build_filename(SYSCONFDIR, "fstab");
+    const std::string fstab_path = Glib::build_filename(SYSCONFDIR, "fstab");
 
     const std::string base = Glib::path_get_basename(vol->device_file);
     if (!base.empty())
@@ -1736,27 +1738,28 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
     if (vol->is_mounted)
     {
         path = Glib::find_program_in_path("df");
-        std::string esc_path = bash_quote(vol->mount_point);
+        const std::string esc_path = bash_quote(vol->mount_point);
         df = fmt::format("echo USAGE ; {} -hT {} ; echo ; ", path, esc_path);
     }
     else
     {
         if (vol->is_mountable)
         {
-            std::string size_str;
-            size_str = vfs_file_size_to_string_format(vol->size, true);
+            const std::string size_str = vfs_file_size_to_string_format(vol->size, true);
             df = fmt::format("echo USAGE ; echo \"{}      {}  {}  ( not mounted )\" ; echo ; ",
                              vol->device_file,
                              vol->fs_type ? vol->fs_type : "",
                              size_str);
         }
         else
+        {
             df = fmt::format("echo USAGE ; echo \"{}      ( no media )\" ; echo ; ",
                              vol->device_file);
+        }
     }
 
-    std::string udisks_info = vfs_volume_device_info(vol);
-    std::string udisks = fmt::format("{}\ncat << EOF\n{}\nEOF\necho ; ", info, udisks_info);
+    const std::string udisks_info = vfs_volume_device_info(vol);
+    const std::string udisks = fmt::format("{}\ncat << EOF\n{}\nEOF\necho ; ", info, udisks_info);
 
     if (vol->is_mounted)
     {
@@ -1766,7 +1769,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
                 fmt::format("echo {} ; {} -w | grep /$ | head -n 500 ; echo ; ", "PROCESSES", path);
         else
         {
-            std::string esc_path = bash_quote(vol->mount_point);
+            const std::string esc_path = bash_quote(vol->mount_point);
             lsof = fmt::format("echo {} ; {} -w {} | head -n 500 ; echo ; ",
                                "PROCESSES",
                                path,
@@ -2446,7 +2449,7 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
 
     set = xset_get(XSetName::DEV_MENU_SETTINGS);
 
-    std::string desc =
+    const std::string desc =
         fmt::format("dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
                     "dev_mount_options dev_change{}",
                     file_browser ? " dev_newtab" : "");

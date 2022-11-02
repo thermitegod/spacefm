@@ -829,13 +829,10 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
     {
         node->monitor = vfs_file_monitor_add(path, &on_file_monitor_event, node);
 
-        std::string file_path;
-        std::string file_name;
         for (const auto& file: std::filesystem::directory_iterator(path))
         {
-            file_name = std::filesystem::path(file).filename();
-
-            file_path = Glib::build_filename(path, file_name);
+            const std::string file_name = std::filesystem::path(file).filename();
+            const std::string file_path = Glib::build_filename(path, file_name);
             if (std::filesystem::is_directory(file_path))
                 ptk_dir_tree_insert_child(tree, node, file_path.c_str(), file_name.c_str());
         }
@@ -920,7 +917,7 @@ on_file_monitor_event(VFSFileMonitor* monitor, VFSFileMonitorEvent event, const 
                     child = node->children;
                 else
                     child = nullptr;
-                std::string file_path = Glib::build_filename(monitor->path, file_name);
+                const std::string file_path = Glib::build_filename(monitor->path, file_name);
                 if (std::filesystem::is_directory(file_path))
                 {
                     ptk_dir_tree_insert_child(node->tree, node, monitor->path, file_name);

@@ -227,8 +227,8 @@ check_overwrite(VFSFileTask* task, const std::string& dest_file, bool* dest_exis
             const std::string dest_dir = Glib::path_get_dirname(dest_file);
 
             const auto namepack = get_name_extension(old_name);
-            std::string name = namepack.first;
-            std::string ext = namepack.second;
+            const std::string name = namepack.first;
+            const std::string ext = namepack.second;
 
             *new_dest_file =
                 vfs_file_task_get_unique_name(dest_dir.c_str(), name.c_str(), ext.c_str());
@@ -425,10 +425,9 @@ vfs_file_task_do_copy(VFSFileTask* task, const std::string& src_file, const std:
 
             std::string sub_src_file;
             std::string sub_dest_file;
-            std::string file_name;
             for (const auto& file: std::filesystem::directory_iterator(src_file))
             {
-                file_name = std::filesystem::path(file).filename();
+                const std::string file_name = std::filesystem::path(file).filename();
                 if (should_abort(task))
                     break;
                 sub_src_file = Glib::build_filename(src_file, file_name);
@@ -717,10 +716,9 @@ vfs_file_task_do_move(VFSFileTask* task, const std::string& src_file, const std:
         // moving a directory onto a directory that exists
         std::string sub_src_file;
         std::string sub_dest_file;
-        std::string file_name;
         for (const auto& file: std::filesystem::directory_iterator(src_file))
         {
-            file_name = std::filesystem::path(file).filename();
+            const std::string file_name = std::filesystem::path(file).filename();
             if (should_abort(task))
                 break;
             sub_src_file = Glib::build_filename(src_file, file_name);
@@ -858,13 +856,12 @@ vfs_file_task_delete(VFSFileTask* task, const std::string& src_file)
 
     if (S_ISDIR(file_stat.st_mode))
     {
-        std::string file_name;
         for (const auto& file: std::filesystem::directory_iterator(src_file))
         {
-            file_name = std::filesystem::path(file).filename();
+            const std::string file_name = std::filesystem::path(file).filename();
             if (should_abort(task))
                 break;
-            std::string sub_src_file = Glib::build_filename(src_file, file_name);
+            const std::string sub_src_file = Glib::build_filename(src_file, file_name);
             vfs_file_task_delete(task, sub_src_file);
         }
 
@@ -1030,13 +1027,12 @@ vfs_file_task_chown_chmod(VFSFileTask* task, const std::string& src_file)
 
         if (S_ISDIR(src_stat.st_mode) && task->recursive)
         {
-            std::string file_name;
             for (const auto& file: std::filesystem::directory_iterator(src_file))
             {
-                file_name = std::filesystem::path(file).filename();
+                const std::string file_name = std::filesystem::path(file).filename();
                 if (should_abort(task))
                     break;
-                std::string sub_src_file = Glib::build_filename(src_file, file_name);
+                const std::string sub_src_file = Glib::build_filename(src_file, file_name);
                 vfs_file_task_chown_chmod(task, sub_src_file);
             }
         }
@@ -1055,7 +1051,7 @@ vfs_file_task_get_cpids(Glib::Pid pid)
     std::string* standard_output = nullptr;
     int exit_status;
 
-    std::string command = fmt::format("/bin/ps h --ppid {} -o pid", pid);
+    const std::string command = fmt::format("/bin/ps h --ppid {} -o pid", pid);
     print_command(command);
     Glib::spawn_command_line_sync(command.c_str(), standard_output, nullptr, &exit_status);
 
@@ -1252,7 +1248,7 @@ cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, VFSFileTask* task)
 static char*
 get_xxhash(const std::string& path)
 {
-    std::string xxhash = Glib::find_program_in_path("xxh128sum");
+    const std::string xxhash = Glib::find_program_in_path("xxh128sum");
     if (xxhash.empty())
     {
         LOG_WARN("Missing program xxhash");
@@ -1260,7 +1256,7 @@ get_xxhash(const std::string& path)
     }
 
     std::string* standard_output = nullptr;
-    std::string command = fmt::format("{} {}", xxhash, path);
+    const std::string command = fmt::format("{} {}", xxhash, path);
     print_command(command);
     Glib::spawn_command_line_sync(command, standard_output);
 
@@ -1270,19 +1266,18 @@ get_xxhash(const std::string& path)
 static void
 vfs_file_task_exec_error(VFSFileTask* task, int errnox, const std::string& action)
 {
-    std::string msg;
-
     if (errnox)
     {
         const std::string errno_msg = std::strerror(errnox);
-        msg = fmt::format("{}\n{}\n", action, errno_msg);
+        const std::string msg = fmt::format("{}\n{}\n", action, errno_msg);
+        append_add_log(task, msg);
     }
     else
     {
-        msg = fmt::format("{}\n", action);
+        const std::string msg = fmt::format("{}\n", action);
+        append_add_log(task, msg);
     }
 
-    append_add_log(task, msg);
     call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_ERROR);
 }
 
@@ -1293,7 +1288,6 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
     // another thread because gio adds watches to main loop thread anyway
     std::string tmp;
     std::string su;
-    std::string msg;
     std::string terminal;
     char* sum_script = nullptr;
     GtkWidget* parent = nullptr;
@@ -1331,7 +1325,8 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
             su = get_valid_su();
             if (su.empty())
             {
-                msg = "Configure a valid Terminal SU command in View|Preferences|Advanced";
+                const std::string msg =
+                    "Configure a valid Terminal SU command in View|Preferences|Advanced";
                 LOG_WARN(msg);
                 // do not use xset_msg_dialog if non-main thread
                 // vfs_file_task_exec_error(task, 0, str);
@@ -1351,7 +1346,7 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
     tmp = xset_get_user_tmp_dir();
     if (!std::filesystem::is_directory(tmp))
     {
-        msg = "Cannot create temporary directory";
+        const std::string msg = "Cannot create temporary directory";
         LOG_WARN(msg);
         // do not use xset_msg_dialog if non-main thread
         // vfs_file_task_exec_error(task, 0, str);
@@ -1373,7 +1368,8 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
         terminal = Glib::find_program_in_path(xset_get_s(XSetName::MAIN_TERMINAL));
         if (terminal.empty())
         {
-            msg = "Please set a valid terminal program in View|Preferences|Advanced";
+            const std::string msg =
+                "Please set a valid terminal program in View|Preferences|Advanced";
             LOG_WARN(msg);
             // do not use xset_msg_dialog if non-main thread
             // vfs_file_task_exec_error(task, 0, str);
@@ -1395,7 +1391,7 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
         // get script name
         while (true)
         {
-            std::string hexname = fmt::format("{}.sh", randhex8());
+            const std::string hexname = fmt::format("{}.sh", randhex8());
             task->exec_script = Glib::build_filename(tmp, hexname);
             if (!std::filesystem::exists(task->exec_script))
                 break;
@@ -1650,12 +1646,13 @@ vfs_file_task_exec(VFSFileTask* task, const std::string& src_file)
             if (std::filesystem::exists(task->exec_script))
                 std::filesystem::remove(task->exec_script);
         }
-        std::string cmd = ztd::join(argv, " ");
-        msg = fmt::format("Error executing '{}'\nGlib Spawn Error Code {}, {}\nRun in a terminal "
-                          "for full debug info\n",
-                          cmd,
-                          e.code(),
-                          std::string(Glib::strerror(e.code())));
+        const std::string cmd = ztd::join(argv, " ");
+        const std::string msg =
+            fmt::format("Error executing '{}'\nGlib Spawn Error Code {}, {}\nRun in a terminal "
+                        "for full debug info\n",
+                        cmd,
+                        e.code(),
+                        std::string(Glib::strerror(e.code())));
         vfs_file_task_exec_error(task, errno, msg);
         call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
         // LOG_INFO("vfs_file_task_exec DONE ERROR");
@@ -2160,13 +2157,12 @@ get_total_size_of_dir(VFSFileTask* task, const std::string& path, off_t* size,
     if (S_ISLNK(file_stat.st_mode) || !S_ISDIR(file_stat.st_mode))
         return;
 
-    std::string file_name;
     for (const auto& file: std::filesystem::directory_iterator(path))
     {
-        file_name = std::filesystem::path(file).filename();
+        const std::string file_name = std::filesystem::path(file).filename();
         if (task->state == VFSFileTaskState::VFS_FILE_TASK_SIZE_TIMEOUT || task->abort)
             break;
-        std::string full_path = Glib::build_filename(path, file_name);
+        const std::string full_path = Glib::build_filename(path, file_name);
         if (lstat(full_path.c_str(), &file_stat) != -1)
         {
             if (S_ISDIR(file_stat.st_mode))
@@ -2202,7 +2198,7 @@ vfs_file_task_error(VFSFileTask* task, int errnox, const std::string& action,
 {
     task->error = errnox;
     const std::string errno_msg = std::strerror(errnox);
-    std::string msg = fmt::format("\n{} {}\nError: {}\n", action, target, errno_msg);
+    const std::string msg = fmt::format("\n{} {}\nError: {}\n", action, target, errno_msg);
     append_add_log(task, msg);
     call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_ERROR);
 }

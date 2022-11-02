@@ -330,7 +330,8 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         app_settings.set_confirm_delete(
             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->confirm_delete)));
 
-        std::string s = std::to_string(gtk_combo_box_get_active(GTK_COMBO_BOX(data->drag_action)));
+        const std::string s =
+            std::to_string(gtk_combo_box_get_active(GTK_COMBO_BOX(data->drag_action)));
         xset_set(XSetName::DRAG_ACTION, XSetVar::X, s);
 
         // terminal su command
@@ -384,16 +385,16 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         char* old_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
         const char* sel_terminal =
             gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(data->terminal));
-        std::string terminal = ztd::strip(sel_terminal);
+        const std::string terminal = ztd::strip(sel_terminal);
         if (!ztd::same(terminal, old_terminal))
         {
             xset_set(XSetName::MAIN_TERMINAL, XSetVar::S, terminal);
         }
         // report missing terminal
-        std::string term = Glib::find_program_in_path(terminal);
+        const std::string term = Glib::find_program_in_path(terminal);
         if (term.empty())
         {
-            std::string msg = fmt::format("Unable to find terminal program '{}'", terminal);
+            const std::string msg = fmt::format("Unable to find terminal program '{}'", terminal);
             ptk_show_error(GTK_WINDOW(dlg), "Error", msg);
         }
 

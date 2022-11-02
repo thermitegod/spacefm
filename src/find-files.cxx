@@ -232,7 +232,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
             if (!file)
                 continue;
 
-            std::string full_path = Glib::build_filename(dir, vfs_file_info_get_name(file));
+            const std::string full_path = Glib::build_filename(dir, vfs_file_info_get_name(file));
             if (std::filesystem::is_directory(full_path))
             {
                 ptk_file_browser_emit_open(file_browser,

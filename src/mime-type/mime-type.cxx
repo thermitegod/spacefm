@@ -419,7 +419,7 @@ mime_type_finalize()
 void
 mime_type_init()
 {
-    std::string filename = "/mime/mime.cache";
+    const std::string filename = "/mime/mime.cache";
 
     std::vector<std::string> dirs = vfs_system_data_dir();
     n_caches = dirs.size();
