@@ -85,7 +85,6 @@ std::string settings_config_dir;
 std::string settings_user_tmp_dir;
 
 static XSetContext* xset_context = nullptr;
-static xset_t book_icon_set_cached = nullptr;
 
 EventHandler event_handler;
 
@@ -740,9 +739,6 @@ load_settings()
     event_handler.tab_focus = xset_get(XSetName::EVT_TAB_FOCUS);
     event_handler.tab_close = xset_get(XSetName::EVT_TAB_CLOSE);
     event_handler.device = xset_get(XSetName::EVT_DEVICE);
-
-    // add default bookmarks
-    ptk_bookmark_view_get_first_bookmark(nullptr);
 }
 
 void
@@ -1087,34 +1083,6 @@ xset_remove(xset_t set)
     delete set;
 }
 
-static xset_t
-xset_is_main_bookmark(xset_t set)
-{
-    xset_t set_parent = nullptr;
-
-    // is this xset in main_book ?  returns immediate parent set
-    xset_t set_prev = set;
-    while (set_prev)
-    {
-        if (set_prev->prev)
-            set_prev = xset_is(set_prev->prev);
-        else if (set_prev->parent)
-        {
-            set_prev = xset_is(set_prev->parent);
-            if (!set_parent)
-                set_parent = set_prev;
-            if (set_prev && set_prev->xset_name == XSetName::MAIN_BOOK)
-            {
-                // found bookmark in main_book tree
-                return set_parent;
-            }
-        }
-        else
-            break;
-    }
-    return nullptr;
-}
-
 xset_t
 xset_find_custom(const std::string& search)
 {
@@ -1396,77 +1364,6 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, int icon_size)
     return menu_label;
 }
 
-GdkPixbuf*
-xset_custom_get_bookmark_icon(xset_t set, int icon_size)
-{
-    GdkPixbuf* icon_new = nullptr;
-    const char* icon1 = nullptr;
-    const char* icon2 = nullptr;
-    const char* icon3 = nullptr;
-
-    if (!book_icon_set_cached)
-        book_icon_set_cached = xset_get(XSetName::BOOK_ICON);
-
-    if (!set->lock && XSetCMD(xset_get_int_set(set, XSetVar::X)) == XSetCMD::BOOKMARK)
-    {
-        if (!set->icon && (set->z && (strstr(set->z, ":/") || ztd::startswith(set->z, "//"))))
-        {
-            // a bookmarked URL - show network icon
-            xset_t set2 = xset_get(XSetName::DEV_ICON_NETWORK);
-            if (set2->icon)
-                icon1 = ztd::strdup(set2->icon);
-            else
-                icon1 = ztd::strdup("gtk-network");
-            icon2 = ztd::strdup("user-bookmarks");
-            icon3 = ztd::strdup("gnome-fs-directory");
-        }
-        else if (set->z && (strstr(set->z, ":/") || ztd::startswith(set->z, "//")))
-        {
-            // a bookmarked URL - show custom or network icon
-            icon1 = ztd::strdup(set->icon);
-            xset_t set2 = xset_get(XSetName::DEV_ICON_NETWORK);
-            if (set2->icon)
-                icon2 = ztd::strdup(set2->icon);
-            else
-                icon2 = ztd::strdup("gtk-network");
-            icon3 = ztd::strdup("user-bookmarks");
-        }
-        else if (!set->icon && book_icon_set_cached->icon)
-        {
-            icon1 = ztd::strdup(book_icon_set_cached->icon);
-            icon2 = ztd::strdup("user-bookmarks");
-            icon3 = ztd::strdup("gnome-fs-directory");
-        }
-        else if (set->icon && book_icon_set_cached->icon)
-        {
-            icon1 = ztd::strdup(set->icon);
-            icon2 = ztd::strdup(book_icon_set_cached->icon);
-            icon3 = ztd::strdup("user-bookmarks");
-        }
-        else if (set->icon)
-        {
-            icon1 = ztd::strdup(set->icon);
-            icon2 = ztd::strdup("user-bookmarks");
-            icon3 = ztd::strdup("gnome-fs-directory");
-        }
-        else
-        {
-            icon1 = ztd::strdup("user-bookmarks");
-            icon2 = ztd::strdup("gnome-fs-directory");
-            icon3 = ztd::strdup("gtk-directory");
-        }
-        if (icon1)
-            icon_new = vfs_load_icon(icon1, icon_size);
-        if (!icon_new && icon2)
-            icon_new = vfs_load_icon(icon2, icon_size);
-        if (!icon_new && icon3)
-            icon_new = vfs_load_icon(icon3, icon_size);
-    }
-    else
-        LOG_WARN("xset_custom_get_bookmark_icon set is not XSetCMD::BOOKMARK");
-    return icon_new;
-}
-
 GtkWidget*
 xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
                   xset_t set)
@@ -1613,16 +1510,10 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                 item = xset_new_menuitem(menu_label, nullptr);
                 free(menu_label);
             }
-            else if (!set->lock && cmd_type == XSetCMD::BOOKMARK)
-            {
-                // Bookmark
-                item = xset_new_menuitem(set->menu_label && set->menu_label[0] ? set->menu_label
-                                                                               : set->z,
-                                         nullptr);
-                app_icon = xset_custom_get_bookmark_icon(set, icon_size);
-            }
             else
+            {
                 item = xset_new_menuitem(set->menu_label, icon_name);
+            }
 
             if (app_icon)
             {
@@ -2228,12 +2119,7 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
 
                 if (use && *use == PluginUse::NORMAL)
                 {
-                    if (ztd::same(name, "main_book-child"))
-                    {
-                        // This plugin is an export of all bookmarks
-                        *use = PluginUse::BOOKMARKS;
-                    }
-                    else if (ztd::startswith(name, "hand_"))
+                    if (ztd::startswith(name, "hand_"))
                     {
                         if (ztd::startswith(name, "hand_fs_"))
                             *use = PluginUse::HAND_FS;
@@ -2334,57 +2220,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                                 GTK_BUTTONS_OK,
                                 msg);
             }
-            // TODO - switch
-            else if (use == PluginUse::BOOKMARKS)
-            {
-                // bookmarks
-                if (plugin_data->job != PluginJob::COPY || !plugin_data->set)
-                {
-                    // This dialog should never be seen - failsafe
-                    xset_msg_dialog(
-                        GTK_WIDGET(plugin_data->main_window),
-                        GTK_MESSAGE_ERROR,
-                        "Bookmarks",
-                        GTK_BUTTONS_OK,
-                        "This plugin file contains exported bookmarks which cannot be installed or "
-                        "imported to the design clipboard.\n\nYou can import these directly into a "
-                        "menu (select New|Import from the Design Menu).");
-                }
-                else
-                {
-                    // copy all bookmarks into menu
-                    // paste after insert_set (plugin_data->set)
-                    xset_t newset = xset_custom_copy(set, true, true);
-                    // get last bookmark and toolbar if needed
-                    set = newset;
-                    do
-                    {
-                        if (plugin_data->set->tool != XSetTool::NOT)
-                            set->tool = XSetTool::CUSTOM;
-                        else
-                            set->tool = XSetTool::NOT;
-                        if (!set->next)
-                            break;
-                    } while ((set = xset_get(set->next)));
-                    // set now points to last bookmark
-                    newset->prev = ztd::strdup(plugin_data->set->name);
-                    set->next = plugin_data->set->next; // steal
-                    if (plugin_data->set->next)
-                    {
-                        xset_t set_next = xset_get(plugin_data->set->next);
-                        free(set_next->prev);
-                        set_next->prev = ztd::strdup(set->name); // last bookmark
-                    }
-                    plugin_data->set->next = ztd::strdup(newset->name);
-                    // find parent
-                    set = newset;
-                    while (set->prev)
-                        set = xset_get(set->prev);
-                    if (set->parent)
-                        main_window_bookmark_changed(set->parent);
-                }
-            }
-            else if (use < PluginUse::BOOKMARKS)
+            else if (use != PluginUse::BOOKMARKS)
             {
                 // handler
                 set->plugin_top = false; // prevent being added to Plugins menu
@@ -2427,7 +2263,6 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                         newset->tool = XSetTool::CUSTOM;
                     else
                         newset->tool = XSetTool::NOT;
-                    main_window_bookmark_changed(newset->name);
                 }
                 else
                 {
@@ -2547,32 +2382,6 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& p
     }
 
     std::string book = "";
-    if (insert_set && insert_set->xset_name == XSetName::MAIN_BOOK)
-    {
-        // import bookmarks to end
-        xset_t set = xset_get(XSetName::MAIN_BOOK);
-        if (set->child)
-        {
-            set = xset_is(set->child);
-            while (set && set->next)
-                set = xset_is(set->next);
-
-            if (set)
-            {
-                insert_set = set;
-            }
-            else
-            {
-                // failsafe
-                insert_set = nullptr;
-            }
-        }
-        else
-        {
-            // failsafe
-            insert_set = nullptr;
-        }
-    }
     if (job == PluginJob::INSTALL || !insert_set)
     {
         // prevent install of exported bookmarks or handler as plugin or design clipboard
@@ -2632,16 +2441,6 @@ xset_custom_export_files(xset_t set, const std::string& plug_dir)
 
     if (!(std::filesystem::exists(path_src) && dir_has_files(path_src)))
     {
-        if (set->xset_name == XSetName::MAIN_BOOK)
-        {
-            // exporting all bookmarks - create empty main_book dir
-            std::filesystem::create_directories(path_dest);
-            std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
-            if (!std::filesystem::exists(path_dest))
-            {
-                return false;
-            }
-        }
         // skip empty or missing dirs
         return true;
     }
@@ -2696,9 +2495,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     {
         std::string s1 = clean_label(set->menu_label, true, false);
         std::string type;
-        if (set->xset_name == XSetName::MAIN_BOOK)
-            type = "bookmarks";
-        else if (ztd::startswith(set->name, "hand_arc_"))
+        if (ztd::startswith(set->name, "hand_arc_"))
             type = "archive-handler";
         else if (ztd::startswith(set->name, "hand_fs_"))
             type = "device-handler";
@@ -2856,113 +2653,6 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
 
     free(path);
     return;
-}
-
-static void
-open_spec(PtkFileBrowser* file_browser, const char* url, bool in_new_tab)
-{
-    bool new_window = false;
-    if (!file_browser)
-    {
-        FMMainWindow* main_window = fm_main_window_get_on_current_desktop();
-        if (!main_window)
-        {
-            main_window = FM_MAIN_WINDOW_REINTERPRET(fm_main_window_new());
-            gtk_window_set_default_size(GTK_WINDOW(main_window),
-                                        app_settings.get_width(),
-                                        app_settings.get_height());
-            gtk_widget_show(GTK_WIDGET(main_window));
-            new_window = !xset_get_b(XSetName::MAIN_SAVE_TABS);
-        }
-        file_browser =
-            PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
-        gtk_window_present(GTK_WINDOW(main_window));
-    }
-    bool new_tab = !new_window && in_new_tab;
-
-    // convert ~ to /home/user for smarter bookmarks
-    std::string use_url;
-    if (ztd::startswith(url, "~/") || !g_strcmp0(url, "~"))
-        use_url = fmt::format("{}{}", vfs_user_home_dir(), url + 1);
-    else
-        use_url = url;
-
-    if ((use_url[0] != '/' && strstr(use_url.c_str(), ":/")) || ztd::startswith(use_url, "//"))
-    {
-        // network
-        if (file_browser)
-            ptk_location_view_mount_network(file_browser, use_url.c_str(), new_tab, false);
-        else
-            open_in_prog(use_url.c_str());
-    }
-    else if (std::filesystem::is_directory(use_url))
-    {
-        // dir
-        if (file_browser)
-        {
-            if (new_tab || g_strcmp0(ptk_file_browser_get_cwd(file_browser), use_url.c_str()))
-                ptk_file_browser_emit_open(file_browser,
-                                           use_url.c_str(),
-                                           new_tab ? PtkOpenAction::PTK_OPEN_NEW_TAB
-                                                   : PtkOpenAction::PTK_OPEN_DIR);
-            gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
-        }
-        else
-            open_in_prog(use_url.c_str());
-    }
-    else if (std::filesystem::exists(use_url))
-    {
-        // file - open dir and select file
-        const std::string dir = Glib::path_get_dirname(use_url);
-        if (std::filesystem::is_directory(dir))
-        {
-            if (file_browser)
-            {
-                if (!new_tab && ztd::same(dir, ptk_file_browser_get_cwd(file_browser)))
-                {
-                    ptk_file_browser_select_file(file_browser, use_url.c_str());
-                    gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
-                }
-                else
-                {
-                    file_browser->select_path = ztd::strdup(use_url);
-                    ptk_file_browser_emit_open(file_browser,
-                                               dir.c_str(),
-                                               new_tab ? PtkOpenAction::PTK_OPEN_NEW_TAB
-                                                       : PtkOpenAction::PTK_OPEN_DIR);
-                    if (new_tab)
-                    {
-                        FMMainWindow* main_window_last = FM_MAIN_WINDOW(file_browser->main_window);
-                        file_browser =
-                            main_window_last
-                                ? PTK_FILE_BROWSER_REINTERPRET(
-                                      fm_main_window_get_current_file_browser(main_window_last))
-                                : nullptr;
-                        if (file_browser)
-                        {
-                            // select path in new browser
-                            file_browser->select_path = ztd::strdup(use_url);
-                            // usually this is not ready but try anyway
-                            ptk_file_browser_select_file(file_browser, use_url.c_str());
-                        }
-                    }
-                }
-            }
-            else
-            {
-                open_in_prog(dir.c_str());
-            }
-        }
-    }
-    else
-    {
-        std::string msg = fmt::format("Bookmark target '{}' is missing or invalid.", use_url);
-        xset_msg_dialog(file_browser ? GTK_WIDGET(file_browser) : nullptr,
-                        GTK_MESSAGE_ERROR,
-                        "Invalid Bookmark Target",
-                        GTK_BUTTONS_OK,
-                        msg);
-    }
 }
 
 static void
@@ -3131,42 +2821,6 @@ xset_custom_activate(GtkWidget* item, xset_t set)
             }
             break;
         case XSetCMD::BOOKMARK:
-            // Bookmark
-            if (!(set->z && set->z[0]))
-            {
-                xset_item_prop_dlg(xset_context, set, 0);
-                return;
-            }
-            char* specs;
-            specs = set->z;
-            while (specs && (specs[0] == ' ' || specs[0] == ';'))
-                specs++;
-            if (specs && std::filesystem::exists(specs))
-                open_spec(set->browser, specs, xset_get_b(XSetName::BOOK_NEWTAB));
-            else
-            {
-                // parse semi-colon separated list
-                char* sep;
-                char* url;
-                while (specs && specs[0])
-                {
-                    if ((sep = strchr(specs, ';')))
-                        sep[0] = '\0';
-                    url = ztd::strdup(specs);
-                    url = g_strstrip(url);
-                    if (url[0])
-                        open_spec(set->browser, url, true);
-                    free(url);
-                    if (sep)
-                    {
-                        sep[0] = ';';
-                        specs = sep + 1;
-                    }
-                    else
-                        specs = nullptr;
-                }
-            }
-            return;
         case XSetCMD::INVALID:
         default:
             return;
@@ -3948,22 +3602,6 @@ xset_design_job(GtkWidget* item, xset_t set)
                     break;
                 }
                 case XSetJob::BOOKMARK:
-                    if (set->browser)
-                        folder = (char*)ptk_file_browser_get_cwd(set->browser);
-                    else
-                        folder = nullptr;
-                    file = xset_file_dialog(parent,
-                                            GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-                                            "Choose Directory",
-                                            folder,
-                                            nullptr);
-                    if (!(file && file[0]))
-                    {
-                        free(file);
-                        break;
-                    }
-                    name = ztd::strdup(Glib::path_get_basename(file));
-                    break;
                 case XSetJob::KEY:
                 case XSetJob::ICON:
                 case XSetJob::LABEL:
@@ -3984,7 +3622,6 @@ xset_design_job(GtkWidget* item, xset_t set)
                 case XSetJob::SEP:
                 case XSetJob::ADD_TOOL:
                 case XSetJob::IMPORT_FILE:
-                case XSetJob::IMPORT_GTK:
                 case XSetJob::CUT:
                 case XSetJob::COPY:
                 case XSetJob::PASTE:
@@ -4039,14 +3676,6 @@ xset_design_job(GtkWidget* item, xset_t set)
                     newset->keep_terminal = false;
                     break;
                 case XSetJob::BOOKMARK:
-                    free(newset->x);
-                    newset->x = ztd::strdup("3"); // XSetCMD::BOOKMARK
-                    // unset these to save session space
-                    newset->task = false;
-                    newset->task_err = false;
-                    newset->task_out = false;
-                    newset->keep_terminal = false;
-                    break;
                 case XSetJob::KEY:
                 case XSetJob::ICON:
                 case XSetJob::LABEL:
@@ -4067,7 +3696,6 @@ xset_design_job(GtkWidget* item, xset_t set)
                 case XSetJob::SEP:
                 case XSetJob::ADD_TOOL:
                 case XSetJob::IMPORT_FILE:
-                case XSetJob::IMPORT_GTK:
                 case XSetJob::CUT:
                 case XSetJob::COPY:
                 case XSetJob::PASTE:
@@ -4098,7 +3726,6 @@ xset_design_job(GtkWidget* item, xset_t set)
                 default:
                     break;
             }
-            main_window_bookmark_changed(newset->name);
             break;
         case XSetJob::SUBMENU:
         case XSetJob::SUBMENU_BOOK:
@@ -4144,29 +3771,12 @@ xset_design_job(GtkWidget* item, xset_t set)
             childset = xset_custom_new();
             newset->child = ztd::strdup(childset->name);
             childset->parent = ztd::strdup(newset->name);
-            if (job == XSetJob::SUBMENU_BOOK || xset_is_main_bookmark(set))
-            {
-                // adding new submenu from a bookmark - fill with bookmark
-                folder = set->browser ? (char*)ptk_file_browser_get_cwd(set->browser)
-                                      : (char*)vfs_user_desktop_dir().c_str();
-                childset->menu_label = ztd::strdup(Glib::path_get_basename(folder));
-                childset->z = ztd::strdup(folder);
-                childset->x = ztd::strdup(INT(XSetCMD::BOOKMARK));
-                // unset these to save session space
-                childset->task = false;
-                childset->task_err = false;
-                childset->task_out = false;
-                childset->keep_terminal = false;
-            }
-            else
-                childset->menu_label = ztd::strdup("New _Command");
-            main_window_bookmark_changed(newset->name);
+            childset->menu_label = ztd::strdup("New _Command");
             break;
         case XSetJob::SEP:
             newset = xset_custom_new();
             newset->menu_style = XSetMenu::SEP;
             xset_custom_insert_after(set, newset);
-            main_window_bookmark_changed(newset->name);
             break;
         case XSetJob::ADD_TOOL:
             tool_type = XSetTool(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "tool_type")));
@@ -4226,25 +3836,6 @@ xset_design_job(GtkWidget* item, xset_t set)
                                 set);
             free(file);
             break;
-        case XSetJob::IMPORT_GTK:
-            // both GTK2 and GTK3 now use new location?
-            file2 = Glib::build_filename(vfs_user_config_dir(), "gtk-3.0", "bookmarks");
-            if (!std::filesystem::exists(file2))
-                file2 = Glib::build_filename(vfs_user_home_dir(), ".gtk-bookmarks");
-            msg = fmt::format("GTK bookmarks ({}) will be imported into the current or selected "
-                              "submenu.  Note that importing large numbers of bookmarks (eg more "
-                              "than 500) may impact performance.",
-                              file2);
-            if (xset_msg_dialog(parent,
-                                GTK_MESSAGE_QUESTION,
-                                "Import GTK Bookmarks",
-                                GTK_BUTTONS_OK_CANCEL,
-                                msg) != GTK_RESPONSE_OK)
-            {
-                break;
-            }
-            ptk_bookmark_view_import_gtk(file2.c_str(), set);
-            break;
         case XSetJob::CUT:
             set_clipboard = set;
             clipboard_is_cut = true;
@@ -4252,16 +3843,6 @@ xset_design_job(GtkWidget* item, xset_t set)
         case XSetJob::COPY:
             set_clipboard = set;
             clipboard_is_cut = false;
-
-            // if copy bookmark, put target on real clipboard
-            if (!set->lock && set->z && set->menu_style < XSetMenu::SUBMENU &&
-                XSetCMD(xset_get_int_set(set, XSetVar::X)) == XSetCMD::BOOKMARK)
-            {
-                clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-                gtk_clipboard_set_text(clip, set->z, -1);
-                clip = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
-                gtk_clipboard_set_text(clip, set->z, -1);
-            }
             break;
         case XSetJob::PASTE:
             if (!set_clipboard)
@@ -4282,24 +3863,12 @@ xset_design_job(GtkWidget* item, xset_t set)
                 xset_custom_remove(set_clipboard);
                 xset_custom_insert_after(set, set_clipboard);
 
-                main_window_bookmark_changed(set_clipboard->name);
                 set_clipboard = nullptr;
-
-                if (!set->lock)
-                {
-                    // update parent for bookmarks
-                    newset = set;
-                    while (newset->prev)
-                        newset = xset_get(newset->prev);
-                    if (newset->parent)
-                        main_window_bookmark_changed(newset->parent);
-                }
             }
             else
             {
                 newset = xset_custom_copy(set_clipboard, false, false);
                 xset_custom_insert_after(set, newset);
-                main_window_bookmark_changed(newset->name);
             }
             break;
         case XSetJob::REMOVE:
@@ -4314,7 +3883,7 @@ xset_design_job(GtkWidget* item, xset_t set)
             else
             {
                 if (!set->lock && set->z && set->menu_style < XSetMenu::SUBMENU &&
-                    (cmd_type == XSetCMD::BOOKMARK || cmd_type == XSetCMD::APP))
+                    cmd_type == XSetCMD::APP)
                     name = ztd::strdup(set->z);
                 else
                     name = ztd::strdup("( no name )");
@@ -4335,12 +3904,11 @@ xset_design_job(GtkWidget* item, xset_t set)
                 buttons = GTK_BUTTONS_OK_CANCEL;
             }
             free(name);
-            bool is_bookmark_or_app;
-            is_bookmark_or_app = !set->lock && set->menu_style < XSetMenu::SUBMENU &&
-                                 (cmd_type == XSetCMD::BOOKMARK || cmd_type == XSetCMD::APP) &&
-                                 set->tool <= XSetTool::CUSTOM;
-            if (set->menu_style != XSetMenu::SEP && app_settings.get_confirm() &&
-                !is_bookmark_or_app && set->tool <= XSetTool::CUSTOM)
+            bool is_app;
+            is_app = !set->lock && set->menu_style < XSetMenu::SUBMENU &&
+                     cmd_type == XSetCMD::APP && set->tool <= XSetTool::CUSTOM;
+            if (set->menu_style != XSetMenu::SEP && app_settings.get_confirm() && !is_app &&
+                set->tool <= XSetTool::CUSTOM)
             {
                 if (parent)
                     dlgparent = gtk_widget_get_toplevel(parent);
@@ -4363,10 +3931,6 @@ xset_design_job(GtkWidget* item, xset_t set)
             name = ztd::strdup(set->name);
             prog = ztd::strdup(set->parent);
 
-            if (job == XSetJob::REMOVE && set->parent /* maybe only item in sub */
-                && xset_is_main_bookmark(set))
-                job = XSetJob::REMOVE_BOOK;
-
             if (set->parent && (set_next = xset_is(set->parent)) &&
                 set_next->tool == XSetTool::CUSTOM && set_next->menu_style == XSetMenu::SUBMENU)
                 // this set is first item in custom toolbar submenu
@@ -4374,22 +3938,7 @@ xset_design_job(GtkWidget* item, xset_t set)
 
             childset = xset_custom_remove(set);
 
-            if (childset && job == XSetJob::REMOVE_BOOK)
-            {
-                // added a new default item to submenu from a bookmark
-                folder = set->browser ? (char*)ptk_file_browser_get_cwd(set->browser)
-                                      : (char*)vfs_user_desktop_dir().c_str();
-                free(childset->menu_label);
-                childset->menu_label = ztd::strdup(Glib::path_get_basename(folder));
-                childset->z = ztd::strdup(folder);
-                childset->x = ztd::strdup(INT(XSetCMD::BOOKMARK));
-                // unset these to save session space
-                childset->task = false;
-                childset->task_err = false;
-                childset->task_out = false;
-                childset->keep_terminal = false;
-            }
-            else if (set->tool != XSetTool::NOT)
+            if (set->tool != XSetTool::NOT)
             {
                 update_toolbars = true;
                 free(name);
@@ -4406,11 +3955,9 @@ xset_design_job(GtkWidget* item, xset_t set)
             set = nullptr;
 
             if (prog)
-                main_window_bookmark_changed(prog);
-            else if (name)
-                main_window_bookmark_changed(name);
-            free(name);
-            free(prog);
+                free(prog);
+            if (name)
+                free(name);
             break;
         case XSetJob::EXPORT:
             if ((!set->lock || set->xset_name == XSetName::MAIN_BOOK) &&
@@ -4599,15 +4146,6 @@ xset_design_job(GtkWidget* item, xset_t set)
             break;
     }
 
-    if (set && (!set->lock || set->xset_name == XSetName::MAIN_BOOK))
-    {
-        main_window_bookmark_changed(set->name);
-        if (set->parent && (set_next = xset_is(set->parent)) &&
-            set_next->tool == XSetTool::CUSTOM && set_next->menu_style == XSetMenu::SUBMENU)
-            // this set is first item in custom toolbar submenu
-            update_toolbars = true;
-    }
-
     if ((set && !set->lock && set->tool != XSetTool::NOT) || update_toolbars)
         main_window_rebuild_all_toolbars(set ? set->browser : nullptr);
 
@@ -4628,9 +4166,13 @@ xset_job_is_valid(xset_t set, XSetJob job)
     if (set->plugin)
     {
         if (!set->plug_dir)
+        {
             return false;
+        }
         if (!set->plugin_top)
+        {
             no_remove = true;
+        }
     }
 
     // control open_all item
@@ -4696,7 +4238,6 @@ xset_job_is_valid(xset_t set, XSetJob job)
         case XSetJob::SEP:
         case XSetJob::ADD_TOOL:
         case XSetJob::IMPORT_FILE:
-        case XSetJob::IMPORT_GTK:
         case XSetJob::REMOVE_BOOK:
         case XSetJob::NORMAL:
         case XSetJob::CHECK:
@@ -4867,23 +4408,21 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, unsigned 
     // book_insert is a bookmark set to be used for Paste, etc
     insert_set = book_insert ? book_insert : set;
     // to signal this is a bookmark, pass book_insert = set
-    bool is_bookmark = !!book_insert;
-    bool show_keys = !is_bookmark && set->tool == XSetTool::NOT;
-
-    // if (set->plugin && set->shared_key)
-    //     mset = xset_get_plugin_mirror(set);
-    // else
-    //     mset = set;
+    const bool show_keys = set->tool == XSetTool::NOT;
 
     if (set->plugin)
     {
         if (set->plug_dir)
         {
             if (!set->plugin_top)
+            {
                 no_remove = true;
+            }
         }
         else
+        {
             no_remove = true;
+        }
     }
 
     if (!set_clipboard)
@@ -4941,10 +4480,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, unsigned 
                                    GTK_ACCEL_VISIBLE);
 
     // Remove
-    newitem = xset_design_additem(design_menu,
-                                  "_Remove",
-                                  is_bookmark ? XSetJob::REMOVE_BOOK : XSetJob::REMOVE,
-                                  set);
+    newitem = xset_design_additem(design_menu, "_Remove", XSetJob::REMOVE, set);
     gtk_widget_set_sensitive(newitem, !set->lock && !no_remove);
     if (show_keys)
         gtk_widget_add_accelerator(newitem,
@@ -4987,10 +4523,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, unsigned 
                                    GTK_ACCEL_VISIBLE);
 
     // New > Submenu
-    newitem = xset_design_additem(submenu,
-                                  "Sub_menu",
-                                  is_bookmark ? XSetJob::SUBMENU_BOOK : XSetJob::SUBMENU,
-                                  insert_set);
+    newitem = xset_design_additem(submenu, "Sub_menu", XSetJob::SUBMENU, insert_set);
 
     // New > Separator
     newitem = xset_design_additem(submenu, "S_eparator", XSetJob::SEP, insert_set);
@@ -5008,8 +4541,6 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, unsigned 
                      insert_set);
 
     newitem = xset_design_additem(submenu2, "_File", XSetJob::IMPORT_FILE, insert_set);
-    if (is_bookmark)
-        newitem = xset_design_additem(submenu2, "_GTK Bookmarks", XSetJob::IMPORT_GTK, set);
 
     if (insert_set->tool != XSetTool::NOT)
     {
@@ -5033,10 +4564,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, unsigned 
     gtk_container_add(GTK_CONTAINER(design_menu), gtk_separator_menu_item_new());
 
     // Help
-    newitem = xset_design_additem(design_menu,
-                                  "_Help",
-                                  is_bookmark ? XSetJob::HELP_BOOK : XSetJob::HELP,
-                                  set);
+    newitem = xset_design_additem(design_menu, "_Help", XSetJob::HELP, set);
     gtk_widget_set_sensitive(newitem, !set->lock || set->line);
     if (show_keys)
         gtk_widget_add_accelerator(newitem,
@@ -6201,14 +5729,7 @@ xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventButton* event
             update_views_all_windows(nullptr, file_browser);
             break;
         case XSetTool::BOOKMARKS:
-            set2 = xset_get_panel_mode(p, XSetPanel::SHOW_BOOK, mode);
-            set2->b = set2->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_UNSET : XSetB::XSET_B_TRUE;
             update_views_all_windows(nullptr, file_browser);
-            if (file_browser->side_book)
-            {
-                ptk_bookmark_view_chdir(GTK_TREE_VIEW(file_browser->side_book), file_browser, true);
-                gtk_widget_grab_focus(GTK_WIDGET(file_browser->side_book));
-            }
             break;
         case XSetTool::TREE:
             set2 = xset_get_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode);
@@ -6614,13 +6135,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 // Application
                 new_menu_label = xset_custom_get_app_name_icon(set, &pixbuf, real_icon_size);
             }
-            else if (!set->lock && cmd_type == XSetCMD::BOOKMARK)
-            {
-                // Bookmark
-                pixbuf = xset_custom_get_bookmark_icon(set, real_icon_size);
-                if (!(set->menu_label && set->menu_label[0]))
-                    new_menu_label = ztd::strdup(set->z);
-            }
 
             if (pixbuf)
             {
@@ -6746,11 +6260,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                             xset_custom_get_app_name_icon(set_child, &pixbuf, real_icon_size);
                         break;
                     case XSetCMD::BOOKMARK:
-                        // Bookmark
-                        pixbuf = xset_custom_get_bookmark_icon(set_child, real_icon_size);
-                        if (!(set_child->menu_label && set_child->menu_label[0]))
-                            menu_label = set_child->z;
-                        break;
                     case XSetCMD::SCRIPT:
                     case XSetCMD::LINE:
                     case XSetCMD::INVALID:
@@ -7376,10 +6885,6 @@ xset_defaults()
     set = xset_set(XSetName::BOOK_MENU_ICON, XSetVar::MENU_LABEL, "Sub_menu Icon");
     set->menu_style = XSetMenu::ICON;
     // do not set a default icon for book_menu_icon
-
-    set = xset_set(XSetName::BOOK_SHOW, XSetVar::MENU_LABEL, "_Show Bookmarks");
-    set->menu_style = XSetMenu::CHECK;
-    xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_book");
 
     set = xset_set(XSetName::BOOK_ADD, XSetVar::MENU_LABEL, "New _Bookmark");
     xset_set_var(set, XSetVar::ICN, "gtk-jump-to");
@@ -8559,12 +8064,6 @@ xset_defaults()
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_dirtree");
-
-        set = xset_set_panel(p, XSetPanel::SHOW_BOOK, XSetVar::MENU_LABEL, "_Bookmarks");
-        set->menu_style = XSetMenu::CHECK;
-        set->b = XSetB::XSET_B_UNSET;
-        if (p != 1)
-            xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_book");
 
         set = xset_set_panel(p, XSetPanel::SHOW_SIDEBAR, XSetVar::MENU_LABEL, "_Side Toolbar");
         set->menu_style = XSetMenu::CHECK;

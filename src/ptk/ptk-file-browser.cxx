@@ -41,6 +41,7 @@
 #include "ptk/ptk-utils.hxx"
 #include "ptk/ptk-file-misc.hxx"
 
+#include "ptk/ptk-bookmark-view.hxx"
 #include "ptk/ptk-location-view.hxx"
 #include "ptk/ptk-dir-tree-view.hxx"
 #include "ptk/ptk-dir-tree.hxx"
@@ -677,6 +678,7 @@ ptk_file_browser_add_toolbar_widget(void* set_ptr, GtkWidget* widget)
             x = 3;
             break;
         case XSetTool::BOOKMARKS:
+            // Deprecated - bookmark
             x = 4;
             break;
         case XSetTool::TREE:
@@ -753,7 +755,7 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
     }
 
     // builtin tool
-    bool b;
+    bool b = false;
 
     switch (tool_type)
     {
@@ -779,7 +781,6 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
             break;
         case XSetTool::BOOKMARKS:
             x = 4;
-            b = !!file_browser->side_book;
             break;
         case XSetTool::TREE:
             x = 5;
@@ -832,7 +833,6 @@ enable_toolbar(PtkFileBrowser* file_browser)
     ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::FWD);
     ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::UP);
     ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::DEVICES);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::BOOKMARKS);
     ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::TREE);
     ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::SHOW_HIDDEN);
     ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::SHOW_THUMB);
@@ -1126,7 +1126,6 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
     file_browser->side_vpane_top = gtk_paned_new(GTK_ORIENTATION_VERTICAL);
     file_browser->side_vpane_bottom = gtk_paned_new(GTK_ORIENTATION_VERTICAL);
     file_browser->side_dir_scroll = gtk_scrolled_window_new(nullptr, nullptr);
-    file_browser->side_book_scroll = gtk_scrolled_window_new(nullptr, nullptr);
     file_browser->side_dev_scroll = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_box_pack_start(GTK_BOX(file_browser->side_vbox),
                        file_browser->side_toolbox,
@@ -1146,10 +1145,6 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
     gtk_paned_pack2(GTK_PANED(file_browser->side_vpane_top),
                     file_browser->side_vpane_bottom,
                     true,
-                    false);
-    gtk_paned_pack1(GTK_PANED(file_browser->side_vpane_bottom),
-                    file_browser->side_book_scroll,
-                    false,
                     false);
     gtk_paned_pack2(GTK_PANED(file_browser->side_vpane_bottom),
                     file_browser->side_dir_scroll,
@@ -1199,9 +1194,6 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
                                    GTK_POLICY_AUTOMATIC,
                                    GTK_POLICY_ALWAYS);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(file_browser->side_dir_scroll),
-                                   GTK_POLICY_AUTOMATIC,
-                                   GTK_POLICY_AUTOMATIC);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(file_browser->side_book_scroll),
                                    GTK_POLICY_AUTOMATIC,
                                    GTK_POLICY_AUTOMATIC);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(file_browser->side_dev_scroll),
@@ -1441,50 +1433,6 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
         file_browser->side_dir = nullptr;
     }
 
-    if (xset_get_b_panel_mode(p, XSetPanel::SHOW_BOOK, mode))
-    {
-        if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
-            (!file_browser->side_book_scroll ||
-             !gtk_widget_get_visible(file_browser->side_book_scroll)))
-            main_window_event(main_window,
-                              event_handler.pnl_show,
-                              XSetName::EVT_PNL_SHOW,
-                              0,
-                              0,
-                              "bookmarks",
-                              0,
-                              0,
-                              0,
-                              true);
-        if (!file_browser->side_book)
-        {
-            file_browser->side_book = ptk_bookmark_view_new(file_browser);
-            gtk_container_add(GTK_CONTAINER(file_browser->side_book_scroll),
-                              file_browser->side_book);
-        }
-        gtk_widget_show_all(file_browser->side_book_scroll);
-    }
-    else
-    {
-        if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
-            file_browser->side_book_scroll &&
-            gtk_widget_get_visible(file_browser->side_book_scroll))
-            main_window_event(main_window,
-                              event_handler.pnl_show,
-                              XSetName::EVT_PNL_SHOW,
-                              0,
-                              0,
-                              "bookmarks",
-                              0,
-                              0,
-                              0,
-                              false);
-        gtk_widget_hide(file_browser->side_book_scroll);
-        if (file_browser->side_book)
-            gtk_widget_destroy(file_browser->side_book);
-        file_browser->side_book = nullptr;
-    }
-
     if (xset_get_b_panel_mode(p, XSetPanel::SHOW_DEVMON, mode))
     {
         if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
@@ -1527,15 +1475,13 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
         file_browser->side_dev = nullptr;
     }
 
-    if (xset_get_b_panel_mode(p, XSetPanel::SHOW_BOOK, mode) ||
-        xset_get_b_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode))
+    if (xset_get_b_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode))
         gtk_widget_show(file_browser->side_vpane_bottom);
     else
         gtk_widget_hide(file_browser->side_vpane_bottom);
 
     if (xset_get_b_panel_mode(p, XSetPanel::SHOW_DEVMON, mode) ||
-        xset_get_b_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode) ||
-        xset_get_b_panel_mode(p, XSetPanel::SHOW_BOOK, mode))
+        xset_get_b_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode))
         gtk_widget_show(file_browser->side_vbox);
     else
         gtk_widget_hide(file_browser->side_vbox);
@@ -1546,7 +1492,6 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     {
         // toggle sidepane toolbar buttons
         ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::DEVICES);
-        ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::BOOKMARKS);
         ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::TREE);
     }
 
@@ -1704,7 +1649,6 @@ ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
     gtk_container_add(GTK_CONTAINER(file_browser->folder_view_scroll), file_browser->folder_view);
 
     file_browser->side_dir = nullptr;
-    file_browser->side_book = nullptr;
     file_browser->side_dev = nullptr;
 
     file_browser->select_path = nullptr;
@@ -1932,7 +1876,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
         }
 
         // convert ~ to /home/user for smarter bookmarks
-        if (ztd::startswith(path, "~/") || !g_strcmp0(path, "~"))
+        if (ztd::startswith(path, "~/") || ztd::startswith(path, "~"))
         {
             msg = fmt::format("{}{}", vfs_user_home_dir(), path + 1);
             path = ztd::strdup(msg);
@@ -2351,8 +2295,6 @@ on_dir_file_listed(VFSDir* dir, bool is_cancelled, PtkFileBrowser* file_browser)
     if (file_browser->side_dev)
         ptk_location_view_chdir(GTK_TREE_VIEW(file_browser->side_dev),
                                 ptk_file_browser_get_cwd(file_browser));
-    if (file_browser->side_book)
-        ptk_bookmark_view_chdir(GTK_TREE_VIEW(file_browser->side_book), file_browser, true);
 
     // FIXME:  This is already done in update_model, but is there any better way to
     //            reduce unnecessary code?
@@ -5758,12 +5700,8 @@ ptk_file_browser_focus(GtkMenuItem* item, PtkFileBrowser* file_browser, int job2
             widget = file_browser->side_dir;
             break;
         case 2:
-            if (!xset_get_b_panel_mode(p, XSetPanel::SHOW_BOOK, mode))
-            {
-                xset_set_b_panel_mode(p, XSetPanel::SHOW_BOOK, mode, true);
-                update_views_all_windows(nullptr, file_browser);
-            }
-            widget = file_browser->side_book;
+            // Deprecated - bookmark
+            widget = nullptr;
             break;
         case 3:
             if (!xset_get_b_panel_mode(p, XSetPanel::SHOW_DEVMON, mode))
@@ -6029,9 +5967,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
 
     if (ztd::startswith(set->name, "book_"))
     {
-        if (set->xset_name == XSetName::BOOK_ICON || set->xset_name == XSetName::BOOK_MENU_ICON)
-            ptk_bookmark_view_update_icons(nullptr, browser);
-        else if (set->xset_name == XSetName::BOOK_ADD)
+        if (set->xset_name == XSetName::BOOK_ADD)
         {
             const char* text = browser->path_bar && gtk_widget_has_focus(browser->path_bar)
                                    ? gtk_entry_get_text(GTK_ENTRY(browser->path_bar))
@@ -6042,8 +5978,6 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
             else
                 ptk_bookmark_view_add_bookmark(nullptr, browser, nullptr);
         }
-        else if (set->xset_name == XSetName::BOOK_OPEN && browser->side_book)
-            ptk_bookmark_view_on_open_reverse(nullptr, browser);
     }
     else if (ztd::startswith(set->name, "go_"))
     {
@@ -6160,11 +6094,6 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
                 set2 = xset_get_panel_mode(browser->mypanel, xname, mode);
                 set2->b = set2->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_UNSET : XSetB::XSET_B_TRUE;
                 update_views_all_windows(nullptr, browser);
-                if (ztd::same(xname, "show_book") && browser->side_book)
-                {
-                    ptk_bookmark_view_chdir(GTK_TREE_VIEW(browser->side_book), browser, true);
-                    gtk_widget_grab_focus(GTK_WIDGET(browser->side_book));
-                }
             }
             else if (ztd::same(xname, "list_detailed")) // shared key
                 on_popup_list_detailed(nullptr, browser);

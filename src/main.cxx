@@ -56,6 +56,8 @@
 #include "utils.hxx"
 #include "settings.hxx"
 
+#include "bookmarks.hxx"
+
 static bool folder_initialized = false;
 static bool daemon_initialized = false;
 
@@ -458,6 +460,9 @@ main(int argc, char* argv[])
     // load config file
     load_settings();
 
+    // load user bookmarks
+    load_bookmarks();
+
     // start autosave thread
     autosave_init(autosave_settings);
 
@@ -469,6 +474,7 @@ main(int argc, char* argv[])
     std::atexit(vfs_mime_type_clean);
     std::atexit(vfs_volume_finalize);
     std::atexit(single_instance_finalize);
+    std::atexit(save_bookmarks);
 
     main_window_event(nullptr, nullptr, XSetName::EVT_START, 0, 0, nullptr, 0, 0, 0, false);
 

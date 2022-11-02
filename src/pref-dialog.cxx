@@ -237,8 +237,6 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                             file_browser->side_dir = nullptr;
                         }
                         ptk_file_browser_update_views(nullptr, file_browser);
-                        if (file_browser->side_book)
-                            ptk_bookmark_view_update_icons(nullptr, file_browser);
                     }
                 }
             }

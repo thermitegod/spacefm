@@ -268,6 +268,7 @@ giomm_dep = dependency('giomm-2.68', required : true)
 
 sources = [
   'src/autosave.cxx',
+  'src/bookmarks.cxx',
   'src/find-files.cxx',
   'src/item-prop.cxx',
   'src/main.cxx',
@@ -293,6 +294,7 @@ sources = [
   'src/mime-type/mime-type.cxx',
 
   'src/ptk/ptk-app-chooser.cxx',
+  'src/ptk/ptk-bookmark-view.cxx',
   'src/ptk/ptk-clipboard.cxx',
   'src/ptk/ptk-dir-tree.cxx',
   'src/ptk/ptk-dir-tree-view.cxx',

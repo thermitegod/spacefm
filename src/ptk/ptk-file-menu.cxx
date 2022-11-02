@@ -39,6 +39,7 @@
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dir.hxx"
 
+#include "ptk/ptk-bookmark-view.hxx"
 #include "ptk/ptk-file-misc.hxx"
 #include "ptk/ptk-file-archiver.hxx"
 #include "ptk/ptk-handler.hxx"
@@ -354,14 +355,13 @@ on_popup_toggle_view(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
     const panel_t p = file_browser->mypanel;
     const MainWindowPanel mode = main_window->panel_context.at(p);
 
-    xset_t set = xset_get_panel_mode(p, XSetPanel::SHOW_TOOLBOX, mode);
+    xset_t set;
+    set = xset_get_panel_mode(p, XSetPanel::SHOW_TOOLBOX, mode);
     set->b = xset_get_panel(p, XSetPanel::SHOW_TOOLBOX)->b;
     set = xset_get_panel_mode(p, XSetPanel::SHOW_DEVMON, mode);
     set->b = xset_get_panel(p, XSetPanel::SHOW_DEVMON)->b;
     set = xset_get_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode);
     set->b = xset_get_panel(p, XSetPanel::SHOW_DIRTREE)->b;
-    set = xset_get_panel_mode(p, XSetPanel::SHOW_BOOK, mode);
-    set->b = xset_get_panel(p, XSetPanel::SHOW_BOOK)->b;
     set = xset_get_panel_mode(p, XSetPanel::SHOW_SIDEBAR, mode);
     set->b = xset_get_panel(p, XSetPanel::SHOW_SIDEBAR)->b;
 
@@ -435,10 +435,6 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
         show_side = true;
     set = xset_set_cb_panel(p, XSetPanel::SHOW_DIRTREE, (GFunc)on_popup_toggle_view, browser);
     set->b = xset_get_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode)->b;
-    if (set->b == XSetB::XSET_B_TRUE)
-        show_side = true;
-    set = xset_set_cb_panel(p, XSetPanel::SHOW_BOOK, (GFunc)on_popup_toggle_view, browser);
-    set->b = xset_get_panel_mode(p, XSetPanel::SHOW_BOOK, mode)->b;
     if (set->b == XSetB::XSET_B_TRUE)
         show_side = true;
     set = xset_set_cb_panel(p, XSetPanel::SHOW_SIDEBAR, (GFunc)on_popup_toggle_view, browser);
@@ -613,9 +609,8 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     set = xset_get(XSetName::CON_VIEW);
     set->disable = !browser->file_list;
     desc = fmt::format("panel{}_show_toolbox panel{}_show_sidebar panel{}_show_devmon "
-                       "panel{}_show_book panel{}_show_dirtree separator panel{}_show_hidden "
+                       "panel{}_show_dirtree separator panel{}_show_hidden "
                        "view_list_style view_sortby view_columns separator view_refresh",
-                       p,
                        p,
                        p,
                        p,

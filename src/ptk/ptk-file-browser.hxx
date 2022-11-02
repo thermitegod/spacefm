@@ -130,8 +130,6 @@ struct PtkFileBrowser
     GtkWidget* side_vpane_bottom;
     GtkWidget* side_dir_scroll;
     GtkWidget* side_dev_scroll;
-    GtkWidget* side_book_scroll;
-    GtkWidget* side_book;
     GtkWidget* side_dir;
     GtkWidget* side_dev;
     GtkWidget* status_bar;
@@ -142,7 +140,6 @@ struct PtkFileBrowser
     GtkWidget* side_toolbar;
     GSList* toolbar_widgets[10];
 
-    bool bookmark_button_press : 1;
     GtkTreeIter book_iter_inserted;
     char* select_path;
     char* status_bar_custom;

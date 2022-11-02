@@ -1406,18 +1406,18 @@ replace_item_props(ContextData* ctxt)
         rset->tool <= XSetTool::CUSTOM)
     {
         // custom bookmark, app, or command
-        bool is_bookmark_or_app = false;
+        bool is_app = false;
         int item_type = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->item_type));
 
         switch (item_type)
         {
             case ItemPropItemType::ITEM_TYPE_BOOKMARK:
                 x = XSetCMD::BOOKMARK;
-                is_bookmark_or_app = true;
+                is_app = true;
                 break;
             case ItemPropItemType::ITEM_TYPE_APP:
                 x = XSetCMD::APP;
-                is_bookmark_or_app = true;
+                is_app = true;
                 break;
             case ItemPropItemType::ITEM_TYPE_COMMAND:
                 if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_line)))
@@ -1483,21 +1483,19 @@ replace_item_props(ContextData* ctxt)
             rset->line = ztd::strdup(ctxt->temp_cmd_line);
 
         // run options
-        mset->in_terminal = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_terminal)) &&
-                            !is_bookmark_or_app;
+        mset->in_terminal =
+            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_terminal)) && !is_app;
         mset->keep_terminal =
-            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_keep_term)) &&
-            !is_bookmark_or_app;
-        mset->task =
-            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_task)) && !is_bookmark_or_app;
-        mset->task_pop = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_task_pop)) &&
-                         !is_bookmark_or_app;
-        mset->task_err = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_task_err)) &&
-                         !is_bookmark_or_app;
-        mset->task_out = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_task_out)) &&
-                         !is_bookmark_or_app;
+            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_keep_term)) && !is_app;
+        mset->task = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_task)) && !is_app;
+        mset->task_pop =
+            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_task_pop)) && !is_app;
+        mset->task_err =
+            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_task_err)) && !is_app;
+        mset->task_out =
+            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_task_out)) && !is_app;
         mset->scroll_lock =
-            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_scroll)) || is_bookmark_or_app;
+            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_scroll)) || is_app;
 
         // Opener
         if ((item_type == ItemPropItemType::ITEM_TYPE_COMMAND ||

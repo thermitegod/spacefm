@@ -119,7 +119,6 @@ xset_t xset_custom_new();
 void xset_custom_delete(xset_t set, bool delete_next);
 xset_t xset_custom_remove(xset_t set);
 char* xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, int icon_size);
-GdkPixbuf* xset_custom_get_bookmark_icon(xset_t set, int icon_size);
 void xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set);
 
 GtkWidget* xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert,

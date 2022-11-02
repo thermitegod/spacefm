@@ -107,7 +107,6 @@ enum class XSetJob
     SEP,
     ADD_TOOL,
     IMPORT_FILE,
-    IMPORT_GTK,
     CUT,
     COPY,
     PASTE,

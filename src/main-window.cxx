@@ -46,6 +46,7 @@
 
 #include "settings/app.hxx"
 
+#include "bookmarks.hxx"
 #include "settings.hxx"
 #include "item-prop.hxx"
 #include "find-files.hxx"
@@ -60,6 +61,7 @@
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-file-task.hxx"
 
+#include "ptk/ptk-bookmark-view.hxx"
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-handler.hxx"
 
@@ -653,28 +655,6 @@ main_design_mode(GtkMenuItem* menuitem, FMMainWindow* main_window)
 }
 
 void
-main_window_bookmark_changed(const char* changed_set_name)
-{
-    for (FMMainWindow* window: all_windows)
-    {
-        for (panel_t p: PANELS)
-        {
-            GtkWidget* notebook = window->panel[p - 1];
-            int num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
-            for (int i = 0; i < num_pages; ++i)
-            {
-                PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
-                    gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), i));
-                if (a_browser->side_book)
-                    ptk_bookmark_view_xset_changed(GTK_TREE_VIEW(a_browser->side_book),
-                                                   a_browser,
-                                                   changed_set_name);
-            }
-        }
-    }
-}
-
-void
 main_window_refresh_all_tabs_matching(const char* path)
 {
     (void)path;
@@ -711,28 +691,6 @@ main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser)
         }
     }
     autosave_request_add();
-}
-
-void
-main_window_update_all_bookmark_views()
-{
-    // do all windows all panels all tabs
-    for (FMMainWindow* window: all_windows)
-    {
-        for (panel_t p: PANELS)
-        {
-            GtkWidget* notebook = window->panel[p - 1];
-            int pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
-            for (int cur_tabx = 0; cur_tabx < pages; ++cur_tabx)
-            {
-                PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
-                    gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), cur_tabx));
-                if (a_browser->side_book)
-                    ptk_bookmark_view_update_icons(nullptr, a_browser);
-            }
-        }
-    }
-    main_window_rebuild_all_toolbars(nullptr); // toolbar uses bookmark icon
 }
 
 void
@@ -1042,10 +1000,6 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                                       mode,
                                       xset_get_b_panel(p, XSetPanel::SHOW_DIRTREE));
                 xset_set_b_panel_mode(p,
-                                      XSetPanel::SHOW_BOOK,
-                                      mode,
-                                      xset_get_b_panel(p, XSetPanel::SHOW_BOOK));
-                xset_set_b_panel_mode(p,
                                       XSetPanel::SHOW_SIDEBAR,
                                       mode,
                                       xset_get_b_panel(p, XSetPanel::SHOW_SIDEBAR));
@@ -1319,27 +1273,54 @@ on_menu_bar_event(GtkWidget* widget, GdkEvent* event, FMMainWindow* main_window)
     return false;
 }
 
-static void
-on_bookmarks_show(GtkMenuItem* item, FMMainWindow* main_window)
+static bool
+bookmark_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
 {
-    (void)item;
-    PtkFileBrowser* file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
-    if (!file_browser)
-        return;
+    (void)user_data;
 
-    const MainWindowPanel mode = main_window->panel_context.at(file_browser->mypanel);
+    GtkWidget* item = widget;
 
-    xset_set_b_panel_mode(file_browser->mypanel,
-                          XSetPanel::SHOW_BOOK,
-                          mode,
-                          !file_browser->side_book);
-    update_views_all_windows(nullptr, file_browser);
-    if (file_browser->side_book)
+    if (item)
     {
-        ptk_bookmark_view_chdir(GTK_TREE_VIEW(file_browser->side_book), file_browser, true);
-        gtk_widget_grab_focus(GTK_WIDGET(file_browser->side_book));
+        const std::string file_path =
+            static_cast<const char*>(g_object_get_data(G_OBJECT(item), "path"));
+
+        if (file_path.empty())
+            return false;
+
+        PtkFileBrowser* file_browser =
+            static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(item), "file_browser"));
+        FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
+
+        fm_main_window_add_new_tab(main_window, file_path.c_str());
+
+        return true;
     }
+
+    return false;
+}
+
+static GtkWidget*
+bookmark_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu)
+{
+    GtkWidget* item = nullptr;
+
+    // Add All Bookmarks
+    for (auto [book_path, book_name] : get_all_bookmarks())
+    {
+        item = gtk_menu_item_new_with_label(book_path.c_str());
+
+        g_object_set_data(G_OBJECT(item), "file_browser", file_browser);
+        g_object_set_data(G_OBJECT(item), "path", ztd::strdup(book_path));
+        g_object_set_data(G_OBJECT(item), "name", ztd::strdup(book_name));
+
+        g_signal_connect(item, "activate", G_CALLBACK(bookmark_menu_keypress), nullptr);
+
+        gtk_widget_set_sensitive(item, true);
+        gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+    }
+
+    return item;
 }
 
 static void
@@ -1465,19 +1446,13 @@ rebuild_menus(FMMainWindow* main_window)
 
     // Bookmarks
     newmenu = gtk_menu_new();
-    set = xset_set_cb(XSetName::BOOK_SHOW, (GFunc)on_bookmarks_show, main_window);
-    set->b = file_browser->side_book ? XSetB::XSET_B_TRUE : XSetB::XSET_B_UNSET;
-    xset_add_menuitem(file_browser, newmenu, accel_group, set);
     set = xset_set_cb(XSetName::BOOK_ADD, (GFunc)ptk_bookmark_view_add_bookmark, file_browser);
     set->disable = false;
     xset_add_menuitem(file_browser, newmenu, accel_group, set);
     gtk_menu_shell_append(GTK_MENU_SHELL(newmenu), gtk_separator_menu_item_new());
-    xset_add_menuitem(file_browser,
-                      newmenu,
-                      accel_group,
-                      ptk_bookmark_view_get_first_bookmark(nullptr));
+    bookmark_add_menuitem(file_browser, newmenu);
     gtk_widget_show_all(GTK_WIDGET(newmenu));
-    g_signal_connect(newmenu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
+    g_signal_connect(newmenu, "key-press-event", G_CALLBACK(bookmark_menu_keypress), nullptr);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window->book_menu_item), newmenu);
 
     // Plugins
@@ -1499,7 +1474,9 @@ rebuild_menus(FMMainWindow* main_window)
         set->child = ztd::strdup(child_set->name);
     }
     else
+    {
         child_set = xset_get(set->child);
+    }
     xset_add_menuitem(file_browser, newmenu, accel_group, child_set);
     gtk_widget_show_all(GTK_WIDGET(newmenu));
     g_signal_connect(newmenu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
@@ -3831,13 +3808,6 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
     if (!GTK_IS_WIDGET(file_browser))
         return;
 
-    if (file_browser->side_book)
-    {
-        if (!GTK_IS_WIDGET(file_browser->side_book))
-            return;
-        c->var[ItemPropContext::CONTEXT_BOOKMARK] =
-            ztd::strdup(ptk_bookmark_view_get_selected_dir(GTK_TREE_VIEW(file_browser->side_book)));
-    }
     if (!c->var[ItemPropContext::CONTEXT_BOOKMARK])
         c->var[ItemPropContext::CONTEXT_BOOKMARK] = ztd::strdup("");
 
@@ -4124,20 +4094,6 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
             }
 
             vfs_file_info_list_free(sel_files);
-        }
-
-        // bookmark
-        if (a_browser->side_book)
-        {
-            const char* sel_path =
-                ptk_bookmark_view_get_selected_dir(GTK_TREE_VIEW(a_browser->side_book));
-            if (sel_path)
-            {
-                esc_path = bash_quote(sel_path);
-                if (file_browser == a_browser)
-                    buf.append(fmt::format("fm_bookmark={}\n", esc_path));
-                buf.append(fmt::format("fm_panel{}_bookmark={}\n", p, esc_path));
-            }
         }
 
         // device
@@ -5917,8 +5873,6 @@ main_window_socket_command(char* argv[], std::string& reply)
                     widget = file_browser->folder_view;
                 else if (ztd::same(argv[i + 1], "devices"))
                     widget = file_browser->side_dev;
-                else if (ztd::same(argv[i + 1], "bookmarks"))
-                    widget = file_browser->side_book;
                 else if (ztd::same(argv[i + 1], "dirtree"))
                     widget = file_browser->side_dir;
                 else if (ztd::same(argv[i + 1], "pathbar"))
@@ -5976,12 +5930,6 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (ztd::startswith(socket_property, "devices_"))
             {
                 xset_panel_var = XSetPanel::SHOW_DEVMON;
-                use_mode = true;
-                valid = true;
-            }
-            else if (ztd::startswith(socket_property, "bookmarks_"))
-            {
-                xset_panel_var = XSetPanel::SHOW_BOOK;
                 use_mode = true;
                 valid = true;
             }
@@ -6387,8 +6335,6 @@ main_window_socket_command(char* argv[], std::string& reply)
                 str = "filelist";
             else if (file_browser->side_dev && gtk_widget_is_focus(file_browser->side_dev))
                 str = "devices";
-            else if (file_browser->side_book && gtk_widget_is_focus(file_browser->side_book))
-                str = "bookmarks";
             else if (file_browser->side_dir && gtk_widget_is_focus(file_browser->side_dir))
                 str = "dirtree";
             else if (file_browser->path_bar && gtk_widget_is_focus(file_browser->path_bar))
@@ -6420,12 +6366,6 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (ztd::startswith(socket_property, "devices_"))
             {
                 xset_panel_var = XSetPanel::SHOW_DEVMON;
-                use_mode = true;
-                valid = true;
-            }
-            else if (ztd::startswith(socket_property, "bookmarks_"))
-            {
-                xset_panel_var = XSetPanel::SHOW_BOOK;
                 use_mode = true;
                 valid = true;
             }

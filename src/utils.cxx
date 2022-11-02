@@ -74,7 +74,6 @@ replace_line_subs(const std::string& line) noexcept
     cmd = ztd::replace(cmd, "%l", "\"${fm_device_label}\"");
     cmd = ztd::replace(cmd, "%m", "\"${fm_device_mount_point}\"");
     cmd = ztd::replace(cmd, "%y", "\"${fm_device_fstype}\"");
-    cmd = ztd::replace(cmd, "%b", "\"${fm_bookmark}\"");
     cmd = ztd::replace(cmd, "%t", "\"${fm_task_pwd}\"");
     cmd = ztd::replace(cmd, "%p", "\"${fm_task_pid}\"");
     cmd = ztd::replace(cmd, "%a", "\"${fm_value}\"");
