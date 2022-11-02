@@ -105,7 +105,6 @@ static void xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventB
 static xset_t xset_new_builtin_toolitem(XSetTool tool_type);
 static void xset_custom_insert_after(xset_t target, xset_t set);
 static xset_t xset_custom_copy(xset_t set, bool copy_next, bool delete_set);
-static XSetVar xset_set_var_encode(const std::string& var);
 static void xset_remove(xset_t set);
 
 static const char* enter_command_line =
@@ -335,7 +334,7 @@ xset_parse(std::string& line)
     XSetVar var;
     try
     {
-        var = xset_set_var_encode(token_var);
+        var = xset_get_xsetvar_from_name(token_var);
     }
     catch (const std::logic_error& e)
     {
@@ -484,7 +483,7 @@ config_parse_xset(const toml::value& toml_data, std::uint64_t version)
                 XSetVar var;
                 try
                 {
-                    var = xset_set_var_encode(setvar);
+                    var = xset_get_xsetvar_from_name(setvar);
                 }
                 catch (const std::logic_error& e)
                 {
@@ -899,21 +898,19 @@ xset_pack_set(xset_t set)
     if (set->plugin)
         return setvars;
 
-    if (set->plugin)
-        return setvars;
-
     if (set->s)
-        setvars.insert({"s", fmt::format("{}", set->s)});
+        setvars.insert({xset_get_name_from_xsetvar(XSetVar::S), fmt::format("{}", set->s)});
     if (set->x)
-        setvars.insert({"x", fmt::format("{}", set->x)});
+        setvars.insert({xset_get_name_from_xsetvar(XSetVar::X), fmt::format("{}", set->x)});
     if (set->y)
-        setvars.insert({"y", fmt::format("{}", set->y)});
+        setvars.insert({xset_get_name_from_xsetvar(XSetVar::Y), fmt::format("{}", set->y)});
     if (set->z)
-        setvars.insert({"z", fmt::format("{}", set->z)});
+        setvars.insert({xset_get_name_from_xsetvar(XSetVar::Z), fmt::format("{}", set->z)});
     if (set->key)
-        setvars.insert({"key", fmt::format("{}", set->key)});
+        setvars.insert({xset_get_name_from_xsetvar(XSetVar::KEY), fmt::format("{}", set->key)});
     if (set->keymod)
-        setvars.insert({"keymod", fmt::format("{}", set->keymod)});
+        setvars.insert(
+            {xset_get_name_from_xsetvar(XSetVar::KEYMOD), fmt::format("{}", set->keymod)});
     // menu label
     if (set->menu_label)
     {
@@ -921,12 +918,14 @@ xset_pack_set(xset_t set)
         { // built-in
             if (set->in_terminal && set->menu_label && set->menu_label[0])
             { // only save lbl if menu_label was customized
-                setvars.insert({"menu_label", fmt::format("{}", set->menu_label)});
+                setvars.insert({xset_get_name_from_xsetvar(XSetVar::MENU_LABEL),
+                                fmt::format("{}", set->menu_label)});
             }
         }
         else
         { // custom
-            setvars.insert({"menu_label_custom", fmt::format("{}", set->menu_label)});
+            setvars.insert({xset_get_name_from_xsetvar(XSetVar::MENU_LABEL_CUSTOM),
+                            fmt::format("{}", set->menu_label)});
         }
     }
     // icon
@@ -934,55 +933,72 @@ xset_pack_set(xset_t set)
     { // built-in
         if (set->keep_terminal)
         { // only save icn if icon was customized
-            setvars.insert({"icn", fmt::format("{}", set->icon)});
+            setvars.insert(
+                {xset_get_name_from_xsetvar(XSetVar::ICN), fmt::format("{}", set->icon)});
         }
     }
     else if (set->icon)
     { // custom
-        setvars.insert({"icon", fmt::format("{}", set->icon)});
+        setvars.insert({xset_get_name_from_xsetvar(XSetVar::ICON), fmt::format("{}", set->icon)});
     }
 
     if (set->next)
-        setvars.insert({"next", fmt::format("{}", set->next)});
+        setvars.insert({xset_get_name_from_xsetvar(XSetVar::NEXT), fmt::format("{}", set->next)});
     if (set->child)
-        setvars.insert({"child", fmt::format("{}", set->child)});
+        setvars.insert({xset_get_name_from_xsetvar(XSetVar::CHILD), fmt::format("{}", set->child)});
     if (set->context)
-        setvars.insert({"context", fmt::format("{}", set->context)});
+        setvars.insert(
+            {xset_get_name_from_xsetvar(XSetVar::CONTEXT), fmt::format("{}", set->context)});
     if (set->b != XSetB::XSET_B_UNSET)
-        setvars.insert({"b", fmt::format("{}", set->b)});
+        setvars.insert({xset_get_name_from_xsetvar(XSetVar::B), fmt::format("{}", set->b)});
     if (set->tool != XSetTool::NOT)
-        setvars.insert({"tool", fmt::format("{}", INT(set->tool))});
+        setvars.insert(
+            {xset_get_name_from_xsetvar(XSetVar::TOOL), fmt::format("{}", INT(set->tool))});
 
     if (!set->lock)
     {
         if (set->menu_style != XSetMenu::NORMAL)
-            setvars.insert({"style", fmt::format("{}", INT(set->menu_style))});
+            setvars.insert({xset_get_name_from_xsetvar(XSetVar::STYLE),
+                            fmt::format("{}", INT(set->menu_style))});
         if (set->desc)
-            setvars.insert({"desc", fmt::format("{}", set->desc)});
+            setvars.insert(
+                {xset_get_name_from_xsetvar(XSetVar::DESC), fmt::format("{}", set->desc)});
         if (set->title)
-            setvars.insert({"title", fmt::format("{}", set->title)});
+            setvars.insert(
+                {xset_get_name_from_xsetvar(XSetVar::TITLE), fmt::format("{}", set->title)});
         if (set->prev)
-            setvars.insert({"prev", fmt::format("{}", set->prev)});
+            setvars.insert(
+                {xset_get_name_from_xsetvar(XSetVar::PREV), fmt::format("{}", set->prev)});
         if (set->parent)
-            setvars.insert({"parent", fmt::format("{}", set->parent)});
+            setvars.insert(
+                {xset_get_name_from_xsetvar(XSetVar::PARENT), fmt::format("{}", set->parent)});
         if (set->line)
-            setvars.insert({"line", fmt::format("{}", set->line)});
+            setvars.insert(
+                {xset_get_name_from_xsetvar(XSetVar::LINE), fmt::format("{}", set->line)});
         if (set->task)
-            setvars.insert({"task", fmt::format("{:d}", set->task)});
+            setvars.insert(
+                {xset_get_name_from_xsetvar(XSetVar::TASK), fmt::format("{:d}", set->task)});
         if (set->task_pop)
-            setvars.insert({"task_pop", fmt::format("{:d}", set->task_pop)});
+            setvars.insert({xset_get_name_from_xsetvar(XSetVar::TASK_POP),
+                            fmt::format("{:d}", set->task_pop)});
         if (set->task_err)
-            setvars.insert({"task_err", fmt::format("{:d}", set->task_err)});
+            setvars.insert({xset_get_name_from_xsetvar(XSetVar::TASK_ERR),
+                            fmt::format("{:d}", set->task_err)});
         if (set->task_out)
-            setvars.insert({"task_out", fmt::format("{:d}", set->task_out)});
+            setvars.insert({xset_get_name_from_xsetvar(XSetVar::TASK_OUT),
+                            fmt::format("{:d}", set->task_out)});
         if (set->in_terminal)
-            setvars.insert({"run_in_terminal", fmt::format("{:d}", set->in_terminal)});
+            setvars.insert({xset_get_name_from_xsetvar(XSetVar::RUN_IN_TERMINAL),
+                            fmt::format("{:d}", set->in_terminal)});
         if (set->keep_terminal)
-            setvars.insert({"keep_terminal", fmt::format("{:d}", set->keep_terminal)});
+            setvars.insert({xset_get_name_from_xsetvar(XSetVar::KEEP_TERMINAL),
+                            fmt::format("{:d}", set->keep_terminal)});
         if (set->scroll_lock)
-            setvars.insert({"scroll_lock", fmt::format("{:d}", set->scroll_lock)});
+            setvars.insert({xset_get_name_from_xsetvar(XSetVar::SCROLL_LOCK),
+                            fmt::format("{:d}", set->scroll_lock)});
         if (set->opener != 0)
-            setvars.insert({"opener", fmt::format("{}", set->opener)});
+            setvars.insert(
+                {xset_get_name_from_xsetvar(XSetVar::OPENER), fmt::format("{}", set->opener)});
     }
 
     return setvars;
@@ -1097,96 +1113,6 @@ xset_is_main_bookmark(xset_t set)
             break;
     }
     return nullptr;
-}
-
-static XSetVar
-xset_set_var_encode(const std::string& var)
-{
-    XSetVar tmp;
-    if (ztd::same(var, "s"))
-        tmp = XSetVar::S;
-    else if (ztd::same(var, "b"))
-        tmp = XSetVar::B;
-    else if (ztd::same(var, "x"))
-        tmp = XSetVar::X;
-    else if (ztd::same(var, "y"))
-        tmp = XSetVar::Y;
-    else if (ztd::same(var, "z"))
-        tmp = XSetVar::Z;
-    else if (ztd::same(var, "key"))
-        tmp = XSetVar::KEY;
-    else if (ztd::same(var, "keymod"))
-        tmp = XSetVar::KEYMOD;
-    else if (ztd::same(var, "style"))
-        tmp = XSetVar::STYLE;
-    else if (ztd::same(var, "desc"))
-        tmp = XSetVar::DESC;
-    else if (ztd::same(var, "title"))
-        tmp = XSetVar::TITLE;
-    else if (ztd::same(var, "menu_label"))
-        tmp = XSetVar::MENU_LABEL;
-    else if (ztd::same(var, "icn"))
-        tmp = XSetVar::ICN;
-    else if (ztd::same(var, "menu_label_custom"))
-        tmp = XSetVar::MENU_LABEL_CUSTOM;
-    else if (ztd::same(var, "icon"))
-        tmp = XSetVar::ICON;
-    else if (ztd::same(var, "shared_key"))
-        tmp = XSetVar::SHARED_KEY;
-    else if (ztd::same(var, "next"))
-        tmp = XSetVar::NEXT;
-    else if (ztd::same(var, "prev"))
-        tmp = XSetVar::PREV;
-    else if (ztd::same(var, "parent"))
-        tmp = XSetVar::PARENT;
-    else if (ztd::same(var, "child"))
-        tmp = XSetVar::CHILD;
-    else if (ztd::same(var, "context"))
-        tmp = XSetVar::CONTEXT;
-    else if (ztd::same(var, "line"))
-        tmp = XSetVar::LINE;
-    else if (ztd::same(var, "tool"))
-        tmp = XSetVar::TOOL;
-    else if (ztd::same(var, "task"))
-        tmp = XSetVar::TASK;
-    else if (ztd::same(var, "task_pop"))
-        tmp = XSetVar::TASK_POP;
-    else if (ztd::same(var, "task_err"))
-        tmp = XSetVar::TASK_ERR;
-    else if (ztd::same(var, "task_out"))
-        tmp = XSetVar::TASK_OUT;
-    else if (ztd::same(var, "run_in_terminal"))
-        tmp = XSetVar::RUN_IN_TERMINAL;
-    else if (ztd::same(var, "keep_terminal"))
-        tmp = XSetVar::KEEP_TERMINAL;
-    else if (ztd::same(var, "scroll_lock"))
-        tmp = XSetVar::SCROLL_LOCK;
-    else if (ztd::same(var, "disable"))
-        tmp = XSetVar::DISABLE;
-    else if (ztd::same(var, "opener"))
-        tmp = XSetVar::OPENER;
-    // Deprecated config keys - start
-    else if (ztd::same(var, "lbl"))
-        tmp = XSetVar::MENU_LABEL;
-    else if (ztd::same(var, "label"))
-        tmp = XSetVar::MENU_LABEL_CUSTOM;
-    else if (ztd::same(var, "cxt"))
-        tmp = XSetVar::CONTEXT;
-    else if (ztd::same(var, "term"))
-        tmp = XSetVar::RUN_IN_TERMINAL;
-    else if (ztd::same(var, "keep"))
-        tmp = XSetVar::KEEP_TERMINAL;
-    else if (ztd::same(var, "scroll"))
-        tmp = XSetVar::SCROLL_LOCK;
-    else if (ztd::same(var, "op"))
-        tmp = XSetVar::OPENER;
-    // Deprecated config keys - end
-    else
-    {
-        std::string err_msg = fmt::format("Unknown XSet var {}", var);
-        throw std::logic_error(err_msg);
-    }
-    return tmp;
 }
 
 xset_t
@@ -2149,7 +2075,7 @@ xset_parse_plugin(const char* plug_dir, const std::string& name, const std::stri
     XSetVar var;
     try
     {
-        var = xset_set_var_encode(setvar);
+        var = xset_get_xsetvar_from_name(setvar);
     }
     catch (const std::logic_error& e)
     {

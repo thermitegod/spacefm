@@ -1172,16 +1172,54 @@ enum class XSetPanel
     TOOL_S,
 };
 
+enum class XSetVar
+{
+    S,
+    B,
+    X,
+    Y,
+    Z,
+    KEY,
+    KEYMOD,
+    STYLE,
+    DESC,
+    TITLE,
+    MENU_LABEL,
+    MENU_LABEL_CUSTOM,
+    ICN,
+    ICON,
+    SHARED_KEY,
+    NEXT,
+    PREV,
+    PARENT,
+    CHILD,
+    CONTEXT,
+    LINE,
+    TOOL,
+    TASK,
+    TASK_POP,
+    TASK_ERR,
+    TASK_OUT,
+    RUN_IN_TERMINAL,
+    KEEP_TERMINAL,
+    SCROLL_LOCK,
+    DISABLE,
+    OPENER,
+};
+
 #ifdef XSET_MAP_TEST
 bool is_in_xset_map_test(XSetName name);
 bool is_in_xset_map_test(const std::string& name);
 #endif
 
 XSetName xset_get_xsetname_from_name(const std::string& name);
-const std::string& xset_get_name_from_xsetname(XSetName name);
+const std::string xset_get_name_from_xsetname(XSetName name);
 
 XSetName xset_get_xsetname_from_panel(panel_t panel, XSetPanel panel_var);
 const std::string xset_get_name_from_panel(panel_t panel, XSetPanel name);
 
 XSetName xset_get_xsetname_from_panel_mode(panel_t panel, XSetPanel name, char mode);
 const std::string xset_get_name_from_panel_mode(panel_t panel, XSetPanel name, char mode);
+
+XSetVar xset_get_xsetvar_from_name(const std::string& name);
+const std::string xset_get_name_from_xsetvar(XSetVar name);

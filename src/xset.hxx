@@ -26,41 +26,6 @@
 
 #include "xset-lookup.hxx"
 
-enum class XSetVar
-{
-    S,
-    B,
-    X,
-    Y,
-    Z,
-    KEY,
-    KEYMOD,
-    STYLE,
-    DESC,
-    TITLE,
-    MENU_LABEL,
-    ICN,
-    MENU_LABEL_CUSTOM,
-    ICON,
-    SHARED_KEY,
-    NEXT,
-    PREV,
-    PARENT,
-    CHILD,
-    CONTEXT,
-    LINE,
-    TOOL,
-    TASK,
-    TASK_POP,
-    TASK_ERR,
-    TASK_OUT,
-    RUN_IN_TERMINAL,
-    KEEP_TERMINAL,
-    SCROLL_LOCK,
-    DISABLE,
-    OPENER
-};
-
 enum class XSetCMD
 {
     LINE,

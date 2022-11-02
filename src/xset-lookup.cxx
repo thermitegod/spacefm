@@ -14,6 +14,7 @@
  */
 
 #include <string>
+#include <string_view>
 
 #include <map>
 
@@ -1701,6 +1702,51 @@ const std::map<XSetPanel, XSetName> xset_panel4_mode3_map{
     {XSetPanel::TOOL_S,           XSetName::PANEL4_TOOL_S_3},
 };
 
+const std::map<const std::string_view, XSetVar> xset_var_map{
+    {"s",                 XSetVar::S},
+    {"b",                 XSetVar::B},
+    {"x",                 XSetVar::X},
+    {"y",                 XSetVar::Y},
+    {"z",                 XSetVar::Z},
+    {"key",               XSetVar::KEY},
+    {"keymod",            XSetVar::KEYMOD},
+    {"style",             XSetVar::STYLE},
+    {"desc",              XSetVar::DESC},
+    {"title",             XSetVar::TITLE},
+    {"menu_label",        XSetVar::MENU_LABEL},
+    {"menu_label_custom", XSetVar::MENU_LABEL_CUSTOM},
+    {"icn",               XSetVar::ICN},
+    {"icon",              XSetVar::ICON},
+    {"shared_key",        XSetVar::SHARED_KEY},
+    {"next",              XSetVar::NEXT},
+    {"prev",              XSetVar::PREV},
+    {"parent",            XSetVar::PARENT},
+    {"child",             XSetVar::CHILD},
+    {"context",           XSetVar::CONTEXT},
+    {"line",              XSetVar::LINE},
+    {"tool",              XSetVar::TOOL},
+    {"task",              XSetVar::TASK},
+    {"task_pop",          XSetVar::TASK_POP},
+    {"task_err",          XSetVar::TASK_OUT},
+    {"task_out",          XSetVar::TASK_OUT},
+    {"run_in_terminal",   XSetVar::RUN_IN_TERMINAL},
+    {"keep_terminal",     XSetVar::KEEP_TERMINAL},
+    {"scroll_lock",       XSetVar::SCROLL_LOCK},
+    {"disable",           XSetVar::DISABLE},
+    {"opener",            XSetVar::OPENER},
+
+    // Deprecated ini only config keys
+#ifdef HAVE_DEPRECATED_INI_LOADING
+    {"lbl",               XSetVar::MENU_LABEL},
+    {"label",             XSetVar::MENU_LABEL_CUSTOM},
+    {"cxt",               XSetVar::CONTEXT},
+    {"term",              XSetVar::RUN_IN_TERMINAL},
+    {"keep",              XSetVar::KEEP_TERMINAL},
+    {"scroll",            XSetVar::SCROLL_LOCK},
+    {"op",                XSetVar::OPENER},
+#endif
+};
+
 // clang-format on
 
 #ifdef XSET_MAP_TEST
@@ -1741,7 +1787,7 @@ xset_get_xsetname_from_name(const std::string& name)
     return XSetName::CUSTOM;
 }
 
-const std::string&
+const std::string
 xset_get_name_from_xsetname(XSetName name)
 {
     try
@@ -1858,5 +1904,34 @@ xset_get_xsetname_from_panel_mode(panel_t panel, XSetPanel name, char mode)
 const std::string
 xset_get_name_from_panel_mode(panel_t panel, XSetPanel name, char mode)
 {
-    return xset_name_map.at(xset_get_xsetname_from_panel_mode(panel, name, mode));
+    return xset_name_map.at(xset_get_xsetname_from_panel_mode(panel, name, mode)).data();
+}
+
+// xset var
+
+XSetVar
+xset_get_xsetvar_from_name(const std::string& name)
+{
+    try
+    {
+        return xset_var_map.at(name);
+    }
+    catch (std::out_of_range)
+    {
+        const std::string err_msg = fmt::format("Unknown XSet var {}", name);
+        throw std::logic_error(err_msg);
+    }
+}
+
+const std::string
+xset_get_name_from_xsetvar(XSetVar name)
+{
+    for (auto it = xset_var_map.begin(); it != xset_var_map.end(); ++it)
+    {
+        if (name == it->second)
+            return it->first.data();
+    }
+
+    const std::string err_msg = fmt::format("NOT implemented XSetVar: {}", INT(name));
+    throw std::logic_error(err_msg);
 }
