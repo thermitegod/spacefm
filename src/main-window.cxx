@@ -133,7 +133,7 @@ static int n_windows = 0;
 
 static std::vector<FMMainWindow*> all_windows;
 
-static std::vector<std::string> closed_tabs_restore;
+static std::map<panel_t, std::vector<std::string>> closed_tabs_restore;
 
 //  Drag & Drop/Clipboard targets
 static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
@@ -2138,15 +2138,17 @@ on_restore_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
 {
     (void)btn;
 
-    if (closed_tabs_restore.empty())
+    const panel_t panel = file_browser->mypanel;
+
+    if (closed_tabs_restore[panel].empty())
     {
-        LOG_INFO("No tabs to restore");
+        LOG_INFO("No tabs to restore for panel {}", panel);
         return;
     }
 
-    const std::string file_path = closed_tabs_restore.back();
-    closed_tabs_restore.pop_back();
-    // LOG_INFO("on_restore_notebook_page path={}", file_path);
+    const std::string file_path = closed_tabs_restore[panel].back();
+    closed_tabs_restore[panel].pop_back();
+    // LOG_INFO("on_restore_notebook_page panel={} path={}", panel, file_path);
 
     // LOG_INFO("on_restore_notebook_page fb={:p}", fmt::ptr(file_browser));
     if (!GTK_IS_WIDGET(file_browser))
@@ -2162,8 +2164,9 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
     (void)btn;
     PtkFileBrowser* a_browser;
 
-    closed_tabs_restore.push_back(ptk_file_browser_get_cwd(file_browser));
-    // LOG_INFO("on_close_notebook_page path={}", closed_tabs_restore.back());
+    closed_tabs_restore[file_browser->mypanel].push_back(ptk_file_browser_get_cwd(file_browser));
+    // LOG_INFO("on_close_notebook_page path={}",
+    // closed_tabs_restore[file_browser->mypanel].back());
 
     // LOG_INFO("on_close_notebook_page fb={:p}", fmt::ptr(file_browser));
     if (!GTK_IS_WIDGET(file_browser))
