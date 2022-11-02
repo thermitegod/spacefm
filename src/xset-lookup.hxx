@@ -16,8 +16,7 @@
 #pragma once
 
 #include <string>
-
-#include <utility>
+#include <string_view>
 
 #include <exception>
 
@@ -1209,10 +1208,10 @@ enum class XSetVar
 
 #ifdef XSET_MAP_TEST
 bool is_in_xset_map_test(XSetName name);
-bool is_in_xset_map_test(const std::string& name);
+bool is_in_xset_map_test(std::string_view name);
 #endif
 
-XSetName xset_get_xsetname_from_name(const std::string& name);
+XSetName xset_get_xsetname_from_name(std::string_view name);
 const std::string xset_get_name_from_xsetname(XSetName name);
 
 XSetName xset_get_xsetname_from_panel(panel_t panel, XSetPanel panel_var);
@@ -1221,5 +1220,5 @@ const std::string xset_get_name_from_panel(panel_t panel, XSetPanel name);
 XSetName xset_get_xsetname_from_panel_mode(panel_t panel, XSetPanel name, char mode);
 const std::string xset_get_name_from_panel_mode(panel_t panel, XSetPanel name, char mode);
 
-XSetVar xset_get_xsetvar_from_name(const std::string& name);
+XSetVar xset_get_xsetvar_from_name(std::string_view name);
 const std::string xset_get_name_from_xsetvar(XSetVar name);
