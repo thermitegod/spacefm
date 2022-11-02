@@ -251,7 +251,8 @@ bool ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
                                      PtkFileBrowser* file_browser);
 void ptk_file_browser_rebuild_toolbars(PtkFileBrowser* file_browser);
 void ptk_file_browser_focus_me(PtkFileBrowser* file_browser);
-void ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, int tab_num, const char* file_path);
+void ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, tab_t tab_num,
+                                  const char* file_path);
 void ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
                                     std::vector<VFSFileInfo*>& sel_files, const char* cwd);
 void ptk_file_browser_copycmd(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>& sel_files,

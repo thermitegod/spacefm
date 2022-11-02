@@ -279,6 +279,7 @@ sources = [
   'src/settings.cxx',
   'src/socket.cxx',
   'src/type-conversion.cxx',
+  'src/types.cxx',
   'src/utils.cxx',
   'src/window-reference.cxx',
 

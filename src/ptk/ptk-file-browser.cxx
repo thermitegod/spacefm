@@ -1024,7 +1024,7 @@ on_status_bar_button_press(GtkWidget* widget, GdkEventButton* event, PtkFileBrow
                 else if (i == 2)
                     ptk_file_browser_file_properties(file_browser, 0);
                 else if (i == 3)
-                    focus_panel(nullptr, file_browser->main_window, -3);
+                    focus_panel(nullptr, file_browser->main_window, panel_control_code_hide);
             }
             return true;
         }
@@ -4956,82 +4956,82 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*>
     char* move_dest = nullptr;
 
     if (setname == XSetName::COPY_TAB_PREV)
-        copy_dest = main_window_get_tab_cwd(file_browser, -1);
+        copy_dest = main_window_get_tab_cwd(file_browser, tab_control_code_prev);
     else if (setname == XSetName::COPY_TAB_NEXT)
-        copy_dest = main_window_get_tab_cwd(file_browser, -2);
+        copy_dest = main_window_get_tab_cwd(file_browser, tab_control_code_next);
     else if (setname == XSetName::COPY_TAB_1)
-        copy_dest = main_window_get_tab_cwd(file_browser, 1);
+        copy_dest = main_window_get_tab_cwd(file_browser, tab_1);
     else if (setname == XSetName::COPY_TAB_2)
-        copy_dest = main_window_get_tab_cwd(file_browser, 2);
+        copy_dest = main_window_get_tab_cwd(file_browser, tab_2);
     else if (setname == XSetName::COPY_TAB_3)
-        copy_dest = main_window_get_tab_cwd(file_browser, 3);
+        copy_dest = main_window_get_tab_cwd(file_browser, tab_3);
     else if (setname == XSetName::COPY_TAB_4)
-        copy_dest = main_window_get_tab_cwd(file_browser, 4);
+        copy_dest = main_window_get_tab_cwd(file_browser, tab_4);
     else if (setname == XSetName::COPY_TAB_5)
-        copy_dest = main_window_get_tab_cwd(file_browser, 5);
+        copy_dest = main_window_get_tab_cwd(file_browser, tab_5);
     else if (setname == XSetName::COPY_TAB_6)
-        copy_dest = main_window_get_tab_cwd(file_browser, 6);
+        copy_dest = main_window_get_tab_cwd(file_browser, tab_6);
     else if (setname == XSetName::COPY_TAB_7)
-        copy_dest = main_window_get_tab_cwd(file_browser, 7);
+        copy_dest = main_window_get_tab_cwd(file_browser, tab_7);
     else if (setname == XSetName::COPY_TAB_8)
-        copy_dest = main_window_get_tab_cwd(file_browser, 8);
+        copy_dest = main_window_get_tab_cwd(file_browser, tab_8);
     else if (setname == XSetName::COPY_TAB_9)
-        copy_dest = main_window_get_tab_cwd(file_browser, 9);
+        copy_dest = main_window_get_tab_cwd(file_browser, tab_9);
     else if (setname == XSetName::COPY_TAB_10)
-        copy_dest = main_window_get_tab_cwd(file_browser, 10);
+        copy_dest = main_window_get_tab_cwd(file_browser, tab_10);
     else if (setname == XSetName::COPY_PANEL_PREV)
-        copy_dest = main_window_get_panel_cwd(file_browser, -1);
+        copy_dest = main_window_get_panel_cwd(file_browser, panel_control_code_prev);
     else if (setname == XSetName::COPY_PANEL_NEXT)
-        copy_dest = main_window_get_panel_cwd(file_browser, -2);
+        copy_dest = main_window_get_panel_cwd(file_browser, panel_control_code_next);
     else if (setname == XSetName::COPY_PANEL_1)
-        copy_dest = main_window_get_panel_cwd(file_browser, 1);
+        copy_dest = main_window_get_panel_cwd(file_browser, panel_1);
     else if (setname == XSetName::COPY_PANEL_2)
-        copy_dest = main_window_get_panel_cwd(file_browser, 2);
+        copy_dest = main_window_get_panel_cwd(file_browser, panel_2);
     else if (setname == XSetName::COPY_PANEL_3)
-        copy_dest = main_window_get_panel_cwd(file_browser, 3);
+        copy_dest = main_window_get_panel_cwd(file_browser, panel_3);
     else if (setname == XSetName::COPY_PANEL_4)
-        copy_dest = main_window_get_panel_cwd(file_browser, 4);
+        copy_dest = main_window_get_panel_cwd(file_browser, panel_4);
     else if (setname == XSetName::COPY_LOC_LAST)
     {
         set2 = xset_get(XSetName::COPY_LOC_LAST);
         copy_dest = ztd::strdup(set2->desc);
     }
     else if (setname == XSetName::MOVE_TAB_PREV)
-        move_dest = main_window_get_tab_cwd(file_browser, -1);
+        move_dest = main_window_get_tab_cwd(file_browser, tab_control_code_prev);
     else if (setname == XSetName::MOVE_TAB_NEXT)
-        move_dest = main_window_get_tab_cwd(file_browser, -2);
+        move_dest = main_window_get_tab_cwd(file_browser, tab_control_code_next);
     else if (setname == XSetName::MOVE_TAB_1)
-        move_dest = main_window_get_tab_cwd(file_browser, 1);
+        move_dest = main_window_get_tab_cwd(file_browser, tab_1);
     else if (setname == XSetName::MOVE_TAB_2)
-        move_dest = main_window_get_tab_cwd(file_browser, 2);
+        move_dest = main_window_get_tab_cwd(file_browser, tab_2);
     else if (setname == XSetName::MOVE_TAB_3)
-        move_dest = main_window_get_tab_cwd(file_browser, 3);
+        move_dest = main_window_get_tab_cwd(file_browser, tab_3);
     else if (setname == XSetName::MOVE_TAB_4)
-        move_dest = main_window_get_tab_cwd(file_browser, 4);
+        move_dest = main_window_get_tab_cwd(file_browser, tab_4);
     else if (setname == XSetName::MOVE_TAB_5)
-        move_dest = main_window_get_tab_cwd(file_browser, 5);
+        move_dest = main_window_get_tab_cwd(file_browser, tab_5);
     else if (setname == XSetName::MOVE_TAB_6)
-        move_dest = main_window_get_tab_cwd(file_browser, 6);
+        move_dest = main_window_get_tab_cwd(file_browser, tab_6);
     else if (setname == XSetName::MOVE_TAB_7)
-        move_dest = main_window_get_tab_cwd(file_browser, 7);
+        move_dest = main_window_get_tab_cwd(file_browser, tab_7);
     else if (setname == XSetName::MOVE_TAB_8)
-        move_dest = main_window_get_tab_cwd(file_browser, 8);
+        move_dest = main_window_get_tab_cwd(file_browser, tab_8);
     else if (setname == XSetName::MOVE_TAB_9)
-        move_dest = main_window_get_tab_cwd(file_browser, 9);
+        move_dest = main_window_get_tab_cwd(file_browser, tab_9);
     else if (setname == XSetName::MOVE_TAB_10)
-        move_dest = main_window_get_tab_cwd(file_browser, 10);
+        move_dest = main_window_get_tab_cwd(file_browser, tab_10);
     else if (setname == XSetName::MOVE_PANEL_PREV)
-        move_dest = main_window_get_panel_cwd(file_browser, -1);
+        move_dest = main_window_get_panel_cwd(file_browser, panel_control_code_prev);
     else if (setname == XSetName::MOVE_PANEL_NEXT)
-        move_dest = main_window_get_panel_cwd(file_browser, -2);
+        move_dest = main_window_get_panel_cwd(file_browser, panel_control_code_next);
     else if (setname == XSetName::MOVE_PANEL_1)
-        move_dest = main_window_get_panel_cwd(file_browser, 1);
+        move_dest = main_window_get_panel_cwd(file_browser, panel_1);
     else if (setname == XSetName::MOVE_PANEL_2)
-        move_dest = main_window_get_panel_cwd(file_browser, 2);
+        move_dest = main_window_get_panel_cwd(file_browser, panel_2);
     else if (setname == XSetName::MOVE_PANEL_3)
-        move_dest = main_window_get_panel_cwd(file_browser, 3);
+        move_dest = main_window_get_panel_cwd(file_browser, panel_3);
     else if (setname == XSetName::MOVE_PANEL_4)
-        move_dest = main_window_get_panel_cwd(file_browser, 4);
+        move_dest = main_window_get_panel_cwd(file_browser, panel_4);
     else if (setname == XSetName::MOVE_LOC_LAST)
     {
         set2 = xset_get(XSetName::COPY_LOC_LAST);
@@ -5739,7 +5739,7 @@ ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, int t)
 {
     // LOG_INFO("ptk_file_browser_go_tab fb={:p}", fmt::ptr(file_browser));
     GtkWidget* notebook = file_browser->mynotebook;
-    int tab_num;
+    tab_t tab_num;
     if (item)
         tab_num = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "tab_num"));
     else
@@ -5747,7 +5747,7 @@ ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, int t)
 
     switch (tab_num)
     {
-        case -1:
+        case tab_control_code_prev:
             // prev
             if (gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook)) == 0)
                 gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook),
@@ -5755,7 +5755,7 @@ ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, int t)
             else
                 gtk_notebook_prev_page(GTK_NOTEBOOK(notebook));
             break;
-        case -2:
+        case tab_control_code_next:
             // next
             if (gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook)) + 1 ==
                 gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook)))
@@ -5763,11 +5763,11 @@ ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, int t)
             else
                 gtk_notebook_next_page(GTK_NOTEBOOK(notebook));
             break;
-        case -3:
+        case tab_control_code_close:
             // close
             on_close_notebook_page(nullptr, file_browser);
             break;
-        case -4:
+        case tab_control_code_restore:
             // restore
             on_restore_notebook_page(nullptr, file_browser);
             break;
@@ -5780,20 +5780,20 @@ ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, int t)
 }
 
 void
-ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, int tab_num, const char* file_path)
+ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, tab_t tab_num, const char* file_path)
 {
-    int page_x;
+    tab_t page_x;
     GtkWidget* notebook = file_browser->mynotebook;
-    int cur_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
-    int pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
+    tab_t cur_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
+    tab_t pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
 
     switch (tab_num)
     {
-        case -1:
+        case tab_control_code_prev:
             // prev
             page_x = cur_page - 1;
             break;
-        case -2:
+        case tab_control_code_next:
             // next
             page_x = cur_page + 1;
             break;
@@ -6003,13 +6003,13 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
         else
         {
             if (set->xset_name == XSetName::TAB_PREV)
-                i = -1;
+                i = tab_control_code_prev;
             else if (set->xset_name == XSetName::TAB_NEXT)
-                i = -2;
+                i = tab_control_code_next;
             else if (set->xset_name == XSetName::TAB_CLOSE)
-                i = -3;
+                i = tab_control_code_close;
             else if (set->xset_name == XSetName::TAB_RESTORE)
-                i = -4;
+                i = tab_control_code_restore;
             else
                 i = std::stol(set->name);
             ptk_file_browser_go_tab(nullptr, browser, i);

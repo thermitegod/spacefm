@@ -137,7 +137,7 @@ void main_window_rubberband_all();
 void main_window_refresh_all();
 void main_context_fill(PtkFileBrowser* file_browser, XSetContext* c);
 void set_panel_focus(FMMainWindow* main_window, PtkFileBrowser* file_browser);
-void focus_panel(GtkMenuItem* item, void* mw, int p);
+void focus_panel(GtkMenuItem* item, void* mw, panel_t p);
 void main_window_open_path_in_current_tab(FMMainWindow* main_window, const char* path);
 void main_window_open_network(FMMainWindow* main_window, const char* path, bool new_tab);
 char main_window_socket_command(char* argv[], std::string& reply);

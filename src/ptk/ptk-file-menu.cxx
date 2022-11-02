@@ -1015,34 +1015,34 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
             {
                 // Open Dir
                 set = xset_set_cb(XSetName::OPENTAB_PREV, (GFunc)on_open_in_tab, data);
-                xset_set_ob1_int(set, "tab_num", -1);
+                xset_set_ob1_int(set, "tab_num", tab_control_code_prev);
                 set->disable = (tab_num == 1);
                 set = xset_set_cb(XSetName::OPENTAB_NEXT, (GFunc)on_open_in_tab, data);
-                xset_set_ob1_int(set, "tab_num", -2);
+                xset_set_ob1_int(set, "tab_num", tab_control_code_next);
                 set->disable = (tab_num == tab_count);
                 set = xset_set_cb(XSetName::OPENTAB_NEW,
                                   (GFunc)on_popup_open_in_new_tab_activate,
                                   data);
-                for (int i = 1; i < 11; ++i)
+                for (tab_t tab: TABS)
                 {
-                    const std::string name = fmt::format("opentab_{}", i);
+                    const std::string name = fmt::format("opentab_{}", tab);
                     set = xset_set_cb(name, (GFunc)on_open_in_tab, data);
-                    xset_set_ob1_int(set, "tab_num", i);
-                    set->disable = (i > tab_count) || (i == tab_num);
+                    xset_set_ob1_int(set, "tab_num", tab);
+                    set->disable = (tab > tab_count) || (tab == tab_num);
                 }
 
                 set = xset_set_cb(XSetName::OPEN_IN_PANELPREV, (GFunc)on_open_in_panel, data);
-                xset_set_ob1_int(set, "panel_num", -1);
+                xset_set_ob1_int(set, "panel_num", panel_control_code_prev);
                 set->disable = (panel_count == 1);
                 set = xset_set_cb(XSetName::OPEN_IN_PANELNEXT, (GFunc)on_open_in_panel, data);
-                xset_set_ob1_int(set, "panel_num", -2);
+                xset_set_ob1_int(set, "panel_num", panel_control_code_next);
                 set->disable = (panel_count == 1);
 
-                for (int i = 1; i < 5; ++i)
+                for (panel_t panel: PANELS)
                 {
-                    const std::string name = fmt::format("open_in_panel{}", i);
+                    const std::string name = fmt::format("open_in_panel{}", panel);
                     set = xset_set_cb(name, (GFunc)on_open_in_panel, data);
-                    xset_set_ob1_int(set, "panel_num", i);
+                    xset_set_ob1_int(set, "panel_num", panel);
                     // set->disable = ( p == i );
                 }
 
@@ -1101,22 +1101,22 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
         // Go > Tab >
         set = xset_set_cb(XSetName::TAB_PREV, (GFunc)ptk_file_browser_go_tab, browser);
-        xset_set_ob1_int(set, "tab_num", -1);
+        xset_set_ob1_int(set, "tab_num", tab_control_code_prev);
         set->disable = (tab_count < 2);
         set = xset_set_cb(XSetName::TAB_NEXT, (GFunc)ptk_file_browser_go_tab, browser);
-        xset_set_ob1_int(set, "tab_num", -2);
+        xset_set_ob1_int(set, "tab_num", tab_control_code_next);
         set->disable = (tab_count < 2);
         set = xset_set_cb(XSetName::TAB_CLOSE, (GFunc)ptk_file_browser_go_tab, browser);
-        xset_set_ob1_int(set, "tab_num", -3);
+        xset_set_ob1_int(set, "tab_num", tab_control_code_close);
         set = xset_set_cb(XSetName::TAB_RESTORE, (GFunc)ptk_file_browser_go_tab, browser);
-        xset_set_ob1_int(set, "tab_num", -4);
+        xset_set_ob1_int(set, "tab_num", tab_control_code_restore);
 
-        for (int i = 1; i < 11; ++i)
+        for (tab_t tab: TABS)
         {
-            const std::string name = fmt::format("tab_{}", i);
+            const std::string name = fmt::format("tab_{}", tab);
             set = xset_set_cb(name, (GFunc)ptk_file_browser_go_tab, browser);
-            xset_set_ob1_int(set, "tab_num", i);
-            set->disable = (i > tab_count) || (i == tab_num);
+            xset_set_ob1_int(set, "tab_num", tab);
+            set->disable = (tab > tab_count) || (tab == tab_num);
         }
         set = xset_get(XSetName::CON_GO);
         xset_add_menuitem(browser, popup, accel_group, set);
@@ -1224,28 +1224,28 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         set = xset_get(XSetName::MOVE_PANEL_NEXT);
         set->disable = (panel_count < 2);
 
-        for (int i = 1; i < 11; ++i)
+        for (tab_t tab: TABS)
         {
-            const std::string copy_tab = fmt::format("copy_tab_{}", i);
+            const std::string copy_tab = fmt::format("copy_tab_{}", tab);
             set = xset_get(copy_tab);
-            set->disable = (i > tab_count) || (i == tab_num);
+            set->disable = (tab > tab_count) || (tab == tab_num);
 
-            const std::string move_tab = fmt::format("move_tab_{}", i);
+            const std::string move_tab = fmt::format("move_tab_{}", tab);
             set = xset_get(move_tab);
-            set->disable = (i > tab_count) || (i == tab_num);
+            set->disable = (tab > tab_count) || (tab == tab_num);
 
-            if (i > 4)
+            if (tab > 4)
                 continue;
 
-            bool b = main_window_panel_is_visible(browser, i);
+            const bool b = main_window_panel_is_visible(browser, tab);
 
-            const std::string copy_panel = fmt::format("copy_panel_{}", i);
+            const std::string copy_panel = fmt::format("copy_panel_{}", tab);
             set = xset_get(copy_panel);
-            set->disable = (i == p) || !b;
+            set->disable = (tab == p) || !b;
 
-            const std::string move_panel = fmt::format("move_panel_{}", i);
+            const std::string move_panel = fmt::format("move_panel_{}", tab);
             set = xset_get(move_panel);
-            set->disable = (i == p) || !b;
+            set->disable = (tab == p) || !b;
         }
 
         set = xset_get(XSetName::COPY_TO);
@@ -2626,9 +2626,9 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         if (ztd::startswith(set->name, "open_in_panel"))
         {
             if (!strcmp(set->name, "open_in_panel_prev"))
-                i = -1;
+                i = panel_control_code_prev;
             else if (!strcmp(set->name, "open_in_panel_next"))
-                i = -2;
+                i = panel_control_code_next;
             else
                 i = std::stol(set->name);
             main_window_open_in_panel(data->browser, i, data->file_path);
@@ -2640,9 +2640,9 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
             else
             {
                 if (set->xset_name == XSetName::OPENTAB_PREV)
-                    i = -1;
+                    i = tab_control_code_prev;
                 else if (set->xset_name == XSetName::OPENTAB_NEXT)
-                    i = -2;
+                    i = tab_control_code_next;
                 else
                     i = std::stol(set->name);
                 ptk_file_browser_open_in_tab(data->browser, i, data->file_path);

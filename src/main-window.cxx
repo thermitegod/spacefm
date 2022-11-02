@@ -757,11 +757,11 @@ main_window_toggle_thumbnails_all_windows()
 }
 
 void
-focus_panel(GtkMenuItem* item, void* mw, int p)
+focus_panel(GtkMenuItem* item, void* mw, panel_t p)
 {
     panel_t panel;
     panel_t hidepanel;
-    int panel_num;
+    panel_t panel_num;
 
     FMMainWindow* main_window = FM_MAIN_WINDOW(mw);
 
@@ -772,7 +772,7 @@ focus_panel(GtkMenuItem* item, void* mw, int p)
 
     switch (panel_num)
     {
-        case -1:
+        case panel_control_code_prev:
             // prev
             panel = main_window->curpanel - 1;
             do
@@ -784,7 +784,7 @@ focus_panel(GtkMenuItem* item, void* mw, int p)
                 panel--;
             } while (panel != main_window->curpanel - 1);
             break;
-        case -2:
+        case panel_control_code_next:
             // next
             panel = main_window->curpanel + 1;
             do
@@ -796,7 +796,7 @@ focus_panel(GtkMenuItem* item, void* mw, int p)
                 panel++;
             } while (panel != main_window->curpanel + 1);
             break;
-        case -3:
+        case panel_control_code_hide:
             // hide
             hidepanel = main_window->curpanel;
             panel = main_window->curpanel + 1;
@@ -831,7 +831,7 @@ focus_panel(GtkMenuItem* item, void* mw, int p)
                 set_panel_focus(main_window, file_browser);
             }
         }
-        else if (panel_num != -3)
+        else if (panel_num != panel_control_code_hide)
         {
             xset_set_b_panel(panel, XSetPanel::SHOW, true);
             show_panels_all_windows(nullptr, main_window);
@@ -846,7 +846,7 @@ focus_panel(GtkMenuItem* item, void* mw, int p)
                 set_panel_focus(main_window, file_browser);
             }
         }
-        if (panel_num == -3)
+        if (panel_num == panel_control_code_hide)
         {
             xset_set_b_panel(hidepanel, XSetPanel::SHOW, false);
             show_panels_all_windows(nullptr, main_window);
@@ -933,10 +933,10 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
     if (main_window->panel_context.empty())
     {
         main_window->panel_context = {
-            {1, MainWindowPanel::PANEL_NEITHER},
-            {2, MainWindowPanel::PANEL_NEITHER},
-            {3, MainWindowPanel::PANEL_NEITHER},
-            {4, MainWindowPanel::PANEL_NEITHER},
+            {panel_1, MainWindowPanel::PANEL_NEITHER},
+            {panel_2, MainWindowPanel::PANEL_NEITHER},
+            {panel_3, MainWindowPanel::PANEL_NEITHER},
+            {panel_4, MainWindowPanel::PANEL_NEITHER},
         };
     }
 
@@ -1390,25 +1390,25 @@ rebuild_menus(FMMainWindow* main_window)
     xset_set_cb(XSetName::MAIN_PBAR, (GFunc)show_panels_all_windows, main_window);
 
     set = xset_set_cb(XSetName::PANEL_PREV, (GFunc)focus_panel, main_window);
-    xset_set_ob1_int(set, "panel_num", -1);
+    xset_set_ob1_int(set, "panel_num", panel_control_code_prev);
     set->disable = (vis_count == 1);
     set = xset_set_cb(XSetName::PANEL_NEXT, (GFunc)focus_panel, main_window);
-    xset_set_ob1_int(set, "panel_num", -2);
+    xset_set_ob1_int(set, "panel_num", panel_control_code_next);
     set->disable = (vis_count == 1);
     set = xset_set_cb(XSetName::PANEL_HIDE, (GFunc)focus_panel, main_window);
-    xset_set_ob1_int(set, "panel_num", -3);
+    xset_set_ob1_int(set, "panel_num", panel_control_code_hide);
     set->disable = (vis_count == 1);
     set = xset_set_cb(XSetName::PANEL_1, (GFunc)focus_panel, main_window);
-    xset_set_ob1_int(set, "panel_num", 1);
+    xset_set_ob1_int(set, "panel_num", panel_1);
     set->disable = (main_window->curpanel == 1);
     set = xset_set_cb(XSetName::PANEL_2, (GFunc)focus_panel, main_window);
-    xset_set_ob1_int(set, "panel_num", 2);
+    xset_set_ob1_int(set, "panel_num", panel_2);
     set->disable = (main_window->curpanel == 2);
     set = xset_set_cb(XSetName::PANEL_3, (GFunc)focus_panel, main_window);
-    xset_set_ob1_int(set, "panel_num", 3);
+    xset_set_ob1_int(set, "panel_num", panel_3);
     set->disable = (main_window->curpanel == 3);
     set = xset_set_cb(XSetName::PANEL_4, (GFunc)focus_panel, main_window);
-    xset_set_ob1_int(set, "panel_num", 4);
+    xset_set_ob1_int(set, "panel_num", panel_4);
     set->disable = (main_window->curpanel == 4);
 
     menu_elements =
@@ -1975,11 +1975,11 @@ main_window_get_tab_cwd(PtkFileBrowser* file_browser, int tab_num)
 
     switch (tab_num)
     {
-        case -1:
+        case tab_control_code_prev:
             // prev
             page_x = page_num - 1;
             break;
-        case -2:
+        case tab_control_code_next:
             // next
             page_x = page_num + 1;
             break;
@@ -2008,7 +2008,7 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, int panel_num)
 
     switch (panel_num)
     {
-        case -1:
+        case panel_control_code_prev:
             // prev
             do
             {
@@ -2018,7 +2018,7 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, int panel_num)
                     return nullptr;
             } while (!gtk_widget_get_visible(main_window->panel[panel_x - 1]));
             break;
-        case -2:
+        case panel_control_code_next:
             // next
             do
             {
@@ -2051,7 +2051,7 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, int panel_num, const cha
 
     switch (panel_num)
     {
-        case -1:
+        case panel_control_code_prev:
             // prev
             do
             {
@@ -2061,7 +2061,7 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, int panel_num, const cha
                     return;
             } while (!gtk_widget_get_visible(main_window->panel[panel_x - 1]));
             break;
-        case -2:
+        case panel_control_code_next:
             // next
             do
             {
@@ -3467,11 +3467,11 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, xset_t set)
     {
         int i;
         if (set->xset_name == XSetName::PANEL_PREV)
-            i = -1;
+            i = panel_control_code_prev;
         else if (set->xset_name == XSetName::PANEL_NEXT)
-            i = -2;
+            i = panel_control_code_next;
         else if (set->xset_name == XSetName::PANEL_HIDE)
-            i = -3;
+            i = panel_control_code_hide;
         else
             i = std::stol(set->name);
         focus_panel(nullptr, main_window, i);
@@ -5853,15 +5853,15 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (argv[i + 1])
             {
                 if (ztd::same(argv[i + 1], "prev"))
-                    width = -1;
+                    width = panel_control_code_prev;
                 else if (ztd::same(argv[i + 1], "next"))
-                    width = -2;
+                    width = panel_control_code_next;
                 else if (ztd::same(argv[i + 1], "hide"))
-                    width = -3;
+                    width = panel_control_code_hide;
                 else
                     width = std::stol(argv[i + 1]);
             }
-            if (width == 0 || width < -3 || width > 4)
+            if (!valid_panel(width) || !valid_panel_code(width))
             {
                 reply = "invalid panel number";
                 return 2;
@@ -5891,15 +5891,15 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (argv[i + 1])
             {
                 if (ztd::same(argv[i + 1], "prev"))
-                    width = -1;
+                    width = tab_control_code_prev;
                 else if (ztd::same(argv[i + 1], "next"))
-                    width = -2;
+                    width = tab_control_code_next;
                 else if (ztd::same(argv[i + 1], "close"))
-                    width = -3;
+                    width = tab_control_code_close;
                 else
                     width = std::stol(argv[i + 1]);
             }
-            if (width == 0 || width < -3 ||
+            if (!valid_tab_code(width) || width == 0 ||
                 width > gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[panel - 1])))
             {
                 reply = "invalid tab number";
