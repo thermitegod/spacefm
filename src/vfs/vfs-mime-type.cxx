@@ -283,38 +283,39 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
     if (!icon)
     {
         // guess icon
-        const char* sep = strchr(mime_type->type, '/');
-        if (sep)
+
+        const auto mime_parts = ztd::partition(mime_type->type, "/");
+        const std::string mime = mime_parts[0];
+        const std::string type = mime_parts[2];
+
+        if (ztd::contains(mime_type->type, "/"))
         {
-            char icon_name[100];
-            /* convert mime-type foo/bar to foo-bar */
-            strncpy(icon_name, mime_type->type, sizeof(icon_name));
-            icon_name[(sep - mime_type->type)] = '-';
-            /* is there an icon named foo-bar? */
-            icon = vfs_load_icon(icon_name, size);
+            std::string icon_name;
+
+            // convert mime-type foo/bar to foo-bar
+            icon_name = ztd::replace(mime_type->type, "/", "-");
+
+            // is there an icon named foo-bar?
+            icon = vfs_load_icon(icon_name.c_str(), size);
             if (!icon)
             {
-                /* maybe we can find a legacy icon named gnome-mime-foo-bar */
-                strncpy(icon_name, "gnome-mime-", sizeof(icon_name));
-                strncat(icon_name, mime_type->type, (sep - mime_type->type));
-                strcat(icon_name, "-");
-                strcat(icon_name, sep + 1);
-                icon = vfs_load_icon(icon_name, size);
+                // maybe we can find a legacy icon named gnome-mime-foo-bar
+                icon_name = fmt::format("gnome-mime-{}-{}", mime, type);
+                icon = vfs_load_icon(icon_name.c_str(), size);
             }
-            /* try gnome-mime-foo */
+
+            // try gnome-mime-foo
             if (!icon)
             {
-                icon_name[11] = '\0'; /* std::strlen("gnome-mime-") = 11 */
-                strncat(icon_name, mime_type->type, (sep - mime_type->type));
-                icon = vfs_load_icon(icon_name, size);
+                icon_name = fmt::format("gnome-mime-{}", mime);
+                icon = vfs_load_icon(icon_name.c_str(), size);
             }
-            /* try foo-x-generic */
+
+            // try foo-x-generic
             if (!icon)
             {
-                strncpy(icon_name, mime_type->type, (sep - mime_type->type));
-                icon_name[(sep - mime_type->type)] = '\0';
-                strcat(icon_name, "-x-generic");
-                icon = vfs_load_icon(icon_name, size);
+                icon_name = fmt::format("{}-x-generic", mime);
+                icon = vfs_load_icon(icon_name.c_str(), size);
             }
         }
     }
