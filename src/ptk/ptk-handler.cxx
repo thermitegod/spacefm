@@ -753,22 +753,16 @@ ptk_handler_command_is_empty(std::string_view command)
     if (command.empty())
         return true;
 
-    char** lines = g_strsplit(command.data(), "\n", 0);
-    if (!lines)
-        return true;
-
-    bool found = false;
-    for (int i = 0; lines[i]; ++i)
+    const auto cmd_parts = ztd::split(command, "\n");
+    for (std::string_view cmd_line: cmd_parts)
     {
-        g_strstrip(lines[i]);
-        if (lines[i][0] != '\0' && lines[i][0] != '#')
-        {
-            found = true;
-            break;
-        }
+        if (ztd::strip(cmd_line).empty())
+            continue;
+
+        if (!ztd::startswith(ztd::strip(cmd_line), "#"))
+            return false;
     }
-    g_strfreev(lines);
-    return !found;
+    return true;
 }
 
 void
