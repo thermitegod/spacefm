@@ -986,7 +986,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         set->menu_style = XSetMenu::NORMAL;
         if (set->shared_key)
             free(set->shared_key);
-        set->shared_key = ztd::strdup(translate_xset_name_from(XSetName::OPEN_ALL));
+        set->shared_key = ztd::strdup(xset_get_name_from_xsetname(XSetName::OPEN_ALL));
         set2 = xset_get(XSetName::OPEN_ALL);
         if (set->menu_label)
             free(set->menu_label);

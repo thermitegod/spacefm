@@ -31,6 +31,7 @@
 
 #include "types.hxx"
 
+#include "xset.hxx"
 #include "xset-lookup.hxx"
 
 #define XSET(obj) (static_cast<xset_t>(obj))
@@ -54,159 +55,6 @@ const char* xset_get_user_tmp_dir();
 ///////////////////////////////////////////////////////////////////////////////
 // MOD extra settings below
 
-enum class XSetVar
-{
-    S,
-    B,
-    X,
-    Y,
-    Z,
-    KEY,
-    KEYMOD,
-    STYLE,
-    DESC,
-    TITLE,
-    MENU_LABEL,
-    ICN,
-    MENU_LABEL_CUSTOM,
-    ICON,
-    SHARED_KEY,
-    NEXT,
-    PREV,
-    PARENT,
-    CHILD,
-    CONTEXT,
-    LINE,
-    TOOL,
-    TASK,
-    TASK_POP,
-    TASK_ERR,
-    TASK_OUT,
-    RUN_IN_TERMINAL,
-    KEEP_TERMINAL,
-    SCROLL_LOCK,
-    DISABLE,
-    OPENER
-};
-
-enum class XSetCMD
-{
-    LINE,
-    SCRIPT,
-    APP,
-    BOOKMARK,
-    INVALID // Must be last
-};
-
-enum class XSetMenu
-{ // do not reorder - these values are saved in session files
-    NORMAL,
-    CHECK,
-    STRING,
-    RADIO,
-    FILEDLG,
-    FONTDLG,
-    ICON,
-    COLORDLG,
-    CONFIRM,
-    RESERVED_03,
-    RESERVED_04,
-    RESERVED_05,
-    RESERVED_06,
-    RESERVED_07,
-    RESERVED_08,
-    RESERVED_09,
-    RESERVED_10,
-    SUBMENU, // add new before submenu
-    SEP
-};
-
-enum class XSetTool
-{ // do not reorder - these values are saved in session files
-  // also update builtin_tool_name builtin_tool_icon in settings.c
-    NOT,
-    CUSTOM,
-    DEVICES,
-    BOOKMARKS,
-    TREE,
-    HOME,
-    DEFAULT,
-    UP,
-    BACK,
-    BACK_MENU,
-    FWD,
-    FWD_MENU,
-    REFRESH,
-    NEW_TAB,
-    NEW_TAB_HERE,
-    SHOW_HIDDEN,
-    SHOW_THUMB,
-    LARGE_ICONS,
-    INVALID // Must be last
-};
-
-enum class XSetJob
-{
-    KEY,
-    ICON,
-    LABEL,
-    EDIT,
-    EDIT_ROOT,
-    LINE,
-    SCRIPT,
-    CUSTOM,
-    TERM,
-    KEEP,
-    USER,
-    TASK,
-    POP,
-    ERR,
-    OUT,
-    BOOKMARK,
-    APP,
-    COMMAND,
-    SUBMENU,
-    SUBMENU_BOOK,
-    SEP,
-    ADD_TOOL,
-    IMPORT_FILE,
-    IMPORT_GTK,
-    CUT,
-    COPY,
-    PASTE,
-    REMOVE,
-    REMOVE_BOOK,
-    NORMAL,
-    CHECK,
-    CONFIRM,
-    DIALOG,
-    MESSAGE,
-    COPYNAME,
-    PROP,
-    PROP_CMD,
-    IGNORE_CONTEXT,
-    SCROLL,
-    EXPORT,
-    BROWSE_FILES,
-    BROWSE_DATA,
-    BROWSE_PLUGIN,
-    HELP,
-    HELP_NEW,
-    HELP_ADD,
-    HELP_BROWSE,
-    HELP_STYLE,
-    HELP_BOOK,
-    TOOLTIPS,
-    INVALID // Must be last
-};
-
-enum XSetB
-{
-    XSET_B_UNSET,
-    XSET_B_TRUE,
-    XSET_B_FALSE
-};
-
 enum class PluginJob
 {
     INSTALL,
@@ -223,69 +71,6 @@ enum class PluginUse
     BOOKMARKS,
     NORMAL
 };
-
-struct PtkFileBrowser;
-
-struct XSet
-{
-    XSet(const std::string& name, XSetName xset_name);
-    ~XSet();
-
-    char* name{nullptr};
-    XSetName xset_name;
-
-    XSetB b{XSetB::XSET_B_UNSET};          // saved, tri-state enum 0=unset(false) 1=true 2=false
-    char* s{nullptr};                      // saved
-    char* x{nullptr};                      // saved
-    char* y{nullptr};                      // saved
-    char* z{nullptr};                      // saved, for menu_string locked, stores default
-    bool disable{false};                   // not saved
-    char* menu_label{nullptr};             // saved
-    XSetMenu menu_style{XSetMenu::NORMAL}; // saved if ( !lock ), or read if locked
-    GFunc cb_func{nullptr};                // not saved
-    void* cb_data{nullptr};                // not saved
-    char* ob1{nullptr};                    // not saved
-    void* ob1_data{nullptr};               // not saved
-    char* ob2{nullptr};                    // not saved
-    void* ob2_data{nullptr};               // not saved
-    PtkFileBrowser* browser{nullptr};      // not saved - set automatically
-    unsigned int key{0};                   // saved
-    unsigned int keymod{0};                // saved
-    char* shared_key{nullptr};             // not saved
-    char* icon{nullptr};                   // saved
-    char* desc{nullptr};                   // saved if ( !lock ), or read if locked
-    char* title{nullptr};                  // saved if ( !lock ), or read if locked
-    char* next{nullptr};                   // saved
-    char* context{nullptr};                // saved
-    XSetTool tool{XSetTool::NOT};          // saved
-    bool lock{true};                       // not saved
-
-    // Custom Command ( !lock )
-    char* prev{nullptr};   // saved
-    char* parent{nullptr}; // saved
-    char* child{nullptr};  // saved
-    char* line{nullptr};   // saved or help if lock
-    // x = XSetCMD::LINE..XSetCMD::BOOKMARK
-    // y = user
-    // z = custom executable
-    bool task{false};          // saved
-    bool task_pop{false};      // saved
-    bool task_err{false};      // saved
-    bool task_out{false};      // saved
-    bool in_terminal{false};   // saved, or save menu_label if lock
-    bool keep_terminal{false}; // saved, or save icon if lock
-    bool scroll_lock{false};   // saved
-    char opener{0};            // saved
-
-    // Plugin (not saved at all)
-    bool plugin{false};       // not saved
-    bool plugin_top{false};   // not saved
-    char* plug_name{nullptr}; // not saved
-    char* plug_dir{nullptr};  // not saved
-};
-
-// using xset_t = std::unique_ptr<XSet>;
-using xset_t = ztd::raw_ptr<XSet>;
 
 // cache these for speed in event handlers
 struct EventHandler
@@ -323,59 +108,7 @@ struct XSetContext
 
 void xset_set_window_icon(GtkWindow* win);
 
-xset_t xset_is(XSetName name);
-xset_t xset_is(const std::string& name);
-
-xset_t xset_get(XSetName name);
-xset_t xset_get(const std::string& name);
-
-xset_t xset_get_panel(panel_t panel, const std::string& name);
-xset_t xset_get_panel(panel_t panel, XSetPanel name);
-xset_t xset_get_panel_mode(panel_t panel, const std::string& name, char mode);
-xset_t xset_get_panel_mode(panel_t panel, XSetPanel name, char mode);
-
-int xset_get_int(XSetName name, XSetVar var);
-int xset_get_int(const std::string& name, XSetVar var);
-int xset_get_int_panel(panel_t panel, const std::string& name, XSetVar var);
-int xset_get_int_panel(panel_t panel, XSetPanel name, XSetVar var);
-
-char* xset_get_s(XSetName name);
-char* xset_get_s(const std::string& name);
-char* xset_get_s_panel(panel_t panel, const std::string& name);
-char* xset_get_s_panel(panel_t panel, XSetPanel name);
-
-bool xset_get_b(XSetName name);
-bool xset_get_b(const std::string& name);
-bool xset_get_b_panel(panel_t panel, const std::string& name);
-bool xset_get_b_panel(panel_t panel, XSetPanel name);
-bool xset_get_b_panel_mode(panel_t panel, const std::string& name, char mode);
-bool xset_get_b_panel_mode(panel_t panel, XSetPanel name, char mode);
-
-xset_t xset_set_b(XSetName name, bool bval);
-xset_t xset_set_b(const std::string& name, bool bval);
-xset_t xset_set_b_panel(panel_t panel, const std::string& name, bool bval);
-xset_t xset_set_b_panel(panel_t panel, XSetPanel name, bool bval);
-xset_t xset_set_b_panel_mode(panel_t panel, const std::string& name, char mode, bool bval);
-xset_t xset_set_b_panel_mode(panel_t panel, XSetPanel name, char mode, bool bval);
-
-xset_t xset_set_panel(panel_t panel, const std::string& name, XSetVar var,
-                      const std::string& value);
-xset_t xset_set_panel(panel_t panel, XSetPanel name, XSetVar var, const std::string& value);
-
-xset_t xset_set_cb(XSetName name, GFunc cb_func, void* cb_data);
-xset_t xset_set_cb(const std::string& name, GFunc cb_func, void* cb_data);
-xset_t xset_set_cb_panel(panel_t panel, const std::string& name, GFunc cb_func, void* cb_data);
-xset_t xset_set_cb_panel(panel_t panel, XSetPanel name, GFunc cb_func, void* cb_data);
-
-xset_t xset_set(XSetName name, XSetVar var, const std::string& value);
-xset_t xset_set(const std::string& name, XSetVar var, const std::string& value);
-xset_t xset_set_var(xset_t set, XSetVar var, const std::string& value);
-
 void xset_set_key(GtkWidget* parent, xset_t set);
-
-xset_t xset_set_ob1_int(xset_t set, const char* ob1, int ob1_int);
-xset_t xset_set_ob1(xset_t set, const char* ob1, void* ob1_data);
-xset_t xset_set_ob2(xset_t set, const char* ob2, void* ob2_data);
 
 XSetContext* xset_context_new();
 xset_t xset_get_plugin_mirror(xset_t set);
@@ -418,8 +151,8 @@ GtkTextView* multi_input_new(GtkScrolledWindow* scrolled, const char* text);
 void multi_input_select_region(GtkWidget* input, int start, int end);
 char* multi_input_get_text(GtkWidget* input);
 
-std::vector<xset_t> xset_get_plugins();
-void xset_clear_plugins(std::vector<xset_t>& plugins);
+const std::vector<xset_t> xset_get_plugins();
+void xset_clear_plugins(const std::vector<xset_t>& plugins);
 
 void install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& path,
                          const std::string& plug_dir, PluginJob job, xset_t insert_set);

@@ -1731,7 +1731,7 @@ is_in_xset_map_test(XSetName name)
 #endif
 
 XSetName
-translate_xset_name_to(const std::string& name)
+xset_get_xsetname_from_name(const std::string& name)
 {
     for (auto it = xset_name_map.begin(); it != xset_name_map.end(); ++it)
     {
@@ -1742,7 +1742,7 @@ translate_xset_name_to(const std::string& name)
 }
 
 const std::string&
-translate_xset_name_from(XSetName name)
+xset_get_name_from_xsetname(XSetName name)
 {
     try
     {

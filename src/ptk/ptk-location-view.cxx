@@ -2993,7 +2993,7 @@ ptk_bookmark_view_get_first_bookmark(xset_t book_set)
         child_set->menu_label = ztd::strdup("Home");
         child_set->z = ztd::strdup(vfs_user_home_dir());
         child_set->x = ztd::strdup(INT(XSetCMD::BOOKMARK));
-        child_set->parent = ztd::strdup(translate_xset_name_from(XSetName::MAIN_BOOK));
+        child_set->parent = ztd::strdup(xset_get_name_from_xsetname(XSetName::MAIN_BOOK));
         book_set->child = ztd::strdup(child_set->name);
         child_set->task = false;
         child_set->task_err = false;
@@ -3244,7 +3244,7 @@ ptk_bookmark_view_xset_changed(GtkTreeView* view, PtkFileBrowser* file_browser,
             // The loaded book set has been deleted
             free(file_browser->book_set_name);
             file_browser->book_set_name =
-                ztd::strdup(translate_xset_name_from(XSetName::MAIN_BOOK));
+                ztd::strdup(xset_get_name_from_xsetname(XSetName::MAIN_BOOK));
             ptk_bookmark_view_reload_list(view, xset_get(XSetName::MAIN_BOOK));
         }
         return;
@@ -3832,13 +3832,13 @@ ptk_bookmark_view_new(PtkFileBrowser* file_browser)
 
     // fill list
     if (!file_browser->book_set_name)
-        file_browser->book_set_name = ztd::strdup(translate_xset_name_from(XSetName::MAIN_BOOK));
+        file_browser->book_set_name = ztd::strdup(xset_get_name_from_xsetname(XSetName::MAIN_BOOK));
     xset_t set = xset_is(file_browser->book_set_name);
     if (!set)
     {
         set = xset_get(XSetName::MAIN_BOOK);
         free(file_browser->book_set_name);
-        file_browser->book_set_name = ztd::strdup(translate_xset_name_from(XSetName::MAIN_BOOK));
+        file_browser->book_set_name = ztd::strdup(xset_get_name_from_xsetname(XSetName::MAIN_BOOK));
     }
     ptk_bookmark_view_reload_list(GTK_TREE_VIEW(view), set);
 

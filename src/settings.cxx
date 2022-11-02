@@ -77,11 +77,9 @@
 // MOD settings
 static void xset_defaults();
 
-std::vector<xset_t> xsets;
 static std::vector<xset_t> keysets;
 static xset_t set_clipboard = nullptr;
 static bool clipboard_is_cut;
-static xset_t set_last;
 
 std::string settings_config_dir;
 std::string settings_user_tmp_dir;
@@ -352,32 +350,15 @@ xset_parse(std::string& line)
     if (value.empty())
         return;
 
-    if (ztd::startswith(token, "cstm_") || ztd::startswith(token, "hand_"))
-    {
-        // custom
-        if (ztd::same(token, set_last->name))
-        {
-            xset_set_var(set_last, var, value);
-        }
-        else
-        {
-            set_last = xset_get(token);
-            if (set_last->lock)
-                set_last->lock = false;
-            xset_set_var(set_last, var, value);
-        }
+    xset_t set = xset_get(token);
+    if (ztd::startswith(set->name, "cstm_") || ztd::startswith(set->name, "hand_"))
+    { // custom
+        if (set->lock)
+            set->lock = false;
     }
     else
-    {
-        // normal (lock)
-        if (ztd::same(token, set_last->name))
-        {
-            xset_set_var(set_last, var, value);
-        }
-        else
-        {
-            set_last = xset_set(token, var, value);
-        }
+    { // normal (lock)
+        xset_set_var(set, var, value);
     }
 }
 #endif // Deprecated INI loader - end
@@ -512,30 +493,16 @@ config_parse_xset(const toml::value& toml_data, std::uint64_t version)
                     return;
                 }
 
-                if (ztd::startswith(name, "cstm_") || ztd::startswith(name, "hand_"))
-                {
-                    if (ztd::same(name, set_last->name))
-                    { // custom
-                        xset_set_var(set_last, var, value);
-                    }
-                    else
-                    {
-                        set_last = xset_get(name);
-                        if (set_last->lock)
-                            set_last->lock = false;
-                        xset_set_var(set_last, var, value);
-                    }
+                xset_t set = xset_get(name);
+                if (ztd::startswith(set->name, "cstm_") || ztd::startswith(set->name, "hand_"))
+                { // custom
+                    if (set->lock)
+                        set->lock = false;
+                    xset_set_var(set, var, value);
                 }
                 else
-                {
-                    if (ztd::same(name, set_last->name))
-                    { // normal (lock)
-                        xset_set_var(set_last, var, value);
-                    }
-                    else
-                    {
-                        set_last = xset_set(name, var, value);
-                    }
+                { // normal (lock)
+                    xset_set_var(set, var, value);
                 }
             }
         }
@@ -1092,8 +1059,6 @@ xset_free_all()
         delete set;
     }
 
-    set_last = nullptr;
-
     if (xset_context)
         delete xset_context;
 }
@@ -1104,383 +1069,6 @@ xset_remove(xset_t set)
     xsets.erase(std::remove(xsets.begin(), xsets.end(), set), xsets.end());
 
     delete set;
-
-    set_last = nullptr;
-}
-
-XSet::XSet(const std::string& name, XSetName xset_name)
-{
-    // LOG_INFO("XSet Constructor");
-
-    this->name = ztd::strdup(name);
-    this->xset_name = xset_name;
-}
-
-XSet::~XSet()
-{
-    // LOG_INFO("XSet Destructor");
-
-    if (this->name)
-        free(this->name);
-    if (this->s)
-        free(this->s);
-    if (this->x)
-        free(this->x);
-    if (this->y)
-        free(this->y);
-    if (this->z)
-        free(this->z);
-    if (this->menu_label)
-        free(this->menu_label);
-    if (this->shared_key)
-        free(this->shared_key);
-    if (this->icon)
-        free(this->icon);
-    if (this->desc)
-        free(this->desc);
-    if (this->title)
-        free(this->title);
-    if (this->next)
-        free(this->next);
-    if (this->parent)
-        free(this->parent);
-    if (this->child)
-        free(this->child);
-    if (this->prev)
-        free(this->prev);
-    if (this->line)
-        free(this->line);
-    if (this->context)
-        free(this->context);
-    if (this->plugin)
-    {
-        if (this->plug_dir)
-            free(this->plug_dir);
-        if (this->plug_name)
-            free(this->plug_name);
-    }
-}
-
-static xset_t
-xset_new(const std::string& name, XSetName xset_name)
-{
-    xset_t set = new XSet(name, xset_name);
-
-    return set;
-}
-
-xset_t
-xset_get(const std::string& name)
-{
-#ifdef XSET_MAP_TEST
-    if (!is_in_xset_map_test(name))
-    {
-        if (!ztd::startswith(name, "cstm_"))
-        {
-            // std::cout << name << std::endl;
-            LOG_INFO("set name not found in XSetName: {}", name);
-        }
-    }
-#endif
-
-    for (xset_t set: xsets)
-    {
-        // check for existing xset
-        if (ztd::same(name, set->name))
-            return set;
-    }
-
-    xset_t set = xset_new(name, translate_xset_name_to(name));
-    xsets.push_back(set);
-    return set;
-}
-
-xset_t
-xset_get(XSetName name)
-{
-    for (xset_t set: xsets)
-    {
-        // check for existing xset
-        if (name == set->xset_name)
-            return set;
-    }
-
-    xset_t set = xset_new(translate_xset_name_from(name), name);
-    xsets.push_back(set);
-    return set;
-}
-
-xset_t
-xset_get_panel(panel_t panel, const std::string& name)
-{
-    std::string fullname = fmt::format("panel{}_{}", panel, name);
-    xset_t set = xset_get(fullname);
-    return set;
-}
-
-xset_t
-xset_get_panel(panel_t panel, XSetPanel name)
-{
-    return xset_get(xset_get_xsetname_from_panel(panel, name));
-}
-
-xset_t
-xset_get_panel_mode(panel_t panel, const std::string& name, const char mode)
-{
-    // FMT BUG - need to use std::to_string on char
-    // otherwise it gets ignored and not added to new string
-    std::string fullname = fmt::format("panel{}_{}{}", panel, name, std::to_string(mode));
-    xset_t set = xset_get(fullname);
-    return set;
-}
-
-xset_t
-xset_get_panel_mode(panel_t panel, XSetPanel name, const char mode)
-{
-    return xset_get(xset_get_xsetname_from_panel_mode(panel, name, mode));
-}
-
-char*
-xset_get_s(XSetName name)
-{
-    xset_t set = xset_get(name);
-    if (set)
-        return set->s;
-    return nullptr;
-}
-
-char*
-xset_get_s(const std::string& name)
-{
-    xset_t set = xset_get(name);
-    if (set)
-        return set->s;
-    return nullptr;
-}
-
-char*
-xset_get_s_panel(panel_t panel, const std::string& name)
-{
-    std::string fullname = fmt::format("panel{}_{}", panel, name);
-    return xset_get_s(fullname);
-}
-
-char*
-xset_get_s_panel(panel_t panel, XSetPanel name)
-{
-    return xset_get_s(xset_get_xsetname_from_panel(panel, name));
-}
-
-bool
-xset_get_b(XSetName name)
-{
-    xset_t set = xset_get(name);
-    return (set->b == XSetB::XSET_B_TRUE);
-}
-
-bool
-xset_get_b(const std::string& name)
-{
-    xset_t set = xset_get(name);
-    return (set->b == XSetB::XSET_B_TRUE);
-}
-
-bool
-xset_get_b_panel(panel_t panel, const std::string& name)
-{
-    std::string fullname = fmt::format("panel{}_{}", panel, name);
-    return xset_get_b(fullname);
-}
-
-bool
-xset_get_b_panel(panel_t panel, XSetPanel name)
-{
-    return xset_get_b(xset_get_xsetname_from_panel(panel, name));
-}
-
-bool
-xset_get_b_panel_mode(panel_t panel, const std::string& name, const char mode)
-{
-    // FMT BUG - need to use std::to_string on char
-    // otherwise it gets ignored and not added to new string
-    std::string fullname = fmt::format("panel{}_{}{}", panel, name, std::to_string(mode));
-    return xset_get_b(fullname);
-}
-
-bool
-xset_get_b_panel_mode(panel_t panel, XSetPanel name, const char mode)
-{
-    return xset_get_b(xset_get_xsetname_from_panel_mode(panel, name, mode));
-}
-
-static bool
-xset_get_b_set(xset_t set)
-{
-    return (set->b == XSetB::XSET_B_TRUE);
-}
-
-xset_t
-xset_is(XSetName name)
-{
-    for (xset_t set: xsets)
-    {
-        // check for existing xset
-        if (name == set->xset_name)
-            return set;
-    }
-    return nullptr;
-}
-
-xset_t
-xset_is(const std::string& name)
-{
-    for (xset_t set: xsets)
-    {
-        // check for existing xset
-        if (ztd::same(name, set->name))
-            return set;
-    }
-    return nullptr;
-}
-
-xset_t
-xset_set_b(XSetName name, bool bval)
-{
-    xset_t set = xset_get(name);
-
-    if (bval)
-        set->b = XSetB::XSET_B_TRUE;
-    else
-        set->b = XSetB::XSET_B_FALSE;
-    return set;
-}
-
-xset_t
-xset_set_b(const std::string& name, bool bval)
-{
-    xset_t set = xset_get(name);
-
-    if (bval)
-        set->b = XSetB::XSET_B_TRUE;
-    else
-        set->b = XSetB::XSET_B_FALSE;
-    return set;
-}
-
-xset_t
-xset_set_b_panel(panel_t panel, const std::string& name, bool bval)
-{
-    std::string fullname = fmt::format("panel{}_{}", panel, name);
-    xset_t set = xset_set_b(fullname, bval);
-    return set;
-}
-
-xset_t
-xset_set_b_panel(panel_t panel, XSetPanel name, bool bval)
-{
-    return xset_set_b(xset_get_xsetname_from_panel(panel, name), bval);
-}
-
-xset_t
-xset_set_b_panel_mode(panel_t panel, const std::string& name, const char mode, bool bval)
-{
-    // FMT BUG - need to use std::to_string on char
-    // otherwise it gets ignored and not added to new string
-    std::string fullname = fmt::format("panel{}_{}{}", panel, name, std::to_string(mode));
-    xset_t set = xset_set_b(fullname, bval);
-    return set;
-}
-
-xset_t
-xset_set_b_panel_mode(panel_t panel, XSetPanel name, const char mode, bool bval)
-{
-    return xset_set_b(xset_get_xsetname_from_panel_mode(panel, name, mode), bval);
-}
-
-static int
-xset_get_int_set(xset_t set, XSetVar var)
-{
-    if (!set)
-        return -1;
-
-    const char* varstring = nullptr;
-    switch (var)
-    {
-        case XSetVar::S:
-            varstring = set->s;
-            break;
-        case XSetVar::X:
-            varstring = set->x;
-            break;
-        case XSetVar::Y:
-            varstring = set->y;
-            break;
-        case XSetVar::Z:
-            varstring = set->z;
-            break;
-        case XSetVar::KEY:
-            return set->key;
-        case XSetVar::KEYMOD:
-            return set->keymod;
-        case XSetVar::B:
-        case XSetVar::STYLE:
-        case XSetVar::DESC:
-        case XSetVar::TITLE:
-        case XSetVar::MENU_LABEL:
-        case XSetVar::ICN:
-        case XSetVar::MENU_LABEL_CUSTOM:
-        case XSetVar::ICON:
-        case XSetVar::SHARED_KEY:
-        case XSetVar::NEXT:
-        case XSetVar::PREV:
-        case XSetVar::PARENT:
-        case XSetVar::CHILD:
-        case XSetVar::CONTEXT:
-        case XSetVar::LINE:
-        case XSetVar::TOOL:
-        case XSetVar::TASK:
-        case XSetVar::TASK_POP:
-        case XSetVar::TASK_ERR:
-        case XSetVar::TASK_OUT:
-        case XSetVar::RUN_IN_TERMINAL:
-        case XSetVar::KEEP_TERMINAL:
-        case XSetVar::SCROLL_LOCK:
-        case XSetVar::DISABLE:
-        case XSetVar::OPENER:
-        default:
-            return -1;
-    }
-
-    if (!varstring)
-        return 0;
-    return std::stol(varstring);
-}
-
-int
-xset_get_int(XSetName name, XSetVar var)
-{
-    xset_t set = xset_get(name);
-    return xset_get_int_set(set, var);
-}
-
-int
-xset_get_int(const std::string& name, XSetVar var)
-{
-    xset_t set = xset_get(name);
-    return xset_get_int_set(set, var);
-}
-
-int
-xset_get_int_panel(panel_t panel, const std::string& name, XSetVar var)
-{
-    std::string fullname = fmt::format("panel{}_{}", panel, name);
-    return xset_get_int(fullname, var);
-}
-
-int
-xset_get_int_panel(panel_t panel, XSetPanel name, XSetVar var)
-{
-    return xset_get_int(xset_get_xsetname_from_panel(panel, name), var);
 }
 
 static xset_t
@@ -1509,68 +1097,6 @@ xset_is_main_bookmark(xset_t set)
             break;
     }
     return nullptr;
-}
-
-xset_t
-xset_set_cb(XSetName name, GFunc cb_func, void* cb_data)
-{
-    xset_t set = xset_get(name);
-    set->cb_func = cb_func;
-    set->cb_data = cb_data;
-    return set;
-}
-
-xset_t
-xset_set_cb(const std::string& name, GFunc cb_func, void* cb_data)
-{
-    xset_t set = xset_get(name);
-    set->cb_func = cb_func;
-    set->cb_data = cb_data;
-    return set;
-}
-
-xset_t
-xset_set_cb_panel(panel_t panel, const std::string& name, GFunc cb_func, void* cb_data)
-{
-    std::string fullname = fmt::format("panel{}_{}", panel, name);
-    xset_t set = xset_set_cb(fullname, cb_func, cb_data);
-    return set;
-}
-
-xset_t
-xset_set_cb_panel(panel_t panel, XSetPanel name, GFunc cb_func, void* cb_data)
-{
-    return xset_set_cb(xset_get_xsetname_from_panel(panel, name), cb_func, cb_data);
-}
-
-xset_t
-xset_set_ob1_int(xset_t set, const char* ob1, int ob1_int)
-{
-    if (set->ob1)
-        free(set->ob1);
-    set->ob1 = ztd::strdup(ob1);
-    set->ob1_data = GINT_TO_POINTER(ob1_int);
-    return set;
-}
-
-xset_t
-xset_set_ob1(xset_t set, const char* ob1, void* ob1_data)
-{
-    if (set->ob1)
-        free(set->ob1);
-    set->ob1 = ztd::strdup(ob1);
-    set->ob1_data = ob1_data;
-    return set;
-}
-
-xset_t
-xset_set_ob2(xset_t set, const char* ob2, void* ob2_data)
-{
-    if (set->ob2)
-        free(set->ob2);
-    set->ob2 = ztd::strdup(ob2);
-    set->ob2_data = ob2_data;
-    return set;
 }
 
 static XSetVar
@@ -1661,228 +1187,6 @@ xset_set_var_encode(const std::string& var)
         throw std::logic_error(err_msg);
     }
     return tmp;
-}
-
-xset_t
-xset_set_var(xset_t set, XSetVar var, const std::string& value)
-{
-    if (!set)
-        return nullptr;
-
-    switch (var)
-    {
-        case XSetVar::S:
-            if (set->s)
-                free(set->s);
-            set->s = ztd::strdup(value);
-            break;
-        case XSetVar::B:
-            if (ztd::same(value, "1"))
-                set->b = XSetB::XSET_B_TRUE;
-            else
-                set->b = XSetB::XSET_B_FALSE;
-            break;
-        case XSetVar::X:
-            if (set->x)
-                free(set->x);
-            set->x = ztd::strdup(value);
-            break;
-        case XSetVar::Y:
-            if (set->y)
-                free(set->y);
-            set->y = ztd::strdup(value);
-            break;
-        case XSetVar::Z:
-            if (set->z)
-                free(set->z);
-            set->z = ztd::strdup(value);
-            break;
-        case XSetVar::KEY:
-            set->key = std::stoul(value);
-            break;
-        case XSetVar::KEYMOD:
-            set->keymod = std::stoul(value);
-            break;
-        case XSetVar::STYLE:
-            set->menu_style = XSetMenu(std::stoi(value));
-            break;
-        case XSetVar::DESC:
-            if (set->desc)
-                free(set->desc);
-            set->desc = ztd::strdup(value);
-            break;
-        case XSetVar::TITLE:
-            if (set->title)
-                free(set->title);
-            set->title = ztd::strdup(value);
-            break;
-        case XSetVar::MENU_LABEL:
-            // lbl is only used >= 0.9.0 for changed lock default menu_label
-            if (set->menu_label)
-                free(set->menu_label);
-            set->menu_label = ztd::strdup(value);
-            if (set->lock)
-                // indicate that menu label is not default and should be saved
-                set->in_terminal = true;
-            break;
-        case XSetVar::ICN:
-            // icn is only used >= 0.9.0 for changed lock default icon
-            if (set->icon)
-                free(set->icon);
-            set->icon = ztd::strdup(value);
-            if (set->lock)
-                // indicate that icon is not default and should be saved
-                set->keep_terminal = true;
-            break;
-        case XSetVar::MENU_LABEL_CUSTOM:
-            // pre-0.9.0 menu_label or >= 0.9.0 custom item label
-            // only save if custom or not default label
-            if (!set->lock || !ztd::same(set->menu_label, value))
-            {
-                if (set->menu_label)
-                    free(set->menu_label);
-                set->menu_label = ztd::strdup(value);
-                if (set->lock)
-                    // indicate that menu label is not default and should be saved
-                    set->in_terminal = true;
-            }
-            break;
-        case XSetVar::ICON:
-            // pre-0.9.0 icon or >= 0.9.0 custom item icon
-            // only save if custom or not default icon
-            // also check that stock name does not match
-            break;
-        case XSetVar::SHARED_KEY:
-            if (set->shared_key)
-                free(set->shared_key);
-            set->shared_key = ztd::strdup(value);
-            break;
-        case XSetVar::NEXT:
-            if (set->next)
-                free(set->next);
-            set->next = ztd::strdup(value);
-            break;
-        case XSetVar::PREV:
-            if (set->prev)
-                free(set->prev);
-            set->prev = ztd::strdup(value);
-            break;
-        case XSetVar::PARENT:
-            if (set->parent)
-                free(set->parent);
-            set->parent = ztd::strdup(value);
-            break;
-        case XSetVar::CHILD:
-            if (set->child)
-                free(set->child);
-            set->child = ztd::strdup(value);
-            break;
-        case XSetVar::CONTEXT:
-            if (set->context)
-                free(set->context);
-            set->context = ztd::strdup(value);
-            break;
-        case XSetVar::LINE:
-            if (set->line)
-                free(set->line);
-            set->line = ztd::strdup(value);
-            break;
-        case XSetVar::TOOL:
-            set->tool = XSetTool(std::stoi(value));
-            break;
-        case XSetVar::TASK:
-            if (std::stoi(value) == 1)
-                set->task = true;
-            else
-                set->task = false;
-            break;
-        case XSetVar::TASK_POP:
-            if (std::stoi(value) == 1)
-                set->task_pop = true;
-            else
-                set->task_pop = false;
-            break;
-        case XSetVar::TASK_ERR:
-            if (std::stoi(value) == 1)
-                set->task_err = true;
-            else
-                set->task_err = false;
-            break;
-        case XSetVar::TASK_OUT:
-            if (std::stoi(value) == 1)
-                set->task_out = true;
-            else
-                set->task_out = false;
-            break;
-        case XSetVar::RUN_IN_TERMINAL:
-            if (std::stoi(value) == 1)
-                set->in_terminal = true;
-            else
-                set->in_terminal = false;
-            break;
-        case XSetVar::KEEP_TERMINAL:
-            if (std::stoi(value) == 1)
-                set->keep_terminal = true;
-            else
-                set->keep_terminal = false;
-            break;
-        case XSetVar::SCROLL_LOCK:
-            if (std::stoi(value) == 1)
-                set->scroll_lock = true;
-            else
-                set->scroll_lock = false;
-            break;
-        case XSetVar::DISABLE:
-            if (std::stoi(value) == 1)
-                set->disable = true;
-            else
-                set->disable = false;
-            break;
-        case XSetVar::OPENER:
-            set->opener = std::stoi(value);
-            break;
-        default:
-            break;
-    }
-
-    return set;
-}
-
-static xset_t
-_xset_set(xset_t set, XSetVar var, const std::string& value)
-{
-    if (!set->lock || (var != XSetVar::STYLE && var != XSetVar::DESC && var != XSetVar::TITLE &&
-                       var != XSetVar::SHARED_KEY))
-        return xset_set_var(set, var, value);
-    return set;
-}
-
-xset_t
-xset_set(XSetName name, XSetVar var, const std::string& value)
-{
-    xset_t set = xset_get(name);
-    return _xset_set(set, var, value);
-}
-
-xset_t
-xset_set(const std::string& name, XSetVar var, const std::string& value)
-{
-    xset_t set = xset_get(name);
-    return _xset_set(set, var, value);
-}
-
-xset_t
-xset_set_panel(panel_t panel, const std::string& name, XSetVar var, const std::string& value)
-{
-    std::string fullname = fmt::format("panel{}_{}", panel, name);
-    xset_t set = xset_set(fullname, var, value);
-    return set;
-}
-
-xset_t
-xset_set_panel(panel_t panel, XSetPanel name, XSetVar var, const std::string& value)
-{
-    return xset_set(xset_get_xsetname_from_panel(panel, name), var, value);
 }
 
 xset_t
@@ -2759,7 +2063,7 @@ compare_plugin_sets(xset_t a, xset_t b)
     return g_utf8_collate(a->menu_label, b->menu_label);
 }
 
-std::vector<xset_t>
+const std::vector<xset_t>
 xset_get_plugins()
 { // return list of plugin sets sorted by menu_label
     std::vector<xset_t> plugins;
@@ -2774,14 +2078,13 @@ xset_get_plugins()
 }
 
 void
-xset_clear_plugins(std::vector<xset_t>& plugins)
+xset_clear_plugins(const std::vector<xset_t>& plugins)
 {
-    if (!plugins.empty())
-    {
-        for (xset_t set: plugins)
-            xset_remove(set);
-        plugins.clear();
-    }
+    if (plugins.empty())
+        return;
+
+    for (xset_t set: plugins)
+        xset_remove(set);
 }
 
 static xset_t
@@ -4424,7 +3727,7 @@ xset_set_key(GtkWidget* parent, xset_t set)
         name = clean_label(keyset->menu_label, false, true);
         if (set->shared_key)
             free(set->shared_key);
-        set->shared_key = ztd::strdup(translate_xset_name_from(XSetName::OPEN_ALL));
+        set->shared_key = ztd::strdup(xset_get_name_from_xsetname(XSetName::OPEN_ALL));
     }
     else
         name = "( no name )";
@@ -7835,10 +7138,6 @@ static void
 xset_defaults()
 {
     xset_t set;
-
-    // set_last must be set (to anything)
-    set_last = xset_get(XSetName::SEPARATOR);
-    set_last->menu_style = XSetMenu::SEP;
 
     // separator
     set = xset_get(XSetName::SEPARATOR);

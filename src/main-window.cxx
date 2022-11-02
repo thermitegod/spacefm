@@ -1493,7 +1493,7 @@ rebuild_menus(FMMainWindow* main_window)
     {
         child_set = xset_custom_new();
         child_set->menu_label = ztd::strdup("New _Command");
-        child_set->parent = ztd::strdup(translate_xset_name_from(XSetName::MAIN_TOOL));
+        child_set->parent = ztd::strdup(xset_get_name_from_xsetname(XSetName::MAIN_TOOL));
         set->child = ztd::strdup(child_set->name);
     }
     else
@@ -4740,7 +4740,7 @@ on_task_popup_show(GtkMenuItem* item, FMMainWindow* main_window, char* name2)
 
     if (name)
     {
-        XSetName xset_name = translate_xset_name_to(name);
+        XSetName xset_name = xset_get_xsetname_from_name(name);
 
         if (xset_name == XSetName::TASK_SHOW_MANAGER)
         {
@@ -4789,7 +4789,7 @@ on_task_popup_errset(GtkMenuItem* item, FMMainWindow* main_window, char* name2)
     if (!name)
         return;
 
-    XSetName xset_name = translate_xset_name_to(name);
+    XSetName xset_name = xset_get_xsetname_from_name(name);
 
     if (xset_name == XSetName::TASK_ERR_FIRST)
     {
@@ -7398,7 +7398,7 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset
     int exit_status;
 
     std::string command;
-    std::string event_name = translate_xset_name_from(event);
+    std::string event_name = xset_get_name_from_xsetname(event);
 
     if (!ucmd)
         return false;
@@ -7586,7 +7586,7 @@ main_window_event(void* mw, xset_t preset, XSetName event, int panel, int tab, c
     xset_t set;
     bool inhibit = false;
 
-    // LOG_INFO("main_window_event {}", translate_xset_name_from(event));
+    // LOG_INFO("main_window_event {}", xset_get_name_from_xsetname(event));
 
     if (preset)
         set = preset;

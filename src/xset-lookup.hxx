@@ -1177,8 +1177,8 @@ bool is_in_xset_map_test(XSetName name);
 bool is_in_xset_map_test(const std::string& name);
 #endif
 
-XSetName translate_xset_name_to(const std::string& name);
-const std::string& translate_xset_name_from(XSetName name);
+XSetName xset_get_xsetname_from_name(const std::string& name);
+const std::string& xset_get_name_from_xsetname(XSetName name);
 
 XSetName xset_get_xsetname_from_panel(panel_t panel, XSetPanel panel_var);
 const std::string xset_get_name_from_panel(panel_t panel, XSetPanel name);

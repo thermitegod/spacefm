@@ -280,6 +280,8 @@ sources = [
   'src/type-conversion.cxx',
   'src/utils.cxx',
   'src/window-reference.cxx',
+
+  'src/xset.cxx',
   'src/xset-lookup.cxx',
 
   'src/settings/app.cxx',
