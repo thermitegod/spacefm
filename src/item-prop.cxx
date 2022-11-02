@@ -30,8 +30,6 @@
 
 #include <fnmatch.h>
 
-#include <exo/exo.h>
-
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>

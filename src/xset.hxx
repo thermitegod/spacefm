@@ -44,7 +44,7 @@ enum class XSetMenu
     FILEDLG,
     FONTDLG,
     ICON,
-    COLORDLG,
+    COLORDLG, // deprecated
     CONFIRM,
     RESERVED_03,
     RESERVED_04,

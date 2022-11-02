@@ -98,7 +98,6 @@ using SettingsParseFunc = void (*)(std::string& line);
 
 static void xset_free_all();
 static void xset_default_keys();
-static char* xset_color_dialog(GtkWidget* parent, char* title, char* defcolor);
 static bool xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set);
 static void xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventButton* event);
 static xset_t xset_new_builtin_toolitem(XSetTool tool_type);
@@ -1479,7 +1478,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                 case XSetMenu::FILEDLG:
                 case XSetMenu::FONTDLG:
                 case XSetMenu::ICON:
-                case XSetMenu::COLORDLG:
+                case XSetMenu::COLORDLG: // deprecated
                 case XSetMenu::CONFIRM:
                 case XSetMenu::RESERVED_03:
                 case XSetMenu::RESERVED_04:
@@ -2720,7 +2719,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
         case XSetMenu::FILEDLG:
         case XSetMenu::FONTDLG:
         case XSetMenu::ICON:
-        case XSetMenu::COLORDLG:
+        case XSetMenu::COLORDLG: // deprecated
         case XSetMenu::CONFIRM:
         case XSetMenu::RESERVED_03:
         case XSetMenu::RESERVED_04:
@@ -4185,9 +4184,8 @@ xset_job_is_valid(xset_t set, XSetJob job)
             return set->menu_style < XSetMenu::SUBMENU;
         case XSetJob::ICON:
             return ((set->menu_style == XSetMenu::NORMAL || set->menu_style == XSetMenu::STRING ||
-                     set->menu_style == XSetMenu::FONTDLG ||
-                     set->menu_style == XSetMenu::COLORDLG ||
-                     set->menu_style == XSetMenu::SUBMENU || set->tool != XSetTool::NOT) &&
+                     set->menu_style == XSetMenu::FONTDLG || set->menu_style == XSetMenu::SUBMENU ||
+                     set->tool != XSetTool::NOT) &&
                     !open_all);
         case XSetJob::EDIT:
             return !set->lock && set->menu_style < XSetMenu::SUBMENU;
@@ -5078,17 +5076,7 @@ xset_menu_cb(GtkWidget* item, xset_t set)
                     cb_func(item, cb_data);
             }
             break;
-        case XSetMenu::COLORDLG:
-        {
-            char* scolor;
-            scolor = xset_color_dialog(parent, rset->title, rset->s);
-            if (rset->s)
-                free(rset->s);
-            rset->s = scolor;
-            if (cb_func)
-                cb_func(item, cb_data);
-            break;
-        }
+        case XSetMenu::COLORDLG: // deprecated
         case XSetMenu::RESERVED_03:
         case XSetMenu::RESERVED_04:
         case XSetMenu::RESERVED_05:
@@ -5643,54 +5631,6 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
     }
     gtk_widget_destroy(dlg);
     return nullptr;
-}
-
-static char*
-xset_color_dialog(GtkWidget* parent, char* title, char* defcolor)
-{
-    (void)parent;
-    GdkRGBA color;
-    char* scolor = nullptr;
-    GtkWidget* dlg = gtk_color_chooser_dialog_new(title, nullptr);
-    GtkWidget* color_sel = nullptr;
-    GtkWidget* help_button;
-
-    g_object_get(G_OBJECT(dlg), "help-button", &help_button, nullptr);
-
-    gtk_button_set_label(GTK_BUTTON(help_button), "_Unset");
-
-    xset_set_window_icon(GTK_WINDOW(dlg));
-    gtk_window_set_role(GTK_WINDOW(dlg), "color_dialog");
-
-    if (defcolor && defcolor[0] != '\0')
-    {
-        /*
-        if (gdk_rgba_parse(defcolor, &color))
-        {
-            // LOG_INFO("        gdk_rgba_to_string = {}", gdk_rgba_to_string(&color));
-            gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(color_sel), &color);
-        }
-        */
-        gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(color_sel), &color);
-    }
-
-    gtk_widget_show_all(dlg);
-    int response = gtk_dialog_run(GTK_DIALOG(dlg));
-
-    switch (response)
-    {
-        case GTK_RESPONSE_OK:
-            gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(color_sel), &color);
-            scolor = gdk_rgba_to_string(&color);
-            break;
-        default:
-            // cancel, delete_event
-            scolor = ztd::strdup(defcolor);
-            break;
-    }
-
-    gtk_widget_destroy(dlg);
-    return scolor;
 }
 
 static void
@@ -6443,7 +6383,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
         case XSetMenu::FILEDLG:
         case XSetMenu::FONTDLG:
         case XSetMenu::ICON:
-        case XSetMenu::COLORDLG:
+        case XSetMenu::COLORDLG: // deprecated
         case XSetMenu::CONFIRM:
         case XSetMenu::RESERVED_03:
         case XSetMenu::RESERVED_04:

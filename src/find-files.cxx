@@ -36,8 +36,6 @@
 
 #include <sys/wait.h>
 
-#include <exo/exo.h>
-
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
