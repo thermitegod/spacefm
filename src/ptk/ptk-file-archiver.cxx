@@ -1336,7 +1336,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, std::vector<VFSFileInfo*
             // LOG_INFO("dest       : {}", dest);
 
             // Singular file extraction target (e.g. stdout-redirected gzip)
-            std::array<std::string, 2> keys{"%g", "%G"};
+            static constexpr std::array<std::string_view, 2> keys{"%g", "%G"};
             if (ztd::contains(command, keys))
             {
                 /* Creating extraction target, taking into account whether

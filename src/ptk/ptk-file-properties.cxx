@@ -45,18 +45,20 @@
 #include "ptk/ptk-app-chooser.hxx"
 #include "utils.hxx"
 
-static const std::array<const char*, 12> chmod_names{"owner_r",
-                                                     "owner_w",
-                                                     "owner_x",
-                                                     "group_r",
-                                                     "group_w",
-                                                     "group_x",
-                                                     "others_r",
-                                                     "others_w",
-                                                     "others_x",
-                                                     "set_uid",
-                                                     "set_gid",
-                                                     "sticky"};
+static constexpr std::array<const char*, 12> chmod_names{
+    "owner_r",
+    "owner_w",
+    "owner_x",
+    "group_r",
+    "group_w",
+    "group_x",
+    "others_r",
+    "others_w",
+    "others_x",
+    "set_uid",
+    "set_gid",
+    "sticky",
+};
 
 struct FilePropertiesDialogData
 {

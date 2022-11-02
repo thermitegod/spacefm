@@ -54,81 +54,71 @@ enum PtkHandlerJob
     HANDLER_JOB_EXPORT,
     HANDLER_JOB_IMPORT_FILE,
     HANDLER_JOB_RESTORE_ALL,
-    HANDLER_JOB_REMOVE
+    HANDLER_JOB_REMOVE,
 };
 
 // Archive handlers treeview model enum
 enum PtkHandlerCol
 {
     COL_XSET_NAME,
-    COL_HANDLER_NAME
+    COL_HANDLER_NAME,
 };
 
-// clang-format off
 // xset name prefixes of default handlers
-static const std::array<const char*, 4> handler_def_prefixs
-{
+inline constexpr std::array<const char*, 4> handler_def_prefixs{
     "hand_arc_+",
     "hand_fs_+",
     "hand_net_+",
-    "hand_f_+"
+    "hand_f_+",
 };
 
 // xset name prefixes of custom handlers
-static const std::array<const char*, 4> handler_cust_prefixs
-{
+inline constexpr std::array<const char*, 4> handler_cust_prefixs{
     "hand_arc_",
     "hand_fs_",
     "hand_net_",
-    "hand_f_"
+    "hand_f_",
 };
 
-static const std::array<XSetName, 4> handler_conf_xsets
-{
+inline constexpr std::array<XSetName, 4> handler_conf_xsets{
     XSetName::ARC_CONF2,
     XSetName::DEV_FS_CNF,
     XSetName::DEV_NET_CNF,
     XSetName::OPEN_HAND,
 };
 
-static const std::array<const char*, 4> dialog_titles
-{
+inline constexpr std::array<const char*, 4> dialog_titles{
     "Archive Handlers",
     "Device Handlers",
     "Protocol Handlers",
     "File Handlers",
 };
 
-static const std::array<const char*, 4> dialog_mnemonics
-{
+inline constexpr std::array<const char*, 4> dialog_mnemonics{
     "Archive Hand_lers",
     "Device Hand_lers",
     "Protocol Hand_lers",
     "File Hand_lers",
 };
 
-static const std::array<const char*, 4> modes
-{
+inline constexpr std::array<const char*, 4> modes{
     "archive",
     "device",
     "protocol",
-    "file"
+    "file",
 };
 
-static const std::array<const char*, 3> cmds_arc
-{
+inline constexpr std::array<const char*, 3> cmds_arc{
     "compress",
     "extract",
-    "list"
+    "list",
 };
 
-static const std::array<const char*, 3> cmds_mnt
-{
+inline constexpr std::array<const char*, 3> cmds_mnt{
     "mount",
     "unmount",
-    "info"
+    "info",
 };
-// clang-format on
 
 /* do not change this script header or it will break header detection on
  * existing scripts! */
@@ -249,7 +239,7 @@ struct Handler
 
 /* If you add a new handler, add it to (end of ) existing session file handler
  * list so existing users see the new handler. */
-static const std::array<Handler, 13> handlers_arc{
+inline constexpr std::array<Handler, 13> handlers_arc{
     /* In compress commands:
      *   %n: First selected filename/dir to archive
      *   %N: All selected filenames/dirs to archive, or (with %O) a single filename
@@ -408,9 +398,10 @@ static const std::array<Handler, 13> handlers_arc{
             "zstd -dc --long=31 -d %x >| %G",
             false,
             "zstd -dc --long=31 -tlv %x",
-            false}};
+            false},
+};
 
-const std::array<Handler, 3> handlers_fs{
+inline constexpr std::array<Handler, 3> handlers_fs{
     /* In commands:
      *      %v  device
      *      %o  volume-specific mount options (use in mount command only)
@@ -474,9 +465,10 @@ const std::array<Handler, 3> handlers_fs{
             "     udisksctl unmount -b %v\n#\n",
             false,
             INFO_EXAMPLE,
-            false}};
+            false},
+};
 
-static const std::array<Handler, 10> handlers_net{
+inline constexpr std::array<Handler, 10> handlers_net{
     /* In commands:
      *       %url%     $fm_url
      *       %proto%   $fm_url_proto
@@ -657,9 +649,10 @@ static const std::array<Handler, 10> handlers_net{
             "fusermount -u \"%a\"",
             false,
             INFO_EXAMPLE,
-            false}};
+            false},
+};
 
-static const std::array<Handler, 1> handlers_file{
+inline constexpr std::array<Handler, 1> handlers_file{
     /* %a custom mount point
      * Plus standard bash variables are accepted.
      * For file handlers, extract_term is used for Run As Task. */
@@ -693,7 +686,8 @@ static const std::array<Handler, 1> handlers_file{
         "",
         true, // Run As Task
         "",
-        false}};
+        false},
+};
 
 // Function prototypes
 static void on_configure_handler_enabled_check(GtkToggleButton* togglebutton, HandlerData* hnd);
@@ -2734,7 +2728,7 @@ static void
 on_archive_default(GtkMenuItem* menuitem, xset_t set)
 {
     (void)menuitem;
-    const std::array<XSetName, 4> arcnames{
+    static constexpr std::array<XSetName, 4> arcnames{
         XSetName::ARC_DEF_OPEN,
         XSetName::ARC_DEF_EX,
         XSetName::ARC_DEF_EXTO,

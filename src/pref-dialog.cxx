@@ -77,23 +77,27 @@ struct FMPrefDlg
 
 static FMPrefDlg* data = nullptr;
 
-static const std::array<int, 7> tool_icon_sizes{0,
-                                                GTK_ICON_SIZE_MENU,
-                                                GTK_ICON_SIZE_SMALL_TOOLBAR,
-                                                GTK_ICON_SIZE_LARGE_TOOLBAR,
-                                                GTK_ICON_SIZE_BUTTON,
-                                                GTK_ICON_SIZE_DND,
-                                                GTK_ICON_SIZE_DIALOG};
+inline constexpr std::array<int, 7> tool_icon_sizes{
+    0,
+    GTK_ICON_SIZE_MENU,
+    GTK_ICON_SIZE_SMALL_TOOLBAR,
+    GTK_ICON_SIZE_LARGE_TOOLBAR,
+    GTK_ICON_SIZE_BUTTON,
+    GTK_ICON_SIZE_DND,
+    GTK_ICON_SIZE_DIALOG,
+};
 // also change max_icon_size in settings.c & lists in prefdlg.ui prefdlg2.ui
 // see create_size in vfs-thumbnail-loader.c:_vfs_thumbnail_load()
-static const std::array<int, 13>
+inline constexpr std::array<int, 13>
     big_icon_sizes{512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22};
-static const std::array<int, 15>
+inline constexpr std::array<int, 15>
     small_icon_sizes{512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22, 16, 12};
-static const std::array<const char*, 3> date_formats{"%Y-%m-%d %H:%M",
-                                                     "%Y-%m-%d",
-                                                     "%Y-%m-%d %H:%M:%S"};
-static const std::array<int, 4> drag_actions{0, 1, 2, 3};
+inline constexpr std::array<const char*, 3> date_formats{
+    "%Y-%m-%d %H:%M",
+    "%Y-%m-%d",
+    "%Y-%m-%d %H:%M:%S",
+};
+inline constexpr std::array<int, 4> drag_actions{0, 1, 2, 3};
 
 static void
 dir_unload_thumbnails(const char* path, VFSDir* dir, void* user_data)

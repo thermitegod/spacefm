@@ -194,7 +194,7 @@ VFSAppDesktop::open_multiple_files() noexcept
     if (this->exec.empty())
         return false;
 
-    std::array<std::string, 2> keys{"%U", "%F"};
+    static constexpr std::array<std::string_view, 2> keys{"%U", "%F"};
     if (ztd::contains(this->exec, keys))
         return true;
     return false;
@@ -209,7 +209,7 @@ VFSAppDesktop::translate_app_exec_to_command_line(std::vector<std::string>& file
 
     bool add_files = false;
 
-    std::array<std::string, 2> open_files_keys{"%F", "%U"};
+    static constexpr std::array<std::string_view, 2> open_files_keys{"%F", "%U"};
     if (ztd::contains(cmd, open_files_keys))
     {
         std::string tmp;
@@ -226,7 +226,7 @@ VFSAppDesktop::translate_app_exec_to_command_line(std::vector<std::string>& file
         add_files = true;
     }
 
-    std::array<std::string, 2> open_file_keys{"%f", "%u"};
+    static constexpr std::array<std::string_view, 2> open_file_keys{"%f", "%u"};
     if (ztd::contains(cmd, open_file_keys))
     {
         std::string tmp;

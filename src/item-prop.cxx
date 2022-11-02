@@ -238,7 +238,7 @@ ContextData::~ContextData()
 }
 
 // clang-format off
-static const std::array<const char*, 38> context_subs
+inline constexpr  std::array<const char*, 38> context_subs
 {
     "MIME Type",
     "Filename",
@@ -280,7 +280,7 @@ static const std::array<const char*, 38> context_subs
     "Panel 4 Device",
 };
 
-static const std::array<const char*, 38> context_sub_lists
+inline constexpr  std::array<const char*, 38> context_sub_lists
 {
     "4%%%%%application/%%%%%audio/%%%%%audio/ || video/%%%%%image/%%%%%inode/directory%%%%%text/%%%%%video/%%%%%application/x-bzip||application/x-bzip-compressed-tar||application/x-gzip||application/zstd||application/x-lz4||application/zip||application/x-7z-compressed||application/x-bzip2||application/x-bzip2-compressed-tar||application/x-xz-compressed-tar||application/x-compressed-tar||application/x-rar",  //"MIME Type",
     "6%%%%%archive_types || .gz || .bz2 || .7z || .xz || .zst || .lz4 || .txz || .tgz || .tzst || .tlz4 || .zip || .rar || .tar || .tar.gz || .tar.xz || .tar.zst || .tar.lz4 || .tar.bz2 || .tar.7z%%%%%audio_types || .mp3 || .MP3 || .m3u || .wav || .wma || .aac || .ac3 || .opus || . flac || .ram || .m4a || .ogg%%%%%image_types || .jpg || .jpeg || .gif || .png || .xpm%%%%%video_types || .mp4 || .MP4 || .avi || .AVI || .mkv || .mpeg || .mpg || .flv || .vob || .asf || .rm || .m2ts || .mov",  //"Filename",
@@ -322,7 +322,7 @@ static const std::array<const char*, 38> context_sub_lists
     "0%%%%%dev/sdb1%%%%%/dev/sdc1%%%%%/dev/sdd1%%%%%/dev/sr0"  //"Panel 4 Device"
 };
 
-static const std::array<const char*, 12> context_comps
+inline constexpr std::array<const char*, 12> context_comps
 {
     "equals",
     "does not equal",
@@ -338,7 +338,7 @@ static const std::array<const char*, 12> context_comps
     "does not match",
 };
 
-static const std::array<const char*, 3> item_types
+inline constexpr std::array<const char*, 3> item_types
 {
     "Bookmark",
     "Application",

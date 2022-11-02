@@ -629,11 +629,13 @@ ptk_location_view_get_mount_point_dir(const char* name)
         else
             parent = set->s;
 
-        const std::array<const char*, 5> varnames{"$USER",
-                                                  "$UID",
-                                                  "$HOME",
-                                                  "$XDG_RUNTIME_DIR",
-                                                  "$XDG_CACHE_HOME"};
+        static constexpr std::array<const char*, 5> varnames{
+            "$USER",
+            "$UID",
+            "$HOME",
+            "$XDG_RUNTIME_DIR",
+            "$XDG_CACHE_HOME",
+        };
         for (std::size_t i = 0; i < varnames.size(); ++i)
         {
             if (!ztd::contains(parent, varnames.at(i)))

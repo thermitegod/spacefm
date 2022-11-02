@@ -372,7 +372,7 @@ static void
 on_archive_default(GtkMenuItem* menuitem, xset_t set)
 {
     (void)menuitem;
-    const std::array<XSetName, 4> arcnames{
+    static constexpr std::array<XSetName, 4> arcnames{
         XSetName::ARC_DEF_OPEN,
         XSetName::ARC_DEF_EX,
         XSetName::ARC_DEF_EXTO,
@@ -1180,7 +1180,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         xset_set_cb(XSetName::SELECT_INVERT, (GFunc)ptk_file_browser_invert_selection, browser);
         xset_set_cb(XSetName::SELECT_PATT, (GFunc)on_popup_select_pattern, data);
 
-        const std::array<XSetName, 40> copycmds{
+        static constexpr std::array<XSetName, 40> copycmds{
             XSetName::COPY_LOC,        XSetName::COPY_LOC_LAST,   XSetName::COPY_TAB_PREV,
             XSetName::COPY_TAB_NEXT,   XSetName::COPY_TAB_1,      XSetName::COPY_TAB_2,
             XSetName::COPY_TAB_3,      XSetName::COPY_TAB_4,      XSetName::COPY_TAB_5,
@@ -1194,7 +1194,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
             XSetName::MOVE_TAB_7,      XSetName::MOVE_TAB_8,      XSetName::MOVE_TAB_9,
             XSetName::MOVE_TAB_10,     XSetName::MOVE_PANEL_PREV, XSetName::MOVE_PANEL_NEXT,
             XSetName::MOVE_PANEL_1,    XSetName::MOVE_PANEL_2,    XSetName::MOVE_PANEL_3,
-            XSetName::MOVE_PANEL_4};
+            XSetName::MOVE_PANEL_4,
+        };
 
         for (XSetName copycmd: copycmds)
         {
@@ -1292,7 +1293,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         set = xset_set_cb(XSetName::PROP_INFO, (GFunc)on_popup_file_properties_activate, data);
         set = xset_set_cb(XSetName::PROP_PERM, (GFunc)on_popup_file_permissions_activate, data);
 
-        const std::array<XSetName, 63> permcmds{
+        static constexpr std::array<XSetName, 63> permcmds{
             XSetName::PERM_R,           XSetName::PERM_RW,          XSetName::PERM_RWX,
             XSetName::PERM_R_R,         XSetName::PERM_RW_R,        XSetName::PERM_RW_RW,
             XSetName::PERM_RWXR_X,      XSetName::PERM_RWXRWX,      XSetName::PERM_R_R_R,
@@ -1313,7 +1314,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
             XSetName::OWN_ROOT_USER2,   XSetName::ROWN_MYUSER,      XSetName::ROWN_MYUSER_USERS,
             XSetName::ROWN_USER1,       XSetName::ROWN_USER1_USERS, XSetName::ROWN_USER2,
             XSetName::ROWN_USER2_USERS, XSetName::ROWN_ROOT,        XSetName::ROWN_ROOT_USERS,
-            XSetName::ROWN_ROOT_MYUSER, XSetName::ROWN_ROOT_USER1,  XSetName::ROWN_ROOT_USER2};
+            XSetName::ROWN_ROOT_MYUSER, XSetName::ROWN_ROOT_USER1,  XSetName::ROWN_ROOT_USER2,
+        };
 
         for (XSetName permcmd: permcmds)
         {

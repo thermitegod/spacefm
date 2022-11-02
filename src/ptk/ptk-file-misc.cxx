@@ -3374,7 +3374,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
     std::string fm_filenames = "fm_filenames=(\n";
     std::string fm_files = "fm_files=(\n";
     // command looks like it handles multiple files ?
-    std::array<std::string, 4> keys{"%N", "%F", "fm_files[", "fm_filenames["};
+    static constexpr std::array<std::string_view, 4> keys{"%N", "%F", "fm_files[", "fm_filenames["};
     bool multiple = ztd::contains(command, keys);
     if (multiple)
     {

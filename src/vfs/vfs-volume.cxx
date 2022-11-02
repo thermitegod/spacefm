@@ -54,7 +54,7 @@
 #define MOUNTINFO "/proc/self/mountinfo"
 #define MTAB      "/proc/mounts"
 
-static const std::array<const char*, 14> HIDDEN_NON_BLOCK_FS{
+inline constexpr std::array<const char*, 14> HIDDEN_NON_BLOCK_FS{
     "devpts",
     "proc",
     "fusectl",

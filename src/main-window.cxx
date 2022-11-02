@@ -2841,7 +2841,7 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
     else
         fmt = "%d";
 
-    std::array<std::string, 4> keys{"%t", "%T", "%p", "%P"};
+    static constexpr std::array<std::string_view, 4> keys{"%t", "%T", "%p", "%P"};
     if (ztd::contains(fmt, keys))
     {
         // get panel/tab info
@@ -3651,7 +3651,7 @@ enum MainWindowTaskCol
 };
 
 // clang-format off
-static const std::array<const char*, 14> task_titles
+inline constexpr std::array<const char*, 14> task_titles
 {
     // If you change "Status", also change it in on_task_button_press_event
     "Status",
@@ -3670,7 +3670,7 @@ static const std::array<const char*, 14> task_titles
     "StartTime",
 };
 
-static const std::array<XSetName, 13> task_names
+inline constexpr std::array<XSetName, 13> task_names
 {
     XSetName::TASK_COL_STATUS,
     XSetName::TASK_COL_COUNT,
@@ -3956,7 +3956,7 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
     }
 
     // tasks
-    const std::array<const char*, 7>
+    static constexpr std::array<const char*, 7>
         job_titles{"move", "copy", "trash", "delete", "link", "change", "run"};
     if ((ptask = get_selected_task(file_browser->task_view)))
     {
@@ -4287,7 +4287,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
     // tasks
     if ((ptask = get_selected_task(file_browser->task_view)))
     {
-        const std::array<const char*, 7>
+        static constexpr std::array<const char*, 7>
             job_titles{"move", "copy", "trash", "delete", "link", "change", "run"};
         buf.append(fmt::format("\nfm_task_type=\"{}\"\n", job_titles.at(ptask->task->type)));
         if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
@@ -5144,15 +5144,15 @@ main_task_view_update_task(PtkFileTask* ptask)
     xset_t set;
 
     // LOG_INFO("main_task_view_update_task  ptask={}", ptask);
-    // clang-format off
-    const std::array<const char*, 7> job_titles{"moving",
-                                "copying",
-                                "trashing",
-                                "deleting",
-                                "linking",
-                                "changing",
-                                "running"};
-    // clang-format on
+    static constexpr std::array<const char*, 7> job_titles{
+        "moving",
+        "copying",
+        "trashing",
+        "deleting",
+        "linking",
+        "changing",
+        "running",
+    };
 
     if (!ptask)
         return;
@@ -5428,22 +5428,24 @@ main_task_view_new(FMMainWindow* main_window)
     GtkCellRenderer* renderer;
     GtkCellRenderer* pix_renderer;
 
-    const std::array<int, 16> cols{MainWindowTaskCol::TASK_COL_STATUS,
-                                   MainWindowTaskCol::TASK_COL_COUNT,
-                                   MainWindowTaskCol::TASK_COL_PATH,
-                                   MainWindowTaskCol::TASK_COL_FILE,
-                                   MainWindowTaskCol::TASK_COL_TO,
-                                   MainWindowTaskCol::TASK_COL_PROGRESS,
-                                   MainWindowTaskCol::TASK_COL_TOTAL,
-                                   MainWindowTaskCol::TASK_COL_STARTED,
-                                   MainWindowTaskCol::TASK_COL_ELAPSED,
-                                   MainWindowTaskCol::TASK_COL_CURSPEED,
-                                   MainWindowTaskCol::TASK_COL_CUREST,
-                                   MainWindowTaskCol::TASK_COL_AVGSPEED,
-                                   MainWindowTaskCol::TASK_COL_AVGEST,
-                                   MainWindowTaskCol::TASK_COL_STARTTIME,
-                                   MainWindowTaskCol::TASK_COL_ICON,
-                                   MainWindowTaskCol::TASK_COL_DATA};
+    static constexpr std::array<int, 16> cols{
+        MainWindowTaskCol::TASK_COL_STATUS,
+        MainWindowTaskCol::TASK_COL_COUNT,
+        MainWindowTaskCol::TASK_COL_PATH,
+        MainWindowTaskCol::TASK_COL_FILE,
+        MainWindowTaskCol::TASK_COL_TO,
+        MainWindowTaskCol::TASK_COL_PROGRESS,
+        MainWindowTaskCol::TASK_COL_TOTAL,
+        MainWindowTaskCol::TASK_COL_STARTED,
+        MainWindowTaskCol::TASK_COL_ELAPSED,
+        MainWindowTaskCol::TASK_COL_CURSPEED,
+        MainWindowTaskCol::TASK_COL_CUREST,
+        MainWindowTaskCol::TASK_COL_AVGSPEED,
+        MainWindowTaskCol::TASK_COL_AVGEST,
+        MainWindowTaskCol::TASK_COL_STARTTIME,
+        MainWindowTaskCol::TASK_COL_ICON,
+        MainWindowTaskCol::TASK_COL_DATA,
+    };
 
     // Model
     GtkListStore* list = gtk_list_store_new(cols.size(),
@@ -5651,12 +5653,14 @@ main_window_socket_command(char* argv[], std::string& reply)
     int width;
     GtkWidget* widget;
     // must match file-browser.c
-    const std::array<const char*, 6> column_titles{"Name",
-                                                   "Size",
-                                                   "Type",
-                                                   "Permission",
-                                                   "Owner",
-                                                   "Modified"};
+    static constexpr std::array<const char*, 6> column_titles{
+        "Name",
+        "Size",
+        "Type",
+        "Permission",
+        "Owner",
+        "Modified",
+    };
 
     if (!(argv && argv[0]))
     {

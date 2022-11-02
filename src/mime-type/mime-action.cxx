@@ -139,15 +139,20 @@ get_actions(const std::string& dir, const std::string& type, std::vector<std::st
     // LOG_INFO("get_actions( {}, {} )\n", dir, type);
     std::vector<Glib::ustring> removed;
 
-    const std::array<std::string, 2> names{"mimeapps.list", "mimeinfo.cache"};
-    const std::array<std::string, 3> groups{"Default Applications",
-                                            "Added Associations",
-                                            "MIME Cache"};
+    static constexpr std::array<std::string_view, 2> names{
+        "mimeapps.list",
+        "mimeinfo.cache",
+    };
+    static constexpr std::array<std::string_view, 3> groups{
+        "Default Applications",
+        "Added Associations",
+        "MIME Cache",
+    };
 
     // LOG_INFO("get_actions( {}/, {} )", dir, type);
     for (std::size_t n = 0; n < names.size(); ++n)
     {
-        const std::string path = Glib::build_filename(dir, names.at(n));
+        const std::string path = Glib::build_filename(dir, names.at(n).data());
         // LOG_INFO( "    {}", path);
         const auto kf = Glib::KeyFile::create();
         try
@@ -182,7 +187,7 @@ get_actions(const std::string& dir, const std::string& type, std::vector<std::st
             std::vector<Glib::ustring> apps;
             try
             {
-                apps = kf->get_string_list(groups.at(k), type);
+                apps = kf->get_string_list(groups.at(k).data(), type);
                 // if (apps.empty())
                 //     return nullptr;
             }
@@ -597,12 +602,18 @@ get_default_action(const char* dir, const char* type)
 {
     // LOG_INFO("get_default_action( {}, {} )", dir, type);
     // search these files in dir for the first existing default app
-    const std::array<std::string, 2> names{"mimeapps.list", "defaults.list"};
-    const std::array<std::string, 3> groups{"Default Applications", "Added Associations"};
+    static constexpr std::array<std::string_view, 2> names{
+        "mimeapps.list",
+        "defaults.list",
+    };
+    static constexpr std::array<std::string_view, 3> groups{
+        "Default Applications",
+        "Added Associations",
+    };
 
     for (std::size_t n = 0; n < names.size(); ++n)
     {
-        const std::string path = Glib::build_filename(dir, names.at(n));
+        const std::string path = Glib::build_filename(dir, names.at(n).data());
         // LOG_INFO("    path = {}", path);
         const auto kf = Glib::KeyFile::create();
         try
@@ -619,7 +630,7 @@ get_default_action(const char* dir, const char* type)
             std::vector<Glib::ustring> apps;
             try
             {
-                apps = kf->get_string_list(groups.at(k), type);
+                apps = kf->get_string_list(groups.at(k).data(), type);
                 if (apps.empty())
                     break;
             }
@@ -731,11 +742,13 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
         return;
     }
 
-    std::array<std::string, 3> groups{"Default Applications",
-                                      "Added Associations",
-                                      "Removed Associations"};
+    static constexpr std::array<std::string_view, 3> groups{
+        "Default Applications",
+        "Added Associations",
+        "Removed Associations",
+    };
 
-    for (const std::string& group: groups)
+    for (std::string_view group: groups)
     {
         std::string new_action;
         bool is_present = false;
@@ -743,7 +756,7 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
         std::vector<Glib::ustring> apps;
         try
         {
-            apps = kf->get_string_list(group, type);
+            apps = kf->get_string_list(group.data(), type);
             if (apps.empty())
                 return;
         }
@@ -841,9 +854,9 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
                         new_action = fmt::format("{}{};", new_action, desktop_id);
                 }
                 if (!new_action.empty())
-                    kf->set_string(group, type, new_action);
+                    kf->set_string(group.data(), type, new_action);
                 else
-                    kf->remove_key(group, type);
+                    kf->remove_key(group.data(), type);
                 data_changed = true;
             }
         }
@@ -858,9 +871,9 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
                     new_action = fmt::format("{}{};", new_action, desktop_id);
                 }
                 if (!new_action.empty())
-                    kf->set_string(group, type, new_action);
+                    kf->set_string(group.data(), type, new_action);
                 else
-                    kf->remove_key(group, type);
+                    kf->remove_key(group.data(), type);
                 data_changed = true;
             }
         }

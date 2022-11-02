@@ -692,22 +692,24 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 {
     GtkLabel* label;
 
-    // clang-format off
-    const std::array<const char*, 7> actions{"Move: ",
-                             "Copy: ",
-                             "Trash: ",
-                             "Delete: ",
-                             "Link: ",
-                             "Change: ",
-                             "Run: "};
-    const std::array<const char*, 7> titles{"Moving...",
-                            "Copying...",
-                            "Trashing...",
-                            "Deleting...",
-                            "Linking...",
-                            "Changing...",
-                            "Running..."};
-    // clang-format on
+    static constexpr std::array<const char*, 7> actions{
+        "Move: ",
+        "Copy: ",
+        "Trash: ",
+        "Delete: ",
+        "Link: ",
+        "Change: ",
+        "Run: ",
+    };
+    static constexpr std::array<const char*, 7> titles{
+        "Moving...",
+        "Copying...",
+        "Trashing...",
+        "Deleting...",
+        "Linking...",
+        "Changing...",
+        "Running...",
+    };
 
     if (ptask->progress_dlg)
         return;
@@ -870,13 +872,17 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     GtkWidget* overwrite_align;
     if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
-        static const std::array<const char*, 4> overwrite_options{"Ask",
-                                                                  "Overwrite All",
-                                                                  "Skip All",
-                                                                  "Auto Rename"};
-        static const std::array<const char*, 3> error_options{"Stop If Error First",
-                                                              "Stop On Any Error",
-                                                              "Continue"};
+        static constexpr std::array<const char*, 4> overwrite_options{
+            "Ask",
+            "Overwrite All",
+            "Skip All",
+            "Auto Rename",
+        };
+        static constexpr std::array<const char*, 3> error_options{
+            "Stop If Error First",
+            "Stop On Any Error",
+            "Continue",
+        };
 
         bool overtask = task->type == VFSFileTaskType::VFS_FILE_TASK_MOVE ||
                         task->type == VFSFileTaskType::VFS_FILE_TASK_COPY ||

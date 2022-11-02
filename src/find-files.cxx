@@ -392,7 +392,7 @@ compose_command(FindFile* data)
     std::string tmp;
 
     GtkTreeIter it;
-    std::array<char, 4> size_units{'c', 'k', 'M', 'G'};
+    static constexpr std::array<char, 4> size_units{'c', 'k', 'M', 'G'};
 
     argv.push_back("find");
     argv.push_back("-H");

@@ -123,7 +123,7 @@ static const char* enter_menu_name_new =
 
 // clang-format off
 // must match XSetTool:: enum
-static const std::array<const char*, 18> builtin_tool_name
+inline constexpr std::array<const char*, 18> builtin_tool_name
 {
     nullptr,
     nullptr,
@@ -142,11 +142,11 @@ static const std::array<const char*, 18> builtin_tool_name
     "New Tab Here",
     "Show Hidden",
     "Show Thumbnails",
-    "Large Icons"
+    "Large Icons",
 };
 
 // must match XSetTool:: enum
-static const std::array<const char*, 18> builtin_tool_icon
+inline constexpr std::array<const char*, 18> builtin_tool_icon
 {
     nullptr,
     nullptr,
@@ -165,11 +165,11 @@ static const std::array<const char*, 18> builtin_tool_icon
     "gtk-add",
     "gtk-apply",
     nullptr,
-    "zoom-in"
+    "zoom-in",
 };
 
 // must match XSetTool:: enum
-static const std::array<const char*, 18> builtin_tool_shared_key
+inline constexpr std::array<const char*, 18> builtin_tool_shared_key
 {
     nullptr,
     nullptr,
@@ -188,7 +188,7 @@ static const std::array<const char*, 18> builtin_tool_shared_key
     "tab_new_here",
     "panel1_show_hidden",
     "view_thumb",
-    "panel1_list_large"
+    "panel1_list_large",
 };
 // clang-format on
 
@@ -6421,13 +6421,15 @@ void
 xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,
                   xset_t set_parent, bool show_tooltips)
 {
-    const std::array<XSetTool, 7> default_tools{XSetTool::BOOKMARKS,
-                                                XSetTool::TREE,
-                                                XSetTool::NEW_TAB_HERE,
-                                                XSetTool::BACK_MENU,
-                                                XSetTool::FWD_MENU,
-                                                XSetTool::UP,
-                                                XSetTool::DEFAULT};
+    static constexpr std::array<XSetTool, 7> default_tools{
+        XSetTool::BOOKMARKS,
+        XSetTool::TREE,
+        XSetTool::NEW_TAB_HERE,
+        XSetTool::BACK_MENU,
+        XSetTool::FWD_MENU,
+        XSetTool::UP,
+        XSetTool::DEFAULT,
+    };
     int stop_b4;
     xset_t set;
     xset_t set_target;

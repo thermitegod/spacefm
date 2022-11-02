@@ -167,19 +167,23 @@ static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 #define GDK_ACTION_ALL GdkDragAction(GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK)
 
 // must match main-window.c  main_window_socket_command
-static const std::array<const char*, 6> column_titles{"Name",
-                                                      "Size",
-                                                      "Type",
-                                                      "Permission",
-                                                      "Owner",
-                                                      "Modified"};
+inline constexpr std::array<const char*, 6> column_titles{
+    "Name",
+    "Size",
+    "Type",
+    "Permission",
+    "Owner",
+    "Modified",
+};
 
-static const std::array<XSetPanel, 6> column_names{XSetPanel::DETCOL_NAME,
-                                                   XSetPanel::DETCOL_SIZE,
-                                                   XSetPanel::DETCOL_TYPE,
-                                                   XSetPanel::DETCOL_PERM,
-                                                   XSetPanel::DETCOL_OWNER,
-                                                   XSetPanel::DETCOL_DATE};
+inline constexpr std::array<XSetPanel, 6> column_names{
+    XSetPanel::DETCOL_NAME,
+    XSetPanel::DETCOL_SIZE,
+    XSetPanel::DETCOL_TYPE,
+    XSetPanel::DETCOL_PERM,
+    XSetPanel::DETCOL_OWNER,
+    XSetPanel::DETCOL_DATE,
+};
 
 GType
 ptk_file_browser_get_type()
@@ -993,7 +997,7 @@ on_status_bar_button_press(GtkWidget* widget, GdkEventButton* event, PtkFileBrow
             return true;
         if (event->button == 2)
         {
-            const std::array<XSetName, 4> setnames{
+            static constexpr std::array<XSetName, 4> setnames{
                 XSetName::STATUS_NAME,
                 XSetName::STATUS_PATH,
                 XSetName::STATUS_INFO,
@@ -1044,7 +1048,7 @@ on_status_middle_click_config(GtkMenuItem* menuitem, xset_t set)
 {
     (void)menuitem;
 
-    const std::array<XSetName, 4> setnames{
+    static constexpr std::array<XSetName, 4> setnames{
         XSetName::STATUS_NAME,
         XSetName::STATUS_PATH,
         XSetName::STATUS_INFO,
@@ -4020,12 +4024,14 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
     GtkTreeViewColumn* col;
     GtkCellRenderer* pix_renderer;
 
-    const std::array<int, 6> cols{PTKFileListCol::COL_FILE_NAME,
-                                  PTKFileListCol::COL_FILE_SIZE,
-                                  PTKFileListCol::COL_FILE_DESC,
-                                  PTKFileListCol::COL_FILE_PERM,
-                                  PTKFileListCol::COL_FILE_OWNER,
-                                  PTKFileListCol::COL_FILE_MTIME};
+    static constexpr std::array<int, 6> cols{
+        PTKFileListCol::COL_FILE_NAME,
+        PTKFileListCol::COL_FILE_SIZE,
+        PTKFileListCol::COL_FILE_DESC,
+        PTKFileListCol::COL_FILE_PERM,
+        PTKFileListCol::COL_FILE_OWNER,
+        PTKFileListCol::COL_FILE_MTIME,
+    };
 
     FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
     const panel_t p = file_browser->mypanel;
