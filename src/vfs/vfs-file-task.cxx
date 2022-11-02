@@ -147,7 +147,7 @@ should_abort(VFSFileTask* task)
     return task->abort;
 }
 
-char*
+const std::string
 vfs_file_task_get_unique_name(std::string_view dest_dir, std::string_view base_name,
                               std::string_view ext)
 { // returns nullptr if all names used; otherwise newly allocated string
@@ -169,8 +169,8 @@ vfs_file_task_get_unique_name(std::string_view dest_dir, std::string_view base_n
         new_dest_file = Glib::build_filename(dest_dir.data(), new_name);
     }
     if (n == 0)
-        return nullptr;
-    return ztd::strdup(new_dest_file);
+        return "";
+    return new_dest_file;
 }
 
 /*
@@ -219,7 +219,7 @@ check_overwrite(VFSFileTask* task, std::string_view dest_file, bool* dest_exists
             const std::string name = namepack.first;
             const std::string ext = namepack.second;
 
-            *new_dest_file = vfs_file_task_get_unique_name(dest_dir, name, ext);
+            *new_dest_file = ztd::strdup(vfs_file_task_get_unique_name(dest_dir, name, ext));
             *dest_exists = false;
             if (*new_dest_file)
                 return !task->abort;

@@ -2085,16 +2085,15 @@ query_overwrite(PtkFileTask* ptask)
     const std::string ext = namepack.second;
 
     char* ext_disp = !ext.empty() ? ztd::strdup(Glib::filename_display_name(ext)) : nullptr;
-    char* unique_name = vfs_file_task_get_unique_name(dest_dir, name.c_str(), ext.c_str());
+    const std::string unique_name = vfs_file_task_get_unique_name(dest_dir, name, ext);
     char* new_name_plain =
-        unique_name ? ztd::strdup(Glib::path_get_basename(unique_name)) : nullptr;
+        !unique_name.empty() ? ztd::strdup(Glib::path_get_basename(unique_name)) : nullptr;
     char* new_name =
         new_name_plain ? ztd::strdup(Glib::filename_display_name(new_name_plain)) : nullptr;
 
     int pos = ext_disp ? g_utf8_strlen(base_name_disp, -1) - g_utf8_strlen(ext_disp, -1) - 1 : -1;
 
     free(base_name);
-    free(unique_name);
     free(ext_disp);
     free(src_dir);
     free(dest_dir);
