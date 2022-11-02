@@ -55,7 +55,7 @@ script_exists(Scripts script) noexcept
 }
 
 bool
-script_exists(const std::string& script) noexcept
+script_exists(std::string_view script) noexcept
 {
     if (!std::filesystem::exists(script))
     {

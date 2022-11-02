@@ -29,5 +29,5 @@ const all_bookmarks_t& get_all_bookmarks() noexcept;
 void load_bookmarks() noexcept;
 void save_bookmarks() noexcept;
 
-void add_bookmarks(const std::string& book_path) noexcept;
+void add_bookmarks(std::string_view book_path) noexcept;
 void remove_bookmarks() noexcept;

@@ -18,6 +18,8 @@
 #pragma once
 
 #include <string>
+#include <string_view>
+
 #include <vector>
 
 #include <glib.h>
@@ -32,7 +34,7 @@ enum MimeTypeAction
 /*
  *  Get a list of applications supporting this mime-type
  */
-const std::vector<std::string> mime_type_get_actions(const std::string& type);
+const std::vector<std::string> mime_type_get_actions(std::string_view type);
 
 /*
  * Add an applications used to open this mime-type
@@ -58,7 +60,7 @@ void mime_type_add_action(const char* type, const char* desktop_id, char** custo
  *
  * The old defaults.list is also checked.
  */
-char* mime_type_get_default_action(const std::string& type);
+char* mime_type_get_default_action(std::string_view type);
 
 /*
  * Set applications used to open or never used to open this mime-type

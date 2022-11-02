@@ -16,6 +16,8 @@
 #pragma once
 
 #include <string>
+#include <string_view>
+
 #include <vector>
 
 const std::string& vfs_user_desktop_dir() noexcept;

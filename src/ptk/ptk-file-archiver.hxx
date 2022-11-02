@@ -19,6 +19,9 @@
 
 #pragma once
 
+#include <string>
+#include <string_view>
+
 #include <gtk/gtk.h>
 #include <glib.h>
 

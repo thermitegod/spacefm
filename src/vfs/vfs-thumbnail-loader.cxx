@@ -17,6 +17,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <chrono>
@@ -332,8 +334,7 @@ vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
 }
 
 static GdkPixbuf*
-vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int size,
-                   std::time_t mtime)
+vfs_thumbnail_load(std::string_view file_path, std::string_view uri, int size, std::time_t mtime)
 {
     Glib::Checksum check = Glib::Checksum();
     const std::string file_hash = check.compute_checksum(Glib::Checksum::Type::MD5, uri.data());
@@ -347,7 +348,7 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
     if (mtime == 0)
     {
         struct stat statbuf;
-        if (stat(file_path.c_str(), &statbuf) != -1)
+        if (stat(file_path.data(), &statbuf) != -1)
             mtime = statbuf.st_mtime;
     }
 
@@ -385,7 +386,7 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
             video_thumb.setSeekPercentage(25);
             video_thumb.setThumbnailSize(128);
             video_thumb.setMaintainAspectRatio(true);
-            video_thumb.generateThumbnail(file_path,
+            video_thumb.generateThumbnail(file_path.data(),
                                           ThumbnailerImageType::Png,
                                           thumbnail_file,
                                           nullptr);
@@ -430,17 +431,17 @@ vfs_thumbnail_load(const std::string& file_path, const std::string& uri, int siz
 }
 
 GdkPixbuf*
-vfs_thumbnail_load_for_uri(const std::string& uri, int size, std::time_t mtime)
+vfs_thumbnail_load_for_uri(std::string_view uri, int size, std::time_t mtime)
 {
-    const std::string file = Glib::filename_from_uri(uri);
+    const std::string file = Glib::filename_from_uri(uri.data());
     GdkPixbuf* ret = vfs_thumbnail_load(file, uri, size, mtime);
     return ret;
 }
 
 GdkPixbuf*
-vfs_thumbnail_load_for_file(const std::string& file, int size, std::time_t mtime)
+vfs_thumbnail_load_for_file(std::string_view file, int size, std::time_t mtime)
 {
-    const std::string uri = Glib::filename_to_uri(file);
+    const std::string uri = Glib::filename_to_uri(file.data());
     GdkPixbuf* ret = vfs_thumbnail_load(file, uri, size, mtime);
     return ret;
 }

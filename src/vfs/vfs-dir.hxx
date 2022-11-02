@@ -17,6 +17,9 @@
 
 #pragma once
 
+#include <string>
+#include <string_view>
+
 #include <vector>
 
 #include <glib.h>
@@ -92,7 +95,7 @@ void vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* 
 void vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file);
 void vfs_dir_flush_notify_cache();
 
-bool vfs_dir_add_hidden(const std::string& path, const std::string& file_name);
+bool vfs_dir_add_hidden(std::string_view path, std::string_view file_name);
 
 /* call function "func" for every VFSDir instances */
 void vfs_dir_foreach(VFSDirForeachFunc func, void* user_data);

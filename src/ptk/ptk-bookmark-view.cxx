@@ -14,6 +14,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include "ptk/ptk-file-browser.hxx"

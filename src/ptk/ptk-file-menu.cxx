@@ -14,6 +14,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <array>
@@ -916,7 +918,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         }
         if (!apps.empty())
         {
-            for (const std::string& app: apps)
+            for (std::string_view app: apps)
             {
 #if 0
                 // TODO - FIXME
@@ -934,7 +936,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                 if (app_name)
                     app_menu_item = gtk_menu_item_new_with_label(app_name);
                 else
-                    app_menu_item = gtk_menu_item_new_with_label(app.c_str());
+                    app_menu_item = gtk_menu_item_new_with_label(app.data());
 
                 gtk_container_add(GTK_CONTAINER(submenu), app_menu_item);
                 g_signal_connect(G_OBJECT(app_menu_item),
@@ -952,7 +954,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                                  (void*)data);
                 g_object_set_data_full(G_OBJECT(app_menu_item),
                                        "desktop_file",
-                                       ztd::strdup(app),
+                                       ztd::strdup(app.data()),
                                        free);
             }
         }
@@ -1457,9 +1459,9 @@ get_shared_desktop_file_location(const char* name)
 {
     char* ret;
 
-    for (const std::string& sys_dir: vfs_system_data_dir())
+    for (std::string_view sys_dir: vfs_system_data_dir())
     {
-        if ((ret = vfs_mime_type_locate_desktop_file(sys_dir.c_str(), name)))
+        if ((ret = vfs_mime_type_locate_desktop_file(sys_dir.data(), name)))
             return ret;
     }
 

@@ -21,6 +21,9 @@
 // Most of the inotify parts are taken from "menu-monitor-inotify.c" of
 // gnome-menus, which is licensed under GNU Lesser General Public License.
 
+#include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <map>

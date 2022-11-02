@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <string>
+#include <string_view>
 
 #include <exception>
 
@@ -27,6 +27,6 @@ enum class Scripts
 };
 
 bool script_exists(Scripts script) noexcept;
-bool script_exists(const std::string& script) noexcept;
+bool script_exists(std::string_view script) noexcept;
 
 const std::string get_script_path(Scripts script) noexcept;

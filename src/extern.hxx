@@ -15,15 +15,12 @@
 
 #pragma once
 
-#include <string>
+#include <string_view>
 
 #include <array>
 
-// clang-format off
-
 // for pref-dialog.c
-inline constexpr  std::array<const char*, 13> terminal_programs
-{
+inline constexpr std::array<std::string_view, 13> terminal_programs{
     "terminal",
     "xfce4-terminal",
     "aterm",
@@ -36,15 +33,12 @@ inline constexpr  std::array<const char*, 13> terminal_programs
     "urxvt",
     "xterm",
     "x-terminal-emulator",
-    "qterminal"
+    "qterminal",
 };
 
 // order and contents must match prefdlg.ui
-inline constexpr  std::array<const char*, 3> su_commands
-{
+inline constexpr std::array<std::string_view, 3> su_commands{
     "/bin/su",
     "/usr/bin/sudo",
-    "/usr/bin/doas"
+    "/usr/bin/doas",
 };
-
-// clang-format on

@@ -39,7 +39,7 @@
 
 #include "utils.hxx"
 
-VFSAppDesktop::VFSAppDesktop(const std::string& open_file_name) noexcept
+VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
 {
     // LOG_INFO("VFSAppDesktop constructor");
 
@@ -47,15 +47,15 @@ VFSAppDesktop::VFSAppDesktop(const std::string& open_file_name) noexcept
 
     const auto kf = Glib::KeyFile::create();
 
-    if (Glib::path_is_absolute(open_file_name))
+    if (Glib::path_is_absolute(open_file_name.data()))
     {
-        this->file_name = Glib::path_get_basename(open_file_name);
-        this->full_path = open_file_name;
-        load = kf->load_from_file(open_file_name, Glib::KeyFile::Flags::NONE);
+        this->file_name = Glib::path_get_basename(open_file_name.data());
+        this->full_path = open_file_name.data();
+        load = kf->load_from_file(open_file_name.data(), Glib::KeyFile::Flags::NONE);
     }
     else
     {
-        this->file_name = open_file_name;
+        this->file_name = open_file_name.data();
         const std::string relative_path = Glib::build_filename("applications", this->file_name);
         load = kf->load_from_data_dirs(relative_path, this->full_path, Glib::KeyFile::Flags::NONE);
     }
@@ -214,7 +214,7 @@ VFSAppDesktop::translate_app_exec_to_command_line(
     if (ztd::contains(cmd, open_files_keys))
     {
         std::string tmp;
-        for (const std::string& file: file_list)
+        for (std::string_view file: file_list)
         {
             tmp.append(bash_quote(file));
             tmp.append(" ");
@@ -231,7 +231,7 @@ VFSAppDesktop::translate_app_exec_to_command_line(
     if (ztd::contains(cmd, open_file_keys))
     {
         std::string tmp;
-        for (const std::string& file: file_list)
+        for (std::string_view file: file_list)
         {
             tmp.append(bash_quote(file));
         }
@@ -259,7 +259,7 @@ VFSAppDesktop::translate_app_exec_to_command_line(
         std::string tmp;
 
         cmd.append(" ");
-        for (const std::string& file: file_list)
+        for (std::string_view file: file_list)
         {
             tmp.append(bash_quote(file));
             tmp.append(" ");
@@ -271,13 +271,13 @@ VFSAppDesktop::translate_app_exec_to_command_line(
 }
 
 void
-VFSAppDesktop::exec_in_terminal(const std::string& app_name, const std::string& cwd,
-                                const std::string& cmd) noexcept
+VFSAppDesktop::exec_in_terminal(std::string_view app_name, std::string_view cwd,
+                                std::string_view cmd) noexcept
 {
     // task
-    PtkFileTask* ptask = ptk_file_exec_new(app_name, cwd.c_str(), nullptr, nullptr);
+    PtkFileTask* ptask = ptk_file_exec_new(app_name.data(), cwd.data(), nullptr, nullptr);
 
-    ptask->task->exec_command = cmd;
+    ptask->task->exec_command = cmd.data();
 
     ptask->task->exec_terminal = true;
     // ptask->task->exec_keep_terminal = true;  // for test only
@@ -288,8 +288,7 @@ VFSAppDesktop::exec_in_terminal(const std::string& app_name, const std::string& 
 }
 
 bool
-VFSAppDesktop::open_files(const std::string& working_dir,
-                          const std::vector<std::string>& file_paths)
+VFSAppDesktop::open_files(std::string_view working_dir, const std::vector<std::string>& file_paths)
 {
     if (!get_exec())
     {
@@ -304,9 +303,9 @@ VFSAppDesktop::open_files(const std::string& working_dir,
     else
     {
         // app does not accept multiple files, so run multiple times
-        for (const std::string& open_file: file_paths)
+        for (std::string_view open_file: file_paths)
         {
-            const std::vector<std::string> open_files{open_file};
+            const std::vector<std::string> open_files{open_file.data()};
 
             exec_desktop(working_dir, open_files);
         }
@@ -315,7 +314,7 @@ VFSAppDesktop::open_files(const std::string& working_dir,
 }
 
 void
-VFSAppDesktop::exec_desktop(const std::string& working_dir,
+VFSAppDesktop::exec_desktop(std::string_view working_dir,
                             const std::vector<std::string>& file_paths) noexcept
 {
     const std::string cmd = translate_app_exec_to_command_line(file_paths);

@@ -13,6 +13,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <string>
+#include <string_view>
+
 #include <chrono>
 
 #include <array>
@@ -92,7 +95,7 @@ inline constexpr std::array<int, 13>
     big_icon_sizes{512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22};
 inline constexpr std::array<int, 15>
     small_icon_sizes{512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22, 16, 12};
-inline constexpr std::array<const char*, 3> date_formats{
+inline constexpr std::array<std::string_view, 3> date_formats{
     "%Y-%m-%d %H:%M",
     "%Y-%m-%d",
     "%Y-%m-%d %H:%M:%S",
@@ -516,9 +519,9 @@ fm_edit_preference(GtkWindow* parent, int page)
         gtk_widget_set_sensitive(data->thumb_label1, app_settings.get_show_thumbnail());
         gtk_widget_set_sensitive(data->thumb_label2, app_settings.get_show_thumbnail());
 
-        for (const std::string& terminal: terminal_programs)
+        for (std::string_view terminal: terminal_programs)
         {
-            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->terminal), terminal.c_str());
+            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->terminal), terminal.data());
         }
 
         char* main_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
@@ -662,9 +665,10 @@ fm_edit_preference(GtkWindow* parent, int page)
         gtk_combo_box_set_model(GTK_COMBO_BOX(data->date_format), model);
         gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(data->date_format), 0);
         g_object_unref(model);
-        for (const char* date_format: date_formats)
+        for (std::string_view date_format: date_formats)
         {
-            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->date_format), date_format);
+            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->date_format),
+                                           date_format.data());
         }
         char* date_s = xset_get_s(XSetName::DATE_FORMAT);
         if (date_s)

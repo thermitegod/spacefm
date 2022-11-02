@@ -18,6 +18,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <array>
@@ -65,7 +67,7 @@ enum PtkHandlerCol
 };
 
 // xset name prefixes of default handlers
-inline constexpr std::array<const char*, 4> handler_def_prefixs{
+inline constexpr std::array<std::string_view, 4> handler_def_prefixs{
     "hand_arc_+",
     "hand_fs_+",
     "hand_net_+",
@@ -73,7 +75,7 @@ inline constexpr std::array<const char*, 4> handler_def_prefixs{
 };
 
 // xset name prefixes of custom handlers
-inline constexpr std::array<const char*, 4> handler_cust_prefixs{
+inline constexpr std::array<std::string_view, 4> handler_cust_prefixs{
     "hand_arc_",
     "hand_fs_",
     "hand_net_",
@@ -87,34 +89,34 @@ inline constexpr std::array<XSetName, 4> handler_conf_xsets{
     XSetName::OPEN_HAND,
 };
 
-inline constexpr std::array<const char*, 4> dialog_titles{
+inline constexpr std::array<std::string_view, 4> dialog_titles{
     "Archive Handlers",
     "Device Handlers",
     "Protocol Handlers",
     "File Handlers",
 };
 
-inline constexpr std::array<const char*, 4> dialog_mnemonics{
+inline constexpr std::array<std::string_view, 4> dialog_mnemonics{
     "Archive Hand_lers",
     "Device Hand_lers",
     "Protocol Hand_lers",
     "File Hand_lers",
 };
 
-inline constexpr std::array<const char*, 4> modes{
+inline constexpr std::array<std::string_view, 4> modes{
     "archive",
     "device",
     "protocol",
     "file",
 };
 
-inline constexpr std::array<const char*, 3> cmds_arc{
+inline constexpr std::array<std::string_view, 3> cmds_arc{
     "compress",
     "extract",
     "list",
 };
 
-inline constexpr std::array<const char*, 3> cmds_mnt{
+inline constexpr std::array<std::string_view, 3> cmds_mnt{
     "mount",
     "unmount",
     "info",
@@ -696,14 +698,12 @@ static bool validate_archive_handler(HandlerData* hnd);
 static void on_options_button_clicked(GtkWidget* btn, HandlerData* hnd);
 
 bool
-ptk_handler_command_is_empty(const std::string& command)
+ptk_handler_command_is_empty(std::string_view command)
 {
-    const char* check_command = command.c_str();
-
-    // test if command contains only comments and whitespace
-    if (!check_command)
+    if (command.empty())
         return true;
-    char** lines = g_strsplit(check_command, "\n", 0);
+
+    char** lines = g_strsplit(command.data(), "\n", 0);
     if (!lines)
         return true;
 
@@ -1035,9 +1035,9 @@ ptk_handler_values_in_list(const std::string list, const std::vector<std::string
             required = false;
         }
         match = false;
-        for (const std::string& handler: values)
+        for (std::string_view handler: values)
         {
-            if (fnmatch(element, handler.c_str(), 0) == 0)
+            if (fnmatch(element, handler.data(), 0) == 0)
             {
                 // match
                 ret = match = true;
@@ -2867,7 +2867,7 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, xset_t def_handl
 
     hnd->browser = file_browser;
     hnd->dlg = gtk_dialog_new_with_buttons(
-        dialog_titles.at(mode),
+        dialog_titles.at(mode).data(),
         hnd->parent ? GTK_WINDOW(hnd->parent) : nullptr,
         GtkDialogFlags(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
         nullptr,

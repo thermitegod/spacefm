@@ -14,8 +14,10 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <vector>
-#include <iostream>
+
 #include <filesystem>
 
 #include <utility>
@@ -36,13 +38,13 @@
 #include "utils.hxx"
 
 void
-print_command(const std::string& command) noexcept
+print_command(std::string_view command) noexcept
 {
     LOG_INFO("COMMAND={}", command);
 }
 
 void
-print_task_command(const char* ptask, const char* cmd) noexcept
+print_task_command(const char* ptask, std::string_view cmd) noexcept
 {
     LOG_INFO("TASK_COMMAND({:p})={}", ptask, cmd);
 }
@@ -60,9 +62,9 @@ randhex8() noexcept
 }
 
 const std::string
-replace_line_subs(const std::string& line) noexcept
+replace_line_subs(std::string_view line) noexcept
 {
-    std::string cmd = line;
+    std::string cmd = line.data();
 
     cmd = ztd::replace(cmd, "%f", "\"${fm_file}\"");
     cmd = ztd::replace(cmd, "%F", "\"${fm_files[@]}\"");
@@ -82,19 +84,19 @@ replace_line_subs(const std::string& line) noexcept
 }
 
 bool
-have_x_access(const std::string& path) noexcept
+have_x_access(std::string_view path) noexcept
 {
-    return (faccessat(0, path.c_str(), R_OK | X_OK, AT_EACCESS) == 0);
+    return (faccessat(0, path.data(), R_OK | X_OK, AT_EACCESS) == 0);
 }
 
 bool
-have_rw_access(const std::string& path) noexcept
+have_rw_access(std::string_view path) noexcept
 {
-    return (faccessat(0, path.c_str(), R_OK | W_OK, AT_EACCESS) == 0);
+    return (faccessat(0, path.data(), R_OK | W_OK, AT_EACCESS) == 0);
 }
 
 bool
-dir_has_files(const std::string& path) noexcept
+dir_has_files(std::string_view path) noexcept
 {
     if (!std::filesystem::is_directory(path))
         return false;
@@ -109,13 +111,13 @@ dir_has_files(const std::string& path) noexcept
 }
 
 const std::pair<std::string, std::string>
-get_name_extension(const std::string& full_name) noexcept
+get_name_extension(std::string_view full_name) noexcept
 {
     if (std::filesystem::is_directory(full_name))
-        return {full_name, ""};
+        return {full_name.data(), ""};
 
     if (!ztd::contains(full_name, "."))
-        return {full_name, ""};
+        return {full_name.data(), ""};
 
     std::string fullpath_filebase;
     std::string file_ext;
@@ -144,7 +146,7 @@ get_prog_executable() noexcept
 }
 
 void
-open_in_prog(const char* path) noexcept
+open_in_prog(std::string_view path) noexcept
 {
     const std::string exe = get_prog_executable();
     const std::string qpath = bash_quote(path);
@@ -154,7 +156,7 @@ open_in_prog(const char* path) noexcept
 }
 
 const std::string
-bash_quote(const std::string& str) noexcept
+bash_quote(std::string_view str) noexcept
 {
     if (str.empty())
         return "\"\"";
@@ -164,12 +166,12 @@ bash_quote(const std::string& str) noexcept
 }
 
 const std::string
-clean_label(const std::string& menu_label, bool kill_special, bool escape) noexcept
+clean_label(std::string_view menu_label, bool kill_special, bool escape) noexcept
 {
     if (menu_label.empty())
         return "";
 
-    std::string new_menu_label = menu_label;
+    std::string new_menu_label = menu_label.data();
 
     if (ztd::contains(menu_label, "\\_"))
     {
@@ -198,7 +200,7 @@ get_valid_su() noexcept
     {
         for (std::size_t i = 0; i < terminal_programs.size(); ++i)
         {
-            use_su = Glib::find_program_in_path(su_commands.at(i));
+            use_su = Glib::find_program_in_path(su_commands.at(i).data());
             if (!use_su.empty())
                 break;
         }

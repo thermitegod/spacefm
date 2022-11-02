@@ -16,6 +16,8 @@
 #include <csignal>
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <vector>
@@ -81,7 +83,7 @@ static GOptionEntry opt_entries[] =
 // clang-format on
 
 static bool handle_parsed_commandline_args();
-static void open_file(const std::string& path);
+static void open_file(std::string_view path);
 
 static void
 init_folder()
@@ -494,7 +496,7 @@ main(int argc, char* argv[])
 }
 
 static void
-open_file(const std::string& path)
+open_file(std::string_view path)
 {
     VFSFileInfo* file = vfs_file_info_new();
     vfs_file_info_get(file, path);
@@ -513,8 +515,7 @@ open_file(const std::string& path)
 
     VFSAppDesktop desktop(app_name);
 
-    std::string open_file = path;
-    const std::vector<std::string> open_files{open_file};
+    const std::vector<std::string> open_files{path.data()};
 
     try
     {
@@ -522,7 +523,7 @@ open_file(const std::string& path)
     }
     catch (const VFSAppDesktopException& e)
     {
-        const std::string disp_path = Glib::filename_display_name(path);
+        const std::string disp_path = Glib::filename_display_name(path.data());
         const std::string msg =
             fmt::format("Unable to open file:\n\"{}\"\n{}", disp_path, e.what());
         ptk_show_error(nullptr, "Error", msg);

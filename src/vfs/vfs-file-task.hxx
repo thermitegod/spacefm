@@ -18,6 +18,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 #include <array>
 #include <vector>
@@ -230,5 +231,5 @@ void vfs_file_task_free(VFSFileTask* task);
 
 char* vfs_file_task_get_cpids(Glib::Pid pid);
 void vfs_file_task_kill_cpids(char* cpids, int signal);
-char* vfs_file_task_get_unique_name(const std::string& dest_dir, const std::string& base_name,
-                                    const std::string& ext);
+char* vfs_file_task_get_unique_name(std::string_view dest_dir, std::string_view base_name,
+                                    std::string_view ext);

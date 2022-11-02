@@ -17,7 +17,11 @@
 
 #pragma once
 
+#include <string>
+#include <string_view>
+
 #include <gtk/gtk.h>
+
 #include "ptk/ptk-file-browser.hxx"
 
 #define ENTRY_DATA(obj) (static_cast<EntryData*>(obj))

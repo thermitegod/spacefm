@@ -15,6 +15,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <string>
+#include <string_view>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -25,17 +28,17 @@
 #include "settings.hxx"
 
 void
-ptk_show_error(GtkWindow* parent, const std::string& title, const std::string& message)
+ptk_show_error(GtkWindow* parent, std::string_view title, std::string_view message)
 {
-    const std::string msg = Glib::Markup::escape_text(message);
+    const std::string msg = Glib::Markup::escape_text(message.data());
     GtkWidget* dlg = gtk_message_dialog_new(parent,
                                             GTK_DIALOG_MODAL,
                                             GTK_MESSAGE_ERROR,
                                             GTK_BUTTONS_OK,
-                                            msg.c_str(),
+                                            msg.data(),
                                             nullptr);
     if (!title.empty())
-        gtk_window_set_title(GTK_WINDOW(dlg), title.c_str());
+        gtk_window_set_title(GTK_WINDOW(dlg), title.data());
     xset_set_window_icon(GTK_WINDOW(dlg));
     gtk_dialog_run(GTK_DIALOG(dlg));
     gtk_widget_destroy(dlg);

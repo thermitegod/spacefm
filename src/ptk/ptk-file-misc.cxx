@@ -14,6 +14,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <array>
@@ -3735,7 +3737,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
     const std::vector<std::string> files =
         ptk_clipboard_get_file_paths(cwd, &is_cut, &missing_targets);
 
-    for (const std::string& file_path: files)
+    for (std::string_view file_path: files)
     {
         file = vfs_file_info_new();
         vfs_file_info_get(file, file_path);

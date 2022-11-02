@@ -17,6 +17,9 @@
 
 #pragma once
 
+#include <string>
+#include <string_view>
+
 #include <vector>
 
 void fm_find_files(const std::vector<const char*>& search_dirs);

@@ -16,6 +16,8 @@
 #pragma once
 
 #include <string>
+#include <string_view>
+
 #include <map>
 
 #include <sys/stat.h>
@@ -32,11 +34,11 @@ class Trash
 {
   public:
     // Move a file or directory into the trash.
-    static bool trash(const std::string& path) noexcept;
+    static bool trash(std::string_view path) noexcept;
 
     // Restore a file or directory from the trash to its original location.
     // Currently a NOOP
-    static bool restore(const std::string& path) noexcept;
+    static bool restore(std::string_view path) noexcept;
 
     // Empty all trash cans
     // Currently a NOOP
@@ -49,7 +51,7 @@ class Trash
     static Trash* instance() noexcept;
 
     // return the device of the file or directory
-    static dev_t device(const std::string& path) noexcept;
+    static dev_t device(std::string_view path) noexcept;
 
   protected:
     // Constructor
@@ -60,10 +62,10 @@ class Trash
     virtual ~Trash();
 
     // Find the toplevel directory (mount point) for the device that 'path' is on.
-    static const std::string toplevel(const std::string& path) noexcept;
+    static const std::string toplevel(std::string_view path) noexcept;
 
     // Return the trash dir to use for 'path'.
-    TrashDir* trash_dir(const std::string& path) noexcept;
+    TrashDir* trash_dir(std::string_view path) noexcept;
 
     // Data Members
     static Trash* single_instance;
@@ -84,7 +86,7 @@ class TrashDir
 {
   public:
     // Create the trash directory and subdirectories if they do not exist.
-    TrashDir(const std::string& path, dev_t device) noexcept;
+    TrashDir(std::string_view path, dev_t device) noexcept;
 
     // Return the full path for this trash directory.
     const std::string& trash_path() const noexcept;
@@ -99,19 +101,19 @@ class TrashDir
     const std::string& info_path() const noexcept;
 
     // Get a unique name for use within the trash directory
-    const std::string unique_name(const std::string& path) const noexcept;
+    const std::string unique_name(std::string_view path) const noexcept;
 
     void create_trash_dir() const noexcept;
 
     // Create a .trashinfo file for a file or directory 'path'
-    void create_trash_info(const std::string& path, const std::string& target_name) const noexcept;
+    void create_trash_info(std::string_view path, std::string_view target_name) const noexcept;
 
     // Move a file or directory into the trash directory
-    void move(const std::string& path, const std::string& target_name) const noexcept;
+    void move(std::string_view path, std::string_view target_name) const noexcept;
 
   protected:
     // Create a directory if it does not exist
-    static void check_dir_exists(const std::string& dir) noexcept;
+    static void check_dir_exists(std::string_view dir) noexcept;
 
     // Data Members
     dev_t trash_dir_device;

@@ -14,6 +14,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <sys/socket.h>
@@ -64,7 +66,7 @@ static bool socket_daemon = false;
 
 static void get_socket_name(char* buf, int len);
 static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data);
-static void receive_socket_command(int client, const std::string& args);
+static void receive_socket_command(int client, std::string_view args);
 
 bool
 check_socket_daemon()
@@ -365,14 +367,14 @@ single_instance_finalize()
 }
 
 static void
-receive_socket_command(int client, const std::string& args)
+receive_socket_command(int client, std::string_view args)
 {
     char** argv = nullptr;
     char cmd;
     std::string reply;
 
     if (!args.empty())
-        argv = g_strsplit(args.c_str() + 1, "\n", 0);
+        argv = g_strsplit(args.data() + 1, "\n", 0);
 
     // check inode tag - was socket command sent from the same filesystem?
     // eg this helps deter use of socket commands sent from a chroot jail

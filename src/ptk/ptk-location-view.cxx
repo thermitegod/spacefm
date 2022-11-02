@@ -17,6 +17,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <array>
@@ -629,7 +631,7 @@ ptk_location_view_get_mount_point_dir(const char* name)
         else
             parent = set->s;
 
-        static constexpr std::array<const char*, 5> varnames{
+        static constexpr std::array<std::string_view, 5> varnames{
             "$USER",
             "$UID",
             "$HOME",

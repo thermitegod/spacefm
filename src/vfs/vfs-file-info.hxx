@@ -18,6 +18,9 @@
 #pragma once
 
 #include <string>
+#include <string_view>
+
+#include <vector>
 
 #include <atomic>
 #include <chrono>
@@ -84,7 +87,7 @@ VFSFileInfo* vfs_file_info_new();
 VFSFileInfo* vfs_file_info_ref(VFSFileInfo* fi);
 void vfs_file_info_unref(VFSFileInfo* fi);
 
-bool vfs_file_info_get(VFSFileInfo* fi, const std::string& file_path);
+bool vfs_file_info_get(VFSFileInfo* fi, std::string_view file_path);
 
 const char* vfs_file_info_get_name(VFSFileInfo* fi);
 const char* vfs_file_info_get_disp_name(VFSFileInfo* fi);
@@ -113,7 +116,7 @@ time_t* vfs_file_info_get_atime(VFSFileInfo* fi);
 void vfs_file_info_set_thumbnail_size_big(int size);
 void vfs_file_info_set_thumbnail_size_small(int size);
 
-bool vfs_file_info_load_thumbnail(VFSFileInfo* fi, const std::string& full_path, bool big);
+bool vfs_file_info_load_thumbnail(VFSFileInfo* fi, std::string_view full_path, bool big);
 bool vfs_file_info_is_thumbnail_loaded(VFSFileInfo* fi, bool big);
 
 GdkPixbuf* vfs_file_info_get_big_icon(VFSFileInfo* fi);

@@ -30,9 +30,9 @@ ConfigSettings::get_terminal_su() const noexcept
 }
 
 void
-ConfigSettings::set_terminal_su(const std::string& val) noexcept
+ConfigSettings::set_terminal_su(std::string_view val) noexcept
 {
-    this->terminal_su = val;
+    this->terminal_su = val.data();
 }
 
 const std::string&
@@ -42,9 +42,9 @@ ConfigSettings::get_tmp_dir() const noexcept
 }
 
 void
-ConfigSettings::set_tmp_dir(const std::string& val) noexcept
+ConfigSettings::set_tmp_dir(std::string_view val) noexcept
 {
-    this->tmp_dir = val;
+    this->tmp_dir = val.data();
 }
 
 const std::string&
@@ -54,9 +54,9 @@ ConfigSettings::get_font_view_icon() const noexcept
 }
 
 void
-ConfigSettings::set_font_view_icon(const std::string& val) noexcept
+ConfigSettings::set_font_view_icon(std::string_view val) noexcept
 {
-    this->font_view_icon = val;
+    this->font_view_icon = val.data();
 }
 
 const std::string&
@@ -66,9 +66,9 @@ ConfigSettings::get_font_view_compact() const noexcept
 }
 
 void
-ConfigSettings::set_font_view_compact(const std::string& val) noexcept
+ConfigSettings::set_font_view_compact(std::string_view val) noexcept
 {
-    this->font_view_compact = val;
+    this->font_view_compact = val.data();
 }
 
 const std::string&
@@ -78,9 +78,9 @@ ConfigSettings::get_font_general() const noexcept
 }
 
 void
-ConfigSettings::set_font_general(const std::string& val) noexcept
+ConfigSettings::set_font_general(std::string_view val) noexcept
 {
-    this->font_general = val;
+    this->font_general = val.data();
 }
 
 bool

@@ -16,6 +16,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <vector>
 
 #include <grp.h>
@@ -105,17 +107,17 @@ vfs_file_info_unref(VFSFileInfo* fi)
 }
 
 bool
-vfs_file_info_get(VFSFileInfo* fi, const std::string& file_path)
+vfs_file_info_get(VFSFileInfo* fi, std::string_view file_path)
 {
     vfs_file_info_clear(fi);
 
-    const std::string name = Glib::path_get_basename(file_path);
-    const std::string disp_name = Glib::filename_display_basename(file_path);
+    const std::string name = Glib::path_get_basename(file_path.data());
+    const std::string disp_name = Glib::filename_display_basename(file_path.data());
     fi->name = name;
     fi->disp_name = disp_name;
 
     struct stat file_stat;
-    if (lstat(file_path.c_str(), &file_stat) == 0)
+    if (lstat(file_path.data(), &file_stat) == 0)
     {
         // LOG_INFO("VFSFileInfo {}", fi->name);
         /* This is time-consuming but can save much memory */
@@ -131,7 +133,7 @@ vfs_file_info_get(VFSFileInfo* fi, const std::string& file_path)
         fi->blocks = file_stat.st_blocks;
 
         fi->mime_type =
-            vfs_mime_type_get_from_file(file_path.c_str(), fi->disp_name.c_str(), &file_stat);
+            vfs_mime_type_get_from_file(file_path.data(), fi->disp_name.c_str(), &file_stat);
 
         // sfm get collate keys
         fi->collate_key = g_utf8_collate_key_for_filename(fi->disp_name.c_str(), -1);
@@ -575,7 +577,7 @@ vfs_file_info_is_thumbnail_loaded(VFSFileInfo* fi, bool big)
 }
 
 bool
-vfs_file_info_load_thumbnail(VFSFileInfo* fi, const std::string& full_path, bool big)
+vfs_file_info_load_thumbnail(VFSFileInfo* fi, std::string_view full_path, bool big)
 {
     if (big)
     {

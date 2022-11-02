@@ -14,6 +14,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <map>
@@ -58,8 +60,8 @@ static void vfs_dir_set_property(GObject* obj, unsigned int prop_id, const GValu
 static void vfs_dir_get_property(GObject* obj, unsigned int prop_id, GValue* value,
                                  GParamSpec* pspec);
 
-static const std::string gethidden(const std::string& path);
-static bool ishidden(const std::string& hidden, const std::string& file_name);
+static const std::string gethidden(std::string_view path);
+static bool ishidden(std::string_view hidden, std::string_view file_name);
 
 /* constructor is private */
 static VFSDir* vfs_dir_new(const char* path);
@@ -514,12 +516,12 @@ on_list_task_finished(VFSAsyncTask* task, bool is_cancelled, VFSDir* dir)
 }
 
 static const std::string
-gethidden(const std::string& path)
+gethidden(std::string_view path)
 {
     std::string hidden;
 
     // Read .hidden into string
-    const std::string hidden_path = Glib::build_filename(path, ".hidden");
+    const std::string hidden_path = Glib::build_filename(path.data(), ".hidden");
 
     // test access first because open() on missing file may cause
     // long delay on nfs
@@ -541,17 +543,17 @@ gethidden(const std::string& path)
 }
 
 static bool
-ishidden(const std::string& hidden, const std::string& file_name)
+ishidden(std::string_view hidden, std::string_view file_name)
 {
-    if (ztd::contains(hidden, file_name + '\n'))
+    if (ztd::contains(hidden, file_name))
         return true;
     return false;
 }
 
 bool
-vfs_dir_add_hidden(const std::string& path, const std::string& file_name)
+vfs_dir_add_hidden(std::string_view path, std::string_view file_name)
 {
-    const std::string file_path = Glib::build_filename(path, ".hidden");
+    const std::string file_path = Glib::build_filename(path.data(), ".hidden");
     const std::string data = fmt::format("{}\n", file_name);
 
     const bool result = write_file(file_path, data);

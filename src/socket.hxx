@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <string>
+
 struct CliFlags
 {
     char** files{nullptr};

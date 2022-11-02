@@ -19,6 +19,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 #include <array>
 #include <vector>
@@ -129,15 +130,15 @@ GtkWidget* xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu,
                              GtkAccelGroup* accel_group, xset_t set);
 GtkWidget* xset_get_image(const char* icon, GtkIconSize icon_size);
 
-xset_t xset_find_custom(const std::string& search);
+xset_t xset_find_custom(std::string_view search);
 
-int xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string& title,
-                    GtkButtonsType buttons, const std::string& msg1, const std::string& msg2);
-int xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string& title,
-                    GtkButtonsType buttons, const std::string& msg1);
-bool xset_text_dialog(GtkWidget* parent, const std::string& title, const std::string& msg1,
-                      const std::string& msg2, const char* defstring, char** answer,
-                      const std::string& defreset, bool edit_care);
+int xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title,
+                    GtkButtonsType buttons, std::string_view msg1, std::string_view msg2);
+int xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title,
+                    GtkButtonsType buttons, std::string_view msg1);
+bool xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg1,
+                      std::string_view msg2, const char* defstring, char** answer,
+                      std::string_view defreset, bool edit_care);
 
 void xset_menu_cb(GtkWidget* item, xset_t set);
 bool xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data);
@@ -153,8 +154,8 @@ char* multi_input_get_text(GtkWidget* input);
 const std::vector<xset_t> xset_get_plugins();
 void xset_clear_plugins(const std::vector<xset_t>& plugins);
 
-void install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& path,
-                         const std::string& plug_dir, PluginJob job, xset_t insert_set);
+void install_plugin_file(void* main_win, GtkWidget* handler_dlg, std::string_view path,
+                         std::string_view plug_dir, PluginJob job, xset_t insert_set);
 xset_t xset_import_plugin(const char* plug_dir, int* use);
 void clean_plugin_mirrors();
 bool xset_opener(PtkFileBrowser* file_browser, char job);

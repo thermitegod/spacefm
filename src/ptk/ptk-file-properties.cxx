@@ -14,6 +14,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <array>
@@ -45,7 +47,7 @@
 #include "ptk/ptk-app-chooser.hxx"
 #include "utils.hxx"
 
-static constexpr std::array<const char*, 12> chmod_names{
+static constexpr std::array<std::string_view, 12> chmod_names{
     "owner_r",
     "owner_w",
     "owner_x",
@@ -154,13 +156,13 @@ static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
  * NOTE: path is encoded in on-disk encoding and not necessarily UTF-8.
  */
 static void
-calc_total_size_of_files(const char* path, FilePropertiesDialogData* data)
+calc_total_size_of_files(std::string_view path, FilePropertiesDialogData* data)
 {
     if (data->cancel)
         return;
 
     struct stat file_stat;
-    if (lstat(path, &file_stat))
+    if (lstat(path.data(), &file_stat))
         return;
 
     data->total_size += file_stat.st_size;
@@ -173,11 +175,11 @@ calc_total_size_of_files(const char* path, FilePropertiesDialogData* data)
         {
             file_name = std::filesystem::path(file).filename();
 
-            const std::string full_path = Glib::build_filename(path, file_name);
+            const std::string full_path = Glib::build_filename(path.data(), file_name);
             lstat(full_path.c_str(), &file_stat);
             if (S_ISDIR(file_stat.st_mode))
             {
-                calc_total_size_of_files(full_path.c_str(), data);
+                calc_total_size_of_files(full_path, data);
             }
             else
             {
@@ -434,8 +436,8 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
 
     for (std::size_t i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
     {
-        data->chmod_btns[i] =
-            GTK_TOGGLE_BUTTON(GTK_WIDGET(gtk_builder_get_object(builder, chmod_names.at(i))));
+        data->chmod_btns[i] = GTK_TOGGLE_BUTTON(
+            GTK_WIDGET(gtk_builder_get_object(builder, chmod_names.at(i).data())));
     }
 
     // MOD
@@ -508,7 +510,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
         model = gtk_list_store_new(3, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
         if (!actions.empty())
         {
-            for (const std::string& action: actions)
+            for (std::string_view action: actions)
             {
                 VFSAppDesktop desktop(action);
                 GdkPixbuf* icon;
@@ -521,7 +523,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
                                    1,
                                    desktop.get_disp_name(),
                                    2,
-                                   action.c_str(),
+                                   action.data(),
                                    -1);
                 if (icon)
                     g_object_unref(icon);

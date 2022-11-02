@@ -16,6 +16,9 @@
  */
 #pragma once
 
+#include <string>
+#include <string_view>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -97,7 +100,7 @@ struct PtkFileTask
 void ptk_file_task_lock(PtkFileTask* ptask);
 void ptk_file_task_unlock(PtkFileTask* ptask);
 
-PtkFileTask* ptk_file_exec_new(const std::string& item_name, const char* dir, GtkWidget* parent,
+PtkFileTask* ptk_file_exec_new(std::string_view item_name, const char* dir, GtkWidget* parent,
                                GtkWidget* task_view);
 
 void ptk_file_task_set_complete_notify(PtkFileTask* ptask, GFunc callback, void* user_data);

@@ -14,6 +14,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <fmt/format.h>
@@ -81,16 +83,16 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, un
         use_uri = true;
     }
 
-    for (const std::string& clipboard_file: clipboard_file_list)
+    for (std::string_view clipboard_file: clipboard_file_list)
     {
         std::string file_name;
         if (use_uri)
         {
-            file_name = Glib::filename_to_uri(clipboard_file);
+            file_name = Glib::filename_to_uri(clipboard_file.data());
         }
         else
         {
-            file_name = Glib::filename_display_name(clipboard_file);
+            file_name = Glib::filename_display_name(clipboard_file.data());
         }
 
         uri_list.append(fmt::format("{}\n", file_name));
@@ -304,12 +306,12 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, const char* dest_dir, GtkTreeVi
         std::vector<std::string> file_list;
 
         const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
-        for (const std::string& uri: uri_list)
+        for (std::string_view uri: uri_list)
         {
             std::string file_path;
             try
             {
-                file_path = Glib::filename_from_uri(uri);
+                file_path = Glib::filename_from_uri(uri.data());
             }
             catch (Glib::ConvertError)
             {
@@ -386,12 +388,12 @@ ptk_clipboard_paste_links(GtkWindow* parent_win, const char* dest_dir, GtkTreeVi
         std::vector<std::string> file_list;
 
         const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
-        for (const std::string& uri: uri_list)
+        for (std::string_view uri: uri_list)
         {
             std::string file_path;
             try
             {
-                file_path = Glib::filename_from_uri(uri);
+                file_path = Glib::filename_from_uri(uri.data());
             }
             catch (Glib::ConvertError)
             {
@@ -465,12 +467,12 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
         std::vector<std::string> file_list;
 
         const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
-        for (const std::string& uri: uri_list)
+        for (std::string_view uri: uri_list)
         {
             std::string file_path;
             try
             {
-                file_path = Glib::filename_from_uri(uri);
+                file_path = Glib::filename_from_uri(uri.data());
             }
             catch (Glib::ConvertError)
             {
@@ -570,12 +572,12 @@ ptk_clipboard_get_file_paths(const char* cwd, bool* is_cut, int* missing_targets
 
     // create file list
     const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
-    for (const std::string& uri: uri_list)
+    for (std::string_view uri: uri_list)
     {
         std::string file_path;
         try
         {
-            file_path = Glib::filename_from_uri(uri);
+            file_path = Glib::filename_from_uri(uri.data());
         }
         catch (Glib::ConvertError)
         {

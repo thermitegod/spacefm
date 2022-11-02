@@ -28,7 +28,7 @@ class InvalidXSetName: virtual public std::exception
     std::string error_message;
 
   public:
-    explicit InvalidXSetName(const std::string& msg) : error_message(msg)
+    explicit InvalidXSetName(std::string_view msg) : error_message(msg)
     {
     }
 
@@ -39,7 +39,7 @@ class InvalidXSetName: virtual public std::exception
     virtual const char*
     what() const throw()
     {
-        return error_message.c_str();
+        return error_message.data();
     }
 };
 

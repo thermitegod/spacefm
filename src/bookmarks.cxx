@@ -108,13 +108,13 @@ save_bookmarks() noexcept
 }
 
 void
-add_bookmarks(const std::string& book_path) noexcept
+add_bookmarks(std::string_view book_path) noexcept
 {
     bookmarks_changed = true;
 
     const std::string book_name = ztd::rpartition(book_path, "/")[2];
 
-    bookmarks.push_back({book_path, book_name});
+    bookmarks.push_back({book_path.data(), book_name});
 }
 
 void

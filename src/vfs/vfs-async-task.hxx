@@ -17,6 +17,9 @@
 
 #pragma once
 
+#include <string>
+#include <string_view>
+
 #include <glib.h>
 #include <glib-object.h>
 

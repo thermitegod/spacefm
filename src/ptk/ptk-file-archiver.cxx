@@ -19,6 +19,7 @@
  */
 
 #include <string>
+#include <string_view>
 
 #include <array>
 #include <vector>
@@ -81,7 +82,7 @@ archive_handler_get_first_extension(xset_t handler_xset)
 
         if (!pathnames.empty())
         {
-            for (const std::string& path: pathnames)
+            for (std::string_view path: pathnames)
             {
                 // getting just the extension of the pathname list element
                 const auto namepack = get_name_extension(path);
@@ -290,10 +291,10 @@ generate_bash_error_function(bool run_in_terminal, const char* parent_quote)
 }
 
 static const std::string
-replace_archive_subs(const std::string& line, const std::string& n, const std::string& N,
-                     const std::string& o, const std::string& x, const std::string& g)
+replace_archive_subs(std::string_view line, std::string_view n, std::string_view N,
+                     std::string_view o, std::string_view x, std::string_view g)
 {
-    std::string new_line = line;
+    std::string new_line = line.data();
 
     new_line = ztd::replace(new_line, "%n", n);
     new_line = ztd::replace(new_line, "%N", N);

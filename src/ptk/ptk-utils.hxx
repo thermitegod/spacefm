@@ -18,6 +18,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
@@ -26,7 +27,7 @@
 // The string 'message' can contain pango markups.
 // Special markup characters can also be used and will be
 // escaped in this function.
-void ptk_show_error(GtkWindow* parent, const std::string& title, const std::string& message);
+void ptk_show_error(GtkWindow* parent, std::string_view title, std::string_view message);
 
 unsigned int ptk_get_keymod(unsigned int event);
 

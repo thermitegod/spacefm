@@ -20,6 +20,11 @@
 
 #pragma once
 
+#include <string>
+#include <string_view>
+
+#include <vector>
+
 #include <gtk/gtk.h>
 #include <glib.h>
 
@@ -58,7 +63,7 @@ bool ptk_handler_load_script(int mode, int cmd, xset_t handler_set, GtkTextView*
 bool ptk_handler_save_script(int mode, int cmd, xset_t handler_set, GtkTextView* view,
                              const std::string command, std::string& error_message);
 char* ptk_handler_get_command(int mode, int cmd, xset_t handler_set);
-bool ptk_handler_command_is_empty(const std::string& command);
+bool ptk_handler_command_is_empty(std::string_view command);
 void ptk_handler_load_text_view(GtkTextView* view, const char* text);
 GSList* ptk_handler_file_has_handlers(int mode, int cmd, const char* path, VFSMimeType* mime_type,
                                       bool test_cmd, bool multiple, bool enabled_only);

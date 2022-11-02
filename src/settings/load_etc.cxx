@@ -33,7 +33,7 @@
 #include "settings/etc.hxx"
 
 static void
-parse_etc_conf(const std::string& etc_path, const std::string& raw_line)
+parse_etc_conf(std::string_view etc_path, std::string_view raw_line)
 {
     std::size_t sep = raw_line.find("=");
     if (sep == std::string::npos)

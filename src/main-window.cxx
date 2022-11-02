@@ -14,6 +14,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <array>
@@ -1059,7 +1061,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                     const std::vector<std::string> tab_dirs =
                         ztd::split(tabs_add, CONFIG_FILE_TABS_DELIM);
 
-                    for (const std::string& tab_dir: tab_dirs)
+                    for (std::string_view tab_dir: tab_dirs)
                     {
                         if (tab_dir.empty())
                             continue;
@@ -1067,7 +1069,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                         std::string folder_path;
                         if (std::filesystem::is_directory(tab_dir))
                         {
-                            folder_path = tab_dir;
+                            folder_path = tab_dir.data();
                         }
                         else
                         {
@@ -3650,7 +3652,7 @@ enum MainWindowTaskCol
 };
 
 // clang-format off
-inline constexpr std::array<const char*, 14> task_titles
+inline constexpr std::array<std::string_view, 14> task_titles
 {
     // If you change "Status", also change it in on_task_button_press_event
     "Status",
@@ -3954,11 +3956,12 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
     }
 
     // tasks
-    static constexpr std::array<const char*, 7>
+    static constexpr std::array<std::string_view, 7>
         job_titles{"move", "copy", "trash", "delete", "link", "change", "run"};
     if ((ptask = get_selected_task(file_browser->task_view)))
     {
-        c->var[ItemPropContext::CONTEXT_TASK_TYPE] = ztd::strdup(job_titles.at(ptask->task->type));
+        c->var[ItemPropContext::CONTEXT_TASK_TYPE] =
+            ztd::strdup(job_titles.at(ptask->task->type).data());
         if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
         {
             c->var[ItemPropContext::CONTEXT_TASK_NAME] = ztd::strdup(ptask->task->current_file);
@@ -4283,7 +4286,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
     // tasks
     if ((ptask = get_selected_task(file_browser->task_view)))
     {
-        static constexpr std::array<const char*, 7>
+        static constexpr std::array<std::string_view, 7>
             job_titles{"move", "copy", "trash", "delete", "link", "change", "run"};
         buf.append(fmt::format("\nfm_task_type=\"{}\"\n", job_titles.at(ptask->task->type)));
         if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
@@ -5140,7 +5143,7 @@ main_task_view_update_task(PtkFileTask* ptask)
     xset_t set;
 
     // LOG_INFO("main_task_view_update_task  ptask={}", ptask);
-    static constexpr std::array<const char*, 7> job_titles{
+    static constexpr std::array<std::string_view, 7> job_titles{
         "moving",
         "copying",
         "trashing",
@@ -5548,7 +5551,7 @@ main_task_view_new(FMMainWindow* main_window)
         }
 
         gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
-        gtk_tree_view_column_set_title(col, task_titles.at(j));
+        gtk_tree_view_column_set_title(col, task_titles.at(j).data());
         gtk_tree_view_column_set_reorderable(col, true);
         gtk_tree_view_column_set_visible(col, xset_get_b(task_names.at(j)));
         if (j == MainWindowTaskCol::TASK_COL_FILE) //|| j == MainWindowTaskCol::TASK_COL_PATH || j
@@ -5597,7 +5600,7 @@ main_task_view_new(FMMainWindow* main_window)
 // ============== socket commands
 
 static bool
-get_bool(const std::string& value)
+get_bool(std::string_view value)
 {
     if (ztd::same(ztd::lower(value), "yes") || ztd::same(value, "1"))
         return true;
@@ -5611,9 +5614,9 @@ get_bool(const std::string& value)
 }
 
 static const std::string
-unescape(const std::string& t)
+unescape(std::string_view t)
 {
-    std::string unescaped = t;
+    std::string unescaped = t.data();
     unescaped = ztd::replace(unescaped, "\\\n", "\\n");
     unescaped = ztd::replace(unescaped, "\\\t", "\\t");
     unescaped = ztd::replace(unescaped, "\\\r", "\\r");
@@ -5649,7 +5652,7 @@ main_window_socket_command(char* argv[], std::string& reply)
     int width;
     GtkWidget* widget;
     // must match file-browser.c
-    static constexpr std::array<const char*, 6> column_titles{
+    static constexpr std::array<std::string_view, 6> column_titles{
         "Name",
         "Size",
         "Type",
@@ -6627,7 +6630,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             // build bash array
             const std::vector<std::string> pathv = ztd::split(clip_txt, "");
             str = "(";
-            for (const std::string& path: pathv)
+            for (std::string_view path: pathv)
             {
                 str.append(fmt::format("{} ", bash_quote(path)));
             }

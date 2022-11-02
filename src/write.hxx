@@ -26,9 +26,9 @@
 
 template<class T>
 bool
-write_file(const std::string& path, const T data)
+write_file(std::string_view path, const T data)
 {
-    std::ofstream file(path);
+    std::ofstream file(path.data());
     if (file.is_open())
         file << data;
 

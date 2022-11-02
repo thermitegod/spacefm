@@ -13,6 +13,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <string>
+#include <string_view>
+
 #include <array>
 #include <vector>
 
@@ -178,14 +181,14 @@ ptk_file_task_trylock(PtkFileTask* ptask)
 }
 
 PtkFileTask*
-ptk_file_exec_new(const std::string& item_name, const char* dir, GtkWidget* parent,
+ptk_file_exec_new(std::string_view item_name, const char* dir, GtkWidget* parent,
                   GtkWidget* task_view)
 {
     GtkWidget* parent_win = nullptr;
     if (parent)
         parent_win = gtk_widget_get_toplevel(GTK_WIDGET(parent));
 
-    const std::vector<std::string> file_list{item_name};
+    const std::vector<std::string> file_list{item_name.data()};
     PtkFileTask* ptask = new PtkFileTask(VFSFileTaskType::VFS_FILE_TASK_EXEC,
                                          file_list,
                                          dir,
@@ -689,9 +692,7 @@ on_error_combo_changed(GtkComboBox* box, PtkFileTask* ptask)
 void
 ptk_file_task_progress_open(PtkFileTask* ptask)
 {
-    GtkLabel* label;
-
-    static constexpr std::array<const char*, 7> actions{
+    static constexpr std::array<std::string_view, 7> actions{
         "Move: ",
         "Copy: ",
         "Trash: ",
@@ -700,7 +701,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
         "Change: ",
         "Run: ",
     };
-    static constexpr std::array<const char*, 7> titles{
+    static constexpr std::array<std::string_view, 7> titles{
         "Moving...",
         "Copying...",
         "Trashing...",
@@ -717,7 +718,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 
     VFSFileTask* task = ptask->task;
 
-    ptask->progress_dlg = gtk_dialog_new_with_buttons(titles.at(task->type),
+    ptask->progress_dlg = gtk_dialog_new_with_buttons(titles.at(task->type).data(),
                                                       nullptr /*was task->parent_window*/,
                                                       (GtkDialogFlags)0,
                                                       nullptr,
@@ -759,7 +760,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     int row = 0;
 
     /* Copy/Move/Link: */
-    label = GTK_LABEL(gtk_label_new(actions.at(task->type)));
+    GtkLabel* label = GTK_LABEL(gtk_label_new(actions.at(task->type).data()));
     gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(label), GTK_ALIGN_CENTER);
     gtk_grid_attach(grid, GTK_WIDGET(label), 0, row, 1, 1);
@@ -871,13 +872,13 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     GtkWidget* overwrite_align;
     if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
-        static constexpr std::array<const char*, 4> overwrite_options{
+        static constexpr std::array<std::string_view, 4> overwrite_options{
             "Ask",
             "Overwrite All",
             "Skip All",
             "Auto Rename",
         };
-        static constexpr std::array<const char*, 3> error_options{
+        static constexpr std::array<std::string_view, 3> error_options{
             "Stop If Error First",
             "Stop On Any Error",
             "Continue",
@@ -889,10 +890,10 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
         ptask->overwrite_combo = gtk_combo_box_text_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(ptask->overwrite_combo), false);
         gtk_widget_set_sensitive(ptask->overwrite_combo, overtask);
-        for (const char* overwrite_option: overwrite_options)
+        for (std::string_view overwrite_option: overwrite_options)
         {
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ptask->overwrite_combo),
-                                           overwrite_option);
+                                           overwrite_option.data());
         }
         if (overtask)
             gtk_combo_box_set_active(
@@ -905,9 +906,10 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 
         ptask->error_combo = gtk_combo_box_text_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(ptask->error_combo), false);
-        for (const char* error_option: error_options)
+        for (std::string_view error_option: error_options)
         {
-            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ptask->error_combo), error_option);
+            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ptask->error_combo),
+                                           error_option.data());
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(ptask->error_combo),
                                  ptask->err_mode < error_options.size() ? ptask->err_mode : 0);

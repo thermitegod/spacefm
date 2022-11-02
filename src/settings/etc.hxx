@@ -16,6 +16,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 struct ConfigSettings
 {
@@ -24,19 +25,19 @@ struct ConfigSettings
     // ~ConfigSettings();
 
     const std::string& get_terminal_su() const noexcept;
-    void set_terminal_su(const std::string& val) noexcept;
+    void set_terminal_su(std::string_view val) noexcept;
 
     const std::string& get_tmp_dir() const noexcept;
-    void set_tmp_dir(const std::string& val) noexcept;
+    void set_tmp_dir(std::string_view val) noexcept;
 
     const std::string& get_font_view_icon() const noexcept;
-    void set_font_view_icon(const std::string& val) noexcept;
+    void set_font_view_icon(std::string_view val) noexcept;
 
     const std::string& get_font_view_compact() const noexcept;
-    void set_font_view_compact(const std::string& val) noexcept;
+    void set_font_view_compact(std::string_view val) noexcept;
 
     const std::string& get_font_general() const noexcept;
-    void set_font_general(const std::string& val) noexcept;
+    void set_font_general(std::string_view val) noexcept;
 
     bool get_git_backed_settings() const noexcept;
     void set_git_backed_settings(bool val) noexcept;

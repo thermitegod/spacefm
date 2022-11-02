@@ -16,31 +16,32 @@
 #pragma once
 
 #include <string>
+#include <string_view>
+
 #include <vector>
 
 #include <utility>
 
-void print_command(const std::string& command) noexcept;
-void print_task_command(const char* ptask, const char* cmd) noexcept;
+void print_command(std::string_view command) noexcept;
+void print_task_command(const char* ptask, std::string_view cmd) noexcept;
 void print_task_command_spawn(const std::vector<std::string>& argv, int pid) noexcept;
 
 const std::string randhex8() noexcept;
 
-bool have_rw_access(const std::string& path) noexcept;
-bool have_x_access(const std::string& path) noexcept;
+bool have_rw_access(std::string_view path) noexcept;
+bool have_x_access(std::string_view path) noexcept;
 
-bool dir_has_files(const std::string& path) noexcept;
+bool dir_has_files(std::string_view path) noexcept;
 
-const std::string replace_line_subs(const std::string& line) noexcept;
+const std::string replace_line_subs(std::string_view line) noexcept;
 
-const std::pair<std::string, std::string> get_name_extension(const std::string& full_name) noexcept;
+const std::pair<std::string, std::string> get_name_extension(std::string_view full_name) noexcept;
 
 const std::string get_prog_executable() noexcept;
-void open_in_prog(const char* path) noexcept;
+void open_in_prog(std::string_view path) noexcept;
 
-const std::string bash_quote(const std::string& str) noexcept;
+const std::string bash_quote(std::string_view str) noexcept;
 
-const std::string clean_label(const std::string& menu_label, bool kill_special,
-                              bool escape) noexcept;
+const std::string clean_label(std::string_view menu_label, bool kill_special, bool escape) noexcept;
 
 const std::string get_valid_su() noexcept;

@@ -13,9 +13,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <chrono>
 #include <string>
+#include <string_view>
+
+#include <chrono>
+
 #include <filesystem>
+
 #include <iostream>
 #include <fstream>
 
@@ -61,11 +65,11 @@ Trash::~Trash()
 }
 
 dev_t
-Trash::device(const std::string& path) noexcept
+Trash::device(std::string_view path) noexcept
 {
     dev_t dev = 0;
     struct stat statBuf;
-    int result = stat(path.c_str(), &statBuf);
+    int result = stat(path.data(), &statBuf);
     dev = statBuf.st_dev;
 
     // stat failed
@@ -76,11 +80,11 @@ Trash::device(const std::string& path) noexcept
 }
 
 const std::string
-Trash::toplevel(const std::string& path) noexcept
+Trash::toplevel(std::string_view path) noexcept
 {
-    dev_t dev = device(path);
+    const dev_t dev = device(path);
 
-    std::string mount_path = path;
+    std::string mount_path = path.data();
     std::string last_path;
 
     // LOG_INFO("dev mount {}", device(mount_path));
@@ -101,9 +105,9 @@ Trash::toplevel(const std::string& path) noexcept
 }
 
 TrashDir*
-Trash::trash_dir(const std::string& path) noexcept
+Trash::trash_dir(std::string_view path) noexcept
 {
-    dev_t dev = device(path);
+    const dev_t dev = device(path);
 
     if (this->trash_dirs.count(dev))
         return this->trash_dirs[dev];
@@ -120,7 +124,7 @@ Trash::trash_dir(const std::string& path) noexcept
 }
 
 bool
-Trash::trash(const std::string& path) noexcept
+Trash::trash(std::string_view path) noexcept
 {
     TrashDir* trash_dir = instance()->trash_dir(path);
 
@@ -148,7 +152,7 @@ Trash::trash(const std::string& path) noexcept
 }
 
 bool
-Trash::restore(const std::string& path) noexcept
+Trash::restore(std::string_view path) noexcept
 {
     (void)path;
     // NOOP
@@ -161,7 +165,7 @@ Trash::empty() noexcept
     // NOOP
 }
 
-TrashDir::TrashDir(const std::string& path, dev_t device) noexcept
+TrashDir::TrashDir(std::string_view path, dev_t device) noexcept
 {
     this->trash_dir_path = path;
     this->trash_dir_files_path = Glib::build_filename(this->trash_dir_path, "files");
@@ -172,7 +176,7 @@ TrashDir::TrashDir(const std::string& path, dev_t device) noexcept
 }
 
 const std::string
-TrashDir::unique_name(const std::string& path) const noexcept
+TrashDir::unique_name(std::string_view path) const noexcept
 {
     const std::string filename = std::filesystem::path(path).filename();
     const std::string basename = std::filesystem::path(path).stem();
@@ -200,7 +204,7 @@ TrashDir::unique_name(const std::string& path) const noexcept
 }
 
 void
-TrashDir::check_dir_exists(const std::string& path) noexcept
+TrashDir::check_dir_exists(std::string_view path) noexcept
 {
     if (std::filesystem::is_directory(path))
         return;
@@ -221,7 +225,7 @@ TrashDir::create_trash_dir() const noexcept
 }
 
 void
-TrashDir::create_trash_info(const std::string& path, const std::string& target_name) const noexcept
+TrashDir::create_trash_info(std::string_view path, std::string_view target_name) const noexcept
 {
     const std::string trash_info =
         Glib::build_filename(info_path(), fmt::format("{}.trashinfo", target_name));
@@ -238,11 +242,11 @@ TrashDir::create_trash_info(const std::string& path, const std::string& target_n
 }
 
 void
-TrashDir::move(const std::string& path, const std::string& target_name) const noexcept
+TrashDir::move(std::string_view path, std::string_view target_name) const noexcept
 {
     // LOG_INFO("fp {}", files_path());
     // LOG_INFO("ip {}", info_path());
-    const std::string target_path = Glib::build_filename(files_path(), target_name);
+    const std::string target_path = Glib::build_filename(files_path(), target_name.data());
     std::filesystem::rename(path, target_path);
 }
 

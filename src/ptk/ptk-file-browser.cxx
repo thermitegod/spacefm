@@ -14,6 +14,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <array>
@@ -167,7 +169,7 @@ static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 #define GDK_ACTION_ALL GdkDragAction(GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK)
 
 // must match main-window.c  main_window_socket_command
-inline constexpr std::array<const char*, 6> column_titles{
+inline constexpr std::array<std::string_view, 6> column_titles{
     "Name",
     "Size",
     "Type",
@@ -4140,7 +4142,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
         gtk_tree_view_column_pack_start(col, renderer, true);
         gtk_tree_view_column_set_attributes(col, renderer, "text", cols.at(j), nullptr);
         gtk_tree_view_append_column(list_view, col);
-        gtk_tree_view_column_set_title(col, column_titles.at(j));
+        gtk_tree_view_column_set_title(col, column_titles.at(j).data());
         gtk_tree_view_column_set_sort_indicator(col, true);
         gtk_tree_view_column_set_sort_column_id(col, cols.at(j));
         gtk_tree_view_column_set_sort_order(col, GTK_SORT_DESCENDING);

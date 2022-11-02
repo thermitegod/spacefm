@@ -17,6 +17,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <array>
@@ -121,10 +123,8 @@ static const char* enter_menu_name_new =
     "character as a shortcut key if desired.\n\nTIP: To change this item later, right-click on "
     "the item to open the Design Menu.";
 
-// clang-format off
 // must match XSetTool:: enum
-inline constexpr std::array<const char*, 18> builtin_tool_name
-{
+inline constexpr std::array<const char*, 18> builtin_tool_name{
     nullptr,
     nullptr,
     "Show Devices",
@@ -146,8 +146,7 @@ inline constexpr std::array<const char*, 18> builtin_tool_name
 };
 
 // must match XSetTool:: enum
-inline constexpr std::array<const char*, 18> builtin_tool_icon
-{
+inline constexpr std::array<const char*, 18> builtin_tool_icon{
     nullptr,
     nullptr,
     "gtk-harddisk",
@@ -169,8 +168,7 @@ inline constexpr std::array<const char*, 18> builtin_tool_icon
 };
 
 // must match XSetTool:: enum
-inline constexpr std::array<const char*, 18> builtin_tool_shared_key
-{
+inline constexpr std::array<const char*, 18> builtin_tool_shared_key{
     nullptr,
     nullptr,
     "panel1_show_devmon",
@@ -190,7 +188,6 @@ inline constexpr std::array<const char*, 18> builtin_tool_shared_key
     "view_thumb",
     "panel1_list_large",
 };
-// clang-format on
 
 /**
  *  TOML data structure types for serialization
@@ -564,7 +561,7 @@ load_settings()
 
     if (git_backed_settings)
     {
-        const std::string& command_script = get_script_path(Scripts::CONFIG_UPDATE_GIT);
+        const std::string command_script = get_script_path(Scripts::CONFIG_UPDATE_GIT);
 
         if (script_exists(command_script))
         {
@@ -580,7 +577,7 @@ load_settings()
     }
     else
     {
-        const std::string& command_script = get_script_path(Scripts::CONFIG_UPDATE);
+        const std::string command_script = get_script_path(Scripts::CONFIG_UPDATE);
 
         if (script_exists(command_script))
         {
@@ -686,9 +683,9 @@ load_settings()
     char* main_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
     if (!main_terminal || main_terminal[0] == '\0')
     {
-        for (const std::string& terminal: terminal_programs)
+        for (std::string_view terminal: terminal_programs)
         {
-            const std::string term = Glib::find_program_in_path(terminal);
+            const std::string term = Glib::find_program_in_path(terminal.data());
             if (term.empty())
                 continue;
 
@@ -1083,7 +1080,7 @@ xset_remove(xset_t set)
 }
 
 xset_t
-xset_find_custom(const std::string& search)
+xset_find_custom(std::string_view search)
 {
     // find a custom command or submenu by label or xset name
     const std::string label = clean_label(search, true, false);
@@ -1280,7 +1277,7 @@ xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* acce
 
     const std::vector<std::string> split_elements = ztd::split(elements, " ");
 
-    for (const std::string& element: split_elements)
+    for (std::string_view element: split_elements)
     {
         xset_t set = xset_get(element);
         xset_add_menuitem(file_browser, menu, accel_group, set);
@@ -1907,9 +1904,9 @@ xset_clear_plugins(const std::vector<xset_t>& plugins)
 }
 
 static xset_t
-xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
+xset_get_by_plug_name(std::string_view plug_dir, std::string_view plug_name)
 {
-    if (!plug_name)
+    if (plug_name.empty())
         return nullptr;
 
     for (xset_t set: xsets)
@@ -1923,8 +1920,8 @@ xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
     const std::string setname = xset_custom_new_name();
 
     xset_t set = xset_new(setname, XSetName::CUSTOM);
-    set->plug_dir = ztd::strdup(plug_dir);
-    set->plug_name = ztd::strdup(plug_name);
+    set->plug_dir = ztd::strdup(plug_dir  .data());
+    set->plug_name = ztd::strdup(plug_name.data());
     set->plugin = true;
     set->lock = false;
     xsets.push_back(set);
@@ -1933,8 +1930,8 @@ xset_get_by_plug_name(const char* plug_dir, const char* plug_name)
 }
 
 static void
-xset_parse_plugin(const char* plug_dir, const std::string& name, const std::string& setvar,
-                  const std::string& value, PluginUse use)
+xset_parse_plugin(std::string_view plug_dir, std::string_view name, std::string_view setvar,
+                  std::string_view value, PluginUse use)
 {
     if (value.empty())
         return;
@@ -1981,8 +1978,8 @@ xset_parse_plugin(const char* plug_dir, const std::string& name, const std::stri
     xset_t set;
     xset_t set2;
 
-    set = xset_get_by_plug_name(plug_dir, name.c_str());
-    xset_set_var(set, var, value);
+    set = xset_get_by_plug_name(plug_dir, name);
+    xset_set_var(set, var, value.data());
 
     if (use >= PluginUse::BOOKMARKS)
     {
@@ -2351,8 +2348,8 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
 }
 
 void
-install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& path,
-                    const std::string& plug_dir, PluginJob job, xset_t insert_set)
+install_plugin_file(void* main_win, GtkWidget* handler_dlg, std::string_view path,
+                    std::string_view plug_dir, PluginJob job, xset_t insert_set)
 {
     std::string own;
     const std::string plug_dir_q = bash_quote(plug_dir);
@@ -2414,7 +2411,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& p
     PluginData* plugin_data = new PluginData;
     plugin_data->main_window = main_window;
     plugin_data->handler_dlg = handler_dlg;
-    plugin_data->plug_dir = ztd::strdup(plug_dir);
+    plugin_data->plug_dir = ztd::strdup(plug_dir.data());
     plugin_data->job = job;
     plugin_data->set = insert_set;
     ptask->complete_notify = (GFunc)on_install_plugin_cb;
@@ -2424,7 +2421,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string& p
 }
 
 static bool
-xset_custom_export_files(xset_t set, const std::string& plug_dir)
+xset_custom_export_files(xset_t set, std::string_view plug_dir)
 {
     std::string path_src;
     std::string path_dest;
@@ -2432,12 +2429,12 @@ xset_custom_export_files(xset_t set, const std::string& plug_dir)
     if (set->plugin)
     {
         path_src = Glib::build_filename(set->plug_dir, set->plug_name);
-        path_dest = Glib::build_filename(plug_dir, set->plug_name);
+        path_dest = Glib::build_filename(plug_dir.data(), set->plug_name);
     }
     else
     {
         path_src = Glib::build_filename(xset_get_config_dir(), "scripts", set->name);
-        path_dest = Glib::build_filename(plug_dir, set->name);
+        path_dest = Glib::build_filename(plug_dir.data(), set->name);
     }
 
     if (!(std::filesystem::exists(path_src) && dir_has_files(path_src)))
@@ -2455,7 +2452,7 @@ xset_custom_export_files(xset_t set, const std::string& plug_dir)
 }
 
 static bool
-xset_custom_export_write(xsetpak_t& xsetpak, xset_t set, const std::string& plug_dir)
+xset_custom_export_write(xsetpak_t& xsetpak, xset_t set, std::string_view plug_dir)
 { // recursively write set, submenu sets, and next sets
     xsetpak_t xsetpak_local{{fmt::format("{}", set->name), xset_pack_set(set)}};
 
@@ -5105,16 +5102,16 @@ xset_menu_cb(GtkWidget* item, xset_t set)
 }
 
 int
-xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string& title,
-                GtkButtonsType buttons, const std::string& msg1)
+xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title,
+                GtkButtonsType buttons, std::string_view msg1)
 {
     std::string msg2;
     return xset_msg_dialog(parent, action, title, buttons, msg1, msg2);
 }
 
 int
-xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string& title,
-                GtkButtonsType buttons, const std::string& msg1, const std::string& msg2)
+xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title,
+                GtkButtonsType buttons, std::string_view msg1, std::string_view msg2)
 {
     GtkWidget* dlgparent = nullptr;
 
@@ -5126,7 +5123,7 @@ xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string& tit
                                GtkDialogFlags(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
                                action,
                                buttons,
-                               msg1.c_str(),
+                               msg1.data(),
                                nullptr);
 
     if (action == GTK_MESSAGE_INFO)
@@ -5134,9 +5131,9 @@ xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string& tit
     gtk_window_set_role(GTK_WINDOW(dlg), "msg_dialog");
 
     if (!msg2.empty())
-        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dlg), msg2.c_str(), nullptr);
+        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dlg), msg2.data(), nullptr);
 
-    gtk_window_set_title(GTK_WINDOW(dlg), title.c_str());
+    gtk_window_set_title(GTK_WINDOW(dlg), title.data());
 
     gtk_widget_show_all(dlg);
     int res = gtk_dialog_run(GTK_DIALOG(dlg));
@@ -5366,9 +5363,9 @@ xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
 }
 
 bool
-xset_text_dialog(GtkWidget* parent, const std::string& title, const std::string& msg1,
-                 const std::string& msg2, const char* defstring, char** answer,
-                 const std::string& defreset, bool edit_care)
+xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg1,
+                 std::string_view msg2, const char* defstring, char** answer,
+                 std::string_view defreset, bool edit_care)
 {
     GtkTextIter iter;
     GtkTextIter siter;
@@ -5384,7 +5381,7 @@ xset_text_dialog(GtkWidget* parent, const std::string& title, const std::string&
                                             GTK_DIALOG_MODAL,
                                             GTK_MESSAGE_QUESTION,
                                             GTK_BUTTONS_NONE,
-                                            msg1.c_str(),
+                                            msg1.data(),
                                             nullptr);
     xset_set_window_icon(GTK_WINDOW(dlg));
     gtk_window_set_role(GTK_WINDOW(dlg), "text_dialog");
@@ -5400,7 +5397,7 @@ xset_text_dialog(GtkWidget* parent, const std::string& title, const std::string&
     gtk_window_set_resizable(GTK_WINDOW(dlg), true);
 
     if (!msg2.empty())
-        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dlg), msg2.c_str(), nullptr);
+        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dlg), msg2.data(), nullptr);
 
     // input view
     GtkScrolledWindow* scroll_input =
@@ -5455,7 +5452,7 @@ xset_text_dialog(GtkWidget* parent, const std::string& title, const std::string&
     // show
     gtk_widget_show_all(dlg);
 
-    gtk_window_set_title(GTK_WINDOW(dlg), title.c_str());
+    gtk_window_set_title(GTK_WINDOW(dlg), title.data());
 
     if (edit_care)
     {
@@ -5530,7 +5527,7 @@ xset_text_dialog(GtkWidget* parent, const std::string& title, const std::string&
                 break;
             case GTK_RESPONSE_NO:
                 // btn_default clicked
-                gtk_text_buffer_set_text(buf, defreset.c_str(), -1);
+                gtk_text_buffer_set_text(buf, defreset.data(), -1);
                 exit_loop = true;
                 break;
             case GTK_RESPONSE_CANCEL:

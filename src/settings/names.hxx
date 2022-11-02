@@ -16,6 +16,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 // Config file macros for on disk names
 

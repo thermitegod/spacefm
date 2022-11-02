@@ -20,6 +20,8 @@
 // device info code uses code excerpts from freedesktop's udisks v1.0.4
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <array>
@@ -54,7 +56,7 @@
 #define MOUNTINFO "/proc/self/mountinfo"
 #define MTAB      "/proc/mounts"
 
-inline constexpr std::array<const char*, 14> HIDDEN_NON_BLOCK_FS{
+inline constexpr std::array<std::string_view, 14> HIDDEN_NON_BLOCK_FS{
     "devpts",
     "proc",
     "fusectl",
@@ -390,9 +392,9 @@ ptr_str_array_compare(const char** a, const char** b)
 }
 
 static double
-sysfs_get_double(const std::string& dir, const std::string& attribute)
+sysfs_get_double(std::string_view dir, const std::string_view attribute)
 {
-    const std::string filename = Glib::build_filename(dir, attribute);
+    const std::string filename = Glib::build_filename(dir.data(), attribute.data());
 
     std::string contents;
     try
@@ -407,9 +409,9 @@ sysfs_get_double(const std::string& dir, const std::string& attribute)
 }
 
 static const std::string
-sysfs_get_string(const std::string& dir, const std::string& attribute)
+sysfs_get_string(std::string_view dir, std::string_view attribute)
 {
-    const std::string filename = Glib::build_filename(dir, attribute);
+    const std::string filename = Glib::build_filename(dir.data(), attribute.data());
 
     std::string result;
     try
@@ -424,9 +426,9 @@ sysfs_get_string(const std::string& dir, const std::string& attribute)
 }
 
 static int
-sysfs_get_int(const std::string& dir, const std::string& attribute)
+sysfs_get_int(std::string_view dir, std::string_view attribute)
 {
-    const std::string filename = Glib::build_filename(dir, attribute);
+    const std::string filename = Glib::build_filename(dir.data(), attribute.data());
 
     std::string contents;
     try
@@ -441,9 +443,9 @@ sysfs_get_int(const std::string& dir, const std::string& attribute)
 }
 
 static std::uint64_t
-sysfs_get_uint64(const std::string& dir, const std::string& attribute)
+sysfs_get_uint64(std::string_view dir, std::string_view attribute)
 {
-    const std::string filename = Glib::build_filename(dir, attribute);
+    const std::string filename = Glib::build_filename(dir.data(), attribute.data());
 
     std::string contents;
     try
@@ -458,18 +460,18 @@ sysfs_get_uint64(const std::string& dir, const std::string& attribute)
 }
 
 static bool
-sysfs_file_exists(const std::string& dir, const std::string& attribute)
+sysfs_file_exists(std::string_view dir, std::string_view attribute)
 {
-    const std::string filename = Glib::build_filename(dir, attribute);
+    const std::string filename = Glib::build_filename(dir.data(), attribute.data());
     if (std::filesystem::exists(filename))
         return true;
     return false;
 }
 
 static const std::string
-sysfs_resolve_link(const std::string& sysfs_path, const std::string& name)
+sysfs_resolve_link(std::string_view sysfs_path, std::string_view name)
 {
-    const std::string full_path = Glib::build_filename(sysfs_path, name);
+    const std::string full_path = Glib::build_filename(sysfs_path.data(), name.data());
 
     std::string target_path;
     try
@@ -1104,7 +1106,7 @@ info_mount_points(device_t* device)
      */
 
     const std::vector<std::string> lines = ztd::split(contents, "\n");
-    for (const std::string& line: lines)
+    for (std::string_view line: lines)
     {
         unsigned int mount_id;
         unsigned int parent_id;
@@ -1116,7 +1118,7 @@ info_mount_points(device_t* device)
         if (line.size() == 0)
             continue;
 
-        if (sscanf(line.c_str(),
+        if (sscanf(line.data(),
                    "%d %d %lu:%lu %s %s",
                    &mount_id,
                    &parent_id,
@@ -1508,7 +1510,7 @@ parse_mounts(bool report)
      */
 
     const std::vector<std::string> lines = ztd::split(contents, "\n");
-    for (const std::string& line: lines)
+    for (std::string_view line: lines)
     {
         unsigned int mount_id;
         unsigned int parent_id;
@@ -1520,7 +1522,7 @@ parse_mounts(bool report)
         if (line.size() == 0)
             continue;
 
-        if (sscanf(line.c_str(),
+        if (sscanf(line.data(),
                    "%d %d %lu:%lu %s %s",
                    &mount_id,
                    &parent_id,
@@ -1544,7 +1546,7 @@ parse_mounts(bool report)
             char typebuf[PATH_MAX];
             char mount_source[PATH_MAX];
             const char* sep;
-            sep = strstr(line.c_str(), " - ");
+            sep = strstr(line.data(), " - ");
             if (sep && sscanf(sep + 3, "%s %s", typebuf, mount_source) == 2)
             {
                 // LOG_INFO("    source={}", mount_source);
@@ -2231,12 +2233,12 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
     }
 
     const std::vector<std::string> lines = ztd::split(contents, "\n");
-    for (const std::string& line: lines)
+    for (std::string_view line: lines)
     {
         if (line.size() == 0)
             continue;
 
-        if (sscanf(line.c_str(), "%s %s %s ", encoded_file, encoded_point, encoded_fstype) != 3)
+        if (sscanf(line.data(), "%s %s %s ", encoded_file, encoded_point, encoded_fstype) != 3)
         {
             LOG_WARN("Error parsing mtab line '{}'", line);
             continue;
@@ -2540,7 +2542,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         // a non-block device is mounted - do we want to include it?
         // is a protocol handler present?
         bool keep = mtab_fstype_is_handled_by_protocol(mtab_fstype);
-        if (!keep && ztd::contains(HIDDEN_NON_BLOCK_FS, (const char*)mtab_fstype))
+        if (!keep && ztd::contains(HIDDEN_NON_BLOCK_FS, std::string_view(mtab_fstype)))
         {
             // no protocol handler and not blacklisted - show anyway?
             keep = ztd::startswith(point, vfs_user_cache_dir()) ||

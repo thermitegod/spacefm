@@ -17,6 +17,9 @@
 
 #pragma once
 
+#include <string>
+#include <string_view>
+
 #include <chrono>
 
 #include "vfs/vfs-dir.hxx"
@@ -66,5 +69,5 @@ void vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big);
 // prevent unnecessary disk I/O and this can speed up the loading.
 // Otherwise, it should pass 0 for mtime, and the function will do stat() on the file
 // to get mtime.
-GdkPixbuf* vfs_thumbnail_load_for_uri(const std::string& uri, int size, std::time_t mtime);
-GdkPixbuf* vfs_thumbnail_load_for_file(const std::string& file, int size, std::time_t mtime);
+GdkPixbuf* vfs_thumbnail_load_for_uri(std::string_view uri, int size, std::time_t mtime);
+GdkPixbuf* vfs_thumbnail_load_for_file(std::string_view file, int size, std::time_t mtime);

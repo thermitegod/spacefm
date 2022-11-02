@@ -14,6 +14,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <array>
@@ -238,7 +240,7 @@ ContextData::~ContextData()
 }
 
 // clang-format off
-inline constexpr  std::array<const char*, 38> context_subs
+inline constexpr  std::array<std::string_view, 38> context_subs
 {
     "MIME Type",
     "Filename",
@@ -280,7 +282,7 @@ inline constexpr  std::array<const char*, 38> context_subs
     "Panel 4 Device",
 };
 
-inline constexpr  std::array<const char*, 38> context_sub_lists
+inline constexpr  std::array<std::string_view, 38> context_sub_lists
 {
     "4%%%%%application/%%%%%audio/%%%%%audio/ || video/%%%%%image/%%%%%inode/directory%%%%%text/%%%%%video/%%%%%application/x-bzip||application/x-bzip-compressed-tar||application/x-gzip||application/zstd||application/x-lz4||application/zip||application/x-7z-compressed||application/x-bzip2||application/x-bzip2-compressed-tar||application/x-xz-compressed-tar||application/x-compressed-tar||application/x-rar",  //"MIME Type",
     "6%%%%%archive_types || .gz || .bz2 || .7z || .xz || .zst || .lz4 || .txz || .tgz || .tzst || .tlz4 || .zip || .rar || .tar || .tar.gz || .tar.xz || .tar.zst || .tar.lz4 || .tar.bz2 || .tar.7z%%%%%audio_types || .mp3 || .MP3 || .m3u || .wav || .wma || .aac || .ac3 || .opus || . flac || .ram || .m4a || .ogg%%%%%image_types || .jpg || .jpeg || .gif || .png || .xpm%%%%%video_types || .mp4 || .MP4 || .avi || .AVI || .mkv || .mpeg || .mpg || .flv || .vob || .asf || .rm || .m2ts || .mov",  //"Filename",
@@ -322,7 +324,7 @@ inline constexpr  std::array<const char*, 38> context_sub_lists
     "0%%%%%dev/sdb1%%%%%/dev/sdc1%%%%%/dev/sdd1%%%%%/dev/sr0"  //"Panel 4 Device"
 };
 
-inline constexpr std::array<const char*, 12> context_comps
+inline constexpr std::array<std::string_view, 12> context_comps
 {
     "equals",
     "does not equal",
@@ -338,7 +340,7 @@ inline constexpr std::array<const char*, 12> context_comps
     "does not match",
 };
 
-inline constexpr std::array<const char*, 3> item_types
+inline constexpr std::array<std::string_view, 3> item_types
 {
     "Bookmark",
     "Application",
@@ -670,9 +672,9 @@ context_display(int sub, int comp, const char* value)
 {
     std::string disp;
     if (value[0] == '\0' || value[0] == ' ' || ztd::endswith(value, " "))
-        disp = fmt::format("{} {} \"{}\"", context_subs[sub], context_comps[comp], value);
+        disp = fmt::format("{} {} \"{}\"", context_subs.at(sub), context_comps.at(comp), value);
     else
-        disp = fmt::format("{} {} {}", context_subs[sub], context_comps[comp], value);
+        disp = fmt::format("{} {} {}", context_subs.at(sub), context_comps.at(comp), value);
     return ztd::strdup(disp);
 }
 
@@ -744,7 +746,7 @@ on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
     int sub = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_sub));
     if (sub < 0)
         return;
-    char* elements = ztd::strdup(context_sub_lists[sub]);
+    char* elements = ztd::strdup(context_sub_lists[sub].data());
     char* def_comp = get_element_next(&elements);
     if (def_comp)
     {
@@ -1191,7 +1193,7 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
     }
 
     if (std::filesystem::is_directory(folder))
-        open_in_prog(folder.c_str());
+        open_in_prog(folder);
 }
 
 static void
@@ -1839,17 +1841,17 @@ xset_item_prop_dlg(XSetContext* context, xset_t set, int page)
     // boxes
     ctxt->box_sub = gtk_combo_box_text_new();
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->box_sub), false);
-    for (const char* context_sub: context_subs)
+    for (std::string_view context_sub: context_subs)
     {
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_sub), context_sub);
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_sub), context_sub.data());
     }
     g_signal_connect(G_OBJECT(ctxt->box_sub), "changed", G_CALLBACK(on_context_sub_changed), ctxt);
 
     ctxt->box_comp = gtk_combo_box_text_new();
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->box_comp), false);
-    for (const char* context_comp: context_comps)
+    for (std::string_view context_comp: context_comps)
     {
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_comp), context_comp);
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_comp), context_comp.data());
     }
 
     ctxt->box_value = gtk_combo_box_text_new_with_entry();
@@ -2282,9 +2284,9 @@ xset_item_prop_dlg(XSetContext* context, xset_t set, int page)
     {
         // custom command
         XSetCMD x;
-        for (const char* item_type2: item_types)
+        for (std::string_view item_type2: item_types)
         {
-            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), item_type2);
+            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), item_type2.data());
         }
         x = rset->x ? XSetCMD(std::stol(rset->x)) : XSetCMD::LINE;
 

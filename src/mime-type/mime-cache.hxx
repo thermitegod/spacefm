@@ -17,12 +17,15 @@
 
 #pragma once
 
+#include <string>
+#include <string_view>
+
 #include <vector>
 
 class MimeCache
 {
   public:
-    MimeCache(const std::string& file_path);
+    MimeCache(std::string_view file_path);
     ~MimeCache();
 
     void reload();

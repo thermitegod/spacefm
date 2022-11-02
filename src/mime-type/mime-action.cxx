@@ -28,6 +28,8 @@
  */
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <array>
@@ -55,7 +57,7 @@
 #include "mime-action.hxx"
 
 static void
-save_to_file(const std::string& path, const std::string& data)
+save_to_file(std::string_view path, std::string_view data)
 {
     write_file(path, data);
 
@@ -74,7 +76,7 @@ update_desktop_database()
 
 /* Determine removed associations for this type */
 static void
-remove_actions(const std::string mime_type, std::vector<std::string>& actions)
+remove_actions(std::string_view mime_type, std::vector<std::string>& actions)
 {
     // LOG_INFO("remove_actions( {} )", type);
 
@@ -105,7 +107,7 @@ remove_actions(const std::string mime_type, std::vector<std::string>& actions)
     std::vector<Glib::ustring> removed;
     try
     {
-        removed = kf->get_string_list("Removed Associations", mime_type);
+        removed = kf->get_string_list("Removed Associations", mime_type.data());
         if (removed.empty())
             return;
     }
@@ -134,7 +136,7 @@ remove_actions(const std::string mime_type, std::vector<std::string>& actions)
  *
  */
 static void
-get_actions(const std::string& dir, const std::string& type, std::vector<std::string>& actions)
+get_actions(std::string_view dir, std::string_view type, std::vector<std::string>& actions)
 {
     // LOG_INFO("get_actions( {}, {} )\n", dir, type);
     std::vector<Glib::ustring> removed;
@@ -152,7 +154,7 @@ get_actions(const std::string& dir, const std::string& type, std::vector<std::st
     // LOG_INFO("get_actions( {}/, {} )", dir, type);
     for (std::size_t n = 0; n < names.size(); ++n)
     {
-        const std::string path = Glib::build_filename(dir, names.at(n).data());
+        const std::string path = Glib::build_filename(dir.data(), names.at(n).data());
         // LOG_INFO( "    {}", path);
         const auto kf = Glib::KeyFile::create();
         try
@@ -169,7 +171,7 @@ get_actions(const std::string& dir, const std::string& type, std::vector<std::st
             // get removed associations in this dir
             try
             {
-                removed = kf->get_string_list("Removed Associations", type);
+                removed = kf->get_string_list("Removed Associations", type.data());
                 // if (removed.empty())
                 //     continue;
             }
@@ -187,7 +189,7 @@ get_actions(const std::string& dir, const std::string& type, std::vector<std::st
             std::vector<Glib::ustring> apps;
             try
             {
-                apps = kf->get_string_list(groups.at(k).data(), type);
+                apps = kf->get_string_list(groups.at(k).data(), type.data());
                 // if (apps.empty())
                 //     return nullptr;
             }
@@ -216,7 +218,7 @@ get_actions(const std::string& dir, const std::string& type, std::vector<std::st
                 if (!is_removed && !ztd::contains(actions, app))
                 {
                     /* check for app existence */
-                    if (mime_type_locate_desktop_file(nullptr, apps.at(i).c_str()))
+                    if (mime_type_locate_desktop_file(nullptr, apps.at(i).data()))
                     {
                         // LOG_INFO("                EXISTS");
                         actions.push_back(app);
@@ -232,7 +234,7 @@ get_actions(const std::string& dir, const std::string& type, std::vector<std::st
 }
 
 const std::vector<std::string>
-mime_type_get_actions(const std::string& mime_type)
+mime_type_get_actions(std::string_view mime_type)
 {
     std::vector<std::string> actions;
 
@@ -249,9 +251,9 @@ mime_type_get_actions(const std::string& mime_type)
     get_actions(dir, mime_type, actions);
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
-    for (const std::string& sys_dir: vfs_system_data_dir())
+    for (std::string_view sys_dir: vfs_system_data_dir())
     {
-        dir = Glib::build_filename(sys_dir, "applications");
+        dir = Glib::build_filename(sys_dir.data(), "applications");
         get_actions(dir, mime_type, actions);
     }
 
@@ -343,7 +345,7 @@ mime_type_has_action(const char* type, const char* desktop_id)
     const std::vector<std::string> actions = mime_type_get_actions(type);
     if (!actions.empty())
     {
-        for (const std::string& action: actions)
+        for (std::string_view action: actions)
         {
             /* Try to match directly by desktop_id first */
             if (is_desktop && ztd::same(action, desktop_id))
@@ -354,7 +356,7 @@ mime_type_has_action(const char* type, const char* desktop_id)
             else /* Then, try to match by "Exec" and "Name" keys */
             {
                 const Glib::ustring filename =
-                    mime_type_locate_desktop_file(nullptr, action.c_str());
+                    mime_type_locate_desktop_file(nullptr, action.data());
 
                 const auto kf = Glib::KeyFile::create();
                 try
@@ -470,7 +472,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
         if (!std::filesystem::exists(path))     /* this generated filename can be used */
             break;
     }
-    save_to_file(path, file_content);
+    save_to_file(path, file_content.data());
 
     /* execute update-desktop-database" to update mimeinfo.cache */
     update_desktop_database();
@@ -517,7 +519,7 @@ _locate_desktop_file_recursive(const char* path, const char* desktop_id, bool fi
             const std::string sub_path = Glib::build_filename(path, file_name);
             if (std::filesystem::is_directory(sub_path))
             {
-                found = _locate_desktop_file_recursive(sub_path.c_str(), desktop_id, false);
+                found = _locate_desktop_file_recursive(sub_path.data(), desktop_id, false);
                 if (found)
                     break;
             }
@@ -570,7 +572,7 @@ _locate_desktop_file(const char* dir, const void* desktop_id)
 
     // sfm 0.8.7 some desktop files listed by the app chooser are in subdirs
     const std::string desktop_recursive_path = Glib::build_filename(dir, "applications");
-    sep = _locate_desktop_file_recursive(desktop_recursive_path.c_str(),
+    sep = _locate_desktop_file_recursive(desktop_recursive_path.data(),
                                          (const char*)desktop_id,
                                          true);
     return sep;
@@ -586,19 +588,19 @@ mime_type_locate_desktop_file(const char* dir, const char* desktop_id)
 
     const std::string data_dir = vfs_user_data_dir();
 
-    if ((ret = _locate_desktop_file(data_dir.c_str(), (void*)desktop_id)))
+    if ((ret = _locate_desktop_file(data_dir.data(), (void*)desktop_id)))
         return ret;
 
-    for (const std::string& sys_dir: vfs_system_data_dir())
+    for (std::string_view sys_dir: vfs_system_data_dir())
     {
-        if ((ret = _locate_desktop_file(sys_dir.c_str(), (void*)desktop_id)))
+        if ((ret = _locate_desktop_file(sys_dir.data(), (void*)desktop_id)))
             return ret;
     }
     return ret;
 }
 
 static char*
-get_default_action(const char* dir, const char* type)
+get_default_action(std::string_view dir, std::string_view type)
 {
     // LOG_INFO("get_default_action( {}, {} )", dir, type);
     // search these files in dir for the first existing default app
@@ -613,7 +615,7 @@ get_default_action(const char* dir, const char* type)
 
     for (std::size_t n = 0; n < names.size(); ++n)
     {
-        const std::string path = Glib::build_filename(dir, names.at(n).data());
+        const std::string path = Glib::build_filename(dir.data(), names.at(n).data());
         // LOG_INFO("    path = {}", path);
         const auto kf = Glib::KeyFile::create();
         try
@@ -630,7 +632,7 @@ get_default_action(const char* dir, const char* type)
             std::vector<Glib::ustring> apps;
             try
             {
-                apps = kf->get_string_list(groups.at(k).data(), type);
+                apps = kf->get_string_list(groups.at(k).data(), type.data());
                 if (apps.empty())
                     break;
             }
@@ -644,7 +646,7 @@ get_default_action(const char* dir, const char* type)
                 if (apps[i][0] != '\0')
                 {
                     // LOG_INFO("        {}", apps[i]);
-                    if (mime_type_locate_desktop_file(nullptr, apps.at(i).c_str()))
+                    if (mime_type_locate_desktop_file(nullptr, apps.at(i).data()))
                     {
                         // LOG_INFO("            EXISTS");
                         return ztd::strdup(apps.at(i));
@@ -673,7 +675,7 @@ get_default_action(const char* dir, const char* type)
  * The old defaults.list is also checked.
  */
 char*
-mime_type_get_default_action(const std::string& mime_type)
+mime_type_get_default_action(std::string_view mime_type)
 {
     /* FIXME: need to check parent types if default action of current type is not set. */
 
@@ -682,19 +684,19 @@ mime_type_get_default_action(const std::string& mime_type)
     std::string dir;
 
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    if ((ret = get_default_action(vfs_user_config_dir().c_str(), mime_type.c_str())))
+    if ((ret = get_default_action(vfs_user_config_dir(), mime_type)))
         return ret;
 
     // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
     dir = Glib::build_filename(vfs_user_data_dir(), "applications");
-    if ((ret = get_default_action(dir.c_str(), mime_type.c_str())))
+    if ((ret = get_default_action(dir, mime_type)))
         return ret;
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
-    for (const std::string& sys_dir: vfs_system_data_dir())
+    for (std::string_view sys_dir: vfs_system_data_dir())
     {
-        dir = Glib::build_filename(sys_dir, "applications");
-        if ((ret = get_default_action(dir.c_str(), mime_type.c_str())))
+        dir = Glib::build_filename(sys_dir.data(), "applications");
+        if ((ret = get_default_action(dir, mime_type)))
             return ret;
     }
 
@@ -883,6 +885,6 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
     if (data_changed)
     {
         Glib::ustring data = kf->to_data();
-        save_to_file(path, data);
+        save_to_file(path, data.data());
     }
 }

@@ -15,6 +15,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <string>
+#include <string_view>
+
 #include <vector>
 
 #include <sys/stat.h>
@@ -54,7 +57,7 @@
 #define MAGIC_LIST     24
 #define NAMESPACE_LIST 28
 
-MimeCache::MimeCache(const std::string& file_path)
+MimeCache::MimeCache(std::string_view file_path)
 {
     // LOG_INFO("MimeCache Constructor");
 

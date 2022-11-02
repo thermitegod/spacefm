@@ -19,6 +19,8 @@
 // Compatibility with other systems like BSD, need to be improved.
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <array>
@@ -190,17 +192,17 @@ FindFile::FindFile()
 
 struct FoundFile
 {
-    FoundFile(VFSFileInfo* fi, const std::string& dir_path);
+    FoundFile(VFSFileInfo* fi, std::string_view dir_path);
     // ~FoundFile();
 
     VFSFileInfo* fi;
     std::string dir_path;
 };
 
-FoundFile::FoundFile(VFSFileInfo* fi, const std::string& dir_path)
+FoundFile::FoundFile(VFSFileInfo* fi, std::string_view dir_path)
 {
     this->fi = fi;
-    this->dir_path = dir_path;
+    this->dir_path = dir_path.data();
 }
 
 #define FOUND_FILE(obj) (static_cast<FoundFile*>(obj))
@@ -392,7 +394,7 @@ compose_command(FindFile* data)
     std::string tmp;
 
     GtkTreeIter it;
-    static constexpr std::array<char, 4> size_units{'c', 'k', 'M', 'G'};
+    static constexpr std::array<std::string_view, 4> size_units{"c", "k", "M", "G"};
 
     argv.push_back("find");
     argv.push_back("-H");
@@ -781,11 +783,11 @@ menu_pos(GtkMenu* menu, int* x, int* y, bool* push_in, GtkWidget* btn)
 }
 
 static void
-add_search_dir(FindFile* data, const std::string& path)
+add_search_dir(FindFile* data, std::string_view path)
 {
     GtkTreeIter it;
     gtk_list_store_append(data->places_list, &it);
-    gtk_list_store_set(data->places_list, &it, 0, path.c_str(), -1);
+    gtk_list_store_set(data->places_list, &it, 0, path.data(), -1);
 }
 
 static void
@@ -1139,10 +1141,10 @@ fm_find_files(const std::vector<const char*>& search_dirs)
     remove_directory_btn = GTK_WIDGET(gtk_builder_get_object(builder, "remove_directory_btn"));
     data->include_sub = GTK_WIDGET(gtk_builder_get_object(builder, "include_sub"));
 
-    for (const char* dir: search_dirs)
+    for (std::string_view dir: search_dirs)
     {
         if (std::filesystem::is_directory(dir))
-            gtk_list_store_insert_with_values(data->places_list, &it, 0, 0, dir, -1);
+            gtk_list_store_insert_with_values(data->places_list, &it, 0, 0, dir.data(), -1);
     }
 
     gtk_tree_view_set_model(GTK_TREE_VIEW(data->places_view), GTK_TREE_MODEL(data->places_list));
