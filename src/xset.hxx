@@ -208,149 +208,149 @@ struct XSet
   public:
     // get/set
 
-    const char* get_name();
+    const char* get_name() const noexcept;
 
-    bool is_xset_name(XSetName val);
-    bool is_xset_name(const std::vector<XSetName>& val);
-    XSetName get_xset_name();
+    bool is_xset_name(XSetName val) noexcept;
+    bool is_xset_name(const std::vector<XSetName>& val) noexcept;
+    XSetName get_xset_name() const noexcept;
 
-    bool is_b(XSetB bval);
-    bool get_b();
-    void set_b(bool bval);
-    void set_b(XSetB bval);
+    bool is_b(XSetB bval) noexcept;
+    bool get_b() const noexcept;
+    void set_b(bool bval) noexcept;
+    void set_b(XSetB bval) noexcept;
 
-    char* get_s();
-    int get_s_int();
-    void set_s(const char* val);
-    void set_s(const std::string& val);
+    char* get_s() const noexcept;
+    int get_s_int() const noexcept;
+    void set_s(const char* val) noexcept;
+    void set_s(const std::string& val) noexcept;
 
-    char* get_x();
-    int get_x_int();
-    void set_x(const char* val);
-    void set_x(const std::string& val);
+    char* get_x() const noexcept;
+    int get_x_int() const noexcept;
+    void set_x(const char* val) noexcept;
+    void set_x(const std::string& val) noexcept;
 
-    char* get_y();
-    int get_y_int();
-    void set_y(const char* val);
-    void set_y(const std::string& val);
+    char* get_y() const noexcept;
+    int get_y_int() const noexcept;
+    void set_y(const char* val) noexcept;
+    void set_y(const std::string& val) noexcept;
 
-    char* get_z();
-    int get_z_int();
-    void set_z(const char* val);
-    void set_z(const std::string& val);
+    char* get_z() const noexcept;
+    int get_z_int() const noexcept;
+    void set_z(const char* val) noexcept;
+    void set_z(const std::string& val) noexcept;
 
-    bool get_disable();
-    void set_disable(bool bval);
+    bool get_disable() const noexcept;
+    void set_disable(bool bval) noexcept;
 
-    char* get_menu_label();
-    void set_menu_label(const char* val);
-    void set_menu_label(const std::string& val);
-    void set_menu_label_custom(const char* val);
-    void set_menu_label_custom(const std::string& val);
+    char* get_menu_label() const noexcept;
+    void set_menu_label(const char* val) noexcept;
+    void set_menu_label(const std::string& val) noexcept;
+    void set_menu_label_custom(const char* val) noexcept;
+    void set_menu_label_custom(const std::string& val) noexcept;
 
-    bool is_menu_style(XSetMenu val);
-    bool is_menu_style(const std::vector<XSetMenu>& val);
-    XSetMenu get_menu_style();
-    void set_menu_style(XSetMenu val);
+    bool is_menu_style(XSetMenu val) noexcept;
+    bool is_menu_style(const std::vector<XSetMenu>& val) noexcept;
+    XSetMenu get_menu_style() const noexcept;
+    void set_menu_style(XSetMenu val) noexcept;
 
-    void set_cb(GFunc func, void* data);
+    void set_cb(GFunc func, void* data) noexcept;
 
-    void set_ob1(const char* ob, void* data);
-    void set_ob1(const char* ob, const char* data);
-    void set_ob1_int(const char* ob, int data);
-    void set_ob2(const char* ob, void* data);
+    void set_ob1(const char* ob, void* data) noexcept;
+    void set_ob1(const char* ob, const char* data) noexcept;
+    void set_ob1_int(const char* ob, int data) noexcept;
+    void set_ob2(const char* ob, void* data) noexcept;
 
-    unsigned int get_key();
-    void set_key(unsigned int val);
+    unsigned int get_key() const noexcept;
+    void set_key(unsigned int val) noexcept;
 
-    unsigned int get_keymod();
-    void set_keymod(unsigned int val);
+    unsigned int get_keymod() const noexcept;
+    void set_keymod(unsigned int val) noexcept;
 
-    char* get_shared_key();
-    void set_shared_key(const char* val);
-    void set_shared_key(const std::string& val);
+    char* get_shared_key() const noexcept;
+    void set_shared_key(const char* val) noexcept;
+    void set_shared_key(const std::string& val) noexcept;
 
-    char* get_icon();
-    void set_icon(const char* val);
-    void set_icon(const std::string& val);
+    char* get_icon() const noexcept;
+    void set_icon(const char* val) noexcept;
+    void set_icon(const std::string& val) noexcept;
 
-    char* get_desc();
-    void set_desc(const char* val);
-    void set_desc(const std::string& val);
+    char* get_desc() const noexcept;
+    void set_desc(const char* val) noexcept;
+    void set_desc(const std::string& val) noexcept;
 
-    char* get_title();
-    void set_title(const char* val);
-    void set_title(const std::string& val);
+    char* get_title() const noexcept;
+    void set_title(const char* val) noexcept;
+    void set_title(const std::string& val) noexcept;
 
-    char* get_next();
-    void set_next(const char* val);
-    void set_next(const std::string& val);
+    char* get_next() const noexcept;
+    void set_next(const char* val) noexcept;
+    void set_next(const std::string& val) noexcept;
 
-    char* get_context();
-    void set_context(const char* val);
-    void set_context(const std::string& val);
+    char* get_context() const noexcept;
+    void set_context(const char* val) noexcept;
+    void set_context(const std::string& val) noexcept;
 
-    bool is_tool(XSetTool val);
-    bool is_tool(const std::vector<XSetTool>& val);
-    XSetTool get_tool();
-    void set_tool(XSetTool val);
+    bool is_tool(XSetTool val) noexcept;
+    bool is_tool(const std::vector<XSetTool>& val) noexcept;
+    XSetTool get_tool() const noexcept;
+    void set_tool(XSetTool val) noexcept;
 
-    bool get_lock();
-    void set_lock(bool bval);
+    bool get_lock() const noexcept;
+    void set_lock(bool bval) noexcept;
 
-    char* get_prev();
-    void set_prev(const char* val);
-    void set_prev(const std::string& val);
+    char* get_prev() const noexcept;
+    void set_prev(const char* val) noexcept;
+    void set_prev(const std::string& val) noexcept;
 
-    char* get_parent();
-    void set_parent(const char* val);
-    void set_parent(const std::string& val);
+    char* get_parent() const noexcept;
+    void set_parent(const char* val) noexcept;
+    void set_parent(const std::string& val) noexcept;
 
-    char* get_child();
-    void set_child(const char* val);
-    void set_child(const std::string& val);
+    char* get_child() const noexcept;
+    void set_child(const char* val) noexcept;
+    void set_child(const std::string& val) noexcept;
 
-    char* get_line();
-    void set_line(const char* val);
-    void set_line(const std::string& val);
+    char* get_line() const noexcept;
+    void set_line(const char* val) noexcept;
+    void set_line(const std::string& val) noexcept;
 
-    bool get_task();
-    void set_task(bool bval);
+    bool get_task() const noexcept;
+    void set_task(bool bval) noexcept;
 
-    bool get_task_pop();
-    void set_task_pop(bool bval);
+    bool get_task_pop() const noexcept;
+    void set_task_pop(bool bval) noexcept;
 
-    bool get_task_err();
-    void set_task_err(bool bval);
+    bool get_task_err() const noexcept;
+    void set_task_err(bool bval) noexcept;
 
-    bool get_task_out();
-    void set_task_out(bool bval);
+    bool get_task_out() const noexcept;
+    void set_task_out(bool bval) noexcept;
 
-    bool get_in_terminal();
-    void set_in_terminal(bool bval);
+    bool get_in_terminal() const noexcept;
+    void set_in_terminal(bool bval) noexcept;
 
-    bool get_keep_terminal();
-    void set_keep_terminal(bool bval);
+    bool get_keep_terminal() const noexcept;
+    void set_keep_terminal(bool bval) noexcept;
 
-    bool get_scroll_lock();
-    void set_scroll_lock(bool bval);
+    bool get_scroll_lock() const noexcept;
+    void set_scroll_lock(bool bval) noexcept;
 
-    char get_opener();
-    void set_opener(char val);
+    char get_opener() const noexcept;
+    void set_opener(char val) noexcept;
 
-    bool get_plugin();
-    void set_plugin(bool bval);
+    bool get_plugin() const noexcept;
+    void set_plugin(bool bval) noexcept;
 
-    bool get_plugin_top();
-    void set_plugin_top(bool bval);
+    bool get_plugin_top() const noexcept;
+    void set_plugin_top(bool bval) noexcept;
 
-    char* get_plug_name();
-    void set_plug_name(const char* val);
-    void set_plug_name(const std::string& val);
+    char* get_plug_name() const noexcept;
+    void set_plug_name(const char* val) noexcept;
+    void set_plug_name(const std::string& val) noexcept;
 
-    char* get_plug_dir();
-    void set_plug_dir(const char* val);
-    void set_plug_dir(const std::string& val);
+    char* get_plug_dir() const noexcept;
+    void set_plug_dir(const char* val) noexcept;
+    void set_plug_dir(const std::string& val) noexcept;
 };
 
 // using xset_t = std::unique_ptr<XSet>;
@@ -361,87 +361,90 @@ extern std::vector<xset_t> xsets;
 
 // get/set //
 
-xset_t xset_new(const std::string& name, XSetName xset_name);
+xset_t xset_new(const std::string& name, XSetName xset_name) noexcept;
 
-xset_t xset_get(XSetName name);
-xset_t xset_get(const std::string& name);
+xset_t xset_get(XSetName name) noexcept;
+xset_t xset_get(const std::string& name) noexcept;
 
-xset_t xset_is(XSetName name);
-xset_t xset_is(const std::string& name);
+xset_t xset_is(XSetName name) noexcept;
+xset_t xset_is(const std::string& name) noexcept;
 
-xset_t xset_set(xset_t name, XSetVar var, const std::string& value);
-xset_t xset_set(XSetName name, XSetVar var, const std::string& value);
-xset_t xset_set(const std::string& name, XSetVar var, const std::string& value);
+xset_t xset_set(xset_t name, XSetVar var, const std::string& value) noexcept;
+xset_t xset_set(XSetName name, XSetVar var, const std::string& value) noexcept;
+xset_t xset_set(const std::string& name, XSetVar var, const std::string& value) noexcept;
 
-xset_t xset_set_var(xset_t set, XSetVar var, const std::string& value);
+xset_t xset_set_var(xset_t set, XSetVar var, const std::string& value) noexcept;
 
 // B
-bool xset_get_b(xset_t set);
-bool xset_get_b(XSetName name);
-bool xset_get_b(const std::string& name);
-bool xset_get_b_set(xset_t set);
-bool xset_get_b_panel(panel_t panel, const std::string& name);
-bool xset_get_b_panel(panel_t panel, XSetPanel name);
-bool xset_get_b_panel_mode(panel_t panel, const std::string& name, MainWindowPanel mode);
-bool xset_get_b_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode);
+bool xset_get_b(xset_t set) noexcept;
+bool xset_get_b(XSetName name) noexcept;
+bool xset_get_b(const std::string& name) noexcept;
+bool xset_get_b_set(xset_t set) noexcept;
+bool xset_get_b_panel(panel_t panel, const std::string& name) noexcept;
+bool xset_get_b_panel(panel_t panel, XSetPanel name) noexcept;
+bool xset_get_b_panel_mode(panel_t panel, const std::string& name, MainWindowPanel mode) noexcept;
+bool xset_get_b_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode) noexcept;
 
-xset_t xset_set_b(xset_t set, bool bval);
-xset_t xset_set_b(XSetName name, bool bval);
-xset_t xset_set_b(const std::string& name, bool bval);
-xset_t xset_set_b_panel(panel_t panel, const std::string& name, bool bval);
-xset_t xset_set_b_panel(panel_t panel, XSetPanel name, bool bval);
+xset_t xset_set_b(xset_t set, bool bval) noexcept;
+xset_t xset_set_b(XSetName name, bool bval) noexcept;
+xset_t xset_set_b(const std::string& name, bool bval) noexcept;
+xset_t xset_set_b_panel(panel_t panel, const std::string& name, bool bval) noexcept;
+xset_t xset_set_b_panel(panel_t panel, XSetPanel name, bool bval) noexcept;
 xset_t xset_set_b_panel_mode(panel_t panel, const std::string& name, MainWindowPanel mode,
-                             bool bval);
-xset_t xset_set_b_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode, bool bval);
+                             bool bval) noexcept;
+xset_t xset_set_b_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode,
+                             bool bval) noexcept;
 
 // S
-char* xset_get_s(xset_t set);
-char* xset_get_s(XSetName name);
-char* xset_get_s(const std::string& name);
-char* xset_get_s_panel(panel_t panel, const std::string& name);
-char* xset_get_s_panel(panel_t panel, XSetPanel name);
+char* xset_get_s(xset_t set) noexcept;
+char* xset_get_s(XSetName name) noexcept;
+char* xset_get_s(const std::string& name) noexcept;
+char* xset_get_s_panel(panel_t panel, const std::string& name) noexcept;
+char* xset_get_s_panel(panel_t panel, XSetPanel name) noexcept;
 
 // X
-char* xset_get_x(xset_t set);
-char* xset_get_x(XSetName name);
-char* xset_get_x(const std::string& name);
+char* xset_get_x(xset_t set) noexcept;
+char* xset_get_x(XSetName name) noexcept;
+char* xset_get_x(const std::string& name) noexcept;
 
 // Y
-char* xset_get_y(xset_t set);
-char* xset_get_y(XSetName name);
-char* xset_get_y(const std::string& name);
+char* xset_get_y(xset_t set) noexcept;
+char* xset_get_y(XSetName name) noexcept;
+char* xset_get_y(const std::string& name) noexcept;
 
 // Z
-char* xset_get_z(xset_t set);
-char* xset_get_z(XSetName name);
-char* xset_get_z(const std::string& name);
+char* xset_get_z(xset_t set) noexcept;
+char* xset_get_z(XSetName name) noexcept;
+char* xset_get_z(const std::string& name) noexcept;
 
 // Panel
-xset_t xset_get_panel(panel_t panel, const std::string& name);
-xset_t xset_get_panel(panel_t panel, XSetPanel name);
-xset_t xset_get_panel_mode(panel_t panel, const std::string& name, MainWindowPanel mode);
-xset_t xset_get_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode);
+xset_t xset_get_panel(panel_t panel, const std::string& name) noexcept;
+xset_t xset_get_panel(panel_t panel, XSetPanel name) noexcept;
+xset_t xset_get_panel_mode(panel_t panel, const std::string& name, MainWindowPanel mode) noexcept;
+xset_t xset_get_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode) noexcept;
 
 xset_t xset_set_panel(panel_t panel, const std::string& name, XSetVar var,
-                      const std::string& value);
-xset_t xset_set_panel(panel_t panel, XSetPanel name, XSetVar var, const std::string& value);
+                      const std::string& value) noexcept;
+xset_t xset_set_panel(panel_t panel, XSetPanel name, XSetVar var,
+                      const std::string& value) noexcept;
 
 // CB
 
-xset_t xset_set_cb(XSetName name, GFunc cb_func, void* cb_data);
-xset_t xset_set_cb(const std::string& name, GFunc cb_func, void* cb_data);
-xset_t xset_set_cb_panel(panel_t panel, const std::string& name, GFunc cb_func, void* cb_data);
-xset_t xset_set_cb_panel(panel_t panel, XSetPanel name, GFunc cb_func, void* cb_data);
+xset_t xset_set_cb(XSetName name, GFunc cb_func, void* cb_data) noexcept;
+xset_t xset_set_cb(const std::string& name, GFunc cb_func, void* cb_data) noexcept;
+xset_t xset_set_cb_panel(panel_t panel, const std::string& name, GFunc cb_func,
+                         void* cb_data) noexcept;
+xset_t xset_set_cb_panel(panel_t panel, XSetPanel name, GFunc cb_func, void* cb_data) noexcept;
 
-xset_t xset_set_ob1_int(xset_t set, const char* ob1, int ob1_int);
-xset_t xset_set_ob1(xset_t set, const char* ob1, void* ob1_data);
-xset_t xset_set_ob2(xset_t set, const char* ob2, void* ob2_data);
+xset_t xset_set_ob1_int(xset_t set, const char* ob1, int ob1_int) noexcept;
+xset_t xset_set_ob1(xset_t set, const char* ob1, void* ob1_data) noexcept;
+xset_t xset_set_ob2(xset_t set, const char* ob2, void* ob2_data) noexcept;
 
 // Int
 
-int xset_get_int_set(xset_t set, XSetVar var);
+int xset_get_int_set(xset_t set, XSetVar var) noexcept;
 
-int xset_get_int(XSetName name, XSetVar var);
-int xset_get_int(const std::string& name, XSetVar var);
-int xset_get_int_panel(panel_t panel, const std::string& name, XSetVar var);
-int xset_get_int_panel(panel_t panel, XSetPanel name, XSetVar var);
+int xset_get_int(XSetName name, XSetVar var) noexcept;
+int xset_get_int(const std::string& name, XSetVar var) noexcept;
+int xset_get_int_panel(panel_t panel, const std::string& name, XSetVar var) noexcept;
+int xset_get_int_panel(panel_t panel, XSetPanel name, XSetVar var) noexcept;
