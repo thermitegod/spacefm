@@ -3763,15 +3763,16 @@ create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode view_mode)
     GtkWidget* folder_view = nullptr;
     GtkTreeSelection* tree_sel;
     GtkCellRenderer* renderer;
-    int big_icon_size, small_icon_size, icon_size = 0;
+
+    int icon_size = 0;
+    const int big_icon_size = vfs_mime_type_get_icon_size_big();
+    const int small_icon_size = vfs_mime_type_get_icon_size_small();
 
     PangoAttrList* attr_list;
     attr_list = pango_attr_list_new();
 #if PANGO_VERSION_CHECK(1, 44, 0)
     pango_attr_list_insert(attr_list, pango_attr_insert_hyphens_new(false));
 #endif
-
-    vfs_mime_type_get_icon_size(&big_icon_size, &small_icon_size);
 
     switch (view_mode)
     {

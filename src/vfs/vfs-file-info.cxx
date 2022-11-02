@@ -238,15 +238,16 @@ vfs_file_info_get_big_icon(VFSFileInfo* fi)
     if (fi->flags != VFSFileInfoFlag::VFS_FILE_INFO_NONE)
     {
         int w, h;
-        int icon_size;
-        vfs_mime_type_get_icon_size(&icon_size, nullptr);
+        const int icon_size = vfs_mime_type_get_icon_size_big();
         if (fi->big_thumbnail)
         {
             w = gdk_pixbuf_get_width(fi->big_thumbnail);
             h = gdk_pixbuf_get_height(fi->big_thumbnail);
         }
         else
+        {
             w = h = 0;
+        }
 
         if (std::abs(std::max(w, h) - icon_size) > 2)
         {
@@ -606,10 +607,15 @@ vfs_file_info_load_thumbnail(VFSFileInfo* fi, const std::string& full_path, bool
 }
 
 void
-vfs_file_info_set_thumbnail_size(int big, int small)
+vfs_file_info_set_thumbnail_size_big(int size)
 {
-    big_thumb_size = big;
-    small_thumb_size = small;
+    big_thumb_size = size;
+}
+
+void
+vfs_file_info_set_thumbnail_size_small(int size)
+{
+    small_thumb_size = size;
 }
 
 void
@@ -633,8 +639,8 @@ vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
         if (desktop.get_icon_name())
         {
             GdkPixbuf* icon;
-            int big_size, small_size;
-            vfs_mime_type_get_icon_size(&big_size, &small_size);
+            const int big_size = vfs_mime_type_get_icon_size_big();
+            const int small_size = vfs_mime_type_get_icon_size_small();
             if (!fi->big_thumbnail)
             {
                 icon = desktop.get_icon(big_size);

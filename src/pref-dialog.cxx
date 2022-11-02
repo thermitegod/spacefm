@@ -205,8 +205,11 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         if (big_icon != app_settings.get_icon_size_big() ||
             small_icon != app_settings.get_icon_size_small())
         {
-            vfs_mime_type_set_icon_size(big_icon, small_icon);
-            vfs_file_info_set_thumbnail_size(big_icon, small_icon);
+            vfs_mime_type_set_icon_size_big(big_icon);
+            vfs_mime_type_set_icon_size_small(small_icon);
+
+            vfs_file_info_set_thumbnail_size_big(big_icon);
+            vfs_file_info_set_thumbnail_size_small(small_icon);
 
             /* unload old thumbnails (icons of *.desktop files will be unloaded here, too)  */
             if (big_icon != app_settings.get_icon_size_big())

@@ -365,21 +365,28 @@ free_cached_icons(const char* key, VFSMimeType* mime_type, bool big_icons)
 }
 
 void
-vfs_mime_type_set_icon_size(int big, int small)
+vfs_mime_type_set_icon_size_big(int size)
 {
     mime_map_lock.lock();
-    if (big != big_icon_size)
+    if (size != big_icon_size)
     {
-        big_icon_size = big;
+        big_icon_size = size;
         /* Unload old cached icons */
         for (auto it = mime_map.begin(); it != mime_map.end(); ++it)
         {
             free_cached_icons(it->first, it->second, true);
         }
     }
-    if (small != small_icon_size)
+    mime_map_lock.unlock();
+}
+
+void
+vfs_mime_type_set_icon_size_small(int size)
+{
+    mime_map_lock.lock();
+    if (size != small_icon_size)
     {
-        small_icon_size = small;
+        small_icon_size = size;
         /* Unload old cached icons */
         for (auto it = mime_map.begin(); it != mime_map.end(); ++it)
         {
@@ -389,13 +396,16 @@ vfs_mime_type_set_icon_size(int big, int small)
     mime_map_lock.unlock();
 }
 
-void
-vfs_mime_type_get_icon_size(int* big, int* small)
+int
+vfs_mime_type_get_icon_size_big()
 {
-    if (big)
-        *big = big_icon_size;
-    if (small)
-        *small = small_icon_size;
+    return big_icon_size;
+}
+
+int
+vfs_mime_type_get_icon_size_small()
+{
+    return small_icon_size;
 }
 
 const char*
