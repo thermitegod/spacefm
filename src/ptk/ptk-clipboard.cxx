@@ -18,6 +18,8 @@
 
 #include <filesystem>
 
+#include <vector>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>
@@ -28,7 +30,8 @@
 
 #include "ptk/ptk-error.hxx"
 #include "ptk/ptk-file-task.hxx"
-#include "ptk/ptk-file-misc.hxx"
+#include "ptk/ptk-file-actions-rename.hxx"
+#include "ptk/ptk-utils.hxx"
 
 #include "utils.hxx"
 
@@ -481,7 +484,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
 
             if (std::filesystem::is_symlink(file_path))
             { // canonicalize target
-                file_path = get_real_link_target(file_path.c_str());
+                file_path = get_real_link_target(file_path);
             }
 
             struct stat stat;

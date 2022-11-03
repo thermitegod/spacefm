@@ -42,8 +42,11 @@
 #include "vfs/vfs-user-dir.hxx"
 
 #include "ptk/ptk-bookmark-view.hxx"
-#include "ptk/ptk-file-misc.hxx"
+#include "ptk/ptk-file-actions-open.hxx"
+#include "ptk/ptk-file-actions-misc.hxx"
+#include "ptk/ptk-file-actions-rename.hxx"
 #include "ptk/ptk-file-archiver.hxx"
+#include "ptk/ptk-file-properties.hxx"
 #include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-app-chooser.hxx"

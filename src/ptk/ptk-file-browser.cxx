@@ -41,9 +41,12 @@
 #include <magic_enum.hpp>
 
 #include "ptk/ptk-error.hxx"
-#include "ptk/ptk-file-misc.hxx"
+
+#include "ptk/ptk-file-actions-open.hxx"
+#include "ptk/ptk-file-actions-rename.hxx"
 
 #include "ptk/ptk-bookmark-view.hxx"
+#include "ptk/ptk-file-properties.hxx"
 #include "ptk/ptk-location-view.hxx"
 #include "ptk/ptk-dir-tree-view.hxx"
 #include "ptk/ptk-dir-tree.hxx"

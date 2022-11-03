@@ -1,6 +1,4 @@
 /**
- * Copyright (C) 2006 Hong Jen Yee (PCMan) <pcman.tw@gmail.com>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -20,9 +18,13 @@
 #include <string>
 #include <string_view>
 
+#include <vector>
+
 #include <gtk/gtk.h>
 
 #include "vfs/vfs-file-info.hxx"
 
-void ptk_show_file_properties(GtkWindow* parent_win, const char* cwd,
-                              std::vector<VFSFileInfo*>& sel_files, int page);
+void ptk_trash_files(GtkWindow* parent_win, std::string_view cwd,
+                     const std::vector<VFSFileInfo*>& sel_files, GtkTreeView* task_view);
+void ptk_delete_files(GtkWindow* parent_win, std::string_view cwd,
+                      const std::vector<VFSFileInfo*>& sel_files, GtkTreeView* task_view);

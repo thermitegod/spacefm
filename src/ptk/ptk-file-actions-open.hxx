@@ -1,6 +1,4 @@
 /**
- * Copyright (C) 2006 Hong Jen Yee (PCMan) <pcman.tw@gmail.com>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -20,9 +18,18 @@
 #include <string>
 #include <string_view>
 
+#include <vector>
+
 #include <gtk/gtk.h>
+
+#include "ptk/ptk-file-browser.hxx"
 
 #include "vfs/vfs-file-info.hxx"
 
-void ptk_show_file_properties(GtkWindow* parent_win, const char* cwd,
-                              std::vector<VFSFileInfo*>& sel_files, int page);
+/* sel_files is a list of VFSFileInfo
+ * app_desktop is the application used to open the files.
+ * If app_desktop == nullptr, each file will be opened with its
+ * default application. */
+void ptk_open_files_with_app(const char* cwd, const std::vector<VFSFileInfo*>& sel_files,
+                             const char* app_desktop, PtkFileBrowser* file_browser, bool xforce,
+                             bool xnever);

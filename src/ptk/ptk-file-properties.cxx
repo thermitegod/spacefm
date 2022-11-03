@@ -378,7 +378,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
     }
 }
 
-GtkWidget*
+static GtkWidget*
 file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
                         const std::vector<VFSFileInfo*>& sel_files, int page)
 {
@@ -953,4 +953,40 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
     }
 
     gtk_widget_destroy(GTK_WIDGET(dialog));
+}
+
+void
+ptk_show_file_properties(GtkWindow* parent_win, const char* cwd,
+                         std::vector<VFSFileInfo*>& sel_files, int page)
+{
+    GtkWidget* dlg;
+
+    if (!sel_files.empty())
+    {
+        /* Make a copy of the list */
+        // for (VFSFileInfo* file: sel_files)
+        // {
+        //     vfs_file_info_ref(file);
+        // }
+
+        dlg = file_properties_dlg_new(parent_win, cwd, sel_files, page);
+    }
+    else
+    {
+        // no files selected, use cwd as file
+        VFSFileInfo* file = vfs_file_info_new();
+        vfs_file_info_get(file, cwd);
+        // sel_files.push_back(vfs_file_info_ref(file));
+        sel_files.push_back(file);
+        const std::string parent_dir = Glib::path_get_dirname(cwd);
+        dlg = file_properties_dlg_new(parent_win, parent_dir.c_str(), sel_files, page);
+    }
+
+    // disabling this should not cause leaks since
+    // ref count increments are also disabled above?
+    // g_signal_connect_swapped(dlg,
+    //                         "destroy",
+    //                         G_CALLBACK(vfs_file_info_list_free),
+    //                         vector_to_glist_VFSFileInfo(sel_files));
+    gtk_widget_show(dlg);
 }

@@ -1,6 +1,4 @@
 /**
- * Copyright (C) 2006 Hong Jen Yee (PCMan) <pcman.tw@gmail.com>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -20,9 +18,4 @@
 #include <string>
 #include <string_view>
 
-#include <gtk/gtk.h>
-
-#include "vfs/vfs-file-info.hxx"
-
-void ptk_show_file_properties(GtkWindow* parent_win, const char* cwd,
-                              std::vector<VFSFileInfo*>& sel_files, int page);
+const std::string get_real_link_target(std::string_view link_path);

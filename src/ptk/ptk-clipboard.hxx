@@ -25,6 +25,8 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include "vfs/vfs-file-info.hxx"
+
 void ptk_clipboard_cut_or_copy_files(const char* working_dir,
                                      const std::vector<VFSFileInfo*>& sel_files, bool copy);
 
