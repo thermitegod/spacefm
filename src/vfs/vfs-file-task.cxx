@@ -984,20 +984,23 @@ vfs_file_task_chown_chmod(VFSFileTask* task, std::string_view src_file)
         /* chmod */
         if (task->chmod_actions)
         {
-            mode_t new_mode = src_stat.st_mode;
+            std::filesystem::perms new_perms;
+            std::filesystem::perms orig_perms = std::filesystem::status(src_file).permissions();
+
             for (std::size_t i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
             {
                 if (task->chmod_actions[i] == 2) /* Do not change */
                     continue;
                 if (task->chmod_actions[i] == 0) /* Remove this bit */
-                    new_mode &= ~chmod_flags.at(i);
+                    new_perms &= ~chmod_flags.at(i);
                 else /* Add this bit */
-                    new_mode |= chmod_flags.at(i);
+                    new_perms |= chmod_flags.at(i);
             }
-            if (new_mode != src_stat.st_mode)
+            if (new_perms != orig_perms)
             {
-                result = chmod(src_file.data(), new_mode);
-                if (result != 0)
+                std::error_code ec;
+                std::filesystem::permissions(src_file, new_perms, ec);
+                if (ec)
                 {
                     vfs_file_task_error(task, errno, "chmod", src_file);
                     if (should_abort(task))

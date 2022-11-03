@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <array>
 #include <vector>
 
@@ -64,19 +66,27 @@ enum ChmodActionType
     STICKY,
 };
 
-inline constexpr std::array<mode_t, 12> chmod_flags{
-    S_IRUSR,
-    S_IWUSR,
-    S_IXUSR,
-    S_IRGRP,
-    S_IWGRP,
-    S_IXGRP,
-    S_IROTH,
-    S_IWOTH,
-    S_IXOTH,
-    S_ISUID,
-    S_ISGID,
-    S_ISVTX,
+inline constexpr std::array<std::filesystem::perms, 12> chmod_flags{
+    // User
+    std::filesystem::perms::owner_read,
+    std::filesystem::perms::owner_write,
+    std::filesystem::perms::owner_exec,
+    // Group
+    std::filesystem::perms::group_read,
+    std::filesystem::perms::group_write,
+    std::filesystem::perms::group_exec,
+
+    // Other
+    std::filesystem::perms::others_read,
+    std::filesystem::perms::others_write,
+    std::filesystem::perms::others_exec,
+
+    // uid/gid
+    std::filesystem::perms::set_uid,
+    std::filesystem::perms::set_gid,
+
+    // sticky bit
+    std::filesystem::perms::sticky_bit,
 };
 
 enum VFSFileTaskState

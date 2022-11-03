@@ -644,7 +644,10 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
         {
             if (data->chmod_states[i] != 2) /* allow to touch this bit */
             {
-                data->chmod_states[i] = (vfs_file_info_get_mode(file) & chmod_flags.at(i) ? 1 : 0);
+                data->chmod_states[i] = ((vfs_file_info_get_mode(file) & chmod_flags.at(i)) !=
+                                                 std::filesystem::perms::none
+                                             ? 1
+                                             : 0);
                 gtk_toggle_button_set_active(data->chmod_btns[i], data->chmod_states[i]);
             }
         }

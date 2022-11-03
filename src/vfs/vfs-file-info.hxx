@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <vector>
 
 #include <atomic>
@@ -61,6 +63,8 @@ struct VFSFileInfo
     blksize_t blksize; // st_blksize - Block size for filesystem I/O
     blkcnt_t blocks;   // st_blocks - Number of 512B blocks allocated
 
+    std::filesystem::file_status status;
+
     std::string name;              // real name on file system
     std::string disp_name;         // displayed name (in UTF-8)
     std::string collate_key;       // sfm sort key
@@ -99,7 +103,7 @@ const char* vfs_file_info_get_disp_size(VFSFileInfo* fi);
 
 off_t vfs_file_info_get_blocks(VFSFileInfo* fi);
 
-mode_t vfs_file_info_get_mode(VFSFileInfo* fi);
+std::filesystem::perms vfs_file_info_get_mode(VFSFileInfo* fi);
 
 VFSMimeType* vfs_file_info_get_mime_type(VFSFileInfo* fi);
 void vfs_file_info_reload_mime_type(VFSFileInfo* fi, const char* full_path);

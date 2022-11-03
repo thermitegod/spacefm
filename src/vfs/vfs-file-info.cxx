@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <vector>
 
 #include <grp.h>
@@ -119,18 +121,20 @@ vfs_file_info_get(VFSFileInfo* fi, std::string_view file_path)
     struct stat file_stat;
     if (lstat(file_path.data(), &file_stat) == 0)
     {
-        // LOG_INFO("VFSFileInfo {}", fi->name);
-        /* This is time-consuming but can save much memory */
+        // LOG_INFO("VFSFileInfo name={}  size={}", fi->name, fi->name);
+        // This is time-consuming but can save much memory
         fi->mode = file_stat.st_mode;
         fi->dev = file_stat.st_dev;
         fi->uid = file_stat.st_uid;
         fi->gid = file_stat.st_gid;
         fi->size = file_stat.st_size;
-        // LOG_INFO("size {} {}", fi->name, fi->size);
         fi->mtime = file_stat.st_mtime;
         fi->atime = file_stat.st_atime;
         fi->blksize = file_stat.st_blksize;
         fi->blocks = file_stat.st_blocks;
+
+        // fi->status = std::filesystem::status(file_path);
+        fi->status = std::filesystem::symlink_status(file_path);
 
         fi->mime_type =
             vfs_mime_type_get_from_file(file_path.data(), fi->disp_name.c_str(), &file_stat);
@@ -212,11 +216,11 @@ vfs_file_info_reload_mime_type(VFSFileInfo* fi, const char* full_path)
     VFSMimeType* old_mime_type;
     struct stat file_stat;
 
-    /* convert VFSFileInfo to struct stat */
-    /* In current implementation, only st_mode is used in
-       mime-type detection, so let's save some CPU cycles
-       and do not copy unused fields.
-    */
+    // convert VFSFileInfo to struct stat
+
+    // In current implementation, only st_mode is used in
+    // mime-type detection, so let's save some CPU cycles
+    // and do not copy unused fields.
     file_stat.st_mode = fi->mode;
 
     old_mime_type = fi->mime_type;
@@ -360,99 +364,101 @@ vfs_file_info_get_atime(VFSFileInfo* fi)
 }
 
 static const std::string
-get_file_perm_string(mode_t mode)
+get_file_perm_string(std::filesystem::file_status status)
 {
-    std::string perm;
+    static constexpr std::uint8_t file_type{0};
 
-    // Special Permissions
-    if (S_ISREG(mode))
-        perm.append("-");
-    else if (S_ISDIR(mode))
-        perm.append("d");
-    else if (S_ISLNK(mode))
-        perm.append("l");
-    else if (S_ISCHR(mode))
-        perm.append("c");
-    else if (S_ISBLK(mode))
-        perm.append("b");
-    else if (S_ISFIFO(mode))
-        perm.append("p");
-    else if (S_ISSOCK(mode))
-        perm.append("s");
-    else
-        perm.append("-");
+    static constexpr std::uint8_t owner_read{1};
+    static constexpr std::uint8_t owner_write{2};
+    static constexpr std::uint8_t owner_exec{3};
+
+    static constexpr std::uint8_t group_read{4};
+    static constexpr std::uint8_t group_write{5};
+    static constexpr std::uint8_t group_exec{6};
+
+    static constexpr std::uint8_t other_read{7};
+    static constexpr std::uint8_t other_write{8};
+    static constexpr std::uint8_t other_exec{9};
+
+    // blank permissions
+    std::string perm = "----------";
+
+    // File Type Permissions
+    if (std::filesystem::is_regular_file(status))
+        perm[file_type] = '-';
+    else if (std::filesystem::is_directory(status))
+        perm[file_type] = 'd';
+    else if (std::filesystem::is_symlink(status))
+        perm[file_type] = 'l';
+    else if (std::filesystem::is_character_file(status))
+        perm[file_type] = 'c';
+    else if (std::filesystem::is_block_file(status))
+        perm[file_type] = 'b';
+    else if (std::filesystem::is_fifo(status))
+        perm[file_type] = 'p';
+    else if (std::filesystem::is_socket(status))
+        perm[file_type] = 's';
+
+    std::filesystem::perms p = status.permissions();
 
     // Owner
-    if (mode & S_IRUSR)
-        perm.append("r");
-    else
-        perm.append("-");
-    if (mode & S_IWUSR)
-        perm.append("w");
-    else
-        perm.append("-");
+    if ((p & std::filesystem::perms::owner_read) != std::filesystem::perms::none)
+        perm[owner_read] = 'r';
 
-    if (mode & S_ISUID)
+    if ((p & std::filesystem::perms::owner_write) != std::filesystem::perms::none)
+        perm[owner_write] = 'w';
+
+    if ((p & std::filesystem::perms::set_uid) != std::filesystem::perms::none)
     {
-        if (mode & S_IXUSR)
-            perm.append("s");
+        if ((p & std::filesystem::perms::owner_exec) != std::filesystem::perms::none)
+            perm[owner_exec] = 's';
         else
-            perm.append("S");
+            perm[owner_exec] = 's';
     }
     else
     {
-        if (mode & S_IXUSR)
-            perm.append("x");
-        else
-            perm.append("-");
+        if ((p & std::filesystem::perms::owner_exec) != std::filesystem::perms::none)
+            perm[owner_exec] = 'x';
     }
 
     // Group
-    if (mode & S_IRGRP)
-        perm.append("r");
-    else
-        perm.append("-");
-    if (mode & S_IWGRP)
-        perm.append("w");
-    else
-        perm.append("-");
-    if (mode & S_ISGID)
+    if ((p & std::filesystem::perms::group_read) != std::filesystem::perms::none)
+        perm[group_read] = 'r';
+
+    if ((p & std::filesystem::perms::group_write) != std::filesystem::perms::none)
+        perm[group_write] = 'w';
+
+    if ((p & std::filesystem::perms::set_gid) != std::filesystem::perms::none)
     {
-        if (mode & S_IXGRP)
-            perm.append("s");
+        if ((p & std::filesystem::perms::group_exec) != std::filesystem::perms::none)
+            perm[group_exec] = 's';
         else
-            perm.append("S");
+            perm[group_exec] = 'S';
     }
     else
     {
-        if (mode & S_IXGRP)
-            perm.append("x");
-        else
-            perm.append("-");
+        if ((p & std::filesystem::perms::group_exec) != std::filesystem::perms::none)
+            perm[group_exec] = 'x';
     }
 
     // Other
-    if (mode & S_IROTH)
-        perm.append("r");
-    else
-        perm.append("-");
-    if (mode & S_IWOTH)
-        perm.append("w");
-    else
-        perm.append("-");
-    if (mode & S_ISVTX)
+    if ((p & std::filesystem::perms::others_read) != std::filesystem::perms::none)
+        perm[other_read] = 'r';
+
+    if ((p & std::filesystem::perms::others_write) != std::filesystem::perms::none)
+        perm[other_write] = 'w';
+
+    if ((p & std::filesystem::perms::sticky_bit) != std::filesystem::perms::none)
     {
-        if (mode & S_IXOTH)
-            perm.append("t");
+        if ((p & std::filesystem::perms::others_exec) != std::filesystem::perms::none)
+            perm[other_exec] = 't';
         else
-            perm.append("T");
+            perm[other_exec] = 'T';
     }
     else
     {
-        if (mode & S_IXOTH)
-            perm.append("x");
-        else
-            perm.append("-");
+        if ((p & std::filesystem::perms::others_exec) != std::filesystem::perms::none)
+            perm[other_exec] = 'x';
     }
 
     return perm;
@@ -462,76 +468,68 @@ const char*
 vfs_file_info_get_disp_perm(VFSFileInfo* fi)
 {
     if (fi->disp_perm.empty())
-        fi->disp_perm = get_file_perm_string(fi->mode);
-
+        fi->disp_perm = get_file_perm_string(fi->status);
     return fi->disp_perm.c_str();
 }
 
 bool
 vfs_file_info_is_dir(VFSFileInfo* fi)
 {
-    if (S_ISDIR(fi->mode))
+    if (std::filesystem::is_directory(fi->status))
         return true;
-    if (S_ISLNK(fi->mode) &&
-        !strcmp(vfs_mime_type_get_type(fi->mime_type), XDG_MIME_TYPE_DIRECTORY))
-    {
-        return true;
-    }
+    else if (std::filesystem::is_symlink(fi->status))
+        return std::filesystem::is_directory(std::filesystem::read_symlink(fi->name));
     return false;
 }
 
 bool
 vfs_file_info_is_regular_file(VFSFileInfo* fi)
 {
-    return S_ISREG(fi->mode) ? true : false;
+    return std::filesystem::is_regular_file(fi->status);
 }
 
 bool
 vfs_file_info_is_symlink(VFSFileInfo* fi)
 {
-    return S_ISLNK(fi->mode) ? true : false;
+    return std::filesystem::is_symlink(fi->status);
 }
 
 bool
 vfs_file_info_is_socket(VFSFileInfo* fi)
 {
-    return S_ISSOCK(fi->mode) ? true : false;
+    return std::filesystem::is_socket(fi->status);
 }
 
 bool
 vfs_file_info_is_named_pipe(VFSFileInfo* fi)
 {
-    return S_ISFIFO(fi->mode) ? true : false;
+    return std::filesystem::is_fifo(fi->status);
 }
 
 bool
 vfs_file_info_is_block_device(VFSFileInfo* fi)
 {
-    return S_ISBLK(fi->mode) ? true : false;
+    return std::filesystem::is_block_file(fi->status);
 }
 
 bool
 vfs_file_info_is_char_device(VFSFileInfo* fi)
 {
-    return S_ISCHR(fi->mode) ? true : false;
+    return std::filesystem::is_character_file(fi->status);
 }
 
 bool
 vfs_file_info_is_image(VFSFileInfo* fi)
 {
-    /* FIXME: We had better use functions of xdg_mime to check this */
-    if (!strncmp("image/", vfs_mime_type_get_type(fi->mime_type), 6))
-        return true;
-    return false;
+    // FIXME: We had better use functions of xdg_mime to check this
+    return ztd::startswith(vfs_mime_type_get_type(fi->mime_type), "image/");
 }
 
 bool
 vfs_file_info_is_video(VFSFileInfo* fi)
 {
-    /* FIXME: We had better use functions of xdg_mime to check this */
-    if (!strncmp("video/", vfs_mime_type_get_type(fi->mime_type), 6))
-        return true;
-    return false;
+    // FIXME: We had better use functions of xdg_mime to check this
+    return ztd::startswith(vfs_mime_type_get_type(fi->mime_type), "video/");
 }
 
 bool
@@ -543,9 +541,7 @@ vfs_file_info_is_desktop_entry(VFSFileInfo* fi)
 bool
 vfs_file_info_is_unknown_type(VFSFileInfo* fi)
 {
-    if (!strcmp(XDG_MIME_TYPE_UNKNOWN, vfs_mime_type_get_type(fi->mime_type)))
-        return true;
-    return false;
+    return ztd::same(vfs_mime_type_get_type(fi->mime_type), XDG_MIME_TYPE_UNKNOWN);
 }
 
 /* full path of the file is required by this function */
@@ -562,10 +558,10 @@ vfs_file_info_is_text(VFSFileInfo* fi, const char* file_path)
     return mime_type_is_text_file(file_path, fi->mime_type->type);
 }
 
-mode_t
+std::filesystem::perms
 vfs_file_info_get_mode(VFSFileInfo* fi)
 {
-    return fi->mode;
+    return fi->status.permissions();
 }
 
 bool
