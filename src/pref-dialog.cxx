@@ -104,10 +104,9 @@ inline constexpr std::array<std::string_view, 3> date_formats{
 inline constexpr std::array<int, 4> drag_actions{0, 1, 2, 3};
 
 static void
-dir_unload_thumbnails(const char* path, VFSDir* dir, void* user_data)
+dir_unload_thumbnails(VFSDir* dir, bool user_data)
 {
-    (void)path;
-    vfs_dir_unload_thumbnails(dir, GPOINTER_TO_INT(user_data));
+    vfs_dir_unload_thumbnails(dir, user_data);
 }
 
 static void
@@ -221,9 +220,9 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
 
             /* unload old thumbnails (icons of *.desktop files will be unloaded here, too)  */
             if (big_icon != app_settings.get_icon_size_big())
-                vfs_dir_foreach(&dir_unload_thumbnails, GINT_TO_POINTER(1));
+                vfs_dir_foreach(&dir_unload_thumbnails, true);
             if (small_icon != app_settings.get_icon_size_small())
-                vfs_dir_foreach(&dir_unload_thumbnails, GINT_TO_POINTER(0));
+                vfs_dir_foreach(&dir_unload_thumbnails, false);
 
             app_settings.set_icon_size_big(big_icon);
             app_settings.set_icon_size_small(small_icon);

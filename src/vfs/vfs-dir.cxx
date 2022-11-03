@@ -671,10 +671,10 @@ notify_file_change(void* user_data)
 {
     (void)user_data;
 
-    for (auto it = dir_map.begin(); it != dir_map.end(); ++it)
+    for (const auto& dir: dir_map)
     {
-        update_changed_files(it->first, it->second);
-        update_created_files(it->first, it->second);
+        update_changed_files(dir.first, dir.second);
+        update_created_files(dir.first, dir.second);
     }
     /* remove the timeout */
     change_notify_timeout = 0;
@@ -688,10 +688,10 @@ vfs_dir_flush_notify_cache()
         g_source_remove(change_notify_timeout);
     change_notify_timeout = 0;
 
-    for (auto it = dir_map.begin(); it != dir_map.end(); ++it)
+    for (const auto& dir: dir_map)
     {
-        update_changed_files(it->first, it->second);
-        update_created_files(it->first, it->second);
+        update_changed_files(dir.first, dir.second);
+        update_created_files(dir.first, dir.second);
     }
 }
 
@@ -801,19 +801,19 @@ on_mime_type_reload(void* user_data)
 {
     (void)user_data;
     // LOG_DEBUG("reload mime-type");
-    for (auto it = dir_map.begin(); it != dir_map.end(); ++it)
+    for (const auto& dir: dir_map)
     {
-        reload_mime_type(it->first, it->second);
+        reload_mime_type(dir.first, dir.second);
     }
 }
 
 void
-vfs_dir_foreach(VFSDirForeachFunc func, void* user_data)
+vfs_dir_foreach(VFSDirForeachFunc func, bool user_data)
 {
     // LOG_DEBUG("reload mime-type");
-    for (auto it = dir_map.begin(); it != dir_map.end(); ++it)
+    for (const auto& dir: dir_map)
     {
-        func(it->first, it->second, user_data);
+        func(dir.second, user_data);
     }
 }
 

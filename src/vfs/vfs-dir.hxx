@@ -271,7 +271,7 @@ struct VFSDir
     // PtkFileList* evt_data_thumb_list{nullptr};
 };
 
-using VFSDirForeachFunc = void (*)(const char* parh, VFSDir* dir, void* user_data);
+using VFSDirForeachFunc = void (*)(VFSDir* dir, bool user_data);
 
 void vfs_dir_lock(VFSDir* dir);
 void vfs_dir_unlock(VFSDir* dir);
@@ -296,6 +296,6 @@ void vfs_dir_flush_notify_cache();
 bool vfs_dir_add_hidden(std::string_view path, std::string_view file_name);
 
 /* call function "func" for every VFSDir instances */
-void vfs_dir_foreach(VFSDirForeachFunc func, void* user_data);
+void vfs_dir_foreach(VFSDirForeachFunc func, bool user_data);
 
 void vfs_dir_monitor_mime();
