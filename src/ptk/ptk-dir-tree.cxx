@@ -213,7 +213,7 @@ ptk_dir_tree_init(PtkDirTree* tree)
     tree->root->children = child;
 
     /* Random int to check whether an iter belongs to our model */
-    tree->stamp = g_random_int();
+    tree->stamp = std::rand();
 }
 
 static void

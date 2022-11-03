@@ -158,7 +158,7 @@ ptk_file_list_init(PtkFileList* list)
     list->sort_order = (GtkSortType)-1;
     list->sort_col = -1;
     /* Random int to check whether an iter belongs to our model */
-    list->stamp = g_random_int();
+    list->stamp = std::rand();
 }
 
 static void

@@ -30,6 +30,8 @@
 
 #include <sys/types.h>
 
+#include <ztd/ztd.hxx>
+
 #include <magic_enum.hpp>
 
 #include "vfs/vfs-dir.hxx"
