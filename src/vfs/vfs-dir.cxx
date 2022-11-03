@@ -893,9 +893,8 @@ on_mime_change_timer(void* user_data)
 }
 
 static void
-mime_change(void* user_data)
+mime_change()
 {
-    (void)user_data;
     if (mime_change_timer)
     {
         // timer is already running, so ignore request
@@ -916,17 +915,18 @@ vfs_dir_monitor_mime()
     // start watching for changes
     if (mime_dir)
         return;
-    const std::string path = Glib::build_filename(vfs_user_data_dir(), "mime/packages", nullptr);
-    if (std::filesystem::is_directory(path))
-    {
-        mime_dir = vfs_dir_get_by_path(path.c_str());
-        if (mime_dir)
-        {
-            g_signal_connect(mime_dir, "file-listed", G_CALLBACK(mime_change), nullptr);
-            g_signal_connect(mime_dir, "file-created", G_CALLBACK(mime_change), nullptr);
-            g_signal_connect(mime_dir, "file-deleted", G_CALLBACK(mime_change), nullptr);
-            g_signal_connect(mime_dir, "file-changed", G_CALLBACK(mime_change), nullptr);
-        }
-        // LOG_INFO("MIME-UPDATE watch started");
-    }
+
+    const std::string path = Glib::build_filename(vfs_user_data_dir(), "mime/packages");
+    if (!std::filesystem::is_directory(path))
+        return;
+
+    mime_dir = vfs_dir_get_by_path(path.data());
+    if (!mime_dir)
+        return;
+
+    // LOG_INFO("MIME-UPDATE watch started");
+    mime_dir->add_event<EventType::FILE_LISTED>(mime_change);
+    mime_dir->add_event<EventType::FILE_CHANGED>(mime_change);
+    mime_dir->add_event<EventType::FILE_DELETED>(mime_change);
+    mime_dir->add_event<EventType::FILE_CHANGED>(mime_change);
 }

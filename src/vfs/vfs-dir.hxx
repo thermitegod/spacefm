@@ -86,6 +86,8 @@ struct VFSDir
 
     using evt_file_thumbnail_loaded_t = void(VFSFileInfo*, PtkFileList*);
 
+    using evt_mime_change_t = void();
+
     // Signals Add Event
     template<EventType evt>
     typename std::enable_if<evt == EventType::FILE_CREATED, sigc::connection>::type
@@ -103,6 +105,14 @@ struct VFSDir
         // LOG_TRACE("Signal Connect   : EventType::FILE_CREATED");
         this->evt_data_list = list;
         return this->evt_file_created__last.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_CREATED, sigc::connection>::type
+    add_event(evt_mime_change_t fun)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::FILE_CREATED");
+        return this->evt_mime_change.connect(sigc::ptr_fun(fun));
     }
 
     template<EventType evt>
@@ -124,6 +134,14 @@ struct VFSDir
     }
 
     template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_CHANGED, sigc::connection>::type
+    add_event(evt_mime_change_t fun)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::FILE_CHANGED");
+        return this->evt_mime_change.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
     typename std::enable_if<evt == EventType::FILE_DELETED, sigc::connection>::type
     add_event(evt_file_deleted__run_first__t fun, PtkFileBrowser* browser)
     {
@@ -142,6 +160,14 @@ struct VFSDir
     }
 
     template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_DELETED, sigc::connection>::type
+    add_event(evt_mime_change_t fun)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::FILE_DELETED");
+        return this->evt_mime_change.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
     typename std::enable_if<evt == EventType::FILE_LISTED, sigc::connection>::type
     add_event(evt_file_listed_t fun, PtkFileBrowser* browser)
     {
@@ -149,6 +175,14 @@ struct VFSDir
         // this->evt_data_listed_browser = browser;
         this->evt_data_browser = browser;
         return this->evt_file_listed.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_LISTED, sigc::connection>::type
+    add_event(evt_mime_change_t fun)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::FILE_LISTED");
+        return this->evt_mime_change.connect(sigc::ptr_fun(fun));
     }
 
     template<EventType evt>
@@ -167,6 +201,7 @@ struct VFSDir
     run_event(VFSFileInfo* info)
     {
         // LOG_TRACE("Signal Execute   : EventType::FILE_CREATED");
+        this->evt_mime_change.emit();
         this->evt_file_created__first.emit(info, this->evt_data_browser);
         this->evt_file_created__last.emit(info, this->evt_data_list);
     }
@@ -176,6 +211,7 @@ struct VFSDir
     run_event(VFSFileInfo* info)
     {
         // LOG_TRACE("Signal Execute   : EventType::FILE_CHANGED");
+        this->evt_mime_change.emit();
         this->evt_file_changed__first.emit(info, this->evt_data_browser);
         this->evt_file_changed__last.emit(info, this->evt_data_list);
     }
@@ -185,6 +221,7 @@ struct VFSDir
     run_event(VFSFileInfo* info)
     {
         // LOG_TRACE("Signal Execute   : EventType::FILE_DELETED");
+        this->evt_mime_change.emit();
         this->evt_file_deleted__first.emit(info, this->evt_data_browser);
         this->evt_file_deleted__last.emit(info, this->evt_data_list);
     }
@@ -194,6 +231,7 @@ struct VFSDir
     run_event(bool is_cancelled)
     {
         // LOG_TRACE("Signal Execute   : EventType::FILE_LISTED");
+        this->evt_mime_change.emit();
         this->evt_file_listed.emit(this->evt_data_browser, is_cancelled);
     }
 
@@ -220,6 +258,8 @@ struct VFSDir
     sigc::signal<evt_file_listed_t> evt_file_listed;
 
     sigc::signal<evt_file_thumbnail_loaded_t> evt_file_thumbnail_loaded;
+
+    sigc::signal<evt_mime_change_t> evt_mime_change;
 
   private:
     // Signal data
