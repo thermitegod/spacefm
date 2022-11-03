@@ -1819,34 +1819,36 @@ on_label_button_press(GtkWidget* widget, GdkEventButton* event, MoveSet* mset)
     return true;
 }
 
-static char*
-get_unique_name(const char* dir, const char* ext)
+static const std::string
+get_unique_name(std::string_view dir, std::string_view ext = "")
 {
-    std::string name;
+    const std::string base = "new";
+
     std::string path;
 
-    const std::string base = "new";
-    if (ext && ext[0] != '\0')
+    if (ext.empty())
     {
-        name = fmt::format("{}.{}", base, ext);
-        path = Glib::build_filename(dir, name);
+        path = Glib::build_filename(dir.data(), base);
     }
     else
-        path = Glib::build_filename(dir, base);
-
-    int n = 2;
-    struct stat statbuf;
-    while (lstat(path.c_str(), &statbuf) == 0) // need to see broken symlinks
     {
-        if (n == 1000)
-            return ztd::strdup(base);
-        if (ext && ext[0] != '\0')
-            name = fmt::format("{}{}.{}", base, ++n, ext);
-        else
-            name = fmt::format("{}{}", base, ++n);
-        path = Glib::build_filename(dir, name);
+        const std::string name = fmt::format("{}.{}", base, ext);
+        path = Glib::build_filename(dir.data(), name);
     }
-    return ztd::strdup(path);
+
+    unsigned int n = 1;
+    while (ztd::lstat(path).is_valid()) // need to see broken symlinks
+    {
+        std::string name;
+        if (ext.empty())
+            name = fmt::format("{}{}", base, ++n);
+        else
+            name = fmt::format("{}{}.{}", base, ++n, ext);
+
+        path = Glib::build_filename(dir.data(), name);
+    }
+
+    return path;
 }
 
 static const std::string
@@ -1866,18 +1868,12 @@ get_template_dir()
     return templates_path;
 }
 
-static GList*
-get_templates(const char* templates_dir, const char* subdir, GList* templates, bool getdir)
+static const std::vector<std::string>
+get_templates(std::string_view templates_dir, std::string_view subdir, bool getdir)
 {
-    if (!templates_dir)
-    {
-        const std::string templates_path = get_template_dir();
-        if (!templates_path.empty())
-            templates = get_templates(templates_path.c_str(), nullptr, templates, getdir);
-        return templates;
-    }
+    std::vector<std::string> templates;
 
-    const std::string templates_path = Glib::build_filename(templates_dir, subdir);
+    const std::string templates_path = Glib::build_filename(templates_dir.data(), subdir.data());
 
     if (!std::filesystem::is_directory(templates_path))
         return templates;
@@ -1892,44 +1888,55 @@ get_templates(const char* templates_dir, const char* subdir, GList* templates, b
             if (std::filesystem::is_directory(path))
             {
                 std::string subsubdir;
-                if (subdir)
-                    subsubdir = Glib::build_filename(subdir, file_name);
-                else
-                    subsubdir = file_name;
 
-                const std::string subsubdir_fmt = fmt::format("{}/", subsubdir);
-                templates = g_list_prepend(templates, ztd::strdup(subsubdir_fmt));
+                if (subdir.empty())
+                    subsubdir = file_name;
+                else
+                    subsubdir = Glib::build_filename(subdir.data(), file_name);
+
+                templates.push_back(subsubdir);
+
                 // prevent filesystem loops during recursive find
                 if (!std::filesystem::is_symlink(path))
-                    templates = get_templates(templates_dir, subsubdir.c_str(), templates, getdir);
+                {
+                    std::vector<std::string> subsubdir_templates =
+                        get_templates(templates_dir, subsubdir, getdir);
+
+                    templates = ztd::merge(templates, subsubdir_templates);
+                }
             }
         }
         else
         {
             if (std::filesystem::is_regular_file(path))
             {
-                if (subdir)
+                if (subdir.empty())
                 {
-                    path = Glib::build_filename(subdir, file_name);
-                    templates = g_list_prepend(templates, ztd::strdup(path));
+                    templates.push_back(file_name);
                 }
                 else
                 {
-                    templates = g_list_prepend(templates, ztd::strdup(file_name));
+                    templates.push_back(Glib::build_filename(subdir.data(), file_name));
                 }
             }
             else if (std::filesystem::is_directory(path) &&
                      // prevent filesystem loops during recursive find
                      !std::filesystem::is_symlink(path))
             {
-                if (subdir)
+                if (subdir.empty())
                 {
-                    const std::string subsubdir = Glib::build_filename(subdir, file_name);
-                    templates = get_templates(templates_dir, subsubdir.c_str(), templates, getdir);
+                    std::vector<std::string> subsubdir_templates =
+                        get_templates(templates_dir, file_name, getdir);
+
+                    templates = ztd::merge(templates, subsubdir_templates);
                 }
                 else
                 {
-                    templates = get_templates(templates_dir, file_name.c_str(), templates, getdir);
+                    const std::string subsubdir = Glib::build_filename(subdir.data(), file_name);
+                    std::vector<std::string> subsubdir_templates =
+                        get_templates(templates_dir, subsubdir, getdir);
+
+                    templates = ztd::merge(templates, subsubdir_templates);
                 }
             }
         }
@@ -1942,47 +1949,39 @@ static void
 on_template_changed(GtkWidget* widget, MoveSet* mset)
 {
     (void)widget;
-    char* str = nullptr;
 
     if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
         return;
-    char* text = ztd::strdup(
-        gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(mset->combo_template)))));
+
+    std::string ext;
+
+    const char* text =
+        gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(mset->combo_template))));
     if (text)
     {
-        g_strstrip(text);
-        str = text;
-        char* str2;
-        while ((str2 = strchr(str, '/')))
-            str = str2 + 1;
-        if (str[0] == '.')
-            str++;
-        if ((str2 = strchr(str, '.')))
-            str = str2 + 1;
+        // ext = ztd::strip(text);
+        ext = ztd::rpartition(ext, "/")[2];
+        if (ztd::contains(ext, "."))
+            ext = ztd::rpartition(ext, ".")[2];
         else
-            str = nullptr;
+            ext = "";
     }
-    gtk_entry_set_text(mset->entry_ext, str ? str : "");
+    gtk_entry_set_text(mset->entry_ext, ext.c_str());
 
     // need new name due to extension added?
     GtkTextIter iter, siter;
     gtk_text_buffer_get_start_iter(mset->buf_full_path, &siter);
     gtk_text_buffer_get_end_iter(mset->buf_full_path, &iter);
-    char* full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
-    struct stat statbuf;
-    if (lstat(full_path, &statbuf) == 0) // need to see broken symlinks
+    const char* full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
+
+    if (std::filesystem::exists(full_path) ||
+        std::filesystem::is_symlink(full_path)) // need to see broken symlinks
     {
         const std::string dir = Glib::path_get_dirname(full_path);
-        free(full_path);
-        full_path = get_unique_name(dir.c_str(), str);
-        if (full_path)
-        {
-            gtk_text_buffer_set_text(mset->buf_full_path, full_path, -1);
-        }
-    }
-    free(full_path);
+        const std::string unique_path = get_unique_name(dir, ext);
 
-    free(text);
+        gtk_text_buffer_set_text(mset->buf_full_path, unique_path.c_str(), -1);
+    }
 }
 
 static bool
@@ -2025,7 +2024,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     GtkWidget* task_view = nullptr;
     int ret = 1;
     bool target_missing = false;
-    GList* templates;
     struct stat statbuf;
 
     if (!file_dir)
@@ -2069,7 +2067,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     }
     else
     {
-        mset->full_path = get_unique_name(file_dir, nullptr);
+        mset->full_path = ztd::strdup(get_unique_name(file_dir));
         mset->new_path = ztd::strdup(mset->full_path);
         mset->is_dir = false; // is_dir is dynamic for create
         mset->is_link = false;
@@ -2216,7 +2214,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         type = ztd::strdup(mset->mime_type);
     }
     mset->label_mime = GTK_LABEL(gtk_label_new(type.c_str()));
-    gtk_label_set_ellipsize(mset->label_mime, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
+    gtk_label_set_ellipsize(mset->label_mime, PANGO_ELLIPSIZE_MIDDLE);
 
     gtk_label_set_selectable(mset->label_mime, true);
     gtk_widget_set_halign(GTK_WIDGET(mset->label_mime), GtkAlign::GTK_ALIGN_START);
@@ -2297,21 +2295,20 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         // template combo
         mset->combo_template = GTK_COMBO_BOX(gtk_combo_box_text_new_with_entry());
         gtk_widget_set_focus_on_click(GTK_WIDGET(mset->combo_template), false);
+
         // add entries
+        std::vector<std::string> templates;
+
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template), "Empty File");
-        templates = nullptr;
-        templates = get_templates(nullptr, nullptr, templates, false);
-        if (templates)
+        templates.clear();
+        templates = get_templates(get_template_dir(), "", false);
+        if (!templates.empty())
         {
-            templates = g_list_sort(templates, (GCompareFunc)g_strcmp0);
-            int x = 0;
-            for (GList* l = templates; l && x++ < 500; l = l->next)
+            std::sort(templates.begin(), templates.end());
+            for (std::string_view t: templates)
             {
-                gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template),
-                                               (char*)l->data);
-                free(l->data);
+                gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template), t.data());
             }
-            g_list_free(templates);
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(mset->combo_template), 0);
         g_signal_connect(G_OBJECT(mset->combo_template),
@@ -2330,18 +2327,16 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         // add entries
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template_dir),
                                        "Empty Directory");
-        templates = nullptr;
-        templates = get_templates(nullptr, nullptr, templates, true);
-        if (templates)
+        templates.clear();
+        templates = get_templates(get_template_dir(), "", true);
+        if (!templates.empty())
         {
-            templates = g_list_sort(templates, (GCompareFunc)g_strcmp0);
-            for (GList* l = templates; l; l = l->next)
+            std::sort(templates.begin(), templates.end());
+            for (std::string_view t: templates)
             {
                 gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template_dir),
-                                               (char*)l->data);
-                free(l->data);
+                                               t.data());
             }
-            g_list_free(templates);
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(mset->combo_template_dir), 0);
         g_signal_connect(G_OBJECT(gtk_bin_get_child(GTK_BIN(mset->combo_template_dir))),
