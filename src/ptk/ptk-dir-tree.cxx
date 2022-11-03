@@ -109,14 +109,14 @@ static gboolean ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* 
 static int ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b);
 
 static void ptk_dir_tree_insert_child(PtkDirTree* tree, PtkDirTreeNode* parent,
-                                      const char* file_path, const char* name);
+                                      std::string_view file_path, std::string_view name);
 
 static void ptk_dir_tree_delete_child(PtkDirTree* tree, PtkDirTreeNode* child);
 
 /* signal handlers */
 
 static void on_file_monitor_event(VFSFileMonitor* monitor, VFSFileMonitorEvent event,
-                                  const char* file_name, void* user_data);
+                                  std::string_view file_name, void* user_data);
 
 static PtkDirTreeNode* ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent,
                                              const char* path, const char* base_name);
@@ -731,11 +731,11 @@ dir_path_from_tree_node(PtkDirTree* tree, PtkDirTreeNode* node)
 }
 
 static void
-ptk_dir_tree_insert_child(PtkDirTree* tree, PtkDirTreeNode* parent, const char* file_path,
-                          const char* name)
+ptk_dir_tree_insert_child(PtkDirTree* tree, PtkDirTreeNode* parent, std::string_view file_path = "",
+                          std::string_view name = "")
 {
     PtkDirTreeNode* node;
-    PtkDirTreeNode* child_node = ptk_dir_tree_node_new(tree, parent, file_path, name);
+    PtkDirTreeNode* child_node = ptk_dir_tree_node_new(tree, parent, file_path.data(), name.data());
     for (node = parent->children; node; node = node->next)
     {
         if (ptk_dir_tree_node_compare(tree, child_node, node) >= 0)
@@ -813,7 +813,7 @@ ptk_dir_tree_delete_child(PtkDirTree* tree, PtkDirTreeNode* child)
     if (parent->n_children == 0)
     {
         /* add place holder */
-        ptk_dir_tree_insert_child(tree, parent, nullptr, nullptr);
+        ptk_dir_tree_insert_child(tree, parent);
     }
 }
 
@@ -839,7 +839,7 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
             const std::string file_name = std::filesystem::path(file).filename();
             const std::string file_path = Glib::build_filename(path, file_name);
             if (std::filesystem::is_directory(file_path))
-                ptk_dir_tree_insert_child(tree, node, file_path.c_str(), file_name.c_str());
+                ptk_dir_tree_insert_child(tree, node, file_path, file_name);
         }
 
         if (node->n_children > 1)
@@ -906,12 +906,12 @@ find_node(PtkDirTreeNode* parent, const char* name)
 }
 
 static void
-on_file_monitor_event(VFSFileMonitor* monitor, VFSFileMonitorEvent event, const char* file_name,
-                      void* user_data)
+on_file_monitor_event(VFSFileMonitor* monitor, VFSFileMonitorEvent event,
+                      std::string_view file_name, void* user_data)
 {
     PtkDirTreeNode* node = PTK_DIR_TREE_NODE(user_data);
 
-    PtkDirTreeNode* child = find_node(node, file_name);
+    PtkDirTreeNode* child = find_node(node, file_name.data());
     switch (event)
     {
         case VFSFileMonitorEvent::VFS_FILE_MONITOR_CREATE:
@@ -922,7 +922,7 @@ on_file_monitor_event(VFSFileMonitor* monitor, VFSFileMonitorEvent event, const 
                     child = node->children;
                 else
                     child = nullptr;
-                const std::string file_path = Glib::build_filename(monitor->path, file_name);
+                const std::string file_path = Glib::build_filename(monitor->path, file_name.data());
                 if (std::filesystem::is_directory(file_path))
                 {
                     ptk_dir_tree_insert_child(node->tree, node, monitor->path, file_name);

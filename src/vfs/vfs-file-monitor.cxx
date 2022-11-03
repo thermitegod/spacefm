@@ -45,7 +45,7 @@
 
 #define BUF_LEN (1024 * (sizeof(inotify_event) + 16))
 
-static std::map<const char*, VFSFileMonitor*> monitor_map;
+static std::map<std::string, VFSFileMonitor*> monitor_map;
 
 static GIOChannel* vfs_inotify_io_channel = nullptr;
 static unsigned int vfs_inotify_io_watch = 0;
@@ -70,12 +70,12 @@ VFSFileMonitorCallbackEntry::VFSFileMonitorCallbackEntry(VFSFileMonitorCallback 
     this->user_data = user_data;
 }
 
-VFSFileMonitor::VFSFileMonitor(const char* real_path)
+VFSFileMonitor::VFSFileMonitor(std::string_view real_path)
 {
     // LOG_INFO("VFSFileMonitor Constructor");
     this->ref_inc();
 
-    this->path = ztd::strdup(real_path);
+    this->path = real_path.data();
 }
 
 VFSFileMonitor::~VFSFileMonitor()
@@ -143,10 +143,10 @@ vfs_file_monitor_init()
 }
 
 VFSFileMonitor*
-vfs_file_monitor_add(const char* path, VFSFileMonitorCallback cb, void* user_data)
+vfs_file_monitor_add(std::string_view path, VFSFileMonitorCallback cb, void* user_data)
 {
     // inotify does not follow symlinks, need to get real path
-    const char* real_path = ztd::strdup(std::filesystem::absolute(path));
+    const std::string real_path = std::filesystem::absolute(path);
 
     VFSFileMonitor* monitor = nullptr;
 
@@ -156,10 +156,10 @@ vfs_file_monitor_add(const char* path, VFSFileMonitorCallback cb, void* user_dat
     }
     catch (std::out_of_range)
     {
-        int wd = inotify_add_watch(vfs_inotify_fd,
-                                   real_path,
-                                   IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE |
-                                       IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
+        const int wd = inotify_add_watch(vfs_inotify_fd,
+                                         real_path.c_str(),
+                                         IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF |
+                                             IN_MOVE | IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
         if (wd < 0)
         {
             LOG_ERROR("Failed to add watch on '{}' ({})", real_path, path);
@@ -213,13 +213,13 @@ vfs_file_monitor_remove(VFSFileMonitor* monitor, VFSFileMonitorCallback cb, void
 }
 
 static void
-vfs_file_monitor_reconnect_inotify(const char* path, VFSFileMonitor* monitor)
+vfs_file_monitor_reconnect_inotify(std::string_view path, VFSFileMonitor* monitor)
 {
     if (!std::filesystem::exists(path))
         return;
 
     monitor->wd =
-        inotify_add_watch(vfs_inotify_fd, path, IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVE);
+        inotify_add_watch(vfs_inotify_fd, path.data(), IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVE);
     if (monitor->wd < 0)
     {
         /*
@@ -252,7 +252,7 @@ vfs_file_monitor_translate_inotify_event(int inotify_mask)
 
 static void
 vfs_file_monitor_dispatch_event(VFSFileMonitor* monitor, VFSFileMonitorEvent evt,
-                                const char* file_name)
+                                std::string_view file_name)
 {
     /* Call the callback functions */
     if (!monitor->callbacks.empty())
@@ -328,18 +328,16 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
 
         if (monitor)
         {
-            const char* file_name;
-
-            file_name = ievent->len > 0 ? (char*)ievent->name : monitor->path;
+            const std::string file_name = ievent->len > 0 ? (char*)ievent->name : monitor->path;
 
 #ifdef VFS_FILE_MONITOR_DEBUG
-            char* desc;
+            std::stirng desc;
             if (ievent->mask & (IN_CREATE | IN_MOVED_TO))
-                desc = ztd::strdup("CREATE");
+                desc = "CREATE";
             else if (ievent->mask & (IN_DELETE | IN_MOVED_FROM | IN_DELETE_SELF | IN_UNMOUNT))
-                desc = ztd::strdup("DELETE");
+                desc = "DELETE";
             else if (ievent->mask & (IN_MODIFY | IN_ATTRIB))
-                desc = ztd::strdup("CHANGE");
+                desc = "CHANGE";
 
             LOG_INFO("inotify-event {}: {}///{}", desc, monitor->path, file_name);
             LOG_DEBUG("inotify ({}) :{}", ievent->mask, file_name);

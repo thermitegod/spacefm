@@ -89,8 +89,8 @@ vfs_mime_type_reload(void* user_data)
 }
 
 static void
-on_mime_cache_changed(VFSFileMonitor* monitor, VFSFileMonitorEvent event, const char* file_name,
-                      void* user_data)
+on_mime_cache_changed(VFSFileMonitor* monitor, VFSFileMonitorEvent event,
+                      std::string_view file_name, void* user_data)
 {
     (void)monitor;
     (void)file_name;
@@ -122,7 +122,7 @@ vfs_mime_type_init()
             continue;
 
         VFSFileMonitor* monitor =
-            vfs_file_monitor_add(cache.get_file_path().c_str(), on_mime_cache_changed, nullptr);
+            vfs_file_monitor_add(cache.get_file_path(), on_mime_cache_changed, nullptr);
 
         mime_caches_monitors.push_back(monitor);
     }
