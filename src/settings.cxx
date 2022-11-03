@@ -531,19 +531,6 @@ load_settings()
 
     if (!std::filesystem::exists(settings_config_dir))
     {
-        // copy /etc/xdg/spacefm
-        std::string xdg_path = Glib::build_filename(settings_config_dir, "xdg", PACKAGE_NAME);
-        if (std::filesystem::is_directory(xdg_path))
-        {
-            const std::string command = fmt::format("cp -r {} '{}'", xdg_path, settings_config_dir);
-            Glib::spawn_command_line_sync(command);
-
-            std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
-        }
-    }
-
-    if (!std::filesystem::exists(settings_config_dir))
-    {
         std::filesystem::create_directories(settings_config_dir);
         std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
     }
