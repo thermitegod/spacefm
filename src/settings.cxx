@@ -4037,9 +4037,7 @@ xset_design_job(GtkWidget* item, xset_t set)
 
             if (set->browser)
             {
-                ptk_file_browser_emit_open(set->browser,
-                                           folder2.c_str(),
-                                           PtkOpenAction::PTK_OPEN_DIR);
+                set->browser->run_event<EventType::OPEN_ITEM>(folder2, PtkOpenAction::PTK_OPEN_DIR);
             }
             break;
         case XSetJob::BROWSE_DATA:
@@ -4062,9 +4060,7 @@ xset_design_job(GtkWidget* item, xset_t set)
 
             if (set->browser)
             {
-                ptk_file_browser_emit_open(set->browser,
-                                           folder2.c_str(),
-                                           PtkOpenAction::PTK_OPEN_DIR);
+                set->browser->run_event<EventType::OPEN_ITEM>(folder2, PtkOpenAction::PTK_OPEN_DIR);
             }
             break;
         case XSetJob::BROWSE_PLUGIN:
@@ -4072,9 +4068,8 @@ xset_design_job(GtkWidget* item, xset_t set)
             {
                 if (set->browser)
                 {
-                    ptk_file_browser_emit_open(set->browser,
-                                               set->plug_dir,
-                                               PtkOpenAction::PTK_OPEN_DIR);
+                    set->browser->run_event<EventType::OPEN_ITEM>(set->plug_dir,
+                                                                  PtkOpenAction::PTK_OPEN_DIR);
                 }
             }
             break;

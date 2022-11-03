@@ -349,9 +349,9 @@ ptk_open_files_with_app(const char* cwd, const std::vector<VFSFileInfo*>& sel_fi
                 {
                     if (file_browser)
                     {
-                        ptk_file_browser_emit_open(file_browser,
-                                                   full_path.c_str(),
-                                                   PtkOpenAction::PTK_OPEN_NEW_TAB);
+                        file_browser->run_event<EventType::OPEN_ITEM>(
+                            full_path,
+                            PtkOpenAction::PTK_OPEN_NEW_TAB);
                     }
                 }
                 continue;
@@ -363,9 +363,8 @@ ptk_open_files_with_app(const char* cwd, const std::vector<VFSFileInfo*>& sel_fi
             {
                 Glib::spawn_command_line_async(full_path);
                 if (file_browser)
-                    ptk_file_browser_emit_open(file_browser,
-                                               full_path.c_str(),
-                                               PtkOpenAction::PTK_OPEN_FILE);
+                    file_browser->run_event<EventType::OPEN_ITEM>(full_path,
+                                                                  PtkOpenAction::PTK_OPEN_FILE);
                 continue;
             }
 
@@ -511,9 +510,7 @@ ptk_open_files_with_app(const char* cwd, const std::vector<VFSFileInfo*>& sel_fi
     {
         if (file_browser)
         {
-            ptk_file_browser_emit_open(file_browser,
-                                       full_path.c_str(),
-                                       PtkOpenAction::PTK_OPEN_DIR);
+            file_browser->run_event<EventType::OPEN_ITEM>(full_path, PtkOpenAction::PTK_OPEN_DIR);
         }
         free(new_dir);
     }

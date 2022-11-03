@@ -86,7 +86,7 @@ static gboolean fm_main_window_window_state_event(GtkWidget* widget, GdkEventWin
 static void on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page,
                                            unsigned int page_num, void* user_data);
 static void on_file_browser_begin_chdir(PtkFileBrowser* file_browser, FMMainWindow* main_window);
-static void on_file_browser_open_item(PtkFileBrowser* file_browser, const char* path,
+static void on_file_browser_open_item(PtkFileBrowser* file_browser, std::string_view path,
                                       PtkOpenAction action, FMMainWindow* main_window);
 static void on_file_browser_after_chdir(PtkFileBrowser* file_browser, FMMainWindow* main_window);
 static void on_file_browser_content_change(PtkFileBrowser* file_browser, FMMainWindow* main_window);
@@ -2566,27 +2566,13 @@ fm_main_window_add_new_tab(FMMainWindow* main_window, const char* folder_path)
 
     gtk_widget_show(GTK_WIDGET(file_browser));
 
-    g_signal_connect(file_browser,
-                     "begin-chdir",
-                     G_CALLBACK(on_file_browser_begin_chdir),
-                     main_window);
-    g_signal_connect(file_browser,
-                     "content-change",
-                     G_CALLBACK(on_file_browser_content_change),
-                     main_window);
-    g_signal_connect(file_browser,
-                     "after-chdir",
-                     G_CALLBACK(on_file_browser_after_chdir),
-                     main_window);
-    g_signal_connect(file_browser, "open-item", G_CALLBACK(on_file_browser_open_item), main_window);
-    g_signal_connect(file_browser,
-                     "sel-change",
-                     G_CALLBACK(on_file_browser_sel_change),
-                     main_window);
-    g_signal_connect(file_browser,
-                     "pane-mode-change",
-                     G_CALLBACK(on_file_browser_panel_change),
-                     main_window);
+    // file_browser->add_event<EventType::CHDIR_BEFORE>(on_file_browser_before_chdir, main_window);
+    file_browser->add_event<EventType::CHDIR_BEGIN>(on_file_browser_begin_chdir, main_window);
+    file_browser->add_event<EventType::CHDIR_AFTER>(on_file_browser_after_chdir, main_window);
+    file_browser->add_event<EventType::OPEN_ITEM>(on_file_browser_open_item, main_window);
+    file_browser->add_event<EventType::CHANGE_CONTENT>(on_file_browser_content_change, main_window);
+    file_browser->add_event<EventType::CHANGE_SEL>(on_file_browser_sel_change, main_window);
+    file_browser->add_event<EventType::CHANGE_PANE>(on_file_browser_panel_change, main_window);
 
     GtkWidget* tab_label = fm_main_window_create_tab_label(main_window, file_browser);
     int idx = gtk_notebook_append_page(GTK_NOTEBOOK(notebook), GTK_WIDGET(file_browser), tab_label);
@@ -2951,30 +2937,25 @@ main_window_open_network(FMMainWindow* main_window, const char* path, bool new_t
 }
 
 static void
-on_file_browser_open_item(PtkFileBrowser* file_browser, const char* path, PtkOpenAction action,
+on_file_browser_open_item(PtkFileBrowser* file_browser, std::string_view path, PtkOpenAction action,
                           FMMainWindow* main_window)
 {
-    if (path)
+    if (path.empty())
+        return;
+
+    switch (action)
     {
-        switch (action)
-        {
-            case PtkOpenAction::PTK_OPEN_DIR:
-                ptk_file_browser_chdir(file_browser,
-                                       path,
-                                       PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
-                break;
-            case PtkOpenAction::PTK_OPEN_NEW_TAB:
-                fm_main_window_add_new_tab(main_window, path);
-                break;
-            case PtkOpenAction::PTK_OPEN_NEW_WINDOW:
-                break;
-            case PtkOpenAction::PTK_OPEN_TERMINAL:
-                break;
-            case PtkOpenAction::PTK_OPEN_FILE:
-                break;
-            default:
-                break;
-        }
+        case PtkOpenAction::PTK_OPEN_DIR:
+            ptk_file_browser_chdir(file_browser, path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+            break;
+        case PtkOpenAction::PTK_OPEN_NEW_TAB:
+            fm_main_window_add_new_tab(main_window, path.data());
+            break;
+        case PtkOpenAction::PTK_OPEN_NEW_WINDOW:
+        case PtkOpenAction::PTK_OPEN_TERMINAL:
+        case PtkOpenAction::PTK_OPEN_FILE:
+        default:
+            break;
     }
 }
 

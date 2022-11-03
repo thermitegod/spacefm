@@ -1604,9 +1604,8 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
 
             if (data->browser)
-                ptk_file_browser_emit_open(data->browser,
-                                           path.c_str(),
-                                           PtkOpenAction::PTK_OPEN_NEW_TAB);
+                data->browser->run_event<EventType::OPEN_ITEM>(path,
+                                                               PtkOpenAction::PTK_OPEN_NEW_TAB);
             break;
         case PTKFileMenuAppJob::APP_JOB_BROWSE_SHARED:
             str = get_shared_desktop_file_location(desktop.get_name());
@@ -1616,9 +1615,8 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 path = "/usr/share/applications";
             free(str);
             if (data->browser)
-                ptk_file_browser_emit_open(data->browser,
-                                           path.c_str(),
-                                           PtkOpenAction::PTK_OPEN_NEW_TAB);
+                data->browser->run_event<EventType::OPEN_ITEM>(path,
+                                                               PtkOpenAction::PTK_OPEN_NEW_TAB);
             break;
         case PTKFileMenuAppJob::APP_JOB_EDIT_TYPE:
             path = Glib::build_filename(vfs_user_data_dir(), "mime/packages");
@@ -1747,18 +1745,16 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             break;
         case PTKFileMenuAppJob::APP_JOB_BROWSE_MIME_USR:
             if (data->browser)
-                ptk_file_browser_emit_open(data->browser,
-                                           "/usr/share/mime/packages",
-                                           PtkOpenAction::PTK_OPEN_NEW_TAB);
+                data->browser->run_event<EventType::OPEN_ITEM>("/usr/share/mime/packages",
+                                                               PtkOpenAction::PTK_OPEN_NEW_TAB);
             break;
         case PTKFileMenuAppJob::APP_JOB_BROWSE_MIME:
             path = Glib::build_filename(vfs_user_data_dir(), "mime/packages");
             std::filesystem::create_directories(path);
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
             if (data->browser)
-                ptk_file_browser_emit_open(data->browser,
-                                           path.c_str(),
-                                           PtkOpenAction::PTK_OPEN_NEW_TAB);
+                data->browser->run_event<EventType::OPEN_ITEM>(path,
+                                                               PtkOpenAction::PTK_OPEN_NEW_TAB);
             vfs_dir_monitor_mime();
             break;
         case PTKFileMenuAppJob::APP_JOB_UPDATE:
@@ -2162,15 +2158,14 @@ on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
                 Glib::build_filename(data->cwd, vfs_file_info_get_name(file));
             if (data->browser && std::filesystem::is_directory(full_path))
             {
-                ptk_file_browser_emit_open(data->browser,
-                                           full_path.c_str(),
-                                           PtkOpenAction::PTK_OPEN_NEW_TAB);
+                data->browser->run_event<EventType::OPEN_ITEM>(full_path,
+                                                               PtkOpenAction::PTK_OPEN_NEW_TAB);
             }
         }
     }
     else if (data->browser)
     {
-        ptk_file_browser_emit_open(data->browser, data->file_path, PtkOpenAction::PTK_OPEN_NEW_TAB);
+        data->browser->run_event<EventType::OPEN_ITEM>(data->cwd, PtkOpenAction::PTK_OPEN_NEW_TAB);
     }
 }
 
@@ -2179,7 +2174,8 @@ on_popup_open_in_new_tab_here(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
     if (data->browser && data->cwd && std::filesystem::is_directory(data->cwd))
-        ptk_file_browser_emit_open(data->browser, data->cwd, PtkOpenAction::PTK_OPEN_NEW_TAB);
+        data->browser->run_event<EventType::OPEN_ITEM>(data->file_path,
+                                                       PtkOpenAction::PTK_OPEN_NEW_TAB);
 }
 
 static void

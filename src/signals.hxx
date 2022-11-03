@@ -27,4 +27,13 @@ enum class EventType
 
     // VFSFileTask
     TASK_FINISH,
+
+    // PTKFileBrowser
+    CHDIR_BEFORE,
+    CHDIR_BEGIN,
+    CHDIR_AFTER,
+    OPEN_ITEM,
+    CHANGE_CONTENT,
+    CHANGE_SEL,
+    CHANGE_PANE,
 };

@@ -149,21 +149,8 @@ static int file_list_order_from_sort_order(PtkFBSortOrder order);
 
 static GtkPanedClass* parent_class = nullptr;
 
-enum PTKFileBrowserSignal
-{
-    BEFORE_CHDIR_SIGNAL,
-    BEGIN_CHDIR_SIGNAL,
-    AFTER_CHDIR_SIGNAL,
-    OPEN_ITEM_SIGNAL,
-    CONTENT_CHANGE_SIGNAL,
-    SEL_CHANGE_SIGNAL,
-    PANE_MODE_CHANGE_SIGNAL,
-};
-
 static void rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser);
 static void rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser);
-
-static unsigned int signals[magic_enum::enum_count<PTKFileBrowserSignal>()] = {0};
 
 static unsigned int folder_view_auto_scroll_timer = 0;
 static GtkDirectionType folder_view_auto_scroll_direction = GTK_DIR_TAB_FORWARD;
@@ -221,47 +208,6 @@ ptk_file_browser_get_type()
 }
 
 static void
-g_cclosure_marshal_VOID__POINTER_INT(GClosure* closure, GValue* return_value,
-                                     unsigned int n_param_values, const GValue* param_values,
-                                     void* invocation_hint, void* marshal_data)
-{
-    (void)return_value;
-    (void)n_param_values;
-    (void)invocation_hint;
-
-    using GMarshalFunc_VOID__POINTER_INT =
-        void (*)(void* data1, void* arg_1, int arg_2, void* data2);
-
-    GMarshalFunc_VOID__POINTER_INT callback;
-    GCClosure* cc = (GCClosure*)closure;
-    void* data1;
-    void* data2;
-
-    if (n_param_values != 3)
-    {
-        LOG_ERROR("g_cclosure_marshal_VOID__POINTER_INT n_param_values != 3");
-        return;
-    }
-
-    if (G_CCLOSURE_SWAP_DATA(closure))
-    {
-        data1 = closure->data;
-        data2 = g_value_peek_pointer(param_values + 0);
-    }
-    else
-    {
-        data1 = g_value_peek_pointer(param_values + 0);
-        data2 = closure->data;
-    }
-    callback = (GMarshalFunc_VOID__POINTER_INT)(marshal_data ? marshal_data : cc->callback);
-
-    callback(data1,
-             g_value_get_pointer(param_values + 1),
-             g_value_get_int(param_values + 2),
-             data2);
-}
-
-static void
 ptk_file_browser_class_init(PtkFileBrowserClass* klass)
 {
     GObjectClass* object_class = (GObjectClass*)klass;
@@ -279,93 +225,6 @@ ptk_file_browser_class_init(PtkFileBrowserClass* klass)
     klass->content_change = ptk_file_browser_content_change;
     klass->sel_change = ptk_file_browser_sel_change;
     klass->pane_mode_change = ptk_file_browser_pane_mode_change;
-
-    // before-chdir is emitted when PtkFileBrowser is about to change
-    // its working directory. The param is the path of the dir (in UTF-8),
-    signals[PTKFileBrowserSignal::BEFORE_CHDIR_SIGNAL] =
-        g_signal_new("before-chdir",
-                     G_TYPE_FROM_CLASS(klass),
-                     G_SIGNAL_RUN_LAST,
-                     G_STRUCT_OFFSET(PtkFileBrowserClass, before_chdir),
-                     nullptr,
-                     nullptr,
-                     g_cclosure_marshal_VOID__POINTER,
-                     G_TYPE_NONE,
-                     1,
-                     G_TYPE_POINTER);
-
-    signals[PTKFileBrowserSignal::BEGIN_CHDIR_SIGNAL] =
-        g_signal_new("begin-chdir",
-                     G_TYPE_FROM_CLASS(klass),
-                     G_SIGNAL_RUN_LAST,
-                     G_STRUCT_OFFSET(PtkFileBrowserClass, begin_chdir),
-                     nullptr,
-                     nullptr,
-                     g_cclosure_marshal_VOID__VOID,
-                     G_TYPE_NONE,
-                     0);
-
-    signals[PTKFileBrowserSignal::AFTER_CHDIR_SIGNAL] =
-        g_signal_new("after-chdir",
-                     G_TYPE_FROM_CLASS(klass),
-                     G_SIGNAL_RUN_LAST,
-                     G_STRUCT_OFFSET(PtkFileBrowserClass, after_chdir),
-                     nullptr,
-                     nullptr,
-                     g_cclosure_marshal_VOID__VOID,
-                     G_TYPE_NONE,
-                     0);
-
-    /*
-     * This signal is sent when a directory is about to be opened
-     * arg1 is the path to be opened, and arg2 is the type of action,
-     * ex: open in tab, open in terminal...etc.
-     */
-    signals[PTKFileBrowserSignal::OPEN_ITEM_SIGNAL] =
-        g_signal_new("open-item",
-                     G_TYPE_FROM_CLASS(klass),
-                     G_SIGNAL_RUN_LAST,
-                     G_STRUCT_OFFSET(PtkFileBrowserClass, open_item),
-                     nullptr,
-                     nullptr,
-                     g_cclosure_marshal_VOID__POINTER_INT,
-                     G_TYPE_NONE,
-                     2,
-                     G_TYPE_POINTER,
-                     G_TYPE_INT);
-
-    signals[PTKFileBrowserSignal::CONTENT_CHANGE_SIGNAL] =
-        g_signal_new("content-change",
-                     G_TYPE_FROM_CLASS(klass),
-                     G_SIGNAL_RUN_LAST,
-                     G_STRUCT_OFFSET(PtkFileBrowserClass, content_change),
-                     nullptr,
-                     nullptr,
-                     g_cclosure_marshal_VOID__VOID,
-                     G_TYPE_NONE,
-                     0);
-
-    signals[PTKFileBrowserSignal::SEL_CHANGE_SIGNAL] =
-        g_signal_new("sel-change",
-                     G_TYPE_FROM_CLASS(klass),
-                     G_SIGNAL_RUN_LAST,
-                     G_STRUCT_OFFSET(PtkFileBrowserClass, sel_change),
-                     nullptr,
-                     nullptr,
-                     g_cclosure_marshal_VOID__VOID,
-                     G_TYPE_NONE,
-                     0);
-
-    signals[PTKFileBrowserSignal::PANE_MODE_CHANGE_SIGNAL] =
-        g_signal_new("pane-mode-change",
-                     G_TYPE_FROM_CLASS(klass),
-                     G_SIGNAL_RUN_LAST,
-                     G_STRUCT_OFFSET(PtkFileBrowserClass, pane_mode_change),
-                     nullptr,
-                     nullptr,
-                     g_cclosure_marshal_VOID__VOID,
-                     G_TYPE_NONE,
-                     0);
 }
 
 bool
@@ -548,7 +407,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
     { // open dir
         if (!ztd::same(final_path, ptk_file_browser_get_cwd(file_browser)))
             ptk_file_browser_chdir(file_browser,
-                                   final_path.c_str(),
+                                   final_path,
                                    PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
     }
     else if (std::filesystem::is_regular_file(final_path))
@@ -559,7 +418,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
             free(file_browser->select_path);
             file_browser->select_path = ztd::strdup(final_path);
             ptk_file_browser_chdir(file_browser,
-                                   dirname_path.c_str(),
+                                   dirname_path,
                                    PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
         }
         else
@@ -1774,9 +1633,9 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
 }
 
 bool
-ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, PtkFBChdirMode mode)
+ptk_file_browser_chdir(PtkFileBrowser* file_browser, std::string_view folder_path,
+                       PtkFBChdirMode mode)
 {
-    bool cancel = false;
     GtkWidget* folder_view = file_browser->folder_view;
     // LOG_INFO("ptk_file_browser_chdir");
 
@@ -1786,44 +1645,24 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
     file_browser->menu_shown = false;
     if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW ||
         app_settings.get_single_click())
+    {
         /* sfm 1.0.6 do not reset skip_release for Icon/Compact to prevent file
            under cursor being selected when entering dir with double-click.
            Reset is conditional here to avoid possible but unlikely unintended
            breakage elsewhere. */
         file_browser->skip_release = false;
+    }
 
-    if (!folder_path)
+    if (folder_path.empty())
         return false;
 
-    char* path;
+    std::string path = folder_path.data();
 
-    if (folder_path)
-    {
-        path = ztd::strdup(folder_path);
-        /* remove redundent '/' */
-        if (strcmp(path, "/"))
-        {
-            char* path_end = path + std::strlen(path) - 1;
-            for (; path_end > path; --path_end)
-            {
-                if (*path_end != '/')
-                    break;
-                else
-                    *path_end = '\0';
-            }
-        }
+    // convert ~ to /home/user for smarter bookmarks
+    if (ztd::startswith(path, "~/"))
+        path = Glib::build_filename(vfs_user_home_dir(), ztd::removeprefix(path, "~/"));
 
-        // convert ~ to /home/user for smarter bookmarks
-        if (ztd::startswith(path, "~/") || ztd::startswith(path, "~"))
-        {
-            const std::string msg = fmt::format("{}{}", vfs_user_home_dir(), path + 1);
-            path = ztd::strdup(msg);
-        }
-    }
-    else
-        path = nullptr;
-
-    if (!path || !std::filesystem::is_directory(path))
+    if (!std::filesystem::is_directory(path))
     {
         if (!inhibit_focus)
         {
@@ -1831,8 +1670,6 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                            "Error",
                            msg);
-            if (path)
-                free(path);
         }
         return false;
     }
@@ -1850,14 +1687,10 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
         return false;
     }
 
-    g_signal_emit(file_browser,
-                  signals[PTKFileBrowserSignal::BEFORE_CHDIR_SIGNAL],
-                  0,
-                  path,
-                  &cancel);
-
-    if (cancel)
-        return false;
+    // bool cancel;
+    // file_browser->run_event<EventType::CHDIR_BEFORE>();
+    // if (cancel)
+    //     return false;
 
     // MOD remember selected files
     // g_debug ("@@@@@@@@@@@ remember: %s", ptk_file_browser_get_cwd( file_browser ) );
@@ -1883,7 +1716,8 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
     switch (mode)
     {
         case PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY:
-            if (!file_browser->curHistory || strcmp((char*)file_browser->curHistory->data, path))
+            if (!file_browser->curHistory ||
+                strcmp((char*)file_browser->curHistory->data, path.c_str()))
             {
                 /* Has forward history */
                 if (file_browser->curHistory && file_browser->curHistory->next)
@@ -1911,7 +1745,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
                     file_browser->curhistsel->next = nullptr;
                 }
                 /* Add path to history if there is no forward history */
-                file_browser->history = g_list_append(file_browser->history, path);
+                file_browser->history = g_list_append(file_browser->history, ztd::strdup(path));
                 file_browser->curHistory = g_list_last(file_browser->history);
                 // MOD added - make histsel shadow file_browser->history
                 GList* sellist = nullptr;
@@ -1963,10 +1797,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
     file_browser->busy = true;
     file_browser->dir = vfs_dir_get_by_path(path);
 
-    if (!file_browser->curHistory || path != (char*)file_browser->curHistory->data)
-        free(path);
-
-    g_signal_emit(file_browser, signals[PTKFileBrowserSignal::BEGIN_CHDIR_SIGNAL], 0);
+    file_browser->run_event<EventType::CHDIR_BEGIN>();
 
     if (vfs_dir_is_file_listed(file_browser->dir))
     {
@@ -1974,7 +1805,9 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
         file_browser->busy = false;
     }
     else
+    {
         file_browser->busy = true;
+    }
 
     file_browser->signal_file_listed =
         file_browser->dir->add_event<EventType::FILE_LISTED>(on_dir_file_listed, file_browser);
@@ -2073,7 +1906,7 @@ ptk_file_browser_show_history_menu(PtkFileBrowser* file_browser, bool is_back_hi
 static bool
 ptk_file_browser_content_changed(PtkFileBrowser* file_browser)
 {
-    g_signal_emit(file_browser, signals[PTKFileBrowserSignal::CONTENT_CHANGE_SIGNAL], 0);
+    file_browser->run_event<EventType::CHANGE_CONTENT>();
     return false;
 }
 
@@ -2219,9 +2052,9 @@ on_dir_file_listed(PtkFileBrowser* file_browser, bool is_cancelled)
     malloc_trim(0);
 #endif
 
-    g_signal_emit(file_browser, signals[PTKFileBrowserSignal::AFTER_CHDIR_SIGNAL], 0);
-    // g_signal_emit( file_browser, signals[ PTKFileBrowserSignal::CONTENT_CHANGE_SIGNAL ], 0 );
-    g_signal_emit(file_browser, signals[PTKFileBrowserSignal::SEL_CHANGE_SIGNAL], 0);
+    file_browser->run_event<EventType::CHDIR_AFTER>();
+    file_browser->run_event<EventType::CHANGE_CONTENT>();
+    file_browser->run_event<EventType::CHANGE_SEL>();
 
     if (file_browser->side_dir)
         ptk_dir_tree_view_chdir(GTK_TREE_VIEW(file_browser->side_dir),
@@ -2277,7 +2110,7 @@ ptk_file_browser_canon(PtkFileBrowser* file_browser, const char* path)
             free(file_browser->select_path);
             file_browser->select_path = ztd::strdup(canon);
             ptk_file_browser_chdir(file_browser,
-                                   dir_path.c_str(),
+                                   dir_path,
                                    PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
         }
         else
@@ -2327,9 +2160,7 @@ ptk_file_browser_go_up(GtkWidget* item, PtkFileBrowser* file_browser)
     focus_folder_view(file_browser);
     const std::string parent_dir = Glib::path_get_dirname(ptk_file_browser_get_cwd(file_browser));
     if (!ztd::same(parent_dir, ptk_file_browser_get_cwd(file_browser)))
-        ptk_file_browser_chdir(file_browser,
-                               parent_dir.c_str(),
-                               PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+        ptk_file_browser_chdir(file_browser, parent_dir, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
 }
 
 void
@@ -2338,7 +2169,7 @@ ptk_file_browser_go_home(GtkWidget* item, PtkFileBrowser* file_browser)
     (void)item;
     focus_folder_view(file_browser);
     ptk_file_browser_chdir(file_browser,
-                           vfs_user_home_dir().c_str(),
+                           vfs_user_home_dir(),
                            PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
 }
 
@@ -2352,7 +2183,7 @@ ptk_file_browser_go_default(GtkWidget* item, PtkFileBrowser* file_browser)
         ptk_file_browser_chdir(file_browser, path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
     else if (geteuid() != 0)
         ptk_file_browser_chdir(file_browser,
-                               vfs_user_home_dir().c_str(),
+                               vfs_user_home_dir(),
                                PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
     else
         ptk_file_browser_chdir(file_browser, "/", PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
@@ -3115,7 +2946,7 @@ on_folder_view_item_sel_change_idle(PtkFileBrowser* file_browser)
     g_list_foreach(sel_files, (GFunc)gtk_tree_path_free, nullptr);
     g_list_free(sel_files);
 
-    g_signal_emit(file_browser, signals[PTKFileBrowserSignal::SEL_CHANGE_SIGNAL], 0);
+    file_browser->run_event<EventType::CHANGE_SEL>();
     file_browser->sel_change_idle = 0;
     return false;
 }
@@ -3305,11 +3136,8 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
             /* open in new tab if its a directory */
             if (std::filesystem::is_directory(file_path))
             {
-                g_signal_emit(file_browser,
-                              signals[PTKFileBrowserSignal::OPEN_ITEM_SIGNAL],
-                              0,
-                              file_path.c_str(),
-                              PtkOpenAction::PTK_OPEN_NEW_TAB);
+                file_browser->run_event<EventType::OPEN_ITEM>(file_path,
+                                                              PtkOpenAction::PTK_OPEN_NEW_TAB);
             }
             ret = true;
         }
@@ -3496,28 +3324,19 @@ void
 ptk_file_browser_new_tab(GtkMenuItem* item, PtkFileBrowser* file_browser)
 {
     (void)item;
-    const char* dir_path;
 
     focus_folder_view(file_browser);
+
+    std::string dir_path;
     if (xset_get_s(XSetName::GO_SET_DEFAULT))
         dir_path = xset_get_s(XSetName::GO_SET_DEFAULT);
     else
-        dir_path = vfs_user_home_dir().c_str();
+        dir_path = vfs_user_home_dir();
 
     if (!std::filesystem::is_directory(dir_path))
-        g_signal_emit(file_browser,
-                      signals[PTKFileBrowserSignal::OPEN_ITEM_SIGNAL],
-                      0,
-                      "/",
-                      PtkOpenAction::PTK_OPEN_NEW_TAB);
+        file_browser->run_event<EventType::OPEN_ITEM>("/", PtkOpenAction::PTK_OPEN_NEW_TAB);
     else
-    {
-        g_signal_emit(file_browser,
-                      signals[PTKFileBrowserSignal::OPEN_ITEM_SIGNAL],
-                      0,
-                      dir_path,
-                      PtkOpenAction::PTK_OPEN_NEW_TAB);
-    }
+        file_browser->run_event<EventType::OPEN_ITEM>(dir_path, PtkOpenAction::PTK_OPEN_NEW_TAB);
 }
 
 void
@@ -3525,28 +3344,19 @@ ptk_file_browser_new_tab_here(GtkMenuItem* item, PtkFileBrowser* file_browser)
 {
     (void)item;
     focus_folder_view(file_browser);
-    const char* dir_path = ptk_file_browser_get_cwd(file_browser);
+
+    std::string dir_path = ptk_file_browser_get_cwd(file_browser);
     if (!std::filesystem::is_directory(dir_path))
     {
         if (xset_get_s(XSetName::GO_SET_DEFAULT))
             dir_path = xset_get_s(XSetName::GO_SET_DEFAULT);
         else
-            dir_path = vfs_user_home_dir().c_str();
+            dir_path = vfs_user_home_dir();
     }
     if (!std::filesystem::is_directory(dir_path))
-        g_signal_emit(file_browser,
-                      signals[PTKFileBrowserSignal::OPEN_ITEM_SIGNAL],
-                      0,
-                      "/",
-                      PtkOpenAction::PTK_OPEN_NEW_TAB);
+        file_browser->run_event<EventType::OPEN_ITEM>("/", PtkOpenAction::PTK_OPEN_NEW_TAB);
     else
-    {
-        g_signal_emit(file_browser,
-                      signals[PTKFileBrowserSignal::OPEN_ITEM_SIGNAL],
-                      0,
-                      dir_path,
-                      PtkOpenAction::PTK_OPEN_NEW_TAB);
-    }
+        file_browser->run_event<EventType::OPEN_ITEM>(dir_path, PtkOpenAction::PTK_OPEN_NEW_TAB);
 }
 
 void
@@ -4171,7 +3981,9 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
     // begin load dir
     file_browser->busy = true;
     file_browser->dir = vfs_dir_get_by_path(ptk_file_browser_get_cwd(file_browser));
-    g_signal_emit(file_browser, signals[PTKFileBrowserSignal::BEGIN_CHDIR_SIGNAL], 0);
+
+    file_browser->run_event<EventType::CHDIR_BEGIN>();
+
     if (vfs_dir_is_file_listed(file_browser->dir))
     {
         on_dir_file_listed(file_browser, false);
@@ -5160,7 +4972,8 @@ ptk_file_browser_show_hidden_files(PtkFileBrowser* file_browser, bool show)
     if (file_browser->file_list)
     {
         ptk_file_browser_update_model(file_browser);
-        g_signal_emit(file_browser, signals[PTKFileBrowserSignal::SEL_CHANGE_SIGNAL], 0);
+
+        file_browser->run_event<EventType::CHANGE_SEL>();
     }
 
     if (file_browser->side_dir)
@@ -5213,14 +5026,9 @@ on_dir_tree_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrowser* f
                 gtk_tree_model_get(model, &it, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
                 if (file)
                 {
-                    char* file_path;
-                    file_path = ptk_dir_view_get_dir_path(model, &it);
-                    g_signal_emit(file_browser,
-                                  signals[PTKFileBrowserSignal::OPEN_ITEM_SIGNAL],
-                                  0,
-                                  file_path,
-                                  PtkOpenAction::PTK_OPEN_NEW_TAB);
-                    free(file_path);
+                    const std::string file_path = ptk_dir_view_get_dir_path(model, &it);
+                    file_browser->run_event<EventType::OPEN_ITEM>(file_path,
+                                                                  PtkOpenAction::PTK_OPEN_NEW_TAB);
                     vfs_file_info_unref(file);
                 }
             }
@@ -5556,12 +5364,6 @@ ptk_file_browser_show_thumbnails(PtkFileBrowser* file_browser, int max_file_size
 }
 
 void
-ptk_file_browser_emit_open(PtkFileBrowser* file_browser, const char* path, PtkOpenAction action)
-{
-    g_signal_emit(file_browser, signals[PTKFileBrowserSignal::OPEN_ITEM_SIGNAL], 0, path, action);
-}
-
-void
 ptk_file_browser_set_single_click(PtkFileBrowser* file_browser, bool single_click)
 {
     if (single_click == file_browser->single_click)
@@ -5682,13 +5484,14 @@ static void
 focus_folder_view(PtkFileBrowser* file_browser)
 {
     gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
-    g_signal_emit(file_browser, signals[PTKFileBrowserSignal::PANE_MODE_CHANGE_SIGNAL], 0);
+
+    file_browser->run_event<EventType::CHANGE_PANE>();
 }
 
 void
 ptk_file_browser_focus_me(PtkFileBrowser* file_browser)
 {
-    g_signal_emit(file_browser, signals[PTKFileBrowserSignal::PANE_MODE_CHANGE_SIGNAL], 0);
+    file_browser->run_event<EventType::CHANGE_PANE>();
 }
 
 void

@@ -242,9 +242,8 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
             const std::string full_path = Glib::build_filename(dir, vfs_file_info_get_name(file));
             if (std::filesystem::is_directory(full_path))
             {
-                ptk_file_browser_emit_open(file_browser,
-                                           full_path.c_str(),
-                                           PtkOpenAction::PTK_OPEN_NEW_TAB);
+                file_browser->run_event<EventType::OPEN_ITEM>(full_path,
+                                                              PtkOpenAction::PTK_OPEN_NEW_TAB);
             }
         }
     }

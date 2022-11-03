@@ -3357,11 +3357,10 @@ vfs_volume_autoexec(VFSVolume* vol)
                         LOG_INFO("Auto Open Tab for {} in {}", vol->device_file, vol->mount_point);
                         // PtkFileBrowser* file_browser =
                         //        (PtkFileBrowser*)fm_main_window_get_current_file_browser(
-                        //                                                main_window );
-                        // if ( file_browser )
-                        //    ptk_file_browser_emit_open( file_browser, vol->mount_point,
-                        //                                        PtkOpenAction::PTK_OPEN_DIR );
-                        //                                        //PtkOpenAction::PTK_OPEN_NEW_TAB
+                        //                                                main_window);
+                        // if (file_browser)
+                        //     file_browser->run_event<EventType::OPEN_ITEM>(vol->mount_point,
+                        //                                                   PtkOpenAction::PTK_OPEN_DIR);
                         // fm_main_window_add_new_tab causes hang without GDK_THREADS_ENTER
                         fm_main_window_add_new_tab(main_window, vol->mount_point);
                         // LOG_INFO("DONE Auto Open Tab for {} in {}", vol->device_file,

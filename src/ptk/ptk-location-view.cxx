@@ -88,7 +88,7 @@ struct AutoOpen
     char* device_file;
     char* mount_point;
     bool keep_point;
-    int job;
+    PtkOpenAction job;
 };
 
 AutoOpen::AutoOpen(PtkFileBrowser* file_browser)
@@ -98,7 +98,7 @@ AutoOpen::AutoOpen(PtkFileBrowser* file_browser)
     this->device_file = nullptr;
     this->mount_point = nullptr;
     this->keep_point = false;
-    this->job = 0;
+    this->job = PtkOpenAction::PTK_OPEN_DIR;
 }
 
 AutoOpen::~AutoOpen()
@@ -361,9 +361,8 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
     {
         if (xset_get_b(XSetName::DEV_NEWTAB))
         {
-            ptk_file_browser_emit_open(file_browser,
-                                       vol->mount_point,
-                                       PtkOpenAction::PTK_OPEN_NEW_TAB);
+            file_browser->run_event<EventType::OPEN_ITEM>(vol->mount_point,
+                                                          PtkOpenAction::PTK_OPEN_NEW_TAB);
             ptk_location_view_chdir(view, ptk_file_browser_get_cwd(file_browser));
         }
         else
@@ -892,15 +891,14 @@ on_autoopen_net_cb(VFSFileTask* task, AutoOpen* ao)
         if (GTK_IS_WIDGET(ao->file_browser) &&
             std::filesystem::is_directory(device_file_vol->mount_point))
         {
-            ptk_file_browser_emit_open(ao->file_browser,
-                                       device_file_vol->mount_point,
-                                       (PtkOpenAction)ao->job);
+            PtkFileBrowser* file_browser = ao->file_browser;
+            file_browser->run_event<EventType::OPEN_ITEM>(device_file_vol->mount_point, ao->job);
 
-            if (ao->job == PtkOpenAction::PTK_OPEN_NEW_TAB && GTK_IS_WIDGET(ao->file_browser))
+            if (ao->job == PtkOpenAction::PTK_OPEN_NEW_TAB && GTK_IS_WIDGET(file_browser))
             {
-                if (ao->file_browser->side_dev)
-                    ptk_location_view_chdir(GTK_TREE_VIEW(ao->file_browser->side_dev),
-                                            ptk_file_browser_get_cwd(ao->file_browser));
+                if (file_browser->side_dev)
+                    ptk_location_view_chdir(GTK_TREE_VIEW(file_browser->side_dev),
+                                            ptk_file_browser_get_cwd(file_browser));
             }
         }
     }
@@ -955,9 +953,9 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
                 {
                     if (new_tab)
                     {
-                        ptk_file_browser_emit_open(file_browser,
-                                                   volume->mount_point,
-                                                   PtkOpenAction::PTK_OPEN_NEW_TAB);
+                        file_browser->run_event<EventType::OPEN_ITEM>(
+                            volume->mount_point,
+                            PtkOpenAction::PTK_OPEN_NEW_TAB);
                     }
                     else
                     {
@@ -1295,14 +1293,15 @@ on_autoopen_cb(VFSFileTask* task, AutoOpen* ao)
             volume->inhibit_auto = false;
             if (volume->is_mounted)
             {
-                if (GTK_IS_WIDGET(ao->file_browser))
+                PtkFileBrowser* file_browser = ao->file_browser;
+                if (GTK_IS_WIDGET(file_browser))
                 {
-                    ptk_file_browser_emit_open(ao->file_browser,
-                                               volume->mount_point,
-                                               (PtkOpenAction)ao->job);
+                    file_browser->run_event<EventType::OPEN_ITEM>(volume->mount_point, ao->job);
                 }
                 else
+                {
                     open_in_prog(volume->mount_point);
+                }
             }
             break;
         }
@@ -1431,7 +1430,10 @@ on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         ptk_file_task_run(ptask);
     }
     else
-        ptk_file_browser_emit_open(file_browser, vol->mount_point, PtkOpenAction::PTK_OPEN_NEW_TAB);
+    {
+        file_browser->run_event<EventType::OPEN_ITEM>(vol->mount_point,
+                                                      PtkOpenAction::PTK_OPEN_NEW_TAB);
+    }
 }
 
 static void
@@ -1501,9 +1503,14 @@ on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
         ptk_file_task_run(ptask);
     }
     else if (file_browser)
-        ptk_file_browser_emit_open(file_browser, vol->mount_point, PtkOpenAction::PTK_OPEN_DIR);
+    {
+        file_browser->run_event<EventType::OPEN_ITEM>(vol->mount_point,
+                                                      PtkOpenAction::PTK_OPEN_DIR);
+    }
     else
+    {
         open_in_prog(vol->mount_point);
+    }
 }
 
 static void

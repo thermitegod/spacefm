@@ -68,6 +68,10 @@ enum PtkOpenAction
     PTK_OPEN_FILE
 };
 
+// forward declare
+struct PtkFileBrowser;
+struct FMMainWindow;
+
 struct PtkFileBrowser
 {
     /* parent class */
@@ -149,6 +153,154 @@ struct PtkFileBrowser
     char* select_path;
     char* status_bar_custom;
 
+    // Signals
+  public:
+    // Signals function types
+    using evt_chdir_before_t = void(PtkFileBrowser*, FMMainWindow*);
+    using evt_chdir_begin_t = void(PtkFileBrowser*, FMMainWindow*);
+    using evt_chdir_after_t = void(PtkFileBrowser*, FMMainWindow*);
+    using evt_open_file_t = void(PtkFileBrowser*, std::string_view, PtkOpenAction, FMMainWindow*);
+    using evt_change_content_t = void(PtkFileBrowser*, FMMainWindow*);
+    using evt_change_sel_t = void(PtkFileBrowser*, FMMainWindow*);
+    using evt_change_pane_mode_t = void(PtkFileBrowser*, FMMainWindow*);
+
+    // Signals Add Event
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::CHDIR_BEFORE, sigc::connection>::type
+    add_event(evt_chdir_before_t fun, FMMainWindow* window)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::CHDIR_BEFORE");
+        this->evt_data_window = window;
+        return this->evt_chdir_before.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::CHDIR_BEGIN, sigc::connection>::type
+    add_event(evt_chdir_begin_t fun, FMMainWindow* window)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::CHDIR_BEGIN");
+        this->evt_data_window = window;
+        return this->evt_chdir_begin.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::CHDIR_AFTER, sigc::connection>::type
+    add_event(evt_chdir_after_t fun, FMMainWindow* window)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::CHDIR_AFTER");
+        this->evt_data_window = window;
+        return this->evt_chdir_after.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::OPEN_ITEM, sigc::connection>::type
+    add_event(evt_open_file_t fun, FMMainWindow* window)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::OPEN_ITEM");
+        this->evt_data_window = window;
+        return this->evt_open_file.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::CHANGE_CONTENT, sigc::connection>::type
+    add_event(evt_change_content_t fun, FMMainWindow* window)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::CHANGE_CONTENT");
+        this->evt_data_window = window;
+        return this->evt_change_content.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::CHANGE_SEL, sigc::connection>::type
+    add_event(evt_change_sel_t fun, FMMainWindow* window)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::CHANGE_SEL");
+        this->evt_data_window = window;
+        return this->evt_change_sel.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::CHANGE_PANE, sigc::connection>::type
+    add_event(evt_change_pane_mode_t fun, FMMainWindow* window)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::CHANGE_PANE");
+        this->evt_data_window = window;
+        return this->evt_change_pane_mode.connect(sigc::ptr_fun(fun));
+    }
+
+    // Signals Run Event
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::CHDIR_BEFORE, void>::type
+    run_event()
+    {
+        // LOG_TRACE("Signal Execute   : EventType::CHDIR_BEFORE");
+        this->evt_chdir_before.emit(this, this->evt_data_window);
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::CHDIR_BEGIN, void>::type
+    run_event()
+    {
+        // LOG_TRACE("Signal Execute   : EventType::CHDIR_BEGIN");
+        this->evt_chdir_begin.emit(this, this->evt_data_window);
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::CHDIR_AFTER, void>::type
+    run_event()
+    {
+        // LOG_TRACE("Signal Execute   : EventType::CHDIR_AFTER");
+        this->evt_chdir_after.emit(this, this->evt_data_window);
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::OPEN_ITEM, void>::type
+    run_event(std::string_view path, PtkOpenAction action)
+    {
+        // LOG_TRACE("Signal Execute   : EventType::OPEN_ITEM");
+        this->evt_open_file.emit(this, path, action, this->evt_data_window);
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::CHANGE_CONTENT, void>::type
+    run_event()
+    {
+        // LOG_TRACE("Signal Execute   : EventType::CHANGE_CONTENT");
+        this->evt_change_content.emit(this, this->evt_data_window);
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::CHANGE_SEL, void>::type
+    run_event()
+    {
+        // LOG_TRACE("Signal Execute   : EventType::CHANGE_SEL");
+        this->evt_change_sel.emit(this, this->evt_data_window);
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::CHANGE_PANE, void>::type
+    run_event()
+    {
+        // LOG_TRACE("Signal Execute   : EventType::CHANGE_PANE");
+        this->evt_change_pane_mode.emit(this, this->evt_data_window);
+    }
+
+    // Signals
+  private:
+    // Signal types
+    sigc::signal<evt_chdir_before_t> evt_chdir_before;
+    sigc::signal<evt_chdir_begin_t> evt_chdir_begin;
+    sigc::signal<evt_chdir_after_t> evt_chdir_after;
+    sigc::signal<evt_open_file_t> evt_open_file;
+    sigc::signal<evt_change_content_t> evt_change_content;
+    sigc::signal<evt_change_sel_t> evt_change_sel;
+    sigc::signal<evt_change_pane_mode_t> evt_change_pane_mode;
+
+  private:
+    // Signal data
+    // TODO/FIXME has to be a better way to do this
+    FMMainWindow* evt_data_window{nullptr};
+
   public:
     // Signals we connect to
     sigc::connection signal_file_created;
@@ -179,7 +331,7 @@ GtkWidget* ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* ta
 /*
  * folder_path should be encodede in on-disk encoding
  */
-bool ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path,
+bool ptk_file_browser_chdir(PtkFileBrowser* file_browser, std::string_view folder_path,
                             PtkFBChdirMode mode);
 
 /*
@@ -244,9 +396,6 @@ void ptk_file_browser_hide_selected(PtkFileBrowser* file_browser,
                                     const std::vector<VFSFileInfo*>& sel_files, const char* cwd);
 
 void ptk_file_browser_show_thumbnails(PtkFileBrowser* file_browser, int max_file_size);
-
-void ptk_file_browser_emit_open(PtkFileBrowser* file_browser, const char* path,
-                                PtkOpenAction action);
 
 // MOD
 int ptk_file_browser_no_access(const char* cwd, const char* smode);
