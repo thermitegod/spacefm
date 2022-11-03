@@ -6151,7 +6151,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             gtk_widget_show(image);
             gtk_button_set_image(GTK_BUTTON(btn), image);
             gtk_button_set_relief(GTK_BUTTON(btn), GTK_RELIEF_NONE);
-            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(btn), xset_get_b_set(set));
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(btn), xset_get_b(set));
             gtk_widget_set_margin_start(btn, 0);
             gtk_widget_set_margin_end(btn, 0);
             gtk_widget_set_margin_top(btn, 0);

@@ -205,6 +205,7 @@ struct XSet
     char* plug_name{nullptr}; // not saved
     char* plug_dir{nullptr};  // not saved
 
+#ifdef XSET_GETTER_SETTER
   public:
     // get/set
 
@@ -351,6 +352,7 @@ struct XSet
     char* get_plug_dir() const noexcept;
     void set_plug_dir(const char* val) noexcept;
     void set_plug_dir(const std::string& val) noexcept;
+#endif
 };
 
 // using xset_t = std::unique_ptr<XSet>;
@@ -373,13 +375,12 @@ xset_t xset_set(xset_t name, XSetVar var, std::string_view value) noexcept;
 xset_t xset_set(XSetName name, XSetVar var, std::string_view value) noexcept;
 xset_t xset_set(std::string_view name, XSetVar var, std::string_view value) noexcept;
 
-xset_t xset_set_var(xset_t set, XSetVar var, const std::string& value) noexcept;
+xset_t xset_set_var(xset_t set, XSetVar var, std::string_view value) noexcept;
 
 // B
 bool xset_get_b(xset_t set) noexcept;
 bool xset_get_b(XSetName name) noexcept;
 bool xset_get_b(std::string_view name) noexcept;
-bool xset_get_b_set(xset_t set) noexcept;
 bool xset_get_b_panel(panel_t panel, std::string_view name) noexcept;
 bool xset_get_b_panel(panel_t panel, XSetPanel name) noexcept;
 bool xset_get_b_panel_mode(panel_t panel, std::string_view name, MainWindowPanel mode) noexcept;
