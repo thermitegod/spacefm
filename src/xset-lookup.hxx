@@ -388,7 +388,6 @@ enum class XSetName
     VIEW_REFRESH,
     PATH_SEEK,
     PATH_HAND,
-    PATH_HELP,
     EDIT_CUT,
     EDIT_COPY,
     EDIT_PASTE,

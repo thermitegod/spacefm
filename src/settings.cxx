@@ -7699,9 +7699,6 @@ xset_defaults()
     xset_set_var(set, XSetVar::SHARED_KEY, "dev_net_cnf");
     // set->s was custom protocol handler in sfm<=0.9.3 - retained
 
-    set = xset_set(XSetName::PATH_HELP, XSetVar::MENU_LABEL, "Path Bar _Help");
-    xset_set_var(set, XSetVar::ICN, "gtk-help");
-
     // EDIT
     set = xset_set(XSetName::EDIT_CUT, XSetVar::MENU_LABEL, "Cu_t");
     xset_set_var(set, XSetVar::ICN, "gtk-cut");

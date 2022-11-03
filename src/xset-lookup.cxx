@@ -371,7 +371,6 @@ static const std::unordered_map<XSetName, std::string_view> xset_name_map{
     {XSetName::VIEW_REFRESH,                "view_refresh"sv},
     {XSetName::PATH_SEEK,                   "path_seek"sv},
     {XSetName::PATH_HAND,                   "path_hand"sv},
-    {XSetName::PATH_HELP,                   "path_help"sv},
     {XSetName::EDIT_CUT,                    "edit_cut"sv},
     {XSetName::EDIT_COPY,                   "edit_copy"sv},
     {XSetName::EDIT_PASTE,                  "edit_paste"sv},

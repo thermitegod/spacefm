@@ -512,148 +512,71 @@ static void
 on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
 {
     const char* text = gtk_entry_get_text(GTK_ENTRY(entry));
+    if (!text || std::strlen(text) == 0)
+        return;
+    std::string path = text;
 
     gtk_editable_select_region(GTK_EDITABLE(entry), 0, 0); // clear selection
 
-    if (text[0] == '\0')
-        return;
-
-    // Convert to on-disk encoding
-    std::string dir_path = Glib::filename_from_utf8(text);
-    std::string final_path = std::filesystem::absolute(dir_path);
-
-    bool final_path_exists = std::filesystem::exists(final_path);
-
-    if (!final_path_exists &&
-        (text[0] == '$' || text[0] == '+' || text[0] == '&' || text[0] == '!' || text[0] == '\0'))
+    // network path
+    if ((!ztd::startswith(path, "/") && ztd::contains(path, ":/")) || ztd::startswith(path, "//"))
     {
-        // command
-        std::string command;
-        bool as_root = false;
-        bool in_terminal = false;
-        bool as_task = true;
-        std::string prefix;
-        while (text[0] == '$' || text[0] == '+' || text[0] == '&' || text[0] == '!')
-        {
-            if (text[0] == '+')
-                in_terminal = true;
-            else if (text[0] == '&')
-                as_task = false;
-            else if (text[0] == '!')
-                as_root = true;
-
-            prefix = fmt::format("{}{}", prefix, text[0]);
-            text++;
-        }
-        bool is_space = text[0] == ' ';
-        command = ztd::strip(text);
-        if (command.empty())
-        {
-            ptk_path_entry_help(entry, GTK_WIDGET(file_browser));
-            gtk_editable_set_position(GTK_EDITABLE(entry), -1);
-            return;
-        }
-
         save_command_history(GTK_ENTRY(entry));
+        ptk_location_view_mount_network(file_browser, path.c_str(), false, false);
+        return;
+    }
 
-        // task
-        char* task_name;
-        const char* cwd;
-        task_name = ztd::strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
-        cwd = ptk_file_browser_get_cwd(file_browser);
-        PtkFileTask* ptask;
-        ptask =
-            ptk_file_exec_new(task_name, cwd, GTK_WIDGET(file_browser), file_browser->task_view);
-        free(task_name);
-        // do not free cwd!
-        ptask->task->exec_browser = file_browser;
-        ptask->task->exec_command = replace_line_subs(command);
-        if (as_root)
-            ptask->task->exec_as_user = "root";
-        if (!as_task)
-            ptask->task->exec_sync = false;
+    // convert ~/ to /home/user
+    if (ztd::startswith(path, "~/"))
+        path = Glib::build_filename(vfs_user_home_dir(), ztd::removeprefix(path, "~/"));
+
+    // path
+    const std::string dir_path = Glib::filename_from_utf8(path);
+    const std::string final_path = std::filesystem::absolute(dir_path);
+
+    if (std::filesystem::is_directory(final_path))
+    { // open dir
+        if (!ztd::same(final_path, ptk_file_browser_get_cwd(file_browser)))
+            ptk_file_browser_chdir(file_browser,
+                                   final_path.c_str(),
+                                   PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+    }
+    else if (std::filesystem::is_regular_file(final_path))
+    { // open dir and select file
+        const std::string dirname_path = Glib::path_get_dirname(final_path);
+        if (!ztd::contains(dirname_path, ptk_file_browser_get_cwd(file_browser)))
+        {
+            free(file_browser->select_path);
+            file_browser->select_path = ztd::strdup(final_path);
+            ptk_file_browser_chdir(file_browser,
+                                   dirname_path.c_str(),
+                                   PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+        }
         else
-            ptask->task->exec_sync = !in_terminal;
-        ptask->task->exec_show_output = true;
-        ptask->task->exec_show_error = true;
-        ptask->task->exec_export = true;
-        ptask->task->exec_terminal = in_terminal;
-        ptask->task->exec_keep_terminal = as_task;
-        // ptask->task->exec_keep_tmp = true;
-        ptk_file_task_run(ptask);
-        // gtk_widget_grab_focus( GTK_WIDGET( file_browser->folder_view ) );
-
-        // reset entry text
-        prefix = fmt::format("{}{}", prefix, is_space ? " " : "");
-        gtk_entry_set_text(GTK_ENTRY(entry), prefix.c_str());
-        gtk_editable_set_position(GTK_EDITABLE(entry), -1);
-    }
-    else if (!final_path_exists && text[0] == '%')
-    {
-        const std::string str = ztd::strip(++text);
-        if (!str.empty())
         {
-            save_command_history(GTK_ENTRY(entry));
-            ptk_file_browser_select_pattern(nullptr, file_browser, str.c_str());
+            ptk_file_browser_select_file(file_browser, final_path.c_str());
         }
     }
-    else if ((text[0] != '/' && strstr(text, ":/")) || ztd::startswith(text, "//"))
-    {
-        save_command_history(GTK_ENTRY(entry));
-        ptk_location_view_mount_network(file_browser, text, false, false);
-        return;
+    else if (std::filesystem::is_block_file(final_path))
+    { // open block device
+        // LOG_INFO("opening block device: {}", final_path);
+        ptk_location_view_open_block(final_path.c_str(), false);
     }
     else
+    { // do nothing for other special files
+      // LOG_INFO("special file ignored: {}", final_path);
+      // return;
+    }
+
+    gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
+    gtk_editable_set_position(GTK_EDITABLE(entry), -1);
+
+    // inhibit auto seek because if multiple completions will change dir
+    EntryData* edata = ENTRY_DATA(g_object_get_data(G_OBJECT(entry), "edata"));
+    if (edata && edata->seek_timer)
     {
-        // path?
-        // clean double slashes
-        final_path = ztd::replace(final_path, "//", "/");
-
-        if (std::filesystem::is_directory(final_path))
-        {
-            // open dir
-            if (strcmp(final_path.c_str(), ptk_file_browser_get_cwd(file_browser)))
-                ptk_file_browser_chdir(file_browser,
-                                       final_path.c_str(),
-                                       PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
-            gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
-        }
-        else if (final_path_exists)
-        {
-            struct stat statbuf;
-            if (stat(final_path.c_str(), &statbuf) == 0 && S_ISBLK(statbuf.st_mode) &&
-                ptk_location_view_open_block(final_path.c_str(), false))
-            {
-                // ptk_location_view_open_block opened device
-            }
-            else
-            {
-                // open dir and select file
-                dir_path = Glib::path_get_dirname(final_path);
-                if (!ztd::contains(dir_path, ptk_file_browser_get_cwd(file_browser)))
-                {
-                    free(file_browser->select_path);
-                    file_browser->select_path = ztd::strdup(final_path);
-                    ptk_file_browser_chdir(file_browser,
-                                           dir_path.c_str(),
-                                           PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
-                }
-                else
-                {
-                    ptk_file_browser_select_file(file_browser, final_path.c_str());
-                }
-            }
-            gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
-        }
-        gtk_editable_set_position(GTK_EDITABLE(entry), -1);
-
-        // inhibit auto seek because if multiple completions will change dir
-        EntryData* edata = ENTRY_DATA(g_object_get_data(G_OBJECT(entry), "edata"));
-        if (edata && edata->seek_timer)
-        {
-            g_source_remove(edata->seek_timer);
-            edata->seek_timer = 0;
-        }
+        g_source_remove(edata->seek_timer);
+        edata->seek_timer = 0;
     }
 }
 
@@ -6073,8 +5996,6 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
     }
     else if (ztd::startswith(set->name, "sortx_"))
         ptk_file_browser_set_sort_extra(browser, set->xset_name);
-    else if (set->xset_name == XSetName::PATH_HELP)
-        ptk_path_entry_help(nullptr, GTK_WIDGET(browser));
     else if (ztd::startswith(set->name, "panel"))
     {
         int panel_num = set->name[5];

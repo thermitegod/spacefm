@@ -35,4 +35,3 @@ struct EntryData
 };
 
 GtkWidget* ptk_path_entry_new(PtkFileBrowser* file_browser);
-void ptk_path_entry_help(GtkWidget* widget, GtkWidget* parent);
