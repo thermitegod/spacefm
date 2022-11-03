@@ -58,7 +58,7 @@
 #include "ptk/ptk-file-list.hxx"
 
 #include "ptk/ptk-file-menu.hxx"
-#include "ptk/ptk-utils.hxx"
+#include "ptk/ptk-keyboard.hxx"
 
 static bool on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data);
 static bool app_menu_keypress(GtkWidget* widget, GdkEventKey* event, PtkFileMenu* data);

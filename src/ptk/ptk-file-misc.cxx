@@ -32,7 +32,7 @@
 
 #include "ptk/ptk-file-misc.hxx"
 #include "ptk/ptk-error.hxx"
-#include "ptk/ptk-utils.hxx"
+#include "ptk/ptk-keyboard.hxx"
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-file-properties.hxx"
 #include "ptk/ptk-file-browser.hxx"

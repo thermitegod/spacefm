@@ -43,7 +43,7 @@
 
 #include "ptk/ptk-builder.hxx"
 #include "ptk/ptk-error.hxx"
-#include "ptk/ptk-utils.hxx"
+#include "ptk/ptk-keyboard.hxx"
 
 #include "pref-dialog.hxx"
 #include "ptk/ptk-file-menu.hxx"

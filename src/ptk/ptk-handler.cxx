@@ -38,7 +38,7 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "ptk/ptk-handler.hxx"
-#include "ptk/ptk-utils.hxx"
+#include "ptk/ptk-keyboard.hxx"
 
 #include "autosave.hxx"
 #include "write.hxx"

@@ -71,7 +71,7 @@
 #include "vfs/vfs-user-dir.hxx"
 
 #include "ptk/ptk-error.hxx"
-#include "ptk/ptk-utils.hxx"
+#include "ptk/ptk-keyboard.hxx"
 #include "ptk/ptk-app-chooser.hxx"
 #include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-file-menu.hxx"
