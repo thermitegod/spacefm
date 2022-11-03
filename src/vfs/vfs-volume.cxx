@@ -1119,7 +1119,7 @@ info_mount_points(device_t* device)
             continue;
 
         if (sscanf(line.data(),
-                   "%d %d %lu:%lu %s %s",
+                   "%u %u %lu:%lu %s %s",
                    &mount_id,
                    &parent_id,
                    &major,
@@ -1523,7 +1523,7 @@ parse_mounts(bool report)
             continue;
 
         if (sscanf(line.data(),
-                   "%d %d %lu:%lu %s %s",
+                   "%u %u %lu:%lu %s %s",
                    &mount_id,
                    &parent_id,
                    &major,
