@@ -59,14 +59,14 @@ enum SocketEvent
 
 CliFlags cli_flags = CliFlags();
 
-static int sock;
+static i32 sock;
 static GIOChannel* io_channel = nullptr;
 
 static bool socket_daemon = false;
 
-static void get_socket_name(char* buf, int len);
+static void get_socket_name(char* buf, i32 len);
 static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data);
-static void receive_socket_command(int client, std::string_view args);
+static void receive_socket_command(i32 client, std::string_view args);
 
 bool
 check_socket_daemon()
@@ -107,13 +107,13 @@ on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
     socklen_t addr_len = 0;
     struct sockaddr_un client_addr;
 
-    int client = accept(g_io_channel_unix_get_fd(ioc), (struct sockaddr*)&client_addr, &addr_len);
+    i32 client = accept(g_io_channel_unix_get_fd(ioc), (struct sockaddr*)&client_addr, &addr_len);
     if (client == -1)
         return true;
 
     static char buf[1024];
     std::string args;
-    std::size_t r;
+    usize r;
     while ((r = read(client, buf, sizeof(buf))) > 0)
     {
         args.append(buf, r);
@@ -134,7 +134,7 @@ on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
     cli_flags.no_tabs = false;
     socket_daemon = false;
 
-    std::size_t argx = 0;
+    usize argx = 0;
     if (args[argx] == SocketEvent::CMD_NO_TABS)
     {
         cli_flags.reuse_tab = false;
@@ -218,7 +218,7 @@ on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
 }
 
 static void
-get_socket_name(char* buf, int len)
+get_socket_name(char* buf, i32 len)
 {
     std::string dpy = ztd::strdup(Glib::getenv("DISPLAY"));
     // treat :0.0 as :0 to prevent multiple instances on screen 0
@@ -233,7 +233,7 @@ get_socket_name(char* buf, int len)
 }
 
 [[noreturn]] static void
-single_instance_check_fatal(int ret)
+single_instance_check_fatal(i32 ret)
 {
     gdk_notify_startup_complete();
     std::exit(ret);
@@ -251,7 +251,7 @@ single_instance_check()
     struct sockaddr_un addr;
     addr.sun_family = AF_UNIX;
     get_socket_name(addr.sun_path, sizeof(addr.sun_path));
-    int addr_len = SUN_LEN(&addr);
+    i32 addr_len = SUN_LEN(&addr);
 
     // try to connect to existing instance
     if (sock && connect(sock, (struct sockaddr*)&addr, addr_len) == 0)
@@ -328,7 +328,7 @@ single_instance_check()
         // delete old socket file if it exists.
         std::filesystem::remove(addr.sun_path);
     }
-    int reuse = 1;
+    i32 reuse = 1;
     setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
     if (bind(sock, (struct sockaddr*)&addr, addr_len) == -1)
     {
@@ -367,7 +367,7 @@ single_instance_finalize()
 }
 
 static void
-receive_socket_command(int client, std::string_view args)
+receive_socket_command(i32 client, std::string_view args)
 {
     char** argv = nullptr;
     char cmd;
@@ -399,8 +399,8 @@ receive_socket_command(int client, std::string_view args)
         write(client, reply.c_str(), reply.size()); // send reply or error msg
 }
 
-int
-send_socket_command(int argc, char* argv[], std::string& reply)
+i32
+send_socket_command(i32 argc, char* argv[], std::string& reply)
 {
     if (argc < 3)
     {
@@ -419,7 +419,7 @@ send_socket_command(int argc, char* argv[], std::string& reply)
     struct sockaddr_un addr;
     addr.sun_family = AF_UNIX;
     get_socket_name(addr.sun_path, sizeof(addr.sun_path));
-    int addr_len = SUN_LEN(&addr);
+    i32 addr_len = SUN_LEN(&addr);
 
     if (connect(sock, (struct sockaddr*)&addr, addr_len) != 0)
     {
@@ -438,7 +438,7 @@ send_socket_command(int argc, char* argv[], std::string& reply)
     write(sock, "\n", 1);
 
     // send arguments
-    for (int i = 2; i < argc; ++i)
+    for (i32 i = 2; i < argc; ++i)
     {
         write(sock, argv[i], std::strlen(argv[i]));
         write(sock, "\n", 1);
@@ -447,7 +447,7 @@ send_socket_command(int argc, char* argv[], std::string& reply)
 
     // get response
     std::string sock_reply;
-    std::size_t r;
+    usize r;
     char buf[1024];
     while ((r = read(sock, buf, sizeof(buf))) > 0)
     {

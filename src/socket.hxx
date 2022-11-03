@@ -17,6 +17,8 @@
 
 #include <string>
 
+#include <ztd/ztd.hxx>
+
 struct CliFlags
 {
     char** files{nullptr};
@@ -29,7 +31,7 @@ struct CliFlags
 
     bool daemon_mode{false};
 
-    int panel{0};
+    i32 panel{0};
 
     bool find_files{false};
     char* config_dir{nullptr};
@@ -41,4 +43,4 @@ extern CliFlags cli_flags;
 bool check_socket_daemon();
 bool single_instance_check();
 void single_instance_finalize();
-int send_socket_command(int argc, char* argv[], std::string& reply);
+i32 send_socket_command(i32 argc, char* argv[], std::string& reply);

@@ -145,12 +145,12 @@ struct VFSFileTask
 
     off_t total_size; // Total size of the files to be processed, in bytes
     off_t progress;   // Total size of current processed files, in btytes
-    int percent{0};   // progress (percentage)
+    i32 percent{0};   // progress (percentage)
     bool custom_percent{false};
     off_t last_speed{0};
     off_t last_progress{0};
-    double last_elapsed{0.0};
-    unsigned int current_item{0};
+    f64 last_elapsed{0.0};
+    u32 current_item{0};
 
     ztd::timer timer;
     std::time_t start_time;
@@ -158,8 +158,8 @@ struct VFSFileTask
     std::string current_file; // copy of Current processed file
     std::string current_dest; // copy of Current destination file
 
-    int err_count{0};
-    int error{0};
+    i32 err_count{0};
+    i32 error{0};
     bool error_first{true};
 
     GThread* thread;
@@ -200,8 +200,8 @@ struct VFSFileTask
     std::string exec_as_user;
     std::string exec_icon;
     Glib::Pid exec_pid;
-    int exec_exit_status{0};
-    unsigned int child_watch{0};
+    i32 exec_exit_status{0};
+    u32 child_watch{0};
     bool exec_is_error{false};
     GIOChannel* exec_channel_out;
     GIOChannel* exec_channel_err;
@@ -240,6 +240,6 @@ void vfs_file_task_abort(VFSFileTask* task);
 void vfs_file_task_free(VFSFileTask* task);
 
 char* vfs_file_task_get_cpids(Glib::Pid pid);
-void vfs_file_task_kill_cpids(char* cpids, int signal);
+void vfs_file_task_kill_cpids(char* cpids, i32 signal);
 const std::string vfs_file_task_get_unique_name(std::string_view dest_dir,
                                                 std::string_view base_name, std::string_view ext);

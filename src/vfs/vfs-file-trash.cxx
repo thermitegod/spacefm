@@ -69,7 +69,7 @@ Trash::device(std::string_view path) noexcept
 {
     dev_t dev = 0;
     struct stat statBuf;
-    int result = stat(path.data(), &statBuf);
+    i32 result = stat(path.data(), &statBuf);
     dev = statBuf.st_dev;
 
     // stat failed
@@ -187,7 +187,7 @@ TrashDir::unique_name(std::string_view path) const noexcept
 
     if (std::filesystem::exists(to_trash_path))
     {
-        for (int i = 1; true; ++i)
+        for (i32 i = 1; true; ++i)
         {
             const std::string ii = std::to_string(i);
             const std::string check_to_trash_filename = basename + "_" + ii + ext;

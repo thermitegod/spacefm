@@ -133,7 +133,7 @@ struct HandlerData
 
     GtkWidget* dlg;
     GtkWidget* parent;
-    int mode;
+    i32 mode;
     bool changed;
     PtkFileBrowser* browser;
 
@@ -791,7 +791,7 @@ ptk_handler_get_text_view(GtkTextView* view)
 }
 
 char*
-ptk_handler_get_command(int mode, int cmd, xset_t handler_set)
+ptk_handler_get_command(i32 mode, i32 cmd, xset_t handler_set)
 { /* if handler->disable, get const command, else get script path if exists */
     if (!handler_set)
         return nullptr;
@@ -799,7 +799,7 @@ ptk_handler_get_command(int mode, int cmd, xset_t handler_set)
     {
         // is default handler - get command from const char
         const Handler* handler;
-        std::size_t nelements;
+        usize nelements;
         const char* command;
 
         switch (mode)
@@ -820,7 +820,7 @@ ptk_handler_get_command(int mode, int cmd, xset_t handler_set)
                 return nullptr;
         }
 
-        for (std::size_t i = 0; i < nelements; ++i)
+        for (usize i = 0; i < nelements; ++i)
         {
             switch (mode)
             {
@@ -885,7 +885,7 @@ ptk_handler_get_command(int mode, int cmd, xset_t handler_set)
 }
 
 bool
-ptk_handler_load_script(int mode, int cmd, xset_t handler_set, GtkTextView* view,
+ptk_handler_load_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view,
                         std::string& script, std::string& error_message)
 {
     // returns true if there is an error
@@ -982,7 +982,7 @@ ptk_handler_load_script(int mode, int cmd, xset_t handler_set, GtkTextView* view
 }
 
 bool
-ptk_handler_save_script(int mode, int cmd, xset_t handler_set, GtkTextView* view,
+ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view,
                         const std::string command, std::string& error_message)
 {
     // returns true if there is an error
@@ -1063,7 +1063,7 @@ ptk_handler_values_in_list(const std::string list, const std::vector<std::string
     char* element;
     bool required, match;
     bool ret = false;
-    for (int i = 0; elements[i]; ++i)
+    for (i32 i = 0; elements[i]; ++i)
     {
         if (!elements[i][0])
             continue;
@@ -1138,7 +1138,7 @@ value_in_list(const char* list, const char* value)
 }
 
 GSList*
-ptk_handler_file_has_handlers(int mode, int cmd, const char* path, VFSMimeType* mime_type,
+ptk_handler_file_has_handlers(i32 mode, i32 cmd, const char* path, VFSMimeType* mime_type,
                               bool test_cmd, bool multiple, bool enabled_only)
 { /* this function must be FAST - is run multiple times on menu popup
    * command must be non-empty if test_cmd */
@@ -1232,9 +1232,9 @@ string_copy_free(char** s, const char* src)
 }
 
 void
-ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
+ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
 {
-    std::size_t nelements;
+    usize nelements;
     char* list;
     char* str;
     xset_t set;
@@ -1269,7 +1269,7 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
         overwrite = add_missing = true;
     }
 
-    for (std::size_t i = 0; i < nelements; ++i)
+    for (usize i = 0; i < nelements; ++i)
     {
         switch (mode)
         {
@@ -1334,7 +1334,7 @@ ptk_handler_add_defaults(int mode, bool overwrite, bool add_missing)
 }
 
 static xset_t
-add_new_handler(int mode)
+add_new_handler(i32 mode)
 {
     // creates a new xset for a custom handler type
     std::string setname;
@@ -1354,7 +1354,7 @@ add_new_handler(int mode)
 }
 
 void
-ptk_handler_import(int mode, GtkWidget* handler_dlg, xset_t set)
+ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
 {
     // Adding new handler as a copy of the imported plugin set
     xset_t new_handler_xset = add_new_handler(mode);
@@ -1379,7 +1379,7 @@ ptk_handler_import(int mode, GtkWidget* handler_dlg, xset_t set)
     // run command
     std::string* standard_output = nullptr;
     std::string* standard_error = nullptr;
-    int exit_status;
+    i32 exit_status;
 
     print_command(cp_command);
     Glib::spawn_command_line_sync(cp_command, standard_output, standard_error, &exit_status);
@@ -1627,7 +1627,7 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
     GtkTreeIter iter;
     GtkTreeIter def_handler_iter;
     def_handler_iter.stamp = 0;
-    int i;
+    i32 i;
     for (i = 0; archive_handlers[i] != nullptr; ++i)
     {
         if (ztd::startswith(archive_handlers[i], handler_cust_prefixs.at(hnd->mode)))
@@ -2001,7 +2001,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         // Looping for handlers (nullptr-terminated list)
         if (archive_handlers)
         {
-            for (int i = 0; archive_handlers[i] != nullptr; ++i)
+            for (i32 i = 0; archive_handlers[i] != nullptr; ++i)
             {
                 // Appending to new archive handlers list when it isnt the
                 // deleted handler - remember that archive handlers are
@@ -2290,7 +2290,7 @@ restore_defaults(HandlerData* hnd, bool all)
 {
     if (all)
     {
-        int response = xset_msg_dialog(GTK_WIDGET(hnd->dlg),
+        i32 response = xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                                        GtkMessageType::GTK_MESSAGE_WARNING,
                                        "Restore Default Handlers",
                                        GtkButtonsType::GTK_BUTTONS_YES_NO,
@@ -2329,7 +2329,7 @@ restore_defaults(HandlerData* hnd, bool all)
         }
 
         // get default handler
-        std::size_t nelements;
+        usize nelements;
         const Handler* handler = nullptr;
 
         switch (hnd->mode)
@@ -2351,7 +2351,7 @@ restore_defaults(HandlerData* hnd, bool all)
         }
 
         bool found_handler = false;
-        for (std::size_t i = 0; i < nelements; ++i)
+        for (usize i = 0; i < nelements; ++i)
         {
             switch (hnd->mode)
             {
@@ -2560,7 +2560,7 @@ on_activate_link(GtkLabel* label, const char* uri, HandlerData* hnd)
     // click apply to save handler
     on_configure_button_press(GTK_BUTTON(hnd->btn_apply), hnd);
     // open in editor
-    int action = std::stol(uri);
+    i32 action = std::stol(uri);
     if (action > PtkHandlerArchive::HANDLER_LIST || action < 0)
         return true;
 
@@ -2591,7 +2591,7 @@ on_activate_link(GtkLabel* label, const char* uri, HandlerData* hnd)
 static bool
 on_textview_keypress(GtkWidget* widget, GdkEventKey* event, HandlerData* hnd)
 { // also used on dlg keypress
-    unsigned int keymod = ptk_get_keymod(event->state);
+    u32 keymod = ptk_get_keymod(event->state);
     switch (event->keyval)
     {
         case GDK_KEY_Return:
@@ -2633,8 +2633,8 @@ on_textview_buffer_changed(GtkTextBuffer* buf, HandlerData* hnd)
 }
 
 static void
-on_entry_text_insert(GtkEntryBuffer* buffer, unsigned int position, char* chars,
-                     unsigned int n_chars, HandlerData* hnd)
+on_entry_text_insert(GtkEntryBuffer* buffer, u32 position, char* chars, u32 n_chars,
+                     HandlerData* hnd)
 {
     (void)buffer;
     (void)position;
@@ -2648,8 +2648,7 @@ on_entry_text_insert(GtkEntryBuffer* buffer, unsigned int position, char* chars,
 }
 
 static void
-on_entry_text_delete(GtkEntryBuffer* buffer, unsigned int position, unsigned int n_chars,
-                     HandlerData* hnd)
+on_entry_text_delete(GtkEntryBuffer* buffer, u32 position, u32 n_chars, HandlerData* hnd)
 {
     on_entry_text_insert(buffer, position, nullptr, n_chars, hnd);
 }
@@ -2686,7 +2685,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     if (hnd->changed)
         on_configure_button_press(GTK_BUTTON(hnd->btn_apply), hnd);
 
-    int job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
+    i32 job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
 
     // Determine handler selected
     xset_t set_sel = nullptr;
@@ -2801,7 +2800,7 @@ on_archive_default(GtkMenuItem* menuitem, xset_t set)
 }
 
 static GtkWidget*
-add_popup_menuitem(GtkWidget* popup, GtkAccelGroup* accel_group, const char* label, int job,
+add_popup_menuitem(GtkWidget* popup, GtkAccelGroup* accel_group, const char* label, i32 job,
                    HandlerData* hnd)
 {
     (void)accel_group;
@@ -2908,7 +2907,7 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
 }
 
 void
-ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, xset_t def_handler_set)
+ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handler_set)
 {
     std::string str;
 
@@ -2940,8 +2939,8 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, xset_t def_handl
     xset_set_window_icon(GTK_WINDOW(hnd->dlg));
 
     // Setting saved dialog size
-    int width = xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), XSetVar::X);
-    int height = xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), XSetVar::Y);
+    i32 width = xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), XSetVar::X);
+    i32 height = xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), XSetVar::Y);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(hnd->dlg), width, height);
 
@@ -3435,7 +3434,7 @@ ptk_handler_show_config(int mode, PtkFileBrowser* file_browser, xset_t def_handl
     /* Rendering dialog - while loop is used to deal with standard
      * buttons that should not cause the dialog to exit */
     /*igcr need to handle dialog delete event? */
-    int response;
+    i32 response;
     while ((response = gtk_dialog_run(GTK_DIALOG(hnd->dlg))))
     {
         bool exit_loop = false;

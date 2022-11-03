@@ -35,7 +35,7 @@
 static void
 parse_etc_conf(std::string_view etc_path, std::string_view raw_line)
 {
-    std::size_t sep = raw_line.find("=");
+    usize sep = raw_line.find("=");
     if (sep == std::string::npos)
         return;
 

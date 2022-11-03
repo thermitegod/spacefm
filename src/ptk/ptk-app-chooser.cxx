@@ -71,12 +71,12 @@ init_list_view(GtkTreeView* view)
     gtk_tree_view_set_tooltip_column(view, PTKAppChooser::COL_FULL_PATH);
 }
 
-static int
+static i32
 sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_data)
 {
     (void)user_data;
     char* name_a;
-    int ret = 0;
+    i32 ret = 0;
     gtk_tree_model_get(model, a, PTKAppChooser::COL_APP_NAME, &name_a, -1);
     if (name_a)
     {
@@ -221,8 +221,8 @@ app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all
 
     xset_set_window_icon(GTK_WINDOW(dlg));
 
-    int width = xset_get_int(XSetName::APP_DLG, XSetVar::X);
-    int height = xset_get_int(XSetName::APP_DLG, XSetVar::Y);
+    i32 width = xset_get_int(XSetName::APP_DLG, XSetVar::X);
+    i32 height = xset_get_int(XSetName::APP_DLG, XSetVar::Y);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
     else
@@ -306,8 +306,7 @@ on_load_all_apps_finish(VFSAsyncTask* task, bool is_cancelled, GtkWidget* dlg)
 }
 
 void
-on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, unsigned int page_num,
-                        void* user_data)
+on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, u32 page_num, void* user_data)
 {
     (void)notebook;
     (void)page;
@@ -369,7 +368,7 @@ app_chooser_dialog_get_selected_app(GtkWidget* dlg)
     }
 
     GtkNotebook* notebook = GTK_NOTEBOOK(GTK_WIDGET(gtk_builder_get_object(builder, "notebook")));
-    int idx = gtk_notebook_get_current_page(notebook);
+    i32 idx = gtk_notebook_get_current_page(notebook);
     GtkBin* scroll = GTK_BIN(gtk_notebook_get_nth_page(notebook, idx));
     GtkTreeView* view = GTK_TREE_VIEW(gtk_bin_get_child(scroll));
     GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(view);
@@ -443,15 +442,15 @@ on_browse_btn_clicked(GtkButton* button, void* user_data)
 }
 
 static void
-on_dlg_response(GtkDialog* dlg, int id, void* user_data)
+on_dlg_response(GtkDialog* dlg, i32 id, void* user_data)
 {
     (void)user_data;
     VFSAsyncTask* task;
     GtkAllocation allocation;
 
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-    int width = allocation.width;
-    int height = allocation.height;
+    i32 width = allocation.width;
+    i32 height = allocation.height;
     if (width && height)
     {
         xset_set(XSetName::APP_DLG, XSetVar::X, std::to_string(width));

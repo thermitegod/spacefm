@@ -110,7 +110,7 @@ seek_path(GtkEntry* entry)
     bool is_unique = true;
     if (std::filesystem::is_directory(seek_dir))
     { // complete dir path is in entry - is it unique?
-        unsigned int count = 0;
+        u32 count = 0;
         for (const auto& file: std::filesystem::directory_iterator(seek_dir))
         {
             if (count == 2)
@@ -139,7 +139,7 @@ seek_path(GtkEntry* entry)
 }
 
 static void
-seek_path_delayed(GtkEntry* entry, unsigned int delay = 250)
+seek_path_delayed(GtkEntry* entry, u32 delay = 250)
 {
     EntryData* edata = ENTRY_DATA(g_object_get_data(G_OBJECT(entry), "edata"));
     if (!(edata && edata->browser))
@@ -261,7 +261,7 @@ insert_complete(GtkEntry* entry)
         return;
 
     // find longest common prefix
-    int count = 0;
+    i32 count = 0;
     std::string last_path;
     std::string prefix_name;
     std::string long_prefix;
@@ -292,7 +292,7 @@ insert_complete(GtkEntry* entry)
             }
             else
             {
-                int i = 0;
+                i32 i = 0;
                 while (file_name[i] && file_name[i] == long_prefix[i])
                     i++;
 
@@ -346,7 +346,7 @@ on_key_press(GtkWidget* entry, GdkEventKey* evt, EntryData* edata)
 
     if (evt->keyval == GDK_KEY_Tab)
     {
-        unsigned int keymod = ptk_get_keymod(evt->state);
+        u32 keymod = ptk_get_keymod(evt->state);
         if (keymod)
             return false;
 

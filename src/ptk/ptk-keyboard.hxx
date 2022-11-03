@@ -21,7 +21,9 @@
 #include <gdk/gdk.h>
 #include <glib.h>
 
-unsigned int ptk_get_keymod(unsigned int event);
+#include <ztd/ztd.hxx>
+
+u32 ptk_get_keymod(u32 event);
 
 #ifdef HAVE_NONLATIN
 void transpose_nonlatin_keypress(GdkEventKey* event);

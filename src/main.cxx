@@ -104,7 +104,7 @@ init_folder()
 }
 
 [[noreturn]] static void
-exit_from_signal(int sig)
+exit_from_signal(i32 sig)
 {
     gtk_main_quit();
     std::exit(sig);
@@ -357,7 +357,7 @@ tmp_clean()
 }
 
 int
-main(int argc, char* argv[])
+main(i32 argc, char* argv[])
 {
     // logging init
     ztd::Logger->initialize();
@@ -395,7 +395,7 @@ main(int argc, char* argv[])
                 std::exit(EXIT_SUCCESS);
             }
             std::string sock_reply;
-            int ret = send_socket_command(argc, argv, sock_reply);
+            i32 ret = send_socket_command(argc, argv, sock_reply);
             if (!sock_reply.empty())
                 fmt::print("{}\n", sock_reply);
             std::exit(ret);

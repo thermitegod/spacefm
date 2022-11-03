@@ -52,17 +52,16 @@ static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 
 // MOD drag n drop...
 static void on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context,
-                                                int x, int y, GtkSelectionData* sel_data,
-                                                unsigned int info, unsigned int time,
-                                                void* user_data);
-static bool on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, int x,
-                                         int y, unsigned int time, PtkFileBrowser* file_browser);
+                                                i32 x, i32 y, GtkSelectionData* sel_data, u32 info,
+                                                u32 time, void* user_data);
+static bool on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x,
+                                         i32 y, u32 time, PtkFileBrowser* file_browser);
 
-static bool on_dir_tree_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context,
-                                        unsigned int time, PtkFileBrowser* file_browser);
+static bool on_dir_tree_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, u32 time,
+                                        PtkFileBrowser* file_browser);
 
-static bool on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, int x,
-                                       int y, unsigned int time, PtkFileBrowser* file_browser);
+static bool on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x,
+                                       i32 y, u32 time, PtkFileBrowser* file_browser);
 
 #define GDK_ACTION_ALL                                                 \
     (GdkDragAction::GDK_ACTION_MOVE | GdkDragAction::GDK_ACTION_COPY | \
@@ -458,7 +457,7 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrows
     }
     else if (evt->type == GdkEventType::GDK_2BUTTON_PRESS && evt->button == 1)
     {
-        // double click - expand/collapse
+        // f64 click - expand/collapse
         if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
                                           evt->x,
                                           evt->y,
@@ -488,7 +487,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* br
     if (!gtk_tree_selection_get_selected(select, &model, &iter))
         return false;
 
-    int keymod =
+    i32 keymod =
         (evt->state & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
                        GdkModifierType::GDK_MOD1_MASK | GdkModifierType::GDK_SUPER_MASK |
                        GdkModifierType::GDK_HYPER_MASK | GdkModifierType::GDK_META_MASK));
@@ -556,7 +555,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* br
 
 // MOD drag n drop
 static char*
-dir_tree_view_get_drop_dir(GtkWidget* view, int x, int y)
+dir_tree_view_get_drop_dir(GtkWidget* view, i32 x, i32 y)
 {
     GtkTreePath* tree_path = nullptr;
     GtkTreeIter it;
@@ -595,9 +594,8 @@ dir_tree_view_get_drop_dir(GtkWidget* view, int x, int y)
 }
 
 static void
-on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context, int x, int y,
-                                    GtkSelectionData* sel_data, unsigned int info,
-                                    unsigned int time,
+on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
+                                    GtkSelectionData* sel_data, u32 info, u32 time,
                                     void* user_data) // MOD added
 {
     (void)info;
@@ -727,8 +725,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
 }
 
 static bool
-on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, int x, int y,
-                           unsigned int time,
+on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y, u32 time,
                            PtkFileBrowser* file_browser) // MOD added
 {
     (void)x;
@@ -744,8 +741,8 @@ on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, int 
 }
 
 static bool
-on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, int x, int y,
-                             unsigned int time,
+on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
+                             u32 time,
                              PtkFileBrowser* file_browser) // MOD added
 {
     (void)x;
@@ -776,7 +773,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, in
         /* Several different actions are available. We have to figure out a good default action. */
         else
         {
-            int drag_action = xset_get_int(XSetName::DRAG_ACTION, XSetVar::X);
+            i32 drag_action = xset_get_int(XSetName::DRAG_ACTION, XSetVar::X);
             if (drag_action == 1)
                 suggested_action = GdkDragAction::GDK_ACTION_COPY;
             else if (drag_action == 2)
@@ -814,7 +811,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, in
             GdkDragAction suggested_action;
             GdkDragAction action;
 
-            std::uint32_t start_time;
+            u32 start_time;
 
             GdkDevice* device;
 
@@ -822,7 +819,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, in
              * different versions of GTK3 which causes the crash. It appears they
              * added/removed some variables from that struct.
              * https://github.com/IgnorantGuru/spacefm/issues/670 */
-            unsigned int drop_done : 1; /* Whether gdk_drag_drop_done() was performed */
+            u32 drop_done : 1; /* Whether gdk_drag_drop_done() was performed */
         };
         ((struct _GdkDragContext*)drag_context)->suggested_action = suggested_action;
         gdk_drag_status(drag_context, suggested_action, gtk_get_current_event_time());
@@ -831,7 +828,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, in
 }
 
 static bool
-on_dir_tree_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, unsigned int time,
+on_dir_tree_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, u32 time,
                             PtkFileBrowser* file_browser)
 {
     (void)widget;

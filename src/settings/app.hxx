@@ -18,7 +18,7 @@
 #include <string>
 #include <string_view>
 
-#include <cstdint>
+#include <ztd/ztd.hxx>
 
 struct AppSettings
 {
@@ -29,17 +29,17 @@ struct AppSettings
     bool get_show_thumbnail() const noexcept;
     void set_show_thumbnail(bool val) noexcept;
 
-    std::uint64_t get_max_thumb_size() const noexcept;
-    void set_max_thumb_size(std::uint64_t val) noexcept;
+    u64 get_max_thumb_size() const noexcept;
+    void set_max_thumb_size(u64 val) noexcept;
 
-    std::uint64_t get_icon_size_big() const noexcept;
-    void set_icon_size_big(std::uint64_t val) noexcept;
+    u64 get_icon_size_big() const noexcept;
+    void set_icon_size_big(u64 val) noexcept;
 
-    std::uint64_t get_icon_size_small() const noexcept;
-    void set_icon_size_small(std::uint64_t val) noexcept;
+    u64 get_icon_size_small() const noexcept;
+    void set_icon_size_small(u64 val) noexcept;
 
-    std::uint64_t get_icon_size_tool() const noexcept;
-    void set_icon_size_tool(std::uint64_t val) noexcept;
+    u64 get_icon_size_tool() const noexcept;
+    void set_icon_size_tool(u64 val) noexcept;
 
     bool get_single_click() const noexcept;
     void set_single_click(bool val) noexcept;
@@ -65,17 +65,17 @@ struct AppSettings
     const std::string& get_date_format() const noexcept;
     void set_date_format(std::string_view val) noexcept;
 
-    std::uint64_t get_sort_order() const noexcept;
-    void set_sort_order(std::uint64_t val) noexcept;
+    u64 get_sort_order() const noexcept;
+    void set_sort_order(u64 val) noexcept;
 
-    std::uint64_t get_sort_type() const noexcept;
-    void set_sort_type(std::uint64_t val) noexcept;
+    u64 get_sort_type() const noexcept;
+    void set_sort_type(u64 val) noexcept;
 
-    std::uint64_t get_width() const noexcept;
-    void set_width(std::uint64_t val) noexcept;
+    u64 get_width() const noexcept;
+    void set_width(u64 val) noexcept;
 
-    std::uint64_t get_height() const noexcept;
-    void set_height(std::uint64_t val) noexcept;
+    u64 get_height() const noexcept;
+    void set_height(u64 val) noexcept;
 
     bool get_maximized() const noexcept;
     void set_maximized(bool val) noexcept;
@@ -92,11 +92,11 @@ struct AppSettings
   private:
     // General Settings
     bool show_thumbnail{false};
-    std::uint64_t max_thumb_size{8 << 20};
+    u64 max_thumb_size{8 << 20};
 
-    std::uint64_t icon_size_big{48};
-    std::uint64_t icon_size_small{22};
-    std::uint64_t icon_size_tool{22};
+    u64 icon_size_big{48};
+    u64 icon_size_small{22};
+    u64 icon_size_tool{22};
 
     bool single_click{false};
     bool single_hover{false};
@@ -113,13 +113,13 @@ struct AppSettings
     std::string date_format_custom{""};
 
     // Sort by name, size, time
-    std::uint64_t sort_order{0};
+    u64 sort_order{0};
     // ascending, descending
-    std::uint64_t sort_type{0};
+    u64 sort_type{0};
 
     // Window State
-    std::uint64_t width{640};
-    std::uint64_t height{480};
+    u64 width{640};
+    u64 height{480};
     bool maximized{false};
 
     // Interface

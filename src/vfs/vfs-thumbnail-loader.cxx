@@ -164,7 +164,7 @@ thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
         }
 
         bool need_update = false;
-        for (int i = 0; i < 2; ++i)
+        for (i32 i = 0; i < 2; ++i)
         {
             if (req->n_requests[i] == 0)
                 continue;
@@ -319,7 +319,7 @@ vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
 }
 
 static GdkPixbuf*
-vfs_thumbnail_load(std::string_view file_path, std::string_view uri, int size, std::time_t mtime)
+vfs_thumbnail_load(std::string_view file_path, std::string_view uri, i32 size, std::time_t mtime)
 {
     Glib::Checksum check = Glib::Checksum();
     const std::string file_hash = check.compute_checksum(Glib::Checksum::Type::MD5, uri.data());
@@ -344,8 +344,8 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view uri, int size, s
         return nullptr;
 
     // load existing thumbnail
-    int w;
-    int h;
+    i32 w;
+    i32 h;
     const char* thumb_mtime = nullptr;
     GdkPixbuf* thumbnail = nullptr;
     if (std::filesystem::is_regular_file(thumbnail_file))
@@ -416,7 +416,7 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view uri, int size, s
 }
 
 GdkPixbuf*
-vfs_thumbnail_load_for_uri(std::string_view uri, int size, std::time_t mtime)
+vfs_thumbnail_load_for_uri(std::string_view uri, i32 size, std::time_t mtime)
 {
     const std::string file = Glib::filename_from_uri(uri.data());
     GdkPixbuf* ret = vfs_thumbnail_load(file, uri, size, mtime);
@@ -424,7 +424,7 @@ vfs_thumbnail_load_for_uri(std::string_view uri, int size, std::time_t mtime)
 }
 
 GdkPixbuf*
-vfs_thumbnail_load_for_file(std::string_view file, int size, std::time_t mtime)
+vfs_thumbnail_load_for_file(std::string_view file, i32 size, std::time_t mtime)
 {
     const std::string uri = Glib::filename_to_uri(file.data());
     GdkPixbuf* ret = vfs_thumbnail_load(file, uri, size, mtime);

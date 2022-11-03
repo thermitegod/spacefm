@@ -85,10 +85,10 @@ struct PtkFileBrowser
 
     VFSDir* dir;
     GtkTreeModel* file_list;
-    int max_thumbnail;
-    int n_sel_files;
+    i32 max_thumbnail;
+    i32 n_sel_files;
     off_t sel_size;
-    unsigned int sel_change_idle;
+    u32 sel_change_idle;
 
     // path bar auto seek
     bool inhibit_focus;
@@ -110,8 +110,8 @@ struct PtkFileBrowser
     bool pending_drag_status : 1;
     dev_t drag_source_dev;
     ino_t drag_source_inode;
-    int drag_x;
-    int drag_y;
+    i32 drag_x;
+    i32 drag_y;
     bool pending_drag_status_tree : 1;
     dev_t drag_source_dev_tree;
     bool is_drag : 1;
@@ -123,7 +123,7 @@ struct PtkFileBrowser
     GtkWidget* folder_view;
     GtkWidget* folder_view_scroll;
     GtkCellRenderer* icon_render;
-    unsigned int single_click_timeout;
+    u32 single_click_timeout;
 
     // MOD
     panel_t mypanel;
@@ -317,7 +317,7 @@ struct PtkFileBrowserClass
     void (*before_chdir)(PtkFileBrowser* file_browser, const char* path);
     void (*begin_chdir)(PtkFileBrowser* file_browser);
     void (*after_chdir)(PtkFileBrowser* file_browser);
-    void (*open_item)(PtkFileBrowser* file_browser, const char* path, int action);
+    void (*open_item)(PtkFileBrowser* file_browser, const char* path, i32 action);
     void (*content_change)(PtkFileBrowser* file_browser);
     void (*sel_change)(PtkFileBrowser* file_browser);
     void (*pane_mode_change)(PtkFileBrowser* file_browser);
@@ -325,7 +325,7 @@ struct PtkFileBrowserClass
 
 GType ptk_file_browser_get_type();
 
-GtkWidget* ptk_file_browser_new(int curpanel, GtkWidget* notebook, GtkWidget* task_view,
+GtkWidget* ptk_file_browser_new(i32 curpanel, GtkWidget* notebook, GtkWidget* task_view,
                                 void* main_window);
 
 /*
@@ -340,10 +340,10 @@ bool ptk_file_browser_chdir(PtkFileBrowser* file_browser, std::string_view folde
  */
 const char* ptk_file_browser_get_cwd(PtkFileBrowser* file_browser);
 
-unsigned int ptk_file_browser_get_n_all_files(PtkFileBrowser* file_browser);
-unsigned int ptk_file_browser_get_n_visible_files(PtkFileBrowser* file_browser);
+u32 ptk_file_browser_get_n_all_files(PtkFileBrowser* file_browser);
+u32 ptk_file_browser_get_n_visible_files(PtkFileBrowser* file_browser);
 
-unsigned int ptk_file_browser_get_n_sel(PtkFileBrowser* file_browser, std::uint64_t* sel_size);
+u32 ptk_file_browser_get_n_sel(PtkFileBrowser* file_browser, u64* sel_size);
 
 void ptk_file_browser_go_back(GtkWidget* item, PtkFileBrowser* file_browser);
 
@@ -356,7 +356,7 @@ void ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_show_hidden_files(PtkFileBrowser* file_browser, bool show);
 
 void ptk_file_browser_set_single_click(PtkFileBrowser* file_browser, bool single_click);
-void ptk_file_browser_set_single_click_timeout(PtkFileBrowser* file_browser, unsigned int timeout);
+void ptk_file_browser_set_single_click_timeout(PtkFileBrowser* file_browser, u32 timeout);
 
 /* Sorting files */
 void ptk_file_browser_set_sort_order(PtkFileBrowser* file_browser, PtkFBSortOrder order);
@@ -386,7 +386,7 @@ void ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser,
                                             const std::vector<VFSFileInfo*>& sel_files,
                                             const char* cwd);
 
-void ptk_file_browser_file_properties(PtkFileBrowser* file_browser, int page);
+void ptk_file_browser_file_properties(PtkFileBrowser* file_browser, i32 page);
 
 void ptk_file_browser_view_as_icons(PtkFileBrowser* file_browser);
 void ptk_file_browser_view_as_compact_list(PtkFileBrowser* file_browser);
@@ -395,18 +395,18 @@ void ptk_file_browser_view_as_list(PtkFileBrowser* file_browser);
 void ptk_file_browser_hide_selected(PtkFileBrowser* file_browser,
                                     const std::vector<VFSFileInfo*>& sel_files, const char* cwd);
 
-void ptk_file_browser_show_thumbnails(PtkFileBrowser* file_browser, int max_file_size);
+void ptk_file_browser_show_thumbnails(PtkFileBrowser* file_browser, i32 max_file_size);
 
 // MOD
-int ptk_file_browser_no_access(const char* cwd, const char* smode);
+i32 ptk_file_browser_no_access(const char* cwd, const char* smode);
 void ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_go_home(GtkWidget* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_go_default(GtkWidget* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_new_tab(GtkMenuItem* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_new_tab_here(GtkMenuItem* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_set_default_folder(GtkWidget* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, int t);
-void ptk_file_browser_focus(GtkMenuItem* item, PtkFileBrowser* file_browser, int job2);
+void ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, i32 t);
+void ptk_file_browser_focus(GtkMenuItem* item, PtkFileBrowser* file_browser, i32 job2);
 void ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_browser);
 
 bool ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,

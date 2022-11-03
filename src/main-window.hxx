@@ -55,9 +55,9 @@ struct FMMainWindow
     GtkWidget* plug_menu;
     GtkWidget* notebook; // MOD changed use to current panel
     GtkWidget* panel[4];
-    int panel_slide_x[4];
-    int panel_slide_y[4];
-    int panel_slide_s[4];
+    i32 panel_slide_x[4];
+    i32 panel_slide_y[4];
+    i32 panel_slide_s[4];
     std::map<panel_t, MainWindowPanel> panel_context;
     bool panel_change;
     GtkWidget* panelbar;
@@ -76,7 +76,7 @@ struct FMMainWindow
     GtkAccelGroup* accel_group;
 
     GtkWindowGroup* wgroup;
-    unsigned int configure_evt_timer;
+    u32 configure_evt_timer;
     bool maximized;
     bool opened_maximized;
     bool fullscreen;
@@ -127,12 +127,12 @@ void main_window_refresh_all_tabs_matching(const char* path);
 void main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser);
 void main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf);
 void on_reorder(GtkWidget* item, GtkWidget* parent);
-char* main_window_get_tab_cwd(PtkFileBrowser* file_browser, int tab_num);
-char* main_window_get_panel_cwd(PtkFileBrowser* file_browser, int panel_num);
-void main_window_get_counts(PtkFileBrowser* file_browser, int* panel_count, int* tab_count,
-                            int* tab_num);
-bool main_window_panel_is_visible(PtkFileBrowser* file_browser, int panel);
-void main_window_open_in_panel(PtkFileBrowser* file_browser, int panel_num, const char* file_path);
+char* main_window_get_tab_cwd(PtkFileBrowser* file_browser, tab_t tab_num);
+char* main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num);
+const std::array<i64, 3> main_window_get_counts(PtkFileBrowser* file_browser);
+bool main_window_panel_is_visible(PtkFileBrowser* file_browser, panel_t panel);
+void main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
+                               const char* file_path);
 void main_window_rubberband_all();
 void main_window_refresh_all();
 void main_context_fill(PtkFileBrowser* file_browser, XSetContext* c);
@@ -141,6 +141,6 @@ void focus_panel(GtkMenuItem* item, void* mw, panel_t p);
 void main_window_open_path_in_current_tab(FMMainWindow* main_window, const char* path);
 void main_window_open_network(FMMainWindow* main_window, const char* path, bool new_tab);
 char main_window_socket_command(char* argv[], std::string& reply);
-bool main_window_event(void* mw, xset_t preset, XSetName event, int panel, int tab,
-                       const char* focus, int keyval, int button, int state, bool visible);
+bool main_window_event(void* mw, xset_t preset, XSetName event, i64 panel, i64 tab,
+                       const char* focus, i32 keyval, i32 button, i32 state, bool visible);
 void fm_main_window_store_positions(FMMainWindow* main_window);

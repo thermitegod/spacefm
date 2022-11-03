@@ -77,13 +77,13 @@ struct VFSVolume
     ~VFSVolume();
 
     dev_t devnum;
-    int device_type;
+    i32 device_type;
     char* device_file;
     char* udi;
     char* disp_name;
     std::string icon;
     char* mount_point;
-    std::uint64_t size;
+    u64 size;
     std::string label;
     char* fs_type;
 
@@ -133,7 +133,7 @@ void vfs_volume_set_info(VFSVolume* volume);
 char* vfs_volume_device_mount_cmd(VFSVolume* vol, const char* options, bool* run_in_terminal);
 char* vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal);
 const std::string vfs_volume_device_info(VFSVolume* vol);
-char* vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options,
+char* vfs_volume_handler_cmd(i32 mode, i32 action, VFSVolume* vol, const char* options,
                              netmount_t* netmount, bool* run_in_terminal, char** mount_point);
 
 SplitNetworkURL split_network_url(const char* url, netmount_t** netmount);

@@ -60,9 +60,9 @@
  */
 static void get_total_size_of_dir(VFSFileTask* task, std::string_view path, off_t* size,
                                   struct stat* have_stat);
-static void vfs_file_task_error(VFSFileTask* task, int errnox, std::string_view action,
+static void vfs_file_task_error(VFSFileTask* task, i32 errnox, std::string_view action,
                                 std::string_view target);
-static void vfs_file_task_exec_error(VFSFileTask* task, int errnox, std::string_view action);
+static void vfs_file_task_exec_error(VFSFileTask* task, i32 errnox, std::string_view action);
 static void add_task_dev(VFSFileTask* task, dev_t dev);
 static bool should_abort(VFSFileTask* task);
 
@@ -158,7 +158,7 @@ vfs_file_task_get_unique_name(std::string_view dest_dir, std::string_view base_n
     else
         new_name = fmt::format("{}.{}", base_name, ext);
     std::string new_dest_file = Glib::build_filename(dest_dir.data(), new_name);
-    unsigned int n = 1;
+    u32 n = 1;
     while (n && lstat(new_dest_file.c_str(), &dest_stat) == 0)
     {
         if (ext.empty())
@@ -303,7 +303,7 @@ check_dest_in_src(VFSFileTask* task, std::string_view src_dir)
 {
     char real_src_path[PATH_MAX];
     char real_dest_path[PATH_MAX];
-    int len;
+    i32 len;
 
     if (!(!task->dest_dir.empty() && realpath(task->dest_dir.c_str(), real_dest_path)))
         return false;
@@ -531,8 +531,8 @@ vfs_file_task_do_copy(VFSFileTask* task, std::string_view src_file, std::string_
     else
     {
         char buffer[4096];
-        int rfd;
-        int wfd;
+        i32 rfd;
+        i32 wfd;
 
         if ((rfd = open(src_file.data(), O_RDONLY)) >= 0)
         {
@@ -572,7 +572,7 @@ vfs_file_task_do_copy(VFSFileTask* task, std::string_view src_file, std::string_
                 // if (task->avoid_changes)
                 //    emit_created(actual_dest_file);
                 struct utimbuf times;
-                ssize_t rsize;
+                isize rsize;
                 while ((rsize = read(rfd, buffer, sizeof(buffer))) > 0)
                 {
                     if (should_abort(task))
@@ -658,7 +658,7 @@ vfs_file_task_copy(VFSFileTask* task, std::string_view src_file)
     vfs_file_task_do_copy(task, src_file, dest_file);
 }
 
-static int
+static i32
 vfs_file_task_do_move(VFSFileTask* task, std::string_view src_file, std::string_view dest_path)
 {
     if (should_abort(task))
@@ -969,7 +969,7 @@ vfs_file_task_chown_chmod(VFSFileTask* task, std::string_view src_file)
     if (lstat(src_file.data(), &src_stat) == 0)
     {
         /* chown */
-        int result;
+        i32 result;
         if (!task->uid || !task->gid)
         {
             result = chown(src_file.data(), task->uid, task->gid);
@@ -987,7 +987,7 @@ vfs_file_task_chown_chmod(VFSFileTask* task, std::string_view src_file)
             std::filesystem::perms new_perms;
             std::filesystem::perms orig_perms = std::filesystem::status(src_file).permissions();
 
-            for (std::size_t i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
+            for (usize i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
             {
                 if (task->chmod_actions[i] == 2) /* Do not change */
                     continue;
@@ -1040,7 +1040,7 @@ vfs_file_task_get_cpids(Glib::Pid pid)
         return nullptr;
 
     std::string* standard_output = nullptr;
-    int exit_status;
+    i32 exit_status;
 
     const std::string command = fmt::format("/bin/ps h --ppid {} -o pid", pid);
     print_command(command);
@@ -1078,7 +1078,7 @@ vfs_file_task_get_cpids(Glib::Pid pid)
 }
 
 void
-vfs_file_task_kill_cpids(char* cpids, int signal)
+vfs_file_task_kill_cpids(char* cpids, i32 signal)
 {
     if (!signal || !cpids || cpids[0] == '\0')
         return;
@@ -1102,7 +1102,7 @@ vfs_file_task_kill_cpids(char* cpids, int signal)
 }
 
 static void
-cb_exec_child_cleanup(Glib::Pid pid, int status, char* tmp_file)
+cb_exec_child_cleanup(Glib::Pid pid, i32 status, char* tmp_file)
 { // delete tmp files after async task terminates
     // LOG_INFO("cb_exec_child_cleanup pid={} status={} file={}", pid, status, tmp_file );
     g_spawn_close_pid(pid);
@@ -1115,7 +1115,7 @@ cb_exec_child_cleanup(Glib::Pid pid, int status, char* tmp_file)
 }
 
 static void
-cb_exec_child_watch(Glib::Pid pid, int status, VFSFileTask* task)
+cb_exec_child_watch(Glib::Pid pid, i32 status, VFSFileTask* task)
 {
     bool bad_status = false;
     g_spawn_close_pid(pid);
@@ -1175,11 +1175,11 @@ cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, VFSFileTask* task)
 
     if ( !( cond & G_IO_NVAL ) )
     {
-        int fd = g_io_channel_unix_get_fd( channel );
+        i32 fd = g_io_channel_unix_get_fd( channel );
         LOG_INFO("    fd={}", fd);
         if ( fcntl(fd, F_GETFL) != -1 || errno != EBADF )
         {
-            int flags = g_io_channel_get_flags( channel );
+            i32 flags = g_io_channel_get_flags( channel );
             if ( flags & G_IO_FLAG_IS_READABLE )
                 LOG_INFO( "    G_IO_FLAG_IS_READABLE");
         }
@@ -1225,7 +1225,7 @@ cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, VFSFileTask* task)
     }
 
     // GError *error = nullptr;
-    unsigned long size;
+    u64 size;
     char buf[2048];
     if (g_io_channel_read_chars(channel, buf, sizeof(buf), &size, nullptr) == G_IO_STATUS_NORMAL &&
         size > 0)
@@ -1255,7 +1255,7 @@ get_xxhash(std::string_view path)
 }
 
 static void
-vfs_file_task_exec_error(VFSFileTask* task, int errnox, std::string_view action)
+vfs_file_task_exec_error(VFSFileTask* task, i32 errnox, std::string_view action)
 {
     if (errnox)
     {
@@ -1500,7 +1500,7 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
     std::vector<std::string> argv;
 
     Glib::Pid pid;
-    int out, err;
+    i32 out, err;
     std::string use_su;
     bool single_arg = false;
     std::string auth;
@@ -1719,7 +1719,7 @@ static void*
 vfs_file_task_thread(VFSFileTask* task)
 {
     struct stat file_stat;
-    unsigned int size_timeout = 0;
+    u32 size_timeout = 0;
     dev_t dest_dev = 0;
     off_t size;
     if (task->type < VFSFileTaskType::VFS_FILE_TASK_MOVE ||
@@ -2144,7 +2144,7 @@ get_total_size_of_dir(VFSFileTask* task, std::string_view path, off_t* size, str
     // remember device for smart queue
     if (!task->devs)
         add_task_dev(task, file_stat.st_dev);
-    else if ((unsigned int)file_stat.st_dev != GPOINTER_TO_UINT(task->devs->data))
+    else if ((u32)file_stat.st_dev != GPOINTER_TO_UINT(task->devs->data))
         add_task_dev(task, file_stat.st_dev);
 
     // Do not follow symlinks
@@ -2187,7 +2187,7 @@ vfs_file_task_set_state_callback(VFSFileTask* task, VFSFileTaskStateCallback cb,
 }
 
 static void
-vfs_file_task_error(VFSFileTask* task, int errnox, std::string_view action, std::string_view target)
+vfs_file_task_error(VFSFileTask* task, i32 errnox, std::string_view action, std::string_view target)
 {
     task->error = errnox;
     const std::string errno_msg = std::strerror(errnox);

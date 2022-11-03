@@ -24,7 +24,7 @@
 
 void print_command(std::string_view command) noexcept;
 void print_task_command(const char* ptask, std::string_view cmd) noexcept;
-void print_task_command_spawn(const std::vector<std::string>& argv, int pid) noexcept;
+void print_task_command_spawn(const std::vector<std::string>& argv, i32 pid) noexcept;
 
 const std::string randhex8() noexcept;
 

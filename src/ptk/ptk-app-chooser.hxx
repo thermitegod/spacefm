@@ -41,7 +41,6 @@ char* ptk_choose_app_for_mime_type(GtkWindow* parent, VFSMimeType* mime_type, bo
 // bool app_chooser_dialog_get_set_default(GtkWidget* dlg);
 void ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type);
 
-void on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, unsigned int page_num,
-                             void* user_data);
+void on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, u32 page_num, void* user_data);
 
 void on_browse_btn_clicked(GtkButton* button, void* user_data);

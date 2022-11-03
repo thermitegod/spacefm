@@ -41,10 +41,10 @@
 static std::map<const char*, VFSMimeType*> mime_map;
 std::mutex mime_map_lock;
 
-static unsigned int reload_callback_id = 0;
+static u32 reload_callback_id = 0;
 static GList* reload_cb = nullptr;
 
-static int big_icon_size = 32, small_icon_size = 16;
+static i32 big_icon_size = 32, small_icon_size = 16;
 
 static std::vector<vfs::file_monitor_t> mime_caches_monitors;
 
@@ -221,7 +221,7 @@ vfs_mime_type_unref(VFSMimeType* mime_type)
 GdkPixbuf*
 vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
 {
-    int size;
+    i32 size;
 
     if (big)
     {
@@ -368,7 +368,7 @@ free_cached_icons(const char* key, VFSMimeType* mime_type, bool big_icons)
 }
 
 void
-vfs_mime_type_set_icon_size_big(int size)
+vfs_mime_type_set_icon_size_big(i32 size)
 {
     mime_map_lock.lock();
     if (size != big_icon_size)
@@ -384,7 +384,7 @@ vfs_mime_type_set_icon_size_big(int size)
 }
 
 void
-vfs_mime_type_set_icon_size_small(int size)
+vfs_mime_type_set_icon_size_small(i32 size)
 {
     mime_map_lock.lock();
     if (size != small_icon_size)
@@ -399,13 +399,13 @@ vfs_mime_type_set_icon_size_small(int size)
     mime_map_lock.unlock();
 }
 
-int
+i32
 vfs_mime_type_get_icon_size_big()
 {
     return big_icon_size;
 }
 
-int
+i32
 vfs_mime_type_get_icon_size_small()
 {
     return small_icon_size;
@@ -542,7 +542,7 @@ VFSMimeType::ref_dec()
     --n_ref;
 }
 
-unsigned int
+u32
 VFSMimeType::ref_count()
 {
     return n_ref;

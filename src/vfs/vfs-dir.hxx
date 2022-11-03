@@ -69,7 +69,7 @@ struct VFSDir
     std::vector<VFSFileInfo*> changed_files;
     std::vector<std::string> created_files;
 
-    long xhidden_count;
+    i64 xhidden_count;
 
     // Signals
   public:

@@ -57,7 +57,7 @@ struct VFSAsyncTask
     void* ret_val;
 
     GThread* thread;
-    unsigned int idle_id;
+    u32 idle_id;
 
     std::mutex mutex;
 

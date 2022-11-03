@@ -42,7 +42,7 @@ action_dialog(GtkWindow* parent_win, std::string_view title, std::string_view me
     gtk_window_set_title(GTK_WINDOW(dlg), title.data());
     // xset_set_window_icon(GTK_WINDOW(dlg));
 
-    const int ret = gtk_dialog_run(GTK_DIALOG(dlg));
+    const i32 ret = gtk_dialog_run(GTK_DIALOG(dlg));
     gtk_widget_destroy(dlg);
 
     if (ret != GtkResponseType::GTK_RESPONSE_YES)

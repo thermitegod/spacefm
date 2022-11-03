@@ -370,7 +370,7 @@ get_element_next(char** s)
 }
 
 static bool
-get_rule_next(char** s, int* sub, int* comp, char** value)
+get_rule_next(char** s, i32* sub, i32* comp, char** value)
 {
     char* vs;
     vs = get_element_next(s);
@@ -378,28 +378,28 @@ get_rule_next(char** s, int* sub, int* comp, char** value)
         return false;
     *sub = std::stol(vs);
     free(vs);
-    if (*sub < 0 || *sub >= (int)context_subs.size())
+    if (*sub < 0 || *sub >= (i32)context_subs.size())
         return false;
     vs = get_element_next(s);
     *comp = std::stol(vs);
     free(vs);
-    if (*comp < 0 || *comp >= (int)context_comps.size())
+    if (*comp < 0 || *comp >= (i32)context_comps.size())
         return false;
     if (!(*value = get_element_next(s)))
         *value = ztd::strdup("");
     return true;
 }
 
-int
+i32
 xset_context_test(XSetContext* context, char* rules, bool def_disable)
 {
     // assumes valid xset_context and rules != nullptr and no global ignore
-    int i;
-    int sep_type;
-    int sub;
-    int comp;
+    i32 i;
+    i32 sep_type;
+    i32 sub;
+    i32 comp;
     char* value;
-    int match, action;
+    i32 match, action;
     char* s;
     char* eleval;
     char* sep;
@@ -602,7 +602,7 @@ context_build(ContextData* ctxt)
 {
     GtkTreeIter it;
     char* value;
-    int sub, comp;
+    i32 sub, comp;
     std::string new_context;
 
     GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(ctxt->view));
@@ -646,7 +646,7 @@ enable_context(ContextData* ctxt)
         std::string text = "Current: Show";
         if (rules)
         {
-            int action = xset_context_test(ctxt->context, rules, false);
+            i32 action = xset_context_test(ctxt->context, rules, false);
             if (action == ItemPropContextState::CONTEXT_HIDE)
                 text = "Current: Hide";
             else if (action == ItemPropContextState::CONTEXT_DISABLE)
@@ -668,7 +668,7 @@ on_context_action_changed(GtkComboBox* box, ContextData* ctxt)
 }
 
 static char*
-context_display(int sub, int comp, const char* value)
+context_display(i32 sub, i32 comp, const char* value)
 {
     std::string disp;
     if (value[0] == '\0' || value[0] == ' ' || ztd::endswith(value, " "))
@@ -687,8 +687,8 @@ on_context_button_press(GtkWidget* widget, ContextData* ctxt)
 
     if (widget == GTK_WIDGET(ctxt->btn_add) || widget == GTK_WIDGET(ctxt->btn_apply))
     {
-        int sub = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_sub));
-        int comp = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_comp));
+        i32 sub = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_sub));
+        i32 comp = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_comp));
         if (sub < 0 || comp < 0)
             return;
         model = gtk_tree_view_get_model(GTK_TREE_VIEW(ctxt->view));
@@ -743,7 +743,7 @@ on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
     while (gtk_tree_model_get_iter_first(model, &it))
         gtk_list_store_remove(GTK_LIST_STORE(model), &it);
 
-    int sub = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_sub));
+    i32 sub = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_sub));
     if (sub < 0)
         return;
     char* elements = ztd::strdup(context_sub_lists[sub].data());
@@ -773,7 +773,7 @@ on_context_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewC
     (void)col;
     GtkTreeIter it;
     char* value;
-    int sub, comp;
+    i32 sub, comp;
 
     GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(ctxt->view));
     if (!gtk_tree_model_get_iter(model, &it, tree_path))
@@ -809,8 +809,8 @@ on_current_value_button_press(GtkWidget* widget, GdkEventButton* event, ContextD
 }
 
 static void
-on_context_entry_insert(GtkEntryBuffer* buf, unsigned int position, char* chars,
-                        unsigned int n_chars, void* user_data)
+on_context_entry_insert(GtkEntryBuffer* buf, u32 position, char* chars, u32 n_chars,
+                        void* user_data)
 { // remove linefeeds from pasted text
     (void)position;
     (void)chars;
@@ -1143,7 +1143,7 @@ static void
 on_open_browser(GtkComboBox* box, ContextData* ctxt)
 {
     std::string folder;
-    const int job = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
+    const i32 job = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
     gtk_combo_box_set_active(GTK_COMBO_BOX(box), -1);
     if (job == 0)
     {
@@ -1217,7 +1217,7 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
 {
     xset_t rset = ctxt->set;
     xset_t mset = xset_get_plugin_mirror(rset);
-    int job = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
+    i32 job = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
     switch (job)
     {
         case ItemPropItemType::ITEM_TYPE_BOOKMARK:
@@ -1330,7 +1330,7 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
 static void
 on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
 {
-    int job = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->item_type));
+    i32 job = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->item_type));
     if (job == ItemPropItemType::ITEM_TYPE_BOOKMARK)
     {
         // Bookmark Browse
@@ -1409,7 +1409,7 @@ replace_item_props(ContextData* ctxt)
     {
         // custom bookmark, app, or command
         bool is_app = false;
-        int item_type = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->item_type));
+        i32 item_type = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->item_type));
 
         switch (item_type)
         {
@@ -1576,7 +1576,7 @@ delayed_focus(GtkWidget* widget)
 }
 
 static void
-on_prop_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, unsigned int page_num,
+on_prop_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, u32 page_num,
                              ContextData* ctxt)
 {
     (void)notebook;
@@ -1634,7 +1634,7 @@ on_target_keypress(GtkWidget* widget, GdkEventKey* event, ContextData* ctxt)
 }
 
 void
-xset_item_prop_dlg(XSetContext* context, xset_t set, int page)
+xset_item_prop_dlg(XSetContext* context, xset_t set, i32 page)
 {
     GtkTreeViewColumn* col;
     GtkCellRenderer* renderer;
@@ -1658,8 +1658,8 @@ xset_item_prop_dlg(XSetContext* context, xset_t set, int page)
     xset_set_window_icon(GTK_WINDOW(ctxt->dlg));
     gtk_window_set_role(GTK_WINDOW(ctxt->dlg), "context_dialog");
 
-    int width = xset_get_int(XSetName::CONTEXT_DLG, XSetVar::X);
-    int height = xset_get_int(XSetName::CONTEXT_DLG, XSetVar::Y);
+    i32 width = xset_get_int(XSetName::CONTEXT_DLG, XSetVar::X);
+    i32 height = xset_get_int(XSetName::CONTEXT_DLG, XSetVar::Y);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(ctxt->dlg), width, height);
     else
@@ -1693,7 +1693,7 @@ xset_item_prop_dlg(XSetContext* context, xset_t set, int page)
     gtk_container_set_border_width(GTK_CONTAINER(grid), 0);
     gtk_grid_set_row_spacing(grid, 6);
     gtk_grid_set_column_spacing(grid, 8);
-    int row = 0;
+    i32 row = 0;
 
     GtkWidget* label = gtk_label_new_with_mnemonic("Type:");
     gtk_widget_set_halign(GTK_WIDGET(label), GtkAlign::GTK_ALIGN_START);
@@ -2020,7 +2020,7 @@ xset_item_prop_dlg(XSetContext* context, xset_t set, int page)
     char* match = get_element_next(&elements);
     if (match && action)
     {
-        int i = std::stol(match);
+        i32 i = std::stol(match);
         if (i < 0 || i > 3)
             i = 0;
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_match), i);
@@ -2041,7 +2041,7 @@ xset_item_prop_dlg(XSetContext* context, xset_t set, int page)
             free(action);
     }
     // set rules
-    int sub, comp;
+    i32 sub, comp;
     char* value;
     char* disp;
     GtkTreeIter it;
@@ -2271,7 +2271,7 @@ xset_item_prop_dlg(XSetContext* context, xset_t set, int page)
 
     // load values  ========================================================
     // type
-    int item_type = -1;
+    i32 item_type = -1;
 
     std::string item_type_str;
     if (set->tool > XSetTool::CUSTOM)
@@ -2443,7 +2443,7 @@ xset_item_prop_dlg(XSetContext* context, xset_t set, int page)
     else
         gtk_widget_grab_focus(ctxt->set->plugin ? ctxt->item_icon : ctxt->item_name);
 
-    int response;
+    i32 response;
     while ((response = gtk_dialog_run(GTK_DIALOG(ctxt->dlg))))
     {
         bool exit_loop = false;

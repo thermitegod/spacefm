@@ -47,7 +47,7 @@ static void query_overwrite(PtkFileTask* ptask);
 
 static void ptk_file_task_update(PtkFileTask* ptask);
 static bool ptk_file_task_add_main(PtkFileTask* ptask);
-static void on_progress_dlg_response(GtkDialog* dlg, int response, PtkFileTask* ptask);
+static void on_progress_dlg_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask);
 static void save_progress_dialog_size(PtkFileTask* ptask);
 
 PtkFileTask::PtkFileTask(VFSFileTaskType type, const std::vector<std::string>& src_files,
@@ -485,13 +485,13 @@ set_button_states(PtkFileTask* ptask)
 }
 
 void
-ptk_file_task_pause(PtkFileTask* ptask, int state)
+ptk_file_task_pause(PtkFileTask* ptask, i32 state)
 {
     if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
         // exec task
         // ptask->keep_dlg = true;
-        int sig;
+        i32 sig;
         if (state == VFSFileTaskState::VFS_FILE_TASK_PAUSE ||
             (ptask->task->state_pause == VFSFileTaskState::VFS_FILE_TASK_RUNNING &&
              state == VFSFileTaskState::VFS_FILE_TASK_QUEUE))
@@ -552,7 +552,7 @@ on_progress_dlg_delete_event(GtkWidget* widget, GdkEvent* event, PtkFileTask* pt
 }
 
 static void
-on_progress_dlg_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
+on_progress_dlg_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
 {
     (void)dlg;
     save_progress_dialog_size(ptask);
@@ -677,7 +677,7 @@ set_progress_icon(PtkFileTask* ptask)
 static void
 on_overwrite_combo_changed(GtkComboBox* box, PtkFileTask* ptask)
 {
-    int overwrite_mode = gtk_combo_box_get_active(box);
+    i32 overwrite_mode = gtk_combo_box_get_active(box);
     if (overwrite_mode < 0)
         overwrite_mode = 0;
     vfs_file_task_set_overwrite_mode(ptask->task, (VFSFileTaskOverwriteMode)overwrite_mode);
@@ -686,7 +686,7 @@ on_overwrite_combo_changed(GtkComboBox* box, PtkFileTask* ptask)
 static void
 on_error_combo_changed(GtkComboBox* box, PtkFileTask* ptask)
 {
-    int error_mode = gtk_combo_box_get_active(box);
+    i32 error_mode = gtk_combo_box_get_active(box);
     if (error_mode < 0)
         error_mode = 0;
     ptask->err_mode = PTKFileTaskPtaskError(error_mode);
@@ -760,7 +760,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     gtk_container_set_border_width(GTK_CONTAINER(grid), 5);
     gtk_grid_set_row_spacing(grid, 6);
     gtk_grid_set_column_spacing(grid, 4);
-    int row = 0;
+    i32 row = 0;
 
     /* Copy/Move/Link: */
     GtkLabel* label = GTK_LABEL(gtk_label_new(actions.at(task->type).data()));
@@ -956,7 +956,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
                            true,
                            5);
 
-    int win_width, win_height;
+    i32 win_width, win_height;
     if (task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
         win_width = xset_get_int(XSetName::TASK_POP_TOP, XSetVar::S);
@@ -1160,7 +1160,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         {
             if (task->percent > 100)
                 task->percent = 100;
-            gtk_progress_bar_set_fraction(ptask->progress_bar, ((double)task->percent) / 100);
+            gtk_progress_bar_set_fraction(ptask->progress_bar, ((f64)task->percent) / 100);
             g_snprintf(percent_str, 16, "%d %%", task->percent);
             gtk_progress_bar_set_text(ptask->progress_bar, percent_str);
         }
@@ -1379,12 +1379,12 @@ ptk_file_task_update(PtkFileTask* ptask)
 
     VFSFileTask* task = ptask->task;
     off_t cur_speed;
-    double timer_elapsed = task->timer.elapsed();
+    f64 timer_elapsed = task->timer.elapsed();
 
     if (task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
     {
         // test for zombie process
-        int status = 0;
+        i32 status = 0;
         if (!ptask->complete && task->exec_pid && waitpid(task->exec_pid, &status, WNOHANG))
         {
             // process is no longer running (defunct zombie)
@@ -1422,7 +1422,7 @@ ptk_file_task_update(PtkFileTask* ptask)
         // cur speed
         if (task->state_pause == VFSFileTaskState::VFS_FILE_TASK_RUNNING)
         {
-            double since_last = timer_elapsed - task->last_elapsed;
+            f64 since_last = timer_elapsed - task->last_elapsed;
             if (since_last >= 2.0)
             {
                 cur_speed = (task->progress - task->last_progress) / since_last;
@@ -1438,11 +1438,11 @@ ptk_file_task_update(PtkFileTask* ptask)
                 cur_speed = 0;
         }
         // calc percent
-        int ipercent;
+        i32 ipercent;
         if (task->total_size)
         {
-            double dpercent = ((double)task->progress) / task->total_size;
-            ipercent = (int)(dpercent * 100);
+            f64 dpercent = ((f64)task->progress) / task->total_size;
+            ipercent = (i32)(dpercent * 100);
         }
         else
             ipercent = 50; // total_size calculation timed out
@@ -1451,19 +1451,19 @@ ptk_file_task_update(PtkFileTask* ptask)
     }
 
     // elapsed
-    unsigned int hours = timer_elapsed / 3600.0;
+    u32 hours = timer_elapsed / 3600.0;
     std::string elapsed;
     std::string elapsed2;
     if (hours != 0)
         elapsed = fmt::format("{}", hours);
-    unsigned int mins = (timer_elapsed - (hours * 3600)) / 60;
+    u32 mins = (timer_elapsed - (hours * 3600)) / 60;
     if (hours > 0)
         elapsed2 = fmt::format("{}:{:02d}", elapsed, mins);
     else if (mins > 0)
         elapsed2 = fmt::format("{}", mins);
     else
         elapsed2 = elapsed;
-    unsigned int secs = (timer_elapsed - (hours * 3600) - (mins * 60));
+    u32 secs = (timer_elapsed - (hours * 3600) - (mins * 60));
     const std::string elapsed3 = fmt::format("{}:{:02d}", elapsed2, secs);
     ptask->dsp_elapsed = elapsed3;
 
@@ -1813,7 +1813,7 @@ on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input)
 }
 
 static void
-query_overwrite_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
+query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
 {
     std::string file_name;
     char* str;
@@ -1894,7 +1894,7 @@ query_overwrite_response(GtkDialog* dlg, int response, PtkFileTask* ptask)
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
     if (allocation.width && allocation.height)
     {
-        int has_overwrite_btn =
+        i32 has_overwrite_btn =
             GPOINTER_TO_INT((void*)g_object_get_data(G_OBJECT(dlg), "has_overwrite_btn"));
         xset_set(XSetName::TASK_POPUPS,
                  has_overwrite_btn ? XSetVar::X : XSetVar::S,
@@ -1933,7 +1933,7 @@ on_query_button_press(GtkWidget* widget, PtkFileTask* ptask)
     GtkWidget* auto_button = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "auto_button"));
     if (!rename_button || !auto_button)
         return;
-    int response;
+    i32 response;
     if (widget == rename_button)
         response = RESPONSE_RENAME;
     else if (widget == auto_button)
@@ -2096,7 +2096,7 @@ query_overwrite(PtkFileTask* ptask)
     char* new_name =
         new_name_plain ? ztd::strdup(Glib::filename_display_name(new_name_plain)) : nullptr;
 
-    int pos = ext_disp ? g_utf8_strlen(base_name_disp, -1) - g_utf8_strlen(ext_disp, -1) - 1 : -1;
+    i32 pos = ext_disp ? g_utf8_strlen(base_name_disp, -1) - g_utf8_strlen(ext_disp, -1) - 1 : -1;
 
     free(base_name);
     free(ext_disp);
@@ -2125,7 +2125,7 @@ query_overwrite(PtkFileTask* ptask)
     gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     gtk_window_set_role(GTK_WINDOW(dlg), "overwrite_dialog");
 
-    int width, height;
+    i32 width, height;
     if (has_overwrite_btn)
     {
         width = xset_get_int(XSetName::TASK_POPUPS, XSetVar::X);

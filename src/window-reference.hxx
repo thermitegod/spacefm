@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <ztd/ztd.hxx>
+
 class WindowRef
 {
     static WindowRef* s_instance;
@@ -42,7 +44,7 @@ class WindowRef
     void set_daemon_mode(bool is_daemon);
 
   private:
-    unsigned int ref_count{0};
+    u32 ref_count{0};
     bool daemon_mode{false};
 };
 

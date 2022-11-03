@@ -65,8 +65,8 @@
 
 static bool on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data);
 static bool app_menu_keypress(GtkWidget* widget, GdkEventKey* event, PtkFileMenu* data);
-static void show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data,
-                          unsigned int button, std::time_t time);
+static void show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 button,
+                          std::time_t time);
 
 /* Signal handlers for popup menu */
 static void on_popup_open_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
@@ -132,7 +132,7 @@ void
 on_popup_list_large(GtkMenuItem* menuitem, PtkFileBrowser* browser)
 {
     (void)menuitem;
-    int p = browser->mypanel;
+    i32 p = browser->mypanel;
     FMMainWindow* main_window = FM_MAIN_WINDOW(browser->main_window);
     const MainWindowPanel mode = main_window->panel_context.at(p);
 
@@ -147,7 +147,7 @@ void
 on_popup_list_detailed(GtkMenuItem* menuitem, PtkFileBrowser* browser)
 {
     (void)menuitem;
-    int p = browser->mypanel;
+    i32 p = browser->mypanel;
 
     if (xset_get_b_panel(p, XSetPanel::LIST_DETAILED))
     {
@@ -168,7 +168,7 @@ void
 on_popup_list_icons(GtkMenuItem* menuitem, PtkFileBrowser* browser)
 {
     (void)menuitem;
-    int p = browser->mypanel;
+    i32 p = browser->mypanel;
 
     if (xset_get_b_panel(p, XSetPanel::LIST_ICONS))
     {
@@ -189,7 +189,7 @@ void
 on_popup_list_compact(GtkMenuItem* menuitem, PtkFileBrowser* browser)
 {
     (void)menuitem;
-    int p = browser->mypanel;
+    i32 p = browser->mypanel;
 
     if (xset_get_b_panel(p, XSetPanel::LIST_COMPACT))
     {
@@ -253,7 +253,7 @@ on_popup_select_pattern(GtkMenuItem* menuitem, PtkFileMenu* data)
 static void
 on_open_in_tab(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
-    int tab_num = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(menuitem), "tab_num"));
+    const tab_t tab_num = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(menuitem), "tab_num"));
     if (data->browser)
         ptk_file_browser_open_in_tab(data->browser, tab_num, data->file_path);
 }
@@ -262,7 +262,7 @@ static void
 on_open_in_panel(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    int panel_num = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(menuitem), "panel_num"));
+    const panel_t panel_num = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(menuitem), "panel_num"));
     if (data->browser)
         main_window_open_in_panel(data->browser, panel_num, data->file_path);
 }
@@ -293,11 +293,11 @@ on_popup_sort_extra(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, xset_t 
 }
 
 void
-on_popup_sortby(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, int order)
+on_popup_sortby(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, i32 order)
 {
-    int v;
+    i32 v;
 
-    int sort_order;
+    i32 sort_order;
     if (menuitem)
         sort_order = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(menuitem), "sortorder"));
     else
@@ -425,7 +425,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 
     if (!browser || !menu || !browser->file_list)
         return;
-    int p = browser->mypanel;
+    i32 p = browser->mypanel;
 
     FMMainWindow* main_window = FM_MAIN_WINDOW(browser->main_window);
     const MainWindowPanel mode = main_window->panel_context.at(p);
@@ -648,10 +648,10 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
 
     const char* app_name = nullptr;
     xset_t set_radio;
-    int icon_w;
-    int icon_h;
-    int no_write_access = 0;
-    int no_read_access = 0;
+    i32 icon_w;
+    i32 icon_h;
+    i32 no_write_access = 0;
+    i32 no_read_access = 0;
     xset_t set;
     xset_t set2;
     GtkMenuItem* item;
@@ -699,15 +699,12 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
     else
         is_clip = true;
 
-    int p = 0;
-    int tab_count = 0;
-    int tab_num = 0;
-    int panel_count = 0;
-    if (browser)
-    {
-        p = browser->mypanel;
-        main_window_get_counts(browser, &panel_count, &tab_count, &tab_num);
-    }
+    const i32 p = browser->mypanel;
+
+    const auto counts = main_window_get_counts(browser);
+    const panel_t panel_count = counts[0];
+    const tab_t tab_count = counts[1];
+    const tab_t tab_num = counts[2];
 
     XSetContext* context = xset_context_new();
 
@@ -1487,7 +1484,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
     if (!desktop.get_name())
         return;
 
-    int job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
+    i32 job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
     PtkFileMenu* data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
     if (!(data && data->info))
         return;
@@ -1776,7 +1773,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 static bool
 app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
 {
-    int job = -1;
+    i32 job = -1;
 
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(menu));
     if (!item)
@@ -1788,7 +1785,7 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
     // else if app menu, data will be set
     // PtkFileMenu* app_data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
 
-    unsigned int keymod = ptk_get_keymod(event->state);
+    u32 keymod = ptk_get_keymod(event->state);
 
     if (keymod == 0)
     {
@@ -1830,7 +1827,7 @@ on_app_menu_hide(GtkWidget* widget, GtkWidget* app_menu)
 }
 
 static GtkWidget*
-app_menu_additem(GtkWidget* menu, const char* label, const char* stock_icon, int job,
+app_menu_additem(GtkWidget* menu, const char* label, const char* stock_icon, i32 job,
                  GtkWidget* app_item, PtkFileMenu* data)
 {
     GtkWidget* item;
@@ -1852,8 +1849,7 @@ app_menu_additem(GtkWidget* menu, const char* label, const char* stock_icon, int
 }
 
 static void
-show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, unsigned int button,
-              std::time_t time)
+show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 button, std::time_t time)
 {
     (void)button;
     (void)time;
@@ -2088,7 +2084,7 @@ static bool
 on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data)
 {
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
-    unsigned int keymod = ptk_get_keymod(event->state);
+    u32 keymod = ptk_get_keymod(event->state);
 
     if (event->type == GdkEventType::GDK_BUTTON_RELEASE)
     {
@@ -2417,7 +2413,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
 }
 
 static void
-create_new_file(PtkFileMenu* data, int create_new)
+create_new_file(PtkFileMenu* data, i32 create_new)
 {
     if (!data->cwd)
         return;
@@ -2433,7 +2429,7 @@ create_new_file(PtkFileMenu* data, int create_new)
     if (!data->sel_files.empty())
         file = data->sel_files.front();
 
-    int result = ptk_rename_file(data->browser,
+    i32 result = ptk_rename_file(data->browser,
                                  data->cwd,
                                  file,
                                  nullptr,
@@ -2624,9 +2620,10 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     else if (browser)
     {
         // browser only
-        int i;
         if (ztd::startswith(set->name, "open_in_panel"))
         {
+            panel_t i;
+
             if (!strcmp(set->name, "open_in_panel_prev"))
                 i = panel_control_code_prev;
             else if (!strcmp(set->name, "open_in_panel_next"))
@@ -2637,8 +2634,12 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         }
         else if (ztd::startswith(set->name, "opentab_"))
         {
+            tab_t i;
+
             if (set->xset_name == XSetName::OPENTAB_NEW)
+            {
                 on_popup_open_in_new_tab_activate(nullptr, data);
+            }
             else
             {
                 if (set->xset_name == XSetName::OPENTAB_PREV)

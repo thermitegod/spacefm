@@ -116,7 +116,7 @@ remove_actions(std::string_view mime_type, std::vector<std::string>& actions)
         return;
     }
 
-    for (std::size_t r = 0; r < removed.size(); ++r)
+    for (usize r = 0; r < removed.size(); ++r)
     {
         // LOG_INFO("    {}", removed[r]);
         const std::string rem = removed.at(r);
@@ -152,7 +152,7 @@ get_actions(std::string_view dir, std::string_view type, std::vector<std::string
     };
 
     // LOG_INFO("get_actions( {}/, {} )", dir, type);
-    for (std::size_t n = 0; n < names.size(); ++n)
+    for (usize n = 0; n < names.size(); ++n)
     {
         const std::string path = Glib::build_filename(dir.data(), names.at(n).data());
         // LOG_INFO( "    {}", path);
@@ -182,7 +182,7 @@ get_actions(std::string_view dir, std::string_view type, std::vector<std::string
         }
 
         // mimeinfo.cache has only MIME Cache; others do not have it
-        for (int k = (n == 0 ? 0 : 2); k < (n == 0 ? 2 : 3); ++k)
+        for (i32 k = (n == 0 ? 0 : 2); k < (n == 0 ? 2 : 3); ++k)
         {
             // LOG_INFO("        {} [{}]", groups[k], k);
             bool is_removed;
@@ -197,14 +197,14 @@ get_actions(std::string_view dir, std::string_view type, std::vector<std::string
             {
                 continue;
             }
-            for (std::size_t i = 0; i < apps.size(); ++i)
+            for (usize i = 0; i < apps.size(); ++i)
             {
                 //  LOG_INFO("            {}", apps[i]);
                 //  check if removed
                 is_removed = false;
                 if (!removed.empty() && n > 0)
                 {
-                    for (std::size_t r = 0; r < removed.size(); ++r)
+                    for (usize r = 0; r < removed.size(); ++r)
                     {
                         if (ztd::same(removed[r].data(), apps[i].data()))
                         {
@@ -271,7 +271,7 @@ mime_type_get_actions(std::string_view mime_type)
         }
         else /* default app is in the list, move it to the first. */
         {
-            if (std::size_t index = ztd::index(actions, default_app) != 0)
+            if (usize index = ztd::index(actions, default_app) != 0)
             {
                 ztd::move(actions, index, 0);
             }
@@ -464,7 +464,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
     std::filesystem::create_directories(dir);
     std::filesystem::permissions(dir, std::filesystem::perms::owner_all);
     std::string path;
-    for (int i = 0;; ++i)
+    for (i32 i = 0;; ++i)
     {
         /* generate the basename */
         cust = ztd::replace(cust_template, replace_txt, std::to_string(i));
@@ -613,7 +613,7 @@ get_default_action(std::string_view dir, std::string_view type)
         "Added Associations",
     };
 
-    for (std::size_t n = 0; n < names.size(); ++n)
+    for (usize n = 0; n < names.size(); ++n)
     {
         const std::string path = Glib::build_filename(dir.data(), names.at(n).data());
         // LOG_INFO("    path = {}", path);
@@ -627,7 +627,7 @@ get_default_action(std::string_view dir, std::string_view type)
             return nullptr;
         }
 
-        for (std::size_t k = 0; k < groups.size(); ++k)
+        for (usize k = 0; k < groups.size(); ++k)
         {
             std::vector<Glib::ustring> apps;
             try
@@ -641,7 +641,7 @@ get_default_action(std::string_view dir, std::string_view type)
                 break;
             }
 
-            for (std::size_t i = 0; i < apps.size(); ++i)
+            for (usize i = 0; i < apps.size(); ++i)
             {
                 if (apps[i][0] != '\0')
                 {
@@ -714,7 +714,7 @@ mime_type_get_default_action(std::string_view mime_type)
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  */
 void
-mime_type_update_association(const char* type, const char* desktop_id, int action)
+mime_type_update_association(const char* type, const char* desktop_id, i32 action)
 {
     bool data_changed = false;
 
@@ -775,7 +775,7 @@ mime_type_update_association(const char* type, const char* desktop_id, int actio
         else // if (ztd::same(group, "Default Applications"))
             group_block = MimeTypeAction::MIME_TYPE_ACTION_REMOVE;
 
-        for (std::size_t i = 0; i < apps.size(); ++i)
+        for (usize i = 0; i < apps.size(); ++i)
         {
             if (apps[i][0] != '\0')
             {

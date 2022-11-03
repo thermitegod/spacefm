@@ -90,12 +90,12 @@ struct FilePropertiesDialogData
     GtkLabel* count_label;
     off_t total_size;
     off_t size_on_disk;
-    unsigned int total_count;
-    unsigned int total_count_dir;
+    u32 total_count;
+    u32 total_count_dir;
     bool cancel;
     bool done;
     GThread* calc_size_thread;
-    unsigned int update_label_timer;
+    u32 update_label_timer;
     GtkWidget* recurse;
 };
 
@@ -145,7 +145,7 @@ FilePropertiesDialogData::~FilePropertiesDialogData()
 
 #define FILE_PROPERTIES_DIALOG_DATA(obj) (static_cast<FilePropertiesDialogData*>(obj))
 
-static void on_dlg_response(GtkDialog* dialog, int response_id, void* user_data);
+static void on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data);
 
 /*
  * void get_total_size_of_dir( const char* path, off_t* size )
@@ -218,12 +218,12 @@ on_update_labels(FilePropertiesDialogData* data)
 
     size_str = fmt::format("{} ( {} bytes )",
                            vfs_file_size_to_string_format(data->total_size, true),
-                           (std::uint64_t)data->total_size);
+                           (u64)data->total_size);
     gtk_label_set_text(data->total_size_label, size_str.c_str());
 
     size_str = fmt::format("{} ( {} bytes )",
                            vfs_file_size_to_string_format(data->size_on_disk, true),
-                           (std::uint64_t)data->size_on_disk);
+                           (u64)data->size_on_disk);
     gtk_label_set_text(data->size_on_disk_label, size_str.c_str());
 
     std::string count;
@@ -284,7 +284,7 @@ static bool
 combo_sep(GtkTreeModel* model, GtkTreeIter* it, void* user_data)
 {
     (void)user_data;
-    for (int i = 2; i > 0; --i)
+    for (i32 i = 2; i > 0; --i)
     {
         char* tmp;
         gtk_tree_model_get(model, it, i, &tmp, -1);
@@ -361,14 +361,14 @@ on_combo_change(GtkComboBox* combo, void* user_data)
             }
             else
             {
-                int prev_sel;
+                i32 prev_sel;
                 prev_sel = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(combo), "prev_sel"));
                 gtk_combo_box_set_active(combo, prev_sel);
             }
         }
         else
         {
-            int prev_sel = gtk_combo_box_get_active(combo);
+            i32 prev_sel = gtk_combo_box_get_active(combo);
             g_object_set_data(G_OBJECT(combo), "prev_sel", GINT_TO_POINTER(prev_sel));
         }
     }
@@ -380,7 +380,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
 
 static GtkWidget*
 file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
-                        const std::vector<VFSFileInfo*>& sel_files, int page)
+                        const std::vector<VFSFileInfo*>& sel_files, i32 page)
 {
     GtkBuilder* builder = ptk_gtk_builder_new_from_file(PTK_DLG_FILE_PROPERTIES);
     GtkWidget* dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
@@ -408,8 +408,8 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     char* owner_group;
     char* tmp;
 
-    int width = xset_get_int(XSetName::APP_DLG, XSetVar::S);
-    int height = xset_get_int(XSetName::APP_DLG, XSetVar::Z);
+    i32 width = xset_get_int(XSetName::APP_DLG, XSetVar::S);
+    i32 height = xset_get_int(XSetName::APP_DLG, XSetVar::Z);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, -1);
 
@@ -435,7 +435,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     data->mtime = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "mtime")));
     data->atime = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "atime")));
 
-    for (std::size_t i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
+    for (usize i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
     {
         data->chmod_btns[i] = GTK_TOGGLE_BUTTON(
             GTK_WIDGET(gtk_builder_get_object(builder, chmod_names.at(i).data())));
@@ -565,7 +565,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
         data->orig_mtime = nullptr;
         data->orig_atime = nullptr;
 
-        for (std::size_t i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
+        for (usize i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
         {
             gtk_toggle_button_set_inconsistent(data->chmod_btns[i], true);
             data->chmod_states[i] = 2; /* Do not touch this bit */
@@ -605,7 +605,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
                        sizeof(buf),
                        "%s  ( %lu bytes )",
                        vfs_file_info_get_disp_size(file),
-                       (std::uint64_t)vfs_file_info_get_size(file));
+                       (u64)vfs_file_info_get_size(file));
             gtk_label_set_text(data->total_size_label, buf);
 
             const std::string size_str =
@@ -615,7 +615,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
                        sizeof(buf),
                        "%s  ( %lu bytes )",
                        size_str.c_str(),
-                       (std::uint64_t)vfs_file_info_get_blocks(file) * 512);
+                       (u64)vfs_file_info_get_blocks(file) * 512);
             gtk_label_set_text(data->size_on_disk_label, buf);
 
             gtk_label_set_text(data->count_label, "1 file");
@@ -640,7 +640,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
         data->group_name = ztd::strdup(tmp + 1);
         gtk_entry_set_text(GTK_ENTRY(data->group), data->group_name);
 
-        for (std::size_t i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
+        for (usize i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
         {
             if (data->chmod_states[i] != 2) /* allow to touch this bit */
             {
@@ -767,7 +767,7 @@ gid_from_name(const char* group_name)
 }
 
 static void
-on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
+on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
 {
     (void)user_data;
     uid_t uid;
@@ -777,8 +777,8 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
 
     gtk_widget_get_allocation(GTK_WIDGET(dialog), &allocation);
 
-    int width = allocation.width;
-    int height = allocation.height;
+    i32 width = allocation.width;
+    i32 height = allocation.height;
     if (width && height)
     {
         xset_set(XSetName::APP_DLG, XSetVar::S, std::to_string(width));
@@ -896,7 +896,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
                 }
             }
 
-            for (std::size_t i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
+            for (usize i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
             {
                 if (gtk_toggle_button_get_inconsistent(data->chmod_btns[i]))
                 {
@@ -960,7 +960,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
 
 void
 ptk_show_file_properties(GtkWindow* parent_win, const char* cwd,
-                         std::vector<VFSFileInfo*>& sel_files, int page)
+                         std::vector<VFSFileInfo*>& sel_files, i32 page)
 {
     GtkWidget* dlg;
 

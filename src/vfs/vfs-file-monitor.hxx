@@ -28,6 +28,8 @@
 
 #include <glib.h>
 
+#include <ztd/ztd.hxx>
+
 #define VFS_FILE_MONITOR_CALLBACK_DATA(obj) (reinterpret_cast<VFSFileMonitorCallbackEntry*>(obj))
 
 struct VFSFileMonitorCallbackEntry;
@@ -47,7 +49,7 @@ struct VFSFileMonitor
     std::string path;
 
     // TODO private
-    int wd;
+    i32 wd;
     std::vector<VFSFileMonitorCallbackEntry*> callbacks;
 };
 

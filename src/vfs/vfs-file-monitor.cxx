@@ -50,8 +50,8 @@
 static std::map<std::string, vfs::file_monitor_t> monitor_map;
 
 static GIOChannel* vfs_inotify_io_channel = nullptr;
-static unsigned int vfs_inotify_io_watch = 0;
-static int vfs_inotify_fd = -1;
+static u32 vfs_inotify_io_watch = 0;
+static i32 vfs_inotify_fd = -1;
 
 /* event handler of all inotify events */
 static bool vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond,
@@ -156,7 +156,7 @@ vfs_file_monitor_add(std::string_view path, VFSFileMonitorCallback cb, void* use
     }
     catch (std::out_of_range)
     {
-        int wd = inotify_add_watch(vfs_inotify_fd,
+        i32 wd = inotify_add_watch(vfs_inotify_fd,
                                    real_path.c_str(),
                                    IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE |
                                        IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
@@ -229,7 +229,7 @@ vfs_file_monitor_reconnect_inotify(std::string_view path, vfs::file_monitor_t mo
 }
 
 static VFSFileMonitorEvent
-vfs_file_monitor_translate_inotify_event(int inotify_mask)
+vfs_file_monitor_translate_inotify_event(i32 inotify_mask)
 {
     if (inotify_mask & (IN_CREATE | IN_MOVED_TO))
         return VFSFileMonitorEvent::VFS_FILE_MONITOR_CREATE;
@@ -288,7 +288,7 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
         return true;
     }
 
-    int len;
+    i32 len;
     while ((len = read(vfs_inotify_fd, buf, BUF_LEN)) < 0 && errno == EINTR)
         ;
 
@@ -305,7 +305,7 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
         return false;
     }
 
-    int i = 0;
+    i32 i = 0;
     while (i < len)
     {
         struct inotify_event* ievent = (struct inotify_event*)&buf[i];

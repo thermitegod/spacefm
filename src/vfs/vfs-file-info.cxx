@@ -43,7 +43,7 @@
 
 #include "vfs/vfs-file-info.hxx"
 
-static int big_thumb_size = 48, small_thumb_size = 20;
+static i32 big_thumb_size = 48, small_thumb_size = 20;
 
 VFSFileInfo*
 vfs_file_info_new()
@@ -243,8 +243,8 @@ vfs_file_info_get_big_icon(VFSFileInfo* fi)
 
     if (fi->flags != VFSFileInfoFlag::VFS_FILE_INFO_NONE)
     {
-        int w, h;
-        const int icon_size = vfs_mime_type_get_icon_size_big();
+        i32 w, h;
+        const i32 icon_size = vfs_mime_type_get_icon_size_big();
         if (fi->big_thumbnail)
         {
             w = gdk_pixbuf_get_width(fi->big_thumbnail);
@@ -366,19 +366,19 @@ vfs_file_info_get_atime(VFSFileInfo* fi)
 static const std::string
 get_file_perm_string(std::filesystem::file_status status)
 {
-    static constexpr std::uint8_t file_type{0};
+    static constexpr u8 file_type{0};
 
-    static constexpr std::uint8_t owner_read{1};
-    static constexpr std::uint8_t owner_write{2};
-    static constexpr std::uint8_t owner_exec{3};
+    static constexpr u8 owner_read{1};
+    static constexpr u8 owner_write{2};
+    static constexpr u8 owner_exec{3};
 
-    static constexpr std::uint8_t group_read{4};
-    static constexpr std::uint8_t group_write{5};
-    static constexpr std::uint8_t group_exec{6};
+    static constexpr u8 group_read{4};
+    static constexpr u8 group_write{5};
+    static constexpr u8 group_exec{6};
 
-    static constexpr std::uint8_t other_read{7};
-    static constexpr std::uint8_t other_write{8};
-    static constexpr std::uint8_t other_exec{9};
+    static constexpr u8 other_read{7};
+    static constexpr u8 other_write{8};
+    static constexpr u8 other_exec{9};
 
     // blank permissions
     std::string perm = "----------";
@@ -605,13 +605,13 @@ vfs_file_info_load_thumbnail(VFSFileInfo* fi, std::string_view full_path, bool b
 }
 
 void
-vfs_file_info_set_thumbnail_size_big(int size)
+vfs_file_info_set_thumbnail_size_big(i32 size)
 {
     big_thumb_size = size;
 }
 
 void
-vfs_file_info_set_thumbnail_size_small(int size)
+vfs_file_info_set_thumbnail_size_small(i32 size)
 {
     small_thumb_size = size;
 }
@@ -639,8 +639,8 @@ vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
     if (desktop.get_icon_name())
     {
         GdkPixbuf* icon;
-        const int big_size = vfs_mime_type_get_icon_size_big();
-        const int small_size = vfs_mime_type_get_icon_size_small();
+        const i32 big_size = vfs_mime_type_get_icon_size_big();
+        const i32 small_size = vfs_mime_type_get_icon_size_small();
         if (!fi->big_thumbnail)
         {
             icon = desktop.get_icon(big_size);
@@ -680,7 +680,7 @@ VFSFileInfo::ref_dec()
     --n_ref;
 }
 
-unsigned int
+u32
 VFSFileInfo::ref_count()
 {
     return n_ref;

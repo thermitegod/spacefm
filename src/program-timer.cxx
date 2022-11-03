@@ -34,7 +34,7 @@ program_timer::start() noexcept
     ptimer.timer.start();
 }
 
-double
+f64
 program_timer::elapsed() noexcept
 {
     return ptimer.timer.elapsed();

@@ -205,7 +205,7 @@ static const xsetpak_t xset_pack_sets();
 static void
 parse_general_settings(std::string& line)
 {
-    std::size_t sep = line.find("=");
+    usize sep = line.find("=");
     if (sep == std::string::npos)
         return;
 
@@ -254,7 +254,7 @@ parse_general_settings(std::string& line)
 static void
 parse_window_state(std::string& line)
 {
-    std::size_t sep = line.find("=");
+    usize sep = line.find("=");
     if (sep == std::string::npos)
         return;
 
@@ -283,7 +283,7 @@ parse_window_state(std::string& line)
 static void
 parse_interface_settings(std::string& line)
 {
-    std::size_t sep = line.find("=");
+    usize sep = line.find("=");
     if (sep == std::string::npos)
         return;
 
@@ -310,11 +310,11 @@ parse_interface_settings(std::string& line)
 static void
 xset_parse(std::string& line)
 {
-    std::size_t sep = line.find("=");
+    usize sep = line.find("=");
     if (sep == std::string::npos)
         return;
 
-    std::size_t sep2 = line.find("-");
+    usize sep2 = line.find("-");
     if (sep2 == std::string::npos)
         return;
 
@@ -358,17 +358,17 @@ xset_parse(std::string& line)
 }
 #endif // Deprecated INI loader - end
 
-static std::uint64_t
+static u64
 get_config_file_version(const toml::value& data)
 {
     const auto& version = toml::find(data, TOML_SECTION_VERSION);
 
-    const auto config_version = toml::find<std::uint64_t>(version, TOML_KEY_VERSION);
+    const auto config_version = toml::find<u64>(version, TOML_KEY_VERSION);
     return config_version;
 }
 
 static void
-config_parse_general(const toml::value& toml_data, std::uint64_t version)
+config_parse_general(const toml::value& toml_data, u64 version)
 {
     (void)version;
 
@@ -377,16 +377,16 @@ config_parse_general(const toml::value& toml_data, std::uint64_t version)
     const auto show_thumbnail = toml::find<bool>(section, TOML_KEY_SHOW_THUMBNAIL);
     app_settings.set_show_thumbnail(show_thumbnail);
 
-    const auto max_thumb_size = toml::find<std::uint64_t>(section, TOML_KEY_MAX_THUMB_SIZE);
+    const auto max_thumb_size = toml::find<u64>(section, TOML_KEY_MAX_THUMB_SIZE);
     app_settings.set_max_thumb_size(max_thumb_size << 10);
 
-    const auto icon_size_big = toml::find<std::uint64_t>(section, TOML_KEY_ICON_SIZE_BIG);
+    const auto icon_size_big = toml::find<u64>(section, TOML_KEY_ICON_SIZE_BIG);
     app_settings.set_icon_size_big(icon_size_big);
 
-    const auto icon_size_small = toml::find<std::uint64_t>(section, TOML_KEY_ICON_SIZE_SMALL);
+    const auto icon_size_small = toml::find<u64>(section, TOML_KEY_ICON_SIZE_SMALL);
     app_settings.set_icon_size_small(icon_size_small);
 
-    const auto icon_size_tool = toml::find<std::uint64_t>(section, TOML_KEY_ICON_SIZE_TOOL);
+    const auto icon_size_tool = toml::find<u64>(section, TOML_KEY_ICON_SIZE_TOOL);
     app_settings.set_icon_size_tool(icon_size_tool);
 
     const auto single_click = toml::find<bool>(section, TOML_KEY_SINGLE_CLICK);
@@ -395,10 +395,10 @@ config_parse_general(const toml::value& toml_data, std::uint64_t version)
     const auto single_hover = toml::find<bool>(section, TOML_KEY_SINGLE_HOVER);
     app_settings.set_single_hover(single_hover);
 
-    const auto sort_order = toml::find<std::uint64_t>(section, TOML_KEY_SORT_ORDER);
+    const auto sort_order = toml::find<u64>(section, TOML_KEY_SORT_ORDER);
     app_settings.set_sort_order(sort_order);
 
-    const auto sort_type = toml::find<std::uint64_t>(section, TOML_KEY_SORT_TYPE);
+    const auto sort_type = toml::find<u64>(section, TOML_KEY_SORT_TYPE);
     app_settings.set_sort_type(sort_type);
 
     const auto use_si_prefix = toml::find<bool>(section, TOML_KEY_USE_SI_PREFIX);
@@ -418,16 +418,16 @@ config_parse_general(const toml::value& toml_data, std::uint64_t version)
 }
 
 static void
-config_parse_window(const toml::value& toml_data, std::uint64_t version)
+config_parse_window(const toml::value& toml_data, u64 version)
 {
     (void)version;
 
     const auto& section = toml::find(toml_data, TOML_SECTION_WINDOW);
 
-    const auto height = toml::find<std::uint64_t>(section, TOML_KEY_HEIGHT);
+    const auto height = toml::find<u64>(section, TOML_KEY_HEIGHT);
     app_settings.set_height(height);
 
-    const auto width = toml::find<std::uint64_t>(section, TOML_KEY_WIDTH);
+    const auto width = toml::find<u64>(section, TOML_KEY_WIDTH);
     app_settings.set_width(width);
 
     const auto maximized = toml::find<bool>(section, TOML_KEY_MAXIMIZED);
@@ -435,7 +435,7 @@ config_parse_window(const toml::value& toml_data, std::uint64_t version)
 }
 
 static void
-config_parse_interface(const toml::value& toml_data, std::uint64_t version)
+config_parse_interface(const toml::value& toml_data, u64 version)
 {
     (void)version;
 
@@ -449,7 +449,7 @@ config_parse_interface(const toml::value& toml_data, std::uint64_t version)
 }
 
 static void
-config_parse_xset(const toml::value& toml_data, std::uint64_t version)
+config_parse_xset(const toml::value& toml_data, u64 version)
 {
     (void)version;
 
@@ -600,7 +600,7 @@ load_settings()
                 return;
             }
 
-            const std::uint64_t version = get_config_file_version(toml_data);
+            const u64 version = get_config_file_version(toml_data);
 
             config_parse_general(toml_data, version);
             config_parse_window(toml_data, version);
@@ -753,7 +753,7 @@ save_settings(void* main_window_ptr)
                 xset_t set = xset_get_panel(p, XSetPanel::SHOW);
                 if (GTK_IS_NOTEBOOK(main_window->panel[p - 1]))
                 {
-                    int pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1]));
+                    i32 pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1]));
                     if (pages) // panel was shown
                     {
                         if (set->s)
@@ -762,7 +762,7 @@ save_settings(void* main_window_ptr)
                             set->s = nullptr;
                         }
                         std::string tabs;
-                        for (int g = 0; g < pages; ++g)
+                        for (i32 g = 0; g < pages; ++g)
                         {
                             PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
                                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]),
@@ -778,7 +778,7 @@ save_settings(void* main_window_ptr)
                         if (set->x)
                             free(set->x);
 
-                        int current_page =
+                        i32 current_page =
                             gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
                         set->x = ztd::strdup(current_page);
                     }
@@ -1100,7 +1100,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
     xset_t tset;
     xset_t open_all_tset;
     XSetContext* context = nullptr;
-    int context_action;
+    i32 context_action;
     bool found = false;
     char pinned;
 
@@ -1295,7 +1295,7 @@ xset_new_menuitem(const char* label, const char* icon)
 }
 
 char*
-xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, int icon_size)
+xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
 {
     char* menu_label = nullptr;
     GdkPixbuf* icon_new = nullptr;
@@ -1360,7 +1360,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
     xset_t set_next;
     char* icon_name = nullptr;
     char* context = nullptr;
-    int context_action = ItemPropContextState::CONTEXT_SHOW;
+    i32 context_action = ItemPropContextState::CONTEXT_SHOW;
     xset_t mset;
     std::string icon_file;
     // LOG_INFO("xset_add_menuitem {}", set->name);
@@ -1482,10 +1482,10 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         if (!item)
         {
             // get menu icon size
-            int icon_w;
-            int icon_h;
+            i32 icon_w;
+            i32 icon_h;
             gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
-            int icon_size = icon_w > icon_h ? icon_w : icon_h;
+            i32 icon_size = icon_w > icon_h ? icon_w : icon_h;
 
             GdkPixbuf* app_icon = nullptr;
             XSetCMD cmd_type = XSetCMD(xset_get_int_set(set, XSetVar::X));
@@ -1649,7 +1649,7 @@ xset_custom_copy_files(xset_t src, xset_t dest)
 
     std::string* standard_output = nullptr;
     std::string* standard_error = nullptr;
-    int exit_status;
+    i32 exit_status;
 
     // LOG_INFO("xset_custom_copy_files( {}, {} )", src->name, dest->name);
 
@@ -1869,7 +1869,7 @@ xset_get_plugin_mirror(xset_t set)
     return newset;
 }
 
-static int
+static i32
 compare_plugin_sets(xset_t a, xset_t b)
 {
     return g_utf8_collate(a->menu_label, b->menu_label);
@@ -2087,7 +2087,7 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
 
     bool plugin_good = false;
 
-    // const std::uint64_t version = get_config_file_version(toml_data);
+    // const u64 version = get_config_file_version(toml_data);
 
     // loop over all of [[Plugin]]
     for (const auto& section: toml::find<toml::array>(toml_data, PLUGIN_FILE_SECTION_PLUGIN))
@@ -2439,7 +2439,7 @@ xset_custom_export_files(xset_t set, std::string_view plug_dir)
         return true;
     }
 
-    int exit_status;
+    i32 exit_status;
     const std::string command = fmt::format("cp -a {} {}", path_src, path_dest);
     print_command(command);
     Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
@@ -3117,10 +3117,10 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
 }
 
 const std::string
-xset_get_keyname(xset_t set, int key_val, int key_mod)
+xset_get_keyname(xset_t set, i32 key_val, i32 key_mod)
 {
-    int keyval;
-    int keymod;
+    i32 keyval;
+    i32 keymod;
     if (set)
     {
         keyval = set->key;
@@ -3165,14 +3165,14 @@ static bool
 on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
 {
     (void)widget;
-    int* newkey = (int*)g_object_get_data(G_OBJECT(dlg), "newkey");
-    int* newkeymod = (int*)g_object_get_data(G_OBJECT(dlg), "newkeymod");
+    i32* newkey = (i32*)g_object_get_data(G_OBJECT(dlg), "newkey");
+    i32* newkeymod = (i32*)g_object_get_data(G_OBJECT(dlg), "newkeymod");
     GtkWidget* btn = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "btn"));
     xset_t set = XSET(g_object_get_data(G_OBJECT(dlg), "set"));
     xset_t keyset = nullptr;
     std::string keyname;
 
-    unsigned int keymod = ptk_get_keymod(event->state);
+    u32 keymod = ptk_get_keymod(event->state);
 
     if (!event->keyval) // || ( event->keyval < 1000 && !keymod ) )
     {
@@ -3203,7 +3203,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
     }
 
 #ifdef HAVE_NONLATIN
-    unsigned int nonlatin_key = 0;
+    u32 nonlatin_key = 0;
     // need to transpose nonlatin keyboard layout ?
     if (!((GDK_KEY_0 <= event->keyval && event->keyval <= GDK_KEY_9) ||
           (GDK_KEY_A <= event->keyval && event->keyval <= GDK_KEY_Z) ||
@@ -3288,8 +3288,8 @@ xset_set_key(GtkWidget* parent, xset_t set)
 {
     std::string name;
     xset_t keyset;
-    unsigned int newkey = 0;
-    unsigned int newkeymod = 0;
+    u32 newkey = 0;
+    u32 newkeymod = 0;
     GtkWidget* dlgparent = nullptr;
 
     if (set->menu_label)
@@ -3353,7 +3353,7 @@ xset_set_key(GtkWidget* parent, xset_t set)
     gtk_widget_show_all(dlg);
     gtk_window_set_title(GTK_WINDOW(dlg), "Set Key");
 
-    int response = gtk_dialog_run(GTK_DIALOG(dlg));
+    i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
     gtk_widget_destroy(dlg);
     if (response == GtkResponseType::GTK_RESPONSE_OK ||
         response == GtkResponseType::GTK_RESPONSE_NO)
@@ -3396,7 +3396,7 @@ xset_design_job(GtkWidget* item, xset_t set)
     xset_t childset;
     xset_t set_next;
     std::string msg;
-    int response;
+    i32 response;
     char* folder;
     std::string folder2;
     char* file = nullptr;
@@ -3406,7 +3406,7 @@ xset_design_job(GtkWidget* item, xset_t set)
     char* cscript;
     char* name;
     char* prog;
-    int buttons;
+    i32 buttons;
     GtkWidget* dlgparent = nullptr;
     GtkWidget* dlg;
     GtkClipboard* clip;
@@ -4268,7 +4268,7 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, xset_t set)
     if (!item)
         return false;
 
-    unsigned int keymod = ptk_get_keymod(event->state);
+    u32 keymod = ptk_get_keymod(event->state);
 
 #ifdef HAVE_NONLATIN
     transpose_nonlatin_keypress(event);
@@ -4386,8 +4386,7 @@ xset_design_additem(GtkWidget* menu, const char* label, XSetJob job, xset_t set)
 }
 
 GtkWidget*
-xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, unsigned int button,
-                      std::time_t time)
+xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 button, std::time_t time)
 {
     GtkWidget* newitem;
     GtkWidget* submenu;
@@ -4546,7 +4545,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, unsigned 
         g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(XSetJob::HELP_ADD));
         g_signal_connect(submenu, "key_press_event", G_CALLBACK(xset_design_menu_keypress), set);
 
-        for (std::size_t i = INT(XSetTool::DEVICES); i < builtin_tool_name.size(); ++i)
+        for (usize i = INT(XSetTool::DEVICES); i < builtin_tool_name.size(); ++i)
         {
             newitem =
                 xset_design_additem(submenu, builtin_tool_name[i], XSetJob::ADD_TOOL, insert_set);
@@ -4684,7 +4683,7 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
     XSetJob job = XSetJob::INVALID;
 
     GtkWidget* menu = item ? GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu")) : nullptr;
-    unsigned int keymod = ptk_get_keymod(event->state);
+    u32 keymod = ptk_get_keymod(event->state);
 
     if (event->type == GdkEventType::GDK_BUTTON_RELEASE)
     {
@@ -4832,7 +4831,7 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
     else
         return false;
 
-    unsigned int keymod = ptk_get_keymod(event->state);
+    u32 keymod = ptk_get_keymod(event->state);
 
 #ifdef HAVE_NONLATIN
     transpose_nonlatin_keypress(event);
@@ -5094,7 +5093,7 @@ xset_menu_cb(GtkWidget* item, xset_t set)
         autosave_request_add();
 }
 
-int
+i32
 xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title,
                 GtkButtonsType buttons, std::string_view msg1)
 {
@@ -5102,7 +5101,7 @@ xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title
     return xset_msg_dialog(parent, action, title, buttons, msg1, msg2);
 }
 
-int
+i32
 xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title,
                 GtkButtonsType buttons, std::string_view msg1, std::string_view msg2)
 {
@@ -5130,7 +5129,7 @@ xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title
     gtk_window_set_title(GTK_WINDOW(dlg), title.data());
 
     gtk_widget_show_all(dlg);
-    int res = gtk_dialog_run(GTK_DIALOG(dlg));
+    i32 res = gtk_dialog_run(GTK_DIALOG(dlg));
     gtk_widget_destroy(dlg);
     return res;
 }
@@ -5140,7 +5139,7 @@ on_multi_input_insert(GtkTextBuffer* buf)
 { // remove linefeeds from pasted text
     GtkTextIter iter, siter;
     // bool changed = false;
-    int x;
+    i32 x;
 
     // buffer contains linefeeds?
     gtk_text_buffer_get_start_iter(buf, &siter);
@@ -5234,7 +5233,7 @@ multi_input_get_text(GtkWidget* input)
 }
 
 void
-multi_input_select_region(GtkWidget* input, int start, int end)
+multi_input_select_region(GtkWidget* input, i32 start, i32 end)
 {
     GtkTextIter iter, siter;
 
@@ -5324,8 +5323,8 @@ xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
                                                           GtkResponseType::GTK_RESPONSE_ACCEPT,
                                                           nullptr);
     // Set icon chooser dialog size
-    int width = xset_get_int(XSetName::MAIN_ICON, XSetVar::X);
-    int height = xset_get_int(XSetName::MAIN_ICON, XSetVar::Y);
+    i32 width = xset_get_int(XSetName::MAIN_ICON, XSetVar::X);
+    i32 height = xset_get_int(XSetName::MAIN_ICON, XSetVar::Y);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(icon_chooser), width, height);
 
@@ -5334,7 +5333,7 @@ xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
         exo_icon_chooser_dialog_set_icon(EXO_ICON_CHOOSER_DIALOG(icon_chooser), def_icon);
 
     // Prompting user to pick icon
-    int response_icon_chooser = gtk_dialog_run(GTK_DIALOG(icon_chooser));
+    i32 response_icon_chooser = gtk_dialog_run(GTK_DIALOG(icon_chooser));
     if (response_icon_chooser == GtkResponseType::GTK_RESPONSE_ACCEPT)
     {
         /* Fetching selected icon */
@@ -5364,8 +5363,8 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
     GtkTextIter iter;
     GtkTextIter siter;
     GtkAllocation allocation;
-    int width;
-    int height;
+    i32 width;
+    i32 height;
     GtkWidget* dlgparent = nullptr;
 
     if (parent)
@@ -5460,7 +5459,7 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
     }
 
     std::string ans;
-    int response;
+    i32 response;
     char* icon;
     bool ret = false;
     while ((response = gtk_dialog_run(GTK_DIALOG(dlg))))
@@ -5601,8 +5600,8 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
         }
     }
 
-    int width = xset_get_int(XSetName::FILE_DLG, XSetVar::X);
-    int height = xset_get_int(XSetName::FILE_DLG, XSetVar::Y);
+    i32 width = xset_get_int(XSetName::FILE_DLG, XSetVar::X);
+    i32 height = xset_get_int(XSetName::FILE_DLG, XSetVar::Y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -5614,7 +5613,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
-    int response = gtk_dialog_run(GTK_DIALOG(dlg));
+    i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
 
     GtkAllocation allocation;
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
@@ -5764,7 +5763,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     // LOG_INFO("on_tool_icon_button_press  {}   button = {}", set->menu_label, event->button);
     if (event->type != GdkEventType::GDK_BUTTON_PRESS)
         return false;
-    unsigned int keymod = ptk_get_keymod(event->state);
+    u32 keymod = ptk_get_keymod(event->state);
 
     // get and focus browser
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
@@ -5902,7 +5901,7 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     // LOG_INFO("on_tool_menu_button_press  {}   button = {}", set->menu_label, event->button);
     if (event->type != GdkEventType::GDK_BUTTON_PRESS)
         return false;
-    unsigned int keymod = ptk_get_keymod(event->state);
+    u32 keymod = ptk_get_keymod(event->state);
     if (keymod != 0 || event->button != 1)
         return on_tool_icon_button_press(widget, event, set);
 
@@ -5941,7 +5940,7 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
 }
 
 static void
-set_gtk3_widget_padding(GtkWidget* widget, int left_right, int top_bottom)
+set_gtk3_widget_padding(GtkWidget* widget, i32 left_right, i32 top_bottom)
 {
     const std::string str = fmt::format("GtkWidget {{ padding-left: {}px; padding-right: {}px; "
                                         "padding-top: {}px; padding-bottom: {}px; }}",
@@ -5960,7 +5959,7 @@ set_gtk3_widget_padding(GtkWidget* widget, int left_right, int top_bottom)
 
 static GtkWidget*
 xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,
-                  int icon_size, xset_t set, bool show_tooltips)
+                  i32 icon_size, xset_t set, bool show_tooltips)
 {
     if (!set)
         return nullptr;
@@ -5983,9 +5982,9 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     std::string str;
 
     // get real icon size from gtk icon size
-    int icon_w, icon_h;
+    i32 icon_w, icon_h;
     gtk_icon_size_lookup((GtkIconSize)icon_size, &icon_w, &icon_h);
-    int real_icon_size = icon_w > icon_h ? icon_w : icon_h;
+    i32 real_icon_size = icon_w > icon_h ? icon_w : icon_h;
 
     set->browser = file_browser;
 
@@ -6427,7 +6426,7 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
         XSetTool::UP,
         XSetTool::DEFAULT,
     };
-    int stop_b4;
+    i32 stop_b4;
     xset_t set;
     xset_t set_target;
 
@@ -6457,7 +6456,7 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             else
                 stop_b4 = default_tools.size();
             set_target = set_child;
-            for (int i = 0; i < stop_b4; ++i)
+            for (i32 i = 0; i < stop_b4; ++i)
             {
                 set = xset_new_builtin_toolitem(default_tools.at(i));
                 xset_custom_insert_after(set_target, set);
@@ -8128,7 +8127,7 @@ xset_defaults()
 }
 
 static void
-def_key(XSetName name, unsigned int key, unsigned int keymod)
+def_key(XSetName name, u32 key, u32 keymod)
 {
     xset_t set = xset_get(name);
 

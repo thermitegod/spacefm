@@ -72,7 +72,7 @@ char* mime_type_get_default_action(std::string_view type);
  *
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  */
-void mime_type_update_association(const char* type, const char* desktop_id, int action);
+void mime_type_update_association(const char* type, const char* desktop_id, i32 action);
 
 /* Locate the file path of desktop file by desktop_id */
 char* mime_type_locate_desktop_file(const char* dir, const char* desktop_id);

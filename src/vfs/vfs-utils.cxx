@@ -30,7 +30,7 @@
 #include "vfs/vfs-utils.hxx"
 
 GdkPixbuf*
-vfs_load_icon(const char* icon_name, int size)
+vfs_load_icon(const char* icon_name, i32 size)
 {
     if (!icon_name)
         return nullptr;
@@ -66,7 +66,7 @@ vfs_load_icon(const char* icon_name, int size)
 }
 
 const std::string
-vfs_file_size_to_string_format(std::uint64_t size_in_bytes, bool decimal)
+vfs_file_size_to_string_format(u64 size_in_bytes, bool decimal)
 {
     if (app_settings.get_use_si_prefix())
     {

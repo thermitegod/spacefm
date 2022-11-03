@@ -181,8 +181,8 @@ struct device_t
     char* device_presentation_icon_name;
     char* device_automount_hint;
     char* device_by_id;
-    std::uint64_t device_size;
-    std::uint64_t device_block_size;
+    u64 device_size;
+    u64 device_block_size;
     char* id_usage;
     char* id_type;
     char* id_version;
@@ -195,7 +195,7 @@ struct device_t
     char* drive_serial;
     char* drive_wwn;
     char* drive_connection_interface;
-    std::uint64_t drive_connection_speed;
+    u64 drive_connection_speed;
     char* drive_media_compatibility;
     char* drive_media;
     bool drive_is_media_ejectable;
@@ -385,7 +385,7 @@ decode_udev_encoded_string(const char* str)
     return decode;
 }
 
-static int
+static i32
 ptr_str_array_compare(const char** a, const char** b)
 {
     return g_strcmp0(*a, *b);
@@ -425,7 +425,7 @@ sysfs_get_string(std::string_view dir, std::string_view attribute)
     return ztd::strip(result);
 }
 
-static int
+static i32
 sysfs_get_int(std::string_view dir, std::string_view attribute)
 {
     const std::string filename = Glib::build_filename(dir.data(), attribute.data());
@@ -442,7 +442,7 @@ sysfs_get_int(std::string_view dir, std::string_view attribute)
     return std::stoi(contents);
 }
 
-static std::uint64_t
+static u64
 sysfs_get_uint64(std::string_view dir, std::string_view attribute)
 {
     const std::string filename = Glib::build_filename(dir.data(), attribute.data());
@@ -529,7 +529,7 @@ static void
 info_drive_connection(device_t* device)
 {
     std::string connection_interface;
-    std::uint64_t connection_speed = 0;
+    u64 connection_speed = 0;
 
     /* walk up the device tree to figure out the subsystem */
     if (!device->native_path)
@@ -589,7 +589,7 @@ info_drive_connection(device_t* device)
             }
             else if (ztd::same(subsystem, "usb"))
             {
-                double usb_speed;
+                f64 usb_speed;
 
                 /* both the interface and the device will be 'usb'. However only
                  * the device will have the 'speed' property.
@@ -853,7 +853,7 @@ info_drive_properties(device_t* device)
 
     // drive_media_compatibility
     media_compat_array = g_ptr_array_new();
-    for (std::size_t n = 0; drive_media_mapping[n].udev_property != nullptr; ++n)
+    for (usize n = 0; drive_media_mapping[n].udev_property != nullptr; ++n)
     {
         if (udev_device_get_property_value(device->udevice, drive_media_mapping[n].udev_property) ==
             nullptr)
@@ -888,7 +888,7 @@ info_drive_properties(device_t* device)
     media_in_drive = nullptr;
     if (device->device_is_media_available)
     {
-        for (std::size_t n = 0; media_mapping[n].udev_property != nullptr; ++n)
+        for (usize n = 0; media_mapping[n].udev_property != nullptr; ++n)
         {
             if (udev_device_get_property_value(device->udevice, media_mapping[n].udev_property) ==
                 nullptr)
@@ -955,7 +955,7 @@ info_device_properties(device_t* device)
 
     // filesystem properties
     const char* partition_scheme;
-    int partition_type = 0;
+    i32 partition_type = 0;
 
     partition_scheme = udev_device_get_property_value(device->udevice, "UDISKS_PARTITION_SCHEME");
     if ((value = udev_device_get_property_value(device->udevice, "UDISKS_PARTITION_TYPE")))
@@ -1012,7 +1012,7 @@ info_device_properties(device_t* device)
         {
             // this test is limited for non-root - user may not have read
             // access to device file even if media is present
-            int fd;
+            i32 fd;
             fd = open(device->devnode, O_RDONLY);
             if (fd >= 0)
             {
@@ -1032,9 +1032,9 @@ info_device_properties(device_t* device)
     /* device_size, device_block_size and device_is_read_only properties */
     if (device->device_is_media_available)
     {
-        std::uint64_t block_size;
+        u64 block_size;
 
-        device->device_size = sysfs_get_uint64(device->native_path, "size") * ((std::uint64_t)512);
+        device->device_size = sysfs_get_uint64(device->native_path, "size") * ((u64)512);
         device->device_is_read_only = (sysfs_get_int(device->native_path, "ro") != 0);
         /* This is not available on all devices so fall back to 512 if unavailable.
          *
@@ -1108,8 +1108,8 @@ info_mount_points(device_t* device)
     const std::vector<std::string> lines = ztd::split(contents, "\n");
     for (std::string_view line: lines)
     {
-        unsigned int mount_id;
-        unsigned int parent_id;
+        u32 mount_id;
+        u32 parent_id;
         dev_t major, minor;
         char encoded_root[PATH_MAX];
         char encoded_mount_point[PATH_MAX];
@@ -1190,7 +1190,7 @@ info_partition_table(device_t* device)
     }
 
     /* Note that udisks-part-id might not detect all partition table
-     * formats.. so in the negative case, also double check with
+     * formats.. so in the negative case, also f64 check with
      * information in sysfs.
      *
      * The kernel guarantees that all childs are created before the
@@ -1206,7 +1206,7 @@ info_partition_table(device_t* device)
     {
         const std::string s = Glib::path_get_basename(device->native_path);
 
-        unsigned int partition_count;
+        u32 partition_count;
 
         partition_count = 0;
 
@@ -1286,18 +1286,17 @@ info_partition(device_t* device)
      */
     if (!is_partition && sysfs_file_exists(device->native_path, "start"))
     {
-        std::uint64_t size = sysfs_get_uint64(device->native_path, "size");
-        std::uint64_t alignment_offset = sysfs_get_uint64(device->native_path, "alignment_offset");
+        u64 size = sysfs_get_uint64(device->native_path, "size");
+        u64 alignment_offset = sysfs_get_uint64(device->native_path, "alignment_offset");
 
         device->partition_size = ztd::strdup(size * 512);
         device->partition_alignment_offset = ztd::strdup(alignment_offset);
 
-        std::uint64_t offset =
-            sysfs_get_uint64(device->native_path, "start") * device->device_block_size;
+        u64 offset = sysfs_get_uint64(device->native_path, "start") * device->device_block_size;
         device->partition_offset = ztd::strdup(offset);
 
         char* s = device->native_path;
-        std::size_t n;
+        usize n;
         for (n = std::strlen(s) - 1; n >= 0 && g_ascii_isdigit(s[n]); --n)
             ;
         device->partition_number = ztd::strdup(std::stol(s + n + 1, nullptr, 0));
@@ -1451,7 +1450,7 @@ device_show_info(device_t* device, std::string& info)
  * udev & mount monitors
  * ************************************************************************ */
 
-static int
+static i32
 cmp_devmounts(devmount_t* a, devmount_t* b)
 {
     if (!a && !b)
@@ -1512,8 +1511,8 @@ parse_mounts(bool report)
     const std::vector<std::string> lines = ztd::split(contents, "\n");
     for (std::string_view line: lines)
     {
-        unsigned int mount_id;
-        unsigned int parent_id;
+        u32 mount_id;
+        u32 parent_id;
         dev_t major, minor;
         char encoded_root[PATH_MAX];
         char encoded_mount_point[PATH_MAX];
@@ -1769,7 +1768,7 @@ free_devmounts()
 }
 
 static const char*
-get_devmount_fstype(unsigned int major, unsigned int minor)
+get_devmount_fstype(u32 major, u32 minor)
 {
     for (GList* l = devmounts; l; l = l->next)
     {
@@ -1815,11 +1814,11 @@ cb_udev_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
 
     if ( !( cond & G_IO_NVAL ) )
     {
-        int fd = g_io_channel_unix_get_fd( channel );
+        i32 fd = g_io_channel_unix_get_fd( channel );
         LOG_INFO("    fd={}", fd);
         if ( fcntl(fd, F_GETFL) != -1 || errno != EBADF )
         {
-            int flags = g_io_channel_get_flags( channel );
+            i32 flags = g_io_channel_get_flags( channel );
             if ( flags & G_IO_FLAG_IS_READABLE )
                 LOG_INFO( "    G_IO_FLAG_IS_READABLE");
         }
@@ -2276,7 +2275,7 @@ mtab_fstype_is_handled_by_protocol(const char* mtab_fstype)
             // test handlers
             std::string msg;
             xset_t set;
-            for (int i = 0; handlers[i]; ++i)
+            for (i32 i = 0; handlers[i]; ++i)
             {
                 if (!handlers[i][0] || !(set = xset_is(handlers[i])) ||
                     set->b != XSetB::XSET_B_TRUE /* disabled */)
@@ -2589,7 +2588,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
 }
 
 char*
-vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options,
+vfs_volume_handler_cmd(i32 mode, i32 action, VFSVolume* vol, const char* options,
                        netmount_t* netmount, bool* run_in_terminal, char** mount_point)
 {
     const char* handlers_list;
@@ -2687,7 +2686,7 @@ vfs_volume_handler_cmd(int mode, int action, VFSVolume* vol, const char* options
     // test handlers
     bool found = false;
     std::string msg;
-    for (int i = 0; handlers[i]; ++i)
+    for (i32 i = 0; handlers[i]; ++i)
     {
         if (!handlers[i][0] || !(set = xset_is(handlers[i])) ||
             set->b != XSetB::XSET_B_TRUE /* disabled */)
@@ -2943,9 +2942,9 @@ vfs_volume_is_automount(VFSVolume* vol)
 
     const std::string showhidelist =
         fmt::format(" {} ", ztd::null_check(xset_get_s(XSetName::DEV_AUTOMOUNT_VOLUMES)));
-    for (int i = 0; i < 3; ++i)
+    for (i32 i = 0; i < 3; ++i)
     {
-        for (int j = 0; j < 2; ++j)
+        for (i32 j = 0; j < 2; ++j)
         {
             if (i == 0)
                 value = vol->device_file;
@@ -3175,9 +3174,9 @@ vfs_volume_get_mount_options(VFSVolume* vol, char* options)
     // change spaces to commas
     bool leading = true;
     bool trailing = false;
-    int j = -1;
+    i32 j = -1;
     char news[16384];
-    for (std::size_t i = 0; i < std::strlen(options); ++i)
+    for (usize i = 0; i < std::strlen(options); ++i)
     {
         if (leading && (options[i] == ' ' || options[i] == ','))
             continue;
@@ -3717,7 +3716,7 @@ vfs_volume_init()
         return true;
     }
 
-    int ufd;
+    i32 ufd;
     ufd = udev_monitor_get_fd(umonitor);
     if (ufd == 0)
     {
@@ -3867,7 +3866,7 @@ call_callbacks(VFSVolume* vol, VFSVolumeState state)
     if (callbacks)
     {
         VFSVolumeCallbackData* e = VFS_VOLUME_CALLBACK_DATA(callbacks->data);
-        for (std::size_t i = 0; i < callbacks->len; ++i)
+        for (usize i = 0; i < callbacks->len; ++i)
             (*e[i].cb)(vol, state, e[i].user_data);
     }
 
@@ -3908,7 +3907,7 @@ vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data)
         return;
 
     VFSVolumeCallbackData* e = VFS_VOLUME_CALLBACK_DATA(callbacks->data);
-    for (std::size_t i = 0; i < callbacks->len; ++i)
+    for (usize i = 0; i < callbacks->len; ++i)
     {
         if (e[i].cb == cb && e[i].user_data == user_data)
         {
@@ -3999,7 +3998,7 @@ vfs_volume_dir_avoid_changes(const char* dir)
         if (fstype && fstype[0])
         {
             // fstype listed in change detection blacklist?
-            int len = std::strlen(fstype);
+            i32 len = std::strlen(fstype);
             char* ptr;
             if ((ptr = xset_get_s(XSetName::DEV_CHANGE)))
             {

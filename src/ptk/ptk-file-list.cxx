@@ -49,16 +49,16 @@ static void ptk_file_list_finalize(GObject* object);
 
 static GtkTreeModelFlags ptk_file_list_get_flags(GtkTreeModel* tree_model);
 
-static int ptk_file_list_get_n_columns(GtkTreeModel* tree_model);
+static i32 ptk_file_list_get_n_columns(GtkTreeModel* tree_model);
 
-static GType ptk_file_list_get_column_type(GtkTreeModel* tree_model, int index);
+static GType ptk_file_list_get_column_type(GtkTreeModel* tree_model, i32 index);
 
 static gboolean ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                        GtkTreePath* path);
 
 static GtkTreePath* ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter);
 
-static void ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column,
+static void ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
                                     GValue* value);
 
 static gboolean ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter);
@@ -68,21 +68,21 @@ static gboolean ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIte
 
 static gboolean ptk_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter);
 
-static int ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter);
+static i32 ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter);
 
 static gboolean ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter,
-                                             GtkTreeIter* parent, int n);
+                                             GtkTreeIter* parent, i32 n);
 
 static gboolean ptk_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                           GtkTreeIter* child);
 
-static gboolean ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, int* sort_column_id,
+static gboolean ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, i32* sort_column_id,
                                                  GtkSortType* order);
 
-static void ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, int sort_column_id,
+static void ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, i32 sort_column_id,
                                              GtkSortType order);
 
-static void ptk_file_list_set_sort_func(GtkTreeSortable* sortable, int sort_column_id,
+static void ptk_file_list_set_sort_func(GtkTreeSortable* sortable, i32 sort_column_id,
                                         GtkTreeIterCompareFunc sort_func, void* user_data,
                                         GDestroyNotify destroy);
 
@@ -345,7 +345,7 @@ ptk_file_list_get_flags(GtkTreeModel* tree_model)
     return GtkTreeModelFlags(GTK_TREE_MODEL_LIST_ONLY | GTK_TREE_MODEL_ITERS_PERSIST);
 }
 
-static int
+static i32
 ptk_file_list_get_n_columns(GtkTreeModel* tree_model)
 {
     (void)tree_model;
@@ -353,7 +353,7 @@ ptk_file_list_get_n_columns(GtkTreeModel* tree_model)
 }
 
 static GType
-ptk_file_list_get_column_type(GtkTreeModel* tree_model, int index)
+ptk_file_list_get_column_type(GtkTreeModel* tree_model, i32 index)
 {
     (void)tree_model;
     if (!PTK_IS_FILE_LIST(tree_model))
@@ -361,9 +361,9 @@ ptk_file_list_get_column_type(GtkTreeModel* tree_model, int index)
         LOG_ERROR("!PTK_IS_FILE_LIST(tree_model)");
         return G_TYPE_INVALID;
     }
-    if (index > (int)G_N_ELEMENTS(column_types))
+    if (index > (i32)G_N_ELEMENTS(column_types))
     {
-        LOG_ERROR("index > (int)G_N_ELEMENTS(column_types)");
+        LOG_ERROR("index > (i32)G_N_ELEMENTS(column_types)");
         return G_TYPE_INVALID;
     }
     return column_types[index];
@@ -377,13 +377,13 @@ ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
 
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
 
-    int* indices = gtk_tree_path_get_indices(path);
-    int depth = gtk_tree_path_get_depth(path);
+    i32* indices = gtk_tree_path_get_indices(path);
+    i32 depth = gtk_tree_path_get_depth(path);
 
     /* we do not allow children */
     assert(depth == 1); /* depth 1 = top level; a list only has top level nodes and no children */
 
-    unsigned int n = indices[0]; /* the n-th top level row */
+    u32 n = indices[0]; /* the n-th top level row */
 
     if (n >= list->n_files || n < 0)
         return false;
@@ -435,7 +435,7 @@ ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
 }
 
 static void
-ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column, GValue* value)
+ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, GValue* value)
 {
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     GdkPixbuf* icon;
@@ -450,9 +450,9 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column,
         LOG_ERROR("!iter");
         return;
     }
-    if (column > (int)G_N_ELEMENTS(column_types))
+    if (column > (i32)G_N_ELEMENTS(column_types))
     {
-        LOG_ERROR("column > (int)G_N_ELEMENTS(column_types)");
+        LOG_ERROR("column > (i32)G_N_ELEMENTS(column_types)");
         return;
     }
 
@@ -589,7 +589,7 @@ ptk_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter)
     return false;
 }
 
-static int
+static i32
 ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
     if (!PTK_IS_FILE_LIST(tree_model))
@@ -607,7 +607,7 @@ ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
 
 static gboolean
 ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent,
-                             int n)
+                             i32 n)
 {
     if (!PTK_IS_FILE_LIST(tree_model))
     {
@@ -645,7 +645,7 @@ ptk_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIt
 }
 
 static gboolean
-ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, int* sort_column_id, GtkSortType* order)
+ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, i32* sort_column_id, GtkSortType* order)
 {
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(sortable);
     if (sort_column_id)
@@ -656,7 +656,7 @@ ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, int* sort_column_id,
 }
 
 static void
-ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, int sort_column_id, GtkSortType order)
+ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, i32 sort_column_id, GtkSortType order)
 {
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(sortable);
     if (list->sort_col == sort_column_id && list->sort_order == order)
@@ -668,7 +668,7 @@ ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, int sort_column_id, 
 }
 
 static void
-ptk_file_list_set_sort_func(GtkTreeSortable* sortable, int sort_column_id,
+ptk_file_list_set_sort_func(GtkTreeSortable* sortable, i32 sort_column_id,
                             GtkTreeIterCompareFunc sort_func, void* user_data,
                             GDestroyNotify destroy)
 {
@@ -691,13 +691,13 @@ ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompar
     LOG_WARN("ptk_file_list_set_default_sort_func: Not supported");
 }
 
-static int
+static i32
 ptk_file_list_compare(const void* a, const void* b, void* user_data)
 {
     VFSFileInfo* file_a = (VFSFileInfo*)(a);
     VFSFileInfo* file_b = (VFSFileInfo*)b;
     PtkFileList* list = PTK_FILE_LIST(user_data);
-    int result;
+    i32 result;
 
     // dirs before/after files
     if (list->sort_dir != PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED)
@@ -813,7 +813,7 @@ ptk_file_list_sort(PtkFileList* list)
 
     GHashTable* old_order = g_hash_table_new(g_direct_hash, g_direct_equal);
     /* save old order */
-    int i;
+    i32 i;
     GList* l;
     for (i = 0, l = list->files; l; l = l->next, ++i)
         g_hash_table_insert(old_order, l, GINT_TO_POINTER(i));
@@ -822,7 +822,7 @@ ptk_file_list_sort(PtkFileList* list)
     list->files = g_list_sort_with_data(list->files, ptk_file_list_compare, list);
 
     /* save new order */
-    int* new_order = g_new(int, list->n_files);
+    i32* new_order = g_new(i32, list->n_files);
     for (i = 0, l = list->files; l; l = l->next, ++i)
         new_order[i] = GPOINTER_TO_INT(g_hash_table_lookup(old_order, l));
     g_hash_table_destroy(old_order);
@@ -989,7 +989,7 @@ on_thumbnail_loaded(VFSFileInfo* file, PtkFileList* list)
 }
 
 void
-ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, int max_file_size)
+ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size)
 {
     if (!list)
         return;
@@ -997,7 +997,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, int max_file_size)
     GList* l;
     VFSFileInfo* file;
 
-    int old_max_thumbnail = list->max_thumbnail;
+    i32 old_max_thumbnail = list->max_thumbnail;
     list->max_thumbnail = max_file_size;
     list->big_thumbnail = is_big;
     /* FIXME: This is buggy!!! Further testing might be needed.

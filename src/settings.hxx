@@ -114,16 +114,16 @@ void xset_set_key(GtkWidget* parent, xset_t set);
 XSetContext* xset_context_new();
 xset_t xset_get_plugin_mirror(xset_t set);
 char* xset_custom_get_script(xset_t set, bool create);
-const std::string xset_get_keyname(xset_t set, int key_val, int key_mod);
+const std::string xset_get_keyname(xset_t set, i32 key_val, i32 key_mod);
 
 xset_t xset_custom_new();
 void xset_custom_delete(xset_t set, bool delete_next);
 xset_t xset_custom_remove(xset_t set);
-char* xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, int icon_size);
+char* xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size);
 void xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set);
 
-GtkWidget* xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert,
-                                 unsigned int button, std::time_t time);
+GtkWidget* xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 button,
+                                 std::time_t time);
 void xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
                    const char* elements);
 GtkWidget* xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu,
@@ -132,9 +132,9 @@ GtkWidget* xset_get_image(const char* icon, GtkIconSize icon_size);
 
 xset_t xset_find_custom(std::string_view search);
 
-int xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title,
+i32 xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title,
                     GtkButtonsType buttons, std::string_view msg1, std::string_view msg2);
-int xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title,
+i32 xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title,
                     GtkButtonsType buttons, std::string_view msg1);
 bool xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg1,
                       std::string_view msg2, const char* defstring, char** answer,
@@ -148,7 +148,7 @@ void xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_roo
 void xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,
                        xset_t set_parent, bool show_tooltips);
 GtkTextView* multi_input_new(GtkScrolledWindow* scrolled, const char* text);
-void multi_input_select_region(GtkWidget* input, int start, int end);
+void multi_input_select_region(GtkWidget* input, i32 start, i32 end);
 char* multi_input_get_text(GtkWidget* input);
 
 const std::vector<xset_t> xset_get_plugins();
@@ -156,7 +156,7 @@ void xset_clear_plugins(const std::vector<xset_t>& plugins);
 
 void install_plugin_file(void* main_win, GtkWidget* handler_dlg, std::string_view path,
                          std::string_view plug_dir, PluginJob job, xset_t insert_set);
-xset_t xset_import_plugin(const char* plug_dir, int* use);
+xset_t xset_import_plugin(const char* plug_dir, i32* use);
 void clean_plugin_mirrors();
 bool xset_opener(PtkFileBrowser* file_browser, char job);
 const char* xset_get_builtin_toolitem_label(XSetTool tool_type);

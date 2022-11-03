@@ -40,4 +40,4 @@ void ptk_file_archiver_create(PtkFileBrowser* file_browser,
                               const std::vector<VFSFileInfo*>& sel_files, const char* cwd);
 void ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                                const std::vector<VFSFileInfo*>& sel_files, const char* cwd,
-                               const char* dest_dir, int job, bool archive_presence_checked);
+                               const char* dest_dir, i32 job, bool archive_presence_checked);

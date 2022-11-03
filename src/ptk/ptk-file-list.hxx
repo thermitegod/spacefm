@@ -71,13 +71,13 @@ struct PtkFileList
     /* <private> */
     VFSDir* dir;
     GList* files;
-    unsigned int n_files;
+    u32 n_files;
 
     bool show_hidden : 1;
     bool big_thumbnail : 1;
-    int max_thumbnail;
+    i32 max_thumbnail;
 
-    int sort_col;
+    i32 sort_col;
     GtkSortType sort_order;
     bool sort_alphanum;
     bool sort_natural;
@@ -86,7 +86,7 @@ struct PtkFileList
     char sort_dir;
 
     // Random integer to check whether an iter belongs to our model
-    int stamp;
+    i32 stamp;
 
   public:
     // Signals we connect to
@@ -114,5 +114,5 @@ void ptk_file_list_set_dir(PtkFileList* list, VFSDir* dir);
 
 bool ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, VFSFileInfo* fi);
 
-void ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, int max_file_size);
+void ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size);
 void ptk_file_list_sort(PtkFileList* list); // sfm

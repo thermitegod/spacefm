@@ -81,10 +81,10 @@ struct VFSFileInfo
 
     void ref_inc();
     void ref_dec();
-    unsigned int ref_count();
+    u32 ref_count();
 
   private:
-    std::atomic<unsigned int> n_ref{0};
+    std::atomic<u32> n_ref{0};
 };
 
 VFSFileInfo* vfs_file_info_new();
@@ -117,8 +117,8 @@ const char* vfs_file_info_get_disp_perm(VFSFileInfo* fi);
 time_t* vfs_file_info_get_mtime(VFSFileInfo* fi);
 time_t* vfs_file_info_get_atime(VFSFileInfo* fi);
 
-void vfs_file_info_set_thumbnail_size_big(int size);
-void vfs_file_info_set_thumbnail_size_small(int size);
+void vfs_file_info_set_thumbnail_size_big(i32 size);
+void vfs_file_info_set_thumbnail_size_small(i32 size);
 
 bool vfs_file_info_load_thumbnail(VFSFileInfo* fi, std::string_view full_path, bool big);
 bool vfs_file_info_is_thumbnail_loaded(VFSFileInfo* fi, bool big);

@@ -50,10 +50,10 @@
 
 static bool mime_type_is_subclass(const char* type, const char* parent);
 
-static std::size_t n_caches = 0;
+static usize n_caches = 0;
 std::vector<MimeCache> caches;
 
-std::uint32_t mime_cache_max_extent = 0;
+u32 mime_cache_max_extent = 0;
 
 /* allocated buffer used for mime magic checking to
      prevent frequent memory allocation */
@@ -64,7 +64,7 @@ G_LOCK_DEFINE_STATIC(mime_magic_buf);
 /* free all mime.cache files on the system */
 static void mime_cache_free_all();
 
-static bool mime_type_is_data_plain_text(const char* data, int len);
+static bool mime_type_is_data_plain_text(const char* data, i32 len);
 
 /*
  * Get mime-type of the specified file (quick, but less accurate):
@@ -81,7 +81,7 @@ mime_type_get_by_filename(const char* filename, struct stat* statbuf)
     if (statbuf && S_ISDIR(statbuf->st_mode))
         return XDG_MIME_TYPE_DIRECTORY;
 
-    for (std::size_t i = 0; !type && i < n_caches; ++i)
+    for (usize i = 0; !type && i < n_caches; ++i)
     {
         MimeCache cache = caches.at(i);
         type = cache.lookup_literal(filename);
@@ -98,9 +98,9 @@ mime_type_get_by_filename(const char* filename, struct stat* statbuf)
 
     if (!type) /* glob matching */
     {
-        int max_glob_len = 0;
-        int glob_len = 0;
-        for (std::size_t i = 0; !type && i < n_caches; ++i)
+        i32 max_glob_len = 0;
+        i32 glob_len = 0;
+        for (usize i = 0; !type && i < n_caches; ++i)
         {
             MimeCache cache = caches.at(i);
             const char* matched_type;
@@ -169,14 +169,14 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
     // sfm added check for reg or link due to hangs on fifo and chr dev
     if (statbuf->st_size > 0 && (S_ISREG(statbuf->st_mode) || S_ISLNK(statbuf->st_mode)))
     {
-        int fd = -1;
+        i32 fd = -1;
         char* data;
 
         /* Open the file and map it into memory */
         fd = open(filepath, O_RDONLY, 0);
         if (fd != -1)
         {
-            int len =
+            i32 len =
                 mime_cache_max_extent < statbuf->st_size ? mime_cache_max_extent : statbuf->st_size;
             /*
              * FIXME: Can g_alloca() be used here? It is very fast, but is it safe?
@@ -202,7 +202,7 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
             }
             if (data != (char*)-1)
             {
-                for (std::size_t i = 0; !type && i < caches.size(); ++i)
+                for (usize i = 0; !type && i < caches.size(); ++i)
                 {
                     type = caches.at(i).lookup_magic(data, len);
                 }
@@ -236,7 +236,7 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
 }
 
 static char*
-parse_xml_icon(const char* buf, std::size_t len, bool is_local)
+parse_xml_icon(const char* buf, usize len, bool is_local)
 { // Note: This function modifies contents of buf
     char* icon_tag = nullptr;
 
@@ -285,13 +285,13 @@ parse_xml_icon(const char* buf, std::size_t len, bool is_local)
 }
 
 static char*
-parse_xml_desc(const char* buf, std::size_t len, const char* locale)
+parse_xml_desc(const char* buf, usize len, const char* locale)
 {
     const char* buf_end = buf + len;
     const char* comment = nullptr;
     const char* comment_end;
     const char* eng_comment;
-    std::size_t comment_len = 0;
+    usize comment_len = 0;
     static const char end_comment_tag[] = "</comment>";
 
     eng_comment = g_strstr_len(buf, len, "<comment>"); /* default English comment */
@@ -302,12 +302,12 @@ parse_xml_desc(const char* buf, std::size_t len, const char* locale)
     comment_end = g_strstr_len(eng_comment, len, end_comment_tag); /* find </comment> */
     if (!comment_end)
         return nullptr;
-    std::size_t eng_comment_len = comment_end - eng_comment;
+    usize eng_comment_len = comment_end - eng_comment;
 
     if (locale)
     {
         char target[64];
-        int target_len = g_snprintf(target, 64, "<comment xml:lang=\"%s\">", locale);
+        i32 target_len = g_snprintf(target, 64, "<comment xml:lang=\"%s\">", locale);
         buf = comment_end + 10;
         len = (buf_end - buf);
         if ((comment = g_strstr_len(buf, len, target)))
@@ -432,7 +432,7 @@ mime_type_init()
     if (caches[0].get_magic_max_extent() > mime_cache_max_extent)
         mime_cache_max_extent = caches[0].get_magic_max_extent();
 
-    for (std::size_t i = 0; i < n_caches; ++i)
+    for (usize i = 0; i < n_caches; ++i)
     {
         path = Glib::build_filename(dirs[i], filename);
         caches.push_back(MimeCache(path));
@@ -467,7 +467,7 @@ mime_cache_reload(MimeCache& cache)
     cache.reload();
 
     /* recalculate max magic extent */
-    for (std::size_t i = 0; i < n_caches; ++i)
+    for (usize i = 0; i < n_caches; ++i)
     {
         if (caches[i].get_magic_max_extent() > mime_cache_max_extent)
             mime_cache_max_extent = caches[i].get_magic_max_extent();
@@ -481,11 +481,11 @@ mime_cache_reload(MimeCache& cache)
 }
 
 static bool
-mime_type_is_data_plain_text(const char* data, int len)
+mime_type_is_data_plain_text(const char* data, i32 len)
 {
     if (len >= 0 && data)
     {
-        for (int i = 0; i < len; ++i)
+        for (i32 i = 0; i < len; ++i)
         {
             if (data[i] == '\0')
                 return false;
@@ -498,7 +498,7 @@ mime_type_is_data_plain_text(const char* data, int len)
 bool
 mime_type_is_text_file(const char* file_path, const char* mime_type)
 {
-    int rlen;
+    i32 rlen;
     bool ret = false;
 
     if (mime_type)
@@ -515,7 +515,7 @@ mime_type_is_text_file(const char* file_path, const char* mime_type)
     if (!file_path)
         return false;
 
-    int file = open(file_path, O_RDONLY);
+    i32 file = open(file_path, O_RDONLY);
     if (file != -1)
     {
         struct stat statbuf;

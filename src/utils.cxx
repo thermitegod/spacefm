@@ -50,7 +50,7 @@ print_task_command(const char* ptask, std::string_view cmd) noexcept
 }
 
 void
-print_task_command_spawn(const std::vector<std::string>& argv, int pid) noexcept
+print_task_command_spawn(const std::vector<std::string>& argv, i32 pid) noexcept
 {
     LOG_INFO("SPAWN=\"{}\" pid={} ", ztd::join(argv, " "), pid);
 }
@@ -198,7 +198,7 @@ get_valid_su() noexcept
     std::string use_su;
     if (!xset_get_s(XSetName::SU_COMMAND))
     {
-        for (std::size_t i = 0; i < terminal_programs.size(); ++i)
+        for (usize i = 0; i < terminal_programs.size(); ++i)
         {
             use_su = Glib::find_program_in_path(su_commands.at(i).data());
             if (!use_su.empty())

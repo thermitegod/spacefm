@@ -259,7 +259,7 @@ static bool
 on_move_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
 {
     (void)widget;
-    unsigned int keymod = ptk_get_keymod(event->state);
+    u32 keymod = ptk_get_keymod(event->state);
 
     if (keymod == 0)
     {
@@ -281,7 +281,7 @@ static bool
 on_move_entry_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
 {
     (void)widget;
-    unsigned int keymod = ptk_get_keymod(event->state);
+    u32 keymod = ptk_get_keymod(event->state);
 
     if (keymod == 0)
     {
@@ -894,7 +894,7 @@ on_revert_button_press(GtkWidget* widget, MoveSet* mset)
 static void
 on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
 {
-    int action;
+    i32 action;
     const char* title;
     const char* text;
 
@@ -978,8 +978,8 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path.c_str());
     }
 
-    int width = xset_get_int(XSetName::MOVE_DLG_HELP, XSetVar::X);
-    int height = xset_get_int(XSetName::MOVE_DLG_HELP, XSetVar::Y);
+    i32 width = xset_get_int(XSetName::MOVE_DLG_HELP, XSetVar::X);
+    i32 height = xset_get_int(XSetName::MOVE_DLG_HELP, XSetVar::Y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -991,7 +991,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
-    int response = gtk_dialog_run(GTK_DIALOG(dlg));
+    i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
         char* new_path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
@@ -1043,17 +1043,17 @@ on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
 
     GtkWidget** mode = (GtkWidget**)g_object_get_data(G_OBJECT(dlg), "mode");
 
-    for (int i = MODE_FILENAME; i <= MODE_PATH; ++i)
+    for (i32 i = MODE_FILENAME; i <= MODE_PATH; ++i)
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
         {
-            int action = i == MODE_PARENT
+            i32 action = i == MODE_PARENT
                              ? GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
                              : GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE;
             GtkAllocation allocation;
             gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-            int width = allocation.width;
-            int height = allocation.height;
+            i32 width = allocation.width;
+            i32 height = allocation.height;
             gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dlg), (GtkFileChooserAction)action);
             if (width && height)
             {
@@ -1076,7 +1076,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     (void)widget;
     GtkTextIter iter;
     GtkTextIter siter;
-    int mode_default = MODE_PARENT;
+    i32 mode_default = MODE_PARENT;
 
     xset_t set = xset_get(XSetName::MOVE_DLG_HELP);
     if (set->z)
@@ -1126,7 +1126,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
                                                        "P_ath");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mode[mode_default]), true);
     gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new("Insert as"), false, true, 2);
-    for (int i = MODE_FILENAME; i <= MODE_PATH; ++i)
+    for (i32 i = MODE_FILENAME; i <= MODE_PATH; ++i)
     {
         gtk_widget_set_focus_on_click(GTK_WIDGET(mode[i]), false);
         g_signal_connect(G_OBJECT(mode[i]), "toggled", G_CALLBACK(on_browse_mode_toggled), dlg);
@@ -1136,8 +1136,8 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     g_object_set_data(G_OBJECT(dlg), "mode", mode);
     gtk_widget_show_all(hbox);
 
-    int width = xset_get_int(XSetName::MOVE_DLG_HELP, XSetVar::X);
-    int height = xset_get_int(XSetName::MOVE_DLG_HELP, XSetVar::Y);
+    i32 width = xset_get_int(XSetName::MOVE_DLG_HELP, XSetVar::X);
+    i32 height = xset_get_int(XSetName::MOVE_DLG_HELP, XSetVar::Y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -1149,11 +1149,11 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
-    int response = gtk_dialog_run(GTK_DIALOG(dlg));
+    i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
     // bogus GTK warning here: Unable to retrieve the file info for...
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
-        for (int i = MODE_FILENAME; i <= MODE_PATH; ++i)
+        for (i32 i = MODE_FILENAME; i <= MODE_PATH; ++i)
         {
             if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
                 continue;
@@ -1192,7 +1192,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     }
 
     // save mode
-    for (int i = MODE_FILENAME; i <= MODE_PATH; ++i)
+    for (i32 i = MODE_FILENAME; i <= MODE_PATH; ++i)
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
         {
@@ -1836,7 +1836,7 @@ get_unique_name(std::string_view dir, std::string_view ext = "")
         path = Glib::build_filename(dir.data(), name);
     }
 
-    unsigned int n = 1;
+    u32 n = 1;
     while (ztd::lstat(path).is_valid()) // need to see broken symlinks
     {
         std::string name;
@@ -2013,7 +2013,7 @@ update_new_display(const char* path)
     g_timeout_add(1500, (GSourceFunc)update_new_display_delayed, ztd::strdup(path));
 }
 
-int
+i32
 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo* file,
                 const char* dest_dir, bool clip_copy, PtkRenameMode create_new,
                 AutoOpenCreate* auto_open)
@@ -2022,7 +2022,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
 
     char* str;
     GtkWidget* task_view = nullptr;
-    int ret = 1;
+    i32 ret = 1;
     bool target_missing = false;
     struct stat statbuf;
 
@@ -2692,7 +2692,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     std::string to_path;
     std::string from_path;
     std::string full_path;
-    int response;
+    i32 response;
     while ((response = gtk_dialog_run(GTK_DIALOG(mset->dlg))))
     {
         if (response == GtkResponseType::GTK_RESPONSE_OK ||
@@ -3149,7 +3149,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
 {
     (void)callback;
     bool is_cut = false;
-    int missing_targets;
+    i32 missing_targets;
     VFSFileInfo* file;
     std::string file_dir;
 
@@ -3209,7 +3209,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<VFSFileInf
     GtkWidget* parent = GTK_WIDGET(file_browser);
     std::string file_paths;
     std::string file_path_q;
-    int item_count = 0;
+    i32 item_count = 0;
     for (VFSFileInfo* file: sel_files)
     {
         const std::string file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));

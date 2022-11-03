@@ -78,7 +78,7 @@ open_archives_with_handler(ParentInfo* parent, const std::vector<VFSFileInfo*>& 
 
     bool extract_here = xset_get_b(XSetName::ARC_DEF_EX);
     const char* dest_dir = nullptr;
-    int cmd;
+    i32 cmd;
 
     // determine default archive action in this dir
     if (extract_here && have_rw_access(parent->cwd))

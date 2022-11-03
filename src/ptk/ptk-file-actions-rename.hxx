@@ -44,7 +44,7 @@ enum PtkRenameMode
     PTK_RENAME_NEW_LINK
 };
 
-int ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo* file,
+i32 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo* file,
                     const char* dest_dir, bool clip_copy, PtkRenameMode create_new,
                     AutoOpenCreate* auto_open);
 

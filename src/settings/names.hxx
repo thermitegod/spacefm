@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <ztd/ztd.hxx>
+
 // Config file macros for on disk names
 
 /**
@@ -25,7 +27,7 @@
  */
 
 // TOML config file
-constexpr std::uint64_t CONFIG_FILE_VERSION{1}; // 3.0.0-dev
+constexpr u64 CONFIG_FILE_VERSION{1}; // 3.0.0-dev
 // #define CONFIG_FILE_VERSION  1 // 3.0.0-dev
 const std::string CONFIG_FILE_FILENAME{"session.toml"};
 

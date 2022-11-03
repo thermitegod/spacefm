@@ -15,6 +15,9 @@
 
 #include <gtk/gtk.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "window-reference.hxx"
 
 WindowRef* window_ref = window_ref->getInstance();

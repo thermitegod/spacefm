@@ -59,7 +59,7 @@ uri_list_extract_uris(const char* uri_list_str)
 }
 
 static void
-clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, unsigned int info,
+clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, u32 info,
                    void* user_data)
 {
     (void)clipboard;
@@ -144,7 +144,7 @@ ptk_clipboard_copy_name(const char* working_dir, const std::vector<VFSFileInfo*>
     (void)working_dir;
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
-    int fcount = 0;
+    i32 fcount = 0;
 
     std::string file_text;
     for (VFSFileInfo* file: sel_files)
@@ -176,7 +176,7 @@ ptk_clipboard_cut_or_copy_files(const char* working_dir, const std::vector<VFSFi
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkTargetList* target_list = gtk_target_list_new(nullptr, 0);
-    int n_targets;
+    i32 n_targets;
     std::vector<std::string> file_list;
 
     gtk_target_list_add_text_targets(target_list, 0);
@@ -217,7 +217,7 @@ ptk_clipboard_copy_file_list(char** path, bool copy)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkTargetList* target_list = gtk_target_list_new(nullptr, 0);
-    int n_targets;
+    i32 n_targets;
     std::vector<std::string> file_list;
 
     gtk_target_list_add_text_targets(target_list, 0);
@@ -466,7 +466,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
 
     if (uri_list_str)
     {
-        int missing_targets = 0;
+        i32 missing_targets = 0;
 
         std::vector<std::string> file_list;
 

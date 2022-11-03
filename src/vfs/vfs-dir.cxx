@@ -70,10 +70,8 @@ struct VFSDirClass
 static void vfs_dir_class_init(VFSDirClass* klass);
 static void vfs_dir_init(VFSDir* dir);
 static void vfs_dir_finalize(GObject* obj);
-static void vfs_dir_set_property(GObject* obj, unsigned int prop_id, const GValue* value,
-                                 GParamSpec* pspec);
-static void vfs_dir_get_property(GObject* obj, unsigned int prop_id, GValue* value,
-                                 GParamSpec* pspec);
+static void vfs_dir_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec* pspec);
+static void vfs_dir_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec);
 
 static const std::string gethidden(std::string_view path);
 static bool ishidden(std::string_view hidden, std::string_view file_name);
@@ -99,7 +97,7 @@ static GObjectClass* parent_class = nullptr;
 static std::map<const char*, VFSDir*> dir_map;
 
 static GList* mime_cb = nullptr;
-static unsigned int change_notify_timeout = 0;
+static u32 change_notify_timeout = 0;
 
 GType
 vfs_dir_get_type()
@@ -240,7 +238,7 @@ vfs_dir_finalize(GObject* obj)
 }
 
 static void
-vfs_dir_get_property(GObject* obj, unsigned int prop_id, GValue* value, GParamSpec* pspec)
+vfs_dir_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec)
 {
     (void)obj;
     (void)prop_id;
@@ -249,7 +247,7 @@ vfs_dir_get_property(GObject* obj, unsigned int prop_id, GValue* value, GParamSp
 }
 
 static void
-vfs_dir_set_property(GObject* obj, unsigned int prop_id, const GValue* value, GParamSpec* pspec)
+vfs_dir_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec* pspec)
 {
     (void)obj;
     (void)prop_id;
@@ -861,7 +859,7 @@ vfs_dir_unload_thumbnails(VFSDir* dir, bool is_big)
 }
 
 // sfm added mime change timer
-static unsigned int mime_change_timer = 0;
+static u32 mime_change_timer = 0;
 static VFSDir* mime_dir = nullptr;
 
 static bool

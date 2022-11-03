@@ -81,8 +81,8 @@ struct FMPrefDlg
 
 static FMPrefDlg* data = nullptr;
 
-inline constexpr std::array<int, 7> tool_icon_sizes{
-    0,
+inline constexpr std::array<GtkIconSize, 7> tool_icon_sizes{
+    GtkIconSize(0),
     GtkIconSize::GTK_ICON_SIZE_MENU,
     GtkIconSize::GTK_ICON_SIZE_SMALL_TOOLBAR,
     GtkIconSize::GTK_ICON_SIZE_LARGE_TOOLBAR,
@@ -92,16 +92,16 @@ inline constexpr std::array<int, 7> tool_icon_sizes{
 };
 // also change max_icon_size in settings.c & lists in prefdlg.ui prefdlg2.ui
 // see create_size in vfs-thumbnail-loader.c:_vfs_thumbnail_load()
-inline constexpr std::array<int, 13>
+inline constexpr std::array<i32, 13>
     big_icon_sizes{512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22};
-inline constexpr std::array<int, 15>
+inline constexpr std::array<i32, 15>
     small_icon_sizes{512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22, 16, 12};
 inline constexpr std::array<std::string_view, 3> date_formats{
     "%Y-%m-%d %H:%M",
     "%Y-%m-%d",
     "%Y-%m-%d %H:%M:%S",
 };
-inline constexpr std::array<int, 4> drag_actions{0, 1, 2, 3};
+inline constexpr std::array<i32, 4> drag_actions{0, 1, 2, 3};
 
 static void
 dir_unload_thumbnails(VFSDir* dir, bool user_data)
@@ -110,18 +110,18 @@ dir_unload_thumbnails(VFSDir* dir, bool user_data)
 }
 
 static void
-on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
+on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
 {
     (void)user_data;
-    int ibig_icon = -1;
-    int ismall_icon = -1;
-    int itool_icon = -1;
+    i32 ibig_icon = -1;
+    i32 ismall_icon = -1;
+    i32 itool_icon = -1;
 
-    std::uint64_t max_thumb;
+    u64 max_thumb;
     bool show_thumbnail;
-    std::uint64_t big_icon;
-    std::uint64_t small_icon;
-    std::uint64_t tool_icon;
+    u64 big_icon;
+    u64 small_icon;
+    u64 tool_icon;
     bool single_click;
     PtkFileBrowser* file_browser;
     bool use_si_prefix;
@@ -139,7 +139,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
         show_thumbnail = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->show_thumbnail));
-        max_thumb = ((int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->max_thumb_size))) << 10;
+        max_thumb = ((i32)gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->max_thumb_size))) << 10;
 
         /* interface settings */
 
@@ -153,7 +153,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                 for (panel_t p: PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    int n = gtk_notebook_get_n_pages(notebook);
+                    i32 n = gtk_notebook_get_n_pages(notebook);
                     if (always_show_tabs)
                         gtk_notebook_set_show_tabs(notebook, true);
                     else if (n == 1)
@@ -172,8 +172,8 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                 for (panel_t p: PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    int n = gtk_notebook_get_n_pages(notebook);
-                    for (int i = 0; i < n; ++i)
+                    i32 n = gtk_notebook_get_n_pages(notebook);
+                    for (i32 i = 0; i < n; ++i)
                     {
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -233,8 +233,8 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                 for (panel_t p: PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    int n = gtk_notebook_get_n_pages(notebook);
-                    for (int i = 0; i < n; ++i)
+                    i32 n = gtk_notebook_get_n_pages(notebook);
+                    for (i32 i = 0; i < n; ++i)
                     {
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -295,8 +295,8 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                 for (panel_t p: PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    int n = gtk_notebook_get_n_pages(notebook);
-                    for (int i = 0; i < n; ++i)
+                    i32 n = gtk_notebook_get_n_pages(notebook);
+                    for (i32 i = 0; i < n; ++i)
                     {
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -318,8 +318,8 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
                 for (panel_t p: PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    int n = gtk_notebook_get_n_pages(notebook);
-                    for (int i = 0; i < n; ++i)
+                    i32 n = gtk_notebook_get_n_pages(notebook);
+                    for (i32 i = 0; i < n; ++i)
                     {
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -348,7 +348,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
             custom_su = Glib::find_program_in_path(custom_su);
         }
 
-        int idx = gtk_combo_box_get_active(GTK_COMBO_BOX(data->su_command));
+        i32 idx = gtk_combo_box_get_active(GTK_COMBO_BOX(data->su_command));
         if (idx > -1)
         {
             if (!custom_su.empty())
@@ -457,11 +457,11 @@ on_show_thumbnail_toggled(GtkWidget* widget, FMPrefDlg* fm_data)
 }
 
 bool
-fm_edit_preference(GtkWindow* parent, int page)
+fm_edit_preference(GtkWindow* parent, i32 page)
 {
-    int ibig_icon = -1;
-    int ismall_icon = -1;
-    int itool_icon = -1;
+    i32 ibig_icon = -1;
+    i32 ismall_icon = -1;
+    i32 itool_icon = -1;
     GtkWidget* dlg;
 
     if (!data)
@@ -527,7 +527,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         char* main_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
         if (main_terminal)
         {
-            std::size_t i;
+            usize i;
             for (i = 0; i < terminal_programs.size(); ++i)
             {
                 if (ztd::same(main_terminal, terminal_programs.at(i)))
@@ -542,7 +542,7 @@ fm_edit_preference(GtkWindow* parent, int page)
             gtk_combo_box_set_active(GTK_COMBO_BOX(data->terminal), i);
         }
 
-        for (std::uint64_t big_icon_size: big_icon_sizes)
+        for (u64 big_icon_size: big_icon_sizes)
         {
             if (big_icon_size == app_settings.get_icon_size_big())
             {
@@ -552,7 +552,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(data->big_icon_size), ibig_icon);
 
-        for (std::uint64_t small_icon_size: small_icon_sizes)
+        for (u64 small_icon_size: small_icon_sizes)
         {
             if (small_icon_size == app_settings.get_icon_size_small())
             {
@@ -563,7 +563,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         gtk_combo_box_set_active(GTK_COMBO_BOX(data->small_icon_size), ismall_icon);
 
         itool_icon = 0;
-        for (std::uint64_t tool_icon_size: tool_icon_sizes)
+        for (u64 tool_icon_size: tool_icon_sizes)
         {
             if (tool_icon_size == app_settings.get_icon_size_tool())
             {
@@ -603,8 +603,8 @@ fm_edit_preference(GtkWindow* parent, int page)
                                      xset_get_b(XSetName::ROOT_BAR));
         gtk_widget_set_sensitive(data->root_bar, geteuid() == 0);
 
-        int drag_action_set = 0;
-        for (int drag_action: drag_actions)
+        i32 drag_action_set = 0;
+        for (i32 drag_action: drag_actions)
         {
             if (drag_action == xset_get_int(XSetName::DRAG_ACTION, XSetVar::X))
             {
@@ -620,7 +620,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         // Advanced Tab ==================================================
 
         // terminal su
-        int idx;
+        i32 idx;
         GtkTreeIter it;
         data->su_command = GTK_WIDGET(gtk_builder_get_object(builder, "su_command"));
 
@@ -643,7 +643,7 @@ fm_edit_preference(GtkWindow* parent, int page)
             idx = 0;
         else
         {
-            std::size_t i;
+            usize i;
             for (i = 0; i < su_commands.size(); ++i)
             {
                 if (ztd::same(su_commands.at(i), use_su))
@@ -673,7 +673,7 @@ fm_edit_preference(GtkWindow* parent, int page)
         char* date_s = xset_get_s(XSetName::DATE_FORMAT);
         if (date_s)
         {
-            std::size_t i;
+            usize i;
             for (i = 0; i < date_formats.size(); ++i)
             {
                 if (ztd::same(date_formats.at(i), date_s))
@@ -709,7 +709,7 @@ fm_edit_preference(GtkWindow* parent, int page)
     }
 
     // Set current Preferences page
-    const int desktop_page_num = 2;
+    const i32 desktop_page_num = 2;
     // notebook page number 3 is permanently hidden Volume Management
     if (page > desktop_page_num)
         page++;

@@ -52,7 +52,7 @@
 #include "utils.hxx"
 
 static GtkTreeModel* model = nullptr;
-static int n_vols = 0;
+static i32 n_vols = 0;
 
 static void ptk_location_view_init_model(GtkListStore* list);
 
@@ -140,7 +140,7 @@ update_volume_icons()
     VFSVolume* vol;
 
     // GtkListStore* list = GTK_LIST_STORE( model );
-    int icon_size = app_settings.get_icon_size_small();
+    i32 icon_size = app_settings.get_icon_size_small();
     if (icon_size > PANE_MAX_ICON_SIZE)
         icon_size = PANE_MAX_ICON_SIZE;
 
@@ -182,8 +182,8 @@ update_change_detection()
         for (panel_t p: PANELS)
         {
             GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-            int n = gtk_notebook_get_n_pages(notebook);
-            for (int i = 0; i < n; ++i)
+            i32 n = gtk_notebook_get_n_pages(notebook);
+            for (i32 i = 0; i < n; ++i)
             {
                 PtkFileBrowser* file_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -542,7 +542,7 @@ add_volume(VFSVolume* vol, bool set_icon)
                                       -1);
     if (set_icon)
     {
-        int icon_size = app_settings.get_icon_size_small();
+        i32 icon_size = app_settings.get_icon_size_small();
         if (icon_size > PANE_MAX_ICON_SIZE)
             icon_size = PANE_MAX_ICON_SIZE;
         GdkPixbuf* icon = vfs_load_icon(vfs_volume_get_icon(vol), icon_size);
@@ -595,7 +595,7 @@ update_volume(VFSVolume* vol)
         return;
     }
 
-    int icon_size = app_settings.get_icon_size_small();
+    i32 icon_size = app_settings.get_icon_size_small();
     if (icon_size > PANE_MAX_ICON_SIZE)
         icon_size = PANE_MAX_ICON_SIZE;
 
@@ -637,7 +637,7 @@ ptk_location_view_get_mount_point_dir(const char* name)
             "$XDG_RUNTIME_DIR",
             "$XDG_CACHE_HOME",
         };
-        for (std::size_t i = 0; i < varnames.size(); ++i)
+        for (usize i = 0; i < varnames.size(); ++i)
         {
             if (!ztd::contains(parent, varnames.at(i)))
                 continue;
@@ -688,7 +688,7 @@ ptk_location_view_clean_mount_points()
      * build also requires it. */
 
     // clean cache and Auto-Mount|Mount Dirs  (eg for fuse mounts)
-    for (int i = 0; i < 2; ++i)
+    for (i32 i = 0; i < 2; ++i)
     {
         std::string path;
 
@@ -734,7 +734,7 @@ ptk_location_view_clean_mount_points()
 }
 
 char*
-ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmount,
+ptk_location_view_create_mount_point(i32 mode, VFSVolume* vol, netmount_t* netmount,
                                      const char* path)
 {
     std::string mname;
@@ -813,7 +813,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
 
     // complete mount point
     char* point1 = ptk_location_view_get_mount_point_dir(mname.c_str());
-    int r = 2;
+    i32 r = 2;
     std::string point = point1;
 
     // attempt to remove existing dir - succeeds only if empty and unmounted
@@ -1052,7 +1052,7 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
 }
 
 static void
-popup_missing_mount(GtkWidget* view, int job)
+popup_missing_mount(GtkWidget* view, i32 job)
 {
     std::string cmd;
     if (job == 0)
@@ -1867,7 +1867,7 @@ static void
 on_handler_show_config(GtkMenuItem* item, GtkWidget* view, xset_t set2)
 {
     xset_t set;
-    int mode;
+    i32 mode;
 
     if (!item)
         set = set2;
@@ -1894,9 +1894,9 @@ volume_is_visible(VFSVolume* vol)
     char* value;
 
     char* showhidelist = g_strdup_printf(" %s ", xset_get_s(XSetName::DEV_SHOW_HIDE_VOLUMES));
-    for (int i = 0; i < 3; ++i)
+    for (i32 i = 0; i < 3; ++i)
     {
-        for (int j = 0; j < 2; ++j)
+        for (i32 j = 0; j < 2; ++j)
         {
             if (i == 0)
                 value = vol->device_file;
@@ -2028,8 +2028,8 @@ ptk_location_view_on_action(GtkWidget* view, xset_t set)
 }
 
 static void
-show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browser,
-                  unsigned int button, std::time_t time)
+show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browser, u32 button,
+                  std::time_t time)
 {
     (void)button;
     (void)time;
@@ -2216,7 +2216,7 @@ static bool
 on_key_press_event(GtkWidget* w, GdkEventKey* event, PtkFileBrowser* file_browser)
 {
     (void)w;
-    unsigned int keymod = ptk_get_keymod(event->state);
+    u32 keymod = ptk_get_keymod(event->state);
 
     if (event->keyval == GDK_KEY_Menu ||
         (event->keyval == GDK_KEY_F10 && keymod == GdkModifierType::GDK_SHIFT_MASK))
@@ -2240,7 +2240,7 @@ on_dev_menu_hide(GtkWidget* widget, GtkWidget* dev_menu)
 }
 
 static void
-show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, unsigned int button,
+show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, u32 button,
                      std::time_t time)
 {
     (void)dev_item;
@@ -2371,7 +2371,7 @@ static bool
 on_dev_menu_button_press(GtkWidget* item, GdkEventButton* event, VFSVolume* vol)
 {
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
-    unsigned int keymod = ptk_get_keymod(event->state);
+    u32 keymod = ptk_get_keymod(event->state);
 
     if (event->type == GdkEventType::GDK_BUTTON_RELEASE)
     {
@@ -2399,7 +2399,7 @@ on_dev_menu_button_press(GtkWidget* item, GdkEventButton* event, VFSVolume* vol)
     return true;
 }
 
-static int
+static i32
 cmp_dev_name(VFSVolume* a, VFSVolume* b)
 {
     return g_strcmp0(vfs_volume_get_disp_name(a), vfs_volume_get_disp_name(b));

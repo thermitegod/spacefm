@@ -20,6 +20,8 @@
 
 #include <vector>
 
+#include <glib.h>
+
 #include <ztd/ztd.hxx>
 
 #include "types.hxx"
@@ -171,8 +173,8 @@ struct XSet
     char* ob2{nullptr};                    // not saved
     void* ob2_data{nullptr};               // not saved
     PtkFileBrowser* browser{nullptr};      // not saved - set automatically
-    unsigned int key{0};                   // saved
-    unsigned int keymod{0};                // saved
+    u32 key{0};                            // saved
+    u32 keymod{0};                         // saved
     char* shared_key{nullptr};             // not saved
     char* icon{nullptr};                   // saved
     char* desc{nullptr};                   // saved if ( !lock ), or read if locked
@@ -221,22 +223,22 @@ struct XSet
     void set_b(XSetB bval) noexcept;
 
     char* get_s() const noexcept;
-    int get_s_int() const noexcept;
+    i32 get_s_int() const noexcept;
     void set_s(const char* val) noexcept;
     void set_s(const std::string& val) noexcept;
 
     char* get_x() const noexcept;
-    int get_x_int() const noexcept;
+    i32 get_x_int() const noexcept;
     void set_x(const char* val) noexcept;
     void set_x(const std::string& val) noexcept;
 
     char* get_y() const noexcept;
-    int get_y_int() const noexcept;
+    i32 get_y_int() const noexcept;
     void set_y(const char* val) noexcept;
     void set_y(const std::string& val) noexcept;
 
     char* get_z() const noexcept;
-    int get_z_int() const noexcept;
+    i32 get_z_int() const noexcept;
     void set_z(const char* val) noexcept;
     void set_z(const std::string& val) noexcept;
 
@@ -258,14 +260,14 @@ struct XSet
 
     void set_ob1(const char* ob, void* data) noexcept;
     void set_ob1(const char* ob, const char* data) noexcept;
-    void set_ob1_int(const char* ob, int data) noexcept;
+    void set_ob1_int(const char* ob, i32 data) noexcept;
     void set_ob2(const char* ob, void* data) noexcept;
 
-    unsigned int get_key() const noexcept;
-    void set_key(unsigned int val) noexcept;
+    u32 get_key() const noexcept;
+    void set_key(u32 val) noexcept;
 
-    unsigned int get_keymod() const noexcept;
-    void set_keymod(unsigned int val) noexcept;
+    u32 get_keymod() const noexcept;
+    void set_keymod(u32 val) noexcept;
 
     char* get_shared_key() const noexcept;
     void set_shared_key(const char* val) noexcept;
@@ -436,15 +438,15 @@ xset_t xset_set_cb_panel(panel_t panel, std::string_view name, GFunc cb_func,
                          void* cb_data) noexcept;
 xset_t xset_set_cb_panel(panel_t panel, XSetPanel name, GFunc cb_func, void* cb_data) noexcept;
 
-xset_t xset_set_ob1_int(xset_t set, const char* ob1, int ob1_int) noexcept;
+xset_t xset_set_ob1_int(xset_t set, const char* ob1, i32 ob1_int) noexcept;
 xset_t xset_set_ob1(xset_t set, const char* ob1, void* ob1_data) noexcept;
 xset_t xset_set_ob2(xset_t set, const char* ob2, void* ob2_data) noexcept;
 
 // Int
 
-int xset_get_int_set(xset_t set, XSetVar var) noexcept;
+i32 xset_get_int_set(xset_t set, XSetVar var) noexcept;
 
-int xset_get_int(XSetName name, XSetVar var) noexcept;
-int xset_get_int(std::string_view name, XSetVar var) noexcept;
-int xset_get_int_panel(panel_t panel, std::string_view name, XSetVar var) noexcept;
-int xset_get_int_panel(panel_t panel, XSetPanel name, XSetVar var) noexcept;
+i32 xset_get_int(XSetName name, XSetVar var) noexcept;
+i32 xset_get_int(std::string_view name, XSetVar var) noexcept;
+i32 xset_get_int_panel(panel_t panel, std::string_view name, XSetVar var) noexcept;
+i32 xset_get_int_panel(panel_t panel, XSetPanel name, XSetVar var) noexcept;

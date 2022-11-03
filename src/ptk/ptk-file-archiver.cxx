@@ -102,7 +102,7 @@ archive_handler_get_first_extension(xset_t handler_xset)
 }
 
 static bool
-archive_handler_run_in_term(xset_t handler_xset, int operation)
+archive_handler_run_in_term(xset_t handler_xset, i32 operation)
 {
     // Making sure a valid handler_xset has been passed
     if (!handler_xset)
@@ -112,7 +112,7 @@ archive_handler_run_in_term(xset_t handler_xset, int operation)
         return false;
     }
 
-    int ret;
+    i32 ret;
     switch (operation)
     {
         case PTKFileArchiverArc::ARC_COMPRESS:
@@ -164,7 +164,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     }
 
     // Loop through available handlers
-    std::size_t len = 0;
+    usize len = 0;
     xset_t handler_xset;
     char* xset_name = nullptr;
     std::string extension;
@@ -304,7 +304,7 @@ replace_archive_subs(std::string_view line, std::string_view n, std::string_view
     new_line = ztd::replace(new_line, "%g", g);
     new_line = ztd::replace(new_line, "%G", g);
 
-    // double percent %% - reduce to single
+    // f64 percent %% - reduce to single
     new_line = ztd::replace(new_line, "%%", "%");
 
     return new_line;
@@ -399,9 +399,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
     xset_t handler_xset;
     // Get xset name of last used handler
     char* xset_name = xset_get_s(XSetName::ARC_DLG); // do not free
-    int format = 4;                                  // default tar.gz
-    int n = 0;
-    for (int i = 0; archive_handlers[i] != nullptr; ++i)
+    i32 format = 4;                                  // default tar.gz
+    i32 n = 0;
+    for (i32 i = 0; archive_handlers[i] != nullptr; ++i)
     {
         if (!archive_handlers[i])
             continue;
@@ -559,8 +559,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd);
 
     // Setting dimension and position
-    int width = xset_get_int(XSetName::ARC_DLG, XSetVar::X);
-    int height = xset_get_int(XSetName::ARC_DLG, XSetVar::Y);
+    i32 width = xset_get_int(XSetName::ARC_DLG, XSetVar::X);
+    i32 height = xset_get_int(XSetName::ARC_DLG, XSetVar::Y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -577,7 +577,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
     gtk_widget_show_all(dlg);
 
     bool exit_loop = false;
-    int res;
+    i32 res;
     while ((res = gtk_dialog_run(GTK_DIALOG(dlg))))
     {
         switch (res)
@@ -765,7 +765,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
 
         /* Looping for all selected files/directories - all are used
          * when '%N' is present, only the first otherwise */
-        int i = 0;
+        i32 i = 0;
         bool loop_once = ztd::contains(command, "%N");
         for (VFSFileInfo* file: sel_files)
         {
@@ -790,7 +790,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
 
                 // Looping to find a path that doesnt exist
                 struct stat statbuf;
-                int c = 1;
+                i32 c = 1;
                 while (lstat(udest_file.c_str(), &statbuf) == 0)
                 {
                     udest_file = fmt::format("{}/{}-{}{}{}", dest_dir, desc, "copy", ++c, ext);
@@ -945,7 +945,7 @@ on_create_subfolder_toggled(GtkToggleButton* togglebutton, GtkWidget* chk_write)
 
 void
 ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFileInfo*>& sel_files,
-                          const char* cwd, const char* dest_dir, int job,
+                          const char* cwd, const char* dest_dir, i32 job,
                           bool archive_presence_checked)
 { /* This function is also used to list the contents of archives */
     GtkWidget* dlgparent = nullptr;
@@ -960,7 +960,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFil
     const char* dest;
     std::string dest_quote;
     std::string full_quote;
-    int res;
+    i32 res;
     struct stat statbuf;
     GSList* handlers_slist = nullptr;
 
@@ -974,7 +974,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFil
 
     /* Setting desired archive operation and keeping in terminal while
      * listing */
-    int archive_operation =
+    i32 archive_operation =
         list_contents ? PTKFileArchiverArc::ARC_LIST : PTKFileArchiverArc::ARC_EXTRACT;
     keep_term = list_contents;
 
@@ -1066,8 +1066,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFil
         gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd);
 
         // Fetching saved dialog dimensions and applying
-        int width = xset_get_int(XSetName::ARC_DLG, XSetVar::X);
-        int height = xset_get_int(XSetName::ARC_DLG, XSetVar::Y);
+        i32 width = xset_get_int(XSetName::ARC_DLG, XSetVar::X);
+        i32 height = xset_get_int(XSetName::ARC_DLG, XSetVar::Y);
         if (width && height)
         {
             // filechooser will not honor default size or size request ?
@@ -1236,7 +1236,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFil
             std::string filename_no_ext;
             if (pathnames)
             {
-                for (int i = 0; pathnames[i]; ++i)
+                for (i32 i = 0; pathnames[i]; ++i)
                 {
                     // getting just the extension of the pathname list element
                     const auto namepack = get_name_extension(pathnames[i]);
@@ -1251,7 +1251,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFil
                         if (ztd::endswith(filename, extension))
                         {
                             // It is - determining filename without extension
-                            std::size_t n = std::strlen(filename) - extension.size();
+                            usize n = std::strlen(filename) - extension.size();
                             char ch = filename[n];
                             filename[n] = '\0';
                             filename_no_archive_ext = ztd::strdup(filename);
@@ -1306,7 +1306,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFil
                 /* Determining full path of parent directory to make
                  * (also used later in '%g' substitution) */
                 parent_path = Glib::build_filename(dest, filename_no_archive_ext);
-                int n = 1;
+                i32 n = 1;
 
                 // Looping to find a path that doesnt exist
                 while (lstat(parent_path.c_str(), &statbuf) == 0)
@@ -1353,7 +1353,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFil
                  * guaranteed not to exist so as to avoid overwriting */
                 extract_target = Glib::build_filename(create_parent ? parent_path : dest,
                                                       filename_no_archive_ext);
-                int n = 1;
+                i32 n = 1;
 
                 // Looping to find a path that doesnt exist
                 while (lstat(extract_target.c_str(), &statbuf) == 0)

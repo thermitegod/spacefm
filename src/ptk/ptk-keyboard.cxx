@@ -19,8 +19,11 @@
 #include <gdk/gdk.h>
 #include <glib.h>
 
-unsigned int
-ptk_get_keymod(unsigned int event)
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
+u32
+ptk_get_keymod(u32 event)
 {
     return (event & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
                      GdkModifierType::GDK_MOD1_MASK | GdkModifierType::GDK_SUPER_MASK |
@@ -42,9 +45,9 @@ transpose_nonlatin_keypress(GdkEventKey* event)
 
     // We have a non-latin char, try other keyboard groups
     GdkKeymapKey* keys = nullptr;
-    unsigned int* keyvals;
-    int n_entries;
-    int level;
+    u32* keyvals;
+    i32 n_entries;
+    i32 level;
 
     GdkDisplay* display = gdk_display_get_default();
 
@@ -62,7 +65,7 @@ transpose_nonlatin_keypress(GdkEventKey* event)
                                            &keyvals,
                                            &n_entries))
     {
-        for (int n = 0; n < n_entries; ++n)
+        for (i32 n = 0; n < n_entries; ++n)
         {
             if (keys[n].group == event->group)
                 // Skip keys from the same group

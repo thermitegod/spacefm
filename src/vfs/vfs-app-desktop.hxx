@@ -26,6 +26,8 @@
 
 #include <gtk/gtk.h>
 
+#include <ztd/ztd.hxx>
+
 class VFSAppDesktop
 {
   public:
@@ -36,7 +38,7 @@ class VFSAppDesktop
     const char* get_disp_name() noexcept;
     const char* get_exec() noexcept;
     const char* get_full_path() noexcept;
-    GdkPixbuf* get_icon(int size) noexcept;
+    GdkPixbuf* get_icon(i32 size) noexcept;
     const char* get_icon_name() noexcept;
     bool use_terminal() noexcept;
     bool open_multiple_files() noexcept;

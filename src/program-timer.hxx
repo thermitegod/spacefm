@@ -18,5 +18,5 @@
 namespace program_timer
 {
     void start() noexcept;
-    double elapsed() noexcept;
+    f64 elapsed() noexcept;
 } // namespace program_timer

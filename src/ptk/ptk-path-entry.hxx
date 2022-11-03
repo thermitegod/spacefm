@@ -31,7 +31,7 @@ struct EntryData
     EntryData(PtkFileBrowser* browser);
 
     PtkFileBrowser* browser;
-    unsigned int seek_timer;
+    u32 seek_timer;
 };
 
 GtkWidget* ptk_path_entry_new(PtkFileBrowser* file_browser);

@@ -147,7 +147,7 @@ XSet::get_s() const noexcept
     return this->s;
 }
 
-int
+i32
 XSet::get_s_int() const noexcept
 {
     if (!this->s)
@@ -177,7 +177,7 @@ XSet::get_x() const noexcept
     return this->x;
 }
 
-int
+i32
 XSet::get_x_int() const noexcept
 {
     if (!this->x)
@@ -207,7 +207,7 @@ XSet::get_y() const noexcept
     return this->y;
 }
 
-int
+i32
 XSet::get_y_int() const noexcept
 {
     if (!this->y)
@@ -237,7 +237,7 @@ XSet::get_z() const noexcept
     return this->z;
 }
 
-int
+i32
 XSet::get_z_int() const noexcept
 {
     if (!this->z)
@@ -373,7 +373,7 @@ XSet::set_ob1(const char* ob, const char* data) noexcept
 }
 
 void
-XSet::set_ob1_int(const char* ob, int data) noexcept
+XSet::set_ob1_int(const char* ob, i32 data) noexcept
 {
     if (this->ob1)
         free(this->ob1);
@@ -390,26 +390,26 @@ XSet::set_ob2(const char* ob, void* data) noexcept
     this->ob2_data = data;
 }
 
-unsigned int
+unsigned i32
 XSet::get_key() const noexcept
 {
     return this->key;
 }
 
 void
-XSet::set_key(unsigned int val) noexcept
+XSet::set_key(u32 val) noexcept
 {
     this->key = val;
 }
 
-unsigned int
+unsigned i32
 XSet::get_keymod() const noexcept
 {
     return this->keymod;
 }
 
 void
-XSet::set_keymod(unsigned int val) noexcept
+XSet::set_keymod(u32 val) noexcept
 {
     this->keymod = val;
 }
@@ -1397,7 +1397,7 @@ xset_get_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode) noexcep
  * Generic Int get
  */
 
-int
+i32
 xset_get_int_set(xset_t set, XSetVar var) noexcept
 {
     if (!set)
@@ -1456,28 +1456,28 @@ xset_get_int_set(xset_t set, XSetVar var) noexcept
     return std::stol(varstring);
 }
 
-int
+i32
 xset_get_int(XSetName name, XSetVar var) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_int_set(set, var);
 }
 
-int
+i32
 xset_get_int(std::string_view name, XSetVar var) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_int_set(set, var);
 }
 
-int
+i32
 xset_get_int_panel(panel_t panel, std::string_view name, XSetVar var) noexcept
 {
     const std::string fullname = fmt::format("panel{}_{}", panel, name);
     return xset_get_int(fullname, var);
 }
 
-int
+i32
 xset_get_int_panel(panel_t panel, XSetPanel name, XSetVar var) noexcept
 {
     return xset_get_int(xset_get_xsetname_from_panel(panel, name), var);
@@ -1536,7 +1536,7 @@ xset_set_cb_panel(panel_t panel, XSetPanel name, GFunc cb_func, void* cb_data) n
 }
 
 xset_t
-xset_set_ob1_int(xset_t set, const char* ob1, int ob1_int) noexcept
+xset_set_ob1_int(xset_t set, const char* ob1, i32 ob1_int) noexcept
 {
     if (set->ob1)
         free(set->ob1);

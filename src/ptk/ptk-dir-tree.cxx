@@ -55,9 +55,9 @@ struct PtkDirTreeNode
 
     VFSFileInfo* file;
     PtkDirTreeNode* children;
-    int n_children;
+    i32 n_children;
     vfs::file_monitor_t monitor;
-    int n_expand;
+    i32 n_expand;
     PtkDirTreeNode* parent;
     PtkDirTreeNode* next;
     PtkDirTreeNode* prev;
@@ -79,16 +79,16 @@ static void ptk_dir_tree_finalize(GObject* object);
 
 static GtkTreeModelFlags ptk_dir_tree_get_flags(GtkTreeModel* tree_model);
 
-static int ptk_dir_tree_get_n_columns(GtkTreeModel* tree_model);
+static i32 ptk_dir_tree_get_n_columns(GtkTreeModel* tree_model);
 
-static GType ptk_dir_tree_get_column_type(GtkTreeModel* tree_model, int index);
+static GType ptk_dir_tree_get_column_type(GtkTreeModel* tree_model, i32 index);
 
 static gboolean ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                       GtkTreePath* path);
 
 static GtkTreePath* ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter);
 
-static void ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column,
+static void ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
                                    GValue* value);
 
 static gboolean ptk_dir_tree_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter);
@@ -98,15 +98,15 @@ static gboolean ptk_dir_tree_iter_children(GtkTreeModel* tree_model, GtkTreeIter
 
 static gboolean ptk_dir_tree_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter);
 
-static int ptk_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter);
+static i32 ptk_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter);
 
 static gboolean ptk_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter,
-                                            GtkTreeIter* parent, int n);
+                                            GtkTreeIter* parent, i32 n);
 
 static gboolean ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                          GtkTreeIter* child);
 
-static int ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b);
+static i32 ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b);
 
 static void ptk_dir_tree_insert_child(PtkDirTree* tree, PtkDirTreeNode* parent,
                                       std::string_view file_path, std::string_view name);
@@ -293,7 +293,7 @@ ptk_dir_tree_get_flags(GtkTreeModel* tree_model)
     return GTK_TREE_MODEL_ITERS_PERSIST;
 }
 
-static int
+static i32
 ptk_dir_tree_get_n_columns(GtkTreeModel* tree_model)
 {
     (void)tree_model;
@@ -301,7 +301,7 @@ ptk_dir_tree_get_n_columns(GtkTreeModel* tree_model)
 }
 
 static GType
-ptk_dir_tree_get_column_type(GtkTreeModel* tree_model, int index)
+ptk_dir_tree_get_column_type(GtkTreeModel* tree_model, i32 index)
 {
     (void)tree_model;
     if (!PTK_IS_DIR_TREE(tree_model))
@@ -309,16 +309,16 @@ ptk_dir_tree_get_column_type(GtkTreeModel* tree_model, int index)
         LOG_ERROR("!PTK_IS_DIR_TREE(tree_model)");
         return G_TYPE_INVALID;
     }
-    if (index > (int)G_N_ELEMENTS(column_types))
+    if (index > (i32)G_N_ELEMENTS(column_types))
     {
-        LOG_ERROR("index > (int)G_N_ELEMENTS(column_types)");
+        LOG_ERROR("index > (i32)G_N_ELEMENTS(column_types)");
         return G_TYPE_INVALID;
     }
     return column_types[index];
 }
 
 static PtkDirTreeNode*
-get_nth_node(PtkDirTreeNode* parent, int n)
+get_nth_node(PtkDirTreeNode* parent, i32 n)
 {
     if (n >= parent->n_children || n < 0)
         return nullptr;
@@ -342,11 +342,11 @@ ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* 
     if (!tree || !tree->root)
         return false;
 
-    int* indices = gtk_tree_path_get_indices(path);
-    int depth = gtk_tree_path_get_depth(path);
+    i32* indices = gtk_tree_path_get_indices(path);
+    i32 depth = gtk_tree_path_get_depth(path);
 
     PtkDirTreeNode* node = tree->root;
-    for (int i = 0; i < depth; ++i)
+    for (i32 i = 0; i < depth; ++i)
     {
         node = get_nth_node(node, indices[i]);
         if (!node)
@@ -362,13 +362,13 @@ ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* 
     return true;
 }
 
-static int
+static i32
 get_node_index(PtkDirTreeNode* parent, PtkDirTreeNode* child)
 {
     if (!parent || !child)
         return -1;
 
-    int i = 0;
+    i32 i = 0;
     for (PtkDirTreeNode* node = parent->children; node; node = node->next)
     {
         if (node == child)
@@ -415,7 +415,7 @@ ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
 
     while (node != tree->root)
     {
-        int i = get_node_index(node->parent, node);
+        i32 i = get_node_index(node->parent, node);
         if (i == -1)
         {
             gtk_tree_path_free(path);
@@ -428,7 +428,7 @@ ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
 }
 
 static void
-ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column, GValue* value)
+ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, GValue* value)
 {
     if (!PTK_IS_DIR_TREE(tree_model))
     {
@@ -440,9 +440,9 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column, 
         LOG_ERROR("!iter");
         return;
     }
-    if (column > (int)G_N_ELEMENTS(column_types))
+    if (column > (i32)G_N_ELEMENTS(column_types))
     {
-        LOG_ERROR("column > (int)G_N_ELEMENTS(column_types)");
+        LOG_ERROR("column > (i32)G_N_ELEMENTS(column_types)");
         return;
     }
 
@@ -455,7 +455,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, int column, 
         case PTKDirTreeCol::COL_DIR_TREE_ICON:
             if (!info)
                 return;
-            int icon_size;
+            i32 icon_size;
             GdkPixbuf* icon;
             // icon = vfs_file_info_get_small_icon( info );
             icon_size = app_settings.get_icon_size_small();
@@ -566,7 +566,7 @@ ptk_dir_tree_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter)
     return node->n_children != 0;
 }
 
-static int
+static i32
 ptk_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
     PtkDirTreeNode* node;
@@ -593,7 +593,7 @@ ptk_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
 }
 
 static gboolean
-ptk_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent, int n)
+ptk_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent, i32 n)
 {
     PtkDirTreeNode* parent_node;
 
@@ -651,7 +651,7 @@ ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIte
     return false;
 }
 
-static int
+static i32
 ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b)
 {
     (void)tree;
@@ -661,7 +661,7 @@ ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b
     if (!file1 || !file2)
         return 0;
     /* FIXME: UTF-8 strings should not be treated as ASCII when sorted  */
-    int ret =
+    i32 ret =
         g_ascii_strcasecmp(vfs_file_info_get_disp_name(file2), vfs_file_info_get_disp_name(file1));
     return ret;
 }
@@ -704,7 +704,7 @@ dir_path_from_tree_node(PtkDirTree* tree, PtkDirTreeNode* node)
         node = node->parent;
     }
 
-    int len;
+    i32 len;
     GSList* l;
     for (len = 1, l = names; l; l = l->next)
     {

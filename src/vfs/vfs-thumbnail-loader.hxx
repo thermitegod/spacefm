@@ -41,7 +41,7 @@ struct VFSThumbnailRequest
     ~VFSThumbnailRequest();
 
     VFSFileInfo* file;
-    unsigned int n_requests[magic_enum::enum_count<VFSThumbnailSize>()];
+    u32 n_requests[magic_enum::enum_count<VFSThumbnailSize>()];
 };
 
 struct VFSThumbnailLoader
@@ -52,7 +52,7 @@ struct VFSThumbnailLoader
     VFSDir* dir;
     GQueue* queue;
     VFSAsyncTask* task;
-    unsigned int idle_handler;
+    u32 idle_handler;
     GQueue* update_queue;
 };
 
@@ -69,5 +69,5 @@ void vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big);
 // prevent unnecessary disk I/O and this can speed up the loading.
 // Otherwise, it should pass 0 for mtime, and the function will do stat() on the file
 // to get mtime.
-GdkPixbuf* vfs_thumbnail_load_for_uri(std::string_view uri, int size, std::time_t mtime);
-GdkPixbuf* vfs_thumbnail_load_for_file(std::string_view file, int size, std::time_t mtime);
+GdkPixbuf* vfs_thumbnail_load_for_uri(std::string_view uri, i32 size, std::time_t mtime);
+GdkPixbuf* vfs_thumbnail_load_for_file(std::string_view file, i32 size, std::time_t mtime);

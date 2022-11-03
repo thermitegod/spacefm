@@ -63,7 +63,7 @@ struct PtkFileTask
     GtkTextBuffer* log_buf;
     GtkTextMark* log_end;
     bool log_appended;
-    int err_count;
+    i32 err_count;
     PTKFileTaskPtaskError err_mode;
 
     bool complete;
@@ -73,9 +73,9 @@ struct PtkFileTask
     bool force_scroll;
 
     /* <private> */
-    unsigned int timeout;
+    u32 timeout;
     bool restart_timeout;
-    unsigned int progress_timer;
+    u32 progress_timer;
     char progress_count;
     GFunc complete_notify;
     void* user_data;
@@ -115,6 +115,6 @@ void ptk_file_task_run(PtkFileTask* ptask);
 
 bool ptk_file_task_cancel(PtkFileTask* ptask);
 
-void ptk_file_task_pause(PtkFileTask* ptask, int state);
+void ptk_file_task_pause(PtkFileTask* ptask, i32 state);
 
 void ptk_file_task_progress_open(PtkFileTask* ptask);

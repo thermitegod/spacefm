@@ -168,7 +168,7 @@ VFSAppDesktop::get_icon_name() noexcept
 }
 
 GdkPixbuf*
-VFSAppDesktop::get_icon(int size) noexcept
+VFSAppDesktop::get_icon(i32 size) noexcept
 {
     GdkPixbuf* icon = nullptr;
 

@@ -52,7 +52,7 @@ struct PtkDirTree
     PtkDirTreeNode* root;
     /* GtkSortType sort_order; */ /* I do not want to support this :-( */
     /* Random integer to check whether an iter belongs to our model */
-    int stamp;
+    i32 stamp;
 };
 
 struct PtkDirTreeClass

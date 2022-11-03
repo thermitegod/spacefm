@@ -35,50 +35,50 @@ AppSettings::set_show_thumbnail(bool val) noexcept
     this->show_thumbnail = val;
 }
 
-std::uint64_t
+u64
 AppSettings::get_max_thumb_size() const noexcept
 {
     return this->max_thumb_size;
 }
 
 void
-AppSettings::set_max_thumb_size(std::uint64_t val) noexcept
+AppSettings::set_max_thumb_size(u64 val) noexcept
 {
     this->max_thumb_size = val;
 }
 
-std::uint64_t
+u64
 AppSettings::get_icon_size_big() const noexcept
 {
     return this->icon_size_big;
 }
 
 void
-AppSettings::set_icon_size_big(std::uint64_t val) noexcept
+AppSettings::set_icon_size_big(u64 val) noexcept
 {
     this->icon_size_big = val;
 }
 
-std::uint64_t
+u64
 AppSettings::get_icon_size_small() const noexcept
 {
     return this->icon_size_small;
 }
 
 void
-AppSettings::set_icon_size_small(std::uint64_t val) noexcept
+AppSettings::set_icon_size_small(u64 val) noexcept
 {
     this->icon_size_small = val;
 }
 
-std::uint64_t
+u64
 AppSettings::get_icon_size_tool() const noexcept
 {
     return this->icon_size_tool;
 }
 
 void
-AppSettings::set_icon_size_tool(std::uint64_t val) noexcept
+AppSettings::set_icon_size_tool(u64 val) noexcept
 {
     this->icon_size_tool = val;
 }
@@ -183,50 +183,50 @@ AppSettings::set_date_format(std::string_view val) noexcept
     this->date_format_custom = val.data();
 }
 
-std::uint64_t
+u64
 AppSettings::get_sort_order() const noexcept
 {
     return this->sort_order;
 }
 
 void
-AppSettings::set_sort_order(std::uint64_t val) noexcept
+AppSettings::set_sort_order(u64 val) noexcept
 {
     this->sort_order = val;
 }
 
-std::uint64_t
+u64
 AppSettings::get_sort_type() const noexcept
 {
     return this->sort_type;
 }
 
 void
-AppSettings::set_sort_type(std::uint64_t val) noexcept
+AppSettings::set_sort_type(u64 val) noexcept
 {
     this->sort_type = val;
 }
 
-std::uint64_t
+u64
 AppSettings::get_width() const noexcept
 {
     return this->width;
 }
 
 void
-AppSettings::set_width(std::uint64_t val) noexcept
+AppSettings::set_width(u64 val) noexcept
 {
     this->width = val;
 }
 
-std::uint64_t
+u64
 AppSettings::get_height() const noexcept
 {
     return this->height;
 }
 
 void
-AppSettings::set_height(std::uint64_t val) noexcept
+AppSettings::set_height(u64 val) noexcept
 {
     this->height = val;
 }
