@@ -79,7 +79,7 @@ static const std::string gethidden(std::string_view path);
 static bool ishidden(std::string_view hidden, std::string_view file_name);
 
 /* constructor is private */
-static VFSDir* vfs_dir_new(const char* path);
+static VFSDir* vfs_dir_new(std::string_view path);
 
 static void vfs_dir_load(VFSDir* dir);
 static void* vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir);
@@ -272,7 +272,7 @@ vfs_dir_find_file(VFSDir* dir, std::string_view file_name, VFSFileInfo* file)
 
 /* signal handlers */
 void
-vfs_dir_emit_file_created(VFSDir* dir, const char* file_name, bool force)
+vfs_dir_emit_file_created(VFSDir* dir, std::string_view file_name, bool force)
 {
     (void)force;
     // Ignore avoid_changes for creation of files
@@ -280,12 +280,11 @@ vfs_dir_emit_file_created(VFSDir* dir, const char* file_name, bool force)
     //    return;
 
     if (ztd::same(file_name, dir->path))
-    {
-        // Special Case: The directory itself was created?
+    { // Special Case: The directory itself was created?
         return;
     }
 
-    dir->created_files.push_back(file_name);
+    dir->created_files.push_back(file_name.data());
     if (change_notify_timeout == 0)
     {
         change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
@@ -297,7 +296,7 @@ vfs_dir_emit_file_created(VFSDir* dir, const char* file_name, bool force)
 }
 
 void
-vfs_dir_emit_file_deleted(VFSDir* dir, const char* file_name, VFSFileInfo* file)
+vfs_dir_emit_file_deleted(VFSDir* dir, std::string_view file_name, VFSFileInfo* file)
 {
     if (ztd::same(file_name, dir->path))
     {
@@ -338,7 +337,7 @@ vfs_dir_emit_file_deleted(VFSDir* dir, const char* file_name, VFSFileInfo* file)
 }
 
 void
-vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* file, bool force)
+vfs_dir_emit_file_changed(VFSDir* dir, std::string_view file_name, VFSFileInfo* file, bool force)
 {
     // LOG_INFO("vfs_dir_emit_file_changed dir={} file_name={} avoid={}", dir->path, file_name,
     // dir->avoid_changes ? "true" : "false");
@@ -425,12 +424,12 @@ vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file)
 /* methods */
 
 static VFSDir*
-vfs_dir_new(const char* path)
+vfs_dir_new(std::string_view path)
 {
     VFSDir* dir = VFS_DIR(g_object_new(VFS_TYPE_DIR, nullptr));
-    dir->path = ztd::strdup(path);
+    dir->path = ztd::strdup(path.data());
 
-    dir->avoid_changes = vfs_volume_dir_avoid_changes(path);
+    dir->avoid_changes = vfs_volume_dir_avoid_changes(path.data());
     // LOG_INFO("vfs_dir_new {}  avoid_changes={}", dir->path, dir->avoid_changes ? "true" :
     // "false");
     return dir;
@@ -477,7 +476,7 @@ gethidden(std::string_view path)
 static bool
 ishidden(std::string_view hidden, std::string_view file_name)
 {
-    if (ztd::contains(hidden, file_name))
+    if (ztd::contains(hidden, fmt::format("{}\n", file_name)))
         return true;
     return false;
 }
@@ -497,13 +496,13 @@ vfs_dir_add_hidden(std::string_view path, std::string_view file_name)
 static void
 vfs_dir_load(VFSDir* dir)
 {
-    if (dir->path)
-    {
-        dir->disp_path = ztd::strdup(Glib::filename_display_name(dir->path));
-        dir->task = vfs_async_task_new((VFSAsyncFunc)vfs_dir_load_thread, dir);
-        g_signal_connect(dir->task, "finish", G_CALLBACK(on_list_task_finished), dir);
-        vfs_async_task_execute(dir->task);
-    }
+    if (!dir->path)
+        return;
+
+    dir->disp_path = ztd::strdup(Glib::filename_display_name(dir->path));
+    dir->task = vfs_async_task_new((VFSAsyncFunc)vfs_dir_load_thread, dir);
+    g_signal_connect(dir->task, "finish", G_CALLBACK(on_list_task_finished), dir);
+    vfs_async_task_execute(dir->task);
 }
 
 static void*
@@ -514,47 +513,48 @@ vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
     dir->file_listed = false;
     dir->load_complete = false;
     dir->xhidden_count = 0; // MOD
-    if (dir->path)
+    if (!dir->path)
+        return nullptr;
+
+    /* Install file alteration monitor */
+    dir->monitor = vfs_file_monitor_add(dir->path, vfs_dir_monitor_callback, dir);
+
+    // MOD  dir contains .hidden file?
+    const std::string hidden = gethidden(dir->path);
+
+    for (const auto& file: std::filesystem::directory_iterator(dir->path))
     {
-        /* Install file alteration monitor */
-        dir->monitor = vfs_file_monitor_add(dir->path, vfs_dir_monitor_callback, dir);
+        if (vfs_async_task_is_cancelled(dir->task))
+            break;
 
-        // MOD  dir contains .hidden file?
-        const std::string hidden = gethidden(dir->path);
+        const std::string file_name = std::filesystem::path(file).filename();
+        const std::string full_path = Glib::build_filename(dir->path, file_name);
 
-        for (const auto& file: std::filesystem::directory_iterator(dir->path))
+        // MOD ignore if in .hidden
+        if (ishidden(hidden, file_name))
         {
-            if (vfs_async_task_is_cancelled(dir->task))
-                break;
+            dir->xhidden_count++;
+            continue;
+        }
 
-            const std::string file_name = std::filesystem::path(file).filename();
-            const std::string full_path = Glib::build_filename(dir->path, file_name);
+        VFSFileInfo* fi = vfs_file_info_new();
+        if (vfs_file_info_get(fi, full_path))
+        {
+            vfs_dir_lock(dir);
 
-            // MOD ignore if in .hidden
-            if (ishidden(hidden, file_name))
-            {
-                dir->xhidden_count++;
-                continue;
-            }
+            /* Special processing for desktop directory */
+            vfs_file_info_load_special_info(fi, full_path.c_str());
 
-            VFSFileInfo* fi = vfs_file_info_new();
-            if (vfs_file_info_get(fi, full_path))
-            {
-                vfs_dir_lock(dir);
+            dir->file_list.push_back(fi);
 
-                /* Special processing for desktop directory */
-                vfs_file_info_load_special_info(fi, full_path.c_str());
-
-                dir->file_list.push_back(fi);
-
-                vfs_dir_unlock(dir);
-            }
-            else
-            {
-                vfs_file_info_unref(fi);
-            }
+            vfs_dir_unlock(dir);
+        }
+        else
+        {
+            vfs_file_info_unref(fi);
         }
     }
+
     return nullptr;
 }
 
@@ -600,7 +600,7 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
 }
 
 static void
-update_changed_files(const char* key, VFSDir* dir)
+update_changed_files(std::string_view key, VFSDir* dir)
 {
     (void)key;
 
@@ -622,7 +622,7 @@ update_changed_files(const char* key, VFSDir* dir)
 }
 
 static void
-update_created_files(const char* key, VFSDir* dir)
+update_created_files(std::string_view key, VFSDir* dir)
 {
     (void)key;
 
@@ -720,16 +720,13 @@ vfs_dir_monitor_callback(VFSFileMonitor* monitor, VFSFileMonitorEvent event, con
 }
 
 VFSDir*
-vfs_dir_get_by_path_soft(const char* path)
+vfs_dir_get_by_path_soft(std::string_view path)
 {
-    if (!path)
-        return nullptr;
-
     VFSDir* dir = nullptr;
 
     try
     {
-        dir = dir_map.at(path);
+        dir = dir_map.at(path.data());
     }
     catch (std::out_of_range)
     {
@@ -742,18 +739,15 @@ vfs_dir_get_by_path_soft(const char* path)
 }
 
 VFSDir*
-vfs_dir_get_by_path(const char* path)
+vfs_dir_get_by_path(std::string_view path)
 {
-    if (!path)
-        return nullptr;
-
     VFSDir* dir = nullptr;
 
     if (!dir_map.empty())
     {
         try
         {
-            dir = dir_map.at(path);
+            dir = dir_map.at(path.data());
         }
         catch (std::out_of_range)
         {
@@ -778,7 +772,7 @@ vfs_dir_get_by_path(const char* path)
 }
 
 static void
-reload_mime_type(const char* key, VFSDir* dir)
+reload_mime_type(std::string_view key, VFSDir* dir)
 {
     (void)key;
 
@@ -872,17 +866,16 @@ static bool
 on_mime_change_timer(void* user_data)
 {
     (void)user_data;
+    std::string command;
 
     // LOG_INFO("MIME-UPDATE on_timer");
-    const std::string mime_command =
-        fmt::format("update-mime-database {}/mime", vfs_user_data_dir());
-    print_command(mime_command);
-    Glib::spawn_command_line_async(mime_command);
+    command = fmt::format("update-mime-database {}/mime", vfs_user_data_dir());
+    print_command(command);
+    Glib::spawn_command_line_async(command);
 
-    const std::string desk_command =
-        fmt::format("update-desktop-database {}/applications", vfs_user_data_dir());
-    print_command(desk_command);
-    Glib::spawn_command_line_async(desk_command);
+    command = fmt::format("update-desktop-database {}/applications", vfs_user_data_dir());
+    print_command(command);
+    Glib::spawn_command_line_async(command);
 
     g_source_remove(mime_change_timer);
     mime_change_timer = 0;
@@ -917,7 +910,7 @@ vfs_dir_monitor_mime()
     if (!std::filesystem::is_directory(path))
         return;
 
-    mime_dir = vfs_dir_get_by_path(path.data());
+    mime_dir = vfs_dir_get_by_path(path);
     if (!mime_dir)
         return;
 

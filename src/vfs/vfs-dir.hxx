@@ -278,17 +278,18 @@ void vfs_dir_unlock(VFSDir* dir);
 
 GType vfs_dir_get_type();
 
-VFSDir* vfs_dir_get_by_path(const char* path);
-VFSDir* vfs_dir_get_by_path_soft(const char* path);
+VFSDir* vfs_dir_get_by_path(std::string_view path);
+VFSDir* vfs_dir_get_by_path_soft(std::string_view path);
 
 bool vfs_dir_is_file_listed(VFSDir* dir);
 
 void vfs_dir_unload_thumbnails(VFSDir* dir, bool is_big);
 
 /* emit signals */
-void vfs_dir_emit_file_created(VFSDir* dir, const char* file_name, bool force);
-void vfs_dir_emit_file_deleted(VFSDir* dir, const char* file_name, VFSFileInfo* file);
-void vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* file, bool force);
+void vfs_dir_emit_file_created(VFSDir* dir, std::string_view file_name, bool force);
+void vfs_dir_emit_file_deleted(VFSDir* dir, std::string_view file_name, VFSFileInfo* file);
+void vfs_dir_emit_file_changed(VFSDir* dir, std::string_view file_name, VFSFileInfo* file,
+                               bool force);
 void vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file);
 void vfs_dir_flush_notify_cache();
 
