@@ -51,16 +51,6 @@ ptk_get_keymod(unsigned int event)
                      GDK_HYPER_MASK | GDK_META_MASK));
 }
 
-GtkBuilder*
-_gtk_builder_new_from_file(const char* file)
-{
-    const std::string filename = Glib::build_filename(PACKAGE_UI_DIR, file);
-    GtkBuilder* builder = gtk_builder_new();
-    gtk_builder_add_from_file(builder, filename.c_str(), nullptr);
-
-    return builder;
-}
-
 #ifdef HAVE_NONLATIN
 void
 transpose_nonlatin_keypress(GdkEventKey* event)

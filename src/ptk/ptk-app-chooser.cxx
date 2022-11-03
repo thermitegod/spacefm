@@ -27,8 +27,8 @@
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dir.hxx"
 
+#include "ptk/ptk-builder.hxx"
 #include "ptk/ptk-handler.hxx"
-#include "ptk/ptk-utils.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
 
@@ -209,7 +209,7 @@ app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all
     show_default        Show 'Set as default' checkbox
     dir_default         Show 'Set as default' also for type dir
     */
-    GtkBuilder* builder = _gtk_builder_new_from_file("appchooserdlg3.ui");
+    GtkBuilder* builder = ptk_gtk_builder_new_from_file(PTK_DLG_APP_CHOOSER);
     GtkWidget* dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
     GtkWidget* file_type = GTK_WIDGET(gtk_builder_get_object(builder, "file_type"));
     GtkTreeView* view;

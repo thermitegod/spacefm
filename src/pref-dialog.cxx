@@ -39,6 +39,7 @@
 
 #include "extern.hxx"
 
+#include "ptk/ptk-builder.hxx"
 #include "ptk/ptk-utils.hxx"
 #include "ptk/ptk-location-view.hxx"
 
@@ -468,7 +469,7 @@ fm_edit_preference(GtkWindow* parent, int page)
     {
         GtkTreeModel* model;
         // this invokes GVFS-RemoteVolumeMonitor via IsSupported
-        GtkBuilder* builder = _gtk_builder_new_from_file("prefdlg3.ui");
+        GtkBuilder* builder = ptk_gtk_builder_new_from_file(PTK_DLG_PREFERENCES);
 
         if (!builder)
             return false;

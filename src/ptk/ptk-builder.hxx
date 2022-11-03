@@ -1,6 +1,4 @@
 /**
- * Copyright (C) 2006 Hong Jen Yee (PCMan) <pcman.tw@gmail.com>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -17,20 +15,14 @@
 
 #pragma once
 
-#include <string>
 #include <string_view>
 
 #include <gtk/gtk.h>
-#include <gdk/gdk.h>
-#include <glib.h>
 
-// The string 'message' can contain pango markups.
-// Special markup characters can also be used and will be
-// escaped in this function.
-void ptk_show_error(GtkWindow* parent, std::string_view title, std::string_view message);
+inline constexpr std::string_view PTK_DLG_FIND_FILES("find-files3.ui");
+inline constexpr std::string_view PTK_DLG_ABOUT("about-dlg3.ui");
+inline constexpr std::string_view PTK_DLG_PREFERENCES("prefdlg3.ui");
+inline constexpr std::string_view PTK_DLG_APP_CHOOSER("appchooserdlg3.ui");
+inline constexpr std::string_view PTK_DLG_FILE_PROPERTIES("file_properties3.ui");
 
-unsigned int ptk_get_keymod(unsigned int event);
-
-#ifdef HAVE_NONLATIN
-void transpose_nonlatin_keypress(GdkEventKey* event);
-#endif
+GtkBuilder* ptk_gtk_builder_new_from_file(std::string_view file);

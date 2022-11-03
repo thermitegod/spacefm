@@ -41,6 +41,7 @@
 #include "window-reference.hxx"
 #include "main-window.hxx"
 
+#include "ptk/ptk-builder.hxx"
 #include "ptk/ptk-utils.hxx"
 
 #include "pref-dialog.hxx"
@@ -2669,7 +2670,7 @@ on_about_activate(GtkMenuItem* menuitem, void* user_data)
 
         WindowReference::increase();
 
-        builder = _gtk_builder_new_from_file("about-dlg3.ui");
+        builder = ptk_gtk_builder_new_from_file(PTK_DLG_ABOUT);
         about_dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
         g_object_unref(builder);
         gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(about_dlg), PACKAGE_VERSION);

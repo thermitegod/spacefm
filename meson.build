@@ -295,6 +295,7 @@ sources = [
   'src/mime-type/mime-type.cxx',
 
   'src/ptk/ptk-app-chooser.cxx',
+  'src/ptk/ptk-builder.cxx',
   'src/ptk/ptk-bookmark-view.cxx',
   'src/ptk/ptk-clipboard.cxx',
   'src/ptk/ptk-dir-tree.cxx',

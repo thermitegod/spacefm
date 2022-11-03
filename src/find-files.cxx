@@ -51,7 +51,7 @@
 #include "main-window.hxx"
 
 #include "ptk/ptk-file-misc.hxx"
-#include "ptk/ptk-utils.hxx"
+#include "ptk/ptk-builder.hxx"
 
 #include "settings/app.hxx"
 
@@ -1074,7 +1074,7 @@ fm_find_files(const std::vector<const char*>& search_dirs)
     GtkWidget* add_directory_btn;
     GtkWidget* remove_directory_btn;
 
-    GtkBuilder* builder = _gtk_builder_new_from_file("find-files3.ui");
+    GtkBuilder* builder = ptk_gtk_builder_new_from_file(PTK_DLG_FIND_FILES);
     data->win = GTK_WIDGET(gtk_builder_get_object(builder, "win"));
     g_object_set_data_full(G_OBJECT(data->win), "find-files", data, (GDestroyNotify)free_data);
 

@@ -36,6 +36,7 @@
 #include <pwd.h>
 #include <grp.h>
 
+#include "ptk/ptk-builder.hxx"
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-utils.hxx"
 
@@ -381,7 +382,7 @@ GtkWidget*
 file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
                         const std::vector<VFSFileInfo*>& sel_files, int page)
 {
-    GtkBuilder* builder = _gtk_builder_new_from_file("file_properties3.ui");
+    GtkBuilder* builder = ptk_gtk_builder_new_from_file(PTK_DLG_FILE_PROPERTIES);
     GtkWidget* dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
     GtkNotebook* notebook = GTK_NOTEBOOK(gtk_builder_get_object(builder, "notebook"));
     xset_set_window_icon(GTK_WINDOW(dlg));
