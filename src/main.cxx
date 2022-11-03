@@ -41,8 +41,8 @@
 #include "vfs/vfs-user-dir.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 
-#include "ptk/ptk-utils.hxx"
 #include "ptk/ptk-app-chooser.hxx"
+#include "ptk/ptk-error.hxx"
 #include "ptk/ptk-location-view.hxx"
 
 #include "settings/app.hxx"

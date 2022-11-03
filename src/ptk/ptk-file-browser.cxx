@@ -40,7 +40,7 @@
 
 #include <magic_enum.hpp>
 
-#include "ptk/ptk-utils.hxx"
+#include "ptk/ptk-error.hxx"
 #include "ptk/ptk-file-misc.hxx"
 
 #include "ptk/ptk-bookmark-view.hxx"

@@ -70,6 +70,7 @@
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-user-dir.hxx"
 
+#include "ptk/ptk-error.hxx"
 #include "ptk/ptk-utils.hxx"
 #include "ptk/ptk-app-chooser.hxx"
 #include "ptk/ptk-handler.hxx"
@@ -1907,7 +1908,7 @@ xset_get_by_plug_name(std::string_view plug_dir, std::string_view plug_name)
     const std::string setname = xset_custom_new_name();
 
     xset_t set = xset_new(setname, XSetName::CUSTOM);
-    set->plug_dir = ztd::strdup(plug_dir  .data());
+    set->plug_dir = ztd::strdup(plug_dir.data());
     set->plug_name = ztd::strdup(plug_name.data());
     set->plugin = true;
     set->lock = false;

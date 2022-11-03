@@ -42,6 +42,7 @@
 #include "main-window.hxx"
 
 #include "ptk/ptk-builder.hxx"
+#include "ptk/ptk-error.hxx"
 #include "ptk/ptk-utils.hxx"
 
 #include "pref-dialog.hxx"

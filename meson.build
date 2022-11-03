@@ -300,6 +300,7 @@ sources = [
   'src/ptk/ptk-clipboard.cxx',
   'src/ptk/ptk-dir-tree.cxx',
   'src/ptk/ptk-dir-tree-view.cxx',
+  'src/ptk/ptk-error.cxx',
   'src/ptk/ptk-file-archiver.cxx',
   'src/ptk/ptk-file-browser.cxx',
   'src/ptk/ptk-file-list.cxx',

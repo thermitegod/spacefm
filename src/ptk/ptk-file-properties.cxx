@@ -37,8 +37,8 @@
 #include <grp.h>
 
 #include "ptk/ptk-builder.hxx"
+#include "ptk/ptk-error.hxx"
 #include "ptk/ptk-file-task.hxx"
-#include "ptk/ptk-utils.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-file-info.hxx"
