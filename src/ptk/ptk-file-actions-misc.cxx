@@ -33,19 +33,19 @@ static bool
 action_dialog(GtkWindow* parent_win, std::string_view title, std::string_view message)
 {
     GtkWidget* dlg = gtk_message_dialog_new(parent_win,
-                                            GTK_DIALOG_MODAL,
-                                            GTK_MESSAGE_WARNING,
-                                            GTK_BUTTONS_YES_NO,
+                                            GtkDialogFlags::GTK_DIALOG_MODAL,
+                                            GtkMessageType::GTK_MESSAGE_WARNING,
+                                            GtkButtonsType::GTK_BUTTONS_YES_NO,
                                             message.data(),
                                             nullptr);
-    gtk_dialog_set_default_response(GTK_DIALOG(dlg), GTK_RESPONSE_YES);
+    gtk_dialog_set_default_response(GTK_DIALOG(dlg), GtkResponseType::GTK_RESPONSE_YES);
     gtk_window_set_title(GTK_WINDOW(dlg), title.data());
     // xset_set_window_icon(GTK_WINDOW(dlg));
 
     const int ret = gtk_dialog_run(GTK_DIALOG(dlg));
     gtk_widget_destroy(dlg);
 
-    if (ret != GTK_RESPONSE_YES)
+    if (ret != GtkResponseType::GTK_RESPONSE_YES)
         return false;
     return true;
 }

@@ -1239,19 +1239,19 @@ GtkWidget*
 xset_get_image(const char* icon, GtkIconSize icon_size)
 {
     /*
-        GTK_ICON_SIZE_MENU,
-        GTK_ICON_SIZE_SMALL_TOOLBAR,
-        GTK_ICON_SIZE_LARGE_TOOLBAR,
-        GTK_ICON_SIZE_BUTTON,
-        GTK_ICON_SIZE_DND,
-        GTK_ICON_SIZE_DIALOG
+        GtkIconSize::GTK_ICON_SIZE_MENU,
+        GtkIconSize::GTK_ICON_SIZE_SMALL_TOOLBAR,
+        GtkIconSize::GTK_ICON_SIZE_LARGE_TOOLBAR,
+        GtkIconSize::GTK_ICON_SIZE_BUTTON,
+        GtkIconSize::GTK_ICON_SIZE_DND,
+        GtkIconSize::GTK_ICON_SIZE_DIALOG
     */
 
     if (!(icon && icon[0]))
         return nullptr;
 
     if (!icon_size)
-        icon_size = GTK_ICON_SIZE_MENU;
+        icon_size = GtkIconSize::GTK_ICON_SIZE_MENU;
 
     return gtk_image_new_from_icon_name(icon, icon_size);
 }
@@ -1289,7 +1289,7 @@ xset_new_menuitem(const char* label, const char* icon)
     }
     if (!(icon && icon[0]))
         return item;
-    // GtkWidget* image = xset_get_image(icon, GTK_ICON_SIZE_MENU);
+    // GtkWidget* image = xset_get_image(icon, GtkIconSize::GTK_ICON_SIZE_MENU);
 
     return item;
 }
@@ -1484,7 +1484,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
             // get menu icon size
             int icon_w;
             int icon_h;
-            gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
+            gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
             int icon_size = icon_w > icon_h ? icon_w : icon_h;
 
             GdkPixbuf* app_icon = nullptr;
@@ -1676,7 +1676,11 @@ xset_custom_copy_files(xset_t src, xset_t dest)
     {
         const std::string msg =
             fmt::format("An error occured copying command files\n\n{}", *standard_error);
-        xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", GTK_BUTTONS_OK, msg);
+        xset_msg_dialog(nullptr,
+                        GtkMessageType::GTK_MESSAGE_ERROR,
+                        "Copy Command Error",
+                        GtkButtonsType::GTK_BUTTONS_OK,
+                        msg);
     }
     command = fmt::format("chmod -R go-rwx {}", path_dest);
     print_command(command);
@@ -1696,7 +1700,11 @@ xset_custom_copy_files(xset_t src, xset_t dest)
         {
             const std::string msg =
                 fmt::format("An error occured copying command data files\n\n{}", *standard_error);
-            xset_msg_dialog(nullptr, GTK_MESSAGE_ERROR, "Copy Command Error", GTK_BUTTONS_OK, msg);
+            xset_msg_dialog(nullptr,
+                            GtkMessageType::GTK_MESSAGE_ERROR,
+                            "Copy Command Error",
+                            GtkButtonsType::GTK_BUTTONS_OK,
+                            msg);
         }
         command = fmt::format("chmod -R go-rwx {}", path_dest);
         print_command(command);
@@ -2201,9 +2209,9 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                     "The imported plugin directory does not contain a valid plugin.\n\n({}/)",
                     plugin_data->plug_dir);
                 xset_msg_dialog(GTK_WIDGET(plugin_data->main_window),
-                                GTK_MESSAGE_ERROR,
+                                GtkMessageType::GTK_MESSAGE_ERROR,
                                 "Invalid Plugin",
-                                GTK_BUTTONS_OK,
+                                GtkButtonsType::GTK_BUTTONS_OK,
                                 msg);
             }
             else if (use != PluginUse::BOOKMARKS)
@@ -2215,9 +2223,9 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                     // This dialog should never be seen - failsafe
                     xset_msg_dialog(plugin_data->main_window ? GTK_WIDGET(plugin_data->main_window)
                                                              : nullptr,
-                                    GTK_MESSAGE_ERROR,
+                                    GtkMessageType::GTK_MESSAGE_ERROR,
                                     "Handler Plugin",
-                                    GTK_BUTTONS_OK,
+                                    GtkButtonsType::GTK_BUTTONS_OK,
                                     "This file contains a handler plugin which cannot be installed "
                                     "as a plugin.\n\nYou can import handlers from a handler "
                                     "configuration window, or use Plugins|Import.");
@@ -2278,9 +2286,9 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                                 "improve your system security.",
                                 label);
                         xset_msg_dialog(GTK_WIDGET(plugin_data->main_window),
-                                        GTK_MESSAGE_INFO,
+                                        GtkMessageType::GTK_MESSAGE_INFO,
                                         "Copy Plugin",
-                                        GTK_BUTTONS_OK,
+                                        GtkButtonsType::GTK_BUTTONS_OK,
                                         msg);
                     }
                 }
@@ -2304,10 +2312,10 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
         const std::string msg =
             fmt::format("Uninstall the '{}' plugin?\n\n( {} )", label, set->plug_dir);
         if (xset_msg_dialog(parent,
-                            GTK_MESSAGE_WARNING,
+                            GtkMessageType::GTK_MESSAGE_WARNING,
                             "Uninstall Plugin",
-                            GTK_BUTTONS_YES_NO,
-                            msg) != GTK_RESPONSE_YES)
+                            GtkButtonsType::GTK_BUTTONS_YES_NO,
+                            msg) != GtkResponseType::GTK_RESPONSE_YES)
         {
             return;
         }
@@ -2503,7 +2511,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     }
 
     char* path = xset_file_dialog(parent,
-                                  GTK_FILE_CHOOSER_ACTION_SAVE,
+                                  GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
                                   "Save As Plugin File",
                                   deffolder,
                                   deffile.c_str());
@@ -2522,9 +2530,9 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
         {
             free(path);
             xset_msg_dialog(parent,
-                            GTK_MESSAGE_ERROR,
+                            GtkMessageType::GTK_MESSAGE_ERROR,
                             "Export Error",
-                            GTK_BUTTONS_OK,
+                            GtkButtonsType::GTK_BUTTONS_OK,
                             "Unable to create temporary files");
             return;
         }
@@ -2563,9 +2571,9 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
             }
             free(path);
             xset_msg_dialog(parent,
-                            GTK_MESSAGE_ERROR,
+                            GtkMessageType::GTK_MESSAGE_ERROR,
                             "Export Error",
-                            GTK_BUTTONS_OK,
+                            GtkButtonsType::GTK_BUTTONS_OK,
                             "Unable to create temporary files");
             return;
         }
@@ -2580,9 +2588,9 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
                 }
                 free(path);
                 xset_msg_dialog(parent,
-                                GTK_MESSAGE_ERROR,
+                                GtkMessageType::GTK_MESSAGE_ERROR,
                                 "Export Error",
-                                GTK_BUTTONS_OK,
+                                GtkButtonsType::GTK_BUTTONS_OK,
                                 "Unable to create temporary files");
                 return;
             }
@@ -3137,17 +3145,17 @@ xset_get_keyname(xset_t set, int key_val, int key_mod)
 
     if (keymod)
     {
-        if (keymod & GDK_SUPER_MASK)
+        if (keymod & GdkModifierType::GDK_SUPER_MASK)
             mod = fmt::format("Super+{}", mod);
-        if (keymod & GDK_HYPER_MASK)
+        if (keymod & GdkModifierType::GDK_HYPER_MASK)
             mod = fmt::format("Hyper+{}", mod);
-        if (keymod & GDK_META_MASK)
+        if (keymod & GdkModifierType::GDK_META_MASK)
             mod = fmt::format("Meta+{}", mod);
-        if (keymod & GDK_MOD1_MASK)
+        if (keymod & GdkModifierType::GDK_MOD1_MASK)
             mod = fmt::format("Alt+{}", mod);
-        if (keymod & GDK_CONTROL_MASK)
+        if (keymod & GdkModifierType::GDK_CONTROL_MASK)
             mod = fmt::format("Ctrl+{}", mod);
-        if (keymod & GDK_SHIFT_MASK)
+        if (keymod & GdkModifierType::GDK_SHIFT_MASK)
             mod = fmt::format("Shift+{}", mod);
     }
     return mod;
@@ -3309,20 +3317,20 @@ xset_set_key(GtkWidget* parent, xset_t set)
         dlgparent = gtk_widget_get_toplevel(parent);
 
     GtkWidget* dlg = gtk_message_dialog_new_with_markup(GTK_WINDOW(dlgparent),
-                                                        GTK_DIALOG_MODAL,
-                                                        GTK_MESSAGE_QUESTION,
-                                                        GTK_BUTTONS_NONE,
+                                                        GtkDialogFlags::GTK_DIALOG_MODAL,
+                                                        GtkMessageType::GTK_MESSAGE_QUESTION,
+                                                        GtkButtonsType::GTK_BUTTONS_NONE,
                                                         keymsg.c_str(),
                                                         nullptr);
     xset_set_window_icon(GTK_WINDOW(dlg));
 
     GtkWidget* btn_cancel = gtk_button_new_with_label("Cancel");
     gtk_button_set_label(GTK_BUTTON(btn_cancel), "Cancel");
-    gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_cancel, GTK_RESPONSE_CANCEL);
+    gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_cancel, GtkResponseType::GTK_RESPONSE_CANCEL);
 
     GtkWidget* btn_unset = gtk_button_new_with_label("NO");
     gtk_button_set_label(GTK_BUTTON(btn_unset), "Unset");
-    gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_unset, GTK_RESPONSE_NO);
+    gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_unset, GtkResponseType::GTK_RESPONSE_NO);
 
     if (set->shared_key)
         keyset = xset_get(set->shared_key);
@@ -3333,7 +3341,7 @@ xset_set_key(GtkWidget* parent, xset_t set)
 
     GtkWidget* btn = gtk_button_new_with_label("Apply");
     gtk_button_set_label(GTK_BUTTON(btn), "Set");
-    gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn, GTK_RESPONSE_OK);
+    gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn, GtkResponseType::GTK_RESPONSE_OK);
     gtk_widget_set_sensitive(btn, false);
 
     g_object_set_data(G_OBJECT(dlg), "set", set);
@@ -3347,9 +3355,10 @@ xset_set_key(GtkWidget* parent, xset_t set)
 
     int response = gtk_dialog_run(GTK_DIALOG(dlg));
     gtk_widget_destroy(dlg);
-    if (response == GTK_RESPONSE_OK || response == GTK_RESPONSE_NO)
+    if (response == GtkResponseType::GTK_RESPONSE_OK ||
+        response == GtkResponseType::GTK_RESPONSE_NO)
     {
-        if (response == GTK_RESPONSE_OK && (newkey || newkeymod))
+        if (response == GtkResponseType::GTK_RESPONSE_OK && (newkey || newkeymod))
         {
             // clear duplicate key assignments
             for (xset_t set2: xsets)
@@ -3361,7 +3370,7 @@ xset_set_key(GtkWidget* parent, xset_t set)
                 }
             }
         }
-        else if (response == GTK_RESPONSE_NO)
+        else if (response == GtkResponseType::GTK_RESPONSE_NO)
         {
             newkey = 0; // unset
             newkeymod = 0;
@@ -3507,7 +3516,7 @@ xset_design_job(GtkWidget* item, xset_t set)
                 folder2 = "/usr/bin";
             }
             if ((custom_file = xset_file_dialog(parent,
-                                                GTK_FILE_CHOOSER_ACTION_OPEN,
+                                                GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
                                                 "Choose Custom Executable",
                                                 folder2.c_str(),
                                                 file2.c_str())))
@@ -3542,10 +3551,10 @@ xset_design_job(GtkWidget* item, xset_t set)
                     "or menus here which you only want to appear for this one MIME type.",
                     name[0] == '\0' ? "(none)" : name);
                 if (xset_msg_dialog(parent,
-                                    GTK_MESSAGE_INFO,
+                                    GtkMessageType::GTK_MESSAGE_INFO,
                                     "New Context Command",
-                                    GTK_BUTTONS_OK_CANCEL,
-                                    msg) != GTK_RESPONSE_OK)
+                                    GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
+                                    msg) != GtkResponseType::GTK_RESPONSE_OK)
                 {
                     break;
                 }
@@ -3729,10 +3738,10 @@ xset_design_job(GtkWidget* item, xset_t set)
                     "or menus here which you only want to appear for this one MIME type.",
                     name[0] == '\0' ? "(none)" : name);
                 if (xset_msg_dialog(parent,
-                                    GTK_MESSAGE_INFO,
+                                    GtkMessageType::GTK_MESSAGE_INFO,
                                     "New Context Submenu",
-                                    GTK_BUTTONS_OK_CANCEL,
-                                    msg) != GTK_RESPONSE_OK)
+                                    GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
+                                    msg) != GtkResponseType::GTK_RESPONSE_OK)
                 {
                     break;
                 }
@@ -3789,7 +3798,7 @@ xset_design_job(GtkWidget* item, xset_t set)
                     folder = ztd::strdup("/");
             }
             file = xset_file_dialog(GTK_WIDGET(parent),
-                                    GTK_FILE_CHOOSER_ACTION_OPEN,
+                                    GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
                                     "Choose Plugin File",
                                     folder,
                                     nullptr);
@@ -3805,9 +3814,9 @@ xset_design_job(GtkWidget* item, xset_t set)
             if (!user_tmp)
             {
                 xset_msg_dialog(GTK_WIDGET(parent),
-                                GTK_MESSAGE_ERROR,
+                                GtkMessageType::GTK_MESSAGE_ERROR,
                                 "Error Creating Temp Directory",
-                                GTK_BUTTONS_OK,
+                                GtkButtonsType::GTK_BUTTONS_OK,
                                 "Unable to create temporary directory");
                 free(file);
                 break;
@@ -3884,14 +3893,14 @@ xset_design_job(GtkWidget* item, xset_t set)
                     "Permanently remove the '{}' SUBMENU AND ALL ITEMS WITHIN IT?\n\nThis action "
                     "will delete all settings and files associated with these items.",
                     name);
-                buttons = GTK_BUTTONS_YES_NO;
+                buttons = GtkButtonsType::GTK_BUTTONS_YES_NO;
             }
             else
             {
                 msg = fmt::format("Permanently remove the '{}' item?\n\nThis action will delete "
                                   "all settings and files associated with this item.",
                                   name);
-                buttons = GTK_BUTTONS_OK_CANCEL;
+                buttons = GtkButtonsType::GTK_BUTTONS_OK_CANCEL;
             }
             free(name);
             bool is_app;
@@ -3903,8 +3912,8 @@ xset_design_job(GtkWidget* item, xset_t set)
                 if (parent)
                     dlgparent = gtk_widget_get_toplevel(parent);
                 dlg = gtk_message_dialog_new(GTK_WINDOW(dlgparent),
-                                             GTK_DIALOG_MODAL,
-                                             GTK_MESSAGE_WARNING,
+                                             GtkDialogFlags::GTK_DIALOG_MODAL,
+                                             GtkMessageType::GTK_MESSAGE_WARNING,
                                              (GtkButtonsType)buttons,
                                              msg.c_str(),
                                              nullptr);
@@ -3913,7 +3922,8 @@ xset_design_job(GtkWidget* item, xset_t set)
                 gtk_widget_show_all(dlg);
                 response = gtk_dialog_run(GTK_DIALOG(dlg));
                 gtk_widget_destroy(dlg);
-                if (response != GTK_RESPONSE_OK && response != GTK_RESPONSE_YES)
+                if (response != GtkResponseType::GTK_RESPONSE_OK &&
+                    response != GtkResponseType::GTK_RESPONSE_YES)
                     break;
             }
 
@@ -4295,7 +4305,7 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, xset_t set)
                     break;
             }
             break;
-        case GDK_CONTROL_MASK:
+        case GdkModifierType::GDK_CONTROL_MASK:
             switch (event->keyval)
             {
                 case GDK_KEY_c:
@@ -4443,7 +4453,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, unsigned 
                                    "activate",
                                    accel_group,
                                    GDK_KEY_x,
-                                   GDK_CONTROL_MASK,
+                                   GdkModifierType::GDK_CONTROL_MASK,
                                    GTK_ACCEL_VISIBLE);
 
     // Copy
@@ -4454,7 +4464,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, unsigned 
                                    "activate",
                                    accel_group,
                                    GDK_KEY_c,
-                                   GDK_CONTROL_MASK,
+                                   GdkModifierType::GDK_CONTROL_MASK,
                                    GTK_ACCEL_VISIBLE);
 
     // Paste
@@ -4465,7 +4475,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, unsigned 
                                    "activate",
                                    accel_group,
                                    GDK_KEY_v,
-                                   GDK_CONTROL_MASK,
+                                   GdkModifierType::GDK_CONTROL_MASK,
                                    GTK_ACCEL_VISIBLE);
 
     // Remove
@@ -4579,7 +4589,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, unsigned 
                                    "activate",
                                    accel_group,
                                    GDK_KEY_k,
-                                   GDK_CONTROL_MASK,
+                                   GdkModifierType::GDK_CONTROL_MASK,
                                    GTK_ACCEL_VISIBLE);
 
     // Edit (script)
@@ -4681,7 +4691,7 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
     GtkWidget* menu = item ? GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu")) : nullptr;
     unsigned int keymod = ptk_get_keymod(event->state);
 
-    if (event->type == GDK_BUTTON_RELEASE)
+    if (event->type == GdkEventType::GDK_BUTTON_RELEASE)
     {
         if (event->button == 1 && keymod == 0)
         {
@@ -4700,7 +4710,7 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
         // menu item in some GTK2/3 themes.
         return true;
     }
-    else if (event->type != GDK_BUTTON_PRESS)
+    else if (event->type != GdkEventType::GDK_BUTTON_PRESS)
         return false;
 
     switch (event->button)
@@ -4728,19 +4738,19 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
                         return true;
                     }
                     break;
-                case GDK_CONTROL_MASK:
+                case GdkModifierType::GDK_CONTROL_MASK:
                     // ctrl
                     job = XSetJob::COPY;
                     break;
-                case GDK_MOD1_MASK:
+                case GdkModifierType::GDK_MOD1_MASK:
                     // alt
                     job = XSetJob::CUT;
                     break;
-                case GDK_SHIFT_MASK:
+                case GdkModifierType::GDK_SHIFT_MASK:
                     // shift
                     job = XSetJob::PASTE;
                     break;
-                case (GDK_CONTROL_MASK | GDK_SHIFT_MASK):
+                case (GdkModifierType::GDK_CONTROL_MASK | GdkModifierType::GDK_SHIFT_MASK):
                     // ctrl + shift
                     job = XSetJob::COMMAND;
                     break;
@@ -4767,23 +4777,23 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
                             job = XSetJob::PROP_CMD;
                     }
                     break;
-                case GDK_CONTROL_MASK:
+                case GdkModifierType::GDK_CONTROL_MASK:
                     // ctrl
                     job = XSetJob::KEY;
                     break;
-                case GDK_MOD1_MASK:
+                case GdkModifierType::GDK_MOD1_MASK:
                     // alt
                     job = XSetJob::HELP;
                     break;
-                case GDK_SHIFT_MASK:
+                case GdkModifierType::GDK_SHIFT_MASK:
                     // shift
                     job = XSetJob::ICON;
                     break;
-                case (GDK_CONTROL_MASK | GDK_SHIFT_MASK):
+                case (GdkModifierType::GDK_CONTROL_MASK | GdkModifierType::GDK_SHIFT_MASK):
                     // ctrl + shift
                     job = XSetJob::REMOVE;
                     break;
-                case (GDK_CONTROL_MASK | GDK_MOD1_MASK):
+                case (GdkModifierType::GDK_CONTROL_MASK | GdkModifierType::GDK_MOD1_MASK):
                     // ctrl + alt
                     job = XSetJob::PROP;
                     break;
@@ -4861,7 +4871,7 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
                     break;
             }
             break;
-        case GDK_CONTROL_MASK:
+        case GdkModifierType::GDK_CONTROL_MASK:
             switch (event->keyval)
             {
                 case GDK_KEY_c:
@@ -4998,10 +5008,10 @@ xset_menu_cb(GtkWidget* item, xset_t set)
             if (rset->menu_style == XSetMenu::CONFIRM)
             {
                 if (xset_msg_dialog(parent,
-                                    GTK_MESSAGE_QUESTION,
+                                    GtkMessageType::GTK_MESSAGE_QUESTION,
                                     title,
-                                    GTK_BUTTONS_OK_CANCEL,
-                                    msg) == GTK_RESPONSE_OK)
+                                    GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
+                                    msg) == GtkResponseType::GTK_RESPONSE_OK)
                 {
                     if (cb_func)
                         cb_func(item, cb_data);
@@ -5040,7 +5050,7 @@ xset_menu_cb(GtkWidget* item, xset_t set)
             {
                 char* file;
                 file = xset_file_dialog(parent,
-                                        GTK_FILE_CHOOSER_ACTION_SAVE,
+                                        GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
                                         rset->title,
                                         rset->s,
                                         "foobar.xyz");
@@ -5108,13 +5118,14 @@ xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title
 
     GtkWidget* dlg =
         gtk_message_dialog_new(GTK_WINDOW(dlgparent),
-                               GtkDialogFlags(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+                               GtkDialogFlags(GtkDialogFlags::GTK_DIALOG_MODAL |
+                                              GtkDialogFlags::GTK_DIALOG_DESTROY_WITH_PARENT),
                                action,
                                buttons,
                                msg1.data(),
                                nullptr);
 
-    if (action == GTK_MESSAGE_INFO)
+    if (action == GtkMessageType::GTK_MESSAGE_INFO)
         xset_set_window_icon(GTK_WINDOW(dlg));
     gtk_window_set_role(GTK_WINDOW(dlg), "msg_dialog");
 
@@ -5253,8 +5264,8 @@ multi_input_new(GtkScrolledWindow* scrolled, const char* text)
     GtkTextIter iter;
 
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
-                                   GTK_POLICY_AUTOMATIC,
-                                   GTK_POLICY_AUTOMATIC);
+                                   GtkPolicyType::GTK_POLICY_AUTOMATIC,
+                                   GtkPolicyType::GTK_POLICY_AUTOMATIC);
     GtkTextView* input = GTK_TEXT_VIEW(gtk_text_view_new());
     // ubuntu shows input too small so use mininum height
     gtk_widget_set_size_request(GTK_WIDGET(input), -1, 50);
@@ -5286,7 +5297,7 @@ on_input_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
     (void)widget;
     if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter)
     {
-        gtk_dialog_response(GTK_DIALOG(dlg), GTK_RESPONSE_OK);
+        gtk_dialog_response(GTK_DIALOG(dlg), GtkResponseType::GTK_RESPONSE_OK);
         return true;
     }
     return false;
@@ -5299,8 +5310,8 @@ xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
     char* icon = nullptr;
 
     // set busy cursor
-    GdkCursor* cursor =
-        gdk_cursor_new_for_display(gtk_widget_get_display(GTK_WIDGET(parent)), GDK_WATCH);
+    GdkCursor* cursor = gdk_cursor_new_for_display(gtk_widget_get_display(GTK_WIDGET(parent)),
+                                                   GdkCursorType::GDK_WATCH);
     if (cursor)
     {
         gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(parent)), cursor);
@@ -5313,9 +5324,9 @@ xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
     GtkWidget* icon_chooser = exo_icon_chooser_dialog_new("Choose Icon",
                                                           GTK_WINDOW(parent),
                                                           "Cancel",
-                                                          GTK_RESPONSE_CANCEL,
+                                                          GtkResponseType::GTK_RESPONSE_CANCEL,
                                                           "OK",
-                                                          GTK_RESPONSE_ACCEPT,
+                                                          GtkResponseType::GTK_RESPONSE_ACCEPT,
                                                           nullptr);
     // Set icon chooser dialog size
     int width = xset_get_int(XSetName::MAIN_ICON, XSetVar::X);
@@ -5329,7 +5340,7 @@ xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
 
     // Prompting user to pick icon
     int response_icon_chooser = gtk_dialog_run(GTK_DIALOG(icon_chooser));
-    if (response_icon_chooser == GTK_RESPONSE_ACCEPT)
+    if (response_icon_chooser == GtkResponseType::GTK_RESPONSE_ACCEPT)
     {
         /* Fetching selected icon */
         icon = exo_icon_chooser_dialog_get_icon(EXO_ICON_CHOOSER_DIALOG(icon_chooser));
@@ -5366,9 +5377,9 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
         dlgparent = gtk_widget_get_toplevel(parent);
 
     GtkWidget* dlg = gtk_message_dialog_new(GTK_WINDOW(dlgparent),
-                                            GTK_DIALOG_MODAL,
-                                            GTK_MESSAGE_QUESTION,
-                                            GTK_BUTTONS_NONE,
+                                            GtkDialogFlags::GTK_DIALOG_MODAL,
+                                            GtkMessageType::GTK_MESSAGE_QUESTION,
+                                            GtkButtonsType::GTK_BUTTONS_NONE,
                                             msg1.data(),
                                             nullptr);
     xset_set_window_icon(GTK_WINDOW(dlg));
@@ -5409,7 +5420,7 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
     if (edit_care)
     {
         btn_edit = gtk_toggle_button_new_with_mnemonic("_Edit");
-        gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_edit, GTK_RESPONSE_YES);
+        gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_edit, GtkResponseType::GTK_RESPONSE_YES);
         gtk_widget_set_focus_on_click(GTK_WIDGET(btn_edit), false);
         gtk_text_view_set_editable(input, false);
     }
@@ -5420,22 +5431,26 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
     if (ztd::same(title, "Set Icon") || ztd::same(title, "Set Window Icon"))
     {
         btn_icon_choose = gtk_button_new_with_mnemonic("C_hoose");
-        gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_icon_choose, GTK_RESPONSE_ACCEPT);
+        gtk_dialog_add_action_widget(GTK_DIALOG(dlg),
+                                     btn_icon_choose,
+                                     GtkResponseType::GTK_RESPONSE_ACCEPT);
         gtk_widget_set_focus_on_click(GTK_WIDGET(btn_icon_choose), false);
     }
 
     if (!defreset.empty())
     {
         btn_default = gtk_button_new_with_mnemonic("_Default");
-        gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_default, GTK_RESPONSE_NO);
+        gtk_dialog_add_action_widget(GTK_DIALOG(dlg),
+                                     btn_default,
+                                     GtkResponseType::GTK_RESPONSE_NO);
         gtk_widget_set_focus_on_click(GTK_WIDGET(btn_default), false);
     }
 
     GtkWidget* btn_cancel = gtk_button_new_with_label("Cancel");
-    gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_cancel, GTK_RESPONSE_CANCEL);
+    gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_cancel, GtkResponseType::GTK_RESPONSE_CANCEL);
 
     GtkWidget* btn_ok = gtk_button_new_with_label("OK");
-    gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_ok, GTK_RESPONSE_OK);
+    gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_ok, GtkResponseType::GTK_RESPONSE_OK);
 
     // show
     gtk_widget_show_all(dlg);
@@ -5458,7 +5473,7 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
         bool exit_loop = false;
         switch (response)
         {
-            case GTK_RESPONSE_OK:
+            case GtkResponseType::GTK_RESPONSE_OK:
                 gtk_text_buffer_get_start_iter(buf, &siter);
                 gtk_text_buffer_get_end_iter(buf, &iter);
                 ans = gtk_text_buffer_get_text(buf, &siter, &iter, false);
@@ -5485,7 +5500,7 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
                 }
 
                 break;
-            case GTK_RESPONSE_YES:
+            case GtkResponseType::GTK_RESPONSE_YES:
                 // btn_edit clicked
                 gtk_text_view_set_editable(
                     input,
@@ -5496,7 +5511,7 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
                         gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(btn_edit)));
                 exit_loop = true;
                 break;
-            case GTK_RESPONSE_ACCEPT:
+            case GtkResponseType::GTK_RESPONSE_ACCEPT:
                 // get current icon
                 gtk_text_buffer_get_start_iter(buf, &siter);
                 gtk_text_buffer_get_end_iter(buf, &iter);
@@ -5513,13 +5528,13 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
                 }
                 exit_loop = true;
                 break;
-            case GTK_RESPONSE_NO:
+            case GtkResponseType::GTK_RESPONSE_NO:
                 // btn_default clicked
                 gtk_text_buffer_set_text(buf, defreset.data(), -1);
                 exit_loop = true;
                 break;
-            case GTK_RESPONSE_CANCEL:
-            case GTK_RESPONSE_DELETE_EVENT:
+            case GtkResponseType::GTK_RESPONSE_CANCEL:
+            case GtkResponseType::GTK_RESPONSE_DELETE_EVENT:
             default:
                 exit_loop = true;
                 break;
@@ -5546,20 +5561,22 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
 {
     char* path;
     /*  Actions:
-     *      GTK_FILE_CHOOSER_ACTION_OPEN
-     *      GTK_FILE_CHOOSER_ACTION_SAVE
-     *      GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
-     *      GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER  */
+     *      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN
+     *      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE
+     *      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
+     *      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER
+     */
     GtkWidget* dlgparent = parent ? gtk_widget_get_toplevel(parent) : nullptr;
     GtkWidget* dlg = gtk_file_chooser_dialog_new(title,
                                                  dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
                                                  action,
                                                  "Cancel",
-                                                 GTK_RESPONSE_CANCEL,
+                                                 GtkResponseType::GTK_RESPONSE_CANCEL,
                                                  "OK",
-                                                 GTK_RESPONSE_OK,
+                                                 GtkResponseType::GTK_RESPONSE_OK,
                                                  nullptr);
-    // gtk_file_chooser_set_action( GTK_FILE_CHOOSER(dlg), GTK_FILE_CHOOSER_ACTION_SAVE );
+    // gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dlg),
+    // GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE);
     gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), true);
     xset_set_window_icon(GTK_WINDOW(dlg));
     gtk_window_set_role(GTK_WINDOW(dlg), "file_dialog");
@@ -5579,8 +5596,8 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
     }
     if (deffile)
     {
-        if (action == GTK_FILE_CHOOSER_ACTION_SAVE ||
-            action == GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER)
+        if (action == GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE ||
+            action == GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER)
             gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), deffile);
         else
         {
@@ -5595,11 +5612,11 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
     {
         // filechooser will not honor default size or size request ?
         gtk_widget_show_all(dlg);
-        gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER_ALWAYS);
+        gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
         while (gtk_events_pending())
             gtk_main_iteration();
-        gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER);
+        gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
     int response = gtk_dialog_run(GTK_DIALOG(dlg));
@@ -5614,7 +5631,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
         xset_set(XSetName::FILE_DLG, XSetVar::Y, std::to_string(height));
     }
 
-    if (response == GTK_RESPONSE_OK)
+    if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
         char* dest = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
         gtk_widget_destroy(dlg);
@@ -5750,7 +5767,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     XSetJob job = XSetJob::INVALID;
 
     // LOG_INFO("on_tool_icon_button_press  {}   button = {}", set->menu_label, event->button);
-    if (event->type != GDK_BUTTON_PRESS)
+    if (event->type != GdkEventType::GDK_BUTTON_PRESS)
         return false;
     unsigned int keymod = ptk_get_keymod(event->state);
 
@@ -5808,19 +5825,19 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
                         return true;
                     }
                     break;
-                case GDK_CONTROL_MASK:
+                case GdkModifierType::GDK_CONTROL_MASK:
                     // ctrl
                     job = XSetJob::COPY;
                     break;
-                case GDK_MOD1_MASK:
+                case GdkModifierType::GDK_MOD1_MASK:
                     // alt
                     job = XSetJob::CUT;
                     break;
-                case GDK_SHIFT_MASK:
+                case GdkModifierType::GDK_SHIFT_MASK:
                     // shift
                     job = XSetJob::PASTE;
                     break;
-                case (GDK_CONTROL_MASK | GDK_SHIFT_MASK):
+                case (GdkModifierType::GDK_CONTROL_MASK | GdkModifierType::GDK_SHIFT_MASK):
                     // ctrl + shift
                     job = XSetJob::COMMAND;
                     break;
@@ -5840,22 +5857,22 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
                     else
                         job = XSetJob::PROP_CMD;
                     break;
-                case GDK_CONTROL_MASK:
+                case GdkModifierType::GDK_CONTROL_MASK:
                     // ctrl
                     job = XSetJob::KEY;
                     break;
-                case GDK_MOD1_MASK:
+                case GdkModifierType::GDK_MOD1_MASK:
                     // alt
                     break;
-                case GDK_SHIFT_MASK:
+                case GdkModifierType::GDK_SHIFT_MASK:
                     // shift
                     job = XSetJob::ICON;
                     break;
-                case (GDK_CONTROL_MASK | GDK_SHIFT_MASK):
+                case (GdkModifierType::GDK_CONTROL_MASK | GdkModifierType::GDK_SHIFT_MASK):
                     // ctrl + shift
                     job = XSetJob::REMOVE;
                     break;
-                case (GDK_CONTROL_MASK | GDK_MOD1_MASK):
+                case (GdkModifierType::GDK_CONTROL_MASK | GdkModifierType::GDK_MOD1_MASK):
                     // ctrl + alt
                     job = XSetJob::PROP;
                     break;
@@ -5888,7 +5905,7 @@ static bool
 on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
 {
     // LOG_INFO("on_tool_menu_button_press  {}   button = {}", set->menu_label, event->button);
-    if (event->type != GDK_BUTTON_PRESS)
+    if (event->type != GdkEventType::GDK_BUTTON_PRESS)
         return false;
     unsigned int keymod = ptk_get_keymod(event->state);
     if (keymod != 0 || event->button != 1)
@@ -6279,7 +6296,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             ptk_file_browser_add_toolbar_widget(set, btn);
 
             // pack into hbox
-            hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+            hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
             gtk_box_pack_start(GTK_BOX(hbox), ebox, false, false, 0);
             // tooltip
             if (show_tooltips)
@@ -8144,55 +8161,59 @@ xset_default_keys()
             keysets.push_back(set);
     }
 
-    def_key(XSetName::TAB_PREV, GDK_KEY_Tab, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
-    def_key(XSetName::TAB_NEXT, GDK_KEY_Tab, GDK_CONTROL_MASK);
-    def_key(XSetName::TAB_NEW, GDK_KEY_t, GDK_CONTROL_MASK);
-    def_key(XSetName::TAB_RESTORE, GDK_KEY_T, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
-    def_key(XSetName::TAB_CLOSE, GDK_KEY_w, GDK_CONTROL_MASK);
-    def_key(XSetName::TAB_1, GDK_KEY_1, GDK_MOD1_MASK);
-    def_key(XSetName::TAB_2, GDK_KEY_2, GDK_MOD1_MASK);
-    def_key(XSetName::TAB_3, GDK_KEY_3, GDK_MOD1_MASK);
-    def_key(XSetName::TAB_4, GDK_KEY_4, GDK_MOD1_MASK);
-    def_key(XSetName::TAB_5, GDK_KEY_5, GDK_MOD1_MASK);
-    def_key(XSetName::TAB_6, GDK_KEY_6, GDK_MOD1_MASK);
-    def_key(XSetName::TAB_7, GDK_KEY_7, GDK_MOD1_MASK);
-    def_key(XSetName::TAB_8, GDK_KEY_8, GDK_MOD1_MASK);
-    def_key(XSetName::TAB_9, GDK_KEY_9, GDK_MOD1_MASK);
-    def_key(XSetName::TAB_10, GDK_KEY_0, GDK_MOD1_MASK);
-    def_key(XSetName::EDIT_CUT, GDK_KEY_x, GDK_CONTROL_MASK);
-    def_key(XSetName::EDIT_COPY, GDK_KEY_c, GDK_CONTROL_MASK);
-    def_key(XSetName::EDIT_PASTE, GDK_KEY_v, GDK_CONTROL_MASK);
+    // clang-format off
+
+    def_key(XSetName::TAB_PREV, GDK_KEY_Tab, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
+    def_key(XSetName::TAB_NEXT, GDK_KEY_Tab, GdkModifierType::GDK_CONTROL_MASK);
+    def_key(XSetName::TAB_NEW, GDK_KEY_t, GdkModifierType::GDK_CONTROL_MASK);
+    def_key(XSetName::TAB_RESTORE, GDK_KEY_T, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
+    def_key(XSetName::TAB_CLOSE, GDK_KEY_w, GdkModifierType::GDK_CONTROL_MASK);
+    def_key(XSetName::TAB_1, GDK_KEY_1, GdkModifierType::GDK_MOD1_MASK);
+    def_key(XSetName::TAB_2, GDK_KEY_2, GdkModifierType::GDK_MOD1_MASK);
+    def_key(XSetName::TAB_3, GDK_KEY_3, GdkModifierType::GDK_MOD1_MASK);
+    def_key(XSetName::TAB_4, GDK_KEY_4, GdkModifierType::GDK_MOD1_MASK);
+    def_key(XSetName::TAB_5, GDK_KEY_5, GdkModifierType::GDK_MOD1_MASK);
+    def_key(XSetName::TAB_6, GDK_KEY_6, GdkModifierType::GDK_MOD1_MASK);
+    def_key(XSetName::TAB_7, GDK_KEY_7, GdkModifierType::GDK_MOD1_MASK);
+    def_key(XSetName::TAB_8, GDK_KEY_8, GdkModifierType::GDK_MOD1_MASK);
+    def_key(XSetName::TAB_9, GDK_KEY_9, GdkModifierType::GDK_MOD1_MASK);
+    def_key(XSetName::TAB_10, GDK_KEY_0, GdkModifierType::GDK_MOD1_MASK);
+    def_key(XSetName::EDIT_CUT, GDK_KEY_x, GdkModifierType::GDK_CONTROL_MASK);
+    def_key(XSetName::EDIT_COPY, GDK_KEY_c, GdkModifierType::GDK_CONTROL_MASK);
+    def_key(XSetName::EDIT_PASTE, GDK_KEY_v, GdkModifierType::GDK_CONTROL_MASK);
     def_key(XSetName::EDIT_RENAME, GDK_KEY_F2, 0);
-    def_key(XSetName::EDIT_DELETE, GDK_KEY_Delete, GDK_SHIFT_MASK);
+    def_key(XSetName::EDIT_DELETE, GDK_KEY_Delete, GdkModifierType::GDK_SHIFT_MASK);
     def_key(XSetName::EDIT_TRASH, GDK_KEY_Delete, 0);
-    def_key(XSetName::COPY_NAME, GDK_KEY_C, (GDK_SHIFT_MASK | GDK_MOD1_MASK));
-    def_key(XSetName::COPY_PATH, GDK_KEY_C, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
-    def_key(XSetName::PASTE_LINK, GDK_KEY_V, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
-    def_key(XSetName::PASTE_AS, GDK_KEY_A, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
-    def_key(XSetName::SELECT_ALL, GDK_KEY_A, GDK_CONTROL_MASK);
+    def_key(XSetName::COPY_NAME, GDK_KEY_C, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_MOD1_MASK));
+    def_key(XSetName::COPY_PATH, GDK_KEY_C, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
+    def_key(XSetName::PASTE_LINK, GDK_KEY_V, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
+    def_key(XSetName::PASTE_AS, GDK_KEY_A, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
+    def_key(XSetName::SELECT_ALL, GDK_KEY_A, GdkModifierType::GDK_CONTROL_MASK);
     def_key(XSetName::MAIN_TERMINAL, GDK_KEY_F4, 0);
     def_key(XSetName::GO_DEFAULT, GDK_KEY_Escape, 0);
-    def_key(XSetName::GO_BACK, GDK_KEY_Left, GDK_MOD1_MASK);
-    def_key(XSetName::GO_FORWARD, GDK_KEY_Right, GDK_MOD1_MASK);
-    def_key(XSetName::GO_UP, GDK_KEY_Up, GDK_MOD1_MASK);
-    def_key(XSetName::FOCUS_PATH_BAR, GDK_KEY_l, GDK_CONTROL_MASK);
+    def_key(XSetName::GO_BACK, GDK_KEY_Left, GdkModifierType::GDK_MOD1_MASK);
+    def_key(XSetName::GO_FORWARD, GDK_KEY_Right, GdkModifierType::GDK_MOD1_MASK);
+    def_key(XSetName::GO_UP, GDK_KEY_Up, GdkModifierType::GDK_MOD1_MASK);
+    def_key(XSetName::FOCUS_PATH_BAR, GDK_KEY_l, GdkModifierType::GDK_CONTROL_MASK);
     def_key(XSetName::VIEW_REFRESH, GDK_KEY_F5, 0);
-    def_key(XSetName::PROP_INFO, GDK_KEY_Return, GDK_MOD1_MASK);
-    def_key(XSetName::PROP_PERM, GDK_KEY_p, GDK_CONTROL_MASK);
-    def_key(XSetName::PANEL1_SHOW_HIDDEN, GDK_KEY_h, GDK_CONTROL_MASK);
-    def_key(XSetName::BOOK_NEW, GDK_KEY_d, GDK_CONTROL_MASK);
-    def_key(XSetName::NEW_FILE, GDK_KEY_F, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
-    def_key(XSetName::NEW_DIRECTORY, GDK_KEY_N, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
-    def_key(XSetName::NEW_LINK, GDK_KEY_L, (GDK_SHIFT_MASK | GDK_CONTROL_MASK));
-    def_key(XSetName::MAIN_NEW_WINDOW, GDK_KEY_n, GDK_CONTROL_MASK);
+    def_key(XSetName::PROP_INFO, GDK_KEY_Return, GdkModifierType::GDK_MOD1_MASK);
+    def_key(XSetName::PROP_PERM, GDK_KEY_p, GdkModifierType::GDK_CONTROL_MASK);
+    def_key(XSetName::PANEL1_SHOW_HIDDEN, GDK_KEY_h, GdkModifierType::GDK_CONTROL_MASK);
+    def_key(XSetName::BOOK_NEW, GDK_KEY_d, GdkModifierType::GDK_CONTROL_MASK);
+    def_key(XSetName::NEW_FILE, GDK_KEY_F, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
+    def_key(XSetName::NEW_DIRECTORY, GDK_KEY_N, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
+    def_key(XSetName::NEW_LINK, GDK_KEY_L, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
+    def_key(XSetName::MAIN_NEW_WINDOW, GDK_KEY_n, GdkModifierType::GDK_CONTROL_MASK);
     def_key(XSetName::OPEN_ALL, GDK_KEY_F6, 0);
     def_key(XSetName::MAIN_FULL, GDK_KEY_F11, 0);
-    def_key(XSetName::PANEL1_SHOW, GDK_KEY_1, GDK_CONTROL_MASK);
-    def_key(XSetName::PANEL2_SHOW, GDK_KEY_2, GDK_CONTROL_MASK);
-    def_key(XSetName::PANEL3_SHOW, GDK_KEY_3, GDK_CONTROL_MASK);
-    def_key(XSetName::PANEL4_SHOW, GDK_KEY_4, GDK_CONTROL_MASK);
+    def_key(XSetName::PANEL1_SHOW, GDK_KEY_1, GdkModifierType::GDK_CONTROL_MASK);
+    def_key(XSetName::PANEL2_SHOW, GDK_KEY_2, GdkModifierType::GDK_CONTROL_MASK);
+    def_key(XSetName::PANEL3_SHOW, GDK_KEY_3, GdkModifierType::GDK_CONTROL_MASK);
+    def_key(XSetName::PANEL4_SHOW, GDK_KEY_4, GdkModifierType::GDK_CONTROL_MASK);
     // def_key(XSetName::MAIN_HELP, GDK_KEY_F1, 0);
-    def_key(XSetName::MAIN_EXIT, GDK_KEY_q, GDK_CONTROL_MASK);
+    def_key(XSetName::MAIN_EXIT, GDK_KEY_q, GdkModifierType::GDK_CONTROL_MASK);
     def_key(XSetName::MAIN_PREFS, GDK_KEY_F12, 0);
-    def_key(XSetName::BOOK_ADD, GDK_KEY_d, GDK_CONTROL_MASK);
+    def_key(XSetName::BOOK_ADD, GDK_KEY_d, GdkModifierType::GDK_CONTROL_MASK);
+
+    // clang-format on
 }

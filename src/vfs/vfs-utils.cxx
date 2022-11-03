@@ -42,7 +42,8 @@ vfs_load_icon(const char* icon_name, int size)
         icon_theme,
         icon_name,
         size,
-        GtkIconLookupFlags(GTK_ICON_LOOKUP_USE_BUILTIN | GTK_ICON_LOOKUP_FORCE_SIZE));
+        GtkIconLookupFlags(GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN |
+                           GtkIconLookupFlags::GTK_ICON_LOOKUP_FORCE_SIZE));
 
     if (!inf && icon_name[0] == '/')
         return gdk_pixbuf_new_from_file_at_size(icon_name, size, size, nullptr);

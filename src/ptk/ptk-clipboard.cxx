@@ -37,7 +37,7 @@
 
 #include "ptk/ptk-clipboard.hxx"
 
-static GdkDragAction clipboard_action = GDK_ACTION_DEFAULT;
+static GdkDragAction clipboard_action = GdkDragAction::GDK_ACTION_DEFAULT;
 static std::vector<std::string> clipboard_file_list;
 
 static const std::vector<std::string>
@@ -77,7 +77,8 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, un
 
     if (gtk_selection_data_get_target(selection_data) == gnome_target)
     {
-        const char* action = clipboard_action == GDK_ACTION_MOVE ? "cut\n" : "copy\n";
+        const char* action =
+            clipboard_action == GdkDragAction::GDK_ACTION_MOVE ? "cut\n" : "copy\n";
         uri_list.append(action);
         use_uri = true;
     }
@@ -116,7 +117,7 @@ clipboard_clean_data(GtkClipboard* clipboard, void* user_data)
     (void)user_data;
     // LOG_DEBUG("clean clipboard!");
     clipboard_file_list.clear();
-    clipboard_action = GDK_ACTION_DEFAULT;
+    clipboard_action = GdkDragAction::GDK_ACTION_DEFAULT;
 }
 
 void
@@ -208,7 +209,7 @@ ptk_clipboard_cut_or_copy_files(const char* working_dir, const std::vector<VFSFi
     free(targets);
 
     clipboard_file_list = file_list;
-    clipboard_action = copy ? GDK_ACTION_COPY : GDK_ACTION_MOVE;
+    clipboard_action = copy ? GdkDragAction::GDK_ACTION_COPY : GdkDragAction::GDK_ACTION_MOVE;
 }
 
 void
@@ -249,7 +250,7 @@ ptk_clipboard_copy_file_list(char** path, bool copy)
     free(targets);
 
     clipboard_file_list = file_list;
-    clipboard_action = copy ? GDK_ACTION_COPY : GDK_ACTION_MOVE;
+    clipboard_action = copy ? GdkDragAction::GDK_ACTION_COPY : GdkDragAction::GDK_ACTION_MOVE;
 }
 
 void
@@ -298,7 +299,7 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, const char* dest_dir, GtkTreeVi
         }
         uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
 
-        if (clipboard_action == GDK_ACTION_MOVE)
+        if (clipboard_action == GdkDragAction::GDK_ACTION_MOVE)
             action = VFSFileTaskType::VFS_FILE_TASK_MOVE;
         else
             action = VFSFileTaskType::VFS_FILE_TASK_COPY;

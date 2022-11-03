@@ -83,12 +83,12 @@ static FMPrefDlg* data = nullptr;
 
 inline constexpr std::array<int, 7> tool_icon_sizes{
     0,
-    GTK_ICON_SIZE_MENU,
-    GTK_ICON_SIZE_SMALL_TOOLBAR,
-    GTK_ICON_SIZE_LARGE_TOOLBAR,
-    GTK_ICON_SIZE_BUTTON,
-    GTK_ICON_SIZE_DND,
-    GTK_ICON_SIZE_DIALOG,
+    GtkIconSize::GTK_ICON_SIZE_MENU,
+    GtkIconSize::GTK_ICON_SIZE_SMALL_TOOLBAR,
+    GtkIconSize::GTK_ICON_SIZE_LARGE_TOOLBAR,
+    GtkIconSize::GTK_ICON_SIZE_BUTTON,
+    GtkIconSize::GTK_ICON_SIZE_DND,
+    GtkIconSize::GTK_ICON_SIZE_DIALOG,
 };
 // also change max_icon_size in settings.c & lists in prefdlg.ui prefdlg2.ui
 // see create_size in vfs-thumbnail-loader.c:_vfs_thumbnail_load()
@@ -137,7 +137,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
     if (response >= 0)
         return;
 
-    if (response == GTK_RESPONSE_OK)
+    if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
         show_thumbnail = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->show_thumbnail));
         max_thumb = ((int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->max_thumb_size))) << 10;
@@ -207,7 +207,7 @@ on_response(GtkDialog* dlg, int response, FMPrefDlg* user_data)
         small_icon =
             ismall_icon >= 0 ? small_icon_sizes[ismall_icon] : app_settings.get_icon_size_small();
         itool_icon = gtk_combo_box_get_active(GTK_COMBO_BOX(data->tool_icon_size));
-        if (itool_icon >= 0 && itool_icon <= GTK_ICON_SIZE_DIALOG)
+        if (itool_icon >= 0 && itool_icon <= GtkIconSize::GTK_ICON_SIZE_DIALOG)
             tool_icon = tool_icon_sizes[itool_icon];
 
         if (big_icon != app_settings.get_icon_size_big() ||

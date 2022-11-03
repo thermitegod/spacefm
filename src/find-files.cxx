@@ -724,7 +724,7 @@ on_start_search(GtkWidget* btn, FindFile* data)
     g_signal_connect(data->task, "finish", G_CALLBACK(on_search_finish), data);
     vfs_async_task_execute(data->task);
 
-    busy_cursor = gdk_cursor_new_for_display(nullptr, GDK_WATCH);
+    busy_cursor = gdk_cursor_new_for_display(nullptr, GdkCursorType::GDK_WATCH);
     gdk_window_set_cursor(gtk_widget_get_window(data->search_result), busy_cursor);
     g_object_unref(busy_cursor);
 }
@@ -794,16 +794,17 @@ static void
 on_add_search_browse(GtkWidget* menu, FindFile* data)
 {
     (void)menu;
-    GtkWidget* dlg = gtk_file_chooser_dialog_new("Select a directory",
-                                                 GTK_WINDOW(data->win),
-                                                 GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-                                                 "Cancel",
-                                                 GTK_RESPONSE_CANCEL,
-                                                 "document-open",
-                                                 GTK_RESPONSE_OK,
-                                                 nullptr);
+    GtkWidget* dlg =
+        gtk_file_chooser_dialog_new("Select a directory",
+                                    GTK_WINDOW(data->win),
+                                    GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                                    "Cancel",
+                                    GtkResponseType::GTK_RESPONSE_CANCEL,
+                                    "document-open",
+                                    GtkResponseType::GTK_RESPONSE_OK,
+                                    nullptr);
 
-    if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
+    if (gtk_dialog_run(GTK_DIALOG(dlg)) == GtkResponseType::GTK_RESPONSE_OK)
     {
         char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
         add_search_dir(data, path);
@@ -857,20 +858,20 @@ on_add_search_folder(GtkWidget* btn, FindFile* data)
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
     item = gtk_menu_item_new_with_label(vfs_user_home_dir().c_str());
-    // img = gtk_image_new_from_icon_name( "gnome-fs-directory", GTK_ICON_SIZE_MENU );
-    // img = xset_get_image("gtk-directory", GTK_ICON_SIZE_MENU);
+    // img = gtk_image_new_from_icon_name( "gnome-fs-directory", GtkIconSize::GTK_ICON_SIZE_MENU );
+    // img = xset_get_image("gtk-directory", GtkIconSize::GTK_ICON_SIZE_MENU);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     g_signal_connect(item, "activate", G_CALLBACK(on_add_search_home), data);
 
     item = gtk_menu_item_new_with_label(vfs_user_desktop_dir().c_str());
-    // img = gtk_image_new_from_icon_name( "gnome-fs-desktop", GTK_ICON_SIZE_MENU );
-    // img = xset_get_image("gtk-directory", GTK_ICON_SIZE_MENU);
+    // img = gtk_image_new_from_icon_name( "gnome-fs-desktop", GtkIconSize::GTK_ICON_SIZE_MENU );
+    // img = xset_get_image("gtk-directory", GtkIconSize::GTK_ICON_SIZE_MENU);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     g_signal_connect(item, "activate", G_CALLBACK(on_add_search_desktop), data);
 
     item = gtk_menu_item_new_with_label("Local Volumes");
-    // img = gtk_image_new_from_icon_name( "gnome-dev-harddisk", GTK_ICON_SIZE_MENU );
-    // img = xset_get_image("gtk-harddisk", GTK_ICON_SIZE_MENU);
+    // img = gtk_image_new_from_icon_name( "gnome-dev-harddisk", GtkIconSize::GTK_ICON_SIZE_MENU );
+    // img = xset_get_image("gtk-harddisk", GtkIconSize::GTK_ICON_SIZE_MENU);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     g_signal_connect(item, "activate", G_CALLBACK(on_add_search_volumes), data);
 
@@ -920,7 +921,7 @@ init_search_result(FindFile* data)
     GtkCellRenderer* render;
 
     gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(data->result_view)),
-                                GTK_SELECTION_MULTIPLE);
+                                GtkSelectionMode::GTK_SELECTION_MULTIPLE);
     data->result_list = gtk_list_store_new(magic_enum::enum_count<FindFilesCol>(),
                                            GDK_TYPE_PIXBUF, /* icon */
                                            G_TYPE_STRING,   /* name */
@@ -938,7 +939,7 @@ init_search_result(FindFile* data)
     gtk_tree_view_column_pack_start(col, render, false);
     gtk_tree_view_column_set_attributes(col, render, "pixbuf", FindFilesCol::COL_ICON, nullptr);
     render = gtk_cell_renderer_text_new();
-    g_object_set(render, "ellipsize", PANGO_ELLIPSIZE_END, nullptr);
+    g_object_set(render, "ellipsize", PangoEllipsizeMode::PANGO_ELLIPSIZE_END, nullptr);
     gtk_tree_view_column_pack_start(col, render, true);
     gtk_tree_view_column_set_attributes(col, render, "text", FindFilesCol::COL_NAME, nullptr);
     gtk_tree_view_column_set_expand(col, true);
@@ -947,7 +948,7 @@ init_search_result(FindFile* data)
     gtk_tree_view_append_column(GTK_TREE_VIEW(data->result_view), col);
 
     render = gtk_cell_renderer_text_new();
-    g_object_set(render, "ellipsize", PANGO_ELLIPSIZE_END, nullptr);
+    g_object_set(render, "ellipsize", PangoEllipsizeMode::PANGO_ELLIPSIZE_END, nullptr);
     col = gtk_tree_view_column_new_with_attributes("Directory",
                                                    render,
                                                    "text",
@@ -971,7 +972,7 @@ init_search_result(FindFile* data)
                                                    "text",
                                                    FindFilesCol::COL_TYPE,
                                                    nullptr);
-    gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
+    gtk_tree_view_column_set_sizing(col, GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
     gtk_tree_view_column_set_fixed_width(col, 120);
     gtk_tree_view_column_set_resizable(col, true);
     gtk_tree_view_append_column(GTK_TREE_VIEW(data->result_view), col);
@@ -988,7 +989,7 @@ init_search_result(FindFile* data)
 static bool
 on_view_button_press(GtkTreeView* view, GdkEventButton* evt, FindFile* data)
 {
-    if (evt->type == GDK_BUTTON_PRESS)
+    if (evt->type == GdkEventType::GDK_BUTTON_PRESS)
     {
         if (evt->button == 3) /* right single click */
         {
@@ -1034,7 +1035,7 @@ on_view_button_press(GtkTreeView* view, GdkEventButton* evt, FindFile* data)
             return true;
         }
     }
-    else if (evt->type == GDK_2BUTTON_PRESS)
+    else if (evt->type == GdkEventType::GDK_2BUTTON_PRESS)
     {
         if (evt->button == 1) /* left double click */
         {

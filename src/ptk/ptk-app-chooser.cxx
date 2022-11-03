@@ -297,7 +297,7 @@ on_load_all_apps_finish(VFSAsyncTask* task, bool is_cancelled, GtkWidget* dlg)
                                     nullptr);
     gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(model),
                                          PTKAppChooser::COL_APP_NAME,
-                                         GTK_SORT_ASCENDING);
+                                         GtkSortType::GTK_SORT_ASCENDING);
 
     gtk_tree_view_set_model(view, model);
     g_object_unref(model);
@@ -323,8 +323,8 @@ on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, unsigned int pag
         {
             init_list_view(view);
             gtk_widget_grab_focus(GTK_WIDGET(view));
-            GdkCursor* busy =
-                gdk_cursor_new_for_display(gtk_widget_get_display(GTK_WIDGET(view)), GDK_WATCH);
+            GdkCursor* busy = gdk_cursor_new_for_display(gtk_widget_get_display(GTK_WIDGET(view)),
+                                                         GdkCursorType::GDK_WATCH);
             gdk_window_set_cursor(
                 gtk_widget_get_window(GTK_WIDGET(gtk_widget_get_toplevel(GTK_WIDGET(view)))),
                 busy);
@@ -401,17 +401,17 @@ on_browse_btn_clicked(GtkButton* button, void* user_data)
     GtkWidget* parent = GTK_WIDGET(user_data);
     GtkWidget* dlg = gtk_file_chooser_dialog_new(nullptr,
                                                  GTK_WINDOW(parent),
-                                                 GTK_FILE_CHOOSER_ACTION_OPEN,
+                                                 GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
                                                  "Cancel",
-                                                 GTK_RESPONSE_CANCEL,
+                                                 GtkResponseType::GTK_RESPONSE_CANCEL,
                                                  "document-open",
-                                                 GTK_RESPONSE_OK,
+                                                 GtkResponseType::GTK_RESPONSE_OK,
                                                  nullptr);
 
     xset_set_window_icon(GTK_WINDOW(dlg));
 
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), "/usr/bin");
-    if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
+    if (gtk_dialog_run(GTK_DIALOG(dlg)) == GtkResponseType::GTK_RESPONSE_OK)
     {
         char* filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
         if (filename)
@@ -459,10 +459,10 @@ on_dlg_response(GtkDialog* dlg, int id, void* user_data)
     switch (id)
     {
         /* The dialog is going to be closed */
-        case GTK_RESPONSE_OK:
-        case GTK_RESPONSE_CANCEL:
-        case GTK_RESPONSE_NONE:
-        case GTK_RESPONSE_DELETE_EVENT:
+        case GtkResponseType::GTK_RESPONSE_OK:
+        case GtkResponseType::GTK_RESPONSE_CANCEL:
+        case GtkResponseType::GTK_RESPONSE_NONE:
+        case GtkResponseType::GTK_RESPONSE_DELETE_EVENT:
             /* cancel app loading on dialog closing... */
             task = VFS_ASYNC_TASK(g_object_get_data(G_OBJECT(dlg), "task"));
             if (task)
@@ -500,7 +500,11 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
             "application by default.",
             vfs_mime_type_get_type(mime_type),
             (XSET(handlers_slist->data))->menu_label);
-        xset_msg_dialog(parent, GTK_MESSAGE_INFO, "MIME Type Has Handler", GTK_BUTTONS_OK, msg);
+        xset_msg_dialog(parent,
+                        GtkMessageType::GTK_MESSAGE_INFO,
+                        "MIME Type Has Handler",
+                        GtkButtonsType::GTK_BUTTONS_OK,
+                        msg);
         g_slist_free(handlers_slist);
     }
     else if (!xset_get_b(XSetName::ARC_DEF_OPEN))
@@ -523,7 +527,11 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
                 "with your associated application by default.",
                 vfs_mime_type_get_type(mime_type),
                 (XSET(handlers_slist->data))->menu_label);
-            xset_msg_dialog(parent, GTK_MESSAGE_INFO, "MIME Type Has Handler", GTK_BUTTONS_OK, msg);
+            xset_msg_dialog(parent,
+                            GtkMessageType::GTK_MESSAGE_INFO,
+                            "MIME Type Has Handler",
+                            GtkButtonsType::GTK_BUTTONS_OK,
+                            msg);
             g_slist_free(handlers_slist);
         }
     }
@@ -550,7 +558,7 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, VFSMimeType* mime_type, bool foc
 
     g_signal_connect(dlg, "response", G_CALLBACK(on_dlg_response), nullptr);
 
-    if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)
+    if (gtk_dialog_run(GTK_DIALOG(dlg)) == GtkResponseType::GTK_RESPONSE_OK)
     {
         app = app_chooser_dialog_get_selected_app(dlg);
         if (app)

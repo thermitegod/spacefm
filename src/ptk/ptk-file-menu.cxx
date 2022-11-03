@@ -306,9 +306,9 @@ on_popup_sortby(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, int order)
     if (sort_order < 0)
     {
         if (sort_order == -1)
-            v = GTK_SORT_ASCENDING;
+            v = GtkSortType::GTK_SORT_ASCENDING;
         else
-            v = GTK_SORT_DESCENDING;
+            v = GtkSortType::GTK_SORT_DESCENDING;
         xset_set_panel(file_browser->mypanel,
                        XSetPanel::LIST_DETAILED,
                        XSetVar::Y,
@@ -544,12 +544,14 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     set = xset_set_cb(XSetName::SORTBY_ASCEND, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set, "sortorder", -1);
     xset_set_ob2(set, nullptr, nullptr);
-    set->b = browser->sort_type == GTK_SORT_ASCENDING ? XSetB::XSET_B_TRUE : XSetB::XSET_B_FALSE;
+    set->b = browser->sort_type == GtkSortType::GTK_SORT_ASCENDING ? XSetB::XSET_B_TRUE
+                                                                   : XSetB::XSET_B_FALSE;
     set_radio = set;
     set = xset_set_cb(XSetName::SORTBY_DESCEND, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set, "sortorder", -2);
     xset_set_ob2(set, nullptr, set_radio);
-    set->b = browser->sort_type == GTK_SORT_DESCENDING ? XSetB::XSET_B_TRUE : XSetB::XSET_B_FALSE;
+    set->b = browser->sort_type == GtkSortType::GTK_SORT_DESCENDING ? XSetB::XSET_B_TRUE
+                                                                    : XSetB::XSET_B_FALSE;
 
     // this crashes if !browser->file_list so do not allow
     if (browser->file_list)
@@ -910,7 +912,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
         }
 
         // add apps
-        gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
+        gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
         if (is_text)
         {
             VFSMimeType* txt_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
@@ -1509,9 +1511,9 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             if (strcmp(mime_type->type, "text/plain") && ztd::startswith(mime_type->type, "text/"))
                 xset_msg_dialog(
                     GTK_WIDGET(data->browser),
-                    GTK_MESSAGE_INFO,
+                    GtkMessageType::GTK_MESSAGE_INFO,
                     "Remove Text Type Association",
-                    GTK_BUTTONS_OK,
+                    GtkButtonsType::GTK_BUTTONS_OK,
                     "NOTE:  When compiling the list of applications to appear in the Open "
                     "submenu for a text file, SpaceFM will include applications associated "
                     "with the MIME type (eg text/html) AND applications associated with "
@@ -1542,10 +1544,10 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                 share_desktop,
                                 path);
                 if (xset_msg_dialog(GTK_WIDGET(data->browser),
-                                    GTK_MESSAGE_QUESTION,
+                                    GtkMessageType::GTK_MESSAGE_QUESTION,
                                     "Copy Desktop File",
-                                    GTK_BUTTONS_YES_NO,
-                                    msg) != GTK_RESPONSE_YES)
+                                    GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                    msg) != GtkResponseType::GTK_RESPONSE_YES)
                 {
                     free(share_desktop);
                     break;
@@ -1647,10 +1649,10 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                       path,
                                       mime_type->type);
                 if (xset_msg_dialog(GTK_WIDGET(data->browser),
-                                    GTK_MESSAGE_QUESTION,
+                                    GtkMessageType::GTK_MESSAGE_QUESTION,
                                     "Create New XML",
-                                    GTK_BUTTONS_YES_NO,
-                                    msg) != GTK_RESPONSE_YES)
+                                    GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                    msg) != GtkResponseType::GTK_RESPONSE_YES)
                 {
                     break;
                 }
@@ -2092,7 +2094,7 @@ on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data)
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
     unsigned int keymod = ptk_get_keymod(event->state);
 
-    if (event->type == GDK_BUTTON_RELEASE)
+    if (event->type == GdkEventType::GDK_BUTTON_RELEASE)
     {
         if (event->button == 1 && keymod == 0)
         {
@@ -2111,7 +2113,7 @@ on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data)
         // menu item in some GTK2/3 themes.
         return true;
     }
-    else if (event->type != GDK_BUTTON_PRESS)
+    else if (event->type != GdkEventType::GDK_BUTTON_PRESS)
     {
         return false;
     }

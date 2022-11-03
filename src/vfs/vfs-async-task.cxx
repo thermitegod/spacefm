@@ -60,8 +60,10 @@ vfs_async_task_get_type()
             nullptr /* value_table */
         };
 
-        self_type =
-            g_type_register_static(G_TYPE_OBJECT, "VFSAsyncTask", &self_info, (GTypeFlags)0);
+        self_type = g_type_register_static(G_TYPE_OBJECT,
+                                           "VFSAsyncTask",
+                                           &self_info,
+                                           GTypeFlags::G_TYPE_FLAG_NONE);
     }
 
     return self_type;

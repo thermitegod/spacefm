@@ -1319,9 +1319,9 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
                 // do not use xset_msg_dialog if non-main thread
                 // vfs_file_task_exec_error(task, 0, str);
                 xset_msg_dialog(parent,
-                                GTK_MESSAGE_ERROR,
+                                GtkMessageType::GTK_MESSAGE_ERROR,
                                 "Terminal SU Not Available",
-                                GTK_BUTTONS_OK,
+                                GtkButtonsType::GTK_BUTTONS_OK,
                                 msg);
                 call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
                 // LOG_INFO("vfs_file_task_exec DONE ERROR");
@@ -1338,7 +1338,11 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
         LOG_WARN(msg);
         // do not use xset_msg_dialog if non-main thread
         // vfs_file_task_exec_error(task, 0, str);
-        xset_msg_dialog(parent, GTK_MESSAGE_ERROR, "Error", GTK_BUTTONS_OK, msg);
+        xset_msg_dialog(parent,
+                        GtkMessageType::GTK_MESSAGE_ERROR,
+                        "Error",
+                        GtkButtonsType::GTK_BUTTONS_OK,
+                        msg);
         call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
         // LOG_INFO("vfs_file_task_exec DONE ERROR");
         return;
@@ -1362,9 +1366,9 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
             // do not use xset_msg_dialog if non-main thread
             // vfs_file_task_exec_error(task, 0, str);
             xset_msg_dialog(parent,
-                            GTK_MESSAGE_ERROR,
+                            GtkMessageType::GTK_MESSAGE_ERROR,
                             "Terminal Not Available",
-                            GTK_BUTTONS_OK,
+                            GtkButtonsType::GTK_BUTTONS_OK,
                             msg);
 
             call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);

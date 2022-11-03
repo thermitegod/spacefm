@@ -422,7 +422,7 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view uri, int size, s
         }
 
         if (w > 0 && h > 0)
-            result = gdk_pixbuf_scale_simple(thumbnail, w, h, GDK_INTERP_BILINEAR);
+            result = gdk_pixbuf_scale_simple(thumbnail, w, h, GdkInterpType::GDK_INTERP_BILINEAR);
 
         g_object_unref(thumbnail);
     }

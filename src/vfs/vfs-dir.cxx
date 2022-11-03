@@ -114,7 +114,7 @@ vfs_dir_get_type()
             (GInstanceInitFunc)vfs_dir_init,
             nullptr,
         };
-        type = g_type_register_static(G_TYPE_OBJECT, "VFSDir", &info, (GTypeFlags)0);
+        type = g_type_register_static(G_TYPE_OBJECT, "VFSDir", &info, GTypeFlags::G_TYPE_FLAG_NONE);
     }
     return type;
 }

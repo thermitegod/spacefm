@@ -243,9 +243,9 @@ on_format_changed(GtkComboBox* combo, void* user_data)
         if (error)
         {
             xset_msg_dialog(GTK_WIDGET(dlg),
-                            GTK_MESSAGE_ERROR,
+                            GtkMessageType::GTK_MESSAGE_ERROR,
                             "Error Loading Handler",
-                            GTK_BUTTONS_OK,
+                            GtkButtonsType::GTK_BUTTONS_OK,
                             error_message);
         }
     }
@@ -322,27 +322,29 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
         file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser->main_window)) : nullptr;
     GtkWidget* dlg = gtk_file_chooser_dialog_new("Create Archive",
                                                  top_level ? GTK_WINDOW(top_level) : nullptr,
-                                                 GTK_FILE_CHOOSER_ACTION_SAVE,
+                                                 GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
                                                  nullptr,
                                                  nullptr);
 
     /* Adding standard buttons and saving references in the dialog
      * 'Configure' button has custom text but a stock image */
-    GtkButton* btn_configure =
-        GTK_BUTTON(gtk_dialog_add_button(GTK_DIALOG(dlg), "Conf_igure", GTK_RESPONSE_NONE));
+    GtkButton* btn_configure = GTK_BUTTON(
+        gtk_dialog_add_button(GTK_DIALOG(dlg), "Conf_igure", GtkResponseType::GTK_RESPONSE_NONE));
     g_object_set_data(G_OBJECT(dlg), "btn_configure", GTK_BUTTON(btn_configure));
-    g_object_set_data(G_OBJECT(dlg),
-                      "btn_cancel",
-                      gtk_dialog_add_button(GTK_DIALOG(dlg), "Cancel", GTK_RESPONSE_CANCEL));
-    g_object_set_data(G_OBJECT(dlg),
-                      "btn_ok",
-                      gtk_dialog_add_button(GTK_DIALOG(dlg), "OK", GTK_RESPONSE_OK));
+    g_object_set_data(
+        G_OBJECT(dlg),
+        "btn_cancel",
+        gtk_dialog_add_button(GTK_DIALOG(dlg), "Cancel", GtkResponseType::GTK_RESPONSE_CANCEL));
+    g_object_set_data(
+        G_OBJECT(dlg),
+        "btn_ok",
+        gtk_dialog_add_button(GTK_DIALOG(dlg), "OK", GtkResponseType::GTK_RESPONSE_OK));
 
     GtkFileFilter* filter = gtk_file_filter_new();
 
     /* Top hbox has 'Command:' label, 'Archive Format:' label then format
      * combobox */
-    GtkWidget* hbox_top = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget* hbox_top = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 4);
     GtkWidget* lbl_command = gtk_label_new(nullptr);
     gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_command), "Co_mpress Commands:");
     gtk_box_pack_start(GTK_BOX(hbox_top), lbl_command, false, true, 2);
@@ -376,9 +378,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
         /* Telling user to ensure handlers are available and bringing
          * up configuration */
         xset_msg_dialog(GTK_WIDGET(dlg),
-                        GTK_MESSAGE_ERROR,
+                        GtkMessageType::GTK_MESSAGE_ERROR,
                         "Archive Handlers - Create Archive",
-                        GTK_BUTTONS_OK,
+                        GtkButtonsType::GTK_BUTTONS_OK,
                         "No archive handlers "
                         "configured. You must add a handler before "
                         "creating an archive.");
@@ -467,11 +469,11 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
     gtk_widget_show_all(hbox_top);
 
     GtkTextView* view = (GtkTextView*)gtk_text_view_new();
-    gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(view), GTK_WRAP_WORD_CHAR);
+    gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(view), GtkWrapMode::GTK_WRAP_WORD_CHAR);
     GtkWidget* view_scroll = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(view_scroll),
-                                   GTK_POLICY_AUTOMATIC,
-                                   GTK_POLICY_AUTOMATIC);
+                                   GtkPolicyType::GTK_POLICY_AUTOMATIC,
+                                   GtkPolicyType::GTK_POLICY_AUTOMATIC);
     gtk_container_add(GTK_CONTAINER(view_scroll), GTK_WIDGET(view));
     g_object_set_data(G_OBJECT(dlg), "view", view);
 
@@ -506,9 +508,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
             if (error)
             {
                 xset_msg_dialog(GTK_WIDGET(dlg),
-                                GTK_MESSAGE_ERROR,
+                                GtkMessageType::GTK_MESSAGE_ERROR,
                                 "Error Loading Handler",
-                                GTK_BUTTONS_OK,
+                                GtkButtonsType::GTK_BUTTONS_OK,
                                 error_message);
                 error_message.clear();
             }
@@ -527,18 +529,19 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
 
     /* Creating hbox for the command textview, on a line under the top
      * hbox */
-    GtkWidget* hbox_bottom = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget* hbox_bottom = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 4);
     gtk_box_pack_start(GTK_BOX(hbox_bottom), GTK_WIDGET(view_scroll), true, true, 4);
     gtk_widget_show_all(hbox_bottom);
 
     // Packing the two hboxes into a vbox, then adding to dialog at bottom
-    GtkWidget* vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+    GtkWidget* vbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 4);
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(hbox_top), true, true, 0);
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(hbox_bottom), true, true, 1);
     gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg))), vbox, false, true, 0);
 
     // Configuring dialog
-    gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dlg), GTK_FILE_CHOOSER_ACTION_SAVE);
+    gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dlg),
+                                GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE);
     gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), true);
 
     // Populating name of archive and setting the correct directory
@@ -562,11 +565,11 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
     {
         // filechooser will not honor default size or size request ?
         gtk_widget_show_all(dlg);
-        gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER_ALWAYS);
+        gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
         while (gtk_events_pending())
             gtk_main_iteration();
-        gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER);
+        gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
     // Displaying dialog
@@ -579,7 +582,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
     {
         switch (res)
         {
-            case GTK_RESPONSE_OK:
+            case GtkResponseType::GTK_RESPONSE_OK:
                 // Dialog OK'd - fetching archive filename
                 dest_file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
 
@@ -625,9 +628,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
                 {
                     xset_msg_dialog(
                         GTK_WIDGET(dlg),
-                        GTK_MESSAGE_ERROR,
+                        GtkMessageType::GTK_MESSAGE_ERROR,
                         "Create Archive",
-                        GTK_BUTTONS_OK,
+                        GtkButtonsType::GTK_BUTTONS_OK,
                         "The archive creation command is empty.  Please enter a command.");
                     continue;
                 }
@@ -699,9 +702,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
                     if (error)
                     {
                         xset_msg_dialog(GTK_WIDGET(dlg),
-                                        GTK_MESSAGE_ERROR,
+                                        GtkMessageType::GTK_MESSAGE_ERROR,
                                         "Error Saving Handler",
-                                        GTK_BUTTONS_OK,
+                                        GtkButtonsType::GTK_BUTTONS_OK,
                                         error_message);
                         error_message.clear();
                     }
@@ -711,7 +714,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
                 autosave_request_add();
                 exit_loop = true;
                 break;
-            case GTK_RESPONSE_NONE:
+            case GtkResponseType::GTK_RESPONSE_NONE:
                 /* User wants to configure archive handlers - call up the
                  * config dialog then exit, as this dialog would need to be
                  * reconstructed if changes occur */
@@ -1018,25 +1021,30 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFil
     {
         /* It has not - generating dialog to ask user. Only dealing with
          * user-writable contents if the user is not root */
-        GtkWidget* dlg = gtk_file_chooser_dialog_new("Extract To",
-                                                     dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
-                                                     GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-                                                     nullptr,
-                                                     nullptr);
+        GtkWidget* dlg =
+            gtk_file_chooser_dialog_new("Extract To",
+                                        dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
+                                        GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                                        nullptr,
+                                        nullptr);
 
         /* Adding standard buttons and saving references in the dialog
          * 'Configure' button has custom text but a stock image */
         GtkButton* btn_configure =
-            GTK_BUTTON(gtk_dialog_add_button(GTK_DIALOG(dlg), "Conf_igure", GTK_RESPONSE_NONE));
+            GTK_BUTTON(gtk_dialog_add_button(GTK_DIALOG(dlg),
+                                             "Conf_igure",
+                                             GtkResponseType::GTK_RESPONSE_NONE));
         g_object_set_data(G_OBJECT(dlg), "btn_configure", GTK_BUTTON(btn_configure));
-        g_object_set_data(G_OBJECT(dlg),
-                          "btn_cancel",
-                          gtk_dialog_add_button(GTK_DIALOG(dlg), "Cancel", GTK_RESPONSE_CANCEL));
-        g_object_set_data(G_OBJECT(dlg),
-                          "btn_ok",
-                          gtk_dialog_add_button(GTK_DIALOG(dlg), "OK", GTK_RESPONSE_OK));
+        g_object_set_data(
+            G_OBJECT(dlg),
+            "btn_cancel",
+            gtk_dialog_add_button(GTK_DIALOG(dlg), "Cancel", GtkResponseType::GTK_RESPONSE_CANCEL));
+        g_object_set_data(
+            G_OBJECT(dlg),
+            "btn_ok",
+            gtk_dialog_add_button(GTK_DIALOG(dlg), "OK", GtkResponseType::GTK_RESPONSE_OK));
 
-        GtkWidget* hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+        GtkWidget* hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 10);
         GtkWidget* chk_parent = gtk_check_button_new_with_mnemonic("Cre_ate subdirectories");
         GtkWidget* chk_write = gtk_check_button_new_with_mnemonic("Make contents "
                                                                   "user-_writable");
@@ -1064,11 +1072,11 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFil
         {
             // filechooser will not honor default size or size request ?
             gtk_widget_show_all(dlg);
-            gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER_ALWAYS);
+            gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
             gtk_window_resize(GTK_WINDOW(dlg), width, height);
             while (gtk_events_pending())
                 gtk_main_iteration();
-            gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER);
+            gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
         }
 
         // Displaying dialog
@@ -1077,7 +1085,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFil
         {
             switch (res)
             {
-                case GTK_RESPONSE_OK:
+                case GtkResponseType::GTK_RESPONSE_OK:
                     // Fetching user-specified settings and saving
                     choose_dir = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
                     create_parent = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_parent));
@@ -1087,7 +1095,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFil
                     xset_set(XSetName::ARC_DLG, XSetVar::Z, write_access ? "1" : "0");
                     exit_loop = true;
                     break;
-                case GTK_RESPONSE_NONE:
+                case GtkResponseType::GTK_RESPONSE_NONE:
                     /* User wants to configure archive handlers - call up the
                      * config dialog then exit, as this dialog would need to be
                      * reconstructed if changes occur */

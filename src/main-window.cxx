@@ -158,7 +158,10 @@ fm_main_window_get_type()
             (GInstanceInitFunc)fm_main_window_init,
             nullptr,
         };
-        type = g_type_register_static(GTK_TYPE_WINDOW, "FMMainWindow", &info, (GTypeFlags)0);
+        type = g_type_register_static(GTK_TYPE_WINDOW,
+                                      "FMMainWindow",
+                                      &info,
+                                      GTypeFlags::G_TYPE_FLAG_NONE);
     }
     return type;
 }
@@ -266,7 +269,7 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, xset_t set2)
                 deffolder = ztd::strdup("/");
         }
         path = xset_file_dialog(GTK_WIDGET(main_window),
-                                GTK_FILE_CHOOSER_ACTION_OPEN,
+                                GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
                                 "Choose Plugin File",
                                 deffolder,
                                 nullptr);
@@ -297,9 +300,9 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, xset_t set2)
                 msg = "This plugin's filename is invalid.  Please rename it using "
                       "alpha-numeric ASCII characters and try again.";
                 xset_msg_dialog(GTK_WIDGET(main_window),
-                                GTK_MESSAGE_ERROR,
+                                GtkMessageType::GTK_MESSAGE_ERROR,
                                 "Invalid Plugin Filename",
-                                GTK_BUTTONS_OK,
+                                GtkButtonsType::GTK_BUTTONS_OK,
                                 msg);
                 {
                     free(plug_dir_name);
@@ -317,10 +320,10 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, xset_t set2)
                     "also rename this plugin file to install it under a different name.",
                     plug_dir_name);
                 if (xset_msg_dialog(GTK_WIDGET(main_window),
-                                    GTK_MESSAGE_WARNING,
+                                    GtkMessageType::GTK_MESSAGE_WARNING,
                                     "Overwrite Plugin ?",
-                                    GTK_BUTTONS_YES_NO,
-                                    msg) != GTK_RESPONSE_YES)
+                                    GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                    msg) != GtkResponseType::GTK_RESPONSE_YES)
                 {
                     free(plug_dir_name);
                     free(path);
@@ -337,9 +340,9 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, xset_t set2)
             if (!user_tmp)
             {
                 xset_msg_dialog(GTK_WIDGET(main_window),
-                                GTK_MESSAGE_ERROR,
+                                GtkMessageType::GTK_MESSAGE_ERROR,
                                 "Error Creating Temp Directory",
-                                GTK_BUTTONS_OK,
+                                GtkButtonsType::GTK_BUTTONS_OK,
                                 "Unable to create temporary directory");
                 free(path);
                 return;
@@ -647,9 +650,9 @@ main_design_mode(GtkMenuItem* menuitem, FMMainWindow* main_window)
     (void)menuitem;
     xset_msg_dialog(
         GTK_WIDGET(main_window),
-        GTK_MESSAGE_INFO,
+        GtkMessageType::GTK_MESSAGE_INFO,
         "Design Mode Help",
-        GTK_BUTTONS_OK,
+        GtkButtonsType::GTK_BUTTONS_OK,
         "Design Mode allows you to change the name, shortcut key and icon of menu, toolbar and "
         "bookmark items, show help for an item, and add your own custom commands and "
         "applications.\n\nTo open the Design Menu, simply right-click on a menu item, bookmark, "
@@ -1535,13 +1538,13 @@ fm_main_window_init(FMMainWindow* main_window)
                               "gnome-fs-directory" ); */
     update_window_icon(GTK_WINDOW(main_window), gtk_icon_theme_get_default());
 
-    main_window->main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    main_window->main_vbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0);
     gtk_container_add(GTK_CONTAINER(main_window), main_window->main_vbox);
 
     // Create menu bar
     main_window->accel_group = gtk_accel_group_new();
     main_window->menu_bar = gtk_menu_bar_new();
-    GtkWidget* menu_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget* menu_hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_box_pack_start(GTK_BOX(menu_hbox), main_window->menu_bar, true, true, 0);
 
     // panelbar
@@ -1550,12 +1553,11 @@ fm_main_window_init(FMMainWindow* main_window)
     gtk_style_context_add_class(style_ctx, GTK_STYLE_CLASS_MENUBAR);
     gtk_style_context_remove_class(style_ctx, GTK_STYLE_CLASS_TOOLBAR);
     gtk_toolbar_set_show_arrow(GTK_TOOLBAR(main_window->panelbar), false);
-    gtk_toolbar_set_style(GTK_TOOLBAR(main_window->panelbar), GTK_TOOLBAR_ICONS);
-    gtk_toolbar_set_icon_size(GTK_TOOLBAR(main_window->panelbar), GTK_ICON_SIZE_MENU);
+    gtk_toolbar_set_style(GTK_TOOLBAR(main_window->panelbar), GtkToolbarStyle::GTK_TOOLBAR_ICONS);
+    gtk_toolbar_set_icon_size(GTK_TOOLBAR(main_window->panelbar), GtkIconSize::GTK_ICON_SIZE_MENU);
     // set pbar background to menu bar background
-    // gtk_widget_modify_bg( main_window->panelbar, GTK_STATE_NORMAL,
-    //                                    &GTK_WIDGET( main_window )
-    //                                    ->style->bg[ GTK_STATE_NORMAL ] );
+    // gtk_widget_modify_bg(main_window->panelbar, GtkStateType::GTK_STATE_NORMAL,
+    //                      &GTK_WIDGET(main_window)->style->bg[GtkStateType::GTK_STATE_NORMAL]);
 
     for (int i = 0; i < 4; ++i)
     {
@@ -1567,7 +1569,8 @@ fm_main_window_init(FMMainWindow* main_window)
             icon_name = set->icon;
         else
             icon_name = "gtk-yes";
-        main_window->panel_image[i] = xset_get_image(icon_name.c_str(), GTK_ICON_SIZE_MENU);
+        main_window->panel_image[i] =
+            xset_get_image(icon_name.c_str(), GtkIconSize::GTK_ICON_SIZE_MENU);
         gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(main_window->panel_btn[i]),
                                         main_window->panel_image[i]);
         gtk_toolbar_insert(GTK_TOOLBAR(main_window->panelbar),
@@ -1613,10 +1616,10 @@ fm_main_window_init(FMMainWindow* main_window)
     rebuild_menus(main_window);
 
     /* Create client area */
-    main_window->task_vpane = gtk_paned_new(GTK_ORIENTATION_VERTICAL);
-    main_window->vpane = gtk_paned_new(GTK_ORIENTATION_VERTICAL);
-    main_window->hpane_top = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
-    main_window->hpane_bottom = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
+    main_window->task_vpane = gtk_paned_new(GtkOrientation::GTK_ORIENTATION_VERTICAL);
+    main_window->vpane = gtk_paned_new(GtkOrientation::GTK_ORIENTATION_VERTICAL);
+    main_window->hpane_top = gtk_paned_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL);
+    main_window->hpane_bottom = gtk_paned_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL);
 
     for (int i = 0; i < 4; ++i)
     {
@@ -1653,8 +1656,8 @@ fm_main_window_init(FMMainWindow* main_window)
 
     // Task View
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(main_window->task_scroll),
-                                   GTK_POLICY_AUTOMATIC,
-                                   GTK_POLICY_AUTOMATIC);
+                                   GtkPolicyType::GTK_POLICY_AUTOMATIC,
+                                   GtkPolicyType::GTK_POLICY_AUTOMATIC);
     main_window->task_view = main_task_view_new(main_window);
     gtk_container_add(GTK_CONTAINER(main_window->task_scroll), GTK_WIDGET(main_window->task_view));
 
@@ -1907,18 +1910,18 @@ fm_main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
     if (main_tasks_running(main_window))
     {
         GtkWidget* dlg = gtk_message_dialog_new(GTK_WINDOW(widget),
-                                                GTK_DIALOG_MODAL,
-                                                GTK_MESSAGE_QUESTION,
-                                                GTK_BUTTONS_YES_NO,
+                                                GtkDialogFlags::GTK_DIALOG_MODAL,
+                                                GtkMessageType::GTK_MESSAGE_QUESTION,
+                                                GtkButtonsType::GTK_BUTTONS_YES_NO,
                                                 "Stop all tasks running in this window?");
-        gtk_dialog_set_default_response(GTK_DIALOG(dlg), GTK_RESPONSE_NO);
-        if (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_YES)
+        gtk_dialog_set_default_response(GTK_DIALOG(dlg), GtkResponseType::GTK_RESPONSE_NO);
+        if (gtk_dialog_run(GTK_DIALOG(dlg)) == GtkResponseType::GTK_RESPONSE_YES)
         {
             gtk_widget_destroy(dlg);
             dlg = gtk_message_dialog_new(GTK_WINDOW(widget),
-                                         GTK_DIALOG_MODAL,
-                                         GTK_MESSAGE_INFO,
-                                         GTK_BUTTONS_CLOSE,
+                                         GtkDialogFlags::GTK_DIALOG_MODAL,
+                                         GtkMessageType::GTK_MESSAGE_INFO,
+                                         GtkButtonsType::GTK_BUTTONS_CLOSE,
                                          "Aborting tasks...");
             g_signal_connect(dlg, "response", G_CALLBACK(on_abort_tasks_response), widget);
             g_signal_connect(dlg, "destroy", G_CALLBACK(gtk_widget_destroy), dlg);
@@ -1949,7 +1952,7 @@ fm_main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event)
 {
     FMMainWindow* main_window = FM_MAIN_WINDOW_REINTERPRET(widget);
 
-    bool maximized = ((event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED) != 0);
+    bool maximized = ((event->new_window_state & GdkWindowState::GDK_WINDOW_STATE_MAXIMIZED) != 0);
 
     main_window->maximized = maximized;
     app_settings.set_maximized(maximized);
@@ -2306,7 +2309,7 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
                           true))
         return true;
     // middle-click on tab closes
-    if (event->type == GDK_BUTTON_PRESS)
+    if (event->type == GdkEventType::GDK_BUTTON_PRESS)
     {
         if (event->button == 2)
         {
@@ -2411,7 +2414,7 @@ fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
     evt_box = GTK_EVENT_BOX(gtk_event_box_new());
     gtk_event_box_set_visible_window(GTK_EVENT_BOX(evt_box), false);
 
-    tab_label = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    tab_label = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
     xset_t set = xset_get_panel(file_browser->mypanel, XSetPanel::ICON_TAB);
     if (set->icon)
     {
@@ -2422,10 +2425,10 @@ fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
             g_object_unref(pixbuf);
         }
         else
-            tab_icon = xset_get_image(set->icon, GTK_ICON_SIZE_MENU);
+            tab_icon = xset_get_image(set->icon, GtkIconSize::GTK_ICON_SIZE_MENU);
     }
     if (!tab_icon)
-        tab_icon = gtk_image_new_from_icon_name("gtk-directory", GTK_ICON_SIZE_MENU);
+        tab_icon = gtk_image_new_from_icon_name("gtk-directory", GtkIconSize::GTK_ICON_SIZE_MENU);
     gtk_box_pack_start(GTK_BOX(tab_label), tab_icon, false, false, 4);
 
     if (ptk_file_browser_get_cwd(file_browser))
@@ -2436,10 +2439,10 @@ fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
     else
         tab_text = gtk_label_new("");
 
-    gtk_label_set_ellipsize(GTK_LABEL(tab_text), PANGO_ELLIPSIZE_MIDDLE);
+    gtk_label_set_ellipsize(GTK_LABEL(tab_text), PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
     if (std::strlen(gtk_label_get_text(GTK_LABEL(tab_text))) < 30)
     {
-        gtk_label_set_ellipsize(GTK_LABEL(tab_text), PANGO_ELLIPSIZE_NONE);
+        gtk_label_set_ellipsize(GTK_LABEL(tab_text), PangoEllipsizeMode::PANGO_ELLIPSIZE_NONE);
         gtk_label_set_width_chars(GTK_LABEL(tab_text), -1);
     }
     else
@@ -2452,7 +2455,7 @@ fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
         close_btn = gtk_button_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(close_btn), false);
         gtk_button_set_relief(GTK_BUTTON(close_btn), GTK_RELIEF_NONE);
-        close_icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+        close_icon = gtk_image_new_from_icon_name("window-close", GtkIconSize::GTK_ICON_SIZE_MENU);
 
         gtk_container_add(GTK_CONTAINER(close_btn), close_icon);
         gtk_box_pack_end(GTK_BOX(tab_label), close_btn, false, false, 0);
@@ -2464,13 +2467,14 @@ fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
 
     gtk_container_add(GTK_CONTAINER(evt_box), tab_label);
 
-    gtk_widget_set_events(GTK_WIDGET(evt_box), GDK_ALL_EVENTS_MASK);
+    gtk_widget_set_events(GTK_WIDGET(evt_box), GdkEventMask::GDK_ALL_EVENTS_MASK);
     gtk_drag_dest_set(
         GTK_WIDGET(evt_box),
         GTK_DEST_DEFAULT_ALL,
         drag_targets,
         sizeof(drag_targets) / sizeof(GtkTargetEntry),
-        GdkDragAction(GDK_ACTION_DEFAULT | GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+        GdkDragAction(GdkDragAction::GDK_ACTION_DEFAULT | GdkDragAction::GDK_ACTION_COPY |
+                      GdkDragAction::GDK_ACTION_MOVE | GdkDragAction::GDK_ACTION_LINK));
     g_signal_connect((void*)evt_box, "drag-motion", G_CALLBACK(on_tab_drag_motion), file_browser);
 
     // MOD  middle-click to close tab
@@ -2508,10 +2512,10 @@ fm_main_window_update_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
 
         const std::string name = Glib::path_get_basename(path);
         gtk_label_set_text(text, name.c_str());
-        gtk_label_set_ellipsize(text, PANGO_ELLIPSIZE_MIDDLE);
+        gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
         if (name.size() < 30)
         {
-            gtk_label_set_ellipsize(text, PANGO_ELLIPSIZE_NONE);
+            gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_NONE);
             gtk_label_set_width_chars(text, -1);
         }
         else
@@ -3232,7 +3236,7 @@ on_window_button_press_event(GtkWidget* widget, GdkEventButton* event,
                              FMMainWindow* main_window) // sfm
 {
     (void)widget;
-    if (event->type != GDK_BUTTON_PRESS)
+    if (event->type != GdkEventType::GDK_BUTTON_PRESS)
         return false;
 
     // handle mouse back/forward buttons anywhere in the main window
@@ -3292,13 +3296,17 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, xset_t kn
 
     unsigned int keymod = ptk_get_keymod(event->state);
 
-    if ((event->keyval == GDK_KEY_Home && (keymod == 0 || keymod == GDK_SHIFT_MASK)) ||
-        (event->keyval == GDK_KEY_End && (keymod == 0 || keymod == GDK_SHIFT_MASK)) ||
+    if ((event->keyval == GDK_KEY_Home &&
+         (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
+        (event->keyval == GDK_KEY_End &&
+         (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
         (event->keyval == GDK_KEY_Delete && keymod == 0) ||
         (event->keyval == GDK_KEY_Tab && keymod == 0) ||
         (keymod == 0 && (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter)) ||
-        (event->keyval == GDK_KEY_Left && (keymod == 0 || keymod == GDK_SHIFT_MASK)) ||
-        (event->keyval == GDK_KEY_Right && (keymod == 0 || keymod == GDK_SHIFT_MASK)) ||
+        (event->keyval == GDK_KEY_Left &&
+         (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
+        (event->keyval == GDK_KEY_Right &&
+         (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
         (event->keyval == GDK_KEY_BackSpace && keymod == 0) ||
         (keymod == 0 && event->keyval != GDK_KEY_Escape &&
          gdk_keyval_to_unicode(event->keyval))) // visible char
@@ -3393,7 +3401,7 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, xset_t kn
     }
 #endif
 
-    if ((event->state & GDK_MOD1_MASK))
+    if ((event->state & GdkModifierType::GDK_MOD1_MASK))
         rebuild_menus(main_window);
 
     return false;
@@ -3700,9 +3708,9 @@ on_reorder(GtkWidget* item, GtkWidget* parent)
     (void)item;
     xset_msg_dialog(
         parent,
-        GTK_MESSAGE_INFO,
+        GtkMessageType::GTK_MESSAGE_INFO,
         "Reorder Columns Help",
-        GTK_BUTTONS_OK,
+        GtkButtonsType::GTK_BUTTONS_OK,
         "To change the order of the columns, drag the column header to the desired location.");
 }
 
@@ -4896,7 +4904,7 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow*
     xset_t set;
     bool is_tasks;
 
-    if (event->type != GDK_BUTTON_PRESS)
+    if (event->type != GdkEventType::GDK_BUTTON_PRESS)
         return false;
 
     if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
@@ -5298,17 +5306,19 @@ main_task_view_update_task(PtkFileTask* ptask)
 
             GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
-            pixbuf = gtk_icon_theme_load_icon(icon_theme,
-                                              iname.c_str(),
-                                              icon_size,
-                                              (GtkIconLookupFlags)GTK_ICON_LOOKUP_USE_BUILTIN,
-                                              nullptr);
+            pixbuf = gtk_icon_theme_load_icon(
+                icon_theme,
+                iname.c_str(),
+                icon_size,
+                (GtkIconLookupFlags)GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
+                nullptr);
             if (!pixbuf)
-                pixbuf = gtk_icon_theme_load_icon(icon_theme,
-                                                  "gtk-execute",
-                                                  icon_size,
-                                                  (GtkIconLookupFlags)GTK_ICON_LOOKUP_USE_BUILTIN,
-                                                  nullptr);
+                pixbuf = gtk_icon_theme_load_icon(
+                    icon_theme,
+                    "gtk-execute",
+                    icon_size,
+                    (GtkIconLookupFlags)GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
+                    nullptr);
             ptask->pause_change_view = false;
         }
 
@@ -5484,7 +5494,7 @@ main_task_view_new(FMMainWindow* main_window)
     {
         col = gtk_tree_view_column_new();
         gtk_tree_view_column_set_resizable(col, true);
-        gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
+        gtk_tree_view_column_set_sizing(col, GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
         gtk_tree_view_column_set_min_width(col, 20);
 
         // column order
@@ -5526,7 +5536,9 @@ main_task_view_new(FMMainWindow* main_window)
                                                     MainWindowTaskCol::TASK_COL_STATUS,
                                                     nullptr);
                 gtk_tree_view_column_set_expand(col, false);
-                gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
+                gtk_tree_view_column_set_sizing(
+                    col,
+                    GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
                 gtk_tree_view_column_set_min_width(col, 60);
                 break;
             case MainWindowTaskCol::TASK_COL_PROGRESS:
@@ -5548,7 +5560,7 @@ main_task_view_new(FMMainWindow* main_window)
                 {
                     GValue val = GValue();
                     g_value_init(&val, G_TYPE_CHAR);
-                    g_value_set_schar(&val, PANGO_ELLIPSIZE_MIDDLE);
+                    g_value_set_schar(&val, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
                     g_object_set_property(G_OBJECT(renderer), "ellipsize", &val);
                     g_value_unset(&val);
                 }
@@ -5562,7 +5574,8 @@ main_task_view_new(FMMainWindow* main_window)
         if (j == MainWindowTaskCol::TASK_COL_FILE) //|| j == MainWindowTaskCol::TASK_COL_PATH || j
                                                    //== MainWindowTaskCol::TASK_COL_TO
         {
-            gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
+            gtk_tree_view_column_set_sizing(col,
+                                            GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
             gtk_tree_view_column_set_min_width(col, 20);
             // If set_expand is true, columns flicker and adjustment is
             // difficult during high i/o load on some systems
@@ -5589,7 +5602,7 @@ main_task_view_new(FMMainWindow* main_window)
     if (GTK_IS_TREE_SORTABLE(list))
         gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(list),
                                              MainWindowTaskCol::TASK_COL_STARTTIME,
-                                             GTK_SORT_ASCENDING);
+                                             GtkSortType::GTK_SORT_ASCENDING);
 
     g_signal_connect(view, "row-activated", G_CALLBACK(on_task_row_activated), nullptr);
     g_signal_connect(view, "columns-changed", G_CALLBACK(on_task_columns_changed), nullptr);
@@ -6099,8 +6112,9 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (ztd::same(socket_property, "sort_ascend"))
             {
                 ptk_file_browser_set_sort_type(file_browser,
-                                               get_bool(argv[i + 1]) ? GTK_SORT_ASCENDING
-                                                                     : GTK_SORT_DESCENDING);
+                                               get_bool(argv[i + 1])
+                                                   ? GtkSortType::GTK_SORT_ASCENDING
+                                                   : GtkSortType::GTK_SORT_DESCENDING);
                 return 0;
             }
             else if (ztd::same(socket_property, "sort_alphanum"))
@@ -6514,7 +6528,9 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (ztd::startswith(socket_property, "sort_"))
         {
             if (ztd::same(socket_property, "sort_ascend"))
-                reply = fmt::format("{}", file_browser->sort_type == GTK_SORT_ASCENDING ? 1 : 0);
+                reply =
+                    fmt::format("{}",
+                                file_browser->sort_type == GtkSortType::GTK_SORT_ASCENDING ? 1 : 0);
 #if 0
             else if (ztd::same(socket_property, "sort_natural"))
 #endif
@@ -7231,7 +7247,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             return 1;
         }
         // this only handles keys assigned to menu items
-        GdkEventKey* event = (GdkEventKey*)gdk_event_new(GDK_KEY_PRESS);
+        GdkEventKey* event = (GdkEventKey*)gdk_event_new(GdkEventType::GDK_KEY_PRESS);
         event->keyval = std::stoul(socket_property, nullptr, 0);
         event->state = argv[i + 1] ? std::stoul(argv[i + 1], nullptr, 0) : 0;
         if (event->keyval)
@@ -7404,8 +7420,9 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset
     if (set == event_handler.win_click)
     {
         replace = "%e %w %p %t %f %b %m";
-        state = (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_SUPER_MASK |
-                          GDK_HYPER_MASK | GDK_META_MASK));
+        state = (state & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
+                          GdkModifierType::GDK_MOD1_MASK | GdkModifierType::GDK_SUPER_MASK |
+                          GdkModifierType::GDK_HYPER_MASK | GdkModifierType::GDK_META_MASK));
     }
     else if (set == event_handler.win_key)
     {

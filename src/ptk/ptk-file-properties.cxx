@@ -793,7 +793,7 @@ on_dlg_response(GtkDialog* dialog, int response_id, void* user_data)
         if (data->calc_size_thread)
             g_thread_join(data->calc_size_thread);
 
-        if (response_id == GTK_RESPONSE_OK)
+        if (response_id == GtkResponseType::GTK_RESPONSE_OK)
         {
             bool mod_change;
             PtkFileTask* ptask;

@@ -22,8 +22,9 @@
 unsigned int
 ptk_get_keymod(unsigned int event)
 {
-    return (event & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_SUPER_MASK |
-                     GDK_HYPER_MASK | GDK_META_MASK));
+    return (event & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
+                     GdkModifierType::GDK_MOD1_MASK | GdkModifierType::GDK_SUPER_MASK |
+                     GdkModifierType::GDK_HYPER_MASK | GdkModifierType::GDK_META_MASK));
 }
 
 #ifdef HAVE_NONLATIN

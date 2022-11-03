@@ -191,7 +191,10 @@ ptk_dir_tree_get_type()
             nullptr,
             nullptr};
 
-        type = g_type_register_static(G_TYPE_OBJECT, "PtkDirTree", &type_info, (GTypeFlags)0);
+        type = g_type_register_static(G_TYPE_OBJECT,
+                                      "PtkDirTree",
+                                      &type_info,
+                                      GTypeFlags::G_TYPE_FLAG_NONE);
         g_type_add_interface_static(type, GTK_TYPE_TREE_MODEL, &tree_model_info);
         g_type_add_interface_static(type, GTK_TYPE_TREE_DRAG_SOURCE, &drag_src_info);
         g_type_add_interface_static(type, GTK_TYPE_TREE_DRAG_DEST, &drag_dest_info);

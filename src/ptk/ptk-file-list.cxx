@@ -135,7 +135,10 @@ ptk_file_list_get_type()
             nullptr,
             nullptr};
 
-        type = g_type_register_static(G_TYPE_OBJECT, "PtkFileList", &type_info, (GTypeFlags)0);
+        type = g_type_register_static(G_TYPE_OBJECT,
+                                      "PtkFileList",
+                                      &type_info,
+                                      GTypeFlags::G_TYPE_FLAG_NONE);
         g_type_add_interface_static(type, GTK_TYPE_TREE_MODEL, &tree_model_info);
         g_type_add_interface_static(type, GTK_TYPE_TREE_SORTABLE, &tree_sortable_info);
         g_type_add_interface_static(type, GTK_TYPE_TREE_DRAG_SOURCE, &drag_src_info);
@@ -732,7 +735,7 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
     }
 
     if (result != 0)
-        return list->sort_order == GTK_SORT_ASCENDING ? result : -result;
+        return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
 
     // hidden first/last
     bool hidden_a = file_a->disp_name.at(0) == '.';
@@ -791,7 +794,7 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
          * UTF-8 strings case sensitively without collating (natural) */
         result = g_ascii_strcasecmp(file_a->disp_name.c_str(), file_b->disp_name.c_str());
     }
-    return list->sort_order == GTK_SORT_ASCENDING ? result : -result;
+    return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
 }
 
 void

@@ -64,7 +64,9 @@ static bool on_dir_tree_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_
 static bool on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, int x,
                                        int y, unsigned int time, PtkFileBrowser* file_browser);
 
-#define GDK_ACTION_ALL (GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK)
+#define GDK_ACTION_ALL                                                 \
+    (GdkDragAction::GDK_ACTION_MOVE | GdkDragAction::GDK_ACTION_COPY | \
+     GdkDragAction::GDK_ACTION_LINK)
 
 static bool
 filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
@@ -115,17 +117,19 @@ ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
     /*    exo_icon_view_enable_model_drag_dest (
                 EXO_ICON_VIEW( dir_tree_view ),
                 drag_targets, G_N_ELEMENTS( drag_targets ), GDK_ACTION_ALL ); */
-    gtk_tree_view_enable_model_drag_dest(
-        dir_tree_view,
-        drag_targets,
-        sizeof(drag_targets) / sizeof(GtkTargetEntry),
-        GdkDragAction(GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK));
+    gtk_tree_view_enable_model_drag_dest(dir_tree_view,
+                                         drag_targets,
+                                         sizeof(drag_targets) / sizeof(GtkTargetEntry),
+                                         GdkDragAction(GdkDragAction::GDK_ACTION_MOVE |
+                                                       GdkDragAction::GDK_ACTION_COPY |
+                                                       GdkDragAction::GDK_ACTION_LINK));
     /*
         gtk_tree_view_enable_model_drag_source ( dir_tree_view,
-                                                 ( GDK_CONTROL_MASK | GDK_BUTTON1_MASK |
-       GDK_BUTTON3_MASK ), drag_targets, sizeof( drag_targets ) / sizeof( GtkTargetEntry ),
-                                                 GDK_ACTION_DEFAULT | GDK_ACTION_COPY |
-       GDK_ACTION_MOVE | GDK_ACTION_LINK );
+                                                 ( GdkModifierType::GDK_CONTROL_MASK |
+       GdkModifierType::GDK_BUTTON1_MASK | GdkModifierType::GDK_BUTTON3_MASK ), drag_targets,
+       sizeof( drag_targets ) / sizeof( GtkTargetEntry ), GdkDragAction::GDK_ACTION_DEFAULT |
+       GdkDragAction::GDK_ACTION_COPY | GdkDragAction::GDK_ACTION_MOVE |
+       GdkDragAction::GDK_ACTION_LINK );
       */
 
     col = gtk_tree_view_column_new();
@@ -411,7 +415,7 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrows
     GtkTreeViewColumn* tree_col;
     GtkTreeIter it;
 
-    if (evt->type == GDK_BUTTON_PRESS && (evt->button == 1 || evt->button == 3))
+    if (evt->type == GdkEventType::GDK_BUTTON_PRESS && (evt->button == 1 || evt->button == 3))
     {
         // middle click 2 handled in ptk-file-browser.c on_dir_tree_button_press
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
@@ -452,7 +456,7 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrows
             gtk_tree_path_free(tree_path);
         }
     }
-    else if (evt->type == GDK_2BUTTON_PRESS && evt->button == 1)
+    else if (evt->type == GdkEventType::GDK_2BUTTON_PRESS && evt->button == 1)
     {
         // double click - expand/collapse
         if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
@@ -484,8 +488,10 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* br
     if (!gtk_tree_selection_get_selected(select, &model, &iter))
         return false;
 
-    int keymod = (evt->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_SUPER_MASK |
-                                GDK_HYPER_MASK | GDK_META_MASK));
+    int keymod =
+        (evt->state & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
+                       GdkModifierType::GDK_MOD1_MASK | GdkModifierType::GDK_SUPER_MASK |
+                       GdkModifierType::GDK_HYPER_MASK | GdkModifierType::GDK_META_MASK));
 
     GtkTreePath* path = gtk_tree_model_get_path(model, &iter);
 
@@ -521,7 +527,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* br
             break;
         case GDK_KEY_F10:
         case GDK_KEY_Menu:
-            if (evt->keyval == GDK_KEY_F10 && keymod != GDK_SHIFT_MASK)
+            if (evt->keyval == GDK_KEY_F10 && keymod != GdkModifierType::GDK_SHIFT_MASK)
             {
                 gtk_tree_path_free(path);
                 return false;
@@ -632,13 +638,13 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                     }
                     if (file_browser->drag_source_dev_tree != dest_dev)
                         // src and dest are on different devices
-                        gdk_drag_status(drag_context, GDK_ACTION_COPY, time);
+                        gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
                     else
-                        gdk_drag_status(drag_context, GDK_ACTION_MOVE, time);
+                        gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_MOVE, time);
                 }
                 else
                 { // stat failed
-                    gdk_drag_status(drag_context, GDK_ACTION_COPY, time);
+                    gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
                 }
 
                 free(dest_dir);
@@ -651,9 +657,10 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
             {
                 std::vector<std::string> file_list;
                 if ((gdk_drag_context_get_selected_action(drag_context) &
-                     (GDK_ACTION_MOVE | GDK_ACTION_COPY | GDK_ACTION_LINK)) == 0)
+                     (GdkDragAction::GDK_ACTION_MOVE | GdkDragAction::GDK_ACTION_COPY |
+                      GdkDragAction::GDK_ACTION_LINK)) == 0)
                 {
-                    gdk_drag_status(drag_context, GDK_ACTION_MOVE, time);
+                    gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_MOVE, time);
                 }
                 gtk_drag_finish(drag_context, true, false, time);
 
@@ -672,18 +679,18 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                 VFSFileTaskType file_action;
                 switch (gdk_drag_context_get_selected_action(drag_context))
                 {
-                    case GDK_ACTION_COPY:
+                    case GdkDragAction::GDK_ACTION_COPY:
                         file_action = VFSFileTaskType::VFS_FILE_TASK_COPY;
                         break;
-                    case GDK_ACTION_MOVE:
+                    case GdkDragAction::GDK_ACTION_MOVE:
                         file_action = VFSFileTaskType::VFS_FILE_TASK_MOVE;
                         break;
-                    case GDK_ACTION_LINK:
+                    case GdkDragAction::GDK_ACTION_LINK:
                         file_action = VFSFileTaskType::VFS_FILE_TASK_LINK;
                         break;
-                    case GDK_ACTION_DEFAULT:
-                    case GDK_ACTION_PRIVATE:
-                    case GDK_ACTION_ASK:
+                    case GdkDragAction::GDK_ACTION_DEFAULT:
+                    case GdkDragAction::GDK_ACTION_PRIVATE:
+                    case GdkDragAction::GDK_ACTION_ASK:
                     default:
                         break;
                 }
@@ -712,7 +719,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
     /* If we are only getting drag status, not finished. */
     if (file_browser->pending_drag_status_tree)
     {
-        gdk_drag_status(drag_context, GDK_ACTION_COPY, time);
+        gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
         file_browser->pending_drag_status_tree = false;
         return;
     }
@@ -755,24 +762,27 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, in
     {
         // Need to set suggested_action because default handler assumes copy
         /* Only 'move' is available. The user force move action by pressing Shift key */
-        if ((gdk_drag_context_get_actions(drag_context) & GDK_ACTION_ALL) == GDK_ACTION_MOVE)
-            suggested_action = GDK_ACTION_MOVE;
+        if ((gdk_drag_context_get_actions(drag_context) & GDK_ACTION_ALL) ==
+            GdkDragAction::GDK_ACTION_MOVE)
+            suggested_action = GdkDragAction::GDK_ACTION_MOVE;
         /* Only 'copy' is available. The user force copy action by pressing Ctrl key */
-        else if ((gdk_drag_context_get_actions(drag_context) & GDK_ACTION_ALL) == GDK_ACTION_COPY)
-            suggested_action = GDK_ACTION_COPY;
+        else if ((gdk_drag_context_get_actions(drag_context) & GDK_ACTION_ALL) ==
+                 GdkDragAction::GDK_ACTION_COPY)
+            suggested_action = GdkDragAction::GDK_ACTION_COPY;
         /* Only 'link' is available. The user force link action by pressing Shift+Ctrl key */
-        else if ((gdk_drag_context_get_actions(drag_context) & GDK_ACTION_ALL) == GDK_ACTION_LINK)
-            suggested_action = GDK_ACTION_LINK;
+        else if ((gdk_drag_context_get_actions(drag_context) & GDK_ACTION_ALL) ==
+                 GdkDragAction::GDK_ACTION_LINK)
+            suggested_action = GdkDragAction::GDK_ACTION_LINK;
         /* Several different actions are available. We have to figure out a good default action. */
         else
         {
             int drag_action = xset_get_int(XSetName::DRAG_ACTION, XSetVar::X);
             if (drag_action == 1)
-                suggested_action = GDK_ACTION_COPY;
+                suggested_action = GdkDragAction::GDK_ACTION_COPY;
             else if (drag_action == 2)
-                suggested_action = GDK_ACTION_MOVE;
+                suggested_action = GdkDragAction::GDK_ACTION_MOVE;
             else if (drag_action == 3)
-                suggested_action = GDK_ACTION_LINK;
+                suggested_action = GdkDragAction::GDK_ACTION_LINK;
             else
             {
                 // automatic

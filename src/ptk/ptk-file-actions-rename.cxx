@@ -268,7 +268,7 @@ on_move_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
             case GDK_KEY_Return:
             case GDK_KEY_KP_Enter:
                 if (gtk_widget_get_sensitive(GTK_WIDGET(mset->next)))
-                    gtk_dialog_response(GTK_DIALOG(mset->dlg), GTK_RESPONSE_OK);
+                    gtk_dialog_response(GTK_DIALOG(mset->dlg), GtkResponseType::GTK_RESPONSE_OK);
                 return true;
             default:
                 break;
@@ -290,7 +290,7 @@ on_move_entry_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
             case GDK_KEY_Return:
             case GDK_KEY_KP_Enter:
                 if (gtk_widget_get_sensitive(GTK_WIDGET(mset->next)))
-                    gtk_dialog_response(GTK_DIALOG(mset->dlg), GTK_RESPONSE_OK);
+                    gtk_dialog_response(GTK_DIALOG(mset->dlg), GtkResponseType::GTK_RESPONSE_OK);
                 return true;
             default:
                 break;
@@ -904,7 +904,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     if (widget == GTK_WIDGET(mset->browse_target))
     {
         title = "Select Link Target";
-        action = GTK_FILE_CHOOSER_ACTION_OPEN;
+        action = GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN;
         text = gtk_entry_get_text(mset->entry_target);
         if (text[0] == '/')
         {
@@ -921,7 +921,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
     {
         title = "Select Template File";
-        action = GTK_FILE_CHOOSER_ACTION_OPEN;
+        action = GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN;
         text = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(mset->combo_template))));
         if (text && text[0] == '/')
         {
@@ -940,7 +940,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     else
     {
         title = "Select Template Directory";
-        action = GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
+        action = GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
         text = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(mset->combo_template))));
         if (text && text[0] == '/')
         {
@@ -961,9 +961,9 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
                                                  mset->parent ? GTK_WINDOW(mset->parent) : nullptr,
                                                  (GtkFileChooserAction)action,
                                                  "Cancel",
-                                                 GTK_RESPONSE_CANCEL,
+                                                 GtkResponseType::GTK_RESPONSE_CANCEL,
                                                  "OK",
-                                                 GTK_RESPONSE_OK,
+                                                 GtkResponseType::GTK_RESPONSE_OK,
                                                  nullptr);
 
     xset_set_window_icon(GTK_WINDOW(dlg));
@@ -984,15 +984,15 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     {
         // filechooser will not honor default size or size request ?
         gtk_widget_show_all(dlg);
-        gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER_ALWAYS);
+        gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
         while (gtk_events_pending())
             gtk_main_iteration();
-        gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER);
+        gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
     int response = gtk_dialog_run(GTK_DIALOG(dlg));
-    if (response == GTK_RESPONSE_OK)
+    if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
         char* new_path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
         char* path = new_path;
@@ -1047,8 +1047,9 @@ on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
         {
-            int action = i == MODE_PARENT ? GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
-                                          : GTK_FILE_CHOOSER_ACTION_SAVE;
+            int action = i == MODE_PARENT
+                             ? GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
+                             : GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE;
             GtkAllocation allocation;
             gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
             int width = allocation.width;
@@ -1057,11 +1058,12 @@ on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
             if (width && height)
             {
                 // under some circumstances, changing the action changes the size
-                gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER_ALWAYS);
+                gtk_window_set_position(GTK_WINDOW(dlg),
+                                        GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
                 gtk_window_resize(GTK_WINDOW(dlg), width, height);
                 while (gtk_events_pending())
                     gtk_main_iteration();
-                gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER);
+                gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
             }
             return;
         }
@@ -1083,16 +1085,16 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     // action create directory does not work properly so not used:
     //  it creates a directory by default with no way to stop it
     //  it gives 'directory already exists' error popup
-    GtkWidget* dlg = gtk_file_chooser_dialog_new("Browse",
-                                                 mset->parent ? GTK_WINDOW(mset->parent) : nullptr,
-                                                 mode_default == MODE_PARENT
-                                                     ? GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
-                                                     : GTK_FILE_CHOOSER_ACTION_SAVE,
-                                                 "Cancel",
-                                                 GTK_RESPONSE_CANCEL,
-                                                 "OK",
-                                                 GTK_RESPONSE_OK,
-                                                 nullptr);
+    GtkWidget* dlg = gtk_file_chooser_dialog_new(
+        "Browse",
+        mset->parent ? GTK_WINDOW(mset->parent) : nullptr,
+        mode_default == MODE_PARENT ? GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
+                                    : GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
+        "Cancel",
+        GtkResponseType::GTK_RESPONSE_CANCEL,
+        "OK",
+        GtkResponseType::GTK_RESPONSE_OK,
+        nullptr);
     gtk_window_set_role(GTK_WINDOW(dlg), "file_dialog");
 
     gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
@@ -1114,7 +1116,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
 
     // Mode
     GtkWidget* mode[3];
-    GtkWidget* hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget* hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 4);
     mode[MODE_FILENAME] = gtk_radio_button_new_with_mnemonic(nullptr, "Fil_ename");
     mode[MODE_PARENT] =
         gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(mode[MODE_FILENAME]),
@@ -1140,16 +1142,16 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     {
         // filechooser will not honor default size or size request ?
         gtk_widget_show_all(dlg);
-        gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER_ALWAYS);
+        gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
         while (gtk_events_pending())
             gtk_main_iteration();
-        gtk_window_set_position(GTK_WINDOW(dlg), GTK_WIN_POS_CENTER);
+        gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
     int response = gtk_dialog_run(GTK_DIALOG(dlg));
     // bogus GTK warning here: Unable to retrieve the file info for...
-    if (response == GTK_RESPONSE_OK)
+    if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
         for (int i = MODE_FILENAME; i <= MODE_PATH; ++i)
         {
@@ -1290,7 +1292,7 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     GdkPixbuf* pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
                                                  win_icon,
                                                  16,
-                                                 GTK_ICON_LOOKUP_USE_BUILTIN,
+                                                 GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
                                                  nullptr);
     if (pixbuf)
         gtk_window_set_icon(GTK_WINDOW(mset->dlg), pixbuf);
@@ -1767,7 +1769,7 @@ copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
 static bool
 on_label_button_press(GtkWidget* widget, GdkEventButton* event, MoveSet* mset)
 {
-    if (event->type == GDK_BUTTON_PRESS)
+    if (event->type == GdkEventType::GDK_BUTTON_PRESS)
     {
         if (event->button == 1 || event->button == 2)
         {
@@ -1809,7 +1811,7 @@ on_label_button_press(GtkWidget* widget, GdkEventButton* event, MoveSet* mset)
             }
         }
     }
-    else if (event->type == GDK_2BUTTON_PRESS)
+    else if (event->type == GdkEventType::GDK_2BUTTON_PRESS)
     {
         copy_entry_to_clipboard(widget, mset);
     }
@@ -2101,43 +2103,56 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         task_view = file_browser->task_view;
     }
 
-    mset->dlg = gtk_dialog_new_with_buttons(
-        "Move",
-        mset->parent ? GTK_WINDOW(mset->parent) : nullptr,
-        GtkDialogFlags(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-        nullptr,
-        nullptr);
+    mset->dlg =
+        gtk_dialog_new_with_buttons("Move",
+                                    mset->parent ? GTK_WINDOW(mset->parent) : nullptr,
+                                    GtkDialogFlags(GtkDialogFlags::GTK_DIALOG_MODAL |
+                                                   GtkDialogFlags::GTK_DIALOG_DESTROY_WITH_PARENT),
+                                    nullptr,
+                                    nullptr);
     // free( title );
     gtk_window_set_role(GTK_WINDOW(mset->dlg), "rename_dialog");
 
     // Buttons
     mset->options = gtk_button_new_with_mnemonic("Opt_ions");
-    gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg), mset->options, GTK_RESPONSE_YES);
+    gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg),
+                                 mset->options,
+                                 GtkResponseType::GTK_RESPONSE_YES);
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->options), false);
     g_signal_connect(G_OBJECT(mset->options), "clicked", G_CALLBACK(on_options_button_press), mset);
 
     mset->browse = gtk_button_new_with_mnemonic("_Browse");
-    gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg), mset->browse, GTK_RESPONSE_YES);
+    gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg),
+                                 mset->browse,
+                                 GtkResponseType::GTK_RESPONSE_YES);
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->browse), false);
     g_signal_connect(G_OBJECT(mset->browse), "clicked", G_CALLBACK(on_browse_button_press), mset);
 
     mset->revert = gtk_button_new_with_mnemonic("Re_vert");
-    gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg), mset->revert, GTK_RESPONSE_NO);
+    gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg),
+                                 mset->revert,
+                                 GtkResponseType::GTK_RESPONSE_NO);
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->revert), false);
     g_signal_connect(G_OBJECT(mset->revert), "clicked", G_CALLBACK(on_revert_button_press), mset);
 
     mset->cancel = gtk_button_new_with_label("Cancel");
-    gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg), mset->cancel, GTK_RESPONSE_CANCEL);
+    gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg),
+                                 mset->cancel,
+                                 GtkResponseType::GTK_RESPONSE_CANCEL);
 
     mset->next = gtk_button_new_with_label("OK");
-    gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg), mset->next, GTK_RESPONSE_OK);
+    gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg),
+                                 mset->next,
+                                 GtkResponseType::GTK_RESPONSE_OK);
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->next), false);
     gtk_button_set_label(GTK_BUTTON(mset->next), "_Rename");
 
     if (create_new && auto_open)
     {
         mset->open = gtk_button_new_with_mnemonic("& _Open");
-        gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg), mset->open, GTK_RESPONSE_APPLY);
+        gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg),
+                                     mset->open,
+                                     GtkResponseType::GTK_RESPONSE_APPLY);
         gtk_widget_set_focus_on_click(GTK_WIDGET(mset->open), false);
     }
     else
@@ -2148,7 +2163,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     // Window
     gtk_widget_set_size_request(GTK_WIDGET(mset->dlg), 800, 500);
     gtk_window_set_resizable(GTK_WINDOW(mset->dlg), true);
-    gtk_window_set_type_hint(GTK_WINDOW(mset->dlg), GDK_WINDOW_TYPE_HINT_DIALOG);
+    gtk_window_set_type_hint(GTK_WINDOW(mset->dlg), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
     gtk_widget_show_all(mset->dlg);
 
     // Entries
@@ -2201,11 +2216,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         type = ztd::strdup(mset->mime_type);
     }
     mset->label_mime = GTK_LABEL(gtk_label_new(type.c_str()));
-    gtk_label_set_ellipsize(mset->label_mime, PANGO_ELLIPSIZE_MIDDLE);
+    gtk_label_set_ellipsize(mset->label_mime, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
 
     gtk_label_set_selectable(mset->label_mime, true);
-    gtk_widget_set_halign(GTK_WIDGET(mset->label_mime), GTK_ALIGN_START);
-    gtk_widget_set_valign(GTK_WIDGET(mset->label_mime), GTK_ALIGN_START);
+    gtk_widget_set_halign(GTK_WIDGET(mset->label_mime), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(mset->label_mime), GtkAlign::GTK_ALIGN_START);
 
     gtk_label_set_selectable(mset->label_type, true);
     g_signal_connect(G_OBJECT(mset->label_type),
@@ -2219,8 +2234,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     {
         mset->label_target = GTK_LABEL(gtk_label_new(nullptr));
         gtk_label_set_markup_with_mnemonic(mset->label_target, "<b>_Target:</b>");
-        gtk_widget_set_halign(GTK_WIDGET(mset->label_target), GTK_ALIGN_START);
-        gtk_widget_set_valign(GTK_WIDGET(mset->label_target), GTK_ALIGN_END);
+        gtk_widget_set_halign(GTK_WIDGET(mset->label_target), GtkAlign::GTK_ALIGN_START);
+        gtk_widget_set_valign(GTK_WIDGET(mset->label_target), GtkAlign::GTK_ALIGN_END);
         mset->entry_target = GTK_ENTRY(gtk_entry_new());
         gtk_label_set_mnemonic_widget(mset->label_target, GTK_WIDGET(mset->entry_target));
         g_signal_connect(G_OBJECT(mset->entry_target),
@@ -2266,8 +2281,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     {
         mset->label_template = GTK_LABEL(gtk_label_new(nullptr));
         gtk_label_set_markup_with_mnemonic(mset->label_template, "<b>_Template:</b>");
-        gtk_widget_set_halign(GTK_WIDGET(mset->label_template), GTK_ALIGN_START);
-        gtk_widget_set_valign(GTK_WIDGET(mset->label_template), GTK_ALIGN_END);
+        gtk_widget_set_halign(GTK_WIDGET(mset->label_template), GtkAlign::GTK_ALIGN_START);
+        gtk_widget_set_valign(GTK_WIDGET(mset->label_template), GtkAlign::GTK_ALIGN_END);
         g_signal_connect(G_OBJECT(mset->entry_target),
                          "mnemonic-activate",
                          G_CALLBACK(on_mnemonic_activate),
@@ -2352,8 +2367,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     // Name
     mset->label_name = GTK_LABEL(gtk_label_new(nullptr));
     gtk_label_set_markup_with_mnemonic(mset->label_name, "<b>_Name:</b>");
-    gtk_widget_set_halign(GTK_WIDGET(mset->label_name), GTK_ALIGN_START);
-    gtk_widget_set_valign(GTK_WIDGET(mset->label_name), GTK_ALIGN_START);
+    gtk_widget_set_halign(GTK_WIDGET(mset->label_name), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(mset->label_name), GtkAlign::GTK_ALIGN_START);
     mset->scroll_name = gtk_scrolled_window_new(nullptr, nullptr);
     mset->input_name = GTK_WIDGET(multi_input_new(GTK_SCROLLED_WINDOW(mset->scroll_name), nullptr));
     gtk_label_set_mnemonic_widget(mset->label_name, mset->input_name);
@@ -2379,8 +2394,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     // Ext
     mset->label_ext = GTK_LABEL(gtk_label_new(nullptr));
     gtk_label_set_markup_with_mnemonic(mset->label_ext, "<b>E_xtension:</b>");
-    gtk_widget_set_halign(GTK_WIDGET(mset->label_ext), GTK_ALIGN_START);
-    gtk_widget_set_valign(GTK_WIDGET(mset->label_ext), GTK_ALIGN_END);
+    gtk_widget_set_halign(GTK_WIDGET(mset->label_ext), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(mset->label_ext), GtkAlign::GTK_ALIGN_END);
     mset->entry_ext = GTK_ENTRY(gtk_entry_new());
     gtk_label_set_mnemonic_widget(mset->label_ext, GTK_WIDGET(mset->entry_ext));
     g_signal_connect(G_OBJECT(mset->entry_ext),
@@ -2405,8 +2420,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     // Filename
     mset->label_full_name = GTK_LABEL(gtk_label_new(nullptr));
     gtk_label_set_markup_with_mnemonic(mset->label_full_name, "<b>_Filename:</b>");
-    gtk_widget_set_halign(GTK_WIDGET(mset->label_full_name), GTK_ALIGN_START);
-    gtk_widget_set_valign(GTK_WIDGET(mset->label_full_name), GTK_ALIGN_START);
+    gtk_widget_set_halign(GTK_WIDGET(mset->label_full_name), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(mset->label_full_name), GtkAlign::GTK_ALIGN_START);
     mset->scroll_full_name = gtk_scrolled_window_new(nullptr, nullptr);
     mset->input_full_name =
         GTK_WIDGET(multi_input_new(GTK_SCROLLED_WINDOW(mset->scroll_full_name), nullptr));
@@ -2433,8 +2448,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     // Parent
     mset->label_path = GTK_LABEL(gtk_label_new(nullptr));
     gtk_label_set_markup_with_mnemonic(mset->label_path, "<b>_Parent:</b>");
-    gtk_widget_set_halign(GTK_WIDGET(mset->label_path), GTK_ALIGN_START);
-    gtk_widget_set_valign(GTK_WIDGET(mset->label_path), GTK_ALIGN_START);
+    gtk_widget_set_halign(GTK_WIDGET(mset->label_path), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(mset->label_path), GtkAlign::GTK_ALIGN_START);
     mset->scroll_path = gtk_scrolled_window_new(nullptr, nullptr);
     mset->input_path = GTK_WIDGET(multi_input_new(GTK_SCROLLED_WINDOW(mset->scroll_path), nullptr));
     gtk_label_set_mnemonic_widget(mset->label_path, mset->input_path);
@@ -2460,8 +2475,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     // Path
     mset->label_full_path = GTK_LABEL(gtk_label_new(nullptr));
     gtk_label_set_markup_with_mnemonic(mset->label_full_path, "<b>P_ath:</b>");
-    gtk_widget_set_halign(GTK_WIDGET(mset->label_full_path), GTK_ALIGN_START);
-    gtk_widget_set_valign(GTK_WIDGET(mset->label_full_path), GTK_ALIGN_START);
+    gtk_widget_set_halign(GTK_WIDGET(mset->label_full_path), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(mset->label_full_path), GtkAlign::GTK_ALIGN_START);
     mset->scroll_full_path = gtk_scrolled_window_new(nullptr, nullptr);
     // set initial path
     mset->input_full_path =
@@ -2528,7 +2543,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->label_name), false, true, 4);
     gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->scroll_name), true, true, 0);
 
-    mset->hbox_ext = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    mset->hbox_ext = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_box_pack_start(GTK_BOX(mset->hbox_ext), GTK_WIDGET(mset->label_ext), false, true, 0);
     gtk_box_pack_start(GTK_BOX(mset->hbox_ext), GTK_WIDGET(gtk_label_new(" ")), false, true, 0);
     gtk_box_pack_start(GTK_BOX(mset->hbox_ext), GTK_WIDGET(mset->entry_ext), true, true, 0);
@@ -2546,12 +2561,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->label_full_path), false, true, 4);
     gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->scroll_full_path), true, true, 0);
 
-    mset->hbox_type = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    mset->hbox_type = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_box_pack_start(GTK_BOX(mset->hbox_type), GTK_WIDGET(mset->label_type), false, true, 0);
     gtk_box_pack_start(GTK_BOX(mset->hbox_type), GTK_WIDGET(mset->label_mime), true, true, 5);
     gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->hbox_type), false, true, 5);
 
-    mset->hbox_target = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    mset->hbox_target = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
     if (mset->label_target)
     {
         gtk_box_pack_start(GTK_BOX(mset->hbox_target),
@@ -2579,7 +2594,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->hbox_target), false, true, 5);
     }
 
-    mset->hbox_template = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    mset->hbox_template = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
     if (mset->label_template)
     {
         gtk_box_pack_start(GTK_BOX(mset->hbox_template),
@@ -2605,7 +2620,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->hbox_template), false, true, 5);
     }
 
-    GtkWidget* hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget* hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 4);
     if (create_new)
     {
         gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(gtk_label_new("New")), false, true, 3);
@@ -2685,7 +2700,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
     int response;
     while ((response = gtk_dialog_run(GTK_DIALOG(mset->dlg))))
     {
-        if (response == GTK_RESPONSE_OK || response == GTK_RESPONSE_APPLY)
+        if (response == GtkResponseType::GTK_RESPONSE_OK ||
+            response == GtkResponseType::GTK_RESPONSE_APPLY)
         {
             GtkTextIter iter;
             GtkTextIter siter;
@@ -2708,7 +2724,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             const std::string old_path = Glib::path_get_dirname(mset->full_path);
             bool overwrite = false;
 
-            if (response == GTK_RESPONSE_APPLY)
+            if (response == GtkResponseType::GTK_RESPONSE_APPLY)
                 ret = 2;
 
             if (!create_new && (mset->full_path_same || ztd::same(full_path, mset->full_path)))
@@ -2741,11 +2757,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 if (xset_get_b(XSetName::MOVE_DLG_CONFIRM_CREATE))
                 {
                     if (xset_msg_dialog(mset->parent,
-                                        GTK_MESSAGE_QUESTION,
+                                        GtkMessageType::GTK_MESSAGE_QUESTION,
                                         "Create Parent Directory",
-                                        GTK_BUTTONS_YES_NO,
+                                        GtkButtonsType::GTK_BUTTONS_YES_NO,
                                         "The parent directory does not exist.  Create it?") !=
-                        GTK_RESPONSE_YES)
+                        GtkResponseType::GTK_RESPONSE_YES)
                     {
                         continue;
                     }
@@ -2784,12 +2800,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                     continue;
                 }
                 if (xset_msg_dialog(mset->parent,
-                                    GTK_MESSAGE_WARNING,
+                                    GtkMessageType::GTK_MESSAGE_WARNING,
                                     "Overwrite Existing File",
-                                    GTK_BUTTONS_YES_NO,
+                                    GtkButtonsType::GTK_BUTTONS_YES_NO,
                                     "OVERWRITE WARNING",
                                     "The file path exists.  Overwrite existing file?") !=
-                    GTK_RESPONSE_YES)
+                    GtkResponseType::GTK_RESPONSE_YES)
                 {
                     continue;
                 }
@@ -2830,7 +2846,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 if (auto_open)
                 {
                     auto_open->path = ztd::strdup(full_path);
-                    auto_open->open_file = (response == GTK_RESPONSE_APPLY);
+                    auto_open->open_file = (response == GtkResponseType::GTK_RESPONSE_APPLY);
                     ptask->complete_notify = auto_open->callback;
                     ptask->user_data = auto_open;
                 }
@@ -2892,7 +2908,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 if (auto_open)
                 {
                     auto_open->path = ztd::strdup(full_path);
-                    auto_open->open_file = (response == GTK_RESPONSE_APPLY);
+                    auto_open->open_file = (response == GtkResponseType::GTK_RESPONSE_APPLY);
                     ptask->complete_notify = auto_open->callback;
                     ptask->user_data = auto_open;
                 }
@@ -2955,7 +2971,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
                 if (auto_open)
                 {
                     auto_open->path = ztd::strdup(full_path);
-                    auto_open->open_file = (response == GTK_RESPONSE_APPLY);
+                    auto_open->open_file = (response == GtkResponseType::GTK_RESPONSE_APPLY);
                     ptask->complete_notify = auto_open->callback;
                     ptask->user_data = auto_open;
                 }
@@ -3109,7 +3125,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
             }
             break;
         }
-        else if (response == GTK_RESPONSE_CANCEL || response == GTK_RESPONSE_DELETE_EVENT)
+        else if (response == GtkResponseType::GTK_RESPONSE_CANCEL ||
+                 response == GtkResponseType::GTK_RESPONSE_DELETE_EVENT)
         {
             ret = 0;
             break;
@@ -3212,11 +3229,11 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<VFSFileInf
         {
             const std::string msg = fmt::format("Delete {} selected item as root ?", item_count);
             if (xset_msg_dialog(parent,
-                                GTK_MESSAGE_WARNING,
+                                GtkMessageType::GTK_MESSAGE_WARNING,
                                 "Confirm Delete As Root",
-                                GTK_BUTTONS_YES_NO,
+                                GtkButtonsType::GTK_BUTTONS_YES_NO,
                                 "DELETE AS ROOT",
-                                msg) != GTK_RESPONSE_YES)
+                                msg) != GtkResponseType::GTK_RESPONSE_YES)
             {
                 return;
             }
@@ -3233,7 +3250,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<VFSFileInf
         else
             folder = cwd;
         path = xset_file_dialog(parent,
-                                GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                                GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
                                 "Choose Location",
                                 folder,
                                 nullptr);

@@ -439,7 +439,7 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
     g_object_unref(G_OBJECT(model));
     // LOG_INFO("ptk_location_view_new   view = {}", view);
     GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
-    gtk_tree_selection_set_mode(tree_sel, GTK_SELECTION_SINGLE);
+    gtk_tree_selection_set_mode(tree_sel, GtkSelectionMode::GTK_SELECTION_SINGLE);
 
     gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), false);
 
@@ -465,10 +465,10 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
     if (GTK_IS_TREE_SORTABLE(model)) // why is this needed to stop error on new tab?
         gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(model),
                                              PtkLocationViewCol::COL_NAME,
-                                             GTK_SORT_ASCENDING); // MOD
+                                             GtkSortType::GTK_SORT_ASCENDING); // MOD
 
     gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
-    gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
+    gtk_tree_view_column_set_sizing(col, GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_AUTOSIZE);
 
     g_object_set_data(G_OBJECT(view), "file_browser", file_browser);
 
@@ -925,9 +925,9 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     {
         // not a valid url
         xset_msg_dialog(GTK_WIDGET(file_browser),
-                        GTK_MESSAGE_ERROR,
+                        GtkMessageType::GTK_MESSAGE_ERROR,
                         "Invalid URL",
-                        GTK_BUTTONS_OK,
+                        GtkButtonsType::GTK_BUTTONS_OK,
                         "The entered URL is not valid.");
         return;
     }
@@ -989,9 +989,9 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     if (!cmd)
     {
         xset_msg_dialog(GTK_WIDGET(file_browser),
-                        GTK_MESSAGE_ERROR,
+                        GtkMessageType::GTK_MESSAGE_ERROR,
                         "Handler Not Found",
-                        GTK_BUTTONS_OK,
+                        GtkButtonsType::GTK_BUTTONS_OK,
                         "No network handler is configured for this URL, or no mount command is "
                         "set.  Add a handler in Devices|Settings|Protocol Handlers.");
 
@@ -1065,7 +1065,11 @@ popup_missing_mount(GtkWidget* view, int job)
         fmt::format("No handler is configured for this device type, or no {} command is set. "
                     " Add a handler in Settings|Device Handlers or Protocol Handlers.",
                     cmd);
-    xset_msg_dialog(view, GTK_MESSAGE_ERROR, "Handler Not Found", GTK_BUTTONS_OK, msg);
+    xset_msg_dialog(view,
+                    GtkMessageType::GTK_MESSAGE_ERROR,
+                    "Handler Not Found",
+                    GtkButtonsType::GTK_BUTTONS_OK,
+                    msg);
 }
 
 static void
@@ -2130,7 +2134,7 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data)
     VFSVolume* vol = nullptr;
     bool ret = false;
 
-    if (evt->type != GDK_BUTTON_PRESS)
+    if (evt->type != GdkEventType::GDK_BUTTON_PRESS)
         return false;
 
     // LOG_INFO("on_button_press_event   view = {}", view);
@@ -2207,7 +2211,8 @@ on_key_press_event(GtkWidget* w, GdkEventKey* event, PtkFileBrowser* file_browse
     (void)w;
     unsigned int keymod = ptk_get_keymod(event->state);
 
-    if (event->keyval == GDK_KEY_Menu || (event->keyval == GDK_KEY_F10 && keymod == GDK_SHIFT_MASK))
+    if (event->keyval == GDK_KEY_Menu ||
+        (event->keyval == GDK_KEY_F10 && keymod == GdkModifierType::GDK_SHIFT_MASK))
     {
         // simulate right-click (menu)
         show_devices_menu(GTK_TREE_VIEW(file_browser->side_dev),
@@ -2361,7 +2366,7 @@ on_dev_menu_button_press(GtkWidget* item, GdkEventButton* event, VFSVolume* vol)
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
     unsigned int keymod = ptk_get_keymod(event->state);
 
-    if (event->type == GDK_BUTTON_RELEASE)
+    if (event->type == GdkEventType::GDK_BUTTON_RELEASE)
     {
         if (event->button == 1 && keymod == 0)
         {
@@ -2380,7 +2385,7 @@ on_dev_menu_button_press(GtkWidget* item, GdkEventButton* event, VFSVolume* vol)
         return false;
         return false;
     }
-    else if (event->type != GDK_BUTTON_PRESS)
+    else if (event->type != GdkEventType::GDK_BUTTON_PRESS)
         return false;
 
     show_dev_design_menu(menu, item, vol, event->button, event->time);

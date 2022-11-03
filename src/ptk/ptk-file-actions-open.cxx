@@ -146,9 +146,9 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
     if (error)
     {
         xset_msg_dialog(parent->file_browser ? GTK_WIDGET(parent->file_browser) : nullptr,
-                        GTK_MESSAGE_ERROR,
+                        GtkMessageType::GTK_MESSAGE_ERROR,
                         "Error Loading Handler",
-                        GTK_BUTTONS_OK,
+                        GtkButtonsType::GTK_BUTTONS_OK,
                         error_message);
         return;
     }
