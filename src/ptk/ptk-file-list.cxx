@@ -92,7 +92,10 @@ static void ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable,
 
 /* signal handlers */
 
-static void on_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file, PtkFileList* list);
+static void ptk_file_list_file_created(VFSFileInfo* file, PtkFileList* list);
+static void on_file_list_file_deleted(VFSFileInfo* file, PtkFileList* list);
+static void ptk_file_list_file_changed(VFSFileInfo* file, PtkFileList* list);
+static void on_thumbnail_loaded(VFSFileInfo* file, PtkFileList* list);
 
 static GObjectClass* parent_class = nullptr;
 
@@ -242,12 +245,12 @@ ptk_file_list_new(VFSDir* dir, bool show_hidden)
 }
 
 static void
-_ptk_file_list_file_changed(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
+on_file_list_file_changed(VFSFileInfo* file, PtkFileList* list)
 {
-    if (!file || !dir || dir->cancel)
+    if (!file || !list->dir || list->dir->cancel)
         return;
 
-    ptk_file_list_file_changed(dir, file, list);
+    ptk_file_list_file_changed(file, list);
 
     /* check if reloading of thumbnail is needed.
      * See also desktop-window.c:on_file_changed() */
@@ -263,9 +266,9 @@ _ptk_file_list_file_changed(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
 }
 
 static void
-_ptk_file_list_file_created(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
+on_file_list_file_created(VFSFileInfo* file, PtkFileList* list)
 {
-    ptk_file_list_file_created(dir, file, list);
+    ptk_file_list_file_created(file, list);
 
     /* check if reloading of thumbnail is needed. */
     if (list->max_thumbnail != 0 &&
@@ -293,10 +296,12 @@ ptk_file_list_set_dir(PtkFileList* list, VFSDir* dir)
         }
         g_list_foreach(list->files, (GFunc)vfs_file_info_unref, nullptr);
         g_list_free(list->files);
-        g_signal_handlers_disconnect_by_func(list->dir, (void*)_ptk_file_list_file_created, list);
-        g_signal_handlers_disconnect_by_func(list->dir, (void*)ptk_file_list_file_deleted, list);
-        g_signal_handlers_disconnect_by_func(list->dir, (void*)_ptk_file_list_file_changed, list);
-        g_signal_handlers_disconnect_by_func(list->dir, (void*)on_thumbnail_loaded, list);
+
+        list->signal_file_created.disconnect();
+        list->signal_file_deleted.disconnect();
+        list->signal_file_changed.disconnect();
+        list->signal_file_thumbnail_loaded.disconnect();
+
         g_object_unref(list->dir);
     }
 
@@ -308,9 +313,12 @@ ptk_file_list_set_dir(PtkFileList* list, VFSDir* dir)
 
     g_object_ref(list->dir);
 
-    g_signal_connect(list->dir, "file-created", G_CALLBACK(_ptk_file_list_file_created), list);
-    g_signal_connect(list->dir, "file-deleted", G_CALLBACK(ptk_file_list_file_deleted), list);
-    g_signal_connect(list->dir, "file-changed", G_CALLBACK(_ptk_file_list_file_changed), list);
+    list->signal_file_created =
+        list->dir->add_event<EventType::FILE_CREATED>(on_file_list_file_created, list);
+    list->signal_file_deleted =
+        list->dir->add_event<EventType::FILE_DELETED>(on_file_list_file_deleted, list);
+    list->signal_file_changed =
+        list->dir->add_event<EventType::FILE_CHANGED>(on_file_list_file_changed, list);
 
     if (dir && !dir->file_list.empty())
     {
@@ -842,10 +850,9 @@ ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, VFSFileInfo* fi)
     return false;
 }
 
-void
-ptk_file_list_file_created(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
+static void
+ptk_file_list_file_created(VFSFileInfo* file, PtkFileList* list)
 {
-    (void)dir;
     if (!list->show_hidden && vfs_file_info_get_name(file)[0] == '.')
         return;
 
@@ -911,10 +918,9 @@ ptk_file_list_file_created(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
     gtk_tree_path_free(path);
 }
 
-void
-ptk_file_list_file_deleted(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
+static void
+on_file_list_file_deleted(VFSFileInfo* file, PtkFileList* list)
 {
-    (void)dir;
     GList* l;
     GtkTreePath* path;
 
@@ -954,13 +960,12 @@ ptk_file_list_file_deleted(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
 }
 
 void
-ptk_file_list_file_changed(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
+ptk_file_list_file_changed(VFSFileInfo* file, PtkFileList* list)
 {
-    (void)dir;
     if (!list->show_hidden && vfs_file_info_get_name(file)[0] == '.')
         return;
-    GList* l = g_list_find(list->files, file);
 
+    GList* l = g_list_find(list->files, file);
     if (!l)
         return;
 
@@ -977,10 +982,10 @@ ptk_file_list_file_changed(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
 }
 
 static void
-on_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file, PtkFileList* list)
+on_thumbnail_loaded(VFSFileInfo* file, PtkFileList* list)
 {
     // LOG_DEBUG("LOADED: {}", file->name);
-    ptk_file_list_file_changed(dir, file, list);
+    ptk_file_list_file_changed(file, list);
 }
 
 void
@@ -1002,7 +1007,8 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, int max_file_size)
         if (old_max_thumbnail > 0) /* cancel thumbnails */
         {
             vfs_thumbnail_loader_cancel_all_requests(list->dir, list->big_thumbnail);
-            g_signal_handlers_disconnect_by_func(list->dir, (void*)on_thumbnail_loaded, list);
+
+            list->signal_file_thumbnail_loaded.disconnect();
 
             for (l = list->files; l; l = l->next)
             {
@@ -1011,7 +1017,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, int max_file_size)
                     vfs_file_info_is_thumbnail_loaded(file, is_big))
                 {
                     /* update the model */
-                    ptk_file_list_file_changed(list->dir, file, list);
+                    ptk_file_list_file_changed(file, list);
                 }
             }
 
@@ -1021,7 +1027,9 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, int max_file_size)
         }
         return;
     }
-    g_signal_connect(list->dir, "thumbnail-loaded", G_CALLBACK(on_thumbnail_loaded), list);
+
+    list->signal_file_thumbnail_loaded =
+        list->dir->add_event<EventType::FILE_THUMBNAIL_LOADED>(on_thumbnail_loaded, list);
 
     for (l = list->files; l; l = l->next)
     {
@@ -1032,7 +1040,9 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, int max_file_size)
               vfs_file_info_is_image(file))))
         {
             if (vfs_file_info_is_thumbnail_loaded(file, is_big))
-                ptk_file_list_file_changed(list->dir, file, list);
+            {
+                ptk_file_list_file_changed(file, list);
+            }
             else
             {
                 vfs_thumbnail_loader_request(list->dir, file, is_big);

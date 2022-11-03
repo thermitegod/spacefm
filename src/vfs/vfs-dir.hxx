@@ -22,16 +22,26 @@
 
 #include <vector>
 
+#include <sigc++/sigc++.h>
+
 #include <glib.h>
 
 #include "vfs/vfs-file-monitor.hxx"
 #include "vfs/vfs-file-info.hxx"
 #include "vfs/vfs-async-task.hxx"
 
+#include "signals.hxx"
+
 #define VFS_DIR(obj)             (static_cast<VFSDir*>(obj))
 #define VFS_DIR_REINTERPRET(obj) (reinterpret_cast<VFSDir*>(obj))
 
 #define VFS_TYPE_DIR (vfs_dir_get_type())
+
+// forward declare types
+struct VFSFileInfo;
+struct PtkFileBrowser;
+struct PtkFileList;
+struct VFSDir;
 
 struct VFSDir
 {
@@ -47,31 +57,177 @@ struct VFSDir
     GMutex* mutex; /* Used to guard file_list */
 
     VFSAsyncTask* task;
-    bool file_listed : 1;
-    bool load_complete : 1;
-    bool cancel : 1;
-    bool show_hidden : 1;
-    bool avoid_changes : 1; // sfm
+
+    bool file_listed{true};
+    bool load_complete{true};
+    bool cancel{true};
+    bool show_hidden{true};
+    bool avoid_changes{true};
 
     struct VFSThumbnailLoader* thumbnail_loader;
 
     std::vector<VFSFileInfo*> changed_files;
     GSList* created_files; // MOD
     long xhidden_count;    // MOD
-};
 
-struct VFSDirClass
-{
-    GObjectClass parent;
-    /* Default signal handlers */
-    void (*file_created)(VFSDir* dir, VFSFileInfo* file);
-    void (*file_deleted)(VFSDir* dir, VFSFileInfo* file);
-    void (*file_changed)(VFSDir* dir, VFSFileInfo* file);
-    void (*thumbnail_loaded)(VFSDir* dir, VFSFileInfo* file);
-    void (*file_listed)(VFSDir* dir);
-    void (*load_complete)(VFSDir* dir);
-    /*  void (*need_reload) ( VFSDir* dir ); */
-    /*  void (*update_mime) ( VFSDir* dir ); */
+    // Signals
+  public:
+    // Signals function types
+    using evt_file_created__run_first__t = void(VFSFileInfo*, PtkFileBrowser*);
+    using evt_file_created__run_last__t = void(VFSFileInfo*, PtkFileList*);
+
+    using evt_file_changed__run_first__t = void(VFSFileInfo*, PtkFileBrowser*);
+    using evt_file_changed__run_last__t = void(VFSFileInfo*, PtkFileList*);
+
+    using evt_file_deleted__run_first__t = void(VFSFileInfo*, PtkFileBrowser*);
+    using evt_file_deleted__run_last__t = void(VFSFileInfo*, PtkFileList*);
+
+    using evt_file_listed_t = void(PtkFileBrowser*, bool);
+
+    using evt_file_thumbnail_loaded_t = void(VFSFileInfo*, PtkFileList*);
+
+    // Signals Add Event
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_CREATED, sigc::connection>::type
+    add_event(evt_file_created__run_first__t fun, PtkFileBrowser* browser)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::FILE_CREATED");
+        this->evt_data_browser = browser;
+        return this->evt_file_created__first.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_CREATED, sigc::connection>::type
+    add_event(evt_file_created__run_last__t fun, PtkFileList* list)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::FILE_CREATED");
+        this->evt_data_list = list;
+        return this->evt_file_created__last.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_CHANGED, sigc::connection>::type
+    add_event(evt_file_changed__run_first__t fun, PtkFileBrowser* browser)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::FILE_CHANGED");
+        this->evt_data_browser = browser;
+        return this->evt_file_changed__first.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_CHANGED, sigc::connection>::type
+    add_event(evt_file_changed__run_last__t fun, PtkFileList* list)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::FILE_CHANGED");
+        this->evt_data_list = list;
+        return this->evt_file_changed__last.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_DELETED, sigc::connection>::type
+    add_event(evt_file_deleted__run_first__t fun, PtkFileBrowser* browser)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::FILE_DELETED");
+        this->evt_data_browser = browser;
+        return this->evt_file_deleted__first.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_DELETED, sigc::connection>::type
+    add_event(evt_file_deleted__run_last__t fun, PtkFileList* list)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::FILE_DELETED");
+        this->evt_data_list = list;
+        return this->evt_file_deleted__last.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_LISTED, sigc::connection>::type
+    add_event(evt_file_listed_t fun, PtkFileBrowser* browser)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::FILE_LISTED");
+        // this->evt_data_listed_browser = browser;
+        this->evt_data_browser = browser;
+        return this->evt_file_listed.connect(sigc::ptr_fun(fun));
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_THUMBNAIL_LOADED, sigc::connection>::type
+    add_event(evt_file_thumbnail_loaded_t fun, PtkFileList* list)
+    {
+        // LOG_TRACE("Signal Connect   : EventType::FILE_THUMBNAIL_LOADED");
+        // this->evt_data_thumb_list = list;
+        this->evt_data_list = list;
+        return this->evt_file_thumbnail_loaded.connect(sigc::ptr_fun(fun));
+    }
+
+    // Signals Run Event
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_CREATED, void>::type
+    run_event(VFSFileInfo* info)
+    {
+        // LOG_TRACE("Signal Execute   : EventType::FILE_CREATED");
+        this->evt_file_created__first.emit(info, this->evt_data_browser);
+        this->evt_file_created__last.emit(info, this->evt_data_list);
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_CHANGED, void>::type
+    run_event(VFSFileInfo* info)
+    {
+        // LOG_TRACE("Signal Execute   : EventType::FILE_CHANGED");
+        this->evt_file_changed__first.emit(info, this->evt_data_browser);
+        this->evt_file_changed__last.emit(info, this->evt_data_list);
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_DELETED, void>::type
+    run_event(VFSFileInfo* info)
+    {
+        // LOG_TRACE("Signal Execute   : EventType::FILE_DELETED");
+        this->evt_file_deleted__first.emit(info, this->evt_data_browser);
+        this->evt_file_deleted__last.emit(info, this->evt_data_list);
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_LISTED, void>::type
+    run_event(bool is_cancelled)
+    {
+        // LOG_TRACE("Signal Execute   : EventType::FILE_LISTED");
+        this->evt_file_listed.emit(this->evt_data_browser, is_cancelled);
+    }
+
+    template<EventType evt>
+    typename std::enable_if<evt == EventType::FILE_THUMBNAIL_LOADED, void>::type
+    run_event(VFSFileInfo* info)
+    {
+        // LOG_TRACE("Signal Execute   : EventType::FILE_THUMBNAIL_LOADED");
+        this->evt_file_thumbnail_loaded.emit(info, this->evt_data_list);
+    }
+
+    // Signals
+  private:
+    // Signal types
+    sigc::signal<evt_file_created__run_first__t> evt_file_created__first;
+    sigc::signal<evt_file_created__run_last__t> evt_file_created__last;
+
+    sigc::signal<evt_file_changed__run_first__t> evt_file_changed__first;
+    sigc::signal<evt_file_changed__run_last__t> evt_file_changed__last;
+
+    sigc::signal<evt_file_deleted__run_first__t> evt_file_deleted__first;
+    sigc::signal<evt_file_deleted__run_last__t> evt_file_deleted__last;
+
+    sigc::signal<evt_file_listed_t> evt_file_listed;
+
+    sigc::signal<evt_file_thumbnail_loaded_t> evt_file_thumbnail_loaded;
+
+  private:
+    // Signal data
+    // TODO/FIXME has to be a better way to do this
+    // PtkFileBrowser* evt_data_listed_browser{nullptr};
+    PtkFileBrowser* evt_data_browser{nullptr};
+    PtkFileList* evt_data_list{nullptr};
+    // PtkFileList* evt_data_thumb_list{nullptr};
 };
 
 using VFSDirForeachFunc = void (*)(const char* parh, VFSDir* dir, void* user_data);

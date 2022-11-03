@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <sigc++/sigc++.h>
+
 #include <gtk/gtk.h>
 
 #include "vfs/vfs-dir.hxx"
@@ -146,6 +148,13 @@ struct PtkFileBrowser
     GtkTreeIter book_iter_inserted;
     char* select_path;
     char* status_bar_custom;
+
+  public:
+    // Signals we connect to
+    sigc::connection signal_file_created;
+    sigc::connection signal_file_deleted;
+    sigc::connection signal_file_changed;
+    sigc::connection signal_file_listed;
 };
 
 struct PtkFileBrowserClass

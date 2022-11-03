@@ -20,6 +20,10 @@
 #include <string>
 #include <string_view>
 
+#include <sys/types.h>
+
+#include <sigc++/sigc++.h>
+
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <glib-object.h>
@@ -81,6 +85,13 @@ struct PtkFileList
 
     // Random integer to check whether an iter belongs to our model
     int stamp;
+
+  public:
+    // Signals we connect to
+    sigc::connection signal_file_created;
+    sigc::connection signal_file_deleted;
+    sigc::connection signal_file_changed;
+    sigc::connection signal_file_thumbnail_loaded;
 };
 
 struct PtkFileListClass
@@ -100,12 +111,6 @@ PtkFileList* ptk_file_list_new(VFSDir* dir, bool show_hidden);
 void ptk_file_list_set_dir(PtkFileList* list, VFSDir* dir);
 
 bool ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, VFSFileInfo* fi);
-
-void ptk_file_list_file_created(VFSDir* dir, VFSFileInfo* file, PtkFileList* list);
-
-void ptk_file_list_file_deleted(VFSDir* dir, VFSFileInfo* file, PtkFileList* list);
-
-void ptk_file_list_file_changed(VFSDir* dir, VFSFileInfo* file, PtkFileList* list);
 
 void ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, int max_file_size);
 void ptk_file_list_sort(PtkFileList* list); // sfm

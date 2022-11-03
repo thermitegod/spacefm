@@ -59,6 +59,9 @@
 // FMT
 #include <fmt/format.h>
 
+// SIGNALS
+#include <sigc++/sigc++.h>
+
 // GTK
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>

@@ -64,6 +64,8 @@
 #include "settings/app.hxx"
 #include "settings/etc.hxx"
 
+#include "signals.hxx"
+
 #include "settings.hxx"
 #include "utils.hxx"
 #include "type-conversion.hxx"
@@ -83,7 +85,7 @@ static void init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
 
 static GtkWidget* ptk_file_browser_create_dir_tree(PtkFileBrowser* file_browser);
 
-static void on_dir_file_listed(VFSDir* dir, bool is_cancelled, PtkFileBrowser* file_browser);
+static void on_dir_file_listed(PtkFileBrowser* file_browser, bool is_cancelled);
 
 static void ptk_file_browser_update_model(PtkFileBrowser* file_browser);
 
@@ -1968,16 +1970,14 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const char* folder_path, Pt
 
     if (vfs_dir_is_file_listed(file_browser->dir))
     {
-        on_dir_file_listed(file_browser->dir, false, file_browser);
+        on_dir_file_listed(file_browser, false);
         file_browser->busy = false;
     }
     else
         file_browser->busy = true;
 
-    g_signal_connect(file_browser->dir,
-                     "file-listed",
-                     G_CALLBACK(on_dir_file_listed),
-                     file_browser);
+    file_browser->signal_file_listed =
+        file_browser->dir->add_event<EventType::FILE_LISTED>(on_dir_file_listed, file_browser);
 
     ptk_file_browser_update_tab_label(file_browser);
 
@@ -2078,9 +2078,8 @@ ptk_file_browser_content_changed(PtkFileBrowser* file_browser)
 }
 
 static void
-on_folder_content_changed(VFSDir* dir, VFSFileInfo* file, PtkFileBrowser* file_browser)
+on_folder_content_changed(VFSFileInfo* file, PtkFileBrowser* file_browser)
 {
-    (void)dir;
     if (file == nullptr)
     {
         // The current directory itself changed
@@ -2089,11 +2088,13 @@ on_folder_content_changed(VFSDir* dir, VFSFileInfo* file, PtkFileBrowser* file_b
             on_close_notebook_page(nullptr, file_browser);
     }
     else
+    {
         g_idle_add((GSourceFunc)ptk_file_browser_content_changed, file_browser);
+    }
 }
 
 static void
-on_file_deleted(VFSDir* dir, VFSFileInfo* file, PtkFileBrowser* file_browser)
+on_file_deleted(VFSFileInfo* file, PtkFileBrowser* file_browser)
 {
     if (file == nullptr)
     {
@@ -2104,7 +2105,7 @@ on_file_deleted(VFSDir* dir, VFSFileInfo* file, PtkFileBrowser* file_browser)
     }
     else
     {
-        on_folder_content_changed(dir, file, file_browser);
+        on_folder_content_changed(file, file_browser);
     }
 }
 
@@ -2191,15 +2192,20 @@ ptk_file_browser_update_model(PtkFileBrowser* file_browser)
 }
 
 static void
-on_dir_file_listed(VFSDir* dir, bool is_cancelled, PtkFileBrowser* file_browser)
+on_dir_file_listed(PtkFileBrowser* file_browser, bool is_cancelled)
 {
+    VFSDir* dir = file_browser->dir;
+
     file_browser->n_sel_files = 0;
 
     if (!is_cancelled)
     {
-        g_signal_connect(dir, "file-created", G_CALLBACK(on_folder_content_changed), file_browser);
-        g_signal_connect(dir, "file-deleted", G_CALLBACK(on_file_deleted), file_browser);
-        g_signal_connect(dir, "file-changed", G_CALLBACK(on_folder_content_changed), file_browser);
+        file_browser->signal_file_created =
+            dir->add_event<EventType::FILE_CREATED>(on_folder_content_changed, file_browser);
+        file_browser->signal_file_deleted =
+            dir->add_event<EventType::FILE_DELETED>(on_file_deleted, file_browser);
+        file_browser->signal_file_changed =
+            dir->add_event<EventType::FILE_CHANGED>(on_folder_content_changed, file_browser);
     }
 
     ptk_file_browser_update_model(file_browser);
@@ -4168,7 +4174,7 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
     g_signal_emit(file_browser, signals[PTKFileBrowserSignal::BEGIN_CHDIR_SIGNAL], 0);
     if (vfs_dir_is_file_listed(file_browser->dir))
     {
-        on_dir_file_listed(file_browser->dir, false, file_browser);
+        on_dir_file_listed(file_browser, false);
         if (std::filesystem::exists(cursor_path))
             ptk_file_browser_select_file(file_browser, cursor_path.c_str());
         file_browser->busy = false;
@@ -4179,10 +4185,8 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
         free(file_browser->select_path);
         file_browser->select_path = ztd::strdup(cursor_path);
     }
-    g_signal_connect(file_browser->dir,
-                     "file-listed",
-                     G_CALLBACK(on_dir_file_listed),
-                     file_browser);
+    file_browser->signal_file_listed =
+        file_browser->dir->add_event<EventType::FILE_LISTED>(on_dir_file_listed, file_browser);
 }
 
 unsigned int
