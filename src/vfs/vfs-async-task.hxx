@@ -20,6 +20,13 @@
 #include <string>
 #include <string_view>
 
+#include <thread>
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <future>
+#include <chrono>
+
 #include <gtk/gtk.h>
 
 #include <glib.h>
@@ -35,14 +42,13 @@
 #define VFS_ASYNC_TASK(obj)             (static_cast<VFSAsyncTask*>(obj))
 #define VFS_ASYNC_TASK_REINTERPRET(obj) (reinterpret_cast<VFSAsyncTask*>(obj))
 
-#define VFS_ASYNC_TASK_TYPE (vfs_async_task_get_type())
-
 // forward declare
 struct VFSDir;
 struct VFSAsyncTask;
 struct FindFile;
 
 using VFSAsyncFunc = void* (*)(VFSAsyncTask*, void*);
+
 struct VFSAsyncTask
 {
     GObject parent;
@@ -51,12 +57,32 @@ struct VFSAsyncTask
     void* ret_val;
 
     GThread* thread;
-    GMutex* lock;
-
     unsigned int idle_id;
-    bool cancel{true};
-    bool cancelled{true};
-    bool finished{true};
+
+    std::mutex mutex;
+
+    // private:
+    std::atomic<bool> thread_cancel{true};
+    std::atomic<bool> thread_cancelled{true};
+    std::atomic<bool> thread_finished{true};
+
+  public:
+    void* get_data();
+
+    // Execute the async task
+    void run_thread();
+
+    bool is_finished();
+    bool is_cancelled();
+
+    // Cancel the async task running in another thread.
+    // NOTE: Only can be called from main thread.
+    void cancel();
+
+    // private
+    void cleanup(bool finalize);
+    void real_cancel(bool finalize);
+    // void* task_thread(void* _task)
 
     // Signals
   public:
@@ -119,28 +145,4 @@ struct VFSAsyncTask
     VFSDir* evt_data_load_dir{nullptr};
 };
 
-struct VFSAsyncTaskClass
-{
-    GObjectClass parent_class;
-    void (*finish)(VFSAsyncTask* task, bool is_cancelled);
-};
-
-GType vfs_async_task_get_type();
 VFSAsyncTask* vfs_async_task_new(VFSAsyncFunc task_func, void* user_data);
-
-void* vfs_async_task_get_data(VFSAsyncTask* task);
-
-/* Execute the async task */
-void vfs_async_task_execute(VFSAsyncTask* task);
-
-bool vfs_async_task_is_finished(VFSAsyncTask* task);
-bool vfs_async_task_is_cancelled(VFSAsyncTask* task);
-
-/*
- * Cancel the async task running in another thread.
- * NOTE: Only can be called from main thread.
- */
-void vfs_async_task_cancel(VFSAsyncTask* task);
-
-void vfs_async_task_lock(VFSAsyncTask* task);
-void vfs_async_task_unlock(VFSAsyncTask* task);

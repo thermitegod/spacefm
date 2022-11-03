@@ -73,7 +73,7 @@ VFSThumbnailLoader::~VFSThumbnailLoader()
     }
 
     // stop the running thread, if any.
-    vfs_async_task_cancel(this->task);
+    this->task->cancel();
 
     if (this->idle_handler)
     {
@@ -126,7 +126,6 @@ on_thumbnail_idle(VFSThumbnailLoader* loader)
     VFSFileInfo* file;
 
     // LOG_DEBUG("ENTER ON_THUMBNAIL_IDLE");
-    vfs_async_task_lock(loader->task);
 
     while ((file = VFS_FILE_INFO(g_queue_pop_head(loader->update_queue))))
     {
@@ -136,9 +135,7 @@ on_thumbnail_idle(VFSThumbnailLoader* loader)
 
     loader->idle_handler = 0;
 
-    vfs_async_task_unlock(loader->task);
-
-    if (vfs_async_task_is_finished(loader->task))
+    if (loader->task->is_finished())
     {
         // LOG_DEBUG("FREE LOADER IN IDLE HANDLER");
         loader->dir->thumbnail_loader = nullptr;
@@ -152,11 +149,9 @@ on_thumbnail_idle(VFSThumbnailLoader* loader)
 static void*
 thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
 {
-    while (!vfs_async_task_is_cancelled(task))
+    while (!task->is_cancelled())
     {
-        vfs_async_task_lock(task);
         VFSThumbnailRequest* req = VFS_THUMBNAIL_REQUEST(g_queue_pop_head(loader->queue));
-        vfs_async_task_unlock(task);
         if (!req)
             break;
         // LOG_DEBUG("pop: {}", req->file->name);
@@ -188,9 +183,8 @@ thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
             need_update = true;
         }
 
-        if (!vfs_async_task_is_cancelled(task) && need_update)
+        if (!task->is_cancelled() && need_update)
         {
-            vfs_async_task_lock(task);
             g_queue_push_tail(loader->update_queue, vfs_file_info_ref(req->file));
             if (loader->idle_handler == 0)
             {
@@ -199,22 +193,19 @@ thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
                                                        loader,
                                                        nullptr);
             }
-            vfs_async_task_unlock(task);
         }
         // LOG_DEBUG("NEED_UPDATE: {}", need_update);
         thumbnail_request_free(req);
     }
 
-    if (vfs_async_task_is_cancelled(task))
+    if (task->is_cancelled())
     {
         // LOG_DEBUG("THREAD CANCELLED!!!");
-        vfs_async_task_lock(task);
         if (loader->idle_handler)
         {
             g_source_remove(loader->idle_handler);
             loader->idle_handler = 0;
         }
-        vfs_async_task_unlock(task);
     }
     else
     {
@@ -253,7 +244,6 @@ vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big)
         loader->task = vfs_async_task_new((VFSAsyncFunc)thumbnail_loader_thread, loader);
         new_task = true;
     }
-    vfs_async_task_lock(loader->task);
 
     // Check if the request is already scheduled
     VFSThumbnailRequest* req;
@@ -278,10 +268,8 @@ vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big)
     ++req->n_requests[is_big ? VFSThumbnailSize::LOAD_BIG_THUMBNAIL
                              : VFSThumbnailSize::LOAD_SMALL_THUMBNAIL];
 
-    vfs_async_task_unlock(loader->task);
-
     if (new_task)
-        vfs_async_task_execute(loader->task);
+        loader->task->run_thread();
 }
 
 void
@@ -291,7 +279,6 @@ vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
 
     if ((loader = dir->thumbnail_loader))
     {
-        vfs_async_task_lock(loader->task);
         // LOG_DEBUG("TRY TO CANCEL REQUESTS!!");
         for (GList* l = loader->queue->head; l;)
         {
@@ -313,7 +300,6 @@ vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
         if (g_queue_get_length(loader->queue) == 0)
         {
             // LOG_DEBUG("FREE LOADER IN vfs_thumbnail_loader_cancel_all_requests!");
-            vfs_async_task_unlock(loader->task);
             loader->dir->thumbnail_loader = nullptr;
 
             // FIXME: added idle_handler = 0 to prevent idle_handler being
@@ -329,7 +315,6 @@ vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
             vfs_thumbnail_loader_free(loader);
             return;
         }
-        vfs_async_task_unlock(loader->task);
     }
 }
 

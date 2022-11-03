@@ -639,14 +639,14 @@ search_thread(VFSAsyncTask* task, FindFile* data)
     std::string path;
     GQueue* queue = g_queue_new();
 
-    while (!data->task->cancel && (rlen = read(data->stdo, buf, sizeof(buf) - 1)) > 0)
+    while (!data->task->is_cancelled() && (rlen = read(data->stdo, buf, sizeof(buf) - 1)) > 0)
     {
         char* pbuf;
         char* eol;
         buf[rlen] = '\0';
         pbuf = buf;
 
-        while (!data->task->cancel)
+        while (!data->task->is_cancelled())
         {
             if ((eol = strchr(pbuf, '\n'))) /* end of line is reached */
             {
@@ -654,7 +654,7 @@ search_thread(VFSAsyncTask* task, FindFile* data)
                 path.append(pbuf);
 
                 /* we get a complete file path */
-                if (!data->task->cancel)
+                if (!data->task->is_cancelled())
                     process_found_files(data, queue, path.c_str());
 
                 pbuf = eol + 1;  /* start reading the next line */
@@ -671,7 +671,7 @@ search_thread(VFSAsyncTask* task, FindFile* data)
     /* end of stream (EOF) is reached */
     if (!path.empty()) /* this is the last line without eol character '\n' */
     {
-        if (!data->task->cancel)
+        if (!data->task->is_cancelled())
         {
             process_found_files(data, queue, path.c_str());
             process_found_files(data, queue, nullptr);
@@ -726,7 +726,7 @@ on_start_search(GtkWidget* btn, FindFile* data)
 
     data->signal_task = data->task->add_event<EventType::TASK_FINISH>(on_search_finish, data);
 
-    vfs_async_task_execute(data->task);
+    data->task->run_thread();
 
     busy_cursor = gdk_cursor_new_for_display(nullptr, GdkCursorType::GDK_WATCH);
     gdk_window_set_cursor(gtk_widget_get_window(data->search_result), busy_cursor);
@@ -737,10 +737,10 @@ static void
 on_stop_search(GtkWidget* btn, FindFile* data)
 {
     (void)btn;
-    if (data->task && !vfs_async_task_is_finished(data->task))
+    if (data->task && !data->task->is_finished())
     {
         // see note in vfs-async-task.c: vfs_async_task_real_cancel()
-        vfs_async_task_cancel(data->task);
+        data->task->cancel();
     }
 }
 

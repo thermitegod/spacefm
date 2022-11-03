@@ -281,7 +281,7 @@ app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all
 static void
 on_load_all_apps_finish(VFSAsyncTask* task, bool is_cancelled, GtkWidget* dlg)
 {
-    GtkTreeModel* model = GTK_TREE_MODEL(vfs_async_task_get_data(task));
+    GtkTreeModel* model = GTK_TREE_MODEL(task->get_data());
     if (is_cancelled)
     {
         g_object_unref(model);
@@ -341,7 +341,7 @@ on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, unsigned int pag
 
             task->add_event<EventType::TASK_FINISH>(on_load_all_apps_finish, dlg);
 
-            vfs_async_task_execute(task);
+            task->run_thread();
             g_signal_connect(G_OBJECT(view),
                              "row_activated",
                              G_CALLBACK(on_view_row_activated),
@@ -471,7 +471,7 @@ on_dlg_response(GtkDialog* dlg, int id, void* user_data)
             {
                 // LOG_INFO("app-chooser.cxx -> vfs_async_task_cancel");
                 // see note in vfs-async-task.c: vfs_async_task_real_cancel()
-                vfs_async_task_cancel(task);
+                task->cancel();
                 // The GtkListStore will be freed in
                 // EventType::TASK_FINISH handler of task - on_load_all_app_finish()
                 g_object_unref(task);
@@ -597,13 +597,8 @@ load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* tas
 
     for (const auto& file: std::filesystem::directory_iterator(dir_path))
     {
-        vfs_async_task_lock(task);
-        if (task->cancel)
-        {
-            vfs_async_task_unlock(task);
+        if (task->is_cancelled())
             break;
-        }
-        vfs_async_task_unlock(task);
 
         const std::string file_name = std::filesystem::path(file).filename();
         const std::string file_path = Glib::build_filename(dir_path, file_name);
@@ -616,13 +611,8 @@ load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* tas
         if (!ztd::endswith(file_name, ".desktop"))
             continue;
 
-        vfs_async_task_lock(task);
-        if (task->cancel)
-        {
-            vfs_async_task_unlock(task);
+        if (task->is_cancelled())
             break;
-        }
-        vfs_async_task_unlock(task);
 
         /* There are some operations using GTK+, so lock may be needed. */
         add_list_item(list, file_path.c_str());
@@ -632,7 +622,7 @@ load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* tas
 static void*
 load_all_known_apps_thread(VFSAsyncTask* task)
 {
-    GtkListStore* list = GTK_LIST_STORE(vfs_async_task_get_data(task));
+    GtkListStore* list = GTK_LIST_STORE(task->get_data());
 
     std::string dir = Glib::build_filename(vfs_user_data_dir(), "applications");
     load_all_apps_in_dir(dir.c_str(), list, task);
@@ -642,9 +632,6 @@ load_all_known_apps_thread(VFSAsyncTask* task)
         dir = Glib::build_filename(sys_dir.data(), "applications");
         load_all_apps_in_dir(dir.c_str(), list, task);
     }
-
-    vfs_async_task_lock(task);
-    vfs_async_task_unlock(task);
 
     return nullptr;
 }

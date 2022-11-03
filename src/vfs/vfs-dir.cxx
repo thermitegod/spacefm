@@ -181,7 +181,7 @@ vfs_dir_finalize(GObject* obj)
         // FIXME: should we generate a "file-list" signal to indicate the dir loading was cancelled?
 
         // LOG_INFO("vfs_dir_finalize -> vfs_async_task_cancel");
-        vfs_async_task_cancel(dir->task);
+        dir->task->cancel();
         g_object_unref(dir->task);
         dir->task = nullptr;
     }
@@ -504,7 +504,7 @@ vfs_dir_load(VFSDir* dir)
     dir->signal_task_load_dir =
         dir->task->add_event<EventType::TASK_FINISH>(on_list_task_finished, dir);
 
-    vfs_async_task_execute(dir->task);
+    dir->task->run_thread();
 }
 
 static void*
@@ -526,7 +526,7 @@ vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
 
     for (const auto& file: std::filesystem::directory_iterator(dir->path))
     {
-        if (vfs_async_task_is_cancelled(dir->task))
+        if (dir->task->is_cancelled())
             break;
 
         const std::string file_name = std::filesystem::path(file).filename();

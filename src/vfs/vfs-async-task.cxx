@@ -18,18 +18,31 @@
 #include <string>
 #include <string_view>
 
+#include <thread>
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <future>
+#include <chrono>
+
+#include <glib.h>
+
 #include "vfs/vfs-async-task.hxx"
 
-#include <magic_enum.hpp>
+struct VFSAsyncTaskClass
+{
+    GObjectClass parent_class;
+    void (*finish)(VFSAsyncTask* task, bool is_cancelled);
+};
+
+GType vfs_async_task_get_type();
+
+#define VFS_ASYNC_TASK_TYPE (vfs_async_task_get_type())
 
 static void vfs_async_task_class_init(VFSAsyncTaskClass* klass);
 static void vfs_async_task_init(VFSAsyncTask* task);
 static void vfs_async_task_finalize(GObject* object);
-
 static void vfs_async_task_finish(VFSAsyncTask* task, bool is_cancelled);
-static void vfs_async_thread_cleanup(VFSAsyncTask* task, bool finalize);
-
-void vfs_async_task_real_cancel(VFSAsyncTask* task, bool finalize);
 
 /* Local data */
 static GObjectClass* parent_class = nullptr;
@@ -76,20 +89,6 @@ vfs_async_task_class_init(VFSAsyncTaskClass* klass)
 static void
 vfs_async_task_init(VFSAsyncTask* task)
 {
-    task->lock = (GMutex*)g_malloc(sizeof(GMutex));
-    g_mutex_init(task->lock);
-}
-
-void
-vfs_async_task_lock(VFSAsyncTask* task)
-{
-    g_mutex_lock(task->lock);
-}
-
-void
-vfs_async_task_unlock(VFSAsyncTask* task)
-{
-    g_mutex_unlock(task->lock);
 }
 
 VFSAsyncTask*
@@ -101,25 +100,17 @@ vfs_async_task_new(VFSAsyncFunc task_func, void* user_data)
     return VFS_ASYNC_TASK(task);
 }
 
-void*
-vfs_async_task_get_data(VFSAsyncTask* task)
-{
-    return task->user_data;
-}
-
 static void
 vfs_async_task_finalize(GObject* object)
 {
     VFSAsyncTask* task;
-    /* FIXME: destroying the object without calling vfs_async_task_cancel
-     currently induces unknown errors. */
+    // FIXME: destroying the object without calling vfs_async_task_cancel
+    // currently induces unknown errors.
     task = VFS_ASYNC_TASK_REINTERPRET(object);
 
-    /* finalize = true, inhibit the emission of signals */
-    vfs_async_task_real_cancel(task, true);
-    vfs_async_thread_cleanup(task, true);
-
-    task->lock = nullptr;
+    // finalize = true, inhibit the emission of signal
+    task->real_cancel(true);
+    task->cleanup(true);
 
     if (G_OBJECT_CLASS(parent_class)->finalize)
         (*G_OBJECT_CLASS(parent_class)->finalize)(object);
@@ -129,57 +120,61 @@ static bool
 on_idle(void* _task)
 {
     VFSAsyncTask* task = VFS_ASYNC_TASK(_task);
-    vfs_async_thread_cleanup(task, false);
-    return true; /* the idle handler is removed in vfs_async_thread_cleanup. */
+    task->cleanup(false);
+    return true; // the idle handler is removed in task->cleanup.
 }
 
-static void*
+void*
 vfs_async_task_thread(void* _task)
 {
     VFSAsyncTask* task = VFS_ASYNC_TASK(_task);
     void* ret = task->func(task, task->user_data);
 
-    vfs_async_task_lock(task);
+    std::unique_lock<std::mutex> lock(task->mutex);
+
     task->idle_id = g_idle_add((GSourceFunc)on_idle, task); // runs in main loop thread
     task->ret_val = ret;
-    task->finished = true;
-    vfs_async_task_unlock(task);
+    task->thread_finished.store(true);
 
     return ret;
 }
 
-void
-vfs_async_task_execute(VFSAsyncTask* task)
-{
-    task->thread = g_thread_new("async_task", vfs_async_task_thread, task);
-}
-
 static void
-vfs_async_thread_cleanup(VFSAsyncTask* task, bool finalize)
+vfs_async_task_finish(VFSAsyncTask* task, bool is_cancelled)
 {
-    if (task->idle_id)
-    {
-        g_source_remove(task->idle_id);
-        task->idle_id = 0;
-    }
-    if (task->thread)
-    {
-        g_thread_join(task->thread);
-        task->thread = nullptr;
-        task->finished = true;
-        // Only emit the signal when we are not finalizing.
-        // Emitting signal on an object during destruction is not allowed.
-        if (!finalize)
-        {
-            task->run_event<EventType::TASK_FINISH>(task->cancelled);
-        }
-    }
+    (void)task;
+    (void)is_cancelled;
+    // default handler of EventType::TASK_FINISH signal.
+}
+
+void*
+VFSAsyncTask::get_data()
+{
+    return this->user_data;
 }
 
 void
-vfs_async_task_real_cancel(VFSAsyncTask* task, bool finalize)
+VFSAsyncTask::run_thread()
 {
-    if (!task->thread)
+    this->thread = g_thread_new("async_task", vfs_async_task_thread, this);
+}
+
+bool
+VFSAsyncTask::is_finished()
+{
+    return this->thread_finished;
+}
+
+bool
+VFSAsyncTask::is_cancelled()
+{
+    return this->thread_cancel;
+}
+
+void
+VFSAsyncTask::real_cancel(bool finalize)
+{
+    if (!this->thread)
         return;
 
     /*
@@ -196,36 +191,36 @@ vfs_async_task_real_cancel(VFSAsyncTask* task, bool finalize)
      * to get things right.
      */
 
-    vfs_async_task_lock(task);
-    task->cancel = true;
-    vfs_async_task_unlock(task);
-
-    vfs_async_thread_cleanup(task, finalize);
-    task->cancelled = true;
+    this->thread_cancel.store(true);
+    this->cleanup(finalize);
+    this->thread_cancelled.store(true);
 }
 
 void
-vfs_async_task_cancel(VFSAsyncTask* task)
+VFSAsyncTask::cancel()
 {
-    vfs_async_task_real_cancel(task, false);
+    this->real_cancel(false);
 }
 
-static void
-vfs_async_task_finish(VFSAsyncTask* task, bool is_cancelled)
+void
+VFSAsyncTask::cleanup(bool finalize)
 {
-    (void)task;
-    (void)is_cancelled;
-    // default handler of EventType::TASK_FINISH signal.
-}
+    if (this->idle_id)
+    {
+        g_source_remove(this->idle_id);
+        this->idle_id = 0;
+    }
+    if (this->thread)
+    {
+        g_thread_join(this->thread);
+        this->thread = nullptr;
+        this->thread_finished.store(true);
 
-bool
-vfs_async_task_is_finished(VFSAsyncTask* task)
-{
-    return task->finished;
-}
-
-bool
-vfs_async_task_is_cancelled(VFSAsyncTask* task)
-{
-    return task->cancel;
+        // Only emit the signal when we are not finalizing.
+        // Emitting signal on an object during destruction is not allowed.
+        if (!finalize)
+        {
+            this->run_event<EventType::TASK_FINISH>(this->thread_cancelled);
+        }
+    }
 }
