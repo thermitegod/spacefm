@@ -92,7 +92,7 @@ static void on_mime_type_reload(void* user_data);
 static bool notify_file_change(void* user_data);
 static bool update_file_info(VFSDir* dir, VFSFileInfo* file);
 
-static void on_list_task_finished(VFSAsyncTask* task, bool is_cancelled, VFSDir* dir);
+static void on_list_task_finished(VFSDir* dir, bool is_cancelled);
 
 static GObjectClass* parent_class = nullptr;
 
@@ -177,9 +177,9 @@ vfs_dir_finalize(GObject* obj)
 
     if (dir->task)
     {
-        g_signal_handlers_disconnect_by_func(dir->task, (void*)on_list_task_finished, dir);
-        /* FIXME: should we generate a "file-list" signal to indicate the dir loading was cancelled?
-         */
+        dir->signal_task_load_dir.disconnect();
+        // FIXME: should we generate a "file-list" signal to indicate the dir loading was cancelled?
+
         // LOG_INFO("vfs_dir_finalize -> vfs_async_task_cancel");
         vfs_async_task_cancel(dir->task);
         g_object_unref(dir->task);
@@ -436,9 +436,8 @@ vfs_dir_new(std::string_view path)
 }
 
 void
-on_list_task_finished(VFSAsyncTask* task, bool is_cancelled, VFSDir* dir)
+on_list_task_finished(VFSDir* dir, bool is_cancelled)
 {
-    (void)task;
     g_object_unref(dir->task);
     dir->task = nullptr;
     dir->run_event<EventType::FILE_LISTED>(is_cancelled);
@@ -501,7 +500,10 @@ vfs_dir_load(VFSDir* dir)
 
     dir->disp_path = ztd::strdup(Glib::filename_display_name(dir->path));
     dir->task = vfs_async_task_new((VFSAsyncFunc)vfs_dir_load_thread, dir);
-    g_signal_connect(dir->task, "finish", G_CALLBACK(on_list_task_finished), dir);
+
+    dir->signal_task_load_dir =
+        dir->task->add_event<EventType::TASK_FINISH>(on_list_task_finished, dir);
+
     vfs_async_task_execute(dir->task);
 }
 

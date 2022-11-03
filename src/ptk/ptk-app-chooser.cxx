@@ -338,7 +338,9 @@ on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, unsigned int pag
             VFSAsyncTask* task = vfs_async_task_new((VFSAsyncFunc)load_all_known_apps_thread, list);
             g_object_set_data(G_OBJECT(task), "view", view);
             g_object_set_data(G_OBJECT(dlg), "task", task);
-            g_signal_connect(task, "finish", G_CALLBACK(on_load_all_apps_finish), dlg);
+
+            task->add_event<EventType::TASK_FINISH>(on_load_all_apps_finish, dlg);
+
             vfs_async_task_execute(task);
             g_signal_connect(G_OBJECT(view),
                              "row_activated",
@@ -470,8 +472,8 @@ on_dlg_response(GtkDialog* dlg, int id, void* user_data)
                 // LOG_INFO("app-chooser.cxx -> vfs_async_task_cancel");
                 // see note in vfs-async-task.c: vfs_async_task_real_cancel()
                 vfs_async_task_cancel(task);
-                /* The GtkListStore will be freed in "finish" handler of task -
-                 * on_load_all_app_finish(). */
+                // The GtkListStore will be freed in
+                // EventType::TASK_FINISH handler of task - on_load_all_app_finish()
                 g_object_unref(task);
             }
             break;

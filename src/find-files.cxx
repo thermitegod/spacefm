@@ -129,6 +129,11 @@ struct FindFile
     int stdo;
 
     VFSAsyncTask* task;
+
+  public:
+    // private:
+    // Signals we connect to
+    sigc::connection signal_task;
 };
 
 FindFile::FindFile()
@@ -679,10 +684,8 @@ search_thread(VFSAsyncTask* task, FindFile* data)
 }
 
 static void
-on_search_finish(VFSAsyncTask* task, bool cancelled, FindFile* data)
+on_search_finish(FindFile* data)
 {
-    (void)task;
-    (void)cancelled;
     finish_search(data);
 }
 
@@ -721,7 +724,9 @@ on_start_search(GtkWidget* btn, FindFile* data)
 
     GdkCursor* busy_cursor;
     data->task = vfs_async_task_new((VFSAsyncFunc)search_thread, data);
-    g_signal_connect(data->task, "finish", G_CALLBACK(on_search_finish), data);
+
+    data->signal_task = data->task->add_event<EventType::TASK_FINISH>(on_search_finish, data);
+
     vfs_async_task_execute(data->task);
 
     busy_cursor = gdk_cursor_new_for_display(nullptr, GdkCursorType::GDK_WATCH);

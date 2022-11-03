@@ -24,4 +24,7 @@ enum class EventType
     FILE_LISTED,
     FILE_THUMBNAIL_LOADED,
     // FILE_LOAD_COMPLETE,
+
+    // VFSFileTask
+    TASK_FINISH,
 };

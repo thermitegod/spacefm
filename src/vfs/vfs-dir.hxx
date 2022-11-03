@@ -269,6 +269,11 @@ struct VFSDir
     PtkFileBrowser* evt_data_browser{nullptr};
     PtkFileList* evt_data_list{nullptr};
     // PtkFileList* evt_data_thumb_list{nullptr};
+
+  public:
+    // private:
+    // Signals we connect to
+    sigc::connection signal_task_load_dir;
 };
 
 using VFSDirForeachFunc = void (*)(VFSDir* dir, bool user_data);

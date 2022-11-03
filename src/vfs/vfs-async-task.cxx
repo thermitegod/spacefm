@@ -34,13 +34,6 @@ void vfs_async_task_real_cancel(VFSAsyncTask* task, bool finalize);
 /* Local data */
 static GObjectClass* parent_class = nullptr;
 
-enum VFSAsyncSignal
-{
-    FINISH_SIGNAL,
-};
-
-static unsigned int signals[magic_enum::enum_count<VFSAsyncSignal>()] = {0};
-
 GType
 vfs_async_task_get_type()
 {
@@ -78,18 +71,6 @@ vfs_async_task_class_init(VFSAsyncTaskClass* klass)
     parent_class = (GObjectClass*)g_type_class_peek(G_TYPE_OBJECT);
 
     klass->finish = vfs_async_task_finish;
-
-    signals[VFSAsyncSignal::FINISH_SIGNAL] =
-        g_signal_new("finish",
-                     G_TYPE_FROM_CLASS(klass),
-                     G_SIGNAL_RUN_FIRST,
-                     G_STRUCT_OFFSET(VFSAsyncTaskClass, finish),
-                     nullptr,
-                     nullptr,
-                     g_cclosure_marshal_VOID__BOOLEAN,
-                     G_TYPE_NONE,
-                     1,
-                     G_TYPE_BOOLEAN);
 }
 
 static void
@@ -186,10 +167,12 @@ vfs_async_thread_cleanup(VFSAsyncTask* task, bool finalize)
         g_thread_join(task->thread);
         task->thread = nullptr;
         task->finished = true;
-        /* Only emit the signal when we are not finalizing.
-            Emitting signal on an object during destruction is not allowed. */
+        // Only emit the signal when we are not finalizing.
+        // Emitting signal on an object during destruction is not allowed.
         if (!finalize)
-            g_signal_emit(task, signals[VFSAsyncSignal::FINISH_SIGNAL], 0, task->cancelled);
+        {
+            task->run_event<EventType::TASK_FINISH>(task->cancelled);
+        }
     }
 }
 
@@ -232,7 +215,7 @@ vfs_async_task_finish(VFSAsyncTask* task, bool is_cancelled)
 {
     (void)task;
     (void)is_cancelled;
-    /* default handler of "finish" signal. */
+    // default handler of EventType::TASK_FINISH signal.
 }
 
 bool
