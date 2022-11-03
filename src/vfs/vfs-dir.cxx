@@ -230,11 +230,9 @@ vfs_dir_finalize(GObject* obj)
         dir->changed_files.clear();
     }
 
-    if (dir->created_files)
+    if (!dir->created_files.empty())
     {
-        g_slist_foreach(dir->created_files, (GFunc)free, nullptr);
-        g_slist_free(dir->created_files);
-        dir->created_files = nullptr;
+        dir->created_files.clear();
     }
 
     vfs_dir_clear(dir);
@@ -260,7 +258,7 @@ vfs_dir_set_property(GObject* obj, unsigned int prop_id, const GValue* value, GP
 }
 
 static VFSFileInfo*
-vfs_dir_find_file(VFSDir* dir, const char* file_name, VFSFileInfo* file)
+vfs_dir_find_file(VFSDir* dir, std::string_view file_name, VFSFileInfo* file)
 {
     for (VFSFileInfo* file2: dir->file_list)
     {
@@ -281,13 +279,13 @@ vfs_dir_emit_file_created(VFSDir* dir, const char* file_name, bool force)
     // if ( !force && dir->avoid_changes )
     //    return;
 
-    if (!strcmp(file_name, dir->path))
+    if (ztd::same(file_name, dir->path))
     {
         // Special Case: The directory itself was created?
         return;
     }
 
-    dir->created_files = g_slist_append(dir->created_files, ztd::strdup(file_name));
+    dir->created_files.push_back(file_name);
     if (change_notify_timeout == 0)
     {
         change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
@@ -301,7 +299,7 @@ vfs_dir_emit_file_created(VFSDir* dir, const char* file_name, bool force)
 void
 vfs_dir_emit_file_deleted(VFSDir* dir, const char* file_name, VFSFileInfo* file)
 {
-    if (!strcmp(file_name, dir->path))
+    if (ztd::same(file_name, dir->path))
     {
         /* Special Case: The directory itself was deleted... */
         file = nullptr;
@@ -348,7 +346,7 @@ vfs_dir_emit_file_changed(VFSDir* dir, const char* file_name, VFSFileInfo* file,
     if (!force && dir->avoid_changes)
         return;
 
-    if (!strcmp(file_name, dir->path))
+    if (ztd::same(file_name, dir->path))
     {
         // Special Case: The directory itself was changed
         dir->run_event<EventType::FILE_CHANGED>(nullptr);
@@ -628,45 +626,44 @@ update_created_files(const char* key, VFSDir* dir)
 {
     (void)key;
 
-    if (dir->created_files)
+    if (dir->created_files.empty())
+        return;
+
+    vfs_dir_lock(dir);
+    for (std::string_view created_file: dir->created_files)
     {
-        vfs_dir_lock(dir);
-        for (GSList* l = dir->created_files; l; l = l->next)
+        VFSFileInfo* file;
+        VFSFileInfo* file_found = vfs_dir_find_file(dir, created_file, nullptr);
+        if (!file_found)
         {
-            VFSFileInfo* file;
-            VFSFileInfo* file_found = vfs_dir_find_file(dir, (char*)l->data, nullptr);
-            if (!file_found)
+            // file is not in dir file_list
+            const std::string full_path = Glib::build_filename(dir->path, created_file.data());
+            file = vfs_file_info_new();
+            if (vfs_file_info_get(file, full_path))
             {
-                // file is not in dir file_list
-                const std::string full_path = Glib::build_filename(dir->path, (char*)l->data);
-                file = vfs_file_info_new();
-                if (vfs_file_info_get(file, full_path))
-                {
-                    // add new file to dir file_list
-                    vfs_file_info_load_special_info(file, full_path.c_str());
-                    dir->file_list.push_back(vfs_file_info_ref(file));
-                    dir->run_event<EventType::FILE_CREATED>(file);
-                }
-                // else file does not exist in filesystem
+                // add new file to dir file_list
+                vfs_file_info_load_special_info(file, full_path.c_str());
+                dir->file_list.push_back(vfs_file_info_ref(file));
+
+                dir->run_event<EventType::FILE_CREATED>(file);
+            }
+            // else file does not exist in filesystem
+            vfs_file_info_unref(file);
+        }
+        else
+        {
+            // file already exists in dir file_list
+            file = vfs_file_info_ref(file_found);
+            if (update_file_info(dir, file))
+            {
+                dir->run_event<EventType::FILE_CHANGED>(file);
                 vfs_file_info_unref(file);
             }
-            else
-            {
-                // file already exists in dir file_list
-                file = vfs_file_info_ref(file_found);
-                if (update_file_info(dir, file))
-                {
-                    dir->run_event<EventType::FILE_CHANGED>(file);
-                    vfs_file_info_unref(file);
-                }
-                // else was deleted, signaled, and unrefed in update_file_info
-            }
-            free((char*)l->data); // free file_name string
+            // else was deleted, signaled, and unrefed in update_file_info
         }
-        g_slist_free(dir->created_files);
-        dir->created_files = nullptr;
-        vfs_dir_unlock(dir);
     }
+    dir->created_files.clear();
+    vfs_dir_unlock(dir);
 }
 
 static bool

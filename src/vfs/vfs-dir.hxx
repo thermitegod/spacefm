@@ -67,8 +67,9 @@ struct VFSDir
     struct VFSThumbnailLoader* thumbnail_loader;
 
     std::vector<VFSFileInfo*> changed_files;
-    GSList* created_files; // MOD
-    long xhidden_count;    // MOD
+    std::vector<std::string> created_files;
+
+    long xhidden_count;
 
     // Signals
   public:
