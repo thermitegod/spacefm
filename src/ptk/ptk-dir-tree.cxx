@@ -56,7 +56,7 @@ struct PtkDirTreeNode
     VFSFileInfo* file;
     PtkDirTreeNode* children;
     int n_children;
-    VFSFileMonitor* monitor;
+    vfs::file_monitor_t monitor;
     int n_expand;
     PtkDirTreeNode* parent;
     PtkDirTreeNode* next;
@@ -115,7 +115,7 @@ static void ptk_dir_tree_delete_child(PtkDirTree* tree, PtkDirTreeNode* child);
 
 /* signal handlers */
 
-static void on_file_monitor_event(VFSFileMonitor* monitor, VFSFileMonitorEvent event,
+static void on_file_monitor_event(vfs::file_monitor_t monitor, VFSFileMonitorEvent event,
                                   std::string_view file_name, void* user_data);
 
 static PtkDirTreeNode* ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent,
@@ -906,7 +906,7 @@ find_node(PtkDirTreeNode* parent, const char* name)
 }
 
 static void
-on_file_monitor_event(VFSFileMonitor* monitor, VFSFileMonitorEvent event,
+on_file_monitor_event(vfs::file_monitor_t monitor, VFSFileMonitorEvent event,
                       std::string_view file_name, void* user_data)
 {
     PtkDirTreeNode* node = PTK_DIR_TREE_NODE(user_data);

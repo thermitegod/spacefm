@@ -28,6 +28,8 @@
 
 #include <map>
 
+#include <memory>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -45,7 +47,7 @@
 
 #define BUF_LEN (1024 * (sizeof(inotify_event) + 16))
 
-static std::map<std::string, VFSFileMonitor*> monitor_map;
+static std::map<std::string, vfs::file_monitor_t> monitor_map;
 
 static GIOChannel* vfs_inotify_io_channel = nullptr;
 static unsigned int vfs_inotify_io_watch = 0;
@@ -73,8 +75,6 @@ VFSFileMonitorCallbackEntry::VFSFileMonitorCallbackEntry(VFSFileMonitorCallback 
 VFSFileMonitor::VFSFileMonitor(std::string_view real_path)
 {
     // LOG_INFO("VFSFileMonitor Constructor");
-    this->ref_inc();
-
     this->path = real_path.data();
 }
 
@@ -142,13 +142,13 @@ vfs_file_monitor_init()
     return true;
 }
 
-VFSFileMonitor*
+vfs::file_monitor_t
 vfs_file_monitor_add(std::string_view path, VFSFileMonitorCallback cb, void* user_data)
 {
     // inotify does not follow symlinks, need to get real path
     const std::string real_path = std::filesystem::absolute(path);
 
-    VFSFileMonitor* monitor = nullptr;
+    vfs::file_monitor_t monitor;
 
     try
     {
@@ -156,10 +156,10 @@ vfs_file_monitor_add(std::string_view path, VFSFileMonitorCallback cb, void* use
     }
     catch (std::out_of_range)
     {
-        const int wd = inotify_add_watch(vfs_inotify_fd,
-                                         real_path.c_str(),
-                                         IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF |
-                                             IN_MOVE | IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
+        int wd = inotify_add_watch(vfs_inotify_fd,
+                                   real_path.c_str(),
+                                   IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE |
+                                       IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
         if (wd < 0)
         {
             LOG_ERROR("Failed to add watch on '{}' ({})", real_path, path);
@@ -169,7 +169,7 @@ vfs_file_monitor_add(std::string_view path, VFSFileMonitorCallback cb, void* use
         }
         // LOG_INFO("vfs_file_monitor_add  {} ({}) {}", real_path, path, wd);
 
-        monitor = new VFSFileMonitor(real_path);
+        monitor = std::make_shared<VFSFileMonitor>(real_path);
         monitor->wd = wd;
 
         monitor_map.insert({monitor->path, monitor});
@@ -186,7 +186,7 @@ vfs_file_monitor_add(std::string_view path, VFSFileMonitorCallback cb, void* use
 }
 
 void
-vfs_file_monitor_remove(VFSFileMonitor* monitor, VFSFileMonitorCallback cb, void* user_data)
+vfs_file_monitor_remove(vfs::file_monitor_t monitor, VFSFileMonitorCallback cb, void* user_data)
 {
     if (!monitor)
         return;
@@ -204,16 +204,11 @@ vfs_file_monitor_remove(VFSFileMonitor* monitor, VFSFileMonitorCallback cb, void
             }
         }
     }
-
-    monitor->ref_dec();
-    if (monitor->ref_count() == 0)
-        delete monitor;
-
     // LOG_INFO("vfs_file_monitor_remove   DONE");
 }
 
 static void
-vfs_file_monitor_reconnect_inotify(std::string_view path, VFSFileMonitor* monitor)
+vfs_file_monitor_reconnect_inotify(std::string_view path, vfs::file_monitor_t monitor)
 {
     if (!std::filesystem::exists(path))
         return;
@@ -251,17 +246,17 @@ vfs_file_monitor_translate_inotify_event(int inotify_mask)
 }
 
 static void
-vfs_file_monitor_dispatch_event(VFSFileMonitor* monitor, VFSFileMonitorEvent evt,
+vfs_file_monitor_dispatch_event(vfs::file_monitor_t monitor, VFSFileMonitorEvent evt,
                                 std::string_view file_name)
 {
     /* Call the callback functions */
-    if (!monitor->callbacks.empty())
+    if (monitor->callbacks.empty())
+        return;
+
+    for (VFSFileMonitorCallbackEntry* cb: monitor->callbacks)
     {
-        for (VFSFileMonitorCallbackEntry* cb: monitor->callbacks)
-        {
-            VFSFileMonitorCallback func = cb->callback;
-            func(monitor, evt, file_name, cb->user_data);
-        }
+        VFSFileMonitorCallback func = cb->callback;
+        func(monitor, evt, file_name, cb->user_data);
     }
 }
 
@@ -281,9 +276,10 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
             // Disconnected from inotify server, but there are still monitors, reconnect
             if (vfs_file_monitor_connect_to_inotify())
             {
-                for (auto it = monitor_map.begin(); it != monitor_map.end(); ++it)
+                // for (auto it = monitor_map.begin(); it != monitor_map.end(); ++it)
+                for (const auto& fm: monitor_map)
                 {
-                    vfs_file_monitor_reconnect_inotify(it->first, it->second);
+                    vfs_file_monitor_reconnect_inotify(fm.first, fm.second);
                 }
             }
         }
@@ -316,13 +312,14 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
         // FIXME: 2 different paths can have the same wd because of link
         // This was fixed in spacefm 0.8.7 ??
 
-        VFSFileMonitor* monitor = nullptr;
+        vfs::file_monitor_t monitor;
 
-        for (auto it = monitor_map.begin(); it != monitor_map.end(); ++it)
+        for (const auto& fm: monitor_map)
         {
-            if (it->second->wd != ievent->wd)
+            if (fm.second->wd != ievent->wd)
                 continue;
-            monitor = it->second;
+
+            monitor = fm.second;
             break;
         }
 
@@ -350,22 +347,4 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
         i += sizeof(inotify_event) + ievent->len;
     }
     return true;
-}
-
-void
-VFSFileMonitor::ref_inc()
-{
-    ++n_ref;
-}
-
-void
-VFSFileMonitor::ref_dec()
-{
-    --n_ref;
-}
-
-unsigned int
-VFSFileMonitor::ref_count()
-{
-    return n_ref;
 }

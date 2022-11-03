@@ -52,7 +52,7 @@ struct VFSDir
     std::vector<VFSFileInfo*> file_list;
 
     /*<private>*/
-    VFSFileMonitor* monitor;
+    vfs::file_monitor_t monitor;
 
     GMutex* mutex; /* Used to guard file_list */
 

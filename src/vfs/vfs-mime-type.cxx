@@ -46,7 +46,7 @@ static GList* reload_cb = nullptr;
 
 static int big_icon_size = 32, small_icon_size = 16;
 
-static std::vector<VFSFileMonitor*> mime_caches_monitors;
+static std::vector<vfs::file_monitor_t> mime_caches_monitors;
 
 struct VFSMimeReloadCbEnt
 {
@@ -89,7 +89,7 @@ vfs_mime_type_reload(void* user_data)
 }
 
 static void
-on_mime_cache_changed(VFSFileMonitor* monitor, VFSFileMonitorEvent event,
+on_mime_cache_changed(vfs::file_monitor_t monitor, VFSFileMonitorEvent event,
                       std::string_view file_name, void* user_data)
 {
     (void)monitor;
@@ -121,7 +121,7 @@ vfs_mime_type_init()
         if (!std::filesystem::exists(cache.get_file_path()))
             continue;
 
-        VFSFileMonitor* monitor =
+        vfs::file_monitor_t monitor =
             vfs_file_monitor_add(cache.get_file_path(), on_mime_cache_changed, nullptr);
 
         mime_caches_monitors.push_back(monitor);
@@ -132,7 +132,7 @@ void
 vfs_mime_type_clean()
 {
     /* remove file alteration monitor for mime-cache */
-    for (VFSFileMonitor* mime_caches_monitor: mime_caches_monitors)
+    for (vfs::file_monitor_t mime_caches_monitor: mime_caches_monitors)
     {
         vfs_file_monitor_remove(mime_caches_monitor, on_mime_cache_changed, nullptr);
     }

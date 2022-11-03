@@ -24,9 +24,10 @@
 
 #include <atomic>
 
+#include <memory>
+
 #include <glib.h>
 
-#define VFS_FILE_MONITOR(obj)               (static_cast<VFSFileMonitor*>(obj))
 #define VFS_FILE_MONITOR_CALLBACK_DATA(obj) (reinterpret_cast<VFSFileMonitorCallbackEntry*>(obj))
 
 struct VFSFileMonitorCallbackEntry;
@@ -48,21 +49,19 @@ struct VFSFileMonitor
     // TODO private
     int wd;
     std::vector<VFSFileMonitorCallbackEntry*> callbacks;
-
-    void ref_inc();
-    void ref_dec();
-    unsigned int ref_count();
-
-  private:
-    std::atomic<unsigned int> n_ref{0};
 };
+
+namespace vfs
+{
+    using file_monitor_t = std::shared_ptr<VFSFileMonitor>;
+}
 
 /* Callback function which will be called when monitored events happen
  *  NOTE: GDK_THREADS_ENTER and GDK_THREADS_LEAVE might be needed
  *  if gtk+ APIs are called in this callback, since the callback is called from
  *  IO channel handler.
  */
-using VFSFileMonitorCallback = void (*)(VFSFileMonitor* monitor, VFSFileMonitorEvent event,
+using VFSFileMonitorCallback = void (*)(vfs::file_monitor_t monitor, VFSFileMonitorEvent event,
                                         std::string_view file_name, void* user_data);
 
 /*
@@ -79,13 +78,14 @@ bool vfs_file_monitor_init();
  * cb: callback function to be called when file event happens.
  * user_data: user data to be passed to callback function.
  */
-VFSFileMonitor* vfs_file_monitor_add(std::string_view path, VFSFileMonitorCallback cb,
-                                     void* user_data);
+vfs::file_monitor_t vfs_file_monitor_add(std::string_view path, VFSFileMonitorCallback cb,
+                                         void* user_data);
 
 /*
  * Remove previously installed monitor.
  */
-void vfs_file_monitor_remove(VFSFileMonitor* monitor, VFSFileMonitorCallback cb, void* user_data);
+void vfs_file_monitor_remove(vfs::file_monitor_t monitor, VFSFileMonitorCallback cb,
+                             void* user_data);
 
 /*
  * Clean up and shutdown file alteration monitor.
