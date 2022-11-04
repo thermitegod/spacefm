@@ -697,7 +697,7 @@ load_settings()
             vfs_mime_type_unref(mime_type);
             if (app_name)
             {
-                VFSAppDesktop desktop(app_name);
+                vfs::desktop desktop(app_name);
                 xset_set(XSetName::EDITOR, XSetVar::S, desktop.get_exec());
             }
         }
@@ -1284,7 +1284,7 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
     {
         if (set->z && ztd::endswith(set->z, ".desktop"))
         {
-            VFSAppDesktop desktop(set->z);
+            vfs::desktop desktop(set->z);
 
             if (!(set->menu_label && set->menu_label[0]))
                 menu_label = ztd::strdup(desktop.get_disp_name());
@@ -2748,7 +2748,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
             }
             else if (ztd::endswith(set->z, ".desktop"))
             {
-                VFSAppDesktop desktop(set->z);
+                vfs::desktop desktop(set->z);
                 if (desktop.get_exec() && desktop.get_exec()[0] != '\0')
                 {
                     // get file list

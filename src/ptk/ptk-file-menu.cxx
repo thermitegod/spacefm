@@ -928,7 +928,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
                 }
 #endif
 
-                VFSAppDesktop desktop(app);
+                vfs::desktop desktop(app);
                 app_name = desktop.get_disp_name();
                 if (app_name)
                     app_menu_item = gtk_menu_item_new_with_label(app_name);
@@ -1415,8 +1415,9 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     xset_t handler_set = XSET(g_object_get_data(G_OBJECT(menuitem), "handler_set"));
 
-    const char* desktop_file = CONST_CHAR(g_object_get_data(G_OBJECT(menuitem), "desktop_file"));
-    VFSAppDesktop desktop(desktop_file);
+    const std::string desktop_file =
+        CONST_CHAR(g_object_get_data(G_OBJECT(menuitem), "desktop_file"));
+    vfs::desktop desktop(desktop_file);
 
     std::string app;
 
@@ -1474,8 +1475,9 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 
     std::string command;
 
-    const char* desktop_file = CONST_CHAR(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
-    VFSAppDesktop desktop(desktop_file);
+    const std::string desktop_file =
+        CONST_CHAR(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
+    vfs::desktop desktop(desktop_file);
     if (!desktop.get_name())
         return;
 
@@ -1775,8 +1777,8 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
         return false;
 
     // if original menu, desktop will be set
-    const char* desktop_file = CONST_CHAR(g_object_get_data(G_OBJECT(item), "desktop_file"));
-    VFSAppDesktop desktop(desktop_file);
+    const std::string desktop_file = CONST_CHAR(g_object_get_data(G_OBJECT(item), "desktop_file"));
+    vfs::desktop desktop(desktop_file);
     // else if app menu, data will be set
     // PtkFileMenu* app_data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
 
@@ -1876,8 +1878,9 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     else
         type = "unknown";
 
-    const char* desktop_file = CONST_CHAR(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
-    VFSAppDesktop desktop(desktop_file);
+    const std::string desktop_file =
+        CONST_CHAR(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
+    vfs::desktop desktop(desktop_file);
 
     GtkWidget* app_menu = gtk_menu_new();
 

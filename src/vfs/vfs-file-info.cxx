@@ -630,7 +630,7 @@ vfs_file_info_load_special_info(VFSFileInfo* fi, std::string_view file_path)
 
     fi->flags = (VFSFileInfoFlag)(fi->flags | VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY);
 
-    VFSAppDesktop desktop(file_path);
+    vfs::desktop desktop(file_path);
 
     // MOD  display real filenames of .desktop files not in desktop directory
     if (ztd::same(file_dir, vfs_user_desktop_dir()))

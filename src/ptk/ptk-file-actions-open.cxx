@@ -268,7 +268,7 @@ open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
     }
     else if (app_desktop)
     {
-        VFSAppDesktop desktop(check_desktop_name(app_desktop));
+        vfs::desktop desktop(check_desktop_name(app_desktop));
 
         LOG_INFO("EXEC({})={}", desktop.get_full_path(), desktop.get_exec());
 

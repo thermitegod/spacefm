@@ -110,7 +110,7 @@ add_list_item(GtkListStore* list, const char* path)
                                -1);
             if (file)
             {
-                VFSAppDesktop desktop(path);
+                vfs::desktop desktop(path);
                 const char* name = desktop.get_name();
                 if (!g_strcmp0(file, name))
                 {
@@ -123,7 +123,7 @@ add_list_item(GtkListStore* list, const char* path)
         } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(list), &it));
     }
 
-    VFSAppDesktop desktop(path);
+    vfs::desktop desktop(path);
 
     // tooltip
     const std::string tooltip = fmt::format("{}\nName={}\nExec={}{}",

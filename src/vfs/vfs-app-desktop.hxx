@@ -22,6 +22,8 @@
 
 #include <vector>
 
+#include <memory>
+
 #include <exception>
 
 #include <gtk/gtk.h>
@@ -31,6 +33,7 @@
 class VFSAppDesktop
 {
   public:
+    VFSAppDesktop() = delete;
     VFSAppDesktop(std::string_view open_file_name) noexcept;
     ~VFSAppDesktop() noexcept;
 
@@ -62,6 +65,12 @@ class VFSAppDesktop
     std::string full_path;
     bool terminal{false};
 };
+
+namespace vfs
+{
+    // using desktop = std::shared_ptr<VFSAppDesktop>
+    using desktop = VFSAppDesktop;
+} // namespace vfs
 
 class VFSAppDesktopException: virtual public std::exception
 {

@@ -513,7 +513,7 @@ open_file(std::string_view path)
         }
     }
 
-    VFSAppDesktop desktop(app_name);
+    vfs::desktop desktop(app_name);
 
     const std::vector<std::string> open_files{path.data()};
 
