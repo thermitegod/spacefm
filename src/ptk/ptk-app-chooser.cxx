@@ -40,8 +40,8 @@ enum PTKAppChooser
     COL_FULL_PATH,
 };
 
-static void load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* task);
-static void* load_all_known_apps_thread(VFSAsyncTask* task);
+static void load_all_apps_in_dir(const char* dir_path, GtkListStore* list, vfs::async_task task);
+static void* load_all_known_apps_thread(vfs::async_task task);
 
 static void
 init_list_view(GtkTreeView* view)
@@ -279,7 +279,7 @@ app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all
 }
 
 static void
-on_load_all_apps_finish(VFSAsyncTask* task, bool is_cancelled, GtkWidget* dlg)
+on_load_all_apps_finish(vfs::async_task task, bool is_cancelled, GtkWidget* dlg)
 {
     GtkTreeModel* model = GTK_TREE_MODEL(task->get_data());
     if (is_cancelled)
@@ -334,7 +334,8 @@ on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, u32 page_num, vo
                                                     G_TYPE_STRING,
                                                     G_TYPE_STRING,
                                                     G_TYPE_STRING);
-            VFSAsyncTask* task = vfs_async_task_new((VFSAsyncFunc)load_all_known_apps_thread, list);
+            vfs::async_task task =
+                vfs_async_task_new((VFSAsyncFunc)load_all_known_apps_thread, list);
             g_object_set_data(G_OBJECT(task), "view", view);
             g_object_set_data(G_OBJECT(dlg), "task", task);
 
@@ -445,7 +446,7 @@ static void
 on_dlg_response(GtkDialog* dlg, i32 id, void* user_data)
 {
     (void)user_data;
-    VFSAsyncTask* task;
+    vfs::async_task task;
     GtkAllocation allocation;
 
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
@@ -589,7 +590,7 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, VFSMimeType* mime_type, bool foc
 }
 
 static void
-load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* task)
+load_all_apps_in_dir(const char* dir_path, GtkListStore* list, vfs::async_task task)
 {
     if (!std::filesystem::is_directory(dir_path))
         return;
@@ -619,7 +620,7 @@ load_all_apps_in_dir(const char* dir_path, GtkListStore* list, VFSAsyncTask* tas
 }
 
 static void*
-load_all_known_apps_thread(VFSAsyncTask* task)
+load_all_known_apps_thread(vfs::async_task task)
 {
     GtkListStore* list = GTK_LIST_STORE(task->get_data());
 

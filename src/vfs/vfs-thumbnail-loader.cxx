@@ -41,7 +41,7 @@
 
 #include "utils.hxx"
 
-static void* thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader);
+static void* thumbnail_loader_thread(vfs::async_task task, VFSThumbnailLoader* loader);
 static void thumbnail_request_free(VFSThumbnailRequest* req);
 static bool on_thumbnail_idle(VFSThumbnailLoader* loader);
 
@@ -147,7 +147,7 @@ on_thumbnail_idle(VFSThumbnailLoader* loader)
 }
 
 static void*
-thumbnail_loader_thread(VFSAsyncTask* task, VFSThumbnailLoader* loader)
+thumbnail_loader_thread(vfs::async_task task, VFSThumbnailLoader* loader)
 {
     while (!task->is_cancelled())
     {

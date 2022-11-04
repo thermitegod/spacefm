@@ -128,7 +128,7 @@ struct FindFile
     Glib::Pid pid;
     i32 stdo;
 
-    VFSAsyncTask* task;
+    vfs::async_task task;
 
   public:
     // private:
@@ -631,7 +631,7 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
 }
 
 static void*
-search_thread(VFSAsyncTask* task, FindFile* data)
+search_thread(vfs::async_task task, FindFile* data)
 {
     (void)task;
     isize rlen;

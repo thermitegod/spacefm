@@ -56,7 +56,7 @@ struct VFSDir
 
     GMutex* mutex; /* Used to guard file_list */
 
-    VFSAsyncTask* task;
+    vfs::async_task task;
 
     bool file_listed{true};
     bool load_complete{true};

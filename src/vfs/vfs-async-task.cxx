@@ -32,7 +32,7 @@
 struct VFSAsyncTaskClass
 {
     GObjectClass parent_class;
-    void (*finish)(VFSAsyncTask* task, bool is_cancelled);
+    void (*finish)(vfs::async_task task, bool is_cancelled);
 };
 
 GType vfs_async_task_get_type();
@@ -40,9 +40,9 @@ GType vfs_async_task_get_type();
 #define VFS_ASYNC_TASK_TYPE (vfs_async_task_get_type())
 
 static void vfs_async_task_class_init(VFSAsyncTaskClass* klass);
-static void vfs_async_task_init(VFSAsyncTask* task);
+static void vfs_async_task_init(vfs::async_task task);
 static void vfs_async_task_finalize(GObject* object);
-static void vfs_async_task_finish(VFSAsyncTask* task, bool is_cancelled);
+static void vfs_async_task_finish(vfs::async_task task, bool is_cancelled);
 
 /* Local data */
 static GObjectClass* parent_class = nullptr;
@@ -87,14 +87,14 @@ vfs_async_task_class_init(VFSAsyncTaskClass* klass)
 }
 
 static void
-vfs_async_task_init(VFSAsyncTask* task)
+vfs_async_task_init(vfs::async_task task)
 {
 }
 
-VFSAsyncTask*
+vfs::async_task
 vfs_async_task_new(VFSAsyncFunc task_func, void* user_data)
 {
-    VFSAsyncTask* task = VFS_ASYNC_TASK(g_object_new(VFS_ASYNC_TASK_TYPE, nullptr));
+    vfs::async_task task = VFS_ASYNC_TASK(g_object_new(VFS_ASYNC_TASK_TYPE, nullptr));
     task->func = task_func;
     task->user_data = user_data;
     return VFS_ASYNC_TASK(task);
@@ -103,7 +103,7 @@ vfs_async_task_new(VFSAsyncFunc task_func, void* user_data)
 static void
 vfs_async_task_finalize(GObject* object)
 {
-    VFSAsyncTask* task;
+    vfs::async_task task;
     // FIXME: destroying the object without calling vfs_async_task_cancel
     // currently induces unknown errors.
     task = VFS_ASYNC_TASK_REINTERPRET(object);
@@ -119,7 +119,7 @@ vfs_async_task_finalize(GObject* object)
 static bool
 on_idle(void* _task)
 {
-    VFSAsyncTask* task = VFS_ASYNC_TASK(_task);
+    vfs::async_task task = VFS_ASYNC_TASK(_task);
     task->cleanup(false);
     return true; // the idle handler is removed in task->cleanup.
 }
@@ -127,7 +127,7 @@ on_idle(void* _task)
 void*
 vfs_async_task_thread(void* _task)
 {
-    VFSAsyncTask* task = VFS_ASYNC_TASK(_task);
+    vfs::async_task task = VFS_ASYNC_TASK(_task);
     void* ret = task->func(task, task->user_data);
 
     std::unique_lock<std::mutex> lock(task->mutex);
@@ -140,7 +140,7 @@ vfs_async_task_thread(void* _task)
 }
 
 static void
-vfs_async_task_finish(VFSAsyncTask* task, bool is_cancelled)
+vfs_async_task_finish(vfs::async_task task, bool is_cancelled)
 {
     (void)task;
     (void)is_cancelled;

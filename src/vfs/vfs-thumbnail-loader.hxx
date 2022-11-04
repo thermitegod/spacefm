@@ -51,7 +51,7 @@ struct VFSThumbnailLoader
 
     VFSDir* dir;
     GQueue* queue;
-    VFSAsyncTask* task;
+    vfs::async_task task;
     u32 idle_handler;
     GQueue* update_queue;
 };

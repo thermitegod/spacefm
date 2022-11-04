@@ -83,7 +83,7 @@ static bool ishidden(std::string_view hidden, std::string_view file_name);
 static VFSDir* vfs_dir_new(std::string_view path);
 
 static void vfs_dir_load(VFSDir* dir);
-static void* vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir);
+static void* vfs_dir_load_thread(vfs::async_task task, VFSDir* dir);
 
 static void vfs_dir_monitor_callback(vfs::file_monitor_t monitor, VFSFileMonitorEvent event,
                                      std::string_view file_name, void* user_data);
@@ -509,7 +509,7 @@ vfs_dir_load(VFSDir* dir)
 }
 
 static void*
-vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
+vfs_dir_load_thread(vfs::async_task task, VFSDir* dir)
 {
     (void)task;
 

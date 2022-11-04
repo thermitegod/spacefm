@@ -145,4 +145,9 @@ struct VFSAsyncTask
     VFSDir* evt_data_load_dir{nullptr};
 };
 
+namespace vfs
+{
+    using async_task = ztd::raw_ptr<VFSAsyncTask>;
+} // namespace vfs
+
 VFSAsyncTask* vfs_async_task_new(VFSAsyncFunc task_func, void* user_data);
