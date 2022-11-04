@@ -23,6 +23,9 @@
 #include <iostream>
 #include <fstream>
 
+#include <algorithm>
+#include <ranges>
+
 #include <cassert>
 
 #include <fmt/format.h>
@@ -788,10 +791,11 @@ reload_mime_type(std::string_view key, VFSDir* dir)
         // LOG_DEBUG("reload {}", full_path);
     }
 
-    for (VFSFileInfo* file: dir->file_list)
-    {
-        dir->run_event<EventType::FILE_CHANGED>(file);
-    }
+    std::ranges::for_each(dir->file_list,
+                          [dir](VFSFileInfo* file)
+                          {
+                              dir->run_event<EventType::FILE_CHANGED>(file);
+                          });
 
     vfs_dir_unlock(dir);
 }
@@ -801,20 +805,22 @@ on_mime_type_reload(void* user_data)
 {
     (void)user_data;
     // LOG_DEBUG("reload mime-type");
-    for (const auto& dir: dir_map)
-    {
-        reload_mime_type(dir.first, dir.second);
-    }
+    std::ranges::for_each(dir_map,
+                          [](const auto& dir)
+                          {
+                              reload_mime_type(dir.first, dir.second);
+                          });
 }
 
 void
 vfs_dir_foreach(VFSDirForeachFunc func, bool user_data)
 {
     // LOG_DEBUG("reload mime-type");
-    for (const auto& dir: dir_map)
-    {
-        func(dir.second, user_data);
-    }
+    std::ranges::for_each(dir_map,
+                          [func, user_data](const auto& dir)
+                          {
+                              func(dir.second, user_data);
+                          });
 }
 
 void

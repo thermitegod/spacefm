@@ -24,6 +24,9 @@
 
 #include <map>
 
+#include <algorithm>
+#include <ranges>
+
 #include <mutex>
 
 #include <glibmm.h>
@@ -71,10 +74,13 @@ vfs_mime_type_reload(void* user_data)
     /* Remove all items in the hash table */
 
     mime_map_lock.lock();
-    for (auto it = mime_map.begin(); it != mime_map.end(); ++it)
-    {
-        vfs_mime_type_unref(it->second);
-    }
+
+    std::ranges::for_each(mime_map,
+                          [](const auto& mime)
+                          {
+                              vfs_mime_type_unref(mime.second);
+                          });
+
     mime_map.clear();
     mime_map_lock.unlock();
 
@@ -131,18 +137,21 @@ vfs_mime_type_init()
 void
 vfs_mime_type_clean()
 {
-    /* remove file alteration monitor for mime-cache */
-    for (vfs::file_monitor_t mime_caches_monitor: mime_caches_monitors)
-    {
-        vfs_file_monitor_remove(mime_caches_monitor, on_mime_cache_changed, nullptr);
-    }
+    // remove file alteration monitor for mime-cache
+    std::ranges::for_each(mime_caches_monitors,
+                          [](vfs::file_monitor_t monitor)
+                          {
+                              vfs_file_monitor_remove(monitor, on_mime_cache_changed, nullptr);
+                          });
 
     mime_type_finalize();
 
-    for (auto it = mime_map.begin(); it != mime_map.end(); ++it)
-    {
-        vfs_mime_type_unref(it->second);
-    }
+    std::ranges::for_each(mime_map,
+                          [](const auto& mime)
+                          {
+                              vfs_mime_type_unref(mime.second);
+                          });
+
     mime_map.clear();
 }
 
@@ -345,57 +354,54 @@ vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big)
 }
 
 static void
-free_cached_icons(const char* key, VFSMimeType* mime_type, bool big_icons)
+free_cached_big_icons(VFSMimeType* mime_type)
 {
-    (void)key;
+    if (!mime_type->big_icon)
+        return;
+    g_object_unref(mime_type->big_icon);
+    mime_type->big_icon = nullptr;
+}
 
-    if (big_icons)
-    {
-        if (mime_type->big_icon)
-        {
-            g_object_unref(mime_type->big_icon);
-            mime_type->big_icon = nullptr;
-        }
-    }
-    else
-    {
-        if (mime_type->small_icon)
-        {
-            g_object_unref(mime_type->small_icon);
-            mime_type->small_icon = nullptr;
-        }
-    }
+static void
+free_cached_small_icons(VFSMimeType* mime_type)
+{
+    if (!mime_type->small_icon)
+        return;
+    g_object_unref(mime_type->small_icon);
+    mime_type->small_icon = nullptr;
 }
 
 void
 vfs_mime_type_set_icon_size_big(i32 size)
 {
+    if (size == big_icon_size)
+        return;
+
     mime_map_lock.lock();
-    if (size != big_icon_size)
-    {
-        big_icon_size = size;
-        /* Unload old cached icons */
-        for (auto it = mime_map.begin(); it != mime_map.end(); ++it)
-        {
-            free_cached_icons(it->first, it->second, true);
-        }
-    }
+    big_icon_size = size;
+    // Unload old cached icons
+    std::ranges::for_each(mime_map,
+                          [](const auto& mime)
+                          {
+                              free_cached_big_icons(mime.second);
+                          });
     mime_map_lock.unlock();
 }
 
 void
 vfs_mime_type_set_icon_size_small(i32 size)
 {
+    if (size == small_icon_size)
+        return;
+
     mime_map_lock.lock();
-    if (size != small_icon_size)
-    {
-        small_icon_size = size;
-        /* Unload old cached icons */
-        for (auto it = mime_map.begin(); it != mime_map.end(); ++it)
-        {
-            free_cached_icons(it->first, it->second, false);
-        }
-    }
+    small_icon_size = size;
+    // Unload old cached icons
+    std::ranges::for_each(mime_map,
+                          [](const auto& mime)
+                          {
+                              free_cached_small_icons(mime.second);
+                          });
     mime_map_lock.unlock();
 }
 

@@ -27,6 +27,9 @@
 #include <iostream>
 #include <fstream>
 
+#include <algorithm>
+#include <ranges>
+
 #include <fcntl.h>
 
 #include <fmt/format.h>
@@ -596,8 +599,5 @@ mime_type_get_caches()
 void
 mime_type_regen_all_caches()
 {
-    for (MimeCache& cache: caches)
-    {
-        mime_cache_reload(cache);
-    }
+    std::ranges::for_each(caches, mime_cache_reload);
 }

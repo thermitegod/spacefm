@@ -28,6 +28,9 @@
 #include <iostream>
 #include <fstream>
 
+#include <algorithm>
+#include <ranges>
+
 #include <unistd.h>
 
 #include <sys/stat.h>
@@ -1892,11 +1895,7 @@ xset_get_plugins()
 void
 xset_clear_plugins(const std::vector<xset_t>& plugins)
 {
-    if (plugins.empty())
-        return;
-
-    for (xset_t set: plugins)
-        xset_remove(set);
+    std::ranges::for_each(plugins, xset_remove);
 }
 
 static xset_t

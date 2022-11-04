@@ -22,6 +22,9 @@
 
 #include <vector>
 
+#include <algorithm>
+#include <ranges>
+
 #include <grp.h>
 #include <pwd.h>
 
@@ -659,13 +662,7 @@ vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
 void
 vfs_file_info_list_free(const std::vector<VFSFileInfo*>& list)
 {
-    if (list.empty())
-        return;
-
-    for (VFSFileInfo* file: list)
-    {
-        vfs_file_info_unref(file);
-    }
+    std::ranges::for_each(list, vfs_file_info_unref);
 }
 
 void

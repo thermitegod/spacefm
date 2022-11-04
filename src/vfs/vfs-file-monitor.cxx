@@ -30,6 +30,9 @@
 
 #include <memory>
 
+#include <algorithm>
+#include <ranges>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -276,11 +279,11 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
             // Disconnected from inotify server, but there are still monitors, reconnect
             if (vfs_file_monitor_connect_to_inotify())
             {
-                // for (auto it = monitor_map.begin(); it != monitor_map.end(); ++it)
-                for (const auto& fm: monitor_map)
-                {
-                    vfs_file_monitor_reconnect_inotify(fm.first, fm.second);
-                }
+                std::ranges::for_each(monitor_map,
+                                      [](const auto& fm)
+                                      {
+                                          vfs_file_monitor_reconnect_inotify(fm.first, fm.second);
+                                      });
             }
         }
         // do not need to remove the event source since
