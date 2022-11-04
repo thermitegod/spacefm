@@ -18,6 +18,9 @@
 
 #include <filesystem>
 
+#include <algorithm>
+#include <ranges>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>
@@ -205,7 +208,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
                 name_list.push_back(full_path);
         }
 
-        std::sort(name_list.begin(), name_list.end());
+        std::ranges::sort(name_list);
 
         GtkListStore* list = GTK_LIST_STORE(gtk_entry_completion_get_model(completion));
         gtk_list_store_clear(list);

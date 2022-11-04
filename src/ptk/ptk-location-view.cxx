@@ -27,6 +27,9 @@
 #include <iostream>
 #include <fstream>
 
+#include <algorithm>
+#include <ranges>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>
@@ -2426,7 +2429,7 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
 
     VFSVolume* vol;
 
-    sort(names.begin(), names.end(), cmp_dev_name);
+    std::ranges::sort(names, cmp_dev_name);
     for (VFSVolume* volume: names)
     {
         vol = volume;

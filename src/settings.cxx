@@ -1888,7 +1888,7 @@ xset_get_plugins()
         if (set->plugin && set->plugin_top && set->plug_dir)
             plugins.push_back(set);
     }
-    sort(plugins.begin(), plugins.end(), compare_plugin_sets);
+    std::ranges::sort(plugins, compare_plugin_sets);
     return plugins;
 }
 

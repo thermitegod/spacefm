@@ -21,6 +21,9 @@
 #include <array>
 #include <vector>
 
+#include <algorithm>
+#include <ranges>
+
 #include <fmt/format.h>
 
 #include <glib.h>
@@ -2304,7 +2307,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         templates = get_templates(get_template_dir(), "", false);
         if (!templates.empty())
         {
-            std::sort(templates.begin(), templates.end());
+            std::ranges::sort(templates);
             for (std::string_view t: templates)
             {
                 gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template), t.data());
@@ -2331,7 +2334,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo*
         templates = get_templates(get_template_dir(), "", true);
         if (!templates.empty())
         {
-            std::sort(templates.begin(), templates.end());
+            std::ranges::sort(templates);
             for (std::string_view t: templates)
             {
                 gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template_dir),
