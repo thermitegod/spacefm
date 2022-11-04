@@ -861,7 +861,7 @@ static void
 on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_browser)
 {
     (void)widget;
-    XSetContext* context = xset_context_new();
+    xset_context_t context = xset_context_new();
     main_context_fill(file_browser, context);
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     const std::string desc =

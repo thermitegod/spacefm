@@ -90,7 +90,7 @@ static bool clipboard_is_cut;
 std::string settings_config_dir;
 std::string settings_user_tmp_dir;
 
-static XSetContext* xset_context = nullptr;
+static xset_context_t xset_context = nullptr;
 
 EventHandler event_handler;
 
@@ -1057,9 +1057,6 @@ xset_free_all()
 
         delete set;
     }
-
-    if (xset_context)
-        delete xset_context;
 }
 
 static void
@@ -1102,7 +1099,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
     xset_t open_all_set;
     xset_t tset;
     xset_t open_all_tset;
-    XSetContext* context = nullptr;
+    xset_context_t context;
     i32 context_action;
     bool found = false;
     char pinned;
@@ -1141,13 +1138,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
                     return false;
 
                 // get mime type open_all_type set
-                std::string str;
-                char* open_all_name = ztd::strdup(context->var[ItemPropContext::CONTEXT_MIME]);
-                if (open_all_name)
-                    str = open_all_name;
-                else
-                    str = "";
-
+                std::string str = context->var[ItemPropContext::CONTEXT_MIME];
                 str = ztd::replace(str, "-", "_");
                 str = ztd::replace(str, " ", "");
                 open_all_set = xset_is(fmt::format("open_all_type_{}", str));
@@ -1210,31 +1201,17 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
 XSetContext::XSetContext()
 {
     // LOG_INFO("XSetContext Constructor");
-
-    this->valid = false;
-    for (std::size_t i = 0; i < this->var.size(); ++i)
-        this->var[i] = nullptr;
 }
 
 XSetContext::~XSetContext()
 {
     // LOG_INFO("XSetContext Destructor");
-
-    this->valid = false;
-    for (std::size_t i = 0; i < this->var.size(); ++i)
-    {
-        if (this->var[i])
-            free(this->var[i]);
-        this->var[i] = nullptr;
-    }
 }
 
-XSetContext*
+xset_context_t
 xset_context_new()
 {
-    if (xset_context)
-        delete xset_context;
-    xset_context = new XSetContext();
+    xset_context = std::make_shared<XSetContext>();
     return xset_context;
 }
 
@@ -3580,9 +3557,8 @@ xset_design_job(GtkWidget* item, xset_t set)
                 {
                     VFSMimeType* mime_type;
                     mime_type = vfs_mime_type_get_from_type(
-                        xset_context && xset_context->var[ItemPropContext::CONTEXT_MIME] &&
-                                xset_context->var[ItemPropContext::CONTEXT_MIME][0]
-                            ? xset_context->var[ItemPropContext::CONTEXT_MIME]
+                        xset_context && !xset_context->var[ItemPropContext::CONTEXT_MIME].empty()
+                            ? xset_context->var[ItemPropContext::CONTEXT_MIME].c_str()
                             : XDG_MIME_TYPE_UNKNOWN);
                     file = (char*)ptk_choose_app_for_mime_type(GTK_WINDOW(parent),
                                                                mime_type,
@@ -5772,7 +5748,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     set->browser = file_browser;
 
     // get context
-    XSetContext* context = xset_context_new();
+    xset_context_t context = xset_context_new();
     main_context_fill(file_browser, context);
     if (!context->valid)
         return true;
@@ -5911,7 +5887,7 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     ptk_file_browser_focus_me(file_browser);
 
     // get context
-    XSetContext* context = xset_context_new();
+    xset_context_t context = xset_context_new();
     main_context_fill(file_browser, context);
     if (!context->valid)
         return true;

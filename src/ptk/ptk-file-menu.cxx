@@ -706,7 +706,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
     const tab_t tab_count = counts[1];
     const tab_t tab_num = counts[2];
 
-    XSetContext* context = xset_context_new();
+    xset_context_t context = xset_context_new();
 
     // Get mime type and apps
     VFSMimeType* mime_type;
@@ -715,39 +715,35 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
     {
         mime_type = vfs_file_info_get_mime_type(info);
         apps = vfs_mime_type_get_actions(mime_type);
-        context->var[ItemPropContext::CONTEXT_MIME] =
-            ztd::strdup(vfs_mime_type_get_type(mime_type));
+        context->var[ItemPropContext::CONTEXT_MIME] = vfs_mime_type_get_type(mime_type);
     }
     else
     {
         mime_type = nullptr;
-        context->var[ItemPropContext::CONTEXT_MIME] = ztd::strdup("");
+        context->var[ItemPropContext::CONTEXT_MIME] = "";
     }
 
     // context
     if (file_path)
-        context->var[ItemPropContext::CONTEXT_NAME] =
-            ztd::strdup(Glib::path_get_basename(file_path));
-    else
-        context->var[ItemPropContext::CONTEXT_NAME] = ztd::strdup("");
-    context->var[ItemPropContext::CONTEXT_DIR] = ztd::strdup(cwd);
-    context->var[ItemPropContext::CONTEXT_READ_ACCESS] =
-        no_read_access ? ztd::strdup("false") : ztd::strdup("true");
-    context->var[ItemPropContext::CONTEXT_WRITE_ACCESS] =
-        no_write_access ? ztd::strdup("false") : ztd::strdup("true");
-    context->var[ItemPropContext::CONTEXT_IS_TEXT] =
-        is_text ? ztd::strdup("true") : ztd::strdup("false");
-    context->var[ItemPropContext::CONTEXT_IS_DIR] =
-        is_dir ? ztd::strdup("true") : ztd::strdup("false");
-    context->var[ItemPropContext::CONTEXT_MUL_SEL] =
-        sel_files.size() > 1 ? ztd::strdup("true") : ztd::strdup("false");
-    context->var[ItemPropContext::CONTEXT_CLIP_FILES] =
-        is_clip ? ztd::strdup("true") : ztd::strdup("false");
+        context->var[ItemPropContext::CONTEXT_NAME] = Glib::path_get_basename(file_path);
+
+    context->var[ItemPropContext::CONTEXT_DIR] = cwd;
+    context->var[ItemPropContext::CONTEXT_READ_ACCESS] = no_read_access ? "false" : "true";
+    context->var[ItemPropContext::CONTEXT_WRITE_ACCESS] = no_write_access ? "false" : "true";
+    context->var[ItemPropContext::CONTEXT_IS_TEXT] = is_text ? "true" : "false";
+    context->var[ItemPropContext::CONTEXT_IS_DIR] = is_dir ? "true" : "false";
+    context->var[ItemPropContext::CONTEXT_MUL_SEL] = sel_files.size() > 1 ? "true" : "false";
+    context->var[ItemPropContext::CONTEXT_CLIP_FILES] = is_clip ? "true" : "false";
+
     if (info)
+    {
         context->var[ItemPropContext::CONTEXT_IS_LINK] =
-            vfs_file_info_is_symlink(info) ? ztd::strdup("true") : ztd::strdup("false");
+            vfs_file_info_is_symlink(info) ? "true" : "false";
+    }
     else
-        context->var[ItemPropContext::CONTEXT_IS_LINK] = ztd::strdup("false");
+    {
+        context->var[ItemPropContext::CONTEXT_IS_LINK] = "false";
+    }
 
     if (browser)
         main_context_fill(browser, context);
@@ -756,7 +752,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* i
     {
         LOG_WARN("rare exception due to context_fill hacks - fb was probably destroyed");
         context = xset_context_new();
-        delete context;
         return nullptr;
     }
 

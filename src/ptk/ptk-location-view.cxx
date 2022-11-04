@@ -2040,7 +2040,7 @@ show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browse
     char* str;
     GtkWidget* popup = gtk_menu_new();
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    XSetContext* context = xset_context_new();
+    xset_context_t context = xset_context_new();
     main_context_fill(file_browser, context);
 
     set = xset_set_cb(XSetName::DEV_MENU_REMOVE, (GFunc)on_eject, vol);

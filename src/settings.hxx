@@ -24,6 +24,8 @@
 #include <array>
 #include <vector>
 
+#include <memory>
+
 #include <glib.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
@@ -104,14 +106,16 @@ struct XSetContext
     ~XSetContext();
 
     bool valid{false};
-    std::array<char*, 40> var;
+    std::array<std::string, 40> var;
 };
+
+using xset_context_t = std::shared_ptr<XSetContext>;
 
 void xset_set_window_icon(GtkWindow* win);
 
 void xset_set_key(GtkWidget* parent, xset_t set);
 
-XSetContext* xset_context_new();
+xset_context_t xset_context_new();
 xset_t xset_get_plugin_mirror(xset_t set);
 char* xset_custom_get_script(xset_t set, bool create);
 const std::string xset_get_keyname(xset_t set, i32 key_val, i32 key_mod);

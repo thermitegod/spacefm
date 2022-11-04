@@ -476,7 +476,7 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
 
     xset_t set;
 
-    XSetContext* context = xset_context_new();
+    xset_context_t context = xset_context_new();
     main_context_fill(file_browser, context);
 
     GtkAccelGroup* accel_group = gtk_accel_group_new();

@@ -1343,7 +1343,7 @@ rebuild_menus(FMMainWindow* main_window)
         PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
     if (!file_browser)
         return;
-    XSetContext* context = xset_context_new();
+    xset_context_t context = xset_context_new();
     main_context_fill(file_browser, context);
 
     // File
@@ -2323,7 +2323,7 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
         {
             GtkWidget* popup = gtk_menu_new();
             GtkAccelGroup* accel_group = gtk_accel_group_new();
-            XSetContext* context = xset_context_new();
+            xset_context_t context = xset_context_new();
             main_context_fill(file_browser, context);
 
             xset_t set;
@@ -3701,14 +3701,13 @@ on_reorder(GtkWidget* item, GtkWidget* parent)
 }
 
 void
-main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
+main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
 {
     PtkFileBrowser* a_browser;
     VFSMimeType* mime_type;
     GtkClipboard* clip = nullptr;
     VFSVolume* vol;
     PtkFileTask* ptask;
-    char* path;
     GtkTreeModel* model;
     GtkTreeModel* model_task;
     GtkTreeIter it;
@@ -3721,19 +3720,17 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
     if (!main_window)
         return;
 
-    if (!c->var[ItemPropContext::CONTEXT_NAME])
+    if (!c->var[ItemPropContext::CONTEXT_NAME].empty())
     {
         // if name is set, assume we do not need all selected files info
-        c->var[ItemPropContext::CONTEXT_DIR] = ztd::strdup(ptk_file_browser_get_cwd(file_browser));
-        if (!c->var[ItemPropContext::CONTEXT_DIR])
-            c->var[ItemPropContext::CONTEXT_DIR] = ztd::strdup("");
-        else
-        {
-            c->var[ItemPropContext::CONTEXT_WRITE_ACCESS] =
-                ptk_file_browser_no_access(c->var[ItemPropContext::CONTEXT_DIR], nullptr)
-                    ? ztd::strdup("false")
-                    : ztd::strdup("true");
-        }
+        c->var[ItemPropContext::CONTEXT_DIR] = ptk_file_browser_get_cwd(file_browser);
+        // if (c->var[ItemPropContext::CONTEXT_DIR])
+        //{
+        c->var[ItemPropContext::CONTEXT_WRITE_ACCESS] =
+            ptk_file_browser_no_access(c->var[ItemPropContext::CONTEXT_DIR].c_str(), nullptr)
+                ? "false"
+                : "true";
+        // }
 
         const std::vector<VFSFileInfo*> sel_files =
             ptk_file_browser_get_selected_files(file_browser);
@@ -3741,68 +3738,60 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
         {
             VFSFileInfo* file = vfs_file_info_ref(sel_files.front());
 
-            c->var[ItemPropContext::CONTEXT_NAME] = ztd::strdup(vfs_file_info_get_name(file));
-            path = ztd::strdup(Glib::build_filename(c->var[ItemPropContext::CONTEXT_DIR],
-                                                    c->var[ItemPropContext::CONTEXT_NAME]));
-            c->var[ItemPropContext::CONTEXT_IS_DIR] = path && std::filesystem::is_directory(path)
-                                                          ? ztd::strdup("true")
-                                                          : ztd::strdup("false");
+            c->var[ItemPropContext::CONTEXT_NAME] = vfs_file_info_get_name(file);
+            const std::string path = Glib::build_filename(c->var[ItemPropContext::CONTEXT_DIR],
+                                                          c->var[ItemPropContext::CONTEXT_NAME]);
+            c->var[ItemPropContext::CONTEXT_IS_DIR] =
+                std::filesystem::is_directory(path) ? "true" : "false";
             c->var[ItemPropContext::CONTEXT_IS_TEXT] =
-                vfs_file_info_is_text(file, path) ? ztd::strdup("true") : ztd::strdup("false");
+                vfs_file_info_is_text(file, path.c_str()) ? "true" : "false";
             c->var[ItemPropContext::CONTEXT_IS_LINK] =
-                vfs_file_info_is_symlink(file) ? ztd::strdup("true") : ztd::strdup("false");
+                vfs_file_info_is_symlink(file) ? "true" : "false";
 
             mime_type = vfs_file_info_get_mime_type(file);
             if (mime_type)
             {
-                c->var[ItemPropContext::CONTEXT_MIME] =
-                    ztd::strdup(vfs_mime_type_get_type(mime_type));
+                c->var[ItemPropContext::CONTEXT_MIME] = vfs_mime_type_get_type(mime_type);
                 vfs_mime_type_unref(mime_type);
             }
-            else
-                c->var[ItemPropContext::CONTEXT_MIME] = ztd::strdup("");
 
-            c->var[ItemPropContext::CONTEXT_MUL_SEL] =
-                sel_files.size() > 1 ? ztd::strdup("true") : ztd::strdup("false");
+            c->var[ItemPropContext::CONTEXT_MUL_SEL] = sel_files.size() > 1 ? "true" : "false";
 
             vfs_file_info_unref(file);
-            free(path);
         }
         else
         {
-            c->var[ItemPropContext::CONTEXT_NAME] = ztd::strdup("");
-            c->var[ItemPropContext::CONTEXT_IS_DIR] = ztd::strdup("false");
-            c->var[ItemPropContext::CONTEXT_IS_TEXT] = ztd::strdup("false");
-            c->var[ItemPropContext::CONTEXT_IS_LINK] = ztd::strdup("false");
-            c->var[ItemPropContext::CONTEXT_MIME] = ztd::strdup("");
-            c->var[ItemPropContext::CONTEXT_MUL_SEL] = ztd::strdup("false");
+            c->var[ItemPropContext::CONTEXT_NAME] = "";
+            c->var[ItemPropContext::CONTEXT_IS_DIR] = "false";
+            c->var[ItemPropContext::CONTEXT_IS_TEXT] = "false";
+            c->var[ItemPropContext::CONTEXT_IS_LINK] = "false";
+            c->var[ItemPropContext::CONTEXT_MIME] = "";
+            c->var[ItemPropContext::CONTEXT_MUL_SEL] = "false";
         }
 
         vfs_file_info_list_free(sel_files);
     }
 
-    if (!c->var[ItemPropContext::CONTEXT_IS_ROOT])
-        c->var[ItemPropContext::CONTEXT_IS_ROOT] =
-            geteuid() == 0 ? ztd::strdup("true") : ztd::strdup("false");
+    c->var[ItemPropContext::CONTEXT_IS_ROOT] = geteuid() == 0 ? "true" : "false";
 
-    if (!c->var[ItemPropContext::CONTEXT_CLIP_FILES])
+    if (c->var[ItemPropContext::CONTEXT_CLIP_FILES].empty())
     {
         clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
         if (!gtk_clipboard_wait_is_target_available(
                 clip,
                 gdk_atom_intern("x-special/gnome-copied-files", false)) &&
             !gtk_clipboard_wait_is_target_available(clip, gdk_atom_intern("text/uri-list", false)))
-            c->var[ItemPropContext::CONTEXT_CLIP_FILES] = ztd::strdup("false");
+            c->var[ItemPropContext::CONTEXT_CLIP_FILES] = "false";
         else
-            c->var[ItemPropContext::CONTEXT_CLIP_FILES] = ztd::strdup("true");
+            c->var[ItemPropContext::CONTEXT_CLIP_FILES] = "true";
     }
 
-    if (!c->var[ItemPropContext::CONTEXT_CLIP_TEXT])
+    if (c->var[ItemPropContext::CONTEXT_CLIP_TEXT].empty())
     {
         if (!clip)
             clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
         c->var[ItemPropContext::CONTEXT_CLIP_TEXT] =
-            gtk_clipboard_wait_is_text_available(clip) ? ztd::strdup("true") : ztd::strdup("false");
+            gtk_clipboard_wait_is_text_available(clip) ? "true" : "false";
     }
 
     // hack - Due to ptk_file_browser_update_views main iteration, fb tab may be destroyed
@@ -3811,28 +3800,15 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
     if (!GTK_IS_WIDGET(file_browser))
         return;
 
-    if (!c->var[ItemPropContext::CONTEXT_BOOKMARK])
-        c->var[ItemPropContext::CONTEXT_BOOKMARK] = ztd::strdup("");
-
     // device
     if (file_browser->side_dev &&
         (vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(file_browser->side_dev))))
     {
-        c->var[ItemPropContext::CONTEXT_DEVICE] = ztd::strdup(vol->device_file);
-        if (!c->var[ItemPropContext::CONTEXT_DEVICE])
-            c->var[ItemPropContext::CONTEXT_DEVICE] = ztd::strdup("");
-        c->var[ItemPropContext::CONTEXT_DEVICE_LABEL] = ztd::strdup(vol->label);
-        if (!c->var[ItemPropContext::CONTEXT_DEVICE_LABEL])
-            c->var[ItemPropContext::CONTEXT_DEVICE_LABEL] = ztd::strdup("");
-        c->var[ItemPropContext::CONTEXT_DEVICE_MOUNT_POINT] = ztd::strdup(vol->mount_point);
-        if (!c->var[ItemPropContext::CONTEXT_DEVICE_MOUNT_POINT])
-            c->var[ItemPropContext::CONTEXT_DEVICE_MOUNT_POINT] = ztd::strdup("");
-        c->var[ItemPropContext::CONTEXT_DEVICE_UDI] = ztd::strdup(vol->udi);
-        if (!c->var[ItemPropContext::CONTEXT_DEVICE_UDI])
-            c->var[ItemPropContext::CONTEXT_DEVICE_UDI] = ztd::strdup("");
-        c->var[ItemPropContext::CONTEXT_DEVICE_FSTYPE] = ztd::strdup(vol->fs_type);
-        if (!c->var[ItemPropContext::CONTEXT_DEVICE_FSTYPE])
-            c->var[ItemPropContext::CONTEXT_DEVICE_FSTYPE] = ztd::strdup("");
+        c->var[ItemPropContext::CONTEXT_DEVICE] = vol->device_file;
+        c->var[ItemPropContext::CONTEXT_DEVICE_LABEL] = vol->label;
+        c->var[ItemPropContext::CONTEXT_DEVICE_MOUNT_POINT] = vol->mount_point;
+        c->var[ItemPropContext::CONTEXT_DEVICE_UDI] = vol->udi;
+        c->var[ItemPropContext::CONTEXT_DEVICE_FSTYPE] = vol->fs_type;
 
         std::string flags;
         if (vol->is_removable)
@@ -3869,26 +3845,16 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
         if (vol->is_dvd)
             flags = fmt::format("{} dvd", flags);
 
-        c->var[ItemPropContext::CONTEXT_DEVICE_PROP] = ztd::strdup(flags);
-    }
-    else
-    {
-        c->var[ItemPropContext::CONTEXT_DEVICE] = ztd::strdup("");
-        c->var[ItemPropContext::CONTEXT_DEVICE_LABEL] = ztd::strdup("");
-        c->var[ItemPropContext::CONTEXT_DEVICE_MOUNT_POINT] = ztd::strdup("");
-        c->var[ItemPropContext::CONTEXT_DEVICE_UDI] = ztd::strdup("");
-        c->var[ItemPropContext::CONTEXT_DEVICE_FSTYPE] = ztd::strdup("");
-        c->var[ItemPropContext::CONTEXT_DEVICE_PROP] = ztd::strdup("");
+        c->var[ItemPropContext::CONTEXT_DEVICE_PROP] = flags;
     }
 
     // panels
-    i32 i;
     i32 panel_count = 0;
     for (panel_t p: PANELS)
     {
         if (!xset_get_b_panel(p, XSetPanel::SHOW))
             continue;
-        i = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
+        const i32 i = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
         if (i != -1)
         {
             a_browser = PTK_FILE_BROWSER_REINTERPRET(
@@ -3905,7 +3871,7 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
 
         if (a_browser->side_dev &&
             (vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(a_browser->side_dev))))
-            c->var[ItemPropContext::CONTEXT_PANEL1_DEVICE + p - 1] = ztd::strdup(vol->device_file);
+            c->var[ItemPropContext::CONTEXT_PANEL1_DEVICE + p - 1] = vol->device_file;
 
         // panel has files selected?
         if (a_browser->view_mode == PtkFBViewMode::PTK_FB_ICON_VIEW ||
@@ -3913,9 +3879,9 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
         {
             GList* sel_files = folder_view_get_selected_items(a_browser, &model);
             if (sel_files)
-                c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = ztd::strdup("true");
+                c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "true";
             else
-                c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = ztd::strdup("false");
+                c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "false";
             g_list_foreach(sel_files, (GFunc)gtk_tree_path_free, nullptr);
             g_list_free(sel_files);
         }
@@ -3924,68 +3890,74 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
             GtkTreeSelection* tree_sel =
                 gtk_tree_view_get_selection(GTK_TREE_VIEW(a_browser->folder_view));
             if (gtk_tree_selection_count_selected_rows(tree_sel) > 0)
-                c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = ztd::strdup("true");
+                c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "true";
             else
-                c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = ztd::strdup("false");
+                c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "false";
         }
         else
-            c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = ztd::strdup("false");
+        {
+            c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "false";
+        }
 
         if (file_browser == a_browser)
         {
-            c->var[ItemPropContext::CONTEXT_TAB] = ztd::strdup(i + 1);
-            c->var[ItemPropContext::CONTEXT_TAB_COUNT] = ztd::strdup(
-                std::to_string(gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1]))));
+            c->var[ItemPropContext::CONTEXT_TAB] = std::to_string(i + 1);
+            c->var[ItemPropContext::CONTEXT_TAB_COUNT] =
+                std::to_string(gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1])));
         }
     }
-    c->var[ItemPropContext::CONTEXT_PANEL_COUNT] = ztd::strdup(panel_count);
-    c->var[ItemPropContext::CONTEXT_PANEL] = ztd::strdup(file_browser->mypanel);
-    if (!c->var[ItemPropContext::CONTEXT_TAB])
-        c->var[ItemPropContext::CONTEXT_TAB] = ztd::strdup("");
-    if (!c->var[ItemPropContext::CONTEXT_TAB_COUNT])
-        c->var[ItemPropContext::CONTEXT_TAB_COUNT] = ztd::strdup("");
+    c->var[ItemPropContext::CONTEXT_PANEL_COUNT] = panel_count;
+    c->var[ItemPropContext::CONTEXT_PANEL] = file_browser->mypanel;
+
     for (panel_t p: PANELS)
     {
-        if (!c->var[ItemPropContext::CONTEXT_PANEL1_DIR + p - 1])
-            c->var[ItemPropContext::CONTEXT_PANEL1_DIR + p - 1] = ztd::strdup("");
-        if (!c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1])
-            c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = ztd::strdup("false");
-        if (!c->var[ItemPropContext::CONTEXT_PANEL1_DEVICE + p - 1])
-            c->var[ItemPropContext::CONTEXT_PANEL1_DEVICE + p - 1] = ztd::strdup("");
+        if (c->var[ItemPropContext::CONTEXT_PANEL1_DIR + p - 1].empty())
+            c->var[ItemPropContext::CONTEXT_PANEL1_DIR + p - 1] = "";
+        if (c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1].empty())
+            c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "false";
+        if (c->var[ItemPropContext::CONTEXT_PANEL1_DEVICE + p - 1].empty())
+            c->var[ItemPropContext::CONTEXT_PANEL1_DEVICE + p - 1] = "";
     }
 
     // tasks
-    static constexpr std::array<std::string_view, 7>
-        job_titles{"move", "copy", "trash", "delete", "link", "change", "run"};
+    static constexpr std::array<std::string_view, 7> job_titles{
+        "move",
+        "copy",
+        "trash",
+        "delete",
+        "link",
+        "change",
+        "run",
+    };
+
     if ((ptask = get_selected_task(file_browser->task_view)))
     {
-        c->var[ItemPropContext::CONTEXT_TASK_TYPE] =
-            ztd::strdup(job_titles.at(ptask->task->type).data());
+        c->var[ItemPropContext::CONTEXT_TASK_TYPE] = job_titles.at(ptask->task->type).data();
         if (ptask->task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC)
         {
-            c->var[ItemPropContext::CONTEXT_TASK_NAME] = ztd::strdup(ptask->task->current_file);
-            c->var[ItemPropContext::CONTEXT_TASK_DIR] = ztd::strdup(ptask->task->dest_dir);
+            c->var[ItemPropContext::CONTEXT_TASK_NAME] = ptask->task->current_file;
+            c->var[ItemPropContext::CONTEXT_TASK_DIR] = ptask->task->dest_dir;
         }
         else
         {
-            c->var[ItemPropContext::CONTEXT_TASK_NAME] = ztd::strdup("");
+            c->var[ItemPropContext::CONTEXT_TASK_NAME] = "";
             ptk_file_task_lock(ptask);
             if (!ptask->task->current_file.empty())
                 c->var[ItemPropContext::CONTEXT_TASK_DIR] =
-                    ztd::strdup(Glib::path_get_dirname(ptask->task->current_file));
+                    Glib::path_get_dirname(ptask->task->current_file);
             else
-                c->var[ItemPropContext::CONTEXT_TASK_DIR] = ztd::strdup("");
+                c->var[ItemPropContext::CONTEXT_TASK_DIR] = "";
             ptk_file_task_unlock(ptask);
         }
     }
     else
     {
-        c->var[ItemPropContext::CONTEXT_TASK_TYPE] = ztd::strdup("");
-        c->var[ItemPropContext::CONTEXT_TASK_NAME] = ztd::strdup("");
-        c->var[ItemPropContext::CONTEXT_TASK_DIR] = ztd::strdup("");
+        c->var[ItemPropContext::CONTEXT_TASK_TYPE] = "";
+        c->var[ItemPropContext::CONTEXT_TASK_NAME] = "";
+        c->var[ItemPropContext::CONTEXT_TASK_DIR] = "";
     }
     if (!main_window->task_view || !GTK_IS_TREE_VIEW(main_window->task_view))
-        c->var[ItemPropContext::CONTEXT_TASK_COUNT] = ztd::strdup("0");
+        c->var[ItemPropContext::CONTEXT_TASK_COUNT] = "0";
     else
     {
         model_task = gtk_tree_view_get_model(GTK_TREE_VIEW(main_window->task_view));
@@ -3996,7 +3968,7 @@ main_context_fill(PtkFileBrowser* file_browser, XSetContext* c)
             while (gtk_tree_model_iter_next(model_task, &it))
                 task_count++;
         }
-        c->var[ItemPropContext::CONTEXT_TASK_COUNT] = ztd::strdup(task_count);
+        c->var[ItemPropContext::CONTEXT_TASK_COUNT] = std::to_string(task_count);
     }
 
     c->valid = true;
@@ -4906,6 +4878,7 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow*
                           true))
         return false;
 
+    xset_context_t context;
     std::string menu_elements;
 
     switch (event->button)
@@ -4989,7 +4962,6 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow*
                 return false;
             GtkWidget* popup;
             GtkAccelGroup* accel_group;
-            XSetContext* context;
             popup = gtk_menu_new();
             accel_group = gtk_accel_group_new();
             context = xset_context_new();
@@ -7294,7 +7266,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             reply = fmt::format("custom command or submenu '{}' not found", argv[i]);
             return 2;
         }
-        XSetContext* context = xset_context_new();
+        xset_context_t context = xset_context_new();
         main_context_fill(file_browser, context);
         if (context && context->valid)
         {

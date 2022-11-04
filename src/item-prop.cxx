@@ -91,7 +91,7 @@ struct ContextData
     GtkWidget* dlg;
     GtkWidget* parent;
     GtkWidget* notebook;
-    XSetContext* context;
+    xset_context_t context;
     xset_t set;
     char* temp_cmd_line;
     struct stat script_stat;
@@ -391,7 +391,7 @@ get_rule_next(char** s, i32* sub, i32* comp, char** value)
 }
 
 i32
-xset_context_test(XSetContext* context, char* rules, bool def_disable)
+xset_context_test(xset_context_t context, char* rules, bool def_disable)
 {
     // assumes valid xset_context and rules != nullptr and no global ignore
     i32 i;
@@ -465,16 +465,16 @@ xset_context_test(XSetContext* context, char* rules, bool def_disable)
             switch (comp)
             {
                 case ItemPropContextComp::CONTEXT_COMP_EQUALS:
-                    test = !strcmp(context->var[sub], eleval);
+                    test = ztd::same(context->var[sub], eleval);
                     break;
                 case ItemPropContextComp::CONTEXT_COMP_NEQUALS:
-                    test = strcmp(context->var[sub], eleval);
+                    test = !ztd::same(context->var[sub], eleval);
                     break;
                 case ItemPropContextComp::CONTEXT_COMP_CONTAINS:
-                    test = !!strstr(context->var[sub], eleval);
+                    test = ztd::contains(context->var[sub], eleval);
                     break;
                 case ItemPropContextComp::CONTEXT_COMP_NCONTAINS:
-                    test = !strstr(context->var[sub], eleval);
+                    test = !ztd::contains(context->var[sub], eleval);
                     break;
                 case ItemPropContextComp::CONTEXT_COMP_BEGINS:
                     test = ztd::startswith(context->var[sub], eleval);
@@ -500,14 +500,13 @@ xset_context_test(XSetContext* context, char* rules, bool def_disable)
                     if (g_strcmp0(eleval, s))
                     {
                         // pattern contains uppercase chars - test case sensitive
-                        test = fnmatch(eleval, context->var[sub], 0);
+                        test = fnmatch(eleval, context->var[sub].c_str(), 0);
                     }
                     else
                     {
                         // case insensitive
-                        char* str = g_utf8_strdown(context->var[sub], -1);
-                        test = fnmatch(s, str, 0);
-                        free(str);
+                        const std::string str = ztd::lower(context->var[sub]);
+                        test = fnmatch(s, str.c_str(), 0);
                     }
                     free(s);
                     if (comp == ItemPropContextComp::CONTEXT_COMP_MATCH)
@@ -760,7 +759,7 @@ on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
     }
     gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(ctxt->box_value))), "");
     if (ctxt->context && ctxt->context->valid)
-        gtk_label_set_text(ctxt->current_value, ctxt->context->var[sub]);
+        gtk_label_set_text(ctxt->current_value, ctxt->context->var[sub].c_str());
 
     free(elements);
 }
@@ -1338,7 +1337,7 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
             xset_file_dialog(ctxt->dlg,
                              GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
                              "Choose Directory",
-                             ctxt->context->var[ItemPropContext::CONTEXT_DIR],
+                             ctxt->context->var[ItemPropContext::CONTEXT_DIR].c_str(),
                              nullptr);
         if (add_path && add_path[0])
         {
@@ -1360,9 +1359,8 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
         {
             // Choose
             VFSMimeType* mime_type = vfs_mime_type_get_from_type(
-                ctxt->context->var[ItemPropContext::CONTEXT_MIME] &&
-                        ctxt->context->var[ItemPropContext::CONTEXT_MIME][0]
-                    ? ctxt->context->var[ItemPropContext::CONTEXT_MIME]
+                !ctxt->context->var[ItemPropContext::CONTEXT_MIME].empty()
+                    ? ctxt->context->var[ItemPropContext::CONTEXT_MIME].c_str()
                     : XDG_MIME_TYPE_UNKNOWN);
             char* app = (char*)ptk_choose_app_for_mime_type(
                 GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(ctxt->dlg))),
@@ -1634,7 +1632,7 @@ on_target_keypress(GtkWidget* widget, GdkEventKey* event, ContextData* ctxt)
 }
 
 void
-xset_item_prop_dlg(XSetContext* context, xset_t set, i32 page)
+xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
 {
     GtkTreeViewColumn* col;
     GtkCellRenderer* renderer;
