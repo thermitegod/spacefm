@@ -49,6 +49,12 @@ struct FindFile;
 
 using VFSAsyncFunc = void* (*)(VFSAsyncTask*, void*);
 
+namespace vfs
+{
+    using async_task = ztd::raw_ptr<VFSAsyncTask>;
+    using dir = ztd::raw_ptr<VFSDir>;
+} // namespace vfs
+
 struct VFSAsyncTask
 {
     GObject parent;
@@ -89,7 +95,7 @@ struct VFSAsyncTask
     // Signals function types
     using evt_task_finished__find_file_t = void(FindFile*);
     using evt_task_finished__load_app_t = void(VFSAsyncTask*, bool, GtkWidget*);
-    using evt_task_finished__load_dir_t = void(VFSDir*, bool);
+    using evt_task_finished__load_dir_t = void(vfs::dir, bool);
 
     // Signals Add Event
     template<EventType evt>
@@ -112,7 +118,7 @@ struct VFSAsyncTask
 
     template<EventType evt>
     typename std::enable_if<evt == EventType::TASK_FINISH, sigc::connection>::type
-    add_event(evt_task_finished__load_dir_t fun, VFSDir* dir)
+    add_event(evt_task_finished__load_dir_t fun, vfs::dir dir)
     {
         // LOG_TRACE("Signal Connect   : EventType::TASK_FINISH");
         this->evt_data_load_dir = dir;
@@ -142,12 +148,7 @@ struct VFSAsyncTask
     // TODO/FIXME has to be a better way to do this
     FindFile* evt_data_find_file{nullptr};
     GtkWidget* evt_data_load_app{nullptr};
-    VFSDir* evt_data_load_dir{nullptr};
+    vfs::dir evt_data_load_dir{nullptr};
 };
-
-namespace vfs
-{
-    using async_task = ztd::raw_ptr<VFSAsyncTask>;
-} // namespace vfs
 
 VFSAsyncTask* vfs_async_task_new(VFSAsyncFunc task_func, void* user_data);

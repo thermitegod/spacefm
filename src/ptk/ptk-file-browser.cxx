@@ -2025,7 +2025,7 @@ ptk_file_browser_update_model(PtkFileBrowser* file_browser)
 static void
 on_dir_file_listed(PtkFileBrowser* file_browser, bool is_cancelled)
 {
-    VFSDir* dir = file_browser->dir;
+    vfs::dir dir = file_browser->dir;
 
     file_browser->n_sel_files = 0;
 

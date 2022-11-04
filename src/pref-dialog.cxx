@@ -104,7 +104,7 @@ inline constexpr std::array<std::string_view, 3> date_formats{
 inline constexpr std::array<i32, 4> drag_actions{0, 1, 2, 3};
 
 static void
-dir_unload_thumbnails(VFSDir* dir, bool user_data)
+dir_unload_thumbnails(vfs::dir dir, bool user_data)
 {
     vfs_dir_unload_thumbnails(dir, user_data);
 }

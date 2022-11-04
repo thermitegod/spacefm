@@ -55,7 +55,7 @@ VFSThumbnailRequest::~VFSThumbnailRequest()
     vfs_file_info_unref(this->file);
 }
 
-VFSThumbnailLoader::VFSThumbnailLoader(VFSDir* dir)
+VFSThumbnailLoader::VFSThumbnailLoader(vfs::dir dir)
 {
     this->idle_handler = 0;
     this->dir = g_object_ref(dir);
@@ -101,7 +101,7 @@ VFSThumbnailLoader::~VFSThumbnailLoader()
 }
 
 VFSThumbnailLoader*
-vfs_thumbnail_loader_new(VFSDir* dir)
+vfs_thumbnail_loader_new(vfs::dir dir)
 {
     VFSThumbnailLoader* loader = new VFSThumbnailLoader(dir);
     return loader;
@@ -226,7 +226,7 @@ thumbnail_loader_thread(vfs::async_task task, VFSThumbnailLoader* loader)
 }
 
 void
-vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big)
+vfs_thumbnail_loader_request(vfs::dir dir, VFSFileInfo* file, bool is_big)
 {
     bool new_task = false;
 
@@ -273,7 +273,7 @@ vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big)
 }
 
 void
-vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big)
+vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big)
 {
     VFSThumbnailLoader* loader;
 

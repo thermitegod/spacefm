@@ -337,7 +337,7 @@ update_file_display(std::string_view path)
     // for devices like nfs, emit created and flush to avoid a
     // blocking stat call in GUI thread during writes
     const std::string dir_path = Glib::path_get_dirname(path.data());
-    VFSDir* vdir = vfs_dir_get_by_path_soft(dir_path.c_str());
+    vfs::dir vdir = vfs_dir_get_by_path_soft(dir_path.c_str());
     if (vdir && vdir->avoid_changes)
     {
         VFSFileInfo* file = vfs_file_info_new();

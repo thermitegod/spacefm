@@ -46,10 +46,10 @@ struct VFSThumbnailRequest
 
 struct VFSThumbnailLoader
 {
-    VFSThumbnailLoader(VFSDir* dir);
+    VFSThumbnailLoader(vfs::dir dir);
     ~VFSThumbnailLoader();
 
-    VFSDir* dir;
+    vfs::dir dir;
     GQueue* queue;
     vfs::async_task task;
     u32 idle_handler;
@@ -61,8 +61,8 @@ void vfs_thumbnail_init();
 
 void vfs_thumbnail_loader_free(VFSThumbnailLoader* loader);
 
-void vfs_thumbnail_loader_request(VFSDir* dir, VFSFileInfo* file, bool is_big);
-void vfs_thumbnail_loader_cancel_all_requests(VFSDir* dir, bool is_big);
+void vfs_thumbnail_loader_request(vfs::dir dir, VFSFileInfo* file, bool is_big);
+void vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big);
 
 // Load thumbnail for the specified file
 // If the caller knows mtime of the file, it should pass mtime to this function to

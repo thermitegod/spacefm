@@ -69,7 +69,7 @@ struct PtkFileList
 {
     GObject parent;
     /* <private> */
-    VFSDir* dir;
+    vfs::dir dir;
     GList* files;
     u32 n_files;
 
@@ -100,17 +100,17 @@ struct PtkFileListClass
 {
     GObjectClass parent;
     /* Default signal handlers */
-    void (*file_created)(VFSDir* dir, const char* file_name);
-    void (*file_deleted)(VFSDir* dir, const char* file_name);
-    void (*file_changed)(VFSDir* dir, const char* file_name);
-    void (*load_complete)(VFSDir* dir);
+    void (*file_created)(vfs::dir dir, const char* file_name);
+    void (*file_deleted)(vfs::dir dir, const char* file_name);
+    void (*file_changed)(vfs::dir dir, const char* file_name);
+    void (*load_complete)(vfs::dir dir);
 };
 
 GType ptk_file_list_get_type();
 
-PtkFileList* ptk_file_list_new(VFSDir* dir, bool show_hidden);
+PtkFileList* ptk_file_list_new(vfs::dir dir, bool show_hidden);
 
-void ptk_file_list_set_dir(PtkFileList* list, VFSDir* dir);
+void ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir);
 
 bool ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, VFSFileInfo* fi);
 

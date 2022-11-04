@@ -236,7 +236,7 @@ ptk_file_list_finalize(GObject* object)
 }
 
 PtkFileList*
-ptk_file_list_new(VFSDir* dir, bool show_hidden)
+ptk_file_list_new(vfs::dir dir, bool show_hidden)
 {
     PtkFileList* list = PTK_FILE_LIST(g_object_new(PTK_TYPE_FILE_LIST, nullptr));
     list->show_hidden = show_hidden;
@@ -282,7 +282,7 @@ on_file_list_file_created(VFSFileInfo* file, PtkFileList* list)
 }
 
 void
-ptk_file_list_set_dir(PtkFileList* list, VFSDir* dir)
+ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir)
 {
     if (list->dir == dir)
         return;

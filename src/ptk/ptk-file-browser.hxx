@@ -83,7 +83,7 @@ struct PtkFileBrowser
     GList* histsel;    // MOD added
     GList* curhistsel; // MOD added
 
-    VFSDir* dir;
+    vfs::dir dir;
     GtkTreeModel* file_list;
     i32 max_thumbnail;
     i32 n_sel_files;

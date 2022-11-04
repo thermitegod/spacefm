@@ -26,14 +26,16 @@
 
 #include <glib.h>
 
+#include <ztd/ztd.hxx>
+
 #include "vfs/vfs-file-monitor.hxx"
 #include "vfs/vfs-file-info.hxx"
 #include "vfs/vfs-async-task.hxx"
 
 #include "signals.hxx"
 
-#define VFS_DIR(obj)             (static_cast<VFSDir*>(obj))
-#define VFS_DIR_REINTERPRET(obj) (reinterpret_cast<VFSDir*>(obj))
+#define VFS_DIR(obj)             (static_cast<vfs::dir>(obj))
+#define VFS_DIR_REINTERPRET(obj) (reinterpret_cast<vfs::dir>(obj))
 
 #define VFS_TYPE_DIR (vfs_dir_get_type())
 
@@ -276,26 +278,31 @@ struct VFSDir
     sigc::connection signal_task_load_dir;
 };
 
-using VFSDirForeachFunc = void (*)(VFSDir* dir, bool user_data);
+namespace vfs
+{
+    using dir = ztd::raw_ptr<VFSDir>;
+} // namespace vfs
 
-void vfs_dir_lock(VFSDir* dir);
-void vfs_dir_unlock(VFSDir* dir);
+using VFSDirForeachFunc = void (*)(vfs::dir dir, bool user_data);
+
+void vfs_dir_lock(vfs::dir dir);
+void vfs_dir_unlock(vfs::dir dir);
 
 GType vfs_dir_get_type();
 
-VFSDir* vfs_dir_get_by_path(std::string_view path);
-VFSDir* vfs_dir_get_by_path_soft(std::string_view path);
+vfs::dir vfs_dir_get_by_path(std::string_view path);
+vfs::dir vfs_dir_get_by_path_soft(std::string_view path);
 
-bool vfs_dir_is_file_listed(VFSDir* dir);
+bool vfs_dir_is_file_listed(vfs::dir dir);
 
-void vfs_dir_unload_thumbnails(VFSDir* dir, bool is_big);
+void vfs_dir_unload_thumbnails(vfs::dir dir, bool is_big);
 
 /* emit signals */
-void vfs_dir_emit_file_created(VFSDir* dir, std::string_view file_name, bool force);
-void vfs_dir_emit_file_deleted(VFSDir* dir, std::string_view file_name, VFSFileInfo* file);
-void vfs_dir_emit_file_changed(VFSDir* dir, std::string_view file_name, VFSFileInfo* file,
+void vfs_dir_emit_file_created(vfs::dir dir, std::string_view file_name, bool force);
+void vfs_dir_emit_file_deleted(vfs::dir dir, std::string_view file_name, VFSFileInfo* file);
+void vfs_dir_emit_file_changed(vfs::dir dir, std::string_view file_name, VFSFileInfo* file,
                                bool force);
-void vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file);
+void vfs_dir_emit_thumbnail_loaded(vfs::dir dir, VFSFileInfo* file);
 void vfs_dir_flush_notify_cache();
 
 bool vfs_dir_add_hidden(std::string_view path, std::string_view file_name);

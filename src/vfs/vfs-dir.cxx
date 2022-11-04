@@ -60,18 +60,18 @@ struct VFSDirClass
     GObjectClass parent;
 
     /* Default signal handlers */
-    void (*file_created)(VFSDir* dir, VFSFileInfo* file);
-    void (*file_deleted)(VFSDir* dir, VFSFileInfo* file);
-    void (*file_changed)(VFSDir* dir, VFSFileInfo* file);
-    void (*thumbnail_loaded)(VFSDir* dir, VFSFileInfo* file);
-    void (*file_listed)(VFSDir* dir);
-    void (*load_complete)(VFSDir* dir);
-    // void (*need_reload)(VFSDir* dir);
-    // void (*update_mime)(VFSDir* dir);
+    void (*file_created)(vfs::dir dir, VFSFileInfo* file);
+    void (*file_deleted)(vfs::dir dir, VFSFileInfo* file);
+    void (*file_changed)(vfs::dir dir, VFSFileInfo* file);
+    void (*thumbnail_loaded)(vfs::dir dir, VFSFileInfo* file);
+    void (*file_listed)(vfs::dir dir);
+    void (*load_complete)(vfs::dir dir);
+    // void (*need_reload)(vfs::dir dir);
+    // void (*update_mime)(vfs::dir dir);
 };
 
 static void vfs_dir_class_init(VFSDirClass* klass);
-static void vfs_dir_init(VFSDir* dir);
+static void vfs_dir_init(vfs::dir dir);
 static void vfs_dir_finalize(GObject* obj);
 static void vfs_dir_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec* pspec);
 static void vfs_dir_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec);
@@ -80,10 +80,10 @@ static const std::string gethidden(std::string_view path);
 static bool ishidden(std::string_view hidden, std::string_view file_name);
 
 /* constructor is private */
-static VFSDir* vfs_dir_new(std::string_view path);
+static vfs::dir vfs_dir_new(std::string_view path);
 
-static void vfs_dir_load(VFSDir* dir);
-static void* vfs_dir_load_thread(vfs::async_task task, VFSDir* dir);
+static void vfs_dir_load(vfs::dir dir);
+static void* vfs_dir_load_thread(vfs::async_task task, vfs::dir dir);
 
 static void vfs_dir_monitor_callback(vfs::file_monitor_t monitor, VFSFileMonitorEvent event,
                                      std::string_view file_name, void* user_data);
@@ -91,13 +91,13 @@ static void vfs_dir_monitor_callback(vfs::file_monitor_t monitor, VFSFileMonitor
 static void on_mime_type_reload(void* user_data);
 
 static bool notify_file_change(void* user_data);
-static bool update_file_info(VFSDir* dir, VFSFileInfo* file);
+static bool update_file_info(vfs::dir dir, VFSFileInfo* file);
 
-static void on_list_task_finished(VFSDir* dir, bool is_cancelled);
+static void on_list_task_finished(vfs::dir dir, bool is_cancelled);
 
 static GObjectClass* parent_class = nullptr;
 
-static std::map<const char*, VFSDir*> dir_map;
+static std::map<const char*, vfs::dir> dir_map;
 
 static GList* mime_cb = nullptr;
 static u32 change_notify_timeout = 0;
@@ -140,26 +140,26 @@ vfs_dir_class_init(VFSDirClass* klass)
 
 /* constructor */
 static void
-vfs_dir_init(VFSDir* dir)
+vfs_dir_init(vfs::dir dir)
 {
     dir->mutex = (GMutex*)g_malloc(sizeof(GMutex));
     g_mutex_init(dir->mutex);
 }
 
 void
-vfs_dir_lock(VFSDir* dir)
+vfs_dir_lock(vfs::dir dir)
 {
     g_mutex_lock(dir->mutex);
 }
 
 void
-vfs_dir_unlock(VFSDir* dir)
+vfs_dir_unlock(vfs::dir dir)
 {
     g_mutex_unlock(dir->mutex);
 }
 
 static void
-vfs_dir_clear(VFSDir* dir)
+vfs_dir_clear(vfs::dir dir)
 {
     g_mutex_clear(dir->mutex);
     free(dir->mutex);
@@ -170,7 +170,7 @@ vfs_dir_clear(VFSDir* dir)
 static void
 vfs_dir_finalize(GObject* obj)
 {
-    VFSDir* dir = VFS_DIR_REINTERPRET(obj);
+    vfs::dir dir = VFS_DIR_REINTERPRET(obj);
     // LOG_INFO("vfs_dir_finalize  {}", dir->path);
     do
     {
@@ -259,7 +259,7 @@ vfs_dir_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec*
 }
 
 static VFSFileInfo*
-vfs_dir_find_file(VFSDir* dir, std::string_view file_name, VFSFileInfo* file)
+vfs_dir_find_file(vfs::dir dir, std::string_view file_name, VFSFileInfo* file)
 {
     for (VFSFileInfo* file2: dir->file_list)
     {
@@ -273,7 +273,7 @@ vfs_dir_find_file(VFSDir* dir, std::string_view file_name, VFSFileInfo* file)
 
 /* signal handlers */
 void
-vfs_dir_emit_file_created(VFSDir* dir, std::string_view file_name, bool force)
+vfs_dir_emit_file_created(vfs::dir dir, std::string_view file_name, bool force)
 {
     (void)force;
     // Ignore avoid_changes for creation of files
@@ -297,7 +297,7 @@ vfs_dir_emit_file_created(VFSDir* dir, std::string_view file_name, bool force)
 }
 
 void
-vfs_dir_emit_file_deleted(VFSDir* dir, std::string_view file_name, VFSFileInfo* file)
+vfs_dir_emit_file_deleted(vfs::dir dir, std::string_view file_name, VFSFileInfo* file)
 {
     if (ztd::same(file_name, dir->path))
     {
@@ -338,7 +338,7 @@ vfs_dir_emit_file_deleted(VFSDir* dir, std::string_view file_name, VFSFileInfo* 
 }
 
 void
-vfs_dir_emit_file_changed(VFSDir* dir, std::string_view file_name, VFSFileInfo* file, bool force)
+vfs_dir_emit_file_changed(vfs::dir dir, std::string_view file_name, VFSFileInfo* file, bool force)
 {
     // LOG_INFO("vfs_dir_emit_file_changed dir={} file_name={} avoid={}", dir->path, file_name,
     // dir->avoid_changes ? "true" : "false");
@@ -398,7 +398,7 @@ vfs_dir_emit_file_changed(VFSDir* dir, std::string_view file_name, VFSFileInfo* 
 }
 
 void
-vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file)
+vfs_dir_emit_thumbnail_loaded(vfs::dir dir, VFSFileInfo* file)
 {
     vfs_dir_lock(dir);
 
@@ -424,10 +424,10 @@ vfs_dir_emit_thumbnail_loaded(VFSDir* dir, VFSFileInfo* file)
 
 /* methods */
 
-static VFSDir*
+static vfs::dir
 vfs_dir_new(std::string_view path)
 {
-    VFSDir* dir = VFS_DIR(g_object_new(VFS_TYPE_DIR, nullptr));
+    vfs::dir dir = VFS_DIR(g_object_new(VFS_TYPE_DIR, nullptr));
     dir->path = ztd::strdup(path.data());
 
     dir->avoid_changes = vfs_volume_dir_avoid_changes(path.data());
@@ -437,7 +437,7 @@ vfs_dir_new(std::string_view path)
 }
 
 void
-on_list_task_finished(VFSDir* dir, bool is_cancelled)
+on_list_task_finished(vfs::dir dir, bool is_cancelled)
 {
     g_object_unref(dir->task);
     dir->task = nullptr;
@@ -494,7 +494,7 @@ vfs_dir_add_hidden(std::string_view path, std::string_view file_name)
 }
 
 static void
-vfs_dir_load(VFSDir* dir)
+vfs_dir_load(vfs::dir dir)
 {
     if (!dir->path)
         return;
@@ -509,7 +509,7 @@ vfs_dir_load(VFSDir* dir)
 }
 
 static void*
-vfs_dir_load_thread(vfs::async_task task, VFSDir* dir)
+vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
 {
     (void)task;
 
@@ -562,13 +562,13 @@ vfs_dir_load_thread(vfs::async_task task, VFSDir* dir)
 }
 
 bool
-vfs_dir_is_file_listed(VFSDir* dir)
+vfs_dir_is_file_listed(vfs::dir dir)
 {
     return dir->file_listed;
 }
 
 static bool
-update_file_info(VFSDir* dir, VFSFileInfo* file)
+update_file_info(vfs::dir dir, VFSFileInfo* file)
 {
     bool ret = false;
 
@@ -603,7 +603,7 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
 }
 
 static void
-update_changed_files(std::string_view key, VFSDir* dir)
+update_changed_files(std::string_view key, vfs::dir dir)
 {
     (void)key;
 
@@ -625,7 +625,7 @@ update_changed_files(std::string_view key, VFSDir* dir)
 }
 
 static void
-update_created_files(std::string_view key, VFSDir* dir)
+update_created_files(std::string_view key, vfs::dir dir)
 {
     (void)key;
 
@@ -704,7 +704,7 @@ vfs_dir_monitor_callback(vfs::file_monitor_t monitor, VFSFileMonitorEvent event,
                          std::string_view file_name, void* user_data)
 {
     (void)monitor;
-    VFSDir* dir = VFS_DIR(user_data);
+    vfs::dir dir = VFS_DIR(user_data);
 
     switch (event)
     {
@@ -722,10 +722,10 @@ vfs_dir_monitor_callback(vfs::file_monitor_t monitor, VFSFileMonitorEvent event,
     }
 }
 
-VFSDir*
+vfs::dir
 vfs_dir_get_by_path_soft(std::string_view path)
 {
-    VFSDir* dir = nullptr;
+    vfs::dir dir = nullptr;
 
     try
     {
@@ -741,10 +741,10 @@ vfs_dir_get_by_path_soft(std::string_view path)
     return dir;
 }
 
-VFSDir*
+vfs::dir
 vfs_dir_get_by_path(std::string_view path)
 {
-    VFSDir* dir = nullptr;
+    vfs::dir dir = nullptr;
 
     if (!dir_map.empty())
     {
@@ -775,7 +775,7 @@ vfs_dir_get_by_path(std::string_view path)
 }
 
 static void
-reload_mime_type(std::string_view key, VFSDir* dir)
+reload_mime_type(std::string_view key, vfs::dir dir)
 {
     (void)key;
 
@@ -824,7 +824,7 @@ vfs_dir_foreach(VFSDirForeachFunc func, bool user_data)
 }
 
 void
-vfs_dir_unload_thumbnails(VFSDir* dir, bool is_big)
+vfs_dir_unload_thumbnails(vfs::dir dir, bool is_big)
 {
     vfs_dir_lock(dir);
     for (VFSFileInfo* file: dir->file_list)
@@ -866,7 +866,7 @@ vfs_dir_unload_thumbnails(VFSDir* dir, bool is_big)
 
 // sfm added mime change timer
 static u32 mime_change_timer = 0;
-static VFSDir* mime_dir = nullptr;
+static vfs::dir mime_dir = nullptr;
 
 static bool
 on_mime_change_timer(void* user_data)
