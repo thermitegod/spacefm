@@ -485,8 +485,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
      * Do not show this option menu if files of different types are selected,
      * ,the selected file is a directory, or its type is unknown.
      */
-    if (!same_type || vfs_file_info_is_desktop_entry(file) ||
-        vfs_file_info_is_executable(file, nullptr))
+    if (!same_type || vfs_file_info_is_desktop_entry(file) || vfs_file_info_is_executable(file))
     {
         /* if open with should not show, destroy it. */
         gtk_widget_destroy(open_with);

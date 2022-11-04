@@ -161,7 +161,7 @@ create_model_from_mime_type(VFSMimeType* mime_type)
     {
         std::vector<std::string> apps = vfs_mime_type_get_actions(mime_type);
         const char* type = vfs_mime_type_get_type(mime_type);
-        if (apps.empty() && mime_type_is_text_file(nullptr, type))
+        if (apps.empty() && mime_type_is_text_file("", type))
         {
             mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
             apps = vfs_mime_type_get_actions(mime_type);

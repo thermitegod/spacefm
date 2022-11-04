@@ -499,26 +499,26 @@ mime_type_is_data_plain_text(const char* data, i32 len)
 }
 
 bool
-mime_type_is_text_file(const char* file_path, const char* mime_type)
+mime_type_is_text_file(std::string_view file_path, std::string_view mime_type)
 {
     i32 rlen;
     bool ret = false;
 
-    if (mime_type)
+    if (!mime_type.empty())
     {
-        if (!strcmp(mime_type, "application/pdf"))
+        if (ztd::same(mime_type, "application/pdf"))
             // seems to think this is XDG_MIME_TYPE_PLAIN_TEXT
             return false;
-        if (mime_type_is_subclass(mime_type, XDG_MIME_TYPE_PLAIN_TEXT))
+        if (mime_type_is_subclass(mime_type.data(), XDG_MIME_TYPE_PLAIN_TEXT))
             return true;
         if (!ztd::startswith(mime_type, "text/") && !ztd::startswith(mime_type, "application/"))
             return false;
     }
 
-    if (!file_path)
+    if (file_path.empty())
         return false;
 
-    i32 file = open(file_path, O_RDONLY);
+    const i32 file = open(file_path.data(), O_RDONLY);
     if (file != -1)
     {
         struct stat statbuf;
@@ -537,10 +537,10 @@ mime_type_is_text_file(const char* file_path, const char* mime_type)
 }
 
 bool
-mime_type_is_executable_file(const char* file_path, const char* mime_type)
+mime_type_is_executable_file(std::string_view file_path, std::string_view mime_type)
 {
-    if (!mime_type)
-        mime_type = mime_type_get_by_file(file_path, nullptr, nullptr);
+    if (mime_type.empty())
+        mime_type = mime_type_get_by_file(file_path.data(), nullptr, nullptr);
 
     /*
      * Only executable types can be executale.
@@ -548,10 +548,10 @@ mime_type_is_executable_file(const char* file_path, const char* mime_type)
      * are not in mime database, we have to add them ourselves.
      */
     if (!ztd::same(mime_type, XDG_MIME_TYPE_UNKNOWN) &&
-        (mime_type_is_subclass(mime_type, XDG_MIME_TYPE_EXECUTABLE) ||
-         mime_type_is_subclass(mime_type, "application/x-shellscript")))
+        (mime_type_is_subclass(mime_type.data(), XDG_MIME_TYPE_EXECUTABLE) ||
+         mime_type_is_subclass(mime_type.data(), "application/x-shellscript")))
     {
-        if (file_path)
+        if (!file_path.empty())
         {
             if (!have_x_access(file_path))
                 return false;

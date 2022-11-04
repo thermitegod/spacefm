@@ -358,7 +358,7 @@ ptk_open_files_with_app(const char* cwd, const std::vector<VFSFileInfo*>& sel_fi
             }
 
             /* If this file is an executable file, run it. */
-            if (!xnever && vfs_file_info_is_executable(file, full_path.c_str()) &&
+            if (!xnever && vfs_file_info_is_executable(file, full_path) &&
                 (app_settings.get_click_executes() || xforce))
             {
                 Glib::spawn_command_line_async(full_path);
@@ -415,7 +415,7 @@ ptk_open_files_with_app(const char* cwd, const std::vector<VFSFileInfo*>& sel_fi
                 }
             }
 
-            if (alloc_desktop.empty() && mime_type_is_text_file(full_path.c_str(), mime_type->type))
+            if (alloc_desktop.empty() && mime_type_is_text_file(full_path, mime_type->type))
             {
                 /* FIXME: special handling for plain text file */
                 vfs_mime_type_unref(mime_type);

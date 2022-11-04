@@ -549,14 +549,14 @@ vfs_file_info_is_unknown_type(VFSFileInfo* fi)
 
 /* full path of the file is required by this function */
 bool
-vfs_file_info_is_executable(VFSFileInfo* fi, const char* file_path)
+vfs_file_info_is_executable(VFSFileInfo* fi, std::string_view file_path)
 {
     return mime_type_is_executable_file(file_path, fi->mime_type->type);
 }
 
 /* full path of the file is required by this function */
 bool
-vfs_file_info_is_text(VFSFileInfo* fi, const char* file_path)
+vfs_file_info_is_text(VFSFileInfo* fi, std::string_view file_path)
 {
     return mime_type_is_text_file(file_path, fi->mime_type->type);
 }
@@ -620,13 +620,13 @@ vfs_file_info_set_thumbnail_size_small(i32 size)
 }
 
 void
-vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path)
+vfs_file_info_load_special_info(VFSFileInfo* fi, std::string_view file_path)
 {
     /*if (fi->type && fi->type->name, "application/x-desktop") */
     if (!ztd::endswith(fi->name, ".desktop"))
         return;
 
-    const std::string file_dir = Glib::path_get_dirname(file_path);
+    const std::string file_dir = Glib::path_get_dirname(file_path.data());
 
     fi->flags = (VFSFileInfoFlag)(fi->flags | VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY);
 

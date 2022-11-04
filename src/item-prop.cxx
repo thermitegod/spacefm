@@ -1113,7 +1113,7 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
             }
         }
         free(text);
-        if (!(path && mime_type_is_text_file(path, nullptr)))
+        if (!(path && mime_type_is_text_file(path)))
         {
             xset_msg_dialog(GTK_WIDGET(ctxt->dlg),
                             GtkMessageType::GTK_MESSAGE_ERROR,
@@ -1131,7 +1131,7 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
         save_command_script(ctxt, false);
         path = xset_custom_get_script(ctxt->set, !ctxt->set->plugin);
     }
-    if (path && mime_type_is_text_file(path, nullptr))
+    if (path && mime_type_is_text_file(path))
     {
         xset_edit(ctxt->dlg, path, btn == ctxt->cmd_edit_root, btn != ctxt->cmd_edit_root);
     }

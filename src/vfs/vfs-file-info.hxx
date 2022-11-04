@@ -142,11 +142,11 @@ bool vfs_file_info_is_video(VFSFileInfo* fi);
 bool vfs_file_info_is_desktop_entry(VFSFileInfo* fi);
 
 /* Full path of the file is required by this function */
-bool vfs_file_info_is_executable(VFSFileInfo* fi, const char* file_path);
+bool vfs_file_info_is_executable(VFSFileInfo* fi, std::string_view file_path = "");
 
 /* Full path of the file is required by this function */
-bool vfs_file_info_is_text(VFSFileInfo* fi, const char* file_path);
+bool vfs_file_info_is_text(VFSFileInfo* fi, std::string_view file_path = "");
 
-void vfs_file_info_load_special_info(VFSFileInfo* fi, const char* file_path);
+void vfs_file_info_load_special_info(VFSFileInfo* fi, std::string_view file_path = "");
 
 void vfs_file_info_list_free(const std::vector<VFSFileInfo*>& list);

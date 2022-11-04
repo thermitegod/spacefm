@@ -3744,7 +3744,7 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
             c->var[ItemPropContext::CONTEXT_IS_DIR] =
                 std::filesystem::is_directory(path) ? "true" : "false";
             c->var[ItemPropContext::CONTEXT_IS_TEXT] =
-                vfs_file_info_is_text(file, path.c_str()) ? "true" : "false";
+                vfs_file_info_is_text(file, path) ? "true" : "false";
             c->var[ItemPropContext::CONTEXT_IS_LINK] =
                 vfs_file_info_is_symlink(file) ? "true" : "false";
 

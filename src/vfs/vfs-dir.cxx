@@ -546,7 +546,7 @@ vfs_dir_load_thread(VFSAsyncTask* task, VFSDir* dir)
             vfs_dir_lock(dir);
 
             /* Special processing for desktop directory */
-            vfs_file_info_load_special_info(fi, full_path.c_str());
+            vfs_file_info_load_special_info(fi, full_path);
 
             dir->file_list.push_back(fi);
 
@@ -583,7 +583,7 @@ update_file_info(VFSDir* dir, VFSFileInfo* file)
     if (vfs_file_info_get(file, full_path))
     {
         ret = true;
-        vfs_file_info_load_special_info(file, full_path.c_str());
+        vfs_file_info_load_special_info(file, full_path);
     }
     else /* The file does not exist */
     {
@@ -645,7 +645,7 @@ update_created_files(std::string_view key, VFSDir* dir)
             if (vfs_file_info_get(file, full_path))
             {
                 // add new file to dir file_list
-                vfs_file_info_load_special_info(file, full_path.c_str());
+                vfs_file_info_load_special_info(file, full_path);
                 dir->file_list.push_back(vfs_file_info_ref(file));
 
                 dir->run_event<EventType::FILE_CREATED>(file);
@@ -851,7 +851,7 @@ vfs_dir_unload_thumbnails(VFSDir* dir, bool is_big)
         if (file->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY)
         {
             const std::string file_path = Glib::build_filename(dir->path, file->name);
-            vfs_file_info_load_special_info(file, file_path.c_str());
+            vfs_file_info_load_special_info(file, file_path);
         }
     }
     vfs_dir_unlock(dir);

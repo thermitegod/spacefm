@@ -64,9 +64,8 @@ const char* mime_type_get_by_filename(const char* filename, struct stat* statbuf
  */
 const char* mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* basename);
 
-bool mime_type_is_text_file(const char* file_path, const char* mime_type);
-
-bool mime_type_is_executable_file(const char* file_path, const char* mime_type);
+bool mime_type_is_text_file(std::string_view file_path, std::string_view mime_type = "");
+bool mime_type_is_executable_file(std::string_view file_path, std::string_view mime_type = "");
 
 /* Check if the specified mime_type is the subclass of the specified parent type */
 // bool mime_type_is_subclass(const char* type, const char* parent);
