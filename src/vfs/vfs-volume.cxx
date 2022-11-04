@@ -73,13 +73,13 @@ inline constexpr std::array<std::string_view, 14> HIDDEN_NON_BLOCK_FS{
     "fuse.gvfsd-fuse",
 };
 
-static VFSVolume* vfs_volume_read_by_device(struct udev_device* udevice);
-static VFSVolume* vfs_volume_read_by_mount(dev_t devnum, const char* mount_points);
-static void vfs_volume_device_added(VFSVolume* volume, bool automount);
+static vfs::volume vfs_volume_read_by_device(struct udev_device* udevice);
+static vfs::volume vfs_volume_read_by_mount(dev_t devnum, const char* mount_points);
+static void vfs_volume_device_added(vfs::volume volume, bool automount);
 static void vfs_volume_device_removed(struct udev_device* udevice);
 static bool vfs_volume_nonblock_removed(dev_t devnum);
-static void call_callbacks(VFSVolume* vol, VFSVolumeState state);
-static void unmount_if_mounted(VFSVolume* vol);
+static void call_callbacks(vfs::volume vol, VFSVolumeState state);
+static void unmount_if_mounted(vfs::volume vol);
 
 VFSVolume::VFSVolume()
 {
@@ -110,7 +110,7 @@ struct VFSVolumeCallbackData
     void* user_data;
 };
 
-static std::vector<VFSVolume*> volumes;
+static std::vector<vfs::volume> volumes;
 static GArray* callbacks = nullptr;
 static bool global_inhibit_auto = false;
 
@@ -1711,7 +1711,7 @@ parse_mounts(bool report)
     // report
     if (report && changed)
     {
-        VFSVolume* volume;
+        vfs::volume volume;
         char* devnode;
         for (GList* l = changed; l; l = l->next)
         {
@@ -1854,7 +1854,7 @@ cb_udev_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
 
     struct udev_device* udevice;
     const char* acted = nullptr;
-    VFSVolume* volume;
+    vfs::volume volume;
     if ((udevice = udev_monitor_receive_device(umonitor)))
     {
         const char* action = udev_device_get_action(udevice);
@@ -1890,7 +1890,7 @@ cb_udev_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
 }
 
 void
-vfs_volume_set_info(VFSVolume* volume)
+vfs_volume_set_info(vfs::volume volume)
 {
     char* lastcomma;
     std::string disp_device;
@@ -2092,10 +2092,10 @@ vfs_volume_set_info(VFSVolume* volume)
         volume->udi = ztd::strdup(volume->device_file);
 }
 
-static VFSVolume*
+static vfs::volume
 vfs_volume_read_by_device(struct udev_device* udevice)
 { // uses udev to read device parameters into returned volume
-    VFSVolume* volume = nullptr;
+    vfs::volume volume = nullptr;
 
     if (!udevice)
         return nullptr;
@@ -2451,13 +2451,13 @@ split_network_url(const char* url, netmount_t** netmount)
     return ret;
 }
 
-static VFSVolume*
+static vfs::volume
 vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
 { // read a non-block device
     if (devnum == 0 || !mount_points)
         return nullptr;
 
-    VFSVolume* volume;
+    vfs::volume volume;
 
     // check mount path has path sep
     std::string point = mount_points;
@@ -2588,7 +2588,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
 }
 
 char*
-vfs_volume_handler_cmd(i32 mode, i32 action, VFSVolume* vol, const char* options,
+vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* options,
                        netmount_t* netmount, bool* run_in_terminal, char** mount_point)
 {
     const char* handlers_list;
@@ -2927,7 +2927,7 @@ vfs_volume_handler_cmd(i32 mode, i32 action, VFSVolume* vol, const char* options
 }
 
 static bool
-vfs_volume_is_automount(VFSVolume* vol)
+vfs_volume_is_automount(vfs::volume vol)
 { // determine if volume should be automounted or auto-unmounted
     std::string test;
     char* value;
@@ -2986,7 +2986,7 @@ vfs_volume_is_automount(VFSVolume* vol)
 }
 
 const std::string
-vfs_volume_device_info(VFSVolume* vol)
+vfs_volume_device_info(vfs::volume vol)
 {
     std::string info = "";
 
@@ -3012,7 +3012,7 @@ vfs_volume_device_info(VFSVolume* vol)
 }
 
 char*
-vfs_volume_device_mount_cmd(VFSVolume* vol, const char* options, bool* run_in_terminal)
+vfs_volume_device_mount_cmd(vfs::volume vol, const char* options, bool* run_in_terminal)
 {
     char* command = nullptr;
     *run_in_terminal = false;
@@ -3066,7 +3066,7 @@ vfs_volume_device_mount_cmd(VFSVolume* vol, const char* options, bool* run_in_te
 }
 
 char*
-vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
+vfs_volume_device_unmount_cmd(vfs::volume vol, bool* run_in_terminal)
 {
     char* command = nullptr;
     std::string pointq = "";
@@ -3167,7 +3167,7 @@ vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal)
 }
 
 char*
-vfs_volume_get_mount_options(VFSVolume* vol, char* options)
+vfs_volume_get_mount_options(vfs::volume vol, char* options)
 {
     if (!options)
         return nullptr;
@@ -3272,7 +3272,7 @@ vfs_volume_get_mount_options(VFSVolume* vol, char* options)
 }
 
 char*
-vfs_volume_get_mount_command(VFSVolume* vol, char* default_options, bool* run_in_terminal)
+vfs_volume_get_mount_command(vfs::volume vol, char* default_options, bool* run_in_terminal)
 {
     char* options = vfs_volume_get_mount_options(vol, default_options);
     char* command = vfs_volume_device_mount_cmd(vol, options, run_in_terminal);
@@ -3299,7 +3299,7 @@ exec_task(const char* command, bool run_in_terminal)
 }
 
 static void
-vfs_volume_exec(VFSVolume* vol, const char* command)
+vfs_volume_exec(vfs::volume vol, const char* command)
 {
     // LOG_INFO("vfs_volume_exec {} {}", vol->device_file, command);
     if (!(command && command[0]) || vol->device_type != VFSVolumeDeviceType::DEVICE_TYPE_BLOCK)
@@ -3318,7 +3318,7 @@ vfs_volume_exec(VFSVolume* vol, const char* command)
 }
 
 static void
-vfs_volume_autoexec(VFSVolume* vol)
+vfs_volume_autoexec(vfs::volume vol)
 {
     char* command = nullptr;
 
@@ -3382,7 +3382,7 @@ vfs_volume_autoexec(VFSVolume* vol)
 }
 
 static void
-vfs_volume_autounmount(VFSVolume* vol)
+vfs_volume_autounmount(vfs::volume vol)
 {
     if (!vol->is_mounted || !vfs_volume_is_automount(vol))
         return;
@@ -3399,7 +3399,7 @@ vfs_volume_autounmount(VFSVolume* vol)
 }
 
 void
-vfs_volume_automount(VFSVolume* vol)
+vfs_volume_automount(vfs::volume vol)
 {
     if (vol->is_mounted || vol->ever_mounted || vol->is_audiocd || vol->should_autounmount ||
         !vfs_volume_is_automount(vol))
@@ -3424,7 +3424,7 @@ vfs_volume_automount(VFSVolume* vol)
 }
 
 static void
-vfs_volume_device_added(VFSVolume* volume, bool automount)
+vfs_volume_device_added(vfs::volume volume, bool automount)
 { // frees volume if needed
     char* changed_mount_point = nullptr;
 
@@ -3432,7 +3432,7 @@ vfs_volume_device_added(VFSVolume* volume, bool automount)
         return;
 
     // check if we already have this volume device file
-    for (VFSVolume* volume2: volumes)
+    for (vfs::volume volume2: volumes)
     {
         if (volume2->devnum == volume->devnum)
         {
@@ -3540,7 +3540,7 @@ vfs_volume_device_added(VFSVolume* volume, bool automount)
 static bool
 vfs_volume_nonblock_removed(dev_t devnum)
 {
-    for (VFSVolume* volume: volumes)
+    for (vfs::volume volume: volumes)
     {
         if (volume->device_type != VFSVolumeDeviceType::DEVICE_TYPE_BLOCK &&
             volume->devnum == devnum)
@@ -3569,7 +3569,7 @@ vfs_volume_device_removed(struct udev_device* udevice)
 
     dev_t devnum = udev_device_get_devnum(udevice);
 
-    for (VFSVolume* volume: volumes)
+    for (vfs::volume volume: volumes)
     {
         if (volume->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK &&
             volume->devnum == devnum)
@@ -3591,7 +3591,7 @@ vfs_volume_device_removed(struct udev_device* udevice)
 }
 
 static void
-unmount_if_mounted(VFSVolume* vol)
+unmount_if_mounted(vfs::volume vol)
 {
     if (!vol->device_file)
         return;
@@ -3656,7 +3656,7 @@ vfs_volume_init()
             udevice = udev_device_new_from_syspath(udev, syspath);
             if (udevice)
             {
-                VFSVolume* volume = vfs_volume_read_by_device(udevice);
+                vfs::volume volume = vfs_volume_read_by_device(udevice);
                 if (volume)
                     vfs_volume_device_added(volume, false); // frees volume if needed
                 udev_device_unref(udevice);
@@ -3760,7 +3760,7 @@ vfs_volume_init()
     }
 
     // do startup automounts
-    for (VFSVolume* volume: volumes)
+    for (vfs::volume volume: volumes)
         vfs_volume_automount(volume);
 
     // start resume autoexec timer
@@ -3808,7 +3808,7 @@ vfs_volume_finalize()
         if (volumes.empty())
             break;
 
-        VFSVolume* volume = volumes.back();
+        vfs::volume volume = volumes.back();
         volumes.pop_back();
 
         if (unmount_all)
@@ -3821,13 +3821,13 @@ vfs_volume_finalize()
     ptk_location_view_clean_mount_points();
 }
 
-const std::vector<VFSVolume*>
+const std::vector<vfs::volume>
 vfs_volume_get_all_volumes()
 {
     return volumes;
 }
 
-VFSVolume*
+vfs::volume
 vfs_volume_get_by_device_or_point(const char* device_file, const char* point)
 {
     if (!point && !device_file)
@@ -3845,7 +3845,7 @@ vfs_volume_get_by_device_or_point(const char* device_file, const char* point)
 
     if (!volumes.empty())
     {
-        for (VFSVolume* volume: volumes)
+        for (vfs::volume volume: volumes)
         {
             if (device_file && !strcmp(device_file, volume->device_file))
                 return volume;
@@ -3861,7 +3861,7 @@ vfs_volume_get_by_device_or_point(const char* device_file, const char* point)
 }
 
 static void
-call_callbacks(VFSVolume* vol, VFSVolumeState state)
+call_callbacks(vfs::volume vol, VFSVolumeState state)
 {
     if (callbacks)
     {
@@ -3920,30 +3920,30 @@ vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data)
 }
 
 const char*
-vfs_volume_get_disp_name(VFSVolume* vol)
+vfs_volume_get_disp_name(vfs::volume vol)
 {
     return vol->disp_name;
 }
 
 const char*
-vfs_volume_get_mount_point(VFSVolume* vol)
+vfs_volume_get_mount_point(vfs::volume vol)
 {
     return vol->mount_point;
 }
 
 const char*
-vfs_volume_get_device(VFSVolume* vol)
+vfs_volume_get_device(vfs::volume vol)
 {
     return vol->device_file;
 }
 const char*
-vfs_volume_get_fstype(VFSVolume* vol)
+vfs_volume_get_fstype(vfs::volume vol)
 {
     return vol->fs_type;
 }
 
 const char*
-vfs_volume_get_icon(VFSVolume* vol)
+vfs_volume_get_icon(vfs::volume vol)
 {
     if (vol->icon.empty())
         return nullptr;
@@ -3952,7 +3952,7 @@ vfs_volume_get_icon(VFSVolume* vol)
 }
 
 bool
-vfs_volume_is_mounted(VFSVolume* vol)
+vfs_volume_is_mounted(vfs::volume vol)
 {
     return vol->is_mounted;
 }

@@ -4619,7 +4619,8 @@ on_folder_view_drag_end(GtkWidget* widget, GdkDragContext* drag_context,
 
 void
 ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser,
-                                       const std::vector<vfs::file_info>& sel_files, const char* cwd)
+                                       const std::vector<vfs::file_info>& sel_files,
+                                       const char* cwd)
 {
     if (!file_browser)
         return;

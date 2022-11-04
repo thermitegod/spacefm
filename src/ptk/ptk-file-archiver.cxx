@@ -944,9 +944,9 @@ on_create_subfolder_toggled(GtkToggleButton* togglebutton, GtkWidget* chk_write)
 }
 
 void
-ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<vfs::file_info>& sel_files,
-                          const char* cwd, const char* dest_dir, i32 job,
-                          bool archive_presence_checked)
+ptk_file_archiver_extract(PtkFileBrowser* file_browser,
+                          const std::vector<vfs::file_info>& sel_files, const char* cwd,
+                          const char* dest_dir, i32 job, bool archive_presence_checked)
 { /* This function is also used to list the contents of archives */
     GtkWidget* dlgparent = nullptr;
     char* choose_dir = nullptr;

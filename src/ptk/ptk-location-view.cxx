@@ -59,19 +59,19 @@ static i32 n_vols = 0;
 
 static void ptk_location_view_init_model(GtkListStore* list);
 
-static void on_volume_event(VFSVolume* vol, VFSVolumeState state, void* user_data);
+static void on_volume_event(vfs::volume vol, VFSVolumeState state, void* user_data);
 
-static void add_volume(VFSVolume* vol, bool set_icon);
-static void remove_volume(VFSVolume* vol);
-static void update_volume(VFSVolume* vol);
+static void add_volume(vfs::volume vol, bool set_icon);
+static void remove_volume(vfs::volume vol);
+static void update_volume(vfs::volume vol);
 
 static bool on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data);
 static bool on_key_press_event(GtkWidget* w, GdkEventKey* event, PtkFileBrowser* file_browser);
 
-static bool try_mount(GtkTreeView* view, VFSVolume* vol);
+static bool try_mount(GtkTreeView* view, vfs::volume vol);
 
-static void on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2);
-static void on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2);
+static void on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2);
+static void on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2);
 
 enum PtkLocationViewCol
 {
@@ -112,7 +112,7 @@ AutoOpen::~AutoOpen()
         free(this->mount_point);
 }
 
-static bool volume_is_visible(VFSVolume* vol);
+static bool volume_is_visible(vfs::volume vol);
 static void update_all();
 
 // do not translate - bash security
@@ -140,7 +140,7 @@ update_volume_icons()
 
     GtkTreeIter it;
     GdkPixbuf* icon;
-    VFSVolume* vol;
+    vfs::volume vol;
 
     // GtkListStore* list = GTK_LIST_STORE( model );
     i32 icon_size = app_settings.get_icon_size_small();
@@ -211,11 +211,11 @@ update_all()
     if (!model)
         return;
 
-    VFSVolume* v = nullptr;
+    vfs::volume v = nullptr;
     bool havevol;
 
-    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
-    for (VFSVolume* volume: volumes)
+    const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
+    for (vfs::volume volume: volumes)
     {
         if (volume)
         {
@@ -255,9 +255,9 @@ update_all()
 static void
 update_names()
 {
-    VFSVolume* v = nullptr;
-    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
-    for (VFSVolume* volume: volumes)
+    vfs::volume v = nullptr;
+    const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
+    for (vfs::volume volume: volumes)
     {
         vfs_volume_set_info(volume);
 
@@ -287,7 +287,7 @@ ptk_location_view_chdir(GtkTreeView* location_view, const char* cur_dir)
     {
         do
         {
-            VFSVolume* vol;
+            vfs::volume vol;
             gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
             const char* mount_point = vfs_volume_get_mount_point(vol);
             if (mount_point && !strcmp(cur_dir, mount_point))
@@ -307,7 +307,7 @@ ptk_location_view_chdir(GtkTreeView* location_view, const char* cur_dir)
     return false;
 }
 
-VFSVolume*
+vfs::volume
 ptk_location_view_get_selected_vol(GtkTreeView* location_view)
 {
     // LOG_INFO("ptk_location_view_get_selected_vol    view = {}", location_view);
@@ -316,7 +316,7 @@ ptk_location_view_get_selected_vol(GtkTreeView* location_view)
     GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(location_view));
     if (gtk_tree_selection_get_selected(tree_sel, nullptr, &it))
     {
-        VFSVolume* vol;
+        vfs::volume vol;
         gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
         return vol;
     }
@@ -336,7 +336,7 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
     if (!gtk_tree_model_get_iter(model, &it, tree_path))
         return;
 
-    VFSVolume* vol;
+    vfs::volume vol;
     gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
     if (!vol)
         return;
@@ -387,8 +387,8 @@ ptk_location_view_open_block(const char* block, bool new_tab)
     char buf[PATH_MAX + 1];
     char* canon = realpath(block, buf);
 
-    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
-    for (VFSVolume* volume: volumes)
+    const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
+    for (vfs::volume volume: volumes)
     {
         if (!g_strcmp0(vfs_volume_get_device(volume), canon))
         {
@@ -407,11 +407,11 @@ ptk_location_view_init_model(GtkListStore* list)
 {
     (void)list;
     n_vols = 0;
-    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
+    const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
 
     vfs_volume_add_callback(on_volume_event, model);
 
-    for (VFSVolume* volume: volumes)
+    for (vfs::volume volume: volumes)
     {
         add_volume(volume, false);
     }
@@ -483,7 +483,7 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
 }
 
 static void
-on_volume_event(VFSVolume* vol, VFSVolumeState state, void* user_data)
+on_volume_event(vfs::volume vol, VFSVolumeState state, void* user_data)
 {
     (void)user_data;
     switch (state)
@@ -509,13 +509,13 @@ on_volume_event(VFSVolume* vol, VFSVolumeState state, void* user_data)
 }
 
 static void
-add_volume(VFSVolume* vol, bool set_icon)
+add_volume(vfs::volume vol, bool set_icon)
 {
     if (!volume_is_visible(vol))
         return;
 
     // sfm - vol already exists?
-    VFSVolume* v = nullptr;
+    vfs::volume v = nullptr;
     GtkTreeIter it;
     if (gtk_tree_model_get_iter_first(model, &it))
     {
@@ -557,13 +557,13 @@ add_volume(VFSVolume* vol, bool set_icon)
 }
 
 static void
-remove_volume(VFSVolume* vol)
+remove_volume(vfs::volume vol)
 {
     if (!vol)
         return;
 
     GtkTreeIter it;
-    VFSVolume* v = nullptr;
+    vfs::volume v = nullptr;
     if (gtk_tree_model_get_iter_first(model, &it))
     {
         do
@@ -578,13 +578,13 @@ remove_volume(VFSVolume* vol)
 }
 
 static void
-update_volume(VFSVolume* vol)
+update_volume(vfs::volume vol)
 {
     if (!vol)
         return;
 
     GtkTreeIter it;
-    VFSVolume* v = nullptr;
+    vfs::volume v = nullptr;
     if (gtk_tree_model_get_iter_first(model, &it))
     {
         do
@@ -737,7 +737,7 @@ ptk_location_view_clean_mount_points()
 }
 
 char*
-ptk_location_view_create_mount_point(i32 mode, VFSVolume* vol, netmount_t* netmount,
+ptk_location_view_create_mount_point(i32 mode, vfs::volume vol, netmount_t* netmount,
                                      const char* path)
 {
     std::string mname;
@@ -848,10 +848,10 @@ on_autoopen_net_cb(VFSFileTask* task, AutoOpen* ao)
 
     // try to find device of mounted url.  url in mtab may differ from
     // user-entered url
-    VFSVolume* device_file_vol = nullptr;
-    VFSVolume* mount_point_vol = nullptr;
-    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
-    for (VFSVolume* volume: volumes)
+    vfs::volume device_file_vol = nullptr;
+    vfs::volume mount_point_vol = nullptr;
+    const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
+    for (vfs::volume volume: volumes)
     {
         if (volume->is_mounted)
         {
@@ -946,8 +946,8 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     // already mounted?
     if (!force_new_mount)
     {
-        const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
-        for (VFSVolume* volume: volumes)
+        const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
+        for (vfs::volume volume: volumes)
         {
             // test against mtab url and copy of user-entered url (udi)
             if (strstr(volume->device_file, netmount->url) || strstr(volume->udi, netmount->url))
@@ -1074,7 +1074,7 @@ popup_missing_mount(GtkWidget* view, i32 job)
 }
 
 static void
-on_mount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
+on_mount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 {
     GtkWidget* view;
     if (!item)
@@ -1127,7 +1127,7 @@ on_mount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 }
 
 static void
-on_umount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
+on_umount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 {
     GtkWidget* view;
     if (!item)
@@ -1171,7 +1171,7 @@ on_umount(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 }
 
 static void
-on_eject(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
+on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 {
     PtkFileTask* ptask;
     GtkWidget* view;
@@ -1288,8 +1288,8 @@ on_autoopen_cb(VFSFileTask* task, AutoOpen* ao)
 {
     (void)task;
     // LOG_INFO("on_autoopen_cb");
-    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
-    for (VFSVolume* volume: volumes)
+    const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
+    for (vfs::volume volume: volumes)
     {
         if (volume->devnum == ao->devnum)
         {
@@ -1319,7 +1319,7 @@ on_autoopen_cb(VFSFileTask* task, AutoOpen* ao)
 }
 
 static bool
-try_mount(GtkTreeView* view, VFSVolume* vol)
+try_mount(GtkTreeView* view, vfs::volume vol)
 {
     if (!view || !vol)
         return false;
@@ -1373,7 +1373,7 @@ try_mount(GtkTreeView* view, VFSVolume* vol)
 }
 
 static void
-on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
+on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 {
     PtkFileBrowser* file_browser;
     GtkWidget* view;
@@ -1440,7 +1440,7 @@ on_open_tab(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 }
 
 static void
-on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
+on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 {
     PtkFileBrowser* file_browser;
     GtkWidget* view;
@@ -1517,7 +1517,7 @@ on_open(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 }
 
 static void
-on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
+on_prop(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 {
     GtkWidget* view;
     std::string cmd;
@@ -1807,7 +1807,7 @@ on_prop(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 }
 
 static void
-on_showhide(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
+on_showhide(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 {
     std::string msg;
     GtkWidget* view;
@@ -1836,7 +1836,7 @@ on_showhide(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
 }
 
 static void
-on_automountlist(GtkMenuItem* item, VFSVolume* vol, GtkWidget* view2)
+on_automountlist(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 {
     std::string msg;
     GtkWidget* view;
@@ -1889,7 +1889,7 @@ on_handler_show_config(GtkMenuItem* item, GtkWidget* view, xset_t set2)
 }
 
 static bool
-volume_is_visible(VFSVolume* vol)
+volume_is_visible(vfs::volume vol)
 {
     // check show/hide
 #if 0
@@ -1981,7 +1981,7 @@ ptk_location_view_on_action(GtkWidget* view, xset_t set)
     // LOG_INFO("ptk_location_view_on_action");
     if (!view)
         return;
-    VFSVolume* vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(view));
+    vfs::volume vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(view));
 
     if (set->xset_name == XSetName::DEV_SHOW_INTERNAL_DRIVES ||
         set->xset_name == XSetName::DEV_SHOW_EMPTY ||
@@ -2031,7 +2031,7 @@ ptk_location_view_on_action(GtkWidget* view, xset_t set)
 }
 
 static void
-show_devices_menu(GtkTreeView* view, VFSVolume* vol, PtkFileBrowser* file_browser, u32 button,
+show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_browser, u32 button,
                   std::time_t time)
 {
     (void)button;
@@ -2141,7 +2141,7 @@ static bool
 on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data)
 {
     (void)user_data;
-    VFSVolume* vol = nullptr;
+    vfs::volume vol = nullptr;
     bool ret = false;
 
     if (evt->type != GdkEventType::GDK_BUTTON_PRESS)
@@ -2243,7 +2243,7 @@ on_dev_menu_hide(GtkWidget* widget, GtkWidget* dev_menu)
 }
 
 static void
-show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, u32 button,
+show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 button,
                      std::time_t time)
 {
     (void)dev_item;
@@ -2251,8 +2251,8 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, VFSVolume* vol, u32 b
     PtkFileBrowser* file_browser;
 
     // validate vol
-    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
-    for (VFSVolume* volume: volumes)
+    const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
+    for (vfs::volume volume: volumes)
     {
         if (volume == vol)
             break;
@@ -2353,7 +2353,7 @@ on_dev_menu_keypress(GtkWidget* menu, GdkEventKey* event, void* user_data)
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(menu));
     if (item)
     {
-        VFSVolume* vol = VFS_VOLUME(g_object_get_data(G_OBJECT(item), "vol"));
+        vfs::volume vol = VFS_VOLUME(g_object_get_data(G_OBJECT(item), "vol"));
         if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter ||
             event->keyval == GDK_KEY_space)
         {
@@ -2371,7 +2371,7 @@ on_dev_menu_keypress(GtkWidget* menu, GdkEventKey* event, void* user_data)
 }
 
 static bool
-on_dev_menu_button_press(GtkWidget* item, GdkEventButton* event, VFSVolume* vol)
+on_dev_menu_button_press(GtkWidget* item, GdkEventButton* event, vfs::volume vol)
 {
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
     u32 keymod = ptk_get_keymod(event->state);
@@ -2403,7 +2403,7 @@ on_dev_menu_button_press(GtkWidget* item, GdkEventButton* event, VFSVolume* vol)
 }
 
 static i32
-cmp_dev_name(VFSVolume* a, VFSVolume* b)
+cmp_dev_name(vfs::volume a, vfs::volume b)
 {
     return g_strcmp0(vfs_volume_get_disp_name(a), vfs_volume_get_disp_name(b));
 }
@@ -2414,23 +2414,23 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     GtkWidget* item;
     xset_t set;
 
-    std::vector<VFSVolume*> names;
+    std::vector<vfs::volume> names;
 
     g_object_set_data(G_OBJECT(menu), "parent", parent);
     // file_browser may be nullptr
     g_object_set_data(G_OBJECT(parent), "file_browser", file_browser);
 
-    const std::vector<VFSVolume*> volumes = vfs_volume_get_all_volumes();
-    for (VFSVolume* volume: volumes)
+    const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
+    for (vfs::volume volume: volumes)
     {
         if (volume && volume_is_visible(volume))
             names.push_back(volume);
     }
 
-    VFSVolume* vol;
+    vfs::volume vol;
 
     std::ranges::sort(names, cmp_dev_name);
-    for (VFSVolume* volume: names)
+    for (vfs::volume volume: names)
     {
         vol = volume;
         item = gtk_menu_item_new_with_label(vfs_volume_get_disp_name(volume));

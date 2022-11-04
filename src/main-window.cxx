@@ -3706,7 +3706,7 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
     PtkFileBrowser* a_browser;
     VFSMimeType* mime_type;
     GtkClipboard* clip = nullptr;
-    VFSVolume* vol;
+    vfs::volume vol;
     PtkFileTask* ptask;
     GtkTreeModel* model;
     GtkTreeModel* model_task;
@@ -4035,7 +4035,8 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         buf.append(fmt::format("\nfm_tab_panel[{}]=\"{}\"\n", p, current_page + 1));
 
         // selected files
-        const std::vector<vfs::file_info> sel_files = ptk_file_browser_get_selected_files(a_browser);
+        const std::vector<vfs::file_info> sel_files =
+            ptk_file_browser_get_selected_files(a_browser);
         if (!sel_files.empty())
         {
             buf.append(fmt::format("fm_panel{}_files=(\n", p));
@@ -4073,7 +4074,8 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         // device
         if (a_browser->side_dev)
         {
-            VFSVolume* vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(a_browser->side_dev));
+            vfs::volume vol =
+                ptk_location_view_get_selected_vol(GTK_TREE_VIEW(a_browser->side_dev));
             if (vol)
             {
                 if (file_browser == a_browser)
@@ -7031,7 +7033,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             struct stat statbuf;
             char* real_path = argv[j];
             char* device_file = nullptr;
-            VFSVolume* vol = nullptr;
+            vfs::volume vol = nullptr;
             netmount_t* netmount = new netmount_t;
             if (ztd::same(socket_property, "unmount") && std::filesystem::is_directory(real_path))
             {

@@ -171,8 +171,8 @@ ptk_clipboard_copy_text(const char* text)
 }
 
 void
-ptk_clipboard_cut_or_copy_files(const char* working_dir, const std::vector<vfs::file_info>& sel_files,
-                                bool copy)
+ptk_clipboard_cut_or_copy_files(const char* working_dir,
+                                const std::vector<vfs::file_info>& sel_files, bool copy)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkTargetList* target_list = gtk_target_list_new(nullptr, 0);

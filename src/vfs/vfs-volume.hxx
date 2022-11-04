@@ -29,7 +29,7 @@
 
 #include "settings.hxx"
 
-#define VFS_VOLUME(obj)               (static_cast<VFSVolume*>(obj))
+#define VFS_VOLUME(obj)               (static_cast<vfs::volume>(obj))
 #define VFS_VOLUME_CALLBACK_DATA(obj) (reinterpret_cast<VFSVolumeCallbackData*>(obj))
 
 enum VFSVolumeState
@@ -71,6 +71,14 @@ struct netmount_t
     const char* path{nullptr};
 };
 
+// forward declare types
+struct VFSVolume;
+
+namespace vfs
+{
+    using volume = ztd::raw_ptr<VFSVolume>;
+} // namespace vfs
+
 struct VFSVolume
 {
     VFSVolume();
@@ -107,33 +115,33 @@ struct VFSVolume
     void* open_main_window;
 };
 
-using VFSVolumeCallback = void (*)(VFSVolume* vol, VFSVolumeState state, void* user_data);
+using VFSVolumeCallback = void (*)(vfs::volume vol, VFSVolumeState state, void* user_data);
 
 bool vfs_volume_init();
 
 void vfs_volume_finalize();
 
-const std::vector<VFSVolume*> vfs_volume_get_all_volumes();
+const std::vector<vfs::volume> vfs_volume_get_all_volumes();
 
 void vfs_volume_add_callback(VFSVolumeCallback cb, void* user_data);
 void vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data);
 
-const char* vfs_volume_get_disp_name(VFSVolume* vol);
-const char* vfs_volume_get_mount_point(VFSVolume* vol);
-const char* vfs_volume_get_device(VFSVolume* vol);
-const char* vfs_volume_get_fstype(VFSVolume* vol);
-const char* vfs_volume_get_icon(VFSVolume* vol);
+const char* vfs_volume_get_disp_name(vfs::volume vol);
+const char* vfs_volume_get_mount_point(vfs::volume vol);
+const char* vfs_volume_get_device(vfs::volume vol);
+const char* vfs_volume_get_fstype(vfs::volume vol);
+const char* vfs_volume_get_icon(vfs::volume vol);
 
-bool vfs_volume_is_mounted(VFSVolume* vol);
+bool vfs_volume_is_mounted(vfs::volume vol);
 
-char* vfs_volume_get_mount_command(VFSVolume* vol, char* default_options, bool* run_in_terminal);
-char* vfs_volume_get_mount_options(VFSVolume* vol, char* options);
-void vfs_volume_automount(VFSVolume* vol);
-void vfs_volume_set_info(VFSVolume* volume);
-char* vfs_volume_device_mount_cmd(VFSVolume* vol, const char* options, bool* run_in_terminal);
-char* vfs_volume_device_unmount_cmd(VFSVolume* vol, bool* run_in_terminal);
-const std::string vfs_volume_device_info(VFSVolume* vol);
-char* vfs_volume_handler_cmd(i32 mode, i32 action, VFSVolume* vol, const char* options,
+char* vfs_volume_get_mount_command(vfs::volume vol, char* default_options, bool* run_in_terminal);
+char* vfs_volume_get_mount_options(vfs::volume vol, char* options);
+void vfs_volume_automount(vfs::volume vol);
+void vfs_volume_set_info(vfs::volume volume);
+char* vfs_volume_device_mount_cmd(vfs::volume vol, const char* options, bool* run_in_terminal);
+char* vfs_volume_device_unmount_cmd(vfs::volume vol, bool* run_in_terminal);
+const std::string vfs_volume_device_info(vfs::volume vol);
+char* vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* options,
                              netmount_t* netmount, bool* run_in_terminal, char** mount_point);
 
 SplitNetworkURL split_network_url(const char* url, netmount_t** netmount);
@@ -142,4 +150,4 @@ dev_t get_device_parent(dev_t dev);
 bool path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file,
                           char** fs_type);
 bool mtab_fstype_is_handled_by_protocol(const char* mtab_fstype);
-VFSVolume* vfs_volume_get_by_device_or_point(const char* device_file, const char* point);
+vfs::volume vfs_volume_get_by_device_or_point(const char* device_file, const char* point);

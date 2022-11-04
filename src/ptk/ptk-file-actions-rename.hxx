@@ -49,5 +49,6 @@ i32 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::fil
                     AutoOpenCreate* auto_open);
 
 void ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc callback);
-void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<vfs::file_info>& sel_files,
-                           const char* cwd, const char* setname);
+void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser,
+                           const std::vector<vfs::file_info>& sel_files, const char* cwd,
+                           const char* setname);
