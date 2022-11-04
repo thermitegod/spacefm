@@ -26,5 +26,5 @@
 std::vector<std::string> glist_t_char_to_vector_t_string(GList* list);
 
 // VFSFileInfo
-std::vector<VFSFileInfo*> glist_to_vector_VFSFileInfo(GList* list);
-GList* vector_to_glist_VFSFileInfo(std::vector<VFSFileInfo*> list);
+std::vector<vfs::file_info> glist_to_vector_VFSFileInfo(GList* list);
+GList* vector_to_glist_VFSFileInfo(std::vector<vfs::file_info> list);

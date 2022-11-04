@@ -68,7 +68,7 @@ ParentInfo::ParentInfo(PtkFileBrowser* file_browser, std::string_view cwd)
 }
 
 static bool
-open_archives_with_handler(ParentInfo* parent, const std::vector<VFSFileInfo*>& sel_files,
+open_archives_with_handler(ParentInfo* parent, const std::vector<vfs::file_info>& sel_files,
                            const char* full_path, VFSMimeType* mime_type)
 {
     if (xset_get_b(XSetName::ARC_DEF_OPEN))
@@ -308,7 +308,7 @@ free_file_list_hash(void* key, void* value, void* user_data)
 }
 
 void
-ptk_open_files_with_app(const char* cwd, const std::vector<VFSFileInfo*>& sel_files,
+ptk_open_files_with_app(const char* cwd, const std::vector<vfs::file_info>& sel_files,
                         const char* app_desktop, PtkFileBrowser* file_browser, bool xforce,
                         bool xnever)
 {
@@ -323,7 +323,7 @@ ptk_open_files_with_app(const char* cwd, const std::vector<VFSFileInfo*>& sel_fi
 
     ParentInfo* parent = new ParentInfo(file_browser, cwd);
 
-    for (VFSFileInfo* file: sel_files)
+    for (vfs::file_info file: sel_files)
     {
         if (!file)
             continue;

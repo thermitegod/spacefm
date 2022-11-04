@@ -121,13 +121,13 @@ clipboard_clean_data(GtkClipboard* clipboard, void* user_data)
 }
 
 void
-ptk_clipboard_copy_as_text(const char* working_dir, const std::vector<VFSFileInfo*>& sel_files)
+ptk_clipboard_copy_as_text(const char* working_dir, const std::vector<vfs::file_info>& sel_files)
 { // aka copy path
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
 
     std::string file_text;
-    for (VFSFileInfo* file: sel_files)
+    for (vfs::file_info file: sel_files)
     {
         const std::string file_path =
             Glib::build_filename(working_dir, vfs_file_info_get_name(file));
@@ -139,7 +139,7 @@ ptk_clipboard_copy_as_text(const char* working_dir, const std::vector<VFSFileInf
 }
 
 void
-ptk_clipboard_copy_name(const char* working_dir, const std::vector<VFSFileInfo*>& sel_files)
+ptk_clipboard_copy_name(const char* working_dir, const std::vector<vfs::file_info>& sel_files)
 {
     (void)working_dir;
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -147,7 +147,7 @@ ptk_clipboard_copy_name(const char* working_dir, const std::vector<VFSFileInfo*>
     i32 fcount = 0;
 
     std::string file_text;
-    for (VFSFileInfo* file: sel_files)
+    for (vfs::file_info file: sel_files)
     {
         if (fcount == 0)
             file_text = fmt::format("{}", vfs_file_info_get_name(file));
@@ -171,7 +171,7 @@ ptk_clipboard_copy_text(const char* text)
 }
 
 void
-ptk_clipboard_cut_or_copy_files(const char* working_dir, const std::vector<VFSFileInfo*>& sel_files,
+ptk_clipboard_cut_or_copy_files(const char* working_dir, const std::vector<vfs::file_info>& sel_files,
                                 bool copy)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -192,7 +192,7 @@ ptk_clipboard_cut_or_copy_files(const char* working_dir, const std::vector<VFSFi
 
     gtk_target_list_unref(target_list);
 
-    for (VFSFileInfo* file: sel_files)
+    for (vfs::file_info file: sel_files)
     {
         const std::string file_path =
             Glib::build_filename(working_dir, vfs_file_info_get_name(file));

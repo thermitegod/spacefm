@@ -53,7 +53,7 @@ struct PtkDirTreeNode
     PtkDirTreeNode();
     ~PtkDirTreeNode();
 
-    VFSFileInfo* file;
+    vfs::file_info file;
     PtkDirTreeNode* children;
     i32 n_children;
     vfs::file_monitor_t monitor;
@@ -449,7 +449,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
     PtkDirTreeNode* node = PTK_DIR_TREE_NODE(iter->user_data);
 
     g_value_init(value, column_types[column]);
-    VFSFileInfo* info = node->file;
+    vfs::file_info info = node->file;
     switch (column)
     {
         case PTKDirTreeCol::COL_DIR_TREE_ICON:
@@ -655,8 +655,8 @@ static i32
 ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b)
 {
     (void)tree;
-    VFSFileInfo* file1 = a->file;
-    VFSFileInfo* file2 = b->file;
+    vfs::file_info file1 = a->file;
+    vfs::file_info file2 = b->file;
 
     if (!file1 || !file2)
         return 0;

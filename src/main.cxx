@@ -498,7 +498,7 @@ main(i32 argc, char* argv[])
 static void
 open_file(std::string_view path)
 {
-    VFSFileInfo* file = vfs_file_info_new();
+    vfs::file_info file = vfs_file_info_new();
     vfs_file_info_get(file, path);
     VFSMimeType* mime_type = vfs_file_info_get_mime_type(file);
 

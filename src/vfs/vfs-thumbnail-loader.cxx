@@ -45,7 +45,7 @@ static void* thumbnail_loader_thread(vfs::async_task task, VFSThumbnailLoader* l
 static void thumbnail_request_free(VFSThumbnailRequest* req);
 static bool on_thumbnail_idle(VFSThumbnailLoader* loader);
 
-VFSThumbnailRequest::VFSThumbnailRequest(VFSFileInfo* file)
+VFSThumbnailRequest::VFSThumbnailRequest(vfs::file_info file)
 {
     this->file = vfs_file_info_ref(file);
 }
@@ -123,7 +123,7 @@ thumbnail_request_free(VFSThumbnailRequest* req)
 static bool
 on_thumbnail_idle(VFSThumbnailLoader* loader)
 {
-    VFSFileInfo* file;
+    vfs::file_info file;
 
     // LOG_DEBUG("ENTER ON_THUMBNAIL_IDLE");
 
@@ -226,7 +226,7 @@ thumbnail_loader_thread(vfs::async_task task, VFSThumbnailLoader* loader)
 }
 
 void
-vfs_thumbnail_loader_request(vfs::dir dir, VFSFileInfo* file, bool is_big)
+vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
 {
     bool new_task = false;
 

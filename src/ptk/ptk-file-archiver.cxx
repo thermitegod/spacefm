@@ -311,7 +311,7 @@ replace_archive_subs(std::string_view line, std::string_view n, std::string_view
 }
 
 void
-ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFileInfo*>& sel_files,
+ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::file_info>& sel_files,
                          const char* cwd)
 {
     /* Generating dialog - extra nullptr on the nullptr-terminated list to
@@ -549,7 +549,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
     if (!sel_files.empty())
     {
         // Fetching first extension handler deals with
-        VFSFileInfo* file = sel_files.front();
+        vfs::file_info file = sel_files.front();
         const std::string ext = archive_handler_get_first_extension(handler_xset);
         dest_file = g_strjoin(nullptr, vfs_file_info_get_disp_name(file), ext.c_str(), nullptr);
         gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), dest_file);
@@ -767,7 +767,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
          * when '%N' is present, only the first otherwise */
         i32 i = 0;
         bool loop_once = ztd::contains(command, "%N");
-        for (VFSFileInfo* file: sel_files)
+        for (vfs::file_info file: sel_files)
         {
             desc = vfs_file_info_get_name(file);
 
@@ -860,7 +860,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<VFSFile
              * '%N' is present */
             if (ztd::contains(command, "%N"))
             {
-                for (VFSFileInfo* file: sel_files)
+                for (vfs::file_info file: sel_files)
                 {
                     desc = vfs_file_info_get_name(file);
                     if (desc[0] == '-')
@@ -944,7 +944,7 @@ on_create_subfolder_toggled(GtkToggleButton* togglebutton, GtkWidget* chk_write)
 }
 
 void
-ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFileInfo*>& sel_files,
+ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<vfs::file_info>& sel_files,
                           const char* cwd, const char* dest_dir, i32 job,
                           bool archive_presence_checked)
 { /* This function is also used to list the contents of archives */
@@ -985,7 +985,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFil
         bool archive_found = false;
 
         // Looping for all files to attempt to list/extract
-        for (VFSFileInfo* file: sel_files)
+        for (vfs::file_info file: sel_files)
         {
             // Fetching file details
             mime_type = vfs_file_info_get_mime_type(file);
@@ -1155,7 +1155,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser, const std::vector<VFSFil
     std::string final_command;
     std::string error_message;
     // Looping for all files to attempt to list/extract
-    for (VFSFileInfo* file: sel_files)
+    for (vfs::file_info file: sel_files)
     {
         // Fetching file details
         mime_type = vfs_file_info_get_mime_type(file);

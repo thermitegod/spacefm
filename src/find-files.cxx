@@ -197,14 +197,14 @@ FindFile::FindFile()
 
 struct FoundFile
 {
-    FoundFile(VFSFileInfo* fi, std::string_view dir_path);
+    FoundFile(vfs::file_info fi, std::string_view dir_path);
     // ~FoundFile();
 
-    VFSFileInfo* fi;
+    vfs::file_info fi;
     std::string dir_path;
 };
 
-FoundFile::FoundFile(VFSFileInfo* fi, std::string_view dir_path)
+FoundFile::FoundFile(vfs::file_info fi, std::string_view dir_path)
 {
     this->fi = fi;
     this->dir_path = dir_path.data();
@@ -225,7 +225,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
     if (!files)
         return false;
 
-    const std::vector<VFSFileInfo*> sel_files = glist_to_vector_VFSFileInfo(files);
+    const std::vector<vfs::file_info> sel_files = glist_to_vector_VFSFileInfo(files);
 
     /*igtodo test passing file_browser here? */
     ptk_open_files_with_app(dir, sel_files, nullptr, nullptr, false, true);
@@ -235,7 +235,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
     {
         for (GList* l = files; l; l = l->next)
         {
-            VFSFileInfo* file = VFS_FILE_INFO(l->data);
+            vfs::file_info file = VFS_FILE_INFO(l->data);
             if (!file)
                 continue;
 
@@ -269,7 +269,7 @@ on_open_files(GAction* action, FindFile* data)
     GList* rows;
     GHashTable* hash;
     GtkWidget* w;
-    VFSFileInfo* fi;
+    vfs::file_info fi;
     bool open_files_has_dir = false;        // sfm
     PtkFileBrowser* file_browser = nullptr; // sfm
     bool open_files = true;
@@ -575,7 +575,7 @@ static void
 process_found_files(FindFile* data, GQueue* queue, const char* path)
 {
     GtkTreeIter it;
-    VFSFileInfo* fi;
+    vfs::file_info fi;
     GdkPixbuf* icon;
     FoundFile* ff;
 

@@ -34,8 +34,8 @@
 
 #include <gtk/gtk.h>
 
-#define VFS_FILE_INFO(obj)             (static_cast<VFSFileInfo*>(obj))
-#define VFS_FILE_INFO_REINTERPRET(obj) (reinterpret_cast<VFSFileInfo*>(obj))
+#define VFS_FILE_INFO(obj)             (static_cast<vfs::file_info>(obj))
+#define VFS_FILE_INFO_REINTERPRET(obj) (reinterpret_cast<vfs::file_info>(obj))
 
 // For future use, not all supported now
 enum VFSFileInfoFlag
@@ -87,66 +87,71 @@ struct VFSFileInfo
     std::atomic<u32> n_ref{0};
 };
 
-VFSFileInfo* vfs_file_info_new();
-VFSFileInfo* vfs_file_info_ref(VFSFileInfo* fi);
-void vfs_file_info_unref(VFSFileInfo* fi);
+namespace vfs
+{
+    using file_info = ztd::raw_ptr<VFSFileInfo>;
+} // namespace vfs
 
-bool vfs_file_info_get(VFSFileInfo* fi, std::string_view file_path);
+vfs::file_info vfs_file_info_new();
+vfs::file_info vfs_file_info_ref(vfs::file_info fi);
+void vfs_file_info_unref(vfs::file_info fi);
 
-const char* vfs_file_info_get_name(VFSFileInfo* fi);
-const char* vfs_file_info_get_disp_name(VFSFileInfo* fi);
+bool vfs_file_info_get(vfs::file_info fi, std::string_view file_path);
 
-void vfs_file_info_set_disp_name(VFSFileInfo* fi, const char* name);
+const char* vfs_file_info_get_name(vfs::file_info fi);
+const char* vfs_file_info_get_disp_name(vfs::file_info fi);
 
-off_t vfs_file_info_get_size(VFSFileInfo* fi);
-const char* vfs_file_info_get_disp_size(VFSFileInfo* fi);
+void vfs_file_info_set_disp_name(vfs::file_info fi, const char* name);
 
-off_t vfs_file_info_get_blocks(VFSFileInfo* fi);
+off_t vfs_file_info_get_size(vfs::file_info fi);
+const char* vfs_file_info_get_disp_size(vfs::file_info fi);
 
-std::filesystem::perms vfs_file_info_get_mode(VFSFileInfo* fi);
+off_t vfs_file_info_get_blocks(vfs::file_info fi);
 
-VFSMimeType* vfs_file_info_get_mime_type(VFSFileInfo* fi);
-void vfs_file_info_reload_mime_type(VFSFileInfo* fi, const char* full_path);
+std::filesystem::perms vfs_file_info_get_mode(vfs::file_info fi);
 
-const char* vfs_file_info_get_mime_type_desc(VFSFileInfo* fi);
+VFSMimeType* vfs_file_info_get_mime_type(vfs::file_info fi);
+void vfs_file_info_reload_mime_type(vfs::file_info fi, const char* full_path);
 
-const char* vfs_file_info_get_disp_owner(VFSFileInfo* fi);
-const char* vfs_file_info_get_disp_mtime(VFSFileInfo* fi);
-const char* vfs_file_info_get_disp_perm(VFSFileInfo* fi);
+const char* vfs_file_info_get_mime_type_desc(vfs::file_info fi);
 
-time_t* vfs_file_info_get_mtime(VFSFileInfo* fi);
-time_t* vfs_file_info_get_atime(VFSFileInfo* fi);
+const char* vfs_file_info_get_disp_owner(vfs::file_info fi);
+const char* vfs_file_info_get_disp_mtime(vfs::file_info fi);
+const char* vfs_file_info_get_disp_perm(vfs::file_info fi);
+
+time_t* vfs_file_info_get_mtime(vfs::file_info fi);
+time_t* vfs_file_info_get_atime(vfs::file_info fi);
 
 void vfs_file_info_set_thumbnail_size_big(i32 size);
 void vfs_file_info_set_thumbnail_size_small(i32 size);
 
-bool vfs_file_info_load_thumbnail(VFSFileInfo* fi, std::string_view full_path, bool big);
-bool vfs_file_info_is_thumbnail_loaded(VFSFileInfo* fi, bool big);
+bool vfs_file_info_load_thumbnail(vfs::file_info fi, std::string_view full_path, bool big);
+bool vfs_file_info_is_thumbnail_loaded(vfs::file_info fi, bool big);
 
-GdkPixbuf* vfs_file_info_get_big_icon(VFSFileInfo* fi);
-GdkPixbuf* vfs_file_info_get_small_icon(VFSFileInfo* fi);
+GdkPixbuf* vfs_file_info_get_big_icon(vfs::file_info fi);
+GdkPixbuf* vfs_file_info_get_small_icon(vfs::file_info fi);
 
-GdkPixbuf* vfs_file_info_get_big_thumbnail(VFSFileInfo* fi);
-GdkPixbuf* vfs_file_info_get_small_thumbnail(VFSFileInfo* fi);
+GdkPixbuf* vfs_file_info_get_big_thumbnail(vfs::file_info fi);
+GdkPixbuf* vfs_file_info_get_small_thumbnail(vfs::file_info fi);
 
-bool vfs_file_info_is_dir(VFSFileInfo* fi);
-bool vfs_file_info_is_regular_file(VFSFileInfo* fi);
-bool vfs_file_info_is_symlink(VFSFileInfo* fi);
-bool vfs_file_info_is_socket(VFSFileInfo* fi);
-bool vfs_file_info_is_named_pipe(VFSFileInfo* fi);
-bool vfs_file_info_is_block_device(VFSFileInfo* fi);
-bool vfs_file_info_is_char_device(VFSFileInfo* fi);
+bool vfs_file_info_is_dir(vfs::file_info fi);
+bool vfs_file_info_is_regular_file(vfs::file_info fi);
+bool vfs_file_info_is_symlink(vfs::file_info fi);
+bool vfs_file_info_is_socket(vfs::file_info fi);
+bool vfs_file_info_is_named_pipe(vfs::file_info fi);
+bool vfs_file_info_is_block_device(vfs::file_info fi);
+bool vfs_file_info_is_char_device(vfs::file_info fi);
 
-bool vfs_file_info_is_image(VFSFileInfo* fi);
-bool vfs_file_info_is_video(VFSFileInfo* fi);
-bool vfs_file_info_is_desktop_entry(VFSFileInfo* fi);
-
-/* Full path of the file is required by this function */
-bool vfs_file_info_is_executable(VFSFileInfo* fi, std::string_view file_path = "");
+bool vfs_file_info_is_image(vfs::file_info fi);
+bool vfs_file_info_is_video(vfs::file_info fi);
+bool vfs_file_info_is_desktop_entry(vfs::file_info fi);
 
 /* Full path of the file is required by this function */
-bool vfs_file_info_is_text(VFSFileInfo* fi, std::string_view file_path = "");
+bool vfs_file_info_is_executable(vfs::file_info fi, std::string_view file_path = "");
 
-void vfs_file_info_load_special_info(VFSFileInfo* fi, std::string_view file_path = "");
+/* Full path of the file is required by this function */
+bool vfs_file_info_is_text(vfs::file_info fi, std::string_view file_path = "");
 
-void vfs_file_info_list_free(const std::vector<VFSFileInfo*>& list);
+void vfs_file_info_load_special_info(vfs::file_info fi, std::string_view file_path = "");
+
+void vfs_file_info_list_free(const std::vector<vfs::file_info>& list);

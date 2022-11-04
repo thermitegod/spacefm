@@ -340,7 +340,7 @@ update_file_display(std::string_view path)
     vfs::dir vdir = vfs_dir_get_by_path_soft(dir_path.c_str());
     if (vdir && vdir->avoid_changes)
     {
-        VFSFileInfo* file = vfs_file_info_new();
+        vfs::file_info file = vfs_file_info_new();
         vfs_file_info_get(file, path);
         vfs_dir_emit_file_created(vdir, vfs_file_info_get_name(file), true);
         vfs_file_info_unref(file);

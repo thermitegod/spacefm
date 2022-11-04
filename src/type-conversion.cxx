@@ -42,23 +42,23 @@ glist_t_char_to_vector_t_string(GList* list)
  * VFSFileInfo
  */
 
-std::vector<VFSFileInfo*>
+std::vector<vfs::file_info>
 glist_to_vector_VFSFileInfo(GList* list)
 {
-    std::vector<VFSFileInfo*> vec;
+    std::vector<vfs::file_info> vec;
     for (GList* l = list; l; l = l->next)
     {
-        VFSFileInfo* file = VFS_FILE_INFO(l->data);
+        vfs::file_info file = VFS_FILE_INFO(l->data);
         vec.push_back(file);
     }
     return vec;
 }
 
 GList*
-vector_to_glist_VFSFileInfo(std::vector<VFSFileInfo*> list)
+vector_to_glist_VFSFileInfo(std::vector<vfs::file_info> list)
 {
     GList* l = nullptr;
-    for (VFSFileInfo* file: list)
+    for (vfs::file_info file: list)
     {
         l = g_list_append(l, file);
     }

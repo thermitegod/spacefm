@@ -44,10 +44,10 @@ enum PtkRenameMode
     PTK_RENAME_NEW_LINK
 };
 
-i32 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo* file,
+i32 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_info file,
                     const char* dest_dir, bool clip_copy, PtkRenameMode create_new,
                     AutoOpenCreate* auto_open);
 
 void ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc callback);
-void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<VFSFileInfo*>& sel_files,
+void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<vfs::file_info>& sel_files,
                            const char* cwd, const char* setname);

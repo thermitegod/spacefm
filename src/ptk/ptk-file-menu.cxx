@@ -635,15 +635,15 @@ ptk_file_menu_free(PtkFileMenu* data)
 
 /* Retrieve popup menu for selected file(s) */
 GtkWidget*
-ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* info,
+ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info info,
                   const char* cwd)
 {
     return ptk_file_menu_new(browser, file_path, info, cwd, {});
 }
 
 GtkWidget*
-ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, VFSFileInfo* info,
-                  const char* cwd, const std::vector<VFSFileInfo*>& sel_files)
+ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info info,
+                  const char* cwd, const std::vector<vfs::file_info>& sel_files)
 { // either desktop or browser must be non-nullptr
 
     const char* app_name = nullptr;
@@ -1348,7 +1348,7 @@ on_popup_open_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
 
-    std::vector<VFSFileInfo*> sel_files = data->sel_files;
+    std::vector<vfs::file_info> sel_files = data->sel_files;
 
     if (sel_files.empty())
         sel_files.push_back(data->info);
@@ -1381,7 +1381,7 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     char* app = ptk_choose_app_for_mime_type(parent_win, mime_type, false, true, true, false);
     if (app)
     {
-        std::vector<VFSFileInfo*> sel_files = data->sel_files;
+        std::vector<vfs::file_info> sel_files = data->sel_files;
         if (sel_files.empty())
             sel_files.push_back(data->info);
         ptk_open_files_with_app(data->cwd, sel_files, app, data->browser, false, false);
@@ -1404,7 +1404,7 @@ on_popup_open_all(GtkMenuItem* menuitem, PtkFileMenu* data)
     if (xset_opener(data->browser, 1))
         return;
 
-    std::vector<VFSFileInfo*> sel_files = data->sel_files;
+    std::vector<vfs::file_info> sel_files = data->sel_files;
     if (sel_files.empty())
         sel_files.push_back(data->info);
     ptk_open_files_with_app(data->cwd, sel_files, nullptr, data->browser, false, true);
@@ -1427,7 +1427,7 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
     else
         app = desktop.get_name();
 
-    std::vector<VFSFileInfo*> sel_files = data->sel_files;
+    std::vector<vfs::file_info> sel_files = data->sel_files;
     if (sel_files.empty())
         sel_files.push_back(data->info);
     ptk_open_files_with_app(data->cwd, sel_files, app.c_str(), data->browser, false, false);
@@ -2146,7 +2146,7 @@ on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 
     if (!data->sel_files.empty())
     {
-        for (VFSFileInfo* file: data->sel_files)
+        for (vfs::file_info file: data->sel_files)
         {
             const std::string full_path =
                 Glib::build_filename(data->cwd, vfs_file_info_get_name(file));
@@ -2180,7 +2180,7 @@ on_new_bookmark(GtkMenuItem* menuitem, PtkFileMenu* data)
     // if a single dir or file is selected, bookmark it instead of cwd
     if (!data->sel_files.empty() && data->sel_files.size() == 1)
     {
-        VFSFileInfo* file = data->sel_files.back();
+        vfs::file_info file = data->sel_files.back();
         const std::string full_path = Glib::build_filename(data->cwd, vfs_file_info_get_name(file));
         ptk_bookmark_view_add_bookmark(nullptr, data->browser, full_path.c_str());
     }
@@ -2368,7 +2368,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
     if (ao->path && GTK_IS_WIDGET(ao->file_browser) && std::filesystem::exists(ao->path))
     {
         const std::string cwd = Glib::path_get_dirname(ao->path);
-        VFSFileInfo* file;
+        vfs::file_info file;
 
         // select file
         if (ztd::same(cwd, ptk_file_browser_get_cwd(ao->file_browser)))
@@ -2395,7 +2395,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
             {
                 file = vfs_file_info_new();
                 vfs_file_info_get(file, ao->path);
-                const std::vector<VFSFileInfo*> sel_files{file};
+                const std::vector<vfs::file_info> sel_files{file};
                 ptk_open_files_with_app(cwd.c_str(),
                                         sel_files,
                                         nullptr,
@@ -2423,7 +2423,7 @@ create_new_file(PtkFileMenu* data, i32 create_new)
     if (data->browser)
         ao->callback = (GFunc)on_autoopen_create_cb;
 
-    VFSFileInfo* file = nullptr;
+    vfs::file_info file = nullptr;
     if (!data->sel_files.empty())
         file = data->sel_files.front();
 
@@ -2499,8 +2499,8 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
 
     const char* cwd;
     std::string file_path;
-    VFSFileInfo* info;
-    std::vector<VFSFileInfo*> sel_files;
+    vfs::file_info info;
+    std::vector<vfs::file_info> sel_files;
 
     // setup data
     if (browser)

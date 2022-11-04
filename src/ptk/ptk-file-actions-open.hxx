@@ -30,6 +30,6 @@
  * app_desktop is the application used to open the files.
  * If app_desktop == nullptr, each file will be opened with its
  * default application. */
-void ptk_open_files_with_app(const char* cwd, const std::vector<VFSFileInfo*>& sel_files,
+void ptk_open_files_with_app(const char* cwd, const std::vector<vfs::file_info>& sel_files,
                              const char* app_desktop, PtkFileBrowser* file_browser, bool xforce,
                              bool xnever);

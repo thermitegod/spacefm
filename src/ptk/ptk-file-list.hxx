@@ -112,7 +112,7 @@ PtkFileList* ptk_file_list_new(vfs::dir dir, bool show_hidden);
 
 void ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir);
 
-bool ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, VFSFileInfo* fi);
+bool ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, vfs::file_info fi);
 
 void ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size);
 void ptk_file_list_sort(PtkFileList* list); // sfm

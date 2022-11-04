@@ -1994,7 +1994,7 @@ update_new_display_delayed(char* path)
     vfs::dir vdir = vfs_dir_get_by_path_soft(dir_path.c_str());
     if (vdir && vdir->avoid_changes)
     {
-        VFSFileInfo* file = vfs_file_info_new();
+        vfs::file_info file = vfs_file_info_new();
         vfs_file_info_get(file, path);
         vfs_dir_emit_file_created(vdir, vfs_file_info_get_name(file), true);
         vfs_file_info_unref(file);
@@ -2017,7 +2017,7 @@ update_new_display(const char* path)
 }
 
 i32
-ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, VFSFileInfo* file,
+ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_info file,
                 const char* dest_dir, bool clip_copy, PtkRenameMode create_new,
                 AutoOpenCreate* auto_open)
 {
@@ -3153,7 +3153,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
     (void)callback;
     bool is_cut = false;
     i32 missing_targets;
-    VFSFileInfo* file;
+    vfs::file_info file;
     std::string file_dir;
 
     const std::vector<std::string> files =
@@ -3194,7 +3194,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
 }
 
 void
-ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<VFSFileInfo*>& sel_files,
+ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<vfs::file_info>& sel_files,
                       const char* cwd, const char* setname)
 {
     /*
@@ -3213,7 +3213,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<VFSFileInf
     std::string file_paths;
     std::string file_path_q;
     i32 item_count = 0;
-    for (VFSFileInfo* file: sel_files)
+    for (vfs::file_info file: sel_files)
     {
         const std::string file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
         file_path_q = bash_quote(file_path);

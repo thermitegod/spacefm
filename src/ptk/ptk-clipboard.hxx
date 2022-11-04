@@ -28,12 +28,12 @@
 #include "vfs/vfs-file-info.hxx"
 
 void ptk_clipboard_cut_or_copy_files(const char* working_dir,
-                                     const std::vector<VFSFileInfo*>& sel_files, bool copy);
+                                     const std::vector<vfs::file_info>& sel_files, bool copy);
 
 void ptk_clipboard_copy_as_text(const char* working_dir,
-                                const std::vector<VFSFileInfo*>& sel_files);
+                                const std::vector<vfs::file_info>& sel_files);
 
-void ptk_clipboard_copy_name(const char* working_dir, const std::vector<VFSFileInfo*>& sel_files);
+void ptk_clipboard_copy_name(const char* working_dir, const std::vector<vfs::file_info>& sel_files);
 
 void ptk_clipboard_paste_files(GtkWindow* parent_win, const char* dest_dir, GtkTreeView* task_view,
                                GFunc callback, GtkWindow* callback_win);

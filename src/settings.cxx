@@ -2752,7 +2752,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
                 if (desktop.get_exec() && desktop.get_exec()[0] != '\0')
                 {
                     // get file list
-                    std::vector<VFSFileInfo*> sel_files;
+                    std::vector<vfs::file_info> sel_files;
                     if (set->browser)
                     {
                         sel_files = ptk_file_browser_get_selected_files(set->browser);
@@ -2764,7 +2764,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
 
                     std::vector<std::string> open_files;
 
-                    for (VFSFileInfo* file: sel_files)
+                    for (vfs::file_info file: sel_files)
                     {
                         const std::string open_file =
                             Glib::build_filename(cwd, vfs_file_info_get_name(file));

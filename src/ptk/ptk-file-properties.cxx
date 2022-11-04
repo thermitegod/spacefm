@@ -69,7 +69,7 @@ struct FilePropertiesDialogData
     ~FilePropertiesDialogData();
 
     char* dir_path;
-    std::vector<VFSFileInfo*> file_list;
+    std::vector<vfs::file_info> file_list;
     GtkWidget* dlg;
 
     GtkEntry* owner;
@@ -200,7 +200,7 @@ static void*
 calc_size(void* user_data)
 {
     FilePropertiesDialogData* data = FILE_PROPERTIES_DIALOG_DATA(user_data);
-    for (VFSFileInfo* file: data->file_list)
+    for (vfs::file_info file: data->file_list)
     {
         if (data->cancel)
             break;
@@ -380,7 +380,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
 
 static GtkWidget*
 file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
-                        const std::vector<VFSFileInfo*>& sel_files, i32 page)
+                        const std::vector<vfs::file_info>& sel_files, i32 page)
 {
     GtkBuilder* builder = ptk_gtk_builder_new_from_file(PTK_DLG_FILE_PROPERTIES);
     GtkWidget* dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
@@ -444,7 +444,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     // MOD
     VFSMimeType* type;
     VFSMimeType* type2 = nullptr;
-    for (VFSFileInfo* file: sel_files)
+    for (vfs::file_info file: sel_files)
     {
         type = vfs_file_info_get_mime_type(file);
         if (!type2)
@@ -463,7 +463,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     data->recurse = GTK_WIDGET(gtk_builder_get_object(builder, "recursive"));
     gtk_widget_set_sensitive(data->recurse, is_dirs);
 
-    VFSFileInfo* file;
+    vfs::file_info file;
     VFSMimeType* mime;
 
     file = sel_files.front();
@@ -812,7 +812,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
             if ((new_mtime || new_atime) && !data->file_list.empty())
             {
                 std::string str;
-                for (VFSFileInfo* file: data->file_list)
+                for (vfs::file_info file: data->file_list)
                 {
                     const std::string file_path = Glib::build_filename(data->dir_path, file->name);
                     quoted_path = bash_quote(file_path);
@@ -862,7 +862,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                     gtk_tree_model_get(model, &it, 2, &action, -1);
                     if (action)
                     {
-                        VFSFileInfo* file = data->file_list.front();
+                        vfs::file_info file = data->file_list.front();
                         VFSMimeType* mime = vfs_file_info_get_mime_type(file);
                         vfs_mime_type_set_default_action(mime, action);
                         vfs_mime_type_unref(mime);
@@ -915,7 +915,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
             if (!uid || !gid || mod_change)
             {
                 std::vector<std::string> file_list;
-                for (VFSFileInfo* file: data->file_list)
+                for (vfs::file_info file: data->file_list)
                 {
                     const std::string file_path =
                         Glib::build_filename(data->dir_path, vfs_file_info_get_name(file));
@@ -959,14 +959,14 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
 
 void
 ptk_show_file_properties(GtkWindow* parent_win, const char* cwd,
-                         std::vector<VFSFileInfo*>& sel_files, i32 page)
+                         std::vector<vfs::file_info>& sel_files, i32 page)
 {
     GtkWidget* dlg;
 
     if (!sel_files.empty())
     {
         /* Make a copy of the list */
-        // for (VFSFileInfo* file: sel_files)
+        // for (vfs::file_info file: sel_files)
         // {
         //     vfs_file_info_ref(file);
         // }
@@ -976,7 +976,7 @@ ptk_show_file_properties(GtkWindow* parent_win, const char* cwd,
     else
     {
         // no files selected, use cwd as file
-        VFSFileInfo* file = vfs_file_info_new();
+        vfs::file_info file = vfs_file_info_new();
         vfs_file_info_get(file, cwd);
         // sel_files.push_back(vfs_file_info_ref(file));
         sel_files.push_back(file);

@@ -3019,7 +3019,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
 
     if (num_sel > 0)
     {
-        const std::vector<VFSFileInfo*> sel_files =
+        const std::vector<vfs::file_info> sel_files =
             ptk_file_browser_get_selected_files(file_browser);
         if (sel_files.empty())
             return;
@@ -3031,7 +3031,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
         if (num_sel == 1)
         // display file name or symlink info in status bar if one file selected
         {
-            VFSFileInfo* file = vfs_file_info_ref(sel_files.front());
+            vfs::file_info file = vfs_file_info_ref(sel_files.front());
             if (!file)
                 return;
 
@@ -3099,7 +3099,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
             u32 count_block = 0;
             u32 count_char = 0;
 
-            for (VFSFileInfo* file: sel_files)
+            for (vfs::file_info file: sel_files)
             {
                 file = vfs_file_info_ref(file);
                 if (!file)
@@ -3732,11 +3732,11 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
                 : "true";
         // }
 
-        const std::vector<VFSFileInfo*> sel_files =
+        const std::vector<vfs::file_info> sel_files =
             ptk_file_browser_get_selected_files(file_browser);
         if (!sel_files.empty())
         {
-            VFSFileInfo* file = vfs_file_info_ref(sel_files.front());
+            vfs::file_info file = vfs_file_info_ref(sel_files.front());
 
             c->var[ItemPropContext::CONTEXT_NAME] = vfs_file_info_get_name(file);
             const std::string path = Glib::build_filename(c->var[ItemPropContext::CONTEXT_DIR],
@@ -4035,11 +4035,11 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         buf.append(fmt::format("\nfm_tab_panel[{}]=\"{}\"\n", p, current_page + 1));
 
         // selected files
-        const std::vector<VFSFileInfo*> sel_files = ptk_file_browser_get_selected_files(a_browser);
+        const std::vector<vfs::file_info> sel_files = ptk_file_browser_get_selected_files(a_browser);
         if (!sel_files.empty())
         {
             buf.append(fmt::format("fm_panel{}_files=(\n", p));
-            for (VFSFileInfo* file: sel_files)
+            for (vfs::file_info file: sel_files)
             {
                 path = vfs_file_info_get_name(file);
                 if (!cwd_needs_quote && ztd::contains(path, "\""))
@@ -4059,7 +4059,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
             if (file_browser == a_browser)
             {
                 buf.append(fmt::format("fm_filenames=(\n"));
-                for (VFSFileInfo* file: sel_files)
+                for (vfs::file_info file: sel_files)
                 {
                     path = vfs_file_info_get_name(file);
                     buf.append(fmt::format("{}\n", bash_quote(path)));
@@ -6652,14 +6652,14 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (ztd::same(socket_property, "selected_filenames") ||
                  ztd::same(socket_property, "selected_files"))
         {
-            const std::vector<VFSFileInfo*> sel_files =
+            const std::vector<vfs::file_info> sel_files =
                 ptk_file_browser_get_selected_files(file_browser);
             if (sel_files.empty())
                 return 0;
 
             // build bash array
             str = "(";
-            for (VFSFileInfo* file: sel_files)
+            for (vfs::file_info file: sel_files)
             {
                 file = vfs_file_info_ref(file);
                 if (!file)

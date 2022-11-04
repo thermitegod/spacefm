@@ -70,7 +70,7 @@ static bool on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_c
 static bool
 filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
 {
-    VFSFileInfo* file;
+    vfs::file_info file;
     GtkTreeView* view = GTK_TREE_VIEW(data);
     bool show_hidden = GPOINTER_TO_INT(g_object_get_qdata(G_OBJECT(view), dir_tree_view_data));
 
@@ -269,7 +269,7 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
             return false;
         }
         bool found = false;
-        VFSFileInfo* info;
+        vfs::file_info info;
         do
         {
             gtk_tree_model_get(model, &it, PTKDirTreeCol::COL_DIR_TREE_INFO, &info, -1);
@@ -360,7 +360,7 @@ sel_func(GtkTreeSelection* selection, GtkTreeModel* model, GtkTreePath* path,
     (void)path_currently_selected;
     (void)data;
     GtkTreeIter it;
-    VFSFileInfo* file;
+    vfs::file_info file;
 
     if (!gtk_tree_model_get_iter(model, &it, path))
         return false;
@@ -559,7 +559,7 @@ dir_tree_view_get_drop_dir(GtkWidget* view, i32 x, i32 y)
 {
     GtkTreePath* tree_path = nullptr;
     GtkTreeIter it;
-    VFSFileInfo* file;
+    vfs::file_info file;
     char* dest_path = nullptr;
 
     // if drag is in progress, get the dest row path

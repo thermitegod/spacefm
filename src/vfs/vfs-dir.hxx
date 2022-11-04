@@ -51,7 +51,7 @@ struct VFSDir
 
     char* path;
     char* disp_path;
-    std::vector<VFSFileInfo*> file_list;
+    std::vector<vfs::file_info> file_list;
 
     /*<private>*/
     vfs::file_monitor_t monitor;
@@ -68,7 +68,7 @@ struct VFSDir
 
     struct VFSThumbnailLoader* thumbnail_loader;
 
-    std::vector<VFSFileInfo*> changed_files;
+    std::vector<vfs::file_info> changed_files;
     std::vector<std::string> created_files;
 
     i64 xhidden_count;
@@ -76,18 +76,18 @@ struct VFSDir
     // Signals
   public:
     // Signals function types
-    using evt_file_created__run_first__t = void(VFSFileInfo*, PtkFileBrowser*);
-    using evt_file_created__run_last__t = void(VFSFileInfo*, PtkFileList*);
+    using evt_file_created__run_first__t = void(vfs::file_info, PtkFileBrowser*);
+    using evt_file_created__run_last__t = void(vfs::file_info, PtkFileList*);
 
-    using evt_file_changed__run_first__t = void(VFSFileInfo*, PtkFileBrowser*);
-    using evt_file_changed__run_last__t = void(VFSFileInfo*, PtkFileList*);
+    using evt_file_changed__run_first__t = void(vfs::file_info, PtkFileBrowser*);
+    using evt_file_changed__run_last__t = void(vfs::file_info, PtkFileList*);
 
-    using evt_file_deleted__run_first__t = void(VFSFileInfo*, PtkFileBrowser*);
-    using evt_file_deleted__run_last__t = void(VFSFileInfo*, PtkFileList*);
+    using evt_file_deleted__run_first__t = void(vfs::file_info, PtkFileBrowser*);
+    using evt_file_deleted__run_last__t = void(vfs::file_info, PtkFileList*);
 
     using evt_file_listed_t = void(PtkFileBrowser*, bool);
 
-    using evt_file_thumbnail_loaded_t = void(VFSFileInfo*, PtkFileList*);
+    using evt_file_thumbnail_loaded_t = void(vfs::file_info, PtkFileList*);
 
     using evt_mime_change_t = void();
 
@@ -201,7 +201,7 @@ struct VFSDir
     // Signals Run Event
     template<EventType evt>
     typename std::enable_if<evt == EventType::FILE_CREATED, void>::type
-    run_event(VFSFileInfo* info)
+    run_event(vfs::file_info info)
     {
         // LOG_TRACE("Signal Execute   : EventType::FILE_CREATED");
         this->evt_mime_change.emit();
@@ -211,7 +211,7 @@ struct VFSDir
 
     template<EventType evt>
     typename std::enable_if<evt == EventType::FILE_CHANGED, void>::type
-    run_event(VFSFileInfo* info)
+    run_event(vfs::file_info info)
     {
         // LOG_TRACE("Signal Execute   : EventType::FILE_CHANGED");
         this->evt_mime_change.emit();
@@ -221,7 +221,7 @@ struct VFSDir
 
     template<EventType evt>
     typename std::enable_if<evt == EventType::FILE_DELETED, void>::type
-    run_event(VFSFileInfo* info)
+    run_event(vfs::file_info info)
     {
         // LOG_TRACE("Signal Execute   : EventType::FILE_DELETED");
         this->evt_mime_change.emit();
@@ -240,7 +240,7 @@ struct VFSDir
 
     template<EventType evt>
     typename std::enable_if<evt == EventType::FILE_THUMBNAIL_LOADED, void>::type
-    run_event(VFSFileInfo* info)
+    run_event(vfs::file_info info)
     {
         // LOG_TRACE("Signal Execute   : EventType::FILE_THUMBNAIL_LOADED");
         this->evt_file_thumbnail_loaded.emit(info, this->evt_data_list);
@@ -299,10 +299,10 @@ void vfs_dir_unload_thumbnails(vfs::dir dir, bool is_big);
 
 /* emit signals */
 void vfs_dir_emit_file_created(vfs::dir dir, std::string_view file_name, bool force);
-void vfs_dir_emit_file_deleted(vfs::dir dir, std::string_view file_name, VFSFileInfo* file);
-void vfs_dir_emit_file_changed(vfs::dir dir, std::string_view file_name, VFSFileInfo* file,
+void vfs_dir_emit_file_deleted(vfs::dir dir, std::string_view file_name, vfs::file_info file);
+void vfs_dir_emit_file_changed(vfs::dir dir, std::string_view file_name, vfs::file_info file,
                                bool force);
-void vfs_dir_emit_thumbnail_loaded(vfs::dir dir, VFSFileInfo* file);
+void vfs_dir_emit_thumbnail_loaded(vfs::dir dir, vfs::file_info file);
 void vfs_dir_flush_notify_cache();
 
 bool vfs_dir_add_hidden(std::string_view path, std::string_view file_name);

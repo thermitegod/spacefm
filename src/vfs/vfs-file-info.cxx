@@ -48,16 +48,16 @@
 
 static i32 big_thumb_size = 48, small_thumb_size = 20;
 
-VFSFileInfo*
+vfs::file_info
 vfs_file_info_new()
 {
-    VFSFileInfo* fi = g_slice_new0(VFSFileInfo);
+    vfs::file_info fi = g_slice_new0(VFSFileInfo);
     fi->ref_inc();
     return fi;
 }
 
 static void
-vfs_file_info_clear(VFSFileInfo* fi)
+vfs_file_info_clear(vfs::file_info fi)
 {
     if (!fi->disp_name.empty() && !ztd::same(fi->disp_name, fi->name))
         fi->disp_name.clear();
@@ -93,15 +93,15 @@ vfs_file_info_clear(VFSFileInfo* fi)
     fi->flags = VFSFileInfoFlag::VFS_FILE_INFO_NONE;
 }
 
-VFSFileInfo*
-vfs_file_info_ref(VFSFileInfo* fi)
+vfs::file_info
+vfs_file_info_ref(vfs::file_info fi)
 {
     fi->ref_inc();
     return fi;
 }
 
 void
-vfs_file_info_unref(VFSFileInfo* fi)
+vfs_file_info_unref(vfs::file_info fi)
 {
     fi->ref_dec();
     if (fi->ref_count() == 0)
@@ -112,7 +112,7 @@ vfs_file_info_unref(VFSFileInfo* fi)
 }
 
 bool
-vfs_file_info_get(VFSFileInfo* fi, std::string_view file_path)
+vfs_file_info_get(vfs::file_info fi, std::string_view file_path)
 {
     vfs_file_info_clear(fi);
 
@@ -158,20 +158,20 @@ vfs_file_info_get(VFSFileInfo* fi, std::string_view file_path)
 }
 
 const char*
-vfs_file_info_get_name(VFSFileInfo* fi)
+vfs_file_info_get_name(vfs::file_info fi)
 {
     return fi->name.c_str();
 }
 
 /* Get displayed name encoded in UTF-8 */
 const char*
-vfs_file_info_get_disp_name(VFSFileInfo* fi)
+vfs_file_info_get_disp_name(vfs::file_info fi)
 {
     return fi->disp_name.c_str();
 }
 
 void
-vfs_file_info_set_disp_name(VFSFileInfo* fi, const char* name)
+vfs_file_info_set_disp_name(vfs::file_info fi, const char* name)
 {
     if (fi->disp_name.c_str() != fi->name.c_str())
         fi->disp_name.clear();
@@ -184,13 +184,13 @@ vfs_file_info_set_disp_name(VFSFileInfo* fi, const char* name)
 }
 
 off_t
-vfs_file_info_get_size(VFSFileInfo* fi)
+vfs_file_info_get_size(vfs::file_info fi)
 {
     return fi->size;
 }
 
 const char*
-vfs_file_info_get_disp_size(VFSFileInfo* fi)
+vfs_file_info_get_disp_size(vfs::file_info fi)
 {
     if (fi->disp_size.empty())
     {
@@ -201,20 +201,20 @@ vfs_file_info_get_disp_size(VFSFileInfo* fi)
 }
 
 off_t
-vfs_file_info_get_blocks(VFSFileInfo* fi)
+vfs_file_info_get_blocks(vfs::file_info fi)
 {
     return fi->blocks;
 }
 
 VFSMimeType*
-vfs_file_info_get_mime_type(VFSFileInfo* fi)
+vfs_file_info_get_mime_type(vfs::file_info fi)
 {
     vfs_mime_type_ref(fi->mime_type);
     return fi->mime_type;
 }
 
 void
-vfs_file_info_reload_mime_type(VFSFileInfo* fi, const char* full_path)
+vfs_file_info_reload_mime_type(vfs::file_info fi, const char* full_path)
 {
     VFSMimeType* old_mime_type;
     struct stat file_stat;
@@ -233,13 +233,13 @@ vfs_file_info_reload_mime_type(VFSFileInfo* fi, const char* full_path)
 }
 
 const char*
-vfs_file_info_get_mime_type_desc(VFSFileInfo* fi)
+vfs_file_info_get_mime_type_desc(vfs::file_info fi)
 {
     return vfs_mime_type_get_description(fi->mime_type);
 }
 
 GdkPixbuf*
-vfs_file_info_get_big_icon(VFSFileInfo* fi)
+vfs_file_info_get_big_icon(vfs::file_info fi)
 {
     /* get special icons for special files, especially for
        some desktop icons */
@@ -287,7 +287,7 @@ vfs_file_info_get_big_icon(VFSFileInfo* fi)
 }
 
 GdkPixbuf*
-vfs_file_info_get_small_icon(VFSFileInfo* fi)
+vfs_file_info_get_small_icon(vfs::file_info fi)
 {
     if (fi->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY && fi->small_thumbnail) // sfm
         return g_object_ref(fi->small_thumbnail);
@@ -298,19 +298,19 @@ vfs_file_info_get_small_icon(VFSFileInfo* fi)
 }
 
 GdkPixbuf*
-vfs_file_info_get_big_thumbnail(VFSFileInfo* fi)
+vfs_file_info_get_big_thumbnail(vfs::file_info fi)
 {
     return fi->big_thumbnail ? g_object_ref(fi->big_thumbnail) : nullptr;
 }
 
 GdkPixbuf*
-vfs_file_info_get_small_thumbnail(VFSFileInfo* fi)
+vfs_file_info_get_small_thumbnail(vfs::file_info fi)
 {
     return fi->small_thumbnail ? g_object_ref(fi->small_thumbnail) : nullptr;
 }
 
 const char*
-vfs_file_info_get_disp_owner(VFSFileInfo* fi)
+vfs_file_info_get_disp_owner(vfs::file_info fi)
 {
     struct passwd* puser;
     struct group* pgroup;
@@ -340,7 +340,7 @@ vfs_file_info_get_disp_owner(VFSFileInfo* fi)
 }
 
 const char*
-vfs_file_info_get_disp_mtime(VFSFileInfo* fi)
+vfs_file_info_get_disp_mtime(vfs::file_info fi)
 {
     if (fi->disp_mtime.empty())
     {
@@ -355,13 +355,13 @@ vfs_file_info_get_disp_mtime(VFSFileInfo* fi)
 }
 
 time_t*
-vfs_file_info_get_mtime(VFSFileInfo* fi)
+vfs_file_info_get_mtime(vfs::file_info fi)
 {
     return &fi->mtime;
 }
 
 time_t*
-vfs_file_info_get_atime(VFSFileInfo* fi)
+vfs_file_info_get_atime(vfs::file_info fi)
 {
     return &fi->atime;
 }
@@ -468,7 +468,7 @@ get_file_perm_string(std::filesystem::file_status status)
 }
 
 const char*
-vfs_file_info_get_disp_perm(VFSFileInfo* fi)
+vfs_file_info_get_disp_perm(vfs::file_info fi)
 {
     if (fi->disp_perm.empty())
         fi->disp_perm = get_file_perm_string(fi->status);
@@ -476,7 +476,7 @@ vfs_file_info_get_disp_perm(VFSFileInfo* fi)
 }
 
 bool
-vfs_file_info_is_dir(VFSFileInfo* fi)
+vfs_file_info_is_dir(vfs::file_info fi)
 {
     if (std::filesystem::is_directory(fi->status))
         return true;
@@ -486,89 +486,89 @@ vfs_file_info_is_dir(VFSFileInfo* fi)
 }
 
 bool
-vfs_file_info_is_regular_file(VFSFileInfo* fi)
+vfs_file_info_is_regular_file(vfs::file_info fi)
 {
     return std::filesystem::is_regular_file(fi->status);
 }
 
 bool
-vfs_file_info_is_symlink(VFSFileInfo* fi)
+vfs_file_info_is_symlink(vfs::file_info fi)
 {
     return std::filesystem::is_symlink(fi->status);
 }
 
 bool
-vfs_file_info_is_socket(VFSFileInfo* fi)
+vfs_file_info_is_socket(vfs::file_info fi)
 {
     return std::filesystem::is_socket(fi->status);
 }
 
 bool
-vfs_file_info_is_named_pipe(VFSFileInfo* fi)
+vfs_file_info_is_named_pipe(vfs::file_info fi)
 {
     return std::filesystem::is_fifo(fi->status);
 }
 
 bool
-vfs_file_info_is_block_device(VFSFileInfo* fi)
+vfs_file_info_is_block_device(vfs::file_info fi)
 {
     return std::filesystem::is_block_file(fi->status);
 }
 
 bool
-vfs_file_info_is_char_device(VFSFileInfo* fi)
+vfs_file_info_is_char_device(vfs::file_info fi)
 {
     return std::filesystem::is_character_file(fi->status);
 }
 
 bool
-vfs_file_info_is_image(VFSFileInfo* fi)
+vfs_file_info_is_image(vfs::file_info fi)
 {
     // FIXME: We had better use functions of xdg_mime to check this
     return ztd::startswith(vfs_mime_type_get_type(fi->mime_type), "image/");
 }
 
 bool
-vfs_file_info_is_video(VFSFileInfo* fi)
+vfs_file_info_is_video(vfs::file_info fi)
 {
     // FIXME: We had better use functions of xdg_mime to check this
     return ztd::startswith(vfs_mime_type_get_type(fi->mime_type), "video/");
 }
 
 bool
-vfs_file_info_is_desktop_entry(VFSFileInfo* fi)
+vfs_file_info_is_desktop_entry(vfs::file_info fi)
 {
     return 0 != (fi->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY);
 }
 
 bool
-vfs_file_info_is_unknown_type(VFSFileInfo* fi)
+vfs_file_info_is_unknown_type(vfs::file_info fi)
 {
     return ztd::same(vfs_mime_type_get_type(fi->mime_type), XDG_MIME_TYPE_UNKNOWN);
 }
 
 /* full path of the file is required by this function */
 bool
-vfs_file_info_is_executable(VFSFileInfo* fi, std::string_view file_path)
+vfs_file_info_is_executable(vfs::file_info fi, std::string_view file_path)
 {
     return mime_type_is_executable_file(file_path, fi->mime_type->type);
 }
 
 /* full path of the file is required by this function */
 bool
-vfs_file_info_is_text(VFSFileInfo* fi, std::string_view file_path)
+vfs_file_info_is_text(vfs::file_info fi, std::string_view file_path)
 {
     return mime_type_is_text_file(file_path, fi->mime_type->type);
 }
 
 std::filesystem::perms
-vfs_file_info_get_mode(VFSFileInfo* fi)
+vfs_file_info_get_mode(vfs::file_info fi)
 {
     return fi->status.permissions();
 }
 
 bool
-vfs_file_info_is_thumbnail_loaded(VFSFileInfo* fi, bool big)
+vfs_file_info_is_thumbnail_loaded(vfs::file_info fi, bool big)
 {
     if (big)
         return (fi->big_thumbnail != nullptr);
@@ -576,7 +576,7 @@ vfs_file_info_is_thumbnail_loaded(VFSFileInfo* fi, bool big)
 }
 
 bool
-vfs_file_info_load_thumbnail(VFSFileInfo* fi, std::string_view full_path, bool big)
+vfs_file_info_load_thumbnail(vfs::file_info fi, std::string_view full_path, bool big)
 {
     if (big)
     {
@@ -620,7 +620,7 @@ vfs_file_info_set_thumbnail_size_small(i32 size)
 }
 
 void
-vfs_file_info_load_special_info(VFSFileInfo* fi, std::string_view file_path)
+vfs_file_info_load_special_info(vfs::file_info fi, std::string_view file_path)
 {
     /*if (fi->type && fi->type->name, "application/x-desktop") */
     if (!ztd::endswith(fi->name, ".desktop"))
@@ -660,7 +660,7 @@ vfs_file_info_load_special_info(VFSFileInfo* fi, std::string_view file_path)
 }
 
 void
-vfs_file_info_list_free(const std::vector<VFSFileInfo*>& list)
+vfs_file_info_list_free(const std::vector<vfs::file_info>& list)
 {
     std::ranges::for_each(list, vfs_file_info_unref);
 }

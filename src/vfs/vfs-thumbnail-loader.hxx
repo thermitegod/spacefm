@@ -37,10 +37,10 @@ enum VFSThumbnailSize
 
 struct VFSThumbnailRequest
 {
-    VFSThumbnailRequest(VFSFileInfo* file);
+    VFSThumbnailRequest(vfs::file_info file);
     ~VFSThumbnailRequest();
 
-    VFSFileInfo* file;
+    vfs::file_info file;
     u32 n_requests[magic_enum::enum_count<VFSThumbnailSize>()];
 };
 
@@ -61,7 +61,7 @@ void vfs_thumbnail_init();
 
 void vfs_thumbnail_loader_free(VFSThumbnailLoader* loader);
 
-void vfs_thumbnail_loader_request(vfs::dir dir, VFSFileInfo* file, bool is_big);
+void vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big);
 void vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big);
 
 // Load thumbnail for the specified file
