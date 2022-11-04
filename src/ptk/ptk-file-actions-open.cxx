@@ -69,7 +69,7 @@ ParentInfo::ParentInfo(PtkFileBrowser* file_browser, std::string_view cwd)
 
 static bool
 open_archives_with_handler(ParentInfo* parent, const std::vector<vfs::file_info>& sel_files,
-                           const char* full_path, VFSMimeType* mime_type)
+                           const char* full_path, vfs::mime_type mime_type)
 {
     if (xset_get_b(XSetName::ARC_DEF_OPEN))
     {                 // user has open archives with app option enabled
@@ -372,7 +372,7 @@ ptk_open_files_with_app(const char* cwd, const std::vector<vfs::file_info>& sel_
              * This string is freed when hash table is destroyed. */
             std::string alloc_desktop;
 
-            VFSMimeType* mime_type = vfs_file_info_get_mime_type(file);
+            vfs::mime_type mime_type = vfs_file_info_get_mime_type(file);
 
             // has archive handler?
             if (!sel_files.empty() &&

@@ -956,7 +956,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     bool write_access = false;
     bool list_contents = false;
     std::string parent_quote;
-    VFSMimeType* mime_type;
+    vfs::mime_type mime_type;
     const char* dest;
     std::string dest_quote;
     std::string full_quote;

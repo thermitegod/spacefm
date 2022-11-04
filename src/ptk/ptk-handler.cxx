@@ -1138,7 +1138,7 @@ value_in_list(const char* list, const char* value)
 }
 
 GSList*
-ptk_handler_file_has_handlers(i32 mode, i32 cmd, const char* path, VFSMimeType* mime_type,
+ptk_handler_file_has_handlers(i32 mode, i32 cmd, const char* path, vfs::mime_type mime_type,
                               bool test_cmd, bool multiple, bool enabled_only)
 { /* this function must be FAST - is run multiple times on menu popup
    * command must be non-empty if test_cmd */

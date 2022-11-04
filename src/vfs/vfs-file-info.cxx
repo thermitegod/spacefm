@@ -206,7 +206,7 @@ vfs_file_info_get_blocks(vfs::file_info fi)
     return fi->blocks;
 }
 
-VFSMimeType*
+vfs::mime_type
 vfs_file_info_get_mime_type(vfs::file_info fi)
 {
     vfs_mime_type_ref(fi->mime_type);
@@ -216,7 +216,7 @@ vfs_file_info_get_mime_type(vfs::file_info fi)
 void
 vfs_file_info_reload_mime_type(vfs::file_info fi, const char* full_path)
 {
-    VFSMimeType* old_mime_type;
+    vfs::mime_type old_mime_type;
     struct stat file_stat;
 
     // convert VFSFileInfo to struct stat

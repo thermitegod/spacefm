@@ -690,7 +690,7 @@ load_settings()
     char* app_name = xset_get_s(XSetName::EDITOR);
     if (!app_name || app_name[0] == '\0')
     {
-        VFSMimeType* mime_type = vfs_mime_type_get_from_type("text/plain");
+        vfs::mime_type mime_type = vfs_mime_type_get_from_type("text/plain");
         if (mime_type)
         {
             app_name = vfs_mime_type_get_default_action(mime_type);
@@ -3555,7 +3555,7 @@ xset_design_job(GtkWidget* item, xset_t set)
                     break;
                 case XSetJob::APP:
                 {
-                    VFSMimeType* mime_type;
+                    vfs::mime_type mime_type;
                     mime_type = vfs_mime_type_get_from_type(
                         xset_context && !xset_context->var[ItemPropContext::CONTEXT_MIME].empty()
                             ? xset_context->var[ItemPropContext::CONTEXT_MIME].c_str()

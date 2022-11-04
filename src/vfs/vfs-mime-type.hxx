@@ -28,7 +28,7 @@
 
 #include "mime-type/mime-type.hxx"
 
-#define VFS_MIME_TYPE(obj)               (static_cast<VFSMimeType*>(obj))
+#define VFS_MIME_TYPE(obj)               (static_cast<vfs::mime_type>(obj))
 #define VFS_MIME_TYPE_CALLBACK_DATA(obj) (static_cast<VFSMimeReloadCbEnt*>(obj))
 
 struct VFSMimeType
@@ -46,24 +46,29 @@ struct VFSMimeType
     std::atomic<u32> n_ref{0};
 };
 
+namespace vfs
+{
+    using mime_type = ztd::raw_ptr<VFSMimeType>;
+} // namespace vfs
+
 void vfs_mime_type_init();
 
 void vfs_mime_type_clean();
 
 /* file name used in this API should be encoded in UTF-8 */
-VFSMimeType* vfs_mime_type_get_from_file_name(const char* ufile_name);
+vfs::mime_type vfs_mime_type_get_from_file_name(const char* ufile_name);
 
-VFSMimeType* vfs_mime_type_get_from_file(const char* file_path, /* Should be on-disk encoding */
-                                         const char* base_name, /* Should be in UTF-8 */
-                                         struct stat* pstat);   /* Can be nullptr */
+vfs::mime_type vfs_mime_type_get_from_file(const char* file_path, /* Should be on-disk encoding */
+                                           const char* base_name, /* Should be in UTF-8 */
+                                           struct stat* pstat);   /* Can be nullptr */
 
-VFSMimeType* vfs_mime_type_get_from_type(const char* type);
+vfs::mime_type vfs_mime_type_get_from_type(const char* type);
 
-VFSMimeType* vfs_mime_type_new(const char* type_name);
-void vfs_mime_type_ref(VFSMimeType* mime_type);
-void vfs_mime_type_unref(VFSMimeType* mime_type);
+vfs::mime_type vfs_mime_type_new(const char* type_name);
+void vfs_mime_type_ref(vfs::mime_type mime_type);
+void vfs_mime_type_unref(vfs::mime_type mime_type);
 
-GdkPixbuf* vfs_mime_type_get_icon(VFSMimeType* mime_type, bool big);
+GdkPixbuf* vfs_mime_type_get_icon(vfs::mime_type mime_type, bool big);
 
 void vfs_mime_type_set_icon_size_big(i32 size);
 void vfs_mime_type_set_icon_size_small(i32 size);
@@ -72,26 +77,26 @@ i32 vfs_mime_type_get_icon_size_big();
 i32 vfs_mime_type_get_icon_size_small();
 
 /* Get mime-type string */
-const char* vfs_mime_type_get_type(VFSMimeType* mime_type);
+const char* vfs_mime_type_get_type(vfs::mime_type mime_type);
 
 /* Get human-readable description of mime-type */
-const char* vfs_mime_type_get_description(VFSMimeType* mime_type);
+const char* vfs_mime_type_get_description(vfs::mime_type mime_type);
 
 /*
  * Get available actions (applications) for this mime-type
  * returned vector should be freed with g_strfreev when not needed.
  */
-const std::vector<std::string> vfs_mime_type_get_actions(VFSMimeType* mime_type);
+const std::vector<std::string> vfs_mime_type_get_actions(vfs::mime_type mime_type);
 
 /* returned string should be freed with g_strfreev when not needed. */
-char* vfs_mime_type_get_default_action(VFSMimeType* mime_type);
+char* vfs_mime_type_get_default_action(vfs::mime_type mime_type);
 
-void vfs_mime_type_set_default_action(VFSMimeType* mime_type, const char* desktop_id);
+void vfs_mime_type_set_default_action(vfs::mime_type mime_type, const char* desktop_id);
 
-void vfs_mime_type_remove_action(VFSMimeType* mime_type, const char* desktop_id);
+void vfs_mime_type_remove_action(vfs::mime_type mime_type, const char* desktop_id);
 
 /* If user-custom desktop file is created, it is returned in custom_desktop. */
-void vfs_mime_type_add_action(VFSMimeType* mime_type, const char* desktop_id,
+void vfs_mime_type_add_action(vfs::mime_type mime_type, const char* desktop_id,
                               char** custom_desktop);
 
 void vfs_mime_type_append_action(const char* type, const char* desktop_id);

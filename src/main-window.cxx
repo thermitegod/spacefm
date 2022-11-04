@@ -3704,7 +3704,7 @@ void
 main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
 {
     PtkFileBrowser* a_browser;
-    VFSMimeType* mime_type;
+    vfs::mime_type mime_type;
     GtkClipboard* clip = nullptr;
     vfs::volume vol;
     PtkFileTask* ptask;

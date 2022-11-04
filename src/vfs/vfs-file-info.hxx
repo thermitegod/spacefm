@@ -73,7 +73,7 @@ struct VFSFileInfo
     std::string disp_owner;        // displayed owner:group pair
     std::string disp_mtime;        // displayed last modification time
     std::string disp_perm;         // displayed permission in string form
-    VFSMimeType* mime_type;        // mime type related information
+    vfs::mime_type mime_type;      // mime type related information
     GdkPixbuf* big_thumbnail;      // thumbnail of the file
     GdkPixbuf* small_thumbnail;    // thumbnail of the file
 
@@ -110,7 +110,7 @@ off_t vfs_file_info_get_blocks(vfs::file_info fi);
 
 std::filesystem::perms vfs_file_info_get_mode(vfs::file_info fi);
 
-VFSMimeType* vfs_file_info_get_mime_type(vfs::file_info fi);
+vfs::mime_type vfs_file_info_get_mime_type(vfs::file_info fi);
 void vfs_file_info_reload_mime_type(vfs::file_info fi, const char* full_path);
 
 const char* vfs_file_info_get_mime_type_desc(vfs::file_info fi);

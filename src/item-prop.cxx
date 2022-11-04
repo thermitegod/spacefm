@@ -1358,7 +1358,7 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
         if (widget == ctxt->item_choose)
         {
             // Choose
-            VFSMimeType* mime_type = vfs_mime_type_get_from_type(
+            vfs::mime_type mime_type = vfs_mime_type_get_from_type(
                 !ctxt->context->var[ItemPropContext::CONTEXT_MIME].empty()
                     ? ctxt->context->var[ItemPropContext::CONTEXT_MIME].c_str()
                     : XDG_MIME_TYPE_UNKNOWN);

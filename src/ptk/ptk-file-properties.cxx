@@ -308,7 +308,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
         gtk_tree_model_get(model, &it, 2, &action, -1);
         if (!action)
         {
-            VFSMimeType* mime = VFS_MIME_TYPE(user_data);
+            vfs::mime_type mime = VFS_MIME_TYPE(user_data);
             GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(combo));
             action = (char*)
                 ptk_choose_app_for_mime_type(GTK_WINDOW(parent), mime, false, true, true, true);
@@ -442,8 +442,8 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     }
 
     // MOD
-    VFSMimeType* type;
-    VFSMimeType* type2 = nullptr;
+    vfs::mime_type type;
+    vfs::mime_type type2 = nullptr;
     for (vfs::file_info file: sel_files)
     {
         type = vfs_file_info_get_mime_type(file);
@@ -464,7 +464,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     gtk_widget_set_sensitive(data->recurse, is_dirs);
 
     vfs::file_info file;
-    VFSMimeType* mime;
+    vfs::mime_type mime;
 
     file = sel_files.front();
     if (same_type)
@@ -863,7 +863,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                     if (action)
                     {
                         vfs::file_info file = data->file_list.front();
-                        VFSMimeType* mime = vfs_file_info_get_mime_type(file);
+                        vfs::mime_type mime = vfs_file_info_get_mime_type(file);
                         vfs_mime_type_set_default_action(mime, action);
                         vfs_mime_type_unref(mime);
                         free(action);

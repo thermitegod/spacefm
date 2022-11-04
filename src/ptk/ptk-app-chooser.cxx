@@ -150,7 +150,7 @@ add_list_item(GtkListStore* list, const char* path)
 }
 
 static GtkTreeModel*
-create_model_from_mime_type(VFSMimeType* mime_type)
+create_model_from_mime_type(vfs::mime_type mime_type)
 {
     GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<PTKAppChooser>(),
                                             GDK_TYPE_PIXBUF,
@@ -200,7 +200,7 @@ on_view_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColu
 }
 
 static GtkWidget*
-app_chooser_dialog_new(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all_apps,
+app_chooser_dialog_new(GtkWindow* parent, vfs::mime_type mime_type, bool focus_all_apps,
                        bool show_command, bool show_default, bool dir_default)
 {
     /*
@@ -483,7 +483,7 @@ on_dlg_response(GtkDialog* dlg, i32 id, void* user_data)
 }
 
 void
-ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
+ptk_app_chooser_has_handler_warn(GtkWidget* parent, vfs::mime_type mime_type)
 {
     // is file handler set for this type?
     GSList* handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_FILE,
@@ -540,7 +540,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, VFSMimeType* mime_type)
 }
 
 char*
-ptk_choose_app_for_mime_type(GtkWindow* parent, VFSMimeType* mime_type, bool focus_all_apps,
+ptk_choose_app_for_mime_type(GtkWindow* parent, vfs::mime_type mime_type, bool focus_all_apps,
                              bool show_command, bool show_default, bool dir_default)
 {
     /*
