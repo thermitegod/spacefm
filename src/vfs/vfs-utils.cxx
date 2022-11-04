@@ -25,28 +25,23 @@
 
 #include "settings/app.hxx"
 
-#include "settings.hxx"
-
 #include "vfs/vfs-utils.hxx"
 
 GdkPixbuf*
-vfs_load_icon(const char* icon_name, i32 size)
+vfs_load_icon(std::string_view icon_name, i32 size)
 {
-    if (!icon_name)
-        return nullptr;
-
     GtkIconInfo* inf = nullptr;
     GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
     inf = gtk_icon_theme_lookup_icon(
         icon_theme,
-        icon_name,
+        icon_name.data(),
         size,
         GtkIconLookupFlags(GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN |
                            GtkIconLookupFlags::GTK_ICON_LOOKUP_FORCE_SIZE));
 
-    if (!inf && icon_name[0] == '/')
-        return gdk_pixbuf_new_from_file_at_size(icon_name, size, size, nullptr);
+    if (!inf && !ztd::startswith(icon_name, "/"))
+        return gdk_pixbuf_new_from_file_at_size(icon_name.data(), size, size, nullptr);
 
     if (!inf)
         return nullptr;
@@ -54,7 +49,9 @@ vfs_load_icon(const char* icon_name, i32 size)
     const char* file = gtk_icon_info_get_filename(inf);
     GdkPixbuf* icon = nullptr;
     if (file)
+    {
         icon = gdk_pixbuf_new_from_file_at_size(file, size, size, nullptr);
+    }
     else
     {
         icon = gtk_icon_info_get_builtin_pixbuf(inf);

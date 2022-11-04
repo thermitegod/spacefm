@@ -1991,7 +1991,7 @@ static bool
 update_new_display_delayed(char* path)
 {
     const std::string dir_path = Glib::path_get_dirname(path);
-    vfs::dir vdir = vfs_dir_get_by_path_soft(dir_path.c_str());
+    vfs::dir vdir = vfs_dir_get_by_path_soft(dir_path);
     if (vdir && vdir->avoid_changes)
     {
         vfs::file_info file = vfs_file_info_new();

@@ -22,6 +22,6 @@
 
 #include <gtk/gtk.h>
 
-GdkPixbuf* vfs_load_icon(const char* icon_name, i32 size);
+GdkPixbuf* vfs_load_icon(std::string_view icon_name, i32 size);
 
 const std::string vfs_file_size_to_string_format(u64 size_in_bytes, bool decimal);

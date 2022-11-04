@@ -174,7 +174,7 @@ VFSAppDesktop::get_icon(i32 size) noexcept
 
     if (this->icon_name.c_str())
     {
-        icon = vfs_load_icon(this->icon_name.c_str(), size);
+        icon = vfs_load_icon(this->icon_name, size);
     }
 
     // fallback to generic icon

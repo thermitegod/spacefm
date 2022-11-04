@@ -399,7 +399,7 @@ vfs_dir_emit_thumbnail_loaded(vfs::dir dir, vfs::file_info file)
 {
     vfs_dir_lock(dir);
 
-    vfs::file_info file_found = vfs_dir_find_file(dir, file->name.c_str(), file);
+    vfs::file_info file_found = vfs_dir_find_file(dir, file->name, file);
     if (file_found)
     {
         assert(file == file_found);

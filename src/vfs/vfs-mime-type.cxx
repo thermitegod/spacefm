@@ -305,26 +305,26 @@ vfs_mime_type_get_icon(vfs::mime_type mime_type, bool big)
             icon_name = ztd::replace(mime_type->type, "/", "-");
 
             // is there an icon named foo-bar?
-            icon = vfs_load_icon(icon_name.c_str(), size);
+            icon = vfs_load_icon(icon_name, size);
             if (!icon)
             {
                 // maybe we can find a legacy icon named gnome-mime-foo-bar
                 icon_name = fmt::format("gnome-mime-{}-{}", mime, type);
-                icon = vfs_load_icon(icon_name.c_str(), size);
+                icon = vfs_load_icon(icon_name, size);
             }
 
             // try gnome-mime-foo
             if (!icon)
             {
                 icon_name = fmt::format("gnome-mime-{}", mime);
-                icon = vfs_load_icon(icon_name.c_str(), size);
+                icon = vfs_load_icon(icon_name, size);
             }
 
             // try foo-x-generic
             if (!icon)
             {
                 icon_name = fmt::format("{}-x-generic", mime);
-                icon = vfs_load_icon(icon_name.c_str(), size);
+                icon = vfs_load_icon(icon_name, size);
             }
         }
     }

@@ -1302,7 +1302,7 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
             {
                 // guess icon name from executable name
                 const std::string name = Glib::path_get_basename(set->z);
-                icon_new = vfs_load_icon(name.c_str(), icon_size);
+                icon_new = vfs_load_icon(name, icon_size);
             }
         }
 
