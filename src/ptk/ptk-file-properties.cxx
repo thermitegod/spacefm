@@ -204,7 +204,7 @@ calc_size(void* user_data)
     {
         if (data->cancel)
             break;
-        const std::string path = Glib::build_filename(data->dir_path, vfs_file_info_get_name(file));
+        const std::string path = Glib::build_filename(data->dir_path, file->get_name());
         calc_total_size_of_files(path.c_str(), data);
     }
     data->done = true;
@@ -401,12 +401,8 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     GtkWidget* mime_type = GTK_WIDGET(gtk_builder_get_object(builder, "mime_type"));
     GtkWidget* open_with = GTK_WIDGET(gtk_builder_get_object(builder, "open_with"));
 
-    const char* time_format = ztd::strdup("%Y-%m-%d %H:%M:%S");
-
     bool same_type = true;
     bool is_dirs = false;
-    char* owner_group;
-    char* tmp;
 
     i32 width = xset_get_int(XSetName::APP_DLG, XSetVar::S);
     i32 height = xset_get_int(XSetName::APP_DLG, XSetVar::Z);
@@ -446,10 +442,10 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     vfs::mime_type type2 = nullptr;
     for (vfs::file_info file: sel_files)
     {
-        type = vfs_file_info_get_mime_type(file);
+        type = file->get_mime_type();
         if (!type2)
-            type2 = vfs_file_info_get_mime_type(file);
-        if (vfs_file_info_is_dir(file))
+            type2 = file->get_mime_type();
+        if (file->is_directory())
             is_dirs = true;
         if (type != type2)
             same_type = false;
@@ -469,7 +465,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     file = sel_files.front();
     if (same_type)
     {
-        mime = vfs_file_info_get_mime_type(file);
+        mime = file->get_mime_type();
         const std::string file_type = fmt::format("{}\n{}",
                                                   vfs_mime_type_get_description(mime),
                                                   vfs_mime_type_get_type(mime));
@@ -485,7 +481,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
      * Do not show this option menu if files of different types are selected,
      * ,the selected file is a directory, or its type is unknown.
      */
-    if (!same_type || vfs_file_info_is_desktop_entry(file) || vfs_file_info_is_executable(file))
+    if (!same_type || file->is_desktop_entry() || file->is_executable())
     {
         /* if open with should not show, destroy it. */
         gtk_widget_destroy(open_with);
@@ -497,7 +493,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
         GtkTreeIter it;
         const std::vector<std::string> actions = vfs_mime_type_get_actions(mime);
 
-        mime = vfs_file_info_get_mime_type(file);
+        mime = file->get_mime_type();
         GtkCellRenderer* renderer;
         GtkListStore* model;
         gtk_cell_layout_clear(GTK_CELL_LAYOUT(open_with));
@@ -577,82 +573,78 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     else
     {
         /* special processing for files with special display names */
-        if (vfs_file_info_is_desktop_entry(file))
+        if (file->is_desktop_entry())
         {
             const std::string disp_name = Glib::filename_display_name(file->name);
             gtk_entry_set_text(GTK_ENTRY(name), disp_name.c_str());
         }
         else
         {
-            if (vfs_file_info_is_dir(file) && !vfs_file_info_is_symlink(file))
+            if (file->is_directory() && !file->is_symlink())
                 gtk_label_set_markup_with_mnemonic(GTK_LABEL(label_name),
                                                    "<b>Directory _Name:</b>");
-            gtk_entry_set_text(GTK_ENTRY(name), vfs_file_info_get_disp_name(file));
+            gtk_entry_set_text(GTK_ENTRY(name), file->get_disp_name().data());
         }
 
         gtk_editable_set_editable(GTK_EDITABLE(name), false);
 
-        char buf[64];
-
-        if (!vfs_file_info_is_dir(file))
+        if (!file->is_directory())
         {
             /* Only single "file" is selected, so we do not need to
                 caculate total file size */
             need_calc_size = false;
 
-            g_snprintf(buf,
-                       sizeof(buf),
-                       "%s  ( %lu bytes )",
-                       vfs_file_info_get_disp_size(file),
-                       (u64)vfs_file_info_get_size(file));
-            gtk_label_set_text(data->total_size_label, buf);
+            std::string buf;
+
+            buf = fmt::format("{}  ( {} bytes )", file->get_disp_size(), file->get_size());
+            gtk_label_set_text(data->total_size_label, buf.data());
 
             const std::string size_str =
-                vfs_file_size_to_string_format(vfs_file_info_get_blocks(file) * 512, true);
+                vfs_file_size_to_string_format(file->get_blocks() * 512, true);
 
-            g_snprintf(buf,
-                       sizeof(buf),
-                       "%s  ( %lu bytes )",
-                       size_str.c_str(),
-                       (u64)vfs_file_info_get_blocks(file) * 512);
-            gtk_label_set_text(data->size_on_disk_label, buf);
+            buf = fmt::format("{}  ( {} bytes )", size_str, file->get_blocks() * 512);
+            gtk_label_set_text(data->size_on_disk_label, buf.data());
 
             gtk_label_set_text(data->count_label, "1 file");
         }
 
         // Modified / Accessed
-        // gtk_entry_set_text( GTK_ENTRY( mtime ),
-        //                    vfs_file_info_get_disp_mtime( file ) );
-        strftime(buf, sizeof(buf), time_format, std::localtime(vfs_file_info_get_mtime(file)));
+        char buf[64];
+        const std::string time_format = "%Y-%m-%d %H:%M:%S";
+
+        // gtk_entry_set_text(GTK_ENTRY(mtime), file->get_disp_mtime());
+        strftime(buf, sizeof(buf), time_format.data(), std::localtime(file->get_mtime()));
         gtk_entry_set_text(GTK_ENTRY(data->mtime), buf);
         data->orig_mtime = ztd::strdup(buf);
 
-        strftime(buf, sizeof(buf), time_format, std::localtime(vfs_file_info_get_atime(file)));
+        strftime(buf, sizeof(buf), time_format.data(), std::localtime(file->get_atime()));
         gtk_entry_set_text(GTK_ENTRY(data->atime), buf);
         data->orig_atime = ztd::strdup(buf);
 
         // Permissions
-        owner_group = (char*)vfs_file_info_get_disp_owner(file);
-        tmp = strchr(owner_group, ':');
-        data->owner_name = strndup(owner_group, tmp - owner_group);
+        const auto owner_group = ztd::partition(file->get_disp_owner(), ":");
+        const std::string& group = owner_group[0];
+        const std::string& owner = owner_group[2];
+
+        data->owner_name = ztd::strdup(owner);
         gtk_entry_set_text(GTK_ENTRY(data->owner), data->owner_name);
-        data->group_name = ztd::strdup(tmp + 1);
+        data->group_name = ztd::strdup(group);
         gtk_entry_set_text(GTK_ENTRY(data->group), data->group_name);
 
         for (usize i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
         {
             if (data->chmod_states[i] != 2) /* allow to touch this bit */
             {
-                data->chmod_states[i] = ((vfs_file_info_get_mode(file) & chmod_flags.at(i)) !=
-                                                 std::filesystem::perms::none
-                                             ? 1
-                                             : 0);
+                data->chmod_states[i] =
+                    ((file->get_permissions() & chmod_flags.at(i)) != std::filesystem::perms::none
+                         ? 1
+                         : 0);
                 gtk_toggle_button_set_active(data->chmod_btns[i], data->chmod_states[i]);
             }
         }
 
         // target
-        if (vfs_file_info_is_symlink(file))
+        if (file->is_symlink())
         {
             gtk_label_set_markup_with_mnemonic(GTK_LABEL(label_name), "<b>Link _Name:</b>");
             const std::string disp_sym_path = Glib::build_filename(dir_path, file->name);
@@ -863,7 +855,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                     if (action)
                     {
                         vfs::file_info file = data->file_list.front();
-                        vfs::mime_type mime = vfs_file_info_get_mime_type(file);
+                        vfs::mime_type mime = file->get_mime_type();
                         vfs_mime_type_set_default_action(mime, action);
                         vfs_mime_type_unref(mime);
                         free(action);
@@ -918,7 +910,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                 for (vfs::file_info file: data->file_list)
                 {
                     const std::string file_path =
-                        Glib::build_filename(data->dir_path, vfs_file_info_get_name(file));
+                        Glib::build_filename(data->dir_path, file->get_name());
                     file_list.push_back(file_path);
                 }
 

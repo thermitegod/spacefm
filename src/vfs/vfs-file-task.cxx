@@ -342,7 +342,7 @@ update_file_display(std::string_view path)
     {
         vfs::file_info file = vfs_file_info_new();
         vfs_file_info_get(file, path);
-        vfs_dir_emit_file_created(vdir, vfs_file_info_get_name(file), true);
+        vfs_dir_emit_file_created(vdir, file->get_name(), true);
         vfs_file_info_unref(file);
         vfs_dir_flush_notify_cache();
     }

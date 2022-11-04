@@ -328,7 +328,7 @@ ptk_open_files_with_app(const char* cwd, const std::vector<vfs::file_info>& sel_
         if (!file)
             continue;
 
-        full_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
+        full_path = Glib::build_filename(cwd, file->get_name());
 
         if (app_desktop)
         { // specified app to open all files
@@ -358,7 +358,7 @@ ptk_open_files_with_app(const char* cwd, const std::vector<vfs::file_info>& sel_
             }
 
             /* If this file is an executable file, run it. */
-            if (!xnever && vfs_file_info_is_executable(file, full_path) &&
+            if (!xnever && file->is_executable(full_path) &&
                 (app_settings.get_click_executes() || xforce))
             {
                 Glib::spawn_command_line_async(full_path);
@@ -372,7 +372,7 @@ ptk_open_files_with_app(const char* cwd, const std::vector<vfs::file_info>& sel_
              * This string is freed when hash table is destroyed. */
             std::string alloc_desktop;
 
-            vfs::mime_type mime_type = vfs_file_info_get_mime_type(file);
+            vfs::mime_type mime_type = file->get_mime_type();
 
             // has archive handler?
             if (!sel_files.empty() &&
@@ -400,7 +400,7 @@ ptk_open_files_with_app(const char* cwd, const std::vector<vfs::file_info>& sel_
             }
 
             /* The file itself is a desktop entry file. */
-            /* was: if( ztd::endswith( vfs_file_info_get_name( file ), ".desktop" ) )
+            /* was: if (ztd::endswith(vfs_file_info_get_name(file), ".desktop"))
              */
             if (alloc_desktop.empty())
             {
@@ -425,7 +425,7 @@ ptk_open_files_with_app(const char* cwd, const std::vector<vfs::file_info>& sel_
 
             vfs_mime_type_unref(mime_type);
 
-            if (alloc_desktop.empty() && vfs_file_info_is_symlink(file))
+            if (alloc_desktop.empty() && file->is_symlink())
             {
                 // broken link?
                 try

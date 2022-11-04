@@ -3029,10 +3029,9 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
             if (!file)
                 return;
 
-            if (vfs_file_info_is_symlink(file))
+            if (file->is_symlink())
             {
-                const std::string file_path =
-                    Glib::build_filename(cwd, vfs_file_info_get_name(file));
+                const std::string file_path = Glib::build_filename(cwd, file->get_name());
                 const std::string target = std::filesystem::absolute(file_path);
                 if (!target.empty())
                 {
@@ -3049,7 +3048,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
                         target_path = target;
                     }
 
-                    if (vfs_file_info_is_dir(file))
+                    if (file->is_directory())
                     {
                         if (std::filesystem::exists(target_path))
                             statusbar_txt.append(fmt::format("  Link -> {}/", target));
@@ -3078,7 +3077,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
             }
             else
             {
-                statusbar_txt.append(fmt::format("  {}", vfs_file_info_get_name(file)));
+                statusbar_txt.append(fmt::format("  {}", file->get_name()));
             }
 
             vfs_file_info_unref(file);
@@ -3099,19 +3098,19 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
                 if (!file)
                     continue;
 
-                if (vfs_file_info_is_dir(file))
+                if (file->is_directory())
                     ++count_dir;
-                else if (vfs_file_info_is_regular_file(file))
+                else if (file->is_regular_file())
                     ++count_file;
-                else if (vfs_file_info_is_symlink(file))
+                else if (file->is_symlink())
                     ++count_symlink;
-                else if (vfs_file_info_is_socket(file))
+                else if (file->is_socket())
                     ++count_socket;
-                else if (vfs_file_info_is_named_pipe(file))
+                else if (file->is_fifo())
                     ++count_pipe;
-                else if (vfs_file_info_is_block_device(file))
+                else if (file->is_block_file())
                     ++count_block;
-                else if (vfs_file_info_is_char_device(file))
+                else if (file->is_character_file())
                     ++count_char;
 
                 vfs_file_info_unref(file);
@@ -3732,17 +3731,15 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
         {
             vfs::file_info file = vfs_file_info_ref(sel_files.front());
 
-            c->var[ItemPropContext::CONTEXT_NAME] = vfs_file_info_get_name(file);
+            c->var[ItemPropContext::CONTEXT_NAME] = file->get_name();
             const std::string path = Glib::build_filename(c->var[ItemPropContext::CONTEXT_DIR],
                                                           c->var[ItemPropContext::CONTEXT_NAME]);
             c->var[ItemPropContext::CONTEXT_IS_DIR] =
                 std::filesystem::is_directory(path) ? "true" : "false";
-            c->var[ItemPropContext::CONTEXT_IS_TEXT] =
-                vfs_file_info_is_text(file, path) ? "true" : "false";
-            c->var[ItemPropContext::CONTEXT_IS_LINK] =
-                vfs_file_info_is_symlink(file) ? "true" : "false";
+            c->var[ItemPropContext::CONTEXT_IS_TEXT] = file->is_text(path) ? "true" : "false";
+            c->var[ItemPropContext::CONTEXT_IS_LINK] = file->is_symlink() ? "true" : "false";
 
-            mime_type = vfs_file_info_get_mime_type(file);
+            mime_type = file->get_mime_type();
             if (mime_type)
             {
                 c->var[ItemPropContext::CONTEXT_MIME] = vfs_mime_type_get_type(mime_type);
@@ -4036,7 +4033,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
             buf.append(fmt::format("fm_panel{}_files=(\n", p));
             for (vfs::file_info file: sel_files)
             {
-                path = vfs_file_info_get_name(file);
+                path = file->get_name();
                 if (!cwd_needs_quote && ztd::contains(path, "\""))
                     buf.append(fmt::format("\"{}{}{}\"\n",
                                            cwd,
@@ -4056,7 +4053,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
                 buf.append(fmt::format("fm_filenames=(\n"));
                 for (vfs::file_info file: sel_files)
                 {
-                    path = vfs_file_info_get_name(file);
+                    path = file->get_name();
                     buf.append(fmt::format("{}\n", bash_quote(path)));
                 }
                 buf.append(fmt::format(")\n"));
@@ -6660,7 +6657,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 file = vfs_file_info_ref(file);
                 if (!file)
                     continue;
-                str.append(fmt::format("{} ", bash_quote(vfs_file_info_get_name(file))));
+                str.append(fmt::format("{} ", bash_quote(file->get_name())));
                 vfs_file_info_unref(file);
             }
             vfs_file_info_list_free(sel_files);

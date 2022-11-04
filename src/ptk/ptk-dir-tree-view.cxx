@@ -80,8 +80,8 @@ filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
     gtk_tree_model_get(model, iter, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
     if (file)
     {
-        const char* name = vfs_file_info_get_name(file);
-        if (name && name[0] == '.')
+        const std::string name = file->get_name();
+        if (ztd::startswith(name, "."))
         {
             vfs_file_info_unref(file);
             return false;
@@ -275,7 +275,7 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
             gtk_tree_model_get(model, &it, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
             if (!file)
                 continue;
-            if (!strcmp(vfs_file_info_get_name(file), *dir))
+            if (ztd::same(file->get_name(), *dir))
             {
                 tree_path = gtk_tree_model_get_path(model, &it);
 

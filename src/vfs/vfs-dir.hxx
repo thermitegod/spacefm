@@ -44,6 +44,13 @@ struct VFSFileInfo;
 struct PtkFileBrowser;
 struct PtkFileList;
 struct VFSDir;
+struct VFSThumbnailLoader;
+
+namespace vfs
+{
+    using dir = ztd::raw_ptr<VFSDir>;
+    using thumbnail_loader = ztd::raw_ptr<VFSThumbnailLoader>;
+} // namespace vfs
 
 struct VFSDir
 {
@@ -65,7 +72,7 @@ struct VFSDir
     bool show_hidden{true};
     bool avoid_changes{true};
 
-    struct VFSThumbnailLoader* thumbnail_loader;
+    vfs::thumbnail_loader thumbnail_loader;
 
     std::vector<vfs::file_info> changed_files;
     std::vector<std::string> created_files;
@@ -276,11 +283,6 @@ struct VFSDir
     // Signals we connect to
     sigc::connection signal_task_load_dir;
 };
-
-namespace vfs
-{
-    using dir = ztd::raw_ptr<VFSDir>;
-} // namespace vfs
 
 using VFSDirForeachFunc = void (*)(vfs::dir dir, bool user_data);
 

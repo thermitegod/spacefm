@@ -44,6 +44,14 @@ struct VFSThumbnailRequest
     u32 n_requests[magic_enum::enum_count<VFSThumbnailSize>()];
 };
 
+// forward declare types
+struct VFSThumbnailLoader;
+
+namespace vfs
+{
+    using thumbnail_loader = ztd::raw_ptr<VFSThumbnailLoader>;
+} // namespace vfs
+
 struct VFSThumbnailLoader
 {
     VFSThumbnailLoader(vfs::dir dir);
@@ -59,7 +67,7 @@ struct VFSThumbnailLoader
 // Ensure the thumbnail dirs exist and have proper file permission.
 void vfs_thumbnail_init();
 
-void vfs_thumbnail_loader_free(VFSThumbnailLoader* loader);
+void vfs_thumbnail_loader_free(vfs::thumbnail_loader loader);
 
 void vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big);
 void vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big);
@@ -69,5 +77,5 @@ void vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big);
 // prevent unnecessary disk I/O and this can speed up the loading.
 // Otherwise, it should pass 0 for mtime, and the function will do stat() on the file
 // to get mtime.
-GdkPixbuf* vfs_thumbnail_load_for_uri(std::string_view uri, i32 size, std::time_t mtime);
-GdkPixbuf* vfs_thumbnail_load_for_file(std::string_view file, i32 size, std::time_t mtime);
+GdkPixbuf* vfs_thumbnail_load_for_uri(std::string_view uri, i32 size);
+GdkPixbuf* vfs_thumbnail_load_for_file(std::string_view file, i32 size);

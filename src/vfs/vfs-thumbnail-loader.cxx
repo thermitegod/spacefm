@@ -41,9 +41,9 @@
 
 #include "utils.hxx"
 
-static void* thumbnail_loader_thread(vfs::async_task task, VFSThumbnailLoader* loader);
+static void* thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader);
 static void thumbnail_request_free(VFSThumbnailRequest* req);
-static bool on_thumbnail_idle(VFSThumbnailLoader* loader);
+static bool on_thumbnail_idle(vfs::thumbnail_loader loader);
 
 VFSThumbnailRequest::VFSThumbnailRequest(vfs::file_info file)
 {
@@ -100,15 +100,15 @@ VFSThumbnailLoader::~VFSThumbnailLoader()
     g_object_unref(this->dir);
 }
 
-VFSThumbnailLoader*
+vfs::thumbnail_loader
 vfs_thumbnail_loader_new(vfs::dir dir)
 {
-    VFSThumbnailLoader* loader = new VFSThumbnailLoader(dir);
+    vfs::thumbnail_loader loader = new VFSThumbnailLoader(dir);
     return loader;
 }
 
 void
-vfs_thumbnail_loader_free(VFSThumbnailLoader* loader)
+vfs_thumbnail_loader_free(vfs::thumbnail_loader loader)
 {
     delete loader;
 }
@@ -121,7 +121,7 @@ thumbnail_request_free(VFSThumbnailRequest* req)
 }
 
 static bool
-on_thumbnail_idle(VFSThumbnailLoader* loader)
+on_thumbnail_idle(vfs::thumbnail_loader loader)
 {
     vfs::file_info file;
 
@@ -147,7 +147,7 @@ on_thumbnail_idle(VFSThumbnailLoader* loader)
 }
 
 static void*
-thumbnail_loader_thread(vfs::async_task task, VFSThumbnailLoader* loader)
+thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
 {
     while (!task->is_cancelled())
     {
@@ -164,17 +164,17 @@ thumbnail_loader_thread(vfs::async_task task, VFSThumbnailLoader* loader)
         }
 
         bool need_update = false;
-        for (i32 i = 0; i < 2; ++i)
+        for (u32 i = 0; i < 2; ++i)
         {
             if (req->n_requests[i] == 0)
                 continue;
 
             bool load_big = (i == VFSThumbnailSize::LOAD_BIG_THUMBNAIL);
-            if (!vfs_file_info_is_thumbnail_loaded(req->file, load_big))
+            if (!req->file->is_thumbnail_loaded(load_big))
             {
                 const std::string full_path =
-                    Glib::build_filename(loader->dir->path, vfs_file_info_get_name(req->file));
-                vfs_file_info_load_thumbnail(req->file, full_path, load_big);
+                    Glib::build_filename(loader->dir->path, req->file->get_name());
+                req->file->load_thumbnail(full_path, load_big);
                 // Slow down for debugging.
                 // LOG_DEBUG("DELAY!!");
                 // Glib::usleep(G_USEC_PER_SEC/2);
@@ -237,7 +237,7 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
         new_task = true;
     }
 
-    VFSThumbnailLoader* loader = dir->thumbnail_loader;
+    vfs::thumbnail_loader loader = dir->thumbnail_loader;
 
     if (!loader->task)
     {
@@ -275,7 +275,7 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
 void
 vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big)
 {
-    VFSThumbnailLoader* loader;
+    vfs::thumbnail_loader loader;
 
     if ((loader = dir->thumbnail_loader))
     {
@@ -319,7 +319,7 @@ vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big)
 }
 
 static GdkPixbuf*
-vfs_thumbnail_load(std::string_view file_path, std::string_view uri, i32 size, std::time_t mtime)
+vfs_thumbnail_load(std::string_view file_path, std::string_view uri, i32 size)
 {
     Glib::Checksum check = Glib::Checksum();
     const std::string file_hash = check.compute_checksum(Glib::Checksum::Type::MD5, uri.data());
@@ -330,34 +330,36 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view uri, i32 size, s
 
     // LOG_INFO("{}", thumbnail_file);
 
-    if (mtime == 0)
-    {
-        struct stat statbuf;
-        if (stat(file_path.data(), &statbuf) != -1)
-            mtime = statbuf.st_mtime;
-    }
+    // get file mtime
+    const auto ftime = std::filesystem::last_write_time(file_path);
+    const auto stime = std::chrono::file_clock::to_sys(ftime);
+    const auto mtime = std::chrono::system_clock::to_time_t(stime);
 
-    // if mtime of video being thumbnailed is less than 5 sec ago,
-    // do not create a thumbnail. This means that newly created video
-    // files will not have a thumbnail until a refresh.
-    if (std::time(nullptr) - mtime < 5)
+    // if the mtime of the file being thumbnailed is less than 5 sec ago,
+    // do not create a thumbnail. This means that newly created files
+    // will not have a thumbnail until a refresh
+    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    if (now - mtime < 5)
         return nullptr;
 
     // load existing thumbnail
     i32 w;
     i32 h;
-    const char* thumb_mtime = nullptr;
+    std::time_t embeded_mtime = 0;
     GdkPixbuf* thumbnail = nullptr;
     if (std::filesystem::is_regular_file(thumbnail_file))
     {
-        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
-
-        w = gdk_pixbuf_get_width(thumbnail);
-        h = gdk_pixbuf_get_height(thumbnail);
-        thumb_mtime = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::MTime");
+        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.data(), nullptr);
+        if (thumbnail)
+        { // need to check for broken thumbnail images
+            w = gdk_pixbuf_get_width(thumbnail);
+            h = gdk_pixbuf_get_height(thumbnail);
+            const char* thumb_mtime = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::MTime");
+            embeded_mtime = std::stol(thumb_mtime);
+        }
     }
 
-    if (!thumbnail || (w < size && h < size) || !thumb_mtime || std::stol(thumb_mtime) != mtime)
+    if (!thumbnail || (w < size && h < size) || embeded_mtime != mtime)
     {
         if (thumbnail)
             g_object_unref(thumbnail);
@@ -382,7 +384,7 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view uri, i32 size, s
             return nullptr;
         }
 
-        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
+        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.data(), nullptr);
     }
 
     GdkPixbuf* result = nullptr;
@@ -416,25 +418,25 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view uri, i32 size, s
 }
 
 GdkPixbuf*
-vfs_thumbnail_load_for_uri(std::string_view uri, i32 size, std::time_t mtime)
+vfs_thumbnail_load_for_uri(std::string_view uri, i32 size)
 {
     const std::string file = Glib::filename_from_uri(uri.data());
-    GdkPixbuf* ret = vfs_thumbnail_load(file, uri, size, mtime);
+    GdkPixbuf* ret = vfs_thumbnail_load(file, uri, size);
     return ret;
 }
 
 GdkPixbuf*
-vfs_thumbnail_load_for_file(std::string_view file, i32 size, std::time_t mtime)
+vfs_thumbnail_load_for_file(std::string_view file, i32 size)
 {
     const std::string uri = Glib::filename_to_uri(file.data());
-    GdkPixbuf* ret = vfs_thumbnail_load(file, uri, size, mtime);
+    GdkPixbuf* ret = vfs_thumbnail_load(file, uri, size);
     return ret;
 }
 
 void
 vfs_thumbnail_init()
 {
-    std::string dir = Glib::build_filename(vfs_user_cache_dir(), "thumbnails/normal");
+    const std::string dir = Glib::build_filename(vfs_user_cache_dir(), "thumbnails/normal");
 
     if (!std::filesystem::is_directory(dir))
         std::filesystem::create_directories(dir);

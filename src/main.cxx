@@ -501,7 +501,7 @@ open_file(std::string_view path)
 {
     vfs::file_info file = vfs_file_info_new();
     vfs_file_info_get(file, path);
-    vfs::mime_type mime_type = vfs_file_info_get_mime_type(file);
+    vfs::mime_type mime_type = file->get_mime_type();
 
     char* app_name = vfs_mime_type_get_default_action(mime_type);
     if (!app_name)

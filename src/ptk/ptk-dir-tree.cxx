@@ -209,7 +209,7 @@ ptk_dir_tree_init(PtkDirTree* tree)
     tree->root->tree = tree;
     tree->root->n_children = 1;
     PtkDirTreeNode* child = ptk_dir_tree_node_new(tree, tree->root, "/", "/");
-    vfs_file_info_set_disp_name(child->file, "File System");
+    child->file->set_disp_name("File System");
     tree->root->children = child;
 
     /* Random int to check whether an iter belongs to our model */
@@ -457,7 +457,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
                 return;
             i32 icon_size;
             GdkPixbuf* icon;
-            // icon = vfs_file_info_get_small_icon(file);
+            // icon = file->get_small_icon();
             icon_size = app_settings.get_icon_size_small();
             if (icon_size > PANE_MAX_ICON_SIZE)
                 icon_size = PANE_MAX_ICON_SIZE;
@@ -475,7 +475,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
             break;
         case PTKDirTreeCol::COL_DIR_TREE_DISP_NAME:
             if (file)
-                g_value_set_string(value, vfs_file_info_get_disp_name(file));
+                g_value_set_string(value, file->get_disp_name().data());
             else
                 g_value_set_string(value, "( no subdirectory )"); // no sub directory
             break;
@@ -661,8 +661,7 @@ ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b
     if (!file1 || !file2)
         return 0;
     /* FIXME: UTF-8 strings should not be treated as ASCII when sorted  */
-    i32 ret =
-        g_ascii_strcasecmp(vfs_file_info_get_disp_name(file2), vfs_file_info_get_disp_name(file1));
+    i32 ret = g_ascii_strcasecmp(file2->get_disp_name().data(), file1->get_disp_name().data());
     return ret;
 }
 
@@ -691,16 +690,17 @@ dir_path_from_tree_node(PtkDirTree* tree, PtkDirTreeNode* node)
     if (!node)
         return nullptr;
 
-    const char* name;
     GSList* names = nullptr;
     while (node != tree->root)
     {
-        if (!node->file || !(name = vfs_file_info_get_name(node->file)))
+        if (!node->file)
         {
             g_slist_free(names);
             return nullptr;
         }
-        names = g_slist_prepend(names, (void*)name);
+        const std::string name = node->file->get_name();
+
+        names = g_slist_prepend(names, ztd::strdup(name));
         node = node->parent;
     }
 
@@ -715,7 +715,7 @@ dir_path_from_tree_node(PtkDirTree* tree, PtkDirTreeNode* node)
     char* p;
     for (p = dir_path, l = names; l; l = l->next)
     {
-        name = (char*)l->data;
+        char* name = (char*)l->data;
         len = std::strlen(name);
         memcpy(p, name, len * sizeof(char));
         p += len;
@@ -897,7 +897,7 @@ find_node(PtkDirTreeNode* parent, const char* name)
     PtkDirTreeNode* child;
     for (child = parent->children; child; child = child->next)
     {
-        if (child->file && !strcmp(vfs_file_info_get_name(child->file), name))
+        if (child->file && ztd::same(child->file->get_name(), name))
         {
             return child;
         }

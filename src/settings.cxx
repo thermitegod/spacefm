@@ -2766,8 +2766,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
 
                     for (vfs::file_info file: sel_files)
                     {
-                        const std::string open_file =
-                            Glib::build_filename(cwd, vfs_file_info_get_name(file));
+                        const std::string open_file = Glib::build_filename(cwd, file->get_name());
 
                         open_files.push_back(open_file);
                     }

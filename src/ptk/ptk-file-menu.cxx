@@ -118,10 +118,6 @@ PtkFileMenu::~PtkFileMenu()
 {
     if (this->file)
         vfs_file_info_unref(this->file);
-    // if (this->cwd)
-    //     free(this->cwd);
-    // if (this->file_path)
-    //   free(this->file_path);
     vfs_file_info_list_free(this->sel_files);
 
     if (this->accel_group)
@@ -679,9 +675,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     g_signal_connect_after((void*)popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
 
     // is_dir = file_path && std::filesystem::is_directory(file_path);
-    bool is_dir = (file && vfs_file_info_is_dir(file));
+    bool is_dir = (file && file->is_directory());
     // Note: network filesystems may become unresponsive here
-    bool is_text = file && file_path && vfs_file_info_is_text(file, file_path);
+    bool is_text = file && file_path && file->is_text(file_path);
 
     // test R/W access to cwd instead of selected file
     // Note: network filesystems may become unresponsive here
@@ -712,7 +708,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     std::vector<std::string> apps;
     if (file)
     {
-        mime_type = vfs_file_info_get_mime_type(file);
+        mime_type = file->get_mime_type();
         apps = vfs_mime_type_get_actions(mime_type);
         context->var[ItemPropContext::CONTEXT_MIME] = vfs_mime_type_get_type(mime_type);
     }
@@ -736,8 +732,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
     if (file)
     {
-        context->var[ItemPropContext::CONTEXT_IS_LINK] =
-            vfs_file_info_is_symlink(file) ? "true" : "false";
+        context->var[ItemPropContext::CONTEXT_IS_LINK] = file->is_symlink() ? "true" : "false";
     }
     else
     {
@@ -768,7 +763,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         if (!is_dir && file && file_path &&
             (file->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY ||
              // Note: network filesystems may become unresponsive here
-             vfs_file_info_is_executable(file, file_path)))
+             file->is_executable(file_path)))
         {
             set = xset_set_cb(XSetName::OPEN_EXECUTE, (GFunc)on_popup_open_activate, data);
             xset_add_menuitem(browser, submenu, accel_group, set);
@@ -1363,7 +1358,7 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 
     if (data->file)
     {
-        mime_type = vfs_file_info_get_mime_type(data->file);
+        mime_type = data->file->get_mime_type();
         if (!mime_type)
         {
             mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
@@ -1485,7 +1480,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
     if (!(data && data->file))
         return;
 
-    vfs::mime_type mime_type = vfs_file_info_get_mime_type(data->file);
+    vfs::mime_type mime_type = data->file->get_mime_type();
     if (!mime_type)
         mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
 
@@ -1868,7 +1863,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
         return;
     }
 
-    vfs::mime_type mime_type = vfs_file_info_get_mime_type(data->file);
+    vfs::mime_type mime_type = data->file->get_mime_type();
     if (mime_type)
     {
         type = vfs_mime_type_get_type(mime_type);
@@ -2147,8 +2142,7 @@ on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     {
         for (vfs::file_info file: data->sel_files)
         {
-            const std::string full_path =
-                Glib::build_filename(data->cwd, vfs_file_info_get_name(file));
+            const std::string full_path = Glib::build_filename(data->cwd, file->get_name());
             if (data->browser && std::filesystem::is_directory(full_path))
             {
                 data->browser->run_event<EventType::OPEN_ITEM>(full_path,
@@ -2180,7 +2174,7 @@ on_new_bookmark(GtkMenuItem* menuitem, PtkFileMenu* data)
     if (!data->sel_files.empty() && data->sel_files.size() == 1)
     {
         vfs::file_info file = data->sel_files.back();
-        const std::string full_path = Glib::build_filename(data->cwd, vfs_file_info_get_name(file));
+        const std::string full_path = Glib::build_filename(data->cwd, file->get_name());
         ptk_bookmark_view_add_bookmark(nullptr, data->browser, full_path.c_str());
     }
     else
@@ -2374,7 +2368,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
         {
             file = vfs_file_info_new();
             vfs_file_info_get(file, ao->path);
-            vfs_dir_emit_file_created(ao->file_browser->dir, vfs_file_info_get_name(file), true);
+            vfs_dir_emit_file_created(ao->file_browser->dir, file->get_name(), true);
             vfs_file_info_unref(file);
             vfs_dir_flush_notify_cache();
             ptk_file_browser_select_file(ao->file_browser, ao->path);
@@ -2519,7 +2513,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     else
     {
         file = vfs_file_info_ref(sel_files.front());
-        file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
+        file_path = Glib::build_filename(cwd, file->get_name());
     }
 
     PtkFileMenu* data = new PtkFileMenu;

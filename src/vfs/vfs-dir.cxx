@@ -523,12 +523,12 @@ vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
     // MOD  dir contains .hidden file?
     const std::string hidden = gethidden(dir->path);
 
-    for (const auto& file: std::filesystem::directory_iterator(dir->path))
+    for (const auto& dfile: std::filesystem::directory_iterator(dir->path))
     {
         if (dir->task->is_cancelled())
             break;
 
-        const std::string file_name = std::filesystem::path(file).filename();
+        const std::string file_name = std::filesystem::path(dfile).filename();
         const std::string full_path = Glib::build_filename(dir->path, file_name);
 
         // MOD ignore if in .hidden
@@ -538,21 +538,21 @@ vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
             continue;
         }
 
-        vfs::file_info fi = vfs_file_info_new();
-        if (vfs_file_info_get(fi, full_path))
+        vfs::file_info file = vfs_file_info_new();
+        if (vfs_file_info_get(file, full_path))
         {
             vfs_dir_lock(dir);
 
             /* Special processing for desktop directory */
-            vfs_file_info_load_special_info(fi, full_path);
+            file->load_special_info(full_path);
 
-            dir->file_list.push_back(fi);
+            dir->file_list.push_back(file);
 
             vfs_dir_unlock(dir);
         }
         else
         {
-            vfs_file_info_unref(fi);
+            vfs_file_info_unref(file);
         }
     }
 
@@ -581,7 +581,7 @@ update_file_info(vfs::dir dir, vfs::file_info file)
     if (vfs_file_info_get(file, full_path))
     {
         ret = true;
-        vfs_file_info_load_special_info(file, full_path);
+        file->load_special_info(full_path);
     }
     else /* The file does not exist */
     {
@@ -643,7 +643,7 @@ update_created_files(std::string_view key, vfs::dir dir)
             if (vfs_file_info_get(file, full_path))
             {
                 // add new file to dir file_list
-                vfs_file_info_load_special_info(file, full_path);
+                file->load_special_info(full_path);
                 dir->file_list.push_back(vfs_file_info_ref(file));
 
                 dir->run_event<EventType::FILE_CREATED>(file);
@@ -784,8 +784,8 @@ reload_mime_type(std::string_view key, vfs::dir dir)
 
     for (vfs::file_info file: dir->file_list)
     {
-        const std::string full_path = Glib::build_filename(dir->path, vfs_file_info_get_name(file));
-        vfs_file_info_reload_mime_type(file, full_path);
+        const std::string full_path = Glib::build_filename(dir->path, file->get_name());
+        file->reload_mime_type(full_path);
         // LOG_DEBUG("reload {}", full_path);
     }
 
@@ -849,7 +849,7 @@ vfs_dir_unload_thumbnails(vfs::dir dir, bool is_big)
         if (file->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY)
         {
             const std::string file_path = Glib::build_filename(dir->path, file->name);
-            vfs_file_info_load_special_info(file, file_path);
+            file->load_special_info(file_path);
         }
     }
     vfs_dir_unlock(dir);

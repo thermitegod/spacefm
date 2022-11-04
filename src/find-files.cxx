@@ -239,7 +239,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
             if (!file)
                 continue;
 
-            const std::string full_path = Glib::build_filename(dir, vfs_file_info_get_name(file));
+            const std::string full_path = Glib::build_filename(dir, file->get_name());
             if (std::filesystem::is_directory(full_path))
             {
                 file_browser->run_event<EventType::OPEN_ITEM>(full_path,
@@ -311,7 +311,7 @@ on_open_files(GAction* action, FindFile* data)
                 l = (GList*)g_hash_table_lookup(hash, dir);
                 l = g_list_prepend(l, vfs_file_info_ref(file));
                 g_hash_table_insert(hash, dir, l); // sfm caused segfault with destroy function
-                if (vfs_file_info_is_dir(file))    // sfm
+                if (file->is_directory())
                     open_files_has_dir = true;
             }
             else
@@ -606,21 +606,21 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
     while ((ff = FOUND_FILE(g_queue_pop_head(queue))))
     {
         gtk_list_store_append(data->result_list, &it);
-        icon = vfs_file_info_get_small_icon(ff->file);
+        icon = ff->file->get_small_icon();
         gtk_list_store_set(data->result_list,
                            &it,
                            FindFilesCol::COL_ICON,
                            icon,
                            FindFilesCol::COL_NAME,
-                           vfs_file_info_get_disp_name(ff->file),
+                           ff->file->get_disp_name().data(),
                            FindFilesCol::COL_DIR,
-                           ff->dir_path.c_str(), /* FIXME: non-UTF8? */
+                           ff->dir_path.data(), /* FIXME: non-UTF8? */
                            FindFilesCol::COL_TYPE,
-                           vfs_file_info_get_mime_type_desc(ff->file),
+                           ff->file->get_mime_type_desc().data(),
                            FindFilesCol::COL_SIZE,
-                           vfs_file_info_get_disp_size(ff->file),
+                           ff->file->get_disp_size().data(),
                            FindFilesCol::COL_MTIME,
-                           vfs_file_info_get_disp_mtime(ff->file),
+                           ff->file->get_disp_mtime().data(),
                            FindFilesCol::COL_INFO,
                            ff->file,
                            -1);

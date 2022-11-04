@@ -307,7 +307,7 @@ ptk_file_browser_select_file(PtkFileBrowser* file_browser, const char* path)
             gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
             if (file)
             {
-                const char* file_name = vfs_file_info_get_name(file);
+                const std::string file_name = file->get_name();
                 if (ztd::same(file_name, name))
                 {
                     GtkTreePath* tree_path = gtk_tree_model_get_path(GTK_TREE_MODEL(list), &it);
@@ -2405,14 +2405,11 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
                 continue;
 
             // test name
-            char* name = (char*)vfs_file_info_get_disp_name(file);
+            std::string name = file->get_disp_name();
             if (icase)
-                name = g_utf8_strdown(name, -1);
+                name = ztd::lower(name);
 
-            bool select = fnmatch(key, name, 0) == 0;
-
-            if (icase)
-                free(name);
+            const bool select = fnmatch(key, name.data(), 0) == 0;
 
             // do selection and scroll to first selected
             path = gtk_tree_model_get_path(
@@ -2574,11 +2571,11 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
                 continue;
 
             // test name
-            char* name = (char*)vfs_file_info_get_disp_name(file);
+            const std::string name = file->get_disp_name();
             char** test_name = filename;
             while (*test_name)
             {
-                if (!strcmp(*test_name, name))
+                if (ztd::same(*test_name, name))
                     break;
                 test_name++;
             }
@@ -2806,8 +2803,8 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const char* seek_dir,
                 continue;
 
             // test name
-            char* name = (char*)vfs_file_info_get_disp_name(file);
-            if (!g_strcmp0(name, seek_name))
+            const std::string name = file->get_disp_name();
+            if (ztd::same(name, seek_name))
             {
                 // exact match (may be file or dir)
                 it_dir = it;
@@ -2816,13 +2813,15 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const char* seek_dir,
             if (ztd::startswith(name, seek_name))
             {
                 // prefix found
-                if (vfs_file_info_is_dir(file))
+                if (file->is_directory())
                 {
                     if (!it_dir.stamp)
                         it_dir = it;
                 }
                 else if (!it_file.stamp)
+                {
                     it_file = it;
+                }
             }
         } while (gtk_tree_model_iter_next(model, &it));
     }
@@ -2934,7 +2933,7 @@ on_folder_view_item_sel_change_idle(PtkFileBrowser* file_browser)
             gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
             if (file)
             {
-                file_browser->sel_size += vfs_file_info_get_size(file);
+                file_browser->sel_size += file->get_size();
                 vfs_file_info_unref(file);
             }
             ++file_browser->n_sel_files;
@@ -2980,7 +2979,7 @@ show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
     else
     {
         file = vfs_file_info_ref(sel_files.front());
-        file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
+        file_path = Glib::build_filename(cwd, file->get_name());
     }
 
     /*
@@ -3120,8 +3119,8 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
         if (tree_path && gtk_tree_model_get_iter(model, &it, tree_path))
         {
             gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
-            file_path = Glib::build_filename(ptk_file_browser_get_cwd(file_browser),
-                                             vfs_file_info_get_name(file));
+            file_path =
+                Glib::build_filename(ptk_file_browser_get_cwd(file_browser), file->get_name());
         }
         else /* no item is clicked */
         {
@@ -3945,8 +3944,8 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
         gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
         if (file)
         {
-            cursor_path = Glib::build_filename(ptk_file_browser_get_cwd(file_browser),
-                                               vfs_file_info_get_name(file));
+            cursor_path =
+                Glib::build_filename(ptk_file_browser_get_cwd(file_browser), file->get_name());
         }
     }
     gtk_tree_path_free(tree_path);
@@ -4097,10 +4096,10 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, i32 x, i32 y)
         gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
         if (file)
         {
-            if (vfs_file_info_is_dir(file))
+            if (file->is_directory())
             {
-                dest_path = Glib::build_filename(ptk_file_browser_get_cwd(file_browser),
-                                                 vfs_file_info_get_name(file));
+                dest_path =
+                    Glib::build_filename(ptk_file_browser_get_cwd(file_browser), file->get_name());
             }
             else /* Drop on a file, not directory */
             {
@@ -4302,8 +4301,8 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
 
     for (vfs::file_info file: sel_files)
     {
-        const std::string full_path = Glib::build_filename(ptk_file_browser_get_cwd(file_browser),
-                                                           vfs_file_info_get_name(file));
+        const std::string full_path =
+            Glib::build_filename(ptk_file_browser_get_cwd(file_browser), file->get_name());
         const std::string uri = Glib::filename_to_uri(full_path);
 
         uri_list.append(fmt::format("{}\n", uri));
@@ -4470,7 +4469,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
         {
             vfs::file_info file;
             gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
-            if (!file || !vfs_file_info_is_dir(file))
+            if (!file || !file->is_directory())
             {
                 gtk_tree_path_free(tree_path);
                 tree_path = nullptr;
@@ -4867,7 +4866,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, const std::vector<vfs::fi
         std::string file_path;
         for (vfs::file_info file: sel_files)
         {
-            file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
+            file_path = Glib::build_filename(cwd, file->get_name());
             file_list.push_back(file_path);
         }
 
@@ -4917,7 +4916,7 @@ ptk_file_browser_hide_selected(PtkFileBrowser* file_browser,
 
     for (vfs::file_info file: sel_files)
     {
-        if (!vfs_dir_add_hidden(cwd, vfs_file_info_get_name(file)))
+        if (!vfs_dir_add_hidden(cwd, file->get_name()))
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                            "Error",
                            "Error hiding files");
@@ -5695,7 +5694,7 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
     std::string file_paths;
     for (vfs::file_info file: sel_files)
     {
-        const std::string file_path = bash_quote(vfs_file_info_get_name(file));
+        const std::string file_path = bash_quote(file->get_name());
         file_paths = fmt::format("{} {}", file_paths, file_path);
     }
 

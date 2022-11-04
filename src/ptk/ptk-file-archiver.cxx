@@ -551,7 +551,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
         // Fetching first extension handler deals with
         vfs::file_info file = sel_files.front();
         const std::string ext = archive_handler_get_first_extension(handler_xset);
-        dest_file = g_strjoin(nullptr, vfs_file_info_get_disp_name(file), ext.c_str(), nullptr);
+        dest_file = g_strjoin(nullptr, file->get_disp_name().data(), ext.data(), nullptr);
         gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), dest_file);
         free(dest_file);
         dest_file = nullptr;
@@ -769,7 +769,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
         bool loop_once = ztd::contains(command, "%N");
         for (vfs::file_info file: sel_files)
         {
-            desc = vfs_file_info_get_name(file);
+            desc = file->get_name();
 
             /* In %O mode, every source file is output to its own archive,
              * so the resulting archive name is based on the filename and
@@ -843,7 +843,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
         std::string first;
         if (!sel_files.empty())
         {
-            desc = vfs_file_info_get_name(sel_files.front());
+            desc = sel_files.front()->get_name();
             if (desc[0] == '-')
             {
                 // special handling for filename starting with a dash
@@ -862,7 +862,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
             {
                 for (vfs::file_info file: sel_files)
                 {
-                    desc = vfs_file_info_get_name(file);
+                    desc = file->get_name();
                     if (desc[0] == '-')
                     {
                         // special handling for filename starting with a dash
@@ -988,8 +988,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         for (vfs::file_info file: sel_files)
         {
             // Fetching file details
-            mime_type = vfs_file_info_get_mime_type(file);
-            const std::string full_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
+            mime_type = file->get_mime_type();
+            const std::string full_path = Glib::build_filename(cwd, file->get_name());
 
             // Checking for enabled handler with non-empty command
             handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
@@ -1158,9 +1158,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     for (vfs::file_info file: sel_files)
     {
         // Fetching file details
-        mime_type = vfs_file_info_get_mime_type(file);
+        mime_type = file->get_mime_type();
         // Determining file paths
-        const std::string full_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
+        const std::string full_path = Glib::build_filename(cwd, file->get_name());
 
         // Get handler with non-empty command
         handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
@@ -1227,7 +1227,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
              * needed if a parent directory must be created, and if the
              * extraction target is a file without the handler extension
              * filename is strdup'd to get rid of the const */
-            char* filename = ztd::strdup(vfs_file_info_get_name(file));
+            char* filename = ztd::strdup(file->get_name());
             char* filename_no_archive_ext = nullptr;
 
             /* Looping for all extensions registered with the current
@@ -1398,8 +1398,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     g_strfreev(archive_handlers);
 
     // Creating task
-    const std::string task_name =
-        fmt::format("Extract {}", vfs_file_info_get_name(sel_files.front()));
+    const std::string task_name = fmt::format("Extract {}", sel_files.front()->get_name());
     PtkFileTask* ptask = ptk_file_exec_new(task_name,
                                            cwd,
                                            dlgparent,

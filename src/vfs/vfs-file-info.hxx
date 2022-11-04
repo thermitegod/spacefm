@@ -24,6 +24,8 @@
 
 #include <vector>
 
+#include <memory>
+
 #include <atomic>
 #include <chrono>
 
@@ -51,17 +53,18 @@ enum VFSFileInfoFlag
 
 struct VFSFileInfo
 {
-    // cached copy of struct stat file_stat
+  public:
+    // cached copy of struct stat()
     // Only use some members of struct stat to reduce memory usage
-    dev_t dev;         // st_dev - ID of device containing file
-    mode_t mode;       // st_dev - File type and mode
-    uid_t uid;         // st_uid - User ID of owner
-    gid_t gid;         // st_gid - Group ID of owner
-    off_t size;        // st_size - Total size, in bytes
-    std::time_t atime; // st_atime - Time of the last access
-    std::time_t mtime; // st_mtime - Time of last modification
+    dev_t dev;         // st_dev     - ID of device containing file
+    mode_t mode;       // st_dev     - File type and mode
+    uid_t uid;         // st_uid     - User ID of owner
+    gid_t gid;         // st_gid     - Group ID of owner
+    off_t size;        // st_size    - Total size, in bytes
+    std::time_t atime; // st_atime   - Time of the last access
+    std::time_t mtime; // st_mtime   - Time of last modification
     blksize_t blksize; // st_blksize - Block size for filesystem I/O
-    blkcnt_t blocks;   // st_blocks - Number of 512B blocks allocated
+    blkcnt_t blocks;   // st_blocks  - Number of 512B blocks allocated
 
     std::filesystem::file_status status;
 
@@ -79,6 +82,62 @@ struct VFSFileInfo
 
     VFSFileInfoFlag flags; // if it is a special file
 
+  public:
+    const std::string& get_name() const noexcept;
+    const std::string& get_disp_name() const noexcept;
+
+    void set_disp_name(std::string_view new_disp_name) noexcept;
+
+    off_t get_size() const noexcept;
+    const std::string& get_disp_size() const noexcept;
+
+    blkcnt_t get_blocks() const noexcept;
+
+    std::filesystem::perms get_permissions() const noexcept;
+
+    vfs::mime_type get_mime_type() const noexcept;
+    void reload_mime_type(std::string_view full_path) noexcept;
+
+    const std::string get_mime_type_desc() const noexcept;
+
+    const std::string& get_disp_owner() noexcept;
+    const std::string& get_disp_mtime() noexcept;
+    const std::string& get_disp_perm() noexcept;
+
+    time_t* get_mtime() noexcept;
+    time_t* get_atime() noexcept;
+
+    bool load_thumbnail(std::string_view full_path, bool big) noexcept;
+    bool is_thumbnail_loaded(bool big) const noexcept;
+
+    GdkPixbuf* get_big_icon() noexcept;
+    GdkPixbuf* get_small_icon() noexcept;
+
+    GdkPixbuf* get_big_thumbnail() const noexcept;
+    GdkPixbuf* get_small_thumbnail() const noexcept;
+
+    void load_special_info(std::string_view file_path) noexcept;
+
+    bool is_directory() const noexcept;
+    bool is_regular_file() const noexcept;
+    bool is_symlink() const noexcept;
+    bool is_socket() const noexcept;
+    bool is_fifo() const noexcept;
+    bool is_block_file() const noexcept;
+    bool is_character_file() const noexcept;
+
+    bool is_image() const noexcept;
+    bool is_video() const noexcept;
+    bool is_desktop_entry() const noexcept;
+    bool is_unknown_type() const noexcept;
+
+    // Full path of the file is required by this function
+    bool is_executable(std::string_view file_path = "") const noexcept;
+
+    // Full path of the file is required by this function
+    bool is_text(std::string_view file_path = "") const noexcept;
+
+  public:
     void ref_inc();
     void ref_dec();
     u32 ref_count();
@@ -93,65 +152,12 @@ namespace vfs
 } // namespace vfs
 
 vfs::file_info vfs_file_info_new();
-vfs::file_info vfs_file_info_ref(vfs::file_info fi);
-void vfs_file_info_unref(vfs::file_info fi);
+vfs::file_info vfs_file_info_ref(vfs::file_info file);
+void vfs_file_info_unref(vfs::file_info file);
 
-bool vfs_file_info_get(vfs::file_info fi, std::string_view file_path);
+bool vfs_file_info_get(vfs::file_info file, std::string_view file_path);
 
-const char* vfs_file_info_get_name(vfs::file_info fi);
-const char* vfs_file_info_get_disp_name(vfs::file_info fi);
-
-void vfs_file_info_set_disp_name(vfs::file_info fi, std::string_view name);
-
-off_t vfs_file_info_get_size(vfs::file_info fi);
-const char* vfs_file_info_get_disp_size(vfs::file_info fi);
-
-off_t vfs_file_info_get_blocks(vfs::file_info fi);
-
-std::filesystem::perms vfs_file_info_get_mode(vfs::file_info fi);
-
-vfs::mime_type vfs_file_info_get_mime_type(vfs::file_info fi);
-void vfs_file_info_reload_mime_type(vfs::file_info fi, std::string_view full_path);
-
-const char* vfs_file_info_get_mime_type_desc(vfs::file_info fi);
-
-const char* vfs_file_info_get_disp_owner(vfs::file_info fi);
-const char* vfs_file_info_get_disp_mtime(vfs::file_info fi);
-const char* vfs_file_info_get_disp_perm(vfs::file_info fi);
-
-time_t* vfs_file_info_get_mtime(vfs::file_info fi);
-time_t* vfs_file_info_get_atime(vfs::file_info fi);
+void vfs_file_info_list_free(const std::vector<vfs::file_info>& list);
 
 void vfs_file_info_set_thumbnail_size_big(i32 size);
 void vfs_file_info_set_thumbnail_size_small(i32 size);
-
-bool vfs_file_info_load_thumbnail(vfs::file_info fi, std::string_view full_path, bool big);
-bool vfs_file_info_is_thumbnail_loaded(vfs::file_info fi, bool big);
-
-GdkPixbuf* vfs_file_info_get_big_icon(vfs::file_info fi);
-GdkPixbuf* vfs_file_info_get_small_icon(vfs::file_info fi);
-
-GdkPixbuf* vfs_file_info_get_big_thumbnail(vfs::file_info fi);
-GdkPixbuf* vfs_file_info_get_small_thumbnail(vfs::file_info fi);
-
-bool vfs_file_info_is_dir(vfs::file_info fi);
-bool vfs_file_info_is_regular_file(vfs::file_info fi);
-bool vfs_file_info_is_symlink(vfs::file_info fi);
-bool vfs_file_info_is_socket(vfs::file_info fi);
-bool vfs_file_info_is_named_pipe(vfs::file_info fi);
-bool vfs_file_info_is_block_device(vfs::file_info fi);
-bool vfs_file_info_is_char_device(vfs::file_info fi);
-
-bool vfs_file_info_is_image(vfs::file_info fi);
-bool vfs_file_info_is_video(vfs::file_info fi);
-bool vfs_file_info_is_desktop_entry(vfs::file_info fi);
-
-/* Full path of the file is required by this function */
-bool vfs_file_info_is_executable(vfs::file_info fi, std::string_view file_path = "");
-
-/* Full path of the file is required by this function */
-bool vfs_file_info_is_text(vfs::file_info fi, std::string_view file_path = "");
-
-void vfs_file_info_load_special_info(vfs::file_info fi, std::string_view file_path = "");
-
-void vfs_file_info_list_free(const std::vector<vfs::file_info>& list);

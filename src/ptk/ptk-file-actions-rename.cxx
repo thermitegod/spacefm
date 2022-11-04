@@ -1996,7 +1996,7 @@ update_new_display_delayed(char* path)
     {
         vfs::file_info file = vfs_file_info_new();
         vfs_file_info_get(file, path);
-        vfs_dir_emit_file_created(vdir, vfs_file_info_get_name(file), true);
+        vfs_dir_emit_file_created(vdir, file->get_name(), true);
         vfs_file_info_unref(file);
         vfs_dir_flush_notify_cache();
     }
@@ -2041,15 +2041,15 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
 
         std::string full_name;
         // special processing for files with inconsistent real name and display name
-        if (vfs_file_info_is_desktop_entry(file))
+        if (file->is_desktop_entry())
             full_name = Glib::filename_display_name(file->name);
         if (full_name.empty())
-            full_name = vfs_file_info_get_disp_name(file);
+            full_name = file->get_disp_name();
         if (full_name.empty())
-            full_name = vfs_file_info_get_name(file);
+            full_name = file->get_name();
 
-        mset->is_dir = vfs_file_info_is_dir(file);
-        mset->is_link = vfs_file_info_is_symlink(file);
+        mset->is_dir = file->is_directory();
+        mset->is_link = file->is_symlink();
         mset->clip_copy = clip_copy;
         mset->full_path = ztd::strdup(Glib::build_filename(file_dir, full_name));
         if (dest_dir)
@@ -2059,13 +2059,13 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     }
     else if (create_new == PtkRenameMode::PTK_RENAME_NEW_LINK && file)
     {
-        std::string full_name = vfs_file_info_get_disp_name(file);
+        std::string full_name = file->get_disp_name();
         if (full_name.empty())
-            full_name = ztd::strdup(vfs_file_info_get_name(file));
+            full_name = ztd::strdup(file->get_name());
         mset->full_path = ztd::strdup(Glib::build_filename(file_dir, full_name));
         mset->new_path = ztd::strdup(mset->full_path);
-        mset->is_dir = vfs_file_info_is_dir(file); // is_dir is dynamic for create
-        mset->is_link = vfs_file_info_is_symlink(file);
+        mset->is_dir = file->is_directory(); // is_dir is dynamic for create
+        mset->is_link = file->is_symlink();
         mset->clip_copy = false;
     }
     else
@@ -2196,7 +2196,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     }
     else if (file)
     {
-        vfs::mime_type mime_type = vfs_file_info_get_mime_type(file);
+        vfs::mime_type mime_type = file->get_mime_type();
         if (mime_type)
         {
             mset->mime_type = ztd::strdup(vfs_mime_type_get_type(mime_type));
@@ -3215,7 +3215,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<vfs::file_
     i32 item_count = 0;
     for (vfs::file_info file: sel_files)
     {
-        const std::string file_path = Glib::build_filename(cwd, vfs_file_info_get_name(file));
+        const std::string file_path = Glib::build_filename(cwd, file->get_name());
         file_path_q = bash_quote(file_path);
         file_paths = fmt::format("{} {}", file_paths, file_path_q);
         item_count++;
