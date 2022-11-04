@@ -458,20 +458,20 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
 
     g_value_init(value, column_types[column]);
 
-    vfs::file_info info = VFS_FILE_INFO(iter->user_data2);
+    vfs::file_info file = VFS_FILE_INFO(iter->user_data2);
 
     switch (column)
     {
         case PTKFileListCol::COL_FILE_BIG_ICON:
             icon = nullptr;
             /* special file can use special icons saved as thumbnails*/
-            if (info->flags == VFSFileInfoFlag::VFS_FILE_INFO_NONE &&
-                (list->max_thumbnail > info->size /*vfs_file_info_get_size( info )*/
-                 || (list->max_thumbnail != 0 && vfs_file_info_is_video(info))))
-                icon = vfs_file_info_get_big_thumbnail(info);
+            if (file->flags == VFSFileInfoFlag::VFS_FILE_INFO_NONE &&
+                (list->max_thumbnail > file->size /*vfs_file_info_get_size(file)*/
+                 || (list->max_thumbnail != 0 && vfs_file_info_is_video(file))))
+                icon = vfs_file_info_get_big_thumbnail(file);
 
             if (!icon)
-                icon = vfs_file_info_get_big_icon(info);
+                icon = vfs_file_info_get_big_icon(file);
             if (icon)
             {
                 g_value_set_object(value, icon);
@@ -481,11 +481,11 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
         case PTKFileListCol::COL_FILE_SMALL_ICON:
             icon = nullptr;
             /* special file can use special icons saved as thumbnails*/
-            if (list->max_thumbnail > info->size /*vfs_file_info_get_size( info )*/
-                || (list->max_thumbnail != 0 && vfs_file_info_is_video(info)))
-                icon = vfs_file_info_get_small_thumbnail(info);
+            if (list->max_thumbnail > file->size /*vfs_file_info_get_size( info )*/
+                || (list->max_thumbnail != 0 && vfs_file_info_is_video(file)))
+                icon = vfs_file_info_get_small_thumbnail(file);
             if (!icon)
-                icon = vfs_file_info_get_small_icon(info);
+                icon = vfs_file_info_get_small_icon(file);
             if (icon)
             {
                 g_value_set_object(value, icon);
@@ -493,30 +493,30 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             }
             break;
         case PTKFileListCol::COL_FILE_NAME:
-            g_value_set_string(value, vfs_file_info_get_disp_name(info));
+            g_value_set_string(value, vfs_file_info_get_disp_name(file));
             break;
         case PTKFileListCol::COL_FILE_SIZE:
-            if (S_ISDIR(info->mode) ||
-                (S_ISLNK(info->mode) &&
-                 !strcmp(vfs_mime_type_get_type(info->mime_type), XDG_MIME_TYPE_DIRECTORY)))
+            if (S_ISDIR(file->mode) ||
+                (S_ISLNK(file->mode) &&
+                 !strcmp(vfs_mime_type_get_type(file->mime_type), XDG_MIME_TYPE_DIRECTORY)))
                 g_value_set_string(value, nullptr);
             else
-                g_value_set_string(value, vfs_file_info_get_disp_size(info));
+                g_value_set_string(value, vfs_file_info_get_disp_size(file));
             break;
         case PTKFileListCol::COL_FILE_DESC:
-            g_value_set_string(value, vfs_file_info_get_mime_type_desc(info));
+            g_value_set_string(value, vfs_file_info_get_mime_type_desc(file));
             break;
         case PTKFileListCol::COL_FILE_PERM:
-            g_value_set_string(value, vfs_file_info_get_disp_perm(info));
+            g_value_set_string(value, vfs_file_info_get_disp_perm(file));
             break;
         case PTKFileListCol::COL_FILE_OWNER:
-            g_value_set_string(value, vfs_file_info_get_disp_owner(info));
+            g_value_set_string(value, vfs_file_info_get_disp_owner(file));
             break;
         case PTKFileListCol::COL_FILE_MTIME:
-            g_value_set_string(value, vfs_file_info_get_disp_mtime(info));
+            g_value_set_string(value, vfs_file_info_get_disp_mtime(file));
             break;
         case PTKFileListCol::COL_FILE_INFO:
-            g_value_set_pointer(value, vfs_file_info_ref(info));
+            g_value_set_pointer(value, vfs_file_info_ref(file));
             break;
         default:
             break;

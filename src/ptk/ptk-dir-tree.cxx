@@ -449,15 +449,15 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
     PtkDirTreeNode* node = PTK_DIR_TREE_NODE(iter->user_data);
 
     g_value_init(value, column_types[column]);
-    vfs::file_info info = node->file;
+    vfs::file_info file = node->file;
     switch (column)
     {
         case PTKDirTreeCol::COL_DIR_TREE_ICON:
-            if (!info)
+            if (!file)
                 return;
             i32 icon_size;
             GdkPixbuf* icon;
-            // icon = vfs_file_info_get_small_icon( info );
+            // icon = vfs_file_info_get_small_icon(file);
             icon_size = app_settings.get_icon_size_small();
             if (icon_size > PANE_MAX_ICON_SIZE)
                 icon_size = PANE_MAX_ICON_SIZE;
@@ -474,15 +474,15 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
             }
             break;
         case PTKDirTreeCol::COL_DIR_TREE_DISP_NAME:
-            if (info)
-                g_value_set_string(value, vfs_file_info_get_disp_name(info));
+            if (file)
+                g_value_set_string(value, vfs_file_info_get_disp_name(file));
             else
                 g_value_set_string(value, "( no subdirectory )"); // no sub directory
             break;
         case PTKDirTreeCol::COL_DIR_TREE_INFO:
-            if (!info)
+            if (!file)
                 return;
-            g_value_set_pointer(value, vfs_file_info_ref(info));
+            g_value_set_pointer(value, vfs_file_info_ref(file));
             break;
         default:
             break;

@@ -269,13 +269,13 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
             return false;
         }
         bool found = false;
-        vfs::file_info info;
+        vfs::file_info file;
         do
         {
-            gtk_tree_model_get(model, &it, PTKDirTreeCol::COL_DIR_TREE_INFO, &info, -1);
-            if (!info)
+            gtk_tree_model_get(model, &it, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
+            if (!file)
                 continue;
-            if (!strcmp(vfs_file_info_get_name(info), *dir))
+            if (!strcmp(vfs_file_info_get_name(file), *dir))
             {
                 tree_path = gtk_tree_model_get_path(model, &it);
 
@@ -285,10 +285,10 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
                     gtk_tree_model_get_iter(model, &parent_it, tree_path);
                 }
                 found = true;
-                vfs_file_info_unref(info);
+                vfs_file_info_unref(file);
                 break;
             }
-            vfs_file_info_unref(info);
+            vfs_file_info_unref(file);
         } while (gtk_tree_model_iter_next(model, &it));
 
         if (!found)

@@ -200,32 +200,32 @@ struct VFSDir
     // Signals Run Event
     template<EventType evt>
     typename std::enable_if<evt == EventType::FILE_CREATED, void>::type
-    run_event(vfs::file_info info)
+    run_event(vfs::file_info file)
     {
         // LOG_TRACE("Signal Execute   : EventType::FILE_CREATED");
         this->evt_mime_change.emit();
-        this->evt_file_created__first.emit(info, this->evt_data_browser);
-        this->evt_file_created__last.emit(info, this->evt_data_list);
+        this->evt_file_created__first.emit(file, this->evt_data_browser);
+        this->evt_file_created__last.emit(file, this->evt_data_list);
     }
 
     template<EventType evt>
     typename std::enable_if<evt == EventType::FILE_CHANGED, void>::type
-    run_event(vfs::file_info info)
+    run_event(vfs::file_info file)
     {
         // LOG_TRACE("Signal Execute   : EventType::FILE_CHANGED");
         this->evt_mime_change.emit();
-        this->evt_file_changed__first.emit(info, this->evt_data_browser);
-        this->evt_file_changed__last.emit(info, this->evt_data_list);
+        this->evt_file_changed__first.emit(file, this->evt_data_browser);
+        this->evt_file_changed__last.emit(file, this->evt_data_list);
     }
 
     template<EventType evt>
     typename std::enable_if<evt == EventType::FILE_DELETED, void>::type
-    run_event(vfs::file_info info)
+    run_event(vfs::file_info file)
     {
         // LOG_TRACE("Signal Execute   : EventType::FILE_DELETED");
         this->evt_mime_change.emit();
-        this->evt_file_deleted__first.emit(info, this->evt_data_browser);
-        this->evt_file_deleted__last.emit(info, this->evt_data_list);
+        this->evt_file_deleted__first.emit(file, this->evt_data_browser);
+        this->evt_file_deleted__last.emit(file, this->evt_data_list);
     }
 
     template<EventType evt>
@@ -239,10 +239,10 @@ struct VFSDir
 
     template<EventType evt>
     typename std::enable_if<evt == EventType::FILE_THUMBNAIL_LOADED, void>::type
-    run_event(vfs::file_info info)
+    run_event(vfs::file_info file)
     {
         // LOG_TRACE("Signal Execute   : EventType::FILE_THUMBNAIL_LOADED");
-        this->evt_file_thumbnail_loaded.emit(info, this->evt_data_list);
+        this->evt_file_thumbnail_loaded.emit(file, this->evt_data_list);
     }
 
     // Signals

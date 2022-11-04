@@ -197,16 +197,16 @@ FindFile::FindFile()
 
 struct FoundFile
 {
-    FoundFile(vfs::file_info fi, std::string_view dir_path);
+    FoundFile(vfs::file_info file, std::string_view dir_path);
     // ~FoundFile();
 
-    vfs::file_info fi;
+    vfs::file_info file;
     std::string dir_path;
 };
 
-FoundFile::FoundFile(vfs::file_info fi, std::string_view dir_path)
+FoundFile::FoundFile(vfs::file_info file, std::string_view dir_path)
 {
-    this->fi = fi;
+    this->file = file;
     this->dir_path = dir_path.data();
 }
 
@@ -269,7 +269,7 @@ on_open_files(GAction* action, FindFile* data)
     GList* rows;
     GHashTable* hash;
     GtkWidget* w;
-    vfs::file_info fi;
+    vfs::file_info file;
     bool open_files_has_dir = false;        // sfm
     PtkFileBrowser* file_browser = nullptr; // sfm
     bool open_files = true;
@@ -298,7 +298,7 @@ on_open_files(GAction* action, FindFile* data)
                 gtk_tree_model_get(model,
                                    &it,
                                    FindFilesCol::COL_INFO,
-                                   &fi,
+                                   &file,
                                    FindFilesCol::COL_DIR,
                                    &dir,
                                    -1);
@@ -309,9 +309,9 @@ on_open_files(GAction* action, FindFile* data)
             {
                 GList* l;
                 l = (GList*)g_hash_table_lookup(hash, dir);
-                l = g_list_prepend(l, vfs_file_info_ref(fi));
+                l = g_list_prepend(l, vfs_file_info_ref(file));
                 g_hash_table_insert(hash, dir, l); // sfm caused segfault with destroy function
-                if (vfs_file_info_is_dir(fi))      // sfm
+                if (vfs_file_info_is_dir(file))    // sfm
                     open_files_has_dir = true;
             }
             else
@@ -575,21 +575,21 @@ static void
 process_found_files(FindFile* data, GQueue* queue, const char* path)
 {
     GtkTreeIter it;
-    vfs::file_info fi;
+    vfs::file_info file;
     GdkPixbuf* icon;
     FoundFile* ff;
 
     if (path)
     {
-        fi = vfs_file_info_new();
-        if (vfs_file_info_get(fi, path))
+        file = vfs_file_info_new();
+        if (vfs_file_info_get(file, path))
         {
-            ff = new FoundFile(fi, Glib::path_get_dirname(path));
+            ff = new FoundFile(file, Glib::path_get_dirname(path));
             g_queue_push_tail(queue, ff);
         }
         else
         {
-            vfs_file_info_unref(fi);
+            vfs_file_info_unref(file);
         }
 
         /* we queue the found files, and not add them to the tree view direclty.
@@ -606,23 +606,23 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
     while ((ff = FOUND_FILE(g_queue_pop_head(queue))))
     {
         gtk_list_store_append(data->result_list, &it);
-        icon = vfs_file_info_get_small_icon(ff->fi);
+        icon = vfs_file_info_get_small_icon(ff->file);
         gtk_list_store_set(data->result_list,
                            &it,
                            FindFilesCol::COL_ICON,
                            icon,
                            FindFilesCol::COL_NAME,
-                           vfs_file_info_get_disp_name(ff->fi),
+                           vfs_file_info_get_disp_name(ff->file),
                            FindFilesCol::COL_DIR,
                            ff->dir_path.c_str(), /* FIXME: non-UTF8? */
                            FindFilesCol::COL_TYPE,
-                           vfs_file_info_get_mime_type_desc(ff->fi),
+                           vfs_file_info_get_mime_type_desc(ff->file),
                            FindFilesCol::COL_SIZE,
-                           vfs_file_info_get_disp_size(ff->fi),
+                           vfs_file_info_get_disp_size(ff->file),
                            FindFilesCol::COL_MTIME,
-                           vfs_file_info_get_disp_mtime(ff->fi),
+                           vfs_file_info_get_disp_mtime(ff->file),
                            FindFilesCol::COL_INFO,
-                           ff->fi,
+                           ff->file,
                            -1);
         g_object_unref(icon);
 
