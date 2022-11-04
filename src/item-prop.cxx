@@ -1360,7 +1360,7 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
             // Choose
             vfs::mime_type mime_type = vfs_mime_type_get_from_type(
                 !ctxt->context->var[ItemPropContext::CONTEXT_MIME].empty()
-                    ? ctxt->context->var[ItemPropContext::CONTEXT_MIME].c_str()
+                    ? ctxt->context->var[ItemPropContext::CONTEXT_MIME]
                     : XDG_MIME_TYPE_UNKNOWN);
             char* app = (char*)ptk_choose_app_for_mime_type(
                 GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(ctxt->dlg))),

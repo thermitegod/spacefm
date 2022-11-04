@@ -37,23 +37,23 @@ class VFSAppDesktop
     VFSAppDesktop(std::string_view open_file_name) noexcept;
     ~VFSAppDesktop() noexcept;
 
-    const char* get_name() noexcept;
-    const char* get_disp_name() noexcept;
-    const char* get_exec() noexcept;
-    const char* get_full_path() noexcept;
-    GdkPixbuf* get_icon(i32 size) noexcept;
-    const char* get_icon_name() noexcept;
-    bool use_terminal() noexcept;
-    bool open_multiple_files() noexcept;
-    bool open_files(std::string_view working_dir, const std::vector<std::string>& file_paths);
+    const std::string& get_name() const noexcept;
+    const std::string& get_disp_name() const noexcept;
+    const std::string& get_exec() const noexcept;
+    const std::string& get_full_path() const noexcept;
+    const std::string& get_icon_name() const noexcept;
+    GdkPixbuf* get_icon(i32 size) const noexcept;
+    bool use_terminal() const noexcept;
+    bool open_multiple_files() const noexcept;
+    bool open_files(std::string_view working_dir, const std::vector<std::string>& file_paths) const;
 
   private:
     const std::string
-    translate_app_exec_to_command_line(const std::vector<std::string>& file_list) noexcept;
+    translate_app_exec_to_command_line(const std::vector<std::string>& file_list) const noexcept;
     void exec_in_terminal(std::string_view app_name, std::string_view cwd,
-                          std::string_view cmd) noexcept;
+                          std::string_view cmd) const noexcept;
     void exec_desktop(std::string_view working_dir,
-                      const std::vector<std::string>& file_paths) noexcept;
+                      const std::vector<std::string>& file_paths) const noexcept;
 
   private:
     // desktop entry spec keys
@@ -78,7 +78,7 @@ class VFSAppDesktopException: virtual public std::exception
     std::string error_message;
 
   public:
-    explicit VFSAppDesktopException(const std::string& msg) : error_message(msg)
+    explicit VFSAppDesktopException(std::string_view msg) : error_message(msg)
     {
     }
 
@@ -89,6 +89,6 @@ class VFSAppDesktopException: virtual public std::exception
     virtual const char*
     what() const throw()
     {
-        return error_message.c_str();
+        return error_message.data();
     }
 };

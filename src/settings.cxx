@@ -2749,7 +2749,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
             else if (ztd::endswith(set->z, ".desktop"))
             {
                 vfs::desktop desktop(set->z);
-                if (desktop.get_exec() && desktop.get_exec()[0] != '\0')
+                if (!desktop.get_exec().empty())
                 {
                     // get file list
                     std::vector<vfs::file_info> sel_files;

@@ -101,7 +101,7 @@ bool vfs_file_info_get(vfs::file_info fi, std::string_view file_path);
 const char* vfs_file_info_get_name(vfs::file_info fi);
 const char* vfs_file_info_get_disp_name(vfs::file_info fi);
 
-void vfs_file_info_set_disp_name(vfs::file_info fi, const char* name);
+void vfs_file_info_set_disp_name(vfs::file_info fi, std::string_view name);
 
 off_t vfs_file_info_get_size(vfs::file_info fi);
 const char* vfs_file_info_get_disp_size(vfs::file_info fi);
@@ -111,7 +111,7 @@ off_t vfs_file_info_get_blocks(vfs::file_info fi);
 std::filesystem::perms vfs_file_info_get_mode(vfs::file_info fi);
 
 vfs::mime_type vfs_file_info_get_mime_type(vfs::file_info fi);
-void vfs_file_info_reload_mime_type(vfs::file_info fi, const char* full_path);
+void vfs_file_info_reload_mime_type(vfs::file_info fi, std::string_view full_path);
 
 const char* vfs_file_info_get_mime_type_desc(vfs::file_info fi);
 

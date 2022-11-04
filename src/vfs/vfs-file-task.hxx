@@ -213,7 +213,7 @@ struct VFSFileTask
 };
 
 VFSFileTask* vfs_task_new(VFSFileTaskType task_type, const std::vector<std::string>& src_files,
-                          const char* dest_dir);
+                          std::string_view dest_dir);
 
 void vfs_file_task_lock(VFSFileTask* task);
 void vfs_file_task_unlock(VFSFileTask* task);

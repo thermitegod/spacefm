@@ -55,7 +55,7 @@ struct VFSFileMonitor
 
 namespace vfs
 {
-    using file_monitor_t = std::shared_ptr<VFSFileMonitor>;
+    using file_monitor = std::shared_ptr<VFSFileMonitor>;
 }
 
 /* Callback function which will be called when monitored events happen
@@ -63,7 +63,7 @@ namespace vfs
  *  if gtk+ APIs are called in this callback, since the callback is called from
  *  IO channel handler.
  */
-using VFSFileMonitorCallback = void (*)(vfs::file_monitor_t monitor, VFSFileMonitorEvent event,
+using VFSFileMonitorCallback = void (*)(vfs::file_monitor monitor, VFSFileMonitorEvent event,
                                         std::string_view file_name, void* user_data);
 
 /*
@@ -80,14 +80,13 @@ bool vfs_file_monitor_init();
  * cb: callback function to be called when file event happens.
  * user_data: user data to be passed to callback function.
  */
-vfs::file_monitor_t vfs_file_monitor_add(std::string_view path, VFSFileMonitorCallback cb,
-                                         void* user_data);
+vfs::file_monitor vfs_file_monitor_add(std::string_view path, VFSFileMonitorCallback cb,
+                                       void* user_data);
 
 /*
  * Remove previously installed monitor.
  */
-void vfs_file_monitor_remove(vfs::file_monitor_t monitor, VFSFileMonitorCallback cb,
-                             void* user_data);
+void vfs_file_monitor_remove(vfs::file_monitor monitor, VFSFileMonitorCallback cb, void* user_data);
 
 /*
  * Clean up and shutdown file alteration monitor.

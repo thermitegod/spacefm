@@ -34,7 +34,6 @@
 
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-user-dir.hxx"
-
 #include "vfs/vfs-app-desktop.hxx"
 
 #include "utils.hxx"
@@ -129,50 +128,50 @@ VFSAppDesktop::~VFSAppDesktop() noexcept
     // LOG_INFO("VFSAppDesktop destructor");
 }
 
-const char*
-VFSAppDesktop::get_name() noexcept
+const std::string&
+VFSAppDesktop::get_name() const noexcept
 {
-    return this->file_name.c_str();
+    return this->file_name;
 }
 
-const char*
-VFSAppDesktop::get_disp_name() noexcept
+const std::string&
+VFSAppDesktop::get_disp_name() const noexcept
 {
     if (!this->disp_name.empty())
-        return this->disp_name.c_str();
-    return this->file_name.c_str();
+        return this->disp_name;
+    return this->file_name;
 }
 
-const char*
-VFSAppDesktop::get_exec() noexcept
+const std::string&
+VFSAppDesktop::get_exec() const noexcept
 {
-    return this->exec.c_str();
+    return this->exec;
 }
 
 bool
-VFSAppDesktop::use_terminal() noexcept
+VFSAppDesktop::use_terminal() const noexcept
 {
     return this->terminal;
 }
 
-const char*
-VFSAppDesktop::get_full_path() noexcept
+const std::string&
+VFSAppDesktop::get_full_path() const noexcept
 {
-    return this->full_path.c_str();
+    return this->full_path;
 }
 
-const char*
-VFSAppDesktop::get_icon_name() noexcept
+const std::string&
+VFSAppDesktop::get_icon_name() const noexcept
 {
-    return this->icon_name.c_str();
+    return this->icon_name;
 }
 
 GdkPixbuf*
-VFSAppDesktop::get_icon(i32 size) noexcept
+VFSAppDesktop::get_icon(i32 size) const noexcept
 {
     GdkPixbuf* icon = nullptr;
 
-    if (this->icon_name.c_str())
+    if (!this->icon_name.empty())
     {
         icon = vfs_load_icon(this->icon_name, size);
     }
@@ -189,7 +188,7 @@ VFSAppDesktop::get_icon(i32 size) noexcept
 }
 
 bool
-VFSAppDesktop::open_multiple_files() noexcept
+VFSAppDesktop::open_multiple_files() const noexcept
 {
     if (this->exec.empty())
         return false;
@@ -197,16 +196,17 @@ VFSAppDesktop::open_multiple_files() noexcept
     static constexpr std::array<std::string_view, 2> keys{"%U", "%F"};
     if (ztd::contains(this->exec, keys))
         return true;
+
     return false;
 }
 
 const std::string
 VFSAppDesktop::translate_app_exec_to_command_line(
-    const std::vector<std::string>& file_list) noexcept
+    const std::vector<std::string>& file_list) const noexcept
 {
     // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
 
-    std::string cmd = get_exec();
+    std::string cmd = this->exec;
 
     bool add_files = false;
 
@@ -272,7 +272,7 @@ VFSAppDesktop::translate_app_exec_to_command_line(
 
 void
 VFSAppDesktop::exec_in_terminal(std::string_view app_name, std::string_view cwd,
-                                std::string_view cmd) noexcept
+                                std::string_view cmd) const noexcept
 {
     // task
     PtkFileTask* ptask = ptk_file_exec_new(app_name.data(), cwd.data(), nullptr, nullptr);
@@ -288,11 +288,12 @@ VFSAppDesktop::exec_in_terminal(std::string_view app_name, std::string_view cwd,
 }
 
 bool
-VFSAppDesktop::open_files(std::string_view working_dir, const std::vector<std::string>& file_paths)
+VFSAppDesktop::open_files(std::string_view working_dir,
+                          const std::vector<std::string>& file_paths) const
 {
-    if (!get_exec())
+    if (this->exec.empty())
     {
-        const std::string msg = fmt::format("Command not found\n\n{}", get_name());
+        const std::string msg = fmt::format("Command not found\n\n{}", this->file_name);
         throw VFSAppDesktopException(msg);
     }
 
@@ -305,9 +306,8 @@ VFSAppDesktop::open_files(std::string_view working_dir, const std::vector<std::s
         // app does not accept multiple files, so run multiple times
         for (std::string_view open_file: file_paths)
         {
-            const std::vector<std::string> open_files{open_file.data()};
-
-            exec_desktop(working_dir, open_files);
+            // const std::vector<std::string> open_files{open_file};
+            exec_desktop(working_dir, {open_file.data()});
         }
     }
     return true;
@@ -315,9 +315,9 @@ VFSAppDesktop::open_files(std::string_view working_dir, const std::vector<std::s
 
 void
 VFSAppDesktop::exec_desktop(std::string_view working_dir,
-                            const std::vector<std::string>& file_paths) noexcept
+                            const std::vector<std::string>& file_paths) const noexcept
 {
-    const std::string cmd = translate_app_exec_to_command_line(file_paths);
+    const std::string cmd = this->translate_app_exec_to_command_line(file_paths);
     if (cmd.empty())
         return;
 
@@ -325,7 +325,7 @@ VFSAppDesktop::exec_desktop(std::string_view working_dir,
 
     if (use_terminal())
     {
-        const std::string app_name = get_disp_name();
+        const std::string app_name = this->get_disp_name();
         exec_in_terminal(app_name, !this->path.empty() ? this->path : working_dir, cmd);
     }
     else

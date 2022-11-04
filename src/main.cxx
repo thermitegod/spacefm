@@ -457,8 +457,9 @@ main(i32 argc, char* argv[])
     // Initialize our mime-type system
     vfs_mime_type_init();
 
-    // Set current config dir
-    vfs_user_set_config_dir(cli_flags.config_dir);
+    // Sets custom config dir
+    if (cli_flags.config_dir)
+        vfs_user_set_config_dir(cli_flags.config_dir);
 
     // load config file
     load_settings();

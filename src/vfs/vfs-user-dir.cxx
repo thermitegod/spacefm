@@ -146,11 +146,9 @@ vfs_current_dir() noexcept
 }
 
 void
-vfs_user_set_config_dir(const char* config_dir) noexcept
+vfs_user_set_config_dir(std::string_view config_dir) noexcept
 {
-    if (!config_dir)
-        return;
-    vfs_dir_xdg.config_dir = config_dir;
+    vfs_dir_xdg.config_dir = config_dir.data();
 }
 
 const std::string&

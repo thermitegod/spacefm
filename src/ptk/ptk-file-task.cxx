@@ -53,7 +53,7 @@ static void save_progress_dialog_size(PtkFileTask* ptask);
 PtkFileTask::PtkFileTask(VFSFileTaskType type, const std::vector<std::string>& src_files,
                          const char* dest_dir, GtkWindow* parent_window, GtkWidget* task_view)
 {
-    this->task = vfs_task_new(type, src_files, dest_dir);
+    this->task = vfs_task_new(type, src_files, dest_dir ? dest_dir : "");
 
     vfs_file_task_set_state_callback(this->task, on_vfs_file_task_state_cb, this);
     this->parent_window = parent_window;

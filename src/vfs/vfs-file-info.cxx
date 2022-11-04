@@ -139,8 +139,7 @@ vfs_file_info_get(vfs::file_info fi, std::string_view file_path)
         // fi->status = std::filesystem::status(file_path);
         fi->status = std::filesystem::symlink_status(file_path);
 
-        fi->mime_type =
-            vfs_mime_type_get_from_file(file_path.data(), fi->disp_name.c_str(), &file_stat);
+        fi->mime_type = vfs_mime_type_get_from_file(file_path, fi->disp_name, &file_stat);
 
         // sfm get collate keys
         fi->collate_key = g_utf8_collate_key_for_filename(fi->disp_name.c_str(), -1);
@@ -171,12 +170,9 @@ vfs_file_info_get_disp_name(vfs::file_info fi)
 }
 
 void
-vfs_file_info_set_disp_name(vfs::file_info fi, const char* name)
+vfs_file_info_set_disp_name(vfs::file_info fi, std::string_view name)
 {
-    if (fi->disp_name.c_str() != fi->name.c_str())
-        fi->disp_name.clear();
-
-    fi->disp_name = name;
+    fi->disp_name = name.data();
     // sfm get new collate keys
     fi->collate_key = g_utf8_collate_key_for_filename(fi->disp_name.c_str(), -1);
     const std::string str = g_utf8_casefold(fi->disp_name.c_str(), -1);
@@ -214,7 +210,7 @@ vfs_file_info_get_mime_type(vfs::file_info fi)
 }
 
 void
-vfs_file_info_reload_mime_type(vfs::file_info fi, const char* full_path)
+vfs_file_info_reload_mime_type(vfs::file_info fi, std::string_view full_path)
 {
     vfs::mime_type old_mime_type;
     struct stat file_stat;
@@ -629,33 +625,29 @@ vfs_file_info_load_special_info(vfs::file_info fi, std::string_view file_path)
     const std::string file_dir = Glib::path_get_dirname(file_path.data());
 
     fi->flags = (VFSFileInfoFlag)(fi->flags | VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY);
-
     vfs::desktop desktop(file_path);
 
     // MOD  display real filenames of .desktop files not in desktop directory
     if (ztd::same(file_dir, vfs_user_desktop_dir()))
-    {
-        if (desktop.get_disp_name())
-            vfs_file_info_set_disp_name(fi, desktop.get_disp_name());
-    }
+        vfs_file_info_set_disp_name(fi, desktop.get_disp_name());
 
-    if (desktop.get_icon_name())
+    if (desktop.get_icon_name().empty())
+        return;
+
+    GdkPixbuf* icon;
+    const i32 big_size = vfs_mime_type_get_icon_size_big();
+    const i32 small_size = vfs_mime_type_get_icon_size_small();
+    if (!fi->big_thumbnail)
     {
-        GdkPixbuf* icon;
-        const i32 big_size = vfs_mime_type_get_icon_size_big();
-        const i32 small_size = vfs_mime_type_get_icon_size_small();
-        if (!fi->big_thumbnail)
-        {
-            icon = desktop.get_icon(big_size);
-            if (icon)
-                fi->big_thumbnail = icon;
-        }
-        if (!fi->small_thumbnail)
-        {
-            icon = desktop.get_icon(small_size);
-            if (icon)
-                fi->small_thumbnail = icon;
-        }
+        icon = desktop.get_icon(big_size);
+        if (icon)
+            fi->big_thumbnail = icon;
+    }
+    if (!fi->small_thumbnail)
+    {
+        icon = desktop.get_icon(small_size);
+        if (icon)
+            fi->small_thumbnail = icon;
     }
 }
 

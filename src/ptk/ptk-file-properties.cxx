@@ -148,7 +148,7 @@ FilePropertiesDialogData::~FilePropertiesDialogData()
 static void on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data);
 
 /*
- * void get_total_size_of_dir( const char* path, off_t* size )
+ * void get_total_size_of_dir(const char* path, off_t* size)
  * Recursively count total size of all files in the specified directory.
  * If the path specified is a file, the size of the file is directly returned.
  * cancel is used to cancel the operation. This function will check the value
@@ -346,7 +346,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
                                                       0,
                                                       icon,
                                                       1,
-                                                      desktop.get_disp_name(),
+                                                      desktop.get_disp_name().data(),
                                                       2,
                                                       action,
                                                       -1);
@@ -521,7 +521,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
                                    0,
                                    icon,
                                    1,
-                                   desktop.get_disp_name(),
+                                   desktop.get_disp_name().data(),
                                    2,
                                    action.data(),
                                    -1);

@@ -33,8 +33,8 @@
 
 struct VFSMimeType
 {
-    char* type;        /* mime_type-type string */
-    char* description; /* description of the mimele type */
+    std::string type;        // mime_type-type string
+    std::string description; // description of the mimele type
     GdkPixbuf* big_icon;
     GdkPixbuf* small_icon;
 
@@ -56,15 +56,16 @@ void vfs_mime_type_init();
 void vfs_mime_type_clean();
 
 /* file name used in this API should be encoded in UTF-8 */
-vfs::mime_type vfs_mime_type_get_from_file_name(const char* ufile_name);
+vfs::mime_type vfs_mime_type_get_from_file_name(std::string_view ufile_name);
 
-vfs::mime_type vfs_mime_type_get_from_file(const char* file_path, /* Should be on-disk encoding */
-                                           const char* base_name, /* Should be in UTF-8 */
-                                           struct stat* pstat);   /* Can be nullptr */
+vfs::mime_type
+vfs_mime_type_get_from_file(std::string_view file_path, /* Should be on-disk encoding */
+                            std::string_view base_name, /* Should be in UTF-8 */
+                            struct stat* pstat);        /* Can be nullptr */
 
-vfs::mime_type vfs_mime_type_get_from_type(const char* type);
+vfs::mime_type vfs_mime_type_get_from_type(std::string_view type);
 
-vfs::mime_type vfs_mime_type_new(const char* type_name);
+vfs::mime_type vfs_mime_type_new(std::string_view type_name);
 void vfs_mime_type_ref(vfs::mime_type mime_type);
 void vfs_mime_type_unref(vfs::mime_type mime_type);
 
@@ -91,18 +92,18 @@ const std::vector<std::string> vfs_mime_type_get_actions(vfs::mime_type mime_typ
 /* returned string should be freed with g_strfreev when not needed. */
 char* vfs_mime_type_get_default_action(vfs::mime_type mime_type);
 
-void vfs_mime_type_set_default_action(vfs::mime_type mime_type, const char* desktop_id);
+void vfs_mime_type_set_default_action(vfs::mime_type mime_type, std::string_view desktop_id);
 
-void vfs_mime_type_remove_action(vfs::mime_type mime_type, const char* desktop_id);
+void vfs_mime_type_remove_action(vfs::mime_type mime_type, std::string_view desktop_id);
 
 /* If user-custom desktop file is created, it is returned in custom_desktop. */
-void vfs_mime_type_add_action(vfs::mime_type mime_type, const char* desktop_id,
+void vfs_mime_type_add_action(vfs::mime_type mime_type, std::string_view desktop_id,
                               char** custom_desktop);
 
-void vfs_mime_type_append_action(const char* type, const char* desktop_id);
+void vfs_mime_type_append_action(std::string_view type, std::string_view desktop_id);
 
 GList* vfs_mime_type_add_reload_cb(GFreeFunc cb, void* user_data);
 
 void vfs_mime_type_remove_reload_cb(GList* cb);
 
-char* vfs_mime_type_locate_desktop_file(const char* dir, const char* desktop_id);
+char* vfs_mime_type_locate_desktop_file(std::string_view dir, std::string_view desktop_id);

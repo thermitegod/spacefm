@@ -711,7 +711,7 @@ vfs_file_task_do_move(VFSFileTask* task, std::string_view src_file, std::string_
                 break;
             sub_src_file = Glib::build_filename(src_file.data(), file_name);
             sub_dest_file = Glib::build_filename(dest_file, file_name);
-            vfs_file_task_do_move(task, sub_src_file.c_str(), sub_dest_file.c_str());
+            vfs_file_task_do_move(task, sub_src_file, sub_dest_file);
         }
         // remove moved src dir if empty
         if (!should_abort(task))
@@ -1044,7 +1044,7 @@ vfs_file_task_get_cpids(Glib::Pid pid)
 
     const std::string command = fmt::format("/bin/ps h --ppid {} -o pid", pid);
     print_command(command);
-    Glib::spawn_command_line_sync(command.c_str(), standard_output, nullptr, &exit_status);
+    Glib::spawn_command_line_sync(command, standard_output, nullptr, &exit_status);
 
     if (standard_output->empty())
         return nullptr;
@@ -1448,7 +1448,7 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
         }
 
         // build - command
-        print_task_command((char*)task->exec_ptask, task->exec_command.c_str());
+        print_task_command((char*)task->exec_ptask, task->exec_command);
 
         buf.append(fmt::format("{}\nfm_err=$?\n", task->exec_command));
 
@@ -1491,7 +1491,7 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
 
         // use checksum
         if (geteuid() != 0 && (!task->exec_as_user.empty() || task->exec_checksum))
-            sum_script = get_xxhash(task->exec_script.c_str());
+            sum_script = get_xxhash(task->exec_script);
     }
 
     task->percent = 50;
@@ -1973,14 +1973,15 @@ vfs_file_task_thread(VFSFileTask* task)
  * freed after file operation has been completed
  */
 VFSFileTask*
-vfs_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files, const char* dest_dir)
+vfs_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files,
+             std::string_view dest_dir)
 {
     VFSFileTask* task = g_slice_new0(VFSFileTask);
 
     task->type = type;
     task->src_paths = src_files;
-    if (dest_dir)
-        task->dest_dir = dest_dir;
+    if (!dest_dir.empty())
+        task->dest_dir = dest_dir.data();
 
     task->recursive = (task->type == VFSFileTaskType::VFS_FILE_TASK_COPY ||
                        task->type == VFSFileTaskType::VFS_FILE_TASK_DELETE);
@@ -2118,7 +2119,7 @@ add_task_dev(VFSFileTask* task, dev_t dev)
 }
 
 /*
- * void get_total_size_of_dir( const char* path, off_t* size )
+ * void get_total_size_of_dir(const char* path, off_t* size)
  * Recursively count total size of all files in the specified directory.
  * If the path specified is a file, the size of the file is directly returned.
  * cancel is used to cancel the operation. This function will check the value

@@ -50,7 +50,7 @@
 
 #define BUF_LEN (1024 * (sizeof(inotify_event) + 16))
 
-static std::map<std::string, vfs::file_monitor_t> monitor_map;
+static std::map<std::string, vfs::file_monitor> monitor_map;
 
 static GIOChannel* vfs_inotify_io_channel = nullptr;
 static u32 vfs_inotify_io_watch = 0;
@@ -145,13 +145,13 @@ vfs_file_monitor_init()
     return true;
 }
 
-vfs::file_monitor_t
+vfs::file_monitor
 vfs_file_monitor_add(std::string_view path, VFSFileMonitorCallback cb, void* user_data)
 {
     // inotify does not follow symlinks, need to get real path
     const std::string real_path = std::filesystem::absolute(path);
 
-    vfs::file_monitor_t monitor;
+    vfs::file_monitor monitor;
 
     try
     {
@@ -189,7 +189,7 @@ vfs_file_monitor_add(std::string_view path, VFSFileMonitorCallback cb, void* use
 }
 
 void
-vfs_file_monitor_remove(vfs::file_monitor_t monitor, VFSFileMonitorCallback cb, void* user_data)
+vfs_file_monitor_remove(vfs::file_monitor monitor, VFSFileMonitorCallback cb, void* user_data)
 {
     if (!monitor)
         return;
@@ -211,7 +211,7 @@ vfs_file_monitor_remove(vfs::file_monitor_t monitor, VFSFileMonitorCallback cb, 
 }
 
 static void
-vfs_file_monitor_reconnect_inotify(std::string_view path, vfs::file_monitor_t monitor)
+vfs_file_monitor_reconnect_inotify(std::string_view path, vfs::file_monitor monitor)
 {
     if (!std::filesystem::exists(path))
         return;
@@ -249,7 +249,7 @@ vfs_file_monitor_translate_inotify_event(i32 inotify_mask)
 }
 
 static void
-vfs_file_monitor_dispatch_event(vfs::file_monitor_t monitor, VFSFileMonitorEvent evt,
+vfs_file_monitor_dispatch_event(vfs::file_monitor monitor, VFSFileMonitorEvent evt,
                                 std::string_view file_name)
 {
     /* Call the callback functions */
@@ -315,7 +315,7 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
         // FIXME: 2 different paths can have the same wd because of link
         // This was fixed in spacefm 0.8.7 ??
 
-        vfs::file_monitor_t monitor;
+        vfs::file_monitor monitor;
 
         for (const auto& fm: monitor_map)
         {

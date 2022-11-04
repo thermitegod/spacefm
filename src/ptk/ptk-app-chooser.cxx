@@ -111,8 +111,7 @@ add_list_item(GtkListStore* list, const char* path)
             if (file)
             {
                 vfs::desktop desktop(path);
-                const char* name = desktop.get_name();
-                if (!g_strcmp0(file, name))
+                if (ztd::same(file, desktop.get_name()))
                 {
                     // already exists
                     free(file);
@@ -139,11 +138,11 @@ add_list_item(GtkListStore* list, const char* path)
                        PTKAppChooser::COL_APP_ICON,
                        icon,
                        PTKAppChooser::COL_APP_NAME,
-                       desktop.get_disp_name(),
+                       desktop.get_disp_name().data(),
                        PTKAppChooser::COL_DESKTOP_FILE,
-                       desktop.get_name(),
+                       desktop.get_name().data(),
                        PTKAppChooser::COL_FULL_PATH,
-                       tooltip.c_str(),
+                       tooltip.data(),
                        -1);
     if (icon)
         g_object_unref(icon);
