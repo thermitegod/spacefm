@@ -172,7 +172,7 @@ calc_total_size_of_files(std::string_view path, FilePropertiesDialogData* data)
     if (std::filesystem::is_directory(path))
     {
         std::string file_name;
-        for (const auto& file: std::filesystem::directory_iterator(path))
+        for (const auto& file : std::filesystem::directory_iterator(path))
         {
             file_name = std::filesystem::path(file).filename();
 
@@ -200,7 +200,7 @@ static void*
 calc_size(void* user_data)
 {
     FilePropertiesDialogData* data = FILE_PROPERTIES_DIALOG_DATA(user_data);
-    for (vfs::file_info file: data->file_list)
+    for (vfs::file_info file : data->file_list)
     {
         if (data->cancel)
             break;
@@ -438,7 +438,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     // MOD
     vfs::mime_type type;
     vfs::mime_type type2 = nullptr;
-    for (vfs::file_info file: sel_files)
+    for (vfs::file_info file : sel_files)
     {
         type = file->get_mime_type();
         if (!type2)
@@ -504,7 +504,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
         model = gtk_list_store_new(3, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
         if (!actions.empty())
         {
-            for (std::string_view action: actions)
+            for (std::string_view action : actions)
             {
                 vfs::desktop desktop(action);
                 GdkPixbuf* icon;
@@ -802,7 +802,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
             if ((new_mtime || new_atime) && !data->file_list.empty())
             {
                 std::string str;
-                for (vfs::file_info file: data->file_list)
+                for (vfs::file_info file : data->file_list)
                 {
                     const std::string file_path = Glib::build_filename(data->dir_path, file->name);
                     quoted_path = bash_quote(file_path);
@@ -905,7 +905,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
             if (!uid || !gid || mod_change)
             {
                 std::vector<std::string> file_list;
-                for (vfs::file_info file: data->file_list)
+                for (vfs::file_info file : data->file_list)
                 {
                     const std::string file_path =
                         Glib::build_filename(data->dir_path, file->get_name());

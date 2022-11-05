@@ -848,7 +848,7 @@ on_status_middle_click_config(GtkMenuItem* menuitem, xset_t set)
         XSetName::STATUS_HIDE,
     };
 
-    for (XSetName setname: setnames)
+    for (XSetName setname : setnames)
     {
         if (set->xset_name == setname)
             set->b = XSetB::XSET_B_TRUE;
@@ -4299,7 +4299,7 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
 
     // drag_context->suggested_action = GdkDragAction::GDK_ACTION_MOVE;
 
-    for (vfs::file_info file: sel_files)
+    for (vfs::file_info file : sel_files)
     {
         const std::string full_path =
             Glib::build_filename(ptk_file_browser_get_cwd(file_browser), file->get_name());
@@ -4630,7 +4630,7 @@ ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser,
     gtk_widget_grab_focus(file_browser->folder_view);
     gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
 
-    for (vfs::file_info file: sel_files)
+    for (vfs::file_info file : sel_files)
     {
         if (!ptk_rename_file(file_browser,
                              cwd,
@@ -4864,7 +4864,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, const std::vector<vfs::fi
         // rebuild sel_files with full paths
         std::vector<std::string> file_list;
         std::string file_path;
-        for (vfs::file_info file: sel_files)
+        for (vfs::file_info file : sel_files)
         {
             file_path = Glib::build_filename(cwd, file->get_name());
             file_list.emplace_back(file_path);
@@ -4914,7 +4914,7 @@ ptk_file_browser_hide_selected(PtkFileBrowser* file_browser,
         return;
     }
 
-    for (vfs::file_info file: sel_files)
+    for (vfs::file_info file : sel_files)
     {
         if (!vfs_dir_add_hidden(cwd, file->get_name()))
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
@@ -5692,7 +5692,7 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
         return;
 
     std::string file_paths;
-    for (vfs::file_info file: sel_files)
+    for (vfs::file_info file : sel_files)
     {
         const std::string file_path = bash_quote(file->get_name());
         file_paths = fmt::format("{} {}", file_paths, file_path);

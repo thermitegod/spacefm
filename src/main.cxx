@@ -148,7 +148,7 @@ open_in_tab(FMMainWindow** main_window, const char* real_path)
         else
         {
             // use first visible panel
-            for (panel_t p: PANELS)
+            for (panel_t p : PANELS)
             {
                 if (xset_get_b_panel(p, XSetPanel::SHOW))
                 {

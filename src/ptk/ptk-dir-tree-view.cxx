@@ -256,7 +256,7 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
         return true;
     }
 
-    for (std::string_view dir: dirs)
+    for (std::string_view dir : dirs)
     {
         if (dir.empty())
             continue; // first item will be empty because of how ztd::split works

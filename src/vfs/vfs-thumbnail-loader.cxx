@@ -252,7 +252,7 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
 
     // Check if the request is already scheduled
     vfs::thumbnail::request req;
-    for (vfs::thumbnail::request& queued_req: loader->queue)
+    for (vfs::thumbnail::request& queued_req : loader->queue)
     {
         req = queued_req;
         // LOG_INFO("req->file->name={} | file->name={}", req->file->name, file->name);
@@ -285,7 +285,7 @@ vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big)
     u32 idx = 0;
     std::vector<u32> remove_idx;
     // LOG_DEBUG("TRY TO CANCEL REQUESTS!!");
-    for (vfs::thumbnail::request req: loader->queue)
+    for (vfs::thumbnail::request req : loader->queue)
     {
         --req->n_requests[is_big ? VFSThumbnailSize::BIG : VFSThumbnailSize::SMALL];
 
@@ -302,7 +302,7 @@ vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big)
     // std::ranges::sort(remove_idx);
     // std::ranges::reverse(remove_idx);
 
-    for (u32 i: remove_idx)
+    for (u32 i : remove_idx)
     {
         loader->queue.erase(loader->queue.cbegin() + i);
     }

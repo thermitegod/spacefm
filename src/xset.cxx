@@ -103,7 +103,7 @@ XSet::is_xset_name(XSetName val) noexcept
 bool
 XSet::is_xset_name(const std::vector<XSetName>& val) noexcept
 {
-    for (XSetName v: val)
+    for (XSetName v : val)
     {
         if (this->xset_name == v)
             return true;
@@ -326,7 +326,7 @@ XSet::is_menu_style(XSetMenu val) noexcept
 bool
 XSet::is_menu_style(const std::vector<XSetMenu>& val) noexcept
 {
-    for (XSetMenu v: val)
+    for (XSetMenu v : val)
     {
         if (this->menu_style == v)
             return true;
@@ -565,7 +565,7 @@ XSet::is_tool(XSetTool val) noexcept
 bool
 XSet::is_tool(const std::vector<XSetTool>& val) noexcept
 {
-    for (XSetTool v: val)
+    for (XSetTool v : val)
     {
         if (this->tool == v)
             return true;
@@ -875,7 +875,7 @@ xset_get(std::string_view name) noexcept
     }
 #endif
 
-    for (xset_t set: xsets)
+    for (xset_t set : xsets)
     { // check for existing xset
         if (ztd::same(name, set->name))
             return set;
@@ -889,7 +889,7 @@ xset_get(std::string_view name) noexcept
 xset_t
 xset_get(XSetName name) noexcept
 {
-    for (xset_t set: xsets)
+    for (xset_t set : xsets)
     { // check for existing xset
         if (name == set->xset_name)
             return set;
@@ -903,7 +903,7 @@ xset_get(XSetName name) noexcept
 xset_t
 xset_is(XSetName name) noexcept
 {
-    for (xset_t set: xsets)
+    for (xset_t set : xsets)
     { // check for existing xset
         if (name == set->xset_name)
             return set;
@@ -914,7 +914,7 @@ xset_is(XSetName name) noexcept
 xset_t
 xset_is(std::string_view name) noexcept
 {
-    for (xset_t set: xsets)
+    for (xset_t set : xsets)
     { // check for existing xset
         if (ztd::same(name, set->name))
             return set;

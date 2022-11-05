@@ -221,7 +221,7 @@ HandlerData::~HandlerData()
 
 struct Handler
 {
-    // enabled              set->b
+    // enabled                                        set->b
     const char* setname;      //                      set->name
     XSetName xset_name;       //                      set->xset_name
     const char* handler_name; //                      set->menu_label
@@ -233,10 +233,9 @@ struct Handler
     bool extract_term;        // or run task file     set->keep_terminal
     const char* list_cmd;     // or info              (script)
     bool list_term;           //                      set->scroll_lock
-    /*  save as custom item                                 set->lock = false
-        if handler equals default, do not save in session    set->disable = true
-        icon (file handlers only)                           set->icon
-    */
+    // save as custom item                            set->lock = false
+    // if handler equals default, do not save         set->disable = true
+    // icon (file handlers only)                      set->icon
 };
 
 /* If you add a new handler, add it to (end of ) existing session file handler
@@ -754,7 +753,7 @@ ptk_handler_command_is_empty(std::string_view command)
         return true;
 
     const auto cmd_parts = ztd::split(command, "\n");
-    for (std::string_view cmd_line: cmd_parts)
+    for (std::string_view cmd_line : cmd_parts)
     {
         if (ztd::strip(cmd_line).empty())
             continue;
@@ -1079,7 +1078,7 @@ ptk_handler_values_in_list(const std::string list, const std::vector<std::string
             required = false;
         }
         match = false;
-        for (std::string_view handler: values)
+        for (std::string_view handler : values)
         {
             if (fnmatch(element, handler.data(), 0) == 0)
             {
@@ -2788,7 +2787,7 @@ on_archive_default(GtkMenuItem* menuitem, xset_t set)
         XSetName::ARC_DEF_LIST,
     };
 
-    for (XSetName arcname: arcnames)
+    for (XSetName arcname : arcnames)
     {
         if (set->xset_name == arcname)
             set->b = XSetB::XSET_B_TRUE;

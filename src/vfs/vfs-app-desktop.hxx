@@ -72,7 +72,7 @@ namespace vfs
     using desktop = VFSAppDesktop;
 } // namespace vfs
 
-class VFSAppDesktopException: virtual public std::exception
+class VFSAppDesktopException : virtual public std::exception
 {
   protected:
     std::string error_message;

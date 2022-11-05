@@ -87,7 +87,7 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, u3
         use_uri = true;
     }
 
-    for (std::string_view clipboard_file: clipboard_file_list)
+    for (std::string_view clipboard_file : clipboard_file_list)
     {
         std::string file_name;
         if (use_uri)
@@ -127,7 +127,7 @@ ptk_clipboard_copy_as_text(const char* working_dir, const std::vector<vfs::file_
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
 
     std::string file_text;
-    for (vfs::file_info file: sel_files)
+    for (vfs::file_info file : sel_files)
     {
         const std::string file_path = Glib::build_filename(working_dir, file->get_name());
         const std::string quoted = bash_quote(file_path);
@@ -146,7 +146,7 @@ ptk_clipboard_copy_name(const char* working_dir, const std::vector<vfs::file_inf
     i32 fcount = 0;
 
     std::string file_text;
-    for (vfs::file_info file: sel_files)
+    for (vfs::file_info file : sel_files)
     {
         if (fcount == 0)
             file_text = fmt::format("{}", file->get_name());
@@ -191,7 +191,7 @@ ptk_clipboard_cut_or_copy_files(const char* working_dir,
 
     gtk_target_list_unref(target_list);
 
-    for (vfs::file_info file: sel_files)
+    for (vfs::file_info file : sel_files)
     {
         const std::string file_path = Glib::build_filename(working_dir, file->get_name());
         file_list.emplace_back(file_path);
@@ -308,7 +308,7 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, const char* dest_dir, GtkTreeVi
         std::vector<std::string> file_list;
 
         const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
-        for (std::string_view uri: uri_list)
+        for (std::string_view uri : uri_list)
         {
             std::string file_path;
             try
@@ -390,7 +390,7 @@ ptk_clipboard_paste_links(GtkWindow* parent_win, const char* dest_dir, GtkTreeVi
         std::vector<std::string> file_list;
 
         const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
-        for (std::string_view uri: uri_list)
+        for (std::string_view uri : uri_list)
         {
             std::string file_path;
             try
@@ -469,7 +469,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
         std::vector<std::string> file_list;
 
         const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
-        for (std::string_view uri: uri_list)
+        for (std::string_view uri : uri_list)
         {
             std::string file_path;
             try
@@ -574,7 +574,7 @@ ptk_clipboard_get_file_paths(const char* cwd, bool* is_cut, int* missing_targets
 
     // create file list
     const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
-    for (std::string_view uri: uri_list)
+    for (std::string_view uri : uri_list)
     {
         std::string file_path;
         try

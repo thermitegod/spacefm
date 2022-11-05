@@ -262,7 +262,7 @@ vfs_dir_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec*
 static vfs::file_info
 vfs_dir_find_file(vfs::dir dir, std::string_view file_name, vfs::file_info file)
 {
-    for (vfs::file_info file2: dir->file_list)
+    for (vfs::file_info file2 : dir->file_list)
     {
         if (file == file2)
             return file2;
@@ -527,7 +527,7 @@ vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
     // MOD  dir contains .hidden file?
     const std::string hidden = gethidden(dir->path);
 
-    for (const auto& dfile: std::filesystem::directory_iterator(dir->path))
+    for (const auto& dfile : std::filesystem::directory_iterator(dir->path))
     {
         if (dir->task->is_cancelled())
             break;
@@ -613,7 +613,7 @@ update_changed_files(std::string_view key, vfs::dir dir)
         return;
 
     vfs_dir_lock(dir);
-    for (vfs::file_info file: dir->changed_files)
+    for (vfs::file_info file : dir->changed_files)
     {
         if (update_file_info(dir, file))
         {
@@ -635,7 +635,7 @@ update_created_files(std::string_view key, vfs::dir dir)
         return;
 
     vfs_dir_lock(dir);
-    for (std::string_view created_file: dir->created_files)
+    for (std::string_view created_file : dir->created_files)
     {
         vfs::file_info file;
         vfs::file_info file_found = vfs_dir_find_file(dir, created_file, nullptr);
@@ -676,7 +676,7 @@ notify_file_change(void* user_data)
 {
     (void)user_data;
 
-    for (const auto& dir: dir_map)
+    for (const auto& dir : dir_map)
     {
         update_changed_files(dir.first, dir.second);
         update_created_files(dir.first, dir.second);
@@ -693,7 +693,7 @@ vfs_dir_flush_notify_cache()
         g_source_remove(change_notify_timeout);
     change_notify_timeout = 0;
 
-    for (const auto& dir: dir_map)
+    for (const auto& dir : dir_map)
     {
         update_changed_files(dir.first, dir.second);
         update_created_files(dir.first, dir.second);
@@ -786,7 +786,7 @@ reload_mime_type(std::string_view key, vfs::dir dir)
 
     vfs_dir_lock(dir);
 
-    for (vfs::file_info file: dir->file_list)
+    for (vfs::file_info file : dir->file_list)
     {
         const std::string full_path = Glib::build_filename(dir->path, file->get_name());
         file->reload_mime_type(full_path);
@@ -795,9 +795,7 @@ reload_mime_type(std::string_view key, vfs::dir dir)
 
     std::ranges::for_each(dir->file_list,
                           [dir](vfs::file_info file)
-                          {
-                              dir->run_event<EventType::FILE_CHANGED>(file);
-                          });
+                          { dir->run_event<EventType::FILE_CHANGED>(file); });
 
     vfs_dir_unlock(dir);
 }
@@ -808,10 +806,7 @@ on_mime_type_reload(void* user_data)
     (void)user_data;
     // LOG_DEBUG("reload mime-type");
     std::ranges::for_each(dir_map,
-                          [](const auto& dir)
-                          {
-                              reload_mime_type(dir.first, dir.second);
-                          });
+                          [](const auto& dir) { reload_mime_type(dir.first, dir.second); });
 }
 
 void
@@ -819,17 +814,14 @@ vfs_dir_foreach(VFSDirForeachFunc func, bool user_data)
 {
     // LOG_DEBUG("reload mime-type");
     std::ranges::for_each(dir_map,
-                          [func, user_data](const auto& dir)
-                          {
-                              func(dir.second, user_data);
-                          });
+                          [func, user_data](const auto& dir) { func(dir.second, user_data); });
 }
 
 void
 vfs_dir_unload_thumbnails(vfs::dir dir, bool is_big)
 {
     vfs_dir_lock(dir);
-    for (vfs::file_info file: dir->file_list)
+    for (vfs::file_info file : dir->file_list)
     {
         if (is_big)
         {

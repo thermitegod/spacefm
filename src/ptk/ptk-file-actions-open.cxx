@@ -323,7 +323,7 @@ ptk_open_files_with_app(const char* cwd, const std::vector<vfs::file_info>& sel_
 
     ParentInfo* parent = new ParentInfo(file_browser, cwd);
 
-    for (vfs::file_info file: sel_files)
+    for (vfs::file_info file : sel_files)
     {
         if (!file)
             continue;

@@ -1830,7 +1830,7 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
     // boxes
     ctxt->box_sub = gtk_combo_box_text_new();
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->box_sub), false);
-    for (std::string_view context_sub: context_subs)
+    for (std::string_view context_sub : context_subs)
     {
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_sub), context_sub.data());
     }
@@ -1838,7 +1838,7 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
 
     ctxt->box_comp = gtk_combo_box_text_new();
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->box_comp), false);
-    for (std::string_view context_comp: context_comps)
+    for (std::string_view context_comp : context_comps)
     {
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_comp), context_comp.data());
     }
@@ -2273,7 +2273,7 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
     {
         // custom command
         XSetCMD x;
-        for (std::string_view item_type2: item_types)
+        for (std::string_view item_type2 : item_types)
         {
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), item_type2.data());
         }

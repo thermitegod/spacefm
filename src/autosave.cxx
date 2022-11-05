@@ -43,12 +43,7 @@ class AutoSave
     wait(std::chrono::duration<R, P> const& time) noexcept
     {
         std::unique_lock<std::mutex> lock(m);
-        return !cv.wait_for(lock,
-                            time,
-                            [&]
-                            {
-                                return terminate;
-                            });
+        return !cv.wait_for(lock, time, [&] { return terminate; });
     }
     void
     kill() noexcept

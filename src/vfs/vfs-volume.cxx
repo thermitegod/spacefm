@@ -1056,7 +1056,7 @@ info_mount_points(device_t device)
     // if we have the mount point list, use this instead of reading mountinfo
     if (!devmounts.empty())
     {
-        for (devmount_t devmount: devmounts)
+        for (devmount_t devmount : devmounts)
         {
             if (devmount->major == dmajor && devmount->minor == dminor)
                 return ztd::strdup(devmount->mount_points);
@@ -1081,7 +1081,7 @@ info_mount_points(device_t device)
      */
 
     const std::vector<std::string> lines = ztd::split(contents, "\n");
-    for (std::string_view line: lines)
+    for (std::string_view line : lines)
     {
         u32 mount_id;
         u32 parent_id;
@@ -1169,7 +1169,7 @@ info_partition_table(device_t device)
 
         partition_count = 0;
 
-        for (const auto& file: std::filesystem::directory_iterator(device->native_path))
+        for (const auto& file : std::filesystem::directory_iterator(device->native_path))
         {
             const std::string file_name = std::filesystem::path(file).filename();
 
@@ -1375,7 +1375,7 @@ parse_mounts(bool report)
      */
 
     const std::vector<std::string> lines = ztd::split(contents, "\n");
-    for (std::string_view line: lines)
+    for (std::string_view line : lines)
     {
         u32 mount_id;
         u32 parent_id;
@@ -1437,7 +1437,7 @@ parse_mounts(bool report)
 
         // LOG_INFO("mount_point({}:{})={}", major, minor, mount_point);
         devmount_t devmount = nullptr;
-        for (devmount_t search: newmounts)
+        for (devmount_t search : newmounts)
         {
             if (search->major == major && search->minor == minor)
             {
@@ -1498,7 +1498,7 @@ parse_mounts(bool report)
     }
     // LOG_INFO("LINES DONE");
     // translate each mount points list to string
-    for (devmount_t devmount: newmounts)
+    for (devmount_t devmount : newmounts)
     {
         // Sort the list to ensure that shortest mount paths appear first
         std::ranges::sort(devmount->mounts, ztd::compare);
@@ -1513,13 +1513,13 @@ parse_mounts(bool report)
     // compare old and new lists
     if (report)
     {
-        for (devmount_t devmount: newmounts)
+        for (devmount_t devmount : newmounts)
         {
             // LOG_INFO("finding {}:{}", devmount->major, devmount->minor);
 
             devmount_t found = nullptr;
 
-            for (devmount_t search: devmounts)
+            for (devmount_t search : devmounts)
             {
                 if (devmount->major == search->major && devmount->minor == search->minor)
                     found = search;
@@ -1551,7 +1551,7 @@ parse_mounts(bool report)
     }
     // LOG_INFO("REMAINING");
     // any remaining devices in old list have changed mount status
-    for (devmount_t devmount: devmounts)
+    for (devmount_t devmount : devmounts)
     {
         // LOG_INFO("remain {}:{}", devmount->major, devmount->minor );
         if (report)
@@ -1565,7 +1565,7 @@ parse_mounts(bool report)
     // report
     if (report && !changed.empty())
     {
-        for (devmount_t devmount: changed)
+        for (devmount_t devmount : changed)
         {
             char* devnode = nullptr;
             devnum = makedev(devmount->major, devmount->minor);
@@ -1609,7 +1609,7 @@ parse_mounts(bool report)
 static const char*
 get_devmount_fstype(u32 major, u32 minor)
 {
-    for (devmount_t devmount: devmounts)
+    for (devmount_t devmount : devmounts)
     {
         if (devmount->major == major && devmount->minor == minor)
             return devmount->fstype;
@@ -2017,7 +2017,7 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
     }
 
     const std::vector<std::string> lines = ztd::split(contents, "\n");
-    for (std::string_view line: lines)
+    for (std::string_view line : lines)
     {
         if (line.size() == 0)
             continue;
@@ -3183,7 +3183,7 @@ VFSVolume::device_added(bool automount) noexcept
         return;
 
     // check if we already have this volume device file
-    for (vfs::volume volume: volumes)
+    for (vfs::volume volume : volumes)
     {
         if (volume->devnum == this->devnum)
         {
@@ -3289,7 +3289,7 @@ VFSVolume::device_added(bool automount) noexcept
 static bool
 vfs_volume_nonblock_removed(dev_t devnum)
 {
-    for (vfs::volume volume: volumes)
+    for (vfs::volume volume : volumes)
     {
         if (volume->device_type != VFSVolumeDeviceType::BLOCK && volume->devnum == devnum)
         {
@@ -3317,7 +3317,7 @@ vfs_volume_device_removed(struct udev_device* udevice)
 
     dev_t devnum = udev_device_get_devnum(udevice);
 
-    for (vfs::volume volume: volumes)
+    for (vfs::volume volume : volumes)
     {
         if (volume->device_type == VFSVolumeDeviceType::BLOCK && volume->devnum == devnum)
         {
@@ -3493,7 +3493,7 @@ vfs_volume_init()
                               Glib::IOCondition::IO_ERR);
 
     // do startup automounts
-    for (vfs::volume volume: volumes)
+    for (vfs::volume volume : volumes)
         volume->automount();
 
     // start resume autoexec timer
@@ -3573,7 +3573,7 @@ vfs_volume_get_by_device_or_point(const char* device_file, const char* point)
 
     if (!volumes.empty())
     {
-        for (vfs::volume volume: volumes)
+        for (vfs::volume volume : volumes)
         {
             if (device_file && ztd::same(device_file, volume->device_file))
                 return volume;
@@ -3593,7 +3593,7 @@ call_callbacks(vfs::volume vol, VFSVolumeState state)
 {
     if (!callbacks.empty())
     {
-        for (volume_callback_data_t callback: callbacks)
+        for (volume_callback_data_t callback : callbacks)
         {
             callback->cb(vol, state, callback->user_data);
         }
@@ -3631,7 +3631,7 @@ vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data)
     if (callbacks.empty())
         return;
 
-    for (auto callback: callbacks)
+    for (auto callback : callbacks)
     {
         if (callback->cb == cb && callback->user_data == user_data)
         {

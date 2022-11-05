@@ -58,7 +58,7 @@ GList*
 vector_to_glist_VFSFileInfo(std::vector<vfs::file_info> list)
 {
     GList* l = nullptr;
-    for (vfs::file_info file: list)
+    for (vfs::file_info file : list)
     {
         l = g_list_append(l, file);
     }

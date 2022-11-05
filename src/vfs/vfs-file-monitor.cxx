@@ -215,7 +215,7 @@ vfs_file_monitor_remove(vfs::file_monitor monitor, vfs::file_monitor_callback ca
     if (!monitor || !callback)
         return;
 
-    for (vfs::file_monitor_callback_entry installed_callback: monitor->callbacks)
+    for (vfs::file_monitor_callback_entry installed_callback : monitor->callbacks)
     {
         if (installed_callback->callback == callback && installed_callback->user_data == user_data)
         {
@@ -242,7 +242,7 @@ vfs_file_monitor_dispatch_event(vfs::file_monitor monitor, VFSFileMonitorEvent e
     if (monitor->callbacks.empty())
         return;
 
-    for (vfs::file_monitor_callback_entry cb: monitor->callbacks)
+    for (vfs::file_monitor_callback_entry cb : monitor->callbacks)
     {
         vfs::file_monitor_callback func = cb->callback;
         func(monitor, evt, file_name, cb->user_data);
@@ -276,7 +276,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
         {
             vfs::file_monitor monitor;
 
-            for (const auto& fm: monitor_map)
+            for (const auto& fm : monitor_map)
             {
                 if (fm.second->wd != event->wd)
                     continue;

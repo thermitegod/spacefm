@@ -92,10 +92,10 @@ inline constexpr std::array<GtkIconSize, 7> tool_icon_sizes{
 };
 // also change max_icon_size in settings.c & lists in prefdlg.ui prefdlg2.ui
 // see create_size in vfs-thumbnail-loader.c:_vfs_thumbnail_load()
-inline constexpr std::array<i32, 13>
-    big_icon_sizes{512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22};
-inline constexpr std::array<i32, 15>
-    small_icon_sizes{512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22, 16, 12};
+inline constexpr std::array<i32, 13> big_icon_sizes{
+    512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22};
+inline constexpr std::array<i32, 15> small_icon_sizes{
+    512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22, 16, 12};
 inline constexpr std::array<std::string_view, 3> date_formats{
     "%Y-%m-%d %H:%M",
     "%Y-%m-%d",
@@ -148,9 +148,9 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         {
             app_settings.set_always_show_tabs(always_show_tabs);
             // update all windows/all panels
-            for (FMMainWindow* window: fm_main_window_get_all())
+            for (FMMainWindow* window : fm_main_window_get_all())
             {
-                for (panel_t p: PANELS)
+                for (panel_t p : PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
                     i32 n = gtk_notebook_get_n_pages(notebook);
@@ -167,9 +167,9 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         {
             app_settings.set_show_close_tab_buttons(hide_close_tab_buttons);
             // update all windows/all panels/all browsers
-            for (FMMainWindow* window: fm_main_window_get_all())
+            for (FMMainWindow* window : fm_main_window_get_all())
             {
-                for (panel_t p: PANELS)
+                for (panel_t p : PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
                     i32 n = gtk_notebook_get_n_pages(notebook);
@@ -228,9 +228,9 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
             app_settings.set_icon_size_small(small_icon);
 
             // update all windows/all panels/all browsers
-            for (FMMainWindow* window: fm_main_window_get_all())
+            for (FMMainWindow* window : fm_main_window_get_all())
             {
-                for (panel_t p: PANELS)
+                for (panel_t p : PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
                     i32 n = gtk_notebook_get_n_pages(notebook);
@@ -290,9 +290,9 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         {
             app_settings.set_single_click(single_click);
             // update all windows/all panels/all browsers
-            for (FMMainWindow* window: fm_main_window_get_all())
+            for (FMMainWindow* window : fm_main_window_get_all())
             {
-                for (panel_t p: PANELS)
+                for (panel_t p : PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
                     i32 n = gtk_notebook_get_n_pages(notebook);
@@ -313,9 +313,9 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         {
             app_settings.set_single_hover(single_hover);
             // update all windows/all panels/all browsers
-            for (FMMainWindow* window: fm_main_window_get_all())
+            for (FMMainWindow* window : fm_main_window_get_all())
             {
-                for (panel_t p: PANELS)
+                for (panel_t p : PANELS)
                 {
                     notebook = GTK_NOTEBOOK(window->panel[p - 1]);
                     i32 n = gtk_notebook_get_n_pages(notebook);
@@ -520,7 +520,7 @@ fm_edit_preference(GtkWindow* parent, i32 page)
         gtk_widget_set_sensitive(data->thumb_label1, app_settings.get_show_thumbnail());
         gtk_widget_set_sensitive(data->thumb_label2, app_settings.get_show_thumbnail());
 
-        for (std::string_view terminal: terminal_programs)
+        for (std::string_view terminal : terminal_programs)
         {
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->terminal), terminal.data());
         }
@@ -543,7 +543,7 @@ fm_edit_preference(GtkWindow* parent, i32 page)
             gtk_combo_box_set_active(GTK_COMBO_BOX(data->terminal), i);
         }
 
-        for (u64 big_icon_size: big_icon_sizes)
+        for (u64 big_icon_size : big_icon_sizes)
         {
             if (big_icon_size == app_settings.get_icon_size_big())
             {
@@ -553,7 +553,7 @@ fm_edit_preference(GtkWindow* parent, i32 page)
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(data->big_icon_size), ibig_icon);
 
-        for (u64 small_icon_size: small_icon_sizes)
+        for (u64 small_icon_size : small_icon_sizes)
         {
             if (small_icon_size == app_settings.get_icon_size_small())
             {
@@ -564,7 +564,7 @@ fm_edit_preference(GtkWindow* parent, i32 page)
         gtk_combo_box_set_active(GTK_COMBO_BOX(data->small_icon_size), ismall_icon);
 
         itool_icon = 0;
-        for (u64 tool_icon_size: tool_icon_sizes)
+        for (u64 tool_icon_size : tool_icon_sizes)
         {
             if (tool_icon_size == app_settings.get_icon_size_tool())
             {
@@ -605,7 +605,7 @@ fm_edit_preference(GtkWindow* parent, i32 page)
         gtk_widget_set_sensitive(data->root_bar, geteuid() == 0);
 
         i32 drag_action_set = 0;
-        for (i32 drag_action: drag_actions)
+        for (i32 drag_action : drag_actions)
         {
             if (drag_action == xset_get_int(XSetName::DRAG_ACTION, XSetVar::X))
             {
@@ -666,7 +666,7 @@ fm_edit_preference(GtkWindow* parent, i32 page)
         gtk_combo_box_set_model(GTK_COMBO_BOX(data->date_format), model);
         gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(data->date_format), 0);
         g_object_unref(model);
-        for (std::string_view date_format: date_formats)
+        for (std::string_view date_format : date_formats)
         {
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->date_format),
                                            date_format.data());

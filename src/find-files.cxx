@@ -837,7 +837,7 @@ on_add_search_volumes(GtkWidget* menu, FindFile* data)
     (void)menu;
     const char* path;
     const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-    for (vfs::volume volume: volumes)
+    for (vfs::volume volume : volumes)
     {
         if (volume->is_mounted)
         {
@@ -1146,7 +1146,7 @@ fm_find_files(const std::vector<const char*>& search_dirs)
     remove_directory_btn = GTK_WIDGET(gtk_builder_get_object(builder, "remove_directory_btn"));
     data->include_sub = GTK_WIDGET(gtk_builder_get_object(builder, "include_sub"));
 
-    for (std::string_view dir: search_dirs)
+    for (std::string_view dir : search_dirs)
     {
         if (std::filesystem::is_directory(dir))
             gtk_list_store_insert_with_values(data->places_list, &it, 0, 0, dir.data(), -1);

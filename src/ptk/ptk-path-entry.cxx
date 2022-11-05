@@ -114,7 +114,7 @@ seek_path(GtkEntry* entry)
     if (std::filesystem::is_directory(seek_dir))
     { // complete dir path is in entry - is it unique?
         u32 count = 0;
-        for (const auto& file: std::filesystem::directory_iterator(seek_dir))
+        for (const auto& file : std::filesystem::directory_iterator(seek_dir))
         {
             if (count == 2)
             {
@@ -200,7 +200,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
     {
         std::vector<std::string> name_list;
 
-        for (const auto& file: std::filesystem::directory_iterator(cwd))
+        for (const auto& file : std::filesystem::directory_iterator(cwd))
         {
             const std::string file_name = std::filesystem::path(file).filename();
             const std::string full_path = Glib::build_filename(cwd, file_name);
@@ -214,7 +214,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
         gtk_list_store_clear(list);
 
         // add sorted list to liststore
-        for (std::string_view name: name_list)
+        for (std::string_view name : name_list)
         {
             const std::string disp_name = Glib::filename_display_basename(name.data());
 
@@ -272,7 +272,7 @@ insert_complete(GtkEntry* entry)
     if (!ztd::endswith(prefix, "/"))
         prefix_name = Glib::path_get_basename(prefix);
 
-    for (const auto& file: std::filesystem::directory_iterator(cwd))
+    for (const auto& file : std::filesystem::directory_iterator(cwd))
     {
         const std::string file_name = std::filesystem::path(file).filename();
         const std::string full_path = Glib::build_filename(cwd, file_name);

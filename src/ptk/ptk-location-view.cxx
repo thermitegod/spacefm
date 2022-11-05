@@ -181,9 +181,9 @@ static void
 update_change_detection()
 {
     // update all windows/all panels/all browsers
-    for (FMMainWindow* window: fm_main_window_get_all())
+    for (FMMainWindow* window : fm_main_window_get_all())
     {
-        for (panel_t p: PANELS)
+        for (panel_t p : PANELS)
         {
             GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
             i32 n = gtk_notebook_get_n_pages(notebook);
@@ -216,7 +216,7 @@ update_all()
     bool havevol;
 
     const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-    for (vfs::volume volume: volumes)
+    for (vfs::volume volume : volumes)
     {
         if (volume)
         {
@@ -260,7 +260,7 @@ update_names()
 {
     vfs::volume v = nullptr;
     const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-    for (vfs::volume volume: volumes)
+    for (vfs::volume volume : volumes)
     {
         volume->set_info();
 
@@ -391,7 +391,7 @@ ptk_location_view_open_block(const char* block, bool new_tab)
     char* canon = realpath(block, buf);
 
     const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-    for (vfs::volume volume: volumes)
+    for (vfs::volume volume : volumes)
     {
         if (ztd::same(volume->get_device(), canon))
         {
@@ -414,7 +414,7 @@ ptk_location_view_init_model(GtkListStore* list)
 
     vfs_volume_add_callback(on_volume_event, model);
 
-    for (vfs::volume volume: volumes)
+    for (vfs::volume volume : volumes)
     {
         add_volume(volume, false);
     }
@@ -717,7 +717,7 @@ ptk_location_view_clean_mount_points()
 
         if (std::filesystem::is_directory(path))
         {
-            for (const auto& file: std::filesystem::directory_iterator(path))
+            for (const auto& file : std::filesystem::directory_iterator(path))
             {
                 const std::string file_name = std::filesystem::path(file).filename();
 
@@ -842,7 +842,7 @@ on_autoopen_net_cb(VFSFileTask* task, AutoOpen* ao)
     vfs::volume device_file_vol = nullptr;
     vfs::volume mount_point_vol = nullptr;
     const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-    for (vfs::volume volume: volumes)
+    for (vfs::volume volume : volumes)
     {
         if (volume->is_mounted)
         {
@@ -938,7 +938,7 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     if (!force_new_mount)
     {
         const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-        for (vfs::volume volume: volumes)
+        for (vfs::volume volume : volumes)
         {
             // test against mtab url and copy of user-entered url (udi)
             if (ztd::contains(volume->device_file, netmount->url) ||
@@ -1272,7 +1272,7 @@ on_autoopen_cb(VFSFileTask* task, AutoOpen* ao)
     (void)task;
     // LOG_INFO("on_autoopen_cb");
     const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-    for (vfs::volume volume: volumes)
+    for (vfs::volume volume : volumes)
     {
         if (volume->devnum == ao->devnum)
         {
@@ -1931,7 +1931,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 
 
     // validate vol
     const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-    for (vfs::volume volume: volumes)
+    for (vfs::volume volume : volumes)
     {
         if (volume == vol)
             break;
@@ -2089,7 +2089,7 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     g_object_set_data(G_OBJECT(parent), "file_browser", file_browser);
 
     const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-    for (vfs::volume volume: volumes)
+    for (vfs::volume volume : volumes)
     {
         if (volume && volume_is_visible(volume))
             names.emplace_back(volume);
@@ -2098,7 +2098,7 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     vfs::volume vol;
 
     std::ranges::sort(names, cmp_dev_name);
-    for (vfs::volume volume: names)
+    for (vfs::volume volume : names)
     {
         vol = volume;
         item = gtk_menu_item_new_with_label(volume->get_disp_name());

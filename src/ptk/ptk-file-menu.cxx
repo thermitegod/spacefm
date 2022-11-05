@@ -382,7 +382,7 @@ on_archive_default(GtkMenuItem* menuitem, xset_t set)
         XSetName::ARC_DEF_LIST,
     };
 
-    for (XSetName arcname: arcnames)
+    for (XSetName arcname : arcnames)
     {
         if (set->xset_name == arcname)
             set->b = XSetB::XSET_B_TRUE;
@@ -911,7 +911,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         }
         if (!apps.empty())
         {
-            for (std::string_view app: apps)
+            for (std::string_view app : apps)
             {
 #if 0
                 // TODO - FIXME
@@ -1016,7 +1016,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
                 set = xset_set_cb(XSetName::OPENTAB_NEW,
                                   (GFunc)on_popup_open_in_new_tab_activate,
                                   data);
-                for (tab_t tab: TABS)
+                for (tab_t tab : TABS)
                 {
                     const std::string name = fmt::format("opentab_{}", tab);
                     set = xset_set_cb(name, (GFunc)on_open_in_tab, data);
@@ -1031,7 +1031,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
                 xset_set_ob1_int(set, "panel_num", panel_control_code_next);
                 set->disable = (panel_count == 1);
 
-                for (panel_t panel: PANELS)
+                for (panel_t panel : PANELS)
                 {
                     const std::string name = fmt::format("open_in_panel{}", panel);
                     set = xset_set_cb(name, (GFunc)on_open_in_panel, data);
@@ -1104,7 +1104,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         set = xset_set_cb(XSetName::TAB_RESTORE, (GFunc)ptk_file_browser_go_tab, browser);
         xset_set_ob1_int(set, "tab_num", tab_control_code_restore);
 
-        for (tab_t tab: TABS)
+        for (tab_t tab : TABS)
         {
             const std::string name = fmt::format("tab_{}", tab);
             set = xset_set_cb(name, (GFunc)ptk_file_browser_go_tab, browser);
@@ -1190,7 +1190,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
             XSetName::MOVE_PANEL_4,
         };
 
-        for (XSetName copycmd: copycmds)
+        for (XSetName copycmd : copycmds)
         {
             set = xset_set_cb(copycmd, (GFunc)on_copycmd, data);
             xset_set_ob1(set, "set", set);
@@ -1218,7 +1218,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         set = xset_get(XSetName::MOVE_PANEL_NEXT);
         set->disable = (panel_count < 2);
 
-        for (tab_t tab: TABS)
+        for (tab_t tab : TABS)
         {
             const std::string copy_tab = fmt::format("copy_tab_{}", tab);
             set = xset_get(copy_tab);
@@ -1310,7 +1310,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
             XSetName::ROWN_ROOT_MYUSER, XSetName::ROWN_ROOT_USER1,  XSetName::ROWN_ROOT_USER2,
         };
 
-        for (XSetName permcmd: permcmds)
+        for (XSetName permcmd : permcmds)
         {
             set = xset_set_cb(permcmd, (GFunc)on_permission, data);
             xset_set_ob1(set, "set", set);
@@ -1451,7 +1451,7 @@ enum PTKFileMenuAppJob
 static const char*
 get_shared_desktop_file_location(std::string_view name)
 {
-    for (std::string_view sys_dir: vfs_system_data_dir())
+    for (std::string_view sys_dir : vfs_system_data_dir())
     {
         const char* ret = vfs_mime_type_locate_desktop_file(sys_dir, name);
         if (ret)
@@ -2136,7 +2136,7 @@ on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 
     if (!data->sel_files.empty())
     {
-        for (vfs::file_info file: data->sel_files)
+        for (vfs::file_info file : data->sel_files)
         {
             const std::string full_path = Glib::build_filename(data->cwd, file->get_name());
             if (data->browser && std::filesystem::is_directory(full_path))

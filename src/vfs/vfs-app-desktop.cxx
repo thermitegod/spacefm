@@ -214,7 +214,7 @@ VFSAppDesktop::translate_app_exec_to_command_line(
     if (ztd::contains(cmd, open_files_keys))
     {
         std::string tmp;
-        for (std::string_view file: file_list)
+        for (std::string_view file : file_list)
         {
             tmp.append(bash_quote(file));
             tmp.append(" ");
@@ -231,7 +231,7 @@ VFSAppDesktop::translate_app_exec_to_command_line(
     if (ztd::contains(cmd, open_file_keys))
     {
         std::string tmp;
-        for (std::string_view file: file_list)
+        for (std::string_view file : file_list)
         {
             tmp.append(bash_quote(file));
         }
@@ -259,7 +259,7 @@ VFSAppDesktop::translate_app_exec_to_command_line(
         std::string tmp;
 
         cmd.append(" ");
-        for (std::string_view file: file_list)
+        for (std::string_view file : file_list)
         {
             tmp.append(bash_quote(file));
             tmp.append(" ");
@@ -304,7 +304,7 @@ VFSAppDesktop::open_files(std::string_view working_dir,
     else
     {
         // app does not accept multiple files, so run multiple times
-        for (std::string_view open_file: file_paths)
+        for (std::string_view open_file : file_paths)
         {
             // const std::vector<std::string> open_files{open_file};
             exec_desktop(working_dir, {open_file.data()});

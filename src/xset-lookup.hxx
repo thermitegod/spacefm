@@ -22,7 +22,7 @@
 
 // #define XSET_MAP_TEST
 
-class InvalidXSetName: virtual public std::exception
+class InvalidXSetName : virtual public std::exception
 {
   protected:
     std::string error_message;

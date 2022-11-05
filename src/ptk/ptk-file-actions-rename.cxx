@@ -1881,7 +1881,7 @@ get_templates(std::string_view templates_dir, std::string_view subdir, bool getd
     if (!std::filesystem::is_directory(templates_path))
         return templates;
 
-    for (const auto& file: std::filesystem::directory_iterator(templates_path))
+    for (const auto& file : std::filesystem::directory_iterator(templates_path))
     {
         const std::string file_name = std::filesystem::path(file).filename();
 
@@ -2306,7 +2306,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         if (!templates.empty())
         {
             std::ranges::sort(templates);
-            for (std::string_view t: templates)
+            for (std::string_view t : templates)
             {
                 gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template), t.data());
             }
@@ -2333,7 +2333,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         if (!templates.empty())
         {
             std::ranges::sort(templates);
-            for (std::string_view t: templates)
+            for (std::string_view t : templates)
             {
                 gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template_dir),
                                                t.data());
@@ -3153,7 +3153,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
     const std::vector<std::string> files =
         ptk_clipboard_get_file_paths(cwd, &is_cut, &missing_targets);
 
-    for (std::string_view file_path: files)
+    for (std::string_view file_path : files)
     {
         file = vfs_file_info_new();
         vfs_file_info_get(file, file_path);
@@ -3207,7 +3207,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<vfs::file_
     std::string file_paths;
     std::string file_path_q;
     i32 item_count = 0;
-    for (vfs::file_info file: sel_files)
+    for (vfs::file_info file : sel_files)
     {
         const std::string file_path = Glib::build_filename(cwd, file->get_name());
         file_path_q = bash_quote(file_path);

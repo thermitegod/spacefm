@@ -251,7 +251,7 @@ mime_type_get_actions(std::string_view mime_type)
     get_actions(dir, mime_type, actions);
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
-    for (std::string_view sys_dir: vfs_system_data_dir())
+    for (std::string_view sys_dir : vfs_system_data_dir())
     {
         dir = Glib::build_filename(sys_dir.data(), "applications");
         get_actions(dir, mime_type, actions);
@@ -323,7 +323,7 @@ mime_type_has_action(std::string_view type, std::string_view desktop_id)
             return false;
         }
 
-        for (Glib::ustring known_type: types)
+        for (Glib::ustring known_type : types)
         {
             if (ztd::same(known_type.data(), type))
             {
@@ -348,7 +348,7 @@ mime_type_has_action(std::string_view type, std::string_view desktop_id)
     const std::vector<std::string> actions = mime_type_get_actions(type);
     if (!actions.empty())
     {
-        for (std::string_view action: actions)
+        for (std::string_view action : actions)
         {
             /* Try to match directly by desktop_id first */
             if (is_desktop && ztd::same(action.data(), desktop_id.data()))
@@ -541,7 +541,7 @@ mime_type_locate_desktop_file(std::string_view desktop_id)
     if ((ret = _locate_desktop_file(data_dir, desktop_id)))
         return ret;
 
-    for (std::string_view sys_dir: vfs_system_data_dir())
+    for (std::string_view sys_dir : vfs_system_data_dir())
     {
         if ((ret = _locate_desktop_file(sys_dir, desktop_id)))
             return ret;
@@ -563,7 +563,7 @@ get_default_action(std::string_view dir, std::string_view type)
         "Added Associations",
     };
 
-    for (std::string_view name: names)
+    for (std::string_view name : names)
     {
         const std::string path = Glib::build_filename(dir.data(), name.data());
         // LOG_INFO("    path = {}", path);
@@ -577,7 +577,7 @@ get_default_action(std::string_view dir, std::string_view type)
             return nullptr;
         }
 
-        for (std::string_view group: groups)
+        for (std::string_view group : groups)
         {
             std::vector<Glib::ustring> apps;
             try
@@ -591,7 +591,7 @@ get_default_action(std::string_view dir, std::string_view type)
                 break;
             }
 
-            for (const Glib::ustring& app: apps)
+            for (const Glib::ustring& app : apps)
             {
                 if (app.empty())
                     continue;
@@ -643,7 +643,7 @@ mime_type_get_default_action(std::string_view mime_type)
         return ret;
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
-    for (std::string_view sys_dir: vfs_system_data_dir())
+    for (std::string_view sys_dir : vfs_system_data_dir())
     {
         dir = Glib::build_filename(sys_dir.data(), "applications");
         if ((ret = get_default_action(dir, mime_type.data())))
@@ -695,7 +695,7 @@ mime_type_update_association(std::string_view type, std::string_view desktop_id,
         "Removed Associations",
     };
 
-    for (std::string_view group: groups)
+    for (std::string_view group : groups)
     {
         std::string new_action;
         bool is_present = false;

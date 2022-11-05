@@ -82,7 +82,7 @@ archive_handler_get_first_extension(xset_t handler_xset)
 
         if (!pathnames.empty())
         {
-            for (std::string_view path: pathnames)
+            for (std::string_view path : pathnames)
             {
                 // getting just the extension of the pathname list element
                 const auto namepack = get_name_extension(path);
@@ -767,7 +767,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
          * when '%N' is present, only the first otherwise */
         i32 i = 0;
         bool loop_once = ztd::contains(command, "%N");
-        for (vfs::file_info file: sel_files)
+        for (vfs::file_info file : sel_files)
         {
             desc = file->get_name();
 
@@ -860,7 +860,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
              * '%N' is present */
             if (ztd::contains(command, "%N"))
             {
-                for (vfs::file_info file: sel_files)
+                for (vfs::file_info file : sel_files)
                 {
                     desc = file->get_name();
                     if (desc[0] == '-')
@@ -985,7 +985,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         bool archive_found = false;
 
         // Looping for all files to attempt to list/extract
-        for (vfs::file_info file: sel_files)
+        for (vfs::file_info file : sel_files)
         {
             // Fetching file details
             mime_type = file->get_mime_type();
@@ -1155,7 +1155,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     std::string final_command;
     std::string error_message;
     // Looping for all files to attempt to list/extract
-    for (vfs::file_info file: sel_files)
+    for (vfs::file_info file : sel_files)
     {
         // Fetching file details
         mime_type = file->get_mime_type();

@@ -168,7 +168,7 @@ create_model_from_mime_type(vfs::mime_type mime_type)
         }
         if (!apps.empty())
         {
-            for (std::string_view app: apps)
+            for (std::string_view app : apps)
             {
                 add_list_item(list, ztd::strdup(app.data()));
             }
@@ -593,7 +593,7 @@ load_all_apps_in_dir(const char* dir_path, GtkListStore* list, vfs::async_task t
     if (!std::filesystem::is_directory(dir_path))
         return;
 
-    for (const auto& file: std::filesystem::directory_iterator(dir_path))
+    for (const auto& file : std::filesystem::directory_iterator(dir_path))
     {
         if (task->is_cancelled())
             break;
@@ -625,7 +625,7 @@ load_all_known_apps_thread(vfs::async_task task)
     std::string dir = Glib::build_filename(vfs_user_data_dir(), "applications");
     load_all_apps_in_dir(dir.c_str(), list, task);
 
-    for (std::string_view sys_dir: vfs_system_data_dir())
+    for (std::string_view sys_dir : vfs_system_data_dir())
     {
         dir = Glib::build_filename(sys_dir.data(), "applications");
         load_all_apps_in_dir(dir.c_str(), list, task);

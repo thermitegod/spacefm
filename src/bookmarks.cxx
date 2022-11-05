@@ -99,7 +99,7 @@ save_bookmarks() noexcept
     bookmarks_changed = false;
 
     std::string book_entry;
-    for (auto [book_path, book_name]: bookmarks)
+    for (auto [book_path, book_name] : bookmarks)
     {
         book_entry.append(fmt::format("file://{} {}\n", book_path, book_name));
     }

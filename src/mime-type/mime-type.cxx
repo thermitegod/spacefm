@@ -86,7 +86,7 @@ mime_type_get_by_filename(std::string_view filename, std::filesystem::file_statu
     if (std::filesystem::is_directory(status))
         return XDG_MIME_TYPE_DIRECTORY;
 
-    for (mime_cache_t cache: caches)
+    for (mime_cache_t cache : caches)
     {
         type = cache->lookup_literal(filename);
         if (type)
@@ -107,7 +107,7 @@ mime_type_get_by_filename(std::string_view filename, std::filesystem::file_statu
     {
         i32 max_glob_len = 0;
         i32 glob_len = 0;
-        for (mime_cache_t cache: caches)
+        for (mime_cache_t cache : caches)
         {
             const char* matched_type;
             matched_type = cache->lookup_glob(filename, &glob_len);
@@ -391,7 +391,7 @@ mime_type_get_desc_icon(const char* type, const char* locale, char** icon_name)
     }
 
     // look in system dirs
-    for (std::string_view sys_dir: vfs_system_data_dir())
+    for (std::string_view sys_dir : vfs_system_data_dir())
     {
         file_path = fmt::format("{}/mime/{}.xml", sys_dir, type);
         if (faccessat(0, file_path.c_str(), F_OK, AT_EACCESS) != -1)
@@ -427,7 +427,7 @@ mime_type_init()
         mime_cache_max_extent = cache->get_magic_max_extent();
 
     const std::vector<std::string> dirs = vfs_system_data_dir();
-    for (std::string_view dir: dirs)
+    for (std::string_view dir : dirs)
     {
         const std::string path2 = Glib::build_filename(dir.data(), filename);
         mime_cache_t dir_cache = std::make_shared<MimeCache>(path2);
@@ -458,7 +458,7 @@ mime_cache_reload(mime_cache_t cache)
     cache->reload();
 
     /* recalculate max magic extent */
-    for (mime_cache_t mcache: caches)
+    for (mime_cache_t mcache : caches)
     {
         if (mcache->get_magic_max_extent() > mime_cache_max_extent)
             mime_cache_max_extent = mcache->get_magic_max_extent();
@@ -556,10 +556,10 @@ mime_type_is_subclass(std::string_view type, std::string_view parent)
     if (ztd::same(type.data(), parent.data()))
         return true;
 
-    for (mime_cache_t cache: caches)
+    for (mime_cache_t cache : caches)
     {
         const std::vector<std::string> parents = cache->lookup_parents(type);
-        for (std::string_view p: parents)
+        for (std::string_view p : parents)
         {
             if (ztd::same(parent.data(), p.data()))
                 return true;

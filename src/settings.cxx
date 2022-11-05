@@ -457,13 +457,13 @@ config_parse_xset(const toml::value& toml_data, u64 version)
     (void)version;
 
     // loop over all of [[XSet]]
-    for (const auto& section: toml::find<toml::array>(toml_data, TOML_SECTION_XSET))
+    for (const auto& section : toml::find<toml::array>(toml_data, TOML_SECTION_XSET))
     {
         // get [XSet.name] and all vars
-        for (const auto& [toml_name, toml_vars]: section.as_table())
+        for (const auto& [toml_name, toml_vars] : section.as_table())
         {
             // get var and value
-            for (const auto& [toml_var, toml_value]: toml_vars.as_table())
+            for (const auto& [toml_var, toml_value] : toml_vars.as_table())
             {
                 std::stringstream ss_name;
                 std::stringstream ss_var;
@@ -674,7 +674,7 @@ load_settings()
     char* main_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
     if (!main_terminal || main_terminal[0] == '\0')
     {
-        for (std::string_view terminal: terminal_programs)
+        for (std::string_view terminal : terminal_programs)
         {
             const std::string term = Glib::find_program_in_path(terminal.data());
             if (term.empty())
@@ -751,7 +751,7 @@ save_settings(void* main_window_ptr)
     {
         if (save_tabs)
         {
-            for (panel_t p: PANELS)
+            for (panel_t p : PANELS)
             {
                 xset_t set = xset_get_panel(p, XSetPanel::SHOW);
                 if (GTK_IS_NOTEBOOK(main_window->panel[p - 1]))
@@ -791,7 +791,7 @@ save_settings(void* main_window_ptr)
         else
         {
             // clear saved tabs
-            for (panel_t p: PANELS)
+            for (panel_t p : PANELS)
             {
                 xset_t set = xset_get_panel(p, XSetPanel::SHOW);
                 if (set->s)
@@ -1000,7 +1000,7 @@ xset_pack_sets()
     // map layout <XSet->name, <XSet->var, XSet->value>>
     xsetpak_t xsetpak;
 
-    for (xset_t set: xsets)
+    for (xset_t set : xsets)
     {
         setvars_t setvars = xset_pack_set(set);
 
@@ -1073,7 +1073,7 @@ xset_find_custom(std::string_view search)
     // find a custom command or submenu by label or xset name
     const std::string label = clean_label(search, true, false);
 
-    for (xset_t set: xsets)
+    for (xset_t set : xsets)
     {
         if (!set->lock && ((set->menu_style == XSetMenu::SUBMENU && set->child) ||
                            (set->menu_style < XSetMenu::SUBMENU &&
@@ -1104,7 +1104,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
     bool found = false;
     char pinned;
 
-    for (xset_t set2: xsets)
+    for (xset_t set2 : xsets)
     {
         if (!set2->lock && set2->opener == job && set2->tool == XSetTool::NOT &&
             set2->menu_style != XSetMenu::SUBMENU && set2->menu_style != XSetMenu::SEP)
@@ -1161,7 +1161,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
 
             // is set pinned to open_all_type for pre-context?
             pinned = 0;
-            for (xset_t set3: xsets)
+            for (xset_t set3 : xsets)
             {
                 if (set3->next && ztd::startswith(set3->name, "open_all_type_"))
                 {
@@ -1245,7 +1245,7 @@ xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* acce
 
     const std::vector<std::string> split_elements = ztd::split(elements, " ");
 
-    for (std::string_view element: split_elements)
+    for (std::string_view element : split_elements)
     {
         xset_t set = xset_get(element);
         xset_add_menuitem(file_browser, menu, accel_group, set);
@@ -1764,7 +1764,7 @@ clean_plugin_mirrors()
     while (redo)
     {
         redo = false;
-        for (xset_t set: xsets)
+        for (xset_t set : xsets)
         {
             if (set->desc && ztd::same(set->desc, "@plugin@mirror@"))
             {
@@ -1782,7 +1782,7 @@ clean_plugin_mirrors()
     const std::string path = Glib::build_filename(xset_get_config_dir(), "plugin-data");
     if (std::filesystem::is_directory(path))
     {
-        for (const auto& file: std::filesystem::directory_iterator(path))
+        for (const auto& file : std::filesystem::directory_iterator(path))
         {
             const std::string file_name = std::filesystem::path(file).filename();
             if (ztd::startswith(file_name, "cstm_") && !xset_is(file_name))
@@ -1798,7 +1798,7 @@ clean_plugin_mirrors()
 static void
 xset_set_plugin_mirror(xset_t pset)
 {
-    for (xset_t set: xsets)
+    for (xset_t set : xsets)
     {
         if (set->desc && ztd::same(set->desc, "@plugin@mirror@"))
         {
@@ -1861,7 +1861,7 @@ xset_get_plugins()
 { // return list of plugin sets sorted by menu_label
     std::vector<xset_t> plugins;
 
-    for (xset_t set: xsets)
+    for (xset_t set : xsets)
     {
         if (set->plugin && set->plugin_top && set->plug_dir)
             plugins.emplace_back(set);
@@ -1882,7 +1882,7 @@ xset_get_by_plug_name(std::string_view plug_dir, std::string_view plug_name)
     if (plug_name.empty())
         return nullptr;
 
-    for (xset_t set: xsets)
+    for (xset_t set : xsets)
     {
         if (set->plugin && ztd::same(plug_name, set->plug_name) &&
             ztd::same(plug_dir, set->plug_dir))
@@ -2028,7 +2028,7 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
     while (redo)
     {
         redo = false;
-        for (xset_t set: xsets)
+        for (xset_t set : xsets)
         {
             if (set->plugin && ztd::same(plug_dir, set->plug_dir))
             {
@@ -2067,13 +2067,13 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
     // const u64 version = get_config_file_version(toml_data);
 
     // loop over all of [[Plugin]]
-    for (const auto& section: toml::find<toml::array>(toml_data, PLUGIN_FILE_SECTION_PLUGIN))
+    for (const auto& section : toml::find<toml::array>(toml_data, PLUGIN_FILE_SECTION_PLUGIN))
     {
         // get [Plugin.name] and all vars
-        for (const auto& [toml_name, toml_vars]: section.as_table())
+        for (const auto& [toml_name, toml_vars] : section.as_table())
         {
             // get var and value
-            for (const auto& [toml_var, toml_value]: toml_vars.as_table())
+            for (const auto& [toml_var, toml_value] : toml_vars.as_table())
             {
                 std::stringstream ss_name;
                 std::stringstream ss_var;
@@ -2113,7 +2113,7 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
     // clean plugin sets, set type
     bool top = true;
     xset_t rset = nullptr;
-    for (xset_t set: xsets)
+    for (xset_t set : xsets)
     {
         if (set->plugin && ztd::same(plug_dir, set->plug_dir))
         {
@@ -2765,7 +2765,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
 
                     std::vector<std::string> open_files;
 
-                    for (vfs::file_info file: sel_files)
+                    for (vfs::file_info file : sel_files)
                     {
                         const std::string open_file = Glib::build_filename(cwd, file->get_name());
 
@@ -3195,7 +3195,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
     if (set->shared_key)
         keyset = xset_get(set->shared_key);
 
-    for (xset_t set2: xsets)
+    for (xset_t set2 : xsets)
     {
         if (set2 && set2 != set && set2->key > 0 && set2->key == event->keyval &&
             set2->keymod == keymod && set2 != keyset)
@@ -3337,7 +3337,7 @@ xset_set_key(GtkWidget* parent, xset_t set)
         if (response == GtkResponseType::GTK_RESPONSE_OK && (newkey || newkeymod))
         {
             // clear duplicate key assignments
-            for (xset_t set2: xsets)
+            for (xset_t set2 : xsets)
             {
                 if (set2 && set2->key > 0 && set2->key == newkey && set2->keymod == newkeymod)
                 {
@@ -7954,7 +7954,7 @@ xset_defaults()
     xset_set(XSetName::ROWN_ROOT_USER2, XSetVar::MENU_LABEL, "root:user2");
 
     // PANELS
-    for (panel_t p: PANELS)
+    for (panel_t p : PANELS)
     {
         set = xset_set_panel(p, XSetPanel::SHOW_TOOLBOX, XSetVar::MENU_LABEL, "_Toolbar");
         set->menu_style = XSetMenu::CHECK;
@@ -8082,7 +8082,7 @@ xset_defaults()
     set->b = XSetB::XSET_B_TRUE;
 
     // mark all labels and icons as default
-    for (xset_t set2: xsets)
+    for (xset_t set2 : xsets)
     {
         if (set2->lock)
         {
@@ -8104,7 +8104,7 @@ def_key(XSetName name, u32 key, u32 keymod)
         return;
 
     // key combo already in use?
-    for (xset_t set2: keysets)
+    for (xset_t set2 : keysets)
     {
         if (set2->key == key && set2->keymod == keymod)
             return;
@@ -8117,7 +8117,7 @@ static void
 xset_default_keys()
 {
     // read all currently set or unset keys
-    for (xset_t set: xsets)
+    for (xset_t set : xsets)
     {
         if (set->key)
             keysets.emplace_back(set);

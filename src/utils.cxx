@@ -101,7 +101,7 @@ dir_has_files(std::string_view path) noexcept
     if (!std::filesystem::is_directory(path))
         return false;
 
-    for (const auto& file: std::filesystem::directory_iterator(path))
+    for (const auto& file : std::filesystem::directory_iterator(path))
     {
         if (file.exists())
             return true;

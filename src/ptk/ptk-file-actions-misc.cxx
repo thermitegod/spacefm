@@ -66,7 +66,7 @@ ptk_delete_files(GtkWindow* parent_win, std::string_view cwd,
     }
 
     std::vector<std::string> file_list;
-    for (vfs::file_info file: sel_files)
+    for (vfs::file_info file : sel_files)
     {
         const std::string file_path = Glib::build_filename(cwd.data(), file->get_name());
         file_list.emplace_back(file_path);
@@ -96,7 +96,7 @@ ptk_trash_files(GtkWindow* parent_win, std::string_view cwd,
     }
 
     std::vector<std::string> file_list;
-    for (vfs::file_info file: sel_files)
+    for (vfs::file_info file : sel_files)
     {
         const std::string file_path = Glib::build_filename(cwd.data(), file->get_name());
         file_list.emplace_back(file_path);

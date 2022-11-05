@@ -79,11 +79,7 @@ vfs_mime_type_reload(void* user_data)
     /* Remove all items in the hash table */
 
     mime_map_lock.lock();
-    std::ranges::for_each(mime_map,
-                          [](const auto& mime)
-                          {
-                              vfs_mime_type_unref(mime.second);
-                          });
+    std::ranges::for_each(mime_map, [](const auto& mime) { vfs_mime_type_unref(mime.second); });
     mime_map.clear();
     mime_map_lock.unlock();
 
@@ -123,7 +119,7 @@ vfs_mime_type_init()
 
     /* install file alteration monitor for mime-cache */
     std::vector<mime_cache_t> caches = mime_type_get_caches();
-    for (mime_cache_t cache: caches)
+    for (mime_cache_t cache : caches)
     {
         // MOD NOTE1  check to see if path exists - otherwise it later tries to
         //  remove nullptr monitor with inotify which caused segfault
@@ -143,17 +139,11 @@ vfs_mime_type_clean()
     // remove file alteration monitor for mime-cache
     std::ranges::for_each(mime_caches_monitors,
                           [](vfs::file_monitor monitor)
-                          {
-                              vfs_file_monitor_remove(monitor, on_mime_cache_changed, nullptr);
-                          });
+                          { vfs_file_monitor_remove(monitor, on_mime_cache_changed, nullptr); });
 
     mime_type_finalize();
 
-    std::ranges::for_each(mime_map,
-                          [](const auto& mime)
-                          {
-                              vfs_mime_type_unref(mime.second);
-                          });
+    std::ranges::for_each(mime_map, [](const auto& mime) { vfs_mime_type_unref(mime.second); });
 
     mime_map.clear();
 }
@@ -373,11 +363,7 @@ vfs_mime_type_set_icon_size_big(i32 size)
     mime_map_lock.lock();
     big_icon_size = size;
     // Unload old cached icons
-    std::ranges::for_each(mime_map,
-                          [](const auto& mime)
-                          {
-                              free_cached_big_icons(mime.second);
-                          });
+    std::ranges::for_each(mime_map, [](const auto& mime) { free_cached_big_icons(mime.second); });
     mime_map_lock.unlock();
 }
 
@@ -390,11 +376,7 @@ vfs_mime_type_set_icon_size_small(i32 size)
     mime_map_lock.lock();
     small_icon_size = size;
     // Unload old cached icons
-    std::ranges::for_each(mime_map,
-                          [](const auto& mime)
-                          {
-                              free_cached_small_icons(mime.second);
-                          });
+    std::ranges::for_each(mime_map, [](const auto& mime) { free_cached_small_icons(mime.second); });
     mime_map_lock.unlock();
 }
 

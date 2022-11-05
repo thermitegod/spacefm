@@ -324,7 +324,7 @@ ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir)
 
     if (dir && !dir->file_list.empty())
     {
-        for (vfs::file_info file: dir->file_list)
+        for (vfs::file_info file : dir->file_list)
         {
             if (list->show_hidden || file->disp_name.at(0) != '.')
             {

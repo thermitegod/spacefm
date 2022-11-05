@@ -202,7 +202,7 @@ on_configure_evt_timer(FMMainWindow* main_window)
         return false;
 
     // verify main_window still valid
-    for (FMMainWindow* window: all_windows)
+    for (FMMainWindow* window : all_windows)
     {
         if (window == main_window)
             break;
@@ -393,7 +393,7 @@ create_plugins_menu(FMMainWindow* main_window)
     gtk_menu_shell_append(GTK_MENU_SHELL(plug_menu), item);
 
     plugins = xset_get_plugins();
-    for (xset_t set2: plugins)
+    for (xset_t set2 : plugins)
         xset_add_menuitem(file_browser, plug_menu, accel_group, set2);
     if (!plugins.empty())
         xset_clear_plugins(plugins);
@@ -565,9 +565,9 @@ on_quit_activate(GtkMenuItem* menuitem, void* user_data)
 void
 main_window_rubberband_all()
 {
-    for (FMMainWindow* window: all_windows)
+    for (FMMainWindow* window : all_windows)
     {
-        for (panel_t p: PANELS)
+        for (panel_t p : PANELS)
         {
             GtkWidget* notebook = window->panel[p - 1];
             i32 num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
@@ -588,9 +588,9 @@ main_window_rubberband_all()
 void
 main_window_refresh_all()
 {
-    for (FMMainWindow* window: all_windows)
+    for (FMMainWindow* window : all_windows)
     {
-        for (panel_t p: PANELS)
+        for (panel_t p : PANELS)
         {
             i64 notebook = (i64)window->panel[p - 1];
             i32 num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
@@ -639,7 +639,7 @@ on_main_icon()
 {
     GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
-    for (FMMainWindow* window: all_windows)
+    for (FMMainWindow* window : all_windows)
     {
         update_window_icon(GTK_WINDOW(window), icon_theme);
     }
@@ -682,9 +682,9 @@ main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser)
         ptk_file_browser_rebuild_toolbars(file_browser);
 
     // do all windows all panels all tabs
-    for (FMMainWindow* window: all_windows)
+    for (FMMainWindow* window : all_windows)
     {
-        for (panel_t p: PANELS)
+        for (panel_t p : PANELS)
         {
             GtkWidget* notebook = window->panel[p - 1];
             i32 pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
@@ -713,7 +713,7 @@ update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser)
     ptk_file_browser_update_views(nullptr, file_browser);
 
     // do other windows
-    for (FMMainWindow* window: all_windows)
+    for (FMMainWindow* window : all_windows)
     {
         if (gtk_widget_get_visible(window->panel[p - 1]))
         {
@@ -738,9 +738,9 @@ main_window_toggle_thumbnails_all_windows()
     app_settings.set_show_thumbnail(!app_settings.get_show_thumbnail());
 
     // update all windows/all panels/all browsers
-    for (FMMainWindow* window: all_windows)
+    for (FMMainWindow* window : all_windows)
     {
-        for (panel_t p: PANELS)
+        for (panel_t p : PANELS)
         {
             GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
             i32 n = gtk_notebook_get_n_pages(notebook);
@@ -871,7 +871,7 @@ show_panels_all_windows(GtkMenuItem* item, FMMainWindow* main_window)
 
     // do other windows
     main_window->panel_change = false; // do not save columns for other windows
-    for (FMMainWindow* window: all_windows)
+    for (FMMainWindow* window : all_windows)
     {
         if (main_window != window)
             show_panels(nullptr, window);
@@ -891,7 +891,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
     // save column widths and side sliders of visible panels
     if (main_window->panel_change)
     {
-        for (panel_t p: PANELS)
+        for (panel_t p : PANELS)
         {
             if (gtk_widget_get_visible(GTK_WIDGET(main_window->panel[p - 1])))
             {
@@ -915,7 +915,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
     }
 
     // which panels to show
-    for (panel_t p: PANELS)
+    for (panel_t p : PANELS)
     {
         show[p] = xset_get_b_panel(p, XSetPanel::SHOW);
     }
@@ -933,7 +933,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
 
     bool horiz;
     bool vert;
-    for (panel_t p: PANELS)
+    for (panel_t p : PANELS)
     {
         // panel context - how panels share horiz and vert space with other panels
         switch (p)
@@ -1051,7 +1051,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                     const std::vector<std::string> tab_dirs =
                         ztd::split(tabs_add, CONFIG_FILE_TABS_DELIM);
 
-                    for (std::string_view tab_dir: tab_dirs)
+                    for (std::string_view tab_dir : tab_dirs)
                     {
                         if (tab_dir.empty())
                             continue;
@@ -1179,7 +1179,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
     set_panel_focus(main_window, nullptr);
 
     // update views all panels
-    for (panel_t p: PANELS)
+    for (panel_t p : PANELS)
     {
         if (show[p])
         {
@@ -1299,7 +1299,7 @@ rebuild_menus(FMMainWindow* main_window)
     xset_set_cb(XSetName::MAIN_TITLE, (GFunc)update_window_title, main_window);
 
     i32 vis_count = 0;
-    for (panel_t p: PANELS)
+    for (panel_t p : PANELS)
     {
         if (xset_get_b_panel(p, XSetPanel::SHOW))
             vis_count++;
@@ -1755,7 +1755,7 @@ fm_main_window_store_positions(FMMainWindow* main_window)
         PtkFileBrowser* a_browser;
         if (main_window->maximized)
             main_window->opened_maximized = true; // force save of columns
-        for (panel_t p: PANELS)
+        for (panel_t p : PANELS)
         {
             page_x = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
             if (page_x != -1)
@@ -2959,7 +2959,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
             u32 count_block = 0;
             u32 count_char = 0;
 
-            for (vfs::file_info file: sel_files)
+            for (vfs::file_info file : sel_files)
             {
                 file = vfs_file_info_ref(file);
                 if (!file)
@@ -3189,7 +3189,7 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, xset_t kn
                           true))
         return true;
 
-    for (xset_t set: xsets)
+    for (xset_t set : xsets)
     {
         if (set->shared_key)
         {
@@ -3475,7 +3475,7 @@ fm_main_window_get_on_current_desktop()
         return fm_main_window_get_last_active(); // revert to dumb if no current
 
     bool invalid = false;
-    for (FMMainWindow* window: all_windows)
+    for (FMMainWindow* window : all_windows)
     {
         desktop = get_desktop_index(GTK_WINDOW(window));
         // LOG_INFO( "    test win {:p} = {}", window, desktop);
@@ -3706,7 +3706,7 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
 
     // panels
     i32 panel_count = 0;
-    for (panel_t p: PANELS)
+    for (panel_t p : PANELS)
     {
         if (!xset_get_b_panel(p, XSetPanel::SHOW))
             continue;
@@ -3765,7 +3765,7 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
     c->var[ItemPropContext::CONTEXT_PANEL_COUNT] = panel_count;
     c->var[ItemPropContext::CONTEXT_PANEL] = file_browser->mypanel;
 
-    for (panel_t p: PANELS)
+    for (panel_t p : PANELS)
     {
         if (c->var[ItemPropContext::CONTEXT_PANEL1_DIR + p - 1].empty())
             c->var[ItemPropContext::CONTEXT_PANEL1_DIR + p - 1] = "";
@@ -3833,7 +3833,7 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
 static FMMainWindow*
 get_task_view_window(GtkWidget* view)
 {
-    for (FMMainWindow* window: all_windows)
+    for (FMMainWindow* window : all_windows)
     {
         if (window->task_view == view)
             return window;
@@ -3856,7 +3856,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
     // buf.append("\n\ncp $0 /tmp\n\n");
 
     // panels
-    for (panel_t p: PANELS)
+    for (panel_t p : PANELS)
     {
         PtkFileBrowser* a_browser;
 
@@ -3896,7 +3896,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         if (!sel_files.empty())
         {
             buf.append(fmt::format("fm_panel{}_files=(\n", p));
-            for (vfs::file_info file: sel_files)
+            for (vfs::file_info file : sel_files)
             {
                 path = file->get_name();
                 if (!cwd_needs_quote && ztd::contains(path, "\""))
@@ -3916,7 +3916,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
             if (file_browser == a_browser)
             {
                 buf.append(fmt::format("fm_filenames=(\n"));
-                for (vfs::file_info file: sel_files)
+                for (vfs::file_info file : sel_files)
                 {
                     path = file->get_name();
                     buf.append(fmt::format("{}\n", bash_quote(path)));
@@ -5558,7 +5558,7 @@ main_window_socket_command(char* argv[], std::string& reply)
     }
     else
     {
-        for (FMMainWindow* window2: all_windows)
+        for (FMMainWindow* window2 : all_windows)
         {
             const std::string str = fmt::format("{:p}", (void*)window2);
             if (ztd::same(str, window))
@@ -6510,7 +6510,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             // build bash array
             const std::vector<std::string> pathv = ztd::split(clip_txt, "");
             std::string str;
-            for (std::string_view path: pathv)
+            for (std::string_view path : pathv)
             {
                 str.append(fmt::format("{} ", bash_quote(path)));
             }
@@ -6526,7 +6526,7 @@ main_window_socket_command(char* argv[], std::string& reply)
 
             // build bash array
             std::string str;
-            for (vfs::file_info file: sel_files)
+            for (vfs::file_info file : sel_files)
             {
                 file = vfs_file_info_ref(file);
                 if (!file)

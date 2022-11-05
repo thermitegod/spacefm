@@ -410,7 +410,7 @@ vfs_file_task_do_copy(VFSFileTask* task, std::string_view src_file, std::string_
 
             std::string sub_src_file;
             std::string sub_dest_file;
-            for (const auto& file: std::filesystem::directory_iterator(src_file))
+            for (const auto& file : std::filesystem::directory_iterator(src_file))
             {
                 const std::string file_name = std::filesystem::path(file).filename();
                 if (should_abort(task))
@@ -700,7 +700,7 @@ vfs_file_task_do_move(VFSFileTask* task, std::string_view src_file, std::string_
         // moving a directory onto a directory that exists
         std::string sub_src_file;
         std::string sub_dest_file;
-        for (const auto& file: std::filesystem::directory_iterator(src_file))
+        for (const auto& file : std::filesystem::directory_iterator(src_file))
         {
             const std::string file_name = std::filesystem::path(file).filename();
             if (should_abort(task))
@@ -847,7 +847,7 @@ vfs_file_task_delete(VFSFileTask* task, std::string_view src_file)
 
     if (S_ISDIR(file_stat.st_mode))
     {
-        for (const auto& file: std::filesystem::directory_iterator(src_file))
+        for (const auto& file : std::filesystem::directory_iterator(src_file))
         {
             const std::string file_name = std::filesystem::path(file).filename();
             if (should_abort(task))
@@ -1021,7 +1021,7 @@ vfs_file_task_chown_chmod(VFSFileTask* task, std::string_view src_file)
 
         if (S_ISDIR(src_stat.st_mode) && task->recursive)
         {
-            for (const auto& file: std::filesystem::directory_iterator(src_file))
+            for (const auto& file : std::filesystem::directory_iterator(src_file))
             {
                 const std::string file_name = std::filesystem::path(file).filename();
                 if (should_abort(task))
@@ -1761,7 +1761,7 @@ vfs_file_task_thread(VFSFileTask* task)
         // start timer to limit the amount of time to spend on this - can be
         // VERY slow for network filesystems
         size_timeout = g_timeout_add_seconds(5, (GSourceFunc)on_size_timeout, task);
-        for (std::string_view src_path: task->src_paths)
+        for (std::string_view src_path : task->src_paths)
         {
             if (lstat(src_path.data(), &file_stat) == -1)
             {
@@ -1817,7 +1817,7 @@ vfs_file_task_thread(VFSFileTask* task)
             dest_dev = file_stat.st_dev;
         }
 
-        for (std::string_view src_path: task->src_paths)
+        for (std::string_view src_path : task->src_paths)
         {
             if (lstat(src_path.data(), &file_stat) == -1)
             {
@@ -1927,7 +1927,7 @@ vfs_file_task_thread(VFSFileTask* task)
         return nullptr;
     }
 
-    for (std::string_view src_path: task->src_paths)
+    for (std::string_view src_path : task->src_paths)
     {
         switch (task->type)
         {
@@ -2151,7 +2151,7 @@ get_total_size_of_dir(VFSFileTask* task, std::string_view path, off_t* size, str
     if (S_ISLNK(file_stat.st_mode) || !S_ISDIR(file_stat.st_mode))
         return;
 
-    for (const auto& file: std::filesystem::directory_iterator(path))
+    for (const auto& file : std::filesystem::directory_iterator(path))
     {
         const std::string file_name = std::filesystem::path(file).filename();
         if (task->state == VFSFileTaskState::SIZE_TIMEOUT || task->abort)

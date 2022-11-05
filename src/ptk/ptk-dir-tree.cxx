@@ -837,7 +837,7 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
     {
         node->monitor = vfs_file_monitor_add(path, &on_file_monitor_event, node);
 
-        for (const auto& file: std::filesystem::directory_iterator(path))
+        for (const auto& file : std::filesystem::directory_iterator(path))
         {
             const std::string file_name = std::filesystem::path(file).filename();
             const std::string file_path = Glib::build_filename(path, file_name);
