@@ -104,8 +104,8 @@ struct VFSFileInfo
     const std::string& get_disp_mtime() noexcept;
     const std::string& get_disp_perm() noexcept;
 
-    time_t* get_mtime() noexcept;
-    time_t* get_atime() noexcept;
+    std::time_t* get_mtime() noexcept;
+    std::time_t* get_atime() noexcept;
 
     bool load_thumbnail(std::string_view full_path, bool big) noexcept;
     bool is_thumbnail_loaded(bool big) const noexcept;

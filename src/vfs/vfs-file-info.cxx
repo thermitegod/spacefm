@@ -356,13 +356,13 @@ VFSFileInfo::get_disp_mtime() noexcept
     return this->disp_mtime;
 }
 
-time_t*
+std::time_t*
 VFSFileInfo::get_mtime() noexcept
 {
     return &this->mtime;
 }
 
-time_t*
+std::time_t*
 VFSFileInfo::get_atime() noexcept
 {
     return &this->atime;

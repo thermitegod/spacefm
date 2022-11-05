@@ -375,8 +375,8 @@ get_date_offset(GtkCalendar* calendar)
 {
     i32 offset;
 
-    std::time_t timeval = std::time(nullptr);
-    struct tm* lt = std::localtime(&timeval);
+    std::time_t timeval = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::tm* lt = std::localtime(&timeval);
 
     u32 d, m, y;
     gtk_calendar_get_date(calendar, &y, &m, &d);

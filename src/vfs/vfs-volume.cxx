@@ -3405,9 +3405,11 @@ vfs_volume_automount(vfs::volume vol)
         !vfs_volume_is_automount(vol))
         return;
 
-    if (vol->automount_time && std::time(nullptr) - vol->automount_time < 5)
+    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    if (vol->automount_time && now - vol->automount_time < 5)
         return;
-    vol->automount_time = std::time(nullptr);
+    vol->automount_time = now;
 
     bool run_in_terminal;
     char* line = vfs_volume_get_mount_command(vol,

@@ -1994,7 +1994,7 @@ vfs_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files,
     gtk_text_buffer_get_end_iter(task->add_log_buf, &iter);
     gtk_text_buffer_add_mark(task->add_log_buf, task->add_log_end, &iter);
 
-    task->start_time = std::time(nullptr);
+    task->start_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     task->timer = ztd::timer();
 
     return task;

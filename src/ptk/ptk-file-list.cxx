@@ -252,10 +252,12 @@ on_file_list_file_changed(vfs::file_info file, PtkFileList* list)
 
     ptk_file_list_file_changed(file, list);
 
-    /* check if reloading of thumbnail is needed.
-     * See also desktop-window.c:on_file_changed() */
+    // check if reloading of thumbnail is needed.
+    // See also desktop-window.c:on_file_changed()
+    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
     if (list->max_thumbnail != 0 &&
-        ((file->is_video() && std::time(nullptr) - *file->get_mtime() > 5) ||
+        ((file->is_video() && (now - *file->get_mtime() > 5)) ||
          (file->size /*vfs_file_info_get_size( file )*/ < list->max_thumbnail && file->is_image())))
     {
         if (!file->is_thumbnail_loaded(list->big_thumbnail))

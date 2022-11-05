@@ -230,7 +230,7 @@ TrashDir::create_trash_info(std::string_view path, std::string_view target_name)
     const std::string trash_info =
         Glib::build_filename(info_path(), fmt::format("{}.trashinfo", target_name));
 
-    std::time_t t = std::time(nullptr);
+    std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     char iso_time[100];
     std::strftime(iso_time, sizeof(iso_time), "%FT%TZ", std::localtime(&t));
 
