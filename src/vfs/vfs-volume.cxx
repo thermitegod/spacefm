@@ -2152,7 +2152,7 @@ mtab_fstype_is_handled_by_protocol(const char* mtab_fstype)
 }
 
 SplitNetworkURL
-split_network_url(const char* url, netmount_t** netmount)
+split_network_url(const char* url, netmount_t netmount)
 {
     if (!url || !netmount)
         return SplitNetworkURL::NOT_A_NETWORK_URL;
@@ -2162,7 +2162,7 @@ split_network_url(const char* url, netmount_t** netmount)
     char* orig_url = ztd::strdup(url);
     char* xurl = orig_url;
 
-    netmount_t* nm = new netmount_t;
+    netmount_t nm = std::make_shared<Netmount>();
     nm->url = ztd::strdup(url);
 
     // get protocol
@@ -2171,7 +2171,6 @@ split_network_url(const char* url, netmount_t** netmount)
     { // //host...
         if (xurl[2] == '\0')
         {
-            delete nm;
             free(orig_url);
             return SplitNetworkURL::NOT_A_NETWORK_URL;
         }
@@ -2182,7 +2181,6 @@ split_network_url(const char* url, netmount_t** netmount)
     { // protocol://host...
         if (xurl[0] == ':' || xurl[0] == '/')
         {
-            delete nm;
             free(orig_url);
             return SplitNetworkURL::NOT_A_NETWORK_URL;
         }
@@ -2190,7 +2188,6 @@ split_network_url(const char* url, netmount_t** netmount)
         nm->fstype = ztd::strdup(ztd::strip(xurl));
         if (nm->fstype[0] == '\0')
         {
-            delete nm;
             free(orig_url);
             return SplitNetworkURL::NOT_A_NETWORK_URL;
         }
@@ -2208,7 +2205,6 @@ split_network_url(const char* url, netmount_t** netmount)
         if (xurl[0] == ':' || xurl[0] == '/')
 
         {
-            delete nm;
             free(orig_url);
             return SplitNetworkURL::NOT_A_NETWORK_URL;
         }
@@ -2220,7 +2216,6 @@ split_network_url(const char* url, netmount_t** netmount)
     }
     else
     {
-        delete nm;
         free(orig_url);
         return SplitNetworkURL::NOT_A_NETWORK_URL;
     }
@@ -2305,7 +2300,7 @@ split_network_url(const char* url, netmount_t** netmount)
         ret = SplitNetworkURL::INVALID_NETWORK_URL;
 #endif
 
-    *netmount = nm;
+    netmount = nm;
     return ret;
 }
 
@@ -2335,8 +2330,8 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
           name[0] != '\0'))
         return nullptr;
 
-    netmount_t* netmount = new netmount_t;
-    if (split_network_url(name, &netmount) == SplitNetworkURL::VALID_NETWORK_URL)
+    netmount_t netmount = std::make_shared<Netmount>();
+    if (split_network_url(name, netmount) == SplitNetworkURL::VALID_NETWORK_URL)
     {
         // network URL
         volume = new VFSVolume;
@@ -2355,9 +2350,6 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         volume->disp_name = nullptr;
         volume->automount_time = 0;
         volume->inhibit_auto = false;
-
-        // free unused netmount
-        delete netmount;
     }
     else if (ztd::same(mtab_fstype, "fuse.fuseiso"))
     {
@@ -2447,7 +2439,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
 
 char*
 vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* options,
-                       netmount_t* netmount, bool* run_in_terminal, char** mount_point)
+                       netmount_t netmount, bool* run_in_terminal, char** mount_point)
 {
     const char* handlers_list;
     xset_t set;
@@ -2922,14 +2914,14 @@ VFSVolume::device_unmount_cmd(bool* run_in_terminal) noexcept
     std::string pointq = "";
     *run_in_terminal = false;
 
-    netmount_t* netmount = new netmount_t;
+    netmount_t netmount = std::make_shared<Netmount>();
 
     // unmounting a network ?
     switch (this->device_type)
     {
         case VFSVolumeDeviceType::NETWORK:
             // is a network - try to get unmount command
-            if (split_network_url(this->udi, &netmount) == SplitNetworkURL::VALID_NETWORK_URL)
+            if (split_network_url(this->udi, netmount) == SplitNetworkURL::VALID_NETWORK_URL)
             {
                 command = vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_NET,
                                                  PtkHandlerMount::HANDLER_UNMOUNT,
@@ -2938,7 +2930,6 @@ VFSVolume::device_unmount_cmd(bool* run_in_terminal) noexcept
                                                  netmount,
                                                  run_in_terminal,
                                                  nullptr);
-                delete netmount;
 
                 // igtodo is this redundant?
                 // replace mount point sub var

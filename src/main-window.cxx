@@ -7086,7 +7086,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             char* real_path = argv[j];
             char* device_file = nullptr;
             vfs::volume vol = nullptr;
-            netmount_t* netmount = new netmount_t;
+            netmount_t netmount = std::make_shared<Netmount>();
             if (ztd::same(socket_property, "unmount") && std::filesystem::is_directory(real_path))
             {
                 // unmount DIR
@@ -7115,7 +7115,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                       ztd::startswith(real_path, "//")))
             {
                 // mount URL
-                if (split_network_url(real_path, &netmount) != SplitNetworkURL::VALID_NETWORK_URL)
+                if (split_network_url(real_path, netmount) != SplitNetworkURL::VALID_NETWORK_URL)
                 {
                     // not a valid url
                     reply = fmt::format("invalid TARGET '{}'", argv[j]);
@@ -7153,7 +7153,6 @@ main_window_socket_command(char* argv[], std::string& reply)
                                              netmount,
                                              &run_in_terminal,
                                              nullptr);
-                delete netmount;
             }
             if (cmd.empty())
             {

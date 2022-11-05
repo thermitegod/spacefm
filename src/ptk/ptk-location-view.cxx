@@ -740,7 +740,7 @@ ptk_location_view_clean_mount_points()
 }
 
 char*
-ptk_location_view_create_mount_point(i32 mode, vfs::volume vol, netmount_t* netmount,
+ptk_location_view_create_mount_point(i32 mode, vfs::volume vol, netmount_t netmount,
                                      const char* path)
 {
     std::string mname;
@@ -908,12 +908,12 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
                                 bool force_new_mount)
 {
     char* mount_point = nullptr;
-    netmount_t* netmount = new netmount_t;
+    netmount_t netmount = std::make_shared<Netmount>();
 
     std::string line;
 
     // split url
-    if (split_network_url(url, &netmount) != SplitNetworkURL::VALID_NETWORK_URL)
+    if (split_network_url(url, netmount) != SplitNetworkURL::VALID_NETWORK_URL)
     {
         // not a valid url
         xset_msg_dialog(GTK_WIDGET(file_browser),
@@ -959,7 +959,6 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
                                                    PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
                     }
                     free(mount_point);
-                    delete netmount;
                     return;
                 }
             }
@@ -988,7 +987,6 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
                         "set.  Add a handler in Devices|Settings|Protocol Handlers.");
 
         free(mount_point);
-        delete netmount;
         return;
     }
 
@@ -1042,7 +1040,6 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     ptk_file_task_run(ptask);
 
     free(mount_point);
-    delete netmount;
 }
 
 static void
@@ -1520,8 +1517,8 @@ on_prop(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     if (vol->device_type == VFSVolumeDeviceType::NETWORK)
     {
         // is a network - try to get prop command
-        netmount_t* netmount = new netmount_t;
-        if (split_network_url(vol->udi, &netmount) == SplitNetworkURL::VALID_NETWORK_URL)
+        netmount_t netmount = std::make_shared<Netmount>();
+        if (split_network_url(vol->udi, netmount) == SplitNetworkURL::VALID_NETWORK_URL)
         {
             cmd = ztd::null_check(vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_NET,
                                                          PtkHandlerMount::HANDLER_PROP,
@@ -1530,7 +1527,6 @@ on_prop(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
                                                          netmount,
                                                          &run_in_terminal,
                                                          nullptr));
-            delete netmount;
 
             if (cmd.empty())
             {

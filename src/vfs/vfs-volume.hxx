@@ -24,6 +24,8 @@
 
 #include <chrono>
 
+#include <memory>
+
 #include <glib.h>
 
 #include "settings.hxx"
@@ -54,7 +56,7 @@ enum class SplitNetworkURL
     INVALID_NETWORK_URL,
 };
 
-struct netmount_t
+struct Netmount
 {
     // netmount_t();
     // ~netmount_t();
@@ -68,6 +70,8 @@ struct netmount_t
     const char* pass{nullptr};
     const char* path{nullptr};
 };
+
+using netmount_t = std::shared_ptr<Netmount>;
 
 // forward declare types
 struct VFSVolume;
@@ -159,9 +163,9 @@ void vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data);
 ////////////////
 
 char* vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* options,
-                             netmount_t* netmount, bool* run_in_terminal, char** mount_point);
+                             netmount_t netmount, bool* run_in_terminal, char** mount_point);
 
-SplitNetworkURL split_network_url(const char* url, netmount_t** netmount);
+SplitNetworkURL split_network_url(const char* url, netmount_t netmount);
 bool vfs_volume_dir_avoid_changes(const char* dir);
 dev_t get_device_parent(dev_t dev);
 bool path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file,
