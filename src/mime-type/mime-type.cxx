@@ -56,7 +56,8 @@ static bool mime_type_is_subclass(const char* type, const char* parent);
 static usize n_caches = 0;
 std::vector<MimeCache> caches;
 
-u32 mime_cache_max_extent = 0;
+/* max magic extent of all caches */
+static u32 mime_cache_max_extent = 0;
 
 /* allocated buffer used for mime magic checking to
      prevent frequent memory allocation */
