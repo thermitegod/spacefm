@@ -1715,33 +1715,6 @@ static const std::unordered_map<MainWindowPanel, std::string_view> main_window_p
 
 // clang-format on
 
-#ifdef XSET_MAP_TEST
-bool
-is_in_xset_map_test(std::string_view name)
-{
-    for (auto it = xset_name_map.begin(); it != xset_name_map.end(); ++it)
-    {
-        if (ztd::same(name, it->second))
-            return true;
-    }
-    return false;
-}
-
-bool
-is_in_xset_map_test(XSetName name)
-{
-    try
-    {
-        xset_name_map.at(name);
-    }
-    catch (std::out_of_range)
-    {
-        return false;
-    }
-    return true;
-}
-#endif
-
 XSetName
 xset_get_xsetname_from_name(std::string_view name)
 {

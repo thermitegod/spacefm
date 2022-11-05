@@ -872,17 +872,6 @@ xset_new(std::string_view name, XSetName xset_name) noexcept
 xset_t
 xset_get(std::string_view name) noexcept
 {
-#ifdef XSET_MAP_TEST
-    if (!is_in_xset_map_test(name))
-    {
-        if (!ztd::startswith(name, "cstm_"))
-        {
-            // std::cout << name << std::endl;
-            LOG_INFO("set name not found in XSetName: {}", name);
-        }
-    }
-#endif
-
     for (xset_t set : xsets)
     { // check for existing xset
         if (ztd::same(name, set->name))

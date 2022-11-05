@@ -20,8 +20,6 @@
 
 #include <exception>
 
-// #define XSET_MAP_TEST
-
 class InvalidXSetName : virtual public std::exception
 {
   protected:
@@ -1189,11 +1187,6 @@ enum class MainWindowPanel
     PANEL_VERT,
     PANEL_BOTH
 };
-
-#ifdef XSET_MAP_TEST
-bool is_in_xset_map_test(XSetName name);
-bool is_in_xset_map_test(std::string_view name);
-#endif
 
 XSetName xset_get_xsetname_from_name(std::string_view name);
 const std::string xset_get_name_from_xsetname(XSetName name);
