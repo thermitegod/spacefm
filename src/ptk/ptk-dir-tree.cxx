@@ -914,7 +914,7 @@ on_file_monitor_event(vfs::file_monitor monitor, VFSFileMonitorEvent event,
     PtkDirTreeNode* child = find_node(node, file_name.data());
     switch (event)
     {
-        case VFSFileMonitorEvent::VFS_FILE_MONITOR_CREATE:
+        case VFSFileMonitorEvent::CREATE:
             if (!child)
             {
                 /* remove place holder */
@@ -931,7 +931,7 @@ on_file_monitor_event(vfs::file_monitor monitor, VFSFileMonitorEvent event,
                 }
             }
             break;
-        case VFSFileMonitorEvent::VFS_FILE_MONITOR_DELETE:
+        case VFSFileMonitorEvent::DELETE:
             if (child)
             {
                 ptk_dir_tree_delete_child(node->tree, child);
@@ -945,7 +945,7 @@ on_file_monitor_event(vfs::file_monitor monitor, VFSFileMonitorEvent event,
             model has changed without letting the view know.  Any display from now on is likely to
             be incorrect.
             */
-        case VFSFileMonitorEvent::VFS_FILE_MONITOR_CHANGE:
+        case VFSFileMonitorEvent::CHANGE:
             break;
         default:
             break;

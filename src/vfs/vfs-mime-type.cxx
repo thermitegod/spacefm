@@ -102,9 +102,9 @@ on_mime_cache_changed(vfs::file_monitor monitor, VFSFileMonitorEvent event,
 
     switch (event)
     {
-        case VFSFileMonitorEvent::VFS_FILE_MONITOR_CREATE:
-        case VFSFileMonitorEvent::VFS_FILE_MONITOR_DELETE:
-        case VFSFileMonitorEvent::VFS_FILE_MONITOR_CHANGE:
+        case VFSFileMonitorEvent::CREATE:
+        case VFSFileMonitorEvent::DELETE:
+        case VFSFileMonitorEvent::CHANGE:
             // LOG_DEBUG("reloading all mime caches");
             if (reload_callback_id == 0)
                 reload_callback_id = g_idle_add((GSourceFunc)vfs_mime_type_reload, nullptr);

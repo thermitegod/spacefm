@@ -706,13 +706,13 @@ vfs_dir_monitor_callback(vfs::file_monitor monitor, VFSFileMonitorEvent event,
 
     switch (event)
     {
-        case VFSFileMonitorEvent::VFS_FILE_MONITOR_CREATE:
+        case VFSFileMonitorEvent::CREATE:
             vfs_dir_emit_file_created(dir, file_name, false);
             break;
-        case VFSFileMonitorEvent::VFS_FILE_MONITOR_DELETE:
+        case VFSFileMonitorEvent::DELETE:
             vfs_dir_emit_file_deleted(dir, file_name, nullptr);
             break;
-        case VFSFileMonitorEvent::VFS_FILE_MONITOR_CHANGE:
+        case VFSFileMonitorEvent::CHANGE:
             vfs_dir_emit_file_changed(dir, file_name, nullptr, false);
             break;
         default:

@@ -48,11 +48,13 @@
 
 // #define VFS_FILE_MONITOR_DEBUG
 
-#define BUF_LEN (1024 * (sizeof(inotify_event) + 16))
+#define EVENT_SIZE (sizeof(struct inotify_event))
+#define BUF_LEN    (1024 * (EVENT_SIZE + 16))
 
 static std::map<std::string, vfs::file_monitor> monitor_map;
 
 static GIOChannel* vfs_inotify_io_channel = nullptr;
+
 static u32 vfs_inotify_io_watch = 0;
 static i32 vfs_inotify_fd = -1;
 
@@ -62,17 +64,27 @@ static bool vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition 
 
 struct VFSFileMonitorCallbackEntry
 {
-    VFSFileMonitorCallbackEntry(VFSFileMonitorCallback callback, void* user_data);
+    VFSFileMonitorCallbackEntry() = delete;
+    ~VFSFileMonitorCallbackEntry();
 
-    VFSFileMonitorCallback callback;
+    VFSFileMonitorCallbackEntry(vfs::file_monitor_callback callback, void* user_data);
+
+    vfs::file_monitor_callback callback;
     void* user_data;
 };
 
-VFSFileMonitorCallbackEntry::VFSFileMonitorCallbackEntry(VFSFileMonitorCallback callback,
+VFSFileMonitorCallbackEntry::VFSFileMonitorCallbackEntry(vfs::file_monitor_callback callback,
                                                          void* user_data)
 {
+    // LOG_INFO("VFSFileMonitorCallbackEntry Constructor");
+
     this->callback = callback;
     this->user_data = user_data;
+}
+
+VFSFileMonitorCallbackEntry::~VFSFileMonitorCallbackEntry()
+{
+    // LOG_INFO("VFSFileMonitorCallbackEntry Destructor");
 }
 
 VFSFileMonitor::VFSFileMonitor(std::string_view real_path)
@@ -83,26 +95,23 @@ VFSFileMonitor::VFSFileMonitor(std::string_view real_path)
 
 VFSFileMonitor::~VFSFileMonitor()
 {
-    // LOG_INFO("VFSFileMonitor Destructor");
+    // LOG_INFO("VFSFileMonitor Destructor {}", this->wd);
 
-    // LOG_INFO("vfs_file_monitor_remove  {}", this->wd);
     inotify_rm_watch(vfs_inotify_fd, this->wd);
 
     monitor_map.erase(this->path);
-
-    this->callbacks.clear();
 }
 
 static bool
 vfs_file_monitor_connect_to_inotify()
 {
     vfs_inotify_fd = inotify_init();
-    if (vfs_inotify_fd < 0)
+    if (vfs_inotify_fd == -1)
     {
-        vfs_inotify_io_channel = nullptr;
-        LOG_WARN("failed to initialize inotify.");
+        LOG_WARN("failed to initialize inotify");
         return false;
     }
+
     vfs_inotify_io_channel = g_io_channel_unix_new(vfs_inotify_fd);
 
     g_io_channel_set_encoding(vfs_inotify_io_channel, nullptr, nullptr);
@@ -146,7 +155,7 @@ vfs_file_monitor_init()
 }
 
 vfs::file_monitor
-vfs_file_monitor_add(std::string_view path, VFSFileMonitorCallback cb, void* user_data)
+vfs_file_monitor_add(std::string_view path, vfs::file_monitor_callback callback, void* user_data)
 {
     // inotify does not follow symlinks, need to get real path
     const std::string real_path = std::filesystem::absolute(path);
@@ -159,10 +168,10 @@ vfs_file_monitor_add(std::string_view path, VFSFileMonitorCallback cb, void* use
     }
     catch (std::out_of_range)
     {
-        i32 wd = inotify_add_watch(vfs_inotify_fd,
-                                   real_path.c_str(),
-                                   IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE |
-                                       IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
+        const i32 wd = inotify_add_watch(vfs_inotify_fd,
+                                         real_path.data(),
+                                         IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF |
+                                             IN_MOVE | IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
         if (wd < 0)
         {
             LOG_ERROR("Failed to add watch on '{}' ({})", real_path, path);
@@ -179,9 +188,10 @@ vfs_file_monitor_add(std::string_view path, VFSFileMonitorCallback cb, void* use
     }
 
     // LOG_DEBUG("monitor installed for: {}", path);
-    if (cb)
-    { /* Install a callback */
-        VFSFileMonitorCallbackEntry* cb_ent = new VFSFileMonitorCallbackEntry(cb, user_data);
+    if (callback)
+    { // Install a callback
+        vfs::file_monitor_callback_entry cb_ent =
+            std::make_shared<VFSFileMonitorCallbackEntry>(callback, user_data);
         monitor->callbacks.push_back(cb_ent);
     }
 
@@ -189,62 +199,19 @@ vfs_file_monitor_add(std::string_view path, VFSFileMonitorCallback cb, void* use
 }
 
 void
-vfs_file_monitor_remove(vfs::file_monitor monitor, VFSFileMonitorCallback cb, void* user_data)
+vfs_file_monitor_remove(vfs::file_monitor monitor, vfs::file_monitor_callback callback,
+                        void* user_data)
 {
-    if (!monitor)
+    if (!monitor || !callback)
         return;
 
-    // LOG_INFO("vfs_file_monitor_remove");
-    if (cb)
+    for (vfs::file_monitor_callback_entry installed_callback: monitor->callbacks)
     {
-        for (VFSFileMonitorCallbackEntry* cb2: monitor->callbacks)
+        if (installed_callback->callback == callback && installed_callback->user_data == user_data)
         {
-            if (cb2->callback == cb && cb2->user_data == VFS_FILE_MONITOR_CALLBACK_DATA(user_data))
-            {
-                ztd::remove(monitor->callbacks, cb2);
-                delete cb2;
-                break;
-            }
+            ztd::remove(monitor->callbacks, installed_callback);
+            break;
         }
-    }
-    // LOG_INFO("vfs_file_monitor_remove   DONE");
-}
-
-static void
-vfs_file_monitor_reconnect_inotify(std::string_view path, vfs::file_monitor monitor)
-{
-    if (!std::filesystem::exists(path))
-        return;
-
-    monitor->wd =
-        inotify_add_watch(vfs_inotify_fd, path.data(), IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVE);
-    if (monitor->wd < 0)
-    {
-        /*
-         * FIXME: add monitor to an ancestor which does actually exist,
-         *        or do the equivalent of inotify-missing.c by maintaining
-         *        a list of monitors on non-existent files/directories
-         *        which you retry in a timeout.
-         */
-        const std::string errno_msg = std::strerror(errno);
-        LOG_WARN("Failed to add monitor on '{}': {}", path, errno_msg);
-    }
-}
-
-static VFSFileMonitorEvent
-vfs_file_monitor_translate_inotify_event(i32 inotify_mask)
-{
-    if (inotify_mask & (IN_CREATE | IN_MOVED_TO))
-        return VFSFileMonitorEvent::VFS_FILE_MONITOR_CREATE;
-    else if (inotify_mask & (IN_DELETE | IN_MOVED_FROM | IN_DELETE_SELF | IN_UNMOUNT))
-        return VFSFileMonitorEvent::VFS_FILE_MONITOR_DELETE;
-    else if (inotify_mask & (IN_MODIFY | IN_ATTRIB))
-        return VFSFileMonitorEvent::VFS_FILE_MONITOR_CHANGE;
-    else
-    {
-        // IN_IGNORED not handled
-        // LOG_WARN("translate_inotify_event mask not handled {}", inotify_mask);
-        return VFSFileMonitorEvent::VFS_FILE_MONITOR_CHANGE;
     }
 }
 
@@ -252,13 +219,13 @@ static void
 vfs_file_monitor_dispatch_event(vfs::file_monitor monitor, VFSFileMonitorEvent evt,
                                 std::string_view file_name)
 {
-    /* Call the callback functions */
+    // Call the callback functions
     if (monitor->callbacks.empty())
         return;
 
-    for (VFSFileMonitorCallbackEntry* cb: monitor->callbacks)
+    for (vfs::file_monitor_callback_entry cb: monitor->callbacks)
     {
-        VFSFileMonitorCallback func = cb->callback;
+        vfs::file_monitor_callback func = cb->callback;
         func(monitor, evt, file_name, cb->user_data);
     }
 }
@@ -269,85 +236,87 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
     (void)channel;
     (void)user_data;
 
-    char buf[BUF_LEN];
-
     if (cond & (G_IO_HUP | G_IO_ERR))
     {
-        vfs_file_monitor_disconnect_from_inotify();
-        if (monitor_map.size() > 0)
-        {
-            // Disconnected from inotify server, but there are still monitors, reconnect
-            if (vfs_file_monitor_connect_to_inotify())
-            {
-                std::ranges::for_each(monitor_map,
-                                      [](const auto& fm)
-                                      {
-                                          vfs_file_monitor_reconnect_inotify(fm.first, fm.second);
-                                      });
-            }
-        }
-        // do not need to remove the event source since
-        // it has been removed by vfs_monitor_disconnect_from_inotify()
-        return true;
-    }
-
-    i32 len;
-    while ((len = read(vfs_inotify_fd, buf, BUF_LEN)) < 0 && errno == EINTR)
-        ;
-
-    if (len < 0)
-    {
-        const std::string errno_msg = std::strerror(errno);
-        LOG_WARN("Error reading inotify event: {}", errno_msg);
+        LOG_ERROR("Disconnected from inotify server");
         return false;
     }
-    else if (len == 0)
+
+    char buffer[BUF_LEN];
+    const i32 length = read(vfs_inotify_fd, buffer, BUF_LEN);
+    if (length < 0)
     {
-        // FIXME: handle this better?
-        LOG_WARN("Error reading inotify event: supplied buffer was too small");
+        LOG_WARN("Error reading inotify event: {}", std::strerror(errno));
         return false;
     }
 
     i32 i = 0;
-    while (i < len)
+    while (i < length)
     {
-        struct inotify_event* ievent = (struct inotify_event*)&buf[i];
+        struct inotify_event* event = (struct inotify_event*)&buffer[i];
         // FIXME: 2 different paths can have the same wd because of link
         // This was fixed in spacefm 0.8.7 ??
-
-        vfs::file_monitor monitor;
-
-        for (const auto& fm: monitor_map)
+        if (event->len)
         {
-            if (fm.second->wd != ievent->wd)
-                continue;
+            vfs::file_monitor monitor;
 
-            monitor = fm.second;
-            break;
-        }
+            for (const auto& fm: monitor_map)
+            {
+                if (fm.second->wd != event->wd)
+                    continue;
 
-        if (monitor)
-        {
-            const std::string file_name = ievent->len > 0 ? (char*)ievent->name : monitor->path;
+                monitor = fm.second;
+                break;
+            }
 
+            if (monitor)
+            {
+                // const std::string file_name = event->len > 0 ? (char*)event->name :
+                // monitor->path;
+                const std::string file_name = (const char*)event->name;
+
+                VFSFileMonitorEvent monitor_event;
+                if (event->mask & (IN_CREATE | IN_MOVED_TO))
+                {
+                    monitor_event = VFSFileMonitorEvent::CREATE;
 #ifdef VFS_FILE_MONITOR_DEBUG
-            std::stirng desc;
-            if (ievent->mask & (IN_CREATE | IN_MOVED_TO))
-                desc = "CREATE";
-            else if (ievent->mask & (IN_DELETE | IN_MOVED_FROM | IN_DELETE_SELF | IN_UNMOUNT))
-                desc = "DELETE";
-            else if (ievent->mask & (IN_MODIFY | IN_ATTRIB))
-                desc = "CHANGE";
-
-            LOG_INFO("inotify-event {}: {}///{}", desc, monitor->path, file_name);
-            LOG_DEBUG("inotify ({}) :{}", ievent->mask, file_name);
+                    LOG_DEBUG("inotify-event MASK={} CREATE={}",
+                              event->mask,
+                              Glib::build_filename(monitor->path, file_name));
 #endif
+                }
+                else if (event->mask & (IN_DELETE | IN_MOVED_FROM | IN_DELETE_SELF | IN_UNMOUNT))
+                {
+                    monitor_event = VFSFileMonitorEvent::DELETE;
+#ifdef VFS_FILE_MONITOR_DEBUG
+                    LOG_DEBUG("inotify-event MASK={} DELETE={}",
+                              event->mask,
+                              Glib::build_filename(monitor->path, file_name));
+#endif
+                }
+                else if (event->mask & (IN_MODIFY | IN_ATTRIB))
+                {
+                    monitor_event = VFSFileMonitorEvent::CHANGE;
+#ifdef VFS_FILE_MONITOR_DEBUG
+                    LOG_DEBUG("inotify-event MASK={} CHANGE={}",
+                              event->mask,
+                              Glib::build_filename(monitor->path, file_name));
+#endif
+                }
+                else
+                { // IN_IGNORED not handled
+                    monitor_event = VFSFileMonitorEvent::CHANGE;
+#ifdef VFS_FILE_MONITOR_DEBUG
+                    LOG_DEBUG("inotify-event MASK={} OTHER={}",
+                              event->mask,
+                              Glib::build_filename(monitor->path, file_name));
+#endif
+                }
 
-            vfs_file_monitor_dispatch_event(monitor,
-                                            vfs_file_monitor_translate_inotify_event(ievent->mask),
-                                            file_name);
+                vfs_file_monitor_dispatch_event(monitor, monitor_event, file_name);
+            }
         }
-        i += sizeof(inotify_event) + ievent->len;
+        i += EVENT_SIZE + event->len;
     }
     return true;
 }
