@@ -1986,7 +1986,7 @@ vfs_volume_read_by_device(struct udev_device* udevice)
     volume->is_mountable = device->device_is_media_available;
     volume->is_audiocd = (device->device_is_optical_disc && device->optical_disc_num_audio_tracks &&
                           std::stol(device->optical_disc_num_audio_tracks) > 0);
-    volume->is_dvd = (device->drive_media && strstr(device->drive_media, "optical_dvd"));
+    volume->is_dvd = (device->drive_media && ztd::contains(device->drive_media, "optical_dvd"));
     volume->is_blank = (device->device_is_optical_disc && device->optical_disc_is_blank);
     volume->is_mounted = device->device_is_mounted;
     volume->is_user_visible =
@@ -2933,7 +2933,7 @@ VFSVolume::device_unmount_cmd(bool* run_in_terminal) noexcept
 
                 // igtodo is this redundant?
                 // replace mount point sub var
-                if (command && strstr(command, "%a"))
+                if (command && ztd::contains(command, "%a"))
                 {
                     if (this->is_mounted)
                         pointq = bash_quote(this->mount_point);
@@ -2955,7 +2955,7 @@ VFSVolume::device_unmount_cmd(bool* run_in_terminal) noexcept
                                                  nullptr);
                 // igtodo is this redundant?
                 // replace mount point sub var
-                if (command && strstr(command, "%a"))
+                if (command && ztd::contains(command, "%a"))
                 {
                     if (this->is_mounted)
                         pointq = bash_quote(this->mount_point);

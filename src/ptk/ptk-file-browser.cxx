@@ -3492,13 +3492,13 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* key, GtkTreeI
         if (end)
             key2[std::strlen(key2) - 1] = '\0';
         if (start && end)
-            no_match = !strstr(name, keyp);
+            no_match = !ztd::contains(name, keyp);
         else if (start)
             no_match = !ztd::startswith(name, keyp);
         else if (end)
             no_match = !ztd::endswith(name, keyp);
         else
-            no_match = !strstr(name, key);
+            no_match = !ztd::contains(name, key);
         free(key2);
     }
     free(lower_name);
@@ -5729,7 +5729,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
             const char* text = browser->path_bar && gtk_widget_has_focus(browser->path_bar)
                                    ? gtk_entry_get_text(GTK_ENTRY(browser->path_bar))
                                    : nullptr;
-            if (text && (std::filesystem::exists(text) || strstr(text, ":/") ||
+            if (text && (std::filesystem::exists(text) || ztd::contains(text, ":/") ||
                          ztd::startswith(text, "//")))
                 ptk_bookmark_view_add_bookmark(nullptr, browser, text);
             else

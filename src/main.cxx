@@ -294,7 +294,8 @@ handle_parsed_commandline_args()
                     open_file(real_path);
                 }
             }
-            else if ((*file[0] != '/' && strstr(*file, ":/")) || ztd::startswith(*file, "//"))
+            else if ((*file[0] != '/' && ztd::contains(*file, ":/")) ||
+                     ztd::startswith(*file, "//"))
             {
                 if (main_window)
                     main_window_open_network(main_window, *file, true);

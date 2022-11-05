@@ -941,7 +941,8 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
         for (vfs::volume volume: volumes)
         {
             // test against mtab url and copy of user-entered url (udi)
-            if (strstr(volume->device_file, netmount->url) || strstr(volume->udi, netmount->url))
+            if (ztd::contains(volume->device_file, netmount->url) ||
+                ztd::contains(volume->udi, netmount->url))
             {
                 if (volume->is_mounted && volume->mount_point && have_x_access(volume->mount_point))
                 {
@@ -1895,7 +1896,7 @@ volume_is_visible(vfs::volume vol)
                     test = g_strdup_printf(" +%s ", value);
                 else
                     test = g_strdup_printf(" -%s ", value);
-                if (strstr(showhidelist, test))
+                if (ztd::contains(showhidelist, test))
                 {
                     free(test);
                     free(showhidelist);
@@ -2051,7 +2052,7 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     xset_set_ob1(set, "view", view);
 
     if (vol && vol->device_type == VFSVolumeDeviceType::NETWORK &&
-        (ztd::startswith(vol->device_file, "//") || strstr(vol->device_file, ":/")))
+        (ztd::startswith(vol->device_file, "//") || ztd::contains(vol->device_file, ":/")))
         str = ztd::strdup(" dev_menu_mark");
     else
         str = ztd::strdup("");
