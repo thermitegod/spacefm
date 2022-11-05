@@ -60,7 +60,7 @@
 inline constexpr std::string_view MOUNTINFO{"/proc/self/mountinfo"};
 inline constexpr std::string_view MTAB{"/proc/mounts"};
 
-inline constexpr std::array<std::string_view, 14> HIDDEN_NON_BLOCK_FS{
+inline constexpr std::array<std::string_view, 15> HIDDEN_NON_BLOCK_FS{
     "devpts",
     "proc",
     "fusectl",
@@ -74,6 +74,7 @@ inline constexpr std::array<std::string_view, 14> HIDDEN_NON_BLOCK_FS{
     "cgroup",
     "binfmt_misc",
     "rpc_pipefs",
+    "gvfsd-fuse",
     "fuse.gvfsd-fuse",
 };
 
@@ -1036,7 +1037,7 @@ info_device_properties(device_t device)
 static char*
 info_mount_points(device_t device)
 {
-    GList* mounts = nullptr;
+    std::vector<std::string> mounts;
 
     dev_t dmajor = MAJOR(device->devnum);
     dev_t dminor = MINOR(device->devnum);
@@ -1076,7 +1077,6 @@ info_mount_points(device_t device)
         dev_t major, minor;
         char encoded_root[PATH_MAX];
         char encoded_mount_point[PATH_MAX];
-        char* mount_point;
 
         if (line.size() == 0)
             continue;
@@ -1094,45 +1094,28 @@ info_mount_points(device_t device)
             continue;
         }
 
-        /* ignore mounts where only a subtree of a filesystem is mounted
-         * this function is only used for block devices. */
+        // ignore mounts where only a subtree of a filesystem is mounted
+        // this function is only used for block devices.
         if (ztd::same(encoded_root, "/"))
             continue;
 
         if (major != dmajor || minor != dminor)
             continue;
 
-        mount_point = g_strcompress(encoded_mount_point);
-        if (mount_point && mount_point[0] != '\0')
-        {
-            if (!g_list_find(mounts, mount_point))
-            {
-                mounts = g_list_prepend(mounts, mount_point);
-            }
-            else
-            {
-                free(mount_point);
-            }
-        }
+        const std::string mount_point = g_strcompress(encoded_mount_point);
+        if (!ztd::contains(mounts, mount_point))
+            mounts.push_back(mount_point);
     }
 
-    if (mounts)
-    {
-        GList* l;
-        // Sort the list to ensure that shortest mount paths appear first
-        mounts = g_list_sort(mounts, (GCompareFunc)ztd::compare);
-        std::string points = ztd::strdup((char*)mounts->data);
-        l = mounts;
-        while ((l = l->next))
-        {
-            points = fmt::format("{}, {}", points, (char*)l->data);
-        }
-        g_list_foreach(mounts, (GFunc)free, nullptr);
-        g_list_free(mounts);
-        return ztd::strdup(points);
-    }
+    if (mounts.empty())
+        return nullptr;
 
-    return nullptr;
+    // Sort the list to ensure that shortest mount paths appear first
+    std::ranges::sort(mounts, ztd::compare);
+
+    const std::string points = ztd::join(mounts, ",");
+
+    return ztd::strdup(points);
 }
 
 static void
