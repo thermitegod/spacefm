@@ -305,11 +305,10 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, xset_t set2)
                                 "Invalid Plugin Filename",
                                 GtkButtonsType::GTK_BUTTONS_OK,
                                 msg);
-                {
-                    free(plug_dir_name);
-                    free(path);
-                    return;
-                }
+
+                free(plug_dir_name);
+                free(path);
+                return;
             }
 
             plug_dir = Glib::build_filename(DATADIR, PACKAGE_NAME, "plugins", plug_dir_name);
@@ -320,11 +319,13 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, xset_t set2)
                     "There is already a plugin installed as '{}'.  Overwrite ?\n\nTip: You can "
                     "also rename this plugin file to install it under a different name.",
                     plug_dir_name);
-                if (xset_msg_dialog(GTK_WIDGET(main_window),
-                                    GtkMessageType::GTK_MESSAGE_WARNING,
-                                    "Overwrite Plugin ?",
-                                    GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                    msg) != GtkResponseType::GTK_RESPONSE_YES)
+                const i32 response = xset_msg_dialog(GTK_WIDGET(main_window),
+                                                     GtkMessageType::GTK_MESSAGE_WARNING,
+                                                     "Overwrite Plugin ?",
+                                                     GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                                     msg);
+
+                if (response != GtkResponseType::GTK_RESPONSE_YES)
                 {
                     free(plug_dir_name);
                     free(path);
@@ -1794,7 +1795,10 @@ fm_main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
                                                 GtkButtonsType::GTK_BUTTONS_YES_NO,
                                                 "Stop all tasks running in this window?");
         gtk_dialog_set_default_response(GTK_DIALOG(dlg), GtkResponseType::GTK_RESPONSE_NO);
-        if (gtk_dialog_run(GTK_DIALOG(dlg)) == GtkResponseType::GTK_RESPONSE_YES)
+
+        const i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
+
+        if (response == GtkResponseType::GTK_RESPONSE_YES)
         {
             gtk_widget_destroy(dlg);
             dlg = gtk_message_dialog_new(GTK_WINDOW(widget),

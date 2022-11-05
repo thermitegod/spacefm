@@ -1517,8 +1517,11 @@ on_showhide(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
                           devid);
     }
     else
-        msg = ztd::strdup(set->desc);
-    if (xset_text_dialog(view, set->title, msg, "", set->s, &set->s, "", false))
+    {
+        msg = set->desc;
+    }
+    const bool response = xset_text_dialog(view, set->title, msg, "", set->s, &set->s, "", false);
+    if (response)
         update_all();
 }
 
@@ -1546,8 +1549,12 @@ on_automountlist(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
                           devid);
     }
     else
-        msg = ztd::strdup(set->desc);
-    if (xset_text_dialog(view, set->title, msg, "", set->s, &set->s, "", false))
+    {
+        msg = set->desc;
+    }
+
+    const bool response = xset_text_dialog(view, set->title, msg, "", set->s, &set->s, "", false);
+    if (response)
     {
         // update view / automount all?
     }

@@ -137,9 +137,7 @@ GtkWidget* xset_get_image(const char* icon, GtkIconSize icon_size);
 xset_t xset_find_custom(std::string_view search);
 
 i32 xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title,
-                    GtkButtonsType buttons, std::string_view msg1, std::string_view msg2);
-i32 xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title,
-                    GtkButtonsType buttons, std::string_view msg1);
+                    GtkButtonsType buttons, std::string_view msg1 = "", std::string_view msg2 = "");
 bool xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg1,
                       std::string_view msg2, const char* defstring, char** answer,
                       std::string_view defreset, bool edit_care);

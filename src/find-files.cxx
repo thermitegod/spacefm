@@ -808,7 +808,9 @@ on_add_search_browse(GtkWidget* menu, FindFile* data)
                                     GtkResponseType::GTK_RESPONSE_OK,
                                     nullptr);
 
-    if (gtk_dialog_run(GTK_DIALOG(dlg)) == GtkResponseType::GTK_RESPONSE_OK)
+    const i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
+
+    if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
         char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
         add_search_dir(data, path);

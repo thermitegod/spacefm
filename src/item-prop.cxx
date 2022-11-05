@@ -1000,22 +1000,31 @@ save_command_script(ContextData* ctxt, bool query)
     GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->cmd_script));
     if (!gtk_text_buffer_get_modified(buf))
         return;
-    if (query && xset_msg_dialog(ctxt->dlg,
-                                 GtkMessageType::GTK_MESSAGE_QUESTION,
-                                 "Save Modified Script?",
-                                 GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                 "Save your changes to the command script?") ==
-                     GtkResponseType::GTK_RESPONSE_NO)
-        return;
-    if (is_command_script_newer(ctxt) &&
-        xset_msg_dialog(
+
+    if (query)
+    {
+        const i32 response = xset_msg_dialog(ctxt->dlg,
+                                             GtkMessageType::GTK_MESSAGE_QUESTION,
+                                             "Save Modified Script?",
+                                             GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                             "Save your changes to the command script?");
+
+        if (response == GtkResponseType::GTK_RESPONSE_NO)
+            return;
+    }
+
+    if (is_command_script_newer(ctxt))
+    {
+        const i32 response = xset_msg_dialog(
             ctxt->dlg,
             GtkMessageType::GTK_MESSAGE_QUESTION,
             "Overwrite Script?",
             GtkButtonsType::GTK_BUTTONS_YES_NO,
-            "The command script on disk has changed.\n\nDo you want to overwrite it?") ==
-            GtkResponseType::GTK_RESPONSE_NO)
-        return;
+            "The command script on disk has changed.\n\nDo you want to overwrite it?");
+
+        if (response == GtkResponseType::GTK_RESPONSE_NO)
+            return;
+    }
 
     char* script = xset_custom_get_script(ctxt->set, false);
     if (!script)

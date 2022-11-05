@@ -2751,12 +2751,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 // create parent directory
                 if (xset_get_b(XSetName::MOVE_DLG_CONFIRM_CREATE))
                 {
-                    if (xset_msg_dialog(mset->parent,
-                                        GtkMessageType::GTK_MESSAGE_QUESTION,
-                                        "Create Parent Directory",
-                                        GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                        "The parent directory does not exist.  Create it?") !=
-                        GtkResponseType::GTK_RESPONSE_YES)
+                    response = xset_msg_dialog(mset->parent,
+                                               GtkMessageType::GTK_MESSAGE_QUESTION,
+                                               "Create Parent Directory",
+                                               GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                               "The parent directory does not exist. Create it?");
+                    if (response != GtkResponseType::GTK_RESPONSE_YES)
                     {
                         continue;
                     }
@@ -2795,13 +2795,14 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     // just in case
                     continue;
                 }
-                if (xset_msg_dialog(mset->parent,
-                                    GtkMessageType::GTK_MESSAGE_WARNING,
-                                    "Overwrite Existing File",
-                                    GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                    "OVERWRITE WARNING",
-                                    "The file path exists.  Overwrite existing file?") !=
-                    GtkResponseType::GTK_RESPONSE_YES)
+                response = xset_msg_dialog(mset->parent,
+                                           GtkMessageType::GTK_MESSAGE_WARNING,
+                                           "Overwrite Existing File",
+                                           GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                           "OVERWRITE WARNING",
+                                           "The file path exists.  Overwrite existing file?");
+
+                if (response != GtkResponseType::GTK_RESPONSE_YES)
                 {
                     continue;
                 }
@@ -3220,12 +3221,15 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<vfs::file_
         if (app_settings.get_confirm_delete())
         {
             const std::string msg = fmt::format("Delete {} selected item as root ?", item_count);
-            if (xset_msg_dialog(parent,
-                                GtkMessageType::GTK_MESSAGE_WARNING,
-                                "Confirm Delete As Root",
-                                GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                "DELETE AS ROOT",
-                                msg) != GtkResponseType::GTK_RESPONSE_YES)
+
+            const i32 response = xset_msg_dialog(parent,
+                                                 GtkMessageType::GTK_MESSAGE_WARNING,
+                                                 "Confirm Delete As Root",
+                                                 GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                                 "DELETE AS ROOT",
+                                                 msg);
+
+            if (response != GtkResponseType::GTK_RESPONSE_YES)
             {
                 return;
             }

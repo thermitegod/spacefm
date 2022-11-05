@@ -1967,12 +1967,13 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
             return;
         }
 
-        if (xset_msg_dialog(hnd->dlg,
-                            GtkMessageType::GTK_MESSAGE_WARNING,
-                            "Confirm Remove",
-                            GtkButtonsType::GTK_BUTTONS_YES_NO,
-                            "Permanently remove the selected handler?") !=
-            GtkResponseType::GTK_RESPONSE_YES)
+        const i32 response = xset_msg_dialog(hnd->dlg,
+                                             GtkMessageType::GTK_MESSAGE_WARNING,
+                                             "Confirm Remove",
+                                             GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                             "Permanently remove the selected handler?");
+
+        if (response != GtkResponseType::GTK_RESPONSE_YES)
         {
             free(xset_name);
             free(handler_name_from_model);
@@ -2188,12 +2189,13 @@ on_handlers_key_press(GtkWidget* widget, GdkEventKey* evt, HandlerData* hnd)
     if (!hnd->changed /* was !gtk_widget_get_sensitive( hnd->btn_apply )*/)
         return false;
 
-    if (xset_msg_dialog(hnd->dlg,
-                        GtkMessageType::GTK_MESSAGE_QUESTION,
-                        "Apply Changes ?",
-                        GtkButtonsType::GTK_BUTTONS_YES_NO,
-                        "Apply changes to the current handler?") ==
-        GtkResponseType::GTK_RESPONSE_YES)
+    const i32 response = xset_msg_dialog(hnd->dlg,
+                                         GtkMessageType::GTK_MESSAGE_QUESTION,
+                                         "Apply Changes ?",
+                                         GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                         "Apply changes to the current handler?");
+
+    if (response == GtkResponseType::GTK_RESPONSE_YES)
         on_configure_button_press(GTK_BUTTON(hnd->btn_apply), hnd);
     else
         hnd->changed = false;
@@ -2228,13 +2230,16 @@ on_handlers_button_press(GtkWidget* view, GdkEventButton* evt, HandlerData* hnd)
     if (gtk_widget_get_sensitive(hnd->btn_apply))
     {
         // Query apply changes
-        if (xset_msg_dialog(hnd->dlg,
-                            GtkMessageType::GTK_MESSAGE_QUESTION,
-                            "Apply Changes ?",
-                            GtkButtonsType::GTK_BUTTONS_YES_NO,
-                            "Apply changes to the current handler?") ==
-            GtkResponseType::GTK_RESPONSE_YES)
+        const i32 response = xset_msg_dialog(hnd->dlg,
+                                             GtkMessageType::GTK_MESSAGE_QUESTION,
+                                             "Apply Changes ?",
+                                             GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                             "Apply changes to the current handler?");
+
+        if (response == GtkResponseType::GTK_RESPONSE_YES)
+        {
             on_configure_button_press(GTK_BUTTON(hnd->btn_apply), hnd);
+        }
 
         // Move cursor or unselect
         if (item_clicked)

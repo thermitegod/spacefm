@@ -2338,18 +2338,19 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
     {
         // get pattern from user  (store in ob1 so it is not saved)
         xset_t set = xset_get(XSetName::SELECT_PATT);
-        if (!xset_text_dialog(
-                GTK_WIDGET(file_browser),
-                "Select By Pattern",
-                "Enter pattern to select files and directories:\n\nIf your pattern contains any "
-                "uppercase characters, the matching will be case sensitive.\n\nExample:  "
-                "*sp*e?m*\n\nTIP: You can also enter '%% PATTERN' in the path bar.",
-                "",
-                set->ob1,
-                &set->ob1,
-                "",
-                false) ||
-            !set->ob1)
+        const bool response = xset_text_dialog(
+            GTK_WIDGET(file_browser),
+            "Select By Pattern",
+            "Enter pattern to select files and directories:\n\nIf your pattern contains any "
+            "uppercase characters, the matching will be case sensitive.\n\nExample:  "
+            "*sp*e?m*\n\nTIP: You can also enter '%% PATTERN' in the path bar.",
+            "",
+            set->ob1,
+            &set->ob1,
+            "",
+            false);
+
+        if (!response || !set->ob1)
             return;
         key = set->ob1;
     }
@@ -4894,16 +4895,17 @@ void
 ptk_file_browser_hide_selected(PtkFileBrowser* file_browser,
                                const std::vector<vfs::file_info>& sel_files, const char* cwd)
 {
-    if (xset_msg_dialog(
-            GTK_WIDGET(file_browser),
-            GtkMessageType::GTK_MESSAGE_INFO,
-            "Hide File",
-            GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
-            "The names of the selected files will be added to the '.hidden' file located in this "
-            "directory, which will hide them from view in SpaceFM.  You may need to refresh the "
-            "view or restart SpaceFM for the files to disappear.\n\nTo unhide a file, open the "
-            ".hidden file in your text editor, remove the name of the file, and refresh.") !=
-        GtkResponseType::GTK_RESPONSE_OK)
+    const i32 response = xset_msg_dialog(
+        GTK_WIDGET(file_browser),
+        GtkMessageType::GTK_MESSAGE_INFO,
+        "Hide File",
+        GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
+        "The names of the selected files will be added to the '.hidden' file located in this "
+        "directory, which will hide them from view in SpaceFM.  You may need to refresh the "
+        "view or restart SpaceFM for the files to disappear.\n\nTo unhide a file, open the "
+        ".hidden file in your text editor, remove the name of the file, and refresh.");
+
+    if (response != GtkResponseType::GTK_RESPONSE_OK)
         return;
 
     if (sel_files.empty())

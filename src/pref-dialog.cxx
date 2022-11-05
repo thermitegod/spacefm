@@ -132,10 +132,6 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
     bool always_show_tabs;
     bool hide_close_tab_buttons;
 
-    /* built-in response codes of GTK+ are all negative */
-    if (response >= 0)
-        return;
-
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
         show_thumbnail = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->show_thumbnail));

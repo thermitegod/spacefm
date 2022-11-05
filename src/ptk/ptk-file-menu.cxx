@@ -1528,11 +1528,13 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                 path,
                                 share_desktop,
                                 path);
-                if (xset_msg_dialog(GTK_WIDGET(data->browser),
-                                    GtkMessageType::GTK_MESSAGE_QUESTION,
-                                    "Copy Desktop File",
-                                    GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                    msg) != GtkResponseType::GTK_RESPONSE_YES)
+                const i32 response = xset_msg_dialog(GTK_WIDGET(data->browser),
+                                                     GtkMessageType::GTK_MESSAGE_QUESTION,
+                                                     "Copy Desktop File",
+                                                     GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                                     msg);
+
+                if (response != GtkResponseType::GTK_RESPONSE_YES)
                 {
                     break;
                 }
@@ -1617,6 +1619,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 const std::string usr_path = Glib::build_filename("/usr/share/mime", xml_file);
 
                 if (std::filesystem::exists(usr_path))
+                {
                     msg = fmt::format("The file '{}' does not exist.\n\nBy copying '{}' to '{}' "
                                       "and editing it, you can adjust how MIME type '{}' files are "
                                       "recognized for the current user.\n\nCreate this copy now?",
@@ -1624,18 +1627,24 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                       usr_path,
                                       path,
                                       mime_type->type);
+                }
                 else
+                {
                     msg = fmt::format("The file '{}' does not exist.\n\nBy creating new file '{}' "
                                       "and editing it, you can define how MIME type '{}' files are "
                                       "recognized for the current user.\n\nCreate this file now?",
                                       path,
                                       path,
                                       mime_type->type);
-                if (xset_msg_dialog(GTK_WIDGET(data->browser),
-                                    GtkMessageType::GTK_MESSAGE_QUESTION,
-                                    "Create New XML",
-                                    GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                    msg) != GtkResponseType::GTK_RESPONSE_YES)
+                }
+
+                const i32 response = xset_msg_dialog(GTK_WIDGET(data->browser),
+                                                     GtkMessageType::GTK_MESSAGE_QUESTION,
+                                                     "Create New XML",
+                                                     GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                                     msg);
+
+                if (response != GtkResponseType::GTK_RESPONSE_YES)
                 {
                     break;
                 }

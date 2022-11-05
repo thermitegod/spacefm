@@ -412,7 +412,10 @@ on_browse_btn_clicked(GtkButton* button, void* user_data)
     xset_set_window_icon(GTK_WINDOW(dlg));
 
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), "/usr/bin");
-    if (gtk_dialog_run(GTK_DIALOG(dlg)) == GtkResponseType::GTK_RESPONSE_OK)
+
+    const i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
+
+    if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
         char* filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
         if (filename)
@@ -559,7 +562,9 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, vfs::mime_type mime_type, bool f
 
     g_signal_connect(dlg, "response", G_CALLBACK(on_dlg_response), nullptr);
 
-    if (gtk_dialog_run(GTK_DIALOG(dlg)) == GtkResponseType::GTK_RESPONSE_OK)
+    const i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
+
+    if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
         app = app_chooser_dialog_get_selected_app(dlg);
         if (app)

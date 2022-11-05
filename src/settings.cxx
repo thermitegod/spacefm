@@ -2245,13 +2245,16 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                         std::string msg;
                         const std::string label = clean_label(set->menu_label, false, false);
                         if (geteuid() == 0)
+                        {
                             msg = fmt::format(
                                 "The '{}' plugin has been copied to the design clipboard.  Use "
                                 "View|Design Mode to paste it into a menu.\n\nBecause it has not "
                                 "been installed, this plugin will not appear in the Plugins "
                                 "menu.",
                                 label);
+                        }
                         else
+                        {
                             msg = fmt::format(
                                 "The '{}' plugin has been copied to the design clipboard.  Use "
                                 "View|Design Mode to paste it into a menu.\n\nBecause it has not "
@@ -2262,6 +2265,7 @@ on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
                                 "and running it only from the Plugins menu is recommended to "
                                 "improve your system security.",
                                 label);
+                        }
                         xset_msg_dialog(GTK_WIDGET(plugin_data->main_window),
                                         GtkMessageType::GTK_MESSAGE_INFO,
                                         "Copy Plugin",
@@ -2288,11 +2292,14 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
         const std::string label = clean_label(set->menu_label, false, false);
         const std::string msg =
             fmt::format("Uninstall the '{}' plugin?\n\n( {} )", label, set->plug_dir);
-        if (xset_msg_dialog(parent,
-                            GtkMessageType::GTK_MESSAGE_WARNING,
-                            "Uninstall Plugin",
-                            GtkButtonsType::GTK_BUTTONS_YES_NO,
-                            msg) != GtkResponseType::GTK_RESPONSE_YES)
+
+        const i32 response = xset_msg_dialog(parent,
+                                             GtkMessageType::GTK_MESSAGE_WARNING,
+                                             "Uninstall Plugin",
+                                             GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                             msg);
+
+        if (response != GtkResponseType::GTK_RESPONSE_YES)
         {
             return;
         }
@@ -2667,14 +2674,15 @@ xset_custom_activate(GtkWidget* item, xset_t set)
         if (!(set->menu_label && set->menu_label[0]) ||
             (set->menu_label && ztd::same(set->menu_label, "New _Command")))
         {
-            if (!xset_text_dialog(parent,
-                                  "Change Item Name",
-                                  enter_menu_name_new,
-                                  "",
-                                  set->menu_label,
-                                  &set->menu_label,
-                                  "",
-                                  false))
+            const bool response = xset_text_dialog(parent,
+                                                   "Change Item Name",
+                                                   enter_menu_name_new,
+                                                   "",
+                                                   set->menu_label,
+                                                   &set->menu_label,
+                                                   "",
+                                                   false);
+            if (!response)
                 return;
         }
     }
@@ -3372,7 +3380,6 @@ xset_design_job(GtkWidget* item, xset_t set)
     xset_t childset;
     xset_t set_next;
     std::string msg;
-    i32 response;
     char* folder;
     std::string folder2;
     char* file = nullptr;
@@ -3394,6 +3401,9 @@ xset_design_job(GtkWidget* item, xset_t set)
     XSetTool tool_type;
     XSetJob job = XSetJob(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job")));
     XSetCMD cmd_type = XSetCMD(xset_get_int_set(set, XSetVar::X));
+
+    i32 response;
+    bool response2;
 
     // LOG_INFO("activate job {} {}", job, set->name);
     switch (job)
@@ -3463,14 +3473,15 @@ xset_design_job(GtkWidget* item, xset_t set)
             }
             break;
         case XSetJob::LINE:
-            if (xset_text_dialog(parent,
-                                 "Edit Command Line",
-                                 enter_command_line,
-                                 "",
-                                 set->line,
-                                 &set->line,
-                                 "",
-                                 false))
+            response2 = xset_text_dialog(parent,
+                                         "Edit Command Line",
+                                         enter_command_line,
+                                         "",
+                                         set->line,
+                                         &set->line,
+                                         "",
+                                         false);
+            if (response2)
                 xset_set_var(set, XSetVar::X, "0");
             break;
         case XSetJob::SCRIPT:
@@ -3504,6 +3515,7 @@ xset_design_job(GtkWidget* item, xset_t set)
             break;
         case XSetJob::USER:
             if (!set->plugin)
+            {
                 xset_text_dialog(
                     parent,
                     "Run As User",
@@ -3513,6 +3525,7 @@ xset_design_job(GtkWidget* item, xset_t set)
                     &set->y,
                     "",
                     false);
+            }
             break;
         case XSetJob::BOOKMARK:
         case XSetJob::APP:
@@ -3526,11 +3539,14 @@ xset_design_job(GtkWidget* item, xset_t set)
                     "of the first selected file matches the current type '{}'.\n\nAdd commands "
                     "or menus here which you only want to appear for this one MIME type.",
                     name[0] == '\0' ? "(none)" : name);
-                if (xset_msg_dialog(parent,
-                                    GtkMessageType::GTK_MESSAGE_INFO,
-                                    "New Context Command",
-                                    GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
-                                    msg) != GtkResponseType::GTK_RESPONSE_OK)
+
+                response = xset_msg_dialog(parent,
+                                           GtkMessageType::GTK_MESSAGE_INFO,
+                                           "New Context Command",
+                                           GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
+                                           msg);
+
+                if (response != GtkResponseType::GTK_RESPONSE_OK)
                 {
                     break;
                 }
@@ -3539,14 +3555,15 @@ xset_design_job(GtkWidget* item, xset_t set)
             {
                 case XSetJob::COMMAND:
                     name = ztd::strdup("New _Command");
-                    if (!xset_text_dialog(parent,
-                                          "Set Item Name",
-                                          enter_menu_name_new,
-                                          "",
-                                          name,
-                                          &name,
-                                          "",
-                                          false))
+                    response2 = xset_text_dialog(parent,
+                                                 "Set Item Name",
+                                                 enter_menu_name_new,
+                                                 "",
+                                                 name,
+                                                 &name,
+                                                 "",
+                                                 false);
+                    if (!response2)
                     {
                         free(name);
                         break;
@@ -3712,27 +3729,29 @@ xset_design_job(GtkWidget* item, xset_t set)
                     "of the first selected file matches the current type '{}'.\n\nAdd commands "
                     "or menus here which you only want to appear for this one MIME type.",
                     name[0] == '\0' ? "(none)" : name);
-                if (xset_msg_dialog(parent,
-                                    GtkMessageType::GTK_MESSAGE_INFO,
-                                    "New Context Submenu",
-                                    GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
-                                    msg) != GtkResponseType::GTK_RESPONSE_OK)
+                response = xset_msg_dialog(parent,
+                                           GtkMessageType::GTK_MESSAGE_INFO,
+                                           "New Context Submenu",
+                                           GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
+                                           msg);
+
+                if (response != GtkResponseType::GTK_RESPONSE_OK)
                 {
                     break;
                 }
             }
             name = nullptr;
-            if (!xset_text_dialog(
-                    parent,
-                    "Set Submenu Name",
-                    "Enter submenu name:\n\nPrecede a character with an underscore (_) "
-                    "to underline that character as a shortcut key if desired.",
-                    "",
-                    "New _Submenu",
-                    &name,
-                    "",
-                    false) ||
-                !name)
+            response2 = xset_text_dialog(
+                parent,
+                "Set Submenu Name",
+                "Enter submenu name:\n\nPrecede a character with an underscore (_) "
+                "to underline that character as a shortcut key if desired.",
+                "",
+                "New _Submenu",
+                &name,
+                "",
+                false);
+            if (!response2 || !name)
                 break;
 
             // add new submenu
@@ -3948,27 +3967,29 @@ xset_design_job(GtkWidget* item, xset_t set)
         case XSetJob::CONFIRM:
             if (!set->desc)
                 set->desc = ztd::strdup("Are you sure?");
-            if (xset_text_dialog(parent,
-                                 "Dialog Message",
-                                 "Enter the message to be displayed in this "
-                                 "dialog:\n\nUse:\n\t\\n\tnewline\n\t\\t\ttab",
-                                 "",
-                                 set->desc,
-                                 &set->desc,
-                                 "",
-                                 false))
+            response2 = xset_text_dialog(parent,
+                                         "Dialog Message",
+                                         "Enter the message to be displayed in this "
+                                         "dialog:\n\nUse:\n\t\\n\tnewline\n\t\\t\ttab",
+                                         "",
+                                         set->desc,
+                                         &set->desc,
+                                         "",
+                                         false);
+            if (response2)
                 set->menu_style = XSetMenu::CONFIRM;
             break;
         case XSetJob::DIALOG:
-            if (xset_text_dialog(parent,
-                                 "Dialog Message",
-                                 "Enter the message to be displayed in this "
-                                 "dialog:\n\nUse:\n\t\\n\tnewline\n\t\\t\ttab",
-                                 "",
-                                 set->desc,
-                                 &set->desc,
-                                 "",
-                                 false))
+            response2 = xset_text_dialog(parent,
+                                         "Dialog Message",
+                                         "Enter the message to be displayed in this "
+                                         "dialog:\n\nUse:\n\t\\n\tnewline\n\t\\t\ttab",
+                                         "",
+                                         set->desc,
+                                         &set->desc,
+                                         "",
+                                         false);
+            if (response2)
                 set->menu_style = XSetMenu::STRING;
             break;
         case XSetJob::MESSAGE:
@@ -4936,6 +4957,8 @@ xset_menu_cb(GtkWidget* item, xset_t set)
         rset = set;
     }
 
+    bool response2;
+
     switch (rset->menu_style)
     {
         case XSetMenu::NORMAL:
@@ -4976,11 +4999,13 @@ xset_menu_cb(GtkWidget* item, xset_t set)
             }
             if (rset->menu_style == XSetMenu::CONFIRM)
             {
-                if (xset_msg_dialog(parent,
-                                    GtkMessageType::GTK_MESSAGE_QUESTION,
-                                    title,
-                                    GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
-                                    msg) == GtkResponseType::GTK_RESPONSE_OK)
+                const i32 response = xset_msg_dialog(parent,
+                                                     GtkMessageType::GTK_MESSAGE_QUESTION,
+                                                     title,
+                                                     GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
+                                                     msg);
+
+                if (response == GtkResponseType::GTK_RESPONSE_OK)
                 {
                     if (cb_func)
                         cb_func(item, cb_data);
@@ -4988,19 +5013,17 @@ xset_menu_cb(GtkWidget* item, xset_t set)
                         xset_custom_activate(item, rset);
                 }
             }
-            else if (xset_text_dialog(parent,
-                                      title,
-                                      msg,
-                                      "",
-                                      mset->s,
-                                      &mset->s,
-                                      default_str,
-                                      false))
+            else
             {
-                if (cb_func)
-                    cb_func(item, cb_data);
-                else if (!set->lock)
-                    xset_custom_activate(item, rset);
+                response2 =
+                    xset_text_dialog(parent, title, msg, "", mset->s, &mset->s, default_str, false);
+                if (response2)
+                {
+                    if (cb_func)
+                        cb_func(item, cb_data);
+                    else if (!set->lock)
+                        xset_custom_activate(item, rset);
+                }
             }
         }
         break;
@@ -5031,14 +5054,15 @@ xset_menu_cb(GtkWidget* item, xset_t set)
             // Note: xset_text_dialog uses the title passed to know this is an
             // icon chooser, so it adds a Choose button.  If you change the title,
             // change xset_text_dialog.
-            if (xset_text_dialog(parent,
-                                 rset->title ? rset->title : "Set Icon",
-                                 rset->desc ? rset->desc : icon_desc,
-                                 "",
-                                 rset->icon,
-                                 &rset->icon,
-                                 "",
-                                 false))
+            response2 = xset_text_dialog(parent,
+                                         rset->title ? rset->title : "Set Icon",
+                                         rset->desc ? rset->desc : icon_desc,
+                                         "",
+                                         rset->icon,
+                                         &rset->icon,
+                                         "",
+                                         false);
+            if (response2)
             {
                 if (rset->lock)
                     rset->keep_terminal = true; // trigger save of changed icon
@@ -5066,14 +5090,6 @@ xset_menu_cb(GtkWidget* item, xset_t set)
 
     if (rset->menu_style != XSetMenu::NORMAL)
         autosave_request_add();
-}
-
-i32
-xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title,
-                GtkButtonsType buttons, std::string_view msg1)
-{
-    std::string msg2;
-    return xset_msg_dialog(parent, action, title, buttons, msg1, msg2);
 }
 
 i32
