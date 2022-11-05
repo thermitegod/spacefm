@@ -354,7 +354,7 @@ handle_parsed_commandline_args()
 static void
 tmp_clean()
 {
-    const std::string tmp = xset_get_user_tmp_dir();
+    const std::string tmp = vfs_user_get_tmp_dir();
     std::filesystem::remove_all(tmp);
     LOG_INFO("Removed {}", tmp);
 }

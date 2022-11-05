@@ -41,3 +41,5 @@ const std::string& vfs_current_dir() noexcept;
 
 const std::string& vfs_user_get_config_dir() noexcept;
 void vfs_user_set_config_dir(std::string_view config_dir) noexcept;
+
+const std::string& vfs_user_get_tmp_dir() noexcept;

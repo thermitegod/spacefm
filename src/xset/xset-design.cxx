@@ -436,9 +436,8 @@ xset_design_job_set_import_file(xset_t set)
     save->s = ztd::strdup(Glib::path_get_dirname(file));
 
     // Make Plugin Dir
-    const char* user_tmp;
-    user_tmp = xset_get_user_tmp_dir();
-    if (!user_tmp)
+    const std::string user_tmp = vfs_user_get_tmp_dir();
+    if (!std::filesystem::is_directory(user_tmp))
     {
         xset_msg_dialog(GTK_WIDGET(parent),
                         GtkMessageType::GTK_MESSAGE_ERROR,
@@ -781,7 +780,7 @@ xset_design_job_set_browse_files(xset_t set)
     }
     else
     {
-        folder = Glib::build_filename(xset_get_config_dir(), "scripts", set->name);
+        folder = Glib::build_filename(vfs_user_get_config_dir(), "scripts", set->name);
     }
     if (!std::filesystem::exists(folder) && !set->plugin)
     {
@@ -805,11 +804,11 @@ xset_design_job_set_browse_data(xset_t set)
     if (set->plugin)
     {
         xset_t mset = xset_get_plugin_mirror(set);
-        folder = Glib::build_filename(xset_get_config_dir(), "plugin-data", mset->name);
+        folder = Glib::build_filename(vfs_user_get_config_dir(), "plugin-data", mset->name);
     }
     else
     {
-        folder = Glib::build_filename(xset_get_config_dir(), "plugin-data", set->name);
+        folder = Glib::build_filename(vfs_user_get_config_dir(), "plugin-data", set->name);
     }
     if (!std::filesystem::exists(folder))
     {

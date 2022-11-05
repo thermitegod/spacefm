@@ -37,6 +37,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "vfs/vfs-user-dir.hxx"
+
 #include "xset/xset.hxx"
 #include "xset/xset-dialog.hxx"
 #include "xset/xset-context.hxx"
@@ -1157,7 +1159,7 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
         }
         else
         {
-            folder = Glib::build_filename(xset_get_config_dir(), "scripts", ctxt->set->name);
+            folder = Glib::build_filename(vfs_user_get_config_dir(), "scripts", ctxt->set->name);
         }
         if (!std::filesystem::exists(folder) && !ctxt->set->plugin)
         {
@@ -1171,10 +1173,11 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
         if (ctxt->set->plugin)
         {
             xset_t mset = xset_get_plugin_mirror(ctxt->set);
-            folder = Glib::build_filename(xset_get_config_dir(), "plugin-data", mset->name);
+            folder = Glib::build_filename(vfs_user_get_config_dir(), "plugin-data", mset->name);
         }
         else
-            folder = Glib::build_filename(xset_get_config_dir(), "plugin-data", ctxt->set->name);
+            folder =
+                Glib::build_filename(vfs_user_get_config_dir(), "plugin-data", ctxt->set->name);
         if (!std::filesystem::exists(folder))
         {
             std::filesystem::create_directories(folder);
@@ -2246,11 +2249,11 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
     if (rset->plugin)
         path = Glib::build_filename(rset->plug_dir, rset->plug_name);
     else
-        path = Glib::build_filename(xset_get_config_dir(), "scripts", rset->name);
+        path = Glib::build_filename(vfs_user_get_config_dir(), "scripts", rset->name);
     str = fmt::format("Command Dir  $fm_cmd_dir  {}", dir_has_files(path) ? "" : "(no files)");
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str.c_str());
 
-    path = Glib::build_filename(xset_get_config_dir(),
+    path = Glib::build_filename(vfs_user_get_config_dir(),
                                 "plugin-data",
                                 rset->plugin ? mset->name : rset->name);
     str = fmt::format("Data Dir  $fm_cmd_data  {}", dir_has_files(path) ? "" : "(no files)");

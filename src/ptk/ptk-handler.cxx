@@ -37,6 +37,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "vfs/vfs-user-dir.hxx"
+
 #include "xset/xset.hxx"
 #include "xset/xset-context.hxx"
 #include "xset/xset-custom.hxx"
@@ -1370,10 +1372,10 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
 
     // build copy scripts command
     const std::string path_src = Glib::build_filename(set->plug_dir, set->plug_name);
-    std::string path_dest = Glib::build_filename(xset_get_config_dir(), "scripts");
+    std::string path_dest = Glib::build_filename(vfs_user_get_config_dir(), "scripts");
     std::filesystem::create_directories(path_dest);
     std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
-    path_dest = Glib::build_filename(xset_get_config_dir(), "scripts", new_handler_xset->name);
+    path_dest = Glib::build_filename(vfs_user_get_config_dir(), "scripts", new_handler_xset->name);
     const std::string cp_command = fmt::format("cp -a {} {}", path_src, path_dest);
 
     // run command
@@ -2743,8 +2745,8 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     }
 
     // Make Plugin Dir
-    const char* user_tmp = xset_get_user_tmp_dir();
-    if (!user_tmp)
+    const std::string user_tmp = vfs_user_get_tmp_dir();
+    if (!std::filesystem::is_directory(user_tmp))
     {
         xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                         GtkMessageType::GTK_MESSAGE_ERROR,

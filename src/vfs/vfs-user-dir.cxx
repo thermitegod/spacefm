@@ -16,12 +16,16 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <memory>
 
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
+
+#include "settings/etc.hxx"
 
 #include "vfs/vfs-user-dir.hxx"
 
@@ -53,6 +57,7 @@ class VFSDirXDG
 
     // Program config dir
     std::string config_dir{Glib::build_filename(user_config, PACKAGE_NAME)};
+    const std::string tmp_dir{Glib::build_filename(etc_settings.get_tmp_dir(), PACKAGE_NAME)};
 };
 
 const std::unique_ptr user_dirs = std::make_unique<VFSDirXDG>();
@@ -157,4 +162,16 @@ const std::string&
 vfs_user_get_config_dir() noexcept
 {
     return user_dirs->config_dir;
+}
+
+const std::string&
+vfs_user_get_tmp_dir() noexcept
+{
+    if (!std::filesystem::exists(user_dirs->tmp_dir))
+    {
+        std::filesystem::create_directories(user_dirs->tmp_dir);
+        std::filesystem::permissions(user_dirs->tmp_dir, std::filesystem::perms::owner_all);
+    }
+
+    return user_dirs->tmp_dir;
 }

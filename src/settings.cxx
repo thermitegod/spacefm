@@ -92,8 +92,6 @@
 #include "ptk/ptk-location-view.hxx"
 
 // MOD settings
-std::string settings_config_dir;
-std::string settings_user_tmp_dir;
 
 static bool xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set);
 static void xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventButton* event);
@@ -167,9 +165,9 @@ inline constexpr std::array<const char*, 18> builtin_tool_shared_key{
 void
 load_settings()
 {
-    app_settings.set_load_saved_tabs(true);
+    const std::string settings_config_dir = vfs_user_get_config_dir();
 
-    settings_config_dir = vfs_user_get_config_dir();
+    app_settings.set_load_saved_tabs(true);
 
     // MOD extra settings
     xset_defaults();
@@ -406,6 +404,7 @@ save_settings(void* main_window_ptr)
     }
 
     /* save settings */
+    const std::string settings_config_dir = vfs_user_get_config_dir();
     if (!std::filesystem::exists(settings_config_dir))
     {
         std::filesystem::create_directories(settings_config_dir);
@@ -434,25 +433,6 @@ free_settings()
 
         delete set;
     }
-}
-
-const char*
-xset_get_config_dir()
-{
-    return settings_config_dir.c_str();
-}
-
-const char*
-xset_get_user_tmp_dir()
-{
-    if (settings_user_tmp_dir.empty() && std::filesystem::exists(settings_user_tmp_dir))
-        return settings_user_tmp_dir.c_str();
-
-    settings_user_tmp_dir = Glib::build_filename(etc_settings.get_tmp_dir(), PACKAGE_NAME);
-    std::filesystem::create_directories(settings_user_tmp_dir);
-    std::filesystem::permissions(settings_user_tmp_dir, std::filesystem::perms::owner_all);
-
-    return settings_user_tmp_dir.c_str();
 }
 
 bool
@@ -650,7 +630,8 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         if (set->plugin)
             icon_file = Glib::build_filename(set->plug_dir, set->plug_name, "icon");
         else
-            icon_file = Glib::build_filename(xset_get_config_dir(), "scripts", set->name, "icon");
+            icon_file =
+                Glib::build_filename(vfs_user_get_config_dir(), "scripts", set->name, "icon");
 
         if (std::filesystem::exists(icon_file))
             icon_name = ztd::strdup(icon_file);
@@ -2833,7 +2814,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     {
         // custom 'icon' file?
         const std::string icon_file =
-            Glib::build_filename(xset_get_config_dir(), "scripts", set->name, "icon");
+            Glib::build_filename(vfs_user_get_config_dir(), "scripts", set->name, "icon");
         if (std::filesystem::exists(icon_file))
             icon_name = ztd::strdup(icon_file);
     }

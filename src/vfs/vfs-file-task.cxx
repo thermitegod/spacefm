@@ -1283,7 +1283,6 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
 {
     // this function is now thread safe but is not currently run in
     // another thread because gio adds watches to main loop thread anyway
-    std::string tmp;
     std::string su;
     std::string terminal;
     char* sum_script = nullptr;
@@ -1340,7 +1339,7 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
     }
 
     // make tmpdir
-    tmp = xset_get_user_tmp_dir();
+    const std::string tmp = vfs_user_get_tmp_dir();
     if (!std::filesystem::is_directory(tmp))
     {
         const std::string msg = "Cannot create temporary directory";
@@ -1576,13 +1575,14 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
         // spacefm-auth
         if (single_arg)
         {
-            tmp = fmt::format("{} {} {} {} {}",
-                              BASH_PATH,
-                              auth,
-                              ztd::same(task->exec_as_user, "root") ? "root" : "",
-                              task->exec_script,
-                              sum_script);
-            argv.emplace_back(tmp);
+            const std::string script =
+                fmt::format("{} {} {} {} {}",
+                            BASH_PATH,
+                            auth,
+                            ztd::same(task->exec_as_user, "root") ? "root" : "",
+                            task->exec_script,
+                            sum_script);
+            argv.emplace_back(script);
         }
         else
         {

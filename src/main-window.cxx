@@ -346,8 +346,8 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, xset_t set2)
         case PluginJob::COPY:
         {
             // copy job
-            const char* user_tmp = xset_get_user_tmp_dir();
-            if (!user_tmp)
+            const std::string user_tmp = vfs_user_get_tmp_dir();
+            if (std::filesystem::is_directory(user_tmp))
             {
                 xset_msg_dialog(GTK_WIDGET(main_window),
                                 GtkMessageType::GTK_MESSAGE_ERROR,
@@ -4088,7 +4088,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         }
         else
         {
-            path = Glib::build_filename(xset_get_config_dir(), "scripts", set->name);
+            path = Glib::build_filename(vfs_user_get_config_dir(), "scripts", set->name);
         }
         esc_path = bash_quote(path);
         buf.append(fmt::format("fm_cmd_dir={}\n", esc_path));
@@ -4097,11 +4097,11 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
         if (set->plugin)
         {
             xset_t mset = xset_get_plugin_mirror(set);
-            path = Glib::build_filename(xset_get_config_dir(), "plugin-data", mset->name);
+            path = Glib::build_filename(vfs_user_get_config_dir(), "plugin-data", mset->name);
         }
         else
         {
-            path = Glib::build_filename(xset_get_config_dir(), "plugin-data", set->name);
+            path = Glib::build_filename(vfs_user_get_config_dir(), "plugin-data", set->name);
         }
         esc_path = bash_quote(path);
         buf.append(fmt::format("fm_cmd_data={}\n", esc_path));
@@ -4122,7 +4122,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
     }
 
     // tmp
-    buf.append(fmt::format("fm_tmp_dir=\"{}\"\n", xset_get_user_tmp_dir()));
+    buf.append(fmt::format("fm_tmp_dir=\"{}\"\n", vfs_user_get_tmp_dir()));
 
     // tasks
     if ((ptask = get_selected_task(file_browser->task_view)))

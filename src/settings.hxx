@@ -48,8 +48,6 @@ void load_settings();
 void autosave_settings();
 void save_settings(void* main_window_ptr);
 void free_settings();
-const char* xset_get_config_dir();
-const char* xset_get_user_tmp_dir();
 
 ///////////////////////////////////////////////////////////////////////////////
 // MOD extra settings below
