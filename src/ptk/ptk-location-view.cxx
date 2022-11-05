@@ -2092,7 +2092,7 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     for (vfs::volume volume: volumes)
     {
         if (volume && volume_is_visible(volume))
-            names.push_back(volume);
+            names.emplace_back(volume);
     }
 
     vfs::volume vol;

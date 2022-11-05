@@ -242,7 +242,7 @@ handle_parsed_commandline_args()
             if (!*dir)
                 continue;
             if (std::filesystem::is_directory(*dir))
-                search_dirs.push_back(*dir);
+                search_dirs.emplace_back(*dir);
         }
 
         fm_find_files(search_dirs);

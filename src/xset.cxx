@@ -882,7 +882,7 @@ xset_get(std::string_view name) noexcept
     }
 
     xset_t set = xset_new(name, xset_get_xsetname_from_name(name));
-    xsets.push_back(set);
+    xsets.emplace_back(set);
     return set;
 }
 
@@ -896,7 +896,7 @@ xset_get(XSetName name) noexcept
     }
 
     xset_t set = xset_new(xset_get_name_from_xsetname(name), name);
-    xsets.push_back(set);
+    xsets.emplace_back(set);
     return set;
 }
 

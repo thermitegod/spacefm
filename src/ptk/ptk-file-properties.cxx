@@ -909,7 +909,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                 {
                     const std::string file_path =
                         Glib::build_filename(data->dir_path, file->get_name());
-                    file_list.push_back(file_path);
+                    file_list.emplace_back(file_path);
                 }
 
                 ptask = new PtkFileTask(VFSFileTaskType::CHMOD_CHOWN,
@@ -968,8 +968,8 @@ ptk_show_file_properties(GtkWindow* parent_win, const char* cwd,
         // no files selected, use cwd as file
         vfs::file_info file = vfs_file_info_new();
         vfs_file_info_get(file, cwd);
-        // sel_files.push_back(vfs_file_info_ref(file));
-        sel_files.push_back(file);
+        // sel_files.emplace_back(vfs_file_info_ref(file));
+        sel_files.emplace_back(file);
         const std::string parent_dir = Glib::path_get_dirname(cwd);
         dlg = file_properties_dlg_new(parent_win, parent_dir.c_str(), sel_files, page);
     }

@@ -205,7 +205,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
             const std::string file_name = std::filesystem::path(file).filename();
             const std::string full_path = Glib::build_filename(cwd, file_name);
             if (std::filesystem::is_directory(full_path))
-                name_list.push_back(full_path);
+                name_list.emplace_back(full_path);
         }
 
         std::ranges::sort(name_list);

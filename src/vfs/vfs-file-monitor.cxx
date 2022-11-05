@@ -202,7 +202,7 @@ vfs_file_monitor_add(std::string_view path, vfs::file_monitor_callback callback,
     { // Install a callback
         vfs::file_monitor_callback_entry cb_ent =
             std::make_shared<VFSFileMonitorCallbackEntry>(callback, user_data);
-        monitor->callbacks.push_back(cb_ent);
+        monitor->callbacks.emplace_back(cb_ent);
     }
 
     return monitor;

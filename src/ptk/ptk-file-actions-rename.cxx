@@ -1897,7 +1897,7 @@ get_templates(std::string_view templates_dir, std::string_view subdir, bool getd
                 else
                     subsubdir = Glib::build_filename(subdir.data(), file_name);
 
-                templates.push_back(subsubdir);
+                templates.emplace_back(subsubdir);
 
                 // prevent filesystem loops during recursive find
                 if (!std::filesystem::is_symlink(path))
@@ -1915,11 +1915,11 @@ get_templates(std::string_view templates_dir, std::string_view subdir, bool getd
             {
                 if (subdir.empty())
                 {
-                    templates.push_back(file_name);
+                    templates.emplace_back(file_name);
                 }
                 else
                 {
-                    templates.push_back(Glib::build_filename(subdir.data(), file_name));
+                    templates.emplace_back(Glib::build_filename(subdir.data(), file_name));
                 }
             }
             else if (std::filesystem::is_directory(path) &&

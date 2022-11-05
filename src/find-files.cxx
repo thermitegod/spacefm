@@ -400,8 +400,8 @@ compose_command(FindFile* data)
     GtkTreeIter it;
     static constexpr std::array<std::string_view, 4> size_units{"c", "k", "M", "G"};
 
-    argv.push_back("find");
-    argv.push_back("-H");
+    argv.emplace_back("find");
+    argv.emplace_back("-H");
 
     if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(data->places_list), &it))
     {
@@ -411,7 +411,7 @@ compose_command(FindFile* data)
             gtk_tree_model_get(GTK_TREE_MODEL(data->places_list), &it, 0, &arg, -1);
             if (arg && *arg)
             {
-                argv.push_back(arg);
+                argv.emplace_back(arg);
                 free(arg);
             }
         } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(data->places_list), &it));
@@ -420,39 +420,39 @@ compose_command(FindFile* data)
     /* if include sub is excluded */ // MOD added
     if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->include_sub)))
     {
-        argv.push_back("-maxdepth");
-        argv.push_back("1");
+        argv.emplace_back("-maxdepth");
+        argv.emplace_back("1");
     }
 
     /* if hidden files is excluded */
     if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->search_hidden)))
     {
-        argv.push_back("-name");
-        argv.push_back(".");
-        argv.push_back("-prune");
-        argv.push_back("-or");
+        argv.emplace_back("-name");
+        argv.emplace_back(".");
+        argv.emplace_back("-prune");
+        argv.emplace_back("-or");
     }
 
     /* if lower limit of file size is set */
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_size_lower)))
     {
-        argv.push_back("-size");
+        argv.emplace_back("-size");
         tmp = fmt::format(
             "+{}{}",
             gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->size_lower)),
             size_units.at(gtk_combo_box_get_active(GTK_COMBO_BOX(data->size_lower_unit))));
-        argv.push_back(tmp);
+        argv.emplace_back(tmp);
     }
 
     /* if upper limit of file size is set */
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_size_upper)))
     {
-        argv.push_back("-size");
+        argv.emplace_back("-size");
         tmp = fmt::format(
             "-{}{}",
             gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->size_upper)),
             size_units.at(gtk_combo_box_get_active(GTK_COMBO_BOX(data->size_upper_unit))));
-        argv.push_back(tmp);
+        argv.emplace_back(tmp);
     }
 
     /* If -name is used */
@@ -460,11 +460,11 @@ compose_command(FindFile* data)
     if (ztd::contains(tmp, "*"))
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->fn_case_sensitive)))
-            argv.push_back("-name");
+            argv.emplace_back("-name");
         else
-            argv.push_back("-iname");
+            argv.emplace_back("-iname");
 
-        argv.push_back(tmp);
+        argv.emplace_back(tmp);
     }
 
     /* match by mtime */
@@ -473,42 +473,42 @@ compose_command(FindFile* data)
     {
         if (idx == 5) /* range */
         {
-            argv.push_back("(");
+            argv.emplace_back("(");
 
-            argv.push_back("-mtime");
+            argv.emplace_back("-mtime");
 
             /* date1 */
             tmp = fmt::format("-{}", get_date_offset(GTK_CALENDAR(data->date1)));
-            argv.push_back(tmp);
+            argv.emplace_back(tmp);
 
-            argv.push_back("-mtime");
+            argv.emplace_back("-mtime");
 
             /* date2 */
             tmp = fmt::format("+{}", get_date_offset(GTK_CALENDAR(data->date2)));
-            argv.push_back(tmp);
+            argv.emplace_back(tmp);
 
-            argv.push_back(")");
+            argv.emplace_back(")");
         }
         else
         {
-            argv.push_back("-mtime");
+            argv.emplace_back("-mtime");
 
             switch (idx)
             {
                 case 1: /* within one day */
-                    argv.push_back("-1");
+                    argv.emplace_back("-1");
                     break;
                 case 2: /* within one week */
-                    argv.push_back("-7");
+                    argv.emplace_back("-7");
                     break;
                 case 3: /* within one month */
-                    argv.push_back("-30");
+                    argv.emplace_back("-30");
                     break;
                 case 4: /* within one year */
-                    argv.push_back("-365");
+                    argv.emplace_back("-365");
                     break;
                 default:
-                    argv.push_back("-1");
+                    argv.emplace_back("-1");
                     break;
             }
         }
@@ -522,30 +522,30 @@ compose_command(FindFile* data)
         print = true;
 
         /* ensure we only call 'grep' on regular files */
-        argv.push_back("-type");
-        argv.push_back("f");
+        argv.emplace_back("-type");
+        argv.emplace_back("f");
 
-        argv.push_back("-exec");
-        argv.push_back("grep");
+        argv.emplace_back("-exec");
+        argv.emplace_back("grep");
 
         if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->fc_case_sensitive)))
-            argv.push_back("-i");
+            argv.emplace_back("-i");
 
-        argv.push_back("--files-with-matches");
+        argv.emplace_back("--files-with-matches");
 
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->fc_use_regexp)))
-            argv.push_back("--regexp");
+            argv.emplace_back("--regexp");
         else
-            argv.push_back("--fixed-strings");
+            argv.emplace_back("--fixed-strings");
 
-        argv.push_back(tmp);
+        argv.emplace_back(tmp);
 
-        argv.push_back("{}");
-        argv.push_back(";");
+        argv.emplace_back("{}");
+        argv.emplace_back(";");
     }
 
     if (!print)
-        argv.push_back("-print");
+        argv.emplace_back("-print");
 
     return argv;
 }

@@ -358,7 +358,7 @@ save_command_history(GtkEntry* entry)
     if (text.empty())
         return;
 
-    xset_cmd_history.push_back(text);
+    xset_cmd_history.emplace_back(text);
 
     // shorten to 200 entries
     while (xset_cmd_history.size() > 200)
@@ -4218,7 +4218,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     else
                         file_path = Glib::filename_from_uri(*puri);
 
-                    file_list.push_back(file_path);
+                    file_list.emplace_back(file_path);
                 }
                 g_strfreev(list);
 
@@ -4679,7 +4679,7 @@ ptk_file_browser_get_selected_files(PtkFileBrowser* file_browser)
         vfs::file_info file;
         gtk_tree_model_get_iter(model, &it, (GtkTreePath*)sel->data);
         gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
-        file_list.push_back(file);
+        file_list.emplace_back(file);
     }
     g_list_foreach(sel_files, (GFunc)gtk_tree_path_free, nullptr);
     g_list_free(sel_files);
@@ -4867,7 +4867,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, const std::vector<vfs::fi
         for (vfs::file_info file: sel_files)
         {
             file_path = Glib::build_filename(cwd, file->get_name());
-            file_list.push_back(file_path);
+            file_list.emplace_back(file_path);
         }
 
         // task
@@ -4939,7 +4939,7 @@ ptk_file_browser_file_properties(PtkFileBrowser* file_browser, i32 page)
     {
         vfs::file_info file = vfs_file_info_new();
         vfs_file_info_get(file, ptk_file_browser_get_cwd(file_browser));
-        sel_files.push_back(file);
+        sel_files.emplace_back(file);
         dir_name = Glib::path_get_dirname(cwd);
     }
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));

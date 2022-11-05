@@ -191,7 +191,7 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
 
         if (!task->is_cancelled() && need_update)
         {
-            loader->update_queue.push_back(vfs_file_info_ref(req->file));
+            loader->update_queue.emplace_back(vfs_file_info_ref(req->file));
             if (loader->idle_handler == 0)
             {
                 loader->idle_handler = g_idle_add_full(G_PRIORITY_LOW,
@@ -265,7 +265,7 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
     if (!req)
     {
         req = std::make_shared<VFSThumbnailRequest>(file);
-        dir->thumbnail_loader->queue.push_back(req);
+        dir->thumbnail_loader->queue.emplace_back(req);
     }
 
     ++req->n_requests[is_big ? VFSThumbnailSize::BIG : VFSThumbnailSize::SMALL];
@@ -293,7 +293,7 @@ vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big)
         if (req->n_requests[VFSThumbnailSize::BIG] <= 0 &&
             req->n_requests[VFSThumbnailSize::SMALL] <= 0)
         {
-            remove_idx.push_back(idx);
+            remove_idx.emplace_back(idx);
         }
 
         ++idx;

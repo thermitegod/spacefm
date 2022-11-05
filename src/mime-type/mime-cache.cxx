@@ -262,7 +262,7 @@ MimeCache::lookup_parents(std::string_view mime_type)
     {
         const u32 parent_off = VAL32(found_parents, i * 4);
         const std::string parent = this->buffer + parent_off;
-        result.push_back(parent);
+        result.emplace_back(parent);
     }
     return result;
 }

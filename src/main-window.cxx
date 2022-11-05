@@ -1445,7 +1445,7 @@ fm_main_window_init(FMMainWindow* main_window)
 
     /* Add to total window count */
     ++n_windows;
-    all_windows.push_back(main_window);
+    all_windows.emplace_back(main_window);
 
     WindowReference::increase();
 
@@ -2052,7 +2052,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
     (void)btn;
     PtkFileBrowser* a_browser;
 
-    closed_tabs_restore[file_browser->mypanel].push_back(ptk_file_browser_get_cwd(file_browser));
+    closed_tabs_restore[file_browser->mypanel].emplace_back(ptk_file_browser_get_cwd(file_browser));
     // LOG_INFO("on_close_notebook_page path={}",
     // closed_tabs_restore[file_browser->mypanel].back());
 
@@ -7105,7 +7105,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                         }
                         str = Glib::build_filename(opt_cwd, argv[j]);
                     }
-                    file_list.push_back(str);
+                    file_list.emplace_back(str);
                 }
             }
             if (file_list.empty() || (!ztd::same(socket_property, "delete") && !target_dir))

@@ -286,7 +286,7 @@ vfs_dir_emit_file_created(vfs::dir dir, std::string_view file_name, bool force)
         return;
     }
 
-    dir->created_files.push_back(file_name.data());
+    dir->created_files.emplace_back(file_name.data());
     if (change_notify_timeout == 0)
     {
         change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
@@ -321,7 +321,7 @@ vfs_dir_emit_file_deleted(vfs::dir dir, std::string_view file_name, vfs::file_in
         file_found = vfs_file_info_ref(file_found);
         if (!ztd::contains(dir->changed_files, file_found))
         {
-            dir->changed_files.push_back(file_found);
+            dir->changed_files.emplace_back(file_found);
             if (change_notify_timeout == 0)
             {
                 change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
@@ -365,7 +365,7 @@ vfs_dir_emit_file_changed(vfs::dir dir, std::string_view file_name, vfs::file_in
         {
             if (force)
             {
-                dir->changed_files.push_back(file_found);
+                dir->changed_files.emplace_back(file_found);
                 if (change_notify_timeout == 0)
                 {
                     change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
@@ -377,7 +377,7 @@ vfs_dir_emit_file_changed(vfs::dir dir, std::string_view file_name, vfs::file_in
             }
             else if (update_file_info(dir, file_found)) // update file info the first time
             {
-                dir->changed_files.push_back(file_found);
+                dir->changed_files.emplace_back(file_found);
                 if (change_notify_timeout == 0)
                 {
                     change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
@@ -550,7 +550,7 @@ vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
             /* Special processing for desktop directory */
             file->load_special_info(full_path);
 
-            dir->file_list.push_back(file);
+            dir->file_list.emplace_back(file);
 
             vfs_dir_unlock(dir);
         }
@@ -648,7 +648,7 @@ update_created_files(std::string_view key, vfs::dir dir)
             {
                 // add new file to dir file_list
                 file->load_special_info(full_path);
-                dir->file_list.push_back(vfs_file_info_ref(file));
+                dir->file_list.emplace_back(vfs_file_info_ref(file));
 
                 dir->run_event<EventType::FILE_CREATED>(file);
             }

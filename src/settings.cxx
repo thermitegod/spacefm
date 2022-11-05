@@ -991,7 +991,7 @@ static const xsetpak_t
 xset_pack_sets()
 {
     // this is stupid, but it works.
-    // trying to .push_back() a toml::value into a toml::value
+    // trying to .emplace_back() a toml::value into a toml::value
     // segfaults with toml::detail::throw_bad_cast.
     //
     // So the whole toml::value has to get created in one go,
@@ -1864,7 +1864,7 @@ xset_get_plugins()
     for (xset_t set: xsets)
     {
         if (set->plugin && set->plugin_top && set->plug_dir)
-            plugins.push_back(set);
+            plugins.emplace_back(set);
     }
     std::ranges::sort(plugins, compare_plugin_sets);
     return plugins;
@@ -1897,7 +1897,7 @@ xset_get_by_plug_name(std::string_view plug_dir, std::string_view plug_name)
     set->plug_name = ztd::strdup(plug_name.data());
     set->plugin = true;
     set->lock = false;
-    xsets.push_back(set);
+    xsets.emplace_back(set);
 
     return set;
 }
@@ -2769,7 +2769,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
                     {
                         const std::string open_file = Glib::build_filename(cwd, file->get_name());
 
-                        open_files.push_back(open_file);
+                        open_files.emplace_back(open_file);
                     }
 
                     // open in app
@@ -8120,7 +8120,7 @@ xset_default_keys()
     for (xset_t set: xsets)
     {
         if (set->key)
-            keysets.push_back(set);
+            keysets.emplace_back(set);
     }
 
     // clang-format off

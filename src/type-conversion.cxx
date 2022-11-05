@@ -33,7 +33,7 @@ glist_t_char_to_vector_t_string(GList* list)
     for (GList* l = list; l; l = l->next)
     {
         const std::string open_file = (const char*)(l->data);
-        vec.push_back(open_file);
+        vec.emplace_back(open_file);
     }
     return vec;
 }
@@ -49,7 +49,7 @@ glist_to_vector_VFSFileInfo(GList* list)
     for (GList* l = list; l; l = l->next)
     {
         vfs::file_info file = VFS_FILE_INFO(l->data);
-        vec.push_back(file);
+        vec.emplace_back(file);
     }
     return vec;
 }

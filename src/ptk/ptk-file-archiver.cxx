@@ -77,7 +77,7 @@ archive_handler_get_first_extension(xset_t handler_xset)
         std::string tmp;
         while (std::getline(ss, tmp, ' '))
         {
-            pathnames.push_back(tmp);
+            pathnames.emplace_back(tmp);
         }
 
         if (!pathnames.empty())

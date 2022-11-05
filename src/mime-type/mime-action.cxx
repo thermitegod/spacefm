@@ -221,7 +221,7 @@ get_actions(std::string_view dir, std::string_view type, std::vector<std::string
                     if (mime_type_locate_desktop_file(apps.at(i).data()))
                     {
                         // LOG_INFO("                EXISTS");
-                        actions.push_back(app);
+                        actions.emplace_back(app);
                     }
                     else
                     {
@@ -267,7 +267,7 @@ mime_type_get_actions(std::string_view mime_type)
         if (!ztd::contains(actions, default_app))
         {
             // default app is not in the list, add it!
-            actions.push_back(default_app);
+            actions.emplace_back(default_app);
         }
         else /* default app is in the list, move it to the first. */
         {

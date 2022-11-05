@@ -1504,19 +1504,19 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
     if (!terminal.empty())
     {
         // terminal
-        argv.push_back(terminal);
+        argv.emplace_back(terminal);
 
         // automatic terminal options
         if (ztd::contains(terminal, "xfce4-terminal") || ztd::contains(terminal, "/terminal"))
-            argv.push_back("--disable-server");
+            argv.emplace_back("--disable-server");
 
         // add option to execute command in terminal
         if (ztd::contains(terminal, "xfce4-terminal") || ztd::contains(terminal, "terminator") ||
             ztd::endswith(terminal, "/terminal")) // xfce
-            argv.push_back("-x");
+            argv.emplace_back("-x");
         else if (ztd::contains(terminal, "sakura"))
         {
-            argv.push_back("-x");
+            argv.emplace_back("-x");
             single_arg = true;
         }
         else
@@ -1524,7 +1524,7 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
              * others needs the entire command quoted and passed as a single
              * argument to -e.  SpaceFM uses spacefm-auth to run commands,
              * so only a single argument is ever used as the command. */
-            argv.push_back("-e");
+            argv.emplace_back("-e");
 
         use_su = su;
     }
@@ -1532,20 +1532,20 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
     if (!task->exec_as_user.empty())
     {
         // su
-        argv.push_back(use_su);
+        argv.emplace_back(use_su);
         if (!ztd::same(task->exec_as_user, "root"))
         {
             if (!ztd::same(use_su, "/bin/su"))
-                argv.push_back("-u");
-            argv.push_back(task->exec_as_user);
+                argv.emplace_back("-u");
+            argv.emplace_back(task->exec_as_user);
         }
 
         if (ztd::same(use_su, "/bin/su"))
         {
             // /bin/su
-            argv.push_back("-s");
-            argv.push_back(BASH_PATH);
-            argv.push_back("-c");
+            argv.emplace_back("-s");
+            argv.emplace_back(BASH_PATH);
+            argv.emplace_back("-c");
             single_arg = true;
         }
     }
@@ -1572,16 +1572,16 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
                               ztd::same(task->exec_as_user, "root") ? "root" : "",
                               task->exec_script,
                               sum_script);
-            argv.push_back(tmp);
+            argv.emplace_back(tmp);
         }
         else
         {
-            argv.push_back(BASH_PATH);
-            argv.push_back(auth);
+            argv.emplace_back(BASH_PATH);
+            argv.emplace_back(auth);
             if (ztd::same(task->exec_as_user, "root"))
-                argv.push_back("root");
-            argv.push_back(task->exec_script);
-            argv.push_back(sum_script);
+                argv.emplace_back("root");
+            argv.emplace_back(task->exec_script);
+            argv.emplace_back(sum_script);
         }
         free(sum_script);
     }
@@ -1592,9 +1592,9 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
     }
     else
     {
-        argv.push_back(BASH_PATH);
-        argv.push_back(task->exec_script);
-        argv.push_back("run");
+        argv.emplace_back(BASH_PATH);
+        argv.emplace_back(task->exec_script);
+        argv.emplace_back("run");
     }
 
     try

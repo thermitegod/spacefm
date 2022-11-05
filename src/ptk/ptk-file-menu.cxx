@@ -1347,7 +1347,7 @@ on_popup_open_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     std::vector<vfs::file_info> sel_files = data->sel_files;
 
     if (sel_files.empty())
-        sel_files.push_back(data->file);
+        sel_files.emplace_back(data->file);
 
     ptk_open_files_with_app(data->cwd, sel_files, nullptr, data->browser, true, false);
 }
@@ -1379,7 +1379,7 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     {
         std::vector<vfs::file_info> sel_files = data->sel_files;
         if (sel_files.empty())
-            sel_files.push_back(data->file);
+            sel_files.emplace_back(data->file);
         ptk_open_files_with_app(data->cwd, sel_files, app, data->browser, false, false);
         free(app);
     }
@@ -1402,7 +1402,7 @@ on_popup_open_all(GtkMenuItem* menuitem, PtkFileMenu* data)
 
     std::vector<vfs::file_info> sel_files = data->sel_files;
     if (sel_files.empty())
-        sel_files.push_back(data->file);
+        sel_files.emplace_back(data->file);
     ptk_open_files_with_app(data->cwd, sel_files, nullptr, data->browser, false, true);
 }
 
@@ -1425,7 +1425,7 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
 
     std::vector<vfs::file_info> sel_files = data->sel_files;
     if (sel_files.empty())
-        sel_files.push_back(data->file);
+        sel_files.emplace_back(data->file);
     ptk_open_files_with_app(data->cwd, sel_files, app.c_str(), data->browser, false, false);
 }
 

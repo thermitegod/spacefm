@@ -421,7 +421,7 @@ mime_type_init()
 
     const std::string path = Glib::build_filename(vfs_user_data_dir(), filename);
     mime_cache_t cache = std::make_shared<MimeCache>(path);
-    caches.push_back(cache);
+    caches.emplace_back(cache);
 
     if (cache->get_magic_max_extent() > mime_cache_max_extent)
         mime_cache_max_extent = cache->get_magic_max_extent();
@@ -431,7 +431,7 @@ mime_type_init()
     {
         const std::string path2 = Glib::build_filename(dir.data(), filename);
         mime_cache_t dir_cache = std::make_shared<MimeCache>(path2);
-        caches.push_back(dir_cache);
+        caches.emplace_back(dir_cache);
 
         if (dir_cache->get_magic_max_extent() > mime_cache_max_extent)
             mime_cache_max_extent = dir_cache->get_magic_max_extent();

@@ -1115,7 +1115,7 @@ info_mount_points(device_t device)
 
         const std::string mount_point = g_strcompress(encoded_mount_point);
         if (!ztd::contains(mounts, mount_point))
-            mounts.push_back(mount_point);
+            mounts.emplace_back(mount_point);
     }
 
     if (mounts.empty())
@@ -1465,7 +1465,7 @@ parse_mounts(bool report)
                 devmount = std::make_shared<Devmount>(major, minor);
                 devmount->fstype = ztd::strdup(fstype);
 
-                newmounts.push_back(devmount);
+                newmounts.emplace_back(devmount);
             }
             else
             {
@@ -1485,7 +1485,7 @@ parse_mounts(bool report)
                     devmount = std::make_shared<Devmount>(major, minor);
                     devmount->fstype = ztd::strdup(fstype);
 
-                    newmounts.push_back(devmount);
+                    newmounts.emplace_back(devmount);
                 }
             }
         }
@@ -1493,7 +1493,7 @@ parse_mounts(bool report)
         if (devmount && !ztd::contains(devmount->mounts, mount_point))
         {
             // LOG_INFO("    prepended");
-            devmount->mounts.push_back(mount_point);
+            devmount->mounts.emplace_back(mount_point);
         }
     }
     // LOG_INFO("LINES DONE");
@@ -1545,7 +1545,7 @@ parse_mounts(bool report)
                 devcopy->mount_points = ztd::strdup(devmount->mount_points);
                 devcopy->fstype = ztd::strdup(devmount->fstype);
 
-                changed.push_back(devcopy);
+                changed.emplace_back(devcopy);
             }
         }
     }
@@ -1555,7 +1555,7 @@ parse_mounts(bool report)
     {
         // LOG_INFO("remain {}:{}", devmount->major, devmount->minor );
         if (report)
-            changed.push_back(devmount);
+            changed.emplace_back(devmount);
     }
 
     free_devmounts();
@@ -2052,8 +2052,8 @@ mtab_fstype_is_handled_by_protocol(const char* mtab_fstype)
     {
         // is the mtab_fstype handled by a protocol handler?
         std::vector<std::string> values;
-        values.push_back(mtab_fstype);
-        values.push_back(fmt::format("mtab_fs={}", mtab_fstype));
+        values.emplace_back(mtab_fstype);
+        values.emplace_back(fmt::format("mtab_fs={}", mtab_fstype));
         char** handlers = g_strsplit(handlers_list, " ", 0);
         if (handlers)
         {
@@ -2385,18 +2385,18 @@ vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* option
             // change spaces in label to underscores for testing
             // clang-format off
             if (!vol->label.empty())
-                values.push_back(fmt::format("label={}", vol->label));
+                values.emplace_back(fmt::format("label={}", vol->label));
             if (vol->udi && vol->udi[0])
-                values.push_back(fmt::format("id={}", vol->udi));
-            values.push_back(fmt::format("audiocd={}", vol->is_audiocd ? "1" : "0"));
-            values.push_back(fmt::format("optical={}", vol->is_optical ? "1" : "0"));
-            values.push_back(fmt::format("removable={}", vol->is_removable ? "1" : "0"));
-            values.push_back(fmt::format("mountable={}", vol->is_mountable && !vol->is_blank ? "1" : "0"));
+                values.emplace_back(fmt::format("id={}", vol->udi));
+            values.emplace_back(fmt::format("audiocd={}", vol->is_audiocd ? "1" : "0"));
+            values.emplace_back(fmt::format("optical={}", vol->is_optical ? "1" : "0"));
+            values.emplace_back(fmt::format("removable={}", vol->is_removable ? "1" : "0"));
+            values.emplace_back(fmt::format("mountable={}", vol->is_mountable && !vol->is_blank ? "1" : "0"));
             // change spaces in device to underscores for testing - for ISO files
-            values.push_back(fmt::format("dev={}", vol->device_file));
+            values.emplace_back(fmt::format("dev={}", vol->device_file));
             // clang-format on
             if (vol->fs_type)
-                values.push_back(fmt::format("{}", vol->fs_type));
+                values.emplace_back(fmt::format("{}", vol->fs_type));
             break;
         case PtkHandlerMode::HANDLER_MODE_NET:
             // for VFSVolumeDeviceType::NETWORK
@@ -2404,26 +2404,26 @@ vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* option
             {
                 // net values
                 if (netmount->host && netmount->host[0])
-                    values.push_back(fmt::format("host={}", netmount->host));
+                    values.emplace_back(fmt::format("host={}", netmount->host));
                 if (netmount->user && netmount->user[0])
-                    values.push_back(fmt::format("user={}", netmount->user));
+                    values.emplace_back(fmt::format("user={}", netmount->user));
                 if (action != PtkHandlerMount::HANDLER_MOUNT && vol && vol->is_mounted)
                 {
                     // clang-format off
                     // user-entered url (or mtab url if not available)
-                    values.push_back(fmt::format("url={}", vol->udi));
+                    values.emplace_back(fmt::format("url={}", vol->udi));
                     // mtab fs type (fuse.ssh)
-                    values.push_back(fmt::format("mtab_fs={}", vol->fs_type));
+                    values.emplace_back(fmt::format("mtab_fs={}", vol->fs_type));
                     // mtab_url == url if mounted
-                    values.push_back(fmt::format("mtab_url={}", vol->device_file));
+                    values.emplace_back(fmt::format("mtab_url={}", vol->device_file));
                     // clang-format on
                 }
                 else if (netmount->url && netmount->url[0])
                     // user-entered url
-                    values.push_back(fmt::format("url={}", netmount->url));
+                    values.emplace_back(fmt::format("url={}", netmount->url));
                 // url-derived protocol
                 if (netmount->fstype && netmount->fstype[0])
-                    values.push_back(fmt::format("{}", netmount->fstype));
+                    values.emplace_back(fmt::format("{}", netmount->fstype));
             }
             else
             {
@@ -2433,11 +2433,11 @@ vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* option
                 {
                     // clang-format off
                     // user-entered url (or mtab url if not available)
-                    values.push_back(fmt::format("url={}", vol->udi));
+                    values.emplace_back(fmt::format("url={}", vol->udi));
                     // mtab fs type (fuse.ssh)
-                    values.push_back(fmt::format("mtab_fs={}", vol->fs_type));
+                    values.emplace_back(fmt::format("mtab_fs={}", vol->fs_type));
                     // mtab_url == url if mounted
-                    values.push_back(fmt::format("mtab_url={}", vol->device_file));
+                    values.emplace_back(fmt::format("mtab_url={}", vol->device_file));
                     // clang-format on
                 }
             }
@@ -2449,7 +2449,7 @@ vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* option
 
     // universal values
     if (vol && vol->is_mounted && vol->mount_point && vol->mount_point[0])
-        values.push_back(fmt::format("point={}", vol->mount_point));
+        values.emplace_back(fmt::format("point={}", vol->mount_point));
 
     // get handlers
     if (!(handlers_list =
@@ -3272,7 +3272,7 @@ VFSVolume::device_added(bool automount) noexcept
     }
 
     // add as new volume
-    volumes.push_back(this);
+    volumes.emplace_back(this);
     call_callbacks(this, VFSVolumeState::ADDED);
     if (automount)
     {
@@ -3622,7 +3622,7 @@ vfs_volume_add_callback(VFSVolumeCallback cb, void* user_data)
 
     volume_callback_data_t data = std::make_shared<VFSVolumeCallbackData>(cb, user_data);
 
-    callbacks.push_back(data);
+    callbacks.emplace_back(data);
 }
 
 void
