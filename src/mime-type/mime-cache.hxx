@@ -26,28 +26,30 @@ class MimeCache
 {
   public:
     MimeCache(std::string_view file_path);
+
+    MimeCache() = delete;
     ~MimeCache();
 
     void reload();
 
-    const char* lookup_literal(const char* filename);
-    const char* lookup_suffix(const char* filename, const char** suffix_pos);
+    const char* lookup_literal(std::string_view filename);
+    const char* lookup_suffix(std::string_view filename, const char** suffix_pos);
     const char* lookup_magic(const char* data, u32 len);
-    const char* lookup_glob(const char* filename, i32* glob_len);
-    const std::vector<const char*> lookup_parents(const char* mime_type);
-    const char* lookup_alias(const char* mime_type);
+    const char* lookup_glob(std::string_view filename, i32* glob_len);
+    const std::vector<const char*> lookup_parents(std::string_view mime_type);
+    const char* lookup_alias(std::string_view mime_type);
 
     const std::string& get_file_path();
     u32 get_magic_max_extent();
 
   private:
     void load_mime_file();
-    const char* lookup_str_in_entries(const char* entries, u32 n, const char* str);
+    const char* lookup_str_in_entries(const char* entries, u32 n, std::string_view str);
     bool magic_rule_match(const char* buf, const char* rule, const char* data, u32 len);
     bool magic_match(const char* buf, const char* magic, const char* data, u32 len);
     const char* lookup_suffix_nodes(const char* buf, const char* nodes, u32 n, const char* name);
     const char* lookup_reverse_suffix_nodes(const char* buf, const char* nodes, u32 n,
-                                            const char* name, const char* suffix,
+                                            std::string_view name, const char* suffix,
                                             const char** suffix_pos);
 
   private:

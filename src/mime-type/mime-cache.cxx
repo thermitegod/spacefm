@@ -61,7 +61,7 @@ MimeCache::MimeCache(std::string_view file_path)
 {
     // LOG_INFO("MimeCache Constructor");
 
-    this->file_path = file_path;
+    this->file_path = file_path.data();
 
     load_mime_file();
 }
@@ -75,7 +75,7 @@ void
 MimeCache::load_mime_file()
 {
     // Open the file and map it into memory
-    i32 fd = open(this->file_path.c_str(), O_RDONLY, 0);
+    i32 fd = open(this->file_path.data(), O_RDONLY, 0);
 
     if (fd < 0)
         return;
@@ -144,7 +144,7 @@ MimeCache::reload()
 }
 
 const char*
-MimeCache::lookup_literal(const char* filename)
+MimeCache::lookup_literal(std::string_view filename)
 {
     /* FIXME: weight is used in literal lookup after mime.cache v1.1.
      * However, it is poorly documented. So I have no idea how to implement this. */
@@ -155,44 +155,44 @@ MimeCache::lookup_literal(const char* filename)
     i32 lower = 0;
     i32 middle = upper / 2;
 
-    if (entries && filename && *filename)
+    if (!entries)
+        return nullptr;
+
+    /* binary search */
+    while (upper >= lower)
     {
-        /* binary search */
-        while (upper >= lower)
-        {
-            /* The entry size is different in v 1.1 */
-            const char* entry = entries + middle * 12;
-            const char* str2 = this->buffer + VAL32(entry, 0);
-            i32 comp = ztd::compare(filename, str2);
-            if (comp < 0)
-                upper = middle - 1;
-            else if (comp > 0)
-                lower = middle + 1;
-            else /* comp == 0 */
-                return (this->buffer + VAL32(entry, 4));
-            middle = (upper + lower) / 2;
-        }
+        /* The entry size is different in v 1.1 */
+        const char* entry = entries + middle * 12;
+        const char* str = this->buffer + VAL32(entry, 0);
+        const i32 comp = ztd::compare(filename, str);
+        if (comp < 0)
+            upper = middle - 1;
+        else if (comp > 0)
+            lower = middle + 1;
+        else /* comp == 0 */
+            return (this->buffer + VAL32(entry, 4));
+        middle = (upper + lower) / 2;
     }
+
     return nullptr;
 }
 
 const char*
-MimeCache::lookup_suffix(const char* filename, const char** suffix_pos)
+MimeCache::lookup_suffix(std::string_view filename, const char** suffix_pos)
 {
     const char* root = this->suffix_roots;
-    u32 n = this->n_suffix_roots;
+    const u32 n = this->n_suffix_roots;
     const char* mime_type = nullptr;
     const char* ret = nullptr;
 
-    if (!filename || !*filename || n == 0)
+    if (n == 0)
         return nullptr;
 
-    const char* suffix;
-    const char* leaf_node;
     const char* _suffix_pos = (const char*)-1;
-    usize fn_len = std::strlen(filename);
-    suffix = g_utf8_find_prev_char(filename, filename + fn_len);
-    leaf_node = lookup_reverse_suffix_nodes(this->buffer, root, n, filename, suffix, &_suffix_pos);
+    const usize fn_len = filename.size();
+    const char* suffix = g_utf8_find_prev_char(filename.data(), filename.substr(fn_len).data());
+    const char* leaf_node =
+        this->lookup_reverse_suffix_nodes(this->buffer, root, n, filename, suffix, &_suffix_pos);
     if (leaf_node)
     {
         mime_type = this->buffer + VAL32(leaf_node, 4);
@@ -221,7 +221,7 @@ MimeCache::lookup_magic(const char* data, u32 len)
 }
 
 const char*
-MimeCache::lookup_glob(const char* filename, i32* glob_len)
+MimeCache::lookup_glob(std::string_view filename, i32* glob_len)
 {
     const char* entry = this->globs;
     const char* type = nullptr;
@@ -234,7 +234,7 @@ MimeCache::lookup_glob(const char* filename, i32* glob_len)
     {
         const char* glob = this->buffer + VAL32(entry, 0);
         i32 _glob_len;
-        if (fnmatch(glob, filename, 0) == 0 && (_glob_len = strlen(glob)) > max_glob_len)
+        if (fnmatch(glob, filename.data(), 0) == 0 && (_glob_len = strlen(glob)) > max_glob_len)
         {
             max_glob_len = _glob_len;
             type = (this->buffer + VAL32(entry, 4));
@@ -246,11 +246,12 @@ MimeCache::lookup_glob(const char* filename, i32* glob_len)
 }
 
 const std::vector<const char*>
-MimeCache::lookup_parents(const char* mime_type)
+MimeCache::lookup_parents(std::string_view mime_type)
 {
     std::vector<const char*> result;
 
-    const char* found_parents = lookup_str_in_entries(this->parents, this->n_parents, mime_type);
+    const char* found_parents =
+        this->lookup_str_in_entries(this->parents, this->n_parents, mime_type);
     if (!found_parents)
         return result;
 
@@ -267,9 +268,9 @@ MimeCache::lookup_parents(const char* mime_type)
 }
 
 const char*
-MimeCache::lookup_alias(const char* mime_type)
+MimeCache::lookup_alias(std::string_view mime_type)
 {
-    return lookup_str_in_entries(this->alias, this->n_alias, mime_type);
+    return this->lookup_str_in_entries(this->alias, this->n_alias, mime_type);
 }
 
 const std::string&
@@ -285,31 +286,32 @@ MimeCache::get_magic_max_extent()
 }
 
 const char*
-MimeCache::lookup_str_in_entries(const char* entries, u32 n, const char* str)
+MimeCache::lookup_str_in_entries(const char* entries, u32 n, std::string_view str)
 {
     i32 upper = n;
     i32 lower = 0;
     i32 middle = upper / 2;
 
-    if (entries && str && *str)
+    if (!entries || str.empty())
+        return nullptr;
+
+    /* binary search */
+    while (upper >= lower)
     {
-        /* binary search */
-        while (upper >= lower)
-        {
-            const char* entry = entries + middle * 8;
-            const char* str2 = this->buffer + VAL32(entry, 0);
+        const char* entry = entries + middle * 8;
+        const char* str2 = this->buffer + VAL32(entry, 0);
 
-            i32 comp = ztd::compare(str, str2);
-            if (comp < 0)
-                upper = middle - 1;
-            else if (comp > 0)
-                lower = middle + 1;
-            else /* comp == 0 */
-                return (this->buffer + VAL32(entry, 4));
+        const i32 comp = ztd::compare(str, str2);
+        if (comp < 0)
+            upper = middle - 1;
+        else if (comp > 0)
+            lower = middle + 1;
+        else /* comp == 0 */
+            return (this->buffer + VAL32(entry, 4));
 
-            middle = (upper + lower) / 2;
-        }
+        middle = (upper + lower) / 2;
     }
+
     return nullptr;
 }
 
@@ -443,19 +445,20 @@ MimeCache::lookup_suffix_nodes(const char* buf, const char* nodes, u32 n, const 
  *        2. Should consider weight of suffix nodes
  */
 const char*
-MimeCache::lookup_reverse_suffix_nodes(const char* buf, const char* nodes, u32 n, const char* name,
-                                       const char* suffix, const char** suffix_pos)
+MimeCache::lookup_reverse_suffix_nodes(const char* buf, const char* nodes, u32 n,
+                                       std::string_view name, const char* suffix,
+                                       const char** suffix_pos)
 {
     const char* ret = nullptr;
     const char* cur_suffix_pos = (const char*)suffix + 1;
 
-    u32 uchar = suffix ? g_unichar_tolower(g_utf8_get_char(suffix)) : 0;
+    const u32 uchar = suffix ? g_unichar_tolower(g_utf8_get_char(suffix)) : 0;
     // LOG_DEBUG("{}: suffix= '{}'", name, suffix);
 
     for (usize i = 0; i < n; ++i)
     {
         const char* node = nodes + i * 12;
-        u32 ch = VAL32(node, 0);
+        const u32 ch = VAL32(node, 0);
         const char* _suffix_pos = suffix;
         if (ch)
         {
@@ -464,12 +467,12 @@ MimeCache::lookup_reverse_suffix_nodes(const char* buf, const char* nodes, u32 n
                 u32 n_children = VAL32(node, 4);
                 u32 first_child_off = VAL32(node, 8);
                 const char* leaf_node =
-                    lookup_reverse_suffix_nodes(buf,
-                                                buf + first_child_off,
-                                                n_children,
-                                                name,
-                                                g_utf8_find_prev_char(name, suffix),
-                                                &_suffix_pos);
+                    this->lookup_reverse_suffix_nodes(buf,
+                                                      buf + first_child_off,
+                                                      n_children,
+                                                      name,
+                                                      g_utf8_find_prev_char(name.data(), suffix),
+                                                      &_suffix_pos);
                 if (leaf_node && _suffix_pos < cur_suffix_pos)
                 {
                     ret = leaf_node;
