@@ -20,85 +20,21 @@
 
 #include <map>
 
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-
-class TrashDir;
-using TrashDirMap = std::map<dev_t, TrashDir*>;
-
-// This class implements some of the XDG Trash specification:
-//
-// https://standards.freedesktop.org/trash-spec/trashspec-1.0.html
-class Trash
-{
-  public:
-    // Move a file or directory into the trash.
-    static bool trash(std::string_view path) noexcept;
-
-    // Restore a file or directory from the trash to its original location.
-    // Currently a NOOP
-    static bool restore(std::string_view path) noexcept;
-
-    // Empty all trash cans
-    // Currently a NOOP
-    static void empty() noexcept;
-
-    // Return the singleton object for this class. The first use will create
-    // the singleton. Notice that the static methods all access the singleton,
-    // too, so the first call to any of those static methods will already
-    // create the singleton.
-    static Trash* instance() noexcept;
-
-    // return the device of the file or directory
-    static dev_t device(std::string_view path) noexcept;
-
-  protected:
-    // Constructor
-    // Not for public use. Use instance() or the static methods instead.
-    Trash() noexcept;
-
-    // Destructor.
-    virtual ~Trash();
-
-    // Find the toplevel directory (mount point) for the device that 'path' is on.
-    static const std::string toplevel(std::string_view path) noexcept;
-
-    // Return the trash dir to use for 'path'.
-    TrashDir* trash_dir(std::string_view path) noexcept;
-
-    // Data Members
-    static Trash* single_instance;
-
-    dev_t home_device;
-    TrashDir* home_trash_dir{nullptr};
-    TrashDirMap trash_dirs;
-
-}; // class Trash
+#include <memory>
+#include <optional>
 
 // trash directories. There might be several on a system:
 //
-// One in $XDG_DATA_HOME/Trash or ~/.local/share/Trash
+// One in $XDG_DATA_HOME/VFSTrash or ~/.local/share/VFSTrash
 // if $XDG_DATA_HOME is not set
 //
-// Every mountpoint will get a trash directory at $TOPLEVEL/.Trash-$UID.
-class TrashDir
+// Every mountpoint will get a trash directory at $TOPLEVEL/.VFSTrash-$UID.
+class VFSTrashDir
 {
   public:
     // Create the trash directory and subdirectories if they do not exist.
-    TrashDir(std::string_view path, dev_t device) noexcept;
-
-    // Return the full path for this trash directory.
-    const std::string& trash_path() const noexcept;
-
-    // Return the device (as returned from stat()) for this trash directory.
-    dev_t device() const noexcept;
-
-    // Return the path of the "files" subdirectory of this trash dir.
-    const std::string& files_path() const noexcept;
-
-    // Return the path of the "info" subdirectory of this trash dir.
-    const std::string& info_path() const noexcept;
+    VFSTrashDir(std::string_view path) noexcept;
+    ~VFSTrashDir() = default;
 
     // Get a unique name for use within the trash directory
     const std::string unique_name(std::string_view path) const noexcept;
@@ -116,8 +52,58 @@ class TrashDir
     static void check_dir_exists(std::string_view dir) noexcept;
 
     // Data Members
-    dev_t trash_dir_device;
-    std::string trash_dir_path;
-    std::string trash_dir_files_path;
-    std::string trash_dir_info_path;
+
+    // the device (as returned from stat()) for this trash directory
+    dev_t trash_device;
+
+    // the full path for this trash directory
+    std::string trash_path{};
+    // the path of the "files" subdirectory of this trash dir
+    std::string files_path{};
+    // the path of the "info" subdirectory of this trash dir
+    std::string info_path{};
 };
+
+// This class implements some of the XDG VFSTrash specification:
+//
+// https://standards.freedesktop.org/trash-spec/trashspec-1.0.html
+class VFSTrash
+{
+  public:
+    // Move a file or directory into the trash.
+    static bool trash(std::string_view path) noexcept;
+
+    // Restore a file or directory from the trash to its original location.
+    // Currently a NOOP
+    static bool restore(std::string_view path) noexcept;
+
+    // Empty all trash cans
+    // Currently a NOOP
+    static void empty() noexcept;
+
+  private:
+    // Not for public use. Use instance() or the static methods instead.
+    VFSTrash() noexcept;
+    virtual ~VFSTrash() = default;
+
+    // Return the singleton object for this class. The first use will create
+    // the singleton. Notice that the static methods all access the singleton,
+    // too, so the first call to any of those static methods will already
+    // create the singleton.
+    // static std::shared_ptr<VFSTrash> instance() noexcept;
+    static VFSTrash* instance() noexcept;
+    static VFSTrash* single_instance;
+
+    // return the device of the file or directory
+    static std::optional<dev_t> device(std::string_view path) noexcept;
+
+    // Find the toplevel directory (mount point) for the device that 'path' is on.
+    static const std::string toplevel(std::string_view path) noexcept;
+
+    // Return the trash dir to use for 'path'.
+    std::shared_ptr<VFSTrashDir> trash_dir(std::string_view path) noexcept;
+
+    // Data Members
+    std::map<dev_t, std::shared_ptr<VFSTrashDir>> trash_dirs;
+
+}; // class VFSTrash

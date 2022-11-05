@@ -805,7 +805,14 @@ vfs_file_task_trash(VFSFileTask* task, std::string_view src_file)
         return;
     }
 
-    bool result = Trash::trash(std::string(src_file));
+    if (!have_rw_access(src_file))
+    {
+        // this->task_error(errno, "Trashing", src_file);
+        LOG_ERROR("Trashing failed missing RW permissions '{}'", src_file);
+        return;
+    }
+
+    const bool result = VFSTrash::trash(src_file);
 
     if (!result)
     {
