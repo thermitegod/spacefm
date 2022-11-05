@@ -719,7 +719,7 @@ dir_path_from_tree_node(PtkDirTree* tree, PtkDirTreeNode* node)
         len = std::strlen(name);
         memcpy(p, name, len * sizeof(char));
         p += len;
-        if (l->next && strcmp(name, "/"))
+        if (l->next && !ztd::same(name, "/"))
         {
             *p = '/';
             ++p;

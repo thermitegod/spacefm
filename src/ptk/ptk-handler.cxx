@@ -1399,7 +1399,7 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     Glib::spawn_command_line_sync(chmod_command);
 
     // add to handler list
-    if (g_strcmp0(xset_get_s(handler_conf_xsets.at(mode)), "") <= 0)
+    if (ztd::compare(xset_get_s(handler_conf_xsets.at(mode)), "") <= 0)
     {
         // No handlers present - adding new handler
         xset_set(handler_conf_xsets.at(mode), XSetVar::S, new_handler_xset->name);
@@ -1854,7 +1854,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                            -1);
 
         // Updating available archive handlers list
-        if (g_strcmp0(xset_get_s(handler_conf_xsets.at(hnd->mode)), "") <= 0)
+        if (ztd::compare(xset_get_s(handler_conf_xsets.at(hnd->mode)), "") <= 0)
         {
             // No handlers present - adding new handler
             xset_set(handler_conf_xsets.at(hnd->mode), XSetVar::S, new_handler_xset->name);
@@ -1905,7 +1905,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(hnd->chkbtn_handler_enabled));
 
         // Checking if the handler has been renamed
-        if (g_strcmp0(handler_name_from_model, handler_name) != 0)
+        if (ztd::compare(handler_name_from_model, handler_name) != 0)
         {
             // It has - updating model
             const char* disabled =
@@ -2006,7 +2006,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                 // Appending to new archive handlers list when it isnt the
                 // deleted handler - remember that archive handlers are
                 // referred to by their xset names, not handler names!!
-                if (g_strcmp0(archive_handlers[i], xset_name) != 0)
+                if (ztd::compare(archive_handlers[i], xset_name) != 0)
                 {
                     // Debug code
                     // LOG_INFO("archive_handlers[i] : {}", archive_handlers[i])
@@ -2371,7 +2371,7 @@ restore_defaults(HandlerData* hnd, bool all)
                     break;
             }
 
-            if (!g_strcmp0(handler->setname, xset_name))
+            if (ztd::same(handler->setname, xset_name))
             {
                 found_handler = true;
                 break;
@@ -2415,7 +2415,7 @@ validate_archive_handler(HandlerData* hnd)
      * be modified or stored
      * Note that archive creation also allows for a command to be
      * saved */
-    if (g_strcmp0(handler_name, "") <= 0)
+    if (ztd::compare(handler_name, "") <= 0)
     {
         /* Handler name not set - warning user and exiting. Note
          * that the created dialog does not have an icon set */
@@ -2429,7 +2429,7 @@ validate_archive_handler(HandlerData* hnd)
     }
 
     // MIME and Pathname cannot both be empty
-    if (g_strcmp0(handler_mime, "") <= 0 && g_strcmp0(handler_extension, "") <= 0)
+    if (ztd::compare(handler_mime, "") <= 0 && ztd::compare(handler_extension, "") <= 0)
     {
         xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                         GtkMessageType::GTK_MESSAGE_WARNING,
@@ -2453,7 +2453,7 @@ validate_archive_handler(HandlerData* hnd)
     /* Compression handler validation - remember to maintain this code
      * in ptk_file_archiver_create too
      * Checking if a compression command has been entered */
-    if (g_strcmp0(handler_compress, "") != 0)
+    if (ztd::compare(handler_compress, "") != 0)
     {
         /* It has - making sure all substitution characters are in
          * place - not mandatory to only have one of the particular
@@ -2488,7 +2488,7 @@ validate_archive_handler(HandlerData* hnd)
         }
     }
 
-    if (g_strcmp0(handler_extract, "") != 0 && (!g_strstr_len(handler_extract, -1, "%x")))
+    if (ztd::compare(handler_extract, "") != 0 && (!g_strstr_len(handler_extract, -1, "%x")))
     {
         /* Not all substitution characters are in place - warning
          * user and exiting. Note that the created dialog does not
@@ -2509,7 +2509,7 @@ validate_archive_handler(HandlerData* hnd)
         return false;
     }
 
-    if (g_strcmp0(handler_list, "") != 0 && (!g_strstr_len(handler_list, -1, "%x")))
+    if (ztd::compare(handler_list, "") != 0 && (!g_strstr_len(handler_list, -1, "%x")))
     {
         /* Not all substitution characters are in place  - warning
          * user and exiting. Note that the created dialog does not

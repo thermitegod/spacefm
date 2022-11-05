@@ -275,7 +275,7 @@ on_open_files(GAction* action, FindFile* data)
     bool open_files = true;
 
     if (action)
-        open_files = (!strcmp(g_action_get_name(action), "OpenAction"));
+        open_files = ztd::same(g_action_get_name(action), "OpenAction");
 
     sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(data->result_view));
     rows = gtk_tree_selection_get_selected_rows(sel, &model);

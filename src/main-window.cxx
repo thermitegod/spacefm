@@ -4901,7 +4901,7 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow*
 
             if (!ptask)
                 return false;
-            if (event->button == 1 && g_strcmp0(gtk_tree_view_column_get_title(col), "Status"))
+            if (event->button == 1 && !ztd::same(gtk_tree_view_column_get_title(col), "Status"))
                 return false;
             XSetName sname;
             switch (ptask->task->state_pause)
@@ -7309,14 +7309,14 @@ main_window_socket_command(char* argv[], std::string& reply)
         // modify list
         if (ztd::same(socket_cmd, "remove-event"))
         {
-            l = g_list_find_custom((GList*)set->ob2_data, str.c_str(), (GCompareFunc)g_strcmp0);
+            l = g_list_find_custom((GList*)set->ob2_data, str.c_str(), (GCompareFunc)ztd::compare);
             if (!l)
             {
                 // remove replace event
                 const std::string str2 = fmt::format("*{}", str);
                 l = g_list_find_custom((GList*)set->ob2_data,
                                        str2.c_str(),
-                                       (GCompareFunc)g_strcmp0);
+                                       (GCompareFunc)ztd::compare);
             }
             if (!l)
             {

@@ -373,7 +373,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
     char* archive_handlers_s = xset_get_s(XSetName::ARC_CONF2);
 
     // Dealing with possibility of no handlers
-    if (g_strcmp0(archive_handlers_s, "") <= 0)
+    if (ztd::compare(archive_handlers_s, "") <= 0)
     {
         /* Telling user to ensure handlers are available and bringing
          * up configuration */
@@ -414,9 +414,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
          * compression and the extension is set - dealing with empty
          * command yet 'run in terminal' still ticked
                                && handler_xset->y
-                               && g_strcmp0( handler_xset->y, "" ) != 0
-                               && g_strcmp0( handler_xset->y, "+" ) != 0
-                               && g_strcmp0( handler_xset->x, "" ) != 0) */
+                               && !ztd::same(handler_xset->y, "") != 0
+                               && !ztd::same(handler_xset->y, "+") != 0
+                               && !ztd::same(handler_xset->x, "") != 0) */
         {
             /* Adding to filter so that only relevant archives
              * are displayed when the user chooses an archive name to
@@ -440,7 +440,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
                                -1);
 
             // Is last used handler?
-            if (!g_strcmp0(xset_name, handler_xset->name))
+            if (ztd::same(xset_name, handler_xset->name))
                 format = n;
             n++;
         }

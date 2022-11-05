@@ -1109,7 +1109,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
         if (!set2->lock && set2->opener == job && set2->tool == XSetTool::NOT &&
             set2->menu_style != XSetMenu::SUBMENU && set2->menu_style != XSetMenu::SEP)
         {
-            if (set2->desc && !strcmp(set2->desc, "@plugin@mirror@"))
+            if (set2->desc && ztd::same(set2->desc, "@plugin@mirror@"))
             {
                 // is a plugin mirror
                 mset = set2;
@@ -1168,7 +1168,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
                     tset = open_all_tset = set3;
                     while (tset->next)
                     {
-                        if (!strcmp(set->name, tset->next))
+                        if (ztd::same(set->name, tset->next))
                         {
                             // found pinned to open_all_type
                             if (open_all_tset == open_all_set)
@@ -1766,7 +1766,7 @@ clean_plugin_mirrors()
         redo = false;
         for (xset_t set: xsets)
         {
-            if (set->desc && !strcmp(set->desc, "@plugin@mirror@"))
+            if (set->desc && ztd::same(set->desc, "@plugin@mirror@"))
             {
                 if (!set->shared_key || !xset_is(set->shared_key))
                 {
@@ -1800,11 +1800,12 @@ xset_set_plugin_mirror(xset_t pset)
 {
     for (xset_t set: xsets)
     {
-        if (set->desc && !strcmp(set->desc, "@plugin@mirror@"))
+        if (set->desc && ztd::same(set->desc, "@plugin@mirror@"))
         {
             if (set->parent && set->child)
             {
-                if (!strcmp(set->child, pset->plug_name) && !strcmp(set->parent, pset->plug_dir))
+                if (ztd::same(set->child, pset->plug_name) &&
+                    ztd::same(set->parent, pset->plug_dir))
                 {
                     if (set->shared_key)
                         free(set->shared_key);
@@ -2029,7 +2030,7 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
         redo = false;
         for (xset_t set: xsets)
         {
-            if (set->plugin && !strcmp(plug_dir, set->plug_dir))
+            if (set->plugin && ztd::same(plug_dir, set->plug_dir))
             {
                 xset_remove(set);
                 redo = true; // search list from start again due to changed list
@@ -2664,7 +2665,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
                                             XSetCMD::SCRIPT /*app or bookmark*/))
     {
         if (!(set->menu_label && set->menu_label[0]) ||
-            (set->menu_label && !strcmp(set->menu_label, "New _Command")))
+            (set->menu_label && ztd::same(set->menu_label, "New _Command")))
         {
             if (!xset_text_dialog(parent,
                                   "Change Item Name",
@@ -3200,7 +3201,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
             set2->keymod == keymod && set2 != keyset)
         {
             std::string name;
-            if (set2->desc && !strcmp(set2->desc, "@plugin@mirror@") && set2->shared_key)
+            if (set2->desc && ztd::same(set2->desc, "@plugin@mirror@") && set2->shared_key)
             {
                 // set2 is plugin mirror
                 xset_t rset = xset_get(set2->shared_key);
@@ -3408,7 +3409,7 @@ xset_design_job(GtkWidget* item, xset_t set)
             // icon chooser, so it adds a Choose button.  If you change the title,
             // change xset_text_dialog.
             xset_text_dialog(parent, "Set Icon", icon_desc, "", mset->icon, &mset->icon, "", false);
-            if (set->lock && g_strcmp0(old_icon, mset->icon))
+            if (set->lock && !ztd::same(old_icon, mset->icon))
             {
                 // built-in icon has been changed from default, save it
                 set->keep_terminal = true;
@@ -4922,7 +4923,7 @@ xset_menu_cb(GtkWidget* item, xset_t set)
         mset = xset_get_plugin_mirror(set);
         rset = set;
     }
-    else if (!set->lock && set->desc && !strcmp(set->desc, "@plugin@mirror@") && set->shared_key)
+    else if (!set->lock && set->desc && ztd::same(set->desc, "@plugin@mirror@") && set->shared_key)
     {
         // set is plugin mirror
         mset = set;

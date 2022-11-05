@@ -1784,7 +1784,7 @@ on_query_input_keypress(GtkWidget* widget, GdkEventKey* event, PtkFileTask* ptas
         GtkWidget* dlg = gtk_widget_get_toplevel(widget);
         if (!GTK_IS_DIALOG(dlg))
             return true;
-        if (new_name && new_name[0] != '\0' && strcmp(new_name, old_name))
+        if (new_name && !ztd::same(new_name, old_name))
             gtk_dialog_response(GTK_DIALOG(dlg), RESPONSE_RENAME);
         else
             gtk_dialog_response(GTK_DIALOG(dlg), RESPONSE_AUTO_RENAME);
@@ -1800,7 +1800,7 @@ on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input)
     (void)input_buf;
     char* new_name = multi_input_get_text(query_input);
     const char* old_name = (const char*)g_object_get_data(G_OBJECT(query_input), "old_name");
-    bool can_rename = new_name && (0 != strcmp(new_name, old_name));
+    bool can_rename = new_name && (!ztd::same(new_name, old_name));
     free(new_name);
     GtkWidget* dlg = gtk_widget_get_toplevel(query_input);
     if (!GTK_IS_DIALOG(dlg))

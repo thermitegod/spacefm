@@ -497,7 +497,7 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
         case PTKFileListCol::COL_FILE_SIZE:
             if (S_ISDIR(file->mode) ||
                 (S_ISLNK(file->mode) &&
-                 !strcmp(vfs_mime_type_get_type(file->mime_type), XDG_MIME_TYPE_DIRECTORY)))
+                 ztd::same(vfs_mime_type_get_type(file->mime_type), XDG_MIME_TYPE_DIRECTORY)))
                 g_value_set_string(value, nullptr);
             else
                 g_value_set_string(value, file->get_disp_size().data());

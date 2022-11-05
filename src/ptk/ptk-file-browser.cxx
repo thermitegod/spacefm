@@ -560,7 +560,7 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
             const char* cwd;
             x = 0;
             cwd = ptk_file_browser_get_cwd(file_browser);
-            b = !cwd || strcmp(cwd, "/");
+            b = !cwd || !ztd::same(cwd, "/");
             break;
         case XSetTool::BACK:
         case XSetTool::BACK_MENU:
@@ -1523,7 +1523,7 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
     if (file_browser->history && file_browser->histsel && file_browser->curHistory &&
         (l = g_list_last(file_browser->history)))
     {
-        if (l->data && !strcmp((char*)l->data, (char*)file_browser->curHistory->data))
+        if (l->data && ztd::same((char*)l->data, (char*)file_browser->curHistory->data))
         {
             elementn = g_list_position(file_browser->history, l);
             if (elementn != -1)
@@ -1542,7 +1542,7 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
         {
             while ((l = l->prev))
             {
-                if (l->data && !strcmp((char*)l->data, (char*)file_browser->curHistory->data))
+                if (l->data && ztd::same((char*)l->data, (char*)file_browser->curHistory->data))
                 {
                     elementn = g_list_position(file_browser->history, l);
                     // printf ("        found elementn=%d\n", elementn );
@@ -1715,7 +1715,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, std::string_view folder_pat
     {
         case PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY:
             if (!file_browser->curHistory ||
-                strcmp((char*)file_browser->curHistory->data, path.c_str()))
+                !ztd::same((char*)file_browser->curHistory->data, path))
             {
                 /* Has forward history */
                 if (file_browser->curHistory && file_browser->curHistory->next)
@@ -2090,7 +2090,7 @@ ptk_file_browser_canon(PtkFileBrowser* file_browser, const char* path)
     const char* cwd = ptk_file_browser_get_cwd(file_browser);
     char buf[PATH_MAX + 1];
     char* canon = realpath(path, buf);
-    if (!canon || !g_strcmp0(canon, cwd) || !g_strcmp0(canon, path))
+    if (!canon || ztd::same(canon, cwd) || ztd::same(canon, path))
         return;
 
     if (std::filesystem::is_directory(canon))
@@ -2357,7 +2357,7 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
     // case insensitive search ?
     bool icase = false;
     char* lower_key = g_utf8_strdown(key, -1);
-    if (!strcmp(lower_key, key))
+    if (ztd::same(lower_key, key))
     {
         // key is all lowercase so do icase search
         icase = true;
@@ -2722,7 +2722,7 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const char* seek_dir,
     // prefix seek_name
     const char* cwd = ptk_file_browser_get_cwd(file_browser);
 
-    if (seek_dir && g_strcmp0(cwd, seek_dir))
+    if (seek_dir && !ztd::same(cwd, seek_dir))
     {
         // change dir
         free(file_browser->seek_name);
@@ -3295,7 +3295,7 @@ on_dir_tree_update_sel(PtkFileBrowser* file_browser)
 
     if (dir_path)
     {
-        if (strcmp(dir_path, ptk_file_browser_get_cwd(file_browser)))
+        if (!ztd::same(dir_path, ptk_file_browser_get_cwd(file_browser)))
         {
             if (ptk_file_browser_chdir(file_browser,
                                        dir_path,
@@ -3466,7 +3466,7 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* key, GtkTreeI
         return true;
 
     char* lower_key = g_utf8_strdown(key, -1);
-    if (!strcmp(lower_key, key))
+    if (ztd::same(lower_key, key))
     {
         // key is all lowercase so do icase search
         lower_name = g_utf8_strdown(name, -1);
@@ -4850,7 +4850,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, const std::vector<vfs::fi
             dest_dir = move_dest;
         }
 
-        if (!strcmp(dest_dir, cwd))
+        if (ztd::same(dest_dir, cwd))
         {
             xset_msg_dialog(GTK_WIDGET(file_browser),
                             GtkMessageType::GTK_MESSAGE_ERROR,
@@ -5415,7 +5415,7 @@ ptk_file_browser_no_access(const char* cwd, const char* smode)
     i32 mode;
     if (!smode)
         mode = W_OK;
-    else if (!strcmp(smode, "R_OK"))
+    else if (ztd::same(smode, "R_OK"))
         mode = R_OK;
     else
         mode = W_OK;
@@ -5877,7 +5877,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
     }
     else if (ztd::startswith(set->name, "status_"))
     {
-        if (!strcmp(set->name, "status_border") || !strcmp(set->name, "status_text"))
+        if (ztd::same(set->name, "status_border") || ztd::same(set->name, "status_text"))
             on_status_effect_change(nullptr, browser);
         else if (set->xset_name == XSetName::STATUS_NAME ||
                  set->xset_name == XSetName::STATUS_PATH ||

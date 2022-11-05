@@ -389,7 +389,7 @@ decode_udev_encoded_string(const char* str)
 static i32
 ptr_str_array_compare(const char** a, const char** b)
 {
-    return g_strcmp0(*a, *b);
+    return ztd::compare(*a, *b);
 }
 
 static double
@@ -517,10 +517,10 @@ info_is_system_internal(device_t* device)
     /* devices on certain buses are never system internal */
     if (device->drive_connection_interface != nullptr)
     {
-        if (!strcmp(device->drive_connection_interface, "ata_serial_esata") ||
-            !strcmp(device->drive_connection_interface, "sdio") ||
-            !strcmp(device->drive_connection_interface, "usb") ||
-            !strcmp(device->drive_connection_interface, "firewire"))
+        if (ztd::same(device->drive_connection_interface, "ata_serial_esata") ||
+            ztd::same(device->drive_connection_interface, "sdio") ||
+            ztd::same(device->drive_connection_interface, "usb") ||
+            ztd::same(device->drive_connection_interface, "firewire"))
             return false;
     }
     return true;
@@ -582,7 +582,7 @@ info_drive_connection(device_t* device)
                  *       information before we can properly get the type and speed.
                  */
 
-                if (device->drive_vendor != nullptr && !strcmp(device->drive_vendor, "ATA"))
+                if (device->drive_vendor != nullptr && ztd::same(device->drive_vendor, "ATA"))
                 {
                     connection_interface = "ata";
                     break;
@@ -864,7 +864,7 @@ info_drive_properties(device_t* device)
     }
     /* special handling for SDIO since we do not yet have a sdio_id helper in udev to set properties
      */
-    if (!g_strcmp0(device->drive_connection_interface, "sdio"))
+    if (ztd::same(device->drive_connection_interface, "sdio"))
     {
         const std::string type = sysfs_get_string(device->native_path, "../../type");
 
@@ -911,7 +911,7 @@ info_drive_properties(device_t* device)
     // drive_can_detach
     // right now, we only offer to detach USB devices
     drive_can_detach = false;
-    if (!g_strcmp0(device->drive_connection_interface, "usb"))
+    if (ztd::same(device->drive_connection_interface, "usb"))
     {
         drive_can_detach = true;
     }
@@ -955,13 +955,13 @@ info_device_properties(device_t* device)
     // clang-format on
 
     // filesystem properties
-    const char* partition_scheme;
     i32 partition_type = 0;
 
-    partition_scheme = udev_device_get_property_value(device->udevice, "UDISKS_PARTITION_SCHEME");
+    const std::string partition_scheme =
+        ztd::null_check(udev_device_get_property_value(device->udevice, "UDISKS_PARTITION_SCHEME"));
     if ((value = udev_device_get_property_value(device->udevice, "UDISKS_PARTITION_TYPE")))
         partition_type = std::stol(value);
-    if (!g_strcmp0(partition_scheme, "mbr") &&
+    if (ztd::same(partition_scheme, "mbr") &&
         (partition_type == 0x05 || partition_type == 0x0f || partition_type == 0x85))
     {
     }
@@ -1132,7 +1132,7 @@ info_mount_points(device_t* device)
 
         /* ignore mounts where only a subtree of a filesystem is mounted
          * this function is only used for block devices. */
-        if (g_strcmp0(encoded_root, "/") != 0)
+        if (!ztd::same(encoded_root, "/"))
             continue;
 
         if (major != dmajor || minor != dminor)
@@ -1154,7 +1154,7 @@ info_mount_points(device_t* device)
     {
         GList* l;
         // Sort the list to ensure that shortest mount paths appear first
-        mounts = g_list_sort(mounts, (GCompareFunc)g_strcmp0);
+        mounts = g_list_sort(mounts, (GCompareFunc)ztd::compare);
         std::string points = ztd::strdup((char*)mounts->data);
         l = mounts;
         while ((l = l->next))
@@ -1336,15 +1336,17 @@ info_optical_disc(device_t* device)
         device->optical_disc_num_audio_tracks = ztd::strdup(udev_device_get_property_value(device->udevice, "ID_CDROM_MEDIA_TRACK_COUNT_AUDIO"));
         device->optical_disc_num_sessions = ztd::strdup(udev_device_get_property_value(device->udevice, "ID_CDROM_MEDIA_SESSION_COUNT"));
 
-        const char* cdrom_disc_state = udev_device_get_property_value(device->udevice, "ID_CDROM_MEDIA_STATE");
+        const std::string cdrom_disc_state = ztd::null_check(udev_device_get_property_value(device->udevice, "ID_CDROM_MEDIA_STATE"));
 
-        device->optical_disc_is_blank = (!g_strcmp0(cdrom_disc_state, "blank"));
-        device->optical_disc_is_appendable = (!g_strcmp0(cdrom_disc_state, "appendable"));
-        device->optical_disc_is_closed = (!g_strcmp0(cdrom_disc_state, "complete"));
+        device->optical_disc_is_blank = (ztd::same(cdrom_disc_state, "blank"));
+        device->optical_disc_is_appendable = (ztd::same(cdrom_disc_state, "appendable"));
+        device->optical_disc_is_closed = (ztd::same(cdrom_disc_state, "complete"));
         // clang-format on
     }
     else
+    {
         device->device_is_optical_disc = false;
+    }
 }
 
 static bool
@@ -1534,7 +1536,7 @@ parse_mounts(bool report)
         }
 
         /* mount where only a subtree of a filesystem is mounted? */
-        subdir_mount = (g_strcmp0(encoded_root, "/") != 0);
+        subdir_mount = (!ztd::same(encoded_root, "/") != 0);
 
         if (subdir_mount)
         {
@@ -1644,7 +1646,7 @@ parse_mounts(bool report)
     {
         devmount = DEVMOUNT_T(l->data);
         // Sort the list to ensure that shortest mount paths appear first
-        devmount->mounts = g_list_sort(devmount->mounts, (GCompareFunc)g_strcmp0);
+        devmount->mounts = g_list_sort(devmount->mounts, (GCompareFunc)ztd::compare);
         GList* m = devmount->mounts;
         points = ztd::strdup((char*)m->data);
         while ((m = m->next))
@@ -1671,7 +1673,7 @@ parse_mounts(bool report)
             if (found)
             {
                 // LOG_INFO("    found");
-                if (!g_strcmp0((DEVMOUNT_T(found->data))->mount_points, devmount->mount_points))
+                if (ztd::same((DEVMOUNT_T(found->data))->mount_points, devmount->mount_points))
                 {
                     // LOG_INFO("    freed");
                     // no change to mount points, so remove from old list
@@ -2067,8 +2069,8 @@ vfs_volume_read_by_device(struct udev_device* udevice)
     volume->should_autounmount = false;
     volume->is_optical = device->device_is_optical_disc;
     volume->is_table = device->device_is_partition_table;
-    volume->is_floppy =
-        (device->drive_media_compatibility && !strcmp(device->drive_media_compatibility, "floppy"));
+    volume->is_floppy = (device->drive_media_compatibility &&
+                         ztd::same(device->drive_media_compatibility, "floppy"));
     volume->is_removable = !device->device_is_system_internal;
     volume->requires_eject = device->drive_is_media_ejectable;
     volume->is_mountable = device->device_is_media_available;
@@ -2194,7 +2196,7 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
         }
 
         char* point = g_strcompress(encoded_point);
-        if (!g_strcmp0(point, path))
+        if (ztd::same(point, path))
         {
             if (device_file)
                 *device_file = g_strcompress(encoded_file);
@@ -2231,7 +2233,7 @@ mtab_fstype_is_handled_by_protocol(const char* mtab_fstype)
                     set->b != XSetB::XSET_B_TRUE /* disabled */)
                     continue;
                 // test whitelist
-                if (g_strcmp0(set->s, "*") && ptk_handler_values_in_list(set->s, values, msg))
+                if (!ztd::same(set->s, "*") && ptk_handler_values_in_list(set->s, values, msg))
                 {
                     found = true;
                     break;
@@ -2451,7 +2453,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         // free unused netmount
         delete netmount;
     }
-    else if (!g_strcmp0(mtab_fstype, "fuse.fuseiso"))
+    else if (ztd::same(mtab_fstype, "fuse.fuseiso"))
     {
         // an ISO file mounted with fuseiso
         /* get device_file from ~/.mtab.fuseiso
@@ -3778,7 +3780,7 @@ vfs_volume_get_by_device_or_point(const char* device_file, const char* point)
     if (point)
     {
         canon = realpath(point, buf);
-        if (canon && !strcmp(canon, point))
+        if (canon && ztd::same(canon, point))
             canon = nullptr;
     }
 
@@ -3786,12 +3788,12 @@ vfs_volume_get_by_device_or_point(const char* device_file, const char* point)
     {
         for (vfs::volume volume: volumes)
         {
-            if (device_file && !strcmp(device_file, volume->device_file))
+            if (device_file && ztd::same(device_file, volume->device_file))
                 return volume;
             if (point && volume->is_mounted && volume->mount_point)
             {
-                if (!strcmp(point, volume->mount_point) ||
-                    (canon && !strcmp(canon, volume->mount_point)))
+                if (ztd::same(point, volume->mount_point) ||
+                    (canon && ztd::same(canon, volume->mount_point)))
                     return volume;
             }
         }
@@ -3957,22 +3959,11 @@ vfs_volume_dir_avoid_changes(const char* dir)
                 }
             }
         }
-        /* blacklist these types for no change detection (if not block device)
-        ret = (    ztd::startswith( fstype, "nfs" )    // nfs nfs4 etc
-                || ( ztd::startswith( fstype, "fuse" ) &&
-                            strcmp( fstype, "fuseblk" ) ) // fuse fuse.sshfs curlftpfs(fuse) etc
-                || strstr( fstype, "cifs" )
-                || !strcmp( fstype, "smbfs" )
-                || !strcmp( fstype, "ftpfs" ) );
-        // whitelist
-                !g_strcmp0( fstype, "tmpfs" ) || !g_strcmp0( fstype, "ramfs" )
-               || !g_strcmp0( fstype, "aufs" )  || !g_strcmp0( fstype, "devtmpfs" )
-               || !g_strcmp0( fstype, "overlayfs" ) );
-        */
     }
     else
-        // block device
+    { // block device
         ret = false;
+    }
 
     if (udevice)
         udev_device_unref(udevice);

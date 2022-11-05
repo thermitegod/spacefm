@@ -1073,7 +1073,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         set = xset_set_cb(XSetName::GO_FORWARD, (GFunc)ptk_file_browser_go_forward, browser);
         set->disable = !(browser->curHistory && browser->curHistory->next);
         set = xset_set_cb(XSetName::GO_UP, (GFunc)ptk_file_browser_go_up, browser);
-        set->disable = !strcmp(cwd, "/");
+        set->disable = ztd::same(cwd, "/");
         xset_set_cb(XSetName::GO_HOME, (GFunc)ptk_file_browser_go_home, browser);
         xset_set_cb(XSetName::GO_DEFAULT, (GFunc)ptk_file_browser_go_default, browser);
         xset_set_cb(XSetName::GO_SET_DEFAULT, (GFunc)ptk_file_browser_set_default_folder, browser);
@@ -1824,7 +1824,7 @@ app_menu_additem(GtkWidget* menu, const char* label, const char* stock_icon, i32
     GtkWidget* item;
     if (stock_icon)
     {
-        if (!strcmp(stock_icon, "@check"))
+        if (ztd::same(stock_icon, "@check"))
             item = gtk_check_menu_item_new_with_mnemonic(label);
         else
             item = gtk_menu_item_new_with_mnemonic(label);
@@ -2615,9 +2615,9 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         {
             panel_t i;
 
-            if (!strcmp(set->name, "open_in_panel_prev"))
+            if (ztd::same(set->name, "open_in_panel_prev"))
                 i = panel_control_code_prev;
-            else if (!strcmp(set->name, "open_in_panel_next"))
+            else if (ztd::same(set->name, "open_in_panel_next"))
                 i = panel_control_code_next;
             else
                 i = std::stol(set->name);

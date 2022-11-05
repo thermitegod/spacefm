@@ -164,7 +164,7 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
     if (basename)
     {
         type = mime_type_get_by_filename(basename, statbuf);
-        if (strcmp(type, XDG_MIME_TYPE_UNKNOWN))
+        if (!ztd::same(type, XDG_MIME_TYPE_UNKNOWN))
             return type;
         type = nullptr;
     }
@@ -566,7 +566,7 @@ static bool
 mime_type_is_subclass(const char* type, const char* parent)
 {
     /* special case, the type specified is identical to the parent type. */
-    if (!strcmp(type, parent))
+    if (ztd::same(type, parent))
         return true;
 
     for (MimeCache& cache: caches)
@@ -577,7 +577,7 @@ mime_type_is_subclass(const char* type, const char* parent)
 
         for (const char* p: parents)
         {
-            if (!strcmp(parent, p))
+            if (ztd::same(parent, p))
                 return true;
         }
     }

@@ -322,7 +322,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
                         gtk_tree_model_get(model, &it, 2, &tmp, -1);
                         if (!tmp)
                             continue;
-                        if (!strcmp(tmp, action))
+                        if (ztd::same(tmp, action))
                         {
                             exist = true;
                             free(tmp);
@@ -793,10 +793,10 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
             std::string quoted_time;
             std::string quoted_path;
             const char* new_mtime = gtk_entry_get_text(data->mtime);
-            if (!(new_mtime && new_mtime[0]) || !g_strcmp0(data->orig_mtime, new_mtime))
+            if (!(new_mtime && new_mtime[0]) || ztd::same(data->orig_mtime, new_mtime))
                 new_mtime = nullptr;
             const char* new_atime = gtk_entry_get_text(data->atime);
-            if (!(new_atime && new_atime[0]) || !g_strcmp0(data->orig_atime, new_atime))
+            if (!(new_atime && new_atime[0]) || ztd::same(data->orig_atime, new_atime))
                 new_atime = nullptr;
 
             if ((new_mtime || new_atime) && !data->file_list.empty())
@@ -864,7 +864,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
             /* Check if we need chown */
             const char* owner_name = gtk_entry_get_text(data->owner);
             if (owner_name && *owner_name &&
-                (!data->owner_name || strcmp(owner_name, data->owner_name)))
+                (!data->owner_name || !ztd::same(owner_name, data->owner_name)))
             {
                 uid = uid_from_name(owner_name);
                 if (!uid)
@@ -875,7 +875,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
             }
             const char* group_name = gtk_entry_get_text(data->group);
             if (group_name && *group_name &&
-                (!data->group_name || strcmp(group_name, data->group_name)))
+                (!data->group_name || !ztd::same(group_name, data->group_name)))
             {
                 gid = gid_from_name(group_name);
                 if (!gid)

@@ -625,7 +625,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
 
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_move)))
         {
-            is_move = strcmp(path.c_str(), mset->old_path);
+            is_move = !ztd::same(path, mset->old_path);
         }
     }
 
@@ -2862,7 +2862,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     g_strstrip(str);
                     if (str[0] == '/')
                         from_path = bash_quote(str);
-                    // else if (!g_strcmp0("Empty File", str) || str[0] == '\0')
+                    // else if (ztd::same("Empty File", str) || str[0] == '\0')
                     //     from_path = "";
                     else
                     {
@@ -2929,7 +2929,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     g_strstrip(str);
                     if (str[0] == '/')
                         from_path = bash_quote(str);
-                    // else if (!g_strcmp0("Empty Directory", str) || str[0] == '\0')
+                    // else if (ztd::same("Empty Directory", str) || str[0] == '\0')
                     //     from_path = nullptr;
                     else
                     {
@@ -3221,7 +3221,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<vfs::file_
         item_count++;
     }
 
-    if (!strcmp(setname, "root_delete"))
+    if (ztd::same(setname, "root_delete"))
     {
         if (app_settings.get_confirm_delete())
         {
@@ -3257,7 +3257,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<vfs::file_
             xset_set_var(set, XSetVar::DESC, path);
             const std::string quote_path = bash_quote(path);
 
-            if (!strcmp(setname, "root_move2"))
+            if (ztd::same(setname, "root_move2"))
             {
                 task_name = "Move As Root";
                 // problem: no warning if already exists

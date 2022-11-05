@@ -233,8 +233,8 @@ app_chooser_dialog_new(GtkWindow* parent, vfs::mime_type mime_type, bool focus_a
 
     /* Do not set default handler for directories and files with unknown type */
     if (!show_default ||
-        /*  !strcmp( vfs_mime_type_get_type( mime_type ), XDG_MIME_TYPE_UNKNOWN ) || */
-        (!strcmp(vfs_mime_type_get_type(mime_type), XDG_MIME_TYPE_DIRECTORY) && !dir_default))
+        /*  ztd::same(vfs_mime_type_get_type(mime_type), XDG_MIME_TYPE_UNKNOWN) || */
+        (ztd::same(vfs_mime_type_get_type(mime_type), XDG_MIME_TYPE_DIRECTORY) && !dir_default))
     {
         gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(builder, "set_default")));
     }
@@ -571,10 +571,10 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, vfs::mime_type mime_type, bool f
                 vfs_mime_type_set_default_action(mime_type, app);
                 ptk_app_chooser_has_handler_warn(dlg, mime_type);
             }
-            else if (/* strcmp( vfs_mime_type_get_type( mime_type ),
-                                                    XDG_MIME_TYPE_UNKNOWN ) && */
+            else if (/* !ztd::same(vfs_mime_type_get_type(mime_type),
+                                                    XDG_MIME_TYPE_UNKNOWN) && */
                      (dir_default ||
-                      strcmp(vfs_mime_type_get_type(mime_type), XDG_MIME_TYPE_DIRECTORY)))
+                      !ztd::same(vfs_mime_type_get_type(mime_type), XDG_MIME_TYPE_DIRECTORY)))
             {
                 char* custom = nullptr;
                 vfs_mime_type_add_action(mime_type, app, &custom);

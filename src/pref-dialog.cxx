@@ -271,7 +271,7 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         // date format
         char* etext = ztd::strdup(
             gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(data->date_format)))));
-        if (g_strcmp0(etext, xset_get_s(XSetName::DATE_FORMAT)))
+        if (!ztd::same(etext, xset_get_s(XSetName::DATE_FORMAT)))
         {
             if (etext[0] == '\0')
                 xset_set(XSetName::DATE_FORMAT, XSetVar::S, "%Y-%m-%d %H:%M");
@@ -377,7 +377,7 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
                 xset_set(XSetName::ROOT_EDITOR, XSetVar::S, root_editor);
             }
         }
-        else if (strcmp(root_editor, old_root_editor))
+        else if (!ztd::same(root_editor, old_root_editor))
         {
             xset_set(XSetName::ROOT_EDITOR, XSetVar::S, root_editor);
         }

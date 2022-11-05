@@ -163,7 +163,7 @@ MimeCache::lookup_literal(const char* filename)
             /* The entry size is different in v 1.1 */
             const char* entry = entries + middle * 12;
             const char* str2 = this->buffer + VAL32(entry, 0);
-            i32 comp = strcmp(filename, str2);
+            i32 comp = ztd::compare(filename, str2);
             if (comp < 0)
                 upper = middle - 1;
             else if (comp > 0)
@@ -299,7 +299,7 @@ MimeCache::lookup_str_in_entries(const char* entries, u32 n, const char* str)
             const char* entry = entries + middle * 8;
             const char* str2 = this->buffer + VAL32(entry, 0);
 
-            i32 comp = strcmp(str, str2);
+            i32 comp = ztd::compare(str, str2);
             if (comp < 0)
                 upper = middle - 1;
             else if (comp > 0)

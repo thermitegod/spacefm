@@ -378,7 +378,7 @@ receive_socket_command(i32 client, const std::string& args)
     // eg this helps deter use of socket commands sent from a chroot jail
     // or from another user or system
     const std::string inode_tag = get_inode_tag();
-    if (argv && strcmp(inode_tag.data(), argv[0]))
+    if (argv && !ztd::same(inode_tag, argv[0]))
     {
         cmd = 1;
         reply = "invalid socket command user";

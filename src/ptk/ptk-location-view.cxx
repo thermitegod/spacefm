@@ -290,7 +290,7 @@ ptk_location_view_chdir(GtkTreeView* location_view, const char* cur_dir)
             vfs::volume vol;
             gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
             const char* mount_point = vfs_volume_get_mount_point(vol);
-            if (mount_point && !strcmp(cur_dir, mount_point))
+            if (mount_point && ztd::same(cur_dir, mount_point))
             {
                 gtk_tree_selection_select_iter(tree_sel, &it);
                 GtkTreePath* path = gtk_tree_model_get_path(model, &it);
@@ -370,7 +370,7 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
         }
         else
         {
-            if (strcmp(vol->mount_point, ptk_file_browser_get_cwd(file_browser)))
+            if (!ztd::same(vol->mount_point, ptk_file_browser_get_cwd(file_browser)))
                 ptk_file_browser_chdir(file_browser,
                                        vol->mount_point,
                                        PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
@@ -390,7 +390,7 @@ ptk_location_view_open_block(const char* block, bool new_tab)
     const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
     for (vfs::volume volume: volumes)
     {
-        if (!g_strcmp0(vfs_volume_get_device(volume), canon))
+        if (ztd::same(vfs_volume_get_device(volume), canon))
         {
             if (new_tab)
                 on_open_tab(nullptr, volume, nullptr);
@@ -702,7 +702,7 @@ ptk_location_view_clean_mount_points()
         else // i == 1
         {
             char* del_path = ptk_location_view_get_mount_point_dir(nullptr);
-            if (!g_strcmp0(del_path, path.c_str()))
+            if (ztd::same(del_path, path))
             {
                 // Auto-Mount|Mount Dirs is not set or valid
                 free(del_path);
@@ -855,13 +855,13 @@ on_autoopen_net_cb(VFSFileTask* task, AutoOpen* ao)
     {
         if (volume->is_mounted)
         {
-            if (!strcmp(volume->device_file, ao->device_file))
+            if (ztd::same(volume->device_file, ao->device_file))
             {
                 device_file_vol = volume;
                 break;
             }
             else if (!mount_point_vol && ao->mount_point && !volume->should_autounmount &&
-                     !g_strcmp0(volume->mount_point, ao->mount_point))
+                     ztd::same(volume->mount_point, ao->mount_point))
                 // found an unspecial mount point that matches the ao mount point -
                 // save for later use if no device file match found
                 mount_point_vol = volume;
@@ -962,7 +962,7 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
                     }
                     else
                     {
-                        if (strcmp(volume->mount_point, ptk_file_browser_get_cwd(file_browser)))
+                        if (!ztd::same(volume->mount_point, ptk_file_browser_get_cwd(file_browser)))
                             ptk_file_browser_chdir(file_browser,
                                                    volume->mount_point,
                                                    PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
@@ -1782,7 +1782,7 @@ on_prop(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     if (vol->is_mounted)
     {
         path = Glib::find_program_in_path("lsof");
-        if (!strcmp(vol->mount_point, "/"))
+        if (ztd::same(vol->mount_point, "/"))
             lsof =
                 fmt::format("echo {} ; {} -w | grep /$ | head -n 500 ; echo ; ", "PROCESSES", path);
         else
@@ -2405,7 +2405,7 @@ on_dev_menu_button_press(GtkWidget* item, GdkEventButton* event, vfs::volume vol
 static i32
 cmp_dev_name(vfs::volume a, vfs::volume b)
 {
-    return g_strcmp0(vfs_volume_get_disp_name(a), vfs_volume_get_disp_name(b));
+    return ztd::compare(vfs_volume_get_disp_name(a), vfs_volume_get_disp_name(b));
 }
 
 void

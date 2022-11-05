@@ -497,7 +497,7 @@ xset_context_test(xset_context_t context, char* rules, bool def_disable)
                 case ItemPropContextComp::CONTEXT_COMP_MATCH:
                 case ItemPropContextComp::CONTEXT_COMP_NMATCH:
                     s = g_utf8_strdown(eleval, -1);
-                    if (g_strcmp0(eleval, s))
+                    if (ztd::compare(eleval, s))
                     {
                         // pattern contains uppercase chars - test case sensitive
                         test = fnmatch(eleval, context->var[sub].c_str(), 0);
@@ -880,7 +880,7 @@ enable_options(ContextData* ctxt)
         gtk_text_buffer_get_start_iter(buf, &siter);
         gtk_text_buffer_get_end_iter(buf, &iter);
         char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
-        if (text && !strcmp(text, "Are you sure?"))
+        if (text && ztd::same(text, "Are you sure?"))
             gtk_text_buffer_set_text(buf, "", -1);
         free(text);
     }
@@ -1513,14 +1513,14 @@ replace_item_props(ContextData* ctxt)
     {
         // name
         if (rset->lock &&
-            g_strcmp0(rset->menu_label, gtk_entry_get_text(GTK_ENTRY(ctxt->item_name))))
+            !ztd::same(rset->menu_label, gtk_entry_get_text(GTK_ENTRY(ctxt->item_name))))
             // built-in label has been changed from default, save it
             rset->in_terminal = true;
 
         free(rset->menu_label);
         if (rset->tool > XSetTool::CUSTOM &&
-            !g_strcmp0(gtk_entry_get_text(GTK_ENTRY(ctxt->item_name)),
-                       xset_get_builtin_toolitem_label(rset->tool)))
+            ztd::same(gtk_entry_get_text(GTK_ENTRY(ctxt->item_name)),
+                      xset_get_builtin_toolitem_label(rset->tool)))
             // do not save default label of builtin toolitems
             rset->menu_label = nullptr;
         else
@@ -1540,7 +1540,7 @@ replace_item_props(ContextData* ctxt)
         else
             mset->icon = nullptr;
 
-        if (rset->lock && g_strcmp0(old_icon, mset->icon))
+        if (rset->lock && !ztd::same(old_icon, mset->icon))
             // built-in icon has been changed from default, save it
             rset->keep_terminal = true;
         free(old_icon);
@@ -1998,7 +1998,7 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
         mset = xset_get_plugin_mirror(set);
         rset = set;
     }
-    else if (!set->lock && set->desc && !strcmp(set->desc, "@plugin@mirror@") && set->shared_key)
+    else if (!set->lock && set->desc && ztd::same(set->desc, "@plugin@mirror@") && set->shared_key)
     {
         // set is plugin mirror
         mset = set;
