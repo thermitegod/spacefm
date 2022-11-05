@@ -228,7 +228,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
     const std::vector<vfs::file_info> sel_files = glist_to_vector_VFSFileInfo(files);
 
     /*igtodo test passing file_browser here? */
-    ptk_open_files_with_app(dir, sel_files, nullptr, nullptr, false, true);
+    ptk_open_files_with_app(dir, sel_files, "", nullptr, false, true);
 
     // sfm open selected dirs
     if (file_browser)
@@ -1073,7 +1073,7 @@ on_use_size_upper_toggled(GtkWidget* widget, FindFile* data)
 }
 
 void
-fm_find_files(const std::vector<const char*>& search_dirs)
+fm_find_files(const std::vector<std::string>& search_dirs)
 {
     FindFile* data = new FindFile;
     GtkTreeIter it;
@@ -1099,7 +1099,9 @@ fm_find_files(const std::vector<const char*>& search_dirs)
         g_object_unref(icon);
     }
     else
+    {
         gtk_window_set_icon_name(GTK_WINDOW(data->win), "Find");
+    }
 
     /* search criteria pane */
     data->search_criteria = GTK_WIDGET(gtk_builder_get_object(builder, "search_criteria"));

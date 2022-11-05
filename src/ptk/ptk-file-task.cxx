@@ -473,13 +473,11 @@ ptk_file_task_cancel(PtkFileTask* ptask)
 static void
 set_button_states(PtkFileTask* ptask)
 {
-    // const char* icon;
-    // const char* iconset;
-    const char* label;
-    bool sens = !ptask->complete;
-
     if (!ptask->progress_dlg)
         return;
+
+    std::string label;
+    bool sens = !ptask->complete;
 
     switch (ptask->task->state_pause)
     {
@@ -506,14 +504,8 @@ set_button_states(PtkFileTask* ptask)
     }
     sens = sens && !(ptask->task->type == VFSFileTaskType::EXEC && !ptask->task->exec_pid);
 
-    /*
-    xset_t set = xset_get(iconset);
-    if (set->icon)
-        icon = set->icon;
-    */
-
     gtk_widget_set_sensitive(ptask->progress_btn_pause, sens);
-    gtk_button_set_label(GTK_BUTTON(ptask->progress_btn_pause), label);
+    gtk_button_set_label(GTK_BUTTON(ptask->progress_btn_pause), label.data());
     gtk_widget_set_sensitive(ptask->progress_btn_close, ptask->complete || !!ptask->task_view);
 }
 
@@ -863,14 +855,14 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     gtk_widget_set_halign(GTK_WIDGET(label), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(label), GtkAlign::GTK_ALIGN_CENTER);
     gtk_grid_attach(grid, GTK_WIDGET(label), 0, row, 1, 1);
-    const char* status;
+    std::string status;
     if (task->state_pause == VFSFileTaskState::PAUSE)
         status = "Paused";
     else if (task->state_pause == VFSFileTaskState::QUEUE)
         status = "Queued";
     else
         status = "Running...";
-    ptask->errors = GTK_LABEL(gtk_label_new(status));
+    ptask->errors = GTK_LABEL(gtk_label_new(status.data()));
     gtk_widget_set_halign(GTK_WIDGET(ptask->errors), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(ptask->errors), GtkAlign::GTK_ALIGN_CENTER);
     gtk_label_set_ellipsize(ptask->errors, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);

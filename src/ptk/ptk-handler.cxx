@@ -132,7 +132,7 @@ inline constexpr std::array<std::string_view, 3> cmds_mnt{
 
 /* do not change this script header or it will break header detection on
  * existing scripts! */
-static const char* script_header = "#!/bin/bash\n";
+inline constexpr std::string_view script_header = "#!/bin/bash\n";
 
 struct HandlerData
 {
@@ -772,14 +772,14 @@ ptk_handler_command_is_empty(std::string_view command)
     return true;
 }
 
-void
-ptk_handler_load_text_view(GtkTextView* view, const char* text)
+static void
+ptk_handler_load_text_view(GtkTextView* view, std::string_view text = "")
 {
-    if (view)
-    {
-        GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
-        gtk_text_buffer_set_text(buf, text ? text : "", -1);
-    }
+    if (!view)
+        return;
+
+    GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+    gtk_text_buffer_set_text(buf, text.data(), -1);
 }
 
 static char*
@@ -1140,7 +1140,7 @@ value_in_list(const char* list, const char* value)
 }
 
 GSList*
-ptk_handler_file_has_handlers(i32 mode, i32 cmd, const char* path, vfs::mime_type mime_type,
+ptk_handler_file_has_handlers(i32 mode, i32 cmd, std::string_view path, vfs::mime_type mime_type,
                               bool test_cmd, bool multiple, bool enabled_only)
 { /* this function must be FAST - is run multiple times on menu popup
    * command must be non-empty if test_cmd */
@@ -1150,7 +1150,7 @@ ptk_handler_file_has_handlers(i32 mode, i32 cmd, const char* path, vfs::mime_typ
     char* under_path;
     GSList* handlers = nullptr;
 
-    if (!path && !mime_type)
+    if (path.empty() && !mime_type)
         return nullptr;
     // Fetching and validating MIME type if provided
     if (mime_type)
@@ -1159,14 +1159,14 @@ ptk_handler_file_has_handlers(i32 mode, i32 cmd, const char* path, vfs::mime_typ
         type = nullptr;
 
     // replace spaces in path with underscores for matching
-    if (path && strchr(path, ' '))
+    if (ztd::contains(path, " "))
     {
         const std::string cleaned = ztd::replace(path, " ", "_");
         under_path = ztd::strdup(cleaned);
     }
     else
     {
-        under_path = (char*)path;
+        under_path = (char*)path.data();
     }
 
     // parsing handlers space-separated list
@@ -1598,11 +1598,11 @@ config_unload_handler_settings(HandlerData* hnd)
     gtk_entry_set_text(GTK_ENTRY(hnd->entry_handler_extension), "");
     if (hnd->entry_handler_icon)
         gtk_entry_set_text(GTK_ENTRY(hnd->entry_handler_icon), "");
-    ptk_handler_load_text_view(GTK_TEXT_VIEW(hnd->view_handler_compress), nullptr);
+    ptk_handler_load_text_view(GTK_TEXT_VIEW(hnd->view_handler_compress));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hnd->chkbtn_handler_compress_term), false);
-    ptk_handler_load_text_view(GTK_TEXT_VIEW(hnd->view_handler_extract), nullptr);
+    ptk_handler_load_text_view(GTK_TEXT_VIEW(hnd->view_handler_extract));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hnd->chkbtn_handler_extract_term), false);
-    ptk_handler_load_text_view(GTK_TEXT_VIEW(hnd->view_handler_list), nullptr);
+    ptk_handler_load_text_view(GTK_TEXT_VIEW(hnd->view_handler_list));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hnd->chkbtn_handler_list_term), false);
 
     gtk_widget_set_sensitive(GTK_WIDGET(hnd->btn_apply), false);
@@ -1640,7 +1640,7 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
                 // Obtaining appending iterator for treeview model
                 gtk_list_store_append(GTK_LIST_STORE(hnd->list), &iter);
                 // Adding handler to model
-                const char* disabled =
+                const std::string disabled =
                     hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
                 const std::string dis_name =
                     fmt::format("{} {}",
@@ -2791,11 +2791,11 @@ on_archive_default(GtkMenuItem* menuitem, xset_t set)
 }
 
 static GtkWidget*
-add_popup_menuitem(GtkWidget* popup, GtkAccelGroup* accel_group, const char* label, i32 job,
-                   HandlerData* hnd)
+add_popup_menuitem(GtkWidget* popup, GtkAccelGroup* accel_group, std::string_view label,
+                   PtkHandlerJob job, HandlerData* hnd)
 {
     (void)accel_group;
-    GtkWidget* item = gtk_menu_item_new_with_mnemonic(label);
+    GtkWidget* item = gtk_menu_item_new_with_mnemonic(label.data());
     gtk_container_add(GTK_CONTAINER(popup), item);
     g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_option_cb), (void*)hnd);
     g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(job));
@@ -3429,7 +3429,6 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
     while ((response = gtk_dialog_run(GTK_DIALOG(hnd->dlg))))
     {
         bool exit_loop = false;
-        // const char* help = nullptr;
         switch (response)
         {
             case GtkResponseType::GTK_RESPONSE_OK:

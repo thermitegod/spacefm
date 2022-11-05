@@ -2030,11 +2030,11 @@ vfs_file_task_run(VFSFileTask* task)
         if (task->type == VFSFileTaskType::CHMOD_CHOWN && !task->src_paths.empty())
         {
             const std::string dir = Glib::path_get_dirname(task->src_paths.at(0));
-            task->avoid_changes = vfs_volume_dir_avoid_changes(dir.c_str());
+            task->avoid_changes = vfs_volume_dir_avoid_changes(dir);
         }
         else
         {
-            task->avoid_changes = vfs_volume_dir_avoid_changes(task->dest_dir.c_str());
+            task->avoid_changes = vfs_volume_dir_avoid_changes(task->dest_dir);
         }
 
         task->thread = g_thread_new("task_run", (GThreadFunc)vfs_file_task_thread, task);

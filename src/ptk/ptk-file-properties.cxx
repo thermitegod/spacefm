@@ -377,7 +377,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
 }
 
 static GtkWidget*
-file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
+file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
                         const std::vector<vfs::file_info>& sel_files, i32 page)
 {
     GtkBuilder* builder = ptk_gtk_builder_new_from_file(PTK_DLG_FILE_PROPERTIES);
@@ -387,7 +387,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
 
     bool need_calc_size = true;
 
-    const char* multiple_files = "( multiple files )";
+    const std::string multiple_files = "( multiple files )";
     const char* calculating;
     GtkWidget* name = GTK_WIDGET(gtk_builder_get_object(builder, "file_name"));
     GtkWidget* label_name = GTK_WIDGET(gtk_builder_get_object(builder, "label_filename"));
@@ -402,8 +402,8 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     bool same_type = true;
     bool is_dirs = false;
 
-    i32 width = xset_get_int(XSetName::APP_DLG, XSetVar::S);
-    i32 height = xset_get_int(XSetName::APP_DLG, XSetVar::Z);
+    const i32 width = xset_get_int(XSetName::APP_DLG, XSetVar::S);
+    const i32 height = xset_get_int(XSetName::APP_DLG, XSetVar::Z);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, -1);
 
@@ -414,9 +414,9 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     data->file_list = sel_files;
     data->dlg = dlg;
 
-    data->dir_path = ztd::strdup(dir_path);
+    data->dir_path = ztd::strdup(dir_path.data());
 
-    const std::string disp_path = Glib::filename_display_name(dir_path);
+    const std::string disp_path = Glib::filename_display_name(dir_path.data());
     // gtk_label_set_text(GTK_LABEL(location), disp_path.c_str());
     gtk_entry_set_text(GTK_ENTRY(location), disp_path.c_str());
 
@@ -467,7 +467,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
         const std::string file_type = fmt::format("{}\n{}",
                                                   vfs_mime_type_get_description(mime),
                                                   vfs_mime_type_get_type(mime));
-        gtk_label_set_text(GTK_LABEL(mime_type), file_type.c_str());
+        gtk_label_set_text(GTK_LABEL(mime_type), file_type.data());
         vfs_mime_type_unref(mime);
     }
     else
@@ -489,9 +489,9 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     else /* Add available actions to the option menu */
     {
         GtkTreeIter it;
-        const std::vector<std::string> actions = vfs_mime_type_get_actions(mime);
 
         mime = file->get_mime_type();
+        const std::vector<std::string> actions = vfs_mime_type_get_actions(mime);
         GtkCellRenderer* renderer;
         GtkListStore* model;
         gtk_cell_layout_clear(GTK_CELL_LAYOUT(open_with));
@@ -553,7 +553,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
     if (sel_files.size() > 1)
     {
         gtk_widget_set_sensitive(name, false);
-        gtk_entry_set_text(GTK_ENTRY(name), multiple_files);
+        gtk_entry_set_text(GTK_ENTRY(name), multiple_files.data());
 
         data->orig_mtime = nullptr;
         data->orig_atime = nullptr;
@@ -588,8 +588,8 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
 
         if (!file->is_directory())
         {
-            /* Only single "file" is selected, so we do not need to
-                caculate total file size */
+            // Only single "file" is selected, so we do not need to
+            // caculate total file size
             need_calc_size = false;
 
             std::string buf;
@@ -645,7 +645,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
         if (file->is_symlink())
         {
             gtk_label_set_markup_with_mnemonic(GTK_LABEL(label_name), "<b>Link _Name:</b>");
-            const std::string disp_sym_path = Glib::build_filename(dir_path, file->name);
+            const std::string disp_sym_path = Glib::build_filename(dir_path.data(), file->name);
 
             try
             {
@@ -655,7 +655,7 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
 
                 // relative link to absolute
                 if (ztd::startswith(target_path, "/"))
-                    target_path = Glib::build_filename(dir_path, target_path);
+                    target_path = Glib::build_filename(dir_path.data(), target_path);
 
                 if (!std::filesystem::exists(target_path))
                     gtk_label_set_text(GTK_LABEL(mime_type), "( broken link )");
@@ -912,7 +912,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
 }
 
 void
-ptk_show_file_properties(GtkWindow* parent_win, const char* cwd,
+ptk_show_file_properties(GtkWindow* parent_win, std::string_view cwd,
                          std::vector<vfs::file_info>& sel_files, i32 page)
 {
     GtkWidget* dlg;
@@ -934,8 +934,8 @@ ptk_show_file_properties(GtkWindow* parent_win, const char* cwd,
         vfs_file_info_get(file, cwd);
         // sel_files.emplace_back(vfs_file_info_ref(file));
         sel_files.emplace_back(file);
-        const std::string parent_dir = Glib::path_get_dirname(cwd);
-        dlg = file_properties_dlg_new(parent_win, parent_dir.c_str(), sel_files, page);
+        const std::string parent_dir = Glib::path_get_dirname(cwd.data());
+        dlg = file_properties_dlg_new(parent_win, parent_dir, sel_files, page);
     }
 
     // disabling this should not cause leaks since

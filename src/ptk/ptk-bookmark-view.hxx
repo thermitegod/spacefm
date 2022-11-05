@@ -22,5 +22,7 @@
 
 #include "vfs/vfs-volume.hxx"
 
-void ptk_bookmark_view_add_bookmark(GtkMenuItem* menuitem, PtkFileBrowser* file_browser,
-                                    const char* url);
+void ptk_bookmark_view_add_bookmark(std::string_view book_path);
+void ptk_bookmark_view_add_bookmark(PtkFileBrowser* file_browser);
+
+void ptk_bookmark_view_add_bookmark_cb(GtkMenuItem* menuitem, PtkFileBrowser* file_browser);

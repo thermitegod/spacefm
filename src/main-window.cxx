@@ -481,9 +481,9 @@ on_find_file_activate(GtkMenuItem* menuitem, void* user_data)
     FMMainWindow* main_window = FM_MAIN_WINDOW(user_data);
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
-    const char* cwd = ptk_file_browser_get_cwd(file_browser);
+    const std::string cwd = ptk_file_browser_get_cwd(file_browser);
 
-    const std::vector<const char*> search_dirs{cwd};
+    const std::vector<std::string> search_dirs{cwd};
 
     fm_find_files(search_dirs);
 }
@@ -1384,7 +1384,7 @@ rebuild_menus(FMMainWindow* main_window)
 
     // Bookmarks
     newmenu = gtk_menu_new();
-    set = xset_set_cb(XSetName::BOOK_ADD, (GFunc)ptk_bookmark_view_add_bookmark, file_browser);
+    set = xset_set_cb(XSetName::BOOK_ADD, (GFunc)ptk_bookmark_view_add_bookmark_cb, file_browser);
     set->disable = false;
     xset_add_menuitem(file_browser, newmenu, accel_group, set);
     gtk_menu_shell_append(GTK_MENU_SHELL(newmenu), gtk_separator_menu_item_new());
@@ -1890,8 +1890,8 @@ main_window_get_tab_cwd(PtkFileBrowser* file_browser, tab_t tab_num)
         return ztd::strdup(ptk_file_browser_get_cwd(PTK_FILE_BROWSER_REINTERPRET(
             gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), page_x))));
     }
-    else
-        return nullptr;
+
+    return nullptr;
 }
 
 char*
@@ -2267,7 +2267,7 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, FMMainWindow* main_win
         file_browser->inhibit_focus = false;
         if (file_browser->seek_name)
         {
-            ptk_file_browser_seek_path(file_browser, nullptr, file_browser->seek_name);
+            ptk_file_browser_seek_path(file_browser, "", file_browser->seek_name);
             free(file_browser->seek_name);
             file_browser->seek_name = nullptr;
         }
@@ -2326,13 +2326,12 @@ fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
         tab_icon = gtk_image_new_from_icon_name("gtk-directory", GtkIconSize::GTK_ICON_SIZE_MENU);
     gtk_box_pack_start(GTK_BOX(tab_label), tab_icon, false, false, 4);
 
-    if (ptk_file_browser_get_cwd(file_browser))
+    const std::string cwd = ptk_file_browser_get_cwd(file_browser);
+    if (!cwd.empty())
     {
         const std::string name = Glib::path_get_basename(ptk_file_browser_get_cwd(file_browser));
         tab_text = gtk_label_new(name.c_str());
     }
-    else
-        tab_text = gtk_label_new("");
 
     gtk_label_set_ellipsize(GTK_LABEL(tab_text), PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
     if (std::strlen(gtk_label_get_text(GTK_LABEL(tab_text))) < 30)
@@ -2341,7 +2340,9 @@ fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
         gtk_label_set_width_chars(GTK_LABEL(tab_text), -1);
     }
     else
+    {
         gtk_label_set_width_chars(GTK_LABEL(tab_text), 30);
+    }
     gtk_label_set_max_width_chars(GTK_LABEL(tab_text), 30);
     gtk_box_pack_start(GTK_BOX(tab_label), tab_text, false, false, 4);
 
@@ -2697,10 +2698,10 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
     }
     else
     {
-        const char* path = ptk_file_browser_get_cwd(file_browser);
-        if (path)
+        const std::string cwd = ptk_file_browser_get_cwd(file_browser);
+        if (!cwd.empty())
         {
-            disp_path = Glib::filename_display_name(path);
+            disp_path = Glib::filename_display_name(cwd);
             disp_name = Glib::path_get_basename(disp_path);
         }
     }
@@ -2852,8 +2853,8 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
         return;
     }
 
-    const char* cwd = ptk_file_browser_get_cwd(file_browser);
-    if (!cwd)
+    const std::string cwd = ptk_file_browser_get_cwd(file_browser);
+    if (cwd.empty())
         return;
 
     std::string size_str;
@@ -2863,7 +2864,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
     {
         // FIXME: statvfs support should be moved to src/vfs
         struct statvfs fs_stat;
-        statvfs(cwd, &fs_stat);
+        statvfs(cwd.data(), &fs_stat);
 
         // calc free space
         size_str = vfs_file_size_to_string_format(fs_stat.f_bsize * fs_stat.f_bavail);
@@ -3596,9 +3597,7 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
         // if (c->var[ItemPropContext::CONTEXT_DIR])
         //{
         c->var[ItemPropContext::CONTEXT_WRITE_ACCESS] =
-            ptk_file_browser_no_access(c->var[ItemPropContext::CONTEXT_DIR].c_str(), nullptr)
-                ? "false"
-                : "true";
+            ptk_file_browser_write_access(c->var[ItemPropContext::CONTEXT_DIR]) ? "false" : "true";
         // }
 
         const std::vector<vfs::file_info> sel_files =
@@ -3733,8 +3732,7 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
             continue;
 
         panel_count++;
-        c->var[ItemPropContext::CONTEXT_PANEL1_DIR + p - 1] =
-            ztd::strdup(ptk_file_browser_get_cwd(a_browser));
+        c->var[ItemPropContext::CONTEXT_PANEL1_DIR + p - 1] = ptk_file_browser_get_cwd(a_browser);
 
         if (a_browser->side_dev &&
             (vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(a_browser->side_dev))))
@@ -3889,7 +3887,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
 
         // cwd
         bool cwd_needs_quote;
-        const char* cwd = ptk_file_browser_get_cwd(a_browser);
+        const std::string cwd = ptk_file_browser_get_cwd(a_browser);
         if ((cwd_needs_quote = ztd::contains(cwd, "\"")))
         {
             path = bash_quote(cwd);
@@ -3911,10 +3909,9 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
             {
                 path = file->get_name();
                 if (!cwd_needs_quote && ztd::contains(path, "\""))
-                    buf.append(fmt::format("\"{}{}{}\"\n",
-                                           cwd,
-                                           (cwd[0] != '\0' && cwd[1] == '\0') ? "" : "/",
-                                           path));
+                {
+                    buf.append(fmt::format("\"{}\"\n", Glib::build_filename(cwd, path)));
+                }
                 else
                 {
                     path = Glib::build_filename(cwd, path);

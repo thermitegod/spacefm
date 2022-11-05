@@ -191,16 +191,16 @@ update_change_detection()
         for (panel_t p : PANELS)
         {
             GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-            i32 n = gtk_notebook_get_n_pages(notebook);
+            const i32 n = gtk_notebook_get_n_pages(notebook);
             for (i32 i = 0; i < n; ++i)
             {
                 PtkFileBrowser* file_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
-                const char* pwd;
-                if (file_browser && (pwd = ptk_file_browser_get_cwd(file_browser)))
+                if (file_browser)
                 {
+                    const std::string cwd = ptk_file_browser_get_cwd(file_browser);
                     // update current dir change detection
-                    file_browser->dir->avoid_changes = vfs_volume_dir_avoid_changes(pwd);
+                    file_browser->dir->avoid_changes = vfs_volume_dir_avoid_changes(cwd);
                     // update thumbnail visibility
                     ptk_file_browser_show_thumbnails(
                         file_browser,
@@ -284,9 +284,9 @@ update_names()
 }
 
 bool
-ptk_location_view_chdir(GtkTreeView* location_view, const char* cur_dir)
+ptk_location_view_chdir(GtkTreeView* location_view, std::string_view cur_dir)
 {
-    if (!cur_dir || !GTK_IS_TREE_VIEW(location_view))
+    if (cur_dir.empty() || !GTK_IS_TREE_VIEW(location_view))
         return false;
 
     GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(location_view);

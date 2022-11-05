@@ -235,7 +235,7 @@ handle_parsed_commandline_args()
         // find files
         init_folder();
 
-        std::vector<const char*> search_dirs;
+        std::vector<std::string> search_dirs;
         char** dir;
         for (dir = cli_flags.files; *dir; ++dir)
         {

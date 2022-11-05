@@ -64,6 +64,6 @@ bool ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView*
                              const std::string command, std::string& error_message);
 char* ptk_handler_get_command(i32 mode, i32 cmd, xset_t handler_set);
 bool ptk_handler_command_is_empty(std::string_view command);
-void ptk_handler_load_text_view(GtkTextView* view, const char* text);
-GSList* ptk_handler_file_has_handlers(i32 mode, i32 cmd, const char* path, vfs::mime_type mime_type,
-                                      bool test_cmd, bool multiple, bool enabled_only);
+GSList* ptk_handler_file_has_handlers(i32 mode, i32 cmd, std::string_view path,
+                                      vfs::mime_type mime_type, bool test_cmd, bool multiple,
+                                      bool enabled_only);

@@ -20,9 +20,11 @@
 #include <string>
 #include <string_view>
 
+#include <vector>
+
 #include <gtk/gtk.h>
 
 #include "vfs/vfs-file-info.hxx"
 
-void ptk_show_file_properties(GtkWindow* parent_win, const char* cwd,
+void ptk_show_file_properties(GtkWindow* parent_win, std::string_view cwd,
                               std::vector<vfs::file_info>& sel_files, i32 page);

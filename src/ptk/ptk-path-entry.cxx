@@ -137,9 +137,7 @@ seek_path(GtkEntry* entry)
         }
     }
 
-    ptk_file_browser_seek_path(edata->browser,
-                               is_unique ? seek_dir.c_str() : nullptr,
-                               seek_name.c_str());
+    ptk_file_browser_seek_path(edata->browser, is_unique ? seek_dir : "", seek_name);
 
     return false;
 }

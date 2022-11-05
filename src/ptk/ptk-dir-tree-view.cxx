@@ -222,7 +222,7 @@ ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
 }
 
 bool
-ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
+ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, std::string_view path)
 {
     GtkTreeIter it;
     GtkTreeIter parent_it;

@@ -812,7 +812,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
     (void)item;
     GtkWidget* parent;
     GtkWidget* task_view = nullptr;
-    const char* cwd;
+    std::string cwd;
     std::string value;
     xset_t mset;
 
@@ -939,7 +939,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
                     }
                     else
                     {
-                        cwd = ztd::strdup("/");
+                        cwd = "/";
                     }
 
                     std::vector<std::string> open_files;

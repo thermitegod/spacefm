@@ -255,7 +255,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
 }
 
 static const std::string
-generate_bash_error_function(bool run_in_terminal, const char* parent_quote)
+generate_bash_error_function(bool run_in_terminal, std::string_view parent_quote = "")
 {
     /* When ran in a terminal, errors need to result in a pause so that
      * the user can review the situation. Even outside a terminal, IG
@@ -275,20 +275,33 @@ generate_bash_error_function(bool run_in_terminal, const char* parent_quote)
         finished_with_errors = "[ Finished With Errors ]";
     }
 
-    const std::string script =
-        fmt::format("fm_handle_err(){{\n"
-                    "    fm_err=$?\n"
-                    "{}{}{}"
-                    "    if [ $fm_err -ne 0 ];then\n"
-                    "       echo;{} \"{}\"\n"
-                    "       exit $fm_err\n"
-                    "    fi\n"
-                    "}}",
-                    parent_quote ? "    rmdir --ignore-fail-on-non-empty " : "",
-                    parent_quote ? parent_quote : "",
-                    parent_quote ? "\n" : "",
-                    error_pause,
-                    finished_with_errors);
+    std::string script;
+    if (!parent_quote.empty())
+    {
+        script = fmt::format("fm_handle_err(){{\n"
+                             "    fm_err=$?\n"
+                             "    rmdir --ignore-fail-on-non-empty {}\n"
+                             "    if [ $fm_err -ne 0 ];then\n"
+                             "       echo;{} \"{}\"\n"
+                             "       exit $fm_err\n"
+                             "    fi\n"
+                             "}}",
+                             parent_quote,
+                             error_pause,
+                             finished_with_errors);
+    }
+    else
+    {
+        script = fmt::format("fm_handle_err(){{\n"
+                             "    fm_err=$?\n"
+                             "    if [ $fm_err -ne 0 ];then\n"
+                             "       echo;{} \"{}\"\n"
+                             "       exit $fm_err\n"
+                             "    fi\n"
+                             "}}",
+                             error_pause,
+                             finished_with_errors);
+    }
 
     return script;
 }
@@ -315,7 +328,7 @@ replace_archive_subs(std::string_view line, std::string_view n, std::string_view
 
 void
 ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::file_info>& sel_files,
-                         const char* cwd)
+                         std::string_view cwd)
 {
     /* Generating dialog - extra nullptr on the nullptr-terminated list to
      * placate an irrelevant compilation warning. See notes in
@@ -373,7 +386,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
                                    nullptr);
 
     // Fetching available archive handlers
-    char* archive_handlers_s = xset_get_s(XSetName::ARC_CONF2);
+    const std::string archive_handlers_s = xset_get_s(XSetName::ARC_CONF2);
 
     // Dealing with possibility of no handlers
     if (ztd::compare(archive_handlers_s, "") <= 0)
@@ -556,7 +569,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
         free(dest_file);
         dest_file = nullptr;
     }
-    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd);
+    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd.data());
 
     // Setting dimension and position
     i32 width = xset_get_int(XSetName::ARC_DLG, XSetVar::X);
@@ -896,7 +909,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
     /* When ran in a terminal, errors need to result in a pause so that
      * the user can review the situation - in any case an error check
      * needs to be made */
-    const std::string str = generate_bash_error_function(run_in_terminal, nullptr);
+    const std::string str = generate_bash_error_function(run_in_terminal);
     final_command = fmt::format("{}\n\n{}", str, final_command);
 
     /* Cleaning up - final_command does not need freeing, as this
@@ -945,8 +958,8 @@ on_create_subfolder_toggled(GtkToggleButton* togglebutton, GtkWidget* chk_write)
 
 void
 ptk_file_archiver_extract(PtkFileBrowser* file_browser,
-                          const std::vector<vfs::file_info>& sel_files, const char* cwd,
-                          const char* dest_dir, i32 job, bool archive_presence_checked)
+                          const std::vector<vfs::file_info>& sel_files, std::string_view cwd,
+                          std::string_view dest_dir, i32 job, bool archive_presence_checked)
 { /* This function is also used to list the contents of archives */
     GtkWidget* dlgparent = nullptr;
     char* choose_dir = nullptr;
@@ -989,12 +1002,12 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         {
             // Fetching file details
             mime_type = file->get_mime_type();
-            const std::string full_path = Glib::build_filename(cwd, file->get_name());
+            const std::string full_path = Glib::build_filename(cwd.data(), file->get_name());
 
             // Checking for enabled handler with non-empty command
             handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
                                                            archive_operation,
-                                                           full_path.c_str(),
+                                                           full_path,
                                                            mime_type,
                                                            true,
                                                            false,
@@ -1017,7 +1030,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         dlgparent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser->main_window));
 
     // Checking if extract to directory has not been specified
-    if (!dest_dir && !list_contents)
+    if (dest_dir.empty() && !list_contents)
     {
         /* It has not - generating dialog to ask user. Only dealing with
          * user-writable contents if the user is not root */
@@ -1063,7 +1076,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(dlg), hbox);
 
         // Setting dialog to current working directory
-        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd);
+        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd.data());
 
         // Fetching saved dialog dimensions and applying
         i32 width = xset_get_int(XSetName::ARC_DLG, XSetVar::X);
@@ -1138,7 +1151,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         create_parent = xset_get_b(XSetName::ARC_DEF_PARENT);
         write_access = create_parent && xset_get_b(XSetName::ARC_DEF_WRITE);
 
-        dest = dest_dir;
+        dest = ztd::strdup(dest_dir.data());
     }
 
     /* Quoting destination directory (doing this outside of the later
@@ -1160,12 +1173,12 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         // Fetching file details
         mime_type = file->get_mime_type();
         // Determining file paths
-        const std::string full_path = Glib::build_filename(cwd, file->get_name());
+        const std::string full_path = Glib::build_filename(cwd.data(), file->get_name());
 
         // Get handler with non-empty command
         handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
                                                        archive_operation,
-                                                       full_path.c_str(),
+                                                       full_path,
                                                        mime_type,
                                                        true,
                                                        false,
@@ -1375,7 +1388,10 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
      * the user can review the situation - in any case an error check
      * needs to be made */
     std::string str;
-    str = generate_bash_error_function(in_term, create_parent ? parent_quote.c_str() : nullptr);
+    if (create_parent)
+        str = generate_bash_error_function(in_term, parent_quote);
+    else
+        str = generate_bash_error_function(in_term);
     final_command = fmt::format("{}\n{}", str, final_command);
     free(choose_dir);
 

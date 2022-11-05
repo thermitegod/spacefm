@@ -1353,7 +1353,7 @@ on_popup_open_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     if (sel_files.empty())
         sel_files.emplace_back(data->file);
 
-    ptk_open_files_with_app(data->cwd, sel_files, nullptr, data->browser, true, false);
+    ptk_open_files_with_app(data->cwd, sel_files, "", data->browser, true, false);
 }
 
 static void
@@ -1407,7 +1407,7 @@ on_popup_open_all(GtkMenuItem* menuitem, PtkFileMenu* data)
     std::vector<vfs::file_info> sel_files = data->sel_files;
     if (sel_files.empty())
         sel_files.emplace_back(data->file);
-    ptk_open_files_with_app(data->cwd, sel_files, nullptr, data->browser, false, true);
+    ptk_open_files_with_app(data->cwd, sel_files, "", data->browser, false, true);
 }
 
 static void
@@ -1430,7 +1430,7 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
     std::vector<vfs::file_info> sel_files = data->sel_files;
     if (sel_files.empty())
         sel_files.emplace_back(data->file);
-    ptk_open_files_with_app(data->cwd, sel_files, app.c_str(), data->browser, false, false);
+    ptk_open_files_with_app(data->cwd, sel_files, app, data->browser, false, false);
 }
 
 enum PTKFileMenuAppJob
@@ -2135,11 +2135,11 @@ on_new_bookmark(GtkMenuItem* menuitem, PtkFileMenu* data)
     {
         vfs::file_info file = data->sel_files.back();
         const std::string full_path = Glib::build_filename(data->cwd, file->get_name());
-        ptk_bookmark_view_add_bookmark(nullptr, data->browser, full_path.c_str());
+        ptk_bookmark_view_add_bookmark(full_path);
     }
     else
     {
-        ptk_bookmark_view_add_bookmark(nullptr, data->browser, nullptr);
+        ptk_bookmark_view_add_bookmark(data->browser);
     }
 }
 
@@ -2275,12 +2275,11 @@ on_popup_compress_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 static void
 on_popup_extract_to_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
-    /* If menuitem is set, function was called from GUI so files will contain
-     * an archive */
+    // If menuitem is set, function was called from GUI so files will contain an archive
     ptk_file_archiver_extract(data->browser,
                               data->sel_files,
                               data->cwd,
-                              nullptr,
+                              "",
                               PtkHandlerArchive::HANDLER_EXTRACT,
                               menuitem ? true : false);
 }
@@ -2288,8 +2287,7 @@ on_popup_extract_to_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 static void
 on_popup_extract_here_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
-    /* If menuitem is set, function was called from GUI so files will contain
-     * an archive */
+    // If menuitem is set, function was called from GUI so files will contain an archive
     ptk_file_archiver_extract(data->browser,
                               data->sel_files,
                               data->cwd,
@@ -2301,12 +2299,11 @@ on_popup_extract_here_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 static void
 on_popup_extract_list_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
-    /* If menuitem is set, function was called from GUI so files will contain
-     * an archive */
+    // If menuitem is set, function was called from GUI so files will contain an archive
     ptk_file_archiver_extract(data->browser,
                               data->sel_files,
                               data->cwd,
-                              nullptr,
+                              "",
                               PtkHandlerArchive::HANDLER_LIST,
                               menuitem ? true : false);
 }
@@ -2349,12 +2346,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
                 file = vfs_file_info_new();
                 vfs_file_info_get(file, ao->path);
                 const std::vector<vfs::file_info> sel_files{file};
-                ptk_open_files_with_app(cwd.c_str(),
-                                        sel_files,
-                                        nullptr,
-                                        ao->file_browser,
-                                        false,
-                                        true);
+                ptk_open_files_with_app(cwd, sel_files, "", ao->file_browser, false, true);
                 vfs_file_info_unref(file);
             }
         }
@@ -2450,7 +2442,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     if (!browser || !setname)
         return;
 
-    const char* cwd;
+    std::string cwd;
     std::string file_path;
     vfs::file_info file;
     std::vector<vfs::file_info> sel_files;
@@ -2463,7 +2455,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     }
     else
     {
-        cwd = vfs_user_desktop_dir().c_str();
+        cwd = vfs_user_desktop_dir();
     }
 
     if (sel_files.empty())
@@ -2519,7 +2511,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         else if (set->xset_name == XSetName::NEW_LINK)
             on_popup_new_link_activate(nullptr, data);
         else if (set->xset_name == XSetName::NEW_BOOKMARK)
-            ptk_bookmark_view_add_bookmark(nullptr, browser, nullptr);
+            ptk_bookmark_view_add_bookmark(browser);
         else if (set->xset_name == XSetName::NEW_ARCHIVE)
         {
             if (browser)

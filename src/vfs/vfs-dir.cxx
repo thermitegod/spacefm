@@ -431,7 +431,7 @@ vfs_dir_new(std::string_view path)
     vfs::dir dir = VFS_DIR(g_object_new(VFS_TYPE_DIR, nullptr));
 
     dir->path = path;
-    dir->avoid_changes = vfs_volume_dir_avoid_changes(path.data());
+    dir->avoid_changes = vfs_volume_dir_avoid_changes(path);
 
     // LOG_INFO("vfs_dir_new {}  avoid_changes={}", dir->path, dir->avoid_changes);
 

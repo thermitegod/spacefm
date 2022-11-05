@@ -72,7 +72,7 @@ ParentInfo::ParentInfo(PtkFileBrowser* file_browser, std::string_view cwd)
 
 static bool
 open_archives_with_handler(ParentInfo* parent, const std::vector<vfs::file_info>& sel_files,
-                           const char* full_path, vfs::mime_type mime_type)
+                           std::string_view full_path, vfs::mime_type mime_type)
 {
     if (xset_get_b(XSetName::ARC_DEF_OPEN))
     {                 // user has open archives with app option enabled
@@ -80,7 +80,7 @@ open_archives_with_handler(ParentInfo* parent, const std::vector<vfs::file_info>
     }
 
     bool extract_here = xset_get_b(XSetName::ARC_DEF_EX);
-    const char* dest_dir = nullptr;
+    std::string dest_dir;
     i32 cmd;
 
     // determine default archive action in this dir
@@ -239,56 +239,57 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
     }
 }
 
-static const char*
-check_desktop_name(const char* app_desktop)
+static const std::string
+check_desktop_name(std::string_view app_desktop)
 {
     // Check whether this is an app desktop file or just a command line
     if (ztd::endswith(app_desktop, ".desktop"))
-        return app_desktop;
+        return app_desktop.data();
 
     // Not a desktop entry name
     // If we are lucky enough, there might be a desktop entry
     // for this program
     const std::string name = fmt::format("{}.desktop", app_desktop);
     if (std::filesystem::exists(name))
-        return ztd::strdup(name);
+        return name;
 
     // fallback
-    return app_desktop;
+    return app_desktop.data();
 }
 
 static bool
-open_files_with_app(ParentInfo* parent, GList* files, const char* app_desktop)
+open_files_with_app(ParentInfo* parent, GList* files, std::string_view app_desktop)
 {
     xset_t handler_set;
 
-    if (app_desktop && ztd::startswith(app_desktop, "###") &&
-        (handler_set = xset_is(app_desktop + 3)) && files)
+    if (ztd::startswith(app_desktop, "###") && (handler_set = xset_is(app_desktop.substr(3))) &&
+        files)
     {
         // is a handler
         open_files_with_handler(parent, files, handler_set);
         return true;
     }
-    else if (app_desktop)
+    if (app_desktop.empty())
+        return false;
+
+    vfs::desktop desktop(check_desktop_name(app_desktop));
+
+    LOG_INFO("EXEC({})={}", desktop.get_full_path(), desktop.get_exec());
+
+    const std::vector<std::string> open_files = glist_t_char_to_vector_t_string(files);
+
+    try
     {
-        vfs::desktop desktop(check_desktop_name(app_desktop));
-
-        LOG_INFO("EXEC({})={}", desktop.get_full_path(), desktop.get_exec());
-
-        const std::vector<std::string> open_files = glist_t_char_to_vector_t_string(files);
-
-        try
-        {
-            desktop.open_files(parent->cwd, open_files);
-        }
-        catch (const VFSAppDesktopException& e)
-        {
-            GtkWidget* toplevel = parent->file_browser
-                                      ? gtk_widget_get_toplevel(GTK_WIDGET(parent->file_browser))
-                                      : nullptr;
-            ptk_show_error(GTK_WINDOW(toplevel), "Error", e.what());
-        }
+        desktop.open_files(parent->cwd, open_files);
     }
+    catch (const VFSAppDesktopException& e)
+    {
+        GtkWidget* toplevel = parent->file_browser
+                                  ? gtk_widget_get_toplevel(GTK_WIDGET(parent->file_browser))
+                                  : nullptr;
+        ptk_show_error(GTK_WINDOW(toplevel), "Error", e.what());
+    }
+
     return true;
 }
 
@@ -311,8 +312,8 @@ free_file_list_hash(void* key, void* value, void* user_data)
 }
 
 void
-ptk_open_files_with_app(const char* cwd, const std::vector<vfs::file_info>& sel_files,
-                        const char* app_desktop, PtkFileBrowser* file_browser, bool xforce,
+ptk_open_files_with_app(std::string_view cwd, const std::vector<vfs::file_info>& sel_files,
+                        std::string_view app_desktop, PtkFileBrowser* file_browser, bool xforce,
                         bool xnever)
 {
     // if xnever, never execute an executable
@@ -331,9 +332,9 @@ ptk_open_files_with_app(const char* cwd, const std::vector<vfs::file_info>& sel_
         if (!file)
             continue;
 
-        full_path = Glib::build_filename(cwd, file->get_name());
+        full_path = Glib::build_filename(cwd.data(), file->get_name());
 
-        if (app_desktop)
+        if (!app_desktop.empty())
         { // specified app to open all files
             files_to_open = g_list_append(files_to_open, ztd::strdup(full_path));
         }
@@ -379,7 +380,7 @@ ptk_open_files_with_app(const char* cwd, const std::vector<vfs::file_info>& sel_
 
             // has archive handler?
             if (!sel_files.empty() &&
-                open_archives_with_handler(parent, sel_files, full_path.c_str(), mime_type))
+                open_archives_with_handler(parent, sel_files, full_path, mime_type))
             {
                 // all files were handled by open_archives_with_handler
                 vfs_mime_type_unref(mime_type);
@@ -390,7 +391,7 @@ ptk_open_files_with_app(const char* cwd, const std::vector<vfs::file_info>& sel_
             GSList* handlers_slist =
                 ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_FILE,
                                               PtkHandlerMount::HANDLER_MOUNT,
-                                              full_path.c_str(),
+                                              full_path,
                                               mime_type,
                                               true,
                                               false,
@@ -403,7 +404,7 @@ ptk_open_files_with_app(const char* cwd, const std::vector<vfs::file_info>& sel_
             }
 
             /* The file itself is a desktop entry file. */
-            /* was: if (ztd::endswith(vfs_file_info_get_name(file), ".desktop"))
+            /* was: if(ztd::endswith(file->get_name(), ".desktop"))
              */
             if (alloc_desktop.empty())
             {
@@ -493,7 +494,7 @@ ptk_open_files_with_app(const char* cwd, const std::vector<vfs::file_info>& sel_
         }
     }
 
-    if (app_desktop && files_to_open)
+    if (!app_desktop.empty() && files_to_open)
     {
         // specified app to open all files
         open_files_with_app(parent, files_to_open, app_desktop);

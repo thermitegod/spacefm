@@ -3675,7 +3675,7 @@ VFSVolume::get_icon() const noexcept
 }
 
 bool
-vfs_volume_dir_avoid_changes(const char* dir)
+vfs_volume_dir_avoid_changes(std::string_view dir)
 {
     // determines if file change detection should be disabled for this
     // dir (eg nfs stat calls block when a write is in progress so file
@@ -3685,18 +3685,15 @@ vfs_volume_dir_avoid_changes(const char* dir)
     bool ret;
 
     // LOG_INFO("vfs_volume_dir_avoid_changes( {} )", dir);
-    if (!udev || !dir)
+    if (!udev || dir.empty())
         return false;
 
     // canonicalize path
-    char buf[PATH_MAX + 1];
-    char* canon = realpath(dir, buf);
-    if (!canon)
-        return false;
+    const std::string canon = std::filesystem::canonical(dir);
 
     // get devnum
     struct stat stat_buf; // skip stat
-    if (stat(canon, &stat_buf) == -1)
+    if (stat(canon.data(), &stat_buf) == -1)
         return false;
     // LOG_INFO("    stat_buf.st_dev = {}:{}", major(stat_buf.st_dev), minor(stat_buf.st_dev));
 

@@ -1992,7 +1992,7 @@ on_template_changed(GtkWidget* widget, MoveSet* mset)
 }
 
 static bool
-update_new_display_delayed(char* path)
+update_new_display_delayed(const char* path)
 {
     const std::string dir_path = Glib::path_get_dirname(path);
     vfs::dir vdir = vfs_dir_get_by_path_soft(dir_path);
@@ -2006,18 +2006,17 @@ update_new_display_delayed(char* path)
     }
     if (vdir)
         g_object_unref(vdir);
-    free(path);
     return false;
 }
 
 static void
-update_new_display(const char* path)
+update_new_display(std::string_view path)
 {
     // for devices like nfs, emit created so the new file is shown
     // update now
-    update_new_display_delayed(ztd::strdup(path));
+    update_new_display_delayed(path.data());
     // update a little later for exec tasks
-    g_timeout_add(1500, (GSourceFunc)update_new_display_delayed, ztd::strdup(path));
+    g_timeout_add(1500, (GSourceFunc)update_new_display_delayed, ztd::strdup(path.data()));
 }
 
 i32
@@ -2786,7 +2785,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     }
                     else
                     {
-                        update_new_display(path.c_str());
+                        update_new_display(path);
                     }
                 }
             }
@@ -2856,7 +2855,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     ptask->user_data = auto_open;
                 }
                 ptk_file_task_run(ptask);
-                update_new_display(full_path.c_str());
+                update_new_display(full_path);
             }
             else if (create_new && new_file)
             {
@@ -2916,7 +2915,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     ptask->user_data = auto_open;
                 }
                 ptk_file_task_run(ptask);
-                update_new_display(full_path.c_str());
+                update_new_display(full_path);
             }
             else if (create_new)
             {
@@ -2975,7 +2974,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     ptask->user_data = auto_open;
                 }
                 ptk_file_task_run(ptask);
-                update_new_display(full_path.c_str());
+                update_new_display(full_path);
             }
             else if (copy || copy_target)
             {
@@ -3024,7 +3023,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 if (as_root)
                     ptask->task->exec_as_user = "root";
                 ptk_file_task_run(ptask);
-                update_new_display(full_path.c_str());
+                update_new_display(full_path);
             }
             else if (link || link_target)
             {
@@ -3066,7 +3065,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 if (as_root)
                     ptask->task->exec_as_user = "root";
                 ptk_file_task_run(ptask);
-                update_new_display(full_path.c_str());
+                update_new_display(full_path);
             }
             // need move?  (do move as task in case it takes a long time)
             else if (as_root || !ztd::same(old_path, path))
@@ -3096,7 +3095,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 if (as_root)
                     ptask->task->exec_as_user = "root";
                 ptk_file_task_run(ptask);
-                update_new_display(full_path.c_str());
+                update_new_display(full_path);
             }
             else
             {
@@ -3117,7 +3116,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 }
                 else
                 {
-                    update_new_display(full_path.c_str());
+                    update_new_display(full_path);
                 }
             }
             break;
@@ -3147,7 +3146,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
 /////////////////////////////////////////////////////////////
 
 void
-ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc callback)
+ptk_file_misc_paste_as(PtkFileBrowser* file_browser, std::string_view cwd, GFunc callback)
 {
     (void)callback;
     bool is_cut = false;
@@ -3156,7 +3155,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
     std::string file_dir;
 
     const std::vector<std::string> files =
-        ptk_clipboard_get_file_paths(cwd, &is_cut, &missing_targets);
+        ptk_clipboard_get_file_paths(cwd.data(), &is_cut, &missing_targets);
 
     for (std::string_view file_path : files)
     {
@@ -3167,7 +3166,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const char* cwd, GFunc call
         if (!ptk_rename_file(file_browser,
                              file_dir.c_str(),
                              file,
-                             cwd,
+                             cwd.data(),
                              !is_cut,
                              PtkRenameMode::PTK_RENAME,
                              nullptr))

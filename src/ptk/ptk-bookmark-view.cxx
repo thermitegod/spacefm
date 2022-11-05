@@ -18,23 +18,31 @@
 
 #include <filesystem>
 
+#include "bookmarks.hxx"
+
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-bookmark-view.hxx"
 
-#include "bookmarks.hxx"
+void
+ptk_bookmark_view_add_bookmark(std::string_view book_path)
+{
+    if (book_path.empty())
+        return;
+
+    add_bookmarks(book_path);
+}
 
 void
-ptk_bookmark_view_add_bookmark(GtkMenuItem* menuitem, PtkFileBrowser* file_browser,
-                               const char* path)
+ptk_bookmark_view_add_bookmark(PtkFileBrowser* file_browser)
 { // adding from file browser - bookmarks may not be shown
     if (!file_browser)
         return;
 
-    std::string book_path;
-    if (menuitem || !path)
-        book_path = ptk_file_browser_get_cwd(file_browser);
-    else
-        book_path = path;
+    add_bookmarks(ptk_file_browser_get_cwd(file_browser));
+}
 
-    add_bookmarks(book_path);
+void
+ptk_bookmark_view_add_bookmark_cb(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
+{
+    ptk_bookmark_view_add_bookmark(file_browser);
 }

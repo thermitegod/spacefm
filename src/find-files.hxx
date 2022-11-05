@@ -22,4 +22,4 @@
 
 #include <vector>
 
-void fm_find_files(const std::vector<const char*>& search_dirs);
+void fm_find_files(const std::vector<std::string>& search_dirs);
