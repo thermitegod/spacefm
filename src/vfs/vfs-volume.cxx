@@ -2328,7 +2328,7 @@ split_network_url(const char* url, netmount_t** netmount)
     {
         xurl = str + 1;
     }
-    while (xurl[0] == '/')
+    while (ztd::startswith(xurl, "/"))
         xurl++;
 
     char* trim_url;

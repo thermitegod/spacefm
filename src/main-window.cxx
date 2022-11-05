@@ -7012,7 +7012,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 else if (ztd::same(argv[j], "--dir"))
                 {
                     opt_cwd = argv[++j];
-                    if (!(opt_cwd && opt_cwd[0] == '/' && std::filesystem::is_directory(opt_cwd)))
+                    if (!opt_cwd || !std::filesystem::is_directory(opt_cwd))
                     {
                         reply = fmt::format("no such directory '{}'", opt_cwd);
                         return 2;
@@ -7202,7 +7202,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 if (ztd::same(argv[j], "--dir"))
                 {
                     opt_cwd = argv[++j];
-                    if (!(opt_cwd && opt_cwd[0] == '/' && std::filesystem::is_directory(opt_cwd)))
+                    if (!opt_cwd || !std::filesystem::is_directory(opt_cwd))
                     {
                         reply = fmt::format("no such directory '{}'", opt_cwd);
                         return 2;
@@ -7235,7 +7235,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 else
                 {
                     std::string str;
-                    if (argv[j][0] == '/')
+                    if (ztd::startswith(argv[j], "/"))
                     { // absolute path
                         str = argv[j];
                     }
