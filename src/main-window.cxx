@@ -2987,10 +2987,10 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
         statvfs(cwd, &fs_stat);
 
         // calc free space
-        size_str = vfs_file_size_to_string_format(fs_stat.f_bsize * fs_stat.f_bavail, true);
+        size_str = vfs_file_size_to_string_format(fs_stat.f_bsize * fs_stat.f_bavail);
         // calc total space
         const std::string total_size_str =
-            vfs_file_size_to_string_format(fs_stat.f_frsize * fs_stat.f_blocks, true);
+            vfs_file_size_to_string_format(fs_stat.f_frsize * fs_stat.f_blocks);
 
         statusbar_txt.append(fmt::format(" {} / {}   ", size_str, total_size_str));
     }
@@ -3018,7 +3018,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
         if (sel_files.empty())
             return;
 
-        size_str = vfs_file_size_to_string_format(total_size, true);
+        size_str = vfs_file_size_to_string_format(total_size);
 
         statusbar_txt.append(fmt::format("{} / {} ({})", num_sel, num_vis, size_str));
 
@@ -3061,7 +3061,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
                         if (stat(target_path.c_str(), &results) == 0)
                         {
                             const std::string lsize =
-                                vfs_file_size_to_string_format(results.st_size, true);
+                                vfs_file_size_to_string_format(results.st_size);
                             statusbar_txt.append(fmt::format("  Link -> {} ({})", target, lsize));
                         }
                         else

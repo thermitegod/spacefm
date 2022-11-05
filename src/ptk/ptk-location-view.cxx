@@ -1763,7 +1763,7 @@ on_prop(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     {
         if (vol->is_mountable)
         {
-            const std::string size_str = vfs_file_size_to_string_format(vol->size, true);
+            const std::string size_str = vfs_file_size_to_string_format(vol->size);
             df = fmt::format("echo USAGE ; echo \"{}      {}  {}  ( not mounted )\" ; echo ; ",
                              vol->device_file,
                              vol->fs_type ? vol->fs_type : "",

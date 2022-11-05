@@ -1482,9 +1482,9 @@ ptk_file_task_update(PtkFileTask* ptask)
         // count
         file_count = std::to_string(task->current_item);
         // size
-        size_str = vfs_file_size_to_string_format(task->progress, true);
+        size_str = vfs_file_size_to_string_format(task->progress);
         if (task->total_size)
-            size_str2 = vfs_file_size_to_string_format(task->total_size, true);
+            size_str2 = vfs_file_size_to_string_format(task->total_size);
         else
             size_str2 = "??"; // total_size calculation timed out
         size_tally = fmt::format("{} / {}", size_str, size_str2);
@@ -1503,7 +1503,7 @@ ptk_file_task_update(PtkFileTask* ptask)
         }
         else
         {
-            size_str = vfs_file_size_to_string_format(cur_speed, true);
+            size_str = vfs_file_size_to_string_format(cur_speed);
             speed1 = fmt::format("{}/s", size_str);
         }
         // avg speed
@@ -1512,7 +1512,7 @@ ptk_file_task_update(PtkFileTask* ptask)
             avg_speed = task->progress / timer_elapsed;
         else
             avg_speed = 0;
-        size_str2 = vfs_file_size_to_string_format(avg_speed, true);
+        size_str2 = vfs_file_size_to_string_format(avg_speed);
         speed2 = fmt::format("{}/s", size_str2);
 
         // remain cur
@@ -2017,7 +2017,7 @@ query_overwrite(PtkFileTask* ptask)
                 src_size = "<b>( same size )</b>";
             else
             {
-                size_str = vfs_file_size_to_string_format(src_stat.st_size, true);
+                size_str = vfs_file_size_to_string_format(src_stat.st_size);
                 src_size = fmt::format("{}\t( {} bytes )", size_str, src_stat.st_size);
                 if (src_stat.st_size > dest_stat.st_size)
                     src_rel_size = "larger";
@@ -2038,7 +2038,7 @@ query_overwrite(PtkFileTask* ptask)
                 else
                     src_rel_time = "older";
             }
-            size_str = vfs_file_size_to_string_format(dest_stat.st_size, true);
+            size_str = vfs_file_size_to_string_format(dest_stat.st_size);
             dest_size = fmt::format("{}\t( {} bytes )", size_str, dest_stat.st_size);
             strftime(buf,
                      sizeof(buf),

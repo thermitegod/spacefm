@@ -146,7 +146,7 @@ vfs_file_info_get(vfs::file_info file, std::string_view file_path)
         file->mime_type = vfs_mime_type_get_from_file(file_path, file->disp_name, &file_stat);
 
         // file size formated
-        const std::string size_str = vfs_file_size_to_string_format(file->size, true);
+        const std::string size_str = vfs_file_size_to_string_format(file->size);
         file->disp_size = size_str;
 
         // sfm get collate keys

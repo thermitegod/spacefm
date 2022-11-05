@@ -1033,18 +1033,16 @@ info_device_properties(device_t* device)
     /* device_size, device_block_size and device_is_read_only properties */
     if (device->device_is_media_available)
     {
-        u64 block_size;
-
-        device->device_size = sysfs_get_uint64(device->native_path, "size") * ((u64)512);
+        device->device_size = sysfs_get_uint64(device->native_path, "size") * ztd::BLOCK_SIZE;
         device->device_is_read_only = (sysfs_get_int(device->native_path, "ro") != 0);
         /* This is not available on all devices so fall back to 512 if unavailable.
          *
          * Another way to get this information is the BLKSSZGET ioctl but we do not want
          * to open the device. Ideally vol_id would export it.
          */
-        block_size = sysfs_get_uint64(device->native_path, "queue/hw_sector_size");
+        u64 block_size = sysfs_get_uint64(device->native_path, "queue/hw_sector_size");
         if (block_size == 0)
-            block_size = 512;
+            block_size = ztd::BLOCK_SIZE;
         device->device_block_size = block_size;
     }
     else
@@ -1290,7 +1288,7 @@ info_partition(device_t* device)
         u64 size = sysfs_get_uint64(device->native_path, "size");
         u64 alignment_offset = sysfs_get_uint64(device->native_path, "alignment_offset");
 
-        device->partition_size = ztd::strdup(size * 512);
+        device->partition_size = ztd::strdup(size * ztd::BLOCK_SIZE);
         device->partition_alignment_offset = ztd::strdup(alignment_offset);
 
         u64 offset = sysfs_get_uint64(device->native_path, "start") * device->device_block_size;

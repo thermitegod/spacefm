@@ -167,7 +167,7 @@ calc_total_size_of_files(std::string_view path, FilePropertiesDialogData* data)
         return;
 
     data->total_size += file_stat.st_size;
-    data->size_on_disk += (file_stat.st_blocks << 9); /* block x 512 */
+    data->size_on_disk += (file_stat.st_blocks * ztd::BLOCK_SIZE);
 
     if (std::filesystem::is_directory(path))
     {
@@ -185,7 +185,7 @@ calc_total_size_of_files(std::string_view path, FilePropertiesDialogData* data)
             else
             {
                 data->total_size += file_stat.st_size;
-                data->size_on_disk += (file_stat.st_blocks << 9);
+                data->size_on_disk += (file_stat.st_blocks * ztd::BLOCK_SIZE);
                 ++data->total_count;
             }
         }
@@ -214,17 +214,15 @@ calc_size(void* user_data)
 static bool
 on_update_labels(FilePropertiesDialogData* data)
 {
-    std::string size_str;
+    const std::string size_str = fmt::format("{} ( {} bytes )",
+                                             vfs_file_size_to_string_format(data->total_size),
+                                             data->total_size);
+    gtk_label_set_text(data->total_size_label, size_str.data());
 
-    size_str = fmt::format("{} ( {} bytes )",
-                           vfs_file_size_to_string_format(data->total_size, true),
-                           (u64)data->total_size);
-    gtk_label_set_text(data->total_size_label, size_str.c_str());
-
-    size_str = fmt::format("{} ( {} bytes )",
-                           vfs_file_size_to_string_format(data->size_on_disk, true),
-                           (u64)data->size_on_disk);
-    gtk_label_set_text(data->size_on_disk_label, size_str.c_str());
+    const std::string disk_str = fmt::format("{} ( {} bytes )",
+                                             vfs_file_size_to_string_format(data->size_on_disk),
+                                             data->size_on_disk);
+    gtk_label_set_text(data->size_on_disk_label, disk_str.data());
 
     std::string count;
     std::string count_dir;
@@ -600,9 +598,9 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
             gtk_label_set_text(data->total_size_label, buf.data());
 
             const std::string size_str =
-                vfs_file_size_to_string_format(file->get_blocks() * 512, true);
+                vfs_file_size_to_string_format(file->get_blocks() * ztd::BLOCK_SIZE);
 
-            buf = fmt::format("{}  ( {} bytes )", size_str, file->get_blocks() * 512);
+            buf = fmt::format("{}  ( {} bytes )", size_str, file->get_blocks() * ztd::BLOCK_SIZE);
             gtk_label_set_text(data->size_on_disk_label, buf.data());
 
             gtk_label_set_text(data->count_label, "1 file");
