@@ -169,138 +169,82 @@ static Glib::RefPtr<Glib::IOChannel> mchannel = nullptr;
  * device info
  ************************************************************************** */
 
-struct device_t
+struct Device
 {
-    device_t(udev_device* udevice);
-    ~device_t();
+    Device() = delete;
+    Device(udev_device* udevice);
+    ~Device();
 
     struct udev_device* udevice;
-    dev_t devnum;
-    char* devnode;
-    char* native_path;
-    char* mount_points;
 
-    bool device_is_system_internal;
-    bool device_is_partition;
-    bool device_is_partition_table;
-    bool device_is_removable;
-    bool device_is_media_available;
-    bool device_is_read_only;
-    bool device_is_drive;
-    bool device_is_optical_disc;
-    bool device_is_mounted;
-    char* device_presentation_hide;
-    char* device_presentation_nopolicy;
-    char* device_presentation_name;
-    char* device_presentation_icon_name;
-    char* device_automount_hint;
-    char* device_by_id;
-    u64 device_size;
-    u64 device_block_size;
-    char* id_usage;
-    char* id_type;
-    char* id_version;
-    char* id_uuid;
-    char* id_label;
+    dev_t devnum{0};
 
-    char* drive_vendor;
-    char* drive_model;
-    char* drive_revision;
-    char* drive_serial;
-    char* drive_wwn;
-    char* drive_connection_interface;
-    u64 drive_connection_speed;
-    char* drive_media_compatibility;
-    char* drive_media;
-    bool drive_is_media_ejectable;
-    bool drive_can_detach;
+    char* devnode{nullptr};
+    char* native_path{nullptr};
+    char* mount_points{nullptr};
 
-    char* partition_scheme;
-    char* partition_number;
-    char* partition_type;
-    char* partition_label;
-    char* partition_uuid;
-    char* partition_flags;
-    char* partition_offset;
-    char* partition_size;
-    char* partition_alignment_offset;
+    bool device_is_system_internal{true};
+    bool device_is_partition{false};
+    bool device_is_partition_table{false};
+    bool device_is_removable{false};
+    bool device_is_media_available{false};
+    bool device_is_read_only{false};
+    bool device_is_drive{false};
+    bool device_is_optical_disc{false};
+    bool device_is_mounted{false};
+    char* device_presentation_hide{nullptr};
+    char* device_presentation_nopolicy{nullptr};
+    char* device_presentation_name{nullptr};
+    char* device_presentation_icon_name{nullptr};
+    char* device_automount_hint{nullptr};
+    char* device_by_id{nullptr};
+    u64 device_size{0};
+    u64 device_block_size{0};
+    char* id_usage{nullptr};
+    char* id_type{nullptr};
+    char* id_version{nullptr};
+    char* id_uuid{nullptr};
+    char* id_label{nullptr};
 
-    char* partition_table_scheme;
-    char* partition_table_count;
+    char* drive_vendor{nullptr};
+    char* drive_model{nullptr};
+    char* drive_revision{nullptr};
+    char* drive_serial{nullptr};
+    char* drive_wwn{nullptr};
+    char* drive_connection_interface{nullptr};
+    u64 drive_connection_speed{0};
+    char* drive_media_compatibility{nullptr};
+    char* drive_media{nullptr};
+    bool drive_is_media_ejectable{false};
+    bool drive_can_detach{false};
 
-    bool optical_disc_is_blank;
-    bool optical_disc_is_appendable;
-    bool optical_disc_is_closed;
-    char* optical_disc_num_tracks;
-    char* optical_disc_num_audio_tracks;
-    char* optical_disc_num_sessions;
+    char* partition_scheme{nullptr};
+    char* partition_number{nullptr};
+    char* partition_type{nullptr};
+    char* partition_label{nullptr};
+    char* partition_uuid{nullptr};
+    char* partition_flags{nullptr};
+    char* partition_offset{nullptr};
+    char* partition_size{nullptr};
+    char* partition_alignment_offset{nullptr};
+
+    char* partition_table_scheme{nullptr};
+    char* partition_table_count{nullptr};
+
+    bool optical_disc_is_blank{false};
+    bool optical_disc_is_appendable{false};
+    bool optical_disc_is_closed{false};
+    char* optical_disc_num_tracks{nullptr};
+    char* optical_disc_num_audio_tracks{nullptr};
+    char* optical_disc_num_sessions{nullptr};
 };
 
-device_t::device_t(udev_device* udevice)
+Device::Device(udev_device* udevice)
 {
     this->udevice = udevice;
-
-    this->native_path = nullptr;
-    this->mount_points = nullptr;
-    this->devnode = nullptr;
-
-    this->device_is_system_internal = true;
-    this->device_is_partition = false;
-    this->device_is_partition_table = false;
-    this->device_is_removable = false;
-    this->device_is_media_available = false;
-    this->device_is_read_only = false;
-    this->device_is_drive = false;
-    this->device_is_optical_disc = false;
-    this->device_is_mounted = false;
-    this->device_presentation_hide = nullptr;
-    this->device_presentation_nopolicy = nullptr;
-    this->device_presentation_name = nullptr;
-    this->device_presentation_icon_name = nullptr;
-    this->device_automount_hint = nullptr;
-    this->device_by_id = nullptr;
-    this->device_size = 0;
-    this->device_block_size = 0;
-    this->id_usage = nullptr;
-    this->id_type = nullptr;
-    this->id_version = nullptr;
-    this->id_uuid = nullptr;
-    this->id_label = nullptr;
-
-    this->drive_vendor = nullptr;
-    this->drive_model = nullptr;
-    this->drive_revision = nullptr;
-    this->drive_serial = nullptr;
-    this->drive_wwn = nullptr;
-    this->drive_connection_interface = nullptr;
-    this->drive_connection_speed = 0;
-    this->drive_media_compatibility = nullptr;
-    this->drive_media = nullptr;
-    this->drive_is_media_ejectable = false;
-    this->drive_can_detach = false;
-
-    this->partition_scheme = nullptr;
-    this->partition_number = nullptr;
-    this->partition_type = nullptr;
-    this->partition_label = nullptr;
-    this->partition_uuid = nullptr;
-    this->partition_flags = nullptr;
-    this->partition_offset = nullptr;
-    this->partition_size = nullptr;
-    this->partition_alignment_offset = nullptr;
-
-    this->partition_table_scheme = nullptr;
-    this->partition_table_count = nullptr;
-
-    this->optical_disc_is_blank = false;
-    this->optical_disc_is_appendable = false;
-    this->optical_disc_is_closed = false;
-    this->optical_disc_num_tracks = nullptr;
-    this->optical_disc_num_audio_tracks = nullptr;
-    this->optical_disc_num_sessions = nullptr;
 }
 
-device_t::~device_t()
+Device::~Device()
 {
     if (this->native_path)
         free(this->native_path);
@@ -380,6 +324,8 @@ device_t::~device_t()
     if (this->optical_disc_num_sessions)
         free(this->optical_disc_num_sessions);
 }
+
+using device_t = std::shared_ptr<Device>;
 
 /**
  * unescapes things like \x20 to " " and ensures the returned string is valid UTF-8.
@@ -501,7 +447,7 @@ sysfs_resolve_link(std::string_view sysfs_path, std::string_view name)
 }
 
 static bool
-info_is_system_internal(device_t* device)
+info_is_system_internal(device_t device)
 {
     const char* value;
 
@@ -540,7 +486,7 @@ info_is_system_internal(device_t* device)
 }
 
 static void
-info_drive_connection(device_t* device)
+info_drive_connection(device_t device)
 {
     std::string connection_interface;
     u64 connection_speed = 0;
@@ -784,7 +730,7 @@ static const struct
 };
 
 static void
-info_drive_properties(device_t* device)
+info_drive_properties(device_t device)
 {
     GPtrArray* media_compat_array;
     const char* media_in_drive;
@@ -936,7 +882,7 @@ info_drive_properties(device_t* device)
 }
 
 static void
-info_device_properties(device_t* device)
+info_device_properties(device_t device)
 {
     const char* value;
 
@@ -1079,7 +1025,7 @@ info_device_properties(device_t* device)
 }
 
 static char*
-info_mount_points(device_t* device)
+info_mount_points(device_t device)
 {
     GList* mounts = nullptr;
 
@@ -1181,7 +1127,7 @@ info_mount_points(device_t* device)
 }
 
 static void
-info_partition_table(device_t* device)
+info_partition_table(device_t device)
 {
     bool is_partition_table = false;
     const char* value;
@@ -1249,7 +1195,7 @@ info_partition_table(device_t* device)
 }
 
 static void
-info_partition(device_t* device)
+info_partition(device_t device)
 {
     bool is_partition = false;
 
@@ -1334,7 +1280,7 @@ info_partition(device_t* device)
 }
 
 static void
-info_optical_disc(device_t* device)
+info_optical_disc(device_t device)
 {
     const char* optical_state = udev_device_get_property_value(device->udevice, "ID_CDROM");
 
@@ -1361,7 +1307,7 @@ info_optical_disc(device_t* device)
 }
 
 static bool
-device_get_info(device_t* device)
+device_get_info(device_t device)
 {
     info_device_properties(device);
     if (!device->native_path || device->devnum == 0)
@@ -1377,7 +1323,7 @@ device_get_info(device_t* device)
 }
 
 static void
-device_show_info(device_t* device, std::string& info)
+device_show_info(device_t device, std::string& info)
 {
     // clang-format off
     info.append(fmt::format("Showing information for {}\n", device->devnode));
@@ -2059,21 +2005,18 @@ VFSVolume::set_info() noexcept
 static vfs::volume
 vfs_volume_read_by_device(struct udev_device* udevice)
 { // uses udev to read device parameters into returned volume
-    vfs::volume volume = nullptr;
-
     if (!udevice)
         return nullptr;
 
-    device_t* device = new device_t(udevice);
+    device_t device = std::make_shared<Device>(udevice);
     if (!device_get_info(device) || !device->devnode || device->devnum == 0 ||
         !ztd::startswith(device->devnode, "/dev/"))
     {
-        delete device;
         return nullptr;
     }
 
     // translate device info to VFSVolume
-    volume = new VFSVolume;
+    vfs::volume volume = new VFSVolume;
     volume->devnum = device->devnum;
     volume->device_type = VFSVolumeDeviceType::BLOCK;
     volume->device_file = ztd::strdup(device->devnode);
@@ -2118,8 +2061,6 @@ vfs_volume_read_by_device(struct udev_device* udevice)
     volume->disp_name = nullptr;
     volume->automount_time = 0;
     volume->inhibit_auto = false;
-
-    delete device;
 
     // adjustments
     volume->ever_mounted = volume->is_mounted;
@@ -2956,12 +2897,11 @@ VFSVolume::device_info() const noexcept
 
     std::string info = "";
 
-    device_t* device = new device_t(udevice);
+    device_t device = std::make_shared<Device>(udevice);
     if (!device_get_info(device))
         return info;
 
     device_show_info(device, info);
-    delete device;
     udev_device_unref(udevice);
     return info;
 }
