@@ -389,7 +389,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
     }
 
     // Splitting archive handlers
-    char** archive_handlers = g_strsplit(archive_handlers_s, " ", -1);
+    const std::vector<std::string> archive_handlers = ztd::split(archive_handlers_s, " ");
 
     // Debug code
     // LOG_INFO("archive_handlers_s: {}", archive_handlers_s);
@@ -401,13 +401,13 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
     char* xset_name = xset_get_s(XSetName::ARC_DLG); // do not free
     i32 format = 4;                                  // default tar.gz
     i32 n = 0;
-    for (i32 i = 0; archive_handlers[i] != nullptr; ++i)
+    for (std::string_view archive_handler : archive_handlers)
     {
-        if (!archive_handlers[i])
+        if (archive_handler.empty())
             continue;
 
         // Fetching handler
-        handler_xset = xset_is(archive_handlers[i]);
+        handler_xset = xset_is(archive_handler);
 
         if (handler_xset && handler_xset->b == XSetB::XSET_B_TRUE)
         /* Checking to see if handler is enabled, can cope with
@@ -434,7 +434,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
             gtk_list_store_set(GTK_LIST_STORE(list),
                                &iter,
                                PTKFileArchiverCol::COL_XSET_NAME,
-                               archive_handlers[i],
+                               archive_handlers.data(),
                                PTKFileArchiverExtensionsCol::COL_HANDLER_EXTENSIONS,
                                extensions.c_str(),
                                -1);
@@ -445,9 +445,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
             n++;
         }
     }
-
-    // Clearing up archive_handlers
-    g_strfreev(archive_handlers);
 
     // Applying filter
     gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(dlg), filter);
@@ -1146,9 +1143,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     dest_quote = bash_quote(dest ? dest : cwd);
 
     // Fetching available archive handlers and splitting
-    char* archive_handlers_s = xset_get_s(XSetName::ARC_CONF2);
-    char** archive_handlers =
-        archive_handlers_s ? g_strsplit(archive_handlers_s, " ", -1) : nullptr;
+    const std::string archive_handlers_s = xset_get_s(XSetName::ARC_CONF2);
+    const std::vector<std::string> archive_handlers = ztd::split(archive_handlers_s, " ");
+
     xset_t handler_xset = nullptr;
 
     std::string command;
@@ -1202,7 +1199,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         std::string extract_target;         // %g or %G
         std::string mkparent;
         std::string perm;
-        std::string extension;
 
         if (list_contents)
         {
@@ -1227,59 +1223,46 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
              * needed if a parent directory must be created, and if the
              * extraction target is a file without the handler extension
              * filename is strdup'd to get rid of the const */
-            char* filename = ztd::strdup(file->get_name());
-            char* filename_no_archive_ext = nullptr;
+            const std::string filename = file->get_name();
+            std::string filename_no_archive_ext;
 
-            /* Looping for all extensions registered with the current
-             * archive handler (nullptr-terminated list) */
-            char** pathnames = handler_xset->x ? g_strsplit(handler_xset->x, " ", -1) : nullptr;
-            std::string filename_no_ext;
-            if (pathnames)
+            // Looping for all extensions registered with the current archive handler
+            const std::vector<std::string> pathnames = ztd::split(handler_xset->x, " ");
+
+            for (std::string_view pathname : pathnames)
             {
-                for (i32 i = 0; pathnames[i]; ++i)
-                {
-                    // getting just the extension of the pathname list element
-                    const auto namepack = get_name_extension(pathnames[i]);
-                    filename_no_ext = namepack.first;
-                    extension = namepack.second;
+                // getting just the extension of the pathname list element
+                const auto namepack = get_name_extension(pathname);
+                const std::string filename_no_ext = namepack.first;
+                const std::string extension = namepack.second;
 
-                    if (!extension.empty())
-                    {
-                        // add a dot to extension
-                        extension = fmt::format(".{}", extension);
-                        // Checking if the current extension is being used
-                        if (ztd::endswith(filename, extension))
-                        {
-                            // It is - determining filename without extension
-                            usize n = std::strlen(filename) - extension.size();
-                            char ch = filename[n];
-                            filename[n] = '\0';
-                            filename_no_archive_ext = ztd::strdup(filename);
-                            filename[n] = ch;
-                            break;
-                        }
-                    }
+                if (extension.empty())
+                    continue;
+
+                // add a dot to extension
+                const std::string new_extension = fmt::format(".{}", extension);
+                // Checking if the current extension is being used
+                if (ztd::endswith(filename, new_extension))
+                { // It is - determining filename without extension
+                    filename_no_archive_ext = ztd::rpartition(filename, new_extension)[0];
+                    break;
                 }
             }
-            g_strfreev(pathnames);
 
             /* An archive may not have an extension, or there may be no
              * extensions specified for the handler (they are optional)
              * - making sure filename_no_archive_ext is set in this case */
-            if (!filename_no_archive_ext)
-                filename_no_archive_ext = ztd::strdup(filename);
+            if (filename_no_archive_ext.empty())
+                filename_no_archive_ext = filename;
 
             /* Now the extraction filename is obtained, determine the
              * normal filename without the extension */
             const auto namepack = get_name_extension(filename_no_archive_ext);
-            filename_no_ext = namepack.first;
-            extension = namepack.second;
+            const std::string filename_no_ext = namepack.first;
+            std::string extension = namepack.second;
 
-            /* 'Completing' the extension and dealing with files with
-             * no extension */
-            if (extension.empty())
-                extension = "";
-            else
+            // 'Completing' the extension and dealing with files with no extension
+            if (!extension.empty())
                 extension = fmt::format(".{}", extension);
 
             /* Get extraction command - Doing this here as parent
@@ -1297,10 +1280,11 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                 command = "";
             }
 
+            std::string parent_path;
+
             /* Dealing with creation of parent directory if needed -
              * never create a parent directory if '%G' is used - this is
              * an override substitution for the sake of gzip */
-            std::string parent_path;
             if (create_parent && !ztd::contains(command, "%G"))
             {
                 /* Determining full path of parent directory to make
@@ -1366,10 +1350,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                 // Quoting target
                 extract_target = bash_quote(extract_target);
             }
-
-            // Cleaning up
-            free(filename);
-            free(filename_no_archive_ext);
         }
 
         // Substituting %x %g %G
@@ -1395,7 +1375,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     str = generate_bash_error_function(in_term, create_parent ? parent_quote.c_str() : nullptr);
     final_command = fmt::format("{}\n{}", str, final_command);
     free(choose_dir);
-    g_strfreev(archive_handlers);
 
     // Creating task
     const std::string task_name = fmt::format("Extract {}", sel_files.front()->get_name());

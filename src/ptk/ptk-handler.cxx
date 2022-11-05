@@ -1046,7 +1046,7 @@ ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
 }
 
 bool
-ptk_handler_values_in_list(const std::string list, const std::vector<std::string>& values,
+ptk_handler_values_in_list(std::string_view list, const std::vector<std::string>& values,
                            std::string& msg)
 { /* test for the presence of values in list, using wildcards.
    *  list is space-separated, plus sign (+) indicates required. */
@@ -1054,33 +1054,30 @@ ptk_handler_values_in_list(const std::string list, const std::vector<std::string
         return false;
 
     // get elements of list
-    char** elements = g_strsplit(list.c_str(), " ", -1);
-    if (!elements)
+    const std::vector<std::string> elements = ztd::split(list, " ");
+    if (elements.empty())
         return false;
 
     // test each element for match
-    char* element;
     bool required, match;
     bool ret = false;
-    for (i32 i = 0; elements[i]; ++i)
+    for (std::string_view element : elements)
     {
-        if (!elements[i][0])
+        if (element.empty())
             continue;
-        if (elements[i][0] == '+')
-        {
-            // plus prefix indicates this element is required
-            element = elements[i] + 1;
+        if (ztd::startswith(element, "+"))
+        {                                // plus prefix indicates this element is required
+            element = element.substr(1); // shift right of '+'
             required = true;
         }
         else
         {
-            element = elements[i];
             required = false;
         }
         match = false;
         for (std::string_view handler : values)
         {
-            if (fnmatch(element, handler.data(), 0) == 0)
+            if (fnmatch(element.data(), handler.data(), 0) == 0)
             {
                 // match
                 ret = match = true;
@@ -1090,13 +1087,11 @@ ptk_handler_values_in_list(const std::string list, const std::vector<std::string
         if (required && !match)
         {
             // no match of required
-            g_strfreev(elements);
             return false;
         }
 
-        msg = fmt::format("{}{}{}", match ? "[" : "", elements[i], match ? "]" : "");
+        msg = fmt::format("{}{}{}", match ? "[" : "", element, match ? "]" : "");
     }
-    g_strfreev(elements);
 
     return ret;
 }
@@ -1617,7 +1612,7 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
     if (!archive_handlers_s)
         return;
 
-    char** archive_handlers = g_strsplit(archive_handlers_s, " ", -1);
+    const std::vector<std::string> archive_handlers = ztd::split(archive_handlers_s, " ");
 
     // Debug code
     // LOG_INFO("archive_handlers_s: {}", archive_handlers_s);
@@ -1626,13 +1621,12 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
     GtkTreeIter iter;
     GtkTreeIter def_handler_iter;
     def_handler_iter.stamp = 0;
-    i32 i;
-    for (i = 0; archive_handlers[i] != nullptr; ++i)
+    for (std::string_view archive_handler : archive_handlers)
     {
-        if (ztd::startswith(archive_handlers[i], handler_cust_prefixs.at(hnd->mode)))
+        if (ztd::startswith(archive_handler, handler_cust_prefixs.at(hnd->mode)))
         {
             // Fetching handler  - ignoring invalid handler xset names
-            xset_t handler_xset = xset_is(archive_handlers[i]);
+            xset_t handler_xset = xset_is(archive_handler);
             if (handler_xset)
             {
                 // Obtaining appending iterator for treeview model
@@ -1647,7 +1641,7 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
                 gtk_list_store_set(GTK_LIST_STORE(hnd->list),
                                    &iter,
                                    PtkHandlerCol::COL_XSET_NAME,
-                                   archive_handlers[i],
+                                   archive_handler.data(),
                                    PtkHandlerCol::COL_HANDLER_NAME,
                                    dis_name.c_str(),
                                    -1);
@@ -1657,16 +1651,11 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
         }
     }
 
-    // Clearing up archive_handlers
-    g_strfreev(archive_handlers);
-
     // Fetching selection from treeview
-    GtkTreeSelection* selection;
-    selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(hnd->view_handlers));
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(hnd->view_handlers));
 
-    /* Loading first or default archive handler if there is one and no selection is
-     * present */
-    if (i > 0 && !gtk_tree_selection_get_selected(GTK_TREE_SELECTION(selection), nullptr, nullptr))
+    // Loading first or default archive handler if there is one and no selection is present
+    if (!gtk_tree_selection_get_selected(GTK_TREE_SELECTION(selection), nullptr, nullptr))
     {
         GtkTreePath* tree_path;
         if (def_handler_set && def_handler_iter.stamp)
@@ -1990,33 +1979,28 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
             return;
         }
 
-        // Updating available archive handlers list - fetching current
-        // handlers
-        const char* archive_handlers_s = xset_get_s(handler_conf_xsets.at(hnd->mode));
-        char** archive_handlers =
-            archive_handlers_s ? g_strsplit(archive_handlers_s, " ", -1) : nullptr;
+        // Updating available archive handlers list - fetching current handlers
+        const std::string archive_handlers_s = xset_get_s(handler_conf_xsets.at(hnd->mode));
+        const std::vector<std::string> archive_handlers = ztd::split(archive_handlers_s, " ");
         std::string new_archive_handlers_s;
 
         // Looping for handlers (nullptr-terminated list)
-        if (archive_handlers)
+        for (std::string_view archive_handler : archive_handlers)
         {
-            for (i32 i = 0; archive_handlers[i] != nullptr; ++i)
+            // Appending to new archive handlers list when it isnt the
+            // deleted handler - remember that archive handlers are
+            // referred to by their xset names, not handler names!!
+            if (ztd::compare(archive_handler, xset_name) != 0)
             {
-                // Appending to new archive handlers list when it isnt the
-                // deleted handler - remember that archive handlers are
-                // referred to by their xset names, not handler names!!
-                if (ztd::compare(archive_handlers[i], xset_name) != 0)
-                {
-                    // Debug code
-                    // LOG_INFO("archive_handlers[i] : {}", archive_handlers[i])
-                    // LOG_INFO("xset_name           : {}", xset_name);
+                // Debug code
+                // LOG_INFO("archive_handler     : {}", archive_handler)
+                // LOG_INFO("xset_name           : {}", xset_name);
 
-                    if (ztd::same(new_archive_handlers_s, ""))
-                        new_archive_handlers_s = ztd::strdup(archive_handlers[i]);
-                    else
-                        new_archive_handlers_s =
-                            fmt::format("{} {}", new_archive_handlers_s, archive_handlers[i]);
-                }
+                if (new_archive_handlers_s.empty())
+                    new_archive_handlers_s = archive_handler.data();
+                else
+                    new_archive_handlers_s =
+                        fmt::format("{} {}", new_archive_handlers_s, archive_handler);
             }
         }
 
@@ -2058,9 +2042,6 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
             gtk_tree_selection_select_path(GTK_TREE_SELECTION(selection), new_path);
             gtk_tree_path_free(new_path);
         }
-
-        // Clearing up
-        g_strfreev(archive_handlers);
     }
     else if (GTK_WIDGET(widget) == GTK_WIDGET(hnd->btn_up) ||
              GTK_WIDGET(widget) == GTK_WIDGET(hnd->btn_down))

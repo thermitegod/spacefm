@@ -2054,25 +2054,24 @@ mtab_fstype_is_handled_by_protocol(const char* mtab_fstype)
         std::vector<std::string> values;
         values.emplace_back(mtab_fstype);
         values.emplace_back(fmt::format("mtab_fs={}", mtab_fstype));
-        char** handlers = g_strsplit(handlers_list, " ", 0);
-        if (handlers)
+        const std::vector<std::string> handlers = ztd::split(handlers_list, " ");
+        if (!handlers.empty())
         {
             // test handlers
-            std::string msg;
             xset_t set;
-            for (i32 i = 0; handlers[i]; ++i)
+            for (std::string_view handler : handlers)
             {
-                if (!handlers[i][0] || !(set = xset_is(handlers[i])) ||
+                if (handlers.empty() || !(set = xset_is(handler)) ||
                     set->b != XSetB::XSET_B_TRUE /* disabled */)
                     continue;
                 // test whitelist
+                std::string msg;
                 if (!ztd::same(set->s, "*") && ptk_handler_values_in_list(set->s, values, msg))
                 {
                     found = true;
                     break;
                 }
             }
-            g_strfreev(handlers);
         }
     }
     return found;
@@ -2456,16 +2455,16 @@ vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* option
               xset_get_s(mode == PtkHandlerMode::HANDLER_MODE_FS ? XSetName::DEV_FS_CNF
                                                                  : XSetName::DEV_NET_CNF)))
         return nullptr;
-    char** handlers = g_strsplit(handlers_list, " ", 0);
-    if (!handlers)
+    const std::vector<std::string> handlers = ztd::split(handlers_list, " ");
+    if (handlers.empty())
         return nullptr;
 
     // test handlers
     bool found = false;
     std::string msg;
-    for (i32 i = 0; handlers[i]; ++i)
+    for (std::string_view handler : handlers)
     {
-        if (!handlers[i][0] || !(set = xset_is(handlers[i])) ||
+        if (handler.empty() || !(set = xset_is(handler)) ||
             set->b != XSetB::XSET_B_TRUE /* disabled */)
             continue;
         switch (mode)
@@ -2496,7 +2495,6 @@ vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* option
                 break;
         }
     }
-    g_strfreev(handlers);
     if (!found)
         return nullptr;
 
