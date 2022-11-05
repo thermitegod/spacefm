@@ -228,29 +228,25 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
     GtkTreeIter parent_it;
     GtkTreePath* tree_path = nullptr;
 
-    if (!path || *path != '/')
+    if (!ztd::startswith(path, "/"))
         return false;
 
-    char** dirs = g_strsplit(path + 1, "/", -1);
+    const std::vector<std::string> dirs = ztd::split(path, "/");
 
-    if (!dirs)
+    if (dirs.empty())
         return false;
 
     GtkTreeModel* model = gtk_tree_view_get_model(dir_tree_view);
 
     if (!gtk_tree_model_iter_children(model, &parent_it, nullptr))
-    {
-        g_strfreev(dirs);
         return false;
-    }
 
-    /* special case: root dir */
-    if (!dirs[0])
+    // special case: root dir
+    if (dirs.size() == 1)
     {
         it = parent_it;
         tree_path = gtk_tree_model_get_path(model, &parent_it);
 
-        g_strfreev(dirs);
         gtk_tree_selection_select_path(gtk_tree_view_get_selection(dir_tree_view), tree_path);
 
         gtk_tree_view_scroll_to_cell(dir_tree_view, tree_path, nullptr, false, 0.5, 0.5);
@@ -260,14 +256,14 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
         return true;
     }
 
-    char** dir;
-    for (dir = dirs; *dir; ++dir)
+    for (std::string_view dir: dirs)
     {
+        if (dir.empty())
+            continue; // first item will be empty because of how ztd::split works
+
         if (!gtk_tree_model_iter_children(model, &it, &parent_it))
-        {
-            g_strfreev(dirs);
             return false;
-        }
+
         bool found = false;
         vfs::file_info file;
         do
@@ -275,7 +271,8 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
             gtk_tree_model_get(model, &it, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
             if (!file)
                 continue;
-            if (ztd::same(file->get_name(), *dir))
+
+            if (ztd::same(file->get_name(), dir.data()))
             {
                 tree_path = gtk_tree_model_get_path(model, &it);
 
@@ -301,7 +298,6 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const char* path)
         }
     }
 
-    g_strfreev(dirs);
     gtk_tree_selection_select_path(gtk_tree_view_get_selection(dir_tree_view), tree_path);
 
     gtk_tree_view_scroll_to_cell(dir_tree_view, tree_path, nullptr, false, 0.5, 0.5);
