@@ -245,23 +245,23 @@ MimeCache::lookup_glob(std::string_view filename, i32* glob_len)
     return type;
 }
 
-const std::vector<const char*>
+const std::vector<std::string>
 MimeCache::lookup_parents(std::string_view mime_type)
 {
-    std::vector<const char*> result;
+    std::vector<std::string> result;
 
     const char* found_parents =
         this->lookup_str_in_entries(this->parents, this->n_parents, mime_type);
     if (!found_parents)
         return result;
 
-    u32 n = VAL32(found_parents, 0);
+    const u32 n = VAL32(found_parents, 0);
     found_parents += 4;
 
     for (usize i = 0; i < n; ++i)
     {
-        u32 parent_off = VAL32(found_parents, i * 4);
-        const char* parent = this->buffer + parent_off;
+        const u32 parent_off = VAL32(found_parents, i * 4);
+        const std::string parent = this->buffer + parent_off;
         result.push_back(parent);
     }
     return result;

@@ -67,9 +67,6 @@ const char* mime_type_get_by_file(const char* filepath, struct stat* statbuf, co
 bool mime_type_is_text_file(std::string_view file_path, std::string_view mime_type = "");
 bool mime_type_is_executable_file(std::string_view file_path, std::string_view mime_type = "");
 
-/* Check if the specified mime_type is the subclass of the specified parent type */
-// bool mime_type_is_subclass(const char* type, const char* parent);
-
 /* Get human-readable description and icon name of the mime-type
  * If locale is nullptr, current locale will be used.
  * The returned string should be freed when no longer used.
@@ -79,6 +76,6 @@ char* mime_type_get_desc_icon(const char* type, const char* locale, char** icon_
 /*
  * Get mime caches
  */
-std::vector<MimeCache>& mime_type_get_caches();
+std::vector<mime_cache_t>& mime_type_get_caches();
 
 void mime_type_regen_all_caches();

@@ -30,6 +30,8 @@
 #include <algorithm>
 #include <ranges>
 
+#include <memory>
+
 #include <fcntl.h>
 
 #include <fmt/format.h>
@@ -51,10 +53,10 @@
 /* max extent used to checking text files */
 constexpr i32 TEXT_MAX_EXTENT = 512;
 
-static bool mime_type_is_subclass(const char* type, const char* parent);
+/* Check if the specified mime_type is the subclass of the specified parent type */
+static bool mime_type_is_subclass(std::string_view type, std::string_view parent);
 
-static usize n_caches = 0;
-std::vector<MimeCache> caches;
+std::vector<mime_cache_t> caches;
 
 /* max magic extent of all caches */
 static u32 mime_cache_max_extent = 0;
@@ -85,18 +87,20 @@ mime_type_get_by_filename(const char* filename, struct stat* statbuf)
     if (statbuf && S_ISDIR(statbuf->st_mode))
         return XDG_MIME_TYPE_DIRECTORY;
 
-    for (usize i = 0; !type && i < n_caches; ++i)
+    for (mime_cache_t cache: caches)
     {
-        MimeCache cache = caches.at(i);
-        type = cache.lookup_literal(filename);
-        if (!type)
+        type = cache->lookup_literal(filename);
+        if (type)
+            break;
+
+        const char* _type = cache->lookup_suffix(filename, &suffix_pos);
+        if (_type && suffix_pos < prev_suffix_pos)
         {
-            const char* _type = cache.lookup_suffix(filename, &suffix_pos);
-            if (_type && suffix_pos < prev_suffix_pos)
-            {
-                type = _type;
-                prev_suffix_pos = suffix_pos;
-            }
+            type = _type;
+            prev_suffix_pos = suffix_pos;
+
+            if (type)
+                break;
         }
     }
 
@@ -104,17 +108,19 @@ mime_type_get_by_filename(const char* filename, struct stat* statbuf)
     {
         i32 max_glob_len = 0;
         i32 glob_len = 0;
-        for (usize i = 0; !type && i < n_caches; ++i)
+        for (mime_cache_t cache: caches)
         {
-            MimeCache cache = caches.at(i);
             const char* matched_type;
-            matched_type = cache.lookup_glob(filename, &glob_len);
+            matched_type = cache->lookup_glob(filename, &glob_len);
             /* according to the mime.cache 1.0 spec, we should use the longest glob matched. */
             if (matched_type && glob_len > max_glob_len)
             {
                 type = matched_type;
                 max_glob_len = glob_len;
             }
+
+            if (type)
+                break;
         }
     }
 
@@ -208,7 +214,7 @@ mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* ba
             {
                 for (usize i = 0; !type && i < caches.size(); ++i)
                 {
-                    type = caches.at(i).lookup_magic(data, len);
+                    type = caches.at(i)->lookup_magic(data, len);
                 }
 
                 /* Check for executable file */
@@ -354,7 +360,7 @@ _mime_type_get_desc_icon(const char* file_path, const char* locale, bool is_loca
         const char* const* langs = g_get_language_names();
         char* dot = (char*)strchr(langs[0], '.');
         if (dot)
-            locale = _locale = strndup(langs[0], (size_t)(dot - langs[0]));
+            locale = _locale = strndup(langs[0], (usize)(dot - langs[0]));
         else
             locale = langs[0];
     }
@@ -427,22 +433,22 @@ mime_type_init()
 {
     const std::string filename = "/mime/mime.cache";
 
+    const std::string path = Glib::build_filename(vfs_user_data_dir(), filename);
+    mime_cache_t cache = std::make_shared<MimeCache>(path);
+    caches.push_back(cache);
+
+    if (cache->get_magic_max_extent() > mime_cache_max_extent)
+        mime_cache_max_extent = cache->get_magic_max_extent();
+
     const std::vector<std::string> dirs = vfs_system_data_dir();
-    n_caches = dirs.size();
-
-    std::string path = Glib::build_filename(vfs_user_data_dir(), filename);
-    caches.push_back(MimeCache(path));
-
-    if (caches[0].get_magic_max_extent() > mime_cache_max_extent)
-        mime_cache_max_extent = caches[0].get_magic_max_extent();
-
-    for (usize i = 0; i < n_caches; ++i)
+    for (std::string_view dir: dirs)
     {
-        path = Glib::build_filename(dirs[i], filename);
-        caches.push_back(MimeCache(path));
+        const std::string path2 = Glib::build_filename(dir.data(), filename);
+        mime_cache_t dir_cache = std::make_shared<MimeCache>(path2);
+        caches.push_back(dir_cache);
 
-        if (caches[i].get_magic_max_extent() > mime_cache_max_extent)
-            mime_cache_max_extent = caches[i].get_magic_max_extent();
+        if (dir_cache->get_magic_max_extent() > mime_cache_max_extent)
+            mime_cache_max_extent = dir_cache->get_magic_max_extent();
     }
 
     mime_magic_buf = CHAR(g_malloc(mime_cache_max_extent));
@@ -452,12 +458,7 @@ mime_type_init()
 static void
 mime_cache_free_all()
 {
-    while (true)
-    {
-        if (caches.empty())
-            break;
-        caches.pop_back();
-    }
+    caches.clear();
 
     mime_cache_max_extent = 0;
 
@@ -466,15 +467,15 @@ mime_cache_free_all()
 }
 
 void
-mime_cache_reload(MimeCache& cache)
+mime_cache_reload(mime_cache_t cache)
 {
-    cache.reload();
+    cache->reload();
 
     /* recalculate max magic extent */
-    for (usize i = 0; i < n_caches; ++i)
+    for (mime_cache_t mcache: caches)
     {
-        if (caches[i].get_magic_max_extent() > mime_cache_max_extent)
-            mime_cache_max_extent = caches[i].get_magic_max_extent();
+        if (mcache->get_magic_max_extent() > mime_cache_max_extent)
+            mime_cache_max_extent = mcache->get_magic_max_extent();
     }
 
     G_LOCK(mime_magic_buf);
@@ -507,10 +508,10 @@ mime_type_is_text_file(std::string_view file_path, std::string_view mime_type)
 
     if (!mime_type.empty())
     {
-        if (ztd::same(mime_type, "application/pdf"))
+        if (ztd::same(mime_type.data(), "application/pdf"))
             // seems to think this is XDG_MIME_TYPE_PLAIN_TEXT
             return false;
-        if (mime_type_is_subclass(mime_type.data(), XDG_MIME_TYPE_PLAIN_TEXT))
+        if (mime_type_is_subclass(mime_type, XDG_MIME_TYPE_PLAIN_TEXT))
             return true;
         if (!ztd::startswith(mime_type, "text/") && !ztd::startswith(mime_type, "application/"))
             return false;
@@ -519,7 +520,7 @@ mime_type_is_text_file(std::string_view file_path, std::string_view mime_type)
     if (file_path.empty())
         return false;
 
-    const i32 file = open(file_path.data(), O_RDONLY);
+    i32 file = open(file_path.data(), O_RDONLY);
     if (file != -1)
     {
         struct stat statbuf;
@@ -548,9 +549,9 @@ mime_type_is_executable_file(std::string_view file_path, std::string_view mime_t
      * Since some common types, such as application/x-shellscript,
      * are not in mime database, we have to add them ourselves.
      */
-    if (!ztd::same(mime_type, XDG_MIME_TYPE_UNKNOWN) &&
-        (mime_type_is_subclass(mime_type.data(), XDG_MIME_TYPE_EXECUTABLE) ||
-         mime_type_is_subclass(mime_type.data(), "application/x-shellscript")))
+    if (!ztd::same(mime_type.data(), XDG_MIME_TYPE_UNKNOWN) &&
+        (mime_type_is_subclass(mime_type, XDG_MIME_TYPE_EXECUTABLE) ||
+         mime_type_is_subclass(mime_type, "application/x-shellscript")))
     {
         if (!file_path.empty())
         {
@@ -562,23 +563,19 @@ mime_type_is_executable_file(std::string_view file_path, std::string_view mime_t
     return false;
 }
 
-/* Check if the specified mime_type is the subclass of the specified parent type */
 static bool
-mime_type_is_subclass(const char* type, const char* parent)
+mime_type_is_subclass(std::string_view type, std::string_view parent)
 {
     /* special case, the type specified is identical to the parent type. */
-    if (ztd::same(type, parent))
+    if (ztd::same(type.data(), parent.data()))
         return true;
 
-    for (MimeCache& cache: caches)
+    for (mime_cache_t cache: caches)
     {
-        const std::vector<const char*> parents = cache.lookup_parents(type);
-        if (parents.empty())
-            break;
-
-        for (const char* p: parents)
+        const std::vector<std::string> parents = cache->lookup_parents(type);
+        for (std::string_view p: parents)
         {
-            if (ztd::same(parent, p))
+            if (ztd::same(parent.data(), p.data()))
                 return true;
         }
     }
@@ -588,7 +585,7 @@ mime_type_is_subclass(const char* type, const char* parent)
 /*
  * Get mime caches
  */
-std::vector<MimeCache>&
+std::vector<mime_cache_t>&
 mime_type_get_caches()
 {
     return caches;
