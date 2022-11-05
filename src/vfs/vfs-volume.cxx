@@ -127,10 +127,11 @@ static std::vector<vfs::volume> volumes;
 static std::vector<volume_callback_data_t> callbacks;
 static bool global_inhibit_auto = false;
 
-struct devmount_t
+struct Devmount
 {
-    devmount_t(dev_t major, dev_t minor);
-    ~devmount_t();
+    Devmount() = delete;
+    Devmount(dev_t major, dev_t minor);
+    ~Devmount();
 
     dev_t major;
     dev_t minor;
@@ -139,7 +140,7 @@ struct devmount_t
     GList* mounts;
 };
 
-devmount_t::devmount_t(dev_t major, dev_t minor)
+Devmount::Devmount(dev_t major, dev_t minor)
 {
     this->major = major;
     this->minor = minor;
@@ -148,7 +149,7 @@ devmount_t::devmount_t(dev_t major, dev_t minor)
     this->mounts = nullptr;
 }
 
-devmount_t::~devmount_t()
+Devmount::~Devmount()
 {
     if (this->mount_points)
         free(this->mount_points);
@@ -156,7 +157,9 @@ devmount_t::~devmount_t()
         free(this->fstype);
 }
 
-static std::vector<devmount_t*> devmounts;
+using devmount_t = std::shared_ptr<Devmount>;
+
+static std::vector<devmount_t> devmounts;
 static struct udev* udev = nullptr;
 static struct udev_monitor* umonitor = nullptr;
 
@@ -330,11 +333,6 @@ free_devmounts()
 {
     if (devmounts.empty())
         return;
-
-    for (devmount_t* devmount: devmounts)
-    {
-        delete devmount;
-    }
 
     devmounts.clear();
 }
@@ -1047,7 +1045,7 @@ info_mount_points(device_t device)
     // if we have the mount point list, use this instead of reading mountinfo
     if (!devmounts.empty())
     {
-        for (devmount_t* devmount: devmounts)
+        for (devmount_t devmount: devmounts)
         {
             if (devmount->major == dmajor && devmount->minor == dminor)
                 return ztd::strdup(devmount->mount_points);
@@ -1441,8 +1439,8 @@ parse_mounts(bool report)
     }
 
     // get all mount points for all devices
-    std::vector<devmount_t*> newmounts;
-    std::vector<devmount_t*> changed;
+    std::vector<devmount_t> newmounts;
+    std::vector<devmount_t> changed;
 
     bool subdir_mount;
 
@@ -1533,8 +1531,8 @@ parse_mounts(bool report)
             fstype = ztd::rpartition(line, " - ")[2];
 
         // LOG_INFO("mount_point({}:{})={}", major, minor, mount_point);
-        devmount_t* devmount = nullptr;
-        for (devmount_t* search: newmounts)
+        devmount_t devmount = nullptr;
+        for (devmount_t search: newmounts)
         {
             if (search->major == major && search->minor == minor)
             {
@@ -1560,7 +1558,7 @@ parse_mounts(bool report)
                         continue;
                     }
                 }
-                devmount = new devmount_t(major, minor);
+                devmount = std::make_shared<Devmount>(major, minor);
                 devmount->fstype = ztd::strdup(fstype);
 
                 newmounts.push_back(devmount);
@@ -1581,7 +1579,7 @@ parse_mounts(bool report)
                         continue;
                     }
                     // add
-                    devmount = new devmount_t(major, minor);
+                    devmount = std::make_shared<Devmount>(major, minor);
                     devmount->fstype = ztd::strdup(fstype);
 
                     newmounts.push_back(devmount);
@@ -1600,7 +1598,7 @@ parse_mounts(bool report)
     // LOG_INFO("LINES DONE");
     // translate each mount points list to string
     std::string points;
-    for (devmount_t* devmount: newmounts)
+    for (devmount_t devmount: newmounts)
     {
         // Sort the list to ensure that shortest mount paths appear first
         devmount->mounts = g_list_sort(devmount->mounts, (GCompareFunc)g_strcmp0);
@@ -1620,13 +1618,13 @@ parse_mounts(bool report)
     // compare old and new lists
     if (report)
     {
-        for (devmount_t* devmount: newmounts)
+        for (devmount_t devmount: newmounts)
         {
             // LOG_INFO("finding {}:{}", devmount->major, devmount->minor);
 
-            devmount_t* found = nullptr;
+            devmount_t found = nullptr;
 
-            for (devmount_t* search: devmounts)
+            for (devmount_t search: devmounts)
             {
                 if (devmount->major == search->major && devmount->minor == search->minor)
                     found = search;
@@ -1641,7 +1639,6 @@ parse_mounts(bool report)
                     // no change to mount points, so remove from old list
                     devmount = found;
                     ztd::remove(devmounts, devmount);
-                    delete devmount;
                 }
             }
             else
@@ -1649,7 +1646,7 @@ parse_mounts(bool report)
                 // new mount
                 // LOG_INFO("    new mount {}:{} {}", devmount->major, devmount->minor,
                 // devmount->mount_points);
-                devmount_t* devcopy = new devmount_t(devmount->major, devmount->minor);
+                devmount_t devcopy = std::make_shared<Devmount>(devmount->major, devmount->minor);
                 devcopy->mount_points = ztd::strdup(devmount->mount_points);
                 devcopy->fstype = ztd::strdup(devmount->fstype);
 
@@ -1659,7 +1656,7 @@ parse_mounts(bool report)
     }
     // LOG_INFO("REMAINING");
     // any remaining devices in old list have changed mount status
-    for (devmount_t* devmount: devmounts)
+    for (devmount_t devmount: devmounts)
     {
         // LOG_INFO("remain {}:{}", devmount->major, devmount->minor );
         if (report)
@@ -1673,7 +1670,7 @@ parse_mounts(bool report)
     // report
     if (report && !changed.empty())
     {
-        for (devmount_t* devmount: changed)
+        for (devmount_t devmount: changed)
         {
             char* devnode = nullptr;
             devnum = makedev(devmount->major, devmount->minor);
@@ -1709,7 +1706,6 @@ parse_mounts(bool report)
                 }
             }
             udev_device_unref(udevice);
-            delete devmount;
         }
     }
     // printf ( "END PARSE\n");
@@ -1718,7 +1714,7 @@ parse_mounts(bool report)
 static const char*
 get_devmount_fstype(u32 major, u32 minor)
 {
-    for (devmount_t* devmount: devmounts)
+    for (devmount_t devmount: devmounts)
     {
         if (devmount->major == major && devmount->minor == minor)
             return devmount->fstype;
