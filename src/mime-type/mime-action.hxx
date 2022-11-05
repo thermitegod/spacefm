@@ -24,11 +24,11 @@
 
 #include <glib.h>
 
-enum MimeTypeAction
+enum class MimeTypeAction
 {
-    MIME_TYPE_ACTION_DEFAULT,
-    MIME_TYPE_ACTION_APPEND,
-    MIME_TYPE_ACTION_REMOVE
+    DEFAULT,
+    APPEND,
+    REMOVE,
 };
 
 /*
@@ -66,13 +66,13 @@ char* mime_type_get_default_action(std::string_view type);
  * Set applications used to open or never used to open this mime-type
  * desktop_id is the name of *.desktop file.
  * action ==
- *     MimeTypeAction::MIME_TYPE_ACTION_DEFAULT - make desktop_id the default app
- *     MimeTypeAction::MIME_TYPE_ACTION_APPEND  - add desktop_id to Default and Added apps
- *     MimeTypeAction::MIME_TYPE_ACTION_REMOVE  - add desktop id to Removed apps
+ *     MimeTypeAction::DEFAULT - make desktop_id the default app
+ *     MimeTypeAction::APPEND  - add desktop_id to Default and Added apps
+ *     MimeTypeAction::REMOVE  - add desktop id to Removed apps
  *
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  */
-void mime_type_update_association(const char* type, const char* desktop_id, i32 action);
+void mime_type_update_association(const char* type, const char* desktop_id, MimeTypeAction action);
 
 /* Locate the file path of desktop file by desktop_id */
 char* mime_type_locate_desktop_file(const char* dir, const char* desktop_id);

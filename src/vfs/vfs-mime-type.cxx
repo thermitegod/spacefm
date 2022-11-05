@@ -486,7 +486,7 @@ vfs_mime_type_set_default_action(vfs::mime_type mime_type, std::string_view desk
         desktop_id = cust_desktop;
     mime_type_update_association(mime_type->type.c_str(),
                                  desktop_id.data(),
-                                 MimeTypeAction::MIME_TYPE_ACTION_DEFAULT);
+                                 MimeTypeAction::DEFAULT);
     free(cust_desktop);
 }
 
@@ -495,7 +495,7 @@ vfs_mime_type_remove_action(vfs::mime_type mime_type, std::string_view desktop_i
 {
     mime_type_update_association(mime_type->type.c_str(),
                                  desktop_id.data(),
-                                 MimeTypeAction::MIME_TYPE_ACTION_REMOVE);
+                                 MimeTypeAction::REMOVE);
 }
 
 /* If user-custom desktop file is created, it is returned in custom_desktop. */
@@ -534,9 +534,7 @@ vfs_mime_type_locate_desktop_file(std::string_view dir, std::string_view desktop
 void
 vfs_mime_type_append_action(std::string_view type, std::string_view desktop_id)
 {
-    mime_type_update_association(type.data(),
-                                 desktop_id.data(),
-                                 MimeTypeAction::MIME_TYPE_ACTION_APPEND);
+    mime_type_update_association(type.data(), desktop_id.data(), MimeTypeAction::APPEND);
 }
 
 void

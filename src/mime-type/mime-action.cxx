@@ -707,28 +707,22 @@ mime_type_get_default_action(std::string_view mime_type)
  * Set applications used to open or never used to open this mime-type
  * desktop_id is the name of *.desktop file.
  * action ==
- *     MimeTypeAction::MIME_TYPE_ACTION_DEFAULT - make desktop_id the default app
- *     MimeTypeAction::MIME_TYPE_ACTION_APPEND  - add desktop_id to Default and Added apps
- *     MimeTypeAction::MIME_TYPE_ACTION_REMOVE  - add desktop id to Removed apps
+ *     MimeTypeAction::DEFAULT - make desktop_id the default app
+ *     MimeTypeAction::APPEND  - add desktop_id to Default and Added apps
+ *     MimeTypeAction::REMOVE  - add desktop id to Removed apps
  *
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  */
 void
-mime_type_update_association(const char* type, const char* desktop_id, i32 action)
+mime_type_update_association(const char* type, const char* desktop_id, MimeTypeAction action)
 {
-    bool data_changed = false;
-
-    if (!(type && type[0] != '\0' && desktop_id && desktop_id[0] != '\0'))
+    if (!type || !desktop_id)
     {
         LOG_WARN("mime_type_update_association invalid type or desktop_id");
         return;
     }
-    if (action > MimeTypeAction::MIME_TYPE_ACTION_REMOVE ||
-        action < MimeTypeAction::MIME_TYPE_ACTION_DEFAULT)
-    {
-        LOG_WARN("mime_type_update_association invalid action");
-        return;
-    }
+
+    bool data_changed = false;
 
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
     const std::string path = Glib::build_filename(vfs_user_config_dir(), "mimeapps.list");
@@ -768,12 +762,12 @@ mime_type_update_association(const char* type, const char* desktop_id, i32 actio
         }
 
         MimeTypeAction group_block;
-        if (ztd::same(group, "Default Applications"))
-            group_block = MimeTypeAction::MIME_TYPE_ACTION_DEFAULT;
-        else if (ztd::same(group, "Default Applications"))
-            group_block = MimeTypeAction::MIME_TYPE_ACTION_APPEND;
+        if (ztd::same(group.data(), "Default Applications"))
+            group_block = MimeTypeAction::DEFAULT;
+        else if (ztd::same(group.data(), "Default Applications"))
+            group_block = MimeTypeAction::APPEND;
         else // if (ztd::same(group, "Default Applications"))
-            group_block = MimeTypeAction::MIME_TYPE_ACTION_REMOVE;
+            group_block = MimeTypeAction::REMOVE;
 
         for (usize i = 0; i < apps.size(); ++i)
         {
@@ -783,9 +777,15 @@ mime_type_update_association(const char* type, const char* desktop_id, i32 actio
                 {
                     switch (action)
                     {
-                        case MimeTypeAction::MIME_TYPE_ACTION_DEFAULT:
+                        case MimeTypeAction::DEFAULT:
                             // found desktop_id already in group list
-                            if (group_block < MimeTypeAction::MIME_TYPE_ACTION_REMOVE)
+                            if (group_block == MimeTypeAction::REMOVE)
+                            {
+                                // Removed Associations - remove it
+                                is_present = true;
+                                continue;
+                            }
+                            else
                             {
                                 // Default Applications or Added Associations
                                 if (i == 0)
@@ -797,39 +797,33 @@ mime_type_update_association(const char* type, const char* desktop_id, i32 actio
                                 // in later position - remove it
                                 continue;
                             }
-                            else
+                            break;
+                        case MimeTypeAction::APPEND:
+                            if (group_block == MimeTypeAction::REMOVE)
                             {
                                 // Removed Associations - remove it
                                 is_present = true;
                                 continue;
                             }
-                            break;
-                        case MimeTypeAction::MIME_TYPE_ACTION_APPEND:
-                            if (group_block < MimeTypeAction::MIME_TYPE_ACTION_REMOVE)
+                            else
                             {
                                 // Default or Added - already present, skip change
                                 is_present = true;
                                 break;
                             }
-                            else
-                            {
-                                // Removed Associations - remove it
-                                is_present = true;
-                                continue;
-                            }
                             break;
-                        case MimeTypeAction::MIME_TYPE_ACTION_REMOVE:
-                            if (group_block < MimeTypeAction::MIME_TYPE_ACTION_REMOVE)
-                            {
-                                // Default or Added - remove it
-                                is_present = true;
-                                continue;
-                            }
-                            else
+                        case MimeTypeAction::REMOVE:
+                            if (group_block == MimeTypeAction::REMOVE)
                             {
                                 // Removed Associations - already present
                                 is_present = true;
                                 break;
+                            }
+                            else
+                            {
+                                // Default or Added - remove it
+                                is_present = true;
+                                continue;
                             }
                             break;
                         default:
@@ -842,17 +836,19 @@ mime_type_update_association(const char* type, const char* desktop_id, i32 actio
         }
 
         // update key string if needed
-        if (action < MimeTypeAction::MIME_TYPE_ACTION_REMOVE)
+        if (action < MimeTypeAction::REMOVE)
         {
-            if ((group_block < MimeTypeAction::MIME_TYPE_ACTION_REMOVE && !is_present) ||
-                (group_block == MimeTypeAction::MIME_TYPE_ACTION_REMOVE && is_present))
+            if (((group_block == MimeTypeAction::DEFAULT ||
+                  group_block == MimeTypeAction::APPEND) &&
+                 !is_present) ||
+                (group_block == MimeTypeAction::REMOVE && is_present))
             {
-                if (group_block < MimeTypeAction::MIME_TYPE_ACTION_REMOVE)
+                if (group_block < MimeTypeAction::REMOVE)
                 {
                     // add to front of Default or Added list
-                    if (action == MimeTypeAction::MIME_TYPE_ACTION_DEFAULT)
+                    if (action == MimeTypeAction::DEFAULT)
                         new_action = fmt::format("{};{}", desktop_id, new_action);
-                    else // if ( action == MimeTypeAction::MIME_TYPE_ACTION_APPEND )
+                    else // if ( action == MimeTypeAction::APPEND )
                         new_action = fmt::format("{}{};", new_action, desktop_id);
                 }
                 if (!new_action.empty())
@@ -862,12 +858,14 @@ mime_type_update_association(const char* type, const char* desktop_id, i32 actio
                 data_changed = true;
             }
         }
-        else // if ( action == MimeTypeAction::MIME_TYPE_ACTION_REMOVE )
+        else // if ( action == MimeTypeAction::REMOVE )
         {
-            if ((group_block < MimeTypeAction::MIME_TYPE_ACTION_REMOVE && is_present) ||
-                (group_block == MimeTypeAction::MIME_TYPE_ACTION_REMOVE && !is_present))
+            if (((group_block == MimeTypeAction::DEFAULT ||
+                  group_block == MimeTypeAction::APPEND) &&
+                 is_present) ||
+                (group_block == MimeTypeAction::REMOVE && !is_present))
             {
-                if (group_block == MimeTypeAction::MIME_TYPE_ACTION_REMOVE)
+                if (group_block == MimeTypeAction::REMOVE)
                 {
                     // add to end of Removed list
                     new_action = fmt::format("{}{};", new_action, desktop_id);
