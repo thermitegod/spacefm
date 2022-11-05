@@ -49,7 +49,7 @@
 
 #include "settings/app.hxx"
 #include "settings/etc.hxx"
-#include "settings/load_etc.hxx"
+#include "settings/etc-load.hxx"
 
 #include "program-timer.hxx"
 #include "autosave.hxx"

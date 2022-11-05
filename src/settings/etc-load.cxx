@@ -31,6 +31,7 @@
 #include "vfs/vfs-user-dir.hxx"
 
 #include "settings/etc.hxx"
+#include "settings/etc-load.hxx"
 
 static void
 parse_etc_conf(std::string_view etc_path, std::string_view raw_line)

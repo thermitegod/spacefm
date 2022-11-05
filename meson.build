@@ -300,7 +300,8 @@ sources = [
 
   'src/settings/app.cxx',
   'src/settings/etc.cxx',
-  'src/settings/load_etc.cxx',
+  'src/settings/config-load.cxx',
+  'src/settings/etc-load.cxx',
 
   'src/mime-type/mime-action.cxx',
   'src/mime-type/mime-cache.cxx',

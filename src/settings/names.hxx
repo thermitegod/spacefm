@@ -22,6 +22,9 @@
 
 #include <ztd/ztd.hxx>
 
+// delimiter used in config file for tabs
+const std::string CONFIG_FILE_TABS_DELIM = "///";
+
 // Config file macros for on disk names
 
 /**

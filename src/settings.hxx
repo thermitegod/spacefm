@@ -46,9 +46,6 @@ inline constexpr u32 SINGLE_CLICK_TIMEOUT = 150;
 // This limits the small icon size for side panes and task list
 inline constexpr i32 PANE_MAX_ICON_SIZE = 48;
 
-// delimiter used in config file for tabs
-const std::string CONFIG_FILE_TABS_DELIM = "///";
-
 void load_settings();
 void autosave_settings();
 void save_settings(void* main_window_ptr);
