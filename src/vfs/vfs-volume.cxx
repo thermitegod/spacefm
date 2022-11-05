@@ -137,7 +137,7 @@ struct Devmount
     dev_t minor;
     char* mount_points;
     char* fstype;
-    GList* mounts;
+    std::vector<std::string> mounts;
 };
 
 Devmount::Devmount(dev_t major, dev_t minor)
@@ -146,7 +146,6 @@ Devmount::Devmount(dev_t major, dev_t minor)
     this->minor = minor;
     this->mount_points = nullptr;
     this->fstype = nullptr;
-    this->mounts = nullptr;
 }
 
 Devmount::~Devmount()
@@ -1111,7 +1110,9 @@ info_mount_points(device_t device)
                 mounts = g_list_prepend(mounts, mount_point);
             }
             else
+            {
                 free(mount_point);
+            }
         }
     }
 
@@ -1130,8 +1131,8 @@ info_mount_points(device_t device)
         g_list_free(mounts);
         return ztd::strdup(points);
     }
-    else
-        return nullptr;
+
+    return nullptr;
 }
 
 static void
@@ -1473,7 +1474,6 @@ parse_mounts(bool report)
         dev_t major, minor;
         char encoded_root[PATH_MAX];
         char encoded_mount_point[PATH_MAX];
-        char* mount_point;
 
         if (line.size() == 0)
             continue;
@@ -1518,12 +1518,9 @@ parse_mounts(bool report)
                 continue;
         }
 
-        mount_point = g_strcompress(encoded_mount_point);
-        if (!mount_point || mount_point[0] == '\0')
-        {
-            free(mount_point);
+        const std::string mount_point = g_strcompress(encoded_mount_point);
+        if (mount_point.empty())
             continue;
-        }
 
         // fstype
         std::string fstype;
@@ -1554,7 +1551,6 @@ parse_mounts(bool report)
                     {
                         // is block device with subdir mount - ignore
                         udev_device_unref(udevice);
-                        free(mount_point);
                         continue;
                     }
                 }
@@ -1575,7 +1571,6 @@ parse_mounts(bool report)
                     if (subdir_mount)
                     {
                         // is block device with subdir mount - ignore
-                        free(mount_point);
                         continue;
                     }
                     // add
@@ -1587,30 +1582,22 @@ parse_mounts(bool report)
             }
         }
 
-        if (devmount && !g_list_find(devmount->mounts, mount_point))
+        if (devmount && !ztd::contains(devmount->mounts, mount_point))
         {
             // LOG_INFO("    prepended");
-            devmount->mounts = g_list_prepend(devmount->mounts, mount_point);
+            devmount->mounts.push_back(mount_point);
         }
-        else
-            free(mount_point);
     }
     // LOG_INFO("LINES DONE");
     // translate each mount points list to string
-    std::string points;
     for (devmount_t devmount: newmounts)
     {
         // Sort the list to ensure that shortest mount paths appear first
-        devmount->mounts = g_list_sort(devmount->mounts, (GCompareFunc)g_strcmp0);
-        GList* m = devmount->mounts;
-        points = ztd::strdup((char*)m->data);
-        while ((m = m->next))
-        {
-            points = fmt::format("{}, {}", points, (char*)m->data);
-        }
-        g_list_foreach(devmount->mounts, (GFunc)free, nullptr);
-        g_list_free(devmount->mounts);
-        devmount->mounts = nullptr;
+        std::ranges::sort(devmount->mounts, ztd::compare);
+
+        const std::string points = ztd::join(devmount->mounts, ",");
+
+        devmount->mounts.clear();
         devmount->mount_points = ztd::strdup(points);
         // LOG_INFO("translate {}:{} {}", devmount->major, devmount->minor, points);
     }
