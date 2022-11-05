@@ -59,14 +59,14 @@ enum SocketEvent
 
 CliFlags cli_flags = CliFlags();
 
-static i32 sock;
-static GIOChannel* io_channel = nullptr;
+static i32 sock_fd = -1;
+static Glib::RefPtr<Glib::IOChannel> sock_io_channel = nullptr;
 
 static bool socket_daemon = false;
 
 static void get_socket_name(char* buf, i32 len);
-static bool on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data);
-static void receive_socket_command(i32 client, std::string_view args);
+static bool on_socket_event(Glib::IOCondition condition);
+static void receive_socket_command(i32 client, const std::string& args);
 
 bool
 check_socket_daemon()
@@ -80,7 +80,7 @@ get_inode_tag()
     struct stat stat_buf;
     std::string inode_tag;
 
-    if (stat(vfs_user_home_dir().c_str(), &stat_buf) == -1)
+    if (stat(vfs_user_home_dir().data(), &stat_buf) == -1)
     {
         inode_tag = fmt::format("{}=", getuid());
     }
@@ -97,17 +97,15 @@ get_inode_tag()
 }
 
 static bool
-on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
+on_socket_event(Glib::IOCondition condition)
 {
-    (void)data;
-
-    if (!(cond & G_IO_IN))
+    if (condition != Glib::IOCondition::IO_IN)
         return true;
 
     socklen_t addr_len = 0;
     struct sockaddr_un client_addr;
 
-    i32 client = accept(g_io_channel_unix_get_fd(ioc), (struct sockaddr*)&client_addr, &addr_len);
+    const i32 client = accept(sock_fd, (struct sockaddr*)&client_addr, &addr_len);
     if (client == -1)
         return true;
 
@@ -194,7 +192,7 @@ on_socket_event(GIOChannel* ioc, GIOCondition cond, void* data)
     }
 
     if (args[argx + 1])
-        cli_flags.files = g_strsplit(args.c_str() + argx + 1, "\n", 0);
+        cli_flags.files = g_strsplit(args.data() + argx + 1, "\n", 0);
     else
         cli_flags.files = nullptr;
 
@@ -224,12 +222,13 @@ get_socket_name(char* buf, i32 len)
     // treat :0.0 as :0 to prevent multiple instances on screen 0
     if (ztd::same(dpy, ":0.0"))
         dpy = ":0";
+
     const std::string socket_path = fmt::format("{}/{}-{}{}.socket",
                                                 vfs_user_runtime_dir(),
                                                 PACKAGE_NAME,
                                                 Glib::get_user_name(),
                                                 dpy);
-    g_snprintf(buf, len, "%s", socket_path.c_str());
+    g_snprintf(buf, len, "%s", socket_path.data());
 }
 
 [[noreturn]] static void
@@ -242,7 +241,7 @@ single_instance_check_fatal(i32 ret)
 bool
 single_instance_check()
 {
-    if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
+    if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
     {
         LOG_ERROR("failed to create socket");
         single_instance_check_fatal(EXIT_FAILURE);
@@ -251,10 +250,10 @@ single_instance_check()
     struct sockaddr_un addr;
     addr.sun_family = AF_UNIX;
     get_socket_name(addr.sun_path, sizeof(addr.sun_path));
-    i32 addr_len = SUN_LEN(&addr);
+    const i32 addr_len = SUN_LEN(&addr);
 
     // try to connect to existing instance
-    if (sock && connect(sock, (struct sockaddr*)&addr, addr_len) == 0)
+    if (sock_fd && connect(sock_fd, (struct sockaddr*)&addr, addr_len) == 0)
     {
         // connected successfully
         char cmd = SocketEvent::CMD_OPEN_TAB;
@@ -262,14 +261,14 @@ single_instance_check()
         if (cli_flags.no_tabs)
         {
             cmd = SocketEvent::CMD_NO_TABS;
-            write(sock, &cmd, sizeof(char));
+            write(sock_fd, &cmd, sizeof(char));
             // another command always follows SocketEvent::CMD_NO_TABS
             cmd = SocketEvent::CMD_OPEN_TAB;
         }
         if (cli_flags.reuse_tab)
         {
             cmd = SocketEvent::CMD_REUSE_TAB;
-            write(sock, &cmd, sizeof(char));
+            write(sock_fd, &cmd, sizeof(char));
             // another command always follows SocketEvent::CMD_REUSE_TAB
             cmd = SocketEvent::CMD_OPEN;
         }
@@ -292,7 +291,7 @@ single_instance_check()
         if (cmd == SocketEvent::CMD_OPEN_TAB && !cli_flags.files)
             cmd = SocketEvent::CMD_OPEN;
 
-        write(sock, &cmd, sizeof(char));
+        write(sock_fd, &cmd, sizeof(char));
 
         if (cli_flags.files)
         {
@@ -309,16 +308,16 @@ single_instance_check()
                     // $PWDs resolution would not work.
                     real_path = std::filesystem::absolute(*file);
                 }
-                write(sock, real_path.c_str(), real_path.length());
-                write(sock, "\n", 1);
+                write(sock_fd, real_path.data(), real_path.length());
+                write(sock_fd, "\n", 1);
             }
         }
 
         if (cli_flags.config_dir)
             LOG_WARN("Option --config ignored - an instance is already running");
 
-        shutdown(sock, 2);
-        close(sock);
+        shutdown(sock_fd, 2);
+        close(sock_fd);
         single_instance_check_fatal(EXIT_SUCCESS);
     }
 
@@ -329,21 +328,22 @@ single_instance_check()
         std::filesystem::remove(addr.sun_path);
     }
     i32 reuse = 1;
-    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
-    if (bind(sock, (struct sockaddr*)&addr, addr_len) == -1)
+    setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+    if (bind(sock_fd, (struct sockaddr*)&addr, addr_len) == -1)
     {
         LOG_ERROR("failed to create socket: {}", addr.sun_path);
         single_instance_check_fatal(EXIT_FAILURE);
     }
     else
     {
-        io_channel = g_io_channel_unix_new(sock);
-        g_io_channel_set_encoding(io_channel, nullptr, nullptr);
-        g_io_channel_set_buffered(io_channel, false);
+        sock_io_channel = Glib::IOChannel::create_from_fd(sock_fd);
+        sock_io_channel->set_buffered(false);
 
-        g_io_add_watch(io_channel, G_IO_IN, (GIOFunc)on_socket_event, nullptr);
+        Glib::signal_io().connect(sigc::ptr_fun(on_socket_event),
+                                  sock_io_channel,
+                                  Glib::IOCondition::IO_IN);
 
-        if (listen(sock, 5) == -1)
+        if (listen(sock_fd, 5) == -1)
         {
             LOG_WARN("could not listen to socket");
             single_instance_check_fatal(EXIT_FAILURE);
@@ -356,18 +356,16 @@ single_instance_check()
 void
 single_instance_finalize()
 {
+    shutdown(sock_fd, 2);
+    close(sock_fd);
+
     char lock_file[256];
-
-    shutdown(sock, 2);
-    g_io_channel_unref(io_channel);
-    close(sock);
-
     get_socket_name(lock_file, sizeof(lock_file));
     std::filesystem::remove(lock_file);
 }
 
 static void
-receive_socket_command(i32 client, std::string_view args)
+receive_socket_command(i32 client, const std::string& args)
 {
     char** argv = nullptr;
     char cmd;
@@ -380,7 +378,7 @@ receive_socket_command(i32 client, std::string_view args)
     // eg this helps deter use of socket commands sent from a chroot jail
     // or from another user or system
     const std::string inode_tag = get_inode_tag();
-    if (argv && strcmp(inode_tag.c_str(), argv[0]))
+    if (argv && strcmp(inode_tag.data(), argv[0]))
     {
         cmd = 1;
         reply = "invalid socket command user";
@@ -396,7 +394,7 @@ receive_socket_command(i32 client, std::string_view args)
     // send response
     write(client, &cmd, sizeof(char)); // send exit status
     if (!reply.empty())
-        write(client, reply.c_str(), reply.size()); // send reply or error msg
+        write(client, reply.data(), reply.size()); // send reply or error msg
 }
 
 i32
@@ -409,7 +407,7 @@ send_socket_command(i32 argc, char* argv[], std::string& reply)
     }
 
     // create socket
-    if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
+    if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
     {
         reply = "failed to create socket";
         return EXIT_FAILURE;
@@ -419,9 +417,9 @@ send_socket_command(i32 argc, char* argv[], std::string& reply)
     struct sockaddr_un addr;
     addr.sun_family = AF_UNIX;
     get_socket_name(addr.sun_path, sizeof(addr.sun_path));
-    i32 addr_len = SUN_LEN(&addr);
+    socklen_t addr_len = SUN_LEN(&addr);
 
-    if (connect(sock, (struct sockaddr*)&addr, addr_len) != 0)
+    if (connect(sock_fd, (struct sockaddr*)&addr, addr_len) != 0)
     {
         reply = fmt::format("failed to connect to socket ({})\nnot running or $DISPLAY not set",
                             addr.sun_path);
@@ -430,33 +428,33 @@ send_socket_command(i32 argc, char* argv[], std::string& reply)
 
     // send command
     char cmd = SocketEvent::CMD_SOCKET_CMD;
-    write(sock, &cmd, sizeof(char));
+    write(sock_fd, &cmd, sizeof(char));
 
     // send inode tag
     const std::string inode_tag = get_inode_tag();
-    write(sock, inode_tag.c_str(), std::strlen(inode_tag.c_str()));
-    write(sock, "\n", 1);
+    write(sock_fd, inode_tag.data(), inode_tag.size());
+    write(sock_fd, "\n", 1);
 
     // send arguments
     for (i32 i = 2; i < argc; ++i)
     {
-        write(sock, argv[i], std::strlen(argv[i]));
-        write(sock, "\n", 1);
+        write(sock_fd, argv[i], std::strlen(argv[i]));
+        write(sock_fd, "\n", 1);
     }
-    write(sock, "\n", 1);
+    write(sock_fd, "\n", 1);
 
     // get response
     std::string sock_reply;
     usize r;
     char buf[1024];
-    while ((r = read(sock, buf, sizeof(buf))) > 0)
+    while ((r = read(sock_fd, buf, sizeof(buf))) > 0)
     {
         sock_reply.append(buf, r);
     }
 
     // close socket
-    shutdown(sock, 2);
-    close(sock);
+    shutdown(sock_fd, 2);
+    close(sock_fd);
 
     // set reply
     if (sock_reply.size() == 0)
