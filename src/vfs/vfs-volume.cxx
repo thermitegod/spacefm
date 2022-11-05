@@ -148,8 +148,9 @@ devmount_t::~devmount_t()
 static GList* devmounts = nullptr;
 static struct udev* udev = nullptr;
 static struct udev_monitor* umonitor = nullptr;
-static GIOChannel* uchannel = nullptr;
-static GIOChannel* mchannel = nullptr;
+
+static Glib::RefPtr<Glib::IOChannel> uchannel = nullptr;
+static Glib::RefPtr<Glib::IOChannel> mchannel = nullptr;
 
 /* *************************************************************************
  * device info
@@ -1779,11 +1780,9 @@ get_devmount_fstype(u32 major, u32 minor)
 }
 
 static bool
-cb_mount_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
+cb_mount_monitor_watch(Glib::IOCondition condition)
 {
-    (void)channel;
-    (void)user_data;
-    if (cond & ~G_IO_ERR)
+    if (condition == Glib::IOCondition::IO_ERR)
         return true;
 
     // LOG_INFO("@@@ {} changed", MOUNTINFO);
@@ -1793,67 +1792,20 @@ cb_mount_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
 }
 
 static bool
-cb_udev_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
+cb_udev_monitor_watch(Glib::IOCondition condition)
 {
-    (void)user_data;
-
-    /*
-    LOG_INFO("cb_monitor_watch {}", channel);
-    if ( cond & G_IO_IN )
-        LOG_INFO("    G_IO_IN");
-    if ( cond & G_IO_OUT )
-        LOG_INFO("    G_IO_OUT");
-    if ( cond & G_IO_PRI )
-        LOG_INFO("    G_IO_PRI");
-    if ( cond & G_IO_ERR )
-        LOG_INFO("    G_IO_ERR");
-    if ( cond & G_IO_HUP )
-        LOG_INFO("    G_IO_HUP");
-    if ( cond & G_IO_NVAL )
-        LOG_INFO("    G_IO_NVAL");
-
-    if ( !( cond & G_IO_NVAL ) )
+    if (condition == Glib::IOCondition::IO_NVAL)
     {
-        i32 fd = g_io_channel_unix_get_fd( channel );
-        LOG_INFO("    fd={}", fd);
-        if ( fcntl(fd, F_GETFL) != -1 || errno != EBADF )
-        {
-            i32 flags = g_io_channel_get_flags( channel );
-            if ( flags & G_IO_FLAG_IS_READABLE )
-                LOG_INFO( "    G_IO_FLAG_IS_READABLE");
-        }
-        else
-            LOG_INFO("    Invalid FD");
-    }
-    */
-
-    if ((cond & G_IO_NVAL))
-    {
-        LOG_WARN("udev g_io_channel_unref G_IO_NVAL");
-        g_io_channel_unref(channel);
         return false;
     }
-    else if (!(cond & G_IO_IN))
+    else if (condition != Glib::IOCondition::IO_IN)
     {
-        if ((cond & G_IO_HUP))
-        {
-            LOG_WARN("udev g_io_channel_unref !G_IO_IN && G_IO_HUP");
-            g_io_channel_unref(channel);
+        if (condition == Glib::IOCondition::IO_HUP)
             return false;
-        }
-        else
-            return true;
-    }
-    else if (!(fcntl(g_io_channel_unix_get_fd(channel), F_GETFL) != -1 || errno != EBADF))
-    {
-        // bad file descriptor
-        LOG_WARN("udev g_io_channel_unref BAD_FD");
-        g_io_channel_unref(channel);
-        return false;
+        return true;
     }
 
     struct udev_device* udevice;
-    const char* acted = nullptr;
     vfs::volume volume;
     if ((udevice = udev_monitor_receive_device(umonitor)))
     {
@@ -1862,25 +1814,25 @@ cb_udev_monitor_watch(GIOChannel* channel, GIOCondition cond, void* user_data)
         if (action)
         {
             // print action
-            if (!strcmp(action, "add"))
-                acted = "added:   ";
-            else if (!strcmp(action, "remove"))
-                acted = "removed: ";
-            else if (!strcmp(action, "change"))
-                acted = "changed: ";
-            else if (!strcmp(action, "move"))
-                acted = "moved:   ";
-            if (acted)
-                LOG_INFO("udev {}{}", acted, devnode);
+            if (ztd::same(action, "add"))
+                LOG_INFO("udev added:   {}", devnode);
+            else if (ztd::same(action, "remove"))
+                LOG_INFO("udev removed: {}", devnode);
+            else if (ztd::same(action, "change"))
+                LOG_INFO("udev changed: {}", devnode);
+            else if (ztd::same(action, "move"))
+                LOG_INFO("udev moved:   {}", devnode);
 
             // add/remove volume
-            if (!strcmp(action, "add") || !strcmp(action, "change"))
+            if (ztd::same(action, "add") || ztd::same(action, "change"))
             {
                 if ((volume = vfs_volume_read_by_device(udevice)))
                     vfs_volume_device_added(volume, true); // frees volume if needed
             }
-            else if (!strcmp(action, "remove"))
+            else if (ztd::same(action, "remove"))
+            {
                 vfs_volume_device_removed(udevice);
+            }
             // what to do for move action?
         }
         free(devnode);
@@ -3718,8 +3670,7 @@ vfs_volume_init()
         return true;
     }
 
-    i32 ufd;
-    ufd = udev_monitor_get_fd(umonitor);
+    const i32 ufd = udev_monitor_get_fd(umonitor);
     if (ufd == 0)
     {
         LOG_INFO("scannot get udev monitor socket file descriptor");
@@ -3737,29 +3688,21 @@ vfs_volume_init()
     }
     global_inhibit_auto = true; // do not autoexec during startup
 
-    uchannel = g_io_channel_unix_new(ufd);
-    g_io_channel_set_flags(uchannel, G_IO_FLAG_NONBLOCK, nullptr);
-    g_io_channel_set_close_on_unref(uchannel, true);
-    g_io_add_watch(uchannel,
-                   GIOCondition(G_IO_IN | G_IO_HUP), // | G_IO_NVAL | G_IO_ERR,
-                   (GIOFunc)cb_udev_monitor_watch,
-                   nullptr);
+    uchannel = Glib::IOChannel::create_from_fd(ufd);
+    uchannel->set_flags(Glib::IOFlags::NONBLOCK);
+    uchannel->set_close_on_unref(true);
+
+    Glib::signal_io().connect(sigc::ptr_fun(cb_udev_monitor_watch),
+                              uchannel,
+                              Glib::IOCondition::IO_IN | Glib::IOCondition::IO_HUP);
 
     // start mount monitor
-    GError* error;
-    error = nullptr;
-    mchannel = g_io_channel_new_file(MOUNTINFO, "r", &error);
-    if (mchannel != nullptr)
-    {
-        g_io_channel_set_close_on_unref(mchannel, true);
-        g_io_add_watch(mchannel, G_IO_ERR, (GIOFunc)cb_mount_monitor_watch, nullptr);
-    }
-    else
-    {
-        free_devmounts();
-        LOG_INFO("error monitoring {}: {}", MOUNTINFO, error->message);
-        g_error_free(error);
-    }
+    mchannel = Glib::IOChannel::create_from_file(MOUNTINFO, "r");
+    mchannel->set_close_on_unref(true);
+
+    Glib::signal_io().connect(sigc::ptr_fun(cb_mount_monitor_watch),
+                              mchannel,
+                              Glib::IOCondition::IO_ERR);
 
     // do startup automounts
     for (vfs::volume volume: volumes)
@@ -3776,18 +3719,14 @@ vfs_volume_finalize()
 {
     // stop mount monitor
     if (mchannel)
-    {
-        g_io_channel_unref(mchannel);
         mchannel = nullptr;
-    }
+
     free_devmounts();
 
     // stop udev monitor
     if (uchannel)
-    {
-        g_io_channel_unref(uchannel);
         uchannel = nullptr;
-    }
+
     if (umonitor)
     {
         udev_monitor_unref(umonitor);
