@@ -287,8 +287,16 @@ sources = [
   'src/utils.cxx',
   'src/window-reference.cxx',
 
-  'src/xset.cxx',
-  'src/xset-lookup.cxx',
+  'src/xset/xset.cxx',
+  'src/xset/xset-context.cxx',
+  'src/xset/xset-custom.cxx',
+  'src/xset/xset-defaults.cxx',
+  'src/xset/xset-design.cxx',
+  'src/xset/xset-design-clipboard.cxx',
+  'src/xset/xset-dialog.cxx',
+  'src/xset/xset-event-handler.cxx',
+  'src/xset/xset-lookup.cxx',
+  'src/xset/xset-plugins.cxx',
 
   'src/settings/app.cxx',
   'src/settings/etc.cxx',

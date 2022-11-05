@@ -25,7 +25,7 @@
 
 #include "types.hxx"
 
-#include "xset-lookup.hxx"
+#include "xset/xset-lookup.hxx"
 
 using namespace std::literals::string_view_literals;
 

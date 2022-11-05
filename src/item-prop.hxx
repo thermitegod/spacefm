@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include "xset/xset-context.hxx"
+
 #include "settings.hxx"
 
 enum ItemPropContextState

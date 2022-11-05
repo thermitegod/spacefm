@@ -48,6 +48,13 @@
 #include "pref-dialog.hxx"
 #include "ptk/ptk-file-menu.hxx"
 
+#include "xset/xset.hxx"
+#include "xset/xset-context.hxx"
+#include "xset/xset-custom.hxx"
+#include "xset/xset-dialog.hxx"
+#include "xset/xset-event-handler.hxx"
+#include "xset/xset-plugins.hxx"
+
 #include "settings/app.hxx"
 
 #include "bookmarks.hxx"

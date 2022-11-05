@@ -24,6 +24,9 @@
 
 #include <magic_enum.hpp>
 
+#include "xset/xset.hxx"
+#include "xset/xset-dialog.hxx"
+
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dir.hxx"
 

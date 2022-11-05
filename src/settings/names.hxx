@@ -18,16 +18,27 @@
 #include <string>
 #include <string_view>
 
+#include <map>
+
 #include <ztd/ztd.hxx>
 
 // Config file macros for on disk names
+
+/**
+ *  TOML data structure types for serialization
+ */
+
+// map<var, value>
+using setvars_t = std::map<std::string, std::string>;
+// map<xset_name, setvars_t>
+using xsetpak_t = std::map<std::string, setvars_t>;
 
 /**
  * TOML
  */
 
 // TOML config file
-constexpr u64 CONFIG_FILE_VERSION{1}; // 3.0.0-dev
+inline constexpr u64 CONFIG_FILE_VERSION{1}; // 3.0.0-dev
 const std::string CONFIG_FILE_FILENAME{"session.toml"};
 
 // TOML config on disk names - TOML sections

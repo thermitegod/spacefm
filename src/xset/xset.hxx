@@ -26,7 +26,7 @@
 
 #include "types.hxx"
 
-#include "xset-lookup.hxx"
+#include "xset/xset-lookup.hxx"
 
 enum class XSetCMD
 {
@@ -360,8 +360,12 @@ struct XSet
 // using xset_t = std::unique_ptr<XSet>;
 using xset_t = ztd::raw_ptr<XSet>;
 
+#define XSET(obj) (static_cast<xset_t>(obj))
+
 // all xsets
 extern std::vector<xset_t> xsets;
+
+void xset_remove(xset_t set);
 
 // get/set //
 

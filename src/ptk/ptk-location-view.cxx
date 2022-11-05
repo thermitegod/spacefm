@@ -40,6 +40,11 @@
 
 #include <magic_enum.hpp>
 
+#include "xset/xset.hxx"
+#include "xset/xset-context.hxx"
+#include "xset/xset-dialog.hxx"
+#include "xset/xset-event-handler.hxx"
+
 #include "types.hxx"
 
 #include "ptk/ptk-location-view.hxx"

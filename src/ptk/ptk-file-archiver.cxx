@@ -34,6 +34,9 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "xset/xset.hxx"
+#include "xset/xset-dialog.hxx"
+
 #include "ptk/ptk-file-archiver.hxx"
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-handler.hxx"

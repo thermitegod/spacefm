@@ -29,9 +29,17 @@
 
 #include "types.hxx"
 
-#include "xset.hxx"
+#include "xset/xset.hxx"
 
 std::vector<xset_t> xsets;
+
+void
+xset_remove(xset_t set)
+{
+    xsets.erase(std::remove(xsets.begin(), xsets.end(), set), xsets.end());
+
+    delete set;
+}
 
 XSet::XSet(std::string_view name, XSetName xset_name)
 {

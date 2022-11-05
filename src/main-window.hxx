@@ -23,7 +23,9 @@
 #include <vector>
 
 #include "types.hxx"
-#include "xset.hxx"
+
+#include "xset/xset.hxx"
+#include "xset/xset-context.hxx"
 
 #include <gtk/gtk.h>
 #include "ptk/ptk-file-browser.hxx"

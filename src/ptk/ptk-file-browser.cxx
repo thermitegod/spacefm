@@ -40,6 +40,11 @@
 
 #include <magic_enum.hpp>
 
+#include "xset/xset.hxx"
+#include "xset/xset-context.hxx"
+#include "xset/xset-dialog.hxx"
+#include "xset/xset-event-handler.hxx"
+
 #include "ptk/ptk-error.hxx"
 
 #include "ptk/ptk-file-actions-open.hxx"
@@ -160,6 +165,9 @@ static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 #define GDK_ACTION_ALL                                                              \
     GdkDragAction(GdkDragAction::GDK_ACTION_MOVE | GdkDragAction::GDK_ACTION_COPY | \
                   GdkDragAction::GDK_ACTION_LINK)
+
+// instance-wide command history
+std::vector<std::string> xset_cmd_history;
 
 // must match main-window.c  main_window_socket_command
 inline constexpr std::array<std::string_view, 6> column_titles{

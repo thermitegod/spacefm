@@ -31,6 +31,9 @@
 
 #include <magic_enum.hpp>
 
+#include "xset/xset.hxx"
+#include "xset/xset-context.hxx"
+
 #include "vfs/vfs-user-dir.hxx"
 
 #include "main-window.hxx"
