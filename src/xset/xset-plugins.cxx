@@ -534,7 +534,6 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, std::string_view pat
     FMMainWindow* main_window = FM_MAIN_WINDOW(main_win);
     // task
     PtkFileTask* ptask = ptk_file_exec_new("Install Plugin",
-                                           nullptr,
                                            main_win ? GTK_WIDGET(main_window) : nullptr,
                                            main_win ? main_window->task_view : nullptr);
 

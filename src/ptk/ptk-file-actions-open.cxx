@@ -218,7 +218,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
         // Run task
         PtkFileTask* ptask =
             ptk_file_exec_new(handler_set->menu_label,
-                              parent->cwd.data(),
+                              parent->cwd,
                               parent->file_browser ? GTK_WIDGET(parent->file_browser) : nullptr,
                               parent->file_browser ? parent->file_browser->task_view : nullptr);
         // do not free cwd!

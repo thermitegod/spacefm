@@ -4266,11 +4266,11 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     else /* Accept the drop and perform file actions */
                     {
                         GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
-                        PtkFileTask* ptask = new PtkFileTask(file_action,
-                                                             file_list,
-                                                             dest_dir,
-                                                             GTK_WINDOW(parent_win),
-                                                             file_browser->task_view);
+                        PtkFileTask* ptask = ptk_file_task_new(file_action,
+                                                               file_list,
+                                                               dest_dir,
+                                                               GTK_WINDOW(parent_win),
+                                                               file_browser->task_view);
                         ptk_file_task_run(ptask);
                     }
                 }
@@ -4881,11 +4881,11 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, const std::vector<vfs::fi
 
         // task
         PtkFileTask* ptask =
-            new PtkFileTask(file_action,
-                            file_list,
-                            dest_dir,
-                            GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
-                            file_browser->task_view);
+            ptk_file_task_new(file_action,
+                              file_list,
+                              dest_dir,
+                              GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
+                              file_browser->task_view);
         ptk_file_task_run(ptask);
         free(dest_dir);
     }

@@ -433,7 +433,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     // task
     PtkFileTask* ptask;
     ptask = ptk_file_exec_new("Export Plugin",
-                              plug_dir.c_str(),
+                              plug_dir,
                               parent,
                               file_browser ? file_browser->task_view : nullptr);
 

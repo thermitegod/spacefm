@@ -535,8 +535,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
             return;
         }
     }
-    PtkFileTask* ptask =
-        ptk_file_exec_new("Uninstall Plugin", nullptr, parent, file_browser->task_view);
+    PtkFileTask* ptask = ptk_file_exec_new("Uninstall Plugin", parent, file_browser->task_view);
 
     const std::string plug_dir_q = bash_quote(set->plug_dir);
 

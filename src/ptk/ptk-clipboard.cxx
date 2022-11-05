@@ -329,11 +329,11 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, const char* dest_dir, GtkTreeVi
          * otherwise, paste the file in current directory.
          */
 
-        PtkFileTask* ptask = new PtkFileTask(action,
-                                             file_list,
-                                             dest_dir,
-                                             parent_win ? GTK_WINDOW(parent_win) : nullptr,
-                                             GTK_WIDGET(task_view));
+        PtkFileTask* ptask = ptk_file_task_new(action,
+                                               file_list,
+                                               dest_dir,
+                                               parent_win ? GTK_WINDOW(parent_win) : nullptr,
+                                               GTK_WIDGET(task_view));
         if (callback && callback_win)
             ptk_file_task_set_complete_notify(ptask, callback, (void*)callback_win);
         ptk_file_task_run(ptask);
@@ -405,11 +405,11 @@ ptk_clipboard_paste_links(GtkWindow* parent_win, const char* dest_dir, GtkTreeVi
             file_list.emplace_back(file_path);
         }
 
-        PtkFileTask* ptask = new PtkFileTask(action,
-                                             file_list,
-                                             dest_dir,
-                                             parent_win ? GTK_WINDOW(parent_win) : nullptr,
-                                             task_view ? GTK_WIDGET(task_view) : nullptr);
+        PtkFileTask* ptask = ptk_file_task_new(action,
+                                               file_list,
+                                               dest_dir,
+                                               parent_win ? GTK_WINDOW(parent_win) : nullptr,
+                                               task_view ? GTK_WIDGET(task_view) : nullptr);
         if (callback && callback_win)
             ptk_file_task_set_complete_notify(ptask, callback, (void*)callback_win);
         ptk_file_task_run(ptask);
@@ -497,11 +497,11 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
             }
         }
 
-        PtkFileTask* ptask = new PtkFileTask(action,
-                                             file_list,
-                                             dest_dir,
-                                             parent_win ? GTK_WINDOW(parent_win) : nullptr,
-                                             GTK_WIDGET(task_view));
+        PtkFileTask* ptask = ptk_file_task_new(action,
+                                               file_list,
+                                               dest_dir,
+                                               parent_win ? GTK_WINDOW(parent_win) : nullptr,
+                                               GTK_WIDGET(task_view));
         if (callback && callback_win)
             ptk_file_task_set_complete_notify(ptask, callback, (void*)callback_win);
         ptk_file_task_run(ptask);

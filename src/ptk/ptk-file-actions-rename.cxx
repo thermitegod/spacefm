@@ -2817,7 +2817,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             {
                 // new link task
                 const std::string task_name = fmt::format("Create Link{}", root_msg);
-                PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
 
                 std::string str = gtk_entry_get_text(mset->entry_target);
                 str = ztd::strip(str);
@@ -2894,7 +2894,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     over_cmd = fmt::format("rm -f {} && ", to_path);
 
                 const std::string task_name = fmt::format("Create New File{}", root_msg);
-                PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
                 if (from_path.empty())
                     ptask->task->exec_command =
                         fmt::format("{}{}touch {}", root_mkdir, over_cmd, to_path);
@@ -2954,7 +2954,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 to_path = bash_quote(full_path);
 
                 const std::string task_name = fmt::format("Create New Directory{}", root_msg);
-                PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
                 if (from_path.empty())
                     ptask->task->exec_command = fmt::format("{}mkdir {}", root_mkdir, to_path);
                 else
@@ -2981,7 +2981,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             {
                 // copy task
                 const std::string task_name = fmt::format("Copy{}", root_msg);
-                PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
                 char* over_opt = nullptr;
                 to_path = bash_quote(full_path);
                 if (copy || !mset->is_link)
@@ -3030,7 +3030,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             {
                 // link task
                 const std::string task_name = fmt::format("Create Link{}", root_msg);
-                PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
                 if (link || !mset->is_link)
                 {
                     from_path = bash_quote(mset->full_path);
@@ -3075,7 +3075,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 // move task - this is jumped to from the below rename block on
                 // EXDEV error
                 const std::string task_name = fmt::format("Move{}", root_msg);
-                PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
                 from_path = bash_quote(mset->full_path);
                 to_path = bash_quote(full_path);
                 if (overwrite)

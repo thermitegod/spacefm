@@ -788,7 +788,6 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
         if (response_id == GtkResponseType::GTK_RESPONSE_OK)
         {
             bool mod_change;
-            PtkFileTask* ptask;
             // change file dates
             std::string quoted_time;
             std::string quoted_path;
@@ -829,7 +828,8 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                 }
                 if (!cmd.empty())
                 {
-                    ptask = ptk_file_exec_new("Change File Date", "/", GTK_WIDGET(dialog), nullptr);
+                    PtkFileTask* ptask =
+                        ptk_file_exec_new("Change File Date", "/", GTK_WIDGET(dialog), nullptr);
                     ptask->task->exec_command = cmd;
                     ptask->task->exec_sync = true;
                     ptask->task->exec_export = false;
@@ -912,11 +912,11 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                     file_list.emplace_back(file_path);
                 }
 
-                ptask = new PtkFileTask(VFSFileTaskType::CHMOD_CHOWN,
-                                        file_list,
-                                        nullptr,
-                                        GTK_WINDOW(gtk_widget_get_parent(GTK_WIDGET(dialog))),
-                                        nullptr);
+                PtkFileTask* ptask =
+                    ptk_file_task_new(VFSFileTaskType::CHMOD_CHOWN,
+                                      file_list,
+                                      GTK_WINDOW(gtk_widget_get_parent(GTK_WIDGET(dialog))),
+                                      nullptr);
                 // MOD
                 ptk_file_task_set_recursive(
                     ptask,

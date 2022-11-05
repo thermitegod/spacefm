@@ -37,9 +37,11 @@ enum PTKFileTaskPtaskError
 
 struct PtkFileTask
 {
-    PtkFileTask(VFSFileTaskType type, const std::vector<std::string>& src_files,
-                const char* dest_dir, GtkWindow* parent_window, GtkWidget* task_view);
+    PtkFileTask() = delete;
     ~PtkFileTask();
+
+    PtkFileTask(VFSFileTaskType type, const std::vector<std::string>& src_files,
+                std::string_view dest_dir, GtkWindow* parent_window, GtkWidget* task_view);
 
     VFSFileTask* task;
 
@@ -100,8 +102,16 @@ struct PtkFileTask
 void ptk_file_task_lock(PtkFileTask* ptask);
 void ptk_file_task_unlock(PtkFileTask* ptask);
 
-PtkFileTask* ptk_file_exec_new(std::string_view item_name, const char* dir, GtkWidget* parent,
+PtkFileTask* ptk_file_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files,
+                               GtkWindow* parent_window, GtkWidget* task_view);
+
+PtkFileTask* ptk_file_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files,
+                               std::string_view dest_dir, GtkWindow* parent_window,
                                GtkWidget* task_view);
+
+PtkFileTask* ptk_file_exec_new(std::string_view item_name, GtkWidget* parent, GtkWidget* task_view);
+PtkFileTask* ptk_file_exec_new(std::string_view item_name, std::string_view dest_dir,
+                               GtkWidget* parent, GtkWidget* task_view);
 
 void ptk_file_task_set_complete_notify(PtkFileTask* ptask, GFunc callback, void* user_data);
 

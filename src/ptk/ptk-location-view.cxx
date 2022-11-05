@@ -1010,10 +1010,9 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     line = fmt::format("{}{}\n{}", ssh_udevil ? "echo Connecting...\n\n" : "", cmd, keepterm);
     free(cmd);
 
-    PtkFileTask* ptask;
     const std::string task_name = fmt::format("Open URL {}", netmount->url);
-    ptask =
-        ptk_file_exec_new(task_name, nullptr, GTK_WIDGET(file_browser), file_browser->task_view);
+    PtkFileTask* ptask =
+        ptk_file_exec_new(task_name, GTK_WIDGET(file_browser), file_browser->task_view);
     ptask->task->exec_command = line;
     ptask->task->exec_sync = !ssh_udevil;
     ptask->task->exec_export = true;
@@ -1096,10 +1095,8 @@ on_mount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         return;
     }
     const std::string task_name = fmt::format("Mount {}", vol->device_file);
-    PtkFileTask* ptask = ptk_file_exec_new(task_name,
-                                           nullptr,
-                                           view,
-                                           file_browser ? file_browser->task_view : nullptr);
+    PtkFileTask* ptask =
+        ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
 
     std::string keep_term = "";
     if (run_in_terminal)
@@ -1141,10 +1138,8 @@ on_umount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         return;
     }
     const std::string task_name = fmt::format("Unmount {}", vol->device_file);
-    PtkFileTask* ptask = ptk_file_exec_new(task_name,
-                                           nullptr,
-                                           view,
-                                           file_browser ? file_browser->task_view : nullptr);
+    PtkFileTask* ptask =
+        ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
 
     std::string keep_term = "";
     if (run_in_terminal)
@@ -1164,7 +1159,6 @@ on_umount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 static void
 on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 {
-    PtkFileTask* ptask;
     GtkWidget* view;
     if (!item)
         view = view2;
@@ -1175,8 +1169,6 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     // Note: file_browser may be nullptr
     if (!GTK_IS_WIDGET(file_browser))
         file_browser = nullptr;
-
-    std::string line;
 
     if (vol->is_mounted)
     {
@@ -1211,7 +1203,10 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
             // sleep .2 here to ensure spacefm -g is not killed too quickly causing hang
             wait_done = "\n( sleep .2; kill $waitp 2>/dev/null ) &";
         }
+
+        std::string line;
         if (run_in_terminal)
+        {
             line = fmt::format("echo 'Unmounting {}...'\n{}{}\nif [ $? -ne 0 ];then\n    "
                                "read -p '{}: '\n    exit 1\nelse\n    {}\nfi",
                                vol->device_file,
@@ -1219,18 +1214,19 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
                                unmount,
                                press_enter_to_close,
                                eject);
+        }
         else
+        {
             line = fmt::format("{}{}{}\nuerr=$?{}\nif [ $uerr -ne 0 ];then\n    exit 1\nfi{}",
                                wait,
                                vol->device_type == VFSVolumeDeviceType::BLOCK ? "sync\n" : "",
                                unmount,
                                wait_done,
                                eject);
+        }
         const std::string task_name = fmt::format("Remove {}", vol->device_file);
-        ptask = ptk_file_exec_new(task_name,
-                                  nullptr,
-                                  view,
-                                  file_browser ? file_browser->task_view : nullptr);
+        PtkFileTask* ptask =
+            ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
         ptask->task->exec_command = line;
         ptask->task->exec_sync = !run_in_terminal;
         ptask->task->exec_export = !!file_browser;
@@ -1238,37 +1234,38 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         ptask->task->exec_show_error = true;
         ptask->task->exec_terminal = run_in_terminal;
         ptask->task->exec_icon = vol->get_icon();
+
+        ptk_file_task_run(ptask);
     }
     else if (vol->device_type == VFSVolumeDeviceType::BLOCK &&
              (vol->is_optical || vol->requires_eject))
     {
         // task
-        line = fmt::format("eject {}", vol->device_file);
+        const std::string line = fmt::format("eject {}", vol->device_file);
         const std::string task_name = fmt::format("Remove {}", vol->device_file);
-        ptask = ptk_file_exec_new(task_name,
-                                  nullptr,
-                                  view,
-                                  file_browser ? file_browser->task_view : nullptr);
+        PtkFileTask* ptask =
+            ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
         ptask->task->exec_command = line;
         ptask->task->exec_sync = false;
         ptask->task->exec_show_error = false;
         ptask->task->exec_icon = vol->get_icon();
+
+        ptk_file_task_run(ptask);
     }
     else
     {
         // task
-        line = "sync";
+        const std::string line = "sync";
         const std::string task_name = fmt::format("Remove {}", vol->device_file);
-        ptask = ptk_file_exec_new(task_name,
-                                  nullptr,
-                                  view,
-                                  file_browser ? file_browser->task_view : nullptr);
+        PtkFileTask* ptask =
+            ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
         ptask->task->exec_command = line;
         ptask->task->exec_sync = false;
         ptask->task->exec_show_error = false;
         ptask->task->exec_icon = vol->get_icon();
+
+        ptk_file_task_run(ptask);
     }
-    ptk_file_task_run(ptask);
 }
 
 static bool
@@ -1325,8 +1322,7 @@ try_mount(GtkTreeView* view, vfs::volume vol)
         return false;
     }
     const std::string task_name = fmt::format("Mount {}", vol->device_file);
-    PtkFileTask* ptask =
-        ptk_file_exec_new(task_name, nullptr, GTK_WIDGET(view), file_browser->task_view);
+    PtkFileTask* ptask = ptk_file_exec_new(task_name, GTK_WIDGET(view), file_browser->task_view);
     std::string keep_term = "";
     if (run_in_terminal)
         keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
@@ -1391,7 +1387,7 @@ on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 
         // task
         const std::string task_name = fmt::format("Mount {}", vol->device_file);
-        PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, view, file_browser->task_view);
+        PtkFileTask* ptask = ptk_file_exec_new(task_name, view, file_browser->task_view);
         std::string keep_term = "";
         if (run_in_terminal)
             keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
@@ -1459,10 +1455,8 @@ on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 
         // task
         const std::string task_name = fmt::format("Mount {}", vol->device_file);
-        PtkFileTask* ptask = ptk_file_exec_new(task_name,
-                                               nullptr,
-                                               view,
-                                               file_browser ? file_browser->task_view : nullptr);
+        PtkFileTask* ptask =
+            ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
         std::string keep_term = "";
         if (run_in_terminal)
             keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);

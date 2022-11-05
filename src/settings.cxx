@@ -1148,7 +1148,7 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     // task
     const std::string task_name = fmt::format("Edit {}", path);
     const std::string cwd = Glib::path_get_dirname(path);
-    PtkFileTask* ptask = ptk_file_exec_new(task_name, cwd.c_str(), dlgparent, nullptr);
+    PtkFileTask* ptask = ptk_file_exec_new(task_name, cwd, dlgparent, nullptr);
     ptask->task->exec_command = editor;
     ptask->task->exec_sync = false;
     ptask->task->exec_terminal = terminal;

@@ -3036,7 +3036,7 @@ exec_task(const char* command, bool run_in_terminal)
 
     const std::vector<std::string> file_list{"exec_task"};
 
-    PtkFileTask* ptask = new PtkFileTask(VFSFileTaskType::EXEC, file_list, "/", nullptr, nullptr);
+    PtkFileTask* ptask = ptk_file_task_new(VFSFileTaskType::EXEC, file_list, "/", nullptr, nullptr);
     ptask->task->exec_action = "exec_task";
     ptask->task->exec_command = command;
     ptask->task->exec_sync = false;

@@ -3577,7 +3577,6 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
     vfs::mime_type mime_type;
     GtkClipboard* clip = nullptr;
     vfs::volume vol;
-    PtkFileTask* ptask;
     GtkTreeModel* model;
     GtkTreeModel* model_task;
     GtkTreeIter it;
@@ -3798,7 +3797,8 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
         "run",
     };
 
-    if ((ptask = get_selected_task(file_browser->task_view)))
+    PtkFileTask* ptask = get_selected_task(file_browser->task_view);
+    if (ptask)
     {
         c->var[ItemPropContext::CONTEXT_TASK_TYPE] = job_titles.at(ptask->task->type).data();
         if (ptask->task->type == VFSFileTaskType::EXEC)
@@ -3858,7 +3858,6 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
 {
     std::string path;
     std::string esc_path;
-    PtkFileTask* ptask;
 
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(vtask->exec_browser);
     FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
@@ -4125,7 +4124,8 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
     buf.append(fmt::format("fm_tmp_dir=\"{}\"\n", vfs_user_get_tmp_dir()));
 
     // tasks
-    if ((ptask = get_selected_task(file_browser->task_view)))
+    PtkFileTask* ptask = get_selected_task(file_browser->task_view);
+    if (ptask)
     {
         static constexpr std::array<std::string_view, 7>
             job_titles{"move", "copy", "trash", "delete", "link", "change", "run"};
@@ -4358,7 +4358,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask
 {
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
-    PtkFileTask* ptask;
+    PtkFileTask* ptask = nullptr;
     xset_t set;
 
     enum class MainWindowJob
@@ -4394,7 +4394,6 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask
     if (all)
     {
         model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
-        ptask = nullptr;
     }
     else
     {
@@ -7151,11 +7150,11 @@ main_window_socket_command(char* argv[], std::string& reply)
                 return 1;
             }
             PtkFileTask* ptask =
-                new PtkFileTask(task_type,
-                                file_list,
-                                target_dir,
-                                GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
-                                file_browser->task_view);
+                ptk_file_task_new(task_type,
+                                  file_list,
+                                  target_dir,
+                                  GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
+                                  file_browser->task_view);
             ptk_file_task_run(ptask);
             reply = fmt::format("# Note: $new_task_id not valid until approx one "
                                 "half second after task  start\nnew_task_window={}\n"
