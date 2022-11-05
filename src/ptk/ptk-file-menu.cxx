@@ -1448,17 +1448,15 @@ enum PTKFileMenuAppJob
     APP_JOB_USR
 };
 
-static char*
+static const char*
 get_shared_desktop_file_location(std::string_view name)
 {
-    char* ret;
-
     for (std::string_view sys_dir: vfs_system_data_dir())
     {
-        if ((ret = vfs_mime_type_locate_desktop_file(sys_dir, name)))
+        const char* ret = vfs_mime_type_locate_desktop_file(sys_dir, name);
+        if (ret)
             return ret;
     }
-
     return nullptr;
 }
 
@@ -1519,12 +1517,9 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             path = Glib::build_filename(vfs_user_data_dir(), "applications", desktop.get_name());
             if (!std::filesystem::exists(path))
             {
-                char* share_desktop = vfs_mime_type_locate_desktop_file("", desktop.get_name());
+                const char* share_desktop = vfs_mime_type_locate_desktop_file(desktop.get_name());
                 if (!(share_desktop && ztd::same(share_desktop, path)))
-                {
-                    free(share_desktop);
                     return;
-                }
 
                 const std::string msg =
                     fmt::format("The file '{}' does not exist.\n\nBy copying '{}' to '{}' and "
@@ -1539,25 +1534,24 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                     GtkButtonsType::GTK_BUTTONS_YES_NO,
                                     msg) != GtkResponseType::GTK_RESPONSE_YES)
                 {
-                    free(share_desktop);
                     break;
                 }
 
                 // need to copy
                 command = fmt::format("cp -a  {} {}", share_desktop, path);
                 Glib::spawn_command_line_sync(command);
-                free(share_desktop);
                 if (!std::filesystem::exists(path))
                     return;
             }
             xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, false);
             break;
         case PTKFileMenuAppJob::APP_JOB_VIEW:
-            str = get_shared_desktop_file_location(desktop.get_name());
-            if (str)
-                xset_edit(GTK_WIDGET(data->browser), str, false, true);
-            free(str);
+        {
+            const char* desktop_path = get_shared_desktop_file_location(desktop.get_name());
+            if (desktop_path)
+                xset_edit(GTK_WIDGET(data->browser), desktop_path, false, true);
             break;
+        }
         case PTKFileMenuAppJob::APP_JOB_EDIT_LIST:
             // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
             path = Glib::build_filename(vfs_user_config_dir(), "mimeapps.list");
@@ -1598,16 +1592,17 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                                                PtkOpenAction::PTK_OPEN_NEW_TAB);
             break;
         case PTKFileMenuAppJob::APP_JOB_BROWSE_SHARED:
-            str = get_shared_desktop_file_location(desktop.get_name());
-            if (str)
-                path = Glib::path_get_dirname(str);
+        {
+            const char* desktop_path = get_shared_desktop_file_location(desktop.get_name());
+            if (desktop_path)
+                path = Glib::path_get_dirname(desktop_path);
             else
                 path = "/usr/share/applications";
-            free(str);
             if (data->browser)
                 data->browser->run_event<EventType::OPEN_ITEM>(path,
                                                                PtkOpenAction::PTK_OPEN_NEW_TAB);
-            break;
+        }
+        break;
         case PTKFileMenuAppJob::APP_JOB_EDIT_TYPE:
             path = Glib::build_filename(vfs_user_data_dir(), "mime/packages");
             std::filesystem::create_directories(path);
@@ -2006,9 +2001,8 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
                                    app_item,
                                    data);
 
-        char* desk_path = get_shared_desktop_file_location(desktop.get_name());
+        const char* desk_path = get_shared_desktop_file_location(desktop.get_name());
         gtk_widget_set_sensitive(GTK_WIDGET(newitem), !!desk_path);
-        free(desk_path);
     }
 
     // /usr applications/

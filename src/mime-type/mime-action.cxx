@@ -57,7 +57,7 @@
 #include "mime-action.hxx"
 
 static void
-save_to_file(std::string_view path, std::string_view data)
+save_to_file(std::string_view path, const Glib::ustring& data)
 {
     write_file(path, data);
 
@@ -218,7 +218,7 @@ get_actions(std::string_view dir, std::string_view type, std::vector<std::string
                 if (!is_removed && !ztd::contains(actions, app))
                 {
                     /* check for app existence */
-                    if (mime_type_locate_desktop_file(nullptr, apps.at(i).data()))
+                    if (mime_type_locate_desktop_file(apps.at(i).data()))
                     {
                         // LOG_INFO("                EXISTS");
                         actions.push_back(app);
@@ -296,7 +296,7 @@ mime_type_has_action(const char* type, const char* desktop_id)
 
     if (is_desktop)
     {
-        const Glib::ustring filename = mime_type_locate_desktop_file(nullptr, desktop_id);
+        const Glib::ustring filename = mime_type_locate_desktop_file(desktop_id);
 
         const auto kf = Glib::KeyFile::create();
         try
@@ -348,15 +348,14 @@ mime_type_has_action(const char* type, const char* desktop_id)
         for (std::string_view action: actions)
         {
             /* Try to match directly by desktop_id first */
-            if (is_desktop && ztd::same(action, desktop_id))
+            if (is_desktop && ztd::same(action.data(), desktop_id))
             {
                 found = true;
                 break;
             }
             else /* Then, try to match by "Exec" and "Name" keys */
             {
-                const Glib::ustring filename =
-                    mime_type_locate_desktop_file(nullptr, action.data());
+                const Glib::ustring filename = mime_type_locate_desktop_file(action);
 
                 const auto kf = Glib::KeyFile::create();
                 try
@@ -409,7 +408,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
 
     if (ztd::endswith(desktop_id, desktop_ext))
     {
-        const Glib::ustring filename = mime_type_locate_desktop_file(nullptr, desktop_id);
+        const Glib::ustring filename = mime_type_locate_desktop_file(desktop_id);
 
         const auto kf = Glib::KeyFile::create();
         try
@@ -472,7 +471,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
         if (!std::filesystem::exists(path))     /* this generated filename can be used */
             break;
     }
-    save_to_file(path, file_content.data());
+    save_to_file(path, file_content);
 
     /* execute update-desktop-database" to update mimeinfo.cache */
     update_desktop_database();
@@ -504,96 +503,51 @@ mime_type_add_action(const char* type, const char* desktop_id, char** custom_des
 }
 
 static char*
-_locate_desktop_file_recursive(const char* path, const char* desktop_id, bool first)
+_locate_desktop_file(std::string_view dir, std::string_view desktop_id)
 {
-    // if first is true, just search for subdirs not desktop_id (already searched)
+    std::string desktop_path = Glib::build_filename(dir.data(), "applications", desktop_id.data());
+    if (std::filesystem::is_regular_file(desktop_path))
+        return ztd::strdup(desktop_path);
 
-    char* found = nullptr;
+    // LOG_INFO("desktop_id={}", desktop_id);
 
-    if (std::filesystem::is_directory(path))
+    // mime encodes directory separators as '-'.
+    // so the desktop_id 'mime-mime-mime.desktop' could be on-disk
+    // mime-mime-mime.desktop, mime/mime-mime.desktop, or mime/mime/mime.desktop.
+    // not supported is mime-mime/mime.desktop
+    std::string new_desktop_id = desktop_id.data();
+    while (ztd::contains(new_desktop_id, "-"))
     {
-        for (const auto& file: std::filesystem::directory_iterator(path))
-        {
-            const std::string file_name = std::filesystem::path(file).filename();
-
-            const std::string sub_path = Glib::build_filename(path, file_name);
-            if (std::filesystem::is_directory(sub_path))
-            {
-                found = _locate_desktop_file_recursive(sub_path.data(), desktop_id, false);
-                if (found)
-                    break;
-            }
-            else if (!first && ztd::same(file_name, desktop_id) &&
-                     std::filesystem::is_regular_file(sub_path))
-            {
-                found = ztd::strdup(sub_path);
-                break;
-            }
-        }
+        new_desktop_id = ztd::replace(new_desktop_id, "-", "/", 1);
+        const std::string new_desktop_path =
+            Glib::build_filename(dir.data(), "applications", new_desktop_id);
+        // LOG_INFO("new_desktop_id={}", new_desktop_id);
+        if (std::filesystem::is_regular_file(new_desktop_path))
+            return ztd::strdup(new_desktop_path);
     }
 
-    return found;
+    return nullptr;
 }
 
-static char*
-_locate_desktop_file(const char* dir, const void* desktop_id)
-{ // sfm 0.7.8 modified + 0.8.7 modified
-    bool found = false;
-
-    const std::string desktop_path =
-        Glib::build_filename(dir, "applications", (const char*)desktop_id);
-    char* path = ztd::strdup(desktop_path);
-
-    char* sep = (char*)strchr((const char*)desktop_id, '-');
-    if (sep)
-        sep = strrchr(path, '-');
-
-    do
-    {
-        if (std::filesystem::is_regular_file(path))
-        {
-            found = true;
-            break;
-        }
-        if (sep)
-        {
-            *sep = '/';
-            sep = strchr(sep + 1, '-');
-        }
-        else
-        {
-            break;
-        }
-    } while (!found);
-
-    if (found)
-        return path;
-    free(path);
-
-    // sfm 0.8.7 some desktop files listed by the app chooser are in subdirs
-    const std::string desktop_recursive_path = Glib::build_filename(dir, "applications");
-    sep = _locate_desktop_file_recursive(desktop_recursive_path.data(),
-                                         (const char*)desktop_id,
-                                         true);
-    return sep;
-}
-
-char*
-mime_type_locate_desktop_file(const char* dir, const char* desktop_id)
+const char*
+mime_type_locate_desktop_file(std::string_view dir, std::string_view desktop_id)
 {
-    if (dir)
-        return _locate_desktop_file(dir, (void*)desktop_id);
+    return _locate_desktop_file(dir, desktop_id);
+}
 
+const char*
+mime_type_locate_desktop_file(std::string_view desktop_id)
+{
     char* ret = nullptr;
 
     const std::string data_dir = vfs_user_data_dir();
 
-    if ((ret = _locate_desktop_file(data_dir.data(), (void*)desktop_id)))
+    if ((ret = _locate_desktop_file(data_dir, desktop_id)))
         return ret;
 
     for (std::string_view sys_dir: vfs_system_data_dir())
     {
-        if ((ret = _locate_desktop_file(sys_dir.data(), (void*)desktop_id)))
+        if ((ret = _locate_desktop_file(sys_dir, desktop_id)))
             return ret;
     }
     return ret;
@@ -613,9 +567,9 @@ get_default_action(std::string_view dir, std::string_view type)
         "Added Associations",
     };
 
-    for (usize n = 0; n < names.size(); ++n)
+    for (std::string_view name: names)
     {
-        const std::string path = Glib::build_filename(dir.data(), names.at(n).data());
+        const std::string path = Glib::build_filename(dir.data(), name.data());
         // LOG_INFO("    path = {}", path);
         const auto kf = Glib::KeyFile::create();
         try
@@ -627,12 +581,12 @@ get_default_action(std::string_view dir, std::string_view type)
             return nullptr;
         }
 
-        for (usize k = 0; k < groups.size(); ++k)
+        for (std::string_view group: groups)
         {
             std::vector<Glib::ustring> apps;
             try
             {
-                apps = kf->get_string_list(groups.at(k).data(), type.data());
+                apps = kf->get_string_list(group.data(), type.data());
                 if (apps.empty())
                     break;
             }
@@ -641,24 +595,24 @@ get_default_action(std::string_view dir, std::string_view type)
                 break;
             }
 
-            for (usize i = 0; i < apps.size(); ++i)
+            for (const Glib::ustring& app: apps)
             {
-                if (apps[i][0] != '\0')
+                if (app.empty())
+                    continue;
+
+                // LOG_INFO("        {}", apps[i]);
+                if (mime_type_locate_desktop_file(app.data()))
                 {
-                    // LOG_INFO("        {}", apps[i]);
-                    if (mime_type_locate_desktop_file(nullptr, apps.at(i).data()))
-                    {
-                        // LOG_INFO("            EXISTS");
-                        return ztd::strdup(apps.at(i));
-                    }
+                    // LOG_INFO("            EXISTS");
+                    return ztd::strdup(app);
                 }
             }
 
-            if (n == 1)
+            if (ztd::same(name.data(), "defaults.list"))
                 break; // defaults.list does not have Added Associations
         }
 
-        if (ztd::same(dir, vfs_user_config_dir()))
+        if (ztd::same(dir.data(), vfs_user_config_dir()))
             break; // no defaults.list in ~/.config
     }
     return nullptr;
@@ -684,19 +638,19 @@ mime_type_get_default_action(std::string_view mime_type)
     std::string dir;
 
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    if ((ret = get_default_action(vfs_user_config_dir(), mime_type)))
+    if ((ret = get_default_action(vfs_user_config_dir(), mime_type.data())))
         return ret;
 
     // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
     dir = Glib::build_filename(vfs_user_data_dir(), "applications");
-    if ((ret = get_default_action(dir, mime_type)))
+    if ((ret = get_default_action(dir, mime_type.data())))
         return ret;
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
     for (std::string_view sys_dir: vfs_system_data_dir())
     {
         dir = Glib::build_filename(sys_dir.data(), "applications");
-        if ((ret = get_default_action(dir, mime_type)))
+        if ((ret = get_default_action(dir, mime_type.data())))
             return ret;
     }
 
@@ -883,6 +837,6 @@ mime_type_update_association(const char* type, const char* desktop_id, MimeTypeA
     if (data_changed)
     {
         Glib::ustring data = kf->to_data();
-        save_to_file(path, data.data());
+        save_to_file(path, data);
     }
 }

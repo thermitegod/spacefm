@@ -518,10 +518,16 @@ vfs_mime_type_remove_reload_cb(GList* cb)
     reload_cb = g_list_delete_link(reload_cb, cb);
 }
 
-char*
+const char*
+vfs_mime_type_locate_desktop_file(std::string_view desktop_id)
+{
+    return mime_type_locate_desktop_file(desktop_id);
+}
+
+const char*
 vfs_mime_type_locate_desktop_file(std::string_view dir, std::string_view desktop_id)
 {
-    return mime_type_locate_desktop_file(dir.empty() ? nullptr : dir.data(), desktop_id.data());
+    return mime_type_locate_desktop_file(dir, desktop_id);
 }
 
 void

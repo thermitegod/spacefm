@@ -75,4 +75,5 @@ char* mime_type_get_default_action(std::string_view type);
 void mime_type_update_association(const char* type, const char* desktop_id, MimeTypeAction action);
 
 /* Locate the file path of desktop file by desktop_id */
-char* mime_type_locate_desktop_file(const char* dir, const char* desktop_id);
+const char* mime_type_locate_desktop_file(std::string_view desktop_id);
+const char* mime_type_locate_desktop_file(std::string_view dir, std::string_view desktop_id);

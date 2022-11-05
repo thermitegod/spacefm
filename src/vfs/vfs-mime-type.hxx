@@ -99,4 +99,5 @@ GList* vfs_mime_type_add_reload_cb(GFreeFunc cb, void* user_data);
 
 void vfs_mime_type_remove_reload_cb(GList* cb);
 
-char* vfs_mime_type_locate_desktop_file(std::string_view dir, std::string_view desktop_id);
+const char* vfs_mime_type_locate_desktop_file(std::string_view desktop_id);
+const char* vfs_mime_type_locate_desktop_file(std::string_view dir, std::string_view desktop_id);
