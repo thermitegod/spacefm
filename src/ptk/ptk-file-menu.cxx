@@ -63,6 +63,8 @@
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/ptk-keyboard.hxx"
 
+#define PTK_FILE_MENU(obj) (static_cast<PtkFileMenu*>(obj))
+
 static bool on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data);
 static bool app_menu_keypress(GtkWidget* widget, GdkEventKey* event, PtkFileMenu* data);
 static void show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 button,

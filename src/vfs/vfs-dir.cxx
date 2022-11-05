@@ -55,6 +55,10 @@
 #include "vfs/vfs-user-dir.hxx"
 #include "vfs/vfs-dir.hxx"
 
+#define VFS_DIR_REINTERPRET(obj) (reinterpret_cast<VFSDir*>(obj))
+
+#define VFS_TYPE_DIR (vfs_dir_get_type())
+
 struct VFSDirClass
 {
     GObjectClass parent;

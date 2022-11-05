@@ -49,7 +49,7 @@
 #include "mime-type/mime-cache.hxx"
 
 /* max extent used to checking text files */
-#define TEXT_MAX_EXTENT 512
+constexpr i32 TEXT_MAX_EXTENT = 512;
 
 static bool mime_type_is_subclass(const char* type, const char* parent);
 

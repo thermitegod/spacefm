@@ -41,6 +41,8 @@
 
 #include "vfs/vfs-utils.hxx"
 
+#define VFS_MIME_TYPE_CALLBACK_DATA(obj) (static_cast<VFSMimeReloadCbEnt*>(obj))
+
 static std::map<std::string, vfs::mime_type> mime_map;
 std::mutex mime_map_lock;
 

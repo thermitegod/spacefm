@@ -53,8 +53,10 @@
 
 #include "vfs/vfs-volume.hxx"
 
-#define MOUNTINFO "/proc/self/mountinfo"
-#define MTAB      "/proc/mounts"
+#define VFS_VOLUME_CALLBACK_DATA(obj) (reinterpret_cast<VFSVolumeCallbackData*>(obj))
+
+inline constexpr std::string_view MOUNTINFO{"/proc/self/mountinfo"};
+inline constexpr std::string_view MTAB{"/proc/mounts"};
 
 inline constexpr std::array<std::string_view, 14> HIDDEN_NON_BLOCK_FS{
     "devpts",
@@ -1090,7 +1092,7 @@ info_mount_points(device_t* device)
     std::string contents;
     try
     {
-        contents = Glib::file_get_contents(MOUNTINFO);
+        contents = Glib::file_get_contents(MOUNTINFO.data());
     }
     catch (const Glib::FileError& e)
     {
@@ -1473,7 +1475,7 @@ parse_mounts(bool report)
     std::string contents;
     try
     {
-        contents = Glib::file_get_contents(MOUNTINFO);
+        contents = Glib::file_get_contents(MOUNTINFO.data());
     }
     catch (const Glib::FileError& e)
     {
@@ -2173,7 +2175,7 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
     {
         try
         {
-            contents = Glib::file_get_contents(MTAB);
+            contents = Glib::file_get_contents(MTAB.data());
         }
         catch (const Glib::FileError& e)
         {
@@ -3555,14 +3557,8 @@ unmount_if_mounted(vfs::volume vol)
     if (!str)
         return;
 
-    const std::string mtab_path = Glib::build_filename(SYSCONFDIR, "mtab");
-
-    std::string mtab = MTAB;
-    if (!std::filesystem::exists(mtab))
-        mtab = mtab_path;
-
     const std::string line =
-        fmt::format("grep -qs '^{} ' {} 2>/dev/nullptr || exit\n{}\n", vol->device_file, mtab, str);
+        fmt::format("grep -qs '^{} ' {} 2>/dev/nullptr || exit\n{}\n", vol->device_file, MTAB, str);
     LOG_INFO("Unmount-If-Mounted: {}", line);
     exec_task(line.c_str(), run_in_terminal);
 }
@@ -3697,7 +3693,7 @@ vfs_volume_init()
                               Glib::IOCondition::IO_IN | Glib::IOCondition::IO_HUP);
 
     // start mount monitor
-    mchannel = Glib::IOChannel::create_from_file(MOUNTINFO, "r");
+    mchannel = Glib::IOChannel::create_from_file(MOUNTINFO.data(), "r");
     mchannel->set_close_on_unref(true);
 
     Glib::signal_io().connect(sigc::ptr_fun(cb_mount_monitor_watch),

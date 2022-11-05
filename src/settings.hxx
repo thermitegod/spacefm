@@ -40,13 +40,13 @@
 #define XSET(obj) (static_cast<xset_t>(obj))
 
 // this determines time before item is selected by hover in single-click mode
-#define SINGLE_CLICK_TIMEOUT 150
+inline constexpr u32 SINGLE_CLICK_TIMEOUT = 150;
 
 // This limits the small icon size for side panes and task list
-#define PANE_MAX_ICON_SIZE 48
+inline constexpr i32 PANE_MAX_ICON_SIZE = 48;
 
 // delimiter used in config file for tabs
-#define CONFIG_FILE_TABS_DELIM "///"
+const std::string CONFIG_FILE_TABS_DELIM = "///";
 
 void load_settings();
 void autosave_settings();

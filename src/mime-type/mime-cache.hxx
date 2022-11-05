@@ -32,7 +32,7 @@ class MimeCache
 
     const char* lookup_literal(const char* filename);
     const char* lookup_suffix(const char* filename, const char** suffix_pos);
-    const char* lookup_magic(const char* data, i32 len);
+    const char* lookup_magic(const char* data, u32 len);
     const char* lookup_glob(const char* filename, i32* glob_len);
     const std::vector<const char*> lookup_parents(const char* mime_type);
     const char* lookup_alias(const char* mime_type);
@@ -43,8 +43,8 @@ class MimeCache
   private:
     void load_mime_file();
     const char* lookup_str_in_entries(const char* entries, u32 n, const char* str);
-    bool magic_rule_match(const char* buf, const char* rule, const char* data, i32 len);
-    bool magic_match(const char* buf, const char* magic, const char* data, i32 len);
+    bool magic_rule_match(const char* buf, const char* rule, const char* data, u32 len);
+    bool magic_match(const char* buf, const char* magic, const char* data, u32 len);
     const char* lookup_suffix_nodes(const char* buf, const char* nodes, u32 n, const char* name);
     const char* lookup_reverse_suffix_nodes(const char* buf, const char* nodes, u32 n,
                                             const char* name, const char* suffix,

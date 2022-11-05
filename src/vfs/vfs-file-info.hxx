@@ -36,8 +36,7 @@
 
 #include <gtk/gtk.h>
 
-#define VFS_FILE_INFO(obj)             (static_cast<vfs::file_info>(obj))
-#define VFS_FILE_INFO_REINTERPRET(obj) (reinterpret_cast<vfs::file_info>(obj))
+#define VFS_FILE_INFO(obj) (static_cast<vfs::file_info>(obj))
 
 // For future use, not all supported now
 enum VFSFileInfoFlag

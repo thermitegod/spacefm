@@ -37,6 +37,8 @@ struct VFSAsyncTaskClass
 
 GType vfs_async_task_get_type();
 
+#define VFS_ASYNC_TASK_REINTERPRET(obj) (reinterpret_cast<VFSAsyncTask*>(obj))
+
 #define VFS_ASYNC_TASK_TYPE (vfs_async_task_get_type())
 
 static void vfs_async_task_class_init(VFSAsyncTaskClass* klass);

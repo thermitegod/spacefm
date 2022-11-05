@@ -140,6 +140,8 @@ static std::map<panel_t, std::vector<std::string>> closed_tabs_restore;
 //  Drag & Drop/Clipboard targets
 static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 
+#define FM_TYPE_MAIN_WINDOW (fm_main_window_get_type())
+
 GType
 fm_main_window_get_type()
 {

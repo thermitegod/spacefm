@@ -97,6 +97,9 @@ static void on_file_list_file_deleted(vfs::file_info file, PtkFileList* list);
 static void ptk_file_list_file_changed(vfs::file_info file, PtkFileList* list);
 static void on_thumbnail_loaded(vfs::file_info file, PtkFileList* list);
 
+#define PTK_TYPE_FILE_LIST    (ptk_file_list_get_type())
+#define PTK_IS_FILE_LIST(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_FILE_LIST))
+
 static GObjectClass* parent_class = nullptr;
 
 static GType column_types[magic_enum::enum_count<PTKFileListCol>()];

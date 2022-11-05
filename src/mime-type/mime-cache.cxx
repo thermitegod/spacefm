@@ -31,31 +31,31 @@
 
 #include "mime-cache.hxx"
 
-#define LIB_MAJOR_VERSION 1
+inline constexpr u64 LIB_MAJOR_VERSION = 1;
 /* FIXME: since mime-cache 1.2, weight is splitted into three parts
  * only lower 8 bit contains weight, and higher bits are flags and case-sensitivity.
  * anyway, since we do not support weight at all, it will be fixed later.
  * We claimed that we support 1.2 to cheat pcmanfm as a temporary quick dirty fix
  * for the broken file manager, but this should be correctly done in the future.
  * Weight and case-sensitivity are not handled now. */
-#define LIB_MINOR_VERSION 2
+inline constexpr u64 LIB_MINOR_VERSION = 2;
 
 /* handle byte order here */
 #define VAL16(buffer, idx) GUINT16_FROM_BE(*(u16*)(buffer + idx))
 #define VAL32(buffer, idx) GUINT32_FROM_BE(*(u32*)(buffer + idx))
 
-#define UINT32(obj) (static_cast<u32>(obj))
-
 /* cache header */
-#define MAJOR_VERSION  0
-#define MINOR_VERSION  2
-#define ALIAS_LIST     4
-#define PARENT_LIST    8
-#define LITERAL_LIST   12
-#define SUFFIX_TREE    16
-#define GLOB_LIST      20
-#define MAGIC_LIST     24
-#define NAMESPACE_LIST 28
+// clang-format off
+inline constexpr u64 MAJOR_VERSION  = 0;
+inline constexpr u64 MINOR_VERSION  = 2;
+inline constexpr u64 ALIAS_LIST     = 4;
+inline constexpr u64 PARENT_LIST    = 8;
+inline constexpr u64 LITERAL_LIST   = 12;
+inline constexpr u64 SUFFIX_TREE    = 16;
+inline constexpr u64 GLOB_LIST      = 20;
+inline constexpr u64 MAGIC_LIST     = 24;
+// inline constexpr u64 NAMESPACE_LIST = 28;
+// clang-format on
 
 MimeCache::MimeCache(std::string_view file_path)
 {
@@ -205,7 +205,7 @@ MimeCache::lookup_suffix(const char* filename, const char** suffix_pos)
 }
 
 const char*
-MimeCache::lookup_magic(const char* data, i32 len)
+MimeCache::lookup_magic(const char* data, u32 len)
 {
     const char* magic = this->magics;
 
@@ -314,7 +314,7 @@ MimeCache::lookup_str_in_entries(const char* entries, u32 n, const char* str)
 }
 
 bool
-MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data, i32 len)
+MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data, u32 len)
 {
     u32 offset = VAL32(rule, 0);
     u32 range = VAL32(rule, 4);
@@ -322,7 +322,7 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data,
     u32 max_offset = offset + range;
     u32 val_len = VAL32(rule, 12);
 
-    for (; offset < max_offset && (offset + val_len) <= UINT32(len); ++offset)
+    for (; offset < max_offset && (offset + val_len) <= len; ++offset)
     {
         bool match = false;
         u32 val_off = VAL32(rule, 16);
@@ -372,7 +372,7 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data,
 }
 
 bool
-MimeCache::magic_match(const char* buf, const char* magic, const char* data, i32 len)
+MimeCache::magic_match(const char* buf, const char* magic, const char* data, u32 len)
 {
     u32 n_rules = VAL32(magic, 8);
     u32 rules_off = VAL32(magic, 12);

@@ -34,10 +34,7 @@
 
 #include "signals.hxx"
 
-#define VFS_DIR(obj)             (static_cast<vfs::dir>(obj))
-#define VFS_DIR_REINTERPRET(obj) (reinterpret_cast<vfs::dir>(obj))
-
-#define VFS_TYPE_DIR (vfs_dir_get_type())
+#define VFS_DIR(obj) (static_cast<VFSDir*>(obj))
 
 // forward declare types
 struct VFSFileInfo;

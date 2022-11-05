@@ -46,6 +46,9 @@
 
 #include "ptk/ptk-dir-tree.hxx"
 
+#define PTK_TYPE_DIR_TREE    (ptk_dir_tree_get_type())
+#define PTK_IS_DIR_TREE(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_DIR_TREE))
+
 #define PTK_DIR_TREE_NODE(obj) (static_cast<PtkDirTreeNode*>(obj))
 
 struct PtkDirTreeNode

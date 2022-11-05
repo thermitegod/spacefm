@@ -28,7 +28,6 @@
 
 // TOML config file
 constexpr u64 CONFIG_FILE_VERSION{1}; // 3.0.0-dev
-// #define CONFIG_FILE_VERSION  1 // 3.0.0-dev
 const std::string CONFIG_FILE_FILENAME{"session.toml"};
 
 // TOML config on disk names - TOML sections

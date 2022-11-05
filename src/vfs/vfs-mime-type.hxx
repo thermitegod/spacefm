@@ -28,8 +28,7 @@
 
 #include "mime-type/mime-type.hxx"
 
-#define VFS_MIME_TYPE(obj)               (static_cast<vfs::mime_type>(obj))
-#define VFS_MIME_TYPE_CALLBACK_DATA(obj) (static_cast<VFSMimeReloadCbEnt*>(obj))
+#define VFS_MIME_TYPE(obj) (static_cast<vfs::mime_type>(obj))
 
 struct VFSMimeType
 {

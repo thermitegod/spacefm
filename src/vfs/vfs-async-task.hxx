@@ -39,8 +39,7 @@
 
 #include "signals.hxx"
 
-#define VFS_ASYNC_TASK(obj)             (static_cast<VFSAsyncTask*>(obj))
-#define VFS_ASYNC_TASK_REINTERPRET(obj) (reinterpret_cast<VFSAsyncTask*>(obj))
+#define VFS_ASYNC_TASK(obj) (static_cast<VFSAsyncTask*>(obj))
 
 // forward declare
 struct VFSDir;

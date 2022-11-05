@@ -48,8 +48,10 @@
 
 // #define VFS_FILE_MONITOR_DEBUG
 
-#define EVENT_SIZE (sizeof(struct inotify_event))
-#define BUF_LEN    (1024 * (EVENT_SIZE + 16))
+// clang-format off
+inline constexpr u64 EVENT_SIZE = (sizeof(struct inotify_event));
+inline constexpr u64 BUF_LEN    = (1024 * (EVENT_SIZE + 16));
+// clang-format on
 
 static std::map<std::string, vfs::file_monitor> monitor_map;
 

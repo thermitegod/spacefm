@@ -29,8 +29,7 @@
 
 #include "settings.hxx"
 
-#define VFS_VOLUME(obj)               (static_cast<vfs::volume>(obj))
-#define VFS_VOLUME_CALLBACK_DATA(obj) (reinterpret_cast<VFSVolumeCallbackData*>(obj))
+#define VFS_VOLUME(obj) (static_cast<vfs::volume>(obj))
 
 enum VFSVolumeState
 {
