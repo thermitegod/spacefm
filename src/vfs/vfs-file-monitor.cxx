@@ -53,14 +53,11 @@
 
 static std::map<std::string, vfs::file_monitor> monitor_map;
 
-static GIOChannel* vfs_inotify_io_channel = nullptr;
+static i32 inotify_fd = -1;
+static Glib::RefPtr<Glib::IOChannel> inotify_io_channel = nullptr;
 
-static u32 vfs_inotify_io_watch = 0;
-static i32 vfs_inotify_fd = -1;
-
-/* event handler of all inotify events */
-static bool vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond,
-                                              void* user_data);
+// event handler of all inotify events
+static bool vfs_file_monitor_on_inotify_event(Glib::IOCondition condition);
 
 struct VFSFileMonitorCallbackEntry
 {
@@ -87,55 +84,67 @@ VFSFileMonitorCallbackEntry::~VFSFileMonitorCallbackEntry()
     // LOG_INFO("VFSFileMonitorCallbackEntry Destructor");
 }
 
-VFSFileMonitor::VFSFileMonitor(std::string_view real_path)
+VFSFileMonitor::VFSFileMonitor(std::string_view real_path, i32 wd)
 {
-    // LOG_INFO("VFSFileMonitor Constructor");
+    // LOG_INFO("VFSFileMonitor Constructor {}", real_path);
     this->path = real_path.data();
+    this->wd = wd;
 }
 
 VFSFileMonitor::~VFSFileMonitor()
 {
     // LOG_INFO("VFSFileMonitor Destructor {}", this->wd);
+    inotify_rm_watch(inotify_fd, this->wd);
+}
 
-    inotify_rm_watch(vfs_inotify_fd, this->wd);
+void
+VFSFileMonitor::add_user() noexcept
+{
+    this->user_count += 1;
+}
 
-    monitor_map.erase(this->path);
+void
+VFSFileMonitor::remove_user() noexcept
+{
+    this->user_count -= 1;
+}
+
+bool
+VFSFileMonitor::has_users() const noexcept
+{
+    return (this->user_count != 0);
 }
 
 static bool
 vfs_file_monitor_connect_to_inotify()
 {
-    vfs_inotify_fd = inotify_init();
-    if (vfs_inotify_fd == -1)
+    inotify_fd = inotify_init();
+    if (inotify_fd == -1)
     {
-        LOG_WARN("failed to initialize inotify");
+        LOG_ERROR("failed to initialize inotify");
         return false;
     }
 
-    vfs_inotify_io_channel = g_io_channel_unix_new(vfs_inotify_fd);
+    inotify_io_channel = Glib::IOChannel::create_from_fd(inotify_fd);
+    inotify_io_channel->set_buffered(true);
+    inotify_io_channel->set_flags(Glib::IOFlags::NONBLOCK);
 
-    g_io_channel_set_encoding(vfs_inotify_io_channel, nullptr, nullptr);
-    g_io_channel_set_buffered(vfs_inotify_io_channel, false);
-    g_io_channel_set_flags(vfs_inotify_io_channel, G_IO_FLAG_NONBLOCK, nullptr);
+    Glib::signal_io().connect(sigc::ptr_fun(vfs_file_monitor_on_inotify_event),
+                              inotify_io_channel,
+                              Glib::IOCondition::IO_IN | Glib::IOCondition::IO_PRI |
+                                  Glib::IOCondition::IO_HUP | Glib::IOCondition::IO_ERR);
 
-    vfs_inotify_io_watch = g_io_add_watch(vfs_inotify_io_channel,
-                                          GIOCondition(G_IO_IN | G_IO_PRI | G_IO_HUP | G_IO_ERR),
-                                          (GIOFunc)vfs_file_monitor_on_inotify_event,
-                                          nullptr);
     return true;
 }
 
 static void
 vfs_file_monitor_disconnect_from_inotify()
 {
-    if (!vfs_inotify_io_channel)
+    if (!inotify_io_channel)
         return;
 
-    g_io_channel_unref(vfs_inotify_io_channel);
-    vfs_inotify_io_channel = nullptr;
-    g_source_remove(vfs_inotify_io_watch);
-    close(vfs_inotify_fd);
-    vfs_inotify_fd = -1;
+    close(inotify_fd);
+    inotify_fd = -1;
 }
 
 void
@@ -143,7 +152,7 @@ vfs_file_monitor_clean()
 {
     vfs_file_monitor_disconnect_from_inotify();
 
-    // monitor_map.clear();
+    monitor_map.clear();
 }
 
 bool
@@ -162,13 +171,14 @@ vfs_file_monitor_add(std::string_view path, vfs::file_monitor_callback callback,
 
     vfs::file_monitor monitor;
 
-    try
+    if (monitor_map.contains(real_path))
     {
         monitor = monitor_map.at(real_path);
+        monitor->add_user();
     }
-    catch (std::out_of_range)
+    else
     {
-        const i32 wd = inotify_add_watch(vfs_inotify_fd,
+        const i32 wd = inotify_add_watch(inotify_fd,
                                          real_path.data(),
                                          IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF |
                                              IN_MOVE | IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
@@ -181,9 +191,7 @@ vfs_file_monitor_add(std::string_view path, vfs::file_monitor_callback callback,
         }
         // LOG_INFO("vfs_file_monitor_add  {} ({}) {}", real_path, path, wd);
 
-        monitor = std::make_shared<VFSFileMonitor>(real_path);
-        monitor->wd = wd;
-
+        monitor = std::make_shared<VFSFileMonitor>(real_path, wd);
         monitor_map.insert({monitor->path, monitor});
     }
 
@@ -213,6 +221,15 @@ vfs_file_monitor_remove(vfs::file_monitor monitor, vfs::file_monitor_callback ca
             break;
         }
     }
+
+    if (monitor_map.contains(monitor->path))
+    {
+        monitor->remove_user();
+        if (!monitor->has_users())
+        {
+            monitor_map.erase(monitor->path);
+        }
+    }
 }
 
 static void
@@ -231,19 +248,16 @@ vfs_file_monitor_dispatch_event(vfs::file_monitor monitor, VFSFileMonitorEvent e
 }
 
 static bool
-vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* user_data)
+vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
 {
-    (void)channel;
-    (void)user_data;
-
-    if (cond & (G_IO_HUP | G_IO_ERR))
+    if (condition == Glib::IOCondition::IO_HUP || condition == Glib::IOCondition::IO_ERR)
     {
         LOG_ERROR("Disconnected from inotify server");
         return false;
     }
 
     char buffer[BUF_LEN];
-    const i32 length = read(vfs_inotify_fd, buffer, BUF_LEN);
+    const i32 length = read(inotify_fd, buffer, BUF_LEN);
     if (length < 0)
     {
         LOG_WARN("Error reading inotify event: {}", std::strerror(errno));
@@ -318,5 +332,6 @@ vfs_file_monitor_on_inotify_event(GIOChannel* channel, GIOCondition cond, void* 
         }
         i += EVENT_SIZE + event->len;
     }
+
     return true;
 }

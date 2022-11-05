@@ -26,8 +26,6 @@
 
 #include <memory>
 
-#include <glib.h>
-
 #include <ztd/ztd.hxx>
 
 struct VFSFileMonitor;
@@ -45,25 +43,31 @@ namespace vfs
     using file_monitor = std::shared_ptr<VFSFileMonitor>;
 
     // Callback function which will be called when monitored events happen
-    // NOTE: GDK_THREADS_ENTER and GDK_THREADS_LEAVE might be needed
-    // if gtk+ APIs are called in this callback, since the callback is called from
-    // IO channel handler.
     using file_monitor_callback = void (*)(vfs::file_monitor monitor, VFSFileMonitorEvent event,
                                            std::string_view file_name, void* user_data);
 
     using file_monitor_callback_entry = std::shared_ptr<VFSFileMonitorCallbackEntry>;
+
 } // namespace vfs
 
 struct VFSFileMonitor
 {
-    VFSFileMonitor(std::string_view real_path);
+    VFSFileMonitor() = delete;
+    VFSFileMonitor(std::string_view real_path, i32 wd);
     ~VFSFileMonitor();
 
-    std::string path;
+    void add_user() noexcept;
+    void remove_user() noexcept;
+    bool has_users() const noexcept;
+
+    std::string path{};
 
     // TODO private
-    i32 wd;
-    std::vector<vfs::file_monitor_callback_entry> callbacks;
+    i32 wd{0};
+    std::vector<vfs::file_monitor_callback_entry> callbacks{};
+
+  private:
+    i32 user_count{1};
 };
 
 /*
