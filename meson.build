@@ -303,6 +303,7 @@ sources = [
   'src/settings/config-load.cxx',
   'src/settings/config-save.cxx',
   'src/settings/etc-load.cxx',
+  'src/settings/plugins-load.cxx',
 
   'src/mime-type/mime-action.cxx',
   'src/mime-type/mime-cache.cxx',

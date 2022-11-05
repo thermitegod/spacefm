@@ -34,6 +34,7 @@
 #include "utils.hxx"
 
 #include "settings/disk-format.hxx"
+#include "settings/plugins-load.hxx"
 
 #include "settings.hxx"
 #include "main-window.hxx"
@@ -324,6 +325,29 @@ xset_parse_plugin(std::string_view plug_dir, std::string_view name, std::string_
     }
 }
 
+static void
+xset_import_plugin_parse(std::string_view plug_dir, PluginUse* use, std::string_view name,
+                         std::string_view var, std::string_view value)
+{
+    // LOG_INFO("name: {} | var: {} | value: {}", name, var, value);
+
+    if (use && *use == PluginUse::NORMAL)
+    {
+        if (ztd::startswith(name, "hand_"))
+        {
+            if (ztd::startswith(name, "hand_fs_"))
+                *use = PluginUse::HAND_FS;
+            else if (ztd::startswith(name, "hand_arc_"))
+                *use = PluginUse::HAND_ARC;
+            else if (ztd::startswith(name, "hand_net_"))
+                *use = PluginUse::HAND_NET;
+            else if (ztd::startswith(name, "hand_f_"))
+                *use = PluginUse::HAND_FILE;
+        }
+    }
+    xset_parse_plugin(plug_dir, name, var, value, use ? *use : PluginUse::NORMAL);
+}
+
 xset_t
 xset_import_plugin(const char* plug_dir, PluginUse* use)
 {
@@ -353,70 +377,7 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
     if (!std::filesystem::exists(plugin))
         return nullptr;
 
-    toml::value toml_data;
-    try
-    {
-        toml_data = toml::parse(plugin);
-        // DEBUG
-        // std::cout << "###### TOML PARSE ######" << "\n\n";
-        // std::cout << toml_data << "\n\n";
-    }
-    catch (const toml::syntax_error& e)
-    {
-        const std::string msg =
-            fmt::format("Plugin file parsing failed:\n\"{}\"\n{}", plugin, e.what());
-        LOG_ERROR("{}", msg);
-        ptk_show_error(nullptr, "Plugin Load Error", msg);
-        return nullptr;
-    }
-
-    bool plugin_good = false;
-
-    // const u64 version = get_config_file_version(toml_data);
-
-    // loop over all of [[Plugin]]
-    for (const auto& section : toml::find<toml::array>(toml_data, PLUGIN_FILE_SECTION_PLUGIN))
-    {
-        // get [Plugin.name] and all vars
-        for (const auto& [toml_name, toml_vars] : section.as_table())
-        {
-            // get var and value
-            for (const auto& [toml_var, toml_value] : toml_vars.as_table())
-            {
-                std::stringstream ss_name;
-                std::stringstream ss_var;
-                std::stringstream ss_value;
-
-                ss_name << toml_name;
-                ss_var << toml_var;
-                ss_value << toml_value;
-
-                const std::string name{ss_name.str()};
-                const std::string var{ss_var.str()};
-                const std::string value{ztd::strip(ss_value.str(), "\"")};
-
-                // LOG_INFO("name: {} | var: {} | value: {}", name, var, value);
-
-                if (use && *use == PluginUse::NORMAL)
-                {
-                    if (ztd::startswith(name, "hand_"))
-                    {
-                        if (ztd::startswith(name, "hand_fs_"))
-                            *use = PluginUse::HAND_FS;
-                        else if (ztd::startswith(name, "hand_arc_"))
-                            *use = PluginUse::HAND_ARC;
-                        else if (ztd::startswith(name, "hand_net_"))
-                            *use = PluginUse::HAND_NET;
-                        else if (ztd::startswith(name, "hand_f_"))
-                            *use = PluginUse::HAND_FILE;
-                    }
-                }
-                xset_parse_plugin(plug_dir, name, var, value, use ? *use : PluginUse::NORMAL);
-                if (!plugin_good)
-                    plugin_good = true;
-            }
-        }
-    }
+    const bool plugin_good = load_user_plugin(plug_dir, use, plugin, &xset_import_plugin_parse);
 
     // clean plugin sets, set type
     bool top = true;
