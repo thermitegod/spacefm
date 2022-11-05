@@ -6614,7 +6614,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 gtk_selection_data_free(sel_data);
                 return 0;
             }
-            if (!strncmp((char*)gtk_selection_data_get_data(sel_data), "cut", 3))
+            if (ztd::startswith((const char*)gtk_selection_data_get_data(sel_data), "cut"))
             {
                 if (ztd::same(socket_property, "clipboard_copy_files"))
                 {

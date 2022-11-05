@@ -1918,11 +1918,11 @@ vfs_volume_set_info(vfs::volume volume)
                 if ((lastcomma = strrchr(volume->udi, '/')))
                 {
                     lastcomma++;
-                    if (!strncmp(lastcomma, "usb-", 4))
+                    if (ztd::startswith(lastcomma, "usb-"))
                         lastcomma += 4;
-                    else if (!strncmp(lastcomma, "ata-", 4))
+                    else if (ztd::startswith(lastcomma, "ata-"))
                         lastcomma += 4;
-                    else if (!strncmp(lastcomma, "scsi-", 5))
+                    else if (ztd::startswith(lastcomma, "scsi-"))
                         lastcomma += 5;
                 }
                 else
@@ -1992,7 +1992,7 @@ vfs_volume_set_info(vfs::volume volume)
     {
         disp_label = "[no media]";
     }
-    if (!strncmp(volume->device_file, "/dev/", 5))
+    if (ztd::startswith(volume->device_file, "/dev/"))
         disp_device = ztd::strdup(volume->device_file + 5);
     else if (ztd::startswith(volume->device_file, "curlftpfs#"))
         disp_device = ztd::removeprefix(volume->device_file, "curlftpfs#");

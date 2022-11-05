@@ -1549,12 +1549,12 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
 char*
 xset_custom_get_script(xset_t set, bool create)
 {
-    std::string path;
-
-    if ((strncmp(set->name, "cstm_", 5) && strncmp(set->name, "cust", 4) &&
-         strncmp(set->name, "hand", 4)) ||
+    if ((!ztd::startswith(set->name, "cstm_") && !ztd::startswith(set->name, "cust") &&
+         !ztd::startswith(set->name, "hand")) ||
         (create && set->plugin))
         return nullptr;
+
+    std::string path;
 
     if (create)
     {
