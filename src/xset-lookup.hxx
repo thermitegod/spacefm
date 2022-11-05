@@ -60,7 +60,6 @@ enum class XSetName
     DEV_MENU_TAB,
     DEV_MENU_MOUNT,
     DEV_MENU_MARK,
-    DEV_PROP,
     DEV_MENU_SETTINGS,
 
     // dev settings

@@ -43,7 +43,6 @@ static const std::unordered_map<XSetName, std::string_view> xset_name_map{
     {XSetName::DEV_MENU_TAB,                "dev_menu_tab"sv},
     {XSetName::DEV_MENU_MOUNT,              "dev_menu_mount"sv},
     {XSetName::DEV_MENU_MARK,               "dev_menu_mark"sv},
-    {XSetName::DEV_PROP,                    "dev_prop"sv},
     {XSetName::DEV_MENU_SETTINGS,           "dev_menu_settings"sv},
 
     // dev settings

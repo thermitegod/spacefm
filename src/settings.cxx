@@ -6516,9 +6516,6 @@ xset_defaults()
     set = xset_set(XSetName::DEV_MENU_MARK, XSetVar::MENU_LABEL, "_Bookmark");
     xset_set_var(set, XSetVar::ICN, "gtk-add");
 
-    set = xset_set(XSetName::DEV_PROP, XSetVar::MENU_LABEL, "_Properties");
-    xset_set_var(set, XSetVar::ICN, "gtk-properties");
-
     set = xset_set(XSetName::DEV_MENU_SETTINGS, XSetVar::MENU_LABEL, "Setti_ngs");
     xset_set_var(set, XSetVar::ICN, "gtk-properties");
     set->menu_style = XSetMenu::SUBMENU;

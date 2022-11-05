@@ -136,8 +136,6 @@ struct VFSVolume
     const char* device_mount_cmd(const char* options, bool* run_in_terminal) noexcept;
     const char* device_unmount_cmd(bool* run_in_terminal) noexcept;
 
-    const std::string device_info() const noexcept;
-
     // private:
     bool is_automount() const noexcept;
 

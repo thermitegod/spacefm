@@ -1314,92 +1314,6 @@ device_get_info(device_t device)
     return true;
 }
 
-static const std::string
-device_show_info(device_t device)
-{
-    std::string info;
-
-    // clang-format off
-    info.append(fmt::format("Showing information for {}\n", device->devnode));
-    info.append(fmt::format("  native-path:                 {}\n", device->native_path));
-    info.append(fmt::format("  device:                      {}:{}\n", MAJOR(device->devnum), MINOR(device->devnum)));
-    info.append(fmt::format("  device-file:                 {}\n", device->devnode));
-    info.append(fmt::format("    presentation:              {}\n", device->devnode));
-    if (device->device_by_id)
-        info.append(fmt::format("    by-id:                     {}\n", device->device_by_id));
-    info.append(fmt::format("  system internal:             {}\n", device->device_is_system_internal));
-    info.append(fmt::format("  removable:                   {}\n", device->device_is_removable));
-    info.append(fmt::format("  has media:                   {}\n", device->device_is_media_available));
-    info.append(fmt::format("  is read only:                {}\n", device->device_is_read_only));
-    info.append(fmt::format("  is mounted:                  {}\n", device->device_is_mounted));
-    info.append(fmt::format("  mount paths:                 {}\n", device->mount_points ? device->mount_points : ""));
-    info.append(fmt::format("  presentation hide:           {}\n", device->device_presentation_hide ? device->device_presentation_hide : "0"));
-    info.append(fmt::format("  presentation nopolicy:       {}\n", device->device_presentation_nopolicy ? device->device_presentation_nopolicy : "0"));
-    info.append(fmt::format("  presentation name:           {}\n", device->device_presentation_name ? device->device_presentation_name : ""));
-    info.append(fmt::format("  presentation icon:           {}\n", device->device_presentation_icon_name ? device->device_presentation_icon_name : ""));
-    info.append(fmt::format("  automount hint:              {}\n", device->device_automount_hint ? device->device_automount_hint : ""));
-    info.append(fmt::format("  size:                        {}\n", device->device_size));
-    info.append(fmt::format("  block size:                  {}\n", device->device_block_size));
-    info.append(fmt::format("  usage:                       {}\n", device->id_usage ? device->id_usage : ""));
-    info.append(fmt::format("  type:                        {}\n", device->id_type ? device->id_type : ""));
-    info.append(fmt::format("  version:                     {}\n", device->id_version ? device->id_version : ""));
-    info.append(fmt::format("  uuid:                        {}\n", device->id_uuid ? device->id_uuid : ""));
-    info.append(fmt::format("  label:                       {}\n", device->id_label ? device->id_label : ""));
-    if (device->device_is_partition_table)
-    {
-        info.append(fmt::format("  partition table:\n"));
-        info.append(fmt::format("    scheme:                    {}\n", device->partition_table_scheme ? device->partition_table_scheme : ""));
-        info.append(fmt::format("    count:                     {}\n", device->partition_table_count ? device->partition_table_count : "0"));
-    }
-    if (device->device_is_partition)
-    {
-        info.append(fmt::format("  partition:\n"));
-        info.append(fmt::format("    scheme:                    {}\n", device->partition_scheme ? device->partition_scheme : ""));
-        info.append(fmt::format("    number:                    {}\n", device->partition_number ? device->partition_number : ""));
-        info.append(fmt::format("    type:                      {}\n", device->partition_type ? device->partition_type : ""));
-        info.append(fmt::format("    flags:                     {}\n", device->partition_flags ? device->partition_flags : ""));
-        info.append(fmt::format("    offset:                    {}\n", device->partition_offset ? device->partition_offset : ""));
-        info.append(fmt::format("    alignment offset:          {}\n", device->partition_alignment_offset ? device->partition_alignment_offset : ""));
-        info.append(fmt::format("    size:                      {}\n", device->partition_size ? device->partition_size : ""));
-        info.append(fmt::format("    label:                     {}\n", device->partition_label ? device->partition_label : ""));
-        info.append(fmt::format("    uuid:                      {}\n", device->partition_uuid ? device->partition_uuid : ""));
-    }
-    if (device->device_is_optical_disc)
-    {
-        info.append(fmt::format("  optical disc:\n"));
-        info.append(fmt::format("    blank:                     {}\n", device->optical_disc_is_blank));
-        info.append(fmt::format("    appendable:                {}\n", device->optical_disc_is_appendable));
-        info.append(fmt::format("    closed:                    {}\n", device->optical_disc_is_closed));
-        info.append(fmt::format("    num tracks:                {}\n", device->optical_disc_num_tracks ? device->optical_disc_num_tracks : "0"));
-        info.append(fmt::format("    num audio tracks:          {}\n", device->optical_disc_num_audio_tracks ? device->optical_disc_num_audio_tracks : "0"));
-        info.append(fmt::format("    num sessions:              {}\n", device->optical_disc_num_sessions ? device->optical_disc_num_sessions : "0"));
-    }
-    if (device->device_is_drive)
-    {
-        info.append(fmt::format("  drive:\n"));
-        info.append(fmt::format("    vendor:                    {}\n", device->drive_vendor ? device->drive_vendor : ""));
-        info.append(fmt::format("    model:                     {}\n", device->drive_model ? device->drive_model : ""));
-        info.append(fmt::format("    revision:                  {}\n", device->drive_revision ? device->drive_revision : ""));
-        info.append(fmt::format("    serial:                    {}\n", device->drive_serial ? device->drive_serial : ""));
-        info.append(fmt::format("    WWN:                       {}\n", device->drive_wwn ? device->drive_wwn : ""));
-        info.append(fmt::format("    detachable:                {}\n", device->drive_can_detach));
-        info.append(fmt::format("    ejectable:                 {}\n", device->drive_is_media_ejectable));
-        info.append(fmt::format("    media:                     {}\n", device->drive_media ? device->drive_media : ""));
-        info.append(fmt::format("      compat:                  {}\n", device->drive_media_compatibility ? device->drive_media_compatibility : ""));
-        if (device->drive_connection_interface == nullptr || std::strlen(device->drive_connection_interface) == 0)
-            info.append(fmt::format("    interface:                 (unknown)\n"));
-        else
-            info.append(fmt::format("    interface:                 {}\n", device->drive_connection_interface));
-        if (device->drive_connection_speed == 0)
-            info.append(fmt::format("    if speed:                  (unknown)\n"));
-        else
-            info.append(fmt::format("    if speed:                  {} bits/s\n", device->drive_connection_speed));
-    }
-    // clang-format on
-
-    return info;
-}
-
 /* ************************************************************************
  * udev & mount monitors
  * ************************************************************************ */
@@ -1997,7 +1911,7 @@ vfs_volume_read_by_device(struct udev_device* udevice)
                            ? std::stol(device->device_presentation_nopolicy)
                            : false;
     volume->mount_point = nullptr;
-    if (device->mount_points && device->mount_points[0] != '\0')
+    if (device->mount_points)
     {
         char* comma;
         if ((comma = strchr(device->mount_points, ',')))
@@ -2007,7 +1921,9 @@ vfs_volume_read_by_device(struct udev_device* udevice)
             comma[0] = ',';
         }
         else
+        {
             volume->mount_point = ztd::strdup(device->mount_points);
+        }
     }
     volume->size = device->device_size;
     if (device->id_label)
@@ -2025,26 +1941,26 @@ vfs_volume_read_by_device(struct udev_device* udevice)
         volume->is_audiocd = false;
 
     volume->set_info();
-    /*
-        LOG_INFO( "====devnum={}:{}", MAJOR(volume->devnum), MINOR(volume->devnum));
-        LOG_INFO( "    device_file={}", volume->device_file);
-        LOG_INFO( "    udi={}", volume->udi);
-        LOG_INFO( "    label={}", volume->label);
-        LOG_INFO( "    icon={}", volume->icon);
-        LOG_INFO( "    is_mounted={}", volume->is_mounted);
-        LOG_INFO( "    is_mountable={}", volume->is_mountable);
-        LOG_INFO( "    is_optical={}", volume->is_optical);
-        LOG_INFO( "    is_audiocd={}", volume->is_audiocd);
-        LOG_INFO( "    is_blank={}", volume->is_blank);
-        LOG_INFO( "    is_floppy={}", volume->is_floppy);
-        LOG_INFO( "    is_table={}", volume->is_table);
-        LOG_INFO( "    is_removable={}", volume->is_removable);
-        LOG_INFO( "    requires_eject={}", volume->requires_eject);
-        LOG_INFO( "    is_user_visible={}", volume->is_user_visible);
-        LOG_INFO( "    mount_point={}", volume->mount_point);
-        LOG_INFO( "    size={}", volume->size);
-        LOG_INFO( "    disp_name={}", volume->disp_name);
-    */
+
+    // LOG_INFO( "====devnum={}:{}", MAJOR(volume->devnum), MINOR(volume->devnum));
+    // LOG_INFO( "    device_file={}", volume->device_file);
+    // LOG_INFO( "    udi={}", volume->udi);
+    // LOG_INFO( "    label={}", volume->label);
+    // LOG_INFO( "    icon={}", volume->icon);
+    // LOG_INFO( "    is_mounted={}", volume->is_mounted);
+    // LOG_INFO( "    is_mountable={}", volume->is_mountable);
+    // LOG_INFO( "    is_optical={}", volume->is_optical);
+    // LOG_INFO( "    is_audiocd={}", volume->is_audiocd);
+    // LOG_INFO( "    is_blank={}", volume->is_blank);
+    // LOG_INFO( "    is_floppy={}", volume->is_floppy);
+    // LOG_INFO( "    is_table={}", volume->is_table);
+    // LOG_INFO( "    is_removable={}", volume->is_removable);
+    // LOG_INFO( "    requires_eject={}", volume->requires_eject);
+    // LOG_INFO( "    is_user_visible={}", volume->is_user_visible);
+    // LOG_INFO( "    mount_point={}", volume->mount_point);
+    // LOG_INFO( "    size={}", volume->size);
+    // LOG_INFO( "    disp_name={}", volume->disp_name);
+
     return volume;
 }
 
@@ -2827,28 +2743,6 @@ VFSVolume::is_automount() const noexcept
         return true;
 
     return false;
-}
-
-const std::string
-VFSVolume::device_info() const noexcept
-{
-    struct udev_device* udevice = udev_device_new_from_devnum(udev, 'b', this->devnum);
-    if (udevice == nullptr)
-    {
-        LOG_WARN("No udev device for device {} ({}:{})",
-                 this->device_file,
-                 MAJOR(this->devnum),
-                 MINOR(this->devnum));
-        return "( no udev device )";
-    }
-
-    device_t device = std::make_shared<Device>(udevice);
-    if (!device_get_info(device))
-        return "";
-
-    const std::string info = device_show_info(device);
-    udev_device_unref(udevice);
-    return info;
 }
 
 const char*
