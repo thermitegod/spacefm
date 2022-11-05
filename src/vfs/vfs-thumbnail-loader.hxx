@@ -20,48 +20,51 @@
 #include <string>
 #include <string_view>
 
+#include <deque>
+
 #include <chrono>
+
+#include <memory>
 
 #include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-file-info.hxx"
 
 #include <magic_enum.hpp>
 
-#define VFS_THUMBNAIL_REQUEST(obj) (static_cast<VFSThumbnailRequest*>(obj))
-
-enum VFSThumbnailSize
-{
-    LOAD_BIG_THUMBNAIL,
-    LOAD_SMALL_THUMBNAIL,
-};
-
-struct VFSThumbnailRequest
-{
-    VFSThumbnailRequest(vfs::file_info file);
-    ~VFSThumbnailRequest();
-
-    vfs::file_info file;
-    u32 n_requests[magic_enum::enum_count<VFSThumbnailSize>()];
-};
-
 // forward declare types
+struct VFSThumbnailRequest;
 struct VFSThumbnailLoader;
 
 namespace vfs
 {
+    // using thumbnail_loader = std::shared_ptr<VFSThumbnailLoader>;
     using thumbnail_loader = ztd::raw_ptr<VFSThumbnailLoader>;
+
+    namespace thumbnail
+    {
+        using request = std::shared_ptr<VFSThumbnailRequest>;
+    }
 } // namespace vfs
+
+namespace vfs::thumbnail
+{
+    using request = std::shared_ptr<VFSThumbnailRequest>;
+}
 
 struct VFSThumbnailLoader
 {
+  public:
+    VFSThumbnailLoader() = delete;
     VFSThumbnailLoader(vfs::dir dir);
     ~VFSThumbnailLoader();
 
     vfs::dir dir;
-    GQueue* queue;
     vfs::async_task task;
+
     u32 idle_handler;
-    GQueue* update_queue;
+
+    std::deque<vfs::thumbnail::request> queue;
+    std::deque<vfs::file_info> update_queue;
 };
 
 // Ensure the thumbnail dirs exist and have proper file permission.

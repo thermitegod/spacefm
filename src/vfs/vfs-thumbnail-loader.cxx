@@ -23,6 +23,8 @@
 
 #include <chrono>
 
+#include <memory>
+
 #include <sys/stat.h>
 
 #include <fmt/format.h>
@@ -42,8 +44,22 @@
 #include "utils.hxx"
 
 static void* thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader);
-static void thumbnail_request_free(VFSThumbnailRequest* req);
 static bool on_thumbnail_idle(vfs::thumbnail_loader loader);
+
+enum VFSThumbnailSize
+{
+    LOAD_BIG_THUMBNAIL,
+    LOAD_SMALL_THUMBNAIL,
+};
+
+struct VFSThumbnailRequest
+{
+    VFSThumbnailRequest(vfs::file_info file);
+    ~VFSThumbnailRequest();
+
+    vfs::file_info file;
+    i32 n_requests[magic_enum::enum_count<VFSThumbnailSize>()];
+};
 
 VFSThumbnailRequest::VFSThumbnailRequest(vfs::file_info file)
 {
@@ -57,10 +73,8 @@ VFSThumbnailRequest::~VFSThumbnailRequest()
 
 VFSThumbnailLoader::VFSThumbnailLoader(vfs::dir dir)
 {
-    this->idle_handler = 0;
     this->dir = g_object_ref(dir);
-    this->queue = g_queue_new();
-    this->update_queue = g_queue_new();
+    this->idle_handler = 0;
     this->task = vfs_async_task_new((VFSAsyncFunc)thumbnail_loader_thread, this);
 }
 
@@ -83,16 +97,11 @@ VFSThumbnailLoader::~VFSThumbnailLoader()
 
     g_object_unref(this->task);
 
-    if (this->queue)
+    if (!this->update_queue.empty())
     {
-        g_queue_foreach(this->queue, (GFunc)thumbnail_request_free, nullptr);
-        g_queue_free(this->queue);
+        std::ranges::for_each(this->update_queue, vfs_file_info_unref);
     }
-    if (this->update_queue)
-    {
-        g_queue_foreach(this->update_queue, (GFunc)vfs_file_info_unref, nullptr);
-        g_queue_free(this->update_queue);
-    }
+
     // LOG_DEBUG("FREE THUMBNAIL LOADER");
 
     // prevent recursive unref called from vfs_dir_finalize
@@ -113,22 +122,16 @@ vfs_thumbnail_loader_free(vfs::thumbnail_loader loader)
     delete loader;
 }
 
-static void
-thumbnail_request_free(VFSThumbnailRequest* req)
-{
-    // LOG_DEBUG("FREE REQUEST!");
-    delete req;
-}
-
 static bool
 on_thumbnail_idle(vfs::thumbnail_loader loader)
 {
-    vfs::file_info file;
-
     // LOG_DEBUG("ENTER ON_THUMBNAIL_IDLE");
 
-    while ((file = VFS_FILE_INFO(g_queue_pop_head(loader->update_queue))))
+    while (!loader->update_queue.empty())
     {
+        vfs::file_info file = loader->update_queue.front();
+        loader->update_queue.pop_front();
+
         vfs_dir_emit_thumbnail_loaded(loader->dir, file);
         vfs_file_info_unref(file);
     }
@@ -151,17 +154,18 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
 {
     while (!task->is_cancelled())
     {
-        VFSThumbnailRequest* req = VFS_THUMBNAIL_REQUEST(g_queue_pop_head(loader->queue));
+        if (loader->queue.empty())
+            break;
+
+        vfs::thumbnail::request req = loader->queue.front();
+        loader->queue.pop_front();
         if (!req)
             break;
         // LOG_DEBUG("pop: {}", req->file->name);
 
         // Only we have the reference. That means, no body is using the file
         if (req->file->ref_count() == 1)
-        {
-            thumbnail_request_free(req);
             continue;
-        }
 
         bool need_update = false;
         for (u32 i = 0; i < 2; ++i)
@@ -178,14 +182,14 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
                 // Slow down for debugging.
                 // LOG_DEBUG("DELAY!!");
                 // Glib::usleep(G_USEC_PER_SEC/2);
-                // LOG_DEBUG("thumbnail loaded: %s", req->file);
+                // LOG_DEBUG("thumbnail loaded: {}", req->file);
             }
             need_update = true;
         }
 
         if (!task->is_cancelled() && need_update)
         {
-            g_queue_push_tail(loader->update_queue, vfs_file_info_ref(req->file));
+            loader->update_queue.push_back(vfs_file_info_ref(req->file));
             if (loader->idle_handler == 0)
             {
                 loader->idle_handler = g_idle_add_full(G_PRIORITY_LOW,
@@ -195,7 +199,6 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
             }
         }
         // LOG_DEBUG("NEED_UPDATE: {}", need_update);
-        thumbnail_request_free(req);
     }
 
     if (task->is_cancelled())
@@ -246,23 +249,21 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
     }
 
     // Check if the request is already scheduled
-    VFSThumbnailRequest* req;
-    GList* l;
-    for (l = loader->queue->head; l; l = l->next)
+    vfs::thumbnail::request req;
+    for (vfs::thumbnail::request& queued_req: loader->queue)
     {
-        req = VFS_THUMBNAIL_REQUEST(l->data);
+        req = queued_req;
+        // LOG_INFO("req->file->name={} | file->name={}", req->file->name, file->name);
         // If file with the same name is already in our queue
         if (req->file == file || ztd::same(req->file->name, file->name))
             break;
+        req = nullptr;
     }
-    if (l)
+
+    if (!req)
     {
-        req = VFS_THUMBNAIL_REQUEST(l->data);
-    }
-    else
-    {
-        req = new VFSThumbnailRequest(file);
-        g_queue_push_tail(dir->thumbnail_loader->queue, req);
+        req = std::make_shared<VFSThumbnailRequest>(file);
+        dir->thumbnail_loader->queue.push_back(req);
     }
 
     ++req->n_requests[is_big ? VFSThumbnailSize::LOAD_BIG_THUMBNAIL
@@ -275,46 +276,54 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
 void
 vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big)
 {
-    vfs::thumbnail_loader loader;
+    vfs::thumbnail_loader loader = dir->thumbnail_loader;
 
-    if ((loader = dir->thumbnail_loader))
+    if (!loader)
+        return;
+
+    u32 idx = 0;
+    std::vector<u32> remove_idx;
+    // LOG_DEBUG("TRY TO CANCEL REQUESTS!!");
+    for (vfs::thumbnail::request req: loader->queue)
     {
-        // LOG_DEBUG("TRY TO CANCEL REQUESTS!!");
-        for (GList* l = loader->queue->head; l;)
-        {
-            VFSThumbnailRequest* req = VFS_THUMBNAIL_REQUEST(l->data);
-            --req->n_requests[is_big ? VFSThumbnailSize::LOAD_BIG_THUMBNAIL
-                                     : VFSThumbnailSize::LOAD_SMALL_THUMBNAIL];
+        --req->n_requests[is_big ? VFSThumbnailSize::LOAD_BIG_THUMBNAIL
+                                 : VFSThumbnailSize::LOAD_SMALL_THUMBNAIL];
 
-            // nobody needs this
-            if (req->n_requests[0] <= 0 && req->n_requests[1] <= 0)
-            {
-                GList* next = l->next;
-                g_queue_delete_link(loader->queue, l);
-                l = next;
-            }
-            else
-                l = l->next;
+        // nobody needs this
+        if (req->n_requests[VFSThumbnailSize::LOAD_BIG_THUMBNAIL] <= 0 &&
+            req->n_requests[VFSThumbnailSize::LOAD_SMALL_THUMBNAIL] <= 0)
+        {
+            remove_idx.push_back(idx);
         }
 
-        if (g_queue_get_length(loader->queue) == 0)
-        {
-            // LOG_DEBUG("FREE LOADER IN vfs_thumbnail_loader_cancel_all_requests!");
-            loader->dir->thumbnail_loader = nullptr;
+        ++idx;
+    }
 
-            // FIXME: added idle_handler = 0 to prevent idle_handler being
-            // removed in vfs_thumbnail_loader_free - BUT causes a segfault
-            // in vfs_async_task_lock ??
-            // If source is removed here or in vfs_thumbnail_loader_free
-            // it causes a "GLib-CRITICAL **: Source ID N was not found when
-            // attempting to remove it" warning.  Such a source ID is always
-            // the one added in thumbnail_loader_thread at the "add2" comment.
+    // std::ranges::sort(remove_idx);
+    // std::ranges::reverse(remove_idx);
 
-            // loader->idle_handler = 0;
+    for (u32 i: remove_idx)
+    {
+        loader->queue.erase(loader->queue.cbegin() + i);
+    }
 
-            vfs_thumbnail_loader_free(loader);
-            return;
-        }
+    if (loader->queue.empty())
+    {
+        // LOG_DEBUG("FREE LOADER IN vfs_thumbnail_loader_cancel_all_requests!");
+        loader->dir->thumbnail_loader = nullptr;
+
+        // FIXME: added idle_handler = 0 to prevent idle_handler being
+        // removed in vfs_thumbnail_loader_free - BUT causes a segfault
+        // in vfs_async_task_lock ??
+        // If source is removed here or in vfs_thumbnail_loader_free
+        // it causes a "GLib-CRITICAL **: Source ID N was not found when
+        // attempting to remove it" warning.  Such a source ID is always
+        // the one added in thumbnail_loader_thread at the "add2" comment.
+
+        // loader->idle_handler = 0;
+
+        vfs_thumbnail_loader_free(loader);
+        return;
     }
 }
 
