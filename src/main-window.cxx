@@ -56,6 +56,7 @@
 #include "xset/xset-plugins.hxx"
 
 #include "settings/app.hxx"
+#include "settings/disk-format.hxx"
 
 #include "bookmarks.hxx"
 #include "settings.hxx"

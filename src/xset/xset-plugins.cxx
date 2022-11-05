@@ -29,11 +29,11 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "settings/names.hxx"
-
 #include "types.hxx"
 
 #include "utils.hxx"
+
+#include "settings/disk-format.hxx"
 
 #include "settings.hxx"
 #include "main-window.hxx"

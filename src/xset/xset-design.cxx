@@ -57,7 +57,7 @@
 
 #include "settings/app.hxx"
 #include "settings/etc.hxx"
-#include "settings/names.hxx"
+#include "settings/disk-format.hxx"
 
 #include "autosave.hxx"
 #include "extern.hxx"

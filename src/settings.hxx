@@ -35,8 +35,6 @@
 
 #include "vfs/vfs-file-task.hxx"
 
-#include "settings/names.hxx"
-
 #include "xset/xset.hxx"
 #include "xset/xset-lookup.hxx"
 
@@ -85,6 +83,3 @@ const char* xset_get_builtin_toolitem_label(XSetTool tool_type);
 
 void xset_custom_insert_after(xset_t target, xset_t set);
 xset_t xset_new_builtin_toolitem(XSetTool tool_type);
-
-const xsetpak_t xset_pack_sets();
-const setvars_t xset_pack_set(xset_t set);

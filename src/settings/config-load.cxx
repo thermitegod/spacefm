@@ -31,7 +31,7 @@
 
 #include "settings/app.hxx"
 #include "settings/config-load.hxx"
-#include "settings/names.hxx"
+#include "settings/disk-format.hxx"
 
 #ifdef HAVE_DEPRECATED_INI_LOADING
 static void xset_parse(std::string& line);

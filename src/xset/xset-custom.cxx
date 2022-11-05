@@ -25,14 +25,15 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "settings/names.hxx"
-
 #include "utils.hxx"
 
 #include "types.hxx"
 
 #include "write.hxx"
 #include "settings.hxx"
+
+#include "settings/config-save.hxx"
+#include "settings/disk-format.hxx"
 
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-file-task.hxx"
