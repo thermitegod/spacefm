@@ -219,6 +219,8 @@ struct Device
     bool drive_is_media_ejectable{false};
     bool drive_can_detach{false};
 
+    char* filesystem{nullptr};
+
     char* partition_scheme{nullptr};
     char* partition_number{nullptr};
     char* partition_type{nullptr};
@@ -293,6 +295,9 @@ Device::~Device()
         free(this->drive_media_compatibility);
     if (this->drive_media)
         free(this->drive_media);
+
+    if (this->filesystem)
+        free(this->filesystem);
 
     if (this->partition_scheme)
         free(this->partition_scheme);
@@ -797,6 +802,12 @@ info_drive_properties(device_t device)
     else if ((value = udev_device_get_property_value(device->udevice, "ID_WWN")))
     {
         device->drive_wwn = ztd::strdup(value + 2);
+    }
+
+    // filesystem
+    if ((value = udev_device_get_property_value(device->udevice, "ID_FS_TYPE")))
+    {
+        device->filesystem = ztd::strdup(value);
     }
 
     /* pick up some things (vendor, model, connection_interface, connection_speed)
