@@ -22,6 +22,8 @@
 
 #include <vector>
 
+#include <chrono>
+
 #include <stdio.h>
 
 #include <fmt/format.h>
@@ -452,7 +454,8 @@ main(i32 argc, char* argv[])
 
     // Seed RNG
     // using the current time is a good enough seed
-    std::srand(std::time(nullptr));
+    const auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    std::srand(seed);
 
     // Initialize our mime-type system
     vfs_mime_type_init();
