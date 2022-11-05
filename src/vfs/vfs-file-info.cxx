@@ -143,7 +143,7 @@ vfs_file_info_get(vfs::file_info file, std::string_view file_path)
         // file->status = std::filesystem::status(file_path);
         file->status = std::filesystem::symlink_status(file_path);
 
-        file->mime_type = vfs_mime_type_get_from_file(file_path, file->disp_name, &file_stat);
+        file->mime_type = vfs_mime_type_get_from_file(file_path);
 
         // file size formated
         const std::string size_str = vfs_file_size_to_string_format(file->size);
@@ -227,7 +227,7 @@ VFSFileInfo::reload_mime_type(std::string_view full_path) noexcept
     file_stat.st_mode = this->mode;
 
     old_mime_type = this->mime_type;
-    this->mime_type = vfs_mime_type_get_from_file(full_path, this->name, &file_stat);
+    this->mime_type = vfs_mime_type_get_from_file(full_path);
     this->load_special_info(full_path);
     vfs_mime_type_unref(old_mime_type); /* FIXME: is vfs_mime_type_unref needed ?*/
 }

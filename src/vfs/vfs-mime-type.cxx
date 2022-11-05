@@ -36,6 +36,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "mime-type/mime-action.hxx"
+
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-file-monitor.hxx"
 
@@ -157,18 +159,9 @@ vfs_mime_type_clean()
 }
 
 vfs::mime_type
-vfs_mime_type_get_from_file_name(std::string_view ufile_name)
+vfs_mime_type_get_from_file(std::string_view file_path)
 {
-    /* type = xdg_mime_get_mime_type_from_file_name( ufile_name ); */
-    const char* type = mime_type_get_by_filename(ufile_name.data(), nullptr);
-    return vfs_mime_type_get_from_type(type);
-}
-
-vfs::mime_type
-vfs_mime_type_get_from_file(std::string_view file_path, std::string_view base_name,
-                            struct stat* pstat)
-{
-    const char* type = mime_type_get_by_file(file_path.data(), pstat, base_name.data());
+    const char* type = mime_type_get_by_file(file_path);
     return vfs_mime_type_get_from_type(type);
 }
 

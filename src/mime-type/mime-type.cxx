@@ -75,16 +75,15 @@ static bool mime_type_is_data_plain_text(const char* data, i32 len);
 /*
  * Get mime-type of the specified file (quick, but less accurate):
  * Mime-type of the file is determined by cheking the filename only.
- * If statbuf != nullptr, it will be used to determine if the file is a directory.
  */
-const char*
-mime_type_get_by_filename(const char* filename, struct stat* statbuf)
+static const char*
+mime_type_get_by_filename(std::string_view filename, std::filesystem::file_status status)
 {
     const char* type = nullptr;
     const char* suffix_pos = nullptr;
     const char* prev_suffix_pos = (const char*)-1;
 
-    if (statbuf && S_ISDIR(statbuf->st_mode))
+    if (std::filesystem::is_directory(status))
         return XDG_MIME_TYPE_DIRECTORY;
 
     for (mime_cache_t cache: caches)
@@ -141,53 +140,40 @@ mime_type_get_by_filename(const char* filename, struct stat* statbuf)
  * the specified file again.
  */
 const char*
-mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* basename)
+mime_type_get_by_file(std::string_view filepath)
 {
-    const char* type;
-    struct stat _statbuf;
+    auto status = std::filesystem::status(filepath);
 
-    /* IMPORTANT!! vfs-file-info.c:vfs_file_info_reload_mime_type() depends
-     * on this function only using the st_mode from statbuf.
-     * Also see vfs-dir.c:vfs_dir_load_thread */
-    if (statbuf == nullptr || S_ISLNK(statbuf->st_mode))
-    {
-        statbuf = &_statbuf;
-        if (stat(filepath, statbuf) == -1)
-            return XDG_MIME_TYPE_UNKNOWN;
-    }
+    if (!std::filesystem::exists(status))
+        return XDG_MIME_TYPE_UNKNOWN;
 
-    if (S_ISDIR(statbuf->st_mode))
+    if (std::filesystem::is_other(status))
+        return XDG_MIME_TYPE_UNKNOWN;
+
+    if (std::filesystem::is_directory(status))
         return XDG_MIME_TYPE_DIRECTORY;
 
-    if (basename == nullptr)
-    {
-        basename = g_utf8_strrchr(filepath, -1, '/');
-        if (basename)
-            ++basename;
-        else
-            basename = filepath;
-    }
+    const char* type;
 
-    if (basename)
-    {
-        type = mime_type_get_by_filename(basename, statbuf);
-        if (!ztd::same(type, XDG_MIME_TYPE_UNKNOWN))
-            return type;
-        type = nullptr;
-    }
+    const std::string basename = Glib::path_get_basename(filepath.data());
+    type = mime_type_get_by_filename(basename, status);
+    if (!ztd::same(type, XDG_MIME_TYPE_UNKNOWN))
+        return type;
 
-    // sfm added check for reg or link due to hangs on fifo and chr dev
-    if (statbuf->st_size > 0 && (S_ISREG(statbuf->st_mode) || S_ISLNK(statbuf->st_mode)))
+    type = nullptr;
+
+    // check for reg or link due to hangs on fifo and chr dev
+    const auto file_size = std::filesystem::file_size(filepath);
+    if (file_size > 0 &&
+        (std::filesystem::is_regular_file(status) || std::filesystem::is_symlink(status)))
     {
-        i32 fd = -1;
         char* data;
 
         /* Open the file and map it into memory */
-        fd = open(filepath, O_RDONLY, 0);
+        const i32 fd = open(filepath.data(), O_RDONLY, 0);
         if (fd != -1)
         {
-            i32 len =
-                mime_cache_max_extent < statbuf->st_size ? mime_cache_max_extent : statbuf->st_size;
+            i32 len = mime_cache_max_extent < file_size ? mime_cache_max_extent : file_size;
             /*
              * FIXME: Can g_alloca() be used here? It is very fast, but is it safe?
              * Actually, we can allocate a block of memory with the size of mime_cache_max_extent,
@@ -542,7 +528,7 @@ bool
 mime_type_is_executable_file(std::string_view file_path, std::string_view mime_type)
 {
     if (mime_type.empty())
-        mime_type = mime_type_get_by_file(file_path.data(), nullptr, nullptr);
+        mime_type = mime_type_get_by_file(file_path);
 
     /*
      * Only executable types can be executale.

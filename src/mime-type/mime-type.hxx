@@ -20,11 +20,8 @@
 #include <string>
 #include <string_view>
 
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <glib.h>
+#include <vector>
 
-#include "mime-action.hxx"
 #include "mime-cache.hxx"
 
 #define XDG_MIME_TYPE_UNKNOWN    "application/octet-stream"
@@ -37,17 +34,6 @@ void mime_type_init();
 
 /* Finalize the library and free related resources */
 void mime_type_finalize();
-
-/* Get additional info of the specified mime-type */
-// MimeInfo* mime_type_get_by_type( const char* type_name );
-
-/*
- * Get mime-type info of the specified file (quick, but less accurate):
- * Mime-type of the file is determined by cheking the filename only.
- * If statbuf != nullptr, it will be used to determine if the file is a directory,
- * or if the file is an executable file.
- */
-const char* mime_type_get_by_filename(const char* filename, struct stat* statbuf);
 
 /*
  * Get mime-type info of the specified file (slow, but more accurate):
@@ -62,7 +48,7 @@ const char* mime_type_get_by_filename(const char* filename, struct stat* statbuf
  * efifciency, too. Otherwise, the function will try to get the basename of
  * the specified file again.
  */
-const char* mime_type_get_by_file(const char* filepath, struct stat* statbuf, const char* basename);
+const char* mime_type_get_by_file(std::string_view filepath);
 
 bool mime_type_is_text_file(std::string_view file_path, std::string_view mime_type = "");
 bool mime_type_is_executable_file(std::string_view file_path, std::string_view mime_type = "");

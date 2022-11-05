@@ -54,13 +54,7 @@ void vfs_mime_type_init();
 
 void vfs_mime_type_clean();
 
-/* file name used in this API should be encoded in UTF-8 */
-vfs::mime_type vfs_mime_type_get_from_file_name(std::string_view ufile_name);
-
-vfs::mime_type
-vfs_mime_type_get_from_file(std::string_view file_path, /* Should be on-disk encoding */
-                            std::string_view base_name, /* Should be in UTF-8 */
-                            struct stat* pstat);        /* Can be nullptr */
+vfs::mime_type vfs_mime_type_get_from_file(std::string_view file_path);
 
 vfs::mime_type vfs_mime_type_get_from_type(std::string_view type);
 
