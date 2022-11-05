@@ -29,6 +29,8 @@
 
 #include <ranges>
 
+#include <memory>
+
 #include <chrono>
 
 #include <libudev.h>
@@ -54,8 +56,6 @@
 #include "vfs/vfs-user-dir.hxx"
 
 #include "vfs/vfs-volume.hxx"
-
-#define VFS_VOLUME_CALLBACK_DATA(obj) (reinterpret_cast<VFSVolumeCallbackData*>(obj))
 
 inline constexpr std::string_view MOUNTINFO{"/proc/self/mountinfo"};
 inline constexpr std::string_view MTAB{"/proc/mounts"};
@@ -108,12 +108,23 @@ VFSVolume::~VFSVolume()
 
 struct VFSVolumeCallbackData
 {
+    VFSVolumeCallbackData() = delete;
+    VFSVolumeCallbackData(VFSVolumeCallback callback, void* callback_data);
+
     VFSVolumeCallback cb;
     void* user_data;
 };
 
+VFSVolumeCallbackData::VFSVolumeCallbackData(VFSVolumeCallback callback, void* callback_data)
+{
+    this->cb = callback;
+    this->user_data = callback_data;
+}
+
+using volume_callback_data_t = std::shared_ptr<VFSVolumeCallbackData>;
+
 static std::vector<vfs::volume> volumes;
-static GArray* callbacks = nullptr;
+static std::vector<volume_callback_data_t> callbacks;
 static bool global_inhibit_auto = false;
 
 #define DEVMOUNT_T(obj) (static_cast<devmount_t*>(obj))
@@ -3727,8 +3738,7 @@ vfs_volume_finalize()
     }
 
     // free callbacks
-    if (callbacks)
-        g_array_free(callbacks, true);
+    callbacks.clear(); // free all shared_ptr
 
     // free volumes / unmount all ?
     bool unmount_all = xset_get_b(XSetName::DEV_UNMOUNT_QUIT);
@@ -3792,11 +3802,12 @@ vfs_volume_get_by_device_or_point(const char* device_file, const char* point)
 static void
 call_callbacks(vfs::volume vol, VFSVolumeState state)
 {
-    if (callbacks)
+    if (!callbacks.empty())
     {
-        VFSVolumeCallbackData* e = VFS_VOLUME_CALLBACK_DATA(callbacks->data);
-        for (usize i = 0; i < callbacks->len; ++i)
-            (*e[i].cb)(vol, state, e[i].user_data);
+        for (volume_callback_data_t callback: callbacks)
+        {
+            callback->cb(vol, state, callback->user_data);
+        }
     }
 
     if (event_handler.device->s || event_handler.device->ob2_data)
@@ -3820,29 +3831,22 @@ vfs_volume_add_callback(VFSVolumeCallback cb, void* user_data)
     if (!cb)
         return;
 
-    if (!callbacks)
-        callbacks = g_array_sized_new(false, false, sizeof(VFSVolumeCallbackData), 8);
+    volume_callback_data_t data = std::make_shared<VFSVolumeCallbackData>(cb, user_data);
 
-    VFSVolumeCallbackData e;
-    e.cb = cb;
-    e.user_data = user_data;
-    callbacks = g_array_append_val(callbacks, e);
+    callbacks.push_back(data);
 }
 
 void
 vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data)
 {
-    if (!callbacks)
+    if (callbacks.empty())
         return;
 
-    VFSVolumeCallbackData* e = VFS_VOLUME_CALLBACK_DATA(callbacks->data);
-    for (usize i = 0; i < callbacks->len; ++i)
+    for (auto callback: callbacks)
     {
-        if (e[i].cb == cb && e[i].user_data == user_data)
+        if (callback->cb == cb && callback->user_data == user_data)
         {
-            callbacks = g_array_remove_index_fast(callbacks, i);
-            if (callbacks->len > 8)
-                g_array_set_size(callbacks, 8);
+            ztd::remove(callbacks, callback);
             break;
         }
     }
