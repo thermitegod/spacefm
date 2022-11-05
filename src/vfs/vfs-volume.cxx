@@ -1322,9 +1322,11 @@ device_get_info(device_t device)
     return true;
 }
 
-static void
-device_show_info(device_t device, std::string& info)
+static const std::string
+device_show_info(device_t device)
 {
+    std::string info;
+
     // clang-format off
     info.append(fmt::format("Showing information for {}\n", device->devnode));
     info.append(fmt::format("  native-path:                 {}\n", device->native_path));
@@ -1402,6 +1404,8 @@ device_show_info(device_t device, std::string& info)
             info.append(fmt::format("    if speed:                  {} bits/s\n", device->drive_connection_speed));
     }
     // clang-format on
+
+    return info;
 }
 
 /* ************************************************************************
@@ -2895,13 +2899,11 @@ VFSVolume::device_info() const noexcept
         return "( no udev device )";
     }
 
-    std::string info = "";
-
     device_t device = std::make_shared<Device>(udevice);
     if (!device_get_info(device))
-        return info;
+        return "";
 
-    device_show_info(device, info);
+    const std::string info = device_show_info(device);
     udev_device_unref(udevice);
     return info;
 }
