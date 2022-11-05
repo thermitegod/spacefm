@@ -704,55 +704,19 @@ file_properties_dlg_new(GtkWindow* parent, const char* dir_path,
 }
 
 static uid_t
-uid_from_name(const char* user_name)
+uid_from_name(std::string_view user_name)
 {
-    uid_t uid;
+    struct passwd* pwd = getpwnam(user_name.data());
 
-    struct passwd* pw;
-    pw = getpwnam(user_name);
-    if (pw)
-    {
-        uid = pw->pw_uid;
-    }
-    else
-    {
-        uid = 0;
-        const char* p;
-        for (p = user_name; *p; ++p)
-        {
-            if (!g_ascii_isdigit(*p))
-                return -1;
-            uid *= 10;
-            uid += (*p - '0');
-        }
-    }
-    return uid;
+    return pwd->pw_uid;
 }
 
 static gid_t
-gid_from_name(const char* group_name)
+gid_from_name(std::string_view group_name)
 {
-    gid_t gid;
+    struct group* grp = getgrnam(group_name.data());
 
-    struct group* grp;
-    grp = getgrnam(group_name);
-    if (grp)
-    {
-        gid = grp->gr_gid;
-    }
-    else
-    {
-        gid = 0;
-        const char* p;
-        for (p = group_name; *p; ++p)
-        {
-            if (!g_ascii_isdigit(*p))
-                return -1;
-            gid *= 10;
-            gid += (*p - '0');
-        }
-    }
-    return gid;
+    return grp->gr_gid;
 }
 
 static void
