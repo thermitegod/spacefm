@@ -15,11 +15,16 @@
 
 #pragma once
 
+#include <memory>
+
 #include "xset/xset.hxx"
 
 // cache these for speed in event handlers
-struct EventHandler
+struct XSetEventHandler
 {
+    XSetEventHandler();
+    ~XSetEventHandler();
+
     xset_t win_focus{nullptr};
     xset_t win_move{nullptr};
     xset_t win_click{nullptr};
@@ -35,4 +40,6 @@ struct EventHandler
     xset_t device{nullptr};
 };
 
-extern EventHandler event_handler;
+using xset_event_handler_t = std::unique_ptr<XSetEventHandler>;
+
+extern xset_event_handler_t event_handler;

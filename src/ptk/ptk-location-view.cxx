@@ -1843,9 +1843,9 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data)
         PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
     ptk_file_browser_focus_me(file_browser);
 
-    if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
+    if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
         main_window_event(file_browser->main_window,
-                          event_handler.win_click,
+                          event_handler->win_click,
                           XSetName::EVT_WIN_CLICK,
                           0,
                           0,

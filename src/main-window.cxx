@@ -222,7 +222,7 @@ on_configure_evt_timer(FMMainWindow* main_window)
         main_window->configure_evt_timer = 0;
     }
     main_window_event(main_window,
-                      event_handler.win_move,
+                      event_handler->win_move,
                       XSetName::EVT_WIN_MOVE,
                       0,
                       0,
@@ -240,7 +240,7 @@ on_window_configure_event(GtkWindow* window, GdkEvent* event, FMMainWindow* main
     (void)window;
     (void)event;
     // use timer to prevent rapid events during resize
-    if ((event_handler.win_move->s || event_handler.win_move->ob2_data) &&
+    if ((event_handler->win_move->s || event_handler->win_move->ob2_data) &&
         !main_window->configure_evt_timer)
         main_window->configure_evt_timer =
             g_timeout_add(200, (GSourceFunc)on_configure_evt_timer, main_window);
@@ -1121,10 +1121,10 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                     fm_main_window_add_new_tab(main_window, folder_path.c_str());
                 }
             }
-            if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
+            if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
                 !gtk_widget_get_visible(GTK_WIDGET(main_window->panel[p - 1])))
                 main_window_event(main_window,
-                                  event_handler.pnl_show,
+                                  event_handler->pnl_show,
                                   XSetName::EVT_PNL_SHOW,
                                   p,
                                   0,
@@ -1138,10 +1138,10 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
         else
         {
             // not shown
-            if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
+            if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
                 gtk_widget_get_visible(GTK_WIDGET(main_window->panel[p - 1])))
                 main_window_event(main_window,
-                                  event_handler.pnl_show,
+                                  event_handler->pnl_show,
                                   XSetName::EVT_PNL_SHOW,
                                   p,
                                   0,
@@ -1684,9 +1684,9 @@ fm_main_window_close(FMMainWindow* main_window)
                             G_OBJECT(main_window),
                             G_CALLBACK(ptk_file_task_notify_handler), nullptr));
     */
-    if (event_handler.win_close->s || event_handler.win_close->ob2_data)
+    if (event_handler->win_close->s || event_handler->win_close->ob2_data)
         main_window_event(main_window,
-                          event_handler.win_close,
+                          event_handler->win_close,
                           XSetName::EVT_WIN_CLOSE,
                           0,
                           0,
@@ -2078,10 +2078,10 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
     main_window->curpanel = file_browser->mypanel;
     main_window->notebook = main_window->panel[main_window->curpanel - 1];
 
-    if (event_handler.tab_close->s || event_handler.tab_close->ob2_data)
+    if (event_handler->tab_close->s || event_handler->tab_close->ob2_data)
         main_window_event(
             main_window,
-            event_handler.tab_close,
+            event_handler->tab_close,
             XSetName::EVT_TAB_CLOSE,
             file_browser->mypanel,
             gtk_notebook_page_num(GTK_NOTEBOOK(main_window->notebook), GTK_WIDGET(file_browser)) +
@@ -2159,9 +2159,9 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
             fm_main_window_update_status_bar(main_window, a_browser);
             g_idle_add((GSourceFunc)delayed_focus, a_browser->folder_view);
         }
-        if (event_handler.tab_focus->s || event_handler.tab_focus->ob2_data)
+        if (event_handler->tab_focus->s || event_handler->tab_focus->ob2_data)
             main_window_event(main_window,
-                              event_handler.tab_focus,
+                              event_handler->tab_focus,
                               XSetName::EVT_TAB_FOCUS,
                               main_window->curpanel,
                               cur_tabx + 1,
@@ -2191,9 +2191,9 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
 {
     (void)widget;
     on_file_browser_panel_change(file_browser, FM_MAIN_WINDOW(file_browser->main_window));
-    if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
+    if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
         main_window_event(file_browser->main_window,
-                          event_handler.win_click,
+                          event_handler->win_click,
                           XSetName::EVT_WIN_CLICK,
                           0,
                           0,
@@ -2280,9 +2280,9 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, FMMainWindow* main_win
     if (xset_get_b(XSetName::MAIN_SAVE_TABS))
         autosave_request_add();
 
-    if (event_handler.tab_chdir->s || event_handler.tab_chdir->ob2_data)
+    if (event_handler->tab_chdir->s || event_handler->tab_chdir->ob2_data)
         main_window_event(main_window,
-                          event_handler.tab_chdir,
+                          event_handler->tab_chdir,
                           XSetName::EVT_TAB_CHDIR,
                           0,
                           0,
@@ -2480,9 +2480,9 @@ fm_main_window_add_new_tab(FMMainWindow* main_window, const char* folder_path)
                                 PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY))
         ptk_file_browser_chdir(file_browser, "/", PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
 
-    if (event_handler.tab_new->s || event_handler.tab_new->ob2_data)
+    if (event_handler->tab_new->s || event_handler->tab_new->ob2_data)
         main_window_event(main_window,
-                          event_handler.tab_new,
+                          event_handler->tab_new,
                           XSetName::EVT_TAB_NEW,
                           0,
                           0,
@@ -2642,9 +2642,9 @@ set_panel_focus(FMMainWindow* main_window, PtkFileBrowser* file_browser)
         mw = FM_MAIN_WINDOW(file_browser->main_window);
 
     update_window_title(nullptr, mw);
-    if (event_handler.pnl_focus->s || event_handler.pnl_focus->ob2_data)
+    if (event_handler->pnl_focus->s || event_handler->pnl_focus->ob2_data)
         main_window_event(main_window,
-                          event_handler.pnl_focus,
+                          event_handler->pnl_focus,
                           XSetName::EVT_PNL_FOCUS,
                           mw->curpanel,
                           0,
@@ -2774,9 +2774,9 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
 
     set_window_title(main_window, file_browser);
 
-    if (event_handler.tab_focus->ob2_data || event_handler.tab_focus->s)
+    if (event_handler->tab_focus->ob2_data || event_handler->tab_focus->s)
         main_window_event(main_window,
-                          event_handler.tab_focus,
+                          event_handler->tab_focus,
                           XSetName::EVT_TAB_FOCUS,
                           main_window->curpanel,
                           page_num + 1,
@@ -3051,9 +3051,9 @@ static void
 on_file_browser_sel_change(PtkFileBrowser* file_browser, FMMainWindow* main_window)
 {
     // LOG_INFO("sel_change  panel {}", file_browser->mypanel);
-    if ((event_handler.pnl_sel->ob2_data || event_handler.pnl_sel->s) &&
+    if ((event_handler->pnl_sel->ob2_data || event_handler->pnl_sel->s) &&
         main_window_event(main_window,
-                          event_handler.pnl_sel,
+                          event_handler->pnl_sel,
                           XSetName::EVT_PNL_SEL,
                           0,
                           0,
@@ -3122,9 +3122,9 @@ on_main_window_focus(GtkWidget* main_window, GdkEventFocus* event, void* user_da
     // rebuild_menus is already running
     // but this unneeded anyway?  cross-window menu changes seem to work ok
     // rebuild_menus( main_window );  // xset may change in another window
-    if (event_handler.win_focus->s || event_handler.win_focus->ob2_data)
+    if (event_handler->win_focus->s || event_handler->win_focus->ob2_data)
         main_window_event(FM_MAIN_WINDOW_REINTERPRET(main_window),
-                          event_handler.win_focus,
+                          event_handler->win_focus,
                           XSetName::EVT_WIN_FOCUS,
                           0,
                           0,
@@ -3188,9 +3188,9 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, xset_t kn
     }
 #endif
 
-    if ((event_handler.win_key->s || event_handler.win_key->ob2_data) &&
+    if ((event_handler->win_key->s || event_handler->win_key->ob2_data) &&
         main_window_event(main_window,
-                          event_handler.win_key,
+                          event_handler->win_key,
                           XSetName::EVT_WIN_KEY,
                           0,
                           0,
@@ -4735,9 +4735,9 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow*
     if (event->type != GdkEventType::GDK_BUTTON_PRESS)
         return false;
 
-    if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
+    if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
         main_window_event(main_window,
-                          event_handler.win_click,
+                          event_handler->win_click,
                           XSetName::EVT_WIN_CLICK,
                           0,
                           0,
@@ -7350,22 +7350,22 @@ run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset
 
     // replace vars
     std::string replace;
-    if (set == event_handler.win_click)
+    if (set == event_handler->win_click)
     {
         replace = "%e %w %p %t %f %b %m";
         state = (state & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
                           GdkModifierType::GDK_MOD1_MASK | GdkModifierType::GDK_SUPER_MASK |
                           GdkModifierType::GDK_HYPER_MASK | GdkModifierType::GDK_META_MASK));
     }
-    else if (set == event_handler.win_key)
+    else if (set == event_handler->win_key)
     {
         replace = "%e %w %p %t %k %m";
     }
-    else if (set == event_handler.pnl_show)
+    else if (set == event_handler->pnl_show)
     {
         replace = "%e %w %p %t %f %v";
     }
-    else if (set == event_handler.tab_chdir)
+    else if (set == event_handler->tab_chdir)
     {
         replace = "%e %w %p %t %d";
     }

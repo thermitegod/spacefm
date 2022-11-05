@@ -308,19 +308,7 @@ load_settings()
     xset_default_keys();
 
     // cache event handlers
-    event_handler.win_focus = xset_get(XSetName::EVT_WIN_FOCUS);
-    event_handler.win_move = xset_get(XSetName::EVT_WIN_MOVE);
-    event_handler.win_click = xset_get(XSetName::EVT_WIN_CLICK);
-    event_handler.win_key = xset_get(XSetName::EVT_WIN_KEY);
-    event_handler.win_close = xset_get(XSetName::EVT_WIN_CLOSE);
-    event_handler.pnl_show = xset_get(XSetName::EVT_PNL_SHOW);
-    event_handler.pnl_focus = xset_get(XSetName::EVT_PNL_FOCUS);
-    event_handler.pnl_sel = xset_get(XSetName::EVT_PNL_SEL);
-    event_handler.tab_new = xset_get(XSetName::EVT_TAB_NEW);
-    event_handler.tab_chdir = xset_get(XSetName::EVT_TAB_CHDIR);
-    event_handler.tab_focus = xset_get(XSetName::EVT_TAB_FOCUS);
-    event_handler.tab_close = xset_get(XSetName::EVT_TAB_CLOSE);
-    event_handler.device = xset_get(XSetName::EVT_DEVICE);
+    event_handler = std::make_unique<XSetEventHandler>();
 }
 
 void

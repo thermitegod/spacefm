@@ -785,9 +785,9 @@ on_status_bar_button_press(GtkWidget* widget, GdkEventButton* event, PtkFileBrow
     focus_folder_view(file_browser);
     if (event->type == GdkEventType::GDK_BUTTON_PRESS)
     {
-        if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
+        if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
             main_window_event(file_browser->main_window,
-                              event_handler.win_click,
+                              event_handler->win_click,
                               XSetName::EVT_WIN_CLICK,
                               0,
                               0,
@@ -1110,10 +1110,10 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
 
     if (xset_get_b_panel_mode(p, XSetPanel::SHOW_TOOLBOX, mode))
     {
-        if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
+        if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
             (!file_browser->toolbar || !gtk_widget_get_visible(file_browser->toolbox)))
             main_window_event(main_window,
-                              event_handler.pnl_show,
+                              event_handler->pnl_show,
                               XSetName::EVT_PNL_SHOW,
                               0,
                               0,
@@ -1131,10 +1131,10 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     }
     else
     {
-        if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
+        if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
             file_browser->toolbox && gtk_widget_get_visible(file_browser->toolbox))
             main_window_event(main_window,
-                              event_handler.pnl_show,
+                              event_handler->pnl_show,
                               XSetName::EVT_PNL_SHOW,
                               0,
                               0,
@@ -1148,10 +1148,10 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
 
     if (xset_get_b_panel_mode(p, XSetPanel::SHOW_SIDEBAR, mode))
     {
-        if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
+        if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
             (!file_browser->side_toolbox || !gtk_widget_get_visible(file_browser->side_toolbox)))
             main_window_event(main_window,
-                              event_handler.pnl_show,
+                              event_handler->pnl_show,
                               XSetName::EVT_PNL_SHOW,
                               0,
                               0,
@@ -1169,11 +1169,11 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     }
     else
     {
-        if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
+        if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
             file_browser->side_toolbar && file_browser->side_toolbox &&
             gtk_widget_get_visible(file_browser->side_toolbox))
             main_window_event(main_window,
-                              event_handler.pnl_show,
+                              event_handler->pnl_show,
                               XSetName::EVT_PNL_SHOW,
                               0,
                               0,
@@ -1194,11 +1194,11 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
 
     if (xset_get_b_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode))
     {
-        if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
+        if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
             (!file_browser->side_dir_scroll ||
              !gtk_widget_get_visible(file_browser->side_dir_scroll)))
             main_window_event(main_window,
-                              event_handler.pnl_show,
+                              event_handler->pnl_show,
                               XSetName::EVT_PNL_SHOW,
                               0,
                               0,
@@ -1219,10 +1219,10 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     }
     else
     {
-        if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
+        if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
             file_browser->side_dir_scroll && gtk_widget_get_visible(file_browser->side_dir_scroll))
             main_window_event(main_window,
-                              event_handler.pnl_show,
+                              event_handler->pnl_show,
                               XSetName::EVT_PNL_SHOW,
                               0,
                               0,
@@ -1239,11 +1239,11 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
 
     if (xset_get_b_panel_mode(p, XSetPanel::SHOW_DEVMON, mode))
     {
-        if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
+        if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
             (!file_browser->side_dev_scroll ||
              !gtk_widget_get_visible(file_browser->side_dev_scroll)))
             main_window_event(main_window,
-                              event_handler.pnl_show,
+                              event_handler->pnl_show,
                               XSetName::EVT_PNL_SHOW,
                               0,
                               0,
@@ -1261,10 +1261,10 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     }
     else
     {
-        if ((event_handler.pnl_show->s || event_handler.pnl_show->ob2_data) &&
+        if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
             file_browser->side_dev_scroll && gtk_widget_get_visible(file_browser->side_dev_scroll))
             main_window_event(main_window,
-                              event_handler.pnl_show,
+                              event_handler->pnl_show,
                               XSetName::EVT_PNL_SHOW,
                               0,
                               0,
@@ -3048,9 +3048,9 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
         focus_folder_view(file_browser);
         // file_browser->button_press = true;
 
-        if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
+        if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
             main_window_event(file_browser->main_window,
-                              event_handler.win_click,
+                              event_handler->win_click,
                               XSetName::EVT_WIN_CLICK,
                               0,
                               0,
@@ -3191,9 +3191,9 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
     else if (event->type == GdkEventType::GDK_2BUTTON_PRESS && event->button == 1)
     {
         // f64 click event -  button = 0
-        if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
+        if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
             main_window_event(file_browser->main_window,
-                              event_handler.win_click,
+                              event_handler->win_click,
                               XSetName::EVT_WIN_CLICK,
                               0,
                               0,
@@ -4997,9 +4997,9 @@ on_dir_tree_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrowser* f
 {
     ptk_file_browser_focus_me(file_browser);
 
-    if ((event_handler.win_click->s || event_handler.win_click->ob2_data) &&
+    if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
         main_window_event(file_browser->main_window,
-                          event_handler.win_click,
+                          event_handler->win_click,
                           XSetName::EVT_WIN_CLICK,
                           0,
                           0,

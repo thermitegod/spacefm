@@ -20,4 +20,28 @@
 
 #include "xset/xset-event-handler.hxx"
 
-EventHandler event_handler;
+xset_event_handler_t event_handler;
+
+XSetEventHandler::XSetEventHandler()
+{
+    // LOG_INFO("XSetEventHandler constructor");
+
+    this->win_focus = xset_get(XSetName::EVT_WIN_FOCUS);
+    this->win_move = xset_get(XSetName::EVT_WIN_MOVE);
+    this->win_click = xset_get(XSetName::EVT_WIN_CLICK);
+    this->win_key = xset_get(XSetName::EVT_WIN_KEY);
+    this->win_close = xset_get(XSetName::EVT_WIN_CLOSE);
+    this->pnl_show = xset_get(XSetName::EVT_PNL_SHOW);
+    this->pnl_focus = xset_get(XSetName::EVT_PNL_FOCUS);
+    this->pnl_sel = xset_get(XSetName::EVT_PNL_SEL);
+    this->tab_new = xset_get(XSetName::EVT_TAB_NEW);
+    this->tab_chdir = xset_get(XSetName::EVT_TAB_CHDIR);
+    this->tab_focus = xset_get(XSetName::EVT_TAB_FOCUS);
+    this->tab_close = xset_get(XSetName::EVT_TAB_CLOSE);
+    this->device = xset_get(XSetName::EVT_DEVICE);
+}
+
+XSetEventHandler::~XSetEventHandler()
+{
+    // LOG_INFO("XSetEventHandler constructor");
+}

@@ -3600,7 +3600,7 @@ call_callbacks(vfs::volume vol, VFSVolumeState state)
         }
     }
 
-    if (event_handler.device->s || event_handler.device->ob2_data)
+    if (event_handler->device->s || event_handler->device->ob2_data)
     {
         main_window_event(nullptr,
                           nullptr,
