@@ -576,10 +576,9 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, vfs::mime_type mime_type, bool f
                      (dir_default ||
                       !ztd::same(vfs_mime_type_get_type(mime_type), XDG_MIME_TYPE_DIRECTORY)))
             {
-                char* custom = nullptr;
-                vfs_mime_type_add_action(mime_type, app, &custom);
+                const std::string custom = vfs_mime_type_add_action(mime_type, app);
                 free(app);
-                app = custom;
+                app = ztd::strdup(custom);
             }
         }
     }

@@ -469,38 +469,27 @@ vfs_mime_type_get_default_action(vfs::mime_type mime_type)
 void
 vfs_mime_type_set_default_action(vfs::mime_type mime_type, std::string_view desktop_id)
 {
-    char* cust_desktop = nullptr;
-    /*
-        if( ! ztd::endswith( desktop_id, ".desktop" ) )
-            return;
-    */
-    vfs_mime_type_add_action(mime_type, desktop_id, &cust_desktop);
-    if (cust_desktop)
-        desktop_id = cust_desktop;
-    mime_type_update_association(mime_type->type.c_str(),
-                                 desktop_id.data(),
+    const std::string custom_desktop = vfs_mime_type_add_action(mime_type, desktop_id);
+
+    mime_type_update_association(mime_type->type,
+                                 custom_desktop.empty() ? desktop_id : custom_desktop,
                                  MimeTypeAction::DEFAULT);
-    free(cust_desktop);
 }
 
 void
 vfs_mime_type_remove_action(vfs::mime_type mime_type, std::string_view desktop_id)
 {
-    mime_type_update_association(mime_type->type.c_str(),
-                                 desktop_id.data(),
-                                 MimeTypeAction::REMOVE);
+    mime_type_update_association(mime_type->type, desktop_id, MimeTypeAction::REMOVE);
 }
 
 /* If user-custom desktop file is created, it is returned in custom_desktop. */
-void
-vfs_mime_type_add_action(vfs::mime_type mime_type, std::string_view desktop_id,
-                         char** custom_desktop)
+const std::string
+vfs_mime_type_add_action(vfs::mime_type mime_type, std::string_view desktop_id)
 {
     // MOD  do not create custom desktop file if desktop_id is not a command
     if (!ztd::endswith(desktop_id, ".desktop"))
-        mime_type_add_action(mime_type->type.c_str(), desktop_id.data(), custom_desktop);
-    else if (custom_desktop) // sfm
-        *custom_desktop = ztd::strdup(desktop_id.data());
+        return mime_type_add_action(mime_type->type, desktop_id);
+    return desktop_id.data();
 }
 
 GList*
@@ -533,7 +522,7 @@ vfs_mime_type_locate_desktop_file(std::string_view dir, std::string_view desktop
 void
 vfs_mime_type_append_action(std::string_view type, std::string_view desktop_id)
 {
-    mime_type_update_association(type.data(), desktop_id.data(), MimeTypeAction::APPEND);
+    mime_type_update_association(type, desktop_id, MimeTypeAction::APPEND);
 }
 
 void

@@ -90,8 +90,7 @@ void vfs_mime_type_set_default_action(vfs::mime_type mime_type, std::string_view
 void vfs_mime_type_remove_action(vfs::mime_type mime_type, std::string_view desktop_id);
 
 /* If user-custom desktop file is created, it is returned in custom_desktop. */
-void vfs_mime_type_add_action(vfs::mime_type mime_type, std::string_view desktop_id,
-                              char** custom_desktop);
+const std::string vfs_mime_type_add_action(vfs::mime_type mime_type, std::string_view desktop_id);
 
 void vfs_mime_type_append_action(std::string_view type, std::string_view desktop_id);
 

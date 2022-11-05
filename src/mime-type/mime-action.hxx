@@ -42,13 +42,7 @@ const std::vector<std::string> mime_type_get_actions(std::string_view type);
  *
  * custom_desktop: used to store name of the newly created user-custom desktop file, can be nullptr.
  */
-void mime_type_add_action(const char* type, const char* desktop_id, char** custom_desktop);
-
-/*
- * Check if an applications currently set to open this mime-type
- * desktop_id is the name of *.desktop file.
- */
-// bool mime_type_has_action(const char* type, const char* desktop_id);
+const std::string mime_type_add_action(std::string_view type, std::string_view desktop_id);
 
 /*
  * Get default applications used to open this mime-type
@@ -72,7 +66,8 @@ char* mime_type_get_default_action(std::string_view type);
  *
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  */
-void mime_type_update_association(const char* type, const char* desktop_id, MimeTypeAction action);
+void mime_type_update_association(std::string_view type, std::string_view desktop_id,
+                                  MimeTypeAction action);
 
 /* Locate the file path of desktop file by desktop_id */
 const char* mime_type_locate_desktop_file(std::string_view desktop_id);

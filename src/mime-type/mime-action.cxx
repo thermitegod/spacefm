@@ -284,15 +284,18 @@ mime_type_get_actions(std::string_view mime_type)
  * NOTE:
  * This API is very time consuming, but unfortunately, due to the damn poor design of
  * Freedesktop.org spec, all the insane checks here are necessary.  Sigh...  :-(
+ *
+ * Check if an applications currently set to open this mime-type
+ * desktop_id is the name of *.desktop file.
  */
 static bool
-mime_type_has_action(const char* type, const char* desktop_id)
+mime_type_has_action(std::string_view type, std::string_view desktop_id)
 {
     Glib::ustring cmd;
     Glib::ustring name;
 
     bool found = false;
-    bool is_desktop = ztd::endswith(desktop_id, ".desktop");
+    bool is_desktop = ztd::endswith(desktop_id.data(), ".desktop");
 
     if (is_desktop)
     {
@@ -339,7 +342,7 @@ mime_type_has_action(const char* type, const char* desktop_id)
     }
     else
     {
-        cmd = desktop_id;
+        cmd = desktop_id.data();
     }
 
     const std::vector<std::string> actions = mime_type_get_actions(type);
@@ -348,7 +351,7 @@ mime_type_has_action(const char* type, const char* desktop_id)
         for (std::string_view action: actions)
         {
             /* Try to match directly by desktop_id first */
-            if (is_desktop && ztd::same(action.data(), desktop_id))
+            if (is_desktop && ztd::same(action.data(), desktop_id.data()))
             {
                 found = true;
                 break;
@@ -395,8 +398,8 @@ mime_type_has_action(const char* type, const char* desktop_id)
     return found;
 }
 
-static char*
-make_custom_desktop_file(const char* desktop_id, const char* mime_type)
+static const std::string
+make_custom_desktop_file(std::string_view desktop_id, std::string_view mime_type)
 {
     std::string name;
     std::string cust_template;
@@ -427,11 +430,11 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
         //  if(is_custom_desktop_file(desktop_id))
         //
 
-        const std::vector<Glib::ustring> mime_types{mime_type};
+        const std::vector<Glib::ustring> mime_types{mime_type.data()};
         /* set our mime-type */
         kf->set_string_list("Desktop Entry", "MimeType", mime_types);
         /* store id of original desktop file, for future use. */
-        kf->set_string("Desktop Entry", "X-MimeType-Derived", desktop_id);
+        kf->set_string("Desktop Entry", "X-MimeType-Derived", desktop_id.data());
         kf->set_string("Desktop Entry", "NoDisplay", "true");
 
         name = ztd::removesuffix(desktop_id, desktop_ext);
@@ -442,7 +445,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
     else /* it is not a desktop_id, but a command */
     {
         /* Make a user-created desktop file for the command */
-        name = Glib::path_get_basename(desktop_id);
+        name = Glib::path_get_basename(desktop_id.data());
         cust_template = fmt::format("{}-usercreated-{}.desktop", name, replace_txt);
 
         file_content = fmt::format("[Desktop Entry]\n"
@@ -476,7 +479,7 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
     /* execute update-desktop-database" to update mimeinfo.cache */
     update_desktop_database();
 
-    return ztd::strdup(cust);
+    return cust;
 }
 
 /*
@@ -485,21 +488,14 @@ make_custom_desktop_file(const char* desktop_id, const char* mime_type)
  *
  * custom_desktop: used to store name of the newly created user-custom desktop file, can be nullptr.
  */
-void
-mime_type_add_action(const char* type, const char* desktop_id, char** custom_desktop)
+const std::string
+mime_type_add_action(std::string_view type, std::string_view desktop_id)
 {
     if (mime_type_has_action(type, desktop_id))
-    {
-        if (custom_desktop)
-            *custom_desktop = ztd::strdup(desktop_id);
-        return;
-    }
+        return desktop_id.data();
 
-    char* cust = make_custom_desktop_file(desktop_id, type);
-    if (custom_desktop)
-        *custom_desktop = cust;
-    else
-        free(cust);
+    const std::string cust = make_custom_desktop_file(desktop_id, type);
+    return cust;
 }
 
 static char*
@@ -668,9 +664,10 @@ mime_type_get_default_action(std::string_view mime_type)
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  */
 void
-mime_type_update_association(const char* type, const char* desktop_id, MimeTypeAction action)
+mime_type_update_association(std::string_view type, std::string_view desktop_id,
+                             MimeTypeAction action)
 {
-    if (!type || !desktop_id)
+    if (type.empty() || desktop_id.empty())
     {
         LOG_WARN("mime_type_update_association invalid type or desktop_id");
         return;
@@ -706,7 +703,7 @@ mime_type_update_association(const char* type, const char* desktop_id, MimeTypeA
         std::vector<Glib::ustring> apps;
         try
         {
-            apps = kf->get_string_list(group.data(), type);
+            apps = kf->get_string_list(group.data(), type.data());
             if (apps.empty())
                 return;
         }
@@ -806,9 +803,9 @@ mime_type_update_association(const char* type, const char* desktop_id, MimeTypeA
                         new_action = fmt::format("{}{};", new_action, desktop_id);
                 }
                 if (!new_action.empty())
-                    kf->set_string(group.data(), type, new_action);
+                    kf->set_string(group.data(), type.data(), new_action);
                 else
-                    kf->remove_key(group.data(), type);
+                    kf->remove_key(group.data(), type.data());
                 data_changed = true;
             }
         }
@@ -825,9 +822,9 @@ mime_type_update_association(const char* type, const char* desktop_id, MimeTypeA
                     new_action = fmt::format("{}{};", new_action, desktop_id);
                 }
                 if (!new_action.empty())
-                    kf->set_string(group.data(), type, new_action);
+                    kf->set_string(group.data(), type.data(), new_action);
                 else
-                    kf->remove_key(group.data(), type);
+                    kf->remove_key(group.data(), type.data());
                 data_changed = true;
             }
         }
