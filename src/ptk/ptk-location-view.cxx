@@ -764,33 +764,21 @@ ptk_location_view_create_mount_point(i32 mode, vfs::volume vol, netmount_t* netm
         case PtkHandlerMode::HANDLER_MODE_NET:
             if (netmount->host && g_utf8_validate(netmount->host, -1, nullptr))
             {
-                char* parent_dir = nullptr;
-                std::string parent_dir_str;
+                std::string parent_dir;
                 if (netmount->path)
                 {
-                    parent_dir_str = ztd::replace(netmount->path, "/", "-");
-                    parent_dir = ztd::strdup(parent_dir_str);
-                    g_strstrip(parent_dir);
-                    while (ztd::endswith(parent_dir, "-"))
-                        parent_dir[std::strlen(parent_dir) - 1] = '\0';
-                    while (ztd::startswith(parent_dir, "-"))
-                    {
-                        parent_dir = ztd::strdup(parent_dir + 1);
-                    }
-                    if (parent_dir[0] == '\0' || !g_utf8_validate(parent_dir, -1, nullptr) ||
-                        std::strlen(parent_dir) > 30)
-                    {
-                        free(parent_dir);
-                        parent_dir = nullptr;
-                    }
+                    const std::string parent_dir_str = ztd::replace(netmount->path, "/", "-");
+                    parent_dir = ztd::strip(parent_dir_str);
+                    parent_dir = ztd::strip(parent_dir, "-");
+                    if (parent_dir.empty() || parent_dir.size() > 30)
+                        parent_dir = "";
                 }
-                if (parent_dir)
+                if (!parent_dir.empty())
                     mname = fmt::format("{}-{}-{}", netmount->fstype, netmount->host, parent_dir);
                 else if (netmount->host && netmount->host[0])
                     mname = fmt::format("{}-{}", netmount->fstype, netmount->host);
                 else
                     mname = fmt::format("{}", netmount->fstype);
-                free(parent_dir);
             }
             else
             {

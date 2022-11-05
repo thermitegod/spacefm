@@ -1081,8 +1081,8 @@ on_ignore_context_toggled(GtkWidget* item, ContextData* ctxt)
 static void
 on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
 {
-    char* path;
-    if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_line)))
+    std::string path;
+    if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_line)))
     {
         // set to command line - get path of first argument
         GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->cmd_script));
@@ -1090,30 +1090,16 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
         gtk_text_buffer_get_start_iter(buf, &siter);
         gtk_text_buffer_get_end_iter(buf, &iter);
         char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
-        if (!(text && text[0]))
-            path = nullptr;
-        else
+        if (text)
         {
-            char* str;
-            if ((str = strchr(text, ' ')))
-                str[0] = '\0';
-            if ((str = strchr(text, '\n')))
-                str[0] = '\0';
-            path = ztd::strdup(g_strstrip(text));
-            if (path[0] == '\0' || (path[0] != '/' && !g_ascii_isalnum(path[0])))
+            path = ztd::strip(text);
+            if (!ztd::startswith(path, "/"))
             {
-                free(path);
-                path = nullptr;
-            }
-            else if (path[0] != '/')
-            {
-                str = path;
-                path = ztd::strdup(Glib::find_program_in_path(str));
-                free(str);
+                path = Glib::find_program_in_path(path);
             }
         }
         free(text);
-        if (!(path && mime_type_is_text_file(path)))
+        if (path.empty() || !mime_type_is_text_file(path, ""))
         {
             xset_msg_dialog(GTK_WIDGET(ctxt->dlg),
                             GtkMessageType::GTK_MESSAGE_ERROR,
@@ -1121,7 +1107,6 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
                             GtkButtonsType::GTK_BUTTONS_OK,
                             "The command line does not begin with a text file (script) to be "
                             "opened, or the script was not found in your $PATH.");
-            free(path);
             return;
         }
     }
@@ -1131,11 +1116,11 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
         save_command_script(ctxt, false);
         path = xset_custom_get_script(ctxt->set, !ctxt->set->plugin);
     }
-    if (path && mime_type_is_text_file(path))
+
+    if (mime_type_is_text_file(path))
     {
-        xset_edit(ctxt->dlg, path, btn == ctxt->cmd_edit_root, btn != ctxt->cmd_edit_root);
+        xset_edit(ctxt->dlg, path.data(), btn == ctxt->cmd_edit_root, btn != ctxt->cmd_edit_root);
     }
-    free(path);
 }
 
 static void
@@ -1448,7 +1433,7 @@ replace_item_props(ContextData* ctxt)
             // target
             char* str = multi_input_get_text(ctxt->item_target);
             free(rset->z);
-            rset->z = str ? g_strstrip(str) : nullptr;
+            rset->z = str ? ztd::strdup(ztd::strip(str)) : nullptr;
             // run as user
             free(rset->y);
             rset->y = ztd::strdup(gtk_entry_get_text(GTK_ENTRY(ctxt->cmd_user)));

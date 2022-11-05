@@ -2023,11 +2023,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
 {
     // TODO convert to gtk_builder (glade file)
 
-    char* str;
     GtkWidget* task_view = nullptr;
     i32 ret = 1;
     bool target_missing = false;
-    struct stat statbuf;
 
     if (!file_dir)
         return 0;
@@ -2061,7 +2059,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     {
         std::string full_name = file->get_disp_name();
         if (full_name.empty())
-            full_name = ztd::strdup(file->get_name());
+            full_name = file->get_name();
         mset->full_path = ztd::strdup(Glib::build_filename(file_dir, full_name));
         mset->new_path = ztd::strdup(mset->full_path);
         mset->is_dir = file->is_directory(); // is_dir is dynamic for create
@@ -2690,7 +2688,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     g_signal_connect(G_OBJECT(mset->cancel), "focus", G_CALLBACK(on_button_focus), mset);
 
     // run
-    std::string task_name;
     std::string root_mkdir;
     std::string to_path;
     std::string from_path;
@@ -2706,7 +2703,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             gtk_text_buffer_get_start_iter(mset->buf_full_path, &siter);
             gtk_text_buffer_get_end_iter(mset->buf_full_path, &iter);
             full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
-            if (full_path[0] != '/')
+            if (!ztd::startswith(full_path, "/"))
             {
                 // update full_path to absolute
                 const std::string cwd = Glib::path_get_dirname(mset->full_path);
@@ -2789,7 +2786,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     }
                 }
             }
-            else if (lstat(full_path.c_str(), &statbuf) == 0)
+            else if (std::filesystem::exists(full_path) ||
+                     std::filesystem::is_symlink(full_path)) // need to see broken symlinks
             {
                 // overwrite
                 if (std::filesystem::is_directory(full_path))
@@ -2813,15 +2811,19 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             if (create_new && new_link)
             {
                 // new link task
-                task_name = fmt::format("Create Link{}", root_msg);
+                const std::string task_name = fmt::format("Create Link{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
 
-                str = ztd::strdup(gtk_entry_get_text(mset->entry_target));
-                g_strstrip(str);
-                while (ztd::endswith(str, "/") && str[1] != '\0')
-                    str[g_utf8_strlen(str, -1) - 1] = '\0';
+                std::string str = gtk_entry_get_text(mset->entry_target);
+                str = ztd::strip(str);
+                while (ztd::endswith(str, "/"))
+                {
+                    if (str.size() == 1)
+                        break;
+                    str = ztd::removesuffix(str, "/");
+                }
+
                 from_path = bash_quote(str);
-                free(str);
                 to_path = bash_quote(full_path);
 
                 if (overwrite)
@@ -2854,16 +2856,16 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             else if (create_new && new_file)
             {
                 // new file task
-                if (gtk_widget_get_visible(
-                        gtk_widget_get_parent(GTK_WIDGET(mset->combo_template))) &&
-                    (str = gtk_combo_box_text_get_active_text(
-                         GTK_COMBO_BOX_TEXT(mset->combo_template))))
+                if (gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->combo_template))))
                 {
-                    g_strstrip(str);
-                    if (str[0] == '/')
+                    std::string str = gtk_combo_box_text_get_active_text(
+                        GTK_COMBO_BOX_TEXT(mset->combo_template));
+
+                    str = ztd::strip(str);
+                    if (ztd::startswith(str, "/"))
+                    {
                         from_path = bash_quote(str);
-                    // else if (ztd::same("Empty File", str) || str[0] == '\0')
-                    //     from_path = "";
+                    }
                     else
                     {
                         const std::string templates_path = get_template_dir();
@@ -2875,20 +2877,18 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                                 ptk_show_error(GTK_WINDOW(mset->dlg),
                                                "Template Missing",
                                                "The specified template does not exist");
-                                free(str);
                                 continue;
                             }
                             from_path = bash_quote(from_path);
                         }
                     }
-                    free(str);
                 }
                 to_path = bash_quote(full_path);
                 std::string over_cmd;
                 if (overwrite)
                     over_cmd = fmt::format("rm -f {} && ", to_path);
 
-                task_name = fmt::format("Create New File{}", root_msg);
+                const std::string task_name = fmt::format("Create New File{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 if (from_path.empty())
                     ptask->task->exec_command =
@@ -2917,20 +2917,18 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             {
                 // new directory task
                 if (!new_folder)
-                {
-                    // failsafe
+                { // failsafe
                     continue;
                 }
                 if (gtk_widget_get_visible(
-                        gtk_widget_get_parent(GTK_WIDGET(mset->combo_template_dir))) &&
-                    (str = gtk_combo_box_text_get_active_text(
-                         GTK_COMBO_BOX_TEXT(mset->combo_template_dir))))
+                        gtk_widget_get_parent(GTK_WIDGET(mset->combo_template_dir))))
                 {
-                    g_strstrip(str);
-                    if (str[0] == '/')
+                    std::string str = gtk_combo_box_text_get_active_text(
+                        GTK_COMBO_BOX_TEXT(mset->combo_template_dir));
+                    if (ztd::startswith(str, "/"))
+                    {
                         from_path = bash_quote(str);
-                    // else if (ztd::same("Empty Directory", str) || str[0] == '\0')
-                    //     from_path = nullptr;
+                    }
                     else
                     {
                         const std::string templates_path = get_template_dir();
@@ -2942,17 +2940,15 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                                 ptk_show_error(GTK_WINDOW(mset->dlg),
                                                "Template Missing",
                                                "The specified template does not exist");
-                                free(str);
                                 continue;
                             }
                             from_path = bash_quote(from_path);
                         }
                     }
-                    free(str);
                 }
                 to_path = bash_quote(full_path);
 
-                task_name = fmt::format("Create New Directory{}", root_msg);
+                const std::string task_name = fmt::format("Create New Directory{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 if (from_path.empty())
                     ptask->task->exec_command = fmt::format("{}mkdir {}", root_mkdir, to_path);
@@ -2979,7 +2975,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             else if (copy || copy_target)
             {
                 // copy task
-                task_name = fmt::format("Copy{}", root_msg);
+                const std::string task_name = fmt::format("Copy{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 char* over_opt = nullptr;
                 to_path = bash_quote(full_path);
@@ -2997,8 +2993,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                                        "Error determining link's target");
                         continue;
                     }
-                    from_path = bash_quote(str);
-                    free(str);
+                    from_path = bash_quote(real_path);
                 }
                 if (overwrite)
                     over_opt = ztd::strdup(" --remove-destination");
@@ -3029,7 +3024,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             else if (link || link_target)
             {
                 // link task
-                task_name = fmt::format("Create Link{}", root_msg);
+                const std::string task_name = fmt::format("Create Link{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 if (link || !mset->is_link)
                 {
@@ -3045,8 +3040,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                                        "Error determining link's target");
                         continue;
                     }
-                    from_path = bash_quote(str);
-                    free(str);
+                    from_path = bash_quote(real_path);
                 }
                 to_path = bash_quote(full_path);
                 if (overwrite)
@@ -3075,7 +3069,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             _move_task:
                 // move task - this is jumped to from the below rename block on
                 // EXDEV error
-                task_name = fmt::format("Move{}", root_msg);
+                const std::string task_name = fmt::format("Move{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, nullptr, mset->parent, task_view);
                 from_path = bash_quote(mset->full_path);
                 to_path = bash_quote(full_path);

@@ -2283,7 +2283,7 @@ split_network_url(const char* url, netmount_t** netmount)
             return SplitNetworkURL::NOT_A_NETWORK_URL;
         }
         str[0] = '\0';
-        nm->fstype = g_strstrip(ztd::strdup(xurl));
+        nm->fstype = ztd::strdup(ztd::strip(xurl));
         if (nm->fstype[0] == '\0')
         {
             delete nm;
