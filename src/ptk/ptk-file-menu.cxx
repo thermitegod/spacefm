@@ -694,7 +694,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     else
         is_clip = true;
 
-    const i32 p = browser->mypanel;
+    const panel_t p = browser->mypanel;
 
     const auto counts = main_window_get_counts(browser);
     const panel_t panel_count = counts[0];

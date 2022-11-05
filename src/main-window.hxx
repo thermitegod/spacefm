@@ -140,7 +140,8 @@ void set_panel_focus(FMMainWindow* main_window, PtkFileBrowser* file_browser);
 void focus_panel(GtkMenuItem* item, void* mw, panel_t p);
 void main_window_open_path_in_current_tab(FMMainWindow* main_window, const char* path);
 void main_window_open_network(FMMainWindow* main_window, const char* path, bool new_tab);
-char main_window_socket_command(char* argv[], std::string& reply);
 bool main_window_event(void* mw, xset_t preset, XSetName event, i64 panel, i64 tab,
                        const char* focus, i32 keyval, i32 button, i32 state, bool visible);
 void fm_main_window_store_positions(FMMainWindow* main_window);
+
+char main_window_socket_command(char* argv[], std::string& reply);
