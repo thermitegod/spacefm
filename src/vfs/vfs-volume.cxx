@@ -127,8 +127,6 @@ static std::vector<vfs::volume> volumes;
 static std::vector<volume_callback_data_t> callbacks;
 static bool global_inhibit_auto = false;
 
-#define DEVMOUNT_T(obj) (static_cast<devmount_t*>(obj))
-
 struct devmount_t
 {
     devmount_t(dev_t major, dev_t minor);
@@ -158,7 +156,7 @@ devmount_t::~devmount_t()
         free(this->fstype);
 }
 
-static GList* devmounts = nullptr;
+static std::vector<devmount_t*> devmounts;
 static struct udev* udev = nullptr;
 static struct udev_monitor* umonitor = nullptr;
 
@@ -326,6 +324,20 @@ Device::~Device()
 }
 
 using device_t = std::shared_ptr<Device>;
+
+static void
+free_devmounts()
+{
+    if (devmounts.empty())
+        return;
+
+    for (devmount_t* devmount: devmounts)
+    {
+        delete devmount;
+    }
+
+    devmounts.clear();
+}
 
 /**
  * unescapes things like \x20 to " " and ensures the returned string is valid UTF-8.
@@ -1033,14 +1045,12 @@ info_mount_points(device_t device)
     dev_t dminor = MINOR(device->devnum);
 
     // if we have the mount point list, use this instead of reading mountinfo
-    if (devmounts)
+    if (!devmounts.empty())
     {
-        for (GList* l = devmounts; l; l = l->next)
+        for (devmount_t* devmount: devmounts)
         {
-            if ((DEVMOUNT_T(l->data))->major == dmajor && (DEVMOUNT_T(l->data))->minor == dminor)
-            {
-                return ztd::strdup((DEVMOUNT_T(l->data))->mount_points);
-            }
+            if (devmount->major == dmajor && devmount->minor == dminor)
+                return ztd::strdup(devmount->mount_points);
         }
         return nullptr;
     }
@@ -1412,18 +1422,6 @@ device_show_info(device_t device)
  * udev & mount monitors
  * ************************************************************************ */
 
-static i32
-cmp_devmounts(devmount_t* a, devmount_t* b)
-{
-    if (!a && !b)
-        return 0;
-    if (!a || !b)
-        return 1;
-    if (a->major == b->major && a->minor == b->minor)
-        return 0;
-    return 1;
-}
-
 static void
 parse_mounts(bool report)
 {
@@ -1443,9 +1441,9 @@ parse_mounts(bool report)
     }
 
     // get all mount points for all devices
-    GList* newmounts = nullptr;
-    GList* changed = nullptr;
-    devmount_t* devmount;
+    std::vector<devmount_t*> newmounts;
+    std::vector<devmount_t*> changed;
+
     bool subdir_mount;
 
     /* See Documentation/filesystems/proc.txt for the format of /proc/self/mountinfo
@@ -1535,12 +1533,12 @@ parse_mounts(bool report)
             fstype = ztd::rpartition(line, " - ")[2];
 
         // LOG_INFO("mount_point({}:{})={}", major, minor, mount_point);
-        devmount = nullptr;
-        for (GList* l = newmounts; l; l = l->next)
+        devmount_t* devmount = nullptr;
+        for (devmount_t* search: newmounts)
         {
-            if ((DEVMOUNT_T(l->data))->major == major && (DEVMOUNT_T(l->data))->minor == minor)
+            if (search->major == major && search->minor == minor)
             {
-                devmount = DEVMOUNT_T(l->data);
+                devmount = search;
                 break;
             }
         }
@@ -1565,7 +1563,7 @@ parse_mounts(bool report)
                 devmount = new devmount_t(major, minor);
                 devmount->fstype = ztd::strdup(fstype);
 
-                newmounts = g_list_prepend(newmounts, devmount);
+                newmounts.push_back(devmount);
             }
             else
             {
@@ -1586,7 +1584,7 @@ parse_mounts(bool report)
                     devmount = new devmount_t(major, minor);
                     devmount->fstype = ztd::strdup(fstype);
 
-                    newmounts = g_list_prepend(newmounts, devmount);
+                    newmounts.push_back(devmount);
                 }
             }
         }
@@ -1602,11 +1600,10 @@ parse_mounts(bool report)
     // LOG_INFO("LINES DONE");
     // translate each mount points list to string
     std::string points;
-    for (GList* l = newmounts; l; l = l->next)
+    for (devmount_t* devmount: newmounts)
     {
-        devmount = DEVMOUNT_T(l->data);
         // Sort the list to ensure that shortest mount paths appear first
-        devmount->mounts = g_list_sort(devmount->mounts, (GCompareFunc)ztd::compare);
+        devmount->mounts = g_list_sort(devmount->mounts, (GCompareFunc)g_strcmp0);
         GList* m = devmount->mounts;
         points = ztd::strdup((char*)m->data);
         while ((m = m->next))
@@ -1621,24 +1618,29 @@ parse_mounts(bool report)
     }
 
     // compare old and new lists
-    GList* found;
     if (report)
     {
-        for (GList* l = newmounts; l; l = l->next)
+        for (devmount_t* devmount: newmounts)
         {
-            devmount = DEVMOUNT_T(l->data);
             // LOG_INFO("finding {}:{}", devmount->major, devmount->minor);
-            found =
-                g_list_find_custom(devmounts, (const void*)devmount, (GCompareFunc)cmp_devmounts);
+
+            devmount_t* found = nullptr;
+
+            for (devmount_t* search: devmounts)
+            {
+                if (devmount->major == search->major && devmount->minor == search->minor)
+                    found = search;
+            }
+
             if (found)
             {
                 // LOG_INFO("    found");
-                if (ztd::same((DEVMOUNT_T(found->data))->mount_points, devmount->mount_points))
+                if (ztd::same(found->mount_points, devmount->mount_points))
                 {
                     // LOG_INFO("    freed");
                     // no change to mount points, so remove from old list
-                    devmount = DEVMOUNT_T(found->data);
-                    devmounts = g_list_remove(devmounts, devmount);
+                    devmount = found;
+                    ztd::remove(devmounts, devmount);
                     delete devmount;
                 }
             }
@@ -1651,33 +1653,29 @@ parse_mounts(bool report)
                 devcopy->mount_points = ztd::strdup(devmount->mount_points);
                 devcopy->fstype = ztd::strdup(devmount->fstype);
 
-                changed = g_list_prepend(changed, devcopy);
+                changed.push_back(devcopy);
             }
         }
     }
     // LOG_INFO("REMAINING");
     // any remaining devices in old list have changed mount status
-    for (GList* l = devmounts; l; l = l->next)
+    for (devmount_t* devmount: devmounts)
     {
-        devmount = DEVMOUNT_T(l->data);
         // LOG_INFO("remain {}:{}", devmount->major, devmount->minor );
         if (report)
-            changed = g_list_prepend(changed, devmount);
-        else
-            delete devmount;
+            changed.push_back(devmount);
     }
-    g_list_free(devmounts);
+
+    free_devmounts();
+
     devmounts = newmounts;
 
     // report
-    if (report && changed)
+    if (report && !changed.empty())
     {
-        vfs::volume volume;
-        char* devnode;
-        for (GList* l = changed; l; l = l->next)
+        for (devmount_t* devmount: changed)
         {
-            devnode = nullptr;
-            devmount = DEVMOUNT_T(l->data);
+            char* devnode = nullptr;
             devnum = makedev(devmount->major, devmount->minor);
             udevice = udev_device_new_from_devnum(udev, 'b', devnum);
             if (udevice)
@@ -1686,14 +1684,17 @@ parse_mounts(bool report)
             {
                 // block device
                 LOG_INFO("mount changed: {}", devnode);
-                if ((volume = vfs_volume_read_by_device(udevice)))
+
+                vfs::volume volume = vfs_volume_read_by_device(udevice);
+                if (volume)
                     volume->device_added(true); // frees volume if needed
                 free(devnode);
             }
             else
             {
                 // not a block device
-                if ((volume = vfs_volume_read_by_mount(devnum, devmount->mount_points)))
+                vfs::volume volume = vfs_volume_read_by_mount(devnum, devmount->mount_points);
+                if (volume)
                 {
                     LOG_INFO("special mount changed: {} ({}:{}) on {}",
                              volume->device_file,
@@ -1710,33 +1711,17 @@ parse_mounts(bool report)
             udev_device_unref(udevice);
             delete devmount;
         }
-        g_list_free(changed);
     }
     // printf ( "END PARSE\n");
-}
-
-static void
-free_devmounts()
-{
-    if (!devmounts)
-        return;
-
-    for (GList* l = devmounts; l; l = l->next)
-    {
-        devmount_t* devmount = DEVMOUNT_T(l->data);
-        delete devmount;
-    }
-    g_list_free(devmounts);
-    devmounts = nullptr;
 }
 
 static const char*
 get_devmount_fstype(u32 major, u32 minor)
 {
-    for (GList* l = devmounts; l; l = l->next)
+    for (devmount_t* devmount: devmounts)
     {
-        if ((DEVMOUNT_T(l->data))->major == major && (DEVMOUNT_T(l->data))->minor == minor)
-            return (DEVMOUNT_T(l->data))->fstype;
+        if (devmount->major == major && devmount->minor == minor)
+            return devmount->fstype;
     }
     return nullptr;
 }
