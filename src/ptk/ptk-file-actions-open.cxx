@@ -404,7 +404,7 @@ ptk_open_files_with_app(const char* cwd, const std::vector<vfs::file_info>& sel_
              */
             if (alloc_desktop.empty())
             {
-                if (file->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY &&
+                if (file->flags & VFSFileInfoFlag::DESKTOP_ENTRY &&
                     (app_settings.get_click_executes() || xforce))
                 {
                     alloc_desktop = full_path;

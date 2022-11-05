@@ -850,7 +850,7 @@ vfs_dir_unload_thumbnails(vfs::dir dir, bool is_big)
 
         /* This is a desktop entry file, so the icon needs reload
              FIXME: This is not a good way to do things, but there is no better way now.  */
-        if (file->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY)
+        if (file->flags & VFSFileInfoFlag::DESKTOP_ENTRY)
         {
             const std::string file_path = Glib::build_filename(dir->path, file->name);
             file->load_special_info(file_path);

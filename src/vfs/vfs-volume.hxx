@@ -33,19 +33,19 @@
 
 enum VFSVolumeState
 {
-    VFS_VOLUME_ADDED,
-    VFS_VOLUME_REMOVED,
-    VFS_VOLUME_MOUNTED,   // Not implemented
-    VFS_VOLUME_UNMOUNTED, // Not implemented
-    VFS_VOLUME_EJECT,
-    VFS_VOLUME_CHANGED
+    ADDED,
+    REMOVED,
+    MOUNTED,   // Not implemented
+    UNMOUNTED, // Not implemented
+    EJECT,
+    CHANGED,
 };
 
 enum VFSVolumeDeviceType
 {
-    DEVICE_TYPE_BLOCK,
-    DEVICE_TYPE_NETWORK,
-    DEVICE_TYPE_OTHER // eg fuseiso mounted file
+    BLOCK,
+    NETWORK,
+    OTHER, // eg fuseiso mounted file
 };
 
 enum class SplitNetworkURL
@@ -84,7 +84,7 @@ struct VFSVolume
     ~VFSVolume();
 
     dev_t devnum;
-    i32 device_type;
+    VFSVolumeDeviceType device_type;
     char* device_file;
     char* udi;
     char* disp_name;

@@ -41,13 +41,13 @@
 // For future use, not all supported now
 enum VFSFileInfoFlag
 {
-    VFS_FILE_INFO_NONE = 0,
-    VFS_FILE_INFO_HOME_DIR = (1 << 0),    // Not implemented
-    VFS_FILE_INFO_DESKTOP_DIR = (1 << 1), // Not implemented
-    VFS_FILE_INFO_DESKTOP_ENTRY = (1 << 2),
-    VFS_FILE_INFO_MOUNT_POINT = (1 << 3), // Not implemented
-    VFS_FILE_INFO_REMOTE = (1 << 4),      // Not implemented
-    VFS_FILE_INFO_VIRTUAL = (1 << 5)      // Not implemented
+    NONE = 0,
+    HOME_DIR = (1 << 0),    // Not implemented
+    DESKTOP_DIR = (1 << 1), // Not implemented
+    DESKTOP_ENTRY = (1 << 2),
+    MOUNT_POINT = (1 << 3), // Not implemented
+    REMOTE = (1 << 4),      // Not implemented
+    VIRTUAL = (1 << 5),     // Not implemented
 };
 
 struct VFSFileInfo

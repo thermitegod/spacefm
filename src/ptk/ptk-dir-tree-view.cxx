@@ -674,13 +674,13 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                 switch (gdk_drag_context_get_selected_action(drag_context))
                 {
                     case GdkDragAction::GDK_ACTION_COPY:
-                        file_action = VFSFileTaskType::VFS_FILE_TASK_COPY;
+                        file_action = VFSFileTaskType::COPY;
                         break;
                     case GdkDragAction::GDK_ACTION_MOVE:
-                        file_action = VFSFileTaskType::VFS_FILE_TASK_MOVE;
+                        file_action = VFSFileTaskType::MOVE;
                         break;
                     case GdkDragAction::GDK_ACTION_LINK:
-                        file_action = VFSFileTaskType::VFS_FILE_TASK_LINK;
+                        file_action = VFSFileTaskType::LINK;
                         break;
                     case GdkDragAction::GDK_ACTION_DEFAULT:
                     case GdkDragAction::GDK_ACTION_PRIVATE:

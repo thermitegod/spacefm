@@ -912,7 +912,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                     file_list.push_back(file_path);
                 }
 
-                ptask = new PtkFileTask(VFSFileTaskType::VFS_FILE_TASK_CHMOD_CHOWN,
+                ptask = new PtkFileTask(VFSFileTaskType::CHMOD_CHOWN,
                                         file_list,
                                         nullptr,
                                         GTK_WINDOW(gtk_widget_get_parent(GTK_WIDGET(dialog))),

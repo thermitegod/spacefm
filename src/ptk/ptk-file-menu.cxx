@@ -763,7 +763,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
         // Execute
         if (!is_dir && file && file_path &&
-            (file->flags & VFSFileInfoFlag::VFS_FILE_INFO_DESKTOP_ENTRY ||
+            (file->flags & VFSFileInfoFlag::DESKTOP_ENTRY ||
              // Note: network filesystems may become unresponsive here
              file->is_executable(file_path)))
         {

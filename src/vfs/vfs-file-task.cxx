@@ -111,7 +111,7 @@ call_state_callback(VFSFileTask* task, VFSFileTaskState state)
         if (!task->state_cb(task, state, nullptr, task->state_cb_data))
         {
             task->abort = true;
-            if (task->type == VFSFileTaskType::VFS_FILE_TASK_EXEC && task->exec_cond)
+            if (task->type == VFSFileTaskType::EXEC && task->exec_cond)
             {
                 // this is used only if exec task run in non-main loop thread
                 vfs_file_task_lock(task);
@@ -120,14 +120,14 @@ call_state_callback(VFSFileTask* task, VFSFileTaskState state)
             }
         }
         else
-            task->state = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+            task->state = VFSFileTaskState::RUNNING;
     }
 }
 
 static bool
 should_abort(VFSFileTask* task)
 {
-    if (task->state_pause != VFSFileTaskState::VFS_FILE_TASK_RUNNING)
+    if (task->state_pause != VFSFileTaskState::RUNNING)
     {
         // paused or queued - suspend thread
         vfs_file_task_lock(task);
@@ -141,7 +141,7 @@ should_abort(VFSFileTask* task)
         task->last_progress = task->progress;
         task->last_speed = 0;
         task->timer.start();
-        task->state_pause = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+        task->state_pause = VFSFileTaskState::RUNNING;
         vfs_file_task_unlock(task);
     }
     return task->abort;
@@ -189,7 +189,7 @@ check_overwrite(VFSFileTask* task, std::string_view dest_file, bool* dest_exists
     while (true)
     {
         *new_dest_file = nullptr;
-        if (task->overwrite_mode == VFSFileTaskOverwriteMode::VFS_FILE_TASK_OVERWRITE_ALL)
+        if (task->overwrite_mode == VFSFileTaskOverwriteMode::OVERWRITE_ALL)
         {
             *dest_exists = !lstat(dest_file.data(), &dest_stat);
             if (ztd::same(task->current_file, task->current_dest))
@@ -200,12 +200,12 @@ check_overwrite(VFSFileTask* task, std::string_view dest_file, bool* dest_exists
             }
             return true;
         }
-        if (task->overwrite_mode == VFSFileTaskOverwriteMode::VFS_FILE_TASK_SKIP_ALL)
+        if (task->overwrite_mode == VFSFileTaskOverwriteMode::SKIP_ALL)
         {
             *dest_exists = !lstat(dest_file.data(), &dest_stat);
             return !*dest_exists;
         }
-        if (task->overwrite_mode == VFSFileTaskOverwriteMode::VFS_FILE_TASK_AUTO_RENAME)
+        if (task->overwrite_mode == VFSFileTaskOverwriteMode::AUTO_RENAME)
         {
             *dest_exists = !lstat(dest_file.data(), &dest_stat);
             if (!*dest_exists)
@@ -238,18 +238,18 @@ check_overwrite(VFSFileTask* task, std::string_view dest_file, bool* dest_exists
         {
             // destination file exists
             *dest_exists = true;
-            task->state = VFSFileTaskState::VFS_FILE_TASK_QUERY_OVERWRITE;
+            task->state = VFSFileTaskState::QUERY_OVERWRITE;
             new_dest = nullptr;
 
             // query user
             if (!task->state_cb(task,
-                                VFSFileTaskState::VFS_FILE_TASK_QUERY_OVERWRITE,
+                                VFSFileTaskState::QUERY_OVERWRITE,
                                 &new_dest,
                                 task->state_cb_data))
                 // task->abort is actually set in query_overwrite_response
-                // VFSFileTaskState::VFS_FILE_TASK_QUERY_OVERWRITE never returns false
+                // VFSFileTaskState::QUERY_OVERWRITE never returns false
                 task->abort = true;
-            task->state = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+            task->state = VFSFileTaskState::RUNNING;
 
             // may pause here - user may change overwrite mode
             if (should_abort(task))
@@ -258,14 +258,14 @@ check_overwrite(VFSFileTask* task, std::string_view dest_file, bool* dest_exists
                 return false;
             }
 
-            if (task->overwrite_mode != VFSFileTaskOverwriteMode::VFS_FILE_TASK_RENAME)
+            if (task->overwrite_mode != VFSFileTaskOverwriteMode::RENAME)
             {
                 free(new_dest);
                 new_dest = nullptr;
                 switch (task->overwrite_mode)
                 {
-                    case VFSFileTaskOverwriteMode::VFS_FILE_TASK_OVERWRITE:
-                    case VFSFileTaskOverwriteMode::VFS_FILE_TASK_OVERWRITE_ALL:
+                    case VFSFileTaskOverwriteMode::OVERWRITE:
+                    case VFSFileTaskOverwriteMode::OVERWRITE_ALL:
                         *dest_exists = !lstat(dest_file.data(), &dest_stat);
                         if (ztd::same(task->current_file, task->current_dest))
                         {
@@ -275,10 +275,10 @@ check_overwrite(VFSFileTask* task, std::string_view dest_file, bool* dest_exists
                         }
                         return true;
                         break;
-                    case VFSFileTaskOverwriteMode::VFS_FILE_TASK_SKIP_ALL:
-                    case VFSFileTaskOverwriteMode::VFS_FILE_TASK_AUTO_RENAME:
-                    case VFSFileTaskOverwriteMode::VFS_FILE_TASK_SKIP:
-                    case VFSFileTaskOverwriteMode::VFS_FILE_TASK_RENAME:
+                    case VFSFileTaskOverwriteMode::SKIP_ALL:
+                    case VFSFileTaskOverwriteMode::AUTO_RENAME:
+                    case VFSFileTaskOverwriteMode::SKIP:
+                    case VFSFileTaskOverwriteMode::RENAME:
                     default:
                         return false;
                 }
@@ -321,11 +321,8 @@ check_dest_in_src(VFSFileTask* task, std::string_view src_dir)
                         disp_src);
         append_add_log(task, err);
         if (task->state_cb)
-            task->state_cb(task,
-                           VFSFileTaskState::VFS_FILE_TASK_ERROR,
-                           nullptr,
-                           task->state_cb_data);
-        task->state = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+            task->state_cb(task, VFSFileTaskState::ERROR, nullptr, task->state_cb_data);
+        task->state = VFSFileTaskState::RUNNING;
         return true;
     }
     return false;
@@ -433,8 +430,7 @@ vfs_file_task_do_copy(VFSFileTask* task, std::string_view src_file, std::string_
                 update_file_display(actual_dest_file);
 
             /* Move files to different device: Need to delete source dir */
-            if ((task->type == VFSFileTaskType::VFS_FILE_TASK_MOVE) && !should_abort(task) &&
-                !copy_fail)
+            if ((task->type == VFSFileTaskType::MOVE) && !should_abort(task) && !copy_fail)
             {
                 std::filesystem::remove_all(src_file);
                 if (std::filesystem::exists(src_file))
@@ -503,7 +499,7 @@ vfs_file_task_do_copy(VFSFileTask* task, std::string_view src_file, std::string_
             if (std::filesystem::is_symlink(actual_dest_file))
             {
                 /* Move files to different device: Need to delete source files */
-                if ((task->type == VFSFileTaskType::VFS_FILE_TASK_MOVE) && !copy_fail)
+                if ((task->type == VFSFileTaskType::MOVE) && !copy_fail)
                 {
                     std::filesystem::remove(src_file);
                     if (std::filesystem::exists(src_file))
@@ -618,7 +614,7 @@ vfs_file_task_do_copy(VFSFileTask* task, std::string_view src_file, std::string_
                         update_file_display(actual_dest_file);
 
                     /* Move files to different device: Need to delete source files */
-                    if ((task->type == VFSFileTaskType::VFS_FILE_TASK_MOVE) && !should_abort(task))
+                    if ((task->type == VFSFileTaskType::MOVE) && !should_abort(task))
                     {
                         std::filesystem::remove(src_file);
                         if (std::filesystem::exists(src_file))
@@ -1149,10 +1145,10 @@ cb_exec_child_watch(Glib::Pid pid, i32 status, VFSFileTask* task)
             task->percent = 100;
     }
     else
-        call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_ERROR);
+        call_state_callback(task, VFSFileTaskState::ERROR);
 
     if (bad_status || (!task->exec_channel_out && !task->exec_channel_err))
-        call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+        call_state_callback(task, VFSFileTaskState::FINISH);
 }
 
 static bool
@@ -1203,7 +1199,7 @@ cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, VFSFileTask* task)
             else if (channel == task->exec_channel_err)
                 task->exec_channel_err = nullptr;
             if (!task->exec_channel_out && !task->exec_channel_err && !task->exec_pid)
-                call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+                call_state_callback(task, VFSFileTaskState::FINISH);
             return false;
         }
         else
@@ -1220,7 +1216,7 @@ cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, VFSFileTask* task)
         else if (channel == task->exec_channel_err)
             task->exec_channel_err = nullptr;
         if (!task->exec_channel_out && !task->exec_channel_err && !task->exec_pid)
-            call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+            call_state_callback(task, VFSFileTaskState::FINISH);
         return false;
     }
 
@@ -1269,7 +1265,7 @@ vfs_file_task_exec_error(VFSFileTask* task, i32 errnox, std::string_view action)
         append_add_log(task, msg);
     }
 
-    call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_ERROR);
+    call_state_callback(task, VFSFileTaskState::ERROR);
 }
 
 static void
@@ -1293,7 +1289,7 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
     else if (task->exec_desktop)
         parent = gtk_widget_get_toplevel(GTK_WIDGET(task->exec_desktop));
 
-    task->state = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+    task->state = VFSFileTaskState::RUNNING;
     task->current_file = src_file;
     task->total_size = 0;
     task->percent = 0;
@@ -1326,7 +1322,7 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
                                 "Terminal SU Not Available",
                                 GtkButtonsType::GTK_BUTTONS_OK,
                                 msg);
-                call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+                call_state_callback(task, VFSFileTaskState::FINISH);
                 // LOG_INFO("vfs_file_task_exec DONE ERROR");
                 return;
             }
@@ -1346,7 +1342,7 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
                         "Error",
                         GtkButtonsType::GTK_BUTTONS_OK,
                         msg);
-        call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+        call_state_callback(task, VFSFileTaskState::FINISH);
         // LOG_INFO("vfs_file_task_exec DONE ERROR");
         return;
     }
@@ -1374,7 +1370,7 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
                             GtkButtonsType::GTK_BUTTONS_OK,
                             msg);
 
-            call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+            call_state_callback(task, VFSFileTaskState::FINISH);
             // LOG_INFO("vfs_file_task_exec DONE ERROR");
             return;
         }
@@ -1414,7 +1410,7 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
                     if (std::filesystem::exists(task->exec_script))
                         std::filesystem::remove(task->exec_script);
                 }
-                call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+                call_state_callback(task, VFSFileTaskState::FINISH);
                 // LOG_INFO("vfs_file_task_exec DONE ERROR");
                 return;
             }
@@ -1481,7 +1477,7 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
                 if (std::filesystem::exists(task->exec_script))
                     std::filesystem::remove(task->exec_script);
             }
-            call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+            call_state_callback(task, VFSFileTaskState::FINISH);
             // LOG_INFO("vfs_file_task_exec DONE ERROR");
             return;
         }
@@ -1649,7 +1645,7 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
                         e.code(),
                         std::string(Glib::strerror(e.code())));
         vfs_file_task_exec_error(task, errno, msg);
-        call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+        call_state_callback(task, VFSFileTaskState::FINISH);
         // LOG_INFO("vfs_file_task_exec DONE ERROR");
         return;
     }
@@ -1665,7 +1661,7 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
                           !task->exec_keep_tmp && !task->exec_direct && task->exec_script.c_str()
                               ? ztd::strdup(task->exec_script)
                               : nullptr);
-        call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+        call_state_callback(task, VFSFileTaskState::FINISH);
         return;
     }
 
@@ -1701,7 +1697,7 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
                         nullptr);
 
     // running
-    task->state = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+    task->state = VFSFileTaskState::RUNNING;
 
     // LOG_INFO("vfs_file_task_exec DONE");
     return; // exit thread
@@ -1711,7 +1707,7 @@ static bool
 on_size_timeout(VFSFileTask* task)
 {
     if (!task->abort)
-        task->state = VFSFileTaskState::VFS_FILE_TASK_SIZE_TIMEOUT;
+        task->state = VFSFileTaskState::SIZE_TIMEOUT;
     return false;
 }
 
@@ -1722,33 +1718,32 @@ vfs_file_task_thread(VFSFileTask* task)
     u32 size_timeout = 0;
     dev_t dest_dev = 0;
     off_t size;
-    if (task->type < VFSFileTaskType::VFS_FILE_TASK_MOVE ||
-        task->type >= VFSFileTaskType::VFS_FILE_TASK_LAST)
+    if (task->type < VFSFileTaskType::MOVE || task->type >= VFSFileTaskType::LAST)
     {
-        task->state = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+        task->state = VFSFileTaskState::RUNNING;
         if (size_timeout)
             g_source_remove_by_user_data(task);
         if (task->state_cb)
         {
-            call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+            call_state_callback(task, VFSFileTaskState::FINISH);
         }
         return nullptr;
     }
 
     vfs_file_task_lock(task);
-    task->state = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+    task->state = VFSFileTaskState::RUNNING;
     task->current_file = task->src_paths.at(0);
     task->total_size = 0;
     vfs_file_task_unlock(task);
 
     if (task->abort)
     {
-        task->state = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+        task->state = VFSFileTaskState::RUNNING;
         if (size_timeout)
             g_source_remove_by_user_data(task);
         if (task->state_cb)
         {
-            call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+            call_state_callback(task, VFSFileTaskState::FINISH);
         }
         return nullptr;
     }
@@ -1776,39 +1771,39 @@ vfs_file_task_thread(VFSFileTask* task)
             }
             if (task->abort)
             {
-                task->state = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+                task->state = VFSFileTaskState::RUNNING;
                 if (size_timeout)
                     g_source_remove_by_user_data(task);
                 if (task->state_cb)
                 {
-                    call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+                    call_state_callback(task, VFSFileTaskState::FINISH);
                 }
                 return nullptr;
             }
-            if (task->state == VFSFileTaskState::VFS_FILE_TASK_SIZE_TIMEOUT)
+            if (task->state == VFSFileTaskState::SIZE_TIMEOUT)
                 break;
         }
     }
-    else if (task->type == VFSFileTaskType::VFS_FILE_TASK_TRASH)
+    else if (task->type == VFSFileTaskType::TRASH)
     {
     }
-    else if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
+    else if (task->type != VFSFileTaskType::EXEC)
     {
         // start timer to limit the amount of time to spend on this - can be
         // VERY slow for network filesystems
         size_timeout = g_timeout_add_seconds(5, (GSourceFunc)on_size_timeout, task);
-        if (task->type != VFSFileTaskType::VFS_FILE_TASK_CHMOD_CHOWN)
+        if (task->type != VFSFileTaskType::CHMOD_CHOWN)
         {
             if (!(!task->dest_dir.empty() && stat(task->dest_dir.c_str(), &file_stat) == 0))
             {
                 vfs_file_task_error(task, errno, "Accessing", task->dest_dir);
                 task->abort = true;
-                task->state = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+                task->state = VFSFileTaskState::RUNNING;
                 if (size_timeout)
                     g_source_remove_by_user_data(task);
                 if (task->state_cb)
                 {
-                    call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+                    call_state_callback(task, VFSFileTaskState::FINISH);
                 }
                 return nullptr;
             }
@@ -1824,8 +1819,7 @@ vfs_file_task_thread(VFSFileTask* task)
             }
             else
             {
-                if ((task->type == VFSFileTaskType::VFS_FILE_TASK_MOVE) &&
-                    file_stat.st_dev != dest_dev)
+                if ((task->type == VFSFileTaskType::MOVE) && file_stat.st_dev != dest_dev)
                 {
                     // recursive size
                     size = 0;
@@ -1843,16 +1837,16 @@ vfs_file_task_thread(VFSFileTask* task)
             }
             if (task->abort)
             {
-                task->state = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+                task->state = VFSFileTaskState::RUNNING;
                 if (size_timeout)
                     g_source_remove_by_user_data(task);
                 if (task->state_cb)
                 {
-                    call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+                    call_state_callback(task, VFSFileTaskState::FINISH);
                 }
                 return nullptr;
             }
-            if (task->state == VFSFileTaskState::VFS_FILE_TASK_SIZE_TIMEOUT)
+            if (task->state == VFSFileTaskState::SIZE_TIMEOUT)
                 break;
         }
     }
@@ -1862,12 +1856,12 @@ vfs_file_task_thread(VFSFileTask* task)
 
     if (task->abort)
     {
-        task->state = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+        task->state = VFSFileTaskState::RUNNING;
         if (size_timeout)
             g_source_remove_by_user_data(task);
         if (task->state_cb)
         {
-            call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+            call_state_callback(task, VFSFileTaskState::FINISH);
         }
         return nullptr;
     }
@@ -1876,53 +1870,52 @@ vfs_file_task_thread(VFSFileTask* task)
     if (size_timeout)
         g_source_remove_by_user_data(task);
 
-    if (task->state_pause == VFSFileTaskState::VFS_FILE_TASK_QUEUE)
+    if (task->state_pause == VFSFileTaskState::QUEUE)
     {
-        if (task->state != VFSFileTaskState::VFS_FILE_TASK_SIZE_TIMEOUT &&
-            xset_get_b(XSetName::TASK_Q_SMART))
+        if (task->state != VFSFileTaskState::SIZE_TIMEOUT && xset_get_b(XSetName::TASK_Q_SMART))
         {
             // make queue exception for smaller tasks
             off_t exlimit;
             switch (task->type)
             {
-                case VFSFileTaskType::VFS_FILE_TASK_MOVE:
-                case VFSFileTaskType::VFS_FILE_TASK_COPY:
-                case VFSFileTaskType::VFS_FILE_TASK_TRASH:
+                case VFSFileTaskType::MOVE:
+                case VFSFileTaskType::COPY:
+                case VFSFileTaskType::TRASH:
                     exlimit = 10485760; // 10M
                     break;
-                case VFSFileTaskType::VFS_FILE_TASK_DELETE:
+                case VFSFileTaskType::DELETE:
                     exlimit = 5368709120; // 5G
                     break;
-                case VFSFileTaskType::VFS_FILE_TASK_LINK:
-                case VFSFileTaskType::VFS_FILE_TASK_CHMOD_CHOWN:
-                case VFSFileTaskType::VFS_FILE_TASK_EXEC:
-                case VFSFileTaskType::VFS_FILE_TASK_LAST:
+                case VFSFileTaskType::LINK:
+                case VFSFileTaskType::CHMOD_CHOWN:
+                case VFSFileTaskType::EXEC:
+                case VFSFileTaskType::LAST:
                 default:
                     exlimit = 0; // always exception for other types
                     break;
             }
 
             if (!exlimit || task->total_size < exlimit)
-                task->state_pause = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+                task->state_pause = VFSFileTaskState::RUNNING;
         }
         // device list is populated so signal queue start
         task->queue_start = true;
     }
 
-    if (task->state == VFSFileTaskState::VFS_FILE_TASK_SIZE_TIMEOUT)
+    if (task->state == VFSFileTaskState::SIZE_TIMEOUT)
     {
         append_add_log(task, "Timed out calculating total size\n");
         task->total_size = 0;
     }
-    task->state = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+    task->state = VFSFileTaskState::RUNNING;
     if (should_abort(task))
     {
-        task->state = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+        task->state = VFSFileTaskState::RUNNING;
         if (size_timeout)
             g_source_remove_by_user_data(task);
         if (task->state_cb)
         {
-            call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+            call_state_callback(task, VFSFileTaskState::FINISH);
         }
         return nullptr;
     }
@@ -1931,39 +1924,39 @@ vfs_file_task_thread(VFSFileTask* task)
     {
         switch (task->type)
         {
-            case VFSFileTaskType::VFS_FILE_TASK_MOVE:
+            case VFSFileTaskType::MOVE:
                 vfs_file_task_move(task, src_path);
                 break;
-            case VFSFileTaskType::VFS_FILE_TASK_COPY:
+            case VFSFileTaskType::COPY:
                 vfs_file_task_copy(task, src_path);
                 break;
-            case VFSFileTaskType::VFS_FILE_TASK_TRASH:
+            case VFSFileTaskType::TRASH:
                 vfs_file_task_trash(task, src_path);
                 break;
-            case VFSFileTaskType::VFS_FILE_TASK_DELETE:
+            case VFSFileTaskType::DELETE:
                 vfs_file_task_delete(task, src_path);
                 break;
-            case VFSFileTaskType::VFS_FILE_TASK_LINK:
+            case VFSFileTaskType::LINK:
                 vfs_file_task_link(task, src_path);
                 break;
-            case VFSFileTaskType::VFS_FILE_TASK_CHMOD_CHOWN:
+            case VFSFileTaskType::CHMOD_CHOWN:
                 vfs_file_task_chown_chmod(task, src_path);
                 break;
-            case VFSFileTaskType::VFS_FILE_TASK_EXEC:
+            case VFSFileTaskType::EXEC:
                 vfs_file_task_exec(task, src_path);
                 break;
-            case VFSFileTaskType::VFS_FILE_TASK_LAST:
+            case VFSFileTaskType::LAST:
             default:
                 break;
         }
     }
 
-    task->state = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+    task->state = VFSFileTaskState::RUNNING;
     if (size_timeout)
         g_source_remove_by_user_data(task);
     if (task->state_cb)
     {
-        call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_FINISH);
+        call_state_callback(task, VFSFileTaskState::FINISH);
     }
     return nullptr;
 }
@@ -1983,8 +1976,8 @@ vfs_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files,
     if (!dest_dir.empty())
         task->dest_dir = dest_dir.data();
 
-    task->recursive = (task->type == VFSFileTaskType::VFS_FILE_TASK_COPY ||
-                       task->type == VFSFileTaskType::VFS_FILE_TASK_DELETE);
+    task->recursive =
+        (task->type == VFSFileTaskType::COPY || task->type == VFSFileTaskType::DELETE);
 
     vfs_file_task_init(task);
 
@@ -2022,9 +2015,9 @@ vfs_file_task_set_chown(VFSFileTask* task, uid_t uid, gid_t gid)
 void
 vfs_file_task_run(VFSFileTask* task)
 {
-    if (task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
+    if (task->type != VFSFileTaskType::EXEC)
     {
-        if (task->type == VFSFileTaskType::VFS_FILE_TASK_CHMOD_CHOWN && !task->src_paths.empty())
+        if (task->type == VFSFileTaskType::CHMOD_CHOWN && !task->src_paths.empty())
         {
             const std::string dir = Glib::path_get_dirname(task->src_paths.at(0));
             task->avoid_changes = vfs_volume_dir_avoid_changes(dir.c_str());
@@ -2066,7 +2059,7 @@ vfs_file_task_try_abort(VFSFileTask* task)
         task->last_speed = 0;
         vfs_file_task_unlock(task);
     }
-    task->state_pause = VFSFileTaskState::VFS_FILE_TASK_RUNNING;
+    task->state_pause = VFSFileTaskState::RUNNING;
 }
 
 void
@@ -2074,8 +2067,7 @@ vfs_file_task_abort(VFSFileTask* task)
 {
     task->abort = true;
     /* Called from another thread */
-    if (task->thread && g_thread_self() != task->thread &&
-        task->type != VFSFileTaskType::VFS_FILE_TASK_EXEC)
+    if (task->thread && g_thread_self() != task->thread && task->type != VFSFileTaskType::EXEC)
     {
         g_thread_join(task->thread);
         task->thread = nullptr;
@@ -2155,7 +2147,7 @@ get_total_size_of_dir(VFSFileTask* task, std::string_view path, off_t* size, str
     for (const auto& file: std::filesystem::directory_iterator(path))
     {
         const std::string file_name = std::filesystem::path(file).filename();
-        if (task->state == VFSFileTaskState::VFS_FILE_TASK_SIZE_TIMEOUT || task->abort)
+        if (task->state == VFSFileTaskState::SIZE_TIMEOUT || task->abort)
             break;
         const std::string full_path = Glib::build_filename(path.data(), file_name);
         if (lstat(full_path.c_str(), &file_stat) != -1)
@@ -2194,5 +2186,5 @@ vfs_file_task_error(VFSFileTask* task, i32 errnox, std::string_view action, std:
     const std::string errno_msg = std::strerror(errnox);
     const std::string msg = fmt::format("\n{} {}\nError: {}\n", action, target, errno_msg);
     append_add_log(task, msg);
-    call_state_callback(task, VFSFileTaskState::VFS_FILE_TASK_ERROR);
+    call_state_callback(task, VFSFileTaskState::ERROR);
 }

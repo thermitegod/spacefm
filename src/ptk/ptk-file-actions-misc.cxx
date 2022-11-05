@@ -72,7 +72,7 @@ ptk_delete_files(GtkWindow* parent_win, std::string_view cwd,
         file_list.push_back(file_path);
     }
 
-    PtkFileTask* ptask = new PtkFileTask(VFSFileTaskType::VFS_FILE_TASK_DELETE,
+    PtkFileTask* ptask = new PtkFileTask(VFSFileTaskType::DELETE,
                                          file_list,
                                          nullptr,
                                          parent_win ? GTK_WINDOW(parent_win) : nullptr,
@@ -102,7 +102,7 @@ ptk_trash_files(GtkWindow* parent_win, std::string_view cwd,
         file_list.push_back(file_path);
     }
 
-    PtkFileTask* ptask = new PtkFileTask(VFSFileTaskType::VFS_FILE_TASK_TRASH,
+    PtkFileTask* ptask = new PtkFileTask(VFSFileTaskType::TRASH,
                                          file_list,
                                          nullptr,
                                          parent_win ? GTK_WINDOW(parent_win) : nullptr,

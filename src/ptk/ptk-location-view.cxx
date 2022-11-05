@@ -344,7 +344,7 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
     if (xset_opener(file_browser, 2))
         return;
 
-    if (!vfs_volume_is_mounted(vol) && vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK)
+    if (!vfs_volume_is_mounted(vol) && vol->device_type == VFSVolumeDeviceType::BLOCK)
     {
         try_mount(view, vol);
         if (vfs_volume_is_mounted(vol))
@@ -488,21 +488,21 @@ on_volume_event(vfs::volume vol, VFSVolumeState state, void* user_data)
     (void)user_data;
     switch (state)
     {
-        case VFSVolumeState::VFS_VOLUME_ADDED:
+        case VFSVolumeState::ADDED:
             add_volume(vol, true);
             break;
-        case VFSVolumeState::VFS_VOLUME_REMOVED:
+        case VFSVolumeState::REMOVED:
             remove_volume(vol);
             break;
-        case VFSVolumeState::VFS_VOLUME_CHANGED: // CHANGED may occur before ADDED !
+        case VFSVolumeState::CHANGED: // CHANGED may occur before ADDED !
             if (!volume_is_visible(vol))
                 remove_volume(vol);
             else
                 update_volume(vol);
             break;
-        case VFSVolumeState::VFS_VOLUME_MOUNTED:
-        case VFSVolumeState::VFS_VOLUME_UNMOUNTED:
-        case VFSVolumeState::VFS_VOLUME_EJECT:
+        case VFSVolumeState::MOUNTED:
+        case VFSVolumeState::UNMOUNTED:
+        case VFSVolumeState::EJECT:
         default:
             break;
     }
@@ -1190,14 +1190,13 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
             return;
         }
 
-        if (vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK &&
+        if (vol->device_type == VFSVolumeDeviceType::BLOCK &&
             (vol->is_optical || vol->requires_eject))
             eject = fmt::format("\neject {}", vol->device_file);
         else
             eject = "\nexit 0";
 
-        if (!file_browser && !run_in_terminal &&
-            vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK)
+        if (!file_browser && !run_in_terminal && vol->device_type == VFSVolumeDeviceType::BLOCK)
         {
             const std::string exe = get_prog_executable();
             // run from desktop window - show a pending dialog
@@ -1213,16 +1212,14 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
             line = fmt::format("echo 'Unmounting {}...'\n{}{}\nif [ $? -ne 0 ];then\n    "
                                "read -p '{}: '\n    exit 1\nelse\n    {}\nfi",
                                vol->device_file,
-                               vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK ? "sync\n"
-                                                                                          : "",
+                               vol->device_type == VFSVolumeDeviceType::BLOCK ? "sync\n" : "",
                                unmount,
                                press_enter_to_close,
                                eject);
         else
             line = fmt::format("{}{}{}\nuerr=$?{}\nif [ $uerr -ne 0 ];then\n    exit 1\nfi{}",
                                wait,
-                               vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK ? "sync\n"
-                                                                                          : "",
+                               vol->device_type == VFSVolumeDeviceType::BLOCK ? "sync\n" : "",
                                unmount,
                                wait_done,
                                eject);
@@ -1239,7 +1236,7 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         ptask->task->exec_terminal = run_in_terminal;
         ptask->task->exec_icon = vfs_volume_get_icon(vol);
     }
-    else if (vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK &&
+    else if (vol->device_type == VFSVolumeDeviceType::BLOCK &&
              (vol->is_optical || vol->requires_eject))
     {
         // task
@@ -1526,7 +1523,7 @@ on_prop(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 
     // use handler command if available
     bool run_in_terminal;
-    if (vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_NETWORK)
+    if (vol->device_type == VFSVolumeDeviceType::NETWORK)
     {
         // is a network - try to get prop command
         netmount_t* netmount = new netmount_t;
@@ -1559,7 +1556,7 @@ on_prop(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         else
             return;
     }
-    else if (vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_OTHER &&
+    else if (vol->device_type == VFSVolumeDeviceType::OTHER &&
              mtab_fstype_is_handled_by_protocol(vol->fs_type))
     {
         cmd = ztd::null_check(vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_NET,
@@ -1922,11 +1919,11 @@ volume_is_visible(vfs::volume vol)
 #endif
 
     // network
-    if (vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_NETWORK)
+    if (vol->device_type == VFSVolumeDeviceType::NETWORK)
         return xset_get_b(XSetName::DEV_SHOW_NET);
 
     // other - eg fuseiso mounted file
-    if (vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_OTHER)
+    if (vol->device_type == VFSVolumeDeviceType::OTHER)
         return xset_get_b(XSetName::DEV_SHOW_FILE);
 
     // loop
@@ -2063,7 +2060,7 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     set = xset_set_cb(XSetName::DEV_AUTOMOUNT_VOLUMES, (GFunc)on_automountlist, vol);
     xset_set_ob1(set, "view", view);
 
-    if (vol && vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_NETWORK &&
+    if (vol && vol->device_type == VFSVolumeDeviceType::NETWORK &&
         (ztd::startswith(vol->device_file, "//") || strstr(vol->device_file, ":/")))
         str = ztd::strdup(" dev_menu_mark");
     else

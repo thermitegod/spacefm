@@ -39,15 +39,15 @@
 
 enum VFSFileTaskType
 {
-    VFS_FILE_TASK_MOVE,
-    VFS_FILE_TASK_COPY,
-    VFS_FILE_TASK_TRASH,
-    VFS_FILE_TASK_DELETE,
-    VFS_FILE_TASK_LINK,
-    VFS_FILE_TASK_CHMOD_CHOWN, // These two kinds of operation have lots in common,
-                               // so put them together to reduce duplicated disk I/O
-    VFS_FILE_TASK_EXEC,        // MOD
-    VFS_FILE_TASK_LAST
+    MOVE,
+    COPY,
+    TRASH,
+    DELETE,
+    LINK,
+    CHMOD_CHOWN, // These two kinds of operation have lots in common,
+                 // so put them together to reduce duplicated disk I/O
+    EXEC,
+    LAST,
 };
 
 enum ChmodActionType
@@ -91,30 +91,30 @@ inline constexpr std::array<std::filesystem::perms, 12> chmod_flags{
 
 enum VFSFileTaskState
 {
-    VFS_FILE_TASK_RUNNING,
-    VFS_FILE_TASK_SIZE_TIMEOUT,
-    VFS_FILE_TASK_QUERY_OVERWRITE,
-    VFS_FILE_TASK_ERROR,
-    VFS_FILE_TASK_PAUSE,
-    VFS_FILE_TASK_QUEUE,
-    VFS_FILE_TASK_FINISH
+    RUNNING,
+    SIZE_TIMEOUT,
+    QUERY_OVERWRITE,
+    ERROR,
+    PAUSE,
+    QUEUE,
+    FINISH,
 };
 
 enum VFSFileTaskOverwriteMode
 {
     // do not reposition first four values
-    VFS_FILE_TASK_OVERWRITE,     // Overwrite current dest file / Ask
-    VFS_FILE_TASK_OVERWRITE_ALL, // Overwrite all existing files without prompt
-    VFS_FILE_TASK_SKIP_ALL,      // Do not try to overwrite any files
-    VFS_FILE_TASK_AUTO_RENAME,   // Assign a new unique name
-    VFS_FILE_TASK_SKIP,          // Do not overwrite current file
-    VFS_FILE_TASK_RENAME         // Rename file
+    OVERWRITE,     // Overwrite current dest file / Ask
+    OVERWRITE_ALL, // Overwrite all existing files without prompt
+    SKIP_ALL,      // Do not try to overwrite any files
+    AUTO_RENAME,   // Assign a new unique name
+    SKIP,          // Do not overwrite current file
+    RENAME,        // Rename file
 };
 
 enum VFSExecType
 {
-    VFS_EXEC_NORMAL,
-    VFS_EXEC_CUSTOM,
+    NORMAL,
+    CUSTOM,
 };
 
 struct VFSFileTask;
@@ -164,7 +164,7 @@ struct VFSFileTask
 
     GThread* thread;
     VFSFileTaskState state;
-    VFSFileTaskState state_pause{VFSFileTaskState::VFS_FILE_TASK_RUNNING};
+    VFSFileTaskState state_pause{VFSFileTaskState::RUNNING};
     bool abort{false};
     GCond* pause_cond{nullptr};
     bool queue_start{false};
@@ -179,7 +179,7 @@ struct VFSFileTask
     GtkTextMark* add_log_end;
 
     // MOD run task
-    VFSExecType exec_type{VFSExecType::VFS_EXEC_NORMAL};
+    VFSExecType exec_type{VFSExecType::NORMAL};
     std::string exec_action;
     std::string exec_command;
     bool exec_sync{true};

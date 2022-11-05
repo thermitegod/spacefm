@@ -273,9 +273,9 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, const char* dest_dir, GtkTreeVi
 
         uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
         if (ztd::startswith((const char*)gtk_selection_data_get_data(sel_data), "cut"))
-            action = VFSFileTaskType::VFS_FILE_TASK_MOVE;
+            action = VFSFileTaskType::MOVE;
         else
-            action = VFSFileTaskType::VFS_FILE_TASK_COPY;
+            action = VFSFileTaskType::COPY;
 
         if (uri_list_str)
         {
@@ -298,9 +298,9 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, const char* dest_dir, GtkTreeVi
         uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
 
         if (clipboard_action == GdkDragAction::GDK_ACTION_MOVE)
-            action = VFSFileTaskType::VFS_FILE_TASK_MOVE;
+            action = VFSFileTaskType::MOVE;
         else
-            action = VFSFileTaskType::VFS_FILE_TASK_COPY;
+            action = VFSFileTaskType::COPY;
     }
 
     if (uri_list_str)
@@ -362,7 +362,7 @@ ptk_clipboard_paste_links(GtkWindow* parent_win, const char* dest_dir, GtkTreeVi
         }
 
         uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
-        action = VFSFileTaskType::VFS_FILE_TASK_LINK;
+        action = VFSFileTaskType::LINK;
         if (uri_list_str)
         {
             while (*uri_list_str && *uri_list_str != '\n')
@@ -382,7 +382,7 @@ ptk_clipboard_paste_links(GtkWindow* parent_win, const char* dest_dir, GtkTreeVi
             return;
         }
         uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
-        action = VFSFileTaskType::VFS_FILE_TASK_LINK;
+        action = VFSFileTaskType::LINK;
     }
 
     if (uri_list_str)
@@ -438,7 +438,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
         }
 
         uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
-        action = VFSFileTaskType::VFS_FILE_TASK_COPY;
+        action = VFSFileTaskType::COPY;
         if (uri_list_str)
         {
             while (*uri_list_str && *uri_list_str != '\n')
@@ -459,7 +459,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const char* dest_dir, GtkTree
         }
 
         uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
-        action = VFSFileTaskType::VFS_FILE_TASK_COPY;
+        action = VFSFileTaskType::COPY;
     }
 
     if (uri_list_str)

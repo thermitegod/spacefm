@@ -1861,7 +1861,7 @@ vfs_volume_set_info(vfs::volume volume)
     // set device icon
     switch (volume->device_type)
     {
-        case VFSVolumeDeviceType::DEVICE_TYPE_BLOCK:
+        case VFSVolumeDeviceType::BLOCK:
             if (volume->is_audiocd)
                 volume->icon = "dev_icon_audiocd";
             else if (volume->is_optical)
@@ -1901,10 +1901,10 @@ vfs_volume_set_info(vfs::volume volume)
                     volume->icon = "dev_icon_internal_unmounted";
             }
             break;
-        case VFSVolumeDeviceType::DEVICE_TYPE_NETWORK:
+        case VFSVolumeDeviceType::NETWORK:
             volume->icon = "dev_icon_network";
             break;
-        case VFSVolumeDeviceType::DEVICE_TYPE_OTHER:
+        case VFSVolumeDeviceType::OTHER:
             volume->icon = "dev_icon_file";
             break;
         default:
@@ -1912,47 +1912,48 @@ vfs_volume_set_info(vfs::volume volume)
     }
 
     // set disp_id using by-id
-    switch (volume->device_type)
+    if (volume->device_type == VFSVolumeDeviceType::BLOCK)
     {
-        case VFSVolumeDeviceType::DEVICE_TYPE_BLOCK:
-            if (volume->is_floppy && !volume->udi)
-                disp_id = ":floppy";
-            else if (volume->udi)
+        if (volume->is_floppy && !volume->udi)
+        {
+            disp_id = ":floppy";
+        }
+        else if (volume->udi)
+        {
+            if ((lastcomma = strrchr(volume->udi, '/')))
             {
-                if ((lastcomma = strrchr(volume->udi, '/')))
-                {
-                    lastcomma++;
-                    if (ztd::startswith(lastcomma, "usb-"))
-                        lastcomma += 4;
-                    else if (ztd::startswith(lastcomma, "ata-"))
-                        lastcomma += 4;
-                    else if (ztd::startswith(lastcomma, "scsi-"))
-                        lastcomma += 5;
-                }
-                else
-                    lastcomma = volume->udi;
-                if (lastcomma[0] != '\0')
-                {
-                    disp_id = fmt::format(":{:.16s}", lastcomma);
-                }
+                lastcomma++;
+                if (ztd::startswith(lastcomma, "usb-"))
+                    lastcomma += 4;
+                else if (ztd::startswith(lastcomma, "ata-"))
+                    lastcomma += 4;
+                else if (ztd::startswith(lastcomma, "scsi-"))
+                    lastcomma += 5;
             }
-            else if (volume->is_optical)
-                disp_id = ":optical";
-            // table type
-            if (volume->is_table)
+            else
+                lastcomma = volume->udi;
+            if (lastcomma[0] != '\0')
             {
-                if (volume->fs_type && volume->fs_type[0] == '\0')
-                {
-                    free(volume->fs_type);
-                    volume->fs_type = nullptr;
-                }
-                if (!volume->fs_type)
-                    volume->fs_type = ztd::strdup("table");
+                disp_id = fmt::format(":{:.16s}", lastcomma);
             }
-            break;
-        default:
-            disp_id = volume->udi;
-            break;
+        }
+        else if (volume->is_optical)
+            disp_id = ":optical";
+        // table type
+        if (volume->is_table)
+        {
+            if (volume->fs_type && volume->fs_type[0] == '\0')
+            {
+                free(volume->fs_type);
+                volume->fs_type = nullptr;
+            }
+            if (!volume->fs_type)
+                volume->fs_type = ztd::strdup("table");
+        }
+    }
+    else
+    {
+        disp_id = volume->udi;
     }
 
     std::string size_str;
@@ -2065,7 +2066,7 @@ vfs_volume_read_by_device(struct udev_device* udevice)
     // translate device info to VFSVolume
     volume = new VFSVolume;
     volume->devnum = device->devnum;
-    volume->device_type = VFSVolumeDeviceType::DEVICE_TYPE_BLOCK;
+    volume->device_type = VFSVolumeDeviceType::BLOCK;
     volume->device_file = ztd::strdup(device->devnode);
     volume->udi = ztd::strdup(device->device_by_id);
     volume->should_autounmount = false;
@@ -2437,7 +2438,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         // network URL
         volume = new VFSVolume;
         volume->devnum = devnum;
-        volume->device_type = VFSVolumeDeviceType::DEVICE_TYPE_NETWORK;
+        volume->device_type = VFSVolumeDeviceType::NETWORK;
         volume->should_autounmount = false;
         volume->udi = ztd::strdup(netmount->url);
         volume->label = netmount->host;
@@ -2476,7 +2477,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         // create a volume
         volume = new VFSVolume;
         volume->devnum = devnum;
-        volume->device_type = VFSVolumeDeviceType::DEVICE_TYPE_OTHER;
+        volume->device_type = VFSVolumeDeviceType::OTHER;
         volume->device_file = name;
         volume->udi = ztd::strdup(name);
         volume->should_autounmount = false;
@@ -2516,7 +2517,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
             // create a volume
             volume = new VFSVolume;
             volume->devnum = devnum;
-            volume->device_type = VFSVolumeDeviceType::DEVICE_TYPE_OTHER;
+            volume->device_type = VFSVolumeDeviceType::OTHER;
             volume->device_file = name;
             volume->udi = ztd::strdup(name);
             volume->should_autounmount = false;
@@ -2576,7 +2577,7 @@ vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* option
                 values.push_back(fmt::format("{}", vol->fs_type));
             break;
         case PtkHandlerMode::HANDLER_MODE_NET:
-            // for VFSVolumeDeviceType::DEVICE_TYPE_NETWORK
+            // for VFSVolumeDeviceType::NETWORK
             if (netmount)
             {
                 // net values
@@ -2604,7 +2605,7 @@ vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* option
             }
             else
             {
-                // for VFSVolumeDeviceType::DEVICE_TYPE_OTHER unmount or prop that has protocol
+                // for VFSVolumeDeviceType::OTHER unmount or prop that has protocol
                 // handler in mtab_fs
                 if (action != PtkHandlerMount::HANDLER_MOUNT && vol && vol->is_mounted)
                 {
@@ -2769,7 +2770,7 @@ vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* option
             command = replace_line_subs(command);
             break;
         case PtkHandlerMode::HANDLER_MODE_NET:
-            // also used for VFSVolumeDeviceType::DEVICE_TYPE_OTHER unmount and prop
+            // also used for VFSVolumeDeviceType::OTHER unmount and prop
             /*
              *       %url%     $fm_url
              *       %proto%   $fm_url_proto
@@ -2890,8 +2891,7 @@ vfs_volume_is_automount(vfs::volume vol)
         // volume is a network or ISO file that was manually mounted -
         // for autounmounting only
         return true;
-    if (!vol->is_mountable || vol->is_blank ||
-        vol->device_type != VFSVolumeDeviceType::DEVICE_TYPE_BLOCK)
+    if (!vol->is_mountable || vol->is_blank || vol->device_type != VFSVolumeDeviceType::BLOCK)
         return false;
 
     const std::string showhidelist =
@@ -3031,7 +3031,7 @@ vfs_volume_device_unmount_cmd(vfs::volume vol, bool* run_in_terminal)
     // unmounting a network ?
     switch (vol->device_type)
     {
-        case VFSVolumeDeviceType::DEVICE_TYPE_NETWORK:
+        case VFSVolumeDeviceType::NETWORK:
             // is a network - try to get unmount command
             if (split_network_url(vol->udi, &netmount) == SplitNetworkURL::VALID_NETWORK_URL)
             {
@@ -3056,7 +3056,7 @@ vfs_volume_device_unmount_cmd(vfs::volume vol, bool* run_in_terminal)
             }
             break;
 
-        case VFSVolumeDeviceType::DEVICE_TYPE_OTHER:
+        case VFSVolumeDeviceType::OTHER:
             if (mtab_fstype_is_handled_by_protocol(vol->fs_type))
             {
                 command = vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_NET,
@@ -3077,7 +3077,7 @@ vfs_volume_device_unmount_cmd(vfs::volume vol, bool* run_in_terminal)
                 }
             }
             break;
-        default:
+        case VFSVolumeDeviceType::BLOCK:
             command = vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_FS,
                                              PtkHandlerMount::HANDLER_UNMOUNT,
                                              vol,
@@ -3095,10 +3095,9 @@ vfs_volume_device_unmount_cmd(vfs::volume vol, bool* run_in_terminal)
     std::string command2;
     std::string path;
 
-    pointq =
-        bash_quote(vol->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK || !vol->is_mounted
-                       ? vol->device_file
-                       : vol->mount_point);
+    pointq = bash_quote(vol->device_type == VFSVolumeDeviceType::BLOCK || !vol->is_mounted
+                            ? vol->device_file
+                            : vol->mount_point);
 
     // udevil
     path = Glib::find_program_in_path("udevil");
@@ -3242,8 +3241,7 @@ exec_task(const char* command, bool run_in_terminal)
 
     const std::vector<std::string> file_list{"exec_task"};
 
-    PtkFileTask* ptask =
-        new PtkFileTask(VFSFileTaskType::VFS_FILE_TASK_EXEC, file_list, "/", nullptr, nullptr);
+    PtkFileTask* ptask = new PtkFileTask(VFSFileTaskType::EXEC, file_list, "/", nullptr, nullptr);
     ptask->task->exec_action = "exec_task";
     ptask->task->exec_command = command;
     ptask->task->exec_sync = false;
@@ -3256,7 +3254,7 @@ static void
 vfs_volume_exec(vfs::volume vol, const char* command)
 {
     // LOG_INFO("vfs_volume_exec {} {}", vol->device_file, command);
-    if (!(command && command[0]) || vol->device_type != VFSVolumeDeviceType::DEVICE_TYPE_BLOCK)
+    if (!(command && command[0]) || vol->device_type != VFSVolumeDeviceType::BLOCK)
         return;
 
     std::string cmd = command;
@@ -3278,7 +3276,7 @@ vfs_volume_autoexec(vfs::volume vol)
 
     // Note: audiocd is is_mountable
     if (!vol->is_mountable || global_inhibit_auto ||
-        vol->device_type != VFSVolumeDeviceType::DEVICE_TYPE_BLOCK || !vfs_volume_is_automount(vol))
+        vol->device_type != VFSVolumeDeviceType::BLOCK || !vfs_volume_is_automount(vol))
         return;
 
     if (vol->is_audiocd)
@@ -3440,7 +3438,7 @@ vfs_volume_device_added(vfs::volume volume, bool automount)
                 }
             }
 
-            call_callbacks(volume2, VFSVolumeState::VFS_VOLUME_CHANGED);
+            call_callbacks(volume2, VFSVolumeState::CHANGED);
 
             delete volume;
 
@@ -3480,7 +3478,7 @@ vfs_volume_device_added(vfs::volume volume, bool automount)
 
     // add as new volume
     volumes.push_back(volume);
-    call_callbacks(volume, VFSVolumeState::VFS_VOLUME_ADDED);
+    call_callbacks(volume, VFSVolumeState::ADDED);
     if (automount)
     {
         vfs_volume_automount(volume);
@@ -3498,8 +3496,7 @@ vfs_volume_nonblock_removed(dev_t devnum)
 {
     for (vfs::volume volume: volumes)
     {
-        if (volume->device_type != VFSVolumeDeviceType::DEVICE_TYPE_BLOCK &&
-            volume->devnum == devnum)
+        if (volume->device_type != VFSVolumeDeviceType::BLOCK && volume->devnum == devnum)
         {
             // remove volume
             LOG_INFO("special mount removed: {} ({}:{}) on {}",
@@ -3508,7 +3505,7 @@ vfs_volume_nonblock_removed(dev_t devnum)
                      MINOR(volume->devnum),
                      volume->mount_point);
             volumes.erase(std::remove(volumes.begin(), volumes.end(), volume), volumes.end());
-            call_callbacks(volume, VFSVolumeState::VFS_VOLUME_REMOVED);
+            call_callbacks(volume, VFSVolumeState::REMOVED);
             delete volume;
             ptk_location_view_clean_mount_points();
             return true;
@@ -3527,8 +3524,7 @@ vfs_volume_device_removed(struct udev_device* udevice)
 
     for (vfs::volume volume: volumes)
     {
-        if (volume->device_type == VFSVolumeDeviceType::DEVICE_TYPE_BLOCK &&
-            volume->devnum == devnum)
+        if (volume->device_type == VFSVolumeDeviceType::BLOCK && volume->devnum == devnum)
         {
             // remove volume
             // LOG_INFO("remove volume {}", volume->device_file);
@@ -3536,7 +3532,7 @@ vfs_volume_device_removed(struct udev_device* udevice)
             if (volume->is_mounted && volume->is_removable)
                 unmount_if_mounted(volume);
             volumes.erase(std::remove(volumes.begin(), volumes.end(), volume), volumes.end());
-            call_callbacks(volume, VFSVolumeState::VFS_VOLUME_REMOVED);
+            call_callbacks(volume, VFSVolumeState::REMOVED);
             if (volume->is_mounted && volume->mount_point)
                 main_window_refresh_all_tabs_matching(volume->mount_point);
             delete volume;

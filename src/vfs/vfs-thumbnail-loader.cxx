@@ -50,8 +50,8 @@ static bool on_thumbnail_idle(vfs::thumbnail_loader loader);
 
 enum VFSThumbnailSize
 {
-    LOAD_BIG_THUMBNAIL,
-    LOAD_SMALL_THUMBNAIL,
+    BIG,
+    SMALL,
 };
 
 struct VFSThumbnailRequest
@@ -175,7 +175,7 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
             if (req->n_requests[i] == 0)
                 continue;
 
-            bool load_big = (i == VFSThumbnailSize::LOAD_BIG_THUMBNAIL);
+            bool load_big = (i == VFSThumbnailSize::BIG);
             if (!req->file->is_thumbnail_loaded(load_big))
             {
                 const std::string full_path =
@@ -268,8 +268,7 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
         dir->thumbnail_loader->queue.push_back(req);
     }
 
-    ++req->n_requests[is_big ? VFSThumbnailSize::LOAD_BIG_THUMBNAIL
-                             : VFSThumbnailSize::LOAD_SMALL_THUMBNAIL];
+    ++req->n_requests[is_big ? VFSThumbnailSize::BIG : VFSThumbnailSize::SMALL];
 
     if (new_task)
         loader->task->run_thread();
@@ -288,12 +287,11 @@ vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big)
     // LOG_DEBUG("TRY TO CANCEL REQUESTS!!");
     for (vfs::thumbnail::request req: loader->queue)
     {
-        --req->n_requests[is_big ? VFSThumbnailSize::LOAD_BIG_THUMBNAIL
-                                 : VFSThumbnailSize::LOAD_SMALL_THUMBNAIL];
+        --req->n_requests[is_big ? VFSThumbnailSize::BIG : VFSThumbnailSize::SMALL];
 
         // nobody needs this
-        if (req->n_requests[VFSThumbnailSize::LOAD_BIG_THUMBNAIL] <= 0 &&
-            req->n_requests[VFSThumbnailSize::LOAD_SMALL_THUMBNAIL] <= 0)
+        if (req->n_requests[VFSThumbnailSize::BIG] <= 0 &&
+            req->n_requests[VFSThumbnailSize::SMALL] <= 0)
         {
             remove_idx.push_back(idx);
         }
