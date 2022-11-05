@@ -1815,19 +1815,10 @@ on_app_menu_hide(GtkWidget* widget, GtkWidget* app_menu)
 }
 
 static GtkWidget*
-app_menu_additem(GtkWidget* menu, const char* label, const char* stock_icon, i32 job,
-                 GtkWidget* app_item, PtkFileMenu* data)
+app_menu_additem(GtkWidget* menu, std::string_view label, i32 job, GtkWidget* app_item,
+                 PtkFileMenu* data)
 {
-    GtkWidget* item;
-    if (stock_icon)
-    {
-        if (ztd::same(stock_icon, "@check"))
-            item = gtk_check_menu_item_new_with_mnemonic(label);
-        else
-            item = gtk_menu_item_new_with_mnemonic(label);
-    }
-    else
-        item = gtk_menu_item_new_with_mnemonic(label);
+    GtkWidget* item = gtk_menu_item_new_with_mnemonic(label.data());
 
     g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(job));
     g_object_set_data(G_OBJECT(item), "data", data);
@@ -1845,7 +1836,6 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     GtkWidget* submenu;
     std::string str;
     std::string path;
-    char* icon;
     const char* type;
 
     if (!(data && data->file))
@@ -1877,27 +1867,17 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
 
     // Set Default
     newitem = app_menu_additem(app_menu,
-                               ztd::strdup("_Set As Default"),
-                               ztd::strdup("document-save"),
+                               "_Set As Default",
                                PTKFileMenuAppJob::APP_JOB_DEFAULT,
                                app_item,
                                data);
 
     // Remove
-    newitem = app_menu_additem(app_menu,
-                               ztd::strdup("_Remove"),
-                               ztd::strdup("edit-delete"),
-                               PTKFileMenuAppJob::APP_JOB_REMOVE,
-                               app_item,
-                               data);
+    newitem =
+        app_menu_additem(app_menu, "_Remove", PTKFileMenuAppJob::APP_JOB_REMOVE, app_item, data);
 
     // Add
-    newitem = app_menu_additem(app_menu,
-                               ztd::strdup("_Add..."),
-                               ztd::strdup("list-add"),
-                               PTKFileMenuAppJob::APP_JOB_ADD,
-                               app_item,
-                               data);
+    newitem = app_menu_additem(app_menu, "_Add...", PTKFileMenuAppJob::APP_JOB_ADD, app_item, data);
 
     // Separator
     gtk_container_add(GTK_CONTAINER(app_menu), gtk_separator_menu_item_new());
@@ -1909,34 +1889,25 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
         if (std::filesystem::exists(path))
         {
             str = ztd::replace(desktop.get_name(), ".desktop", "._desktop");
-            icon = ztd::strdup("Edit");
         }
         else
         {
             str = ztd::replace(desktop.get_name(), ".desktop", "._desktop");
             str = fmt::format("{} (*copy)", str);
-            icon = ztd::strdup("document-new");
         }
-        newitem = app_menu_additem(app_menu,
-                                   str.c_str(),
-                                   icon,
-                                   PTKFileMenuAppJob::APP_JOB_EDIT,
-                                   app_item,
-                                   data);
+        newitem = app_menu_additem(app_menu, str, PTKFileMenuAppJob::APP_JOB_EDIT, app_item, data);
     }
 
     // mimeapps.list
     newitem = app_menu_additem(app_menu,
-                               ztd::strdup("_mimeapps.list"),
-                               ztd::strdup("Edit"),
+                               "_mimeapps.list",
                                PTKFileMenuAppJob::APP_JOB_EDIT_LIST,
                                app_item,
                                data);
 
     // applications/
     newitem = app_menu_additem(app_menu,
-                               ztd::strdup("appli_cations/"),
-                               ztd::strdup("folder"),
+                               "appli_cations/",
                                PTKFileMenuAppJob::APP_JOB_BROWSE,
                                app_item,
                                data);
@@ -1953,27 +1924,17 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     {
         str = ztd::replace(type, "/", "-");
         str = fmt::format("{}._xml", str);
-
-        icon = ztd::strdup("Edit");
     }
     else
     {
         str = ztd::replace(type, "/", "-");
         str = fmt::format("{}._xml (*new)", str);
-
-        icon = ztd::strdup("document-new");
     }
-    newitem = app_menu_additem(app_menu,
-                               str.c_str(),
-                               icon,
-                               PTKFileMenuAppJob::APP_JOB_EDIT_TYPE,
-                               app_item,
-                               data);
+    newitem = app_menu_additem(app_menu, str, PTKFileMenuAppJob::APP_JOB_EDIT_TYPE, app_item, data);
 
     // mime/packages/
     newitem = app_menu_additem(app_menu,
-                               ztd::strdup("mime/pac_kages/"),
-                               ztd::strdup("folder"),
+                               "mime/pac_kages/",
                                PTKFileMenuAppJob::APP_JOB_BROWSE_MIME,
                                app_item,
                                data);
@@ -1995,8 +1956,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     if (!desktop.get_name().empty())
     {
         newitem = app_menu_additem(submenu,
-                                   desktop.get_name().data(),
-                                   ztd::strdup("text-x-generic"),
+                                   desktop.get_name(),
                                    PTKFileMenuAppJob::APP_JOB_VIEW,
                                    app_item,
                                    data);
@@ -2007,8 +1967,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
 
     // /usr applications/
     newitem = app_menu_additem(submenu,
-                               ztd::strdup("appli_cations/"),
-                               ztd::strdup("folder"),
+                               "appli_cations/",
                                PTKFileMenuAppJob::APP_JOB_BROWSE_SHARED,
                                app_item,
                                data);
@@ -2021,19 +1980,12 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     str = fmt::format("{}.xml", type);
     path = Glib::build_filename("/usr/share/mime", str);
     str = fmt::format("{}._xml", type);
-
-    newitem = app_menu_additem(submenu,
-                               str.c_str(),
-                               ztd::strdup("text-x-generic"),
-                               PTKFileMenuAppJob::APP_JOB_VIEW_TYPE,
-                               app_item,
-                               data);
+    newitem = app_menu_additem(submenu, str, PTKFileMenuAppJob::APP_JOB_VIEW_TYPE, app_item, data);
     gtk_widget_set_sensitive(GTK_WIDGET(newitem), std::filesystem::exists(path));
 
     // /usr *Overrides.xml
     newitem = app_menu_additem(submenu,
-                               ztd::strdup("_Overrides.xml"),
-                               ztd::strdup("Edit"),
+                               "_Overrides.xml",
                                PTKFileMenuAppJob::APP_JOB_VIEW_OVER,
                                app_item,
                                data);
@@ -2042,8 +1994,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
 
     // mime/packages/
     newitem = app_menu_additem(submenu,
-                               ztd::strdup("mime/pac_kages/"),
-                               ztd::strdup("folder"),
+                               "mime/pac_kages/",
                                PTKFileMenuAppJob::APP_JOB_BROWSE_MIME_USR,
                                app_item,
                                data);
