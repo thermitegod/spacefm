@@ -839,9 +839,9 @@ on_add_search_volumes(GtkWidget* menu, FindFile* data)
     const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
     for (vfs::volume volume: volumes)
     {
-        if (vfs_volume_is_mounted(volume))
+        if (volume->is_mounted)
         {
-            path = vfs_volume_get_mount_point(volume);
+            path = volume->get_mount_point();
             if (path && path[0] != '\0')
                 add_search_dir(data, path);
         }

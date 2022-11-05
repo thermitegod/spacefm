@@ -7138,11 +7138,10 @@ main_window_socket_command(char* argv[], std::string& reply)
             {
                 // mount/unmount vol
                 if (ztd::same(socket_property, "mount"))
-                    cmd = vfs_volume_get_mount_command(vol,
-                                                       xset_get_s(XSetName::DEV_MOUNT_OPTIONS),
-                                                       &run_in_terminal);
+                    cmd = vol->get_mount_command(xset_get_s(XSetName::DEV_MOUNT_OPTIONS),
+                                                 &run_in_terminal);
                 else
-                    cmd = vfs_volume_device_unmount_cmd(vol, &run_in_terminal);
+                    cmd = vol->device_unmount_cmd(&run_in_terminal);
             }
             else if (netmount)
             {

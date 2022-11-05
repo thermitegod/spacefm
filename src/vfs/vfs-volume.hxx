@@ -19,7 +19,6 @@
 #pragma once
 
 #include <string>
-#include <string_view>
 
 #include <vector>
 
@@ -72,6 +71,7 @@ struct netmount_t
 
 // forward declare types
 struct VFSVolume;
+struct VFSMimeType;
 
 namespace vfs
 {
@@ -80,6 +80,7 @@ namespace vfs
 
 struct VFSVolume
 {
+  public:
     VFSVolume();
     ~VFSVolume();
 
@@ -112,12 +113,42 @@ struct VFSVolume
 
     std::time_t automount_time;
     void* open_main_window;
+
+  public:
+    const char* get_disp_name() const noexcept;
+    const char* get_mount_point() const noexcept;
+    const char* get_device() const noexcept;
+    const char* get_fstype() const noexcept;
+    const char* get_icon() const noexcept;
+
+    // bool is_mounted() const noexcept;
+
+    const char* get_mount_command(const char* default_options, bool* run_in_terminal) noexcept;
+    const char* get_mount_options(const char* options) const noexcept;
+
+    void automount() noexcept;
+    void set_info() noexcept;
+
+    const char* device_mount_cmd(const char* options, bool* run_in_terminal) noexcept;
+    const char* device_unmount_cmd(bool* run_in_terminal) noexcept;
+
+    const std::string device_info() const noexcept;
+
+    // private:
+    bool is_automount() const noexcept;
+
+    void autoexec() noexcept;
+
+    void exec(const char* command) const noexcept;
+    void autounmount() noexcept;
+    void device_added(bool automount) noexcept;
+
+    void unmount_if_mounted() noexcept;
 };
 
 using VFSVolumeCallback = void (*)(vfs::volume vol, VFSVolumeState state, void* user_data);
 
 bool vfs_volume_init();
-
 void vfs_volume_finalize();
 
 const std::vector<vfs::volume> vfs_volume_get_all_volumes();
@@ -125,21 +156,8 @@ const std::vector<vfs::volume> vfs_volume_get_all_volumes();
 void vfs_volume_add_callback(VFSVolumeCallback cb, void* user_data);
 void vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data);
 
-const char* vfs_volume_get_disp_name(vfs::volume vol);
-const char* vfs_volume_get_mount_point(vfs::volume vol);
-const char* vfs_volume_get_device(vfs::volume vol);
-const char* vfs_volume_get_fstype(vfs::volume vol);
-const char* vfs_volume_get_icon(vfs::volume vol);
+////////////////
 
-bool vfs_volume_is_mounted(vfs::volume vol);
-
-char* vfs_volume_get_mount_command(vfs::volume vol, char* default_options, bool* run_in_terminal);
-char* vfs_volume_get_mount_options(vfs::volume vol, char* options);
-void vfs_volume_automount(vfs::volume vol);
-void vfs_volume_set_info(vfs::volume volume);
-char* vfs_volume_device_mount_cmd(vfs::volume vol, const char* options, bool* run_in_terminal);
-char* vfs_volume_device_unmount_cmd(vfs::volume vol, bool* run_in_terminal);
-const std::string vfs_volume_device_info(vfs::volume vol);
 char* vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* options,
                              netmount_t* netmount, bool* run_in_terminal, char** mount_point);
 
