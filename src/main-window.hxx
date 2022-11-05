@@ -58,9 +58,6 @@ struct FMMainWindow
     i32 panel_slide_s[4];
     std::map<panel_t, MainWindowPanel> panel_context;
     bool panel_change;
-    GtkWidget* panelbar;
-    GtkWidget* panel_btn[4];
-    GtkWidget* panel_image[4];
 
     panel_t curpanel;
 

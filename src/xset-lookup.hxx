@@ -160,7 +160,6 @@ enum class XSetName
     PANEL2_SHOW,
     PANEL3_SHOW,
     PANEL4_SHOW,
-    MAIN_PBAR,
     MAIN_FOCUS_PANEL,
     PANEL_PREV,
     PANEL_NEXT,

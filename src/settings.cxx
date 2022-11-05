@@ -6939,10 +6939,6 @@ xset_defaults()
     set = xset_set(XSetName::PANEL4_SHOW, XSetVar::MENU_LABEL, "Panel _4");
     set->menu_style = XSetMenu::CHECK;
 
-    set = xset_set(XSetName::MAIN_PBAR, XSetVar::MENU_LABEL, "Panel _Bar");
-    set->menu_style = XSetMenu::CHECK;
-    set->b = XSetB::XSET_B_TRUE;
-
     set = xset_set(XSetName::MAIN_FOCUS_PANEL, XSetVar::MENU_LABEL, "F_ocus");
     set->menu_style = XSetMenu::SUBMENU;
     xset_set_var(set,

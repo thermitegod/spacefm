@@ -123,7 +123,6 @@ static void on_task_popup_errset(GtkMenuItem* item, FMMainWindow* main_window, c
 static void show_task_dialog(GtkWidget* widget, GtkWidget* view);
 static void on_about_activate(GtkMenuItem* menuitem, void* user_data);
 static void update_window_title(GtkMenuItem* item, FMMainWindow* main_window);
-static void on_toggle_panelbar(GtkWidget* widget, FMMainWindow* main_window);
 static void on_fullscreen_activate(GtkMenuItem* menuitem, FMMainWindow* main_window);
 static bool delayed_focus(GtkWidget* widget);
 static bool delayed_focus_file_browser(PtkFileBrowser* file_browser);
@@ -915,23 +914,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
         }
     }
 
-    // show panelbar
-    if (!!gtk_widget_get_visible(main_window->panelbar) !=
-        !!(!main_window->fullscreen && xset_get_b(XSetName::MAIN_PBAR)))
-    {
-        if (xset_get_b(XSetName::MAIN_PBAR))
-            gtk_widget_show(GTK_WIDGET(main_window->panelbar));
-        else
-            gtk_widget_hide(GTK_WIDGET(main_window->panelbar));
-    }
-
-    // all panels hidden?
-    for (panel_t p: PANELS)
-    {
-        if (xset_get_b_panel(p, XSetPanel::SHOW))
-            break;
-    }
-
+    // which panels to show
     for (panel_t p: PANELS)
     {
         show[p] = xset_get_b_panel(p, XSetPanel::SHOW);
@@ -1142,27 +1125,6 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                                   0,
                                   true);
             gtk_widget_show(GTK_WIDGET(main_window->panel[p - 1]));
-            if (!gtk_toggle_tool_button_get_active(
-                    GTK_TOGGLE_TOOL_BUTTON(main_window->panel_btn[p - 1])))
-            {
-                g_signal_handlers_block_matched(main_window->panel_btn[p - 1],
-                                                G_SIGNAL_MATCH_FUNC,
-                                                0,
-                                                0,
-                                                nullptr,
-                                                (void*)on_toggle_panelbar,
-                                                nullptr);
-                gtk_toggle_tool_button_set_active(
-                    GTK_TOGGLE_TOOL_BUTTON(main_window->panel_btn[p - 1]),
-                    true);
-                g_signal_handlers_unblock_matched(main_window->panel_btn[p - 1],
-                                                  G_SIGNAL_MATCH_FUNC,
-                                                  0,
-                                                  0,
-                                                  nullptr,
-                                                  (void*)on_toggle_panelbar,
-                                                  nullptr);
-            }
         }
         else
         {
@@ -1180,27 +1142,6 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                                   0,
                                   false);
             gtk_widget_hide(GTK_WIDGET(main_window->panel[p - 1]));
-            if (gtk_toggle_tool_button_get_active(
-                    GTK_TOGGLE_TOOL_BUTTON(main_window->panel_btn[p - 1])))
-            {
-                g_signal_handlers_block_matched(main_window->panel_btn[p - 1],
-                                                G_SIGNAL_MATCH_FUNC,
-                                                0,
-                                                0,
-                                                nullptr,
-                                                (void*)on_toggle_panelbar,
-                                                nullptr);
-                gtk_toggle_tool_button_set_active(
-                    GTK_TOGGLE_TOOL_BUTTON(main_window->panel_btn[p - 1]),
-                    false);
-                g_signal_handlers_unblock_matched(main_window->panel_btn[p - 1],
-                                                  G_SIGNAL_MATCH_FUNC,
-                                                  0,
-                                                  0,
-                                                  nullptr,
-                                                  (void*)on_toggle_panelbar,
-                                                  nullptr);
-            }
         }
     }
     if (show[1] || show[2])
@@ -1252,23 +1193,6 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
             }
         }
     }
-}
-
-static void
-on_toggle_panelbar(GtkWidget* widget, FMMainWindow* main_window)
-{
-    // LOG_INFO("on_toggle_panelbar");
-    for (i32 i = 0; i < 4; ++i)
-    {
-        if (widget == main_window->panel_btn[i])
-        {
-            xset_set_b_panel(i + 1,
-                             XSetPanel::SHOW,
-                             gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(widget)));
-            break;
-        }
-    }
-    show_panels_all_windows(nullptr, main_window);
 }
 
 static bool
@@ -1394,8 +1318,6 @@ rebuild_menus(FMMainWindow* main_window)
     set = xset_set_cb(XSetName::PANEL4_SHOW, (GFunc)show_panels_all_windows, main_window);
     set->disable = (main_window->curpanel == 4 && vis_count == 1);
 
-    xset_set_cb(XSetName::MAIN_PBAR, (GFunc)show_panels_all_windows, main_window);
-
     set = xset_set_cb(XSetName::PANEL_PREV, (GFunc)focus_panel, main_window);
     xset_set_ob1_int(set, "panel_num", panel_control_code_prev);
     set->disable = (vis_count == 1);
@@ -1418,8 +1340,7 @@ rebuild_menus(FMMainWindow* main_window)
     xset_set_ob1_int(set, "panel_num", panel_4);
     set->disable = (main_window->curpanel == 4);
 
-    menu_elements =
-        ztd::strdup("panel1_show panel2_show panel3_show panel4_show main_pbar main_focus_panel");
+    menu_elements = ztd::strdup("panel1_show panel2_show panel3_show panel4_show main_focus_panel");
     char* menu_elements2 = ztd::strdup(
         "separator main_tasks main_auto separator main_title main_icon main_full separator "
         "main_design_mode main_prefs");
@@ -1513,8 +1434,6 @@ on_main_window_realize(GtkWidget* widget, FMMainWindow* main_window)
 static void
 fm_main_window_init(FMMainWindow* main_window)
 {
-    xset_t set;
-
     main_window->configure_evt_timer = 0;
     main_window->fullscreen = false;
     main_window->opened_maximized = app_settings.get_maximized();
@@ -1549,47 +1468,6 @@ fm_main_window_init(FMMainWindow* main_window)
     GtkWidget* menu_hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_box_pack_start(GTK_BOX(menu_hbox), main_window->menu_bar, true, true, 0);
 
-    // panelbar
-    main_window->panelbar = gtk_toolbar_new();
-    GtkStyleContext* style_ctx = gtk_widget_get_style_context(main_window->panelbar);
-    gtk_style_context_add_class(style_ctx, GTK_STYLE_CLASS_MENUBAR);
-    gtk_style_context_remove_class(style_ctx, GTK_STYLE_CLASS_TOOLBAR);
-    gtk_toolbar_set_show_arrow(GTK_TOOLBAR(main_window->panelbar), false);
-    gtk_toolbar_set_style(GTK_TOOLBAR(main_window->panelbar), GtkToolbarStyle::GTK_TOOLBAR_ICONS);
-    gtk_toolbar_set_icon_size(GTK_TOOLBAR(main_window->panelbar), GtkIconSize::GTK_ICON_SIZE_MENU);
-    // set pbar background to menu bar background
-    // gtk_widget_modify_bg(main_window->panelbar, GtkStateType::GTK_STATE_NORMAL,
-    //                      &GTK_WIDGET(main_window)->style->bg[GtkStateType::GTK_STATE_NORMAL]);
-
-    for (i32 i = 0; i < 4; ++i)
-    {
-        main_window->panel_btn[i] = GTK_WIDGET(gtk_toggle_tool_button_new());
-        std::string icon_name = fmt::format("Show Panel {}", i + 1);
-        gtk_tool_button_set_label(GTK_TOOL_BUTTON(main_window->panel_btn[i]), icon_name.c_str());
-        set = xset_get_panel(i + 1, XSetPanel::ICON_STATUS);
-        if (set->icon && set->icon[0] != '\0')
-            icon_name = set->icon;
-        else
-            icon_name = "gtk-yes";
-        main_window->panel_image[i] =
-            xset_get_image(icon_name.c_str(), GtkIconSize::GTK_ICON_SIZE_MENU);
-        gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(main_window->panel_btn[i]),
-                                        main_window->panel_image[i]);
-        gtk_toolbar_insert(GTK_TOOLBAR(main_window->panelbar),
-                           GTK_TOOL_ITEM(main_window->panel_btn[i]),
-                           -1);
-        g_signal_connect(main_window->panel_btn[i],
-                         "toggled",
-                         G_CALLBACK(on_toggle_panelbar),
-                         main_window);
-        if (i == 1)
-        {
-            GtkToolItem* sep = gtk_separator_tool_item_new();
-            gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(sep), true);
-            gtk_toolbar_insert(GTK_TOOLBAR(main_window->panelbar), sep, -1);
-        }
-    }
-    gtk_box_pack_start(GTK_BOX(menu_hbox), main_window->panelbar, true, true, 0);
     gtk_box_pack_start(GTK_BOX(main_window->main_vbox), menu_hbox, false, false, 0);
 
     main_window->file_menu_item = gtk_menu_item_new_with_mnemonic("_File");
@@ -2744,22 +2622,12 @@ delayed_focus_file_browser(PtkFileBrowser* file_browser)
 void
 set_panel_focus(FMMainWindow* main_window, PtkFileBrowser* file_browser)
 {
-    // i32 pages;
-    // GtkWidget* notebook;
-
     if (!file_browser && !main_window)
         return;
 
     FMMainWindow* mw = main_window;
     if (!mw)
         mw = FM_MAIN_WINDOW(file_browser->main_window);
-
-    for (panel_t p: PANELS)
-    {
-        // notebook = mw->panel[p - 1];
-        // pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
-        gtk_widget_set_sensitive(mw->panel_image[p - 1], p == mw->curpanel);
-    }
 
     update_window_title(nullptr, mw);
     if (event_handler.pnl_focus->s || event_handler.pnl_focus->ob2_data)
@@ -2787,7 +2655,6 @@ on_fullscreen_activate(GtkMenuItem* menuitem, FMMainWindow* main_window)
             ptk_file_browser_save_column_widths(GTK_TREE_VIEW(file_browser->folder_view),
                                                 file_browser);
         gtk_widget_hide(main_window->menu_bar);
-        gtk_widget_hide(main_window->panelbar);
         gtk_window_fullscreen(GTK_WINDOW(main_window));
         main_window->fullscreen = true;
     }
@@ -2796,8 +2663,6 @@ on_fullscreen_activate(GtkMenuItem* menuitem, FMMainWindow* main_window)
         main_window->fullscreen = false;
         gtk_window_unfullscreen(GTK_WINDOW(main_window));
         gtk_widget_show(main_window->menu_bar);
-        if (xset_get_b(XSetName::MAIN_PBAR))
-            gtk_widget_show(main_window->panelbar);
 
         if (!main_window->maximized)
             show_panels(nullptr, main_window); // restore columns
@@ -3449,8 +3314,6 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, xset_t set)
             on_preference_activate(nullptr, main_window);
         else if (set->xset_name == XSetName::MAIN_DESIGN_MODE)
             main_design_mode(nullptr, main_window);
-        else if (set->xset_name == XSetName::MAIN_PBAR)
-            show_panels_all_windows(nullptr, main_window);
         else if (set->xset_name == XSetName::MAIN_ICON)
             on_main_icon();
         else if (set->xset_name == XSetName::MAIN_TITLE)

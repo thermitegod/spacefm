@@ -143,7 +143,6 @@ static const std::unordered_map<XSetName, std::string_view> xset_name_map{
     {XSetName::PANEL2_SHOW,                 "panel2_show"sv},
     {XSetName::PANEL3_SHOW,                 "panel3_show"sv},
     {XSetName::PANEL4_SHOW,                 "panel4_show"sv},
-    {XSetName::MAIN_PBAR,                   "main_pbar"sv},
     {XSetName::MAIN_FOCUS_PANEL,            "main_focus_panel"sv},
     {XSetName::PANEL_PREV,                  "panel_prev"sv},
     {XSetName::PANEL_NEXT,                  "panel_next"sv},
