@@ -24,8 +24,6 @@
 
 #include <glib.h>
 
-#include <toml.hpp> // toml11
-
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 

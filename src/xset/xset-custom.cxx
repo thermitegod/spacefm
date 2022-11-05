@@ -20,8 +20,6 @@
 
 #include <gtk/gtk.h>
 
-#include <toml.hpp> // toml11
-
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -34,6 +32,7 @@
 
 #include "settings/config-save.hxx"
 #include "settings/disk-format.hxx"
+#include "settings/plugins-save.hxx"
 
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-file-task.hxx"
@@ -421,20 +420,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
             }
         }
 
-        // Plugin TOML
-        const toml::value toml_data = toml::value{
-            {TOML_SECTION_VERSION,
-             toml::value{
-                 {TOML_KEY_VERSION, CONFIG_FILE_VERSION},
-             }},
-
-            {PLUGIN_FILE_SECTION_PLUGIN,
-             toml::value{
-                 xsetpak,
-             }},
-        };
-
-        write_file(path, toml_data);
+        save_user_plugin(path, xsetpak);
     }
     else
     {
