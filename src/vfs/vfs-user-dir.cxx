@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <memory>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -53,106 +55,106 @@ class VFSDirXDG
     std::string config_dir{Glib::build_filename(user_config, PACKAGE_NAME)};
 };
 
-VFSDirXDG vfs_dir_xdg = VFSDirXDG();
+const std::unique_ptr user_dirs = std::make_unique<VFSDirXDG>();
 
 const std::string&
 vfs_user_desktop_dir() noexcept
 {
-    return vfs_dir_xdg.user_desktop;
+    return user_dirs->user_desktop;
 }
 
 const std::string&
 vfs_user_documents_dir() noexcept
 {
-    return vfs_dir_xdg.user_documents;
+    return user_dirs->user_documents;
 }
 
 const std::string&
 vfs_user_download_dir() noexcept
 {
-    return vfs_dir_xdg.user_download;
+    return user_dirs->user_download;
 }
 
 const std::string&
 vfs_user_music_dir() noexcept
 {
-    return vfs_dir_xdg.user_music;
+    return user_dirs->user_music;
 }
 
 const std::string&
 vfs_user_pictures_dir() noexcept
 {
-    return vfs_dir_xdg.user_pictures;
+    return user_dirs->user_pictures;
 }
 
 const std::string&
 vfs_user_public_share_dir() noexcept
 {
-    return vfs_dir_xdg.user_share;
+    return user_dirs->user_share;
 }
 
 const std::string&
 vfs_user_template_dir() noexcept
 {
-    return vfs_dir_xdg.user_template;
+    return user_dirs->user_template;
 }
 
 const std::string&
 vfs_user_videos_dir() noexcept
 {
-    return vfs_dir_xdg.user_videos;
+    return user_dirs->user_videos;
 }
 
 const std::string&
 vfs_user_home_dir() noexcept
 {
-    return vfs_dir_xdg.user_home;
+    return user_dirs->user_home;
 }
 
 const std::string&
 vfs_user_cache_dir() noexcept
 {
-    return vfs_dir_xdg.user_cache;
+    return user_dirs->user_cache;
 }
 
 const std::string&
 vfs_user_data_dir() noexcept
 {
-    return vfs_dir_xdg.user_data;
+    return user_dirs->user_data;
 }
 
 const std::string&
 vfs_user_config_dir() noexcept
 {
-    return vfs_dir_xdg.user_config;
+    return user_dirs->user_config;
 }
 
 const std::string&
 vfs_user_runtime_dir() noexcept
 {
-    return vfs_dir_xdg.user_runtime;
+    return user_dirs->user_runtime;
 }
 
 const std::vector<std::string>&
 vfs_system_data_dir() noexcept
 {
-    return vfs_dir_xdg.sys_data;
+    return user_dirs->sys_data;
 }
 
 const std::string&
 vfs_current_dir() noexcept
 {
-    return vfs_dir_xdg.current_dir;
+    return user_dirs->current_dir;
 }
 
 void
 vfs_user_set_config_dir(std::string_view config_dir) noexcept
 {
-    vfs_dir_xdg.config_dir = config_dir.data();
+    user_dirs->config_dir = config_dir.data();
 }
 
 const std::string&
 vfs_user_get_config_dir() noexcept
 {
-    return vfs_dir_xdg.config_dir;
+    return user_dirs->config_dir;
 }
