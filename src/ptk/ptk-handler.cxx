@@ -2458,10 +2458,8 @@ validate_archive_handler(HandlerData* hnd)
         /* It has - making sure all substitution characters are in
          * place - not mandatory to only have one of the particular
          * type */
-        if ((!g_strstr_len(handler_compress, -1, "%o") &&
-             !g_strstr_len(handler_compress, -1, "%O")) ||
-            (!g_strstr_len(handler_compress, -1, "%n") &&
-             !g_strstr_len(handler_compress, -1, "%N")))
+        if ((!ztd::contains(handler_compress, "%o") && !ztd::contains(handler_compress, "%O")) ||
+            (!ztd::contains(handler_compress, "%n") && !ztd::contains(handler_compress, "%N")))
         {
             xset_msg_dialog(GTK_WIDGET(hnd->dlg),
                             GtkMessageType::GTK_MESSAGE_WARNING,
