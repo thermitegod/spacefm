@@ -88,6 +88,7 @@ struct PtkFileBrowser
     i32 max_thumbnail;
     i32 n_sel_files;
     off_t sel_size;
+    off_t sel_disk_size;
     u32 sel_change_idle;
 
     // path bar auto seek
@@ -343,7 +344,7 @@ const std::string ptk_file_browser_get_cwd(PtkFileBrowser* file_browser);
 u32 ptk_file_browser_get_n_all_files(PtkFileBrowser* file_browser);
 u32 ptk_file_browser_get_n_visible_files(PtkFileBrowser* file_browser);
 
-u32 ptk_file_browser_get_n_sel(PtkFileBrowser* file_browser, u64* sel_size);
+u32 ptk_file_browser_get_n_sel(PtkFileBrowser* file_browser, u64* sel_size, u64* sel_disk_size);
 
 void ptk_file_browser_go_back(GtkWidget* item, PtkFileBrowser* file_browser);
 

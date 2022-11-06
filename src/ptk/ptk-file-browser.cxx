@@ -2916,6 +2916,7 @@ on_folder_view_item_sel_change_idle(PtkFileBrowser* file_browser)
 
     file_browser->n_sel_files = 0;
     file_browser->sel_size = 0;
+    file_browser->sel_disk_size = 0;
 
     GtkTreeModel* model;
     GList* sel_files = folder_view_get_selected_items(file_browser, &model);
@@ -2931,6 +2932,7 @@ on_folder_view_item_sel_change_idle(PtkFileBrowser* file_browser)
             if (file)
             {
                 file_browser->sel_size += file->get_size();
+                file_browser->sel_disk_size += file->get_disk_size();
                 vfs_file_info_unref(file);
             }
             ++file_browser->n_sel_files;
@@ -5262,10 +5264,12 @@ ptk_file_browser_view_as_list(PtkFileBrowser* file_browser)
 }
 
 u32
-ptk_file_browser_get_n_sel(PtkFileBrowser* file_browser, u64* sel_size)
+ptk_file_browser_get_n_sel(PtkFileBrowser* file_browser, u64* sel_size, u64* sel_disk_size)
 {
     if (sel_size)
         *sel_size = file_browser->sel_size;
+    if (sel_disk_size)
+        *sel_disk_size = file_browser->sel_disk_size;
     return file_browser->n_sel_files;
 }
 

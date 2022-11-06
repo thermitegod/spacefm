@@ -2854,7 +2854,6 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
     if (cwd.empty())
         return;
 
-    std::string size_str;
     std::string statusbar_txt;
 
     if (std::filesystem::exists(cwd))
@@ -2880,9 +2879,10 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
     u32 num_sel;
     u32 num_vis;
     u64 total_size;
+    u64 total_on_disk_size;
 
     // note: total size will not include content changes since last selection change
-    num_sel = ptk_file_browser_get_n_sel(file_browser, &total_size);
+    num_sel = ptk_file_browser_get_n_sel(file_browser, &total_size, &total_on_disk_size);
     num_vis = ptk_file_browser_get_n_visible_files(file_browser);
 
     if (num_sel > 0)
@@ -2892,9 +2892,11 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
         if (sel_files.empty())
             return;
 
-        size_str = vfs_file_size_format(total_size);
+        const std::string file_size = vfs_file_size_format(total_size);
+        const std::string disk_size = vfs_file_size_format(total_on_disk_size);
 
-        statusbar_txt.append(fmt::format("{} / {} ({})", num_sel, num_vis, size_str));
+        statusbar_txt.append(
+            fmt::format("{} / {} ({} / {})", num_sel, num_vis, file_size, disk_size));
 
         if (num_sel == 1)
         // display file name or symlink info in status bar if one file selected
