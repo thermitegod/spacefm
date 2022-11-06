@@ -25,6 +25,8 @@
 #include <array>
 #include <vector>
 
+#include <ranges>
+
 #include <iostream>
 #include <fstream>
 
@@ -1105,60 +1107,35 @@ ptk_handler_values_in_list(std::string_view list, const std::vector<std::string>
 }
 
 static bool
-value_in_list(const char* list, const char* value)
+value_in_list(std::string_view list, std::string_view value)
 { // this function must be FAST - is run multiple times on menu popup
-    char* ptr;
-    char* delim;
-    char ch;
-
-    // value in space-separated list with wildcards?
-    if (value && (ptr = (char*)list) && ptr[0])
+    // value in space-separated list with wildcards
+    for (std::string_view key : ztd::split(list, " "))
     {
-        while (true)
-        {
-            while (ptr[0] == ' ')
-                ptr++;
-            if (!ptr[0])
-                break;
-            delim = ptr;
-            while (delim[0] != ' ' && delim[0])
-                delim++;
-            ch = delim[0];
-            delim[0] = '\0'; // set temporary end of string
-            if (fnmatch(ptr, value, 0) == 0)
-            {
-                delim[0] = ch; // restore
-                return true;
-            }
-            delim[0] = ch; // restore
-            if (ch == '\0')
-                break; // is end of string
-            ptr = delim + 1;
-        }
+        if (fnmatch(key.data(), value.data(), 0) == 0)
+            return true;
     }
     return false;
 }
 
-GSList*
+const std::vector<xset_t>
 ptk_handler_file_has_handlers(i32 mode, i32 cmd, std::string_view path, vfs::mime_type mime_type,
                               bool test_cmd, bool multiple, bool enabled_only)
 { /* this function must be FAST - is run multiple times on menu popup
    * command must be non-empty if test_cmd */
-    const char* type;
-    char* delim;
-    char* ptr;
-    char* under_path;
-    GSList* handlers = nullptr;
+
+    std::vector<xset_t> xset_handlers;
 
     if (path.empty() && !mime_type)
-        return nullptr;
+        return xset_handlers;
+
     // Fetching and validating MIME type if provided
+    std::string type;
     if (mime_type)
-        type = (char*)vfs_mime_type_get_type(mime_type);
-    else
-        type = nullptr;
+        type = vfs_mime_type_get_type(mime_type);
 
     // replace spaces in path with underscores for matching
+    std::string under_path;
     if (ztd::contains(path, " "))
     {
         const std::string cleaned = ztd::replace(path, " ", "_");
@@ -1166,63 +1143,60 @@ ptk_handler_file_has_handlers(i32 mode, i32 cmd, std::string_view path, vfs::mim
     }
     else
     {
-        under_path = (char*)path.data();
+        under_path = path;
     }
 
     // parsing handlers space-separated list
-    if ((ptr = xset_get_s(handler_conf_xsets.at(mode))))
+    const auto handlers = ztd::split(xset_get_s(handler_conf_xsets.at(mode)), " ");
+    if (handlers.empty())
+        return xset_handlers;
+
+    for (std::string_view handler : handlers)
     {
-        while (ptr[0])
+        xset_t handler_set = xset_is(handler);
+        if (!handler_set)
+            continue;
+
+        if (!(!enabled_only || handler_set->b))
+            continue;
+
+        // handler supports type or path ?
+        if (value_in_list(handler_set->s, type) || value_in_list(handler_set->x, under_path))
         {
-            while (ptr[0] == ' ')
-                ptr++;
-            if (!ptr[0])
-                break;
-            if ((delim = strchr(ptr, ' ')))
-                delim[0] = '\0'; // set temporary end of string
-
-            // Fetching handler
-            xset_t handler_set = xset_is(ptr);
-            if (delim)
-                delim[0] = ' '; // remove temporary end of string
-
-            // handler supports type or path ?
-            if (handler_set && (!enabled_only || handler_set->b == XSetB::XSET_B_TRUE) &&
-                (value_in_list(handler_set->s, type) || value_in_list(handler_set->x, under_path)))
+            // test command
+            if (test_cmd)
             {
-                // test command
-                if (test_cmd)
+                std::string command;
+                std::string error_message;
+                bool error = ptk_handler_load_script(mode,
+                                                     cmd,
+                                                     handler_set,
+                                                     nullptr,
+                                                     command,
+                                                     error_message);
+                if (error)
                 {
-                    std::string command;
-                    std::string error_message;
-                    bool error = ptk_handler_load_script(mode,
-                                                         cmd,
-                                                         handler_set,
-                                                         nullptr,
-                                                         command,
-                                                         error_message);
-                    if (error)
-                        LOG_ERROR(error_message);
-                    else if (!ptk_handler_command_is_empty(command))
-                    {
-                        handlers = g_slist_prepend(handlers, handler_set);
-                        if (!multiple)
-                            break;
-                    }
+                    LOG_ERROR(error_message);
                 }
-                else
+                else if (!ptk_handler_command_is_empty(command))
                 {
-                    handlers = g_slist_prepend(handlers, handler_set);
+                    xset_handlers.emplace_back(handler_set);
                     if (!multiple)
                         break;
                 }
             }
-            if (!delim)
-                break;
-            ptr = delim + 1;
+            else
+            {
+                xset_handlers.emplace_back(handler_set);
+                if (!multiple)
+                    break;
+            }
         }
     }
-    return g_slist_reverse(handlers);
+
+    std::ranges::reverse(xset_handlers);
+
+    return xset_handlers;
 }
 
 static void

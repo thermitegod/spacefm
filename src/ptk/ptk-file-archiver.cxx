@@ -975,7 +975,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     std::string full_quote;
     i32 res;
     struct stat statbuf;
-    GSList* handlers_slist = nullptr;
 
     // Making sure files to act on have been passed
     if (sel_files.empty() || job == PtkHandlerArchive::HANDLER_COMPRESS)
@@ -1005,18 +1004,18 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
             const std::string full_path = Glib::build_filename(cwd.data(), file->get_name());
 
             // Checking for enabled handler with non-empty command
-            handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
-                                                           archive_operation,
-                                                           full_path,
-                                                           mime_type,
-                                                           true,
-                                                           false,
-                                                           true);
+            const std::vector<xset_t> handlers =
+                ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
+                                              archive_operation,
+                                              full_path,
+                                              mime_type,
+                                              true,
+                                              false,
+                                              true);
             vfs_mime_type_unref(mime_type);
-            if (handlers_slist)
+            if (!handlers.empty())
             {
                 archive_found = true;
-                g_slist_free(handlers_slist);
                 break;
             }
         }
@@ -1176,20 +1175,16 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         const std::string full_path = Glib::build_filename(cwd.data(), file->get_name());
 
         // Get handler with non-empty command
-        handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
-                                                       archive_operation,
-                                                       full_path,
-                                                       mime_type,
-                                                       true,
-                                                       false,
-                                                       true);
-        if (handlers_slist)
-        {
-            handler_xset = XSET(handlers_slist->data);
-            g_slist_free(handlers_slist);
-        }
-        else
-            handler_xset = nullptr;
+        const std::vector<xset_t> handlers =
+            ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
+                                          archive_operation,
+                                          full_path,
+                                          mime_type,
+                                          true,
+                                          false,
+                                          true);
+        if (!handlers.empty())
+            handler_xset = handlers.front();
         vfs_mime_type_unref(mime_type);
 
         // Continuing to next file if a handler hasnt been found

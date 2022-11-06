@@ -107,25 +107,19 @@ open_archives_with_handler(ParentInfo* parent, const std::vector<vfs::file_info>
 
     // type or pathname has archive handler? - do not test command non-empty
     // here because only applies to first file
-    GSList* handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
-                                                           cmd,
-                                                           full_path,
-                                                           mime_type,
-                                                           false,
-                                                           false,
-                                                           true);
-    if (handlers_slist)
-    {
-        g_slist_free(handlers_slist);
-        ptk_file_archiver_extract(parent->file_browser,
-                                  sel_files,
-                                  parent->cwd.data(),
-                                  dest_dir,
-                                  cmd,
-                                  true);
-        return true; // all files handled
-    }
-    return false; // do not handle these files
+    const std::vector<xset_t> handlers =
+        ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
+                                      cmd,
+                                      full_path,
+                                      mime_type,
+                                      false,
+                                      false,
+                                      true);
+    if (handlers.empty())
+        return false; // do not handle these files
+
+    ptk_file_archiver_extract(parent->file_browser, sel_files, parent->cwd, dest_dir, cmd, true);
+    return true; // all files handled
 }
 
 static void
@@ -388,7 +382,7 @@ ptk_open_files_with_app(std::string_view cwd, const std::vector<vfs::file_info>&
             }
 
             // if has file handler, set alloc_desktop = ###XSETNAME
-            GSList* handlers_slist =
+            const std::vector<xset_t> handlers =
                 ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_FILE,
                                               PtkHandlerMount::HANDLER_MOUNT,
                                               full_path,
@@ -396,10 +390,9 @@ ptk_open_files_with_app(std::string_view cwd, const std::vector<vfs::file_info>&
                                               true,
                                               false,
                                               true);
-            if (handlers_slist)
+            if (!handlers.empty())
             {
-                xset_t handler_set = XSET(handlers_slist->data);
-                g_slist_free(handlers_slist);
+                const xset_t handler_set = handlers.front();
                 alloc_desktop = fmt::format("###{}", handler_set->name);
             }
 

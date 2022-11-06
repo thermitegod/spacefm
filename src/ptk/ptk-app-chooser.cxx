@@ -492,14 +492,14 @@ void
 ptk_app_chooser_has_handler_warn(GtkWidget* parent, vfs::mime_type mime_type)
 {
     // is file handler set for this type?
-    GSList* handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_FILE,
-                                                           PtkHandlerMount::HANDLER_MOUNT,
-                                                           "",
-                                                           mime_type,
-                                                           false,
-                                                           false,
-                                                           true);
-    if (handlers_slist)
+    std::vector<xset_t> handlers = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_FILE,
+                                                                 PtkHandlerMount::HANDLER_MOUNT,
+                                                                 "",
+                                                                 mime_type,
+                                                                 false,
+                                                                 false,
+                                                                 true);
+    if (!handlers.empty())
     {
         const std::string msg = fmt::format(
             "Note:  MIME type '{}' is currently set to open with the '{}' file handler, rather "
@@ -507,25 +507,24 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, vfs::mime_type mime_type)
             "handler in Open|File Handlers for this type to be opened with your associated "
             "application by default.",
             vfs_mime_type_get_type(mime_type),
-            (XSET(handlers_slist->data))->menu_label);
+            handlers.front()->menu_label);
         xset_msg_dialog(parent,
                         GtkMessageType::GTK_MESSAGE_INFO,
                         "MIME Type Has Handler",
                         GtkButtonsType::GTK_BUTTONS_OK,
                         msg);
-        g_slist_free(handlers_slist);
     }
     else if (!xset_get_b(XSetName::ARC_DEF_OPEN))
     {
         // is archive handler set for this type?
-        handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
-                                                       PtkHandlerArchive::HANDLER_EXTRACT,
-                                                       "",
-                                                       mime_type,
-                                                       false,
-                                                       false,
-                                                       true);
-        if (handlers_slist)
+        handlers = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
+                                                 PtkHandlerArchive::HANDLER_EXTRACT,
+                                                 "",
+                                                 mime_type,
+                                                 false,
+                                                 false,
+                                                 true);
+        if (!handlers.empty())
         {
             const std::string msg = fmt::format(
                 "Note:  MIME type '{}' is currently set to open with the '{}' archive handler, "
@@ -534,13 +533,12 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, vfs::mime_type mime_type)
                 "global option Open|Archive Defaults|Open With App, for this type to be opened "
                 "with your associated application by default.",
                 vfs_mime_type_get_type(mime_type),
-                (XSET(handlers_slist->data))->menu_label);
+                handlers.front()->menu_label);
             xset_msg_dialog(parent,
                             GtkMessageType::GTK_MESSAGE_INFO,
                             "MIME Type Has Handler",
                             GtkButtonsType::GTK_BUTTONS_OK,
                             msg);
-            g_slist_free(handlers_slist);
         }
     }
 }

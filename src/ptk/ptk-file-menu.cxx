@@ -656,7 +656,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     xset_t set;
     xset_t set2;
     GtkMenuItem* item;
-    GSList* handlers_slist;
 
     if (!browser)
         return nullptr;
@@ -776,20 +775,20 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         }
 
         // Prepare archive commands
+        std::vector<xset_t> handlers;
+
         xset_t set_arc_extract = nullptr;
         xset_t set_arc_extractto;
         xset_t set_arc_list;
-        handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
-                                                       PtkHandlerArchive::HANDLER_EXTRACT,
-                                                       file_path,
-                                                       mime_type,
-                                                       false,
-                                                       false,
-                                                       false);
-        if (handlers_slist)
+        handlers = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
+                                                 PtkHandlerArchive::HANDLER_EXTRACT,
+                                                 file_path,
+                                                 mime_type,
+                                                 false,
+                                                 false,
+                                                 false);
+        if (!handlers.empty())
         {
-            g_slist_free(handlers_slist);
-
             set_arc_extract =
                 xset_set_cb(XSetName::ARC_EXTRACT, (GFunc)on_popup_extract_here_activate, data);
             xset_set_ob1(set_arc_extract, "set", set_arc_extract);
@@ -865,21 +864,20 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         }
 
         // file handlers
-        handlers_slist = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_FILE,
-                                                       PtkHandlerMount::HANDLER_MOUNT,
-                                                       file_path,
-                                                       mime_type,
-                                                       false,
-                                                       true,
-                                                       false);
+        handlers = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_FILE,
+                                                 PtkHandlerMount::HANDLER_MOUNT,
+                                                 file_path,
+                                                 mime_type,
+                                                 false,
+                                                 true,
+                                                 false);
 
         GtkWidget* app_menu_item;
-        if (handlers_slist)
+        if (!handlers.empty())
         {
-            for (GSList* sl = handlers_slist; sl; sl = sl->next)
+            for (const xset_t handler_set : handlers)
             {
-                set = XSET(sl->data);
-                app_menu_item = gtk_menu_item_new_with_label(set->menu_label);
+                app_menu_item = gtk_menu_item_new_with_label(handler_set->menu_label);
                 gtk_container_add(GTK_CONTAINER(submenu), app_menu_item);
                 g_signal_connect(G_OBJECT(app_menu_item),
                                  "activate",
@@ -894,9 +892,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
                                  "button-release-event",
                                  G_CALLBACK(on_app_button_press),
                                  (void*)data);
-                g_object_set_data(G_OBJECT(app_menu_item), "handler_set", set);
+                g_object_set_data(G_OBJECT(app_menu_item), "handler_set", handler_set);
             }
-            g_slist_free(handlers_slist);
             // add a separator
             item = GTK_MENU_ITEM(gtk_separator_menu_item_new());
             gtk_widget_show(GTK_WIDGET(item));
@@ -919,7 +916,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
             {
 #if 0
                 // TODO - FIXME
-                if ((app - apps) == 1 && !handlers_slist)
+                if ((app - apps) == 1 && handlers.empty())
                 {
                     // Add a separator after default app if no handlers listed
                     item = GTK_MENU_ITEM(gtk_separator_menu_item_new());
