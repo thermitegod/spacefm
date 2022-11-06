@@ -129,7 +129,7 @@ init_daemon()
 }
 
 static void
-open_in_tab(FMMainWindow** main_window, const char* real_path)
+open_in_tab(MainWindow** main_window, const char* real_path)
 {
     xset_t set;
     panel_t panel;
@@ -164,8 +164,8 @@ open_in_tab(FMMainWindow** main_window, const char* real_path)
         set->b = XSetB::XSET_B_TRUE;
 
         // create new window
-        fm_main_window_store_positions(nullptr);
-        *main_window = FM_MAIN_WINDOW_REINTERPRET(fm_main_window_new());
+        main_window_store_positions(nullptr);
+        *main_window = MAIN_WINDOW_REINTERPRET(main_window_new());
     }
     else
     {
@@ -201,7 +201,7 @@ open_in_tab(FMMainWindow** main_window, const char* real_path)
                 cli_flags.reuse_tab = false;
             }
             else
-                fm_main_window_add_new_tab(*main_window, real_path);
+                main_window_add_new_tab(*main_window, real_path);
         }
     }
     gtk_window_present(GTK_WINDOW(*main_window));
@@ -220,11 +220,11 @@ handle_parsed_commandline_args()
         cli_flags.files = default_files;
 
     // get the last active window on this desktop, if available
-    FMMainWindow* main_window = nullptr;
+    MainWindow* main_window = nullptr;
     if (cli_flags.new_tab || cli_flags.reuse_tab)
     {
-        main_window = fm_main_window_get_on_current_desktop();
-        // LOG_INFO("fm_main_window_get_on_current_desktop = {:p}  {} {}",
+        main_window = main_window_get_on_current_desktop();
+        // LOG_INFO("main_window_get_on_current_desktop = {:p}  {} {}",
         //          (void*)main_window,
         //          cli_flags.new_tab ? "new_tab" : "",
         //          cli_flags.reuse_tab ? "reuse_tab" : "");
@@ -245,7 +245,7 @@ handle_parsed_commandline_args()
                 search_dirs.emplace_back(*dir);
         }
 
-        fm_find_files(search_dirs);
+        find_files(search_dirs);
         cli_flags.find_files = false;
     }
     else if (cli_flags.daemon_mode)
@@ -322,8 +322,8 @@ handle_parsed_commandline_args()
             // initialize things required by folder view
             if (!cli_flags.daemon_mode)
                 init_folder();
-            fm_main_window_store_positions(nullptr);
-            main_window = FM_MAIN_WINDOW_REINTERPRET(fm_main_window_new());
+            main_window_store_positions(nullptr);
+            main_window = MAIN_WINDOW_REINTERPRET(main_window_new());
         }
         gtk_window_present(GTK_WINDOW(main_window));
 

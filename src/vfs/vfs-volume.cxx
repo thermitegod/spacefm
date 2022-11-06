@@ -3097,20 +3097,20 @@ VFSVolume::autoexec() noexcept
             {
                 if (xset_get_b(XSetName::DEV_AUTO_OPEN))
                 {
-                    FMMainWindow* main_window = fm_main_window_get_last_active();
+                    MainWindow* main_window = main_window_get_last_active();
                     if (main_window)
                     {
                         LOG_INFO("Auto Open Tab for {} in {}",
                                  this->device_file,
                                  this->mount_point);
                         // PtkFileBrowser* file_browser =
-                        //        (PtkFileBrowser*)fm_main_window_get_current_file_browser(
+                        //        (PtkFileBrowser*)main_window_get_current_file_browser(
                         //                                                main_window);
                         // if (file_browser)
                         //     file_browser->run_event<EventType::OPEN_ITEM>(this->mount_point,
                         //                                                   PtkOpenAction::PTK_OPEN_DIR);
-                        // fm_main_window_add_new_tab causes hang without GDK_THREADS_ENTER
-                        fm_main_window_add_new_tab(main_window, this->mount_point);
+                        // main_window_add_new_tab causes hang without GDK_THREADS_ENTER
+                        main_window_add_new_tab(main_window, this->mount_point);
                         // LOG_INFO("DONE Auto Open Tab for {} in {}", this->device_file,
                         //                                             this->mount_point);
                     }

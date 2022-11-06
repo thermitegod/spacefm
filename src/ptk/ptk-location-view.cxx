@@ -186,7 +186,7 @@ static void
 update_change_detection()
 {
     // update all windows/all panels/all browsers
-    for (FMMainWindow* window : fm_main_window_get_all())
+    for (MainWindow* window : main_window_get_all())
     {
         for (panel_t p : PANELS)
         {
@@ -1366,8 +1366,7 @@ on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     if (view)
         file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
     else
-        file_browser =
-            PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(nullptr));
+        file_browser = PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(nullptr));
 
     if (!file_browser || !vol)
         return;
@@ -1430,8 +1429,7 @@ on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     if (view)
         file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
     else
-        file_browser =
-            PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(nullptr));
+        file_browser = PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(nullptr));
 
     if (!vol)
         return;

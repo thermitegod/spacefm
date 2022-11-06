@@ -45,14 +45,14 @@ enum class PluginUse
     NORMAL
 };
 
-struct FMMainWindow;
+struct MainWindow;
 
 struct PluginData
 {
     PluginData();
     ~PluginData();
 
-    FMMainWindow* main_window{nullptr};
+    MainWindow* main_window{nullptr};
     GtkWidget* handler_dlg{nullptr};
     char* plug_dir{nullptr};
     xset_t set{nullptr};

@@ -144,7 +144,7 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         {
             app_settings.set_always_show_tabs(always_show_tabs);
             // update all windows/all panels
-            for (FMMainWindow* window : fm_main_window_get_all())
+            for (MainWindow* window : main_window_get_all())
             {
                 for (panel_t p : PANELS)
                 {
@@ -163,7 +163,7 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         {
             app_settings.set_show_close_tab_buttons(hide_close_tab_buttons);
             // update all windows/all panels/all browsers
-            for (FMMainWindow* window : fm_main_window_get_all())
+            for (MainWindow* window : main_window_get_all())
             {
                 for (panel_t p : PANELS)
                 {
@@ -173,11 +173,9 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
                     {
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
-                        tab_label = fm_main_window_create_tab_label(window, file_browser);
+                        tab_label = main_window_create_tab_label(window, file_browser);
                         gtk_notebook_set_tab_label(notebook, GTK_WIDGET(file_browser), tab_label);
-                        fm_main_window_update_tab_label(window,
-                                                        file_browser,
-                                                        file_browser->dir->path);
+                        main_window_update_tab_label(window, file_browser, file_browser->dir->path);
                     }
                 }
             }
@@ -224,7 +222,7 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
             app_settings.set_icon_size_small(small_icon);
 
             // update all windows/all panels/all browsers
-            for (FMMainWindow* window : fm_main_window_get_all())
+            for (MainWindow* window : main_window_get_all())
             {
                 for (panel_t p : PANELS)
                 {
@@ -286,7 +284,7 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         {
             app_settings.set_single_click(single_click);
             // update all windows/all panels/all browsers
-            for (FMMainWindow* window : fm_main_window_get_all())
+            for (MainWindow* window : main_window_get_all())
             {
                 for (panel_t p : PANELS)
                 {
@@ -309,7 +307,7 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         {
             app_settings.set_single_hover(single_hover);
             // update all windows/all panels/all browsers
-            for (FMMainWindow* window : fm_main_window_get_all())
+            for (MainWindow* window : main_window_get_all())
             {
                 for (panel_t p : PANELS)
                 {
@@ -454,7 +452,7 @@ on_show_thumbnail_toggled(GtkWidget* widget, FMPrefDlg* fm_data)
 }
 
 bool
-fm_edit_preference(GtkWindow* parent, i32 page)
+edit_preference(GtkWindow* parent, i32 page)
 {
     i32 ibig_icon = -1;
     i32 ismall_icon = -1;

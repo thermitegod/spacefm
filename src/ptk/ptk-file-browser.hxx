@@ -70,7 +70,7 @@ enum PtkOpenAction
 
 // forward declare
 struct PtkFileBrowser;
-struct FMMainWindow;
+struct MainWindow;
 
 struct PtkFileBrowser
 {
@@ -157,18 +157,18 @@ struct PtkFileBrowser
     // Signals
   public:
     // Signals function types
-    using evt_chdir_before_t = void(PtkFileBrowser*, FMMainWindow*);
-    using evt_chdir_begin_t = void(PtkFileBrowser*, FMMainWindow*);
-    using evt_chdir_after_t = void(PtkFileBrowser*, FMMainWindow*);
-    using evt_open_file_t = void(PtkFileBrowser*, std::string_view, PtkOpenAction, FMMainWindow*);
-    using evt_change_content_t = void(PtkFileBrowser*, FMMainWindow*);
-    using evt_change_sel_t = void(PtkFileBrowser*, FMMainWindow*);
-    using evt_change_pane_mode_t = void(PtkFileBrowser*, FMMainWindow*);
+    using evt_chdir_before_t = void(PtkFileBrowser*, MainWindow*);
+    using evt_chdir_begin_t = void(PtkFileBrowser*, MainWindow*);
+    using evt_chdir_after_t = void(PtkFileBrowser*, MainWindow*);
+    using evt_open_file_t = void(PtkFileBrowser*, std::string_view, PtkOpenAction, MainWindow*);
+    using evt_change_content_t = void(PtkFileBrowser*, MainWindow*);
+    using evt_change_sel_t = void(PtkFileBrowser*, MainWindow*);
+    using evt_change_pane_mode_t = void(PtkFileBrowser*, MainWindow*);
 
     // Signals Add Event
     template<EventType evt>
     typename std::enable_if<evt == EventType::CHDIR_BEFORE, sigc::connection>::type
-    add_event(evt_chdir_before_t fun, FMMainWindow* window)
+    add_event(evt_chdir_before_t fun, MainWindow* window)
     {
         // LOG_TRACE("Signal Connect   : EventType::CHDIR_BEFORE");
         this->evt_data_window = window;
@@ -177,7 +177,7 @@ struct PtkFileBrowser
 
     template<EventType evt>
     typename std::enable_if<evt == EventType::CHDIR_BEGIN, sigc::connection>::type
-    add_event(evt_chdir_begin_t fun, FMMainWindow* window)
+    add_event(evt_chdir_begin_t fun, MainWindow* window)
     {
         // LOG_TRACE("Signal Connect   : EventType::CHDIR_BEGIN");
         this->evt_data_window = window;
@@ -186,7 +186,7 @@ struct PtkFileBrowser
 
     template<EventType evt>
     typename std::enable_if<evt == EventType::CHDIR_AFTER, sigc::connection>::type
-    add_event(evt_chdir_after_t fun, FMMainWindow* window)
+    add_event(evt_chdir_after_t fun, MainWindow* window)
     {
         // LOG_TRACE("Signal Connect   : EventType::CHDIR_AFTER");
         this->evt_data_window = window;
@@ -195,7 +195,7 @@ struct PtkFileBrowser
 
     template<EventType evt>
     typename std::enable_if<evt == EventType::OPEN_ITEM, sigc::connection>::type
-    add_event(evt_open_file_t fun, FMMainWindow* window)
+    add_event(evt_open_file_t fun, MainWindow* window)
     {
         // LOG_TRACE("Signal Connect   : EventType::OPEN_ITEM");
         this->evt_data_window = window;
@@ -204,7 +204,7 @@ struct PtkFileBrowser
 
     template<EventType evt>
     typename std::enable_if<evt == EventType::CHANGE_CONTENT, sigc::connection>::type
-    add_event(evt_change_content_t fun, FMMainWindow* window)
+    add_event(evt_change_content_t fun, MainWindow* window)
     {
         // LOG_TRACE("Signal Connect   : EventType::CHANGE_CONTENT");
         this->evt_data_window = window;
@@ -213,7 +213,7 @@ struct PtkFileBrowser
 
     template<EventType evt>
     typename std::enable_if<evt == EventType::CHANGE_SEL, sigc::connection>::type
-    add_event(evt_change_sel_t fun, FMMainWindow* window)
+    add_event(evt_change_sel_t fun, MainWindow* window)
     {
         // LOG_TRACE("Signal Connect   : EventType::CHANGE_SEL");
         this->evt_data_window = window;
@@ -222,7 +222,7 @@ struct PtkFileBrowser
 
     template<EventType evt>
     typename std::enable_if<evt == EventType::CHANGE_PANE, sigc::connection>::type
-    add_event(evt_change_pane_mode_t fun, FMMainWindow* window)
+    add_event(evt_change_pane_mode_t fun, MainWindow* window)
     {
         // LOG_TRACE("Signal Connect   : EventType::CHANGE_PANE");
         this->evt_data_window = window;
@@ -300,7 +300,7 @@ struct PtkFileBrowser
   private:
     // Signal data
     // TODO/FIXME has to be a better way to do this
-    FMMainWindow* evt_data_window{nullptr};
+    MainWindow* evt_data_window{nullptr};
 
   public:
     // Signals we connect to

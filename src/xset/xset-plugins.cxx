@@ -531,7 +531,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, std::string_view pat
     const std::string plug_dir_q = bash_quote(plug_dir);
     const std::string file_path_q = bash_quote(path);
 
-    FMMainWindow* main_window = FM_MAIN_WINDOW(main_win);
+    MainWindow* main_window = MAIN_WINDOW(main_win);
     // task
     PtkFileTask* ptask = ptk_file_exec_new("Install Plugin",
                                            main_win ? GTK_WIDGET(main_window) : nullptr,

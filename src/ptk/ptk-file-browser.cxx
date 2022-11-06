@@ -242,7 +242,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
 {
     (void)event;
     i32 pos;
-    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
+    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     const panel_t p = file_browser->mypanel;
     const MainWindowPanel mode = main_window->panel_context.at(p);
 
@@ -652,7 +652,7 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     if (!file_browser)
         return;
 
-    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
+    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     const panel_t p = file_browser->mypanel;
     const MainWindowPanel mode = main_window->panel_context.at(p);
 
@@ -720,7 +720,7 @@ static void
 rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
 {
     (void)widget;
-    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
+    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     const panel_t p = file_browser->mypanel;
     const MainWindowPanel mode =
         main_window ? main_window->panel_context.at(p) : MainWindowPanel::PANEL_NEITHER;
@@ -1102,7 +1102,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     // LOG_INFO("ptk_file_browser_update_views fb={:p}  (panel {})", file_browser,
     // file_browser->mypanel);
 
-    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
+    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     // hide/show browser widgets based on user settings
     const panel_t p = file_browser->mypanel;
     const MainWindowPanel mode = main_window->panel_context.at(p);
@@ -1442,10 +1442,9 @@ ptk_file_browser_new(i32 curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
     // Large Icons - option for Detailed and Compact list views
     file_browser->large_icons =
         view_mode == PtkFBViewMode::PTK_FB_ICON_VIEW ||
-        xset_get_b_panel_mode(
-            file_browser->mypanel,
-            XSetPanel::LIST_LARGE,
-            (FM_MAIN_WINDOW(main_window))->panel_context.at(file_browser->mypanel));
+        xset_get_b_panel_mode(file_browser->mypanel,
+                              XSetPanel::LIST_LARGE,
+                              (MAIN_WINDOW(main_window))->panel_context.at(file_browser->mypanel));
     file_browser->folder_view = create_folder_view(file_browser, view_mode);
 
     gtk_container_add(GTK_CONTAINER(file_browser->folder_view_scroll), file_browser->folder_view);
@@ -3364,7 +3363,7 @@ ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_brow
     if (file_browser->view_mode != PtkFBViewMode::PTK_FB_LIST_VIEW)
         return;
 
-    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
+    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
 
     // if the window was opened maximized and stayed maximized, or the window is
     // unmaximized and not fullscreen, save the columns
@@ -3788,7 +3787,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
         PTKFileListCol::COL_FILE_MTIME,
     };
 
-    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
+    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     const panel_t p = file_browser->mypanel;
     const MainWindowPanel mode = main_window->panel_context.at(p);
 
@@ -5409,7 +5408,7 @@ ptk_file_browser_focus(GtkMenuItem* item, PtkFileBrowser* file_browser, i32 job2
     else
         job = job2;
 
-    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
+    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     const panel_t p = file_browser->mypanel;
     const MainWindowPanel mode = main_window->panel_context.at(p);
     switch (job)
@@ -5694,7 +5693,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
 {
     i32 i = 0;
     xset_t set = xset_get(setname);
-    FMMainWindow* main_window = FM_MAIN_WINDOW(browser->main_window);
+    MainWindow* main_window = MAIN_WINDOW(browser->main_window);
     const MainWindowPanel mode = main_window->panel_context.at(browser->mypanel);
 
     // LOG_INFO("ptk_file_browser_on_action {}", set->name);
@@ -5820,7 +5819,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
                     xset_get_b_panel(browser->mypanel, XSetPanel::SHOW_HIDDEN));
             }
             else if (ztd::same(xname, "show")) // main View|Panel N
-                show_panels_all_windows(nullptr, FM_MAIN_WINDOW(browser->main_window));
+                show_panels_all_windows(nullptr, MAIN_WINDOW(browser->main_window));
             else if (ztd::startswith(xname, "show_")) // shared key
             {
                 set2 = xset_get_panel_mode(browser->mypanel, xname, mode);

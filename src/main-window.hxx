@@ -31,10 +31,10 @@
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-file-task.hxx"
 
-#define FM_MAIN_WINDOW(obj)             (static_cast<FMMainWindow*>(obj))
-#define FM_MAIN_WINDOW_REINTERPRET(obj) (reinterpret_cast<FMMainWindow*>(obj))
+#define MAIN_WINDOW(obj)             (static_cast<MainWindow*>(obj))
+#define MAIN_WINDOW_REINTERPRET(obj) (reinterpret_cast<MainWindow*>(obj))
 
-struct FMMainWindow
+struct MainWindow
 {
     /* Private */
     GtkWindow parent;
@@ -79,36 +79,36 @@ struct FMMainWindow
     bool fullscreen;
 };
 
-struct FMMainWindowClass
+struct MainWindowClass
 {
     GtkWindowClass parent;
 };
 
-GType fm_main_window_get_type();
+GType main_window_get_type();
 
-GtkWidget* fm_main_window_new();
+GtkWidget* main_window_new();
 
 /* Utility functions */
-GtkWidget* fm_main_window_get_current_file_browser(FMMainWindow* mainWindow);
+GtkWidget* main_window_get_current_file_browser(MainWindow* mainWindow);
 
-void fm_main_window_add_new_tab(FMMainWindow* main_window, const char* folder_path);
+void main_window_add_new_tab(MainWindow* main_window, const char* folder_path);
 
-GtkWidget* fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_browser);
+GtkWidget* main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_browser);
 
-void fm_main_window_update_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_browser,
-                                     std::string_view path);
+void main_window_update_tab_label(MainWindow* main_window, PtkFileBrowser* file_browser,
+                                  std::string_view path);
 
-// void fm_main_window_preference(FMMainWindow* main_window);
+// void main_window_preference(MainWindow* main_window);
 
 /* get last active window */
-FMMainWindow* fm_main_window_get_last_active();
-FMMainWindow* fm_main_window_get_on_current_desktop();
+MainWindow* main_window_get_last_active();
+MainWindow* main_window_get_on_current_desktop();
 
 /* get all windows
- * The returned GList is owned and used internally by FMMainWindow, and
+ * The returned GList is owned and used internally by MainWindow, and
  * should not be freed.
  */
-const std::vector<FMMainWindow*>& fm_main_window_get_all();
+const std::vector<MainWindow*>& main_window_get_all();
 
 void main_task_view_update_task(PtkFileTask* ptask);
 void main_task_view_remove_task(PtkFileTask* ptask);
@@ -116,8 +116,8 @@ void main_task_pause_all_queued(PtkFileTask* ptask);
 void main_task_start_queued(GtkWidget* view, PtkFileTask* new_task);
 void on_restore_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser);
 void on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser);
-// void show_panels(GtkMenuItem* item, FMMainWindow* main_window);
-void show_panels_all_windows(GtkMenuItem* item, FMMainWindow* main_window);
+// void show_panels(GtkMenuItem* item, MainWindow* main_window);
+void show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window);
 void update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser);
 void main_window_toggle_thumbnails_all_windows();
 void main_window_refresh_all_tabs_matching(const char* path);
@@ -133,12 +133,12 @@ void main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
 void main_window_rubberband_all();
 void main_window_refresh_all();
 void main_context_fill(PtkFileBrowser* file_browser, xset_context_t c);
-void set_panel_focus(FMMainWindow* main_window, PtkFileBrowser* file_browser);
+void set_panel_focus(MainWindow* main_window, PtkFileBrowser* file_browser);
 void focus_panel(GtkMenuItem* item, void* mw, panel_t p);
-void main_window_open_path_in_current_tab(FMMainWindow* main_window, const char* path);
-void main_window_open_network(FMMainWindow* main_window, const char* path, bool new_tab);
+void main_window_open_path_in_current_tab(MainWindow* main_window, const char* path);
+void main_window_open_network(MainWindow* main_window, const char* path, bool new_tab);
 bool main_window_event(void* mw, xset_t preset, XSetName event, i64 panel, i64 tab,
                        const char* focus, i32 keyval, i32 button, i32 state, bool visible);
-void fm_main_window_store_positions(FMMainWindow* main_window);
+void main_window_store_positions(MainWindow* main_window);
 
 char main_window_socket_command(char* argv[], std::string& reply);

@@ -74,98 +74,95 @@
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-handler.hxx"
 
-static void rebuild_menus(FMMainWindow* main_window);
-static void fm_main_window_preference(FMMainWindow* main_window);
+static void rebuild_menus(MainWindow* main_window);
+static void main_window_preference(MainWindow* main_window);
 
-static void fm_main_window_class_init(FMMainWindowClass* klass);
-static void fm_main_window_init(FMMainWindow* main_window);
-static void fm_main_window_finalize(GObject* obj);
-static void fm_main_window_get_property(GObject* obj, u32 prop_id, GValue* value,
-                                        GParamSpec* pspec);
-static void fm_main_window_set_property(GObject* obj, u32 prop_id, const GValue* value,
-                                        GParamSpec* pspec);
-static gboolean fm_main_window_delete_event(GtkWidget* widget, GdkEventAny* event);
+static void main_window_class_init(MainWindowClass* klass);
+static void main_window_init(MainWindow* main_window);
+static void main_window_finalize(GObject* obj);
+static void main_window_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec);
+static void main_window_set_property(GObject* obj, u32 prop_id, const GValue* value,
+                                     GParamSpec* pspec);
+static gboolean main_window_delete_event(GtkWidget* widget, GdkEventAny* event);
 
-static gboolean fm_main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event);
+static gboolean main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event);
 
 static void on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_num,
                                            void* user_data);
-static void on_file_browser_begin_chdir(PtkFileBrowser* file_browser, FMMainWindow* main_window);
+static void on_file_browser_begin_chdir(PtkFileBrowser* file_browser, MainWindow* main_window);
 static void on_file_browser_open_item(PtkFileBrowser* file_browser, std::string_view path,
-                                      PtkOpenAction action, FMMainWindow* main_window);
-static void on_file_browser_after_chdir(PtkFileBrowser* file_browser, FMMainWindow* main_window);
-static void on_file_browser_content_change(PtkFileBrowser* file_browser, FMMainWindow* main_window);
-static void on_file_browser_sel_change(PtkFileBrowser* file_browser, FMMainWindow* main_window);
-static void on_file_browser_panel_change(PtkFileBrowser* file_browser, FMMainWindow* main_window);
+                                      PtkOpenAction action, MainWindow* main_window);
+static void on_file_browser_after_chdir(PtkFileBrowser* file_browser, MainWindow* main_window);
+static void on_file_browser_content_change(PtkFileBrowser* file_browser, MainWindow* main_window);
+static void on_file_browser_sel_change(PtkFileBrowser* file_browser, MainWindow* main_window);
+static void on_file_browser_panel_change(PtkFileBrowser* file_browser, MainWindow* main_window);
 static bool on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
                                u32 time, PtkFileBrowser* file_browser);
 static bool on_main_window_focus(GtkWidget* main_window, GdkEventFocus* event, void* user_data);
 
-static bool on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event,
-                                    xset_t known_set);
-static bool on_main_window_keypress_found_key(FMMainWindow* main_window, xset_t set);
+static bool on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t known_set);
+static bool on_main_window_keypress_found_key(MainWindow* main_window, xset_t set);
 static bool on_window_button_press_event(GtkWidget* widget, GdkEventButton* event,
-                                         FMMainWindow* main_window); // sfm
+                                         MainWindow* main_window); // sfm
 static void on_new_window_activate(GtkMenuItem* menuitem, void* user_data);
-static void fm_main_window_close(FMMainWindow* main_window);
+static void main_window_close(MainWindow* main_window);
 
-static void show_panels(GtkMenuItem* item, FMMainWindow* main_window);
+static void show_panels(GtkMenuItem* item, MainWindow* main_window);
 
-static GtkWidget* main_task_view_new(FMMainWindow* main_window);
-static void on_task_popup_show(GtkMenuItem* item, FMMainWindow* main_window, char* name2);
-static bool main_tasks_running(FMMainWindow* main_window);
+static GtkWidget* main_task_view_new(MainWindow* main_window);
+static void on_task_popup_show(GtkMenuItem* item, MainWindow* main_window, char* name2);
+static bool main_tasks_running(MainWindow* main_window);
 static void on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask2);
 static void on_preference_activate(GtkMenuItem* menuitem, void* user_data);
-static void main_task_prepare_menu(FMMainWindow* main_window, GtkWidget* menu,
+static void main_task_prepare_menu(MainWindow* main_window, GtkWidget* menu,
                                    GtkAccelGroup* accel_group);
 static void on_task_columns_changed(GtkWidget* view, void* user_data);
 static PtkFileTask* get_selected_task(GtkWidget* view);
-static void fm_main_window_update_status_bar(FMMainWindow* main_window,
-                                             PtkFileBrowser* file_browser);
-static void set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser);
+static void main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_browser);
+static void set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser);
 static void on_task_column_selected(GtkMenuItem* item, GtkWidget* view);
-static void on_task_popup_errset(GtkMenuItem* item, FMMainWindow* main_window, char* name2);
+static void on_task_popup_errset(GtkMenuItem* item, MainWindow* main_window, char* name2);
 static void show_task_dialog(GtkWidget* widget, GtkWidget* view);
 static void on_about_activate(GtkMenuItem* menuitem, void* user_data);
-static void update_window_title(GtkMenuItem* item, FMMainWindow* main_window);
-static void on_fullscreen_activate(GtkMenuItem* menuitem, FMMainWindow* main_window);
+static void update_window_title(GtkMenuItem* item, MainWindow* main_window);
+static void on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window);
 static bool delayed_focus(GtkWidget* widget);
 static bool delayed_focus_file_browser(PtkFileBrowser* file_browser);
-static bool idle_set_task_height(FMMainWindow* main_window);
+static bool idle_set_task_height(MainWindow* main_window);
 
 static GtkWindowClass* parent_class = nullptr;
 
 static i32 n_windows = 0;
 
-static std::vector<FMMainWindow*> all_windows;
+static std::vector<MainWindow*> all_windows;
 
 static std::map<panel_t, std::vector<std::string>> closed_tabs_restore;
 
 //  Drag & Drop/Clipboard targets
 static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 
-#define FM_TYPE_MAIN_WINDOW (fm_main_window_get_type())
+#define FM_TYPE_MAIN_WINDOW (main_window_get_type())
 
 GType
-fm_main_window_get_type()
+main_window_get_type()
 {
     static GType type = G_TYPE_INVALID;
     if (type == G_TYPE_INVALID)
     {
         static const GTypeInfo info = {
-            sizeof(FMMainWindowClass),
+            sizeof(MainWindowClass),
             nullptr,
             nullptr,
-            (GClassInitFunc)fm_main_window_class_init,
+            (GClassInitFunc)main_window_class_init,
             nullptr,
             nullptr,
-            sizeof(FMMainWindow),
+            sizeof(MainWindow),
             0,
-            (GInstanceInitFunc)fm_main_window_init,
+            (GInstanceInitFunc)main_window_init,
             nullptr,
         };
         type = g_type_register_static(GTK_TYPE_WINDOW,
-                                      "FMMainWindow",
+                                      "MainWindow",
                                       &info,
                                       GTypeFlags::G_TYPE_FLAG_NONE);
     }
@@ -173,7 +170,7 @@ fm_main_window_get_type()
 }
 
 static void
-fm_main_window_class_init(FMMainWindowClass* klass)
+main_window_class_init(MainWindowClass* klass)
 {
     GObjectClass* object_class;
     GtkWidgetClass* widget_class;
@@ -181,13 +178,13 @@ fm_main_window_class_init(FMMainWindowClass* klass)
     object_class = (GObjectClass*)klass;
     parent_class = (GtkWindowClass*)g_type_class_peek_parent(klass);
 
-    object_class->set_property = fm_main_window_set_property;
-    object_class->get_property = fm_main_window_get_property;
-    object_class->finalize = fm_main_window_finalize;
+    object_class->set_property = main_window_set_property;
+    object_class->get_property = main_window_get_property;
+    object_class->finalize = main_window_finalize;
 
     widget_class = GTK_WIDGET_CLASS(klass);
-    widget_class->delete_event = fm_main_window_delete_event;
-    widget_class->window_state_event = fm_main_window_window_state_event;
+    widget_class->delete_event = main_window_delete_event;
+    widget_class->window_state_event = main_window_window_state_event;
 
     /*  this works but desktop_window does not
     g_signal_new ( "task-notify",
@@ -201,13 +198,13 @@ fm_main_window_class_init(FMMainWindowClass* klass)
 }
 
 static bool
-on_configure_evt_timer(FMMainWindow* main_window)
+on_configure_evt_timer(MainWindow* main_window)
 {
     if (all_windows.empty())
         return false;
 
     // verify main_window still valid
-    for (FMMainWindow* window : all_windows)
+    for (MainWindow* window : all_windows)
     {
         if (window == main_window)
             break;
@@ -232,7 +229,7 @@ on_configure_evt_timer(FMMainWindow* main_window)
 }
 
 static bool
-on_window_configure_event(GtkWindow* window, GdkEvent* event, FMMainWindow* main_window)
+on_window_configure_event(GtkWindow* window, GdkEvent* event, MainWindow* main_window)
 {
     (void)window;
     (void)event;
@@ -245,7 +242,7 @@ on_window_configure_event(GtkWindow* window, GdkEvent* event, FMMainWindow* main
 }
 
 static void
-on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, xset_t set2)
+on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
 {
     xset_t set;
     char* path = nullptr;
@@ -372,10 +369,10 @@ on_plugin_install(GtkMenuItem* item, FMMainWindow* main_window, xset_t set2)
 }
 
 static GtkWidget*
-create_plugins_menu(FMMainWindow* main_window)
+create_plugins_menu(MainWindow* main_window)
 {
     PtkFileBrowser* file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     GtkWidget* plug_menu = gtk_menu_new();
     if (!file_browser)
@@ -409,11 +406,11 @@ create_plugins_menu(FMMainWindow* main_window)
 }
 
 static void
-on_devices_show(GtkMenuItem* item, FMMainWindow* main_window)
+on_devices_show(GtkMenuItem* item, MainWindow* main_window)
 {
     (void)item;
     PtkFileBrowser* file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!file_browser)
         return;
     const MainWindowPanel mode = main_window->panel_context[file_browser->mypanel - 1];
@@ -428,10 +425,10 @@ on_devices_show(GtkMenuItem* item, FMMainWindow* main_window)
 }
 
 static GtkWidget*
-create_devices_menu(FMMainWindow* main_window)
+create_devices_menu(MainWindow* main_window)
 {
     PtkFileBrowser* file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     GtkWidget* dev_menu = gtk_menu_new();
     if (!file_browser)
@@ -461,11 +458,11 @@ create_devices_menu(FMMainWindow* main_window)
 }
 
 static void
-on_open_url(GtkWidget* widget, FMMainWindow* main_window)
+on_open_url(GtkWidget* widget, MainWindow* main_window)
 {
     (void)widget;
     PtkFileBrowser* file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     char* url = xset_get_s(XSetName::MAIN_SAVE_SESSION);
     if (file_browser && url && url[0])
         ptk_location_view_mount_network(file_browser, url, true, true);
@@ -475,23 +472,23 @@ static void
 on_find_file_activate(GtkMenuItem* menuitem, void* user_data)
 {
     (void)menuitem;
-    FMMainWindow* main_window = FM_MAIN_WINDOW(user_data);
+    MainWindow* main_window = MAIN_WINDOW(user_data);
     PtkFileBrowser* file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     const std::string cwd = ptk_file_browser_get_cwd(file_browser);
 
     const std::vector<std::string> search_dirs{cwd};
 
-    fm_find_files(search_dirs);
+    find_files(search_dirs);
 }
 
 static void
 on_open_current_folder_as_root(GtkMenuItem* menuitem, void* user_data)
 {
     (void)menuitem;
-    FMMainWindow* main_window = FM_MAIN_WINDOW(user_data);
+    MainWindow* main_window = MAIN_WINDOW(user_data);
     PtkFileBrowser* file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!file_browser)
         return;
     // root task
@@ -510,10 +507,10 @@ on_open_current_folder_as_root(GtkMenuItem* menuitem, void* user_data)
 }
 
 static void
-main_window_open_terminal(FMMainWindow* main_window, bool as_root)
+main_window_open_terminal(MainWindow* main_window, bool as_root)
 {
     PtkFileBrowser* file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!file_browser)
         return;
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
@@ -523,7 +520,7 @@ main_window_open_terminal(FMMainWindow* main_window, bool as_root)
         ptk_show_error(GTK_WINDOW(parent),
                        "Terminal Not Available",
                        "Please set your terminal program in View|Preferences|Advanced");
-        fm_edit_preference(GTK_WINDOW(parent), PrefDlgPage::PREF_ADVANCED);
+        edit_preference(GTK_WINDOW(parent), PrefDlgPage::PREF_ADVANCED);
         main_term = xset_get_s(XSetName::MAIN_TERMINAL);
         if (!main_term || main_term[0] == '\0')
             return;
@@ -548,7 +545,7 @@ static void
 on_open_terminal_activate(GtkMenuItem* menuitem, void* user_data)
 {
     (void)menuitem;
-    FMMainWindow* main_window = FM_MAIN_WINDOW(user_data);
+    MainWindow* main_window = MAIN_WINDOW(user_data);
     main_window_open_terminal(main_window, false);
 }
 
@@ -556,7 +553,7 @@ static void
 on_open_root_terminal_activate(GtkMenuItem* menuitem, void* user_data)
 {
     (void)menuitem;
-    FMMainWindow* main_window = FM_MAIN_WINDOW(user_data);
+    MainWindow* main_window = MAIN_WINDOW(user_data);
     main_window_open_terminal(main_window, true);
 }
 
@@ -564,14 +561,14 @@ static void
 on_quit_activate(GtkMenuItem* menuitem, void* user_data)
 {
     (void)menuitem;
-    fm_main_window_delete_event(GTK_WIDGET(user_data), nullptr);
-    // fm_main_window_close( GTK_WIDGET( user_data ) );
+    main_window_delete_event(GTK_WIDGET(user_data), nullptr);
+    // main_window_close( GTK_WIDGET( user_data ) );
 }
 
 void
 main_window_rubberband_all()
 {
-    for (FMMainWindow* window : all_windows)
+    for (MainWindow* window : all_windows)
     {
         for (panel_t p : PANELS)
         {
@@ -594,7 +591,7 @@ main_window_rubberband_all()
 void
 main_window_refresh_all()
 {
-    for (FMMainWindow* window : all_windows)
+    for (MainWindow* window : all_windows)
     {
         for (panel_t p : PANELS)
         {
@@ -645,14 +642,14 @@ on_main_icon()
 {
     GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
-    for (FMMainWindow* window : all_windows)
+    for (MainWindow* window : all_windows)
     {
         update_window_icon(GTK_WINDOW(window), icon_theme);
     }
 }
 
 static void
-main_design_mode(GtkMenuItem* menuitem, FMMainWindow* main_window)
+main_design_mode(GtkMenuItem* menuitem, MainWindow* main_window)
 {
     (void)menuitem;
     xset_msg_dialog(
@@ -688,7 +685,7 @@ main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser)
         ptk_file_browser_rebuild_toolbars(file_browser);
 
     // do all windows all panels all tabs
-    for (FMMainWindow* window : all_windows)
+    for (MainWindow* window : all_windows)
     {
         for (panel_t p : PANELS)
         {
@@ -719,7 +716,7 @@ update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser)
     ptk_file_browser_update_views(nullptr, file_browser);
 
     // do other windows
-    for (FMMainWindow* window : all_windows)
+    for (MainWindow* window : all_windows)
     {
         if (gtk_widget_get_visible(window->panel[p - 1]))
         {
@@ -744,7 +741,7 @@ main_window_toggle_thumbnails_all_windows()
     app_settings.set_show_thumbnail(!app_settings.get_show_thumbnail());
 
     // update all windows/all panels/all browsers
-    for (FMMainWindow* window : all_windows)
+    for (MainWindow* window : all_windows)
     {
         for (panel_t p : PANELS)
         {
@@ -776,7 +773,7 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
     panel_t hidepanel;
     panel_t panel_num;
 
-    FMMainWindow* main_window = FM_MAIN_WINDOW(mw);
+    MainWindow* main_window = MAIN_WINDOW(mw);
 
     if (item)
         panel_num = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "panel_num"));
@@ -837,7 +834,7 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
             main_window->curpanel = panel;
             main_window->notebook = main_window->panel[panel - 1];
             PtkFileBrowser* file_browser =
-                PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+                PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
             if (file_browser)
             {
                 gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
@@ -852,7 +849,7 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
             main_window->curpanel = panel;
             main_window->notebook = main_window->panel[panel - 1];
             PtkFileBrowser* file_browser =
-                PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+                PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
             if (file_browser)
             {
                 gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
@@ -868,7 +865,7 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
 }
 
 void
-show_panels_all_windows(GtkMenuItem* item, FMMainWindow* main_window)
+show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window)
 {
     (void)item;
     // do this window first
@@ -877,7 +874,7 @@ show_panels_all_windows(GtkMenuItem* item, FMMainWindow* main_window)
 
     // do other windows
     main_window->panel_change = false; // do not save columns for other windows
-    for (FMMainWindow* window : all_windows)
+    for (MainWindow* window : all_windows)
     {
         if (main_window != window)
             show_panels(nullptr, window);
@@ -887,7 +884,7 @@ show_panels_all_windows(GtkMenuItem* item, FMMainWindow* main_window)
 }
 
 static void
-show_panels(GtkMenuItem* item, FMMainWindow* main_window)
+show_panels(GtkMenuItem* item, MainWindow* main_window)
 {
     (void)item;
     i32 cur_tabx;
@@ -926,7 +923,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
         show[p] = xset_get_b_panel(p, XSetPanel::SHOW);
     }
 
-    // TODO - write and move this to FMMainWindow constructor
+    // TODO - write and move this to MainWindow constructor
     if (main_window->panel_context.empty())
     {
         main_window->panel_context = {
@@ -1074,7 +1071,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                             else
                                 folder_path = "/";
                         }
-                        fm_main_window_add_new_tab(main_window, folder_path.c_str());
+                        main_window_add_new_tab(main_window, folder_path.c_str());
                         tab_added = true;
                     }
                     if (set->x && !set->ob1)
@@ -1115,7 +1112,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
                         else
                             folder_path = "/";
                     }
-                    fm_main_window_add_new_tab(main_window, folder_path.c_str());
+                    main_window_add_new_tab(main_window, folder_path.c_str());
                 }
             }
             if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
@@ -1202,7 +1199,7 @@ show_panels(GtkMenuItem* item, FMMainWindow* main_window)
 }
 
 static bool
-on_menu_bar_event(GtkWidget* widget, GdkEvent* event, FMMainWindow* main_window)
+on_menu_bar_event(GtkWidget* widget, GdkEvent* event, MainWindow* main_window)
 {
     (void)widget;
     (void)event;
@@ -1227,9 +1224,9 @@ bookmark_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
 
         PtkFileBrowser* file_browser =
             static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(item), "file_browser"));
-        FMMainWindow* main_window = static_cast<FMMainWindow*>(file_browser->main_window);
+        MainWindow* main_window = static_cast<MainWindow*>(file_browser->main_window);
 
-        fm_main_window_add_new_tab(main_window, file_path.c_str());
+        main_window_add_new_tab(main_window, file_path.c_str());
 
         return true;
     }
@@ -1261,7 +1258,7 @@ bookmark_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu)
 }
 
 static void
-rebuild_menus(FMMainWindow* main_window)
+rebuild_menus(MainWindow* main_window)
 {
     GtkWidget* newmenu;
     char* menu_elements;
@@ -1272,7 +1269,7 @@ rebuild_menus(FMMainWindow* main_window)
 
     // LOG_INFO("rebuild_menus");
     PtkFileBrowser* file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!file_browser)
         return;
     xset_context_t context = xset_context_new();
@@ -1430,7 +1427,7 @@ rebuild_menus(FMMainWindow* main_window)
 }
 
 static void
-on_main_window_realize(GtkWidget* widget, FMMainWindow* main_window)
+on_main_window_realize(GtkWidget* widget, MainWindow* main_window)
 {
     (void)widget;
     // preset the task manager height for no double-resize on first show
@@ -1438,7 +1435,7 @@ on_main_window_realize(GtkWidget* widget, FMMainWindow* main_window)
 }
 
 static void
-fm_main_window_init(FMMainWindow* main_window)
+main_window_init(MainWindow* main_window)
 {
     main_window->configure_evt_timer = 0;
     main_window->fullscreen = false;
@@ -1642,13 +1639,13 @@ fm_main_window_init(FMMainWindow* main_window)
 }
 
 static void
-fm_main_window_finalize(GObject* obj)
+main_window_finalize(GObject* obj)
 {
-    ztd::remove(all_windows, FM_MAIN_WINDOW_REINTERPRET(obj));
+    ztd::remove(all_windows, MAIN_WINDOW_REINTERPRET(obj));
 
     --n_windows;
 
-    g_object_unref((FM_MAIN_WINDOW_REINTERPRET(obj))->wgroup);
+    g_object_unref((MAIN_WINDOW_REINTERPRET(obj))->wgroup);
 
     WindowReference::decrease();
 
@@ -1656,7 +1653,7 @@ fm_main_window_finalize(GObject* obj)
 }
 
 static void
-fm_main_window_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec)
+main_window_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec)
 {
     (void)obj;
     (void)prop_id;
@@ -1665,7 +1662,7 @@ fm_main_window_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec
 }
 
 static void
-fm_main_window_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec* pspec)
+main_window_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec* pspec)
 {
     (void)obj;
     (void)prop_id;
@@ -1674,7 +1671,7 @@ fm_main_window_set_property(GObject* obj, u32 prop_id, const GValue* value, GPar
 }
 
 static void
-fm_main_window_close(FMMainWindow* main_window)
+main_window_close(MainWindow* main_window)
 {
     /*
     LOG_INFO("DISC={}", g_signal_handlers_disconnect_by_func(
@@ -1700,14 +1697,14 @@ on_abort_tasks_response(GtkDialog* dlg, i32 response, GtkWidget* main_window)
 {
     (void)dlg;
     (void)response;
-    fm_main_window_close(FM_MAIN_WINDOW_REINTERPRET(main_window));
+    main_window_close(MAIN_WINDOW_REINTERPRET(main_window));
 }
 
 void
-fm_main_window_store_positions(FMMainWindow* main_window)
+main_window_store_positions(MainWindow* main_window)
 {
     if (!main_window)
-        main_window = fm_main_window_get_last_active();
+        main_window = main_window_get_last_active();
     if (!main_window)
         return;
     // if the window is not fullscreen (is normal or maximized) save sliders
@@ -1777,14 +1774,14 @@ fm_main_window_store_positions(FMMainWindow* main_window)
 }
 
 static gboolean
-fm_main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
+main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
 {
     (void)event;
-    // LOG_INFO("fm_main_window_delete_event");
+    // LOG_INFO("main_window_delete_event");
 
-    FMMainWindow* main_window = FM_MAIN_WINDOW_REINTERPRET(widget);
+    MainWindow* main_window = MAIN_WINDOW_REINTERPRET(widget);
 
-    fm_main_window_store_positions(main_window);
+    main_window_store_positions(main_window);
 
     // save settings
     app_settings.set_maximized(main_window->maximized);
@@ -1831,14 +1828,14 @@ fm_main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
             return true;
         }
     }
-    fm_main_window_close(main_window);
+    main_window_close(main_window);
     return true;
 }
 
 static gboolean
-fm_main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event)
+main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event)
 {
-    FMMainWindow* main_window = FM_MAIN_WINDOW_REINTERPRET(widget);
+    MainWindow* main_window = MAIN_WINDOW_REINTERPRET(widget);
 
     bool maximized = ((event->new_window_state & GdkWindowState::GDK_WINDOW_STATE_MAXIMIZED) != 0);
 
@@ -1861,7 +1858,7 @@ main_window_get_tab_cwd(PtkFileBrowser* file_browser, tab_t tab_num)
     if (!file_browser)
         return nullptr;
     i32 page_x;
-    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
+    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     GtkWidget* notebook = main_window->panel[file_browser->mypanel - 1];
     i32 pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
     i32 page_num = gtk_notebook_page_num(GTK_NOTEBOOK(notebook), GTK_WIDGET(file_browser));
@@ -1896,7 +1893,7 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
 {
     if (!file_browser)
         return nullptr;
-    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
+    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     panel_t panel_x = file_browser->mypanel;
 
     switch (panel_num)
@@ -1939,7 +1936,7 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num, const
 {
     if (!file_browser)
         return;
-    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
+    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     panel_t panel_x = file_browser->mypanel;
 
     switch (panel_num)
@@ -1985,7 +1982,7 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num, const
     main_window->curpanel = panel_x;
     main_window->notebook = main_window->panel[panel_x - 1];
 
-    fm_main_window_add_new_tab(main_window, file_path);
+    main_window_add_new_tab(main_window, file_path);
 
     main_window->curpanel = save_curpanel;
     main_window->notebook = main_window->panel[main_window->curpanel - 1];
@@ -2003,7 +2000,7 @@ main_window_panel_is_visible(PtkFileBrowser* file_browser, panel_t panel)
 {
     if (!valid_panel(panel))
         return false;
-    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
+    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     return gtk_widget_get_visible(main_window->panel[panel - 1]);
 }
 
@@ -2013,7 +2010,7 @@ main_window_get_counts(PtkFileBrowser* file_browser)
     if (!file_browser)
         return {0, 0, 0};
 
-    const FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
+    const MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     const GtkWidget* notebook = main_window->panel[file_browser->mypanel - 1];
     const tab_t tab_count = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
 
@@ -2051,8 +2048,8 @@ on_restore_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
     if (!GTK_IS_WIDGET(file_browser))
         return;
 
-    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
-    fm_main_window_add_new_tab(main_window, file_path.c_str());
+    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
+    main_window_add_new_tab(main_window, file_path.c_str());
 }
 
 void
@@ -2070,7 +2067,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
         return;
     GtkNotebook* notebook =
         GTK_NOTEBOOK(gtk_widget_get_ancestor(GTK_WIDGET(file_browser), GTK_TYPE_NOTEBOOK));
-    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
+    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
 
     main_window->curpanel = file_browser->mypanel;
     main_window->notebook = main_window->panel[main_window->curpanel - 1];
@@ -2122,7 +2119,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
             else
                 path = ztd::strdup("/");
         }
-        fm_main_window_add_new_tab(main_window, path);
+        main_window_add_new_tab(main_window, path);
         a_browser =
             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0));
         if (GTK_IS_WIDGET(a_browser))
@@ -2153,7 +2150,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
         ptk_file_browser_update_views(nullptr, a_browser);
         if (GTK_IS_WIDGET(a_browser))
         {
-            fm_main_window_update_status_bar(main_window, a_browser);
+            main_window_update_status_bar(main_window, a_browser);
             g_idle_add((GSourceFunc)delayed_focus, a_browser->folder_view);
         }
         if (event_handler->tab_focus->s || event_handler->tab_focus->ob2_data)
@@ -2187,7 +2184,7 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
                  PtkFileBrowser* file_browser) // MOD added
 {
     (void)widget;
-    on_file_browser_panel_change(file_browser, FM_MAIN_WINDOW(file_browser->main_window));
+    on_file_browser_panel_change(file_browser, MAIN_WINDOW(file_browser->main_window));
     if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
         main_window_event(file_browser->main_window,
                           event_handler->win_click,
@@ -2238,25 +2235,25 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
 }
 
 static void
-on_file_browser_begin_chdir(PtkFileBrowser* file_browser, FMMainWindow* main_window)
+on_file_browser_begin_chdir(PtkFileBrowser* file_browser, MainWindow* main_window)
 {
-    fm_main_window_update_status_bar(main_window, file_browser);
+    main_window_update_status_bar(main_window, file_browser);
 }
 
 static void
-on_file_browser_after_chdir(PtkFileBrowser* file_browser, FMMainWindow* main_window)
+on_file_browser_after_chdir(PtkFileBrowser* file_browser, MainWindow* main_window)
 {
-    // fm_main_window_stop_busy_task( main_window );
+    // main_window_stop_busy_task( main_window );
 
-    if (fm_main_window_get_current_file_browser(main_window) == GTK_WIDGET(file_browser))
+    if (main_window_get_current_file_browser(main_window) == GTK_WIDGET(file_browser))
     {
         set_window_title(main_window, file_browser);
         // gtk_entry_set_text(main_window->address_bar, file_browser->dir->path);
         // gtk_statusbar_push(GTK_STATUSBAR(main_window->status_bar), 0, "");
-        // fm_main_window_update_command_ui(main_window, file_browser);
+        // main_window_update_command_ui(main_window, file_browser);
     }
 
-    // fm_main_window_update_tab_label(main_window, file_browser, file_browser->dir->path);
+    // main_window_update_tab_label(main_window, file_browser, file_browser->dir->path);
 
     if (file_browser->inhibit_focus)
     {
@@ -2291,7 +2288,7 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, FMMainWindow* main_win
 }
 
 GtkWidget*
-fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_browser)
+main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_browser)
 {
     (void)main_window;
     GtkEventBox* evt_box;
@@ -2383,8 +2380,8 @@ fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
 }
 
 void
-fm_main_window_update_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_browser,
-                                std::string_view path)
+main_window_update_tab_label(MainWindow* main_window, PtkFileBrowser* file_browser,
+                             std::string_view path)
 {
     GtkWidget* label =
         gtk_notebook_get_tab_label(GTK_NOTEBOOK(main_window->notebook), GTK_WIDGET(file_browser));
@@ -2415,12 +2412,12 @@ fm_main_window_update_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
 }
 
 void
-fm_main_window_add_new_tab(FMMainWindow* main_window, const char* folder_path)
+main_window_add_new_tab(MainWindow* main_window, const char* folder_path)
 {
     GtkWidget* notebook = main_window->notebook;
 
     PtkFileBrowser* curfb =
-        PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (GTK_IS_WIDGET(curfb))
     {
         // save sliders of current fb ( new tab while task manager is shown changes vals )
@@ -2432,7 +2429,7 @@ fm_main_window_add_new_tab(FMMainWindow* main_window, const char* folder_path)
         ptk_file_browser_new(main_window->curpanel, notebook, main_window->task_view, main_window));
     if (!file_browser)
         return;
-    // LOG_INFO("fm_main_window_add_new_tab fb={:p}", fmt::ptr(file_browser));
+    // LOG_INFO("main_window_add_new_tab fb={:p}", fmt::ptr(file_browser));
     ptk_file_browser_set_single_click(file_browser, app_settings.get_single_click());
     // FIXME: this should not be hard-code
     ptk_file_browser_set_single_click_timeout(file_browser,
@@ -2461,7 +2458,7 @@ fm_main_window_add_new_tab(FMMainWindow* main_window, const char* folder_path)
     file_browser->add_event<EventType::CHANGE_SEL>(on_file_browser_sel_change, main_window);
     file_browser->add_event<EventType::CHANGE_PANE>(on_file_browser_panel_change, main_window);
 
-    GtkWidget* tab_label = fm_main_window_create_tab_label(main_window, file_browser);
+    GtkWidget* tab_label = main_window_create_tab_label(main_window, file_browser);
     i32 idx = gtk_notebook_append_page(GTK_NOTEBOOK(notebook), GTK_WIDGET(file_browser), tab_label);
     gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(notebook), GTK_WIDGET(file_browser), true);
     gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), idx);
@@ -2500,17 +2497,17 @@ fm_main_window_add_new_tab(FMMainWindow* main_window, const char* folder_path)
 }
 
 GtkWidget*
-fm_main_window_new()
+main_window_new()
 {
     return GTK_WIDGET(g_object_new(FM_TYPE_MAIN_WINDOW, nullptr));
 }
 
 GtkWidget*
-fm_main_window_get_current_file_browser(FMMainWindow* main_window)
+main_window_get_current_file_browser(MainWindow* main_window)
 {
     if (!main_window)
     {
-        main_window = fm_main_window_get_last_active();
+        main_window = main_window_get_last_active();
         if (!main_window)
             return nullptr;
     }
@@ -2527,14 +2524,14 @@ static void
 on_preference_activate(GtkMenuItem* menuitem, void* user_data)
 {
     (void)menuitem;
-    FMMainWindow* main_window = FM_MAIN_WINDOW(user_data);
-    fm_main_window_preference(main_window);
+    MainWindow* main_window = MAIN_WINDOW(user_data);
+    main_window_preference(main_window);
 }
 
 static void
-fm_main_window_preference(FMMainWindow* main_window)
+main_window_preference(MainWindow* main_window)
 {
-    fm_edit_preference(GTK_WINDOW(main_window), PrefDlgPage::PREF_GENERAL);
+    edit_preference(GTK_WINDOW(main_window), PrefDlgPage::PREF_GENERAL);
 }
 
 static void
@@ -2572,7 +2569,7 @@ on_about_activate(GtkMenuItem* menuitem, void* user_data)
 }
 
 static void
-fm_main_window_add_new_window(FMMainWindow* main_window)
+main_window_add_new_window(MainWindow* main_window)
 {
     if (main_window && !main_window->maximized && !main_window->fullscreen)
     {
@@ -2585,21 +2582,21 @@ fm_main_window_add_new_window(FMMainWindow* main_window)
             app_settings.set_height(allocation.height);
         }
     }
-    // GtkWidget* new_win = fm_main_window_new();
-    fm_main_window_new();
+    // GtkWidget* new_win = main_window_new();
+    main_window_new();
 }
 
 static void
 on_new_window_activate(GtkMenuItem* menuitem, void* user_data)
 {
     (void)menuitem;
-    FMMainWindow* main_window = FM_MAIN_WINDOW(user_data);
+    MainWindow* main_window = MAIN_WINDOW(user_data);
 
     autosave_request_cancel();
-    fm_main_window_store_positions(main_window);
+    main_window_store_positions(main_window);
     save_settings(main_window);
 
-    fm_main_window_add_new_window(main_window);
+    main_window_add_new_window(main_window);
 }
 
 static bool
@@ -2630,14 +2627,14 @@ delayed_focus_file_browser(PtkFileBrowser* file_browser)
 }
 
 void
-set_panel_focus(FMMainWindow* main_window, PtkFileBrowser* file_browser)
+set_panel_focus(MainWindow* main_window, PtkFileBrowser* file_browser)
 {
     if (!file_browser && !main_window)
         return;
 
-    FMMainWindow* mw = main_window;
+    MainWindow* mw = main_window;
     if (!mw)
-        mw = FM_MAIN_WINDOW(file_browser->main_window);
+        mw = MAIN_WINDOW(file_browser->main_window);
 
     update_window_title(nullptr, mw);
     if (event_handler->pnl_focus->s || event_handler->pnl_focus->ob2_data)
@@ -2654,11 +2651,11 @@ set_panel_focus(FMMainWindow* main_window, PtkFileBrowser* file_browser)
 }
 
 static void
-on_fullscreen_activate(GtkMenuItem* menuitem, FMMainWindow* main_window)
+on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window)
 {
     (void)menuitem;
     PtkFileBrowser* file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (xset_get_b(XSetName::MAIN_FULL))
     {
         if (file_browser && file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
@@ -2680,7 +2677,7 @@ on_fullscreen_activate(GtkMenuItem* menuitem, FMMainWindow* main_window)
 }
 
 static void
-set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
+set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser)
 {
     std::string disp_path;
     std::string disp_name;
@@ -2735,11 +2732,11 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
 }
 
 static void
-update_window_title(GtkMenuItem* item, FMMainWindow* main_window)
+update_window_title(GtkMenuItem* item, MainWindow* main_window)
 {
     (void)item;
     PtkFileBrowser* file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (file_browser)
         set_window_title(main_window, file_browser);
 }
@@ -2749,12 +2746,12 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
                                void* user_data)
 {
     (void)page;
-    FMMainWindow* main_window = FM_MAIN_WINDOW(user_data);
+    MainWindow* main_window = MAIN_WINDOW(user_data);
     PtkFileBrowser* file_browser;
 
     // save sliders of current fb ( new tab while task manager is shown changes vals )
     PtkFileBrowser* curfb =
-        PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (curfb)
     {
         ptk_file_browser_slider_release(nullptr, nullptr, curfb);
@@ -2768,7 +2765,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
     main_window->curpanel = file_browser->mypanel;
     main_window->notebook = main_window->panel[main_window->curpanel - 1];
 
-    fm_main_window_update_status_bar(main_window, file_browser);
+    main_window_update_status_bar(main_window, file_browser);
 
     set_window_title(main_window, file_browser);
 
@@ -2791,20 +2788,20 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
 }
 
 void
-main_window_open_path_in_current_tab(FMMainWindow* main_window, const char* path)
+main_window_open_path_in_current_tab(MainWindow* main_window, const char* path)
 {
     PtkFileBrowser* file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!file_browser)
         return;
     ptk_file_browser_chdir(file_browser, path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
 }
 
 void
-main_window_open_network(FMMainWindow* main_window, const char* path, bool new_tab)
+main_window_open_network(MainWindow* main_window, const char* path, bool new_tab)
 {
     PtkFileBrowser* file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!file_browser)
         return;
     char* str = ztd::strdup(path);
@@ -2814,7 +2811,7 @@ main_window_open_network(FMMainWindow* main_window, const char* path, bool new_t
 
 static void
 on_file_browser_open_item(PtkFileBrowser* file_browser, std::string_view path, PtkOpenAction action,
-                          FMMainWindow* main_window)
+                          MainWindow* main_window)
 {
     if (path.empty())
         return;
@@ -2825,7 +2822,7 @@ on_file_browser_open_item(PtkFileBrowser* file_browser, std::string_view path, P
             ptk_file_browser_chdir(file_browser, path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
             break;
         case PtkOpenAction::PTK_OPEN_NEW_TAB:
-            fm_main_window_add_new_tab(main_window, path.data());
+            main_window_add_new_tab(main_window, path.data());
             break;
         case PtkOpenAction::PTK_OPEN_NEW_WINDOW:
         case PtkOpenAction::PTK_OPEN_TERMINAL:
@@ -2836,7 +2833,7 @@ on_file_browser_open_item(PtkFileBrowser* file_browser, std::string_view path, P
 }
 
 static void
-fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file_browser)
+main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_browser)
 {
     (void)main_window;
     if (!(GTK_IS_WIDGET(file_browser) && GTK_IS_STATUSBAR(file_browser->status_bar)))
@@ -3064,7 +3061,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
 }
 
 static void
-on_file_browser_panel_change(PtkFileBrowser* file_browser, FMMainWindow* main_window)
+on_file_browser_panel_change(PtkFileBrowser* file_browser, MainWindow* main_window)
 {
     // LOG_INFO("panel_change  panel {}", file_browser->mypanel);
     main_window->curpanel = file_browser->mypanel;
@@ -3074,7 +3071,7 @@ on_file_browser_panel_change(PtkFileBrowser* file_browser, FMMainWindow* main_wi
 }
 
 static void
-on_file_browser_sel_change(PtkFileBrowser* file_browser, FMMainWindow* main_window)
+on_file_browser_sel_change(PtkFileBrowser* file_browser, MainWindow* main_window)
 {
     // LOG_INFO("sel_change  panel {}", file_browser->mypanel);
     if ((event_handler->pnl_sel->ob2_data || event_handler->pnl_sel->s) &&
@@ -3089,14 +3086,14 @@ on_file_browser_sel_change(PtkFileBrowser* file_browser, FMMainWindow* main_wind
                           0,
                           true))
         return;
-    fm_main_window_update_status_bar(main_window, file_browser);
+    main_window_update_status_bar(main_window, file_browser);
 }
 
 static void
-on_file_browser_content_change(PtkFileBrowser* file_browser, FMMainWindow* main_window)
+on_file_browser_content_change(PtkFileBrowser* file_browser, MainWindow* main_window)
 {
     // LOG_INFO("content_change  panel {}", file_browser->mypanel);
-    fm_main_window_update_status_bar(main_window, file_browser);
+    main_window_update_status_bar(main_window, file_browser);
 }
 
 static bool
@@ -3117,7 +3114,7 @@ on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y
 
 static bool
 on_window_button_press_event(GtkWidget* widget, GdkEventButton* event,
-                             FMMainWindow* main_window) // sfm
+                             MainWindow* main_window) // sfm
 {
     (void)widget;
     if (event->type != GdkEventType::GDK_BUTTON_PRESS)
@@ -3127,7 +3124,7 @@ on_window_button_press_event(GtkWidget* widget, GdkEventButton* event,
     if (event->button == 4 || event->button == 5 || event->button == 8 || event->button == 9) // sfm
     {
         PtkFileBrowser* file_browser =
-            PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+            PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
         if (!file_browser)
             return false;
         if (event->button == 4 || event->button == 8)
@@ -3149,7 +3146,7 @@ on_main_window_focus(GtkWidget* main_window, GdkEventFocus* event, void* user_da
     // but this unneeded anyway?  cross-window menu changes seem to work ok
     // rebuild_menus( main_window );  // xset may change in another window
     if (event_handler->win_focus->s || event_handler->win_focus->ob2_data)
-        main_window_event(FM_MAIN_WINDOW_REINTERPRET(main_window),
+        main_window_event(MAIN_WINDOW_REINTERPRET(main_window),
                           event_handler->win_focus,
                           XSetName::EVT_WIN_FOCUS,
                           0,
@@ -3163,7 +3160,7 @@ on_main_window_focus(GtkWidget* main_window, GdkEventFocus* event, void* user_da
 }
 
 static bool
-on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, xset_t known_set)
+on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t known_set)
 {
     // LOG_INFO("main_keypress {} {}", event->keyval, event->state);
 
@@ -3195,8 +3192,7 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, xset_t kn
         (keymod == 0 && event->keyval != GDK_KEY_Escape &&
          gdk_keyval_to_unicode(event->keyval))) // visible char
     {
-        browser =
-            PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+        browser = PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
         if (browser && browser->path_bar && gtk_widget_has_focus(GTK_WIDGET(browser->path_bar)))
             return false; // send to pathbar
     }
@@ -3247,7 +3243,7 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, xset_t kn
                 {
                     // use current panel's set
                     browser = PTK_FILE_BROWSER_REINTERPRET(
-                        fm_main_window_get_current_file_browser(main_window));
+                        main_window_get_current_file_browser(main_window));
                     if (browser)
                     {
                         const std::string new_set_name =
@@ -3292,11 +3288,11 @@ on_main_window_keypress(FMMainWindow* main_window, GdkEventKey* event, xset_t kn
 }
 
 static bool
-on_main_window_keypress_found_key(FMMainWindow* main_window, xset_t set)
+on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
 {
     PtkFileBrowser* browser;
 
-    browser = PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+    browser = PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!browser)
         return true;
 
@@ -3419,16 +3415,16 @@ on_main_window_keypress_found_key(FMMainWindow* main_window, xset_t set)
     return true;
 }
 
-FMMainWindow*
-fm_main_window_get_last_active()
+MainWindow*
+main_window_get_last_active()
 {
     if (!all_windows.empty())
         return all_windows.at(0);
     return nullptr;
 }
 
-const std::vector<FMMainWindow*>&
-fm_main_window_get_all()
+const std::vector<MainWindow*>&
+main_window_get_all()
 {
     return all_windows;
 }
@@ -3503,17 +3499,17 @@ get_desktop_index(GtkWindow* win)
 #endif
 }
 
-FMMainWindow*
-fm_main_window_get_on_current_desktop()
+MainWindow*
+main_window_get_on_current_desktop()
 { // find the last used spacefm window on the current desktop
     i64 desktop;
     i64 cur_desktop = get_desktop_index(nullptr);
     // LOG_INFO("current_desktop = {}", cur_desktop);
     if (cur_desktop == -1)
-        return fm_main_window_get_last_active(); // revert to dumb if no current
+        return main_window_get_last_active(); // revert to dumb if no current
 
     bool invalid = false;
-    for (FMMainWindow* window : all_windows)
+    for (MainWindow* window : all_windows)
     {
         desktop = get_desktop_index(GTK_WINDOW(window));
         // LOG_INFO( "    test win {:p} = {}", window, desktop);
@@ -3523,7 +3519,7 @@ fm_main_window_get_on_current_desktop()
             invalid = true;
     }
     // revert to dumb if one or more window desktops unreadable
-    return invalid ? fm_main_window_get_last_active() : nullptr;
+    return invalid ? main_window_get_last_active() : nullptr;
 }
 
 enum MainWindowTaskCol
@@ -3611,7 +3607,7 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
     if (!GTK_IS_WIDGET(file_browser))
         return;
 
-    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
+    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     if (!main_window)
         return;
 
@@ -3865,10 +3861,10 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
     c->valid = true;
 }
 
-static FMMainWindow*
+static MainWindow*
 get_task_view_window(GtkWidget* view)
 {
-    for (FMMainWindow* window : all_windows)
+    for (MainWindow* window : all_windows)
     {
         if (window->task_view == view)
             return window;
@@ -3883,7 +3879,7 @@ main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
     std::string esc_path;
 
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(vtask->exec_browser);
-    FMMainWindow* main_window = FM_MAIN_WINDOW(file_browser->main_window);
+    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     xset_t set = XSET(vtask->exec_set);
 
     buf.append("\n#source");
@@ -4191,7 +4187,7 @@ static void
 on_task_columns_changed(GtkWidget* view, void* user_data)
 {
     (void)user_data;
-    FMMainWindow* main_window = get_task_view_window(view);
+    MainWindow* main_window = get_task_view_window(view);
     if (!main_window || !view)
         return;
 
@@ -4258,7 +4254,7 @@ on_task_column_selected(GtkMenuItem* item, GtkWidget* view)
 }
 
 static bool
-main_tasks_running(FMMainWindow* main_window)
+main_tasks_running(MainWindow* main_window)
 {
     if (!main_window->task_view || !GTK_IS_TREE_VIEW(main_window->task_view))
         return false;
@@ -4466,7 +4462,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask
 }
 
 static bool
-idle_set_task_height(FMMainWindow* main_window)
+idle_set_task_height(MainWindow* main_window)
 {
     GtkAllocation allocation;
     i32 pos;
@@ -4507,7 +4503,7 @@ idle_set_task_height(FMMainWindow* main_window)
 }
 
 static void
-show_task_manager(FMMainWindow* main_window, bool show)
+show_task_manager(MainWindow* main_window, bool show)
 {
     GtkAllocation allocation;
 
@@ -4547,7 +4543,7 @@ show_task_manager(FMMainWindow* main_window, bool show)
         {
             // focus the file list
             PtkFileBrowser* file_browser =
-                PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+                PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
             if (file_browser)
                 gtk_widget_grab_focus(file_browser->folder_view);
         }
@@ -4555,7 +4551,7 @@ show_task_manager(FMMainWindow* main_window, bool show)
 }
 
 static void
-on_task_popup_show(GtkMenuItem* item, FMMainWindow* main_window, char* name2)
+on_task_popup_show(GtkMenuItem* item, MainWindow* main_window, char* name2)
 {
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
@@ -4605,7 +4601,7 @@ on_task_popup_show(GtkMenuItem* item, FMMainWindow* main_window, char* name2)
 }
 
 static void
-on_task_popup_errset(GtkMenuItem* item, FMMainWindow* main_window, char* name2)
+on_task_popup_errset(GtkMenuItem* item, MainWindow* main_window, char* name2)
 {
     (void)main_window;
     char* name;
@@ -4661,7 +4657,7 @@ on_task_popup_errset(GtkMenuItem* item, FMMainWindow* main_window, char* name2)
 }
 
 static void
-main_task_prepare_menu(FMMainWindow* main_window, GtkWidget* menu, GtkAccelGroup* accel_group)
+main_task_prepare_menu(MainWindow* main_window, GtkWidget* menu, GtkAccelGroup* accel_group)
 {
     (void)menu;
     (void)accel_group;
@@ -4713,7 +4709,7 @@ get_selected_task(GtkWidget* view)
 
     if (!view)
         return nullptr;
-    FMMainWindow* main_window = get_task_view_window(view);
+    MainWindow* main_window = get_task_view_window(view);
     if (!main_window)
         return nullptr;
 
@@ -4748,7 +4744,7 @@ show_task_dialog(GtkWidget* widget, GtkWidget* view)
 }
 
 static bool
-on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow* main_window)
+on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* main_window)
 {
     GtkTreeModel* model = nullptr;
     GtkTreePath* tree_path;
@@ -4853,7 +4849,7 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, FMMainWindow*
             // build popup
             PtkFileBrowser* file_browser;
             file_browser =
-                PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+                PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
             if (!file_browser)
                 return false;
             GtkWidget* popup;
@@ -4929,7 +4925,7 @@ on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn
     GtkTreeIter it;
     PtkFileTask* ptask;
 
-    FMMainWindow* main_window = get_task_view_window(view);
+    MainWindow* main_window = get_task_view_window(view);
     if (!main_window)
         return;
 
@@ -4964,7 +4960,7 @@ main_task_view_remove_task(PtkFileTask* ptask)
     if (!view)
         return;
 
-    FMMainWindow* main_window = get_task_view_window(view);
+    MainWindow* main_window = get_task_view_window(view);
     if (!main_window)
         return;
 
@@ -5021,7 +5017,7 @@ main_task_view_update_task(PtkFileTask* ptask)
     if (!view)
         return;
 
-    FMMainWindow* main_window = get_task_view_window(view);
+    MainWindow* main_window = get_task_view_window(view);
     if (!main_window)
         return;
 
@@ -5281,7 +5277,7 @@ main_task_view_update_task(PtkFileTask* ptask)
 }
 
 static GtkWidget*
-main_task_view_new(FMMainWindow* main_window)
+main_task_view_new(MainWindow* main_window)
 {
     GtkTreeViewColumn* col;
     GtkCellRenderer* renderer;
@@ -5507,7 +5503,7 @@ unescape(std::string_view t)
 static bool
 delayed_show_menu(GtkWidget* menu)
 {
-    FMMainWindow* main_window = fm_main_window_get_last_active();
+    MainWindow* main_window = main_window_get_last_active();
     if (main_window)
         gtk_window_present(GTK_WINDOW(main_window));
     gtk_widget_show_all(GTK_WIDGET(menu));
@@ -5584,10 +5580,10 @@ main_window_socket_command(char* argv[], std::string& reply)
     }
 
     // window
-    FMMainWindow* main_window = nullptr;
+    MainWindow* main_window = nullptr;
     if (!window)
     {
-        main_window = fm_main_window_get_last_active();
+        main_window = main_window_get_last_active();
         if (!main_window)
         {
             reply = "invalid window";
@@ -5596,7 +5592,7 @@ main_window_socket_command(char* argv[], std::string& reply)
     }
     else
     {
-        for (FMMainWindow* window2 : all_windows)
+        for (MainWindow* window2 : all_windows)
         {
             const std::string str = fmt::format("{:p}", (void*)window2);
             if (ztd::same(str, window))
@@ -5795,7 +5791,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (!(argv[i + 1] && std::filesystem::is_directory(argv[i + 1])))
                 ptk_file_browser_new_tab(nullptr, file_browser);
             else
-                fm_main_window_add_new_tab(main_window, argv[i + 1]);
+                main_window_add_new_tab(main_window, argv[i + 1]);
 
             const auto counts = main_window_get_counts(file_browser);
             // const panel_t panel_count = counts[0];
@@ -6052,7 +6048,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 free(file_browser->status_bar_custom);
                 file_browser->status_bar_custom = ztd::strdup(argv[i + 1]);
             }
-            fm_main_window_update_status_bar(main_window, file_browser);
+            main_window_update_status_bar(main_window, file_browser);
         }
         else if (ztd::same(socket_property, "pathbar_text"))
         { // TEXT [[SELSTART] SELEND]
@@ -7321,7 +7317,7 @@ main_window_socket_command(char* argv[], std::string& reply)
 }
 
 static bool
-run_event(FMMainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, XSetName event,
+run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, XSetName event,
           i32 panel, i32 tab, const char* focus, i32 keyval, i32 button, i32 state, bool visible,
           xset_t set, char* ucmd)
 {
@@ -7530,16 +7526,16 @@ main_window_event(void* mw, xset_t preset, XSetName event, i64 panel, i64 tab, c
     }
 
     // get main_window, panel, and tab
-    FMMainWindow* main_window;
+    MainWindow* main_window;
     PtkFileBrowser* file_browser;
     if (!mw)
-        main_window = fm_main_window_get_last_active();
+        main_window = main_window_get_last_active();
     else
-        main_window = FM_MAIN_WINDOW(mw);
+        main_window = MAIN_WINDOW(mw);
     if (main_window)
     {
         file_browser =
-            PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+            PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
         if (!file_browser)
             return false;
         if (!panel)

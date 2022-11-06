@@ -24,4 +24,4 @@ enum PrefDlgPage
     PREF_ADVANCED
 };
 
-bool fm_edit_preference(GtkWindow* parent, i32 page);
+bool edit_preference(GtkWindow* parent, i32 page);

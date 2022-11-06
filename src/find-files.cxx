@@ -254,10 +254,10 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
 }
 
 static void
-open_dir(char* dir, GList* files, FMMainWindow* w)
+open_dir(char* dir, GList* files, MainWindow* w)
 {
     (void)files;
-    fm_main_window_add_new_tab(w, dir);
+    main_window_add_new_tab(w, dir);
 }
 
 static void
@@ -330,27 +330,27 @@ on_open_files(GAction* action, FindFile* data)
     {
         if (open_files_has_dir)
         {
-            w = GTK_WIDGET(fm_main_window_get_on_current_desktop());
+            w = GTK_WIDGET(main_window_get_on_current_desktop());
             if (!w)
             {
-                w = fm_main_window_new();
-                // now done in fm_main_window_new
+                w = main_window_new();
+                // now done in main_window_new
                 // gtk_window_set_default_size(GTK_WINDOW(w), app_settings.get_width(),
                 // app_settings.get_height());
             }
             gtk_window_present(GTK_WINDOW(w));
             file_browser = PTK_FILE_BROWSER_REINTERPRET(
-                fm_main_window_get_current_file_browser(FM_MAIN_WINDOW_REINTERPRET(w)));
+                main_window_get_current_file_browser(MAIN_WINDOW_REINTERPRET(w)));
         }
         g_hash_table_foreach_steal(hash, (GHRFunc)open_file, file_browser);
     }
     else
     {
-        w = GTK_WIDGET(fm_main_window_get_on_current_desktop());
+        w = GTK_WIDGET(main_window_get_on_current_desktop());
         if (!w)
         {
-            w = fm_main_window_new();
-            // now done in fm_main_window_new
+            w = main_window_new();
+            // now done in main_window_new
             // gtk_window_set_default_size(GTK_WINDOW(w), app_settings.get_width(),
             // app_settings.get_height());
         }
@@ -1074,7 +1074,7 @@ on_use_size_upper_toggled(GtkWidget* widget, FindFile* data)
 }
 
 void
-fm_find_files(const std::vector<std::string>& search_dirs)
+find_files(const std::vector<std::string>& search_dirs)
 {
     FindFile* data = new FindFile;
     GtkTreeIter it;

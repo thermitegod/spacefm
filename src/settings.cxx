@@ -318,15 +318,15 @@ autosave_settings()
 void
 save_settings(void* main_window_ptr)
 {
-    FMMainWindow* main_window;
+    MainWindow* main_window;
     // LOG_INFO("save_settings");
 
     // save tabs
     bool save_tabs = xset_get_b(XSetName::MAIN_SAVE_TABS);
     if (main_window_ptr)
-        main_window = FM_MAIN_WINDOW(main_window_ptr);
+        main_window = MAIN_WINDOW(main_window_ptr);
     else
-        main_window = fm_main_window_get_last_active();
+        main_window = main_window_get_last_active();
 
     if (GTK_IS_WIDGET(main_window))
     {
@@ -2402,7 +2402,7 @@ xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventButton* event
     panel_t p;
     MainWindowPanel mode;
     PtkFileBrowser* file_browser = nullptr;
-    FMMainWindow* main_window = fm_main_window_get_last_active();
+    MainWindow* main_window = main_window_get_last_active();
 
     // set may be a submenu that does not match tool_type
     if (!(set && !set->lock && tool_type > XSetTool::CUSTOM))
@@ -2416,7 +2416,7 @@ xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventButton* event
     if (main_window)
     {
         file_browser =
-            PTK_FILE_BROWSER_REINTERPRET(fm_main_window_get_current_file_browser(main_window));
+            PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
         p = file_browser->mypanel;
         mode = main_window->panel_context.at(p);
     }
