@@ -799,7 +799,7 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
             panel = main_window->curpanel + 1;
             do
             {
-                if (panel > 4)
+                if (!valid_panel(panel))
                     panel = 1;
                 if (xset_get_b_panel(panel, XSetPanel::SHOW))
                     break;
@@ -812,7 +812,7 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
             panel = main_window->curpanel + 1;
             do
             {
-                if (panel > 4)
+                if (!valid_panel(panel))
                     panel = 1;
                 if (xset_get_b_panel(panel, XSetPanel::SHOW))
                     break;
@@ -1160,7 +1160,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
     if (!xset_get_b_panel(main_window->curpanel, XSetPanel::SHOW))
     {
         panel_t p = main_window->curpanel + 1;
-        if (p > 4)
+        if (!valid_panel(p))
             p = 1;
         while (p != main_window->curpanel)
         {
@@ -1175,7 +1175,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                 break;
             }
             p++;
-            if (p > 4)
+            if (!valid_panel(p))
                 p = 1;
         }
     }
@@ -1912,7 +1912,7 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
             // next
             do
             {
-                if (++panel_x > 4)
+                if (!valid_panel(++panel_x))
                     panel_x = 1;
                 if (panel_x == file_browser->mypanel)
                     return nullptr;
@@ -1956,7 +1956,7 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
             // next
             do
             {
-                if (++panel_x > 4)
+                if (!valid_panel(++panel_x))
                     panel_x = 1;
                 if (panel_x == file_browser->mypanel)
                     return;
@@ -1967,7 +1967,7 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
             break;
     }
 
-    if (panel_x < 1 || panel_x > 4)
+    if (!valid_panel(panel_x))
         return;
 
     // show panel
@@ -5840,8 +5840,8 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             else if (ztd::startswith(socket_property, "panel"))
             {
-                i32 j = argv[i][5] - 48;
-                if (j < 1 || j > 4)
+                const i32 j = argv[i][5] - 48;
+                if (!valid_panel(j))
                 {
                     reply = fmt::format("invalid property {}", argv[i]);
                     return 2;
@@ -6298,8 +6298,8 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             else if (ztd::startswith(socket_property, "panel"))
             {
-                i32 j = argv[i][5] - 48;
-                if (j < 1 || j > 4)
+                const i32 j = argv[i][5] - 48;
+                if (!valid_panel(j))
                 {
                     reply = fmt::format("invalid property {}", argv[i]);
                     return 2;
