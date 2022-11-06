@@ -40,12 +40,9 @@
 #include "ptk/ptk-error.hxx"
 #include "ptk/ptk-keyboard.hxx"
 
-#include "ptk/ptk-utils.hxx"
-
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-clipboard.hxx"
-#include "ptk/ptk-utils.hxx"
 
 #include "vfs/vfs-file-info.hxx"
 #include "vfs/vfs-user-dir.hxx"
@@ -2992,7 +2989,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 }
                 else
                 {
-                    const std::string real_path = get_real_link_target(mset->full_path);
+                    const std::string real_path = std::filesystem::read_symlink(mset->full_path);
                     if (ztd::same(real_path, mset->full_path))
                     {
                         ptk_show_error(GTK_WINDOW(mset->dlg),
@@ -3039,7 +3036,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 }
                 else
                 {
-                    const std::string real_path = get_real_link_target(mset->full_path);
+                    const std::string real_path = std::filesystem::read_symlink(mset->full_path);
                     if (ztd::same(real_path, mset->full_path))
                     {
                         ptk_show_error(GTK_WINDOW(mset->dlg),

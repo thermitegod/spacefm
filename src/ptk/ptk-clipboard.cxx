@@ -31,7 +31,6 @@
 #include "ptk/ptk-error.hxx"
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-file-actions-rename.hxx"
-#include "ptk/ptk-utils.hxx"
 
 #include "utils.hxx"
 
@@ -485,7 +484,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, std::string_view dest_dir,
 
             if (std::filesystem::is_symlink(file_path))
             { // canonicalize target
-                file_path = get_real_link_target(file_path);
+                file_path = std::filesystem::read_symlink(file_path);
             }
 
             const auto file_stat = ztd::lstat(file_path);

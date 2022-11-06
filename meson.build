@@ -330,7 +330,6 @@ sources = [
   'src/ptk/ptk-keyboard.cxx',
   'src/ptk/ptk-location-view.cxx',
   'src/ptk/ptk-path-entry.cxx',
-  'src/ptk/ptk-utils.cxx',
 
   'src/vfs/vfs-app-desktop.cxx',
   'src/vfs/vfs-async-task.cxx',
