@@ -180,7 +180,13 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
             {
                 const std::string full_path =
                     Glib::build_filename(loader->dir->path, req->file->get_name());
+
+                // LOG_INFO("loader->dir->path    = {}", loader->dir->path);
+                // LOG_INFO("req->file->get_name  = {}", req->file->get_name());
+                // LOG_INFO("full_path            = {}", full_path);
+
                 req->file->load_thumbnail(full_path, load_big);
+
                 // Slow down for debugging.
                 // LOG_DEBUG("DELAY!!");
                 // Glib::usleep(G_USEC_PER_SEC/2);
@@ -277,54 +283,13 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
 void
 vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big)
 {
-    vfs::thumbnail_loader loader = dir->thumbnail_loader;
+    (void)is_big;
 
+    vfs::thumbnail_loader loader = dir->thumbnail_loader;
     if (!loader)
         return;
 
-    u32 idx = 0;
-    std::vector<u32> remove_idx;
-    // LOG_DEBUG("TRY TO CANCEL REQUESTS!!");
-    for (vfs::thumbnail::request req : loader->queue)
-    {
-        --req->n_requests[is_big ? VFSThumbnailSize::BIG : VFSThumbnailSize::SMALL];
-
-        // nobody needs this
-        if (req->n_requests[VFSThumbnailSize::BIG] <= 0 &&
-            req->n_requests[VFSThumbnailSize::SMALL] <= 0)
-        {
-            remove_idx.emplace_back(idx);
-        }
-
-        ++idx;
-    }
-
-    // std::ranges::sort(remove_idx);
-    // std::ranges::reverse(remove_idx);
-
-    for (u32 i : remove_idx)
-    {
-        loader->queue.erase(loader->queue.cbegin() + i);
-    }
-
-    if (loader->queue.empty())
-    {
-        // LOG_DEBUG("FREE LOADER IN vfs_thumbnail_loader_cancel_all_requests!");
-        loader->dir->thumbnail_loader = nullptr;
-
-        // FIXME: added idle_handler = 0 to prevent idle_handler being
-        // removed in vfs_thumbnail_loader_free - BUT causes a segfault
-        // in vfs_async_task_lock ??
-        // If source is removed here or in vfs_thumbnail_loader_free
-        // it causes a "GLib-CRITICAL **: Source ID N was not found when
-        // attempting to remove it" warning.  Such a source ID is always
-        // the one added in thumbnail_loader_thread at the "add2" comment.
-
-        // loader->idle_handler = 0;
-
-        vfs_thumbnail_loader_free(loader);
-        return;
-    }
+    vfs_thumbnail_loader_free(loader);
 }
 
 static GdkPixbuf*

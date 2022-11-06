@@ -241,51 +241,51 @@ VFSFileInfo::get_mime_type_desc() const noexcept
 GdkPixbuf*
 VFSFileInfo::get_big_icon() noexcept
 {
-    /* get special icons for special files, especially for
-       some desktop icons */
-
-    if (this->flags != VFSFileInfoFlag::NONE)
+    // get special icons for special files, especially for some desktop icons
+    if (this->flags == VFSFileInfoFlag::NONE)
     {
-        i32 w;
-        i32 h;
-        const i32 icon_size = vfs_mime_type_get_icon_size_big();
+        if (!this->mime_type)
+            return nullptr;
+        return vfs_mime_type_get_icon(this->mime_type, true);
+    }
 
+    i32 w;
+    i32 h;
+    const i32 icon_size = vfs_mime_type_get_icon_size_big();
+
+    if (this->big_thumbnail)
+    {
+        w = gdk_pixbuf_get_width(this->big_thumbnail);
+        h = gdk_pixbuf_get_height(this->big_thumbnail);
+    }
+    else
+    {
+        w = 0;
+        h = 0;
+    }
+
+    if (std::abs(std::max(w, h) - icon_size) > 2)
+    {
+        char* icon_name = nullptr;
         if (this->big_thumbnail)
         {
-            w = gdk_pixbuf_get_width(this->big_thumbnail);
-            h = gdk_pixbuf_get_height(this->big_thumbnail);
+            icon_name = (char*)g_object_steal_data(G_OBJECT(this->big_thumbnail), "name");
+            g_object_unref(this->big_thumbnail);
+            this->big_thumbnail = nullptr;
         }
-        else
+        if (icon_name)
         {
-            w = h = 0;
-        }
-
-        if (std::abs(std::max(w, h) - icon_size) > 2)
-        {
-            char* icon_name = nullptr;
-            if (this->big_thumbnail)
-            {
-                icon_name = (char*)g_object_steal_data(G_OBJECT(this->big_thumbnail), "name");
-                g_object_unref(this->big_thumbnail);
-                this->big_thumbnail = nullptr;
-            }
-            if (icon_name)
-            {
-                if (icon_name[0] == '/')
-                    this->big_thumbnail = gdk_pixbuf_new_from_file(icon_name, nullptr);
-                else
-                    this->big_thumbnail = vfs_load_icon(icon_name, icon_size);
-            }
-            if (this->big_thumbnail)
-                g_object_set_data_full(G_OBJECT(this->big_thumbnail), "name", icon_name, free);
+            if (ztd::startswith(icon_name, "/"))
+                this->big_thumbnail = gdk_pixbuf_new_from_file(icon_name, nullptr);
             else
-                free(icon_name);
+                this->big_thumbnail = vfs_load_icon(icon_name, icon_size);
         }
-        return this->big_thumbnail ? g_object_ref(this->big_thumbnail) : nullptr;
+        if (this->big_thumbnail)
+            g_object_set_data_full(G_OBJECT(this->big_thumbnail), "name", icon_name, free);
+        else
+            free(icon_name);
     }
-    if (!this->mime_type)
-        return nullptr;
-    return vfs_mime_type_get_icon(this->mime_type, true);
+    return this->big_thumbnail ? g_object_ref(this->big_thumbnail) : nullptr;
 }
 
 GdkPixbuf*
@@ -592,37 +592,47 @@ VFSFileInfo::is_thumbnail_loaded(bool big) const noexcept
     return (this->small_thumbnail != nullptr);
 }
 
-bool
+void
 VFSFileInfo::load_thumbnail(std::string_view full_path, bool big) noexcept
 {
     if (big)
-    {
-        if (this->big_thumbnail)
-            return true;
-    }
+        load_thumbnail_big(full_path);
     else
-    {
-        if (this->small_thumbnail)
-            return true;
-    }
+        load_thumbnail_small(full_path);
+}
 
-    GdkPixbuf* thumbnail =
-        vfs_thumbnail_load_for_file(full_path, big ? big_thumb_size : small_thumb_size);
+void
+VFSFileInfo::load_thumbnail_small(std::string_view full_path) noexcept
+{
+    if (this->small_thumbnail)
+        return;
+
+    GdkPixbuf* thumbnail = vfs_thumbnail_load_for_file(full_path, small_thumb_size);
     if (thumbnail)
     {
-        if (big)
-            this->big_thumbnail = thumbnail;
-        else
-            this->small_thumbnail = thumbnail;
+        this->small_thumbnail = thumbnail;
     }
-    else /* fallback to mime_type icon */
+    else // fallback to mime_type icon
     {
-        if (big)
-            this->big_thumbnail = this->get_big_icon();
-        else
-            this->small_thumbnail = this->get_small_icon();
+        this->small_thumbnail = this->get_small_icon();
     }
-    return (thumbnail != nullptr);
+}
+
+void
+VFSFileInfo::load_thumbnail_big(std::string_view full_path) noexcept
+{
+    if (this->big_thumbnail)
+        return;
+
+    GdkPixbuf* thumbnail = vfs_thumbnail_load_for_file(full_path, big_thumb_size);
+    if (thumbnail)
+    {
+        this->big_thumbnail = thumbnail;
+    }
+    else // fallback to mime_type icon
+    {
+        this->big_thumbnail = this->get_big_icon();
+    }
 }
 
 void

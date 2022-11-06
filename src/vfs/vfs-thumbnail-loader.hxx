@@ -39,17 +39,12 @@ namespace vfs
 {
     // using thumbnail_loader = std::shared_ptr<VFSThumbnailLoader>;
     using thumbnail_loader = ztd::raw_ptr<VFSThumbnailLoader>;
-
-    namespace thumbnail
-    {
-        using request = std::shared_ptr<VFSThumbnailRequest>;
-    }
 } // namespace vfs
 
 namespace vfs::thumbnail
 {
     using request = std::shared_ptr<VFSThumbnailRequest>;
-}
+} // namespace vfs::thumbnail
 
 struct VFSThumbnailLoader
 {

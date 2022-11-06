@@ -106,7 +106,7 @@ struct VFSFileInfo
     std::time_t* get_mtime() noexcept;
     std::time_t* get_atime() noexcept;
 
-    bool load_thumbnail(std::string_view full_path, bool big) noexcept;
+    void load_thumbnail(std::string_view full_path, bool big) noexcept;
     bool is_thumbnail_loaded(bool big) const noexcept;
 
     GdkPixbuf* get_big_icon() noexcept;
@@ -135,6 +135,10 @@ struct VFSFileInfo
 
     // Full path of the file is required by this function
     bool is_text(std::string_view file_path = "") const noexcept;
+
+  private:
+    void load_thumbnail_small(std::string_view full_path) noexcept;
+    void load_thumbnail_big(std::string_view full_path) noexcept;
 
   public:
     void ref_inc();

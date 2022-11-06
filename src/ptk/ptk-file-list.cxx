@@ -292,8 +292,7 @@ ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir)
     if (list->dir)
     {
         if (list->max_thumbnail > 0)
-        {
-            /* cancel all possible pending requests */
+        { // cancel all possible pending requests
             vfs_thumbnail_loader_cancel_all_requests(list->dir, list->big_thumbnail);
         }
         g_list_foreach(list->files, (GFunc)vfs_file_info_unref, nullptr);
@@ -995,14 +994,10 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size)
     if (!list)
         return;
 
-    GList* l;
-    vfs::file_info file;
-
     i32 old_max_thumbnail = list->max_thumbnail;
     list->max_thumbnail = max_file_size;
     list->big_thumbnail = is_big;
-    /* FIXME: This is buggy!!! Further testing might be needed.
-     */
+    // FIXME: This is buggy!!! Further testing might be needed.
     if (max_file_size == 0)
     {
         if (old_max_thumbnail > 0) /* cancel thumbnails */
@@ -1011,9 +1006,9 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size)
 
             list->signal_file_thumbnail_loaded.disconnect();
 
-            for (l = list->files; l; l = l->next)
+            for (GList* l = list->files; l; l = l->next)
             {
-                file = VFS_FILE_INFO(l->data);
+                vfs::file_info file = VFS_FILE_INFO(l->data);
                 if ((file->is_image() || file->is_video()) && file->is_thumbnail_loaded(is_big))
                 {
                     /* update the model */
@@ -1031,9 +1026,9 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size)
     list->signal_file_thumbnail_loaded =
         list->dir->add_event<EventType::FILE_THUMBNAIL_LOADED>(on_thumbnail_loaded, list);
 
-    for (l = list->files; l; l = l->next)
+    for (GList* l = list->files; l; l = l->next)
     {
-        file = VFS_FILE_INFO(l->data);
+        vfs::file_info file = VFS_FILE_INFO(l->data);
         if (list->max_thumbnail != 0 &&
             (file->is_video() ||
              (file->size /*vfs_file_info_get_size( file )*/ < list->max_thumbnail &&
