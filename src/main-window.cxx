@@ -3016,7 +3016,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
         if (num_hid || num_hidx)
             statusbar_txt.append(fmt::format("{} visible ({} hidden)", num_vis, num_hid));
         else
-            statusbar_txt.append(fmt::format("{} item", num_vis));
+            statusbar_txt.append(fmt::format("{} {}", num_vis, num_vis == 1 ? "item" : "items"));
 
         // cur dir is a symlink? canonicalize path
         if (std::filesystem::is_symlink(cwd))
