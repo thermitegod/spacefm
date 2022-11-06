@@ -32,8 +32,6 @@
 
 #include <fmt/format.h>
 
-#include <fnmatch.h>
-
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -1087,7 +1085,7 @@ ptk_handler_values_in_list(std::string_view list, const std::vector<std::string>
         match = false;
         for (std::string_view handler : values)
         {
-            if (fnmatch(element.data(), handler.data(), 0) == 0)
+            if (ztd::fnmatch(element, handler))
             {
                 // match
                 ret = match = true;
@@ -1112,7 +1110,7 @@ value_in_list(std::string_view list, std::string_view value)
     // value in space-separated list with wildcards
     for (std::string_view key : ztd::split(list, " "))
     {
-        if (fnmatch(key.data(), value.data(), 0) == 0)
+        if (ztd::fnmatch(key, value))
             return true;
     }
     return false;

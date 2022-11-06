@@ -23,7 +23,6 @@
 
 #include <malloc.h>
 
-#include <fnmatch.h>
 #include <fcntl.h>
 
 #include <fmt/format.h>
@@ -2405,7 +2404,7 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
             if (icase)
                 name = ztd::lower(name);
 
-            const bool select = fnmatch(key, name.data(), 0) == 0;
+            const bool select = ztd::fnmatch(key, name);
 
             // do selection and scroll to first selected
             path = gtk_tree_model_get_path(
@@ -3472,7 +3471,7 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* key, GtkTreeI
     if (strchr(key, '*') || strchr(key, '?'))
     {
         const std::string key2 = fmt::format("*{}*", key);
-        no_match = fnmatch(key2.c_str(), name, 0) != 0;
+        no_match = !ztd::fnmatch(key2, name);
     }
     else
     {

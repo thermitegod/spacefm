@@ -22,7 +22,6 @@
 
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <fnmatch.h>
 
 #include <glib.h>
 
@@ -239,8 +238,8 @@ MimeCache::lookup_glob(std::string_view filename, i32* glob_len)
     for (usize i = 0; i < this->n_globs; ++i)
     {
         const char* glob = this->buffer + VAL32(entry, 0);
-        i32 _glob_len;
-        if (fnmatch(glob, filename.data(), 0) == 0 && (_glob_len = strlen(glob)) > max_glob_len)
+        const i32 _glob_len = std::strlen(glob);
+        if (ztd::fnmatch(glob, filename) && _glob_len > max_glob_len)
         {
             max_glob_len = _glob_len;
             type = (this->buffer + VAL32(entry, 4));

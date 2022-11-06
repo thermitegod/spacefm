@@ -30,8 +30,6 @@
 
 #include <gtk/gtk.h>
 
-#include <fnmatch.h>
-
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -510,13 +508,13 @@ xset_context_test(xset_context_t context, char* rules, bool def_disable)
                     if (ztd::compare(eleval, s))
                     {
                         // pattern contains uppercase chars - test case sensitive
-                        test = fnmatch(eleval, context->var[sub].c_str(), 0);
+                        test = !ztd::fnmatch(eleval, context->var[sub]);
                     }
                     else
                     {
                         // case insensitive
                         const std::string str = ztd::lower(context->var[sub]);
-                        test = fnmatch(s, str.c_str(), 0);
+                        test = !ztd::fnmatch(s, str);
                     }
                     free(s);
                     if (comp == ItemPropContextComp::CONTEXT_COMP_MATCH)
