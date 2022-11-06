@@ -275,8 +275,8 @@ handle_parsed_commandline_args()
             }
             else if (std::filesystem::exists(real_path))
             {
-                struct stat statbuf;
-                if (stat(real_path.c_str(), &statbuf) == 0 && S_ISBLK(statbuf.st_mode))
+                const auto file_stat = ztd::stat(real_path);
+                if (file_stat.is_valid() && file_stat.is_block_file())
                 {
                     // open block device eg /dev/sda1
                     if (!main_window)

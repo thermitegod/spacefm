@@ -77,21 +77,23 @@ check_socket_daemon()
 static const std::string
 get_inode_tag()
 {
-    struct stat stat_buf;
     std::string inode_tag;
 
-    if (stat(vfs_user_home_dir().data(), &stat_buf) == -1)
-    {
-        inode_tag = fmt::format("{}=", getuid());
-    }
-    else
+    const auto statbuf = ztd::stat(vfs_user_home_dir());
+    if (statbuf.is_valid())
     {
         inode_tag = fmt::format("{}={}:{}-{}",
                                 getuid(),
-                                MAJOR(stat_buf.st_dev),
-                                MINOR(stat_buf.st_dev),
-                                stat_buf.st_ino);
+                                MAJOR(statbuf.dev()),
+                                MINOR(statbuf.dev()),
+                                statbuf.ino());
     }
+    else
+    {
+        inode_tag = fmt::format("{}=", getuid());
+    }
+
+    // LOG_INFO("inode_tag={}", inode_tag);
 
     return inode_tag;
 }

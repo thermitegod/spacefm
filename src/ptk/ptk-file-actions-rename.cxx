@@ -588,7 +588,6 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     // LOG_INFO("path={}   full={}", path, full_path);
 
     // tests
-    struct stat statbuf;
     bool full_path_exists = false;
     bool full_path_exists_dir = false;
     bool full_path_same = false;
@@ -601,7 +600,8 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         full_path_same = true;
         if (mset->create_new && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link)))
         {
-            if (lstat(full_path.c_str(), &statbuf) == 0)
+            const auto file_stat = ztd::lstat(full_path);
+            if (file_stat.is_valid())
             {
                 full_path_exists = true;
                 if (std::filesystem::is_directory(full_path))
@@ -611,13 +611,16 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     }
     else
     {
-        if (lstat(full_path.c_str(), &statbuf) == 0)
+        const auto path_stat = ztd::lstat(path);
+
+        const auto full_path_stat = ztd::lstat(full_path);
+        if (full_path_stat.is_valid())
         {
             full_path_exists = true;
             if (std::filesystem::is_directory(full_path))
                 full_path_exists_dir = true;
         }
-        else if (lstat(path.c_str(), &statbuf) == 0)
+        else if (path_stat.is_valid())
         {
             if (!std::filesystem::is_directory(path))
                 path_exists_file = true;

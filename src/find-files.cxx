@@ -47,6 +47,7 @@
 
 #include "vfs/vfs-volume.hxx"
 #include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-utils.hxx"
 
 #include "main-window.hxx"
 

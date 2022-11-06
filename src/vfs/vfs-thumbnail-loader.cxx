@@ -25,8 +25,6 @@
 
 #include <memory>
 
-#include <sys/stat.h>
-
 #include <fmt/format.h>
 
 #include <glibmm.h>

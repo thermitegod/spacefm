@@ -488,8 +488,8 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, std::string_view dest_dir,
                 file_path = get_real_link_target(file_path);
             }
 
-            struct stat stat;
-            if (lstat(file_path.c_str(), &stat) == 0)
+            const auto file_stat = ztd::lstat(file_path);
+            if (file_stat.is_valid())
             { // need to see broken symlinks
                 file_list.emplace_back(file_path);
             }

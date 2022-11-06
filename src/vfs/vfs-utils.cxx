@@ -63,7 +63,7 @@ vfs_load_icon(std::string_view icon_name, i32 size)
 }
 
 const std::string
-vfs_file_size_to_string_format(u64 size_in_bytes, bool decimal)
+vfs_file_size_format(u64 size_in_bytes, bool decimal)
 {
     if (app_settings.get_use_si_prefix())
     {

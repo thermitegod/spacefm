@@ -505,20 +505,20 @@ mime_type_is_text_file(std::string_view file_path, std::string_view mime_type)
     if (file_path.empty())
         return false;
 
-    i32 file = open(file_path.data(), O_RDONLY);
-    if (file != -1)
+    const i32 fd = open(file_path.data(), O_RDONLY);
+    if (fd != -1)
     {
-        struct stat statbuf;
-        if (fstat(file, &statbuf) != -1)
+        const auto file_stat = ztd::stat(fd);
+        if (file_stat.is_valid())
         {
-            if (S_ISREG(statbuf.st_mode))
+            if (file_stat.is_regular_file())
             {
                 unsigned char data[TEXT_MAX_EXTENT];
-                const i32 rlen = read(file, data, sizeof(data));
+                const i32 rlen = read(fd, data, sizeof(data));
                 ret = mime_type_is_data_plain_text((char*)data, rlen);
             }
         }
-        close(file);
+        close(fd);
     }
     return ret;
 }

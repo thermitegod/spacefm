@@ -20,7 +20,6 @@
 
 #include <vector>
 
-#include <sys/stat.h>
 #include <fcntl.h>
 
 #include <glib.h>
@@ -88,16 +87,17 @@ MimeCache::load_mime_file()
     if (fd < 0)
         return;
 
-    struct stat statbuf;
-    if (fstat(fd, &statbuf) < 0)
+    const auto mime_stat = ztd::stat(fd);
+
+    if (!mime_stat.is_valid())
     {
         close(fd);
         return;
     }
 
     char* buf = nullptr;
-    buf = (char*)g_malloc(statbuf.st_size);
-    read(fd, buf, statbuf.st_size);
+    buf = (char*)g_malloc(mime_stat.size());
+    read(fd, buf, mime_stat.size());
     close(fd);
 
     const u16 majv = VAL16(buf, MAJOR_VERSION);
@@ -117,7 +117,7 @@ MimeCache::load_mime_file()
     u32 offset;
 
     this->buffer = buf;
-    this->buffer_size = statbuf.st_size;
+    this->buffer_size = mime_stat.size();
 
     offset = VAL32(this->buffer, ALIAS_LIST);
     this->alias = this->buffer + offset + 4;

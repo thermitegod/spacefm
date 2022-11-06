@@ -259,9 +259,8 @@ on_file_list_file_changed(vfs::file_info file, PtkFileList* list)
     // See also desktop-window.c:on_file_changed()
     const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
-    if (list->max_thumbnail != 0 &&
-        ((file->is_video() && (now - *file->get_mtime() > 5)) ||
-         (file->size /*vfs_file_info_get_size( file )*/ < list->max_thumbnail && file->is_image())))
+    if (list->max_thumbnail != 0 && ((file->is_video() && (now - file->get_mtime() > 5)) ||
+                                     (file->get_size() < list->max_thumbnail && file->is_image())))
     {
         if (!file->is_thumbnail_loaded(list->big_thumbnail))
             vfs_thumbnail_loader_request(list->dir, file, list->big_thumbnail);
@@ -275,8 +274,7 @@ on_file_list_file_created(vfs::file_info file, PtkFileList* list)
 
     /* check if reloading of thumbnail is needed. */
     if (list->max_thumbnail != 0 &&
-        (file->is_video() ||
-         (file->size /*vfs_file_info_get_size( file )*/ < list->max_thumbnail && file->is_image())))
+        (file->is_video() || (file->get_size() < list->max_thumbnail && file->is_image())))
     {
         if (!file->is_thumbnail_loaded(list->big_thumbnail))
             vfs_thumbnail_loader_request(list->dir, file, list->big_thumbnail);
@@ -467,8 +465,8 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             icon = nullptr;
             /* special file can use special icons saved as thumbnails*/
             if (file->flags == VFSFileInfoFlag::NONE &&
-                (list->max_thumbnail > file->size /*file->get_size()*/
-                 || (list->max_thumbnail != 0 && file->is_video())))
+                (list->max_thumbnail > file->get_size() ||
+                 (list->max_thumbnail != 0 && file->is_video())))
                 icon = file->get_big_thumbnail();
 
             if (!icon)
@@ -482,8 +480,8 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
         case PTKFileListCol::COL_FILE_SMALL_ICON:
             icon = nullptr;
             /* special file can use special icons saved as thumbnails*/
-            if (list->max_thumbnail > file->size /*vfs_file_info_get_size( info )*/
-                || (list->max_thumbnail != 0 && file->is_video()))
+            if (list->max_thumbnail > file->get_size() ||
+                (list->max_thumbnail != 0 && file->is_video()))
                 icon = file->get_small_thumbnail();
             if (!icon)
                 icon = file->get_small_icon();
@@ -497,9 +495,8 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             g_value_set_string(value, file->get_disp_name().data());
             break;
         case PTKFileListCol::COL_FILE_SIZE:
-            if (S_ISDIR(file->mode) ||
-                (S_ISLNK(file->mode) &&
-                 ztd::same(vfs_mime_type_get_type(file->mime_type), XDG_MIME_TYPE_DIRECTORY)))
+            if ((file->is_directory() || file->is_symlink()) &&
+                ztd::same(vfs_mime_type_get_type(file->mime_type), XDG_MIME_TYPE_DIRECTORY))
                 g_value_set_string(value, nullptr);
             else
                 g_value_set_string(value, file->get_disp_size().data());
@@ -712,17 +709,17 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
     switch (list->sort_col)
     {
         case PTKFileListCol::COL_FILE_SIZE:
-            if (file_a->size > file_b->size)
+            if (file_a->get_size() > file_b->get_size())
                 result = 1;
-            else if (file_a->size == file_b->size)
+            else if (file_a->get_size() == file_b->get_size())
                 result = 0;
             else
                 result = -1;
             break;
         case PTKFileListCol::COL_FILE_MTIME:
-            if (file_a->mtime > file_b->mtime)
+            if (file_a->get_mtime() > file_b->get_mtime())
                 result = 1;
-            else if (file_a->mtime == file_b->mtime)
+            else if (file_a->get_mtime() == file_b->get_mtime())
                 result = 0;
             else
                 result = -1;
@@ -1030,9 +1027,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size)
     {
         vfs::file_info file = VFS_FILE_INFO(l->data);
         if (list->max_thumbnail != 0 &&
-            (file->is_video() ||
-             (file->size /*vfs_file_info_get_size( file )*/ < list->max_thumbnail &&
-              file->is_image())))
+            (file->is_video() || (file->get_size() < list->max_thumbnail && file->is_image())))
         {
             if (file->is_thumbnail_loaded(is_big))
             {

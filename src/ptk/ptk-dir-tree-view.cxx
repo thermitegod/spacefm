@@ -612,29 +612,32 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
             if (file_browser->pending_drag_status_tree)
             {
                 // We only want to update drag status, not really want to drop
-                struct stat statbuf; // skip stat
-                if (stat(dest_dir, &statbuf) == 0)
+                const auto dest_statbuf = ztd::stat(dest_dir);
+                if (dest_statbuf.is_valid())
                 {
-                    dev_t dest_dev = statbuf.st_dev;
                     if (file_browser->drag_source_dev_tree == 0)
                     {
-                        file_browser->drag_source_dev_tree = dest_dev;
+                        file_browser->drag_source_dev_tree = dest_statbuf.dev();
                         for (; *puri; ++puri)
                         {
                             const std::string file_path = Glib::filename_from_uri(*puri);
-                            if (stat(file_path.c_str(), &statbuf) == 0 &&
-                                statbuf.st_dev != dest_dev)
+
+                            const auto statbuf = ztd::stat(file_path);
+                            if (statbuf.is_valid() && statbuf.dev() != dest_statbuf.dev())
                             {
-                                file_browser->drag_source_dev_tree = statbuf.st_dev;
+                                file_browser->drag_source_dev_tree = statbuf.dev();
                                 break;
                             }
                         }
                     }
-                    if (file_browser->drag_source_dev_tree != dest_dev)
-                        // src and dest are on different devices
+                    if (file_browser->drag_source_dev_tree != dest_statbuf.dev())
+                    { // src and dest are on different devices
                         gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
+                    }
                     else
+                    {
                         gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_MOVE, time);
+                    }
                 }
                 else
                 { // stat failed

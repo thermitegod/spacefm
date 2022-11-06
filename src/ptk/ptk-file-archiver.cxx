@@ -802,9 +802,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
                 udest_file = fmt::format("{}/{}{}", dest_dir, desc, ext);
 
                 // Looping to find a path that doesnt exist
-                struct stat statbuf;
                 i32 c = 1;
-                while (lstat(udest_file.c_str(), &statbuf) == 0)
+                while (std::filesystem::exists(udest_file))
                 {
                     udest_file = fmt::format("{}/{}-{}{}{}", dest_dir, desc, "copy", ++c, ext);
                 }
@@ -974,7 +973,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     std::string dest_quote;
     std::string full_quote;
     i32 res;
-    struct stat statbuf;
 
     // Making sure files to act on have been passed
     if (sel_files.empty() || job == PtkHandlerArchive::HANDLER_COMPRESS)
@@ -1304,7 +1302,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                 i32 n = 1;
 
                 // Looping to find a path that doesnt exist
-                while (lstat(parent_path.c_str(), &statbuf) == 0)
+                while (std::filesystem::exists(parent_path))
                 {
                     parent_path = fmt::format("{}-copy{}", parent_path, ++n);
                 }
@@ -1351,7 +1349,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                 i32 n = 1;
 
                 // Looping to find a path that doesnt exist
-                while (lstat(extract_target.c_str(), &statbuf) == 0)
+                while (std::filesystem::exists(extract_target))
                 {
                     const std::string str2 =
                         fmt::format("{}-{}{}{}", filename_no_ext, "copy", ++n, extension);

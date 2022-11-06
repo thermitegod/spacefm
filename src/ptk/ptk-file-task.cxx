@@ -1503,9 +1503,9 @@ ptk_file_task_update(PtkFileTask* ptask)
         // count
         file_count = std::to_string(task->current_item);
         // size
-        size_str = vfs_file_size_to_string_format(task->progress);
+        size_str = vfs_file_size_format(task->progress);
         if (task->total_size)
-            size_str2 = vfs_file_size_to_string_format(task->total_size);
+            size_str2 = vfs_file_size_format(task->total_size);
         else
             size_str2 = "??"; // total_size calculation timed out
         size_tally = fmt::format("{} / {}", size_str, size_str2);
@@ -1524,7 +1524,7 @@ ptk_file_task_update(PtkFileTask* ptask)
         }
         else
         {
-            size_str = vfs_file_size_to_string_format(cur_speed);
+            size_str = vfs_file_size_format(cur_speed);
             speed1 = fmt::format("{}/s", size_str);
         }
         // avg speed
@@ -1533,7 +1533,7 @@ ptk_file_task_update(PtkFileTask* ptask)
             avg_speed = task->progress / timer_elapsed;
         else
             avg_speed = 0;
-        size_str2 = vfs_file_size_to_string_format(avg_speed);
+        size_str2 = vfs_file_size_format(avg_speed);
         speed2 = fmt::format("{}/s", size_str2);
 
         // remain cur
@@ -1965,11 +1965,6 @@ query_overwrite(PtkFileTask* ptask)
 
     bool has_overwrite_btn = true;
     bool different_files;
-    bool is_src_dir;
-    bool is_dest_dir;
-
-    struct stat src_stat;
-    struct stat dest_stat;
 
     std::string title;
     std::string message;
@@ -1986,11 +1981,11 @@ query_overwrite(PtkFileTask* ptask)
 
     different_files = (!ztd::same(ptask->task->current_file, ptask->task->current_dest));
 
-    lstat(ptask->task->current_file.c_str(), &src_stat);
-    lstat(ptask->task->current_dest.c_str(), &dest_stat);
+    const auto src_stat = ztd::lstat(ptask->task->current_file);
+    const auto dest_stat = ztd::lstat(ptask->task->current_dest);
 
-    is_src_dir = !!S_ISDIR(dest_stat.st_mode);
-    is_dest_dir = !!S_ISDIR(src_stat.st_mode);
+    const bool is_src_dir = std::filesystem::is_directory(ptask->task->current_file);
+    const bool is_dest_dir = std::filesystem::is_directory(ptask->task->current_dest);
 
     if (different_files && is_dest_dir == is_src_dir)
     {
@@ -2017,43 +2012,52 @@ query_overwrite(PtkFileTask* ptask)
 
             std::string size_str;
 
-            if (S_ISLNK(src_stat.st_mode))
+            const bool is_src_sym = std::filesystem::is_symlink(ptask->task->current_file);
+            const bool is_dest_sym = std::filesystem::is_symlink(ptask->task->current_dest);
+
+            if (is_src_sym)
                 src_link = "\t<b>( link )</b>";
-            if (S_ISLNK(dest_stat.st_mode))
+            if (is_dest_sym)
                 dest_link = "\t<b>( link )</b>";
-            if (S_ISLNK(src_stat.st_mode) && !S_ISLNK(dest_stat.st_mode))
+            if (is_src_sym && !is_dest_sym)
                 link_warn = "\t<b>! overwrite file with link !</b>";
-            if (src_stat.st_size == dest_stat.st_size)
+            if (src_stat.size() == dest_stat.size())
+            {
                 src_size = "<b>( same size )</b>";
+            }
             else
             {
-                size_str = vfs_file_size_to_string_format(src_stat.st_size);
-                src_size = fmt::format("{}\t( {} bytes )", size_str, src_stat.st_size);
-                if (src_stat.st_size > dest_stat.st_size)
+                size_str = vfs_file_size_format(src_stat.size());
+                src_size = fmt::format("{}\t( {} bytes )", size_str, src_stat.size());
+                if (src_stat.size() > dest_stat.size())
                     src_rel_size = "larger";
                 else
                     src_rel_size = "smaller";
             }
-            if (src_stat.st_mtime == dest_stat.st_mtime)
+            if (src_stat.mtime() == dest_stat.mtime())
+            {
                 src_time = "<b>( same time )</b>\t";
+            }
             else
             {
+                const time_t src_mtime = src_stat.mtime();
                 strftime(buf,
                          sizeof(buf),
-                         app_settings.get_date_format().c_str(),
-                         std::localtime(&src_stat.st_mtime));
+                         app_settings.get_date_format().data(),
+                         std::localtime(&src_mtime));
                 src_time = buf;
-                if (src_stat.st_mtime > dest_stat.st_mtime)
+                if (src_stat.mtime() > dest_stat.mtime())
                     src_rel_time = "newer";
                 else
                     src_rel_time = "older";
             }
-            size_str = vfs_file_size_to_string_format(dest_stat.st_size);
-            dest_size = fmt::format("{}\t( {} bytes )", size_str, dest_stat.st_size);
+            size_str = vfs_file_size_format(dest_stat.size());
+            dest_size = fmt::format("{}\t( {} bytes )", size_str, dest_stat.size());
+            const time_t dest_mtime = dest_stat.mtime();
             strftime(buf,
                      sizeof(buf),
-                     app_settings.get_date_format().c_str(),
-                     std::localtime(&dest_stat.st_mtime));
+                     app_settings.get_date_format().data(),
+                     std::localtime(&dest_mtime));
             dest_time = buf;
 
             src_rel = fmt::format("{}{}{}{}{}",

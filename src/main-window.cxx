@@ -66,9 +66,6 @@
 #include "autosave.hxx"
 #include "utils.hxx"
 
-/* FIXME: statvfs support should be moved to src/vfs */
-#include <sys/statvfs.h>
-
 #include "vfs/vfs-user-dir.hxx"
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-file-task.hxx"
@@ -2862,17 +2859,14 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
 
     if (std::filesystem::exists(cwd))
     {
-        // FIXME: statvfs support should be moved to src/vfs
-        struct statvfs fs_stat;
-        statvfs(cwd.data(), &fs_stat);
+        const auto fs_stat = ztd::statvfs(cwd);
 
         // calc free space
-        size_str = vfs_file_size_to_string_format(fs_stat.f_bsize * fs_stat.f_bavail);
+        const std::string free_size = vfs_file_size_format(fs_stat.bsize() * fs_stat.bavail());
         // calc total space
-        const std::string total_size_str =
-            vfs_file_size_to_string_format(fs_stat.f_frsize * fs_stat.f_blocks);
+        const std::string disk_size = vfs_file_size_format(fs_stat.frsize() * fs_stat.blocks());
 
-        statusbar_txt.append(fmt::format(" {} / {}   ", size_str, total_size_str));
+        statusbar_txt.append(fmt::format(" {} / {}   ", free_size, disk_size));
     }
 
     // Show Reading... while sill loading
@@ -2898,7 +2892,7 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
         if (sel_files.empty())
             return;
 
-        size_str = vfs_file_size_to_string_format(total_size);
+        size_str = vfs_file_size_format(total_size);
 
         statusbar_txt.append(fmt::format("{} / {} ({})", num_sel, num_vis, size_str));
 
@@ -2937,11 +2931,10 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
                     }
                     else
                     {
-                        struct stat results;
-                        if (stat(target_path.c_str(), &results) == 0)
+                        const auto results = ztd::stat(target_path);
+                        if (results.is_valid())
                         {
-                            const std::string lsize =
-                                vfs_file_size_to_string_format(results.st_size);
+                            const std::string lsize = vfs_file_size_format(results.size());
                             statusbar_txt.append(fmt::format("  Link -> {} ({})", target, lsize));
                         }
                         else
@@ -6953,9 +6946,9 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
 
             // Resolve TARGET
-            struct stat statbuf;
             char* real_path = argv[j];
             char* device_file = nullptr;
+            const auto real_path_stat = ztd::stat(real_path);
             vfs::volume vol = nullptr;
             netmount_t netmount = std::make_shared<Netmount>();
             if (ztd::same(socket_property, "unmount") && std::filesystem::is_directory(real_path))
@@ -6963,7 +6956,9 @@ main_window_socket_command(char* argv[], std::string& reply)
                 // unmount DIR
                 if (path_is_mounted_mtab(nullptr, real_path, &device_file, nullptr) && device_file)
                 {
-                    if (!(stat(device_file, &statbuf) == 0 && S_ISBLK(statbuf.st_mode)))
+                    const auto device_file_stat = ztd::stat(device_file);
+
+                    if (!device_file_stat.is_valid() || !device_file_stat.is_block_file())
                     {
                         // NON-block device - try to find vol by mount point
                         if (!(vol = vfs_volume_get_by_device_or_point(device_file, real_path)))
@@ -6976,7 +6971,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                     }
                 }
             }
-            else if (stat(real_path, &statbuf) == 0 && S_ISBLK(statbuf.st_mode))
+            else if (real_path_stat.is_valid() && real_path_stat.is_block_file())
             {
                 // block device eg /dev/sda1
                 device_file = ztd::strdup(real_path);

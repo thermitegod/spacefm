@@ -20,8 +20,6 @@
 #include <string>
 #include <string_view>
 
-#include <sys/types.h>
-
 #include <sigc++/sigc++.h>
 
 #include <gtk/gtk.h>

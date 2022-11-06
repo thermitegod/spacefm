@@ -162,30 +162,30 @@ calc_total_size_of_files(std::string_view path, FilePropertiesDialogData* data)
     if (data->cancel)
         return;
 
-    struct stat file_stat;
-    if (lstat(path.data(), &file_stat))
+    const auto file_stat = ztd::lstat(path);
+    if (!file_stat.is_valid())
         return;
 
-    data->total_size += file_stat.st_size;
-    data->size_on_disk += (file_stat.st_blocks * ztd::BLOCK_SIZE);
+    data->total_size += file_stat.size();
+    data->size_on_disk += (file_stat.blocks() * ztd::BLOCK_SIZE);
 
     if (std::filesystem::is_directory(path))
     {
-        std::string file_name;
         for (const auto& file : std::filesystem::directory_iterator(path))
         {
-            file_name = std::filesystem::path(file).filename();
+            const std::string file_name = std::filesystem::path(file).filename();
 
             const std::string full_path = Glib::build_filename(path.data(), file_name);
-            lstat(full_path.c_str(), &file_stat);
-            if (S_ISDIR(file_stat.st_mode))
+
+            const auto full_file_stat = ztd::lstat(full_path);
+            if (std::filesystem::is_directory(full_path))
             {
                 calc_total_size_of_files(full_path, data);
             }
             else
             {
-                data->total_size += file_stat.st_size;
-                data->size_on_disk += (file_stat.st_blocks * ztd::BLOCK_SIZE);
+                data->total_size += full_file_stat.size();
+                data->size_on_disk += full_file_stat.blocks() * 512; /* block x 512 */
                 ++data->total_count;
             }
         }
@@ -214,13 +214,12 @@ calc_size(void* user_data)
 static bool
 on_update_labels(FilePropertiesDialogData* data)
 {
-    const std::string size_str = fmt::format("{} ( {} bytes )",
-                                             vfs_file_size_to_string_format(data->total_size),
-                                             data->total_size);
+    const std::string size_str =
+        fmt::format("{} ( {} bytes )", vfs_file_size_format(data->total_size), data->total_size);
     gtk_label_set_text(data->total_size_label, size_str.data());
 
     const std::string disk_str = fmt::format("{} ( {} bytes )",
-                                             vfs_file_size_to_string_format(data->size_on_disk),
+                                             vfs_file_size_format(data->size_on_disk),
                                              data->size_on_disk);
     gtk_label_set_text(data->size_on_disk_label, disk_str.data());
 
@@ -592,16 +591,13 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
             // caculate total file size
             need_calc_size = false;
 
-            std::string buf;
+            const std::string size =
+                fmt::format("{}  ( {} bytes )", file->get_disp_size(), file->get_size());
+            gtk_label_set_text(data->total_size_label, size.data());
 
-            buf = fmt::format("{}  ( {} bytes )", file->get_disp_size(), file->get_size());
-            gtk_label_set_text(data->total_size_label, buf.data());
-
-            const std::string size_str =
-                vfs_file_size_to_string_format(file->get_blocks() * ztd::BLOCK_SIZE);
-
-            buf = fmt::format("{}  ( {} bytes )", size_str, file->get_blocks() * ztd::BLOCK_SIZE);
-            gtk_label_set_text(data->size_on_disk_label, buf.data());
+            const std::string on_disk =
+                fmt::format("{}  ( {} bytes )", file->get_disp_disk_size(), file->get_disk_size());
+            gtk_label_set_text(data->size_on_disk_label, on_disk.data());
 
             gtk_label_set_text(data->count_label, "1 file");
         }
@@ -611,11 +607,13 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
         const std::string time_format = "%Y-%m-%d %H:%M:%S";
 
         // gtk_entry_set_text(GTK_ENTRY(mtime), file->get_disp_mtime());
-        strftime(buf, sizeof(buf), time_format.data(), std::localtime(file->get_mtime()));
+        const time_t mtime = file->get_mtime();
+        strftime(buf, sizeof(buf), time_format.data(), std::localtime(&mtime));
         gtk_entry_set_text(GTK_ENTRY(data->mtime), buf);
         data->orig_mtime = ztd::strdup(buf);
 
-        strftime(buf, sizeof(buf), time_format.data(), std::localtime(file->get_atime()));
+        const time_t atime = file->get_atime();
+        strftime(buf, sizeof(buf), time_format.data(), std::localtime(&atime));
         gtk_entry_set_text(GTK_ENTRY(data->atime), buf);
         data->orig_atime = ztd::strdup(buf);
 

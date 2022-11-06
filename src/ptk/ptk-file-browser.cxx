@@ -4142,34 +4142,36 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
             if (file_browser->pending_drag_status)
             {
                 // We only want to update drag status, not really want to drop
-                dev_t dest_dev;
-                ino_t dest_inode;
-                struct stat statbuf; // skip stat
-                if (stat(dest_dir, &statbuf) == 0)
+                const auto dest_dir_stat = ztd::stat(dest_dir);
+                if (dest_dir_stat.is_valid())
                 {
-                    dest_dev = statbuf.st_dev;
-                    dest_inode = statbuf.st_ino;
+                    const dev_t dest_dev = dest_dir_stat.dev();
+                    const ino_t dest_inode = dest_dir_stat.ino();
                     if (file_browser->drag_source_dev == 0)
                     {
                         file_browser->drag_source_dev = dest_dev;
                         for (; *puri; ++puri)
                         {
                             const std::string file_path = Glib::filename_from_uri(*puri);
-                            if (stat(file_path.c_str(), &statbuf) == 0)
+
+                            const auto file_path_stat = ztd::stat(file_path);
+                            if (file_path_stat.is_valid())
                             {
-                                if (statbuf.st_dev != dest_dev)
+                                if (file_path_stat.dev() != dest_dev)
                                 {
                                     // different devices - store source device
-                                    file_browser->drag_source_dev = statbuf.st_dev;
+                                    file_browser->drag_source_dev = file_path_stat.dev();
                                     break;
                                 }
                                 else if (file_browser->drag_source_inode == 0)
                                 {
                                     // same device - store source parent inode
                                     const std::string src_dir = Glib::path_get_dirname(file_path);
-                                    if (stat(src_dir.c_str(), &statbuf) == 0)
+
+                                    const auto src_dir_stat = ztd::stat(src_dir);
+                                    if (src_dir_stat.is_valid())
                                     {
-                                        file_browser->drag_source_inode = statbuf.st_ino;
+                                        file_browser->drag_source_inode = src_dir_stat.ino();
                                     }
                                 }
                             }
@@ -4177,10 +4179,13 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     }
                     if (file_browser->drag_source_dev != dest_dev ||
                         file_browser->drag_source_inode == dest_inode)
-                        // src and dest are on different devices or same dir
+                    { // src and dest are on different devices or same dir
                         gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
+                    }
                     else
+                    {
                         gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_MOVE, time);
+                    }
                 }
                 else
                 { // stat failed
@@ -4243,8 +4248,8 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     /* We only want to update drag status, not really want to drop */
                     if (file_browser->pending_drag_status)
                     {
-                        struct stat statbuf; // skip stat
-                        if (stat(dest_dir, &statbuf) == 0)
+                        const auto file_stat = ztd::stat(dest_dir);
+                        if (file_stat.is_valid())
                             file_browser->pending_drag_status = false;
                         free(dest_dir);
                         return;

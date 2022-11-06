@@ -1804,7 +1804,7 @@ VFSVolume::set_info() noexcept
 
         if (this->size > 0)
         {
-            size_str = vfs_file_size_to_string_format(this->size, false);
+            size_str = vfs_file_size_format(this->size, false);
             disp_size = fmt::format("{}", size_str);
         }
         if (this->mount_point && this->mount_point[0] != '\0')
@@ -1824,7 +1824,7 @@ VFSVolume::set_info() noexcept
             disp_label = "";
         if (this->size > 0)
         {
-            size_str = vfs_file_size_to_string_format(this->size, false);
+            size_str = vfs_file_size_format(this->size, false);
             disp_size = fmt::format("{}", size_str);
         }
         disp_mount = "---";
@@ -3692,12 +3692,12 @@ vfs_volume_dir_avoid_changes(std::string_view dir)
     const std::string canon = std::filesystem::canonical(dir);
 
     // get devnum
-    struct stat stat_buf; // skip stat
-    if (stat(canon.data(), &stat_buf) == -1)
+    const auto statbuf = ztd::stat(canon);
+    if (!statbuf.is_valid())
         return false;
-    // LOG_INFO("    stat_buf.st_dev = {}:{}", major(stat_buf.st_dev), minor(stat_buf.st_dev));
+    // LOG_INFO("    statbuf.dev() = {}:{}", major(statbuf.dev()), minor(statbuf.dev()));
 
-    struct udev_device* udevice = udev_device_new_from_devnum(udev, 'b', stat_buf.st_dev);
+    struct udev_device* udevice = udev_device_new_from_devnum(udev, 'b', statbuf.dev());
     if (udevice)
         devnode = udev_device_get_devnode(udevice);
     else
@@ -3706,7 +3706,7 @@ vfs_volume_dir_avoid_changes(std::string_view dir)
     if (devnode == nullptr)
     {
         // not a block device
-        const char* fstype = get_devmount_fstype(major(stat_buf.st_dev), minor(stat_buf.st_dev));
+        const char* fstype = get_devmount_fstype(major(statbuf.dev()), minor(statbuf.dev()));
         // LOG_INFO("    !udevice || !devnode  fstype={}", fstype);
         ret = false;
         if (fstype && fstype[0])

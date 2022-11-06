@@ -119,26 +119,14 @@ vfs_file_info_get(vfs::file_info file, std::string_view file_path)
 
     const std::string name = Glib::path_get_basename(file_path.data());
     const std::string disp_name = Glib::filename_display_basename(file_path.data());
+
     file->name = name;
     file->disp_name = disp_name;
 
-    struct stat file_stat;
-    if (lstat(file_path.data(), &file_stat) == 0)
+    file->file_stat = ztd::lstat(file_path);
+    if (file->file_stat.is_valid())
     {
-        // LOG_INFO("VFSFileInfo {}", fi->name);
-
-        // This is time-consuming but can save much memory
-        file->mode = file_stat.st_mode;
-        file->dev = file_stat.st_dev;
-        file->uid = file_stat.st_uid;
-        file->gid = file_stat.st_gid;
-        file->size = file_stat.st_size;
-        file->mtime = file_stat.st_mtime;
-        file->atime = file_stat.st_atime;
-        file->blksize = file_stat.st_blksize;
-        file->blocks = file_stat.st_blocks;
-
-        // LOG_INFO("size {} {}", fi->name, fi->size);
+        // LOG_INFO("VFSFileInfo name={}  size={}", file->name, file->file_stat.size());
 
         // file->status = std::filesystem::status(file_path);
         file->status = std::filesystem::symlink_status(file_path);
@@ -146,13 +134,17 @@ vfs_file_info_get(vfs::file_info file, std::string_view file_path)
         file->mime_type = vfs_mime_type_get_from_file(file_path);
 
         // file size formated
-        const std::string size_str = vfs_file_size_to_string_format(file->size);
-        file->disp_size = size_str;
+        const std::string file_size = vfs_file_size_format(file->get_size());
+        file->disp_size = file_size;
 
-        // sfm get collate keys
-        file->collate_key = g_utf8_collate_key_for_filename(file->disp_name.c_str(), -1);
-        const std::string str = g_utf8_casefold(file->disp_name.c_str(), -1);
-        file->collate_icase_key = g_utf8_collate_key_for_filename(str.c_str(), -1);
+        // disk file size formated
+        const std::string disk_size = vfs_file_size_format(file->get_disk_size());
+        file->disp_disk_size = disk_size;
+
+        // collate keys
+        file->collate_key = g_utf8_collate_key_for_filename(file->disp_name.data(), -1);
+        const std::string str = g_utf8_casefold(file->disp_name.data(), -1);
+        file->collate_icase_key = g_utf8_collate_key_for_filename(str.data(), -1);
 
         return true;
     }
@@ -182,15 +174,21 @@ VFSFileInfo::set_disp_name(std::string_view new_disp_name) noexcept
 {
     this->disp_name = new_disp_name.data();
     // sfm get new collate keys
-    this->collate_key = g_utf8_collate_key_for_filename(this->disp_name.c_str(), -1);
-    const std::string str = g_utf8_casefold(this->disp_name.c_str(), -1);
-    this->collate_icase_key = g_utf8_collate_key_for_filename(str.c_str(), -1);
+    this->collate_key = g_utf8_collate_key_for_filename(this->disp_name.data(), -1);
+    const std::string str = g_utf8_casefold(this->disp_name.data(), -1);
+    this->collate_icase_key = g_utf8_collate_key_for_filename(str.data(), -1);
 }
 
 off_t
 VFSFileInfo::get_size() const noexcept
 {
-    return this->size;
+    return this->file_stat.size();
+}
+
+off_t
+VFSFileInfo::get_disk_size() const noexcept
+{
+    return this->file_stat.blocks() * ztd::BLOCK_SIZE;
 }
 
 const std::string&
@@ -199,10 +197,16 @@ VFSFileInfo::get_disp_size() const noexcept
     return this->disp_size;
 }
 
+const std::string&
+VFSFileInfo::get_disp_disk_size() const noexcept
+{
+    return this->disp_disk_size;
+}
+
 blkcnt_t
 VFSFileInfo::get_blocks() const noexcept
 {
-    return this->blocks;
+    return this->file_stat.blocks();
 }
 
 vfs::mime_type
@@ -215,21 +219,13 @@ VFSFileInfo::get_mime_type() const noexcept
 void
 VFSFileInfo::reload_mime_type(std::string_view full_path) noexcept
 {
-    vfs::mime_type old_mime_type;
-    struct stat file_stat;
-
-    // convert VFSFileInfo to struct stat
-
     // In current implementation, only st_mode is used in
     // mime-type detection, so let's save some CPU cycles
     // and do not copy unused fields.
 
-    file_stat.st_mode = this->mode;
-
-    old_mime_type = this->mime_type;
     this->mime_type = vfs_mime_type_get_from_file(full_path);
     this->load_special_info(full_path);
-    vfs_mime_type_unref(old_mime_type); /* FIXME: is vfs_mime_type_unref needed ?*/
+    vfs_mime_type_unref(this->mime_type); /* FIXME: is vfs_mime_type_unref needed ?*/
 }
 
 const std::string
@@ -323,17 +319,17 @@ VFSFileInfo::get_disp_owner() noexcept
     // FIXME: user names should be cached
     if (this->disp_owner.empty())
     {
-        puser = getpwuid(this->uid);
+        puser = getpwuid(this->file_stat.uid());
         if (puser && puser->pw_name && *puser->pw_name)
             user_name = puser->pw_name;
         else
-            user_name = fmt::format("{}", this->uid);
+            user_name = fmt::format("{}", this->file_stat.uid());
 
-        pgroup = getgrgid(this->gid);
+        pgroup = getgrgid(this->file_stat.gid());
         if (pgroup && pgroup->gr_name && *pgroup->gr_name)
             group_name = pgroup->gr_name;
         else
-            group_name = fmt::format("{}", this->gid);
+            group_name = fmt::format("{}", this->file_stat.gid());
 
         const std::string str = fmt::format("{}:{}", user_name, group_name);
         this->disp_owner = str;
@@ -347,25 +343,23 @@ VFSFileInfo::get_disp_mtime() noexcept
     if (this->disp_mtime.empty())
     {
         char buf[64];
-        strftime(buf,
-                 sizeof(buf),
-                 app_settings.get_date_format().c_str(), //"%Y-%m-%d %H:%M",
-                 std::localtime(&this->mtime));
+        const time_t mtime = this->file_stat.mtime();
+        strftime(buf, sizeof(buf), app_settings.get_date_format().data(), std::localtime(&mtime));
         this->disp_mtime = buf;
     }
     return this->disp_mtime;
 }
 
-std::time_t*
+std::time_t
 VFSFileInfo::get_mtime() noexcept
 {
-    return &this->mtime;
+    return this->file_stat.mtime();
 }
 
-std::time_t*
+std::time_t
 VFSFileInfo::get_atime() noexcept
 {
-    return &this->atime;
+    return this->file_stat.atime();
 }
 
 static const std::string

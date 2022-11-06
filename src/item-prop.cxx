@@ -102,7 +102,7 @@ struct ContextData
     xset_context_t context;
     xset_t set;
     char* temp_cmd_line;
-    struct stat script_stat;
+    ztd::stat script_stat;
     bool script_stat_valid;
     bool reset_command;
 
@@ -175,7 +175,6 @@ ContextData::ContextData()
     this->context = nullptr;
     this->set = nullptr;
     this->temp_cmd_line = nullptr;
-    // this->script_stat;
     this->script_stat_valid = false;
     this->reset_command = false;
 
@@ -897,29 +896,41 @@ enable_options(ContextData* ctxt)
 static bool
 is_command_script_newer(ContextData* ctxt)
 {
-    struct stat statbuf;
-
     if (!ctxt->script_stat_valid)
         return false;
-    char* script = xset_custom_get_script(ctxt->set, false);
-    if (script && stat(script, &statbuf) == 0)
-    {
-        if (statbuf.st_mtime != ctxt->script_stat.st_mtime ||
-            statbuf.st_size != ctxt->script_stat.st_size)
-            return true;
-    }
+    const char* script = xset_custom_get_script(ctxt->set, false);
+    if (!script)
+        return false;
+
+    const auto script_stat = ztd::stat(script);
+    if (!script_stat.is_valid())
+        return false;
+
+    if (!ctxt->script_stat.is_valid())
+        return true;
+
+    if (script_stat.mtime() != ctxt->script_stat.mtime() ||
+        script_stat.size() != ctxt->script_stat.size())
+        return true;
+
     return false;
 }
 
 void
 command_script_stat(ContextData* ctxt)
 {
-    char* script = xset_custom_get_script(ctxt->set, false);
-    if (script && stat(script, &ctxt->script_stat) == 0)
+    const char* script = xset_custom_get_script(ctxt->set, false);
+    if (!script)
+    {
+        ctxt->script_stat_valid = false;
+        return;
+    }
+
+    const auto script_stat = ztd::stat(script);
+    if (script_stat.is_valid())
         ctxt->script_stat_valid = true;
     else
         ctxt->script_stat_valid = false;
-    free(script);
 }
 
 void

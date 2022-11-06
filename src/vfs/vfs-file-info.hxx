@@ -52,34 +52,26 @@ enum VFSFileInfoFlag
 
 struct VFSFileInfo
 {
-  public:
+  public: // TODO private
     // cached copy of struct stat()
-    // Only use some members of struct stat to reduce memory usage
-    dev_t dev;         // st_dev     - ID of device containing file
-    mode_t mode;       // st_dev     - File type and mode
-    uid_t uid;         // st_uid     - User ID of owner
-    gid_t gid;         // st_gid     - Group ID of owner
-    off_t size;        // st_size    - Total size, in bytes
-    std::time_t atime; // st_atime   - Time of the last access
-    std::time_t mtime; // st_mtime   - Time of last modification
-    blksize_t blksize; // st_blksize - Block size for filesystem I/O
-    blkcnt_t blocks;   // st_blocks  - Number of 512B blocks allocated
+    ztd::lstat file_stat;
 
     std::filesystem::file_status status;
 
+  public:
     std::string name;              // real name on file system
     std::string disp_name;         // displayed name (in UTF-8)
     std::string collate_key;       // sfm sort key
     std::string collate_icase_key; // sfm case folded sort key
     std::string disp_size;         // displayed human-readable file size
+    std::string disp_disk_size;    // displayed human-readable file size on disk
     std::string disp_owner;        // displayed owner:group pair
     std::string disp_mtime;        // displayed last modification time
     std::string disp_perm;         // displayed permission in string form
     vfs::mime_type mime_type;      // mime type related information
     GdkPixbuf* big_thumbnail;      // thumbnail of the file
     GdkPixbuf* small_thumbnail;    // thumbnail of the file
-
-    VFSFileInfoFlag flags; // if it is a special file
+    VFSFileInfoFlag flags;         // if it is a special file
 
   public:
     const std::string& get_name() const noexcept;
@@ -88,7 +80,10 @@ struct VFSFileInfo
     void set_disp_name(std::string_view new_disp_name) noexcept;
 
     off_t get_size() const noexcept;
+    off_t get_disk_size() const noexcept;
+
     const std::string& get_disp_size() const noexcept;
+    const std::string& get_disp_disk_size() const noexcept;
 
     blkcnt_t get_blocks() const noexcept;
 
@@ -103,8 +98,8 @@ struct VFSFileInfo
     const std::string& get_disp_mtime() noexcept;
     const std::string& get_disp_perm() noexcept;
 
-    std::time_t* get_mtime() noexcept;
-    std::time_t* get_atime() noexcept;
+    std::time_t get_mtime() noexcept;
+    std::time_t get_atime() noexcept;
 
     void load_thumbnail(std::string_view full_path, bool big) noexcept;
     bool is_thumbnail_loaded(bool big) const noexcept;
