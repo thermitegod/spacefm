@@ -3056,6 +3056,10 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
         }
     }
 
+    // too much padding
+    gtk_widget_set_margin_top(GTK_WIDGET(file_browser->status_bar), 0);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(file_browser->status_bar), 0);
+
     gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar), 0, statusbar_txt.c_str());
 }
 
