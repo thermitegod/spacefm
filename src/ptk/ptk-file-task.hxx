@@ -43,7 +43,7 @@ struct PtkFileTask
     PtkFileTask(VFSFileTaskType type, const std::vector<std::string>& src_files,
                 std::string_view dest_dir, GtkWindow* parent_window, GtkWidget* task_view);
 
-    VFSFileTask* task;
+    vfs::file_task task;
 
     GtkWidget* progress_dlg;
     GtkWidget* progress_btn_close;

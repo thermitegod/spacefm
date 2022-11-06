@@ -119,7 +119,12 @@ enum VFSExecType
 
 struct VFSFileTask;
 
-using VFSFileTaskStateCallback = bool (*)(VFSFileTask* task, VFSFileTaskState state,
+namespace vfs
+{
+    using file_task = ztd::raw_ptr<VFSFileTask>;
+}
+
+using VFSFileTaskStateCallback = bool (*)(vfs::file_task task, VFSFileTaskState state,
                                           void* state_data, void* user_data);
 
 struct VFSFileTask
@@ -212,32 +217,32 @@ struct VFSFileTask
     void* exec_ptask{nullptr};
 };
 
-VFSFileTask* vfs_task_new(VFSFileTaskType task_type, const std::vector<std::string>& src_files,
-                          std::string_view dest_dir);
+vfs::file_task vfs_task_new(VFSFileTaskType task_type, const std::vector<std::string>& src_files,
+                            std::string_view dest_dir);
 
-void vfs_file_task_lock(VFSFileTask* task);
-void vfs_file_task_unlock(VFSFileTask* task);
+void vfs_file_task_lock(vfs::file_task task);
+void vfs_file_task_unlock(vfs::file_task task);
 
 /* Set some actions for chmod, this array will be copied
  * and stored in VFSFileTask */
-void vfs_file_task_set_chmod(VFSFileTask* task, unsigned char* chmod_actions);
+void vfs_file_task_set_chmod(vfs::file_task task, unsigned char* chmod_actions);
 
-void vfs_file_task_set_chown(VFSFileTask* task, uid_t uid, gid_t gid);
+void vfs_file_task_set_chown(vfs::file_task task, uid_t uid, gid_t gid);
 
-void vfs_file_task_set_state_callback(VFSFileTask* task, VFSFileTaskStateCallback cb,
+void vfs_file_task_set_state_callback(vfs::file_task task, VFSFileTaskStateCallback cb,
                                       void* user_data);
 
-void vfs_file_task_set_recursive(VFSFileTask* task, bool recursive);
+void vfs_file_task_set_recursive(vfs::file_task task, bool recursive);
 
-void vfs_file_task_set_overwrite_mode(VFSFileTask* task, VFSFileTaskOverwriteMode mode);
+void vfs_file_task_set_overwrite_mode(vfs::file_task task, VFSFileTaskOverwriteMode mode);
 
-void vfs_file_task_run(VFSFileTask* task);
+void vfs_file_task_run(vfs::file_task task);
 
-void vfs_file_task_try_abort(VFSFileTask* task);
+void vfs_file_task_try_abort(vfs::file_task task);
 
-void vfs_file_task_abort(VFSFileTask* task);
+void vfs_file_task_abort(vfs::file_task task);
 
-void vfs_file_task_free(VFSFileTask* task);
+void vfs_file_task_free(vfs::file_task task);
 
 char* vfs_file_task_get_cpids(Glib::Pid pid);
 void vfs_file_task_kill_cpids(char* cpids, i32 signal);

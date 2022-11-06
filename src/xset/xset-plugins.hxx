@@ -62,7 +62,7 @@ struct PluginData
 const std::vector<xset_t> xset_get_plugins();
 void xset_clear_plugins(const std::vector<xset_t>& plugins);
 
-void on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data);
+void on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data);
 
 void install_plugin_file(void* main_win, GtkWidget* handler_dlg, std::string_view path,
                          std::string_view plug_dir, PluginJob job, xset_t insert_set);

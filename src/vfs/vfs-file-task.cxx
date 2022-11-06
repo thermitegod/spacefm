@@ -62,41 +62,41 @@
  * calculation is cancelled.
  * NOTE: *size should be set to zero before calling this function.
  */
-static off_t get_total_size_of_dir(VFSFileTask* task, std::string_view path);
-static void vfs_file_task_error(VFSFileTask* task, i32 errnox, std::string_view action,
+static off_t get_total_size_of_dir(vfs::file_task task, std::string_view path);
+static void vfs_file_task_error(vfs::file_task task, i32 errnox, std::string_view action,
                                 std::string_view target);
-static void vfs_file_task_exec_error(VFSFileTask* task, i32 errnox, std::string_view action);
-static void add_task_dev(VFSFileTask* task, dev_t dev);
-static bool should_abort(VFSFileTask* task);
+static void vfs_file_task_exec_error(vfs::file_task task, i32 errnox, std::string_view action);
+static void add_task_dev(vfs::file_task task, dev_t dev);
+static bool should_abort(vfs::file_task task);
 
 static void
-vfs_file_task_init(VFSFileTask* task)
+vfs_file_task_init(vfs::file_task task)
 {
     task->mutex = (GMutex*)g_malloc(sizeof(GMutex));
     g_mutex_init(task->mutex);
 }
 
 void
-vfs_file_task_lock(VFSFileTask* task)
+vfs_file_task_lock(vfs::file_task task)
 {
     g_mutex_lock(task->mutex);
 }
 
 void
-vfs_file_task_unlock(VFSFileTask* task)
+vfs_file_task_unlock(vfs::file_task task)
 {
     g_mutex_unlock(task->mutex);
 }
 
 static void
-vfs_file_task_clear(VFSFileTask* task)
+vfs_file_task_clear(vfs::file_task task)
 {
     g_mutex_clear(task->mutex);
     free(task->mutex);
 }
 
 static void
-append_add_log(VFSFileTask* task, std::string_view msg)
+append_add_log(vfs::file_task task, std::string_view msg)
 {
     vfs_file_task_lock(task);
     GtkTextIter iter;
@@ -106,7 +106,7 @@ append_add_log(VFSFileTask* task, std::string_view msg)
 }
 
 static void
-call_state_callback(VFSFileTask* task, VFSFileTaskState state)
+call_state_callback(vfs::file_task task, VFSFileTaskState state)
 {
     task->state = state;
     if (task->state_cb)
@@ -128,7 +128,7 @@ call_state_callback(VFSFileTask* task, VFSFileTaskState state)
 }
 
 static bool
-should_abort(VFSFileTask* task)
+should_abort(vfs::file_task task)
 {
     if (task->state_pause != VFSFileTaskState::RUNNING)
     {
@@ -182,7 +182,7 @@ vfs_file_task_get_unique_name(std::string_view dest_dir, std::string_view base_n
  * The returned string is the new destination file chosen by the user
  */
 static bool
-check_overwrite(VFSFileTask* task, std::string_view dest_file, bool* dest_exists,
+check_overwrite(vfs::file_task task, std::string_view dest_file, bool* dest_exists,
                 char** new_dest_file)
 {
     char* new_dest;
@@ -301,7 +301,7 @@ check_overwrite(VFSFileTask* task, std::string_view dest_file, bool* dest_exists
 }
 
 static bool
-check_dest_in_src(VFSFileTask* task, std::string_view src_dir)
+check_dest_in_src(vfs::file_task task, std::string_view src_dir)
 {
     if (task->dest_dir.empty())
         return false;
@@ -347,7 +347,7 @@ update_file_display(std::string_view path)
 }
 
 static bool
-vfs_file_task_do_copy(VFSFileTask* task, std::string_view src_file, std::string_view dest_file)
+vfs_file_task_do_copy(vfs::file_task task, std::string_view src_file, std::string_view dest_file)
 {
     if (should_abort(task))
         return false;
@@ -644,7 +644,7 @@ vfs_file_task_do_copy(VFSFileTask* task, std::string_view src_file, std::string_
 }
 
 static void
-vfs_file_task_copy(VFSFileTask* task, std::string_view src_file)
+vfs_file_task_copy(vfs::file_task task, std::string_view src_file)
 {
     const std::string file_name = Glib::path_get_basename(src_file.data());
     const std::string dest_file = Glib::build_filename(task->dest_dir, file_name);
@@ -652,7 +652,7 @@ vfs_file_task_copy(VFSFileTask* task, std::string_view src_file)
 }
 
 static i32
-vfs_file_task_do_move(VFSFileTask* task, std::string_view src_file, std::string_view dest_path)
+vfs_file_task_do_move(vfs::file_task task, std::string_view src_file, std::string_view dest_path)
 {
     if (should_abort(task))
         return 0;
@@ -743,7 +743,7 @@ vfs_file_task_do_move(VFSFileTask* task, std::string_view src_file, std::string_
 }
 
 static void
-vfs_file_task_move(VFSFileTask* task, std::string_view src_file)
+vfs_file_task_move(vfs::file_task task, std::string_view src_file)
 {
     if (should_abort(task))
         return;
@@ -784,7 +784,7 @@ vfs_file_task_move(VFSFileTask* task, std::string_view src_file)
 }
 
 static void
-vfs_file_task_trash(VFSFileTask* task, std::string_view src_file)
+vfs_file_task_trash(vfs::file_task task, std::string_view src_file)
 {
     if (should_abort(task))
         return;
@@ -824,7 +824,7 @@ vfs_file_task_trash(VFSFileTask* task, std::string_view src_file)
 }
 
 static void
-vfs_file_task_delete(VFSFileTask* task, std::string_view src_file)
+vfs_file_task_delete(vfs::file_task task, std::string_view src_file)
 {
     if (should_abort(task))
         return;
@@ -878,7 +878,7 @@ vfs_file_task_delete(VFSFileTask* task, std::string_view src_file)
 }
 
 static void
-vfs_file_task_link(VFSFileTask* task, std::string_view src_file)
+vfs_file_task_link(vfs::file_task task, std::string_view src_file)
 {
     if (should_abort(task))
         return;
@@ -953,7 +953,7 @@ vfs_file_task_link(VFSFileTask* task, std::string_view src_file)
 }
 
 static void
-vfs_file_task_chown_chmod(VFSFileTask* task, std::string_view src_file)
+vfs_file_task_chown_chmod(vfs::file_task task, std::string_view src_file)
 {
     if (should_abort(task))
         return;
@@ -1114,7 +1114,7 @@ cb_exec_child_cleanup(Glib::Pid pid, i32 status, char* tmp_file)
 }
 
 static void
-cb_exec_child_watch(Glib::Pid pid, i32 status, VFSFileTask* task)
+cb_exec_child_watch(Glib::Pid pid, i32 status, vfs::file_task task)
 {
     bool bad_status = false;
     g_spawn_close_pid(pid);
@@ -1155,7 +1155,7 @@ cb_exec_child_watch(Glib::Pid pid, i32 status, VFSFileTask* task)
 }
 
 static bool
-cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, VFSFileTask* task)
+cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, vfs::file_task task)
 {
     /*
     LOG_INFO("cb_exec_out_watch {:p}", channel);
@@ -1254,7 +1254,7 @@ get_xxhash(std::string_view path)
 }
 
 static void
-vfs_file_task_exec_error(VFSFileTask* task, i32 errnox, std::string_view action)
+vfs_file_task_exec_error(vfs::file_task task, i32 errnox, std::string_view action)
 {
     if (errnox)
     {
@@ -1272,7 +1272,7 @@ vfs_file_task_exec_error(VFSFileTask* task, i32 errnox, std::string_view action)
 }
 
 static void
-vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
+vfs_file_task_exec(vfs::file_task task, std::string_view src_file)
 {
     // this function is now thread safe but is not currently run in
     // another thread because gio adds watches to main loop thread anyway
@@ -1707,7 +1707,7 @@ vfs_file_task_exec(VFSFileTask* task, std::string_view src_file)
 }
 
 static bool
-on_size_timeout(VFSFileTask* task)
+on_size_timeout(vfs::file_task task)
 {
     if (!task->abort)
         task->state = VFSFileTaskState::SIZE_TIMEOUT;
@@ -1715,7 +1715,7 @@ on_size_timeout(VFSFileTask* task)
 }
 
 static void*
-vfs_file_task_thread(VFSFileTask* task)
+vfs_file_task_thread(vfs::file_task task)
 {
     u32 size_timeout = 0;
     if (task->type < VFSFileTaskType::MOVE || task->type >= VFSFileTaskType::LAST)
@@ -1969,11 +1969,11 @@ vfs_file_task_thread(VFSFileTask* task)
  * source_files sould be a newly allocated list, and it will be
  * freed after file operation has been completed
  */
-VFSFileTask*
+vfs::file_task
 vfs_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files,
              std::string_view dest_dir)
 {
-    VFSFileTask* task = g_slice_new0(VFSFileTask);
+    vfs::file_task task = g_slice_new0(VFSFileTask);
 
     task->type = type;
     task->src_paths = src_files;
@@ -2000,7 +2000,7 @@ vfs_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files,
 /* Set some actions for chmod, this array will be copied
  * and stored in VFSFileTask */
 void
-vfs_file_task_set_chmod(VFSFileTask* task, unsigned char* chmod_actions)
+vfs_file_task_set_chmod(vfs::file_task task, unsigned char* chmod_actions)
 {
     task->chmod_actions = (unsigned char*)g_slice_alloc(sizeof(unsigned char) *
                                                         magic_enum::enum_count<ChmodActionType>());
@@ -2010,14 +2010,14 @@ vfs_file_task_set_chmod(VFSFileTask* task, unsigned char* chmod_actions)
 }
 
 void
-vfs_file_task_set_chown(VFSFileTask* task, uid_t uid, gid_t gid)
+vfs_file_task_set_chown(vfs::file_task task, uid_t uid, gid_t gid)
 {
     task->uid = uid;
     task->gid = gid;
 }
 
 void
-vfs_file_task_run(VFSFileTask* task)
+vfs_file_task_run(vfs::file_task task)
 {
     if (task->type != VFSFileTaskType::EXEC)
     {
@@ -2043,7 +2043,7 @@ vfs_file_task_run(VFSFileTask* task)
 }
 
 void
-vfs_file_task_try_abort(VFSFileTask* task)
+vfs_file_task_try_abort(vfs::file_task task)
 {
     task->abort = true;
     if (task->pause_cond)
@@ -2067,7 +2067,7 @@ vfs_file_task_try_abort(VFSFileTask* task)
 }
 
 void
-vfs_file_task_abort(VFSFileTask* task)
+vfs_file_task_abort(vfs::file_task task)
 {
     task->abort = true;
     /* Called from another thread */
@@ -2079,7 +2079,7 @@ vfs_file_task_abort(VFSFileTask* task)
 }
 
 void
-vfs_file_task_free(VFSFileTask* task)
+vfs_file_task_free(vfs::file_task task)
 {
     g_slist_free(task->devs);
 
@@ -2096,7 +2096,7 @@ vfs_file_task_free(VFSFileTask* task)
 }
 
 static void
-add_task_dev(VFSFileTask* task, dev_t dev)
+add_task_dev(vfs::file_task task, dev_t dev)
 {
     dev_t parent = 0;
     if (!g_slist_find(task->devs, GUINT_TO_POINTER(dev)))
@@ -2124,7 +2124,7 @@ add_task_dev(VFSFileTask* task, dev_t dev)
  * NOTE: *size should be set to zero before calling this function.
  */
 static off_t
-get_total_size_of_dir(VFSFileTask* task, std::string_view path)
+get_total_size_of_dir(vfs::file_task task, std::string_view path)
 {
     if (task->abort)
         return 0;
@@ -2166,26 +2166,27 @@ get_total_size_of_dir(VFSFileTask* task, std::string_view path)
 }
 
 void
-vfs_file_task_set_recursive(VFSFileTask* task, bool recursive)
+vfs_file_task_set_recursive(vfs::file_task task, bool recursive)
 {
     task->recursive = recursive;
 }
 
 void
-vfs_file_task_set_overwrite_mode(VFSFileTask* task, VFSFileTaskOverwriteMode mode)
+vfs_file_task_set_overwrite_mode(vfs::file_task task, VFSFileTaskOverwriteMode mode)
 {
     task->overwrite_mode = mode;
 }
 
 void
-vfs_file_task_set_state_callback(VFSFileTask* task, VFSFileTaskStateCallback cb, void* user_data)
+vfs_file_task_set_state_callback(vfs::file_task task, VFSFileTaskStateCallback cb, void* user_data)
 {
     task->state_cb = cb;
     task->state_cb_data = user_data;
 }
 
 static void
-vfs_file_task_error(VFSFileTask* task, i32 errnox, std::string_view action, std::string_view target)
+vfs_file_task_error(vfs::file_task task, i32 errnox, std::string_view action,
+                    std::string_view target)
 {
     task->error = errnox;
     const std::string errno_msg = std::strerror(errnox);

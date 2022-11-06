@@ -835,7 +835,7 @@ ptk_location_view_create_mount_point(i32 mode, vfs::volume vol, netmount_t netmo
 }
 
 static void
-on_autoopen_net_cb(VFSFileTask* task, AutoOpen* ao)
+on_autoopen_net_cb(vfs::file_task task, AutoOpen* ao)
 {
     (void)task;
     if (!(ao && ao->device_file))
@@ -1267,7 +1267,7 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 }
 
 static bool
-on_autoopen_cb(VFSFileTask* task, AutoOpen* ao)
+on_autoopen_cb(vfs::file_task task, AutoOpen* ao)
 {
     (void)task;
     // LOG_INFO("on_autoopen_cb");

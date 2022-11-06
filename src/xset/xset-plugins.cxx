@@ -401,7 +401,7 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
 }
 
 void
-on_install_plugin_cb(VFSFileTask* task, PluginData* plugin_data)
+on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
 {
     (void)task;
     xset_t set;

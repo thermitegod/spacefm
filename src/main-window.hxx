@@ -122,7 +122,7 @@ void update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser);
 void main_window_toggle_thumbnails_all_windows();
 void main_window_refresh_all_tabs_matching(std::string_view path);
 void main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser);
-void main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf);
+void main_write_exports(vfs::file_task vtask, const char* value, std::string& buf);
 void on_reorder(GtkWidget* item, GtkWidget* parent);
 char* main_window_get_tab_cwd(PtkFileBrowser* file_browser, tab_t tab_num);
 char* main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num);

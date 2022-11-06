@@ -3872,7 +3872,7 @@ get_task_view_window(GtkWidget* view)
 }
 
 void
-main_write_exports(VFSFileTask* vtask, const char* value, std::string& buf)
+main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
 {
     std::string path;
     std::string esc_path;

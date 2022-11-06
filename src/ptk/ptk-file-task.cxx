@@ -43,7 +43,7 @@
 
 #include "ptk/ptk-file-task.hxx"
 
-static bool on_vfs_file_task_state_cb(VFSFileTask* task, VFSFileTaskState state, void* state_data,
+static bool on_vfs_file_task_state_cb(vfs::file_task task, VFSFileTaskState state, void* state_data,
                                       void* user_data);
 
 static void query_overwrite(PtkFileTask* ptask);
@@ -654,7 +654,7 @@ static void
 set_progress_icon(PtkFileTask* ptask)
 {
     GdkPixbuf* pixbuf;
-    VFSFileTask* task = ptask->task;
+    vfs::file_task task = ptask->task;
     GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
     if (task->state_pause != VFSFileTaskState::RUNNING)
@@ -742,7 +742,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 
     // LOG_INFO("ptk_file_task_progress_open");
 
-    VFSFileTask* task = ptask->task;
+    vfs::file_task task = ptask->task;
 
     ptask->progress_dlg = gtk_dialog_new_with_buttons(titles.at(task->type).data(),
                                                       nullptr /*was task->parent_window*/,
@@ -1065,7 +1065,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
 
     // LOG_INFO("ptk_file_task_progress_update ptask={:p}", ptask);
 
-    VFSFileTask* task = ptask->task;
+    vfs::file_task task = ptask->task;
 
     // current file
     std::string usrc_dir;
@@ -1398,7 +1398,7 @@ ptk_file_task_update(PtkFileTask* ptask)
         return;
     }
 
-    VFSFileTask* task = ptask->task;
+    vfs::file_task task = ptask->task;
     off_t cur_speed;
     f64 timer_elapsed = task->timer.elapsed();
 
@@ -1699,7 +1699,7 @@ ptk_file_task_update(PtkFileTask* ptask)
 }
 
 static bool
-on_vfs_file_task_state_cb(VFSFileTask* task, VFSFileTaskState state, void* state_data,
+on_vfs_file_task_state_cb(vfs::file_task task, VFSFileTaskState state, void* state_data,
                           void* user_data)
 {
     PtkFileTask* ptask = PTK_FILE_TASK(user_data);
