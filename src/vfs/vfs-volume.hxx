@@ -169,4 +169,6 @@ dev_t get_device_parent(dev_t dev);
 bool path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file,
                           char** fs_type);
 bool mtab_fstype_is_handled_by_protocol(const char* mtab_fstype);
-vfs::volume vfs_volume_get_by_device_or_point(const char* device_file, const char* point);
+
+vfs::volume vfs_volume_get_by_device(std::string_view device_file);
+vfs::volume vfs_volume_get_by_device_or_point(std::string_view device_file, std::string_view point);

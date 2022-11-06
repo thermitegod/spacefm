@@ -3557,35 +3557,47 @@ vfs_volume_get_all_volumes()
 }
 
 vfs::volume
-vfs_volume_get_by_device_or_point(const char* device_file, const char* point)
+vfs_volume_get_by_device(std::string_view device_file)
 {
-    if (!point && !device_file)
+    if (device_file.empty())
+        return nullptr;
+
+    if (volumes.empty())
+        return nullptr;
+
+    for (vfs::volume volume : volumes)
+    {
+        if (ztd::same(device_file, volume->device_file))
+            return volume;
+    }
+
+    return nullptr;
+}
+
+vfs::volume
+vfs_volume_get_by_device_or_point(std::string_view device_file, std::string_view point)
+{
+    if (point.empty() && device_file.empty())
+        return nullptr;
+
+    if (volumes.empty())
         return nullptr;
 
     // canonicalize point
-    char buf[PATH_MAX + 1];
-    char* canon = nullptr;
-    if (point)
-    {
-        canon = realpath(point, buf);
-        if (canon && ztd::same(canon, point))
-            canon = nullptr;
-    }
+    const std::string canon = std::filesystem::canonical(point);
 
-    if (!volumes.empty())
+    for (vfs::volume volume : volumes)
     {
-        for (vfs::volume volume : volumes)
+        if (ztd::same(device_file, volume->device_file))
+            return volume;
+
+        if (volume->is_mounted && volume->mount_point)
         {
-            if (device_file && ztd::same(device_file, volume->device_file))
+            if (ztd::same(point, volume->mount_point) || ztd::same(canon, volume->mount_point))
                 return volume;
-            if (point && volume->is_mounted && volume->mount_point)
-            {
-                if (ztd::same(point, volume->mount_point) ||
-                    (canon && ztd::same(canon, volume->mount_point)))
-                    return volume;
-            }
         }
     }
+
     return nullptr;
 }
 

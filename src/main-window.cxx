@@ -6998,7 +6998,8 @@ main_window_socket_command(char* argv[], std::string& reply)
                     if (!device_file_stat.is_valid() || !device_file_stat.is_block_file())
                     {
                         // NON-block device - try to find vol by mount point
-                        if (!(vol = vfs_volume_get_by_device_or_point(device_file, real_path)))
+                        vol = vfs_volume_get_by_device(device_file);
+                        if (!vol)
                         {
                             reply = fmt::format("invalid TARGET '{}'", argv[j]);
                             return 2;
@@ -7029,7 +7030,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (device_file)
             {
                 // block device - get vol
-                vol = vfs_volume_get_by_device_or_point(device_file, nullptr);
+                vol = vfs_volume_get_by_device(device_file);
                 free(device_file);
                 device_file = nullptr;
             }

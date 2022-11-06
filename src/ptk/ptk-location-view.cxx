@@ -392,8 +392,7 @@ ptk_location_view_open_block(const char* block, bool new_tab)
     // open block device file if in volumes list
 
     // may be link so get real path
-    char buf[PATH_MAX + 1];
-    char* canon = realpath(block, buf);
+    const std::string canon = std::filesystem::canonical(block);
 
     const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
     for (vfs::volume volume : volumes)

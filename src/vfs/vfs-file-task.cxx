@@ -303,31 +303,28 @@ check_overwrite(VFSFileTask* task, std::string_view dest_file, bool* dest_exists
 static bool
 check_dest_in_src(VFSFileTask* task, std::string_view src_dir)
 {
-    char real_src_path[PATH_MAX];
-    char real_dest_path[PATH_MAX];
-    i32 len;
-
-    if (!(!task->dest_dir.empty() && realpath(task->dest_dir.c_str(), real_dest_path)))
+    if (task->dest_dir.empty())
         return false;
 
-    if (realpath(src_dir.data(), real_src_path) && ztd::startswith(real_dest_path, real_src_path) &&
-        (len = std::strlen(real_src_path)) &&
-        (real_dest_path[len] == '/' || real_dest_path[len] == '\0'))
-    {
-        // source is contained in destination dir
-        const std::string disp_src = Glib::filename_display_name(src_dir.data());
-        const std::string disp_dest = Glib::filename_display_name(task->dest_dir);
-        const std::string err =
-            fmt::format("Destination directory \"{}\" is contained in source \"{}\"",
-                        disp_dest,
-                        disp_src);
-        append_add_log(task, err);
-        if (task->state_cb)
-            task->state_cb(task, VFSFileTaskState::ERROR, nullptr, task->state_cb_data);
-        task->state = VFSFileTaskState::RUNNING;
-        return true;
-    }
-    return false;
+    const std::string real_dest_path = std::filesystem::canonical(task->dest_dir);
+    const std::string real_src_path = std::filesystem::canonical(src_dir);
+
+    if (!ztd::startswith(real_dest_path, real_src_path))
+        return false;
+
+    // source is contained in destination dir
+    const std::string disp_src = Glib::filename_display_name(src_dir.data());
+    const std::string disp_dest = Glib::filename_display_name(task->dest_dir);
+    const std::string err =
+        fmt::format("Destination directory \"{}\" is contained in source \"{}\"",
+                    disp_dest,
+                    disp_src);
+    append_add_log(task, err);
+    if (task->state_cb)
+        task->state_cb(task, VFSFileTaskState::ERROR, nullptr, task->state_cb_data);
+    task->state = VFSFileTaskState::RUNNING;
+
+    return true;
 }
 
 static void
