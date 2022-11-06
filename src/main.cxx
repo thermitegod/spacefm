@@ -507,7 +507,7 @@ open_file(std::string_view path)
     vfs_file_info_get(file, path);
     vfs::mime_type mime_type = file->get_mime_type();
 
-    char* app_name = vfs_mime_type_get_default_action(mime_type);
+    const char* app_name = vfs_mime_type_get_default_action(mime_type);
     if (!app_name)
     {
         app_name = ptk_choose_app_for_mime_type(nullptr, mime_type, true, true, true, false);
@@ -534,7 +534,6 @@ open_file(std::string_view path)
         ptk_show_error(nullptr, "Error", msg);
     }
 
-    free(app_name);
     vfs_mime_type_unref(mime_type);
     vfs_file_info_unref(file);
 }

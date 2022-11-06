@@ -18,8 +18,6 @@
 /* Currently this library is NOT MT-safe */
 
 #include <string>
-#include <string_view>
-
 #include <filesystem>
 
 #include <vector>
@@ -51,7 +49,7 @@
 #include "mime-type/mime-cache.hxx"
 
 /* max extent used to checking text files */
-constexpr i32 TEXT_MAX_EXTENT = 512;
+inline constexpr i32 TEXT_MAX_EXTENT = 512;
 
 /* Check if the specified mime_type is the subclass of the specified parent type */
 static bool mime_type_is_subclass(std::string_view type, std::string_view parent);
@@ -145,7 +143,7 @@ mime_type_get_by_filename(std::string_view filename, std::filesystem::file_statu
 const std::string
 mime_type_get_by_file(std::string_view filepath)
 {
-    auto status = std::filesystem::status(filepath);
+    const auto status = std::filesystem::status(filepath);
 
     if (!std::filesystem::exists(status))
         return XDG_MIME_TYPE_UNKNOWN.data();
@@ -384,7 +382,7 @@ mime_type_get_desc_icon(std::string_view type, std::string_view locale, char** i
      * Since the spec really sucks, we do not follow it here.
      */
 
-    std::string file_path = fmt::format("{}/mime/{}.xml", vfs_user_data_dir(), type);
+    const std::string file_path = fmt::format("{}/mime/{}.xml", vfs_user_data_dir(), type);
     if (faccessat(0, file_path.data(), F_OK, AT_EACCESS) != -1)
     {
         const char* desc = _mime_type_get_desc_icon(file_path, locale, true, icon_name);
@@ -395,10 +393,10 @@ mime_type_get_desc_icon(std::string_view type, std::string_view locale, char** i
     // look in system dirs
     for (std::string_view sys_dir : vfs_system_data_dir())
     {
-        file_path = fmt::format("{}/mime/{}.xml", sys_dir, type);
-        if (faccessat(0, file_path.data(), F_OK, AT_EACCESS) != -1)
+        const std::string sys_file_path = fmt::format("{}/mime/{}.xml", sys_dir, type);
+        if (faccessat(0, sys_file_path.data(), F_OK, AT_EACCESS) != -1)
         {
-            const char* desc = _mime_type_get_desc_icon(file_path, locale, false, icon_name);
+            const char* desc = _mime_type_get_desc_icon(sys_file_path, locale, false, icon_name);
             if (desc)
                 return desc;
         }
@@ -491,7 +489,6 @@ mime_type_is_data_plain_text(const char* data, i32 len)
 bool
 mime_type_is_text_file(std::string_view file_path, std::string_view mime_type)
 {
-    i32 rlen;
     bool ret = false;
 
     if (!mime_type.empty())
@@ -517,7 +514,7 @@ mime_type_is_text_file(std::string_view file_path, std::string_view mime_type)
             if (S_ISREG(statbuf.st_mode))
             {
                 unsigned char data[TEXT_MAX_EXTENT];
-                rlen = read(file, data, sizeof(data));
+                const i32 rlen = read(file, data, sizeof(data));
                 ret = mime_type_is_data_plain_text((char*)data, rlen);
             }
         }

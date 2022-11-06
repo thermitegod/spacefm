@@ -83,7 +83,7 @@ const char* vfs_mime_type_get_description(vfs::mime_type mime_type);
 const std::vector<std::string> vfs_mime_type_get_actions(vfs::mime_type mime_type);
 
 /* returned string should be freed with g_strfreev when not needed. */
-char* vfs_mime_type_get_default_action(vfs::mime_type mime_type);
+const char* vfs_mime_type_get_default_action(vfs::mime_type mime_type);
 
 void vfs_mime_type_set_default_action(vfs::mime_type mime_type, std::string_view desktop_id);
 

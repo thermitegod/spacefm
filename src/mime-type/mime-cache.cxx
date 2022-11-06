@@ -191,8 +191,6 @@ MimeCache::lookup_suffix(std::string_view filename, const char** suffix_pos)
 {
     const char* root = this->suffix_roots;
     const u32 n = this->n_suffix_roots;
-    const char* mime_type = nullptr;
-    const char* ret = nullptr;
 
     if (n == 0)
         return nullptr;
@@ -202,15 +200,14 @@ MimeCache::lookup_suffix(std::string_view filename, const char** suffix_pos)
     const char* suffix = g_utf8_find_prev_char(filename.data(), filename.substr(fn_len).data());
     const char* leaf_node =
         this->lookup_reverse_suffix_nodes(this->buffer, root, n, filename, suffix, &_suffix_pos);
-    if (leaf_node)
-    {
-        mime_type = this->buffer + VAL32(leaf_node, 4);
-        // LOG_DEBUG("found: {}", mime_type);
-        *suffix_pos = _suffix_pos;
-        ret = mime_type;
-    }
 
-    return ret;
+    if (!leaf_node)
+        return nullptr;
+
+    const char* mime_type = this->buffer + VAL32(leaf_node, 4);
+    // LOG_DEBUG("found: {}", mime_type);
+    *suffix_pos = _suffix_pos;
+    return mime_type;
 }
 
 const char*
@@ -237,7 +234,7 @@ MimeCache::lookup_glob(std::string_view filename, i32* glob_len)
     i32 max_glob_len = 0;
 
     /* entry size is changed in mime.cache 1.1 */
-    usize entry_size = 12;
+    const usize entry_size = 12;
 
     for (usize i = 0; i < this->n_globs; ++i)
     {
@@ -328,16 +325,16 @@ bool
 MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data, u32 len)
 {
     u32 offset = VAL32(rule, 0);
-    u32 range = VAL32(rule, 4);
+    const u32 range = VAL32(rule, 4);
 
-    u32 max_offset = offset + range;
-    u32 val_len = VAL32(rule, 12);
+    const u32 max_offset = offset + range;
+    const u32 val_len = VAL32(rule, 12);
 
     for (; offset < max_offset && (offset + val_len) <= len; ++offset)
     {
         bool match = false;
-        u32 val_off = VAL32(rule, 16);
-        u32 mask_off = VAL32(rule, 20);
+        const u32 val_off = VAL32(rule, 16);
+        const u32 mask_off = VAL32(rule, 20);
         const char* value = buf + val_off;
         /* FIXME: word_size and byte order are not supported! */
 
@@ -362,10 +359,10 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data,
 
         if (match)
         {
-            u32 n_children = VAL32(rule, 24);
+            const u32 n_children = VAL32(rule, 24);
             if (n_children > 0)
             {
-                u32 first_child_off = VAL32(rule, 28);
+                const u32 first_child_off = VAL32(rule, 28);
                 rule = buf + first_child_off;
                 for (usize i = 0; i < n_children; ++i, rule += 32)
                 {
@@ -385,8 +382,8 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data,
 bool
 MimeCache::magic_match(const char* buf, const char* magic, const char* data, u32 len)
 {
-    u32 n_rules = VAL32(magic, 8);
-    u32 rules_off = VAL32(magic, 12);
+    const u32 n_rules = VAL32(magic, 8);
+    const u32 rules_off = VAL32(magic, 12);
     const char* rule = buf + rules_off;
 
     for (usize i = 0; i < n_rules; ++i, rule += 32)
@@ -398,7 +395,7 @@ MimeCache::magic_match(const char* buf, const char* magic, const char* data, u32
 const char*
 MimeCache::lookup_suffix_nodes(const char* buf, const char* nodes, u32 n, const char* name)
 {
-    u32 uchar = g_unichar_tolower(g_utf8_get_char(name));
+    const u32 uchar = g_unichar_tolower(g_utf8_get_char(name));
 
     /* binary search */
     i32 upper = n;
@@ -408,12 +405,16 @@ MimeCache::lookup_suffix_nodes(const char* buf, const char* nodes, u32 n, const 
     while (upper >= lower)
     {
         const char* node = nodes + middle * 16;
-        u32 ch = VAL32(node, 0);
+        const u32 ch = VAL32(node, 0);
 
         if (uchar < ch)
+        {
             upper = middle - 1;
+        }
         else if (uchar > ch)
+        {
             lower = middle + 1;
+        }
         else /* uchar == ch */
         {
             u32 n_children = VAL32(node, 8);
@@ -421,7 +422,6 @@ MimeCache::lookup_suffix_nodes(const char* buf, const char* nodes, u32 n, const 
 
             if (n_children > 0)
             {
-                u32 first_child_off;
                 if (uchar == 0)
                     return nullptr;
 
@@ -430,14 +430,14 @@ MimeCache::lookup_suffix_nodes(const char* buf, const char* nodes, u32 n, const 
                     u32 offset = VAL32(node, 4);
                     return offset ? buf + offset : nullptr;
                 }
-                first_child_off = VAL32(node, 12);
+                const u32 first_child_off = VAL32(node, 12);
                 return lookup_suffix_nodes(buf, (buf + first_child_off), n_children, name);
             }
             else
             {
                 if (!name || name[0] == 0)
                 {
-                    u32 offset = VAL32(node, 4);
+                    const u32 offset = VAL32(node, 4);
                     return offset ? buf + offset : nullptr;
                 }
                 return nullptr;
@@ -473,8 +473,8 @@ MimeCache::lookup_reverse_suffix_nodes(const char* buf, const char* nodes, u32 n
         {
             if (ch == uchar)
             {
-                u32 n_children = VAL32(node, 4);
-                u32 first_child_off = VAL32(node, 8);
+                const u32 n_children = VAL32(node, 4);
+                const u32 first_child_off = VAL32(node, 8);
                 const char* leaf_node =
                     this->lookup_reverse_suffix_nodes(buf,
                                                       buf + first_child_off,

@@ -282,8 +282,8 @@ load_settings()
     }
 
     // MOD editor discovery
-    char* app_name = xset_get_s(XSetName::EDITOR);
-    if (!app_name || app_name[0] == '\0')
+    const char* app_name = xset_get_s(XSetName::EDITOR);
+    if (!app_name)
     {
         vfs::mime_type mime_type = vfs_mime_type_get_from_type("text/plain");
         if (mime_type)

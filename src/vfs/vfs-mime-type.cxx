@@ -424,10 +424,10 @@ vfs_mime_type_get_actions(vfs::mime_type mime_type)
     return mime_type_get_actions(mime_type->type);
 }
 
-char*
+const char*
 vfs_mime_type_get_default_action(vfs::mime_type mime_type)
 {
-    char* def = mime_type_get_default_action(mime_type->type);
+    const char* def = mime_type_get_default_action(mime_type->type);
 
     /* FIXME:
      * If default app is not set, choose one from all availble actions.

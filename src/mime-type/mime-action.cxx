@@ -295,7 +295,7 @@ mime_type_has_action(std::string_view type, std::string_view desktop_id)
     Glib::ustring name;
 
     bool found = false;
-    bool is_desktop = ztd::endswith(desktop_id.data(), ".desktop");
+    const bool is_desktop = ztd::endswith(desktop_id.data(), ".desktop");
 
     if (is_desktop)
     {
@@ -346,51 +346,51 @@ mime_type_has_action(std::string_view type, std::string_view desktop_id)
     }
 
     const std::vector<std::string> actions = mime_type_get_actions(type);
-    if (!actions.empty())
+    if (actions.empty())
+        return found;
+
+    for (std::string_view action : actions)
     {
-        for (std::string_view action : actions)
+        /* Try to match directly by desktop_id first */
+        if (is_desktop && ztd::same(action, desktop_id))
         {
-            /* Try to match directly by desktop_id first */
-            if (is_desktop && ztd::same(action, desktop_id))
+            found = true;
+            break;
+        }
+        else /* Then, try to match by "Exec" and "Name" keys */
+        {
+            const Glib::ustring filename = mime_type_locate_desktop_file(action);
+
+            const auto kf = Glib::KeyFile::create();
+            try
             {
-                found = true;
-                break;
+                kf->load_from_file(filename, Glib::KeyFile::Flags::NONE);
             }
-            else /* Then, try to match by "Exec" and "Name" keys */
+            catch (Glib::FileError)
             {
-                const Glib::ustring filename = mime_type_locate_desktop_file(action);
+                return false;
+            }
 
-                const auto kf = Glib::KeyFile::create();
-                try
+            const Glib::ustring cmd2 = kf->get_string("Desktop Entry", "Exec");
+            if (ztd::same(cmd.data(), cmd2.data())) /* 2 desktop files have same "Exec" */
+            {
+                if (is_desktop)
                 {
-                    kf->load_from_file(filename, Glib::KeyFile::Flags::NONE);
-                }
-                catch (Glib::FileError)
-                {
-                    return false;
-                }
-
-                const Glib::ustring cmd2 = kf->get_string("Desktop Entry", "Exec");
-                if (ztd::same(cmd.data(), cmd2.data())) /* 2 desktop files have same "Exec" */
-                {
-                    if (is_desktop)
+                    const Glib::ustring name2 = kf->get_string("Desktop Entry", "Name");
+                    /* Then, check if the "Name" keys of 2 desktop files are the same. */
+                    if (ztd::same(name.data(), name2.data()))
                     {
-                        const Glib::ustring name2 = kf->get_string("Desktop Entry", "Name");
-                        /* Then, check if the "Name" keys of 2 desktop files are the same. */
-                        if (ztd::same(name.data(), name2.data()))
-                        {
-                            /* Both "Exec" and "Name" keys of the 2 desktop files are
-                             *  totally the same. So, despite having different desktop id
-                             *  They actually refer to the same application. */
-                            found = true;
-                            break;
-                        }
-                    }
-                    else
-                    {
+                        /* Both "Exec" and "Name" keys of the 2 desktop files are
+                         *  totally the same. So, despite having different desktop id
+                         *  They actually refer to the same application. */
                         found = true;
                         break;
                     }
+                }
+                else
+                {
+                    found = true;
+                    break;
                 }
             }
         }
@@ -406,8 +406,8 @@ make_custom_desktop_file(std::string_view desktop_id, std::string_view mime_type
     std::string cust;
     Glib::ustring file_content;
 
-    static const std::string desktop_ext = ".desktop";
-    static const std::string replace_txt = "<REPLACE_TXT>";
+    static constexpr std::string_view desktop_ext{".desktop"};
+    static constexpr std::string_view replace_txt{"<REPLACE_TXT>"};
 
     if (ztd::endswith(desktop_id, desktop_ext))
     {
@@ -501,7 +501,8 @@ mime_type_add_action(std::string_view type, std::string_view desktop_id)
 static char*
 _locate_desktop_file(std::string_view dir, std::string_view desktop_id)
 {
-    std::string desktop_path = Glib::build_filename(dir.data(), "applications", desktop_id.data());
+    const std::string desktop_path =
+        Glib::build_filename(dir.data(), "applications", desktop_id.data());
     if (std::filesystem::is_regular_file(desktop_path))
         return ztd::strdup(desktop_path);
 
@@ -534,19 +535,20 @@ mime_type_locate_desktop_file(std::string_view dir, std::string_view desktop_id)
 const char*
 mime_type_locate_desktop_file(std::string_view desktop_id)
 {
-    char* ret = nullptr;
-
     const std::string data_dir = vfs_user_data_dir();
 
-    if ((ret = _locate_desktop_file(data_dir, desktop_id)))
-        return ret;
+    const char* data_desktop = _locate_desktop_file(data_dir, desktop_id);
+    if (data_desktop)
+        return data_desktop;
 
     for (std::string_view sys_dir : vfs_system_data_dir())
     {
-        if ((ret = _locate_desktop_file(sys_dir, desktop_id)))
-            return ret;
+        const char* sys_desktop = _locate_desktop_file(sys_dir, desktop_id);
+        if (sys_desktop)
+            return sys_desktop;
     }
-    return ret;
+
+    return nullptr;
 }
 
 static char*
@@ -624,33 +626,32 @@ get_default_action(std::string_view dir, std::string_view type)
  *
  * The old defaults.list is also checked.
  */
-char*
+const char*
 mime_type_get_default_action(std::string_view mime_type)
 {
     /* FIXME: need to check parent types if default action of current type is not set. */
 
-    char* ret = nullptr;
-
-    std::string dir;
-
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    if ((ret = get_default_action(vfs_user_config_dir(), mime_type.data())))
-        return ret;
+    const char* home_default_action = get_default_action(vfs_user_config_dir(), mime_type.data());
+    if (home_default_action)
+        return home_default_action;
 
     // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
-    dir = Glib::build_filename(vfs_user_data_dir(), "applications");
-    if ((ret = get_default_action(dir, mime_type.data())))
-        return ret;
+    const std::string data_app_dir = Glib::build_filename(vfs_user_data_dir(), "applications");
+    const char* data_default_action = get_default_action(data_app_dir, mime_type.data());
+    if (data_default_action)
+        return data_default_action;
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
     for (std::string_view sys_dir : vfs_system_data_dir())
     {
-        dir = Glib::build_filename(sys_dir.data(), "applications");
-        if ((ret = get_default_action(dir, mime_type.data())))
-            return ret;
+        const std::string sys_app_dir = Glib::build_filename(sys_dir.data(), "applications");
+        const char* sys_default_action = get_default_action(sys_app_dir, mime_type.data());
+        if (sys_default_action)
+            return sys_default_action;
     }
 
-    return ret;
+    return nullptr;
 }
 
 /*
@@ -722,68 +723,68 @@ mime_type_update_association(std::string_view type, std::string_view desktop_id,
 
         for (usize i = 0; i < apps.size(); ++i)
         {
-            if (apps[i][0] != '\0')
+            if (apps[i].empty())
+                continue;
+
+            if (ztd::same(apps.at(i).data(), desktop_id))
             {
-                if (ztd::same(apps.at(i).data(), desktop_id))
+                switch (action)
                 {
-                    switch (action)
-                    {
-                        case MimeTypeAction::DEFAULT:
-                            // found desktop_id already in group list
-                            if (group_block == MimeTypeAction::REMOVE)
+                    case MimeTypeAction::DEFAULT:
+                        // found desktop_id already in group list
+                        if (group_block == MimeTypeAction::REMOVE)
+                        {
+                            // Removed Associations - remove it
+                            is_present = true;
+                            continue;
+                        }
+                        else
+                        {
+                            // Default Applications or Added Associations
+                            if (i == 0)
                             {
-                                // Removed Associations - remove it
-                                is_present = true;
-                                continue;
-                            }
-                            else
-                            {
-                                // Default Applications or Added Associations
-                                if (i == 0)
-                                {
-                                    // is already first - skip change
-                                    is_present = true;
-                                    break;
-                                }
-                                // in later position - remove it
-                                continue;
-                            }
-                            break;
-                        case MimeTypeAction::APPEND:
-                            if (group_block == MimeTypeAction::REMOVE)
-                            {
-                                // Removed Associations - remove it
-                                is_present = true;
-                                continue;
-                            }
-                            else
-                            {
-                                // Default or Added - already present, skip change
+                                // is already first - skip change
                                 is_present = true;
                                 break;
                             }
+                            // in later position - remove it
+                            continue;
+                        }
+                        break;
+                    case MimeTypeAction::APPEND:
+                        if (group_block == MimeTypeAction::REMOVE)
+                        {
+                            // Removed Associations - remove it
+                            is_present = true;
+                            continue;
+                        }
+                        else
+                        {
+                            // Default or Added - already present, skip change
+                            is_present = true;
                             break;
-                        case MimeTypeAction::REMOVE:
-                            if (group_block == MimeTypeAction::REMOVE)
-                            {
-                                // Removed Associations - already present
-                                is_present = true;
-                                break;
-                            }
-                            else
-                            {
-                                // Default or Added - remove it
-                                is_present = true;
-                                continue;
-                            }
+                        }
+                        break;
+                    case MimeTypeAction::REMOVE:
+                        if (group_block == MimeTypeAction::REMOVE)
+                        {
+                            // Removed Associations - already present
+                            is_present = true;
                             break;
-                        default:
-                            break;
-                    }
+                        }
+                        else
+                        {
+                            // Default or Added - remove it
+                            is_present = true;
+                            continue;
+                        }
+                        break;
+                    default:
+                        break;
                 }
-                // copy other apps to new list preserving order
-                new_action = fmt::format("{}{};", new_action, apps.at(i).data());
             }
+            // copy other apps to new list preserving order
+            new_action = fmt::format("{}{};", new_action, apps.at(i).data());
         }
 
         // update key string if needed
