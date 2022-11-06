@@ -23,7 +23,8 @@
 struct XSetEventHandler
 {
     XSetEventHandler();
-    ~XSetEventHandler();
+    ~XSetEventHandler() = default;
+    // ~XSetEventHandler() { LOG_INFO("XSetEventHandler destructor"); };
 
     xset_t win_focus{nullptr};
     xset_t win_move{nullptr};

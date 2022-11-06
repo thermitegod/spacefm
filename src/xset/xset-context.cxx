@@ -19,16 +19,6 @@
 
 xset_context_t xset_context = nullptr;
 
-XSetContext::XSetContext()
-{
-    // LOG_INFO("XSetContext Constructor");
-}
-
-XSetContext::~XSetContext()
-{
-    // LOG_INFO("XSetContext Destructor");
-}
-
 xset_context_t
 xset_context_new()
 {

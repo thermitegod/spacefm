@@ -123,11 +123,6 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
     }
 }
 
-VFSAppDesktop::~VFSAppDesktop() noexcept
-{
-    // LOG_INFO("VFSAppDesktop destructor");
-}
-
 const std::string&
 VFSAppDesktop::get_name() const noexcept
 {

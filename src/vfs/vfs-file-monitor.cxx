@@ -60,7 +60,8 @@ static bool vfs_file_monitor_on_inotify_event(Glib::IOCondition condition);
 struct VFSFileMonitorCallbackEntry
 {
     VFSFileMonitorCallbackEntry() = delete;
-    ~VFSFileMonitorCallbackEntry();
+    ~VFSFileMonitorCallbackEntry() = default;
+    // ~VFSFileMonitorCallbackEntry() { LOG_INFO("VFSFileMonitorCallbackEntry Destructor"); };
 
     VFSFileMonitorCallbackEntry(vfs::file_monitor_callback callback, void* user_data);
 
@@ -75,11 +76,6 @@ VFSFileMonitorCallbackEntry::VFSFileMonitorCallbackEntry(vfs::file_monitor_callb
 
     this->callback = callback;
     this->user_data = user_data;
-}
-
-VFSFileMonitorCallbackEntry::~VFSFileMonitorCallbackEntry()
-{
-    // LOG_INFO("VFSFileMonitorCallbackEntry Destructor");
 }
 
 VFSFileMonitor::VFSFileMonitor(std::string_view real_path, i32 wd)

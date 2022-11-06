@@ -23,8 +23,8 @@
 
 struct XSetContext
 {
-    XSetContext();
-    ~XSetContext();
+    XSetContext() = default;
+    ~XSetContext() = default;
 
     bool valid{false};
     std::array<std::string, 40> var;

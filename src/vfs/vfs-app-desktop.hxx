@@ -34,8 +34,10 @@ class VFSAppDesktop
 {
   public:
     VFSAppDesktop() = delete;
+    ~VFSAppDesktop() = default;
+    // ~VFSAppDesktop() { LOG_INFO("VFSAppDesktop destructor") };
+
     VFSAppDesktop(std::string_view open_file_name) noexcept;
-    ~VFSAppDesktop() noexcept;
 
     const std::string& get_name() const noexcept;
     const std::string& get_disp_name() const noexcept;

@@ -40,8 +40,3 @@ XSetEventHandler::XSetEventHandler()
     this->tab_close = xset_get(XSetName::EVT_TAB_CLOSE);
     this->device = xset_get(XSetName::EVT_DEVICE);
 }
-
-XSetEventHandler::~XSetEventHandler()
-{
-    // LOG_INFO("XSetEventHandler constructor");
-}

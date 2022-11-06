@@ -73,11 +73,6 @@ MimeCache::MimeCache(std::string_view file_path)
     load_mime_file();
 }
 
-MimeCache::~MimeCache()
-{
-    // LOG_INFO("MimeCache Destructor");
-}
-
 void
 MimeCache::load_mime_file()
 {

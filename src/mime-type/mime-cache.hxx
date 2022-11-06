@@ -27,10 +27,11 @@
 class MimeCache
 {
   public:
-    MimeCache(std::string_view file_path);
-
     MimeCache() = delete;
-    ~MimeCache();
+    ~MimeCache() = default;
+    // ~MimeCache() { LOG_INFO("MimeCache Destructor"); };
+
+    MimeCache(std::string_view file_path);
 
     void reload();
 
