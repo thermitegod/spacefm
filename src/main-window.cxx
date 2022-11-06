@@ -3009,16 +3009,40 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
     }
     else
     {
-        // count for .hidden files
-        u32 num_hid;
-        u32 num_hidx;
+        // size of files in dir, does not get subdir size
+        // TODO, can use file_browser->dir->file_list
+        u64 disk_size_bytes = 0;
+        u64 disk_size_disk = 0;
+        for (const auto& file : std::filesystem::directory_iterator(cwd))
+        {
+            const auto file_stat = ztd::stat(file.path().string());
+            if (!file_stat.is_regular_file())
+                continue;
+            disk_size_bytes += file_stat.size();
+            disk_size_disk += file_stat.blocks() * ztd::BLOCK_SIZE;
+        }
+        const std::string file_size = vfs_file_size_format(disk_size_bytes);
+        const std::string disk_size = vfs_file_size_format(disk_size_disk);
 
-        num_hid = ptk_file_browser_get_n_all_files(file_browser) - num_vis;
-        num_hidx = file_browser->dir ? file_browser->dir->xhidden_count : 0;
+        // count for .hidden files
+        const u32 num_hid = ptk_file_browser_get_n_all_files(file_browser) - num_vis;
+        const u32 num_hidx = file_browser->dir ? file_browser->dir->xhidden_count : 0;
         if (num_hid || num_hidx)
-            statusbar_txt.append(fmt::format("{} visible ({} hidden)", num_vis, num_hid));
+        {
+            statusbar_txt.append(fmt::format("{} visible ({} hidden)  ({} / {})",
+                                             num_vis,
+                                             num_hid,
+                                             file_size,
+                                             disk_size));
+        }
         else
-            statusbar_txt.append(fmt::format("{} {}", num_vis, num_vis == 1 ? "item" : "items"));
+        {
+            statusbar_txt.append(fmt::format("{} {}  ({} / {})",
+                                             num_vis,
+                                             num_vis == 1 ? "item" : "items",
+                                             file_size,
+                                             disk_size));
+        }
 
         // cur dir is a symlink? canonicalize path
         if (std::filesystem::is_symlink(cwd))
@@ -3027,7 +3051,9 @@ fm_main_window_update_status_bar(FMMainWindow* main_window, PtkFileBrowser* file
             statusbar_txt.append(fmt::format("  {} -> {}", cwd, canon));
         }
         else
+        {
             statusbar_txt.append(fmt::format("  {}", cwd));
+        }
     }
 
     gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar), 0, statusbar_txt.c_str());
