@@ -41,6 +41,8 @@
 #include "xset/xset.hxx"
 #include "xset/xset-dialog.hxx"
 
+#include "terminal-handlers.hxx"
+
 #include "main-window.hxx"
 #include "vfs/vfs-volume.hxx"
 
@@ -1427,7 +1429,7 @@ vfs_file_task_exec(vfs::file_task task, std::string_view src_file)
         }
 
         // build - run
-        buf.append(fmt::format("#run\nif [ \"$1\" == \"run\" ];then\n\n"));
+        // buf.append(fmt::format("#run\nif [ \"$1\" == \"run\" ];then\n\n"));
 
         // build - export vars
         if (task->exec_export)
@@ -1467,7 +1469,8 @@ vfs_file_task_exec(vfs::file_task task, std::string_view src_file)
             }
         }
 
-        buf.append(fmt::format("\nexit $fm_err\nfi\n"));
+        buf.append(fmt::format("\nexit $fm_err\n"));
+        // buf.append(fmt::format("\nfi\n"));
 
         const bool result = write_file(task->exec_script, buf);
         if (!result)
@@ -1506,27 +1509,12 @@ vfs_file_task_exec(vfs::file_task task, std::string_view src_file)
     if (!terminal.empty())
     {
         // terminal
-        argv.emplace_back(terminal);
-
-        // automatic terminal options
-        if (ztd::contains(terminal, "xfce4-terminal") || ztd::contains(terminal, "/terminal"))
-            argv.emplace_back("--disable-server");
-
-        // add option to execute command in terminal
-        if (ztd::contains(terminal, "xfce4-terminal") || ztd::contains(terminal, "terminator") ||
-            ztd::endswith(terminal, "/terminal")) // xfce
-            argv.emplace_back("-x");
-        else if (ztd::contains(terminal, "sakura"))
+        const auto terminal_args =
+            terminal_handlers->get_terminal_args(xset_get_s(XSetName::MAIN_TERMINAL));
+        for (std::string_view terminal_arg : terminal_args)
         {
-            argv.emplace_back("-x");
-            single_arg = true;
+            argv.emplace_back(terminal_arg);
         }
-        else
-            /* Note: Some terminals accept multiple arguments to -e, whereas
-             * others needs the entire command quoted and passed as a single
-             * argument to -e.  SpaceFM uses spacefm-auth to run commands,
-             * so only a single argument is ever used as the command. */
-            argv.emplace_back("-e");
 
         use_su = su;
     }
@@ -1595,9 +1583,9 @@ vfs_file_task_exec(vfs::file_task task, std::string_view src_file)
     }
     else
     {
-        argv.emplace_back(BASH_PATH);
+        // argv.emplace_back(BASH_PATH);
         argv.emplace_back(task->exec_script);
-        argv.emplace_back("run");
+        // argv.emplace_back("run");
     }
 
     try

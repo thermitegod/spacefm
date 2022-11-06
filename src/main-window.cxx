@@ -514,15 +514,15 @@ main_window_open_terminal(MainWindow* main_window, bool as_root)
     if (!file_browser)
         return;
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
-    char* main_term = xset_get_s(XSetName::MAIN_TERMINAL);
-    if (!main_term || main_term[0] == '\0')
+    const char* main_term = xset_get_s(XSetName::MAIN_TERMINAL);
+    if (!main_term)
     {
         ptk_show_error(GTK_WINDOW(parent),
                        "Terminal Not Available",
                        "Please set your terminal program in View|Preferences|Advanced");
         edit_preference(GTK_WINDOW(parent), PrefDlgPage::PREF_ADVANCED);
         main_term = xset_get_s(XSetName::MAIN_TERMINAL);
-        if (!main_term || main_term[0] == '\0')
+        if (!main_term)
             return;
     }
 
@@ -532,7 +532,14 @@ main_window_open_terminal(MainWindow* main_window, bool as_root)
                                            GTK_WIDGET(file_browser),
                                            file_browser->task_view);
 
-    ptask->task->exec_command = Glib::find_program_in_path(main_term);
+    const std::string terminal = Glib::find_program_in_path(main_term);
+    if (terminal.empty())
+    {
+        LOG_WARN("Cannot locate terminal in $PATH : {}", main_term);
+        return;
+    }
+
+    ptask->task->exec_command = terminal;
     if (as_root)
         ptask->task->exec_as_user = "root";
     ptask->task->exec_sync = false;

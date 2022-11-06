@@ -15,13 +15,38 @@
 
 #pragma once
 
+#include <string>
 #include <string_view>
 
-#include <array>
+#include <vector>
 
-// order and contents must match prefdlg.ui
-inline constexpr std::array<std::string_view, 3> su_commands{
-    "/bin/su",
-    "/usr/bin/sudo",
-    "/usr/bin/doas",
+#include <map>
+
+#include <memory>
+
+class TerminalHandler
+{
+  public:
+    TerminalHandler() = delete;
+    TerminalHandler(std::string_view name, std::string_view exec);
+
+    std::string name;
+    std::string path;
+    std::string exec;
 };
+
+class TerminalHandlers
+{
+  public:
+    TerminalHandlers();
+
+    const std::vector<std::string> get_terminal_args(std::string_view terminal);
+    const std::vector<std::string> get_supported_terminal_names();
+
+  private:
+    std::map<std::string, TerminalHandler> handlers;
+};
+
+using terminal_handlers_t = std::unique_ptr<TerminalHandlers>;
+
+extern const terminal_handlers_t terminal_handlers;

@@ -70,8 +70,9 @@
 #include "settings/config-load.hxx"
 #include "settings/config-save.hxx"
 
+#include "terminal-handlers.hxx"
+
 #include "autosave.hxx"
-#include "extern.hxx"
 #include "write.hxx"
 #include "utils.hxx"
 
@@ -264,16 +265,17 @@ load_settings()
     get_valid_su();
 
     // MOD terminal discovery
-    char* main_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
-    if (!main_terminal || main_terminal[0] == '\0')
+    const char* main_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
+    if (!main_terminal)
     {
-        for (std::string_view terminal : terminal_programs)
+        const auto supported_terminals = terminal_handlers->get_supported_terminal_names();
+        for (std::string_view supported_terminal : supported_terminals)
         {
-            const std::string term = Glib::find_program_in_path(terminal.data());
-            if (term.empty())
+            const std::string terminal = Glib::find_program_in_path(supported_terminal.data());
+            if (terminal.empty())
                 continue;
 
-            xset_set(XSetName::MAIN_TERMINAL, XSetVar::S, terminal);
+            xset_set(XSetName::MAIN_TERMINAL, XSetVar::S, Glib::path_get_basename(terminal));
             xset_set_b(XSetName::MAIN_TERMINAL, true); // discovery
             break;
         }

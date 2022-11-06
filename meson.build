@@ -196,7 +196,7 @@ data_args = []
 
 data_args += '-DDATADIR="/usr/share"'
 data_args += '-DSYSCONFDIR="/etc"'
-data_args += '-DPACKAGE_UI_DIR="/usr/share/spacefm/ui"'
+data_args += '-DPACKAGE_UI_PATH="/usr/share/spacefm/ui"'
 data_args += '-DPACKAGE_SCRIPTS_PATH="/usr/share/spacefm/scripts"'
 
 foreach a : data_args
@@ -288,6 +288,7 @@ sources = [
   'src/scripts.cxx',
   'src/settings.cxx',
   'src/socket.cxx',
+  'src/terminal-handlers.cxx',
   'src/type-conversion.cxx',
   'src/types.cxx',
   'src/utils.cxx',
@@ -386,7 +387,7 @@ spacefm = build_target(
   cpp_pch: 'pch/cxx_pch.hxx',
 )
 
-install_data('etc/spacefm.conf', install_dir : sysconfdir / 'spacefm')
+install_data('etc/spacefm.conf', install_dir : sysconfdir / target_name)
 
 install_subdir('data/applications', install_dir : datadir)
 install_subdir('data/ui', install_dir : datadir / target_name)

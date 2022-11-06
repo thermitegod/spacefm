@@ -60,7 +60,6 @@
 #include "settings/disk-format.hxx"
 
 #include "autosave.hxx"
-#include "extern.hxx"
 #include "write.hxx"
 #include "utils.hxx"
 

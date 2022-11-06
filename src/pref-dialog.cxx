@@ -34,6 +34,8 @@
 #include "settings/app.hxx"
 #include "settings/etc.hxx"
 
+#include "terminal-handlers.hxx"
+
 #include "pref-dialog.hxx"
 #include "main-window.hxx"
 
@@ -383,19 +385,19 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         }
 
         // MOD terminal
-        char* old_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
-        const char* sel_terminal =
+        const std::string old_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
+        const std::string new_terminal =
             gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(data->terminal));
-        const std::string terminal = ztd::strip(sel_terminal);
-        if (!ztd::same(terminal, old_terminal))
+        if (!ztd::same(new_terminal, old_terminal))
         {
-            xset_set(XSetName::MAIN_TERMINAL, XSetVar::S, terminal);
+            xset_set(XSetName::MAIN_TERMINAL, XSetVar::S, new_terminal);
         }
         // report missing terminal
-        const std::string term = Glib::find_program_in_path(terminal);
-        if (term.empty())
+        const std::string terminal = Glib::find_program_in_path(new_terminal);
+        if (terminal.empty())
         {
-            const std::string msg = fmt::format("Unable to find terminal program '{}'", terminal);
+            const std::string msg =
+                fmt::format("Unable to find terminal program '{}'", new_terminal);
             ptk_show_error(GTK_WINDOW(dlg), "Error", msg);
         }
 
@@ -514,22 +516,23 @@ edit_preference(GtkWindow* parent, i32 page)
         gtk_widget_set_sensitive(data->thumb_label1, app_settings.get_show_thumbnail());
         gtk_widget_set_sensitive(data->thumb_label2, app_settings.get_show_thumbnail());
 
-        for (std::string_view terminal : terminal_programs)
+        const auto supported_terminals = terminal_handlers->get_supported_terminal_names();
+        for (std::string_view terminal : supported_terminals)
         {
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->terminal), terminal.data());
         }
 
-        char* main_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
+        const char* main_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
         if (main_terminal)
         {
             usize i;
-            for (i = 0; i < terminal_programs.size(); ++i)
+            for (i = 0; i < supported_terminals.size(); ++i)
             {
-                if (ztd::same(main_terminal, terminal_programs.at(i)))
+                if (ztd::same(main_terminal, supported_terminals.at(i)))
                     break;
             }
 
-            if (i >= terminal_programs.size())
+            if (i >= supported_terminals.size())
             { /* Found */
                 gtk_combo_box_text_prepend_text(GTK_COMBO_BOX_TEXT(data->terminal), main_terminal);
                 i = 0;
