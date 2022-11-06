@@ -76,7 +76,7 @@ static bool mime_type_is_data_plain_text(const char* data, i32 len);
  * Get mime-type of the specified file (quick, but less accurate):
  * Mime-type of the file is determined by cheking the filename only.
  */
-static const char*
+static const std::string
 mime_type_get_by_filename(std::string_view filename, std::filesystem::file_status status)
 {
     const char* type = nullptr;
@@ -84,7 +84,7 @@ mime_type_get_by_filename(std::string_view filename, std::filesystem::file_statu
     const char* prev_suffix_pos = (const char*)-1;
 
     if (std::filesystem::is_directory(status))
-        return XDG_MIME_TYPE_DIRECTORY;
+        return XDG_MIME_TYPE_DIRECTORY.data();
 
     for (mime_cache_t cache : caches)
     {
@@ -123,7 +123,10 @@ mime_type_get_by_filename(std::string_view filename, std::filesystem::file_statu
         }
     }
 
-    return type && *type ? type : XDG_MIME_TYPE_UNKNOWN;
+    if (type && *type)
+        return type;
+
+    return XDG_MIME_TYPE_UNKNOWN.data();
 }
 
 /*
@@ -139,28 +142,26 @@ mime_type_get_by_filename(std::string_view filename, std::filesystem::file_statu
  * efifciency, too. Otherwise, the function will try to get the basename of
  * the specified file again.
  */
-const char*
+const std::string
 mime_type_get_by_file(std::string_view filepath)
 {
     auto status = std::filesystem::status(filepath);
 
     if (!std::filesystem::exists(status))
-        return XDG_MIME_TYPE_UNKNOWN;
+        return XDG_MIME_TYPE_UNKNOWN.data();
 
     if (std::filesystem::is_other(status))
-        return XDG_MIME_TYPE_UNKNOWN;
+        return XDG_MIME_TYPE_UNKNOWN.data();
 
     if (std::filesystem::is_directory(status))
-        return XDG_MIME_TYPE_DIRECTORY;
-
-    const char* type;
+        return XDG_MIME_TYPE_DIRECTORY.data();
 
     const std::string basename = Glib::path_get_basename(filepath.data());
-    type = mime_type_get_by_filename(basename, status);
-    if (!ztd::same(type, XDG_MIME_TYPE_UNKNOWN))
-        return type;
+    const std::string filename_type = mime_type_get_by_filename(basename, status);
+    if (!ztd::same(filename_type, XDG_MIME_TYPE_UNKNOWN))
+        return filename_type;
 
-    type = nullptr;
+    const char* type = nullptr;
 
     // check for reg or link due to hangs on fifo and chr dev
     const auto file_size = std::filesystem::file_size(filepath);
@@ -205,14 +206,14 @@ mime_type_get_by_file(std::string_view filepath)
 
                 /* Check for executable file */
                 if (!type && have_x_access(filepath))
-                    type = XDG_MIME_TYPE_EXECUTABLE;
+                    type = XDG_MIME_TYPE_EXECUTABLE.data();
 
                 /* fallback: check for plain text */
                 if (!type)
                 {
                     if (mime_type_is_data_plain_text(data,
                                                      len > TEXT_MAX_EXTENT ? TEXT_MAX_EXTENT : len))
-                        type = XDG_MIME_TYPE_PLAIN_TEXT;
+                        type = XDG_MIME_TYPE_PLAIN_TEXT.data();
                 }
 
                 if (data == mime_magic_buf)
@@ -226,9 +227,13 @@ mime_type_get_by_file(std::string_view filepath)
     else
     {
         /* empty file can be viewed as text file */
-        type = XDG_MIME_TYPE_PLAIN_TEXT;
+        type = XDG_MIME_TYPE_PLAIN_TEXT.data();
     }
-    return type && *type ? type : XDG_MIME_TYPE_UNKNOWN;
+
+    if (type && *type)
+        return type;
+
+    return XDG_MIME_TYPE_UNKNOWN.data();
 }
 
 static char*
@@ -323,10 +328,11 @@ parse_xml_desc(const char* buf, usize len, const char* locale)
 }
 
 static char*
-_mime_type_get_desc_icon(const char* file_path, const char* locale, bool is_local, char** icon_name)
+_mime_type_get_desc_icon(std::string_view file_path, std::string_view locale, bool is_local,
+                         char** icon_name)
 {
     std::string line;
-    std::ifstream file(file_path);
+    std::ifstream file(file_path.data());
     if (!file.is_open())
         return nullptr;
 
@@ -340,22 +346,21 @@ _mime_type_get_desc_icon(const char* file_path, const char* locale, bool is_loca
     if (buffer.empty())
         return nullptr;
 
-    char* _locale = nullptr;
-    if (!locale)
+    const char* new_locale = locale.data();
+    if (locale.empty())
     {
         const char* const* langs = g_get_language_names();
         char* dot = (char*)strchr(langs[0], '.');
         if (dot)
-            locale = _locale = strndup(langs[0], (usize)(dot - langs[0]));
+            new_locale = strndup(langs[0], (usize)(dot - langs[0]));
         else
-            locale = langs[0];
+            new_locale = langs[0];
     }
-    char* desc = parse_xml_desc(buffer.c_str(), buffer.size(), locale);
-    free(_locale);
+    char* desc = parse_xml_desc(buffer.data(), buffer.size(), new_locale);
 
     // only look for <icon /> tag in .local
     if (is_local && icon_name && *icon_name == nullptr)
-        *icon_name = parse_xml_icon(buffer.c_str(), buffer.size(), is_local);
+        *icon_name = parse_xml_icon(buffer.data(), buffer.size(), is_local);
 
     return desc;
 }
@@ -368,12 +373,9 @@ _mime_type_get_desc_icon(const char* file_path, const char* locale, bool is_loca
  * Note: Spec is not followed for icon.  If icon tag is found in .local
  * xml file, it is used.  Otherwise vfs_mime_type_get_icon guesses the icon.
  * The Freedesktop spec /usr/share/mime/generic-icons is NOT parsed. */
-char*
-mime_type_get_desc_icon(const char* type, const char* locale, char** icon_name)
+const std::string
+mime_type_get_desc_icon(std::string_view type, std::string_view locale, char** icon_name)
 {
-    char* desc;
-    std::string file_path;
-
     /*  //sfm 0.7.7+ FIXED:
      * According to specs on freedesktop.org, user_data_dir has
      * higher priority than system_data_dirs, but in most cases, there was
@@ -382,10 +384,10 @@ mime_type_get_desc_icon(const char* type, const char* locale, char** icon_name)
      * Since the spec really sucks, we do not follow it here.
      */
 
-    file_path = fmt::format("{}/mime/{}.xml", vfs_user_data_dir(), type);
-    if (faccessat(0, file_path.c_str(), F_OK, AT_EACCESS) != -1)
+    std::string file_path = fmt::format("{}/mime/{}.xml", vfs_user_data_dir(), type);
+    if (faccessat(0, file_path.data(), F_OK, AT_EACCESS) != -1)
     {
-        desc = _mime_type_get_desc_icon(file_path.c_str(), locale, true, icon_name);
+        const char* desc = _mime_type_get_desc_icon(file_path, locale, true, icon_name);
         if (desc)
             return desc;
     }
@@ -394,14 +396,14 @@ mime_type_get_desc_icon(const char* type, const char* locale, char** icon_name)
     for (std::string_view sys_dir : vfs_system_data_dir())
     {
         file_path = fmt::format("{}/mime/{}.xml", sys_dir, type);
-        if (faccessat(0, file_path.c_str(), F_OK, AT_EACCESS) != -1)
+        if (faccessat(0, file_path.data(), F_OK, AT_EACCESS) != -1)
         {
-            desc = _mime_type_get_desc_icon(file_path.c_str(), locale, false, icon_name);
+            const char* desc = _mime_type_get_desc_icon(file_path, locale, false, icon_name);
             if (desc)
                 return desc;
         }
     }
-    return nullptr;
+    return "";
 }
 
 void
@@ -494,7 +496,7 @@ mime_type_is_text_file(std::string_view file_path, std::string_view mime_type)
 
     if (!mime_type.empty())
     {
-        if (ztd::same(mime_type.data(), "application/pdf"))
+        if (ztd::same(mime_type, "application/pdf"))
             // seems to think this is XDG_MIME_TYPE_PLAIN_TEXT
             return false;
         if (mime_type_is_subclass(mime_type, XDG_MIME_TYPE_PLAIN_TEXT))
@@ -535,7 +537,7 @@ mime_type_is_executable_file(std::string_view file_path, std::string_view mime_t
      * Since some common types, such as application/x-shellscript,
      * are not in mime database, we have to add them ourselves.
      */
-    if (!ztd::same(mime_type.data(), XDG_MIME_TYPE_UNKNOWN) &&
+    if (!ztd::same(mime_type, XDG_MIME_TYPE_UNKNOWN) &&
         (mime_type_is_subclass(mime_type, XDG_MIME_TYPE_EXECUTABLE) ||
          mime_type_is_subclass(mime_type, "application/x-shellscript")))
     {
@@ -549,11 +551,12 @@ mime_type_is_executable_file(std::string_view file_path, std::string_view mime_t
     return false;
 }
 
+/* Check if the specified mime_type is the subclass of the specified parent type */
 static bool
 mime_type_is_subclass(std::string_view type, std::string_view parent)
 {
     /* special case, the type specified is identical to the parent type. */
-    if (ztd::same(type.data(), parent.data()))
+    if (ztd::same(type, parent))
         return true;
 
     for (mime_cache_t cache : caches)
@@ -561,7 +564,7 @@ mime_type_is_subclass(std::string_view type, std::string_view parent)
         const std::vector<std::string> parents = cache->lookup_parents(type);
         for (std::string_view p : parents)
         {
-            if (ztd::same(parent.data(), p.data()))
+            if (ztd::same(parent, p))
                 return true;
         }
     }
@@ -571,7 +574,7 @@ mime_type_is_subclass(std::string_view type, std::string_view parent)
 /*
  * Get mime caches
  */
-std::vector<mime_cache_t>&
+const std::vector<mime_cache_t>&
 mime_type_get_caches()
 {
     return caches;

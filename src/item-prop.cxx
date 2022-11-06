@@ -37,6 +37,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "mime-type/mime-type.hxx"
+
 #include "vfs/vfs-user-dir.hxx"
 
 #include "xset/xset.hxx"

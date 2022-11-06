@@ -54,7 +54,7 @@
 #include "write.hxx"
 #include "utils.hxx"
 
-#include "mime-action.hxx"
+#include "mime-type/mime-action.hxx"
 
 static void
 save_to_file(std::string_view path, const Glib::ustring& data)
@@ -351,7 +351,7 @@ mime_type_has_action(std::string_view type, std::string_view desktop_id)
         for (std::string_view action : actions)
         {
             /* Try to match directly by desktop_id first */
-            if (is_desktop && ztd::same(action.data(), desktop_id.data()))
+            if (is_desktop && ztd::same(action, desktop_id))
             {
                 found = true;
                 break;
@@ -604,11 +604,11 @@ get_default_action(std::string_view dir, std::string_view type)
                 }
             }
 
-            if (ztd::same(name.data(), "defaults.list"))
+            if (ztd::same(name, "defaults.list"))
                 break; // defaults.list does not have Added Associations
         }
 
-        if (ztd::same(dir.data(), vfs_user_config_dir()))
+        if (ztd::same(dir, vfs_user_config_dir()))
             break; // no defaults.list in ~/.config
     }
     return nullptr;
@@ -713,9 +713,9 @@ mime_type_update_association(std::string_view type, std::string_view desktop_id,
         }
 
         MimeTypeAction group_block;
-        if (ztd::same(group.data(), "Default Applications"))
+        if (ztd::same(group, "Default Applications"))
             group_block = MimeTypeAction::DEFAULT;
-        else if (ztd::same(group.data(), "Default Applications"))
+        else if (ztd::same(group, "Default Applications"))
             group_block = MimeTypeAction::APPEND;
         else // if (ztd::same(group, "Default Applications"))
             group_block = MimeTypeAction::REMOVE;

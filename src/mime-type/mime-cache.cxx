@@ -29,7 +29,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "mime-cache.hxx"
+#include "mime-type/mime-cache.hxx"
 
 inline constexpr u64 LIB_MAJOR_VERSION = 1;
 /* FIXME: since mime-cache 1.2, weight is splitted into three parts
@@ -75,7 +75,7 @@ void
 MimeCache::load_mime_file()
 {
     // Open the file and map it into memory
-    i32 fd = open(this->file_path.data(), O_RDONLY, 0);
+    const i32 fd = open(this->file_path.data(), O_RDONLY, 0);
 
     if (fd < 0)
         return;

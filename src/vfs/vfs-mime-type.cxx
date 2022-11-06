@@ -37,6 +37,7 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "mime-type/mime-action.hxx"
+#include "mime-type/mime-type.hxx"
 
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-file-monitor.hxx"
@@ -151,7 +152,7 @@ vfs_mime_type_clean()
 vfs::mime_type
 vfs_mime_type_get_from_file(std::string_view file_path)
 {
-    const char* type = mime_type_get_by_file(file_path);
+    const std::string type = mime_type_get_by_file(file_path);
     return vfs_mime_type_get_from_type(type);
 }
 
@@ -249,19 +250,17 @@ vfs_mime_type_get_icon(vfs::mime_type mime_type, bool big)
     // get description and icon from freedesktop XML - these are fetched
     // together for performance.
     char* xml_icon = nullptr;
-    char* xml_desc = mime_type_get_desc_icon(mime_type->type.c_str(), nullptr, &xml_icon);
+    const std::string xml_desc = mime_type_get_desc_icon(mime_type->type, "", &xml_icon);
     if (xml_icon)
     {
         if (xml_icon[0])
             icon = vfs_load_icon(xml_icon, size);
         free(xml_icon);
     }
-    if (xml_desc)
+    if (!xml_desc.empty())
     {
         if (mime_type->description.empty() && xml_desc[0])
             mime_type->description = xml_desc;
-        else
-            free(xml_desc);
     }
     if (mime_type->description.empty())
     {
@@ -404,7 +403,7 @@ vfs_mime_type_get_description(vfs::mime_type mime_type)
 {
     if (mime_type->description.empty())
     {
-        mime_type->description = mime_type_get_desc_icon(mime_type->type.c_str(), nullptr, nullptr);
+        mime_type->description = mime_type_get_desc_icon(mime_type->type, "", nullptr);
         if (mime_type->description.empty())
         {
             LOG_WARN("mime-type {} has no description (comment)", mime_type->type);

@@ -22,12 +22,12 @@
 
 #include <vector>
 
-#include "mime-cache.hxx"
+#include "mime-type/mime-cache.hxx"
 
-#define XDG_MIME_TYPE_UNKNOWN    "application/octet-stream"
-#define XDG_MIME_TYPE_DIRECTORY  "inode/directory"
-#define XDG_MIME_TYPE_EXECUTABLE "application/x-executable"
-#define XDG_MIME_TYPE_PLAIN_TEXT "text/plain"
+inline constexpr std::string_view XDG_MIME_TYPE_UNKNOWN{"application/octet-stream"};
+inline constexpr std::string_view XDG_MIME_TYPE_DIRECTORY{"inode/directory"};
+inline constexpr std::string_view XDG_MIME_TYPE_EXECUTABLE{"application/x-executable"};
+inline constexpr std::string_view XDG_MIME_TYPE_PLAIN_TEXT{"text/plain"};
 
 /* Initialize the library */
 void mime_type_init();
@@ -48,7 +48,7 @@ void mime_type_finalize();
  * efifciency, too. Otherwise, the function will try to get the basename of
  * the specified file again.
  */
-const char* mime_type_get_by_file(std::string_view filepath);
+const std::string mime_type_get_by_file(std::string_view filepath);
 
 bool mime_type_is_text_file(std::string_view file_path, std::string_view mime_type = "");
 bool mime_type_is_executable_file(std::string_view file_path, std::string_view mime_type = "");
@@ -57,11 +57,12 @@ bool mime_type_is_executable_file(std::string_view file_path, std::string_view m
  * If locale is nullptr, current locale will be used.
  * The returned string should be freed when no longer used.
  * The icon_name will only be set if points to nullptr, and must be freed. */
-char* mime_type_get_desc_icon(const char* type, const char* locale, char** icon_name);
+const std::string mime_type_get_desc_icon(std::string_view type, std::string_view locale,
+                                          char** icon_name);
 
 /*
  * Get mime caches
  */
-std::vector<mime_cache_t>& mime_type_get_caches();
+const std::vector<mime_cache_t>& mime_type_get_caches();
 
 void mime_type_regen_all_caches();
