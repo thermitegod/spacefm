@@ -662,7 +662,7 @@ enable_context(ContextData* ctxt)
                          ItemPropContextState::CONTEXT_DISABLE)
                 text = "Current: Enable";
         }
-        gtk_label_set_text(ctxt->test, text.c_str());
+        gtk_label_set_text(ctxt->test, text.data());
     }
 }
 
@@ -766,7 +766,7 @@ on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
     }
     gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(ctxt->box_value))), "");
     if (ctxt->context && ctxt->context->valid)
-        gtk_label_set_text(ctxt->current_value, ctxt->context->var[sub].c_str());
+        gtk_label_set_text(ctxt->current_value, ctxt->context->var[sub].data());
 
     free(elements);
 }
@@ -826,7 +826,7 @@ on_context_entry_insert(GtkEntryBuffer* buf, u32 position, char* chars, u32 n_ch
         return;
 
     const std::string new_text = ztd::replace(gtk_entry_buffer_get_text(buf), "\n", "");
-    gtk_entry_buffer_set_text(buf, new_text.c_str(), -1);
+    gtk_entry_buffer_set_text(buf, new_text.data(), -1);
 }
 
 static bool
@@ -945,7 +945,7 @@ load_text_view(GtkTextView* view, const char* line)
     std::string text = line;
     text = ztd::replace(text, "\\n", "\n");
     text = ztd::replace(text, "\\t", "\t");
-    gtk_text_buffer_set_text(buf, text.c_str(), -1);
+    gtk_text_buffer_set_text(buf, text.data(), -1);
 }
 
 char*
@@ -989,7 +989,7 @@ load_command_script(ContextData* ctxt, xset_t set)
             while (std::getline(file, line))
             {
                 // read file one line at a time to prevent splitting UTF-8 characters
-                if (!g_utf8_validate(line.c_str(), -1, nullptr))
+                if (!g_utf8_validate(line.data(), -1, nullptr))
                 {
                     file.close();
                     gtk_text_buffer_set_text(buf, "", -1);
@@ -997,7 +997,7 @@ load_command_script(ContextData* ctxt, xset_t set)
                     LOG_WARN("file '{}' contents are not valid UTF-8", script);
                     break;
                 }
-                gtk_text_buffer_insert_at_cursor(buf, line.c_str(), -1);
+                gtk_text_buffer_insert_at_cursor(buf, line.data(), -1);
             }
             file.close();
         }
@@ -1222,7 +1222,7 @@ on_key_button_clicked(GtkWidget* widget, ContextData* ctxt)
     else
         keyset = ctxt->set;
     const std::string str = xset_get_keyname(keyset, 0, 0);
-    gtk_button_set_label(GTK_BUTTON(ctxt->item_key), str.c_str());
+    gtk_button_set_label(GTK_BUTTON(ctxt->item_key), str.data());
 }
 
 static void
@@ -1351,7 +1351,7 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
             xset_file_dialog(ctxt->dlg,
                              GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
                              "Choose Directory",
-                             ctxt->context->var[ItemPropContext::CONTEXT_DIR].c_str(),
+                             ctxt->context->var[ItemPropContext::CONTEXT_DIR].data(),
                              nullptr);
         if (add_path && add_path[0])
         {
@@ -1361,7 +1361,7 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
                                                      old_path && old_path[0] ? "; " : "",
                                                      add_path);
             GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->item_target));
-            gtk_text_buffer_set_text(buf, new_path.c_str(), -1);
+            gtk_text_buffer_set_text(buf, new_path.data(), -1);
             free(add_path);
             free(old_path);
         }
@@ -2262,18 +2262,18 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
     else
         path = Glib::build_filename(vfs_user_get_config_dir(), "scripts", rset->name);
     str = fmt::format("Command Dir  $fm_cmd_dir  {}", dir_has_files(path) ? "" : "(no files)");
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str.c_str());
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str.data());
 
     path = Glib::build_filename(vfs_user_get_config_dir(),
                                 "plugin-data",
                                 rset->plugin ? mset->name : rset->name);
     str = fmt::format("Data Dir  $fm_cmd_data  {}", dir_has_files(path) ? "" : "(no files)");
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str.c_str());
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str.data());
 
     if (rset->plugin)
     {
         str = "Plugin Dir  $fm_plugin_dir";
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str.c_str());
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str.data());
     }
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(ctxt->open_browser), false, true, 8);
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(hbox), false, true, 0);
@@ -2332,7 +2332,7 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
     }
     if (!item_type_str.empty())
     {
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), item_type_str.c_str());
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), item_type_str.data());
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->item_type), 0);
         gtk_widget_set_sensitive(ctxt->item_type, false);
     }
@@ -2380,7 +2380,7 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
         else
             keyset = set;
         str2 = xset_get_keyname(keyset, 0, 0);
-        gtk_button_set_label(GTK_BUTTON(ctxt->item_key), str2.c_str());
+        gtk_button_set_label(GTK_BUTTON(ctxt->item_key), str2.data());
     }
     else
         gtk_widget_set_sensitive(ctxt->item_key, false);

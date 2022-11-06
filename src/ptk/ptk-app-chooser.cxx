@@ -233,7 +233,7 @@ app_chooser_dialog_new(GtkWindow* parent, vfs::mime_type mime_type, bool focus_a
 
     const std::string mime_desc =
         fmt::format(" {}\n ( {} )", vfs_mime_type_get_description(mime_type), mime_type->type);
-    gtk_label_set_text(GTK_LABEL(file_type), mime_desc.c_str());
+    gtk_label_set_text(GTK_LABEL(file_type), mime_desc.data());
 
     /* Do not set default handler for directories and files with unknown type */
     if (!show_default ||
@@ -433,7 +433,7 @@ on_browse_btn_clicked(GtkButton* button, void* user_data)
                 ztd::endswith(filename, ".desktop"))
             {
                 const std::string app_name = Glib::path_get_basename(filename);
-                gtk_entry_set_text(entry, app_name.c_str());
+                gtk_entry_set_text(entry, app_name.data());
             }
             else
             {

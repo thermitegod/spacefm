@@ -656,7 +656,7 @@ search_thread(vfs::async_task task, FindFile* data)
 
                 /* we get a complete file path */
                 if (!data->task->is_cancelled())
-                    process_found_files(data, queue, path.c_str());
+                    process_found_files(data, queue, path.data());
 
                 pbuf = eol + 1;  /* start reading the next line */
                 path.append(""); /* empty the line buffer */
@@ -674,7 +674,7 @@ search_thread(vfs::async_task task, FindFile* data)
     {
         if (!data->task->is_cancelled())
         {
-            process_found_files(data, queue, path.c_str());
+            process_found_files(data, queue, path.data());
             process_found_files(data, queue, nullptr);
         }
     }
@@ -864,13 +864,13 @@ on_add_search_folder(GtkWidget* btn, FindFile* data)
     item = gtk_separator_menu_item_new();
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    item = gtk_menu_item_new_with_label(vfs_user_home_dir().c_str());
+    item = gtk_menu_item_new_with_label(vfs_user_home_dir().data());
     // img = gtk_image_new_from_icon_name( "gnome-fs-directory", GtkIconSize::GTK_ICON_SIZE_MENU );
     // img = xset_get_image("gtk-directory", GtkIconSize::GTK_ICON_SIZE_MENU);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     g_signal_connect(item, "activate", G_CALLBACK(on_add_search_home), data);
 
-    item = gtk_menu_item_new_with_label(vfs_user_desktop_dir().c_str());
+    item = gtk_menu_item_new_with_label(vfs_user_desktop_dir().data());
     // img = gtk_image_new_from_icon_name( "gnome-fs-desktop", GtkIconSize::GTK_ICON_SIZE_MENU );
     // img = xset_get_image("gtk-directory", GtkIconSize::GTK_ICON_SIZE_MENU);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);

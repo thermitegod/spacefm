@@ -2255,7 +2255,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
     // get device name
     char* name = nullptr;
     char* mtab_fstype = nullptr;
-    if (!(path_is_mounted_mtab(nullptr, point.c_str(), &name, &mtab_fstype) && name &&
+    if (!(path_is_mounted_mtab(nullptr, point.data(), &name, &mtab_fstype) && name &&
           name[0] != '\0'))
         return nullptr;
 
@@ -2289,8 +2289,8 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         Glib::usleep(200000);
         const std::string mtab_file = Glib::build_filename(vfs_user_home_dir(), ".mtab.fuseiso");
         char* new_name = nullptr;
-        if (path_is_mounted_mtab(mtab_file.c_str(), point.c_str(), &new_name, nullptr) &&
-            new_name && new_name[0])
+        if (path_is_mounted_mtab(mtab_file.data(), point.data(), &new_name, nullptr) && new_name &&
+            new_name[0])
         {
             free(name);
             name = new_name;
@@ -2335,7 +2335,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
             }
         }
         // mount point must be readable
-        keep = keep && (geteuid() == 0 || faccessat(0, point.c_str(), R_OK, AT_EACCESS) == 0);
+        keep = keep && (geteuid() == 0 || faccessat(0, point.data(), R_OK, AT_EACCESS) == 0);
         if (keep)
         {
             // create a volume
@@ -3061,7 +3061,7 @@ VFSVolume::exec(const char* command) const noexcept
     cmd = ztd::replace(cmd, "%v", this->device_file);
 
     LOG_INFO("Autoexec: {}", cmd);
-    exec_task(cmd.c_str(), false);
+    exec_task(cmd.data(), false);
 }
 
 void
@@ -3353,7 +3353,7 @@ VFSVolume::unmount_if_mounted() noexcept
     const std::string line =
         fmt::format("grep -qs '^{} ' {} 2>/dev/null || exit\n{}\n", this->device_file, MTAB, str);
     LOG_INFO("Unmount-If-Mounted: {}", line);
-    exec_task(line.c_str(), run_in_terminal);
+    exec_task(line.data(), run_in_terminal);
 }
 
 static bool
@@ -3777,7 +3777,7 @@ get_device_parent(dev_t dev)
 
     const std::string parent = Glib::path_get_dirname(native_path);
     free(native_path);
-    udevice = udev_device_new_from_syspath(udev, parent.c_str());
+    udevice = udev_device_new_from_syspath(udev, parent.data());
     if (!udevice)
         return 0;
     dev_t retdev = udev_device_get_devnum(udevice);

@@ -104,7 +104,7 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, u3
     gtk_selection_data_set(selection_data,
                            gtk_selection_data_get_target(selection_data),
                            8,
-                           (const unsigned char*)uri_list.c_str(),
+                           (const unsigned char*)uri_list.data(),
                            uri_list.size());
     // LOG_DEBUG("clipboard data: \n\n{}\n\n", list);
 }
@@ -133,8 +133,8 @@ ptk_clipboard_copy_as_text(std::string_view working_dir,
         const std::string quoted = bash_quote(file_path);
         file_text = fmt::format("{} {}", file_text, quoted);
     }
-    gtk_clipboard_set_text(clip, file_text.c_str(), -1);
-    gtk_clipboard_set_text(clip_primary, file_text.c_str(), -1);
+    gtk_clipboard_set_text(clip, file_text.data(), -1);
+    gtk_clipboard_set_text(clip_primary, file_text.data(), -1);
 }
 
 void
@@ -157,8 +157,8 @@ ptk_clipboard_copy_name(std::string_view working_dir, const std::vector<vfs::fil
             file_text = fmt::format("{}{}\n", file_text, file->get_name());
         fcount++;
     }
-    gtk_clipboard_set_text(clip, file_text.c_str(), -1);
-    gtk_clipboard_set_text(clip_primary, file_text.c_str(), -1);
+    gtk_clipboard_set_text(clip, file_text.data(), -1);
+    gtk_clipboard_set_text(clip_primary, file_text.data(), -1);
 }
 
 void

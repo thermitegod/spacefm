@@ -770,7 +770,7 @@ ptk_file_browser_rebuild_toolbars(PtkFileBrowser* file_browser)
         rebuild_toolbox(nullptr, file_browser);
         const std::string disp_path =
             Glib::filename_display_name(ptk_file_browser_get_cwd(file_browser));
-        gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), disp_path.c_str());
+        gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), disp_path.data());
     }
     if (file_browser->side_toolbar)
         rebuild_side_toolbox(nullptr, file_browser);
@@ -893,7 +893,7 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
     xset_set_cb(XSetName::STATUS_HIDE, (GFunc)on_status_middle_click_config, set);
     xset_set_ob2(set, nullptr, set_radio);
 
-    xset_add_menu(file_browser, menu, accel_group, desc.c_str());
+    xset_add_menu(file_browser, menu, accel_group, desc.data());
     gtk_widget_show_all(menu);
     g_signal_connect(menu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
 }
@@ -1493,7 +1493,7 @@ ptk_file_browser_update_tab_label(PtkFileBrowser* file_browser)
     /* TODO: Change the icon */
 
     const std::string name = Glib::path_get_basename(ptk_file_browser_get_cwd(file_browser));
-    gtk_label_set_text(text, name.c_str());
+    gtk_label_set_text(text, name.data());
     gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
     if (name.size() < 30)
     {
@@ -1819,7 +1819,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, std::string_view folder_pat
     const std::string disp_path =
         Glib::filename_display_name(ptk_file_browser_get_cwd(file_browser));
     if (!inhibit_focus)
-        gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), disp_path.c_str());
+        gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), disp_path.data());
 
     enable_toolbar(file_browser);
     return true;
@@ -1854,7 +1854,7 @@ add_history_menu_item(PtkFileBrowser* file_browser, GtkWidget* menu, GList* l)
     GtkWidget* menu_item;
     // GtkWidget* folder_image;
     const std::string disp_name = Glib::filename_display_basename((char*)l->data);
-    menu_item = gtk_menu_item_new_with_label(disp_name.c_str());
+    menu_item = gtk_menu_item_new_with_label(disp_name.data());
     g_object_set_data(G_OBJECT(menu_item), "path", l);
     // folder_image = gtk_image_new_from_icon_name("gnome-fs-directory",
     // GtkIconSize::GTK_ICON_SIZE_MENU);
@@ -3593,7 +3593,7 @@ create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode view_mode)
                              "yalign",
                              0.5,
                              "font",
-                             etc_settings.get_font_view_compact().c_str(),
+                             etc_settings.get_font_view_compact().data(),
                              "size-set",
                              true,
                              nullptr);
@@ -3615,7 +3615,7 @@ create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode view_mode)
                              "attributes",
                              attr_list,
                              "font",
-                             etc_settings.get_font_view_icon().c_str(),
+                             etc_settings.get_font_view_icon().data(),
                              "size-set",
                              true,
                              nullptr);
@@ -4285,7 +4285,7 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
     gtk_selection_data_set(sel_data,
                            type,
                            8,
-                           (const unsigned char*)uri_list.c_str(),
+                           (const unsigned char*)uri_list.data(),
                            uri_list.size());
 }
 

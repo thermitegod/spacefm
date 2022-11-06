@@ -394,7 +394,7 @@ vfs_mime_type_get_icon_size_small()
 const char*
 vfs_mime_type_get_type(vfs::mime_type mime_type)
 {
-    return mime_type->type.c_str();
+    return mime_type->type.data();
 }
 
 /* Get human-readable description of mime type */
@@ -415,7 +415,7 @@ vfs_mime_type_get_description(vfs::mime_type mime_type)
             }
         }
     }
-    return mime_type->description.c_str();
+    return mime_type->description.data();
 }
 
 const std::vector<std::string>

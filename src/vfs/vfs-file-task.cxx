@@ -1401,7 +1401,7 @@ vfs_file_task_exec(vfs::file_task task, std::string_view src_file)
         {
             if (task->exec_browser)
             {
-                main_write_exports(task, task->current_dest.c_str(), buf);
+                main_write_exports(task, task->current_dest.data(), buf);
             }
             else
             {
@@ -1485,7 +1485,7 @@ vfs_file_task_exec(vfs::file_task task, std::string_view src_file)
         }
 
         // set permissions
-        chmod(task->exec_script.c_str(), 0700);
+        chmod(task->exec_script.data(), 0700);
 
         // use checksum
         if (geteuid() != 0 && (!task->exec_as_user.empty() || task->exec_checksum))
@@ -1661,7 +1661,7 @@ vfs_file_task_exec(vfs::file_task task, std::string_view src_file)
         // task can be destroyed while this watch is still active
         g_child_watch_add(pid,
                           (GChildWatchFunc)cb_exec_child_cleanup,
-                          !task->exec_keep_tmp && !task->exec_direct && task->exec_script.c_str()
+                          !task->exec_keep_tmp && !task->exec_direct && task->exec_script.data()
                               ? ztd::strdup(task->exec_script)
                               : nullptr);
         call_state_callback(task, VFSFileTaskState::FINISH);

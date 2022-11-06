@@ -24,6 +24,6 @@ ptk_gtk_builder_new_from_file(std::string_view file)
 {
     GtkBuilder* builder = gtk_builder_new();
     const Glib::ustring filename = Glib::build_filename(PACKAGE_UI_DIR, file.data());
-    gtk_builder_add_from_file(builder, filename.c_str(), nullptr);
+    gtk_builder_add_from_file(builder, filename.data(), nullptr);
     return builder;
 }

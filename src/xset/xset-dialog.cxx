@@ -446,7 +446,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
             gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), path);
         else
         {
-            path = (char*)vfs_user_home_dir().c_str();
+            path = (char*)vfs_user_home_dir().data();
             gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), path);
         }
     }
@@ -458,7 +458,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
         else
         {
             const std::string path2 = Glib::build_filename(deffolder, deffile);
-            gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path2.c_str());
+            gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path2.data());
         }
     }
 

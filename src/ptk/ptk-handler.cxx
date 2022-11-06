@@ -956,7 +956,7 @@ ptk_handler_load_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
         {
             while (std::getline(file, line))
             {
-                if (!g_utf8_validate(line.c_str(), -1, nullptr))
+                if (!g_utf8_validate(line.data(), -1, nullptr))
                 {
                     file.close();
                     if (view)
@@ -977,7 +977,7 @@ ptk_handler_load_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
                 }
                 // add line to buffer
                 if (view)
-                    gtk_text_buffer_insert_at_cursor(buf, line.c_str(), -1);
+                    gtk_text_buffer_insert_at_cursor(buf, line.data(), -1);
                 else
                     script.append(line);
             }
@@ -1441,7 +1441,7 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
                        PtkHandlerCol::COL_XSET_NAME,
                        new_handler_xset->name,
                        PtkHandlerCol::COL_HANDLER_NAME,
-                       dis_name.c_str(),
+                       dis_name.data(),
                        -1);
 
     // Activating the new handler - the normal loading code
@@ -1623,7 +1623,7 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
                                    PtkHandlerCol::COL_XSET_NAME,
                                    archive_handler.data(),
                                    PtkHandlerCol::COL_HANDLER_NAME,
-                                   dis_name.c_str(),
+                                   dis_name.data(),
                                    -1);
                 if (def_handler_set == handler_xset)
                     def_handler_iter = iter;
@@ -1818,7 +1818,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                            PtkHandlerCol::COL_XSET_NAME,
                            new_handler_xset->name,
                            PtkHandlerCol::COL_HANDLER_NAME,
-                           dis_name.c_str(),
+                           dis_name.data(),
                            -1);
 
         // Updating available archive handlers list
@@ -1885,7 +1885,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                                PtkHandlerCol::COL_XSET_NAME,
                                xset_name,
                                PtkHandlerCol::COL_HANDLER_NAME,
-                               dis_name.c_str(),
+                               dis_name.data(),
                                -1);
         }
 
@@ -2570,7 +2570,7 @@ on_textview_keypress(GtkWidget* widget, GdkEventKey* event, HandlerData* hnd)
                     keymod = 2;
                 else
                     return false;
-                on_activate_link(nullptr, std::to_string(keymod).c_str(), hnd);
+                on_activate_link(nullptr, std::to_string(keymod).data(), hnd);
                 return true;
             }
             break;
@@ -2930,7 +2930,7 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
     // Generating left-hand side of dialog
     GtkWidget* lbl_handlers = gtk_label_new(nullptr);
     const std::string markup = fmt::format("<b>{}</b>", dialog_mnemonics.at(mode));
-    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handlers), markup.c_str());
+    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handlers), markup.data());
     gtk_widget_set_halign(GTK_WIDGET(lbl_handlers), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(lbl_handlers), GtkAlign::GTK_ALIGN_START);
 
@@ -3077,7 +3077,7 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
         str = "<b>Open Co_mmand:</b>";
     else
         str = "<b>_Mount:</b>";
-    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handler_compress), str.c_str());
+    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handler_compress), str.data());
     gtk_widget_set_halign(GTK_WIDGET(lbl_handler_compress), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(lbl_handler_compress), GtkAlign::GTK_ALIGN_END);
     GtkWidget* lbl_handler_extract = gtk_label_new(nullptr);
@@ -3246,15 +3246,15 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
 
     GtkWidget* lbl_edit0 = gtk_label_new(nullptr);
     str = fmt::format("<a href=\"{}\">{}</a>", 0, "Edit");
-    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit0), str.c_str());
+    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit0), str.data());
     g_signal_connect(G_OBJECT(lbl_edit0), "activate-link", G_CALLBACK(on_activate_link), hnd);
     GtkWidget* lbl_edit1 = gtk_label_new(nullptr);
     str = fmt::format("<a href=\"{}\">{}</a>", 1, "Edit");
-    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit1), str.c_str());
+    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit1), str.data());
     g_signal_connect(G_OBJECT(lbl_edit1), "activate-link", G_CALLBACK(on_activate_link), hnd);
     GtkWidget* lbl_edit2 = gtk_label_new(nullptr);
     str = fmt::format("<a href=\"{}\">{}</a>", 2, "Edit");
-    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit2), str.c_str());
+    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit2), str.data());
     g_signal_connect(G_OBJECT(lbl_edit2), "activate-link", G_CALLBACK(on_activate_link), hnd);
 
     /* Creating container boxes - at this point the dialog already comes

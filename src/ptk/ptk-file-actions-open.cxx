@@ -438,7 +438,7 @@ ptk_open_files_with_app(std::string_view cwd, const std::vector<vfs::file_info>&
                                                             target_path);
                         toplevel = file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser))
                                                 : nullptr;
-                        ptk_show_error(GTK_WINDOW(toplevel), "Broken Link", msg.c_str());
+                        ptk_show_error(GTK_WINDOW(toplevel), "Broken Link", msg.data());
                         continue;
                     }
                 }
@@ -473,7 +473,7 @@ ptk_open_files_with_app(std::string_view cwd, const std::vector<vfs::file_info>&
             }
             else
             { // get existing file list for this app
-                files_to_open = (GList*)g_hash_table_lookup(file_list_hash, alloc_desktop.c_str());
+                files_to_open = (GList*)g_hash_table_lookup(file_list_hash, alloc_desktop.data());
             }
 
             if (!ztd::same(alloc_desktop, full_path))

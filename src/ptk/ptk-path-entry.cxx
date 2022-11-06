@@ -224,7 +224,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
             gtk_list_store_set(list,
                                &it,
                                PTKPathEntryCol::COL_NAME,
-                               disp_name.c_str(),
+                               disp_name.data(),
                                PTKPathEntryCol::COL_PATH,
                                name.data(),
                                -1);
@@ -331,7 +331,7 @@ insert_complete(GtkEntry* entry)
                                         nullptr,
                                         (void*)on_changed,
                                         nullptr);
-        gtk_entry_set_text(GTK_ENTRY(entry), new_prefix.c_str());
+        gtk_entry_set_text(GTK_ENTRY(entry), new_prefix.data());
         gtk_editable_set_position(GTK_EDITABLE(entry), -1);
         g_signal_handlers_unblock_matched(G_OBJECT(entry),
                                           GSignalMatchType::G_SIGNAL_MATCH_FUNC,

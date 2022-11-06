@@ -205,7 +205,7 @@ calc_size(void* user_data)
         if (data->cancel)
             break;
         const std::string path = Glib::build_filename(data->dir_path, file->get_name());
-        calc_total_size_of_files(path.c_str(), data);
+        calc_total_size_of_files(path.data(), data);
     }
     data->done = true;
     return nullptr;
@@ -235,7 +235,7 @@ on_update_labels(FilePropertiesDialogData* data)
         count = fmt::format("{} files", data->total_count);
     }
 
-    gtk_label_set_text(data->count_label, count.c_str());
+    gtk_label_set_text(data->count_label, count.data());
 
     if (data->done)
         data->update_label_timer = 0;
@@ -416,8 +416,8 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
     data->dir_path = ztd::strdup(dir_path.data());
 
     const std::string disp_path = Glib::filename_display_name(dir_path.data());
-    // gtk_label_set_text(GTK_LABEL(location), disp_path.c_str());
-    gtk_entry_set_text(GTK_ENTRY(location), disp_path.c_str());
+    // gtk_label_set_text(GTK_LABEL(location), disp_path.data());
+    gtk_entry_set_text(GTK_ENTRY(location), disp_path.data());
 
     data->total_size_label = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(builder, "total_size")));
     data->size_on_disk_label =
@@ -573,7 +573,7 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
         if (file->is_desktop_entry())
         {
             const std::string disp_name = Glib::filename_display_name(file->name);
-            gtk_entry_set_text(GTK_ENTRY(name), disp_name.c_str());
+            gtk_entry_set_text(GTK_ENTRY(name), disp_name.data());
         }
         else
         {
@@ -649,7 +649,7 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
             {
                 std::string target_path = std::filesystem::read_symlink(disp_sym_path);
 
-                gtk_entry_set_text(GTK_ENTRY(target), target_path.c_str());
+                gtk_entry_set_text(GTK_ENTRY(target), target_path.data());
 
                 // relative link to absolute
                 if (ztd::startswith(target_path, "/"))

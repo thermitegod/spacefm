@@ -630,7 +630,7 @@ edit_preference(GtkWindow* parent, i32 page)
             GtkListStore* su_list =
                 GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(data->su_command)));
             gtk_list_store_prepend(su_list, &it);
-            gtk_list_store_set(GTK_LIST_STORE(su_list), &it, 0, custom_su.c_str(), -1);
+            gtk_list_store_set(GTK_LIST_STORE(su_list), &it, 0, custom_su.data(), -1);
         }
         if (use_su.empty())
             idx = 0;

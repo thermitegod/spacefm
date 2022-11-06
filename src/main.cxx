@@ -272,7 +272,7 @@ handle_parsed_commandline_args()
 
             if (std::filesystem::is_directory(real_path))
             {
-                open_in_tab(&main_window, real_path.c_str());
+                open_in_tab(&main_window, real_path.data());
                 ret = true;
             }
             else if (std::filesystem::exists(real_path))

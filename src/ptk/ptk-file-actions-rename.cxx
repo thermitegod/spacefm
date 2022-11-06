@@ -408,7 +408,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
 
         if (name)
             free(name);
-        gtk_text_buffer_set_text(mset->buf_full_name, full_name.c_str(), -1);
+        gtk_text_buffer_set_text(mset->buf_full_name, full_name.data(), -1);
 
         // update full_path
         gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
@@ -433,7 +433,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
             const std::string cwd = Glib::path_get_dirname(mset->full_path);
             full_path = Glib::build_filename(cwd, path, full_name);
         }
-        gtk_text_buffer_set_text(mset->buf_full_path, full_path.c_str(), -1);
+        gtk_text_buffer_set_text(mset->buf_full_path, full_path.data(), -1);
     }
     else if (widget == GTK_WIDGET(mset->buf_full_name))
     {
@@ -449,9 +449,9 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         const std::string name = namepack.first;
         const std::string ext = namepack.second;
 
-        gtk_text_buffer_set_text(mset->buf_name, name.c_str(), -1);
+        gtk_text_buffer_set_text(mset->buf_name, name.data(), -1);
         if (!ext.empty())
-            gtk_entry_set_text(mset->entry_ext, ext.c_str());
+            gtk_entry_set_text(mset->entry_ext, ext.data());
         else
             gtk_entry_set_text(mset->entry_ext, "");
 
@@ -478,7 +478,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
             const std::string cwd = Glib::path_get_dirname(mset->full_path);
             full_path = Glib::build_filename(cwd, path, full_name);
         }
-        gtk_text_buffer_set_text(mset->buf_full_path, full_path.c_str(), -1);
+        gtk_text_buffer_set_text(mset->buf_full_path, full_path.data(), -1);
     }
     else if (widget == GTK_WIDGET(mset->buf_path))
     {
@@ -511,7 +511,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
             const std::string cwd = Glib::path_get_dirname(mset->full_path);
             full_path = Glib::build_filename(cwd, path, full_name);
         }
-        gtk_text_buffer_set_text(mset->buf_full_path, full_path.c_str(), -1);
+        gtk_text_buffer_set_text(mset->buf_full_path, full_path.data(), -1);
     }
     else // if ( widget == GTK_WIDGET( mset->buf_full_path ) )
     {
@@ -548,9 +548,9 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         const std::string name = namepack.first;
         const std::string ext = namepack.second;
 
-        gtk_text_buffer_set_text(mset->buf_name, name.c_str(), -1);
+        gtk_text_buffer_set_text(mset->buf_name, name.data(), -1);
         if (!ext.empty())
-            gtk_entry_set_text(mset->entry_ext, ext.c_str());
+            gtk_entry_set_text(mset->entry_ext, ext.data());
         else
             gtk_entry_set_text(mset->entry_ext, "");
 
@@ -563,10 +563,10 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
             full_name = ext;
         else
             full_name = "";
-        gtk_text_buffer_set_text(mset->buf_full_name, full_name.c_str(), -1);
+        gtk_text_buffer_set_text(mset->buf_full_name, full_name.data(), -1);
 
         // update path
-        gtk_text_buffer_set_text(mset->buf_path, path.c_str(), -1);
+        gtk_text_buffer_set_text(mset->buf_path, path.data(), -1);
 
         if (full_path[0] != '/')
         {
@@ -817,7 +817,7 @@ select_input(GtkWidget* widget, MoveSet* mset)
             const std::string ext = namepack.second;
 
             free(full_name);
-            gtk_text_buffer_get_iter_at_offset(buf, &iter, g_utf8_strlen(name.c_str(), -1));
+            gtk_text_buffer_get_iter_at_offset(buf, &iter, g_utf8_strlen(name.data(), -1));
         }
         else
             gtk_text_buffer_get_end_iter(buf, &iter);
@@ -977,12 +977,12 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
 
     if (name.empty())
     {
-        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), dir.c_str());
+        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), dir.data());
     }
     else
     {
         const std::string path = Glib::build_filename(dir, name);
-        gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path.c_str());
+        gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path.data());
     }
 
     i32 width = xset_get_int(XSetName::MOVE_DLG_HELP, XSetVar::X);
@@ -1171,7 +1171,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
                 case MODE_FILENAME:
                     path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
                     str = Glib::path_get_basename(path);
-                    gtk_text_buffer_set_text(mset->buf_full_name, str.c_str(), -1);
+                    gtk_text_buffer_set_text(mset->buf_full_name, str.data(), -1);
                     break;
                 case MODE_PARENT:
                     path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dlg));
@@ -1308,7 +1308,7 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     if (!desc)
         desc = mset->desc;
     const std::string title = fmt::format("{} {}{}", action, desc, root_msg);
-    gtk_window_set_title(GTK_WINDOW(mset->dlg), title.c_str());
+    gtk_window_set_title(GTK_WINDOW(mset->dlg), title.data());
 
     if (btn_label)
         gtk_button_set_label(GTK_BUTTON(mset->next), btn_label);
@@ -1973,7 +1973,7 @@ on_template_changed(GtkWidget* widget, MoveSet* mset)
         else
             ext = "";
     }
-    gtk_entry_set_text(mset->entry_ext, ext.c_str());
+    gtk_entry_set_text(mset->entry_ext, ext.data());
 
     // need new name due to extension added?
     GtkTextIter iter, siter;
@@ -1987,7 +1987,7 @@ on_template_changed(GtkWidget* widget, MoveSet* mset)
         const std::string dir = Glib::path_get_dirname(full_path);
         const std::string unique_path = get_unique_name(dir, ext);
 
-        gtk_text_buffer_set_text(mset->buf_full_path, unique_path.c_str(), -1);
+        gtk_text_buffer_set_text(mset->buf_full_path, unique_path.data(), -1);
     }
 }
 
@@ -2217,7 +2217,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         mset->mime_type = ztd::strdup("?");
         type = ztd::strdup(mset->mime_type);
     }
-    mset->label_mime = GTK_LABEL(gtk_label_new(type.c_str()));
+    mset->label_mime = GTK_LABEL(gtk_label_new(type.data()));
     gtk_label_set_ellipsize(mset->label_mime, PANGO_ELLIPSIZE_MIDDLE);
 
     gtk_label_set_selectable(mset->label_mime, true);
@@ -3100,7 +3100,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             else
             {
                 // rename (does overwrite)
-                if (rename(mset->full_path, full_path.c_str()) != 0)
+                if (rename(mset->full_path, full_path.data()) != 0)
                 {
                     // Respond to an EXDEV error by switching to a move (e.g. aufs
                     // directory rename fails due to the directory existing in
@@ -3164,7 +3164,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, std::string_view cwd, GFunc
         file_dir = std::filesystem::path(file_path).parent_path();
 
         if (!ptk_rename_file(file_browser,
-                             file_dir.c_str(),
+                             file_dir.data(),
                              file,
                              cwd.data(),
                              !is_cut,

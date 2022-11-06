@@ -208,8 +208,8 @@ xset_design_job_set_custom(xset_t set)
     char* custom_file = xset_file_dialog(parent,
                                          GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
                                          "Choose Custom Executable",
-                                         folder.c_str(),
-                                         file.c_str());
+                                         folder.data(),
+                                         file.data());
 
     if (custom_file)
     {
@@ -266,7 +266,7 @@ xset_design_job_set_app(xset_t set)
 
     vfs::mime_type mime_type = vfs_mime_type_get_from_type(
         xset_context && !xset_context->var[ItemPropContext::CONTEXT_MIME].empty()
-            ? xset_context->var[ItemPropContext::CONTEXT_MIME].c_str()
+            ? xset_context->var[ItemPropContext::CONTEXT_MIME].data()
             : XDG_MIME_TYPE_UNKNOWN);
     char* file =
         ptk_choose_app_for_mime_type(GTK_WINDOW(parent), mime_type, true, false, false, false);
@@ -618,7 +618,7 @@ xset_design_job_set_remove(xset_t set)
                                      GtkDialogFlags::GTK_DIALOG_MODAL,
                                      GtkMessageType::GTK_MESSAGE_WARNING,
                                      buttons,
-                                     msg.c_str(),
+                                     msg.data(),
                                      nullptr);
         xset_set_window_icon(GTK_WINDOW(dlg));
         gtk_window_set_title(GTK_WINDOW(dlg), "Confirm Remove");

@@ -1242,7 +1242,7 @@ bookmark_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu)
     // Add All Bookmarks
     for (auto [book_path, book_name] : get_all_bookmarks())
     {
-        item = gtk_menu_item_new_with_label(book_path.c_str());
+        item = gtk_menu_item_new_with_label(book_path.data());
 
         g_object_set_data(G_OBJECT(item), "file_browser", file_browser);
         g_object_set_data(G_OBJECT(item), "path", ztd::strdup(book_path));
@@ -2116,7 +2116,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
         if (!(path && path[0] != '\0'))
         {
             if (geteuid() != 0)
-                path = vfs_user_home_dir().c_str();
+                path = vfs_user_home_dir().data();
             else
                 path = ztd::strdup("/");
         }
@@ -2325,7 +2325,7 @@ main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
     if (!cwd.empty())
     {
         const std::string name = Glib::path_get_basename(ptk_file_browser_get_cwd(file_browser));
-        tab_text = gtk_label_new(name.c_str());
+        tab_text = gtk_label_new(name.data());
     }
 
     gtk_label_set_ellipsize(GTK_LABEL(tab_text), PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
@@ -2397,7 +2397,7 @@ main_window_update_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
     // TODO: Change the icon
 
     const std::string name = Glib::path_get_basename(path.data());
-    gtk_label_set_text(text, name.c_str());
+    gtk_label_set_text(text, name.data());
     gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
     if (name.size() < 30)
     {
@@ -2729,7 +2729,7 @@ set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser)
     if (orig_fmt && ztd::contains(orig_fmt, "%d"))
         fmt = ztd::replace(fmt, "%d", disp_path);
 
-    gtk_window_set_title(GTK_WINDOW(main_window), fmt.c_str());
+    gtk_window_set_title(GTK_WINDOW(main_window), fmt.data());
 }
 
 static void
@@ -2868,7 +2868,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
     if (file_browser->busy)
     {
         statusbar_txt.append(fmt::format("Reading {} ...", ptk_file_browser_get_cwd(file_browser)));
-        gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar), 0, statusbar_txt.c_str());
+        gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar), 0, statusbar_txt.data());
         return;
     }
 
@@ -3056,7 +3056,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
     gtk_widget_set_margin_top(GTK_WIDGET(file_browser->status_bar), 0);
     gtk_widget_set_margin_bottom(GTK_WIDGET(file_browser->status_bar), 0);
 
-    gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar), 0, statusbar_txt.c_str());
+    gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar), 0, statusbar_txt.data());
 }
 
 static void
@@ -4899,7 +4899,7 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
                 "task_show_manager "
                 "task_hide_manager separator task_columns task_popups task_errors task_queue",
                 showout);
-            xset_add_menu(file_browser, popup, accel_group, menu_elements.c_str());
+            xset_add_menu(file_browser, popup, accel_group, menu_elements.data());
 
             gtk_widget_show_all(GTK_WIDGET(popup));
             g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
@@ -5021,7 +5021,7 @@ main_task_view_update_task(PtkFileTask* ptask)
         return;
 
     if (ptask->task->type != VFSFileTaskType::EXEC)
-        dest_dir = ptask->task->dest_dir.c_str();
+        dest_dir = ptask->task->dest_dir.data();
     else
         dest_dir = nullptr;
 
@@ -5149,7 +5149,7 @@ main_task_view_update_task(PtkFileTask* ptask)
 
             pixbuf = gtk_icon_theme_load_icon(
                 icon_theme,
-                iname.c_str(),
+                iname.data(),
                 icon_size,
                 (GtkIconLookupFlags)GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
                 nullptr);
@@ -5173,25 +5173,25 @@ main_task_view_update_task(PtkFileTask* ptask)
                                    MainWindowTaskCol::TASK_COL_STATUS,
                                    status3,
                                    MainWindowTaskCol::TASK_COL_COUNT,
-                                   ptask->dsp_file_count.c_str(),
+                                   ptask->dsp_file_count.data(),
                                    MainWindowTaskCol::TASK_COL_PATH,
-                                   path.c_str(),
+                                   path.data(),
                                    MainWindowTaskCol::TASK_COL_FILE,
-                                   file.c_str(),
+                                   file.data(),
                                    MainWindowTaskCol::TASK_COL_PROGRESS,
                                    percent,
                                    MainWindowTaskCol::TASK_COL_TOTAL,
-                                   ptask->dsp_size_tally.c_str(),
+                                   ptask->dsp_size_tally.data(),
                                    MainWindowTaskCol::TASK_COL_ELAPSED,
-                                   ptask->dsp_elapsed.c_str(),
+                                   ptask->dsp_elapsed.data(),
                                    MainWindowTaskCol::TASK_COL_CURSPEED,
-                                   ptask->dsp_curspeed.c_str(),
+                                   ptask->dsp_curspeed.data(),
                                    MainWindowTaskCol::TASK_COL_CUREST,
-                                   ptask->dsp_curest.c_str(),
+                                   ptask->dsp_curest.data(),
                                    MainWindowTaskCol::TASK_COL_AVGSPEED,
-                                   ptask->dsp_avgspeed.c_str(),
+                                   ptask->dsp_avgspeed.data(),
                                    MainWindowTaskCol::TASK_COL_AVGEST,
-                                   ptask->dsp_avgest.c_str(),
+                                   ptask->dsp_avgest.data(),
                                    -1);
             else
                 gtk_list_store_set(GTK_LIST_STORE(model),
@@ -5199,25 +5199,25 @@ main_task_view_update_task(PtkFileTask* ptask)
                                    MainWindowTaskCol::TASK_COL_STATUS,
                                    status3,
                                    MainWindowTaskCol::TASK_COL_COUNT,
-                                   ptask->dsp_file_count.c_str(),
+                                   ptask->dsp_file_count.data(),
                                    MainWindowTaskCol::TASK_COL_PATH,
-                                   path.c_str(),
+                                   path.data(),
                                    MainWindowTaskCol::TASK_COL_FILE,
-                                   file.c_str(),
+                                   file.data(),
                                    MainWindowTaskCol::TASK_COL_PROGRESS,
                                    percent,
                                    MainWindowTaskCol::TASK_COL_TOTAL,
-                                   ptask->dsp_size_tally.c_str(),
+                                   ptask->dsp_size_tally.data(),
                                    MainWindowTaskCol::TASK_COL_ELAPSED,
-                                   ptask->dsp_elapsed.c_str(),
+                                   ptask->dsp_elapsed.data(),
                                    MainWindowTaskCol::TASK_COL_CURSPEED,
-                                   ptask->dsp_curspeed.c_str(),
+                                   ptask->dsp_curspeed.data(),
                                    MainWindowTaskCol::TASK_COL_CUREST,
-                                   ptask->dsp_curest.c_str(),
+                                   ptask->dsp_curest.data(),
                                    MainWindowTaskCol::TASK_COL_AVGSPEED,
-                                   ptask->dsp_avgspeed.c_str(),
+                                   ptask->dsp_avgspeed.data(),
                                    MainWindowTaskCol::TASK_COL_AVGEST,
-                                   ptask->dsp_avgest.c_str(),
+                                   ptask->dsp_avgest.data(),
                                    -1);
         }
         else if (pixbuf)
@@ -5230,7 +5230,7 @@ main_task_view_update_task(PtkFileTask* ptask)
                                MainWindowTaskCol::TASK_COL_PROGRESS,
                                percent,
                                MainWindowTaskCol::TASK_COL_ELAPSED,
-                               ptask->dsp_elapsed.c_str(),
+                               ptask->dsp_elapsed.data(),
                                -1);
         else
             gtk_list_store_set(GTK_LIST_STORE(model),
@@ -5240,7 +5240,7 @@ main_task_view_update_task(PtkFileTask* ptask)
                                MainWindowTaskCol::TASK_COL_PROGRESS,
                                percent,
                                MainWindowTaskCol::TASK_COL_ELAPSED,
-                               ptask->dsp_elapsed.c_str(),
+                               ptask->dsp_elapsed.data(),
                                -1);
 
         // Clearing up
@@ -5259,17 +5259,17 @@ main_task_view_update_task(PtkFileTask* ptask)
         gtk_list_store_set(GTK_LIST_STORE(model),
                            &it,
                            MainWindowTaskCol::TASK_COL_TOTAL,
-                           ptask->dsp_size_tally.c_str(),
+                           ptask->dsp_size_tally.data(),
                            MainWindowTaskCol::TASK_COL_ELAPSED,
-                           ptask->dsp_elapsed.c_str(),
+                           ptask->dsp_elapsed.data(),
                            MainWindowTaskCol::TASK_COL_CURSPEED,
-                           ptask->dsp_curspeed.c_str(),
+                           ptask->dsp_curspeed.data(),
                            MainWindowTaskCol::TASK_COL_CUREST,
-                           ptask->dsp_curest.c_str(),
+                           ptask->dsp_curest.data(),
                            MainWindowTaskCol::TASK_COL_AVGSPEED,
-                           ptask->dsp_avgspeed.c_str(),
+                           ptask->dsp_avgspeed.data(),
                            MainWindowTaskCol::TASK_COL_AVGEST,
-                           ptask->dsp_avgest.c_str(),
+                           ptask->dsp_avgest.data(),
                            -1);
     }
     // LOG_INFO("DONE main_task_view_update_task");
@@ -7281,13 +7281,13 @@ main_window_socket_command(char* argv[], std::string& reply)
         GList* l = nullptr;
         if (ztd::same(socket_cmd, "remove-event"))
         {
-            l = g_list_find_custom((GList*)set->ob2_data, str.c_str(), (GCompareFunc)ztd::compare);
+            l = g_list_find_custom((GList*)set->ob2_data, str.data(), (GCompareFunc)ztd::compare);
             if (!l)
             {
                 // remove replace event
                 const std::string str2 = fmt::format("*{}", str);
                 l = g_list_find_custom((GList*)set->ob2_data,
-                                       str2.c_str(),
+                                       str2.data(),
                                        (GCompareFunc)ztd::compare);
             }
             if (!l)

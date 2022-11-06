@@ -574,7 +574,7 @@ xset_new_menuitem(const char* label, const char* icon)
     {
         // allow escape of underscore
         const std::string str = clean_label(label, false, false);
-        item = gtk_menu_item_new_with_label(str.c_str());
+        item = gtk_menu_item_new_with_label(str.data());
     }
     else
     {
@@ -1287,11 +1287,11 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
                     "\t%s\n\tKeycode: %#4x  Modifier: %#x\n\n%s is already assigned to "
                     "'%s'.\n\nPress a different key or click Set to replace the current key "
                     "assignment.",
-                    keyname.c_str(),
+                    keyname.data(),
                     event->keyval,
                     keymod,
-                    keyname.c_str(),
-                    name.c_str());
+                    keyname.data(),
+                    name.data());
 #ifdef HAVE_NONLATIN
             else
                 gtk_message_dialog_format_secondary_text(
@@ -1299,12 +1299,12 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
                     "\t%s\n\tKeycode: %#4x [%#4x]  Modifier: %#x\n\n%s is already assigned to "
                     "'%s'.\n\nPress a different key or click Set to replace the current key "
                     "assignment.",
-                    keyname.c_str(),
+                    keyname.data(),
                     event->keyval,
                     nonlatin_key,
                     keymod,
-                    keyname.c_str(),
-                    name.c_str());
+                    keyname.data(),
+                    name.data());
 #endif
             *newkey = event->keyval;
             *newkeymod = keymod;
@@ -1314,7 +1314,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
     keyname = xset_get_keyname(nullptr, event->keyval, keymod);
     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dlg),
                                              "\t%s\n\tKeycode: %#4x  Modifier: %#x",
-                                             keyname.c_str(),
+                                             keyname.data(),
                                              event->keyval,
                                              keymod);
     *newkey = event->keyval;
@@ -1359,7 +1359,7 @@ xset_set_key(GtkWidget* parent, xset_t set)
                                                         GtkDialogFlags::GTK_DIALOG_MODAL,
                                                         GtkMessageType::GTK_MESSAGE_QUESTION,
                                                         GtkButtonsType::GTK_BUTTONS_NONE,
-                                                        keymsg.c_str(),
+                                                        keymsg.data(),
                                                         nullptr);
     xset_set_window_icon(GTK_WINDOW(dlg));
 
@@ -2710,7 +2710,7 @@ set_gtk3_widget_padding(GtkWidget* widget, i32 left_right, i32 top_bottom)
                                         top_bottom);
 
     GtkCssProvider* provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(provider), str.c_str(), -1, nullptr);
+    gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(provider), str.data(), -1, nullptr);
     GtkStyleContext* context = gtk_widget_get_style_context(widget);
     gtk_style_context_add_provider(context,
                                    GTK_STYLE_PROVIDER(provider),
@@ -2885,7 +2885,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             if (show_tooltips)
             {
                 str = clean_label(new_menu_label, false, false);
-                gtk_widget_set_tooltip_text(ebox, str.c_str());
+                gtk_widget_set_tooltip_text(ebox, str.data());
             }
             free(new_menu_label);
             break;
@@ -2935,7 +2935,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             if (show_tooltips)
             {
                 str = clean_label(menu_label, false, false);
-                gtk_widget_set_tooltip_text(ebox, str.c_str());
+                gtk_widget_set_tooltip_text(ebox, str.data());
             }
             break;
         case XSetMenu::SUBMENU:
@@ -3056,7 +3056,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             if (show_tooltips)
             {
                 str = clean_label(menu_label, false, false);
-                gtk_widget_set_tooltip_text(ebox, str.c_str());
+                gtk_widget_set_tooltip_text(ebox, str.data());
             }
             free(new_menu_label);
 
@@ -3121,7 +3121,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             if (show_tooltips)
             {
                 str = clean_label(menu_label, false, false);
-                gtk_widget_set_tooltip_text(ebox, str.c_str());
+                gtk_widget_set_tooltip_text(ebox, str.data());
             }
             break;
         case XSetMenu::SEP:

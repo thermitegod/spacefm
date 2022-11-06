@@ -678,7 +678,7 @@ ptk_location_view_get_mount_point_dir(const char* name)
         std::filesystem::create_directories(parent);
         std::filesystem::permissions(parent, std::filesystem::perms::owner_all);
 
-        if (!have_rw_access(parent.c_str()))
+        if (!have_rw_access(parent.data()))
             parent.clear();
     }
 
@@ -755,7 +755,7 @@ ptk_location_view_create_mount_point(i32 mode, vfs::volume vol, netmount_t netmo
             {
                 const std::string bdev = Glib::path_get_basename(vol->device_file);
                 if (!vol->label.empty() && vol->label.at(0) != ' ' &&
-                    g_utf8_validate(vol->label.c_str(), -1, nullptr) &&
+                    g_utf8_validate(vol->label.data(), -1, nullptr) &&
                     !ztd::contains(vol->label, "/"))
                     mname = fmt::format("{:.20s}", vol->label);
                 else if (vol->udi && vol->udi[0] != '\0' && g_utf8_validate(vol->udi, -1, nullptr))
@@ -810,7 +810,7 @@ ptk_location_view_create_mount_point(i32 mode, vfs::volume vol, netmount_t netmo
         mname = "mount";
 
     // complete mount point
-    char* point1 = ptk_location_view_get_mount_point_dir(mname.c_str());
+    char* point1 = ptk_location_view_get_mount_point_dir(mname.data());
     i32 r = 2;
     std::string point = point1;
 
@@ -1771,7 +1771,7 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     menu_elements = fmt::format("dev_menu_remove dev_menu_unmount separator "
                                 "dev_menu_open dev_menu_tab dev_menu_mount{}",
                                 str);
-    xset_add_menu(file_browser, popup, accel_group, menu_elements.c_str());
+    xset_add_menu(file_browser, popup, accel_group, menu_elements.data());
 
     // set = xset_get("dev_menu_root");
     // set->disable = !vol;
@@ -1808,7 +1808,7 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     xset_set_var(set, XSetVar::DESC, menu_elements);
 
     menu_elements = "separator dev_menu_root separator dev_prop dev_menu_settings";
-    xset_add_menu(file_browser, popup, accel_group, menu_elements.c_str());
+    xset_add_menu(file_browser, popup, accel_group, menu_elements.data());
 
     gtk_widget_show_all(GTK_WIDGET(popup));
 
@@ -2142,5 +2142,5 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
         fmt::format("dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
                     "dev_mount_options dev_change{}",
                     file_browser ? " dev_newtab" : "");
-    xset_set_var(set, XSetVar::DESC, desc.c_str());
+    xset_set_var(set, XSetVar::DESC, desc.data());
 }

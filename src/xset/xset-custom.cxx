@@ -340,7 +340,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
                                   GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
                                   "Save As Plugin File",
                                   deffolder,
-                                  deffile.c_str());
+                                  deffile.data());
     if (!path)
         return;
     if (save->s)

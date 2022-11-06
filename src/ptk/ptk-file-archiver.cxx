@@ -226,7 +226,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
             const std::string new_name = fmt::format("{}{}", name, extension);
 
             // Updating new archive filename
-            gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), new_name.c_str());
+            gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), new_name.data());
         }
         free(xset_name);
     }
@@ -452,7 +452,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
                                PTKFileArchiverCol::COL_XSET_NAME,
                                archive_handlers.data(),
                                PTKFileArchiverExtensionsCol::COL_HANDLER_EXTENSIONS,
-                               extensions.c_str(),
+                               extensions.data(),
                                -1);
 
             // Is last used handler?
@@ -499,7 +499,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
     // Obtaining iterator from string turned into a path into the model
     if (gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(list),
                                             &iter,
-                                            std::to_string(format).c_str()))
+                                            std::to_string(format).data()))
     {
         gtk_tree_model_get(GTK_TREE_MODEL(list),
                            &iter,

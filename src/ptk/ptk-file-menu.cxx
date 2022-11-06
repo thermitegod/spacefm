@@ -970,7 +970,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         plain_type = ztd::replace(plain_type, "-", "_");
         plain_type = ztd::replace(plain_type, " ", "");
         plain_type = fmt::format("open_all_type_{}", plain_type);
-        set = xset_set_cb(plain_type.c_str(), (GFunc)on_popup_open_all, data);
+        set = xset_set_cb(plain_type.data(), (GFunc)on_popup_open_all, data);
         set->lock = true;
         set->menu_style = XSetMenu::NORMAL;
         if (set->shared_key)
@@ -1546,7 +1546,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 if (!std::filesystem::exists(path))
                     return;
             }
-            xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, false);
+            xset_edit(GTK_WIDGET(data->browser), path.data(), false, false);
             break;
         case PTKFileMenuAppJob::APP_JOB_VIEW:
         {
@@ -1564,7 +1564,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
                 path = Glib::build_filename(vfs_user_data_dir(), "applications", "mimeapps.list");
             }
-            xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, true);
+            xset_edit(GTK_WIDGET(data->browser), path.data(), false, true);
             break;
         case PTKFileMenuAppJob::APP_JOB_ADD:
             str = ptk_choose_app_for_mime_type(
@@ -1724,7 +1724,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 write_file(path, contents);
             }
             if (std::filesystem::exists(path))
-                xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, false);
+                xset_edit(GTK_WIDGET(data->browser), path.data(), false, false);
 
             vfs_dir_monitor_mime();
             break;
@@ -1732,11 +1732,11 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             str2 = fmt::format("{}.xml", mime_type->type);
             path = Glib::build_filename("/usr/share/mime", str2);
             if (std::filesystem::exists(path))
-                xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, true);
+                xset_edit(GTK_WIDGET(data->browser), path.data(), false, true);
             break;
         case PTKFileMenuAppJob::APP_JOB_VIEW_OVER:
             path = "/usr/share/mime/packages/Overrides.xml";
-            xset_edit(GTK_WIDGET(data->browser), path.c_str(), true, false);
+            xset_edit(GTK_WIDGET(data->browser), path.data(), true, false);
             break;
         case PTKFileMenuAppJob::APP_JOB_BROWSE_MIME_USR:
             if (data->browser)
