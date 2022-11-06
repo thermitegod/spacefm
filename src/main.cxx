@@ -201,7 +201,9 @@ open_in_tab(MainWindow** main_window, const char* real_path)
                 cli_flags.reuse_tab = false;
             }
             else
+            {
                 main_window_add_new_tab(*main_window, real_path);
+            }
         }
     }
     gtk_window_present(GTK_WINDOW(*main_window));
@@ -282,10 +284,10 @@ handle_parsed_commandline_args()
                     if (!main_window)
                     {
                         open_in_tab(&main_window, "/");
-                        ptk_location_view_open_block(real_path.c_str(), false);
+                        ptk_location_view_open_block(real_path, false);
                     }
                     else
-                        ptk_location_view_open_block(real_path.c_str(), true);
+                        ptk_location_view_open_block(real_path, true);
                     ret = true;
                     gtk_window_present(GTK_WINDOW(main_window));
                 }

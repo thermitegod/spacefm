@@ -254,7 +254,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
 }
 
 static void
-open_dir(char* dir, GList* files, MainWindow* w)
+open_dir(std::string_view dir, GList* files, MainWindow* w)
 {
     (void)files;
     main_window_add_new_tab(w, dir);

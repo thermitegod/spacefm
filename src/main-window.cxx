@@ -665,7 +665,7 @@ main_design_mode(GtkMenuItem* menuitem, MainWindow* main_window)
 }
 
 void
-main_window_refresh_all_tabs_matching(const char* path)
+main_window_refresh_all_tabs_matching(std::string_view path)
 {
     (void)path;
     // This function actually closes the tabs because refresh does not work.
@@ -1071,7 +1071,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                             else
                                 folder_path = "/";
                         }
-                        main_window_add_new_tab(main_window, folder_path.c_str());
+                        main_window_add_new_tab(main_window, folder_path);
                         tab_added = true;
                     }
                     if (set->x && !set->ob1)
@@ -1112,7 +1112,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                         else
                             folder_path = "/";
                     }
-                    main_window_add_new_tab(main_window, folder_path.c_str());
+                    main_window_add_new_tab(main_window, folder_path);
                 }
             }
             if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
@@ -1226,7 +1226,7 @@ bookmark_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
             static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(item), "file_browser"));
         MainWindow* main_window = static_cast<MainWindow*>(file_browser->main_window);
 
-        main_window_add_new_tab(main_window, file_path.c_str());
+        main_window_add_new_tab(main_window, file_path);
 
         return true;
     }
@@ -1932,7 +1932,8 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
 }
 
 void
-main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num, const char* file_path)
+main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
+                          std::string_view file_path)
 {
     if (!file_browser)
         return;
@@ -2049,7 +2050,7 @@ on_restore_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
         return;
 
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
-    main_window_add_new_tab(main_window, file_path.c_str());
+    main_window_add_new_tab(main_window, file_path);
 }
 
 void
@@ -2412,7 +2413,7 @@ main_window_update_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
 }
 
 void
-main_window_add_new_tab(MainWindow* main_window, const char* folder_path)
+main_window_add_new_tab(MainWindow* main_window, std::string_view folder_path)
 {
     GtkWidget* notebook = main_window->notebook;
 
@@ -2788,7 +2789,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
 }
 
 void
-main_window_open_path_in_current_tab(MainWindow* main_window, const char* path)
+main_window_open_path_in_current_tab(MainWindow* main_window, std::string_view path)
 {
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
@@ -2798,15 +2799,13 @@ main_window_open_path_in_current_tab(MainWindow* main_window, const char* path)
 }
 
 void
-main_window_open_network(MainWindow* main_window, const char* path, bool new_tab)
+main_window_open_network(MainWindow* main_window, std::string_view path, bool new_tab)
 {
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!file_browser)
         return;
-    char* str = ztd::strdup(path);
-    ptk_location_view_mount_network(file_browser, str, new_tab, false);
-    free(str);
+    ptk_location_view_mount_network(file_browser, path, new_tab, false);
 }
 
 static void
@@ -2822,7 +2821,7 @@ on_file_browser_open_item(PtkFileBrowser* file_browser, std::string_view path, P
             ptk_file_browser_chdir(file_browser, path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
             break;
         case PtkOpenAction::PTK_OPEN_NEW_TAB:
-            main_window_add_new_tab(main_window, path.data());
+            main_window_add_new_tab(main_window, path);
             break;
         case PtkOpenAction::PTK_OPEN_NEW_WINDOW:
         case PtkOpenAction::PTK_OPEN_TERMINAL:

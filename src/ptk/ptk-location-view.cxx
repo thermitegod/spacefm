@@ -387,7 +387,7 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
 }
 
 bool
-ptk_location_view_open_block(const char* block, bool new_tab)
+ptk_location_view_open_block(std::string_view block, bool new_tab)
 {
     // open block device file if in volumes list
 
@@ -908,13 +908,11 @@ on_autoopen_net_cb(VFSFileTask* task, AutoOpen* ao)
 }
 
 void
-ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, bool new_tab,
+ptk_location_view_mount_network(PtkFileBrowser* file_browser, std::string_view url, bool new_tab,
                                 bool force_new_mount)
 {
     char* mount_point = nullptr;
     netmount_t netmount = std::make_shared<Netmount>();
-
-    std::string line;
 
     // split url
     if (split_network_url(url, netmount) != SplitNetworkURL::VALID_NETWORK_URL)
@@ -1006,7 +1004,8 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, const char* url, b
     else if (run_in_terminal)
         keepterm = fmt::format("[[ $? -eq 0 ]] || ( read -p '{}: ' )\n", press_enter_to_close);
 
-    line = fmt::format("{}{}\n{}", ssh_udevil ? "echo Connecting...\n\n" : "", cmd, keepterm);
+    const std::string line =
+        fmt::format("{}{}\n{}", ssh_udevil ? "echo Connecting...\n\n" : "", cmd, keepterm);
     free(cmd);
 
     const std::string task_name = fmt::format("Open URL {}", netmount->url);

@@ -400,7 +400,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
     if ((!ztd::startswith(path, "/") && ztd::contains(path, ":/")) || ztd::startswith(path, "//"))
     {
         save_command_history(GTK_ENTRY(entry));
-        ptk_location_view_mount_network(file_browser, path.c_str(), false, false);
+        ptk_location_view_mount_network(file_browser, path, false, false);
         return;
     }
 
@@ -438,7 +438,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
     else if (std::filesystem::is_block_file(final_path))
     { // open block device
         // LOG_INFO("opening block device: {}", final_path);
-        ptk_location_view_open_block(final_path.c_str(), false);
+        ptk_location_view_open_block(final_path, false);
     }
     else
     { // do nothing for other special files

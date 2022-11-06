@@ -163,7 +163,7 @@ void vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data);
 char* vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* options,
                              netmount_t netmount, bool* run_in_terminal, char** mount_point);
 
-SplitNetworkURL split_network_url(const char* url, netmount_t netmount);
+SplitNetworkURL split_network_url(std::string_view url, netmount_t netmount);
 bool vfs_volume_dir_avoid_changes(std::string_view dir);
 dev_t get_device_parent(dev_t dev);
 bool path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file,

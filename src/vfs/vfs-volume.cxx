@@ -2081,18 +2081,18 @@ mtab_fstype_is_handled_by_protocol(const char* mtab_fstype)
 }
 
 SplitNetworkURL
-split_network_url(const char* url, netmount_t netmount)
+split_network_url(std::string_view url, netmount_t netmount)
 {
-    if (!url || !netmount)
+    if (url.empty() || !netmount)
         return SplitNetworkURL::NOT_A_NETWORK_URL;
 
     char* str;
     char* str2;
-    char* orig_url = ztd::strdup(url);
+    char* orig_url = ztd::strdup(url.data());
     char* xurl = orig_url;
 
     netmount_t nm = std::make_shared<Netmount>();
-    nm->url = ztd::strdup(url);
+    nm->url = ztd::strdup(url.data());
 
     // get protocol
     bool is_colon;
