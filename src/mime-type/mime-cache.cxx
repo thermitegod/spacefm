@@ -41,8 +41,17 @@ inline constexpr u64 LIB_MAJOR_VERSION = 1;
 inline constexpr u64 LIB_MINOR_VERSION = 2;
 
 /* handle byte order here */
-#define VAL16(buffer, idx) GUINT16_FROM_BE(*(u16*)(buffer + idx))
-#define VAL32(buffer, idx) GUINT32_FROM_BE(*(u32*)(buffer + idx))
+static u16
+VAL16(std::string_view buffer, u16 idx)
+{
+    return GUINT16_FROM_BE(*(u16*)(buffer.data() + idx));
+}
+
+static u32
+VAL32(std::string_view buffer, u32 idx)
+{
+    return GUINT32_FROM_BE(*(u32*)(buffer.data() + idx));
+}
 
 /* cache header */
 // clang-format off
@@ -92,8 +101,8 @@ MimeCache::load_mime_file()
     read(fd, buf, statbuf.st_size);
     close(fd);
 
-    u32 majv = VAL16(buf, MAJOR_VERSION);
-    u32 minv = VAL16(buf, MINOR_VERSION);
+    const u16 majv = VAL16(buf, MAJOR_VERSION);
+    const u16 minv = VAL16(buf, MINOR_VERSION);
 
     if (majv != LIB_MAJOR_VERSION || minv != LIB_MINOR_VERSION)
     {
