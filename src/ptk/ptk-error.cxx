@@ -26,12 +26,12 @@
 void
 ptk_show_error(GtkWindow* parent, std::string_view title, std::string_view message)
 {
-    const Glib::ustring msg = Glib::Markup::escape_text(message.data());
+    // const Glib::ustring msg = Glib::Markup::escape_text(message.data());
     GtkWidget* dlg = gtk_message_dialog_new(parent,
                                             GtkDialogFlags::GTK_DIALOG_MODAL,
                                             GtkMessageType::GTK_MESSAGE_ERROR,
                                             GtkButtonsType::GTK_BUTTONS_OK,
-                                            msg.data(),
+                                            message.data(),
                                             nullptr);
 
     gtk_window_set_title(GTK_WINDOW(dlg), title.empty() ? "Error" : title.data());
