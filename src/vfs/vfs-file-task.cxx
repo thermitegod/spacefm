@@ -1973,7 +1973,7 @@ vfs::file_task
 vfs_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files,
              std::string_view dest_dir)
 {
-    vfs::file_task task = g_slice_new0(VFSFileTask);
+    vfs::file_task task = new VFSFileTask();
 
     task->type = type;
     task->src_paths = src_files;
@@ -2092,7 +2092,7 @@ vfs_file_task_free(vfs::file_task task)
     gtk_text_buffer_set_text(task->add_log_buf, "", -1);
     g_object_unref(task->add_log_buf);
 
-    g_slice_free(VFSFileTask, task);
+    delete task;
 }
 
 static void

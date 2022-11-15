@@ -52,7 +52,7 @@ static u32 small_thumb_size = 20;
 vfs::file_info
 vfs_file_info_new()
 {
-    vfs::file_info fi = g_slice_new0(VFSFileInfo);
+    vfs::file_info fi = new VFSFileInfo();
     fi->ref_inc();
     return fi;
 }
@@ -108,7 +108,8 @@ vfs_file_info_unref(vfs::file_info file)
     if (file->ref_count() == 0)
     {
         vfs_file_info_clear(file);
-        g_slice_free(VFSFileInfo, file);
+
+        delete file;
     }
 }
 

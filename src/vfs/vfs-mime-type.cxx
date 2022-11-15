@@ -185,7 +185,7 @@ vfs_mime_type_get_from_type(std::string_view type)
 vfs::mime_type
 vfs_mime_type_new(std::string_view type_name)
 {
-    vfs::mime_type mime_type = g_slice_new0(VFSMimeType);
+    vfs::mime_type mime_type = new VFSMimeType();
     mime_type->type = type_name.data();
     mime_type->ref_inc();
     return mime_type;
@@ -209,7 +209,7 @@ vfs_mime_type_unref(vfs::mime_type mime_type)
         if (mime_type->small_icon)
             g_object_unref(mime_type->small_icon);
 
-        g_slice_free(VFSMimeType, mime_type);
+        delete mime_type;
     }
 }
 
