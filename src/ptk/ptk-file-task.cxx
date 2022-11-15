@@ -58,7 +58,7 @@ PtkFileTask::PtkFileTask(VFSFileTaskType type, const std::vector<std::string>& s
 {
     this->task = vfs_task_new(type, src_files, dest_dir);
 
-    vfs_file_task_set_state_callback(this->task, on_vfs_file_task_state_cb, this);
+    this->task->set_state_callback(on_vfs_file_task_state_cb, this);
     this->parent_window = parent_window;
     this->task_view = task_view;
     this->task->exec_ptask = (void*)this;
@@ -383,7 +383,7 @@ ptk_file_task_run(PtkFileTask* ptask)
     // wait this long to first show task in manager, popup
     ptask->timeout = g_timeout_add(500, (GSourceFunc)ptk_file_task_add_main, ptask);
     ptask->progress_timer = 0;
-    vfs_file_task_run(ptask->task);
+    ptask->task->run_task();
     if (ptask->task->type == VFSFileTaskType::EXEC)
     {
         if ((ptask->complete || !ptask->task->exec_sync) && ptask->timeout)
@@ -431,7 +431,7 @@ ptk_file_task_cancel(PtkFileTask* ptask)
         if (ptask->task->state_pause != VFSFileTaskState::RUNNING)
             ptk_file_task_pause(ptask, VFSFileTaskState::RUNNING);
 
-        vfs_file_task_abort(ptask->task);
+        ptask->task->abort_task();
 
         if (ptask->task->exec_pid)
         {
@@ -466,7 +466,9 @@ ptk_file_task_cancel(PtkFileTask* ptask)
         }
     }
     else
-        vfs_file_task_try_abort(ptask->task);
+    {
+        ptask->task->try_abort_task();
+    }
     return false;
 }
 
@@ -703,7 +705,7 @@ on_overwrite_combo_changed(GtkComboBox* box, PtkFileTask* ptask)
     i32 overwrite_mode = gtk_combo_box_get_active(box);
     if (overwrite_mode < 0)
         overwrite_mode = 0;
-    vfs_file_task_set_overwrite_mode(ptask->task, (VFSFileTaskOverwriteMode)overwrite_mode);
+    ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode(overwrite_mode));
 }
 
 static void
@@ -1370,19 +1372,19 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
 void
 ptk_file_task_set_chmod(PtkFileTask* ptask, unsigned char* chmod_actions)
 {
-    vfs_file_task_set_chmod(ptask->task, chmod_actions);
+    ptask->task->set_chmod(chmod_actions);
 }
 
 void
 ptk_file_task_set_chown(PtkFileTask* ptask, uid_t uid, gid_t gid)
 {
-    vfs_file_task_set_chown(ptask->task, uid, gid);
+    ptask->task->set_chown(uid, gid);
 }
 
 void
 ptk_file_task_set_recursive(PtkFileTask* ptask, bool recursive)
 {
-    vfs_file_task_set_recursive(ptask->task, recursive);
+    ptask->task->set_recursive(recursive);
 }
 
 static void
@@ -1693,7 +1695,7 @@ ptk_file_task_update(PtkFileTask* ptask)
     if (!ptask->timeout && !ptask->complete)
         main_task_view_update_task(ptask);
 
-    vfs_file_task_unlock(task);
+    task->unlock();
     // LOG_INFO("ptk_file_task_update DONE ptask={:p}", fmt::ptr(ptask));
 }
 
@@ -1711,18 +1713,18 @@ on_vfs_file_task_state_cb(vfs::file_task task, VFSFileTaskState state, void* sta
 
             ptask->complete = true;
 
-            vfs_file_task_lock(task);
+            task->lock();
             if (task->type != VFSFileTaskType::EXEC)
                 task->current_file.clear();
             ptask->progress_count = 50; // trigger fast display
-            vfs_file_task_unlock(task);
+            task->unlock();
             // gtk_signal_emit_by_name( G_OBJECT( ptask->signal_widget ), "task-notify",
             //                                                                 ptask );
             break;
         case VFSFileTaskState::QUERY_OVERWRITE:
             // 0; GThread *self = g_thread_self ();
             // LOG_INFO("TASK_THREAD = {:p}", fmt::ptr(self));
-            vfs_file_task_lock(task);
+            task->lock();
             ptask->query_new_dest = (char**)state_data;
             *ptask->query_new_dest = nullptr;
             ptask->query_cond = g_cond_new();
@@ -1735,11 +1737,11 @@ on_vfs_file_task_state_cb(vfs::file_task task, VFSFileTaskState state, void* sta
             task->last_progress = task->progress;
             task->last_speed = 0;
             task->timer.start();
-            vfs_file_task_unlock(task);
+            task->unlock();
             break;
         case VFSFileTaskState::ERROR:
             // LOG_INFO("VFSFileTaskState::ERROR");
-            vfs_file_task_lock(task);
+            task->lock();
             task->err_count++;
             // LOG_INFO("    ptask->item_count = {}", task->current_item );
 
@@ -1757,7 +1759,7 @@ on_vfs_file_task_state_cb(vfs::file_task task, VFSFileTaskState state, void* sta
             }
             ptask->progress_count = 50; // trigger fast display
 
-            vfs_file_task_unlock(task);
+            task->unlock();
 
             if (xset_get_b(XSetName::TASK_Q_PAUSE))
             {
@@ -1837,32 +1839,32 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
     switch (response)
     {
         case RESPONSE_OVERWRITEALL:
-            vfs_file_task_set_overwrite_mode(ptask->task, VFSFileTaskOverwriteMode::OVERWRITE_ALL);
+            ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::OVERWRITE_ALL);
             if (ptask->progress_dlg)
                 gtk_combo_box_set_active(GTK_COMBO_BOX(ptask->overwrite_combo),
                                          VFSFileTaskOverwriteMode::OVERWRITE_ALL);
             break;
         case RESPONSE_OVERWRITE:
-            vfs_file_task_set_overwrite_mode(ptask->task, VFSFileTaskOverwriteMode::OVERWRITE);
+            ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::OVERWRITE);
             break;
         case RESPONSE_SKIPALL:
-            vfs_file_task_set_overwrite_mode(ptask->task, VFSFileTaskOverwriteMode::SKIP_ALL);
+            ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::SKIP_ALL);
             if (ptask->progress_dlg)
                 gtk_combo_box_set_active(GTK_COMBO_BOX(ptask->overwrite_combo),
                                          VFSFileTaskOverwriteMode::SKIP_ALL);
             break;
         case RESPONSE_SKIP:
-            vfs_file_task_set_overwrite_mode(ptask->task, VFSFileTaskOverwriteMode::SKIP);
+            ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::SKIP);
             break;
         case RESPONSE_AUTO_RENAME_ALL:
-            vfs_file_task_set_overwrite_mode(ptask->task, VFSFileTaskOverwriteMode::AUTO_RENAME);
+            ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::AUTO_RENAME);
             if (ptask->progress_dlg)
                 gtk_combo_box_set_active(GTK_COMBO_BOX(ptask->overwrite_combo),
                                          VFSFileTaskOverwriteMode::AUTO_RENAME);
             break;
         case RESPONSE_AUTO_RENAME:
         case RESPONSE_RENAME:
-            vfs_file_task_set_overwrite_mode(ptask->task, VFSFileTaskOverwriteMode::RENAME);
+            ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::RENAME);
             if (response == RESPONSE_AUTO_RENAME)
             {
                 GtkWidget* auto_button =
@@ -1887,7 +1889,7 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
         case RESPONSE_PAUSE:
             ptk_file_task_pause(ptask, VFSFileTaskState::PAUSE);
             main_task_start_queued(ptask->task_view, ptask);
-            vfs_file_task_set_overwrite_mode(ptask->task, VFSFileTaskOverwriteMode::RENAME);
+            ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::RENAME);
             ptask->restart_timeout = false;
             break;
         case GtkResponseType::GTK_RESPONSE_DELETE_EVENT: // escape was pressed or window closed

@@ -117,7 +117,7 @@ enum VFSExecType
     CUSTOM,
 };
 
-struct VFSFileTask;
+class VFSFileTask;
 
 namespace vfs
 {
@@ -127,8 +127,56 @@ namespace vfs
 using VFSFileTaskStateCallback = bool (*)(vfs::file_task task, VFSFileTaskState state,
                                           void* state_data, void* user_data);
 
-struct VFSFileTask
+class VFSFileTask
 {
+  public:
+    VFSFileTask() = delete;
+    VFSFileTask(VFSFileTaskType type, const std::vector<std::string>& src_files,
+                std::string_view dest_dir);
+    ~VFSFileTask();
+
+    void lock();
+    void unlock();
+
+    void set_state_callback(VFSFileTaskStateCallback cb, void* user_data);
+
+    void set_chmod(unsigned char* new_chmod_actions);
+    void set_chown(uid_t new_uid, gid_t new_gid);
+
+    void set_recursive(bool recursive);
+    void set_overwrite_mode(VFSFileTaskOverwriteMode mode);
+
+    void run_task();
+    void try_abort_task();
+    void abort_task();
+
+  public: // private: // TODO
+    bool check_overwrite(std::string_view dest_file, bool* dest_exists, char** new_dest_file);
+    bool check_dest_in_src(std::string_view src_dir);
+
+    void file_copy(std::string_view src_file);
+    bool do_file_copy(std::string_view src_file, std::string_view dest_file);
+
+    void file_move(std::string_view src_file);
+    i32 do_file_move(std::string_view src_file, std::string_view dest_path);
+
+    void file_trash(std::string_view src_file);
+    void file_delete(std::string_view src_file);
+    void file_link(std::string_view src_file);
+    void file_chown_chmod(std::string_view src_file);
+    void file_exec(std::string_view src_file);
+
+    void add_task_dev(dev_t dev);
+    bool should_abort();
+
+    off_t get_total_size_of_dir(std::string_view path);
+
+    void append_add_log(std::string_view msg);
+
+    void task_error(i32 errnox, std::string_view action);
+    void task_error(i32 errnox, std::string_view action, std::string_view target);
+
+  public:
     VFSFileTaskType type;
     std::vector<std::string> src_paths; // All source files. This list will be freed
                                         // after file operation is completed.
@@ -137,16 +185,16 @@ struct VFSFileTask
     GSList* devs{nullptr};
 
     VFSFileTaskOverwriteMode overwrite_mode;
-    bool recursive; // Apply operation to all files under directories
-                    // recursively. This is default to copy/delete,
-                    // and should be set manually for chown/chmod.
+    bool is_recursive; // Apply operation to all files under directories
+                       // recursively. This is default to copy/delete,
+                       // and should be set manually for chown/chmod.
 
     // For chown
     uid_t uid;
     gid_t gid;
 
     // For chmod
-    unsigned char* chmod_actions; // If chmod is not needed, this should be nullptr
+    unsigned char* chmod_actions{nullptr}; // If chmod is not needed, this should be nullptr
 
     off_t total_size; // Total size of the files to be processed, in bytes
     off_t progress;   // Total size of current processed files, in btytes
@@ -174,7 +222,7 @@ struct VFSFileTask
     GCond* pause_cond{nullptr};
     bool queue_start{false};
 
-    VFSFileTaskStateCallback state_cb;
+    VFSFileTaskStateCallback state_cb{nullptr};
     void* state_cb_data;
 
     GMutex* mutex;
@@ -220,31 +268,10 @@ struct VFSFileTask
 vfs::file_task vfs_task_new(VFSFileTaskType task_type, const std::vector<std::string>& src_files,
                             std::string_view dest_dir);
 
-void vfs_file_task_lock(vfs::file_task task);
-void vfs_file_task_unlock(vfs::file_task task);
-
-/* Set some actions for chmod, this array will be copied
- * and stored in VFSFileTask */
-void vfs_file_task_set_chmod(vfs::file_task task, unsigned char* chmod_actions);
-
-void vfs_file_task_set_chown(vfs::file_task task, uid_t uid, gid_t gid);
-
-void vfs_file_task_set_state_callback(vfs::file_task task, VFSFileTaskStateCallback cb,
-                                      void* user_data);
-
-void vfs_file_task_set_recursive(vfs::file_task task, bool recursive);
-
-void vfs_file_task_set_overwrite_mode(vfs::file_task task, VFSFileTaskOverwriteMode mode);
-
-void vfs_file_task_run(vfs::file_task task);
-
-void vfs_file_task_try_abort(vfs::file_task task);
-
-void vfs_file_task_abort(vfs::file_task task);
-
 void vfs_file_task_free(vfs::file_task task);
 
 char* vfs_file_task_get_cpids(Glib::Pid pid);
 void vfs_file_task_kill_cpids(char* cpids, i32 signal);
+
 const std::string vfs_file_task_get_unique_name(std::string_view dest_dir,
                                                 std::string_view base_name, std::string_view ext);
