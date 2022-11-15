@@ -1297,24 +1297,6 @@ cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, vfs::file_task task)
     return true;
 }
 
-static char*
-get_xxhash(std::string_view path)
-{
-    const std::string xxhash = Glib::find_program_in_path("xxh128sum");
-    if (xxhash.empty())
-    {
-        LOG_WARN("Missing program xxhash");
-        return nullptr;
-    }
-
-    std::string* standard_output = nullptr;
-    const std::string command = fmt::format("{} {}", xxhash, path);
-    print_command(command);
-    Glib::spawn_command_line_sync(command, standard_output);
-
-    return ztd::strdup(standard_output);
-}
-
 void
 VFSFileTask::file_exec(std::string_view src_file)
 {
@@ -1322,7 +1304,6 @@ VFSFileTask::file_exec(std::string_view src_file)
     // another thread because gio adds watches to main loop thread anyway
     std::string su;
     std::string terminal;
-    char* sum_script = nullptr;
     GtkWidget* parent = nullptr;
 
     // LOG_INFO("vfs_file_task_exec");
@@ -1419,6 +1400,8 @@ VFSFileTask::file_exec(std::string_view src_file)
             return;
         }
     }
+
+    std::string sum_script;
 
     // Build exec script
     if (!this->exec_direct)
@@ -1532,7 +1515,11 @@ VFSFileTask::file_exec(std::string_view src_file)
 
         // use checksum
         if (geteuid() != 0 && (!this->exec_as_user.empty() || this->exec_checksum))
-            sum_script = get_xxhash(this->exec_script);
+        {
+            Glib::Checksum check = Glib::Checksum();
+            sum_script =
+                check.compute_checksum(Glib::Checksum::Type::MD5, this->exec_script.data());
+        }
     }
 
     this->percent = 50;
@@ -1580,18 +1567,15 @@ VFSFileTask::file_exec(std::string_view src_file)
         }
     }
 
-    if (sum_script)
+    if (!sum_script.empty())
     {
         // spacefm-auth exists?
         auth = get_script_path(Scripts::SPACEFM_AUTH);
         if (!script_exists(auth))
-        {
-            free(sum_script);
-            sum_script = nullptr;
-        }
+            sum_script.clear();
     }
 
-    if (sum_script && !auth.empty())
+    if (!sum_script.empty() && !auth.empty())
     {
         // spacefm-auth
         if (single_arg)
@@ -1614,7 +1598,6 @@ VFSFileTask::file_exec(std::string_view src_file)
             argv.emplace_back(this->exec_script);
             argv.emplace_back(sum_script);
         }
-        free(sum_script);
     }
     else if (this->exec_direct)
     {

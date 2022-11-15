@@ -41,9 +41,9 @@ if [ ! -f "${fm_source}" ];then
 fi
 
 if [ ${#fm_sum} -eq 64 ];then
-    fm_hash=/usr/bin/xxh128sum
+    fm_hash=/usr/bin/md5sum
 elif [ ${#fm_sum} -eq 128 ];then
-    fm_hash=/usr/bin/xxh128sum
+    fm_hash=/usr/bin/md5sum
 else
     echo "spacefm-auth: error: invalid sum" 1>&2
     exit 1
