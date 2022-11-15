@@ -252,7 +252,7 @@ class VFSFileTask
     void* exec_desktop{nullptr};
     std::string exec_as_user;
     std::string exec_icon;
-    Glib::Pid exec_pid;
+    pid_t exec_pid;
     i32 exec_exit_status{0};
     u32 child_watch{0};
     bool exec_is_error{false};
@@ -269,9 +269,6 @@ vfs::file_task vfs_task_new(VFSFileTaskType task_type, const std::vector<std::st
                             std::string_view dest_dir);
 
 void vfs_file_task_free(vfs::file_task task);
-
-char* vfs_file_task_get_cpids(Glib::Pid pid);
-void vfs_file_task_kill_cpids(char* cpids, i32 signal);
 
 const std::string vfs_file_task_get_unique_name(std::string_view dest_dir,
                                                 std::string_view base_name, std::string_view ext);

@@ -396,22 +396,6 @@ ptk_file_task_run(PtkFileTask* ptask)
     // LOG_INFO("ptk_file_task_run DONE ptask={:p}", fmt::ptr(ptask));
 }
 
-static bool
-ptk_file_task_kill(void* pid)
-{
-    // LOG_INFO("SIGKILL {}", GPOINTER_TO_INT(pid));
-    kill(GPOINTER_TO_INT(pid), SIGKILL);
-    return false;
-}
-
-static bool
-ptk_file_task_kill_cpids(char* cpids)
-{
-    vfs_file_task_kill_cpids(cpids, SIGKILL);
-    free(cpids);
-    return false;
-}
-
 bool
 ptk_file_task_cancel(PtkFileTask* ptask)
 {
@@ -436,16 +420,16 @@ ptk_file_task_cancel(PtkFileTask* ptask)
         if (ptask->task->exec_pid)
         {
             // LOG_INFO("SIGTERM {}", ptask->task->exec_pid);
-            char* cpids = vfs_file_task_get_cpids(ptask->task->exec_pid);
-            kill(ptask->task->exec_pid, SIGTERM);
-            if (cpids)
-                vfs_file_task_kill_cpids(cpids, SIGTERM);
-            // SIGKILL 2 seconds later in case SIGTERM fails
-            g_timeout_add(2500,
-                          (GSourceFunc)ptk_file_task_kill,
-                          GINT_TO_POINTER(ptask->task->exec_pid));
-            if (cpids)
-                g_timeout_add(2500, (GSourceFunc)ptk_file_task_kill_cpids, cpids);
+
+            const std::string command =
+                fmt::format("/usr/bin/kill -{} {}", SIGTERM, ptask->task->exec_pid);
+            print_command(command);
+            Glib::spawn_command_line_async(command);
+
+            const std::string command2 =
+                fmt::format("sleep 5 && /usr/bin/kill -{} {}", SIGKILL, ptask->task->exec_pid);
+            print_command(command2);
+            Glib::spawn_command_line_async(command2);
         }
         else
         {
@@ -542,17 +526,20 @@ ptk_file_task_pause(PtkFileTask* ptask, i32 state)
         if (sig && ptask->task->exec_pid)
         {
             // send signal
-            char* cpids = vfs_file_task_get_cpids(ptask->task->exec_pid);
-
-            kill(ptask->task->exec_pid, sig);
-            if (cpids)
-                vfs_file_task_kill_cpids(cpids, sig);
+            const std::string command =
+                fmt::format("/usr/bin/kill -{} {}", sig, ptask->task->exec_pid);
+            print_command(command);
+            Glib::spawn_command_line_async(command);
         }
     }
     else if (state == VFSFileTaskState::PAUSE)
+    {
         ptask->task->state_pause = VFSFileTaskState::PAUSE;
+    }
     else if (state == VFSFileTaskState::QUEUE)
+    {
         ptask->task->state_pause = VFSFileTaskState::QUEUE;
+    }
     else
     {
         // Resume

@@ -1101,77 +1101,8 @@ call_state_callback(vfs::file_task task, VFSFileTaskState state)
     }
 }
 
-char*
-vfs_file_task_get_cpids(Glib::Pid pid)
-{
-    // get child pids recursively as multi-line string
-    if (!pid)
-        return nullptr;
-
-    std::string* standard_output = nullptr;
-    i32 exit_status;
-
-    const std::string command = fmt::format("/bin/ps h --ppid {} -o pid", pid);
-    print_command(command);
-    Glib::spawn_command_line_sync(command, standard_output, nullptr, &exit_status);
-
-    if (standard_output->empty())
-        return nullptr;
-
-    std::string cpids = ztd::strdup(standard_output);
-    // get grand cpids recursively
-    char* pids = ztd::strdup(standard_output);
-    char* nl;
-    while ((nl = strchr(pids, '\n')))
-    {
-        nl[0] = '\0';
-        char* pida = ztd::strdup(pids);
-        nl[0] = '\n';
-        pids = nl + 1;
-        Glib::Pid pidi = std::stol(pida);
-        free(pida);
-        if (pidi)
-        {
-            char* gcpids = vfs_file_task_get_cpids(pidi);
-            if (gcpids)
-            {
-                cpids = fmt::format("{}{}", cpids, gcpids);
-                free(gcpids);
-            }
-        }
-    }
-    free(pids);
-
-    // LOG_INFO("vfs_file_task_get_cpids {}[{}]", pid, cpids );
-    return ztd::strdup(cpids);
-}
-
-void
-vfs_file_task_kill_cpids(char* cpids, i32 signal)
-{
-    if (!signal || !cpids || cpids[0] == '\0')
-        return;
-
-    char* pids = cpids;
-    char* nl;
-    while ((nl = strchr(pids, '\n')))
-    {
-        nl[0] = '\0';
-        char* pida = ztd::strdup(pids);
-        nl[0] = '\n';
-        pids = nl + 1;
-        Glib::Pid pidi = std::stol(pida);
-        free(pida);
-        if (pidi)
-        {
-            // LOG_INFO("KILL_CPID pidi={} signal={}", pidi, signal );
-            kill(pidi, signal);
-        }
-    }
-}
-
 static void
-cb_exec_child_cleanup(Glib::Pid pid, i32 status, char* tmp_file)
+cb_exec_child_cleanup(pid_t pid, i32 status, char* tmp_file)
 { // delete tmp files after async task terminates
     // LOG_INFO("cb_exec_child_cleanup pid={} status={} file={}", pid, status, tmp_file );
     g_spawn_close_pid(pid);
@@ -1184,7 +1115,7 @@ cb_exec_child_cleanup(Glib::Pid pid, i32 status, char* tmp_file)
 }
 
 static void
-cb_exec_child_watch(Glib::Pid pid, i32 status, vfs::file_task task)
+cb_exec_child_watch(pid_t pid, i32 status, vfs::file_task task)
 {
     bool bad_status = false;
     g_spawn_close_pid(pid);
@@ -1527,7 +1458,7 @@ VFSFileTask::file_exec(std::string_view src_file)
     // Spawn
     std::vector<std::string> argv;
 
-    Glib::Pid pid;
+    pid_t pid;
     i32 out, err;
     std::string use_su;
     bool single_arg = false;

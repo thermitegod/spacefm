@@ -58,6 +58,8 @@
 
 #include "type-conversion.hxx"
 
+#include "utils.hxx"
+
 #include "find-files.hxx"
 
 enum FindFilesCol
@@ -126,7 +128,7 @@ struct FindFile
     GtkWidget* stop_btn;
     GtkWidget* again_btn;
 
-    Glib::Pid pid;
+    pid_t pid;
     i32 stdo;
 
     vfs::async_task task;
@@ -556,11 +558,16 @@ finish_search(FindFile* data)
 {
     if (data->pid)
     {
-        i32 status;
-        kill(data->pid, SIGTERM);
-        waitpid(data->pid, &status, 0);
+        const std::string command = fmt::format("/usr/bin/kill -{} {}", SIGTERM, data->pid);
+        print_command(command);
+        Glib::spawn_command_line_async(command);
+
+        const std::string command2 =
+            fmt::format("sleep 5 && /usr/bin/kill -{} {}", SIGKILL, data->pid);
+        print_command(command2);
+        Glib::spawn_command_line_async(command2);
+
         data->pid = 0;
-        LOG_DEBUG("find process is killed!");
     }
     if (data->task)
     {
