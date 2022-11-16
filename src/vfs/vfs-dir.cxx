@@ -97,6 +97,7 @@ static void on_list_task_finished(vfs::dir dir, bool is_cancelled);
 
 static GObjectClass* parent_class = nullptr;
 
+// static std::map<std::string, vfs::dir> dir_map;
 static std::map<const char*, vfs::dir> dir_map;
 
 static GList* mime_cb = nullptr;
@@ -190,9 +191,9 @@ vfs_dir_finalize(GObject* obj)
     {
         vfs_file_monitor_remove(dir->monitor, vfs_dir_monitor_callback, dir);
     }
-    if (dir->path)
+    if (!dir->path.empty())
     {
-        dir_map.erase(dir->path);
+        dir_map.erase(dir->path.data());
 
         /* There is no VFSDir instance */
         if (dir_map.size() == 0)
@@ -206,10 +207,6 @@ vfs_dir_finalize(GObject* obj)
                 change_notify_timeout = 0;
             }
         }
-
-        free(dir->path);
-        free(dir->disp_path);
-        dir->path = dir->disp_path = nullptr;
     }
     // LOG_DEBUG("dir->thumbnail_loader: {:p}", dir->thumbnail_loader);
     if (dir->thumbnail_loader)
@@ -428,11 +425,12 @@ static vfs::dir
 vfs_dir_new(std::string_view path)
 {
     vfs::dir dir = VFS_DIR(g_object_new(VFS_TYPE_DIR, nullptr));
-    dir->path = ztd::strdup(path.data());
 
+    dir->path = path;
     dir->avoid_changes = vfs_volume_dir_avoid_changes(path.data());
-    // LOG_INFO("vfs_dir_new {}  avoid_changes={}", dir->path, dir->avoid_changes ? "true" :
-    // "false");
+
+    // LOG_INFO("vfs_dir_new {}  avoid_changes={}", dir->path, dir->avoid_changes);
+
     return dir;
 }
 
@@ -496,10 +494,10 @@ vfs_dir_add_hidden(std::string_view path, std::string_view file_name)
 static void
 vfs_dir_load(vfs::dir dir)
 {
-    if (!dir->path)
+    if (dir->path.empty())
         return;
+    // LOG_INFO("dir->path={}", dir->path);
 
-    dir->disp_path = ztd::strdup(Glib::filename_display_name(dir->path));
     dir->task = vfs_async_task_new((VFSAsyncFunc)vfs_dir_load_thread, dir);
 
     dir->signal_task_load_dir =
@@ -515,8 +513,8 @@ vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
 
     dir->file_listed = false;
     dir->load_complete = false;
-    dir->xhidden_count = 0; // MOD
-    if (!dir->path)
+    dir->xhidden_count = 0;
+    if (dir->path.empty())
         return nullptr;
 
     /* Install file alteration monitor */
@@ -769,7 +767,7 @@ vfs_dir_get_by_path(std::string_view path)
     {
         dir = vfs_dir_new(path);
         vfs_dir_load(dir); /* asynchronous operation */
-        dir_map.insert({dir->path, dir});
+        dir_map.insert({dir->path.data(), dir});
     }
     return dir;
 }

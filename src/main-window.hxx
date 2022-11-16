@@ -99,7 +99,7 @@ void fm_main_window_add_new_tab(FMMainWindow* main_window, const char* folder_pa
 GtkWidget* fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_browser);
 
 void fm_main_window_update_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_browser,
-                                     const char* path);
+                                     std::string_view path);
 
 // void fm_main_window_preference(FMMainWindow* main_window);
 

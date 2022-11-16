@@ -2362,12 +2362,12 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, FMMainWindow* main_win
     if (fm_main_window_get_current_file_browser(main_window) == GTK_WIDGET(file_browser))
     {
         set_window_title(main_window, file_browser);
-        // gtk_entry_set_text( main_window->address_bar, file_browser->dir->disp_path );
-        // gtk_statusbar_push( GTK_STATUSBAR( main_window->status_bar ), 0, "" );
-        // fm_main_window_update_command_ui( main_window, file_browser );
+        // gtk_entry_set_text(main_window->address_bar, file_browser->dir->path);
+        // gtk_statusbar_push(GTK_STATUSBAR(main_window->status_bar), 0, "");
+        // fm_main_window_update_command_ui(main_window, file_browser);
     }
 
-    // fm_main_window_update_tab_label( main_window, file_browser, file_browser->dir->disp_path );
+    // fm_main_window_update_tab_label(main_window, file_browser, file_browser->dir->path);
 
     if (file_browser->inhibit_focus)
     {
@@ -2494,40 +2494,34 @@ fm_main_window_create_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_
 
 void
 fm_main_window_update_tab_label(FMMainWindow* main_window, PtkFileBrowser* file_browser,
-                                const char* path)
+                                std::string_view path)
 {
-    GtkWidget* label;
-    GtkContainer* hbox;
-    // GtkImage* icon;
-    GtkLabel* text;
-    GList* children;
-
-    label =
+    GtkWidget* label =
         gtk_notebook_get_tab_label(GTK_NOTEBOOK(main_window->notebook), GTK_WIDGET(file_browser));
-    if (label)
+    if (!label)
+        return;
+
+    GtkContainer* hbox = GTK_CONTAINER(gtk_bin_get_child(GTK_BIN(label)));
+    GList* children = gtk_container_get_children(hbox);
+    // icon = GTK_IMAGE(children->data);
+    GtkLabel* text = GTK_LABEL(children->next->data);
+
+    // TODO: Change the icon
+
+    const std::string name = Glib::path_get_basename(path.data());
+    gtk_label_set_text(text, name.c_str());
+    gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
+    if (name.size() < 30)
     {
-        hbox = GTK_CONTAINER(gtk_bin_get_child(GTK_BIN(label)));
-        children = gtk_container_get_children(hbox);
-        // icon = GTK_IMAGE(children->data);
-        text = GTK_LABEL(children->next->data);
-
-        // TODO: Change the icon
-
-        const std::string name = Glib::path_get_basename(path);
-        gtk_label_set_text(text, name.c_str());
-        gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
-        if (name.size() < 30)
-        {
-            gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_NONE);
-            gtk_label_set_width_chars(text, -1);
-        }
-        else
-        {
-            gtk_label_set_width_chars(text, 30);
-        }
-
-        g_list_free(children); // sfm 0.6.0 enabled
+        gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_NONE);
+        gtk_label_set_width_chars(text, -1);
     }
+    else
+    {
+        gtk_label_set_width_chars(text, 30);
+    }
+
+    g_list_free(children); // sfm 0.6.0 enabled
 }
 
 void
@@ -2817,9 +2811,9 @@ set_window_title(FMMainWindow* main_window, PtkFileBrowser* file_browser)
     if (!file_browser || !main_window)
         return;
 
-    if (file_browser->dir && file_browser->dir->disp_path)
+    if (file_browser->dir)
     {
-        disp_path = file_browser->dir->disp_path;
+        disp_path = file_browser->dir->path;
         disp_name = Glib::path_get_basename(disp_path);
     }
     else

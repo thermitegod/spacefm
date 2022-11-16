@@ -49,8 +49,7 @@ struct VFSDir
 {
     GObject parent;
 
-    char* path;
-    char* disp_path;
+    std::string path;
     std::vector<vfs::file_info> file_list;
 
     /*<private>*/

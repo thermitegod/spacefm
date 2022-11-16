@@ -181,7 +181,7 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
                         gtk_notebook_set_tab_label(notebook, GTK_WIDGET(file_browser), tab_label);
                         fm_main_window_update_tab_label(window,
                                                         file_browser,
-                                                        file_browser->dir->disp_path);
+                                                        file_browser->dir->path);
                     }
                 }
             }
