@@ -192,7 +192,7 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
     char* menu_label = nullptr;
     GdkPixbuf* icon_new = nullptr;
 
-    if (!set->lock && XSetCMD(xset_get_int_set(set, XSetVar::X)) == XSetCMD::APP)
+    if (!set->lock && XSetCMD(xset_get_int(set, XSetVar::X)) == XSetCMD::APP)
     {
         if (set->z && ztd::endswith(set->z, ".desktop"))
         {
@@ -660,7 +660,7 @@ xset_find_custom(std::string_view search)
     {
         if (!set->lock && ((set->menu_style == XSetMenu::SUBMENU && set->child) ||
                            (set->menu_style < XSetMenu::SUBMENU &&
-                            XSetCMD(xset_get_int_set(set, XSetVar::X)) <= XSetCMD::BOOKMARK)))
+                            XSetCMD(xset_get_int(set, XSetVar::X)) <= XSetCMD::BOOKMARK)))
         {
             // custom submenu or custom command - label or name matches?
             const std::string str = clean_label(set->menu_label, true, false);

@@ -486,7 +486,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
             }
 
             // valid custom type?
-            XSetCMD cmd_type = XSetCMD(xset_get_int_set(set, XSetVar::X));
+            XSetCMD cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
             if (cmd_type != XSetCMD::APP && cmd_type != XSetCMD::LINE &&
                 cmd_type != XSetCMD::SCRIPT)
                 continue;
@@ -644,8 +644,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
             switch (set->menu_style)
             {
                 case XSetMenu::CHECK:
-                    if (!(!set->lock &&
-                          (XSetCMD(xset_get_int_set(set, XSetVar::X)) > XSetCMD::SCRIPT)))
+                    if (!(!set->lock && (XSetCMD(xset_get_int(set, XSetVar::X)) > XSetCMD::SCRIPT)))
                     {
                         item = gtk_check_menu_item_new_with_mnemonic(set->menu_label);
                         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),
@@ -728,7 +727,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
             i32 icon_size = icon_w > icon_h ? icon_w : icon_h;
 
             GdkPixbuf* app_icon = nullptr;
-            XSetCMD cmd_type = XSetCMD(xset_get_int_set(set, XSetVar::X));
+            XSetCMD cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
             if (!set->lock && cmd_type == XSetCMD::APP)
             {
                 // Application
@@ -839,7 +838,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
     }
 
     // name
-    if (!set->plugin && !(!set->lock && XSetCMD(xset_get_int_set(set, XSetVar::X)) >
+    if (!set->plugin && !(!set->lock && XSetCMD(xset_get_int(set, XSetVar::X)) >
                                             XSetCMD::SCRIPT /*app or bookmark*/))
     {
         if (!(set->menu_label && set->menu_label[0]) ||
@@ -899,7 +898,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
     // command
     std::string command;
     bool app_no_sync = false;
-    XSetCMD cmd_type = XSetCMD(xset_get_int_set(set, XSetVar::X));
+    XSetCMD cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
     switch (cmd_type)
     {
         case XSetCMD::LINE:
@@ -1566,7 +1565,7 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, xset_t set)
                     job = XSetJob::PROP;
                     break;
                 case GDK_KEY_F4:
-                    if (XSetCMD(xset_get_int_set(set, XSetVar::X)) == XSetCMD::SCRIPT)
+                    if (XSetCMD(xset_get_int(set, XSetVar::X)) == XSetCMD::SCRIPT)
                         job = XSetJob::EDIT;
                     else
                         job = XSetJob::PROP_CMD;
@@ -1870,7 +1869,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     // Edit (script)
     if (!set->lock && set->menu_style < XSetMenu::SUBMENU && set->tool <= XSetTool::CUSTOM)
     {
-        if (XSetCMD(xset_get_int_set(set, XSetVar::X)) == XSetCMD::SCRIPT)
+        if (XSetCMD(xset_get_int(set, XSetVar::X)) == XSetCMD::SCRIPT)
         {
             char* script = xset_custom_get_script(set, false);
             if (script)
@@ -1903,7 +1902,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
                 free(script);
             }
         }
-        else if (XSetCMD(xset_get_int_set(set, XSetVar::X)) == XSetCMD::LINE)
+        else if (XSetCMD(xset_get_int(set, XSetVar::X)) == XSetCMD::LINE)
         {
             // edit command line
             newitem = xset_design_additem(design_menu, "_Edit Command", XSetJob::PROP_CMD, set);
@@ -2046,7 +2045,7 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
                     }
                     else
                     {
-                        if (XSetCMD(xset_get_int_set(set, XSetVar::X)) == XSetCMD::SCRIPT)
+                        if (XSetCMD(xset_get_int(set, XSetVar::X)) == XSetCMD::SCRIPT)
                             job = XSetJob::EDIT;
                         else
                             job = XSetJob::PROP_CMD;
@@ -2131,7 +2130,7 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
                     job = XSetJob::PROP;
                     break;
                 case GDK_KEY_F4:
-                    if (XSetCMD(xset_get_int_set(set, XSetVar::X)) == XSetCMD::SCRIPT)
+                    if (XSetCMD(xset_get_int(set, XSetVar::X)) == XSetCMD::SCRIPT)
                         job = XSetJob::EDIT;
                     else
                         job = XSetJob::PROP_CMD;
@@ -2166,7 +2165,7 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
                     }
                     else
                     {
-                        if (XSetCMD(xset_get_int_set(set, XSetVar::X)) == XSetCMD::SCRIPT)
+                        if (XSetCMD(xset_get_int(set, XSetVar::X)) == XSetCMD::SCRIPT)
                             job = XSetJob::EDIT;
                         else
                             job = XSetJob::PROP_CMD;
@@ -2608,7 +2607,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
                 case 0:
                     // no modifier
                     if (set->tool == XSetTool::CUSTOM &&
-                        XSetCMD(xset_get_int_set(set, XSetVar::X)) == XSetCMD::SCRIPT)
+                        XSetCMD(xset_get_int(set, XSetVar::X)) == XSetCMD::SCRIPT)
                         job = XSetJob::EDIT;
                     else
                         job = XSetJob::PROP_CMD;
@@ -2824,7 +2823,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     {
         case XSetMenu::STRING:
             // normal item
-            cmd_type = XSetCMD(xset_get_int_set(set, XSetVar::X));
+            cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
             if (set->tool > XSetTool::CUSTOM)
             {
                 // builtin tool item
@@ -2955,7 +2954,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             else if (!icon_name && set_child && set->tool == XSetTool::CUSTOM)
             {
                 // take the auto icon from the first item in the submenu
-                cmd_type = XSetCMD(xset_get_int_set(set_child, XSetVar::X));
+                cmd_type = XSetCMD(xset_get_int(set_child, XSetVar::X));
                 switch (cmd_type)
                 {
                     case XSetCMD::APP:

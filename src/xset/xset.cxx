@@ -1395,7 +1395,7 @@ xset_get_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode) noexcep
  */
 
 i32
-xset_get_int_set(xset_t set, XSetVar var) noexcept
+xset_get_int(xset_t set, XSetVar var) noexcept
 {
     if (!set)
         return -1;
@@ -1457,14 +1457,14 @@ i32
 xset_get_int(XSetName name, XSetVar var) noexcept
 {
     const xset_t set = xset_get(name);
-    return xset_get_int_set(set, var);
+    return xset_get_int(set, var);
 }
 
 i32
 xset_get_int(std::string_view name, XSetVar var) noexcept
 {
     const xset_t set = xset_get(name);
-    return xset_get_int_set(set, var);
+    return xset_get_int(set, var);
 }
 
 i32

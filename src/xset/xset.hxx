@@ -448,8 +448,7 @@ xset_t xset_set_ob2(xset_t set, const char* ob2, void* ob2_data) noexcept;
 
 // Int
 
-i32 xset_get_int_set(xset_t set, XSetVar var) noexcept;
-
+i32 xset_get_int(xset_t set, XSetVar var) noexcept;
 i32 xset_get_int(XSetName name, XSetVar var) noexcept;
 i32 xset_get_int(std::string_view name, XSetVar var) noexcept;
 i32 xset_get_int_panel(panel_t panel, std::string_view name, XSetVar var) noexcept;

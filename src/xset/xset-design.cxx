@@ -100,7 +100,7 @@ xset_design_job_set_edit(xset_t set)
 {
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
-    XSetCMD cmd_type = XSetCMD(xset_get_int_set(set, XSetVar::X));
+    XSetCMD cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
     if (cmd_type == XSetCMD::SCRIPT)
     {
         // script
@@ -117,7 +117,7 @@ xset_design_job_set_edit_root(xset_t set)
 {
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
-    XSetCMD cmd_type = XSetCMD(xset_get_int_set(set, XSetVar::X));
+    XSetCMD cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
     if (cmd_type == XSetCMD::SCRIPT)
     {
         // script
@@ -134,7 +134,7 @@ xset_design_job_set_copyname(xset_t set)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
-    XSetCMD cmd_type = XSetCMD(xset_get_int_set(set, XSetVar::X));
+    XSetCMD cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
     if (cmd_type == XSetCMD::LINE)
     {
         // line
@@ -574,7 +574,7 @@ xset_design_job_set_remove(xset_t set)
         return false;
     }
 
-    XSetCMD cmd_type = XSetCMD(xset_get_int_set(set, XSetVar::X));
+    XSetCMD cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
 
     if (set->menu_label)
     {
