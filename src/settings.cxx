@@ -292,8 +292,8 @@ load_settings()
             vfs_mime_type_unref(mime_type);
             if (app_name)
             {
-                vfs::desktop desktop(app_name);
-                xset_set(XSetName::EDITOR, XSetVar::S, desktop.get_exec());
+                vfs::desktop desktop = vfs_get_desktop(app_name);
+                xset_set(XSetName::EDITOR, XSetVar::S, desktop->get_exec());
             }
         }
     }
@@ -927,8 +927,8 @@ xset_custom_activate(GtkWidget* item, xset_t set)
             }
             else if (ztd::endswith(set->z, ".desktop"))
             {
-                vfs::desktop desktop(set->z);
-                if (!desktop.get_exec().empty())
+                vfs::desktop desktop = vfs_get_desktop(set->z);
+                if (!desktop->get_exec().empty())
                 {
                     // get file list
                     std::vector<vfs::file_info> sel_files;
@@ -953,7 +953,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
                     // open in app
                     try
                     {
-                        desktop.open_files(cwd, open_files);
+                        desktop->open_files(cwd, open_files);
                     }
                     catch (const VFSAppDesktopException& e)
                     {

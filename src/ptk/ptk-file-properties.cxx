@@ -333,17 +333,17 @@ on_combo_change(GtkComboBox* combo, void* user_data)
 
                 if (!exist) /* It did not exist */
                 {
-                    vfs::desktop desktop(action);
+                    vfs::desktop desktop = vfs_get_desktop(action);
 
                     GdkPixbuf* icon;
-                    icon = desktop.get_icon(20);
+                    icon = desktop->get_icon(20);
                     gtk_list_store_insert_with_values(GTK_LIST_STORE(model),
                                                       &it,
                                                       0,
                                                       0,
                                                       icon,
                                                       1,
-                                                      desktop.get_disp_name().data(),
+                                                      desktop->get_disp_name().data(),
                                                       2,
                                                       action,
                                                       -1);
@@ -505,16 +505,16 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
         {
             for (std::string_view action : actions)
             {
-                vfs::desktop desktop(action);
+                vfs::desktop desktop = vfs_get_desktop(action);
                 GdkPixbuf* icon;
                 gtk_list_store_append(model, &it);
-                icon = desktop.get_icon(20);
+                icon = desktop->get_icon(20);
                 gtk_list_store_set(model,
                                    &it,
                                    0,
                                    icon,
                                    1,
-                                   desktop.get_disp_name().data(),
+                                   desktop->get_disp_name().data(),
                                    2,
                                    action.data(),
                                    -1);

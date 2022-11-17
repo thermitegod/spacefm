@@ -114,8 +114,8 @@ add_list_item(GtkListStore* list, std::string_view path)
                                -1);
             if (file)
             {
-                vfs::desktop desktop(path);
-                if (ztd::same(file, desktop.get_name()))
+                vfs::desktop desktop = vfs_get_desktop(path);
+                if (ztd::same(file, desktop->get_name()))
                 {
                     // already exists
                     free(file);
@@ -126,25 +126,25 @@ add_list_item(GtkListStore* list, std::string_view path)
         } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(list), &it));
     }
 
-    vfs::desktop desktop(path);
+    vfs::desktop desktop = vfs_get_desktop(path);
 
     // tooltip
     const std::string tooltip = fmt::format("{}\nName={}\nExec={}{}",
-                                            desktop.get_full_path(),
-                                            desktop.get_disp_name(),
-                                            desktop.get_exec(),
-                                            desktop.use_terminal() ? "\nTerminal=true" : "");
+                                            desktop->get_full_path(),
+                                            desktop->get_disp_name(),
+                                            desktop->get_exec(),
+                                            desktop->use_terminal() ? "\nTerminal=true" : "");
 
-    GdkPixbuf* icon = desktop.get_icon(20);
+    GdkPixbuf* icon = desktop->get_icon(20);
     gtk_list_store_append(list, &it);
     gtk_list_store_set(list,
                        &it,
                        PTKAppChooser::COL_APP_ICON,
                        icon,
                        PTKAppChooser::COL_APP_NAME,
-                       desktop.get_disp_name().data(),
+                       desktop->get_disp_name().data(),
                        PTKAppChooser::COL_DESKTOP_FILE,
-                       desktop.get_name().data(),
+                       desktop->get_name().data(),
                        PTKAppChooser::COL_FULL_PATH,
                        tooltip.data(),
                        -1);

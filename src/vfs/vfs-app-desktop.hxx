@@ -82,7 +82,7 @@ class VFSAppDesktop
 namespace vfs
 {
     // using desktop = std::shared_ptr<VFSAppDesktop>
-    using desktop = VFSAppDesktop;
+    using desktop = std::shared_ptr<VFSAppDesktop>;
 } // namespace vfs
 
 class VFSAppDesktopException : virtual public std::exception
@@ -105,3 +105,6 @@ class VFSAppDesktopException : virtual public std::exception
         return error_message.data();
     }
 };
+
+// get cached VFSAppDesktop
+vfs::desktop vfs_get_desktop(std::string_view desktop_file);

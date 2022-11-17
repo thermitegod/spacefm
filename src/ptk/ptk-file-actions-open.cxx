@@ -266,15 +266,15 @@ open_files_with_app(ParentInfo* parent, GList* files, std::string_view app_deskt
     if (app_desktop.empty())
         return false;
 
-    vfs::desktop desktop(check_desktop_name(app_desktop));
+    vfs::desktop desktop = vfs_get_desktop(check_desktop_name(app_desktop));
 
-    LOG_INFO("EXEC({})={}", desktop.get_full_path(), desktop.get_exec());
+    LOG_INFO("EXEC({})={}", desktop->get_full_path(), desktop->get_exec());
 
     const std::vector<std::string> open_files = glist_t_char_to_vector_t_string(files);
 
     try
     {
-        desktop.open_files(parent->cwd, open_files);
+        desktop->open_files(parent->cwd, open_files);
     }
     catch (const VFSAppDesktopException& e)
     {

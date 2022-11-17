@@ -21,6 +21,8 @@
 #include <array>
 #include <vector>
 
+#include <map>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>
@@ -38,9 +40,28 @@
 
 #include "utils.hxx"
 
+std::map<std::string, vfs::desktop> desktops_map;
+
+vfs::desktop
+vfs_get_desktop(std::string_view desktop_file)
+{
+    if (desktops_map.count(desktop_file.data()) == 1)
+    {
+        // LOG_INFO("cached vfs_get_desktop={}", desktop_file);
+        return desktops_map.at(desktop_file.data());
+    }
+    // LOG_INFO("new vfs_get_desktop={}", desktop_file);
+
+    vfs::desktop desktop = std::make_shared<VFSAppDesktop>(desktop_file);
+
+    desktops_map.insert({desktop_file.data(), desktop});
+
+    return desktop;
+}
+
 VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
 {
-    // LOG_INFO("VFSAppDesktop constructor");
+    // LOG_INFO("VFSAppDesktop constructor = {}", open_file_name);
 
     bool load;
     const auto kf = Glib::KeyFile::create();

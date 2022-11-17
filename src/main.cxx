@@ -520,13 +520,13 @@ open_file(std::string_view path)
         }
     }
 
-    vfs::desktop desktop(app_name);
+    vfs::desktop desktop = vfs_get_desktop(app_name);
 
     const std::vector<std::string> open_files{path.data()};
 
     try
     {
-        desktop.open_files(vfs_current_dir(), open_files);
+        desktop->open_files(vfs_current_dir(), open_files);
     }
     catch (const VFSAppDesktopException& e)
     {

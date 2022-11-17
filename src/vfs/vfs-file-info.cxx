@@ -661,13 +661,13 @@ VFSFileInfo::load_special_info(std::string_view file_path) noexcept
     const std::string file_dir = Glib::path_get_dirname(file_path.data());
 
     this->flags = (VFSFileInfoFlag)(this->flags | VFSFileInfoFlag::DESKTOP_ENTRY);
-    vfs::desktop desktop(file_path);
+    vfs::desktop desktop = vfs_get_desktop(file_path);
 
     // MOD  display real filenames of .desktop files not in desktop directory
     if (ztd::same(file_dir, vfs_user_desktop_dir()))
-        this->set_disp_name(desktop.get_disp_name());
+        this->set_disp_name(desktop->get_disp_name());
 
-    if (desktop.get_icon_name().empty())
+    if (desktop->get_icon_name().empty())
         return;
 
     GdkPixbuf* icon;
@@ -675,13 +675,13 @@ VFSFileInfo::load_special_info(std::string_view file_path) noexcept
     const i32 small_size = vfs_mime_type_get_icon_size_small();
     if (!this->big_thumbnail)
     {
-        icon = desktop.get_icon(big_size);
+        icon = desktop->get_icon(big_size);
         if (icon)
             this->big_thumbnail = icon;
     }
     if (!this->small_thumbnail)
     {
-        icon = desktop.get_icon(small_size);
+        icon = desktop->get_icon(small_size);
         if (icon)
             this->small_thumbnail = icon;
     }
