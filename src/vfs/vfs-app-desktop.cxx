@@ -196,7 +196,8 @@ VFSAppDesktop::open_multiple_files() const noexcept
 }
 
 const std::vector<std::string>
-VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list) const noexcept
+VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list,
+                                bool quote_file_list) const noexcept
 {
     // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
 
@@ -214,7 +215,14 @@ VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list) const
         argv.pop_back(); // remove open_files_key
         for (std::string_view file : file_list)
         {
-            argv.emplace_back(file.data());
+            if (quote_file_list)
+            {
+                argv.emplace_back(bash_quote(file));
+            }
+            else
+            {
+                argv.emplace_back(file.data());
+            }
         }
 
         add_files = true;
@@ -230,7 +238,14 @@ VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list) const
         argv.pop_back(); // remove open_file_key
         for (std::string_view file : file_list)
         {
-            argv.emplace_back(file.data());
+            if (quote_file_list)
+            {
+                argv.emplace_back(bash_quote(file));
+            }
+            else
+            {
+                argv.emplace_back(file.data());
+            }
         }
 
         add_files = true;
@@ -276,95 +291,27 @@ VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list) const
     {
         for (std::string_view file : file_list)
         {
-            argv.emplace_back(file.data());
+            if (quote_file_list)
+            {
+                argv.emplace_back(bash_quote(file));
+            }
+            else
+            {
+                argv.emplace_back(file.data());
+            }
         }
     }
 
     return argv;
 }
 
-const std::string
-VFSAppDesktop::app_exec_to_command_line(const std::vector<std::string>& file_list) const noexcept
-{
-    // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
-
-    std::string cmd = this->exec;
-
-    bool add_files = false;
-
-    static constexpr std::array<std::string_view, 2> open_files_keys{"%F", "%U"};
-    if (ztd::contains(cmd, open_files_keys))
-    {
-        std::string tmp;
-        for (std::string_view file : file_list)
-        {
-            tmp.append(bash_quote(file));
-            tmp.append(" ");
-        }
-        if (ztd::contains(cmd, open_files_keys[0]))
-            cmd = ztd::replace(cmd, open_files_keys[0], tmp);
-        if (ztd::contains(cmd, open_files_keys[1]))
-            cmd = ztd::replace(cmd, open_files_keys[1], tmp);
-
-        add_files = true;
-    }
-
-    static constexpr std::array<std::string_view, 2> open_file_keys{"%f", "%u"};
-    if (ztd::contains(cmd, open_file_keys))
-    {
-        std::string tmp;
-        for (std::string_view file : file_list)
-        {
-            tmp.append(bash_quote(file));
-        }
-        if (ztd::contains(cmd, open_file_keys[0]))
-            cmd = ztd::replace(cmd, open_file_keys[0], tmp);
-        if (ztd::contains(cmd, open_file_keys[1]))
-            cmd = ztd::replace(cmd, open_file_keys[1], tmp);
-
-        add_files = true;
-    }
-
-    if (ztd::contains(cmd, "%c"))
-    {
-        cmd = ztd::replace(cmd, "%c", this->get_disp_name());
-    }
-
-    if (ztd::contains(cmd, "%k"))
-    {
-        cmd = ztd::replace(cmd, "%k", this->get_full_path());
-    }
-
-    if (ztd::contains(cmd, "%i"))
-    {
-        const std::string icon = fmt::format("--icon {}", this->get_icon_name());
-        cmd = ztd::replace(cmd, "%i", icon);
-    }
-
-    if (!add_files)
-    {
-        std::string tmp;
-
-        cmd.append(" ");
-        for (std::string_view file : file_list)
-        {
-            tmp.append(bash_quote(file));
-            tmp.append(" ");
-        }
-        cmd.append(tmp);
-    }
-
-    return cmd;
-}
-
 void
-VFSAppDesktop::exec_in_terminal(std::string_view app_name, std::string_view cwd,
-                                std::string_view cmd) const noexcept
+VFSAppDesktop::exec_in_terminal(std::string_view cwd, std::string_view command) const noexcept
 {
     // task
-    PtkFileTask* ptask = ptk_file_exec_new(app_name, cwd, nullptr, nullptr);
+    PtkFileTask* ptask = ptk_file_exec_new(this->get_disp_name(), cwd, nullptr, nullptr);
 
-    ptask->task->exec_command = cmd.data();
+    ptask->task->exec_command = command;
 
     ptask->task->exec_terminal = true;
     // ptask->task->exec_keep_terminal = true;  // for test only
@@ -404,23 +351,17 @@ void
 VFSAppDesktop::exec_desktop(std::string_view working_dir,
                             const std::vector<std::string>& file_paths) const noexcept
 {
-    // LOG_DEBUG("Execute: {}", command);
+    const std::vector<std::string> argv = this->app_exec_to_argv(file_paths, this->use_terminal());
+    if (argv.empty())
+        return;
 
     if (this->use_terminal())
     {
-        const std::string command = this->app_exec_to_command_line(file_paths);
-        if (command.empty())
-            return;
-
-        const std::string app_name = this->get_disp_name();
-        exec_in_terminal(app_name, !this->path.empty() ? this->path : working_dir, command);
+        const std::string command = ztd::join(argv, " ");
+        this->exec_in_terminal(!this->path.empty() ? this->path : working_dir, command);
     }
     else
     {
-        const std::vector<std::string> argv = this->app_exec_to_argv(file_paths);
-        if (argv.empty())
-            return;
-
         Glib::spawn_async_with_pipes(!this->path.empty() ? this->path : working_dir.data(),
                                      argv,
                                      Glib::SpawnFlags::SEARCH_PATH |

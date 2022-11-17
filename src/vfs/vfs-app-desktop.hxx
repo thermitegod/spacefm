@@ -50,12 +50,9 @@ class VFSAppDesktop
     bool open_files(std::string_view working_dir, const std::vector<std::string>& file_paths) const;
 
   private:
-    const std::string
-    app_exec_to_command_line(const std::vector<std::string>& file_list) const noexcept;
-    const std::vector<std::string>
-    app_exec_to_argv(const std::vector<std::string>& file_list) const noexcept;
-    void exec_in_terminal(std::string_view app_name, std::string_view cwd,
-                          std::string_view cmd) const noexcept;
+    const std::vector<std::string> app_exec_to_argv(const std::vector<std::string>& file_list,
+                                                    bool quote_file_list) const noexcept;
+    void exec_in_terminal(std::string_view cwd, std::string_view cmd) const noexcept;
     void exec_desktop(std::string_view working_dir,
                       const std::vector<std::string>& file_paths) const noexcept;
 
