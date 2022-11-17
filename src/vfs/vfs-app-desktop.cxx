@@ -43,7 +43,6 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
     // LOG_INFO("VFSAppDesktop constructor");
 
     bool load;
-
     const auto kf = Glib::KeyFile::create();
 
     if (Glib::path_is_absolute(open_file_name.data()))
@@ -59,67 +58,202 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
         load = kf->load_from_data_dirs(relative_path, this->full_path, Glib::KeyFile::Flags::NONE);
     }
 
-    if (load)
+    if (!load)
     {
-        static const std::string desktop_entry = "Desktop Entry";
-        Glib::ustring g_disp_name, g_exec, g_icon_name, g_path;
+        LOG_WARN("Failed to load desktop file {}", open_file_name);
+        this->exec = this->file_name;
+        return;
+    }
 
-        try
-        {
-            g_disp_name = kf->get_string(desktop_entry, "Name");
-            if (!g_disp_name.empty())
-                this->disp_name = g_disp_name;
-        }
-        catch (Glib::KeyFileError)
-        {
-            this->disp_name = "";
-        }
+    static const std::string desktop_entry = "Desktop Entry";
 
-        try
-        {
-            g_exec = kf->get_string(desktop_entry, "Exec");
-            if (!g_exec.empty())
-                this->exec = g_exec;
-        }
-        catch (Glib::KeyFileError)
-        {
-            this->exec = "";
-        }
+    // Keys not loaded from .desktop files
+    // - Hidden
+    // - OnlyShowIn
+    // - NotShowIn
+    // - DBusActivatable
+    // - URL
+    // - PrefersNonDefaultGPU
+    // - SingleMainWindow
 
-        try
+    try
+    {
+        const Glib::ustring g_type = kf->get_string(desktop_entry, "Type");
+        if (!g_type.empty())
         {
-            g_icon_name = kf->get_string(desktop_entry, "Icon");
-            if (!g_icon_name.empty())
-                this->icon_name = g_icon_name;
-        }
-        catch (Glib::KeyFileError)
-        {
-            this->icon_name = "";
-        }
-
-        try
-        {
-            g_path = kf->get_string(desktop_entry, "Path");
-            if (!g_path.empty())
-                this->path = g_path;
-        }
-        catch (Glib::KeyFileError)
-        {
-            this->path = "";
-        }
-
-        try
-        {
-            this->terminal = kf->get_boolean(desktop_entry, "Terminal");
-        }
-        catch (Glib::KeyFileError)
-        {
-            this->terminal = false;
+            this->type = g_type;
         }
     }
-    else
+    catch (Glib::KeyFileError)
+    { /* Desktop Missing Key, Use Default init */
+    }
+
+    try
     {
-        this->exec = this->file_name;
+        const Glib::ustring g_name = kf->get_string(desktop_entry, "Name");
+        if (!g_name.empty())
+        {
+            this->name = g_name;
+        }
+    }
+    catch (Glib::KeyFileError)
+    { /* Desktop Missing Key, Use Default init */
+    }
+
+    try
+    {
+        const Glib::ustring g_generic_name = kf->get_string(desktop_entry, "GenericName");
+        if (!g_generic_name.empty())
+        {
+            this->generic_name = g_generic_name;
+        }
+    }
+    catch (Glib::KeyFileError)
+    { /* Desktop Missing Key, Use Default init */
+    }
+
+    try
+    {
+        this->no_display = kf->get_boolean(desktop_entry, "NoDisplay");
+    }
+    catch (Glib::KeyFileError)
+    { /* Desktop Missing Key, Use Default init */
+    }
+
+    try
+    {
+        const Glib::ustring g_comment = kf->get_string(desktop_entry, "Comment");
+        if (!g_comment.empty())
+        {
+            this->comment = g_comment;
+        }
+    }
+    catch (Glib::KeyFileError)
+    { /* Desktop Missing Key, Use Default init */
+    }
+
+    try
+    {
+        const Glib::ustring g_icon = kf->get_string(desktop_entry, "Icon");
+        if (!g_icon.empty())
+        {
+            this->icon = g_icon;
+        }
+    }
+    catch (Glib::KeyFileError)
+    { /* Desktop Missing Key, Use Default init */
+    }
+
+    try
+    {
+        const Glib::ustring g_try_exec = kf->get_string(desktop_entry, "TryExec");
+        if (!g_try_exec.empty())
+        {
+            this->try_exec = g_try_exec;
+        }
+    }
+    catch (Glib::KeyFileError)
+    { /* Desktop Missing Key, Use Default init */
+    }
+
+    try
+    {
+        const Glib::ustring g_exec = kf->get_string(desktop_entry, "Exec");
+        if (!g_exec.empty())
+        {
+            this->exec = g_exec;
+        }
+    }
+    catch (Glib::KeyFileError)
+    { /* Desktop Missing Key, Use Default init */
+    }
+
+    try
+    {
+        const Glib::ustring g_path = kf->get_string(desktop_entry, "Path");
+        if (!g_path.empty())
+        {
+            this->path = g_path;
+        }
+    }
+    catch (Glib::KeyFileError)
+    { /* Desktop Missing Key, Use Default init */
+    }
+
+    try
+    {
+        this->terminal = kf->get_boolean(desktop_entry, "Terminal");
+    }
+    catch (Glib::KeyFileError)
+    { /* Desktop Missing Key, Use Default init */
+    }
+
+    try
+    {
+        const Glib::ustring g_actions = kf->get_string(desktop_entry, "Actions");
+        if (!g_actions.empty())
+        {
+            this->actions = g_actions;
+        }
+    }
+    catch (Glib::KeyFileError)
+    { /* Desktop Missing Key, Use Default init */
+    }
+
+    try
+    {
+        const Glib::ustring g_mime_type = kf->get_string(desktop_entry, "MimeType");
+        if (!g_mime_type.empty())
+        {
+            this->mime_type = g_mime_type; // TODO vector
+        }
+    }
+    catch (Glib::KeyFileError)
+    { /* Desktop Missing Key, Use Default init */
+    }
+
+    try
+    {
+        const Glib::ustring g_categories = kf->get_string(desktop_entry, "Categories");
+        if (!g_categories.empty())
+        {
+            this->categories = g_categories;
+        }
+    }
+    catch (Glib::KeyFileError)
+    { /* Desktop Missing Key, Use Default init */
+    }
+
+    try
+    {
+        const Glib::ustring g_keywords = kf->get_string(desktop_entry, "Keywords");
+        if (!g_keywords.empty())
+        {
+            this->keywords = g_keywords;
+        }
+    }
+    catch (Glib::KeyFileError)
+    { /* Desktop Missing Key, Use Default init */
+    }
+
+    try
+    {
+        this->startup_notify = kf->get_boolean(desktop_entry, "StartupNotify");
+    }
+    catch (Glib::KeyFileError)
+    { /* Desktop Missing Key, Use Default init */
+    }
+
+    try
+    {
+        const Glib::ustring g_startup_wm_class = kf->get_string(desktop_entry, "StartupWMClass");
+        if (!g_startup_wm_class.empty())
+        {
+            this->startup_wm_class = g_startup_wm_class;
+        }
+    }
+    catch (Glib::KeyFileError)
+    { /* Desktop Missing Key, Use Default init */
     }
 }
 
@@ -132,8 +266,8 @@ VFSAppDesktop::get_name() const noexcept
 const std::string&
 VFSAppDesktop::get_disp_name() const noexcept
 {
-    if (!this->disp_name.empty())
-        return this->disp_name;
+    if (!this->name.empty())
+        return this->name;
     return this->file_name;
 }
 
@@ -158,28 +292,28 @@ VFSAppDesktop::get_full_path() const noexcept
 const std::string&
 VFSAppDesktop::get_icon_name() const noexcept
 {
-    return this->icon_name;
+    return this->icon;
 }
 
 GdkPixbuf*
 VFSAppDesktop::get_icon(i32 size) const noexcept
 {
-    GdkPixbuf* icon = nullptr;
+    GdkPixbuf* desktop_icon = nullptr;
 
-    if (!this->icon_name.empty())
+    if (!this->icon.empty())
     {
-        icon = vfs_load_icon(this->icon_name, size);
+        desktop_icon = vfs_load_icon(this->icon, size);
     }
 
     // fallback to generic icon
-    if (!icon)
+    if (!desktop_icon)
     {
-        icon = vfs_load_icon("application-x-executable", size);
+        desktop_icon = vfs_load_icon("application-x-executable", size);
         // fallback to generic icon
-        if (!icon)
-            icon = vfs_load_icon("gnome-mime-application-x-executable", size);
+        if (!desktop_icon)
+            desktop_icon = vfs_load_icon("gnome-mime-application-x-executable", size);
     }
-    return icon;
+    return desktop_icon;
 }
 
 bool
