@@ -195,9 +195,84 @@ VFSAppDesktop::open_multiple_files() const noexcept
     return false;
 }
 
+const std::vector<std::string>
+VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list) const noexcept
+{
+    // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
+
+    std::vector<std::string> argv{ztd::split(this->exec, " ")};
+
+    bool add_files = false;
+
+    static constexpr std::array<std::string_view, 2> open_files_keys{"%F", "%U"};
+    if (ztd::contains(this->exec, open_files_keys))
+    {
+        // TODO
+        // %F and %U should always be at the end
+        // probably need a better way to do this
+
+        argv.pop_back(); // remove open_files_key
+        for (std::string_view file : file_list)
+        {
+            argv.emplace_back(file.data());
+        }
+
+        add_files = true;
+    }
+
+    static constexpr std::array<std::string_view, 2> open_file_keys{"%f", "%u"};
+    if (ztd::contains(this->exec, open_file_keys))
+    {
+        // TODO
+        // %f and %u should always be at the end
+        // probably need a better way to do this
+
+        argv.pop_back(); // remove open_file_key
+        for (std::string_view file : file_list)
+        {
+            argv.emplace_back(file.data());
+        }
+
+        add_files = true;
+    }
+
+    if (ztd::contains(this->exec, "%c"))
+    {
+        for (std::string& arg : argv)
+        {
+            if (!ztd::contains(arg, "%c"))
+                continue;
+
+            arg = ztd::replace(arg, "%c", this->get_disp_name());
+            break;
+        }
+    }
+
+    if (ztd::contains(this->exec, "%i"))
+    {
+        for (std::string& arg : argv)
+        {
+            if (!ztd::contains(arg, "%i"))
+                continue;
+
+            arg = ztd::replace(arg, "%i", fmt::format("--icon {}", this->get_icon_name()));
+            break;
+        }
+    }
+
+    if (!add_files)
+    {
+        for (std::string_view file : file_list)
+        {
+            argv.emplace_back(file.data());
+        }
+    }
+
+    return argv;
+}
+
 const std::string
-VFSAppDesktop::translate_app_exec_to_command_line(
-    const std::vector<std::string>& file_list) const noexcept
+VFSAppDesktop::app_exec_to_command_line(const std::vector<std::string>& file_list) const noexcept
 {
     // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
 
@@ -240,12 +315,12 @@ VFSAppDesktop::translate_app_exec_to_command_line(
 
     if (ztd::contains(cmd, "%c"))
     {
-        cmd = ztd::replace(cmd, "%c", get_disp_name());
+        cmd = ztd::replace(cmd, "%c", this->get_disp_name());
     }
 
     if (ztd::contains(cmd, "%i"))
     {
-        const std::string icon = fmt::format("--icon {}", get_icon_name());
+        const std::string icon = fmt::format("--icon {}", this->get_icon_name());
         cmd = ztd::replace(cmd, "%i", icon);
     }
 
@@ -292,9 +367,9 @@ VFSAppDesktop::open_files(std::string_view working_dir,
         throw VFSAppDesktopException(msg);
     }
 
-    if (open_multiple_files())
+    if (this->open_multiple_files())
     {
-        exec_desktop(working_dir, file_paths);
+        this->exec_desktop(working_dir, file_paths);
     }
     else
     {
@@ -302,7 +377,7 @@ VFSAppDesktop::open_files(std::string_view working_dir,
         for (std::string_view open_file : file_paths)
         {
             // const std::vector<std::string> open_files{open_file};
-            exec_desktop(working_dir, {open_file.data()});
+            this->exec_desktop(working_dir, {open_file.data()});
         }
     }
     return true;
@@ -312,19 +387,32 @@ void
 VFSAppDesktop::exec_desktop(std::string_view working_dir,
                             const std::vector<std::string>& file_paths) const noexcept
 {
-    const std::string cmd = this->translate_app_exec_to_command_line(file_paths);
-    if (cmd.empty())
-        return;
+    // LOG_DEBUG("Execute: {}", command);
 
-    // LOG_DEBUG("Execute: {}", cmd);
-
-    if (use_terminal())
+    if (this->use_terminal())
     {
+        const std::string command = this->app_exec_to_command_line(file_paths);
+        if (command.empty())
+            return;
+
         const std::string app_name = this->get_disp_name();
-        exec_in_terminal(app_name, !this->path.empty() ? this->path : working_dir, cmd);
+        exec_in_terminal(app_name, !this->path.empty() ? this->path : working_dir, command);
     }
     else
     {
-        Glib::spawn_command_line_async(cmd);
+        const std::vector<std::string> argv = this->app_exec_to_argv(file_paths);
+        if (argv.empty())
+            return;
+
+        Glib::spawn_async_with_pipes(!this->path.empty() ? this->path : working_dir.data(),
+                                     argv,
+                                     Glib::SpawnFlags::SEARCH_PATH |
+                                         Glib::SpawnFlags::STDOUT_TO_DEV_NULL |
+                                         Glib::SpawnFlags::STDERR_TO_DEV_NULL,
+                                     Glib::SlotSpawnChildSetup(),
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr);
     }
 }
