@@ -248,6 +248,18 @@ VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list) const
         }
     }
 
+    if (ztd::contains(this->exec, "%k"))
+    {
+        for (std::string& arg : argv)
+        {
+            if (!ztd::contains(arg, "%k"))
+                continue;
+
+            arg = ztd::replace(arg, "%k", this->get_full_path());
+            break;
+        }
+    }
+
     if (ztd::contains(this->exec, "%i"))
     {
         for (std::string& arg : argv)
@@ -316,6 +328,11 @@ VFSAppDesktop::app_exec_to_command_line(const std::vector<std::string>& file_lis
     if (ztd::contains(cmd, "%c"))
     {
         cmd = ztd::replace(cmd, "%c", this->get_disp_name());
+    }
+
+    if (ztd::contains(cmd, "%k"))
+    {
+        cmd = ztd::replace(cmd, "%k", this->get_full_path());
     }
 
     if (ztd::contains(cmd, "%i"))
