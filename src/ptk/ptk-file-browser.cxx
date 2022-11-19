@@ -1027,7 +1027,7 @@ ptk_file_browser_finalize(GObject* obj)
     if (file_browser->dir)
     {
         g_signal_handlers_disconnect_matched(file_browser->dir,
-                                             G_SIGNAL_MATCH_DATA,
+                                             GSignalMatchType::G_SIGNAL_MATCH_DATA,
                                              0,
                                              0,
                                              nullptr,
@@ -1044,7 +1044,7 @@ ptk_file_browser_finalize(GObject* obj)
     if (file_browser->file_list)
     {
         g_signal_handlers_disconnect_matched(file_browser->file_list,
-                                             G_SIGNAL_MATCH_DATA,
+                                             GSignalMatchType::G_SIGNAL_MATCH_DATA,
                                              0,
                                              0,
                                              nullptr,
@@ -1774,7 +1774,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, std::string_view folder_pat
     if (file_browser->dir)
     {
         g_signal_handlers_disconnect_matched(file_browser->dir,
-                                             G_SIGNAL_MATCH_DATA,
+                                             GSignalMatchType::G_SIGNAL_MATCH_DATA,
                                              0,
                                              0,
                                              nullptr,
@@ -2275,7 +2275,7 @@ ptk_file_browser_invert_selection(GtkWidget* item, PtkFileBrowser* file_browser)
         case PtkFBViewMode::PTK_FB_COMPACT_VIEW:
             model = exo_icon_view_get_model(EXO_ICON_VIEW(file_browser->folder_view));
             g_signal_handlers_block_matched(file_browser->folder_view,
-                                            G_SIGNAL_MATCH_FUNC,
+                                            GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                             0,
                                             0,
                                             nullptr,
@@ -2283,7 +2283,7 @@ ptk_file_browser_invert_selection(GtkWidget* item, PtkFileBrowser* file_browser)
                                             nullptr);
             gtk_tree_model_foreach(model, (GtkTreeModelForeachFunc)invert_selection, file_browser);
             g_signal_handlers_unblock_matched(file_browser->folder_view,
-                                              G_SIGNAL_MATCH_FUNC,
+                                              GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                               0,
                                               0,
                                               nullptr,
@@ -2294,7 +2294,7 @@ ptk_file_browser_invert_selection(GtkWidget* item, PtkFileBrowser* file_browser)
         case PtkFBViewMode::PTK_FB_LIST_VIEW:
             tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
             g_signal_handlers_block_matched(tree_sel,
-                                            G_SIGNAL_MATCH_FUNC,
+                                            GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                             0,
                                             0,
                                             nullptr,
@@ -2303,7 +2303,7 @@ ptk_file_browser_invert_selection(GtkWidget* item, PtkFileBrowser* file_browser)
             model = gtk_tree_view_get_model(GTK_TREE_VIEW(file_browser->folder_view));
             gtk_tree_model_foreach(model, (GtkTreeModelForeachFunc)invert_selection, file_browser);
             g_signal_handlers_unblock_matched(tree_sel,
-                                              G_SIGNAL_MATCH_FUNC,
+                                              GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                               0,
                                               0,
                                               nullptr,
@@ -2368,7 +2368,7 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
         case PtkFBViewMode::PTK_FB_COMPACT_VIEW:
             model = exo_icon_view_get_model(EXO_ICON_VIEW(file_browser->folder_view));
             g_signal_handlers_block_matched(file_browser->folder_view,
-                                            G_SIGNAL_MATCH_FUNC,
+                                            GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                             0,
                                             0,
                                             nullptr,
@@ -2378,7 +2378,7 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
         case PtkFBViewMode::PTK_FB_LIST_VIEW:
             tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
             g_signal_handlers_block_matched(tree_sel,
-                                            G_SIGNAL_MATCH_FUNC,
+                                            GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                             0,
                                             0,
                                             nullptr,
@@ -2482,7 +2482,7 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
         case PtkFBViewMode::PTK_FB_ICON_VIEW:
         case PtkFBViewMode::PTK_FB_COMPACT_VIEW:
             g_signal_handlers_unblock_matched(file_browser->folder_view,
-                                              G_SIGNAL_MATCH_FUNC,
+                                              GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                               0,
                                               0,
                                               nullptr,
@@ -2492,7 +2492,7 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
             break;
         case PtkFBViewMode::PTK_FB_LIST_VIEW:
             g_signal_handlers_unblock_matched(tree_sel,
-                                              G_SIGNAL_MATCH_FUNC,
+                                              GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                               0,
                                               0,
                                               nullptr,
@@ -2531,7 +2531,7 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
         case PtkFBViewMode::PTK_FB_COMPACT_VIEW:
             model = exo_icon_view_get_model(EXO_ICON_VIEW(file_browser->folder_view));
             g_signal_handlers_block_matched(file_browser->folder_view,
-                                            G_SIGNAL_MATCH_FUNC,
+                                            GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                             0,
                                             0,
                                             nullptr,
@@ -2541,7 +2541,7 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
         case PtkFBViewMode::PTK_FB_LIST_VIEW:
             tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
             g_signal_handlers_block_matched(tree_sel,
-                                            G_SIGNAL_MATCH_FUNC,
+                                            GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                             0,
                                             0,
                                             nullptr,
@@ -2655,7 +2655,7 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
         case PtkFBViewMode::PTK_FB_ICON_VIEW:
         case PtkFBViewMode::PTK_FB_COMPACT_VIEW:
             g_signal_handlers_unblock_matched(file_browser->folder_view,
-                                              G_SIGNAL_MATCH_FUNC,
+                                              GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                               0,
                                               0,
                                               nullptr,
@@ -2665,7 +2665,7 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
             break;
         case PtkFBViewMode::PTK_FB_LIST_VIEW:
             g_signal_handlers_unblock_matched(tree_sel,
-                                              G_SIGNAL_MATCH_FUNC,
+                                              GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                               0,
                                               0,
                                               nullptr,
@@ -2688,7 +2688,7 @@ ptk_file_browser_restore_sig(PtkFileBrowser* file_browser, GtkTreeSelection* tre
         case PtkFBViewMode::PTK_FB_ICON_VIEW:
         case PtkFBViewMode::PTK_FB_COMPACT_VIEW:
             g_signal_handlers_unblock_matched(file_browser->folder_view,
-                                              G_SIGNAL_MATCH_FUNC,
+                                              GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                               0,
                                               0,
                                               nullptr,
@@ -2698,7 +2698,7 @@ ptk_file_browser_restore_sig(PtkFileBrowser* file_browser, GtkTreeSelection* tre
             break;
         case PtkFBViewMode::PTK_FB_LIST_VIEW:
             g_signal_handlers_unblock_matched(tree_sel,
-                                              G_SIGNAL_MATCH_FUNC,
+                                              GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                               0,
                                               0,
                                               nullptr,
@@ -2756,7 +2756,7 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, std::string_view seek_d
         case PtkFBViewMode::PTK_FB_COMPACT_VIEW:
             model = exo_icon_view_get_model(EXO_ICON_VIEW(file_browser->folder_view));
             g_signal_handlers_block_matched(file_browser->folder_view,
-                                            G_SIGNAL_MATCH_FUNC,
+                                            GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                             0,
                                             0,
                                             nullptr,
@@ -2766,7 +2766,7 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, std::string_view seek_d
         case PtkFBViewMode::PTK_FB_LIST_VIEW:
             tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
             g_signal_handlers_block_matched(tree_sel,
-                                            G_SIGNAL_MATCH_FUNC,
+                                            GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                             0,
                                             0,
                                             nullptr,
@@ -3438,8 +3438,13 @@ on_folder_view_destroy(GtkTreeView* view, PtkFileBrowser* file_browser)
     u32 id = g_signal_lookup("columns-changed", G_TYPE_FROM_INSTANCE(view));
     if (id)
     {
-        u64 hand =
-            g_signal_handler_find((void*)view, G_SIGNAL_MATCH_ID, id, 0, nullptr, nullptr, nullptr);
+        u64 hand = g_signal_handler_find((void*)view,
+                                         GSignalMatchType::G_SIGNAL_MATCH_ID,
+                                         id,
+                                         0,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr);
         if (hand)
             g_signal_handler_disconnect((void*)view, hand);
     }
@@ -3952,7 +3957,7 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
     if (file_browser->dir)
     {
         g_signal_handlers_disconnect_matched(file_browser->dir,
-                                             G_SIGNAL_MATCH_DATA,
+                                             GSignalMatchType::G_SIGNAL_MATCH_DATA,
                                              0,
                                              0,
                                              nullptr,

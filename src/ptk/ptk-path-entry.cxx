@@ -325,7 +325,7 @@ insert_complete(GtkEntry* entry)
     if (!new_prefix.empty())
     {
         g_signal_handlers_block_matched(G_OBJECT(entry),
-                                        G_SIGNAL_MATCH_FUNC,
+                                        GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                         0,
                                         0,
                                         nullptr,
@@ -334,7 +334,7 @@ insert_complete(GtkEntry* entry)
         gtk_entry_set_text(GTK_ENTRY(entry), new_prefix.c_str());
         gtk_editable_set_position(GTK_EDITABLE(entry), -1);
         g_signal_handlers_unblock_matched(G_OBJECT(entry),
-                                          G_SIGNAL_MATCH_FUNC,
+                                          GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                           0,
                                           0,
                                           nullptr,
@@ -385,7 +385,7 @@ on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIt
     if (path && path[0])
     {
         g_signal_handlers_block_matched(G_OBJECT(entry),
-                                        G_SIGNAL_MATCH_FUNC,
+                                        GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                         0,
                                         0,
                                         nullptr,
@@ -397,7 +397,7 @@ on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIt
         gtk_editable_set_position(GTK_EDITABLE(entry), -1);
 
         g_signal_handlers_unblock_matched(G_OBJECT(entry),
-                                          G_SIGNAL_MATCH_FUNC,
+                                          GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                           0,
                                           0,
                                           nullptr,

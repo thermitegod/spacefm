@@ -111,7 +111,7 @@ on_multi_input_insert(GtkTextBuffer* buf)
     }
 
     g_signal_handlers_block_matched(buf,
-                                    G_SIGNAL_MATCH_FUNC,
+                                    GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                     0,
                                     0,
                                     nullptr,
@@ -127,7 +127,7 @@ on_multi_input_insert(GtkTextBuffer* buf)
     gtk_text_buffer_place_cursor(buf, &iter);
 
     g_signal_handlers_unblock_matched(buf,
-                                      G_SIGNAL_MATCH_FUNC,
+                                      GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                       0,
                                       0,
                                       nullptr,

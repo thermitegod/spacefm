@@ -251,7 +251,7 @@ on_chmod_btn_toggled(GtkToggleButton* btn, FilePropertiesDialogData* data)
     /* Block this handler while we are changing the state of buttons,
       or this handler will be called recursively. */
     g_signal_handlers_block_matched(btn,
-                                    G_SIGNAL_MATCH_FUNC,
+                                    GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                     0,
                                     0,
                                     nullptr,
@@ -269,7 +269,7 @@ on_chmod_btn_toggled(GtkToggleButton* btn, FilePropertiesDialogData* data)
     }
 
     g_signal_handlers_unblock_matched(btn,
-                                      G_SIGNAL_MATCH_FUNC,
+                                      GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                       0,
                                       0,
                                       nullptr,

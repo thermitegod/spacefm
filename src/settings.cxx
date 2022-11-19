@@ -1636,7 +1636,7 @@ static void
 set_check_menu_item_block(GtkWidget* item)
 {
     g_signal_handlers_block_matched(item,
-                                    G_SIGNAL_MATCH_FUNC,
+                                    GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                     0,
                                     0,
                                     nullptr,
@@ -1644,7 +1644,7 @@ set_check_menu_item_block(GtkWidget* item)
                                     nullptr);
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), true);
     g_signal_handlers_unblock_matched(item,
-                                      G_SIGNAL_MATCH_FUNC,
+                                      GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                       0,
                                       0,
                                       nullptr,

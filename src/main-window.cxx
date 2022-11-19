@@ -192,7 +192,7 @@ fm_main_window_class_init(FMMainWindowClass* klass)
     /*  this works but desktop_window does not
     g_signal_new ( "task-notify",
                        G_TYPE_FROM_CLASS ( klass ),
-                       G_SIGNAL_RUN_FIRST,
+                       GSignalMatchType::G_SIGNAL_RUN_FIRST,
                        0,
                        nullptr, nullptr,
                        g_cclosure_marshal_VOID__POINTER,
@@ -2096,7 +2096,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
     // without this signal blocked, on_close_notebook_page is called while
     // ptk_file_browser_update_views is still in progress causing segfault
     g_signal_handlers_block_matched(main_window->notebook,
-                                    G_SIGNAL_MATCH_FUNC,
+                                    GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                     0,
                                     0,
                                     nullptr,
@@ -2129,7 +2129,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
             ptk_file_browser_update_views(nullptr, a_browser);
 
         g_signal_handlers_unblock_matched(main_window->notebook,
-                                          G_SIGNAL_MATCH_FUNC,
+                                          GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                           0,
                                           0,
                                           nullptr,
@@ -2170,7 +2170,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
     }
 
     g_signal_handlers_unblock_matched(main_window->notebook,
-                                      G_SIGNAL_MATCH_FUNC,
+                                      GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                       0,
                                       0,
                                       nullptr,
@@ -4205,8 +4205,13 @@ on_task_destroy(GtkWidget* view, void* user_data)
     u32 id = g_signal_lookup("columns-changed", G_TYPE_FROM_INSTANCE(view));
     if (id)
     {
-        u64 hand =
-            g_signal_handler_find((void*)view, G_SIGNAL_MATCH_ID, id, 0, nullptr, nullptr, nullptr);
+        u64 hand = g_signal_handler_find((void*)view,
+                                         GSignalMatchType::G_SIGNAL_MATCH_ID,
+                                         id,
+                                         0,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr);
         if (hand)
             g_signal_handler_disconnect((void*)view, hand);
     }
