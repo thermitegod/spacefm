@@ -347,7 +347,7 @@ sources = [
   'src/vfs/vfs-file-trash.cxx',
   'src/vfs/vfs-mime-type.cxx',
   'src/vfs/vfs-thumbnail-loader.cxx',
-  'src/vfs/vfs-user-dir.cxx',
+  'src/vfs/vfs-user-dirs.cxx',
   'src/vfs/vfs-utils.cxx',
   'src/vfs/vfs-volume.cxx',
 ]

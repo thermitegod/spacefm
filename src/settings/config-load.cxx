@@ -27,7 +27,7 @@
 
 #include "ptk/ptk-error.hxx"
 
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "settings/app.hxx"
 #include "settings/config-load.hxx"

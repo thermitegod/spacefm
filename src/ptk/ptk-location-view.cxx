@@ -53,7 +53,7 @@
 #include "main-window.hxx"
 
 #include "vfs/vfs-utils.hxx"
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "settings/app.hxx"
 
@@ -636,7 +636,7 @@ ptk_location_view_get_mount_point_dir(const char* name)
     if (set->s)
     {
         if (ztd::startswith(set->s, "~/"))
-            parent = Glib::build_filename(vfs_user_home_dir(), set->s + 2);
+            parent = Glib::build_filename(vfs::user_dirs->home_dir(), set->s + 2);
         else
             parent = set->s;
 
@@ -662,13 +662,13 @@ ptk_location_view_get_mount_point_dir(const char* name)
                     value = fmt::format("{}", geteuid());
                     break;
                 case 2: // $HOME
-                    value = vfs_user_home_dir();
+                    value = vfs::user_dirs->home_dir();
                     break;
                 case 3: // $XDG_RUNTIME_DIR
-                    value = vfs_user_runtime_dir();
+                    value = vfs::user_dirs->runtime_dir();
                     break;
                 case 4: // $XDG_CACHE_HOME
-                    value = vfs_user_cache_dir();
+                    value = vfs::user_dirs->cache_dir();
                     break;
                 default:
                     value = "";
@@ -684,7 +684,7 @@ ptk_location_view_get_mount_point_dir(const char* name)
 
     std::string path;
     if (!std::filesystem::exists(parent))
-        path = Glib::build_filename(vfs_user_cache_dir(), "spacefm-mount", name);
+        path = Glib::build_filename(vfs::user_dirs->cache_dir(), "spacefm-mount", name);
     else
         path = Glib::build_filename(parent, name);
 
@@ -704,7 +704,7 @@ ptk_location_view_clean_mount_points()
 
         if (i == 0)
         {
-            path = Glib::build_filename(vfs_user_cache_dir(), "spacefm-mount");
+            path = Glib::build_filename(vfs::user_dirs->cache_dir(), "spacefm-mount");
         }
         else // i == 1
         {

@@ -42,7 +42,7 @@
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 #include "vfs/vfs-utils.hxx"
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "vfs/vfs-file-info.hxx"
 
@@ -664,7 +664,7 @@ VFSFileInfo::load_special_info(std::string_view file_path) noexcept
     vfs::desktop desktop = vfs_get_desktop(file_path);
 
     // MOD  display real filenames of .desktop files not in desktop directory
-    if (ztd::same(file_dir, vfs_user_desktop_dir()))
+    if (ztd::same(file_dir, vfs::user_dirs->desktop_dir()))
         this->set_disp_name(desktop->get_disp_name());
 
     if (desktop->get_icon_name().empty())

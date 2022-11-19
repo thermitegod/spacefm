@@ -42,7 +42,7 @@
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-utils.hxx"
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "ptk/ptk-error.hxx"
 #include "ptk/ptk-keyboard.hxx"
@@ -435,7 +435,7 @@ xset_design_job_set_import_file(xset_t set)
     save->s = ztd::strdup(Glib::path_get_dirname(file));
 
     // Make Plugin Dir
-    const std::string user_tmp = vfs_user_get_tmp_dir();
+    const std::string& user_tmp = vfs::user_dirs->program_tmp_dir();
     if (!std::filesystem::is_directory(user_tmp))
     {
         xset_msg_dialog(GTK_WIDGET(parent),
@@ -778,7 +778,7 @@ xset_design_job_set_browse_files(xset_t set)
     }
     else
     {
-        folder = Glib::build_filename(vfs_user_get_config_dir(), "scripts", set->name);
+        folder = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", set->name);
     }
     if (!std::filesystem::exists(folder) && !set->plugin)
     {
@@ -802,11 +802,13 @@ xset_design_job_set_browse_data(xset_t set)
     if (set->plugin)
     {
         xset_t mset = xset_get_plugin_mirror(set);
-        folder = Glib::build_filename(vfs_user_get_config_dir(), "plugin-data", mset->name);
+        folder =
+            Glib::build_filename(vfs::user_dirs->program_config_dir(), "plugin-data", mset->name);
     }
     else
     {
-        folder = Glib::build_filename(vfs_user_get_config_dir(), "plugin-data", set->name);
+        folder =
+            Glib::build_filename(vfs::user_dirs->program_config_dir(), "plugin-data", set->name);
     }
     if (!std::filesystem::exists(folder))
     {

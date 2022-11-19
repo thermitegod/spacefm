@@ -46,7 +46,7 @@
 #include "window-reference.hxx"
 
 #include "vfs/vfs-volume.hxx"
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-utils.hxx"
 
 #include "main-window.hxx"
@@ -720,7 +720,7 @@ on_start_search(GtkWidget* btn, FindFile* data)
 
     LOG_DEBUG("find command: {}", ztd::join(argv, " "));
 
-    Glib::spawn_async_with_pipes(vfs_user_home_dir(),
+    Glib::spawn_async_with_pipes(vfs::user_dirs->home_dir(),
                                  argv,
                                  Glib::SpawnFlags::SEARCH_PATH,
                                  Glib::SlotSpawnChildSetup(),
@@ -831,14 +831,14 @@ static void
 on_add_search_home(GtkWidget* menu, FindFile* data)
 {
     (void)menu;
-    add_search_dir(data, vfs_user_home_dir());
+    add_search_dir(data, vfs::user_dirs->home_dir());
 }
 
 static void
 on_add_search_desktop(GtkWidget* menu, FindFile* data)
 {
     (void)menu;
-    add_search_dir(data, vfs_user_desktop_dir());
+    add_search_dir(data, vfs::user_dirs->desktop_dir());
 }
 
 static void
@@ -871,13 +871,13 @@ on_add_search_folder(GtkWidget* btn, FindFile* data)
     item = gtk_separator_menu_item_new();
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    item = gtk_menu_item_new_with_label(vfs_user_home_dir().data());
+    item = gtk_menu_item_new_with_label(vfs::user_dirs->home_dir().data());
     // img = gtk_image_new_from_icon_name( "gnome-fs-directory", GtkIconSize::GTK_ICON_SIZE_MENU );
     // img = xset_get_image("gtk-directory", GtkIconSize::GTK_ICON_SIZE_MENU);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     g_signal_connect(item, "activate", G_CALLBACK(on_add_search_home), data);
 
-    item = gtk_menu_item_new_with_label(vfs_user_desktop_dir().data());
+    item = gtk_menu_item_new_with_label(vfs::user_dirs->desktop_dir().data());
     // img = gtk_image_new_from_icon_name( "gnome-fs-desktop", GtkIconSize::GTK_ICON_SIZE_MENU );
     // img = xset_get_image("gtk-directory", GtkIconSize::GTK_ICON_SIZE_MENU);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);

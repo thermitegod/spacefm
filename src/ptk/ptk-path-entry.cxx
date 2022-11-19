@@ -34,7 +34,7 @@
 #include "xset/xset.hxx"
 #include "xset/xset-context.hxx"
 
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "main-window.hxx"
 
@@ -62,11 +62,11 @@ get_cwd(GtkEntry* entry)
 {
     const char* entry_txt = gtk_entry_get_text(entry);
     if (!entry_txt)
-        return vfs_user_home_dir();
+        return vfs::user_dirs->home_dir();
 
     const std::string path = entry_txt;
     if (path.empty())
-        return vfs_user_home_dir();
+        return vfs::user_dirs->home_dir();
 
     if (ztd::startswith(path, "/"))
     {
@@ -77,7 +77,7 @@ get_cwd(GtkEntry* entry)
     //     LOG_WARN("entered path in pathbar is invalid: {}", path);
     // }
 
-    return vfs_user_home_dir();
+    return vfs::user_dirs->home_dir();
 }
 
 static bool

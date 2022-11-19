@@ -41,7 +41,7 @@
 
 #include "vfs/vfs-file-monitor.hxx"
 #include "vfs/vfs-file-info.hxx"
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-utils.hxx"
 
 #include "ptk/ptk-dir-tree.hxx"

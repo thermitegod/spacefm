@@ -45,7 +45,7 @@
 #include "ptk/ptk-clipboard.hxx"
 
 #include "vfs/vfs-file-info.hxx"
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "settings/app.hxx"
 
@@ -1861,9 +1861,9 @@ get_unique_name(std::string_view dir, std::string_view ext = "")
 static const std::string
 get_template_dir()
 {
-    const std::string templates_path = vfs_user_template_dir();
+    const std::string templates_path = vfs::user_dirs->template_dir();
 
-    if (ztd::same(templates_path, vfs_user_home_dir()))
+    if (ztd::same(templates_path, vfs::user_dirs->home_dir()))
     {
         /* If $XDG_TEMPLATES_DIR == $HOME this means it is disabled. Do not
          * recurse it as this is too many files/directories and may slow

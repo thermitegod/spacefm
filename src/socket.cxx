@@ -30,7 +30,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "settings/app.hxx"
 
@@ -78,7 +78,7 @@ get_inode_tag()
 {
     std::string inode_tag;
 
-    const auto statbuf = ztd::stat(vfs_user_home_dir());
+    const auto statbuf = ztd::stat(vfs::user_dirs->home_dir());
     if (statbuf.is_valid())
     {
         inode_tag = fmt::format("{}={}:{}-{}",
@@ -225,7 +225,7 @@ get_socket_name()
         dpy = ":0";
 
     const std::string socket_path = fmt::format("{}/{}-{}{}.socket",
-                                                vfs_user_runtime_dir(),
+                                                vfs::user_dirs->runtime_dir(),
                                                 PACKAGE_NAME,
                                                 Glib::get_user_name(),
                                                 dpy);

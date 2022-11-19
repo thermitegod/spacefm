@@ -48,7 +48,7 @@
 
 #include "utils.hxx"
 
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "mime-type/mime-type.hxx"
 #include "mime-type/mime-cache.hxx"
@@ -311,7 +311,7 @@ mime_type_get_desc_icon(std::string_view type)
      * Since the spec really sucks, we do not follow it here.
      */
 
-    const std::string file_path = fmt::format("{}/mime/{}.xml", vfs_user_data_dir(), type);
+    const std::string file_path = fmt::format("{}/mime/{}.xml", vfs::user_dirs->data_dir(), type);
     if (faccessat(0, file_path.data(), F_OK, AT_EACCESS) != -1)
     {
         const auto icon_data = mime_type_parse_xml_file(file_path, true);
@@ -322,7 +322,7 @@ mime_type_get_desc_icon(std::string_view type)
     }
 
     // look in system dirs
-    for (std::string_view sys_dir : vfs_system_data_dir())
+    for (std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
         const std::string sys_file_path = fmt::format("{}/mime/{}.xml", sys_dir, type);
         if (faccessat(0, sys_file_path.data(), F_OK, AT_EACCESS) != -1)
@@ -352,15 +352,14 @@ mime_type_init()
 {
     const std::string filename = "/mime/mime.cache";
 
-    const std::string path = Glib::build_filename(vfs_user_data_dir(), filename);
+    const std::string path = Glib::build_filename(vfs::user_dirs->data_dir(), filename);
     mime_cache_t cache = std::make_shared<MimeCache>(path);
     caches.emplace_back(cache);
 
     if (cache->get_magic_max_extent() > mime_cache_max_extent)
         mime_cache_max_extent = cache->get_magic_max_extent();
 
-    const std::vector<std::string> dirs = vfs_system_data_dir();
-    for (std::string_view dir : dirs)
+    for (std::string_view dir : vfs::user_dirs->system_data_dirs())
     {
         const std::string path2 = Glib::build_filename(dir.data(), filename);
         mime_cache_t dir_cache = std::make_shared<MimeCache>(path2);

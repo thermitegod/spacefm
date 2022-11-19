@@ -80,7 +80,7 @@
 #include "vfs/vfs-file-task.hxx"
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-utils.hxx"
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "ptk/ptk-error.hxx"
 #include "ptk/ptk-keyboard.hxx"
@@ -164,7 +164,7 @@ inline constexpr std::array<const char*, 18> builtin_tool_shared_key{
 void
 load_settings()
 {
-    const std::string settings_config_dir = vfs_user_get_config_dir();
+    const std::string& settings_config_dir = vfs::user_dirs->program_config_dir();
 
     app_settings.set_load_saved_tabs(true);
 
@@ -392,7 +392,7 @@ save_settings(void* main_window_ptr)
     }
 
     /* save settings */
-    const std::string settings_config_dir = vfs_user_get_config_dir();
+    const std::string& settings_config_dir = vfs::user_dirs->program_config_dir();
     if (!std::filesystem::exists(settings_config_dir))
     {
         std::filesystem::create_directories(settings_config_dir);
@@ -618,8 +618,10 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         if (set->plugin)
             icon_file = Glib::build_filename(set->plug_dir, set->plug_name, "icon");
         else
-            icon_file =
-                Glib::build_filename(vfs_user_get_config_dir(), "scripts", set->name, "icon");
+            icon_file = Glib::build_filename(vfs::user_dirs->program_config_dir(),
+                                             "scripts",
+                                             set->name,
+                                             "icon");
 
         if (std::filesystem::exists(icon_file))
             icon_name = ztd::strdup(icon_file);
@@ -2800,8 +2802,10 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     if (!icon_name && set->tool == XSetTool::CUSTOM)
     {
         // custom 'icon' file?
-        const std::string icon_file =
-            Glib::build_filename(vfs_user_get_config_dir(), "scripts", set->name, "icon");
+        const std::string icon_file = Glib::build_filename(vfs::user_dirs->program_config_dir(),
+                                                           "scripts",
+                                                           set->name,
+                                                           "icon");
         if (std::filesystem::exists(icon_file))
             icon_name = ztd::strdup(icon_file);
     }

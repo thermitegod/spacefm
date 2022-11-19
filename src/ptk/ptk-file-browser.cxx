@@ -65,7 +65,7 @@
 #include "ptk/ptk-path-entry.hxx"
 #include "main-window.hxx"
 
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "settings/app.hxx"
 #include "settings/etc.hxx"
@@ -406,7 +406,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
 
     // convert ~/ to /home/user
     if (ztd::startswith(path, "~/"))
-        path = Glib::build_filename(vfs_user_home_dir(), ztd::removeprefix(path, "~/"));
+        path = Glib::build_filename(vfs::user_dirs->home_dir(), ztd::removeprefix(path, "~/"));
 
     // path
     const std::string dir_path = Glib::filename_from_utf8(path);
@@ -1663,7 +1663,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, std::string_view folder_pat
 
     // convert ~ to /home/user for smarter bookmarks
     if (ztd::startswith(path, "~/"))
-        path = Glib::build_filename(vfs_user_home_dir(), ztd::removeprefix(path, "~/"));
+        path = Glib::build_filename(vfs::user_dirs->home_dir(), ztd::removeprefix(path, "~/"));
 
     if (!std::filesystem::is_directory(path))
     {
@@ -1934,7 +1934,7 @@ on_file_deleted(vfs::file_info file, PtkFileBrowser* file_browser)
     {
         // The directory itself was deleted
         on_close_notebook_page(nullptr, file_browser);
-        // ptk_file_browser_chdir( file_browser, vfs_user_home_dir(),
+        // ptk_file_browser_chdir( file_browser, vfs::user_dirs->home_dir(),
         // PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
     }
     else
@@ -2117,7 +2117,7 @@ const std::string
 ptk_file_browser_get_cwd(PtkFileBrowser* file_browser)
 {
     if (!file_browser->curHistory)
-        return vfs_user_home_dir();
+        return vfs::user_dirs->home_dir();
     return (const char*)file_browser->curHistory->data;
 }
 
@@ -2161,7 +2161,7 @@ ptk_file_browser_go_home(GtkWidget* item, PtkFileBrowser* file_browser)
     (void)item;
     focus_folder_view(file_browser);
     ptk_file_browser_chdir(file_browser,
-                           vfs_user_home_dir(),
+                           vfs::user_dirs->home_dir(),
                            PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
 }
 
@@ -2175,7 +2175,7 @@ ptk_file_browser_go_default(GtkWidget* item, PtkFileBrowser* file_browser)
         ptk_file_browser_chdir(file_browser, path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
     else if (geteuid() != 0)
         ptk_file_browser_chdir(file_browser,
-                               vfs_user_home_dir(),
+                               vfs::user_dirs->home_dir(),
                                PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
     else
         ptk_file_browser_chdir(file_browser, "/", PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
@@ -3324,7 +3324,7 @@ ptk_file_browser_new_tab(GtkMenuItem* item, PtkFileBrowser* file_browser)
     if (xset_get_s(XSetName::GO_SET_DEFAULT))
         dir_path = xset_get_s(XSetName::GO_SET_DEFAULT);
     else
-        dir_path = vfs_user_home_dir();
+        dir_path = vfs::user_dirs->home_dir();
 
     if (!std::filesystem::is_directory(dir_path))
         file_browser->run_event<EventType::OPEN_ITEM>("/", PtkOpenAction::PTK_OPEN_NEW_TAB);
@@ -3344,7 +3344,7 @@ ptk_file_browser_new_tab_here(GtkMenuItem* item, PtkFileBrowser* file_browser)
         if (xset_get_s(XSetName::GO_SET_DEFAULT))
             dir_path = xset_get_s(XSetName::GO_SET_DEFAULT);
         else
-            dir_path = vfs_user_home_dir();
+            dir_path = vfs::user_dirs->home_dir();
     }
     if (!std::filesystem::is_directory(dir_path))
         file_browser->run_event<EventType::OPEN_ITEM>("/", PtkOpenAction::PTK_OPEN_NEW_TAB);

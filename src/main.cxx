@@ -40,7 +40,7 @@
 #include "window-reference.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
@@ -356,7 +356,7 @@ handle_parsed_commandline_args()
 static void
 tmp_clean()
 {
-    const std::string tmp = vfs_user_get_tmp_dir();
+    const std::string& tmp = vfs::user_dirs->program_tmp_dir();
     std::filesystem::remove_all(tmp);
     LOG_INFO("Removed {}", tmp);
 }
@@ -465,7 +465,7 @@ main(i32 argc, char* argv[])
 
     // Sets custom config dir
     if (cli_flags.config_dir)
-        vfs_user_set_config_dir(cli_flags.config_dir);
+        vfs::user_dirs->program_config_dir(cli_flags.config_dir);
 
     // load config file
     load_settings();
@@ -526,7 +526,7 @@ open_file(std::string_view path)
 
     try
     {
-        desktop->open_files(vfs_current_dir(), open_files);
+        desktop->open_files(vfs::user_dirs->current_dir(), open_files);
     }
     catch (const VFSAppDesktopException& e)
     {

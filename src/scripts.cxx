@@ -27,7 +27,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "scripts.hxx"
 
@@ -72,7 +72,7 @@ get_script_path(Scripts script) noexcept
 
 #ifdef SPACEFM_USER_SCRIPT_OVERRIDE
     const std::string script_path =
-        Glib::build_filename(vfs_user_get_config_dir(), "scripts", script_name);
+        Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", script_name);
     // LOG_INFO("user script: {}", script_path);
     if (std::filesystem::exists(script_path))
         return script_path;

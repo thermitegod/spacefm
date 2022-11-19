@@ -30,7 +30,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "write.hxx"
 #include "bookmarks.hxx"
@@ -73,7 +73,7 @@ load_bookmarks() noexcept
         bookmarks.clear();
 
     if (bookmark_file.empty())
-        bookmark_file = Glib::build_filename(vfs_user_config_dir(), "gtk-3.0", "bookmarks");
+        bookmark_file = Glib::build_filename(vfs::user_dirs->config_dir(), "gtk-3.0", "bookmarks");
 
     // no bookmark file
     if (!std::filesystem::exists(bookmark_file))

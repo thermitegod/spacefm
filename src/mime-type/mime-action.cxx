@@ -49,7 +49,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "write.hxx"
 #include "utils.hxx"
@@ -68,7 +68,7 @@ save_to_file(std::string_view path, const Glib::ustring& data)
 static void
 update_desktop_database()
 {
-    const std::string path = Glib::build_filename(vfs_user_data_dir(), "applications");
+    const std::string path = Glib::build_filename(vfs::user_dirs->data_dir(), "applications");
     const std::string command = fmt::format("update-desktop-database {}", path);
     print_command(command);
     Glib::spawn_command_line_sync(command);
@@ -84,7 +84,8 @@ remove_actions(std::string_view mime_type, std::vector<std::string>& actions)
     try
     {
         // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-        const std::string path = Glib::build_filename(vfs_user_config_dir(), "mimeapps.list");
+        const std::string path =
+            Glib::build_filename(vfs::user_dirs->config_dir(), "mimeapps.list");
 
         kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
     }
@@ -94,7 +95,7 @@ remove_actions(std::string_view mime_type, std::vector<std::string>& actions)
         {
             // $XDG_DATA_HOME=[~/.local]/share/applications/mimeapps.list
             const std::string path =
-                Glib::build_filename(vfs_user_data_dir(), "applications/mimeapps.list");
+                Glib::build_filename(vfs::user_dirs->data_dir(), "applications/mimeapps.list");
 
             kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
         }
@@ -244,14 +245,14 @@ mime_type_get_actions(std::string_view mime_type)
     std::string dir;
 
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    get_actions(vfs_user_config_dir(), mime_type, actions);
+    get_actions(vfs::user_dirs->config_dir(), mime_type, actions);
 
     // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
-    dir = Glib::build_filename(vfs_user_data_dir(), "applications");
+    dir = Glib::build_filename(vfs::user_dirs->data_dir(), "applications");
     get_actions(dir, mime_type, actions);
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
-    for (std::string_view sys_dir : vfs_system_data_dir())
+    for (std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
         dir = Glib::build_filename(sys_dir.data(), "applications");
         get_actions(dir, mime_type, actions);
@@ -462,7 +463,7 @@ make_custom_desktop_file(std::string_view desktop_id, std::string_view mime_type
     }
 
     /* generate unique file name */
-    const std::string dir = Glib::build_filename(vfs_user_data_dir(), "applications");
+    const std::string dir = Glib::build_filename(vfs::user_dirs->data_dir(), "applications");
     std::filesystem::create_directories(dir);
     std::filesystem::permissions(dir, std::filesystem::perms::owner_all);
     std::string path;
@@ -535,13 +536,13 @@ mime_type_locate_desktop_file(std::string_view dir, std::string_view desktop_id)
 const char*
 mime_type_locate_desktop_file(std::string_view desktop_id)
 {
-    const std::string data_dir = vfs_user_data_dir();
+    const std::string& data_dir = vfs::user_dirs->data_dir();
 
     const char* data_desktop = _locate_desktop_file(data_dir, desktop_id);
     if (data_desktop)
         return data_desktop;
 
-    for (std::string_view sys_dir : vfs_system_data_dir())
+    for (std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
         const char* sys_desktop = _locate_desktop_file(sys_dir, desktop_id);
         if (sys_desktop)
@@ -610,7 +611,7 @@ get_default_action(std::string_view dir, std::string_view type)
                 break; // defaults.list does not have Added Associations
         }
 
-        if (ztd::same(dir, vfs_user_config_dir()))
+        if (ztd::same(dir, vfs::user_dirs->config_dir()))
             break; // no defaults.list in ~/.config
     }
     return nullptr;
@@ -632,18 +633,20 @@ mime_type_get_default_action(std::string_view mime_type)
     /* FIXME: need to check parent types if default action of current type is not set. */
 
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    const char* home_default_action = get_default_action(vfs_user_config_dir(), mime_type.data());
+    const char* home_default_action =
+        get_default_action(vfs::user_dirs->config_dir(), mime_type.data());
     if (home_default_action)
         return home_default_action;
 
     // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
-    const std::string data_app_dir = Glib::build_filename(vfs_user_data_dir(), "applications");
+    const std::string data_app_dir =
+        Glib::build_filename(vfs::user_dirs->data_dir(), "applications");
     const char* data_default_action = get_default_action(data_app_dir, mime_type.data());
     if (data_default_action)
         return data_default_action;
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
-    for (std::string_view sys_dir : vfs_system_data_dir())
+    for (std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
         const std::string sys_app_dir = Glib::build_filename(sys_dir.data(), "applications");
         const char* sys_default_action = get_default_action(sys_app_dir, mime_type.data());
@@ -677,7 +680,7 @@ mime_type_update_association(std::string_view type, std::string_view desktop_id,
     bool data_changed = false;
 
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    const std::string path = Glib::build_filename(vfs_user_config_dir(), "mimeapps.list");
+    const std::string path = Glib::build_filename(vfs::user_dirs->config_dir(), "mimeapps.list");
 
     // Load current mimeapps.list content, if available
     const auto kf = Glib::KeyFile::create();

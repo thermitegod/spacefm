@@ -66,7 +66,7 @@
 #include "autosave.hxx"
 #include "utils.hxx"
 
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-file-task.hxx"
 
@@ -340,7 +340,7 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
         case PluginJob::COPY:
         {
             // copy job
-            const std::string user_tmp = vfs_user_get_tmp_dir();
+            const std::string& user_tmp = vfs::user_dirs->program_tmp_dir();
             if (std::filesystem::is_directory(user_tmp))
             {
                 xset_msg_dialog(GTK_WIDGET(main_window),
@@ -1073,7 +1073,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                         else
                         {
                             if (geteuid() != 0)
-                                folder_path = vfs_user_home_dir();
+                                folder_path = vfs::user_dirs->home_dir();
                             else
                                 folder_path = "/";
                         }
@@ -1114,7 +1114,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                     else
                     {
                         if (geteuid() != 0)
-                            folder_path = vfs_user_home_dir();
+                            folder_path = vfs::user_dirs->home_dir();
                         else
                             folder_path = "/";
                     }
@@ -2125,7 +2125,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
         if (!(path && path[0] != '\0'))
         {
             if (geteuid() != 0)
-                path = vfs_user_home_dir().data();
+                path = vfs::user_dirs->home_dir().data();
             else
                 path = ztd::strdup("/");
         }
@@ -4115,7 +4115,7 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
         }
         else
         {
-            path = Glib::build_filename(vfs_user_get_config_dir(), "scripts", set->name);
+            path = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", set->name);
         }
         esc_path = bash_quote(path);
         buf.append(fmt::format("fm_cmd_dir={}\n", esc_path));
@@ -4124,11 +4124,15 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
         if (set->plugin)
         {
             xset_t mset = xset_get_plugin_mirror(set);
-            path = Glib::build_filename(vfs_user_get_config_dir(), "plugin-data", mset->name);
+            path = Glib::build_filename(vfs::user_dirs->program_config_dir(),
+                                        "plugin-data",
+                                        mset->name);
         }
         else
         {
-            path = Glib::build_filename(vfs_user_get_config_dir(), "plugin-data", set->name);
+            path = Glib::build_filename(vfs::user_dirs->program_config_dir(),
+                                        "plugin-data",
+                                        set->name);
         }
         esc_path = bash_quote(path);
         buf.append(fmt::format("fm_cmd_data={}\n", esc_path));
@@ -4149,7 +4153,7 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
     }
 
     // tmp
-    buf.append(fmt::format("fm_tmp_dir=\"{}\"\n", vfs_user_get_tmp_dir()));
+    buf.append(fmt::format("fm_tmp_dir=\"{}\"\n", vfs::user_dirs->program_tmp_dir()));
 
     // tasks
     PtkFileTask* ptask = get_selected_task(file_browser->task_view);

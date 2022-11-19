@@ -37,7 +37,7 @@
 
 #include "write.hxx"
 
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "vfs/vfs-file-trash.hxx"
 
@@ -60,8 +60,8 @@ VFSTrash::instance() noexcept
 
 VFSTrash::VFSTrash() noexcept
 {
-    const dev_t home_device = device(vfs_user_home_dir()).value();
-    const std::string user_trash = Glib::build_filename(vfs_user_data_dir(), "Trash");
+    const dev_t home_device = device(vfs::user_dirs->home_dir()).value();
+    const std::string user_trash = Glib::build_filename(vfs::user_dirs->data_dir(), "Trash");
     std::shared_ptr<VFSTrashDir> home_trash = std::make_shared<VFSTrashDir>(user_trash);
     this->trash_dirs[home_device] = home_trash;
 }

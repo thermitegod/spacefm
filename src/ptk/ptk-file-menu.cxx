@@ -43,7 +43,7 @@
 #include "utils.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "ptk/ptk-bookmark-view.hxx"
 #include "ptk/ptk-file-actions-open.hxx"
@@ -1452,7 +1452,7 @@ enum PTKFileMenuAppJob
 static const char*
 get_shared_desktop_file_location(std::string_view name)
 {
-    for (std::string_view sys_dir : vfs_system_data_dir())
+    for (std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
         const char* ret = vfs_mime_type_locate_desktop_file(sys_dir, name);
         if (ret)
@@ -1515,7 +1515,9 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     "it from text/plain.");
             break;
         case PTKFileMenuAppJob::APP_JOB_EDIT:
-            path = Glib::build_filename(vfs_user_data_dir(), "applications", desktop->get_name());
+            path = Glib::build_filename(vfs::user_dirs->data_dir(),
+                                        "applications",
+                                        desktop->get_name());
             if (!std::filesystem::exists(path))
             {
                 const char* share_desktop = vfs_mime_type_locate_desktop_file(desktop->get_name());
@@ -1557,12 +1559,14 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         }
         case PTKFileMenuAppJob::APP_JOB_EDIT_LIST:
             // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-            path = Glib::build_filename(vfs_user_config_dir(), "mimeapps.list");
+            path = Glib::build_filename(vfs::user_dirs->config_dir(), "mimeapps.list");
             if (!std::filesystem::exists(path))
             {
                 // try old location
                 // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
-                path = Glib::build_filename(vfs_user_data_dir(), "applications", "mimeapps.list");
+                path = Glib::build_filename(vfs::user_dirs->data_dir(),
+                                            "applications",
+                                            "mimeapps.list");
             }
             xset_edit(GTK_WIDGET(data->browser), path.data(), false, true);
             break;
@@ -1586,7 +1590,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             free(str);
             break;
         case PTKFileMenuAppJob::APP_JOB_BROWSE:
-            path = Glib::build_filename(vfs_user_data_dir(), "applications");
+            path = Glib::build_filename(vfs::user_dirs->data_dir(), "applications");
             std::filesystem::create_directories(path);
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
 
@@ -1607,12 +1611,12 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         }
         break;
         case PTKFileMenuAppJob::APP_JOB_EDIT_TYPE:
-            path = Glib::build_filename(vfs_user_data_dir(), "mime/packages");
+            path = Glib::build_filename(vfs::user_dirs->data_dir(), "mime/packages");
             std::filesystem::create_directories(path);
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
             str2 = ztd::replace(mime_type->type, "/", "-");
             str2 = fmt::format("{}.xml", str2);
-            path = Glib::build_filename(vfs_user_data_dir(), "mime/packages", str2);
+            path = Glib::build_filename(vfs::user_dirs->data_dir(), "mime/packages", str2);
             if (!std::filesystem::exists(path))
             {
                 std::string msg;
@@ -1746,7 +1750,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                                                PtkOpenAction::PTK_OPEN_NEW_TAB);
             break;
         case PTKFileMenuAppJob::APP_JOB_BROWSE_MIME:
-            path = Glib::build_filename(vfs_user_data_dir(), "mime/packages");
+            path = Glib::build_filename(vfs::user_dirs->data_dir(), "mime/packages");
             std::filesystem::create_directories(path);
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
             if (data->browser)
@@ -1755,11 +1759,12 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             vfs_dir_monitor_mime();
             break;
         case PTKFileMenuAppJob::APP_JOB_UPDATE:
-            command = fmt::format("update-mime-database {}/mime", vfs_user_data_dir());
+            command = fmt::format("update-mime-database {}/mime", vfs::user_dirs->data_dir());
             print_command(command);
             Glib::spawn_command_line_async(command);
 
-            command = fmt::format("update-desktop-database {}/applications", vfs_user_data_dir());
+            command =
+                fmt::format("update-desktop-database {}/applications", vfs::user_dirs->data_dir());
             print_command(command);
             Glib::spawn_command_line_async(command);
             break;
@@ -1897,7 +1902,8 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     // *.desktop (missing)
     if (!desktop->get_name().empty())
     {
-        path = Glib::build_filename(vfs_user_data_dir(), "applications", desktop->get_name());
+        path =
+            Glib::build_filename(vfs::user_dirs->data_dir(), "applications", desktop->get_name());
         if (std::filesystem::exists(path))
         {
             str = ztd::replace(desktop->get_name(), ".desktop", "._desktop");
@@ -1931,7 +1937,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     // *.xml (missing)
     str = ztd::replace(type, "/", "-");
     str = fmt::format("{}.xml", str);
-    path = Glib::build_filename(vfs_user_data_dir(), "mime/packages", str);
+    path = Glib::build_filename(vfs::user_dirs->data_dir(), "mime/packages", str);
     if (std::filesystem::exists(path))
     {
         str = ztd::replace(type, "/", "-");
@@ -2454,7 +2460,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     }
     else
     {
-        cwd = vfs_user_desktop_dir();
+        cwd = vfs::user_dirs->desktop_dir();
     }
 
     if (sel_files.empty())

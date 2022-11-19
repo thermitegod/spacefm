@@ -35,7 +35,7 @@
 
 #include "ptk/ptk-error.hxx"
 
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "xset/xset.hxx"
 #include "xset/xset-dialog.hxx"
@@ -443,11 +443,13 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
     {
         path = xset_get_s(XSetName::GO_SET_DEFAULT);
         if (path && path[0] != '\0')
+        {
             gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), path);
+        }
         else
         {
-            path = (char*)vfs_user_home_dir().data();
-            gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), path);
+            gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg),
+                                                vfs::user_dirs->home_dir().data());
         }
     }
     if (deffile)

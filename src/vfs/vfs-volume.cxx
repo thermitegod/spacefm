@@ -56,7 +56,7 @@
 #include "utils.hxx"
 
 #include "vfs/vfs-utils.hxx"
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "vfs/vfs-volume.hxx"
 
@@ -2287,7 +2287,8 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
          * hack - sleep for 0.2 seconds here because sometimes the
          * .mtab.fuseiso file is not updated until after new device is detected. */
         Glib::usleep(200000);
-        const std::string mtab_file = Glib::build_filename(vfs_user_home_dir(), ".mtab.fuseiso");
+        const std::string mtab_file =
+            Glib::build_filename(vfs::user_dirs->home_dir(), ".mtab.fuseiso");
         char* new_name = nullptr;
         if (path_is_mounted_mtab(mtab_file.data(), point.data(), &new_name, nullptr) && new_name &&
             new_name[0])
@@ -2323,7 +2324,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         if (!keep && ztd::contains(HIDDEN_NON_BLOCK_FS, std::string_view(mtab_fstype)))
         {
             // no protocol handler and not blacklisted - show anyway?
-            keep = ztd::startswith(point, vfs_user_cache_dir()) ||
+            keep = ztd::startswith(point, vfs::user_dirs->cache_dir()) ||
                    ztd::startswith(point, "/media/") || ztd::startswith(point, "/run/media/") ||
                    ztd::startswith(mtab_fstype, "fuse.");
             if (!keep)

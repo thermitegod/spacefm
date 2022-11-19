@@ -28,7 +28,7 @@
 #include "xset/xset-dialog.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "ptk/ptk-builder.hxx"
 #include "ptk/ptk-handler.hxx"
@@ -629,10 +629,10 @@ load_all_known_apps_thread(vfs::async_task task)
 {
     GtkListStore* list = GTK_LIST_STORE(task->get_data());
 
-    std::string dir = Glib::build_filename(vfs_user_data_dir(), "applications");
+    std::string dir = Glib::build_filename(vfs::user_dirs->data_dir(), "applications");
     load_all_apps_in_dir(dir, list, task);
 
-    for (std::string_view sys_dir : vfs_system_data_dir())
+    for (std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
         dir = Glib::build_filename(sys_dir.data(), "applications");
         load_all_apps_in_dir(dir, list, task);

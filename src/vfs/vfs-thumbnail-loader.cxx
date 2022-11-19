@@ -38,7 +38,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 
 #include "utils.hxx"
@@ -298,7 +298,7 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view file_uri, i32 th
     const std::string file_name = fmt::format("{}.png", file_hash);
 
     const std::string thumbnail_file =
-        Glib::build_filename(vfs_user_cache_dir(), "thumbnails/normal", file_name);
+        Glib::build_filename(vfs::user_dirs->cache_dir(), "thumbnails/normal", file_name);
 
     // LOG_DEBUG("thumbnail_load()={} | uri={} | thumb_size={}", file_path, file_uri, thumb_size);
 
@@ -422,7 +422,7 @@ vfs_thumbnail_load_for_file(std::string_view file, i32 thumb_size)
 void
 vfs_thumbnail_init()
 {
-    const std::string dir = Glib::build_filename(vfs_user_cache_dir(), "thumbnails/normal");
+    const std::string dir = Glib::build_filename(vfs::user_dirs->cache_dir(), "thumbnails/normal");
 
     if (!std::filesystem::is_directory(dir))
         std::filesystem::create_directories(dir);

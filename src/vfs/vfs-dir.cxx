@@ -52,7 +52,7 @@
 #include "vfs/vfs-volume.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-dir.hxx"
 
 #define VFS_DIR_REINTERPRET(obj) (reinterpret_cast<VFSDir*>(obj))
@@ -869,11 +869,11 @@ on_mime_change_timer(void* user_data)
     std::string command;
 
     // LOG_INFO("MIME-UPDATE on_timer");
-    command = fmt::format("update-mime-database {}/mime", vfs_user_data_dir());
+    command = fmt::format("update-mime-database {}/mime", vfs::user_dirs->data_dir());
     print_command(command);
     Glib::spawn_command_line_async(command);
 
-    command = fmt::format("update-desktop-database {}/applications", vfs_user_data_dir());
+    command = fmt::format("update-desktop-database {}/applications", vfs::user_dirs->data_dir());
     print_command(command);
     Glib::spawn_command_line_async(command);
 
@@ -906,7 +906,7 @@ vfs_dir_monitor_mime()
     if (mime_dir)
         return;
 
-    const std::string path = Glib::build_filename(vfs_user_data_dir(), "mime/packages");
+    const std::string path = Glib::build_filename(vfs::user_dirs->data_dir(), "mime/packages");
     if (!std::filesystem::is_directory(path))
         return;
 

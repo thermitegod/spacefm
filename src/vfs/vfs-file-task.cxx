@@ -46,7 +46,7 @@
 #include "write.hxx"
 #include "utils.hxx"
 
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "vfs/vfs-file-task.hxx"
 #include "vfs/vfs-file-trash.hxx"
@@ -1287,7 +1287,7 @@ VFSFileTask::file_exec(std::string_view src_file)
     }
 
     // make tmpdir
-    const std::string tmp = vfs_user_get_tmp_dir();
+    const std::string& tmp = vfs::user_dirs->program_tmp_dir();
     if (!std::filesystem::is_directory(tmp))
     {
         const std::string msg = "Cannot create temporary directory";

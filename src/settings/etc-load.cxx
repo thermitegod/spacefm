@@ -28,7 +28,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "settings/etc.hxx"
 #include "settings/etc-load.hxx"
@@ -79,11 +79,11 @@ void
 load_etc_conf()
 {
     // Set default config values
-    etc_settings.set_tmp_dir(vfs_user_cache_dir());
+    etc_settings.set_tmp_dir(vfs::user_dirs->cache_dir());
 
     // load spacefm.conf
     std::string config_path =
-        Glib::build_filename(vfs_user_config_dir(), PACKAGE_NAME, "spacefm.conf");
+        Glib::build_filename(vfs::user_dirs->config_dir(), PACKAGE_NAME, "spacefm.conf");
     if (!std::filesystem::exists(config_path))
         config_path = Glib::build_filename(SYSCONFDIR, PACKAGE_NAME, "spacefm.conf");
 

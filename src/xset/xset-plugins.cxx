@@ -42,7 +42,7 @@
 #include "ptk/ptk-handler.hxx"
 
 #include "vfs/vfs-file-task.hxx"
-#include "vfs/vfs-user-dir.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "xset/xset.hxx"
 #include "xset/xset-custom.hxx"
@@ -87,7 +87,8 @@ clean_plugin_mirrors()
     }
 
     // remove plugin-data for non-existent xsets
-    const std::string path = Glib::build_filename(vfs_user_get_config_dir(), "plugin-data");
+    const std::string path =
+        Glib::build_filename(vfs::user_dirs->program_config_dir(), "plugin-data");
     if (std::filesystem::is_directory(path))
     {
         for (const auto& file : std::filesystem::directory_iterator(path))
