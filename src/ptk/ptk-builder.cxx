@@ -13,6 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <string>
 #include <string_view>
 
 #include <glibmm.h>
@@ -23,7 +24,7 @@ GtkBuilder*
 ptk_gtk_builder_new_from_file(std::string_view file)
 {
     GtkBuilder* builder = gtk_builder_new();
-    const Glib::ustring filename = Glib::build_filename(PACKAGE_UI_PATH, file.data());
+    const std::string filename = Glib::build_filename(PACKAGE_UI_PATH, file.data());
     gtk_builder_add_from_file(builder, filename.data(), nullptr);
     return builder;
 }

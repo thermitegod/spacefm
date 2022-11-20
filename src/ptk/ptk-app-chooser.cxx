@@ -215,17 +215,13 @@ app_chooser_dialog_new(GtkWindow* parent, vfs::mime_type mime_type, bool focus_a
     GtkBuilder* builder = ptk_gtk_builder_new_from_file(PTK_DLG_APP_CHOOSER);
     GtkWidget* dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
     GtkWidget* file_type = GTK_WIDGET(gtk_builder_get_object(builder, "file_type"));
-    GtkTreeView* view;
-    GtkTreeModel* model;
-    GtkEntry* entry;
-    GtkNotebook* notebook;
 
     g_object_set_data_full(G_OBJECT(dlg), "builder", builder, (GDestroyNotify)g_object_unref);
 
     xset_set_window_icon(GTK_WINDOW(dlg));
 
-    i32 width = xset_get_int(XSetName::APP_DLG, XSetVar::X);
-    i32 height = xset_get_int(XSetName::APP_DLG, XSetVar::Y);
+    const i32 width = xset_get_int(XSetName::APP_DLG, XSetVar::X);
+    const i32 height = xset_get_int(XSetName::APP_DLG, XSetVar::Y);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
     else
@@ -249,11 +245,12 @@ app_chooser_dialog_new(GtkWindow* parent, vfs::mime_type mime_type, bool focus_a
                            "Please choose an application:");
     }
 
-    view = GTK_TREE_VIEW(GTK_WIDGET(gtk_builder_get_object(builder, "recommended_apps")));
-    notebook = GTK_NOTEBOOK(GTK_WIDGET(gtk_builder_get_object(builder, "notebook")));
-    entry = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "cmdline")));
+    GtkTreeView* view =
+        GTK_TREE_VIEW(GTK_WIDGET(gtk_builder_get_object(builder, "recommended_apps")));
+    GtkNotebook* notebook = GTK_NOTEBOOK(GTK_WIDGET(gtk_builder_get_object(builder, "notebook")));
+    GtkEntry* entry = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "cmdline")));
 
-    model = create_model_from_mime_type(mime_type);
+    GtkTreeModel* model = create_model_from_mime_type(mime_type);
     gtk_tree_view_set_model(view, model);
     g_object_unref(G_OBJECT(model));
     init_list_view(view);
@@ -372,7 +369,7 @@ app_chooser_dialog_get_selected_app(GtkWidget* dlg)
     }
 
     GtkNotebook* notebook = GTK_NOTEBOOK(GTK_WIDGET(gtk_builder_get_object(builder, "notebook")));
-    i32 idx = gtk_notebook_get_current_page(notebook);
+    const i32 idx = gtk_notebook_get_current_page(notebook);
     GtkBin* scroll = GTK_BIN(gtk_notebook_get_nth_page(notebook, idx));
     GtkTreeView* view = GTK_TREE_VIEW(gtk_bin_get_child(scroll));
     GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(view);
@@ -384,7 +381,9 @@ app_chooser_dialog_get_selected_app(GtkWidget* dlg)
         gtk_tree_model_get(model, &it, PTKAppChooser::COL_DESKTOP_FILE, &app, -1);
     }
     else
+    {
         app = nullptr;
+    }
     return app;
 }
 
@@ -452,39 +451,31 @@ static void
 on_dlg_response(GtkDialog* dlg, i32 id, void* user_data)
 {
     (void)user_data;
-    vfs::async_task task;
     GtkAllocation allocation;
 
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-    i32 width = allocation.width;
-    i32 height = allocation.height;
+    const i32 width = allocation.width;
+    const i32 height = allocation.height;
     if (width && height)
     {
         xset_set(XSetName::APP_DLG, XSetVar::X, std::to_string(width));
         xset_set(XSetName::APP_DLG, XSetVar::Y, std::to_string(height));
     }
 
-    switch (id)
+    if (id == GtkResponseType::GTK_RESPONSE_OK || id == GtkResponseType::GTK_RESPONSE_CANCEL ||
+        id == GtkResponseType::GTK_RESPONSE_NONE ||
+        id == GtkResponseType::GTK_RESPONSE_DELETE_EVENT)
     {
-        /* The dialog is going to be closed */
-        case GtkResponseType::GTK_RESPONSE_OK:
-        case GtkResponseType::GTK_RESPONSE_CANCEL:
-        case GtkResponseType::GTK_RESPONSE_NONE:
-        case GtkResponseType::GTK_RESPONSE_DELETE_EVENT:
-            /* cancel app loading on dialog closing... */
-            task = VFS_ASYNC_TASK(g_object_get_data(G_OBJECT(dlg), "task"));
-            if (task)
-            {
-                // LOG_INFO("app-chooser.cxx -> vfs_async_task_cancel");
-                // see note in vfs-async-task.c: vfs_async_task_real_cancel()
-                task->cancel();
-                // The GtkListStore will be freed in
-                // EventType::TASK_FINISH handler of task - on_load_all_app_finish()
-                g_object_unref(task);
-            }
-            break;
-        default:
-            break;
+        vfs::async_task task = VFS_ASYNC_TASK(g_object_get_data(G_OBJECT(dlg), "task"));
+        if (task)
+        {
+            // LOG_INFO("app-chooser.cxx -> vfs_async_task_cancel");
+            // see note in vfs-async-task.c: vfs_async_task_real_cancel()
+            task->cancel();
+            // The GtkListStore will be freed in
+            // EventType::TASK_FINISH handler of task - on_load_all_app_finish()
+            g_object_unref(task);
+        }
     }
 }
 
@@ -629,13 +620,13 @@ load_all_known_apps_thread(vfs::async_task task)
 {
     GtkListStore* list = GTK_LIST_STORE(task->get_data());
 
-    std::string dir = Glib::build_filename(vfs::user_dirs->data_dir(), "applications");
+    const std::string dir = Glib::build_filename(vfs::user_dirs->data_dir(), "applications");
     load_all_apps_in_dir(dir, list, task);
 
     for (std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
-        dir = Glib::build_filename(sys_dir.data(), "applications");
-        load_all_apps_in_dir(dir, list, task);
+        const std::string sdir = Glib::build_filename(sys_dir.data(), "applications");
+        load_all_apps_in_dir(sdir, list, task);
     }
 
     return nullptr;

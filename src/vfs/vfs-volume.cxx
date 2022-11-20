@@ -1169,9 +1169,7 @@ info_partition_table(device_t device)
     {
         const std::string s = Glib::path_get_basename(device->native_path);
 
-        u32 partition_count;
-
-        partition_count = 0;
+        u32 partition_count = 0;
 
         for (const auto& file : std::filesystem::directory_iterator(device->native_path))
         {
@@ -1249,13 +1247,14 @@ info_partition(device_t device)
      */
     if (!is_partition && sysfs_file_exists(device->native_path, "start"))
     {
-        u64 size = sysfs_get_uint64(device->native_path, "size");
-        u64 alignment_offset = sysfs_get_uint64(device->native_path, "alignment_offset");
+        const u64 size = sysfs_get_uint64(device->native_path, "size");
+        const u64 alignment_offset = sysfs_get_uint64(device->native_path, "alignment_offset");
 
         device->partition_size = ztd::strdup(size * ztd::BLOCK_SIZE);
         device->partition_alignment_offset = ztd::strdup(alignment_offset);
 
-        u64 offset = sysfs_get_uint64(device->native_path, "start") * device->device_block_size;
+        const u64 offset =
+            sysfs_get_uint64(device->native_path, "start") * device->device_block_size;
         device->partition_offset = ztd::strdup(offset);
 
         char* s = device->native_path;
@@ -1793,8 +1792,6 @@ VFSVolume::set_info() noexcept
         disp_id = ztd::null_check(this->udi);
     }
 
-    std::string size_str;
-
     // set display name
     if (this->is_mounted)
     {
@@ -1805,7 +1802,7 @@ VFSVolume::set_info() noexcept
 
         if (this->size > 0)
         {
-            size_str = vfs_file_size_format(this->size, false);
+            const std::string size_str = vfs_file_size_format(this->size, false);
             disp_size = fmt::format("{}", size_str);
         }
         if (this->mount_point && this->mount_point[0] != '\0')
@@ -1825,7 +1822,7 @@ VFSVolume::set_info() noexcept
             disp_label = "";
         if (this->size > 0)
         {
-            size_str = vfs_file_size_format(this->size, false);
+            const std::string size_str = vfs_file_size_format(this->size, false);
             disp_size = fmt::format("{}", size_str);
         }
         disp_mount = "---";
@@ -2508,7 +2505,7 @@ vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* option
     std::string error_message;
     const char* action_s;
     bool terminal;
-    bool error = ptk_handler_load_script(mode, action, set, nullptr, command, error_message);
+    const bool error = ptk_handler_load_script(mode, action, set, nullptr, command, error_message);
 
     if (error)
     {
@@ -2819,7 +2816,7 @@ const char*
 VFSVolume::device_unmount_cmd(bool* run_in_terminal) noexcept
 {
     char* command = nullptr;
-    std::string pointq = "";
+    std::string pointq;
     *run_in_terminal = false;
 
     netmount_t netmount = std::make_shared<Netmount>();
@@ -3191,9 +3188,9 @@ VFSVolume::device_added(bool automount) noexcept
         if (volume->devnum == this->devnum)
         {
             // update existing volume
-            bool was_mounted = volume->is_mounted;
-            bool was_audiocd = volume->is_audiocd;
-            bool was_mountable = volume->is_mountable;
+            const bool was_mounted = volume->is_mounted;
+            const bool was_audiocd = volume->is_audiocd;
+            const bool was_mountable = volume->is_mountable;
 
             // detect changed mount point
             if (!was_mounted && this->is_mounted)
@@ -3533,7 +3530,7 @@ vfs_volume_finalize()
     callbacks.clear(); // free all shared_ptr
 
     // free volumes / unmount all ?
-    bool unmount_all = xset_get_b(XSetName::DEV_UNMOUNT_QUIT);
+    const bool unmount_all = xset_get_b(XSetName::DEV_UNMOUNT_QUIT);
     while (true)
     {
         if (volumes.empty())
@@ -3726,7 +3723,7 @@ vfs_volume_dir_avoid_changes(std::string_view dir)
         if (fstype && fstype[0])
         {
             // fstype listed in change detection blacklist?
-            i32 len = std::strlen(fstype);
+            const i32 len = std::strlen(fstype);
             char* ptr = ztd::strdup(xset_get_s(XSetName::DEV_CHANGE));
             if (ptr)
             {

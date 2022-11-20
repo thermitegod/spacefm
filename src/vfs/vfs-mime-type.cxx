@@ -119,7 +119,7 @@ vfs_mime_type_init()
     mime_type_init();
 
     /* install file alteration monitor for mime-cache */
-    std::vector<mime_cache_t> caches = mime_type_get_caches();
+    const std::vector<mime_cache_t> caches = mime_type_get_caches();
     for (mime_cache_t cache : caches)
     {
         // MOD NOTE1  check to see if path exists - otherwise it later tries to
@@ -282,10 +282,8 @@ vfs_mime_type_get_icon(vfs::mime_type mime_type, bool big)
 
         if (ztd::contains(mime_type->type, "/"))
         {
-            std::string icon_name;
-
             // convert mime-type foo/bar to foo-bar
-            icon_name = ztd::replace(mime_type->type, "/", "-");
+            std::string icon_name = ztd::replace(mime_type->type, "/", "-");
 
             // is there an icon named foo-bar?
             icon = vfs_load_icon(icon_name, size);

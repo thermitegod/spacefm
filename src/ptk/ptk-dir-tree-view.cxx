@@ -72,7 +72,8 @@ filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
 {
     vfs::file_info file;
     GtkTreeView* view = GTK_TREE_VIEW(data);
-    bool show_hidden = GPOINTER_TO_INT(g_object_get_qdata(G_OBJECT(view), dir_tree_view_data));
+    const bool show_hidden =
+        GPOINTER_TO_INT(g_object_get_qdata(G_OBJECT(view), dir_tree_view_data));
 
     if (show_hidden)
         return true;
@@ -483,7 +484,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* br
     if (!gtk_tree_selection_get_selected(select, &model, &iter))
         return false;
 
-    i32 keymod =
+    const i32 keymod =
         (evt->state & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
                        GdkModifierType::GDK_MOD1_MASK | GdkModifierType::GDK_SUPER_MASK |
                        GdkModifierType::GDK_HYPER_MASK | GdkModifierType::GDK_META_MASK));
@@ -711,7 +712,9 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
             free(dest_dir);
         }
         else
+        {
             LOG_WARN("bad dest_dir in on_dir_tree_view_drag_data_received");
+        }
     }
     /* If we are only getting drag status, not finished. */
     if (file_browser->pending_drag_status_tree)
@@ -753,7 +756,9 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i3
     gtk_target_list_unref(target_list);
 
     if (target == GDK_NONE)
+    {
         gdk_drag_status(drag_context, (GdkDragAction)0, time);
+    }
     else
     {
         // Need to set suggested_action because default handler assumes copy
@@ -772,7 +777,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i3
         /* Several different actions are available. We have to figure out a good default action. */
         else
         {
-            i32 drag_action = xset_get_int(XSetName::DRAG_ACTION, XSetVar::X);
+            const i32 drag_action = xset_get_int(XSetName::DRAG_ACTION, XSetVar::X);
             if (drag_action == 1)
                 suggested_action = GdkDragAction::GDK_ACTION_COPY;
             else if (drag_action == 2)

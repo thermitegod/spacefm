@@ -263,7 +263,7 @@ static bool
 on_move_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
 {
     (void)widget;
-    u32 keymod = ptk_get_keymod(event->state);
+    const u32 keymod = ptk_get_keymod(event->state);
 
     if (keymod == 0)
     {
@@ -285,7 +285,7 @@ static bool
 on_move_entry_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
 {
     (void)widget;
-    u32 keymod = ptk_get_keymod(event->state);
+    const u32 keymod = ptk_get_keymod(event->state);
 
     if (keymod == 0)
     {
@@ -345,8 +345,9 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     // change is_dir to reflect state of new directory or link option
     if (mset->create_new)
     {
-        bool new_folder = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder));
-        bool new_link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link));
+        const bool new_folder =
+            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder));
+        const bool new_link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link));
         if (new_folder ||
             (new_link &&
              std::filesystem::is_directory(gtk_entry_get_text(GTK_ENTRY(mset->entry_target))) &&
@@ -998,7 +999,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
-    i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
+    const i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
         char* new_path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
@@ -1054,13 +1055,13 @@ on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
         {
-            i32 action = i == MODE_PARENT
-                             ? GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
-                             : GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE;
+            const i32 action = i == MODE_PARENT
+                                   ? GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
+                                   : GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE;
             GtkAllocation allocation;
             gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-            i32 width = allocation.width;
-            i32 height = allocation.height;
+            const i32 width = allocation.width;
+            const i32 height = allocation.height;
             gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dlg), (GtkFileChooserAction)action);
             if (width && height)
             {
@@ -1156,7 +1157,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
-    i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
+    const i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
     // bogus GTK warning here: Unable to retrieve the file info for...
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
@@ -1218,16 +1219,16 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     const char* action;
     char* btn_label = nullptr;
 
-    bool move = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_move));
-    bool copy = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_copy));
-    bool link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_link));
-    bool copy_target = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_copy_target));
-    bool link_target = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_link_target));
-    bool as_root = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_as_root));
+    const bool move = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_move));
+    const bool copy = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_copy));
+    const bool link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_link));
+    const bool copy_target = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_copy_target));
+    const bool link_target = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_link_target));
+    const bool as_root = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_as_root));
 
-    bool new_file = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file));
-    bool new_folder = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder));
-    bool new_link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link));
+    const bool new_file = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file));
+    const bool new_folder = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder));
+    const bool new_link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link));
 
     const char* desc = nullptr;
     if (mset->create_new)
@@ -1250,7 +1251,7 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
         char* full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
         const std::string new_path = Glib::path_get_dirname(full_path);
 
-        bool rename = (ztd::same(mset->old_path, new_path) || ztd::same(new_path, "."));
+        const bool rename = (ztd::same(mset->old_path, new_path) || ztd::same(new_path, "."));
         free(full_path);
 
         if (move)
@@ -1889,7 +1890,7 @@ get_templates(std::string_view templates_dir, std::string_view subdir, bool getd
     {
         const std::string file_name = std::filesystem::path(file).filename();
 
-        std::string path = Glib::build_filename(templates_path, file_name);
+        const std::string path = Glib::build_filename(templates_path, file_name);
         if (getdir)
         {
             if (std::filesystem::is_directory(path))
@@ -2733,16 +2734,19 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
 
             // determine job
             // bool move = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_move));
-            bool copy = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_copy));
-            bool link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_link));
-            bool copy_target =
+            const bool copy = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_copy));
+            const bool link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_link));
+            const bool copy_target =
                 gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_copy_target));
-            bool link_target =
+            const bool link_target =
                 gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_link_target));
-            bool as_root = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_as_root));
-            bool new_file = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file));
-            bool new_folder = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder));
-            bool new_link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link));
+            const bool as_root = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_as_root));
+            const bool new_file =
+                gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file));
+            const bool new_folder =
+                gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder));
+            const bool new_link =
+                gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link));
 
             if (as_root)
                 root_msg = " As Root";
@@ -2927,7 +2931,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 if (gtk_widget_get_visible(
                         gtk_widget_get_parent(GTK_WIDGET(mset->combo_template_dir))))
                 {
-                    std::string str = gtk_combo_box_text_get_active_text(
+                    const std::string str = gtk_combo_box_text_get_active_text(
                         GTK_COMBO_BOX_TEXT(mset->combo_template_dir));
                     if (ztd::startswith(str, "/"))
                     {
@@ -3151,17 +3155,15 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, std::string_view cwd, GFunc
     (void)callback;
     bool is_cut = false;
     i32 missing_targets;
-    vfs::file_info file;
-    std::string file_dir;
 
     const std::vector<std::string> files =
         ptk_clipboard_get_file_paths(cwd.data(), &is_cut, &missing_targets);
 
     for (std::string_view file_path : files)
     {
-        file = vfs_file_info_new();
+        vfs::file_info file = vfs_file_info_new();
         vfs_file_info_get(file, file_path);
-        file_dir = std::filesystem::path(file_path).parent_path();
+        const std::string file_dir = std::filesystem::path(file_path).parent_path();
 
         if (!ptk_rename_file(file_browser,
                              file_dir.data(),

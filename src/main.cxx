@@ -262,13 +262,11 @@ handle_parsed_commandline_args()
         char** file;
         for (file = cli_flags.files; *file; ++file)
         {
-            std::string real_path;
-
             // skip empty string
             if (!**file)
                 continue;
 
-            real_path = std::filesystem::absolute(*file);
+            const std::string real_path = std::filesystem::absolute(*file);
 
             if (std::filesystem::is_directory(real_path))
             {
@@ -400,7 +398,7 @@ main(i32 argc, char* argv[])
                 std::exit(EXIT_SUCCESS);
             }
             std::string sock_reply;
-            i32 ret = send_socket_command(argc, argv, sock_reply);
+            const i32 ret = send_socket_command(argc, argv, sock_reply);
             if (!sock_reply.empty())
                 fmt::print("{}\n", sock_reply);
             std::exit(ret);

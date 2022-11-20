@@ -173,7 +173,7 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
             if (req->n_requests[i] == 0)
                 continue;
 
-            bool load_big = (i == VFSThumbnailSize::BIG);
+            const bool load_big = (i == VFSThumbnailSize::BIG);
             if (!req->file->is_thumbnail_loaded(load_big))
             {
                 const std::string full_path =

@@ -406,7 +406,6 @@ xset_context_test(xset_context_t context, char* rules, bool def_disable)
     i32 sub;
     i32 comp;
     char* value;
-    i32 match, action;
     char* s;
     char* eleval;
     char* sep;
@@ -424,14 +423,14 @@ xset_context_test(xset_context_t context, char* rules, bool def_disable)
     char* elements = rules;
     if (!(s = get_element_next(&elements)))
         return 0;
-    action = std::stol(s);
+    const i32 action = std::stol(s);
     free(s);
     if (action < 0 || action > 3)
         return 0;
 
     if (!(s = get_element_next(&elements)))
         return 0;
-    match = std::stol(s);
+    const i32 match = std::stol(s);
     free(s);
     if (match < 0 || match > 3)
         return 0;
@@ -637,7 +636,7 @@ context_build(ContextData* ctxt)
 static void
 enable_context(ContextData* ctxt)
 {
-    bool is_sel =
+    const bool is_sel =
         gtk_tree_selection_get_selected(gtk_tree_view_get_selection(GTK_TREE_VIEW(ctxt->view)),
                                         nullptr,
                                         nullptr);
@@ -652,7 +651,7 @@ enable_context(ContextData* ctxt)
         std::string text = "Current: Show";
         if (rules)
         {
-            i32 action = xset_context_test(ctxt->context, rules, false);
+            const i32 action = xset_context_test(ctxt->context, rules, false);
             if (action == ItemPropContextState::CONTEXT_HIDE)
                 text = "Current: Hide";
             else if (action == ItemPropContextState::CONTEXT_DISABLE)
@@ -693,8 +692,8 @@ on_context_button_press(GtkWidget* widget, ContextData* ctxt)
 
     if (widget == GTK_WIDGET(ctxt->btn_add) || widget == GTK_WIDGET(ctxt->btn_apply))
     {
-        i32 sub = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_sub));
-        i32 comp = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_comp));
+        const i32 sub = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_sub));
+        const i32 comp = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_comp));
         if (sub < 0 || comp < 0)
             return;
         model = gtk_tree_view_get_model(GTK_TREE_VIEW(ctxt->view));
@@ -749,7 +748,7 @@ on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
     while (gtk_tree_model_get_iter_first(model, &it))
         gtk_list_store_remove(GTK_LIST_STORE(model), &it);
 
-    i32 sub = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_sub));
+    const i32 sub = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_sub));
     if (sub < 0)
         return;
     char* elements = ztd::strdup(context_sub_lists[sub].data());
@@ -857,7 +856,7 @@ enable_options(ContextData* ctxt)
 {
     gtk_widget_set_sensitive(ctxt->opt_keep_term,
                              gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_terminal)));
-    bool as_task = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_task));
+    const bool as_task = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_task));
     gtk_widget_set_sensitive(ctxt->opt_task_pop, as_task);
     gtk_widget_set_sensitive(ctxt->opt_task_err, as_task);
     gtk_widget_set_sensitive(ctxt->opt_task_out, as_task);
@@ -1002,7 +1001,7 @@ load_command_script(ContextData* ctxt, xset_t set)
             file.close();
         }
     }
-    bool have_access = script && have_rw_access(script);
+    const bool have_access = script && have_rw_access(script);
     gtk_text_view_set_editable(GTK_TEXT_VIEW(ctxt->cmd_script), !set->plugin && have_access);
     gtk_text_buffer_set_modified(buf, modified);
     command_script_stat(ctxt);
@@ -1235,7 +1234,7 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
 {
     xset_t rset = ctxt->set;
     xset_t mset = xset_get_plugin_mirror(rset);
-    i32 job = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
+    const i32 job = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
     switch (job)
     {
         case ItemPropItemType::ITEM_TYPE_BOOKMARK:
@@ -1348,7 +1347,7 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
 static void
 on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
 {
-    i32 job = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->item_type));
+    const i32 job = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->item_type));
     if (job == ItemPropItemType::ITEM_TYPE_BOOKMARK)
     {
         // Bookmark Browse
@@ -1426,7 +1425,7 @@ replace_item_props(ContextData* ctxt)
     {
         // custom bookmark, app, or command
         bool is_app = false;
-        i32 item_type = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->item_type));
+        const i32 item_type = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->item_type));
 
         switch (item_type)
         {

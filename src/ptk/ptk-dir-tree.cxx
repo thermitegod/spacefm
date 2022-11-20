@@ -51,6 +51,12 @@
 
 #define PTK_DIR_TREE_NODE(obj) (static_cast<PtkDirTreeNode*>(obj))
 
+struct PtkDirTreeClass
+{
+    GObjectClass parent;
+    /* Default signal handlers */
+};
+
 struct PtkDirTreeNode
 {
     PtkDirTreeNode();
@@ -335,8 +341,8 @@ ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* 
     if (!tree || !tree->root)
         return false;
 
-    i32* indices = gtk_tree_path_get_indices(path);
-    i32 depth = gtk_tree_path_get_depth(path);
+    const i32* indices = gtk_tree_path_get_indices(path);
+    const i32 depth = gtk_tree_path_get_depth(path);
 
     PtkDirTreeNode* node = tree->root;
     assert(node != nullptr);
@@ -390,7 +396,7 @@ ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
 
     while (node != tree->root)
     {
-        i32 i = get_node_index(node->parent, node);
+        const i32 i = get_node_index(node->parent, node);
         if (i == -1)
         {
             gtk_tree_path_free(path);
@@ -490,7 +496,9 @@ ptk_dir_tree_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeI
     assert(tree != nullptr);
 
     if (parent)
+    {
         parent_node = PTK_DIR_TREE_NODE(parent->user_data);
+    }
     else
     {
         /* parent == nullptr is a special case; we need to return the first top-level row */
@@ -601,7 +609,8 @@ ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b
     if (!file1 || !file2)
         return 0;
     /* FIXME: UTF-8 strings should not be treated as ASCII when sorted  */
-    i32 ret = g_ascii_strcasecmp(file2->get_disp_name().data(), file1->get_disp_name().data());
+    const i32 ret =
+        g_ascii_strcasecmp(file2->get_disp_name().data(), file1->get_disp_name().data());
     return ret;
 }
 
@@ -851,42 +860,38 @@ on_file_monitor_event(vfs::file_monitor monitor, VFSFileMonitorEvent event,
     assert(node != nullptr);
 
     PtkDirTreeNode* child = find_node(node, file_name);
-    switch (event)
+
+    if (event == VFSFileMonitorEvent::CREATE)
     {
-        case VFSFileMonitorEvent::CREATE:
-            if (!child)
+        if (!child)
+        {
+            /* remove place holder */
+            if (node->n_children == 1 && !node->children->file)
+                child = node->children;
+            else
+                child = nullptr;
+            const std::string file_path = Glib::build_filename(monitor->path, file_name.data());
+            if (std::filesystem::is_directory(file_path))
             {
-                /* remove place holder */
-                if (node->n_children == 1 && !node->children->file)
-                    child = node->children;
-                else
-                    child = nullptr;
-                const std::string file_path = Glib::build_filename(monitor->path, file_name.data());
-                if (std::filesystem::is_directory(file_path))
-                {
-                    ptk_dir_tree_insert_child(node->tree, node, monitor->path, file_name);
-                    if (child)
-                        ptk_dir_tree_delete_child(node->tree, child);
-                }
+                ptk_dir_tree_insert_child(node->tree, node, monitor->path, file_name);
+                if (child)
+                    ptk_dir_tree_delete_child(node->tree, child);
             }
-            break;
-        case VFSFileMonitorEvent::DELETE:
-            if (child)
-            {
-                ptk_dir_tree_delete_child(node->tree, child);
-            }
-            break;
-            /* //MOD Change is not needed?  Creates this warning and triggers subsequent
-             * errors and causes visible redrawing problems:
-            Gtk-CRITICAL **: /tmp/buildd/gtk+2.0-2.24.3/gtk/gtktreeview.c:6072
-            (validate_visible_area): assertion `has_next' failed. There is a disparity between the
-            internal view of the GtkTreeView, and the GtkTreeModel.  This generally means that the
-            model has changed without letting the view know.  Any display from now on is likely to
-            be incorrect.
-            */
-        case VFSFileMonitorEvent::CHANGE:
-            break;
-        default:
-            break;
+        }
+    }
+    else if (event == VFSFileMonitorEvent::DELETE)
+    {
+        if (child)
+        {
+            ptk_dir_tree_delete_child(node->tree, child);
+        }
+        /* //MOD Change is not needed?  Creates this warning and triggers subsequent
+         * errors and causes visible redrawing problems:
+        Gtk-CRITICAL **: /tmp/buildd/gtk+2.0-2.24.3/gtk/gtktreeview.c:6072
+        (validate_visible_area): assertion `has_next' failed. There is a disparity between the
+        internal view of the GtkTreeView, and the GtkTreeModel.  This generally means that the
+        model has changed without letting the view know.  Any display from now on is likely to
+        be incorrect.
+        */
     }
 }

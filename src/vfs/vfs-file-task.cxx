@@ -1013,10 +1013,9 @@ VFSFileTask::file_chown_chmod(std::string_view src_file)
     if (src_stat.is_valid())
     {
         /* chown */
-        i32 result;
         if (!this->uid || !this->gid)
         {
-            result = chown(src_file.data(), this->uid, this->gid);
+            const i32 result = chown(src_file.data(), this->uid, this->gid);
             if (result != 0)
             {
                 this->task_error(errno, "chown", src_file);
@@ -1233,15 +1232,13 @@ VFSFileTask::file_exec(std::string_view src_file)
 {
     // this function is now thread safe but is not currently run in
     // another thread because gio adds watches to main loop thread anyway
-    std::string su;
-    std::string terminal;
-    GtkWidget* parent = nullptr;
 
     // LOG_INFO("vfs_file_task_exec");
     // this->exec_keep_tmp = true;
 
     this->lock();
 
+    GtkWidget* parent = nullptr;
     if (this->exec_browser)
         parent = gtk_widget_get_toplevel(GTK_WIDGET(this->exec_browser));
     else if (this->exec_desktop)
@@ -1257,6 +1254,7 @@ VFSFileTask::file_exec(std::string_view src_file)
         return;
 
     // need su?
+    std::string su;
     if (!this->exec_as_user.empty())
     {
         if (geteuid() == 0 && ztd::same(this->exec_as_user, "root"))
@@ -1309,6 +1307,8 @@ VFSFileTask::file_exec(std::string_view src_file)
     { // using cli tool so run in terminal
         this->exec_terminal = true;
     }
+
+    std::string terminal;
     if (this->exec_terminal)
     {
         // get terminal
@@ -1347,7 +1347,7 @@ VFSFileTask::file_exec(std::string_view src_file)
         }
 
         // open buffer
-        std::string buf = "";
+        std::string buf;
 
         // build - header
         buf.append(fmt::format("#!{}\n{}\n#tmp exec script\n", BASH_PATH, SHELL_SETTINGS));
@@ -1458,11 +1458,8 @@ VFSFileTask::file_exec(std::string_view src_file)
     // Spawn
     std::vector<std::string> argv;
 
-    pid_t pid;
-    i32 out, err;
     std::string use_su;
     bool single_arg = false;
-    std::string auth;
 
     if (!terminal.empty())
     {
@@ -1498,6 +1495,7 @@ VFSFileTask::file_exec(std::string_view src_file)
         }
     }
 
+    std::string auth;
     if (!sum_script.empty())
     {
         // spacefm-auth exists?
@@ -1542,6 +1540,8 @@ VFSFileTask::file_exec(std::string_view src_file)
         // argv.emplace_back("run");
     }
 
+    pid_t pid;
+    i32 out, err;
     try
     {
         if (this->exec_sync)

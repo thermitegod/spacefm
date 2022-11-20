@@ -324,7 +324,7 @@ save_settings(void* main_window_ptr)
     // LOG_INFO("save_settings");
 
     // save tabs
-    bool save_tabs = xset_get_b(XSetName::MAIN_SAVE_TABS);
+    const bool save_tabs = xset_get_b(XSetName::MAIN_SAVE_TABS);
     if (main_window_ptr)
         main_window = MAIN_WINDOW(main_window_ptr);
     else
@@ -339,7 +339,8 @@ save_settings(void* main_window_ptr)
                 xset_t set = xset_get_panel(p, XSetPanel::SHOW);
                 if (GTK_IS_NOTEBOOK(main_window->panel[p - 1]))
                 {
-                    i32 pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1]));
+                    const i32 pages =
+                        gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1]));
                     if (pages) // panel was shown
                     {
                         if (set->s)
@@ -364,7 +365,7 @@ save_settings(void* main_window_ptr)
                         if (set->x)
                             free(set->x);
 
-                        i32 current_page =
+                        const i32 current_page =
                             gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
                         set->x = ztd::strdup(current_page);
                     }
@@ -432,7 +433,6 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
     xset_t tset;
     xset_t open_all_tset;
     xset_context_t context;
-    i32 context_action;
     bool found = false;
     char pinned;
 
@@ -479,7 +479,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
             // test context
             if (mset->context)
             {
-                context_action = xset_context_test(context, mset->context, false);
+                const i32 context_action = xset_context_test(context, mset->context, false);
                 if (context_action == ItemPropContextState::CONTEXT_HIDE ||
                     context_action == ItemPropContextState::CONTEXT_DISABLE)
                     continue;
@@ -1214,7 +1214,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
     xset_t keyset = nullptr;
     std::string keyname;
 
-    u32 keymod = ptk_get_keymod(event->state);
+    const u32 keymod = ptk_get_keymod(event->state);
 
     if (!event->keyval) // || ( event->keyval < 1000 && !keymod ) )
     {
@@ -1395,7 +1395,7 @@ xset_set_key(GtkWidget* parent, xset_t set)
     gtk_widget_show_all(dlg);
     gtk_window_set_title(GTK_WINDOW(dlg), "Set Key");
 
-    i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
+    const i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
     gtk_widget_destroy(dlg);
     if (response == GtkResponseType::GTK_RESPONSE_OK ||
         response == GtkResponseType::GTK_RESPONSE_NO)
@@ -1550,7 +1550,7 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, xset_t set)
     if (!item)
         return false;
 
-    u32 keymod = ptk_get_keymod(event->state);
+    const u32 keymod = ptk_get_keymod(event->state);
 
 #ifdef HAVE_NONLATIN
     transpose_nonlatin_keypress(event);
@@ -1965,7 +1965,7 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
     XSetJob job = XSetJob::INVALID;
 
     GtkWidget* menu = item ? GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu")) : nullptr;
-    u32 keymod = ptk_get_keymod(event->state);
+    const u32 keymod = ptk_get_keymod(event->state);
 
     if (event->type == GdkEventType::GDK_BUTTON_RELEASE)
     {
@@ -2113,7 +2113,7 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
     else
         return false;
 
-    u32 keymod = ptk_get_keymod(event->state);
+    const u32 keymod = ptk_get_keymod(event->state);
 
 #ifdef HAVE_NONLATIN
     transpose_nonlatin_keypress(event);
@@ -2526,7 +2526,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     // LOG_INFO("on_tool_icon_button_press  {}   button = {}", set->menu_label, event->button);
     if (event->type != GdkEventType::GDK_BUTTON_PRESS)
         return false;
-    u32 keymod = ptk_get_keymod(event->state);
+    const u32 keymod = ptk_get_keymod(event->state);
 
     // get and focus browser
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
@@ -2664,7 +2664,7 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     // LOG_INFO("on_tool_menu_button_press  {}   button = {}", set->menu_label, event->button);
     if (event->type != GdkEventType::GDK_BUTTON_PRESS)
         return false;
-    u32 keymod = ptk_get_keymod(event->state);
+    const u32 keymod = ptk_get_keymod(event->state);
     if (keymod != 0 || event->button != 1)
         return on_tool_icon_button_press(widget, event, set);
 

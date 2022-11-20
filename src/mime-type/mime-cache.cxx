@@ -90,8 +90,7 @@ MimeCache::load_mime_file()
         return;
     }
 
-    char* buf = nullptr;
-    buf = (char*)g_malloc(mime_stat.size());
+    char* buf = (char*)g_malloc(mime_stat.size());
     read(fd, buf, mime_stat.size());
     close(fd);
 
@@ -153,7 +152,7 @@ MimeCache::lookup_literal(std::string_view filename)
      * However, it is poorly documented. So I have no idea how to implement this. */
 
     const char* entries = this->literals;
-    i32 n = this->n_literals;
+    const i32 n = this->n_literals;
     i32 upper = n;
     i32 lower = 0;
     i32 middle = upper / 2;
@@ -228,7 +227,7 @@ MimeCache::lookup_glob(std::string_view filename, i32* glob_len)
     i32 max_glob_len = 0;
 
     /* entry size is changed in mime.cache 1.1 */
-    const usize entry_size = 12;
+    static constexpr usize entry_size = 12;
 
     for (usize i = 0; i < this->n_globs; ++i)
     {
@@ -411,7 +410,7 @@ MimeCache::lookup_suffix_nodes(const char* buf, const char* nodes, u32 n, const 
         }
         else /* uchar == ch */
         {
-            u32 n_children = VAL32(node, 8);
+            const u32 n_children = VAL32(node, 8);
             name = g_utf8_next_char(name);
 
             if (n_children > 0)
@@ -421,7 +420,7 @@ MimeCache::lookup_suffix_nodes(const char* buf, const char* nodes, u32 n, const 
 
                 if (!name || name[0] == 0)
                 {
-                    u32 offset = VAL32(node, 4);
+                    const u32 offset = VAL32(node, 4);
                     return offset ? buf + offset : nullptr;
                 }
                 const u32 first_child_off = VAL32(node, 12);

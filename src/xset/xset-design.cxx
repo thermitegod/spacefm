@@ -605,9 +605,8 @@ xset_design_job_set_remove(xset_t set)
         buttons = GtkButtonsType::GTK_BUTTONS_OK_CANCEL;
     }
     free(name);
-    bool is_app;
-    is_app = !set->lock && set->menu_style < XSetMenu::SUBMENU && cmd_type == XSetCMD::APP &&
-             set->tool <= XSetTool::CUSTOM;
+    const bool is_app = !set->lock && set->menu_style < XSetMenu::SUBMENU &&
+                        cmd_type == XSetCMD::APP && set->tool <= XSetTool::CUSTOM;
     if (!(set->menu_style == XSetMenu::SEP) && app_settings.get_confirm() && !is_app &&
         set->tool <= XSetTool::CUSTOM)
     {

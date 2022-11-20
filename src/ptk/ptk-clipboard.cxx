@@ -88,17 +88,16 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, u3
 
     for (std::string_view clipboard_file : clipboard_file_list)
     {
-        std::string file_name;
         if (use_uri)
         {
-            file_name = Glib::filename_to_uri(clipboard_file.data());
+            const std::string uri_name = Glib::filename_to_uri(clipboard_file.data());
+            uri_list.append(fmt::format("{}\n", uri_name));
         }
         else
         {
-            file_name = Glib::filename_display_name(clipboard_file.data());
+            const std::string file_name = Glib::filename_display_name(clipboard_file.data());
+            uri_list.append(fmt::format("{}\n", file_name));
         }
-
-        uri_list.append(fmt::format("{}\n", file_name));
     }
 
     gtk_selection_data_set(selection_data,
@@ -177,7 +176,6 @@ ptk_clipboard_cut_or_copy_files(std::string_view working_dir,
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkTargetList* target_list = gtk_target_list_new(nullptr, 0);
     i32 n_targets;
-    std::vector<std::string> file_list;
 
     gtk_target_list_add_text_targets(target_list, 0);
     GtkTargetEntry* targets = gtk_target_table_new_from_list(target_list, &n_targets);
@@ -192,6 +190,7 @@ ptk_clipboard_cut_or_copy_files(std::string_view working_dir,
 
     gtk_target_list_unref(target_list);
 
+    std::vector<std::string> file_list;
     for (vfs::file_info file : sel_files)
     {
         const std::string file_path = Glib::build_filename(working_dir.data(), file->get_name());
@@ -217,7 +216,6 @@ ptk_clipboard_copy_file_list(char** path, bool copy)
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkTargetList* target_list = gtk_target_list_new(nullptr, 0);
     i32 n_targets;
-    std::vector<std::string> file_list;
 
     gtk_target_list_add_text_targets(target_list, 0);
     GtkTargetEntry* targets = gtk_target_table_new_from_list(target_list, &n_targets);
@@ -233,6 +231,7 @@ ptk_clipboard_copy_file_list(char** path, bool copy)
     gtk_target_list_unref(target_list);
 
     char** file_path = path;
+    std::vector<std::string> file_list;
     while (*file_path)
     {
         if (*file_path[0] == '/')

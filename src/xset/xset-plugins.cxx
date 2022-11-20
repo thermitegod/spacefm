@@ -555,7 +555,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, std::string_view pat
             break;
     }
 
-    std::string book = "";
+    std::string book;
     if (job == PluginJob::INSTALL || !insert_set)
     {
         // prevent install of exported bookmarks or handler as plugin or design clipboard

@@ -241,7 +241,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
                                 PtkFileBrowser* file_browser)
 {
     (void)event;
-    i32 pos;
+
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     const panel_t p = file_browser->mypanel;
     const MainWindowPanel mode = main_window->panel_context.at(p);
@@ -250,7 +250,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
 
     if (widget == file_browser->hpane)
     {
-        pos = gtk_paned_get_position(GTK_PANED(file_browser->hpane));
+        const i32 pos = gtk_paned_get_position(GTK_PANED(file_browser->hpane));
         if (!main_window->fullscreen)
         {
             free(set->x);
@@ -261,6 +261,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
     }
     else
     {
+        i32 pos;
         // LOG_INFO("ptk_file_browser_slider_release fb={:p}  (panel {})  mode = {}", file_browser,
         // p, fmt::ptr(mode));
         pos = gtk_paned_get_position(GTK_PANED(file_browser->side_vpane_top));
@@ -531,8 +532,6 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
     if (!PTK_IS_FILE_BROWSER(file_browser))
         return;
 
-    unsigned char x;
-    GtkWidget* widget;
     xset_t set = XSET(set_ptr);
 
     if (set && !set->lock && set->menu_style == XSetMenu::CHECK && set->tool == XSetTool::CUSTOM)
@@ -542,7 +541,7 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
         {
             if (XSET(g_object_get_data(G_OBJECT(l->data), "set")) == set)
             {
-                widget = GTK_WIDGET(l->data);
+                GtkWidget* widget = GTK_WIDGET(l->data);
                 if (GTK_IS_TOGGLE_BUTTON(widget))
                 {
                     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget),
@@ -562,6 +561,7 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
 
     // builtin tool
     bool b = false;
+    unsigned char x;
 
     switch (tool_type)
     {
@@ -618,7 +618,7 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
     // update all widgets in list
     for (GSList* l = file_browser->toolbar_widgets[x]; l; l = g_slist_next(l))
     {
-        widget = GTK_WIDGET(l->data);
+        GtkWidget* widget = GTK_WIDGET(l->data);
         if (GTK_IS_TOGGLE_BUTTON(widget))
             gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), b);
         else if (GTK_IS_WIDGET(widget))
@@ -655,7 +655,7 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     const panel_t p = file_browser->mypanel;
     const MainWindowPanel mode = main_window->panel_context.at(p);
 
-    bool show_tooltips = !xset_get_b_panel(1, XSetPanel::TOOL_L);
+    const bool show_tooltips = !xset_get_b_panel(1, XSetPanel::TOOL_L);
 
     // destroy
     if (file_browser->toolbar)
@@ -724,7 +724,7 @@ rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     const MainWindowPanel mode =
         main_window ? main_window->panel_context.at(p) : MainWindowPanel::PANEL_NEITHER;
 
-    bool show_tooltips = !xset_get_b_panel(1, XSetPanel::TOOL_L);
+    const bool show_tooltips = !xset_get_b_panel(1, XSetPanel::TOOL_L);
 
     // destroy
     if (file_browser->side_toolbar)
@@ -1299,9 +1299,9 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     }
 
     // set slider positions
-    i32 pos;
+
     // hpane
-    pos = main_window->panel_slide_x[p - 1];
+    i32 pos = main_window->panel_slide_x[p - 1];
     if (pos < 100)
         pos = -1;
     // LOG_INFO("    set slide_x = {}", pos);
@@ -1323,8 +1323,8 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     gtk_paned_set_position(GTK_PANED(file_browser->side_vpane_bottom), pos);
 
     // Large Icons - option for Detailed and Compact list views
-    bool large_icons = xset_get_b_panel(p, XSetPanel::LIST_ICONS) ||
-                       xset_get_b_panel_mode(p, XSetPanel::LIST_LARGE, mode);
+    const bool large_icons = xset_get_b_panel(p, XSetPanel::LIST_ICONS) ||
+                             xset_get_b_panel_mode(p, XSetPanel::LIST_LARGE, mode);
     if (large_icons != !!file_browser->large_icons)
     {
         if (file_browser->folder_view)
@@ -1642,7 +1642,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, std::string_view folder_pat
     GtkWidget* folder_view = file_browser->folder_view;
     // LOG_INFO("ptk_file_browser_chdir");
 
-    bool inhibit_focus = file_browser->inhibit_focus;
+    const bool inhibit_focus = file_browser->inhibit_focus;
     // file_browser->button_press = false;
     file_browser->is_drag = false;
     file_browser->menu_shown = false;
@@ -3223,7 +3223,7 @@ on_folder_view_button_release_event(GtkWidget* widget, GdkEventButton* event,
         if (file_browser->skip_release)
             file_browser->skip_release = false;
         // this fixes bug where right-click shows menu and release unselects files
-        bool ret = file_browser->menu_shown && event->button != 1;
+        const bool ret = file_browser->menu_shown && event->button != 1;
         if (file_browser->menu_shown)
             file_browser->menu_shown = false;
         return ret;
@@ -3386,7 +3386,7 @@ ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_brow
             {
                 // save column width for this panel context
                 xset_t set = xset_get_panel_mode(p, column_names.at(j), mode);
-                i32 width = gtk_tree_view_column_get_width(col);
+                const i32 width = gtk_tree_view_column_get_width(col);
                 if (width > 0)
                 {
                     free(set->y);
@@ -3434,16 +3434,16 @@ static void
 on_folder_view_destroy(GtkTreeView* view, PtkFileBrowser* file_browser)
 {
     (void)file_browser;
-    u32 id = g_signal_lookup("columns-changed", G_TYPE_FROM_INSTANCE(view));
+    const u32 id = g_signal_lookup("columns-changed", G_TYPE_FROM_INSTANCE(view));
     if (id)
     {
-        u64 hand = g_signal_handler_find((void*)view,
-                                         GSignalMatchType::G_SIGNAL_MATCH_ID,
-                                         id,
-                                         0,
-                                         nullptr,
-                                         nullptr,
-                                         nullptr);
+        const u64 hand = g_signal_handler_find((void*)view,
+                                               GSignalMatchType::G_SIGNAL_MATCH_ID,
+                                               id,
+                                               0,
+                                               nullptr,
+                                               nullptr,
+                                               nullptr);
         if (hand)
             g_signal_handler_disconnect((void*)view, hand);
     }
@@ -3481,7 +3481,7 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* key, GtkTreeI
     }
     else
     {
-        bool end = ztd::endswith(key, "$");
+        const bool end = ztd::endswith(key, "$");
         bool start = !end && (std::strlen(key) < 3);
         char* key2 = ztd::strdup(key);
         char* keyp = key2;
@@ -3814,7 +3814,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
             gtk_tree_view_column_set_sizing(col,
                                             GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
             xset_t set = xset_get_panel_mode(p, column_names.at(j), mode);
-            i32 width = set->y ? std::stol(set->y) : 100;
+            const i32 width = set->y ? std::stol(set->y) : 100;
             if (width)
             {
                 if (cols.at(j) == PTKFileListCol::COL_FILE_NAME &&
@@ -3841,7 +3841,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
                             gtk_tree_view_get_column(GTK_TREE_VIEW(first_fb->folder_view), 0);
                         if (first_col)
                         {
-                            i32 first_width = gtk_tree_view_column_get_width(first_col);
+                            const i32 first_width = gtk_tree_view_column_get_width(first_col);
                             if (first_width > 10)
                                 gtk_tree_view_column_set_fixed_width(first_col, first_width - 6);
                         }
@@ -4497,7 +4497,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
         /* Several different actions are available. We have to figure out a good default action. */
         else
         {
-            i32 drag_action = xset_get_int(XSetName::DRAG_ACTION, XSetVar::X);
+            const i32 drag_action = xset_get_int(XSetName::DRAG_ACTION, XSetVar::X);
 
             switch (drag_action)
             {
@@ -4688,7 +4688,6 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, const std::vector<vfs::fi
     if (!file_browser)
         return;
 
-    xset_t set2;
     char* copy_dest = nullptr;
     char* move_dest = nullptr;
 
@@ -4730,7 +4729,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, const std::vector<vfs::fi
         copy_dest = main_window_get_panel_cwd(file_browser, panel_4);
     else if (setname == XSetName::COPY_LOC_LAST)
     {
-        set2 = xset_get(XSetName::COPY_LOC_LAST);
+        xset_t set2 = xset_get(XSetName::COPY_LOC_LAST);
         copy_dest = ztd::strdup(set2->desc);
     }
     else if (setname == XSetName::MOVE_TAB_PREV)
@@ -4771,7 +4770,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, const std::vector<vfs::fi
         move_dest = main_window_get_panel_cwd(file_browser, panel_4);
     else if (setname == XSetName::MOVE_LOC_LAST)
     {
-        set2 = xset_get(XSetName::COPY_LOC_LAST);
+        xset_t set2 = xset_get(XSetName::COPY_LOC_LAST);
         move_dest = ztd::strdup(set2->desc);
     }
 
@@ -4780,7 +4779,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, const std::vector<vfs::fi
         !copy_dest && !move_dest)
     {
         std::string folder;
-        set2 = xset_get(XSetName::COPY_LOC_LAST);
+        xset_t set2 = xset_get(XSetName::COPY_LOC_LAST);
         if (set2->desc)
             folder = set2->desc;
         else
@@ -4976,11 +4975,10 @@ on_dir_tree_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrowser* f
     {
         /* left and right click handled in ptk-dir-tree-view.c
          * on_dir_tree_view_button_press() */
-        GtkTreeModel* model;
         GtkTreePath* tree_path;
         GtkTreeIter it;
 
-        model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
+        GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
         if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
                                           evt->x,
                                           evt->y,
@@ -5090,7 +5088,7 @@ ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname)
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(file_browser->file_list);
     if (!list)
         return;
-    i32 panel = file_browser->mypanel;
+    const panel_t panel = file_browser->mypanel;
 
     if (set->xset_name == XSetName::SORTX_ALPHANUM)
     {
@@ -5157,7 +5155,7 @@ ptk_file_browser_set_sort_order(PtkFileBrowser* file_browser, PtkFBSortOrder ord
         return;
 
     file_browser->sort_order = order;
-    i32 col = file_list_order_from_sort_order(order);
+    const i32 col = file_list_order_from_sort_order(order);
 
     if (file_browser->file_list)
     {
@@ -5800,7 +5798,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
         ptk_file_browser_set_sort_extra(browser, set->xset_name);
     else if (ztd::startswith(set->name, "panel"))
     {
-        i32 panel_num = set->name[5];
+        const i32 panel_num = set->name[5];
 
         // LOG_INFO("ACTION panelN={}  {}", panel_num, set->name[5]);
 

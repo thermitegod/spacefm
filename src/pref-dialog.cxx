@@ -130,7 +130,6 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
     bool single_click;
     PtkFileBrowser* file_browser;
     bool use_si_prefix;
-    GtkNotebook* notebook;
 
     GtkWidget* tab_label;
     /* interface settings */
@@ -153,8 +152,8 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
             {
                 for (panel_t p : PANELS)
                 {
-                    notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    i32 n = gtk_notebook_get_n_pages(notebook);
+                    GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
+                    const i32 n = gtk_notebook_get_n_pages(notebook);
                     if (always_show_tabs)
                         gtk_notebook_set_show_tabs(notebook, true);
                     else if (n == 1)
@@ -172,8 +171,8 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
             {
                 for (panel_t p : PANELS)
                 {
-                    notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    i32 n = gtk_notebook_get_n_pages(notebook);
+                    GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
+                    const i32 n = gtk_notebook_get_n_pages(notebook);
                     for (i32 i = 0; i < n; ++i)
                     {
                         file_browser =
@@ -231,8 +230,8 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
             {
                 for (panel_t p : PANELS)
                 {
-                    notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    i32 n = gtk_notebook_get_n_pages(notebook);
+                    GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
+                    const i32 n = gtk_notebook_get_n_pages(notebook);
                     for (i32 i = 0; i < n; ++i)
                     {
                         file_browser =
@@ -293,8 +292,8 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
             {
                 for (panel_t p : PANELS)
                 {
-                    notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    i32 n = gtk_notebook_get_n_pages(notebook);
+                    GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
+                    const i32 n = gtk_notebook_get_n_pages(notebook);
                     for (i32 i = 0; i < n; ++i)
                     {
                         file_browser =
@@ -307,7 +306,8 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         }
 
         /* single click - hover selects changed? */
-        bool single_hover = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->single_hover));
+        const bool single_hover =
+            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->single_hover));
         if (single_hover != app_settings.get_single_hover())
         {
             app_settings.set_single_hover(single_hover);
@@ -316,8 +316,8 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
             {
                 for (panel_t p : PANELS)
                 {
-                    notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    i32 n = gtk_notebook_get_n_pages(notebook);
+                    GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
+                    const i32 n = gtk_notebook_get_n_pages(notebook);
                     for (i32 i = 0; i < n; ++i)
                     {
                         file_browser =
@@ -347,7 +347,7 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
             custom_su = Glib::find_program_in_path(custom_su);
         }
 
-        i32 idx = gtk_combo_box_get_active(GTK_COMBO_BOX(data->su_command));
+        const i32 idx = gtk_combo_box_get_active(GTK_COMBO_BOX(data->su_command));
         if (idx > -1)
         {
             if (!custom_su.empty())
@@ -625,7 +625,7 @@ edit_preference(GtkWindow* parent, i32 page)
         GtkTreeIter it;
         data->su_command = GTK_WIDGET(gtk_builder_get_object(builder, "su_command"));
 
-        std::string use_su = xset_get_s(XSetName::SU_COMMAND);
+        const std::string use_su = xset_get_s(XSetName::SU_COMMAND);
         std::string custom_su = etc_settings.get_terminal_su();
         if (!custom_su.empty())
         { // get su from /etc/spacefm/spacefm.conf

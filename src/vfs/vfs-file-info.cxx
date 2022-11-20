@@ -248,19 +248,14 @@ VFSFileInfo::get_big_icon() noexcept
         return vfs_mime_type_get_icon(this->mime_type, true);
     }
 
-    i32 w;
-    i32 h;
+    i32 w = 0;
+    i32 h = 0;
     const i32 icon_size = vfs_mime_type_get_icon_size_big();
 
     if (this->big_thumbnail)
     {
         w = gdk_pixbuf_get_width(this->big_thumbnail);
         h = gdk_pixbuf_get_height(this->big_thumbnail);
-    }
-    else
-    {
-        w = 0;
-        h = 0;
     }
 
     if (std::abs(std::max(w, h) - icon_size) > 2)
@@ -676,18 +671,17 @@ VFSFileInfo::load_special_info(std::string_view file_path) noexcept
     if (desktop->get_icon_name().empty())
         return;
 
-    GdkPixbuf* icon;
     const i32 big_size = vfs_mime_type_get_icon_size_big();
     const i32 small_size = vfs_mime_type_get_icon_size_small();
     if (!this->big_thumbnail)
     {
-        icon = desktop->get_icon(big_size);
+        GdkPixbuf* icon = desktop->get_icon(big_size);
         if (icon)
             this->big_thumbnail = icon;
     }
     if (!this->small_thumbnail)
     {
-        icon = desktop->get_icon(small_size);
+        GdkPixbuf* icon = desktop->get_icon(small_size);
         if (icon)
             this->small_thumbnail = icon;
     }

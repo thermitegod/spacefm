@@ -68,8 +68,8 @@ struct PtkFileList
     GList* files;
     u32 n_files;
 
-    bool show_hidden : 1;
-    bool big_thumbnail : 1;
+    bool show_hidden{true};
+    bool big_thumbnail{true};
     i32 max_thumbnail;
 
     i32 sort_col;

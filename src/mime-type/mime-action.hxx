@@ -22,8 +22,6 @@
 
 #include <vector>
 
-#include <glib.h>
-
 enum class MimeTypeAction
 {
     DEFAULT,

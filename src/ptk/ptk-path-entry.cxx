@@ -350,7 +350,7 @@ on_key_press(GtkWidget* entry, GdkEventKey* evt, EntryData* edata)
 
     if (evt->keyval == GDK_KEY_Tab)
     {
-        u32 keymod = ptk_get_keymod(evt->state);
+        const u32 keymod = ptk_get_keymod(evt->state);
         if (keymod)
             return false;
 

@@ -79,7 +79,7 @@ open_archives_with_handler(ParentInfo* parent, const std::vector<vfs::file_info>
         return false; // do not handle these files
     }
 
-    bool extract_here = xset_get_b(XSetName::ARC_DEF_EX);
+    const bool extract_here = xset_get_b(XSetName::ARC_DEF_EX);
     std::string dest_dir;
     i32 cmd;
 
@@ -127,19 +127,18 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
 {
     std::string str;
     std::string command_final;
-    std::string name;
 
     LOG_INFO("Selected File Handler '{}'", handler_set->menu_label);
 
     // get command - was already checked as non-empty
     std::string error_message;
     std::string command;
-    bool error = ptk_handler_load_script(PtkHandlerMode::HANDLER_MODE_FILE,
-                                         PtkHandlerMount::HANDLER_MOUNT,
-                                         handler_set,
-                                         nullptr,
-                                         command,
-                                         error_message);
+    const bool error = ptk_handler_load_script(PtkHandlerMode::HANDLER_MODE_FILE,
+                                               PtkHandlerMount::HANDLER_MOUNT,
+                                               handler_set,
+                                               nullptr,
+                                               command,
+                                               error_message);
     if (error)
     {
         xset_msg_dialog(parent->file_browser ? GTK_WIDGET(parent->file_browser) : nullptr,
@@ -152,11 +151,11 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
     // auto mount point
     if (ztd::contains(command, "%a"))
     {
-        name = ptk_location_view_create_mount_point(PtkHandlerMode::HANDLER_MODE_FILE,
-                                                    nullptr,
-                                                    nullptr,
-                                                    files && files->data ? (char*)files->data
-                                                                         : nullptr);
+        const std::string name = ptk_location_view_create_mount_point(
+            PtkHandlerMode::HANDLER_MODE_FILE,
+            nullptr,
+            nullptr,
+            files && files->data ? (char*)files->data : nullptr);
         command = ztd::replace(command, "%a", name);
     }
 
@@ -166,7 +165,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
     std::string fm_files = "fm_files=(\n";
     // command looks like it handles multiple files ?
     static constexpr std::array<std::string_view, 4> keys{"%N", "%F", "fm_files[", "fm_filenames["};
-    bool multiple = ztd::contains(command, keys);
+    const bool multiple = ztd::contains(command, keys);
     if (multiple)
     {
         for (GList* l = files; l; l = g_list_next(l))
@@ -174,12 +173,10 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
             // filename
             std::string quoted;
 
-            name = Glib::path_get_basename((char*)l->data);
-            quoted = bash_quote(name);
-            fm_filenames.append(fmt::format("{}\n", quoted));
+            const std::string name = Glib::path_get_basename((char*)l->data);
+            fm_filenames.append(fmt::format("{}\n", bash_quote(name)));
             // file path
-            quoted = bash_quote((char*)l->data);
-            fm_filenames.append(fmt::format("{}\n", quoted));
+            fm_filenames.append(fmt::format("{}\n", bash_quote((char*)l->data)));
         }
     }
     fm_filenames.append(")\nfm_filename=\"$fm_filenames[0]\"\n");
@@ -200,7 +197,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
             // filename
             std::string quoted;
 
-            name = Glib::path_get_basename((char*)l->data);
+            const std::string name = Glib::path_get_basename((char*)l->data);
             quoted = bash_quote(name);
             str = fmt::format("fm_filename={}\n", quoted);
             // file path

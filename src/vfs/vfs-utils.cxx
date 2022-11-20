@@ -30,10 +30,9 @@
 GdkPixbuf*
 vfs_load_icon(std::string_view icon_name, i32 size)
 {
-    GtkIconInfo* inf = nullptr;
     GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
-    inf = gtk_icon_theme_lookup_icon(
+    GtkIconInfo* inf = gtk_icon_theme_lookup_icon(
         icon_theme,
         icon_name.data(),
         size,

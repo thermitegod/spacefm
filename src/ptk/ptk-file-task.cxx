@@ -463,7 +463,6 @@ set_button_states(PtkFileTask* ptask)
         return;
 
     std::string label;
-    bool sens = !ptask->complete;
 
     switch (ptask->task->state_pause)
     {
@@ -488,7 +487,8 @@ set_button_states(PtkFileTask* ptask)
             //  icon = "media-playback-pause";
             break;
     }
-    sens = sens && !(ptask->task->type == VFSFileTaskType::EXEC && !ptask->task->exec_pid);
+    const bool sens =
+        !ptask->complete && !(ptask->task->type == VFSFileTaskType::EXEC && !ptask->task->exec_pid);
 
     gtk_widget_set_sensitive(ptask->progress_btn_pause, sens);
     gtk_button_set_label(GTK_BUTTON(ptask->progress_btn_pause), label.data());
@@ -899,8 +899,9 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
             "Continue",
         };
 
-        bool overtask = task->type == VFSFileTaskType::MOVE ||
-                        task->type == VFSFileTaskType::COPY || task->type == VFSFileTaskType::LINK;
+        const bool overtask = task->type == VFSFileTaskType::MOVE ||
+                              task->type == VFSFileTaskType::COPY ||
+                              task->type == VFSFileTaskType::LINK;
         ptask->overwrite_combo = gtk_combo_box_text_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(ptask->overwrite_combo), false);
         gtk_widget_set_sensitive(ptask->overwrite_combo, overtask);
@@ -1431,7 +1432,7 @@ ptk_file_task_update(PtkFileTask* ptask)
         // cur speed
         if (task->state_pause == VFSFileTaskState::RUNNING)
         {
-            f64 since_last = timer_elapsed - task->last_elapsed;
+            const f64 since_last = timer_elapsed - task->last_elapsed;
             if (since_last >= 2.0)
             {
                 cur_speed = (task->progress - task->last_progress) / since_last;
@@ -1450,7 +1451,7 @@ ptk_file_task_update(PtkFileTask* ptask)
         i32 ipercent;
         if (task->total_size)
         {
-            f64 dpercent = ((f64)task->progress) / task->total_size;
+            const f64 dpercent = ((f64)task->progress) / task->total_size;
             ipercent = (i32)(dpercent * 100);
         }
         else
@@ -1478,8 +1479,6 @@ ptk_file_task_update(PtkFileTask* ptask)
 
     if (task->type != VFSFileTaskType::EXEC)
     {
-        std::string file_count;
-        std::string size_tally;
         std::string speed1;
         std::string speed2;
         std::string remain1;
@@ -1489,14 +1488,14 @@ ptk_file_task_update(PtkFileTask* ptask)
         std::string size_str2;
 
         // count
-        file_count = std::to_string(task->current_item);
+        const std::string file_count = std::to_string(task->current_item);
         // size
         size_str = vfs_file_size_format(task->progress);
         if (task->total_size)
             size_str2 = vfs_file_size_format(task->total_size);
         else
             size_str2 = "??"; // total_size calculation timed out
-        size_tally = fmt::format("{} / {}", size_str, size_str2);
+        const std::string size_tally = fmt::format("{} / {}", size_str, size_str2);
         // cur speed display
         if (task->last_speed != 0)
             // use speed of last 2 sec interval if available
@@ -1805,7 +1804,7 @@ on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input)
     (void)input_buf;
     char* new_name = multi_input_get_text(query_input);
     const char* old_name = (const char*)g_object_get_data(G_OBJECT(query_input), "old_name");
-    bool can_rename = new_name && (!ztd::same(new_name, old_name));
+    const bool can_rename = new_name && (!ztd::same(new_name, old_name));
     free(new_name);
     GtkWidget* dlg = gtk_widget_get_toplevel(query_input);
     if (!GTK_IS_DIALOG(dlg))
@@ -1892,7 +1891,7 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
     if (allocation.width && allocation.height)
     {
-        i32 has_overwrite_btn =
+        const i32 has_overwrite_btn =
             GPOINTER_TO_INT((void*)g_object_get_data(G_OBJECT(dlg), "has_overwrite_btn"));
         xset_set(XSetName::TASK_POPUPS,
                  has_overwrite_btn ? XSetVar::X : XSetVar::S,
@@ -1952,7 +1951,6 @@ query_overwrite(PtkFileTask* ptask)
     GtkTextIter iter;
 
     bool has_overwrite_btn = true;
-    bool different_files;
 
     std::string title;
     std::string message;
@@ -1967,7 +1965,7 @@ query_overwrite(PtkFileTask* ptask)
     else
         from_disp = "Copying from directory:";
 
-    different_files = (!ztd::same(ptask->task->current_file, ptask->task->current_dest));
+    const bool different_files = (!ztd::same(ptask->task->current_file, ptask->task->current_dest));
 
     const auto src_stat = ztd::lstat(ptask->task->current_file);
     const auto dest_stat = ztd::lstat(ptask->task->current_dest);
@@ -1987,18 +1985,13 @@ query_overwrite(PtkFileTask* ptask)
         {
             /* Ask the user whether to overwrite the file or not */
             char buf[64];
-            std::string dest_size;
-            std::string dest_time;
             std::string src_size;
             std::string src_time;
-            std::string src_rel;
             std::string src_rel_size;
             std::string src_rel_time;
             std::string src_link;
             std::string dest_link;
             std::string link_warn;
-
-            std::string size_str;
 
             const bool is_src_sym = std::filesystem::is_symlink(ptask->task->current_file);
             const bool is_dest_sym = std::filesystem::is_symlink(ptask->task->current_dest);
@@ -2015,7 +2008,7 @@ query_overwrite(PtkFileTask* ptask)
             }
             else
             {
-                size_str = vfs_file_size_format(src_stat.size());
+                const std::string size_str = vfs_file_size_format(src_stat.size());
                 src_size = fmt::format("{}\t( {} bytes )", size_str, src_stat.size());
                 if (src_stat.size() > dest_stat.size())
                     src_rel_size = "larger";
@@ -2039,21 +2032,23 @@ query_overwrite(PtkFileTask* ptask)
                 else
                     src_rel_time = "older";
             }
-            size_str = vfs_file_size_format(dest_stat.size());
-            dest_size = fmt::format("{}\t( {} bytes )", size_str, dest_stat.size());
+            const std::string size_str = vfs_file_size_format(dest_stat.size());
+            const std::string dest_size =
+                fmt::format("{}\t( {} bytes )", size_str, dest_stat.size());
             const time_t dest_mtime = dest_stat.mtime();
             strftime(buf,
                      sizeof(buf),
                      app_settings.get_date_format().data(),
                      std::localtime(&dest_mtime));
-            dest_time = buf;
+            const std::string dest_time = buf;
 
-            src_rel = fmt::format("{}{}{}{}{}",
-                                  !src_rel_time.empty() || !src_rel_size.empty() ? "<b>( " : "",
-                                  !src_rel_time.empty() ? src_rel_time : "",
-                                  !src_rel_time.empty() && !src_rel_size.empty() ? " &amp; " : "",
-                                  !src_rel_size.empty() ? src_rel_size : "",
-                                  !src_rel_time.empty() || !src_rel_size.empty() ? " )</b> " : "");
+            const std::string src_rel =
+                fmt::format("{}{}{}{}{}",
+                            !src_rel_time.empty() || !src_rel_size.empty() ? "<b>( " : "",
+                            !src_rel_time.empty() ? src_rel_time : "",
+                            !src_rel_time.empty() && !src_rel_size.empty() ? " &amp; " : "",
+                            !src_rel_size.empty() ? src_rel_size : "",
+                            !src_rel_time.empty() || !src_rel_size.empty() ? " )</b> " : "");
 
             from_size_str = fmt::format("\t{}\t{}{}{}{}",
                                         src_time,
@@ -2098,7 +2093,8 @@ query_overwrite(PtkFileTask* ptask)
     char* new_name =
         new_name_plain ? ztd::strdup(Glib::filename_display_name(new_name_plain)) : nullptr;
 
-    i32 pos = ext_disp ? g_utf8_strlen(base_name_disp, -1) - g_utf8_strlen(ext_disp, -1) - 1 : -1;
+    const i32 pos =
+        ext_disp ? g_utf8_strlen(base_name_disp, -1) - g_utf8_strlen(ext_disp, -1) - 1 : -1;
 
     free(base_name);
     free(ext_disp);

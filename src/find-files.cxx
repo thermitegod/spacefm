@@ -376,8 +376,6 @@ static GtkActionEntry menu_actions[] = {
 static i32
 get_date_offset(GtkCalendar* calendar)
 {
-    i32 offset;
-
     std::time_t timeval = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     std::tm* lt = std::localtime(&timeval);
 
@@ -389,7 +387,7 @@ get_date_offset(GtkCalendar* calendar)
                                   Glib::Date::Month(lt->tm_mon),
                                   Glib::Date::Year(lt->tm_year + 1900));
 
-    offset = today.days_between(date);
+    const i32 offset = today.days_between(date);
 
     return std::abs(offset);
 }
@@ -471,7 +469,7 @@ compose_command(FindFile* data)
     }
 
     /* match by mtime */
-    i32 idx = gtk_combo_box_get_active(GTK_COMBO_BOX(data->date_limit));
+    const i32 idx = gtk_combo_box_get_active(GTK_COMBO_BOX(data->date_limit));
     if (idx > 0)
     {
         if (idx == 5) /* range */
@@ -702,8 +700,8 @@ on_start_search(GtkWidget* btn, FindFile* data)
     GtkAllocation allocation;
 
     gtk_widget_get_allocation(GTK_WIDGET(data->win), &allocation);
-    i32 width = allocation.width;
-    i32 height = allocation.height;
+    const i32 width = allocation.width;
+    const i32 height = allocation.height;
     if (width && height)
     {
         xset_set(XSetName::MAIN_SEARCH, XSetVar::X, std::to_string(width));
@@ -729,14 +727,13 @@ on_start_search(GtkWidget* btn, FindFile* data)
                                  &data->stdo,
                                  nullptr);
 
-    GdkCursor* busy_cursor;
     data->task = vfs_async_task_new((VFSAsyncFunc)search_thread, data);
 
     data->signal_task = data->task->add_event<EventType::TASK_FINISH>(on_search_finish, data);
 
     data->task->run_thread();
 
-    busy_cursor = gdk_cursor_new_for_display(nullptr, GdkCursorType::GDK_WATCH);
+    GdkCursor* busy_cursor = gdk_cursor_new_for_display(nullptr, GdkCursorType::GDK_WATCH);
     gdk_window_set_cursor(gtk_widget_get_window(data->search_result), busy_cursor);
     g_object_unref(busy_cursor);
 }
@@ -758,8 +755,8 @@ on_search_again(GtkWidget* btn, FindFile* data)
     GtkAllocation allocation;
 
     gtk_widget_get_allocation(GTK_WIDGET(data->win), &allocation);
-    i32 width = allocation.width;
-    i32 height = allocation.height;
+    const i32 width = allocation.width;
+    const i32 height = allocation.height;
     if (width && height)
     {
         xset_set(XSetName::MAIN_SEARCH, XSetVar::X, std::to_string(width));
@@ -916,8 +913,8 @@ on_remove_search_folder(GtkWidget* btn, FindFile* data)
 static void
 on_date_limit_changed(GtkWidget* date_limit, FindFile* data)
 {
-    i32 sel = gtk_combo_box_get_active(GTK_COMBO_BOX(date_limit));
-    bool sensitive = (sel == 5); /* date range */
+    const i32 sel = gtk_combo_box_get_active(GTK_COMBO_BOX(date_limit));
+    const bool sensitive = (sel == 5); /* date range */
     gtk_widget_set_sensitive(data->date1, sensitive);
     gtk_widget_set_sensitive(data->date2, sensitive);
 }
@@ -1221,8 +1218,8 @@ find_files(const std::vector<std::string>& search_dirs)
     WindowReference::increase();
     g_signal_connect(data->win, "destroy", G_CALLBACK(WindowReference::decrease), nullptr);
 
-    i32 width = xset_get_int(XSetName::MAIN_SEARCH, XSetVar::X);
-    i32 height = xset_get_int(XSetName::MAIN_SEARCH, XSetVar::Y);
+    const i32 width = xset_get_int(XSetName::MAIN_SEARCH, XSetVar::X);
+    const i32 height = xset_get_int(XSetName::MAIN_SEARCH, XSetVar::Y);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(data->win), width, height);
 

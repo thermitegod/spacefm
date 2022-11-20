@@ -134,7 +134,7 @@ void
 on_popup_list_large(GtkMenuItem* menuitem, PtkFileBrowser* browser)
 {
     (void)menuitem;
-    i32 p = browser->mypanel;
+    const panel_t p = browser->mypanel;
     MainWindow* main_window = MAIN_WINDOW(browser->main_window);
     const MainWindowPanel mode = main_window->panel_context.at(p);
 
@@ -149,7 +149,7 @@ void
 on_popup_list_detailed(GtkMenuItem* menuitem, PtkFileBrowser* browser)
 {
     (void)menuitem;
-    i32 p = browser->mypanel;
+    const panel_t p = browser->mypanel;
 
     if (xset_get_b_panel(p, XSetPanel::LIST_DETAILED))
     {
@@ -170,7 +170,7 @@ void
 on_popup_list_icons(GtkMenuItem* menuitem, PtkFileBrowser* browser)
 {
     (void)menuitem;
-    i32 p = browser->mypanel;
+    const panel_t p = browser->mypanel;
 
     if (xset_get_b_panel(p, XSetPanel::LIST_ICONS))
     {
@@ -191,7 +191,7 @@ void
 on_popup_list_compact(GtkMenuItem* menuitem, PtkFileBrowser* browser)
 {
     (void)menuitem;
-    i32 p = browser->mypanel;
+    const panel_t p = browser->mypanel;
 
     if (xset_get_b_panel(p, XSetPanel::LIST_COMPACT))
     {
@@ -427,7 +427,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 
     if (!browser || !menu || !browser->file_list)
         return;
-    i32 p = browser->mypanel;
+    const panel_t p = browser->mypanel;
 
     MainWindow* main_window = MAIN_WINDOW(browser->main_window);
     const MainWindowPanel mode = main_window->panel_context.at(p);
@@ -649,10 +649,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 { // either desktop or browser must be non-nullptr
 
     xset_t set_radio;
-    i32 icon_w;
-    i32 icon_h;
-    i32 no_write_access = 0;
-    i32 no_read_access = 0;
     xset_t set;
     xset_t set2;
     GtkMenuItem* item;
@@ -680,14 +676,14 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     g_signal_connect_after((void*)popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
 
     // is_dir = file_path && std::filesystem::is_directory(file_path);
-    bool is_dir = (file && file->is_directory());
+    const bool is_dir = (file && file->is_directory());
     // Note: network filesystems may become unresponsive here
-    bool is_text = file && file_path && file->is_text(file_path);
+    const bool is_text = file && file_path && file->is_text(file_path);
 
     // test R/W access to cwd instead of selected file
     // Note: network filesystems may become unresponsive here
-    no_read_access = faccessat(0, cwd, R_OK, AT_EACCESS);
-    no_write_access = faccessat(0, cwd, W_OK, AT_EACCESS);
+    const i32 no_read_access = faccessat(0, cwd, R_OK, AT_EACCESS);
+    const i32 no_write_access = faccessat(0, cwd, W_OK, AT_EACCESS);
 
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     bool is_clip;
@@ -900,6 +896,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
             gtk_container_add(GTK_CONTAINER(submenu), GTK_WIDGET(item));
         }
 
+        i32 icon_w;
+        i32 icon_h;
+
         // add apps
         gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
         if (is_text)
@@ -964,7 +963,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         xset_add_menuitem(browser, submenu, accel_group, set);
 
         // Default
-        std::string plain_type = "";
+        std::string plain_type;
         if (mime_type)
             plain_type = ztd::strdup(vfs_mime_type_get_type(mime_type));
         plain_type = ztd::replace(plain_type, "-", "_");
@@ -1476,7 +1475,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
     if (desktop->get_name().empty())
         return;
 
-    i32 job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
+    const i32 job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
     PtkFileMenu* data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
     if (!(data && data->file))
         return;
@@ -1790,7 +1789,7 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
     // else if app menu, data will be set
     // PtkFileMenu* app_data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
 
-    u32 keymod = ptk_get_keymod(event->state);
+    const u32 keymod = ptk_get_keymod(event->state);
 
     if (keymod == 0)
     {
@@ -2041,7 +2040,7 @@ static bool
 on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data)
 {
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
-    u32 keymod = ptk_get_keymod(event->state);
+    const u32 keymod = ptk_get_keymod(event->state);
 
     if (event->type == GdkEventType::GDK_BUTTON_RELEASE)
     {
@@ -2377,13 +2376,13 @@ create_new_file(PtkFileMenu* data, i32 create_new)
     if (!data->sel_files.empty())
         file = data->sel_files.front();
 
-    i32 result = ptk_rename_file(data->browser,
-                                 data->cwd,
-                                 file,
-                                 nullptr,
-                                 false,
-                                 (PtkRenameMode)create_new,
-                                 ao);
+    const i32 result = ptk_rename_file(data->browser,
+                                       data->cwd,
+                                       file,
+                                       nullptr,
+                                       false,
+                                       (PtkRenameMode)create_new,
+                                       ao);
     if (result == 0)
         delete ao;
 }

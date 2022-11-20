@@ -1094,13 +1094,11 @@ ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
         std::filesystem::permissions(parent_dir, std::filesystem::perms::owner_all);
     }
     // name script
-    std::string script;
-    std::string str;
-    str =
+    const std::string str =
         fmt::format("/hand-{}-{}.sh",
                     modes.at(mode),
                     mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
-    script = ztd::replace(def_script, "/exec.sh", str);
+    const std::string script = ztd::replace(def_script, "/exec.sh", str);
     free(def_script);
     // get text
     std::string text;
@@ -1244,12 +1242,12 @@ ptk_handler_file_has_handlers(i32 mode, i32 cmd, std::string_view path, vfs::mim
             {
                 std::string command;
                 std::string error_message;
-                bool error = ptk_handler_load_script(mode,
-                                                     cmd,
-                                                     handler_set,
-                                                     nullptr,
-                                                     command,
-                                                     error_message);
+                const bool error = ptk_handler_load_script(mode,
+                                                           cmd,
+                                                           handler_set,
+                                                           nullptr,
+                                                           command,
+                                                           error_message);
                 if (error)
                 {
                     LOG_ERROR(error_message);
@@ -1341,13 +1339,10 @@ ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
                 return;
         }
 
-        std::string testlist;
-        std::string testname;
-
         // add a space to end of list and end of name before testing to avoid
         // substring false positive
-        testlist = fmt::format("{} ", list);
-        testname = fmt::format("{} ", handler->setname);
+        std::string testlist = fmt::format("{} ", list);
+        std::string testname = fmt::format("{} ", handler->setname);
         if (add_missing && !ztd::contains(testlist, testname))
         {
             // add a missing default handler to the list
@@ -1387,22 +1382,19 @@ ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
 
 static xset_t
 add_new_handler(i32 mode)
-{
-    // creates a new xset for a custom handler type
-    std::string setname;
-
+{ // creates a new xset for a custom handler type
     // get a unique new xset name
     while (true)
     {
-        setname = fmt::format("{}{}", handler_cust_prefixs.at(mode), randhex8());
+        const std::string setname = fmt::format("{}{}", handler_cust_prefixs.at(mode), randhex8());
         if (!xset_is(setname))
-            break;
+        {
+            // create and return the xset
+            xset_t set = xset_get(setname);
+            set->lock = false;
+            return set;
+        }
     };
-
-    // create and return the xset
-    xset_t set = xset_get(setname);
-    set->lock = false;
-    return set;
 }
 
 void
@@ -1666,7 +1658,7 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
 {
     /* Fetching available archive handlers (literally gets member s from
      * the xset) - user-defined order has already been set */
-    char* archive_handlers_s = xset_get_s(handler_conf_xsets.at(hnd->mode));
+    const char* archive_handlers_s = xset_get_s(handler_conf_xsets.at(hnd->mode));
 
     // Making sure archive handlers are available
     if (!archive_handlers_s)
@@ -1949,7 +1941,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         validate_archive_handler(hnd);
 
         // Determining current handler enabled state
-        bool handler_enabled =
+        const bool handler_enabled =
             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(hnd->chkbtn_handler_enabled));
 
         // Checking if the handler has been renamed
@@ -1971,7 +1963,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
 
         // Saving archive handler
         handler_xset->b = handler_enabled ? XSetB::XSET_B_TRUE : XSetB::XSET_B_UNSET;
-        bool was_default = handler_xset->disable;
+        const bool was_default = handler_xset->disable;
         handler_xset->disable = false; // not default - save in session
         xset_set_var(handler_xset, XSetVar::MENU_LABEL, handler_name);
         xset_set_var(handler_xset, XSetVar::S, handler_mime);
@@ -2216,8 +2208,7 @@ on_configure_handler_enabled_check(GtkToggleButton* togglebutton, HandlerData* h
         return;
 
     // Fetching selection from treeview
-    GtkTreeSelection* selection;
-    selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(hnd->view_handlers));
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(hnd->view_handlers));
 
     // Exiting if no handler is selected
     GtkTreeIter it;
@@ -2226,7 +2217,7 @@ on_configure_handler_enabled_check(GtkToggleButton* togglebutton, HandlerData* h
         return;
 
     // Fetching current status
-    bool enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(togglebutton));
+    const bool enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(togglebutton));
 
     // Setting sensitive/insensitive various widgets as appropriate
     gtk_widget_set_sensitive(hnd->entry_handler_name, enabled);
@@ -2335,12 +2326,12 @@ restore_defaults(HandlerData* hnd, bool all)
 {
     if (all)
     {
-        i32 response = xset_msg_dialog(GTK_WIDGET(hnd->dlg),
-                                       GtkMessageType::GTK_MESSAGE_WARNING,
-                                       "Restore Default Handlers",
-                                       GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                       "Missing default handlers will be restored.\n\nAlso "
-                                       "OVERWRITE ALL EXISTING default handlers?");
+        const i32 response = xset_msg_dialog(GTK_WIDGET(hnd->dlg),
+                                             GtkMessageType::GTK_MESSAGE_WARNING,
+                                             "Restore Default Handlers",
+                                             GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                             "Missing default handlers will be restored.\n\nAlso "
+                                             "OVERWRITE ALL EXISTING default handlers?");
         if (response != GtkResponseType::GTK_RESPONSE_YES &&
             response != GtkResponseType::GTK_RESPONSE_NO)
             // dialog was closed with no button pressed - cancel
@@ -2603,7 +2594,7 @@ on_activate_link(GtkLabel* label, const char* uri, HandlerData* hnd)
     // click apply to save handler
     on_configure_button_press(GTK_BUTTON(hnd->btn_apply), hnd);
     // open in editor
-    i32 action = std::stol(uri);
+    const i32 action = std::stol(uri);
     if (action > PtkHandlerArchive::HANDLER_LIST || action < 0)
         return true;
 
@@ -2728,7 +2719,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     if (hnd->changed)
         on_configure_button_press(GTK_BUTTON(hnd->btn_apply), hnd);
 
-    i32 job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
+    const i32 job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
 
     // Determine handler selected
     xset_t set_sel = nullptr;
@@ -2858,11 +2849,10 @@ static void
 on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
 {
     GtkWidget* item;
-    xset_t set;
 
     // Determine if a handler is selected
     GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(hnd->view_handlers));
-    bool handler_selected = gtk_tree_selection_get_selected(selection, nullptr, nullptr);
+    const bool handler_selected = gtk_tree_selection_get_selected(selection, nullptr, nullptr);
 
     // build menu
     GtkWidget* popup = gtk_menu_new();
@@ -2898,6 +2888,8 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
         // menu is shown from Options button
         if (hnd->mode == PtkHandlerMode::HANDLER_MODE_ARC)
         {
+            xset_t set;
+
             // Archive options
             xset_context_new();
             gtk_container_add(GTK_CONTAINER(popup), gtk_separator_menu_item_new());
@@ -2952,8 +2944,6 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
 void
 ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handler_set)
 {
-    std::string str;
-
     HandlerData* hnd = new HandlerData;
     hnd->mode = mode;
 
@@ -3148,8 +3138,11 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
         gtk_widget_set_valign(GTK_WIDGET(lbl_handler_icon), GtkAlign::GTK_ALIGN_END);
     }
     else
+    {
         lbl_handler_icon = nullptr;
+    }
 
+    std::string str;
     GtkWidget* lbl_handler_compress = gtk_label_new(nullptr);
     if (mode == PtkHandlerMode::HANDLER_MODE_ARC)
         str = "<b>Co_mpress:</b>";

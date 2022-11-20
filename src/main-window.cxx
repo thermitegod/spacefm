@@ -580,7 +580,7 @@ main_window_rubberband_all()
         for (panel_t p : PANELS)
         {
             GtkWidget* notebook = window->panel[p - 1];
-            i32 num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
+            const i32 num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
             for (i32 i = 0; i < num_pages; ++i)
             {
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
@@ -602,8 +602,8 @@ main_window_refresh_all()
     {
         for (panel_t p : PANELS)
         {
-            i64 notebook = (i64)window->panel[p - 1];
-            i32 num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
+            const i64 notebook = (i64)window->panel[p - 1];
+            const i32 num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
             for (i32 i = 0; i < num_pages; ++i)
             {
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
@@ -697,7 +697,7 @@ main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser)
         for (panel_t p : PANELS)
         {
             GtkWidget* notebook = window->panel[p - 1];
-            i32 pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
+            const i32 pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
             for (i32 cur_tabx = 0; cur_tabx < pages; ++cur_tabx)
             {
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
@@ -728,7 +728,7 @@ update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser)
         if (gtk_widget_get_visible(window->panel[p - 1]))
         {
             GtkWidget* notebook = window->panel[p - 1];
-            i32 cur_tabx = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
+            const i32 cur_tabx = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
             if (cur_tabx != -1)
             {
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
@@ -753,7 +753,7 @@ main_window_toggle_thumbnails_all_windows()
         for (panel_t p : PANELS)
         {
             GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-            i32 n = gtk_notebook_get_n_pages(notebook);
+            const i32 n = gtk_notebook_get_n_pages(notebook);
             for (i32 i = 0; i < n; ++i)
             {
                 PtkFileBrowser* file_browser =
@@ -1040,18 +1040,16 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
             // LOG_INFO("loaded panel {}", p);
             if (!gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1])))
             {
-                bool tab_added;
-
                 main_window->notebook = main_window->panel[p - 1];
                 main_window->curpanel = p;
                 // load saved tabs
-                tab_added = false;
+                bool tab_added = false;
                 set = xset_get_panel(p, XSetPanel::SHOW);
                 if ((set->s && app_settings.get_load_saved_tabs()) || set->ob1)
                 {
                     // set->ob1 is preload path
 
-                    std::string tabs_add =
+                    const std::string tabs_add =
                         fmt::format("{}{}{}",
                                     set->s && app_settings.get_load_saved_tabs() ? set->s : "",
                                     set->ob1 ? CONFIG_FILE_TABS_DELIM : "",
@@ -1763,13 +1761,13 @@ main_window_store_positions(MainWindow* main_window)
         on_task_columns_changed(main_window->task_view, nullptr);
 
         // store fb columns
-        i32 page_x;
         PtkFileBrowser* a_browser;
         if (main_window->maximized)
             main_window->opened_maximized = true; // force save of columns
         for (panel_t p : PANELS)
         {
-            page_x = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
+            const i32 page_x =
+                gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
             if (page_x != -1)
             {
                 a_browser = PTK_FILE_BROWSER_REINTERPRET(
@@ -1846,7 +1844,8 @@ main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event)
 {
     MainWindow* main_window = MAIN_WINDOW_REINTERPRET(widget);
 
-    bool maximized = ((event->new_window_state & GdkWindowState::GDK_WINDOW_STATE_MAXIMIZED) != 0);
+    const bool maximized =
+        ((event->new_window_state & GdkWindowState::GDK_WINDOW_STATE_MAXIMIZED) != 0);
 
     main_window->maximized = maximized;
     app_settings.set_maximized(maximized);
@@ -1869,8 +1868,8 @@ main_window_get_tab_cwd(PtkFileBrowser* file_browser, tab_t tab_num)
     i32 page_x;
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     GtkWidget* notebook = main_window->panel[file_browser->mypanel - 1];
-    i32 pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
-    i32 page_num = gtk_notebook_page_num(GTK_NOTEBOOK(notebook), GTK_WIDGET(file_browser));
+    const i32 pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
+    const i32 page_num = gtk_notebook_page_num(GTK_NOTEBOOK(notebook), GTK_WIDGET(file_browser));
 
     switch (tab_num)
     {
@@ -1935,7 +1934,7 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
     }
 
     GtkWidget* notebook = main_window->panel[panel_x - 1];
-    i32 page_x = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
+    const i32 page_x = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
     return ztd::strdup(ptk_file_browser_get_cwd(
         PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), page_x))));
 }
@@ -1987,7 +1986,7 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
     }
 
     // open in tab in panel
-    i32 save_curpanel = main_window->curpanel;
+    const i32 save_curpanel = main_window->curpanel;
 
     main_window->curpanel = panel_x;
     main_window->notebook = main_window->panel[panel_x - 1];
@@ -2471,7 +2470,8 @@ main_window_add_new_tab(MainWindow* main_window, std::string_view folder_path)
     file_browser->add_event<EventType::CHANGE_PANE>(on_file_browser_panel_change, main_window);
 
     GtkWidget* tab_label = main_window_create_tab_label(main_window, file_browser);
-    i32 idx = gtk_notebook_append_page(GTK_NOTEBOOK(notebook), GTK_WIDGET(file_browser), tab_label);
+    const i32 idx =
+        gtk_notebook_append_page(GTK_NOTEBOOK(notebook), GTK_WIDGET(file_browser), tab_label);
     gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(notebook), GTK_WIDGET(file_browser), true);
     gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), idx);
 
@@ -2525,7 +2525,7 @@ main_window_get_current_file_browser(MainWindow* main_window)
     }
     if (main_window->notebook)
     {
-        i32 idx = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->notebook));
+        const i32 idx = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->notebook));
         if (idx >= 0)
             return gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->notebook), idx);
     }
@@ -2883,14 +2883,12 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         return;
     }
 
-    u32 num_sel;
-    u32 num_vis;
     u64 total_size;
     u64 total_on_disk_size;
 
     // note: total size will not include content changes since last selection change
-    num_sel = ptk_file_browser_get_n_sel(file_browser, &total_size, &total_on_disk_size);
-    num_vis = ptk_file_browser_get_n_visible_files(file_browser);
+    const u32 num_sel = ptk_file_browser_get_n_sel(file_browser, &total_size, &total_on_disk_size);
+    const u32 num_vis = ptk_file_browser_get_n_visible_files(file_browser);
 
     if (num_sel > 0)
     {
@@ -3117,7 +3115,7 @@ on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y
     (void)time;
     GtkNotebook* notebook = GTK_NOTEBOOK(gtk_widget_get_parent(GTK_WIDGET(file_browser)));
     // TODO: Add a timeout here and do not set current page immediately
-    i32 idx = gtk_notebook_page_num(notebook, GTK_WIDGET(file_browser));
+    const i32 idx = gtk_notebook_page_num(notebook, GTK_WIDGET(file_browser));
     gtk_notebook_set_current_page(notebook, idx);
     return false;
 }
@@ -3185,7 +3183,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
     if (event->keyval == 0)
         return false;
 
-    u32 keymod = ptk_get_keymod(event->state);
+    const u32 keymod = ptk_get_keymod(event->state);
 
     if ((event->keyval == GDK_KEY_Home &&
          (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
@@ -3208,8 +3206,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
     }
 
 #ifdef HAVE_NONLATIN
-    u32 nonlatin_key;
-    nonlatin_key = 0;
+    u32 nonlatin_key = 0;
     // need to transpose nonlatin keyboard layout ?
     if (!((GDK_KEY_0 <= event->keyval && event->keyval <= GDK_KEY_9) ||
           (GDK_KEY_A <= event->keyval && event->keyval <= GDK_KEY_Z) ||
@@ -3315,7 +3312,7 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
     }
     else if (set->xset_name == XSetName::EDIT_PASTE)
     {
-        bool side_dir_focus =
+        const bool side_dir_focus =
             (browser->side_dir && gtk_widget_is_focus(GTK_WIDGET(browser->side_dir)));
         if (!gtk_widget_is_focus(GTK_WIDGET(browser->folder_view)) && !side_dir_focus)
             return false;
@@ -3512,8 +3509,7 @@ get_desktop_index(GtkWindow* win)
 MainWindow*
 main_window_get_on_current_desktop()
 { // find the last used spacefm window on the current desktop
-    i64 desktop;
-    i64 cur_desktop = get_desktop_index(nullptr);
+    const i64 cur_desktop = get_desktop_index(nullptr);
     // LOG_INFO("current_desktop = {}", cur_desktop);
     if (cur_desktop == -1)
         return main_window_get_last_active(); // revert to dumb if no current
@@ -3521,7 +3517,7 @@ main_window_get_on_current_desktop()
     bool invalid = false;
     for (MainWindow* window : all_windows)
     {
-        desktop = get_desktop_index(GTK_WINDOW(window));
+        const i64 desktop = get_desktop_index(GTK_WINDOW(window));
         // LOG_INFO( "    test win {:p} = {}", window, desktop);
         if (desktop == cur_desktop || desktop > 254 /* 255 == all desktops */)
             return window;
@@ -3902,7 +3898,8 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
 
         if (!xset_get_b_panel(p, XSetPanel::SHOW))
             continue;
-        i32 current_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
+        const i32 current_page =
+            gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
         if (current_page != -1)
         {
             a_browser = PTK_FILE_BROWSER_REINTERPRET(
@@ -3917,9 +3914,9 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
             continue;
 
         // cwd
-        bool cwd_needs_quote;
         const std::string cwd = ptk_file_browser_get_cwd(a_browser);
-        if ((cwd_needs_quote = ztd::contains(cwd, "\"")))
+        const bool cwd_needs_quote = ztd::contains(cwd, "\"");
+        if (cwd_needs_quote)
         {
             path = bash_quote(cwd);
             buf.append(fmt::format("\nfm_pwd_panel[{}]={}\n", p, path));
@@ -4052,7 +4049,7 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
         }
 
         // tabs
-        i32 num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1]));
+        const i32 num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1]));
         for (i32 i = 0; i < num_pages; ++i)
         {
             PtkFileBrowser* t_browser = PTK_FILE_BROWSER_REINTERPRET(
@@ -4227,7 +4224,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
             if ((!main_window->maximized || main_window->opened_maximized) &&
                 !main_window->fullscreen)
             {
-                i32 width = gtk_tree_view_column_get_width(col);
+                const i32 width = gtk_tree_view_column_get_width(col);
                 if (width) // manager unshown, all widths are zero
                 {
                     // save column width
@@ -4244,16 +4241,16 @@ static void
 on_task_destroy(GtkWidget* view, void* user_data)
 {
     (void)user_data;
-    u32 id = g_signal_lookup("columns-changed", G_TYPE_FROM_INSTANCE(view));
+    const u32 id = g_signal_lookup("columns-changed", G_TYPE_FROM_INSTANCE(view));
     if (id)
     {
-        u64 hand = g_signal_handler_find((void*)view,
-                                         GSignalMatchType::G_SIGNAL_MATCH_ID,
-                                         id,
-                                         0,
-                                         nullptr,
-                                         nullptr,
-                                         nullptr);
+        const u64 hand = g_signal_handler_find((void*)view,
+                                               GSignalMatchType::G_SIGNAL_MATCH_ID,
+                                               id,
+                                               0,
+                                               nullptr,
+                                               nullptr,
+                                               nullptr);
         if (hand)
             g_signal_handler_disconnect((void*)view, hand);
     }
@@ -4275,7 +4272,7 @@ main_tasks_running(MainWindow* main_window)
 
     GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(main_window->task_view));
     GtkTreeIter it;
-    bool ret = gtk_tree_model_get_iter_first(model, &it);
+    const bool ret = gtk_tree_model_get_iter_first(model, &it);
 
     return ret;
 }
@@ -4304,18 +4301,16 @@ main_task_pause_all_queued(PtkFileTask* ptask)
 void
 main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
 {
-    GtkTreeModel* model;
     GtkTreeIter it;
     PtkFileTask* qtask;
     PtkFileTask* rtask;
     GSList* running = nullptr;
     GSList* queued = nullptr;
-    bool smart;
-    smart = xset_get_b(XSetName::TASK_Q_SMART);
+    const bool smart = xset_get_b(XSetName::TASK_Q_SMART);
     if (!GTK_IS_TREE_VIEW(view))
         return;
 
-    model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
+    GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
     if (gtk_tree_model_get_iter_first(model, &it))
     {
         do
@@ -4426,7 +4421,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask
     else
         return;
 
-    bool all = ztd::endswith(set->name, "_all");
+    const bool all = ztd::endswith(set->name, "_all");
 
     if (all)
     {
@@ -4479,8 +4474,6 @@ static bool
 idle_set_task_height(MainWindow* main_window)
 {
     GtkAllocation allocation;
-    i32 pos;
-    i32 taskh;
 
     gtk_widget_get_allocation(GTK_WIDGET(main_window), &allocation);
 
@@ -4496,11 +4489,11 @@ idle_set_task_height(MainWindow* main_window)
     }
 
     // restore height (in case window height changed)
-    taskh = xset_get_int(XSetName::TASK_SHOW_MANAGER, XSetVar::X); // task height >=0.9.2
+    i32 taskh = xset_get_int(XSetName::TASK_SHOW_MANAGER, XSetVar::X); // task height >=0.9.2
     if (taskh == 0)
     {
         // use pre-0.9.2 slider pos to calculate height
-        pos = xset_get_int(XSetName::PANEL_SLIDERS, XSetVar::Z); // < 0.9.2 slider pos
+        const i32 pos = xset_get_int(XSetName::PANEL_SLIDERS, XSetVar::Z); // < 0.9.2 slider pos
         if (pos == 0)
             taskh = 200;
         else
@@ -4537,7 +4530,7 @@ show_task_manager(MainWindow* main_window, bool show)
         // save height
         if (gtk_widget_get_visible(GTK_WIDGET(main_window->task_scroll)))
         {
-            i32 pos = gtk_paned_get_position(GTK_PANED(main_window->task_vpane));
+            const i32 pos = gtk_paned_get_position(GTK_PANED(main_window->task_vpane));
             if (pos)
             {
                 // save slider pos for version < 0.9.2 (in case of downgrade)
@@ -4551,7 +4544,7 @@ show_task_manager(MainWindow* main_window, bool show)
             }
         }
         // hide
-        bool tasks_has_focus = gtk_widget_is_focus(GTK_WIDGET(main_window->task_view));
+        const bool tasks_has_focus = gtk_widget_is_focus(GTK_WIDGET(main_window->task_view));
         gtk_widget_hide(GTK_WIDGET(main_window->task_scroll));
         if (tasks_has_focus)
         {
@@ -6931,7 +6924,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 reply = fmt::format("{} requires two arguments", socket_cmd);
                 return 1;
             }
-            std::string cmd = "";
+            std::string cmd;
             while (argv[++j])
                 cmd.append(fmt::format(" {}", argv[j]));
 
@@ -7338,7 +7331,6 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
     bool inhibit;
     i32 exit_status;
 
-    std::string command;
     const std::string event_name = xset_get_name_from_xsetname(event);
 
     if (!ucmd)
@@ -7379,7 +7371,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
             cmd = ztd::replace(cmd, "%v", change);
         }
         LOG_INFO("EVENT {} >>> {}", event_name, cmd);
-        command = fmt::format("bash -c {}", cmd);
+        const std::string command = fmt::format("bash -c {}", cmd);
         Glib::spawn_command_line_async(command);
         return false;
     }
@@ -7487,7 +7479,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
         LOG_INFO("EVENT {} >>> {}", event_name, cmd);
         if (event == XSetName::EVT_TAB_CLOSE)
         {
-            command = fmt::format("bash -c {}", cmd);
+            const std::string command = fmt::format("bash -c {}", cmd);
             // file_browser becomes invalid so spawn
             Glib::spawn_command_line_async(command);
         }
@@ -7511,7 +7503,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
     LOG_INFO("REPLACE_EVENT {} >>> {}", event_name, cmd);
 
     inhibit = false;
-    command = fmt::format("bash -c {}", cmd);
+    const std::string command = fmt::format("bash -c {}", cmd);
     Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
 
     if (WIFEXITED(exit_status) && WEXITSTATUS(exit_status) == 0)

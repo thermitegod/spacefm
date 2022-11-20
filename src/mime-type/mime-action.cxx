@@ -242,20 +242,19 @@ mime_type_get_actions(std::string_view mime_type)
     /* FIXME: actions of parent types should be added, too. */
 
     /* get all actions for this file type */
-    std::string dir;
 
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
     get_actions(vfs::user_dirs->config_dir(), mime_type, actions);
 
     // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
-    dir = Glib::build_filename(vfs::user_dirs->data_dir(), "applications");
+    const std::string dir = Glib::build_filename(vfs::user_dirs->data_dir(), "applications");
     get_actions(dir, mime_type, actions);
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
     for (std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
-        dir = Glib::build_filename(sys_dir.data(), "applications");
-        get_actions(dir, mime_type, actions);
+        const std::string sdir = Glib::build_filename(sys_dir.data(), "applications");
+        get_actions(sdir, mime_type, actions);
     }
 
     /* remove actions for this file type */ // sfm
@@ -402,9 +401,7 @@ mime_type_has_action(std::string_view type, std::string_view desktop_id)
 static const std::string
 make_custom_desktop_file(std::string_view desktop_id, std::string_view mime_type)
 {
-    std::string name;
     std::string cust_template;
-    std::string cust;
     Glib::ustring file_content;
 
     static constexpr std::string_view desktop_ext{".desktop"};
@@ -438,7 +435,7 @@ make_custom_desktop_file(std::string_view desktop_id, std::string_view mime_type
         kf->set_string("Desktop Entry", "X-MimeType-Derived", desktop_id.data());
         kf->set_string("Desktop Entry", "NoDisplay", "true");
 
-        name = ztd::removesuffix(desktop_id, desktop_ext);
+        const std::string name = ztd::removesuffix(desktop_id, desktop_ext);
         cust_template = fmt::format("{}-usercustom-{}.desktop", name, replace_txt);
 
         file_content = kf->to_data();
@@ -446,7 +443,7 @@ make_custom_desktop_file(std::string_view desktop_id, std::string_view mime_type
     else /* it is not a desktop_id, but a command */
     {
         /* Make a user-created desktop file for the command */
-        name = Glib::path_get_basename(desktop_id.data());
+        const std::string name = Glib::path_get_basename(desktop_id.data());
         cust_template = fmt::format("{}-usercreated-{}.desktop", name, replace_txt);
 
         file_content = fmt::format("[Desktop Entry]\n"
@@ -466,16 +463,20 @@ make_custom_desktop_file(std::string_view desktop_id, std::string_view mime_type
     const std::string dir = Glib::build_filename(vfs::user_dirs->data_dir(), "applications");
     std::filesystem::create_directories(dir);
     std::filesystem::permissions(dir, std::filesystem::perms::owner_all);
-    std::string path;
+    std::string cust;
+
     for (i32 i = 0;; ++i)
     {
         /* generate the basename */
         cust = ztd::replace(cust_template, replace_txt, std::to_string(i));
-        path = Glib::build_filename(dir, cust); /* test if the filename already exists */
-        if (!std::filesystem::exists(path))     /* this generated filename can be used */
+        /* test if the filename already exists */
+        const std::string path = Glib::build_filename(dir, cust);
+        if (!std::filesystem::exists(path))
+        { /* this generated filename can be used */
+            save_to_file(path, file_content);
             break;
+        }
     }
-    save_to_file(path, file_content);
 
     /* execute update-desktop-database" to update mimeinfo.cache */
     update_desktop_database();
@@ -495,8 +496,7 @@ mime_type_add_action(std::string_view type, std::string_view desktop_id)
     if (mime_type_has_action(type, desktop_id))
         return desktop_id.data();
 
-    const std::string cust = make_custom_desktop_file(desktop_id, type);
-    return cust;
+    return make_custom_desktop_file(desktop_id, type);
 }
 
 static char*

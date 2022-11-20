@@ -866,16 +866,17 @@ static bool
 on_mime_change_timer(void* user_data)
 {
     (void)user_data;
-    std::string command;
 
     // LOG_INFO("MIME-UPDATE on_timer");
-    command = fmt::format("update-mime-database {}/mime", vfs::user_dirs->data_dir());
-    print_command(command);
-    Glib::spawn_command_line_async(command);
+    const std::string command1 =
+        fmt::format("update-mime-database {}/mime", vfs::user_dirs->data_dir());
+    print_command(command1);
+    Glib::spawn_command_line_async(command1);
 
-    command = fmt::format("update-desktop-database {}/applications", vfs::user_dirs->data_dir());
-    print_command(command);
-    Glib::spawn_command_line_async(command);
+    const std::string command2 =
+        fmt::format("update-desktop-database {}/applications", vfs::user_dirs->data_dir());
+    print_command(command2);
+    Glib::spawn_command_line_async(command2);
 
     g_source_remove(mime_change_timer);
     mime_change_timer = 0;

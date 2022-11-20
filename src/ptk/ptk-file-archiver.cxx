@@ -237,12 +237,12 @@ on_format_changed(GtkComboBox* combo, void* user_data)
         GtkTextView* view = (GtkTextView*)g_object_get_data(G_OBJECT(dlg), "view");
         std::string error_message;
         std::string command;
-        bool error = ptk_handler_load_script(PtkHandlerMode::HANDLER_MODE_ARC,
-                                             PtkHandlerArchive::HANDLER_COMPRESS,
-                                             handler_xset,
-                                             GTK_TEXT_VIEW(view),
-                                             command,
-                                             error_message);
+        const bool error = ptk_handler_load_script(PtkHandlerMode::HANDLER_MODE_ARC,
+                                                   PtkHandlerArchive::HANDLER_COMPRESS,
+                                                   handler_xset,
+                                                   GTK_TEXT_VIEW(view),
+                                                   command,
+                                                   error_message);
         if (error)
         {
             xset_msg_dialog(GTK_WIDGET(dlg),
@@ -320,7 +320,7 @@ replace_archive_subs(std::string_view line, std::string_view n, std::string_view
     new_line = ztd::replace(new_line, "%g", g);
     new_line = ztd::replace(new_line, "%G", g);
 
-    // f64 percent %% - reduce to single
+    // double percent %% - reduce to single
     new_line = ztd::replace(new_line, "%%", "%");
 
     return new_line;
@@ -572,8 +572,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd.data());
 
     // Setting dimension and position
-    i32 width = xset_get_int(XSetName::ARC_DLG, XSetVar::X);
-    i32 height = xset_get_int(XSetName::ARC_DLG, XSetVar::Y);
+    const i32 width = xset_get_int(XSetName::ARC_DLG, XSetVar::X);
+    const i32 height = xset_get_int(XSetName::ARC_DLG, XSetVar::Y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -746,12 +746,12 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
     // Saving dialog dimensions
     GtkAllocation allocation;
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-    width = allocation.width;
-    height = allocation.height;
-    if (width && height)
+    const i32 new_width = allocation.width;
+    const i32 new_height = allocation.height;
+    if (new_width && new_height)
     {
-        xset_set(XSetName::ARC_DLG, XSetVar::X, std::to_string(width));
-        xset_set(XSetName::ARC_DLG, XSetVar::Y, std::to_string(height));
+        xset_set(XSetName::ARC_DLG, XSetVar::X, std::to_string(new_width));
+        xset_set(XSetName::ARC_DLG, XSetVar::Y, std::to_string(new_height));
     }
 
     // Destroying dialog
@@ -779,7 +779,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
         /* Looping for all selected files/directories - all are used
          * when '%N' is present, only the first otherwise */
         i32 i = 0;
-        bool loop_once = ztd::contains(command, "%N");
+        const bool loop_once = ztd::contains(command, "%N");
         for (vfs::file_info file : sel_files)
         {
             desc = file->get_name();
@@ -951,7 +951,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
 static void
 on_create_subfolder_toggled(GtkToggleButton* togglebutton, GtkWidget* chk_write)
 {
-    bool enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(togglebutton));
+    const bool enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(togglebutton));
     gtk_widget_set_sensitive(chk_write, enabled && geteuid() != 0);
 }
 
@@ -968,7 +968,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     bool write_access = false;
     bool list_contents = false;
     std::string parent_quote;
-    vfs::mime_type mime_type;
     const char* dest;
     std::string dest_quote;
     std::string full_quote;
@@ -984,7 +983,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
 
     /* Setting desired archive operation and keeping in terminal while
      * listing */
-    i32 archive_operation =
+    const i32 archive_operation =
         list_contents ? PTKFileArchiverArc::ARC_LIST : PTKFileArchiverArc::ARC_EXTRACT;
     keep_term = list_contents;
 
@@ -998,7 +997,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         for (vfs::file_info file : sel_files)
         {
             // Fetching file details
-            mime_type = file->get_mime_type();
+            vfs::mime_type mime_type = file->get_mime_type();
             const std::string full_path = Glib::build_filename(cwd.data(), file->get_name());
 
             // Checking for enabled handler with non-empty command
@@ -1168,7 +1167,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     for (vfs::file_info file : sel_files)
     {
         // Fetching file details
-        mime_type = file->get_mime_type();
+        vfs::mime_type mime_type = file->get_mime_type();
         // Determining file paths
         const std::string full_path = Glib::build_filename(cwd.data(), file->get_name());
 
@@ -1212,12 +1211,12 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         if (list_contents)
         {
             // List archive contents only
-            bool error = ptk_handler_load_script(PtkHandlerMode::HANDLER_MODE_ARC,
-                                                 PtkHandlerArchive::HANDLER_LIST,
-                                                 handler_xset,
-                                                 nullptr,
-                                                 command,
-                                                 error_message);
+            const bool error = ptk_handler_load_script(PtkHandlerMode::HANDLER_MODE_ARC,
+                                                       PtkHandlerArchive::HANDLER_LIST,
+                                                       handler_xset,
+                                                       nullptr,
+                                                       command,
+                                                       error_message);
             if (error)
             {
                 LOG_WARN(error_message);
@@ -1276,12 +1275,12 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
 
             /* Get extraction command - Doing this here as parent
              * directory creation needs access to the command. */
-            bool error = ptk_handler_load_script(PtkHandlerMode::HANDLER_MODE_ARC,
-                                                 PtkHandlerArchive::HANDLER_EXTRACT,
-                                                 handler_xset,
-                                                 nullptr,
-                                                 command,
-                                                 error_message);
+            const bool error = ptk_handler_load_script(PtkHandlerMode::HANDLER_MODE_ARC,
+                                                       PtkHandlerArchive::HANDLER_EXTRACT,
+                                                       handler_xset,
+                                                       nullptr,
+                                                       command,
+                                                       error_message);
             if (error)
             {
                 LOG_WARN(error_message);

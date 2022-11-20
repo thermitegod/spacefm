@@ -355,14 +355,14 @@ on_combo_change(GtkComboBox* combo, void* user_data)
             }
             else
             {
-                i32 prev_sel;
-                prev_sel = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(combo), "prev_sel"));
+                const i32 prev_sel =
+                    GPOINTER_TO_INT(g_object_get_data(G_OBJECT(combo), "prev_sel"));
                 gtk_combo_box_set_active(combo, prev_sel);
             }
         }
         else
         {
-            i32 prev_sel = gtk_combo_box_get_active(combo);
+            const i32 prev_sel = gtk_combo_box_get_active(combo);
             g_object_set_data(G_OBJECT(combo), "prev_sel", GINT_TO_POINTER(prev_sel));
         }
     }
@@ -453,13 +453,10 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
     data->recurse = GTK_WIDGET(gtk_builder_get_object(builder, "recursive"));
     gtk_widget_set_sensitive(data->recurse, is_dirs);
 
-    vfs::file_info file;
-    vfs::mime_type mime;
-
-    file = sel_files.front();
+    vfs::file_info file = sel_files.front();
     if (same_type)
     {
-        mime = file->get_mime_type();
+        vfs::mime_type mime = file->get_mime_type();
         const std::string file_type = fmt::format("{}\n{}",
                                                   vfs_mime_type_get_description(mime),
                                                   vfs_mime_type_get_type(mime));
@@ -486,7 +483,7 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
     {
         GtkTreeIter it;
 
-        mime = file->get_mime_type();
+        vfs::mime_type mime = file->get_mime_type();
         const std::vector<std::string> actions = vfs_mime_type_get_actions(mime);
         GtkCellRenderer* renderer;
         GtkListStore* model;
@@ -723,8 +720,8 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
 
     gtk_widget_get_allocation(GTK_WIDGET(dialog), &allocation);
 
-    i32 width = allocation.width;
-    i32 height = allocation.height;
+    const i32 width = allocation.width;
+    const i32 height = allocation.height;
     if (width && height)
     {
         xset_set(XSetName::APP_DLG, XSetVar::S, std::to_string(width));

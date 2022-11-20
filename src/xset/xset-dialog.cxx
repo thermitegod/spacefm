@@ -212,7 +212,7 @@ xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title
     gtk_window_set_title(GTK_WINDOW(dlg), title.data());
 
     gtk_widget_show_all(dlg);
-    i32 res = gtk_dialog_run(GTK_DIALOG(dlg));
+    const i32 res = gtk_dialog_run(GTK_DIALOG(dlg));
     gtk_widget_destroy(dlg);
     return res;
 }
@@ -225,8 +225,6 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
     GtkTextIter iter;
     GtkTextIter siter;
     GtkAllocation allocation;
-    i32 width;
-    i32 height;
     GtkWidget* dlgparent = nullptr;
 
     if (parent)
@@ -241,8 +239,8 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
     xset_set_window_icon(GTK_WINDOW(dlg));
     gtk_window_set_role(GTK_WINDOW(dlg), "text_dialog");
 
-    width = xset_get_int(XSetName::TEXT_DLG, XSetVar::S);
-    height = xset_get_int(XSetName::TEXT_DLG, XSetVar::Z);
+    i32 width = xset_get_int(XSetName::TEXT_DLG, XSetVar::S);
+    i32 height = xset_get_int(XSetName::TEXT_DLG, XSetVar::Z);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
     else
@@ -477,7 +475,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
-    i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
+    const i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
 
     GtkAllocation allocation;
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
@@ -525,8 +523,8 @@ xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
                                                           GtkResponseType::GTK_RESPONSE_ACCEPT,
                                                           nullptr);
     // Set icon chooser dialog size
-    i32 width = xset_get_int(XSetName::MAIN_ICON, XSetVar::X);
-    i32 height = xset_get_int(XSetName::MAIN_ICON, XSetVar::Y);
+    const i32 width = xset_get_int(XSetName::MAIN_ICON, XSetVar::X);
+    const i32 height = xset_get_int(XSetName::MAIN_ICON, XSetVar::Y);
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(icon_chooser), width, height);
 
@@ -535,7 +533,7 @@ xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
         exo_icon_chooser_dialog_set_icon(EXO_ICON_CHOOSER_DIALOG(icon_chooser), def_icon);
 
     // Prompting user to pick icon
-    i32 response_icon_chooser = gtk_dialog_run(GTK_DIALOG(icon_chooser));
+    const i32 response_icon_chooser = gtk_dialog_run(GTK_DIALOG(icon_chooser));
     if (response_icon_chooser == GtkResponseType::GTK_RESPONSE_ACCEPT)
     {
         /* Fetching selected icon */

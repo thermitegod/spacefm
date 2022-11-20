@@ -52,12 +52,6 @@ struct PtkDirTree
     i32 stamp;
 };
 
-struct PtkDirTreeClass
-{
-    GObjectClass parent;
-    /* Default signal handlers */
-};
-
 GType ptk_dir_tree_get_type();
 
 PtkDirTree* ptk_dir_tree_new();

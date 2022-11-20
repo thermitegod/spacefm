@@ -112,8 +112,7 @@ mime_type_get_by_filename(std::string_view filename, std::filesystem::file_statu
         i32 glob_len = 0;
         for (mime_cache_t cache : caches)
         {
-            const char* matched_type;
-            matched_type = cache->lookup_glob(filename, &glob_len);
+            const char* matched_type = cache->lookup_glob(filename, &glob_len);
             /* according to the mime.cache 1.0 spec, we should use the longest glob matched. */
             if (matched_type && glob_len > max_glob_len)
             {
@@ -177,7 +176,7 @@ mime_type_get_by_file(std::string_view filepath)
         const i32 fd = open(filepath.data(), O_RDONLY, 0);
         if (fd != -1)
         {
-            i32 len = mime_cache_max_extent < file_size ? mime_cache_max_extent : file_size;
+            const i32 elen = mime_cache_max_extent < file_size ? mime_cache_max_extent : file_size;
             /*
              * FIXME: Can g_alloca() be used here? It is very fast, but is it safe?
              * Actually, we can allocate a block of memory with the size of mime_cache_max_extent,
@@ -188,9 +187,9 @@ mime_type_get_by_file(std::string_view filepath)
             if (G_TRYLOCK(mime_magic_buf))
                 data = mime_magic_buf;
             else /* the buffer is in use, allocate new one */
-                data = CHAR(g_malloc(len));
+                data = CHAR(g_malloc(elen));
 
-            len = read(fd, data, len);
+            const i32 len = read(fd, data, elen);
 
             if (len == -1)
             {

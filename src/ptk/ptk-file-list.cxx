@@ -370,13 +370,13 @@ ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
 
-    i32* indices = gtk_tree_path_get_indices(path);
-    i32 depth = gtk_tree_path_get_depth(path);
+    const i32* indices = gtk_tree_path_get_indices(path);
+    const i32 depth = gtk_tree_path_get_depth(path);
 
     /* we do not allow children */
     assert(depth == 1); /* depth 1 = top level; a list only has top level nodes and no children */
 
-    u32 n = indices[0]; /* the n-th top level row */
+    const u32 n = indices[0]; /* the n-th top level row */
 
     if (n >= list->n_files || n < 0)
         return false;
@@ -695,8 +695,8 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
         return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
 
     // hidden first/last
-    bool hidden_a = file_a->get_disp_name().at(0) == '.';
-    bool hidden_b = file_b->get_disp_name().at(0) == '.';
+    const bool hidden_a = ztd::startswith(file_a->get_disp_name(), ".");
+    const bool hidden_b = ztd::startswith(file_b->get_disp_name(), ".");
     if (hidden_a && !hidden_b)
         result = list->sort_hidden_first ? -1 : 1;
     else if (!hidden_a && hidden_b)
@@ -710,8 +710,8 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
         // TODO - option to enable/disable numbers first
 
         // numbers before letters
-        bool num_a = isdigit(file_a->get_disp_name().at(0));
-        bool num_b = isdigit(file_b->get_disp_name().at(0));
+        const bool num_a = std::isdigit(file_a->get_disp_name().at(0));
+        const bool num_b = std::isdigit(file_b->get_disp_name().at(0));
         if (num_a && !num_b)
             result = -1;
         else if (!num_a && num_b)
@@ -946,7 +946,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size)
     if (!list)
         return;
 
-    i32 old_max_thumbnail = list->max_thumbnail;
+    const i32 old_max_thumbnail = list->max_thumbnail;
     list->max_thumbnail = max_file_size;
     list->big_thumbnail = is_big;
     // FIXME: This is buggy!!! Further testing might be needed.
