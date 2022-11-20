@@ -419,7 +419,8 @@ send_socket_command(int argc, char* argv[], std::string& reply)
 
     if (connect(sock, (struct sockaddr*)&addr, addr_len) != 0)
     {
-        reply = "could not connect to socket (not running? or DISPLAY not set?)";
+        reply = fmt::format("failed to connect to socket ({})\nnot running or $DISPLAY not set",
+                            addr.sun_path);
         return EXIT_FAILURE;
     }
 
