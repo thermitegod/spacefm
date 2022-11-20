@@ -895,7 +895,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
 {
     (void)item;
     i32 cur_tabx;
-    bool show[5]; // array starts at 1 for clarity
+    std::array<bool, 5> show; // start at 1 for clarity
 
     // save column widths and side sliders of visible panels
     if (main_window->panel_change)
@@ -948,20 +948,20 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
         switch (p)
         {
             case 1:
-                horiz = show[2];
-                vert = show[3] || show[4];
+                horiz = show[panel_2];
+                vert = show[panel_3] || show[panel_4];
                 break;
             case 2:
-                horiz = show[1];
-                vert = show[3] || show[4];
+                horiz = show[panel_1];
+                vert = show[panel_3] || show[panel_4];
                 break;
             case 3:
-                horiz = show[4];
-                vert = show[1] || show[2];
+                horiz = show[panel_4];
+                vert = show[panel_1] || show[panel_2];
                 break;
             default:
-                horiz = show[3];
-                vert = show[1] || show[2];
+                horiz = show[panel_3];
+                vert = show[panel_1] || show[panel_2];
                 break;
         }
 
@@ -1153,11 +1153,11 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
             gtk_widget_hide(GTK_WIDGET(main_window->panel[p - 1]));
         }
     }
-    if (show[1] || show[2])
+    if (show[panel_1] || show[panel_2])
         gtk_widget_show(GTK_WIDGET(main_window->hpane_top));
     else
         gtk_widget_hide(GTK_WIDGET(main_window->hpane_top));
-    if (show[3] || show[4])
+    if (show[panel_3] || show[panel_4])
         gtk_widget_show(GTK_WIDGET(main_window->hpane_bottom));
     else
         gtk_widget_hide(GTK_WIDGET(main_window->hpane_bottom));
