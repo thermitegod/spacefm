@@ -22,6 +22,8 @@
 
 #include <memory>
 
+#include <glibmm.h>
+
 #include "settings/etc.hxx"
 
 class VFSUserDirs

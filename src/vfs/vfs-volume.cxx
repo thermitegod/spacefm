@@ -27,6 +27,7 @@
 #include <array>
 #include <vector>
 
+#include <algorithm>
 #include <ranges>
 
 #include <memory>

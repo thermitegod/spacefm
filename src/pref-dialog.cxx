@@ -29,6 +29,9 @@
 
 #include <glibmm.h>
 
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "types.hxx"
 
 #include "settings/app.hxx"
