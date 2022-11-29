@@ -33,9 +33,6 @@
 
 #include "ptk/ptk-file-properties.hxx"
 
-#include <pwd.h>
-#include <grp.h>
-
 #include "ptk/ptk-builder.hxx"
 #include "ptk/ptk-error.hxx"
 #include "ptk/ptk-file-task.hxx"
@@ -704,17 +701,15 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
 static uid_t
 uid_from_name(std::string_view user_name)
 {
-    struct passwd* pwd = getpwnam(user_name.data());
-
-    return pwd->pw_uid;
+    const auto pw = ztd::passwd(user_name);
+    return pw.uid();
 }
 
 static gid_t
 gid_from_name(std::string_view group_name)
 {
-    struct group* grp = getgrnam(group_name.data());
-
-    return grp->gr_gid;
+    const auto gr = ztd::group(group_name);
+    return gr.gid();
 }
 
 static void

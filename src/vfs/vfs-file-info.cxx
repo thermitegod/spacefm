@@ -22,11 +22,10 @@
 
 #include <vector>
 
+#include <map>
+
 #include <algorithm>
 #include <ranges>
-
-#include <grp.h>
-#include <pwd.h>
 
 #include <fmt/format.h>
 
@@ -45,6 +44,9 @@
 #include "vfs/vfs-user-dirs.hxx"
 
 #include "vfs/vfs-file-info.hxx"
+
+static std::map<uid_t, ztd::passwd> cached_uid;
+static std::map<gid_t, ztd::group> cached_gid;
 
 static u32 big_thumb_size = 48;
 static u32 small_thumb_size = 20;
@@ -311,30 +313,34 @@ VFSFileInfo::get_small_thumbnail() const noexcept
 const std::string&
 VFSFileInfo::get_disp_owner() noexcept
 {
-    struct passwd* puser;
-    struct group* pgroup;
-
     std::string user_name;
-    std::string group_name;
-
-    // FIXME: user names should be cached
-    if (this->disp_owner.empty())
+    if (cached_uid.count(this->file_stat.uid()) == 0)
     {
-        puser = getpwuid(this->file_stat.uid());
-        if (puser && puser->pw_name && *puser->pw_name)
-            user_name = puser->pw_name;
-        else
-            user_name = fmt::format("{}", this->file_stat.uid());
-
-        pgroup = getgrgid(this->file_stat.gid());
-        if (pgroup && pgroup->gr_name && *pgroup->gr_name)
-            group_name = pgroup->gr_name;
-        else
-            group_name = fmt::format("{}", this->file_stat.gid());
-
-        const std::string str = fmt::format("{}:{}", user_name, group_name);
-        this->disp_owner = str;
+        const auto pw = ztd::passwd(this->file_stat.uid());
+        cached_uid.insert({this->file_stat.uid(), pw});
+        user_name = pw.name();
     }
+    else
+    {
+        const auto pw = cached_uid.at(this->file_stat.uid());
+        user_name = pw.name();
+    }
+
+    std::string group_name;
+    if (cached_gid.count(this->file_stat.gid()) == 0)
+    {
+        const auto gr = ztd::group(this->file_stat.gid());
+        cached_gid.insert({this->file_stat.gid(), gr});
+        group_name = gr.name();
+    }
+    else
+    {
+        const auto gr = cached_gid.at(this->file_stat.gid());
+        group_name = gr.name();
+    }
+
+    this->disp_owner = fmt::format("{}:{}", user_name, group_name);
+
     return this->disp_owner;
 }
 
