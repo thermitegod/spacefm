@@ -61,8 +61,8 @@ struct VFSMimeReloadCbEnt
 {
     VFSMimeReloadCbEnt(GFreeFunc cb, void* user_data);
 
-    GFreeFunc cb;
-    void* user_data;
+    GFreeFunc cb{nullptr};
+    void* user_data{nullptr};
 };
 
 VFSMimeReloadCbEnt::VFSMimeReloadCbEnt(GFreeFunc cb, void* user_data)

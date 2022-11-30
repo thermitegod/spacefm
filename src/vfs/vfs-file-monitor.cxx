@@ -65,8 +65,8 @@ struct VFSFileMonitorCallbackEntry
 
     VFSFileMonitorCallbackEntry(vfs::file_monitor_callback callback, void* user_data);
 
-    vfs::file_monitor_callback callback;
-    void* user_data;
+    vfs::file_monitor_callback callback{nullptr};
+    void* user_data{nullptr};
 };
 
 VFSFileMonitorCallbackEntry::VFSFileMonitorCallbackEntry(vfs::file_monitor_callback callback,

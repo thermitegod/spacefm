@@ -32,10 +32,10 @@
 
 struct VFSMimeType
 {
-    std::string type;        // mime_type-type string
-    std::string description; // description of the mimele type
-    GdkPixbuf* big_icon;
-    GdkPixbuf* small_icon;
+    std::string type{};        // mime_type-type string
+    std::string description{}; // description of the mimele type
+    GdkPixbuf* big_icon{nullptr};
+    GdkPixbuf* small_icon{nullptr};
 
     void ref_inc();
     void ref_dec();

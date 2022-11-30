@@ -110,7 +110,7 @@ struct AppSettings
     bool load_saved_tabs{true};
 
     const std::string date_format_default{"%Y-%m-%d %H:%M:%S"};
-    std::string date_format_custom{""};
+    std::string date_format_custom{};
 
     // Sort by name, size, time
     u64 sort_order{0};

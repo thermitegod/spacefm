@@ -62,16 +62,16 @@ struct PtkDirTreeNode
     PtkDirTreeNode();
     ~PtkDirTreeNode();
 
-    vfs::file_info file;
-    PtkDirTreeNode* children;
-    i32 n_children;
-    vfs::file_monitor monitor;
-    i32 n_expand;
-    PtkDirTreeNode* parent;
-    PtkDirTreeNode* next;
-    PtkDirTreeNode* prev;
-    PtkDirTreeNode* last;
-    PtkDirTree* tree; /* FIXME: This is a waste of memory :-( */
+    vfs::file_info file{nullptr};
+    PtkDirTreeNode* children{nullptr};
+    i32 n_children{0};
+    vfs::file_monitor monitor{nullptr};
+    i32 n_expand{0};
+    PtkDirTreeNode* parent{nullptr};
+    PtkDirTreeNode* next{nullptr};
+    PtkDirTreeNode* prev{nullptr};
+    PtkDirTreeNode* last{nullptr};
+    PtkDirTree* tree{nullptr}; /* FIXME: This is a waste of memory :-( */
 };
 
 static void ptk_dir_tree_init(PtkDirTree* tree);
@@ -220,9 +220,6 @@ ptk_dir_tree_init(PtkDirTree* tree)
     PtkDirTreeNode* child = ptk_dir_tree_node_new(tree, tree->root, "/");
     child->file->set_disp_name("File System");
     tree->root->children = child;
-
-    /* Random int to check whether an iter belongs to our model */
-    tree->stamp = std::rand();
 }
 
 static void

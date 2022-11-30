@@ -35,12 +35,12 @@ struct PtkFileMenu
     PtkFileMenu();
     ~PtkFileMenu();
 
-    PtkFileBrowser* browser;
-    const char* cwd;
-    const char* file_path;
-    vfs::file_info file;
-    std::vector<vfs::file_info> sel_files;
-    GtkAccelGroup* accel_group;
+    PtkFileBrowser* browser{nullptr};
+    const char* cwd{nullptr};
+    const char* file_path{nullptr};
+    vfs::file_info file{nullptr};
+    std::vector<vfs::file_info> sel_files{};
+    GtkAccelGroup* accel_group{nullptr};
 };
 
 GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info file,

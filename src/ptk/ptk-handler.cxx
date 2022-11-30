@@ -137,91 +137,48 @@ inline constexpr std::string_view script_header = "#!/bin/bash\n";
 
 struct HandlerData
 {
-    HandlerData();
+    HandlerData() = default;
     ~HandlerData();
 
-    GtkWidget* dlg;
-    GtkWidget* parent;
-    i32 mode;
-    bool changed;
-    PtkFileBrowser* browser;
+    GtkWidget* dlg{nullptr};
+    GtkWidget* parent{nullptr};
+    i32 mode{0};
+    bool changed{false};
+    PtkFileBrowser* browser{nullptr};
 
-    GtkWidget* view_handlers;
-    GtkListStore* list;
+    GtkWidget* view_handlers{nullptr};
+    GtkListStore* list{nullptr};
 
-    GtkWidget* chkbtn_handler_enabled;
-    GtkWidget* entry_handler_name;
-    GtkWidget* entry_handler_mime;
-    GtkWidget* entry_handler_extension;
-    GtkWidget* entry_handler_icon;
-    GtkWidget* view_handler_compress;
-    GtkWidget* view_handler_extract;
-    GtkWidget* view_handler_list;
-    GtkTextBuffer* buf_handler_compress;
-    GtkTextBuffer* buf_handler_extract;
-    GtkTextBuffer* buf_handler_list;
+    GtkWidget* chkbtn_handler_enabled{nullptr};
+    GtkWidget* entry_handler_name{nullptr};
+    GtkWidget* entry_handler_mime{nullptr};
+    GtkWidget* entry_handler_extension{nullptr};
+    GtkWidget* entry_handler_icon{nullptr};
+    GtkWidget* view_handler_compress{nullptr};
+    GtkWidget* view_handler_extract{nullptr};
+    GtkWidget* view_handler_list{nullptr};
+    GtkTextBuffer* buf_handler_compress{nullptr};
+    GtkTextBuffer* buf_handler_extract{nullptr};
+    GtkTextBuffer* buf_handler_list{nullptr};
 
-    bool compress_changed;
-    bool extract_changed;
-    bool list_changed;
+    bool compress_changed{false};
+    bool extract_changed{false};
+    bool list_changed{false};
 
-    GtkWidget* chkbtn_handler_compress_term;
-    GtkWidget* chkbtn_handler_extract_term;
-    GtkWidget* chkbtn_handler_list_term;
-    GtkWidget* btn_remove;
-    GtkWidget* btn_add;
-    GtkWidget* btn_apply;
-    GtkWidget* btn_up;
-    GtkWidget* btn_down;
-    GtkWidget* btn_ok;
-    GtkWidget* btn_cancel;
-    GtkWidget* btn_defaults;
-    GtkWidget* btn_defaults0;
-    GtkWidget* icon_choose_btn;
+    GtkWidget* chkbtn_handler_compress_term{nullptr};
+    GtkWidget* chkbtn_handler_extract_term{nullptr};
+    GtkWidget* chkbtn_handler_list_term{nullptr};
+    GtkWidget* btn_remove{nullptr};
+    GtkWidget* btn_add{nullptr};
+    GtkWidget* btn_apply{nullptr};
+    GtkWidget* btn_up{nullptr};
+    GtkWidget* btn_down{nullptr};
+    GtkWidget* btn_ok{nullptr};
+    GtkWidget* btn_cancel{nullptr};
+    GtkWidget* btn_defaults{nullptr};
+    GtkWidget* btn_defaults0{nullptr};
+    GtkWidget* icon_choose_btn{nullptr};
 };
-
-HandlerData::HandlerData()
-{
-    this->dlg = nullptr;
-    this->parent = nullptr;
-
-    this->mode = 0;
-    this->changed = false;
-
-    this->browser = nullptr;
-
-    this->view_handlers = nullptr;
-    this->list = nullptr;
-    this->chkbtn_handler_enabled = nullptr;
-    this->entry_handler_name = nullptr;
-    this->entry_handler_mime = nullptr;
-    this->entry_handler_extension = nullptr;
-    this->entry_handler_icon = nullptr;
-    this->view_handler_compress = nullptr;
-    this->view_handler_extract = nullptr;
-    this->view_handler_list = nullptr;
-    this->buf_handler_compress = nullptr;
-    this->buf_handler_extract = nullptr;
-    this->buf_handler_list = nullptr;
-
-    this->compress_changed = false;
-    this->extract_changed = false;
-    this->list_changed = false;
-
-    this->chkbtn_handler_compress_term = nullptr;
-    this->chkbtn_handler_extract_term = nullptr;
-    this->chkbtn_handler_list_term = nullptr;
-    this->btn_remove = nullptr;
-    this->btn_add = nullptr;
-    this->btn_apply = nullptr;
-    this->btn_up = nullptr;
-    this->btn_down = nullptr;
-    this->btn_ok = nullptr;
-    this->btn_cancel = nullptr;
-    this->btn_defaults = nullptr;
-    this->btn_defaults0 = nullptr;
-    this->icon_choose_btn = nullptr;
-}
 
 HandlerData::~HandlerData()
 {
@@ -231,17 +188,17 @@ HandlerData::~HandlerData()
 struct Handler
 {
     // enabled                                        set->b
-    const char* setname;      //                      set->name
-    XSetName xset_name;       //                      set->xset_name
-    const char* handler_name; //                      set->menu_label
-    const char* type;         // or whitelist         set->s
-    const char* ext;          // or blacklist         set->x
-    const char* compress_cmd; // or mount             (script)
-    bool compress_term;       //                      set->in_terminal
-    const char* extract_cmd;  // or unmount           (script)
-    bool extract_term;        // or run task file     set->keep_terminal
-    const char* list_cmd;     // or info              (script)
-    bool list_term;           //                      set->scroll_lock
+    const char* setname{nullptr};      //                      set->name
+    XSetName xset_name;                //                      set->xset_name
+    const char* handler_name{nullptr}; //                      set->menu_label
+    const char* type{nullptr};         // or whitelist         set->s
+    const char* ext{nullptr};          // or blacklist         set->x
+    const char* compress_cmd{nullptr}; // or mount             (script)
+    bool compress_term{false};         //                      set->in_terminal
+    const char* extract_cmd{nullptr};  // or unmount           (script)
+    bool extract_term{false};          // or run task file     set->keep_terminal
+    const char* list_cmd{nullptr};     // or info              (script)
+    bool list_term{false};             //                      set->scroll_lock
     // save as custom item                            set->lock = false
     // if handler equals default, do not save         set->disable = true
     // icon (file handlers only)                      set->icon

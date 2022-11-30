@@ -58,11 +58,11 @@ struct VFSAsyncTask
 {
     GObject parent;
     VFSAsyncFunc func;
-    void* user_data;
-    void* ret_val;
+    void* user_data{nullptr};
+    void* ret_val{nullptr};
 
-    GThread* thread;
-    u32 idle_id;
+    GThread* thread{nullptr};
+    u32 idle_id{0};
 
     std::mutex mutex;
 

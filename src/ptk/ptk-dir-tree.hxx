@@ -24,6 +24,8 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#include <cstdlib>
+
 #include <sys/types.h>
 
 #include <magic_enum.hpp>
@@ -46,10 +48,10 @@ struct PtkDirTree
     GObject parent;
     /* <private> */
 
-    PtkDirTreeNode* root;
+    PtkDirTreeNode* root{nullptr};
     /* GtkSortType sort_order; */ /* I do not want to support this :-( */
     /* Random integer to check whether an iter belongs to our model */
-    i32 stamp;
+    const i32 stamp{std::rand()};
 };
 
 GType ptk_dir_tree_get_type();

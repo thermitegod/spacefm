@@ -116,8 +116,8 @@ struct VFSVolumeCallbackData
     VFSVolumeCallbackData() = delete;
     VFSVolumeCallbackData(VFSVolumeCallback callback, void* callback_data);
 
-    VFSVolumeCallback cb;
-    void* user_data;
+    VFSVolumeCallback cb{nullptr};
+    void* user_data{nullptr};
 };
 
 VFSVolumeCallbackData::VFSVolumeCallbackData(VFSVolumeCallback callback, void* callback_data)
@@ -138,19 +138,17 @@ struct Devmount
     Devmount(dev_t major, dev_t minor);
     ~Devmount();
 
-    dev_t major;
-    dev_t minor;
-    char* mount_points;
-    char* fstype;
-    std::vector<std::string> mounts;
+    dev_t major{0};
+    dev_t minor{0};
+    char* mount_points{nullptr};
+    char* fstype{nullptr};
+    std::vector<std::string> mounts{};
 };
 
 Devmount::Devmount(dev_t major, dev_t minor)
 {
     this->major = major;
     this->minor = minor;
-    this->mount_points = nullptr;
-    this->fstype = nullptr;
 }
 
 Devmount::~Devmount()

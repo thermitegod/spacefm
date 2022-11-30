@@ -55,180 +55,93 @@
 
 struct MoveSet
 {
-    MoveSet();
+    MoveSet() = default;
     ~MoveSet();
 
-    char* full_path;
-    const char* old_path;
-    char* new_path;
-    char* desc;
-    bool is_dir;
-    bool is_link;
-    bool clip_copy;
+    char* full_path{nullptr};
+    const char* old_path{nullptr};
+    char* new_path{nullptr};
+    char* desc{nullptr};
+    bool is_dir{false};
+    bool is_link{false};
+    bool clip_copy{false};
     PtkRenameMode create_new;
 
-    GtkWidget* dlg;
-    GtkWidget* parent;
-    PtkFileBrowser* browser;
+    GtkWidget* dlg{nullptr};
+    GtkWidget* parent{nullptr};
+    PtkFileBrowser* browser{nullptr};
 
-    GtkLabel* label_type;
-    GtkLabel* label_mime;
-    GtkWidget* hbox_type;
-    char* mime_type;
+    GtkLabel* label_type{nullptr};
+    GtkLabel* label_mime{nullptr};
+    GtkWidget* hbox_type{nullptr};
+    char* mime_type{nullptr};
 
-    GtkLabel* label_target;
-    GtkEntry* entry_target;
-    GtkWidget* hbox_target;
-    GtkWidget* browse_target;
+    GtkLabel* label_target{nullptr};
+    GtkEntry* entry_target{nullptr};
+    GtkWidget* hbox_target{nullptr};
+    GtkWidget* browse_target{nullptr};
 
-    GtkLabel* label_template;
-    GtkComboBox* combo_template;
-    GtkComboBox* combo_template_dir;
-    GtkWidget* hbox_template;
-    GtkWidget* browse_template;
+    GtkLabel* label_template{nullptr};
+    GtkComboBox* combo_template{nullptr};
+    GtkComboBox* combo_template_dir{nullptr};
+    GtkWidget* hbox_template{nullptr};
+    GtkWidget* browse_template{nullptr};
 
-    GtkLabel* label_name;
-    GtkWidget* scroll_name;
-    GtkWidget* input_name;
-    GtkTextBuffer* buf_name;
-    GtkLabel* blank_name;
+    GtkLabel* label_name{nullptr};
+    GtkWidget* scroll_name{nullptr};
+    GtkWidget* input_name{nullptr};
+    GtkTextBuffer* buf_name{nullptr};
+    GtkLabel* blank_name{nullptr};
 
-    GtkWidget* hbox_ext;
-    GtkLabel* label_ext;
-    GtkEntry* entry_ext;
+    GtkWidget* hbox_ext{nullptr};
+    GtkLabel* label_ext{nullptr};
+    GtkEntry* entry_ext{nullptr};
 
-    GtkLabel* label_full_name;
-    GtkWidget* scroll_full_name;
-    GtkWidget* input_full_name;
-    GtkTextBuffer* buf_full_name;
-    GtkLabel* blank_full_name;
+    GtkLabel* label_full_name{nullptr};
+    GtkWidget* scroll_full_name{nullptr};
+    GtkWidget* input_full_name{nullptr};
+    GtkTextBuffer* buf_full_name{nullptr};
+    GtkLabel* blank_full_name{nullptr};
 
-    GtkLabel* label_path;
-    GtkWidget* scroll_path;
-    GtkWidget* input_path;
-    GtkTextBuffer* buf_path;
-    GtkLabel* blank_path;
+    GtkLabel* label_path{nullptr};
+    GtkWidget* scroll_path{nullptr};
+    GtkWidget* input_path{nullptr};
+    GtkTextBuffer* buf_path{nullptr};
+    GtkLabel* blank_path{nullptr};
 
-    GtkLabel* label_full_path;
-    GtkWidget* scroll_full_path;
-    GtkWidget* input_full_path;
-    GtkTextBuffer* buf_full_path;
+    GtkLabel* label_full_path{nullptr};
+    GtkWidget* scroll_full_path{nullptr};
+    GtkWidget* input_full_path{nullptr};
+    GtkTextBuffer* buf_full_path{nullptr};
 
-    GtkWidget* opt_move;
-    GtkWidget* opt_copy;
-    GtkWidget* opt_link;
-    GtkWidget* opt_copy_target;
-    GtkWidget* opt_link_target;
-    GtkWidget* opt_as_root;
+    GtkWidget* opt_move{nullptr};
+    GtkWidget* opt_copy{nullptr};
+    GtkWidget* opt_link{nullptr};
+    GtkWidget* opt_copy_target{nullptr};
+    GtkWidget* opt_link_target{nullptr};
+    GtkWidget* opt_as_root{nullptr};
 
-    GtkWidget* opt_new_file;
-    GtkWidget* opt_new_folder;
-    GtkWidget* opt_new_link;
+    GtkWidget* opt_new_file{nullptr};
+    GtkWidget* opt_new_folder{nullptr};
+    GtkWidget* opt_new_link{nullptr};
 
-    GtkWidget* options;
-    GtkWidget* browse;
-    GtkWidget* revert;
-    GtkWidget* cancel;
-    GtkWidget* next;
-    GtkWidget* open;
+    GtkWidget* options{nullptr};
+    GtkWidget* browse{nullptr};
+    GtkWidget* revert{nullptr};
+    GtkWidget* cancel{nullptr};
+    GtkWidget* next{nullptr};
+    GtkWidget* open{nullptr};
 
-    GtkWidget* last_widget;
+    GtkWidget* last_widget{nullptr};
 
-    bool full_path_exists;
-    bool full_path_exists_dir;
-    bool full_path_same;
-    bool path_missing;
-    bool path_exists_file;
-    bool mode_change;
-    bool is_move;
+    bool full_path_exists{false};
+    bool full_path_exists_dir{false};
+    bool full_path_same{false};
+    bool path_missing{false};
+    bool path_exists_file{false};
+    bool mode_change{false};
+    bool is_move{false};
 };
-
-MoveSet::MoveSet()
-{
-    this->full_path = nullptr;
-    this->old_path = nullptr;
-    this->new_path = nullptr;
-    this->desc = nullptr;
-    this->is_dir = false;
-    this->is_link = false;
-    this->clip_copy = false;
-    // this->create_new;
-
-    this->dlg = nullptr;
-    this->parent = nullptr;
-    this->browser = nullptr;
-
-    this->label_type = nullptr;
-    this->label_mime = nullptr;
-    this->hbox_type = nullptr;
-    this->mime_type = nullptr;
-
-    this->label_target = nullptr;
-    this->entry_target = nullptr;
-    this->hbox_target = nullptr;
-    this->browse_target = nullptr;
-
-    this->label_template = nullptr;
-    this->combo_template = nullptr;
-    this->combo_template_dir = nullptr;
-    this->hbox_template = nullptr;
-    this->browse_template = nullptr;
-
-    this->label_name = nullptr;
-    this->scroll_name = nullptr;
-    this->input_name = nullptr;
-    this->buf_name = nullptr;
-    this->blank_name = nullptr;
-
-    this->hbox_ext = nullptr;
-    this->label_ext = nullptr;
-    this->entry_ext = nullptr;
-
-    this->label_full_name = nullptr;
-    this->scroll_full_name = nullptr;
-    this->input_full_name = nullptr;
-    this->buf_full_name = nullptr;
-    this->blank_full_name = nullptr;
-
-    this->label_path = nullptr;
-    this->scroll_path = nullptr;
-    this->input_path = nullptr;
-    this->buf_path = nullptr;
-    this->blank_path = nullptr;
-
-    this->label_full_path = nullptr;
-    this->scroll_full_path = nullptr;
-    this->input_full_path = nullptr;
-    this->buf_full_path = nullptr;
-
-    this->opt_move = nullptr;
-    this->opt_copy = nullptr;
-    this->opt_link = nullptr;
-    this->opt_copy_target = nullptr;
-    this->opt_link_target = nullptr;
-    this->opt_as_root = nullptr;
-
-    this->opt_new_file = nullptr;
-    this->opt_new_folder = nullptr;
-    this->opt_new_link = nullptr;
-
-    this->options = nullptr;
-    this->browse = nullptr;
-    this->revert = nullptr;
-    this->cancel = nullptr;
-    this->next = nullptr;
-    this->open = nullptr;
-
-    this->last_widget = nullptr;
-
-    this->full_path_exists = false;
-    this->full_path_exists_dir = false;
-    this->full_path_same = false;
-    this->path_missing = false;
-    this->path_exists_file = false;
-    this->mode_change = false;
-    this->is_move = false;
-}
 
 MoveSet::~MoveSet()
 {
@@ -240,14 +153,6 @@ MoveSet::~MoveSet()
         free(this->desc);
     if (this->mime_type)
         free(this->mime_type);
-}
-
-AutoOpenCreate::AutoOpenCreate()
-{
-    this->path = nullptr;
-    this->file_browser = nullptr;
-    this->callback = nullptr;
-    this->open_file = false;
 }
 
 AutoOpenCreate::~AutoOpenCreate()

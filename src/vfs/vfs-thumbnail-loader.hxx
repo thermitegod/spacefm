@@ -53,13 +53,13 @@ struct VFSThumbnailLoader
     VFSThumbnailLoader(vfs::dir dir);
     ~VFSThumbnailLoader();
 
-    vfs::dir dir;
-    vfs::async_task task;
+    vfs::dir dir{nullptr};
+    vfs::async_task task{nullptr};
 
-    u32 idle_handler;
+    u32 idle_handler{0};
 
-    std::deque<vfs::thumbnail::request> queue;
-    std::deque<vfs::file_info> update_queue;
+    std::deque<vfs::thumbnail::request> queue{};
+    std::deque<vfs::file_info> update_queue{};
 };
 
 // Ensure the thumbnail dirs exist and have proper file permission.

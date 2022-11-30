@@ -57,26 +57,26 @@ class VFSAppDesktop
                       const std::vector<std::string>& file_paths) const noexcept;
 
   private:
-    std::string file_name{""};
-    std::string full_path{""};
+    std::string file_name{};
+    std::string full_path{};
 
     // desktop entry spec keys
-    std::string type{""};
-    std::string name{""};
-    std::string generic_name{""};
+    std::string type{};
+    std::string name{};
+    std::string generic_name{};
     bool no_display{false};
-    std::string comment{""};
-    std::string icon{""};
-    std::string exec{""};
-    std::string try_exec{""};
-    std::string path{""}; // working dir
+    std::string comment{};
+    std::string icon{};
+    std::string exec{};
+    std::string try_exec{};
+    std::string path{}; // working dir
     bool terminal{false};
-    std::string actions{""};
-    std::string mime_type{""};
-    std::string categories{""};
-    std::string keywords{""};
+    std::string actions{};
+    std::string mime_type{};
+    std::string categories{};
+    std::string keywords{};
     bool startup_notify{false};
-    std::string startup_wm_class{""};
+    std::string startup_wm_class{};
 };
 
 namespace vfs

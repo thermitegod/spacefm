@@ -178,27 +178,27 @@ class VFSFileTask
 
   public:
     VFSFileTaskType type;
-    std::vector<std::string> src_paths; // All source files. This list will be freed
-                                        // after file operation is completed.
-    std::string dest_dir;               // Destinaton directory
-    bool avoid_changes;
+    std::vector<std::string> src_paths{}; // All source files. This list will be freed
+                                          // after file operation is completed.
+    std::string dest_dir{};               // Destinaton directory
+    bool avoid_changes{false};
     GSList* devs{nullptr};
 
     VFSFileTaskOverwriteMode overwrite_mode;
-    bool is_recursive; // Apply operation to all files under directories
-                       // recursively. This is default to copy/delete,
-                       // and should be set manually for chown/chmod.
+    bool is_recursive{false}; // Apply operation to all files under directories
+                              // recursively. This is default to copy/delete,
+                              // and should be set manually for chown/chmod.
 
     // For chown
-    uid_t uid;
-    gid_t gid;
+    uid_t uid{0};
+    gid_t gid{0};
 
     // For chmod
     unsigned char* chmod_actions{nullptr}; // If chmod is not needed, this should be nullptr
 
-    off_t total_size; // Total size of the files to be processed, in bytes
-    off_t progress;   // Total size of current processed files, in btytes
-    i32 percent{0};   // progress (percentage)
+    off_t total_size{0}; // Total size of the files to be processed, in bytes
+    off_t progress{0};   // Total size of current processed files, in btytes
+    i32 percent{0};      // progress (percentage)
     bool custom_percent{false};
     off_t last_speed{0};
     off_t last_progress{0};
@@ -208,14 +208,14 @@ class VFSFileTask
     ztd::timer timer;
     std::time_t start_time;
 
-    std::string current_file; // copy of Current processed file
-    std::string current_dest; // copy of Current destination file
+    std::string current_file{}; // copy of Current processed file
+    std::string current_dest{}; // copy of Current destination file
 
     i32 err_count{0};
     i32 error{0};
     bool error_first{true};
 
-    GThread* thread;
+    GThread* thread{nullptr};
     VFSFileTaskState state;
     VFSFileTaskState state_pause{VFSFileTaskState::RUNNING};
     bool abort{false};
@@ -223,18 +223,18 @@ class VFSFileTask
     bool queue_start{false};
 
     VFSFileTaskStateCallback state_cb{nullptr};
-    void* state_cb_data;
+    void* state_cb_data{nullptr};
 
-    GMutex* mutex;
+    GMutex* mutex{nullptr};
 
     // sfm write directly to gtk buffer for speed
-    GtkTextBuffer* add_log_buf;
-    GtkTextMark* add_log_end;
+    GtkTextBuffer* add_log_buf{nullptr};
+    GtkTextMark* add_log_end{nullptr};
 
     // MOD run task
     VFSExecType exec_type{VFSExecType::NORMAL};
-    std::string exec_action;
-    std::string exec_command;
+    std::string exec_action{};
+    std::string exec_command{};
     bool exec_sync{true};
     bool exec_popup{false};
     bool exec_show_output{false};
@@ -243,21 +243,21 @@ class VFSFileTask
     bool exec_keep_terminal{false};
     bool exec_export{false};
     bool exec_direct{false};
-    std::vector<std::string> exec_argv; // for exec_direct, command ignored
-                                        // for su commands, must use bash -c
-                                        // as su does not execute binaries
-    std::string exec_script;
+    std::vector<std::string> exec_argv{}; // for exec_direct, command ignored
+                                          // for su commands, must use bash -c
+                                          // as su does not execute binaries
+    std::string exec_script{};
     bool exec_keep_tmp{false}; // diagnostic to keep temp files
     void* exec_browser{nullptr};
     void* exec_desktop{nullptr};
-    std::string exec_as_user;
-    std::string exec_icon;
-    pid_t exec_pid;
+    std::string exec_as_user{};
+    std::string exec_icon{};
+    pid_t exec_pid{0};
     i32 exec_exit_status{0};
     u32 child_watch{0};
     bool exec_is_error{false};
-    GIOChannel* exec_channel_out;
-    GIOChannel* exec_channel_err;
+    GIOChannel* exec_channel_out{nullptr};
+    GIOChannel* exec_channel_err{nullptr};
     bool exec_scroll_lock{false};
     bool exec_checksum{false};
     void* exec_set{nullptr};

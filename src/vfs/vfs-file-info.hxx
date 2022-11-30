@@ -59,19 +59,19 @@ struct VFSFileInfo
     std::filesystem::file_status status;
 
   public:
-    std::string name;              // real name on file system
-    std::string disp_name;         // displayed name (in UTF-8)
-    std::string collate_key;       // sfm sort key
-    std::string collate_icase_key; // sfm case folded sort key
-    std::string disp_size;         // displayed human-readable file size
-    std::string disp_disk_size;    // displayed human-readable file size on disk
-    std::string disp_owner;        // displayed owner:group pair
-    std::string disp_mtime;        // displayed last modification time
-    std::string disp_perm;         // displayed permission in string form
-    vfs::mime_type mime_type;      // mime type related information
-    GdkPixbuf* big_thumbnail;      // thumbnail of the file
-    GdkPixbuf* small_thumbnail;    // thumbnail of the file
-    VFSFileInfoFlag flags;         // if it is a special file
+    std::string name{};                           // real name on file system
+    std::string disp_name{};                      // displayed name (in UTF-8)
+    std::string collate_key{};                    // sfm sort key
+    std::string collate_icase_key{};              // sfm case folded sort key
+    std::string disp_size{};                      // displayed human-readable file size
+    std::string disp_disk_size{};                 // displayed human-readable file size on disk
+    std::string disp_owner{};                     // displayed owner:group pair
+    std::string disp_mtime{};                     // displayed last modification time
+    std::string disp_perm{};                      // displayed permission in string form
+    vfs::mime_type mime_type{};                   // mime type related information
+    GdkPixbuf* big_thumbnail{};                   // thumbnail of the file
+    GdkPixbuf* small_thumbnail{};                 // thumbnail of the file
+    VFSFileInfoFlag flags{VFSFileInfoFlag::NONE}; // if it is a special file
 
   public:
     const std::string& get_name() const noexcept;

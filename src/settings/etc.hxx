@@ -43,7 +43,7 @@ struct ConfigSettings
     void set_git_backed_settings(bool val) noexcept;
 
   private:
-    std::string terminal_su{""};
+    std::string terminal_su{};
     std::string tmp_dir{"/tmp"};
 
     std::string font_view_icon{"Monospace 9"};

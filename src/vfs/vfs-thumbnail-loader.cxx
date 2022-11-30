@@ -57,7 +57,7 @@ struct VFSThumbnailRequest
     VFSThumbnailRequest(vfs::file_info file);
     ~VFSThumbnailRequest();
 
-    vfs::file_info file;
+    vfs::file_info file{nullptr};
     i32 n_requests[magic_enum::enum_count<VFSThumbnailSize>()];
 };
 

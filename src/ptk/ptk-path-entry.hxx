@@ -30,8 +30,8 @@ struct EntryData
 {
     EntryData(PtkFileBrowser* browser);
 
-    PtkFileBrowser* browser;
-    u32 seek_timer;
+    PtkFileBrowser* browser{nullptr};
+    u32 seek_timer{0};
 };
 
 GtkWidget* ptk_path_entry_new(PtkFileBrowser* file_browser);

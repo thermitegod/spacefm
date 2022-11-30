@@ -27,7 +27,7 @@ struct XSetContext
     ~XSetContext() = default;
 
     bool valid{false};
-    std::array<std::string, 40> var;
+    std::array<std::string, 40> var{};
 };
 
 using xset_context_t = std::shared_ptr<XSetContext>;

@@ -91,22 +91,17 @@ struct AutoOpen
     AutoOpen(PtkFileBrowser* file_browser);
     ~AutoOpen();
 
-    PtkFileBrowser* file_browser;
-    dev_t devnum;
-    char* device_file;
-    char* mount_point;
-    bool keep_point;
-    PtkOpenAction job;
+    PtkFileBrowser* file_browser{nullptr};
+    dev_t devnum{0};
+    char* device_file{nullptr};
+    char* mount_point{nullptr};
+    bool keep_point{false};
+    PtkOpenAction job{PtkOpenAction::PTK_OPEN_DIR};
 };
 
 AutoOpen::AutoOpen(PtkFileBrowser* file_browser)
 {
     this->file_browser = file_browser;
-    this->devnum = 0;
-    this->device_file = nullptr;
-    this->mount_point = nullptr;
-    this->keep_point = false;
-    this->job = PtkOpenAction::PTK_OPEN_DIR;
 }
 
 AutoOpen::~AutoOpen()

@@ -56,7 +56,7 @@ class MimeCache
                                             const char** suffix_pos);
 
   private:
-    std::string file_path;
+    std::string file_path{};
 
     usize buffer_size{0};
     const char* buffer{nullptr};

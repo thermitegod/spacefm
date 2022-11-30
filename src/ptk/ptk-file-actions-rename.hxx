@@ -27,13 +27,13 @@
 
 struct AutoOpenCreate
 {
-    AutoOpenCreate();
+    AutoOpenCreate() = default;
     ~AutoOpenCreate();
 
-    char* path;
-    PtkFileBrowser* file_browser;
-    GFunc callback;
-    bool open_file;
+    char* path{nullptr};
+    PtkFileBrowser* file_browser{nullptr};
+    GFunc callback{nullptr};
+    bool open_file{false};
 };
 
 enum PtkRenameMode

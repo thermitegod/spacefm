@@ -53,15 +53,15 @@ struct VFSDir
 {
     GObject parent;
 
-    std::string path;
-    std::vector<vfs::file_info> file_list;
+    std::string path{};
+    std::vector<vfs::file_info> file_list{};
 
     /*<private>*/
-    vfs::file_monitor monitor;
+    vfs::file_monitor monitor{nullptr};
 
-    GMutex* mutex; /* Used to guard file_list */
+    GMutex* mutex{nullptr}; /* Used to guard file_list */
 
-    vfs::async_task task;
+    vfs::async_task task{nullptr};
 
     bool file_listed{true};
     bool load_complete{true};
@@ -69,12 +69,12 @@ struct VFSDir
     bool show_hidden{true};
     bool avoid_changes{true};
 
-    vfs::thumbnail_loader thumbnail_loader;
+    vfs::thumbnail_loader thumbnail_loader{nullptr};
 
-    std::vector<vfs::file_info> changed_files;
-    std::vector<std::string> created_files;
+    std::vector<vfs::file_info> changed_files{};
+    std::vector<std::string> created_files{};
 
-    i64 xhidden_count;
+    i64 xhidden_count{0};
 
     // Signals
   public:

@@ -78,81 +78,81 @@ struct PtkFileBrowser
     GtkVBox parent;
 
     /* <private> */
-    GList* history;
-    GList* curHistory;
-    GList* histsel;    // MOD added
-    GList* curhistsel; // MOD added
+    GList* history{nullptr};
+    GList* curHistory{nullptr};
+    GList* histsel{nullptr};
+    GList* curhistsel{nullptr};
 
-    vfs::dir dir;
-    GtkTreeModel* file_list;
-    i32 max_thumbnail;
-    i32 n_sel_files;
-    off_t sel_size;
-    off_t sel_disk_size;
-    u32 sel_change_idle;
+    vfs::dir dir{nullptr};
+    GtkTreeModel* file_list{nullptr};
+    i32 max_thumbnail{0};
+    i32 n_sel_files{0};
+    off_t sel_size{0};
+    off_t sel_disk_size{0};
+    u32 sel_change_idle{0};
 
     // path bar auto seek
-    bool inhibit_focus;
-    char* seek_name;
+    bool inhibit_focus{false};
+    char* seek_name{nullptr};
 
     /* side pane */
-    GtkWidget* side_pane_buttons;
-    GtkToggleToolButton* location_btn;
-    GtkToggleToolButton* dir_tree_btn;
+    GtkWidget* side_pane_buttons{nullptr};
+    GtkToggleToolButton* location_btn{nullptr};
+    GtkToggleToolButton* dir_tree_btn{nullptr};
 
     GtkSortType sort_type;
-    PtkFBSortOrder sort_order : 4;
-    PtkFBViewMode view_mode : 2;
+    PtkFBSortOrder sort_order{PtkFBSortOrder::PTK_FB_SORT_BY_PERM};
+    PtkFBViewMode view_mode{PtkFBViewMode::PTK_FB_COMPACT_VIEW};
 
-    bool single_click : 1;
-    bool show_hidden_files : 1;
-    bool large_icons : 1;
-    bool busy : 1;
-    bool pending_drag_status : 1;
-    dev_t drag_source_dev;
-    ino_t drag_source_inode;
-    i32 drag_x;
-    i32 drag_y;
-    bool pending_drag_status_tree : 1;
-    dev_t drag_source_dev_tree;
-    bool is_drag : 1;
-    bool skip_release : 1;
-    bool menu_shown : 1;
-    char* book_set_name;
+    bool single_click{true};
+    bool show_hidden_files{true};
+    bool large_icons{true};
+    bool busy{true};
+    bool pending_drag_status{true};
+    dev_t drag_source_dev{0};
+    ino_t drag_source_inode{0};
+    i32 drag_x{0};
+    i32 drag_y{0};
+    bool pending_drag_status_tree{true};
+    dev_t drag_source_dev_tree{0};
+    bool is_drag{true};
+    bool skip_release{true};
+    bool menu_shown{true};
+    char* book_set_name{nullptr};
 
     /* directory view */
-    GtkWidget* folder_view;
-    GtkWidget* folder_view_scroll;
-    GtkCellRenderer* icon_render;
-    u32 single_click_timeout;
+    GtkWidget* folder_view{nullptr};
+    GtkWidget* folder_view_scroll{nullptr};
+    GtkCellRenderer* icon_render{nullptr};
+    u32 single_click_timeout{0};
 
     // MOD
-    panel_t mypanel;
-    GtkWidget* mynotebook;
-    GtkWidget* task_view;
-    void* main_window;
-    GtkWidget* toolbox;
-    GtkWidget* path_bar;
-    GtkWidget* hpane;
-    GtkWidget* side_vbox;
-    GtkWidget* side_toolbox;
-    GtkWidget* side_vpane_top;
-    GtkWidget* side_vpane_bottom;
-    GtkWidget* side_dir_scroll;
-    GtkWidget* side_dev_scroll;
-    GtkWidget* side_dir;
-    GtkWidget* side_dev;
-    GtkWidget* status_bar;
-    GtkFrame* status_frame;
-    GtkLabel* status_label;
-    GtkWidget* status_image;
-    GtkWidget* toolbar;
-    GtkWidget* side_toolbar;
+    panel_t mypanel{0};
+    GtkWidget* mynotebook{nullptr};
+    GtkWidget* task_view{nullptr};
+    void* main_window{nullptr};
+    GtkWidget* toolbox{nullptr};
+    GtkWidget* path_bar{nullptr};
+    GtkWidget* hpane{nullptr};
+    GtkWidget* side_vbox{nullptr};
+    GtkWidget* side_toolbox{nullptr};
+    GtkWidget* side_vpane_top{nullptr};
+    GtkWidget* side_vpane_bottom{nullptr};
+    GtkWidget* side_dir_scroll{nullptr};
+    GtkWidget* side_dev_scroll{nullptr};
+    GtkWidget* side_dir{nullptr};
+    GtkWidget* side_dev{nullptr};
+    GtkWidget* status_bar{nullptr};
+    GtkFrame* status_frame{nullptr};
+    GtkLabel* status_label{nullptr};
+    GtkWidget* status_image{nullptr};
+    GtkWidget* toolbar{nullptr};
+    GtkWidget* side_toolbar{nullptr};
     GSList* toolbar_widgets[10];
 
     GtkTreeIter book_iter_inserted;
-    char* select_path;
-    char* status_bar_custom;
+    char* select_path{nullptr};
+    char* status_bar_custom{nullptr};
 
     // Signals
   public:

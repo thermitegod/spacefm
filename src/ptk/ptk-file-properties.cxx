@@ -62,71 +62,39 @@ static constexpr std::array<std::string_view, 12> chmod_names{
 
 struct FilePropertiesDialogData
 {
-    FilePropertiesDialogData();
+    FilePropertiesDialogData() = default;
     ~FilePropertiesDialogData();
 
-    char* dir_path;
-    std::vector<vfs::file_info> file_list;
-    GtkWidget* dlg;
+    char* dir_path{nullptr};
+    std::vector<vfs::file_info> file_list{};
+    GtkWidget* dlg{nullptr};
 
-    GtkEntry* owner;
-    GtkEntry* group;
-    char* owner_name;
-    char* group_name;
+    GtkEntry* owner{nullptr};
+    GtkEntry* group{nullptr};
+    char* owner_name{nullptr};
+    char* group_name{nullptr};
 
-    GtkEntry* mtime;
-    char* orig_mtime;
-    GtkEntry* atime;
-    char* orig_atime;
+    GtkEntry* mtime{nullptr};
+    char* orig_mtime{nullptr};
+    GtkEntry* atime{nullptr};
+    char* orig_atime{nullptr};
 
     GtkToggleButton* chmod_btns[magic_enum::enum_count<ChmodActionType>()];
     unsigned char chmod_states[magic_enum::enum_count<ChmodActionType>()];
 
-    GtkLabel* total_size_label;
-    GtkLabel* size_on_disk_label;
-    GtkLabel* count_label;
-    off_t total_size;
-    off_t size_on_disk;
-    u32 total_count;
-    u32 total_count_dir;
-    bool cancel;
-    bool done;
-    GThread* calc_size_thread;
-    u32 update_label_timer;
-    GtkWidget* recurse;
+    GtkLabel* total_size_label{nullptr};
+    GtkLabel* size_on_disk_label{nullptr};
+    GtkLabel* count_label{nullptr};
+    off_t total_size{0};
+    off_t size_on_disk{0};
+    u32 total_count{0};
+    u32 total_count_dir{0};
+    bool cancel{false};
+    bool done{false};
+    GThread* calc_size_thread{nullptr};
+    u32 update_label_timer{0};
+    GtkWidget* recurse{nullptr};
 };
-
-FilePropertiesDialogData::FilePropertiesDialogData()
-{
-    this->dir_path = nullptr;
-    this->dlg = nullptr;
-
-    this->owner = nullptr;
-    this->group = nullptr;
-    this->owner_name = nullptr;
-    this->group_name = nullptr;
-
-    this->mtime = nullptr;
-    this->orig_mtime = nullptr;
-    this->atime = nullptr;
-    this->orig_atime = nullptr;
-
-    // this->chmod_btns[magic_enum::enum_count<ChmodActionType>()];
-    // this->chmod_states[magic_enum::enum_count<ChmodActionType>()];
-
-    this->total_size_label = nullptr;
-    this->size_on_disk_label = nullptr;
-    this->count_label = nullptr;
-    this->total_size = 0;
-    this->size_on_disk = 0;
-    this->total_count = 0;
-    this->total_count_dir = 0;
-    this->cancel = false;
-    this->done = false;
-    this->calc_size_thread = nullptr;
-    this->update_label_timer = 0;
-    this->recurse = nullptr;
-}
 
 FilePropertiesDialogData::~FilePropertiesDialogData()
 {

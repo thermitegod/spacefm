@@ -43,60 +43,60 @@ struct PtkFileTask
     PtkFileTask(VFSFileTaskType type, const std::vector<std::string>& src_files,
                 std::string_view dest_dir, GtkWindow* parent_window, GtkWidget* task_view);
 
-    vfs::file_task task;
+    vfs::file_task task{nullptr};
 
-    GtkWidget* progress_dlg;
-    GtkWidget* progress_btn_close;
-    GtkWidget* progress_btn_stop;
-    GtkWidget* progress_btn_pause;
-    GtkWindow* parent_window;
-    GtkWidget* task_view;
-    GtkLabel* from;
-    GtkLabel* to;
-    GtkLabel* src_dir;
-    GtkLabel* current;
-    GtkProgressBar* progress_bar;
-    GtkLabel* errors;
-    GtkWidget* error_view;
-    GtkScrolledWindow* scroll;
-    GtkWidget* overwrite_combo;
-    GtkWidget* error_combo;
+    GtkWidget* progress_dlg{nullptr};
+    GtkWidget* progress_btn_close{nullptr};
+    GtkWidget* progress_btn_stop{nullptr};
+    GtkWidget* progress_btn_pause{nullptr};
+    GtkWindow* parent_window{nullptr};
+    GtkWidget* task_view{nullptr};
+    GtkLabel* from{nullptr};
+    GtkLabel* to{nullptr};
+    GtkLabel* src_dir{nullptr};
+    GtkLabel* current{nullptr};
+    GtkProgressBar* progress_bar{nullptr};
+    GtkLabel* errors{nullptr};
+    GtkWidget* error_view{nullptr};
+    GtkScrolledWindow* scroll{nullptr};
+    GtkWidget* overwrite_combo{nullptr};
+    GtkWidget* error_combo{nullptr};
 
-    GtkTextBuffer* log_buf;
-    GtkTextMark* log_end;
-    bool log_appended;
-    i32 err_count;
-    PTKFileTaskPtaskError err_mode;
+    GtkTextBuffer* log_buf{nullptr};
+    GtkTextMark* log_end{nullptr};
+    bool log_appended{false};
+    i32 err_count{0};
+    PTKFileTaskPtaskError err_mode{PTKFileTaskPtaskError::PTASK_ERROR_FIRST};
 
-    bool complete;
-    bool aborted;
-    bool pause_change;
-    bool pause_change_view;
-    bool force_scroll;
+    bool complete{false};
+    bool aborted{false};
+    bool pause_change{false};
+    bool pause_change_view{false};
+    bool force_scroll{false};
 
     /* <private> */
-    u32 timeout;
-    bool restart_timeout;
-    u32 progress_timer;
-    char progress_count;
-    GFunc complete_notify;
-    void* user_data;
-    bool keep_dlg;
-    bool pop_detail;
-    char* pop_handler;
+    u32 timeout{0};
+    bool restart_timeout{false};
+    u32 progress_timer{0};
+    char progress_count{false};
+    GFunc complete_notify{};
+    void* user_data{nullptr};
+    bool keep_dlg{false};
+    bool pop_detail{false};
+    char* pop_handler{nullptr};
 
-    GCond* query_cond;
-    GCond* query_cond_last;
-    char** query_new_dest;
-    bool query_ret;
+    GCond* query_cond{nullptr};
+    GCond* query_cond_last{nullptr};
+    char** query_new_dest{nullptr};
+    bool query_ret{false};
 
-    std::string dsp_file_count;
-    std::string dsp_size_tally;
-    std::string dsp_elapsed;
-    std::string dsp_curspeed;
-    std::string dsp_curest;
-    std::string dsp_avgspeed;
-    std::string dsp_avgest;
+    std::string dsp_file_count{};
+    std::string dsp_size_tally{};
+    std::string dsp_elapsed{};
+    std::string dsp_curspeed{};
+    std::string dsp_curest{};
+    std::string dsp_avgspeed{};
+    std::string dsp_avgest{};
 };
 
 void ptk_file_task_lock(PtkFileTask* ptask);

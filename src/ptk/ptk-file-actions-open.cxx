@@ -60,8 +60,8 @@ struct ParentInfo
 {
     ParentInfo(PtkFileBrowser* file_browser, std::string_view cwd);
 
-    PtkFileBrowser* file_browser;
-    std::string cwd;
+    PtkFileBrowser* file_browser{nullptr};
+    std::string cwd{};
 };
 
 ParentInfo::ParentInfo(PtkFileBrowser* file_browser, std::string_view cwd)

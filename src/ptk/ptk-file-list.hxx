@@ -26,6 +26,8 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#include <cstdlib>
+
 #include <sys/types.h>
 
 #include <ztd/ztd.hxx>
@@ -64,24 +66,24 @@ struct PtkFileList
 {
     GObject parent;
     /* <private> */
-    vfs::dir dir;
-    GList* files;
-    u32 n_files;
+    vfs::dir dir{nullptr};
+    GList* files{nullptr};
+    u32 n_files{0};
 
     bool show_hidden{true};
     bool big_thumbnail{true};
-    i32 max_thumbnail;
+    i32 max_thumbnail{0};
 
-    i32 sort_col;
+    i32 sort_col{0};
     GtkSortType sort_order;
-    bool sort_alphanum;
-    bool sort_natural;
-    bool sort_case;
-    bool sort_hidden_first;
-    char sort_dir;
+    bool sort_alphanum{false};
+    bool sort_natural{false};
+    bool sort_case{false};
+    bool sort_hidden_first{false};
+    char sort_dir{false};
 
     // Random integer to check whether an iter belongs to our model
-    i32 stamp;
+    const i32 stamp{std::rand()};
 
   public:
     // Signals we connect to

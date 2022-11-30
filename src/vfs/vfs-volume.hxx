@@ -88,16 +88,16 @@ struct VFSVolume
     VFSVolume();
     ~VFSVolume();
 
-    dev_t devnum;
+    dev_t devnum{0};
     VFSVolumeDeviceType device_type;
-    char* device_file;
-    char* udi;
-    char* disp_name;
-    std::string icon;
-    char* mount_point;
-    u64 size;
-    std::string label;
-    char* fs_type;
+    char* device_file{nullptr};
+    char* udi{nullptr};
+    char* disp_name{nullptr};
+    std::string icon{};
+    char* mount_point{nullptr};
+    u64 size{0};
+    std::string label{};
+    char* fs_type{nullptr};
 
     bool should_autounmount{false}; // a network or ISO file was mounted
     bool is_mounted{false};
@@ -115,8 +115,8 @@ struct VFSVolume
     bool ever_mounted{false};
     bool inhibit_auto{false};
 
-    std::time_t automount_time;
-    void* open_main_window;
+    std::time_t automount_time{0};
+    void* open_main_window{nullptr};
 
   public:
     const char* get_disp_name() const noexcept;
