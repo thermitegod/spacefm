@@ -809,8 +809,7 @@ ptk_location_view_create_mount_point(int mode, VFSVolume* vol, netmount_t* netmo
     // remove spaces
     if (ztd::contains(mname, " "))
     {
-        ztd::strip(mname);
-        mname = ztd::replace(mname, " ", "");
+        mname = ztd::replace(ztd::strip(mname), " ", "");
     }
 
     if (mname.empty())
