@@ -325,7 +325,7 @@ spacefm = build_target(
     glib_dep,
     gtk_dep,
 
-    x11_dep,
+    # x11_dep,
     exo_dep,
 
     spdlog_dep,

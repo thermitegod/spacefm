@@ -3515,6 +3515,11 @@ fm_main_window_get_all()
 static long
 get_desktop_index(GtkWindow* win)
 {
+#if 1
+    (void)win;
+
+    return -1;
+#else // Broken with wayland
     long desktop = -1;
     GdkDisplay* display;
     GdkWindow* window = nullptr;
@@ -3574,6 +3579,7 @@ get_desktop_index(GtkWindow* win)
         XFree(data);
     }
     return desktop;
+#endif
 }
 
 FMMainWindow*
