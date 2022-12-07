@@ -186,7 +186,7 @@ PtkFileTask*
 ptk_file_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files,
                   GtkWindow* parent_window, GtkWidget* task_view)
 {
-    PtkFileTask* ptask = new PtkFileTask(type, src_files, "", parent_window, task_view);
+    const auto ptask = new PtkFileTask(type, src_files, "", parent_window, task_view);
 
     return ptask;
 }
@@ -195,7 +195,7 @@ PtkFileTask*
 ptk_file_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files,
                   std::string_view dest_dir, GtkWindow* parent_window, GtkWidget* task_view)
 {
-    PtkFileTask* ptask = new PtkFileTask(type, src_files, dest_dir, parent_window, task_view);
+    const auto ptask = new PtkFileTask(type, src_files, dest_dir, parent_window, task_view);
 
     return ptask;
 }
@@ -208,7 +208,7 @@ ptk_file_exec_new(std::string_view item_name, GtkWidget* parent, GtkWidget* task
         parent_win = gtk_widget_get_toplevel(GTK_WIDGET(parent));
 
     const std::vector<std::string> file_list{item_name.data()};
-    PtkFileTask* ptask =
+    const auto ptask =
         new PtkFileTask(VFSFileTaskType::EXEC, file_list, "", GTK_WINDOW(parent_win), task_view);
 
     return ptask;
@@ -223,11 +223,11 @@ ptk_file_exec_new(std::string_view item_name, std::string_view dest_dir, GtkWidg
         parent_win = gtk_widget_get_toplevel(GTK_WIDGET(parent));
 
     const std::vector<std::string> file_list{item_name.data()};
-    PtkFileTask* ptask = new PtkFileTask(VFSFileTaskType::EXEC,
-                                         file_list,
-                                         dest_dir,
-                                         GTK_WINDOW(parent_win),
-                                         task_view);
+    const auto ptask = new PtkFileTask(VFSFileTaskType::EXEC,
+                                       file_list,
+                                       dest_dir,
+                                       GTK_WINDOW(parent_win),
+                                       task_view);
 
     return ptask;
 }

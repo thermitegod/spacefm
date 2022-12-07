@@ -1939,7 +1939,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     if (!file_dir)
         return 0;
 
-    MoveSet* mset = new MoveSet;
+    const auto mset = new MoveSet;
 
     if (!create_new)
     {

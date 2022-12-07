@@ -584,7 +584,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, std::string_view pat
     ptask->task->exec_show_error = true;
     ptask->task->exec_export = false;
 
-    PluginData* plugin_data = new PluginData;
+    const auto plugin_data = new PluginData;
     plugin_data->main_window = main_window;
     plugin_data->handler_dlg = handler_dlg;
     plugin_data->plug_dir = ztd::strdup(plug_dir.data());

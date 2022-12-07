@@ -54,7 +54,7 @@ static u32 small_thumb_size = 20;
 vfs::file_info
 vfs_file_info_new()
 {
-    vfs::file_info fi = new VFSFileInfo();
+    const auto fi = new VFSFileInfo();
     fi->ref_inc();
     return fi;
 }

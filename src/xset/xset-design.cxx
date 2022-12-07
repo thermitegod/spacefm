@@ -100,7 +100,7 @@ xset_design_job_set_edit(xset_t set)
 {
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
-    XSetCMD cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
+    const auto cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
     if (cmd_type == XSetCMD::SCRIPT)
     {
         // script
@@ -117,7 +117,7 @@ xset_design_job_set_edit_root(xset_t set)
 {
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
-    XSetCMD cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
+    const auto cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
     if (cmd_type == XSetCMD::SCRIPT)
     {
         // script
@@ -134,7 +134,7 @@ xset_design_job_set_copyname(xset_t set)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
-    XSetCMD cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
+    const auto cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
     if (cmd_type == XSetCMD::LINE)
     {
         // line
@@ -546,7 +546,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     ptask->task->exec_export = false;
     ptask->task->exec_as_user = "root";
 
-    PluginData* plugin_data = new PluginData;
+    const auto plugin_data = new PluginData;
     plugin_data->plug_dir = ztd::strdup(set->plug_dir);
     plugin_data->set = set;
     plugin_data->job = PluginJob::REMOVE;
@@ -574,7 +574,7 @@ xset_design_job_set_remove(xset_t set)
         return false;
     }
 
-    XSetCMD cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
+    const auto cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
 
     if (set->menu_label)
     {
@@ -915,7 +915,7 @@ xset_design_job(GtkWidget* item, xset_t set)
     bool update_toolbars = false;
 
     XSetTool tool_type;
-    XSetJob job = XSetJob(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job")));
+    const auto job = XSetJob(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job")));
 
     // LOG_INFO("activate job {} {}", job, set->name);
     switch (job)

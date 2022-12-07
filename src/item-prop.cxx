@@ -1657,7 +1657,7 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
 
     if (!context || !set)
         return;
-    ContextData* ctxt = new ContextData;
+    const auto ctxt = new ContextData;
     ctxt->context = context;
     ctxt->set = set;
     if (set->browser)

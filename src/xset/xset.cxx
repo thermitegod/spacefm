@@ -864,7 +864,7 @@ XSet::set_plug_dir(const std::string& val) noexcept
 xset_t
 xset_new(std::string_view name, XSetName xset_name) noexcept
 {
-    xset_t set = new XSet(name, xset_name);
+    const auto set = new XSet(name, xset_name);
 
     return set;
 }

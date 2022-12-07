@@ -1080,7 +1080,7 @@ on_use_size_upper_toggled(GtkWidget* widget, FindFile* data)
 void
 find_files(const std::vector<std::string>& search_dirs)
 {
-    FindFile* data = new FindFile;
+    const auto data = new FindFile;
     GtkTreeIter it;
     GtkTreeViewColumn* col;
     GtkWidget* add_directory_btn;

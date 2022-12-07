@@ -1229,9 +1229,9 @@ bookmark_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
         if (file_path.empty())
             return false;
 
-        PtkFileBrowser* file_browser =
+        const auto file_browser =
             static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(item), "file_browser"));
-        MainWindow* main_window = static_cast<MainWindow*>(file_browser->main_window);
+        const auto main_window = static_cast<MainWindow*>(file_browser->main_window);
 
         main_window_add_new_tab(main_window, file_path);
 
@@ -7211,7 +7211,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             return 1;
         }
         // this only handles keys assigned to menu items
-        GdkEventKey* event = (GdkEventKey*)gdk_event_new(GdkEventType::GDK_KEY_PRESS);
+        const auto event = (GdkEventKey*)gdk_event_new(GdkEventType::GDK_KEY_PRESS);
         event->keyval = std::stoul(socket_property, nullptr, 0);
         event->state = argv[i + 1] ? std::stoul(argv[i + 1], nullptr, 0) : 0;
         if (event->keyval)

@@ -371,7 +371,7 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
     if (width && height)
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, -1);
 
-    FilePropertiesDialogData* data = new FilePropertiesDialogData;
+    const auto data = new FilePropertiesDialogData;
     data->update_label_timer = 0;
     /* FIXME: When will the data be freed??? */
     g_object_set_data(G_OBJECT(dlg), "DialogData", data);

@@ -1020,7 +1020,7 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, std::string_view u
     // autoopen
     if (!ssh_udevil) // !sync
     {
-        AutoOpen* ao = new AutoOpen(file_browser);
+        const auto ao = new AutoOpen(file_browser);
         ao->device_file = ztd::strdup(netmount->url);
         ao->devnum = 0;
         ao->mount_point = mount_point;
@@ -1328,7 +1328,7 @@ try_mount(GtkTreeView* view, vfs::volume vol)
     ptask->task->exec_icon = vol->get_icon();
 
     // autoopen
-    AutoOpen* ao = new AutoOpen(file_browser);
+    const auto ao = new AutoOpen(file_browser);
     ao->devnum = vol->devnum;
 
     if (xset_get_b(XSetName::DEV_NEWTAB))
@@ -1392,7 +1392,7 @@ on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         ptask->task->exec_icon = vol->get_icon();
 
         // autoopen
-        AutoOpen* ao = new AutoOpen(file_browser);
+        const auto ao = new AutoOpen(file_browser);
         ao->devnum = vol->devnum;
         ao->job = PtkOpenAction::PTK_OPEN_NEW_TAB;
 
@@ -1460,7 +1460,7 @@ on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         ptask->task->exec_icon = vol->get_icon();
 
         // autoopen
-        AutoOpen* ao = new AutoOpen(file_browser);
+        const auto ao = new AutoOpen(file_browser);
         ao->devnum = vol->devnum;
         ao->job = PtkOpenAction::PTK_OPEN_DIR;
 

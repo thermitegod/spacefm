@@ -316,7 +316,7 @@ ptk_open_files_with_app(std::string_view cwd, const std::vector<vfs::file_info>&
     char* new_dir = nullptr;
     GtkWidget* toplevel;
 
-    ParentInfo* parent = new ParentInfo(file_browser, cwd);
+    const auto parent = new ParentInfo(file_browser, cwd);
 
     for (vfs::file_info file : sel_files)
     {

@@ -112,7 +112,7 @@ VFSThumbnailLoader::~VFSThumbnailLoader()
 vfs::thumbnail_loader
 vfs_thumbnail_loader_new(vfs::dir dir)
 {
-    vfs::thumbnail_loader loader = new VFSThumbnailLoader(dir);
+    const auto loader = new VFSThumbnailLoader(dir);
     return loader;
 }
 

@@ -2375,7 +2375,7 @@ restore_defaults(HandlerData* hnd, bool all)
             return;
 
         // create fake xset
-        xset_t set = new XSet(ztd::strdup(handler->setname), XSetName::CUSTOM);
+        const auto set = new XSet(ztd::strdup(handler->setname), XSetName::CUSTOM);
         set->menu_label = (char*)handler->handler_name;
         set->s = (char*)handler->type;
         set->x = (char*)handler->ext;
@@ -2901,7 +2901,7 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
 void
 ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handler_set)
 {
-    HandlerData* hnd = new HandlerData;
+    const auto hnd = new HandlerData;
     hnd->mode = mode;
 
     /* Create handlers dialog

@@ -486,7 +486,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
             }
 
             // valid custom type?
-            XSetCMD cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
+            const auto cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
             if (cmd_type != XSetCMD::APP && cmd_type != XSetCMD::LINE &&
                 cmd_type != XSetCMD::SCRIPT)
                 continue;
@@ -729,7 +729,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
             i32 icon_size = icon_w > icon_h ? icon_w : icon_h;
 
             GdkPixbuf* app_icon = nullptr;
-            XSetCMD cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
+            const auto cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
             if (!set->lock && cmd_type == XSetCMD::APP)
             {
                 // Application
@@ -900,7 +900,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
     // command
     std::string command;
     bool app_no_sync = false;
-    XSetCMD cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
+    const auto cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
     switch (cmd_type)
     {
         case XSetCMD::LINE:

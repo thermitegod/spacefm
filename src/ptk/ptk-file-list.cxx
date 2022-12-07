@@ -642,8 +642,8 @@ ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompar
 static i32
 ptk_file_list_compare(const void* a, const void* b, void* user_data)
 {
-    vfs::file_info file_a = (vfs::file_info)(a);
-    vfs::file_info file_b = (vfs::file_info)b;
+    const auto file_a = (vfs::file_info)(a);
+    const auto file_b = (vfs::file_info)(b);
     PtkFileList* list = PTK_FILE_LIST(user_data);
     i32 result;
 

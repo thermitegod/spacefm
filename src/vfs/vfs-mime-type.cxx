@@ -185,7 +185,7 @@ vfs_mime_type_get_from_type(std::string_view type)
 vfs::mime_type
 vfs_mime_type_new(std::string_view type_name)
 {
-    vfs::mime_type mime_type = new VFSMimeType();
+    const auto mime_type = new VFSMimeType();
     mime_type->type = type_name.data();
     mime_type->ref_inc();
     return mime_type;
@@ -475,7 +475,7 @@ vfs_mime_type_add_action(vfs::mime_type mime_type, std::string_view desktop_id)
 GList*
 vfs_mime_type_add_reload_cb(GFreeFunc cb, void* user_data)
 {
-    VFSMimeReloadCbEnt* ent = new VFSMimeReloadCbEnt(cb, user_data);
+    const auto ent = new VFSMimeReloadCbEnt(cb, user_data);
     reload_cb = g_list_append(reload_cb, ent);
     return g_list_last(reload_cb);
 }

@@ -59,7 +59,7 @@ vfs::file_task
 vfs_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files,
              std::string_view dest_dir)
 {
-    vfs::file_task task = new VFSFileTask(type, src_files, dest_dir);
+    const auto task = new VFSFileTask(type, src_files, dest_dir);
 
     return task;
 }

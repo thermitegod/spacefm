@@ -614,7 +614,7 @@ ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b
 static PtkDirTreeNode*
 ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent, std::string_view path)
 {
-    PtkDirTreeNode* node = new PtkDirTreeNode;
+    const auto node = new PtkDirTreeNode;
     node->tree = tree;
     node->parent = parent;
     if (!path.empty())

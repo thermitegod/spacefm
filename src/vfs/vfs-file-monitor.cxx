@@ -261,7 +261,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
     i32 i = 0;
     while (i < length)
     {
-        struct inotify_event* event = (struct inotify_event*)&buffer[i];
+        const auto event = (struct inotify_event*)&buffer[i];
         // FIXME: 2 different paths can have the same wd because of link
         // This was fixed in spacefm 0.8.7 ??
         if (event->len)

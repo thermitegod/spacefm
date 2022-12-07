@@ -656,7 +656,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     if (!browser)
         return nullptr;
 
-    PtkFileMenu* data = new PtkFileMenu;
+    const auto data = new PtkFileMenu;
 
     data->cwd = ztd::strdup(cwd);
     data->browser = browser;
@@ -2365,7 +2365,7 @@ create_new_file(PtkFileMenu* data, i32 create_new)
     if (!data->cwd)
         return;
 
-    AutoOpenCreate* ao = new AutoOpenCreate;
+    const auto ao = new AutoOpenCreate;
     ao->path = nullptr;
     ao->file_browser = data->browser;
     ao->open_file = false;
@@ -2472,7 +2472,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
         file_path = Glib::build_filename(cwd, file->get_name());
     }
 
-    PtkFileMenu* data = new PtkFileMenu;
+    const auto data = new PtkFileMenu;
     data->cwd = ztd::strdup(cwd);
     data->browser = browser;
     data->sel_files = sel_files;

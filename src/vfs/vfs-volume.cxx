@@ -1895,7 +1895,7 @@ vfs_volume_read_by_device(struct udev_device* udevice)
     }
 
     // translate device info to VFSVolume
-    vfs::volume volume = new VFSVolume;
+    const auto volume = new VFSVolume;
     volume->devnum = device->devnum;
     volume->device_type = VFSVolumeDeviceType::BLOCK;
     volume->device_file = ztd::strdup(device->devnode);
