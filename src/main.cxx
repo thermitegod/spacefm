@@ -24,7 +24,7 @@
 
 #include <chrono>
 
-#include <stdio.h>
+#include <cstdio>
 
 #include <fmt/format.h>
 
