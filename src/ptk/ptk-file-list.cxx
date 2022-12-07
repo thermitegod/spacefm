@@ -336,6 +336,7 @@ static GtkTreeModelFlags
 ptk_file_list_get_flags(GtkTreeModel* tree_model)
 {
     (void)tree_model;
+    assert(PTK_IS_FILE_LIST(tree_model) == true);
     if (!PTK_IS_FILE_LIST(tree_model))
     {
         LOG_ERROR("!PTK_IS_FILE_LIST(tree_model)");
@@ -355,26 +356,19 @@ static GType
 ptk_file_list_get_column_type(GtkTreeModel* tree_model, i32 index)
 {
     (void)tree_model;
-    if (!PTK_IS_FILE_LIST(tree_model))
-    {
-        LOG_ERROR("!PTK_IS_FILE_LIST(tree_model)");
-        return G_TYPE_INVALID;
-    }
-    if (index > (i32)G_N_ELEMENTS(column_types))
-    {
-        LOG_ERROR("index > (i32)G_N_ELEMENTS(column_types)");
-        return G_TYPE_INVALID;
-    }
+    assert(PTK_IS_FILE_LIST(tree_model) == true);
+    // assert(index > (i32)G_N_ELEMENTS(column_types));
     return column_types[index];
 }
 
 static gboolean
 ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* path)
 {
-    assert(PTK_IS_FILE_LIST(tree_model));
+    assert(PTK_IS_FILE_LIST(tree_model) == true);
     assert(path != nullptr);
 
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    assert(list != nullptr);
 
     i32* indices = gtk_tree_path_get_indices(path);
     i32 depth = gtk_tree_path_get_depth(path);
@@ -404,28 +398,11 @@ static GtkTreePath*
 ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    assert(list != nullptr);
 
-    if (!list)
-    {
-        LOG_ERROR("!list");
-        return nullptr;
-    }
-    if (!iter)
-    {
-        LOG_ERROR("!iter");
-        return nullptr;
-    }
-    if (iter->stamp != list->stamp)
-    {
-        LOG_ERROR("iter->stamp != list->stamp");
-        return nullptr;
-    }
-    if (!iter->user_data)
-    {
-        LOG_ERROR("!iter->user_data");
-        return nullptr;
-    }
-
+    assert(iter != nullptr);
+    // assert(iter->stamp != list->stamp);
+    assert(iter->user_data != nullptr);
     GList* l = (GList*)iter->user_data;
 
     GtkTreePath* path = gtk_tree_path_new();
@@ -437,27 +414,17 @@ static void
 ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, GValue* value)
 {
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
-    GdkPixbuf* icon;
+    assert(list != nullptr);
 
-    if (!PTK_IS_FILE_LIST(tree_model))
-    {
-        LOG_ERROR("!PTK_IS_FILE_LIST(tree_model)");
-        return;
-    }
-    if (!iter)
-    {
-        LOG_ERROR("!iter");
-        return;
-    }
-    if (column > (i32)G_N_ELEMENTS(column_types))
-    {
-        LOG_ERROR("column > (i32)G_N_ELEMENTS(column_types)");
-        return;
-    }
+    assert(PTK_IS_FILE_LIST(tree_model) == true);
+    assert(iter != nullptr);
+    // assert(column > (i32)G_N_ELEMENTS(column_types));
 
     g_value_init(value, column_types[column]);
 
     vfs::file_info file = VFS_FILE_INFO(iter->user_data2);
+
+    GdkPixbuf* icon;
 
     switch (column)
     {
@@ -524,16 +491,13 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
 static gboolean
 ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
-    if (!PTK_IS_FILE_LIST(tree_model))
-    {
-        LOG_ERROR("!PTK_IS_FILE_LIST(tree_model)");
-        return false;
-    }
-
     if (iter == nullptr || iter->user_data == nullptr)
         return false;
 
+    assert(PTK_IS_FILE_LIST(tree_model) == true);
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    assert(list != nullptr);
+
     GList* l = (GList*)iter->user_data;
 
     /* Is this the last l in the list? */
@@ -550,23 +514,17 @@ ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter)
 static gboolean
 ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent)
 {
-    // if (!parent || !parent->user_data)
-    //{
-    //    LOG_ERROR("!parent || !parent->user_data");
-    //    return false;
-    //}
-
     /* this is a list, nodes have no children */
     if (parent)
         return false;
 
     /* parent == nullptr is a special case; we need to return the first top-level row */
-    if (!PTK_IS_FILE_LIST(tree_model))
-    {
-        LOG_ERROR("!PTK_IS_FILE_LIST(tree_model)");
-        return false;
-    }
+    assert(parent != nullptr);
+    assert(parent->user_data != nullptr);
+
+    assert(PTK_IS_FILE_LIST(tree_model) == true);
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    assert(list != nullptr);
 
     /* No rows => no first row */
     if (list->dir->file_list.size() == 0)
@@ -590,13 +548,10 @@ ptk_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter)
 static i32
 ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
-    if (!PTK_IS_FILE_LIST(tree_model))
-    {
-        LOG_ERROR("!PTK_IS_FILE_LIST(tree_model)");
-        return -1;
-    }
+    assert(PTK_IS_FILE_LIST(tree_model) == true);
 
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    assert(list != nullptr);
     /* special case: if iter == nullptr, return number of top-level rows */
     if (!iter)
         return list->n_files;
@@ -607,13 +562,10 @@ static gboolean
 ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent,
                              i32 n)
 {
-    if (!PTK_IS_FILE_LIST(tree_model))
-    {
-        LOG_ERROR("!PTK_IS_FILE_LIST(tree_model)");
-        return false;
-    }
+    assert(PTK_IS_FILE_LIST(tree_model) == true);
 
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    assert(list != nullptr);
 
     /* a list has only top-level rows */
     if (parent)
