@@ -1511,12 +1511,13 @@ main_window_init(MainWindow* main_window)
     main_window->hpane_top = gtk_paned_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL);
     main_window->hpane_bottom = gtk_paned_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL);
 
-    for (i32 i = 0; i < 4; ++i)
+    for (panel_t p : PANELS)
     {
-        main_window->panel[i] = gtk_notebook_new();
-        gtk_notebook_set_show_border(GTK_NOTEBOOK(main_window->panel[i]), false);
-        gtk_notebook_set_scrollable(GTK_NOTEBOOK(main_window->panel[i]), true);
-        g_signal_connect(main_window->panel[i],
+        const panel_t idx = p - 1;
+        main_window->panel[idx] = gtk_notebook_new();
+        gtk_notebook_set_show_border(GTK_NOTEBOOK(main_window->panel[idx]), false);
+        gtk_notebook_set_scrollable(GTK_NOTEBOOK(main_window->panel[idx]), true);
+        g_signal_connect(main_window->panel[idx],
                          "switch-page",
                          G_CALLBACK(on_folder_notebook_switch_pape),
                          main_window);
@@ -2027,9 +2028,10 @@ main_window_get_counts(PtkFileBrowser* file_browser)
     const tab_t tab_num =
         gtk_notebook_page_num(GTK_NOTEBOOK(notebook), GTK_WIDGET(file_browser)) + 1;
     panel_t panel_count = 0;
-    for (i32 i = 0; i < 4; ++i)
+    for (panel_t p : PANELS)
     {
-        if (gtk_widget_get_visible(main_window->panel[i]))
+        const panel_t idx = p - 1;
+        if (gtk_widget_get_visible(main_window->panel[idx]))
             panel_count++;
     }
 

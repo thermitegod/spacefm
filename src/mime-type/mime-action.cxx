@@ -117,14 +117,13 @@ remove_actions(std::string_view mime_type, std::vector<std::string>& actions)
         return;
     }
 
-    for (usize r = 0; r < removed.size(); ++r)
+    for (auto& r : removed)
     {
-        // LOG_INFO("    {}", removed[r]);
-        const std::string rem = removed.at(r);
+        const std::string rem = r;
         if (ztd::contains(actions, rem))
         {
             ztd::remove(actions, rem);
-            // LOG_INFO("        ACTION-REMOVED");
+            // LOG_INFO("        ACTION-REMOVED {}", rem);
         }
     }
 }
@@ -198,16 +197,16 @@ get_actions(std::string_view dir, std::string_view type, std::vector<std::string
             {
                 continue;
             }
-            for (usize i = 0; i < apps.size(); ++i)
+            for (auto& a : apps)
             {
                 //  LOG_INFO("            {}", apps[i]);
                 //  check if removed
                 is_removed = false;
                 if (!removed.empty() && n > 0)
                 {
-                    for (usize r = 0; r < removed.size(); ++r)
+                    for (auto& r : removed)
                     {
-                        if (ztd::same(removed[r].data(), apps[i].data()))
+                        if (ztd::same(r.data(), a.data()))
                         {
                             // LOG_INFO("                REMOVED");
                             is_removed = true;
@@ -215,11 +214,11 @@ get_actions(std::string_view dir, std::string_view type, std::vector<std::string
                         }
                     }
                 }
-                const std::string app = apps.at(i);
+                const std::string app = a;
                 if (!is_removed && !ztd::contains(actions, app))
                 {
                     /* check for app existence */
-                    if (mime_type_locate_desktop_file(apps.at(i).data()))
+                    if (mime_type_locate_desktop_file(app))
                     {
                         // LOG_INFO("                EXISTS");
                         actions.emplace_back(app);

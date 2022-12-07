@@ -1718,10 +1718,10 @@ static const std::unordered_map<MainWindowPanel, std::string_view> main_window_p
 XSetName
 xset_get_xsetname_from_name(std::string_view name)
 {
-    for (auto it = xset_name_map.begin(); it != xset_name_map.end(); ++it)
+    for (const auto& it : xset_name_map)
     {
-        if (ztd::same(name, it->second))
-            return it->first;
+        if (ztd::same(name, it.second))
+            return it.first;
     }
     return XSetName::CUSTOM;
 }
@@ -1853,10 +1853,10 @@ xset_get_xsetvar_from_name(std::string_view name)
 const std::string
 xset_get_name_from_xsetvar(XSetVar name)
 {
-    for (auto it = xset_var_map.begin(); it != xset_var_map.end(); ++it)
+    for (const auto& it : xset_var_map)
     {
-        if (name == it->second)
-            return it->first.data();
+        if (name == it.second)
+            return it.first.data();
     }
 
     const std::string err_msg = fmt::format("NOT implemented XSetVar: {}", INT(name));

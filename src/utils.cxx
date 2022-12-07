@@ -198,9 +198,9 @@ get_valid_su() noexcept
     std::string use_su;
     if (!xset_get_s(XSetName::SU_COMMAND))
     {
-        for (usize i = 0; i < su_commands.size(); ++i)
+        for (auto su_command : su_commands)
         {
-            use_su = Glib::find_program_in_path(su_commands.at(i).data());
+            use_su = Glib::find_program_in_path(su_command.data());
             if (!use_su.empty())
                 break;
         }

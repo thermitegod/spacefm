@@ -759,10 +759,10 @@ rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
 void
 ptk_file_browser_rebuild_toolbars(PtkFileBrowser* file_browser)
 {
-    for (usize i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); ++i)
+    for (auto& toolbar_widget : file_browser->toolbar_widgets)
     {
-        g_slist_free(file_browser->toolbar_widgets[i]);
-        file_browser->toolbar_widgets[i] = nullptr;
+        g_slist_free(toolbar_widget);
+        toolbar_widget = nullptr;
     }
     if (file_browser->toolbar)
     {
@@ -1059,10 +1059,10 @@ ptk_file_browser_finalize(GObject* obj)
     file_browser->book_set_name = nullptr;
     free(file_browser->select_path);
     file_browser->select_path = nullptr;
-    for (usize i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); ++i)
+    for (auto& toolbar_widget : file_browser->toolbar_widgets)
     {
-        g_slist_free(file_browser->toolbar_widgets[i]);
-        file_browser->toolbar_widgets[i] = nullptr;
+        g_slist_free(toolbar_widget);
+        toolbar_widget = nullptr;
     }
 
     G_OBJECT_CLASS(parent_class)->finalize(obj);
@@ -1412,8 +1412,11 @@ ptk_file_browser_new(i32 curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
     file_browser->inhibit_focus = file_browser->busy = false;
     file_browser->seek_name = nullptr;
     file_browser->book_set_name = nullptr;
-    for (usize i = 0; i < G_N_ELEMENTS(file_browser->toolbar_widgets); ++i)
-        file_browser->toolbar_widgets[i] = nullptr;
+
+    for (auto& toolbar_widget : file_browser->toolbar_widgets)
+    {
+        toolbar_widget = nullptr;
+    }
 
     if (xset_get_b_panel(curpanel, XSetPanel::LIST_DETAILED))
         view_mode = PtkFBViewMode::PTK_FB_LIST_VIEW;
