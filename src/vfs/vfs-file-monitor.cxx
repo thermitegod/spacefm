@@ -128,7 +128,7 @@ vfs_file_monitor_clean()
 {
     vfs_file_monitor_disconnect_from_inotify();
 
-    monitor_map.clear();
+    // monitor_map.clear();
 }
 
 bool
