@@ -19,7 +19,10 @@
 #include <condition_variable>
 #include <mutex>
 #include <future>
+
 #include <chrono>
+
+#include <memory>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -28,6 +31,8 @@
 #include "program-timer.hxx"
 
 #include "autosave.hxx"
+
+using namespace std::literals::chrono_literals;
 
 class AutoSave
 {
@@ -56,8 +61,8 @@ class AutoSave
   public:
     std::atomic<bool> accepting_requests{false};
     std::atomic<bool> pending_requests{false};
-    // const u64 timer{5}; // 5 seconds
-    const u64 timer{300}; // 5 minutes
+    // const std::chrono::seconds timer = 5s; // 5 seconds
+    const std::chrono::seconds timer = 300s; // 5 minutes
 
   private:
     std::condition_variable cv;
@@ -65,45 +70,45 @@ class AutoSave
     bool terminate{false};
 };
 
-AutoSave autosave;
+const auto autosave = std::make_unique<AutoSave>();
 
-std::vector<std::future<void>> threads;
+std::vector<std::jthread> threads;
 
 static void
 autosave_thread(autosave_f autosave_func) noexcept
 {
-    const std::chrono::duration<u64> duration(autosave.timer);
-    while (autosave.wait(duration))
+    const std::chrono::duration<u64> duration(autosave->timer);
+    while (autosave->wait(duration))
     {
-        // LOG_INFO("AUTOSAVE save_thread_loop");
-        if (autosave.pending_requests)
-        {
-            // LOG_INFO("AUTOSAVE save_settings");
-            autosave.pending_requests.store(false);
-            autosave_func();
-        }
+        // LOG_DEBUG("AUTOSAVE Thread loop");
+        if (!autosave->pending_requests)
+            continue;
+
+        // LOG_DEBUG("AUTOSAVE Thread saving_settings");
+        autosave->pending_requests.store(false);
+        autosave_func();
     }
 }
 
 void
 autosave_request_add() noexcept
 {
-    // LOG_INFO("AUTOSAVE request add");
-    if (autosave.accepting_requests)
+    // LOG_DEBUG("AUTOSAVE request add");
+    if (autosave->accepting_requests)
     {
-        autosave.pending_requests.store(true);
+        autosave->pending_requests.store(true);
     }
     else
     { // At program start lots of requests can be sent, this ignores them
         if (program_timer::elapsed() >= 10.0)
         {
-            // LOG_INFO("AUTOSAVE now accepting request add");
-            autosave.accepting_requests.store(true);
-            autosave.pending_requests.store(true);
+            // LOG_DEBUG("AUTOSAVE now accepting request add");
+            autosave->accepting_requests.store(true);
+            autosave->pending_requests.store(true);
         }
         // else
         // {
-        //     LOG_INFO("AUTOSAVE ignoring request add");
+        //     LOG_DEBUG("AUTOSAVE ignoring request add");
         // }
     }
 }
@@ -111,27 +116,26 @@ autosave_request_add() noexcept
 void
 autosave_request_cancel() noexcept
 {
-    // LOG_INFO("AUTOSAVE request cancel");
-    autosave.pending_requests.store(false);
+    // LOG_DEBUG("AUTOSAVE request cancel");
+    autosave->pending_requests.store(false);
 }
 
 void
 autosave_init(autosave_f autosave_func) noexcept
 {
-    // LOG_INFO("AUTOSAVE init");
-    threads.push_back(std::async(std::launch::async,
-                                 [autosave_func]
-                                 {
-                                     autosave_thread(autosave_func);
-                                 }));
+    // LOG_DEBUG("AUTOSAVE init");
+    threads.emplace_back(std::jthread([autosave_func] { autosave_thread(autosave_func); }));
 }
 
 void
 autosave_terminate() noexcept
 {
-    // LOG_INFO("AUTOSAVE kill thread");
-    autosave.kill();
+    // LOG_DEBUG("AUTOSAVE kill threads");
+    autosave->kill();
 
-    for (auto&& f: threads)
-        f.wait();
+    for (auto&& f : threads)
+    {
+        f.request_stop(); // Request that the thread stop
+        f.join();         // Wait for the thread to stop
+    }
 }
