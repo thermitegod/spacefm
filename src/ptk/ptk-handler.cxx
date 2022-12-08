@@ -1386,7 +1386,12 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
 
     print_command(cp_command);
     Glib::spawn_command_line_sync(cp_command, standard_output, standard_error, &exit_status);
-    LOG_INFO("{}{}", *standard_output, *standard_error);
+    std::string out;
+    if (standard_output)
+        out.append(*standard_output);
+    if (standard_error)
+        out.append(*standard_error);
+    LOG_INFO("{}", out);
     if (exit_status && WIFEXITED(exit_status))
     {
         const std::string msg =

@@ -549,7 +549,12 @@ xset_custom_copy_files(xset_t src, xset_t dest)
     // LOG_INFO("    path_dest={}", path_dest );
     print_command(command);
     Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);
-    LOG_INFO("{}{}", *standard_output, *standard_error);
+    std::string out;
+    if (standard_output)
+        out.append(*standard_output);
+    if (standard_error)
+        out.append(*standard_error);
+    LOG_INFO("{}", out);
     if (exit_status && WIFEXITED(exit_status))
     {
         const std::string msg =
@@ -575,7 +580,12 @@ xset_custom_copy_files(xset_t src, xset_t dest)
         command = fmt::format("cp -a {} {}", path_src, path_dest);
         print_command(command);
         Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);
-        LOG_INFO("{}{}", *standard_output, *standard_error);
+        std::string copy_out;
+        if (standard_output)
+            copy_out.append(*standard_output);
+        if (standard_error)
+            copy_out.append(*standard_error);
+        LOG_INFO("{}", copy_out);
         if (exit_status && WIFEXITED(exit_status))
         {
             const std::string msg =
