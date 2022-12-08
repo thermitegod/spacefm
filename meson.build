@@ -234,6 +234,10 @@ if get_option('deprecated-ini-loading')
   pre_args += '-DHAVE_DEPRECATED_INI_LOADING'
 endif
 
+if get_option('ffmpegthumbnailer-cli')
+  pre_args += '-DFFMPEGTHUMBNAILER_CLI'
+endif
+
 if get_option('deprecated-hw')
   pre_args += '-DHAVE_DEPRECATED_HW'
 endif

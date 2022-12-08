@@ -32,8 +32,10 @@
 #include <glibmm.h>
 #include <glibmm/convert.h>
 
+#ifndef FFMPEGTHUMBNAILER_CLI
 #include <libffmpegthumbnailer/imagetypes.h>
 #include <libffmpegthumbnailer/videothumbnailer.h>
+#endif
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -328,16 +330,16 @@ vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big)
 }
 
 static GdkPixbuf*
-vfs_thumbnail_load(std::string_view file_path, std::string_view uri, i32 size)
+vfs_thumbnail_load(std::string_view file_path, std::string_view file_uri, i32 thumb_size)
 {
-    Glib::Checksum check = Glib::Checksum();
-    const std::string file_hash = check.compute_checksum(Glib::Checksum::Type::MD5, uri.data());
+    Glib::Checksum hash = Glib::Checksum();
+    const std::string file_hash = hash.compute_checksum(Glib::Checksum::Type::MD5, file_uri.data());
     const std::string file_name = fmt::format("{}.png", file_hash);
 
     const std::string thumbnail_file =
         Glib::build_filename(vfs_user_cache_dir(), "thumbnails/normal", file_name);
 
-    // LOG_INFO("{}", thumbnail_file);
+    // LOG_DEBUG("thumbnail_load()={} | uri={} | thumb_size={}", file_path, file_uri, thumb_size);
 
     // get file mtime
     const auto ftime = std::filesystem::last_write_time(file_path);
@@ -358,6 +360,7 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view uri, i32 size)
     GdkPixbuf* thumbnail = nullptr;
     if (std::filesystem::is_regular_file(thumbnail_file))
     {
+        // LOG_DEBUG("Existing thumb: {}", thumbnail_file);
         thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.data(), nullptr);
         if (thumbnail)
         { // need to check for broken thumbnail images
@@ -368,19 +371,24 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view uri, i32 size)
         }
     }
 
-    if (!thumbnail || (w < size && h < size) || embeded_mtime != mtime)
+    if (!thumbnail || (w < thumb_size && h < thumb_size) || embeded_mtime != mtime)
     {
+        // LOG_DEBUG("New thumb: {}", thumbnail_file);
+
         if (thumbnail)
+        {
             g_object_unref(thumbnail);
+        }
 
         // create new thumbnail
+#ifndef FFMPEGTHUMBNAILER_CLI
         try
         {
             ffmpegthumbnailer::VideoThumbnailer video_thumb;
             // video_thumb.setLogCallback(nullptr);
             // video_thumb.clearFilters();
             video_thumb.setSeekPercentage(25);
-            video_thumb.setThumbnailSize(128);
+            video_thumb.setThumbnailSize(thumb_size);
             video_thumb.setMaintainAspectRatio(true);
             video_thumb.generateThumbnail(file_path.data(),
                                           ThumbnailerImageType::Png,
@@ -392,6 +400,14 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view uri, i32 size)
             // file cannot be opened
             return nullptr;
         }
+#else
+        const std::string command = fmt::format("ffmpegthumbnailer -s {} -i {} -o {}",
+                                                thumb_size,
+                                                bash_quote(file_path),
+                                                bash_quote(thumbnail_file));
+        // print_command(command);
+        Glib::spawn_command_line_sync(command);
+#endif
 
         thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.data(), nullptr);
     }
@@ -404,17 +420,17 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view uri, i32 size)
 
         if (w > h)
         {
-            h = h * size / w;
-            w = size;
+            h = h * thumb_size / w;
+            w = thumb_size;
         }
         else if (h > w)
         {
-            w = w * size / h;
-            h = size;
+            w = w * thumb_size / h;
+            h = thumb_size;
         }
         else
         {
-            w = h = size;
+            w = h = thumb_size;
         }
 
         if (w > 0 && h > 0)
@@ -427,18 +443,18 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view uri, i32 size)
 }
 
 GdkPixbuf*
-vfs_thumbnail_load_for_uri(std::string_view uri, i32 size)
+vfs_thumbnail_load_for_uri(std::string_view uri, i32 thumb_size)
 {
     const std::string file = Glib::filename_from_uri(uri.data());
-    GdkPixbuf* ret = vfs_thumbnail_load(file, uri, size);
+    GdkPixbuf* ret = vfs_thumbnail_load(file, uri, thumb_size);
     return ret;
 }
 
 GdkPixbuf*
-vfs_thumbnail_load_for_file(std::string_view file, i32 size)
+vfs_thumbnail_load_for_file(std::string_view file, i32 thumb_size)
 {
     const std::string uri = Glib::filename_to_uri(file.data());
-    GdkPixbuf* ret = vfs_thumbnail_load(file, uri, size);
+    GdkPixbuf* ret = vfs_thumbnail_load(file, uri, thumb_size);
     return ret;
 }
 

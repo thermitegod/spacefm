@@ -6,6 +6,12 @@ option(
   description : 'support for reading old session files',
 )
 option(
+  'ffmpegthumbnailer-cli',
+  type : 'boolean',
+  value : false,
+  description : 'use ffmpegthumbnailer cli not the api',
+)
+option(
   'deprecated-hw',
   type : 'boolean',
   value : false,
