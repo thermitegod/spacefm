@@ -30,9 +30,11 @@
 #include <glibmm.h>
 #include <glibmm/convert.h>
 
-#include <exo/exo.h>
+#include <glib.h>
+#include <gdk/gdk.h>
+#include <gtk/gtk.h>
 
-#include <glibmm.h>
+#include <exo/exo.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -4119,9 +4121,9 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
     (void)x;
     (void)y;
     (void)info;
+
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(user_data);
-    char* dest_dir;
-    /*  Do not call the default handler  */
+    /* Do not call the default handler */
     g_signal_stop_emission_by_name(widget, "drag-data-received");
 
     if ((gtk_selection_data_get_length(sel_data) >= 0) &&
@@ -4130,86 +4132,84 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
         // (list view) use stored x and y because == 0 for update drag status
         //             when is last row (gtk2&3 bug?)
         // and because exo_icon_view has no get_drag_dest_row
-        dest_dir =
+        const char* dest_dir =
             folder_view_get_drop_dir(file_browser, file_browser->drag_x, file_browser->drag_y);
-        // LOG_INFO("FB dest_dir = {}", dest_dir );
+        // LOG_INFO("FB DnD dest_dir = {}", dest_dir );
         if (dest_dir)
         {
+            if (file_browser->pending_drag_status)
+            {
+                // LOG_DEBUG("DnD DEFAULT");
+
+                // We only want to update drag status, not really want to drop
+                gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_DEFAULT, time);
+
+                // DnD is still ongoing, do not continue
+                file_browser->pending_drag_status = false;
+                return;
+            }
+
             char** list;
             char** puri;
             puri = list = gtk_selection_data_get_uris(sel_data);
 
-            if (file_browser->pending_drag_status)
+            if (puri)
             {
                 // We only want to update drag status, not really want to drop
                 const auto dest_dir_stat = ztd::stat(dest_dir);
-                if (dest_dir_stat.is_valid())
+
+                const dev_t dest_dev = dest_dir_stat.dev();
+                const ino_t dest_inode = dest_dir_stat.ino();
+                if (file_browser->drag_source_dev == 0)
                 {
-                    const dev_t dest_dev = dest_dir_stat.dev();
-                    const ino_t dest_inode = dest_dir_stat.ino();
-                    if (file_browser->drag_source_dev == 0)
+                    file_browser->drag_source_dev = dest_dev;
+                    for (; *puri; ++puri)
                     {
-                        file_browser->drag_source_dev = dest_dev;
-                        for (; *puri; ++puri)
+                        const std::string file_path = Glib::filename_from_uri(*puri);
+
+                        const auto file_path_stat = ztd::stat(file_path);
+                        if (file_path_stat.is_valid())
                         {
-                            const std::string file_path = Glib::filename_from_uri(*puri);
-
-                            const auto file_path_stat = ztd::stat(file_path);
-                            if (file_path_stat.is_valid())
+                            if (file_path_stat.dev() != dest_dev)
                             {
-                                if (file_path_stat.dev() != dest_dev)
-                                {
-                                    // different devices - store source device
-                                    file_browser->drag_source_dev = file_path_stat.dev();
-                                    break;
-                                }
-                                else if (file_browser->drag_source_inode == 0)
-                                {
-                                    // same device - store source parent inode
-                                    const std::string src_dir = Glib::path_get_dirname(file_path);
+                                // different devices - store source device
+                                file_browser->drag_source_dev = file_path_stat.dev();
+                                break;
+                            }
+                            else if (file_browser->drag_source_inode == 0)
+                            {
+                                // same device - store source parent inode
+                                const std::string src_dir = Glib::path_get_dirname(file_path);
 
-                                    const auto src_dir_stat = ztd::stat(src_dir);
-                                    if (src_dir_stat.is_valid())
-                                    {
-                                        file_browser->drag_source_inode = src_dir_stat.ino();
-                                    }
+                                const auto src_dir_stat = ztd::stat(src_dir);
+                                if (src_dir_stat.is_valid())
+                                {
+                                    file_browser->drag_source_inode = src_dir_stat.ino();
                                 }
                             }
                         }
                     }
-                    if (file_browser->drag_source_dev != dest_dev ||
-                        file_browser->drag_source_inode == dest_inode)
-                    { // src and dest are on different devices or same dir
-                        gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
-                    }
-                    else
-                    {
-                        gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_MOVE, time);
-                    }
+                }
+                g_strfreev(list);
+
+                VFSFileTaskType file_action;
+
+                if (file_browser->drag_source_dev != dest_dev ||
+                    file_browser->drag_source_inode == dest_inode)
+                { // src and dest are on different devices or same dir
+                    // LOG_DEBUG("DnD COPY");
+                    gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
+                    file_action = VFSFileTaskType::COPY;
                 }
                 else
-                { // stat failed
-                    gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
-                }
-
-                free(dest_dir);
-                g_strfreev(list);
-                file_browser->pending_drag_status = false;
-                return;
-            }
-            if (puri)
-            {
-                std::vector<std::string> file_list;
-                if ((gdk_drag_context_get_selected_action(drag_context) &
-                     (GdkDragAction::GDK_ACTION_MOVE | GdkDragAction::GDK_ACTION_COPY |
-                      GdkDragAction::GDK_ACTION_LINK)) == 0)
                 {
-                    gdk_drag_status(drag_context,
-                                    GdkDragAction::GDK_ACTION_COPY,
-                                    time); // sfm correct?  was MOVE
+                    // LOG_DEBUG("DnD MOVE");
+                    gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_MOVE, time);
+                    file_action = VFSFileTaskType::MOVE;
                 }
-                gtk_drag_finish(drag_context, true, false, time);
 
+                std::vector<std::string> file_list;
+                puri = list = gtk_selection_data_get_uris(sel_data);
                 for (; *puri; ++puri)
                 {
                     std::string file_path;
@@ -4222,55 +4222,22 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                 }
                 g_strfreev(list);
 
-                VFSFileTaskType file_action;
-                switch (gdk_drag_context_get_selected_action(drag_context))
-                {
-                    case GdkDragAction::GDK_ACTION_COPY:
-                        file_action = VFSFileTaskType::COPY;
-                        break;
-                    case GdkDragAction::GDK_ACTION_MOVE:
-                        file_action = VFSFileTaskType::MOVE;
-                        break;
-                    case GdkDragAction::GDK_ACTION_LINK:
-                        file_action = VFSFileTaskType::LINK;
-                        break;
-                    case GdkDragAction::GDK_ACTION_DEFAULT:
-                    case GdkDragAction::GDK_ACTION_PRIVATE:
-                    case GdkDragAction::GDK_ACTION_ASK:
-                    default:
-                        break;
-                }
-
                 if (!file_list.empty())
                 {
-                    // LOG_INFO("dest_dir = {}", dest_dir);
+                    // LOG_INFO("DnD dest_dir = {}", dest_dir);
 
-                    /* We only want to update drag status, not really want to drop */
-                    if (file_browser->pending_drag_status)
-                    {
-                        const auto file_stat = ztd::stat(dest_dir);
-                        if (file_stat.is_valid())
-                            file_browser->pending_drag_status = false;
-                        free(dest_dir);
-                        return;
-                    }
-                    else /* Accept the drop and perform file actions */
-                    {
-                        GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
-                        PtkFileTask* ptask = ptk_file_task_new(file_action,
-                                                               file_list,
-                                                               dest_dir,
-                                                               GTK_WINDOW(parent_win),
-                                                               file_browser->task_view);
-                        ptk_file_task_run(ptask);
-                    }
+                    GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
+                    PtkFileTask* ptask = ptk_file_task_new(file_action,
+                                                           file_list,
+                                                           dest_dir,
+                                                           GTK_WINDOW(parent_win),
+                                                           file_browser->task_view);
+                    ptk_file_task_run(ptask);
                 }
-                free(dest_dir);
                 gtk_drag_finish(drag_context, true, false, time);
                 return;
             }
         }
-        free(dest_dir);
     }
 
     /* If we are only getting drag status, not finished. */
