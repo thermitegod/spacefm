@@ -119,6 +119,7 @@ struct VFSFileInfo
     bool is_fifo() const noexcept;
     bool is_block_file() const noexcept;
     bool is_character_file() const noexcept;
+    bool is_other() const noexcept;
 
     bool is_image() const noexcept;
     bool is_video() const noexcept;

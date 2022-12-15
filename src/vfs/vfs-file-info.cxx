@@ -535,6 +535,12 @@ VFSFileInfo::is_character_file() const noexcept
 }
 
 bool
+VFSFileInfo::is_other() const noexcept
+{
+    return (!this->is_directory() && !this->is_regular_file() && !this->is_symlink());
+}
+
+bool
 VFSFileInfo::is_image() const noexcept
 {
     // FIXME: We had better use functions of xdg_mime to check this
