@@ -19,6 +19,9 @@
 #include <string>
 #include <filesystem>
 
+#include <algorithm>
+#include <ranges>
+
 #include <cassert>
 
 #include <glibmm.h>
@@ -134,13 +137,20 @@ PtkDirTreeNode::PtkDirTreeNode()
 
 PtkDirTreeNode::~PtkDirTreeNode()
 {
-    PtkDirTreeNode* child;
     if (this->file)
         vfs_file_info_unref(this->file);
-    for (child = this->children; child; child = child->next)
+
+    std::vector<PtkDirTreeNode*> childs;
+    for (PtkDirTreeNode* child = this->children; child; child = child->next)
+    {
+        childs.emplace_back(child);
+    }
+    std::ranges::reverse(childs);
+    for (PtkDirTreeNode* child : childs)
     {
         delete child;
     }
+
     if (this->monitor)
         vfs_file_monitor_remove(this->monitor, &on_file_monitor_event, this);
 }
