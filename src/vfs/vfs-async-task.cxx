@@ -91,6 +91,7 @@ vfs_async_task_class_init(VFSAsyncTaskClass* klass)
 static void
 vfs_async_task_init(vfs::async_task task)
 {
+    (void)task;
 }
 
 vfs::async_task

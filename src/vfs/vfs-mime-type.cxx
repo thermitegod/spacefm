@@ -99,18 +99,13 @@ on_mime_cache_changed(vfs::file_monitor monitor, VFSFileMonitorEvent event,
                       std::string_view file_name, void* user_data)
 {
     (void)monitor;
+    (void)event;
     (void)file_name;
+    (void)user_data;
 
-    switch (event)
-    {
-        case VFSFileMonitorEvent::CREATE:
-        case VFSFileMonitorEvent::DELETE:
-        case VFSFileMonitorEvent::CHANGE:
-            // LOG_DEBUG("reloading all mime caches");
-            if (reload_callback_id == 0)
-                reload_callback_id = g_idle_add((GSourceFunc)vfs_mime_type_reload, nullptr);
-            break;
-    }
+    // LOG_DEBUG("reloading all mime caches");
+    if (reload_callback_id == 0)
+        reload_callback_id = g_idle_add((GSourceFunc)vfs_mime_type_reload, nullptr);
 }
 
 void

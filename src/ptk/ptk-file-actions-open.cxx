@@ -296,7 +296,9 @@ open_files_with_each_app(void* key, void* value, void* user_data)
 static void
 free_file_list_hash(void* key, void* value, void* user_data)
 {
+    (void)key;
     (void)user_data;
+
     GList* files = (GList*)value;
     g_list_foreach(files, (GFunc)free, nullptr);
     g_list_free(files);

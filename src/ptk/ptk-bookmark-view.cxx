@@ -44,5 +44,7 @@ ptk_bookmark_view_add_bookmark(PtkFileBrowser* file_browser)
 void
 ptk_bookmark_view_add_bookmark_cb(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
 {
+    (void)menuitem;
+
     ptk_bookmark_view_add_bookmark(file_browser);
 }

@@ -678,6 +678,8 @@ static void
 ptk_dir_tree_insert_child(PtkDirTree* tree, PtkDirTreeNode* parent, std::string_view file_path = "",
                           std::string_view name = "")
 {
+    (void)name;
+
     PtkDirTreeNode* node;
     PtkDirTreeNode* child_node = ptk_dir_tree_node_new(tree, parent, file_path);
     for (node = parent->children; node; node = node->next)

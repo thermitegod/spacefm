@@ -1217,6 +1217,7 @@ on_menu_bar_event(GtkWidget* widget, GdkEvent* event, MainWindow* main_window)
 static bool
 bookmark_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
 {
+    (void)event;
     (void)user_data;
 
     GtkWidget* item = widget;
