@@ -30,7 +30,7 @@ ptk_get_keymod(u32 event)
                      GdkModifierType::GDK_HYPER_MASK | GdkModifierType::GDK_META_MASK));
 }
 
-#ifdef HAVE_NONLATIN
+#if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
 void
 transpose_nonlatin_keypress(GdkEventKey* event)
 {

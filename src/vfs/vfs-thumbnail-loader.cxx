@@ -30,7 +30,7 @@
 #include <glibmm.h>
 #include <glibmm/convert.h>
 
-#ifndef FFMPEGTHUMBNAILER_CLI
+#if !defined(HAVE_USE_FFMPEGTHUMBNAILER_CLI)
 #include <libffmpegthumbnailer/imagetypes.h>
 #include <libffmpegthumbnailer/videothumbnailer.h>
 #endif
@@ -342,7 +342,14 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view file_uri, i32 th
         }
 
         // create new thumbnail
-#ifndef FFMPEGTHUMBNAILER_CLI
+#if defined(HAVE_USE_FFMPEGTHUMBNAILER_CLI)
+        const std::string command = fmt::format("ffmpegthumbnailer -s {} -i {} -o {}",
+                                                thumb_size,
+                                                bash_quote(file_path),
+                                                bash_quote(thumbnail_file));
+        // print_command(command);
+        Glib::spawn_command_line_sync(command);
+#else
         try
         {
             ffmpegthumbnailer::VideoThumbnailer video_thumb;
@@ -361,15 +368,7 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view file_uri, i32 th
             // file cannot be opened
             return nullptr;
         }
-#else
-        const std::string command = fmt::format("ffmpegthumbnailer -s {} -i {} -o {}",
-                                                thumb_size,
-                                                bash_quote(file_path),
-                                                bash_quote(thumbnail_file));
-        // print_command(command);
-        Glib::spawn_command_line_sync(command);
 #endif
-
         thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.data(), nullptr);
     }
 

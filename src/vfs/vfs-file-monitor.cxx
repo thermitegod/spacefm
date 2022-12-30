@@ -287,7 +287,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
                 if (event->mask & (IN_CREATE | IN_MOVED_TO))
                 {
                     monitor_event = VFSFileMonitorEvent::CREATE;
-#ifdef VFS_FILE_MONITOR_DEBUG
+#if defined(VFS_FILE_MONITOR_DEBUG)
                     LOG_DEBUG("inotify-event MASK={} CREATE={}",
                               event->mask,
                               Glib::build_filename(monitor->path, file_name));
@@ -296,7 +296,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
                 else if (event->mask & (IN_DELETE | IN_MOVED_FROM | IN_DELETE_SELF | IN_UNMOUNT))
                 {
                     monitor_event = VFSFileMonitorEvent::DELETE;
-#ifdef VFS_FILE_MONITOR_DEBUG
+#if defined(VFS_FILE_MONITOR_DEBUG)
                     LOG_DEBUG("inotify-event MASK={} DELETE={}",
                               event->mask,
                               Glib::build_filename(monitor->path, file_name));
@@ -305,7 +305,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
                 else if (event->mask & (IN_MODIFY | IN_ATTRIB))
                 {
                     monitor_event = VFSFileMonitorEvent::CHANGE;
-#ifdef VFS_FILE_MONITOR_DEBUG
+#if defined(VFS_FILE_MONITOR_DEBUG)
                     LOG_DEBUG("inotify-event MASK={} CHANGE={}",
                               event->mask,
                               Glib::build_filename(monitor->path, file_name));
@@ -314,7 +314,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
                 else
                 { // IN_IGNORED not handled
                     monitor_event = VFSFileMonitorEvent::CHANGE;
-#ifdef VFS_FILE_MONITOR_DEBUG
+#if defined(VFS_FILE_MONITOR_DEBUG)
                     LOG_DEBUG("inotify-event MASK={} OTHER={}",
                               event->mask,
                               Glib::build_filename(monitor->path, file_name));

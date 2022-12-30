@@ -33,7 +33,7 @@
 #include "settings/config-load.hxx"
 #include "settings/disk-format.hxx"
 
-#ifdef HAVE_DEPRECATED_INI_LOADING
+#if defined(HAVE_DEPRECATED_INI_CONFIG_LOADING)
 static void xset_parse(std::string& line);
 
 using SettingsParseFunc = void (*)(std::string& line);
@@ -415,7 +415,7 @@ config_parse_xset(const toml::value& tbl, u64 version)
     }
 }
 
-#if defined(HAVE_DEPRECATED_INI_LOADING)
+#if defined(HAVE_DEPRECATED_INI_CONFIG_LOADING)
 
 void
 load_user_confing(std::string_view session, bool load_deprecated_ini_config)

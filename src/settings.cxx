@@ -171,7 +171,7 @@ load_settings()
     // MOD extra settings
     xset_defaults();
 
-#ifdef HAVE_DEPRECATED_INI_LOADING
+#if defined(HAVE_DEPRECATED_INI_CONFIG_LOADING)
     // choose which config file to load
     std::string conf_ini = Glib::build_filename(settings_config_dir, CONFIG_FILE_INI_FILENAME);
     std::string conf_toml = Glib::build_filename(settings_config_dir, CONFIG_FILE_FILENAME);
@@ -237,7 +237,7 @@ load_settings()
 
     if (std::filesystem::is_regular_file(session))
     {
-#ifdef HAVE_DEPRECATED_INI_LOADING
+#if defined(HAVE_DEPRECATED_INI_CONFIG_LOADING)
         load_user_confing(session, load_deprecated_ini_config);
 #else
         load_user_confing(session);
@@ -1244,7 +1244,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
         }
     }
 
-#ifdef HAVE_NONLATIN
+#if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
     u32 nonlatin_key = 0;
     // need to transpose nonlatin keyboard layout ?
     if (!((GDK_KEY_0 <= event->keyval && event->keyval <= GDK_KEY_9) ||
@@ -1282,7 +1282,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
                 name = "( no name )";
 
             keyname = xset_get_keyname(nullptr, event->keyval, keymod);
-#ifdef HAVE_NONLATIN
+#if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
             if (nonlatin_key == 0)
 #endif
                 gtk_message_dialog_format_secondary_text(
@@ -1295,7 +1295,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
                     keymod,
                     keyname.data(),
                     name.data());
-#ifdef HAVE_NONLATIN
+#if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
             else
                 gtk_message_dialog_format_secondary_text(
                     GTK_MESSAGE_DIALOG(dlg),
@@ -1552,7 +1552,7 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, xset_t set)
 
     const u32 keymod = ptk_get_keymod(event->state);
 
-#ifdef HAVE_NONLATIN
+#if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
     transpose_nonlatin_keypress(event);
 #endif
 
@@ -2115,7 +2115,7 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
 
     const u32 keymod = ptk_get_keymod(event->state);
 
-#ifdef HAVE_NONLATIN
+#if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
     transpose_nonlatin_keypress(event);
 #endif
 

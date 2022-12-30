@@ -3208,7 +3208,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
             return false; // send to pathbar
     }
 
-#ifdef HAVE_NONLATIN
+#if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
     u32 nonlatin_key = 0;
     // need to transpose nonlatin keyboard layout ?
     if (!((GDK_KEY_0 <= event->keyval && event->keyval <= GDK_KEY_9) ||
@@ -3238,7 +3238,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
         if (set->shared_key)
         {
             // set has shared key
-#ifdef HAVE_NONLATIN
+#if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
             // nonlatin key match is for nonlatin keycodes set prior to 1.0.3
             set = xset_get(set->shared_key);
             if ((set->key == event->keyval || (nonlatin_key && set->key == nonlatin_key)) &&
@@ -3270,7 +3270,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
             else
                 continue;
         }
-#ifdef HAVE_NONLATIN
+#if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
         // nonlatin key match is for nonlatin keycodes set prior to 1.0.3
         if (((set->key == event->keyval ||
             (nonlatin_key && set->key == nonlatin_key)) &&
@@ -3283,7 +3283,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
         }
     }
 
-#ifdef HAVE_NONLATIN
+#if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
     if (nonlatin_key != 0)
     {
         // use literal keycode for pass-thru, eg for find-as-you-type search

@@ -1695,7 +1695,7 @@ static const std::unordered_map<std::string_view, XSetVar> xset_var_map{
     {"opener"sv,            XSetVar::OPENER},
 
     // Deprecated ini only config keys
-#ifdef HAVE_DEPRECATED_INI_LOADING
+#if defined(HAVE_DEPRECATED_INI_CONFIG_LOADING)
     {"lbl"sv,               XSetVar::MENU_LABEL},
     {"label"sv,             XSetVar::MENU_LABEL_CUSTOM},
     {"cxt"sv,               XSetVar::CONTEXT},

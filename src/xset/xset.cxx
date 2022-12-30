@@ -94,7 +94,7 @@ XSet::~XSet()
     }
 }
 
-#ifdef XSET_GETTER_SETTER
+#if defined(XSET_GETTER_SETTER)
 
 const char*
 XSet::get_name() const noexcept

@@ -70,7 +70,7 @@ get_script_path(Scripts script) noexcept
 {
     const std::string script_name = script_map.at(script).data();
 
-#ifdef SPACEFM_USER_SCRIPT_OVERRIDE
+#if defined(SPACEFM_USER_SCRIPT_OVERRIDE)
     const std::string script_path =
         Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", script_name);
     // LOG_INFO("user script: {}", script_path);

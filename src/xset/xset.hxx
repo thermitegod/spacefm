@@ -207,7 +207,7 @@ struct XSet
     char* plug_name{nullptr}; // not saved
     char* plug_dir{nullptr};  // not saved
 
-#ifdef XSET_GETTER_SETTER
+#if defined(XSET_GETTER_SETTER)
   public:
     // get/set
 

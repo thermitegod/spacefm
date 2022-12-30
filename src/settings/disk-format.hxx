@@ -118,7 +118,7 @@ const std::string PLUGIN_FILE_SECTION_PLUGIN{"Plugin"};
  * INI
  */
 
-#ifdef HAVE_DEPRECATED_INI_LOADING
+#if defined(HAVE_DEPRECATED_INI_CONFIG_LOADING)
 
 // INI config file
 const std::string CONFIG_FILE_INI_VERSION{"101"}; // 3.0.0-dev

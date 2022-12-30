@@ -288,15 +288,15 @@ if get_option('deprecated')
 endif
 
 if get_option('deprecated-ini-loading')
-  features += '-DHAVE_DEPRECATED_INI_LOADING'
+  features += '-DHAVE_DEPRECATED_INI_CONFIG_LOADING'
 endif
 
 if get_option('nonlatin')
-  features += '-DHAVE_NONLATIN'
+  features += '-DHAVE_NONLATIN_KEYBOARD_SUPPORT'
 endif
 
 if get_option('ffmpegthumbnailer-cli')
-  features += '-DHAVE_FFMPEGTHUMBNAILER_CLI'
+  features += '-DHAVE_USE_FFMPEGTHUMBNAILER_CLI'
 endif
 
 foreach a : features

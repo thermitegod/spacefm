@@ -25,6 +25,6 @@
 
 u32 ptk_get_keymod(u32 event);
 
-#ifdef HAVE_NONLATIN
+#if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
 void transpose_nonlatin_keypress(GdkEventKey* event);
 #endif
