@@ -3113,7 +3113,7 @@ VFSVolume::autoexec() noexcept
                     }
                     else
                     {
-                        const std::string exe = get_prog_executable();
+                        const std::string exe = ztd::program::exe();
                         const std::string quote_path = bash_quote(this->mount_point);
                         const std::string cmd = fmt::format("{} -t {}", exe, quote_path);
                         LOG_INFO("COMMAND={}", cmd);

@@ -121,16 +121,10 @@ get_name_extension(std::string_view full_name) noexcept
     return {fullpath_filebase, file_ext};
 }
 
-const std::string
-get_prog_executable() noexcept
-{
-    return std::filesystem::read_symlink("/proc/self/exe");
-}
-
 void
 open_in_prog(std::string_view path) noexcept
 {
-    const std::string exe = get_prog_executable();
+    const std::string exe = ztd::program::exe();
     const std::string qpath = bash_quote(path);
     const std::string command = fmt::format("{} {}", exe, qpath);
     LOG_INFO("COMMAND={}", command);

@@ -496,7 +496,7 @@ on_open_current_folder_as_root(GtkMenuItem* menuitem, void* user_data)
                                            ptk_file_browser_get_cwd(file_browser),
                                            GTK_WIDGET(file_browser),
                                            file_browser->task_view);
-    const std::string exe = get_prog_executable();
+    const std::string exe = ztd::program::exe();
     const std::string cwd = bash_quote(ptk_file_browser_get_cwd(file_browser));
     ptask->task->exec_command = fmt::format("HOME=/root {} {}", exe, cwd);
     ptask->task->exec_as_user = "root";

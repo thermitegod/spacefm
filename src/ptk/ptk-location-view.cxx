@@ -1184,7 +1184,7 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 
         if (!file_browser && !run_in_terminal && vol->device_type == VFSVolumeDeviceType::BLOCK)
         {
-            const std::string exe = get_prog_executable();
+            const std::string exe = ztd::program::exe();
             // run from desktop window - show a pending dialog
             wait = fmt::format("{} -g --title 'Remove {}' --label '\\nPlease wait while device "
                                "{} is synced and unmounted...' >/dev/null &\nwaitp=$!\n",
