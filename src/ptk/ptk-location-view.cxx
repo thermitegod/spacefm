@@ -733,7 +733,7 @@ ptk_location_view_clean_mount_points()
     if (!udevil.empty())
     {
         const std::string command = fmt::format("{} -c \"sleep 1 ; {} clean\"", BASH_PATH, udevil);
-        print_command(command);
+        LOG_INFO("COMMAND={}", command);
         Glib::spawn_command_line_async(command);
     }
 }

@@ -70,7 +70,7 @@ update_desktop_database()
 {
     const std::string path = Glib::build_filename(vfs::user_dirs->data_dir(), "applications");
     const std::string command = fmt::format("update-desktop-database {}", path);
-    print_command(command);
+    LOG_INFO("COMMAND={}", command);
     Glib::spawn_command_line_sync(command);
 }
 

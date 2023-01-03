@@ -268,7 +268,7 @@ xset_custom_export_files(xset_t set, std::string_view plug_dir)
 
     i32 exit_status;
     const std::string command = fmt::format("cp -a {} {}", path_src, path_dest);
-    print_command(command);
+    LOG_INFO("COMMAND={}", command);
     Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
 
     return !!exit_status;
@@ -545,9 +545,8 @@ xset_custom_copy_files(xset_t src, xset_t dest)
     std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
     path_dest = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", dest->name);
     command = fmt::format("cp -a {} {}", path_src, path_dest);
-
-    // LOG_INFO("    path_dest={}", path_dest );
-    print_command(command);
+    // LOG_INFO("    path_dest={}", path_dest);
+    LOG_INFO("COMMAND={}", command);
     Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);
     std::string out;
     if (standard_output)
@@ -566,7 +565,7 @@ xset_custom_copy_files(xset_t src, xset_t dest)
                         msg);
     }
     command = fmt::format("chmod -R go-rwx {}", path_dest);
-    print_command(command);
+    LOG_INFO("COMMAND={}", command);
     Glib::spawn_command_line_sync(command);
 
     // copy data dir
@@ -578,7 +577,7 @@ xset_custom_copy_files(xset_t src, xset_t dest)
         path_dest =
             Glib::build_filename(vfs::user_dirs->program_config_dir(), "plugin-data", dest->name);
         command = fmt::format("cp -a {} {}", path_src, path_dest);
-        print_command(command);
+        LOG_INFO("COMMAND={}", command);
         Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);
         std::string copy_out;
         if (standard_output)
@@ -597,7 +596,7 @@ xset_custom_copy_files(xset_t src, xset_t dest)
                             msg);
         }
         command = fmt::format("chmod -R go-rwx {}", path_dest);
-        print_command(command);
+        LOG_INFO("COMMAND={}", command);
         Glib::spawn_command_line_sync(command);
     }
 }

@@ -1402,7 +1402,7 @@ VFSFileTask::file_exec(std::string_view src_file)
         }
 
         // build - command
-        print_task_command((char*)this->exec_ptask, this->exec_command);
+        LOG_INFO("TASK_COMMAND({:p})={}", fmt::ptr(this->exec_ptask), this->exec_command);
 
         buf.append(fmt::format("{}\nfm_err=$?\n", this->exec_command));
 
@@ -1595,7 +1595,7 @@ VFSFileTask::file_exec(std::string_view src_file)
         return;
     }
 
-    print_task_command_spawn(argv, pid);
+    LOG_INFO("SPAWN=\"{}\" pid={}", ztd::join(argv, " "), pid);
 
     if (!this->exec_sync)
     {

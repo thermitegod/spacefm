@@ -347,7 +347,7 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view file_uri, i32 th
                                                 thumb_size,
                                                 bash_quote(file_path),
                                                 bash_quote(thumbnail_file));
-        // print_command(command);
+        // LOG_INFO("COMMAND={}", command);
         Glib::spawn_command_line_sync(command);
 #else
         try

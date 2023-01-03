@@ -1759,12 +1759,12 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             break;
         case PTKFileMenuAppJob::APP_JOB_UPDATE:
             command = fmt::format("update-mime-database {}/mime", vfs::user_dirs->data_dir());
-            print_command(command);
+            LOG_INFO("COMMAND={}", command);
             Glib::spawn_command_line_async(command);
 
             command =
                 fmt::format("update-desktop-database {}/applications", vfs::user_dirs->data_dir());
-            print_command(command);
+            LOG_INFO("COMMAND={}", command);
             Glib::spawn_command_line_async(command);
             break;
         default:

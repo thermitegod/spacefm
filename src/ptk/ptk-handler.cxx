@@ -1384,7 +1384,7 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     std::string* standard_error = nullptr;
     i32 exit_status;
 
-    print_command(cp_command);
+    LOG_INFO("COMMAND={}", cp_command);
     Glib::spawn_command_line_sync(cp_command, standard_output, standard_error, &exit_status);
     std::string out;
     if (standard_output)
@@ -1403,7 +1403,7 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
                         msg);
     }
     const std::string chmod_command = fmt::format("chmod -R go-rwx {}", path_dest);
-    print_command(chmod_command);
+    LOG_INFO("COMMAND={}", chmod_command);
     Glib::spawn_command_line_sync(chmod_command);
 
     // add to handler list

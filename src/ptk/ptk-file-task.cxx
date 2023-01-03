@@ -423,12 +423,12 @@ ptk_file_task_cancel(PtkFileTask* ptask)
 
             const std::string command =
                 fmt::format("/usr/bin/kill -{} {}", SIGTERM, ptask->task->exec_pid);
-            print_command(command);
+            LOG_INFO("COMMAND={}", command);
             Glib::spawn_command_line_async(command);
 
             const std::string command2 =
                 fmt::format("sleep 5 && /usr/bin/kill -{} {}", SIGKILL, ptask->task->exec_pid);
-            print_command(command2);
+            LOG_INFO("COMMAND={}", command2);
             Glib::spawn_command_line_async(command2);
         }
         else
@@ -528,7 +528,7 @@ ptk_file_task_pause(PtkFileTask* ptask, i32 state)
             // send signal
             const std::string command =
                 fmt::format("/usr/bin/kill -{} {}", sig, ptask->task->exec_pid);
-            print_command(command);
+            LOG_INFO("COMMAND={}", command);
             Glib::spawn_command_line_async(command);
         }
     }

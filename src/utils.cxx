@@ -37,24 +37,6 @@
 
 #include "utils.hxx"
 
-void
-print_command(std::string_view command) noexcept
-{
-    LOG_INFO("COMMAND={}", command);
-}
-
-void
-print_task_command(const char* ptask, std::string_view cmd) noexcept
-{
-    LOG_INFO("TASK_COMMAND({:p})={}", ptask, cmd);
-}
-
-void
-print_task_command_spawn(const std::vector<std::string>& argv, i32 pid) noexcept
-{
-    LOG_INFO("SPAWN=\"{}\" pid={} ", ztd::join(argv, " "), pid);
-}
-
 const std::string
 randhex8() noexcept
 {
@@ -151,7 +133,7 @@ open_in_prog(std::string_view path) noexcept
     const std::string exe = get_prog_executable();
     const std::string qpath = bash_quote(path);
     const std::string command = fmt::format("{} {}", exe, qpath);
-    print_command(command);
+    LOG_INFO("COMMAND={}", command);
     Glib::spawn_command_line_async(command);
 }
 

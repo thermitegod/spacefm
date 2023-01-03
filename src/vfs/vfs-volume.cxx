@@ -3116,7 +3116,7 @@ VFSVolume::autoexec() noexcept
                         const std::string exe = get_prog_executable();
                         const std::string quote_path = bash_quote(this->mount_point);
                         const std::string cmd = fmt::format("{} -t {}", exe, quote_path);
-                        print_command(cmd);
+                        LOG_INFO("COMMAND={}", cmd);
                         Glib::spawn_command_line_async(cmd);
                     }
                 }

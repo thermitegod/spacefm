@@ -870,12 +870,12 @@ on_mime_change_timer(void* user_data)
     // LOG_INFO("MIME-UPDATE on_timer");
     const std::string command1 =
         fmt::format("update-mime-database {}/mime", vfs::user_dirs->data_dir());
-    print_command(command1);
+    LOG_INFO("COMMAND={}", command1);
     Glib::spawn_command_line_async(command1);
 
     const std::string command2 =
         fmt::format("update-desktop-database {}/applications", vfs::user_dirs->data_dir());
-    print_command(command2);
+    LOG_INFO("COMMAND={}", command2);
     Glib::spawn_command_line_async(command2);
 
     g_source_remove(mime_change_timer);

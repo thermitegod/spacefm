@@ -557,12 +557,12 @@ finish_search(FindFile* data)
     if (data->pid)
     {
         const std::string command = fmt::format("/usr/bin/kill -{} {}", SIGTERM, data->pid);
-        print_command(command);
+        LOG_INFO("COMMAND={}", command);
         Glib::spawn_command_line_async(command);
 
         const std::string command2 =
             fmt::format("sleep 5 && /usr/bin/kill -{} {}", SIGKILL, data->pid);
-        print_command(command2);
+        LOG_INFO("COMMAND={}", command2);
         Glib::spawn_command_line_async(command2);
 
         data->pid = 0;
