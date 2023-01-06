@@ -259,11 +259,11 @@ VFSFileTask::check_overwrite(std::string_view dest_file, bool* dest_exists, char
             const std::string old_name = Glib::path_get_basename(dest_file.data());
             const std::string dest_file_dir = Glib::path_get_dirname(dest_file.data());
 
-            const auto namepack = get_name_extension(old_name);
-            const std::string name = namepack.first;
-            const std::string ext = namepack.second;
+            const auto [filename_no_extension, filename_extension] = get_name_extension(old_name);
 
-            *new_dest_file = ztd::strdup(vfs_file_task_get_unique_name(dest_file_dir, name, ext));
+            *new_dest_file = ztd::strdup(vfs_file_task_get_unique_name(dest_file_dir,
+                                                                       filename_no_extension,
+                                                                       filename_extension));
             *dest_exists = false;
             if (*new_dest_file)
                 return !this->abort;

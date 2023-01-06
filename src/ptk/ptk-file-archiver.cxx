@@ -68,7 +68,7 @@ archive_handler_get_first_extension(xset_t handler_xset)
     // Function deals with the possibility that a handler is responsible
     // for multiple MIME types and therefore file extensions. Functions
     // like archive creation need only one extension
-    std::string ext;
+    std::string archive_extension;
 
     if (handler_xset && handler_xset->x)
     {
@@ -88,20 +88,18 @@ archive_handler_get_first_extension(xset_t handler_xset)
             for (std::string_view path : pathnames)
             {
                 // getting just the extension of the pathname list element
-                const auto namepack = get_name_extension(path);
-                ext = namepack.second;
-                if (!ext.empty())
+                const auto [filename_no_extension, filename_extension] = get_name_extension(path);
+                archive_extension = filename_extension;
+                if (!filename_extension.empty())
                 {
                     // add a dot to extension
-                    ext = fmt::format(".{}", ext);
+                    archive_extension = fmt::format(".{}", filename_extension);
                     break;
                 }
             }
         }
     }
-    if (ext.empty())
-        return "";
-    return ext;
+    return archive_extension;
 }
 
 static bool
@@ -1240,15 +1238,14 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
             for (std::string_view pathname : pathnames)
             {
                 // getting just the extension of the pathname list element
-                const auto namepack = get_name_extension(pathname);
-                const std::string filename_no_ext = namepack.first;
-                const std::string extension = namepack.second;
+                const auto [filename_no_extension, filename_extension] =
+                    get_name_extension(pathname);
 
-                if (extension.empty())
+                if (filename_extension.empty())
                     continue;
 
                 // add a dot to extension
-                const std::string new_extension = fmt::format(".{}", extension);
+                const std::string new_extension = fmt::format(".{}", filename_extension);
                 // Checking if the current extension is being used
                 if (ztd::endswith(filename, new_extension))
                 { // It is - determining filename without extension
@@ -1262,16 +1259,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
              * - making sure filename_no_archive_ext is set in this case */
             if (filename_no_archive_ext.empty())
                 filename_no_archive_ext = filename;
-
-            /* Now the extraction filename is obtained, determine the
-             * normal filename without the extension */
-            const auto namepack = get_name_extension(filename_no_archive_ext);
-            const std::string filename_no_ext = namepack.first;
-            std::string extension = namepack.second;
-
-            // 'Completing' the extension and dealing with files with no extension
-            if (!extension.empty())
-                extension = fmt::format(".{}", extension);
 
             /* Get extraction command - Doing this here as parent
              * directory creation needs access to the command. */
@@ -1345,13 +1332,18 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                  * guaranteed not to exist so as to avoid overwriting */
                 extract_target = Glib::build_filename(create_parent ? parent_path : dest,
                                                       filename_no_archive_ext);
-                i32 n = 1;
 
+                /* Now the extraction filename is obtained, determine the
+                 * normal filename without the extension */
+                const auto [filename_no_extension, filename_extension] =
+                    get_name_extension(filename_no_archive_ext);
+
+                i32 n = 1;
                 // Looping to find a path that doesnt exist
                 while (std::filesystem::exists(extract_target))
                 {
                     const std::string str2 =
-                        fmt::format("{}-{}{}{}", filename_no_ext, "copy", ++n, extension);
+                        fmt::format("{}-{}{}.{}", filename, "copy", ++n, filename_extension);
                     extract_target = Glib::build_filename(create_parent ? parent_path : dest, str2);
                 }
 
