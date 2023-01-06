@@ -1343,7 +1343,8 @@ add_new_handler(i32 mode)
     // get a unique new xset name
     while (true)
     {
-        const std::string setname = fmt::format("{}{}", handler_cust_prefixs.at(mode), randhex8());
+        const std::string setname =
+            fmt::format("{}{}", handler_cust_prefixs.at(mode), ztd::randhex());
         if (!xset_is(setname))
         {
             // create and return the xset
@@ -2765,7 +2766,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     std::string plug_dir;
     while (true)
     {
-        plug_dir = Glib::build_filename(user_tmp, randhex8());
+        plug_dir = Glib::build_filename(user_tmp, ztd::randhex());
         if (!std::filesystem::exists(plug_dir))
             break;
     }

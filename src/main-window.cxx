@@ -353,7 +353,7 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
             }
             while (true)
             {
-                plug_dir = Glib::build_filename(user_tmp, randhex8());
+                plug_dir = Glib::build_filename(user_tmp, ztd::randhex());
                 if (!std::filesystem::exists(plug_dir))
                     break;
             }

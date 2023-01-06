@@ -38,12 +38,6 @@
 #include "utils.hxx"
 
 const std::string
-randhex8() noexcept
-{
-    return ztd::randhex(8);
-}
-
-const std::string
 replace_line_subs(std::string_view line) noexcept
 {
     std::string cmd = line.data();

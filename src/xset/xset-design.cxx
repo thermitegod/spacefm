@@ -450,7 +450,7 @@ xset_design_job_set_import_file(xset_t set)
     std::string plug_dir;
     while (std::filesystem::exists(plug_dir))
     {
-        plug_dir = Glib::build_filename(user_tmp, randhex8());
+        plug_dir = Glib::build_filename(user_tmp, ztd::randhex());
         if (!std::filesystem::exists(plug_dir))
             break;
     }

@@ -22,8 +22,6 @@
 
 #include <utility>
 
-const std::string randhex8() noexcept;
-
 bool have_rw_access(std::string_view path) noexcept;
 bool have_x_access(std::string_view path) noexcept;
 

@@ -54,7 +54,7 @@ xset_custom_new_name()
 
     while (true)
     {
-        setname = fmt::format("cstm_{}", randhex8());
+        setname = fmt::format("cstm_{}", ztd::randhex());
         if (!xset_is(setname))
         {
             const std::string path1 =
@@ -365,7 +365,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
         }
         while (true)
         {
-            plug_dir = Glib::build_filename(user_tmp, randhex8());
+            plug_dir = Glib::build_filename(user_tmp, ztd::randhex());
             if (!std::filesystem::exists(plug_dir))
                 break;
         }

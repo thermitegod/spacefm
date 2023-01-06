@@ -1340,7 +1340,7 @@ VFSFileTask::file_exec(std::string_view src_file)
         // get script name
         while (true)
         {
-            const std::string hexname = fmt::format("{}.sh", randhex8());
+            const std::string hexname = fmt::format("{}.sh", ztd::randhex());
             this->exec_script = Glib::build_filename(tmp, hexname);
             if (!std::filesystem::exists(this->exec_script))
                 break;
