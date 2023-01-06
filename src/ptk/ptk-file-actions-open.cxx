@@ -174,9 +174,9 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
             std::string quoted;
 
             const std::string name = Glib::path_get_basename((char*)l->data);
-            fm_filenames.append(fmt::format("{}\n", bash_quote(name)));
+            fm_filenames.append(fmt::format("{}\n", ztd::shell::quote(name)));
             // file path
-            fm_filenames.append(fmt::format("{}\n", bash_quote((char*)l->data)));
+            fm_filenames.append(fmt::format("{}\n", ztd::shell::quote((char*)l->data)));
         }
     }
     fm_filenames.append(")\nfm_filename=\"$fm_filenames[0]\"\n");
@@ -198,10 +198,10 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
             std::string quoted;
 
             const std::string name = Glib::path_get_basename((char*)l->data);
-            quoted = bash_quote(name);
+            quoted = ztd::shell::quote(name);
             str = fmt::format("fm_filename={}\n", quoted);
             // file path
-            quoted = bash_quote((char*)l->data);
+            quoted = ztd::shell::quote((char*)l->data);
             command_final =
                 fmt::format("{}{}{}fm_file={}\n{}", fm_filenames, fm_files, str, quoted, command);
         }

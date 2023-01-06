@@ -129,7 +129,7 @@ ptk_clipboard_copy_as_text(std::string_view working_dir,
     for (vfs::file_info file : sel_files)
     {
         const std::string file_path = Glib::build_filename(working_dir.data(), file->get_name());
-        const std::string quoted = bash_quote(file_path);
+        const std::string quoted = ztd::shell::quote(file_path);
         file_text = fmt::format("{} {}", file_text, quoted);
     }
     gtk_clipboard_set_text(clip, file_text.data(), -1);

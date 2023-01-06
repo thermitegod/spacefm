@@ -2675,7 +2675,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 }
                 if (as_root)
                 {
-                    to_path = bash_quote(path);
+                    to_path = ztd::shell::quote(path);
                     root_mkdir = fmt::format("mkdir -p {} && ", to_path);
                 }
                 else
@@ -2736,8 +2736,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     str = ztd::removesuffix(str, "/");
                 }
 
-                from_path = bash_quote(str);
-                to_path = bash_quote(full_path);
+                from_path = ztd::shell::quote(str);
+                to_path = ztd::shell::quote(full_path);
 
                 if (overwrite)
                 {
@@ -2777,7 +2777,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     str = ztd::strip(str);
                     if (ztd::startswith(str, "/"))
                     {
-                        from_path = bash_quote(str);
+                        from_path = ztd::shell::quote(str);
                     }
                     else
                     {
@@ -2792,11 +2792,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                                                "The specified template does not exist");
                                 continue;
                             }
-                            from_path = bash_quote(from_path);
+                            from_path = ztd::shell::quote(from_path);
                         }
                     }
                 }
-                to_path = bash_quote(full_path);
+                to_path = ztd::shell::quote(full_path);
                 std::string over_cmd;
                 if (overwrite)
                     over_cmd = fmt::format("rm -f {} && ", to_path);
@@ -2840,7 +2840,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                         GTK_COMBO_BOX_TEXT(mset->combo_template_dir));
                     if (ztd::startswith(str, "/"))
                     {
-                        from_path = bash_quote(str);
+                        from_path = ztd::shell::quote(str);
                     }
                     else
                     {
@@ -2855,11 +2855,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                                                "The specified template does not exist");
                                 continue;
                             }
-                            from_path = bash_quote(from_path);
+                            from_path = ztd::shell::quote(from_path);
                         }
                     }
                 }
-                to_path = bash_quote(full_path);
+                to_path = ztd::shell::quote(full_path);
 
                 const std::string task_name = fmt::format("Create New Directory{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
@@ -2891,10 +2891,10 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 const std::string task_name = fmt::format("Copy{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
                 char* over_opt = nullptr;
-                to_path = bash_quote(full_path);
+                to_path = ztd::shell::quote(full_path);
                 if (copy || !mset->is_link)
                 {
-                    from_path = bash_quote(mset->full_path);
+                    from_path = ztd::shell::quote(mset->full_path);
                 }
                 else
                 {
@@ -2906,7 +2906,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                                        "Error determining link's target");
                         continue;
                     }
-                    from_path = bash_quote(real_path);
+                    from_path = ztd::shell::quote(real_path);
                 }
                 if (overwrite)
                     over_opt = ztd::strdup(" --remove-destination");
@@ -2941,7 +2941,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
                 if (link || !mset->is_link)
                 {
-                    from_path = bash_quote(mset->full_path);
+                    from_path = ztd::shell::quote(mset->full_path);
                 }
                 else
                 {
@@ -2953,9 +2953,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                                        "Error determining link's target");
                         continue;
                     }
-                    from_path = bash_quote(real_path);
+                    from_path = ztd::shell::quote(real_path);
                 }
-                to_path = bash_quote(full_path);
+                to_path = ztd::shell::quote(full_path);
                 if (overwrite)
                 {
                     ptask->task->exec_command =
@@ -2984,8 +2984,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 // EXDEV error
                 const std::string task_name = fmt::format("Move{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
-                from_path = bash_quote(mset->full_path);
-                to_path = bash_quote(full_path);
+                from_path = ztd::shell::quote(mset->full_path);
+                to_path = ztd::shell::quote(full_path);
                 if (overwrite)
                 {
                     ptask->task->exec_command =
@@ -3121,7 +3121,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<vfs::file_
     for (vfs::file_info file : sel_files)
     {
         const std::string file_path = Glib::build_filename(cwd, file->get_name());
-        file_path_q = bash_quote(file_path);
+        file_path_q = ztd::shell::quote(file_path);
         file_paths = fmt::format("{} {}", file_paths, file_path_q);
         item_count++;
     }
@@ -3163,7 +3163,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<vfs::file_
         if (path && std::filesystem::is_directory(path))
         {
             xset_set_var(set, XSetVar::DESC, path);
-            const std::string quote_path = bash_quote(path);
+            const std::string quote_path = ztd::shell::quote(path);
 
             if (ztd::same(setname, "root_move2"))
             {

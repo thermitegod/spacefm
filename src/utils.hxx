@@ -35,8 +35,6 @@ const std::pair<std::string, std::string> get_name_extension(std::string_view fu
 
 void open_in_prog(std::string_view path) noexcept;
 
-const std::string bash_quote(std::string_view str) noexcept;
-
 const std::string clean_label(std::string_view menu_label, bool kill_special, bool escape) noexcept;
 
 const std::string get_valid_su() noexcept;

@@ -968,7 +968,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
             }
             else
             {
-                command = bash_quote(set->z);
+                command = ztd::shell::quote(set->z);
                 app_no_sync = true;
             }
             break;
@@ -1133,7 +1133,7 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
         terminal = xset_get_b(XSetName::ROOT_EDITOR);
     }
     // replacements
-    const std::string quoted_path = bash_quote(path);
+    const std::string quoted_path = ztd::shell::quote(path);
     if (ztd::contains(editor, "%f"))
         editor = ztd::replace(editor, "%f", quoted_path);
     else if (ztd::contains(editor, "%F"))

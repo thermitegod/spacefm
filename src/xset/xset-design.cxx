@@ -536,7 +536,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     }
     PtkFileTask* ptask = ptk_file_exec_new("Uninstall Plugin", parent, file_browser->task_view);
 
-    const std::string plug_dir_q = bash_quote(set->plug_dir);
+    const std::string plug_dir_q = ztd::shell::quote(set->plug_dir);
 
     ptask->task->exec_command = fmt::format("rm -rf {}", plug_dir_q);
     ptask->task->exec_sync = true;

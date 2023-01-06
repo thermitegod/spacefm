@@ -5668,7 +5668,7 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
     std::string file_paths;
     for (vfs::file_info file : sel_files)
     {
-        const std::string file_path = bash_quote(file->get_name());
+        const std::string file_path = ztd::shell::quote(file->get_name());
         file_paths = fmt::format("{} {}", file_paths, file_path);
     }
 

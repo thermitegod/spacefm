@@ -497,7 +497,7 @@ on_open_current_folder_as_root(GtkMenuItem* menuitem, void* user_data)
                                            GTK_WIDGET(file_browser),
                                            file_browser->task_view);
     const std::string exe = ztd::program::exe();
-    const std::string cwd = bash_quote(ptk_file_browser_get_cwd(file_browser));
+    const std::string cwd = ztd::shell::quote(ptk_file_browser_get_cwd(file_browser));
     ptask->task->exec_command = fmt::format("HOME=/root {} {}", exe, cwd);
     ptask->task->exec_as_user = "root";
     ptask->task->exec_sync = false;
@@ -3921,7 +3921,7 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
         const bool cwd_needs_quote = ztd::contains(cwd, "\"");
         if (cwd_needs_quote)
         {
-            path = bash_quote(cwd);
+            path = ztd::shell::quote(cwd);
             buf.append(fmt::format("\nfm_pwd_panel[{}]={}\n", p, path));
         }
         else
@@ -3946,7 +3946,7 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
                 else
                 {
                     path = Glib::build_filename(cwd, path);
-                    esc_path = bash_quote(path);
+                    esc_path = ztd::shell::quote(path);
                     buf.append(fmt::format("{}\n", esc_path));
                 }
             }
@@ -3958,7 +3958,7 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
                 for (vfs::file_info file : sel_files)
                 {
                     path = file->get_name();
-                    buf.append(fmt::format("{}\n", bash_quote(path)));
+                    buf.append(fmt::format("{}\n", ztd::shell::quote(path)));
                 }
                 buf.append(fmt::format(")\n"));
             }
@@ -3978,17 +3978,17 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
                     buf.append(fmt::format("fm_device=\"{}\"\n", vol->device_file));
                     if (vol->udi)
                     {
-                        esc_path = bash_quote(vol->udi);
+                        esc_path = ztd::shell::quote(vol->udi);
                         buf.append(fmt::format("fm_device_udi={}\n", esc_path));
                     }
                     if (vol->mount_point)
                     {
-                        esc_path = bash_quote(vol->mount_point);
+                        esc_path = ztd::shell::quote(vol->mount_point);
                         buf.append(fmt::format("fm_device_mount_point={}\n", esc_path));
                     }
                     if (!vol->label.empty())
                     {
-                        esc_path = bash_quote(vol->label);
+                        esc_path = ztd::shell::quote(vol->label);
                         buf.append(fmt::format("fm_device_label={}\n", esc_path));
                     }
                     if (vol->fs_type)
@@ -3996,7 +3996,7 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
                     buf.append(fmt::format("fm_device_size=\"{}\"\n", vol->size));
                     if (vol->disp_name)
                     {
-                        esc_path = bash_quote(vol->disp_name);
+                        esc_path = ztd::shell::quote(vol->disp_name);
                         buf.append(fmt::format("fm_device_display_name=\"{}\"\n", esc_path));
                     }
                     // clang-format off
@@ -4015,17 +4015,17 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
                 buf.append(fmt::format("fm_panel{}_device=\"{}\"\n", p, vol->device_file));
                 if (vol->udi)
                 {
-                    esc_path = bash_quote(vol->udi);
+                    esc_path = ztd::shell::quote(vol->udi);
                     buf.append(fmt::format("fm_panel{}_device_udi={}\n", p, esc_path));
                 }
                 if (vol->mount_point)
                 {
-                    esc_path = bash_quote(vol->mount_point);
+                    esc_path = ztd::shell::quote(vol->mount_point);
                     buf.append(fmt::format("fm_panel{}_device_mount_point={}\n", p, esc_path));
                 }
                 if (!vol->label.empty())
                 {
-                    esc_path = bash_quote(vol->label);
+                    esc_path = ztd::shell::quote(vol->label);
                     buf.append(fmt::format("fm_panel{}_device_label={}\n", p, esc_path));
                 }
                 if (vol->fs_type)
@@ -4033,7 +4033,7 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
                 buf.append(fmt::format("fm_panel{}_device_size=\"{}\"\n", p, vol->size));
                 if (vol->disp_name)
                 {
-                    esc_path = bash_quote(vol->disp_name);
+                    esc_path = ztd::shell::quote(vol->disp_name);
                     buf.append(fmt::format("fm_panel{}_device_display_name={}\n", p, esc_path));
                 }
                 buf.append(fmt::format("fm_panel{}_device_icon=\"{}\"\n", p, vol->icon));
@@ -4057,7 +4057,7 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
         {
             PtkFileBrowser* t_browser = PTK_FILE_BROWSER_REINTERPRET(
                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), i));
-            path = bash_quote(ptk_file_browser_get_cwd(t_browser));
+            path = ztd::shell::quote(ptk_file_browser_get_cwd(t_browser));
             buf.append(fmt::format("fm_pwd_panel{}_tab[{}]={}\n", p, i + 1, path));
             if (p == file_browser->mypanel)
             {
@@ -4079,13 +4079,13 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
 
     // user
     const std::string this_user = Glib::get_user_name();
-    esc_path = bash_quote(this_user);
+    esc_path = ztd::shell::quote(this_user);
     buf.append(fmt::format("fm_user={}\n", esc_path));
 
     // variable value
     if (value)
     {
-        esc_path = bash_quote(value);
+        esc_path = ztd::shell::quote(value);
         buf.append(fmt::format("fm_value={}\n", esc_path));
     }
     if (vtask->exec_ptask)
@@ -4097,7 +4097,7 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
     buf.append(fmt::format("fm_my_window_id=\"{:p}\"\n", (void*)main_window));
 
     // utils
-    esc_path = bash_quote(xset_get_s(XSetName::EDITOR));
+    esc_path = ztd::shell::quote(xset_get_s(XSetName::EDITOR));
     buf.append(fmt::format("fm_editor={}\n", esc_path));
     buf.append(fmt::format("fm_editor_terminal=\"{}\"\n", xset_get_b(XSetName::EDITOR) ? 1 : 0));
 
@@ -4117,7 +4117,7 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
         {
             path = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", set->name);
         }
-        esc_path = bash_quote(path);
+        esc_path = ztd::shell::quote(path);
         buf.append(fmt::format("fm_cmd_dir={}\n", esc_path));
 
         // cmd_data
@@ -4134,20 +4134,20 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
                                         "plugin-data",
                                         set->name);
         }
-        esc_path = bash_quote(path);
+        esc_path = ztd::shell::quote(path);
         buf.append(fmt::format("fm_cmd_data={}\n", esc_path));
 
         // plugin_dir
         if (set->plugin)
         {
-            esc_path = bash_quote(set->plug_dir);
+            esc_path = ztd::shell::quote(set->plug_dir);
             buf.append(fmt::format("fm_plugin_dir={}\n", esc_path));
         }
 
         // cmd_name
         if (set->menu_label)
         {
-            esc_path = bash_quote(set->menu_label);
+            esc_path = ztd::shell::quote(set->menu_label);
             buf.append(fmt::format("fm_cmd_name={}\n", esc_path));
         }
     }
@@ -4164,11 +4164,11 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
         buf.append(fmt::format("\nfm_task_type=\"{}\"\n", job_titles.at(ptask->task->type)));
         if (ptask->task->type == VFSFileTaskType::EXEC)
         {
-            esc_path = bash_quote(ptask->task->dest_dir);
+            esc_path = ztd::shell::quote(ptask->task->dest_dir);
             buf.append(fmt::format("fm_task_pwd={}\n", esc_path));
-            esc_path = bash_quote(ptask->task->current_file);
+            esc_path = ztd::shell::quote(ptask->task->current_file);
             buf.append(fmt::format("fm_task_name={}\n", esc_path));
-            esc_path = bash_quote(ptask->task->exec_command);
+            esc_path = ztd::shell::quote(ptask->task->exec_command);
             buf.append(fmt::format("fm_task_command={}\n", esc_path));
             if (!ptask->task->exec_as_user.empty())
                 buf.append(fmt::format("fm_task_user=\"{}\"\n", ptask->task->exec_as_user));
@@ -4179,11 +4179,11 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
         }
         else
         {
-            esc_path = bash_quote(ptask->task->dest_dir);
+            esc_path = ztd::shell::quote(ptask->task->dest_dir);
             buf.append(fmt::format("fm_task_dest_dir={}\n", esc_path));
-            esc_path = bash_quote(ptask->task->current_file);
+            esc_path = ztd::shell::quote(ptask->task->current_file);
             buf.append(fmt::format("fm_task_current_src_file={}\n", esc_path));
-            esc_path = bash_quote(ptask->task->current_dest);
+            esc_path = ztd::shell::quote(ptask->task->current_dest);
             buf.append(fmt::format("fm_task_current_dest_file={}\n", esc_path));
         }
         buf.append(fmt::format("fm_task_id=\"{:p}\"\n", (void*)ptask));
@@ -6556,7 +6556,7 @@ main_window_socket_command(char* argv[], std::string& reply)
             std::string str;
             for (std::string_view path : pathv)
             {
-                str.append(fmt::format("{} ", bash_quote(path)));
+                str.append(fmt::format("{} ", ztd::shell::quote(path)));
             }
             reply = reply = fmt::format("({})", str);
         }
@@ -6575,7 +6575,7 @@ main_window_socket_command(char* argv[], std::string& reply)
                 file = vfs_file_info_ref(file);
                 if (!file)
                     continue;
-                str.append(fmt::format("{} ", bash_quote(file->get_name())));
+                str.append(fmt::format("{} ", ztd::shell::quote(file->get_name())));
                 vfs_file_info_unref(file);
             }
             vfs_file_info_list_free(sel_files);
@@ -7472,7 +7472,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
     {
         if (file_browser)
         {
-            rep = bash_quote(ptk_file_browser_get_cwd(file_browser));
+            rep = ztd::shell::quote(ptk_file_browser_get_cwd(file_browser));
             cmd = ztd::replace(cmd, "%d", rep);
         }
     }

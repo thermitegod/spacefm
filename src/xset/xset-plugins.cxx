@@ -529,8 +529,8 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, std::string_view pat
                     std::string_view plug_dir, PluginJob job, xset_t insert_set)
 {
     std::string own;
-    const std::string plug_dir_q = bash_quote(plug_dir);
-    const std::string file_path_q = bash_quote(path);
+    const std::string plug_dir_q = ztd::shell::quote(plug_dir);
+    const std::string file_path_q = ztd::shell::quote(path);
 
     MainWindow* main_window = MAIN_WINDOW(main_win);
     // task

@@ -808,7 +808,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
                     udest_file = fmt::format("{}/{}-{}{}{}", dest_dir, desc, "copy", ++c, ext);
                 }
             }
-            udest_quote = bash_quote(udest_file);
+            udest_quote = ztd::shell::quote(udest_file);
 
             /* Bash quoting desc - desc original value comes from the
              * VFSFileInfo struct and therefore should not be freed */
@@ -817,10 +817,10 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
                 // special handling for filename starting with a dash
                 // due to tar interpreting it as option
                 s1 = fmt::format("./{}", desc);
-                desc = bash_quote(s1);
+                desc = ztd::shell::quote(s1);
             }
             else
-                desc = bash_quote(desc);
+                desc = ztd::shell::quote(desc);
 
             // Replace sub vars  %n %N %O (and erroneous %o treat as %O)
             cmd_to_run = replace_archive_subs(command,
@@ -850,7 +850,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
         /* '%O' is not present - the normal single command is needed
          * Obtaining valid quoted UTF8 file name %o for archive to create */
         udest_file = Glib::filename_display_name(dest_file);
-        udest_quote = bash_quote(udest_file);
+        udest_quote = ztd::shell::quote(udest_file);
         std::string all;
         std::string first;
         if (!sel_files.empty())
@@ -861,11 +861,11 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
                 // special handling for filename starting with a dash
                 // due to tar interpreting it as option
                 s1 = fmt::format("./{}", desc);
-                first = bash_quote(s1);
+                first = ztd::shell::quote(s1);
             }
             else
             {
-                first = bash_quote(desc);
+                first = ztd::shell::quote(desc);
             }
 
             /* Generating string of selected files/directories to archive if
@@ -880,11 +880,11 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
                         // special handling for filename starting with a dash
                         // due to tar interpreting it as option
                         s1 = fmt::format("./{}", desc);
-                        desc = bash_quote(s1);
+                        desc = ztd::shell::quote(s1);
                     }
                     else
                     {
-                        desc = bash_quote(desc);
+                        desc = ztd::shell::quote(desc);
                     }
 
                     all = fmt::format("{}{}{}", all, all.at(0) ? " " : "", desc);
@@ -1152,7 +1152,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
 
     /* Quoting destination directory (doing this outside of the later
      * loop as its needed after the selected files loop completes) */
-    dest_quote = bash_quote(dest ? dest : cwd);
+    dest_quote = ztd::shell::quote(dest ? dest : cwd);
 
     // Fetching available archive handlers and splitting
     const std::string archive_handlers_s = xset_get_s(XSetName::ARC_CONF2);
@@ -1203,8 +1203,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
             in_term = archive_handler_run_in_term(handler_xset, archive_operation);
 
         // Archive to list or extract:
-        full_quote = bash_quote(full_path); // %x
-        std::string extract_target;         // %g or %G
+        full_quote = ztd::shell::quote(full_path); // %x
+        std::string extract_target;                // %g or %G
         std::string mkparent;
         std::string perm;
 
@@ -1307,7 +1307,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                 }
 
                 // Generating shell command to make directory
-                parent_quote = bash_quote(parent_path);
+                parent_quote = ztd::shell::quote(parent_path);
                 mkparent = fmt::format("mkdir -p {} || fm_handle_err\n"
                                        "cd {} || fm_handle_err\n",
                                        parent_quote,
@@ -1356,7 +1356,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                 }
 
                 // Quoting target
-                extract_target = bash_quote(extract_target);
+                extract_target = ztd::shell::quote(extract_target);
             }
         }
 

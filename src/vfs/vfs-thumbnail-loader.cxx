@@ -345,8 +345,8 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view file_uri, i32 th
 #if defined(HAVE_USE_FFMPEGTHUMBNAILER_CLI)
         const std::string command = fmt::format("ffmpegthumbnailer -s {} -i {} -o {}",
                                                 thumb_size,
-                                                bash_quote(file_path),
-                                                bash_quote(thumbnail_file));
+                                                ztd::shell::quote(file_path),
+                                                ztd::shell::quote(thumbnail_file));
         // LOG_INFO("COMMAND={}", command);
         Glib::spawn_command_line_sync(command);
 #else

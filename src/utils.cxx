@@ -125,20 +125,10 @@ void
 open_in_prog(std::string_view path) noexcept
 {
     const std::string exe = ztd::program::exe();
-    const std::string qpath = bash_quote(path);
+    const std::string qpath = ztd::shell::quote(path);
     const std::string command = fmt::format("{} {}", exe, qpath);
     LOG_INFO("COMMAND={}", command);
     Glib::spawn_command_line_async(command);
-}
-
-const std::string
-bash_quote(std::string_view str) noexcept
-{
-    if (str.empty())
-        return "\"\"";
-    std::string s1 = ztd::replace(str, "\"", "\\\"");
-    s1 = fmt::format("\"{}\"", s1);
-    return s1;
 }
 
 const std::string

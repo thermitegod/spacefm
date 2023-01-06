@@ -438,8 +438,8 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
                               parent,
                               file_browser ? file_browser->task_view : nullptr);
 
-    const std::string plug_dir_q = bash_quote(plug_dir);
-    const std::string path_q = bash_quote(path);
+    const std::string plug_dir_q = ztd::shell::quote(plug_dir);
+    const std::string path_q = ztd::shell::quote(path);
     if (!set->plugin)
         ptask->task->exec_command =
             fmt::format("tar --numeric-owner -cJf {} * ; err=$? ; rm -rf {} ; "

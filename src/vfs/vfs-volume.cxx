@@ -2553,7 +2553,7 @@ vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* option
              *      %t  filesystem type being mounted (eg vfat)
              *      %a  mount point, or create auto mount point
              */
-            fileq = bash_quote(vol->device_file); // for iso files
+            fileq = ztd::shell::quote(vol->device_file); // for iso files
             command = ztd::replace(command, "%v", fileq);
             if (action == PtkHandlerMount::HANDLER_MOUNT)
             {
@@ -2658,25 +2658,25 @@ vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* option
             {
                 // add bash variables
                 // urlq is user-entered url or (if mounted) mtab url
-                const std::string urlq =
-                    bash_quote(action != PtkHandlerMount::HANDLER_MOUNT && vol && vol->is_mounted
-                                   ? vol->udi
-                                   : netmount->url);
+                const std::string urlq = ztd::shell::quote(
+                    action != PtkHandlerMount::HANDLER_MOUNT && vol && vol->is_mounted
+                        ? vol->udi
+                        : netmount->url);
                 const std::string protoq =
-                    bash_quote(netmount->fstype); // url-derived protocol (ssh)
-                const std::string hostq = bash_quote(netmount->host);
-                const std::string portq = bash_quote(netmount->port);
-                const std::string userq = bash_quote(netmount->user);
-                const std::string passq = bash_quote(netmount->pass);
-                const std::string pathq = bash_quote(netmount->path);
+                    ztd::shell::quote(netmount->fstype); // url-derived protocol (ssh)
+                const std::string hostq = ztd::shell::quote(netmount->host);
+                const std::string portq = ztd::shell::quote(netmount->port);
+                const std::string userq = ztd::shell::quote(netmount->user);
+                const std::string passq = ztd::shell::quote(netmount->pass);
+                const std::string pathq = ztd::shell::quote(netmount->path);
                 // mtab fs type (fuse.ssh)
                 std::string mtabfsq;
                 std::string mtaburlq;
                 // urlq and mtaburlq will both be the same mtab url if mounted
                 if (action != PtkHandlerMount::HANDLER_MOUNT && vol && vol->is_mounted)
                 {
-                    mtabfsq = bash_quote(vol->fs_type);
-                    mtaburlq = bash_quote(vol->device_file);
+                    mtabfsq = ztd::shell::quote(vol->fs_type);
+                    mtaburlq = ztd::shell::quote(vol->device_file);
                 }
                 command = fmt::format(
                     "fm_url_proto={}; fm_url={}; fm_url_host={}; fm_url_port={}; fm_url_user={}; "
@@ -2839,7 +2839,7 @@ VFSVolume::device_unmount_cmd(bool* run_in_terminal) noexcept
                 if (command && ztd::contains(command, "%a"))
                 {
                     if (this->is_mounted)
-                        pointq = bash_quote(this->mount_point);
+                        pointq = ztd::shell::quote(this->mount_point);
                     const std::string command2 = ztd::replace(command, "%a", pointq);
                     command = ztd::strdup(command2);
                 }
@@ -2861,7 +2861,7 @@ VFSVolume::device_unmount_cmd(bool* run_in_terminal) noexcept
                 if (command && ztd::contains(command, "%a"))
                 {
                     if (this->is_mounted)
-                        pointq = bash_quote(this->mount_point);
+                        pointq = ztd::shell::quote(this->mount_point);
                     const std::string command2 = ztd::replace(command, "%a", pointq);
                     command = ztd::strdup(command2);
                 }
@@ -2887,9 +2887,9 @@ VFSVolume::device_unmount_cmd(bool* run_in_terminal) noexcept
     std::string command2;
     std::string path;
 
-    pointq = bash_quote(this->device_type == VFSVolumeDeviceType::BLOCK || !this->is_mounted
-                            ? this->device_file
-                            : this->mount_point);
+    pointq = ztd::shell::quote(this->device_type == VFSVolumeDeviceType::BLOCK || !this->is_mounted
+                                   ? this->device_file
+                                   : this->mount_point);
 
     // udevil
     path = Glib::find_program_in_path("udevil");
@@ -3051,8 +3051,8 @@ VFSVolume::exec(const char* command) const noexcept
 
     std::string cmd = command;
 
-    const std::string quoted_mount = bash_quote(this->mount_point);
-    const std::string quoted_label = bash_quote(this->label);
+    const std::string quoted_mount = ztd::shell::quote(this->mount_point);
+    const std::string quoted_label = ztd::shell::quote(this->label);
     cmd = ztd::replace(cmd, "%m", quoted_mount);
     cmd = ztd::replace(cmd, "%l", quoted_label);
     cmd = ztd::replace(cmd, "%v", this->device_file);
@@ -3114,7 +3114,7 @@ VFSVolume::autoexec() noexcept
                     else
                     {
                         const std::string exe = ztd::program::exe();
-                        const std::string quote_path = bash_quote(this->mount_point);
+                        const std::string quote_path = ztd::shell::quote(this->mount_point);
                         const std::string cmd = fmt::format("{} -t {}", exe, quote_path);
                         LOG_INFO("COMMAND={}", cmd);
                         Glib::spawn_command_line_async(cmd);

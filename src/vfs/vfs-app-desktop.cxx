@@ -372,7 +372,7 @@ VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list,
         {
             if (quote_file_list)
             {
-                argv.emplace_back(bash_quote(file));
+                argv.emplace_back(ztd::shell::quote(file));
             }
             else
             {
@@ -395,7 +395,7 @@ VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list,
         {
             if (quote_file_list)
             {
-                argv.emplace_back(bash_quote(file));
+                argv.emplace_back(ztd::shell::quote(file));
             }
             else
             {
@@ -448,7 +448,7 @@ VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list,
         {
             if (quote_file_list)
             {
-                argv.emplace_back(bash_quote(file));
+                argv.emplace_back(ztd::shell::quote(file));
             }
             else
             {

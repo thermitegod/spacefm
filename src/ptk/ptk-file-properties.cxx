@@ -726,21 +726,21 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                 for (vfs::file_info file : data->file_list)
                 {
                     const std::string file_path = Glib::build_filename(data->dir_path, file->name);
-                    quoted_path = bash_quote(file_path);
+                    quoted_path = ztd::shell::quote(file_path);
                     str.append(fmt::format(" {}", quoted_path));
                 }
 
                 std::string cmd;
                 if (new_mtime)
                 {
-                    quoted_time = bash_quote(new_mtime);
+                    quoted_time = ztd::shell::quote(new_mtime);
                     cmd = fmt::format("touch --no-dereference --no-create -m -d {}{}",
                                       quoted_time,
                                       str);
                 }
                 if (new_atime)
                 {
-                    quoted_time = bash_quote(new_atime);
+                    quoted_time = ztd::shell::quote(new_atime);
                     quoted_path = cmd; // temp str
                     cmd = fmt::format("{}{}touch --no-dereference --no-create -a -d {}{}",
                                       cmd,
