@@ -64,7 +64,6 @@
 #include "find-files.hxx"
 
 #include "autosave.hxx"
-#include "utils.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-utils.hxx"

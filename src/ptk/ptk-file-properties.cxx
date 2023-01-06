@@ -43,7 +43,6 @@
 #include "vfs/vfs-utils.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
-#include "utils.hxx"
 
 static constexpr std::array<std::string_view, 12> chmod_names{
     "owner_r",

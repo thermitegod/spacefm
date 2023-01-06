@@ -41,8 +41,6 @@
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 
-#include "utils.hxx"
-
 static void* thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader);
 static bool on_thumbnail_idle(vfs::thumbnail_loader loader);
 

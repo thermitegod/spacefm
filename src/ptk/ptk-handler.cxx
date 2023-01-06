@@ -51,7 +51,6 @@
 
 #include "autosave.hxx"
 #include "write.hxx"
-#include "utils.hxx"
 
 #define HANDLER_DATA(obj) (static_cast<HandlerData*>(obj))
 

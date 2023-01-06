@@ -38,8 +38,6 @@
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-app-desktop.hxx"
 
-#include "utils.hxx"
-
 std::map<std::string, vfs::desktop> desktops_map;
 
 vfs::desktop

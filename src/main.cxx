@@ -57,7 +57,6 @@
 #include "find-files.hxx"
 #include "pref-dialog.hxx"
 #include "socket.hxx"
-#include "utils.hxx"
 #include "settings.hxx"
 
 #include "bookmarks.hxx"

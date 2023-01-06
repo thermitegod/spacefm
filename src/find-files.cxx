@@ -58,8 +58,6 @@
 
 #include "type-conversion.hxx"
 
-#include "utils.hxx"
-
 #include "find-files.hxx"
 
 enum FindFilesCol

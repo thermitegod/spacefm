@@ -32,8 +32,6 @@
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-file-actions-rename.hxx"
 
-#include "utils.hxx"
-
 #include "ptk/ptk-clipboard.hxx"
 
 static GdkDragAction clipboard_action = GdkDragAction::GDK_ACTION_DEFAULT;

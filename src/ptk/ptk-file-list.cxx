@@ -31,8 +31,6 @@
 
 #include "types.hxx"
 
-#include "utils.hxx"
-
 static void ptk_file_list_init(PtkFileList* list);
 
 static void ptk_file_list_class_init(PtkFileListClass* klass);

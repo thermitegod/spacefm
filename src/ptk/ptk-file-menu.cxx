@@ -40,7 +40,6 @@
 #include "xset/xset-dialog.hxx"
 
 #include "write.hxx"
-#include "utils.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dirs.hxx"
