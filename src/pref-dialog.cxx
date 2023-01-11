@@ -21,6 +21,10 @@
 #include <array>
 #include <vector>
 
+#include <sstream>
+
+#include <chrono>
+
 #include "window-reference.hxx"
 
 #include <fmt/format.h>
@@ -422,14 +426,16 @@ static void
 on_date_format_changed(GtkComboBox* widget, FMPrefDlg* fm_data)
 {
     (void)widget;
-    char buf[128];
-    const char* etext;
 
     const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    const char* etext =
+        gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(fm_data->date_format))));
 
-    etext = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(fm_data->date_format))));
-    strftime(buf, sizeof(buf), etext, std::localtime(&now));
-    gtk_label_set_text(GTK_LABEL(fm_data->date_display), buf);
+    std::tm* local_time = std::localtime(&now);
+    std::ostringstream date;
+    date << std::put_time(local_time, etext);
+
+    gtk_label_set_text(GTK_LABEL(fm_data->date_display), date.str().data());
 }
 
 static void

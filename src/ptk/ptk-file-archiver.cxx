@@ -26,6 +26,8 @@
 
 #include <sstream>
 
+#include <chrono>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>

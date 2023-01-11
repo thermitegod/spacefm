@@ -21,6 +21,10 @@
 #include <array>
 #include <vector>
 
+#include <sstream>
+
+#include <chrono>
+
 #include <glibmm.h>
 #include <glibmm/convert.h>
 
@@ -5046,22 +5050,22 @@ main_task_view_update_task(PtkFileTask* ptask)
     if (ptaskt != ptask)
     {
         // new row
-        char buf[64];
-        strftime(buf, sizeof(buf), "%H:%M", std::localtime(&ptask->task->start_time));
-        char* started = ztd::strdup(buf);
+        std::tm* local_time = std::localtime(&ptask->task->start_time);
+        std::ostringstream started;
+        started << std::put_time(local_time, "%H:%M");
+
         gtk_list_store_insert_with_values(GTK_LIST_STORE(model),
                                           &it,
                                           0,
                                           MainWindowTaskCol::TASK_COL_TO,
                                           dest_dir,
                                           MainWindowTaskCol::TASK_COL_STARTED,
-                                          started,
+                                          started.str().data(),
                                           MainWindowTaskCol::TASK_COL_STARTTIME,
                                           (i64)ptask->task->start_time,
                                           MainWindowTaskCol::TASK_COL_DATA,
                                           ptask,
                                           -1);
-        free(started);
     }
 
     if (ptask->task->state_pause == VFSFileTaskState::RUNNING || ptask->pause_change_view)

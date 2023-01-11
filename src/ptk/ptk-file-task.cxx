@@ -1984,7 +1984,6 @@ query_overwrite(PtkFileTask* ptask)
         else
         {
             /* Ask the user whether to overwrite the file or not */
-            char buf[64];
             std::string src_size;
             std::string src_time;
             std::string src_rel_size;
@@ -2022,11 +2021,13 @@ query_overwrite(PtkFileTask* ptask)
             else
             {
                 const time_t src_mtime = src_stat.mtime();
-                strftime(buf,
-                         sizeof(buf),
-                         app_settings.get_date_format().data(),
-                         std::localtime(&src_mtime));
-                src_time = buf;
+
+                std::tm* local_time = std::localtime(&src_mtime);
+                std::ostringstream src_date;
+                src_date << std::put_time(local_time, app_settings.get_date_format().data());
+
+                src_time = src_date.str();
+
                 if (src_stat.mtime() > dest_stat.mtime())
                     src_rel_time = "newer";
                 else
@@ -2036,11 +2037,12 @@ query_overwrite(PtkFileTask* ptask)
             const std::string dest_size =
                 fmt::format("{}\t( {} bytes )", size_str, dest_stat.size());
             const time_t dest_mtime = dest_stat.mtime();
-            strftime(buf,
-                     sizeof(buf),
-                     app_settings.get_date_format().data(),
-                     std::localtime(&dest_mtime));
-            const std::string dest_time = buf;
+
+            std::tm* local_time = std::localtime(&dest_mtime);
+            std::ostringstream dest_date;
+            dest_date << std::put_time(local_time, app_settings.get_date_format().data());
+
+            const std::string dest_time = dest_date.str();
 
             const std::string src_rel =
                 fmt::format("{}{}{}{}{}",

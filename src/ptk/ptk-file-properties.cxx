@@ -21,6 +21,10 @@
 #include <array>
 #include <vector>
 
+#include <sstream>
+
+#include <chrono>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>
@@ -564,19 +568,23 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
         }
 
         // Modified / Accessed
-        char buf[64];
         const std::string time_format = "%Y-%m-%d %H:%M:%S";
 
         // gtk_entry_set_text(GTK_ENTRY(mtime), file->get_disp_mtime());
         const time_t mtime = file->get_mtime();
-        strftime(buf, sizeof(buf), time_format.data(), std::localtime(&mtime));
-        gtk_entry_set_text(GTK_ENTRY(data->mtime), buf);
-        data->orig_mtime = ztd::strdup(buf);
+        std::tm* local_mtime = std::localtime(&mtime);
+        std::ostringstream mtime_formated;
+        mtime_formated << std::put_time(local_mtime, time_format.data());
+
+        gtk_entry_set_text(GTK_ENTRY(data->mtime), mtime_formated.str().data());
+        data->orig_mtime = ztd::strdup(mtime_formated.str());
 
         const time_t atime = file->get_atime();
-        strftime(buf, sizeof(buf), time_format.data(), std::localtime(&atime));
-        gtk_entry_set_text(GTK_ENTRY(data->atime), buf);
-        data->orig_atime = ztd::strdup(buf);
+        std::tm* local_atime = std::localtime(&atime);
+        std::ostringstream atime_formated;
+        atime_formated << std::put_time(local_atime, time_format.data());
+        gtk_entry_set_text(GTK_ENTRY(data->atime), atime_formated.str().data());
+        data->orig_atime = ztd::strdup(mtime_formated.str());
 
         // Permissions
         const auto owner_group = ztd::partition(file->get_disp_owner(), ":");

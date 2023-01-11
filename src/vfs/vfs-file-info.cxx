@@ -27,6 +27,10 @@
 #include <algorithm>
 #include <ranges>
 
+#include <sstream>
+
+#include <chrono>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>
@@ -344,10 +348,13 @@ VFSFileInfo::get_disp_mtime() noexcept
 {
     if (this->disp_mtime.empty())
     {
-        char buf[64];
         const time_t mtime = this->file_stat.mtime();
-        strftime(buf, sizeof(buf), app_settings.get_date_format().data(), std::localtime(&mtime));
-        this->disp_mtime = buf;
+
+        std::tm* local_time = std::localtime(&mtime);
+        std::ostringstream date;
+        date << std::put_time(local_time, app_settings.get_date_format().data());
+
+        this->disp_mtime = date.str();
     }
     return this->disp_mtime;
 }

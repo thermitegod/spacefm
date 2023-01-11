@@ -231,11 +231,13 @@ VFSTrashDir::create_trash_info(std::string_view path, std::string_view target_na
         Glib::build_filename(this->info_path, fmt::format("{}.trashinfo", target_name));
 
     const std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    char iso_time[100];
-    std::strftime(iso_time, sizeof(iso_time), "%FT%TZ", std::localtime(&t));
+
+    std::tm* local_time = std::localtime(&t);
+    std::ostringstream iso_time;
+    iso_time << std::put_time(local_time, "%FT%TZ");
 
     const std::string trash_info_content =
-        fmt::format("[Trash Info]\nPath={}\nDeletionDate={}", path, iso_time);
+        fmt::format("[Trash Info]\nPath={}\nDeletionDate={}", path, iso_time.str());
 
     write_file(trash_info, trash_info_content);
 }
