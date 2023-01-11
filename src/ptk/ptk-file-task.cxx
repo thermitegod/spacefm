@@ -2094,8 +2094,7 @@ query_overwrite(PtkFileTask* ptask)
     char* new_name =
         new_name_plain ? ztd::strdup(Glib::filename_display_name(new_name_plain)) : nullptr;
 
-    const i32 pos =
-        ext_disp ? g_utf8_strlen(base_name_disp, -1) - g_utf8_strlen(ext_disp, -1) - 1 : -1;
+    const i32 pos = ext_disp ? std::strlen(base_name_disp) - std::strlen(ext_disp) - 1 : -1;
 
     free(base_name);
     free(ext_disp);

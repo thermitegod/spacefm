@@ -717,9 +717,7 @@ select_input(GtkWidget* widget, MoveSet* mset)
             const auto [filename_no_extension, filename_extension] = get_name_extension(full_name);
 
             free(full_name);
-            gtk_text_buffer_get_iter_at_offset(buf,
-                                               &iter,
-                                               g_utf8_strlen(filename_no_extension.data(), -1));
+            gtk_text_buffer_get_iter_at_offset(buf, &iter, filename_no_extension.length());
         }
         else
         {
