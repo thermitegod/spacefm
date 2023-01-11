@@ -227,7 +227,6 @@ vfs_file_task_get_unique_name(std::string_view dest_dir, std::string_view base_n
 bool
 VFSFileTask::check_overwrite(std::string_view dest_file, bool* dest_exists, char** new_dest_file)
 {
-    char* new_dest;
     const auto dest_file_stat = ztd::lstat(dest_file);
 
     while (true)
@@ -278,6 +277,7 @@ VFSFileTask::check_overwrite(std::string_view dest_file, bool* dest_exists, char
         if (!this->state_cb) // failsafe
             return false;
 
+        char* new_dest;
         const char* use_dest_file = ztd::strdup(dest_file.data());
         do
         {
@@ -291,9 +291,11 @@ VFSFileTask::check_overwrite(std::string_view dest_file, bool* dest_exists, char
                                 VFSFileTaskState::QUERY_OVERWRITE,
                                 &new_dest,
                                 this->state_cb_data))
+            {
                 // this->abort is actually set in query_overwrite_response
                 // VFSFileTaskState::QUERY_OVERWRITE never returns false
                 this->abort = true;
+            }
             this->state = VFSFileTaskState::RUNNING;
 
             // may pause here - user may change overwrite mode
@@ -307,31 +309,31 @@ VFSFileTask::check_overwrite(std::string_view dest_file, bool* dest_exists, char
             {
                 free(new_dest);
                 new_dest = nullptr;
-                switch (this->overwrite_mode)
+
+                if (this->overwrite_mode == VFSFileTaskOverwriteMode::OVERWRITE ||
+                    this->overwrite_mode == VFSFileTaskOverwriteMode::OVERWRITE_ALL)
                 {
-                    case VFSFileTaskOverwriteMode::OVERWRITE:
-                    case VFSFileTaskOverwriteMode::OVERWRITE_ALL:
-                        *dest_exists = dest_file_stat.is_valid();
-                        if (ztd::same(this->current_file, this->current_dest))
-                        {
-                            // src and dest are same file - do not overwrite (truncates)
-                            // occurs if user pauses task and changes overwrite mode
-                            return false;
-                        }
-                        return true;
-                        break;
-                    case VFSFileTaskOverwriteMode::SKIP_ALL:
-                    case VFSFileTaskOverwriteMode::AUTO_RENAME:
-                    case VFSFileTaskOverwriteMode::SKIP:
-                    case VFSFileTaskOverwriteMode::RENAME:
+                    *dest_exists = dest_file_stat.is_valid();
+                    if (ztd::same(this->current_file, this->current_dest))
+                    {
+                        // src and dest are same file - do not overwrite (truncates)
+                        // occurs if user pauses task and changes overwrite mode
                         return false;
+                    }
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
             // user renamed file or pressed Pause btn
             if (new_dest)
-                // user renamed file - test if new name exists
+            { // user renamed file - test if new name exists
                 use_dest_file = new_dest;
+            }
         } while (std::filesystem::exists(use_dest_file));
+
         if (new_dest)
         {
             // user renamed file to unique name
