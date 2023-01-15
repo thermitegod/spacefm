@@ -80,7 +80,8 @@ vfs_mime_type_reload(void* user_data)
     /* Remove all items in the hash table */
 
     mime_map_lock.lock();
-    std::ranges::for_each(mime_map, [](const auto& mime) { vfs_mime_type_unref(mime.second); });
+    const auto action = [](const auto& mime) { vfs_mime_type_unref(mime.second); };
+    std::ranges::for_each(mime_map, action);
     mime_map.clear();
     mime_map_lock.unlock();
 
@@ -133,13 +134,14 @@ void
 vfs_mime_type_clean()
 {
     // remove file alteration monitor for mime-cache
-    std::ranges::for_each(mime_caches_monitors,
-                          [](vfs::file_monitor monitor)
-                          { vfs_file_monitor_remove(monitor, on_mime_cache_changed, nullptr); });
+    const auto action_remove = [](vfs::file_monitor monitor)
+    { vfs_file_monitor_remove(monitor, on_mime_cache_changed, nullptr); };
+    std::ranges::for_each(mime_caches_monitors, action_remove);
 
     mime_type_finalize();
 
-    std::ranges::for_each(mime_map, [](const auto& mime) { vfs_mime_type_unref(mime.second); });
+    const auto action_unref = [](const auto& mime) { vfs_mime_type_unref(mime.second); };
+    std::ranges::for_each(mime_map, action_unref);
 
     mime_map.clear();
 }
@@ -355,7 +357,8 @@ vfs_mime_type_set_icon_size_big(i32 size)
     mime_map_lock.lock();
     big_icon_size = size;
     // Unload old cached icons
-    std::ranges::for_each(mime_map, [](const auto& mime) { free_cached_big_icons(mime.second); });
+    const auto action = [](const auto& mime) { free_cached_big_icons(mime.second); };
+    std::ranges::for_each(mime_map, action);
     mime_map_lock.unlock();
 }
 
@@ -368,7 +371,8 @@ vfs_mime_type_set_icon_size_small(i32 size)
     mime_map_lock.lock();
     small_icon_size = size;
     // Unload old cached icons
-    std::ranges::for_each(mime_map, [](const auto& mime) { free_cached_small_icons(mime.second); });
+    const auto action = [](const auto& mime) { free_cached_small_icons(mime.second); };
+    std::ranges::for_each(mime_map, action);
     mime_map_lock.unlock();
 }
 

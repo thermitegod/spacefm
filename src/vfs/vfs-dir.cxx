@@ -793,9 +793,9 @@ reload_mime_type(std::string_view key, vfs::dir dir)
         // ztd::logger::debug("reload {}", full_path);
     }
 
-    std::ranges::for_each(dir->file_list,
-                          [dir](vfs::file_info file)
-                          { dir->run_event<EventType::FILE_CHANGED>(file); });
+    const auto action = [dir](vfs::file_info file)
+    { dir->run_event<EventType::FILE_CHANGED>(file); };
+    std::ranges::for_each(dir->file_list, action);
 
     vfs_dir_unlock(dir);
 }
@@ -805,16 +805,16 @@ on_mime_type_reload(void* user_data)
 {
     (void)user_data;
     // ztd::logger::debug("reload mime-type");
-    std::ranges::for_each(dir_map,
-                          [](const auto& dir) { reload_mime_type(dir.first, dir.second); });
+    const auto action = [](const auto& dir) { reload_mime_type(dir.first, dir.second); };
+    std::ranges::for_each(dir_map, action);
 }
 
 void
 vfs_dir_foreach(VFSDirForeachFunc func, bool user_data)
 {
     // ztd::logger::debug("reload mime-type");
-    std::ranges::for_each(dir_map,
-                          [func, user_data](const auto& dir) { func(dir.second, user_data); });
+    const auto action = [func, user_data](const auto& dir) { func(dir.second, user_data); };
+    std::ranges::for_each(dir_map, action);
 }
 
 void
