@@ -35,7 +35,7 @@ class VFSAppDesktop
   public:
     VFSAppDesktop() = delete;
     ~VFSAppDesktop() = default;
-    // ~VFSAppDesktop() { LOG_INFO("VFSAppDesktop destructor") };
+    // ~VFSAppDesktop() { ztd::logger::info("VFSAppDesktop destructor") };
 
     VFSAppDesktop(std::string_view open_file_name) noexcept;
 

@@ -111,13 +111,13 @@ xset_custom_delete(xset_t set, bool delete_next)
     if (std::filesystem::exists(path1))
     {
         std::filesystem::remove_all(path1);
-        LOG_INFO("Removed {}", path1);
+        ztd::logger::info("Removed {}", path1);
     }
 
     if (std::filesystem::exists(path2))
     {
         std::filesystem::remove_all(path2);
-        LOG_INFO("Removed {}", path2);
+        ztd::logger::info("Removed {}", path2);
     }
 
     xset_remove(set);
@@ -132,15 +132,15 @@ xset_custom_remove(xset_t set)
     xset_t set_child;
 
     /*
-    LOG_INFO("xset_custom_remove {} ({})", set->name, set->menu_label );
-    LOG_INFO("    set->parent = {}", set->parent );
-    LOG_INFO("    set->prev   = {}", set->prev );
-    LOG_INFO("    set->next   = {}", set->next );
+    ztd::logger::info("xset_custom_remove {} ({})", set->name, set->menu_label );
+    ztd::logger::info("    set->parent = {}", set->parent );
+    ztd::logger::info("    set->prev   = {}", set->prev );
+    ztd::logger::info("    set->next   = {}", set->next );
     */
     if (set->prev)
     {
         set_prev = xset_get(set->prev);
-        // LOG_INFO("        set->prev = {} ({})", set_prev->name, set_prev->menu_label);
+        // ztd::logger::info("        set->prev = {} ({})", set_prev->name, set_prev->menu_label);
         if (set_prev->next)
             free(set_prev->next);
         if (set->next)
@@ -226,7 +226,7 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
         }
     }
     else
-        LOG_WARN("xset_custom_get_app_name_icon set is not XSetCMD::APP");
+        ztd::logger::warn("xset_custom_get_app_name_icon set is not XSetCMD::APP");
 
     if (icon)
         *icon = icon_new;
@@ -268,7 +268,7 @@ xset_custom_export_files(xset_t set, std::string_view plug_dir)
 
     i32 exit_status;
     const std::string command = fmt::format("cp -a {} {}", path_src, path_dest);
-    LOG_INFO("COMMAND={}", command);
+    ztd::logger::info("COMMAND={}", command);
     Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
 
     return !!exit_status;
@@ -394,7 +394,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
             if (!set->plugin)
             {
                 std::filesystem::remove_all(plug_dir);
-                LOG_INFO("Removed {}", plug_dir);
+                ztd::logger::info("Removed {}", plug_dir);
             }
             free(path);
             xset_msg_dialog(parent,
@@ -411,7 +411,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
                 if (!set->plugin)
                 {
                     std::filesystem::remove_all(plug_dir);
-                    LOG_INFO("Removed {}", plug_dir);
+                    ztd::logger::info("Removed {}", plug_dir);
                 }
                 free(path);
                 xset_msg_dialog(parent,
@@ -529,7 +529,7 @@ xset_custom_copy_files(xset_t src, xset_t dest)
     std::string* standard_error = nullptr;
     i32 exit_status;
 
-    // LOG_INFO("xset_custom_copy_files( {}, {} )", src->name, dest->name);
+    // ztd::logger::info("xset_custom_copy_files( {}, {} )", src->name, dest->name);
 
     // copy command dir
 
@@ -537,23 +537,23 @@ xset_custom_copy_files(xset_t src, xset_t dest)
         path_src = Glib::build_filename(src->plug_dir, src->plug_name);
     else
         path_src = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", src->name);
-    // LOG_INFO("    path_src={}", path_src);
+    // ztd::logger::info("    path_src={}", path_src);
 
-    // LOG_INFO("    path_src EXISTS");
+    // ztd::logger::info("    path_src EXISTS");
     path_dest = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts");
     std::filesystem::create_directories(path_dest);
     std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
     path_dest = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", dest->name);
     command = fmt::format("cp -a {} {}", path_src, path_dest);
-    // LOG_INFO("    path_dest={}", path_dest);
-    LOG_INFO("COMMAND={}", command);
+    // ztd::logger::info("    path_dest={}", path_dest);
+    ztd::logger::info("COMMAND={}", command);
     Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);
     std::string out;
     if (standard_output)
         out.append(*standard_output);
     if (standard_error)
         out.append(*standard_error);
-    LOG_INFO("{}", out);
+    ztd::logger::info("{}", out);
     if (exit_status && WIFEXITED(exit_status))
     {
         const std::string msg =
@@ -565,7 +565,7 @@ xset_custom_copy_files(xset_t src, xset_t dest)
                         msg);
     }
     command = fmt::format("chmod -R go-rwx {}", path_dest);
-    LOG_INFO("COMMAND={}", command);
+    ztd::logger::info("COMMAND={}", command);
     Glib::spawn_command_line_sync(command);
 
     // copy data dir
@@ -577,14 +577,14 @@ xset_custom_copy_files(xset_t src, xset_t dest)
         path_dest =
             Glib::build_filename(vfs::user_dirs->program_config_dir(), "plugin-data", dest->name);
         command = fmt::format("cp -a {} {}", path_src, path_dest);
-        LOG_INFO("COMMAND={}", command);
+        ztd::logger::info("COMMAND={}", command);
         Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);
         std::string copy_out;
         if (standard_output)
             copy_out.append(*standard_output);
         if (standard_error)
             copy_out.append(*standard_error);
-        LOG_INFO("{}", copy_out);
+        ztd::logger::info("{}", copy_out);
         if (exit_status && WIFEXITED(exit_status))
         {
             const std::string msg =
@@ -596,7 +596,7 @@ xset_custom_copy_files(xset_t src, xset_t dest)
                             msg);
         }
         command = fmt::format("chmod -R go-rwx {}", path_dest);
-        LOG_INFO("COMMAND={}", command);
+        ztd::logger::info("COMMAND={}", command);
         Glib::spawn_command_line_sync(command);
     }
 }
@@ -604,7 +604,7 @@ xset_custom_copy_files(xset_t src, xset_t dest)
 xset_t
 xset_custom_copy(xset_t set, bool copy_next, bool delete_set)
 {
-    // LOG_INFO("xset_custom_copy( {}, {}, {})", set->name, copy_next ? "true" : "false",
+    // ztd::logger::info("xset_custom_copy( {}, {}, {})", set->name, copy_next ? "true" : "false",
     // delete_set ? "true" : "false");
     xset_t mset = set;
     // if a plugin with a mirror, get the mirror
@@ -643,7 +643,7 @@ xset_custom_copy(xset_t set, bool copy_next, bool delete_set)
     if (set->menu_style == XSetMenu::SUBMENU && set->child)
     {
         xset_t set_child = xset_get(set->child);
-        // LOG_INFO("    copy submenu {}", set_child->name);
+        // ztd::logger::info("    copy submenu {}", set_child->name);
         xset_t newchild = xset_custom_copy(set_child, true, delete_set);
         newset->child = ztd::strdup(newchild->name);
         newchild->parent = ztd::strdup(newset->name);
@@ -652,7 +652,7 @@ xset_custom_copy(xset_t set, bool copy_next, bool delete_set)
     if (copy_next && set->next)
     {
         xset_t set_next = xset_get(set->next);
-        // LOG_INFO("    copy next {}", set_next->name);
+        // ztd::logger::info("    copy next {}", set_next->name);
         xset_t newnext = xset_custom_copy(set_next, true, delete_set);
         newnext->prev = ztd::strdup(newset->name);
         newset->next = ztd::strdup(newnext->name);

@@ -74,7 +74,7 @@ get_cwd(GtkEntry* entry)
     }
     // else
     // {
-    //     LOG_WARN("entered path in pathbar is invalid: {}", path);
+    //     ztd::logger::warn("entered path in pathbar is invalid: {}", path);
     // }
 
     return vfs::user_dirs->home_dir();

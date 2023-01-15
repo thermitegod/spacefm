@@ -102,13 +102,13 @@ PtkFileTask::PtkFileTask(VFSFileTaskType type, const std::vector<std::string>& s
         ptk_file_task_pause(this, VFSFileTaskState::QUEUE);
 
     // GThread *self = g_thread_self ();
-    // LOG_INFO("GUI_THREAD = {:p}", fmt::ptr(self));
-    // LOG_INFO("ptk_file_task_new DONE ptask={:p}", fmt::ptr(this));
+    // ztd::logger::info("GUI_THREAD = {:p}", fmt::ptr(self));
+    // ztd::logger::info("ptk_file_task_new DONE ptask={:p}", fmt::ptr(this));
 }
 
 PtkFileTask::~PtkFileTask()
 {
-    // LOG_INFO("ptk_file_task_destroy ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_destroy ptask={:p}", fmt::ptr(ptask));
     if (this->timeout)
     {
         g_source_remove(this->timeout);
@@ -135,7 +135,7 @@ PtkFileTask::~PtkFileTask()
     }
     if (this->task->type == VFSFileTaskType::EXEC)
     {
-        // LOG_INFO("    g_io_channel_shutdown");
+        // ztd::logger::info("    g_io_channel_shutdown");
         // channel shutdowns are needed to stop channel reads after task ends.
         // Cannot be placed in cb_exec_child_watch because it causes single
         // line output to be lost
@@ -149,7 +149,7 @@ PtkFileTask::~PtkFileTask()
             g_source_remove(this->task->child_watch);
             this->task->child_watch = 0;
         }
-        // LOG_INFO("    g_io_channel_shutdown DONE");
+        // ztd::logger::info("    g_io_channel_shutdown DONE");
     }
 
     if (this->task)
@@ -161,7 +161,7 @@ PtkFileTask::~PtkFileTask()
     if (this->pop_handler)
         free(this->pop_handler);
 
-    // LOG_INFO("ptk_file_task_destroy DONE ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_destroy DONE ptask={:p}", fmt::ptr(ptask));
 }
 
 void
@@ -265,12 +265,12 @@ static bool
 on_progress_timer(PtkFileTask* ptask)
 {
     // GThread *self = g_thread_self ();
-    // LOG_INFO("PROGRESS_TIMER_THREAD = {:p}", fmt::ptr(self));
+    // ztd::logger::info("PROGRESS_TIMER_THREAD = {:p}", fmt::ptr(self));
 
     // query condition?
     if (ptask->query_cond && ptask->query_cond != ptask->query_cond_last)
     {
-        // LOG_INFO("QUERY = {:p}  mutex = {:p}", fmt::ptr(ptask->query_cond),
+        // ztd::logger::info("QUERY = {:p}  mutex = {:p}", fmt::ptr(ptask->query_cond),
         // fmt::ptr(ptask->task->mutex));
         ptask->restart_timeout = (ptask->timeout != 0);
         if (ptask->timeout)
@@ -311,7 +311,7 @@ on_progress_timer(PtkFileTask* ptask)
     if (++ptask->progress_count < 6)
         return true;
     ptask->progress_count = 0;
-    // LOG_INFO("on_progress_timer ptask={:p}", ptask);
+    // ztd::logger::info("on_progress_timer ptask={:p}", ptask);
 
     if (ptask->complete)
     {
@@ -339,20 +339,20 @@ on_progress_timer(PtkFileTask* ptask)
         if (!ptask->progress_dlg || (!ptask->err_count && !ptask->keep_dlg))
         {
             delete ptask;
-            // LOG_INFO("on_progress_timer DONE false-COMPLETE ptask={:p}", ptask);
+            // ztd::logger::info("on_progress_timer DONE false-COMPLETE ptask={:p}", ptask);
             return false;
         }
         else if (ptask->progress_dlg && ptask->err_count)
             gtk_window_present(GTK_WINDOW(ptask->progress_dlg));
     }
-    // LOG_INFO("on_progress_timer DONE true ptask={:p}", ptask);
+    // ztd::logger::info("on_progress_timer DONE true ptask={:p}", ptask);
     return !ptask->complete;
 }
 
 static bool
 ptk_file_task_add_main(PtkFileTask* ptask)
 {
-    // LOG_INFO("ptk_file_task_add_main ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_add_main ptask={:p}", fmt::ptr(ptask));
     if (ptask->timeout)
     {
         g_source_remove(ptask->timeout);
@@ -372,14 +372,14 @@ ptk_file_task_add_main(PtkFileTask* ptask)
 
     on_progress_timer(ptask);
 
-    // LOG_INFO("ptk_file_task_add_main DONE ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_add_main DONE ptask={:p}", fmt::ptr(ptask));
     return false;
 }
 
 void
 ptk_file_task_run(PtkFileTask* ptask)
 {
-    // LOG_INFO("ptk_file_task_run ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_run ptask={:p}", fmt::ptr(ptask));
     // wait this long to first show task in manager, popup
     ptask->timeout = g_timeout_add(500, (GSourceFunc)ptk_file_task_add_main, ptask);
     ptask->progress_timer = 0;
@@ -393,14 +393,14 @@ ptk_file_task_run(PtkFileTask* ptask)
         }
     }
     ptask->progress_timer = g_timeout_add(50, (GSourceFunc)on_progress_timer, ptask);
-    // LOG_INFO("ptk_file_task_run DONE ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_run DONE ptask={:p}", fmt::ptr(ptask));
 }
 
 bool
 ptk_file_task_cancel(PtkFileTask* ptask)
 {
     // GThread *self = g_thread_self ();
-    // LOG_INFO("CANCEL_THREAD = {:p}", fmt::ptr(self));
+    // ztd::logger::info("CANCEL_THREAD = {:p}", fmt::ptr(self));
     if (ptask->timeout)
     {
         g_source_remove(ptask->timeout);
@@ -419,16 +419,16 @@ ptk_file_task_cancel(PtkFileTask* ptask)
 
         if (ptask->task->exec_pid)
         {
-            // LOG_INFO("SIGTERM {}", ptask->task->exec_pid);
+            // ztd::logger::info("SIGTERM {}", ptask->task->exec_pid);
 
             const std::string command =
                 fmt::format("/usr/bin/kill -{} {}", SIGTERM, ptask->task->exec_pid);
-            LOG_INFO("COMMAND={}", command);
+            ztd::logger::info("COMMAND={}", command);
             Glib::spawn_command_line_async(command);
 
             const std::string command2 =
                 fmt::format("sleep 5 && /usr/bin/kill -{} {}", SIGKILL, ptask->task->exec_pid);
-            LOG_INFO("COMMAND={}", command2);
+            ztd::logger::info("COMMAND={}", command2);
             Glib::spawn_command_line_async(command2);
         }
         else
@@ -528,7 +528,7 @@ ptk_file_task_pause(PtkFileTask* ptask, i32 state)
             // send signal
             const std::string command =
                 fmt::format("/usr/bin/kill -{} {}", sig, ptask->task->exec_pid);
-            LOG_INFO("COMMAND={}", command);
+            ztd::logger::info("COMMAND={}", command);
             Glib::spawn_command_line_async(command);
         }
     }
@@ -729,7 +729,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     if (ptask->progress_dlg)
         return;
 
-    // LOG_INFO("ptk_file_task_progress_open");
+    // ztd::logger::info("ptk_file_task_progress_open");
 
     vfs::file_task task = ptask->task;
 
@@ -1034,7 +1034,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
                                      0);
 
     ptask->progress_count = 50; // trigger fast display
-    // LOG_INFO("ptk_file_task_progress_open DONE");
+    // ztd::logger::info("ptk_file_task_progress_open DONE");
 }
 
 static void
@@ -1052,7 +1052,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     std::string str;
     std::string str2;
 
-    // LOG_INFO("ptk_file_task_progress_update ptask={:p}", ptask);
+    // ztd::logger::info("ptk_file_task_progress_update ptask={:p}", ptask);
 
     vfs::file_task task = ptask->task;
 
@@ -1243,7 +1243,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
                 gtk_adjustment_get_upper(adj) - gtk_adjustment_get_value(adj) <
                     gtk_adjustment_get_page_size(adj) + 40)
             {
-                // LOG_INFO("    scroll to end line {}", ptask->log_end,
+                // ztd::logger::info("    scroll to end line {}", ptask->log_end,
                 // gtk_text_buffer_get_line_count(ptask->log_buf));
                 gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(ptask->error_view),
                                              ptask->log_end,
@@ -1354,7 +1354,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         }
     }
     gtk_label_set_text(ptask->errors, errs.data());
-    // LOG_INFO("ptk_file_task_progress_update DONE ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_progress_update DONE ptask={:p}", fmt::ptr(ptask));
 }
 
 void
@@ -1378,12 +1378,12 @@ ptk_file_task_set_recursive(PtkFileTask* ptask, bool recursive)
 static void
 ptk_file_task_update(PtkFileTask* ptask)
 {
-    // LOG_INFO("ptk_file_task_update ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_update ptask={:p}", fmt::ptr(ptask));
     // calculate updated display data
 
     if (!ptk_file_task_trylock(ptask))
     {
-        // LOG_INFO("UPDATE LOCKED");
+        // ztd::logger::info("UPDATE LOCKED");
         return;
     }
 
@@ -1420,9 +1420,9 @@ ptk_file_task_update(PtkFileTask* ptask)
             }
             else
                 task->exec_exit_status = 0;
-            LOG_INFO("child ZOMBIED  pid={} exit_status={}",
-                     task->exec_pid,
-                     task->exec_exit_status);
+            ztd::logger::info("child ZOMBIED  pid={} exit_status={}",
+                              task->exec_pid,
+                              task->exec_exit_status);
             task->exec_pid = 0;
             ptask->complete = true;
         }
@@ -1436,7 +1436,7 @@ ptk_file_task_update(PtkFileTask* ptask)
             if (since_last >= 2.0)
             {
                 cur_speed = (task->progress - task->last_progress) / since_last;
-                // LOG_INFO("( {} - {} ) / {} = {}", task->progress,
+                // ztd::logger::info("( {} - {} ) / {} = {}", task->progress,
                 //                task->last_progress, since_last, cur_speed);
                 task->last_elapsed = timer_elapsed;
                 task->last_speed = cur_speed;
@@ -1682,7 +1682,7 @@ ptk_file_task_update(PtkFileTask* ptask)
         main_task_view_update_task(ptask);
 
     task->unlock();
-    // LOG_INFO("ptk_file_task_update DONE ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_update DONE ptask={:p}", fmt::ptr(ptask));
 }
 
 static bool
@@ -1695,7 +1695,7 @@ on_vfs_file_task_state_cb(vfs::file_task task, VFSFileTaskState state, void* sta
     switch (state)
     {
         case VFSFileTaskState::FINISH:
-            // LOG_INFO("VFSFileTaskState::FINISH");
+            // ztd::logger::info("VFSFileTaskState::FINISH");
 
             ptask->complete = true;
 
@@ -1709,7 +1709,7 @@ on_vfs_file_task_state_cb(vfs::file_task task, VFSFileTaskState state, void* sta
             break;
         case VFSFileTaskState::QUERY_OVERWRITE:
             // 0; GThread *self = g_thread_self ();
-            // LOG_INFO("TASK_THREAD = {:p}", fmt::ptr(self));
+            // ztd::logger::info("TASK_THREAD = {:p}", fmt::ptr(self));
             task->lock();
             ptask->query_new_dest = (char**)state_data;
             *ptask->query_new_dest = nullptr;
@@ -1726,10 +1726,10 @@ on_vfs_file_task_state_cb(vfs::file_task task, VFSFileTaskState state, void* sta
             task->unlock();
             break;
         case VFSFileTaskState::ERROR:
-            // LOG_INFO("VFSFileTaskState::ERROR");
+            // ztd::logger::info("VFSFileTaskState::ERROR");
             task->lock();
             task->err_count++;
-            // LOG_INFO("    ptask->item_count = {}", task->current_item );
+            // ztd::logger::info("    ptask->item_count = {}", task->current_item );
 
             if (task->type == VFSFileTaskType::EXEC)
             {
@@ -1945,7 +1945,7 @@ query_overwrite(PtkFileTask* ptask)
 {
     // TODO convert to gtk_builder (glade file)
 
-    // LOG_INFO("query_overwrite ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("query_overwrite ptask={:p}", fmt::ptr(ptask));
     GtkWidget* dlg;
     GtkWidget* parent_win;
     GtkTextIter iter;

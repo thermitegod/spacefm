@@ -101,7 +101,7 @@ struct VFSAsyncTask
     typename std::enable_if<evt == EventType::TASK_FINISH, sigc::connection>::type
     add_event(evt_task_finished__find_file_t fun, FindFile* file)
     {
-        // LOG_TRACE("Signal Connect   : EventType::TASK_FINISH");
+        // ztd::logger::trace("Signal Connect   : EventType::TASK_FINISH");
         this->evt_data_find_file = file;
         return this->evt_task_finished__find_file.connect(sigc::ptr_fun(fun));
     }
@@ -110,7 +110,7 @@ struct VFSAsyncTask
     typename std::enable_if<evt == EventType::TASK_FINISH, sigc::connection>::type
     add_event(evt_task_finished__load_app_t fun, GtkWidget* app)
     {
-        // LOG_TRACE("Signal Connect   : EventType::TASK_FINISH");
+        // ztd::logger::trace("Signal Connect   : EventType::TASK_FINISH");
         this->evt_data_load_app = app;
         return this->evt_task_finished__load_app.connect(sigc::ptr_fun(fun));
     }
@@ -119,7 +119,7 @@ struct VFSAsyncTask
     typename std::enable_if<evt == EventType::TASK_FINISH, sigc::connection>::type
     add_event(evt_task_finished__load_dir_t fun, vfs::dir dir)
     {
-        // LOG_TRACE("Signal Connect   : EventType::TASK_FINISH");
+        // ztd::logger::trace("Signal Connect   : EventType::TASK_FINISH");
         this->evt_data_load_dir = dir;
         return this->evt_task_finished__load_dir.connect(sigc::ptr_fun(fun));
     }
@@ -129,7 +129,7 @@ struct VFSAsyncTask
     typename std::enable_if<evt == EventType::TASK_FINISH, void>::type
     run_event(bool is_cancelled)
     {
-        // LOG_TRACE("Signal Execute   : EventType::TASK_FINISH");
+        // ztd::logger::trace("Signal Execute   : EventType::TASK_FINISH");
         this->evt_task_finished__find_file.emit(this->evt_data_find_file);
         this->evt_task_finished__load_app.emit(this, is_cancelled, this->evt_data_load_app);
         this->evt_task_finished__load_dir.emit(this->evt_data_load_dir, is_cancelled);

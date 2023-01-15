@@ -70,7 +70,7 @@ update_desktop_database()
 {
     const std::string path = Glib::build_filename(vfs::user_dirs->data_dir(), "applications");
     const std::string command = fmt::format("update-desktop-database {}", path);
-    LOG_INFO("COMMAND={}", command);
+    ztd::logger::info("COMMAND={}", command);
     Glib::spawn_command_line_sync(command);
 }
 
@@ -78,7 +78,7 @@ update_desktop_database()
 static void
 remove_actions(std::string_view mime_type, std::vector<std::string>& actions)
 {
-    // LOG_INFO("remove_actions( {} )", type);
+    // ztd::logger::info("remove_actions( {} )", type);
 
     const auto kf = Glib::KeyFile::create();
     try
@@ -123,7 +123,7 @@ remove_actions(std::string_view mime_type, std::vector<std::string>& actions)
         if (ztd::contains(actions, rem))
         {
             ztd::remove(actions, rem);
-            // LOG_INFO("        ACTION-REMOVED {}", rem);
+            // ztd::logger::info("        ACTION-REMOVED {}", rem);
         }
     }
 }
@@ -138,7 +138,7 @@ remove_actions(std::string_view mime_type, std::vector<std::string>& actions)
 static void
 get_actions(std::string_view dir, std::string_view type, std::vector<std::string>& actions)
 {
-    // LOG_INFO("get_actions( {}, {} )\n", dir, type);
+    // ztd::logger::info("get_actions( {}, {} )\n", dir, type);
     std::vector<Glib::ustring> removed;
 
     static constexpr std::array<std::string_view, 2> names{
@@ -151,11 +151,11 @@ get_actions(std::string_view dir, std::string_view type, std::vector<std::string
         "MIME Cache",
     };
 
-    // LOG_INFO("get_actions( {}/, {} )", dir, type);
+    // ztd::logger::info("get_actions( {}/, {} )", dir, type);
     for (usize n = 0; n < names.size(); ++n)
     {
         const std::string path = Glib::build_filename(dir.data(), names.at(n).data());
-        // LOG_INFO( "    {}", path);
+        // ztd::logger::info( "    {}", path);
         const auto kf = Glib::KeyFile::create();
         try
         {
@@ -184,7 +184,7 @@ get_actions(std::string_view dir, std::string_view type, std::vector<std::string
         // mimeinfo.cache has only MIME Cache; others do not have it
         for (i32 k = (n == 0 ? 0 : 2); k < (n == 0 ? 2 : 3); ++k)
         {
-            // LOG_INFO("        {} [{}]", groups[k], k);
+            // ztd::logger::info("        {} [{}]", groups[k], k);
             bool is_removed;
             std::vector<Glib::ustring> apps;
             try
@@ -199,7 +199,7 @@ get_actions(std::string_view dir, std::string_view type, std::vector<std::string
             }
             for (auto& a : apps)
             {
-                //  LOG_INFO("            {}", apps[i]);
+                //  ztd::logger::info("            {}", apps[i]);
                 //  check if removed
                 is_removed = false;
                 if (!removed.empty() && n > 0)
@@ -208,7 +208,7 @@ get_actions(std::string_view dir, std::string_view type, std::vector<std::string
                     {
                         if (ztd::same(r.data(), a.data()))
                         {
-                            // LOG_INFO("                REMOVED");
+                            // ztd::logger::info("                REMOVED");
                             is_removed = true;
                             break;
                         }
@@ -220,12 +220,12 @@ get_actions(std::string_view dir, std::string_view type, std::vector<std::string
                     /* check for app existence */
                     if (mime_type_locate_desktop_file(app))
                     {
-                        // LOG_INFO("                EXISTS");
+                        // ztd::logger::info("                EXISTS");
                         actions.emplace_back(app);
                     }
                     else
                     {
-                        // LOG_INFO("                MISSING");
+                        // ztd::logger::info("                MISSING");
                     }
                 }
             }
@@ -506,7 +506,7 @@ _locate_desktop_file(std::string_view dir, std::string_view desktop_id)
     if (std::filesystem::is_regular_file(desktop_path))
         return ztd::strdup(desktop_path);
 
-    // LOG_INFO("desktop_id={}", desktop_id);
+    // ztd::logger::info("desktop_id={}", desktop_id);
 
     // mime encodes directory separators as '-'.
     // so the desktop_id 'mime-mime-mime.desktop' could be on-disk
@@ -518,7 +518,7 @@ _locate_desktop_file(std::string_view dir, std::string_view desktop_id)
         new_desktop_id = ztd::replace(new_desktop_id, "-", "/", 1);
         const std::string new_desktop_path =
             Glib::build_filename(dir.data(), "applications", new_desktop_id);
-        // LOG_INFO("new_desktop_id={}", new_desktop_id);
+        // ztd::logger::info("new_desktop_id={}", new_desktop_id);
         if (std::filesystem::is_regular_file(new_desktop_path))
             return ztd::strdup(new_desktop_path);
     }
@@ -554,7 +554,7 @@ mime_type_locate_desktop_file(std::string_view desktop_id)
 static char*
 get_default_action(std::string_view dir, std::string_view type)
 {
-    // LOG_INFO("get_default_action( {}, {} )", dir, type);
+    // ztd::logger::info("get_default_action( {}, {} )", dir, type);
     // search these files in dir for the first existing default app
     static constexpr std::array<std::string_view, 2> names{
         "mimeapps.list",
@@ -568,7 +568,7 @@ get_default_action(std::string_view dir, std::string_view type)
     for (std::string_view name : names)
     {
         const std::string path = Glib::build_filename(dir.data(), name.data());
-        // LOG_INFO("    path = {}", path);
+        // ztd::logger::info("    path = {}", path);
         const auto kf = Glib::KeyFile::create();
         try
         {
@@ -598,10 +598,10 @@ get_default_action(std::string_view dir, std::string_view type)
                 if (app.empty())
                     continue;
 
-                // LOG_INFO("        {}", apps[i]);
+                // ztd::logger::info("        {}", apps[i]);
                 if (mime_type_locate_desktop_file(app.data()))
                 {
-                    // LOG_INFO("            EXISTS");
+                    // ztd::logger::info("            EXISTS");
                     return ztd::strdup(app);
                 }
             }
@@ -672,7 +672,7 @@ mime_type_update_association(std::string_view type, std::string_view desktop_id,
 {
     if (type.empty() || desktop_id.empty())
     {
-        LOG_WARN("mime_type_update_association invalid type or desktop_id");
+        ztd::logger::warn("mime_type_update_association invalid type or desktop_id");
         return;
     }
 

@@ -88,8 +88,8 @@ VFSTrash::toplevel(std::string_view path) noexcept
     std::string mount_path = path.data();
     std::string last_path;
 
-    // LOG_INFO("dev mount {}", device(mount_path));
-    // LOG_INFO("dev       {}", dev);
+    // ztd::logger::info("dev mount {}", device(mount_path));
+    // ztd::logger::info("dev       {}", dev);
 
     // walk up the path until it gets to the root of the device
     while (device(mount_path).value() == dev)
@@ -99,8 +99,8 @@ VFSTrash::toplevel(std::string_view path) noexcept
         mount_path = mount_parent.string();
     }
 
-    // LOG_INFO("last path   {}", last_path);
-    // LOG_INFO("mount point {}", mount_path);
+    // ztd::logger::info("last path   {}", last_path);
+    // ztd::logger::info("mount point {}", mount_path);
 
     return last_path;
 }
@@ -135,7 +135,7 @@ VFSTrash::trash(std::string_view path) noexcept
 
     if (ztd::endswith(path, "/Trash") || ztd::endswith(path, fmt::format("/.Trash-{}", getuid())))
     {
-        LOG_WARN("Refusing to trash Trash Dir: {}", path);
+        ztd::logger::warn("Refusing to trash Trash Dir: {}", path);
         return true;
     }
 
@@ -145,7 +145,7 @@ VFSTrash::trash(std::string_view path) noexcept
     trash_dir->create_trash_info(path, target_name);
     trash_dir->move(path, target_name);
 
-    // LOG_INFO("moved to trash: {}", path);
+    // ztd::logger::info("moved to trash: {}", path);
 
     return true;
 }
@@ -209,7 +209,7 @@ VFSTrashDir::check_dir_exists(std::string_view path) noexcept
     if (std::filesystem::is_directory(path))
         return;
 
-    // LOG_INFO("trash mkdir {}", path);
+    // ztd::logger::info("trash mkdir {}", path);
     std::filesystem::create_directories(path);
     std::filesystem::permissions(path, std::filesystem::perms::owner_all);
 }
@@ -217,7 +217,7 @@ VFSTrashDir::check_dir_exists(std::string_view path) noexcept
 void
 VFSTrashDir::create_trash_dir() const noexcept
 {
-    // LOG_DEBUG("create trash dirs {}", trash_path());
+    // ztd::logger::debug("create trash dirs {}", trash_path());
 
     this->check_dir_exists(this->trash_path);
     this->check_dir_exists(this->files_path);

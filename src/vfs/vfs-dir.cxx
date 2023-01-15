@@ -176,7 +176,7 @@ static void
 vfs_dir_finalize(GObject* obj)
 {
     vfs::dir dir = VFS_DIR_REINTERPRET(obj);
-    // LOG_INFO("vfs_dir_finalize  {}", dir->path);
+    // ztd::logger::info("vfs_dir_finalize  {}", dir->path);
     do
     {
     } while (g_source_remove_by_user_data(dir));
@@ -186,7 +186,7 @@ vfs_dir_finalize(GObject* obj)
         dir->signal_task_load_dir.disconnect();
         // FIXME: should we generate a "file-list" signal to indicate the dir loading was cancelled?
 
-        // LOG_INFO("vfs_dir_finalize -> vfs_async_task_cancel");
+        // ztd::logger::info("vfs_dir_finalize -> vfs_async_task_cancel");
         dir->task->cancel();
         g_object_unref(dir->task);
         dir->task = nullptr;
@@ -212,10 +212,10 @@ vfs_dir_finalize(GObject* obj)
             }
         }
     }
-    // LOG_DEBUG("dir->thumbnail_loader: {:p}", dir->thumbnail_loader);
+    // ztd::logger::debug("dir->thumbnail_loader: {:p}", dir->thumbnail_loader);
     if (dir->thumbnail_loader)
     {
-        // LOG_DEBUG("FREE THUMBNAIL LOADER IN VFSDIR");
+        // ztd::logger::debug("FREE THUMBNAIL LOADER IN VFSDIR");
         vfs_thumbnail_loader_free(dir->thumbnail_loader);
         dir->thumbnail_loader = nullptr;
     }
@@ -341,8 +341,8 @@ vfs_dir_emit_file_deleted(vfs::dir dir, std::string_view file_name, vfs::file_in
 void
 vfs_dir_emit_file_changed(vfs::dir dir, std::string_view file_name, vfs::file_info file, bool force)
 {
-    // LOG_INFO("vfs_dir_emit_file_changed dir={} file_name={} avoid={}", dir->path, file_name,
-    // dir->avoid_changes ? "true" : "false");
+    // ztd::logger::info("vfs_dir_emit_file_changed dir={} file_name={} avoid={}", dir->path,
+    // file_name, dir->avoid_changes ? "true" : "false");
 
     if (!force && dir->avoid_changes)
         return;
@@ -433,7 +433,7 @@ vfs_dir_new(std::string_view path)
     dir->path = path;
     dir->avoid_changes = vfs_volume_dir_avoid_changes(path);
 
-    // LOG_INFO("vfs_dir_new {}  avoid_changes={}", dir->path, dir->avoid_changes);
+    // ztd::logger::info("vfs_dir_new {}  avoid_changes={}", dir->path, dir->avoid_changes);
 
     return dir;
 }
@@ -500,7 +500,7 @@ vfs_dir_load(vfs::dir dir)
 {
     if (dir->path.empty())
         return;
-    // LOG_INFO("dir->path={}", dir->path);
+    // ztd::logger::info("dir->path={}", dir->path);
 
     dir->task = vfs_async_task_new((VFSAsyncFunc)vfs_dir_load_thread, dir);
 
@@ -720,7 +720,7 @@ vfs_dir_monitor_callback(vfs::file_monitor monitor, VFSFileMonitorEvent event,
             vfs_dir_emit_file_changed(dir, file_name, nullptr, false);
             break;
         default:
-            LOG_WARN("Error: unrecognized file monitor signal!");
+            ztd::logger::warn("Error: unrecognized file monitor signal!");
     }
 }
 
@@ -790,7 +790,7 @@ reload_mime_type(std::string_view key, vfs::dir dir)
     {
         const std::string full_path = Glib::build_filename(dir->path, file->get_name());
         file->reload_mime_type(full_path);
-        // LOG_DEBUG("reload {}", full_path);
+        // ztd::logger::debug("reload {}", full_path);
     }
 
     std::ranges::for_each(dir->file_list,
@@ -804,7 +804,7 @@ static void
 on_mime_type_reload(void* user_data)
 {
     (void)user_data;
-    // LOG_DEBUG("reload mime-type");
+    // ztd::logger::debug("reload mime-type");
     std::ranges::for_each(dir_map,
                           [](const auto& dir) { reload_mime_type(dir.first, dir.second); });
 }
@@ -812,7 +812,7 @@ on_mime_type_reload(void* user_data)
 void
 vfs_dir_foreach(VFSDirForeachFunc func, bool user_data)
 {
-    // LOG_DEBUG("reload mime-type");
+    // ztd::logger::debug("reload mime-type");
     std::ranges::for_each(dir_map,
                           [func, user_data](const auto& dir) { func(dir.second, user_data); });
 }
@@ -867,15 +867,15 @@ on_mime_change_timer(void* user_data)
 {
     (void)user_data;
 
-    // LOG_INFO("MIME-UPDATE on_timer");
+    // ztd::logger::info("MIME-UPDATE on_timer");
     const std::string command1 =
         fmt::format("update-mime-database {}/mime", vfs::user_dirs->data_dir());
-    LOG_INFO("COMMAND={}", command1);
+    ztd::logger::info("COMMAND={}", command1);
     Glib::spawn_command_line_async(command1);
 
     const std::string command2 =
         fmt::format("update-desktop-database {}/applications", vfs::user_dirs->data_dir());
-    LOG_INFO("COMMAND={}", command2);
+    ztd::logger::info("COMMAND={}", command2);
     Glib::spawn_command_line_async(command2);
 
     g_source_remove(mime_change_timer);
@@ -889,14 +889,14 @@ mime_change()
     if (mime_change_timer)
     {
         // timer is already running, so ignore request
-        // LOG_INFO("MIME-UPDATE already set");
+        // ztd::logger::info("MIME-UPDATE already set");
         return;
     }
     if (mime_dir)
     {
         // update mime database in 2 seconds
         mime_change_timer = g_timeout_add_seconds(2, (GSourceFunc)on_mime_change_timer, nullptr);
-        // LOG_INFO("MIME-UPDATE timer started");
+        // ztd::logger::info("MIME-UPDATE timer started");
     }
 }
 
@@ -915,7 +915,7 @@ vfs_dir_monitor_mime()
     if (!mime_dir)
         return;
 
-    // LOG_INFO("MIME-UPDATE watch started");
+    // ztd::logger::info("MIME-UPDATE watch started");
     mime_dir->add_event<EventType::FILE_LISTED>(mime_change);
     mime_dir->add_event<EventType::FILE_CHANGED>(mime_change);
     mime_dir->add_event<EventType::FILE_DELETED>(mime_change);

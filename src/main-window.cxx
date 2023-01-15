@@ -538,7 +538,7 @@ main_window_open_terminal(MainWindow* main_window, bool as_root)
     const std::string terminal = Glib::find_program_in_path(main_term);
     if (terminal.empty())
     {
-        LOG_WARN("Cannot locate terminal in $PATH : {}", main_term);
+        ztd::logger::warn("Cannot locate terminal in $PATH : {}", main_term);
         return;
     }
 
@@ -640,9 +640,9 @@ update_window_icon(GtkWindow* window, GtkIconTheme* theme)
     else if (error != nullptr)
     {
         // An error occured on loading the icon
-        LOG_ERROR("Unable to load the window icon '{}' in - update_window_icon - {}",
-                  name,
-                  error->message);
+        ztd::logger::error("Unable to load the window icon '{}' in - update_window_icon - {}",
+                           name,
+                           error->message);
         g_error_free(error);
     }
 }
@@ -688,7 +688,7 @@ main_window_refresh_all_tabs_matching(std::string_view path)
 void
 main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser)
 {
-    // LOG_INFO("main_window_rebuild_all_toolbars");
+    // ztd::logger::info("main_window_rebuild_all_toolbars");
 
     // do this browser first
     if (file_browser)
@@ -717,7 +717,7 @@ void
 update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser)
 {
     (void)item;
-    // LOG_INFO("update_views_all_windows");
+    // ztd::logger::info("update_views_all_windows");
     // do this browser first
     if (!file_browser)
         return;
@@ -988,7 +988,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
             set = xset_is(xset_get_xsetname_from_panel_mode(p, XSetPanel::SLIDER_POSITIONS, mode));
             if (!set)
             {
-                // LOG_WARN("no config for {}, {}", p, INT(mode));
+                // ztd::logger::warn("no config for {}, {}", p, INT(mode));
 
                 xset_set_b_panel_mode(p,
                                       XSetPanel::SHOW_TOOLBOX,
@@ -1040,7 +1040,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
             main_window->panel_slide_x[p - 1] = set->x ? std::stol(set->x) : 0;
             main_window->panel_slide_y[p - 1] = set->y ? std::stol(set->y) : 0;
             main_window->panel_slide_s[p - 1] = set->s ? std::stol(set->s) : 0;
-            // LOG_INFO("loaded panel {}", p);
+            // ztd::logger::info("loaded panel {}", p);
             if (!gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1])))
             {
                 main_window->notebook = main_window->panel[p - 1];
@@ -1093,10 +1093,11 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                             PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
                                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]),
                                                           cur_tabx));
-                            // if ( file_browser->folder_view )
-                            //      gtk_widget_grab_focus( file_browser->folder_view );
-                            // LOG_INFO("call delayed (showpanels) #{} {:p} window={:p}", cur_tabx,
-                            // fmt::ptr(file_browser->folder_view), fmt::ptr(main_window));
+                            // if (file_browser->folder_view)
+                            //      gtk_widget_grab_focus(file_browser->folder_view);
+                            // ztd::logger::info("call delayed (showpanels) #{} {:p} window={:p}",
+                            // cur_tabx, fmt::ptr(file_browser->folder_view),
+                            // fmt::ptr(main_window));
                             g_idle_add((GSourceFunc)delayed_focus, file_browser->folder_view);
                         }
                     }
@@ -1278,7 +1279,7 @@ rebuild_menus(MainWindow* main_window)
     xset_t child_set;
     char* str;
 
-    // LOG_INFO("rebuild_menus");
+    // ztd::logger::info("rebuild_menus");
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!file_browser)
@@ -1434,7 +1435,7 @@ rebuild_menus(MainWindow* main_window)
     gtk_widget_show_all(GTK_WIDGET(newmenu));
     g_signal_connect(newmenu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window->help_menu_item), newmenu);
-    // LOG_INFO("rebuild_menus  DONE");
+    // ztd::logger::info("rebuild_menus  DONE");
 }
 
 static void
@@ -1686,7 +1687,7 @@ static void
 main_window_close(MainWindow* main_window)
 {
     /*
-    LOG_INFO("DISC={}", g_signal_handlers_disconnect_by_func(
+    ztd::logger::info("DISC={}", g_signal_handlers_disconnect_by_func(
                             G_OBJECT(main_window),
                             G_CALLBACK(ptk_file_task_notify_handler), nullptr));
     */
@@ -1756,8 +1757,8 @@ main_window_store_positions(MainWindow* main_window)
                     xset_set(XSetName::TASK_SHOW_MANAGER,
                              XSetVar::X,
                              std::to_string(allocation.height - pos));
-                    // LOG_INFO("CLOS  win {}x{}    task height {}   slider {}", allocation.width,
-                    // allocation.height, allocation.height - pos, pos);
+                    // ztd::logger::info("CLOS  win {}x{}    task height {}   slider {}",
+                    // allocation.width, allocation.height, allocation.height - pos, pos);
                 }
             }
         }
@@ -1789,7 +1790,7 @@ static gboolean
 main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
 {
     (void)event;
-    // LOG_INFO("main_window_delete_event");
+    // ztd::logger::info("main_window_delete_event");
 
     MainWindow* main_window = MAIN_WINDOW_REINTERPRET(widget);
 
@@ -2051,15 +2052,15 @@ on_restore_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
 
     if (closed_tabs_restore[panel].empty())
     {
-        LOG_INFO("No tabs to restore for panel {}", panel);
+        ztd::logger::info("No tabs to restore for panel {}", panel);
         return;
     }
 
     const std::string file_path = closed_tabs_restore[panel].back();
     closed_tabs_restore[panel].pop_back();
-    // LOG_INFO("on_restore_notebook_page panel={} path={}", panel, file_path);
+    // ztd::logger::info("on_restore_notebook_page panel={} path={}", panel, file_path);
 
-    // LOG_INFO("on_restore_notebook_page fb={:p}", fmt::ptr(file_browser));
+    // ztd::logger::info("on_restore_notebook_page fb={:p}", fmt::ptr(file_browser));
     if (!GTK_IS_WIDGET(file_browser))
         return;
 
@@ -2074,10 +2075,10 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
     PtkFileBrowser* a_browser;
 
     closed_tabs_restore[file_browser->mypanel].emplace_back(ptk_file_browser_get_cwd(file_browser));
-    // LOG_INFO("on_close_notebook_page path={}",
+    // ztd::logger::info("on_close_notebook_page path={}",
     // closed_tabs_restore[file_browser->mypanel].back());
 
-    // LOG_INFO("on_close_notebook_page fb={:p}", fmt::ptr(file_browser));
+    // ztd::logger::info("on_close_notebook_page fb={:p}", fmt::ptr(file_browser));
     if (!GTK_IS_WIDGET(file_browser))
         return;
     GtkNotebook* notebook =
@@ -2444,9 +2445,9 @@ main_window_add_new_tab(MainWindow* main_window, std::string_view folder_path)
         ptk_file_browser_new(main_window->curpanel, notebook, main_window->task_view, main_window));
     if (!file_browser)
         return;
-    // LOG_INFO("New tab panel={} path={}", main_window->curpanel, folder_path);
+    // ztd::logger::info("New tab panel={} path={}", main_window->curpanel, folder_path);
 
-    // LOG_INFO("main_window_add_new_tab fb={:p}", fmt::ptr(file_browser));
+    // ztd::logger::info("main_window_add_new_tab fb={:p}", fmt::ptr(file_browser));
     ptk_file_browser_set_single_click(file_browser, app_settings.get_single_click());
     // FIXME: this should not be hard-code
     ptk_file_browser_set_single_click_timeout(file_browser,
@@ -2509,8 +2510,9 @@ main_window_add_new_tab(MainWindow* main_window, std::string_view folder_path)
     //    while( gtk_events_pending() )  // wait for chdir to grab focus
     //        gtk_main_iteration();
     // gtk_widget_grab_focus( GTK_WIDGET( file_browser->folder_view ) );
-    // LOG_INFO("focus browser {} {}", idx, file_browser->folder_view);
-    // LOG_INFO("call delayed (newtab) #{} {:p}", idx, fmt::ptr(file_browser->folder_view));
+    // ztd::logger::info("focus browser {} {}", idx, file_browser->folder_view);
+    // ztd::logger::info("call delayed (newtab) #{} {:p}", idx,
+    // fmt::ptr(file_browser->folder_view));
     //    g_idle_add( ( GSourceFunc ) delayed_focus, file_browser->folder_view );
 }
 
@@ -2622,7 +2624,7 @@ delayed_focus(GtkWidget* widget)
 {
     if (GTK_IS_WIDGET(widget))
     {
-        // LOG_INFO("delayed_focus {:p}", fmt::ptr(widget));
+        // ztd::logger::info("delayed_focus {:p}", fmt::ptr(widget));
         if (GTK_IS_WIDGET(widget))
             gtk_widget_grab_focus(widget);
     }
@@ -2634,7 +2636,7 @@ delayed_focus_file_browser(PtkFileBrowser* file_browser)
 {
     if (GTK_IS_WIDGET(file_browser) && GTK_IS_WIDGET(file_browser->folder_view))
     {
-        // LOG_INFO("delayed_focus_file_browser fb={:p}", fmt::ptr(file_browser));
+        // ztd::logger::info("delayed_focus_file_browser fb={:p}", fmt::ptr(file_browser));
         if (GTK_IS_WIDGET(file_browser) && GTK_IS_WIDGET(file_browser->folder_view))
         {
             gtk_widget_grab_focus(file_browser->folder_view);
@@ -2778,8 +2780,8 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
     }
 
     file_browser = PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, page_num));
-    // LOG_INFO("on_folder_notebook_switch_pape fb={:p}   panel={}   page={}", file_browser,
-    // file_browser->mypanel, page_num);
+    // ztd::logger::info("on_folder_notebook_switch_pape fb={:p}   panel={}   page={}",
+    // file_browser, file_browser->mypanel, page_num);
     main_window->curpanel = file_browser->mypanel;
     main_window->notebook = main_window->panel[main_window->curpanel - 1];
 
@@ -2924,7 +2926,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
                 {
                     std::string target_path;
 
-                    // LOG_INFO("LINK: {}", file_path);
+                    // ztd::logger::info("LINK: {}", file_path);
                     if (target.at(0) != '/')
                     {
                         // relative link
@@ -3077,7 +3079,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
 static void
 on_file_browser_panel_change(PtkFileBrowser* file_browser, MainWindow* main_window)
 {
-    // LOG_INFO("panel_change  panel {}", file_browser->mypanel);
+    // ztd::logger::info("panel_change  panel {}", file_browser->mypanel);
     main_window->curpanel = file_browser->mypanel;
     main_window->notebook = main_window->panel[main_window->curpanel - 1];
     // set_window_title( main_window, file_browser );
@@ -3087,7 +3089,7 @@ on_file_browser_panel_change(PtkFileBrowser* file_browser, MainWindow* main_wind
 static void
 on_file_browser_sel_change(PtkFileBrowser* file_browser, MainWindow* main_window)
 {
-    // LOG_INFO("sel_change  panel {}", file_browser->mypanel);
+    // ztd::logger::info("sel_change  panel {}", file_browser->mypanel);
     if ((event_handler->pnl_sel->ob2_data || event_handler->pnl_sel->s) &&
         main_window_event(main_window,
                           event_handler->pnl_sel,
@@ -3106,7 +3108,7 @@ on_file_browser_sel_change(PtkFileBrowser* file_browser, MainWindow* main_window
 static void
 on_file_browser_content_change(PtkFileBrowser* file_browser, MainWindow* main_window)
 {
-    // LOG_INFO("content_change  panel {}", file_browser->mypanel);
+    // ztd::logger::info("content_change  panel {}", file_browser->mypanel);
     main_window_update_status_bar(main_window, file_browser);
 }
 
@@ -3176,7 +3178,7 @@ on_main_window_focus(GtkWidget* main_window, GdkEventFocus* event, void* user_da
 static bool
 on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t known_set)
 {
-    // LOG_INFO("main_keypress {} {}", event->keyval, event->state);
+    // ztd::logger::info("main_keypress {} {}", event->keyval, event->state);
 
     PtkFileBrowser* browser;
 
@@ -3481,7 +3483,7 @@ get_desktop_index(GtkWindow* win)
     Atom net_wm_desktop = gdk_x11_get_xatom_by_name_for_display(display, atom_name);
 
     if (net_wm_desktop == None)
-        LOG_ERROR("atom not found: {}", atom_name);
+        ztd::logger::error("atom not found: {}", atom_name);
     else if (XGetWindowProperty(GDK_DISPLAY_XDISPLAY(display),
                                 GDK_WINDOW_XID(window),
                                 net_wm_desktop,
@@ -3497,11 +3499,11 @@ get_desktop_index(GtkWindow* win)
              type == None || data == nullptr)
     {
         if (type == None)
-            LOG_ERROR("No such property from XGetWindowProperty() {}", atom_name);
+            ztd::logger::error("No such property from XGetWindowProperty() {}", atom_name);
         else if (data == nullptr)
-            LOG_ERROR("No data returned from XGetWindowProperty() {}", atom_name);
+            ztd::logger::error("No data returned from XGetWindowProperty() {}", atom_name);
         else
-            LOG_ERROR("XGetWindowProperty() {} failed\n", atom_name);
+            ztd::logger::error("XGetWindowProperty() {} failed\n", atom_name);
     }
     else
     {
@@ -3516,7 +3518,7 @@ MainWindow*
 main_window_get_on_current_desktop()
 { // find the last used spacefm window on the current desktop
     const i64 cur_desktop = get_desktop_index(nullptr);
-    // LOG_INFO("current_desktop = {}", cur_desktop);
+    // ztd::logger::info("current_desktop = {}", cur_desktop);
     if (cur_desktop == -1)
         return main_window_get_last_active(); // revert to dumb if no current
 
@@ -3524,7 +3526,7 @@ main_window_get_on_current_desktop()
     for (MainWindow* window : all_windows)
     {
         const i64 desktop = get_desktop_index(GTK_WINDOW(window));
-        // LOG_INFO( "    test win {:p} = {}", window, desktop);
+        // ztd::logger::info( "    test win {:p} = {}", window, desktop);
         if (desktop == cur_desktop || desktop > 254 /* 255 == all desktops */)
             return window;
         else if (desktop == -1 && !invalid)
@@ -4509,7 +4511,7 @@ idle_set_task_height(MainWindow* main_window)
         taskh = allocation.height / 2;
     if (taskh < 1)
         taskh = 90;
-    // LOG_INFO("SHOW  win {}x{}    task height {}   slider {}", allocation.width,
+    // ztd::logger::info("SHOW  win {}x{}    task height {}   slider {}", allocation.width,
     // allocation.height, taskh, allocation.height - taskh);
     gtk_paned_set_position(GTK_PANED(main_window->task_vpane), allocation.height - taskh);
     return false;
@@ -4545,8 +4547,8 @@ show_task_manager(MainWindow* main_window, bool show)
                 xset_set(XSetName::TASK_SHOW_MANAGER,
                          XSetVar::X,
                          std::to_string(allocation.height - pos));
-                // LOG_INFO("HIDE  win {}x{}    task height {}   slider {}", allocation.width,
-                // allocation.height, allocation.height - pos, pos);
+                // ztd::logger::info("HIDE  win {}x{}    task height {}   slider {}",
+                // allocation.width, allocation.height, allocation.height - pos, pos);
             }
         }
         // hide
@@ -4793,7 +4795,7 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             // left or middle click
             // get selected task
             model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
-            // LOG_INFO("x = {}  y = {}", event->x, event->y);
+            // ztd::logger::info("x = {}  y = {}", event->x, event->y);
             // due to bug in gtk_tree_view_get_path_at_pos (gtk 2.24), a click
             // on the column header resize divider registers as a click on the
             // first row first column.  So if event->x < 7 ignore
@@ -4952,7 +4954,7 @@ on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn
         if (ptask->pop_handler)
         {
             // show custom dialog
-            LOG_INFO("TASK_POPUP >>> {}", ptask->pop_handler);
+            ztd::logger::info("TASK_POPUP >>> {}", ptask->pop_handler);
             const std::string command = fmt::format("bash -c {}", ptask->pop_handler);
             Glib::spawn_command_line_async(command);
         }
@@ -4967,7 +4969,7 @@ on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn
 void
 main_task_view_remove_task(PtkFileTask* ptask)
 {
-    // LOG_INFO("main_task_view_remove_task  ptask={}", ptask);
+    // ztd::logger::info("main_task_view_remove_task  ptask={}", ptask);
 
     GtkWidget* view = ptask->task_view;
     if (!view)
@@ -4998,7 +5000,7 @@ main_task_view_remove_task(PtkFileTask* ptask)
     }
 
     update_window_title(nullptr, main_window);
-    // LOG_INFO("main_task_view_remove_task DONE ptask={}", ptask);
+    // ztd::logger::info("main_task_view_remove_task DONE ptask={}", ptask);
 }
 
 void
@@ -5012,7 +5014,7 @@ main_task_view_update_task(PtkFileTask* ptask)
     const char* dest_dir;
     xset_t set;
 
-    // LOG_INFO("main_task_view_update_task  ptask={}", ptask);
+    // ztd::logger::info("main_task_view_update_task  ptask={}", ptask);
     static constexpr std::array<std::string_view, 7> job_titles{
         "moving",
         "copying",
@@ -5286,7 +5288,7 @@ main_task_view_update_task(PtkFileTask* ptask)
                            ptask->dsp_avgest.data(),
                            -1);
     }
-    // LOG_INFO("DONE main_task_view_update_task");
+    // ztd::logger::info("DONE main_task_view_update_task");
 }
 
 static GtkWidget*
@@ -5496,8 +5498,8 @@ get_bool(std::string_view value)
         return false;
 
     // throw std::logic_error("");
-    LOG_WARN("socket command defaulting to false, invalid value: {}", value);
-    LOG_INFO("supported socket command values are 'yes|1|no|0");
+    ztd::logger::warn("socket command defaulting to false, invalid value: {}", value);
+    ztd::logger::info("supported socket command values are 'yes|1|no|0");
     return false;
 }
 
@@ -5653,12 +5655,12 @@ main_window_socket_command(char* argv[], std::string& reply)
     const std::string socket_cmd = argv[i - 1];
     const std::string socket_property = argv[i];
 
-    // LOG_INFO("argv[i-2]={}", argv[i-2]);
-    // LOG_INFO("argv[i-1]={}", argv[i-1]);
-    // LOG_INFO("argv[i+0]={}", argv[i]);
-    // LOG_INFO("argv[i+1]={}", argv[i+1]);
-    // LOG_INFO("argv[i+2]={}", argv[i+2]);
-    // LOG_INFO("argv[i+3]={}", argv[i+3]);
+    // ztd::logger::info("argv[i-2]={}", argv[i-2]);
+    // ztd::logger::info("argv[i-1]={}", argv[i-1]);
+    // ztd::logger::info("argv[i+0]={}", argv[i]);
+    // ztd::logger::info("argv[i+1]={}", argv[i+1]);
+    // ztd::logger::info("argv[i+2]={}", argv[i+2]);
+    // ztd::logger::info("argv[i+3]={}", argv[i+3]);
 
     if (ztd::same(socket_cmd, "set"))
     {
@@ -7376,7 +7378,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
             }
             cmd = ztd::replace(cmd, "%v", change);
         }
-        LOG_INFO("EVENT {} >>> {}", event_name, cmd);
+        ztd::logger::info("EVENT {} >>> {}", event_name, cmd);
         const std::string command = fmt::format("bash -c {}", cmd);
         Glib::spawn_command_line_async(command);
         return false;
@@ -7482,7 +7484,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
 
     if (!inhibit)
     {
-        LOG_INFO("EVENT {} >>> {}", event_name, cmd);
+        ztd::logger::info("EVENT {} >>> {}", event_name, cmd);
         if (event == XSetName::EVT_TAB_CLOSE)
         {
             const std::string command = fmt::format("bash -c {}", cmd);
@@ -7506,7 +7508,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
         return false;
     }
 
-    LOG_INFO("REPLACE_EVENT {} >>> {}", event_name, cmd);
+    ztd::logger::info("REPLACE_EVENT {} >>> {}", event_name, cmd);
 
     inhibit = false;
     const std::string command = fmt::format("bash -c {}", cmd);
@@ -7515,7 +7517,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
     if (WIFEXITED(exit_status) && WEXITSTATUS(exit_status) == 0)
         inhibit = true;
 
-    LOG_INFO("REPLACE_EVENT ? {}", inhibit ? "true" : "false");
+    ztd::logger::info("REPLACE_EVENT ? {}", inhibit ? "true" : "false");
     return inhibit;
 }
 
@@ -7526,7 +7528,7 @@ main_window_event(void* mw, xset_t preset, XSetName event, i64 panel, i64 tab, c
     xset_t set;
     bool inhibit = false;
 
-    // LOG_INFO("main_window_event {}", xset_get_name_from_xsetname(event));
+    // ztd::logger::info("main_window_event {}", xset_get_name_from_xsetname(event));
 
     if (preset)
         set = preset;

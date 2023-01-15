@@ -24,7 +24,7 @@ xset_event_handler_t event_handler;
 
 XSetEventHandler::XSetEventHandler()
 {
-    // LOG_INFO("XSetEventHandler constructor");
+    // ztd::logger::info("XSetEventHandler constructor");
 
     this->win_focus = xset_get(XSetName::EVT_WIN_FOCUS);
     this->win_move = xset_get(XSetName::EVT_WIN_MOVE);

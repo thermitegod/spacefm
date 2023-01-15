@@ -133,7 +133,7 @@ vfs_file_info_get(vfs::file_info file, std::string_view file_path)
     file->file_stat = ztd::lstat(file_path);
     if (file->file_stat.is_valid())
     {
-        // LOG_INFO("VFSFileInfo name={}  size={}", file->name, file->file_stat.size());
+        // ztd::logger::info("VFSFileInfo name={}  size={}", file->name, file->file_stat.size());
 
         // file->status = std::filesystem::status(file_path);
         file->status = std::filesystem::symlink_status(file_path);

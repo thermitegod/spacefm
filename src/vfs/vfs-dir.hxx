@@ -99,7 +99,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_CREATED, sigc::connection>::type
     add_event(evt_file_created__run_first__t fun, PtkFileBrowser* browser)
     {
-        // LOG_TRACE("Signal Connect   : EventType::FILE_CREATED");
+        // ztd::logger::trace("Signal Connect   : EventType::FILE_CREATED");
         this->evt_data_browser = browser;
         return this->evt_file_created__first.connect(sigc::ptr_fun(fun));
     }
@@ -108,7 +108,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_CREATED, sigc::connection>::type
     add_event(evt_file_created__run_last__t fun, PtkFileList* list)
     {
-        // LOG_TRACE("Signal Connect   : EventType::FILE_CREATED");
+        // ztd::logger::trace("Signal Connect   : EventType::FILE_CREATED");
         this->evt_data_list = list;
         return this->evt_file_created__last.connect(sigc::ptr_fun(fun));
     }
@@ -117,7 +117,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_CREATED, sigc::connection>::type
     add_event(evt_mime_change_t fun)
     {
-        // LOG_TRACE("Signal Connect   : EventType::FILE_CREATED");
+        // ztd::logger::trace("Signal Connect   : EventType::FILE_CREATED");
         return this->evt_mime_change.connect(sigc::ptr_fun(fun));
     }
 
@@ -125,7 +125,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_CHANGED, sigc::connection>::type
     add_event(evt_file_changed__run_first__t fun, PtkFileBrowser* browser)
     {
-        // LOG_TRACE("Signal Connect   : EventType::FILE_CHANGED");
+        // ztd::logger::trace("Signal Connect   : EventType::FILE_CHANGED");
         this->evt_data_browser = browser;
         return this->evt_file_changed__first.connect(sigc::ptr_fun(fun));
     }
@@ -134,7 +134,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_CHANGED, sigc::connection>::type
     add_event(evt_file_changed__run_last__t fun, PtkFileList* list)
     {
-        // LOG_TRACE("Signal Connect   : EventType::FILE_CHANGED");
+        // ztd::logger::trace("Signal Connect   : EventType::FILE_CHANGED");
         this->evt_data_list = list;
         return this->evt_file_changed__last.connect(sigc::ptr_fun(fun));
     }
@@ -143,7 +143,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_CHANGED, sigc::connection>::type
     add_event(evt_mime_change_t fun)
     {
-        // LOG_TRACE("Signal Connect   : EventType::FILE_CHANGED");
+        // ztd::logger::trace("Signal Connect   : EventType::FILE_CHANGED");
         return this->evt_mime_change.connect(sigc::ptr_fun(fun));
     }
 
@@ -151,7 +151,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_DELETED, sigc::connection>::type
     add_event(evt_file_deleted__run_first__t fun, PtkFileBrowser* browser)
     {
-        // LOG_TRACE("Signal Connect   : EventType::FILE_DELETED");
+        // ztd::logger::trace("Signal Connect   : EventType::FILE_DELETED");
         this->evt_data_browser = browser;
         return this->evt_file_deleted__first.connect(sigc::ptr_fun(fun));
     }
@@ -160,7 +160,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_DELETED, sigc::connection>::type
     add_event(evt_file_deleted__run_last__t fun, PtkFileList* list)
     {
-        // LOG_TRACE("Signal Connect   : EventType::FILE_DELETED");
+        // ztd::logger::trace("Signal Connect   : EventType::FILE_DELETED");
         this->evt_data_list = list;
         return this->evt_file_deleted__last.connect(sigc::ptr_fun(fun));
     }
@@ -169,7 +169,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_DELETED, sigc::connection>::type
     add_event(evt_mime_change_t fun)
     {
-        // LOG_TRACE("Signal Connect   : EventType::FILE_DELETED");
+        // ztd::logger::trace("Signal Connect   : EventType::FILE_DELETED");
         return this->evt_mime_change.connect(sigc::ptr_fun(fun));
     }
 
@@ -177,7 +177,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_LISTED, sigc::connection>::type
     add_event(evt_file_listed_t fun, PtkFileBrowser* browser)
     {
-        // LOG_TRACE("Signal Connect   : EventType::FILE_LISTED");
+        // ztd::logger::trace("Signal Connect   : EventType::FILE_LISTED");
         // this->evt_data_listed_browser = browser;
         this->evt_data_browser = browser;
         return this->evt_file_listed.connect(sigc::ptr_fun(fun));
@@ -187,7 +187,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_LISTED, sigc::connection>::type
     add_event(evt_mime_change_t fun)
     {
-        // LOG_TRACE("Signal Connect   : EventType::FILE_LISTED");
+        // ztd::logger::trace("Signal Connect   : EventType::FILE_LISTED");
         return this->evt_mime_change.connect(sigc::ptr_fun(fun));
     }
 
@@ -195,7 +195,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_THUMBNAIL_LOADED, sigc::connection>::type
     add_event(evt_file_thumbnail_loaded_t fun, PtkFileList* list)
     {
-        // LOG_TRACE("Signal Connect   : EventType::FILE_THUMBNAIL_LOADED");
+        // ztd::logger::trace("Signal Connect   : EventType::FILE_THUMBNAIL_LOADED");
         // this->evt_data_thumb_list = list;
         this->evt_data_list = list;
         return this->evt_file_thumbnail_loaded.connect(sigc::ptr_fun(fun));
@@ -206,7 +206,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_CREATED, void>::type
     run_event(vfs::file_info file)
     {
-        // LOG_TRACE("Signal Execute   : EventType::FILE_CREATED");
+        // ztd::logger::trace("Signal Execute   : EventType::FILE_CREATED");
         this->evt_mime_change.emit();
         this->evt_file_created__first.emit(file, this->evt_data_browser);
         this->evt_file_created__last.emit(file, this->evt_data_list);
@@ -216,7 +216,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_CHANGED, void>::type
     run_event(vfs::file_info file)
     {
-        // LOG_TRACE("Signal Execute   : EventType::FILE_CHANGED");
+        // ztd::logger::trace("Signal Execute   : EventType::FILE_CHANGED");
         this->evt_mime_change.emit();
         this->evt_file_changed__first.emit(file, this->evt_data_browser);
         this->evt_file_changed__last.emit(file, this->evt_data_list);
@@ -226,7 +226,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_DELETED, void>::type
     run_event(vfs::file_info file)
     {
-        // LOG_TRACE("Signal Execute   : EventType::FILE_DELETED");
+        // ztd::logger::trace("Signal Execute   : EventType::FILE_DELETED");
         this->evt_mime_change.emit();
         this->evt_file_deleted__first.emit(file, this->evt_data_browser);
         this->evt_file_deleted__last.emit(file, this->evt_data_list);
@@ -236,7 +236,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_LISTED, void>::type
     run_event(bool is_cancelled)
     {
-        // LOG_TRACE("Signal Execute   : EventType::FILE_LISTED");
+        // ztd::logger::trace("Signal Execute   : EventType::FILE_LISTED");
         this->evt_mime_change.emit();
         this->evt_file_listed.emit(this->evt_data_browser, is_cancelled);
     }
@@ -245,7 +245,7 @@ struct VFSDir
     typename std::enable_if<evt == EventType::FILE_THUMBNAIL_LOADED, void>::type
     run_event(vfs::file_info file)
     {
-        // LOG_TRACE("Signal Execute   : EventType::FILE_THUMBNAIL_LOADED");
+        // ztd::logger::trace("Signal Execute   : EventType::FILE_THUMBNAIL_LOADED");
         this->evt_file_thumbnail_loaded.emit(file, this->evt_data_list);
     }
 

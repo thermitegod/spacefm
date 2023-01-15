@@ -45,10 +45,10 @@ vfs_get_desktop(std::string_view desktop_file)
 {
     if (desktops_map.count(desktop_file.data()) == 1)
     {
-        // LOG_INFO("cached vfs_get_desktop={}", desktop_file);
+        // ztd::logger::info("cached vfs_get_desktop={}", desktop_file);
         return desktops_map.at(desktop_file.data());
     }
-    // LOG_INFO("new vfs_get_desktop={}", desktop_file);
+    // ztd::logger::info("new vfs_get_desktop={}", desktop_file);
 
     vfs::desktop desktop = std::make_shared<VFSAppDesktop>(desktop_file);
 
@@ -59,7 +59,7 @@ vfs_get_desktop(std::string_view desktop_file)
 
 VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
 {
-    // LOG_INFO("VFSAppDesktop constructor = {}", open_file_name);
+    // ztd::logger::info("VFSAppDesktop constructor = {}", open_file_name);
 
     bool load;
     const auto kf = Glib::KeyFile::create();
@@ -79,7 +79,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
 
     if (!load)
     {
-        LOG_WARN("Failed to load desktop file {}", open_file_name);
+        ztd::logger::warn("Failed to load desktop file {}", open_file_name);
         this->exec = this->file_name;
         return;
     }

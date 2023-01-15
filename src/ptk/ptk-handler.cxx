@@ -908,7 +908,8 @@ ptk_handler_get_command(i32 mode, i32 cmd, xset_t handler_set)
     char* def_script = xset_custom_get_script(handler_set, false);
     if (!def_script)
     {
-        LOG_WARN("ptk_handler_get_command unable to get script for custom {}", handler_set->name);
+        ztd::logger::warn("ptk_handler_get_command unable to get script for custom {}",
+                          handler_set->name);
         return nullptr;
     }
     // name script
@@ -921,7 +922,7 @@ ptk_handler_get_command(i32 mode, i32 cmd, xset_t handler_set)
     if (std::filesystem::exists(script))
         return ztd::strdup(script);
 
-    LOG_WARN("ptk_handler_get_command missing script for custom {}", handler_set->name);
+    ztd::logger::warn("ptk_handler_get_command missing script for custom {}", handler_set->name);
     return nullptr;
 }
 
@@ -1038,7 +1039,8 @@ ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
     char* def_script = xset_custom_get_script(handler_set, false);
     if (!def_script)
     {
-        LOG_WARN("save_handler_script unable to get script for custom {}", handler_set->name);
+        ztd::logger::warn("save_handler_script unable to get script for custom {}",
+                          handler_set->name);
         error_message = "Error: unable to save command (cannot get script path?)";
         return true;
     }
@@ -1071,7 +1073,7 @@ ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
         text = command;
     }
 
-    // LOG_INFO("WRITE {}", script);
+    // ztd::logger::info("WRITE {}", script);
     const std::string data = fmt::format("{}\n{}\n", script_header, text);
     const bool result = write_file(script, data);
     if (!result)
@@ -1206,7 +1208,7 @@ ptk_handler_file_has_handlers(i32 mode, i32 cmd, std::string_view path, vfs::mim
                                                            error_message);
                 if (error)
                 {
-                    LOG_ERROR(error_message);
+                    ztd::logger::error(error_message);
                 }
                 else if (!ptk_handler_command_is_empty(command))
                 {
@@ -1384,14 +1386,14 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     std::string* standard_error = nullptr;
     i32 exit_status;
 
-    LOG_INFO("COMMAND={}", cp_command);
+    ztd::logger::info("COMMAND={}", cp_command);
     Glib::spawn_command_line_sync(cp_command, standard_output, standard_error, &exit_status);
     std::string out;
     if (standard_output)
         out.append(*standard_output);
     if (standard_error)
         out.append(*standard_error);
-    LOG_INFO("{}", out);
+    ztd::logger::info("{}", out);
     if (exit_status && WIFEXITED(exit_status))
     {
         const std::string msg =
@@ -1403,7 +1405,7 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
                         msg);
     }
     const std::string chmod_command = fmt::format("chmod -R go-rwx {}", path_dest);
-    LOG_INFO("COMMAND={}", chmod_command);
+    ztd::logger::info("COMMAND={}", chmod_command);
     Glib::spawn_command_line_sync(chmod_command);
 
     // add to handler list
@@ -1629,7 +1631,7 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
     const std::vector<std::string> archive_handlers = ztd::split(archive_handlers_s, " ");
 
     // Debug code
-    // LOG_INFO("archive_handlers_s: {}", archive_handlers_s);
+    // ztd::logger::info("archive_handlers_s: {}", archive_handlers_s);
 
     // Looping for handlers (nullptr-terminated list)
     GtkTreeIter iter;
@@ -1692,8 +1694,8 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
     if (!gtk_tree_model_get_iter_first(GTK_TREE_MODEL(hnd->list), &iter))
     {
         // Failed to get iterator - warning user and exiting
-        LOG_WARN("Drag'n'drop end event detected, but unable to get an"
-                 " iterator to the start of the model!");
+        ztd::logger::warn("Drag'n'drop end event detected, but unable to get an"
+                          " iterator to the start of the model!");
         return;
     }
 
@@ -1775,7 +1777,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         // Making sure it has been fetched
         if (!handler_xset)
         {
-            LOG_WARN("Unable to fetch the xset for the archive handler '%s'", handler_name);
+            ztd::logger::warn("Unable to fetch the xset for the archive handler '%s'",
+                              handler_name);
             free(xset_name);
             free(handler_name_from_model);
             return;
@@ -2008,8 +2011,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
             if (ztd::compare(archive_handler, xset_name) != 0)
             {
                 // Debug code
-                // LOG_INFO("archive_handler     : {}", archive_handler)
-                // LOG_INFO("xset_name           : {}", xset_name);
+                // ztd::logger::info("archive_handler     : {}", archive_handler)
+                // ztd::logger::info("xset_name           : {}", xset_name);
 
                 if (new_archive_handlers_s.empty())
                     new_archive_handlers_s = archive_handler.data();
@@ -2928,7 +2931,7 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
     g_object_set_data(G_OBJECT(hnd->dlg), "hnd", hnd);
 
     // Debug code
-    // LOG_INFO("Parent window title: {}", gtk_window_get_title(GTK_WINDOW(hnd->parent)));
+    // ztd::logger::info("Parent window title: {}", gtk_window_get_title(GTK_WINDOW(hnd->parent)));
 
     // Forcing dialog icon
     xset_set_window_icon(GTK_WINDOW(hnd->dlg));

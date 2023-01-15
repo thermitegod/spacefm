@@ -386,7 +386,7 @@ config_parse_xset(const toml::value& tbl, u64 version)
                 const std::string value =
                     ztd::strip(toml::format(toml_value, std::numeric_limits<usize>::max()), "\"");
 
-                // LOG_INFO("name: {} | var: {} | value: {}", name, setvar, value);
+                // ztd::logger::info("name: {} | var: {} | value: {}", name, setvar, value);
 
                 XSetVar var;
                 try
@@ -422,7 +422,7 @@ load_user_confing(std::string_view session, bool load_deprecated_ini_config)
 {
     if (!load_deprecated_ini_config)
     { // TOML
-        // LOG_INFO("Parse TOML");
+        // ztd::logger::info("Parse TOML");
 
         try
         {
@@ -440,13 +440,13 @@ load_user_confing(std::string_view session, bool load_deprecated_ini_config)
         }
         catch (const toml::syntax_error& e)
         {
-            LOG_ERROR("Config file parsing failed: {}", e.what());
+            ztd::logger::error("Config file parsing failed: {}", e.what());
             return;
         }
     }
     else
     { // INI
-        // LOG_INFO("Parse INI");
+        // ztd::logger::info("Parse INI");
 
         std::string line;
         std::ifstream file(session.data());

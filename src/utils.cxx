@@ -121,7 +121,7 @@ open_in_prog(std::string_view path) noexcept
     const std::string exe = ztd::program::exe();
     const std::string qpath = ztd::shell::quote(path);
     const std::string command = fmt::format("{} {}", exe, qpath);
-    LOG_INFO("COMMAND={}", command);
+    ztd::logger::info("COMMAND={}", command);
     Glib::spawn_command_line_async(command);
 }
 

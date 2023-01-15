@@ -539,7 +539,7 @@ ptk_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
 
     if (!node)
     {
-        LOG_ERROR("!node");
+        ztd::logger::error("!node");
         return -1;
     }
     return node->n_children;

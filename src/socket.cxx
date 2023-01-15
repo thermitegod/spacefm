@@ -92,7 +92,7 @@ get_inode_tag()
         inode_tag = fmt::format("{}=", getuid());
     }
 
-    // LOG_INFO("inode_tag={}", inode_tag);
+    // ztd::logger::info("inode_tag={}", inode_tag);
 
     return inode_tag;
 }
@@ -245,7 +245,7 @@ single_instance_check()
 {
     if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
     {
-        LOG_ERROR("failed to create socket");
+        ztd::logger::error("failed to create socket");
         single_instance_check_fatal(EXIT_FAILURE);
     }
 
@@ -320,7 +320,7 @@ single_instance_check()
         }
 
         if (cli_flags.config_dir)
-            LOG_WARN("Option --config ignored - an instance is already running");
+            ztd::logger::warn("Option --config ignored - an instance is already running");
 
         shutdown(sock_fd, 2);
         close(sock_fd);
@@ -337,7 +337,7 @@ single_instance_check()
     setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
     if (bind(sock_fd, (struct sockaddr*)&addr, addr_len) == -1)
     {
-        LOG_ERROR("failed to create socket: {}", addr.sun_path);
+        ztd::logger::error("failed to create socket: {}", addr.sun_path);
         single_instance_check_fatal(EXIT_FAILURE);
     }
     else
@@ -351,7 +351,7 @@ single_instance_check()
 
         if (listen(sock_fd, 5) == -1)
         {
-            LOG_WARN("could not listen to socket");
+            ztd::logger::warn("could not listen to socket");
             single_instance_check_fatal(EXIT_FAILURE);
         }
     }
@@ -387,7 +387,7 @@ receive_socket_command(i32 client, const std::string& args)
     {
         cmd = 1;
         reply = "invalid socket command user";
-        LOG_WARN("{}", reply);
+        ztd::logger::warn("{}", reply);
     }
     else
     {
@@ -465,7 +465,7 @@ send_socket_command(i32 argc, char* argv[], std::string& reply)
     // set reply
     if (sock_reply.size() == 0)
     {
-        LOG_ERROR("invalid response from socket");
+        ztd::logger::error("invalid response from socket");
         return EXIT_FAILURE;
     }
 

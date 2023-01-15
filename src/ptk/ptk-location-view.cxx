@@ -313,7 +313,7 @@ ptk_location_view_chdir(GtkTreeView* location_view, std::string_view cur_dir)
 vfs::volume
 ptk_location_view_get_selected_vol(GtkTreeView* location_view)
 {
-    // LOG_INFO("ptk_location_view_get_selected_vol    view = {}", location_view);
+    // ztd::logger::info("ptk_location_view_get_selected_vol    view = {}", location_view);
     GtkTreeIter it;
 
     GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(location_view));
@@ -331,7 +331,7 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
                  PtkFileBrowser* file_browser)
 {
     (void)col;
-    // LOG_INFO("on_row_activated   view = {}", view);
+    // ztd::logger::info("on_row_activated   view = {}", view);
     if (!file_browser)
         return;
 
@@ -441,7 +441,7 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
 
     GtkWidget* view = gtk_tree_view_new_with_model(model);
     g_object_unref(G_OBJECT(model));
-    // LOG_INFO("ptk_location_view_new   view = {}", view);
+    // ztd::logger::info("ptk_location_view_new   view = {}", view);
     GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
     gtk_tree_selection_set_mode(tree_sel, GtkSelectionMode::GTK_SELECTION_SINGLE);
 
@@ -733,7 +733,7 @@ ptk_location_view_clean_mount_points()
     if (!udevil.empty())
     {
         const std::string command = fmt::format("{} -c \"sleep 1 ; {} clean\"", BASH_PATH, udevil);
-        LOG_INFO("COMMAND={}", command);
+        ztd::logger::info("COMMAND={}", command);
         Glib::spawn_command_line_async(command);
     }
 }
@@ -823,7 +823,7 @@ ptk_location_view_create_mount_point(i32 mode, vfs::volume vol, netmount_t netmo
     if (!std::filesystem::is_directory(point))
     {
         const std::string errno_msg = std::strerror(errno);
-        LOG_WARN("Error creating mount point directory '{}': {}", point, errno_msg);
+        ztd::logger::warn("Error creating mount point directory '{}': {}", point, errno_msg);
     }
 
     return ztd::strdup(point);
@@ -862,10 +862,10 @@ on_autoopen_net_cb(vfs::file_task task, AutoOpen* ao)
     {
         if (mount_point_vol)
         {
-            // LOG_INFO("on_autoopen_net_cb used mount point:");
-            // LOG_INFO("    mount_point     = {}", ao->mount_point);
-            // LOG_INFO("    device_file     = {}", mount_point_vol->device_file);
-            // LOG_INFO("    ao->device_file = {}", ao->device_file);
+            // ztd::logger::info("on_autoopen_net_cb used mount point:");
+            // ztd::logger::info("    mount_point     = {}", ao->mount_point);
+            // ztd::logger::info("    device_file     = {}", mount_point_vol->device_file);
+            // ztd::logger::info("    ao->device_file = {}", ao->device_file);
             device_file_vol = mount_point_vol;
         }
     }
@@ -921,13 +921,13 @@ ptk_location_view_mount_network(PtkFileBrowser* file_browser, std::string_view u
     }
 
     /*
-    LOG_INFO("url={}", netmount->url);
-    LOG_INFO("  fstype = {}", netmount->fstype);
-    LOG_INFO("  host   = {}", netmount->host);
-    LOG_INFO("  port   = {}", netmount->port);
-    LOG_INFO("  user   = {}", netmount->user);
-    LOG_INFO("  pass   = {}", netmount->pass);
-    LOG_INFO("  path   = {}", netmount->path);
+    ztd::logger::info("url={}", netmount->url);
+    ztd::logger::info("  fstype = {}", netmount->fstype);
+    ztd::logger::info("  host   = {}", netmount->host);
+    ztd::logger::info("  port   = {}", netmount->port);
+    ztd::logger::info("  user   = {}", netmount->user);
+    ztd::logger::info("  pass   = {}", netmount->pass);
+    ztd::logger::info("  path   = {}", netmount->path);
     */
 
     // already mounted?
@@ -1263,7 +1263,7 @@ static bool
 on_autoopen_cb(vfs::file_task task, AutoOpen* ao)
 {
     (void)task;
-    // LOG_INFO("on_autoopen_cb");
+    // ztd::logger::info("on_autoopen_cb");
     const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
     for (vfs::volume volume : volumes)
     {
@@ -1660,7 +1660,7 @@ volume_is_visible(vfs::volume vol)
 void
 ptk_location_view_on_action(GtkWidget* view, xset_t set)
 {
-    // LOG_INFO("ptk_location_view_on_action");
+    // ztd::logger::info("ptk_location_view_on_action");
     if (!view)
         return;
     vfs::volume vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(view));
@@ -1821,7 +1821,7 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data)
     if (evt->type != GdkEventType::GDK_BUTTON_PRESS)
         return false;
 
-    // LOG_INFO("on_button_press_event   view = {}", view);
+    // ztd::logger::info("on_button_press_event   view = {}", view);
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
     ptk_file_browser_focus_me(file_browser);

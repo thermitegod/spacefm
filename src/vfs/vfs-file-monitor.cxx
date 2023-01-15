@@ -61,7 +61,8 @@ struct VFSFileMonitorCallbackEntry
 {
     VFSFileMonitorCallbackEntry() = delete;
     ~VFSFileMonitorCallbackEntry() = default;
-    // ~VFSFileMonitorCallbackEntry() { LOG_INFO("VFSFileMonitorCallbackEntry Destructor"); };
+    // ~VFSFileMonitorCallbackEntry() { ztd::logger::info("VFSFileMonitorCallbackEntry Destructor");
+    // };
 
     VFSFileMonitorCallbackEntry(vfs::file_monitor_callback callback, void* user_data);
 
@@ -72,7 +73,7 @@ struct VFSFileMonitorCallbackEntry
 VFSFileMonitorCallbackEntry::VFSFileMonitorCallbackEntry(vfs::file_monitor_callback callback,
                                                          void* user_data)
 {
-    // LOG_INFO("VFSFileMonitorCallbackEntry Constructor");
+    // ztd::logger::info("VFSFileMonitorCallbackEntry Constructor");
 
     this->callback = callback;
     this->user_data = user_data;
@@ -80,14 +81,14 @@ VFSFileMonitorCallbackEntry::VFSFileMonitorCallbackEntry(vfs::file_monitor_callb
 
 VFSFileMonitor::VFSFileMonitor(std::string_view real_path, i32 wd)
 {
-    // LOG_INFO("VFSFileMonitor Constructor {}", real_path);
+    // ztd::logger::info("VFSFileMonitor Constructor {}", real_path);
     this->path = real_path.data();
     this->wd = wd;
 }
 
 VFSFileMonitor::~VFSFileMonitor()
 {
-    // LOG_INFO("VFSFileMonitor Destructor {}", this->wd);
+    // ztd::logger::info("VFSFileMonitor Destructor {}", this->wd);
     inotify_rm_watch(inotify_fd, this->wd);
 }
 
@@ -115,7 +116,7 @@ vfs_file_monitor_connect_to_inotify()
     inotify_fd = inotify_init();
     if (inotify_fd == -1)
     {
-        LOG_ERROR("failed to initialize inotify");
+        ztd::logger::error("failed to initialize inotify");
         return false;
     }
 
@@ -178,18 +179,18 @@ vfs_file_monitor_add(std::string_view path, vfs::file_monitor_callback callback,
                                              IN_MOVE | IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
         if (wd < 0)
         {
-            LOG_ERROR("Failed to add watch on '{}' ({})", real_path, path);
+            ztd::logger::error("Failed to add watch on '{}' ({})", real_path, path);
             // const std::string errno_msg = std::strerror(errno);
-            // LOG_ERROR("inotify_add_watch: {}", errno_msg);
+            // ztd::logger::error("inotify_add_watch: {}", errno_msg);
             return nullptr;
         }
-        // LOG_INFO("vfs_file_monitor_add  {} ({}) {}", real_path, path, wd);
+        // ztd::logger::info("vfs_file_monitor_add  {} ({}) {}", real_path, path, wd);
 
         monitor = std::make_shared<VFSFileMonitor>(real_path, wd);
         monitor_map.insert({monitor->path, monitor});
     }
 
-    // LOG_DEBUG("monitor installed for: {}", path);
+    // ztd::logger::debug("monitor installed for: {}", path);
     if (callback)
     { // Install a callback
         vfs::file_monitor_callback_entry cb_ent =
@@ -246,7 +247,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
 {
     if (condition == Glib::IOCondition::IO_HUP || condition == Glib::IOCondition::IO_ERR)
     {
-        LOG_ERROR("Disconnected from inotify server");
+        ztd::logger::error("Disconnected from inotify server");
         return false;
     }
 
@@ -254,7 +255,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
     const i32 length = read(inotify_fd, buffer, BUF_LEN);
     if (length < 0)
     {
-        LOG_WARN("Error reading inotify event: {}", std::strerror(errno));
+        ztd::logger::warn("Error reading inotify event: {}", std::strerror(errno));
         return false;
     }
 
@@ -288,36 +289,36 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
                 {
                     monitor_event = VFSFileMonitorEvent::CREATE;
 #if defined(VFS_FILE_MONITOR_DEBUG)
-                    LOG_DEBUG("inotify-event MASK={} CREATE={}",
-                              event->mask,
-                              Glib::build_filename(monitor->path, file_name));
+                    ztd::logger::debug("inotify-event MASK={} CREATE={}",
+                                       event->mask,
+                                       Glib::build_filename(monitor->path, file_name));
 #endif
                 }
                 else if (event->mask & (IN_DELETE | IN_MOVED_FROM | IN_DELETE_SELF | IN_UNMOUNT))
                 {
                     monitor_event = VFSFileMonitorEvent::DELETE;
 #if defined(VFS_FILE_MONITOR_DEBUG)
-                    LOG_DEBUG("inotify-event MASK={} DELETE={}",
-                              event->mask,
-                              Glib::build_filename(monitor->path, file_name));
+                    ztd::logger::debug("inotify-event MASK={} DELETE={}",
+                                       event->mask,
+                                       Glib::build_filename(monitor->path, file_name));
 #endif
                 }
                 else if (event->mask & (IN_MODIFY | IN_ATTRIB))
                 {
                     monitor_event = VFSFileMonitorEvent::CHANGE;
 #if defined(VFS_FILE_MONITOR_DEBUG)
-                    LOG_DEBUG("inotify-event MASK={} CHANGE={}",
-                              event->mask,
-                              Glib::build_filename(monitor->path, file_name));
+                    ztd::logger::debug("inotify-event MASK={} CHANGE={}",
+                                       event->mask,
+                                       Glib::build_filename(monitor->path, file_name));
 #endif
                 }
                 else
                 { // IN_IGNORED not handled
                     monitor_event = VFSFileMonitorEvent::CHANGE;
 #if defined(VFS_FILE_MONITOR_DEBUG)
-                    LOG_DEBUG("inotify-event MASK={} OTHER={}",
-                              event->mask,
-                              Glib::build_filename(monitor->path, file_name));
+                    ztd::logger::debug("inotify-event MASK={} OTHER={}",
+                                       event->mask,
+                                       Glib::build_filename(monitor->path, file_name));
 #endif
                 }
 

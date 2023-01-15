@@ -629,7 +629,7 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
             }
             catch (const std::filesystem::filesystem_error& e)
             {
-                LOG_WARN("{}", e.what());
+                ztd::logger::warn("{}", e.what());
                 gtk_entry_set_text(GTK_ENTRY(target), "( read link error )");
             }
 

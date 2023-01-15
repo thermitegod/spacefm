@@ -407,7 +407,7 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
     if (this->should_abort())
         return false;
 
-    // LOG_INFO("vfs_file_task_do_copy( {}, {} )", src_file, dest_file);
+    // ztd::logger::info("vfs_file_task_do_copy( {}, {} )", src_file, dest_file);
     this->lock();
     this->current_file = src_file;
     this->current_dest = dest_file;
@@ -514,7 +514,7 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
         }
         catch (const std::filesystem::filesystem_error& e)
         {
-            LOG_WARN("{}", e.what());
+            ztd::logger::warn("{}", e.what());
         }
 
         if (read_symlink)
@@ -719,12 +719,12 @@ VFSFileTask::file_move(std::string_view src_file)
         /* Not on the same device */
         if (src_stat.dev() != dest_stat.dev())
         {
-            // LOG_INFO("not on the same dev: {}", src_file);
+            // ztd::logger::info("not on the same dev: {}", src_file);
             this->do_file_copy(src_file, dest_file);
         }
         else
         {
-            // LOG_INFO("on the same dev: {}", src_file);
+            // ztd::logger::info("on the same dev: {}", src_file);
             if (this->do_file_move(src_file, dest_file) == EXDEV)
             {
                 // MOD Invalid cross-device link (st_dev not always accurate test)
@@ -753,7 +753,7 @@ VFSFileTask::do_file_move(std::string_view src_file, std::string_view dest_path)
     this->current_item++;
     this->unlock();
 
-    // LOG_DEBUG("move '{}' to '{}'", src_file, dest_file);
+    // ztd::logger::debug("move '{}' to '{}'", src_file, dest_file);
     const auto file_stat = ztd::lstat(src_file);
     if (!file_stat.is_valid())
     {
@@ -851,7 +851,7 @@ VFSFileTask::file_trash(std::string_view src_file)
     if (!have_rw_access(src_file))
     {
         // this->task_error(errno, "Trashing", src_file);
-        LOG_ERROR("Trashing failed missing RW permissions '{}'", src_file);
+        ztd::logger::error("Trashing failed missing RW permissions '{}'", src_file);
         return;
     }
 
@@ -1009,7 +1009,7 @@ VFSFileTask::file_chown_chmod(std::string_view src_file)
     this->current_file = src_file;
     this->current_item++;
     this->unlock();
-    // LOG_DEBUG("chmod_chown: {}", src_file);
+    // ztd::logger::debug("chmod_chown: {}", src_file);
 
     const auto src_stat = ztd::lstat(src_file);
     if (src_stat.is_valid())
@@ -1105,14 +1105,14 @@ call_state_callback(vfs::file_task task, VFSFileTaskState state)
 static void
 cb_exec_child_cleanup(pid_t pid, i32 status, char* tmp_file)
 { // delete tmp files after async task terminates
-    // LOG_INFO("cb_exec_child_cleanup pid={} status={} file={}", pid, status, tmp_file );
+    // ztd::logger::info("cb_exec_child_cleanup pid={} status={} file={}", pid, status, tmp_file );
     g_spawn_close_pid(pid);
     if (tmp_file)
     {
         std::filesystem::remove(tmp_file);
         free(tmp_file);
     }
-    LOG_INFO("async child finished  pid={} status={}", pid, status);
+    ztd::logger::info("async child finished  pid={} status={}", pid, status);
 }
 
 static void
@@ -1144,9 +1144,9 @@ cb_exec_child_watch(pid_t pid, i32 status, vfs::file_task task)
             std::filesystem::remove(task->exec_script);
     }
 
-    LOG_INFO("child finished  pid={} exit_status={}",
-             pid,
-             bad_status ? -1 : task->exec_exit_status);
+    ztd::logger::info("child finished  pid={} exit_status={}",
+                      pid,
+                      bad_status ? -1 : task->exec_exit_status);
 
     if (!task->exec_exit_status && !bad_status)
     {
@@ -1223,7 +1223,7 @@ cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, vfs::file_task task)
     }
     else
     {
-        LOG_INFO("cb_exec_out_watch: g_io_channel_read_chars != G_IO_STATUS_NORMAL");
+        ztd::logger::info("cb_exec_out_watch: g_io_channel_read_chars != G_IO_STATUS_NORMAL");
     }
 
     return true;
@@ -1235,7 +1235,7 @@ VFSFileTask::file_exec(std::string_view src_file)
     // this function is now thread safe but is not currently run in
     // another thread because gio adds watches to main loop thread anyway
 
-    // LOG_INFO("vfs_file_task_exec");
+    // ztd::logger::info("vfs_file_task_exec");
     // this->exec_keep_tmp = true;
 
     this->lock();
@@ -1271,7 +1271,7 @@ VFSFileTask::file_exec(std::string_view src_file)
             {
                 const std::string msg =
                     "Configure a valid Terminal SU command in View|Preferences|Advanced";
-                LOG_WARN(msg);
+                ztd::logger::warn(msg);
                 // do not use xset_msg_dialog if non-main thread
                 // this->task_error(0, str);
                 xset_msg_dialog(parent,
@@ -1280,7 +1280,7 @@ VFSFileTask::file_exec(std::string_view src_file)
                                 GtkButtonsType::GTK_BUTTONS_OK,
                                 msg);
                 call_state_callback(this, VFSFileTaskState::FINISH);
-                // LOG_INFO("vfs_file_task_exec DONE ERROR");
+                // ztd::logger::info("vfs_file_task_exec DONE ERROR");
                 return;
             }
         }
@@ -1291,7 +1291,7 @@ VFSFileTask::file_exec(std::string_view src_file)
     if (!std::filesystem::is_directory(tmp))
     {
         const std::string msg = "Cannot create temporary directory";
-        LOG_WARN(msg);
+        ztd::logger::warn(msg);
         // do not use xset_msg_dialog if non-main thread
         // this->task_error(0, str);
         xset_msg_dialog(parent,
@@ -1300,7 +1300,7 @@ VFSFileTask::file_exec(std::string_view src_file)
                         GtkButtonsType::GTK_BUTTONS_OK,
                         msg);
         call_state_callback(this, VFSFileTaskState::FINISH);
-        // LOG_INFO("vfs_file_task_exec DONE ERROR");
+        // ztd::logger::info("vfs_file_task_exec DONE ERROR");
         return;
     }
 
@@ -1319,7 +1319,7 @@ VFSFileTask::file_exec(std::string_view src_file)
         {
             const std::string msg =
                 "Please set a valid terminal program in View|Preferences|Advanced";
-            LOG_WARN(msg);
+            ztd::logger::warn(msg);
             // do not use xset_msg_dialog if non-main thread
             // this->task_error(0, str);
             xset_msg_dialog(parent,
@@ -1329,7 +1329,7 @@ VFSFileTask::file_exec(std::string_view src_file)
                             msg);
 
             call_state_callback(this, VFSFileTaskState::FINISH);
-            // LOG_INFO("vfs_file_task_exec DONE ERROR");
+            // ztd::logger::info("vfs_file_task_exec DONE ERROR");
             return;
         }
     }
@@ -1371,7 +1371,7 @@ VFSFileTask::file_exec(std::string_view src_file)
                         std::filesystem::remove(this->exec_script);
                 }
                 call_state_callback(this, VFSFileTaskState::FINISH);
-                // LOG_INFO("vfs_file_task_exec DONE ERROR");
+                // ztd::logger::info("vfs_file_task_exec DONE ERROR");
                 return;
             }
         }
@@ -1380,7 +1380,7 @@ VFSFileTask::file_exec(std::string_view src_file)
             if (this->exec_export && !this->exec_browser && !this->exec_desktop)
             {
                 this->exec_export = false;
-                LOG_WARN("exec_export set without exec_browser/exec_desktop");
+                ztd::logger::warn("exec_export set without exec_browser/exec_desktop");
             }
         }
 
@@ -1404,7 +1404,7 @@ VFSFileTask::file_exec(std::string_view src_file)
         }
 
         // build - command
-        LOG_INFO("TASK_COMMAND({:p})={}", fmt::ptr(this->exec_ptask), this->exec_command);
+        ztd::logger::info("TASK_COMMAND({:p})={}", fmt::ptr(this->exec_ptask), this->exec_command);
 
         buf.append(fmt::format("{}\nfm_err=$?\n", this->exec_command));
 
@@ -1439,7 +1439,7 @@ VFSFileTask::file_exec(std::string_view src_file)
                     std::filesystem::remove(this->exec_script);
             }
             call_state_callback(this, VFSFileTaskState::FINISH);
-            // LOG_INFO("vfs_file_task_exec DONE ERROR");
+            // ztd::logger::info("vfs_file_task_exec DONE ERROR");
             return;
         }
 
@@ -1571,12 +1571,12 @@ VFSFileTask::file_exec(std::string_view src_file)
     }
     catch (const Glib::SpawnError& e)
     {
-        LOG_ERROR("    glib_error_code={}", e.code());
+        ztd::logger::error("    glib_error_code={}", e.code());
 
         if (errno)
         {
             const std::string errno_msg = std::strerror(errno);
-            LOG_INFO("    result={} ( {} )", errno, errno_msg);
+            ztd::logger::info("    result={} ( {} )", errno, errno_msg);
         }
 
         if (!this->exec_keep_tmp && this->exec_sync)
@@ -1593,11 +1593,11 @@ VFSFileTask::file_exec(std::string_view src_file)
                         std::string(Glib::strerror(e.code())));
         this->task_error(errno, msg);
         call_state_callback(this, VFSFileTaskState::FINISH);
-        // LOG_INFO("vfs_file_task_exec DONE ERROR");
+        // ztd::logger::info("vfs_file_task_exec DONE ERROR");
         return;
     }
 
-    LOG_INFO("SPAWN=\"{}\" pid={}", ztd::join(argv, " "), pid);
+    ztd::logger::info("SPAWN=\"{}\" pid={}", ztd::join(argv, " "), pid);
 
     if (!this->exec_sync)
     {
@@ -1646,7 +1646,7 @@ VFSFileTask::file_exec(std::string_view src_file)
     // running
     this->state = VFSFileTaskState::RUNNING;
 
-    // LOG_INFO("vfs_file_task_exec DONE");
+    // ztd::logger::info("vfs_file_task_exec DONE");
     return; // exit thread
 }
 
@@ -1996,12 +1996,12 @@ VFSFileTask::add_task_dev(dev_t dev)
     if (!g_slist_find(this->devs, GUINT_TO_POINTER(dev)))
     {
         const dev_t parent = get_device_parent(dev);
-        // LOG_INFO("add_task_dev {}:{}", major(dev), minor(dev));
+        // ztd::logger::info("add_task_dev {}:{}", major(dev), minor(dev));
         this->lock();
         this->devs = g_slist_append(this->devs, GUINT_TO_POINTER(dev));
         if (parent && !g_slist_find(this->devs, GUINT_TO_POINTER(parent)))
         {
-            // LOG_INFO("add_task_dev PARENT {}:{}", major(parent), minor(parent));
+            // ztd::logger::info("add_task_dev PARENT {}:{}", major(parent), minor(parent));
             this->devs = g_slist_append(this->devs, GUINT_TO_POINTER(parent));
         }
         this->unlock();

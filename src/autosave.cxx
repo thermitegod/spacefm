@@ -75,11 +75,11 @@ autosave_thread(autosave_f autosave_func) noexcept
     const std::chrono::duration<u64> duration(autosave->timer);
     while (autosave->wait(duration))
     {
-        // LOG_DEBUG("AUTOSAVE Thread loop");
+        // ztd::logger::debug("AUTOSAVE Thread loop");
         if (!autosave->pending_requests)
             continue;
 
-        // LOG_DEBUG("AUTOSAVE Thread saving_settings");
+        // ztd::logger::debug("AUTOSAVE Thread saving_settings");
         autosave->pending_requests.store(false);
         autosave_func();
     }
@@ -88,7 +88,7 @@ autosave_thread(autosave_f autosave_func) noexcept
 void
 autosave_request_add() noexcept
 {
-    // LOG_DEBUG("AUTOSAVE request add");
+    // ztd::logger::debug("AUTOSAVE request add");
     if (autosave->accepting_requests)
     {
         autosave->pending_requests.store(true);
@@ -97,13 +97,13 @@ autosave_request_add() noexcept
     { // At program start lots of requests can be sent, this ignores them
         if (program_timer::elapsed() >= 10.0)
         {
-            // LOG_DEBUG("AUTOSAVE now accepting request add");
+            // ztd::logger::debug("AUTOSAVE now accepting request add");
             autosave->accepting_requests.store(true);
             autosave->pending_requests.store(true);
         }
         // else
         // {
-        //     LOG_DEBUG("AUTOSAVE ignoring request add");
+        //     ztd::logger::debug("AUTOSAVE ignoring request add");
         // }
     }
 }
@@ -111,21 +111,21 @@ autosave_request_add() noexcept
 void
 autosave_request_cancel() noexcept
 {
-    // LOG_DEBUG("AUTOSAVE request cancel");
+    // ztd::logger::debug("AUTOSAVE request cancel");
     autosave->pending_requests.store(false);
 }
 
 void
 autosave_init(autosave_f autosave_func) noexcept
 {
-    // LOG_DEBUG("AUTOSAVE init");
+    // ztd::logger::debug("AUTOSAVE init");
     threads.emplace_back(std::jthread([autosave_func] { autosave_thread(autosave_func); }));
 }
 
 void
 autosave_terminate() noexcept
 {
-    // LOG_DEBUG("AUTOSAVE kill threads");
+    // ztd::logger::debug("AUTOSAVE kill threads");
     autosave->kill();
 
     for (auto&& f : threads)

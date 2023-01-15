@@ -48,7 +48,7 @@ script_exists(Scripts script) noexcept
 
     if (!std::filesystem::exists(script_name))
     {
-        LOG_ERROR("Missing script: {}", script_name);
+        ztd::logger::error("Missing script: {}", script_name);
         return false;
     }
     return true;
@@ -59,7 +59,7 @@ script_exists(std::string_view script) noexcept
 {
     if (!std::filesystem::exists(script))
     {
-        LOG_ERROR("Missing script {}", script);
+        ztd::logger::error("Missing script {}", script);
         return false;
     }
     return true;
@@ -73,7 +73,7 @@ get_script_path(Scripts script) noexcept
 #if defined(SPACEFM_USER_SCRIPT_OVERRIDE)
     const std::string script_path =
         Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", script_name);
-    // LOG_INFO("user script: {}", script_path);
+    // ztd::logger::info("user script: {}", script_path);
     if (std::filesystem::exists(script_path))
         return script_path;
 #endif

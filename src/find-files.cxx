@@ -555,12 +555,12 @@ finish_search(FindFile* data)
     if (data->pid)
     {
         const std::string command = fmt::format("/usr/bin/kill -{} {}", SIGTERM, data->pid);
-        LOG_INFO("COMMAND={}", command);
+        ztd::logger::info("COMMAND={}", command);
         Glib::spawn_command_line_async(command);
 
         const std::string command2 =
             fmt::format("sleep 5 && /usr/bin/kill -{} {}", SIGKILL, data->pid);
-        LOG_INFO("COMMAND={}", command2);
+        ztd::logger::info("COMMAND={}", command2);
         Glib::spawn_command_line_async(command2);
 
         data->pid = 0;
@@ -714,7 +714,7 @@ on_start_search(GtkWidget* btn, FindFile* data)
 
     const std::vector<std::string> argv = compose_command(data);
 
-    LOG_DEBUG("find command: {}", ztd::join(argv, " "));
+    ztd::logger::debug("find command: {}", ztd::join(argv, " "));
 
     Glib::spawn_async_with_pipes(vfs::user_dirs->home_dir(),
                                  argv,

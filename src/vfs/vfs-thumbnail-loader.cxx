@@ -100,7 +100,7 @@ VFSThumbnailLoader::~VFSThumbnailLoader()
         std::ranges::for_each(this->update_queue, vfs_file_info_unref);
     }
 
-    // LOG_DEBUG("FREE THUMBNAIL LOADER");
+    // ztd::logger::debug("FREE THUMBNAIL LOADER");
 
     // prevent recursive unref called from vfs_dir_finalize
     this->dir->thumbnail_loader = nullptr;
@@ -123,7 +123,7 @@ vfs_thumbnail_loader_free(vfs::thumbnail_loader loader)
 static bool
 on_thumbnail_idle(vfs::thumbnail_loader loader)
 {
-    // LOG_DEBUG("ENTER ON_THUMBNAIL_IDLE");
+    // ztd::logger::debug("ENTER ON_THUMBNAIL_IDLE");
 
     while (!loader->update_queue.empty())
     {
@@ -138,11 +138,11 @@ on_thumbnail_idle(vfs::thumbnail_loader loader)
 
     if (loader->task->is_finished())
     {
-        // LOG_DEBUG("FREE LOADER IN IDLE HANDLER");
+        // ztd::logger::debug("FREE LOADER IN IDLE HANDLER");
         loader->dir->thumbnail_loader = nullptr;
         vfs_thumbnail_loader_free(loader);
     }
-    // LOG_DEBUG("LEAVE ON_THUMBNAIL_IDLE");
+    // ztd::logger::debug("LEAVE ON_THUMBNAIL_IDLE");
 
     return false;
 }
@@ -159,7 +159,7 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
         loader->queue.pop_front();
         if (!req)
             break;
-        // LOG_DEBUG("pop: {}", req->file->name);
+        // ztd::logger::debug("pop: {}", req->file->name);
 
         // Only we have the reference. That means, no body is using the file
         if (req->file->ref_count() == 1)
@@ -177,16 +177,16 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
                 const std::string full_path =
                     Glib::build_filename(loader->dir->path, req->file->get_name());
 
-                // LOG_INFO("loader->dir->path    = {}", loader->dir->path);
-                // LOG_INFO("req->file->get_name  = {}", req->file->get_name());
-                // LOG_INFO("full_path            = {}", full_path);
+                // ztd::logger::info("loader->dir->path    = {}", loader->dir->path);
+                // ztd::logger::info("req->file->get_name  = {}", req->file->get_name());
+                // ztd::logger::info("full_path            = {}", full_path);
 
                 req->file->load_thumbnail(full_path, load_big);
 
                 // Slow down for debugging.
-                // LOG_DEBUG("DELAY!!");
+                // ztd::logger::debug("DELAY!!");
                 // Glib::usleep(G_USEC_PER_SEC/2);
-                // LOG_DEBUG("thumbnail loaded: {}", req->file);
+                // ztd::logger::debug("thumbnail loaded: {}", req->file);
             }
             need_update = true;
         }
@@ -202,12 +202,12 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
                                                        nullptr);
             }
         }
-        // LOG_DEBUG("NEED_UPDATE: {}", need_update);
+        // ztd::logger::debug("NEED_UPDATE: {}", need_update);
     }
 
     if (task->is_cancelled())
     {
-        // LOG_DEBUG("THREAD CANCELLED!!!");
+        // ztd::logger::debug("THREAD CANCELLED!!!");
         if (loader->idle_handler)
         {
             g_source_remove(loader->idle_handler);
@@ -223,12 +223,12 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
             // Where is this being removed?  See comment in
             // vfs_thumbnail_loader_cancel_all_requests
 
-            // LOG_DEBUG("ADD IDLE HANDLER BEFORE THREAD ENDING");
+            // ztd::logger::debug("ADD IDLE HANDLER BEFORE THREAD ENDING");
             loader->idle_handler =
                 g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc)on_thumbnail_idle, loader, nullptr);
         }
     }
-    // LOG_DEBUG("THREAD ENDED!");
+    // ztd::logger::debug("THREAD ENDED!");
     return nullptr;
 }
 
@@ -237,7 +237,7 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
 {
     bool new_task = false;
 
-    // LOG_DEBUG("request thumbnail: {}, is_big: {}", file->name, is_big);
+    // ztd::logger::debug("request thumbnail: {}, is_big: {}", file->name, is_big);
     if (!dir->thumbnail_loader)
     {
         dir->thumbnail_loader = vfs_thumbnail_loader_new(dir);
@@ -257,7 +257,7 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
     for (vfs::thumbnail::request& queued_req : loader->queue)
     {
         req = queued_req;
-        // LOG_INFO("req->file->name={} | file->name={}", req->file->name, file->name);
+        // ztd::logger::info("req->file->name={} | file->name={}", req->file->name, file->name);
         // If file with the same name is already in our queue
         if (req->file == file || ztd::same(req->file->name, file->name))
             break;
@@ -298,7 +298,8 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view file_uri, i32 th
     const std::string thumbnail_file =
         Glib::build_filename(vfs::user_dirs->cache_dir(), "thumbnails/normal", file_name);
 
-    // LOG_DEBUG("thumbnail_load()={} | uri={} | thumb_size={}", file_path, file_uri, thumb_size);
+    // ztd::logger::debug("thumbnail_load()={} | uri={} | thumb_size={}", file_path, file_uri,
+    // thumb_size);
 
     // get file mtime
     const auto ftime = std::filesystem::last_write_time(file_path);
@@ -319,7 +320,7 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view file_uri, i32 th
     GdkPixbuf* thumbnail = nullptr;
     if (std::filesystem::is_regular_file(thumbnail_file))
     {
-        // LOG_DEBUG("Existing thumb: {}", thumbnail_file);
+        // ztd::logger::debug("Existing thumb: {}", thumbnail_file);
         thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.data(), nullptr);
         if (thumbnail)
         { // need to check for broken thumbnail images
@@ -332,7 +333,7 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view file_uri, i32 th
 
     if (!thumbnail || (w < thumb_size && h < thumb_size) || embeded_mtime != mtime)
     {
-        // LOG_DEBUG("New thumb: {}", thumbnail_file);
+        // ztd::logger::debug("New thumb: {}", thumbnail_file);
 
         if (thumbnail)
         {
@@ -345,7 +346,7 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view file_uri, i32 th
                                                 thumb_size,
                                                 ztd::shell::quote(file_path),
                                                 ztd::shell::quote(thumbnail_file));
-        // LOG_INFO("COMMAND={}", command);
+        // ztd::logger::info("COMMAND={}", command);
         Glib::spawn_command_line_sync(command);
 #else
         try

@@ -170,7 +170,7 @@ struct PtkFileBrowser
     typename std::enable_if<evt == EventType::CHDIR_BEFORE, sigc::connection>::type
     add_event(evt_chdir_before_t fun, MainWindow* window)
     {
-        // LOG_TRACE("Signal Connect   : EventType::CHDIR_BEFORE");
+        // ztd::logger::trace("Signal Connect   : EventType::CHDIR_BEFORE");
         this->evt_data_window = window;
         return this->evt_chdir_before.connect(sigc::ptr_fun(fun));
     }
@@ -179,7 +179,7 @@ struct PtkFileBrowser
     typename std::enable_if<evt == EventType::CHDIR_BEGIN, sigc::connection>::type
     add_event(evt_chdir_begin_t fun, MainWindow* window)
     {
-        // LOG_TRACE("Signal Connect   : EventType::CHDIR_BEGIN");
+        // ztd::logger::trace("Signal Connect   : EventType::CHDIR_BEGIN");
         this->evt_data_window = window;
         return this->evt_chdir_begin.connect(sigc::ptr_fun(fun));
     }
@@ -188,7 +188,7 @@ struct PtkFileBrowser
     typename std::enable_if<evt == EventType::CHDIR_AFTER, sigc::connection>::type
     add_event(evt_chdir_after_t fun, MainWindow* window)
     {
-        // LOG_TRACE("Signal Connect   : EventType::CHDIR_AFTER");
+        // ztd::logger::trace("Signal Connect   : EventType::CHDIR_AFTER");
         this->evt_data_window = window;
         return this->evt_chdir_after.connect(sigc::ptr_fun(fun));
     }
@@ -197,7 +197,7 @@ struct PtkFileBrowser
     typename std::enable_if<evt == EventType::OPEN_ITEM, sigc::connection>::type
     add_event(evt_open_file_t fun, MainWindow* window)
     {
-        // LOG_TRACE("Signal Connect   : EventType::OPEN_ITEM");
+        // ztd::logger::trace("Signal Connect   : EventType::OPEN_ITEM");
         this->evt_data_window = window;
         return this->evt_open_file.connect(sigc::ptr_fun(fun));
     }
@@ -206,7 +206,7 @@ struct PtkFileBrowser
     typename std::enable_if<evt == EventType::CHANGE_CONTENT, sigc::connection>::type
     add_event(evt_change_content_t fun, MainWindow* window)
     {
-        // LOG_TRACE("Signal Connect   : EventType::CHANGE_CONTENT");
+        // ztd::logger::trace("Signal Connect   : EventType::CHANGE_CONTENT");
         this->evt_data_window = window;
         return this->evt_change_content.connect(sigc::ptr_fun(fun));
     }
@@ -215,7 +215,7 @@ struct PtkFileBrowser
     typename std::enable_if<evt == EventType::CHANGE_SEL, sigc::connection>::type
     add_event(evt_change_sel_t fun, MainWindow* window)
     {
-        // LOG_TRACE("Signal Connect   : EventType::CHANGE_SEL");
+        // ztd::logger::trace("Signal Connect   : EventType::CHANGE_SEL");
         this->evt_data_window = window;
         return this->evt_change_sel.connect(sigc::ptr_fun(fun));
     }
@@ -224,7 +224,7 @@ struct PtkFileBrowser
     typename std::enable_if<evt == EventType::CHANGE_PANE, sigc::connection>::type
     add_event(evt_change_pane_mode_t fun, MainWindow* window)
     {
-        // LOG_TRACE("Signal Connect   : EventType::CHANGE_PANE");
+        // ztd::logger::trace("Signal Connect   : EventType::CHANGE_PANE");
         this->evt_data_window = window;
         return this->evt_change_pane_mode.connect(sigc::ptr_fun(fun));
     }
@@ -234,7 +234,7 @@ struct PtkFileBrowser
     typename std::enable_if<evt == EventType::CHDIR_BEFORE, void>::type
     run_event()
     {
-        // LOG_TRACE("Signal Execute   : EventType::CHDIR_BEFORE");
+        // ztd::logger::trace("Signal Execute   : EventType::CHDIR_BEFORE");
         this->evt_chdir_before.emit(this, this->evt_data_window);
     }
 
@@ -242,7 +242,7 @@ struct PtkFileBrowser
     typename std::enable_if<evt == EventType::CHDIR_BEGIN, void>::type
     run_event()
     {
-        // LOG_TRACE("Signal Execute   : EventType::CHDIR_BEGIN");
+        // ztd::logger::trace("Signal Execute   : EventType::CHDIR_BEGIN");
         this->evt_chdir_begin.emit(this, this->evt_data_window);
     }
 
@@ -250,7 +250,7 @@ struct PtkFileBrowser
     typename std::enable_if<evt == EventType::CHDIR_AFTER, void>::type
     run_event()
     {
-        // LOG_TRACE("Signal Execute   : EventType::CHDIR_AFTER");
+        // ztd::logger::trace("Signal Execute   : EventType::CHDIR_AFTER");
         this->evt_chdir_after.emit(this, this->evt_data_window);
     }
 
@@ -258,7 +258,7 @@ struct PtkFileBrowser
     typename std::enable_if<evt == EventType::OPEN_ITEM, void>::type
     run_event(std::string_view path, PtkOpenAction action)
     {
-        // LOG_TRACE("Signal Execute   : EventType::OPEN_ITEM");
+        // ztd::logger::trace("Signal Execute   : EventType::OPEN_ITEM");
         this->evt_open_file.emit(this, path, action, this->evt_data_window);
     }
 
@@ -266,7 +266,7 @@ struct PtkFileBrowser
     typename std::enable_if<evt == EventType::CHANGE_CONTENT, void>::type
     run_event()
     {
-        // LOG_TRACE("Signal Execute   : EventType::CHANGE_CONTENT");
+        // ztd::logger::trace("Signal Execute   : EventType::CHANGE_CONTENT");
         this->evt_change_content.emit(this, this->evt_data_window);
     }
 
@@ -274,7 +274,7 @@ struct PtkFileBrowser
     typename std::enable_if<evt == EventType::CHANGE_SEL, void>::type
     run_event()
     {
-        // LOG_TRACE("Signal Execute   : EventType::CHANGE_SEL");
+        // ztd::logger::trace("Signal Execute   : EventType::CHANGE_SEL");
         this->evt_change_sel.emit(this, this->evt_data_window);
     }
 
@@ -282,7 +282,7 @@ struct PtkFileBrowser
     typename std::enable_if<evt == EventType::CHANGE_PANE, void>::type
     run_event()
     {
-        // LOG_TRACE("Signal Execute   : EventType::CHANGE_PANE");
+        // ztd::logger::trace("Signal Execute   : EventType::CHANGE_PANE");
         this->evt_change_pane_mode.emit(this, this->evt_data_window);
     }
 

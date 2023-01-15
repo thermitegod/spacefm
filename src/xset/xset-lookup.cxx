@@ -1756,7 +1756,7 @@ xset_get_xsetname_from_panel(panel_t panel, XSetPanel name)
         case 4:
             return xset_panel4_map.at(name);
         default:
-            // LOG_WARN("Panel out of range, using panel 1");
+            // ztd::logger::warn("Panel out of range, using panel 1");
             return xset_panel1_map.at(name);
     }
 }
@@ -1823,7 +1823,8 @@ xset_get_xsetname_from_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel
                     return xset_panel4_mode3_map.at(name);
             }
         default:
-            // LOG_WARN("Panel Mode out of range: {}, using panel 1", std::to_string(mode));
+            // ztd::logger::warn("Panel Mode out of range: {}, using panel 1",
+            // std::to_string(mode));
             return xset_get_xsetname_from_panel_mode(1, name, mode);
     }
 }

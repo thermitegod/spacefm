@@ -98,7 +98,7 @@ clean_plugin_mirrors()
             {
                 const std::string plugin_path = fmt::format("{}/{}", path, file_name);
                 std::filesystem::remove_all(plugin_path);
-                LOG_INFO("Removed {}/{}", path, file_name);
+                ztd::logger::info("Removed {}/{}", path, file_name);
             }
         }
     }
@@ -252,7 +252,7 @@ xset_parse_plugin(std::string_view plug_dir, std::string_view name, std::string_
     catch (const std::logic_error& e)
     {
         const std::string msg = fmt::format("Plugin load error:\n\"{}\"\n{}", plug_dir, e.what());
-        LOG_ERROR("{}", msg);
+        ztd::logger::error("{}", msg);
         ptk_show_error(nullptr, "Plugin Load Error", msg);
         return;
     }
@@ -329,7 +329,7 @@ static void
 xset_import_plugin_parse(std::string_view plug_dir, PluginUse* use, std::string_view name,
                          std::string_view var, std::string_view value)
 {
-    // LOG_INFO("name: {} | var: {} | value: {}", name, var, value);
+    // ztd::logger::info("name: {} | var: {} | value: {}", name, var, value);
 
     if (use && *use == PluginUse::NORMAL)
     {
@@ -406,7 +406,7 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
 {
     (void)task;
     xset_t set;
-    // LOG_INFO("on_install_plugin_cb");
+    // ztd::logger::info("on_install_plugin_cb");
     if (plugin_data->job == PluginJob::REMOVE) // uninstall
     {
         if (!std::filesystem::exists(plugin_data->plug_dir))

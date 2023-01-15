@@ -744,7 +744,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
     if (!context->valid)
     {
-        LOG_WARN("rare exception due to context_fill hacks - fb was probably destroyed");
+        ztd::logger::warn("rare exception due to context_fill hacks - fb was probably destroyed");
         context = xset_context_new();
         return nullptr;
     }
@@ -1694,7 +1694,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 catch (const Glib::FileError& e)
                 {
                     const std::string what = e.what();
-                    LOG_WARN("Error reading {}: {}", usr_path, what);
+                    ztd::logger::warn("Error reading {}: {}", usr_path, what);
                 }
 
                 if (!contents.empty())
@@ -1758,12 +1758,12 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             break;
         case PTKFileMenuAppJob::APP_JOB_UPDATE:
             command = fmt::format("update-mime-database {}/mime", vfs::user_dirs->data_dir());
-            LOG_INFO("COMMAND={}", command);
+            ztd::logger::info("COMMAND={}", command);
             Glib::spawn_command_line_async(command);
 
             command =
                 fmt::format("update-desktop-database {}/applications", vfs::user_dirs->data_dir());
-            LOG_INFO("COMMAND={}", command);
+            ztd::logger::info("COMMAND={}", command);
             Glib::spawn_command_line_async(command);
             break;
         default:

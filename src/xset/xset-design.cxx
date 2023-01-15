@@ -917,7 +917,7 @@ xset_design_job(GtkWidget* item, xset_t set)
     XSetTool tool_type;
     const auto job = XSetJob(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job")));
 
-    // LOG_INFO("activate job {} {}", job, set->name);
+    // ztd::logger::info("activate job {} {}", job, set->name);
     switch (job)
     {
         case XSetJob::KEY:

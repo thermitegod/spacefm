@@ -128,7 +128,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
     std::string str;
     std::string command_final;
 
-    LOG_INFO("Selected File Handler '{}'", handler_set->menu_label);
+    ztd::logger::info("Selected File Handler '{}'", handler_set->menu_label);
 
     // get command - was already checked as non-empty
     std::string error_message;
@@ -265,7 +265,7 @@ open_files_with_app(ParentInfo* parent, GList* files, std::string_view app_deskt
 
     vfs::desktop desktop = vfs_get_desktop(check_desktop_name(app_desktop));
 
-    LOG_INFO("EXEC({})={}", desktop->get_full_path(), desktop->get_exec());
+    ztd::logger::info("EXEC({})={}", desktop->get_full_path(), desktop->get_exec());
 
     const std::vector<std::string> open_files = glist_t_char_to_vector_t_string(files);
 
@@ -443,7 +443,7 @@ ptk_open_files_with_app(std::string_view cwd, const std::vector<vfs::file_info>&
                 }
                 catch (const std::filesystem::filesystem_error& e)
                 {
-                    LOG_WARN("{}", e.what());
+                    ztd::logger::warn("{}", e.what());
                 }
             }
             if (alloc_desktop.empty())

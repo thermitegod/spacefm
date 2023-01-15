@@ -713,7 +713,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
         }
         else
         {
-            LOG_WARN("bad dest_dir in on_dir_tree_view_drag_data_received");
+            ztd::logger::warn("bad dest_dir in on_dir_tree_view_drag_data_received");
         }
     }
     /* If we are only getting drag status, not finished. */

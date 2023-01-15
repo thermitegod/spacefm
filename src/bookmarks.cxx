@@ -60,7 +60,7 @@ parse_bookmarks(std::string_view raw_line) noexcept
     if (book_path.empty())
         return;
 
-    // LOG_INFO("Bookmark: Path={} | Name={}", book_path, book_name);
+    // ztd::logger::info("Bookmark: Path={} | Name={}", book_path, book_name);
 
     bookmarks.push_back({ztd::removeprefix(book_path, "file://"), book_name});
 }

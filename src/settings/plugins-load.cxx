@@ -47,7 +47,7 @@ load_user_plugin(std::string_view plug_dir, PluginUse* use, std::string_view plu
     {
         const std::string msg =
             fmt::format("Plugin file parsing failed:\n\"{}\"\n{}", plugin, e.what());
-        LOG_ERROR("{}", msg);
+        ztd::logger::error("{}", msg);
         ptk_show_error(nullptr, "Plugin Load Error", msg);
         return false;
     }

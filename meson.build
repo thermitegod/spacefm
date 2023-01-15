@@ -274,6 +274,8 @@ preprocessor = [
     '-DGDKMM_DISABLE_DEPRECATED',
     '-DGLIBMM_DISABLE_DEPRECATED',
     '-DGIOMM_DISABLE_DEPRECATED',
+
+    '-DZTD_DISABLE_GLOBAL_LOG_MACROS',
     ]
 
 foreach a : preprocessor

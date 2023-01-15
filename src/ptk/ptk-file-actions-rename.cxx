@@ -484,7 +484,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         path = Glib::path_get_dirname(full_path);
     }
 
-    // LOG_INFO("path={}   full={}", path, full_path);
+    // ztd::logger::info("path={}   full={}", path, full_path);
 
     // tests
     bool full_path_exists = false;
@@ -535,12 +535,14 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         }
     }
 
-    // LOG_INFO("TEST")
-    // LOG_INFO( "  full_path_same {} {}", full_path_same, mset->full_path_same);
-    // LOG_INFO( "  full_path_exists {} {}", full_path_exists, mset->full_path_exists);
-    // LOG_INFO( "  full_path_exists_dir {} {}", full_path_exists_dir, mset->full_path_exists_dir);
-    // LOG_INFO( "  path_missing {} {}", path_missing, mset->path_missing);
-    // LOG_INFO( "  path_exists_file {} {}", path_exists_file, mset->path_exists_file);
+    // clang-format off
+    // ztd::logger::info("TEST")
+    // ztd::logger::info( "  full_path_same {} {}", full_path_same, mset->full_path_same);
+    // ztd::logger::info( "  full_path_exists {} {}", full_path_exists, mset->full_path_exists);
+    // ztd::logger::info( "  full_path_exists_dir {} {}", full_path_exists_dir, mset->full_path_exists_dir);
+    // ztd::logger::info( "  path_missing {} {}", path_missing, mset->path_missing);
+    // ztd::logger::info( "  path_exists_file {} {}", path_exists_file, mset->path_exists_file);
+    // clang-format on
 
     // update display
     if (mset->full_path_same != full_path_same || mset->full_path_exists != full_path_exists ||

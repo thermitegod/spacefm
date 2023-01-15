@@ -43,7 +43,7 @@ xset_remove(xset_t set)
 
 XSet::XSet(std::string_view name, XSetName xset_name)
 {
-    // LOG_INFO("XSet Constructor");
+    // ztd::logger::info("XSet Constructor");
 
     this->name = ztd::strdup(name.data());
     this->xset_name = xset_name;
@@ -51,7 +51,7 @@ XSet::XSet(std::string_view name, XSetName xset_name)
 
 XSet::~XSet()
 {
-    // LOG_INFO("XSet Destructor");
+    // ztd::logger::info("XSet Destructor");
 
     if (this->name)
         free(this->name);

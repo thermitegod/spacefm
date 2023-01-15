@@ -469,7 +469,7 @@ on_dlg_response(GtkDialog* dlg, i32 id, void* user_data)
         vfs::async_task task = VFS_ASYNC_TASK(g_object_get_data(G_OBJECT(dlg), "task"));
         if (task)
         {
-            // LOG_INFO("app-chooser.cxx -> vfs_async_task_cancel");
+            // ztd::logger::info("app-chooser.cxx -> vfs_async_task_cancel");
             // see note in vfs-async-task.c: vfs_async_task_real_cancel()
             task->cancel();
             // The GtkListStore will be freed in

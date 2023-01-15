@@ -103,7 +103,7 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, u3
                            8,
                            (const unsigned char*)uri_list.data(),
                            uri_list.size());
-    // LOG_DEBUG("clipboard data: \n\n{}\n\n", list);
+    // ztd::logger::debug("clipboard data: \n\n{}\n\n", list);
 }
 
 static void
@@ -111,7 +111,7 @@ clipboard_clean_data(GtkClipboard* clipboard, void* user_data)
 {
     (void)clipboard;
     (void)user_data;
-    // LOG_DEBUG("clean clipboard!");
+    // ztd::logger::debug("clean clipboard!");
     clipboard_file_list.clear();
     clipboard_action = GdkDragAction::GDK_ACTION_DEFAULT;
 }

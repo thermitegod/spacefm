@@ -87,7 +87,7 @@ vfs_mime_type_reload(void* user_data)
     g_source_remove(reload_callback_id);
     reload_callback_id = 0;
 
-    // LOG_DEBUG("reload mime-types");
+    // ztd::logger::debug("reload mime-types");
 
     mime_type_regen_all_caches();
 
@@ -103,7 +103,7 @@ on_mime_cache_changed(vfs::file_monitor monitor, VFSFileMonitorEvent event,
     (void)file_name;
     (void)user_data;
 
-    // LOG_DEBUG("reloading all mime caches");
+    // ztd::logger::debug("reloading all mime caches");
     if (reload_callback_id == 0)
         reload_callback_id = g_idle_add((GSourceFunc)vfs_mime_type_reload, nullptr);
 }
@@ -259,7 +259,7 @@ vfs_mime_type_get_icon(vfs::mime_type mime_type, bool big)
     }
     if (mime_type->description.empty())
     {
-        LOG_WARN("mime-type {} has no description (comment)", mime_type->type);
+        ztd::logger::warn("mime-type {} has no description (comment)", mime_type->type);
         vfs::mime_type vfs_mime = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
         if (vfs_mime)
         {
@@ -400,7 +400,7 @@ vfs_mime_type_get_description(vfs::mime_type mime_type)
         mime_type->description = icon_data[1];
         if (mime_type->description.empty())
         {
-            LOG_WARN("mime-type {} has no description (comment)", mime_type->type);
+            ztd::logger::warn("mime-type {} has no description (comment)", mime_type->type);
             vfs::mime_type vfs_mime = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
             if (vfs_mime)
             {

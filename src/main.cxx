@@ -225,7 +225,7 @@ handle_parsed_commandline_args()
     if (cli_flags.new_tab || cli_flags.reuse_tab)
     {
         main_window = main_window_get_on_current_desktop();
-        // LOG_INFO("main_window_get_on_current_desktop = {:p}  {} {}",
+        // ztd::logger::info("main_window_get_on_current_desktop = {:p}  {} {}",
         //          (void*)main_window,
         //          cli_flags.new_tab ? "new_tab" : "",
         //          cli_flags.reuse_tab ? "reuse_tab" : "");
@@ -341,7 +341,7 @@ handle_parsed_commandline_args()
         }
     }
 
-    // LOG_INFO("    handle_parsed_commandline_args mw = {:p}", main_window);
+    // ztd::logger::info("    handle_parsed_commandline_args mw = {:p}", main_window);
 
     if (cli_flags.files != default_files)
         g_strfreev(cli_flags.files);
@@ -355,7 +355,7 @@ tmp_clean()
 {
     const std::string& tmp = vfs::user_dirs->program_tmp_dir();
     std::filesystem::remove_all(tmp);
-    LOG_INFO("Removed {}", tmp);
+    ztd::logger::info("Removed {}", tmp);
 }
 
 int
@@ -408,7 +408,7 @@ main(i32 argc, char* argv[])
     GError* err = nullptr;
     if (!gtk_init_with_args(&argc, &argv, "", opt_entries, nullptr, &err))
     {
-        LOG_INFO("{}", err->message);
+        ztd::logger::info("{}", err->message);
         g_error_free(err);
         std::exit(EXIT_FAILURE);
     }
@@ -419,7 +419,7 @@ main(i32 argc, char* argv[])
     // socket command with other options?
     if (cli_flags.socket_cmd)
     {
-        LOG_ERROR("socket-cmd must be first option");
+        ztd::logger::error("socket-cmd must be first option");
         std::exit(EXIT_FAILURE);
     }
 
@@ -512,7 +512,7 @@ open_file(std::string_view path)
         app_name = ptk_choose_app_for_mime_type(nullptr, mime_type, true, true, true, false);
         if (!app_name)
         {
-            LOG_ERROR("no application to open file: {}", path);
+            ztd::logger::error("no application to open file: {}", path);
             return;
         }
     }

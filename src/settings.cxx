@@ -179,7 +179,7 @@ load_settings()
     bool load_deprecated_ini_config = false;
     if (std::filesystem::exists(conf_ini) && !std::filesystem::exists(conf_toml))
     {
-        LOG_WARN("INI config files are deprecated, loading support will be removed");
+        ztd::logger::warn("INI config files are deprecated, loading support will be removed");
         load_deprecated_ini_config = true;
         session = conf_ini;
     }
@@ -199,7 +199,7 @@ load_settings()
     {
         if (Glib::find_program_in_path("git").empty())
         {
-            LOG_ERROR("git backed settings enabled but git is not installed");
+            ztd::logger::error("git backed settings enabled but git is not installed");
             git_backed_settings = false;
         }
     }
@@ -245,7 +245,7 @@ load_settings()
     }
     else
     {
-        LOG_INFO("No config file found, using defaults.");
+        ztd::logger::info("No config file found, using defaults.");
     }
 
     // MOD turn off fullscreen
@@ -321,7 +321,7 @@ void
 save_settings(void* main_window_ptr)
 {
     MainWindow* main_window;
-    // LOG_INFO("save_settings");
+    // ztd::logger::info("save_settings");
 
     // save tabs
     const bool save_tabs = xset_get_b(XSetName::MAIN_SAVE_TABS);
@@ -523,7 +523,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
             found = true;
             set->browser = file_browser;
             const std::string clean = clean_label(set->menu_label, false, false);
-            LOG_INFO("Selected Menu Item '{}' As Handler", clean);
+            ztd::logger::info("Selected Menu Item '{}' As Handler", clean);
             xset_menu_cb(nullptr, set); // also does custom activate
         }
     }
@@ -602,7 +602,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
     i32 context_action = ItemPropContextState::CONTEXT_SHOW;
     xset_t mset;
     std::string icon_file;
-    // LOG_INFO("xset_add_menuitem {}", set->name);
+    // ztd::logger::info("xset_add_menuitem {}", set->name);
 
     // plugin?
     mset = xset_get_plugin_mirror(set);
@@ -835,7 +835,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
     }
     else
     {
-        LOG_WARN("xset_custom_activate !browser !desktop");
+        ztd::logger::warn("xset_custom_activate !browser !desktop");
         return;
     }
 
@@ -1016,12 +1016,12 @@ xset_custom_insert_after(xset_t target, xset_t set)
 
     if (!set)
     {
-        LOG_WARN("xset_custom_insert_after set == nullptr");
+        ztd::logger::warn("xset_custom_insert_after set == nullptr");
         return;
     }
     if (!target)
     {
-        LOG_WARN("xset_custom_insert_after target == nullptr");
+        ztd::logger::warn("xset_custom_insert_after target == nullptr");
         return;
     }
 
@@ -1051,7 +1051,7 @@ xset_custom_insert_after(xset_t target, xset_t set)
     else
     {
         if (set->tool > XSetTool::CUSTOM)
-            LOG_WARN("xset_custom_insert_after builtin tool inserted after non-tool");
+            ztd::logger::warn("xset_custom_insert_after builtin tool inserted after non-tool");
         set->tool = XSetTool::NOT;
     }
 }
@@ -2332,7 +2332,7 @@ xset_menu_cb(GtkWidget* item, xset_t set)
                                         rset->title,
                                         rset->s,
                                         "foobar.xyz");
-                // LOG_INFO("file={}", file);
+                // ztd::logger::info("file={}", file);
                 free(file);
             }
             break;
@@ -2410,10 +2410,10 @@ xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventButton* event
     // set may be a submenu that does not match tool_type
     if (!(set && !set->lock && tool_type > XSetTool::CUSTOM))
     {
-        LOG_WARN("xset_builtin_tool_activate invalid");
+        ztd::logger::warn("xset_builtin_tool_activate invalid");
         return;
     }
-    // LOG_INFO("xset_builtin_tool_activate  {}", set->menu_label);
+    // ztd::logger::info("xset_builtin_tool_activate  {}", set->menu_label);
 
     // get current browser, panel, and mode
     if (main_window)
@@ -2490,7 +2490,7 @@ xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventButton* event
         case XSetTool::CUSTOM:
         case XSetTool::INVALID:
         default:
-            LOG_WARN("xset_builtin_tool_activate invalid tool_type");
+            ztd::logger::warn("xset_builtin_tool_activate invalid tool_type");
     }
 }
 
@@ -2523,7 +2523,8 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
 {
     XSetJob job = XSetJob::INVALID;
 
-    // LOG_INFO("on_tool_icon_button_press  {}   button = {}", set->menu_label, event->button);
+    // ztd::logger::info("on_tool_icon_button_press  {}   button = {}", set->menu_label,
+    // event->button);
     if (event->type != GdkEventType::GDK_BUTTON_PRESS)
         return false;
     const u32 keymod = ptk_get_keymod(event->state);
@@ -2661,7 +2662,8 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
 static bool
 on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
 {
-    // LOG_INFO("on_tool_menu_button_press  {}   button = {}", set->menu_label, event->button);
+    // ztd::logger::info("on_tool_menu_button_press  {}   button = {}", set->menu_label,
+    // event->button);
     if (event->type != GdkEventType::GDK_BUTTON_PRESS)
         return false;
     const u32 keymod = ptk_get_keymod(event->state);
@@ -2732,7 +2734,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
 
     if (set->tool == XSetTool::NOT)
     {
-        LOG_WARN("xset_add_toolitem set->tool == XSetTool::NOT");
+        ztd::logger::warn("xset_add_toolitem set->tool == XSetTool::NOT");
         set->tool = XSetTool::CUSTOM;
     }
 
@@ -2758,7 +2760,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
         if (set->next)
         {
             set_next = xset_is(set->next);
-            // LOG_INFO("    NEXT {}", set_next->name);
+            // ztd::logger::info("    NEXT {}", set_next->name);
             xset_add_toolitem(parent, file_browser, toolbar, icon_size, set_next, show_tooltips);
         }
         return item;
@@ -3166,12 +3168,12 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
 
     gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(item), -1);
 
-    // LOG_INFO("    set={}   set->next={}", set->name, set->next);
+    // ztd::logger::info("    set={}   set->next={}", set->name, set->next);
     // next toolitem
     if (set->next)
     {
         set_next = xset_is(set->next);
-        // LOG_INFO("    NEXT {}", set_next->name);
+        // ztd::logger::info("    NEXT {}", set_next->name);
         xset_add_toolitem(parent, file_browser, toolbar, icon_size, set_next, show_tooltips);
     }
 
@@ -3195,7 +3197,7 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     xset_t set;
     xset_t set_target;
 
-    // LOG_INFO("xset_fill_toolbar {}", set_parent->name);
+    // ztd::logger::info("xset_fill_toolbar {}", set_parent->name);
     if (!(file_browser && toolbar && set_parent))
         return;
 
@@ -3271,9 +3273,9 @@ xset_set_window_icon(GtkWindow* win)
     else if (error)
     {
         // An error occured on loading the icon
-        LOG_ERROR("Unable to load the window icon '{}' in - xset_set_window_icon - {}",
-                  name,
-                  error->message);
+        ztd::logger::error("Unable to load the window icon '{}' in - xset_set_window_icon - {}",
+                           name,
+                           error->message);
         g_error_free(error);
     }
 }

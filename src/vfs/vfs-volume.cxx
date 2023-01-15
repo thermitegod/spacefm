@@ -357,8 +357,8 @@ decode_udev_encoded_string(const char* str)
         return "";
 
     const std::string decode = ztd::strip(ztd::replace(str, "\\x20", " "));
-    // LOG_DEBUG("udev encoded string: {}", str);
-    // LOG_DEBUG("udev decoded string: {}", decode);
+    // ztd::logger::debug("udev encoded string: {}", str);
+    // ztd::logger::debug("udev decoded string: {}", decode);
     return decode;
 }
 
@@ -457,7 +457,7 @@ sysfs_resolve_link(std::string_view sysfs_path, std::string_view name)
     }
     catch (const std::filesystem::filesystem_error& e)
     {
-        // LOG_WARN("{}", e.what());
+        // ztd::logger::warn("{}", e.what());
         return "";
     }
     return target_path;
@@ -1073,7 +1073,7 @@ info_mount_points(device_t device)
     }
     catch (const Glib::FileError& e)
     {
-        LOG_WARN("Error reading {}: {}", MOUNTINFO, e.what());
+        ztd::logger::warn("Error reading {}: {}", MOUNTINFO, e.what());
         return nullptr;
     }
 
@@ -1103,7 +1103,7 @@ info_mount_points(device_t device)
                    encoded_root,
                    encoded_mount_point) != 6)
         {
-            LOG_WARN("Error reading {}: Error parsing line '{}'", MOUNTINFO, line);
+            ztd::logger::warn("Error reading {}: Error parsing line '{}'", MOUNTINFO, line);
             continue;
         }
 
@@ -1333,7 +1333,7 @@ device_get_info(device_t device)
 static void
 parse_mounts(bool report)
 {
-    // LOG_INFO("@@@@@@@@@@@@@ parse_mounts {}", report ? "true" : "false");
+    // ztd::logger::info("@@@@@@@@@@@@@ parse_mounts {}", report ? "true" : "false");
     struct udev_device* udevice;
     dev_t devnum;
 
@@ -1344,7 +1344,7 @@ parse_mounts(bool report)
     }
     catch (const Glib::FileError& e)
     {
-        LOG_WARN("Error reading {}: {}", MOUNTINFO, e.what());
+        ztd::logger::warn("Error reading {}: {}", MOUNTINFO, e.what());
         return;
     }
 
@@ -1396,7 +1396,7 @@ parse_mounts(bool report)
                    encoded_root,
                    encoded_mount_point) != 6)
         {
-            LOG_WARN("Error reading {}: Error parsing line '{}'", MOUNTINFO, line);
+            ztd::logger::warn("Error reading {}: Error parsing line '{}'", MOUNTINFO, line);
             continue;
         }
 
@@ -1406,7 +1406,7 @@ parse_mounts(bool report)
         if (subdir_mount)
         {
             // get mount source
-            // LOG_INFO("subdir_mount {}:{} {} root={}", major, minor, encoded_mount_point,
+            // ztd::logger::info("subdir_mount {}:{} {} root={}", major, minor, encoded_mount_point,
             // encoded_root);
             char typebuf[PATH_MAX];
             char mount_source[PATH_MAX];
@@ -1414,12 +1414,12 @@ parse_mounts(bool report)
             sep = strstr(line.data(), " - ");
             if (sep && sscanf(sep + 3, "%s %s", typebuf, mount_source) == 2)
             {
-                // LOG_INFO("    source={}", mount_source);
+                // ztd::logger::info("    source={}", mount_source);
                 if (ztd::startswith(mount_source, "/dev/"))
                 {
                     /* is a subdir mount on a local device, eg a bind mount
                      * so do not include this mount point */
-                    // LOG_INFO("        local");
+                    // ztd::logger::info("        local");
                     continue;
                 }
             }
@@ -1436,7 +1436,7 @@ parse_mounts(bool report)
         if (ztd::contains(line.data(), " - "))
             fstype = ztd::rpartition(line, " - ")[2];
 
-        // LOG_INFO("mount_point({}:{})={}", major, minor, mount_point);
+        // ztd::logger::info("mount_point({}:{})={}", major, minor, mount_point);
         devmount_t devmount = nullptr;
         for (devmount_t search : newmounts)
         {
@@ -1448,7 +1448,7 @@ parse_mounts(bool report)
         }
         if (!devmount)
         {
-            // LOG_INFO("     new devmount {}", mount_point);
+            // ztd::logger::info("     new devmount {}", mount_point);
             if (report)
             {
                 if (subdir_mount)
@@ -1493,11 +1493,11 @@ parse_mounts(bool report)
 
         if (devmount && !ztd::contains(devmount->mounts, mount_point))
         {
-            // LOG_INFO("    prepended");
+            // ztd::logger::info("    prepended");
             devmount->mounts.emplace_back(mount_point);
         }
     }
-    // LOG_INFO("LINES DONE");
+    // ztd::logger::info("LINES DONE");
     // translate each mount points list to string
     for (devmount_t devmount : newmounts)
     {
@@ -1508,7 +1508,7 @@ parse_mounts(bool report)
 
         devmount->mounts.clear();
         devmount->mount_points = ztd::strdup(points);
-        // LOG_INFO("translate {}:{} {}", devmount->major, devmount->minor, points);
+        // ztd::logger::info("translate {}:{} {}", devmount->major, devmount->minor, points);
     }
 
     // compare old and new lists
@@ -1516,7 +1516,7 @@ parse_mounts(bool report)
     {
         for (devmount_t devmount : newmounts)
         {
-            // LOG_INFO("finding {}:{}", devmount->major, devmount->minor);
+            // ztd::logger::info("finding {}:{}", devmount->major, devmount->minor);
 
             devmount_t found = nullptr;
 
@@ -1528,10 +1528,10 @@ parse_mounts(bool report)
 
             if (found)
             {
-                // LOG_INFO("    found");
+                // ztd::logger::info("    found");
                 if (ztd::same(found->mount_points, devmount->mount_points))
                 {
-                    // LOG_INFO("    freed");
+                    // ztd::logger::info("    freed");
                     // no change to mount points, so remove from old list
                     devmount = found;
                     ztd::remove(devmounts, devmount);
@@ -1540,7 +1540,7 @@ parse_mounts(bool report)
             else
             {
                 // new mount
-                // LOG_INFO("    new mount {}:{} {}", devmount->major, devmount->minor,
+                // ztd::logger::info("    new mount {}:{} {}", devmount->major, devmount->minor,
                 // devmount->mount_points);
                 devmount_t devcopy = std::make_shared<Devmount>(devmount->major, devmount->minor);
                 devcopy->mount_points = ztd::strdup(devmount->mount_points);
@@ -1550,11 +1550,11 @@ parse_mounts(bool report)
             }
         }
     }
-    // LOG_INFO("REMAINING");
+    // ztd::logger::info("REMAINING");
     // any remaining devices in old list have changed mount status
     for (devmount_t devmount : devmounts)
     {
-        // LOG_INFO("remain {}:{}", devmount->major, devmount->minor );
+        // ztd::logger::info("remain {}:{}", devmount->major, devmount->minor );
         if (report)
             changed.emplace_back(devmount);
     }
@@ -1576,7 +1576,7 @@ parse_mounts(bool report)
             if (devnode)
             {
                 // block device
-                LOG_INFO("mount changed: {}", devnode);
+                ztd::logger::info("mount changed: {}", devnode);
 
                 vfs::volume volume = vfs_volume_read_by_device(udevice);
                 if (volume)
@@ -1589,11 +1589,11 @@ parse_mounts(bool report)
                 vfs::volume volume = vfs_volume_read_by_mount(devnum, devmount->mount_points);
                 if (volume)
                 {
-                    LOG_INFO("special mount changed: {} ({}:{}) on {}",
-                             volume->device_file,
-                             MAJOR(volume->devnum),
-                             MINOR(volume->devnum),
-                             devmount->mount_points);
+                    ztd::logger::info("special mount changed: {} ({}:{}) on {}",
+                                      volume->device_file,
+                                      MAJOR(volume->devnum),
+                                      MINOR(volume->devnum),
+                                      devmount->mount_points);
                     volume->device_added(false); // frees volume if needed
                 }
                 else
@@ -1624,7 +1624,7 @@ cb_mount_monitor_watch(Glib::IOCondition condition)
     if (condition == Glib::IOCondition::IO_ERR)
         return true;
 
-    // LOG_INFO("@@@ {} changed", MOUNTINFO);
+    // ztd::logger::info("@@@ {} changed", MOUNTINFO);
     parse_mounts(true);
 
     return true;
@@ -1654,13 +1654,13 @@ cb_udev_monitor_watch(Glib::IOCondition condition)
         {
             // print action
             if (ztd::same(action, "add"))
-                LOG_INFO("udev added:   {}", devnode);
+                ztd::logger::info("udev added:   {}", devnode);
             else if (ztd::same(action, "remove"))
-                LOG_INFO("udev removed: {}", devnode);
+                ztd::logger::info("udev removed: {}", devnode);
             else if (ztd::same(action, "change"))
-                LOG_INFO("udev changed: {}", devnode);
+                ztd::logger::info("udev changed: {}", devnode);
             else if (ztd::same(action, "move"))
-                LOG_INFO("udev moved:   {}", devnode);
+                ztd::logger::info("udev moved:   {}", devnode);
 
             // add/remove volume
             if (ztd::same(action, "add") || ztd::same(action, "change"))
@@ -1952,24 +1952,24 @@ vfs_volume_read_by_device(struct udev_device* udevice)
 
     volume->set_info();
 
-    // LOG_INFO( "====devnum={}:{}", MAJOR(volume->devnum), MINOR(volume->devnum));
-    // LOG_INFO( "    device_file={}", volume->device_file);
-    // LOG_INFO( "    udi={}", volume->udi);
-    // LOG_INFO( "    label={}", volume->label);
-    // LOG_INFO( "    icon={}", volume->icon);
-    // LOG_INFO( "    is_mounted={}", volume->is_mounted);
-    // LOG_INFO( "    is_mountable={}", volume->is_mountable);
-    // LOG_INFO( "    is_optical={}", volume->is_optical);
-    // LOG_INFO( "    is_audiocd={}", volume->is_audiocd);
-    // LOG_INFO( "    is_blank={}", volume->is_blank);
-    // LOG_INFO( "    is_floppy={}", volume->is_floppy);
-    // LOG_INFO( "    is_table={}", volume->is_table);
-    // LOG_INFO( "    is_removable={}", volume->is_removable);
-    // LOG_INFO( "    requires_eject={}", volume->requires_eject);
-    // LOG_INFO( "    is_user_visible={}", volume->is_user_visible);
-    // LOG_INFO( "    mount_point={}", volume->mount_point);
-    // LOG_INFO( "    size={}", volume->size);
-    // LOG_INFO( "    disp_name={}", volume->disp_name);
+    // ztd::logger::info( "====devnum={}:{}", MAJOR(volume->devnum), MINOR(volume->devnum));
+    // ztd::logger::info( "    device_file={}", volume->device_file);
+    // ztd::logger::info( "    udi={}", volume->udi);
+    // ztd::logger::info( "    label={}", volume->label);
+    // ztd::logger::info( "    icon={}", volume->icon);
+    // ztd::logger::info( "    is_mounted={}", volume->is_mounted);
+    // ztd::logger::info( "    is_mountable={}", volume->is_mountable);
+    // ztd::logger::info( "    is_optical={}", volume->is_optical);
+    // ztd::logger::info( "    is_audiocd={}", volume->is_audiocd);
+    // ztd::logger::info( "    is_blank={}", volume->is_blank);
+    // ztd::logger::info( "    is_floppy={}", volume->is_floppy);
+    // ztd::logger::info( "    is_table={}", volume->is_table);
+    // ztd::logger::info( "    is_removable={}", volume->is_removable);
+    // ztd::logger::info( "    requires_eject={}", volume->requires_eject);
+    // ztd::logger::info( "    is_user_visible={}", volume->is_user_visible);
+    // ztd::logger::info( "    mount_point={}", volume->mount_point);
+    // ztd::logger::info( "    size={}", volume->size);
+    // ztd::logger::info( "    disp_name={}", volume->disp_name);
 
     return volume;
 }
@@ -1998,7 +1998,7 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
         }
         catch (const Glib::FileError& e)
         {
-            LOG_WARN("Error reading {}: {}", mtab_file, e.what());
+            ztd::logger::warn("Error reading {}: {}", mtab_file, e.what());
             return false;
         }
     }
@@ -2010,7 +2010,7 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
         }
         catch (const Glib::FileError& e)
         {
-            LOG_WARN("Error reading {}: {}", MTAB, e.what());
+            ztd::logger::warn("Error reading {}: {}", MTAB, e.what());
             return false;
         }
     }
@@ -2023,7 +2023,7 @@ path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file
 
         if (sscanf(line.data(), "%s %s %s ", encoded_file, encoded_point, encoded_fstype) != 3)
         {
-            LOG_WARN("Error parsing mtab line '{}'", line);
+            ztd::logger::warn("Error parsing mtab line '{}'", line);
             continue;
         }
 
@@ -2246,7 +2246,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
     if (ztd::contains(point, ","))
         point = ztd::partition(point, ",")[0];
 
-    // LOG_INFO("vfs_volume_read_by_mount point: {}", point);
+    // ztd::logger::info("vfs_volume_read_by_mount point: {}", point);
 
     // get device name
     char* name = nullptr;
@@ -2442,7 +2442,7 @@ vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* option
             }
             break;
         default:
-            LOG_WARN("vfs_volume_handler_cmd invalid mode {}", mode);
+            ztd::logger::warn("vfs_volume_handler_cmd invalid mode {}", mode);
             return nullptr;
     }
 
@@ -2507,7 +2507,7 @@ vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* option
 
     if (error)
     {
-        LOG_ERROR(error_message);
+        ztd::logger::error(error_message);
         return nullptr;
     }
 
@@ -2534,13 +2534,13 @@ vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* option
     }
 
     // show selected handler
-    LOG_INFO("{} '{}': {}{} {}",
-             mode == PtkHandlerMode::HANDLER_MODE_FS ? "Selected Device Handler"
-                                                     : "Selected Protocol Handler",
-             set->menu_label,
-             action_s,
-             !command.empty() ? "" : " (no command)",
-             msg);
+    ztd::logger::info("{} '{}': {}{} {}",
+                      mode == PtkHandlerMode::HANDLER_MODE_FS ? "Selected Device Handler"
+                                                              : "Selected Protocol Handler",
+                      set->menu_label,
+                      action_s,
+                      !command.empty() ? "" : " (no command)",
+                      msg);
 
     // replace sub vars
     std::string fileq;
@@ -3045,7 +3045,7 @@ exec_task(const char* command, bool run_in_terminal)
 void
 VFSVolume::exec(const char* command) const noexcept
 {
-    // LOG_INFO("vfs_volume_exec {} {}", vol->device_file, command);
+    // ztd::logger::info("vfs_volume_exec {} {}", vol->device_file, command);
     if (!(command && command[0]) || this->device_type != VFSVolumeDeviceType::BLOCK)
         return;
 
@@ -3057,7 +3057,7 @@ VFSVolume::exec(const char* command) const noexcept
     cmd = ztd::replace(cmd, "%l", quoted_label);
     cmd = ztd::replace(cmd, "%v", this->device_file);
 
-    LOG_INFO("Autoexec: {}", cmd);
+    ztd::logger::info("Autoexec: {}", cmd);
     exec_task(cmd.data(), false);
 }
 
@@ -3097,9 +3097,9 @@ VFSVolume::autoexec() noexcept
                     MainWindow* main_window = main_window_get_last_active();
                     if (main_window)
                     {
-                        LOG_INFO("Auto Open Tab for {} in {}",
-                                 this->device_file,
-                                 this->mount_point);
+                        ztd::logger::info("Auto Open Tab for {} in {}",
+                                          this->device_file,
+                                          this->mount_point);
                         // PtkFileBrowser* file_browser =
                         //        (PtkFileBrowser*)main_window_get_current_file_browser(
                         //                                                main_window);
@@ -3108,7 +3108,7 @@ VFSVolume::autoexec() noexcept
                         //                                                   PtkOpenAction::PTK_OPEN_DIR);
                         // main_window_add_new_tab causes hang without GDK_THREADS_ENTER
                         main_window_add_new_tab(main_window, this->mount_point);
-                        // LOG_INFO("DONE Auto Open Tab for {} in {}", this->device_file,
+                        // ztd::logger::info("DONE Auto Open Tab for {} in {}", this->device_file,
                         //                                             this->mount_point);
                     }
                     else
@@ -3116,7 +3116,7 @@ VFSVolume::autoexec() noexcept
                         const std::string exe = ztd::program::exe();
                         const std::string quote_path = ztd::shell::quote(this->mount_point);
                         const std::string cmd = fmt::format("{} -t {}", exe, quote_path);
-                        LOG_INFO("COMMAND={}", cmd);
+                        ztd::logger::info("COMMAND={}", cmd);
                         Glib::spawn_command_line_async(cmd);
                     }
                 }
@@ -3136,12 +3136,12 @@ VFSVolume::autounmount() noexcept
     const char* line = this->device_unmount_cmd(&run_in_terminal);
     if (line)
     {
-        LOG_INFO("Auto-Unmount: {}", line);
+        ztd::logger::info("Auto-Unmount: {}", line);
         exec_task(line, run_in_terminal);
     }
     else
     {
-        LOG_INFO("Auto-Unmount: error: no unmount command available");
+        ztd::logger::info("Auto-Unmount: error: no unmount command available");
     }
 }
 
@@ -3163,12 +3163,12 @@ VFSVolume::automount() noexcept
         this->get_mount_command(xset_get_s(XSetName::DEV_MOUNT_OPTIONS), &run_in_terminal);
     if (line)
     {
-        LOG_INFO("Automount: {}", line);
+        ztd::logger::info("Automount: {}", line);
         exec_task(line, run_in_terminal);
     }
     else
     {
-        LOG_INFO("Automount: error: no mount command available");
+        ztd::logger::info("Automount: error: no mount command available");
     }
 }
 
@@ -3292,11 +3292,11 @@ vfs_volume_nonblock_removed(dev_t devnum)
         if (volume->device_type != VFSVolumeDeviceType::BLOCK && volume->devnum == devnum)
         {
             // remove volume
-            LOG_INFO("special mount removed: {} ({}:{}) on {}",
-                     volume->device_file,
-                     MAJOR(volume->devnum),
-                     MINOR(volume->devnum),
-                     volume->mount_point);
+            ztd::logger::info("special mount removed: {} ({}:{}) on {}",
+                              volume->device_file,
+                              MAJOR(volume->devnum),
+                              MINOR(volume->devnum),
+                              volume->mount_point);
             volumes.erase(std::remove(volumes.begin(), volumes.end(), volume), volumes.end());
             call_callbacks(volume, VFSVolumeState::REMOVED);
             delete volume;
@@ -3320,7 +3320,7 @@ vfs_volume_device_removed(struct udev_device* udevice)
         if (volume->device_type == VFSVolumeDeviceType::BLOCK && volume->devnum == devnum)
         {
             // remove volume
-            // LOG_INFO("remove volume {}", volume->device_file);
+            // ztd::logger::info("remove volume {}", volume->device_file);
             volume->exec(xset_get_s(XSetName::DEV_EXEC_REMOVE));
             if (volume->is_mounted && volume->is_removable)
                 volume->unmount_if_mounted();
@@ -3349,7 +3349,7 @@ VFSVolume::unmount_if_mounted() noexcept
 
     const std::string line =
         fmt::format("grep -qs '^{} ' {} 2>/dev/null || exit\n{}\n", this->device_file, MTAB, str);
-    LOG_INFO("Unmount-If-Mounted: {}", line);
+    ztd::logger::info("Unmount-If-Mounted: {}", line);
     exec_task(line.data(), run_in_terminal);
 }
 
@@ -3375,7 +3375,7 @@ vfs_volume_init()
     udev = udev_new();
     if (!udev)
     {
-        LOG_INFO("unable to initialize udev");
+        ztd::logger::info("unable to initialize udev");
         return true;
     }
 
@@ -3412,7 +3412,7 @@ vfs_volume_init()
     umonitor = udev_monitor_new_from_netlink(udev, "udev");
     if (!umonitor)
     {
-        LOG_INFO("cannot create udev monitor");
+        ztd::logger::info("cannot create udev monitor");
         if (umonitor)
         {
             udev_monitor_unref(umonitor);
@@ -3427,7 +3427,7 @@ vfs_volume_init()
     }
     if (udev_monitor_enable_receiving(umonitor))
     {
-        LOG_INFO("cannot enable udev monitor receiving");
+        ztd::logger::info("cannot enable udev monitor receiving");
         if (umonitor)
         {
             udev_monitor_unref(umonitor);
@@ -3442,7 +3442,7 @@ vfs_volume_init()
     }
     if (udev_monitor_filter_add_match_subsystem_devtype(umonitor, "block", nullptr))
     {
-        LOG_INFO("cannot set udev filter");
+        ztd::logger::info("cannot set udev filter");
         if (umonitor)
         {
             udev_monitor_unref(umonitor);
@@ -3459,7 +3459,7 @@ vfs_volume_init()
     const i32 ufd = udev_monitor_get_fd(umonitor);
     if (ufd == 0)
     {
-        LOG_INFO("scannot get udev monitor socket file descriptor");
+        ztd::logger::info("scannot get udev monitor socket file descriptor");
         if (umonitor)
         {
             udev_monitor_unref(umonitor);
@@ -3693,7 +3693,7 @@ vfs_volume_dir_avoid_changes(std::string_view dir)
     const char* devnode;
     bool ret;
 
-    // LOG_INFO("vfs_volume_dir_avoid_changes( {} )", dir);
+    // ztd::logger::info("vfs_volume_dir_avoid_changes( {} )", dir);
     if (!udev || dir.empty())
         return false;
 
@@ -3704,7 +3704,7 @@ vfs_volume_dir_avoid_changes(std::string_view dir)
     const auto statbuf = ztd::stat(canon);
     if (!statbuf.is_valid())
         return false;
-    // LOG_INFO("    statbuf.dev() = {}:{}", major(statbuf.dev()), minor(statbuf.dev()));
+    // ztd::logger::info("    statbuf.dev() = {}:{}", major(statbuf.dev()), minor(statbuf.dev()));
 
     struct udev_device* udevice = udev_device_new_from_devnum(udev, 'b', statbuf.dev());
     if (udevice)
@@ -3716,7 +3716,7 @@ vfs_volume_dir_avoid_changes(std::string_view dir)
     {
         // not a block device
         const char* fstype = get_devmount_fstype(major(statbuf.dev()), minor(statbuf.dev()));
-        // LOG_INFO("    !udevice || !devnode  fstype={}", fstype);
+        // ztd::logger::info("    !udevice || !devnode  fstype={}", fstype);
         ret = false;
         if (fstype && fstype[0])
         {
@@ -3732,7 +3732,9 @@ vfs_volume_dir_avoid_changes(std::string_view dir)
                     if (ztd::startswith(ptr, fstype) &&
                         (ptr[len] == ' ' || ptr[len] == ',' || ptr[len] == '\0'))
                     {
-                        LOG_INFO("Change Detection Blacklist: fstype '{}' on {}", fstype, dir);
+                        ztd::logger::info("Change Detection Blacklist: fstype '{}' on {}",
+                                          fstype,
+                                          dir);
                         ret = true;
                         break;
                     }
@@ -3749,7 +3751,7 @@ vfs_volume_dir_avoid_changes(std::string_view dir)
 
     if (udevice)
         udev_device_unref(udevice);
-    // LOG_INFO("    avoid_changes = {}", ret ? "true" : "false");
+    // ztd::logger::info("    avoid_changes = {}", ret ? "true" : "false");
     return ret;
 }
 

@@ -981,7 +981,7 @@ load_command_script(ContextData* ctxt, xset_t set)
         if (!file.is_open())
         {
             const std::string errno_msg = std::strerror(errno);
-            LOG_WARN("error reading file {}: {}", script, errno_msg);
+            ztd::logger::warn("error reading file {}: {}", script, errno_msg);
         }
         else
         {
@@ -993,7 +993,7 @@ load_command_script(ContextData* ctxt, xset_t set)
                     file.close();
                     gtk_text_buffer_set_text(buf, "", -1);
                     modified = true;
-                    LOG_WARN("file '{}' contents are not valid UTF-8", script);
+                    ztd::logger::warn("file '{}' contents are not valid UTF-8", script);
                     break;
                 }
                 gtk_text_buffer_insert_at_cursor(buf, line.data(), -1);

@@ -29,7 +29,7 @@ class MimeCache
   public:
     MimeCache() = delete;
     ~MimeCache() = default;
-    // ~MimeCache() { LOG_INFO("MimeCache Destructor"); };
+    // ~MimeCache() { ztd::logger::info("MimeCache Destructor"); };
 
     MimeCache(std::string_view file_path);
 

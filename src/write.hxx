@@ -34,6 +34,6 @@ write_file(std::string_view path, const T data)
 
     const bool result = file.good();
     if (!result)
-        LOG_ERROR("Failed to write file: {}", path);
+        ztd::logger::error("Failed to write file: {}", path);
     return result;
 }

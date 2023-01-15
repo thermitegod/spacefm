@@ -57,7 +57,7 @@ parse_etc_conf(std::string_view etc_path, std::string_view raw_line)
     if (ztd::same(token, "terminal_su") || ztd::same(token, "graphical_su"))
     {
         if (value.at(0) != '/' || !std::filesystem::exists(value))
-            LOG_WARN("{}: {} '{}' file not found", etc_path, token, value);
+            ztd::logger::warn("{}: {} '{}' file not found", etc_path, token, value);
         else if (ztd::same(token, "terminal_su"))
             etc_settings.set_terminal_su(value);
     }

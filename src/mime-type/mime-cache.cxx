@@ -66,7 +66,7 @@ inline constexpr u64 MAGIC_LIST     = 24;
 
 MimeCache::MimeCache(std::string_view file_path)
 {
-    // LOG_INFO("MimeCache Constructor");
+    // ztd::logger::info("MimeCache Constructor");
 
     this->file_path = file_path.data();
 
@@ -99,11 +99,12 @@ MimeCache::load_mime_file()
 
     if (majv != LIB_MAJOR_VERSION || minv != LIB_MINOR_VERSION)
     {
-        LOG_ERROR("shared-mime-info version error, only supports {}.{} trying to use {}.{}",
-                  LIB_MAJOR_VERSION,
-                  LIB_MINOR_VERSION,
-                  majv,
-                  minv);
+        ztd::logger::error(
+            "shared-mime-info version error, only supports {}.{} trying to use {}.{}",
+            LIB_MAJOR_VERSION,
+            LIB_MINOR_VERSION,
+            majv,
+            minv);
         free(buf);
         return;
     }
@@ -198,7 +199,7 @@ MimeCache::lookup_suffix(std::string_view filename, const char** suffix_pos)
         return nullptr;
 
     const char* mime_type = this->buffer + VAL32(leaf_node, 4);
-    // LOG_DEBUG("found: {}", mime_type);
+    // ztd::logger::debug("found: {}", mime_type);
     *suffix_pos = _suffix_pos;
     return mime_type;
 }
@@ -455,7 +456,7 @@ MimeCache::lookup_reverse_suffix_nodes(const char* buf, const char* nodes, u32 n
     const char* cur_suffix_pos = (const char*)suffix + 1;
 
     const u32 uchar = suffix ? g_unichar_tolower(g_utf8_get_char(suffix)) : 0;
-    // LOG_DEBUG("{}: suffix= '{}'", name, suffix);
+    // ztd::logger::debug("{}: suffix= '{}'", name, suffix);
 
     for (usize i = 0; i < n; ++i)
     {

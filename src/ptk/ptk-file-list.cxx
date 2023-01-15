@@ -335,7 +335,7 @@ ptk_file_list_get_flags(GtkTreeModel* tree_model)
     assert(PTK_IS_FILE_LIST(tree_model) == true);
     if (!PTK_IS_FILE_LIST(tree_model))
     {
-        LOG_ERROR("!PTK_IS_FILE_LIST(tree_model)");
+        ztd::logger::error("!PTK_IS_FILE_LIST(tree_model)");
         return (GtkTreeModelFlags)0;
     }
     return GtkTreeModelFlags(GTK_TREE_MODEL_LIST_ONLY | GTK_TREE_MODEL_ITERS_PERSIST);
@@ -623,7 +623,7 @@ ptk_file_list_set_sort_func(GtkTreeSortable* sortable, i32 sort_column_id,
     (void)sort_func;
     (void)user_data;
     (void)destroy;
-    LOG_WARN("ptk_file_list_set_sort_func: Not supported");
+    ztd::logger::warn("ptk_file_list_set_sort_func: Not supported");
 }
 
 static void
@@ -634,7 +634,7 @@ ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompar
     (void)sort_func;
     (void)user_data;
     (void)destroy;
-    LOG_WARN("ptk_file_list_set_default_sort_func: Not supported");
+    ztd::logger::warn("ptk_file_list_set_default_sort_func: Not supported");
 }
 
 static i32
@@ -932,7 +932,7 @@ ptk_file_list_file_changed(vfs::file_info file, PtkFileList* list)
 static void
 on_thumbnail_loaded(vfs::file_info file, PtkFileList* list)
 {
-    // LOG_DEBUG("LOADED: {}", file->name);
+    // ztd::logger::debug("LOADED: {}", file->name);
     ptk_file_list_file_changed(file, list);
 }
 
@@ -987,7 +987,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size)
             else
             {
                 vfs_thumbnail_loader_request(list->dir, file, is_big);
-                // LOG_DEBUG("REQUEST: {}", file->name);
+                // ztd::logger::debug("REQUEST: {}", file->name);
             }
         }
     }

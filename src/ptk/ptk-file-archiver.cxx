@@ -110,8 +110,8 @@ archive_handler_run_in_term(xset_t handler_xset, i32 operation)
     // Making sure a valid handler_xset has been passed
     if (!handler_xset)
     {
-        LOG_WARN("archive_handler_run_in_term has been called with an "
-                 "invalid handler_xset!");
+        ztd::logger::warn("archive_handler_run_in_term has been called with an "
+                          "invalid handler_xset!");
         return false;
     }
 
@@ -128,9 +128,9 @@ archive_handler_run_in_term(xset_t handler_xset, i32 operation)
             ret = handler_xset->scroll_lock;
             break;
         default:
-            LOG_WARN("archive_handler_run_in_term was passed an invalid"
-                     " archive operation ('{}')!",
-                     operation);
+            ztd::logger::warn("archive_handler_run_in_term was passed an invalid"
+                              " archive operation ('{}')!",
+                              operation);
             return false;
     }
     return ret == XSetB::XSET_B_TRUE;
@@ -161,8 +161,8 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     if (!gtk_tree_model_get_iter_first(GTK_TREE_MODEL(list), &iter))
     {
         // Failed to get iterator - warning user and exiting
-        LOG_WARN("Unable to get an iterator to the start of the model "
-                 "associated with combobox!");
+        ztd::logger::warn("Unable to get an iterator to the start of the model "
+                          "associated with combobox!");
         return;
     }
 
@@ -408,7 +408,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
     const std::vector<std::string> archive_handlers = ztd::split(archive_handlers_s, " ");
 
     // Debug code
-    // LOG_INFO("archive_handlers_s: {}", archive_handlers_s);
+    // ztd::logger::info("archive_handlers_s: {}", archive_handlers_s);
 
     // Looping for handlers (nullptr-terminated list)
     GtkTreeIter iter;
@@ -533,7 +533,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
     else
     {
         // Recording the fact getting the iter failed
-        LOG_WARN("Unable to fetch the iter from handler ordinal {}!", format);
+        ztd::logger::warn("Unable to fetch the iter from handler ordinal {}!", format);
     };
 
     // Mnemonically attaching widgets to labels
@@ -604,7 +604,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
                 {
                     // Unable to fetch iter from combo box - warning user and
                     // exiting
-                    LOG_WARN("Unable to fetch iter from combobox!");
+                    ztd::logger::warn("Unable to fetch iter from combobox!");
                     free(dest_file);
                     gtk_widget_destroy(dlg);
                     return;
@@ -656,7 +656,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
                                                 error_message);
                 if (error)
                 {
-                    LOG_WARN(error_message);
+                    ztd::logger::warn(error_message);
                     error_message.clear();
                     compress_command = "";
                 }
@@ -682,7 +682,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
                                                         error_message);
                         if (error)
                         {
-                            LOG_WARN(error_message);
+                            ztd::logger::warn(error_message);
                             error_message.clear();
                         }
 
@@ -699,7 +699,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
                                                         error_message);
                         if (error)
                         {
-                            LOG_WARN(error_message);
+                            ztd::logger::warn(error_message);
                             error_message.clear();
                         }
 
@@ -1187,10 +1187,10 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         // Continuing to next file if a handler hasnt been found
         if (!handler_xset)
         {
-            LOG_WARN("No archive handler/command found for file: {}", full_path);
+            ztd::logger::warn("No archive handler/command found for file: {}", full_path);
             continue;
         }
-        LOG_INFO("Archive Handler Selected: {}", handler_xset->menu_label);
+        ztd::logger::info("Archive Handler Selected: {}", handler_xset->menu_label);
 
         /* Handler found - fetching the 'run in terminal' preference, if
          * the operation is listing then the terminal should be kept
@@ -1219,7 +1219,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                                                        error_message);
             if (error)
             {
-                LOG_WARN(error_message);
+                ztd::logger::warn(error_message);
                 error_message.clear();
                 command = "";
             }
@@ -1272,7 +1272,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                                                        error_message);
             if (error)
             {
-                LOG_WARN(error_message);
+                ztd::logger::warn(error_message);
                 error_message.clear();
                 command = "";
             }
@@ -1322,8 +1322,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
             }
 
             // Debug code
-            // LOG_INFO("full_quote : {}", full_quote);
-            // LOG_INFO("dest       : {}", dest);
+            // ztd::logger::info("full_quote : {}", full_quote);
+            // ztd::logger::info("dest       : {}", dest);
 
             // Singular file extraction target (e.g. stdout-redirected gzip)
             static constexpr std::array<std::string_view, 2> keys{"%g", "%G"};
