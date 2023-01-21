@@ -154,7 +154,7 @@ open_in_tab(MainWindow** main_window, const char* real_path)
         else
         {
             // use first visible panel
-            for (panel_t p : PANELS)
+            for (const panel_t p : PANELS)
             {
                 if (xset_get_b_panel(p, XSetPanel::SHOW))
                 {
@@ -544,7 +544,7 @@ open_file(std::string_view path)
         }
     }
 
-    vfs::desktop desktop = vfs_get_desktop(app_name);
+    const vfs::desktop desktop = vfs_get_desktop(app_name);
 
     const std::vector<std::string> open_files{path.data()};
 

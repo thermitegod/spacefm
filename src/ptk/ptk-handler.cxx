@@ -797,7 +797,7 @@ ptk_handler_command_is_empty(std::string_view command)
     }
 
     const auto cmd_parts = ztd::split(command, "\n");
-    for (std::string_view cmd_line : cmd_parts)
+    for (const std::string_view cmd_line : cmd_parts)
     {
         if (ztd::strip(cmd_line).empty())
         {
@@ -1153,7 +1153,7 @@ ptk_handler_values_in_list(std::string_view list, const std::vector<std::string>
             required = false;
         }
         match = false;
-        for (std::string_view handler : values)
+        for (const std::string_view handler : values)
         {
             if (ztd::fnmatch(element, handler))
             {
@@ -1178,7 +1178,7 @@ static bool
 value_in_list(std::string_view list, std::string_view value)
 { // this function must be FAST - is run multiple times on menu popup
     // value in space-separated list with wildcards
-    for (std::string_view key : ztd::split(list, " "))
+    for (const std::string_view key : ztd::split(list, " "))
     {
         if (ztd::fnmatch(key, value))
         {
@@ -1227,7 +1227,7 @@ ptk_handler_file_has_handlers(i32 mode, i32 cmd, std::string_view path, vfs::mim
         return xset_handlers;
     }
 
-    for (std::string_view handler : handlers)
+    for (const std::string_view handler : handlers)
     {
         xset_t handler_set = xset_is(handler);
         if (!handler_set)
@@ -1352,7 +1352,7 @@ ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
         // add a space to end of list and end of name before testing to avoid
         // substring false positive
         std::string testlist = fmt::format("{} ", list);
-        std::string testname = fmt::format("{} ", handler->setname);
+        std::string const testname = fmt::format("{} ", handler->setname);
         if (add_missing && !ztd::contains(testlist, testname))
         {
             // add a missing default handler to the list
@@ -1713,7 +1713,7 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
     GtkTreeIter iter;
     GtkTreeIter def_handler_iter;
     def_handler_iter.stamp = 0;
-    for (std::string_view archive_handler : archive_handlers)
+    for (const std::string_view archive_handler : archive_handlers)
     {
         if (ztd::startswith(archive_handler, handler_cust_prefixs.at(hnd->mode)))
         {
@@ -1813,7 +1813,7 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
 static void
 on_configure_button_press(GtkButton* widget, HandlerData* hnd)
 {
-    std::string command;
+    std::string const command;
     std::string error_message;
     bool error = false;
 
@@ -2580,7 +2580,7 @@ validate_archive_handler(HandlerData* hnd)
     char* handler_compress = ptk_handler_get_text_view(GTK_TEXT_VIEW(hnd->view_handler_compress));
     char* handler_extract = ptk_handler_get_text_view(GTK_TEXT_VIEW(hnd->view_handler_extract));
     char* handler_list = ptk_handler_get_text_view(GTK_TEXT_VIEW(hnd->view_handler_list));
-    bool ret = true;
+    const bool ret = true;
 
     /* Other settings are commands to run in different situations -
      * since different handlers may or may not need different
@@ -2963,7 +2963,7 @@ on_archive_default(GtkMenuItem* menuitem, xset_t set)
         XSetName::ARC_DEF_LIST,
     };
 
-    for (XSetName arcname : arcnames)
+    for (const XSetName arcname : arcnames)
     {
         if (set->xset_name == arcname)
         {

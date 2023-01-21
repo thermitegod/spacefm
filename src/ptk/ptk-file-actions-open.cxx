@@ -173,7 +173,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
         for (GList* l = files; l; l = g_list_next(l))
         {
             // filename
-            std::string quoted;
+            std::string const quoted;
 
             const std::string name = Glib::path_get_basename((char*)l->data);
             fm_filenames.append(fmt::format("{}\n", ztd::shell::quote(name)));
@@ -275,7 +275,7 @@ open_files_with_app(ParentInfo* parent, GList* files, std::string_view app_deskt
         return false;
     }
 
-    vfs::desktop desktop = vfs_get_desktop(check_desktop_name(app_desktop));
+    const vfs::desktop desktop = vfs_get_desktop(check_desktop_name(app_desktop));
 
     ztd::logger::info("EXEC({})={}", desktop->get_full_path(), desktop->get_exec());
 

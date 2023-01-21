@@ -1493,7 +1493,7 @@ xset_defaults()
     xset_set(XSetName::ROWN_ROOT_USER2, XSetVar::MENU_LABEL, "root:user2");
 
     // PANELS
-    for (panel_t p : PANELS)
+    for (const panel_t p : PANELS)
     {
         set = xset_set_panel(p, XSetPanel::SHOW_TOOLBOX, XSetVar::MENU_LABEL, "_Toolbar");
         set->menu_style = XSetMenu::CHECK;

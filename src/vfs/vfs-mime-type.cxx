@@ -127,7 +127,7 @@ vfs_mime_type_init()
             continue;
         }
 
-        vfs::file_monitor monitor =
+        const vfs::file_monitor monitor =
             vfs_file_monitor_add(cache->get_file_path(), on_mime_cache_changed, nullptr);
 
         mime_caches_monitors.emplace_back(monitor);

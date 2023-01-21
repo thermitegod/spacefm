@@ -231,7 +231,7 @@ xset_pack_sets()
 
     for (xset_t set : xsets)
     {
-        setvars_t setvars = xset_pack_set(set);
+        const setvars_t setvars = xset_pack_set(set);
 
         if (!setvars.empty())
         {

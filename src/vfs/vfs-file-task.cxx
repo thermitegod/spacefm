@@ -1136,7 +1136,8 @@ VFSFileTask::file_chown_chmod(std::string_view src_file)
         if (this->chmod_actions)
         {
             std::filesystem::perms new_perms;
-            std::filesystem::perms orig_perms = std::filesystem::status(src_file).permissions();
+            const std::filesystem::perms orig_perms =
+                std::filesystem::status(src_file).permissions();
 
             for (usize i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
             {
@@ -1597,7 +1598,7 @@ VFSFileTask::file_exec(std::string_view src_file)
         // use checksum
         if (geteuid() != 0 && (!this->exec_as_user.empty() || this->exec_checksum))
         {
-            Glib::Checksum check = Glib::Checksum();
+            const Glib::Checksum check = Glib::Checksum();
             sum_script =
                 check.compute_checksum(Glib::Checksum::Type::MD5, this->exec_script.data());
         }
@@ -1861,7 +1862,7 @@ vfs_file_task_thread(vfs::file_task task)
         // start timer to limit the amount of time to spend on this - can be
         // VERY slow for network filesystems
         size_timeout = g_timeout_add_seconds(5, (GSourceFunc)on_size_timeout, task);
-        for (std::string_view src_path : task->src_paths)
+        for (const std::string_view src_path : task->src_paths)
         {
             const auto file_stat = ztd::lstat(src_path);
             if (!file_stat.is_valid())
@@ -1926,7 +1927,7 @@ vfs_file_task_thread(vfs::file_task task)
             dest_dev = file_stat.dev();
         }
 
-        for (std::string_view src_path : task->src_paths)
+        for (const std::string_view src_path : task->src_paths)
         {
             const auto file_stat = ztd::lstat(src_path);
             if (!file_stat.is_valid())
@@ -2052,7 +2053,7 @@ vfs_file_task_thread(vfs::file_task task)
         return nullptr;
     }
 
-    for (std::string_view src_path : task->src_paths)
+    for (const std::string_view src_path : task->src_paths)
     {
         switch (task->type)
         {

@@ -197,7 +197,7 @@ vfs_file_monitor_add(std::string_view path, vfs::file_monitor_callback callback,
     // ztd::logger::debug("monitor installed for: {}", path);
     if (callback)
     { // Install a callback
-        vfs::file_monitor_callback_entry cb_ent =
+        const vfs::file_monitor_callback_entry cb_ent =
             std::make_shared<VFSFileMonitorCallbackEntry>(callback, user_data);
         monitor->callbacks.emplace_back(cb_ent);
     }

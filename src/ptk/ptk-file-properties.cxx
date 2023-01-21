@@ -319,7 +319,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
 
                 if (!exist) /* It did not exist */
                 {
-                    vfs::desktop desktop = vfs_get_desktop(action);
+                    const vfs::desktop desktop = vfs_get_desktop(action);
 
                     GdkPixbuf* icon;
                     icon = desktop->get_icon(20);
@@ -502,9 +502,9 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
         model = gtk_list_store_new(3, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
         if (!actions.empty())
         {
-            for (std::string_view action : actions)
+            for (const std::string_view action : actions)
             {
-                vfs::desktop desktop = vfs_get_desktop(action);
+                const vfs::desktop desktop = vfs_get_desktop(action);
                 GdkPixbuf* icon;
                 gtk_list_store_append(model, &it);
                 icon = desktop->get_icon(20);

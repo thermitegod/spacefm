@@ -659,7 +659,7 @@ update_created_files(std::string_view key, vfs::dir dir)
     }
 
     vfs_dir_lock(dir);
-    for (std::string_view created_file : dir->created_files)
+    for (const std::string_view created_file : dir->created_files)
     {
         vfs::file_info file;
         vfs::file_info file_found = vfs_dir_find_file(dir, created_file, nullptr);

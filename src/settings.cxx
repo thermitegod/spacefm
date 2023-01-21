@@ -269,7 +269,7 @@ load_settings()
     if (!main_terminal)
     {
         const auto supported_terminals = terminal_handlers->get_supported_terminal_names();
-        for (std::string_view supported_terminal : supported_terminals)
+        for (const std::string_view supported_terminal : supported_terminals)
         {
             const std::string terminal = Glib::find_program_in_path(supported_terminal.data());
             if (terminal.empty())
@@ -294,7 +294,7 @@ load_settings()
             vfs_mime_type_unref(mime_type);
             if (app_name)
             {
-                vfs::desktop desktop = vfs_get_desktop(app_name);
+                const vfs::desktop desktop = vfs_get_desktop(app_name);
                 xset_set(XSetName::EDITOR, XSetVar::S, desktop->get_exec());
             }
         }
@@ -340,7 +340,7 @@ save_settings(void* main_window_ptr)
     {
         if (save_tabs)
         {
-            for (panel_t p : PANELS)
+            for (const panel_t p : PANELS)
             {
                 xset_t set = xset_get_panel(p, XSetPanel::SHOW);
                 if (GTK_IS_NOTEBOOK(main_window->panel[p - 1]))
@@ -383,7 +383,7 @@ save_settings(void* main_window_ptr)
         else
         {
             // clear saved tabs
-            for (panel_t p : PANELS)
+            for (const panel_t p : PANELS)
             {
                 xset_t set = xset_get_panel(p, XSetPanel::SHOW);
                 if (set->s)
@@ -600,7 +600,7 @@ xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* acce
 
     const std::vector<std::string> split_elements = ztd::split(elements, " ");
 
-    for (std::string_view element : split_elements)
+    for (const std::string_view element : split_elements)
     {
         xset_t set = xset_get(element);
         xset_add_menuitem(file_browser, menu, accel_group, set);
@@ -788,7 +788,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
             i32 icon_w;
             i32 icon_h;
             gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
-            i32 icon_size = icon_w > icon_h ? icon_w : icon_h;
+            const i32 icon_size = icon_w > icon_h ? icon_w : icon_h;
 
             GdkPixbuf* app_icon = nullptr;
             const auto cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
@@ -1005,7 +1005,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
             }
             else if (ztd::endswith(set->z, ".desktop"))
             {
-                vfs::desktop desktop = vfs_get_desktop(set->z);
+                const vfs::desktop desktop = vfs_get_desktop(set->z);
                 if (!desktop->get_exec().empty())
                 {
                     // get file list
@@ -2847,7 +2847,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     set->browser = file_browser;
 
     // get context
-    xset_context_t context = xset_context_new();
+    const xset_context_t context = xset_context_new();
     main_context_fill(file_browser, context);
     if (!context->valid)
     {
@@ -3005,7 +3005,7 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     ptk_file_browser_focus_me(file_browser);
 
     // get context
-    xset_context_t context = xset_context_new();
+    const xset_context_t context = xset_context_new();
     main_context_fill(file_browser, context);
     if (!context->valid)
     {
@@ -3087,7 +3087,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     // get real icon size from gtk icon size
     i32 icon_w, icon_h;
     gtk_icon_size_lookup((GtkIconSize)icon_size, &icon_w, &icon_h);
-    i32 real_icon_size = icon_w > icon_h ? icon_w : icon_h;
+    const i32 real_icon_size = icon_w > icon_h ? icon_w : icon_h;
 
     set->browser = file_browser;
 
@@ -3580,7 +3580,7 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     set_parent->lock = true;
     set_parent->menu_style = XSetMenu::SUBMENU;
 
-    GtkIconSize icon_size = gtk_toolbar_get_icon_size(GTK_TOOLBAR(toolbar));
+    const GtkIconSize icon_size = gtk_toolbar_get_icon_size(GTK_TOOLBAR(toolbar));
 
     xset_t set_child = nullptr;
     if (set_parent->child)

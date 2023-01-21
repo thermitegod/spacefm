@@ -159,7 +159,7 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
             break;
         }
 
-        vfs::thumbnail::request req = loader->queue.front();
+        const vfs::thumbnail::request req = loader->queue.front();
         loader->queue.pop_front();
         if (!req)
         {
@@ -264,7 +264,7 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
 
     // Check if the request is already scheduled
     vfs::thumbnail::request req;
-    for (vfs::thumbnail::request& queued_req : loader->queue)
+    for (const vfs::thumbnail::request& queued_req : loader->queue)
     {
         req = queued_req;
         // ztd::logger::info("req->file->name={} | file->name={}", req->file->name, file->name);
@@ -307,7 +307,7 @@ vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big)
 static GdkPixbuf*
 vfs_thumbnail_load(std::string_view file_path, std::string_view file_uri, i32 thumb_size)
 {
-    Glib::Checksum hash = Glib::Checksum();
+    const Glib::Checksum hash = Glib::Checksum();
     const std::string file_hash = hash.compute_checksum(Glib::Checksum::Type::MD5, file_uri.data());
     const std::string file_name = fmt::format("{}.png", file_hash);
 

@@ -243,7 +243,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
         gtk_list_store_clear(list);
 
         // add sorted list to liststore
-        for (std::string_view name : name_list)
+        for (const std::string_view name : name_list)
         {
             const std::string disp_name = Glib::filename_display_basename(name.data());
 
@@ -525,7 +525,7 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
 
     xset_t set;
 
-    xset_context_t context = xset_context_new();
+    const xset_context_t context = xset_context_new();
     main_context_fill(file_browser, context);
 
     GtkAccelGroup* accel_group = gtk_accel_group_new();

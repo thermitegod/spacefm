@@ -267,7 +267,7 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, std::string_view path)
         return true;
     }
 
-    for (std::string_view dir : dirs)
+    for (const std::string_view dir : dirs)
     {
         if (dir.empty())
         {

@@ -40,7 +40,7 @@ class AutoSave
     // returns false when killed:
     template<class R, class P>
     bool
-    wait(std::chrono::duration<R, P> const& time) noexcept
+    wait(const std::chrono::duration<R, P>& time) noexcept
     {
         std::unique_lock<std::mutex> lock(m);
         return !cv.wait_for(lock, time, [&] { return terminate; });
@@ -48,7 +48,7 @@ class AutoSave
     void
     kill() noexcept
     {
-        std::unique_lock<std::mutex> lock(m);
+        const std::unique_lock<std::mutex> lock(m);
         this->terminate = true;
         cv.notify_all();
     }

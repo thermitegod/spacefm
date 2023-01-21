@@ -86,7 +86,7 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, u3
         use_uri = true;
     }
 
-    for (std::string_view clipboard_file : clipboard_file_list)
+    for (const std::string_view clipboard_file : clipboard_file_list)
     {
         if (use_uri)
         {
@@ -328,7 +328,7 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, std::string_view dest_dir, GtkT
         std::vector<std::string> file_list;
 
         const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
-        for (std::string_view uri : uri_list)
+        for (const std::string_view uri : uri_list)
         {
             std::string file_path;
             try
@@ -416,7 +416,7 @@ ptk_clipboard_paste_links(GtkWindow* parent_win, std::string_view dest_dir, GtkT
         std::vector<std::string> file_list;
 
         const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
-        for (std::string_view uri : uri_list)
+        for (const std::string_view uri : uri_list)
         {
             std::string file_path;
             try
@@ -501,7 +501,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, std::string_view dest_dir,
         std::vector<std::string> file_list;
 
         const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
-        for (std::string_view uri : uri_list)
+        for (const std::string_view uri : uri_list)
         {
             std::string file_path;
             try
@@ -612,7 +612,7 @@ ptk_clipboard_get_file_paths(std::string_view cwd, bool* is_cut, i32* missing_ta
 
     // create file list
     const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
-    for (std::string_view uri : uri_list)
+    for (const std::string_view uri : uri_list)
     {
         std::string file_path;
         try

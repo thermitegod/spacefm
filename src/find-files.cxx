@@ -390,16 +390,18 @@ static GtkActionEntry menu_actions[] = {
 static i32
 get_date_offset(GtkCalendar* calendar)
 {
-    std::time_t timeval = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    const std::time_t timeval =
+        std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     std::tm* lt = std::localtime(&timeval);
 
     u32 d, m, y;
     gtk_calendar_get_date(calendar, &y, &m, &d);
 
-    Glib::Date date = Glib::Date(Glib::Date::Day(d), Glib::Date::Month(m), Glib::Date::Year(y));
-    Glib::Date today = Glib::Date(Glib::Date::Day(lt->tm_mday),
-                                  Glib::Date::Month(lt->tm_mon),
-                                  Glib::Date::Year(lt->tm_year + 1900));
+    const Glib::Date date =
+        Glib::Date(Glib::Date::Day(d), Glib::Date::Month(m), Glib::Date::Year(y));
+    const Glib::Date today = Glib::Date(Glib::Date::Day(lt->tm_mday),
+                                        Glib::Date::Month(lt->tm_mon),
+                                        Glib::Date::Year(lt->tm_year + 1900));
 
     const i32 offset = today.days_between(date);
 
@@ -1189,7 +1191,7 @@ find_files(const std::vector<std::string>& search_dirs)
     remove_directory_btn = GTK_WIDGET(gtk_builder_get_object(builder, "remove_directory_btn"));
     data->include_sub = GTK_WIDGET(gtk_builder_get_object(builder, "include_sub"));
 
-    for (std::string_view dir : search_dirs)
+    for (const std::string_view dir : search_dirs)
     {
         if (std::filesystem::is_directory(dir))
         {

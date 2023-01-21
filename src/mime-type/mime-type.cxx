@@ -388,7 +388,7 @@ mime_type_init()
     const std::string filename = "/mime/mime.cache";
 
     const std::string path = Glib::build_filename(vfs::user_dirs->data_dir(), filename);
-    mime_cache_t cache = std::make_shared<MimeCache>(path);
+    const mime_cache_t cache = std::make_shared<MimeCache>(path);
     caches.emplace_back(cache);
 
     if (cache->get_magic_max_extent() > mime_cache_max_extent)
@@ -396,10 +396,10 @@ mime_type_init()
         mime_cache_max_extent = cache->get_magic_max_extent();
     }
 
-    for (std::string_view dir : vfs::user_dirs->system_data_dirs())
+    for (const std::string_view dir : vfs::user_dirs->system_data_dirs())
     {
         const std::string path2 = Glib::build_filename(dir.data(), filename);
-        mime_cache_t dir_cache = std::make_shared<MimeCache>(path2);
+        const mime_cache_t dir_cache = std::make_shared<MimeCache>(path2);
         caches.emplace_back(dir_cache);
 
         if (dir_cache->get_magic_max_extent() > mime_cache_max_extent)
@@ -548,7 +548,7 @@ mime_type_is_subclass(std::string_view type, std::string_view parent)
     for (mime_cache_t cache : caches)
     {
         const std::vector<std::string> parents = cache->lookup_parents(type);
-        for (std::string_view p : parents)
+        for (const std::string_view p : parents)
         {
             if (ztd::same(parent, p))
             {

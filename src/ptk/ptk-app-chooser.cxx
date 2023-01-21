@@ -114,7 +114,7 @@ add_list_item(GtkListStore* list, std::string_view path)
                                -1);
             if (file)
             {
-                vfs::desktop desktop = vfs_get_desktop(path);
+                const vfs::desktop desktop = vfs_get_desktop(path);
                 if (ztd::same(file, desktop->get_name()))
                 {
                     // already exists
@@ -126,7 +126,7 @@ add_list_item(GtkListStore* list, std::string_view path)
         } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(list), &it));
     }
 
-    vfs::desktop desktop = vfs_get_desktop(path);
+    const vfs::desktop desktop = vfs_get_desktop(path);
 
     // tooltip
     const std::string tooltip = fmt::format("{}\nName={}\nExec={}{}",
@@ -174,7 +174,7 @@ create_model_from_mime_type(vfs::mime_type mime_type)
         }
         if (!apps.empty())
         {
-            for (std::string_view app : apps)
+            for (const std::string_view app : apps)
             {
                 add_list_item(list, app);
             }
@@ -637,7 +637,7 @@ load_all_known_apps_thread(vfs::async_task task)
     const std::string dir = Glib::build_filename(vfs::user_dirs->data_dir(), "applications");
     load_all_apps_in_dir(dir, list, task);
 
-    for (std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
+    for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
         const std::string sdir = Glib::build_filename(sys_dir.data(), "applications");
         load_all_apps_in_dir(sdir, list, task);

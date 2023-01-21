@@ -451,7 +451,7 @@ get_file_perm_string(std::filesystem::file_status status)
         perm[file_type] = 's';
     }
 
-    std::filesystem::perms p = status.permissions();
+    const std::filesystem::perms p = status.permissions();
 
     // Owner
     if ((p & std::filesystem::perms::owner_read) != std::filesystem::perms::none)
@@ -763,7 +763,7 @@ VFSFileInfo::load_special_info(std::string_view file_path) noexcept
     const std::string file_dir = Glib::path_get_dirname(file_path.data());
 
     this->flags = (VFSFileInfoFlag)(this->flags | VFSFileInfoFlag::DESKTOP_ENTRY);
-    vfs::desktop desktop = vfs_get_desktop(file_path);
+    const vfs::desktop desktop = vfs_get_desktop(file_path);
 
     // MOD  display real filenames of .desktop files not in desktop directory
     if (ztd::same(file_dir, vfs::user_dirs->desktop_dir()))

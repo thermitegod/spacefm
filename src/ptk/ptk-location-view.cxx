@@ -196,7 +196,7 @@ update_change_detection()
     // update all windows/all panels/all browsers
     for (MainWindow* window : main_window_get_all())
     {
-        for (panel_t p : PANELS)
+        for (const panel_t p : PANELS)
         {
             GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
             const i32 n = gtk_notebook_get_n_pages(notebook);
@@ -1005,7 +1005,7 @@ void
 ptk_location_view_mount_network(PtkFileBrowser* file_browser, std::string_view url, bool new_tab,
                                 bool force_new_mount)
 {
-    netmount_t netmount = std::make_shared<Netmount>();
+    const netmount_t netmount = std::make_shared<Netmount>();
 
     // split url
     if (split_network_url(url, netmount) != SplitNetworkURL::VALID_NETWORK_URL)
@@ -1968,7 +1968,7 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     char* str;
     GtkWidget* popup = gtk_menu_new();
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    xset_context_t context = xset_context_new();
+    const xset_context_t context = xset_context_new();
     main_context_fill(file_browser, context);
 
     set = xset_set_cb(XSetName::DEV_MENU_REMOVE, (GFunc)on_eject, vol);

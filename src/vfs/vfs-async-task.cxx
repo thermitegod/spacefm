@@ -135,7 +135,7 @@ vfs_async_task_thread(void* _task)
     vfs::async_task task = VFS_ASYNC_TASK(_task);
     void* ret = task->func(task, task->user_data);
 
-    std::unique_lock<std::mutex> lock(task->mutex);
+    const std::unique_lock<std::mutex> lock(task->mutex);
 
     task->idle_id = g_idle_add((GSourceFunc)on_idle, task); // runs in main loop thread
     task->ret_val = ret;

@@ -2088,7 +2088,7 @@ get_templates(std::string_view templates_dir, std::string_view subdir, bool getd
                 // prevent filesystem loops during recursive find
                 if (!std::filesystem::is_symlink(path))
                 {
-                    std::vector<std::string> subsubdir_templates =
+                    const std::vector<std::string> subsubdir_templates =
                         get_templates(templates_dir, subsubdir, getdir);
 
                     templates = ztd::merge(templates, subsubdir_templates);
@@ -2114,7 +2114,7 @@ get_templates(std::string_view templates_dir, std::string_view subdir, bool getd
             {
                 if (subdir.empty())
                 {
-                    std::vector<std::string> subsubdir_templates =
+                    const std::vector<std::string> subsubdir_templates =
                         get_templates(templates_dir, file_name, getdir);
 
                     templates = ztd::merge(templates, subsubdir_templates);
@@ -2122,7 +2122,7 @@ get_templates(std::string_view templates_dir, std::string_view subdir, bool getd
                 else
                 {
                     const std::string subsubdir = Glib::build_filename(subdir.data(), file_name);
-                    std::vector<std::string> subsubdir_templates =
+                    const std::vector<std::string> subsubdir_templates =
                         get_templates(templates_dir, subsubdir, getdir);
 
                     templates = ztd::merge(templates, subsubdir_templates);
@@ -2527,7 +2527,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         if (!templates.empty())
         {
             std::ranges::sort(templates);
-            for (std::string_view t : templates)
+            for (const std::string_view t : templates)
             {
                 gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template), t.data());
             }
@@ -2554,7 +2554,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         if (!templates.empty())
         {
             std::ranges::sort(templates);
-            for (std::string_view t : templates)
+            for (const std::string_view t : templates)
             {
                 gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template_dir),
                                                t.data());
@@ -3426,7 +3426,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, std::string_view cwd, GFunc
     const std::vector<std::string> files =
         ptk_clipboard_get_file_paths(cwd.data(), &is_cut, &missing_targets);
 
-    for (std::string_view file_path : files)
+    for (const std::string_view file_path : files)
     {
         vfs::file_info file = vfs_file_info_new();
         vfs_file_info_get(file, file_path);

@@ -429,7 +429,7 @@ on_archive_default(GtkMenuItem* menuitem, xset_t set)
         XSetName::ARC_DEF_LIST,
     };
 
-    for (XSetName arcname : arcnames)
+    for (const XSetName arcname : arcnames)
     {
         if (set->xset_name == arcname)
         {
@@ -990,7 +990,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         }
         if (!apps.empty())
         {
-            for (std::string_view app : apps)
+            for (const std::string_view app : apps)
             {
 #if 0
                 // TODO - FIXME
@@ -1003,7 +1003,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
                 }
 #endif
 
-                vfs::desktop desktop = vfs_get_desktop(app);
+                const vfs::desktop desktop = vfs_get_desktop(app);
                 const std::string app_name = desktop->get_disp_name();
                 if (!app_name.empty())
                 {
@@ -1283,7 +1283,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
             XSetName::MOVE_PANEL_4,
         };
 
-        for (XSetName copycmd : copycmds)
+        for (const XSetName copycmd : copycmds)
         {
             set = xset_set_cb(copycmd, (GFunc)on_copycmd, data);
             xset_set_ob1(set, "set", set);
@@ -1405,7 +1405,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
             XSetName::ROWN_ROOT_MYUSER, XSetName::ROWN_ROOT_USER1,  XSetName::ROWN_ROOT_USER2,
         };
 
-        for (XSetName permcmd : permcmds)
+        for (const XSetName permcmd : permcmds)
         {
             set = xset_set_cb(permcmd, (GFunc)on_permission, data);
             xset_set_ob1(set, "set", set);
@@ -1522,7 +1522,7 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
 
     const std::string desktop_file =
         CONST_CHAR(g_object_get_data(G_OBJECT(menuitem), "desktop_file"));
-    vfs::desktop desktop = vfs_get_desktop(desktop_file);
+    const vfs::desktop desktop = vfs_get_desktop(desktop_file);
 
     std::string app;
 
@@ -1566,7 +1566,7 @@ enum PTKFileMenuAppJob
 static const char*
 get_shared_desktop_file_location(std::string_view name)
 {
-    for (std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
+    for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
         const char* ret = vfs_mime_type_locate_desktop_file(sys_dir, name);
         if (ret)
@@ -1588,7 +1588,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 
     const std::string desktop_file =
         CONST_CHAR(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
-    vfs::desktop desktop = vfs_get_desktop(desktop_file);
+    const vfs::desktop desktop = vfs_get_desktop(desktop_file);
     if (desktop->get_name().empty())
     {
         return;
@@ -1944,7 +1944,7 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
 
     // if original menu, desktop will be set
     const std::string desktop_file = CONST_CHAR(g_object_get_data(G_OBJECT(item), "desktop_file"));
-    vfs::desktop desktop = vfs_get_desktop(desktop_file);
+    const vfs::desktop desktop = vfs_get_desktop(desktop_file);
     // else if app menu, data will be set
     // PtkFileMenu* app_data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
 
@@ -2040,7 +2040,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
 
     const std::string desktop_file =
         CONST_CHAR(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
-    vfs::desktop desktop = vfs_get_desktop(desktop_file);
+    const vfs::desktop desktop = vfs_get_desktop(desktop_file);
 
     GtkWidget* app_menu = gtk_menu_new();
 

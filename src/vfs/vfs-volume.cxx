@@ -1188,8 +1188,8 @@ info_mount_points(device_t device)
 {
     std::vector<std::string> mounts;
 
-    dev_t dmajor = MAJOR(device->devnum);
-    dev_t dminor = MINOR(device->devnum);
+    const dev_t dmajor = MAJOR(device->devnum);
+    const dev_t dminor = MINOR(device->devnum);
 
     // if we have the mount point list, use this instead of reading mountinfo
     if (!devmounts.empty())
@@ -1710,7 +1710,8 @@ parse_mounts(bool report)
                 // new mount
                 // ztd::logger::info("    new mount {}:{} {}", devmount->major, devmount->minor,
                 // devmount->mount_points);
-                devmount_t devcopy = std::make_shared<Devmount>(devmount->major, devmount->minor);
+                const devmount_t devcopy =
+                    std::make_shared<Devmount>(devmount->major, devmount->minor);
                 devcopy->mount_points = ztd::strdup(devmount->mount_points);
                 devcopy->fstype = ztd::strdup(devmount->fstype);
 
@@ -2139,7 +2140,7 @@ vfs_volume_read_by_device(struct udev_device* udevice)
         return nullptr;
     }
 
-    device_t device = std::make_shared<Device>(udevice);
+    const device_t device = std::make_shared<Device>(udevice);
     if (!device_get_info(device) || !device->devnode || device->devnum == 0 ||
         !ztd::startswith(device->devnode, "/dev/"))
     {
@@ -2322,7 +2323,7 @@ mtab_fstype_is_handled_by_protocol(const char* mtab_fstype)
         {
             // test handlers
             xset_t set;
-            for (std::string_view handler : handlers)
+            for (const std::string_view handler : handlers)
             {
                 if (handlers.empty() || !(set = xset_is(handler)) ||
                     set->b != XSetB::XSET_B_TRUE /* disabled */)
@@ -2355,7 +2356,7 @@ split_network_url(std::string_view url, netmount_t netmount)
     char* orig_url = ztd::strdup(url.data());
     char* xurl = orig_url;
 
-    netmount_t nm = std::make_shared<Netmount>();
+    const netmount_t nm = std::make_shared<Netmount>();
     nm->url = ztd::strdup(url.data());
 
     // get protocol
@@ -2415,7 +2416,7 @@ split_network_url(std::string_view url, netmount_t netmount)
         return SplitNetworkURL::NOT_A_NETWORK_URL;
     }
 
-    SplitNetworkURL ret = SplitNetworkURL::VALID_NETWORK_URL;
+    const SplitNetworkURL ret = SplitNetworkURL::VALID_NETWORK_URL;
 
     // parse
     if (is_colon && (str = strchr(xurl, ':')))
@@ -2547,7 +2548,7 @@ vfs_volume_read_by_mount(dev_t devnum, const char* mount_points)
         return nullptr;
     }
 
-    netmount_t netmount = std::make_shared<Netmount>();
+    const netmount_t netmount = std::make_shared<Netmount>();
     if (split_network_url(name, netmount) == SplitNetworkURL::VALID_NETWORK_URL)
     {
         // network URL
@@ -2776,7 +2777,7 @@ vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* option
     // test handlers
     bool found = false;
     std::string msg;
-    for (std::string_view handler : handlers)
+    for (const std::string_view handler : handlers)
     {
         if (handler.empty() || !(set = xset_is(handler)) ||
             set->b != XSetB::XSET_B_TRUE /* disabled */)
@@ -3199,7 +3200,7 @@ VFSVolume::device_unmount_cmd(bool* run_in_terminal) noexcept
     std::string pointq;
     *run_in_terminal = false;
 
-    netmount_t netmount = std::make_shared<Netmount>();
+    const netmount_t netmount = std::make_shared<Netmount>();
 
     // unmounting a network ?
     switch (this->device_type)
@@ -3568,7 +3569,7 @@ VFSVolume::automount() noexcept
         return;
     }
 
-    std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
     if (this->automount_time && now - this->automount_time < 5)
     {
@@ -3751,7 +3752,7 @@ vfs_volume_device_removed(struct udev_device* udevice)
         return;
     }
 
-    dev_t devnum = udev_device_get_devnum(udevice);
+    const dev_t devnum = udev_device_get_devnum(udevice);
 
     for (vfs::volume volume : volumes)
     {
@@ -4104,7 +4105,7 @@ vfs_volume_add_callback(VFSVolumeCallback cb, void* user_data)
         return;
     }
 
-    volume_callback_data_t data = std::make_shared<VFSVolumeCallbackData>(cb, user_data);
+    const volume_callback_data_t data = std::make_shared<VFSVolumeCallbackData>(cb, user_data);
 
     callbacks.emplace_back(data);
 }
@@ -4277,7 +4278,7 @@ get_device_parent(dev_t dev)
     {
         return 0;
     }
-    dev_t retdev = udev_device_get_devnum(udevice);
+    const dev_t retdev = udev_device_get_devnum(udevice);
     udev_device_unref(udevice);
     return retdev;
 }

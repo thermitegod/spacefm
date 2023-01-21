@@ -905,7 +905,7 @@ on_status_middle_click_config(GtkMenuItem* menuitem, xset_t set)
         XSetName::STATUS_HIDE,
     };
 
-    for (XSetName setname : setnames)
+    for (const XSetName setname : setnames)
     {
         if (set->xset_name == setname)
         {
@@ -922,7 +922,7 @@ static void
 on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_browser)
 {
     (void)widget;
-    xset_context_t context = xset_context_new();
+    const xset_context_t context = xset_context_new();
     main_context_fill(file_browser, context);
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     const std::string desc =
@@ -6001,8 +6001,8 @@ ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, tab_t tab_num,
 {
     tab_t page_x;
     GtkWidget* notebook = file_browser->mynotebook;
-    tab_t cur_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
-    tab_t pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
+    const tab_t cur_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
+    const tab_t pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
 
     switch (tab_num)
     {

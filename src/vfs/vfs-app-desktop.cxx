@@ -374,7 +374,7 @@ VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list,
         // probably need a better way to do this
 
         argv.pop_back(); // remove open_files_key
-        for (std::string_view file : file_list)
+        for (const std::string_view file : file_list)
         {
             if (quote_file_list)
             {
@@ -397,7 +397,7 @@ VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list,
         // probably need a better way to do this
 
         argv.pop_back(); // remove open_file_key
-        for (std::string_view file : file_list)
+        for (const std::string_view file : file_list)
         {
             if (quote_file_list)
             {
@@ -456,7 +456,7 @@ VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list,
 
     if (!add_files)
     {
-        for (std::string_view file : file_list)
+        for (const std::string_view file : file_list)
         {
             if (quote_file_list)
             {
@@ -505,7 +505,7 @@ VFSAppDesktop::open_files(std::string_view working_dir,
     else
     {
         // app does not accept multiple files, so run multiple times
-        for (std::string_view open_file : file_paths)
+        for (const std::string_view open_file : file_paths)
         {
             // const std::vector<std::string> open_files{open_file};
             this->exec_desktop(working_dir, {open_file.data()});

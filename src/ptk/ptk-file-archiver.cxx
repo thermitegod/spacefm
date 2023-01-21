@@ -87,7 +87,7 @@ archive_handler_get_first_extension(xset_t handler_xset)
 
         if (!pathnames.empty())
         {
-            for (std::string_view path : pathnames)
+            for (const std::string_view path : pathnames)
             {
                 // getting just the extension of the pathname list element
                 const auto [filename_no_extension, filename_extension] = get_name_extension(path);
@@ -421,7 +421,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
     char* xset_name = xset_get_s(XSetName::ARC_DLG); // do not free
     i32 format = 4;                                  // default tar.gz
     i32 n = 0;
-    for (std::string_view archive_handler : archive_handlers)
+    for (const std::string_view archive_handler : archive_handlers)
     {
         if (archive_handler.empty())
         {
@@ -1279,7 +1279,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
             // Looping for all extensions registered with the current archive handler
             const std::vector<std::string> pathnames = ztd::split(handler_xset->x, " ");
 
-            for (std::string_view pathname : pathnames)
+            for (const std::string_view pathname : pathnames)
             {
                 // getting just the extension of the pathname list element
                 const auto [filename_no_extension, filename_extension] =

@@ -254,7 +254,7 @@ mime_type_get_actions(std::string_view mime_type)
     get_actions(dir, mime_type, actions);
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
-    for (std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
+    for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
         const std::string sdir = Glib::build_filename(sys_dir.data(), "applications");
         get_actions(sdir, mime_type, actions);
@@ -274,7 +274,7 @@ mime_type_get_actions(std::string_view mime_type)
         }
         else /* default app is in the list, move it to the first. */
         {
-            if (usize index = ztd::index(actions, default_app) != 0)
+            if (const usize index = ztd::index(actions, default_app) != 0)
             {
                 ztd::move(actions, index, 0);
             }
@@ -328,7 +328,7 @@ mime_type_has_action(std::string_view type, std::string_view desktop_id)
             return false;
         }
 
-        for (Glib::ustring known_type : types)
+        for (const Glib::ustring& known_type : types)
         {
             if (ztd::same(known_type.data(), type))
             {
@@ -356,7 +356,7 @@ mime_type_has_action(std::string_view type, std::string_view desktop_id)
         return found;
     }
 
-    for (std::string_view action : actions)
+    for (const std::string_view action : actions)
     {
         /* Try to match directly by desktop_id first */
         if (is_desktop && ztd::same(action, desktop_id))
@@ -557,7 +557,7 @@ mime_type_locate_desktop_file(std::string_view desktop_id)
         return data_desktop;
     }
 
-    for (std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
+    for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
         const char* sys_desktop = _locate_desktop_file(sys_dir, desktop_id);
         if (sys_desktop)
@@ -583,7 +583,7 @@ get_default_action(std::string_view dir, std::string_view type)
         "Added Associations",
     };
 
-    for (std::string_view name : names)
+    for (const std::string_view name : names)
     {
         const std::string path = Glib::build_filename(dir.data(), name.data());
         // ztd::logger::info("    path = {}", path);
@@ -597,7 +597,7 @@ get_default_action(std::string_view dir, std::string_view type)
             return nullptr;
         }
 
-        for (std::string_view group : groups)
+        for (const std::string_view group : groups)
         {
             std::vector<Glib::ustring> apps;
             try
@@ -675,7 +675,7 @@ mime_type_get_default_action(std::string_view mime_type)
     }
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
-    for (std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
+    for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
         const std::string sys_app_dir = Glib::build_filename(sys_dir.data(), "applications");
         const char* sys_default_action = get_default_action(sys_app_dir, mime_type.data());
@@ -730,7 +730,7 @@ mime_type_update_association(std::string_view type, std::string_view desktop_id,
         "Removed Associations",
     };
 
-    for (std::string_view group : groups)
+    for (const std::string_view group : groups)
     {
         std::string new_action;
         bool is_present = false;
@@ -890,7 +890,7 @@ mime_type_update_association(std::string_view type, std::string_view desktop_id,
     // save updated mimeapps.list
     if (data_changed)
     {
-        Glib::ustring data = kf->to_data();
+        const Glib::ustring data = kf->to_data();
         save_to_file(path, data);
     }
 }

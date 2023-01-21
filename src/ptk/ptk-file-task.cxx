@@ -989,7 +989,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
         ptask->overwrite_combo = gtk_combo_box_text_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(ptask->overwrite_combo), false);
         gtk_widget_set_sensitive(ptask->overwrite_combo, overtask);
-        for (std::string_view overwrite_option : overwrite_options)
+        for (const std::string_view overwrite_option : overwrite_options)
         {
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ptask->overwrite_combo),
                                            overwrite_option.data());
@@ -1007,7 +1007,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 
         ptask->error_combo = gtk_combo_box_text_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(ptask->error_combo), false);
-        for (std::string_view error_option : error_options)
+        for (const std::string_view error_option : error_options)
         {
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ptask->error_combo),
                                            error_option.data());
@@ -1563,7 +1563,7 @@ ptk_file_task_update(PtkFileTask* ptask)
 
     vfs::file_task task = ptask->task;
     off_t cur_speed;
-    f64 timer_elapsed = task->timer.elapsed();
+    const f64 timer_elapsed = task->timer.elapsed();
 
     if (task->type == VFSFileTaskType::EXEC)
     {
