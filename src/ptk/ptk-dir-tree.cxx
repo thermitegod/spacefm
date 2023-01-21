@@ -21,6 +21,8 @@
 
 #include <filesystem>
 
+#include <array>
+
 #include <algorithm>
 #include <ranges>
 
@@ -132,7 +134,7 @@ static PtkDirTreeNode* ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* p
 
 static GObjectClass* parent_class = nullptr;
 
-static GType column_types[magic_enum::enum_count<PTKDirTreeCol>()];
+static std::array<GType, magic_enum::enum_count<PTKDirTreeCol>()> column_types;
 
 PtkDirTreeNode::PtkDirTreeNode()
 {

@@ -21,6 +21,8 @@
 
 #include <filesystem>
 
+#include <array>
+
 #include <chrono>
 
 #include <memory>
@@ -56,7 +58,7 @@ struct VFSThumbnailRequest
     ~VFSThumbnailRequest();
 
     vfs::file_info file{nullptr};
-    i32 n_requests[magic_enum::enum_count<VFSThumbnailSize>()];
+    std::array<i32, magic_enum::enum_count<VFSThumbnailSize>()> n_requests;
 };
 
 VFSThumbnailRequest::VFSThumbnailRequest(vfs::file_info file)
